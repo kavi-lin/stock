@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.localized
+
+# Log files with sensitive data — keep structure but ignore actual content
+news/news_logs/*.json
+sector/sector_logs/*.json
+investment/invest_logs/history.json
+investment/invest_logs/*_phase0.json
+investment/invest_logs/*.md
+
+# Keep directory structure
+!news/news_logs/.gitkeep
+!sector/sector_logs/.gitkeep
+!investment/invest_logs/.gitkeep
