@@ -112,7 +112,14 @@ FOCUS_DATE     : [留空 = 今日]
 
 **Agent**: Theme Intelligence Analyst
 
-**資料來源**: `theme-detector`（FINVIZ 公開資料，不需 API key）
+**Theme-Detector Cache Check（執行 skill 前必須先做）**：
+1. 以今日日期搜尋 `../skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`
+   - **找到** → 直接載入 JSON，`theme_source: THEME_CACHE`，**跳過 skill 執行**，前往填寫下方 JSON
+   - **未找到** → 執行 `theme-detector` skill（FINVIZ Elite 優先，公開模式備用）
+     - JSON cache → 存入 `../skills/theme-detector/cache/`
+     - MD 最終報告 → 移至 `../reports/`，並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`
+
+**資料來源**: `theme-detector` skill（FINVIZ Elite 優先，公開模式備用）
 
 ```json
 {
@@ -261,7 +268,9 @@ FOCUS_DATE     : [留空 = 今日]
 
 **Agent**: Portfolio Strategist (PS)
 
-完成後寫入 `./sector_logs/YYYY-MM-DD_sector_intel.json`
+完成後執行：
+1. 寫入 `./sector_logs/YYYY-MM-DD_sector_intel.json`（cache，供其他 protocol 讀取）
+2. 將 FINAL VERDICT TABLE 存為 `../reports/YYYY-MM-DD_sector_report.md`
 
 ```json
 {
@@ -348,9 +357,13 @@ HANDOFF TO INVESTMENT PROTOCOL: "市場 RISK_ON，科技與工業強，能源避
 ## 本地檔案結構
 
 ```
-sector_logs/
-├── YYYY-MM-DD_sector_intel.json   ← 當日產業分析 cache（Claude 自動讀寫）
-└── sector_history.json            ← 歷史 verdict 紀錄（選擇性 append）
+sector/
+└── sector_logs/
+    ├── YYYY-MM-DD_sector_intel.json   ← 當日產業分析 cache（中繼，Claude 自動讀寫）
+    └── sector_history.json            ← 歷史 verdict 紀錄（選擇性 append）
+
+reports/                               ← 最終報告集中存放
+└── YYYY-MM-DD_sector_report.md        ← FINAL VERDICT TABLE（人類可讀）
 ```
 
 ---

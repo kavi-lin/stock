@@ -1,0 +1,3443 @@
+{
+  "report_type": "theme_detector",
+  "generated_at": "2026-04-11 09:44:40",
+  "metadata": {
+    "generated_at": "2026-04-11 09:44:40",
+    "data_mode": "FINVIZ-Elite+FMP",
+    "finviz_mode": "elite",
+    "fmp_available": true,
+    "max_themes": 10,
+    "max_stocks_per_theme": 10,
+    "data_sources": {
+      "finviz_industries": 144,
+      "yfinance_stocks": 81,
+      "etf_volume": 25,
+      "scanner_backend": {
+        "fmp_calls": 344,
+        "fmp_failures": 314,
+        "yf_calls": 26,
+        "yf_fallbacks": 2,
+        "stock": {
+          "fmp_calls": 294,
+          "fmp_failures": 264,
+          "yf_calls": 1,
+          "yf_fallbacks": 1
+        },
+        "etf": {
+          "fmp_calls": 50,
+          "fmp_failures": 50,
+          "yf_calls": 25,
+          "yf_fallbacks": 1
+        }
+      },
+      "uptrend_sectors": 11,
+      "uptrend_stale": false
+    }
+  },
+  "summary": {
+    "total_themes": 10,
+    "bullish_count": 8,
+    "bearish_count": 2,
+    "top_bullish": "Basic Materials Sector Concentration",
+    "top_bearish": "Industrials Sector Concentration"
+  },
+  "themes": {
+    "all": [
+      {
+        "name": "Basic Materials Sector Concentration",
+        "direction": "bullish",
+        "heat": 64.03,
+        "maturity": 54.06,
+        "stage": "Trending",
+        "confidence": "Medium",
+        "heat_label": "Warm",
+        "heat_breakdown": {
+          "momentum_strength": 76.6,
+          "volume_intensity": 18.82,
+          "uptrend_signal": 63.42,
+          "breadth_signal": 88.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 100.0,
+          "valuation_premium": 27.06,
+          "etf_proliferation": 0.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "LIN",
+          "APD",
+          "NEM",
+          "FCX",
+          "NUE"
+        ],
+        "stock_details": [
+          {
+            "symbol": "LIN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "APD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NEM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FCX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NUE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLB"
+        ],
+        "industries": [
+          "Aluminum",
+          "Chemicals",
+          "Copper",
+          "Other Industrial Metals & Mining"
+        ],
+        "sector_weights": {
+          "Basic Materials": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "vertical",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Infrastructure & Construction",
+        "direction": "bullish",
+        "heat": 59.78,
+        "maturity": 54.28,
+        "stage": "Trending",
+        "confidence": "Medium",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 64.18,
+          "volume_intensity": 24.91,
+          "uptrend_signal": 62.13,
+          "breadth_signal": 84.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 80.0,
+          "valuation_premium": 35.17,
+          "etf_proliferation": 40.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CAT",
+          "DE",
+          "VMC",
+          "MLM",
+          "URI",
+          "PWR",
+          "EME",
+          "J",
+          "ACM",
+          "FAST"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CAT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "DE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "VMC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MLM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "URI",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PWR",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "EME",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "J",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ACM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FAST",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "PAVE",
+          "IFRA"
+        ],
+        "industries": [
+          "Engineering & Construction",
+          "Farm & Heavy Construction Machinery"
+        ],
+        "sector_weights": {
+          "Industrials": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Oil & Gas (Energy)",
+        "direction": "bullish",
+        "heat": 58.7,
+        "maturity": 32.55,
+        "stage": "Accelerating",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 73.12,
+          "volume_intensity": 35.37,
+          "uptrend_signal": 33.74,
+          "breadth_signal": 88.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 10.34,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "XOM",
+          "CVX",
+          "COP",
+          "EOG",
+          "SLB",
+          "FANG",
+          "MPC",
+          "PSX",
+          "OXY",
+          "DVN"
+        ],
+        "stock_details": [
+          {
+            "symbol": "XOM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "CVX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "COP",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "EOG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "SLB",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FANG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MPC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PSX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "OXY",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "DVN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLE",
+          "XOP",
+          "OIH"
+        ],
+        "industries": [
+          "Oil & Gas E&P",
+          "Oil & Gas Equipment & Services",
+          "Oil & Gas Integrated",
+          "Oil & Gas Drilling"
+        ],
+        "sector_weights": {
+          "Energy": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "narrow_rally",
+          "gap": 39.4,
+          "description": "Price momentum strong but breadth weak \u2014 concentrated/fragile move"
+        }
+      },
+      {
+        "name": "Clean Energy & EV",
+        "direction": "bullish",
+        "heat": 58.53,
+        "maturity": 39.8,
+        "stage": "Accelerating",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 59.8,
+          "volume_intensity": 35.41,
+          "uptrend_signal": 53.26,
+          "breadth_signal": 86.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 20.0,
+          "valuation_premium": 12.0,
+          "etf_proliferation": 80.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "ENPH",
+          "SEDG",
+          "FSLR",
+          "RUN",
+          "TSLA",
+          "RIVN",
+          "ALB",
+          "PLUG",
+          "BE",
+          "NEE"
+        ],
+        "stock_details": [
+          {
+            "symbol": "ENPH",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "SEDG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FSLR",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RUN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TSLA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RIVN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ALB",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PLUG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "BE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NEE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "ICLN",
+          "QCLN",
+          "TAN",
+          "LIT"
+        ],
+        "industries": [
+          "Solar",
+          "Utilities - Renewable",
+          "Electrical Equipment & Parts"
+        ],
+        "sector_weights": {
+          "Energy": 0.3333333333333333,
+          "Utilities": 0.3333333333333333,
+          "Industrials": 0.3333333333333333
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Defense & Aerospace",
+        "direction": "bullish",
+        "heat": 54.32,
+        "maturity": 37.28,
+        "stage": "Accelerating",
+        "confidence": "Medium",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 55.72,
+          "volume_intensity": 16.74,
+          "uptrend_signal": 57.07,
+          "breadth_signal": 86.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 41.86,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "LMT",
+          "RTX",
+          "NOC",
+          "GD",
+          "BA",
+          "LHX",
+          "HII",
+          "TDG",
+          "HWM",
+          "AXON"
+        ],
+        "stock_details": [
+          {
+            "symbol": "LMT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RTX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NOC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "GD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "BA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "LHX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HII",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TDG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HWM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AXON",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "ITA",
+          "PPA",
+          "XAR"
+        ],
+        "industries": [
+          "Aerospace & Defense",
+          "Communication Equipment",
+          "Scientific & Technical Instruments"
+        ],
+        "sector_weights": {
+          "Industrials": 0.3333333333333333,
+          "Technology": 0.6666666666666666
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Cybersecurity",
+        "direction": "bullish",
+        "heat": 46.05,
+        "maturity": 10.51,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 68.34,
+          "volume_intensity": 36.47,
+          "uptrend_signal": 54.54,
+          "breadth_signal": 6.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 0.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 30.09,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CRWD",
+          "PANW",
+          "FTNT",
+          "ZS",
+          "S",
+          "OKTA",
+          "NET",
+          "CYBR",
+          "QLYS",
+          "RPD"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CRWD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PANW",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FTNT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ZS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "S",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "OKTA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NET",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "CYBR",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "QLYS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RPD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "CIBR",
+          "HACK",
+          "BUG"
+        ],
+        "industries": [
+          "Software - Infrastructure",
+          "Software - Application",
+          "Information Technology Services"
+        ],
+        "sector_weights": {
+          "Technology": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Cloud Computing & SaaS",
+        "direction": "bullish",
+        "heat": 45.91,
+        "maturity": 14.44,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 68.34,
+          "volume_intensity": 35.81,
+          "uptrend_signal": 54.54,
+          "breadth_signal": 6.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 0.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 56.29,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CRM",
+          "NOW",
+          "SNOW",
+          "DDOG",
+          "MDB",
+          "NET",
+          "ZS",
+          "HUBS",
+          "WDAY",
+          "TEAM"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CRM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NOW",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "SNOW",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "DDOG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MDB",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NET",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ZS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HUBS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "WDAY",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TEAM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "SKYY",
+          "WCLD",
+          "CLOU"
+        ],
+        "industries": [
+          "Software - Application",
+          "Software - Infrastructure",
+          "Information Technology Services"
+        ],
+        "sector_weights": {
+          "Technology": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "AI & Semiconductors",
+        "direction": "bullish",
+        "heat": 30.01,
+        "maturity": 90.67,
+        "stage": "Exhausting",
+        "confidence": "Low",
+        "heat_label": "Cool",
+        "heat_breakdown": {
+          "momentum_strength": 7.51,
+          "volume_intensity": 42.59,
+          "uptrend_signal": 54.54,
+          "breadth_signal": 26.14
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 100.0,
+          "price_extreme_saturation": 100.0,
+          "valuation_premium": 51.16,
+          "etf_proliferation": 80.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "NVDA",
+          "AVGO",
+          "AMD",
+          "INTC",
+          "QCOM",
+          "MRVL",
+          "AMAT",
+          "LRCX",
+          "KLAC",
+          "TSM"
+        ],
+        "stock_details": [
+          {
+            "symbol": "NVDA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AVGO",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AMD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "INTC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "QCOM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MRVL",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AMAT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "LRCX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "KLAC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TSM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "SMH",
+          "SOXX",
+          "AIQ",
+          "BOTZ"
+        ],
+        "industries": [
+          "Semiconductor Equipment & Materials",
+          "Software - Application",
+          "Software - Infrastructure",
+          "Information Technology Services",
+          "Computer Hardware",
+          "Electronic Components"
+        ],
+        "sector_weights": {
+          "Technology": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "internal_recovery",
+          "gap": 47.0,
+          "description": "Breadth improving ahead of price \u2014 potential acceleration candidate"
+        }
+      },
+      {
+        "name": "Industrials Sector Concentration",
+        "direction": "bearish",
+        "heat": 23.73,
+        "maturity": 11.98,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Cool",
+        "heat_breakdown": {
+          "momentum_strength": 0.4,
+          "volume_intensity": 38.33,
+          "uptrend_signal": 37.87,
+          "breadth_signal": 32.31
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 25.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 38.23,
+          "etf_proliferation": 0.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CAT",
+          "HON",
+          "UPS",
+          "GE",
+          "RTX"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CAT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HON",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "UPS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "GE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RTX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLI"
+        ],
+        "industries": [
+          "Business Equipment & Supplies",
+          "Aerospace & Defense",
+          "Rental & Leasing Services",
+          "Airlines",
+          "Waste Management"
+        ],
+        "sector_weights": {
+          "Industrials": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "vertical",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "internal_recovery",
+          "gap": 37.5,
+          "description": "Breadth improving ahead of price \u2014 potential reversal candidate"
+        }
+      },
+      {
+        "name": "Consumer Defensive Sector Concentration",
+        "direction": "bearish",
+        "heat": 16.53,
+        "maturity": 13.75,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Cold",
+        "heat_breakdown": {
+          "momentum_strength": 0.5,
+          "volume_intensity": 0.0,
+          "uptrend_signal": 56.52,
+          "breadth_signal": 11.13
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 25.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 50.0,
+          "etf_proliferation": 0.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "PG",
+          "KO",
+          "PEP",
+          "WMT",
+          "COST"
+        ],
+        "stock_details": [
+          {
+            "symbol": "PG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "KO",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PEP",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "WMT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "COST",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLP"
+        ],
+        "industries": [
+          "Education & Training Services",
+          "Food Distribution",
+          "Grocery Stores"
+        ],
+        "sector_weights": {
+          "Consumer Defensive": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "vertical",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "internal_recovery",
+          "gap": 56.0,
+          "description": "Breadth improving ahead of price \u2014 potential reversal candidate"
+        }
+      }
+    ],
+    "bullish": [
+      {
+        "name": "Basic Materials Sector Concentration",
+        "direction": "bullish",
+        "heat": 64.03,
+        "maturity": 54.06,
+        "stage": "Trending",
+        "confidence": "Medium",
+        "heat_label": "Warm",
+        "heat_breakdown": {
+          "momentum_strength": 76.6,
+          "volume_intensity": 18.82,
+          "uptrend_signal": 63.42,
+          "breadth_signal": 88.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 100.0,
+          "valuation_premium": 27.06,
+          "etf_proliferation": 0.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "LIN",
+          "APD",
+          "NEM",
+          "FCX",
+          "NUE"
+        ],
+        "stock_details": [
+          {
+            "symbol": "LIN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "APD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NEM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FCX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NUE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLB"
+        ],
+        "industries": [
+          "Aluminum",
+          "Chemicals",
+          "Copper",
+          "Other Industrial Metals & Mining"
+        ],
+        "sector_weights": {
+          "Basic Materials": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "vertical",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Infrastructure & Construction",
+        "direction": "bullish",
+        "heat": 59.78,
+        "maturity": 54.28,
+        "stage": "Trending",
+        "confidence": "Medium",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 64.18,
+          "volume_intensity": 24.91,
+          "uptrend_signal": 62.13,
+          "breadth_signal": 84.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 80.0,
+          "valuation_premium": 35.17,
+          "etf_proliferation": 40.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CAT",
+          "DE",
+          "VMC",
+          "MLM",
+          "URI",
+          "PWR",
+          "EME",
+          "J",
+          "ACM",
+          "FAST"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CAT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "DE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "VMC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MLM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "URI",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PWR",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "EME",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "J",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ACM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FAST",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "PAVE",
+          "IFRA"
+        ],
+        "industries": [
+          "Engineering & Construction",
+          "Farm & Heavy Construction Machinery"
+        ],
+        "sector_weights": {
+          "Industrials": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Oil & Gas (Energy)",
+        "direction": "bullish",
+        "heat": 58.7,
+        "maturity": 32.55,
+        "stage": "Accelerating",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 73.12,
+          "volume_intensity": 35.37,
+          "uptrend_signal": 33.74,
+          "breadth_signal": 88.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 10.34,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "XOM",
+          "CVX",
+          "COP",
+          "EOG",
+          "SLB",
+          "FANG",
+          "MPC",
+          "PSX",
+          "OXY",
+          "DVN"
+        ],
+        "stock_details": [
+          {
+            "symbol": "XOM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "CVX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "COP",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "EOG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "SLB",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FANG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MPC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PSX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "OXY",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "DVN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLE",
+          "XOP",
+          "OIH"
+        ],
+        "industries": [
+          "Oil & Gas E&P",
+          "Oil & Gas Equipment & Services",
+          "Oil & Gas Integrated",
+          "Oil & Gas Drilling"
+        ],
+        "sector_weights": {
+          "Energy": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "narrow_rally",
+          "gap": 39.4,
+          "description": "Price momentum strong but breadth weak \u2014 concentrated/fragile move"
+        }
+      },
+      {
+        "name": "Clean Energy & EV",
+        "direction": "bullish",
+        "heat": 58.53,
+        "maturity": 39.8,
+        "stage": "Accelerating",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 59.8,
+          "volume_intensity": 35.41,
+          "uptrend_signal": 53.26,
+          "breadth_signal": 86.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 20.0,
+          "valuation_premium": 12.0,
+          "etf_proliferation": 80.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "ENPH",
+          "SEDG",
+          "FSLR",
+          "RUN",
+          "TSLA",
+          "RIVN",
+          "ALB",
+          "PLUG",
+          "BE",
+          "NEE"
+        ],
+        "stock_details": [
+          {
+            "symbol": "ENPH",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "SEDG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FSLR",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RUN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TSLA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RIVN",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ALB",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PLUG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "BE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NEE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "ICLN",
+          "QCLN",
+          "TAN",
+          "LIT"
+        ],
+        "industries": [
+          "Solar",
+          "Utilities - Renewable",
+          "Electrical Equipment & Parts"
+        ],
+        "sector_weights": {
+          "Energy": 0.3333333333333333,
+          "Utilities": 0.3333333333333333,
+          "Industrials": 0.3333333333333333
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Defense & Aerospace",
+        "direction": "bullish",
+        "heat": 54.32,
+        "maturity": 37.28,
+        "stage": "Accelerating",
+        "confidence": "Medium",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 55.72,
+          "volume_intensity": 16.74,
+          "uptrend_signal": 57.07,
+          "breadth_signal": 86.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 41.86,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "LMT",
+          "RTX",
+          "NOC",
+          "GD",
+          "BA",
+          "LHX",
+          "HII",
+          "TDG",
+          "HWM",
+          "AXON"
+        ],
+        "stock_details": [
+          {
+            "symbol": "LMT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RTX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NOC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "GD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "BA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "LHX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HII",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TDG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HWM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AXON",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "ITA",
+          "PPA",
+          "XAR"
+        ],
+        "industries": [
+          "Aerospace & Defense",
+          "Communication Equipment",
+          "Scientific & Technical Instruments"
+        ],
+        "sector_weights": {
+          "Industrials": 0.3333333333333333,
+          "Technology": 0.6666666666666666
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Cybersecurity",
+        "direction": "bullish",
+        "heat": 46.05,
+        "maturity": 10.51,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 68.34,
+          "volume_intensity": 36.47,
+          "uptrend_signal": 54.54,
+          "breadth_signal": 6.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 0.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 30.09,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CRWD",
+          "PANW",
+          "FTNT",
+          "ZS",
+          "S",
+          "OKTA",
+          "NET",
+          "CYBR",
+          "QLYS",
+          "RPD"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CRWD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PANW",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "FTNT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ZS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "S",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "OKTA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NET",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "CYBR",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "QLYS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RPD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "CIBR",
+          "HACK",
+          "BUG"
+        ],
+        "industries": [
+          "Software - Infrastructure",
+          "Software - Application",
+          "Information Technology Services"
+        ],
+        "sector_weights": {
+          "Technology": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "Cloud Computing & SaaS",
+        "direction": "bullish",
+        "heat": 45.91,
+        "maturity": 14.44,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Neutral",
+        "heat_breakdown": {
+          "momentum_strength": 68.34,
+          "volume_intensity": 35.81,
+          "uptrend_signal": 54.54,
+          "breadth_signal": 6.0
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 0.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 56.29,
+          "etf_proliferation": 60.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CRM",
+          "NOW",
+          "SNOW",
+          "DDOG",
+          "MDB",
+          "NET",
+          "ZS",
+          "HUBS",
+          "WDAY",
+          "TEAM"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CRM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NOW",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "SNOW",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "DDOG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MDB",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "NET",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "ZS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HUBS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "WDAY",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TEAM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "SKYY",
+          "WCLD",
+          "CLOU"
+        ],
+        "industries": [
+          "Software - Application",
+          "Software - Infrastructure",
+          "Information Technology Services"
+        ],
+        "sector_weights": {
+          "Technology": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": null
+      },
+      {
+        "name": "AI & Semiconductors",
+        "direction": "bullish",
+        "heat": 30.01,
+        "maturity": 90.67,
+        "stage": "Exhausting",
+        "confidence": "Low",
+        "heat_label": "Cool",
+        "heat_breakdown": {
+          "momentum_strength": 7.51,
+          "volume_intensity": 42.59,
+          "uptrend_signal": 54.54,
+          "breadth_signal": 26.14
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 100.0,
+          "extremity_clustering": 100.0,
+          "price_extreme_saturation": 100.0,
+          "valuation_premium": 51.16,
+          "etf_proliferation": 80.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "NVDA",
+          "AVGO",
+          "AMD",
+          "INTC",
+          "QCOM",
+          "MRVL",
+          "AMAT",
+          "LRCX",
+          "KLAC",
+          "TSM"
+        ],
+        "stock_details": [
+          {
+            "symbol": "NVDA",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AVGO",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AMD",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "INTC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "QCOM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "MRVL",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "AMAT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "LRCX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "KLAC",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "TSM",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "SMH",
+          "SOXX",
+          "AIQ",
+          "BOTZ"
+        ],
+        "industries": [
+          "Semiconductor Equipment & Materials",
+          "Software - Application",
+          "Software - Infrastructure",
+          "Information Technology Services",
+          "Computer Hardware",
+          "Electronic Components"
+        ],
+        "sector_weights": {
+          "Technology": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "seed",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "internal_recovery",
+          "gap": 47.0,
+          "description": "Breadth improving ahead of price \u2014 potential acceleration candidate"
+        }
+      }
+    ],
+    "bearish": [
+      {
+        "name": "Industrials Sector Concentration",
+        "direction": "bearish",
+        "heat": 23.73,
+        "maturity": 11.98,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Cool",
+        "heat_breakdown": {
+          "momentum_strength": 0.4,
+          "volume_intensity": 38.33,
+          "uptrend_signal": 37.87,
+          "breadth_signal": 32.31
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 25.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 38.23,
+          "etf_proliferation": 0.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "CAT",
+          "HON",
+          "UPS",
+          "GE",
+          "RTX"
+        ],
+        "stock_details": [
+          {
+            "symbol": "CAT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "HON",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "UPS",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "GE",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "RTX",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLI"
+        ],
+        "industries": [
+          "Business Equipment & Supplies",
+          "Aerospace & Defense",
+          "Rental & Leasing Services",
+          "Airlines",
+          "Waste Management"
+        ],
+        "sector_weights": {
+          "Industrials": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "vertical",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "internal_recovery",
+          "gap": 37.5,
+          "description": "Breadth improving ahead of price \u2014 potential reversal candidate"
+        }
+      },
+      {
+        "name": "Consumer Defensive Sector Concentration",
+        "direction": "bearish",
+        "heat": 16.53,
+        "maturity": 13.75,
+        "stage": "Emerging",
+        "confidence": "Low",
+        "heat_label": "Cold",
+        "heat_breakdown": {
+          "momentum_strength": 0.5,
+          "volume_intensity": 0.0,
+          "uptrend_signal": 56.52,
+          "breadth_signal": 11.13
+        },
+        "maturity_breakdown": {
+          "duration_estimate": 25.0,
+          "extremity_clustering": 0.0,
+          "price_extreme_saturation": 0.0,
+          "valuation_premium": 50.0,
+          "etf_proliferation": 0.0
+        },
+        "lifecycle_data_quality": "sufficient",
+        "representative_stocks": [
+          "PG",
+          "KO",
+          "PEP",
+          "WMT",
+          "COST"
+        ],
+        "stock_details": [
+          {
+            "symbol": "PG",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "KO",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "PEP",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "WMT",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          },
+          {
+            "symbol": "COST",
+            "source": "static",
+            "market_cap": 0,
+            "matched_industries": [],
+            "reasons": [
+              "Static config"
+            ],
+            "composite_score": 0
+          }
+        ],
+        "proxy_etfs": [
+          "XLP"
+        ],
+        "industries": [
+          "Education & Training Services",
+          "Food Distribution",
+          "Grocery Stores"
+        ],
+        "sector_weights": {
+          "Consumer Defensive": 1.0
+        },
+        "stock_data": "available",
+        "data_mode": "FINVIZ-Elite+FMP",
+        "stale_data_penalty": false,
+        "theme_origin": "vertical",
+        "name_confidence": "high",
+        "divergence": {
+          "type": "internal_recovery",
+          "gap": 56.0,
+          "description": "Breadth improving ahead of price \u2014 potential reversal candidate"
+        }
+      }
+    ]
+  },
+  "industry_rankings": {
+    "top": [
+      {
+        "name": "Pharmaceutical Retailers",
+        "perf_1w": -6.08,
+        "perf_1m": -23.262402916569826,
+        "perf_3m": -52.99097851782347,
+        "perf_6m": -67.18110272543366,
+        "perf_1y": -92.42,
+        "perf_ytd": -54.4290591215229,
+        "raw_perf_1m": -94.84,
+        "raw_perf_3m": -94.65,
+        "raw_perf_6m": -95.57,
+        "raw_perf_ytd": -94.56,
+        "sector": "Healthcare",
+        "weighted_return": -45.1248,
+        "momentum_score": 99.76,
+        "direction": "bearish",
+        "rank": 1,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Semiconductor Equipment & Materials",
+        "perf_1w": 15.21,
+        "perf_1m": 13.79,
+        "perf_3m": 32.2,
+        "perf_6m": 67.77,
+        "perf_1y": 200.0,
+        "perf_ytd": 48.52,
+        "raw_perf_1y": 201.09,
+        "sector": "Technology",
+        "weighted_return": 36.5695,
+        "momentum_score": 99.13,
+        "direction": "bullish",
+        "rank": 2,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Aluminum",
+        "perf_1w": 4.15,
+        "perf_1m": 12.07,
+        "perf_3m": 28.249999999999996,
+        "perf_6m": 77.2967971698781,
+        "perf_1y": 200.0,
+        "perf_ytd": 44.42,
+        "raw_perf_1y": 251.52999999999997,
+        "raw_perf_6m": 97.9,
+        "sector": "Basic Materials",
+        "weighted_return": 36.509,
+        "momentum_score": 99.12,
+        "direction": "bullish",
+        "rank": 3,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Chemicals",
+        "perf_1w": -3.44,
+        "perf_1m": 13.05,
+        "perf_3m": 40.82,
+        "perf_6m": 52.65,
+        "perf_1y": 59.02,
+        "perf_ytd": 54.98,
+        "sector": "Basic Materials",
+        "weighted_return": 33.0005,
+        "momentum_score": 98.52,
+        "direction": "bullish",
+        "rank": 4,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Electrical Equipment & Parts",
+        "perf_1w": 13.489999999999998,
+        "perf_1m": 9.46,
+        "perf_3m": 41.09,
+        "perf_6m": 48.08,
+        "perf_1y": 200.0,
+        "perf_ytd": 51.17,
+        "raw_perf_1y": 232.13999999999996,
+        "sector": "Industrials",
+        "weighted_return": 32.5195,
+        "momentum_score": 98.41,
+        "direction": "bullish",
+        "rank": 5,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Oil & Gas Drilling",
+        "perf_1w": -2.07,
+        "perf_1m": 2.58,
+        "perf_3m": 42.02,
+        "perf_6m": 55.730000000000004,
+        "perf_1y": 117.92,
+        "perf_ytd": 51.51,
+        "sector": "Energy",
+        "weighted_return": 31.864,
+        "momentum_score": 98.25,
+        "direction": "bullish",
+        "rank": 6,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Computer Hardware",
+        "perf_1w": 13.43,
+        "perf_1m": 15.36,
+        "perf_3m": 40.7,
+        "perf_6m": 29.07,
+        "perf_1y": 200.0,
+        "perf_ytd": 44.83,
+        "raw_perf_1y": 212.23000000000002,
+        "sector": "Technology",
+        "weighted_return": 28.149,
+        "momentum_score": 96.99,
+        "direction": "bullish",
+        "rank": 7,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Gambling",
+        "perf_1w": -3.52,
+        "perf_1m": -6.559999999999999,
+        "perf_3m": -38.62,
+        "perf_6m": -41.96,
+        "perf_1y": -32.03,
+        "perf_ytd": -38.4,
+        "sector": "Consumer Cyclical",
+        "weighted_return": -28.097,
+        "momentum_score": 96.97,
+        "direction": "bearish",
+        "rank": 8,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Software - Application",
+        "perf_1w": -8.41,
+        "perf_1m": -14.31,
+        "perf_3m": -32.37,
+        "perf_6m": -39.2,
+        "perf_1y": -24.77,
+        "perf_ytd": -32.39,
+        "sector": "Technology",
+        "weighted_return": -27.508,
+        "momentum_score": 96.7,
+        "direction": "bearish",
+        "rank": 9,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Oil & Gas Equipment & Services",
+        "perf_1w": 3.2400000000000007,
+        "perf_1m": 6.950000000000001,
+        "perf_3m": 26.99,
+        "perf_6m": 51.32,
+        "perf_1y": 90.6,
+        "perf_ytd": 40.74,
+        "sector": "Energy",
+        "weighted_return": 26.904,
+        "momentum_score": 96.39,
+        "direction": "bullish",
+        "rank": 10,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Marine Shipping",
+        "perf_1w": 30.0,
+        "perf_1m": 5.76,
+        "perf_3m": 19.83,
+        "perf_6m": 51.190000000000005,
+        "perf_1y": 81.02,
+        "perf_ytd": 28.65,
+        "raw_perf_1w": 52.0,
+        "sector": "Industrials",
+        "weighted_return": 26.7375,
+        "momentum_score": 96.31,
+        "direction": "bullish",
+        "rank": 11,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Health Information Services",
+        "perf_1w": -6.570000000000001,
+        "perf_1m": -10.52,
+        "perf_3m": -28.88,
+        "perf_6m": -40.4,
+        "perf_1y": -12.73,
+        "perf_ytd": -23.94,
+        "sector": "Healthcare",
+        "weighted_return": -25.515,
+        "momentum_score": 95.59,
+        "direction": "bearish",
+        "rank": 12,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Scientific & Technical Instruments",
+        "perf_1w": 9.6,
+        "perf_1m": 10.03,
+        "perf_3m": 30.130000000000003,
+        "perf_6m": 35.58,
+        "perf_1y": 97.76,
+        "perf_ytd": 33.57,
+        "sector": "Technology",
+        "weighted_return": 24.687,
+        "momentum_score": 95.04,
+        "direction": "bullish",
+        "rank": 13,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Communication Equipment",
+        "perf_1w": 5.45,
+        "perf_1m": 11.61,
+        "perf_3m": 30.3,
+        "perf_6m": 35.25,
+        "perf_1y": 100.95,
+        "perf_ytd": 28.050000000000004,
+        "sector": "Technology",
+        "weighted_return": 24.6275,
+        "momentum_score": 95.0,
+        "direction": "bullish",
+        "rank": 14,
+        "rank_direction": "bullish"
+      },
+      {
+        "name": "Copper",
+        "perf_1w": 9.25,
+        "perf_1m": 3.94,
+        "perf_3m": 21.62,
+        "perf_6m": 49.82,
+        "perf_1y": 155.71,
+        "perf_ytd": 33.26,
+        "sector": "Basic Materials",
+        "weighted_return": 24.423,
+        "momentum_score": 94.85,
+        "direction": "bullish",
+        "rank": 15,
+        "rank_direction": "bullish"
+      }
+    ],
+    "bottom": [
+      {
+        "name": "Insurance - Property & Casualty",
+        "perf_1w": 30.0,
+        "perf_1m": -0.21,
+        "perf_3m": -2.43,
+        "perf_6m": -3.54,
+        "perf_1y": 4.6,
+        "perf_ytd": -3.9599999999999995,
+        "raw_perf_1w": 56.99999999999999,
+        "sector": "Financial",
+        "weighted_return": 1.035,
+        "momentum_score": 35.55,
+        "direction": "bullish",
+        "rank": 130,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Grocery Stores",
+        "perf_1w": -4.11,
+        "perf_1m": -2.23,
+        "perf_3m": 9.53,
+        "perf_6m": -4.92,
+        "perf_1y": -11.09,
+        "perf_ytd": 5.75,
+        "sector": "Consumer Defensive",
+        "weighted_return": 0.891,
+        "momentum_score": 35.06,
+        "direction": "bullish",
+        "rank": 131,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Restaurants",
+        "perf_1w": 2.15,
+        "perf_1m": -3.3300000000000005,
+        "perf_3m": -0.19,
+        "perf_6m": 5.22,
+        "perf_1y": 3.16,
+        "perf_ytd": 3.2,
+        "sector": "Consumer Cyclical",
+        "weighted_return": 0.882,
+        "momentum_score": 35.03,
+        "direction": "bullish",
+        "rank": 132,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Solar",
+        "perf_1w": 30.0,
+        "perf_1m": -1.8799999999999997,
+        "perf_3m": -4.74,
+        "perf_6m": 0.01,
+        "perf_1y": 81.5,
+        "perf_ytd": -6.75,
+        "raw_perf_1w": 93.0,
+        "sector": "Energy",
+        "weighted_return": 0.874,
+        "momentum_score": 35.0,
+        "direction": "bullish",
+        "rank": 133,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Insurance - Life",
+        "perf_1w": 2.36,
+        "perf_1m": 3.83,
+        "perf_3m": -5.78,
+        "perf_6m": 0.36,
+        "perf_1y": 19.92,
+        "perf_ytd": -3.9800000000000004,
+        "sector": "Financial",
+        "weighted_return": -0.7215,
+        "momentum_score": 34.48,
+        "direction": "bearish",
+        "rank": 134,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Rental & Leasing Services",
+        "perf_1w": 8.21,
+        "perf_1m": 3.5699999999999994,
+        "perf_3m": -3.7800000000000002,
+        "perf_6m": 0.89,
+        "perf_1y": 52.39,
+        "perf_ytd": 6.0,
+        "sector": "Industrials",
+        "weighted_return": 0.6575,
+        "momentum_score": 34.27,
+        "direction": "bullish",
+        "rank": 135,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Specialty Retail",
+        "perf_1w": 30.0,
+        "perf_1m": -3.38,
+        "perf_3m": -4.95,
+        "perf_6m": -3.12,
+        "perf_1y": 28.84,
+        "perf_ytd": 2.18,
+        "raw_perf_1w": 45.0,
+        "sector": "Consumer Cyclical",
+        "weighted_return": -0.5135,
+        "momentum_score": 33.78,
+        "direction": "bearish",
+        "rank": 136,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Resorts & Casinos",
+        "perf_1w": 30.0,
+        "perf_1m": -1.01,
+        "perf_3m": -7.9,
+        "perf_6m": -1.63,
+        "perf_1y": 46.92,
+        "perf_ytd": -9.6,
+        "raw_perf_1w": 59.0,
+        "sector": "Consumer Cyclical",
+        "weighted_return": -0.5065,
+        "momentum_score": 33.76,
+        "direction": "bearish",
+        "rank": 137,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Airlines",
+        "perf_1w": 4.53,
+        "perf_1m": 3.9599999999999995,
+        "perf_3m": -11.22,
+        "perf_6m": 6.75,
+        "perf_1y": 62.49,
+        "perf_ytd": -9.24,
+        "sector": "Industrials",
+        "weighted_return": -0.459,
+        "momentum_score": 33.6,
+        "direction": "bearish",
+        "rank": 138,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Entertainment",
+        "perf_1w": 3.32,
+        "perf_1m": 4.08,
+        "perf_3m": 2.65,
+        "perf_6m": -8.9,
+        "perf_1y": 27.65,
+        "perf_ytd": 0.67,
+        "sector": "Communication Services",
+        "weighted_return": -0.3905,
+        "momentum_score": 33.37,
+        "direction": "bearish",
+        "rank": 139,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Drug Manufacturers - General",
+        "perf_1w": -30.0,
+        "perf_1m": -2.54,
+        "perf_3m": -0.56,
+        "perf_6m": 11.64,
+        "perf_1y": 29.54,
+        "perf_ytd": 1.34,
+        "raw_perf_1w": -36.0,
+        "sector": "Healthcare",
+        "weighted_return": -0.339,
+        "momentum_score": 33.2,
+        "direction": "bearish",
+        "rank": 140,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "REIT - Diversified",
+        "perf_1w": 2.37,
+        "perf_1m": -0.06,
+        "perf_3m": 2.85,
+        "perf_6m": -3.62,
+        "perf_1y": 6.6000000000000005,
+        "perf_ytd": 4.26,
+        "sector": "Real Estate",
+        "weighted_return": 0.1335,
+        "momentum_score": 32.52,
+        "direction": "bullish",
+        "rank": 141,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Insurance - Diversified",
+        "perf_1w": 30.0,
+        "perf_1m": -2.27,
+        "perf_3m": -3.58,
+        "perf_6m": -3.5699999999999994,
+        "perf_1y": -0.9199999999999999,
+        "perf_ytd": -4.3,
+        "raw_perf_1w": 66.0,
+        "sector": "Financial",
+        "weighted_return": 0.1085,
+        "momentum_score": 32.44,
+        "direction": "bullish",
+        "rank": 142,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Waste Management",
+        "perf_1w": -2.73,
+        "perf_1m": -2.66,
+        "perf_3m": 2.58,
+        "perf_6m": -0.2,
+        "perf_1y": 1.23,
+        "perf_ytd": 1.8000000000000003,
+        "sector": "Industrials",
+        "weighted_return": -0.095,
+        "momentum_score": 32.39,
+        "direction": "bearish",
+        "rank": 143,
+        "rank_direction": "bearish"
+      },
+      {
+        "name": "Consumer Electronics",
+        "perf_1w": 1.72,
+        "perf_1m": -0.18,
+        "perf_3m": -0.11,
+        "perf_6m": -0.4699999999999999,
+        "perf_1y": 48.77,
+        "perf_ytd": -4.69,
+        "sector": "Technology",
+        "weighted_return": -0.0525,
+        "momentum_score": 32.25,
+        "direction": "bearish",
+        "rank": 144,
+        "rank_direction": "bearish"
+      }
+    ]
+  },
+  "sector_uptrend": {
+    "Basic Materials": {
+      "ratio": 0.4342105263157895,
+      "ma_10": 0.28874986294564653,
+      "slope": 0.027558983666061743,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Communication Services": {
+      "ratio": 0.2358490566037736,
+      "ma_10": 0.18802567147654015,
+      "slope": 0.01269381655146648,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Consumer Cyclical": {
+      "ratio": 0.26501766784452296,
+      "ma_10": 0.14022623898187192,
+      "slope": 0.02290464448229404,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Consumer Defensive": {
+      "ratio": 0.23478260869565218,
+      "ma_10": 0.19826086956521738,
+      "slope": 0.009565217391304337,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Energy": {
+      "ratio": 0.3374233128834356,
+      "ma_10": 0.45644678263409927,
+      "slope": -0.031072483526471295,
+      "trend": "down",
+      "latest_date": "2026-04-10"
+    },
+    "Financial": {
+      "ratio": 0.3378151260504202,
+      "ma_10": 0.20162819225851064,
+      "slope": 0.031204193017413173,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Healthcare": {
+      "ratio": 0.29743589743589743,
+      "ma_10": 0.2525301607796425,
+      "slope": 0.018516435696592365,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Industrials": {
+      "ratio": 0.42133333333333334,
+      "ma_10": 0.23222752500330884,
+      "slope": 0.03701203953279425,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Real Estate": {
+      "ratio": 0.22142857142857142,
+      "ma_10": 0.11444737823346714,
+      "slope": 0.019201680672268892,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Technology": {
+      "ratio": 0.34536082474226804,
+      "ma_10": 0.23418592986720954,
+      "slope": 0.024429699495503415,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    },
+    "Utilities": {
+      "ratio": 0.43902439024390244,
+      "ma_10": 0.31097560975609756,
+      "slope": 0.03402589581451371,
+      "trend": "up",
+      "latest_date": "2026-04-10"
+    }
+  },
+  "data_quality": {
+    "status": "warning",
+    "flags": [
+      "FMP API (Stock): 264/294 calls failed (90%)",
+      "  Note: FMP uses dual-endpoint fallback; ~90% failure rate likely reflects one endpoint being unavailable, not 90% data loss",
+      "FMP API (ETF): 50/50 calls failed (100%)",
+      "  Note: FMP uses dual-endpoint fallback; ~100% failure rate likely reflects one endpoint being unavailable, not 100% data loss",
+      "yfinance fallback used 2 time(s) for missing FMP data"
+    ]
+  }
+}

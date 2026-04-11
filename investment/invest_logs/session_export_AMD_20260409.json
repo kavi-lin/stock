@@ -1,0 +1,102 @@
+{
+  "session_export_version": "V4.1",
+  "export_date": "2026-04-09",
+  "ticker_analyzed": "AMD",
+
+  "phase0_cache_for_today": {
+    "phase": 0,
+    "agent": "Global_News_Intelligence",
+    "scan_date": "2026-04-09",
+    "data_source_timestamp": "2026-04-09 08:00",
+    "bullish_signals": [
+      { "rank": 1, "headline": "US-Iran ceasefire triggers massive global relief rally", "source": "CNBC/Bloomberg", "impact_score": 5, "affected_sectors": ["Technology", "Consumer", "Airlines", "Industrials"] },
+      { "rank": 2, "headline": "Global semiconductor sales +61.8% YoY in Feb 2026 ($88.8B)", "source": "SIA/Yahoo Finance", "impact_score": 5, "affected_sectors": ["Semiconductors", "Technology"] },
+      { "rank": 3, "headline": "Dow +1,325 pts best day since April 2025; S&P +2.51% to 6,782", "source": "Bloomberg/TheStreet", "impact_score": 4, "affected_sectors": ["Broad Market"] },
+      { "rank": 4, "headline": "Semiconductor spending tracking to $1 trillion in 2026", "source": "Yahoo Finance/Seeking Alpha", "impact_score": 4, "affected_sectors": ["Semiconductors", "Technology"] },
+      { "rank": 5, "headline": "S&P 500 breaks above 6,740 neckline; technical target 6,900", "source": "EquityClock", "impact_score": 3, "affected_sectors": ["Broad Market"] },
+      { "rank": 6, "headline": "Oil plunges 16% to $94.41 — relief for non-energy sectors", "source": "CNBC", "impact_score": 3, "affected_sectors": ["Consumer Discretionary", "Technology", "Airlines"] },
+      { "rank": 7, "headline": "European Stoxx 600 surges ~4%; DAX +4.8% on ceasefire", "source": "Bloomberg", "impact_score": 3, "affected_sectors": ["Global Equities"] },
+      { "rank": 8, "headline": "Erste Group upgrades AMD to Buy; strong data center demand", "source": "Yahoo Finance", "impact_score": 3, "affected_sectors": ["Semiconductors"] },
+      { "rank": 9, "headline": "Wells Fargo adds AMD to Q2 tactical list, PT $345 (+60% upside)", "source": "Yahoo Finance", "impact_score": 3, "affected_sectors": ["Semiconductors"] },
+      { "rank": 10, "headline": "Asia markets surge on ceasefire; broad global risk-on signal", "source": "CNBC", "impact_score": 2, "affected_sectors": ["Global Equities", "Technology"] }
+    ],
+    "bearish_signals": [
+      { "rank": 1, "headline": "Iran accuses US of breaching ceasefire terms; re-escalation risk", "source": "CNBC", "impact_score": 5, "affected_sectors": ["Broad Market", "Energy", "Technology"] },
+      { "rank": 2, "headline": "Fed holds rates 3.5-3.75%; only one cut expected all of 2026", "source": "St. Louis Fed/iShares", "impact_score": 4, "affected_sectors": ["Broad Market", "Growth Stocks"] },
+      { "rank": 3, "headline": "Geopolitical fragmentation accelerating; US reshaping alliances", "source": "Wellington/JPMorgan", "impact_score": 4, "affected_sectors": ["Global Supply Chains", "Technology", "Energy"] },
+      { "rank": 4, "headline": "JPMorgan forecasts 0 rate cuts in 2026; potential Q3 2027 hike", "source": "TheStreet/JPMorgan", "impact_score": 3, "affected_sectors": ["Broad Market", "Technology"] },
+      { "rank": 5, "headline": "Fed Chair Powell term ends May 15; leadership transition uncertainty", "source": "Morningstar", "impact_score": 3, "affected_sectors": ["Broad Market"] },
+      { "rank": 6, "headline": "S&P 500 futures dip -0.37% Apr 9 morning on ceasefire doubts", "source": "CNBC/Benzinga", "impact_score": 2, "affected_sectors": ["Broad Market"] },
+      { "rank": 7, "headline": "AMD CTO Papermaster sells $740K in shares on April 6", "source": "Investing.com", "impact_score": 2, "affected_sectors": ["Semiconductors"] },
+      { "rank": 8, "headline": "AMD stock -1.5% YTD despite recent bounce; relative underperformance", "source": "Yahoo Finance", "impact_score": 2, "affected_sectors": ["Semiconductors"] },
+      { "rank": 9, "headline": "Memory prices surge 125-234% — cost inflation for tech buyers", "source": "Gartner/Yahoo Finance", "impact_score": 2, "affected_sectors": ["Technology", "Consumer Electronics"] },
+      { "rank": 10, "headline": "Energy sector +40% YTD — prior months of oil-driven inflation", "source": "Top1000funds/CNBC", "impact_score": 2, "affected_sectors": ["Consumer", "Industrials"] }
+    ],
+    "macro_backdrop_score": 0.6,
+    "market_regime": "VOLATILE",
+    "key_themes": [
+      "US-Iran ceasefire — fragile risk-on relief rally",
+      "AI/semiconductor supercycle driving data center capex",
+      "Fed hold + tight policy limits multiple expansion",
+      "Geopolitical fragmentation as structural headwind"
+    ],
+    "hot_sectors": ["Semiconductors", "Technology", "Airlines", "Consumer Discretionary"],
+    "cold_sectors": ["Energy", "Oil & Gas"],
+    "phase3_macro_multiplier": 0.90,
+    "mandatory_risk_flags": [
+      "CEASEFIRE_FRAGILITY: Iran breach accusations — re-escalation risk within 48h",
+      "FED_LEADERSHIP_TRANSITION: Powell term ends May 15 — policy uncertainty",
+      "TIGHT_MONETARY_POLICY: Only 1 cut projected 2026 — multiple compression risk"
+    ]
+  },
+
+  "phase0_macro_snapshot": {
+    "market_regime": "VOLATILE",
+    "macro_backdrop_score": 0.6,
+    "key_themes": [
+      "US-Iran ceasefire — fragile risk-on relief",
+      "AI/semiconductor supercycle in full force",
+      "Fed hold — tight policy, 1 cut max 2026",
+      "Geopolitical fragmentation as structural headwind"
+    ],
+    "macro_multiplier": 0.90
+  },
+
+  "analyst_results": {
+    "Fundamentals": { "signal": "BUY", "score": 3, "confidence": 0.70, "phase0_alignment": "ALIGNED" },
+    "Sentiment":    { "signal": "HOLD", "score": 1, "confidence": 0.50, "phase0_alignment": "NEUTRAL" },
+    "News":         { "signal": "BUY",  "score": 2, "confidence": 0.65, "phase0_alignment": "ALIGNED" },
+    "Technical":    { "signal": "HOLD", "score": 1, "confidence": 0.55, "phase0_alignment": "NEUTRAL" }
+  },
+
+  "trades_this_session": [
+    {
+      "ticker": "AMD",
+      "final_action": "CANCEL",
+      "final_score": 1.040,
+      "final_decision": "HOLD",
+      "avg_confidence": 0.60,
+      "entry_range": ["202", "212"],
+      "take_profit": 280.0,
+      "stop_loss": 185.0,
+      "risk_reward_ratio": 2.8,
+      "position_size_pct": 0.00,
+      "time_horizon": "mid",
+      "macro_context": "VOLATILE regime + fragile US-Iran ceasefire; score 1.04 below BUY threshold 2.0. Monitor for Tech signal upgrade + macro stabilisation before re-entry",
+      "reentry_watch_conditions": [
+        "Ceasefire confirmed stable >= 3 trading days",
+        "Technical score upgrades to +2 (MACD golden cross + RSI > 50)",
+        "Final score recalculates above 2.0"
+      ]
+    }
+  ],
+
+  "active_weights_end_of_session": {
+    "Fundamentals": 0.30,
+    "Sentiment": 0.20,
+    "News": 0.20,
+    "Technical": 0.30
+  },
+  "bias_notes": "AMD has strong fundamental thesis (Data Center record $5.4B Q4, analyst upgrades, MI450 H2 catalyst, Wells Fargo PT $345). Neutral technicals + fragile macro prevented BUY. Watchlist candidate.",
+  "last_outcome": "UNKNOWN"
+}

@@ -1,0 +1,58 @@
+{
+  "session_export_version": "V4.3",
+  "export_date": "2026-04-10",
+  "ticker": "CRWV",
+  "phase0_file": "./invest_logs/2026-04-10_phase0.json",
+  "phase0_macro_snapshot": {
+    "market_regime": "VOLATILE",
+    "macro_backdrop_score": -1.8,
+    "key_themes": ["Iran_ceasefire_binary", "AI_capex_cycle_intact", "CPI_3.3pct_Fed_hold"],
+    "macro_multiplier": 0.75
+  },
+  "analyst_scores": {
+    "Fundamentals": {"signal": "HOLD", "score": 1, "confidence": 0.55},
+    "Sentiment":    {"signal": "HOLD", "score": 0, "confidence": 0.50},
+    "News":         {"signal": "BUY",  "score": 2, "confidence": 0.65},
+    "Technical":    {"signal": "BUY",  "score": 2, "confidence": 0.55}
+  },
+  "trades_this_session": [
+    {
+      "ticker": "CRWV",
+      "final_action": "CANCEL",
+      "final_score": 0.481,
+      "final_decision": "HOLD",
+      "avg_confidence": 0.5625,
+      "entry_range": null,
+      "take_profit": null,
+      "stop_loss": null,
+      "risk_reward_ratio": null,
+      "position_size_pct": 0.0,
+      "time_horizon": "mid",
+      "macro_context": "VOLATILE市場；Meta $21B契約確認AI capex週期延續，但EBIT/Interest 0.20x、D/E 8.94x、2026 capex $30-35B vs rev $12-13B — 槓桿結構極端。",
+      "watch_levels": {
+        "ideal_entry": "$75-85",
+        "key_support": "$90 (falling wedge breakout line)",
+        "deep_support": "$75 (prior consolidation)",
+        "ipo_base": "$33-$40",
+        "resistance": ["$110", "$130", "$187"]
+      },
+      "re_evaluate_triggers": [
+        "Post-earnings May 20 — if beats + raises 2026 guide significantly",
+        "Iran ceasefire holds + macro improvement → reduce VOLATILE penalty",
+        "Stock pulls back to $75-85 zone (better risk/reward)"
+      ],
+      "trade_metadata": {
+        "trade_type": "trend",
+        "event_tag": "AI_infrastructure_mega_contract"
+      }
+    }
+  ],
+  "active_weights_end_of_session": {
+    "Fundamentals": 0.30,
+    "Sentiment": 0.20,
+    "News": 0.20,
+    "Technical": 0.30
+  },
+  "bias_notes": "CRWV vs NBIS (同類分析 Apr 8): 兩者皆 CANCEL。AI infra 超高成長股在 VOLATILE 環境下財務槓桿風險系統性過高。等待 post-earnings 或更好的風險/報酬進場點。",
+  "last_outcome": "UNKNOWN"
+}

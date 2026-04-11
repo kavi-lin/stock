@@ -21,13 +21,14 @@ MODE : FLASH | DIGEST
 ## GLOBAL RULES
 
 1. **Debate Required**: 每則新聞必須同時產出 bull 與 bear 兩個解讀，禁止單面結論。
-2. **Cache Update**: 分析完成後，自動 patch 以下檔案：
+2. **Theme Cache**: 若分析需要主題背景脈絡，執行 `theme-detector` skill **前**必須先以今日日期搜尋 `../skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`。找到 → 直接載入（`theme_source: THEME_CACHE`），跳過 skill 執行；未找到 → 執行 skill，JSON cache 存入 `../skills/theme-detector/cache/`，MD 報告移至 `../reports/` 並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`。
+3. **Cache Update**: 分析完成後，自動 patch 以下檔案：
    - `../sector/sector_logs/YYYY-MM-DD_sector_intel.json` — 更新 `top_catalysts` 與 `political_overlay`
    - `../investment/invest_logs/YYYY-MM-DD_phase0.json` — 更新 `binary_risks` 與 `mandatory_risk_flags`
    - `./news_logs/YYYY-MM-DD_digest.json` — append 本次分析
-3. **FLASH mode**: 單則新聞，快速辯論，直接輸出影響結論。
-4. **DIGEST mode**: 掃描近 48h 新聞，產出完整新聞日誌，全面更新所有 cache。
-5. **Output Format**: 邏輯輸出為 JSON，結論輸出 Markdown Impact Card。
+4. **FLASH mode**: 單則新聞，快速辯論，直接輸出影響結論。
+5. **DIGEST mode**: 掃描近 48h 新聞，產出完整新聞日誌，全面更新所有 cache。
+6. **Output Format**: 邏輯輸出為 JSON，結論輸出 Markdown Impact Card。
 
 ---
 
@@ -224,6 +225,10 @@ Web search: "[新聞關鍵詞] site:reuters.com OR site:bloomberg.com OR site:ws
 }
 ```
 
+### 儲存最終報告（Impact Card MD）
+- **DIGEST mode** → 將所有 Impact Card 彙整存為 `../reports/YYYY-MM-DD_news_digest.md`
+- **FLASH mode** → 存為 `../reports/YYYY-MM-DD_HHMM_news_flash.md`
+
 ---
 
 ## FINAL IMPACT CARD（Markdown 輸出）
@@ -255,8 +260,12 @@ news/
 ├── README.md
 ├── news_protocol_v1.md              ← 本 instruction
 └── news_logs/
-    ├── YYYY-MM-DD_digest.json       ← 當日所有新聞分析（累積）
-    └── YYYY-MM-DD_HH-MM_flash.json  ← 單則即時快閃（選擇性）
+    ├── YYYY-MM-DD_digest.json       ← 當日新聞分析 cache（中繼）
+    └── YYYY-MM-DD_HH-MM_flash.json  ← 單則即時快閃 cache（中繼）
+
+reports/                             ← 最終報告集中存放
+├── YYYY-MM-DD_news_digest.md        ← DIGEST 完整 Impact Card 彙整
+└── YYYY-MM-DD_HHMM_news_flash.md   ← FLASH 單則 Impact Card
 ```
 
 ---
