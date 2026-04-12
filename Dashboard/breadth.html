@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市場廣度雷達 | INTEL COMMAND</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css?v=1.1.9">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex min-h-screen transition-all">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all">
+        <div class="p-4 flex items-center justify-between gap-1">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shrink-0">
+                    <i data-lucide="activity" class="text-black w-5 h-5"></i>
+                </div>
+                <h1 class="text-base font-black tracking-tighter uppercase italic line-clamp-1 pr-2">INTEL<span class="text-green-500">COMMAND</span></h1>
+            </div>
+            <button id="theme-toggle" class="p-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all group/theme">
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-zinc-500 group-hover/theme:text-yellow-500 transition-colors" id="theme-icon"></i>
+            </button>
+        </div>
+        <nav class="flex-1 px-4 space-y-1">
+            <a href="index.html"    class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span data-i18n="nav_dash">總體儀表板</span></a>
+            <a href="watchlist.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="radar" class="w-4 h-4"></i><span data-i18n="nav_watchlist">進場雷達</span></a>
+            <a href="breadth.html"  class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span data-i18n="nav_breadth">市場廣度</span></a>
+            <a href="sector.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="pie-chart" class="w-4 h-4"></i><span data-i18n="nav_sector">產業掃描</span></a>
+            <a href="news.html"     class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="newspaper" class="w-4 h-4"></i><span data-i18n="nav_news">即時新聞</span></a>
+            <a href="history.html"  class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i><span data-i18n="nav_history">決策歷史</span></a>
+        </nav>
+        <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
+                <span id="lang-text">English</span>
+                <i data-lucide="languages" class="w-3 h-3"></i>
+            </button>
+            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <span>System Logs</span><i data-lucide="terminal" class="w-3 h-3"></i>
+            </button>
+            <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">V1.1.9.260414</div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="ml-64 flex-1 flex flex-col">
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-10">
+            <div class="flex items-center gap-3">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-400"></i>
+                <h2 class="text-lg font-bold" id="page-title">市場廣度雷達</h2>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden sm:block" id="page-subtitle">Market Breadth</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter">SYNCING...</span>
+                <button id="refresh-btn" class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span id="refresh-label">更新</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-8" id="breadth-body">
+            <div class="col-span-full py-20 text-center animate-pulse text-zinc-600">Loading breadth data...</div>
+        </div>
+    </main>
+
+    <!-- Debug Console -->
+    <div id="debug-console" class="fixed bottom-0 left-64 right-0 border-t border-zinc-200 dark:border-zinc-800 p-4 z-50 hidden font-mono text-[10px]" style="background-color: var(--bg-main); color: var(--text-main)">
+        <div class="flex items-center justify-between mb-2 pb-1 border-b border-zinc-200 dark:border-zinc-900">
+            <div class="flex items-center gap-2"><i data-lucide="terminal" class="w-3 h-3 text-green-500"></i><span class="font-bold uppercase tracking-widest text-[9px]">SYSTEM LOGS</span></div>
+            <button onclick="document.getElementById('debug-console').classList.add('hidden')"><i data-lucide="x" class="w-3 h-3"></i></button>
+        </div>
+        <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
+    </div>
+
+    <script src="i18n.js?v=1.1.9"></script>
+    <script>
+    lucide.createIcons();
+
+    // ── Theme ──────────────────────────────────────────────────────
+    let currentTheme = localStorage.getItem('dash_theme') || 'dark';
+    function initTheme() {
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        currentTheme === 'dark'
+            ? document.documentElement.classList.add('dark')
+            : document.documentElement.classList.remove('dark');
+        const ic = document.getElementById('theme-icon');
+        if (ic) { ic.setAttribute('data-lucide', currentTheme === 'dark' ? 'moon' : 'sun'); lucide.createIcons(); }
+    }
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('dash_theme', currentTheme);
+        initTheme();
+    });
+    initTheme();
+
+    // ── Lang ──────────────────────────────────────────────────────
+    let currentLang = localStorage.getItem('dash_lang') || 'zh';
+
+    function applyTranslations() {
+        if (!window.i18n) return;
+        const t  = window.i18n[currentLang];
+        const b  = t.breadth || {};
+        const nav = t.nav || {};
+        document.getElementById('lang-text').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
+        document.getElementById('page-title').textContent    = b.title    || '市場廣度雷達';
+        document.getElementById('page-subtitle').textContent = b.subtitle || 'Market Breadth';
+        document.getElementById('refresh-label').textContent = currentLang === 'zh' ? '更新' : 'Refresh';
+        document.querySelectorAll('[data-i18n^="nav_"]').forEach(el => {
+            const key = el.getAttribute('data-i18n').replace('nav_', '');
+            if (nav[key]) el.textContent = nav[key];
+        });
+    }
+
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        localStorage.setItem('dash_lang', currentLang);
+        applyTranslations();
+        loadBreadth();
+    });
+
+    // ── Logs ──────────────────────────────────────────────────────
+    function logToUI(msg, type = 'info') {
+        const out = document.getElementById('log-output');
+        const line = document.createElement('div');
+        const color = type === 'error' ? 'text-red-500' : type === 'warn' ? 'text-yellow-500' : 'text-zinc-500';
+        line.innerHTML = `<span>[${new Date().toLocaleTimeString()}]</span> <span class="${color}">${msg}</span>`;
+        out.appendChild(line);
+    }
+    document.getElementById('show-logs').addEventListener('click', () =>
+        document.getElementById('debug-console').classList.toggle('hidden'));
+
+    // ── Gauge SVG ─────────────────────────────────────────────────
+    // Upper semicircle gauge. SVG y-axis points DOWN, so upper arc needs:
+    //   x = cx + R*cos(θ),  y = cy - R*sin(θ)   (note the minus)
+    //   θ: 180° (left/0%) → 0° (right/100%), sweep-flag=0 (counter-clockwise on screen)
+    function buildGauge(score) {
+        const val     = parseFloat(score) || 0;
+        const clamped = Math.max(0, Math.min(100, val));
+        const color   = clamped < 30 ? '#ef4444' : clamped < 55 ? '#f97316' : clamped < 80 ? '#22c55e' : '#22c55e';
+        const label   = clamped < 30 ? 'CRITICAL' : clamped < 55 ? 'WEAKENING' : clamped < 80 ? 'HEALTHY' : 'STRONG';
+
+        const R = 76, cx = 100, cy = 88;
+
+        // Point on the upper arch at percentage pct (0=left end, 100=right end)
+        function pt(pct) {
+            const theta = (1 - pct / 100) * Math.PI;   // 180° at 0%, 0° at 100%
+            return [cx + R * Math.cos(theta), cy - R * Math.sin(theta)];
+        }
+
+        // SVG arc segment from pct1 to pct2 along upper arch
+        // sweep=1 (clockwise in SVG) = goes UPWARD from left → correct upper semicircle
+        function seg(p1, p2) {
+            const [ax, ay] = pt(p1), [bx, by] = pt(p2);
+            const large = (p2 - p1) > 50 ? 1 : 0;
+            return `M ${ax.toFixed(1)} ${ay.toFixed(1)} A ${R} ${R} 0 ${large} 1 ${bx.toFixed(1)} ${by.toFixed(1)}`;
+        }
+
+        const [nx, ny] = pt(clamped);
+
+        // Tick marks at zone boundaries
+        const ticks = [0, 30, 55, 80, 100].map(v => {
+            const theta = (1 - v / 100) * Math.PI;
+            const ix = (cx + (R - 7)  * Math.cos(theta)).toFixed(1);
+            const iy = (cy - (R - 7)  * Math.sin(theta)).toFixed(1);
+            const ox = (cx + (R + 6)  * Math.cos(theta)).toFixed(1);
+            const oy = (cy - (R + 6)  * Math.sin(theta)).toFixed(1);
+            return `<line x1="${ix}" y1="${iy}" x2="${ox}" y2="${oy}" stroke="#52525b" stroke-width="1.5"/>`;
+        }).join('');
+
+        // Zone boundary labels — radially outside the arc
+        // viewBox starts at y=-15 so labels near the arc top have room
+        function boundaryLabel(pct, text, fillColor) {
+            const theta = (1 - pct / 100) * Math.PI;
+            const lx = (cx + (R + 15) * Math.cos(theta)).toFixed(1);
+            const ly = (cy - (R + 15) * Math.sin(theta)).toFixed(1);
+            return `<text x="${lx}" y="${ly}" font-size="7.5" fill="${fillColor}"
+                          font-family="monospace" text-anchor="middle" dominant-baseline="middle" opacity="0.8">${text}</text>`;
+        }
+
+        return `
+        <div class="flex flex-col items-center">
+            <svg viewBox="0 -15 200 115" class="w-56 h-32">
+                <!-- Zone background arcs (dim) — sweep=1 = upper arch -->
+                <path d="${seg(0,  30)}"  fill="none" stroke="#ef4444" stroke-width="12" stroke-linecap="butt" opacity="0.22"/>
+                <path d="${seg(30, 55)}"  fill="none" stroke="#f97316" stroke-width="12" stroke-linecap="butt" opacity="0.22"/>
+                <path d="${seg(55,100)}"  fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="butt" opacity="0.22"/>
+                <!-- Value arc (bright) -->
+                ${clamped > 0 ? `<path d="${seg(0, clamped)}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round"/>` : ''}
+                ${ticks}
+                <!-- Needle dot -->
+                <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="5.5" fill="${color}" stroke="#09090b" stroke-width="2"/>
+                <!-- Axis end labels -->
+                <text x="8"   y="98" font-size="7.5" fill="#71717a" font-family="monospace">0</text>
+                <text x="192" y="98" font-size="7.5" fill="#71717a" font-family="monospace" text-anchor="end">100</text>
+                <!-- Zone boundary labels above the arc -->
+                ${boundaryLabel(30, '30', '#ef4444')}
+                ${boundaryLabel(55, '55', '#22c55e')}
+            </svg>
+            <div class="text-5xl font-black tracking-tighter -mt-2" style="color:${color}">${val % 1 === 0 ? val : val.toFixed(1)}</div>
+            <div class="text-[10px] font-black uppercase tracking-widest mt-1" style="color:${color}">${label}</div>
+        </div>`;
+    }
+
+    // ── Component Bar (6-component full version) ──────────────────
+    function componentBar(label, value, signal = '', weight = 0) {
+        const score = Math.round(value ?? 0);
+        const pct   = score;
+        const color = pct < 30 ? '#ef4444' : pct < 55 ? '#eab308' : '#22c55e';
+        const wtBadge = weight ? `<span class="text-[9px] text-zinc-600 font-mono ml-1">${weight}%</span>` : '';
+        const signalTrim = signal.length > 60 ? signal.slice(0, 57) + '…' : signal;
+        return `
+        <div class="space-y-1.5">
+            <div class="flex justify-between items-center gap-2">
+                <div class="flex items-center gap-1 min-w-0">
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate">${label}</span>
+                    ${wtBadge}
+                </div>
+                <span class="text-sm font-black font-mono shrink-0" style="color:${color}">${score}</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-zinc-800">
+                <div class="h-1.5 rounded-full transition-all duration-700" style="width:${pct}%;background-color:${color}"></div>
+            </div>
+            ${signalTrim ? `<p class="text-[9px] text-zinc-600 leading-tight">${signalTrim}</p>` : ''}
+        </div>`;
+    }
+
+    // ── Flag Badge ────────────────────────────────────────────────
+    function flagBadge(flag, translations) {
+        const label = translations[flag] || flag.replace(/_/g, ' ');
+        const isCritical = flag.includes('Critical') || flag.includes('Death_Cross') || flag.includes('Extreme_Fear');
+        const isWarn = flag.includes('Below_200MA') || flag.includes('Bearish_Signal') || flag.includes('Warning');
+        const cls = isCritical
+            ? 'bg-red-500/15 text-red-400 border-red-500/30'
+            : isWarn
+            ? 'bg-orange-500/10 text-orange-400 border-orange-500/25'
+            : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/25';
+        const icon = isCritical ? 'alert-octagon' : 'alert-triangle';
+        return `<div class="flex items-center gap-2 px-3 py-2 rounded-xl border ${cls}">
+            <i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0"></i>
+            <span class="text-[10px] font-bold uppercase tracking-wider">${label}</span>
+        </div>`;
+    }
+
+    // ── Sector Uptrend Row ────────────────────────────────────────
+    function sectorUptrendRow(sector, sectorName, slopeLabel) {
+        const r = sector.uptrend_ratio ?? 0;
+        const pct = Math.round(r * 100);
+        const barColor = pct >= 60 ? '#22c55e' : pct >= 40 ? '#eab308' : '#ef4444';
+        const rotIcon = sector.rotation_signal === 'INFLOW' ? '▲' : sector.rotation_signal === 'OUTFLOW' ? '▼' : '–';
+        const rotColor = sector.rotation_signal === 'INFLOW' ? '#22c55e' : sector.rotation_signal === 'OUTFLOW' ? '#ef4444' : '#71717a';
+        return `
+        <div class="flex items-center gap-3 py-2 border-b border-zinc-800/40 last:border-0">
+            <div class="w-32 shrink-0">
+                <span class="text-[10px] font-bold uppercase tracking-wide" style="color:var(--text-main)">${sectorName}</span>
+            </div>
+            <div class="flex-1 h-2 rounded-full bg-zinc-800">
+                <div class="h-2 rounded-full transition-all duration-700" style="width:${pct}%;background-color:${barColor}"></div>
+            </div>
+            <div class="w-10 text-right font-mono text-xs font-bold" style="color:${barColor}">${pct}%</div>
+            <div class="w-6 text-center text-xs font-black" style="color:${rotColor}">${rotIcon}</div>
+            <div class="w-12 text-[9px] font-bold text-zinc-600 uppercase">${slopeLabel}</div>
+        </div>`;
+    }
+
+    // ── Main Render ───────────────────────────────────────────────
+    async function loadBreadth() {
+        logToUI('Loading breadth data...');
+        const body = document.getElementById('breadth-body');
+        try {
+            const data = await (await fetch('data.json?t=' + Date.now())).json();
+            document.getElementById('last-update').textContent = `SYNC: ${data.last_updated}`;
+
+            const br = data.breadth || {};
+            const t  = window.i18n?.[currentLang] || {};
+            const b  = t.breadth || {};
+            const flagT = t.warnings?.flags || {};
+            const sectorNames = t.sectors || {};
+            const rotT = t.rotation || {};
+
+            if (!br.score && br.score !== 0) {
+                body.innerHTML = `<div class="py-20 text-center text-zinc-600">${b.no_data || 'No breadth data available'}</div>`;
+                return;
+            }
+
+            const flags   = br.warning_flags || [];
+            const sectors = (data.sectors || []).slice().sort((a, b) => (b.uptrend_ratio ?? 0) - (a.uptrend_ratio ?? 0));
+            const compFull = br.components_full || {};   // 6-component dict from analyzer
+            const compLegacy = br.components || {};       // 4-field fallback
+
+            // Use full 6-component data if available, else legacy 4
+            const hasFullComponents = Object.keys(compFull).length >= 4;
+
+            // Cycle phase colour
+            const cycleColor = br.cycle_phase === 'Late' ? '#ef4444'
+                             : br.cycle_phase === 'Mid'  ? '#eab308'
+                             : '#22c55e';
+
+            // Zone badge
+            const zoneColors = { Strong:'#22c55e', Healthy:'#22c55e', Neutral:'#eab308', Weakening:'#f97316', Critical:'#ef4444' };
+            const zoneColor  = zoneColors[br.zone] || '#71717a';
+
+            // Trend badge
+            const trendDir   = (br.trend_direction || 'stable').toLowerCase();
+            const trendColor = trendDir === 'improving' ? '#22c55e' : trendDir === 'deteriorating' ? '#ef4444' : '#eab308';
+            const trendIcon  = trendDir === 'improving' ? '▲' : trendDir === 'deteriorating' ? '▼' : '→';
+
+            // MA values
+            const ma8Val  = br.current_8ma  != null ? br.current_8ma.toFixed(3)  : '–';
+            const ma200Val= br.current_200ma != null ? br.current_200ma.toFixed(3) : '–';
+            const maColor = (br.current_8ma ?? 0) > (br.current_200ma ?? 0) ? '#22c55e' : '#ef4444';
+
+            // Exposure ceiling
+            const exposureVal = br.exposure_ceiling || '–';
+
+            // Regime confidence bar
+            const confPct  = Math.round((br.regime_confidence ?? 0) * 100);
+            const confColor = confPct >= 70 ? '#22c55e' : confPct >= 50 ? '#eab308' : '#ef4444';
+
+            // Slope translation helper
+            const slopeT = { rising: b.slope_rising || 'Rising', falling: b.slope_falling || 'Falling', flat: b.slope_flat || 'Flat' };
+
+            // 6-component rows (ordered by weight desc)
+            const compOrder = ['breadth_level_trend','ma_crossover','cycle_position','bearish_signal','historical_percentile','divergence'];
+            const compRows = hasFullComponents
+                ? compOrder.filter(k => compFull[k])
+                    .map(k => {
+                        const c = compFull[k];
+                        return componentBar(c.label || k, c.score ?? 0, c.signal || '', c.weight || 0);
+                    }).join('')
+                : [
+                    componentBar('Overall Breadth',       compLegacy.overall_breadth    ?? 0),
+                    componentBar('Sector Participation',  compLegacy.sector_participation ?? 0),
+                    componentBar('Momentum',              compLegacy.momentum ?? 0),
+                    componentBar('Mean Reversion Risk',   compLegacy.mean_reversion_risk ?? 0),
+                  ].join('');
+
+            // Actions list
+            const actions = br.actions || [];
+
+            // Key levels
+            const keyLevels = br.key_levels || {};
+
+            body.innerHTML = `
+            <!-- ── Row 1: Gauge + Stats ───────────────────────────── -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Main gauge card -->
+                <div class="glass-card p-6 flex flex-col items-center justify-center gap-2">
+                    <div class="flex items-center gap-2 mb-2">
+                        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">${b.breadth_score || 'Breadth Score'}</p>
+                        ${br.zone ? `<span class="text-[9px] font-black px-2 py-0.5 rounded border" style="color:${zoneColor};border-color:${zoneColor}40;background:${zoneColor}15">${br.zone.toUpperCase()}</span>` : ''}
+                    </div>
+                    ${buildGauge(br.score)}
+                    ${br.trend_direction ? `
+                    <div class="mt-2 flex items-center gap-1.5">
+                        <span class="text-[9px] font-black uppercase tracking-widest" style="color:${trendColor}">${trendIcon} ${trendDir.toUpperCase()}</span>
+                        ${br.data_date ? `<span class="text-[9px] text-zinc-600">· data: ${br.data_date}</span>` : ''}
+                    </div>` : ''}
+                    ${br.source === 'market-breadth-analyzer' ? `<div class="text-[8px] text-zinc-700 mt-1">TraderMonty CSV · ${br.data_quality || ''}</div>` : ''}
+                </div>
+
+                <!-- Stat grid -->
+                <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+                    <div class="glass-card p-5">
+                        <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">8MA / 200MA</p>
+                        <p class="text-2xl font-black font-mono" style="color:${maColor}">${ma8Val}</p>
+                        <p class="text-[9px] text-zinc-600 mt-0.5">200MA: <span class="font-mono">${ma200Val}</span></p>
+                        <p class="text-[9px] text-zinc-700 mt-1">${(br.current_8ma ?? 0) > (br.current_200ma ?? 0) ? '8MA above 200MA ✓' : '8MA below 200MA ✗'}</p>
+                    </div>
+                    <div class="glass-card p-5">
+                        <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${b.cycle_phase || 'Cycle Phase'}</p>
+                        <p class="text-2xl font-black" style="color:${cycleColor}">${br.cycle_phase || '–'}</p>
+                        <p class="text-[9px] text-zinc-600 mt-1">market cycle position</p>
+                    </div>
+                    <div class="glass-card p-5">
+                        <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${b.exposure_ceiling || 'Exposure Ceiling'}</p>
+                        <p class="text-2xl font-black text-orange-400">${exposureVal}</p>
+                        <p class="text-[9px] text-zinc-600 mt-1">recommended equity range</p>
+                    </div>
+                    <div class="glass-card p-5">
+                        <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">${b.regime_conf || 'Data Quality'}</p>
+                        <p class="text-2xl font-black font-mono" style="color:${confColor}">${confPct}%</p>
+                        <div class="w-full h-1.5 rounded-full bg-zinc-800 mt-2">
+                            <div class="h-1.5 rounded-full" style="width:${confPct}%;background-color:${confColor}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Row 2: Components + Flags ──────────────────────── -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- 6-Component Breakdown -->
+                <div class="glass-card p-6">
+                    <h3 class="text-xs font-black uppercase tracking-widest mb-5 flex items-center gap-2">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-400"></i>
+                        <span>${hasFullComponents ? '6-Component Analysis' : (b.components_title || 'Breadth Components')}</span>
+                    </h3>
+                    <div class="space-y-4">${compRows}</div>
+                </div>
+
+                <!-- Warning Flags + Guidance -->
+                <div class="glass-card p-6 flex flex-col gap-4">
+                    <div>
+                        <h3 class="text-xs font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-red-400"></i>
+                            <span>${b.flags_title || 'Risk Flags'}</span>
+                            <span class="ml-auto text-xs font-black px-2 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/25">${flags.length} ACTIVE</span>
+                        </h3>
+                        ${flags.length
+                            ? `<div class="grid grid-cols-1 gap-2">${flags.map(f => flagBadge(f, flagT)).join('')}</div>`
+                            : `<div class="text-zinc-600 text-xs">No active flags.</div>`
+                        }
+                    </div>
+                    ${actions.length ? `
+                    <div class="border-t border-zinc-800 pt-4">
+                        <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 flex items-center gap-1.5">
+                            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> Recommended Actions
+                        </h4>
+                        <ul class="space-y-1.5">
+                            ${actions.map(a => `<li class="flex items-start gap-2 text-[10px] text-zinc-400 leading-tight">
+                                <span class="text-orange-400 shrink-0 mt-0.5">›</span>${a}
+                            </li>`).join('')}
+                        </ul>
+                    </div>` : ''}
+                </div>
+            </div>
+
+            <!-- ── Row 3: Per-Sector Uptrend ──────────────────────── -->
+            <div class="glass-card p-6">
+                <h3 class="text-xs font-black uppercase tracking-widest mb-5 flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+                    <span>${b.sector_uptrend || 'Per-Sector Uptrend Ratio'}</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10">
+                    ${sectors.map(s => {
+                        const name = sectorNames[s.name.toUpperCase()] || s.name.replace(/_/g, ' ');
+                        const sl   = slopeT[s.slope] || s.slope || '–';
+                        return sectorUptrendRow(s, name, sl);
+                    }).join('')}
+                </div>
+            </div>
+
+            <!-- ── Row 4: Key Levels ──────────────────────────────── -->
+            ${Object.keys(keyLevels).length ? `
+            <div class="glass-card p-6">
+                <h3 class="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="target" class="w-4 h-4 text-purple-400"></i>
+                    <span>Key Breadth Levels</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    ${Object.entries(keyLevels).map(([name, lv]) => `
+                    <div class="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
+                        <p class="text-[10px] font-black text-zinc-400 mb-1">${name}</p>
+                        <p class="text-lg font-black font-mono text-purple-300">${lv.value}</p>
+                        <p class="text-[9px] text-zinc-600 mt-1 leading-tight">${lv.significance}</p>
+                    </div>`).join('')}
+                </div>
+            </div>` : ''}
+
+            <!-- ── Row 5: Analyst Notes ───────────────────────────── -->
+            ${br.notes ? `
+            <div class="glass-card p-6">
+                <h3 class="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4 text-zinc-400"></i>
+                    <span>${b.notes_title || 'Analyst Notes'}</span>
+                </h3>
+                <p class="text-sm leading-relaxed text-zinc-400">${br.notes}</p>
+            </div>` : ''}
+            `;
+
+            lucide.createIcons();
+            logToUI(`Breadth loaded: score=${br.score} zone=${br.zone || '–'} flags=${flags.length} src=${br.source || 'sector_intel'}`);
+        } catch (e) {
+            logToUI(e.message, 'error');
+            body.innerHTML = `<div class="glass-card p-10 text-center text-red-500">${e.message}</div>`;
+        }
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', loadBreadth);
+    applyTranslations();
+    loadBreadth();
+    </script>
+</body>
+</html>

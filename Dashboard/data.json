@@ -1,9 +1,12 @@
 {
   "status": "success",
-  "last_updated": "2026-04-12 09:56:44",
+  "last_updated": "2026-04-13 00:21:08",
   "market": {
     "regime": "VOLATILE",
-    "fear_greed": 50,
+    "cycle_phase": "Mid",
+    "regime_confidence": 0.9,
+    "fear_greed": 15,
+    "fear_greed_label": "Extreme_Fear",
     "themes": [
       "Defensive_Flight_to_Safety (XLP/XLV/XLU)",
       "Bank_Earnings_Catalyst (XLF — monitor Apr 13-15)",
@@ -13,8 +16,420 @@
       "Consumer_Staples",
       "Healthcare"
     ],
+    "warm_sectors": [
+      "Utilities",
+      "Financials"
+    ],
+    "cold_sectors": [
+      "Industrials",
+      "Technology",
+      "Communication",
+      "Materials"
+    ],
+    "avoid_sectors": [
+      "Energy",
+      "Consumer_Discretionary",
+      "Real_Estate"
+    ],
+    "exposure_ceiling": "40-60%",
+    "macro_multiplier": "0.73x",
+    "breadth_score": 36.8,
+    "breadth_components": {
+      "overall_breadth": 37,
+      "sector_participation": 57,
+      "momentum": 30,
+      "mean_reversion_risk": 55
+    },
+    "uptrend_ratio": 0.519098349062016,
+    "warning_flags": [
+      "Bearish_Signal_Active",
+      "Below_200MA",
+      "Low_Historical_Percentile",
+      "Weakening_Zone"
+    ],
+    "trump_signals": [
+      {
+        "keyword": "tariff",
+        "headline": "IEEPA tariffs ruled partially unlawful by SCOTUS; replacements being assembled via Section 301/232/122",
+        "source": "news_report",
+        "affected_sectors": [
+          "Technology",
+          "Consumer_Discretionary",
+          "Industrials"
+        ],
+        "direction": "bearish"
+      },
+      {
+        "keyword": "china_threat",
+        "headline": "New USTR Section 301 investigations vs China; Trump-Xi summit scheduled May 2026",
+        "source": "news_report",
+        "affected_sectors": [
+          "Technology",
+          "Consumer_Discretionary"
+        ],
+        "direction": "bearish"
+      }
+    ],
+    "named_targets": [],
     "notes": "市場VOLATILE/RISK_OFF，Fear&Greed=15觸發極端情緒警示。防禦輪動（XLP/XLV/XLU）為唯一HOT確信方向；Energy因停火binary風險列AVOID；銀行財報週（Apr 13-15）為最重要近期catalyst，結果將定義下週市場方向。建議個股分析聚焦Consumer Staples和Healthcare中具獲利能力且估值合理的標的。"
   },
+  "breadth": {
+    "score": 36.8,
+    "zone": "Weakening",
+    "zone_color": "orange",
+    "exposure_ceiling": "40-60%",
+    "guidance": "Breadth deteriorating. Begin profit-taking and raise cash allocation.",
+    "actions": [
+      "Take profits on weakest 25-40% of positions",
+      "No new momentum entries",
+      "Raise cash allocation significantly",
+      "Consider defensive sector rotation (XLU, XLP, XLV)",
+      "Watch for cycle trough signal for re-entry"
+    ],
+    "components": {
+      "overall_breadth": 37,
+      "sector_participation": 57,
+      "momentum": 30,
+      "mean_reversion_risk": 55
+    },
+    "components_full": {
+      "breadth_level_trend": {
+        "score": 57,
+        "signal": "NEUTRAL: 8MA=0.519 in downtrend - mixed signals",
+        "label": "Current Breadth Level & Trend",
+        "weight": 25
+      },
+      "ma_crossover": {
+        "score": 30,
+        "signal": "NEGATIVE: 8MA below 200MA (gap=-0.087, 8MA rising) (recovery signal)",
+        "label": "8MA vs 200MA Crossover",
+        "weight": 20
+      },
+      "cycle_position": {
+        "score": 45,
+        "signal": "PEAK (25d ago): recovery attempt, 8MA rising",
+        "label": "Peak/Trough Cycle Position",
+        "weight": 20
+      },
+      "bearish_signal": {
+        "score": 25,
+        "signal": "WARNING (muted): Bearish signal active in downtrend, but 8MA=0.519 still relatively strong [PINK ZONE]",
+        "label": "Bearish Signal Status",
+        "weight": 15
+      },
+      "historical_percentile": {
+        "score": 10,
+        "signal": "LOW: 19th percentile - below average breadth",
+        "label": "Historical Percentile",
+        "weight": 10
+      },
+      "divergence": {
+        "score": 28.0,
+        "signal": "Consistent decline (both falling): S&P -1.7%, Breadth 8MA -0.140 over 60d",
+        "label": "S&P 500 vs Breadth Divergence",
+        "weight": 10
+      }
+    },
+    "uptrend_ratio": 0.519098349062016,
+    "current_8ma": 0.519098349062016,
+    "current_200ma": 0.6056138529479576,
+    "cycle_phase": "Mid",
+    "warning_flags": [
+      "Bearish_Signal_Active",
+      "Below_200MA",
+      "Low_Historical_Percentile",
+      "Weakening_Zone"
+    ],
+    "regime_confidence": 0.9,
+    "trend_direction": "stable",
+    "trend_entries": [
+      {
+        "data_date": "2026-04-09",
+        "composite_score": 36.8,
+        "component_scores": {
+          "breadth_level_trend": 57,
+          "ma_crossover": 30,
+          "cycle_position": 45,
+          "bearish_signal": 25,
+          "historical_percentile": 10,
+          "divergence": 28.0
+        },
+        "recorded_at": "2026-04-13 00:16:27"
+      }
+    ],
+    "data_quality": "Complete (6/6 components)",
+    "key_levels": {
+      "200MA Level": {
+        "value": "0.6056",
+        "significance": "Key support/resistance for 8MA. 8MA crossing below is an early warning of deterioration, not a standalone bearish signal."
+      },
+      "Extreme Weakness (0.40)": {
+        "value": "0.4000",
+        "significance": "8MA below 0.40 marks extreme weakness. Historically, troughs at this level precede significant rallies."
+      },
+      "Healthy Threshold (0.60)": {
+        "value": "0.6000",
+        "significance": "8MA above 0.60 indicates broad participation. Below 0.60 = selective market, above = inclusive rally."
+      },
+      "Historical Avg Peak": {
+        "value": "0.713",
+        "significance": "Average peak level. Approaching this level suggests breadth may be near a cyclical high."
+      },
+      "Historical Avg Trough": {
+        "value": "0.231",
+        "significance": "Average extreme trough level. Reaching this level is a potential contrarian buy signal."
+      }
+    },
+    "data_date": "2026-04-09",
+    "days_old": 4,
+    "source": "market-breadth-analyzer",
+    "notes": ""
+  },
+  "sectors": [
+    {
+      "name": "Consumer_Staples",
+      "verdict": "HOT",
+      "score": 78,
+      "proxy_etf": "XLP",
+      "risk_flags": [
+        "extreme_sentiment",
+        "late_cycle"
+      ],
+      "key_reason": "Defensive INFLOW 加速，衰退概率50%支撐",
+      "devils_advocate": "停火若穩定 + 銀行財報強勁 → risk-on反轉可能在2週內壓縮staples",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.68,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "+13% through early Feb; strong defensive INFLOW accelerating"
+    },
+    {
+      "name": "Healthcare",
+      "verdict": "HOT",
+      "score": 76,
+      "proxy_etf": "XLV",
+      "risk_flags": [
+        "extreme_sentiment",
+        "policy_risk"
+      ],
+      "key_reason": "防禦 + AI效率敘事雙重驅動",
+      "devils_advocate": "Trump政策風險（FDA、藥價）未消除；若risk-on反彈將跑輸cyclicals",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.65,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "+12.88% YTD; AI efficiency narrative + defensive appeal"
+    },
+    {
+      "name": "Utilities",
+      "verdict": "WARM",
+      "score": 72,
+      "proxy_etf": "XLU",
+      "risk_flags": [
+        "extreme_sentiment"
+      ],
+      "key_reason": "防禦流入 + 資料中心電力需求雙催化",
+      "devils_advocate": "若停火帶動risk-on，utilities防禦溢價收縮",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.62,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "+8.4%; data center power demand adds growth angle to defensive"
+    },
+    {
+      "name": "Financials",
+      "verdict": "WARM",
+      "score": 68,
+      "proxy_etf": "XLF",
+      "risk_flags": [
+        "binary_risk_this_week",
+        "extreme_sentiment",
+        "high_expectations"
+      ],
+      "key_reason": "Q1 EPS預期+19.6%，M&A復甦驅動IB收入",
+      "devils_advocate": "高預期 = 高miss風險；衰退概率50%下信用品質為隱憂",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.55,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": "+6.4% QTD through Apr 3; bank earnings week April 13-15 is key binary"
+    },
+    {
+      "name": "Industrials",
+      "verdict": "COLD",
+      "score": 42,
+      "proxy_etf": "XLI",
+      "risk_flags": [
+        "binary_risk_within_48h",
+        "late_cycle",
+        "overbought_defense_sub"
+      ],
+      "key_reason": "Defense sub-sector +14%但ceasefire = mean reversion binary",
+      "devils_advocate": "若停火破裂，defense sub-sector急速回溫",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.48,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": "Defense sub-sector +14% (ITA); broader industrials mixed; ceasefire = binary risk"
+    },
+    {
+      "name": "Technology",
+      "verdict": "COLD",
+      "score": 40,
+      "proxy_etf": "XLK",
+      "risk_flags": [
+        "late_cycle",
+        "tariff_exposure",
+        "extreme_sentiment"
+      ],
+      "key_reason": "Death Cross + Late cycle週期性降分",
+      "devils_advocate": "若market risk-on反彈，Tech/Nasdaq可能領漲",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.4,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": "AI narrative intact but tariff on semis + market regime pressure; selectivity high"
+    },
+    {
+      "name": "Communication",
+      "verdict": "COLD",
+      "score": 38,
+      "proxy_etf": "XLC",
+      "risk_flags": [
+        "late_cycle",
+        "valuation_risk"
+      ],
+      "key_reason": "估值高但需求端受macro壓力",
+      "devils_advocate": "Meta/Google AI廣告若超預期可提振板塊",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.38,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "Lofty AI valuations weighed on; fundamentally OK but not leading"
+    },
+    {
+      "name": "Materials",
+      "verdict": "COLD",
+      "score": 36,
+      "proxy_etf": "XLB",
+      "risk_flags": [
+        "late_cycle",
+        "tariff_exposure"
+      ],
+      "key_reason": "關稅對金屬/原物料需求破壞",
+      "devils_advocate": "若中美峰會5月達成協議 → 快速反彈機會",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.42,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "+4.6% QTD; mixed — tariff uncertainty on metals/steel"
+    },
+    {
+      "name": "Energy",
+      "verdict": "AVOID",
+      "score": 22,
+      "proxy_etf": "XLE",
+      "risk_flags": [
+        "binary_risk_within_48h",
+        "overbought",
+        "extreme_sentiment",
+        "late_cycle"
+      ],
+      "key_reason": "伊朗停火觸發XLE急跌5-7.5%，戰爭溢價消化中",
+      "devils_advocate": "若停火破裂，Energy可能在48h內急漲25%+（反向binary）",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.35,
+      "overbought_risk": "HIGH",
+      "ytd_perf_note": "XLE +37% Q1 (war premium) — now reversing sharply: -5 to -7.5% on ceasefire Apr 8. Oil $94-$105 (volatile). Hormuz uncertainty = AVOID"
+    },
+    {
+      "name": "Consumer_Discretionary",
+      "verdict": "AVOID",
+      "score": 20,
+      "proxy_etf": "XLY",
+      "risk_flags": [
+        "late_cycle",
+        "tariff_exposure",
+        "recession_risk"
+      ],
+      "key_reason": "關稅衝擊消費品成本與信心",
+      "devils_advocate": "若關稅全面降低（中美峰會突破）→ 反彈空間最大",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.28,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "Consumer confidence eroded by tariffs and Iran war uncertainty; discretionary spend contracting"
+    },
+    {
+      "name": "Real_Estate",
+      "verdict": "AVOID",
+      "score": 18,
+      "proxy_etf": "XLRE",
+      "risk_flags": [
+        "late_cycle",
+        "rate_sensitive",
+        "recession_risk"
+      ],
+      "key_reason": "利率3.5-3.75%持續高壓，再融資困難",
+      "devils_advocate": "若FOMC意外鴿派轉向 → REIT急彈機會",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.22,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "-5.2% worst sector YTD; elevated rates at 3.5-3.75% keep pressure on"
+    }
+  ],
+  "binary_risks": [
+    {
+      "event": "Iran ceasefire stability — Strait of Hormuz reopening",
+      "date": "2026-04-11",
+      "days_until": -2,
+      "affected_sectors": [
+        "Energy",
+        "Industrials"
+      ],
+      "within_48h": true
+    },
+    {
+      "event": "Goldman Sachs Q1 Earnings",
+      "date": "2026-04-13",
+      "days_until": 0,
+      "affected_sectors": [
+        "Financials"
+      ],
+      "within_48h": false
+    },
+    {
+      "event": "JPMorgan / Citigroup / Wells Fargo Q1 Earnings",
+      "date": "2026-04-14",
+      "days_until": 1,
+      "affected_sectors": [
+        "Financials"
+      ],
+      "within_48h": false
+    },
+    {
+      "event": "FOMC Meeting",
+      "date": "2026-04-28",
+      "days_until": 15,
+      "affected_sectors": [
+        "Real_Estate",
+        "Utilities",
+        "Financials"
+      ],
+      "within_48h": false
+    }
+  ],
+  "divergence_watch": [
+    {
+      "sector": "Energy",
+      "signal": "news_negative_price_negative",
+      "description": "伊朗停火新聞帶動XLE急跌，但Hormuz未完全開放使油價維持高位——價格行為與新聞方向一致，但波動率極高",
+      "action": "reduce_exposure"
+    },
+    {
+      "sector": "Financials",
+      "signal": "news_positive_price_negative",
+      "description": "銀行財報預期樂觀(+19.6%)，但市場Extreme Fear使Financials股價受壓——消息面正面vs價格行為偏弱，等待財報確認",
+      "action": "monitor"
+    },
+    {
+      "sector": "Technology",
+      "signal": "news_positive_price_negative",
+      "description": "AI長期敘事依然強勁（Fidelity稱為'最定義主題'），但Death Cross + Late cycle使短期技術面轉弱",
+      "action": "monitor"
+    }
+  ],
   "recent_analysis": [
     {
       "ticker": "AMZN",
@@ -28,7 +443,23 @@
         "sl": 200.0,
         "watch": null,
         "entry": "$215 - $225"
-      }
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "entry_A": "回調$215-225，RSI降至30附近",
+        "entry_B": "Q1財報(~late April)後，AWS成長>=22% + Operating Income超指引中點"
+      },
+      "key_risks": [
+        "VOLATILE_macro_regime_Fear37",
+        "Q1_earnings_binary_~late_April",
+        "capex_200B_FCF_suppression",
+        "Fed_rate_hike_possible"
+      ],
+      "rr_ratio": 1.76,
+      "position_pct": 0.0,
+      "avg_confidence": 0.7125,
+      "time_horizon": "mid",
+      "da_filed": false
     },
     {
       "ticker": "AAPL",
@@ -42,7 +473,24 @@
         "sl": 242.0,
         "watch": null,
         "entry": "$253 - $258"
-      }
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "entry_A": "回調$253-258，RSI降至35附近，200MA支撐確認",
+        "entry_B": "Q2財報(Apr30)後，EPS>$1.70 + Services成長維持mid-teens",
+        "entry_C": "WWDC 2026 Siri 2.0正式亮相確認AI super-cycle"
+      },
+      "key_risks": [
+        "Q2_earnings_binary_Apr30",
+        "tariff_hearings_Apr28_Section301",
+        "China_manufacturing_dependency_70%",
+        "VOLATILE_macro_MACD_bearish_cross"
+      ],
+      "rr_ratio": 2.25,
+      "position_pct": 0.0,
+      "avg_confidence": 0.6625,
+      "time_horizon": "mid",
+      "da_filed": false
     },
     {
       "ticker": "CRWV",
@@ -56,7 +504,20 @@
         "sl": null,
         "watch": "-85 (prior consolidation zone)",
         "entry": null
-      }
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "EBIT_interest_coverage_0.20x",
+        "debt_refinancing_4.2B_2026",
+        "earnings_binary_May20",
+        "VOLATILE_macro_regime"
+      ],
+      "rr_ratio": null,
+      "position_pct": null,
+      "avg_confidence": 0.5625,
+      "time_horizon": null,
+      "da_filed": false
     },
     {
       "ticker": "MU",
@@ -70,7 +531,20 @@
         "sl": 350.0,
         "watch": null,
         "entry": "$375 - $390"
-      }
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "peak_cycle_margins",
+        "ceasefire_only_2_weeks",
+        "sector_rotation_tech_headwind",
+        "US_China_export_controls"
+      ],
+      "rr_ratio": 2.19,
+      "position_pct": 0.05,
+      "avg_confidence": 0.7125,
+      "time_horizon": "mid",
+      "da_filed": true
     },
     {
       "ticker": "NBIS",
@@ -84,7 +558,15 @@
         "sl": null,
         "watch": null,
         "entry": "108-115"
-      }
+      },
+      "on_watchlist": false,
+      "watch_conditions": null,
+      "key_risks": [],
+      "rr_ratio": null,
+      "position_pct": null,
+      "avg_confidence": 0.7625,
+      "time_horizon": null,
+      "da_filed": false
     },
     {
       "ticker": "MSFT",
@@ -96,9 +578,17 @@
       "targets": {
         "tp": null,
         "sl": null,
-        "watch": "320",
+        "watch": null,
         "entry": null
-      }
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [],
+      "rr_ratio": null,
+      "position_pct": null,
+      "avg_confidence": 0.705,
+      "time_horizon": null,
+      "da_filed": false
     },
     {
       "ticker": "VST",
@@ -110,9 +600,17 @@
       "targets": {
         "tp": null,
         "sl": null,
-        "watch": "143",
+        "watch": null,
         "entry": null
-      }
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [],
+      "rr_ratio": null,
+      "position_pct": null,
+      "avg_confidence": 0.68,
+      "time_horizon": null,
+      "da_filed": false
     },
     {
       "ticker": "TSLA",
@@ -124,23 +622,35 @@
       "targets": {
         "tp": null,
         "sl": null,
-        "watch": "280",
+        "watch": null,
         "entry": null
-      }
+      },
+      "on_watchlist": false,
+      "watch_conditions": null,
+      "key_risks": [],
+      "rr_ratio": null,
+      "position_pct": null,
+      "avg_confidence": 0.74,
+      "time_horizon": null,
+      "da_filed": false
     },
     {
       "ticker": "NEE",
       "decision": "ARCHIVE",
       "score": 0.0,
       "time": "2026-04-09",
-      "report_url": "reports/20260409_NEE_vs_VRT比較報告.md"
+      "report_url": "reports/20260409_NEE_vs_VRT比較報告.md",
+      "on_watchlist": false,
+      "key_risks": []
     },
     {
       "ticker": "RKLB",
       "decision": "ARCHIVE",
       "score": 0.0,
       "time": "2026-04-07",
-      "report_url": "reports/20260407_RKLB.html"
+      "report_url": "reports/20260407_RKLB.html",
+      "on_watchlist": false,
+      "key_risks": []
     }
   ],
   "news": [

@@ -1,212 +1,485 @@
 import json
 import os
 import glob
+import re
 import requests
-from datetime import datetime
+from datetime import datetime, date
 
 FMP_API_KEY = os.getenv("FMP_API_KEY")
 
 # Paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SECTOR_LOGS = os.path.join(BASE_DIR, 'sector', 'sector_logs')
-INVEST_LOGS = os.path.join(BASE_DIR, 'investment', 'invest_logs')
-NEWS_LOGS = os.path.join(BASE_DIR, 'news', 'news_logs')
-OUTPUT_FILE = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
+BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
+SECTOR_LOGS   = os.path.join(BASE_DIR, 'sector', 'sector_logs')
+BREADTH_CACHE = os.path.join(BASE_DIR, 'sector', 'breadth_cache')
+INVEST_LOGS   = os.path.join(BASE_DIR, 'investment', 'invest_logs')
+NEWS_LOGS     = os.path.join(BASE_DIR, 'news', 'news_logs')
+REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
+OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
+
 
 def get_latest_file(pattern):
     files = glob.glob(pattern)
+    return max(files, key=os.path.getmtime) if files else None
+
+
+# ─────────────────────────────────────────────
+# MARKET BREADTH ANALYZER CACHE
+# ─────────────────────────────────────────────
+
+def load_breadth_cache():
+    """Load today's market-breadth-analyzer output from breadth_cache/.
+    Returns parsed JSON dict, or None if not found."""
+    today_str = date.today().strftime("%Y-%m-%d")
+    pattern = os.path.join(BREADTH_CACHE, f"market_breadth_{today_str}_*.json")
+    files = glob.glob(pattern)
     if not files:
         return None
-    return max(files, key=os.path.getmtime)
+    latest = max(files, key=os.path.getmtime)
+    try:
+        with open(latest, 'r') as f:
+            data = json.load(f)
+        print(f"[OK] Breadth cache: {os.path.basename(latest)}")
+        return data
+    except Exception as e:
+        print(f"[WARN] Breadth cache read error: {e}")
+        return None
 
-def run_bridge():
-    data = {
-        "status": "success",
-        "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "market": {
-            "regime": "UNKNOWN",
-            "fear_greed": 50,
-            "themes": [],
-            "hot_sectors": [],
-            "notes": ""
-        },
-        "recent_analysis": [],
-        "news": []
+
+def extract_breadth_from_analyzer(raw):
+    """Map market-breadth-analyzer JSON → data.breadth{} with full 6-component data."""
+    comp   = raw.get("composite", {})
+    comps  = raw.get("components", {})
+    trend  = raw.get("trend_summary", {})
+    meta   = raw.get("metadata", {})
+    fresh  = meta.get("data_freshness", {})
+    c_scores = comp.get("component_scores", {})
+
+    # ── cycle_phase from cycle_position signal ──
+    cyc_signal = comps.get("cycle_position", {}).get("signal", "")
+    if "extreme_trough" in cyc_signal.lower() or ("TROUGH" in cyc_signal and "PEAK" not in cyc_signal):
+        cycle_phase = "Early"
+    elif "PEAK" in cyc_signal and "recovery" in cyc_signal.lower():
+        cycle_phase = "Mid"
+    elif "PEAK" in cyc_signal:
+        cycle_phase = "Late"
+    else:
+        cycle_phase = "Mid"
+
+    # ── warning_flags from quantitative triggers ──
+    warning_flags = []
+    if comps.get("bearish_signal", {}).get("signal_active"):
+        warning_flags.append("Bearish_Signal_Active")
+    if comps.get("ma_crossover", {}).get("gap", 0) < 0:
+        warning_flags.append("Below_200MA")
+    if comps.get("historical_percentile", {}).get("percentile_rank", 50) < 30:
+        warning_flags.append("Low_Historical_Percentile")
+    if comps.get("divergence", {}).get("early_warning"):
+        warning_flags.append("Early_Warning_Divergence")
+    zone = comp.get("zone", "")
+    if zone == "Critical":
+        warning_flags.append("Critical_Zone")
+    elif zone == "Weakening":
+        warning_flags.append("Weakening_Zone")
+
+    # ── backward-compat 4-field breadth_components ──
+    components_compat = {
+        "overall_breadth":      round(comp.get("composite_score", 0)),
+        "sector_participation": c_scores.get("breadth_level_trend", {}).get("score", 0),
+        "momentum":             c_scores.get("ma_crossover", {}).get("score", 0),
+        "mean_reversion_risk":  100 - c_scores.get("cycle_position", {}).get("score", 100),
     }
 
-    # 2. Load Audit History (Consolidated & Smart)
-    REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
+    # ── full 6-component dict for breadth.html ──
+    components_full = {
+        k: {
+            "score":  v.get("score"),
+            "signal": comps.get(k, {}).get("signal", ""),
+            "label":  v.get("label", k),
+            "weight": round(v.get("effective_weight", 0) * 100),
+        }
+        for k, v in c_scores.items()
+    }
+
+    # ── regime_confidence from data quality ──
+    dq_label = comp.get("data_quality", {}).get("label", "")
+    if "Complete" in dq_label:
+        regime_confidence = 0.9
+    elif "Partial" in dq_label:
+        regime_confidence = 0.7
+    else:
+        regime_confidence = 0.4
+
+    return {
+        "score":             comp.get("composite_score"),
+        "zone":              zone,
+        "zone_color":        comp.get("zone_color", "gray"),
+        "exposure_ceiling":  comp.get("exposure_guidance", "60-75%"),
+        "guidance":          comp.get("guidance", ""),
+        "actions":           comp.get("actions", []),
+        "components":        components_compat,
+        "components_full":   components_full,
+        "uptrend_ratio":     comps.get("breadth_level_trend", {}).get("current_8ma"),
+        "current_8ma":       comps.get("breadth_level_trend", {}).get("current_8ma"),
+        "current_200ma":     comps.get("breadth_level_trend", {}).get("current_200ma"),
+        "cycle_phase":       cycle_phase,
+        "warning_flags":     warning_flags,
+        "regime_confidence": regime_confidence,
+        "trend_direction":   trend.get("direction", "stable"),
+        "trend_entries":     trend.get("entries", []),
+        "data_quality":      dq_label,
+        "key_levels":        raw.get("key_levels", {}),
+        "data_date":         fresh.get("latest_date", ""),
+        "days_old":          fresh.get("days_old"),
+        "source":            "market-breadth-analyzer",
+        "notes":             "",
+    }
+
+
+# ─────────────────────────────────────────────
+# SECTOR / MARKET
+# ─────────────────────────────────────────────
+
+def extract_market_data(s_data):
+    """Market regime + pulse from sector_intel.json"""
+    phase0   = s_data.get("_phase0", {})
+    phase3   = s_data.get("_phase3", {})
+    political = phase3.get("political_overlay", {})
+    summary  = s_data.get("summary", {})
+
+    breadth = phase0.get("breadth_score")
+    mult    = f"{0.60 + (breadth / 100) * 0.60:.2f}x" if breadth is not None else "--"
+
+    return {
+        "regime":           s_data.get("market_regime", "UNKNOWN"),
+        "cycle_phase":      phase0.get("cycle_phase", "Unknown"),
+        "regime_confidence": phase0.get("regime_confidence", 0),
+        "fear_greed":       political.get("fear_greed_index", 50),
+        "fear_greed_label": political.get("fear_greed_label", ""),
+        "themes":           s_data.get("actionable_themes", []),
+        "hot_sectors":      summary.get("hot_sectors", []),
+        "warm_sectors":     summary.get("warm_sectors", []),
+        "cold_sectors":     summary.get("cold_sectors", []),
+        "avoid_sectors":    summary.get("avoid_sectors", []),
+        "exposure_ceiling": phase0.get("exposure_ceiling", "100%"),
+        "macro_multiplier": mult,
+        "breadth_score":    breadth,
+        "breadth_components": phase0.get("breadth_components", {}),
+        "uptrend_ratio":    phase0.get("uptrend_ratio_overall"),
+        "warning_flags":    phase0.get("warning_flags", []),
+        "trump_signals":    political.get("trump_trade_signals", []),
+        "named_targets":    political.get("named_targets_today", []),
+        "notes":            s_data.get("session_notes", ""),
+    }
+
+
+def extract_sectors(s_data):
+    """Merge phase-4 verdicts with phase-1 rotation signals"""
+    # Build lookup from _phase1 per sector name
+    p1_map = {}
+    for s in s_data.get("_phase1", {}).get("sectors", []):
+        p1_map[s["name"]] = s
+
+    result = []
+    for s in s_data.get("sectors", []):
+        name = s.get("name", "Unknown")
+        p1   = p1_map.get(name, {})
+        result.append({
+            "name":             name,
+            "verdict":          s.get("verdict", "COLD"),
+            "score":            s.get("composite_score", 0),
+            "proxy_etf":        s.get("proxy_etf", ""),
+            "risk_flags":       s.get("risk_flags", []),
+            "key_reason":       (s.get("key_reasons") or [""])[0],
+            "devils_advocate":  s.get("devils_advocate_note", ""),
+            # Phase-1 additions
+            "rotation_signal":  p1.get("rotation_signal", "NEUTRAL"),
+            "uptrend_ratio":    p1.get("uptrend_ratio"),
+            "overbought_risk":  p1.get("overbought_risk", ""),
+            "ytd_perf_note":    p1.get("ytd_perf_note", ""),
+        })
+    return result
+
+
+def extract_binary_risks(s_data):
+    """Upcoming binary events with days-until countdown"""
+    today = date.today()
+    risks = []
+    for ev in s_data.get("_phase3", {}).get("upcoming_binary_risks", []):
+        ev_date_str = ev.get("date", "")
+        days_until = None
+        try:
+            ev_date = datetime.strptime(ev_date_str, "%Y-%m-%d").date()
+            days_until = (ev_date - today).days
+        except Exception:
+            pass
+        risks.append({
+            "event":            ev.get("event", ""),
+            "date":             ev_date_str,
+            "days_until":       days_until,
+            "affected_sectors": ev.get("affected_sectors", []),
+            "within_48h":       ev.get("within_48h", False),
+        })
+    # Sort by date ascending
+    risks.sort(key=lambda x: x["date"])
+    return risks
+
+
+def extract_divergence_watch(s_data):
+    return s_data.get("sector_divergence_watch", [])
+
+
+# ─────────────────────────────────────────────
+# AUDIT HISTORY + WATCHLIST
+# ─────────────────────────────────────────────
+
+def _find_report(ticker, date_clean):
+    for pattern in [
+        f"{date_clean}_{ticker}.md",
+        f"{date_clean}_{ticker}.html",
+        f"*_{ticker}.md",
+        f"*_{ticker}.html",
+    ]:
+        matches = glob.glob(os.path.join(REPORTS_DIR, pattern))
+        if matches:
+            return os.path.join('reports', os.path.basename(matches[0]))
+    return None
+
+
+def extract_audit_history():
+    """Build recent_analysis[] with full watchlist metadata"""
+    audit_map = {}
+    audits    = []
+
     history_file = os.path.join(INVEST_LOGS, 'history.json')
-    audit_map = {} # To avoid duplicates
-    
-    # Process history.json first
     if os.path.exists(history_file):
         try:
             with open(history_file, 'r') as f:
                 history_data = json.load(f)
-                # Take last 10 audits
-                for item in reversed(history_data[-10:]):
-                    ticker = item.get("ticker", "UNKNOWN")
-                    date_raw = item.get("date", "Unknown")
-                    date_clean = date_raw.replace("-", "")
-                    
-                    # Smart Matching: Search for file in reports/
-                    report_path = None
-                    # Try exact date first, then any date for that ticker
-                    possible_patterns = [
-                        f"{date_clean}_{ticker}.md",
-                        f"{date_clean}_{ticker}.html",
-                        f"*{ticker}.md",
-                        f"*{ticker}.html"
-                    ]
-                    
-                    for pattern in possible_patterns:
-                        matches = glob.glob(os.path.join(REPORTS_DIR, pattern))
-                        if matches:
-                            report_path = os.path.join('reports', os.path.basename(matches[0]))
-                            break
 
-                    meta = item.get("metadata", {})
-                    decision = item.get("final_action", "HOLD")
-                    score = meta.get("final_score") or item.get("final_score", 0.0)
+            for item in reversed(history_data[-10:]):
+                ticker    = item.get("ticker", "UNKNOWN")
+                date_raw  = item.get("date", "Unknown")
+                date_clean = date_raw.replace("-", "")
+                meta      = item.get("metadata", {})
+
+                report_path = _find_report(ticker, date_clean)
+                decision    = item.get("final_action", "HOLD")
+                score       = meta.get("final_score") or item.get("final_score", 0.0)
+
+                # Price targets
+                tp    = meta.get("take_profit") or item.get("take_profit")
+                sl    = meta.get("stop_loss") or item.get("stop_loss")
+                watch = meta.get("watch_price") or meta.get("trigger_price")
+                entry = meta.get("entry_range") or meta.get("entry_price")
+
+                if not entry and not watch:
                     ctx = meta.get("macro_context", "")
+                    pm  = re.findall(r"\$(\d+[\-\d]*)", ctx)
+                    if pm:
+                        entry = pm[-1]
 
-                    # Target Extraction (TP/SL)
-                    tp = meta.get("take_profit") or item.get("take_profit")
-                    sl = meta.get("stop_loss") or item.get("stop_loss")
-                    
-                    # Entry / Watch Extraction
-                    watch = meta.get("watch_price") or meta.get("trigger_price")
-                    entry = meta.get("entry_range") or meta.get("entry_price")
-                    
-                    # Regex Fallback for Watch/Entry from context
-                    import re
-                    if not entry and not watch:
-                        print(f"[DEBUG] Ticker {ticker} missing structure targets. Scanning context...")
-                        # Find patterns like "$143" or "$108-115"
-                        matches = re.findall(r"\$(\d+[\-\d+]*)", ctx)
-                        if matches:
-                            entry = matches[-1]
-                            print(f"[DEBUG] Found target in context: {entry}")
-                        else:
-                            # DEEP SCAN: Read the MD file if it exists
-                            if report_path:
-                                try:
-                                    full_rep_path = os.path.join(BASE_DIR, report_path)
-                                    with open(full_rep_path, 'r') as rf:
-                                        content = rf.read() # Read all
-                                        # Search for support/entry (TAKE THE LAST ONE in the file)
-                                        support_matches = re.findall(r"(支撐|進場|觸及|回調).*?\$(\d+[\.\dot\d+]*)", content)
-                                        target_matches = re.findall(r"(目標).*?\$(\d+[\.\dot\d+]*)", content)
-                                        
-                                        if support_matches:
-                                            watch = support_matches[-1][1] # Get price from last match
-                                            print(f"[DEBUG] Last Priority Support {ticker} found: {watch}")
-                                        elif target_matches:
-                                            watch = target_matches[-1][1]
-                                            print(f"[DEBUG] Last Secondary Target {ticker} found: {watch}")
-                                        else:
-                                            # Fallback: any price
-                                            deep_matches = re.findall(r"\$(\d+[\,\.\d+]*)", content)
-                                            if len(deep_matches) > 3:
-                                                watch = deep_matches[-1]
-                                                print(f"[DEBUG] Last Price {ticker} fallback: {watch}")
-                                except Exception as rf_err:
-                                    print(f"[DEBUG] Deep Scan error for {ticker}: {rf_err}")
+                if isinstance(entry, list):
+                    entry = " - ".join(str(e) for e in entry)
 
-                    if isinstance(entry, list): entry = " - ".join(entry) 
-                    
-                    # Backtest: Fetch Current Price
-                    perf = None
-                    if FMP_API_KEY:
-                        try:
-                            price_res = requests.get(f"https://financialmodelingprep.com/api/v3/quote/{ticker}?apikey={FMP_API_KEY}").json()
-                            if price_res:
-                                curr_price = price_res[0].get("price")
-                                entry_range = meta.get("entry_range") # ["$253", "$258"]
-                                if entry_range and isinstance(entry_range, list):
-                                    entry_price = float(entry_range[0].replace("$", ""))
-                                    chg = ((curr_price - entry_price) / entry_price) * 100
-                                    perf = {
-                                        "current": curr_price,
-                                        "entry": entry_price,
-                                        "change": round(chg, 2)
-                                    }
-                        except Exception as pe:
-                            print(f"Backtest error for {ticker}: {pe}")
+                # Backtest P/L
+                perf = None
+                if FMP_API_KEY and isinstance(meta.get("entry_range"), list):
+                    try:
+                        res = requests.get(
+                            f"https://financialmodelingprep.com/api/v3/quote/{ticker}"
+                            f"?apikey={FMP_API_KEY}", timeout=5
+                        ).json()
+                        if res:
+                            curr  = res[0].get("price")
+                            ep    = float(str(meta["entry_range"][0]).replace("$", ""))
+                            chg   = ((curr - ep) / ep) * 100
+                            perf  = {"current": curr, "entry": ep, "change": round(chg, 2)}
+                    except Exception as e:
+                        print(f"[WARN] Backtest {ticker}: {e}")
 
-                    data["recent_analysis"].append({
-                        "ticker": ticker,
-                        "decision": decision,
-                        "score": round(float(score), 2) if score is not None else 0.0,
-                        "time": date_raw,
-                        "report_url": report_path,
-                        "performance": perf,
-                        "targets": { "tp": tp, "sl": sl, "watch": watch, "entry": entry }
-                    })
-                    audit_map[ticker] = True
+                # ── Watchlist metadata ──────────────────────────────
+                watch_conditions = meta.get("watch_conditions")  # dict entry_A/B/C
+                key_risks        = meta.get("key_risks", [])
+                rr_ratio         = meta.get("risk_reward_ratio")
+                position_pct     = meta.get("position_size_pct")
+                avg_conf         = meta.get("avg_confidence")
+                time_horizon     = meta.get("time_horizon")
+                da_filed         = meta.get("devils_advocate_filed", False)
+                # Determine if this ticker belongs on watchlist
+                on_watchlist = (
+                    decision == "EXECUTE" or
+                    bool(watch_conditions) or
+                    bool(watch)
+                )
+
+                audits.append({
+                    "ticker":           ticker,
+                    "decision":         decision,
+                    "score":            round(float(score), 2) if score is not None else 0.0,
+                    "time":             date_raw,
+                    "report_url":       report_path,
+                    "performance":      perf,
+                    "targets":          {"tp": tp, "sl": sl, "watch": watch, "entry": entry},
+                    # Watchlist fields
+                    "on_watchlist":     on_watchlist,
+                    "watch_conditions": watch_conditions,
+                    "key_risks":        key_risks,
+                    "rr_ratio":         rr_ratio,
+                    "position_pct":     position_pct,
+                    "avg_confidence":   avg_conf,
+                    "time_horizon":     time_horizon,
+                    "da_filed":         da_filed,
+                })
+                audit_map[ticker] = True
+
         except Exception as e:
-            print(f"Error reading history.json: {e}")
+            print(f"[ERROR] history.json: {e}")
 
-    # Fallback: Scan reports/ for files not in history
+    # Fallback: scan reports/ for unlisted tickers
     try:
-        report_files = glob.glob(os.path.join(REPORTS_DIR, "*_*.*"))
-        for rep in sorted(report_files, reverse=True):
-            fname = os.path.basename(rep)
-            if "_" in fname:
-                parts = fname.split("_")
+        for rep in sorted(glob.glob(os.path.join(REPORTS_DIR, "*_*.*")), reverse=True):
+            fname  = os.path.basename(rep)
+            parts  = fname.split("_")
+            if len(parts) >= 2:
                 t_part = parts[1].split(".")[0]
-                if t_part not in audit_map and len(t_part) <= 5 and t_part.isupper():
-                    d_part = parts[0]
-                    data["recent_analysis"].append({
-                        "ticker": t_part,
-                        "decision": "ARCHIVE",
-                        "score": 0.0,
-                        "time": f"{d_part[:4]}-{d_part[4:6]}-{d_part[6:8]}",
-                        "report_url": os.path.join('reports', fname)
+                if t_part not in audit_map and len(t_part) <= 6 and t_part.isupper():
+                    d_part   = parts[0]
+                    date_fmt = f"{d_part[:4]}-{d_part[4:6]}-{d_part[6:8]}" if len(d_part) == 8 else d_part
+                    audits.append({
+                        "ticker":       t_part,
+                        "decision":     "ARCHIVE",
+                        "score":        0.0,
+                        "time":         date_fmt,
+                        "report_url":   os.path.join('reports', fname),
+                        "on_watchlist": False,
+                        "key_risks":    [],
                     })
                     audit_map[t_part] = True
     except Exception as e:
-        print(f"Error scanning reports folder: {e}")
+        print(f"[ERROR] Scanning reports/: {e}")
 
-    # 1. Load Sector Data (Market Pulse)
+    return audits
+
+
+# ─────────────────────────────────────────────
+# NEWS
+# ─────────────────────────────────────────────
+
+def extract_news():
+    news = []
+    for news_file in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)[:3]:
+        try:
+            with open(news_file, 'r') as f:
+                n_data = json.load(f)
+            file_date = n_data.get("timestamp", "")[:10]
+            for v in n_data.get("verdicts", []):
+                sector_names = [s.get("sector", "Unknown") for s in v.get("affected_sectors", [])]
+                news.append({
+                    "headline": v.get("headline"),
+                    "impact":   v.get("verdict", "NEUTRAL").lower(),
+                    "score":    v.get("net_impact_score"),
+                    "date":     file_date,
+                    "sectors":  sector_names,
+                })
+        except Exception as e:
+            print(f"[ERROR] News log {news_file}: {e}")
+    return news
+
+
+# ─────────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────────
+
+def run_bridge():
+    data = {
+        "status":          "success",
+        "last_updated":    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "market":          {},
+        "breadth":         {},
+        "sectors":         [],
+        "binary_risks":    [],
+        "divergence_watch": [],
+        "recent_analysis": [],
+        "news":            [],
+    }
+
+    # 1. Sector / Market / Breadth (base from sector_intel)
     latest_sector = get_latest_file(os.path.join(SECTOR_LOGS, "*_sector_intel.json"))
     if latest_sector:
         try:
             with open(latest_sector, 'r') as f:
                 s_data = json.load(f)
-                data["market"]["regime"] = s_data.get("market_regime", "UNKNOWN")
-                data["market"]["fear_greed"] = s_data.get("political_risk_summary", {}).get("fear_greed_index", 50)
-                data["market"]["themes"] = s_data.get("actionable_themes", [])
-                data["market"]["hot_sectors"] = s_data.get("summary", {}).get("hot_sectors", [])
-                data["market"]["notes"] = s_data.get("session_notes", "")
+            data["market"]           = extract_market_data(s_data)
+            data["sectors"]          = extract_sectors(s_data)
+            data["binary_risks"]     = extract_binary_risks(s_data)
+            data["divergence_watch"] = extract_divergence_watch(s_data)
+            # breadth sub-object: start with sector_intel estimates
+            data["breadth"] = {
+                "score":             data["market"].get("breadth_score"),
+                "components":        data["market"].get("breadth_components", {}),
+                "uptrend_ratio":     data["market"].get("uptrend_ratio"),
+                "warning_flags":     data["market"].get("warning_flags", []),
+                "cycle_phase":       data["market"].get("cycle_phase"),
+                "regime_confidence": data["market"].get("regime_confidence"),
+                "exposure_ceiling":  data["market"].get("exposure_ceiling"),
+                "notes":             s_data.get("_phase0", {}).get("notes", ""),
+                "source":            "sector_intel",
+            }
+            print(f"[OK] Sector: {os.path.basename(latest_sector)} | "
+                  f"{len(data['sectors'])} sectors | "
+                  f"F&G={data['market']['fear_greed']} | "
+                  f"binary_risks={len(data['binary_risks'])}")
         except Exception as e:
-            print(f"Error reading sector log: {e}")
+            print(f"[ERROR] Sector log: {e}")
+    else:
+        print("[WARN] No sector_intel.json found.")
 
-    # 3. Load News Data
-    latest_news_files = sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)
-    for news_file in latest_news_files[:3]: # Look at last 3 days of digests
-        try:
-            with open(news_file, 'r') as f:
-                n_data = json.load(f)
-                file_date = n_data.get("timestamp", "Unknown")[:10]
-                for v in n_data.get("verdicts", []):
-                    # v.get("affected_sectors") is a list of objects, we need the names
-                    sector_names = [s.get("sector", "Unknown") for s in v.get("affected_sectors", [])]
-                    data["news"].append({
-                        "headline": v.get("headline"),
-                        "impact": v.get("verdict", "NEUTRAL").lower(),
-                        "score": v.get("net_impact_score"),
-                        "date": file_date,
-                        "sectors": sector_names
-                    })
-        except Exception as e:
-            print(f"Error reading news log {news_file}: {e}")
+    # 1b. Override breadth with market-breadth-analyzer cache (quantitative, higher precision)
+    raw_breadth = load_breadth_cache()
+    if raw_breadth:
+        analyzer_breadth = extract_breadth_from_analyzer(raw_breadth)
+        # Overwrite data.breadth entirely with quantitative data
+        data["breadth"] = analyzer_breadth
+        # Also sync back key fields to data.market so other pages stay consistent
+        data["market"]["breadth_score"]      = analyzer_breadth["score"]
+        data["market"]["breadth_components"] = analyzer_breadth["components"]
+        data["market"]["uptrend_ratio"]      = analyzer_breadth["uptrend_ratio"]
+        data["market"]["warning_flags"]      = analyzer_breadth["warning_flags"]
+        data["market"]["cycle_phase"]        = analyzer_breadth["cycle_phase"]
+        data["market"]["regime_confidence"]  = analyzer_breadth["regime_confidence"]
+        data["market"]["exposure_ceiling"]   = analyzer_breadth["exposure_ceiling"]
+        print(f"[OK] Breadth override: score={analyzer_breadth['score']} "
+              f"zone={analyzer_breadth['zone']} "
+              f"trend={analyzer_breadth['trend_direction']} "
+              f"flags={analyzer_breadth['warning_flags']}")
+    else:
+        print("[INFO] No breadth cache for today — using sector_intel estimates")
 
-    # Write Output
+    # 2. Audit history + watchlist
+    data["recent_analysis"] = extract_audit_history()
+    wl_count = sum(1 for a in data["recent_analysis"] if a.get("on_watchlist"))
+    print(f"[OK] Audit history: {len(data['recent_analysis'])} entries ({wl_count} on watchlist)")
+
+    # 3. News
+    data["news"] = extract_news()
+    print(f"[OK] News: {len(data['news'])} items")
+
+    # Write
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-    print(f"Bridge completed. Data synced to {OUTPUT_FILE}")
+
+    print(f"\n✅ Bridge complete → {OUTPUT_FILE}")
+    print(f"   Regime     : {data['market'].get('regime')}  ({data['market'].get('cycle_phase')})")
+    print(f"   Fear&Greed : {data['market'].get('fear_greed')}")
+    print(f"   Breadth    : {data['market'].get('breadth_score')} | "
+          f"Zone={data['breadth'].get('zone','–')} | "
+          f"Trend={data['breadth'].get('trend_direction','–')} | "
+          f"Src={data['breadth'].get('source','–')}")
+    print(f"   8MA/200MA  : {data['breadth'].get('current_8ma','–')} / {data['breadth'].get('current_200ma','–')}")
+    print(f"   Exposure   : {data['market'].get('exposure_ceiling')}  Mult {data['market'].get('macro_multiplier')}")
+    print(f"   HOT        : {data['market'].get('hot_sectors')}")
+    print(f"   Flags      : {data['market'].get('warning_flags')}")
+
 
 if __name__ == "__main__":
     run_bridge()

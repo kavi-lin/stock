@@ -57,16 +57,63 @@ FOCUS_DATE     : [留空 = 今日]
 - 否則 → 執行以下分析並寫入檔案
 
 **資料來源**（優先順序）：
-1. `uptrend-analyzer` CSV 輸出（~2,800 股上升趨勢比率）
-2. `market-breadth-analyzer` 6 組件評分
+
+### 層 A — market-breadth-analyzer script（優先，量化）
+1. 檢查 `./breadth_cache/market_breadth_YYYY-MM-DD_*.json` 是否存在且日期符合今日
+   - **存在** → 直接讀取，跳至「欄位映射」步驟
+   - **不存在** → 執行腳本（約 5 秒）：
+     ```bash
+     python3 ~/.claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py \
+       --output-dir ./breadth_cache/
+     ```
+     完成後讀取產出的 `market_breadth_YYYY-MM-DD_*.json`
+
+### 層 B — uptrend-analyzer（補充 uptrend_ratio_overall）
+2. 執行 `uptrend-analyzer` skill 取得 `uptrend_ratio_overall`（各產業上升趨勢比率）
+   - 若無法執行 → 用 `breadth_analyzer.components.breadth_level_trend.current_8ma` 作為代理值
+
+### 層 C — Web search（最後手段，已有 A+B 則跳過）
 3. Web search: "US market breadth today", "S&P 500 advance decline today"
+
+---
+
+### 欄位映射（market-breadth-analyzer → phase0 JSON）
+
+| Phase0 欄位 | 來源路徑 | 說明 |
+|---|---|---|
+| `breadth_score` | `composite.composite_score` | 0–100 複合分數 |
+| `breadth_components.overall_breadth` | `composite.composite_score` | 同複合分數 |
+| `breadth_components.sector_participation` | `composite.component_scores.breadth_level_trend.score` | 廣度水位 |
+| `breadth_components.momentum` | `composite.component_scores.ma_crossover.score` | 8MA vs 200MA 動能 |
+| `breadth_components.mean_reversion_risk` | `100 - composite.component_scores.cycle_position.score` | 週期位置反轉 → 風險 |
+| `exposure_ceiling` | `composite.exposure_guidance` | 如 "40-60%" |
+| `uptrend_ratio_overall` | `components.breadth_level_trend.current_8ma` | 8MA 作為代理（若無 uptrend-analyzer） |
+| `cycle_phase` | 由 `components.cycle_position.signal` 推斷（見下） | Early/Mid/Late/Recession |
+| `warning_flags` | 由各組件信號推斷（見下） | 量化觸發 |
+| `regime_confidence` | data_quality: Complete=0.9, Partial=0.7, Limited=0.4 | 資料完整度 |
+
+**cycle_phase 推斷規則**：
+- signal 含 "extreme_trough" 或 "TROUGH" → `"Early"`
+- signal 含 "PEAK" 且含 "recovery" → `"Mid"`
+- signal 含 "PEAK" 且不含 "recovery" → `"Late"`
+- 其他 → `"Mid"`
+
+**warning_flags 量化觸發規則**：
+- `components.bearish_signal.signal_active = true` → `"Bearish_Signal_Active"`
+- `components.ma_crossover.gap < 0`（8MA 低於 200MA）→ `"Below_200MA"`
+- `components.historical_percentile.percentile_rank < 30` → `"Low_Historical_Percentile"`
+- `components.divergence.early_warning = true` → `"Early_Warning_Divergence"`
+- `composite.zone = "Critical"` → `"Critical_Zone"`
+- `composite.zone = "Weakening"` → `"Weakening_Zone"`
 
 ```json
 {
   "phase": 0,
   "agent": "Macro_Regime_Analyst",
   "scan_date": "YYYY-MM-DD",
-  "breadth_score": "0–100",
+  "breadth_source": "market-breadth-analyzer | uptrend-analyzer | web_search",
+  "breadth_score": "0–100 (composite.composite_score)",
+  "breadth_zone": "Strong | Healthy | Neutral | Weakening | Critical",
   "breadth_components": {
     "overall_breadth": "0–100",
     "sector_participation": "0–100",
@@ -76,8 +123,8 @@ FOCUS_DATE     : [留空 = 今日]
   "market_regime": "BULL | BEAR | SIDEWAYS | VOLATILE | RISK_OFF | RISK_ON",
   "cycle_phase": "Early | Mid | Late | Recession",
   "uptrend_ratio_overall": "float 0.0–1.0",
-  "warning_flags": ["Late_Cycle", "High_Selectivity", "Narrowing_Breadth"],
-  "exposure_ceiling": "0–100%",
+  "warning_flags": ["Bearish_Signal_Active", "Below_200MA", "Low_Historical_Percentile"],
+  "exposure_ceiling": "40-60% (from composite.exposure_guidance)",
   "regime_confidence": "0.0–1.0"
 }
 ```
