@@ -1,6 +1,6 @@
 # INTEL COMMAND — Todo List
 > Last Updated: 2026-04-13
-> Last Session Note: 路線C — C-BREADTH ✅ C-FTD ✅ 完成；C-TOP（market-top-detector）尚未動工
+> Last Session Note: 路線C 全部完成 — C-BREADTH ✅ C-FTD ✅ C-TOP ✅；market_top_yfinance.py 寫好，bridge.py 加入 data.market_top{}，breadth.html 新增 Row 6 Market Top Detector 區塊
 
 ---
 
@@ -91,7 +91,11 @@
   - ~~bridge.py 新增 `load_ftd_cache()` + `extract_ftd_data()`，輸出 `data.ftd{}`~~
   - ~~breadth.html 新增 FTD Detector 區塊：State/Quality/Exposure + FTD Event + Post-FTD Health 三欄~~
   - ~~cache 路徑：`sector/ftd_cache/ftd_detector_YYYY-MM-DD_*.json`~~
-- [ ] **[C-TOP]** 整合 `market-top-detector` skill，顯示市場頂部概率
+- [x] ~~**[C-TOP]** 整合 `market-top-detector` skill，顯示市場頂部概率~~
+  - ~~`sector/market_top_yfinance.py` yfinance 轉接器，`YFinanceClient` drop-in 替代 FMPClient~~
+  - ~~bridge.py 新增 `load_market_top_cache()` + `extract_market_top_data()`，輸出 `data.market_top{}`~~
+  - ~~breadth.html 新增 Market Top Detector 區塊（Row 6）：Top Probability score + zone badge + 6 components bar + actions + FTD monitor~~
+  - ~~cache 路徑：`sector/market_top_cache/market_top_YYYY-MM-DD_*.json`~~
 - [x] ~~**[C-BREADTH]** 整合 `market-breadth-analyzer` skill（Monty's CSV），取代 phase0 的估算值~~
   - ~~sector_protocol_v1_1.md Phase 0 加入 script 執行 + cache 邏輯 + 欄位映射表~~
   - ~~bridge.py 新增 `load_breadth_cache()` + `extract_breadth_from_analyzer()`~~

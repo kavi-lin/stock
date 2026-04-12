@@ -287,6 +287,7 @@
             const flags   = br.warning_flags || [];
             const sectors = (data.sectors || []).slice().sort((a, b) => (b.uptrend_ratio ?? 0) - (a.uptrend_ratio ?? 0));
             const ftd      = data.ftd || {};
+            const mt       = data.market_top || {};
             const compFull = br.components_full || {};   // 6-component dict from analyzer
             const compLegacy = br.components || {};       // 4-field fallback
 
@@ -579,7 +580,110 @@
                 </div>`;
             })() : ''}
 
-            <!-- ── Row 6: Analyst Notes ───────────────────────────── -->
+            <!-- ── Row 6: Market Top Detector ───────────────────── -->
+            ${Object.keys(mt).length ? (() => {
+                const mtScore = mt.composite_score ?? 0;
+                const mtZoneColor = mtScore <= 20 ? '#22c55e'
+                                  : mtScore <= 40 ? '#eab308'
+                                  : mtScore <= 60 ? '#f97316'
+                                  : mtScore <= 80 ? '#ef4444'
+                                  : '#dc2626';
+                const deltaDir = mt.delta_direction || 'first_run';
+                const deltaIcon = deltaDir === 'worsening' ? '▲' : deltaDir === 'improving' ? '▼' : '→';
+                const deltaColor = deltaDir === 'worsening' ? '#ef4444' : deltaDir === 'improving' ? '#22c55e' : '#eab308';
+                const mtComps = mt.components || {};
+
+                // Market-top component order by weight desc: dist(25)>lead(20)>def(15)=breadth(15)=tech(15)>sent(10)
+                const mtCompOrder = ['distribution_days','leading_stocks','defensive_rotation','breadth_divergence','index_technical','sentiment'];
+                const mtCompRows = mtCompOrder
+                    .filter(k => mtComps[k])
+                    .map(k => {
+                        const c = mtComps[k];
+                        const s = c.score ?? 0;
+                        // Inverted color: high score = bearish = red
+                        const col = s <= 30 ? '#22c55e' : s <= 60 ? '#eab308' : '#ef4444';
+                        const wt = c.weight ?? 0;
+                        const sig = (c.signal || '').length > 55 ? c.signal.slice(0,52)+'…' : (c.signal || '');
+                        return `<div class="space-y-1.5">
+                            <div class="flex justify-between items-center gap-2">
+                                <div class="flex items-center gap-1 min-w-0">
+                                    <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate">${c.label || k}</span>
+                                    <span class="text-[9px] text-zinc-600 font-mono ml-1">${wt}%</span>
+                                </div>
+                                <span class="text-sm font-black font-mono shrink-0" style="color:${col}">${s}</span>
+                            </div>
+                            <div class="w-full h-1.5 rounded-full bg-zinc-800">
+                                <div class="h-1.5 rounded-full transition-all duration-700" style="width:${s}%;background-color:${col}"></div>
+                            </div>
+                            ${sig ? `<p class="text-[9px] text-zinc-600 leading-tight">${sig}</p>` : ''}
+                        </div>`;
+                    }).join('');
+
+                return `
+                <div class="glass-card p-6">
+                    <h3 class="text-xs font-black uppercase tracking-widest mb-5 flex items-center gap-2">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-400"></i>
+                        <span>Market Top Detector</span>
+                        <span class="ml-auto text-[9px] text-zinc-600">${mt.generated_at || ''}</span>
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                        <!-- Score + Zone + Actions -->
+                        <div class="flex flex-col gap-4">
+                            <div class="glass-card p-5 flex flex-col gap-2">
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Top Probability</p>
+                                <p class="text-5xl font-black tracking-tighter" style="color:${mtZoneColor}">${mtScore}</p>
+                                <div class="w-full h-1.5 rounded-full bg-zinc-800">
+                                    <div class="h-1.5 rounded-full" style="width:${mtScore}%;background-color:${mtZoneColor}"></div>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[9px] font-black px-2 py-0.5 rounded border" style="color:${mtZoneColor};border-color:${mtZoneColor}40;background:${mtZoneColor}15">${(mt.zone || '').toUpperCase()}</span>
+                                    ${deltaDir !== 'first_run' ? `<span class="text-[9px] font-black" style="color:${deltaColor}">${deltaIcon} ${mt.delta_value > 0 ? '+' : ''}${mt.delta_value ?? 0}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="glass-card p-4">
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Risk Budget</p>
+                                <p class="text-xl font-black text-orange-400">${mt.risk_budget || '–'}</p>
+                                <p class="text-[9px] text-zinc-500 mt-1 leading-relaxed">${mt.guidance || ''}</p>
+                            </div>
+                            ${mt.data_quality ? `<p class="text-[9px] text-zinc-700 px-1">${mt.data_quality}</p>` : ''}
+                        </div>
+
+                        <!-- 6 Components -->
+                        <div class="glass-card p-5">
+                            <h4 class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-1.5">
+                                <i data-lucide="sliders-horizontal" class="w-3 h-3"></i> Component Scores
+                                <span class="ml-auto text-[9px] text-zinc-600">(higher = more bearish)</span>
+                            </h4>
+                            <div class="space-y-4">${mtCompRows}</div>
+                        </div>
+
+                        <!-- Actions + FTD note -->
+                        <div class="flex flex-col gap-4">
+                            ${mt.actions?.length ? `
+                            <div class="glass-card p-5 flex-1">
+                                <h4 class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-3 flex items-center gap-1.5">
+                                    <i data-lucide="list-checks" class="w-3 h-3"></i> Recommended Actions
+                                </h4>
+                                <ul class="space-y-2">
+                                    ${mt.actions.map(a => `<li class="flex items-start gap-2 text-[10px] text-zinc-400 leading-tight">
+                                        <span class="text-orange-400 shrink-0 mt-0.5">›</span>${a}
+                                    </li>`).join('')}
+                                </ul>
+                            </div>` : ''}
+                            ${mt.ftd_applicable ? `
+                            <div class="glass-card p-4">
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Follow-Through Monitor</p>
+                                <p class="text-[10px] text-zinc-400 leading-relaxed">${mt.ftd_reason || '–'}</p>
+                                ${mt.rally_day_count != null ? `<p class="text-[10px] font-mono text-zinc-600 mt-1">Rally Day: ${mt.rally_day_count}</p>` : ''}
+                            </div>` : ''}
+                        </div>
+
+                    </div>
+                </div>`;
+            })() : ''}
+
+            <!-- ── Row 7: Analyst Notes ───────────────────────────── -->
             ${br.notes ? `
             <div class="glass-card p-6">
                 <h3 class="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">

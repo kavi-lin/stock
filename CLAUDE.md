@@ -40,6 +40,7 @@
 - `sector/breadth_cache/market_breadth_YYYY-MM-DD_*.json` — 廣度分析 cache（market-breadth-analyzer 輸出）
 - `sector/breadth_cache/market_breadth_history.json` — 廣度歷史趨勢（滾動 20 筆）
 - `sector/ftd_cache/ftd_detector_YYYY-MM-DD_*.json` — FTD 偵測 cache（ftd_yfinance.py 輸出）
+- `sector/market_top_cache/market_top_YYYY-MM-DD_*.json` — 市場頂部偵測 cache（market_top_yfinance.py 輸出）
 - `investment/invest_logs/YYYY-MM-DD_phase0.json` — 個股 macro cache
 - `investment/invest_logs/history.json` — 歷史 session 記錄
 - `news/news_logs/YYYY-MM-DD_digest.json` — 新聞 cache
@@ -56,7 +57,10 @@ python3 ~/.claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer
 # 2. 刷新 FTD 偵測（每日一次，yfinance 免 API key）
 python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
 
-# 3. 執行 bridge（整合所有 logs → Dashboard/data.json）
+# 3. 刷新市場頂部偵測（每日一次，yfinance 免 API key）
+python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
+
+# 4. 執行 bridge（整合所有 logs → Dashboard/data.json）
 python3 bridge.py
 ```
 

@@ -10,8 +10,9 @@ FMP_API_KEY = os.getenv("FMP_API_KEY")
 # Paths
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
 SECTOR_LOGS   = os.path.join(BASE_DIR, 'sector', 'sector_logs')
-BREADTH_CACHE = os.path.join(BASE_DIR, 'sector', 'breadth_cache')
-FTD_CACHE     = os.path.join(BASE_DIR, 'sector', 'ftd_cache')
+BREADTH_CACHE     = os.path.join(BASE_DIR, 'sector', 'breadth_cache')
+FTD_CACHE         = os.path.join(BASE_DIR, 'sector', 'ftd_cache')
+MARKET_TOP_CACHE  = os.path.join(BASE_DIR, 'sector', 'market_top_cache')
 INVEST_LOGS   = os.path.join(BASE_DIR, 'investment', 'invest_logs')
 NEWS_LOGS     = os.path.join(BASE_DIR, 'news', 'news_logs')
 REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
@@ -439,6 +440,77 @@ def extract_ftd_data(raw):
 
 
 # ─────────────────────────────────────────────
+# MARKET TOP DETECTOR CACHE
+# ─────────────────────────────────────────────
+
+def load_market_top_cache():
+    """Load most recent market_top_*.json from market_top_cache/. Returns None if not found."""
+    pattern = os.path.join(MARKET_TOP_CACHE, "market_top_*.json")
+    files = glob.glob(pattern)
+    if not files:
+        return None
+    latest = max(files, key=os.path.getmtime)
+    try:
+        with open(latest, 'r') as f:
+            data = json.load(f)
+        print(f"[OK] Market Top cache: {os.path.basename(latest)}")
+        return data
+    except Exception as e:
+        print(f"[WARN] Market Top cache read error: {e}")
+        return None
+
+
+def extract_market_top_data(raw):
+    """Map market_top_detector JSON → data.market_top{}"""
+    comp   = raw.get("composite", {})
+    comps  = raw.get("components", {})
+    ftd    = raw.get("follow_through_day", {})
+    delta  = raw.get("delta", {})
+    meta   = raw.get("metadata", {})
+    idx    = meta.get("index_data", {})
+
+    # 6-component breakdown
+    comp_scores = comp.get("component_scores", {})
+    components = {}
+    for key, v in comp_scores.items():
+        raw_comp = comps.get(key, {})
+        components[key] = {
+            "score":    v.get("score", 0),
+            "label":    v.get("label", key),
+            "signal":   raw_comp.get("signal", ""),
+            "weight":   round(v.get("weight", 0) * 100),
+            "weighted": v.get("weighted_contribution", 0),
+        }
+
+    return {
+        "composite_score": comp.get("composite_score", 0),
+        "zone":            comp.get("zone", ""),
+        "zone_color":      comp.get("zone_color", "gray"),
+        "risk_budget":     comp.get("risk_budget", ""),
+        "guidance":        comp.get("guidance", ""),
+        "actions":         comp.get("actions", []),
+        "data_quality":    comp.get("data_quality", {}).get("label", ""),
+        "strongest_warning": comp.get("strongest_warning", {}),
+        "weakest_warning":   comp.get("weakest_warning", {}),
+        "components":      components,
+        # Follow-Through Day from market-top scorer
+        "ftd_applicable":  ftd.get("applicable", False),
+        "ftd_detected":    ftd.get("ftd_detected", False),
+        "ftd_reason":      ftd.get("reason", ""),
+        "rally_day_count": ftd.get("rally_day_count"),
+        # Delta vs previous run
+        "delta_direction": delta.get("composite_direction", "first_run"),
+        "delta_value":     delta.get("composite_delta", 0),
+        # Index context
+        "sp500_price":          idx.get("sp500_price"),
+        "sp500_year_high":      idx.get("sp500_year_high"),
+        "sp500_dist_from_high": idx.get("sp500_distance_from_high_pct"),
+        "vix_level":            idx.get("vix_level"),
+        "generated_at":         meta.get("generated_at", ""),
+    }
+
+
+# ─────────────────────────────────────────────
 # NEWS
 # ─────────────────────────────────────────────
 
@@ -474,6 +546,7 @@ def run_bridge():
         "market":          {},
         "breadth":         {},
         "ftd":             {},
+        "market_top":      {},
         "sectors":         [],
         "binary_risks":    [],
         "divergence_watch": [],
@@ -542,6 +615,16 @@ def run_bridge():
               f"signal={data['ftd']['signal']}")
     else:
         print("[INFO] No FTD cache found — run sector/ftd_yfinance.py")
+
+    # 1d. Market Top cache
+    raw_market_top = load_market_top_cache()
+    if raw_market_top:
+        data["market_top"] = extract_market_top_data(raw_market_top)
+        print(f"[OK] Market Top: score={data['market_top']['composite_score']} "
+              f"zone={data['market_top']['zone']} "
+              f"budget={data['market_top']['risk_budget']}")
+    else:
+        print("[INFO] No Market Top cache found — run sector/market_top_yfinance.py")
 
     # 2. Audit history + watchlist
     data["recent_analysis"] = extract_audit_history()
