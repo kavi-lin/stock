@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | Sector Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="flex min-h-screen bg-black text-zinc-100 overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-zinc-800 flex flex-col fixed h-full bg-black">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                <i data-lucide="activity" class="text-black w-5 h-5"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">AI 委員會</h1>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-1">
+            <a href="index.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span data-i18n="nav_dash">總體儀表板</span>
+            </a>
+            <a href="sector.html" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md transition-all">
+                <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                <span data-i18n="nav_sector">產業掃描</span>
+            </a>
+            <a href="news.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all">
+                <i data-lucide="newspaper" class="w-4 h-4"></i>
+                <span data-i18n="nav_news">即時新聞</span>
+            </a>
+            <a href="history.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span data-i18n="nav_history">決策歷史</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-zinc-800 space-y-2">
+            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
+                <span id="lang-text">繁體中文</span>
+                <i data-lucide="languages" class="w-3 h-3"></i>
+            </button>
+            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <span>System Logs</span>
+                <i data-lucide="terminal" class="w-3 h-3"></i>
+            </button>
+            <div class="pt-2 px-3 text-[8px] text-zinc-700 font-mono tracking-widest border-t border-zinc-900/50 mt-2">
+                V1.1.0.260412_10:55:03
+            </div>
+        </div>
+    </aside>
+
+    <main class="ml-64 flex-1 flex flex-col h-screen">
+        <!-- Header -->
+        <header class="h-16 border-b border-zinc-800 flex items-center justify-between px-8 sticky top-0 bg-black/50 backdrop-blur-md z-10">
+            <h2 class="text-lg font-bold" data-i18n="nav_sector">產業熱掃描</h2>
+            <div class="flex items-center gap-4">
+                <span id="last-update" class="text-[10px] text-zinc-500 font-mono">SYNCING...</span>
+                <button id="refresh-sector" class="bg-zinc-900 border border-zinc-800 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zinc-800 transition-all">
+                    更新分析
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-8">
+            
+            <!-- Top Grid: Macro Drivers -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Macro Multiplier</span>
+                        <div class="text-4xl font-bold text-emerald-500 mt-2" id="macro-multiplier">--</div>
+                    </div>
+                    <p class="text-xs text-zinc-400 mt-4 leading-relaxed" id="multiplier-desc">
+                        Current market regime is scaling positions by <span class="bg-emerald-500/10 text-emerald-500 px-1 rounded">--</span>
+                    </p>
+                </div>
+
+                <div class="glass-card p-6 lg:col-span-2">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block">Actionable Themes</span>
+                    <div class="flex flex-wrap gap-3" id="themes-list">
+                        <!-- JS Populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Sector Heatmap -->
+            <div class="glass-card overflow-hidden">
+                <div class="border-b border-zinc-800 p-6 flex items-center justify-between">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <i data-lucide="thermometer-sun" class="text-orange-500 w-4 h-4"></i>
+                        <span data-i18n="heatmap_title">產業動量分布圖</span>
+                    </h3>
+                    <div class="flex gap-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-emerald-500 rounded"></div>
+                            <span class="text-[10px] font-bold text-zinc-500 uppercase" data-i18n="bullish_label">看多</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full border border-zinc-500"></div>
+                            <span class="text-[10px] font-bold text-zinc-500 uppercase" data-i18n="neutral_label">中性</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-red-500 rounded"></div>
+                            <span class="text-[10px] font-bold text-zinc-500 uppercase" data-i18n="bearish_label">看空</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="sector-grid">
+                        <!-- Dynamic Heatmap Blocks -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Dive Analysis -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
+                <div class="glass-card p-6">
+                    <h3 class="font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="text-blue-500 w-4 h-4"></i>
+                        <span data-i18n="strength_contrast">相對強度對比</span>
+                    </h3>
+                    <div class="h-[300px]">
+                        <canvas id="sectorChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <h3 class="font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="text-green-500 w-4 h-4"></i>
+                        <span data-i18n="strategy_summary">產業策略摘要</span>
+                    </h3>
+                    <div class="space-y-4" id="strategy-notes">
+                        <!-- JS Populated -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Debug Console -->
+    <div id="debug-console" class="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-800 p-4 font-mono text-[10px] text-zinc-400 z-50 max-h-40 overflow-y-auto hidden">
+        <div id="log-output"></div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script>
+        lucide.createIcons();
+        let currentLang = localStorage.getItem('dash_lang') || 'zh';
+        let chartInstance = null;
+
+        function logToUI(msg) {
+            const out = document.getElementById('log-output');
+            const line = document.createElement('div');
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            out.appendChild(line);
+        }
+
+        function applyTranslations() {
+            if (!window.i18n) return;
+            const t = window.i18n[currentLang];
+            const s = t.sentiment_labels;
+            
+            // Nav
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t.nav[key.replace('nav_', '')]) {
+                    el.textContent = t.nav[key.replace('nav_', '')];
+                }
+            });
+
+            document.querySelector('[data-i18n="heatmap_title"]').textContent = s.heatmap_title;
+            document.querySelector('[data-i18n="bullish_label"]').textContent = s.bullish;
+            document.querySelector('[data-i18n="bearish_label"]').textContent = s.bearish;
+            document.querySelector('[data-i18n="neutral_label"]').textContent = s.neutral;
+            document.querySelector('[data-i18n="strength_contrast"]').textContent = s.strength_contrast;
+            document.querySelector('[data-i18n="strategy_summary"]').textContent = s.strategy_summary;
+
+            document.getElementById('lang-text').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
+            document.getElementById('refresh-sector').textContent = currentLang === 'zh' ? '更新分析' : 'Update Scan';
+            
+            // Reload data to refresh internal translations
+            loadSectorData();
+        }
+
+        async function loadSectorData() {
+            logToUI("Loading sector intelligence...");
+            try {
+                const res = await fetch('data.json?t=' + Date.now());
+                const data = await res.json();
+                const t = window.i18n[currentLang];
+                
+                document.getElementById('macro-multiplier').textContent = "0.90x"; 
+                document.getElementById('last-update').textContent = `LAST SYNC: ${data.last_updated}`;
+
+                // Themes
+                const themesList = document.getElementById('themes-list');
+                themesList.innerHTML = '';
+                data.market.themes.forEach(theme => {
+                    const span = document.createElement('span');
+                    span.className = "bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:border-emerald-500/50 transition-all cursor-default";
+                    span.textContent = theme.replace(/_/g, ' ');
+                    themesList.appendChild(span);
+                });
+
+                // Heatmap Grid
+                const grid = document.getElementById('sector-grid');
+                grid.innerHTML = '';
+                
+                const sectors = [
+                    { id: "SEMICONDUCTORS", score: 85 },
+                    { id: "TECHNOLOGY", score: 78 },
+                    { id: "CYBERSECURITY", score: 88 },
+                    { id: "INFRASTRUCTURE", score: 80 },
+                    { id: "SOFTWARE", score: 72 },
+                    { id: "AIRLINES", score: 65 },
+                    { id: "HEALTHCARE", score: 50 },
+                    { id: "FINANCIALS", score: 48 },
+                    { id: "RETAIL", score: 42 },
+                    { id: "ENERGY", score: 25 },
+                    { id: "UTILITIES", score: 18 },
+                    { id: "OIL_GAS", score: 15 }
+                ];
+
+                const translatedSectors = sectors.map(s => ({
+                    name: t.sectors[s.id] || s.id,
+                    score: s.score
+                }));
+
+                translatedSectors.forEach(s => {
+                    const div = document.createElement('div');
+                    const color = s.score > 60 ? 'emerald' : (s.score < 40 ? 'red' : 'zinc');
+                    div.className = `glass-card p-4 border-b-4 border-b-${color}-500 flex flex-col items-center gap-2 group hover:scale-105 transition-all cursor-pointer`;
+                    div.innerHTML = `
+                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter text-center">${s.name}</span>
+                        <div class="text-xl font-bold text-${color}-500">${s.score}%</div>
+                    `;
+                    grid.appendChild(div);
+                });
+
+                updateChart(translatedSectors);
+                
+                // Strategy Notes
+                const strategy = document.getElementById('strategy-notes');
+                strategy.innerHTML = `
+                    <div class="bg-emerald-500/5 border-l-2 border-emerald-500 p-4">
+                        <p class="text-sm font-bold text-emerald-500 mb-1">Growth Bull Case</p>
+                        <p class="text-xs text-zinc-400">Semiconductor AI demand remains inelastic. 0.90x multiplier applied due to volatile rate environment.</p>
+                    </div>
+                    <div class="bg-red-500/5 border-l-2 border-red-500 p-4">
+                        <p class="text-sm font-bold text-red-500 mb-1">Energy Headwind</p>
+                        <p class="text-xs text-zinc-400">Geopolitical de-escalation (Ceasefire) leading to oil price correction. Underweight traditional energy.</p>
+                    </div>
+                `;
+
+                lucide.createIcons();
+            } catch (e) {
+                logToUI("Error: " + e.message);
+            }
+        }
+
+        function updateChart(sectors) {
+            const ctx = document.getElementById('sectorChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sectors.map(s => s.name),
+                    datasets: [{
+                        label: 'Relative Momentum Score',
+                        data: sectors.map(s => s.score),
+                        backgroundColor: sectors.map(s => s.score > 60 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'),
+                        borderColor: sectors.map(s => s.score > 60 ? '#10b981' : '#ef4444'),
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#18181b' }, ticks: { color: '#71717a' } },
+                        x: { grid: { display: false }, ticks: { color: '#71717a', font: { size: 10 } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            localStorage.setItem('dash_lang', currentLang);
+            applyTranslations();
+        });
+
+        document.getElementById('show-logs').addEventListener('click', () => {
+            document.getElementById('debug-console').classList.toggle('hidden');
+        });
+
+        applyTranslations();
+        loadSectorData();
+    </script>
+</body>
+</html>

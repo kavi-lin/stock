@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>即時新聞情報 | AI 投資委員會</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-zinc-800 flex flex-col fixed h-full bg-black">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                <i data-lucide="activity" class="text-black w-5 h-5"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">AI 委員會</h1>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-1">
+            <a href="index.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span data-i18n="nav_dash">總體儀表板</span>
+            </a>
+            <a href="sector.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
+                <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                <span data-i18n="nav_sector">產業掃描</span>
+            </a>
+            <a href="news.html" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md">
+                <i data-lucide="newspaper" class="w-4 h-4"></i>
+                <span data-i18n="nav_news">即時新聞</span>
+            </a>
+            <a href="history.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span data-i18n="nav_history">決策歷史</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-zinc-800 space-y-2">
+            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
+                <span id="lang-text">繁體中文</span>
+                <i data-lucide="languages" class="w-3 h-3"></i>
+            </button>
+            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <span>System Logs</span>
+                <i data-lucide="terminal" class="w-3 h-3"></i>
+            </button>
+            <div class="pt-2 px-3 text-[8px] text-zinc-700 font-mono tracking-widest border-t border-zinc-900/50 mt-2">
+                V1.1.0.260412_10:55:03
+            </div>
+        </div>
+    </aside>
+
+    <main class="ml-64 flex-1 flex flex-col">
+        <header class="h-16 border-b border-zinc-800 flex items-center justify-between px-8 sticky top-0 bg-black/50 backdrop-blur-md z-10">
+            <h2 class="text-lg font-bold">新聞戰情室</h2>
+            <div class="flex items-center gap-4">
+                <span id="last-sync-time" class="text-[10px] text-zinc-500 font-mono tracking-tighter uppercase">LAST SYNC: NONE</span>
+                <button id="refresh-news" class="bg-zinc-900 border border-zinc-800 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zinc-800 transition-all">
+                    同步資料
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <!-- News Stats Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div class="glass-card p-4">
+                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="total">Total Items</span>
+                  <div class="text-2xl font-bold" id="total-news">0</div>
+              </div>
+              <div class="glass-card p-4 border-l-4 border-l-green-600">
+                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="bull">Bullish Signals</span>
+                  <div class="text-2xl font-bold text-green-500" id="bull-news">0</div>
+              </div>
+              <div class="glass-card p-4 border-l-4 border-l-red-600">
+                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="bear">Bearish Signals</span>
+                  <div class="text-2xl font-bold text-red-500" id="bear-news">0</div>
+              </div>
+              <div class="glass-card p-4 border-l-4 border-l-yellow-600">
+                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="binary">Binary Risk</span>
+                  <div class="text-2xl font-bold text-yellow-500" id="binary-news">0</div>
+              </div>
+            </div>
+
+            <div class="space-y-6" id="news-feed-detailed">
+                <!-- Data goes here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Debug Console -->
+    <div id="debug-console" class="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-900 p-4 font-mono text-[10px] text-zinc-400 z-50 max-h-80 overflow-y-auto hidden">
+        <div class="flex justify-between items-center mb-2 border-b border-zinc-900 pb-1">
+            <span class="font-bold text-emerald-500">SYSTEM LOGS</span>
+            <button onclick="document.getElementById('debug-console').classList.add('hidden')" class="hover:text-white">CLOSE [X]</button>
+        </div>
+        <div id="log-output" class="space-y-1"></div>
+    </div>
+
+    <!-- External I18n Resource -->
+    <script src="i18n.js"></script>
+    <script>
+      function logToUI(msg, type = 'info') {
+        const out = document.getElementById('log-output');
+        const line = document.createElement('div');
+        const time = new Date().toLocaleTimeString();
+        const color = type === 'error' ? 'text-red-500' : (type === 'warn' ? 'text-yellow-500' : 'text-zinc-400');
+        line.innerHTML = `<span class="text-zinc-600">[${time}]</span> <span class="${color}">${msg}</span>`;
+        out.appendChild(line);
+        console.log(`[UI LOG] ${msg}`);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        logToUI("Initializing System...");
+        logToUI("Protocol: " + window.location.protocol);
+        logToUI("Path: " + window.location.pathname);
+
+        const debugPanel = document.getElementById('debug-console');
+        
+        // Show console on Error
+        window.onerror = (msg) => {
+          logToUI(msg, 'error');
+          debugPanel.classList.remove('hidden');
+        };
+
+        if (window.location.protocol === 'file:') {
+          logToUI("WARNING: Running via file:// will likely block data loading.", 'error');
+          debugPanel.classList.remove('hidden');
+        }
+
+        let currentLang = localStorage.getItem('dash_lang') || 'zh';
+
+        function applyTranslations() {
+          if (!window.i18n) {
+            logToUI("CRITICAL: i18n.js not found!", 'error');
+            debugPanel.classList.remove('hidden');
+            return;
+          }
+          const t = window.i18n[currentLang];
+          document.querySelector('h2').textContent = t.title;
+          document.getElementById('refresh-news').textContent = t.sync;
+          document.getElementById('lang-text').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
+          
+          // Nav
+          document.querySelector('[data-i18n="nav_dash"]').textContent = t.nav.dash;
+          document.querySelector('[data-i18n="nav_news"]').textContent = t.nav.news;
+          document.querySelector('[data-i18n="nav_sector"]').textContent = t.nav.sector;
+          document.querySelector('[data-i18n="nav_history"]').textContent = t.nav.history;
+          
+          document.querySelector('[data-i18n="nav_history"]').parentElement.href = "history.html";
+
+          document.querySelector('[data-stat-label="total"]').textContent = t.total;
+          document.querySelector('[data-stat-label="bull"]').textContent = t.bullish;
+          document.querySelector('[data-stat-label="bear"]').textContent = t.bearish;
+          document.querySelector('[data-stat-label="binary"]').textContent = t.binary;
+        }
+
+        function toggleLang() {
+          currentLang = currentLang === 'zh' ? 'en' : 'zh';
+          localStorage.setItem('dash_lang', currentLang);
+          applyTranslations();
+          loadNews();
+        }
+
+        async function loadNews() {
+          const feed = document.getElementById('news-feed-detailed');
+          if (!window.i18n) return;
+          const t = window.i18n[currentLang];
+          
+          feed.innerHTML = '<div class="text-center p-20 text-zinc-600 animate-pulse">Loading data...</div>';
+
+          try {
+            const url = 'data.json?t=' + Date.now();
+            logToUI("Fetching data from: " + url);
+            
+            const res = await fetch(url);
+            logToUI("Response status: " + res.status);
+            
+            if (!res.ok) throw new Error(`HTTP ${res.status}: Check if data.json exists in Dashboard/`);
+            
+            const data = await res.json();
+            logToUI(`Data loaded. Found ${data.news?.length || 0} news items.`);
+            
+            feed.innerHTML = '';
+
+            if (!data.news || data.news.length === 0) {
+              feed.innerHTML = `<div class="p-20 text-center text-zinc-500">${t.no_data}</div>`;
+              return;
+            }
+
+            let counts = { bullish: 0, bearish: 0, binary: 0 };
+
+            data.news.forEach((item, idx) => {
+              const impact = (item.impact || 'neutral').toLowerCase();
+              const isBull = impact === 'bullish' || impact === 'positive';
+              const isBear = impact === 'bearish' || impact === 'negative';
+              const isBin = impact === 'binary';
+
+              if (isBull) counts.bullish++;
+              else if (isBear) counts.bearish++;
+              else if (isBin) counts.binary++;
+
+              const color = isBull ? 'green' : (isBear ? 'red' : (isBin ? 'yellow' : 'zinc'));
+              const icon = isBull ? 'trending-up' : (isBear ? 'trending-down' : 'help-circle');
+              
+              const card = document.createElement('div');
+              card.className = `glass-card p-6 flex gap-6 hover:border-${color}-500/50 transition-all mb-4`;
+              
+              const translatedStatus = t.status[impact] || impact;
+              const sectorTags = (item.sectors || []).map(s => {
+                const key = s.toUpperCase().replace(/ /g, '_');
+                const name = currentLang === 'zh' ? (t.sectors[key] || s) : s;
+                return `<span class="bg-zinc-900 border border-zinc-800 text-zinc-400 text-[9px] px-2 py-0.5 rounded uppercase font-bold whitespace-nowrap">${name}</span>`;
+              }).join('');
+
+              card.innerHTML = `
+                <div class="flex flex-col items-center gap-2 min-w-[80px]">
+                  <div class="w-12 h-12 rounded-full bg-${color}-500/10 flex items-center justify-center border border-${color}-500/20">
+                    <i data-lucide="${icon}" class="text-${color}-500 w-6 h-6"></i>
+                  </div>
+                  <span class="text-[10px] font-bold uppercase text-${color}-500">${translatedStatus}</span>
+                  <span class="text-sm font-mono font-bold">${item.score >= 0 ? '+' : ''}${item.score}</span>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-zinc-500 font-mono">${item.date || t.unknown}</span>
+                    <div class="flex gap-2 flex-wrap">${sectorTags}</div>
+                  </div>
+                  <h3 class="text-lg font-semibold text-zinc-100 leading-snug">${item.headline}</h3>
+                </div>
+              `;
+              feed.appendChild(card);
+            });
+
+            document.getElementById('total-news').textContent = data.news.length;
+            document.getElementById('bull-news').textContent = counts.bullish;
+            document.getElementById('bear-news').textContent = counts.bearish;
+            document.getElementById('binary-news').textContent = counts.binary;
+            document.getElementById('last-sync-time').textContent = `${t.last_sync}: ${data.last_updated || 'N/A'}`;
+
+            lucide.createIcons();
+          } catch (e) {
+            logToUI(e.message, 'error');
+            debugPanel.classList.remove('hidden');
+            feed.innerHTML = `
+              <div class="glass-card p-10 border-red-500/20 bg-red-500/5 text-center">
+                <h3 class="text-red-500 font-bold mb-2">${t.failed}</h3>
+                <p class="text-xs text-zinc-500 mb-4">${e.message}</p>
+                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-zinc-800 rounded text-xs font-bold">RETRY</button>
+              </div>`;
+          }
+        }
+
+        // Shortcut to toggle Debug Console: Shift + D
+        document.addEventListener('keydown', (e) => {
+          if (e.shiftKey && e.key === 'D') {
+            debugPanel.classList.toggle('hidden');
+          }
+        });
+
+        document.getElementById('lang-toggle').addEventListener('click', toggleLang);
+        document.getElementById('refresh-news').addEventListener('click', loadNews);
+        document.getElementById('show-logs').addEventListener('click', () => {
+          debugPanel.classList.toggle('hidden');
+        });
+
+        applyTranslations();
+        loadNews();
+        lucide.createIcons();
+      });
+    </script>
+</body>
+</html>
