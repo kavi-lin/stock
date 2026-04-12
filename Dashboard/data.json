@@ -1,0 +1,203 @@
+{
+  "status": "success",
+  "last_updated": "2026-04-12 09:56:44",
+  "market": {
+    "regime": "VOLATILE",
+    "fear_greed": 50,
+    "themes": [
+      "Defensive_Flight_to_Safety (XLP/XLV/XLU)",
+      "Bank_Earnings_Catalyst (XLF — monitor Apr 13-15)",
+      "Energy_Ceasefire_Reversal (avoid XLE until Hormuz clarity)"
+    ],
+    "hot_sectors": [
+      "Consumer_Staples",
+      "Healthcare"
+    ],
+    "notes": "市場VOLATILE/RISK_OFF，Fear&Greed=15觸發極端情緒警示。防禦輪動（XLP/XLV/XLU）為唯一HOT確信方向；Energy因停火binary風險列AVOID；銀行財報週（Apr 13-15）為最重要近期catalyst，結果將定義下週市場方向。建議個股分析聚焦Consumer Staples和Healthcare中具獲利能力且估值合理的標的。"
+  },
+  "recent_analysis": [
+    {
+      "ticker": "AMZN",
+      "decision": "CANCEL",
+      "score": 1.27,
+      "time": "2026-04-11",
+      "report_url": "reports/20260411_AMZN.md",
+      "performance": null,
+      "targets": {
+        "tp": 258.0,
+        "sl": 200.0,
+        "watch": null,
+        "entry": "$215 - $225"
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "decision": "CANCEL",
+      "score": 0.56,
+      "time": "2026-04-11",
+      "report_url": "reports/20260411_AAPL.md",
+      "performance": null,
+      "targets": {
+        "tp": 295.0,
+        "sl": 242.0,
+        "watch": null,
+        "entry": "$253 - $258"
+      }
+    },
+    {
+      "ticker": "CRWV",
+      "decision": "CANCEL",
+      "score": 0.48,
+      "time": "2026-04-10",
+      "report_url": "reports/20260410_CRWV.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": "-85 (prior consolidation zone)",
+        "entry": null
+      }
+    },
+    {
+      "ticker": "MU",
+      "decision": "EXECUTE",
+      "score": 2.5,
+      "time": "2026-04-08",
+      "report_url": "reports/20260407_MU.html",
+      "performance": null,
+      "targets": {
+        "tp": 452.93,
+        "sl": 350.0,
+        "watch": null,
+        "entry": "$375 - $390"
+      }
+    },
+    {
+      "ticker": "NBIS",
+      "decision": "CANCEL",
+      "score": 1.83,
+      "time": "2026-04-08",
+      "report_url": "reports/20260408_NBIS.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": null,
+        "entry": "108-115"
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "decision": "EXECUTE",
+      "score": 0.26,
+      "time": "2026-04-08",
+      "report_url": "reports/20260408_MSFT.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": "320",
+        "entry": null
+      }
+    },
+    {
+      "ticker": "VST",
+      "decision": "EXECUTE",
+      "score": 1.8,
+      "time": "2026-04-07",
+      "report_url": "reports/20260407_VST.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": "143",
+        "entry": null
+      }
+    },
+    {
+      "ticker": "TSLA",
+      "decision": "CANCEL",
+      "score": -2.1,
+      "time": "2026-04-07",
+      "report_url": "reports/20260407_TSLA.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": "280",
+        "entry": null
+      }
+    },
+    {
+      "ticker": "NEE",
+      "decision": "ARCHIVE",
+      "score": 0.0,
+      "time": "2026-04-09",
+      "report_url": "reports/20260409_NEE_vs_VRT比較報告.md"
+    },
+    {
+      "ticker": "RKLB",
+      "decision": "ARCHIVE",
+      "score": 0.0,
+      "time": "2026-04-07",
+      "report_url": "reports/20260407_RKLB.html"
+    }
+  ],
+  "news": [
+    {
+      "headline": "US-Iran Two-Week Ceasefire Agreement; Trump Conditions on Hormuz Reopening",
+      "impact": "binary",
+      "score": 1.0,
+      "date": "2026-04-10",
+      "sectors": [
+        "Energy",
+        "Technology",
+        "Airlines"
+      ]
+    },
+    {
+      "headline": "Iran Accuses US of Ceasefire Violations; Strait of Hormuz Still Effectively Closed, Ships Charged $1M+ Tolls",
+      "impact": "bearish",
+      "score": -2.5,
+      "date": "2026-04-10",
+      "sectors": [
+        "Energy",
+        "Consumer_Discretionary",
+        "Airlines"
+      ]
+    },
+    {
+      "headline": "Trump Imposes 100% Section 232 Tariff on Patented Pharmaceutical Products and APIs",
+      "impact": "bearish",
+      "score": -2.0,
+      "date": "2026-04-10",
+      "sectors": [
+        "International_Pharma",
+        "Healthcare_Payers",
+        "US_Pharma_Domestic"
+      ]
+    },
+    {
+      "headline": "Trump Restructures Section 232 Metal Tariffs: Steel/Aluminum/Copper Dual-Tier 50%/25%",
+      "impact": "binary",
+      "score": 0.5,
+      "date": "2026-04-10",
+      "sectors": [
+        "Materials",
+        "Autos",
+        "Industrials"
+      ]
+    },
+    {
+      "headline": "Meta Platforms Expands CoreWeave AI Infrastructure Deal to $35.2B Total; CoreWeave Raises $3B New Debt",
+      "impact": "bullish",
+      "score": 2.0,
+      "date": "2026-04-10",
+      "sectors": [
+        "Semiconductors",
+        "Cloud_AI_Infrastructure",
+        "High_PE_Tech_Unprofitable"
+      ]
+    }
+  ]
+}
