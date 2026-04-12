@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-04-13 00:21:08",
+  "last_updated": "2026-04-13 00:44:53",
   "market": {
     "regime": "VOLATILE",
     "cycle_phase": "Mid",
@@ -184,6 +184,32 @@
     "days_old": 4,
     "source": "market-breadth-analyzer",
     "notes": ""
+  },
+  "ftd": {
+    "state": "FTD_CONFIRMED",
+    "dual_confirmation": true,
+    "quality_score": 100,
+    "signal": "Strong FTD",
+    "guidance": "Aggressively increase exposure to 75-100%.",
+    "exposure_range": "75-100%",
+    "ftd_detected": true,
+    "ftd_date": "2026-04-08",
+    "ftd_day_number": 6,
+    "ftd_gain_pct": 2.51,
+    "swing_low_date": "2026-03-30",
+    "swing_low_price": 6343.72021484375,
+    "decline_pct": -9.07,
+    "rally_day1_date": "2026-03-31",
+    "rally_day_count": 8,
+    "distribution_days": 0,
+    "days_monitored": 2,
+    "power_trend": false,
+    "power_trend_cond": 1,
+    "invalidated": false,
+    "invalidation_date": null,
+    "sp500_price": 6816.89013671875,
+    "qqq_price": 611.0700073242188,
+    "generated_at": "2026-04-13 00:43:41"
   },
   "sectors": [
     {

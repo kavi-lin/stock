@@ -286,6 +286,7 @@
 
             const flags   = br.warning_flags || [];
             const sectors = (data.sectors || []).slice().sort((a, b) => (b.uptrend_ratio ?? 0) - (a.uptrend_ratio ?? 0));
+            const ftd      = data.ftd || {};
             const compFull = br.components_full || {};   // 6-component dict from analyzer
             const compLegacy = br.components || {};       // 4-field fallback
 
@@ -460,7 +461,125 @@
                 </div>
             </div>` : ''}
 
-            <!-- ── Row 5: Analyst Notes ───────────────────────────── -->
+            <!-- ── Row 5: FTD Detector ───────────────────────────── -->
+            ${Object.keys(ftd).length ? (() => {
+                const stateColors = {
+                    FTD_CONFIRMED:   '#22c55e',
+                    RALLY_ATTEMPT:   '#eab308',
+                    FTD_WINDOW:      '#f97316',
+                    CORRECTION:      '#ef4444',
+                    FTD_INVALIDATED: '#ef4444',
+                    RALLY_FAILED:    '#ef4444',
+                    NO_SIGNAL:       '#71717a',
+                };
+                const stateLabels = {
+                    FTD_CONFIRMED:   'FTD Confirmed',
+                    RALLY_ATTEMPT:   'Rally Attempt',
+                    FTD_WINDOW:      'FTD Window',
+                    CORRECTION:      'Correction',
+                    FTD_INVALIDATED: 'FTD Invalidated',
+                    RALLY_FAILED:    'Rally Failed',
+                    NO_SIGNAL:       'No Signal',
+                };
+                const sc = stateColors[ftd.state] || '#71717a';
+                const sl = stateLabels[ftd.state]  || ftd.state || '–';
+                const qs = ftd.quality_score ?? 0;
+                const qc = qs >= 70 ? '#22c55e' : qs >= 40 ? '#eab308' : '#ef4444';
+                return `
+                <div class="glass-card p-6">
+                    <h3 class="text-xs font-black uppercase tracking-widest mb-5 flex items-center gap-2">
+                        <i data-lucide="signal" class="w-4 h-4 text-emerald-400"></i>
+                        <span>FTD Detector — Market Bottom Signal</span>
+                        <span class="ml-auto text-[9px] text-zinc-600">${ftd.generated_at || ''}</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                        <!-- State + Score -->
+                        <div class="glass-card p-4 flex flex-col gap-3">
+                            <div>
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Market State</p>
+                                <p class="text-xl font-black" style="color:${sc}">${sl}</p>
+                                ${ftd.dual_confirmation ? `<span class="text-[8px] text-emerald-400 font-bold">● DUAL CONFIRMATION (S&P + NASDAQ)</span>` : ''}
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Quality Score</p>
+                                <p class="text-2xl font-black font-mono" style="color:${qc}">${qs}<span class="text-sm text-zinc-500">/100</span></p>
+                                <p class="text-[9px] text-zinc-500 mt-0.5">${ftd.signal || ''}</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Exposure Guidance</p>
+                                <p class="text-lg font-black text-orange-400">${ftd.exposure_range || '–'}</p>
+                            </div>
+                        </div>
+
+                        <!-- FTD Event + Rally -->
+                        <div class="glass-card p-4 space-y-3">
+                            <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">FTD Event</p>
+                            ${ftd.ftd_detected ? `
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between text-[10px]">
+                                    <span class="text-zinc-500">FTD Date</span>
+                                    <span class="font-mono font-bold text-emerald-400">${ftd.ftd_date || '–'}</span>
+                                </div>
+                                <div class="flex justify-between text-[10px]">
+                                    <span class="text-zinc-500">Day #</span>
+                                    <span class="font-mono font-bold">${ftd.ftd_day_number || '–'}</span>
+                                </div>
+                                <div class="flex justify-between text-[10px]">
+                                    <span class="text-zinc-500">Gain</span>
+                                    <span class="font-mono font-bold text-emerald-400">+${(ftd.ftd_gain_pct || 0).toFixed(2)}%</span>
+                                </div>
+                            </div>` : `<p class="text-zinc-600 text-xs">No FTD event detected</p>`}
+                            <div class="border-t border-zinc-800 pt-3 space-y-1.5">
+                                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Swing Low</p>
+                                <div class="flex justify-between text-[10px]">
+                                    <span class="text-zinc-500">Date</span>
+                                    <span class="font-mono font-bold">${ftd.swing_low_date || '–'}</span>
+                                </div>
+                                <div class="flex justify-between text-[10px]">
+                                    <span class="text-zinc-500">Price</span>
+                                    <span class="font-mono font-bold">$${ftd.swing_low_price ? ftd.swing_low_price.toFixed(2) : '–'}</span>
+                                </div>
+                                <div class="flex justify-between text-[10px]">
+                                    <span class="text-zinc-500">Decline</span>
+                                    <span class="font-mono font-bold text-red-400">${ftd.decline_pct ? ftd.decline_pct.toFixed(1) + '%' : '–'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post-FTD Health -->
+                        <div class="glass-card p-4 space-y-3">
+                            <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Post-FTD Health</p>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-zinc-500">Distribution Days</span>
+                                    <span class="font-black font-mono ${(ftd.distribution_days || 0) >= 5 ? 'text-red-400' : (ftd.distribution_days || 0) >= 3 ? 'text-yellow-500' : 'text-emerald-400'}">${ftd.distribution_days ?? 0}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-zinc-500">Days Monitored</span>
+                                    <span class="font-mono text-zinc-400">${ftd.days_monitored ?? 0}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-zinc-500">Power Trend</span>
+                                    <span class="font-black ${ftd.power_trend ? 'text-emerald-400' : 'text-zinc-600'}">${ftd.power_trend ? 'YES' : 'No'} <span class="text-zinc-600">(${ftd.power_trend_cond ?? 0}/3)</span></span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-zinc-500">Invalidated</span>
+                                    <span class="font-black ${ftd.invalidated ? 'text-red-400' : 'text-emerald-400'}">${ftd.invalidated ? ('YES · ' + (ftd.invalidation_date || '')) : 'No'}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-zinc-500">Rally Day 1</span>
+                                    <span class="font-mono text-zinc-400">${ftd.rally_day1_date || '–'} <span class="text-zinc-600">(Day ${ftd.rally_day_count ?? '–'})</span></span>
+                                </div>
+                            </div>
+                            ${ftd.guidance ? `<p class="text-[9px] text-zinc-500 border-t border-zinc-800 pt-2 leading-relaxed">${ftd.guidance}</p>` : ''}
+                        </div>
+
+                    </div>
+                </div>`;
+            })() : ''}
+
+            <!-- ── Row 6: Analyst Notes ───────────────────────────── -->
             ${br.notes ? `
             <div class="glass-card p-6">
                 <h3 class="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">

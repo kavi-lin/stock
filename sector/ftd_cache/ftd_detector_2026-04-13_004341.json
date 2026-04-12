@@ -1,0 +1,274 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-13 00:43:41",
+    "data_source": "yfinance",
+    "index_prices": {
+      "sp500": 6816.89013671875,
+      "qqq": 611.0700073242188
+    }
+  },
+  "market_state": {
+    "combined_state": "FTD_CONFIRMED",
+    "dual_confirmation": true,
+    "ftd_index": "Both"
+  },
+  "sp500": {
+    "index": "S&P 500",
+    "state": "FTD_CONFIRMED",
+    "swing_low": {
+      "swing_low_idx": 51,
+      "swing_low_price": 6343.72021484375,
+      "swing_low_date": "2026-03-30",
+      "swing_low_low": 6316.91015625,
+      "recent_high_price": 6976.43994140625,
+      "recent_high_idx": 12,
+      "recent_high_date": "2026-02-02",
+      "decline_pct": -9.07,
+      "down_days": 24
+    },
+    "rally_attempt": {
+      "day1_idx": 52,
+      "day1_date": "2026-03-31",
+      "day1_low": 6395.8798828125,
+      "current_day_count": 8,
+      "rally_days": [
+        {
+          "day": 1,
+          "idx": 52,
+          "date": "2026-03-31",
+          "close": 6528.52001953125,
+          "volume": 6396100000
+        },
+        {
+          "day": 2,
+          "idx": 53,
+          "date": "2026-04-01",
+          "close": 6575.31982421875,
+          "volume": 5637260000,
+          "change_pct": 0.72,
+          "volume_vs_prev": -11.9
+        },
+        {
+          "day": 3,
+          "idx": 54,
+          "date": "2026-04-02",
+          "close": 6582.68994140625,
+          "volume": 4740740000,
+          "change_pct": 0.11,
+          "volume_vs_prev": -15.9
+        },
+        {
+          "day": 4,
+          "idx": 55,
+          "date": "2026-04-06",
+          "close": 6611.830078125,
+          "volume": 3906440000,
+          "change_pct": 0.44,
+          "volume_vs_prev": -17.6
+        },
+        {
+          "day": 5,
+          "idx": 56,
+          "date": "2026-04-07",
+          "close": 6616.85009765625,
+          "volume": 4555680000,
+          "change_pct": 0.08,
+          "volume_vs_prev": 16.6
+        },
+        {
+          "day": 6,
+          "idx": 57,
+          "date": "2026-04-08",
+          "close": 6782.81005859375,
+          "volume": 5904880000,
+          "change_pct": 2.51,
+          "volume_vs_prev": 29.6
+        },
+        {
+          "day": 7,
+          "idx": 58,
+          "date": "2026-04-09",
+          "close": 6824.66015625,
+          "volume": 4912410000,
+          "change_pct": 0.62,
+          "volume_vs_prev": -16.8
+        },
+        {
+          "day": 8,
+          "idx": 59,
+          "date": "2026-04-10",
+          "close": 6816.89013671875,
+          "volume": 4393220000,
+          "change_pct": -0.11,
+          "volume_vs_prev": -10.6
+        }
+      ],
+      "invalidated": false,
+      "invalidation_reason": null,
+      "reset_count": 0
+    },
+    "ftd": {
+      "ftd_detected": true,
+      "ftd_day_number": 6,
+      "ftd_date": "2026-04-08",
+      "ftd_price": 6782.81005859375,
+      "ftd_low": 6740.27978515625,
+      "gain_pct": 2.51,
+      "volume": 5904880000,
+      "prev_day_volume": 4555680000,
+      "volume_above_avg": true,
+      "gain_tier": "strong",
+      "_ftd_idx": 57
+    },
+    "current_price": 6816.89013671875,
+    "lookback_high": 6978.60009765625,
+    "correction_depth_pct": -2.32
+  },
+  "nasdaq": {
+    "index": "NASDAQ",
+    "state": "FTD_CONFIRMED",
+    "swing_low": {
+      "swing_low_idx": 51,
+      "swing_low_price": 558.280029296875,
+      "swing_low_date": "2026-03-30",
+      "swing_low_low": 555.5999755859375,
+      "recent_high_price": 625.3515014648438,
+      "recent_high_idx": 12,
+      "recent_high_date": "2026-02-02",
+      "decline_pct": -10.73,
+      "down_days": 23
+    },
+    "rally_attempt": {
+      "day1_idx": 52,
+      "day1_date": "2026-03-31",
+      "day1_low": 564.2100219726562,
+      "current_day_count": 8,
+      "rally_days": [
+        {
+          "day": 1,
+          "idx": 52,
+          "date": "2026-03-31",
+          "close": 577.1799926757812,
+          "volume": 95878000
+        },
+        {
+          "day": 2,
+          "idx": 53,
+          "date": "2026-04-01",
+          "close": 584.3099975585938,
+          "volume": 79435100,
+          "change_pct": 1.24,
+          "volume_vs_prev": -17.1
+        },
+        {
+          "day": 3,
+          "idx": 54,
+          "date": "2026-04-02",
+          "close": 584.97998046875,
+          "volume": 50941700,
+          "change_pct": 0.11,
+          "volume_vs_prev": -35.9
+        },
+        {
+          "day": 4,
+          "idx": 55,
+          "date": "2026-04-06",
+          "close": 588.5,
+          "volume": 35108500,
+          "change_pct": 0.6,
+          "volume_vs_prev": -31.1
+        },
+        {
+          "day": 5,
+          "idx": 56,
+          "date": "2026-04-07",
+          "close": 588.5900268554688,
+          "volume": 49948200,
+          "change_pct": 0.02,
+          "volume_vs_prev": 42.3
+        },
+        {
+          "day": 6,
+          "idx": 57,
+          "date": "2026-04-08",
+          "close": 606.0900268554688,
+          "volume": 63086000,
+          "change_pct": 2.97,
+          "volume_vs_prev": 26.3
+        },
+        {
+          "day": 7,
+          "idx": 58,
+          "date": "2026-04-09",
+          "close": 610.1900024414062,
+          "volume": 37837500,
+          "change_pct": 0.68,
+          "volume_vs_prev": -40.0
+        },
+        {
+          "day": 8,
+          "idx": 59,
+          "date": "2026-04-10",
+          "close": 611.0700073242188,
+          "volume": 33831300,
+          "change_pct": 0.14,
+          "volume_vs_prev": -10.6
+        }
+      ],
+      "invalidated": false,
+      "invalidation_reason": null,
+      "reset_count": 0
+    },
+    "ftd": {
+      "ftd_detected": true,
+      "ftd_day_number": 6,
+      "ftd_date": "2026-04-08",
+      "ftd_price": 606.0900268554688,
+      "ftd_low": 602.1199951171875,
+      "gain_pct": 2.97,
+      "volume": 63086000,
+      "prev_day_volume": 49948200,
+      "volume_above_avg": false,
+      "gain_tier": "strong",
+      "_ftd_idx": 57
+    },
+    "current_price": 611.0700073242188,
+    "lookback_high": 632.4225463867188,
+    "correction_depth_pct": -3.38
+  },
+  "quality_score": {
+    "total_score": 100,
+    "breakdown": {
+      "base": "Day 6 FTD: +60 (prime window)",
+      "gain": "+2.51% gain: +15 (strong)",
+      "volume": "Above 50-day avg volume: +10",
+      "dual_confirm": "Both S&P 500 + NASDAQ confirmed: +15",
+      "post_ftd": "No post-FTD distribution (2 days clean): +10"
+    },
+    "signal": "Strong FTD",
+    "guidance": "Aggressively increase exposure to 75-100%.",
+    "exposure_range": "75-100%",
+    "ftd_source": "S&P 500"
+  },
+  "post_ftd_distribution": {
+    "distribution_count": 0,
+    "days_monitored": 2,
+    "earliest_distribution_day": null,
+    "details": []
+  },
+  "ftd_invalidation": {
+    "invalidated": false,
+    "ftd_low": 6740.27978515625,
+    "days_since_ftd": 2
+  },
+  "power_trend": {
+    "power_trend": false,
+    "conditions_met": 1,
+    "ema_21": 6659.16,
+    "sma_50": 6761.97,
+    "current_price": 6816.89,
+    "ema_above_sma": false,
+    "sma_50_rising": false,
+    "price_above_21ema": true
+  }
+}

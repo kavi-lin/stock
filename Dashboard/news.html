@@ -5,61 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>即時新聞情報 | AI 投資委員會</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.1.9">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="flex min-h-screen">
+<body class="flex min-h-screen transition-all">
 
     <!-- Sidebar -->
-    <aside class="w-64 border-r border-zinc-800 flex flex-col fixed h-full bg-black">
-        <div class="p-6 flex items-center gap-3">
-            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                <i data-lucide="activity" class="text-black w-5 h-5"></i>
+    <aside class="w-64 border-r border-zinc-900 flex flex-col fixed h-full transition-all">
+        <div class="p-4 flex items-center justify-between gap-1">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shrink-0">
+                    <i data-lucide="activity" class="text-black w-5 h-5"></i>
+                </div>
+                <h1 class="text-base font-black tracking-tighter uppercase italic line-clamp-1 pr-2">INTEL<span class="text-green-500">COMMAND</span></h1>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">AI 委員會</h1>
+            <button id="theme-toggle" class="p-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all group/theme" title="Toggle Theme">
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-zinc-500 group-hover/theme:text-yellow-500 transition-colors" id="theme-icon"></i>
+            </button>
         </div>
 
         <nav class="flex-1 px-4 space-y-1">
-            <a href="index.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                <span data-i18n="nav_dash">總體儀表板</span>
-            </a>
-            <a href="sector.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="pie-chart" class="w-4 h-4"></i>
-                <span data-i18n="nav_sector">產業掃描</span>
-            </a>
-            <a href="news.html" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="newspaper" class="w-4 h-4"></i>
-                <span data-i18n="nav_news">即時新聞</span>
-            </a>
-            <a href="history.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="shield-check" class="w-4 h-4"></i>
-                <span data-i18n="nav_history">決策歷史</span>
-            </a>
+            <a href="index.html"     class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span data-i18n="nav_dash">總體儀表板</span></a>
+            <a href="watchlist.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="radar" class="w-4 h-4"></i><span data-i18n="nav_watchlist">進場雷達</span></a>
+            <a href="breadth.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span data-i18n="nav_breadth">市場廣度</span></a>
+            <a href="sector.html"    class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="pie-chart" class="w-4 h-4"></i><span data-i18n="nav_sector">產業掃描</span></a>
+            <a href="news.html"      class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="newspaper" class="w-4 h-4"></i><span data-i18n="nav_news">即時新聞</span></a>
+            <a href="history.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i><span data-i18n="nav_history">決策歷史</span></a>
         </nav>
 
-        <div class="p-4 border-t border-zinc-800 space-y-2">
-            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
+        <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
                 <span id="lang-text">繁體中文</span>
                 <i data-lucide="languages" class="w-3 h-3"></i>
             </button>
-            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
-                <span>System Logs</span>
+            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <span data-i18n="nav_logs">System Logs</span>
                 <i data-lucide="terminal" class="w-3 h-3"></i>
             </button>
-            <div class="pt-2 px-3 text-[8px] text-zinc-700 font-mono tracking-widest border-t border-zinc-900/50 mt-2">
-                V1.1.0.260412_10:55:03
+            <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">
+                V1.1.9.260414_19:25:00
             </div>
         </div>
     </aside>
 
     <main class="ml-64 flex-1 flex flex-col">
-        <header class="h-16 border-b border-zinc-800 flex items-center justify-between px-8 sticky top-0 bg-black/50 backdrop-blur-md z-10">
+        <header class="h-16 border-b border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-10 transition-all">
             <h2 class="text-lg font-bold">新聞戰情室</h2>
             <div class="flex items-center gap-4">
                 <span id="last-sync-time" class="text-[10px] text-zinc-500 font-mono tracking-tighter uppercase">LAST SYNC: NONE</span>
-                <button id="refresh-news" class="bg-zinc-900 border border-zinc-800 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zinc-800 transition-all">
+                <button id="refresh-news" class="bg-zinc-900 shadow-lg text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-800 hover:bg-zinc-800 transition-all">
                     同步資料
                 </button>
             </div>
@@ -86,23 +81,54 @@
               </div>
             </div>
 
-            <div class="space-y-6" id="news-feed-detailed">
-                <!-- Data goes here -->
+            <!-- Two-column: feed + binary risks sidebar -->
+            <div class="flex gap-6 items-start">
+                <div class="flex-1 space-y-6 min-w-0" id="news-feed-detailed">
+                    <!-- Data goes here -->
+                </div>
+
+                <!-- Right sidebar: Binary Risks + Trump Signals -->
+                <div class="w-72 shrink-0 space-y-6" id="binary-risks-sidebar">
+                    <!-- Binary Risks -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar-clock" class="w-4 h-4 text-yellow-500"></i>
+                            <h3 id="binary-risks-title" class="text-xs font-black uppercase tracking-widest text-yellow-500">Upcoming Binary Risks</h3>
+                        </div>
+                        <div id="binary-risks-list">
+                            <div class="text-xs text-zinc-600 animate-pulse">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Trump Trade Signals -->
+                    <div class="space-y-3" id="trump-signals-section" style="display:none">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="landmark" class="w-4 h-4 text-blue-400"></i>
+                            <h3 id="trump-signals-title" class="text-xs font-black uppercase tracking-widest text-blue-400">Policy Trade Signals</h3>
+                        </div>
+                        <div id="trump-signals-list" class="space-y-2"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
+    <!-- External I18n Resource -->
     <!-- Debug Console -->
-    <div id="debug-console" class="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-900 p-4 font-mono text-[10px] text-zinc-400 z-50 max-h-80 overflow-y-auto hidden">
-        <div class="flex justify-between items-center mb-2 border-b border-zinc-900 pb-1">
-            <span class="font-bold text-emerald-500">SYSTEM LOGS</span>
-            <button onclick="document.getElementById('debug-console').classList.add('hidden')" class="hover:text-white">CLOSE [X]</button>
+    <div id="debug-console" class="fixed bottom-0 left-64 right-0 border-t border-zinc-200 dark:border-zinc-800 p-4 transition-all z-50 hidden font-mono text-[10px]" style="background-color: var(--bg-main); color: var(--text-main)">
+        <div class="flex items-center justify-between mb-2 pb-1 border-b border-zinc-200 dark:border-zinc-900">
+            <div class="flex items-center gap-2">
+                <i data-lucide="terminal" class="w-3 h-3 text-green-500"></i>
+                <span class="font-bold uppercase tracking-widest text-[9px]" data-i18n="nav_logs">SYSTEM LOGS</span>
+            </div>
+            <button onclick="document.getElementById('debug-console').classList.add('hidden')" class="hover:text-white transition-colors">
+                <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
         </div>
-        <div id="log-output" class="space-y-1"></div>
+        <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
     </div>
 
-    <!-- External I18n Resource -->
-    <script src="i18n.js"></script>
+    <script src="i18n.js?v=1.1.9"></script>
     <script>
       function logToUI(msg, type = 'info') {
         const out = document.getElementById('log-output');
@@ -144,19 +170,23 @@
           document.querySelector('h2').textContent = t.title;
           document.getElementById('refresh-news').textContent = t.sync;
           document.getElementById('lang-text').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
-          
+
           // Nav
-          document.querySelector('[data-i18n="nav_dash"]').textContent = t.nav.dash;
-          document.querySelector('[data-i18n="nav_news"]').textContent = t.nav.news;
-          document.querySelector('[data-i18n="nav_sector"]').textContent = t.nav.sector;
-          document.querySelector('[data-i18n="nav_history"]').textContent = t.nav.history;
-          
-          document.querySelector('[data-i18n="nav_history"]').parentElement.href = "history.html";
+          document.querySelectorAll('[data-i18n^="nav_"]').forEach(el => {
+            const key = el.getAttribute('data-i18n').replace('nav_', '');
+            if (t.nav[key]) el.textContent = t.nav[key];
+          });
 
           document.querySelector('[data-stat-label="total"]').textContent = t.total;
           document.querySelector('[data-stat-label="bull"]').textContent = t.bullish;
           document.querySelector('[data-stat-label="bear"]').textContent = t.bearish;
           document.querySelector('[data-stat-label="binary"]').textContent = t.binary;
+
+          // Sidebar titles
+          const brt = document.getElementById('binary-risks-title');
+          if (brt) brt.textContent = t.calendar?.binary_risks_title || 'Upcoming Binary Risks';
+          const tst = document.getElementById('trump-signals-title');
+          if (tst) tst.textContent = t.trump_signals?.title || 'Policy Trade Signals';
         }
 
         function toggleLang() {
@@ -204,25 +234,25 @@
               else if (isBear) counts.bearish++;
               else if (isBin) counts.binary++;
 
-              const color = isBull ? 'green' : (isBear ? 'red' : (isBin ? 'yellow' : 'zinc'));
+              const statusColor = isBull ? 'var(--status-bullish)' : (isBear ? 'var(--status-bearish)' : (isBin ? 'var(--status-binary)' : 'var(--text-muted)'));
               const icon = isBull ? 'trending-up' : (isBear ? 'trending-down' : 'help-circle');
               
               const card = document.createElement('div');
-              card.className = `glass-card p-6 flex gap-6 hover:border-${color}-500/50 transition-all mb-4`;
+              card.className = `glass-card p-6 flex gap-6 hover:border-zinc-500/50 transition-all mb-4`;
               
               const translatedStatus = t.status[impact] || impact;
               const sectorTags = (item.sectors || []).map(s => {
                 const key = s.toUpperCase().replace(/ /g, '_');
                 const name = currentLang === 'zh' ? (t.sectors[key] || s) : s;
-                return `<span class="bg-zinc-900 border border-zinc-800 text-zinc-400 text-[9px] px-2 py-0.5 rounded uppercase font-bold whitespace-nowrap">${name}</span>`;
+                return `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-[9px] px-2 py-0.5 rounded uppercase font-bold whitespace-nowrap">${name}</span>`;
               }).join('');
 
               card.innerHTML = `
                 <div class="flex flex-col items-center gap-2 min-w-[80px]">
-                  <div class="w-12 h-12 rounded-full bg-${color}-500/10 flex items-center justify-center border border-${color}-500/20">
-                    <i data-lucide="${icon}" class="text-${color}-500 w-6 h-6"></i>
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center border transition-all" style="background-color: color-mix(in srgb, ${statusColor}, transparent 90%); border-color: color-mix(in srgb, ${statusColor}, transparent 80%)">
+                    <i data-lucide="${icon}" style="color: ${statusColor}" class="w-6 h-6"></i>
                   </div>
-                  <span class="text-[10px] font-bold uppercase text-${color}-500">${translatedStatus}</span>
+                  <span class="text-[10px] font-bold uppercase" style="color: ${statusColor}">${translatedStatus}</span>
                   <span class="text-sm font-mono font-bold">${item.score >= 0 ? '+' : ''}${item.score}</span>
                 </div>
                 <div class="flex-1">
@@ -230,7 +260,7 @@
                     <span class="text-xs text-zinc-500 font-mono">${item.date || t.unknown}</span>
                     <div class="flex gap-2 flex-wrap">${sectorTags}</div>
                   </div>
-                  <h3 class="text-lg font-semibold text-zinc-100 leading-snug">${item.headline}</h3>
+                  <h3 class="text-lg font-semibold leading-snug" style="color: var(--text-card-title)">${item.headline}</h3>
                 </div>
               `;
               feed.appendChild(card);
@@ -241,6 +271,65 @@
             document.getElementById('bear-news').textContent = counts.bearish;
             document.getElementById('binary-news').textContent = counts.binary;
             document.getElementById('last-sync-time').textContent = `${t.last_sync}: ${data.last_updated || 'N/A'}`;
+
+            // Binary Risks Sidebar
+            const binaryList = document.getElementById('binary-risks-list');
+            const calT = t.calendar || {};
+            if (binaryList && data.binary_risks?.length) {
+                binaryList.innerHTML = data.binary_risks.map(ev => {
+                    const days = ev.days_until;
+                    const urgency = ev.within_48h ? 'text-red-400 border-red-500/30 bg-red-500/5'
+                                  : days != null && days <= 7 ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/5'
+                                  : 'text-zinc-400 border-zinc-700 bg-zinc-900/30';
+                    const daysLabel = days == null ? '' : days < 0 ? (calT.past || 'PAST') : days === 0 ? (calT.today || 'TODAY') : `T-${days}d`;
+                    const sectorTags = (ev.affected_sectors || []).map(s =>
+                        `<span class="text-[8px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">${s}</span>`
+                    ).join('');
+                    return `
+                    <div class="glass-card p-3 border ${urgency} rounded-xl">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <p class="text-[11px] font-semibold leading-snug flex-1" style="color:var(--text-card-title)">${ev.event}</p>
+                            ${daysLabel ? `<span class="text-[9px] font-black shrink-0 ${ev.within_48h ? 'text-red-400 animate-pulse' : 'text-zinc-500'}">${daysLabel}</span>` : ''}
+                        </div>
+                        <div class="text-[9px] text-zinc-600 font-mono mb-2">${ev.date}</div>
+                        <div class="flex flex-wrap gap-1">${sectorTags}</div>
+                    </div>`;
+                }).join('');
+            } else if (binaryList) {
+                binaryList.innerHTML = `<div class="text-xs text-zinc-600">${calT.no_events || 'No upcoming events.'}</div>`;
+            }
+
+            // Trump Trade Signals (A4-TRUMP)
+            const trumpSection = document.getElementById('trump-signals-section');
+            const trumpList = document.getElementById('trump-signals-list');
+            const trumpT = t.trump_signals || {};
+            const dirT = trumpT.direction || {};
+            if (trumpList && data.market?.trump_signals?.length) {
+                trumpSection.style.display = '';
+                trumpList.innerHTML = data.market.trump_signals.map(sig => {
+                    const dir = (sig.direction || 'binary').toLowerCase();
+                    const isBull = dir === 'bullish';
+                    const isBear = dir === 'bearish';
+                    const sigColor = isBull ? 'var(--status-bullish)' : isBear ? 'var(--status-bearish)' : 'var(--status-binary)';
+                    const dirLabel = dirT[dir] || sig.direction || dir;
+                    const icon = isBull ? 'trending-up' : isBear ? 'trending-down' : 'alert-circle';
+                    const sectors = (sig.affected_sectors || []).map(s =>
+                        `<span class="text-[8px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">${s}</span>`
+                    ).join('');
+                    return `
+                    <div class="glass-card p-3 rounded-xl border border-zinc-700/50">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[9px] font-black uppercase tracking-widest" style="color:${sigColor}">
+                                <i data-lucide="${icon}" class="w-3 h-3 inline-block mr-0.5"></i> ${dirLabel}
+                            </span>
+                        </div>
+                        <p class="text-[10px] leading-relaxed mb-2" style="color:var(--text-card-title)">${sig.headline || sig.trade_idea || ''}</p>
+                        <div class="flex flex-wrap gap-1">${sectors}</div>
+                    </div>`;
+                }).join('');
+            } else if (trumpSection) {
+                trumpSection.style.display = 'none';
+            }
 
             lucide.createIcons();
           } catch (e) {
@@ -268,6 +357,24 @@
           debugPanel.classList.toggle('hidden');
         });
 
+        // Theme Support
+        let currentTheme = localStorage.getItem('dash_theme') || 'dark';
+        function initTheme() {
+          document.documentElement.setAttribute('data-theme', currentTheme);
+          const icon = document.getElementById('theme-icon');
+          if (icon) {
+            icon.setAttribute('data-lucide', currentTheme === 'dark' ? 'moon' : 'sun');
+            if (window.lucide) lucide.createIcons();
+          }
+        }
+        function toggleTheme() {
+          currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('dash_theme', currentTheme);
+          initTheme();
+        }
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+        initTheme();
         applyTranslations();
         loadNews();
         lucide.createIcons();

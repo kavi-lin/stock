@@ -1,6 +1,6 @@
 # INTEL COMMAND — Todo List
 > Last Updated: 2026-04-13
-> Last Session Note: 路線C — C-BREADTH ✅ 完成（market-breadth-analyzer 整合）；C-FTD / C-TOP 尚未動工
+> Last Session Note: 路線C — C-BREADTH ✅ C-FTD ✅ 完成；C-TOP（market-top-detector）尚未動工
 
 ---
 
@@ -86,7 +86,11 @@
   - ~~`uptrend_ratio` per sector（來自 `data.sectors[]`，依比例排序）~~
   - ~~Regime confidence bar、Cycle phase、Exposure ceiling stat cards~~
   - ~~Analyst Notes 區塊（選填）~~
-- [ ] **[C-FTD]** 整合 `ftd-detector` skill 產出，顯示 FTD 狀態 + Distribution Days
+- [x] ~~**[C-FTD]** 整合 `ftd-detector` skill 產出，顯示 FTD 狀態 + Distribution Days~~
+  - ~~FMP endpoint 已停用，改寫 `sector/ftd_yfinance.py` yfinance 轉接器，重用 skill 原有分析邏輯~~
+  - ~~bridge.py 新增 `load_ftd_cache()` + `extract_ftd_data()`，輸出 `data.ftd{}`~~
+  - ~~breadth.html 新增 FTD Detector 區塊：State/Quality/Exposure + FTD Event + Post-FTD Health 三欄~~
+  - ~~cache 路徑：`sector/ftd_cache/ftd_detector_YYYY-MM-DD_*.json`~~
 - [ ] **[C-TOP]** 整合 `market-top-detector` skill，顯示市場頂部概率
 - [x] ~~**[C-BREADTH]** 整合 `market-breadth-analyzer` skill（Monty's CSV），取代 phase0 的估算值~~
   - ~~sector_protocol_v1_1.md Phase 0 加入 script 執行 + cache 邏輯 + 欄位映射表~~

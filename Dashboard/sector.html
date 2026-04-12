@@ -5,63 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 投資委員會 | Sector Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.1.9">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="flex min-h-screen bg-black text-zinc-100 overflow-hidden">
-
+<body class="flex min-h-screen transition-all overflow-hidden font-inter">
     <!-- Sidebar -->
-    <aside class="w-64 border-r border-zinc-800 flex flex-col fixed h-full bg-black">
-        <div class="p-6 flex items-center gap-3">
-            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                <i data-lucide="activity" class="text-black w-5 h-5"></i>
+    <aside class="w-64 border-r border-zinc-900 flex flex-col fixed h-full transition-all">
+        <div class="p-4 flex items-center justify-between gap-1">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shrink-0">
+                    <i data-lucide="activity" class="text-black w-5 h-5"></i>
+                </div>
+                <h1 class="text-base font-black tracking-tighter uppercase italic line-clamp-1 pr-2">INTEL<span class="text-green-500">COMMAND</span></h1>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">AI 委員會</h1>
+            <button id="theme-toggle" class="p-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all group/theme" title="Toggle Theme">
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-zinc-500 group-hover/theme:text-yellow-500 transition-colors" id="theme-icon"></i>
+            </button>
         </div>
 
         <nav class="flex-1 px-4 space-y-1">
-            <a href="index.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all">
-                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                <span data-i18n="nav_dash">總體儀表板</span>
-            </a>
-            <a href="sector.html" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md transition-all">
-                <i data-lucide="pie-chart" class="w-4 h-4"></i>
-                <span data-i18n="nav_sector">產業掃描</span>
-            </a>
-            <a href="news.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all">
-                <i data-lucide="newspaper" class="w-4 h-4"></i>
-                <span data-i18n="nav_news">即時新聞</span>
-            </a>
-            <a href="history.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all">
-                <i data-lucide="shield-check" class="w-4 h-4"></i>
-                <span data-i18n="nav_history">決策歷史</span>
-            </a>
+            <a href="index.html"     class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span data-i18n="nav_dash">總體儀表板</span></a>
+            <a href="watchlist.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="radar" class="w-4 h-4"></i><span data-i18n="nav_watchlist">進場雷達</span></a>
+            <a href="breadth.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span data-i18n="nav_breadth">市場廣度</span></a>
+            <a href="sector.html"    class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="pie-chart" class="w-4 h-4"></i><span data-i18n="nav_sector">產業掃描</span></a>
+            <a href="news.html"      class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="newspaper" class="w-4 h-4"></i><span data-i18n="nav_news">即時新聞</span></a>
+            <a href="history.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i><span data-i18n="nav_history">決策歷史</span></a>
         </nav>
 
-        <div class="p-4 border-t border-zinc-800 space-y-2">
-            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
+        <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
                 <span id="lang-text">繁體中文</span>
                 <i data-lucide="languages" class="w-3 h-3"></i>
             </button>
-            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
-                <span>System Logs</span>
+            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <span data-i18n="nav_logs">System Logs</span>
                 <i data-lucide="terminal" class="w-3 h-3"></i>
             </button>
-            <div class="pt-2 px-3 text-[8px] text-zinc-700 font-mono tracking-widest border-t border-zinc-900/50 mt-2">
-                V1.1.0.260412_10:55:03
+            <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">
+                V1.1.9.260414_19:25:00
             </div>
         </div>
     </aside>
 
     <main class="ml-64 flex-1 flex flex-col h-screen">
         <!-- Header -->
-        <header class="h-16 border-b border-zinc-800 flex items-center justify-between px-8 sticky top-0 bg-black/50 backdrop-blur-md z-10">
+        <header class="h-16 border-b border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-10 transition-all">
             <h2 class="text-lg font-bold" data-i18n="nav_sector">產業熱掃描</h2>
             <div class="flex items-center gap-4">
-                <span id="last-update" class="text-[10px] text-zinc-500 font-mono">SYNCING...</span>
-                <button id="refresh-sector" class="bg-zinc-900 border border-zinc-800 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zinc-800 transition-all">
+                <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter">SYNCING...</span>
+                <button id="refresh-sector" class="bg-zinc-100 dark:bg-zinc-900 shadow-lg text-zinc-900 dark:text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all">
                     更新分析
                 </button>
             </div>
@@ -141,15 +135,34 @@
                 </div>
             </div>
 
+            <!-- Divergence Watch -->
+            <div id="divergence-section" class="hidden pb-8">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <i data-lucide="git-branch" class="w-4 h-4 text-yellow-500"></i>
+                    <span class="uppercase tracking-widest text-xs font-black text-yellow-500">Divergence Watch</span>
+                    <span class="text-[10px] text-zinc-500">— 訊號與價格方向背離警示</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="divergence-watch"></div>
+            </div>
+
         </div>
     </main>
 
     <!-- Debug Console -->
-    <div id="debug-console" class="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-800 p-4 font-mono text-[10px] text-zinc-400 z-50 max-h-40 overflow-y-auto hidden">
-        <div id="log-output"></div>
+    <div id="debug-console" class="fixed bottom-0 left-64 right-0 border-t border-zinc-200 dark:border-zinc-800 p-4 transition-all z-50 hidden font-mono text-[10px]" style="background-color: var(--bg-main); color: var(--text-main)">
+        <div class="flex items-center justify-between mb-2 pb-1 border-b border-zinc-200 dark:border-zinc-900">
+            <div class="flex items-center gap-2">
+                <i data-lucide="terminal" class="w-3 h-3 text-green-500"></i>
+                <span class="font-bold uppercase tracking-widest text-[9px]" data-i18n="nav_logs">SYSTEM LOGS</span>
+            </div>
+            <button onclick="document.getElementById('debug-console').classList.add('hidden')" class="hover:text-white transition-colors">
+                <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+        </div>
+        <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
     </div>
 
-    <script src="i18n.js"></script>
+    <script src="i18n.js?v=1.1.9"></script>
     <script>
         lucide.createIcons();
         let currentLang = localStorage.getItem('dash_lang') || 'zh';
@@ -196,7 +209,8 @@
                 const data = await res.json();
                 const t = window.i18n[currentLang];
                 
-                document.getElementById('macro-multiplier').textContent = "0.90x"; 
+                document.getElementById('macro-multiplier').textContent = data.market?.macro_multiplier || '--';
+                document.getElementById('multiplier-desc').innerHTML = `Exposure ceiling: <span class="bg-emerald-500/10 text-emerald-500 px-1 rounded">${data.market?.exposure_ceiling || '--'}</span> &nbsp;·&nbsp; Regime: <span class="font-bold">${data.market?.regime || '--'}</span>`;
                 document.getElementById('last-update').textContent = `LAST SYNC: ${data.last_updated}`;
 
                 // Themes
@@ -204,60 +218,110 @@
                 themesList.innerHTML = '';
                 data.market.themes.forEach(theme => {
                     const span = document.createElement('span');
-                    span.className = "bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:border-emerald-500/50 transition-all cursor-default";
+                    span.className = "px-4 py-2 rounded-lg text-sm font-semibold hover:border-emerald-500/50 transition-all cursor-default border bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800";
+                    span.style.color = "var(--text-main)";
                     span.textContent = theme.replace(/_/g, ' ');
                     themesList.appendChild(span);
                 });
 
-                // Heatmap Grid
+                // Heatmap Grid — driven by data.json.sectors (from sector_intel.json)
                 const grid = document.getElementById('sector-grid');
                 grid.innerHTML = '';
-                
-                const sectors = [
-                    { id: "SEMICONDUCTORS", score: 85 },
-                    { id: "TECHNOLOGY", score: 78 },
-                    { id: "CYBERSECURITY", score: 88 },
-                    { id: "INFRASTRUCTURE", score: 80 },
-                    { id: "SOFTWARE", score: 72 },
-                    { id: "AIRLINES", score: 65 },
-                    { id: "HEALTHCARE", score: 50 },
-                    { id: "FINANCIALS", score: 48 },
-                    { id: "RETAIL", score: 42 },
-                    { id: "ENERGY", score: 25 },
-                    { id: "UTILITIES", score: 18 },
-                    { id: "OIL_GAS", score: 15 }
-                ];
 
-                const translatedSectors = sectors.map(s => ({
-                    name: t.sectors[s.id] || s.id,
-                    score: s.score
-                }));
+                const verdictConfig = {
+                    HOT:   { border: '#22c55e', text: '#22c55e', badge: '#052e16', badgeBg: 'rgba(34,197,94,0.15)' },
+                    WARM:  { border: '#eab308', text: '#eab308', badge: '#422006', badgeBg: 'rgba(234,179,8,0.15)' },
+                    COLD:  { border: '#ef4444', text: '#ef4444', badge: '#450a0a', badgeBg: 'rgba(239,68,68,0.15)' },
+                    AVOID: { border: '#71717a', text: '#a1a1aa', badge: '#1c1917', badgeBg: 'rgba(113,113,122,0.10)' }
+                };
 
-                translatedSectors.forEach(s => {
+                const sectorData = data.sectors || [];
+                const chartSectors = [];
+
+                sectorData.forEach(s => {
+                    const vc = verdictConfig[s.verdict] || verdictConfig['COLD'];
+                    const displayName = currentLang === 'zh'
+                        ? (t.sectors[s.name.toUpperCase().replace(/ /g, '_')] || s.name.replace(/_/g, ' '))
+                        : s.name.replace(/_/g, ' ');
+
+                    const riskBadges = (s.risk_flags || []).slice(0, 2).map(flag => {
+                        const shortFlag = flag.replace('binary_risk_', '⚡').replace('extreme_sentiment', '⚠️').replace('late_cycle', '🔄').replace(/_/g, ' ');
+                        return `<span class="text-[8px] font-bold px-1.5 py-0.5 rounded tracking-tight" style="color:${vc.text}; background:${vc.badgeBg}">${shortFlag}</span>`;
+                    }).join('');
+
                     const div = document.createElement('div');
-                    const color = s.score > 60 ? 'emerald' : (s.score < 40 ? 'red' : 'zinc');
-                    div.className = `glass-card p-4 border-b-4 border-b-${color}-500 flex flex-col items-center gap-2 group hover:scale-105 transition-all cursor-pointer`;
+                    div.className = 'glass-card p-4 flex flex-col gap-2 group hover:scale-105 transition-all cursor-default border-b-4';
+                    div.style.borderBottomColor = vc.border;
+                    div.title = s.key_reason || '';
+
                     div.innerHTML = `
-                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter text-center">${s.name}</span>
-                        <div class="text-xl font-bold text-${color}-500">${s.score}%</div>
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-tighter leading-tight">${displayName}</span>
+                            <span class="text-[8px] font-black px-1.5 py-0.5 rounded" style="color:${vc.text}; background:${vc.badgeBg}">${s.verdict}</span>
+                        </div>
+                        <div class="text-2xl font-bold" style="color:${vc.text}">${s.score}</div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] text-zinc-600 font-mono">${s.proxy_etf || ''}</span>
+                            ${s.rotation_signal ? (() => {
+                                const rs = s.rotation_signal;
+                                const rColor = rs === 'INFLOW' ? '#22c55e' : rs === 'OUTFLOW' ? '#ef4444' : '#71717a';
+                                const rIcon  = rs === 'INFLOW' ? '▲' : rs === 'OUTFLOW' ? '▼' : '–';
+                                return `<span class="text-[8px] font-black" style="color:${rColor}">${rIcon} ${rs}</span>`;
+                            })() : ''}
+                        </div>
+                        ${s.uptrend_ratio != null ? `<div class="w-full bg-zinc-800 rounded-full h-1"><div class="h-1 rounded-full" style="width:${Math.round(s.uptrend_ratio*100)}%;background:${vc.border}"></div></div>` : ''}
+                        <div class="flex flex-wrap gap-1">${riskBadges}</div>
                     `;
                     grid.appendChild(div);
+                    chartSectors.push({ name: displayName, score: s.score, verdict: s.verdict });
                 });
 
-                updateChart(translatedSectors);
+                updateChart(chartSectors);
                 
-                // Strategy Notes
+                // Strategy Notes — from real sector data
                 const strategy = document.getElementById('strategy-notes');
-                strategy.innerHTML = `
-                    <div class="bg-emerald-500/5 border-l-2 border-emerald-500 p-4">
-                        <p class="text-sm font-bold text-emerald-500 mb-1">Growth Bull Case</p>
-                        <p class="text-xs text-zinc-400">Semiconductor AI demand remains inelastic. 0.90x multiplier applied due to volatile rate environment.</p>
-                    </div>
-                    <div class="bg-red-500/5 border-l-2 border-red-500 p-4">
-                        <p class="text-sm font-bold text-red-500 mb-1">Energy Headwind</p>
-                        <p class="text-xs text-zinc-400">Geopolitical de-escalation (Ceasefire) leading to oil price correction. Underweight traditional energy.</p>
-                    </div>
-                `;
+                const noteItems = [];
+                const hotSectors  = data.market?.hot_sectors || [];
+                const coldSectors = [...(data.market?.cold_sectors || []), ...(data.market?.avoid_sectors || [])];
+                hotSectors.slice(0, 2).forEach(name => {
+                    const sec = sectorData.find(s => s.name === name);
+                    if (sec) noteItems.push(`
+                        <div class="bg-emerald-500/5 border-l-2 border-emerald-500 p-4 rounded-r-lg">
+                            <p class="text-sm font-bold text-emerald-500 mb-1">${(sec.proxy_etf || name)} — HOT</p>
+                            <p class="text-xs leading-relaxed" style="color:var(--text-muted)">${sec.key_reason}</p>
+                            ${sec.devils_advocate ? `<p class="text-[10px] text-violet-400 mt-2 italic">DA: ${sec.devils_advocate}</p>` : ''}
+                        </div>`);
+                });
+                coldSectors.slice(0, 2).forEach(name => {
+                    const sec = sectorData.find(s => s.name === name);
+                    if (sec) noteItems.push(`
+                        <div class="bg-red-500/5 border-l-2 border-red-500 p-4 rounded-r-lg">
+                            <p class="text-sm font-bold text-red-500 mb-1">${(sec.proxy_etf || name)} — ${sec.verdict}</p>
+                            <p class="text-xs leading-relaxed" style="color:var(--text-muted)">${sec.key_reason}</p>
+                        </div>`);
+                });
+                strategy.innerHTML = noteItems.join('') || '<p class="text-xs text-zinc-600">No sector notes available.</p>';
+
+                // Divergence Watch
+                const divergeContainer = document.getElementById('divergence-watch');
+                if (divergeContainer && data.divergence_watch?.length) {
+                    divergeContainer.innerHTML = data.divergence_watch.map(d => {
+                        const actionColor = d.action === 'reduce_exposure' ? 'var(--status-bearish)' : '#eab308';
+                        return `
+                        <div class="flex items-start gap-4 p-4 glass-card">
+                            <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" style="background:${actionColor}"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-black" style="color:var(--text-card-title)">${d.sector}</span>
+                                    <span class="text-[8px] font-bold px-1.5 py-0.5 rounded border" style="color:${actionColor};border-color:${actionColor}40;background:${actionColor}15">${d.signal?.replace(/_/g,' ').toUpperCase()}</span>
+                                </div>
+                                <p class="text-[11px] leading-relaxed" style="color:var(--text-muted)">${d.description}</p>
+                                <p class="text-[9px] font-bold uppercase tracking-widest mt-1" style="color:${actionColor}">→ ${d.action?.replace(/_/g,' ')}</p>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    document.getElementById('divergence-section').classList.remove('hidden');
+                }
 
                 lucide.createIcons();
             } catch (e) {
@@ -268,17 +332,27 @@
         function updateChart(sectors) {
             const ctx = document.getElementById('sectorChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-            
+
+            const isDark = currentTheme === 'dark';
+            const gridColor = isDark ? '#18181b' : '#e2e8f0';
+            const tickColor = isDark ? '#71717a' : '#94a3b8';
+            const barOpacity = isDark ? 0.35 : 0.75;
+
+            const verdictColor = { HOT: '#22c55e', WARM: '#eab308', COLD: '#ef4444', AVOID: '#71717a' };
+
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: sectors.map(s => s.name),
                     datasets: [{
-                        label: 'Relative Momentum Score',
+                        label: 'Composite Score',
                         data: sectors.map(s => s.score),
-                        backgroundColor: sectors.map(s => s.score > 60 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'),
-                        borderColor: sectors.map(s => s.score > 60 ? '#10b981' : '#ef4444'),
-                        borderWidth: 2,
+                        backgroundColor: sectors.map(s => {
+                            const hex = verdictColor[s.verdict] || '#71717a';
+                            return hex + Math.round(barOpacity * 255).toString(16).padStart(2, '0');
+                        }),
+                        borderColor: sectors.map(s => verdictColor[s.verdict] || '#71717a'),
+                        borderWidth: 1.5,
                         borderRadius: 4
                     }]
                 },
@@ -286,10 +360,26 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, grid: { color: '#18181b' }, ticks: { color: '#71717a' } },
-                        x: { grid: { display: false }, ticks: { color: '#71717a', font: { size: 10 } } }
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: gridColor, drawBorder: false }, 
+                            ticks: { color: tickColor, font: { family: 'Inter', size: 10 } } 
+                        },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: tickColor, font: { family: 'Inter', size: 10 } } 
+                        }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#18181b' : '#ffffff',
+                            titleColor: isDark ? '#ffffff' : '#1c1917',
+                            bodyColor: isDark ? '#a1a1aa' : '#78716c',
+                            borderColor: gridColor,
+                            borderWidth: 1
+                        }
+                    }
                 }
             });
         }
@@ -303,6 +393,30 @@
         document.getElementById('show-logs').addEventListener('click', () => {
             document.getElementById('debug-console').classList.toggle('hidden');
         });
+
+        // Theme Support
+        let currentTheme = localStorage.getItem('dash_theme') || 'dark';
+        function initTheme() {
+          document.documentElement.setAttribute('data-theme', currentTheme);
+          if (currentTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          const icon = document.getElementById('theme-icon');
+          if (icon) {
+            icon.setAttribute('data-lucide', currentTheme === 'dark' ? 'moon' : 'sun');
+            if (window.lucide) lucide.createIcons();
+          }
+        }
+        function toggleTheme() {
+          currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('dash_theme', currentTheme);
+          initTheme();
+          if (chartInstance) loadSectorData(); // Re-render chart for theme colors
+        }
+        document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+        initTheme();
 
         applyTranslations();
         loadSectorData();

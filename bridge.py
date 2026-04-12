@@ -11,6 +11,7 @@ FMP_API_KEY = os.getenv("FMP_API_KEY")
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
 SECTOR_LOGS   = os.path.join(BASE_DIR, 'sector', 'sector_logs')
 BREADTH_CACHE = os.path.join(BASE_DIR, 'sector', 'breadth_cache')
+FTD_CACHE     = os.path.join(BASE_DIR, 'sector', 'ftd_cache')
 INVEST_LOGS   = os.path.join(BASE_DIR, 'investment', 'invest_logs')
 NEWS_LOGS     = os.path.join(BASE_DIR, 'news', 'news_logs')
 REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
@@ -362,6 +363,82 @@ def extract_audit_history():
 
 
 # ─────────────────────────────────────────────
+# FTD DETECTOR CACHE
+# ─────────────────────────────────────────────
+
+def load_ftd_cache():
+    """Load most recent ftd_detector_*.json from ftd_cache/. Returns None if not found."""
+    pattern = os.path.join(FTD_CACHE, "ftd_detector_*.json")
+    files = glob.glob(pattern)
+    if not files:
+        return None
+    latest = max(files, key=os.path.getmtime)
+    try:
+        with open(latest, 'r') as f:
+            data = json.load(f)
+        print(f"[OK] FTD cache: {os.path.basename(latest)}")
+        return data
+    except Exception as e:
+        print(f"[WARN] FTD cache read error: {e}")
+        return None
+
+
+def extract_ftd_data(raw):
+    """Map ftd_detector JSON → data.ftd{}"""
+    ms      = raw.get("market_state", {})
+    sp      = raw.get("sp500", {})
+    nq      = raw.get("nasdaq", {})
+    quality = raw.get("quality_score", {})
+    dist    = raw.get("post_ftd_distribution", {})
+    inv     = raw.get("ftd_invalidation", {})
+    pt      = raw.get("power_trend", {})
+    meta    = raw.get("metadata", {})
+    prices  = meta.get("index_prices", {})
+
+    state = ms.get("combined_state", "NO_SIGNAL")
+
+    # FTD details (from whichever index confirmed first)
+    sp_ftd = sp.get("ftd") or {}
+    nq_ftd = nq.get("ftd") or {}
+    ftd    = sp_ftd if sp_ftd.get("ftd_detected") else nq_ftd
+
+    sp_swing = sp.get("swing_low") or {}
+    sp_rally = sp.get("rally_attempt") or {}
+
+    return {
+        "state":              state,
+        "dual_confirmation":  ms.get("dual_confirmation", False),
+        "quality_score":      quality.get("total_score", 0),
+        "signal":             quality.get("signal", ""),
+        "guidance":           quality.get("guidance", ""),
+        "exposure_range":     quality.get("exposure_range", ""),
+        # FTD event details
+        "ftd_detected":       ftd.get("ftd_detected", False),
+        "ftd_date":           ftd.get("ftd_date"),
+        "ftd_day_number":     ftd.get("ftd_day_number"),
+        "ftd_gain_pct":       ftd.get("gain_pct"),
+        # Swing low
+        "swing_low_date":     sp_swing.get("swing_low_date"),
+        "swing_low_price":    sp_swing.get("swing_low_price"),
+        "decline_pct":        sp_swing.get("decline_pct"),
+        # Rally attempt
+        "rally_day1_date":    sp_rally.get("day1_date"),
+        "rally_day_count":    sp_rally.get("current_day_count"),
+        # Post-FTD health
+        "distribution_days":  dist.get("distribution_count", 0),
+        "days_monitored":     dist.get("days_monitored", 0),
+        "power_trend":        pt.get("power_trend", False),
+        "power_trend_cond":   pt.get("conditions_met", 0),
+        "invalidated":        inv.get("invalidated", False),
+        "invalidation_date":  inv.get("invalidation_date"),
+        # Current prices
+        "sp500_price":        prices.get("sp500"),
+        "qqq_price":          prices.get("qqq"),
+        "generated_at":       meta.get("generated_at", ""),
+    }
+
+
+# ─────────────────────────────────────────────
 # NEWS
 # ─────────────────────────────────────────────
 
@@ -396,6 +473,7 @@ def run_bridge():
         "last_updated":    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "market":          {},
         "breadth":         {},
+        "ftd":             {},
         "sectors":         [],
         "binary_risks":    [],
         "divergence_watch": [],
@@ -454,6 +532,16 @@ def run_bridge():
               f"flags={analyzer_breadth['warning_flags']}")
     else:
         print("[INFO] No breadth cache for today — using sector_intel estimates")
+
+    # 1c. FTD cache
+    raw_ftd = load_ftd_cache()
+    if raw_ftd:
+        data["ftd"] = extract_ftd_data(raw_ftd)
+        print(f"[OK] FTD: state={data['ftd']['state']} "
+              f"score={data['ftd']['quality_score']} "
+              f"signal={data['ftd']['signal']}")
+    else:
+        print("[INFO] No FTD cache found — run sector/ftd_yfinance.py")
 
     # 2. Audit history + watchlist
     data["recent_analysis"] = extract_audit_history()
