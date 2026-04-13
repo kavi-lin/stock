@@ -62,9 +62,9 @@ DIGEST: web search    禁止互相妥協              輸出 net_impact_score
 
 | 檔案 | 更新內容 |
 |---|---|
-| `../sector/sector_logs/YYYY-MM-DD_sector_intel.json` | 在 `top_catalysts` 最前插入新事件 |
-| `../investment/invest_logs/YYYY-MM-DD_phase0.json` | 更新 `binary_risks`、重算 `macro_backdrop_score` |
-| `./news_logs/YYYY-MM-DD_digest.json` | 累積當日所有新聞分析 |
+| `sector/sector_logs/YYYY-MM-DD_sector_intel.json` | 在 `top_catalysts` 最前插入新事件 |
+| `investment/invest_logs/YYYY-MM-DD_phase0.json` | 更新 `binary_risks`、重算 `macro_backdrop_score` |
+| `news/news_logs/YYYY-MM-DD_digest.json` | 累積當日所有新聞分析 |
 
 > 其他 protocol 下次執行時，讀取 cache 即自動取得最新新聞影響。  
 > **不需要重新跑整個 sector_protocol 或 investment_protocol。**

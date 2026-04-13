@@ -10,63 +10,10 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="flex min-h-screen transition-all">
+<body class="flex min-h-screen transition-all" data-page="index">
 
-    <!-- Sidebar -->
-    <aside class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all">
-        <div class="p-4 flex items-center justify-between gap-1">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shrink-0">
-                    <i data-lucide="activity" class="text-black w-5 h-5"></i>
-                </div>
-                <h1 class="text-base font-black tracking-tighter uppercase italic line-clamp-1 pr-2">INTEL<span class="text-green-500">COMMAND</span></h1>
-            </div>
-            <button id="theme-toggle" class="p-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all group/theme" title="Toggle Theme">
-                <i data-lucide="moon" class="w-3.5 h-3.5 text-zinc-500 group-hover/theme:text-yellow-500 transition-colors" id="theme-icon"></i>
-            </button>
-        </div>
-
-        <nav class="flex-1 px-4 space-y-1">
-            <a href="index.html" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                <span data-i18n="nav_dash">總體儀表板</span>
-            </a>
-            <a href="watchlist.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="radar" class="w-4 h-4"></i>
-                <span data-i18n="nav_watchlist">進場雷達</span>
-            </a>
-            <a href="breadth.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-                <span data-i18n="nav_breadth">市場廣度</span>
-            </a>
-            <a href="sector.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="pie-chart" class="w-4 h-4"></i>
-                <span data-i18n="nav_sector">產業掃描</span>
-            </a>
-            <a href="news.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="newspaper" class="w-4 h-4"></i>
-                <span data-i18n="nav_news">即時新聞</span>
-            </a>
-            <a href="history.html" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md">
-                <i data-lucide="shield-check" class="w-4 h-4"></i>
-                <span data-i18n="nav_history">決策歷史</span>
-            </a>
-        </nav>
-
-        <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
-            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
-                <span id="lang-text">繁體中文</span>
-                <i data-lucide="languages" class="w-3 h-3"></i>
-            </button>
-            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
-                <span data-i18n="nav_logs">System Logs</span>
-                <i data-lucide="terminal" class="w-3 h-3"></i>
-            </button>
-            <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">
-                V1.1.9.260414_19:25:00
-            </div>
-        </div>
-    </aside>
+    <!-- Sidebar (populated by UI.renderSidebar) -->
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
 
     <!-- Main Content -->
     <main class="ml-64 flex-1 flex flex-col">
@@ -86,11 +33,12 @@
             </div>
             
             <div class="flex items-center gap-4">
-                <button class="bg-zinc-900/80 shadow-lg hover:bg-zinc-800 text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-800 transition-all flex items-center gap-2">
-                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-                    更新快取
+                <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter hidden sm:block">SYNCING...</span>
+                <button id="refresh-btn" onclick="updateDashboard()" class="bg-zinc-900/80 shadow-lg hover:bg-zinc-800 text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-800 transition-all flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    更新
                 </button>
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-700 p-px">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-700 p-px">
                   <div class="w-full h-full rounded-xl bg-white dark:bg-black flex items-center justify-center">
                     <span class="text-xs font-bold">KV</span>
                   </div>
@@ -98,78 +46,70 @@
             </div>
         </header>
 
-        <!-- Dynamic Dashboard Grid -->
-        <div class="p-8 space-y-8">
+        <!-- Dashboard Grid -->
+        <div class="p-6 space-y-5">
 
-            <!-- Warning Flags Banner -->
-            <div id="warning-banner" class="hidden rounded-xl border border-red-500/30 bg-red-500/5 px-5 py-3 flex items-center gap-3 flex-wrap">
-                <div class="flex items-center gap-2 shrink-0">
-                    <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 animate-pulse"></i>
-                    <span id="warning-banner-title" class="text-[10px] font-black text-red-500 uppercase tracking-widest">Risk Flags Active</span>
+            <!-- Row 1: Market Conviction Hero + Verdict -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+                <!-- Composite Signal Hero (2/3) -->
+                <div class="lg:col-span-2 glass-card p-6" id="signal-hero">
+                    <div class="flex items-center gap-2 mb-5">
+                        <i data-lucide="crosshair" class="w-4 h-4 text-zinc-400"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Market Conviction Score</span>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <!-- Score Dial -->
+                        <div class="shrink-0 w-28 flex flex-col items-center">
+                            <div id="composite-score" class="text-6xl font-black tracking-tighter leading-none">–</div>
+                            <div class="w-full h-2 rounded-full bg-zinc-800 mt-3 mb-2">
+                                <div id="composite-bar" class="h-2 rounded-full transition-all duration-700" style="width:0%"></div>
+                            </div>
+                            <div id="composite-label" class="text-[10px] font-black uppercase tracking-widest">LOADING</div>
+                        </div>
+                        <!-- Divider -->
+                        <div class="w-px self-stretch bg-zinc-800 shrink-0"></div>
+                        <!-- Component Breakdown -->
+                        <div class="flex-1 space-y-2.5" id="component-bars">
+                            <!-- JS rendered -->
+                        </div>
+                    </div>
+                    <p id="conviction-summary" class="text-[10px] text-zinc-500 mt-5 border-t border-zinc-800 pt-3 leading-relaxed"></p>
                 </div>
-                <div id="warning-flags-list" class="flex gap-2 flex-wrap"></div>
-                <div class="ml-auto flex items-center gap-3 shrink-0">
-                    <span id="uptrend-label" class="text-[10px] text-zinc-500 font-mono">Uptrend Ratio</span>
-                    <span id="uptrend-ratio-val" class="text-sm font-black font-mono text-red-400">–</span>
+
+                <!-- Verdict Card (1/3) -->
+                <div class="glass-card p-6 flex flex-col gap-4" id="verdict-card">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shield" class="w-4 h-4 text-zinc-400"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Action Posture</span>
+                    </div>
+                    <!-- Regime -->
+                    <div>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest mb-1">Regime</p>
+                        <p class="text-lg font-black" id="regime-text" style="color:var(--primary)">–</p>
+                    </div>
+                    <!-- Exposure Ceiling -->
+                    <div>
+                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest mb-1">Exposure Ceiling</p>
+                        <p class="text-2xl font-black text-orange-400" id="exposure-ceiling-val">–</p>
+                    </div>
+                    <!-- Flags -->
+                    <div id="flags-compact" class="space-y-1.5 mt-auto"></div>
                 </div>
             </div>
 
-            <!-- Top Row: Market Pulse -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Market Regime -->
-                <div class="glass-card p-6 glow-green border border-zinc-200 dark:border-zinc-800 rounded-2xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-xs font-bold text-zinc-500 uppercase" data-i18n="market_regime">Market Regime</span>
-                        <i data-lucide="trending-up" class="text-green-500 w-4 h-4"></i>
-                    </div>
-                    <div class="text-3xl font-bold mb-1" id="regime-text" style="color: var(--primary)">RISK ON</div>
-                    <div class="text-xs flex items-center gap-1 mb-3" style="color: var(--primary); opacity: 0.9">
-                        <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
-                        <span id="regime-desc">Bullish Momentum (High Confidence)</span>
-                    </div>
-                    <!-- Uptrend Ratio mini gauge -->
-                    <div id="uptrend-gauge-wrap" class="hidden mt-1">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest" id="uptrend-gauge-label">Uptrend Ratio</span>
-                            <span class="text-[9px] font-black font-mono" id="uptrend-gauge-val">–</span>
-                        </div>
-                        <div class="w-full h-1.5 rounded-full bg-zinc-800">
-                            <div id="uptrend-gauge-bar" class="h-1.5 rounded-full transition-all duration-700" style="width:0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Active Themes -->
-                <div class="glass-card p-6">
-                  <div class="flex items-center justify-between mb-4">
-                      <span class="text-xs font-bold text-zinc-500 uppercase" data-i18n="hot_themes">Hot Themes</span>
-                      <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold">3 ACTIVE</span>
-                  </div>
-                  <div class="space-y-3" id="themes-container">
-                    <div class="flex justify-between items-center text-sm font-medium">
-                      <span class="text-zinc-700 dark:text-zinc-300">Artificial Intelligence</span>
-                      <span style="color: var(--primary)">+4.2%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Fear & Greed -->
-                <div class="glass-card p-6">
-                  <div class="flex items-center justify-between mb-4">
-                      <span class="text-xs font-bold text-zinc-500 uppercase" data-i18n="sentiment">Sentiment Index</span>
-                      <i data-lucide="info" class="text-zinc-600 w-4 h-4"></i>
-                  </div>
-                  <div class="text-3xl font-bold mb-1 text-orange-400" id="fear-greed-val">68</div>
-                  <div class="text-xs text-zinc-400 uppercase tracking-wider" id="sentiment-desc">GREED PHASE</div>
-                </div>
+            <!-- Row 2: 5 Signal Angle Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="signal-angle-grid">
+                <!-- JS rendered -->
             </div>
 
-            <!-- Second Row: Condensed Analysis + Catalysts -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Recent Tickers (Condensed Cards) -->
-                <div class="space-y-4">
+            <!-- Row 3: Recent Analysis + Quick Launch -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                <!-- Recent Analysis -->
+                <div class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <h3 class="font-bold flex items-center gap-2">
+                        <h3 class="text-xs font-bold flex items-center gap-2">
                             <i data-lucide="history" class="w-4 h-4 text-emerald-500"></i>
                             <span data-i18n="recent_audit">最近審查個股</span>
                         </h3>
@@ -177,52 +117,53 @@
                             View All <i data-lucide="chevron-right" class="w-3 h-3"></i>
                         </a>
                     </div>
-                    <div class="grid grid-cols-1 gap-4" id="audit-grid-condensed">
-                        <!-- JS Populated (Last 3) -->
-                    </div>
+                    <div class="space-y-3" id="audit-grid-condensed"></div>
                 </div>
 
-                <!-- Market Catalyst News -->
-                <div class="glass-card p-6 flex flex-col">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="font-bold flex items-center gap-2">
-                            <i data-lucide="zap" class="w-4 h-4 text-yellow-500"></i>
-                            <span data-i18n="catalyst">市場催化劑</span>
-                        </h3>
+                <!-- Quick Launch -->
+                <div class="glass-card p-6 border-dashed border-zinc-700 bg-emerald-500/5 flex flex-col items-center justify-center gap-4">
+                    <i data-lucide="cpu" class="w-10 h-10 text-emerald-500/20"></i>
+                    <div class="text-center">
+                        <h4 class="font-bold" data-i18n="quick_launch">快速啟動引擎</h4>
+                        <p class="text-xs text-zinc-500 mt-1" data-i18n="launch_desc">輸入 Ticker 或選擇指令進行自動化分析</p>
                     </div>
-                    <div class="space-y-4" id="news-list">
-                        <!-- JS Populated -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="glass-card p-8 border-dashed border-zinc-700 bg-emerald-500/5 items-center justify-center flex flex-col gap-4">
-                <i data-lucide="cpu" class="w-12 h-12 text-emerald-500/20"></i>
-                <div class="text-center">
-                    <h4 class="font-bold text-lg" data-i18n="quick_launch">快速啟動引擎</h4>
-                    <p class="text-sm text-zinc-500" data-i18n="launch_desc">輸入 Ticker 或選擇指令進行自動化分析</p>
-                </div>
-                <div class="flex w-full max-w-md gap-2">
-                    <input type="text" id="ticker-input" placeholder="輸入美股代碼 (e.g. MSFT)..." class="flex-1 bg-black border border-zinc-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-green-500 transition-all uppercase" maxlength="6">
-                    <button id="launch-btn" class="bg-green-600 hover:bg-green-500 text-black font-bold px-6 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
-                        <i data-lucide="play" class="w-4 h-4"></i>
-                        <span data-i18n="start_btn">開始分析</span>
-                    </button>
-                </div>
-                <div id="launch-hint" class="hidden w-full max-w-md">
-                    <div class="bg-zinc-900 border border-green-500/30 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
-                        <span class="text-green-400 font-mono text-sm" id="launch-cmd"></span>
-                        <button id="copy-cmd" class="text-[10px] font-bold text-zinc-400 hover:text-green-400 border border-zinc-700 hover:border-green-500 px-2 py-1 rounded transition-all flex items-center gap-1">
-                            <i data-lucide="copy" class="w-3 h-3"></i> COPY
+                    <div class="flex w-full max-w-xs gap-2">
+                        <input type="text" id="ticker-input" placeholder="e.g. MSFT" class="flex-1 bg-black border border-zinc-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-all uppercase" maxlength="6">
+                        <button id="launch-btn" class="bg-green-600 hover:bg-green-500 text-black font-bold px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5">
+                            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="start_btn">分析</span>
                         </button>
                     </div>
-                    <p class="text-[10px] text-zinc-600 mt-1 text-center">在 Claude Code 終端機貼上以上指令即可啟動分析</p>
+                    <div id="launch-hint" class="hidden w-full max-w-xs">
+                        <div class="bg-zinc-900 border border-green-500/30 rounded-lg px-3 py-2.5 flex items-center justify-between gap-2">
+                            <span class="text-green-400 font-mono text-xs" id="launch-cmd"></span>
+                            <button id="copy-cmd" class="text-[10px] font-bold text-zinc-400 hover:text-green-400 border border-zinc-700 hover:border-green-500 px-2 py-1 rounded transition-all flex items-center gap-1 shrink-0">
+                                <i data-lucide="copy" class="w-3 h-3"></i> COPY
+                            </button>
+                        </div>
+                        <p class="text-[9px] text-zinc-600 mt-1 text-center">在 Claude Code 貼上以上指令</p>
+                    </div>
                 </div>
             </div>
-            
+
         </div>
     </main>
+
+    <!-- hidden elements kept for script.js compat -->
+    <span id="regime-desc" class="hidden"></span>
+    <span id="uptrend-gauge-wrap" class="hidden"></span>
+    <span id="uptrend-gauge-label" class="hidden"></span>
+    <span id="uptrend-gauge-val" class="hidden"></span>
+    <span id="uptrend-gauge-bar" class="hidden"></span>
+    <span id="fear-greed-val" class="hidden"></span>
+    <span id="sentiment-desc" class="hidden"></span>
+    <span id="themes-container" class="hidden"></span>
+    <span id="warning-banner" class="hidden"></span>
+    <span id="warning-flags-list" class="hidden"></span>
+    <span id="warning-banner-title" class="hidden"></span>
+    <span id="uptrend-label" class="hidden"></span>
+    <span id="uptrend-ratio-val" class="hidden"></span>
+    <span id="news-list" class="hidden"></span>
 
     <!-- Report Modal -->
     <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-8 hidden">
@@ -256,6 +197,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="i18n.js?v=1.1.9"></script>
+    <script src="utils.js?v=1.1.9"></script>
+    <script src="components.js?v=1.1.9"></script>
     <script src="script.js?v=1.1.9"></script>
 </body>
 </html>

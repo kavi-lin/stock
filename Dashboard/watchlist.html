@@ -9,40 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="flex min-h-screen transition-all">
+<body class="flex min-h-screen transition-all" data-page="watchlist">
 
-    <!-- Sidebar -->
-    <aside class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all">
-        <div class="p-4 flex items-center justify-between gap-1">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shrink-0">
-                    <i data-lucide="activity" class="text-black w-5 h-5"></i>
-                </div>
-                <h1 class="text-base font-black tracking-tighter uppercase italic line-clamp-1 pr-2">INTEL<span class="text-green-500">COMMAND</span></h1>
-            </div>
-            <button id="theme-toggle" class="p-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all group/theme">
-                <i data-lucide="moon" class="w-3.5 h-3.5 text-zinc-500 group-hover/theme:text-yellow-500 transition-colors" id="theme-icon"></i>
-            </button>
-        </div>
-        <nav class="flex-1 px-4 space-y-1">
-            <a href="index.html"     class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span data-i18n="nav_dash">總體儀表板</span></a>
-            <a href="watchlist.html" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="radar" class="w-4 h-4"></i><span data-i18n="nav_watchlist">進場雷達</span></a>
-            <a href="breadth.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span data-i18n="nav_breadth">市場廣度</span></a>
-            <a href="sector.html"    class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="pie-chart" class="w-4 h-4"></i><span data-i18n="nav_sector">產業掃描</span></a>
-            <a href="news.html"      class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="newspaper" class="w-4 h-4"></i><span data-i18n="nav_news">即時新聞</span></a>
-            <a href="history.html"   class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i><span data-i18n="nav_history">決策歷史</span></a>
-        </nav>
-        <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
-            <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
-                <span id="lang-text">English</span>
-                <i data-lucide="languages" class="w-3 h-3"></i>
-            </button>
-            <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
-                <span>System Logs</span><i data-lucide="terminal" class="w-3 h-3"></i>
-            </button>
-            <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">V1.1.9.260414</div>
-        </div>
-    </aside>
+    <!-- Sidebar (populated by UI.renderSidebar) -->
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
 
     <!-- Main -->
     <main class="ml-64 flex-1 flex flex-col">
@@ -121,82 +91,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="i18n.js?v=1.1.9"></script>
+    <script src="utils.js?v=1.1.9"></script>
     <script>
-    lucide.createIcons();
-
-    // ── Theme ───────────────────────────────────────────���──────────
-    let currentTheme = localStorage.getItem('dash_theme') || 'dark';
-    function initTheme() {
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        currentTheme === 'dark'
-            ? document.documentElement.classList.add('dark')
-            : document.documentElement.classList.remove('dark');
-        const ic = document.getElementById('theme-icon');
-        if (ic) { ic.setAttribute('data-lucide', currentTheme === 'dark' ? 'moon' : 'sun'); lucide.createIcons(); }
-    }
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('dash_theme', currentTheme);
-        initTheme();
-    });
-    initTheme();
-
-    // ── Lang ───────────────────────────────────────────────────────
-    let currentLang = localStorage.getItem('dash_lang') || 'zh';
-
+    // ── Page translations ──────────────────────────────────────────
     function applyTranslations() {
         if (!window.i18n) return;
-        const t  = window.i18n[currentLang];
+        const t  = window.i18n[UI.currentLang];
         const wl = t.watchlist || {};
-        const nav = t.nav || {};
-        if (!t.watchlist) return; // old i18n cache — skip, loadWatchlist still runs
+        if (!wl.title) return;
 
-        document.getElementById('lang-text').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
-
-        // Header
         document.getElementById('page-title').textContent    = wl.title;
         document.getElementById('page-subtitle').textContent = wl.subtitle;
-        document.getElementById('refresh-label').textContent = currentLang === 'zh' ? '更新' : 'Refresh';
-
-        // Summary labels
-        document.getElementById('lbl-active').textContent  = wl.active_label;
-        document.getElementById('lbl-waiting').textContent = wl.waiting_label;
-        document.getElementById('lbl-conf').textContent    = wl.avg_conf;
-        document.getElementById('lbl-rr').textContent      = wl.avg_rr;
-
-        // Filter tabs
-        document.getElementById('ftab-all').textContent     = wl.filter_all;
-        document.getElementById('ftab-execute').textContent = wl.filter_active;
-        document.getElementById('ftab-waiting').textContent = wl.filter_waiting;
-
-        // Nav items
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (key.startsWith('nav_')) {
-                const k = key.replace('nav_', '');
-                if (nav[k]) el.textContent = nav[k];
-            }
-        });
+        document.getElementById('refresh-label').textContent = UI.currentLang === 'zh' ? '更新' : 'Refresh';
+        document.getElementById('lbl-active').textContent    = wl.active_label;
+        document.getElementById('lbl-waiting').textContent   = wl.waiting_label;
+        document.getElementById('lbl-conf').textContent      = wl.avg_conf;
+        document.getElementById('lbl-rr').textContent        = wl.avg_rr;
+        document.getElementById('ftab-all').textContent      = wl.filter_all;
+        document.getElementById('ftab-execute').textContent  = wl.filter_active;
+        document.getElementById('ftab-waiting').textContent  = wl.filter_waiting;
     }
-
-    document.getElementById('lang-toggle').addEventListener('click', () => {
-        currentLang = currentLang === 'zh' ? 'en' : 'zh';
-        localStorage.setItem('dash_lang', currentLang);
-        applyTranslations();
-        loadWatchlist();
-    });
-    applyTranslations();
-
-    // ── Logs ───────────────────────────────────────────────────────
-    function logToUI(msg, type = 'info') {
-        const out = document.getElementById('log-output');
-        const line = document.createElement('div');
-        const color = type === 'error' ? 'text-red-500' : type === 'warn' ? 'text-yellow-500' : 'text-zinc-500';
-        line.innerHTML = `<span>[${new Date().toLocaleTimeString()}]</span> <span class="${color}">${msg}</span>`;
-        out.appendChild(line);
-    }
-    document.getElementById('show-logs').addEventListener('click', () =>
-        document.getElementById('debug-console').classList.toggle('hidden'));
 
     // ── Report Modal ───────────────────────────────────────────────
     async function viewReport(path) {
@@ -266,7 +180,7 @@
     function buildCard(item) {
         const isExecute = item.decision === 'EXECUTE' || item.decision === 'BUY';
         const statusColor = DECISION_COLOR[item.decision] || 'var(--text-muted)';
-        const t  = window.i18n?.[currentLang] || {};
+        const t  = window.i18n?.[UI.currentLang] || {};
         const wl = t.watchlist || {};
         const status  = t.status?.[item.decision] || item.decision;
         const horizon = item.time_horizon ? (t.horizon?.[item.time_horizon] || item.time_horizon) : null;
@@ -375,7 +289,7 @@
         });
 
         if (!filtered.length) {
-            const noItems = (window.i18n?.[currentLang]?.watchlist?.no_items) || 'No items match this filter.';
+            const noItems = (window.i18n?.[UI.currentLang]?.watchlist?.no_items) || 'No items match this filter.';
             grid.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-600">${noItems}</div>`;
             return;
         }
@@ -419,6 +333,7 @@
     }
 
     document.getElementById('refresh-btn').addEventListener('click', loadWatchlist);
+    UI.boot('watchlist', { translate: applyTranslations, reload: loadWatchlist });
     loadWatchlist();
     </script>
 </body>

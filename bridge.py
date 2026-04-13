@@ -516,23 +516,89 @@ def extract_market_top_data(raw):
 
 def extract_news():
     news = []
+
+    # 1. Read from news_logs (primary — news protocol output)
+    news_dates_seen = set()
     for news_file in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)[:3]:
         try:
             with open(news_file, 'r') as f:
                 n_data = json.load(f)
             file_date = n_data.get("timestamp", "")[:10]
+            news_dates_seen.add(file_date)
             for v in n_data.get("verdicts", []):
                 sector_names = [s.get("sector", "Unknown") for s in v.get("affected_sectors", [])]
                 news.append({
-                    "headline": v.get("headline"),
-                    "impact":   v.get("verdict", "NEUTRAL").lower(),
-                    "score":    v.get("net_impact_score"),
-                    "date":     file_date,
-                    "sectors":  sector_names,
+                    "headline":          v.get("headline"),
+                    "headline_zh":       v.get("headline_zh", ""),
+                    "impact":            v.get("verdict", "NEUTRAL").lower(),
+                    "score":             v.get("net_impact_score"),
+                    "date":              file_date,
+                    "sectors":           sector_names,
+                    "source":            "news_protocol",
+                    "source_label":      v.get("source_label", ""),
+                    "type":              v.get("type", ""),
+                    "bull_case":         v.get("bull_case", ""),
+                    "bear_case":         v.get("bear_case", ""),
+                    "arbiter_reasoning": v.get("arbiter_reasoning", ""),
+                    "debate_note":       v.get("debate_note", ""),
+                    "binary_risk":       v.get("binary_risk", False),
+                    "within_48h":        v.get("within_48h", False),
                 })
         except Exception as e:
             print(f"[ERROR] News log {news_file}: {e}")
-    return news
+
+    # 2. Supplement from sector_intel (upcoming_binary_events + top_catalysts)
+    latest_sector = get_latest_file(os.path.join(SECTOR_LOGS, "*_sector_intel.json"))
+    if latest_sector:
+        try:
+            with open(latest_sector, 'r') as f:
+                s_data = json.load(f)
+            sector_date = s_data.get("verdict_date", s_data.get("generated_at", ""))[:10]
+
+            # upcoming_binary_events → treat as news items
+            for ev in s_data.get("upcoming_binary_events", []):
+                ev_date = ev.get("date") or ev.get("dates", "")
+                # Normalise: take first date if range (e.g. "2026-04-13 to 2026-04-15")
+                ev_date_clean = ev_date.split(" to ")[0].strip() if ev_date else sector_date
+                direction = ev.get("direction", "BINARY").split("—")[0].strip().lower()
+                impact_map = {"bullish": "bullish", "bearish": "bearish", "binary": "binary", "neutral": "neutral"}
+                impact = impact_map.get(direction.lower().split()[0] if direction else "binary", "binary")
+                news.append({
+                    "headline": ev.get("event", ""),
+                    "impact":   impact,
+                    "score":    0.0,
+                    "date":     ev_date_clean,
+                    "sectors":  ev.get("impact_sectors", []),
+                    "source":   "sector_intel",
+                })
+
+            # top_catalysts (old schema key, may exist)
+            for cat in s_data.get("top_catalysts", []) or []:
+                if not cat.get("event"):
+                    continue
+                direction = cat.get("direction", "neutral").lower()
+                news.append({
+                    "headline": cat.get("event", ""),
+                    "impact":   direction if direction in ("bullish", "bearish", "binary") else "neutral",
+                    "score":    float(cat.get("impact_score", 0)),
+                    "date":     (cat.get("updated_at") or sector_date)[:10],
+                    "sectors":  cat.get("affected_sectors", []),
+                    "source":   "sector_intel",
+                })
+
+        except Exception as e:
+            print(f"[ERROR] Sector intel news extraction: {e}")
+
+    # Deduplicate by headline, sort by date desc
+    seen_headlines = set()
+    deduped = []
+    for item in sorted(news, key=lambda x: x.get("date", ""), reverse=True):
+        h = (item.get("headline") or "").strip()
+        if h and h not in seen_headlines:
+            seen_headlines.add(h)
+            deduped.append(item)
+
+    return deduped
 
 
 # ─────────────────────────────────────────────

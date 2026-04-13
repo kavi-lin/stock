@@ -1,352 +1,264 @@
-lucide.createIcons();
+/**
+ * script.js — index.html page presenter
+ * Depends on: utils.js (window.UI), components.js (window.Components), i18n.js
+ */
 
-let currentTheme = localStorage.getItem('dash_theme') || 'dark';
-
-function initTheme() {
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  if (currentTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-  const icon = document.getElementById('theme-icon');
-  if (icon) {
-    icon.setAttribute('data-lucide', currentTheme === 'dark' ? 'moon' : 'sun');
-    if (window.lucide) lucide.createIcons();
-  }
-}
-
-function toggleTheme() {
-  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('dash_theme', currentTheme);
-  initTheme();
-}
-
-initTheme();
-
-let currentLang = localStorage.getItem('dash_lang') || 'zh';
-const debugPanel = document.getElementById('debug-console');
-
-function logToUI(msg, type = 'info') {
-  const out = document.getElementById('log-output');
-  if (!out) return;
-  const line = document.createElement('div');
-  const time = new Date().toLocaleTimeString();
-  const color = type === 'error' ? 'text-red-500' : (type === 'warn' ? 'text-yellow-500' : 'text-zinc-500');
-  line.innerHTML = `<span>[${time}]</span> <span class="${color}">${msg}</span>`;
-  out.appendChild(line);
-}
-
+// ── Page-specific translations ────────────────────────────────────────────
 function applyTranslations() {
   if (!window.i18n) return;
-  const t = window.i18n[currentLang];
-  const o = t.overview;
-
-  // Nav
-  document.querySelectorAll('[data-i18n^="nav_"]').forEach(el => {
-    const key = el.getAttribute('data-i18n').replace('nav_', '');
-    if (t.nav[key]) el.textContent = t.nav[key];
-  });
-  
-  document.getElementById('lang-text').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
-
-  // Overview
+  const t = window.i18n[UI.currentLang];
+  const o = t.overview || {};
   const keys = ['market_regime', 'hot_themes', 'sentiment', 'recent_audit', 'catalyst', 'quick_launch', 'launch_desc', 'start_btn'];
   keys.forEach(k => {
     const el = document.querySelector(`[data-i18n="${k}"]`);
-    if (el) el.textContent = o[k];
+    if (el && o[k]) el.textContent = o[k];
   });
 }
 
-function toggleLang() {
-  currentLang = currentLang === 'zh' ? 'en' : 'zh';
-  localStorage.setItem('dash_lang', currentLang);
-  applyTranslations();
-  updateDashboard();
+// ── Composite Signal Score ─────────────────────────────────────────────────
+function computeConviction(data) {
+  const ftd = data.ftd        || {};
+  const br  = data.breadth    || {};
+  const mkt = data.market     || {};
+  const mt  = data.market_top || {};
+
+  let ftdComp = 45;
+  const state = ftd.state || '';
+  if (!ftd.invalidated) {
+    if      (state === 'FTD_CONFIRMED')                    ftdComp = 55 + (ftd.quality_score || 50) * 0.45;
+    else if (state === 'FTD_WINDOW')                       ftdComp = 62;
+    else if (state === 'RALLY_ATTEMPT')                    ftdComp = 55;
+    else if (state === 'CORRECTION' || state === 'RALLY_FAILED') ftdComp = 18;
+    else if (state === 'FTD_INVALIDATED')                  ftdComp = 12;
+  } else { ftdComp = 12; }
+
+  const breadthComp = br.score          ?? 50;
+  const sentComp    = 100 - (mkt.fear_greed ?? 50);
+  const topRiskComp = 100 - (mt.composite_score ?? 50);
+  const uptrendComp = (mkt.uptrend_ratio ?? 0.5) * 100;
+
+  const score = Math.round(
+    ftdComp      * 0.35 +
+    breadthComp  * 0.25 +
+    sentComp     * 0.15 +
+    topRiskComp  * 0.15 +
+    uptrendComp  * 0.10
+  );
+
+  const label =
+    score >= 80 ? 'STRONG BULL' :
+    score >= 65 ? 'BULLISH'     :
+    score >= 50 ? 'MIXED'       :
+    score >= 35 ? 'CAUTIOUS'    :
+    score >= 20 ? 'BEARISH'     : 'STRONG BEAR';
+
+  const color =
+    score >= 65 ? '#22c55e' :
+    score >= 50 ? '#86efac' :
+    score >= 35 ? '#eab308' :
+    score >= 20 ? '#f97316' : '#ef4444';
+
+  const drivers = [
+    { label: 'FTD',       val: ftdComp,     bull: ftdComp     >= 60 },
+    { label: 'Breadth',   val: breadthComp, bull: breadthComp >= 55 },
+    { label: 'Sentiment', val: sentComp,    bull: sentComp    >= 60 },
+    { label: 'Top Risk',  val: topRiskComp, bull: topRiskComp >= 60 },
+    { label: 'Uptrend',   val: uptrendComp, bull: uptrendComp >= 55 },
+  ].sort((a, b) => Math.abs(b.val - 50) - Math.abs(a.val - 50));
+
+  const topBull = drivers.filter(d => d.bull).slice(0, 2).map(d => d.label);
+  const topBear = drivers.filter(d => !d.bull).slice(0, 2).map(d => d.label);
+
+  let summary = '';
+  if (topBull.length && topBear.length)
+    summary = `↑ ${topBull.join(' + ')} 偏多；↓ ${topBear.join(' + ')} 仍偏弱。`;
+  else if (topBull.length)
+    summary = `多方動能明確：${topBull.join(' + ')}。`;
+  else
+    summary = `空方壓力來自：${topBear.join(' + ')}。`;
+
+  const ftdExp = ftd.exposure_range  || '';
+  const brExp  = br.exposure_ceiling || mkt.exposure_ceiling || '';
+  const mtExp  = mt.risk_budget      || '';
+  if (ftdExp || brExp || mtExp)
+    summary += `  建議倉位參考：FTD ${ftdExp || '–'} · 廣度 ${brExp || '–'} · 頂部風控 ${mtExp || '–'}`;
+
+  return {
+    score, label, color,
+    components: [
+      { key: 'FTD Signal',      raw: Math.round(ftdComp),     pct: Math.round(ftdComp),     bull: ftdComp     >= 55, tag: ftd.state || '–' },
+      { key: 'Market Breadth',  raw: Math.round(breadthComp), pct: breadthComp,              bull: breadthComp >= 55, tag: br.zone   || '–' },
+      { key: 'Sentiment (Ctr)', raw: Math.round(sentComp),    pct: sentComp,                 bull: sentComp    >= 60, tag: mkt.fear_greed_label || '–' },
+      { key: 'Top Risk (Inv)',  raw: Math.round(topRiskComp), pct: topRiskComp,              bull: topRiskComp >= 60, tag: mt.zone   || '–' },
+      { key: 'Uptrend Ratio',   raw: Math.round(uptrendComp), pct: uptrendComp,              bull: uptrendComp >= 55, tag: Math.round(uptrendComp) + '%' },
+    ],
+    summary,
+  };
 }
 
-function updateMarketStatus() {
-  const statusEl = document.getElementById('market-status-text');
-  if (!statusEl) return;
-  const nyTime = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
-  const date = new Date(nyTime);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const day = date.getDay();
-  const isWeekday = day >= 1 && day <= 5;
-  const timeInMinutes = (hours * 60) + minutes;
-  const isOpen = isWeekday && (timeInMinutes >= 570 && timeInMinutes < 960);
-  
-  if (isOpen) {
-    statusEl.textContent = currentLang === 'zh' ? '開盤中' : 'OPEN';
-    statusEl.className = 'text-sm font-semibold text-green-400';
-  } else {
-    statusEl.textContent = currentLang === 'zh' ? '已收盤' : 'CLOSED';
-    statusEl.className = 'text-sm font-semibold text-red-500';
-  }
-}
+// ── Signal Angle Cards (Row 2) ─────────────────────────────────────────────
+function renderSignalAngles(data) {
+  const grid = document.getElementById('signal-angle-grid');
+  if (!grid) return;
+  const ftd = data.ftd || {}, br = data.breadth || {}, mkt = data.market || {}, mt = data.market_top || {};
+  const fg = mkt.fear_greed ?? 50;
+  const fgLabel = fg < 25 ? 'Extreme Fear' : fg < 45 ? 'Fear' : fg < 55 ? 'Neutral' : fg < 75 ? 'Greed' : 'Extreme Greed';
+  const fgColor = fg < 25 ? '#22c55e' : fg < 45 ? '#86efac' : fg < 55 ? '#eab308' : fg < 75 ? '#f97316' : '#ef4444';
 
-async function viewReport(path) {
-  const modal = document.getElementById('report-modal');
-  const content = document.getElementById('report-content');
-  if (!path || path === 'null') {
-      alert("Report pending generated...");
-      return;
-  }
-  modal.classList.remove('hidden');
-  content.innerHTML = '<div class="flex items-center justify-center h-full p-20 animate-pulse text-zinc-500">Loading audit report...</div>';
-  try {
-    const fullPath = '../' + path + '?t=' + Date.now();
-    if (path.endsWith('.html')) {
-      content.innerHTML = `<iframe src="${fullPath}" class="w-full h-full border-0 bg-white rounded-lg"></iframe>`;
-    } else {
-      const res = await fetch(fullPath);
-      const md = await res.text();
-      content.innerHTML = `<div class="p-8 prose prose-invert prose-zinc max-w-none text-zinc-300">${marked.parse(md)}</div>`;
-    }
-  } catch (e) {
-    content.innerHTML = `<div class="p-10 text-center text-red-500">Failed to load: ${e.message}</div>`;
-  }
-}
+  const angles = [
+    {
+      icon: 'signal', label: 'FTD Signal', link: 'breadth.html',
+      val: ftd.quality_score != null ? ftd.quality_score : '–',
+      sub: ftd.state?.replace(/_/g, ' ') || 'No Signal',
+      color: ftd.state === 'FTD_CONFIRMED' && !ftd.invalidated ? '#22c55e'
+           : ftd.state === 'FTD_WINDOW' || ftd.state === 'RALLY_ATTEMPT' ? '#eab308' : '#ef4444',
+      bar: ftd.quality_score ?? 0,
+    },
+    {
+      icon: 'bar-chart-2', label: 'Breadth', link: 'breadth.html',
+      val: br.score != null ? br.score.toFixed(1) : '–',
+      sub: br.zone || '–',
+      color: (br.score ?? 0) >= 55 ? '#22c55e' : (br.score ?? 0) >= 35 ? '#eab308' : '#ef4444',
+      bar: br.score ?? 0,
+    },
+    {
+      icon: 'alert-triangle', label: 'Top Risk', link: 'breadth.html',
+      val: mt.composite_score != null ? mt.composite_score : '–',
+      sub: (mt.zone || '–').replace(/\(.*\)/, '').trim(),
+      color: (mt.composite_score ?? 0) <= 20 ? '#22c55e' : (mt.composite_score ?? 0) <= 40 ? '#eab308'
+           : (mt.composite_score ?? 0) <= 60 ? '#f97316' : '#ef4444',
+      bar: mt.composite_score ?? 0,
+    },
+    {
+      icon: 'heart-pulse', label: 'Sentiment', link: 'news.html',
+      val: fg,
+      sub: fgLabel + ' (Ctr)',
+      color: fgColor,
+      bar: 100 - fg,
+    },
+    {
+      icon: 'trending-up', label: 'Uptrend %', link: 'breadth.html',
+      val: Math.round((mkt.uptrend_ratio ?? 0) * 100) + '%',
+      sub: (mkt.uptrend_ratio ?? 0) >= 0.6 ? 'Healthy' : (mkt.uptrend_ratio ?? 0) >= 0.4 ? 'Neutral' : 'Weak',
+      color: (mkt.uptrend_ratio ?? 0) >= 0.6 ? '#22c55e' : (mkt.uptrend_ratio ?? 0) >= 0.4 ? '#eab308' : '#ef4444',
+      bar: Math.round((mkt.uptrend_ratio ?? 0) * 100),
+    },
+  ];
 
-function renderAuditCard(item) {
-    const isBuy = item.decision === 'BUY' || item.decision === 'EXECUTE';
-    const statusColor = isBuy ? 'var(--status-bullish)' : (item.decision === 'CANCEL' ? 'var(--status-bearish)' : 'var(--text-muted)');
-    const perfColor = item.performance?.change >= 0 ? 'var(--status-bullish)' : 'var(--status-bearish)';
-    const perfIcon = item.performance?.change >= 0 ? 'trending-up' : 'trending-down';
-
-    const card = document.createElement('div');
-    card.className = "glass-card p-6 flex flex-col justify-between group hover:border-zinc-500/50 transition-all cursor-default";
-    
-    const perfUI = item.performance 
-      ? `<div class="mt-4 pt-4 border-t border-zinc-900 flex justify-between items-center">
-           <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Backtest P/L</div>
-           <div class="flex items-center gap-1 ${perfColor} font-mono font-bold text-sm">
-             <i data-lucide="${perfIcon}" class="w-3 h-3"></i>
-             ${item.performance.change > 0 ? '+' : ''}${item.performance.change}%
-           </div>
-         </div>`
-      : '';
-
-    const t = window.i18n[currentLang];
-    const s = t.sentiment_labels;
-    const translatedDecision = t.status[item.decision] || item.decision;
-
-    const targetUI = item.targets?.tp 
-      ? `<div class="mt-4 flex gap-4 border-t border-zinc-200 dark:border-zinc-900/50 pt-3">
-           <div class="flex-1">
-             <p class="text-[8px] text-zinc-600 font-bold uppercase">${s.tp}</p>
-             <p class="text-xs font-mono font-bold" style="color: var(--status-bullish)">$${item.targets.tp}</p>
-           </div>
-           <div class="flex-1 border-l border-zinc-200 dark:border-zinc-900/50 pl-4">
-             <p class="text-[8px] text-zinc-600 font-bold uppercase">${s.sl}</p>
-             <p class="text-xs font-mono font-bold" style="color: var(--status-bearish)">$${item.targets.sl}</p>
-           </div>
-         </div>`
-      : (item.targets?.watch || item.targets?.entry ? `<div class="mt-4 border-t border-zinc-200 dark:border-zinc-900/50 pt-3">
-            <p class="text-[8px] text-zinc-600 font-bold uppercase">${item.targets.watch ? s.watch : s.entry}</p>
-            <p class="text-xs font-mono font-bold" style="color: var(--status-binary)">${item.targets.watch || item.targets.entry}</p>
-        </div>` : '');
-
-    // A5-RISKS: key_risks tags
-    const risksUI = (item.key_risks && item.key_risks.length)
-      ? `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
-           <div class="flex flex-wrap gap-1.5">${item.key_risks.map(r =>
-             `<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">${r.replace(/_/g,' ')}</span>`
-           ).join('')}</div>
-         </div>`
-      : '';
-
-    // A5-COND: watch_conditions for CANCEL cards
-    const condUI = (item.decision === 'CANCEL' && item.watch_conditions)
-      ? `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50 space-y-1.5">
-           <p class="text-[9px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-1">
-             <i data-lucide="crosshair" class="w-3 h-3"></i> ${t.watchlist?.entry_triggers || '進場觸發條件'}
-           </p>
-           ${Object.entries(item.watch_conditions).map(([k,v]) =>
-             `<div class="flex gap-2 items-start"><span class="text-[9px] font-black uppercase tracking-widest mt-0.5 shrink-0 w-14" style="color:var(--status-binary)">${k.toUpperCase()}</span><span class="text-[10px] leading-relaxed" style="color:var(--text-main)">${v}</span></div>`
-           ).join('')}
-         </div>`
-      : '';
-
-    card.innerHTML = `
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <h4 class="text-2xl font-black tracking-tighter" style="color: var(--text-card-title)">${item.ticker}</h4>
-          <p class="text-[10px] text-zinc-500 font-mono">${item.time}</p>
-        </div>
-        <span class="px-2 py-1 rounded text-[10px] font-black border transition-all" style="background-color: color-mix(in srgb, ${statusColor}, transparent 90%); border-color: color-mix(in srgb, ${statusColor}, transparent 80%); color: ${statusColor}">${translatedDecision}</span>
+  grid.innerHTML = angles.map(a => `
+    <a href="${a.link}" class="glass-card p-4 flex flex-col gap-2 hover:border-zinc-600/50 transition-all cursor-pointer group">
+      <div class="flex items-center justify-between">
+        <span class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">${a.label}</span>
+        <i data-lucide="${a.icon}" class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors"></i>
       </div>
-      <div class="flex items-end justify-between mt-2">
-        <div class="relative group/score inline-block">
-          <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest border-b-2 border-dotted border-zinc-700 cursor-help pb-0.5 mb-1 hover:border-emerald-500/50 transition-colors" title="Click or hover for scoring logic">
-            Model Score
-          </p>
-          <p class="text-3xl font-bold tracking-tighter" style="color: var(--text-card-title)">${item.score}</p>
-
-          <!-- Tooltip Popup -->
-          <div class="absolute bottom-full left-0 mb-4 w-72 p-5 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl opacity-0 group-hover/score:opacity-100 transition-all duration-300 pointer-events-none z-[999] backdrop-blur-2xl translate-y-4 group-hover/score:translate-y-0" style="background-color: var(--bg-card); color: var(--text-main)">
-            <div class="text-[10px] font-black text-emerald-500 uppercase mb-3 flex items-center gap-2 tracking-widest">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                Scoring Protocol V4.5
-            </div>
-            <ul class="text-[10px] text-zinc-500 dark:text-zinc-400 space-y-2.5 list-none p-0 leading-relaxed">
-                <li class="flex gap-3"><span class="text-zinc-700 font-mono">01</span><span>Σ(Weight × Score × Conf)</span></li>
-                <li class="flex gap-3"><span class="text-zinc-700 font-mono">02</span><span>Weights: Fundamental(30%), Tech(30%), News(20%), Sent(20%)</span></li>
-                <li class="flex gap-3"><span class="text-zinc-700 font-mono">03</span><span>Analyst Range: -5 to +5 based on core skills</span></li>
-                <li class="flex gap-3"><span class="text-zinc-700 font-mono">04</span><span>Market Regime Multiplier: 0.6x to 1.2x adjustment</span></li>
-                <li class="flex gap-3"><span class="text-zinc-700 font-mono">05</span><span>Burry Gap Veto: Mandatory cancellation on extreme valuation misalign</span></li>
-            </ul>
-          </div>
-        </div>
-        <button onclick="viewReport('${item.report_url}')" class="w-12 h-12 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center hover:bg-emerald-500 hover:text-black hover:border-emerald-500 transition-all shadow-md dark:shadow-xl active:scale-95 group/btn" title="View Full Report">
-          <i data-lucide="file-text" class="w-5 h-5 text-zinc-700 dark:text-zinc-100 group-hover/btn:scale-110 transition-transform"></i>
-        </button>
+      <div class="text-2xl font-black tracking-tighter leading-none" style="color:${a.color}">${a.val}</div>
+      <div class="w-full h-1.5 rounded-full bg-zinc-800">
+        <div class="h-1.5 rounded-full transition-all duration-700" style="width:${Math.min(100, a.bar)}%;background-color:${a.color}"></div>
       </div>
-      ${targetUI}
-      ${risksUI}
-      ${condUI}
-      ${perfUI}
-    `;
-    return card;
+      <div class="text-[9px] font-bold uppercase tracking-wide" style="color:${a.color}">${a.sub}</div>
+    </a>
+  `).join('');
 }
 
+// ── Dashboard Update ───────────────────────────────────────────────────────
 async function updateDashboard() {
-  logToUI("Refreshing system synchronization...");
-  updateMarketStatus();
-  
+  UI.logToUI('Refreshing system synchronization...');
+  UI.updateMarketStatus();
+  let data = null;
+
   try {
     const response = await fetch('data.json?t=' + Date.now());
-    const data = await response.json();
-    
-    // 0. Warning Flags Banner
-    const banner = document.getElementById('warning-banner');
-    if (banner && data.market?.warning_flags?.length) {
-        banner.classList.remove('hidden');
-        banner.classList.add('flex');
-        const tw = window.i18n?.[currentLang]?.warnings || {};
-        const flagTranslations = tw.flags || {};
-        const flagList = document.getElementById('warning-flags-list');
-        flagList.innerHTML = data.market.warning_flags.map(f => {
-            const label = flagTranslations[f] || f.replace(/_/g, ' ');
-            const isCritical = f.includes('Death_Cross') || f.includes('Extreme_Fear');
-            return `<span class="text-[9px] font-bold px-2 py-0.5 rounded border ${
-                isCritical ? 'bg-red-500/15 text-red-400 border-red-500/30'
-                           : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'}">${label}</span>`;
-        }).join('');
-        // Banner title + uptrend label
-        const bannerTitle = document.getElementById('warning-banner-title');
-        if (bannerTitle) bannerTitle.textContent = tw.banner_title || 'Risk Flags Active';
-        const uptrendLabel = document.getElementById('uptrend-label');
-        if (uptrendLabel) uptrendLabel.textContent = tw.uptrend_label || 'Uptrend Ratio';
-        const uptrendEl = document.getElementById('uptrend-ratio-val');
-        if (uptrendEl && data.market.uptrend_ratio != null) {
-            const pct = Math.round(data.market.uptrend_ratio * 100);
-            uptrendEl.textContent = pct + '%';
-            uptrendEl.style.color = pct < 40 ? 'var(--status-bearish)' : pct > 60 ? 'var(--status-bullish)' : '#eab308';
-        }
+    data = await response.json();
+
+    // 1. Composite Conviction Hero
+    const conv      = computeConviction(data);
+    const scoreEl   = document.getElementById('composite-score');
+    const barEl     = document.getElementById('composite-bar');
+    const labelEl   = document.getElementById('composite-label');
+    const summaryEl = document.getElementById('conviction-summary');
+    const compBars  = document.getElementById('component-bars');
+
+    if (scoreEl)   { scoreEl.textContent = conv.score; scoreEl.style.color = conv.color; }
+    if (barEl)     { barEl.style.width = conv.score + '%'; barEl.style.backgroundColor = conv.color; }
+    if (labelEl)   { labelEl.textContent = conv.label; labelEl.style.color = conv.color; }
+    if (summaryEl) summaryEl.textContent = conv.summary;
+
+    if (compBars) {
+      const wt = { 'FTD Signal': 35, 'Market Breadth': 25, 'Sentiment (Ctr)': 15, 'Top Risk (Inv)': 15, 'Uptrend Ratio': 10 };
+      compBars.innerHTML = conv.components.map(c => {
+        const col = c.bull ? '#22c55e' : (c.pct >= 40 ? '#eab308' : '#ef4444');
+        return `
+        <div class="flex items-center gap-3">
+          <div class="w-28 shrink-0 flex items-center gap-1">
+            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wide truncate">${c.key}</span>
+            <span class="text-[8px] text-zinc-700 shrink-0">${wt[c.key] || 0}%</span>
+          </div>
+          <div class="flex-1 h-1.5 rounded-full bg-zinc-800">
+            <div class="h-1.5 rounded-full transition-all duration-700" style="width:${Math.min(100,c.pct)}%;background-color:${col}"></div>
+          </div>
+          <span class="text-[10px] font-black font-mono w-7 text-right shrink-0" style="color:${col}">${c.raw}</span>
+          <span class="text-[9px] text-zinc-600 w-24 truncate shrink-0">${c.tag}</span>
+        </div>`;
+      }).join('');
     }
 
-    // 1. Market Data (Dashboard only)
-    if (document.getElementById('regime-text')) {
-        document.getElementById('regime-text').textContent = data.market.regime;
-        document.getElementById('regime-desc').textContent = data.market.notes || "Live Analysis Active";
-        document.getElementById('fear-greed-val').textContent = data.market.fear_greed;
-        const fgVal = data.market.fear_greed;
-        const fgDesc = fgVal < 25 ? "EXTREME FEAR" : (fgVal < 45 ? "FEAR" : (fgVal < 55 ? "NEUTRAL" : (fgVal < 75 ? "GREED" : "EXTREME GREED")));
-        document.getElementById('sentiment-desc').textContent = fgDesc;
+    // 2. Verdict Card
+    const regimeEl = document.getElementById('regime-text');
+    const expEl    = document.getElementById('exposure-ceiling-val');
+    const flagsEl  = document.getElementById('flags-compact');
 
-        // A2-BREADTH: Uptrend Ratio mini gauge
-        const gaugeWrap = document.getElementById('uptrend-gauge-wrap');
-        if (gaugeWrap && data.market.uptrend_ratio != null) {
-            gaugeWrap.classList.remove('hidden');
-            const pct = Math.round(data.market.uptrend_ratio * 100);
-            const barColor = pct < 35 ? '#ef4444' : pct < 50 ? '#eab308' : '#22c55e';
-            const gaugeLabel = document.getElementById('uptrend-gauge-label');
-            if (gaugeLabel) gaugeLabel.textContent = window.i18n?.[currentLang]?.overview?.uptrend_ratio || 'Uptrend Ratio';
-            document.getElementById('uptrend-gauge-val').textContent = pct + '%';
-            document.getElementById('uptrend-gauge-val').style.color = barColor;
-            const bar = document.getElementById('uptrend-gauge-bar');
-            if (bar) { bar.style.width = pct + '%'; bar.style.backgroundColor = barColor; }
-        }
-        
-        const themesContainer = document.getElementById('themes-container');
-        themesContainer.innerHTML = '';
-        data.market.themes.slice(0, 3).forEach(theme => {
-          const div = document.createElement('div');
-          div.className = "flex justify-between items-center text-sm";
-          div.innerHTML = `<span style="color: var(--text-main)"># ${theme.replace(/_/g, ' ')}</span><span class="text-green-500 font-mono text-[10px]">ACTIVE</span>`;
-          themesContainer.appendChild(div);
-        });
+    if (regimeEl) {
+      regimeEl.textContent = data.market?.regime || '–';
+      const rCol = { RISK_ON: '#22c55e', RISK_OFF: '#ef4444', VOLATILE: '#eab308', NEUTRAL: '#71717a' };
+      regimeEl.style.color = rCol[data.market?.regime] || 'var(--primary)';
+    }
+    const expOptions = [data.ftd?.exposure_range, data.breadth?.exposure_ceiling, data.market?.exposure_ceiling].filter(Boolean);
+    if (expEl) expEl.textContent = expOptions[0] || '–';
+
+    if (flagsEl) {
+      const tw    = window.i18n?.[UI.currentLang]?.warnings || {};
+      const flags = data.market?.warning_flags || [];
+      if (flags.length) {
+        flagsEl.innerHTML =
+          `<p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+             <i data-lucide="alert-triangle" class="w-3 h-3 text-yellow-500"></i> ${flags.length} Flag${flags.length > 1 ? 's' : ''} Active
+           </p>` +
+          flags.slice(0, 3).map(f => Components.flagBadge(f, tw.flags)).join('');
+      } else {
+        flagsEl.innerHTML = `<div class="text-[9px] font-bold text-emerald-500 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> No Active Flags</div>`;
+      }
     }
 
-    // 2. Audit Displays
+    // 3. Signal Angle Cards
+    renderSignalAngles(data);
+
+    // 4. Recent Analysis (compact list)
     const condensedGrid = document.getElementById('audit-grid-condensed');
-    const fullGrid = document.getElementById('audit-grid-full');
-    
+    const fullGrid      = document.getElementById('audit-grid-full');
     if (condensedGrid) {
-        condensedGrid.innerHTML = '';
-        data.recent_analysis?.slice(0, 3).forEach(item => condensedGrid.appendChild(renderAuditCard(item)));
+      condensedGrid.innerHTML = '';
+      data.recent_analysis?.slice(0, 3).forEach(item => condensedGrid.appendChild(Components.renderAuditCard(item, true)));
     }
     if (fullGrid) {
-        fullGrid.innerHTML = '';
-        data.recent_analysis?.forEach(item => fullGrid.appendChild(renderAuditCard(item)));
-    }
-
-    // 3. Catalysts News
-    const newsContainer = document.getElementById('news-list');
-    if (newsContainer && data.news) {
-        newsContainer.innerHTML = '';
-        data.news.slice(0, 5).forEach(news => {
-            const div = document.createElement('div');
-            div.className = 'flex items-start gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all cursor-pointer';
-            
-            // Refined Impact Logic
-            const impact = news.impact ? news.impact.toUpperCase() : '';
-            const impactVal = parseInt(news.impact) || 0;
-            const isPos = impactVal >= 3 || impact === 'BULLISH';
-            const isNeg = (impactVal < 0 && impactVal > -10) || impact === 'BEARISH';
-            const isBinary = impact === 'BINARY' || impact === 'VOLATILE';
-            const icon = isPos ? 'trending-up' : (isNeg ? 'trending-down' : (isBinary ? 'alert-triangle' : 'zap'));
-            const statusColor = isPos ? 'var(--status-bullish)' : (isNeg ? 'var(--status-bearish)' : (isBinary ? 'var(--status-binary)' : 'var(--status-binary)'));
-            
-            div.innerHTML = `
-                <div class="mt-1">
-                    <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center border border-zinc-200 dark:border-zinc-800">
-                        <i data-lucide="${icon}" style="color: ${statusColor}" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium truncate" style="color: var(--text-card-title)">${news.headline}</p>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[9px] font-bold text-zinc-500 uppercase">${news.sector || 'GENERAL'}</span>
-                        <div class="w-1 h-1 rounded-full bg-zinc-700"></div>
-                        <span class="text-[9px] font-bold uppercase" style="color: ${statusColor}">Impact: ${news.impact}</span>
-                    </div>
-                </div>
-            `;
-            newsContainer.appendChild(div);
-        });
+      fullGrid.innerHTML = '';
+      data.recent_analysis?.forEach(item => fullGrid.appendChild(Components.renderAuditCard(item, false)));
     }
 
   } catch (error) {
-    logToUI(error.message, "error");
-    console.error("Dashboard update failed:", error);
+    UI.logToUI(error.message, 'error');
+    console.error('Dashboard update failed:', error);
   } finally {
-    // CRITICAL: Refresh icons for ALL dynamically added content
-    if (window.lucide) {
-      lucide.createIcons();
-    }
+    UI.icons();
     const syncEl = document.getElementById('last-update');
     if (syncEl && data?.last_updated) syncEl.textContent = `SYNC: ${data.last_updated}`;
-    logToUI("System update cycle complete.");
+    UI.logToUI('System update cycle complete.');
   }
 }
 
-// Launch Engine
+// ── Launch Engine ──────────────────────────────────────────────────────────
 function launchAnalysis() {
   const input = document.getElementById('ticker-input');
-  const hint = document.getElementById('launch-hint');
+  const hint  = document.getElementById('launch-hint');
   const cmdEl = document.getElementById('launch-cmd');
   if (!input) return;
   const ticker = input.value.trim().toUpperCase();
@@ -354,28 +266,29 @@ function launchAnalysis() {
   const cmd = `分析 ${ticker}`;
   cmdEl.textContent = cmd;
   hint.classList.remove('hidden');
-  logToUI(`Launch command generated: "${cmd}"`, 'info');
+  UI.logToUI(`Launch command generated: "${cmd}"`, 'info');
 }
 
-// Handlers
-document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
-document.getElementById('lang-toggle')?.addEventListener('click', toggleLang);
-document.getElementById('show-logs')?.addEventListener('click', () => debugPanel.classList.toggle('hidden'));
-document.getElementById('close-modal')?.addEventListener('click', () => document.getElementById('report-modal').classList.add('hidden'));
 document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
-document.getElementById('ticker-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') launchAnalysis(); });
+document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
 document.getElementById('copy-cmd')?.addEventListener('click', () => {
   const cmd = document.getElementById('launch-cmd')?.textContent;
-  if (cmd) navigator.clipboard.writeText(cmd).then(() => {
+  if (!cmd) return;
+  navigator.clipboard.writeText(cmd).then(() => {
     const btn = document.getElementById('copy-cmd');
     btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> COPIED';
     btn.classList.add('text-green-400', 'border-green-500');
-    if (window.lucide) lucide.createIcons();
-    setTimeout(() => { btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> COPY'; btn.classList.remove('text-green-400', 'border-green-500'); if (window.lucide) lucide.createIcons(); }, 2000);
+    UI.icons();
+    setTimeout(() => {
+      btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> COPY';
+      btn.classList.remove('text-green-400', 'border-green-500');
+      UI.icons();
+    }, 2000);
   });
 });
 
-// Boot
-applyTranslations();
+// ── Boot ───────────────────────────────────────────────────────────────────
+const _activePage = document.body.dataset.page || 'index';
+UI.boot(_activePage, { translate: applyTranslations, reload: updateDashboard });
 updateDashboard();
 setInterval(updateDashboard, 60000);

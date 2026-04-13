@@ -25,7 +25,7 @@ FOCUS_DATE     : [留空 = 今日]
 ## GLOBAL RULES
 
 1. **Phase Execution Order**: 0 → 1 → 2 → 3 → 4 → 5。絕不跳過順序。
-2. **Cache**: 讀取 `./sector_logs/YYYY-MM-DD_sector_intel.json`。存在且日期符合 → 載入跳過 Phase 0–2，直接從 Phase 3 開始。
+2. **Cache**: 讀取 `./sector_logs/YYYY-MM-DD_sector_intel.json`。存在且日期符合 → 載入跳過 Phase 0–1（廣度與輪動可快取），直接從 Phase 2 開始。**Phase 3（新聞催化劑）永遠重新執行，不可因快取跳過** — 新聞是即時的。
 3. **Debate Requirement**: Phase 4 必須有至少一個反方論點，禁止純多頭共識。
 4. **Extreme Sentiment Trigger（更新）**: 在 Phase 3 執行 `market-sentiment-analyzer` 後，使用 **composite_score** 判斷：
    - `composite_score > 80` 或 `composite_score < 20` → `extreme_sentiment_triggered = true`
@@ -53,7 +53,7 @@ FOCUS_DATE     : [留空 = 今日]
 **Agent**: Macro Regime Analyst
 
 讀取 `./sector_logs/YYYY-MM-DD_sector_intel.json`：
-- 存在且日期符合 → 載入，跳至 Phase 3
+- 存在且日期符合 → 載入，跳至 Phase 2（Phase 3 仍需重新執行）
 - 否則 → 執行以下分析並寫入檔案
 
 **資料來源**（優先順序）：
@@ -167,11 +167,11 @@ FOCUS_DATE     : [留空 = 今日]
 **Agent**: Theme Intelligence Analyst
 
 **Theme-Detector Cache Check（執行 skill 前必須先做）**：
-1. 以今日日期搜尋 `../skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`
+1. 以今日日期搜尋 `skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`
    - **找到** → 直接載入 JSON，`theme_source: THEME_CACHE`，**跳過 skill 執行**，前往填寫下方 JSON
    - **未找到** → 執行 `theme-detector` skill（FINVIZ Elite 優先，公開模式備用）
-     - JSON cache → 存入 `../skills/theme-detector/cache/`
-     - MD 最終報告 → 移至 `../reports/`，並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`
+     - JSON cache → 存入 `skills/theme-detector/cache/`
+     - MD 最終報告 → 移至 `reports/`，並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`
 
 ```json
 {
@@ -206,15 +206,14 @@ FOCUS_DATE     : [留空 = 今日]
 - `economic-calendar-fetcher`（未來 7 天）
 - **`market-sentiment-analyzer` skill（新增，取代 web search 的 F&G 查詢）**
 
-### 市場情緒儀表板（新增步驟，Phase 3 開始時執行）
+### 市場情緒儀表板（Phase 3 開始時執行）
+
+> ⚠️ **Phase 3 強制執行規則（每次都跑，不可用快取跳過）**：
+> 1. `market-sentiment-analyzer` skill — 取得即時情緒數值
+> 2. `market-news-analyst` skill — 取得近 10 天新聞（**必須呼叫 skill，禁止用訓練資料中的舊新聞**）
+> 3. `top_catalysts` 最少 5 筆，全部來自 skill 的 WebSearch 結果
 
 **執行 `market-sentiment-analyzer` skill**，取回以下數值，填入 `political_overlay` 欄位：
-
-```
-優先順序：
-1. sector_intel.json 若已存在且含 fear_greed_status → 直接讀取（跳過 skill）
-2. 否則 → 執行 market-sentiment-analyzer skill
-```
 
 從 skill 輸出中提取：
 - `composite_score` → `fear_greed_index`（0–100）
@@ -372,11 +371,94 @@ FOCUS_DATE     : [留空 = 今日]
 1. 寫入 `./sector_logs/YYYY-MM-DD_sector_intel.json`（cache，供其他 protocol 讀取）
 2. 將 FINAL VERDICT TABLE 存為 `../reports/YYYY-MM-DD_sector_report.md`
 
+> ⚠️ **JSON Schema 必須嚴格遵守**：以下所有 key 名稱不可自行更換。bridge.py 依賴 `_phase0`、`_phase1`、`_phase3` 這三個子物件讀取資料。
+
 ```json
 {
   "verdict_date": "YYYY-MM-DD",
+  "protocol_version": "V1.1",
+  "generated_at": "YYYY-MM-DD HH:MM",
   "market_regime": "from Phase 0",
   "exposure_ceiling": "from Phase 0",
+  "cycle_phase": "from Phase 0",
+  "_phase0": {
+    "phase": 0,
+    "agent": "Macro_Regime_Analyst",
+    "scan_date": "YYYY-MM-DD",
+    "breadth_source": "market-breadth-analyzer | uptrend-analyzer | web_search",
+    "breadth_score": "float 0–100",
+    "breadth_zone": "Strong | Healthy | Neutral | Weakening | Critical",
+    "breadth_components": {
+      "overall_breadth": "0–100",
+      "sector_participation": "0–100",
+      "momentum": "0–100",
+      "mean_reversion_risk": "0–100"
+    },
+    "market_regime": "BULL | BEAR | SIDEWAYS | VOLATILE | RISK_OFF | RISK_ON",
+    "cycle_phase": "Early | Mid | Late | Recession",
+    "uptrend_ratio_overall": "float 0.0–1.0",
+    "warning_flags": ["Bearish_Signal_Active"],
+    "exposure_ceiling": "40-60%",
+    "regime_confidence": "float 0.0–1.0"
+  },
+  "_phase1": {
+    "phase": 1,
+    "agent": "Sector_Rotation_Analyst",
+    "sectors": [
+      {
+        "name": "string",
+        "uptrend_ratio": "float",
+        "rotation_signal": "INFLOW | NEUTRAL | OUTFLOW",
+        "overbought_risk": "HIGH | MEDIUM | LOW",
+        "ytd_perf_note": "string"
+      }
+    ]
+  },
+  "_phase3": {
+    "phase": 3,
+    "agent": "News_Catalyst_Analyst",
+    "scan_window": "past 10 days + next 7 days",
+    "top_catalysts": [
+      {
+        "rank": 1,
+        "event": "string",
+        "type": "FOMC | earnings | geopolitical | macro_data | sector_specific | political",
+        "impact_score": "1–5",
+        "affected_sectors": ["sector1"],
+        "direction": "bullish | bearish | binary",
+        "timing": "past | within_48h | this_week | beyond"
+      }
+    ],
+    "political_overlay": {
+      "trump_trade_signals": [
+        {
+          "keyword": "string",
+          "headline": "string",
+          "affected_sectors": ["sector1"],
+          "direction": "bullish | bearish"
+        }
+      ],
+      "named_targets_today": ["TICKER or COUNTRY"],
+      "fear_greed_index": "float 0–100",
+      "fear_greed_label": "Extreme_Fear | Fear | Neutral | Greed | Extreme_Greed",
+      "vix_current": "float",
+      "put_call_ratio": "float",
+      "spy_rsi": "float",
+      "sentiment_source": "SKILL_EXECUTED | WEB_SEARCH_FALLBACK",
+      "extreme_sentiment_triggered": "true | false"
+    },
+    "upcoming_binary_risks": [
+      {
+        "event": "string",
+        "date": "YYYY-MM-DD",
+        "affected_sectors": [],
+        "within_48h": "true | false"
+      }
+    ],
+    "sector_news_sentiment": {
+      "Technology": "bullish | bearish | neutral"
+    }
+  },
   "sentiment_snapshot": {
     "composite_score": "float 0–100 (from market-sentiment-analyzer)",
     "fear_greed_label": "string",

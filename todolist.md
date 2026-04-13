@@ -1,6 +1,6 @@
 # INTEL COMMAND — Todo List
 > Last Updated: 2026-04-13
-> Last Session Note: 路線C 全部完成 — C-BREADTH ✅ C-FTD ✅ C-TOP ✅；market_top_yfinance.py 寫好，bridge.py 加入 data.market_top{}，breadth.html 新增 Row 6 Market Top Detector 區塊
+> Last Session Note: Phase 1 ARCH 重構完成（utils.js + components.js + 6頁 sidebar 組件化）；執行產業掃描 → RISK_OFF，廣度 36.8，XLP HOT，銀行財報 & 伊朗停火為本週 Binary；bridge.py 更新 data.json
 
 ---
 
@@ -105,11 +105,137 @@
 
 ---
 
-## 🏗️ 架構債（待辦，優先度較低）
+## 🏗️ 架構重構路線（ARCH — MVP Pattern）
+
+> **設計目標**：用 MVP（Model-Presenter-View）把目前散落在各 HTML inline script 的邏輯分層，
+> 同時消除重複代碼、提升效能，但保持 **pure HTML/JS 無框架**，方便維護。
+>
+> **分層定義**：
+> - **Model** → `data-store.js`：單一資料來源、TTL cache、change event
+> - **Presenter** → `page-*.js`：每頁業務邏輯，訂閱 Model、操作 View
+> - **View** → HTML + `components.js`：純 render 函數，只接受資料輸出 DOM string/node
+> - **Shared Utils** → `utils.js`：theme/lang/log/lucide 等通用工具
+
+---
+
+### Phase 1 — 消除重複（低風險，Quick Win）
+
+> 目標：把 5 個頁面都有的重複函數抽到共用檔，不改任何 UI 行為。
+
+- [x] ~~**[ARCH-1]** 建立 `Dashboard/utils.js`~~
+  - 移入：`initTheme()`, `toggleTheme()`（目前 script.js + 4 HTML 各一份）
+  - 移入：`currentLang` state + `toggleLang()`（各頁 ~20 行重複）
+  - 移入：`logToUI(msg, type)`（完全相同，5 個檔案）
+  - 移入：`viewReport(path)`（目前只在 script.js，但 watchlist/news 呼叫不到）
+  - 移入：`updateMarketStatus()`（目前只在 script.js，history.html 用不到）
+  - 加上：`lucide.safe()` wrapper（try-catch 包住 `lucide.createIcons()`）
+  - 所有頁面改 `<script src="utils.js">` 取代重複 inline 代碼
+  - **估計削減**：~400 行重複代碼
+
+- [x] ~~**[ARCH-2]** 建立 `Dashboard/components.js`（純 render 函數）~~
+  - 移入：`renderProgressBar(val, max, color)` → 通用進度條 HTML string
+  - 移入：`renderBadge(label, color, style)` → 通用 badge HTML string
+  - 移入：`renderFlagBadge(flag, translations)` → 目前 breadth.html + script.js 各有一份
+  - 移入：`renderSignalCard(icon, label, val, sub, color, bar, link)` → index.html signal angles
+  - 移入：`renderAuditCard(item, compact)` → 合併 `renderAuditCard` + `renderAuditCardCompact`（compact flag 控制）
+  - 統一 `glass-card` wrapper 邏輯
+  - **估計削減**：~250 行重複代碼
+
+- [x] ~~**[ARCH-3]** Sidebar HTML 組件化~~
+  - 建立 `_sidebar.html` snippet（或 JS function `renderSidebar(activePage)`）
+  - 六個頁面目前各自複製完整 sidebar HTML（~50 行 × 6 = 300 行重複）
+  - 方案 A（簡單）：JS function 動態插入，頁面只留 `<aside id="sidebar"></aside>`
+  - 方案 B（SSI）：若未來有輕量後端，用 server-side include
+  - 推薦方案 A，純 JS，零依賴
+
+---
+
+### Phase 2 — Data Layer（Model 層）
+
+> 目標：建立單一資料來源，消除各頁各自 fetch、無 cache 的問題。
+
+- [ ] **[ARCH-4]** 建立 `Dashboard/data-store.js`（DataStore singleton）
+  ```
+  window.DataStore = {
+    _cache: null,
+    _ttl: 60_000,          // 60秒 TTL，與現有 setInterval 對齊
+    _lastFetch: 0,
+    _listeners: [],
+    async get(force = false),  // 有 cache 直接返回，過期才重 fetch
+    subscribe(fn),             // 頁面 Presenter 訂閱 change event
+    refresh(),                 // 手動強制刷新
+  }
+  ```
+  - 解決問題：目前 6 個頁面每次刷新都獨立 fetch，切換頁面不共用 cache
+  - 加入 `AbortController`，防止快速連點刷新產生 race condition
+  - 加入 retry（最多 2 次，指數退避）
+
+- [ ] **[ARCH-5]** 各頁改用 `DataStore.get()` 取代直接 fetch
+  - `index.html` / `script.js` 的 `updateDashboard()`
+  - `news.html` 的 `loadNews()`
+  - `watchlist.html` 的 `loadWatchlist()`
+  - `breadth.html` 的 `loadBreadth()`
+  - `sector.html` 的 `loadSectorData()`
+  - **估計效益**：頁面切換無需重 fetch；同頁多次刷新不疊加請求
+
+---
+
+### Phase 3 — Presenter 層（各頁邏輯分離）
+
+> 目標：把各頁 inline `<script>` 移到獨立 JS 檔，HTML 只留純結構。
+
+- [ ] **[ARCH-6]** 抽出 `Dashboard/page-breadth.js`
+  - 移出 breadth.html 內 ~620 行 inline script
+  - 保留：`buildGauge()`, `componentBar()`, `flagBadge()`, `sectorUptrendRow()`, `loadBreadth()`
+  - tooltip engine 可留在 breadth.html（breadth 專用）或移入 utils.js（若其他頁也需要）
+  - breadth.html 只留 HTML skeleton + `<script src="page-breadth.js">`
+
+- [ ] **[ARCH-7]** 抽出 `Dashboard/page-watchlist.js`（watchlist.html inline ~300 行）
+- [ ] **[ARCH-8]** 抽出 `Dashboard/page-news.js`（news.html inline ~250 行）
+- [ ] **[ARCH-9]** 抽出 `Dashboard/page-sector.js`（sector.html inline ~250 行）
+  - 保留 Chart.js instance 管理邏輯（sectorchart 有 update/destroy 邏輯）
+
+- [ ] **[ARCH-10]** `script.js` 瘦身 → 成為 `page-index.js`
+  - 目前 script.js 混了：全域工具函數 + index.html 專用邏輯
+  - 全域工具 → 移入 utils.js / components.js
+  - index 邏輯 → 重命名為 page-index.js 或保留 script.js 但清除重複
+
+---
+
+### Phase 4 — 效能優化
+
+> 目標：減少不必要的 CPU/網路消耗，不影響現有功能。
+
+- [ ] **[ARCH-11]** `lucide.createIcons()` 防抖（debounce）
+  - 目前全站呼叫 ~12 次以上（初始化 + 每次 DOM 更新）
+  - 在 utils.js 加入 `scheduleIconUpdate()` — 用 `requestAnimationFrame` 批次執行
+  - 替換所有直接 `lucide.createIcons()` 呼叫
+  - **估計效益**：減少 ~50% 重複 DOM scan
+
+- [ ] **[ARCH-12]** Chart.js 惰性載入（僅 sector.html 需要）
+  - 目前 index.html 也載入了 Chart.js（`script src cdn.jsdelivr.net/npm/chart.js`）
+  - 改為在 sector.html + calendar.html 才載入
+  - 或改為動態 import：`import('https://cdn.jsdelivr.net/.../chart.js')`
+  - **估計效益**：index.html 減少 ~200KB JS 解析
+
+- [ ] **[ARCH-13]** marked.js 惰性載入（僅 viewReport() 觸發時才載入）
+  - 目前所有有 report modal 的頁面都載入 marked（index + watchlist + history）
+  - 改為 viewReport() 第一次呼叫時動態載入
+  - **估計效益**：每頁減少 ~45KB
+
+- [ ] **[ARCH-14]** innerHTML XSS 防護
+  - 建立 `escapeHTML(str)` helper（utils.js）
+  - 套用到所有用 `innerHTML` 渲染 data.json 文字欄位的地方
+  - 高風險欄位：`news.headline`, `sector.key_reason`, `sector.risk_flags[]`, `item.key_risks[]`
+  - **注意**：data.json 是本地產生（trusted source），優先度 Medium，但養成習慣
+
+---
+
+### 舊版架構債（保留）
 
 - [ ] **[BRIDGE-5]** 自動觸發機制：`run_bridge.sh` 或 `.claude` post-analysis hook
-- [ ] **[JS-1]** 建立 `core.js`，統一 `initTheme` / `toggleTheme` / `logToUI`（目前三份重複）
-- [ ] **[SIDEBAR-1]** Sidebar 組件化，消除四頁重複 HTML
+- [ ] **[JS-1]** ← 已被 ARCH-1 取代，可視為同一件事
+- [ ] **[SIDEBAR-1]** ← 已被 ARCH-3 取代
 
 ---
 
