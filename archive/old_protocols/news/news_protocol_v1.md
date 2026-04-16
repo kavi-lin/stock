@@ -21,7 +21,7 @@ MODE : FLASH | DIGEST
 ## GLOBAL RULES
 
 1. **Debate Required**: 每則新聞必須同時產出 bull 與 bear 兩個解讀，禁止單面結論。
-2. **Theme Cache**: 若分析需要主題背景脈絡，執行 `theme-detector` skill **前**必須先以今日日期搜尋 `skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`。找到 → 直接載入（`theme_source: THEME_CACHE`），跳過 skill 執行；未找到 → 執行 skill，JSON cache 存入 `skills/theme-detector/cache/`，MD 報告移至 `reports/` 並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`。
+2. **Theme Cache**（FRESH = mtime < 3 小時前 / 10800s）: 若分析需要主題背景脈絡，執行 `theme-detector` skill **前**先取 `skills/theme-detector/cache/theme_detector_*.json` 最新檔。FRESH → 直接載入（`theme_source: THEME_CACHE`），跳過 skill 執行；STALE 或缺失 → 執行 skill，JSON cache 存入 `skills/theme-detector/cache/`，MD 報告移至 `reports/` 並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`。
 3. **Cache Update**: 分析完成後，自動 patch 以下檔案：
    - `sector/sector_logs/YYYY-MM-DD_sector_intel.json` — 更新 `top_catalysts` 與 `political_overlay`
    - `investment/invest_logs/YYYY-MM-DD_phase0.json` — 更新 `binary_risks` 與 `mandatory_risk_flags`
@@ -208,6 +208,7 @@ Web search: "[新聞關鍵詞] site:reuters.com OR site:bloomberg.com OR site:ws
 ### 寫入 news_logs
 ```json
 // APPEND: news/news_logs/YYYY-MM-DD_digest.json
+// ⚠️ 必須包含所有欄位，缺少任何一欄會導致 Dashboard 顯示空白
 {
   "timestamp": "YYYY-MM-DD HH:MM",
   "mode": "FLASH | DIGEST",
@@ -216,9 +217,22 @@ Web search: "[新聞關鍵詞] site:reuters.com OR site:bloomberg.com OR site:ws
     {
       "news_id": "n001",
       "headline": "string",
+      "headline_zh": "string — 中文標題（已中文可填相同）",
       "verdict": "BULLISH | BEARISH | BINARY | NEUTRAL",
       "net_impact_score": "float",
-      "cache_updated": "true | false"
+      "source_label": "string — 如 Reuters / Bloomberg",
+      "type": "earnings | geopolitical | monetary_policy | corporate | sentiment | economic_data",
+      "bull_case": "string — 多頭核心論點（來自 Phase 2 Bull Analyst）",
+      "bear_case": "string — 空頭核心論點（來自 Phase 2 Bear Analyst）",
+      "arbiter_reasoning": "string — 仲裁理由（來自 Phase 3 Arbiter）",
+      "debate_note": "string — 雙方最大分歧點",
+      "binary_risk": "true | false",
+      "binary_event_date": "YYYY-MM-DD | null",
+      "within_48h": "true | false",
+      "cache_updated": "true | false",
+      "affected_sectors": [
+        { "sector": "SectorName", "direction": "bullish | bearish | binary | neutral" }
+      ]
     }
   ],
   "session_macro_delta": "float — 本次所有新聞的合計 macro_backdrop 變動"

@@ -6,15 +6,15 @@
 (function () {
   'use strict';
 
-  const VERSION = 'V1.1.9';
+  // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
+  // Cache-busting is handled separately by dashboard_server.py (mtime injection).
+  const VERSION = 'V1.7.0';
 
   const NAV_ITEMS = [
     { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板' },
-    { id: 'watchlist', href: 'watchlist.html',  icon: 'radar',            i18n: 'nav_watchlist', zh: '進場雷達' },
-    { id: 'breadth',   href: 'breadth.html',    icon: 'bar-chart-2',      i18n: 'nav_breadth',   zh: '市場廣度' },
-    { id: 'sector',    href: 'sector.html',     icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描' },
-    { id: 'news',      href: 'news.html',       icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞' },
-    { id: 'history',   href: 'history.html',    icon: 'shield-check',     i18n: 'nav_history',   zh: '決策歷史' },
+    { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心' },
+    { id: 'sector',    href: 'sector.html',    icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描' },
+    { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞' },
   ];
 
   window.UI = {
@@ -100,7 +100,11 @@
           content.innerHTML = `<iframe src="${full}" class="w-full h-full border-0 bg-white rounded-lg"></iframe>`;
         } else {
           const md = await (await fetch(full)).text();
-          content.innerHTML = `<div class="p-8 prose prose-invert prose-zinc max-w-none text-zinc-300">${marked.parse(md)}</div>`;
+          const isDark = document.documentElement.classList.contains('dark');
+          const proseTheme = isDark
+            ? 'prose-invert text-zinc-300 prose-headings:text-zinc-100 prose-strong:text-zinc-100 prose-code:text-emerald-400 prose-a:text-emerald-400'
+            : 'text-zinc-800 prose-headings:text-zinc-900 prose-strong:text-zinc-900 prose-code:text-emerald-700 prose-a:text-emerald-700 prose-li:text-zinc-700 prose-p:text-zinc-700';
+          content.innerHTML = `<div class="p-8 prose prose-zinc max-w-none ${proseTheme}">${marked.parse(md)}</div>`;
         }
       } catch (e) {
         content.innerHTML = `<div class="p-10 text-center text-red-500">Failed: ${UI.escapeHTML(e.message)}</div>`;
@@ -185,6 +189,11 @@
       UI.renderSidebar(activePage);
       UI.initTheme();
       UI.applyNavTranslations();
+      // Run page-specific translations once at boot so hardcoded HTML labels
+      // reflect the current language on first paint (not only on lang toggle).
+      if (translate) {
+        try { translate(); } catch (e) { UI.logToUI('translate error: ' + e.message, 'error'); }
+      }
 
       // Modal ESC / close button
       document.getElementById('close-modal')?.addEventListener('click', () =>

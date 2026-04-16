@@ -1,31 +1,35 @@
 # AI 投資委員會 — Claude Code Project Context
 
+> **系統版本：v1.7.0**（實際值以根目錄 `VERSION` 檔與 `Dashboard/utils.js` 的 `VERSION` 常數為準；兩者必須同步；每個 session 結束必須 bump）
+
 ## 專案說明
 這是一套多 Agent 投資分析系統，包含三個 protocol。
 
 ## Protocol 檔案位置
-- **新聞分析**: `news/news_protocol_v1.md`
-- **產業掃描**: `sector/sector_protocol_v1_1.md` ← V1.1（新增 market-sentiment-analyzer + tail-risk）
-- **個股分析**: `investment/investment_protocol_v4_5.md` ← V4.5（新增 Contrarian Agent + vol-sizing + tail-risk）
+- **新聞分析**: `news/news_protocol_v2.md` ← V2.0（RSS 兩階段漏斗 + 5 agent 圓桌 + Triage 人類審核 + Shallow Digest 保留）
+- **產業掃描**: `sector/sector_protocol_main.md` ← V1.2（多檔案架構；子檔案：`phase_0.md` / `phase_1-2-3.md` / `phase_4-5.md` / `schema.md`）
+- **個股分析**: `investment/investment_protocol_v4_6.md` ← V4.6（anti-conservatism：雙軌 entry + STAGED_ENTRY + consensus bonus + directional macro + 移除 VOLATILE 重複懲罰）
 
-### 舊版本（保留備查）
-- `sector/sector_protocol_v1.md` — V1.0
-- `investment/investment_protocol_v4_4.md` — V4.4
+### 舊版本（已歸檔至 `archive/old_protocols/`）
+- `archive/old_protocols/news/` — V1.0
+- `archive/old_protocols/sector/` — V1.0 / V1.1 / V1.2（單一檔版）/ V1.2 optimized
+- `archive/old_protocols/investment/` — V4.3 / V4.4 / V4.5
 
 ## 觸發方式
-- 「新聞分析 DIGEST」→ 執行 news_protocol，MODE: DIGEST
-- 「新聞分析 FLASH [新聞內容]」→ 執行 news_protocol，MODE: FLASH
-- 「產業掃描」→ 執行 sector_protocol_v1_1
-- 「分析 [TICKER]」→ 執行 investment_protocol_v4_5
+- 「新聞分析 DIGEST」→ 執行 news_protocol_v2，MODE: DIGEST（先跑 `news/fetch_news_rss.py` 產 raw.json → Stage 1 triage → Stage 2 deep ≤5 則）
+- 「新聞分析 FLASH [新聞內容]」→ 執行 news_protocol_v2，MODE: FLASH（跳過 Stage 1，直接 Deep Debate）
+- 「產業掃描」→ 執行 sector_protocol_main（先讀主檔，再按需載入子檔）
+- 「分析 [TICKER]」→ 執行 investment_protocol_v4_6
 
-## V4.5 / V1.1 新增能力速查
-| 新 Skill | 在哪裡執行 | 作用 |
+## V4.5 / V1.2 新增能力速查
+| 新 Skill / 改動 | 在哪裡執行 | 作用 |
 |---|---|---|
 | `short-contrarian-analyst` | investment Phase 2（第五 Agent）| Burry Score 估值錨，觸發 T4 veto |
 | `market-sentiment-analyzer` | investment Phase 2 Sentiment fallback；sector Phase 3 F&G | 取代 web search，提供 VIX + composite score |
 | `portfolio-risk-manager` | investment Phase 4 Step 2 | Vol-adjusted 倉位上限 + correlation multiplier |
-| `tail-risk-analyzer` | investment Phase 4 Step 3；sector Phase 4b Devil's Advocate | 個股脆弱性評分，自動觸發產業降級 |
+| `tail-risk-analyzer` | investment Phase 4 Step 3；sector Phase 4b Devil's Advocate（上限前 3） | 個股脆弱性評分，自動觸發產業降級 |
 | `market-breadth-analyzer` | sector Phase 0 層 A（優先）| TraderMonty CSV 6組件廣度評分，取代 AI 估算值 |
+| FTD + market_top 三訊號合成 | sector Phase 0 層 C/D → `synthesized_exposure` | 最保守曝險上限，接入 Phase 4c 仲裁規則 |
 
 ## 檔案路徑規則
 **最終報告（MD）→ 統一存放於 `reports/`**
@@ -48,21 +52,35 @@
 
 ## Scripts & 常用指令
 
-### Dashboard 資料刷新
+### 每日標準流程（開盤前依序執行）
+
+> 產業上升趨勢比例需額外執行「產業掃描」才會更新（見下方）
+
 ```bash
-# 1. 刷新廣度數據（每日一次，產業掃描前執行）
+# Step 1｜廣度數據（TraderMonty CSV，免 API key）
 python3 ~/.claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py \
   --output-dir sector/breadth_cache/
 
-# 2. 刷新 FTD 偵測（每日一次，yfinance 免 API key）
+# Step 2｜FTD 偵測（yfinance，免 API key）
 python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
 
-# 3. 刷新市場頂部偵測（每日一次，yfinance 免 API key）
+# Step 3｜市場頂部偵測（yfinance，免 API key）
 python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
 
-# 4. 執行 bridge（整合所有 logs → Dashboard/data.json）
+# Step 4｜整合所有 cache → Dashboard/data.json
 python3 bridge.py
 ```
+
+#### 各指標資料來源速查
+| Dashboard 指標 | 資料來源 | 更新指令 |
+|---|---|---|
+| 廣度綜合分數 | market-breadth-analyzer | Step 1 → Step 4 |
+| FTD 信號 / 品質分數 | ftd_yfinance.py | Step 2 → Step 4 |
+| 頂部風險分數 | market_top_yfinance.py | Step 3 → Step 4 |
+| 市場體制 / Fear&Greed | 產業掃描 Protocol → sector_intel.json | `產業掃描` → Step 4 |
+| **各產業上升趨勢比例** | 產業掃描 Phase 1 → sector_intel.json | `產業掃描` → Step 4 |
+
+> **注意**：各產業上升趨勢比例無獨立腳本，必須透過 Claude 執行「產業掃描」後再跑 `bridge.py`。
 
 ### 其他腳本
 - `scripts/` — Python 輔助腳本（yfinance, finvizfinance, pandas）
@@ -70,6 +88,33 @@ python3 bridge.py
 ## 環境
 - Python: `/usr/bin/python3` (3.9.6)
 - 已安裝: requests, beautifulsoup4, lxml, pandas, numpy, yfinance, finvizfinance
+
+## 實作前確認規則（大量改動必須遵守）
+
+**觸發條件**：預計改動 ≥ 2 個檔案，或單檔改動 ≥ 50 行時，必須在實作前輸出一張改動摘要表，等待確認後才開始動手。
+
+**摘要表格式**：
+
+```
+## 實作計畫確認
+
+| # | 檔案 | 動作 | 預估行數 | 說明 |
+|---|------|------|----------|------|
+| 1 | path/to/file.py | 修改 | ~80 行 | 說明改什麼 |
+| 2 | path/to/file.html | 修改 | ~200 行 | 說明改什麼 |
+| 3 | path/to/new.sh | 新增 | ~40 行 | 說明用途 |
+
+總計：X 個檔案，約 Y 行，預估消耗 ~Z k tokens
+設計確認後開始實作，是否繼續？
+```
+
+**規則細節**：
+- 改動行數為估算值（±30% 均可接受），重點是讓使用者知道規模
+- Token 估算粗略即可：100 行 ≈ 1k tokens，大型 HTML/JS 檔案 ≈ 3–5k tokens
+- 使用者回覆「繼續」「ok」「確認」或任何肯定語意 → 才開始實作
+- 若使用者已在指令中明確說明所有細節（如「只改這一行」）→ 可跳過此步驟
+
+---
 
 ## Session 進度追蹤規則
 **每個 session 結束前，必須更新 `todolist.md`：**

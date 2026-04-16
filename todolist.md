@@ -1,264 +1,139 @@
 # INTEL COMMAND — Todo List
-> Last Updated: 2026-04-13
-> Last Session Note: Phase 1 ARCH 重構完成（utils.js + components.js + 6頁 sidebar 組件化）；執行產業掃描 → RISK_OFF，廣度 36.8，XLP HOT，銀行財報 & 伊朗停火為本週 Binary；bridge.py 更新 data.json
+
+> **Last Updated**: 2026-04-16
+> **Last Session Note**: 啟動 News Protocol V2 重構（RSS 兩階段漏斗 + 4 agent 圓桌 + Dashboard 個股新聞按鈕）— 草擬中
+> **Last Session Note (prev)**: 資料夾大整理 — archive/ 分類建立、過期 protocol/doc/log 歸檔、根目錄清潔；5 個 README + todolist 對齊 V4.6 現況；V4.6 session 前半段已完成雙軌 entry / STAGED_ENTRY / consensus bonus / directional macro / dashboard_server 定時刷新 / positions tracker / decisions.html 整合 / server-side mtime cache-busting
 
 ---
 
-## ✅ 已完成
+## Current State (2026-04-15)
 
-- [x] Dashboard 基本頁面架構（index / sector / news / history）
-- [x] CSS 變數主題系統（dark/light mode）
-- [x] i18n 雙語支援（zh/en）
-- [x] `bridge.py` 雛形（讀取 invest_logs + news_logs → data.json）
-- [x] `viewReport()` 彈窗支援 .md 和 .html 報告
-- [x] System Logs debug console
-- [x] `ARCHITECTURE_REVIEW.md` 架構分析文件
-- [x] **[BRIDGE-1]** 修復 `fear_greed` 擷取路徑 bug（`_phase3.political_overlay.fear_greed_index`，值 15）
-- [x] **[BRIDGE-2]** 新增 `sectors[]` 陣列擷取，`sector.html` 改從 `data.json.sectors` 讀取
-- [x] **[BRIDGE-3]** 新增 warm / cold / avoid sectors 至 market summary
-- [x] **[BRIDGE-4]** 新增 `macro_multiplier` 和 `exposure_ceiling`（sector.html 顯示真實值）
-- [x] **[SECTOR-1/2/3]** Sector heatmap 改用真實資料，verdict badge + proxy_etf + risk_flags
-- [x] **[LAUNCH-1]** 快速啟動引擎：輸入 ticker → `分析 TICKER` 指令 + copy-to-clipboard
-- [x] **[LAUNCH-2]** 修正 `index.html` 導航 `href="#"` → `href="history.html"`
+- **Investment Protocol**: V4.6（雙軌 entry + STAGED_ENTRY + consensus bonus + CONTRARIAN macro flag）
+- **Sector Protocol**: V1.2（multi-file: main + phase_0/1-2-3/4-5/schema）
+- **News Protocol**: V1
+- **Dashboard**: index / decisions / sector / news 四頁（watchlist + history 已合併至 decisions）
+- **Positions Tracker**: `dashboard_server.py` + `/api/positions` + modal form + live_position overlay
+- **Cache-Busting**: server-side mtime 自動注入（不再需要手動 bump `?v=`）
+- **Auto Refresh**: `bridge.py` 每 5 分鐘背景刷新（可用 `DASH_REFRESH_SEC` 覆蓋）
 
 ---
 
-## 🚀 路線 A — 現有資料補完（零新 skill，純利用 logs）
+## 🎯 活動 Backlog
 
-### A1 · `watchlist.html` 進場雷達（新頁面）
+### 路線 S — Skill 最小替代實作 + Review
+**狀態**：4 個 missing skill 已建立最小可行實作並通過 smoke test，但需實戰驗證與閾值調整。
+- [x] ~~**[S-BUILD-01]** `skills/market-sentiment-analyzer/` — yfinance VIX/SPY RSI + CNN F&G backend + PCR（~150 行）~~
+- [x] ~~**[S-BUILD-02]** `skills/tail-risk-analyzer/` — 1y daily returns → kurt/skew/VaR/DD → fragility label（~120 行）~~
+- [x] ~~**[S-BUILD-03]** `skills/portfolio-risk-manager/` — vol scaling + correlation + sector cap（~180 行）~~
+- [x] ~~**[S-BUILD-04]** `skills/short-contrarian-analyst/` — Burry Score + T4 veto（~180 行）~~
+- [x] ~~**[S-COPY]** 複製 9 個現有 skill 到 `skills/`~~
+- [x] ~~**[S-REVIEW-01]** market-sentiment-analyzer 驗證：composite 63.9 (Greed)，VIX 18.2 NORMAL，CNN F&G backend 成功回傳 56.5；PCR endpoint 當前 null（CBOE JSON 不穩）— 可接受 fallback~~
+- [x] ~~**[S-REVIEW-02]** tail-risk-analyzer 閾值校準完成：跑 7 檔 SPY/TLT/NVDA/TSLA/COIN/RIVN/BTC；重新加權 kurt 10% / skew 10% / var 15% / DD 30% / vol 35%（原本 kurt 30% 過高）；校準後 SPY/TLT=ROBUST, NVDA/TSLA=MODERATE, COIN/RIVN/BTC=FRAGILE ✓~~
+- [x] ~~**[S-REVIEW-03]** portfolio-risk-manager 驗證：讀取 positions.json (3 筆) 成功，avg_corr=0.393 合理，Tech sector cap 正確觸發 → final cap 8.5%~~
+- [x] ~~**[S-REVIEW-04]** short-contrarian-analyst 修正完成：~~
+  - ~~D/E 單位：yf 一致返回 percentage（NVDA 7.26, KO 139.79, PG 68.72）→ 改為 always `/100`，NVDA 現在正確顯示 0.07~~
+  - ~~FCF fallback：KO `freeCashflow` 回傳 -1.46B 錯誤，`operatingCashflow` 正確 7.4B → 加入 `if FCF<=0 and OpCF>0: FCF = OpCF * 0.85` fallback~~
+  - ~~7 檔測試（NVDA/KO/PG/JNJ/TSLA/RIVN/COIN）Burry Score 分布 25-45 合理~~
+- [x] ~~**[S-REVIEW-05]** 4 skill 整合測試完成：以 NVDA 為目標按 investment_protocol_v4_6 Phase 2/Phase 4 序列呼叫 4 skill，全部回傳合法 JSON，串接計算 final_position=4.46%（8.5% × 0.75 fragility × 0.7 Burry WARNING）。protocol 需手動指示 Claude 執行 `python3 skills/<name>/scripts/...` 而非自行模擬~~
 
-- [x] ~~**[A1-BRIDGE]** `bridge.py` 補出 watchlist 專用欄位~~
-  - ~~`watch_conditions` (entry_A/B/C) → `recent_analysis[].watch_conditions`~~
-  - ~~`key_risks[]`, `risk_reward_ratio`, `position_size_pct`, `avg_confidence`, `time_horizon`~~
-  - ~~新增 `binary_risks[]`, `divergence_watch[]`, `breadth{}` 欄位~~
+### 路線 N — News Protocol V2（RSS 兩階段 + 4 Agent 圓桌 + Dashboard 整合）
+- [x] ~~**[N-PROTO]** 草擬 `news/news_protocol_v2.md`~~
+  - 兩階段漏斗：Stage 1 RSS shallow triage → Stage 2 WebFetch deep debate
+  - Team 從 3 人擴至 5 人：News Collector + Bull + Bear + **Sector Analyst** + **Macro/Policy Expert** + Arbiter
+  - Arbiter 加權：平權 25/25/25/25，或依新聞類型動態（FOMC→Macro 40%, Earnings→Sector 40%）
+  - Stage 1 晉級門檻：`|score|≥3` OR `binary+within_48h` OR `HIGH credibility + |score|≥2`；硬上限 5 則
+  - Stage 1 輸出「Triage 篩選表」給人類審核（可手動加選）
+  - 只有 Stage 2 才能 patch `sector_intel.json` / `phase0.json`
+  - `news_logs` verdict 新增欄位：`depth: shallow|deep`、`tickers_mentioned[]`、`sector_view`、`macro_view`
+  - FLASH mode 保持單階段 deep
+- [x] ~~**[N-RSS]** 撰寫 `news/fetch_news_rss.py`~~
+  - 來源：Reuters / Bloomberg / Yahoo Finance / MarketWatch / CNBC RSS
+  - 輸出：`news/news_logs/YYYY-MM-DD_raw.json`（標題 + 摘要 + source + timestamp + url）
+  - 去重（headline 相似度）、時間視窗參數（default 24h）
+- [x] ~~**[N-ARCHIVE]** `news_protocol_v1.md` 移至 `archive/old_protocols/news/`~~
+- [x] ~~**[N-CLAUDEMD]** `CLAUDE.md` 更新 news protocol 路徑 → v2 + VERSION bump 1.7.0~~
+- [ ] **[N-DASH-BTN]** `Dashboard/page-decisions.js` 決策卡片新增 `📰 News` 按鈕
+- [ ] **[N-DASH-MODAL]** `Dashboard/decisions.html` + JS 新增 News modal
+  - 列出該 ticker 近 7 天新聞（從 `news_logs/*_digest.json` 以 `tickers_mentioned` 過濾）
+  - 「執行單股 FLASH 分析」按鈕 → 複製 prompt 到剪貼簿
+- [ ] **[N-I18N]** `Dashboard/i18n.js` 補 news modal 鍵值
+- [ ] **[N-BRIDGE]** `bridge.py` 讀取 news_logs 時納入 `depth=deep` 過濾（shallow 不污染 dashboard）
 
-- [x] ~~**[A1-PAGE]** 建立 `watchlist.html`~~
-  - ~~分兩區：ACTIVE（EXECUTE）/ WAITING（watch_conditions）~~
-  - ~~每張卡：entry_A/B/C 觸發條件 + key_risks 標籤 + R/R + 信心指數 + DA badge~~
-  - ~~Filter tabs (ALL / ACTIVE / WAITING)、Summary stats row~~
-
-- [x] ~~**[A1-NAV]** 所有頁面 sidebar 加入「進場雷達」導航（radar 圖示）~~
-
-### A2 · 強化 `index.html` 主儀表板
-
-- [x] ~~**[A2-WARN]** `_phase0.warning_flags` 頂部警告 banner~~
-  - ~~Death_Cross / Extreme_Fear 旗幟顯示，附 Uptrend Ratio 百分比~~
-- [x] ~~**[A2-BREADTH]** `uptrend_ratio_overall` mini gauge（Market Regime 卡底部橫條）~~
-
-### A3 · 強化 `sector.html` 產業掃描
-
-- [x] ~~**[A3-ROTATION]** Sector tile 加入 `rotation_signal`（▲INFLOW / ▼OUTFLOW）+ uptrend bar~~
-- [x] ~~**[A3-DIVERGE]** 底部新增 `sector_divergence_watch` 區塊（signal + action + description）~~
-- [x] ~~**[A3-NOTES]** Strategy Notes 改從真實資料生成（HOT/COLD sector key_reason + DA note）~~
-
-### A4 · 強化 `news.html` 即時新聞
-
-- [x] ~~**[A4-CALENDAR]** 右側欄 `upcoming_binary_risks` 倒數（T-Xd + 受影響產業 tags）~~
-- [x] ~~**[A4-TRUMP]** `trump_trade_signals[]` 政策交易信號卡片（右側欄新增 Policy Trade Signals 區塊）~~
-
-### A5 · 強化 `history.html` 決策歷史
-
-- [x] ~~**[A5-RISKS]** 每張卡展開顯示 `key_risks[]` 標籤~~
-- [x] ~~**[A5-COND]** 顯示 `watch_conditions.entry_A/B/C` 觸發條件（CANCEL 卡才顯示）~~
-
----
-
-## 📅 路線 B — `calendar.html` 財報 & 事件日曆
-
-- [ ] **[B-BRIDGE]** `bridge.py` 導出 `upcoming_binary_risks[]` + `sector_news_sentiment{}`
+### 路線 B — Calendar 頁面（財報 & 事件日曆）
+- [ ] **[B-BRIDGE]** `bridge.py` 導出 `upcoming_binary_risks[]` + `sector_news_sentiment{}` 至 data.json 頂層
 - [ ] **[B-PAGE]** 建立 `calendar.html`
   - 週曆視圖，顯示財報日期、FOMC、地緣政治 binary events
   - 每個事件顯示受影響產業 + direction（bullish/bearish/binary）
-  - 資料來源：`_phase3.upcoming_binary_risks`（已有）+ `earnings-calendar` skill（補完）
+  - 資料來源：`_phase3.upcoming_binary_risks` + `earnings-calendar` skill
 - [ ] **[B-SKILL]** 整合 `earnings-calendar` skill（FMP API），產出 JSON cache 讓 bridge 讀取
 
----
+### 路線 C — Positions Tracker 強化
+- [ ] **[C-IMPORT]** `import_firstrade_csv.py` — 解析 Firstrade 月結單 CSV → `positions.json`（避免手動輸入，安全方式取代非官方 API）
+- [ ] **[C-CLOSE]** Dashboard 新增「平倉」動作：將 position status 改 closed，自動記錄 exit_price + realized_pl
+- [ ] **[C-ADD]** 同一 ticker 加碼時提示「併入現有 avg cost」vs「另開 lot」兩個選項
 
-## 📊 路線 C — `breadth.html` 市場廣度雷達
-
-- [x] ~~**[C-BRIDGE]** `bridge.py` 導出 `_phase0` 完整廣度資料~~
-  - ~~`breadth_components{}`, `warning_flags[]`, `uptrend_ratio_overall`, `cycle_phase`, `regime_confidence`~~
-  - ~~新增 `data.breadth{}` 子物件供 breadth.html 專用~~
-- [x] ~~**[C-PAGE]** 建立 `breadth.html`（386 行）~~
-  - ~~廣度綜合儀表（0–100 semicircle gauge）~~
-  - ~~4 個分量 bar：`overall_breadth`, `sector_participation`, `momentum`, `mean_reversion_risk`~~
-  - ~~Warning flags 視覺化（badge grid）~~
-  - ~~`uptrend_ratio` per sector（來自 `data.sectors[]`，依比例排序）~~
-  - ~~Regime confidence bar、Cycle phase、Exposure ceiling stat cards~~
-  - ~~Analyst Notes 區塊（選填）~~
-- [x] ~~**[C-FTD]** 整合 `ftd-detector` skill 產出，顯示 FTD 狀態 + Distribution Days~~
-  - ~~FMP endpoint 已停用，改寫 `sector/ftd_yfinance.py` yfinance 轉接器，重用 skill 原有分析邏輯~~
-  - ~~bridge.py 新增 `load_ftd_cache()` + `extract_ftd_data()`，輸出 `data.ftd{}`~~
-  - ~~breadth.html 新增 FTD Detector 區塊：State/Quality/Exposure + FTD Event + Post-FTD Health 三欄~~
-  - ~~cache 路徑：`sector/ftd_cache/ftd_detector_YYYY-MM-DD_*.json`~~
-- [x] ~~**[C-TOP]** 整合 `market-top-detector` skill，顯示市場頂部概率~~
-  - ~~`sector/market_top_yfinance.py` yfinance 轉接器，`YFinanceClient` drop-in 替代 FMPClient~~
-  - ~~bridge.py 新增 `load_market_top_cache()` + `extract_market_top_data()`，輸出 `data.market_top{}`~~
-  - ~~breadth.html 新增 Market Top Detector 區塊（Row 6）：Top Probability score + zone badge + 6 components bar + actions + FTD monitor~~
-  - ~~cache 路徑：`sector/market_top_cache/market_top_YYYY-MM-DD_*.json`~~
-- [x] ~~**[C-BREADTH]** 整合 `market-breadth-analyzer` skill（Monty's CSV），取代 phase0 的估算值~~
-  - ~~sector_protocol_v1_1.md Phase 0 加入 script 執行 + cache 邏輯 + 欄位映射表~~
-  - ~~bridge.py 新增 `load_breadth_cache()` + `extract_breadth_from_analyzer()`~~
-  - ~~data.breadth 新增 `components_full`（6組件）、`zone`、`trend_direction`、`actions`、`key_levels`、`current_8ma/200ma`~~
-  - ~~breadth.html 升級：6組件 bar（含 weight + signal）、zone badge、trend badge、actions、Key Levels 區塊~~
-  - ~~cache 路徑：`sector/breadth_cache/market_breadth_YYYY-MM-DD_*.json`~~
+### 路線 D — 效能優化（低優先）
+- [ ] **[ARCH-11]** `lucide.createIcons()` debounce（`requestAnimationFrame` 批次）
+- [ ] **[ARCH-12]** Chart.js 惰性載入（只在 sector.html 載入）
+- [ ] **[ARCH-13]** marked.js 惰性載入（viewReport 觸發時才載）
+- [ ] **[ARCH-14]** `innerHTML` XSS 防護（`escapeHTML()` helper，已有 `UI.escapeHTML`，套用到剩餘欄位）
 
 ---
 
-## 🏗️ 架構重構路線（ARCH — MVP Pattern）
+## ✅ 已完成（session 2026-04-12 to 2026-04-15）
 
-> **設計目標**：用 MVP（Model-Presenter-View）把目前散落在各 HTML inline script 的邏輯分層，
-> 同時消除重複代碼、提升效能，但保持 **pure HTML/JS 無框架**，方便維護。
->
-> **分層定義**：
-> - **Model** → `data-store.js`：單一資料來源、TTL cache、change event
-> - **Presenter** → `page-*.js`：每頁業務邏輯，訂閱 Model、操作 View
-> - **View** → HTML + `components.js`：純 render 函數，只接受資料輸出 DOM string/node
-> - **Shared Utils** → `utils.js`：theme/lang/log/lucide 等通用工具
+### V4.6 投資協議
+- [x] 雙軌 entry（aggressive + conservative ranges）
+- [x] STAGED_ENTRY / STAGED_EXIT 決策狀態
+- [x] Consensus bonus ×1.15（4 agent 同向 + Burry 不 veto）
+- [x] Directional macro multiplier（只作用於同向訊號）
+- [x] 移除 Phase 3 VOLATILE × 0.85 雙重懲罰
+- [x] HOLD 不再強制 Auto-REJECT，改交由 Phase 4 dual-track 彈性處理
+- [x] Binary risk 三分類（positive / unknown / negative）
+- [x] README + todolist 對齊 V4.6
+- [x] `CLAUDE.md` protocol 路徑更新
 
----
+### Sector Protocol V1.2
+- [x] 主檔案 + 4 子檔拆分（main / phase_0 / phase_1-2-3 / phase_4-5 / schema）
+- [x] 三層訊號合成（breadth + FTD + market_top → synthesized_exposure）
+- [x] Phase 4c 決策樹 STEP A-G
+- [x] Extreme Sentiment Playbook（Greed 防守 / Fear 逆向）
+- [x] consensus_warning 三條件精確定義
 
-### Phase 1 — 消除重複（低風險，Quick Win）
+### Dashboard 整合
+- [x] 合併 watchlist.html + history.html → `decisions.html`（5 filter tabs: all/active/waiting/historical/positions）
+- [x] Sidebar 更新（watch_radar + audit_history → decisions）
+- [x] `decisions.html?view=...` URL 深連結支援
+- [x] ARCH-4/5 DataStore singleton + 各頁改用 DataStore.get()
+- [x] ARCH-7/8/9/10 各頁 inline script 抽出為 `page-*.js`（presenter 層）
 
-> 目標：把 5 個頁面都有的重複函數抽到共用檔，不改任何 UI 行為。
+### Server 與 Infrastructure
+- [x] `dashboard_server.py` — static file server + `/api/positions` GET/POST/DELETE
+- [x] Position modal form（ticker/date/price/shares/track/status/notes + delete per lot）
+- [x] `bridge.py` 整合 positions.json：`live_position` overlay + yfinance 即時報價
+- [x] Server-side mtime cache-busting（移除所有 HTML 的 `?v=` 硬編碼）
+- [x] `bridge.py` 每 5 分鐘定時刷新（背景 daemon thread）
+- [x] `open_dashboard.sh` 整合跑 `dashboard_server.py`
 
-- [x] ~~**[ARCH-1]** 建立 `Dashboard/utils.js`~~
-  - 移入：`initTheme()`, `toggleTheme()`（目前 script.js + 4 HTML 各一份）
-  - 移入：`currentLang` state + `toggleLang()`（各頁 ~20 行重複）
-  - 移入：`logToUI(msg, type)`（完全相同，5 個檔案）
-  - 移入：`viewReport(path)`（目前只在 script.js，但 watchlist/news 呼叫不到）
-  - 移入：`updateMarketStatus()`（目前只在 script.js，history.html 用不到）
-  - 加上：`lucide.safe()` wrapper（try-catch 包住 `lucide.createIcons()`）
-  - 所有頁面改 `<script src="utils.js">` 取代重複 inline 代碼
-  - **估計削減**：~400 行重複代碼
-
-- [x] ~~**[ARCH-2]** 建立 `Dashboard/components.js`（純 render 函數）~~
-  - 移入：`renderProgressBar(val, max, color)` → 通用進度條 HTML string
-  - 移入：`renderBadge(label, color, style)` → 通用 badge HTML string
-  - 移入：`renderFlagBadge(flag, translations)` → 目前 breadth.html + script.js 各有一份
-  - 移入：`renderSignalCard(icon, label, val, sub, color, bar, link)` → index.html signal angles
-  - 移入：`renderAuditCard(item, compact)` → 合併 `renderAuditCard` + `renderAuditCardCompact`（compact flag 控制）
-  - 統一 `glass-card` wrapper 邏輯
-  - **估計削減**：~250 行重複代碼
-
-- [x] ~~**[ARCH-3]** Sidebar HTML 組件化~~
-  - 建立 `_sidebar.html` snippet（或 JS function `renderSidebar(activePage)`）
-  - 六個頁面目前各自複製完整 sidebar HTML（~50 行 × 6 = 300 行重複）
-  - 方案 A（簡單）：JS function 動態插入，頁面只留 `<aside id="sidebar"></aside>`
-  - 方案 B（SSI）：若未來有輕量後端，用 server-side include
-  - 推薦方案 A，純 JS，零依賴
-
----
-
-### Phase 2 — Data Layer（Model 層）
-
-> 目標：建立單一資料來源，消除各頁各自 fetch、無 cache 的問題。
-
-- [ ] **[ARCH-4]** 建立 `Dashboard/data-store.js`（DataStore singleton）
-  ```
-  window.DataStore = {
-    _cache: null,
-    _ttl: 60_000,          // 60秒 TTL，與現有 setInterval 對齊
-    _lastFetch: 0,
-    _listeners: [],
-    async get(force = false),  // 有 cache 直接返回，過期才重 fetch
-    subscribe(fn),             // 頁面 Presenter 訂閱 change event
-    refresh(),                 // 手動強制刷新
-  }
-  ```
-  - 解決問題：目前 6 個頁面每次刷新都獨立 fetch，切換頁面不共用 cache
-  - 加入 `AbortController`，防止快速連點刷新產生 race condition
-  - 加入 retry（最多 2 次，指數退避）
-
-- [ ] **[ARCH-5]** 各頁改用 `DataStore.get()` 取代直接 fetch
-  - `index.html` / `script.js` 的 `updateDashboard()`
-  - `news.html` 的 `loadNews()`
-  - `watchlist.html` 的 `loadWatchlist()`
-  - `breadth.html` 的 `loadBreadth()`
-  - `sector.html` 的 `loadSectorData()`
-  - **估計效益**：頁面切換無需重 fetch；同頁多次刷新不疊加請求
+### 文件整理（2026-04-15）
+- [x] 根目錄 stray 檔歸檔 → `archive/root_stray/`
+- [x] 舊 investment protocols (v4_3/v4_4/v4_5) → `archive/old_protocols/investment/`
+- [x] 舊 sector protocols (v1/v1_1/v1_2/v1_2_optimized) → `archive/old_protocols/sector/`
+- [x] `reports/optimized/` → `archive/old_reports/`
+- [x] `Dashboard/ARCHITECTURE_REVIEW.md` + `CHANGELOG.md` → `archive/old_docs/`
+- [x] 舊 `session_export_*` + phase0 cache → `archive/old_invest_logs/`
+- [x] 5 個 README 改寫對齊（root + investment + sector + news 已更新；CLAUDE.md 已對齊）
 
 ---
 
-### Phase 3 — Presenter 層（各頁邏輯分離）
+## 📋 Bridge 資料流對照（current）
 
-> 目標：把各頁 inline `<script>` 移到獨立 JS 檔，HTML 只留純結構。
-
-- [ ] **[ARCH-6]** 抽出 `Dashboard/page-breadth.js`
-  - 移出 breadth.html 內 ~620 行 inline script
-  - 保留：`buildGauge()`, `componentBar()`, `flagBadge()`, `sectorUptrendRow()`, `loadBreadth()`
-  - tooltip engine 可留在 breadth.html（breadth 專用）或移入 utils.js（若其他頁也需要）
-  - breadth.html 只留 HTML skeleton + `<script src="page-breadth.js">`
-
-- [ ] **[ARCH-7]** 抽出 `Dashboard/page-watchlist.js`（watchlist.html inline ~300 行）
-- [ ] **[ARCH-8]** 抽出 `Dashboard/page-news.js`（news.html inline ~250 行）
-- [ ] **[ARCH-9]** 抽出 `Dashboard/page-sector.js`（sector.html inline ~250 行）
-  - 保留 Chart.js instance 管理邏輯（sectorchart 有 update/destroy 邏輯）
-
-- [ ] **[ARCH-10]** `script.js` 瘦身 → 成為 `page-index.js`
-  - 目前 script.js 混了：全域工具函數 + index.html 專用邏輯
-  - 全域工具 → 移入 utils.js / components.js
-  - index 邏輯 → 重命名為 page-index.js 或保留 script.js 但清除重複
-
----
-
-### Phase 4 — 效能優化
-
-> 目標：減少不必要的 CPU/網路消耗，不影響現有功能。
-
-- [ ] **[ARCH-11]** `lucide.createIcons()` 防抖（debounce）
-  - 目前全站呼叫 ~12 次以上（初始化 + 每次 DOM 更新）
-  - 在 utils.js 加入 `scheduleIconUpdate()` — 用 `requestAnimationFrame` 批次執行
-  - 替換所有直接 `lucide.createIcons()` 呼叫
-  - **估計效益**：減少 ~50% 重複 DOM scan
-
-- [ ] **[ARCH-12]** Chart.js 惰性載入（僅 sector.html 需要）
-  - 目前 index.html 也載入了 Chart.js（`script src cdn.jsdelivr.net/npm/chart.js`）
-  - 改為在 sector.html + calendar.html 才載入
-  - 或改為動態 import：`import('https://cdn.jsdelivr.net/.../chart.js')`
-  - **估計效益**：index.html 減少 ~200KB JS 解析
-
-- [ ] **[ARCH-13]** marked.js 惰性載入（僅 viewReport() 觸發時才載入）
-  - 目前所有有 report modal 的頁面都載入 marked（index + watchlist + history）
-  - 改為 viewReport() 第一次呼叫時動態載入
-  - **估計效益**：每頁減少 ~45KB
-
-- [ ] **[ARCH-14]** innerHTML XSS 防護
-  - 建立 `escapeHTML(str)` helper（utils.js）
-  - 套用到所有用 `innerHTML` 渲染 data.json 文字欄位的地方
-  - 高風險欄位：`news.headline`, `sector.key_reason`, `sector.risk_flags[]`, `item.key_risks[]`
-  - **注意**：data.json 是本地產生（trusted source），優先度 Medium，但養成習慣
-
----
-
-### 舊版架構債（保留）
-
-- [ ] **[BRIDGE-5]** 自動觸發機制：`run_bridge.sh` 或 `.claude` post-analysis hook
-- [ ] **[JS-1]** ← 已被 ARCH-1 取代，可視為同一件事
-- [ ] **[SIDEBAR-1]** ← 已被 ARCH-3 取代
-
----
-
-## 🔁 Bridge 雙向架構（最終目標）
-
-```
-Dashboard [watchlist.html]
-    輸入 Ticker → copy 指令 → Claude Code 終端機
-                                    ↓
-              investment_protocol_v4_5 執行
-                                    ↓
-                    invest_logs/history.json  +  reports/
-                                    ↓  (bridge.py 自動觸發)
-                              data.json 更新
-                                    ↓  (60s polling)
-        Dashboard 所有頁面自動刷新顯示最新結果
-```
-
-### Protocol → Log → Dashboard 對應表
-
-| Protocol | 產出 Log | Bridge 讀取 | Dashboard 顯示 |
-|----------|---------|------------|----------------|
-| `investment_protocol_v4_5` | `invest_logs/history.json` | final_action, score, entry/tp/sl, **watch_conditions**, **key_risks** | history + **watchlist** |
-| `sector_protocol_v1_1` | `sector_logs/*_sector_intel.json` | market_regime, sectors[], themes, fear_greed, **_phase0 breadth**, **_phase3 binary_risks** | sector + index + **breadth** + **calendar** |
-| `news_protocol_v1` | `news_logs/*_digest.json` | verdicts[], **trump_signals**, **upcoming_events** | news + **calendar** |
-| `theme-detector` skill | `skills/theme-detector/cache/*.json` | themes[], heat_scores, stocks | index themes（待加強） |
+| Protocol | 輸出 Log | Bridge 讀取欄位 | Dashboard 顯示 |
+|---|---|---|---|
+| `investment_protocol_v4_6` | `invest_logs/history.json` | `final_action`, `final_decision`, `final_score`, `entry_aggressive/conservative`, `consensus_bonus_applied`, `macro_alignment`, `staged_split`, `binary_classification`, `key_risks` | decisions 頁全部 tabs |
+| `sector_protocol_main` (V1.2) | `sector_logs/*_sector_intel.json` | `market_regime`, `_phase0` (breadth/FTD/MT synth), `_phase1` (sectors[]), `_phase3` (binary_risks/trump_signals), `hot_sectors/cold_sectors` | index + sector + news binary sidebar |
+| `news_protocol_v1` | `news_logs/*_digest.json` | `verdicts[]`, `trump_signals`, `upcoming_events` | news 頁 |
+| `market-breadth-analyzer` | `breadth_cache/*.json` | 6 組件 breadth + trend | index 廣度 gauge |
+| `ftd_yfinance.py` | `ftd_cache/*.json` | FTD state + quality score | index FTD card |
+| `market_top_yfinance.py` | `market_top_cache/*.json` | top_score + zone + budget | index 頂部風險 card |
+| `positions.json` | — | lots → avg_cost / unrealized_pct / live_position | decisions 持倉頁 + watchlist overlay |
