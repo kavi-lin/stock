@@ -52,8 +52,23 @@
               </div>
             </div>
 
-            <!-- Flash Banner (shown when navigated from decisions with ?flash=TICKER) -->
-            <div id="flash-banner" class="hidden mb-6 glass-card p-5 border-l-4 border-l-blue-500"></div>
+            <!-- Protocol Run Banner (shown when DIGEST/FLASH/REVIEW is running) -->
+            <div id="news-run-banner" class="hidden mb-6 glass-card p-5 border-l-4 border-l-blue-500">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span id="news-run-icon" class="shrink-0"><span class="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span></span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold truncate" style="color:var(--text-card-title)" id="news-run-title">Running...</p>
+                            <p class="text-[11px] text-zinc-500 font-mono mt-0.5" id="news-run-detail"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="text-[11px] font-mono text-zinc-500" id="news-run-elapsed">00:00</span>
+                        <button id="news-run-cancel" class="text-[10px] font-bold text-red-400 border border-red-500/40 px-2 py-1 rounded hover:bg-red-500/10 transition-all">CANCEL</button>
+                        <button id="news-run-dismiss" class="text-zinc-500 hover:text-zinc-300 text-xs px-1">✕</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- Review Filter Tabs -->
             <div class="flex gap-2 flex-wrap mb-6" id="news-filter-tabs">

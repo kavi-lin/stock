@@ -485,8 +485,26 @@ function buildCard(item) {
     </div>`;
 }
 
-function goFlash(ticker) {
-    window.location.href = `news.html?flash=${encodeURIComponent(ticker)}`;
+async function goFlash(ticker) {
+    const isZh = UI.currentLang === 'zh';
+    const confirmMsg = isZh
+        ? `透過 Claude 執行「新聞分析 FLASH ${ticker}」？（約 2-3 分鐘，消耗 tokens）`
+        : `Run "FLASH ${ticker}" via Claude? (~2-3 min, consumes tokens)`;
+    if (!confirm(confirmMsg)) return;
+    try {
+        const res = await fetch('/api/run-protocol', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: 'flash', ticker: ticker.toUpperCase() }),
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: res.statusText }));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        window.location.href = `news.html?running=flash&ticker=${encodeURIComponent(ticker)}`;
+    } catch (e) {
+        UI.showToast(e.message, 'error', 5000);
+    }
 }
 window.copyFlashPrompt = goFlash;
 

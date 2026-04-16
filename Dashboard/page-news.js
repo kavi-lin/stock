@@ -311,60 +311,131 @@ document.addEventListener('DOMContentLoaded', () => {
          : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400'}`;
   });
 
-  // Copy review prompt to clipboard
   window.copyReviewPrompt = async function(btnEl, headline) {
-    const prompt = `新聞分析 審核 "${headline}"`;
-    await UI.copyToClipboard(prompt);
-    const t = window.i18n?.[UI.currentLang] || {};
-    const np = t.news_page || {};
-    UI.showToast(
-      np.review_toast || (UI.currentLang === 'zh'
-        ? `<span class="text-emerald-400 font-bold">「${prompt}」</span><br>已複製到剪貼簿，貼回 Claude Code 執行正式委員會審核`
-        : `<span class="text-emerald-400 font-bold">"${prompt}"</span><br>Copied — paste into Claude Code for formal committee review`),
-      'info', 5500
-    );
+    const isZh = UI.currentLang === 'zh';
+    const confirmMsg = isZh
+      ? `透過 Claude 執行正式委員會審核？（約 2-3 分鐘，消耗 tokens）`
+      : `Run formal committee review via Claude? (~2-3 min, consumes tokens)`;
+    if (!confirm(confirmMsg)) return;
+    triggerProtocol('review', { headline }, isZh ? `審核中: ${headline.slice(0, 40)}...` : `Reviewing: ${headline.slice(0, 40)}...`);
   };
 
-  // ── Flash deep-link from decisions.html (?flash=TICKER) ──────
-  const _flashParam = new URLSearchParams(window.location.search).get('flash');
-  if (_flashParam) {
-    const ticker = decodeURIComponent(_flashParam).toUpperCase();
-    const prompt = `新聞分析 FLASH ${ticker} 近期動態`;
-    const banner = document.getElementById('flash-banner');
-    if (banner) {
-      const t = window.i18n?.[UI.currentLang] || {};
-      const np = t.news_page || {};
-      banner.classList.remove('hidden');
-      banner.innerHTML = `
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <i data-lucide="newspaper" class="w-5 h-5 text-blue-400 shrink-0"></i>
-            <div>
-              <p class="text-sm font-bold" style="color:var(--text-card-title)">
-                ${np.flash_banner_title || (UI.currentLang === 'zh' ? `針對 <span class="text-blue-400">${ticker}</span> 執行 FLASH 新聞分析` : `Run FLASH news analysis for <span class="text-blue-400">${ticker}</span>`)}
-              </p>
-              <p class="text-[11px] text-zinc-500 font-mono mt-1">${prompt}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button id="flash-copy-btn" class="flex items-center gap-1.5 text-[11px] font-bold px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-400 transition-all">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i> ${np.copy_prompt || (UI.currentLang === 'zh' ? '複製 Prompt' : 'Copy Prompt')}
-            </button>
-            <button onclick="document.getElementById('flash-banner').classList.add('hidden')" class="text-zinc-500 hover:text-zinc-300 text-xs px-2 py-2">✕</button>
-          </div>
-        </div>`;
-      UI.icons();
-      document.getElementById('flash-copy-btn')?.addEventListener('click', async () => {
-        await UI.copyToClipboard(prompt);
-        UI.showToast(
-          UI.currentLang === 'zh'
-            ? `<span class="text-blue-400 font-bold">「${prompt}」</span><br>已複製，貼回 Claude Code 執行`
-            : `<span class="text-blue-400 font-bold">"${prompt}"</span><br>Copied — paste into Claude Code`,
-          'info', 4500
-        );
+  // ── Protocol run banner (shared by DIGEST / FLASH / REVIEW) ──────
+  let _newsPollTimer = null;
+
+  function formatElapsed(sec) {
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function showRunBanner(title, detail) {
+    const banner = document.getElementById('news-run-banner');
+    if (!banner) return;
+    banner.classList.remove('hidden');
+    banner.classList.remove('border-l-emerald-500', 'border-l-red-500');
+    banner.classList.add('border-l-blue-500');
+    document.getElementById('news-run-icon').innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>';
+    document.getElementById('news-run-title').textContent = title;
+    document.getElementById('news-run-detail').textContent = detail || '';
+    document.getElementById('news-run-elapsed').textContent = '00:00';
+    document.getElementById('news-run-cancel').classList.remove('hidden');
+  }
+
+  function setRunBannerDone(msg) {
+    const banner = document.getElementById('news-run-banner');
+    if (!banner) return;
+    banner.classList.remove('border-l-blue-500', 'border-l-red-500');
+    banner.classList.add('border-l-emerald-500');
+    document.getElementById('news-run-icon').innerHTML = '<span class="text-emerald-400 font-bold">✓</span>';
+    document.getElementById('news-run-title').textContent = msg || 'Done';
+    document.getElementById('news-run-cancel').classList.add('hidden');
+    setTimeout(() => banner.classList.add('hidden'), 8000);
+  }
+
+  function setRunBannerError(msg) {
+    const banner = document.getElementById('news-run-banner');
+    if (!banner) return;
+    banner.classList.remove('border-l-blue-500', 'border-l-emerald-500');
+    banner.classList.add('border-l-red-500');
+    document.getElementById('news-run-icon').innerHTML = '<span class="text-red-400 font-bold">✗</span>';
+    document.getElementById('news-run-title').textContent = msg || 'Error';
+    document.getElementById('news-run-cancel').classList.add('hidden');
+  }
+
+  async function pollNewsRunStatus() {
+    try {
+      const r = await fetch('/api/run-protocol/status');
+      if (!r.ok) return;
+      const s = await r.json();
+      document.getElementById('news-run-elapsed').textContent = formatElapsed(s.elapsed_sec || 0);
+      if (s.status !== 'running') {
+        if (_newsPollTimer) { clearInterval(_newsPollTimer); _newsPollTimer = null; }
+        const isZh = UI.currentLang === 'zh';
+        if (s.status === 'done') {
+          setRunBannerDone(isZh ? '分析完成，資料已更新' : 'Done — data refreshed');
+          setTimeout(() => loadNews(), 2000);
+        } else {
+          setRunBannerError(s.error || s.status);
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  async function triggerProtocol(name, params, title) {
+    const isZh = UI.currentLang === 'zh';
+    showRunBanner(title, isZh ? 'Claude 正在處理中...' : 'Claude is processing...');
+    try {
+      const res = await fetch('/api/run-protocol', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, ...params }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      _newsPollTimer = setInterval(pollNewsRunStatus, 2000);
+      pollNewsRunStatus();
+    } catch (e) {
+      setRunBannerError(e.message);
     }
   }
+
+  document.getElementById('news-run-cancel')?.addEventListener('click', async () => {
+    try { await fetch('/api/run-protocol/cancel', { method: 'POST' }); } catch (e) { /* ignore */ }
+  });
+  document.getElementById('news-run-dismiss')?.addEventListener('click', () => {
+    document.getElementById('news-run-banner')?.classList.add('hidden');
+  });
+
+  // Deep-link: ?running=flash&ticker=NVDA (from decisions page POST)
+  // or ?running=digest (auto-triggered)
+  const _urlParams = new URLSearchParams(window.location.search);
+  const _runningType = _urlParams.get('running');
+  const _runningTicker = _urlParams.get('ticker');
+  if (_runningType) {
+    const isZh = UI.currentLang === 'zh';
+    const title = _runningType === 'flash'
+      ? (isZh ? `FLASH 新聞分析 — ${_runningTicker || ''}` : `FLASH News — ${_runningTicker || ''}`)
+      : (isZh ? '新聞 DIGEST 更新中' : 'News DIGEST running');
+    showRunBanner(title, isZh ? 'Claude 正在處理中...' : 'Claude is processing...');
+    _newsPollTimer = setInterval(pollNewsRunStatus, 2000);
+    pollNewsRunStatus();
+  }
+
+  // Check if a protocol is already running on page load
+  (async () => {
+    try {
+      const r = await fetch('/api/run-protocol/status');
+      const s = await r.json();
+      if (s.status === 'running' && (s.name === 'news' || s.name === 'flash' || s.name === 'review')) {
+        const isZh = UI.currentLang === 'zh';
+        showRunBanner(isZh ? `${s.name} 執行中...` : `${s.name} running...`, '');
+        _newsPollTimer = setInterval(pollNewsRunStatus, 2000);
+      }
+    } catch (e) { /* ignore */ }
+  })();
 
   // Shortcut to toggle Debug Console: Shift + D
   document.addEventListener('keydown', (e) => {
@@ -374,18 +445,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('refresh-news').addEventListener('click', async () => {
-    // Dual behavior: reload data.json immediately + copy DIGEST prompt to clipboard
-    // so user can paste into Claude Code to trigger a fresh v2 news DIGEST run.
-    await loadNews();
-    const prompt = '新聞分析 DIGEST';
-    await UI.copyToClipboard(prompt);
-    const t = window.i18n?.[UI.currentLang] || {};
-    const np = t.news_page || {};
-    const msg = np.digest_toast ||
-      (UI.currentLang === 'zh'
-        ? `資料已重新載入。<br><span class="text-emerald-400 font-bold">「${prompt}」</span> 已複製到剪貼簿，<br>貼回 Claude Code 執行完整 DIGEST 更新（需 1–2 分鐘）`
-        : `Dashboard reloaded.<br><span class="text-emerald-400 font-bold">"${prompt}"</span> copied to clipboard.<br>Paste into Claude Code to run full DIGEST (1–2 min).`);
-    UI.showToast(msg, 'info', 6000);
+    const isZh = UI.currentLang === 'zh';
+    const confirmMsg = isZh
+      ? '透過 Claude 執行「新聞分析 DIGEST」？（約 3-5 分鐘，消耗 tokens）'
+      : 'Run "新聞分析 DIGEST" via Claude? (~3-5 min, consumes tokens)';
+    if (!confirm(confirmMsg)) return;
+    triggerProtocol('news', {}, isZh ? '新聞 DIGEST 更新中' : 'News DIGEST running');
   });
 
   UI.boot('news', { translate: applyTranslations, reload: loadNews });

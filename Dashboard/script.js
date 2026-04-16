@@ -289,60 +289,95 @@ async function updateDashboard() {
   }
 }
 
-// ── Launch Engine ──────────────────────────────────────────────────────────
+// ── Launch Engine (reverse-call to Claude via /api/run-protocol) ──────────
+let _launchPollTimer = null;
+
+function formatElapsed(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function setLaunchStatus(status, text) {
+  const box  = document.getElementById('launch-status');
+  const sbox = document.getElementById('launch-status-box');
+  const icon = document.getElementById('launch-status-icon');
+  const txt  = document.getElementById('launch-status-text');
+  const hint = document.getElementById('launch-status-hint');
+  if (!box) return;
+  box.classList.remove('hidden');
+  txt.textContent = text || status;
+  const isZh = UI.currentLang === 'zh';
+  if (status === 'running') {
+    sbox.className = 'rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 border border-emerald-500/40 bg-emerald-500/5';
+    icon.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>';
+    hint.textContent = isZh ? 'Claude 正在分析中，請稍候...' : 'Claude is analyzing, please wait...';
+  } else if (status === 'done') {
+    sbox.className = 'rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 border border-emerald-500/40 bg-emerald-500/10';
+    icon.innerHTML = '<span class="text-emerald-400">✓</span>';
+    hint.textContent = isZh ? '分析完成，Dashboard 已更新' : 'Analysis complete, Dashboard refreshed';
+  } else if (status === 'error') {
+    sbox.className = 'rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 border border-red-500/40 bg-red-500/5';
+    icon.innerHTML = '<span class="text-red-400">✗</span>';
+    hint.textContent = '';
+  }
+}
+
+async function pollLaunchStatus() {
+  try {
+    const r = await fetch('/api/run-protocol/status');
+    if (!r.ok) return;
+    const s = await r.json();
+    const isZh = UI.currentLang === 'zh';
+    document.getElementById('launch-elapsed').textContent = formatElapsed(s.elapsed_sec || 0);
+    if (s.status === 'running') {
+      setLaunchStatus('running', isZh ? `正在執行 ${s.name || ''}...` : `Running ${s.name || ''}...`);
+    } else {
+      if (_launchPollTimer) { clearInterval(_launchPollTimer); _launchPollTimer = null; }
+      if (s.status === 'done') {
+        setLaunchStatus('done', isZh ? '分析完成' : 'Done');
+        setTimeout(() => document.getElementById('launch-status')?.classList.add('hidden'), 8000);
+      } else if (s.status === 'error' || s.status === 'cancelled') {
+        setLaunchStatus('error', s.error || s.status);
+      }
+    }
+  } catch (e) { /* ignore */ }
+}
+
 async function launchAnalysis() {
   const input = document.getElementById('ticker-input');
-  const hint  = document.getElementById('launch-hint');
-  const cmdEl = document.getElementById('launch-cmd');
   if (!input) return;
   const ticker = input.value.trim().toUpperCase();
   if (!ticker) return;
-  const cmd = `分析 ${ticker}`;
-  cmdEl.textContent = cmd;
-  hint.classList.remove('hidden');
-  // Auto-copy + toast (same pattern as FLASH/DIGEST)
-  await UI.copyToClipboard(cmd);
   const isZh = UI.currentLang === 'zh';
-  UI.showToast(
-    isZh ? `<span class="text-emerald-400 font-bold">「${cmd}」</span><br>已複製到剪貼簿，貼回 Claude Code 執行個股分析`
-         : `<span class="text-emerald-400 font-bold">"${cmd}"</span><br>Copied — paste into Claude Code to run analysis`,
-    'info', 5000
-  );
-  // Flash the COPY button as confirmation
-  const btn = document.getElementById('copy-cmd');
-  if (btn) {
-    btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> COPIED';
-    btn.classList.add('text-green-400', 'border-green-500');
-    UI.icons();
-    setTimeout(() => {
-      btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> COPY';
-      btn.classList.remove('text-green-400', 'border-green-500');
-      UI.icons();
-    }, 2000);
+  const confirmMsg = isZh
+    ? `透過 Claude 執行「分析 ${ticker}」？（約 3-5 分鐘，消耗 tokens）`
+    : `Run "分析 ${ticker}" via Claude? (~3-5 min, consumes tokens)`;
+  if (!confirm(confirmMsg)) return;
+
+  setLaunchStatus('running', isZh ? `啟動 ${ticker} 分析...` : `Starting ${ticker} analysis...`);
+  document.getElementById('launch-elapsed').textContent = '00:00';
+  try {
+    const res = await fetch('/api/run-protocol', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'invest', ticker }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    _launchPollTimer = setInterval(pollLaunchStatus, 2000);
+    pollLaunchStatus();
+    UI.logToUI(`Launched: invest ${ticker}`, 'info');
+  } catch (e) {
+    setLaunchStatus('error', e.message);
+    UI.logToUI(`Launch failed: ${e.message}`, 'error');
   }
-  UI.logToUI(`Launch: "${cmd}" → clipboard`, 'info');
 }
 
 document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
 document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
-document.getElementById('copy-cmd')?.addEventListener('click', async () => {
-  const cmd = document.getElementById('launch-cmd')?.textContent;
-  if (!cmd) return;
-  await UI.copyToClipboard(cmd);
-  UI.showToast(
-    UI.currentLang === 'zh' ? `<span class="text-emerald-400 font-bold">「${cmd}」</span> 已複製` : `<span class="text-emerald-400 font-bold">"${cmd}"</span> copied`,
-    'info', 3000
-  );
-  const btn = document.getElementById('copy-cmd');
-  btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> COPIED';
-  btn.classList.add('text-green-400', 'border-green-500');
-  UI.icons();
-  setTimeout(() => {
-    btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> COPY';
-    btn.classList.remove('text-green-400', 'border-green-500');
-    UI.icons();
-    }, 2000);
-  });
 });
 
 // ── Boot ───────────────────────────────────────────────────────────────────

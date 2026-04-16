@@ -54,11 +54,16 @@ PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "600"))
 PROTOCOL_PROMPTS = {
     "sector": "產業掃描",
     "news":   "新聞分析 DIGEST",
-    # invest is ticker-scoped so not exposed here yet
+    "invest": "分析 {ticker}",
+    "flash":  "新聞分析 FLASH {ticker} 近期動態",
+    "review": "新聞分析 審核 \"{headline}\"",
 }
 PROTOCOL_LOG_DIRS = {
     "sector": "sector/scan_logs",
     "news":   "news/scan_logs",
+    "invest": "investment/scan_logs",
+    "flash":  "news/scan_logs",
+    "review": "news/scan_logs",
 }
 
 _protocol_state = {
@@ -186,10 +191,18 @@ def _tail_log(path, lines=50):
         return f"[tail error: {e}]"
 
 
-def run_protocol(name):
-    """Spawn `claude -p "<prompt>"` in a daemon thread. Single-job lock."""
+def run_protocol(name, params=None):
+    """Spawn `claude -p "<prompt>"` in a daemon thread. Single-job lock.
+    params: optional dict for template substitution (e.g. {ticker: "NVDA"}).
+    """
     if name not in PROTOCOL_PROMPTS:
         return None, f"unknown protocol: {name}"
+    # Validate ticker-scoped protocols
+    params = params or {}
+    if "{ticker}" in PROTOCOL_PROMPTS[name] and not params.get("ticker"):
+        return None, f"protocol '{name}' requires a 'ticker' parameter"
+    if "{headline}" in PROTOCOL_PROMPTS[name] and not params.get("headline"):
+        return None, f"protocol '{name}' requires a 'headline' parameter"
 
     with _protocol_lock:
         if _protocol_state["status"] == "running":
@@ -214,7 +227,7 @@ def run_protocol(name):
 
     def _run():
         start = datetime.now()
-        prompt = PROTOCOL_PROMPTS[name]
+        prompt = PROTOCOL_PROMPTS[name].format(**params)
         claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
         rc = -1
         try:
@@ -513,7 +526,8 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 return self._json(400, {"error": f"invalid JSON: {e}"})
             name = body.get("name", "").strip()
-            job_id, err = run_protocol(name)
+            params = {k: v for k, v in body.items() if k not in ("name",)}
+            job_id, err = run_protocol(name, params)
             if err:
                 return self._json(409, {"error": err})
             return self._json(202, {"job_id": job_id, "name": name})

@@ -143,14 +143,16 @@
                             <span data-i18n="start_btn">分析</span>
                         </button>
                     </div>
-                    <div id="launch-hint" class="hidden w-full max-w-xs">
-                        <div class="bg-zinc-50 dark:bg-zinc-900 border border-green-400/40 dark:border-green-500/30 rounded-lg px-3 py-2.5 flex items-center justify-between gap-2">
-                            <span class="text-green-700 dark:text-green-400 font-mono text-xs" id="launch-cmd"></span>
-                            <button id="copy-cmd" class="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-green-600 dark:hover:text-green-400 border border-zinc-300 dark:border-zinc-700 hover:border-green-500 px-2 py-1 rounded transition-all flex items-center gap-1 shrink-0">
-                                <i data-lucide="copy" class="w-3 h-3"></i> COPY
-                            </button>
+                    <!-- Launch status banner -->
+                    <div id="launch-status" class="hidden w-full max-w-xs">
+                        <div class="rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 border" id="launch-status-box">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span id="launch-status-icon" class="shrink-0"></span>
+                                <span class="text-xs font-mono truncate" id="launch-status-text">Starting...</span>
+                            </div>
+                            <span class="text-[10px] font-mono text-zinc-500 shrink-0" id="launch-elapsed">00:00</span>
                         </div>
-                        <p class="text-[9px] text-zinc-600 mt-1 text-center">在 Claude Code 貼上以上指令</p>
+                        <p id="launch-status-hint" class="text-[9px] text-zinc-500 mt-1 text-center"></p>
                     </div>
                 </div>
             </div>
