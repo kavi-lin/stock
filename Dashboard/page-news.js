@@ -265,7 +265,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('refresh-news').addEventListener('click', loadNews);
+  document.getElementById('refresh-news').addEventListener('click', async () => {
+    // Dual behavior: reload data.json immediately + copy DIGEST prompt to clipboard
+    // so user can paste into Claude Code to trigger a fresh v2 news DIGEST run.
+    await loadNews();
+    const prompt = '新聞分析 DIGEST';
+    await UI.copyToClipboard(prompt);
+    const t = window.i18n?.[UI.currentLang] || {};
+    const np = t.news_page || {};
+    const msg = np.digest_toast ||
+      (UI.currentLang === 'zh'
+        ? `資料已重新載入。<br><span class="text-emerald-400 font-bold">「${prompt}」</span> 已複製到剪貼簿，<br>貼回 Claude Code 執行完整 DIGEST 更新（需 1–2 分鐘）`
+        : `Dashboard reloaded.<br><span class="text-emerald-400 font-bold">"${prompt}"</span> copied to clipboard.<br>Paste into Claude Code to run full DIGEST (1–2 min).`);
+    UI.showToast(msg, 'info', 6000);
+  });
 
   UI.boot('news', { translate: applyTranslations, reload: loadNews });
   loadNews();

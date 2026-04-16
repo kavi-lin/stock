@@ -2,6 +2,9 @@
 .DS_Store
 .localized
 
+# User portfolio data (never commit)
+positions.json
+
 # Log files with sensitive data — keep structure but ignore actual content
 news/news_logs/*.json
 sector/sector_logs/*.json

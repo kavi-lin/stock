@@ -671,6 +671,11 @@ def extract_news():
             file_date = n_data.get("scan_date") or n_data.get("timestamp", "")[:10] or os.path.basename(news_file)[:10]
             news_dates_seen.add(file_date)
             for v in n_data.get("verdicts", []):
+                # v2 protocol: skip shallow (Stage 1) items — they're preserved in
+                # the final MD's Shallow Digest section but should not clutter Dashboard.
+                # Missing depth field = legacy v1 item → treat as deep.
+                if v.get("depth") == "shallow":
+                    continue
                 # Sectors: handle both [dict] and [str] shapes
                 raw_sectors = v.get("affected_sectors", [])
                 if raw_sectors and isinstance(raw_sectors[0], dict):
@@ -682,6 +687,8 @@ def extract_news():
                 impact = impact_val.lower() if isinstance(impact_val, str) else "neutral"
                 # Score: prefer "score", fall back to "net_impact_score"
                 score_val = v.get("score") if v.get("score") is not None else v.get("net_impact_score")
+                # news_type: v2 uses "news_type", v1 used "type"
+                type_val = v.get("news_type") or v.get("type", "")
                 news.append({
                     "headline":          v.get("headline"),
                     "headline_zh":       v.get("headline_zh", ""),
@@ -691,13 +698,18 @@ def extract_news():
                     "sectors":           sector_names,
                     "source":            "news_protocol",
                     "source_label":      v.get("source_label", ""),
-                    "type":              v.get("type", ""),
+                    "type":              type_val,
                     "bull_case":         v.get("bull_case", ""),
                     "bear_case":         v.get("bear_case", ""),
+                    # v2 new agents
+                    "sector_view":       v.get("sector_view", ""),
+                    "macro_view":        v.get("macro_view", ""),
                     "arbiter_reasoning": v.get("arbiter_reasoning", ""),
                     "debate_note":       v.get("debate_note", ""),
                     "binary_risk":       v.get("binary_risk", False),
                     "within_48h":        v.get("within_48h", False),
+                    "tickers_mentioned": v.get("tickers_mentioned", []),
+                    "depth":             v.get("depth", "deep"),
                 })
         except Exception as e:
             print(f"[ERROR] News log {news_file}: {e}")

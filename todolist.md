@@ -52,12 +52,11 @@
   - 去重（headline 相似度）、時間視窗參數（default 24h）
 - [x] ~~**[N-ARCHIVE]** `news_protocol_v1.md` 移至 `archive/old_protocols/news/`~~
 - [x] ~~**[N-CLAUDEMD]** `CLAUDE.md` 更新 news protocol 路徑 → v2 + VERSION bump 1.7.0~~
-- [ ] **[N-DASH-BTN]** `Dashboard/page-decisions.js` 決策卡片新增 `📰 News` 按鈕
-- [ ] **[N-DASH-MODAL]** `Dashboard/decisions.html` + JS 新增 News modal
-  - 列出該 ticker 近 7 天新聞（從 `news_logs/*_digest.json` 以 `tickers_mentioned` 過濾）
-  - 「執行單股 FLASH 分析」按鈕 → 複製 prompt 到剪貼簿
-- [ ] **[N-I18N]** `Dashboard/i18n.js` 補 news modal 鍵值
-- [ ] **[N-BRIDGE]** `bridge.py` 讀取 news_logs 時納入 `depth=deep` 過濾（shallow 不污染 dashboard）
+- [x] ~~**[N-DASH-BTN]** `page-decisions.js` 每張卡 footer 新增 📰 FLASH 按鈕 → 複製單股 prompt 到剪貼簿 + toast~~
+- [x] ~~**[N-DASH-NEWS]** `page-news.js` 更新按鈕合併 reload + 複製「新聞分析 DIGEST」prompt + toast~~
+- [x] ~~**[N-TOAST]** `utils.js` 新增 `UI.showToast()` + `UI.copyToClipboard()` 共用元件~~
+- [x] ~~**[N-I18N]** `i18n.js` 新增 `flash_btn` / `flash_toast` / `digest_toast` 鍵值（中英雙語）~~
+- [x] ~~**[N-BRIDGE]** `bridge.py` 過濾 v2 `depth=shallow`；支援 `tickers_mentioned` / `sector_view` / `macro_view` / `news_type` 新欄位~~
 
 ### 路線 B — Calendar 頁面（財報 & 事件日曆）
 - [ ] **[B-BRIDGE]** `bridge.py` 導出 `upcoming_binary_risks[]` + `sector_news_sentiment{}` 至 data.json 頂層

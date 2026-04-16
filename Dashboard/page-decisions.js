@@ -469,6 +469,10 @@ function buildCard(item) {
 
         <!-- Footer -->
         <div class="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-900/50 flex justify-end gap-2">
+            <button onclick="copyFlashPrompt('${item.ticker}')"
+                class="flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-blue-500 hover:text-black hover:border-blue-500 transition-all" title="Run news FLASH for ${item.ticker}">
+                <i data-lucide="newspaper" class="w-3 h-3"></i> ${wl.flash_btn || 'FLASH'}
+            </button>
             <button onclick="openPositionModal('${item.ticker}')"
                 class="flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-emerald-500 hover:text-black hover:border-emerald-500 transition-all">
                 <i data-lucide="plus" class="w-3 h-3"></i> ${(t.positions?.add_btn || '+ Add').replace(/^\+\s*/, '')}
@@ -480,6 +484,19 @@ function buildCard(item) {
         </div>
     </div>`;
 }
+
+async function copyFlashPrompt(ticker) {
+    const prompt = `新聞分析 FLASH ${ticker} 近期動態`;
+    await UI.copyToClipboard(prompt);
+    const t = window.i18n?.[UI.currentLang] || {};
+    const wl = t.watchlist || {};
+    const msg = (wl.flash_toast || (UI.currentLang === 'zh'
+        ? `<span class="text-emerald-400 font-bold">「${prompt}」</span><br>已複製到剪貼簿，貼回 Claude Code 執行針對 {TICKER} 的單股 FLASH 新聞分析`
+        : `<span class="text-emerald-400 font-bold">"${prompt}"</span><br>Copied — paste into Claude Code to run FLASH news debate on {TICKER}`))
+        .replace(/\{TICKER\}/g, ticker);
+    UI.showToast(msg, 'info', 5500);
+}
+window.copyFlashPrompt = copyFlashPrompt;
 
 function renderCards(filter) {
     const grid     = document.getElementById('watchlist-grid');

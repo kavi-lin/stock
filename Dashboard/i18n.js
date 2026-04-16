@@ -211,6 +211,8 @@ const i18n = {
       reeval_triggers: "觀察觸發條件",
       key_risks:       "主要風險",
       view_report:     "查看報告",
+      flash_btn:       "FLASH",
+      flash_toast:     "<span class=\"text-emerald-400 font-bold\">「新聞分析 FLASH {TICKER} 近期動態」</span><br>已複製到剪貼簿，貼回 Claude Code 執行針對 {TICKER} 的單股 FLASH 新聞分析",
       no_items:        "無符合條件的項目",
       model_score:     "模型分數",
       da_filed:        "反向論點已提交",
@@ -265,6 +267,7 @@ const i18n = {
       retry_btn:        "重試",
       loading:          "資料載入中...",
       last_sync_none:   "最後同步：尚未",
+      digest_toast:     "資料已重新載入。<br><span class=\"text-emerald-400 font-bold\">「新聞分析 DIGEST」</span> 已複製到剪貼簿，<br>貼回 Claude Code 執行完整 DIGEST 更新（需 1–2 分鐘）",
       news_type: {
         fomc:            "FOMC",
         earnings:        "財報",
@@ -571,6 +574,8 @@ const i18n = {
       reeval_triggers: "Watch Triggers",
       key_risks:       "Key Risks",
       view_report:     "View Report",
+      flash_btn:       "FLASH",
+      flash_toast:     "<span class=\"text-emerald-400 font-bold\">\"新聞分析 FLASH {TICKER} 近期動態\"</span><br>Copied to clipboard — paste into Claude Code to run FLASH news debate on {TICKER}",
       no_items:        "No items match this filter.",
       model_score:     "Model Score",
       da_filed:        "DA Filed",
@@ -624,6 +629,7 @@ const i18n = {
       retry_btn:        "RETRY",
       loading:          "Loading data...",
       last_sync_none:   "LAST SYNC: NONE",
+      digest_toast:     "Dashboard reloaded.<br><span class=\"text-emerald-400 font-bold\">\"新聞分析 DIGEST\"</span> copied to clipboard.<br>Paste into Claude Code to run full DIGEST (1–2 min).",
       news_type: {
         fomc:            "FOMC",
         earnings:        "EARNINGS",

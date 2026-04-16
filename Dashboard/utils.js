@@ -76,6 +76,36 @@
       });
     },
 
+    // ── Toast + Clipboard Helper ─────────────────────────────────────────
+    showToast(msg, type = 'info', ms = 4500) {
+      let host = document.getElementById('ui-toast-host');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'ui-toast-host';
+        host.className = 'fixed top-5 right-5 z-[200] flex flex-col gap-2 pointer-events-none';
+        document.body.appendChild(host);
+      }
+      const color = type === 'error' ? 'border-red-500 text-red-300 bg-red-900/30'
+                  : type === 'warn'  ? 'border-yellow-500 text-yellow-200 bg-yellow-900/30'
+                                     : 'border-emerald-500 text-emerald-200 bg-emerald-900/30';
+      const el = document.createElement('div');
+      el.className = `px-4 py-3 rounded-xl border backdrop-blur-xl text-xs font-mono max-w-sm shadow-2xl pointer-events-auto animate-[slideIn_.3s_ease] ${color}`;
+      el.innerHTML = msg;
+      host.appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, ms - 300);
+      setTimeout(() => el.remove(), ms);
+    },
+
+    copyToClipboard(text) {
+      if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+      // Fallback for insecure contexts
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy'); } finally { ta.remove(); }
+      return Promise.resolve();
+    },
+
     // ── Debug Logger ─────────────────────────────────────────────────────
     logToUI(msg, type = 'info') {
       const out = document.getElementById('log-output');
