@@ -16,7 +16,55 @@ MARKET_TOP_CACHE  = os.path.join(BASE_DIR, 'sector', 'market_top_cache')
 INVEST_LOGS   = os.path.join(BASE_DIR, 'investment', 'invest_logs')
 NEWS_LOGS     = os.path.join(BASE_DIR, 'news', 'news_logs')
 REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
+POSITIONS_FILE = os.path.join(BASE_DIR, 'positions.json')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
+
+
+def load_positions_by_ticker():
+    """Load positions.json and group by ticker. Fetch current price once per ticker."""
+    if not os.path.exists(POSITIONS_FILE):
+        return {}, []
+    try:
+        with open(POSITIONS_FILE, 'r') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"[WARN] positions.json: {e}")
+        return {}, []
+
+    all_positions = data.get('positions', [])
+    by_ticker = {}
+    # Group active (non-closed) lots for live overlay; closed lots stay in all_positions
+    for p in all_positions:
+        # Normalize realized_pl display fields for closed/trimmed lots
+        if p.get('exit_price') is not None and p.get('closed_shares') is not None:
+            p['realized_pl'] = round(
+                (float(p['exit_price']) - float(p['entry_price'])) * float(p['closed_shares']), 2
+            )
+            p['realized_pct'] = round(
+                (float(p['exit_price']) / float(p['entry_price']) - 1) * 100, 2
+            )
+        if p.get('status') == 'closed':
+            continue
+        by_ticker.setdefault(p['ticker'], []).append(p)
+
+    # Fetch current prices (yfinance, single call per ticker)
+    try:
+        import yfinance as yf
+        for tk, plist in by_ticker.items():
+            try:
+                info = yf.Ticker(tk).fast_info
+                curr = info.last_price if hasattr(info, 'last_price') else None
+                for p in plist:
+                    if curr:
+                        p['current_price'] = round(curr, 2)
+                        p['unrealized_pl'] = round((curr - p['entry_price']) * p['shares'], 2)
+                        p['unrealized_pct'] = round((curr / p['entry_price'] - 1) * 100, 2)
+            except Exception as e:
+                print(f"[WARN] positions price {tk}: {e}")
+    except ImportError:
+        pass
+
+    return by_ticker, all_positions
 
 
 def get_latest_file(pattern):
@@ -24,23 +72,47 @@ def get_latest_file(pattern):
     return max(files, key=os.path.getmtime) if files else None
 
 
+# Unified cache freshness rule: mtime < 3 hours ago
+CACHE_TTL_SEC = 10800  # 3 hours
+
+def _is_fresh(path, ttl_sec=CACHE_TTL_SEC):
+    """True if file exists and mtime is within ttl_sec. Used across all cache loaders."""
+    try:
+        return (datetime.now().timestamp() - os.path.getmtime(path)) < ttl_sec
+    except OSError:
+        return False
+
+def _freshness_label(path):
+    """Human-readable '(FRESH, 45m)' or '(STALE, 5h)' for log output."""
+    try:
+        age_sec = datetime.now().timestamp() - os.path.getmtime(path)
+        if age_sec < 60:
+            age_str = f"{int(age_sec)}s"
+        elif age_sec < 3600:
+            age_str = f"{int(age_sec // 60)}m"
+        else:
+            age_str = f"{age_sec / 3600:.1f}h"
+        return "FRESH" if age_sec < CACHE_TTL_SEC else "STALE", age_str
+    except OSError:
+        return "MISSING", "-"
+
+
 # ─────────────────────────────────────────────
 # MARKET BREADTH ANALYZER CACHE
 # ─────────────────────────────────────────────
 
 def load_breadth_cache():
-    """Load today's market-breadth-analyzer output from breadth_cache/.
-    Returns parsed JSON dict, or None if not found."""
-    today_str = date.today().strftime("%Y-%m-%d")
-    pattern = os.path.join(BREADTH_CACHE, f"market_breadth_{today_str}_*.json")
-    files = glob.glob(pattern)
-    if not files:
+    """Load newest market-breadth-analyzer output from breadth_cache/ (mtime-based).
+    Returns parsed JSON dict, or None if no files at all."""
+    latest = get_latest_file(os.path.join(BREADTH_CACHE, "market_breadth_*.json"))
+    if not latest:
         return None
-    latest = max(files, key=os.path.getmtime)
     try:
         with open(latest, 'r') as f:
             data = json.load(f)
-        print(f"[OK] Breadth cache: {os.path.basename(latest)}")
+        state, age = _freshness_label(latest)
+        tag = "[OK]" if state == "FRESH" else "[STALE]"
+        print(f"{tag} Breadth cache: {os.path.basename(latest)} ({state}, {age})")
         return data
     except Exception as e:
         print(f"[WARN] Breadth cache read error: {e}")
@@ -189,9 +261,12 @@ def extract_sectors(s_data):
             "name":             name,
             "verdict":          s.get("verdict", "COLD"),
             "score":            s.get("composite_score", 0),
+            "score_components": s.get("score_components", {}),
             "proxy_etf":        s.get("proxy_etf", ""),
             "risk_flags":       s.get("risk_flags", []),
             "key_reason":       (s.get("key_reasons") or [""])[0],
+            "key_reasons":      s.get("key_reasons") or [],
+            "tail_risk_label":  s.get("tail_risk_label", "N/A"),
             "devils_advocate":  s.get("devils_advocate_note", ""),
             # Phase-1 additions
             "rotation_signal":  p1.get("rotation_signal", "NEUTRAL"),
@@ -247,8 +322,9 @@ def _find_report(ticker, date_clean):
     return None
 
 
-def extract_audit_history():
+def extract_audit_history(positions_by_ticker=None):
     """Build recent_analysis[] with full watchlist metadata"""
+    positions_by_ticker = positions_by_ticker or {}
     audit_map = {}
     audits    = []
 
@@ -258,21 +334,38 @@ def extract_audit_history():
             with open(history_file, 'r') as f:
                 history_data = json.load(f)
 
-            for item in reversed(history_data[-10:]):
+            # Process all history entries (was [-10:], caused older cards to fall
+            # through to the ARCHIVE fallback and lose all metadata).
+            for item in reversed(history_data):
                 ticker    = item.get("ticker", "UNKNOWN")
-                date_raw  = item.get("date", "Unknown")
+                date_raw  = item.get("date") or item.get("export_date", "Unknown")
                 date_clean = date_raw.replace("-", "")
-                meta      = item.get("metadata", {})
+                # V4.6 canonical source = trades_this_session[0]; legacy `metadata` block
+                # (pre-V4.6 duplication) layered underneath so older entries still resolve.
+                trade0    = (item.get("trades_this_session") or [{}])[0] or {}
+                legacy    = item.get("metadata") or {}
+                meta      = {**legacy, **trade0}
 
                 report_path = _find_report(ticker, date_clean)
-                decision    = item.get("final_action", "HOLD")
-                score       = meta.get("final_score") or item.get("final_score", 0.0)
+                # V4.6: final_action ∈ {EXECUTE, STAGED, CANCEL}; prefer final_decision for detail
+                decision         = item.get("final_action") or meta.get("final_action") or "HOLD"
+                final_decision   = meta.get("final_decision") or item.get("final_decision")  # BUY/STAGED_ENTRY/HOLD/SELL
+                # Score extraction — handle legacy shapes: item.final_score, meta.final_score, or both
+                raw_score = meta.get("final_score")
+                if raw_score is None:
+                    raw_score = item.get("final_score", 0.0)
+                score = raw_score if raw_score is not None else 0.0
+
+                # V4.6 dual-track entry ranges
+                entry_aggr  = meta.get("entry_aggressive")     # [min, max] or None
+                entry_cons  = meta.get("entry_conservative")   # [min, max] or None
 
                 # Price targets
                 tp    = meta.get("take_profit") or item.get("take_profit")
                 sl    = meta.get("stop_loss") or item.get("stop_loss")
                 watch = meta.get("watch_price") or meta.get("trigger_price")
-                entry = meta.get("entry_range") or meta.get("entry_price")
+                # Legacy fallback: old single entry_range / entry_price
+                entry = entry_aggr or meta.get("entry_range") or meta.get("entry_price")
 
                 if not entry and not watch:
                     ctx = meta.get("macro_context", "")
@@ -280,12 +373,19 @@ def extract_audit_history():
                     if pm:
                         entry = pm[-1]
 
-                if isinstance(entry, list):
-                    entry = " - ".join(str(e) for e in entry)
+                def _range_str(rng):
+                    if isinstance(rng, list):
+                        return " - ".join(str(e) for e in rng)
+                    return rng
 
-                # Backtest P/L
+                entry_display = _range_str(entry)
+                entry_aggr_display = _range_str(entry_aggr)
+                entry_cons_display = _range_str(entry_cons)
+
+                # Backtest P/L — prefer aggressive[0], fall back to legacy entry_range
                 perf = None
-                if FMP_API_KEY and isinstance(meta.get("entry_range"), list):
+                backtest_entry = entry_aggr if isinstance(entry_aggr, list) else meta.get("entry_range")
+                if FMP_API_KEY and isinstance(backtest_entry, list) and backtest_entry:
                     try:
                         res = requests.get(
                             f"https://financialmodelingprep.com/api/v3/quote/{ticker}"
@@ -293,35 +393,70 @@ def extract_audit_history():
                         ).json()
                         if res:
                             curr  = res[0].get("price")
-                            ep    = float(str(meta["entry_range"][0]).replace("$", ""))
+                            ep    = float(str(backtest_entry[0]).replace("$", ""))
                             chg   = ((curr - ep) / ep) * 100
                             perf  = {"current": curr, "entry": ep, "change": round(chg, 2)}
                     except Exception as e:
                         print(f"[WARN] Backtest {ticker}: {e}")
 
                 # ── Watchlist metadata ──────────────────────────────
-                watch_conditions = meta.get("watch_conditions")  # dict entry_A/B/C
-                key_risks        = meta.get("key_risks", [])
-                rr_ratio         = meta.get("risk_reward_ratio")
-                position_pct     = meta.get("position_size_pct")
-                avg_conf         = meta.get("avg_confidence")
-                time_horizon     = meta.get("time_horizon")
-                da_filed         = meta.get("devils_advocate_filed", False)
+                watch_conditions     = meta.get("watch_conditions")
+                key_risks            = meta.get("key_risks", [])
+                rr_ratio             = meta.get("risk_reward_ratio")
+                position_pct         = meta.get("position_size_pct")
+                avg_conf             = meta.get("avg_confidence")
+                time_horizon         = meta.get("time_horizon")
+                da_filed             = meta.get("devils_advocate_filed", False)
+                # V4.6 additions
+                consensus_bonus      = meta.get("consensus_bonus_applied", False)
+                macro_alignment      = meta.get("macro_alignment")          # ALIGNED | CONTRARIAN
+                staged_split         = meta.get("staged_split")             # {aggressive_pct, conservative_pct}
+                binary_class         = meta.get("binary_classification")    # positive|unknown|negative|none
+
+                # Join active positions (open) for this ticker
+                active_positions = positions_by_ticker.get(ticker, [])
+                has_live_position = len(active_positions) > 0
+                position_summary = None
+                if has_live_position:
+                    total_shares = sum(p['shares'] for p in active_positions)
+                    total_cost   = sum(p['cost_basis'] for p in active_positions)
+                    avg_cost     = total_cost / total_shares if total_shares else 0
+                    curr_px      = active_positions[0].get('current_price')
+                    upl_pct      = ((curr_px / avg_cost - 1) * 100) if (curr_px and avg_cost) else None
+                    position_summary = {
+                        "total_shares": round(total_shares, 2),
+                        "avg_cost":     round(avg_cost, 2),
+                        "total_cost":   round(total_cost, 2),
+                        "current_price": curr_px,
+                        "unrealized_pct": round(upl_pct, 2) if upl_pct is not None else None,
+                        "unrealized_pl": round((curr_px - avg_cost) * total_shares, 2) if curr_px else None,
+                        "lots": len(active_positions),
+                    }
+
                 # Determine if this ticker belongs on watchlist
+                # V4.6: STAGED and STAGED_ENTRY are active staged entries; active position forces inclusion
                 on_watchlist = (
-                    decision == "EXECUTE" or
+                    decision in ("EXECUTE", "STAGED") or
+                    final_decision in ("BUY", "STAGED_ENTRY") or
                     bool(watch_conditions) or
-                    bool(watch)
+                    bool(watch) or
+                    has_live_position
                 )
 
                 audits.append({
                     "ticker":           ticker,
                     "decision":         decision,
+                    "final_decision":   final_decision,
                     "score":            round(float(score), 2) if score is not None else 0.0,
                     "time":             date_raw,
                     "report_url":       report_path,
                     "performance":      perf,
-                    "targets":          {"tp": tp, "sl": sl, "watch": watch, "entry": entry},
+                    "targets":          {
+                        "tp": tp, "sl": sl, "watch": watch,
+                        "entry": entry_display,
+                        "entry_aggressive":   entry_aggr_display,
+                        "entry_conservative": entry_cons_display,
+                    },
                     # Watchlist fields
                     "on_watchlist":     on_watchlist,
                     "watch_conditions": watch_conditions,
@@ -331,6 +466,14 @@ def extract_audit_history():
                     "avg_confidence":   avg_conf,
                     "time_horizon":     time_horizon,
                     "da_filed":         da_filed,
+                    # V4.6 fields
+                    "consensus_bonus":  consensus_bonus,
+                    "macro_alignment":  macro_alignment,
+                    "staged_split":     staged_split,
+                    "binary_class":     binary_class,
+                    # Live position overlay (positions.json)
+                    "live_position":    position_summary,
+                    "position_lots":    active_positions,
                 })
                 audit_map[ticker] = True
 
@@ -369,15 +512,15 @@ def extract_audit_history():
 
 def load_ftd_cache():
     """Load most recent ftd_detector_*.json from ftd_cache/. Returns None if not found."""
-    pattern = os.path.join(FTD_CACHE, "ftd_detector_*.json")
-    files = glob.glob(pattern)
-    if not files:
+    latest = get_latest_file(os.path.join(FTD_CACHE, "ftd_detector_*.json"))
+    if not latest:
         return None
-    latest = max(files, key=os.path.getmtime)
     try:
         with open(latest, 'r') as f:
             data = json.load(f)
-        print(f"[OK] FTD cache: {os.path.basename(latest)}")
+        state, age = _freshness_label(latest)
+        tag = "[OK]" if state == "FRESH" else "[STALE]"
+        print(f"{tag} FTD cache: {os.path.basename(latest)} ({state}, {age})")
         return data
     except Exception as e:
         print(f"[WARN] FTD cache read error: {e}")
@@ -445,15 +588,15 @@ def extract_ftd_data(raw):
 
 def load_market_top_cache():
     """Load most recent market_top_*.json from market_top_cache/. Returns None if not found."""
-    pattern = os.path.join(MARKET_TOP_CACHE, "market_top_*.json")
-    files = glob.glob(pattern)
-    if not files:
+    latest = get_latest_file(os.path.join(MARKET_TOP_CACHE, "market_top_*.json"))
+    if not latest:
         return None
-    latest = max(files, key=os.path.getmtime)
     try:
         with open(latest, 'r') as f:
             data = json.load(f)
-        print(f"[OK] Market Top cache: {os.path.basename(latest)}")
+        state, age = _freshness_label(latest)
+        tag = "[OK]" if state == "FRESH" else "[STALE]"
+        print(f"{tag} Market Top cache: {os.path.basename(latest)} ({state}, {age})")
         return data
     except Exception as e:
         print(f"[WARN] Market Top cache read error: {e}")
@@ -518,21 +661,33 @@ def extract_news():
     news = []
 
     # 1. Read from news_logs (primary — news protocol output)
+    # Supports both legacy format (verdict / net_impact_score / affected_sectors as list of dicts)
+    # and 2026-04-15+ format (impact / score / affected_sectors as list of strings)
     news_dates_seen = set()
     for news_file in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)[:3]:
         try:
             with open(news_file, 'r') as f:
                 n_data = json.load(f)
-            file_date = n_data.get("timestamp", "")[:10]
+            file_date = n_data.get("scan_date") or n_data.get("timestamp", "")[:10] or os.path.basename(news_file)[:10]
             news_dates_seen.add(file_date)
             for v in n_data.get("verdicts", []):
-                sector_names = [s.get("sector", "Unknown") for s in v.get("affected_sectors", [])]
+                # Sectors: handle both [dict] and [str] shapes
+                raw_sectors = v.get("affected_sectors", [])
+                if raw_sectors and isinstance(raw_sectors[0], dict):
+                    sector_names = [s.get("sector", "Unknown") for s in raw_sectors]
+                else:
+                    sector_names = [s if isinstance(s, str) else "Unknown" for s in raw_sectors]
+                # Impact: prefer "impact" field, fall back to "verdict"
+                impact_val = v.get("impact") or v.get("verdict") or "NEUTRAL"
+                impact = impact_val.lower() if isinstance(impact_val, str) else "neutral"
+                # Score: prefer "score", fall back to "net_impact_score"
+                score_val = v.get("score") if v.get("score") is not None else v.get("net_impact_score")
                 news.append({
                     "headline":          v.get("headline"),
                     "headline_zh":       v.get("headline_zh", ""),
-                    "impact":            v.get("verdict", "NEUTRAL").lower(),
-                    "score":             v.get("net_impact_score"),
-                    "date":              file_date,
+                    "impact":            impact,
+                    "score":             score_val,
+                    "date":              v.get("date") or file_date,
                     "sectors":           sector_names,
                     "source":            "news_protocol",
                     "source_label":      v.get("source_label", ""),
@@ -642,7 +797,9 @@ def run_bridge():
                 "notes":             s_data.get("_phase0", {}).get("notes", ""),
                 "source":            "sector_intel",
             }
-            print(f"[OK] Sector: {os.path.basename(latest_sector)} | "
+            state, age = _freshness_label(latest_sector)
+            tag = "[OK]" if state == "FRESH" else "[STALE]"
+            print(f"{tag} Sector: {os.path.basename(latest_sector)} ({state}, {age}) | "
                   f"{len(data['sectors'])} sectors | "
                   f"F&G={data['market']['fear_greed']} | "
                   f"binary_risks={len(data['binary_risks'])}")
@@ -693,9 +850,12 @@ def run_bridge():
         print("[INFO] No Market Top cache found — run sector/market_top_yfinance.py")
 
     # 2. Audit history + watchlist
-    data["recent_analysis"] = extract_audit_history()
+    positions_by_ticker, all_positions = load_positions_by_ticker()
+    data["positions"] = all_positions
+    data["recent_analysis"] = extract_audit_history(positions_by_ticker)
     wl_count = sum(1 for a in data["recent_analysis"] if a.get("on_watchlist"))
-    print(f"[OK] Audit history: {len(data['recent_analysis'])} entries ({wl_count} on watchlist)")
+    live_count = sum(1 for a in data["recent_analysis"] if a.get("live_position"))
+    print(f"[OK] Audit history: {len(data['recent_analysis'])} entries ({wl_count} watchlist, {live_count} live positions)")
 
     # 3. News
     data["news"] = extract_news()

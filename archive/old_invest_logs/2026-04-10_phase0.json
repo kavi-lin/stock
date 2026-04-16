@@ -1,0 +1,59 @@
+{
+  "verdict_date": "2026-04-10",
+  "source": "news_protocol_digest",
+  "last_news_update": "2026-04-10 10:00",
+  "news_patch_count": 6,
+
+  "macro_backdrop_score_prev": 30,
+  "macro_backdrop_score": 26.7,
+  "macro_backdrop_delta": -1.7,
+  "macro_backdrop_note": "前日breadth_score 30（VOLATILE）。CPI衝擊(-0.8) + 停火脆弱(-0.3) + 藥品關稅(-0.3) = -1.4。二次DIGEST: Hormuz仍封(-0.8) + 藥品關稅確認(-0.5) + Meta AI capex(+0.3) + 金屬關稅中性(-0.3) = -0.3，累計 delta -1.7，更新為26.7。維持VOLATILE偏空傾斜。",
+
+  "market_regime": "VOLATILE",
+  "exposure_ceiling": "40%",
+  "exposure_ceiling_note": "CPI 3.3%使Fed降息預期消失；停火binary risk維持；earnings season高不確定性。建議從50%降至40%上限直至停火方向明朗。",
+
+  "mandatory_risk_flags": [
+    "CPI_3.3pct_YoY_Fed_rate_cut_removed_from_2026",
+    "Iran_ceasefire_binary_Hormuz_reopen_fragile",
+    "Earnings_season_high_expectation_14pct_EPS_hurdle",
+    "Stagflation_risk_if_ceasefire_fails",
+    "Late_Cycle_Regime_Still_Active"
+  ],
+
+  "binary_risks": [
+    {
+      "id": "br001",
+      "event": "US-Iran Ceasefire Sustainability",
+      "event_date": "2026-04-22",
+      "description": "2週停火到期。伊朗Apr 9已指控美國違約。若破裂：Oil→$112+，市場閃崩。若延續：能源通膨緩解，市場再漲。",
+      "outcome_bull": "停火延續或升級為和平談判 → Oil繼續回落至$85-90，S&P 500可測試52週高點",
+      "outcome_bear": "停火破裂，Hormuz重新封鎖 → Oil>$110，CPI 4月再衝擊，市場-5%至-10%快速下跌",
+      "probability_bull": 0.40,
+      "probability_bear": 0.60,
+      "added_at": "2026-04-10 10:00"
+    },
+    {
+      "id": "br002",
+      "event": "Q1 Earnings Season — Q2 Guidance Quality",
+      "event_date": "2026-04-14",
+      "description": "JPMorgan Apr 14開季。+14.4% EPS高門檻。Q2指引若下修 → 全年EPS重新定價；若維持 → 市場基本面支撐確認。",
+      "outcome_bull": "JPM等大行超預期 + Q2指引維持 → 市場估值撐住，科技/金融反彈",
+      "outcome_bear": "銀行提升信用損失準備 + Q2指引下調 → 市場重估，S&P 500跌破6700",
+      "probability_bull": 0.50,
+      "probability_bear": 0.50,
+      "added_at": "2026-04-10 10:00"
+    },
+    {
+      "id": "br003",
+      "event": "Fed Response to CPI 3.3% — May FOMC Statement",
+      "event_date": "2026-05-07",
+      "description": "March CPI 3.3%大幅超過Fed目標。May FOMC是否進一步鷹化甚至重提升息可能性？",
+      "outcome_bull": "Fed定性為Iran戰爭暫時衝擊，維持鴿派立場 → 降息預期年底回歸",
+      "outcome_bear": "Fed明確移除2026年降息預期 + 鷹派措辭 → 成長股二次殺估值，美股大幅調整",
+      "probability_bull": 0.35,
+      "probability_bear": 0.65,
+      "added_at": "2026-04-10 10:00"
+    }
+  ]
+}

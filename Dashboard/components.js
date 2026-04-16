@@ -12,7 +12,7 @@
     // Returns an HTML string for a thin progress bar.
     progressBar(pct, color, height = '1.5') {
       const w = Math.min(100, Math.max(0, pct));
-      return `<div class="w-full h-${height} rounded-full bg-zinc-800">
+      return `<div class="w-full h-${height} rounded-full bg-zinc-200 dark:bg-zinc-800">
         <div class="h-${height} rounded-full transition-all duration-700" style="width:${w}%;background-color:${color}"></div>
       </div>`;
     },
@@ -41,8 +41,10 @@
     // Returns a DOM element. compact=true → single-row list item; false → full card.
     renderAuditCard(item, compact = false) {
       const isBuy     = item.decision === 'BUY' || item.decision === 'EXECUTE';
-      const isCancel  = item.decision === 'CANCEL' || item.decision === 'PASS';
+      const isStaged  = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY' || item.decision === 'STAGED_EXIT';
+      const isCancel  = item.decision === 'CANCEL' || item.decision === 'PASS' || item.decision === 'SELL';
       const statusColor = isBuy ? 'var(--status-bullish)'
+                        : isStaged ? 'var(--status-binary)'
                         : isCancel ? 'var(--status-bearish)' : 'var(--text-muted)';
       const t = window.i18n?.[UI.currentLang] || {};
       const translatedDecision = t.status?.[item.decision] || item.decision;
@@ -63,7 +65,7 @@
           <div class="flex items-center gap-3 shrink-0">
             <span class="text-xl font-black tracking-tighter font-mono" style="color:var(--text-card-title)">${UI.escapeHTML(String(item.score))}</span>
             <button onclick="UI.viewReport('${UI.escapeHTML(item.report_url)}')"
-                    class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-black transition-all">
+                    class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-zinc-800 text-emerald-600 dark:text-zinc-400 shadow-sm flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white dark:hover:text-black hover:shadow-none transition-all">
               <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
             </button>
           </div>`;
@@ -77,7 +79,7 @@
 
       const perfUI = item.performance
         ? `<div class="mt-4 pt-4 border-t border-zinc-900 flex justify-between items-center">
-             <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Backtest P/L</div>
+             <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">${window.i18n?.[UI.currentLang]?.overview?.backtest_pl || 'Backtest P/L'}</div>
              <div class="flex items-center gap-1 font-mono font-bold text-sm" style="color:${perfColor}">
                <i data-lucide="${perfIcon}" class="w-3 h-3"></i>
                ${item.performance.change > 0 ? '+' : ''}${item.performance.change}%
@@ -108,7 +110,7 @@
              ).join('')}</div>
            </div>` : '';
 
-      const condUI = (item.decision === 'CANCEL' && item.watch_conditions)
+      const condUI = ((item.decision === 'CANCEL' || isStaged) && item.watch_conditions)
         ? `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50 space-y-1.5">
              <p class="text-[9px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-1">
                <i data-lucide="crosshair" class="w-3 h-3"></i> ${UI.escapeHTML(t.watchlist?.entry_triggers || '進場觸發條件')}
@@ -154,8 +156,8 @@
             </div>
           </div>
           <button onclick="UI.viewReport('${UI.escapeHTML(item.report_url)}')"
-                  class="w-12 h-12 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center hover:bg-emerald-500 hover:text-black hover:border-emerald-500 transition-all shadow-md dark:shadow-xl active:scale-95 group/btn">
-            <i data-lucide="file-text" class="w-5 h-5 text-zinc-700 dark:text-zinc-100 group-hover/btn:scale-110 transition-transform"></i>
+                  class="w-12 h-12 rounded-xl bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-zinc-800 text-emerald-600 dark:text-zinc-100 flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white dark:hover:text-black transition-all shadow-sm dark:shadow-xl active:scale-95 group/btn">
+            <i data-lucide="file-text" class="w-5 h-5 group-hover/btn:scale-110 transition-transform"></i>
           </button>
         </div>
         ${targetUI}${risksUI}${condUI}${perfUI}`;

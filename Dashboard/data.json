@@ -1,55 +1,52 @@
 {
   "status": "success",
-  "last_updated": "2026-04-13 23:13:37",
+  "last_updated": "2026-04-16 09:06:08",
   "market": {
-    "regime": "RISK_OFF",
+    "regime": "VOLATILE",
     "cycle_phase": "Mid",
     "regime_confidence": 0.9,
-    "fear_greed": 38,
-    "fear_greed_label": "Fear",
+    "fear_greed": 15,
+    "fear_greed_label": "Extreme Fear",
     "themes": [
-      "AI Infrastructure Picks-and-Shovels (VRT, MU, TSM, ANET — not ETF-level XLK)",
-      "Defensive Rotation (XLP, XLV, XLU)",
-      "Value over Growth / Small-Cap Earnings Recovery"
+      "Basic Materials war-demand play (XLB)",
+      "Cybersecurity geopolitical acceleration (CIBR)"
     ],
-    "hot_sectors": [
-      "Consumer_Staples"
-    ],
+    "hot_sectors": [],
     "warm_sectors": [
       "Utilities",
-      "Healthcare",
-      "Industrials"
+      "Basic_Materials",
+      "Industrials",
+      "Technology",
+      "Financial"
     ],
     "cold_sectors": [
-      "Real_Estate",
-      "Financials",
-      "Materials",
-      "Technology",
-      "Communication_Services",
       "Energy",
-      "Consumer_Discretionary"
+      "Healthcare",
+      "Consumer_Cyclical",
+      "Consumer_Defensive",
+      "Communication_Services",
+      "Real_Estate"
     ],
     "avoid_sectors": [],
-    "exposure_ceiling": "40-60%",
-    "macro_multiplier": "--",
-    "breadth_score": 36.8,
+    "exposure_ceiling": "60-75%",
+    "macro_multiplier": "0.82x",
+    "breadth_score": 41.8,
     "breadth_components": {
-      "overall_breadth": 37,
+      "overall_breadth": 42,
       "sector_participation": 57,
       "momentum": 30,
       "mean_reversion_risk": 55
     },
-    "uptrend_ratio": 0.519098349062016,
+    "uptrend_ratio": 0.5439602152581672,
     "warning_flags": [
       "Bearish_Signal_Active",
       "Below_200MA",
-      "Low_Historical_Percentile",
-      "Weakening_Zone"
+      "Low_Historical_Percentile"
     ],
     "trump_signals": [
       {
         "keyword": "pharma_threat",
-        "headline": "100% Section 232 tariff on patented pharmaceuticals — EU/JP/CH at 15%",
+        "headline": "Trump 100% pharma tariff; risk of 200% by late 2026",
         "affected_sectors": [
           "Healthcare"
         ],
@@ -57,40 +54,53 @@
       },
       {
         "keyword": "tariff",
-        "headline": "Steel/Aluminum/Copper restructured to 50% effective April 6",
+        "headline": "IEEPA ruled unlawful; 10% universal tariff via Section 232/122/301",
         "affected_sectors": [
-          "Industrials",
-          "Materials"
+          "Consumer_Discretionary",
+          "Technology"
+        ],
+        "direction": "bearish"
+      },
+      {
+        "keyword": "iran_blockade",
+        "headline": "Trump naval blockade of Strait of Hormuz; WTI $96-104",
+        "affected_sectors": [
+          "Energy",
+          "Airlines",
+          "Industrials"
         ],
         "direction": "bearish"
       },
       {
         "keyword": "china_threat",
-        "headline": "Chip tariffs deferred to 2027 under Trump-Xi deal — tech supply chain relief",
+        "headline": "Trump 威脅若中國向伊朗輸送武器加徵 50% 關稅",
         "affected_sectors": [
-          "Technology"
+          "Technology",
+          "Consumer_Cyclical"
         ],
-        "direction": "bullish"
+        "direction": "bearish"
       }
     ],
-    "named_targets": [],
-    "notes": "市場 RISK_OFF，廣度 19 百分位，僅 XLP 評 HOT，防禦板塊 (XLU/XLV/XLI) 為 WARM。科技 ETF 整體 COLD 但 AI 基礎設施個股仍可選。本週最大 Binary 事件：銀行 Q1 財報 (Apr 13-15) 及伊朗停火到期 (~Apr 21)。建議倉位上限 40-60%。中美峰會 (五月) 是 H1 2026 最大結構性 Binary。"
+    "named_targets": [
+      "Healthcare/Pharma",
+      "Iran"
+    ],
+    "notes": "【21:00 更新】JPM Q1 大幅超預期（EPS +9%）確認銀行財報季開門紅，Financial sentiment 升至 bullish；Intel/Oracle 科技股大漲帶動 Technology sentiment 升至 bullish。但 Fear&Greed 跌至 15（Extreme Fear），市場情緒與股價走勢背離——S&P 連4漲但投資人仍極端恐懼，為典型 'climbing wall of worry' 情境。Iran 停火信號帶動盤中反彈，但解除二元風險尚早。每日最高監控優先：①Iran 24h 動態 ②FOMC 4/28-29。"
   },
   "breadth": {
-    "score": 36.8,
-    "zone": "Weakening",
-    "zone_color": "orange",
-    "exposure_ceiling": "40-60%",
-    "guidance": "Breadth deteriorating. Begin profit-taking and raise cash allocation.",
+    "score": 41.8,
+    "zone": "Neutral",
+    "zone_color": "yellow",
+    "exposure_ceiling": "60-75%",
+    "guidance": "Mixed signals. Be selective with new positions and tighten risk controls.",
     "actions": [
-      "Take profits on weakest 25-40% of positions",
-      "No new momentum entries",
-      "Raise cash allocation significantly",
-      "Consider defensive sector rotation (XLU, XLP, XLV)",
-      "Watch for cycle trough signal for re-entry"
+      "Reduce new position sizes by 25-50%",
+      "Tighten stop-losses",
+      "Focus on stocks with strong relative strength",
+      "Avoid lagging sectors and speculative names"
     ],
     "components": {
-      "overall_breadth": 37,
+      "overall_breadth": 42,
       "sector_participation": 57,
       "momentum": 30,
       "mean_reversion_risk": 55
@@ -98,56 +108,55 @@
     "components_full": {
       "breadth_level_trend": {
         "score": 57,
-        "signal": "NEUTRAL: 8MA=0.519 in downtrend - mixed signals",
+        "signal": "NEUTRAL: 8MA=0.544 in downtrend - mixed signals",
         "label": "Current Breadth Level & Trend",
         "weight": 25
       },
       "ma_crossover": {
         "score": 30,
-        "signal": "NEGATIVE: 8MA below 200MA (gap=-0.087, 8MA rising) (recovery signal)",
+        "signal": "NEGATIVE: 8MA below 200MA (gap=-0.060, 8MA rising) (recovery signal)",
         "label": "8MA vs 200MA Crossover",
         "weight": 20
       },
       "cycle_position": {
         "score": 45,
-        "signal": "PEAK (25d ago): recovery attempt, 8MA rising",
+        "signal": "PEAK (28d ago): recovery attempt, 8MA rising",
         "label": "Peak/Trough Cycle Position",
         "weight": 20
       },
       "bearish_signal": {
         "score": 25,
-        "signal": "WARNING (muted): Bearish signal active in downtrend, but 8MA=0.519 still relatively strong [PINK ZONE]",
+        "signal": "WARNING (muted): Bearish signal active in downtrend, but 8MA=0.544 still relatively strong [PINK ZONE]",
         "label": "Bearish Signal Status",
         "weight": 15
       },
       "historical_percentile": {
-        "score": 10,
-        "signal": "LOW: 19th percentile - below average breadth",
+        "score": 30,
+        "signal": "LOW: 23th percentile - below average breadth",
         "label": "Historical Percentile",
         "weight": 10
       },
       "divergence": {
-        "score": 28.0,
-        "signal": "Consistent decline (both falling): S&P -1.7%, Breadth 8MA -0.140 over 60d",
+        "score": 58.0,
+        "signal": "Mixed signals: S&P +0.7%, Breadth 8MA -0.138 over 60d",
         "label": "S&P 500 vs Breadth Divergence",
         "weight": 10
       }
     },
-    "uptrend_ratio": 0.519098349062016,
-    "current_8ma": 0.519098349062016,
-    "current_200ma": 0.6056138529479576,
+    "uptrend_ratio": 0.5439602152581672,
+    "current_8ma": 0.5439602152581672,
+    "current_200ma": 0.6043791253974102,
     "cycle_phase": "Mid",
     "warning_flags": [
       "Bearish_Signal_Active",
       "Below_200MA",
-      "Low_Historical_Percentile",
-      "Weakening_Zone"
+      "Low_Historical_Percentile"
     ],
     "regime_confidence": 0.9,
-    "trend_direction": "stable",
+    "trend_direction": "improving",
     "trend_entries": [
       {
-        "data_date": "2026-04-09",
+        "data_date": "2026-04-10",
         "composite_score": 36.8,
         "component_scores": {
           "breadth_level_trend": 57,
@@ -157,13 +166,39 @@
           "historical_percentile": 10,
           "divergence": 28.0
         },
-        "recorded_at": "2026-04-13 00:16:27"
+        "recorded_at": "2026-04-14 08:08:59"
+      },
+      {
+        "data_date": "2026-04-13",
+        "composite_score": 39.8,
+        "component_scores": {
+          "breadth_level_trend": 57,
+          "ma_crossover": 30,
+          "cycle_position": 45,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 38.0
+        },
+        "recorded_at": "2026-04-14 21:05:21"
+      },
+      {
+        "data_date": "2026-04-14",
+        "composite_score": 41.8,
+        "component_scores": {
+          "breadth_level_trend": 57,
+          "ma_crossover": 30,
+          "cycle_position": 45,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 58.0
+        },
+        "recorded_at": "2026-04-16 00:18:48"
       }
     ],
     "data_quality": "Complete (6/6 components)",
     "key_levels": {
       "200MA Level": {
-        "value": "0.6056",
+        "value": "0.6044",
         "significance": "Key support/resistance for 8MA. 8MA crossing below is an early warning of deterioration, not a standalone bearish signal."
       },
       "Extreme Weakness (0.40)": {
@@ -175,7 +210,7 @@
         "significance": "8MA above 0.60 indicates broad participation. Below 0.60 = selective market, above = inclusive rally."
       },
       "Historical Avg Peak": {
-        "value": "0.713",
+        "value": "0.715",
         "significance": "Average peak level. Approaching this level suggests breadth may be near a cyclical high."
       },
       "Historical Avg Trough": {
@@ -183,8 +218,8 @@
         "significance": "Average extreme trough level. Reaching this level is a potential contrarian buy signal."
       }
     },
-    "data_date": "2026-04-09",
-    "days_old": 4,
+    "data_date": "2026-04-14",
+    "days_old": 2,
     "source": "market-breadth-analyzer",
     "notes": ""
   },
@@ -203,19 +238,19 @@
     "swing_low_price": 6343.72021484375,
     "decline_pct": -9.07,
     "rally_day1_date": "2026-03-31",
-    "rally_day_count": 9,
+    "rally_day_count": 11,
     "distribution_days": 0,
-    "days_monitored": 3,
+    "days_monitored": 5,
     "power_trend": false,
     "power_trend_cond": 1,
     "invalidated": false,
     "invalidation_date": null,
-    "sp500_price": 6802.419921875,
-    "qqq_price": 609.65,
-    "generated_at": "2026-04-13 21:30:06"
+    "sp500_price": 6999.02001953125,
+    "qqq_price": 634.1300048828125,
+    "generated_at": "2026-04-16 00:18:50"
   },
   "market_top": {
-    "composite_score": 36.5,
+    "composite_score": 35.5,
     "zone": "Yellow (Early Warning)",
     "zone_color": "yellow",
     "risk_budget": "80-90%",
@@ -246,11 +281,11 @@
         "weighted": 25.0
       },
       "leading_stocks": {
-        "score": 16,
+        "score": 8,
         "label": "Leading Stock Health",
         "signal": "HEALTHY: Leadership intact",
         "weight": 20,
-        "weighted": 3.2
+        "weighted": 1.6
       },
       "defensive_rotation": {
         "score": 0,
@@ -260,253 +295,1303 @@
         "weighted": 0.0
       },
       "breadth_divergence": {
-        "score": 45,
+        "score": 36,
         "label": "Market Breadth Divergence",
         "signal": "CAUTION: Mild breadth weakness",
         "weight": 15,
-        "weighted": 6.8
+        "weighted": 5.4
       },
       "index_technical": {
-        "score": 10,
+        "score": 15,
         "label": "Index Technical Condition",
-        "signal": "HEALTHY: Technical structure intact",
+        "signal": "MIXED: Minor technical concerns",
         "weight": 15,
-        "weighted": 1.5
+        "weighted": 2.2
       },
       "sentiment": {
-        "score": 0,
+        "score": 12,
         "label": "Sentiment & Speculation",
-        "signal": "HEALTHY: No excessive speculation",
+        "signal": "MIXED: Moderate sentiment",
         "weight": 10,
-        "weighted": 0.0
+        "weighted": 1.2
       }
     },
     "ftd_applicable": false,
     "ftd_detected": false,
     "ftd_reason": "Composite < 40 (Green/Yellow zone) - FTD monitoring not needed",
     "rally_day_count": null,
-    "delta_direction": "improving",
-    "delta_value": -3.5,
-    "sp500_price": 6803.1298828125,
+    "delta_direction": "stable",
+    "delta_value": -2.3,
+    "sp500_price": 6999.08984375,
     "sp500_year_high": 7002.27978515625,
-    "sp500_dist_from_high": -2.84,
-    "vix_level": 20.799999237060547,
-    "generated_at": "2026-04-13 21:30:30"
+    "sp500_dist_from_high": -0.05,
+    "vix_level": 18.049999237060547,
+    "generated_at": "2026-04-16 00:19:06"
   },
   "sectors": [
     {
-      "name": "Consumer_Staples",
-      "verdict": "HOT",
-      "score": 76,
-      "proxy_etf": "XLP",
-      "risk_flags": [
-        "consensus_crowding"
-      ],
-      "key_reason": "RISK_OFF confirmed INFLOW; all-time highs",
-      "devils_advocate": "Consensus trade — crowded positioning risk. Possible margin compression if tariff inflation passes through input costs Q2-Q3.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
-    },
-    {
       "name": "Utilities",
       "verdict": "WARM",
-      "score": 73,
+      "score": 68,
+      "score_components": {
+        "breadth_momentum": 22,
+        "theme_heat": 14,
+        "news_catalyst": 14,
+        "rotation_signal": 18
+      },
       "proxy_etf": "XLU",
-      "risk_flags": [],
-      "key_reason": "Classic RISK_OFF safe haven with breakout signals",
-      "devils_advocate": "Near HOT threshold; Fed hawkish surprise (tariff inflation) is the key downside risk.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "risk_flags": [
+        "overbought"
+      ],
+      "key_reason": "Highest uptrend ratio (0.439)",
+      "key_reasons": [
+        "Highest uptrend ratio (0.439)",
+        "Defensive demand in VIX 19+ env",
+        "Overbought; risk-on reversal if FTD holds"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "若停火達成 Risk-ON 轉向，資金快速外流",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.439,
+      "overbought_risk": "HIGH",
+      "ytd_perf_note": "Leading defensive; Overbought"
     },
     {
-      "name": "Healthcare",
+      "name": "Basic_Materials",
       "verdict": "WARM",
-      "score": 70,
-      "proxy_etf": "XLV",
-      "risk_flags": [],
-      "key_reason": "Outperform consensus; Eli Lilly dominance intact",
-      "devils_advocate": "None — clean defensive call.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "score": 67,
+      "score_components": {
+        "breadth_momentum": 20,
+        "theme_heat": 16,
+        "news_catalyst": 13,
+        "rotation_signal": 18
+      },
+      "proxy_etf": "XLB",
+      "risk_flags": [
+        "overbought",
+        "binary_risk_within_48h"
+      ],
+      "key_reason": "War-driven material demand (metals/gold)",
+      "key_reasons": [
+        "War-driven material demand (metals/gold)",
+        "Top bullish theme (heat 64)",
+        "Overbought; binary on ceasefire"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "停火達成即崩跌；consensus warning triggered",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.434,
+      "overbought_risk": "HIGH",
+      "ytd_perf_note": "War-driven demand; Overbought"
     },
     {
       "name": "Industrials",
       "verdict": "WARM",
       "score": 65,
+      "score_components": {
+        "breadth_momentum": 19,
+        "theme_heat": 14,
+        "news_catalyst": 14,
+        "rotation_signal": 18
+      },
       "proxy_etf": "XLI",
-      "risk_flags": [],
-      "key_reason": "Infrastructure spending tailwind; small-cap earnings gap narrowing",
-      "devils_advocate": "Tariff on electronics/auto parts (proposed Apr 10) could hit 2-3% EPS if implemented.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
-    },
-    {
-      "name": "Real_Estate",
-      "verdict": "COLD",
-      "score": 46,
-      "proxy_etf": "XLRE",
-      "risk_flags": [],
-      "key_reason": "Morningstar: 12% discount to fair value (potential catch-up trade)",
-      "devils_advocate": "Most undervalued sector per Morningstar. Monitor for re-entry if rates soften.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
-    },
-    {
-      "name": "Financials",
-      "verdict": "COLD",
-      "score": 34,
-      "proxy_etf": "XLF",
       "risk_flags": [
-        "binary_risk_within_48h"
+        "overbought"
       ],
-      "key_reason": "KBW Bank Index -6% Q1 2026 (worst since 2023 banking crisis)",
-      "devils_advocate": "Strong upgrade candidate post-earnings if GS (+12% rev) and JPM (+7% EPS) beat. M&A pipeline at $11.3B Q1 supports bull case.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
-    },
-    {
-      "name": "Materials",
-      "verdict": "COLD",
-      "score": 44,
-      "proxy_etf": "XLB",
-      "risk_flags": [],
-      "key_reason": "High international supply chain exposure, tariff margin risk",
-      "devils_advocate": "",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "key_reason": "Highest slope (+0.037); Infrastructure theme",
+      "key_reasons": [
+        "Highest slope (+0.037); Infrastructure theme",
+        "War spending backdrop",
+        "Overbought; theme maturity 80% (exhausting)"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "Theme bearish in cache; Overbought status limits upside",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.421,
+      "overbought_risk": "HIGH",
+      "ytd_perf_note": "Highest slope; theme exhausting"
     },
     {
       "name": "Technology",
-      "verdict": "COLD",
-      "score": 40,
+      "verdict": "WARM",
+      "score": 60,
+      "score_components": {
+        "breadth_momentum": 15,
+        "theme_heat": 18,
+        "news_catalyst": 13,
+        "rotation_signal": 14
+      },
       "proxy_etf": "XLK",
       "risk_flags": [],
-      "key_reason": "MSFT -23% YTD, NVDA -5% YTD; 8MA far below 200MA",
-      "devils_advocate": "AI Infrastructure sub-theme (VRT +61.8%, MU +32.3%, TSM +13.7%) is strongly bullish — XLK ETF-level is misleading. Individual name selection within XLK is actionable.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "key_reason": "TSMC capex guidance upside; AI cycle intact",
+      "key_reasons": [
+        "TSMC capex guidance upside; AI cycle intact",
+        "NVDA Q4 +73% revenue YoY",
+        "IT sector lagging YTD; tariff cloud"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "IT sector YTD underperformer despite beats",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.345,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": "TSMC/AI tailwind; IT lagging YTD"
     },
     {
-      "name": "Communication_Services",
-      "verdict": "COLD",
-      "score": 38,
-      "proxy_etf": "XLC",
+      "name": "Financial",
+      "verdict": "WARM",
+      "score": 54,
+      "score_components": {
+        "breadth_momentum": 14,
+        "theme_heat": 12,
+        "news_catalyst": 14,
+        "rotation_signal": 14
+      },
+      "proxy_etf": "XLF",
       "risk_flags": [],
-      "key_reason": "Growth rotation headwinds; hyperscaler AI spend scrutiny",
-      "devils_advocate": "",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "key_reason": "Rate hold 3.5-3.75% supports NIMs",
+      "key_reasons": [
+        "Rate hold 3.5-3.75% supports NIMs",
+        "Earnings season catalyst Q1 starting",
+        "CPI 3.3% delays rate cut expectations"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "Rate cut hopes fading = headwind for rate-sensitive names",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.338,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": "Rates on hold; earnings season"
     },
     {
       "name": "Energy",
       "verdict": "COLD",
-      "score": 32,
+      "score": 47,
+      "score_components": {
+        "breadth_momentum": 8,
+        "theme_heat": 12,
+        "news_catalyst": 22,
+        "rotation_signal": 5
+      },
       "proxy_etf": "XLE",
       "risk_flags": [
-        "binary_risk_ceasefire_apr21"
+        "binary_risk_within_48h",
+        "energy_stock_oil_divergence"
       ],
-      "key_reason": "Iran ceasefire (Apr 7) deflated war premium; XLE worst day in a year (-4.7%)",
-      "devils_advocate": "XLE had +37% YTD through Q1 — if ceasefire fails, energy snaps back violently. Monitor carefully.",
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "key_reason": "ONLY sector trending DOWN; slope -0.031",
+      "key_reasons": [
+        "ONLY sector trending DOWN; slope -0.031",
+        "Oil $96-104 but stocks diverging (distribution)",
+        "Iran 48h binary = high risk"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "若停火完全破裂 WTI >$110 可能短暫補漲，需每日監控",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.337,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "DIVERGENCE: oil +50% but stocks falling"
     },
     {
-      "name": "Consumer_Discretionary",
+      "name": "Consumer_Cyclical",
       "verdict": "COLD",
-      "score": 25,
+      "score": 32,
+      "score_components": {
+        "breadth_momentum": 10,
+        "theme_heat": 6,
+        "news_catalyst": 4,
+        "rotation_signal": 12
+      },
       "proxy_etf": "XLY",
-      "risk_flags": [
-        "avoid_adjacent"
+      "risk_flags": [],
+      "key_reason": "Oil price = effective consumer tax",
+      "key_reasons": [
+        "Oil price = effective consumer tax",
+        "Tariff margin pressure (IEEPA ruling aftermath)",
+        "Low uptrend ratio 0.265"
       ],
-      "key_reason": "Tariff damage most severe: autos, retail, apparel (25% duties)",
-      "devils_advocate": "",
+      "tail_risk_label": "N/A",
+      "devils_advocate": "N/A",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.265,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "Oil price consumer tax effect"
+    },
+    {
+      "name": "Healthcare",
+      "verdict": "COLD",
+      "score": 34,
+      "score_components": {
+        "breadth_momentum": 12,
+        "theme_heat": 8,
+        "news_catalyst": 4,
+        "rotation_signal": 10
+      },
+      "proxy_etf": "XLV",
+      "risk_flags": [
+        "pharma_tariff_risk"
+      ],
+      "key_reason": "Trump pharma tariff 100% (risk of 200%)",
+      "key_reasons": [
+        "Trump pharma tariff 100% (risk of 200%)",
+        "Major margin/supply chain headwind",
+        "Exemptions only for MFN-compliant firms"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "Carve-outs for MFN-compliant companies limit systemic damage",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.297,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "Pharma 100% tariff headwind"
+    },
+    {
+      "name": "Consumer_Defensive",
+      "verdict": "COLD",
+      "score": 40,
+      "score_components": {
+        "breadth_momentum": 9,
+        "theme_heat": 12,
+        "news_catalyst": 10,
+        "rotation_signal": 9
+      },
+      "proxy_etf": "XLP",
+      "risk_flags": [],
+      "key_reason": "Low uptrend ratio 0.235; slow slope",
+      "key_reasons": [
+        "Low uptrend ratio 0.235; slow slope",
+        "Some defensive demand offset",
+        "No specific positive catalyst"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "N/A",
       "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": null,
-      "overbought_risk": "",
-      "ytd_perf_note": ""
+      "uptrend_ratio": 0.235,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "Slow slope; overlooked"
+    },
+    {
+      "name": "Communication_Services",
+      "verdict": "COLD",
+      "score": 41,
+      "score_components": {
+        "breadth_momentum": 9,
+        "theme_heat": 12,
+        "news_catalyst": 10,
+        "rotation_signal": 10
+      },
+      "proxy_etf": "XLC",
+      "risk_flags": [],
+      "key_reason": "Low uptrend ratio 0.236",
+      "key_reasons": [
+        "Low uptrend ratio 0.236",
+        "AI ad tailwind exists but muted",
+        "No major catalyst in window"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "N/A",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.236,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "AI ad tailwinds, muted"
+    },
+    {
+      "name": "Real_Estate",
+      "verdict": "COLD",
+      "score": 27,
+      "score_components": {
+        "breadth_momentum": 8,
+        "theme_heat": 5,
+        "news_catalyst": 6,
+        "rotation_signal": 8
+      },
+      "proxy_etf": "XLRE",
+      "risk_flags": [
+        "late_cycle",
+        "rate_headwind"
+      ],
+      "key_reason": "Lowest uptrend ratio (0.221)",
+      "key_reasons": [
+        "Lowest uptrend ratio (0.221)",
+        "Rates held at 3.75%; CPI re-acceleration",
+        "FOMC cut timeline pushed out further"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "N/A",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.221,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": "Lowest ratio; rates headwind"
     }
   ],
   "binary_risks": [
     {
-      "event": "GS/JPM/C/WFC/BAC Q1 Earnings",
-      "date": "2026-04-13 to 2026-04-15",
-      "days_until": null,
+      "event": "TSM Q1 2026 earnings",
+      "date": "2026-04-16",
+      "days_until": 0,
       "affected_sectors": [
-        "Financials"
+        "TECHNOLOGY"
       ],
       "within_48h": true
     },
     {
-      "event": "Iran Ceasefire Stability / Hormuz Reopening",
+      "event": "Iran ceasefire expiration",
       "date": "2026-04-21",
-      "days_until": 8,
+      "days_until": 5,
       "affected_sectors": [
-        "Energy",
-        "Airlines"
+        "ENERGY",
+        "INDUSTRIALS",
+        "CONSUMER_CYCLICAL"
       ],
       "within_48h": false
     },
     {
-      "event": "FOMC Interest Rate Decision",
+      "event": "NFLX/AMD/TSLA earnings week",
+      "date": "2026-04-22",
+      "days_until": 6,
+      "affected_sectors": [
+        "TECHNOLOGY",
+        "CONSUMER_CYCLICAL"
+      ],
+      "within_48h": false
+    },
+    {
+      "event": "FOMC April rate decision",
       "date": "2026-04-29",
-      "days_until": 16,
+      "days_until": 13,
       "affected_sectors": [
-        "Technology",
-        "Real_Estate",
-        "Financials"
-      ],
-      "within_48h": false
-    },
-    {
-      "event": "Trump-Xi China Summit",
-      "date": "2026-05-01",
-      "days_until": 18,
-      "affected_sectors": [
-        "Technology",
-        "Materials",
-        "Consumer_Discretionary"
+        "FINANCIAL",
+        "REAL_ESTATE"
       ],
       "within_48h": false
     }
   ],
   "divergence_watch": [
     {
-      "sector": "Technology",
+      "sector": "Energy",
       "signal": "news_positive_price_negative",
-      "description": "AI fundamentals (NVDA +65% YoY revenue, $1T demand pipeline) sharply positive, but XLK ETF stocks (MSFT -23%, NVDA -5% YTD) are underperforming",
-      "action": "monitor; individual AI infrastructure names (VRT, MU, TSM, ANET) are viable despite ETF COLD"
+      "description": "WTI +50% from pre-war but Energy stocks trending DOWN; smart money distributing",
+      "action": "monitor"
     },
     {
-      "sector": "Financials",
-      "signal": "binary_pending",
-      "description": "KBW -6% Q1 but earnings consensus +7-34% EPS YoY. This week's reports resolve the divergence.",
-      "action": "wait for Apr 13-15 earnings; reassess immediately after"
+      "sector": "Industrials",
+      "signal": "news_negative_price_positive",
+      "description": "Theme cache labels Industrials bearish (Sector Concentration exhausting) but uptrend ratio Up",
+      "action": "monitor"
     }
   ],
   "recent_analysis": [
     {
+      "ticker": "AVGO",
+      "decision": "STAGED",
+      "final_decision": "STAGED_ENTRY",
+      "score": 0.81,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_AVGO.md",
+      "performance": null,
+      "targets": {
+        "tp": 470,
+        "sl": 305,
+        "watch": null,
+        "entry": "328-345",
+        "entry_aggressive": null,
+        "entry_conservative": "328 - 345"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "conservative_entry": "$328-345 MA20/50/200 cluster 回測 + 日陽包陰 + 量 > 1.2× + RSI < 55",
+        "aggressive_self_veto": "RSI 80.1 + 離 cluster +20% → 禁止追買",
+        "exit_stop": "跌破 $305 (MA cluster 下緣) = Stage 2 失效",
+        "momentum_break": "RSI 回不到 55 以下代表動能破壞 → 重新評估",
+        "customer_risk": "Google/OpenAI custom silicon 合作反轉 → 取消"
+      },
+      "key_risks": [
+        "rsi_80_severely_overbought",
+        "ps_27_rich",
+        "price_20pct_above_ma_cluster",
+        "ev_ebit_63",
+        "gross_margin_77_unsustainable",
+        "china_huawei_ascend_competition",
+        "tail_mean_reversion_imminent"
+      ],
+      "rr_ratio": 4.24,
+      "position_pct": 0.0247,
+      "avg_confidence": 0.71,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.0,
+        "conservative_pct": 0.0247
+      },
+      "binary_class": "positive",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "MU",
+      "decision": "EXECUTE",
+      "final_decision": "BUY",
+      "score": 1.82,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_MU.md",
+      "performance": null,
+      "targets": {
+        "tp": 580,
+        "sl": 395,
+        "watch": null,
+        "entry": "448 - 460",
+        "entry_aggressive": "448 - 460",
+        "entry_conservative": "398 - 415"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "aggressive_entry": "$448-460 立即區間限價，TSM 04-16 前卡 50% / 財報後加 10%",
+        "conservative_entry": "$398-415 MA20/50 cluster 回測不破 + 日陽包陰 + 量 > 1.2×",
+        "exit_stop": "跌破 $395 (MA50 下緣 ATR 緩衝) 立即停損",
+        "tsm_earnings_risk": "TSM 04-16 miss 或 guidance 下修 → 取消 aggressive 第二批",
+        "hbm_supply_shock": "Samsung/SK Hynix HBM4 提前量產或降價 → 縮倉",
+        "dram_asp_warning": "DRAM 現貨週跌 > 5% → 預警"
+      },
+      "key_risks": [
+        "cyclical_peak_risk",
+        "forward_pe_4.58_value_trap_signal",
+        "dram_margin_mean_reversion",
+        "hbm_competition_sk_hynix",
+        "price_177pct_above_ma200",
+        "euphoric_sentiment_contrarian"
+      ],
+      "rr_ratio": 2.14,
+      "position_pct": 0.0467,
+      "avg_confidence": 0.74,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.028,
+        "conservative_pct": 0.0187
+      },
+      "binary_class": "positive",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "VST",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.43,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_VST.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": null,
+        "entry": "179",
+        "entry_aggressive": null,
+        "entry_conservative": null
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "ma200_reclaim": "日收 > MA200 $179.39 + 量 > 1.2× → 升級 STAGED_ENTRY",
+        "breakout_175": "站穩 $175 頸線 + 量 > 1.3×",
+        "pullback_ma50": "$155-162 MA50 cluster 回測不破 + 日陽包陰",
+        "new_hyperscaler_ppa": "VST 新 nuclear/gas PPA 公告 (MSFT/Amazon/Google/Oracle)",
+        "sector_reversal_downgrade": "Utilities uptrend ratio 跌破 0.35 → 降級觀察"
+      },
+      "key_risks": [
+        "earnings_-52pct_yoy",
+        "fcf_neg_459M",
+        "de_400_ipp_norm",
+        "institution_92pct_crowded",
+        "utilities_overbought_sector",
+        "ceasefire_risk_on_rotation_tail",
+        "ma200_not_reclaimed"
+      ],
+      "rr_ratio": 3.95,
+      "position_pct": 0.0,
+      "avg_confidence": 0.63,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "ORCL",
+      "decision": "STAGED",
+      "final_decision": "STAGED_ENTRY",
+      "score": 1.12,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_ORCL.md",
+      "performance": null,
+      "targets": {
+        "tp": 214,
+        "sl": 135,
+        "watch": null,
+        "entry": "148-155",
+        "entry_aggressive": null,
+        "entry_conservative": "148 - 155"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "conservative_entry": "$148-155 回測 MA20/50 cluster 不破 + 日陽包陰 + 量>1.2×",
+        "aggressive_veto": "T4 Burry veto 禁止追高，RSI 71 已 overbought",
+        "exit_stop": "跌破 $135 或 OCI 客戶(Stargate) 違約",
+        "fcf_guidedown": "Oracle 發布意外 FCF guide-down 或債務 downgrade → 立即取消",
+        "binary_escalation": "Iran binary 升至 macro -3 以下 → 取消"
+      },
+      "key_risks": [
+        "fcf_negative_22B",
+        "debt_to_equity_415",
+        "net_debt_123B",
+        "rsi_71_overbought",
+        "drawdown_47pct_from_345",
+        "stargate_customer_concentration",
+        "burry_t4_veto_triggered"
+      ],
+      "rr_ratio": 3.79,
+      "position_pct": 0.0094,
+      "avg_confidence": 0.65,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.0,
+        "conservative_pct": 0.0094
+      },
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "SMR",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": -0.28,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_SMR.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": null,
+        "entry": "1",
+        "entry_aggressive": null,
+        "entry_conservative": null
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "ma50_reclaim": "日收 > MA50 $12.51 + 量 > 1.2× 20D 均量",
+        "breakout_base": "站穩 $13.5 頸線 + 量 > 1.5×",
+        "ppa_catalyst": "hyperscaler nuclear PPA / DOE milestone 公告",
+        "capitulation": "跌破 52w 低 $9.16 量爆 → capitulation re-entry",
+        "ma200_breakout": "站穩 MA200 $27.24 (Stage 2 確認)"
+      },
+      "key_risks": [
+        "pre_commercial_rev_31M",
+        "rev_growth_-95pct",
+        "ps_120_extreme",
+        "op_margin_-3338pct",
+        "stage4_below_ma200_130pct_away",
+        "industrials_theme_maturity_80pct"
+      ],
+      "rr_ratio": 1.25,
+      "position_pct": 0.0,
+      "avg_confidence": 0.59,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "ALIGNED",
+      "staged_split": null,
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "APP",
+      "decision": "STAGED",
+      "final_decision": "STAGED_ENTRY",
+      "score": 0.96,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_APP.md",
+      "performance": null,
+      "targets": {
+        "tp": 580,
+        "sl": 395,
+        "watch": null,
+        "entry": "445 - 460",
+        "entry_aggressive": "445 - 460",
+        "entry_conservative": "418 - 430"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "aggressive_entry": "$445-460 當前區間限價，即時進場",
+        "conservative_entry": "回測 MA50 $427 不破 + 日陽包陰 + 量>1.2×，或站穩 MA200 $519 突破確認",
+        "exit_stop": "跌破 $395 或 MA50 放量崩跌",
+        "short_report_risk": "Burry-style 做空報告重啟 → 立即縮倉"
+      },
+      "key_risks": [
+        "beta_2.5_extreme",
+        "ps_27_crowded",
+        "short_report_history",
+        "regulatory_privacy_risk",
+        "fcf_yield_1.77pct"
+      ],
+      "rr_ratio": 2.22,
+      "position_pct": 0.015,
+      "avg_confidence": 0.65,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.0075,
+        "conservative_pct": 0.0075
+      },
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "IONQ",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.73,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_IONQ.md",
+      "performance": null,
+      "targets": {
+        "tp": 55.0,
+        "sl": 26.0,
+        "watch": null,
+        "entry": "$30 - $33",
+        "entry_aggressive": "$30 - $33",
+        "entry_conservative": "$25 - $28"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "margin_improve": "Op margin < -250%",
+        "ma200_breakout": "日收 > MA200 $46 + 量 > 40M",
+        "deep_pullback": "$27-$30 gap fill",
+        "contract_signal": "大型量子合約公告",
+        "capitulation": "< $25 cash floor"
+      },
+      "key_risks": [
+        "op_margin_-346pct",
+        "commercialization_5-10yrs",
+        "parabolic_20pct_day",
+        "cash_burn_283M_yr"
+      ],
+      "rr_ratio": 3.67,
+      "position_pct": 0.0,
+      "avg_confidence": 0.5875,
+      "time_horizon": "long",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "unknown",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "RGTI",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.24,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_RGTI.md",
+      "performance": null,
+      "targets": {
+        "tp": 22.0,
+        "sl": 8.0,
+        "watch": null,
+        "entry": "10",
+        "entry_aggressive": null,
+        "entry_conservative": "$10 - $12"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "revenue_inflection": "Rev YoY 轉正",
+        "breakout_up": "日收 > MA200 $22.54 + 量 > 50M",
+        "capitulation": "< $10 接近 cash value",
+        "cash_burn_slow": "OpCF loss < -$40M/yr"
+      },
+      "key_risks": [
+        "revenue_declining_-17.9pct",
+        "op_margin_-1210pct",
+        "below_ma200",
+        "theme_speculation"
+      ],
+      "rr_ratio": 5.5,
+      "position_pct": 0.0,
+      "avg_confidence": 0.575,
+      "time_horizon": "long",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "LITE",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.71,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_LITE.md",
+      "performance": null,
+      "targets": {
+        "tp": 900.0,
+        "sl": 590.0,
+        "watch": null,
+        "entry": "650-700",
+        "entry_aggressive": null,
+        "entry_conservative": "$660 - $710"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "deep_pullback": "$650-700 MA50 retest",
+        "capitulation": "< $550",
+        "pt_upgrade": "PT mean > $900",
+        "margin_break": "Q1 Op margin > 15%",
+        "momentum_break": "日收 < $774 MA20 + 量 > 10M"
+      },
+      "key_risks": [
+        "pt_mean_inverted_-9.3pct",
+        "d_e_392pct",
+        "vs_ma200_+160pct",
+        "fcf_approx_zero"
+      ],
+      "rr_ratio": 2.71,
+      "position_pct": 0.0,
+      "avg_confidence": 0.61,
+      "time_horizon": "short",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "unknown",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "PLTR",
+      "decision": "STAGED",
+      "final_decision": "STAGED_ENTRY",
+      "score": 1.01,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_PLTR.md",
+      "performance": null,
+      "targets": {
+        "tp": 175.0,
+        "sl": 125.0,
+        "watch": null,
+        "entry": "$138 - $148",
+        "entry_aggressive": "$138 - $148",
+        "entry_conservative": "$118 - $128"
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "pe_212_high",
+        "below_all_mas",
+        "karp_thiel_selling",
+        "macd_negative"
+      ],
+      "rr_ratio": 2.0,
+      "position_pct": 0.019,
+      "avg_confidence": 0.625,
+      "time_horizon": "mid",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.0095,
+        "conservative_pct": 0.0095
+      },
+      "binary_class": "positive",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "NBIS",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.66,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_NBIS.md",
+      "performance": null,
+      "targets": {
+        "tp": 180.0,
+        "sl": 110.0,
+        "watch": null,
+        "entry": "108-115",
+        "entry_aggressive": null,
+        "entry_conservative": "$125 - $135"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "deep_pullback_A": "$125-135 MA10-20 retest",
+        "deep_pullback_B": "$105-115 MA50 (原 4-08 建議)",
+        "earnings_beat": "FCF 改善 + guide raise",
+        "earnings_miss": "Op margin 惡化 → SELL",
+        "momentum_break": "日收 < $140 + 量 > 30M"
+      },
+      "key_risks": [
+        "op_margin_-103pct",
+        "pt_reached",
+        "parabolic_10d_+56pct",
+        "d_e_1.06"
+      ],
+      "rr_ratio": 2.5,
+      "position_pct": 0.0,
+      "avg_confidence": 0.59,
+      "time_horizon": "short",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "unknown",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "APLD",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.55,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_APLD.md",
+      "performance": null,
+      "targets": {
+        "tp": 40.0,
+        "sl": 20.0,
+        "watch": null,
+        "entry": "22-26",
+        "entry_aggressive": null,
+        "entry_conservative": "$23 - $27"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "deep_pullback": "$22-26 MA50 retest",
+        "breakout_up": "日收 > $35 + 量 > 45M",
+        "finance_clear": "新 credit line 公告",
+        "earnings_beat": "下次財報 Op margin 轉正"
+      },
+      "key_risks": [
+        "beta_7.27_extreme",
+        "op_margin_negative",
+        "fcf_burn_1.5B",
+        "small_cap_funding_risk"
+      ],
+      "rr_ratio": 2.6,
+      "position_pct": 0.0,
+      "avg_confidence": 0.6,
+      "time_horizon": "short",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "TSM",
+      "decision": "EXECUTE",
+      "final_decision": "BUY",
+      "score": 2.05,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_TSM.md",
+      "performance": null,
+      "targets": {
+        "tp": 435.0,
+        "sl": 360.0,
+        "watch": null,
+        "entry": "$375 - $388",
+        "entry_aggressive": "$375 - $388",
+        "entry_conservative": "$345 - $360"
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "q1_earnings_tomorrow",
+        "tariff_taiwan",
+        "52w_high_resistance"
+      ],
+      "rr_ratio": 2.38,
+      "position_pct": 0.04,
+      "avg_confidence": 0.72,
+      "time_horizon": "mid",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "positive",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "NVDA",
+      "decision": "EXECUTE",
+      "final_decision": "BUY",
+      "score": 1.98,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_NVDA.md",
+      "performance": null,
+      "targets": {
+        "tp": 250.0,
+        "sl": 180.0,
+        "watch": null,
+        "entry": "$195 - $202",
+        "entry_aggressive": "$195 - $202",
+        "entry_conservative": "$175 - $185"
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "china_ai_export_controls",
+        "rsi_72_elevated",
+        "crowded_56_strong_buy",
+        "beta_2.33"
+      ],
+      "rr_ratio": 2.78,
+      "position_pct": 0.05,
+      "avg_confidence": 0.71,
+      "time_horizon": "mid",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "positive",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "META",
+      "decision": "EXECUTE",
+      "final_decision": "BUY",
+      "score": 1.91,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_META.md",
+      "performance": null,
+      "targets": {
+        "tp": 780.0,
+        "sl": 655.0,
+        "watch": null,
+        "entry": "$680 - $695",
+        "entry_aggressive": "$680 - $695",
+        "entry_conservative": "$620 - $640"
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "reality_labs_capex_burn",
+        "eu_dma_fine",
+        "below_ma200_resistance",
+        "q1_earnings_10d_binary"
+      ],
+      "rr_ratio": 2.85,
+      "position_pct": 0.05,
+      "avg_confidence": 0.7,
+      "time_horizon": "mid",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "positive",
+      "live_position": {
+        "total_shares": 30.0,
+        "avg_cost": 661.36,
+        "total_cost": 19840.8,
+        "current_price": 671.58,
+        "unrealized_pct": 1.55,
+        "unrealized_pl": 306.6,
+        "lots": 1
+      },
+      "position_lots": [
+        {
+          "id": "pos_20260414_META_01",
+          "ticker": "META",
+          "entry_date": "2026-04-14",
+          "entry_price": 661.36,
+          "shares": 30.0,
+          "cost_basis": 19840.8,
+          "status": "open",
+          "track": "manual",
+          "notes": "",
+          "report_ref": "",
+          "created_at": "2026-04-15T07:36:57",
+          "current_price": 671.58,
+          "unrealized_pl": 306.6,
+          "unrealized_pct": 1.55
+        }
+      ]
+    },
+    {
+      "ticker": "CRWV",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.63,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_CRWV.md",
+      "performance": null,
+      "targets": {
+        "tp": 135.0,
+        "sl": 75.0,
+        "watch": null,
+        "entry": "3",
+        "entry_aggressive": null,
+        "entry_conservative": "$85 - $95"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "deep_pullback": "Price $85-95 zone (MA20 retest)",
+        "earnings_beat": "Q1 05-20: FCF improve + guide raise",
+        "earnings_miss": "Q1 FCF 惡化 OR 2026 capex > $40B",
+        "momentum_break": "Close < MA20 $86 vol > 50M",
+        "breakout_up": "Close > $150 vol > 50M"
+      },
+      "key_risks": [
+        "extreme_leverage_de_894pct",
+        "cash_burn_fcf_-4.6B",
+        "debt_refi_2026_2027",
+        "pt_mean_123_near_current",
+        "parabolic_5d_32pct",
+        "rsi_73_overbought"
+      ],
+      "rr_ratio": 3.0,
+      "position_pct": 0.0,
+      "avg_confidence": 0.625,
+      "time_horizon": "short",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "unknown",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "GOOGL",
+      "decision": "EXECUTE",
+      "final_decision": "BUY",
+      "score": 1.65,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_GOOGL.md",
+      "performance": null,
+      "targets": {
+        "tp": 385.0,
+        "sl": 310.0,
+        "watch": null,
+        "entry": "$325 - $335",
+        "entry_aggressive": "$325 - $335",
+        "entry_conservative": "$295 - $308"
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "doj_chrome_divestiture",
+        "overbought_rsi_75",
+        "volume_divergence",
+        "ai_search_cannibalization"
+      ],
+      "rr_ratio": 2.75,
+      "position_pct": 0.05,
+      "avg_confidence": 0.6875,
+      "time_horizon": "mid",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "positive",
+      "live_position": {
+        "total_shares": 20.0,
+        "avg_cost": 332.61,
+        "total_cost": 6652.2,
+        "current_price": 337.12,
+        "unrealized_pct": 1.36,
+        "unrealized_pl": 90.2,
+        "lots": 1
+      },
+      "position_lots": [
+        {
+          "id": "pos_20260414_GOOGL_01",
+          "ticker": "GOOGL",
+          "entry_date": "2026-04-14",
+          "entry_price": 332.61,
+          "shares": 20.0,
+          "cost_basis": 6652.2,
+          "status": "open",
+          "track": "manual",
+          "notes": "",
+          "report_ref": "",
+          "created_at": "2026-04-15T01:58:05",
+          "current_price": 337.12,
+          "unrealized_pl": 90.2,
+          "unrealized_pct": 1.36
+        }
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": -0.28,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_TSLA.md",
+      "performance": null,
+      "targets": {
+        "tp": 395.0,
+        "sl": 295.0,
+        "watch": null,
+        "entry": null,
+        "entry_aggressive": null,
+        "entry_conservative": "$310 - $325"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "breakout_up": "Close > MA200 $398 vol > 70M",
+        "capitulation": "Price < $310 + RSI < 30",
+        "catalyst_miss": "Q1 deliveries < 400k EPS < $0.30",
+        "catalyst_beat": "Q1 deliveries > 430k + guide raise"
+      },
+      "key_risks": [
+        "revenue_contraction",
+        "extreme_valuation",
+        "death_cross",
+        "narrative_fatigue",
+        "q1_earnings_binary"
+      ],
+      "rr_ratio": 3.44,
+      "position_pct": 0.0,
+      "avg_confidence": 0.5875,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "ALIGNED",
+      "staged_split": null,
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "AMD",
+      "decision": "STAGED",
+      "final_decision": "STAGED_ENTRY",
+      "score": 1.18,
+      "time": "2026-04-15",
+      "report_url": "reports/20260415_AMD.md",
+      "performance": null,
+      "targets": {
+        "tp": 320.0,
+        "sl": 248.0,
+        "watch": null,
+        "entry": "$267 - $275",
+        "entry_aggressive": "$267 - $275",
+        "entry_conservative": "$215 - $228"
+      },
+      "on_watchlist": true,
+      "watch_conditions": null,
+      "key_risks": [
+        "overbought_rsi_74.9",
+        "volume_divergence_severe",
+        "weak_ROE_7pct",
+        "parabolic_4d_rally",
+        "china_ai_export_risk",
+        "crowded_46_buy"
+      ],
+      "rr_ratio": 2.13,
+      "position_pct": 0.0135,
+      "avg_confidence": 0.65,
+      "time_horizon": "mid",
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.0054,
+        "conservative_pct": 0.0081
+      },
+      "binary_class": "none",
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "MSFT",
+      "decision": "CANCEL",
+      "final_decision": "HOLD",
+      "score": 0.68,
+      "time": "2026-04-14",
+      "report_url": "reports/20260414_MSFT.md",
+      "performance": null,
+      "targets": {
+        "tp": null,
+        "sl": null,
+        "watch": null,
+        "entry": "385",
+        "entry_aggressive": null,
+        "entry_conservative": null
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "entry_A": "日收盤站上200MA $386，量>40M確認突破",
+        "entry_B": "Q3財報(Apr29)後，EPS≥$4.10 + Azure≥37%",
+        "entry_C": "F&G<25 + RSI<30 = 極端悲觀底部逆向機會"
+      },
+      "key_risks": [
+        "Q3_earnings_binary_Apr29",
+        "China_50pct_tariff_conditional_tech_exposure",
+        "capex_150B_annual_FCF_suppression",
+        "200MA_resistance_not_cleared",
+        "FOMC_Apr28_rate_hike_risk"
+      ],
+      "rr_ratio": null,
+      "position_pct": 0.0,
+      "avg_confidence": 0.695,
+      "time_horizon": null,
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": {
+        "total_shares": 50.0,
+        "avg_cost": 391.32,
+        "total_cost": 19566.0,
+        "current_price": 411.22,
+        "unrealized_pct": 5.09,
+        "unrealized_pl": 995.0,
+        "lots": 1
+      },
+      "position_lots": [
+        {
+          "id": "pos_20260414_MSFT_01",
+          "ticker": "MSFT",
+          "entry_date": "2026-04-14",
+          "entry_price": 391.32,
+          "shares": 50.0,
+          "cost_basis": 19566.0,
+          "status": "open",
+          "track": "manual",
+          "notes": "",
+          "report_ref": "",
+          "created_at": "2026-04-15T02:14:46",
+          "current_price": 411.22,
+          "unrealized_pl": 995.0,
+          "unrealized_pct": 5.09
+        }
+      ]
+    },
+    {
       "ticker": "AMZN",
       "decision": "CANCEL",
+      "final_decision": "HOLD",
       "score": 1.27,
       "time": "2026-04-11",
       "report_url": "reports/20260411_AMZN.md",
@@ -515,7 +1600,9 @@
         "tp": 258.0,
         "sl": 200.0,
         "watch": null,
-        "entry": "$215 - $225"
+        "entry": "$215 - $225",
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": true,
       "watch_conditions": {
@@ -532,11 +1619,18 @@
       "position_pct": 0.0,
       "avg_confidence": 0.7125,
       "time_horizon": "mid",
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "AAPL",
       "decision": "CANCEL",
+      "final_decision": "HOLD",
       "score": 0.56,
       "time": "2026-04-11",
       "report_url": "reports/20260411_AAPL.md",
@@ -545,7 +1639,9 @@
         "tp": 295.0,
         "sl": 242.0,
         "watch": null,
-        "entry": "$253 - $258"
+        "entry": "$253 - $258",
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": true,
       "watch_conditions": {
@@ -563,11 +1659,18 @@
       "position_pct": 0.0,
       "avg_confidence": 0.6625,
       "time_horizon": "mid",
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "CRWV",
       "decision": "CANCEL",
+      "final_decision": "HOLD",
       "score": 0.48,
       "time": "2026-04-10",
       "report_url": "reports/20260410_CRWV.md",
@@ -576,7 +1679,9 @@
         "tp": null,
         "sl": null,
         "watch": "-85 (prior consolidation zone)",
-        "entry": null
+        "entry": null,
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": true,
       "watch_conditions": null,
@@ -590,20 +1695,29 @@
       "position_pct": null,
       "avg_confidence": 0.5625,
       "time_horizon": null,
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "MU",
       "decision": "EXECUTE",
+      "final_decision": null,
       "score": 2.5,
       "time": "2026-04-08",
-      "report_url": "reports/20260407_MU.html",
+      "report_url": "reports/20260415_MU.md",
       "performance": null,
       "targets": {
         "tp": 452.93,
         "sl": 350.0,
         "watch": null,
-        "entry": "$375 - $390"
+        "entry": "$375 - $390",
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": true,
       "watch_conditions": null,
@@ -617,11 +1731,18 @@
       "position_pct": 0.05,
       "avg_confidence": 0.7125,
       "time_horizon": "mid",
-      "da_filed": true
+      "da_filed": true,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "NBIS",
       "decision": "CANCEL",
+      "final_decision": null,
       "score": 1.83,
       "time": "2026-04-08",
       "report_url": "reports/20260408_NBIS.md",
@@ -630,7 +1751,9 @@
         "tp": null,
         "sl": null,
         "watch": null,
-        "entry": "108-115"
+        "entry": "108-115",
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": false,
       "watch_conditions": null,
@@ -639,11 +1762,18 @@
       "position_pct": null,
       "avg_confidence": 0.7625,
       "time_horizon": null,
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "MSFT",
       "decision": "EXECUTE",
+      "final_decision": null,
       "score": 0.26,
       "time": "2026-04-08",
       "report_url": "reports/20260408_MSFT.md",
@@ -652,7 +1782,9 @@
         "tp": null,
         "sl": null,
         "watch": null,
-        "entry": null
+        "entry": null,
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": true,
       "watch_conditions": null,
@@ -661,11 +1793,43 @@
       "position_pct": null,
       "avg_confidence": 0.705,
       "time_horizon": null,
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": {
+        "total_shares": 50.0,
+        "avg_cost": 391.32,
+        "total_cost": 19566.0,
+        "current_price": 411.22,
+        "unrealized_pct": 5.09,
+        "unrealized_pl": 995.0,
+        "lots": 1
+      },
+      "position_lots": [
+        {
+          "id": "pos_20260414_MSFT_01",
+          "ticker": "MSFT",
+          "entry_date": "2026-04-14",
+          "entry_price": 391.32,
+          "shares": 50.0,
+          "cost_basis": 19566.0,
+          "status": "open",
+          "track": "manual",
+          "notes": "",
+          "report_ref": "",
+          "created_at": "2026-04-15T02:14:46",
+          "current_price": 411.22,
+          "unrealized_pl": 995.0,
+          "unrealized_pct": 5.09
+        }
+      ]
     },
     {
       "ticker": "VST",
       "decision": "EXECUTE",
+      "final_decision": null,
       "score": 1.8,
       "time": "2026-04-07",
       "report_url": "reports/20260407_VST.md",
@@ -674,7 +1838,9 @@
         "tp": null,
         "sl": null,
         "watch": null,
-        "entry": null
+        "entry": null,
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": true,
       "watch_conditions": null,
@@ -683,11 +1849,18 @@
       "position_pct": null,
       "avg_confidence": 0.68,
       "time_horizon": null,
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "TSLA",
       "decision": "CANCEL",
+      "final_decision": null,
       "score": -2.1,
       "time": "2026-04-07",
       "report_url": "reports/20260407_TSLA.md",
@@ -696,7 +1869,9 @@
         "tp": null,
         "sl": null,
         "watch": null,
-        "entry": null
+        "entry": null,
+        "entry_aggressive": null,
+        "entry_conservative": null
       },
       "on_watchlist": false,
       "watch_conditions": null,
@@ -705,7 +1880,13 @@
       "position_pct": null,
       "avg_confidence": 0.74,
       "time_horizon": null,
-      "da_filed": false
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": null,
+      "staged_split": null,
+      "binary_class": null,
+      "live_position": null,
+      "position_lots": []
     },
     {
       "ticker": "NEE",
@@ -728,27 +1909,467 @@
   ],
   "news": [
     {
-      "headline": "Iran Ceasefire Expiry / Renewal",
+      "headline": "Iran-US ceasefire fragile; Hormuz blockade partially active as Vance prepares 2nd round talks",
+      "headline_zh": "",
       "impact": "binary",
-      "score": 0.0,
-      "date": "~2026-04-21",
+      "score": 0,
+      "date": "2026-04-15",
       "sectors": [
         "Energy",
-        "VIX"
+        "Airlines",
+        "Defense",
+        "Consumer_Discretionary",
+        "Transportation"
       ],
-      "source": "sector_intel"
+      "source": "news_protocol",
+      "source_label": "CNN / Al Jazeera / NBC",
+      "type": "geopolitical",
+      "bull_case": "Talks resuming in 2 days per Trump, market pricing in de-escalation (oil already +3% but off highs)",
+      "bear_case": "Ceasefire violated both sides, Lebanon conflict separate, Hormuz blockade unresolved, oil volatility structural until June 2027 capacity concern",
+      "arbiter_reasoning": "Neither side committed, but negotiation channel open. Binary event pending. Market best positioned with DEFENSE overweight + ENERGY neutral.",
+      "debate_note": "2-week ceasefire began 4/8 → expires ~4/22. Decision window is THIS week.",
+      "binary_risk": true,
+      "within_48h": true
     },
     {
-      "headline": "Trump-Xi China Summit",
-      "impact": "binary",
-      "score": 0.0,
-      "date": "2026-05 (TBD)",
+      "headline": "TSMC Q1 2026 earnings Thursday 4/16: expects $35.47B revenue, $3.26 EPS, 59% gross margin",
+      "headline_zh": "台積電 Q1 2026 財報 4/16 公布，預估營收 $35.47B、EPS $3.26、毛利率 59%",
+      "impact": "bullish",
+      "score": 4,
+      "date": "2026-04-15",
       "sectors": [
         "Technology",
-        "Materials",
+        "Semiconductors"
+      ],
+      "source": "news_protocol",
+      "source_label": "GuruFocus / TipRanks / Motley Fool",
+      "type": "earnings",
+      "bull_case": "AI chip demand holds through Middle East conflict; premium 3nm pricing pushes GM > 59%; long-term GM target likely raised above 58%; Qualcomm/MediaTek capacity filled with AI",
+      "bear_case": "Margin peak warning from Wall Street; smartphone/PC outlook uncertain; Middle East supply chain disruption risk (shipping)",
+      "arbiter_reasoning": "4/16 is 1-day binary with high historical beat rate. Positive classification. TSM BUY thesis validated by guide-raise expectation.",
+      "debate_note": "NVDA, AMD, AVGO all downstream of TSMC — any beat also lifts semi sector broadly",
+      "binary_risk": true,
+      "within_48h": true
+    },
+    {
+      "headline": "NVIDIA Blackwell ramp delivers $0.5T visibility through 2026; hyperscalers deploying 1,000 NVL72 racks/week",
+      "headline_zh": "NVDA Blackwell 量產至 2026 年底可視能見度 $0.5T，雲端巨頭每週部署 1,000 個 NVL72 機櫃",
+      "impact": "bullish",
+      "score": 4,
+      "date": "2026-04-15",
+      "sectors": [
+        "Technology",
+        "Semiconductors",
+        "AI_Infrastructure"
+      ],
+      "source": "news_protocol",
+      "source_label": "NVIDIA Newsroom / Futurum / IntuitionLabs",
+      "type": "sector_specific",
+      "bull_case": "72,000 Blackwell GPUs/week hyperscaler deployment, $500B backlog through Dec 2026, Rubin next-gen locked",
+      "bear_case": "China AI chip export deal (15% rev to US gov) caps upside; 25% Section 232 semi tariff effective Jan 2026",
+      "arbiter_reasoning": "NVDA bull case fundamentally intact. Blackwell demand not the question — supply chain execution is the only risk.",
+      "debate_note": "NVDA Q1 FY27 earnings ~late May; visibility extended to end 2026 significantly reduces quarter-by-quarter risk",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "FOMC 4/28-29 meeting: markets price 85% hold at 3.50-3.75%, no dot plot this meeting",
+      "headline_zh": "FOMC 4/28-29 會議：市場定價 85% 維持 3.50-3.75%，本次無 dot plot",
+      "impact": "neutral",
+      "score": 0,
+      "date": "2026-04-15",
+      "sectors": [
+        "Financials",
+        "Real_Estate",
         "Consumer_Discretionary"
       ],
-      "source": "sector_intel"
+      "source": "news_protocol",
+      "source_label": "FedWatch / Yahoo Finance / Kiplinger",
+      "type": "fomc",
+      "bull_case": "Hold provides rate certainty; if Powell hints June cut → risk-on rally",
+      "bear_case": "Inflation still above 2% target, 'progress stalled' language, Iran conflict + oil could delay cuts further to July+",
+      "arbiter_reasoning": "Language is the event, not the decision. Watch for 'patience' vs 'data-dependent' phrasing. Positioning BEFORE 4/29 risky due to reaction asymmetry.",
+      "debate_note": "Non-SEP meeting historically causes lower vol reaction than SEP meetings; June 16-17 is next SEP where actual cut telegraphed",
+      "binary_risk": true,
+      "within_48h": false
+    },
+    {
+      "headline": "Q1 2026 earnings season kicks off with 12.6% expected profit growth — 6th consecutive double-digit quarter",
+      "headline_zh": "Q1 2026 財報季開跑，預估獲利成長 12.6%，連 6 季雙位數成長",
+      "impact": "bullish",
+      "score": 3,
+      "date": "2026-04-15",
+      "sectors": [
+        "Financials",
+        "Technology",
+        "Consumer_Discretionary"
+      ],
+      "source": "news_protocol",
+      "source_label": "Yahoo Finance earnings preview",
+      "type": "earnings",
+      "bull_case": "6 consecutive strong quarters, bull momentum resilient to geopolitical noise",
+      "bear_case": "Goldman's stock drop on FICC miss shows how high the bar is; any disappointment punished",
+      "arbiter_reasoning": "Earnings season is an alpha generator but amplifies dispersion. Pre-earnings positioning risky, post-earnings reaction is the edge.",
+      "debate_note": "Banks start Monday; TSM Thursday; NFLX / Tesla / AMD next week; NVDA late May",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "US-China semiconductor tariff peace extended to Nov 10, 2026; next hike deferred to June 2027",
+      "headline_zh": "美中半導體關稅停戰延長至 2026 年 11 月 10 日，下次調升延至 2027 年 6 月",
+      "impact": "bullish",
+      "score": 2,
+      "date": "2026-04-15",
+      "sectors": [
+        "Technology",
+        "Semiconductors"
+      ],
+      "source": "news_protocol",
+      "source_label": "Tax Foundation / CNBC / Wikipedia",
+      "type": "political",
+      "bull_case": "18 months of tariff stability for semi supply chain; NVDA/AMD keep 15% revenue deal stable",
+      "bear_case": "Section 232 25% still active for specified chip imports since Jan 2026; 15% NVDA/AMD 'revenue tax' ongoing",
+      "arbiter_reasoning": "Near-term tail risk removed; structural 15% rev tax + 25% Section 232 remain as persistent drag.",
+      "debate_note": "Removes June 2026 tariff cliff from binary risks list — positive for 2026 semi earnings",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Goldman Sachs Q1 beats EPS but FICC misses; stock -3% pre-market",
+      "headline_zh": "高盛 Q1 EPS 超預期但 FICC 收入不如預期，盤前跌 3%",
+      "impact": "bearish",
+      "score": -2,
+      "date": "2026-04-15",
+      "sectors": [
+        "Financials",
+        "Banking"
+      ],
+      "source": "news_protocol",
+      "source_label": "Yahoo Finance",
+      "type": "earnings",
+      "bull_case": "M&A and equity trading strong, underlying franchise intact",
+      "bear_case": "FICC weakness = fixed income trading slump = concerning for JPM/MS peer reads; sets cautious tone for bank season",
+      "arbiter_reasoning": "Single-company issue but sector tone-setter. Watch JPM / MS for read-through.",
+      "debate_note": "Banking sector already WARM in sector scan; this reinforces COLD thesis on investment banks",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Dollar Index (DXY) approaches 99 on oil rise + Fed hold expectations",
+      "headline_zh": "美元指數逼近 99，油價上升 + Fed 維持利率預期推動",
+      "impact": "neutral",
+      "score": -1,
+      "date": "2026-04-15",
+      "sectors": [
+        "Consumer_Defensive",
+        "Consumer_Cyclical",
+        "Technology"
+      ],
+      "source": "news_protocol",
+      "source_label": "Yahoo Finance",
+      "type": "macro_data",
+      "bull_case": "Strong dollar is anti-inflationary at margin",
+      "bear_case": "FX translation drag for mega caps; EM currency pressure; commodity deflation",
+      "arbiter_reasoning": "Secondary effect, not a direct driver. Watch if DXY breaks 100 (psychological).",
+      "debate_note": "DXY < 99 = mild headwind, > 100 would be material",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "S&P 500 approaches all-time high 7,002 as Nasdaq +1.96%, Dow +0.66%",
+      "headline_zh": "S&P 500 逼近歷史新高 7,002，Nasdaq +1.96% 科技領漲",
+      "impact": "bullish",
+      "score": 3,
+      "date": "2026-04-15",
+      "sectors": [
+        "TECHNOLOGY",
+        "FINANCIAL"
+      ],
+      "source": "news_protocol",
+      "source_label": "TheStreet",
+      "type": "macro_data",
+      "bull_case": "S&P 500 within 0.3% of all-time high 7002.28; Nasdaq +2% shows AI trade intact; bank earnings season kicks off",
+      "bear_case": "Near-ATH entries = poor RR; any shock = big downside; breadth 36.8 still weakening warns of narrow leadership",
+      "arbiter_reasoning": "Momentum real but RR degraded near ATH. Chase trades dangerous. Focus on individual oversold names (PLTR type).",
+      "debate_note": "",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "ASML Q1 earnings beat on intense AI demand — strong read-through for TSMC tomorrow",
+      "headline_zh": "ASML Q1 財報超預期，AI 需求強勁 — 利多 TSM 明日財報",
+      "impact": "bullish",
+      "score": 3,
+      "date": "2026-04-15",
+      "sectors": [
+        "TECHNOLOGY",
+        "SEMICONDUCTORS"
+      ],
+      "source": "news_protocol",
+      "source_label": "TheStreet",
+      "type": "earnings",
+      "bull_case": "ASML 's strong Q1 validates AI capex super-cycle; N2 ramp at TSMC supported; bullish TSM 4/16 print",
+      "bear_case": "None material — ASML is the cleanest tell on semi equipment demand",
+      "arbiter_reasoning": "This is a POSITIVE leading indicator for TSM tomorrow. Reinforces TSM BUY thesis from V4.6 analysis.",
+      "debate_note": "Read-through strength: ASML > TSMC > NVDA/AMD/AVGO in the AI capex chain",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Trump: Iran war 'close to over', 2nd round of talks in Pakistan within days; ceasefire expires 4/21",
+      "headline_zh": "川普：伊朗戰爭「接近結束」，巴基斯坦第二輪談判即將舉行，停火期 4/21 到期",
+      "impact": "bullish",
+      "score": 2,
+      "date": "2026-04-15",
+      "sectors": [
+        "ENERGY",
+        "DEFENSE",
+        "TRANSPORTATION"
+      ],
+      "source": "news_protocol",
+      "source_label": "CNBC / Al Jazeera / Rappler",
+      "type": "geopolitical",
+      "bull_case": "Trump 'close to over' comment + Iran offering safe passage = bull de-escalation path; oil should retreat on confirmation",
+      "bear_case": "Nuclear sticking point (US wants 20yr halt, Iran wants 3-5yr); US military still blockading; ceasefire expires in 6 days",
+      "arbiter_reasoning": "Shift from 4/14 binary concern → 4/15 mild positive bias. Still binary but weighted toward de-escalation.",
+      "debate_note": "Ceasefire 4/21 expiration window is THE event; binary decision next week",
+      "binary_risk": true,
+      "within_48h": false
+    },
+    {
+      "headline": "Treasury Sec Bessent: Fed can wait on cuts until Iran oil impact clearer",
+      "headline_zh": "財長 Bessent：Fed 可等待 Iran 油價衝擊明朗後再降息",
+      "impact": "bearish",
+      "score": -1,
+      "date": "2026-04-15",
+      "sectors": [
+        "FINANCIAL",
+        "REAL_ESTATE",
+        "UTILITIES"
+      ],
+      "source": "news_protocol",
+      "source_label": "CNBC",
+      "type": "fomc",
+      "bull_case": "Bessent still expects inflation to moderate; rate cuts delayed, not cancelled",
+      "bear_case": "Treasury-Fed coordination signals patience; 2026 only 1 cut expected; Iran + oil keeps core PCE elevated 2.7%",
+      "arbiter_reasoning": "Reduces probability of June cut. Yield curve to stay high. Long-duration assets (REITs/growth) mild headwind.",
+      "debate_note": "Fed March 2026: 1 cut for year maintained; core PCE revised up to 2.7% (was 2.5%)",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Goldman Sachs Q1 2026：EPS $17.55 創紀錄，Equities +27% YoY；股價盤前 -4%",
+      "headline_zh": "Goldman Sachs Q1 2026：EPS $17.55 創紀錄，Equities +27% YoY；股價盤前 -4%",
+      "impact": "binary",
+      "score": -0.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Financial"
+      ],
+      "source": "news_protocol",
+      "source_label": "Reuters / Bloomberg",
+      "type": "earnings",
+      "bull_case": "Equities trading 創紀錄 $5.33B +27%；金融板塊基本面確認",
+      "bear_case": "利多出盡賣壓；Fixed Income -10% YoY；機構分發跡象",
+      "arbiter_reasoning": "Bull 數字採納，Bear 市場反應採納；利多出盡結構性信號不可忽視",
+      "debate_note": "數字好但股價跌 = 市場對金融板塊態度謹慎，非基本面問題",
+      "binary_risk": true,
+      "within_48h": true
+    },
+    {
+      "headline": "JPMorgan Q1 2026 今日盤前發布：預期 EPS $5.45，Revenue -8% YoY",
+      "headline_zh": "JPMorgan Q1 2026 今日盤前發布：預期 EPS $5.45，Revenue -8% YoY",
+      "impact": "binary",
+      "score": 0.0,
+      "date": "2026-04-14",
+      "sectors": [
+        "Financial"
+      ],
+      "source": "news_protocol",
+      "source_label": "Bloomberg / CNBC",
+      "type": "earnings",
+      "bull_case": "低基期（Revenue -8% YoY）有助驚喜效果；GS 強勁 equities revenue 為正面先行指標",
+      "bear_case": "若 Dimon 展望悲觀 + 提高信貸損失準備，Financial 立即承壓",
+      "arbiter_reasoning": "結果未知，強制 binary_risk within_48h；GS 數據提供方向但不保證",
+      "debate_note": "GS strong equities revenue 為正面先行指標但不保證 JPM 複製",
+      "binary_risk": true,
+      "within_48h": true
+    },
+    {
+      "headline": "Trump 威脅若中國向伊朗輸送武器將加徵 50% 關稅",
+      "headline_zh": "Trump 威脅若中國向伊朗輸送武器將加徵 50% 關稅",
+      "impact": "bearish",
+      "score": -2.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Technology",
+        "Consumer_Cyclical"
+      ],
+      "source": "news_protocol",
+      "source_label": "Fox News / Reuters",
+      "type": "geopolitical",
+      "bull_case": "「if we catch them」條件式；5 月峰會談判槓桿；中方明確否認，概率不高",
+      "bear_case": "雙前線地緣風險（Iran + China）；稀土反制潛力極大；科技供應鏈結構性衝擊",
+      "arbiter_reasoning": "Bear 主論點採納；條件式打折但不能忽視；新增結構性尾部風險",
+      "debate_note": "條件式威脅 vs 中美峰會前發言 = 談判籌碼 or 真實威脅解讀分歧",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "美國海軍封鎖伊朗港口正式生效；法英啟動外交；川普稱伊朗「仍想談」",
+      "headline_zh": "美國海軍封鎖伊朗港口正式生效；法英啟動外交；川普稱伊朗「仍想談」",
+      "impact": "binary",
+      "score": -0.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Energy",
+        "Consumer_Discretionary"
+      ],
+      "source": "news_protocol",
+      "source_label": "Reuters / AP",
+      "type": "geopolitical",
+      "bull_case": "WTI $103→$96 = 市場定價部分解決；停火可能 48h 內恢復",
+      "bear_case": "封鎖實際執行中；伊朗指控美違反停火；每日 CPI 能源壓力疊加",
+      "arbiter_reasoning": "每日新二元；停火恢復 = 市場大翻轉；封鎖持續 = 能源壓力",
+      "debate_note": "川普「仍想談」vs 伊朗外交部指控美違反停火 = 訊號混亂，每 24h 更新",
+      "binary_risk": true,
+      "within_48h": true
+    },
+    {
+      "headline": "Powell：升息不必要；但部分官員將升息重新放回桌上；全年仍預期一次降息",
+      "headline_zh": "Powell：升息不必要；但部分官員將升息重新放回桌上；全年仍預期一次降損",
+      "impact": "binary",
+      "score": -0.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Real_Estate",
+        "Technology"
+      ],
+      "source": "news_protocol",
+      "source_label": "Bloomberg / Fed",
+      "type": "monetary_policy",
+      "bull_case": "主席明確「rates in good place」；全年仍預期一次降息；通膨預期 2.7% 年底",
+      "bear_case": "FOMC 共識脆弱；4 月 CPI 若 ≥ 3.3% 降息論崩潰；匿名官員升息信號",
+      "arbiter_reasoning": "Powell 鴿派為基準，但結構性升息風險在積累；FOMC 4/28-29 為最終仲裁節點",
+      "debate_note": "主席立場 vs 匿名官員升息信號 = FOMC 內部分歧擴大的信號",
+      "binary_risk": true,
+      "within_48h": false
+    },
+    {
+      "headline": "JPMorgan Q1 實際：EPS $5.94 (+9% vs $5.45 est)；Net income $16.5B +13% YoY；Revenue $49.8B 超預期",
+      "headline_zh": "JPMorgan Q1 實際：EPS $5.94 (+9% vs $5.45 est)；Net income $16.5B +13% YoY；Revenue $49.8B 超預期",
+      "impact": "bullish",
+      "score": 2.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Financial"
+      ],
+      "source": "news_protocol",
+      "source_label": "JPMorgan IR / Bloomberg",
+      "type": "earnings",
+      "bull_case": "CIB $9B/21% ROE；NII +9%；資本回購 $8.3B；全業務超預期；Q1 銀行季度正式開門紅",
+      "bear_case": "WFC 已出現 Revenue miss；JPM 為最強，他行未必複製；Dimon 措辭仍謹慎",
+      "arbiter_reasoning": "解除 09:15 BINARY；Financial 開門紅確認；JPM 為全行業領先指標，看多基本成立",
+      "debate_note": "JPM 最強 vs WFC revenue miss = 銀行板塊分化開始，非全面性多頭",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "川普暗示願意與伊朗恢復談判；S&P +1.02%，Nasdaq +1.23%；WTI -2.8% 至 $96.31",
+      "headline_zh": "川普暗示願意與伊朗恢復談判；S&P +1.02%，Nasdaq +1.23%；WTI -2.8% 至 $96.31",
+      "impact": "binary",
+      "score": 0.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Energy",
+        "Basic_Materials"
+      ],
+      "source": "news_protocol",
+      "source_label": "Reuters / CNBC",
+      "type": "geopolitical",
+      "bull_case": "WTI 回落 = CPI 壓力緩解；S&P 連 4 漲 = FTD 動能確認；停火可能加速",
+      "bear_case": "封鎖今日正式生效；IRGC 仍威脅；法英拒絕配合；每日二元風險未解",
+      "arbiter_reasoning": "每 24h 更新有效；停火暗示帶動盤中反彈但封鎖結構未變",
+      "debate_note": "川普推文 vs 封鎖實際執行 = 每日市場方向決定者，不能長期押注",
+      "binary_risk": true,
+      "within_48h": true
+    },
+    {
+      "headline": "Intel 9日 +53% / +$100B 市值：Terafab AI 晶片 + Google 合作 + NVIDIA $5B 戰略投資 + 18A 製程",
+      "headline_zh": "Intel 9日 +53% / +$100B 市值：Terafab AI 晶片 + Google 合作 + NVIDIA $5B 戰略投資 + 18A 製程",
+      "impact": "bullish",
+      "score": 2.0,
+      "date": "2026-04-14",
+      "sectors": [
+        "Technology",
+        "Industrials"
+      ],
+      "source": "news_protocol",
+      "source_label": "Bloomberg / CNBC",
+      "type": "corporate",
+      "bull_case": "18A 製程量產 + NVIDIA $5B + $15B backlog = 結構性轉機；美國半導體製造復興敘事打開",
+      "bear_case": "63x 2027E EPS（NVDA 4 倍溢價）；Intel 執行力歷史問題；9 日 +53% = 動能過熱",
+      "arbiter_reasoning": "BULLISH for Tech/Semiconductors；估值過熱警告附帶；AI 製造復興敘事確認",
+      "debate_note": "故事很好但估值 63x 2027E = 需要執行力完美兌現，高槓桿投機",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Oracle +13%：AI 公有雲公告帶動軟體板塊全面反彈",
+      "headline_zh": "Oracle +13%：AI 公有雲公告帶動軟體板塊全面反彈",
+      "impact": "bullish",
+      "score": 1.5,
+      "date": "2026-04-14",
+      "sectors": [
+        "Technology"
+      ],
+      "source": "news_protocol",
+      "source_label": "Reuters / Bloomberg",
+      "type": "corporate",
+      "bull_case": "AI = 軟體升級週期（非顛覆）；Morocco 雲端擴張；最佳單日漲幅；軟體板塊 re-rating",
+      "bear_case": "單日 13% 過度反應；AI 公告缺乏具體財務指引；AWS/Azure 競爭壓力持續",
+      "arbiter_reasoning": "BULLISH，Software AI 升級敘事重估中；單日幅度大但方向確認",
+      "debate_note": "AI 軟體升級 vs 競爭壓力 = 短期情緒驅動 vs 長期基本面需要驗證",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Wells Fargo Q1：EPS $1.60 微超；Revenue $21.45B miss $21.77B 估",
+      "headline_zh": "Wells Fargo Q1：EPS $1.60 微超；Revenue $21.45B miss $21.77B 估",
+      "impact": "neutral",
+      "score": -0.3,
+      "date": "2026-04-14",
+      "sectors": [
+        "Financial"
+      ],
+      "source": "news_protocol",
+      "source_label": "Wells Fargo IR / Bloomberg",
+      "type": "earnings",
+      "bull_case": "EPS 微超；NII +5%；貸款 +10.7% YoY；存款 +5.7%；資產品質穩定",
+      "bear_case": "Revenue 連 3 季 miss；Asset Cap 限制成長空間；Q2 準備金壓力潛在",
+      "arbiter_reasoning": "NEUTRAL；JPM beat 仍主導 Financial 正面情緒；WFC 為邊際負面但非主導",
+      "debate_note": "JPM 強 vs WFC 弱 = 銀行板塊分化，非系統性問題，選股而非選板塊",
+      "binary_risk": false,
+      "within_48h": false
+    },
+    {
+      "headline": "Fear & Greed Index 跌至 15（Extreme Fear），從今晨 41 大幅惡化",
+      "headline_zh": "Fear & Greed Index 跌至 15（Extreme Fear），從今晨 41 大幅惡化",
+      "impact": "bearish",
+      "score": -1.0,
+      "date": "2026-04-14",
+      "sectors": [
+        "All"
+      ],
+      "source": "news_protocol",
+      "source_label": "CNN Fear & Greed",
+      "type": "sentiment",
+      "bull_case": "極端恐懼 = 逆向買入信號；S&P 連 4 漲中仍極端恐懼 = Climbing Wall of Worry；FOMO 動能尚未啟動",
+      "bear_case": "伊朗戰爭情境下極端恐懼可持續 3+ 月；機構去風險行動未完成；零售投資人仍在離場",
+      "arbiter_reasoning": "BEARISH（環境確認）；整體板塊情緒折扣；逆向信號值得記錄但不改變整體格局",
+      "debate_note": "Extreme Fear + 股價漲 = Climbing Wall of Worry 還是 Dead Cat Bounce，需後續確認",
+      "binary_risk": false,
+      "within_48h": false
     },
     {
       "headline": "Iran Ceasefire Announced (Apr 8) but Hormuz Still Effectively Closed; Ships Paying $1M+ Tolls",
@@ -870,257 +2491,56 @@
       "debate_note": "高預期 + 伊朗不確定性，miss 比 beat 的市場反應更不對稱",
       "binary_risk": true,
       "within_48h": true
+    }
+  ],
+  "positions": [
+    {
+      "id": "pos_20260414_GOOGL_01",
+      "ticker": "GOOGL",
+      "entry_date": "2026-04-14",
+      "entry_price": 332.61,
+      "shares": 20.0,
+      "cost_basis": 6652.2,
+      "status": "open",
+      "track": "manual",
+      "notes": "",
+      "report_ref": "",
+      "created_at": "2026-04-15T01:58:05",
+      "current_price": 337.12,
+      "unrealized_pl": 90.2,
+      "unrealized_pct": 1.36
     },
     {
-      "headline": "Major Bank Earnings: GS, JPM, WFC, C, BAC, MS",
-      "impact": "binary",
-      "score": 0.0,
-      "date": "2026-04-13",
-      "sectors": [
-        "Financials"
-      ],
-      "source": "sector_intel"
+      "id": "pos_20260414_MSFT_01",
+      "ticker": "MSFT",
+      "entry_date": "2026-04-14",
+      "entry_price": 391.32,
+      "shares": 50.0,
+      "cost_basis": 19566.0,
+      "status": "open",
+      "track": "manual",
+      "notes": "",
+      "report_ref": "",
+      "created_at": "2026-04-15T02:14:46",
+      "current_price": 411.22,
+      "unrealized_pl": 995.0,
+      "unrealized_pct": 5.09
     },
     {
-      "headline": "US-Iran Two-Week Ceasefire Agreement; Trump Conditions on Hormuz Reopening",
-      "headline_zh": "",
-      "impact": "binary",
-      "score": 1.0,
-      "date": "2026-04-10",
-      "sectors": [
-        "Energy",
-        "Technology",
-        "Airlines"
-      ],
-      "source": "news_protocol",
-      "source_label": "",
-      "type": "",
-      "bull_case": {
-        "interpretation": "停火使 WTI -16% 至 $94.41，能源通膨壓力急降，消費實質所得回升，Fed 降息空間重啟，risk-on 全面展開",
-        "primary_beneficiary_sectors": [
-          "Technology",
-          "Consumer_Discretionary",
-          "Airlines"
-        ],
-        "catalyst_type": "sentiment_boost",
-        "impact_score": 5,
-        "time_horizon": "immediate",
-        "confidence": 0.65,
-        "key_assumption": "停火條款得到執行，Hormuz 在 48h 內實質疏通"
-      },
-      "bear_case": {
-        "interpretation": "停火極脆弱（2 週期限、條件式），Hormuz 仍實質封鎖，Iran 已指控美國違約，油價反彈風險高，市場提前反應未兌現利多",
-        "primary_at_risk_sectors": [
-          "Consumer_Discretionary",
-          "Airlines",
-          "Bonds"
-        ],
-        "risk_type": "demand_destruction",
-        "impact_score": 4,
-        "time_horizon": "immediate",
-        "confidence": 0.7,
-        "key_assumption": "Iran 執行意願不足，Hormuz 維持部分封鎖"
-      },
-      "arbiter_reasoning": "兩方論點差距 <1 分，且 binary_risk=true，裁定 BINARY。市場已 price-in 好消息但風險尚未消除",
-      "debate_note": "停火能否真正疏通 Hormuz — 決定整個 commodity/inflation 路徑",
-      "binary_risk": {
-        "is_binary": true,
-        "event_date": "2026-04-22",
-        "within_48h": false
-      },
-      "within_48h": false
-    },
-    {
-      "headline": "Iran Accuses US of Ceasefire Violations; Strait of Hormuz Still Effectively Closed, Ships Charged $1M+ Tolls",
-      "headline_zh": "",
-      "impact": "bearish",
-      "score": -2.5,
-      "date": "2026-04-10",
-      "sectors": [
-        "Energy",
-        "Consumer_Discretionary",
-        "Airlines"
-      ],
-      "source": "news_protocol",
-      "source_label": "",
-      "type": "",
-      "bull_case": {
-        "interpretation": "部分船隻已通行，談判框架仍存在，市場解讀為可管理的談判籌碼，S&P 500 仍漲 2.51%",
-        "primary_beneficiary_sectors": [
-          "Energy_Diversified"
-        ],
-        "catalyst_type": "sentiment_boost",
-        "impact_score": 2,
-        "time_horizon": "immediate",
-        "confidence": 0.4,
-        "key_assumption": "伊朗最終仍遵守協議精神，只是談判姿態"
-      },
-      "bear_case": {
-        "interpretation": "伊朗議會主席表態談判不合理，Hormuz 仍封、收費 $1M/船，停火破裂機率 >60%，Oil 從 $94 已反彈至 $97.87，市場自我安慰埋下下行風險",
-        "primary_at_risk_sectors": [
-          "Consumer_Discretionary",
-          "Airlines",
-          "Technology",
-          "Bonds"
-        ],
-        "risk_type": "policy_headwind",
-        "impact_score": 4,
-        "time_horizon": "immediate",
-        "confidence": 0.65,
-        "key_assumption": "Iran 內部強硬派主導，和解空間有限"
-      },
-      "arbiter_reasoning": "Bear 論點更具說服力：Hormuz 實質未開放是不爭事實；Oil 已從 $94 反彈；市場 +2.51% 更多是動能延續而非基本面改善",
-      "debate_note": "市場是在 price-in 和解 vs denial 中繼續上漲",
-      "binary_risk": {
-        "is_binary": true,
-        "event_date": "2026-04-22",
-        "within_48h": true
-      },
-      "within_48h": false
-    },
-    {
-      "headline": "Trump Imposes 100% Section 232 Tariff on Patented Pharmaceutical Products and APIs",
-      "headline_zh": "",
-      "impact": "bearish",
-      "score": -2.0,
-      "date": "2026-04-10",
-      "sectors": [
-        "International_Pharma",
-        "Healthcare_Payers",
-        "US_Pharma_Domestic"
-      ],
-      "source": "news_protocol",
-      "source_label": "",
-      "type": "",
-      "bull_case": {
-        "interpretation": "利好美國本土製藥廠（Pfizer、Eli Lilly、Abbott），onshoring 投資週期開啟，US pharma manufacturing capex 上升",
-        "primary_beneficiary_sectors": [
-          "US_Pharma_Domestic",
-          "Industrial_Biotech"
-        ],
-        "catalyst_type": "policy_tailwind",
-        "impact_score": 3,
-        "time_horizon": "mid_term",
-        "confidence": 0.55,
-        "key_assumption": "US 本土製藥有能力快速擴產填補進口缺口"
-      },
-      "bear_case": {
-        "interpretation": "100% 關稅打擊進口藥品，藥價通膨加劇 → CPI 醫療分項惡化，EU/Japan 藥廠（Novartis、Roche、Sanofi）承壓，醫療保險成本上升",
-        "primary_at_risk_sectors": [
-          "International_Pharma",
-          "Healthcare_Payers",
-          "PBM"
-        ],
-        "risk_type": "cost_increase",
-        "impact_score": 4,
-        "time_horizon": "mid_term",
-        "confidence": 0.65,
-        "key_assumption": "藥品製造無法快速 onshore，短期供應不足"
-      },
-      "arbiter_reasoning": "醫藥供應鏈重組需要數年，120-180 天實施期短於製造業反應時間；加劇 CPI 醫療分項，對 Fed 立場雪上加霜",
-      "debate_note": "本土製藥獲益能否抵消全球供應鏈震盪與通膨二次衝擊",
-      "binary_risk": {
-        "is_binary": false,
-        "event_date": null,
-        "within_48h": false
-      },
-      "within_48h": false
-    },
-    {
-      "headline": "Trump Restructures Section 232 Metal Tariffs: Steel/Aluminum/Copper Dual-Tier 50%/25%",
-      "headline_zh": "",
-      "impact": "binary",
-      "score": 0.5,
-      "date": "2026-04-10",
-      "sectors": [
-        "Materials",
-        "Autos",
-        "Industrials"
-      ],
-      "source": "news_protocol",
-      "source_label": "",
-      "type": "",
-      "bull_case": {
-        "interpretation": "Nucor、Cleveland-Cliffs、Freeport-McMoRan 直接受益，US 工業基礎支撐，Materials ETF (XLB) 受惠",
-        "primary_beneficiary_sectors": [
-          "Materials",
-          "US_Industrials"
-        ],
-        "catalyst_type": "policy_tailwind",
-        "impact_score": 3,
-        "time_horizon": "short_term",
-        "confidence": 0.6,
-        "key_assumption": "UK 豁免不擴大至其他貿易夥伴"
-      },
-      "bear_case": {
-        "interpretation": "下游製造業（汽車、機械、建築）原材料成本上升，與停火帶來的能源通膨緩解部分對消，PPI 工業品分項上行",
-        "primary_at_risk_sectors": [
-          "Autos",
-          "Manufacturing",
-          "Construction"
-        ],
-        "risk_type": "cost_increase",
-        "impact_score": 2,
-        "time_horizon": "short_term",
-        "confidence": 0.55,
-        "key_assumption": "成本轉嫁能力有限，利潤率承壓"
-      },
-      "arbiter_reasoning": "上下游影響互相部分對消，裁定 BINARY；淨利多限於純 US 鋼鐵/銅生產商，廣度有限",
-      "debate_note": "供應鏈傳導速度與程度——短期 Materials 受益 vs 中期製造業邊際承壓",
-      "binary_risk": {
-        "is_binary": false,
-        "event_date": null,
-        "within_48h": false
-      },
-      "within_48h": false
-    },
-    {
-      "headline": "Meta Platforms Expands CoreWeave AI Infrastructure Deal to $35.2B Total; CoreWeave Raises $3B New Debt",
-      "headline_zh": "",
-      "impact": "bullish",
-      "score": 2.0,
-      "date": "2026-04-10",
-      "sectors": [
-        "Semiconductors",
-        "Cloud_AI_Infrastructure",
-        "High_PE_Tech_Unprofitable"
-      ],
-      "source": "news_protocol",
-      "source_label": "",
-      "type": "",
-      "bull_case": {
-        "interpretation": "Meta 總承諾 $35.2B 確認超大規模 AI capex 週期未停；帶動 Broadcom +5%，半導體/AI 基建族群情緒提振",
-        "primary_beneficiary_sectors": [
-          "Semiconductors",
-          "Cloud_Infrastructure",
-          "AI_Data_Centers"
-        ],
-        "catalyst_type": "demand_increase",
-        "impact_score": 3,
-        "time_horizon": "short_term",
-        "confidence": 0.7,
-        "key_assumption": "AI 商業化收益足以支撐此規模 capex"
-      },
-      "bear_case": {
-        "interpretation": "CoreWeave 需融資 $3B 新債，顯示 capex 燒錢速度超出自有現金；若 AI 商業化不如預期，估值修正風險",
-        "primary_at_risk_sectors": [
-          "High_PE_Tech",
-          "Unprofitable_AI_Infra"
-        ],
-        "risk_type": "demand_destruction",
-        "impact_score": 2,
-        "time_horizon": "mid_term",
-        "confidence": 0.45,
-        "key_assumption": "AI ROI 遲遲未兌現，資本市場風險偏好轉向"
-      },
-      "arbiter_reasoning": "Meta 作為 Tier 1 超大規模客戶的追加承諾是強確認訊號；Bull 論點主導；CoreWeave 融債是常規資本結構管理",
-      "debate_note": "AI capex 是否已超前消費 vs 真實需求仍加速",
-      "binary_risk": {
-        "is_binary": false,
-        "event_date": null,
-        "within_48h": false
-      },
-      "within_48h": false
+      "id": "pos_20260414_META_01",
+      "ticker": "META",
+      "entry_date": "2026-04-14",
+      "entry_price": 661.36,
+      "shares": 30.0,
+      "cost_basis": 19840.8,
+      "status": "open",
+      "track": "manual",
+      "notes": "",
+      "report_ref": "",
+      "created_at": "2026-04-15T07:36:57",
+      "current_price": 671.58,
+      "unrealized_pl": 306.6,
+      "unrealized_pct": 1.55
     }
   ]
 }

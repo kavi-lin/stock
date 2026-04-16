@@ -1,0 +1,45 @@
+{
+  "phase": 0,
+  "agent": "Global_News_Intelligence",
+  "scan_date": "2026-04-11",
+  "data_source_timestamp": "2026-04-11 00:00",
+  "phase0_source": "FRESHLY_EXECUTED",
+  "bullish_signals": [
+    { "rank": 1, "headline": "US-Iran two-week ceasefire removes Strait of Hormuz blockade risk", "source": "Bloomberg/CNBC", "impact_score": 5, "affected_sectors": ["Energy","Consumer Disc","Airlines","Broad Equities"], "reasoning": "WTI fell 16% in one day; S&P+2.51%, Nasdaq+2.80%; global RISK_ON snap-back; 7-day winning streak" },
+    { "rank": 2, "headline": "Amazon CEO letter: AWS AI services already at $15B revenue run rate", "source": "Amazon IR", "impact_score": 4, "affected_sectors": ["Technology","Cloud","AI Infrastructure"], "reasoning": "First public disclosure of AI revenue scale; validates hyperscaler AI capex thesis; AMZN +5.60%" },
+    { "rank": 3, "headline": "S&P 500 posts best weekly gain since November; 7-day winning streak", "source": "TheStreet/Bloomberg", "impact_score": 3, "affected_sectors": ["Broad Market"], "reasoning": "Momentum breadth recovery; Dow turned positive for 2026; confidence restoration" },
+    { "rank": 4, "headline": "US-China tariff rate stable at 10% through November 2026 (Busan agreement)", "source": "Tax Foundation/PIIE", "impact_score": 3, "affected_sectors": ["Consumer","Manufacturing","Tech"], "reasoning": "Known floor of trade war uncertainty; no escalation removes tail risk" },
+    { "rank": 5, "headline": "AWS Q4 2025 growth accelerates to 24% YoY — fastest in 13 quarters", "source": "Amazon Q4 Earnings", "impact_score": 3, "affected_sectors": ["Cloud","AI","Tech"], "reasoning": "Backlog $244B (+40% YoY); demand pipeline secure" },
+    { "rank": 6, "headline": "European markets surge 4%+ on ceasefire; DAX +4.8%", "source": "Reuters", "impact_score": 2, "affected_sectors": ["Global Equities","Airlines"], "reasoning": "Global synchronized rally; Lufthansa/EasyJet +10%+" },
+    { "rank": 7, "headline": "Consumer Discretionary XLY leads post-ceasefire sector rotation", "source": "State Street/SSGA", "impact_score": 2, "affected_sectors": ["Consumer Discretionary"], "reasoning": "Economy resilience repricing; AMZN is largest XLY component" },
+    { "rank": 8, "headline": "Cantor Fitzgerald raises AMZN target to $260 (Overweight)", "source": "MarketBeat", "impact_score": 2, "affected_sectors": ["Technology"], "reasoning": "Institutional conviction signal; asymmetric upside thesis" },
+    { "rank": 9, "headline": "Goldman Sachs forecasts 12% S&P 500 upside for 2026", "source": "FinancialContent", "impact_score": 2, "affected_sectors": ["Broad Market"], "reasoning": "Institutional baseline bull case intact despite near-term volatility" },
+    { "rank": 10, "headline": "Amazon Pharmacy + Eli Lilly GLP-1 same-day delivery partnership", "source": "Motley Fool", "impact_score": 1, "affected_sectors": ["Healthcare","Consumer"], "reasoning": "Revenue diversification; pharmacy addressable market expansion" }
+  ],
+  "bearish_signals": [
+    { "rank": 1, "headline": "Fed FOMC minutes: willing to consider rate hikes; 78% chance zero cuts 2026", "source": "Axios/Motley Fool", "impact_score": 4, "affected_sectors": ["Rate-Sensitive","Growth Stocks","Real Estate"], "reasoning": "Cleveland Fed Hammack flagged rate hike possibility; inflation stalling above 2% target" },
+    { "rank": 2, "headline": "Software/SaaS stocks selloff on AI disruption fears", "source": "CNBC", "impact_score": 4, "affected_sectors": ["Software","SaaS","Technology"], "reasoning": "Market pricing AI replacing SaaS; broader tech rotation headwind" },
+    { "rank": 3, "headline": "Fear & Greed Index at 37 — Fear territory despite market rally", "source": "CNN/feargreedmeter", "impact_score": 4, "affected_sectors": ["Broad Market"], "reasoning": "Sentiment still structurally bearish; rally may lack retail conviction" },
+    { "rank": 4, "headline": "Amazon 2026 capex $200B vs analyst estimate $146.6B — massive beat on spend", "source": "CNBC/Investing.com", "impact_score": 3, "affected_sectors": ["Technology","Cloud"], "reasoning": "Near-term FCF suppression; P/FCF at 249x elevated; capex shock" },
+    { "rank": 5, "headline": "Section 301 tariff investigations opened vs 15 countries; hearings April 28", "source": "USTR", "impact_score": 3, "affected_sectors": ["Manufacturing","Consumer","Global Trade"], "reasoning": "New trade escalation risk vector; uncertainty on outcome" },
+    { "rank": 6, "headline": "Fed Chair Powell term expires May 2026; leadership transition uncertainty", "source": "iShares/StLouis Fed", "impact_score": 3, "affected_sectors": ["Financials","Broad Market"], "reasoning": "Policy credibility gap risk; market dislikes central bank personnel uncertainty" },
+    { "rank": 7, "headline": "Oil crash -16% signals demand destruction narrative", "source": "Bloomberg", "impact_score": 3, "affected_sectors": ["Energy","EM"], "reasoning": "While good for consumers, -16% in one day indicates prior mispricing; demand worry" },
+    { "rank": 8, "headline": "AMZN down 10.4% over prior 3 months before ceasefire bounce", "source": "Zacks", "impact_score": 2, "affected_sectors": ["Technology"], "reasoning": "Prior downtrend not fully reversed; technical damage remains" },
+    { "rank": 9, "headline": "US-China trade talks in Paris: constructive but no breakthrough", "source": "NPR/SCMP", "impact_score": 2, "affected_sectors": ["Tech","Consumer"], "reasoning": "Structural tension persists; tariff upside risk if talks deteriorate" },
+    { "rank": 10, "headline": "Amazon Q4 2025 EPS $1.95 — slight miss vs $1.96 estimate", "source": "CNBC Earnings", "impact_score": 1, "affected_sectors": ["Technology"], "reasoning": "Marginal miss; Q1 2026 guidance range wide" }
+  ],
+  "macro_summary": {
+    "bullish_total_impact": 27,
+    "bearish_total_impact": 29,
+    "net_score": -2,
+    "macro_backdrop_score": -1.0,
+    "market_regime": "VOLATILE",
+    "regime_confidence": 0.72,
+    "key_themes": ["ceasefire-driven RISK_ON snap-back", "AI capex cycle continues", "Fed hawkishness / no-cut 2026", "SaaS disruption fears"],
+    "hot_sectors": ["Energy", "Consumer Discretionary", "Industrials", "AI Infrastructure"],
+    "cold_sectors": ["Software/SaaS", "Technology (broad, cooling)"]
+  },
+  "phase3_macro_multiplier": 0.90,
+  "mandatory_risk_flags": ["Fed_rate_hike_possible_2026", "Fed_Chair_transition_May2026"],
+  "binary_risks": ["earnings_2026Q1_AMZN_~late_April", "tariff_hearings_2026-04-28"]
+}

@@ -1,15 +1,5 @@
 # Multi-Agent Investment Protocol (V4.5)
 
-> **Changelog from V4.4**
-> - Phase 2: 新增第五 Agent「Contrarian Analyst (Burry)」，使用 `short-contrarian-analyst` skill
-> - Phase 2: Sentiment Agent 新增 `market-sentiment-analyzer` skill 作為 fallback
-> - Phase 2.5: 新增 T4 觸發條件（Burry Score ≤ 2 AND BUY）
-> - Phase 4: Risk Audit 新增 vol-adjusted position sizing（`portfolio-risk-manager`）
-> - Phase 4: Risk Audit 新增尾部風險評估（`tail-risk-analyzer`）
-> - Final Viz Table: 新增 Contrarian 列
-
----
-
 ## SESSION STARTUP
 
 ```
@@ -19,23 +9,23 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 ──────────────────────────────────────────
 ```
 
-> Ticker 由使用者在對話中直接指定，無需填入 config。
+Ticker 由使用者在對話中直接指定。
 
 ---
 
 ## GLOBAL RULES
 
-1. **Phase Execution Order**: 0 → 1 → 2 → 2.5 → 3 → 4 → 5。絕不跳過順序。
+1. **Phase Execution Order**: 0 → 1 → 2 → 2.5 → 3 → 4 → 5。絕不跳過。
 2. **Phase 0 Cache（三層優先順序）**:
-   - **層 1** 讀取 `../sector/sector_logs/YYYY-MM-DD_sector_intel.json`。存在且日期符合 → 直接從中提取 macro context，完全跳過所有 web search（`phase0_source: SECTOR_CACHE`）。
-   - **層 2** 讀取 `./invest_logs/YYYY-MM-DD_phase0.json`。存在且日期符合 → 載入（`phase0_source: INVEST_CACHE`）。
-   - **層 3** 兩者皆不存在 → 執行 web search，完成後寫入 `./invest_logs/YYYY-MM-DD_phase0.json`（`phase0_source: FRESHLY_EXECUTED`）。
-3. **Theme Cache**: 若任何 Phase 需要主題熱度資料，執行 `theme-detector` skill **前**必須先以今日日期搜尋 `../skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`。找到 → 直接載入（`theme_source: THEME_CACHE`），跳過 skill 執行；未找到 → 執行 skill，JSON cache 存入 `../skills/theme-detector/cache/`，MD 報告移至 `../reports/` 並重新命名為 `YYYYMMDD_theme_detector_HHMMSS.md`。
+   - 層 1：`../sector/sector_logs/YYYY-MM-DD_sector_intel.json` 存在且日期符合 → 提取 macro context，跳過 web search（`phase0_source: SECTOR_CACHE`）
+   - 層 2：`./invest_logs/YYYY-MM-DD_phase0.json` 存在且日期符合 → 載入（`phase0_source: INVEST_CACHE`）
+   - 層 3：皆無 → 執行 web search，寫入 `./invest_logs/YYYY-MM-DD_phase0.json`（`phase0_source: FRESHLY_EXECUTED`）
+3. **Theme Cache**: 需要主題熱度時，先搜尋 `../skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json`。找到 → 載入（`theme_source: THEME_CACHE`）；未找到 → 執行 skill，JSON cache 存入 `../skills/theme-detector/cache/`，MD 移至 `../reports/` 並重命名為 `YYYYMMDD_theme_detector_HHMMSS.md`。
 4. **Prior Session**: 讀取 `./invest_logs/history.json`，取最近一筆作為 prior context。
 5. **Output Format**: 邏輯輸出為 JSON；Markdown 僅用於最終 Visualization Table。
 6. **key_factors**: 最多 3 條，每條最多 8 個英文單字。
-7. **Phase 5**: session export 只存結果，不重複 Phase 3 的計算步驟。
-8. **MD Report**（強制）: Phase 5 完成後，將完整分析（Phase 0–4 + Visualization Table + 委員會決議）存為 `../reports/YYYYMMDD_TICKER.md`。命名格式範例：`20260410_CRWV.md`。不得省略。
+7. **Phase 5**: session export 只存結果，不重複 Phase 3 計算。
+8. **MD Report**（強制）: Phase 5 完成後，將完整分析存為 `../reports/YYYYMMDD_TICKER.md`（例：`20260410_CRWV.md`）。不得省略。
 
 ---
 
@@ -45,10 +35,10 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 |---|---|---|
 | Global News Intelligence | Phase 0 macro backdrop | `market-news-analyst` |
 | Fundamentals Analyst | Valuation, balance sheet, growth | `us-stock-analysis` |
-| Sentiment Analyst | Market-wide + stock-specific sentiment | `market-sentiment-analyzer` |
+| Sentiment Analyst | Market + stock-specific sentiment | `market-sentiment-analyzer` |
 | News Analyst | Macro events, CPI/Fed, geopolitical | `market-news-analyst` |
-| Technical Analyst | Price action, RSI, MACD, volume | — |
-| **Contrarian Analyst (Burry)** | **估值錨：FCF yield、EV/EBIT、內部人、逆向情緒** | **`short-contrarian-analyst`** |
+| Technical Analyst | Price action, RSI, MACD, volume | `technical-analyst` |
+| Contrarian Analyst (Burry) | 估值錨：FCF yield、EV/EBIT、內部人、逆向情緒 | `short-contrarian-analyst` |
 | Trader Agent | Entry/exit planner | — |
 | Risk Manager | Position sizer & safety auditor | `portfolio-risk-manager`, `tail-risk-analyzer` |
 | Portfolio Manager (PM) | Decision, weight control, export | — |
@@ -59,18 +49,14 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 
 **三層 cache 檢查（依序執行）**：
 
-1. 讀取 `../sector/sector_logs/YYYY-MM-DD_sector_intel.json`
-   - 存在且 `verdict_date` = 今日 → 從中提取以下欄位作為 macro context，**跳過所有 web search**，前往 Phase 1：
-     `market_regime`, `exposure_ceiling`, `political_risk_summary`, `actionable_themes`, `session_notes`
-   - 同時將 `sector_intel.summary` 的 hot/cold sectors 直接填入 `macro_summary.hot_sectors / cold_sectors`
+1. `../sector/sector_logs/YYYY-MM-DD_sector_intel.json`
+   - `verdict_date` = 今日 → 提取 `market_regime`, `exposure_ceiling`, `political_risk_summary`, `actionable_themes`, `session_notes` 作為 macro context，將 hot/cold sectors 填入 `macro_summary`，跳過 web search → Phase 1
+2. `./invest_logs/YYYY-MM-DD_phase0.json`
+   - `scan_date` = 今日 → 直接載入 → Phase 1
+3. 皆無 → 執行 web search（優先用 `market-news-analyst` skill），寫入 `./invest_logs/YYYY-MM-DD_phase0.json`
 
-2. 讀取 `./invest_logs/YYYY-MM-DD_phase0.json`
-   - 存在且 `scan_date` = 今日 → 直接載入，前往 Phase 1
-
-3. 兩者皆不存在 → 執行以下 web search，完成後寫入 `./invest_logs/YYYY-MM-DD_phase0.json`
-
-**Web search queries（層 3 才執行，優先用 `market-news-analyst` skill）**:
-- `market-news-analyst` skill（涵蓋以下全部）或逐條 web search：
+**Web search queries（層 3）**:
+- `market-news-analyst` skill，或逐條：
   - "global stock market news today"
   - "Fed interest rate outlook today"
   - "geopolitical risk markets today"
@@ -84,18 +70,10 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
   "scan_date": "YYYY-MM-DD",
   "data_source_timestamp": "YYYY-MM-DD HH:MM",
   "bullish_signals": [
-    { "rank": 1, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 2, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 3, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 4, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 5, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" }
+    { "rank": 1, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" }
   ],
   "bearish_signals": [
-    { "rank": 1, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 2, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 3, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 4, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" },
-    { "rank": 5, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" }
+    { "rank": 1, "headline": "string", "source": "string", "impact_score": "1–5", "affected_sectors": [], "reasoning": "string" }
   ],
   "macro_summary": {
     "bullish_total_impact": "sum of bullish impact_scores",
@@ -113,6 +91,8 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
   "binary_risks": ["earnings_YYYYQX", "FOMC_YYYY-MM-DD", "geopolitical_escalation"]
 }
 ```
+
+> bullish_signals / bearish_signals 各輸出 rank 1–5，共 10 條。
 
 **macro_multiplier 規則**:
 
@@ -149,15 +129,15 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 }
 ```
 
-> **Note**: Contrarian Analyst (Burry) 不參與加權計算，作為獨立 veto check 使用。
+Contrarian Analyst (Burry) 不參與加權，僅作為獨立 veto check。
 
 ---
 
 ## PHASE 2 — ANALYST MULTI-AGENT CORE
 
-**Agents**: Fundamentals / Sentiment / News / Technical / **Contrarian (Burry)**
+**Agents**: Fundamentals / Sentiment / News / Technical / Contrarian (Burry)
 
-**五個 Analyst 全部執行，輸出統一格式（Contrarian 另見下方額外 schema）**:
+**統一輸出格式（Contrarian 另見下方）**:
 
 ```json
 {
@@ -174,28 +154,19 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 }
 ```
 
-**各 Analyst 聚焦範圍與建議 skill**:
+**各 Analyst 聚焦範圍與 skill**:
 
-- **Fundamentals**: P/E vs sector, revenue growth YoY, FCF, debt/equity, next earnings date
-  → 優先使用 `us-stock-analysis` skill
+- **Fundamentals**: P/E vs sector, revenue growth YoY, FCF, debt/equity, next earnings date → `us-stock-analysis`
+- **Sentiment**: 市場 + 個股雙層融合
+  - 優先從 `sector_intel.json` 讀 `fear_greed_status`
+  - 不存在時：`market-sentiment-analyzer` skill，取 `composite_score`（0–100）作為市場基底
+  - 個股層級：web search（Reddit/X mention volume, short interest %, insider sentiment）
+  - `Sentiment Score = 0.4 × stock_specific_score + 0.6 × (market_composite/10 - 5)`
+  - 額外輸出：`market_sentiment_composite: 0–100`、`vix_current: float`
+- **News**: Company news 48h, analyst upgrades/downgrades, cross-ref Phase 0 key_themes → `market-news-analyst` 或從 `sector_intel.json.top_catalysts` 提取
+- **Technical**: Price vs 20/50/200MA, RSI(14), MACD, volume vs 20-day avg, support/resistance → 有週線圖用 `technical-analyst`，無則 web search
 
-- **Sentiment**: 市場整體情緒 + 個股特定情緒（雙層融合）
-  → **優先**從 `sector_intel.json` 讀取 `fear_greed_status`（若存在）
-  → `sector_intel.json` 不存在時：執行 `market-sentiment-analyzer` skill，取 `composite_score`（0–100）作為市場基底
-  → 個股層級：web search（Reddit/X mention volume, short interest %, insider sentiment）
-  → 最終 Sentiment Score = `0.4 × stock_specific_score + 0.6 × (market_composite/10 - 5)`
-    （市場 composite 0–100 映射為 -5 至 +5）
-  → 額外輸出：`market_sentiment_composite: 0–100`、`vix_current: float`
-
-- **News**: Company news 48h, analyst upgrades/downgrades, cross-ref Phase 0 key_themes
-  → 優先使用 `market-news-analyst` skill，或從 `sector_intel.json` `top_catalysts` 提取相關條目
-
-- **Technical**: Price vs 20/50/200MA, RSI(14), MACD crossover, volume vs 20-day avg, nearest support/resistance
-  → 若有週線圖 → 使用 `technical-analyst` skill；無圖則 web search
-
-**Contrarian Analyst（Burry）— 額外 schema**:
-
-執行 `short-contrarian-analyst` skill，輸出以下結構：
+**Contrarian Analyst (Burry)** — 執行 `short-contrarian-analyst` skill：
 
 ```json
 {
@@ -205,8 +176,8 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
   "burry_score": "0–12",
   "burry_signal": "STRONGLY BULLISH | BULLISH | NEUTRAL | BEARISH | STRONGLY BEARISH",
   "value_analysis": {
-    "fcf_yield_pct": "float — 正值好，>10% 強烈看多",
-    "ev_ebit_multiple": "float — 低值好，<6x 強烈看多",
+    "fcf_yield_pct": "float",
+    "ev_ebit_multiple": "float",
     "value_pts": "0–6"
   },
   "balance_sheet": {
@@ -220,24 +191,16 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
   },
   "contrarian_sentiment": {
     "news_tone": "NEGATIVE | MIXED | POSITIVE",
-    "contrarian_pts": "0–1",
-    "note": "負面新聞 = 潛在逆向機會；正面新聞 = 人群擁擠警告"
+    "contrarian_pts": "0–1"
   },
-  "burry_voice": "string — 用 Burry 簡潔語氣的一句評語",
-  "veto_flag": "true if burry_score ≤ 2 — 觸發 Phase 2.5 T4",
+  "burry_voice": "string — 用 Burry 語氣的一句評語",
+  "veto_flag": "true if burry_score <= 2",
   "phase0_alignment": "ALIGNED | MISALIGNED | NEUTRAL",
   "data_source_timestamp": "YYYY-MM-DD HH:MM"
 }
 ```
 
-**Burry Score 解讀**：
-
-| Score | Signal | 含義 |
-|---|---|---|
-| ≥ 7 | STRONGLY BULLISH | 深度價值，逆向買入高確信度 |
-| 5–6 | BULLISH | 估值合理偏低，值得關注 |
-| 3–4 | NEUTRAL | 無明顯優勢或劣勢 |
-| ≤ 2 | BEARISH | **觸發 veto_flag → Phase 2.5 T4** |
+`veto_flag = true`（burry_score ≤ 2）→ 觸發 Phase 2.5 T4。
 
 ---
 
@@ -249,8 +212,7 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 - **T1**: `Sentiment.score > +3` AND `Fundamentals.score < 0`
 - **T2**: `News.score < -3` AND `Technical.signal = BUY`
 - **T3**: `macro_backdrop_score < -3` AND any `signal = BUY` with `score > +3`
-- **T4（新增）**: `Contrarian_Analyst.veto_flag = true` AND `tentative_decision = BUY`
-  → 含義：Burry 認為估值嚴重高估（score ≤ 2），與 BUY 決策衝突，強制進行衝突審查
+- **T4**: `Contrarian_Analyst.veto_flag = true` AND `tentative_decision = BUY`
 - **Anti-Bias**: 所有 analyst 信號相同時，News Analyst 追加 `devils_advocate: ["reason1","reason2","reason3"]`
 
 ```json
@@ -261,7 +223,7 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
   "conflict_summary": "one sentence per trigger",
   "t4_detail": {
     "burry_score": "float",
-    "burry_concern": "string — 具體說明高估原因（FCF 負、EV/EBIT 過高等）",
+    "burry_concern": "string",
     "resolution": "OVERRIDE_BURRY | DOWNGRADE_DECISION | CANCEL"
   },
   "resolution": "string",
@@ -271,11 +233,10 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 ```
 
 **T4 仲裁規則**：
-- `burry_score = 0–1`（極端高估）→ 強烈建議 `resolution: CANCEL`
-- `burry_score = 2`（高估）→ PM 可選擇 `DOWNGRADE_DECISION`（BUY → HOLD）或 `OVERRIDE_BURRY`（需提供明確理由）
-- `OVERRIDE_BURRY` 需在 `t4_detail.resolution` 說明為何動能/基本面超越估值疑慮
+- `burry_score = 0–1` → 強烈建議 `CANCEL`
+- `burry_score = 2` → `DOWNGRADE_DECISION`（BUY → HOLD）或 `OVERRIDE_BURRY`（需在 `t4_detail.resolution` 說明動能/基本面如何超越估值疑慮）
 
-`proceed_to_phase3 = false` → 直接跳至 Phase 5，輸出 `CANCEL`。
+`proceed_to_phase3 = false` → 跳至 Phase 5，輸出 `CANCEL`。
 
 ---
 
@@ -285,9 +246,9 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 
 **公式**: `FinalScore = Σ(Weight_i × Score_i × Confidence_i) × macro_multiplier`
 
-> Contrarian Analyst 不納入加權，僅透過 T4 影響決策。
+Contrarian Analyst 不納入加權，僅透過 T4 影響決策。
 
-**Regime Adjustment**: 若 `market_regime = VOLATILE` → `FinalScore × 0.85`
+**Regime Adjustment**: `market_regime = VOLATILE` → `FinalScore × 0.85`
 
 **決策閾值**: BUY `>= 2.0` / HOLD `-2.0 to 2.0` / SELL `<= -2.0`
 
@@ -322,7 +283,7 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 
 **Agents**: Trader Agent + Risk Manager
 
-### Step 1 — Trade Plan（Trader Agent，不變）
+### Step 1 — Trade Plan（Trader Agent）
 
 ```json
 {
@@ -346,48 +307,30 @@ RISK_TOLERANCE : LOW | MEDIUM | HIGH
 }
 ```
 
-### Step 2 — Vol-Adjusted Position Sizing（新增，Risk Manager）
+### Step 2 — Vol-Adjusted Position Sizing（Risk Manager）
 
-**觸發條件**：使用者有多個持倉，或本次分析需要精確倉位計算時執行。
-**執行**：`portfolio-risk-manager` skill（傳入 ticker + 現有持倉 tickers）
+**觸發**：有多個持倉或需精確倉位計算時執行 `portfolio-risk-manager` skill（傳入 ticker + 現有持倉）
 
-取回以下數值用於 Step 3：
-- `vol_adjusted_limit_pct`：基於波動率的基礎上限
-- `correlation_multiplier`：相關性調整係數（0.7x / 0.9x / 1.1x）
-- `final_position_limit_pct` = `vol_adjusted_limit_pct × correlation_multiplier`
+取回供 Step 4 使用：
+- `vol_adjusted_limit_pct`
+- `correlation_multiplier`（0.7x / 0.9x / 1.1x）
+- `final_position_limit_pct = vol_adjusted_limit_pct × correlation_multiplier`
 
-**波動率閾值**（與 portfolio-risk-manager 一致）：
+### Step 3 — Tail Risk Assessment（Risk Manager）
 
-| 年化波動率 | 基礎倉位上限 |
-|---|---|
-| > 50% | 5% |
-| > 30% | 10% |
-| > 中位數 | 15% |
-| ≤ 中位數 | 25% |
+執行 `tail-risk-analyzer` skill（per-stock mode），取回 `fragility_label` → 倉位倍數：
 
-**相關性調整**：
-- > 0.7（高相關）→ × 0.7
-- 0.4–0.7（中等）→ × 0.9
-- < 0.4（低相關）→ × 1.1
-
-### Step 3 — Tail Risk Assessment（新增，Risk Manager）
-
-**執行**：`tail-risk-analyzer` skill（per-stock mode，傳入 ticker）
-
-取回 `fragility_label` 並調整 `position_size_pct`：
-
-| Fragility Label | 倉位調整 |
+| Fragility Label | 倉位倍數 |
 |---|---|
 | EXTREMELY FRAGILE | × 0.5 |
 | FRAGILE | × 0.75 |
-| RESILIENT | × 1.0（不調整）|
-| ANTIFRAGILE | × 1.1（若 PM 高確信度）|
+| RESILIENT | × 1.0 |
+| ANTIFRAGILE | × 1.1（僅 PM 高確信度）|
 
 ### Step 4 — Risk Audit（整合輸出）
 
-最終 position_size_pct 計算邏輯：
 ```
-base = vol_adjusted_limit（若有執行 Step 2）或 0.05（DEFAULT）
+base = vol_adjusted_limit（若 Step 2 執行）或 0.05
 tail_adjusted = base × fragility_multiplier
 macro_capped = min(tail_adjusted, 0.03 if macro_backdrop_score < -3)
 binary_adjusted = macro_capped × 0.5–0.7 if binary_risk present
@@ -408,11 +351,11 @@ final_position_size = binary_adjusted
       "fragility_label": "ANTIFRAGILE | RESILIENT | FRAGILE | EXTREMELY FRAGILE",
       "tail_risk_score": "float 0–100",
       "fragility_adjustment": "× 1.1 | × 1.0 | × 0.75 | × 0.5",
-      "key_tail_flags": ["string — e.g. fat_tail, high_leverage, negative_skew"]
+      "key_tail_flags": ["fat_tail | high_leverage | negative_skew"]
     },
     "position_size_pct": "final float 0.00–0.10",
     "position_size_cap": "if macro_backdrop_score < -3 → cap at 0.03",
-    "binary_risk_rule": "if binary_risks present → reduce position_size_pct 30–50%; if event within 48h → force REJECTED",
+    "binary_risk_rule": "binary_risks present → reduce 30–50%; within 48h → force REJECTED",
     "approval": "APPROVED | REJECTED",
     "rejection_reason": "string if REJECTED"
   }
@@ -425,10 +368,10 @@ final_position_size = binary_adjusted
 
 **Agent**: Portfolio Manager (PM)
 
-完成後執行：
-1. Append 本次 session export JSON 到 `./invest_logs/history.json`（JSON array）
+執行步驟：
+1. Append session export JSON 到 `./invest_logs/history.json`
 2. 確認 `./invest_logs/YYYY-MM-DD_phase0.json` 已存在
-3. 將完整分析報告存為 `../reports/YYYYMMDD_TICKER.md`（含 Phase 0–4、Visualization Table、委員會決議）
+3. 將完整分析存為 `../reports/YYYYMMDD_TICKER.md`（Phase 0–4 + Visualization Table + 委員會決議）
 
 ```json
 {
@@ -480,7 +423,6 @@ final_position_size = binary_adjusted
 ## PHASE 6 — CONTINUOUS LEARNING
 
 **Trigger**: `TRADE_RESULT: ticker=XXX result=WIN|LOSS`
-
 **Agent**: Portfolio Manager (PM)
 
 ```json
@@ -491,7 +433,7 @@ final_position_size = binary_adjusted
   "primary_failure_agent": "Fundamentals | Sentiment | News | Technical | Contrarian | Risk_Manager | timing | macro_model",
   "what_was_missed": "string",
   "contributing_factors": ["factor1", "factor2"],
-  "burry_was_right": "true | false | N/A — 回顧 Burry Score 的預測準確性",
+  "burry_was_right": "true | false | N/A",
   "weight_adjustment_delta": {
     "Fundamentals": "-0.05 to +0.05",
     "Sentiment": "-0.05 to +0.05",
@@ -509,7 +451,7 @@ final_position_size = binary_adjusted
 }
 ```
 
-**Weight 限制**: 單一 agent 0.10–0.50，每次調整 ±0.05 以內，四個總和必須 = 1.0。
+**Weight 限制**: 單一 agent 0.10–0.50，每次調整 ±0.05 以內，四個總和 = 1.0。
 
 ---
 
@@ -528,7 +470,3 @@ final_position_size = binary_adjusted
 |--------|----------|-----------|------------|-------------|-------------|---------------|-------------|-----------------|
 |        | BUY/HOLD |   float   |   float    |    float    |    X/12     |      %        | RESILIENT   | EXECUTE / CANCEL|
 ```
-
----
-
-*End of Protocol V4.5*

@@ -1,6 +1,16 @@
-# Pre-Market Sector Intelligence Protocol (V1.1)
+# Pre-Market Sector Intelligence Protocol (V1.2)
 
-> **Changelog from V1.0**
+> **Changelog from V1.1 → V1.2**
+> - Phase 0: 新增層 D（FTD Detector cache）、層 E（Market Top cache），移除冗餘層 B（uptrend-analyzer），改由 Phase 1 完成後回填 `uptrend_ratio_overall`
+> - Phase 0: 新增三訊號合成規則，輸出 `synthesized_exposure` 與 `signal_conflict`
+> - Phase 0: Phase 5 `_phase0` schema 補齊 `ftd`、`market_top`、`synthesized_exposure`、`signal_conflict` 四個欄位
+> - Phase 3: `named_targets` 統一修正為 `named_targets_today`（對齊 bridge.py）；`sentiment_source` 移除無效的 `SECTOR_CACHE` 選項
+> - Phase 4b: 新增 tail-risk 上限規則（HOT 產業 > 3 → 只跑前 3 名）
+> - Phase 4c: 仲裁 AVOID 觸發條件改用 `synthesized_exposure`（原為 `exposure_ceiling`）
+> - Final Verdict Table: footer 新增 `synthesized_exposure` 顯示
+> - Global Rules: 快取跳過時補充 FTD/market_top 新鮮度更新規則
+
+> **Changelog from V1.0 → V1.1**
 > - Phase 3: `fear_greed_index` 改由 `market-sentiment-analyzer` skill 提供（取代 web search），並新增 VIX、Put/Call Ratio 欄位
 > - Phase 4b: Devil's Advocate 新增 `tail-risk-analyzer` 量化支撐——對 HOT 產業（分數 > 75）的 proxy ETF 跑尾部風險，強制挑戰高分板塊
 > - `extreme_sentiment_triggered` 判斷改用 `market-sentiment-analyzer` composite score
@@ -26,6 +36,7 @@ FOCUS_DATE     : [留空 = 今日]
 
 1. **Phase Execution Order**: 0 → 1 → 2 → 3 → 4 → 5。絕不跳過順序。
 2. **Cache**: 讀取 `./sector_logs/YYYY-MM-DD_sector_intel.json`。存在且日期符合 → 載入跳過 Phase 0–1（廣度與輪動可快取），直接從 Phase 2 開始。**Phase 3（新聞催化劑）永遠重新執行，不可因快取跳過** — 新聞是即時的。
+   - **FTD/Market Top 新鮮度補丁**：即使走快取跳過 Phase 0-1，仍需檢查 `./ftd_cache/` 與 `./market_top_cache/` 是否有比 sector_intel.json 更新的檔案。若有 → 用新資料覆寫 `_phase0.ftd`、`_phase0.market_top`、`_phase0.synthesized_exposure` 後再繼續。
 3. **Debate Requirement**: Phase 4 必須有至少一個反方論點，禁止純多頭共識。
 4. **Extreme Sentiment Trigger（更新）**: 在 Phase 3 執行 `market-sentiment-analyzer` 後，使用 **composite_score** 判斷：
    - `composite_score > 80` 或 `composite_score < 20` → `extreme_sentiment_triggered = true`
@@ -39,7 +50,7 @@ FOCUS_DATE     : [留空 = 今日]
 
 | Agent | 職責 | 對應 Skill |
 |---|---|---|
-| Macro Regime Analyst | 總體市場健康度、制度判斷 | `uptrend-analyzer`, `market-breadth-analyzer` |
+| Macro Regime Analyst | 總體市場健康度、制度判斷 | `market-breadth-analyzer` |
 | Sector Rotation Analyst | 產業輪動、週期定位 | `sector-analyst` |
 | Theme Intelligence Analyst | 跨產業主題熱度與生命週期 | `theme-detector` |
 | News Catalyst Analyst | 48h 新聞、財報催化劑、**市場情緒儀表板** | `market-news-analyst`, `economic-calendar-fetcher`, **`market-sentiment-analyzer`** |
@@ -53,7 +64,7 @@ FOCUS_DATE     : [留空 = 今日]
 **Agent**: Macro Regime Analyst
 
 讀取 `./sector_logs/YYYY-MM-DD_sector_intel.json`：
-- 存在且日期符合 → 載入，跳至 Phase 2（Phase 3 仍需重新執行）
+- 存在且日期符合 → 載入，跳至 Phase 2（Phase 3 仍需重新執行；FTD/market_top 新鮮度補丁見 Global Rule 2）
 - 否則 → 執行以下分析並寫入檔案
 
 **資料來源**（優先順序）：
@@ -68,12 +79,51 @@ FOCUS_DATE     : [留空 = 今日]
      ```
      完成後讀取產出的 `market_breadth_YYYY-MM-DD_*.json`
 
-### 層 B — uptrend-analyzer（補充 uptrend_ratio_overall）
-2. 執行 `uptrend-analyzer` skill 取得 `uptrend_ratio_overall`（各產業上升趨勢比率）
-   - 若無法執行 → 用 `breadth_analyzer.components.breadth_level_trend.current_8ma` 作為代理值
+> **注意**：`uptrend_ratio_overall` 不在此處取得，由 Phase 1 完成後取各產業 `uptrend_ratio` 平均值回填至 `_phase0`。
 
-### 層 C — Web search（最後手段，已有 A+B 則跳過）
-3. Web search: "US market breadth today", "S&P 500 advance decline today"
+### 層 B — Web search（最後手段，已有層 A 則跳過）
+2. Web search: "US market breadth today", "S&P 500 advance decline today"
+
+### 層 C — FTD Detector cache（量化底部確認）
+3. 檢查 `./ftd_cache/ftd_detector_YYYY-MM-DD_*.json`（取最新）
+   - **存在** → 直接讀取
+   - **不存在** → 執行腳本（約 10 秒）：
+     ```bash
+     python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
+     ```
+   - 讀取欄位：`market_state.combined_state`、`quality_score.total_score`、`quality_score.exposure_range`
+
+### 層 D — Market Top Detector cache（量化頂部偵測）
+4. 檢查 `./market_top_cache/market_top_YYYY-MM-DD_*.json`（取最新）
+   - **存在** → 直接讀取
+   - **不存在** → 執行腳本（約 10 秒）：
+     ```bash
+     python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
+     ```
+   - 讀取欄位：`composite.composite_score`、`composite.zone`、`composite.risk_budget`
+
+---
+
+### 三訊號合成規則（Synthesized Exposure）
+
+取三個來源各自給出的曝險上限，採用「最保守值」作為 `synthesized_exposure`：
+
+| 來源 | 欄位 | 說明 |
+|---|---|---|
+| Breadth | `composite.exposure_guidance` | 廣度分析器直接輸出 |
+| FTD | `quality_score.exposure_range` | FTD 品質對應的建議倉位 |
+| Market Top | `composite.risk_budget` | 頂部概率對應的風險預算 |
+
+**合成計算**：
+1. 將各欄位字串（如 "40-60%"）取中位數
+2. 取三個中位數的最小值作為 `synthesized_exposure_midpoint`
+3. 若任兩訊號中位數差距 > 30pp → 標記 `signal_conflict: true`
+4. 最終 `synthesized_exposure` 取最保守字串（對應最低中位數的那個欄位原始值）
+
+**Agent 評估要點**：
+- FTD 訊號代表「底部確認 → 可加倉」；若 Breadth 或 Market Top 同時轉弱 → FTD 的積極訊號打折 50%
+- Market Top 高分（>60）且 FTD 未確認 → 倉位上限取 Market Top 保守值
+- 三訊號一致看多 → 可採納 FTD 進取範圍；三訊號衝突 → 強制降一個等級
 
 ---
 
@@ -86,8 +136,8 @@ FOCUS_DATE     : [留空 = 今日]
 | `breadth_components.sector_participation` | `composite.component_scores.breadth_level_trend.score` | 廣度水位 |
 | `breadth_components.momentum` | `composite.component_scores.ma_crossover.score` | 8MA vs 200MA 動能 |
 | `breadth_components.mean_reversion_risk` | `100 - composite.component_scores.cycle_position.score` | 週期位置反轉 → 風險 |
-| `exposure_ceiling` | `composite.exposure_guidance` | 如 "40-60%" |
-| `uptrend_ratio_overall` | `components.breadth_level_trend.current_8ma` | 8MA 作為代理（若無 uptrend-analyzer） |
+| `exposure_ceiling` | `composite.exposure_guidance` | 如 "40-60%"（廣度單一來源） |
+| `uptrend_ratio_overall` | Phase 1 完成後各產業 `uptrend_ratio` 平均值 | 回填，非 Phase 0 計算 |
 | `cycle_phase` | 由 `components.cycle_position.signal` 推斷（見下） | Early/Mid/Late/Recession |
 | `warning_flags` | 由各組件信號推斷（見下） | 量化觸發 |
 | `regime_confidence` | data_quality: Complete=0.9, Partial=0.7, Limited=0.4 | 資料完整度 |
@@ -111,7 +161,7 @@ FOCUS_DATE     : [留空 = 今日]
   "phase": 0,
   "agent": "Macro_Regime_Analyst",
   "scan_date": "YYYY-MM-DD",
-  "breadth_source": "market-breadth-analyzer | uptrend-analyzer | web_search",
+  "breadth_source": "market-breadth-analyzer | web_search",
   "breadth_score": "0–100 (composite.composite_score)",
   "breadth_zone": "Strong | Healthy | Neutral | Weakening | Critical",
   "breadth_components": {
@@ -122,10 +172,24 @@ FOCUS_DATE     : [留空 = 今日]
   },
   "market_regime": "BULL | BEAR | SIDEWAYS | VOLATILE | RISK_OFF | RISK_ON",
   "cycle_phase": "Early | Mid | Late | Recession",
-  "uptrend_ratio_overall": "float 0.0–1.0",
+  "uptrend_ratio_overall": "float 0.0–1.0 (由 Phase 1 回填)",
   "warning_flags": ["Bearish_Signal_Active", "Below_200MA", "Low_Historical_Percentile"],
-  "exposure_ceiling": "40-60% (from composite.exposure_guidance)",
-  "regime_confidence": "0.0–1.0"
+  "exposure_ceiling": "40-60% (breadth only)",
+  "regime_confidence": "0.0–1.0",
+  "ftd": {
+    "state": "FTD_CONFIRMED | FTD_WINDOW | RALLY_ATTEMPT | CORRECTION | FTD_INVALIDATED | NO_SIGNAL",
+    "quality_score": "0–100",
+    "exposure_range": "0-20% | 20-40% | 40-65% | 65-100%",
+    "source": "ftd_cache | not_available"
+  },
+  "market_top": {
+    "composite_score": "0–100",
+    "zone": "Normal | Early_Warning | Elevated_Risk | High_Probability | Top_Formation",
+    "risk_budget": "string 如 80-100%",
+    "source": "market_top_cache | not_available"
+  },
+  "synthesized_exposure": "string — 最保守曝險上限（取三訊號中最低者）",
+  "signal_conflict": "true | false — 若任兩訊號中位差 > 30pp"
 }
 ```
 
@@ -136,6 +200,8 @@ FOCUS_DATE     : [留空 = 今日]
 **Agent**: Sector Rotation Analyst
 
 **資料來源**: `sector-analyst` CSV（不需 API key）
+
+> Phase 1 完成後，將各產業 `uptrend_ratio` 的平均值回填至 `_phase0.uptrend_ratio_overall`。
 
 ```json
 {
@@ -197,14 +263,14 @@ FOCUS_DATE     : [留空 = 今日]
 
 ---
 
-## PHASE 3 — NEWS CATALYST REVIEW（已更新）
+## PHASE 3 — NEWS CATALYST REVIEW
 
 **Agent**: News Catalyst Analyst
 
 **資料來源**:
 - `market-news-analyst`（WebSearch，10 天內）
 - `economic-calendar-fetcher`（未來 7 天）
-- **`market-sentiment-analyzer` skill（新增，取代 web search 的 F&G 查詢）**
+- **`market-sentiment-analyzer` skill（取代 web search 的 F&G 查詢）**
 
 ### 市場情緒儀表板（Phase 3 開始時執行）
 
@@ -250,13 +316,13 @@ FOCUS_DATE     : [留空 = 今日]
         "direction": "bullish | bearish"
       }
     ],
-    "named_targets": ["TICKER or COUNTRY被點名受威脅"],
+    "named_targets_today": ["TICKER or COUNTRY被點名受威脅"],
     "fear_greed_index": "0–100 (from market-sentiment-analyzer composite_score)",
     "fear_greed_label": "Extreme_Fear | Fear | Neutral | Greed | Extreme_Greed",
     "vix_current": "float (from market-sentiment-analyzer)",
     "put_call_ratio": "float (from market-sentiment-analyzer)",
     "spy_rsi": "float (from market-sentiment-analyzer)",
-    "sentiment_source": "SECTOR_CACHE | SKILL_EXECUTED | WEB_SEARCH_FALLBACK",
+    "sentiment_source": "SKILL_EXECUTED | WEB_SEARCH_FALLBACK",
     "extreme_sentiment_triggered": "true | false"
   },
   "upcoming_binary_risks": [
@@ -283,11 +349,11 @@ FOCUS_DATE     : [留空 = 今日]
 
 ---
 
-## PHASE 4 — MULTI-AGENT DEBATE（已更新）
+## PHASE 4 — MULTI-AGENT DEBATE
 
 **Agent**: Portfolio Strategist (PS) 主持，各 agent 輪流發言
 
-### Step 1 — 各 Agent 提案（不變）
+### Step 1 — 各 Agent 提案
 
 ```json
 {
@@ -299,14 +365,16 @@ FOCUS_DATE     : [留空 = 今日]
 }
 ```
 
-### Step 2 — Devil's Advocate（已更新，加入量化尾部風險）
+### Step 2 — Devil's Advocate（加入量化尾部風險）
 
-**新增：Tail Risk 觸發規則**
+**Tail Risk 觸發規則**
 
-在 Devil's Advocate 準備反方論點前，對所有 `composite_score > 75` 的 HOT 產業執行尾部風險檢查：
+在 Devil's Advocate 準備反方論點前，對 HOT 產業執行尾部風險檢查：
+
+> **效率上限**：若 HOT 產業 > 3 個，僅對 `composite_score` 前 3 名執行 `tail-risk-analyzer`，其餘標記 `tail_risk_source: SKIPPED_CAPACITY_LIMIT`。
 
 ```
-對每個 HOT 產業（composite_score > 75）的 proxy_etf：
+對每個納入檢查的 HOT 產業（composite_score > 75）的 proxy_etf：
 → 執行 tail-risk-analyzer skill（per-stock mode，傳入 proxy_etf ticker）
 → 若 fragility_label = FRAGILE 或 EXTREMELY FRAGILE → 必須將此產業加入 challenge_targets
 → 若 tail_risk_score > 70 OR excess_kurtosis > 5 → 加入 risk_flags: "fat_tail_warning"
@@ -324,7 +392,7 @@ FOCUS_DATE     : [留空 = 今日]
       "fragility_label": "ANTIFRAGILE | RESILIENT | FRAGILE | EXTREMELY FRAGILE",
       "tail_risk_score": "float 0–100",
       "key_tail_flags": ["fat_tail_warning", "crash_vulnerability"],
-      "tail_risk_source": "SKILL_EXECUTED | SKIPPED_LOW_SCORE"
+      "tail_risk_source": "SKILL_EXECUTED | SKIPPED_LOW_SCORE | SKIPPED_CAPACITY_LIMIT"
     }
   ],
   "challenge_targets": [
@@ -340,7 +408,7 @@ FOCUS_DATE     : [留空 = 今日]
 }
 ```
 
-### Step 3 — PS 仲裁 & 權重整合（不變）
+### Step 3 — PS 仲裁 & 權重整合
 
 ```json
 {
@@ -354,12 +422,13 @@ FOCUS_DATE     : [留空 = 今日]
 }
 ```
 
-**仲裁規則（新增）**：
-- `exposure_ceiling < 40%` → 至少 3 個產業標記 AVOID
+**仲裁規則**：
+- `synthesized_exposure < 40%` → 至少 3 個產業標記 AVOID（原為 `exposure_ceiling`，已改用三訊號合成值）
 - `cycle_phase = Late | Recession` → Defensive 產業加分，Cyclical 降分
 - `upcoming_binary_risks` 含 within_48h → 相關產業降一級
-- **新增**：`fragility_label = EXTREMELY FRAGILE` → 該產業強制降一個 verdict 等級（HOT → WARM）
-- **新增**：`extreme_sentiment_triggered = true AND fragility_label = FRAGILE` → 加入 `risk_flags: extreme_sentiment_fragile_combo`
+- `fragility_label = EXTREMELY FRAGILE` → 該產業強制降一個 verdict 等級（HOT → WARM）
+- `extreme_sentiment_triggered = true AND fragility_label = FRAGILE` → 加入 `risk_flags: extreme_sentiment_fragile_combo`
+- `signal_conflict = true` → `final_regime_stance` 不得為 AGGRESSIVE，最高 NEUTRAL
 
 ---
 
@@ -376,16 +445,17 @@ FOCUS_DATE     : [留空 = 今日]
 ```json
 {
   "verdict_date": "YYYY-MM-DD",
-  "protocol_version": "V1.1",
+  "protocol_version": "V1.2",
   "generated_at": "YYYY-MM-DD HH:MM",
   "market_regime": "from Phase 0",
-  "exposure_ceiling": "from Phase 0",
+  "exposure_ceiling": "from Phase 0 (breadth only)",
+  "synthesized_exposure": "from Phase 0 (three-signal)",
   "cycle_phase": "from Phase 0",
   "_phase0": {
     "phase": 0,
     "agent": "Macro_Regime_Analyst",
     "scan_date": "YYYY-MM-DD",
-    "breadth_source": "market-breadth-analyzer | uptrend-analyzer | web_search",
+    "breadth_source": "market-breadth-analyzer | web_search",
     "breadth_score": "float 0–100",
     "breadth_zone": "Strong | Healthy | Neutral | Weakening | Critical",
     "breadth_components": {
@@ -398,8 +468,22 @@ FOCUS_DATE     : [留空 = 今日]
     "cycle_phase": "Early | Mid | Late | Recession",
     "uptrend_ratio_overall": "float 0.0–1.0",
     "warning_flags": ["Bearish_Signal_Active"],
-    "exposure_ceiling": "40-60%",
-    "regime_confidence": "float 0.0–1.0"
+    "exposure_ceiling": "40-60% (breadth only)",
+    "regime_confidence": "float 0.0–1.0",
+    "ftd": {
+      "state": "FTD_CONFIRMED | FTD_WINDOW | RALLY_ATTEMPT | CORRECTION | FTD_INVALIDATED | NO_SIGNAL",
+      "quality_score": "float 0–100",
+      "exposure_range": "string",
+      "source": "ftd_cache | not_available"
+    },
+    "market_top": {
+      "composite_score": "float 0–100",
+      "zone": "Normal | Early_Warning | Elevated_Risk | High_Probability | Top_Formation",
+      "risk_budget": "string",
+      "source": "market_top_cache | not_available"
+    },
+    "synthesized_exposure": "string — 最保守曝險上限",
+    "signal_conflict": "true | false"
   },
   "_phase1": {
     "phase": 1,
@@ -537,12 +621,14 @@ Score = breadth_momentum(25) + theme_heat(25) + news_catalyst(25) + rotation_sig
 | Technology  | HOT     |  82   | AI capex cycle intact...  | RESILIENT   | XLK       |                     |
 | Energy      | COLD    |  38   | Demand slowdown, tariff.. | FRAGILE     | XLE       | binary_48h, fat_tail|
 
-Market Regime: RISK_ON | Exposure Ceiling: 70% | Cycle: Mid
-Sentiment: Fear & Greed [XX/100 — Fear] | VIX: XX.X | Put/Call: X.XX
+Market Regime: RISK_ON | Breadth Ceiling: 70% | Synthesized Ceiling: 55% ⚠️ | Cycle: Mid
+Sentiment: Fear & Greed [XX/100 — Fear] | VIX: XX.X | Put/Call: X.XX | Signal Conflict: No
 
 TOP THEMES TODAY: [theme1] [theme2]
 HANDOFF TO INVESTMENT PROTOCOL: "市場 RISK_ON，科技與工業強，能源脆弱避開。"
 ```
+
+> ⚠️ 當 `signal_conflict = true` 時，Synthesized Ceiling 後方顯示警告符號，並在 HANDOFF 中明確說明衝突訊號。
 
 ---
 
@@ -560,4 +646,4 @@ reports/                               ← 最終報告集中存放
 
 ---
 
-*End of Pre-Market Sector Intelligence Protocol V1.1*
+*End of Pre-Market Sector Intelligence Protocol V1.2*

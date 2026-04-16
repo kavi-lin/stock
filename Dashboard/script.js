@@ -8,12 +8,24 @@ function applyTranslations() {
   if (!window.i18n) return;
   const t = window.i18n[UI.currentLang];
   const o = t.overview || {};
-  const keys = ['market_regime', 'hot_themes', 'sentiment', 'recent_audit', 'catalyst', 'quick_launch', 'launch_desc', 'start_btn'];
+  const keys = [
+    'market_regime', 'hot_themes', 'sentiment', 'recent_audit', 'catalyst',
+    'quick_launch', 'launch_desc', 'start_btn',
+    // Action Posture / header keys added in v1.2.0
+    'market_status', 'operator', 'conviction_title',
+    'action_posture', 'action_posture_desc',
+    'regime_label', 'exposure_label', 'exposure_hint',
+    'view_all',
+  ];
   keys.forEach(k => {
     const el = document.querySelector(`[data-i18n="${k}"]`);
     if (el && o[k]) el.textContent = o[k];
   });
 }
+
+// ── i18n helper ───────────────────────────────────────────────────────────
+function sig() { return window.i18n?.[UI.currentLang]?.signals || {}; }
+function ov()  { return window.i18n?.[UI.currentLang]?.overview || {}; }
 
 // ── Composite Signal Score ─────────────────────────────────────────────────
 function computeConviction(data) {
@@ -45,12 +57,13 @@ function computeConviction(data) {
     uptrendComp  * 0.10
   );
 
+  const cv = sig().conviction || {};
   const label =
-    score >= 80 ? 'STRONG BULL' :
-    score >= 65 ? 'BULLISH'     :
-    score >= 50 ? 'MIXED'       :
-    score >= 35 ? 'CAUTIOUS'    :
-    score >= 20 ? 'BEARISH'     : 'STRONG BEAR';
+    score >= 80 ? (cv.STRONG_BULL || 'Strong Bull') :
+    score >= 65 ? (cv.BULLISH     || 'Bullish')     :
+    score >= 50 ? (cv.MIXED       || 'Mixed')       :
+    score >= 35 ? (cv.CAUTIOUS    || 'Cautious')    :
+    score >= 20 ? (cv.BEARISH     || 'Bearish')     : (cv.STRONG_BEAR || 'Strong Bear');
 
   const color =
     score >= 65 ? '#22c55e' :
@@ -58,12 +71,13 @@ function computeConviction(data) {
     score >= 35 ? '#eab308' :
     score >= 20 ? '#f97316' : '#ef4444';
 
+  const dr = sig().drivers || {};
   const drivers = [
-    { label: 'FTD',       val: ftdComp,     bull: ftdComp     >= 60 },
-    { label: 'Breadth',   val: breadthComp, bull: breadthComp >= 55 },
-    { label: 'Sentiment', val: sentComp,    bull: sentComp    >= 60 },
-    { label: 'Top Risk',  val: topRiskComp, bull: topRiskComp >= 60 },
-    { label: 'Uptrend',   val: uptrendComp, bull: uptrendComp >= 55 },
+    { label: dr.ftd       || 'FTD',       val: ftdComp,     bull: ftdComp     >= 60 },
+    { label: dr.breadth   || 'Breadth',   val: breadthComp, bull: breadthComp >= 55 },
+    { label: dr.sentiment || 'Sentiment', val: sentComp,    bull: sentComp    >= 60 },
+    { label: dr.top_risk  || 'Top Risk',  val: topRiskComp, bull: topRiskComp >= 60 },
+    { label: dr.uptrend   || 'Uptrend',   val: uptrendComp, bull: uptrendComp >= 55 },
   ].sort((a, b) => Math.abs(b.val - 50) - Math.abs(a.val - 50));
 
   const topBull = drivers.filter(d => d.bull).slice(0, 2).map(d => d.label);
@@ -83,14 +97,17 @@ function computeConviction(data) {
   if (ftdExp || brExp || mtExp)
     summary += `  建議倉位參考：FTD ${ftdExp || '–'} · 廣度 ${brExp || '–'} · 頂部風控 ${mtExp || '–'}`;
 
+  const comp = sig().components || {};
+  const ftdStates = sig().ftd_states || {};
+  const fgMap     = sig().fg_labels  || {};
   return {
     score, label, color,
     components: [
-      { key: 'FTD Signal',      raw: Math.round(ftdComp),     pct: Math.round(ftdComp),     bull: ftdComp     >= 55, tag: ftd.state || '–' },
-      { key: 'Market Breadth',  raw: Math.round(breadthComp), pct: breadthComp,              bull: breadthComp >= 55, tag: br.zone   || '–' },
-      { key: 'Sentiment (Ctr)', raw: Math.round(sentComp),    pct: sentComp,                 bull: sentComp    >= 60, tag: mkt.fear_greed_label || '–' },
-      { key: 'Top Risk (Inv)',  raw: Math.round(topRiskComp), pct: topRiskComp,              bull: topRiskComp >= 60, tag: mt.zone   || '–' },
-      { key: 'Uptrend Ratio',   raw: Math.round(uptrendComp), pct: uptrendComp,              bull: uptrendComp >= 55, tag: Math.round(uptrendComp) + '%' },
+      { key: comp.ftd       || 'FTD Signal',      raw: Math.round(ftdComp),     pct: Math.round(ftdComp),     bull: ftdComp     >= 55, tag: ftdStates[ftd.state] || ftd.state || '–' },
+      { key: comp.breadth   || 'Market Breadth',  raw: Math.round(breadthComp), pct: breadthComp,              bull: breadthComp >= 55, tag: br.zone   || '–' },
+      { key: comp.sentiment || 'Sentiment (Ctr)', raw: Math.round(sentComp),    pct: sentComp,                 bull: sentComp    >= 60, tag: fgMap[mkt.fear_greed_label] || mkt.fear_greed_label || '–' },
+      { key: comp.top_risk  || 'Top Risk (Inv)',  raw: Math.round(topRiskComp), pct: topRiskComp,              bull: topRiskComp >= 60, tag: mt.zone   || '–' },
+      { key: comp.uptrend   || 'Uptrend Ratio',   raw: Math.round(uptrendComp), pct: uptrendComp,              bull: uptrendComp >= 55, tag: Math.round(uptrendComp) + '%' },
     ],
     summary,
   };
@@ -102,46 +119,53 @@ function renderSignalAngles(data) {
   if (!grid) return;
   const ftd = data.ftd || {}, br = data.breadth || {}, mkt = data.market || {}, mt = data.market_top || {};
   const fg = mkt.fear_greed ?? 50;
-  const fgLabel = fg < 25 ? 'Extreme Fear' : fg < 45 ? 'Fear' : fg < 55 ? 'Neutral' : fg < 75 ? 'Greed' : 'Extreme Greed';
-  const fgColor = fg < 25 ? '#22c55e' : fg < 45 ? '#86efac' : fg < 55 ? '#eab308' : fg < 75 ? '#f97316' : '#ef4444';
+  const s  = sig();
+  const fgRaw    = fg < 25 ? 'Extreme Fear' : fg < 45 ? 'Fear' : fg < 55 ? 'Neutral' : fg < 75 ? 'Greed' : 'Extreme Greed';
+  const fgMap2   = s.fg_labels || {};
+  const fgLabel  = fgMap2[fgRaw] || fgRaw;
+  const fgSuffix = fgMap2.contrarian_suffix || ' (Ctr)';
+  const fgColor  = fg < 25 ? '#22c55e' : fg < 45 ? '#86efac' : fg < 55 ? '#eab308' : fg < 75 ? '#f97316' : '#ef4444';
+
+  const ftdStates2   = s.ftd_states   || {};
+  const topZones     = s.top_zones    || {};
+  const uptrendLbls  = s.uptrend_labels || {};
+  const cards        = s.cards         || {};
+  const topZoneClean = (mt.zone || '').replace(/\(.*\)/, '').trim();
+  const topColor     = (mt.composite_score ?? 0) <= 20 ? '#22c55e' : (mt.composite_score ?? 0) <= 40 ? '#eab308'
+                     : (mt.composite_score ?? 0) <= 60 ? '#f97316' : '#ef4444';
+  const uptrendRatio = mkt.uptrend_ratio ?? 0;
 
   const angles = [
     {
-      icon: 'signal', label: 'FTD Signal', link: 'breadth.html',
+      icon: 'signal', label: cards.ftd || 'FTD Signal', link: 'sector.html',
       val: ftd.quality_score != null ? ftd.quality_score : '–',
-      sub: ftd.state?.replace(/_/g, ' ') || 'No Signal',
+      sub: ftdStates2[ftd.state] || ftdStates2.default || 'No Signal',
       color: ftd.state === 'FTD_CONFIRMED' && !ftd.invalidated ? '#22c55e'
            : ftd.state === 'FTD_WINDOW' || ftd.state === 'RALLY_ATTEMPT' ? '#eab308' : '#ef4444',
       bar: ftd.quality_score ?? 0,
     },
     {
-      icon: 'bar-chart-2', label: 'Breadth', link: 'breadth.html',
-      val: br.score != null ? br.score.toFixed(1) : '–',
-      sub: br.zone || '–',
-      color: (br.score ?? 0) >= 55 ? '#22c55e' : (br.score ?? 0) >= 35 ? '#eab308' : '#ef4444',
-      bar: br.score ?? 0,
-    },
-    {
-      icon: 'alert-triangle', label: 'Top Risk', link: 'breadth.html',
+      icon: 'alert-triangle', label: cards.top_risk || 'Top Risk', link: 'sector.html',
       val: mt.composite_score != null ? mt.composite_score : '–',
-      sub: (mt.zone || '–').replace(/\(.*\)/, '').trim(),
-      color: (mt.composite_score ?? 0) <= 20 ? '#22c55e' : (mt.composite_score ?? 0) <= 40 ? '#eab308'
-           : (mt.composite_score ?? 0) <= 60 ? '#f97316' : '#ef4444',
+      sub: topZones[topZoneClean] || topZoneClean || '–',
+      color: topColor,
       bar: mt.composite_score ?? 0,
     },
     {
-      icon: 'heart-pulse', label: 'Sentiment', link: 'news.html',
+      icon: 'heart-pulse', label: cards.sentiment || 'Sentiment', link: 'news.html',
       val: fg,
-      sub: fgLabel + ' (Ctr)',
+      sub: fgLabel + fgSuffix,
       color: fgColor,
       bar: 100 - fg,
     },
     {
-      icon: 'trending-up', label: 'Uptrend %', link: 'breadth.html',
-      val: Math.round((mkt.uptrend_ratio ?? 0) * 100) + '%',
-      sub: (mkt.uptrend_ratio ?? 0) >= 0.6 ? 'Healthy' : (mkt.uptrend_ratio ?? 0) >= 0.4 ? 'Neutral' : 'Weak',
-      color: (mkt.uptrend_ratio ?? 0) >= 0.6 ? '#22c55e' : (mkt.uptrend_ratio ?? 0) >= 0.4 ? '#eab308' : '#ef4444',
-      bar: Math.round((mkt.uptrend_ratio ?? 0) * 100),
+      icon: 'trending-up', label: cards.uptrend || 'Uptrend %', link: 'sector.html',
+      val: Math.round(uptrendRatio * 100) + '%',
+      sub: uptrendRatio >= 0.6 ? (uptrendLbls.healthy || 'Healthy')
+         : uptrendRatio >= 0.4 ? (uptrendLbls.neutral || 'Neutral')
+                                : (uptrendLbls.weak    || 'Weak'),
+      color: uptrendRatio >= 0.6 ? '#22c55e' : uptrendRatio >= 0.4 ? '#eab308' : '#ef4444',
+      bar: Math.round(uptrendRatio * 100),
     },
   ];
 
@@ -152,7 +176,7 @@ function renderSignalAngles(data) {
         <i data-lucide="${a.icon}" class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors"></i>
       </div>
       <div class="text-2xl font-black tracking-tighter leading-none" style="color:${a.color}">${a.val}</div>
-      <div class="w-full h-1.5 rounded-full bg-zinc-800">
+      <div class="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
         <div class="h-1.5 rounded-full transition-all duration-700" style="width:${Math.min(100, a.bar)}%;background-color:${a.color}"></div>
       </div>
       <div class="text-[9px] font-bold uppercase tracking-wide" style="color:${a.color}">${a.sub}</div>
@@ -167,8 +191,7 @@ async function updateDashboard() {
   let data = null;
 
   try {
-    const response = await fetch('data.json?t=' + Date.now());
-    data = await response.json();
+    data = await DataStore.get(true);
 
     // 1. Composite Conviction Hero
     const conv      = computeConviction(data);
@@ -184,7 +207,14 @@ async function updateDashboard() {
     if (summaryEl) summaryEl.textContent = conv.summary;
 
     if (compBars) {
-      const wt = { 'FTD Signal': 35, 'Market Breadth': 25, 'Sentiment (Ctr)': 15, 'Top Risk (Inv)': 15, 'Uptrend Ratio': 10 };
+      const comp2 = sig().components || {};
+      const wt = {
+        [comp2.ftd       || 'FTD Signal']:      35,
+        [comp2.breadth   || 'Market Breadth']:  25,
+        [comp2.sentiment || 'Sentiment (Ctr)']: 15,
+        [comp2.top_risk  || 'Top Risk (Inv)']:  15,
+        [comp2.uptrend   || 'Uptrend Ratio']:   10,
+      };
       compBars.innerHTML = conv.components.map(c => {
         const col = c.bull ? '#22c55e' : (c.pct >= 40 ? '#eab308' : '#ef4444');
         return `
@@ -193,7 +223,7 @@ async function updateDashboard() {
             <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wide truncate">${c.key}</span>
             <span class="text-[8px] text-zinc-700 shrink-0">${wt[c.key] || 0}%</span>
           </div>
-          <div class="flex-1 h-1.5 rounded-full bg-zinc-800">
+          <div class="flex-1 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
             <div class="h-1.5 rounded-full transition-all duration-700" style="width:${Math.min(100,c.pct)}%;background-color:${col}"></div>
           </div>
           <span class="text-[10px] font-black font-mono w-7 text-right shrink-0" style="color:${col}">${c.raw}</span>
@@ -208,9 +238,13 @@ async function updateDashboard() {
     const flagsEl  = document.getElementById('flags-compact');
 
     if (regimeEl) {
-      regimeEl.textContent = data.market?.regime || '–';
-      const rCol = { RISK_ON: '#22c55e', RISK_OFF: '#ef4444', VOLATILE: '#eab308', NEUTRAL: '#71717a' };
-      regimeEl.style.color = rCol[data.market?.regime] || 'var(--primary)';
+      const regimeKey  = data.market?.regime || '';
+      const regimeMap  = sig().regime || {};
+      const rCol       = { RISK_ON: '#22c55e', RISK_OFF: '#ef4444', VOLATILE: '#eab308', NEUTRAL: '#71717a' };
+      regimeEl.textContent = regimeMap[regimeKey] || regimeKey || '–';
+      regimeEl.style.color = rCol[regimeKey] || 'var(--primary)';
+      const regimeSubEl = document.getElementById('regime-sub');
+      if (regimeSubEl) regimeSubEl.textContent = regimeKey;
     }
     const expOptions = [data.ftd?.exposure_range, data.breadth?.exposure_ceiling, data.market?.exposure_ceiling].filter(Boolean);
     if (expEl) expEl.textContent = expOptions[0] || '–';
@@ -221,11 +255,11 @@ async function updateDashboard() {
       if (flags.length) {
         flagsEl.innerHTML =
           `<p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-             <i data-lucide="alert-triangle" class="w-3 h-3 text-yellow-500"></i> ${flags.length} Flag${flags.length > 1 ? 's' : ''} Active
+             <i data-lucide="alert-triangle" class="w-3 h-3 text-yellow-500"></i> ${flags.length} ${ov().flags_active || 'Flag(s) Active'}
            </p>` +
           flags.slice(0, 3).map(f => Components.flagBadge(f, tw.flags)).join('');
       } else {
-        flagsEl.innerHTML = `<div class="text-[9px] font-bold text-emerald-500 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> No Active Flags</div>`;
+        flagsEl.innerHTML = `<div class="text-[9px] font-bold text-emerald-500 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> ${ov().no_flags || 'No Active Flags'}</div>`;
       }
     }
 
