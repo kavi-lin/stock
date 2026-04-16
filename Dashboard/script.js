@@ -379,6 +379,20 @@ async function launchAnalysis() {
 document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
 document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
 
+// Resume banner on page load if a protocol is already running
+(async () => {
+  try {
+    const r = await fetch('/api/run-protocol/status');
+    const s = await r.json();
+    if (s.status === 'running') {
+      const isZh = UI.currentLang === 'zh';
+      setLaunchStatus('running', isZh ? `${s.name || ''} 執行中...` : `${s.name || ''} running...`);
+      _launchPollTimer = setInterval(pollLaunchStatus, 2000);
+      pollLaunchStatus();
+    }
+  } catch (e) { /* ignore */ }
+})();
+
 // ── Boot ───────────────────────────────────────────────────────────────────
 const _activePage = document.body.dataset.page || 'index';
 UI.boot(_activePage, { translate: applyTranslations, reload: updateDashboard });
