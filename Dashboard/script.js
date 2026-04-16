@@ -290,7 +290,7 @@ async function updateDashboard() {
 }
 
 // ── Launch Engine ──────────────────────────────────────────────────────────
-function launchAnalysis() {
+async function launchAnalysis() {
   const input = document.getElementById('ticker-input');
   const hint  = document.getElementById('launch-hint');
   const cmdEl = document.getElementById('launch-cmd');
@@ -300,16 +300,17 @@ function launchAnalysis() {
   const cmd = `分析 ${ticker}`;
   cmdEl.textContent = cmd;
   hint.classList.remove('hidden');
-  UI.logToUI(`Launch command generated: "${cmd}"`, 'info');
-}
-
-document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
-document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
-document.getElementById('copy-cmd')?.addEventListener('click', () => {
-  const cmd = document.getElementById('launch-cmd')?.textContent;
-  if (!cmd) return;
-  navigator.clipboard.writeText(cmd).then(() => {
-    const btn = document.getElementById('copy-cmd');
+  // Auto-copy + toast (same pattern as FLASH/DIGEST)
+  await UI.copyToClipboard(cmd);
+  const isZh = UI.currentLang === 'zh';
+  UI.showToast(
+    isZh ? `<span class="text-emerald-400 font-bold">「${cmd}」</span><br>已複製到剪貼簿，貼回 Claude Code 執行個股分析`
+         : `<span class="text-emerald-400 font-bold">"${cmd}"</span><br>Copied — paste into Claude Code to run analysis`,
+    'info', 5000
+  );
+  // Flash the COPY button as confirmation
+  const btn = document.getElementById('copy-cmd');
+  if (btn) {
     btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> COPIED';
     btn.classList.add('text-green-400', 'border-green-500');
     UI.icons();
@@ -317,6 +318,29 @@ document.getElementById('copy-cmd')?.addEventListener('click', () => {
       btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> COPY';
       btn.classList.remove('text-green-400', 'border-green-500');
       UI.icons();
+    }, 2000);
+  }
+  UI.logToUI(`Launch: "${cmd}" → clipboard`, 'info');
+}
+
+document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
+document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
+document.getElementById('copy-cmd')?.addEventListener('click', async () => {
+  const cmd = document.getElementById('launch-cmd')?.textContent;
+  if (!cmd) return;
+  await UI.copyToClipboard(cmd);
+  UI.showToast(
+    UI.currentLang === 'zh' ? `<span class="text-emerald-400 font-bold">「${cmd}」</span> 已複製` : `<span class="text-emerald-400 font-bold">"${cmd}"</span> copied`,
+    'info', 3000
+  );
+  const btn = document.getElementById('copy-cmd');
+  btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> COPIED';
+  btn.classList.add('text-green-400', 'border-green-500');
+  UI.icons();
+  setTimeout(() => {
+    btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> COPY';
+    btn.classList.remove('text-green-400', 'border-green-500');
+    UI.icons();
     }, 2000);
   });
 });
