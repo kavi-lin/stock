@@ -378,7 +378,6 @@ async function launchAnalysis() {
 
 document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
 document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
-});
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 const _activePage = document.body.dataset.page || 'index';
