@@ -36,10 +36,19 @@
             
             <div class="flex items-center gap-4">
                 <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter hidden sm:block">SYNCING...</span>
-                <button id="preflight-btn" class="bg-white dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white border border-zinc-200 dark:border-zinc-800 shadow-sm px-4 py-1.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                    <span data-i18n="preflight_btn">盤前檢查</span>
-                </button>
+                <div class="relative" id="preflight-wrap">
+                    <button id="preflight-btn" class="bg-white dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white border border-zinc-200 dark:border-zinc-800 shadow-sm px-4 py-1.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span data-i18n="preflight_btn">盤前檢查</span>
+                    </button>
+                    <!-- Hover tooltip -->
+                    <div id="preflight-tooltip" class="hidden absolute right-0 top-full mt-2 w-72 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-3 z-50 text-xs" style="background-color:var(--bg-card)">
+                        <div id="preflight-tooltip-body" class="space-y-1.5">
+                            <div class="animate-pulse text-zinc-500 text-center py-2">Loading...</div>
+                        </div>
+                        <div id="preflight-tooltip-summary" class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 text-[10px] text-zinc-500"></div>
+                    </div>
+                </div>
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-700 p-px">
                   <div class="w-full h-full rounded-xl bg-white dark:bg-black flex items-center justify-center">
                     <span class="text-xs font-bold">KV</span>

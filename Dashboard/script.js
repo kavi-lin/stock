@@ -393,6 +393,72 @@ document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (
   } catch (e) { /* ignore */ }
 })();
 
+// ── Preflight Hover Tooltip ──────────────────────────────────────────────
+let _tooltipTimer = null;
+let _tooltipCache = null;
+let _tooltipCacheAge = 0;
+
+async function loadTooltipData() {
+  const body = document.getElementById('preflight-tooltip-body');
+  const summary = document.getElementById('preflight-tooltip-summary');
+  if (!body) return;
+  // Use cached data if < 30s old
+  if (_tooltipCache && Date.now() - _tooltipCacheAge < 30000) {
+    renderTooltip(_tooltipCache);
+    return;
+  }
+  body.innerHTML = '<div class="animate-pulse text-zinc-500 text-center py-2">Loading...</div>';
+  try {
+    const r = await fetch('/api/preflight');
+    const d = await r.json();
+    _tooltipCache = d.items || [];
+    _tooltipCacheAge = Date.now();
+    renderTooltip(_tooltipCache);
+  } catch (e) {
+    body.innerHTML = `<div class="text-red-400 text-center">${e.message}</div>`;
+  }
+}
+
+function renderTooltip(items) {
+  const body = document.getElementById('preflight-tooltip-body');
+  const summary = document.getElementById('preflight-tooltip-summary');
+  const isZh = UI.currentLang === 'zh';
+  if (!body) return;
+  body.innerHTML = items.map(item => {
+    const label = isZh ? item.label : item.label_en;
+    const icon = item.status === 'FRESH' ? '✅' : item.status === 'STALE' ? '⚠️' : '❌';
+    const color = item.status === 'FRESH' ? 'text-emerald-400' : item.status === 'STALE' ? 'text-amber-400' : 'text-red-400';
+    return `<div class="flex items-center justify-between gap-2">
+      <span>${icon} ${label}</span>
+      <span class="font-mono ${color}">${item.age_str}</span>
+    </div>`;
+  }).join('');
+
+  const stale = items.filter(i => i.status !== 'FRESH');
+  const staleFree = stale.filter(i => i.free);
+  const staleToken = stale.filter(i => !i.free);
+  if (stale.length === 0) {
+    summary.innerHTML = isZh ? '✅ 全部最新，無需更新' : '✅ All fresh, nothing to update';
+  } else {
+    const parts = [];
+    if (staleFree.length) parts.push(isZh ? `${staleFree.length} 個免費項目` : `${staleFree.length} free`);
+    if (staleToken.length) parts.push(isZh ? `${staleToken.length} 個需 token` : `${staleToken.length} need tokens`);
+    summary.innerHTML = (isZh ? '點擊更新：' : 'Click to update: ') + parts.join(isZh ? '，' : ', ');
+  }
+}
+
+const _preflightWrap = document.getElementById('preflight-wrap');
+_preflightWrap?.addEventListener('mouseenter', () => {
+  _tooltipTimer = setTimeout(() => {
+    document.getElementById('preflight-tooltip')?.classList.remove('hidden');
+    loadTooltipData();
+  }, 300);
+});
+_preflightWrap?.addEventListener('mouseleave', () => {
+  clearTimeout(_tooltipTimer);
+  document.getElementById('preflight-tooltip')?.classList.add('hidden');
+});
+
 // ── Preflight Modal ──────────────────────────────────────────────────────
 const _preflightModal = document.getElementById('preflight-modal');
 
