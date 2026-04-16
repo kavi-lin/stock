@@ -52,6 +52,13 @@
               </div>
             </div>
 
+            <!-- Review Filter Tabs -->
+            <div class="flex gap-2 flex-wrap mb-6" id="news-filter-tabs">
+                <button data-filter="all"      class="news-filter-tab active px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-all">全部</button>
+                <button data-filter="reviewed"  class="news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-reviewed">已審核 ✅</button>
+                <button data-filter="pending"   class="news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-pending">待審核 ⏳</button>
+            </div>
+
             <!-- Two-column: feed + binary risks sidebar -->
             <div class="flex gap-6 items-start">
                 <div class="flex-1 space-y-6 min-w-0" id="news-feed-detailed">

@@ -16,8 +16,9 @@
 - `archive/old_protocols/investment/` — V4.3 / V4.4 / V4.5
 
 ## 觸發方式
-- 「新聞分析 DIGEST」→ 執行 news_protocol_v2，MODE: DIGEST（先跑 `news/fetch_news_rss.py` 產 raw.json → Stage 1 triage → Stage 2 deep ≤5 則）
-- 「新聞分析 FLASH [新聞內容]」→ 執行 news_protocol_v2，MODE: FLASH（跳過 Stage 1，直接 Deep Debate）
+- 「新聞分析 DIGEST」→ 執行 news_protocol_v2，MODE: DIGEST（先跑 `news/fetch_news_rss.py` 產 raw.json → Stage 1 triage → Stage 2 deep ≤5 則 → `review_status: reviewed`）
+- 「新聞分析 FLASH [新聞內容]」→ 執行 news_protocol_v2，MODE: FLASH（跳過 Stage 1，直接 Deep Debate → `review_status: pending`，不 patch cache）
+- 「新聞分析 審核 [headline]」→ 執行 news_protocol_v2，MODE: REVIEW（擴展 FLASH 辯論 → `review_status: reviewed` + patch cache）
 - 「產業掃描」→ 執行 sector_protocol_main（先讀主檔，再按需載入子檔）
 - 「分析 [TICKER]」→ 執行 investment_protocol_v4_6
 

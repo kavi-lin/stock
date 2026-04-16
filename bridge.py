@@ -710,6 +710,7 @@ def extract_news():
                     "within_48h":        v.get("within_48h", False),
                     "tickers_mentioned": v.get("tickers_mentioned", []),
                     "depth":             v.get("depth", "deep"),
+                    "review_status":     v.get("review_status", "reviewed"),
                 })
         except Exception as e:
             print(f"[ERROR] News log {news_file}: {e}")

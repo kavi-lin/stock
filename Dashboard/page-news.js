@@ -134,8 +134,24 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-[10px] text-zinc-500 italic leading-snug">${item.debate_note}</p>
           </div>` : '';
 
+        // review_status: DIGEST=reviewed, FLASH=pending, legacy=reviewed (no field)
+        const reviewStatus = item.review_status || 'reviewed';
+        const isPending = reviewStatus === 'pending';
+
+        // Review badge + submit-for-review button
+        const reviewBadge = isPending
+          ? `<span class="text-[9px] font-black px-2 py-0.5 rounded-full border text-amber-400 border-amber-500/40 bg-amber-500/10">⏳ ${np.pending_label || 'PENDING'}</span>`
+          : `<span class="text-[9px] font-black px-2 py-0.5 rounded-full border text-emerald-400 border-emerald-500/40 bg-emerald-500/10">✅ ${np.reviewed_label || 'REVIEWED'}</span>`;
+
+        const reviewBtn = isPending
+          ? `<button onclick="copyReviewPrompt(this, '${(item.headline||'').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="mt-2 flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-black hover:border-amber-500 transition-all">
+              <i data-lucide="send" class="w-3 h-3"></i> ${np.review_btn || '送審'}
+            </button>`
+          : '';
+
         const card = document.createElement('div');
         card.className = 'glass-card p-5 hover:border-zinc-500/50 transition-all mb-4';
+        card.dataset.reviewStatus = reviewStatus;
         card.innerHTML = `
           <!-- Header row -->
           <div class="flex items-start justify-between gap-3 mb-3">
@@ -152,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="text-[9px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">${np.news_type?.[(item.type||'').toLowerCase()] || item.type}</span>
               </div>` : ''}
               ${binaryBadge}
+              ${reviewBadge}
             </div>
             <!-- Date + source -->
             <div class="text-right shrink-0">
@@ -176,6 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <!-- Debate note -->
           ${debateNote}
+
+          <!-- Review submit button (pending only) -->
+          ${reviewBtn}
         `;
         feed.appendChild(card);
       });
@@ -257,6 +277,53 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
     }
   }
+
+  // ── Review Filter Tabs ───────────────────────────────────────
+  let activeNewsFilter = 'all';
+
+  function applyNewsFilter() {
+    const cards = document.querySelectorAll('#news-feed-detailed > .glass-card');
+    cards.forEach(c => {
+      const st = c.dataset.reviewStatus || 'reviewed';
+      if (activeNewsFilter === 'all') c.style.display = '';
+      else c.style.display = (st === activeNewsFilter) ? '' : 'none';
+    });
+  }
+
+  document.getElementById('news-filter-tabs')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-filter]');
+    if (!btn) return;
+    activeNewsFilter = btn.dataset.filter;
+    document.querySelectorAll('.news-filter-tab').forEach(b => {
+      const on = b.dataset.filter === activeNewsFilter;
+      b.className = `news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+        on ? 'bg-emerald-500 text-black border-emerald-500'
+           : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400'}`;
+    });
+    applyNewsFilter();
+  });
+
+  // Init tab styles
+  document.querySelectorAll('.news-filter-tab').forEach(b => {
+    const on = b.dataset.filter === activeNewsFilter;
+    b.className = `news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+      on ? 'bg-emerald-500 text-black border-emerald-500'
+         : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400'}`;
+  });
+
+  // Copy review prompt to clipboard
+  window.copyReviewPrompt = async function(btnEl, headline) {
+    const prompt = `新聞分析 審核 "${headline}"`;
+    await UI.copyToClipboard(prompt);
+    const t = window.i18n?.[UI.currentLang] || {};
+    const np = t.news_page || {};
+    UI.showToast(
+      np.review_toast || (UI.currentLang === 'zh'
+        ? `<span class="text-emerald-400 font-bold">「${prompt}」</span><br>已複製到剪貼簿，貼回 Claude Code 執行正式委員會審核`
+        : `<span class="text-emerald-400 font-bold">"${prompt}"</span><br>Copied — paste into Claude Code for formal committee review`),
+      'info', 5500
+    );
+  };
 
   // Shortcut to toggle Debug Console: Shift + D
   document.addEventListener('keydown', (e) => {

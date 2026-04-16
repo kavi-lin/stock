@@ -13,13 +13,15 @@
 ```
 NEWS TRIGGER
 ──────────────────────────────────────────
-MODE : FLASH | DIGEST
+MODE : FLASH | DIGEST | REVIEW
       FLASH  = 單則即時新聞，直接深度辯論（< 5 分鐘）
       DIGEST = RSS 寬掃描 → 漏斗篩選 → 深度辯論（全面更新 cache）
+      REVIEW = 對一則 pending FLASH 重新進行正式委員會審核
 ──────────────────────────────────────────
 ```
 
 > 直接貼標題/連結觸發 FLASH；說「更新新聞 cache」「新聞分析 DIGEST」觸發 DIGEST。
+> 「新聞分析 審核 [headline]」觸發 REVIEW。
 
 ---
 
@@ -35,8 +37,12 @@ MODE : FLASH | DIGEST
    - `sector/sector_logs/YYYY-MM-DD_sector_intel.json` — 更新 `top_catalysts` / `political_overlay`
    - `investment/invest_logs/YYYY-MM-DD_phase0.json` — 更新 `binary_risks` / `macro_backdrop_score`
    - `news/news_logs/YYYY-MM-DD_digest.json` — append 所有（shallow + deep）
-5. **FLASH mode**: 單則新聞直接進入 Stage 2（跳過 Stage 1 triage），因為使用者已經明確指定分析對象。
-6. **Output**: 邏輯輸出 JSON，結論輸出 Markdown Impact Card。
+5. **FLASH mode**: 單則新聞直接進入 Stage 2（跳過 Stage 1 triage），因為使用者已經明確指定分析對象。FLASH 結果標記 `review_status: pending`（**不 patch cache**），直到經過 REVIEW mode 審核後才升級為 `reviewed` 並 patch。
+6. **REVIEW mode**: 讀取 `news_logs` 中 `review_status: pending` 的 FLASH verdict → 每位 Agent 重新擴展辯論（從 snap 30 字 → 完整 200+ 字）→ Arbiter 正式裁決（可改變原 FLASH verdict / score）→ `review_status: pending → reviewed` → 此時才執行 cache patch。
+7. **Output**: 邏輯輸出 JSON，結論輸出 Markdown Impact Card。
+8. **review_status 欄位**:
+   - `reviewed` — DIGEST Stage 2 結果 或 REVIEW mode 審核通過 → 允許 patch cache → Dashboard 顯示為「已審核」
+   - `pending` — FLASH 結果，尚未經委員會審核 → **不 patch** `sector_intel.json` / `phase0.json` → Dashboard 顯示為「待審核」
 
 ---
 
@@ -309,6 +315,7 @@ MODE : FLASH | DIGEST
     {
       "news_id": "n003",
       "depth": "shallow | deep",
+      "review_status": "reviewed | pending (DIGEST Stage 2 → reviewed; FLASH → pending; REVIEW mode → reviewed)",
       "headline": "string",
       "headline_zh": "string",
       "verdict": "BULLISH | BEARISH | BINARY | NEUTRAL",
@@ -404,15 +411,58 @@ MODE : FLASH | DIGEST
 ## FLASH MODE 簡化流程
 
 ```
-使用者貼新聞 → News Collector WebFetch
+使用者貼新聞 / 個股觸發 → News Collector WebFetch
   → Stage 2 Deep Debate（4 agent 完整辯論）
-  → Arbiter → Cache Patch → Impact Card
+  → Arbiter → review_status: pending → Impact Card
+  ⚠️ 不執行 cache patch（等 REVIEW 確認後才 patch）
 ```
 
 FLASH mode **跳過 Stage 1**，因為：
 1. 使用者已明確指定新聞 → 不需要篩選
 2. 只有 1 則 → 無需漏斗
 3. 通常有時效性 → 快速深讀
+
+**FLASH 寫入規則**：
+- `review_status: pending` → 不 patch `sector_intel.json` / `phase0.json`
+- 寫入 `news_logs/YYYY-MM-DD_digest.json` → Dashboard 顯示在「待審核」tab
+- 使用者可在 Dashboard 按「送審」觸發 REVIEW mode
+
+---
+
+## REVIEW MODE — 正式委員會審核
+
+```
+觸發：「新聞分析 審核 [headline]」
+  → 讀取 news_logs 中匹配的 pending verdict
+  → 4 agent 擴展辯論（snap 30 字 → 完整 200+ 字分析）
+  → Arbiter 正式裁決（可覆寫原 verdict / score）
+  → review_status: pending → reviewed
+  → 執行 cache patch（sector_intel + phase0）
+  → 覆寫原 verdict 到 news_logs + 更新 Impact Card
+```
+
+### REVIEW 流程細節
+
+**Step 1 — 載入原 FLASH verdict**：
+在 `news/news_logs/YYYY-MM-DD_digest.json` 搜尋 `review_status: pending` 且 `headline` 含 keyword match 的 verdict。若找到多筆，列出讓使用者選擇。
+
+**Step 2 — 擴展辯論**：
+將原 FLASH 的 4 agent snap（各 ≤ 30 字）作為起點，每位 agent 重新審視並擴展：
+- Bull / Bear / Sector / Macro 各輸出 150–250 字完整論述（schema 同 Stage 2 Deep Debate）
+- 原始 FLASH 結果作為 `prior_flash` 參考，允許推翻但需說明原因
+
+**Step 3 — Arbiter 正式裁決**：
+- 可改變 verdict（例：FLASH 判 BULLISH → REVIEW 改判 BINARY）
+- 可改變 net_impact_score（重新加權計算）
+- 必須在 `arbiter_reasoning` 中說明與原 FLASH 的差異（若有）
+
+**Step 4 — 寫入**：
+- `news_logs/YYYY-MM-DD_digest.json`：覆寫原 verdict，`review_status: reviewed`，`depth: deep`
+- 此時執行 cache patch（Phase 4 規則）
+- Impact Card 標記 `REVIEWED ✅`
+
+### Token 預算
+REVIEW ≈ 單則 Stage 2 deep：~4k tokens（比重跑 DIGEST ~28k 便宜 7 倍）
 
 ---
 
@@ -442,11 +492,12 @@ reports/
 
 | 情境 | MODE | 流程 |
 |---|---|---|
-| 看到重大新聞標題 | FLASH | 直接 WebFetch → Deep Debate |
-| 開盤前更新市場氣氛 | DIGEST | RSS → Triage → Deep Top 5 |
-| 針對個股查近期新聞 | FLASH | 「分析 NVDA 近期動態」→ RSS filter + Deep |
-| Dashboard 卡片按鈕觸發 | FLASH | 複製 prompt → 貼回 CLI |
-| 盤中突發事件 | FLASH → DIGEST | 先 FLASH 該則 → 後續 DIGEST 補齊上下文 |
+| 看到重大新聞標題 | FLASH | 直接 WebFetch → Deep Debate → pending |
+| 開盤前更新市場氣氛 | DIGEST | RSS → Triage → Deep Top 5 → reviewed |
+| 針對個股查近期新聞 | FLASH | 「新聞分析 FLASH NVDA 近期動態」→ pending |
+| Dashboard 決策卡片 📰 | FLASH | 複製 prompt → 貼回 CLI → pending |
+| Dashboard 新聞頁「送審」 | REVIEW | 複製 prompt → 擴展辯論 → reviewed + cache patch |
+| 盤中突發事件 | FLASH → REVIEW | 先 FLASH 快讀 → 需要時再送審正式入 cache |
 
 ---
 

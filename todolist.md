@@ -10,8 +10,8 @@
 
 - **Investment Protocol**: V4.6（雙軌 entry + STAGED_ENTRY + consensus bonus + CONTRARIAN macro flag）
 - **Sector Protocol**: V1.2（multi-file: main + phase_0/1-2-3/4-5/schema）
-- **News Protocol**: V1
-- **Dashboard**: index / decisions / sector / news 四頁（watchlist + history 已合併至 decisions）
+- **News Protocol**: V2（RSS 兩階段漏斗 + 5 agent 圓桌 + FLASH/DIGEST/REVIEW 三模式）
+- **Dashboard**: index / decisions / sector / news 四頁（watchlist + history 已合併至 decisions；news 新增 reviewed/pending 切換 + 送審按鈕）
 - **Positions Tracker**: `dashboard_server.py` + `/api/positions` + modal form + live_position overlay
 - **Cache-Busting**: server-side mtime 自動注入（不再需要手動 bump `?v=`）
 - **Auto Refresh**: `bridge.py` 每 5 分鐘背景刷新（可用 `DASH_REFRESH_SEC` 覆蓋）
