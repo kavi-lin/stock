@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-04-16 09:06:08",
+  "last_updated": "2026-04-16 09:27:44",
   "market": {
     "regime": "VOLATILE",
     "cycle_phase": "Mid",
@@ -1926,10 +1926,15 @@
       "type": "geopolitical",
       "bull_case": "Talks resuming in 2 days per Trump, market pricing in de-escalation (oil already +3% but off highs)",
       "bear_case": "Ceasefire violated both sides, Lebanon conflict separate, Hormuz blockade unresolved, oil volatility structural until June 2027 capacity concern",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Neither side committed, but negotiation channel open. Binary event pending. Market best positioned with DEFENSE overweight + ENERGY neutral.",
       "debate_note": "2-week ceasefire began 4/8 → expires ~4/22. Decision window is THIS week.",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "TSMC Q1 2026 earnings Thursday 4/16: expects $35.47B revenue, $3.26 EPS, 59% gross margin",
@@ -1946,10 +1951,15 @@
       "type": "earnings",
       "bull_case": "AI chip demand holds through Middle East conflict; premium 3nm pricing pushes GM > 59%; long-term GM target likely raised above 58%; Qualcomm/MediaTek capacity filled with AI",
       "bear_case": "Margin peak warning from Wall Street; smartphone/PC outlook uncertain; Middle East supply chain disruption risk (shipping)",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "4/16 is 1-day binary with high historical beat rate. Positive classification. TSM BUY thesis validated by guide-raise expectation.",
       "debate_note": "NVDA, AMD, AVGO all downstream of TSMC — any beat also lifts semi sector broadly",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "NVIDIA Blackwell ramp delivers $0.5T visibility through 2026; hyperscalers deploying 1,000 NVL72 racks/week",
@@ -1967,10 +1977,15 @@
       "type": "sector_specific",
       "bull_case": "72,000 Blackwell GPUs/week hyperscaler deployment, $500B backlog through Dec 2026, Rubin next-gen locked",
       "bear_case": "China AI chip export deal (15% rev to US gov) caps upside; 25% Section 232 semi tariff effective Jan 2026",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "NVDA bull case fundamentally intact. Blackwell demand not the question — supply chain execution is the only risk.",
       "debate_note": "NVDA Q1 FY27 earnings ~late May; visibility extended to end 2026 significantly reduces quarter-by-quarter risk",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "FOMC 4/28-29 meeting: markets price 85% hold at 3.50-3.75%, no dot plot this meeting",
@@ -1988,10 +2003,15 @@
       "type": "fomc",
       "bull_case": "Hold provides rate certainty; if Powell hints June cut → risk-on rally",
       "bear_case": "Inflation still above 2% target, 'progress stalled' language, Iran conflict + oil could delay cuts further to July+",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Language is the event, not the decision. Watch for 'patience' vs 'data-dependent' phrasing. Positioning BEFORE 4/29 risky due to reaction asymmetry.",
       "debate_note": "Non-SEP meeting historically causes lower vol reaction than SEP meetings; June 16-17 is next SEP where actual cut telegraphed",
       "binary_risk": true,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Q1 2026 earnings season kicks off with 12.6% expected profit growth — 6th consecutive double-digit quarter",
@@ -2009,10 +2029,15 @@
       "type": "earnings",
       "bull_case": "6 consecutive strong quarters, bull momentum resilient to geopolitical noise",
       "bear_case": "Goldman's stock drop on FICC miss shows how high the bar is; any disappointment punished",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Earnings season is an alpha generator but amplifies dispersion. Pre-earnings positioning risky, post-earnings reaction is the edge.",
       "debate_note": "Banks start Monday; TSM Thursday; NFLX / Tesla / AMD next week; NVDA late May",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "US-China semiconductor tariff peace extended to Nov 10, 2026; next hike deferred to June 2027",
@@ -2029,10 +2054,15 @@
       "type": "political",
       "bull_case": "18 months of tariff stability for semi supply chain; NVDA/AMD keep 15% revenue deal stable",
       "bear_case": "Section 232 25% still active for specified chip imports since Jan 2026; 15% NVDA/AMD 'revenue tax' ongoing",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Near-term tail risk removed; structural 15% rev tax + 25% Section 232 remain as persistent drag.",
       "debate_note": "Removes June 2026 tariff cliff from binary risks list — positive for 2026 semi earnings",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Goldman Sachs Q1 beats EPS but FICC misses; stock -3% pre-market",
@@ -2049,10 +2079,15 @@
       "type": "earnings",
       "bull_case": "M&A and equity trading strong, underlying franchise intact",
       "bear_case": "FICC weakness = fixed income trading slump = concerning for JPM/MS peer reads; sets cautious tone for bank season",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Single-company issue but sector tone-setter. Watch JPM / MS for read-through.",
       "debate_note": "Banking sector already WARM in sector scan; this reinforces COLD thesis on investment banks",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Dollar Index (DXY) approaches 99 on oil rise + Fed hold expectations",
@@ -2070,10 +2105,15 @@
       "type": "macro_data",
       "bull_case": "Strong dollar is anti-inflationary at margin",
       "bear_case": "FX translation drag for mega caps; EM currency pressure; commodity deflation",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Secondary effect, not a direct driver. Watch if DXY breaks 100 (psychological).",
       "debate_note": "DXY < 99 = mild headwind, > 100 would be material",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "S&P 500 approaches all-time high 7,002 as Nasdaq +1.96%, Dow +0.66%",
@@ -2090,10 +2130,15 @@
       "type": "macro_data",
       "bull_case": "S&P 500 within 0.3% of all-time high 7002.28; Nasdaq +2% shows AI trade intact; bank earnings season kicks off",
       "bear_case": "Near-ATH entries = poor RR; any shock = big downside; breadth 36.8 still weakening warns of narrow leadership",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Momentum real but RR degraded near ATH. Chase trades dangerous. Focus on individual oversold names (PLTR type).",
       "debate_note": "",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "ASML Q1 earnings beat on intense AI demand — strong read-through for TSMC tomorrow",
@@ -2110,10 +2155,15 @@
       "type": "earnings",
       "bull_case": "ASML 's strong Q1 validates AI capex super-cycle; N2 ramp at TSMC supported; bullish TSM 4/16 print",
       "bear_case": "None material — ASML is the cleanest tell on semi equipment demand",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "This is a POSITIVE leading indicator for TSM tomorrow. Reinforces TSM BUY thesis from V4.6 analysis.",
       "debate_note": "Read-through strength: ASML > TSMC > NVDA/AMD/AVGO in the AI capex chain",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Trump: Iran war 'close to over', 2nd round of talks in Pakistan within days; ceasefire expires 4/21",
@@ -2131,10 +2181,15 @@
       "type": "geopolitical",
       "bull_case": "Trump 'close to over' comment + Iran offering safe passage = bull de-escalation path; oil should retreat on confirmation",
       "bear_case": "Nuclear sticking point (US wants 20yr halt, Iran wants 3-5yr); US military still blockading; ceasefire expires in 6 days",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Shift from 4/14 binary concern → 4/15 mild positive bias. Still binary but weighted toward de-escalation.",
       "debate_note": "Ceasefire 4/21 expiration window is THE event; binary decision next week",
       "binary_risk": true,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Treasury Sec Bessent: Fed can wait on cuts until Iran oil impact clearer",
@@ -2152,10 +2207,15 @@
       "type": "fomc",
       "bull_case": "Bessent still expects inflation to moderate; rate cuts delayed, not cancelled",
       "bear_case": "Treasury-Fed coordination signals patience; 2026 only 1 cut expected; Iran + oil keeps core PCE elevated 2.7%",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Reduces probability of June cut. Yield curve to stay high. Long-duration assets (REITs/growth) mild headwind.",
       "debate_note": "Fed March 2026: 1 cut for year maintained; core PCE revised up to 2.7% (was 2.5%)",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Goldman Sachs Q1 2026：EPS $17.55 創紀錄，Equities +27% YoY；股價盤前 -4%",
@@ -2171,10 +2231,15 @@
       "type": "earnings",
       "bull_case": "Equities trading 創紀錄 $5.33B +27%；金融板塊基本面確認",
       "bear_case": "利多出盡賣壓；Fixed Income -10% YoY；機構分發跡象",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Bull 數字採納，Bear 市場反應採納；利多出盡結構性信號不可忽視",
       "debate_note": "數字好但股價跌 = 市場對金融板塊態度謹慎，非基本面問題",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "JPMorgan Q1 2026 今日盤前發布：預期 EPS $5.45，Revenue -8% YoY",
@@ -2190,10 +2255,15 @@
       "type": "earnings",
       "bull_case": "低基期（Revenue -8% YoY）有助驚喜效果；GS 強勁 equities revenue 為正面先行指標",
       "bear_case": "若 Dimon 展望悲觀 + 提高信貸損失準備，Financial 立即承壓",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "結果未知，強制 binary_risk within_48h；GS 數據提供方向但不保證",
       "debate_note": "GS strong equities revenue 為正面先行指標但不保證 JPM 複製",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Trump 威脅若中國向伊朗輸送武器將加徵 50% 關稅",
@@ -2210,10 +2280,15 @@
       "type": "geopolitical",
       "bull_case": "「if we catch them」條件式；5 月峰會談判槓桿；中方明確否認，概率不高",
       "bear_case": "雙前線地緣風險（Iran + China）；稀土反制潛力極大；科技供應鏈結構性衝擊",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Bear 主論點採納；條件式打折但不能忽視；新增結構性尾部風險",
       "debate_note": "條件式威脅 vs 中美峰會前發言 = 談判籌碼 or 真實威脅解讀分歧",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "美國海軍封鎖伊朗港口正式生效；法英啟動外交；川普稱伊朗「仍想談」",
@@ -2230,10 +2305,15 @@
       "type": "geopolitical",
       "bull_case": "WTI $103→$96 = 市場定價部分解決；停火可能 48h 內恢復",
       "bear_case": "封鎖實際執行中；伊朗指控美違反停火；每日 CPI 能源壓力疊加",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "每日新二元；停火恢復 = 市場大翻轉；封鎖持續 = 能源壓力",
       "debate_note": "川普「仍想談」vs 伊朗外交部指控美違反停火 = 訊號混亂，每 24h 更新",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Powell：升息不必要；但部分官員將升息重新放回桌上；全年仍預期一次降息",
@@ -2250,10 +2330,15 @@
       "type": "monetary_policy",
       "bull_case": "主席明確「rates in good place」；全年仍預期一次降息；通膨預期 2.7% 年底",
       "bear_case": "FOMC 共識脆弱；4 月 CPI 若 ≥ 3.3% 降息論崩潰；匿名官員升息信號",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Powell 鴿派為基準，但結構性升息風險在積累；FOMC 4/28-29 為最終仲裁節點",
       "debate_note": "主席立場 vs 匿名官員升息信號 = FOMC 內部分歧擴大的信號",
       "binary_risk": true,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "JPMorgan Q1 實際：EPS $5.94 (+9% vs $5.45 est)；Net income $16.5B +13% YoY；Revenue $49.8B 超預期",
@@ -2269,10 +2354,15 @@
       "type": "earnings",
       "bull_case": "CIB $9B/21% ROE；NII +9%；資本回購 $8.3B；全業務超預期；Q1 銀行季度正式開門紅",
       "bear_case": "WFC 已出現 Revenue miss；JPM 為最強，他行未必複製；Dimon 措辭仍謹慎",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "解除 09:15 BINARY；Financial 開門紅確認；JPM 為全行業領先指標，看多基本成立",
       "debate_note": "JPM 最強 vs WFC revenue miss = 銀行板塊分化開始，非全面性多頭",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "川普暗示願意與伊朗恢復談判；S&P +1.02%，Nasdaq +1.23%；WTI -2.8% 至 $96.31",
@@ -2289,10 +2379,15 @@
       "type": "geopolitical",
       "bull_case": "WTI 回落 = CPI 壓力緩解；S&P 連 4 漲 = FTD 動能確認；停火可能加速",
       "bear_case": "封鎖今日正式生效；IRGC 仍威脅；法英拒絕配合；每日二元風險未解",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "每 24h 更新有效；停火暗示帶動盤中反彈但封鎖結構未變",
       "debate_note": "川普推文 vs 封鎖實際執行 = 每日市場方向決定者，不能長期押注",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Intel 9日 +53% / +$100B 市值：Terafab AI 晶片 + Google 合作 + NVIDIA $5B 戰略投資 + 18A 製程",
@@ -2309,10 +2404,15 @@
       "type": "corporate",
       "bull_case": "18A 製程量產 + NVIDIA $5B + $15B backlog = 結構性轉機；美國半導體製造復興敘事打開",
       "bear_case": "63x 2027E EPS（NVDA 4 倍溢價）；Intel 執行力歷史問題；9 日 +53% = 動能過熱",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "BULLISH for Tech/Semiconductors；估值過熱警告附帶；AI 製造復興敘事確認",
       "debate_note": "故事很好但估值 63x 2027E = 需要執行力完美兌現，高槓桿投機",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Oracle +13%：AI 公有雲公告帶動軟體板塊全面反彈",
@@ -2328,10 +2428,15 @@
       "type": "corporate",
       "bull_case": "AI = 軟體升級週期（非顛覆）；Morocco 雲端擴張；最佳單日漲幅；軟體板塊 re-rating",
       "bear_case": "單日 13% 過度反應；AI 公告缺乏具體財務指引；AWS/Azure 競爭壓力持續",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "BULLISH，Software AI 升級敘事重估中；單日幅度大但方向確認",
       "debate_note": "AI 軟體升級 vs 競爭壓力 = 短期情緒驅動 vs 長期基本面需要驗證",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Wells Fargo Q1：EPS $1.60 微超；Revenue $21.45B miss $21.77B 估",
@@ -2347,10 +2452,15 @@
       "type": "earnings",
       "bull_case": "EPS 微超；NII +5%；貸款 +10.7% YoY；存款 +5.7%；資產品質穩定",
       "bear_case": "Revenue 連 3 季 miss；Asset Cap 限制成長空間；Q2 準備金壓力潛在",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "NEUTRAL；JPM beat 仍主導 Financial 正面情緒；WFC 為邊際負面但非主導",
       "debate_note": "JPM 強 vs WFC 弱 = 銀行板塊分化，非系統性問題，選股而非選板塊",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Fear & Greed Index 跌至 15（Extreme Fear），從今晨 41 大幅惡化",
@@ -2366,10 +2476,15 @@
       "type": "sentiment",
       "bull_case": "極端恐懼 = 逆向買入信號；S&P 連 4 漲中仍極端恐懼 = Climbing Wall of Worry；FOMO 動能尚未啟動",
       "bear_case": "伊朗戰爭情境下極端恐懼可持續 3+ 月；機構去風險行動未完成；零售投資人仍在離場",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "BEARISH（環境確認）；整體板塊情緒折扣；逆向信號值得記錄但不改變整體格局",
       "debate_note": "Extreme Fear + 股價漲 = Climbing Wall of Worry 還是 Dead Cat Bounce，需後續確認",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Iran Ceasefire Announced (Apr 8) but Hormuz Still Effectively Closed; Ships Paying $1M+ Tolls",
@@ -2387,10 +2502,15 @@
       "type": "geopolitical",
       "bull_case": "停火訊號降低風險溢價，油價從 $110+ 回落至 $94，談判機制已開啟",
       "bear_case": "海峽仍封閉，ADNOC CEO 4/9 確認無進展，Goldman 警告油價全年均破 $100",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "停火存在但未被執行，binary 解讀最準確；油價下行需看到海峽實際重開",
       "debate_note": "「停火存在」vs「停火有效執行」是關鍵分歧",
       "binary_risk": true,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "March CPI +3.3% YoY / +0.9% MoM — Energy-Driven; Hottest Monthly Print in Months (Released Apr 10)",
@@ -2408,10 +2528,15 @@
       "type": "macro_data",
       "bull_case": "能源貢獻 3/4 月增量，剔除能源後核心仍溫和，屬暫時性通膨",
       "bear_case": "+0.9% MoM 是近月最高，年增 3.3% 讓 Fed 降息空間幾乎歸零，升息討論浮現",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "Fed 看整體 CPI 非核心，能源驅動不等於可忽略；升息風險明顯上升，採 Bear 論點",
       "debate_note": "「能源 = 暫時性」vs「整體 CPI 高企 = Fed 被迫行動」",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "FOMC Minutes: Some Officials Discuss Possible Rate Hikes; Next Decision April 29",
@@ -2429,10 +2554,15 @@
       "type": "FOMC",
       "bull_case": "多數官員維持「通膨符合預期則降息」基準，鷹派屬少數聲音",
       "bear_case": "首次出現升息措辭，科技高估值（P/E 30x+）面臨重新定價，4/29 決策變 binary",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "「升息討論」是 2023 年以來首次敘事轉折，不能低估；採 Bear 論點，4/29 列為 binary risk",
       "debate_note": "升息討論是敘事轉折點還是例行鷹派少數聲音？",
       "binary_risk": true,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Trump Section 232 Pharma Tariffs: 100% on Patented Imports, EU/JP/CH at 15% (120-180 Day Runway)",
@@ -2448,10 +2578,15 @@
       "type": "political",
       "bull_case": "120-180 天緩衝期，部分藥廠加速美國在地化，長期利好本土製造",
       "bear_case": "史上最高藥品關稅，推高醫療通膨，歐盟藥廠（羅氏、諾華）利潤率受壓",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "短期衝擊 Healthcare 板塊，中期通膨推升壓力，Bear 採納",
       "debate_note": "「本土製造受益」vs「進口成本大幅上升」",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "US-China Semiconductor Tariffs Delayed to June 2027 Under Trump-Xi Stability Framework",
@@ -2468,10 +2603,15 @@
       "type": "political",
       "bull_case": "科技供應鏈在 2026 年底前不受新衝擊，NVDA / AMD / TSM / ANET AI 採購週期不受打斷",
       "bear_case": "2027 起稅率未定，不確定性懸掛；若 5 月峰會破局可能提前啟動",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "短期明確利多，供應鏈確定性恢復；但峰會是關鍵 binary event 需持續追蹤",
       "debate_note": "「短期確定性受益」vs「中期不確定性仍在」",
       "binary_risk": false,
-      "within_48h": false
+      "within_48h": false,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     },
     {
       "headline": "Major Bank Q1 Earnings Kick-Off: GS (Apr 13), JPM/C/WFC (Apr 14), BAC (Apr 15) — IB Fees +18-30% Expected",
@@ -2487,10 +2627,15 @@
       "type": "earnings",
       "bull_case": "GS IB 費用預期 +30%、JPM +18%，M&A 復甦確認，Financials 估值修復",
       "bear_case": "預期已高，任何 miss 或下調 guidance（loan loss provisions 受伊朗影響）均有大賣壓",
+      "sector_view": "",
+      "macro_view": "",
       "arbiter_reasoning": "雙方論點旗鼓相當，市場方向完全取決於數字，今天 GS 結果是最佳先行指標",
       "debate_note": "高預期 + 伊朗不確定性，miss 比 beat 的市場反應更不對稱",
       "binary_risk": true,
-      "within_48h": true
+      "within_48h": true,
+      "tickers_mentioned": [],
+      "depth": "deep",
+      "review_status": "reviewed"
     }
   ],
   "positions": [
