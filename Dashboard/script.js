@@ -393,6 +393,151 @@ document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (
   } catch (e) { /* ignore */ }
 })();
 
+// ── Preflight Modal ──────────────────────────────────────────────────────
+const _preflightModal = document.getElementById('preflight-modal');
+
+function openPreflight() {
+  if (!_preflightModal) return;
+  _preflightModal.classList.remove('hidden');
+  loadPreflightData();
+}
+function closePreflight() {
+  if (_preflightModal) _preflightModal.classList.add('hidden');
+}
+
+document.getElementById('preflight-btn')?.addEventListener('click', openPreflight);
+document.getElementById('preflight-close')?.addEventListener('click', closePreflight);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreflight(); });
+
+async function loadPreflightData() {
+  const body = document.getElementById('preflight-body');
+  const btnFree = document.getElementById('preflight-run-free');
+  const btnAll  = document.getElementById('preflight-run-all');
+  if (!body) return;
+  body.innerHTML = '<div class="animate-pulse text-zinc-500 text-sm text-center py-8">Checking...</div>';
+  btnFree?.classList.add('hidden');
+  btnAll?.classList.add('hidden');
+  try {
+    const r = await fetch('/api/preflight');
+    const d = await r.json();
+    const items = d.items || [];
+    const isZh = UI.currentLang === 'zh';
+    const stale = items.filter(i => i.status !== 'FRESH');
+    const staleFree = stale.filter(i => i.free);
+    const staleToken = stale.filter(i => !i.free);
+
+    body.innerHTML = items.map(item => {
+      const label = isZh ? item.label : item.label_en;
+      const icon = item.status === 'FRESH' ? '✅'
+                 : item.status === 'STALE' ? '⚠️' : '❌';
+      const statusColor = item.status === 'FRESH' ? 'text-emerald-400'
+                        : item.status === 'STALE' ? 'text-amber-400' : 'text-red-400';
+      const freeTag = item.free
+        ? '<span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">FREE</span>'
+        : '<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">TOKEN</span>';
+      return `
+        <div class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <div class="flex items-center gap-2.5">
+            <span class="text-base">${icon}</span>
+            <span class="text-sm font-medium" style="color:var(--text-card-title)">${label}</span>
+            ${freeTag}
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] font-mono ${statusColor}">${item.status}</span>
+            <span class="text-[10px] font-mono text-zinc-500">${item.age_str}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Show action buttons based on stale items
+    if (staleFree.length > 0) {
+      btnFree?.classList.remove('hidden');
+      const lbl = document.getElementById('preflight-free-label');
+      if (lbl) lbl.textContent = isZh ? `更新 ${staleFree.length} 個免費項目` : `Update ${staleFree.length} free items`;
+    }
+    if (stale.length > 0) {
+      btnAll?.classList.remove('hidden');
+      const lbl = document.getElementById('preflight-all-label');
+      if (lbl) lbl.textContent = isZh ? `更新全部 ${stale.length} 個過期` : `Update all ${stale.length} stale`;
+    }
+    if (stale.length === 0) {
+      body.innerHTML += `<div class="text-center py-4 text-emerald-400 text-sm font-bold">${isZh ? '✅ 所有 cache 都是最新的！' : '✅ All caches are fresh!'}</div>`;
+    }
+  } catch (e) {
+    body.innerHTML = `<div class="text-red-400 text-sm text-center py-4">${e.message}</div>`;
+  }
+}
+
+// Run free caches
+document.getElementById('preflight-run-free')?.addEventListener('click', async () => {
+  const body = document.getElementById('preflight-body');
+  const isZh = UI.currentLang === 'zh';
+  try {
+    const res = await fetch('/api/preflight/run-free', { method: 'POST' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    document.getElementById('preflight-run-free')?.classList.add('hidden');
+    // Poll preflight status
+    const pollId = setInterval(async () => {
+      try {
+        const r = await fetch('/api/preflight/status');
+        const s = await r.json();
+        if (s.status !== 'running') {
+          clearInterval(pollId);
+          loadPreflightData(); // refresh the checklist
+          updateDashboard();   // refresh main dashboard
+          UI.showToast(isZh ? '免費項目更新完成' : 'Free caches updated', 'info', 4000);
+        }
+      } catch (e) { clearInterval(pollId); }
+    }, 2000);
+    body.innerHTML = `<div class="text-center py-8 animate-pulse text-blue-400 text-sm">${isZh ? '正在更新免費 cache...' : 'Updating free caches...'}</div>`;
+  } catch (e) {
+    UI.showToast(e.message, 'error', 5000);
+  }
+});
+
+// Run all stale (free first, then token-based with confirm)
+document.getElementById('preflight-run-all')?.addEventListener('click', async () => {
+  const isZh = UI.currentLang === 'zh';
+  // Step 1: run free caches
+  try {
+    await fetch('/api/preflight/run-free', { method: 'POST' });
+  } catch (e) { /* ignore, may already be fresh */ }
+
+  // Step 2: check which token-based items are stale and queue them
+  const r = await fetch('/api/preflight');
+  const d = await r.json();
+  const staleToken = (d.items || []).filter(i => i.status !== 'FRESH' && !i.free);
+  if (staleToken.length > 0) {
+    const names = staleToken.map(i => isZh ? i.label : i.label_en).join(', ');
+    const ok = confirm(isZh
+      ? `以下需消耗 tokens 更新：\n${names}\n\n確認執行？`
+      : `These need tokens to update:\n${names}\n\nProceed?`);
+    if (ok) {
+      // Run first token-based protocol (single-job lock means one at a time)
+      for (const item of staleToken) {
+        const protocolMap = { sector: 'sector', news: 'news' };
+        const name = protocolMap[item.key];
+        if (!name) continue;
+        try {
+          await fetch('/api/run-protocol', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name }),
+          });
+          UI.showToast(isZh ? `已啟動 ${item.label}` : `Started ${item.label_en}`, 'info', 3000);
+          break; // single-job lock — only start one
+        } catch (e) { /* ignore */ }
+      }
+    }
+  }
+  closePreflight();
+  // Let the free cache poll handle refresh
+  setTimeout(() => { updateDashboard(); loadPreflightData(); }, 5000);
+});
+
 // ── Boot ───────────────────────────────────────────────────────────────────
 const _activePage = document.body.dataset.page || 'index';
 UI.boot(_activePage, { translate: applyTranslations, reload: updateDashboard });

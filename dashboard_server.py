@@ -307,6 +307,115 @@ def run_protocol(name, params=None):
     return job_id, None
 
 
+# ── Preflight cache health check ──────────────────────────────────────────
+CACHE_TTL_SEC = 10800  # 3 hours — matches bridge.py
+
+PREFLIGHT_ITEMS = [
+    {"key": "breadth",    "label": "廣度分數",    "label_en": "Breadth Score",
+     "pattern": "sector/breadth_cache/market_breadth_*.json",
+     "free": True, "cmd": ["market_breadth_analyzer", "python3",
+     os.path.join(os.path.expanduser("~"), ".claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py"),
+     "--output-dir", "sector/breadth_cache/"]},
+    {"key": "ftd",        "label": "FTD 信號",    "label_en": "FTD Signal",
+     "free": True, "cmd": ["ftd", "python3", "sector/ftd_yfinance.py",
+     "--output-dir", "sector/ftd_cache/"]},
+    {"key": "market_top", "label": "頂部風險",    "label_en": "Top Risk",
+     "free": True, "cmd": ["market_top", "python3", "sector/market_top_yfinance.py",
+     "--output-dir", "sector/market_top_cache/"]},
+    {"key": "rss",        "label": "RSS 新聞源",   "label_en": "RSS Feed",
+     "free": True, "cmd": ["rss", "python3", "news/fetch_news_rss.py",
+     "--hours", "24", "--output", "news/news_logs/"]},
+    {"key": "sector",     "label": "產業情報",     "label_en": "Sector Intel",
+     "pattern": "sector/sector_logs/*_sector_intel.json",
+     "free": False, "protocol": "sector"},
+    {"key": "news",       "label": "新聞 DIGEST",  "label_en": "News DIGEST",
+     "pattern": "news/news_logs/*_digest.json",
+     "free": False, "protocol": "news"},
+]
+
+def preflight_check():
+    """Return cache freshness status for all monitored items."""
+    results = []
+    for item in PREFLIGHT_ITEMS:
+        pattern = item.get("pattern")
+        if not pattern and item.get("cmd"):
+            # For cmd-based items, derive pattern from output dir
+            key = item["key"]
+            if key == "breadth":  pattern = "sector/breadth_cache/market_breadth_*.json"
+            elif key == "ftd":    pattern = "sector/ftd_cache/ftd_detector_*.json"
+            elif key == "market_top": pattern = "sector/market_top_cache/market_top_*.json"
+            elif key == "rss":    pattern = "news/news_logs/*_raw.json"
+        full_pattern = os.path.join(ROOT, pattern) if pattern else None
+        latest = None
+        if full_pattern:
+            files = sorted(glob.glob(full_pattern), key=os.path.getmtime, reverse=True)
+            latest = files[0] if files else None
+        if latest:
+            age_sec = int(datetime.now().timestamp() - os.path.getmtime(latest))
+            status = "FRESH" if age_sec < CACHE_TTL_SEC else "STALE"
+            if age_sec < 60:     age_str = f"{age_sec}s"
+            elif age_sec < 3600: age_str = f"{age_sec // 60}m"
+            else:                age_str = f"{age_sec / 3600:.1f}h"
+        else:
+            age_sec = -1
+            age_str = "-"
+            status = "MISSING"
+        results.append({
+            "key":      item["key"],
+            "label":    item["label"],
+            "label_en": item["label_en"],
+            "status":   status,
+            "age_sec":  age_sec,
+            "age_str":  age_str,
+            "free":     item.get("free", False),
+        })
+    return results
+
+_preflight_lock = threading.Lock()
+_preflight_state = {"status": "idle", "items_total": 0, "items_done": 0, "errors": []}
+
+def run_free_caches():
+    """Run all STALE free caches in sequence, then bridge.py."""
+    checks = preflight_check()
+    stale_free = [c for c in checks if c["status"] in ("STALE", "MISSING") and c["free"]]
+    if not stale_free:
+        return 0, "all free caches are fresh"
+
+    with _preflight_lock:
+        if _preflight_state["status"] == "running":
+            return -1, "preflight already running"
+        _preflight_state.update({"status": "running", "items_total": len(stale_free),
+                                  "items_done": 0, "errors": []})
+
+    def _run():
+        for item_check in stale_free:
+            key = item_check["key"]
+            item_def = next((i for i in PREFLIGHT_ITEMS if i["key"] == key), None)
+            if not item_def or "cmd" not in item_def:
+                continue
+            cmd_parts = item_def["cmd"][1:]  # skip label at [0]
+            try:
+                r = subprocess.run(cmd_parts, cwd=ROOT, capture_output=True, text=True, timeout=120)
+                if r.returncode != 0:
+                    _preflight_state["errors"].append(f"{key}: exit {r.returncode}")
+            except Exception as e:
+                _preflight_state["errors"].append(f"{key}: {e}")
+            with _preflight_lock:
+                _preflight_state["items_done"] += 1
+
+        # Refresh data.json
+        try:
+            subprocess.run([sys.executable, os.path.join(ROOT, "bridge.py")],
+                           cwd=ROOT, capture_output=True, timeout=60)
+        except Exception:
+            pass
+        with _preflight_lock:
+            _preflight_state["status"] = "done"
+
+    threading.Thread(target=_run, daemon=True).start()
+    return len(stale_free), None
+
+
 def cancel_protocol():
     with _protocol_lock:
         if _protocol_state["status"] != "running":
@@ -451,6 +560,11 @@ class Handler(SimpleHTTPRequestHandler):
         if path == "/api/refresh_status":
             with _state_lock:
                 return self._json(200, dict(_refresh_state))
+        if path == "/api/preflight":
+            return self._json(200, {"items": preflight_check()})
+        if path == "/api/preflight/status":
+            with _preflight_lock:
+                return self._json(200, dict(_preflight_state))
         if path == "/api/run-protocol/status":
             with _protocol_lock:
                 state = dict(_protocol_state)
@@ -518,6 +632,12 @@ class Handler(SimpleHTTPRequestHandler):
             save_positions(data)
             run_bridge(reason=f"POST {entry['ticker']}")
             return self._json(201, entry)
+
+        if path == "/api/preflight/run-free":
+            count, err = run_free_caches()
+            if err:
+                return self._json(409, {"error": err})
+            return self._json(202, {"stale_items": count, "status": "running"})
 
         if path == "/api/run-protocol":
             length = int(self.headers.get("Content-Length", 0))
