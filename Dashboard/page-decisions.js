@@ -485,18 +485,10 @@ function buildCard(item) {
     </div>`;
 }
 
-async function copyFlashPrompt(ticker) {
-    const prompt = `新聞分析 FLASH ${ticker} 近期動態`;
-    await UI.copyToClipboard(prompt);
-    const t = window.i18n?.[UI.currentLang] || {};
-    const wl = t.watchlist || {};
-    const msg = (wl.flash_toast || (UI.currentLang === 'zh'
-        ? `<span class="text-emerald-400 font-bold">「${prompt}」</span><br>已複製到剪貼簿，貼回 Claude Code 執行針對 {TICKER} 的單股 FLASH 新聞分析`
-        : `<span class="text-emerald-400 font-bold">"${prompt}"</span><br>Copied — paste into Claude Code to run FLASH news debate on {TICKER}`))
-        .replace(/\{TICKER\}/g, ticker);
-    UI.showToast(msg, 'info', 5500);
+function goFlash(ticker) {
+    window.location.href = `news.html?flash=${encodeURIComponent(ticker)}`;
 }
-window.copyFlashPrompt = copyFlashPrompt;
+window.copyFlashPrompt = goFlash;
 
 function renderCards(filter) {
     const grid     = document.getElementById('watchlist-grid');

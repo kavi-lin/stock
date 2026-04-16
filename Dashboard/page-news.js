@@ -325,6 +325,47 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   };
 
+  // ── Flash deep-link from decisions.html (?flash=TICKER) ──────
+  const _flashParam = new URLSearchParams(window.location.search).get('flash');
+  if (_flashParam) {
+    const ticker = decodeURIComponent(_flashParam).toUpperCase();
+    const prompt = `新聞分析 FLASH ${ticker} 近期動態`;
+    const banner = document.getElementById('flash-banner');
+    if (banner) {
+      const t = window.i18n?.[UI.currentLang] || {};
+      const np = t.news_page || {};
+      banner.classList.remove('hidden');
+      banner.innerHTML = `
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <i data-lucide="newspaper" class="w-5 h-5 text-blue-400 shrink-0"></i>
+            <div>
+              <p class="text-sm font-bold" style="color:var(--text-card-title)">
+                ${np.flash_banner_title || (UI.currentLang === 'zh' ? `針對 <span class="text-blue-400">${ticker}</span> 執行 FLASH 新聞分析` : `Run FLASH news analysis for <span class="text-blue-400">${ticker}</span>`)}
+              </p>
+              <p class="text-[11px] text-zinc-500 font-mono mt-1">${prompt}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button id="flash-copy-btn" class="flex items-center gap-1.5 text-[11px] font-bold px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-400 transition-all">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> ${np.copy_prompt || (UI.currentLang === 'zh' ? '複製 Prompt' : 'Copy Prompt')}
+            </button>
+            <button onclick="document.getElementById('flash-banner').classList.add('hidden')" class="text-zinc-500 hover:text-zinc-300 text-xs px-2 py-2">✕</button>
+          </div>
+        </div>`;
+      UI.icons();
+      document.getElementById('flash-copy-btn')?.addEventListener('click', async () => {
+        await UI.copyToClipboard(prompt);
+        UI.showToast(
+          UI.currentLang === 'zh'
+            ? `<span class="text-blue-400 font-bold">「${prompt}」</span><br>已複製，貼回 Claude Code 執行`
+            : `<span class="text-blue-400 font-bold">"${prompt}"</span><br>Copied — paste into Claude Code`,
+          'info', 4500
+        );
+      });
+    }
+  }
+
   // Shortcut to toggle Debug Console: Shift + D
   document.addEventListener('keydown', (e) => {
     if (e.shiftKey && e.key === 'D') {
