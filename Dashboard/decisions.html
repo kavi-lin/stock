@@ -185,6 +185,21 @@
         </div>
     </div>
 
+    <!-- History Drill Overlay (click backdrop or ESC to dismiss) -->
+    <div id="history-drill-overlay" class="fixed inset-0 bg-white/70 dark:bg-white/30 backdrop-blur-xl z-[105] hidden flex flex-col p-8">
+        <div class="flex items-center justify-between mb-4 shrink-0">
+            <h3 id="history-drill-title" class="text-lg font-bold flex items-center gap-2" style="color:var(--text-main)">
+                <i data-lucide="history" class="w-5 h-5 text-blue-400"></i>
+                <span>Ticker — History</span>
+            </h3>
+            <button id="history-drill-close" class="text-zinc-400 hover:text-white transition-all text-xs font-bold px-3 py-1 rounded-lg border border-zinc-700">CLOSE [ESC]</button>
+        </div>
+        <div class="flex-1 overflow-x-auto overflow-y-hidden">
+            <div id="history-drill-rail" class="flex gap-6 h-full items-start pb-4"></div>
+            <div id="history-drill-empty" class="hidden text-center py-20 text-zinc-500"></div>
+        </div>
+    </div>
+
     <!-- Debug Console -->
     <div id="debug-console" class="fixed bottom-0 left-64 right-0 border-t border-zinc-200 dark:border-zinc-800 p-4 z-50 hidden font-mono text-[10px]" style="background-color: var(--bg-main); color: var(--text-main)">
         <div class="flex items-center justify-between mb-2 pb-1 border-b border-zinc-200 dark:border-zinc-900">

@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V1.7.0';
+  const VERSION = 'V1.9.4';
 
   const NAV_ITEMS = [
     { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板' },
@@ -106,14 +106,67 @@
       return Promise.resolve();
     },
 
-    // ── Debug Logger ─────────────────────────────────────────────────────
-    logToUI(msg, type = 'info') {
+    // ── Persistent Debug Logger (localStorage ring buffer) ───────────────
+    // Previously: logs were DOM-only, so switching pages wiped them. Now every
+    // log line is appended to localStorage (cap 300) and replayed on page boot.
+    // Additional persistent sources (bridge.py handshake + protocol state) are
+    // monitored globally from the IIFE tail below.
+    _LOG_KEY:  'ui_log_v1',
+    _LOG_CAP:  300,
+
+    _logBufferLoad() {
+      try {
+        const raw = localStorage.getItem(UI._LOG_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    },
+    _logBufferSave(buf) {
+      try {
+        if (buf.length > UI._LOG_CAP) buf = buf.slice(-UI._LOG_CAP);
+        localStorage.setItem(UI._LOG_KEY, JSON.stringify(buf));
+      } catch {}
+    },
+    _logRenderLine(entry) {
       const out = document.getElementById('log-output');
       if (!out) return;
+      const color = entry.type === 'error' ? 'text-red-500'
+                   : entry.type === 'warn' ? 'text-yellow-500'
+                   : entry.type === 'success' ? 'text-emerald-500'
+                   : 'text-zinc-500';
       const line = document.createElement('div');
-      const color = type === 'error' ? 'text-red-500' : type === 'warn' ? 'text-yellow-500' : 'text-zinc-500';
-      line.innerHTML = `<span class="text-zinc-600">[${new Date().toLocaleTimeString()}]</span> <span class="${color}">${msg}</span>`;
+      const pageTag = entry.page ? `<span class="text-zinc-700">[${entry.page}]</span> ` : '';
+      line.innerHTML = `<span class="text-zinc-600">[${entry.ts}]</span> ${pageTag}<span class="${color}">${entry.msg}</span>`;
       out.appendChild(line);
+      // Auto-scroll to bottom so newest is visible
+      out.scrollTop = out.scrollHeight;
+    },
+
+    logToUI(msg, type = 'info') {
+      const entry = {
+        ts:   new Date().toLocaleTimeString(),
+        page: document.body?.dataset?.page || null,
+        type,
+        msg:  String(msg),
+      };
+      const buf = UI._logBufferLoad();
+      buf.push(entry);
+      UI._logBufferSave(buf);
+      UI._logRenderLine(entry);
+    },
+
+    // Render entire ring buffer into the console (called on DOMContentLoaded)
+    replayLog() {
+      const out = document.getElementById('log-output');
+      if (!out) return;
+      out.innerHTML = '';
+      const buf = UI._logBufferLoad();
+      for (const entry of buf) UI._logRenderLine(entry);
+    },
+
+    clearLog() {
+      try { localStorage.removeItem(UI._LOG_KEY); } catch {}
+      const out = document.getElementById('log-output');
+      if (out) out.innerHTML = '<div class="text-zinc-600 text-[9px]">(log cleared)</div>';
     },
 
     // ── Report Modal ─────────────────────────────────────────────────────
@@ -245,5 +298,90 @@
   // ── Global aliases (backward-compat for onclick="viewReport(...)" in rendered cards) ──
   window.viewReport = (path) => UI.viewReport(path);
   window.logToUI    = (msg, type) => UI.logToUI(msg, type);
+
+  // ── Persistent log: replay on page load + inject Clear button ────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    UI.replayLog();
+
+    // Inject a "Clear" button into the debug console header if not present
+    const console_ = document.getElementById('debug-console');
+    if (console_ && !console_.querySelector('.log-clear-btn')) {
+      const header = console_.querySelector('.flex.items-center.justify-between');
+      if (header) {
+        const btn = document.createElement('button');
+        btn.className = 'log-clear-btn text-[9px] font-bold uppercase tracking-widest text-zinc-500 hover:text-red-400 transition-colors mr-2';
+        btn.textContent = 'Clear';
+        btn.title = 'Clear persistent log buffer';
+        btn.onclick = () => UI.clearLog();
+        // insert before the X close button (last child of header-right group)
+        const rightGroup = header.lastElementChild;
+        if (rightGroup && rightGroup.tagName === 'BUTTON') {
+          header.insertBefore(btn, rightGroup);
+        } else {
+          header.appendChild(btn);
+        }
+      }
+    }
+  });
+
+  // ── Bridge.py handshake monitor (persistent log across pages) ────────────
+  // Polls /api/refresh_status every 5s. Emits a log entry ONLY when the server
+  // has reported a new last_ok or new last_error since we last logged (dedup via
+  // localStorage-backed sentinels so switching pages won't re-log the same event).
+  const BRIDGE_SEEN_OK  = 'bridge_last_ok_logged';
+  const BRIDGE_SEEN_ERR = 'bridge_last_err_logged';
+  async function pollBridge() {
+    try {
+      const r = await fetch('/api/refresh_status');
+      if (!r.ok) return;
+      const s = await r.json();
+      const seenOk  = localStorage.getItem(BRIDGE_SEEN_OK);
+      const seenErr = localStorage.getItem(BRIDGE_SEEN_ERR);
+      if (s.last_ok && s.last_ok !== seenOk) {
+        UI.logToUI(`bridge.py OK — ${s.last_reason || 'periodic'} (${s.last_ok.slice(11, 19)})`, 'success');
+        localStorage.setItem(BRIDGE_SEEN_OK, s.last_ok);
+      }
+      if (s.last_error) {
+        // Key error log by the error string itself to avoid loss when timestamp absent
+        const errSig = (s.last_error || '').slice(0, 200);
+        if (errSig && errSig !== seenErr) {
+          UI.logToUI(`bridge.py ERROR — ${errSig}`, 'error');
+          localStorage.setItem(BRIDGE_SEEN_ERR, errSig);
+        }
+      }
+    } catch { /* server unreachable — silent */ }
+  }
+  setInterval(pollBridge, 5000);
+  setTimeout(pollBridge, 1000);
+
+  // ── Protocol (invest/flash/sector) handshake monitor ─────────────────────
+  // Emits log on state transitions: running → done / error / cancelled.
+  const PROTO_SEEN_JOB = 'protocol_last_job_logged';
+  async function pollProtocolStateMonitor() {
+    try {
+      const r = await fetch('/api/run-protocol/status');
+      if (!r.ok) return;
+      const s = await r.json();
+      const seenJob = localStorage.getItem(PROTO_SEEN_JOB);
+      const thisJob = s.job_id ? `${s.job_id}:${s.status}` : null;
+      if (!thisJob || thisJob === seenJob) return;
+      // Only log terminal states (avoid spamming "running" every 3s)
+      if (['done', 'error', 'cancelled'].includes(s.status)) {
+        const type = s.status === 'done' ? 'success' : 'error';
+        const elapsed = s.elapsed_sec || 0;
+        const m = Math.floor(elapsed / 60), sec = elapsed % 60;
+        const timeStr = `${m}:${String(sec).padStart(2,'0')}`;
+        const suffix = s.status === 'done' ? `completed in ${timeStr}` : (s.error || s.status);
+        UI.logToUI(`protocol ${s.name} [${s.job_id}] — ${suffix}`, type);
+        localStorage.setItem(PROTO_SEEN_JOB, thisJob);
+      } else if (s.status === 'running' && thisJob !== seenJob) {
+        // Log start once
+        UI.logToUI(`protocol ${s.name} started [${s.job_id}]`, 'info');
+        localStorage.setItem(PROTO_SEEN_JOB, thisJob);
+      }
+    } catch { /* silent */ }
+  }
+  setInterval(pollProtocolStateMonitor, 3000);
+  setTimeout(pollProtocolStateMonitor, 1500);
 
 })();

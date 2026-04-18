@@ -16,7 +16,7 @@
 | 指令 | 執行 |
 |---|---|
 | `產業掃描` | `sector/sector_protocol_main.md` |
-| `分析 [TICKER]` | `investment/investment_protocol_v4_6.md` |
+| `分析 [TICKER]` | `investment/investment_protocol_v4_8.md` |
 | `新聞分析 DIGEST` | `news/news_protocol_v1.md` (DIGEST mode) |
 | `新聞分析 FLASH [新聞內容]` | `news/news_protocol_v1.md` (FLASH mode) |
 
@@ -40,7 +40,7 @@ AI投資委員會/
 │   └── *.js / style.css       │ presenter / utils / i18n / data-store
 │
 ├── investment/                ← 個股分析 protocol + logs
-│   ├── investment_protocol_v4_6.md   ← V4.6 (current)
+│   ├── investment_protocol_v4_8.md   ← V4.8 (current)
 │   ├── README.md
 │   └── invest_logs/
 │       ├── history.json       │ 所有 session exports

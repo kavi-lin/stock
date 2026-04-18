@@ -1,14 +1,22 @@
 # INTEL COMMAND — Todo List
 
-> **Last Updated**: 2026-04-16
-> **Last Session Note**: 啟動 News Protocol V2 重構（RSS 兩階段漏斗 + 4 agent 圓桌 + Dashboard 個股新聞按鈕）— 草擬中
+> **Last Updated**: 2026-04-18
+> **Last Session Note**: 持久化 Debug Log — `Dashboard/utils.js` 加 localStorage ring buffer（cap 300）取代純 DOM log；換頁 / 重載不再消失。DOMContentLoaded auto-replay。新增：(1) bridge.py handshake monitor（5s poll /api/refresh_status，last_ok/last_error 變化時入日誌）；(2) protocol handshake monitor（3s poll /api/run-protocol/status，running→done/error 轉變時入日誌，含 elapsed 時間）；(3) 動態注入 Clear 按鈕到 debug console header；(4) 每行 log 加 [page] 前綴。bump VERSION → 1.9.4。另修：awaitBridgeAndReload（平倉 / 加倉 / 刪倉改為 poll /api/refresh_status 等 bridge.py 完成才 reload，取代 1.5s 固定 race）；drill overlay card 加 2-layer shadow + 細邊框（scoped to #history-drill-rail，GPU 友善）。
+> **Last Session Note (prev)**: market-sentiment-analyzer 加 file-based cache（TTL 15min），多 ticker 同 session 共用市場層，每 ticker 省 ~$0.1。bump VERSION → 1.9.3。
+> **Last Session Note (prev)**: V4.8 TSLA 實測 11:23 / $4.00 / 31 turns。改動：PROTOCOL_TIMEOUT_SEC 600 → 1500；Dashboard confirm dialog 改 10-15min & ~$4；Phase 5 MD 報告委派 Sonnet 4.6 subagent（純排版、禁改決策數值）每次省 ~$0.5。bump VERSION → 1.9.2。
+> **Last Session Note (prev)**: 決策中心 UX 升級：點卡片 → 橫向 scroll overlay 顯示該 ticker 所有歷次分析（buildCard 複用、日期近到遠、ESC/背景/✕ 關閉）；每張 card 右上 refresh icon + 計時；Global UI lock（server singleton → 所有 refresh/FLASH 按鈕同步鎖定）。bump VERSION → 1.9.1。
+> **Last Session Note (prev)**: Investment Protocol V4.7 → V4.8 Parallel Blind Analyst Subagents（D）：Phase 2 四個 analyst 改 4 個 Agent subagent 平行；Burry 保留 inline；Isolation contract + subagent_isolated sentinel + PARTIAL/FULL_FALLBACK 階梯。bump VERSION → 1.9.0。
+> **Last Session Note (prev)**: Investment Protocol V4.6 → V4.7 Anti-Self-Deception Patch（ABC）：Consensus Bonus 改 Red-Team-gated（NO_VIABLE_COUNTER 才 ×1.15、STRONG_COUNTER ×0.85）、新增 Phase 2.8 Red Team Adversary、Burry OVERRIDE_BURRY 強制成本化。另修 dashboard_server.py 漏 `import glob` 導致盤前檢查 500。bump VERSION → 1.8.0
+> **Last Session Note (prev)**: 產業掃描 2026-04-18 → NEUTRAL 0.68；HOT=Industrials only (78)；Materials+Tech 雙雙 tail-risk 降級 HOT→WARM（consensus_warning + AI/Semis EXHAUSTING + SPY RSI 96.9 extreme）。Synthesized 60-75%（breadth 最保守）。bump VERSION → 1.7.2
+> **Last Session Note (prev)**: 分析 BAC → STAGED_ENTRY 7%（雙軌 3.5/3.5）final_score +1.110；四 Agent 一致看多 + Burry WARNING 20.4 ×0.7；R/R 2.05。打破連續半導體集中。bump VERSION → 1.7.1
+> **Last Session Note (prev)**: 啟動 News Protocol V2 重構（RSS 兩階段漏斗 + 4 agent 圓桌 + Dashboard 個股新聞按鈕）— 草擬中
 > **Last Session Note (prev)**: 資料夾大整理 — archive/ 分類建立、過期 protocol/doc/log 歸檔、根目錄清潔；5 個 README + todolist 對齊 V4.6 現況；V4.6 session 前半段已完成雙軌 entry / STAGED_ENTRY / consensus bonus / directional macro / dashboard_server 定時刷新 / positions tracker / decisions.html 整合 / server-side mtime cache-busting
 
 ---
 
 ## Current State (2026-04-15)
 
-- **Investment Protocol**: V4.6（雙軌 entry + STAGED_ENTRY + consensus bonus + CONTRARIAN macro flag）
+- **Investment Protocol**: V4.8（V4.7 基礎 + Phase 2 四 analyst 平行 subagent 真獨立 + fallback 階梯 + degraded_mode 保護）
 - **Sector Protocol**: V1.2（multi-file: main + phase_0/1-2-3/4-5/schema）
 - **News Protocol**: V2（RSS 兩階段漏斗 + 5 agent 圓桌 + FLASH/DIGEST/REVIEW 三模式）
 - **Dashboard**: index / decisions / sector / news 四頁（watchlist + history 已合併至 decisions；news 新增 reviewed/pending 切換 + 送審按鈕）
@@ -129,7 +137,7 @@
 
 | Protocol | 輸出 Log | Bridge 讀取欄位 | Dashboard 顯示 |
 |---|---|---|---|
-| `investment_protocol_v4_6` | `invest_logs/history.json` | `final_action`, `final_decision`, `final_score`, `entry_aggressive/conservative`, `consensus_bonus_applied`, `macro_alignment`, `staged_split`, `binary_classification`, `key_risks` | decisions 頁全部 tabs |
+| `investment_protocol_v4_8` | `invest_logs/history.json` | `final_action`, `final_decision`, `final_score`, `entry_aggressive/conservative`, `consensus_bonus_applied`, `red_team_verdict`, `burry_override_active`, `phase2_fanout_mode`, `degraded_analysts`, `macro_alignment`, `staged_split`, `binary_classification`, `key_risks` | decisions 頁全部 tabs |
 | `sector_protocol_main` (V1.2) | `sector_logs/*_sector_intel.json` | `market_regime`, `_phase0` (breadth/FTD/MT synth), `_phase1` (sectors[]), `_phase3` (binary_risks/trump_signals), `hot_sectors/cold_sectors` | index + sector + news binary sidebar |
 | `news_protocol_v1` | `news_logs/*_digest.json` | `verdicts[]`, `trump_signals`, `upcoming_events` | news 頁 |
 | `market-breadth-analyzer` | `breadth_cache/*.json` | 6 組件 breadth + trend | index 廣度 gauge |

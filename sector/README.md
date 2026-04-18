@@ -151,4 +151,4 @@ market_top_cache/market_top_*.json        ← Phase 0 層 D 輸入
 
 ## 與 Investment Protocol 的銜接
 
-Phase 5 輸出 `session_notes`（一句話 handoff）。`investment_protocol_v4_6` Phase 0 三層 cache 的 L1 會優先讀取 `sector_intel.json` 的 macro_regime / exposure_ceiling / hot_sectors / binary_risks，**跳過 web search**，節省 ~10k token。
+Phase 5 輸出 `session_notes`（一句話 handoff）。`investment_protocol_v4_8` Phase 0 三層 cache 的 L1 會優先讀取 `sector_intel.json` 的 macro_regime / exposure_ceiling / hot_sectors / binary_risks，**跳過 web search**，節省 ~10k token。

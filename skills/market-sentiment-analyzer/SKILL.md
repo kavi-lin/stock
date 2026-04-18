@@ -12,13 +12,24 @@ so the investment and sector protocols can consume one stable JSON structure.
 
 ## Usage
 ```bash
-python3 skills/market-sentiment-analyzer/scripts/sentiment.py
+python3 skills/market-sentiment-analyzer/scripts/sentiment.py                 # uses 15-min cache if fresh
 python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json-only
+python3 skills/market-sentiment-analyzer/scripts/sentiment.py --no-cache      # force fresh compute
+python3 skills/market-sentiment-analyzer/scripts/sentiment.py --max-age 300   # custom TTL seconds
 ```
 
 No API key required. Uses `yfinance` (VIX, SPY, SPY puts/calls proxy) and
 `requests` to fetch CNN Fear & Greed from the public alternative.me endpoint
 (crypto F&G as proxy) AND attempts the CNN backend JSON endpoint.
+
+## Caching (default behavior)
+Market sentiment is ticker-agnostic — when the investment protocol analyses
+several different tickers in one session, every Sentiment subagent would
+otherwise call this script fresh. Results are cached to
+`skills/market-sentiment-analyzer/cache/sentiment_latest.json` with a default
+TTL of **900 seconds (15 min)**. Within that window the full JSON (including
+`cache_hit: true` and `cache_age_sec`) is returned immediately — no network
+calls, no yfinance download. Override with `--no-cache` for truly-live values.
 
 ## Output schema
 
@@ -40,7 +51,9 @@ No API key required. Uses `yfinance` (VIX, SPY, SPY puts/calls proxy) and
   "put_call_ratio": "float (null if fetch failed)",
   "fear_greed_index": "float 0-100 (null if fetch failed — fall back to composite)",
   "components_used": ["vix", "spy_rsi", "pct_above_ma", "pcr", "fg"],
-  "extreme_sentiment_triggered": "true | false (composite > 80 or < 20)"
+  "extreme_sentiment_triggered": "true | false (composite > 80 or < 20)",
+  "cache_hit":      "true | false (added by cache layer)",
+  "cache_age_sec":  "int — seconds since cache was written (0 on fresh compute)"
 }
 ```
 

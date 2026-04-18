@@ -7,11 +7,14 @@ Replaces CNN F&G web-search queries with a local computation combining:
   and CNN F&G (fetched via public JSON endpoint with graceful fallback).
 
 Usage:
-    python3 sentiment.py
+    python3 sentiment.py                 # default: use 15-min cache if fresh
     python3 sentiment.py --json-only
+    python3 sentiment.py --no-cache      # force fresh compute
+    python3 sentiment.py --max-age 300   # custom TTL in seconds (default 900)
 """
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 
@@ -22,6 +25,46 @@ import numpy as np
 
 TIMEOUT = 10
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+
+# Market-level sentiment is ticker-agnostic; within 15 minutes the composite
+# barely moves (VIX intraday range ~0.3 pts, F&G updates ~hourly). Batch runs
+# that query N tickers in one session share the same value, so we cache a
+# single file rather than recompute per ticker.
+SCRIPT_DIR      = os.path.dirname(os.path.abspath(__file__))
+CACHE_DIR       = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
+CACHE_FILE      = os.path.join(CACHE_DIR, "sentiment_latest.json")
+DEFAULT_TTL_SEC = 900
+
+
+def _load_cache(max_age_sec):
+    """Return cached payload (dict) if fresh, else None."""
+    if not os.path.exists(CACHE_FILE):
+        return None
+    try:
+        age_sec = int(datetime.now().timestamp() - os.path.getmtime(CACHE_FILE))
+        if age_sec >= max_age_sec:
+            return None
+        with open(CACHE_FILE, "r", encoding="utf-8") as fp:
+            payload = json.load(fp)
+        # Strip previous cache sentinels — we'll re-stamp.
+        for k in ("cache_hit", "cache_age_sec", "cache_source"):
+            payload.pop(k, None)
+        payload["cache_hit"]     = True
+        payload["cache_age_sec"] = age_sec
+        payload["cache_source"]  = CACHE_FILE
+        return payload
+    except Exception:
+        return None
+
+
+def _write_cache(payload):
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        with open(CACHE_FILE, "w", encoding="utf-8") as fp:
+            json.dump(payload, fp, ensure_ascii=False, indent=2)
+    except Exception as e:
+        # Cache write failure must not break the skill — fall through silently.
+        print(f"[sentiment] cache write failed: {e}", file=sys.stderr)
 
 
 def rsi(series: pd.Series, period: int = 14) -> float:
@@ -108,7 +151,19 @@ def label_for(score: float) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json-only", action="store_true")
+    ap.add_argument("--no-cache", action="store_true", help="force fresh compute (bypass cache)")
+    ap.add_argument("--max-age", type=int, default=DEFAULT_TTL_SEC,
+                    help=f"cache TTL in seconds (default {DEFAULT_TTL_SEC})")
     args = ap.parse_args()
+
+    # Cache check (skipped with --no-cache)
+    if not args.no_cache:
+        cached = _load_cache(args.max_age)
+        if cached is not None:
+            print(json.dumps(cached, ensure_ascii=False, indent=2))
+            if not args.json_only:
+                print(f"\n→ cache hit (age {cached['cache_age_sec']}s) │ composite {cached.get('composite_score')} ({cached.get('label')})", file=sys.stderr)
+            return
 
     data = fetch_yf()
     # yf multi-ticker returns MultiIndex or dict-like; normalize
@@ -167,11 +222,15 @@ def main():
         "fear_greed_index": round(fg, 1) if fg is not None else None,
         "components_used": list(components.keys()),
         "extreme_sentiment_triggered": (composite is not None and (composite > 80 or composite < 20)),
+        "cache_hit": False,
+        "cache_age_sec": 0,
     }
+
+    _write_cache(out)
 
     print(json.dumps(out, ensure_ascii=False, indent=2))
     if not args.json_only:
-        print(f"\n→ composite {composite} ({out['label']}) │ VIX {vix_now:.1f} {vix_regime} │ SPY RSI {spy_rsi:.1f}", file=sys.stderr)
+        print(f"\n→ fresh compute │ composite {composite} ({out['label']}) │ VIX {vix_now:.1f} {vix_regime} │ SPY RSI {spy_rsi:.1f}", file=sys.stderr)
 
 
 if __name__ == "__main__":

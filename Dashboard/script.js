@@ -351,8 +351,8 @@ async function launchAnalysis() {
   if (!ticker) return;
   const isZh = UI.currentLang === 'zh';
   const confirmMsg = isZh
-    ? `透過 Claude 執行「分析 ${ticker}」？（約 3-5 分鐘，消耗 tokens）`
-    : `Run "分析 ${ticker}" via Claude? (~3-5 min, consumes tokens)`;
+    ? `透過 Claude 執行「分析 ${ticker}」？（V4.8 約 10-15 分鐘，~$4 tokens）`
+    : `Run "分析 ${ticker}" via Claude? (V4.8 ~10-15 min, ~$4 tokens)`;
   if (!confirm(confirmMsg)) return;
 
   setLaunchStatus('running', isZh ? `啟動 ${ticker} 分析...` : `Starting ${ticker} analysis...`);

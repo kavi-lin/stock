@@ -222,6 +222,9 @@ const i18n = {
       size_label:      "建議倉位",
       rr_label:        "風報比",
       conf_label:      "信心指數",
+      refresh_btn:     "重新分析",
+      history_title:   "歷次分析",
+      history_empty:   "沒有歷史分析記錄",
     },
 
     // ── Warning / Breadth (index.html) ────────────────────────────
@@ -595,6 +598,9 @@ const i18n = {
       size_label:      "Size",
       rr_label:        "R/R",
       conf_label:      "Confidence",
+      refresh_btn:     "Re-analyze",
+      history_title:   "Analysis History",
+      history_empty:   "No prior analyses.",
     },
 
     // ── Warning / Breadth (index.html) ────────────────────────────

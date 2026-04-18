@@ -105,8 +105,7 @@ async function submitPositionForm(e) {
         }
         logToUI(`Position saved: ${body.ticker} ${body.shares}@$${body.entry_price}`);
         closePositionModal();
-        // Reload after bridge.py completes (it runs async on server)
-        setTimeout(() => loadWatchlist(), 1500);
+        awaitBridgeAndReload();
     } catch (err) {
         errEl.textContent = err.message;
         errEl.classList.remove('hidden');
@@ -119,10 +118,32 @@ async function deletePosition(posId) {
         const res = await fetch(`/api/positions/${posId}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         logToUI(`Position deleted: ${posId}`);
-        setTimeout(() => loadWatchlist(), 1500);
+        awaitBridgeAndReload();
     } catch (err) {
         alert(`Delete failed: ${err.message}`);
     }
+}
+
+// Wait until dashboard_server's bridge.py run finishes (it's spawned async on every
+// positions.json mutation), THEN reload the component. Replaces the old fixed-1500ms
+// setTimeout race that silently failed when bridge.py took longer than 1.5s.
+async function awaitBridgeAndReload() {
+    const startTs  = Date.now();
+    const deadline = startTs + 6000;   // 6s safety cap — bridge.py normally < 2s
+    while (Date.now() < deadline) {
+        try {
+            const r = await fetch('/api/refresh_status');
+            if (r.ok) {
+                const s = await r.json();
+                if (!s.in_progress && s.last_ok) {
+                    const lastOkTs = new Date(s.last_ok).getTime();
+                    if (lastOkTs >= startTs - 500) break;   // bridge finished after our mutation
+                }
+            }
+        } catch {}
+        await new Promise(res => setTimeout(res, 200));
+    }
+    await loadWatchlist();
 }
 window.deletePosition = deletePosition;
 window.openPositionModal = openPositionModal;
@@ -207,7 +228,7 @@ async function submitCloseForm(e) {
         }
         logToUI(`Position closed: ${_closingLot.ticker} ${closedSh}@$${body.exit_price}`);
         closeExitModal();
-        setTimeout(() => loadWatchlist(), 1500);
+        awaitBridgeAndReload();
     } catch (err) {
         errEl.textContent = err.message;
         errEl.classList.remove('hidden');
@@ -432,21 +453,30 @@ function buildCard(item) {
     ].filter(Boolean).join('');
 
     const statusGlow = isExecute ? 'glow-green' : '';
+    const refreshLbl = wl.refresh_btn || (UI.currentLang === 'zh' ? '重新分析' : 'Re-analyze');
 
     return `
-    <div class="glass-card p-6 flex flex-col gap-0 ${statusGlow} hover:border-zinc-500/50 transition-all">
+    <div class="glass-card p-6 flex flex-col gap-0 ${statusGlow} hover:border-zinc-500/50 transition-all cursor-pointer" data-history-ticker="${item.ticker}">
         <!-- Header -->
         <div class="flex justify-between items-start mb-4">
             <div>
                 <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}</h4>
                 <p class="text-[10px] text-zinc-500 font-mono">${item.time}</p>
             </div>
-            <div class="flex flex-col items-end gap-2">
-                <span class="px-2 py-1 rounded text-[10px] font-black border"
-                    style="background:color-mix(in srgb,${statusColor},transparent 90%);border-color:color-mix(in srgb,${statusColor},transparent 75%);color:${statusColor}">
-                    ${status}
-                </span>
-                ${item.da_filed ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">${wl.da_filed || 'DA Filed'}</span>` : ''}
+            <div class="flex items-start gap-2">
+                <button type="button" data-refresh-ticker="${item.ticker}"
+                    class="refresh-card-btn flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-400 transition-all"
+                    title="${refreshLbl}">
+                    <i data-lucide="refresh-cw" class="w-3 h-3 refresh-icon"></i>
+                    <span class="timer-span hidden font-mono text-[10px]">00:00</span>
+                </button>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="px-2 py-1 rounded text-[10px] font-black border"
+                        style="background:color-mix(in srgb,${statusColor},transparent 90%);border-color:color-mix(in srgb,${statusColor},transparent 75%);color:${statusColor}">
+                        ${status}
+                    </span>
+                    ${item.da_filed ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">${wl.da_filed || 'DA Filed'}</span>` : ''}
+                </div>
             </div>
         </div>
 
@@ -552,7 +582,30 @@ function renderCards(filter) {
     }
     grid.innerHTML = filtered.map(buildCard).join('');
     lucide.createIcons();
+    syncLockUI();   // apply current protocol-lock state to freshly rendered cards
 }
+
+// ── Card click delegation: drill-down or refresh ─────────────────
+// Attached once on the grid container; survives re-renders.
+(function attachCardDelegation() {
+    const grid = document.getElementById('watchlist-grid');
+    if (!grid || grid._delegationAttached) return;
+    grid._delegationAttached = true;
+    grid.addEventListener('click', (e) => {
+        // Refresh button wins
+        const refreshBtn = e.target.closest('[data-refresh-ticker]');
+        if (refreshBtn) {
+            e.stopPropagation();
+            refreshTicker(refreshBtn.dataset.refreshTicker);
+            return;
+        }
+        // Ignore clicks on interactive footer buttons (FLASH / Add / View Report / delete-lot)
+        if (e.target.closest('button, a, input, select, textarea')) return;
+        // Card body → drill
+        const card = e.target.closest('[data-history-ticker]');
+        if (card) openHistoryDrill(card.dataset.historyTicker);
+    });
+})();
 
 // ── Positions Table (flat, cross-ticker) ──────────────────────
 let _showClosed = false;
@@ -827,4 +880,209 @@ async function updateRefreshStatus() {
 }
 
 updateRefreshStatus();
+
+// ═══════════════════════════════════════════════════════════════
+// Per-card refresh + global protocol lock + history drill overlay
+// ═══════════════════════════════════════════════════════════════
+
+const _protoLock = {
+    running:       false,
+    name:          null,   // 'invest' | 'flash' | 'digest' | 'review' | 'sector'
+    ticker:        null,
+    started_at:    null,
+    elapsed_sec:   0,
+    last_done_job: null,   // job_id of last completed run — used to trigger data refresh exactly once
+};
+
+function fmtElapsed(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// Pull protocol status; update lock state; sync UI.
+async function pollProtocolStatus() {
+    try {
+        const res = await fetch('/api/run-protocol/status');
+        if (!res.ok) return;
+        const s = await res.json();
+
+        const wasRunning = _protoLock.running;
+        _protoLock.running     = (s.status === 'running');
+        _protoLock.name        = s.name;
+        _protoLock.elapsed_sec = s.elapsed_sec || 0;
+        _protoLock.started_at  = s.started_at;
+        // Extract ticker from job_id (e.g. "invest_20260418_120342") — fallback: parse log_path
+        _protoLock.ticker = _extractTicker(s);
+
+        // Transition: running → done/error/cancelled → refresh data.json + re-render
+        if (wasRunning && !_protoLock.running && s.job_id && s.job_id !== _protoLock.last_done_job) {
+            _protoLock.last_done_job = s.job_id;
+            if (s.status === 'done') {
+                UI.showToast(
+                    UI.currentLang === 'zh' ? `分析完成：${_protoLock.ticker || ''}` : `Analysis complete: ${_protoLock.ticker || ''}`,
+                    'success', 4000
+                );
+                loadWatchlist();   // refresh data.json + re-render cards
+            } else if (s.status === 'error') {
+                UI.showToast(
+                    UI.currentLang === 'zh' ? `分析失敗：${s.error || 'unknown'}` : `Analysis failed: ${s.error || 'unknown'}`,
+                    'error', 6000
+                );
+            }
+        }
+        syncLockUI();
+    } catch (e) {
+        // silent — the refresh-status ring already surfaces server issues
+    }
+}
+
+// Try to pull a ticker name out of the protocol state (job_id or log path).
+// invest/flash/review all run with {ticker} substitution so the prompt contains it,
+// but job_id only has timestamp — fall back to log_path parsing if needed.
+function _extractTicker(state) {
+    if (!state || !state.log_path) return null;
+    // Prior call to refreshTicker stashed it in _protoLock.ticker already when we
+    // kicked off the run; server-side state doesn't carry it. Best-effort only.
+    return _protoLock.ticker;
+}
+
+function syncLockUI() {
+    const running = _protoLock.running;
+    const runningTicker = _protoLock.ticker;
+    const elapsedStr = fmtElapsed(_protoLock.elapsed_sec);
+
+    document.querySelectorAll('[data-refresh-ticker]').forEach(btn => {
+        const btnTicker = btn.dataset.refreshTicker;
+        const icon  = btn.querySelector('.refresh-icon');
+        const timer = btn.querySelector('.timer-span');
+        if (!running) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-40', 'pointer-events-none', 'border-blue-500/50', 'text-blue-400');
+            icon?.classList.remove('animate-spin');
+            timer?.classList.add('hidden');
+            const lbl = (window.i18n?.[UI.currentLang]?.watchlist?.refresh_btn) ||
+                        (UI.currentLang === 'zh' ? '重新分析' : 'Re-analyze');
+            btn.title = lbl;
+            return;
+        }
+        // Locked state
+        if (btnTicker === runningTicker) {
+            // This card is the one running — spin + show timer
+            btn.disabled = true;
+            btn.classList.remove('opacity-40');
+            btn.classList.add('border-blue-500/50', 'text-blue-400');
+            icon?.classList.add('animate-spin');
+            if (timer) {
+                timer.textContent = elapsedStr;
+                timer.classList.remove('hidden');
+            }
+            btn.title = (UI.currentLang === 'zh' ? `分析中：${btnTicker}` : `Analyzing: ${btnTicker}`) + ` (${elapsedStr})`;
+        } else {
+            // Other cards — greyed out
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'pointer-events-none');
+            icon?.classList.remove('animate-spin');
+            timer?.classList.add('hidden');
+            btn.title = (UI.currentLang === 'zh'
+                ? `執行中：${runningTicker || _protoLock.name} (${elapsedStr})`
+                : `Running: ${runningTicker || _protoLock.name} (${elapsedStr})`);
+        }
+    });
+}
+
+async function refreshTicker(ticker) {
+    if (_protoLock.running) {
+        UI.showToast(UI.currentLang === 'zh'
+            ? `已有分析執行中：${_protoLock.ticker || _protoLock.name}`
+            : `Another analysis is running: ${_protoLock.ticker || _protoLock.name}`, 'error', 4000);
+        return;
+    }
+    const isZh = UI.currentLang === 'zh';
+    const confirmMsg = isZh
+        ? `透過 Claude 執行「分析 ${ticker}」？（V4.8 約 10-15 分鐘，~$4 tokens）`
+        : `Run full "invest ${ticker}" via Claude? (V4.8 ~10-15 min, ~$4 tokens)`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        const res = await fetch('/api/run-protocol', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: 'invest', ticker: ticker.toUpperCase() }),
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: res.statusText }));
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        // Optimistically seed lock so UI reacts before the next poll tick
+        _protoLock.running = true;
+        _protoLock.name = 'invest';
+        _protoLock.ticker = ticker.toUpperCase();
+        _protoLock.started_at = new Date().toISOString();
+        _protoLock.elapsed_sec = 0;
+        syncLockUI();
+        UI.showToast(isZh ? `開始分析 ${ticker}…` : `Analyzing ${ticker}…`, 'info', 3000);
+    } catch (e) {
+        UI.showToast(e.message, 'error', 5000);
+    }
+}
+
+// ── History drill overlay ──────────────────────────────────────
+function openHistoryDrill(ticker) {
+    const all = window._allAnalysis || [];
+    // Filter by ticker, sort by date descending (newest first)
+    const items = all.filter(a => a.ticker === ticker)
+                     .sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+
+    const overlay = document.getElementById('history-drill-overlay');
+    const titleEl = document.getElementById('history-drill-title');
+    const rail    = document.getElementById('history-drill-rail');
+    const emptyEl = document.getElementById('history-drill-empty');
+    if (!overlay || !rail) return;
+
+    const t  = window.i18n?.[UI.currentLang] || {};
+    const wl = t.watchlist || {};
+    titleEl.textContent = `${ticker} — ${wl.history_title || (UI.currentLang === 'zh' ? '歷次分析' : 'Analysis History')} (${items.length})`;
+
+    if (!items.length) {
+        rail.innerHTML = '';
+        emptyEl.textContent = wl.history_empty || (UI.currentLang === 'zh' ? '沒有歷史分析記錄' : 'No prior analyses.');
+        emptyEl.classList.remove('hidden');
+    } else {
+        emptyEl.classList.add('hidden');
+        // Reuse buildCard for identical visual parity; wrap each with a fixed-width shell so they lay out horizontally
+        rail.innerHTML = items.map(i => `<div class="shrink-0 w-[420px]">${buildCard(i)}</div>`).join('');
+    }
+
+    overlay.classList.remove('hidden');
+    lucide.createIcons();
+    syncLockUI();   // make sure refresh buttons inside the rail also reflect lock state
+}
+
+function closeHistoryDrill() {
+    const overlay = document.getElementById('history-drill-overlay');
+    if (overlay) overlay.classList.add('hidden');
+}
+
+// Overlay dismiss: click backdrop or ESC
+(function wireDrillDismissal() {
+    const overlay = document.getElementById('history-drill-overlay');
+    if (!overlay) return;
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeHistoryDrill();
+    });
+    const closeBtn = document.getElementById('history-drill-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeHistoryDrill);
+})();
+
+// Extend existing ESC handler (already closes modals) to also close drill overlay.
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeHistoryDrill();
+});
+
+// Start protocol-status poller (2s cadence). Kicks off with an immediate poll
+// so first page load picks up an in-flight job.
+pollProtocolStatus();
+setInterval(pollProtocolStatus, 2000);
 setInterval(updateRefreshStatus, 1000);

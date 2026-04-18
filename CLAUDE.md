@@ -1,6 +1,6 @@
 # AI 投資委員會 — Claude Code Project Context
 
-> **系統版本：v1.7.0**（實際值以根目錄 `VERSION` 檔與 `Dashboard/utils.js` 的 `VERSION` 常數為準；兩者必須同步；每個 session 結束必須 bump）
+> **系統版本：v1.9.4**（實際值以根目錄 `VERSION` 檔與 `Dashboard/utils.js` 的 `VERSION` 常數為準；兩者必須同步；每個 session 結束必須 bump）
 
 ## 專案說明
 這是一套多 Agent 投資分析系統，包含三個 protocol。
@@ -8,19 +8,19 @@
 ## Protocol 檔案位置
 - **新聞分析**: `news/news_protocol_v2.md` ← V2.0（RSS 兩階段漏斗 + 5 agent 圓桌 + Triage 人類審核 + Shallow Digest 保留）
 - **產業掃描**: `sector/sector_protocol_main.md` ← V1.2（多檔案架構；子檔案：`phase_0.md` / `phase_1-2-3.md` / `phase_4-5.md` / `schema.md`）
-- **個股分析**: `investment/investment_protocol_v4_6.md` ← V4.6（anti-conservatism：雙軌 entry + STAGED_ENTRY + consensus bonus + directional macro + 移除 VOLATILE 重複懲罰）
+- **個股分析**: `investment/investment_protocol_v4_8.md` ← V4.8（parallel blind analyst subagents：Phase 2 四 analyst 平行 subagent 真獨立 + fallback + degraded_mode；繼承 V4.7 Red-Team-gated bonus / Phase 2.8 adversary / Burry OVERRIDE 成本）
 
 ### 舊版本（已歸檔至 `archive/old_protocols/`）
 - `archive/old_protocols/news/` — V1.0
 - `archive/old_protocols/sector/` — V1.0 / V1.1 / V1.2（單一檔版）/ V1.2 optimized
-- `archive/old_protocols/investment/` — V4.3 / V4.4 / V4.5
+- `archive/old_protocols/investment/` — V4.3 / V4.4 / V4.5 / V4.6 / V4.7
 
 ## 觸發方式
 - 「新聞分析 DIGEST」→ 執行 news_protocol_v2，MODE: DIGEST（先跑 `news/fetch_news_rss.py` 產 raw.json → Stage 1 triage → Stage 2 deep ≤5 則 → `review_status: reviewed`）
 - 「新聞分析 FLASH [新聞內容]」→ 執行 news_protocol_v2，MODE: FLASH（跳過 Stage 1，直接 Deep Debate → `review_status: pending`，不 patch cache）
 - 「新聞分析 審核 [headline]」→ 執行 news_protocol_v2，MODE: REVIEW（擴展 FLASH 辯論 → `review_status: reviewed` + patch cache）
 - 「產業掃描」→ 執行 sector_protocol_main（先讀主檔，再按需載入子檔）
-- 「分析 [TICKER]」→ 執行 investment_protocol_v4_6
+- 「分析 [TICKER]」→ 執行 investment_protocol_v4_8
 
 ## V4.5 / V1.2 新增能力速查
 | 新 Skill / 改動 | 在哪裡執行 | 作用 |

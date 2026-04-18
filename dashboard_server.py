@@ -13,6 +13,7 @@ API:
     DELETE /api/positions/{id}    → remove by id
 """
 
+import glob
 import json
 import os
 import re
@@ -49,7 +50,7 @@ _state_lock = threading.Lock()
 # Lets the Dashboard trigger Claude to execute a protocol (sector/news/invest).
 # Single-job lock: one protocol at a time to avoid runaway token burn.
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
-PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "600"))
+PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "1500"))
 
 PROTOCOL_PROMPTS = {
     "sector": "產業掃描",
