@@ -8,12 +8,13 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V1.9.4';
+  const VERSION = 'V1.23.0';
 
   const NAV_ITEMS = [
     { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板' },
     { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心' },
     { id: 'sector',    href: 'sector.html',    icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描' },
+    { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股' },
     { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞' },
   ];
 
@@ -76,8 +77,12 @@
       });
     },
 
-    // ── Toast + Clipboard Helper ─────────────────────────────────────────
-    showToast(msg, type = 'info', ms = 4500) {
+    // ── Toast (minimal, theme-aware, manually dismissible) ──────────────
+    // Defaults tuned per type: info 6s / warn 8s / error 10s — long enough to
+    // actually read. A small ✕ on the right lets the user close early.
+    // Pass ms=0 to make the toast persistent until manually dismissed.
+    showToast(msg, type = 'info', ms = null) {
+      if (ms === null) ms = type === 'error' ? 10000 : type === 'warn' ? 8000 : 6000;
       let host = document.getElementById('ui-toast-host');
       if (!host) {
         host = document.createElement('div');
@@ -85,15 +90,41 @@
         host.className = 'fixed top-5 right-5 z-[200] flex flex-col gap-2 pointer-events-none';
         document.body.appendChild(host);
       }
-      const color = type === 'error' ? 'border-red-500 text-red-300 bg-red-900/30'
-                  : type === 'warn'  ? 'border-yellow-500 text-yellow-200 bg-yellow-900/30'
-                                     : 'border-emerald-500 text-emerald-200 bg-emerald-900/30';
+      const accent = type === 'error' ? 'border-l-red-500'
+                   : type === 'warn'  ? 'border-l-yellow-500'
+                                      : 'border-l-emerald-500';
+      const icon = type === 'error' ? 'alert-circle'
+                 : type === 'warn'  ? 'alert-triangle'
+                                    : 'info';
+      const iconColor = type === 'error' ? 'text-red-500'
+                      : type === 'warn'  ? 'text-yellow-500'
+                                         : 'text-emerald-500';
       const el = document.createElement('div');
-      el.className = `px-4 py-3 rounded-xl border backdrop-blur-xl text-xs font-mono max-w-sm shadow-2xl pointer-events-auto animate-[slideIn_.3s_ease] ${color}`;
-      el.innerHTML = msg;
+      el.className =
+        `pointer-events-auto max-w-sm rounded-lg border border-l-4 ${accent} ` +
+        `border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 ` +
+        `shadow-lg text-xs animate-[slideIn_.3s_ease] flex items-start gap-2 pl-3 pr-2 py-2.5`;
+      el.innerHTML = `
+        <i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0 mt-0.5 ${iconColor}"></i>
+        <div class="flex-1 text-zinc-800 dark:text-zinc-200 leading-snug break-words">${msg}</div>
+        <button class="toast-close shrink-0 text-zinc-400 hover:text-red-500 transition-colors -mt-0.5" title="Close">
+          <i data-lucide="x" class="w-3 h-3"></i>
+        </button>`;
       host.appendChild(el);
-      setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, ms - 300);
-      setTimeout(() => el.remove(), ms);
+      if (window.lucide) lucide.createIcons();
+
+      const close = () => {
+        if (el._closed) return;
+        el._closed = true;
+        el.style.opacity = '0';
+        el.style.transition = 'opacity .25s';
+        setTimeout(() => el.remove(), 250);
+      };
+      el.querySelector('.toast-close').onclick = close;
+
+      if (ms > 0) {
+        setTimeout(close, ms);
+      }
     },
 
     copyToClipboard(text) {
@@ -207,6 +238,19 @@
       el.className = 'text-xs font-bold ' + (isOpen ? 'text-green-400' : 'text-red-500');
     },
 
+    // ── Fetch cancellation detector ────────────────────────────────────
+    // Browsers abort in-flight fetches when the user navigates away.
+    // Chrome throws AbortError (clean); Safari surfaces "Load failed" or
+    // "The string did not match the expected pattern" (various messages).
+    // Treating these as real errors spams the log with noise from page-unload
+    // cleanup that the user can't do anything about.
+    isFetchCancellation(e) {
+      if (!e) return false;
+      if (e.name === 'AbortError') return true;
+      const msg = String(e.message || '');
+      return /Load failed|did not match the expected pattern|NetworkError when attempting/i.test(msg);
+    },
+
     // ── HTML Escape ────────────────────────────────────────────────────────
     escapeHTML(str) {
       return String(str ?? '')
@@ -246,6 +290,10 @@
           <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
             <span>System Logs</span><i data-lucide="terminal" class="w-3 h-3"></i>
           </button>
+          <button id="risk-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold uppercase tracking-tighter" title="Click to cycle LOW → MEDIUM → HIGH">
+            <span class="text-zinc-500" id="risk-label">Risk</span>
+            <span id="risk-chip" class="px-2 py-0.5 rounded text-[9px] font-black border">${UI.riskTolerance}</span>
+          </button>
           <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">${VERSION}</div>
         </div>`;
 
@@ -254,6 +302,33 @@
       document.getElementById('lang-toggle')?.addEventListener('click',  () => UI.toggleLang());
       document.getElementById('show-logs')?.addEventListener('click',    () =>
         document.getElementById('debug-console')?.classList.toggle('hidden'));
+      document.getElementById('risk-toggle')?.addEventListener('click',  () => UI.cycleRiskTolerance());
+      UI._paintRiskChip();  // initial colors
+    },
+
+    // ── Risk Tolerance (sent with every invest protocol invocation) ──────
+    // Stored in localStorage so the choice survives page nav. Cycles LOW → MEDIUM → HIGH.
+    get riskTolerance() {
+      const v = (localStorage.getItem('dash_risk_tolerance') || '').toUpperCase();
+      return ['LOW', 'MEDIUM', 'HIGH'].includes(v) ? v : 'MEDIUM';
+    },
+    cycleRiskTolerance() {
+      const order = ['LOW', 'MEDIUM', 'HIGH'];
+      const next  = order[(order.indexOf(UI.riskTolerance) + 1) % 3];
+      localStorage.setItem('dash_risk_tolerance', next);
+      UI._paintRiskChip();
+      UI.showToast((UI.currentLang === 'zh' ? '風險容忍度：' : 'Risk tolerance: ') + next, 'info', 2500);
+    },
+    _paintRiskChip() {
+      const chip = document.getElementById('risk-chip');
+      if (!chip) return;
+      const v = UI.riskTolerance;
+      chip.textContent = v;
+      chip.className = 'px-2 py-0.5 rounded text-[9px] font-black border';
+      const color = v === 'LOW'    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : v === 'MEDIUM' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
+                                    /* HIGH */ : 'bg-red-500/10 border-red-500/30 text-red-400';
+      chip.className += ' ' + color;
     },
 
     // ── Page Boot ──────────────────────────────────────────────────────────

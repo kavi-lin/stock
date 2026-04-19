@@ -1,7 +1,14 @@
 # JSON Schema Reference
 
+> **Schema Version**: `V1.3`
 > 所有 Phase 的 JSON 輸出 schema。執行各 Phase 寫入 JSON 時按需查閱。
 > ⚠️ Phase 5 的 `_phase0`、`_phase1`、`_phase3` key 名稱不可更換（bridge.py 依賴）。
+> ⚠️ Phase 5 末尾必須執行 `sector/scripts/validate_sector_intel.py`（rc=0 才算完成）。
+>
+> **V1.3 新增**（vs V1.2）：
+> - 頂層：`phase4_fanout_mode` / `degraded_agents`（4a/4b subagent 執行狀態）
+> - Phase 4a: `subagent_isolated` sentinel
+> - Phase 4b: `subagent_isolated` sentinel；`risk_scenario` 要求 falsifiable 格式
 
 ---
 
@@ -161,7 +168,8 @@
   "agent": "Sector_Rotation_Analyst | Theme_Intelligence_Analyst | News_Catalyst_Analyst",
   "top_conviction_hot": ["sector1", "sector2"],
   "top_conviction_cold": ["sector1", "sector2"],
-  "key_rationale": "string — 最多 2 句"
+  "key_rationale": "string — 最多 2 句",
+  "subagent_isolated": "true | false (V1.3: true when produced by parallel subagent; false for inline fallback)"
 }
 ```
 
@@ -189,11 +197,12 @@
       "challenged_call": "HOT | COLD",
       "counter_evidence": "string (≥ 2 句，含具體數據或邏輯)",
       "tail_risk_evidence": "string — 來自 tail-risk-analyzer 的量化支撐（若有）",
-      "risk_scenario": "string",
+      "risk_scenario": "string — V1.3 要求 falsifiable (IF <條件> WITHIN <窗口> THEN <推翻>)",
       "confidence_level": "HIGH | MEDIUM | LOW"
     }
   ],
-  "consensus_warning": "true | false"
+  "consensus_warning": "true | false",
+  "subagent_isolated": "true | false (V1.3: true when DA ran as isolated subagent)"
 }
 ```
 
@@ -223,7 +232,9 @@
 ```json
 {
   "verdict_date": "YYYY-MM-DD",
-  "protocol_version": "V1.2",
+  "protocol_version": "V1.3",
+  "phase4_fanout_mode": "PARALLEL_SUBAGENT | PARTIAL_FALLBACK | FULL_FALLBACK | INLINE",
+  "degraded_agents": ["Sector_Rotation_Analyst | Theme_Intelligence_Analyst | News_Catalyst_Analyst | Devils_Advocate (empty array in normal runs)"],
   "generated_at": "YYYY-MM-DD HH:MM",
   "market_regime": "from Phase 0",
   "exposure_ceiling": "from Phase 0 (breadth only)",

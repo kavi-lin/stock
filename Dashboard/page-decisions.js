@@ -361,10 +361,10 @@ function buildCard(item) {
 
     // V4.6 badges: consensus bonus, macro alignment, binary class
     const badgesHtml = [
-        item.consensus_bonus ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">×1.15 CONSENSUS</span>` : '',
-        item.macro_alignment === 'CONTRARIAN' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">CONTRARIAN</span>` : '',
-        item.binary_class === 'positive' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">POS BINARY</span>` : '',
-        item.binary_class === 'negative' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-bold">NEG BINARY</span>` : '',
+        item.consensus_bonus ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">${wl.badge_consensus || '×1.15 CONSENSUS'}</span>` : '',
+        item.macro_alignment === 'CONTRARIAN' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">${wl.badge_contrarian || 'CONTRARIAN'}</span>` : '',
+        item.binary_class === 'positive' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">${wl.badge_pos_binary || 'POS BINARY'}</span>` : '',
+        item.binary_class === 'negative' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-bold">${wl.badge_neg_binary || 'NEG BINARY'}</span>` : '',
     ].filter(Boolean).join(' ');
 
     // Entry targets block — V4.6 supports dual-track
@@ -460,8 +460,28 @@ function buildCard(item) {
         <!-- Header -->
         <div class="flex justify-between items-start mb-4">
             <div>
-                <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}</h4>
-                <p class="text-[10px] text-zinc-500 font-mono">${item.time}</p>
+                <div class="flex items-baseline gap-2">
+                    <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}</h4>
+                    ${item.current_price != null ? (() => {
+                        const cp = item.current_price;
+                        const ap = item.analysis_price;
+                        let drift = '';
+                        if (ap != null && ap > 0) {
+                            const pct = ((cp / ap - 1) * 100);
+                            if (Math.abs(pct) >= 0.5) {
+                                const sign = pct >= 0 ? '+' : '';
+                                const color = pct >= 0 ? 'var(--status-bullish)' : 'var(--status-bearish)';
+                                drift = `<span class="text-[10px] font-mono font-bold" style="color:${color}">${sign}${pct.toFixed(1)}%</span>`;
+                            }
+                        }
+                        return `<span class="text-sm font-mono font-bold" style="color:var(--text-main)">$${cp}</span>${drift}`;
+                    })() : ''}
+                </div>
+                <p class="text-[10px] text-zinc-500 font-mono flex items-center gap-2">
+                    <span>${item.time}</span>
+                    ${item.analysis_price != null ? `<span class="text-zinc-600" title="${wl.analysis_price_hint || 'Price at analysis time'}">@ $${item.analysis_price}</span>` : ''}
+                    ${item._history_count > 1 ? `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[8px] font-bold" title="${wl.history_hint || 'Click card to see previous analyses'}"><i data-lucide="history" class="w-2.5 h-2.5"></i>+${item._history_count - 1}</span>` : ''}
+                </p>
             </div>
             <div class="flex items-start gap-2">
                 <button type="button" data-refresh-ticker="${item.ticker}"
@@ -533,10 +553,40 @@ async function goFlash(ticker) {
         }
         window.location.href = `news.html?running=flash&ticker=${encodeURIComponent(ticker)}`;
     } catch (e) {
-        UI.showToast(e.message, 'error', 5000);
+        UI.showToast(e.message, 'error');
     }
 }
 window.copyFlashPrompt = goFlash;
+
+// Dedupe items by ticker, keeping the latest-time entry per ticker.
+// Also stashes `_history_count` on each returned item so buildCard can
+// surface a "+N earlier" hint.  `all` is the full unfiltered history used
+// to compute history depth (items list may be a watchlist subset).
+function dedupeByTicker(items, all) {
+    if (!Array.isArray(items) || items.length === 0) return items;
+    const latest = new Map();
+    const keyTime = (i) => i?.time || '';
+    for (const item of items) {
+        const t = item?.ticker;
+        if (!t) continue;
+        const prev = latest.get(t);
+        if (!prev || keyTime(item).localeCompare(keyTime(prev)) > 0) {
+            latest.set(t, item);
+        }
+    }
+    // Count how many total history entries exist per ticker (from full `all`),
+    // not just within the filtered subset — so the +N hint is honest.
+    const historyCount = new Map();
+    for (const item of (all || items)) {
+        if (!item?.ticker) continue;
+        historyCount.set(item.ticker, (historyCount.get(item.ticker) || 0) + 1);
+    }
+    // Attach count to each returned item (non-destructive copy)
+    return [...latest.values()].map(item => ({
+        ...item,
+        _history_count: historyCount.get(item.ticker) || 1,
+    }));
+}
 
 function renderCards(filter) {
     const grid     = document.getElementById('watchlist-grid');
@@ -574,6 +624,11 @@ function renderCards(filter) {
         source = watched;
         filtered = source;
     }
+
+    // Dedupe: one card per ticker (latest entry wins). Earlier analyses of the
+    // same ticker stay accessible via the drill-down overlay — data.json still
+    // has every row, but the grid shows only the most recent snapshot.
+    filtered = dedupeByTicker(filtered, all);
 
     if (!filtered.length) {
         const noItems = (window.i18n?.[UI.currentLang]?.watchlist?.no_items) || 'No items match this filter.';
@@ -776,9 +831,11 @@ async function loadWatchlist() {
         window._watchlistData = watchItems;
         window._positionsFlat = positions;
 
-        // Summary counts (based on watchlist subset)
-        const execCount = watchItems.filter(a => a.decision === 'EXECUTE' || a.decision === 'BUY').length;
-        const waitCount = watchItems.filter(a =>
+        // Summary counts/averages are computed on the deduped watchlist so that
+        // a ticker analysed three times this week only contributes once.
+        const watchLatest = dedupeByTicker(watchItems, allAnalysis);
+        const execCount = watchLatest.filter(a => a.decision === 'EXECUTE' || a.decision === 'BUY').length;
+        const waitCount = watchLatest.filter(a =>
             a.decision === 'STAGED' || a.decision === 'STAGED_ENTRY'
             || a.final_decision === 'STAGED_ENTRY'
             || a.watch_conditions
@@ -787,12 +844,12 @@ async function loadWatchlist() {
         document.getElementById('count-execute').textContent = execCount;
         document.getElementById('count-waiting').textContent = waitCount;
 
-        const validConf = watchItems.filter(a => a.avg_confidence != null);
+        const validConf = watchLatest.filter(a => a.avg_confidence != null);
         document.getElementById('avg-conf').textContent = validConf.length
             ? Math.round(validConf.reduce((s, a) => s + a.avg_confidence, 0) / validConf.length * 100) + '%'
             : '–';
 
-        const validRR = watchItems.filter(a => a.rr_ratio != null);
+        const validRR = watchLatest.filter(a => a.rr_ratio != null);
         document.getElementById('avg-rr').textContent = validRR.length
             ? (validRR.reduce((s, a) => s + a.rr_ratio, 0) / validRR.length).toFixed(2) + 'x'
             : '–';
@@ -922,13 +979,13 @@ async function pollProtocolStatus() {
             if (s.status === 'done') {
                 UI.showToast(
                     UI.currentLang === 'zh' ? `分析完成：${_protoLock.ticker || ''}` : `Analysis complete: ${_protoLock.ticker || ''}`,
-                    'success', 4000
+                    'success'
                 );
                 loadWatchlist();   // refresh data.json + re-render cards
             } else if (s.status === 'error') {
                 UI.showToast(
                     UI.currentLang === 'zh' ? `分析失敗：${s.error || 'unknown'}` : `Analysis failed: ${s.error || 'unknown'}`,
-                    'error', 6000
+                    'error'
                 );
             }
         }
@@ -996,20 +1053,20 @@ async function refreshTicker(ticker) {
     if (_protoLock.running) {
         UI.showToast(UI.currentLang === 'zh'
             ? `已有分析執行中：${_protoLock.ticker || _protoLock.name}`
-            : `Another analysis is running: ${_protoLock.ticker || _protoLock.name}`, 'error', 4000);
+            : `Another analysis is running: ${_protoLock.ticker || _protoLock.name}`, 'error');
         return;
     }
     const isZh = UI.currentLang === 'zh';
     const confirmMsg = isZh
-        ? `透過 Claude 執行「分析 ${ticker}」？（V4.8 約 10-15 分鐘，~$4 tokens）`
-        : `Run full "invest ${ticker}" via Claude? (V4.8 ~10-15 min, ~$4 tokens)`;
+        ? `透過 Claude 執行「分析 ${ticker}」（risk=${UI.riskTolerance}）？\nV4.8 約 10-15 分鐘，~$4 tokens`
+        : `Run full "invest ${ticker}" (risk=${UI.riskTolerance}) via Claude?\nV4.8 ~10-15 min, ~$4 tokens`;
     if (!confirm(confirmMsg)) return;
 
     try {
         const res = await fetch('/api/run-protocol', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: 'invest', ticker: ticker.toUpperCase() }),
+            body: JSON.stringify({ name: 'invest', ticker: ticker.toUpperCase(), risk_tolerance: UI.riskTolerance }),
         });
         if (!res.ok) {
             const err = await res.json().catch(() => ({ error: res.statusText }));
@@ -1024,7 +1081,7 @@ async function refreshTicker(ticker) {
         syncLockUI();
         UI.showToast(isZh ? `開始分析 ${ticker}…` : `Analyzing ${ticker}…`, 'info', 3000);
     } catch (e) {
-        UI.showToast(e.message, 'error', 5000);
+        UI.showToast(e.message, 'error');
     }
 }
 

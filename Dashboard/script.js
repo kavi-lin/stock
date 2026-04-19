@@ -351,8 +351,8 @@ async function launchAnalysis() {
   if (!ticker) return;
   const isZh = UI.currentLang === 'zh';
   const confirmMsg = isZh
-    ? `透過 Claude 執行「分析 ${ticker}」？（V4.8 約 10-15 分鐘，~$4 tokens）`
-    : `Run "分析 ${ticker}" via Claude? (V4.8 ~10-15 min, ~$4 tokens)`;
+    ? `透過 Claude 執行「分析 ${ticker}」（risk=${UI.riskTolerance}）？\nV4.8 約 10-15 分鐘，~$4 tokens`
+    : `Run "分析 ${ticker}" (risk=${UI.riskTolerance}) via Claude?\nV4.8 ~10-15 min, ~$4 tokens`;
   if (!confirm(confirmMsg)) return;
 
   setLaunchStatus('running', isZh ? `啟動 ${ticker} 分析...` : `Starting ${ticker} analysis...`);
@@ -361,7 +361,7 @@ async function launchAnalysis() {
     const res = await fetch('/api/run-protocol', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'invest', ticker }),
+      body: JSON.stringify({ name: 'invest', ticker, risk_tolerance: UI.riskTolerance }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: res.statusText }));
@@ -560,7 +560,7 @@ document.getElementById('preflight-run-free')?.addEventListener('click', async (
     }, 2000);
     body.innerHTML = `<div class="text-center py-8 animate-pulse text-blue-400 text-sm">${isZh ? '正在更新免費 cache...' : 'Updating free caches...'}</div>`;
   } catch (e) {
-    UI.showToast(e.message, 'error', 5000);
+    UI.showToast(e.message, 'error');
   }
 });
 

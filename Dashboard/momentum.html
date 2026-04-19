@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | Momentum Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .label-STRONGLY_BULLISH { color: #22c55e; background: rgba(34,197,94,0.12); }
+        .label-BULLISH          { color: #86efac; background: rgba(34,197,94,0.08); }
+        .label-NEUTRAL          { color: #a1a1aa; background: rgba(161,161,170,0.10); }
+        .label-WEAK             { color: #fbbf24; background: rgba(251,191,36,0.10); }
+        .label-BEARISH          { color: #ef4444; background: rgba(239,68,68,0.10); }
+
+        .mlabel {
+            display: inline-block; font-size: 10px; font-weight: 800;
+            padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em;
+        }
+        .signal-pill {
+            font-size: 9px; font-weight: 700;
+            padding: 2px 6px; border-radius: 4px;
+            background: rgba(34,197,94,0.10); color: #22c55e;
+            display: inline-block; margin-right: 3px; margin-bottom: 2px;
+        }
+        .warning-pill {
+            font-size: 9px; font-weight: 700;
+            padding: 2px 6px; border-radius: 4px;
+            background: rgba(239,68,68,0.10); color: #ef4444;
+            display: inline-block; margin-right: 3px; margin-bottom: 2px;
+        }
+        .mom-row:hover { background: rgba(161,161,170,0.06); cursor: pointer; }
+        .mom-row td { padding: 10px 12px; border-bottom: 1px solid rgba(161,161,170,0.08); }
+        .mom-th  { padding: 8px 12px; font-size: 10px; font-weight: 800;
+                   text-transform: uppercase; letter-spacing: 0.08em;
+                   color: #71717a; text-align: left;
+                   border-bottom: 1px solid rgba(161,161,170,0.15); }
+        .score-cell { font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+
+        /* Sortable column headers */
+        .mom-th.sortable { cursor: pointer; user-select: none; transition: color 0.12s; }
+        .mom-th.sortable:hover { color: #22c55e; }
+        .sort-arrow { display: inline-block; margin-left: 4px; opacity: 0.35; font-size: 9px; }
+        .mom-th.active-sort { color: #22c55e; }
+        .mom-th.active-sort .sort-arrow { opacity: 1; color: #22c55e; }
+
+        /* ── Score battery (10-cell gauge) ─────────────────────── */
+        /*   Cells 1-3 red (0-30), 4-5 yellow (30-50),
+             6-7 green (50-70), 8-10 blue (70-100).
+             Unfilled cells dim gray. Partial cell via gradient. */
+        .score-battery {
+            display: inline-flex; gap: 1.5px;
+            padding: 2px; border-radius: 4px;
+            background: rgba(161,161,170,0.08);
+            border: 1px solid rgba(161,161,170,0.18);
+            vertical-align: middle;
+        }
+        .score-battery .cell {
+            width: 7px; height: 14px; border-radius: 1.5px;
+            background: rgba(161,161,170,0.15);
+        }
+        .score-num {
+            font-size: 11px; font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 34px; text-align: right;
+        }
+
+        .chip {
+            font-size: 11px; font-weight: 600;
+            padding: 5px 12px; border-radius: 999px;
+            border: 1px solid rgba(161,161,170,0.25);
+            cursor: pointer; user-select: none;
+            transition: all 0.15s;
+        }
+        .chip:hover  { border-color: rgba(34,197,94,0.5); color: #22c55e; }
+        .chip.active { background: rgba(34,197,94,0.15);
+                       border-color: rgba(34,197,94,0.6); color: #22c55e; }
+
+        /* Preset strategy buttons (one-click apply a classic filter combo) */
+        .preset-btn {
+            font-size: 11px; font-weight: 600;
+            padding: 5px 12px; border-radius: 6px;
+            border: 1px solid rgba(161,161,170,0.25);
+            cursor: pointer; user-select: none;
+            transition: all 0.12s;
+            background: rgba(161,161,170,0.05);
+            color: var(--text-main);
+        }
+        .preset-btn:hover {
+            border-color: rgba(34,197,94,0.55);
+            background: rgba(34,197,94,0.10);
+            color: #22c55e;
+        }
+
+        /* Filter chips (toggleable; green for required signals, red for excluded warnings) */
+        .filter-chip {
+            font-size: 10px; font-weight: 600;
+            padding: 3px 10px; border-radius: 999px;
+            border: 1px solid rgba(161,161,170,0.25);
+            cursor: pointer; user-select: none;
+            transition: all 0.12s;
+        }
+        .filter-chip:hover { border-color: rgba(34,197,94,0.5); }
+        .filter-chip.active {
+            background: rgba(34,197,94,0.15);
+            border-color: rgba(34,197,94,0.6); color: #22c55e;
+        }
+        .filter-chip.warn:hover { border-color: rgba(239,68,68,0.5); }
+        .filter-chip.warn.active {
+            background: rgba(239,68,68,0.12);
+            border-color: rgba(239,68,68,0.55); color: #ef4444;
+        }
+
+        .meta-card {
+            padding: 12px 16px; border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid rgba(161,161,170,0.15);
+        }
+        .meta-label { font-size: 9px; font-weight: 800;
+                      text-transform: uppercase; letter-spacing: 0.08em;
+                      color: #71717a; }
+        .meta-value { font-size: 22px; font-weight: 800;
+                      font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .meta-sub   { font-size: 10px; color: #71717a; margin-top: 2px; }
+
+        /* Modal overlay */
+        .mom-modal-bg {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+        }
+        .mom-modal {
+            width: 720px; max-width: 90vw; max-height: 80vh; overflow-y: auto;
+            border-radius: 14px; padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid rgba(161,161,170,0.25);
+        }
+
+        /* RSI blood bar (macaron palette) */
+        .rsi-bar-wrap { position: relative; padding-top: 28px; padding-bottom: 18px; }
+        .rsi-bar {
+            position: relative;
+            height: 26px;
+            display: flex;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(161,161,170,0.18);
+        }
+        .rsi-zone {
+            height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 800;
+            color: rgba(30,30,40,0.75);
+            letter-spacing: 0.05em;
+        }
+        .rsi-pointer {
+            position: absolute; top: 0;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none; z-index: 6;
+            color: var(--text-main);
+        }
+        .rsi-pointer-num  { font-size: 11px; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+        .rsi-pointer-tri  { font-size: 10px; line-height: 1; margin-top: 1px; }
+        .rsi-pointer-line {
+            position: absolute; top: 28px;
+            width: 2px; height: 26px;
+            background: var(--text-main);
+            transform: translateX(-50%);
+            pointer-events: none; z-index: 5;
+            opacity: 0.85;
+        }
+        .rsi-ticks {
+            position: absolute; left: 0; right: 0; bottom: 0;
+            height: 14px;
+            font-size: 9px; color: #71717a;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .rsi-tick { position: absolute; transform: translateX(-50%); top: 3px; }
+
+        .stats-row td   { padding: 6px 10px; font-size: 12px;
+                          border-bottom: 1px solid rgba(161,161,170,0.08); }
+        .stats-th       { padding: 8px 10px; font-size: 10px; font-weight: 800;
+                          text-transform: uppercase; letter-spacing: 0.08em;
+                          color: #71717a; text-align: left;
+                          border-bottom: 1px solid rgba(161,161,170,0.15); }
+        .winrate-bar    { height: 4px; border-radius: 2px;
+                          background: rgba(161,161,170,0.15); overflow: hidden; }
+        .winrate-fill   { height: 100%; background: #22c55e; }
+    </style>
+</head>
+<body class="flex min-h-screen transition-all" data-page="momentum">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="ml-64 flex-1 flex flex-col">
+
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-20">
+            <div class="flex items-center gap-3">
+                <i data-lucide="trending-up" class="w-5 h-5 text-emerald-500"></i>
+                <h2 id="momentum-title" class="text-lg font-bold">動能選股</h2>
+                <span id="momentum-subtitle" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden sm:block">Momentum Screener</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="snap-id" class="text-[10px] font-mono text-zinc-500"></span>
+
+                <!-- Compact scan indicator (inline in header, right-corner) -->
+                <div id="scan-indicator" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] transition-all"
+                     style="background:rgba(34,197,94,0.10);border-color:rgba(34,197,94,0.35)">
+                    <i data-lucide="loader-2" id="scan-indicator-icon" class="w-3 h-3 animate-spin" style="color:#22c55e"></i>
+                    <span id="scan-indicator-status" class="font-black uppercase tracking-widest" style="color:#22c55e">SCANNING</span>
+                    <span id="scan-indicator-elapsed" class="font-mono text-zinc-400">00:00</span>
+                </div>
+
+                <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter">SYNCING...</span>
+                <button id="refresh-momentum" class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all flex items-center gap-2"
+                        title="">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    <span id="refresh-btn-label">重新掃描</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-5">
+
+            <!-- Empty-state banner -->
+            <div id="no-data-banner" class="hidden">
+                <div class="glass-card p-10 text-center space-y-3">
+                    <i data-lucide="search" class="w-10 h-10 mx-auto text-zinc-500"></i>
+                    <p id="no-data-text" class="text-sm text-zinc-400">尚未有掃描結果，點擊「重新掃描」開始</p>
+                </div>
+            </div>
+
+            <!-- Meta strip -->
+            <div id="meta-strip" class="grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
+                <div class="meta-card">
+                    <div class="meta-label" id="meta-time-label">掃描時間</div>
+                    <div class="meta-value" id="meta-time">—</div>
+                    <div class="meta-sub" id="meta-time-sub"></div>
+                </div>
+                <div class="meta-card">
+                    <div class="meta-label" id="meta-matched-label">符合筆數</div>
+                    <div class="meta-value" id="meta-matched">—</div>
+                    <div class="meta-sub" id="meta-matched-sub"></div>
+                </div>
+                <div class="meta-card">
+                    <div class="meta-label" id="meta-journal-label">Journal 累積</div>
+                    <div class="meta-value" id="meta-journal">—</div>
+                    <div class="meta-sub" id="meta-journal-sub"></div>
+                </div>
+                <div class="meta-card">
+                    <div class="meta-label" id="meta-snaps-label">歷史快照</div>
+                    <div class="meta-value" id="meta-snaps">—</div>
+                    <div class="meta-sub" id="meta-snaps-sub"></div>
+                </div>
+            </div>
+
+            <!-- Filter panel (client-side, instant) -->
+            <div id="filter-bar" class="hidden glass-card p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-emerald-500"></i>
+                    <span id="filter-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Filters (client-side)</span>
+                    <span class="flex-1"></span>
+                    <span id="filter-match-count" class="text-[10px] font-mono text-zinc-400"></span>
+                    <button id="filter-reset" class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 hover:text-emerald-500 transition-all">
+                        <span id="filter-reset-label">重設</span>
+                    </button>
+                </div>
+
+                <!-- Preset strategies (one-click classic setups) -->
+                <div class="mb-3">
+                    <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-preset-label">預設策略（點擊套用）</div>
+                    <div id="f-presets" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Row 1: sliders & inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    <!-- Score slider -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-[10px] font-bold text-zinc-500" id="filter-score-label">Score ≥</label>
+                            <span id="filter-score-val" class="text-[11px] font-mono font-bold text-emerald-500">50</span>
+                        </div>
+                        <input id="f-min-score" type="range" min="0" max="100" step="5" value="50"
+                               class="w-full accent-emerald-500">
+                    </div>
+                    <!-- RSI range -->
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-rsi-label">RSI range</label>
+                        <div class="flex items-center gap-2">
+                            <input id="f-min-rsi" type="number" min="0" max="100" placeholder="—"
+                                   class="w-16 px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                            <span class="text-zinc-500 text-xs">≤ RSI ≤</span>
+                            <input id="f-max-rsi" type="number" min="0" max="100" placeholder="—"
+                                   class="w-16 px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                        </div>
+                    </div>
+                    <!-- Stage / Sector / Search -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-stage-label">Stage</label>
+                            <select id="f-stage" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                <option value="any">Any</option>
+                                <option value="Stage 1 basing">Stage 1 basing</option>
+                                <option value="Stage 2 uptrend">Stage 2 uptrend</option>
+                                <option value="Stage 3 top">Stage 3 top</option>
+                                <option value="Stage 4 downtrend">Stage 4 downtrend</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-sector-label">Sector</label>
+                            <select id="f-sector" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                <option value="any">Any</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Financials">Financials</option>
+                                <option value="Health Care">Health Care</option>
+                                <option value="Consumer Discretionary">Consumer Discretionary</option>
+                                <option value="Communication Services">Communication Services</option>
+                                <option value="Industrials">Industrials</option>
+                                <option value="Consumer Staples">Consumer Staples</option>
+                                <option value="Energy">Energy</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Real Estate">Real Estate</option>
+                                <option value="Materials">Materials</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-search-label">搜尋</label>
+                            <input id="search-ticker" type="text"
+                                   class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent"
+                                   placeholder="代號…">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: signal chips -->
+                <div class="mb-2">
+                    <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-req-sig-label">必含訊號（同時滿足）</div>
+                    <div id="f-signal-chips" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Row 3: warning chips -->
+                <div>
+                    <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-excl-warn-label">排除警告</div>
+                    <div id="f-warning-chips" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div id="table-wrap" class="glass-card overflow-x-auto hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr>
+                            <th class="mom-th" id="th-rank">#</th>
+                            <th class="mom-th" id="th-ticker">代號</th>
+                            <th class="mom-th text-right sortable" data-sort="price"           id="th-price">價格<span class="sort-arrow"></span></th>
+                            <th class="mom-th text-right sortable" data-sort="score"           id="th-score">分數<span class="sort-arrow"></span></th>
+                            <th class="mom-th" id="th-label">標籤</th>
+                            <th class="mom-th sortable"            data-sort="stage"           id="th-stage">階段<span class="sort-arrow"></span></th>
+                            <th class="mom-th text-right" id="th-volume">量比</th>
+                            <th class="mom-th text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
+                            <th class="mom-th text-right sortable" data-sort="rsi_14"          id="th-rsi">RSI<span class="sort-arrow"></span></th>
+                            <th class="mom-th" id="th-signals">訊號</th>
+                            <th class="mom-th" id="th-short">空方</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mom-tbody"></tbody>
+                </table>
+                <div id="table-count" class="px-4 py-2 text-[10px] text-zinc-500 border-t border-zinc-200 dark:border-zinc-800"></div>
+            </div>
+
+            <!-- Journal stats section -->
+            <div id="journal-section" class="hidden space-y-4">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="chart-bar" class="w-4 h-4 text-emerald-500"></i>
+                    <h3 id="journal-title" class="text-sm font-bold">Journal 統計（前向收益）</h3>
+                    <span id="journal-note" class="text-[10px] text-zinc-500"></span>
+                </div>
+
+                <div id="journal-empty" class="hidden">
+                    <div class="glass-card p-6 text-[12px] text-zinc-400 text-center" id="journal-empty-text"></div>
+                </div>
+
+                <div id="journal-content" class="grid grid-cols-1 lg:grid-cols-2 gap-4 hidden">
+                    <!-- By signal -->
+                    <div class="glass-card p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-bold" id="stats-signal-title">按 Signal 分組（20 日勝率）</h4>
+                            <span id="journal-fills-label" class="text-[9px] text-zinc-500 font-mono"></span>
+                        </div>
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="stats-th" id="stats-col-signal">Signal</th>
+                                    <th class="stats-th text-right" id="stats-col-n">n</th>
+                                    <th class="stats-th" id="stats-col-winrate">勝率</th>
+                                    <th class="stats-th text-right" id="stats-col-mean">平均</th>
+                                    <th class="stats-th text-right" id="stats-col-median">中位數</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats-signal-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- By score bin -->
+                    <div class="glass-card p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-bold" id="stats-bin-title">按分數區間分組</h4>
+                        </div>
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="stats-th">Bin</th>
+                                    <th class="stats-th text-right">n</th>
+                                    <th class="stats-th">Win%</th>
+                                    <th class="stats-th text-right">5d</th>
+                                    <th class="stats-th text-right">20d</th>
+                                    <th class="stats-th text-right">60d</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats-bin-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- RSI-14 detail popup -->
+    <div id="rsi-modal" class="hidden">
+        <div class="mom-modal-bg" id="rsi-modal-bg">
+            <div class="mom-modal" style="width:560px" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold" id="rsi-modal-title">—</h3>
+                    <button id="rsi-modal-close" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="rsi-modal-body" class="space-y-4 text-xs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volume ratio detail popup -->
+    <div id="volume-modal" class="hidden">
+        <div class="mom-modal-bg" id="volume-modal-bg">
+            <div class="mom-modal" style="width:520px" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold" id="volume-modal-title">—</h3>
+                    <button id="volume-modal-close" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="volume-modal-body" class="space-y-3 text-xs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stage classification detail popup -->
+    <div id="stage-modal" class="hidden">
+        <div class="mom-modal-bg" id="stage-modal-bg">
+            <div class="mom-modal" style="width:560px" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold" id="stage-modal-title">—</h3>
+                    <button id="stage-modal-close" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="stage-modal-body" class="space-y-4 text-xs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Per-ticker history modal -->
+    <div id="history-modal" class="hidden">
+        <div class="mom-modal-bg" id="history-modal-bg">
+            <div class="mom-modal" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold" id="history-ticker-title">—</h3>
+                    <button id="history-close" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="text-[10px] text-zinc-500 mb-3" id="history-subtitle"></div>
+                <div style="position:relative; height:280px">
+                    <canvas id="history-chart"></canvas>
+                </div>
+                <div id="history-empty" class="hidden text-center text-zinc-400 text-sm py-10"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Console -->
+    <div id="debug-console" class="fixed bottom-0 left-64 right-0 border-t border-zinc-200 dark:border-zinc-800 p-4 transition-all z-50 hidden font-mono text-[10px]" style="background-color: var(--bg-main); color: var(--text-main)">
+        <div class="flex items-center justify-between mb-2 pb-1 border-b border-zinc-200 dark:border-zinc-900">
+            <div class="flex items-center gap-2">
+                <i data-lucide="terminal" class="w-3 h-3 text-green-500"></i>
+                <span class="font-bold uppercase tracking-widest text-[9px]">SYSTEM LOGS</span>
+            </div>
+            <button onclick="document.getElementById('debug-console').classList.add('hidden')" class="hover:text-white transition-colors">
+                <i data-lucide="x" class="w-3 h-3"></i>
+            </button>
+        </div>
+        <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="data-store.js"></script>
+    <script src="page-momentum.js"></script>
+</body>
+</html>

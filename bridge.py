@@ -1,9 +1,33 @@
 import json
+import math
 import os
 import glob
 import re
 import requests
 from datetime import datetime, date
+
+
+def _safe_float(v):
+    """Parse v as float; return None for empty, 'nan', or NaN floats.
+    Browsers' JSON.parse strictly rejects NaN tokens, so we must sanitize."""
+    if v in (None, '', 'nan', 'NaN', 'None'):
+        return None
+    try:
+        x = float(v)
+        return None if math.isnan(x) or math.isinf(x) else x
+    except (TypeError, ValueError):
+        return None
+
+
+def _clean_nan(obj):
+    """Recursively replace NaN/Infinity floats with None. Prevents invalid JSON."""
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    if isinstance(obj, dict):
+        return {k: _clean_nan(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_clean_nan(v) for v in obj]
+    return obj
 
 FMP_API_KEY = os.getenv("FMP_API_KEY")
 
@@ -17,6 +41,8 @@ INVEST_LOGS   = os.path.join(BASE_DIR, 'investment', 'invest_logs')
 NEWS_LOGS     = os.path.join(BASE_DIR, 'news', 'news_logs')
 REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
 POSITIONS_FILE = os.path.join(BASE_DIR, 'positions.json')
+MOMENTUM_CACHE = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'cache')
+MOMENTUM_JOURNAL = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'journal')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
 
 
@@ -322,8 +348,31 @@ def _find_report(ticker, date_clean):
     return None
 
 
+def _batch_current_prices(tickers):
+    """yfinance batch price fetch for a list of tickers. Returns {ticker: price or None}.
+    Graceful degradation — rate limit / network errors leave entries as None so the
+    frontend can still render the card without a live price."""
+    result = {t: None for t in tickers if t and t != "UNKNOWN"}
+    if not result:
+        return result
+    try:
+        import yfinance as yf
+        # fast_info per ticker is cheap; batch via list comprehension (yf caches inside session)
+        for t in list(result.keys()):
+            try:
+                info = yf.Ticker(t).fast_info
+                p = info.last_price if hasattr(info, 'last_price') else None
+                if p is not None:
+                    result[t] = round(float(p), 2)
+            except Exception:
+                pass
+    except ImportError:
+        pass
+    return result
+
+
 def extract_audit_history(positions_by_ticker=None):
-    """Build recent_analysis[] with full watchlist metadata"""
+    """Build recent_analysis[] with full watchlist metadata + live current_price"""
     positions_by_ticker = positions_by_ticker or {}
     audit_map = {}
     audits    = []
@@ -333,6 +382,15 @@ def extract_audit_history(positions_by_ticker=None):
         try:
             with open(history_file, 'r') as f:
                 history_data = json.load(f)
+
+            # Batch-fetch live prices for all tickers in history (one yfinance round).
+            # Reuses positions_by_ticker price when available to avoid double-fetch.
+            all_tickers = {item.get("ticker") for item in history_data if item.get("ticker")}
+            cached = {t: (positions_by_ticker.get(t, [{}])[0] or {}).get('current_price')
+                      for t in all_tickers if positions_by_ticker.get(t)}
+            to_fetch = [t for t in all_tickers if cached.get(t) is None]
+            fresh = _batch_current_prices(to_fetch)
+            live_prices = {**fresh, **{t: p for t, p in cached.items() if p is not None}}
 
             # Process all history entries (was [-10:], caused older cards to fall
             # through to the ARCHIVE fallback and lose all metadata).
@@ -471,6 +529,9 @@ def extract_audit_history(positions_by_ticker=None):
                     "macro_alignment":  macro_alignment,
                     "staged_split":     staged_split,
                     "binary_class":     binary_class,
+                    # Price fields (current = yfinance live; analysis = snapshot at decision time)
+                    "current_price":    live_prices.get(ticker),
+                    "analysis_price":   meta.get("analysis_price"),
                     # Live position overlay (positions.json)
                     "live_position":    position_summary,
                     "position_lots":    active_positions,
@@ -773,6 +834,119 @@ def extract_news():
 # MAIN
 # ─────────────────────────────────────────────
 
+def ingest_momentum_screen():
+    """
+    Read the latest momentum screen CSV + up to 30 days of history + journal stats.
+    Returns dict for data.json.momentum_screen. Gracefully returns {"status":"no_data"}
+    when nothing is available.
+    """
+    import csv as _csv
+
+    out = {"status": "no_data"}
+    if not os.path.isdir(MOMENTUM_CACHE):
+        return out
+
+    csv_files = sorted(glob.glob(os.path.join(MOMENTUM_CACHE, "screen_*.csv")),
+                       key=os.path.getmtime)
+    if not csv_files:
+        return out
+
+    # Latest snapshot
+    latest_csv = csv_files[-1]
+    latest_rows = []
+    try:
+        with open(latest_csv, "r", encoding="utf-8") as fp:
+            reader = _csv.DictReader(fp)
+            for row in reader:
+                latest_rows.append({
+                    "rank":     int(row["rank"]) if row.get("rank") else None,
+                    "ticker":   row.get("ticker"),
+                    "sector":   row.get("sector") or "Unknown",
+                    "price":    _safe_float(row.get("price")),
+                    "score":    _safe_float(row.get("score")),
+                    "label":    row.get("label"),
+                    "stage":    row.get("stage"),
+                    "volume_today": _safe_float(row.get("volume_today")),
+                    "avg_20d":      _safe_float(row.get("avg_20d")),
+                    "ratio_20d":    _safe_float(row.get("ratio_20d")),
+                    "spike_label":  row.get("spike_label"),
+                    "ma_20":   _safe_float(row.get("ma_20")),
+                    "ma_50":   _safe_float(row.get("ma_50")),
+                    "ma_200":  _safe_float(row.get("ma_200")),
+                    "above_ma20_pct":  _safe_float(row.get("above_ma20_pct")),
+                    "above_ma50_pct":  _safe_float(row.get("above_ma50_pct")),
+                    "above_ma200_pct": _safe_float(row.get("above_ma200_pct")),
+                    "rsi_14":          _safe_float(row.get("rsi_14")),
+                    "rsi_zone":        row.get("rsi_zone"),
+                    "short_pct_float": _safe_float(row.get("short_pct_float")),
+                    "short_interpretation": row.get("short_interpretation"),
+                    "signals":  row.get("signals", "").split("|") if row.get("signals") else [],
+                    "warnings": row.get("warnings", "").split("|") if row.get("warnings") else [],
+                })
+    except Exception as e:
+        print(f"[WARN] momentum CSV parse {latest_csv}: {e}")
+        return out
+
+    # Extract snap_id from filename
+    snap_id = os.path.splitext(os.path.basename(latest_csv))[0]
+    snap_date = None
+    parts = snap_id.split("_")
+    if len(parts) >= 2 and len(parts[1]) == 8:
+        snap_date = f"{parts[1][:4]}-{parts[1][4:6]}-{parts[1][6:8]}"
+
+    state, age = _freshness_label(latest_csv)
+    mtime = datetime.fromtimestamp(os.path.getmtime(latest_csv)).strftime("%Y-%m-%d %H:%M")
+
+    # Per-ticker score history from last ~30 days of CSVs (so UI can render a sparkline)
+    history_by_ticker = {}
+    for csv_path in csv_files[-30:]:
+        fname = os.path.basename(csv_path)
+        try:
+            with open(csv_path, "r", encoding="utf-8") as fp:
+                reader = _csv.DictReader(fp)
+                for row in reader:
+                    tk = row.get("ticker")
+                    if not tk or not row.get("score"):
+                        continue
+                    history_by_ticker.setdefault(tk, []).append({
+                        "snap_id": os.path.splitext(fname)[0],
+                        "score":   _safe_float(row.get("score")),
+                        "price":   _safe_float(row.get("price")),
+                    })
+        except Exception:
+            continue
+
+    # Journal stats (if available)
+    stats = None
+    stats_file = os.path.join(MOMENTUM_JOURNAL, "stats.json")
+    journal_total = 0
+    if os.path.exists(stats_file):
+        try:
+            with open(stats_file, "r", encoding="utf-8") as fp:
+                stats = json.load(fp)
+            journal_total = stats.get("total_entries", 0)
+        except Exception as e:
+            print(f"[WARN] momentum stats: {e}")
+
+    out = {
+        "status":       "success",
+        "snap_id":      snap_id,
+        "snap_date":    snap_date,
+        "generated_at": mtime,
+        "freshness":    state,
+        "age_label":    age,
+        "total_rows":   len(latest_rows),
+        "rows":         latest_rows,
+        "history_by_ticker": history_by_ticker,
+        "journal": {
+            "total_entries": journal_total,
+            "stats":         stats,
+        },
+        "snapshot_count": len(csv_files),
+    }
+    return out
+
+
 def run_bridge():
     data = {
         "status":          "success",
@@ -786,6 +960,7 @@ def run_bridge():
         "divergence_watch": [],
         "recent_analysis": [],
         "news":            [],
+        "momentum_screen": {"status": "no_data"},
     }
 
     # 1. Sector / Market / Breadth (base from sector_intel)
@@ -874,9 +1049,24 @@ def run_bridge():
     data["news"] = extract_news()
     print(f"[OK] News: {len(data['news'])} items")
 
-    # Write
+    # 4. Momentum screen (latest snapshot + history + journal stats)
+    try:
+        data["momentum_screen"] = ingest_momentum_screen()
+        ms = data["momentum_screen"]
+        if ms.get("status") == "success":
+            print(f"[OK] Momentum screen: {ms['total_rows']} rows @ {ms['snap_id']} "
+                  f"({ms['freshness']}, {ms['age_label']}) | "
+                  f"history={len(ms['history_by_ticker'])} tickers | "
+                  f"journal={ms['journal']['total_entries']} entries")
+        else:
+            print("[INFO] No momentum screen CSV found yet")
+    except Exception as e:
+        print(f"[WARN] Momentum screen ingest: {e}")
+
+    # Write — strict JSON (no NaN/Infinity, which browsers reject)
+    clean = _clean_nan(data)
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+        json.dump(clean, f, indent=2, ensure_ascii=False, allow_nan=False)
 
     print(f"\n✅ Bridge complete → {OUTPUT_FILE}")
     print(f"   Regime     : {data['market'].get('regime')}  ({data['market'].get('cycle_phase')})")

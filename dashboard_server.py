@@ -21,7 +21,7 @@ import sys
 import subprocess
 import threading
 from datetime import datetime, timedelta
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 ROOT          = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +55,7 @@ PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "1500"))
 PROTOCOL_PROMPTS = {
     "sector": "產業掃描",
     "news":   "新聞分析 DIGEST",
-    "invest": "分析 {ticker}",
+    "invest": "SESSION CONFIG: RISK_TOLERANCE={risk_tolerance}\n非互動模式：照 protocol 規則直接執行，不要輸出「請確認」類摘要表停下來等候。Phase 0 cache 策略：< 3h 用現有、否則 L3 重跑。\n\n分析 {ticker}",
     "flash":  "新聞分析 FLASH {ticker} 近期動態",
     "review": "新聞分析 審核 \"{headline}\"",
 }
@@ -192,6 +192,49 @@ def _tail_log(path, lines=50):
         return f"[tail error: {e}]"
 
 
+def _extract_error_from_log(log_path, rc):
+    """When the claude subprocess exits non-zero, mine the stream-json log for the
+    actual failure message (e.g. 'API Error: Stream idle timeout') rather than
+    leaving the user with a cryptic 'exit code 1'.
+
+    Strategy: scan lines bottom-up, pick the last JSON object of type 'result'
+    or 'error', extract `.result` (which claude CLI uses for the terminal
+    error string). Fall back to 'exit code <rc>' if nothing parseable found.
+    """
+    try:
+        if not log_path or not os.path.exists(log_path):
+            return f"exit code {rc}"
+        # Read last ~16KB — more than enough for the final result event
+        with open(log_path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            f.seek(max(0, size - 16384), os.SEEK_SET)
+            tail = f.read().decode("utf-8", errors="replace")
+        for line in reversed(tail.splitlines()):
+            line = line.strip()
+            if not line.startswith("{") or not line.endswith("}"):
+                continue
+            try:
+                obj = json.loads(line)
+            except Exception:
+                continue
+            t = obj.get("type")
+            if t == "result":
+                # claude CLI result event carries `.result` (the terminal text)
+                # plus `.is_error` and `.subtype` for classification
+                msg = obj.get("result") or obj.get("error") or ""
+                if isinstance(msg, str) and msg.strip():
+                    # Trim to a single reasonable line for log display
+                    first = msg.strip().splitlines()[0]
+                    return first[:280]
+                if obj.get("is_error"):
+                    return f"error (rc={rc}, subtype={obj.get('subtype')})"
+                break
+        return f"exit code {rc}"
+    except Exception as e:
+        return f"exit code {rc} (log parse failed: {e})"
+
+
 def run_protocol(name, params=None):
     """Spawn `claude -p "<prompt>"` in a daemon thread. Single-job lock.
     params: optional dict for template substitution (e.g. {ticker: "NVDA"}).
@@ -204,6 +247,14 @@ def run_protocol(name, params=None):
         return None, f"protocol '{name}' requires a 'ticker' parameter"
     if "{headline}" in PROTOCOL_PROMPTS[name] and not params.get("headline"):
         return None, f"protocol '{name}' requires a 'headline' parameter"
+    # V4.8 invest: RISK_TOLERANCE is required by protocol SESSION CONFIG.
+    # Default to MEDIUM when caller omits or sends an invalid value — the protocol
+    # non-interactive rule says "don't ask user", so silent server-side default is correct.
+    if "{risk_tolerance}" in PROTOCOL_PROMPTS[name]:
+        rt = (params.get("risk_tolerance") or "").strip().upper()
+        if rt not in ("LOW", "MEDIUM", "HIGH"):
+            rt = "MEDIUM"
+        params["risk_tolerance"] = rt
 
     with _protocol_lock:
         if _protocol_state["status"] == "running":
@@ -290,7 +341,7 @@ def run_protocol(name, params=None):
                 else:
                     _protocol_state["status"] = "error"
                     if not _protocol_state["error"]:
-                        _protocol_state["error"] = f"exit code {rc}"
+                        _protocol_state["error"] = _extract_error_from_log(log_path, rc)
             _protocol_proc["p"] = None
 
             # Success → refresh data.json so Dashboard picks up new state
@@ -417,6 +468,156 @@ def run_free_caches():
     return len(stale_free), None
 
 
+_momentum_lock = threading.Lock()
+_MOM_PROGRESS_RE = re.compile(r'\[screen\]\s+(\d+)/(\d+)\s+\((\d+)\s+errors,\s+(\d+)\s+cache hits\)')
+_momentum_state = {
+    "status":     "idle",     # idle | running | bridging | done | error
+    "phase":      None,        # human label
+    "started_at": None,        # epoch float
+    "ended_at":   None,
+    "csv_path":   None,
+    "error":      None,
+    "last_params":       None,
+    "done":              0,    # tickers processed so far
+    "total":             0,    # universe size (set once screen.py reports it)
+    "errors_count":      0,    # per-ticker fetch errors
+    "cache_hits_count":  0,
+}
+
+
+def _build_screen_cmd(params):
+    # Note: no --md-only; we parse stderr summary for CSV path
+    cmd = [sys.executable, os.path.join(ROOT, "skills", "momentum-monitor", "scripts", "screen.py")]
+    if params.get("universe"):
+        cmd += ["--universe", str(params["universe"])]
+    elif params.get("tickers"):
+        cmd += ["--tickers", str(params["tickers"])]
+    else:
+        cmd += ["--universe", "sp500"]
+    if params.get("min_score") is not None:
+        cmd += ["--min-score", str(params["min_score"])]
+    if params.get("top") is not None:
+        cmd += ["--top", str(params["top"])]
+    if params.get("stage"):
+        cmd += ["--stage", str(params["stage"])]
+    for sig in params.get("signals", []) or []:
+        cmd += ["--signal", str(sig)]
+    for w in params.get("exclude_warnings", []) or []:
+        cmd += ["--exclude-warning", str(w)]
+    if params.get("journal"):
+        cmd += ["--journal"]
+    return cmd
+
+
+def run_momentum_screen(params):
+    """Start a momentum screen in a background thread.
+
+    Returns (state_snapshot, err_msg). err_msg is non-None only for caller-side
+    validation errors (e.g. another scan is already running). Subprocess failures
+    surface through the state dict, not this return value.
+    """
+    with _momentum_lock:
+        if _momentum_state["status"] in ("running", "bridging"):
+            return _momentum_state.copy(), "another momentum scan is already running"
+        _momentum_state.update({
+            "status":      "running",
+            "phase":       f"scanning {params.get('universe') or 'custom list'}…",
+            "started_at":  datetime.now().timestamp(),
+            "ended_at":    None,
+            "csv_path":    None,
+            "error":       None,
+            "last_params": {k: v for k, v in params.items() if k not in ()},
+            "done":              0,
+            "total":             0,
+            "errors_count":      0,
+            "cache_hits_count":  0,
+        })
+
+    cmd = _build_screen_cmd(params)
+
+    def _worker():
+        ref = {"csv_path": None}
+        stderr_tail = []
+
+        try:
+            proc = subprocess.Popen(
+                cmd, cwd=ROOT,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, bufsize=1,
+            )
+        except Exception as e:
+            with _momentum_lock:
+                _momentum_state.update({
+                    "status": "error", "error": f"screen.py launch failed: {e}",
+                    "ended_at": datetime.now().timestamp(),
+                })
+            return
+
+        def _reader():
+            # Parse screen.py stderr live: "[screen] 150/503 (0 errors, 23 cache hits)"
+            for line in iter(proc.stderr.readline, ''):
+                stderr_tail.append(line)
+                if len(stderr_tail) > 50:
+                    stderr_tail.pop(0)  # keep only last 50 lines for error reporting
+                m = _MOM_PROGRESS_RE.search(line)
+                if m:
+                    with _momentum_lock:
+                        _momentum_state["done"]             = int(m.group(1))
+                        _momentum_state["total"]            = int(m.group(2))
+                        _momentum_state["errors_count"]     = int(m.group(3))
+                        _momentum_state["cache_hits_count"] = int(m.group(4))
+                if "CSV:" in line:
+                    ref["csv_path"] = line.split("CSV:", 1)[1].strip()
+
+        reader = threading.Thread(target=_reader, daemon=True)
+        reader.start()
+
+        try:
+            rc = proc.wait(timeout=300)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            with _momentum_lock:
+                _momentum_state.update({
+                    "status": "error", "error": "screen.py timed out (>5 min)",
+                    "ended_at": datetime.now().timestamp(),
+                })
+            return
+
+        reader.join(timeout=2)
+
+        if rc != 0:
+            err = "".join(stderr_tail[-3:]).strip() or "unknown error"
+            with _momentum_lock:
+                _momentum_state.update({
+                    "status": "error", "error": "screen.py failed: " + err,
+                    "ended_at": datetime.now().timestamp(),
+                })
+            return
+
+        with _momentum_lock:
+            _momentum_state.update({
+                "status":   "bridging",
+                "phase":    "refreshing data.json…",
+                "csv_path": ref["csv_path"],
+            })
+
+        try:
+            subprocess.run([sys.executable, os.path.join(ROOT, "bridge.py")],
+                           cwd=ROOT, capture_output=True, text=True, timeout=BRIDGE_TIMEOUT_SEC)
+        except Exception as e:
+            print(f"[momentum-screen] bridge refresh failed: {e}", flush=True)
+
+        with _momentum_lock:
+            _momentum_state.update({
+                "status":   "done",
+                "phase":    "complete",
+                "ended_at": datetime.now().timestamp(),
+            })
+
+    threading.Thread(target=_worker, daemon=True).start()
+    return _momentum_state.copy(), None
+
+
 def cancel_protocol():
     with _protocol_lock:
         if _protocol_state["status"] != "running":
@@ -500,15 +701,18 @@ def refresh_loop():
             ).isoformat(timespec="seconds")
 
 
+_positions_lock = threading.Lock()
+
+
 def load_positions():
     if not os.path.exists(POSITIONS):
         return {"positions": []}
-    with open(POSITIONS, "r") as f:
+    with _positions_lock, open(POSITIONS, "r") as f:
         return json.load(f)
 
 
 def save_positions(data):
-    with open(POSITIONS, "w") as f:
+    with _positions_lock, open(POSITIONS, "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
@@ -566,6 +770,14 @@ class Handler(SimpleHTTPRequestHandler):
         if path == "/api/preflight/status":
             with _preflight_lock:
                 return self._json(200, dict(_preflight_state))
+        if path == "/api/run-momentum-screen/status":
+            with _momentum_lock:
+                state = dict(_momentum_state)
+            if state.get("started_at"):
+                end = state.get("ended_at") or datetime.now().timestamp()
+                state["elapsed_sec"] = int(end - state["started_at"])
+            return self._json(200, state)
+
         if path == "/api/run-protocol/status":
             with _protocol_lock:
                 state = dict(_protocol_state)
@@ -657,6 +869,17 @@ class Handler(SimpleHTTPRequestHandler):
             ok = cancel_protocol()
             return self._json(200 if ok else 409, {"cancelled": ok})
 
+        if path == "/api/run-momentum-screen":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            state, err = run_momentum_screen(body)
+            if err:
+                return self._json(409, {"error": err, "state": state})
+            return self._json(202, {"status": "running", "state": state})
+
         return self._json(404, {"error": "not found"})
 
     def do_PATCH(self):
@@ -725,7 +948,8 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    srv = HTTPServer(("127.0.0.1", PORT), Handler)
+    srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    srv.daemon_threads = True  # don't block shutdown on in-flight requests
     print(f"Dashboard server → http://localhost:{PORT}/")
     print(f"Positions API   → http://localhost:{PORT}/api/positions")
     print(f"Serving files from: {DASHBOARD_DIR}")

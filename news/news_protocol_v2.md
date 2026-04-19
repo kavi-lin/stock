@@ -1,7 +1,12 @@
-# Breaking News Intelligence Protocol (V2.0)
+# Breaking News Intelligence Protocol (V2.1)
 
-> **V2 核心改動**（vs V1）
-> 1. **兩階段漏斗**：Stage 1 用 RSS 便宜寬掃描 → 篩選 TOP N → Stage 2 WebFetch 深度辯論
+> **V2.1 改動**（vs V2.0）
+> 1. **Stage 2 / REVIEW 四 agent 辯論改為 per-agent batch subagent** — Bull/Bear/Sector/Macro 各自一個 Agent tool call，一次分析全部晉級項目，彼此 context 隔離。消除同 model 序列產生 4 視角的 anchoring 風險（與 investment V4.8 Phase 2 fan-out 同邏輯）
+> 2. **Phase 4 digest.json schema 抽離**至 `digest_output_schema.md`，配 `validate_digest_output.py` 驗證腳本（rc=0 才可進 MD 報告）
+> 3. **新欄位**：`fanout_mode` / `degraded_agents` / `subagent_isolated` — 標示 Stage 2 執行模式與 fallback 狀態
+>
+> **V2.0 核心改動**（vs V1；V2.1 保留）
+> 1. **兩階段漏斗**：Stage 1 RSS 便宜寬掃描 → 篩選 TOP N → Stage 2 WebFetch 深度辯論
 > 2. **Team 從 3 人擴至 5 人**：新增 Sector Analyst + Macro/Policy Expert
 > 3. **Triage 表**給使用者，保留人類否決/加碼權
 > 4. **Cache patch 只在 Stage 2 執行**，避免噪音污染
@@ -48,14 +53,16 @@ MODE : FLASH | DIGEST | REVIEW
 
 ## TEAM STRUCTURE
 
-| Agent | 職責 | 核心關注點 |
-|---|---|---|
-| **News Collector** | 蒐集 RSS / WebFetch 原文，確認來源可信度 | 來源 credibility、時效性、去重 |
-| **Bull Analyst** | 多頭角度解讀 | 受益族群、催化劑類型、短中期驅動 |
-| **Bear Analyst** | 空頭角度解讀 | 受損族群、風險傳導、尾部風險 |
-| **Sector Analyst** 🆕 | 產業分析師視角 | 上下游傳導、供應鏈 2 階效應、受影響個股清單 |
-| **Macro/Policy Expert** 🆕 | 財經/政策專家 | Fed 路徑、殖利率、匯率、地緣政治、歷史類比 |
-| **News Arbiter** | 仲裁辯論、加權評分、執行 cache patch | 綜合判斷、cache 一致性 |
+| Agent | 執行模式（V2.1）| 職責 | 核心關注點 |
+|---|---|---|---|
+| **News Collector** | inline | 蒐集 RSS / WebFetch 原文，確認來源可信度 | 來源 credibility、時效性、去重 |
+| **Bull Analyst** | Stage 1 inline / **Stage 2 subagent batch** | 多頭角度解讀 | 受益族群、催化劑類型、短中期驅動 |
+| **Bear Analyst** | Stage 1 inline / **Stage 2 subagent batch** | 空頭角度解讀 | 受損族群、風險傳導、尾部風險 |
+| **Sector Analyst** | Stage 1 inline / **Stage 2 subagent batch** | 產業分析師視角 | 上下游傳導、供應鏈 2 階效應、受影響個股清單 |
+| **Macro/Policy Expert** | Stage 1 inline / **Stage 2 subagent batch** | 財經/政策專家 | Fed 路徑、殖利率、匯率、地緣政治、歷史類比 |
+| **News Arbiter** | inline | 仲裁辯論、加權評分、執行 cache patch | 綜合判斷、cache 一致性 |
+
+> **V2.1 執行模式說明**：Stage 1 shallow triage（30-50 則 × 4 agent snap ≤30 字）保持 inline（subagent 啟動 overhead 對 120 個短 snap 不划算）；Stage 2 deep debate（≤5 則 × 4 agent 完整辯論）改用 **per-agent batch subagent** — 每位 agent 一個 Agent tool 呼叫，一次看全部 Stage 2 晉級項目並輸出 N 份自己視角的分析，彼此不看對方輸出。目的：消除同 model 序列產生 4 視角的 anchoring 風險，與 investment protocol V4.8 Phase 2 fan-out 同邏輯。REVIEW mode 同樣套用 subagent 模式（1 則 × 4 agent 擴展）。
 
 ### Arbiter 加權規則
 
@@ -161,70 +168,81 @@ MODE : FLASH | DIGEST | REVIEW
 
 ---
 
-### STAGE 2 — DEEP DEBATE
+### STAGE 2 — DEEP DEBATE（V2.1 per-agent batch subagent）
 
-**Agent**: News Collector（WebFetch 全文）+ Bull / Bear / Sector / Macro（完整辯論）+ Arbiter
+**Agents**：News Collector（inline WebFetch）+ Bull / Bear / Sector / Macro（**4 個平行 subagent，batch mode**）+ Arbiter（inline）
 
-**資料來源**：
-1. 對每則晉級新聞執行 `WebFetch url` 取得全文
-2. 若 RSS url 為空或 WebFetch 失敗 → 允許 1 次 WebSearch fallback（`"headline" site:reuters.com OR site:bloomberg.com`）
+#### 執行流程
+1. **News Collector inline**：對每則晉級新聞執行 `WebFetch url`；失敗則 1 次 WebSearch fallback。蒐集 full_text_bundle（≤ 5 則 × 全文）
+2. **4 subagent 平行呼叫（同一則訊息內 4 tool_use）** — 每個 agent 看到：
+   - 全部晉級新聞（full text）
+   - Phase 0 macro 快照（read-only shared context）
+   - 自己 lane 的 rubric（見下）
+   - **看不到**：其他 agent 的 output、其他 session 的 bias
+3. **Fan-in**：Arbiter 收到 4 個 subagent 的 JSON（每個內含 N 個 per-item 分析）→ 逐則合併 → 正式裁決
+4. 每個 subagent 輸出 JSON 必含 `subagent_isolated: true` sentinel
 
-**Stage 2 每則新聞輸出**：
+#### Subagent Prompt 模板（每個 lane 差在 `<LANE>` + rubric）
+```
+Agent(
+  description="<LANE> Stage 2 batch analyst",
+  subagent_type="general-purpose",
+  prompt="""
+  You are the <LANE> analyst for Stage 2 deep debate.
 
-```json
-{
-  "phase": "stage2_deep",
-  "news_id": "n003",
-  "headline": "string",
-  "full_text_fetched": "true | false",
-  "bull_case": {
-    "agent": "Bull_Analyst",
-    "interpretation": "string",
-    "primary_beneficiary_sectors": ["sector1"],
-    "catalyst_type": "demand_increase | cost_reduction | policy_tailwind | sentiment_boost | short_squeeze",
-    "impact_score": "1–5",
-    "time_horizon": "immediate | short_term | mid_term",
-    "confidence": "0.0–1.0",
-    "key_assumption": "string"
-  },
-  "bear_case": {
-    "agent": "Bear_Analyst",
-    "interpretation": "string",
-    "primary_at_risk_sectors": ["sector1"],
-    "risk_type": "demand_destruction | cost_increase | policy_headwind | sentiment_crash | contagion",
-    "impact_score": "-5 to -1",
-    "time_horizon": "immediate | short_term | mid_term",
-    "confidence": "0.0–1.0",
-    "key_assumption": "string"
-  },
-  "sector_view": {
-    "agent": "Sector_Analyst",
-    "primary_sectors": [
-      { "sector": "string", "direction": "bullish|bearish|neutral", "magnitude": "strong|moderate|weak" }
-    ],
-    "supply_chain_impact": "string — 上下游 2 階效應",
-    "tickers_mentioned": ["NVDA", "TSM", "..."],
-    "impact_score": "-5 to +5",
-    "confidence": "0.0–1.0"
-  },
-  "macro_view": {
-    "agent": "Macro_Policy_Expert",
-    "fed_path_delta": "string — 對 Fed 路徑的影響（若有）",
-    "yield_curve_impact": "string",
-    "fx_commodity_impact": "string",
-    "historical_analogue": "string — 歷史類比案例（如 2018 關稅戰、2020 COVID）",
-    "impact_score": "-5 to +5",
-    "confidence": "0.0–1.0"
-  },
-  "debate_note": "string — 四方最大分歧點"
-}
+  ISOLATION CONTRACT:
+    - 你與其他 3 個 agent 以獨立 context 平行執行。
+    - 禁止推測其他 lane 的結論。
+    - 禁止為了「與共識一致」調整 impact_score。
+    - 禁止跨題串接語氣（即使同一天 5 則都偏空，你仍各自獨立評估每則）。
+
+  PHASE 0 MACRO CONTEXT:
+  <paste phase0 macro_summary — read-only shared>
+
+  STAGE 2 NEWS BUNDLE（N 則，N ≤ 5）：
+  <paste each news item with full_text + news_id + source + news_type>
+
+  YOUR LANE RUBRIC:
+  <RUBRIC_LANE>（Bull / Bear / Sector / Macro 各一份，見下）
+
+  OUTPUT: 單一 JSON object，包含每則新聞的本 lane 分析：
+  {
+    "agent": "<LANE>_Analyst",
+    "subagent_isolated": true,
+    "per_item": {
+      "<news_id_1>": { ...本 lane 的完整分析 schema... },
+      "<news_id_2>": { ... },
+      ...
+    }
+  }
+  """
+)
 ```
 
-**辯論強制規則**：
-- Bull / Bear 不得同為 impact ≤ 1（代表沒真正辯論）
-- `source_credibility = LOW` → 四方 confidence 上限 0.5
+#### Per-Lane Rubric
+
+**Bull Analyst**：找多頭論據。每則輸出 `{interpretation, primary_beneficiary_sectors[], catalyst_type ∈ {demand_increase, cost_reduction, policy_tailwind, sentiment_boost, short_squeeze}, impact_score 1~5, time_horizon ∈ {immediate, short_term, mid_term}, confidence 0-1, key_assumption}`
+
+**Bear Analyst**：找空頭論據。每則輸出 `{interpretation, primary_at_risk_sectors[], risk_type ∈ {demand_destruction, cost_increase, policy_headwind, sentiment_crash, contagion}, impact_score -5~-1, time_horizon, confidence, key_assumption}`
+
+**Sector Analyst**：每則輸出 `{primary_sectors[{sector, direction, magnitude}], supply_chain_impact, tickers_mentioned[] (≥1 或顯式空陣列 + 理由), impact_score -5~+5, confidence}`
+
+**Macro/Policy Expert**：每則輸出 `{fed_path_delta, yield_curve_impact, fx_commodity_impact, historical_analogue, impact_score -5~+5, confidence}`
+
+#### 辯論強制規則（跨 agent，由 Arbiter 驗證）
+- Bull / Bear 不得同為 |impact| ≤ 1（代表沒真正辯論）→ Arbiter 退回該則要求 re-analyze
+- `source_credibility = LOW` → 四方 confidence 上限 0.5（subagent 自律 + Arbiter 複檢）
 - 含 binary event → Bear + Macro 必須標記 `binary_risk: true`
-- Sector Analyst **必須**輸出 `tickers_mentioned`（至少 1 檔，或明確寫 `[]` 加理由）
+
+#### Fan-Out 失敗處理（fanout_mode 對照）
+
+| 情境 | `fanout_mode` | 處理 |
+|---|---|---|
+| 4 subagent 全部成功、`subagent_isolated=true` | `PER_AGENT_BATCH` | 正常流程 |
+| 1-2 subagent timeout / malformed JSON → retry 1 次仍失敗 | `PARTIAL_FALLBACK` | 失敗者 inline fallback；`degraded_agents` 列出降級名單；該 agent confidence 上限 0.5 |
+| 3-4 subagent 失敗 | `FULL_FALLBACK` | 整批 inline 產出；Arbiter 對該 DIGEST 的 BULLISH verdict 強制降級（例：BULLISH → NEUTRAL，BEARISH 保留不變）以反映 debate 品質下滑 |
+
+**Single-item 特例（FLASH mode）**：1 則新聞時可直接 inline 四視角辯論（`fanout_mode: INLINE`），subagent overhead 不划算。
 
 ---
 
@@ -303,44 +321,19 @@ MODE : FLASH | DIGEST | REVIEW
 
 ### 寫入 news_logs（shallow + deep 都要寫）
 
-```json
-// APPEND: news/news_logs/YYYY-MM-DD_digest.json
-// ⚠️ 缺任何欄位會導致 Dashboard 顯示空白
-{
-  "timestamp": "YYYY-MM-DD HH:MM",
-  "mode": "FLASH | DIGEST",
-  "stage1_count": "integer（DIGEST only）",
-  "stage2_count": "integer（DIGEST only）",
-  "verdicts": [
-    {
-      "news_id": "n003",
-      "depth": "shallow | deep",
-      "review_status": "reviewed | pending (DIGEST Stage 2 → reviewed; FLASH → pending; REVIEW mode → reviewed)",
-      "headline": "string",
-      "headline_zh": "string",
-      "verdict": "BULLISH | BEARISH | BINARY | NEUTRAL",
-      "net_impact_score": "float",
-      "source_label": "string",
-      "news_type": "string",
-      "bull_case": "string",
-      "bear_case": "string",
-      "sector_view": "string — 產業分析師核心論點",
-      "macro_view": "string — 財經專家核心論點",
-      "arbiter_reasoning": "string",
-      "debate_note": "string",
-      "binary_risk": "true | false",
-      "binary_event_date": "YYYY-MM-DD | null",
-      "within_48h": "true | false",
-      "cache_updated": "true | false",
-      "affected_sectors": [
-        { "sector": "string", "direction": "bullish|bearish|binary|neutral" }
-      ],
-      "tickers_mentioned": ["NVDA", "TSM"]
-    }
-  ],
-  "session_macro_delta": "float"
-}
+**Schema 定義位置**：`news/news_logs/YYYY-MM-DD_digest.json` 的完整 shape、必填欄位、三種 mode 差異（DIGEST / FLASH / REVIEW）、`fanout_mode` / `degraded_agents` / `subagent_isolated` 新欄位說明、DO NOT 禁止清單與 FULL EXAMPLE 全部集中於 **`./digest_output_schema.md`**。本 protocol 不再內嵌 JSON 範本。
+
+**關鍵重點**（完整規範對照 schema 檔）：
+- **DIGEST mode**：`verdicts[]` 必須包含全部 Stage 1 項目（shallow + deep 混合），不得丟棄 shallow — Dashboard 的 Shallow Digest 區塊需要這些資料
+- **FLASH mode**：`stage1_count=0, stage2_count=1`；單筆 deep verdict `review_status=pending, cache_updated=false`
+- **REVIEW mode**：`review_status: pending → reviewed`，此時才執行 cache patch
+- **V2.1 新增**：`fanout_mode ∈ {PER_AGENT_BATCH, PARTIAL_FALLBACK, FULL_FALLBACK, INLINE}`、`degraded_agents[]`、每則 deep verdict 的 `subagent_isolated` sentinel
+
+**Phase 4 結束前必須執行 validator**：
+```bash
+python3 news/scripts/validate_digest_output.py
 ```
+rc ≠ 0 時必須修正 `news_logs/YYYY-MM-DD_digest.json` 後再跑一次，直到 rc=0 才可進 MD 報告階段。常見失敗：DIGEST 丟棄 shallow verdicts、deep verdict 缺 `arbiter_reasoning` / `subagent_isolated`、FLASH 誤設 `review_status=reviewed`。
 
 ### 儲存最終報告（Impact Card MD）
 - **DIGEST** → `reports/YYYY-MM-DD_news_digest.md`
@@ -446,10 +439,13 @@ FLASH mode **跳過 Stage 1**，因為：
 **Step 1 — 載入原 FLASH verdict**：
 在 `news/news_logs/YYYY-MM-DD_digest.json` 搜尋 `review_status: pending` 且 `headline` 含 keyword match 的 verdict。若找到多筆，列出讓使用者選擇。
 
-**Step 2 — 擴展辯論**：
-將原 FLASH 的 4 agent snap（各 ≤ 30 字）作為起點，每位 agent 重新審視並擴展：
-- Bull / Bear / Sector / Macro 各輸出 150–250 字完整論述（schema 同 Stage 2 Deep Debate）
-- 原始 FLASH 結果作為 `prior_flash` 參考，允許推翻但需說明原因
+**Step 2 — 擴展辯論（V2.1 subagent 模式）**：
+將原 FLASH 的 4 agent snap（各 ≤ 30 字）作為起點，**以 4 個平行 subagent 重新審視並擴展**：
+- 同一則訊息內發 4 個 Agent tool call（Bull / Bear / Sector / Macro）
+- 每個 subagent 看到：該則新聞 full text + 原 FLASH 的 4 agent snap（作為 `prior_flash` 參考，允許推翻但需在 `why_changed` 欄位說明）+ Phase 0 macro + 自己 lane 的 rubric
+- **不得**看到其他 agent 的 expanded output
+- 每人輸出 150–250 字完整論述（schema 同 Stage 2 Deep Debate 單則）+ `subagent_isolated: true` sentinel
+- `fanout_mode: PER_AGENT_BATCH` 寫入 digest.json（REVIEW 的 N=1 也適用 batch schema）
 
 **Step 3 — Arbiter 正式裁決**：
 - 可改變 verdict（例：FLASH 判 BULLISH → REVIEW 改判 BINARY）

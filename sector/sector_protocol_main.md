@@ -1,6 +1,12 @@
-# Pre-Market Sector Intelligence Protocol (V1.2)
+# Pre-Market Sector Intelligence Protocol (V1.3)
 
 > **多檔案架構**：此主檔案約 200 行，詳細細節分拆於子檔案，按需載入以節省 context。
+
+> **Changelog V1.2 → V1.3（Subagent Fan-Out + Validator）**
+> - Phase 4a：三 agent 提案（Sector Rotation / Theme Intelligence / News Catalyst）改為 **3 個平行 Agent subagent**，isolation contract + `subagent_isolated` sentinel 消除同 model 序列 anchoring 風險（與 investment V4.8 / news V2.1 同邏輯）
+> - Phase 4b：Devil's Advocate 改為獨立 subagent，收 Phase 0-4a 輸出後反駁，`risk_scenario` 要求 falsifiable 格式
+> - Phase 5：新增 `validate_sector_intel.py` 為 MANDATORY gate，rc=0 才算完成；schema 加 `phase4_fanout_mode` / `degraded_agents` 頂層欄位
+> - `protocol_version` 升至 `"V1.3"`
 
 > **Changelog V1.1 → V1.2**
 > - Phase 0: 新增層 C（FTD）、層 D（Market Top），三訊號合成規則輸出 `synthesized_exposure`

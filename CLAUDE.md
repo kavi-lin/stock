@@ -1,14 +1,20 @@
 # AI 投資委員會 — Claude Code Project Context
 
-> **系統版本：v1.9.4**（實際值以根目錄 `VERSION` 檔與 `Dashboard/utils.js` 的 `VERSION` 常數為準；兩者必須同步；每個 session 結束必須 bump）
+> **系統版本：v1.13.0**（實際值以根目錄 `VERSION` 檔與 `Dashboard/utils.js` 的 `VERSION` 常數為準；兩者必須同步；每個 session 結束必須 bump）
 
 ## 專案說明
 這是一套多 Agent 投資分析系統，包含三個 protocol。
 
 ## Protocol 檔案位置
-- **新聞分析**: `news/news_protocol_v2.md` ← V2.0（RSS 兩階段漏斗 + 5 agent 圓桌 + Triage 人類審核 + Shallow Digest 保留）
-- **產業掃描**: `sector/sector_protocol_main.md` ← V1.2（多檔案架構；子檔案：`phase_0.md` / `phase_1-2-3.md` / `phase_4-5.md` / `schema.md`）
+- **新聞分析**: `news/news_protocol_v2.md` ← V2.1（V2.0 基礎 + Stage 2/REVIEW 四 agent 改 **per-agent batch subagent**（isolation + fanout_mode ladder）+ Phase 4 schema 抽離 + validator gate）
+  - Digest 輸出 shape：`news/digest_output_schema.md`（抽離 schema，唯一事實來源）
+  - Phase 4 驗證腳本：`news/scripts/validate_digest_output.py`（rc=0 才可進 MD 報告階段）
+- **產業掃描**: `sector/sector_protocol_main.md` ← V1.3（V1.2 多檔案架構 + Phase 4a 三 agent 提案改 parallel subagent + Phase 4b Devil's Advocate 獨立 subagent + Phase 5 validator gate）
+  - 子檔案：`phase_0.md` / `phase_1-2-3.md` / `phase_4-5.md` / `schema.md`
+  - Phase 5 驗證腳本：`sector/scripts/validate_sector_intel.py`（rc=0 才算完成）
 - **個股分析**: `investment/investment_protocol_v4_8.md` ← V4.8（parallel blind analyst subagents：Phase 2 四 analyst 平行 subagent 真獨立 + fallback + degraded_mode；繼承 V4.7 Red-Team-gated bonus / Phase 2.8 adversary / Burry OVERRIDE 成本）
+  - Phase 5 session export shape：`investment/phase5_export_schema.md`（抽離 schema，唯一事實來源）
+  - Phase 5 驗證腳本：`investment/scripts/validate_session_export.py`（append 後必須 rc=0 才能繼續）
 
 ### 舊版本（已歸檔至 `archive/old_protocols/`）
 - `archive/old_protocols/news/` — V1.0
@@ -21,6 +27,9 @@
 - 「新聞分析 審核 [headline]」→ 執行 news_protocol_v2，MODE: REVIEW（擴展 FLASH 辯論 → `review_status: reviewed` + patch cache）
 - 「產業掃描」→ 執行 sector_protocol_main（先讀主檔，再按需載入子檔）
 - 「分析 [TICKER]」→ 執行 investment_protocol_v4_8
+- 「動能 [TICKER]」/「momentum [TICKER]」/ slash `/momentum-monitor [TICKER]` → 執行 `skills/momentum-monitor/scripts/momentum.py` 並以 MD 表格呈現（volume、MA cross、short interest、composite score）
+- 「動能選股」/「momentum screen」/ slash `/momentum-screen [args]` → 執行 `skills/momentum-monitor/scripts/screen.py` 批次掃描 universe（預設 S&P 500）→ 依 composite score + filter 排名 → 輸出 MD 表格 + `skills/momentum-monitor/cache/screen_YYYYMMDD_HHMM.csv`
+- 「更新 journal」/「journal stats」/ slash `/momentum-journal <snapshot\|update\|stats>` → 執行 `skills/momentum-monitor/scripts/journal.py`（累積每次 screen 結果 + 前向收益填入 → 信號勝率分析）
 
 ## V4.5 / V1.2 新增能力速查
 | 新 Skill / 改動 | 在哪裡執行 | 作用 |
@@ -50,6 +59,9 @@
 - `investment/invest_logs/history.json` — 歷史 session 記錄
 - `news/news_logs/YYYY-MM-DD_digest.json` — 新聞 cache
 - `skills/theme-detector/cache/theme_detector_YYYY-MM-DD_*.json` — 主題偵測 JSON cache
+- `skills/momentum-monitor/cache/screen_YYYYMMDD_HHMM.csv` — 動能選股 CSV snapshot
+- `skills/momentum-monitor/journal/journal.jsonl` — 動能 journal（累積每次 screen 結果 + 前向收益）
+- `skills/momentum-monitor/journal/stats.json` — 動能 journal 滾動統計（by_signal / by_score_bin）
 
 ## Scripts & 常用指令
 
@@ -93,6 +105,8 @@ python3 bridge.py
 ## 實作前確認規則（大量改動必須遵守）
 
 **觸發條件**：預計改動 ≥ 2 個檔案，或單檔改動 ≥ 50 行時，必須在實作前輸出一張改動摘要表，等待確認後才開始動手。
+
+**適用邊界**：本規則**僅適用於使用者要求的 code change / 文件重構**。Protocol 自動產生的輸出（e.g. `reports/YYYYMMDD_TICKER.md`、`history.json` append、`invest_logs/` cache）是 protocol 正常執行流程的副產品，**不計入**觸發條件，亦**不得**在 reverse-call 場景下反問使用者。
 
 **摘要表格式**：
 

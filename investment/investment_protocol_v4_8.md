@@ -11,11 +11,16 @@
 ```
 SESSION CONFIG
 ──────────────────────────────────────────
-RISK_TOLERANCE : LOW | MEDIUM | HIGH
+RISK_TOLERANCE : LOW | MEDIUM | HIGH   (若未提供 → 預設 MEDIUM)
 ──────────────────────────────────────────
 ```
 
 Ticker 由使用者在對話中指定。
+
+> **非互動模式預設值（V4.8 Dashboard reverse-call）**：當 protocol 透過 `claude -p`（non-interactive）被呼叫時：
+> - 若 prompt 中未帶 `RISK_TOLERANCE` → 自動採用 `MEDIUM`
+> - 若 Phase 0 cache 剛過 TTL 但仍在同一交易日的 pre-market 窗口內 → 直接使用不重跑，不得因「是否越線使用」而停下來問使用者
+> - 任何需要使用者輸入的點都應採「protocol 規則預設」而非 ask-and-wait，因為 reverse-call 無法接收後續訊息
 
 ---
 
@@ -41,7 +46,8 @@ Ticker 由使用者在對話中指定。
    - `tail-risk-analyzer`（Phase 4 Step 3）
    - 若某次執行 skill script 發生錯誤，必須在 Final Report 對應欄位標記 `skill_execution_failed: true` 並記錄 stderr，禁止靜默用估算值補上。
 9. **Red Team 獨立執行強制規則（V4.7）**: Phase 2.8 Red Team Adversary **必須以 Agent tool 呼叫 subagent 執行**（`subagent_type: "general-purpose"`），禁止 inline 推理代替。
-10. **Parallel Analyst 強制規則（V4.8 新增 — 核心機制）**:
+10. **Non-Interactive 執行強制規則（V4.8 新增）**: 當 protocol 被 Dashboard reverse-call（`claude -p` non-interactive）觸發時，Claude 不得向使用者發問或輸出「請確認…」的摘要表並等候。Protocol 本身的明確規則優先（e.g. RISK_TOLERANCE 預設 MEDIUM、Phase 0 三層 cache 依 TTL 決定）。**CLAUDE.md 的「實作前確認規則」僅適用於使用者要求的 code change，不適用於 protocol 自動產生的 reports/history/cache 等分析輸出檔案** — 這些是 protocol 正常執行產物，不得因檔案數量觸發確認流程。
+11. **Parallel Analyst 強制規則（V4.8 新增 — 核心機制）**:
     - Phase 2 四個 analyst（Fundamentals / Sentiment / News / Technical）**必須**以 **4 個 Agent tool 平行呼叫**（subagent_type: "general-purpose"）執行，**並放在同一則訊息內**（確保真正平行；parent 在 4 個結果都回來前不進入 Phase 2.5）。
     - 每個 subagent 的 prompt **只能包含**：(a) ticker、(b) Phase 0 macro JSON、(c) 該 lane 的 rubric + MUST run skill 指令、(d) output schema。
     - **禁止** pass 進 subagent 的資訊：其他 analyst 的 tentative signal、prior_session 的 historical_bias、current active_weights、任何來自既有持倉 / 偏好的引導。
@@ -652,9 +658,14 @@ ELSE:
 **Agent**: PM（inline）
 
 執行步驟：
-1. Append session export JSON 至 `./invest_logs/history.json`
-2. 確認 `./invest_logs/YYYY-MM-DD_phase0.json` 已存在
-3. **MD 報告撰寫委派 Sonnet subagent（V4.8 成本優化）**：將完整 Phase 0–4 決策資料傳入 Sonnet subagent，由其**純粹排版**產出 `../reports/YYYYMMDD_TICKER.md`。Subagent 不得重新評分、不得改變任何 score / signal / decision / position_size。這是純格式化任務，節省 ~$0.5/次的 Opus 輸出成本。
+1. **Append session export JSON 至 `./invest_logs/history.json`** — shape **必須**嚴格符合 `./phase5_export_schema.md`（FULL EXAMPLE 區塊）。該檔案是 session export schema 的唯一事實來源；protocol 本身不再內嵌 JSON 範本。
+2. **執行驗證腳本**：
+   ```bash
+   python3 investment/scripts/validate_session_export.py
+   ```
+   rc ≠ 0 時必須**修正 history.json 最後一筆 entry** 後再跑一次，直到 rc=0 才可進入步驟 3。常見失敗：missing top-level `ticker`/`final_action` mirrors、legacy `{ticker, metadata:{}}` flat shape、HOLD 省略 `watch_conditions`。
+3. 確認 `./invest_logs/YYYY-MM-DD_phase0.json` 已存在
+4. **MD 報告撰寫委派 Sonnet subagent（V4.8 成本優化）**：將完整 Phase 0–4 決策資料傳入 Sonnet subagent，由其**純粹排版**產出 `../reports/YYYYMMDD_TICKER.md`。Subagent 不得重新評分、不得改變任何 score / signal / decision / position_size。這是純格式化任務，節省 ~$0.5/次的 Opus 輸出成本。
 
 ### Phase 5 Step 3 — Sonnet MD Report Formatter（MUST use Agent tool）
 
@@ -699,76 +710,16 @@ Agent(
 
 > **成本取捨**：格式化任務從 Opus（$75/M output）移至 Sonnet 4.6（$15/M output）— 假設 MD 約 5-10k tokens，**每次節省約 $0.4-0.7**。排版品質夠用（Sonnet 4.6 格式化能力等同 Opus），但決策內容零改變。若 subagent 偏離 hard constraints（例如擅自改 score），PM 必須 reject 並 retry 一次；再失敗則 PM 自行 inline 寫 MD（fallback）。
 
-> **Schema 契約**：單一事實來源 = `trades_this_session[0]`。所有 Dashboard / bridge.py 需要的欄位（含 `watch_conditions`、`key_risks`、`devils_advocate_filed`、`red_team_verdict`、`burry_override_active`、**`phase2_fanout_mode`**）必須寫入該物件。頂層 `ticker` / `final_action` 需與 `trades_this_session[0]` 同步。
-
-```json
-{
-  "session_export_version": "V4.8",
-  "export_date": "YYYY-MM-DD",
-  "phase0_file": "./invest_logs/YYYY-MM-DD_phase0.json",
-  "phase0_macro_snapshot": {
-    "market_regime": "string",
-    "macro_backdrop_score": "float",
-    "key_themes": [],
-    "macro_multiplier": "float"
-  },
-  "phase2_fanout_summary": {
-    "mode": "PARALLEL_SUBAGENT | PARTIAL_FALLBACK | FULL_FALLBACK",
-    "subagent_successes": 4,
-    "subagent_failures": 0,
-    "degraded_analysts": [],
-    "fanout_started_at": "ISO-8601",
-    "fanout_completed_at": "ISO-8601"
-  },
-  "trades_this_session": [
-    {
-      "ticker": "STRING",
-      "final_action": "EXECUTE | STAGED | CANCEL",
-      "final_score": "float",
-      "final_decision": "BUY | STAGED_ENTRY | HOLD | STAGED_EXIT | SELL",
-      "consensus_bonus_applied": "true | false",
-      "red_team_verdict": "NO_VIABLE_COUNTER | MODERATE_COUNTER | STRONG_COUNTER",
-      "red_team_counter_thesis": "string",
-      "red_team_kill_conditions": ["string", "..."],
-      "red_team_execution_failed": "true | false",
-      "phase2_fanout_mode": "PARALLEL_SUBAGENT | PARTIAL_FALLBACK | FULL_FALLBACK",
-      "degraded_analysts": ["Fundamentals | Sentiment | News | Technical | ..."],
-      "macro_alignment": "ALIGNED | CONTRARIAN",
-      "avg_confidence": "float",
-      "burry_score": "float",
-      "burry_override_active": "true | false",
-      "burry_override_recheck_date": "YYYY-MM-DD | null",
-      "entry_aggressive": ["min", "max"],
-      "entry_conservative": ["min", "max"],
-      "take_profit": "float",
-      "stop_loss": "float",
-      "risk_reward_ratio": "float",
-      "position_size_pct": "float",
-      "staged_split": { "aggressive_pct": "float|null", "conservative_pct": "float|null" },
-      "position_size_method": "VOL_ADJUSTED | RULE_BASED",
-      "fragility_label": "string",
-      "binary_classification": "positive | unknown | negative | none",
-      "time_horizon": "short | mid | long",
-      "macro_context": "string",
-      "watch_conditions": { "trigger_name": "description", "...": "..." },
-      "key_risks": ["tag_snake_case", "..."],
-      "devils_advocate_filed": "true | false",
-      "trade_metadata": {
-        "trade_type": "event | trend | mean_reversion",
-        "event_tag": "FOMC | earnings | tariff | ceasefire | optional"
-      }
-    }
-  ],
-  "active_weights_end_of_session": {
-    "Fundamentals": 0.30,
-    "Sentiment": 0.20,
-    "News": 0.20,
-    "Technical": 0.30
-  },
-  "bias_notes": "string",
-  "last_outcome": "WIN | LOSS | UNKNOWN"
-}
-```
+> **Schema 定義位置**：Session export 的完整 shape、必填欄位、HOLD/CANCEL 填法、legacy shape 禁止清單、FULL EXAMPLE 全部集中於 **`./phase5_export_schema.md`**。本 protocol 不再內嵌 JSON 範本，避免 protocol 升版時兩邊 drift。
+>
+> 以下為該檔案的關鍵重點（完整規範必須對照該檔）：
+> - **單一事實來源** = `trades_this_session[0]`；頂層 `ticker` / `final_action` / `date` 需與 `trades_this_session[0]` 同步（bridge.py 讀頂層）
+> - **禁止 pre-V4.6 legacy shape** `{"ticker":..., "metadata":{...}}` — validator 會直接拒絕
+> - **HOLD / CANCEL 決策也必填觀察類欄位**：`macro_alignment`、`fragility_label`、`binary_classification`、`time_horizon`、`trade_metadata`、`analysis_price` 一律必填；`watch_conditions` ≥ 3 條再評 / 退場觸發
+> - **`analysis_price`**（V4.8 新增必填）：分析當下的股價快照，從 Phase 2 Technical analyst 或 us-stock-analysis skill 的輸出抓取（通常是最新收盤或即時價）。Dashboard 用此對比 yfinance 即時價呈現漂移百分比
+> - **BUY / STAGED_ENTRY 決策**：`risk_reward_ratio` 必填且 ≥ 2.0，否則 validator 失敗
+>
+> **Step 2 validator 是強制 gate**：它 import 當前 schema 的 REQUIRED 清單，自動偵測任何 drift。若未跑 validator 或 rc ≠ 0 就繼續 Step 3，視為 protocol 違規。
 
 ---
 

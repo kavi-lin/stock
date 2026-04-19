@@ -24,6 +24,12 @@ sector/scan_logs/
 # Per-skill runtime caches (generated on demand, not source)
 skills/*/cache/
 
+# Per-skill journal (forward-return tracking, local to each machine)
+skills/*/journal/
+
+# Claude Code local settings (machine-specific allowlists)
+.claude/settings.local.json
+
 # Keep directory structure
 !news/news_logs/.gitkeep
 !sector/sector_logs/.gitkeep
