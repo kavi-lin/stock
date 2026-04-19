@@ -1,4 +1,6 @@
-# Phase 1–3 執行細節
+# Phase 1
+
+<!-- [domain:us-equity] iterates 11 GICS sectors + US sector ETFs via finvizfinance + yfinance. -->–3 執行細節
 
 ---
 

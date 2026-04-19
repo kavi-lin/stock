@@ -17,6 +17,24 @@ const SECTOR_ZH = {
     HEALTHCARE:'醫療保健', CONSUMER_CYCLICAL:'非必需消費', COMMUNICATION_SERVICES:'通訊服務',
     CONSUMER_DEFENSIVE:'必需消費', REAL_ESTATE:'房地產',
 };
+
+// Map sector page names (data.json .sectors[].name) → momentum page row.sector
+// (GICS sector names from sp500_sectors.json). Used when clicking a sector
+// card to deep-link into the momentum table with the sector filter pre-applied.
+const SECTOR_TO_GICS = {
+    'Industrials':            'Industrials',
+    'Financials':             'Financials',
+    'Utilities':              'Utilities',
+    'Consumer_Discretionary': 'Consumer Discretionary',
+    'Technology':             'Information Technology',
+    'Materials':              'Materials',
+    'Healthcare':             'Health Care',
+    'Real_Estate':            'Real Estate',
+    'Communication':          'Communication Services',
+    'Communication_Services': 'Communication Services',
+    'Consumer_Staples':       'Consumer Staples',
+    'Energy':                 'Energy',
+};
 const FLAG_LABELS = {
     zh: {
         overbought:                  '超買',
@@ -39,9 +57,29 @@ const FLAG_LABELS = {
         extreme_sentiment:           '🚨 Extreme Sentiment',
     },
 };
+// Resolve a flag key to a human label. Looks in (1) local FLAG_LABELS, (2)
+// i18n warnings.flags (CamelCase keys like `Below_200MA`), (3) i18n
+// sector_page.risk_flags (lowercase keys like `consensus_warning`). Strips
+// trailing `_MM_DD` date suffix from dynamic keys like `binary_earnings_4_28`
+// so one translation entry covers all dates.
 function flagLabel(key) {
-    const table = FLAG_LABELS[UI.currentLang] || FLAG_LABELS.en;
-    return table[key] || key.replace(/_/g, ' ');
+    if (!key) return '';
+    const lang = UI.currentLang;
+    const local = (FLAG_LABELS[lang] || FLAG_LABELS.en)[key];
+    if (local) return local;
+
+    const i18nRoot = window.i18n?.[lang] || {};
+    const warnFlags = i18nRoot.warnings?.flags || {};
+    const sectorRiskFlags = i18nRoot.sector_page?.risk_flags || {};
+    if (warnFlags[key]) return warnFlags[key];
+    if (sectorRiskFlags[key]) return sectorRiskFlags[key];
+
+    // Dynamic earnings date pattern: binary_earnings_4_28 → binary_earnings + " 4/28"
+    const m = key.match(/^([a-z_]+?)_(\d{1,2})_(\d{1,2})$/);
+    if (m && sectorRiskFlags[m[1]]) return `${sectorRiskFlags[m[1]]} ${m[2]}/${m[3]}`;
+    if (m && warnFlags[m[1]]) return `${warnFlags[m[1]]} ${m[2]}/${m[3]}`;
+
+    return key.replace(/_/g, ' ');
 }
 
 /* ── Main loader ─────────────────────────────────────────────── */
@@ -104,47 +142,141 @@ function renderStatusStrip(data) {
         `;
     });
 
-    // Warning flags
+    // Warning flags — clear first so language switches / reloads don't append duplicates
     const flagRow = document.getElementById('warning-flags-row');
-    (m.warning_flags || []).forEach(f => {
-        const label = flagLabel(f);
-        flagRow.insertAdjacentHTML('beforeend', `
-            <div class="text-[8px] font-black px-2 py-1 rounded border bg-yellow-500/8 text-yellow-500 border-yellow-500/20 tracking-tight">${label}</div>
-        `);
-    });
+    if (flagRow) {
+        flagRow.innerHTML = '';
+        (m.warning_flags || []).forEach(f => {
+            const label = flagLabel(f);
+            flagRow.insertAdjacentHTML('beforeend', `
+                <div class="text-[8px] font-black px-2 py-1 rounded border bg-yellow-500/8 text-yellow-500 border-yellow-500/20 tracking-tight">${label}</div>
+            `);
+        });
+    }
 
     // Scan date
     const sd = document.getElementById('scan-date');
     if (sd) sd.textContent = data.last_updated ? `SCAN: ${data.last_updated.split(' ')[0]}` : '';
 }
 
-/* ── Binary Alert ────────────────────────────────────────────── */
+/* ── Binary Alert (minimalist strip) ─────────────────────────── */
 function renderBinaryAlert(risks) {
     const urgent = risks.filter(r => r.within_48h);
-    if (!urgent.length) return;
-    document.getElementById('binary-alert-section').classList.remove('hidden');
+    const section = document.getElementById('binary-alert-section');
+    if (!urgent.length) { section?.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    const tr = t();
+    const dateLabel = (r) => {
+        if (r.days_until === 0) return tr.binary_today    || 'TODAY';
+        if (r.days_until === 1) return tr.binary_tomorrow || 'TOMORROW';
+        return r.date || '';
+    };
     const container = document.getElementById('binary-alert-items');
     container.innerHTML = urgent.map(r => `
         <div class="flex items-start gap-3">
-            <span class="text-[9px] font-black text-orange-300 font-mono mt-0.5">48H</span>
-            <div>
-                <span class="text-xs font-bold" style="color:#fbd38d">${r.event}</span>
-                <div class="flex flex-wrap gap-1 mt-1">
-                    ${r.affected_sectors.map(s =>
-                        `<span class="text-[8px] bg-orange-500/15 text-orange-300 px-1.5 py-0.5 rounded border border-orange-500/25">${s.replace(/_/g,' ')}</span>`
-                    ).join('')}
-                </div>
+            <span class="binary-date-pill shrink-0 mt-0.5">${dateLabel(r)}</span>
+            <div class="flex-1 min-w-0">
+                <div class="text-[12px] font-semibold leading-snug" style="color:var(--text-main)">${r.event}</div>
+                ${r.affected_sectors?.length ? `
+                <div class="flex flex-wrap gap-1 mt-1.5">
+                    ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${s.replace(/_/g,' ')}</span>`).join('')}
+                </div>` : ''}
             </div>
         </div>
     `).join('');
 }
 
-/* ── PS Handoff ──────────────────────────────────────────────── */
-function renderHandoff(market) {
-    if (!market?.notes) return;
-    document.getElementById('handoff-section').classList.remove('hidden');
-    document.getElementById('handoff-text').textContent = market.notes;
+/* ── Today's Verdict (hero card) ──────────────────────────────── */
+// Prefers the structured today_verdict block from _phase4c; falls back to
+// session_notes prose if the cache predates V1.4.
+function renderTodayVerdict(market) {
+    if (!market) return;
+    const card = document.getElementById('today-verdict-card');
+    if (!card) return;
+    const tv = market.today_verdict;
+    const tr = t();
+
+    // Stance palette (matches sector matrix verdict colours)
+    const STANCE_STYLE = {
+        AGGRESSIVE: { fg: '#22c55e', bg: 'rgba(34,197,94,0.15)', border: '#22c55e' },
+        NEUTRAL:    { fg: '#eab308', bg: 'rgba(234,179,8,0.15)', border: '#eab308' },
+        DEFENSIVE:  { fg: '#ef4444', bg: 'rgba(239,68,68,0.15)', border: '#ef4444' },
+    };
+    const ACTION_STYLE = {
+        overweight:   { fg: '#22c55e', icon: '🟢', label: tr.tv_action_overweight  || '加碼' },
+        underweight:  { fg: '#fbbf24', icon: '🟠', label: tr.tv_action_underweight || '減碼' },
+        avoid:        { fg: '#ef4444', icon: '🔴', label: tr.tv_action_avoid       || '避開' },
+        wait:         { fg: '#eab308', icon: '🟡', label: tr.tv_action_wait        || '觀望' },
+        neutral:      { fg: '#a1a1aa', icon: '⚪', label: tr.tv_action_neutral     || '中性' },
+    };
+
+    // Prefer structured verdict. Fallback: show session_notes prose in fallback block.
+    if (!tv) {
+        if (!market.notes) return;  // nothing to show at all
+        card.classList.remove('hidden');
+        card.style.borderLeftColor = '#a1a1aa';
+        document.getElementById('tv-stance').textContent   = '—';
+        document.getElementById('tv-headline').textContent = tr.tv_no_structured || '今日裁決（舊版快取，待下次掃描升級）';
+        document.getElementById('tv-one-liner').textContent = '';
+        document.getElementById('tv-takeaways').innerHTML = '';
+        document.getElementById('tv-actions').innerHTML   = '';
+        document.getElementById('tv-watch').innerHTML     = '';
+        const fb = document.getElementById('tv-fallback');
+        fb.classList.remove('hidden');
+        document.getElementById('tv-fallback-text').textContent = market.notes;
+        return;
+    }
+
+    // Structured path
+    card.classList.remove('hidden');
+    document.getElementById('tv-fallback').classList.add('hidden');
+
+    const stance = tv.stance || 'NEUTRAL';
+    const sty = STANCE_STYLE[stance] || STANCE_STYLE.NEUTRAL;
+    card.style.borderLeftColor = sty.border;
+
+    const stanceEl = document.getElementById('tv-stance');
+    stanceEl.textContent    = stance;
+    stanceEl.style.background = sty.bg;
+    stanceEl.style.color      = sty.fg;
+
+    document.getElementById('tv-headline').textContent  = tv.headline || '';
+    document.getElementById('tv-one-liner').textContent = tv.one_liner || '';
+    if (tv.confidence != null) {
+        document.getElementById('tv-confidence').textContent = `conf ${(tv.confidence * 100).toFixed(0)}%`;
+    }
+
+    // Takeaways
+    document.getElementById('tv-takeaways').innerHTML =
+        (tv.key_takeaways || []).map(t => `<li class="flex items-start gap-1.5"><span class="text-emerald-500 shrink-0">•</span><span>${t}</span></li>`).join('') ||
+        `<li class="text-zinc-600 italic">—</li>`;
+
+    // Sector actions
+    document.getElementById('tv-actions').innerHTML =
+        (tv.sector_actions || []).map(a => {
+            const as = ACTION_STYLE[a.action] || ACTION_STYLE.neutral;
+            const conf = a.confidence ? `<span class="text-[9px] text-zinc-500 ml-1">(${a.confidence})</span>` : '';
+            return `<li>
+              <div class="flex items-start gap-1.5">
+                <span class="shrink-0">${as.icon}</span>
+                <div>
+                  <span class="font-bold" style="color:${as.fg}">${as.label}</span>
+                  <span class="font-medium" style="color:var(--text-main)">${a.sector.replace(/_/g,' ')}</span>
+                  ${conf}
+                  ${a.reason ? `<div class="text-[10px] text-zinc-500 leading-snug mt-0.5">${a.reason}</div>` : ''}
+                </div>
+              </div>
+            </li>`;
+        }).join('') || `<li class="text-zinc-600 italic">—</li>`;
+
+    // Watch next
+    document.getElementById('tv-watch').innerHTML =
+        (tv.watch_next || []).map(w => `<li class="flex items-start gap-1.5"><span class="text-zinc-500 shrink-0">▸</span><span>${w}</span></li>`).join('') ||
+        `<li class="text-zinc-600 italic">—</li>`;
 }
+
+// Keep legacy name so existing callers don't break while we migrate.
+function renderHandoff(market) { renderTodayVerdict(market); }
 
 /* ── Sector Cards ────────────────────────────────────────────── */
 function renderSectorMatrix(sectors, lang) {
@@ -166,6 +298,16 @@ function renderSectorMatrix(sectors, lang) {
 
         list.sort((a, b) => b.score - a.score);
         gridEl.innerHTML = list.map(s => buildSectorCard(s, lang)).join('');
+
+        // Click a sector card → deep-link into momentum page with sector filter pre-applied
+        gridEl.querySelectorAll('[data-sector-jump]').forEach(card => {
+            card.addEventListener('click', (ev) => {
+                // Don't trigger when the user clicks something interactive inside the card
+                if (ev.target.closest('button, a, input, select')) return;
+                const gics = card.dataset.sectorJump;
+                if (gics) window.location.href = `momentum.html?sector=${encodeURIComponent(gics)}`;
+            });
+        });
     });
 }
 
@@ -223,8 +365,12 @@ function buildSectorCard(s, lang) {
            </div>`
         : '';
 
+    const gicsSector = SECTOR_TO_GICS[s.name] || '';
+    const clickAttrs = gicsSector
+        ? `data-sector-jump="${gicsSector}" style="cursor:pointer" title="${t().jump_to_momentum || '查看此產業的動能選股結果'}"`
+        : '';
     return `
-    <div class="sector-card verdict-${v} flex flex-col gap-2">
+    <div class="sector-card verdict-${v} flex flex-col gap-2" ${clickAttrs}>
         <!-- Header row -->
         <div class="flex items-start justify-between gap-1">
             <div>
@@ -413,6 +559,39 @@ function renderCatalystFeed(market) {
         </div>`);
     }
 
+    // Top catalysts (market-moving events over past ~7 days)
+    if (market.top_catalysts?.length) {
+        const cLabel = t().top_catalysts_title || '主要催化事件';
+        items.push(`<div class="text-[8px] font-black text-zinc-500 uppercase tracking-wider pt-2 border-t border-zinc-200 dark:border-zinc-800">${cLabel}</div>`);
+        market.top_catalysts.forEach(cat => {
+            const dir = cat.direction;
+            const color = dir === 'bullish' ? '#22c55e'
+                        : dir === 'bearish' ? '#ef4444'
+                        : dir === 'binary'  ? '#f97316'
+                        :                     '#a1a1aa';
+            const icon = dir === 'bullish' ? '🔺'
+                       : dir === 'bearish' ? '🔻'
+                       : dir === 'binary'  ? '⚡'
+                       :                     '·';
+            const impact = cat.impact_score ? ` · impact ${cat.impact_score}/5` : '';
+            const sectors = (cat.affected_sectors || []).slice(0, 3)
+                .map(s => `<span class="text-[8px] px-1 rounded" style="background:${color}18;color:${color}">${s.replace(/_/g,' ')}</span>`).join('');
+            items.push(`
+            <div class="trump-signal-card" style="border-left-color:${color};background:color-mix(in srgb,${color},transparent 94%)">
+                <div class="flex items-start gap-2">
+                    <span>${icon}</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] leading-snug" style="color:var(--text-muted)">${cat.event}</p>
+                        <div class="flex flex-wrap gap-1 mt-1 items-center">
+                            ${sectors}
+                            <span class="text-[8px] text-zinc-500">${cat.timing || ''}${impact}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`);
+        });
+    }
+
     container.innerHTML = items.join('') || `<p class="text-[10px] text-zinc-600">${t().no_catalyst || 'No political signals detected.'}</p>`;
 }
 
@@ -474,6 +653,10 @@ function applyTranslations() {
     set('refresh-sector-label', UI.currentLang === 'zh' ? '更新' : 'Refresh');
     set('binary-alert-title',   tr.binary_alert);
     set('handoff-title',        tr.handoff_title);
+    set('tv-takeaways-title',   tr.tv_takeaways_title);
+    set('tv-actions-title',     tr.tv_actions_title);
+    set('tv-watch-title',       tr.tv_watch_title);
+    set('tv-fallback-title',    tr.handoff_title);
     set('three-signal-title',   tr.three_signal_title);
     set('catalyst-title',       tr.catalyst_title);
     set('divergence-title',     tr.divergence_title);
@@ -505,12 +688,17 @@ function hideScanBanner() {
     if (_scanPollTimer) { clearInterval(_scanPollTimer); _scanPollTimer = null; }
 }
 function setBannerStatus(status) {
-    const bar = document.getElementById('scan-banner-bar');
-    const st  = document.getElementById('scan-banner-status');
-    const sty = STATUS_STYLES[status] || STATUS_STYLES.running;
-    if (bar) {
-        bar.style.background   = sty.bg;
-        bar.style.borderColor  = sty.border;
+    const card = document.getElementById('scan-banner');      // outer glass-card
+    const st   = document.getElementById('scan-banner-status'); // status tag inside header row
+    const sty  = STATUS_STYLES[status] || STATUS_STYLES.running;
+    // Color the card's left border via CSS variable — both the solid 6px band
+    // and the inset glow read from --scan-accent. Unified across momentum / sector / news.
+    if (card) card.style.setProperty('--scan-accent', sty.text);
+    const pulse = document.getElementById('scan-banner-pulse');
+    if (pulse) {
+        pulse.style.background = sty.text;
+        // Stop the pulse in terminal states — steady dot reads as "not working anymore"
+        pulse.classList.toggle('animate-pulse', status === 'running');
     }
     if (st) {
         const tr = t();
@@ -521,7 +709,8 @@ function setBannerStatus(status) {
             cancelled: tr.scan_cancelled || 'CANCELLED',
         };
         st.textContent = labelMap[status] || status.toUpperCase();
-        st.style.color = sty.text;
+        st.style.color      = sty.text;
+        st.style.background = sty.bg;
     }
     // Cancel only while running; Dismiss for everything else
     document.getElementById('scan-cancel-btn')?.classList.toggle('hidden', status !== 'running');

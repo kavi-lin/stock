@@ -330,6 +330,15 @@ async function pollLaunchStatus() {
     const s = await r.json();
     const isZh = UI.currentLang === 'zh';
     document.getElementById('launch-elapsed').textContent = formatElapsed(s.elapsed_sec || 0);
+    // Invest protocols render inside the analyze-queue widget — suppress the
+    // legacy launch-status banner to avoid duplicating "analyzing NVDA 07:30".
+    if (s.name === 'invest') {
+      document.getElementById('launch-status')?.classList.add('hidden');
+      if (s.status !== 'running' && _launchPollTimer) {
+        clearInterval(_launchPollTimer); _launchPollTimer = null;
+      }
+      return;
+    }
     if (s.status === 'running') {
       setLaunchStatus('running', isZh ? `正在執行 ${s.name || ''}...` : `Running ${s.name || ''}...`);
     } else {
@@ -351,13 +360,18 @@ async function launchAnalysis() {
   if (!ticker) return;
   const isZh = UI.currentLang === 'zh';
   const confirmMsg = isZh
-    ? `透過 Claude 執行「分析 ${ticker}」（risk=${UI.riskTolerance}）？\nV4.8 約 10-15 分鐘，~$4 tokens`
-    : `Run "分析 ${ticker}" (risk=${UI.riskTolerance}) via Claude?\nV4.8 ~10-15 min, ~$4 tokens`;
+    ? `加入個股分析佇列：${ticker}（risk=${UI.riskTolerance}）？\nV4.8 每檔約 10-15 分鐘，~$4 tokens。重複者（排隊中或分析中）會被忽略。`
+    : `Enqueue invest analysis for ${ticker} (risk=${UI.riskTolerance})?\nV4.8 ~10-15 min per ticker, ~$4 tokens. Duplicates are abandoned.`;
   if (!confirm(confirmMsg)) return;
 
-  setLaunchStatus('running', isZh ? `啟動 ${ticker} 分析...` : `Starting ${ticker} analysis...`);
-  document.getElementById('launch-elapsed').textContent = '00:00';
   try {
+    if (window.AnalyzeQueue) {
+      await window.AnalyzeQueue.enqueue(ticker);
+      input.value = '';
+      UI.logToUI(`Enqueued: invest ${ticker}`, 'info');
+      return;
+    }
+    // Fallback: direct POST when queue module didn't load
     const res = await fetch('/api/run-protocol', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -367,8 +381,6 @@ async function launchAnalysis() {
       const err = await res.json().catch(() => ({ error: res.statusText }));
       throw new Error(err.error || `HTTP ${res.status}`);
     }
-    _launchPollTimer = setInterval(pollLaunchStatus, 2000);
-    pollLaunchStatus();
     UI.logToUI(`Launched: invest ${ticker}`, 'info');
   } catch (e) {
     setLaunchStatus('error', e.message);
@@ -379,12 +391,13 @@ async function launchAnalysis() {
 document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
 document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
 
-// Resume banner on page load if a protocol is already running
+// Resume banner on page load if a protocol is already running.
+// For invest runs the analyze-queue widget handles the display; skip the banner.
 (async () => {
   try {
     const r = await fetch('/api/run-protocol/status');
     const s = await r.json();
-    if (s.status === 'running') {
+    if (s.status === 'running' && s.name !== 'invest') {
       const isZh = UI.currentLang === 'zh';
       setLaunchStatus('running', isZh ? `${s.name || ''} 執行中...` : `${s.name || ''} running...`);
       _launchPollTimer = setInterval(pollLaunchStatus, 2000);
@@ -609,3 +622,6 @@ const _activePage = document.body.dataset.page || 'index';
 UI.boot(_activePage, { translate: applyTranslations, reload: updateDashboard });
 updateDashboard();
 setInterval(updateDashboard, 60000);
+
+// Mount global analyze-queue widget inside Quick Launch engine card
+if (window.AnalyzeQueue) window.AnalyzeQueue.renderWidget('#analyze-queue-widget');

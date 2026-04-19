@@ -154,8 +154,27 @@ def main():
         if key not in summary:
             errors.append(f"summary missing {key}")
 
+    # ── 9. today_verdict (V1.4) — warn-only so older caches don't break ──
+    # Once all new scans produce this, we'll tighten to hard error.
+    warnings = []
+    p4c = data.get("_phase4c") or {}
+    tv = p4c.get("today_verdict")
+    if not isinstance(tv, dict):
+        warnings.append("_phase4c missing today_verdict (required from V1.4 on; Dashboard hero card will fall back to session_notes)")
+    else:
+        for req in ("headline", "stance", "one_liner", "key_takeaways", "sector_actions", "watch_next"):
+            if req not in tv:
+                warnings.append(f"_phase4c.today_verdict missing {req}")
+        if isinstance(tv.get("key_takeaways"), list) and len(tv["key_takeaways"]) < 3:
+            warnings.append("_phase4c.today_verdict.key_takeaways should have ≥ 3 entries")
+        if isinstance(tv.get("sector_actions"), list) and len(tv["sector_actions"]) < 3:
+            warnings.append("_phase4c.today_verdict.sector_actions should have ≥ 3 entries")
+
     if errors:
         fail(errors)
+
+    for w in warnings:
+        print(f"[validate_sector_intel] ⚠ {w}", file=sys.stderr)
 
     hot = summary.get("hot_sectors", [])
     cold = summary.get("cold_sectors", [])

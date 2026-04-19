@@ -1,6 +1,9 @@
 ---
 name: portfolio-risk-manager
 description: Calculates vol-adjusted position size cap and correlation-aware multiplier for a new candidate ticker given current holdings. Use in investment protocol Phase 4 Step 2 to compute safe position size before entry. Reads positions.json and yfinance data; no API key.
+market: market-agnostic
+scope: portfolio-level
+data_sources: [positions.json, yfinance]
 ---
 
 # Portfolio Risk Manager

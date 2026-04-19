@@ -49,7 +49,9 @@ function defaultFilter() {
         maxRsi:   null,
         stage:    'any',
         sector:   'any',
+        label:    'any',
         requiredSignals:   new Set(),
+        requiredWarnings:  new Set(),
         excludedWarnings:  new Set(),
         search:   '',
     };
@@ -73,7 +75,9 @@ const PRESETS = {
         filter: {
             minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
             stage: 'Stage 2 uptrend', sector: 'any',
+            label: 'any',
             requiredSignals:  ['fresh_golden_cross_20_50', 'volume_expansion'],
+            requiredWarnings: [],
             excludedWarnings: ['overbought_rsi'],
             search: '',
         },
@@ -82,7 +86,9 @@ const PRESETS = {
         filter: {
             minScore: 65, maxScore: null, minRsi: null, maxRsi: null,
             stage: 'Stage 2 uptrend', sector: 'any',
+            label: 'any',
             requiredSignals:  [],
+            requiredWarnings: [],
             excludedWarnings: ['overbought_rsi', 'parabolic_blowoff_risk'],
             search: '',
         },
@@ -91,7 +97,9 @@ const PRESETS = {
         filter: {
             minScore: 45, maxScore: null, minRsi: null, maxRsi: null,
             stage: 'Stage 2 uptrend', sector: 'any',
+            label: 'any',
             requiredSignals:  ['oversold_rsi'],
+            requiredWarnings: [],
             excludedWarnings: [],
             search: '',
         },
@@ -100,7 +108,9 @@ const PRESETS = {
         filter: {
             minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
             stage: 'any', sector: 'any',
+            label: 'any',
             requiredSignals:  ['squeeze_candidate'],
+            requiredWarnings: [],
             excludedWarnings: [],
             search: '',
         },
@@ -109,7 +119,9 @@ const PRESETS = {
         filter: {
             minScore: 60, maxScore: null, minRsi: null, maxRsi: null,
             stage: 'any', sector: 'any',
+            label: 'any',
             requiredSignals:  [],
+            requiredWarnings: [],
             excludedWarnings: ['overbought_rsi', 'parabolic_blowoff_risk'],
             search: '',
         },
@@ -127,8 +139,9 @@ function applyPreset(key) {
     } else {
         _state.filter = {
             ...p.filter,
-            requiredSignals:  new Set(p.filter.requiredSignals),
-            excludedWarnings: new Set(p.filter.excludedWarnings),
+            requiredSignals:  new Set(p.filter.requiredSignals  || []),
+            requiredWarnings: new Set(p.filter.requiredWarnings || []),
+            excludedWarnings: new Set(p.filter.excludedWarnings || []),
         };
     }
     renderFilterPanel();
@@ -188,6 +201,14 @@ async function loadMomentumData() {
         _state.rows = ms.rows;
         _state.history = ms.history_by_ticker || {};
         _state.journalStats = ms.journal?.stats || null;
+
+        // Deep-link: ?sector=<GICS> from sector page → pre-apply sector filter
+        const qp = new URLSearchParams(window.location.search);
+        const deepSector = qp.get('sector');
+        if (deepSector) {
+            const known = new Set(ms.rows.map(r => r.sector).filter(Boolean));
+            if (known.has(deepSector)) _state.filter.sector = deepSector;
+        }
 
         document.getElementById('no-data-banner').classList.add('hidden');
         document.getElementById('meta-strip').classList.remove('hidden');
@@ -280,6 +301,24 @@ function renderWarningChips() {
     });
 }
 
+function renderRequiredWarningChips() {
+    const wrap = document.getElementById('f-required-warning-chips');
+    if (!wrap) return;
+    wrap.innerHTML = FILTER_WARNINGS.map(w => {
+        const active = _state.filter.requiredWarnings.has(w);
+        return `<span class="filter-chip${active ? ' active' : ''}" data-reqwarn="${w}" title="${w}">${warnLabel(w)}</span>`;
+    }).join('');
+    wrap.querySelectorAll('[data-reqwarn]').forEach(el => {
+        el.onclick = () => {
+            const k = el.dataset.reqwarn;
+            const s = _state.filter.requiredWarnings;
+            if (s.has(k)) s.delete(k); else s.add(k);
+            renderRequiredWarningChips();
+            renderTable();
+        };
+    });
+}
+
 function renderPresetRow() {
     const wrap = document.getElementById('f-presets');
     if (!wrap) return;
@@ -303,9 +342,12 @@ function renderFilterPanel() {
     document.getElementById('f-max-rsi').value = _state.filter.maxRsi ?? '';
     document.getElementById('f-stage').value = _state.filter.stage;
     document.getElementById('f-sector').value = _state.filter.sector;
+    const labelSel = document.getElementById('f-label');
+    if (labelSel) labelSel.value = _state.filter.label;
     document.getElementById('search-ticker').value = _state.filter.search;
     renderPresetRow();
     renderSignalChips();
+    renderRequiredWarningChips();
     renderWarningChips();
     UI.icons();
 }
@@ -317,12 +359,14 @@ function matchesFilter(r) {
     if (f.maxScore != null && r.score > f.maxScore) return false;
     if (f.minRsi != null && (r.rsi_14 == null || r.rsi_14 < f.minRsi)) return false;
     if (f.maxRsi != null && (r.rsi_14 == null || r.rsi_14 > f.maxRsi)) return false;
-    if (f.stage !== 'any' && r.stage !== f.stage) return false;
+    if (f.stage  !== 'any' && r.stage  !== f.stage)  return false;
     if (f.sector !== 'any' && r.sector !== f.sector) return false;
+    if (f.label  !== 'any' && r.label  !== f.label)  return false;
     const sigs = new Set(r.signals || []);
     for (const s of f.requiredSignals) if (!sigs.has(s)) return false;
     const warns = new Set(r.warnings || []);
-    for (const w of f.excludedWarnings) if (warns.has(w)) return false;
+    for (const w of f.requiredWarnings) if (!warns.has(w)) return false;
+    for (const w of f.excludedWarnings) if (warns.has(w))  return false;
     if (f.search && !(r.ticker || '').toUpperCase().includes(f.search.toUpperCase())) return false;
     return true;
 }
@@ -344,8 +388,11 @@ function renderTable() {
 
     const countTxt = `${visible.length} / ${_state.rows.length}`;
     document.getElementById('table-count').textContent = countTxt;
-    const matchEl = document.getElementById('filter-match-count');
-    if (matchEl) matchEl.textContent = countTxt;
+    // Hero count: big number on its own, total as subtle side label
+    const matchEl  = document.getElementById('filter-match-count');
+    const totalEl  = document.getElementById('filter-match-total');
+    if (matchEl)  matchEl.textContent  = visible.length;
+    if (totalEl)  totalEl.textContent  = `/ ${_state.rows.length}`;
 
     tbody.querySelectorAll('.mom-row').forEach(tr => {
         tr.addEventListener('click', () => openHistory(tr.dataset.ticker));
@@ -374,6 +421,45 @@ function renderTable() {
             if (r) openRsiPopup(r);
         });
     });
+    // Analyze button click → enqueue invest protocol
+    tbody.querySelectorAll('.analyze-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const tk = btn.dataset.analyzeTicker;
+            if (tk && window.AnalyzeQueue) window.AnalyzeQueue.enqueue(tk);
+        });
+    });
+    // Pill click → toggle inclusive filter by label / sector / signal / warning
+    tbody.querySelectorAll('.pill-clickable').forEach(el => {
+        el.addEventListener('click', e => {
+            e.stopPropagation();
+            const type  = el.dataset.pillType;
+            const value = el.dataset.pillValue;
+            if (!type || !value) return;
+            _togglePillFilter(type, value);
+        });
+    });
+}
+
+// Toggle inclusive filter based on pill type + value.
+// Clicking the same pill that's already active un-sets it.
+function _togglePillFilter(type, value) {
+    const f = _state.filter;
+    if (type === 'label') {
+        f.label = (f.label === value) ? 'any' : value;
+    } else if (type === 'sector') {
+        f.sector = (f.sector === value) ? 'any' : value;
+    } else if (type === 'signal') {
+        if (f.requiredSignals.has(value)) f.requiredSignals.delete(value);
+        else f.requiredSignals.add(value);
+    } else if (type === 'warning') {
+        // Clicking a row warning pill = "show more like this" = add to REQUIRED warnings
+        // (excluded warnings are only set via the filter panel's warning chips)
+        if (f.requiredWarnings.has(value)) f.requiredWarnings.delete(value);
+        else f.requiredWarnings.add(value);
+    }
+    renderFilterPanel();
+    renderTable();
 }
 
 /* Score battery: 10 cells, tier colors, partial cell via gradient.
@@ -451,9 +537,9 @@ function rowHTML(r) {
                          : above200 >= 0 ? 'color:#86efac' : 'color:#fca5a5';
 
     const sigHTML = (r.signals || []).slice(0, 4)
-        .map(s => `<span class="signal-pill" title="${s}">${sigLabel(s)}</span>`).join('')
+        .map(s => `<span class="signal-pill pill-clickable" data-pill-type="signal" data-pill-value="${s}" title="${s}">${sigLabel(s)}</span>`).join('')
       + (r.warnings || []).slice(0, 2)
-        .map(w => `<span class="warning-pill" title="${w}">${warnLabel(w)}</span>`).join('');
+        .map(w => `<span class="warning-pill pill-clickable" data-pill-type="warning" data-pill-value="${w}" title="${w}">${warnLabel(w)}</span>`).join('');
 
     const shortTxt = r.short_pct_float == null ? '—'
                     : `${r.short_pct_float.toFixed(1)}%`;
@@ -463,14 +549,22 @@ function rowHTML(r) {
                      : '#a1a1aa';
 
     const sectorTxt = r.sector && r.sector !== 'Unknown'
-        ? `<div class="text-[9px] text-zinc-500 font-normal leading-none mt-0.5">${sectorLabel(r.sector)}</div>`
+        ? `<div class="text-[9px] font-normal leading-none mt-0.5 pill-clickable sector-subscript" data-pill-type="sector" data-pill-value="${r.sector}">${sectorLabel(r.sector)}</div>`
         : '';
     return `<tr class="mom-row" data-ticker="${r.ticker}">
         <td class="text-zinc-500 font-mono text-xs">${r.rank ?? '—'}</td>
-        <td><div class="font-bold">${r.ticker}</div>${sectorTxt}</td>
+        <td>
+            <div class="flex items-center gap-1.5">
+                <span class="font-bold">${r.ticker}</span>
+                <button class="analyze-btn" data-analyze-ticker="${r.ticker}" title="${(t().analyze_tooltip || '加入個股分析佇列')}">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            </div>
+            ${sectorTxt}
+        </td>
         <td class="text-right font-mono">$${r.price != null ? r.price.toFixed(2) : '—'}</td>
         <td class="text-right score-cell">${scoreBatteryHTML(r.score)}</td>
-        <td><span class="mlabel label-${r.label || 'NEUTRAL'}" title="${r.label || ''}">${labelText(r.label)}</span></td>
+        <td><span class="mlabel label-${r.label || 'NEUTRAL'} pill-clickable" data-pill-type="label" data-pill-value="${r.label || ''}" title="${r.label || ''}">${labelText(r.label)}</span></td>
         <td class="text-xs text-zinc-400 stage-cell" data-ticker-stage="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4)" title="${r.stage || ''}">${stageLabel(r.stage)}</td>
         <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_ratioColor(r.ratio_20d)};font-weight:700">${r.ratio_20d != null ? r.ratio_20d.toFixed(2) + '×' : '—'}</td>
         <td class="text-right font-mono text-xs" style="${above200Color}">${above200Txt}</td>
@@ -485,6 +579,15 @@ function emptyRow() {
         ${t().no_data || 'No matches'}</td></tr>`;
 }
 
+// Inline SVG icons for sort state — rendered immediately, no lucide hydration needed.
+// Paths copied from lucide (arrow-up / arrow-down / chevrons-up-down, stroke-width 2.5).
+const SVG_OPEN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">';
+const SORT_ICONS = {
+    desc:     `${SVG_OPEN}<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`,
+    asc:      `${SVG_OPEN}<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>`,
+    inactive: `${SVG_OPEN}<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>`,
+};
+
 function _updateSortHeaders() {
     document.querySelectorAll('.mom-th.sortable').forEach(th => {
         const field = th.dataset.sort;
@@ -492,10 +595,12 @@ function _updateSortHeaders() {
         if (!arrow) return;
         if (_state.sort.field === field) {
             th.classList.add('active-sort');
-            arrow.textContent = _state.sort.dir === 'desc' ? '▼' : '▲';
+            arrow.classList.remove('sort-arrow-inactive');
+            arrow.innerHTML = _state.sort.dir === 'desc' ? SORT_ICONS.desc : SORT_ICONS.asc;
         } else {
             th.classList.remove('active-sort');
-            arrow.textContent = '▼';  // inactive indicator (dimmed)
+            arrow.classList.add('sort-arrow-inactive');
+            arrow.innerHTML = SORT_ICONS.inactive;
         }
     });
 }
@@ -1039,81 +1144,116 @@ function _fmtElapsed(sec) {
 
 let _indicatorHideTimer = null;
 
-function showScanIndicator(status, phase, elapsedSec, progress) {
-    const el = document.getElementById('scan-indicator');
-    if (!el) return;
-    el.classList.remove('hidden');
-    el.classList.add('flex');
+// Palette for the scan card (left-border + pulse-dot + status tag).
+const SCAN_CARD_COLORS = {
+    running:  { fg: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
+    bridging: { fg: '#eab308', bg: 'rgba(234,179,8,0.15)' },
+    done:     { fg: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
+    error:    { fg: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
+};
+
+function showScanCard(status, phase, elapsedSec, progress, logTail) {
+    const card = document.getElementById('scan-card');
+    if (!card) return;
+    card.classList.remove('hidden');
 
     const tr = t();
-    const statusLabels = {
-        running:  tr.banner_scanning || 'SCANNING',
-        bridging: tr.banner_bridging || 'REFRESHING',
-        done:     tr.banner_done     || 'DONE',
-        error:    tr.banner_error    || 'ERROR',
+    const labels = {
+        running:  tr.scan_card_running  || 'Scan running…',
+        bridging: tr.scan_card_bridging || 'Refreshing data…',
+        done:     tr.scan_card_done     || 'Scan complete',
+        error:    tr.scan_card_error    || 'Scan failed',
     };
-    const statusColors = {
-        running:  { fg: '#22c55e', bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.35)' },
-        bridging: { fg: '#eab308', bg: 'rgba(234,179,8,0.10)', border: 'rgba(234,179,8,0.35)' },
-        done:     { fg: '#22c55e', bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.35)' },
-        error:    { fg: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.35)' },
+    const statusTags = {
+        running: tr.banner_scanning || 'SCANNING',
+        bridging:tr.banner_bridging || 'REFRESHING',
+        done:    tr.banner_done     || 'DONE',
+        error:   tr.banner_error    || 'ERROR',
     };
-    const c = statusColors[status] || statusColors.running;
-    el.style.background  = c.bg;
-    el.style.borderColor = c.border;
+    const c = SCAN_CARD_COLORS[status] || SCAN_CARD_COLORS.running;
 
-    const statusEl = document.getElementById('scan-indicator-status');
-    let statusTxt = statusLabels[status] || status.toUpperCase();
-    // Append progress for running state: "SCANNING 150/503"
+    card.style.setProperty('--scan-accent', c.fg);
+    document.getElementById('scan-card-pulse').style.background = c.fg;
+    // Pause the pulse when terminal
+    document.getElementById('scan-card-pulse').style.animation =
+        (status === 'done' || status === 'error') ? 'none' : '';
+
+    // Title + progress inline (e.g. "Scan running… 150/503")
+    let title = labels[status] || status;
     if (status === 'running' && progress && progress.total > 0) {
-        statusTxt += `  ${progress.done || 0}/${progress.total}`;
+        title += `  ${progress.done || 0}/${progress.total}`;
     }
-    statusEl.textContent = statusTxt;
-    statusEl.style.color = c.fg;
+    document.getElementById('scan-card-title').textContent = title;
 
-    const iconEl = document.getElementById('scan-indicator-icon');
-    iconEl.style.color = c.fg;
-    if (status === 'running' || status === 'bridging') {
-        iconEl.setAttribute('data-lucide', 'loader-2');
-        iconEl.classList.add('animate-spin');
-    } else if (status === 'done') {
-        iconEl.setAttribute('data-lucide', 'check-circle-2');
-        iconEl.classList.remove('animate-spin');
-    } else {
-        iconEl.setAttribute('data-lucide', 'alert-circle');
-        iconEl.classList.remove('animate-spin');
-    }
+    const statusEl = document.getElementById('scan-card-status');
+    statusEl.textContent = statusTags[status] || status.toUpperCase();
+    statusEl.style.background = c.bg;
+    statusEl.style.color      = c.fg;
 
-    const elapsedEl = document.getElementById('scan-indicator-elapsed');
-    elapsedEl.textContent = _fmtElapsed(elapsedSec || 0);
-    // Hover tooltip: phase + cache hit / error count when available
-    const tips = [];
-    if (phase) tips.push(phase);
+    // Detail line: phase + cache/error counts
+    const bits = [];
+    if (phase) bits.push(phase);
     if (progress && progress.total > 0) {
-        tips.push(`cache hits ${progress.cache_hits_count || 0}`);
-        if (progress.errors_count) tips.push(`fetch errors ${progress.errors_count}`);
+        bits.push(`cache ${progress.cache_hits_count || 0}`);
+        if (progress.errors_count) bits.push(`errors ${progress.errors_count}`);
     }
-    el.title = tips.join(' · ');
+    document.getElementById('scan-card-detail').textContent = bits.join(' · ');
 
-    // Auto-hide terminal states after a short display window
+    document.getElementById('scan-card-elapsed').textContent = _fmtElapsed(elapsedSec || 0);
+
+    // Log tail — only rebuild when changed, to preserve scroll position
+    const logEl = document.getElementById('scan-card-log');
+    if (logEl && Array.isArray(logTail)) {
+        const text = logTail.join('\n');
+        if (logEl.textContent !== text) {
+            const pinnedToBottom = Math.abs(logEl.scrollHeight - logEl.clientHeight - logEl.scrollTop) < 40;
+            logEl.textContent = text;
+            if (pinnedToBottom) logEl.scrollTop = logEl.scrollHeight;
+        }
+    }
+
+    // Dismiss only makes sense in terminal states
+    const dismiss = document.getElementById('scan-card-dismiss');
+    if (status === 'done' || status === 'error') dismiss.classList.remove('hidden');
+    else                                         dismiss.classList.add('hidden');
+
+    // Terminal auto-hide after a moment (respect user if they've expanded the log)
     if (_indicatorHideTimer) { clearTimeout(_indicatorHideTimer); _indicatorHideTimer = null; }
     if (status === 'done' || status === 'error') {
-        _indicatorHideTimer = setTimeout(hideScanIndicator, 5000);
+        const bodyOpen = !document.getElementById('scan-card-body').classList.contains('hidden');
+        if (!bodyOpen) _indicatorHideTimer = setTimeout(hideScanCard, 6000);
     }
-    UI.icons();
 }
 
-function hideScanIndicator() {
-    const el = document.getElementById('scan-indicator');
+function hideScanCard() {
+    const el = document.getElementById('scan-card');
     if (!el) return;
     el.classList.add('hidden');
-    el.classList.remove('flex');
+    // Also collapse the log panel so next run starts collapsed
+    document.getElementById('scan-card-body')?.classList.add('hidden');
+    const expandLabel = document.getElementById('scan-card-expand-label');
+    if (expandLabel) expandLabel.textContent = (t().scan_card_expand || '展開');
     if (_indicatorHideTimer) { clearTimeout(_indicatorHideTimer); _indicatorHideTimer = null; }
+}
+
+function toggleScanCardBody() {
+    const body = document.getElementById('scan-card-body');
+    if (!body) return;
+    const open = body.classList.toggle('hidden') === false;
+    const lbl = document.getElementById('scan-card-expand-label');
+    if (lbl) lbl.textContent = open ? (t().scan_card_collapse || '收起') : (t().scan_card_expand || '展開');
+    // When opening, scroll log to bottom so latest is visible
+    if (open) {
+        const logEl = document.getElementById('scan-card-log');
+        if (logEl) logEl.scrollTop = logEl.scrollHeight;
+    }
 }
 
 // Legacy aliases so existing callers keep working without churn
-const showScanBanner = showScanIndicator;
-const hideScanBanner = hideScanIndicator;
+const showScanIndicator = showScanCard;
+const hideScanIndicator = hideScanCard;
+const showScanBanner    = showScanCard;
+const hideScanBanner    = hideScanCard;
 
 async function triggerRescan() {
     const btn = document.getElementById('refresh-momentum');
@@ -1166,7 +1306,7 @@ function startScanPolling(btn, label, origLabel) {
                 done: s.done, total: s.total,
                 cache_hits_count: s.cache_hits_count,
                 errors_count: s.errors_count,
-            });
+            }, s.log_tail || []);
 
             if (s.status === 'done') {
                 clearInterval(_scanPollTimer); _scanPollTimer = null;
@@ -1213,7 +1353,7 @@ async function checkExistingScan() {
                 done: s.done, total: s.total,
                 cache_hits_count: s.cache_hits_count,
                 errors_count: s.errors_count,
-            });
+            }, s.log_tail || []);
             startScanPolling(btn, label, origLabel);
         }
     } catch (e) { /* server may not have endpoint yet — ignore */ }
@@ -1245,9 +1385,23 @@ function translate() {
     set('filter-stage-label',    tr.filter_stage);
     set('filter-sector-label',   tr.filter_sector);
     set('filter-search-label',   tr.filter_search);
-    set('filter-preset-label',   tr.filter_preset_title);
-    set('filter-req-sig-label',  tr.filter_req_sig);
-    set('filter-excl-warn-label',tr.filter_excl_warn);
+    set('filter-preset-label',    tr.filter_preset_title);
+    set('filter-match-label',     tr.filter_match_label);
+    set('filter-advanced-label',  tr.filter_advanced);
+    set('filter-req-sig-label',   tr.filter_req_sig);
+    set('filter-req-warn-label',  tr.filter_req_warn);
+    set('filter-excl-warn-label', tr.filter_excl_warn);
+    set('filter-label-label',     tr.filter_label);
+    // Translate label dropdown options via labels_map
+    const labelSel = document.getElementById('f-label');
+    if (labelSel) {
+        const anyOpt = labelSel.querySelector('option[value="any"]');
+        if (anyOpt) anyOpt.textContent = tr.stage_any || 'Any';
+        ['STRONGLY_BULLISH','BULLISH','NEUTRAL','WEAK','BEARISH'].forEach(k => {
+            const opt = labelSel.querySelector(`option[value="${k}"]`);
+            if (opt) opt.textContent = labelText(k);
+        });
+    }
     // Re-render preset row so tooltips translate on language toggle
     if (_state.rows.length) renderPresetRow();
     const search = document.getElementById('search-ticker');
@@ -1286,8 +1440,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('stage-modal-bg')?.addEventListener('click', closeStagePopup);
     document.getElementById('rsi-modal-close')?.addEventListener('click', closeRsiPopup);
     document.getElementById('rsi-modal-bg')?.addEventListener('click', closeRsiPopup);
-    // Click the indicator itself to dismiss (works when in terminal state)
-    document.getElementById('scan-indicator')?.addEventListener('click', hideScanIndicator);
+    // Scan card — expand log / dismiss
+    document.getElementById('scan-card-expand')?.addEventListener('click', toggleScanCardBody);
+    document.getElementById('scan-card-dismiss')?.addEventListener('click', hideScanCard);
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') { closeHistory(); closeVolumePopup(); closeStagePopup(); closeRsiPopup(); }
     });
@@ -1315,6 +1470,10 @@ document.addEventListener('DOMContentLoaded', () => {
         _state.filter.sector = e.target.value;
         renderTable();
     });
+    document.getElementById('f-label')?.addEventListener('change', e => {
+        _state.filter.label = e.target.value;
+        renderTable();
+    });
     document.getElementById('search-ticker').addEventListener('input', e => {
         _state.filter.search = e.target.value;
         renderTable();
@@ -1326,6 +1485,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     _bindSortHeaders();
+
+    // Persist advanced-filter expand state across reloads
+    const details = document.getElementById('filter-advanced');
+    if (details) {
+        if (localStorage.getItem('momentum_advanced_open') === '1') details.open = true;
+        details.addEventListener('toggle', () => {
+            localStorage.setItem('momentum_advanced_open', details.open ? '1' : '0');
+        });
+    }
+
     loadMomentumData();
     checkExistingScan();
 });

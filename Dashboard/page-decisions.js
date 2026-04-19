@@ -1050,38 +1050,26 @@ function syncLockUI() {
 }
 
 async function refreshTicker(ticker) {
-    if (_protoLock.running) {
-        UI.showToast(UI.currentLang === 'zh'
-            ? `已有分析執行中：${_protoLock.ticker || _protoLock.name}`
-            : `Another analysis is running: ${_protoLock.ticker || _protoLock.name}`, 'error');
-        return;
-    }
     const isZh = UI.currentLang === 'zh';
     const confirmMsg = isZh
-        ? `透過 Claude 執行「分析 ${ticker}」（risk=${UI.riskTolerance}）？\nV4.8 約 10-15 分鐘，~$4 tokens`
-        : `Run full "invest ${ticker}" (risk=${UI.riskTolerance}) via Claude?\nV4.8 ~10-15 min, ~$4 tokens`;
+        ? `加入個股分析佇列：${ticker}（risk=${UI.riskTolerance}）？\nV4.8 每檔約 10-15 分鐘，~$4 tokens。已在佇列/分析中的重複請求會被忽略。`
+        : `Enqueue invest analysis for ${ticker} (risk=${UI.riskTolerance})?\nV4.8 ~10-15 min per ticker, ~$4 tokens. Duplicates (queued or active) are abandoned.`;
     if (!confirm(confirmMsg)) return;
 
-    try {
-        const res = await fetch('/api/run-protocol', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: 'invest', ticker: ticker.toUpperCase(), risk_tolerance: UI.riskTolerance }),
-        });
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: res.statusText }));
-            throw new Error(err.error || `HTTP ${res.status}`);
+    if (window.AnalyzeQueue) {
+        await window.AnalyzeQueue.enqueue(ticker);
+    } else {
+        // Fallback to direct run if the queue module didn't load for any reason
+        try {
+            const res = await fetch('/api/run-protocol', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'invest', ticker: ticker.toUpperCase(), risk_tolerance: UI.riskTolerance }),
+            });
+            if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
+        } catch (e) {
+            UI.showToast(e.message, 'error');
         }
-        // Optimistically seed lock so UI reacts before the next poll tick
-        _protoLock.running = true;
-        _protoLock.name = 'invest';
-        _protoLock.ticker = ticker.toUpperCase();
-        _protoLock.started_at = new Date().toISOString();
-        _protoLock.elapsed_sec = 0;
-        syncLockUI();
-        UI.showToast(isZh ? `開始分析 ${ticker}…` : `Analyzing ${ticker}…`, 'info', 3000);
-    } catch (e) {
-        UI.showToast(e.message, 'error');
     }
 }
 

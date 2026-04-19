@@ -369,6 +369,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!r.ok) return;
       const s = await r.json();
       document.getElementById('news-run-elapsed').textContent = formatElapsed(s.elapsed_sec || 0);
+
+      // Live log tail — pin-to-bottom unless user scrolled up
+      const logEl = document.getElementById('news-run-log');
+      if (logEl && typeof s.log_tail === 'string' && s.log_tail !== logEl.textContent) {
+        const pinned = Math.abs(logEl.scrollHeight - logEl.clientHeight - logEl.scrollTop) < 40;
+        logEl.textContent = s.log_tail;
+        if (pinned) logEl.scrollTop = logEl.scrollHeight;
+      }
+
       if (s.status !== 'running') {
         if (_newsPollTimer) { clearInterval(_newsPollTimer); _newsPollTimer = null; }
         const isZh = UI.currentLang === 'zh';
@@ -381,6 +390,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (e) { /* ignore */ }
   }
+
+  // Expand / collapse the live-log panel
+  document.getElementById('news-run-expand')?.addEventListener('click', () => {
+    const panel = document.getElementById('news-run-panel');
+    const btn   = document.getElementById('news-run-expand');
+    if (!panel) return;
+    const open = panel.classList.toggle('hidden') === false;
+    if (btn) btn.textContent = open ? '收起' : '展開';
+    if (open) {
+      const log = document.getElementById('news-run-log');
+      if (log) log.scrollTop = log.scrollHeight;
+    }
+  });
 
   async function triggerProtocol(name, params, title) {
     const isZh = UI.currentLang === 'zh';

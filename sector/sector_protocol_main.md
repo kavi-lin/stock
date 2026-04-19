@@ -1,5 +1,9 @@
 # Pre-Market Sector Intelligence Protocol (V1.3)
 
+<!-- [scope] US equity sector rotation. GICS + US sector ETFs + TraderMonty breadth.
+     Phase 4a/4b debate patterns are [framework]; data inputs are [domain:us-equity].
+     See skills/MARKET_INDEX.md. -->
+
 > **多檔案架構**：此主檔案約 200 行，詳細細節分拆於子檔案，按需載入以節省 context。
 
 > **Changelog V1.2 → V1.3（Subagent Fan-Out + Validator）**

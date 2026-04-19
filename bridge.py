@@ -4,7 +4,7 @@ import os
 import glob
 import re
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timedelta, timezone
 
 
 def _safe_float(v):
@@ -98,27 +98,61 @@ def get_latest_file(pattern):
     return max(files, key=os.path.getmtime) if files else None
 
 
-# Unified cache freshness rule: mtime < 3 hours ago
-CACHE_TTL_SEC = 10800  # 3 hours
+# Unified cache freshness rule: 3h of market-open time elapsed since mtime.
+# Market-open = Mon-Fri 9:30-16:00 ET. Weekend / pre-post market minutes don't
+# count — a Saturday scan stays FRESH until Monday's market open, since no
+# price data changes over the weekend.
+CACHE_TTL_SEC = 10800  # 3h of market-open minutes
+
+try:
+    from zoneinfo import ZoneInfo
+    _ET = ZoneInfo("America/New_York")
+except ImportError:
+    _ET = timezone(timedelta(hours=-4))  # fallback: EDT (off by 1h in winter)
+
+def _market_minutes_between(t_start, t_end):
+    """Minutes of US equity regular session (Mon-Fri 9:30-16:00 ET) elapsed.
+    Holidays ignored — a Mon-holiday weekend stays FRESH slightly longer than strict."""
+    if t_end <= t_start:
+        return 0
+    start = datetime.fromtimestamp(t_start, tz=_ET)
+    end   = datetime.fromtimestamp(t_end,   tz=_ET)
+    total = 0.0
+    cursor = start
+    while cursor < end:
+        if cursor.weekday() < 5:
+            day_open  = cursor.replace(hour=9,  minute=30, second=0, microsecond=0)
+            day_close = cursor.replace(hour=16, minute=0,  second=0, microsecond=0)
+            ws = max(cursor, day_open)
+            we = min(end,    day_close)
+            if we > ws:
+                total += (we - ws).total_seconds() / 60
+        cursor = (cursor + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return int(total)
 
 def _is_fresh(path, ttl_sec=CACHE_TTL_SEC):
-    """True if file exists and mtime is within ttl_sec. Used across all cache loaders."""
+    """True when market-open minutes since mtime < ttl_sec."""
     try:
-        return (datetime.now().timestamp() - os.path.getmtime(path)) < ttl_sec
+        mtime = os.path.getmtime(path)
+        return _market_minutes_between(mtime, datetime.now().timestamp()) * 60 < ttl_sec
     except OSError:
         return False
 
 def _freshness_label(path):
-    """Human-readable '(FRESH, 45m)' or '(STALE, 5h)' for log output."""
+    """Human-readable '(FRESH, 45m)' or '(STALE, 5h)' for log output.
+    Verdict uses market-open minutes; age label uses wall-clock for readability."""
     try:
-        age_sec = datetime.now().timestamp() - os.path.getmtime(path)
+        mtime = os.path.getmtime(path)
+        age_sec = datetime.now().timestamp() - mtime
         if age_sec < 60:
             age_str = f"{int(age_sec)}s"
         elif age_sec < 3600:
             age_str = f"{int(age_sec // 60)}m"
         else:
             age_str = f"{age_sec / 3600:.1f}h"
-        return "FRESH" if age_sec < CACHE_TTL_SEC else "STALE", age_str
+        market_min = _market_minutes_between(mtime, datetime.now().timestamp())
+        state = "FRESH" if market_min * 60 < CACHE_TTL_SEC else "STALE"
+        return state, age_str
     except OSError:
         return "MISSING", "-"
 
@@ -268,8 +302,30 @@ def extract_market_data(s_data):
         "warning_flags":    phase0.get("warning_flags", []),
         "trump_signals":    political.get("trump_trade_signals", []),
         "named_targets":    political.get("named_targets_today", []),
+        "top_catalysts":    _normalize_catalysts(phase3.get("top_catalysts", [])),
+        "today_verdict":    (s_data.get("_phase4c") or {}).get("today_verdict"),
         "notes":            s_data.get("session_notes", ""),
     }
+
+
+def _normalize_catalysts(items, limit=10):
+    """Normalise _phase3.top_catalysts entries for the Dashboard catalyst feed.
+    Keeps fields the sector page actually reads; trims to `limit`."""
+    out = []
+    for c in (items or [])[:limit]:
+        event = c.get("event") or c.get("headline") or ""
+        if not event:
+            continue
+        out.append({
+            "event":            event,
+            "type":             c.get("type", ""),
+            "impact_score":     c.get("impact_score"),
+            "direction":        (c.get("direction") or "").lower(),  # bullish|bearish|binary|neutral
+            "affected_sectors": c.get("affected_sectors", []),
+            "timing":           c.get("timing", ""),                 # past|upcoming|rolling
+            "rank":             c.get("rank"),
+        })
+    return out
 
 
 def extract_sectors(s_data):
@@ -776,47 +832,12 @@ def extract_news():
         except Exception as e:
             print(f"[ERROR] News log {news_file}: {e}")
 
-    # 2. Supplement from sector_intel (upcoming_binary_events + top_catalysts)
-    latest_sector = get_latest_file(os.path.join(SECTOR_LOGS, "*_sector_intel.json"))
-    if latest_sector:
-        try:
-            with open(latest_sector, 'r') as f:
-                s_data = json.load(f)
-            sector_date = s_data.get("verdict_date", s_data.get("generated_at", ""))[:10]
-
-            # upcoming_binary_events → treat as news items
-            for ev in s_data.get("upcoming_binary_events", []):
-                ev_date = ev.get("date") or ev.get("dates", "")
-                # Normalise: take first date if range (e.g. "2026-04-13 to 2026-04-15")
-                ev_date_clean = ev_date.split(" to ")[0].strip() if ev_date else sector_date
-                direction = ev.get("direction", "BINARY").split("—")[0].strip().lower()
-                impact_map = {"bullish": "bullish", "bearish": "bearish", "binary": "binary", "neutral": "neutral"}
-                impact = impact_map.get(direction.lower().split()[0] if direction else "binary", "binary")
-                news.append({
-                    "headline": ev.get("event", ""),
-                    "impact":   impact,
-                    "score":    0.0,
-                    "date":     ev_date_clean,
-                    "sectors":  ev.get("impact_sectors", []),
-                    "source":   "sector_intel",
-                })
-
-            # top_catalysts (old schema key, may exist)
-            for cat in s_data.get("top_catalysts", []) or []:
-                if not cat.get("event"):
-                    continue
-                direction = cat.get("direction", "neutral").lower()
-                news.append({
-                    "headline": cat.get("event", ""),
-                    "impact":   direction if direction in ("bullish", "bearish", "binary") else "neutral",
-                    "score":    float(cat.get("impact_score", 0)),
-                    "date":     (cat.get("updated_at") or sector_date)[:10],
-                    "sectors":  cat.get("affected_sectors", []),
-                    "source":   "sector_intel",
-                })
-
-        except Exception as e:
-            print(f"[ERROR] Sector intel news extraction: {e}")
+    # NOTE: Intentionally NOT supplementing from sector_intel here anymore.
+    # Sector _phase3.top_catalysts render in sector page's catalyst-feed (via
+    # market.top_catalysts). _phase3.upcoming_binary_risks render in sector page's
+    # Binary Risk Alert (via data.binary_risks). The news page should only carry
+    # AI-debated digest items with bull_case/bear_case/arbiter_reasoning/debate_note —
+    # raw sector events don't have those fields and render as half-empty cards.
 
     # Deduplicate by headline, sort by date desc
     seen_headlines = set()
@@ -851,8 +872,24 @@ def ingest_momentum_screen():
     if not csv_files:
         return out
 
-    # Latest snapshot
-    latest_csv = csv_files[-1]
+    # Prefer the latest "substantial" scan (≥ 50 rows) from the last 72h as the
+    # Dashboard baseline. Tiny filtered snapshots (e.g. dev tests producing 5 rows)
+    # shouldn't override a weekend's full-universe 500-ticker baseline.
+    SUBSTANTIAL_ROWS = 50
+    LOOKBACK_SEC    = 72 * 3600
+    now_ts = datetime.now().timestamp()
+    def _row_count(p):
+        try:
+            with open(p, "r", encoding="utf-8") as fp:
+                return sum(1 for _ in fp) - 1  # minus header
+        except Exception:
+            return 0
+    recent_substantial = [
+        p for p in csv_files
+        if (now_ts - os.path.getmtime(p)) < LOOKBACK_SEC
+        and _row_count(p) >= SUBSTANTIAL_ROWS
+    ]
+    latest_csv = recent_substantial[-1] if recent_substantial else csv_files[-1]
     latest_rows = []
     try:
         with open(latest_csv, "r", encoding="utf-8") as fp:

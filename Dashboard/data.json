@@ -1,33 +1,35 @@
 {
   "status": "success",
-  "last_updated": "2026-04-19 11:01:57",
+  "last_updated": "2026-04-19 23:07:43",
   "market": {
     "regime": "RISK_ON",
     "cycle_phase": "Mid",
     "regime_confidence": 0.9,
-    "fear_greed": 69.1,
+    "fear_greed": 68.1,
     "fear_greed_label": "Greed",
     "themes": [
-      "Defense & Aerospace (XAR/ITA)",
-      "Infrastructure & Construction (PAVE/IFRA)",
-      "AI & Semiconductors — AVOID new entries (Exhausting)"
+      "Iran_ceasefire_oil_de-escalation",
+      "Fed_cut_repricing",
+      "AI_capex_mega_print_cycle",
+      "Narrow_rally_index_exhaustion",
+      "Defensive_late_cycle_tilt"
     ],
     "hot_sectors": [
-      "Industrials"
+      "Industrials",
+      "Financials"
     ],
     "warm_sectors": [
-      "Technology",
-      "Financials",
-      "Materials",
       "Utilities",
-      "Energy"
+      "Consumer_Discretionary",
+      "Technology",
+      "Materials"
     ],
     "cold_sectors": [
-      "Consumer_Discretionary",
-      "Communication",
       "Healthcare",
+      "Real_Estate",
+      "Communication",
       "Consumer_Staples",
-      "Real_Estate"
+      "Energy"
     ],
     "avoid_sectors": [],
     "exposure_ceiling": "60-75%",
@@ -39,15 +41,210 @@
       "momentum": 30,
       "mean_reversion_risk": 55
     },
-    "uptrend_ratio": 0.552197413608889,
+    "uptrend_ratio": 0.5521926109325535,
     "warning_flags": [
       "Bearish_Signal_Active",
       "Below_200MA",
       "Low_Historical_Percentile"
     ],
-    "trump_signals": [],
+    "trump_signals": [
+      {
+        "keyword": "iran_ceasefire",
+        "headline": "Truth Social: 'THANK YOU' to Iran for reopening Strait of Hormuz; peace deal 'very close', uranium deal in sight",
+        "source": "Truth_Social_secondary",
+        "affected_sectors": [
+          "Energy",
+          "Consumer_Discretionary"
+        ],
+        "direction": "bearish"
+      }
+    ],
     "named_targets": [],
-    "notes": "NEUTRAL stance — FTD confirmed + S&P 7k breakout but breadth weak (40.3) + SPY RSI 96.9 extreme + AI exhausting + Materials consensus crowded. Industrials only HOT; Tech/Materials downgraded on tail risk. Size down new entries 25-50%, prioritize XLI/XLF over XLK/XLB chasing. Watch for first meaningful pullback before adding."
+    "top_catalysts": [
+      {
+        "event": "Iran war oil shock peaks — IEA reports largest supply disruption in history (10.1 mb/d lost in March, Iraq output -61%)",
+        "type": "geopolitical",
+        "impact_score": 5,
+        "direction": "binary",
+        "affected_sectors": [
+          "Energy",
+          "Industrials",
+          "Consumer_Discretionary"
+        ],
+        "timing": "past",
+        "rank": 1
+      },
+      {
+        "event": "Trump announces US-Iran ceasefire proposal via Truth Social; SPX +2.5%, Nasdaq +2.8%, Dow +1,325",
+        "type": "political",
+        "impact_score": 5,
+        "direction": "bullish",
+        "affected_sectors": [
+          "Energy",
+          "Consumer_Discretionary",
+          "Industrials"
+        ],
+        "timing": "past",
+        "rank": 2
+      },
+      {
+        "event": "Nasdaq logs 12-13 straight up days (longest streak since 1992/2009); Fed funds futures price ≥1 cut by YE",
+        "type": "macro_data",
+        "impact_score": 4,
+        "direction": "bullish",
+        "affected_sectors": [
+          "Technology",
+          "Utilities",
+          "Real_Estate"
+        ],
+        "timing": "past",
+        "rank": 3
+      },
+      {
+        "event": "Iran FM confirms Strait of Hormuz 'fully open'; WTI plunges ~10% to <$84 (5-week low)",
+        "type": "geopolitical",
+        "impact_score": 5,
+        "direction": "bearish",
+        "affected_sectors": [
+          "Energy",
+          "Consumer_Discretionary",
+          "Industrials"
+        ],
+        "timing": "past",
+        "rank": 4
+      },
+      {
+        "event": "March CPI headline hot +0.9% m/m, +3.3% y/y (energy +10.9%); but core goods only +0.2% m/m, slowest in 4 months (tariff pass-through cooling)",
+        "type": "macro_data",
+        "impact_score": 4,
+        "direction": "bullish",
+        "affected_sectors": [
+          "Technology",
+          "Consumer_Discretionary",
+          "Financials"
+        ],
+        "timing": "past",
+        "rank": 5
+      },
+      {
+        "event": "Netflix -9.3% on weak Q2 guide despite EPS/rev beat",
+        "type": "earnings",
+        "impact_score": 3,
+        "direction": "bearish",
+        "affected_sectors": [
+          "Communication"
+        ],
+        "timing": "past",
+        "rank": 6
+      },
+      {
+        "event": "JPM Q1 record markets revenue +19%",
+        "type": "earnings",
+        "impact_score": 4,
+        "direction": "bullish",
+        "affected_sectors": [
+          "Financials"
+        ],
+        "timing": "past",
+        "rank": 7
+      },
+      {
+        "event": "TSLA Q1 + GOOGL Q1 earnings",
+        "type": "earnings",
+        "impact_score": 5,
+        "direction": "binary",
+        "affected_sectors": [
+          "Consumer_Discretionary",
+          "Communication",
+          "Technology"
+        ],
+        "timing": "this_week",
+        "rank": 8
+      },
+      {
+        "event": "MSFT + META Q1 earnings (AI capex guidance)",
+        "type": "earnings",
+        "impact_score": 5,
+        "direction": "binary",
+        "affected_sectors": [
+          "Technology",
+          "Communication"
+        ],
+        "timing": "beyond",
+        "rank": 9
+      },
+      {
+        "event": "FOMC decision (2026-04-29, ~85% priced hold at 3.50-3.75%)",
+        "type": "FOMC",
+        "impact_score": 5,
+        "direction": "binary",
+        "affected_sectors": [
+          "Utilities",
+          "Real_Estate",
+          "Financials",
+          "Technology"
+        ],
+        "timing": "beyond",
+        "rank": 10
+      }
+    ],
+    "today_verdict": {
+      "headline": "NEUTRAL — crowded late-cycle tactical peak",
+      "stance": "NEUTRAL",
+      "confidence": 0.65,
+      "one_liner": "FTD confirmed + RISK_ON 方向在，但 breadth 40 / SPY RSI 96.8 / Nasdaq 13 日連漲顯示是擁擠的後期戰術頂；HOT 僅 XLI/XLF 兩檔且被 DA 挑戰，10 日內密集事件窗。",
+      "key_takeaways": [
+        "FTD confirmed (quality 100) 支撐方向，但 breadth 40 / 23rd pct / SPY RSI 96.8 追漲風險高",
+        "HOT 僅 Industrials + Financials 兩個、全被 Devil's Advocate 挑戰（ceasefire binary / forward NIM）",
+        "4/22 TSLA+GOOGL / 4/28 MSFT+META / 4/29 FOMC 形成 10 日密集事件窗，先別滿倉追新部位"
+      ],
+      "sector_actions": [
+        {
+          "sector": "Industrials",
+          "action": "overweight",
+          "confidence": "medium",
+          "reason": "XLI momentum + infra theme，但停火破裂即翻空"
+        },
+        {
+          "sector": "Financials",
+          "action": "overweight",
+          "confidence": "medium",
+          "reason": "Q1 markets revenue +19%，但 forward NIM 有隱憂"
+        },
+        {
+          "sector": "Technology",
+          "action": "wait",
+          "confidence": "medium",
+          "reason": "AI capex 被 4/28 MSFT+META 綁架，等指引明朗"
+        },
+        {
+          "sector": "Consumer_Discretionary",
+          "action": "wait",
+          "confidence": "low",
+          "reason": "TSLA+GOOGL 4/22 AMC 前不表態"
+        },
+        {
+          "sector": "Energy",
+          "action": "avoid",
+          "confidence": "high",
+          "reason": "oil -10% 衝擊、三 lane 共識 COLD、OUTFLOW"
+        },
+        {
+          "sector": "Communication",
+          "action": "avoid",
+          "confidence": "high",
+          "reason": "Netflix -9.3% + binary earnings 密集"
+        }
+      ],
+      "watch_next": [
+        "⚡ Iran ceasefire collapse headline (rolling within 48h)",
+        "📉 SPY RSI 96.8 — 若觸 3% pullback 觀察 breadth 是否反彈",
+        "🧠 4/28 MSFT+META AI capex 指引 — 決定 Tech overweight/underweight",
+        "🏦 4/29 FOMC — 鷹派機率上升會衝擊 rate-sensitive sectors",
+        "🛢️ WTI < $80 持續 → Energy 若現 OVERSOLD 考慮反向（非現在）"
+      ]
+    },
+    "notes": "盤前裁決：NEUTRAL stance。FTD confirmed 2026-03-31 (100 quality) 給予 RISK_ON 方向性，但 breadth 40 / 23rd pct / SPY RSI 96.8 / Nasdaq 13-day streak / commodity-over-cyclical divergence 顯示是 crowded late-cycle tactical peak。HOT 僅 Industrials (XLI) / Financials (XLF) — 皆被 DA 挑戰 (ceasefire binary / forward NIM)，合成曝險 60-75%。今明兩日 (within_48h) 只有 Iran 停火逆轉為 rolling binary；4/22 TSLA+GOOGL、4/28 MSFT+META、4/29 FOMC 形成 10 日內密集事件窗。避開 Energy (三 lane 共識 COLD，oil -10% 衝擊持續) 與 Communication (Netflix shock + binary earnings)。Theme-detector skill FMP 故障，theme 為 inline fallback — 不影響裁決但 conviction 酌減至 0.65。"
   },
   "breadth": {
     "score": 40.3,
@@ -105,9 +302,9 @@
         "weight": 10
       }
     },
-    "uptrend_ratio": 0.552197413608889,
-    "current_8ma": 0.552197413608889,
-    "current_200ma": 0.6035762147526204,
+    "uptrend_ratio": 0.5521926109325535,
+    "current_8ma": 0.5521926109325535,
+    "current_200ma": 0.6035596587089646,
     "cycle_phase": "Mid",
     "warning_flags": [
       "Bearish_Signal_Active",
@@ -167,7 +364,7 @@
           "historical_percentile": 30,
           "divergence": 43.0
         },
-        "recorded_at": "2026-04-17 23:57:16"
+        "recorded_at": "2026-04-19 15:59:01"
       }
     ],
     "data_quality": "Complete (6/6 components)",
@@ -194,7 +391,7 @@
       }
     },
     "data_date": "2026-04-16",
-    "days_old": 1,
+    "days_old": 3,
     "source": "market-breadth-analyzer",
     "notes": ""
   },
@@ -220,12 +417,12 @@
     "power_trend_cond": 3,
     "invalidated": false,
     "invalidation_date": null,
-    "sp500_price": 7135.89990234375,
-    "qqq_price": 648.7849731445312,
-    "generated_at": "2026-04-17 23:57:18"
+    "sp500_price": 7126.06005859375,
+    "qqq_price": 648.8499755859375,
+    "generated_at": "2026-04-19 15:59:02"
   },
   "market_top": {
-    "composite_score": 33.0,
+    "composite_score": 31.7,
     "zone": "Yellow (Early Warning)",
     "zone_color": "yellow",
     "risk_budget": "80-90%",
@@ -284,11 +481,11 @@
         "weighted": 0.8
       },
       "sentiment": {
-        "score": 25,
+        "score": 12,
         "label": "Sentiment & Speculation",
         "signal": "MIXED: Moderate sentiment",
         "weight": 10,
-        "weighted": 2.5
+        "weighted": 1.2
       }
     },
     "ftd_applicable": false,
@@ -296,330 +493,480 @@
     "ftd_reason": "Composite < 40 (Green/Yellow zone) - FTD monitoring not needed",
     "rally_day_count": null,
     "delta_direction": "stable",
-    "delta_value": -2.5,
-    "sp500_price": 7135.72998046875,
-    "sp500_year_high": 7137.31982421875,
-    "sp500_dist_from_high": -0.02,
-    "vix_level": 17.190000534057617,
-    "generated_at": "2026-04-17 23:57:32"
+    "delta_value": -1.3,
+    "sp500_price": 7126.06005859375,
+    "sp500_year_high": 7147.52001953125,
+    "sp500_dist_from_high": -0.3,
+    "vix_level": 17.479999542236328,
+    "generated_at": "2026-04-19 15:59:16"
   },
   "sectors": [
     {
       "name": "Industrials",
       "verdict": "HOT",
-      "score": 78,
+      "score": 77.9,
       "score_components": {
-        "breadth_momentum": 20,
-        "theme_heat": 20,
-        "news_catalyst": 18,
-        "rotation_signal": 20
+        "breadth_momentum": 15.3,
+        "theme_heat": 29.0,
+        "news_catalyst": 18.1,
+        "rotation_signal": 24.2
       },
       "proxy_etf": "XLI",
       "risk_flags": [
-        "overbought"
+        "overbought",
+        "consensus_warning"
       ],
-      "key_reason": "Strongest slope (+0.037) across all sectors",
+      "key_reason": "Strongest slope +0.037 among 11 sectors",
       "key_reasons": [
-        "Strongest slope (+0.037) across all sectors",
-        "Defense/Infra themes Accelerating + Trending",
-        "Overbought CSV flag (watch for pullback)"
+        "Strongest slope +0.037 among 11 sectors",
+        "Iran ceasefire airline/transport tailwind",
+        "2/3 lane consensus + INFLOW"
       ],
-      "tail_risk_label": "RESILIENT",
-      "devils_advocate": "Concentration theme emerging bearish — monitor but insufficient to downgrade.",
+      "tail_risk_label": "ROBUST",
+      "devils_advocate": "DA-HIGH: Iran ceasefire binary; applied 0.90 score cut — still HOT but watch SPY<20DMA",
       "rotation_signal": "INFLOW",
       "uptrend_ratio": 0.421,
       "overbought_risk": "HIGH",
-      "ytd_perf_note": "Status=Overbought; highest slope +0.037; infrastructure tailwind"
-    },
-    {
-      "name": "Technology",
-      "verdict": "WARM",
-      "score": 70,
-      "score_components": {
-        "breadth_momentum": 16,
-        "theme_heat": 16,
-        "news_catalyst": 22,
-        "rotation_signal": 16
-      },
-      "proxy_etf": "XLK",
-      "risk_flags": [
-        "fat_tail_warning",
-        "fragility_downgrade",
-        "overbought"
-      ],
-      "key_reason": "Q1 earnings +12.5% + S&P 7k breakout tailwind",
-      "key_reasons": [
-        "Q1 earnings +12.5% + S&P 7k breakout tailwind",
-        "AI & Semis theme EXHAUSTING — SMH lower highs",
-        "SPY RSI 96.9 extreme overbought context"
-      ],
-      "tail_risk_label": "FRAGILE",
-      "devils_advocate": "HOT→WARM downgrade: Exhausting lifecycle + leading stock deterioration + extreme RSI.",
-      "rotation_signal": "INFLOW",
-      "uptrend_ratio": 0.345,
-      "overbought_risk": "MEDIUM",
-      "ytd_perf_note": "Recovering; SMH/SOXX showing lower highs (leading stock deterioration)"
+      "ytd_perf_note": ""
     },
     {
       "name": "Financials",
-      "verdict": "WARM",
-      "score": 64,
+      "verdict": "HOT",
+      "score": 75.7,
       "score_components": {
-        "breadth_momentum": 14,
-        "theme_heat": 12,
-        "news_catalyst": 20,
-        "rotation_signal": 18
+        "breadth_momentum": 13.6,
+        "theme_heat": 25.1,
+        "news_catalyst": 19.0,
+        "rotation_signal": 22.0
       },
       "proxy_etf": "XLF",
-      "risk_flags": [],
-      "key_reason": "Slope +0.031 rising; broadening rally participant",
-      "key_reasons": [
-        "Slope +0.031 rising; broadening rally participant",
-        "Fed rate path pared back supportive for NIM",
-        "Earnings season bullish tone"
+      "risk_flags": [
+        "consensus_warning"
       ],
-      "tail_risk_label": "RESILIENT",
-      "devils_advocate": null,
+      "key_reason": "JPM Q1 +19% record markets revenue",
+      "key_reasons": [
+        "JPM Q1 +19% record markets revenue",
+        "INFLOW slope +0.031 Normal breadth",
+        "Fed-cut repricing dual-lever"
+      ],
+      "tail_risk_label": "ROBUST",
+      "devils_advocate": "DA-MEDIUM: Forward NIM compression risk + KRE tail; 0.95 haircut applied",
       "rotation_signal": "INFLOW",
       "uptrend_ratio": 0.338,
-      "overbought_risk": "LOW",
-      "ytd_perf_note": "Slope +0.031; rising breadth; Fed rate path supportive"
-    },
-    {
-      "name": "Materials",
-      "verdict": "WARM",
-      "score": 68,
-      "score_components": {
-        "breadth_momentum": 18,
-        "theme_heat": 18,
-        "news_catalyst": 16,
-        "rotation_signal": 16
-      },
-      "proxy_etf": "XLB",
-      "risk_flags": [
-        "fat_tail_warning",
-        "fragility_downgrade",
-        "overbought"
-      ],
-      "key_reason": "YTD +9.05% sector leader; Status=Overbought",
-      "key_reasons": [
-        "YTD +9.05% sector leader; Status=Overbought",
-        "Consensus_warning triggered (rotation+theme+news all bullish)",
-        "Iran de-escalation removes supply premium"
-      ],
-      "tail_risk_label": "FRAGILE",
-      "devils_advocate": "HOT→WARM downgrade: FRAGILE tail + consensus_warning + commodity mean-reversion risk.",
-      "rotation_signal": "INFLOW",
-      "uptrend_ratio": 0.434,
-      "overbought_risk": "HIGH",
-      "ytd_perf_note": "Status=Overbought; YTD +9.05% sector leader; slope +0.028"
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": ""
     },
     {
       "name": "Utilities",
       "verdict": "WARM",
-      "score": 55,
+      "score": 68.7,
       "score_components": {
-        "breadth_momentum": 22,
-        "theme_heat": 8,
-        "news_catalyst": 10,
-        "rotation_signal": 15
+        "breadth_momentum": 16.1,
+        "theme_heat": 23.8,
+        "news_catalyst": 13.3,
+        "rotation_signal": 23.1
       },
       "proxy_etf": "XLU",
       "risk_flags": [
         "overbought",
-        "defensive_rotation_watch"
+        "fragility_downgrade"
       ],
-      "key_reason": "Highest uptrend_ratio (0.439) but Status=Overbought",
+      "key_reason": "Highest breadth 43.9% overbought",
       "key_reasons": [
-        "Highest uptrend_ratio (0.439) but Status=Overbought",
-        "Defensive flavor — mixed regime signal",
-        "Fed pared-back cuts dent yield-sensitive appeal"
+        "Highest breadth 43.9% overbought",
+        "Fed-cut + defensive tilt Accelerating",
+        "DA downgrade — defensive HOT in RISK_ON incoherent"
       ],
-      "tail_risk_label": "RESILIENT",
-      "devils_advocate": null,
+      "tail_risk_label": "ROBUST",
+      "devils_advocate": "DA-HIGH accepted: incoherent defensive-in-RISK_ON; kurtosis 1.77 worst of HOT; 0.90 cut dropped HOT→WARM",
       "rotation_signal": "INFLOW",
       "uptrend_ratio": 0.439,
       "overbought_risk": "HIGH",
-      "ytd_perf_note": "Status=Overbought, slope +0.034; defensive-flavored leader"
-    },
-    {
-      "name": "Energy",
-      "verdict": "WARM",
-      "score": 52,
-      "score_components": {
-        "breadth_momentum": 14,
-        "theme_heat": 16,
-        "news_catalyst": 12,
-        "rotation_signal": 10
-      },
-      "proxy_etf": "XLE",
-      "risk_flags": [
-        "fat_tail_warning",
-        "geopolitical_reversal"
-      ],
-      "key_reason": "Only Down-trend sector (slope -0.031)",
-      "key_reasons": [
-        "Only Down-trend sector (slope -0.031)",
-        "Iran de-escalation removes tail risk + oil premium",
-        "Oil&Gas theme still Accelerating (lag)"
-      ],
-      "tail_risk_label": "FRAGILE",
-      "devils_advocate": null,
-      "rotation_signal": "OUTFLOW",
-      "uptrend_ratio": 0.337,
-      "overbought_risk": "LOW",
-      "ytd_perf_note": "Only Down-trend sector; slope -0.031; Iran de-escalation risk"
+      "ytd_perf_note": ""
     },
     {
       "name": "Consumer_Discretionary",
-      "verdict": "COLD",
-      "score": 46,
+      "verdict": "WARM",
+      "score": 67.2,
       "score_components": {
-        "breadth_momentum": 12,
-        "theme_heat": 10,
-        "news_catalyst": 12,
-        "rotation_signal": 12
+        "breadth_momentum": 11.1,
+        "theme_heat": 19.8,
+        "news_catalyst": 20.9,
+        "rotation_signal": 15.4
       },
       "proxy_etf": "XLY",
-      "risk_flags": [],
-      "key_reason": "Mid-pack breadth 0.265; no leadership signal",
+      "risk_flags": [
+        "binary_earnings_within_week"
+      ],
+      "key_reason": "Oil -10% airline/transport tailwind",
       "key_reasons": [
-        "Mid-pack breadth 0.265; no leadership signal",
-        "Concentration theme emerging bearish",
-        "Rate-sensitive given Fed path pared back"
+        "Oil -10% airline/transport tailwind",
+        "Core goods CPI +0.2% cooling",
+        "TSLA 4/22 earnings binary"
       ],
       "tail_risk_label": "N/A",
-      "devils_advocate": null,
+      "devils_advocate": "",
       "rotation_signal": "NEUTRAL",
       "uptrend_ratio": 0.265,
       "overbought_risk": "LOW",
-      "ytd_perf_note": "Slope +0.023; mid-pack, no clear leadership"
+      "ytd_perf_note": ""
     },
     {
-      "name": "Communication",
-      "verdict": "COLD",
-      "score": 45,
+      "name": "Technology",
+      "verdict": "WARM",
+      "score": 66.1,
       "score_components": {
-        "breadth_momentum": 10,
-        "theme_heat": 12,
-        "news_catalyst": 13,
-        "rotation_signal": 10
+        "breadth_momentum": 12.8,
+        "theme_heat": 18.5,
+        "news_catalyst": 16.2,
+        "rotation_signal": 18.7
       },
-      "proxy_etf": "XLC",
-      "risk_flags": [],
-      "key_reason": "Weak breadth 0.236; flat slope",
+      "proxy_etf": "XLK",
+      "risk_flags": [
+        "overbought_rsi",
+        "binary_earnings_4_28"
+      ],
+      "key_reason": "AI capex cycle into MSFT 4/28 guide",
       "key_reasons": [
-        "Weak breadth 0.236; flat slope",
-        "Mega-cap AI narrative overlap with Tech exhaustion",
-        "No clear catalyst"
+        "AI capex cycle into MSFT 4/28 guide",
+        "Fed-cut repricing + Nasdaq streak",
+        "Narrow-rally exhaustion risk (RSI 96.8)"
       ],
       "tail_risk_label": "N/A",
-      "devils_advocate": null,
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": 0.236,
-      "overbought_risk": "LOW",
-      "ytd_perf_note": "Slope +0.013; weak breadth"
+      "devils_advocate": "Theme lane flagged as Exhausting Mature — vulnerable to pain-hits-leaders reversal",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.345,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": ""
+    },
+    {
+      "name": "Materials",
+      "verdict": "WARM",
+      "score": 63.6,
+      "score_components": {
+        "breadth_momentum": 15.3,
+        "theme_heat": 15.8,
+        "news_catalyst": 10.5,
+        "rotation_signal": 22.0
+      },
+      "proxy_etf": "XLB",
+      "risk_flags": [
+        "overbought",
+        "late_cycle"
+      ],
+      "key_reason": "Second-highest breadth 43.4% OB",
+      "key_reasons": [
+        "Second-highest breadth 43.4% OB",
+        "INFLOW slope +0.028 rising",
+        "No fresh catalyst — late-cycle mean-reversion risk"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.434,
+      "overbought_risk": "HIGH",
+      "ytd_perf_note": ""
     },
     {
       "name": "Healthcare",
       "verdict": "COLD",
-      "score": 42,
+      "score": 46.1,
       "score_components": {
-        "breadth_momentum": 12,
-        "theme_heat": 8,
-        "news_catalyst": 10,
-        "rotation_signal": 12
+        "breadth_momentum": 10.2,
+        "theme_heat": 13.2,
+        "news_catalyst": 9.5,
+        "rotation_signal": 13.2
       },
       "proxy_etf": "XLV",
       "risk_flags": [],
-      "key_reason": "Lagged -0.64% today vs market leadership",
+      "key_reason": "Neutral across all 3 lanes",
       "key_reasons": [
-        "Lagged -0.64% today vs market leadership",
-        "Modest slope +0.019; no theme tailwind",
-        "Political/regulatory overhang typical"
+        "Neutral across all 3 lanes",
+        "29.7% breadth lagging",
+        "Defensive tilt theme weak support"
       ],
       "tail_risk_label": "N/A",
-      "devils_advocate": null,
+      "devils_advocate": "",
       "rotation_signal": "NEUTRAL",
       "uptrend_ratio": 0.297,
       "overbought_risk": "LOW",
-      "ytd_perf_note": "Lagged -0.64% today; slope +0.019; low conviction"
-    },
-    {
-      "name": "Consumer_Staples",
-      "verdict": "COLD",
-      "score": 38,
-      "score_components": {
-        "breadth_momentum": 10,
-        "theme_heat": 6,
-        "news_catalyst": 12,
-        "rotation_signal": 10
-      },
-      "proxy_etf": "XLP",
-      "risk_flags": [],
-      "key_reason": "Consumer Defensive concentration theme bearish",
-      "key_reasons": [
-        "Consumer Defensive concentration theme bearish",
-        "Weakest slope +0.010 (near flat)",
-        "Greed sentiment reduces defensive bid"
-      ],
-      "tail_risk_label": "N/A",
-      "devils_advocate": null,
-      "rotation_signal": "NEUTRAL",
-      "uptrend_ratio": 0.235,
-      "overbought_risk": "LOW",
-      "ytd_perf_note": "Slope +0.010; bearish theme concentration"
+      "ytd_perf_note": ""
     },
     {
       "name": "Real_Estate",
       "verdict": "COLD",
-      "score": 32,
+      "score": 46.0,
       "score_components": {
-        "breadth_momentum": 8,
-        "theme_heat": 6,
-        "news_catalyst": 8,
-        "rotation_signal": 10
+        "breadth_momentum": 7.7,
+        "theme_heat": 15.8,
+        "news_catalyst": 10.5,
+        "rotation_signal": 12.1
       },
       "proxy_etf": "XLRE",
       "risk_flags": [],
-      "key_reason": "Weakest breadth 0.221",
+      "key_reason": "Weakest breadth 22.1%",
       "key_reasons": [
-        "Weakest breadth 0.221",
-        "Fed path pared-back hurts rate-sensitive",
-        "Rising from oversold but no catalyst"
+        "Weakest breadth 22.1%",
+        "Fed-cut bid offset by RISK_ON rotation",
+        "Rotation-lane COLD"
       ],
       "tail_risk_label": "N/A",
-      "devils_advocate": null,
+      "devils_advocate": "",
       "rotation_signal": "NEUTRAL",
       "uptrend_ratio": 0.221,
       "overbought_risk": "LOW",
-      "ytd_perf_note": "Weakest breadth; slope +0.019; recovering from oversold"
+      "ytd_perf_note": ""
+    },
+    {
+      "name": "Communication",
+      "verdict": "COLD",
+      "score": 43.1,
+      "score_components": {
+        "breadth_momentum": 8.5,
+        "theme_heat": 15.8,
+        "news_catalyst": 6.7,
+        "rotation_signal": 12.1
+      },
+      "proxy_etf": "XLC",
+      "risk_flags": [
+        "binary_earnings_cluster"
+      ],
+      "key_reason": "Netflix -9.3% guide shock",
+      "key_reasons": [
+        "Netflix -9.3% guide shock",
+        "GOOGL 4/22 + META 4/28 binary",
+        "News-lane consensus COLD"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.236,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": ""
+    },
+    {
+      "name": "Consumer_Staples",
+      "verdict": "COLD",
+      "score": 39.3,
+      "score_components": {
+        "breadth_momentum": 7.7,
+        "theme_heat": 13.2,
+        "news_catalyst": 8.6,
+        "rotation_signal": 9.9
+      },
+      "proxy_etf": "XLP",
+      "risk_flags": [],
+      "key_reason": "23.5% breadth weak",
+      "key_reasons": [
+        "23.5% breadth weak",
+        "Flat slope +0.010",
+        "No catalyst in RISK_ON regime"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "",
+      "rotation_signal": "NEUTRAL",
+      "uptrend_ratio": 0.235,
+      "overbought_risk": "LOW",
+      "ytd_perf_note": ""
+    },
+    {
+      "name": "Energy",
+      "verdict": "COLD",
+      "score": 30.6,
+      "score_components": {
+        "breadth_momentum": 10.2,
+        "theme_heat": 7.9,
+        "news_catalyst": 4.8,
+        "rotation_signal": 7.7
+      },
+      "proxy_etf": "XLE",
+      "risk_flags": [
+        "outflow_consensus",
+        "oil_crash"
+      ],
+      "key_reason": "3/3 lane consensus COLD",
+      "key_reasons": [
+        "3/3 lane consensus COLD",
+        "WTI -10% on Hormuz reopening",
+        "Only sector with OUTFLOW + falling slope"
+      ],
+      "tail_risk_label": "N/A",
+      "devils_advocate": "",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.337,
+      "overbought_risk": "MEDIUM",
+      "ytd_perf_note": ""
     }
   ],
   "binary_risks": [
     {
-      "event": "Iran/US Strait of Hormuz blockade resolution",
-      "date": "",
-      "days_until": null,
-      "affected_sectors": [],
+      "event": "Iran ceasefire collapse headline (rolling)",
+      "date": "2026-04-19",
+      "days_until": 0,
+      "affected_sectors": [
+        "Energy",
+        "Industrials",
+        "Consumer_Discretionary"
+      ],
+      "within_48h": true
+    },
+    {
+      "event": "TSLA + GOOGL Q1 earnings (AMC)",
+      "date": "2026-04-22",
+      "days_until": 3,
+      "affected_sectors": [
+        "Consumer_Discretionary",
+        "Communication"
+      ],
+      "within_48h": false
+    },
+    {
+      "event": "MSFT + META Q1 earnings (AMC, AI capex guidance)",
+      "date": "2026-04-28",
+      "days_until": 9,
+      "affected_sectors": [
+        "Technology",
+        "Communication"
+      ],
+      "within_48h": false
+    },
+    {
+      "event": "FOMC decision (non-SEP)",
+      "date": "2026-04-29",
+      "days_until": 10,
+      "affected_sectors": [
+        "Utilities",
+        "Real_Estate",
+        "Financials",
+        "Technology"
+      ],
       "within_48h": false
     }
   ],
   "divergence_watch": [
     {
-      "sector": "Industrials",
-      "signal": "news_negative_price_positive",
-      "description": "Today Industrials -0.36% despite strong breadth+theme — potential short-term exhaustion within mid-cycle uptrend.",
+      "sector": "Utilities",
+      "signal": "news_positive_price_positive_but_incoherent",
+      "description": "Utilities HOT alongside cyclicals in RISK_ON is historically a distribution-phase signature — XLU has kurtosis 1.77 + skew -0.44 (worst of HOT group) and is Overbought at 43.9%",
       "action": "monitor"
     },
     {
-      "sector": "Energy",
-      "signal": "news_negative_price_positive",
-      "description": "Energy +1.48% today despite Iran de-escalation — likely short-covering; underlying trend down.",
-      "action": "reduce_exposure"
+      "sector": "Technology",
+      "signal": "news_positive_breadth_negative",
+      "description": "AI capex + Fed cut push XLK higher but index-level RSI 96.8 + narrow 32.4% breadth + 13-day streak suggest mean-reversion risk; MSFT 4/28 guide is the binary",
+      "action": "monitor"
+    },
+    {
+      "sector": "Industrials",
+      "signal": "news_positive_price_positive_but_binary",
+      "description": "Iran ceasefire premium priced into XLI at 42.1% breadth Overbought — reversal headline gives it back fast",
+      "action": "monitor"
     }
   ],
   "recent_analysis": [
+    {
+      "ticker": "HPE",
+      "decision": "STAGED",
+      "final_decision": "STAGED_ENTRY",
+      "score": 1.01,
+      "time": "2026-04-19",
+      "report_url": "reports/20260419_HPE.md",
+      "performance": null,
+      "targets": {
+        "tp": 30.0,
+        "sl": 22.5,
+        "watch": null,
+        "entry": "25.20 - 25.80",
+        "entry_aggressive": "25.20 - 25.80",
+        "entry_conservative": "23.50 - 24.20"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "conservative_entry_trigger": "回落 $23.50-24.20 (MA20 叢集) + RSI<60 + 量不放 → 啟動 limit 單 (conservative 1.875%)",
+        "aggressive_entry_trigger": "回落 $25.20-25.80 (pivot retest) + RSI<65 + 量不放 → 啟動 limit 單 (aggressive 1.875%)",
+        "aggressive_tight_mental_stop": "aggressive tranche 跌破 MA20 $24.40 收盤即砍 (不等 thesis SL $22.50)，保留 conservative risk budget",
+        "kill_cond_ma50_breakdown": "收盤 < MA50 22.86 on >1.2x 20D avg volume WITHIN 10 交易日 → Stage 2 failed breakout 確認 (Red Team kill #1)，全部清倉",
+        "kill_cond_ai_capex_binary": "MSFT 或 META 4/28 earnings 指引 AI capex flat/down 或 FOMC 4/29 hawkish hold → 倉位砍半 (Red Team kill #2)",
+        "kill_cond_insider_escalation": "NEO tier (CEO/CFO/EVP) 30 天內新增 Form 4 淨賣出 > $10M 或 Juniper 整合 45 天內揭露進一步 margin 惡化 → 退出 (Red Team kill #3)",
+        "rsi_momentum_break": "日 RSI 跌破 60 且 7 交易日內無法收復 $26.56 阻力 → 共識多頭錯誤確認，退出 aggressive tranche",
+        "exit_stop_thesis": "跌破 $22.50 收盤 (MA50 失守 + buffer) → 全部清倉"
+      },
+      "key_risks": [
+        "rsi_69_breakout_at_52w_high",
+        "spy_rsi_96_8_narrow_rally_peak",
+        "net_insider_selling_ceo_cfo_evp_90d",
+        "juniper_integration_profit_margin_hit",
+        "net_debt_5x_pre_deal_covenant_risk",
+        "ai_capex_binary_cluster_10d",
+        "raymond_james_downgrade_signal",
+        "red_team_strong_counter_penalty_applied"
+      ],
+      "rr_ratio": 4.56,
+      "position_pct": 0.0375,
+      "avg_confidence": 0.6425,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": {
+        "aggressive_pct": 0.01875,
+        "conservative_pct": 0.01875
+      },
+      "binary_class": "none",
+      "current_price": 26.44,
+      "analysis_price": 26.44,
+      "live_position": null,
+      "position_lots": []
+    },
+    {
+      "ticker": "CFG",
+      "decision": "EXECUTE",
+      "final_decision": "BUY",
+      "score": 1.38,
+      "time": "2026-04-19",
+      "report_url": "reports/20260419_CFG.md",
+      "performance": null,
+      "targets": {
+        "tp": 72.0,
+        "sl": 59.0,
+        "watch": null,
+        "entry": null,
+        "entry_aggressive": null,
+        "entry_conservative": "60.50 - 62.00"
+      },
+      "on_watchlist": true,
+      "watch_conditions": {
+        "conservative_entry_trigger": "回落 $60.50-62.00 (MA20/MA50 cluster) + RSI<65 + 量不放 → 啟動 limit 單",
+        "aggressive_entry_disabled": "當前 $64.45 aggressive 進場 R/R 僅 1.21 < 2.0 → 禁止追高；若突破 $66.10 帶量 (>1.5x ADV) 可重新評估但倉位腰斬",
+        "exit_stop": "跌破 $59.00 收盤 → 停損 (MA50 $61.60 失守 + ~5% 空間)",
+        "kill_cond_regime_break": "SPY 收盤 <20DMA + VIX>22 → CFG 倉位緊急減半 (Red Team kill #2)",
+        "kill_cond_nim_thesis": "2Y-10Y flat >15bps OR 2026-06 Fed cut odds <30% → NIM 擴張敘事失效，退場",
+        "earnings_recheck": "2026-07-16 Q2 NIM 若低於 3.22% guide 下限 → 重新評估 thesis"
+      },
+      "key_risks": [
+        "rsi_81_8_extreme_overbought",
+        "spy_rsi_96_8_narrow_rally_late_cycle",
+        "insider_net_selling_signal",
+        "cre_maturity_wall_2026_regional_bank",
+        "forward_nim_swap_runoff_execution_risk",
+        "q1_catalyst_spent_next_in_july",
+        "red_team_strong_counter_penalty_applied",
+        "burry_warning_position_x0_7"
+      ],
+      "rr_ratio": 4.78,
+      "position_pct": 0.1,
+      "avg_confidence": 0.7125,
+      "time_horizon": "mid",
+      "da_filed": false,
+      "consensus_bonus": false,
+      "macro_alignment": "CONTRARIAN",
+      "staged_split": null,
+      "binary_class": "none",
+      "current_price": 64.45,
+      "analysis_price": 64.45,
+      "live_position": null,
+      "position_lots": []
+    },
     {
       "ticker": "INTC",
       "decision": "CANCEL",
@@ -2271,6 +2618,239 @@
   ],
   "news": [
     {
+      "headline": "Strait of Hormuz traffic halts again as U.S.-Iran ceasefire deadline nears",
+      "headline_zh": "Strait of Hormuz traffic halts again as U.S.-Iran ceasefire deadline nears",
+      "impact": "binary",
+      "score": -1.9,
+      "date": "2026-04-19",
+      "sectors": [
+        "Energy",
+        "Tanker_Shipping",
+        "Airlines",
+        "Chemicals",
+        "Transports"
+      ],
+      "source": "news_protocol",
+      "source_label": "Seeking Alpha",
+      "type": "geopolitical",
+      "bull_case": "Strait of Hormuz 交通二度中斷看似風險事件，但對多頭框架反而是被低估的正面催化",
+      "bear_case": "Strait of Hormuz 第二次封鎖已非孤立事件，而是 Iran-US 衝突升級的結構性訊號",
+      "sector_view": "Hormuz 第二次停航對能源供應鏈形成結構性尾部風險",
+      "macro_view": "Hormuz 二度中斷是本週最大 tail risk 事件",
+      "arbiter_reasoning": "Weighted per news_type=geopolitical (B 0.15·+3.0 + Br 0.30·-4.0 + S 0.15·+3.0 + M 0.40·-4.0) = -1.9. Verdict BINARY. [salvaged from subagent outputs; Phase 4 write was interrupted by API stream idle timeout]",
+      "debate_note": "Score dispersion Bull +3.0 / Bear -4.0 / Sector +3.0 / Macro -4.0; weights geopolitical → net -1.9",
+      "binary_risk": true,
+      "within_48h": true,
+      "tickers_mentioned": [
+        "XOM",
+        "CVX",
+        "OXY",
+        "VLO",
+        "MPC",
+        "PSX",
+        "LNG",
+        "CQP",
+        "FRO",
+        "STNG",
+        "DHT",
+        "SLB",
+        "HAL",
+        "DAL",
+        "UAL",
+        "AAL",
+        "DOW",
+        "LYB",
+        "FDX"
+      ],
+      "depth": "deep",
+      "review_status": "reviewed"
+    },
+    {
+      "headline": "Trump says talks between U.S. and Iran to resume in Pakistan on Monday",
+      "headline_zh": "Trump says talks between U.S. and Iran to resume in Pakistan on Monday",
+      "impact": "binary",
+      "score": -0.2,
+      "date": "2026-04-19",
+      "sectors": [
+        "Energy",
+        "Airlines",
+        "Defense",
+        "Utilities"
+      ],
+      "source": "news_protocol",
+      "source_label": "CNBC Top",
+      "type": "geopolitical",
+      "bull_case": "U.S.-Iran 週一在 Pakistan 重啟談判本身就是強烈的 de-escalation 多頭訊號",
+      "bear_case": "表面上是 de-escalation catalyst，實質是雙方都在為破局預留台階",
+      "sector_view": "Pakistan 談判桌開啟屬於 de-escalation 技術訊號",
+      "macro_view": "Monday Pakistan talks 是典型 de-escalation channel — 雙方措辭（Iran…",
+      "arbiter_reasoning": "Weighted per news_type=geopolitical (B 0.15·+3.0 + Br 0.30·-3.0 + S 0.15·-1.0 + M 0.40·+1.0) = -0.2. Verdict BINARY. [salvaged from subagent outputs; Phase 4 write was interrupted by API stream idle timeout]",
+      "debate_note": "Score dispersion Bull +3.0 / Bear -3.0 / Sector -1.0 / Macro +1.0; weights geopolitical → net -0.2",
+      "binary_risk": true,
+      "within_48h": true,
+      "tickers_mentioned": [
+        "XOM",
+        "CVX",
+        "DAL",
+        "UAL",
+        "AAL",
+        "LMT",
+        "RTX",
+        "NOC",
+        "GD",
+        "FRO",
+        "STNG"
+      ],
+      "depth": "deep",
+      "review_status": "reviewed"
+    },
+    {
+      "headline": "No escape: U.S.-Iran war, $4 gas, have taken all the fun out of consumer spending",
+      "headline_zh": "No escape: U.S.-Iran war, $4 gas, have taken all the fun out of consumer spending",
+      "impact": "bearish",
+      "score": -1.9,
+      "date": "2026-04-19",
+      "sectors": [
+        "Consumer_Discretionary_Services",
+        "Restaurants",
+        "Cruise_Travel",
+        "Consumer_Staples_Discount",
+        "Retail_REIT",
+        "Regional_Banks"
+      ],
+      "source": "news_protocol",
+      "source_label": "CNBC Top",
+      "type": "macro_data",
+      "bull_case": "消費者在戰爭與 $4 汽油下仍持續消費，這是結構性多頭訊號而非警訊",
+      "bear_case": "這是最被忽略但最危險的訊號：consumer 已經出現 bifurcation——aggregate spending…",
+      "sector_view": "Gas $4 + 地緣焦慮 = 消費者 discretionary services 雙重擠壓",
+      "macro_view": "這則是 real economy 層面最 actionable 的 macro data point",
+      "arbiter_reasoning": "Weighted per news_type=macro_data (B 0.15·+2.0 + Br 0.15·-4.0 + S 0.20·-3.0 + M 0.50·-2.0) = -1.9. Verdict BEARISH. [salvaged from subagent outputs; Phase 4 write was interrupted by API stream idle timeout]",
+      "debate_note": "Score dispersion Bull +2.0 / Bear -4.0 / Sector -3.0 / Macro -2.0; weights macro_data → net -1.9",
+      "binary_risk": false,
+      "within_48h": false,
+      "tickers_mentioned": [
+        "DRI",
+        "EAT",
+        "BLMN",
+        "CAKE",
+        "TXRH",
+        "LYV",
+        "CNK",
+        "CCL",
+        "RCL",
+        "NCLH",
+        "SYY",
+        "USFD",
+        "TSN",
+        "SPG",
+        "MAC",
+        "EPR",
+        "RF",
+        "KEY",
+        "DG",
+        "DLTR",
+        "WMT",
+        "COST"
+      ],
+      "depth": "deep",
+      "review_status": "reviewed"
+    },
+    {
+      "headline": "Earnings week ahead: TSLA, IBM, T, INTC, GE, BA, UNH, NOW, PM, CMCSA, and more",
+      "headline_zh": "Earnings week ahead: TSLA, IBM, T, INTC, GE, BA, UNH, NOW, PM, CMCSA, and more",
+      "impact": "neutral",
+      "score": 0.7,
+      "date": "2026-04-19",
+      "sectors": [
+        "Industrials",
+        "Technology_Semi",
+        "Technology_Software",
+        "Communication",
+        "Healthcare_Managed_Care",
+        "Consumer_Discretionary_EV"
+      ],
+      "source": "news_protocol",
+      "source_label": "Seeking Alpha",
+      "type": "earnings",
+      "bull_case": "這是教科書級別的 bullish earnings setup",
+      "bear_case": "這週是典型的「高預期 + 擁擠倉位 + 極端技術超買」三重地雷",
+      "sector_view": "本週 earnings 橫跨六大產業，屬產業層分散 catalyst 而非單一方向",
+      "macro_view": "本週 mega-cap earnings 密度極高（TSLA, IBM, T, INTC, GE, BA, UNH, N…",
+      "arbiter_reasoning": "Weighted per news_type=earnings (B 0.25·+5.0 + Br 0.25·-4.0 + S 0.40·+1.0 + M 0.10·+0.0) = +0.7. Verdict NEUTRAL. [salvaged from subagent outputs; Phase 4 write was interrupted by API stream idle timeout]",
+      "debate_note": "Score dispersion Bull +5.0 / Bear -4.0 / Sector +1.0 / Macro +0.0; weights earnings → net +0.7",
+      "binary_risk": false,
+      "within_48h": false,
+      "tickers_mentioned": [
+        "GE",
+        "BA",
+        "HEI",
+        "TDG",
+        "SPR",
+        "IBM",
+        "INTC",
+        "NOW",
+        "AMAT",
+        "LRCX",
+        "KLAC",
+        "GOOGL",
+        "CMCSA",
+        "T",
+        "TSLA",
+        "MBLY",
+        "NVDA",
+        "ALB",
+        "UNH",
+        "PM"
+      ],
+      "depth": "deep",
+      "review_status": "reviewed"
+    },
+    {
+      "headline": "5 big analyst AI moves: Bullish on Google stock near-term; Tesla upgraded",
+      "headline_zh": "5 big analyst AI moves: Bullish on Google stock near-term; Tesla upgraded",
+      "impact": "neutral",
+      "score": 1.2,
+      "date": "2026-04-19",
+      "sectors": [
+        "Communication_Ad",
+        "Digital_Advertising_Ecosystem",
+        "Consumer_Discretionary_EV",
+        "Autonomous_Vehicle_Supply_Chain",
+        "Ride_Hailing"
+      ],
+      "source": "news_protocol",
+      "source_label": "Investing.com",
+      "type": "corporate",
+      "bull_case": "財報週前的集體 sell-side upgrades 是極少見的強勢訊號組合",
+      "bear_case": "Sell-side 在 earnings 前集體上調是 classic contrarian bear signal——…",
+      "sector_view": "Sell-side upgrade timing 緊貼 4/22 earnings window 屬於典型「anchor…",
+      "macro_view": "Single-name upgrades 本身 macro 意義有限",
+      "arbiter_reasoning": "Weighted per news_type=corporate (B 0.25·+4.0 + Br 0.25·-3.0 + S 0.40·+2.0 + M 0.10·+1.0) = +1.2. Verdict NEUTRAL. [salvaged from subagent outputs; Phase 4 write was interrupted by API stream idle timeout]",
+      "debate_note": "Score dispersion Bull +4.0 / Bear -3.0 / Sector +2.0 / Macro +1.0; weights corporate → net +1.2",
+      "binary_risk": false,
+      "within_48h": false,
+      "tickers_mentioned": [
+        "GOOGL",
+        "TTD",
+        "APP",
+        "META",
+        "PINS",
+        "SNAP",
+        "TSLA",
+        "MBLY",
+        "NVDA",
+        "LAZR",
+        "OUST",
+        "ALB",
+        "LTHM",
+        "UBER",
+        "LYFT"
+      ],
+      "depth": "deep",
+      "review_status": "reviewed"
+    },
+    {
       "headline": "Iran declares Strait of Hormuz open to shipping; Trump says U.S. blockade still active",
       "headline_zh": "伊朗宣布霍爾木茲海峽對商船開放；川普稱美軍封鎖仍全面生效",
       "impact": "binary",
@@ -2593,315 +3173,6 @@
       ],
       "depth": "deep",
       "review_status": "reviewed"
-    },
-    {
-      "headline": "Iran-US ceasefire fragile; Hormuz blockade partially active as Vance prepares 2nd round talks",
-      "headline_zh": "",
-      "impact": "binary",
-      "score": 0,
-      "date": "2026-04-15",
-      "sectors": [
-        "Energy",
-        "Airlines",
-        "Defense",
-        "Consumer_Discretionary",
-        "Transportation"
-      ],
-      "source": "news_protocol",
-      "source_label": "CNN / Al Jazeera / NBC",
-      "type": "geopolitical",
-      "bull_case": "Talks resuming in 2 days per Trump, market pricing in de-escalation (oil already +3% but off highs)",
-      "bear_case": "Ceasefire violated both sides, Lebanon conflict separate, Hormuz blockade unresolved, oil volatility structural until June 2027 capacity concern",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Neither side committed, but negotiation channel open. Binary event pending. Market best positioned with DEFENSE overweight + ENERGY neutral.",
-      "debate_note": "2-week ceasefire began 4/8 → expires ~4/22. Decision window is THIS week.",
-      "binary_risk": true,
-      "within_48h": true,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "TSMC Q1 2026 earnings Thursday 4/16: expects $35.47B revenue, $3.26 EPS, 59% gross margin",
-      "headline_zh": "台積電 Q1 2026 財報 4/16 公布，預估營收 $35.47B、EPS $3.26、毛利率 59%",
-      "impact": "bullish",
-      "score": 4,
-      "date": "2026-04-15",
-      "sectors": [
-        "Technology",
-        "Semiconductors"
-      ],
-      "source": "news_protocol",
-      "source_label": "GuruFocus / TipRanks / Motley Fool",
-      "type": "earnings",
-      "bull_case": "AI chip demand holds through Middle East conflict; premium 3nm pricing pushes GM > 59%; long-term GM target likely raised above 58%; Qualcomm/MediaTek capacity filled with AI",
-      "bear_case": "Margin peak warning from Wall Street; smartphone/PC outlook uncertain; Middle East supply chain disruption risk (shipping)",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "4/16 is 1-day binary with high historical beat rate. Positive classification. TSM BUY thesis validated by guide-raise expectation.",
-      "debate_note": "NVDA, AMD, AVGO all downstream of TSMC — any beat also lifts semi sector broadly",
-      "binary_risk": true,
-      "within_48h": true,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "NVIDIA Blackwell ramp delivers $0.5T visibility through 2026; hyperscalers deploying 1,000 NVL72 racks/week",
-      "headline_zh": "NVDA Blackwell 量產至 2026 年底可視能見度 $0.5T，雲端巨頭每週部署 1,000 個 NVL72 機櫃",
-      "impact": "bullish",
-      "score": 4,
-      "date": "2026-04-15",
-      "sectors": [
-        "Technology",
-        "Semiconductors",
-        "AI_Infrastructure"
-      ],
-      "source": "news_protocol",
-      "source_label": "NVIDIA Newsroom / Futurum / IntuitionLabs",
-      "type": "sector_specific",
-      "bull_case": "72,000 Blackwell GPUs/week hyperscaler deployment, $500B backlog through Dec 2026, Rubin next-gen locked",
-      "bear_case": "China AI chip export deal (15% rev to US gov) caps upside; 25% Section 232 semi tariff effective Jan 2026",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "NVDA bull case fundamentally intact. Blackwell demand not the question — supply chain execution is the only risk.",
-      "debate_note": "NVDA Q1 FY27 earnings ~late May; visibility extended to end 2026 significantly reduces quarter-by-quarter risk",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "FOMC 4/28-29 meeting: markets price 85% hold at 3.50-3.75%, no dot plot this meeting",
-      "headline_zh": "FOMC 4/28-29 會議：市場定價 85% 維持 3.50-3.75%，本次無 dot plot",
-      "impact": "neutral",
-      "score": 0,
-      "date": "2026-04-15",
-      "sectors": [
-        "Financials",
-        "Real_Estate",
-        "Consumer_Discretionary"
-      ],
-      "source": "news_protocol",
-      "source_label": "FedWatch / Yahoo Finance / Kiplinger",
-      "type": "fomc",
-      "bull_case": "Hold provides rate certainty; if Powell hints June cut → risk-on rally",
-      "bear_case": "Inflation still above 2% target, 'progress stalled' language, Iran conflict + oil could delay cuts further to July+",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Language is the event, not the decision. Watch for 'patience' vs 'data-dependent' phrasing. Positioning BEFORE 4/29 risky due to reaction asymmetry.",
-      "debate_note": "Non-SEP meeting historically causes lower vol reaction than SEP meetings; June 16-17 is next SEP where actual cut telegraphed",
-      "binary_risk": true,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "Q1 2026 earnings season kicks off with 12.6% expected profit growth — 6th consecutive double-digit quarter",
-      "headline_zh": "Q1 2026 財報季開跑，預估獲利成長 12.6%，連 6 季雙位數成長",
-      "impact": "bullish",
-      "score": 3,
-      "date": "2026-04-15",
-      "sectors": [
-        "Financials",
-        "Technology",
-        "Consumer_Discretionary"
-      ],
-      "source": "news_protocol",
-      "source_label": "Yahoo Finance earnings preview",
-      "type": "earnings",
-      "bull_case": "6 consecutive strong quarters, bull momentum resilient to geopolitical noise",
-      "bear_case": "Goldman's stock drop on FICC miss shows how high the bar is; any disappointment punished",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Earnings season is an alpha generator but amplifies dispersion. Pre-earnings positioning risky, post-earnings reaction is the edge.",
-      "debate_note": "Banks start Monday; TSM Thursday; NFLX / Tesla / AMD next week; NVDA late May",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "US-China semiconductor tariff peace extended to Nov 10, 2026; next hike deferred to June 2027",
-      "headline_zh": "美中半導體關稅停戰延長至 2026 年 11 月 10 日，下次調升延至 2027 年 6 月",
-      "impact": "bullish",
-      "score": 2,
-      "date": "2026-04-15",
-      "sectors": [
-        "Technology",
-        "Semiconductors"
-      ],
-      "source": "news_protocol",
-      "source_label": "Tax Foundation / CNBC / Wikipedia",
-      "type": "political",
-      "bull_case": "18 months of tariff stability for semi supply chain; NVDA/AMD keep 15% revenue deal stable",
-      "bear_case": "Section 232 25% still active for specified chip imports since Jan 2026; 15% NVDA/AMD 'revenue tax' ongoing",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Near-term tail risk removed; structural 15% rev tax + 25% Section 232 remain as persistent drag.",
-      "debate_note": "Removes June 2026 tariff cliff from binary risks list — positive for 2026 semi earnings",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "Goldman Sachs Q1 beats EPS but FICC misses; stock -3% pre-market",
-      "headline_zh": "高盛 Q1 EPS 超預期但 FICC 收入不如預期，盤前跌 3%",
-      "impact": "bearish",
-      "score": -2,
-      "date": "2026-04-15",
-      "sectors": [
-        "Financials",
-        "Banking"
-      ],
-      "source": "news_protocol",
-      "source_label": "Yahoo Finance",
-      "type": "earnings",
-      "bull_case": "M&A and equity trading strong, underlying franchise intact",
-      "bear_case": "FICC weakness = fixed income trading slump = concerning for JPM/MS peer reads; sets cautious tone for bank season",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Single-company issue but sector tone-setter. Watch JPM / MS for read-through.",
-      "debate_note": "Banking sector already WARM in sector scan; this reinforces COLD thesis on investment banks",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "Dollar Index (DXY) approaches 99 on oil rise + Fed hold expectations",
-      "headline_zh": "美元指數逼近 99，油價上升 + Fed 維持利率預期推動",
-      "impact": "neutral",
-      "score": -1,
-      "date": "2026-04-15",
-      "sectors": [
-        "Consumer_Defensive",
-        "Consumer_Cyclical",
-        "Technology"
-      ],
-      "source": "news_protocol",
-      "source_label": "Yahoo Finance",
-      "type": "macro_data",
-      "bull_case": "Strong dollar is anti-inflationary at margin",
-      "bear_case": "FX translation drag for mega caps; EM currency pressure; commodity deflation",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Secondary effect, not a direct driver. Watch if DXY breaks 100 (psychological).",
-      "debate_note": "DXY < 99 = mild headwind, > 100 would be material",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "S&P 500 approaches all-time high 7,002 as Nasdaq +1.96%, Dow +0.66%",
-      "headline_zh": "S&P 500 逼近歷史新高 7,002，Nasdaq +1.96% 科技領漲",
-      "impact": "bullish",
-      "score": 3,
-      "date": "2026-04-15",
-      "sectors": [
-        "TECHNOLOGY",
-        "FINANCIAL"
-      ],
-      "source": "news_protocol",
-      "source_label": "TheStreet",
-      "type": "macro_data",
-      "bull_case": "S&P 500 within 0.3% of all-time high 7002.28; Nasdaq +2% shows AI trade intact; bank earnings season kicks off",
-      "bear_case": "Near-ATH entries = poor RR; any shock = big downside; breadth 36.8 still weakening warns of narrow leadership",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Momentum real but RR degraded near ATH. Chase trades dangerous. Focus on individual oversold names (PLTR type).",
-      "debate_note": "",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "ASML Q1 earnings beat on intense AI demand — strong read-through for TSMC tomorrow",
-      "headline_zh": "ASML Q1 財報超預期，AI 需求強勁 — 利多 TSM 明日財報",
-      "impact": "bullish",
-      "score": 3,
-      "date": "2026-04-15",
-      "sectors": [
-        "TECHNOLOGY",
-        "SEMICONDUCTORS"
-      ],
-      "source": "news_protocol",
-      "source_label": "TheStreet",
-      "type": "earnings",
-      "bull_case": "ASML 's strong Q1 validates AI capex super-cycle; N2 ramp at TSMC supported; bullish TSM 4/16 print",
-      "bear_case": "None material — ASML is the cleanest tell on semi equipment demand",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "This is a POSITIVE leading indicator for TSM tomorrow. Reinforces TSM BUY thesis from V4.6 analysis.",
-      "debate_note": "Read-through strength: ASML > TSMC > NVDA/AMD/AVGO in the AI capex chain",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "Trump: Iran war 'close to over', 2nd round of talks in Pakistan within days; ceasefire expires 4/21",
-      "headline_zh": "川普：伊朗戰爭「接近結束」，巴基斯坦第二輪談判即將舉行，停火期 4/21 到期",
-      "impact": "bullish",
-      "score": 2,
-      "date": "2026-04-15",
-      "sectors": [
-        "ENERGY",
-        "DEFENSE",
-        "TRANSPORTATION"
-      ],
-      "source": "news_protocol",
-      "source_label": "CNBC / Al Jazeera / Rappler",
-      "type": "geopolitical",
-      "bull_case": "Trump 'close to over' comment + Iran offering safe passage = bull de-escalation path; oil should retreat on confirmation",
-      "bear_case": "Nuclear sticking point (US wants 20yr halt, Iran wants 3-5yr); US military still blockading; ceasefire expires in 6 days",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Shift from 4/14 binary concern → 4/15 mild positive bias. Still binary but weighted toward de-escalation.",
-      "debate_note": "Ceasefire 4/21 expiration window is THE event; binary decision next week",
-      "binary_risk": true,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
-    },
-    {
-      "headline": "Treasury Sec Bessent: Fed can wait on cuts until Iran oil impact clearer",
-      "headline_zh": "財長 Bessent：Fed 可等待 Iran 油價衝擊明朗後再降息",
-      "impact": "bearish",
-      "score": -1,
-      "date": "2026-04-15",
-      "sectors": [
-        "FINANCIAL",
-        "REAL_ESTATE",
-        "UTILITIES"
-      ],
-      "source": "news_protocol",
-      "source_label": "CNBC",
-      "type": "fomc",
-      "bull_case": "Bessent still expects inflation to moderate; rate cuts delayed, not cancelled",
-      "bear_case": "Treasury-Fed coordination signals patience; 2026 only 1 cut expected; Iran + oil keeps core PCE elevated 2.7%",
-      "sector_view": "",
-      "macro_view": "",
-      "arbiter_reasoning": "Reduces probability of June cut. Yield curve to stay high. Long-duration assets (REITs/growth) mild headwind.",
-      "debate_note": "Fed March 2026: 1 cut for year maintained; core PCE revised up to 2.7% (was 2.5%)",
-      "binary_risk": false,
-      "within_48h": false,
-      "tickers_mentioned": [],
-      "depth": "deep",
-      "review_status": "reviewed"
     }
   ],
   "momentum_screen": {
@@ -2910,7 +3181,7 @@
     "snap_date": "2026-04-19",
     "generated_at": "2026-04-19 08:55",
     "freshness": "FRESH",
-    "age_label": "2.1h",
+    "age_label": "14.2h",
     "total_rows": 501,
     "rows": [
       {
@@ -16705,6 +16976,11 @@
           "snap_id": "screen_20260419_0855",
           "score": 58.8,
           "price": 278.39
+        },
+        {
+          "snap_id": "screen_20260419_1526",
+          "score": 58.8,
+          "price": 278.39
         }
       ],
       "AMZN": [
@@ -16794,6 +17070,11 @@
           "snap_id": "screen_20260419_0855",
           "score": 52.5,
           "price": 270.23
+        },
+        {
+          "snap_id": "screen_20260419_1526",
+          "score": 52.5,
+          "price": 270.23
         }
       ],
       "GOOGL": [
@@ -16829,6 +17110,11 @@
         },
         {
           "snap_id": "screen_20260419_0855",
+          "score": 50.0,
+          "price": 341.68
+        },
+        {
+          "snap_id": "screen_20260419_1526",
           "score": 50.0,
           "price": 341.68
         }
@@ -16871,6 +17157,11 @@
         },
         {
           "snap_id": "screen_20260419_0855",
+          "score": 46.2,
+          "price": 422.79
+        },
+        {
+          "snap_id": "screen_20260419_1526",
           "score": 46.2,
           "price": 422.79
         }
@@ -16933,6 +17224,11 @@
         },
         {
           "snap_id": "screen_20260419_0855",
+          "score": 46.2,
+          "price": 201.68
+        },
+        {
+          "snap_id": "screen_20260419_1526",
           "score": 46.2,
           "price": 201.68
         }
@@ -31105,7 +31401,7 @@
       "total_entries": 0,
       "stats": null
     },
-    "snapshot_count": 17
+    "snapshot_count": 18
   },
   "positions": [
     {

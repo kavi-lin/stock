@@ -1,6 +1,9 @@
 ---
 name: short-contrarian-analyst
 description: Burry-style valuation anchor and contrarian veto check for a single ticker. Computes Burry Score (0-100) from FCF yield, EV/EBIT, debt/equity, and price vs 52-week high. Use in investment protocol Phase 2 as the 5th agent — triggers T4 veto when Burry Score < 20 (extremely overvalued) on an otherwise bullish thesis.
+market: us-equity
+scope: single-ticker
+data_sources: [FMP API, yfinance]
 ---
 
 # Short Contrarian Analyst (Burry)

@@ -1,6 +1,9 @@
 ---
 name: tail-risk-analyzer
 description: Quantifies tail risk / fragility for a single ticker using 1-year daily returns. Computes excess kurtosis, skewness, VaR95, max drawdown, and maps to a fragility label (ROBUST/MODERATE/FRAGILE). Use in sector protocol Phase 4b Devil's Advocate (top-3 HOT sectors) and investment protocol Phase 4 Step 3 (per-stock fragility → position sizing).
+market: market-agnostic
+scope: single-ticker
+data_sources: [yfinance]
 ---
 
 # Tail Risk Analyzer

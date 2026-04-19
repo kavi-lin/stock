@@ -139,30 +139,33 @@
                 </div>
 
                 <!-- Quick Launch -->
-                <div class="glass-card p-6 border-dashed border-zinc-700 bg-emerald-500/5 flex flex-col items-center justify-center gap-4">
-                    <i data-lucide="cpu" class="w-10 h-10 text-emerald-500/20"></i>
-                    <div class="text-center">
-                        <h4 class="font-bold" data-i18n="quick_launch">快速啟動引擎</h4>
-                        <p class="text-xs text-zinc-500 mt-1" data-i18n="launch_desc">輸入 Ticker 或選擇指令進行自動化分析</p>
+                <div class="glass-card p-4 border-dashed border-zinc-700 bg-emerald-500/5 flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-4 h-4 text-emerald-500"></i>
+                        <h4 class="text-sm font-bold" data-i18n="quick_launch">快速啟動引擎</h4>
+                        <span class="text-[10px] text-zinc-500 truncate" data-i18n="launch_desc">輸入 Ticker 或選擇指令進行自動化分析</span>
                     </div>
-                    <div class="flex w-full max-w-xs gap-2">
+                    <div class="flex gap-2">
                         <input type="text" id="ticker-input" placeholder="e.g. MSFT" class="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-all uppercase" maxlength="6">
                         <button id="launch-btn" class="bg-green-600 hover:bg-green-500 text-black font-bold px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5">
                             <i data-lucide="play" class="w-3.5 h-3.5"></i>
                             <span data-i18n="start_btn">分析</span>
                         </button>
                     </div>
-                    <!-- Launch status banner -->
-                    <div id="launch-status" class="hidden w-full max-w-xs">
-                        <div class="rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 border" id="launch-status-box">
+                    <!-- Launch status banner (inline) -->
+                    <div id="launch-status" class="hidden">
+                        <div class="rounded-lg px-3 py-2 flex items-center justify-between gap-2 border" id="launch-status-box">
                             <div class="flex items-center gap-2 min-w-0">
                                 <span id="launch-status-icon" class="shrink-0"></span>
                                 <span class="text-xs font-mono truncate" id="launch-status-text">Starting...</span>
                             </div>
                             <span class="text-[10px] font-mono text-zinc-500 shrink-0" id="launch-elapsed">00:00</span>
                         </div>
-                        <p id="launch-status-hint" class="text-[9px] text-zinc-500 mt-1 text-center"></p>
+                        <p id="launch-status-hint" class="text-[9px] text-zinc-500 mt-1"></p>
                     </div>
+
+                    <!-- Global Analyze Queue (compact strip) — mounted by analyze-queue.js -->
+                    <div id="analyze-queue-widget"></div>
                 </div>
             </div>
 
@@ -244,6 +247,7 @@
     <script src="utils.js"></script>
     <script src="components.js"></script>
     <script src="data-store.js"></script>
+    <script src="analyze-queue.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

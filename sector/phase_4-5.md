@@ -1,5 +1,9 @@
 # Phase 4–5 執行細節
 
+<!-- [framework] Phase 4a 3-agent parallel debate + Phase 4b Devil's Advocate adversary
+     + Phase 5 validator gate + MD report = market-agnostic patterns.
+     [domain:us-equity] actual inputs pull from US sector data. -->
+
 ---
 
 ## PHASE 4 — MULTI-AGENT DEBATE
@@ -222,6 +226,44 @@ FINAL REGIME STANCE:
   HOT >= 3 AND AVOID = 0 AND synthesized_exposure >= 60% → AGGRESSIVE
   HOT >= 1 AND median_verdict >= WARM                    → NEUTRAL
   COLD >= 3 OR synthesized_exposure < 40%                → DEFENSIVE
+
+STEP H — Today Verdict（V1.4 新增，必填）:
+  基於 Phase 0-4b 所有輸出 + STEP A-G 的裁決結果，產出結構化的
+  "today_verdict" 物件給 Dashboard hero card 使用。不可省略、
+  不可只寫 session_notes 散文代替。
+
+  "today_verdict": {
+    "headline":    string ≤ 60 chars,   // stance + 1 行核心診斷（e.g. "NEUTRAL — crowded late-cycle tactical peak"）
+    "stance":      AGGRESSIVE|NEUTRAL|DEFENSIVE,  // 對齊 final_regime_stance
+    "confidence":  0.0-1.0,              // 對齊 regime_confidence
+    "one_liner":   string ≤ 160 chars,   // 一句話擴展，給掃過去的人看
+    "key_takeaways": [                    // 3-5 條，動詞開頭、可操作化
+      "今日必看 1（e.g. FTD confirmed 但 breadth 薄，追漲風險高）",
+      "今日必看 2",
+      "今日必看 3"
+    ],
+    "sector_actions": [                   // 精選 4-6 個，不列全 11 個
+      {
+        "sector":     "Industrials|Financials|...",
+        "action":     "overweight|underweight|avoid|wait|neutral",
+        "confidence": "high|medium|low",
+        "reason":     string ≤ 50 chars   // 簡短原因
+      }
+    ],
+    "watch_next": [                       // 3-5 條，要 monitor 的觸發點
+      "Iran ceasefire collapse (rolling within_48h)",
+      "SPY RSI 96.8 若觸 3% pullback → breadth 能否反彈",
+      "4/29 FOMC 鷹派機率"
+    ]
+  }
+
+  產出規則:
+  - sector_actions 的產業名稱必須來自已產出的 sectors[] 清單
+  - action = "overweight" 的產業必須 verdict ∈ [HOT, WARM]
+  - action = "avoid"     的產業必須 verdict = COLD 或 AVOID
+  - action = "wait"      對應 verdict = WARM 但帶較高不確定性
+  - key_takeaways 第一條必須點出「今日 stance 的主因」
+  - watch_next 必須涵蓋所有 upcoming_binary_risks(within_48h) 項目
 ```
 
 **JSON Schema** → 見 `schema.md` Phase 4c

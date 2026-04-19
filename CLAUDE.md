@@ -3,7 +3,17 @@
 > **系統版本：v1.13.0**（實際值以根目錄 `VERSION` 檔與 `Dashboard/utils.js` 的 `VERSION` 常數為準；兩者必須同步；每個 session 結束必須 bump）
 
 ## 專案說明
-這是一套多 Agent 投資分析系統，包含三個 protocol。
+這是一套多 Agent 投資分析系統，包含三個 protocol。**目前所有 protocol 均針對美股（US equity）市場**。Skills 依綁定程度分 `us-equity` / `market-agnostic` / `global-macro` 三類 — 詳見 `skills/MARKET_INDEX.md`。
+
+## 市場分類速查
+
+| 類別 | Skills | 說明 |
+|---|---|---|
+| 🇺🇸 **us-equity**（9） | us-stock-analysis, short-contrarian-analyst, sector-analyst, market-breadth-analyzer, market-sentiment-analyzer, market-news-analyst, theme-detector, ftd-detector, market-top-detector | 綁定美股資料源（FMP / FINRA / GICS / TraderMonty 等），換市場需重寫 |
+| 🌐 **market-agnostic**（4） | momentum-monitor, technical-analyst, tail-risk-analyzer, portfolio-risk-manager | 邏輯通用，未來可原樣套用台股 / 加密 |
+| 🌍 **global-macro**（1） | economic-calendar-fetcher | FMP 全球央行事件 |
+
+Protocols 內用 `<!-- [framework] -->` / `<!-- [domain:us-equity] -->` HTML 註解標示各 phase 是框架層（可通用）還是美股專屬。未來新增第二市場：複製整份 protocol → 替換 `[domain:us-equity]` 段落 → 新市場版本。
 
 ## Protocol 檔案位置
 - **新聞分析**: `news/news_protocol_v2.md` ← V2.1（V2.0 基礎 + Stage 2/REVIEW 四 agent 改 **per-agent batch subagent**（isolation + fanout_mode ladder）+ Phase 4 schema 抽離 + validator gate）

@@ -221,7 +221,27 @@
   "decision_tree_path": "string — 走過的決策樹分支摘要（如 A:pass B:triggered C:late+cyclical）",
   "final_regime_stance": "AGGRESSIVE | NEUTRAL | DEFENSIVE",
   "regime_confidence": "float 0.0–1.0",
-  "regime_confidence_rationale": "string — 為何這個信度分"
+  "regime_confidence_rationale": "string — 為何這個信度分",
+  "today_verdict": {
+    "headline":    "string ≤ 60 chars — stance + 1 行核心診斷",
+    "stance":      "AGGRESSIVE | NEUTRAL | DEFENSIVE — 對齊 final_regime_stance",
+    "confidence":  "float 0.0–1.0 — 對齊 regime_confidence",
+    "one_liner":   "string ≤ 160 chars — 一句話擴展",
+    "key_takeaways": [
+      "string — 今日必看，動詞開頭可操作化（3-5 條）"
+    ],
+    "sector_actions": [
+      {
+        "sector":     "Industrials | Financials | ...",
+        "action":     "overweight | underweight | avoid | wait | neutral",
+        "confidence": "high | medium | low",
+        "reason":     "string ≤ 50 chars"
+      }
+    ],
+    "watch_next": [
+      "string — 要 monitor 的觸發點（3-5 條，含所有 within_48h binary risks）"
+    ]
+  }
 }
 ```
 

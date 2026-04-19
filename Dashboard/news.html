@@ -52,23 +52,58 @@
               </div>
             </div>
 
-            <!-- Protocol Run Banner (shown when DIGEST/FLASH/REVIEW is running) -->
-            <div id="news-run-banner" class="hidden mb-6 glass-card p-5 border-l-4 border-l-blue-500">
+            <!-- Protocol Run Banner (DIGEST/FLASH/REVIEW) — same inline expandable card pattern as momentum/sector -->
+            <div id="news-run-banner" class="hidden mb-6 glass-card p-5 scan-card-frame" style="--scan-accent:#3b82f6">
                 <div class="flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex items-center gap-3 min-w-0 overflow-hidden flex-1">
                         <span id="news-run-icon" class="shrink-0"><span class="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span></span>
-                        <div class="min-w-0">
-                            <p class="text-sm font-bold truncate" style="color:var(--text-card-title)" id="news-run-title">Running...</p>
-                            <p class="text-[11px] text-zinc-500 font-mono mt-0.5" id="news-run-detail"></p>
+                        <div class="min-w-0 overflow-hidden flex-1">
+                            <p class="text-sm font-bold truncate max-w-full" style="color:var(--text-card-title)" id="news-run-title">Running...</p>
+                            <p class="text-[11px] text-zinc-500 font-mono mt-0.5 truncate max-w-full" id="news-run-detail"></p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 shrink-0">
                         <span class="text-[11px] font-mono text-zinc-500" id="news-run-elapsed">00:00</span>
+                        <button id="news-run-expand" class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 hover:text-emerald-500">展開</button>
                         <button id="news-run-cancel" class="text-[10px] font-bold text-red-400 border border-red-500/40 px-2 py-1 rounded hover:bg-red-500/10 transition-all">CANCEL</button>
                         <button id="news-run-dismiss" class="text-zinc-500 hover:text-zinc-300 text-xs px-1">✕</button>
                     </div>
                 </div>
+                <div id="news-run-panel" class="hidden mt-4">
+                    <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2">即時日誌</div>
+                    <pre id="news-run-log" class="scan-card-log"></pre>
+                </div>
             </div>
+
+            <style>
+                .scan-card-frame {
+                    position: relative;
+                    width: 100%;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                    border-left: 6px solid var(--scan-accent, #3b82f6);
+                    box-shadow: inset 4px 0 12px -4px color-mix(in srgb, var(--scan-accent, #3b82f6) 40%, transparent);
+                    transition: border-left-color 0.2s, box-shadow 0.2s;
+                }
+                .scan-card-frame * { min-width: 0; }
+                .scan-card-log {
+                    display: block;
+                    width: 100%;
+                    box-sizing: border-box;
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 10px; line-height: 1.55;
+                    max-height: 240px; overflow-y: auto;
+                    padding: 0; margin: 0;
+                    background: transparent;
+                    border: none;
+                    color: #a1a1aa;
+                    white-space: pre-wrap;
+                    overflow-wrap: anywhere;
+                }
+                .scan-card-log:empty::before {
+                    content: 'Waiting for log output…'; color: #52525b; font-style: italic;
+                }
+            </style>
 
             <!-- Review Filter Tabs -->
             <div class="flex gap-2 flex-wrap mb-6" id="news-filter-tabs">

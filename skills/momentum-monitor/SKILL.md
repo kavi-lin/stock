@@ -1,6 +1,9 @@
 ---
 name: momentum-monitor
 description: Per-stock momentum & flow monitor — volume dynamics, MA structure & crosses, short interest, spike detection. Use when user asks about 爆大量, 動能, volume spike, moving average cross, short interest / squeeze potential, or a quick bullish/bearish flow read on a single ticker.
+market: market-agnostic
+scope: universe-scan
+data_sources: [yfinance]
 ---
 
 # Momentum Monitor

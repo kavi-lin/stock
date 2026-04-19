@@ -1,6 +1,9 @@
 ---
 name: market-sentiment-analyzer
 description: Provides market sentiment composite score (0-100) combining VIX, SPY RSI, Put/Call ratio, and CNN Fear & Greed index. Use when user asks about market sentiment, fear and greed, VIX level, or needs a sentiment-based fallback for investment/sector protocols. Minimal local implementation — replaces web search for F&G.
+market: us-equity
+scope: market-level
+data_sources: [yfinance (VIX/SPY), CNN F&G]
 ---
 
 # Market Sentiment Analyzer

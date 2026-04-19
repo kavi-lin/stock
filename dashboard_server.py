@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 import subprocess
 import threading
 from datetime import datetime, timedelta
@@ -50,7 +51,16 @@ _state_lock = threading.Lock()
 # Lets the Dashboard trigger Claude to execute a protocol (sector/news/invest).
 # Single-job lock: one protocol at a time to avoid runaway token burn.
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
+# Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
+# a tighter ceiling (12 min) — past runs that crossed 10 min have all been
+# pathological (e.g. Claude looping on a Bash-heredoc write that hits Stream
+# Idle Timeout, burning 2h+ of tokens for nothing).
 PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "1500"))
+PROTOCOL_TIMEOUT_OVERRIDES = {
+    "news":   int(os.getenv("NEWS_TIMEOUT_SEC",   "720")),   # 12 min
+    "flash":  int(os.getenv("FLASH_TIMEOUT_SEC",  "600")),   # 10 min
+    "review": int(os.getenv("REVIEW_TIMEOUT_SEC", "600")),   # 10 min
+}
 
 PROTOCOL_PROMPTS = {
     "sector": "產業掃描",
@@ -320,13 +330,14 @@ def run_protocol(name, params=None):
             rt = threading.Thread(target=_reader, daemon=True)
             rt.start()
 
+            timeout_sec = PROTOCOL_TIMEOUT_OVERRIDES.get(name, PROTOCOL_TIMEOUT_SEC)
             try:
-                rc = proc.wait(timeout=PROTOCOL_TIMEOUT_SEC)
+                rc = proc.wait(timeout=timeout_sec)
             except subprocess.TimeoutExpired:
                 proc.kill()
                 rc = -1
                 with _protocol_lock:
-                    _protocol_state["error"] = f"timeout after {PROTOCOL_TIMEOUT_SEC}s"
+                    _protocol_state["error"] = f"timeout after {timeout_sec}s (hard kill)"
             rt.join(timeout=3)
             lf.write(f"\n=== ended={_now_iso()} rc={rc} ===\n")
             lf.close()
@@ -357,6 +368,154 @@ def run_protocol(name, params=None):
 
     threading.Thread(target=_run, daemon=True).start()
     return job_id, None
+
+
+# ── Analyze Queue ─────────────────────────────────────────────────────────
+# Global sequential queue for per-ticker invest protocol runs.
+# - User enqueues from momentum/decisions pages
+# - Worker thread pops next when no protocol is running, calls run_protocol("invest")
+# - Duplicate tickers (queued OR currently running) are abandoned (409)
+#
+# Shape:
+#   _analyze_queue = [{"ticker":"NVDA","risk_tolerance":"MEDIUM","enqueued_at":"..."},
+#                     {"ticker":"AAPL",...}]
+_analyze_queue = []
+_analyze_queue_lock = threading.Lock()
+_analyze_history = []  # last 10 completions: {"ticker":"NVDA","status":"done|error","ended_at":"..."}
+_ANALYZE_HISTORY_MAX = 10
+
+
+def _currently_analyzing_ticker():
+    """Return ticker currently being analyzed via invest protocol, or None."""
+    with _protocol_lock:
+        if _protocol_state.get("status") != "running":
+            return None
+        if _protocol_state.get("name") != "invest":
+            return None
+        # We stash the ticker on state at enqueue time (see _analyze_worker)
+        return _protocol_state.get("analyze_ticker")
+
+
+def enqueue_analysis(ticker, risk_tolerance="MEDIUM"):
+    """Enqueue a ticker. Returns (state, err). err='duplicate' when already
+    queued or currently running; caller should treat as 409."""
+    ticker = (ticker or "").upper().strip()
+    if not ticker:
+        return None, "missing ticker"
+    rt = (risk_tolerance or "MEDIUM").upper().strip()
+    if rt not in ("LOW", "MEDIUM", "HIGH"):
+        rt = "MEDIUM"
+
+    active = _currently_analyzing_ticker()
+    with _analyze_queue_lock:
+        if active == ticker:
+            return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
+        if any(q["ticker"] == ticker for q in _analyze_queue):
+            return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
+        entry = {"ticker": ticker, "risk_tolerance": rt, "enqueued_at": _now_iso()}
+        _analyze_queue.append(entry)
+        position = len(_analyze_queue)
+    return {"queued": True, "ticker": ticker, "position": position, "enqueued_at": entry["enqueued_at"]}, None
+
+
+def remove_from_queue(ticker):
+    """Remove a pending ticker from queue. Cannot cancel the active run."""
+    ticker = (ticker or "").upper().strip()
+    with _analyze_queue_lock:
+        before = len(_analyze_queue)
+        _analyze_queue[:] = [q for q in _analyze_queue if q["ticker"] != ticker]
+        removed = before - len(_analyze_queue)
+    return removed > 0
+
+
+def get_queue_state():
+    """Return {active:{ticker,elapsed_sec}|None, queue:[...], recent:[...]}"""
+    active = None
+    with _protocol_lock:
+        if _protocol_state.get("status") == "running" and _protocol_state.get("name") == "invest":
+            started = _protocol_state.get("started_at")
+            elapsed = 0
+            if started:
+                try:
+                    elapsed = int((datetime.now() - datetime.fromisoformat(started)).total_seconds())
+                except Exception:
+                    pass
+            active = {
+                "ticker":      _protocol_state.get("analyze_ticker"),
+                "job_id":      _protocol_state.get("job_id"),
+                "started_at":  started,
+                "elapsed_sec": elapsed,
+                "source":      _protocol_state.get("analyze_source", "direct"),
+            }
+    with _analyze_queue_lock:
+        queue_snapshot = [dict(q) for q in _analyze_queue]
+        history_snapshot = list(_analyze_history)
+    return {"active": active, "queue": queue_snapshot, "recent": history_snapshot}
+
+
+def _analyze_worker():
+    """Background loop: whenever queue has pending + no protocol running, start next."""
+    while True:
+        try:
+            # Wait until queue has work AND no protocol is running
+            with _protocol_lock:
+                proto_busy = _protocol_state.get("status") == "running"
+            with _analyze_queue_lock:
+                queue_empty = not _analyze_queue
+            if proto_busy or queue_empty:
+                time.sleep(1.5)
+                continue
+
+            with _analyze_queue_lock:
+                if not _analyze_queue:
+                    continue
+                entry = _analyze_queue.pop(0)
+            ticker = entry["ticker"]
+            rt     = entry.get("risk_tolerance", "MEDIUM")
+
+            # Kick off the invest protocol; tag state with ticker for UI
+            job_id, err = run_protocol("invest", {"ticker": ticker, "risk_tolerance": rt})
+            if err:
+                # Can't start (maybe race with another protocol) — record error and continue
+                with _analyze_queue_lock:
+                    _analyze_history.insert(0, {
+                        "ticker":   ticker,
+                        "status":   "error",
+                        "error":    err,
+                        "ended_at": _now_iso(),
+                    })
+                    del _analyze_history[_ANALYZE_HISTORY_MAX:]
+                continue
+            with _protocol_lock:
+                _protocol_state["analyze_ticker"] = ticker
+                _protocol_state["analyze_source"] = entry.get("source", "queue")
+
+            # Wait for the run to finish
+            while True:
+                time.sleep(2)
+                with _protocol_lock:
+                    s = _protocol_state.get("status")
+                    ended = _protocol_state.get("ended_at")
+                if s != "running" and ended:
+                    break
+
+            with _protocol_lock:
+                final_status = _protocol_state.get("status")
+                final_error  = _protocol_state.get("error")
+            with _analyze_queue_lock:
+                _analyze_history.insert(0, {
+                    "ticker":   ticker,
+                    "status":   final_status,
+                    "error":    final_error if final_status == "error" else None,
+                    "ended_at": _now_iso(),
+                })
+                del _analyze_history[_ANALYZE_HISTORY_MAX:]
+        except Exception as e:
+            sys.stderr.write(f"[analyze_worker error] {e}\n")
+            time.sleep(3)
+
+
+threading.Thread(target=_analyze_worker, daemon=True).start()
 
 
 # ── Preflight cache health check ──────────────────────────────────────────
@@ -482,6 +641,7 @@ _momentum_state = {
     "total":             0,    # universe size (set once screen.py reports it)
     "errors_count":      0,    # per-ticker fetch errors
     "cache_hits_count":  0,
+    "log_tail":          [],   # last ~200 stderr lines for inline expand panel
 }
 
 
@@ -531,6 +691,7 @@ def run_momentum_screen(params):
             "total":             0,
             "errors_count":      0,
             "cache_hits_count":  0,
+            "log_tail":          [],
         })
 
     cmd = _build_screen_cmd(params)
@@ -556,12 +717,20 @@ def run_momentum_screen(params):
         def _reader():
             # Parse screen.py stderr live: "[screen] 150/503 (0 errors, 23 cache hits)"
             for line in iter(proc.stderr.readline, ''):
-                stderr_tail.append(line)
+                stripped = line.rstrip("\n")
+                stderr_tail.append(stripped)
                 if len(stderr_tail) > 50:
                     stderr_tail.pop(0)  # keep only last 50 lines for error reporting
-                m = _MOM_PROGRESS_RE.search(line)
-                if m:
-                    with _momentum_lock:
+
+                # Live log-tail shared with client expand panel (cap 200)
+                with _momentum_lock:
+                    tail = _momentum_state["log_tail"]
+                    tail.append(stripped)
+                    if len(tail) > 200:
+                        del tail[:len(tail) - 200]
+
+                    m = _MOM_PROGRESS_RE.search(line)
+                    if m:
                         _momentum_state["done"]             = int(m.group(1))
                         _momentum_state["total"]            = int(m.group(2))
                         _momentum_state["errors_count"]     = int(m.group(3))
@@ -778,6 +947,9 @@ class Handler(SimpleHTTPRequestHandler):
                 state["elapsed_sec"] = int(end - state["started_at"])
             return self._json(200, state)
 
+        if path == "/api/analyze-queue":
+            return self._json(200, get_queue_state())
+
         if path == "/api/run-protocol/status":
             with _protocol_lock:
                 state = dict(_protocol_state)
@@ -865,6 +1037,21 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(409, {"error": err})
             return self._json(202, {"job_id": job_id, "name": name})
 
+        if path == "/api/analyze-queue":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            ticker = body.get("ticker", "")
+            rt     = body.get("risk_tolerance", "MEDIUM")
+            state, err = enqueue_analysis(ticker, rt)
+            if err == "duplicate":
+                return self._json(409, state)
+            if err:
+                return self._json(400, {"error": err})
+            return self._json(202, state)
+
         if path == "/api/run-protocol/cancel":
             ok = cancel_protocol()
             return self._json(200 if ok else 409, {"cancelled": ok})
@@ -944,6 +1131,15 @@ class Handler(SimpleHTTPRequestHandler):
             save_positions(data)
             run_bridge(reason=f"DELETE {pid}")
             return self._json(200, {"deleted": pid})
+
+        m = re.match(r"^/api/analyze-queue/([A-Za-z0-9\.\-]+)$", path)
+        if m:
+            ticker = m.group(1).upper()
+            removed = remove_from_queue(ticker)
+            if not removed:
+                return self._json(404, {"error": f"ticker not in pending queue: {ticker}"})
+            return self._json(200, {"removed": ticker})
+
         return self._json(404, {"error": "not found"})
 
 

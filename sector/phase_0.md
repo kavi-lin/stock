@@ -1,4 +1,6 @@
-# Phase 0 — Market Regime Check
+# Phase 0
+
+<!-- [domain:us-equity] breadth (SPX), FTD (S&P+NDX), market-top (US distribution days), F&G (CNN), VIX — all US-specific. --> — Market Regime Check
 
 **Agent**: Macro Regime Analyst
 
