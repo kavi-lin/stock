@@ -902,39 +902,79 @@ def ingest_momentum_screen():
         and _row_count(p) >= SUBSTANTIAL_ROWS
     ]
     latest_csv = recent_substantial[-1] if recent_substantial else csv_files[-1]
+
+    # If a newer (smaller) watchlist-only CSV exists after the base, merge its rows in.
+    # This ensures watchlist rescans update tickers without replacing the full base.
+    base_mtime = os.path.getmtime(latest_csv)
+    newer_small = [
+        p for p in csv_files
+        if os.path.getmtime(p) > base_mtime and _row_count(p) < SUBSTANTIAL_ROWS
+    ]
+
+    def _parse_csv_rows(path):
+        rows = []
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                reader = _csv.DictReader(fp)
+                for row in reader:
+                    rows.append(row)
+        except Exception:
+            pass
+        return rows
+
+    def _build_row(row):
+        return {
+            "rank":     int(row["rank"]) if row.get("rank") else None,
+            "ticker":   row.get("ticker"),
+            "in_sp500": row.get("in_sp500", "1") != "0",
+            "sector":   row.get("sector") or "Unknown",
+            "price":    _safe_float(row.get("price")),
+            "score":    _safe_float(row.get("score")),
+            "label":    row.get("label"),
+            "stage":    row.get("stage"),
+            "volume_today":   _safe_float(row.get("volume_today")),
+            "avg_20d":        _safe_float(row.get("avg_20d")),
+            "ratio_20d":      _safe_float(row.get("ratio_20d")),
+            "spike_label":    row.get("spike_label"),
+            "intraday_state": row.get("intraday_state"),
+            "elapsed_min":    _safe_float(row.get("elapsed_min")),
+            "ma_20":   _safe_float(row.get("ma_20")),
+            "ma_50":   _safe_float(row.get("ma_50")),
+            "ma_200":  _safe_float(row.get("ma_200")),
+            "above_ma20_pct":  _safe_float(row.get("above_ma20_pct")),
+            "above_ma50_pct":  _safe_float(row.get("above_ma50_pct")),
+            "above_ma200_pct": _safe_float(row.get("above_ma200_pct")),
+            "rsi_14":          _safe_float(row.get("rsi_14")),
+            "rsi_zone":        row.get("rsi_zone"),
+            "short_pct_float": _safe_float(row.get("short_pct_float")),
+            "short_interpretation": row.get("short_interpretation"),
+            "signals":  row.get("signals", "").split("|") if row.get("signals") else [],
+            "warnings": row.get("warnings", "").split("|") if row.get("warnings") else [],
+        }
+
     latest_rows = []
     try:
         with open(latest_csv, "r", encoding="utf-8") as fp:
             reader = _csv.DictReader(fp)
             for row in reader:
-                latest_rows.append({
-                    "rank":     int(row["rank"]) if row.get("rank") else None,
-                    "ticker":   row.get("ticker"),
-                    "sector":   row.get("sector") or "Unknown",
-                    "price":    _safe_float(row.get("price")),
-                    "score":    _safe_float(row.get("score")),
-                    "label":    row.get("label"),
-                    "stage":    row.get("stage"),
-                    "volume_today": _safe_float(row.get("volume_today")),
-                    "avg_20d":      _safe_float(row.get("avg_20d")),
-                    "ratio_20d":    _safe_float(row.get("ratio_20d")),
-                    "spike_label":  row.get("spike_label"),
-                    "ma_20":   _safe_float(row.get("ma_20")),
-                    "ma_50":   _safe_float(row.get("ma_50")),
-                    "ma_200":  _safe_float(row.get("ma_200")),
-                    "above_ma20_pct":  _safe_float(row.get("above_ma20_pct")),
-                    "above_ma50_pct":  _safe_float(row.get("above_ma50_pct")),
-                    "above_ma200_pct": _safe_float(row.get("above_ma200_pct")),
-                    "rsi_14":          _safe_float(row.get("rsi_14")),
-                    "rsi_zone":        row.get("rsi_zone"),
-                    "short_pct_float": _safe_float(row.get("short_pct_float")),
-                    "short_interpretation": row.get("short_interpretation"),
-                    "signals":  row.get("signals", "").split("|") if row.get("signals") else [],
-                    "warnings": row.get("warnings", "").split("|") if row.get("warnings") else [],
-                })
+                latest_rows.append(_build_row(row))
     except Exception as e:
         print(f"[WARN] momentum CSV parse {latest_csv}: {e}")
         return out
+
+    # Merge newer watchlist-only CSVs (< SUBSTANTIAL_ROWS) on top of the base.
+    # Existing tickers get updated data; new tickers get appended.
+    if newer_small:
+        row_by_ticker = {r["ticker"]: r for r in latest_rows}
+        for small_csv in newer_small:
+            for raw in _parse_csv_rows(small_csv):
+                tk = raw.get("ticker")
+                if not tk:
+                    continue
+                row_by_ticker[tk] = _build_row(raw)
+        latest_rows = list(row_by_ticker.values())
+        # Use the newest small CSV's mtime for freshness display
+        latest_csv = newer_small[-1]
 
     # Extract snap_id from filename
     snap_id = os.path.splitext(os.path.basename(latest_csv))[0]

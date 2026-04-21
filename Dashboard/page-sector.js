@@ -4,6 +4,95 @@
  * Requires Chart.js (loaded via CDN in sector.html)
  */
 
+/* ── Pill hover tooltip ─────────────────────────────────────── */
+const PILL_TIPS = {
+    regime: {
+        zh: { title: '市場機制', desc: '描述大盤資金流向的整體狀態，由廣度、FTD、情緒三訊號綜合判定。影響個股分析的建議曝險上限。', scale: '🟢 RISK_ON / BULL：資金進場，適合持股\n🟡 SIDEWAYS / VOLATILE：震盪觀望\n🔴 RISK_OFF / BEAR：資金撤退，降低倉位' },
+        en: { title: 'Market Regime', desc: 'Overall direction of institutional money flow, derived from breadth, FTD, and sentiment signals. Sets the exposure ceiling for individual trades.', scale: '🟢 RISK_ON / BULL: money flowing in, hold positions\n🟡 SIDEWAYS / VOLATILE: wait & watch\n🔴 RISK_OFF / BEAR: money leaving, reduce exposure' },
+    },
+    breadth: {
+        zh: { title: '市場廣度分數', desc: '衡量市場中有多少股票真正在上漲趨勢。避免「大盤漲但多數個股跌」的陷阱，分數 0–100。', scale: '🟢 60–100  Healthy / Strong：多數股票參與\n🟡 40–60   Neutral：觀望，選股需謹慎\n🔴  0–40   Weakening / Critical：只有少數股票在漲，市場很窄' },
+        en: { title: 'Market Breadth Score', desc: 'Percentage of stocks in an uptrend. Guards against "index up but most stocks down" traps. Scale 0–100.', scale: '🟢 60–100  Healthy / Strong: broad participation\n🟡 40–60   Neutral: selective, proceed with caution\n🔴  0–40   Weakening / Critical: only a handful leading, narrow rally' },
+    },
+    ftd: {
+        zh: { title: 'FTD 跟進日狀態', desc: 'Follow-Through Day（跟進日），William O\'Neil 確認大盤反彈的信號。反彈第 4 天以上出現大成交量收漲，代表機構資金進場確認。', scale: '🟢 FTD_CONFIRMED：反彈已確認，可增加曝險\n🟡 RALLY_ATTEMPT：反彈觀察中，還沒確認\n🔴 NO_SIGNAL / DISTRIBUTION：無反彈信號或派發中，偏弱' },
+        en: { title: 'Follow-Through Day', desc: 'O\'Neil signal confirming a market rally. A big-volume up day on day 4+ of a rally attempt signals institutional buying.', scale: '🟢 FTD_CONFIRMED: rally confirmed, increase exposure\n🟡 RALLY_ATTEMPT: watching, not yet confirmed\n🔴 NO_SIGNAL / DISTRIBUTION: no signal or distribution phase' },
+    },
+    exposure: {
+        zh: { title: '建議曝險上限', desc: '由廣度、FTD、市場頂部三訊號合成的最保守倉位上限。超過這個比例持股，整體組合風險偏高。', scale: '🟢 75–100%：市場強健，可高持股\n🟡 50–74%：謹慎，精選個股\n🔴 <50%：防守模式，降低整體倉位' },
+        en: { title: 'Synthesized Exposure Ceiling', desc: 'Most conservative position limit derived from breadth, FTD, and market-top signals. Holding above this level raises portfolio risk.', scale: '🟢 75–100%: strong market, high allocation OK\n🟡 50–74%: cautious, be selective\n🔴 <50%: defensive, reduce overall exposure' },
+    },
+    fg: {
+        zh: { title: '貪婪恐懼指數', desc: 'CNN Fear & Greed Index，0–100 測量市場整體情緒。極度恐懼時往往是買點，極度貪婪時市場容易反轉。', scale: '🟢 45–74  Greed / Neutral：正常市場情緒\n🟡 75–89  Extreme Greed：警戒，估值偏貴\n🔴  0–24  Extreme Fear：恐慌（逆向可能是機會）\n⚠️  >90  Euphoria：高度警戒反轉風險' },
+        en: { title: 'Fear & Greed Index', desc: 'CNN 0–100 gauge of overall market sentiment. Extreme fear can signal buying opportunities; extreme greed often precedes corrections.', scale: '🟢 45–74  Greed / Neutral: healthy sentiment\n🟡 75–89  Extreme Greed: caution, valuations stretched\n🔴  0–24  Extreme Fear: panic (contrarian opportunity)\n⚠️  >90  Euphoria: high reversal risk' },
+    },
+    cycle: {
+        zh: { title: '市場週期位置', desc: '大盤所處的多頭週期階段，影響產業輪動方向。不同階段適合的產業類型不同。', scale: '🟢 Early：週期初期，科技/成長股最強\n🟡 Mid：均衡輪動，工業/金融輪強\n🔴 Late：週期末，防禦性/能源輪強，成長股逐漸退場' },
+        en: { title: 'Market Cycle Phase', desc: 'Stage of the current bull cycle, driving sector rotation direction.', scale: '🟢 Early: growth & tech outperform\n🟡 Mid: balanced rotation, industrials/financials strengthen\n🔴 Late: defensives & energy lead, growth fades' },
+    },
+    vix: {
+        zh: { title: 'VIX 波動率指數', desc: 'CBOE 恐慌指數，衡量市場對未來 30 天波動的預期。VIX 越高代表市場越不安，個股波動也會放大。', scale: '🟢 <15  低波動：市場平靜，持股舒適\n🟡 15–24 正常：一般市況\n🔴 25–30 警戒：波動升溫，謹慎加倉\n🆘 >30  恐慌：高波動，停損紀律非常重要' },
+        en: { title: 'VIX Volatility Index', desc: 'CBOE fear gauge measuring expected 30-day market volatility. Higher VIX means bigger swings and wider stop-losses needed.', scale: '🟢 <15  Low: calm market, comfortable holding\n🟡 15–24 Normal: typical conditions\n🔴 25–30 Elevated: increasing risk, be careful adding\n🆘 >30  Fear: high volatility, strict stops essential' },
+    },
+};
+
+(function initPillTooltip() {
+    const tip = document.getElementById('pill-tooltip');
+    if (!tip) return;
+    let _hideTimer = null;
+
+    function showTip(el) {
+        const key = el.dataset.tipKey;
+        const lang = document.documentElement.lang === 'en' ? 'en' : 'zh';
+        const data = PILL_TIPS[key]?.[lang];
+        if (!data) return;
+
+        // Build content
+        const valueEl = el.querySelector('.status-pill-value');
+        const valueColor = valueEl?.style.color || 'var(--text-main)';
+        const currentVal = valueEl?.textContent || '';
+        tip.innerHTML = `
+            <div class="tip-title">${data.title} <span style="color:${valueColor};font-size:11px;font-weight:700">${currentVal}</span></div>
+            <div class="tip-desc">${data.desc}</div>
+            <div class="tip-scale">${data.scale.replace(/\n/g, '<br>')}</div>
+        `;
+
+        // Position: invisible first to measure height
+        tip.style.opacity = '0';
+        tip.style.top = '-9999px';
+        tip.classList.add('tip-visible');
+
+        requestAnimationFrame(() => {
+            const rect  = el.getBoundingClientRect();
+            const tRect = tip.getBoundingClientRect();
+            const gap   = 8;
+            let top  = rect.top - tRect.height - gap;
+            if (top < 8) top = rect.bottom + gap;     // flip below if near top
+            let left = rect.left + (rect.width - tRect.width) / 2;
+            left = Math.max(8, Math.min(left, window.innerWidth - tRect.width - 8));
+            tip.style.top  = top  + 'px';
+            tip.style.left = left + 'px';
+            tip.style.opacity = '';  // CSS transition takes over
+        });
+    }
+
+    function hideTip() {
+        tip.classList.remove('tip-visible');
+    }
+
+    document.addEventListener('mouseover', e => {
+        const pill = e.target.closest('[data-tip-key]');
+        if (!pill) return;
+        if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+        showTip(pill);
+    });
+    document.addEventListener('mouseout', e => {
+        const pill = e.target.closest('[data-tip-key]');
+        if (!pill) return;
+        _hideTimer = setTimeout(hideTip, 80);
+    });
+})();
+
 /* ── Constants ──────────────────────────────────────────────── */
 const VC = {
     HOT:   { hex: '#22c55e', bg: 'rgba(34,197,94,0.10)',  border: 'rgba(34,197,94,0.30)'  },
@@ -172,19 +261,25 @@ function renderBinaryAlert(risks) {
         return r.date || '';
     };
     const container = document.getElementById('binary-alert-items');
-    container.innerHTML = urgent.map(r => `
-        <div class="flex items-start gap-3">
-            <span class="binary-date-pill shrink-0 mt-0.5">${dateLabel(r)}</span>
-            <div class="flex-1 min-w-0">
-                <div class="text-[12px] font-semibold leading-snug" style="color:var(--text-main)">${r.event}</div>
+    container.innerHTML = urgent.map(r => {
+        const isTomorrow = r.days_until === 1;
+        const lbl = dateLabel(r);
+        return `
+        <div class="binary-row">
+            <div class="binary-date-box">
+                <span class="binary-date-pill ${isTomorrow ? 'tomorrow' : ''}">${lbl}</span>
+            </div>
+            <div class="binary-content">
+                <div class="binary-headline">${r.event}</div>
                 ${r.affected_sectors?.length ? `
-                <div class="flex flex-wrap gap-1 mt-1.5">
+                <div class="binary-sector-group">
                     ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${s.replace(/_/g,' ')}</span>`).join('')}
                 </div>` : ''}
             </div>
-        </div>
-    `).join('');
-}
+        </div>`;
+    }).join('');
+    }
+
 
 /* ── Today's Verdict (hero card) — shared component ──────────── */
 // Implementation moved to components.js (Components.renderTodayVerdict).
@@ -674,6 +769,39 @@ async function pollScanStatus() {
     }
 }
 
+/* Auto-run breadth/FTD/market_top if any are stale before sector scan.
+   Returns when preflight is done (or on timeout/error — scan proceeds anyway). */
+async function _runPreflightIfStale() {
+    const latest = document.getElementById('scan-banner-latest');
+    try {
+        const checkRes = await fetch('/api/preflight');
+        if (!checkRes.ok) return;
+        const { items } = await checkRes.json();
+        const stale = (items || []).filter(i => (i.status === 'STALE' || i.status === 'MISSING') && i.free);
+        if (stale.length === 0) return;
+
+        const labels = stale.map(i => i.label || i.key).join(', ');
+        if (latest) latest.textContent = `⏳ 更新基礎數據 (${labels})…`;
+
+        const runRes = await fetch('/api/preflight/run-free', { method: 'POST' });
+        if (!runRes.ok) return; // proceed even if kick-off fails
+
+        await new Promise(resolve => {
+            const timer = setInterval(async () => {
+                try {
+                    const s = await fetch('/api/preflight/status').then(r => r.json());
+                    if (s.status !== 'running') { clearInterval(timer); resolve(); }
+                } catch { clearInterval(timer); resolve(); }
+            }, 2000);
+            setTimeout(() => { clearInterval(timer); resolve(); }, 3 * 60 * 1000); // 3 min hard cap
+        });
+
+        if (latest) latest.textContent = '✅ 基礎數據已更新，啟動產業掃描中…';
+    } catch {
+        // preflight failure is non-fatal — let scan proceed
+    }
+}
+
 async function triggerSectorScan() {
     const tr = t();
     const confirmMsg = tr.scan_confirm || 'Run full sector scan via Claude? (~3-5 min, consumes tokens)';
@@ -685,6 +813,7 @@ async function triggerSectorScan() {
     renderScanEvents([]);
     document.getElementById('scan-error')?.classList.add('hidden');
     try {
+        await _runPreflightIfStale();
         const res = await fetch('/api/run-protocol', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

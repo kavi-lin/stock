@@ -52,11 +52,23 @@ _SECTOR_MAP = _load_sector_map()
 
 
 # ── Universe loading ─────────────────────────────────────────────────────
+WATCHLIST_PATH = os.path.join(UNIVERSE_DIR, "watchlist.txt")
+
+
 def _load_universe(name):
     path = os.path.join(UNIVERSE_DIR, f"{name}.txt")
     if not os.path.exists(path):
         raise SystemExit(f"universe not found: {path}")
     with open(path, "r", encoding="utf-8") as fp:
+        return [ln.strip().upper() for ln in fp if ln.strip() and not ln.startswith("#")]
+
+
+def _load_watchlist():
+    """User-editable list of non-SP500 tickers to scan alongside the main universe.
+    Missing file = empty list (no-op). Comments (#) and blank lines ignored."""
+    if not os.path.exists(WATCHLIST_PATH):
+        return []
+    with open(WATCHLIST_PATH, "r", encoding="utf-8") as fp:
         return [ln.strip().upper() for ln in fp if ln.strip() and not ln.startswith("#")]
 
 
@@ -128,8 +140,9 @@ def _passes(payload, args):
 
 # ── Output ───────────────────────────────────────────────────────────────
 CSV_COLUMNS = [
-    "rank", "ticker", "sector", "price", "score", "label", "stage",
+    "rank", "ticker", "in_sp500", "sector", "price", "score", "label", "stage",
     "volume_today", "avg_20d", "ratio_20d", "spike_label", "volume_trend",
+    "intraday_state", "elapsed_min",
     "ma_20", "ma_50", "ma_200",
     "above_ma20_pct", "above_ma50_pct", "above_ma200_pct",
     "rsi_14", "rsi_zone",
@@ -139,26 +152,30 @@ CSV_COLUMNS = [
 ]
 
 
-def _row_from_payload(rank, p):
+def _row_from_payload(rank, p, sp500_set=None):
     v = p.get("volume", {})
     m = p.get("ma_structure", {})
     s = p.get("short_interest", {})
     c = p.get("momentum_composite", {})
     r = p.get("rsi", {})
     ticker = p.get("ticker")
+    in_sp500 = True if sp500_set is None else (ticker in sp500_set)
     return {
         "rank": rank,
         "ticker": ticker,
+        "in_sp500": int(in_sp500),   # CSV-friendly 1/0
         "sector": _SECTOR_MAP.get(ticker) or "Unknown",
         "price": p.get("price"),
         "score": c.get("score"),
         "label": c.get("label"),
         "stage": m.get("stage"),
-        "volume_today": v.get("today"),
-        "avg_20d":      v.get("avg_20d"),
-        "ratio_20d":    v.get("ratio_20d"),
-        "spike_label":  v.get("spike_label"),
-        "volume_trend": v.get("volume_trend"),
+        "volume_today":   v.get("today"),
+        "avg_20d":        v.get("avg_20d"),
+        "ratio_20d":      v.get("ratio_20d"),
+        "spike_label":    v.get("spike_label"),
+        "volume_trend":   v.get("volume_trend"),
+        "intraday_state": v.get("intraday_state"),
+        "elapsed_min":    v.get("elapsed_min"),
         "ma_20":   m.get("ma_20"),
         "ma_50":   m.get("ma_50"),
         "ma_200":  m.get("ma_200"),
@@ -248,15 +265,26 @@ def main():
 
     args = ap.parse_args()
 
+    # Primary universe selection
     if args.universe:
-        tickers = _load_universe(args.universe)
+        base_tickers = _load_universe(args.universe)
         universe_desc = args.universe
     elif args.tickers:
-        tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
-        universe_desc = f"custom ({len(tickers)} tickers)"
+        base_tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+        universe_desc = f"custom ({len(base_tickers)} tickers)"
     else:
-        tickers = _load_tickers_file(args.tickers_file)
+        base_tickers = _load_tickers_file(args.tickers_file)
         universe_desc = f"file:{os.path.basename(args.tickers_file)}"
+
+    # Track SP500 membership BEFORE merging watchlist, so `in_sp500` remains a clean flag.
+    # Watchlist is only merged when the primary universe is 'sp500' (otherwise the
+    # concept of "in universe vs watchlist" is ambiguous for custom scans).
+    base_set = set(base_tickers)
+    watchlist = _load_watchlist() if args.universe == "sp500" else []
+    extra = [t for t in watchlist if t not in base_set]
+    tickers = base_tickers + extra
+    if extra:
+        universe_desc = f"{universe_desc} +{len(extra)} watchlist"
 
     if not tickers:
         raise SystemExit("empty ticker list")
@@ -288,12 +316,13 @@ def main():
     matched = [p for p in results if _passes(p, args)]
     matched.sort(
         key=lambda p: (
-            -p.get("momentum_composite", {}).get("score", 0),
-            -p.get("volume", {}).get("ratio_20d", 0),
+            -(p.get("momentum_composite", {}).get("score") or 0),
+            -(p.get("volume", {}).get("ratio_20d") or 0),  # None → 0 (too_early state)
         )
     )
 
-    rows = [_row_from_payload(i + 1, p) for i, p in enumerate(matched)]
+    rows = [_row_from_payload(i + 1, p, sp500_set=base_set if args.universe == "sp500" else None)
+            for i, p in enumerate(matched)]
 
     # Write CSV
     ts = datetime.now().strftime("%Y%m%d_%H%M")

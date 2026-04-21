@@ -28,6 +28,8 @@ from urllib.parse import urlparse
 ROOT          = os.path.dirname(os.path.abspath(__file__))
 DASHBOARD_DIR = os.path.join(ROOT, "Dashboard")
 POSITIONS     = os.path.join(ROOT, "positions.json")
+WATCHLIST_PATH = os.path.join(ROOT, "skills", "momentum-monitor", "scripts",
+                              "universes", "watchlist.txt")
 PORT          = 8080
 # Periodic bridge.py refresh interval (seconds). Override via DASH_REFRESH_SEC env.
 REFRESH_INTERVAL_SEC = int(os.getenv("DASH_REFRESH_SEC", "300"))
@@ -920,6 +922,30 @@ def generate_id(ticker, entry_date):
     return f"pos_{date_clean}_{ticker}_{seq:02d}"
 
 
+# ── Momentum watchlist (non-SP500 tickers scanned alongside the universe) ──
+_watchlist_lock = threading.Lock()
+_TICKER_RE = re.compile(r"^[A-Z][A-Z0-9.\-]{0,5}$")   # NYSE/NASDAQ style symbols
+
+
+def load_watchlist():
+    if not os.path.exists(WATCHLIST_PATH):
+        return []
+    with _watchlist_lock, open(WATCHLIST_PATH, "r", encoding="utf-8") as f:
+        return [ln.strip().upper() for ln in f
+                if ln.strip() and not ln.startswith("#")]
+
+
+def save_watchlist(tickers):
+    """Atomic write via tmp + rename so we never leave a half-written file."""
+    os.makedirs(os.path.dirname(WATCHLIST_PATH), exist_ok=True)
+    tmp = WATCHLIST_PATH + ".tmp"
+    with _watchlist_lock:
+        with open(tmp, "w", encoding="utf-8") as f:
+            for t in tickers:
+                f.write(t + "\n")
+        os.replace(tmp, WATCHLIST_PATH)
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
@@ -977,6 +1003,9 @@ class Handler(SimpleHTTPRequestHandler):
 
         if path == "/api/analyze-queue":
             return self._json(200, get_queue_state())
+
+        if path == "/api/momentum-watchlist":
+            return self._json(200, {"tickers": load_watchlist()})
 
         if path == "/api/run-protocol/status":
             with _protocol_lock:
@@ -1095,6 +1124,22 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(409, {"error": err, "state": state})
             return self._json(202, {"status": "running", "state": state})
 
+        if path == "/api/momentum-watchlist":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            raw = (body.get("ticker") or "").strip().upper()
+            if not _TICKER_RE.match(raw):
+                return self._json(400, {"error": f"invalid ticker format: {raw!r}"})
+            current = load_watchlist()
+            if raw in current:
+                return self._json(409, {"error": "already in watchlist", "tickers": current})
+            current.append(raw)
+            save_watchlist(current)
+            return self._json(201, {"ticker": raw, "tickers": current})
+
         return self._json(404, {"error": "not found"})
 
     def do_PATCH(self):
@@ -1167,6 +1212,16 @@ class Handler(SimpleHTTPRequestHandler):
             if not removed:
                 return self._json(404, {"error": f"ticker not in pending queue: {ticker}"})
             return self._json(200, {"removed": ticker})
+
+        m = re.match(r"^/api/momentum-watchlist/([A-Za-z0-9\.\-]+)$", path)
+        if m:
+            ticker = m.group(1).upper()
+            current = load_watchlist()
+            if ticker not in current:
+                return self._json(404, {"error": f"not in watchlist: {ticker}"})
+            current.remove(ticker)
+            save_watchlist(current)
+            return self._json(200, {"removed": ticker, "tickers": current})
 
         return self._json(404, {"error": "not found"})
 

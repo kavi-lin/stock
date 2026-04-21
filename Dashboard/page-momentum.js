@@ -53,6 +53,7 @@ function defaultFilter() {
         requiredSignals:   new Set(),
         requiredWarnings:  new Set(),
         excludedWarnings:  new Set(),
+        watchlistMode: 'all',   // 'all' | 'only' | 'exclude'
         search:   '',
     };
 }
@@ -319,6 +320,28 @@ function renderRequiredWarningChips() {
     });
 }
 
+function renderWatchlistScope() {
+    const wrap = document.getElementById('f-watchlist-scope');
+    if (!wrap) return;
+    const tr = t();
+    const modes = [
+        { key: 'all',     label: tr.watchlist_scope_all     || '全部' },
+        { key: 'only',    label: tr.watchlist_scope_only    || '只看 Watchlist' },
+        { key: 'exclude', label: tr.watchlist_scope_exclude || '排除 Watchlist' },
+    ];
+    const current = _state.filter.watchlistMode || 'all';
+    wrap.innerHTML = modes.map(m =>
+        `<span class="filter-chip${m.key === current ? ' active' : ''}" data-wlmode="${m.key}">${m.label}</span>`
+    ).join('');
+    wrap.querySelectorAll('[data-wlmode]').forEach(el => {
+        el.onclick = () => {
+            _state.filter.watchlistMode = el.dataset.wlmode;
+            renderWatchlistScope();
+            renderTable();
+        };
+    });
+}
+
 function renderPresetRow() {
     const wrap = document.getElementById('f-presets');
     if (!wrap) return;
@@ -349,6 +372,7 @@ function renderFilterPanel() {
     renderSignalChips();
     renderRequiredWarningChips();
     renderWarningChips();
+    renderWatchlistScope();
     UI.icons();
 }
 
@@ -367,6 +391,10 @@ function matchesFilter(r) {
     const warns = new Set(r.warnings || []);
     for (const w of f.requiredWarnings) if (!warns.has(w)) return false;
     for (const w of f.excludedWarnings) if (warns.has(w))  return false;
+    // Watchlist scope toggle — filters on origin regardless of other criteria
+    const isWatchlistOnly = r.in_sp500 === false;
+    if (f.watchlistMode === 'only'    && !isWatchlistOnly) return false;
+    if (f.watchlistMode === 'exclude' &&  isWatchlistOnly) return false;
     if (f.search && !(r.ticker || '').toUpperCase().includes(f.search.toUpperCase())) return false;
     return true;
 }
@@ -529,6 +557,33 @@ function _ratioColor(r) {
     return '#a1a1aa';
 }
 
+// Intraday-aware volume cell rendering. State comes from bridge via CSV:
+//   too_early → market open < 30 min, ratio unreliable → dim dash
+//   partial   → ratio is scaled projection → show ratio + '*' marker
+//   complete  → ratio as-is (weekend / pre-market / post-close)
+function _volCellText(r) {
+    if (r.intraday_state === 'too_early') return '—';
+    if (r.ratio_20d == null) return '—';
+    const mark = r.intraday_state === 'partial' ? '*' : '';
+    return `${r.ratio_20d.toFixed(2)}×${mark}`;
+}
+function _volCellColor(r) {
+    if (r.intraday_state === 'too_early') return '#71717a';
+    return _ratioColor(r.ratio_20d);
+}
+function _volCellTitle(r) {
+    const tr = t();
+    if (r.intraday_state === 'too_early') {
+        return (tr.vol_intraday_early || 'Intraday <30m — volume read suppressed')
+             + ` (elapsed ${r.elapsed_min || 0}m)`;
+    }
+    if (r.intraday_state === 'partial') {
+        return (tr.vol_intraday_scaled || 'Intraday — projected full-day ratio')
+             + ` (elapsed ${r.elapsed_min || 0}m)`;
+    }
+    return '';
+}
+
 function rowHTML(r) {
     const above200 = r.above_ma200_pct;
     const above200Txt = above200 == null ? '—'
@@ -551,11 +606,17 @@ function rowHTML(r) {
     const sectorTxt = r.sector && r.sector !== 'Unknown'
         ? `<div class="text-[9px] font-normal leading-none mt-0.5 pill-clickable sector-subscript" data-pill-type="sector" data-pill-value="${r.sector}">${sectorLabel(r.sector)}</div>`
         : '';
-    return `<tr class="mom-row" data-ticker="${r.ticker}">
+    const isWatchlistOnly = r.in_sp500 === false;
+    const rowClass = isWatchlistOnly ? 'mom-row row-watchlist-only' : 'mom-row';
+    const watchBadge = isWatchlistOnly
+        ? `<span class="text-[11px]" title="${t().watchlist_badge_tooltip || '自選清單（非 S&P 500）'}">⭐</span>`
+        : '';
+    return `<tr class="${rowClass}" data-ticker="${r.ticker}">
         <td class="text-zinc-500 font-mono text-xs">${r.rank ?? '—'}</td>
         <td>
             <div class="flex items-center gap-1.5">
                 <span class="font-bold">${r.ticker}</span>
+                ${watchBadge}
                 <button class="analyze-btn" data-analyze-ticker="${r.ticker}" title="${(t().analyze_tooltip || '加入個股分析佇列')}">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>
@@ -566,7 +627,7 @@ function rowHTML(r) {
         <td class="text-right score-cell">${scoreBatteryHTML(r.score)}</td>
         <td><span class="mlabel label-${r.label || 'NEUTRAL'} pill-clickable" data-pill-type="label" data-pill-value="${r.label || ''}" title="${r.label || ''}">${labelText(r.label)}</span></td>
         <td class="text-xs text-zinc-400 stage-cell" data-ticker-stage="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4)" title="${r.stage || ''}">${stageLabel(r.stage)}</td>
-        <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_ratioColor(r.ratio_20d)};font-weight:700">${r.ratio_20d != null ? r.ratio_20d.toFixed(2) + '×' : '—'}</td>
+        <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_volCellColor(r)};font-weight:700" title="${_volCellTitle(r)}">${_volCellText(r)}</td>
         <td class="text-right font-mono text-xs" style="${above200Color}">${above200Txt}</td>
         <td class="text-right rsi-cell" data-ticker-rsi="${r.ticker}" style="cursor:pointer">${rsiCell(r.rsi_14)}</td>
         <td>${sigHTML || '<span class="text-zinc-600 text-xs">—</span>'}</td>
@@ -918,6 +979,21 @@ function openVolumePopup(r) {
     const ratio = r.ratio_20d;
     const spike = r.spike_label;
 
+    // Backend intraday state (applied at scan time — may differ from the client
+    // "live projection" block below if ET clock has advanced since scan).
+    let stateBanner = '';
+    if (r.intraday_state === 'too_early') {
+        stateBanner = `<div class="text-[11px] p-2 mb-2 rounded" style="background:rgba(113,113,122,0.12);color:#a1a1aa">
+            ⏱ ${tr.vol_intraday_early || 'Intraday <30m at scan — volume signals suppressed'}
+            <span class="text-zinc-500"> · elapsed ${r.elapsed_min || 0}m</span>
+          </div>`;
+    } else if (r.intraday_state === 'partial') {
+        stateBanner = `<div class="text-[11px] p-2 mb-2 rounded" style="background:rgba(234,179,8,0.10);color:#eab308">
+            ⏱ ${tr.vol_intraday_scaled || 'Intraday — ratio is projected from elapsed session'}
+            <span class="text-zinc-500"> · elapsed ${r.elapsed_min || 0}m · ×${(390/(r.elapsed_min||390)).toFixed(2)} scale</span>
+          </div>`;
+    }
+
     const et = _etNowInfo();
     const isIntraday = et.openNow && et.fraction > 0.02 && et.fraction < 0.98;
 
@@ -966,6 +1042,7 @@ function openVolumePopup(r) {
     const ratioColor = _ratioColor(ratio);
 
     body.innerHTML = `
+      ${stateBanner}
       <div class="grid grid-cols-2 gap-y-1.5">
         <span class="text-zinc-500">${tr.vol_modal_today || '今日成交量'}</span>
         <span class="font-mono text-right">${_fmtShares(today)} ${tr.vol_modal_shares || '股'}</span>
@@ -1251,7 +1328,7 @@ const hideScanIndicator = hideScanCard;
 const showScanBanner    = showScanCard;
 const hideScanBanner    = hideScanCard;
 
-async function triggerRescan() {
+async function triggerRescan(overrideParams) {
     const btn = document.getElementById('refresh-momentum');
     if (btn.dataset.busy === '1') return;
     btn.dataset.busy = '1';
@@ -1260,12 +1337,10 @@ async function triggerRescan() {
     const origLabel = label.textContent;
     label.textContent = (t().banner_scanning || '掃描中…');
 
-    // Server scans the full universe — no min_score filter so the client-side
-    // panel has the full distribution to slice through.
-    const params = {
-        universe: 'sp500',
-        journal: true,
-    };
+    // Default: full S&P 500 scan. Watchlist rescan passes {tickers:'AAPL,NVDA,...'}.
+    const params = overrideParams
+        ? { journal: true, ...overrideParams }
+        : { universe: 'sp500', journal: true };
 
     try {
         const res = await fetch('/api/run-momentum-screen', {
@@ -1388,6 +1463,20 @@ function translate() {
     set('filter-req-warn-label',  tr.filter_req_warn);
     set('filter-excl-warn-label', tr.filter_excl_warn);
     set('filter-label-label',     tr.filter_label);
+    set('filter-watchlist-scope-label', tr.filter_watchlist_scope);
+    set('watchlist-btn-label',    tr.watchlist_btn_label);
+    set('watchlist-modal-title',  tr.watchlist_modal_title);
+    set('watchlist-modal-hint',   tr.watchlist_modal_hint);
+    set('watchlist-add-label',    tr.watchlist_add_label);
+    set('watchlist-current-label', tr.watchlist_current_label);
+    set('watchlist-footer-hint',  tr.watchlist_footer_hint);
+    set('watchlist-done-label',   tr.watchlist_done_label);
+    set('watchlist-rescan-label', tr.watchlist_rescan_label);
+    const wlInput = document.getElementById('watchlist-add-input');
+    if (wlInput && tr.watchlist_add_placeholder) wlInput.placeholder = tr.watchlist_add_placeholder;
+    // Re-render watchlist chips + scope chips on language toggle
+    renderWatchlistScope();
+    if (document.getElementById('watchlist-chips')) _renderWatchlistChips();
     // Translate label dropdown options via labels_map
     const labelSel = document.getElementById('f-label');
     if (labelSel) {
@@ -1491,6 +1580,149 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Watchlist management — load count on boot + wire modal buttons
+    _initWatchlistUI();
+
     loadMomentumData();
     checkExistingScan();
 });
+
+/* ── Watchlist management ──────────────────────────────────────────
+ * `watchlist.txt` on disk stores user-picked non-SP500 tickers that get
+ * merged into each momentum scan. This section owns the modal UI that
+ * lets the user add/remove without touching the file.
+ */
+const _watchlistState = { tickers: [], dirty: false };
+
+async function _refreshWatchlistBtn() {
+    try {
+        const r = await fetch('/api/momentum-watchlist');
+        const j = await r.json();
+        _watchlistState.tickers = j.tickers || [];
+    } catch (e) {
+        _watchlistState.tickers = [];
+    }
+    const countEl = document.getElementById('watchlist-count');
+    if (countEl) countEl.textContent = `(${_watchlistState.tickers.length})`;
+}
+
+function _renderWatchlistChips() {
+    const wrap = document.getElementById('watchlist-chips');
+    const countEl = document.getElementById('watchlist-current-count');
+    if (!wrap) return;
+    const tr = t();
+    if (_watchlistState.tickers.length === 0) {
+        wrap.innerHTML = `<span class="text-[11px] text-zinc-500 italic">${tr.watchlist_empty || '尚未加入任何代號'}</span>`;
+    } else {
+        wrap.innerHTML = _watchlistState.tickers.map(tk =>
+            `<span class="watchlist-chip" data-tk="${tk}">${tk} <span class="remove" data-remove="${tk}">×</span></span>`
+        ).join('');
+        wrap.querySelectorAll('[data-remove]').forEach(el => {
+            el.onclick = () => _removeWatchlistTicker(el.dataset.remove);
+        });
+    }
+    if (countEl) countEl.textContent = `(${_watchlistState.tickers.length})`;
+}
+
+function _showWatchlistError(msg) {
+    const err = document.getElementById('watchlist-error');
+    if (!err) return;
+    err.textContent = msg;
+    err.classList.remove('hidden');
+    setTimeout(() => err.classList.add('hidden'), 2800);
+}
+
+async function _addWatchlistTicker() {
+    const input = document.getElementById('watchlist-add-input');
+    const raw = (input.value || '').trim().toUpperCase();
+    if (!raw) return;
+    if (!/^[A-Z][A-Z0-9.\-]{0,5}$/.test(raw)) {
+        _showWatchlistError(`格式錯誤：${raw}（需 A-Z 開頭、1-6 字元）`);
+        return;
+    }
+    try {
+        const r = await fetch('/api/momentum-watchlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticker: raw }),
+        });
+        const j = await r.json();
+        if (r.status === 409) {
+            _showWatchlistError(`已存在：${raw}`);
+            return;
+        }
+        if (!r.ok) {
+            _showWatchlistError(j.error || `HTTP ${r.status}`);
+            return;
+        }
+        _watchlistState.tickers = j.tickers || [];
+        _watchlistState.dirty = true;
+        input.value = '';
+        _renderWatchlistChips();
+        _refreshWatchlistBtn();
+    } catch (e) {
+        _showWatchlistError('新增失敗：' + e.message);
+    }
+}
+
+async function _removeWatchlistTicker(ticker) {
+    const chip = document.querySelector(`.watchlist-chip[data-tk="${ticker}"]`);
+    if (chip) chip.classList.add('removing');
+    try {
+        const r = await fetch(`/api/momentum-watchlist/${encodeURIComponent(ticker)}`, {
+            method: 'DELETE',
+        });
+        const j = await r.json();
+        if (!r.ok) {
+            _showWatchlistError(j.error || `HTTP ${r.status}`);
+            if (chip) chip.classList.remove('removing');
+            return;
+        }
+        _watchlistState.tickers = j.tickers || [];
+        _watchlistState.dirty = true;
+        _renderWatchlistChips();
+        _refreshWatchlistBtn();
+    } catch (e) {
+        _showWatchlistError('移除失敗：' + e.message);
+        if (chip) chip.classList.remove('removing');
+    }
+}
+
+function _openWatchlistModal() {
+    _watchlistState.dirty = false;
+    _refreshWatchlistBtn().then(() => {
+        _renderWatchlistChips();
+        document.getElementById('watchlist-modal').classList.remove('hidden');
+        document.getElementById('watchlist-add-input').focus();
+        UI.icons();
+    });
+}
+function _closeWatchlistModal() {
+    document.getElementById('watchlist-modal').classList.add('hidden');
+    document.getElementById('watchlist-error')?.classList.add('hidden');
+}
+
+function _initWatchlistUI() {
+    _refreshWatchlistBtn();
+    document.getElementById('watchlist-btn')?.addEventListener('click', _openWatchlistModal);
+    document.getElementById('watchlist-modal-close')?.addEventListener('click', _closeWatchlistModal);
+    document.getElementById('watchlist-modal-bg')?.addEventListener('click', _closeWatchlistModal);
+    document.getElementById('watchlist-modal-done')?.addEventListener('click', _closeWatchlistModal);
+    document.getElementById('watchlist-modal-rescan')?.addEventListener('click', () => {
+        _closeWatchlistModal();
+        const tickers = (_watchlistState.tickers || []).join(',');
+        if (tickers) triggerRescan({ tickers });
+        else triggerRescan();
+    });
+    document.getElementById('watchlist-add-btn')?.addEventListener('click', _addWatchlistTicker);
+    document.getElementById('watchlist-add-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); _addWatchlistTicker(); }
+    });
+    // ESC closes modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const m = document.getElementById('watchlist-modal');
+            if (m && !m.classList.contains('hidden')) _closeWatchlistModal();
+        }
+    });
+}

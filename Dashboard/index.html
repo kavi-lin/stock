@@ -12,35 +12,21 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Binary Risk strip (ported from sector page) */
-        .binary-alert {
+        /* ── Pill hover tooltip (Ported from sector.html) ─────── */
+        #pill-tooltip {
+            position: fixed; z-index: 9999; width: 280px;
             background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-left: 4px solid #ef4444;
-            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 13px 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            transform: translateY(10px);
         }
-        .binary-sector-chip {
-            font-size: 10px; font-weight: 700;
-            padding: 3px 9px; border-radius: 4px;
-            background: rgba(239,68,68,0.22); color: #fff;
-            border: 1px solid rgba(239,68,68,0.7);
-            white-space: nowrap;
-        }
-        .binary-date-pill {
-            font-size: 9px; font-weight: 900;
-            letter-spacing: 0.1em;
-            padding: 3px 8px; border-radius: 4px;
-            background: #ef4444; color: #fff;
-            white-space: nowrap;
-        }
-        /* Teaser cards (Layer 3) */
-        .teaser-row {
-            display: flex; align-items: center; gap: 8px;
-            padding: 6px 8px; border-radius: 6px;
-            transition: background 0.15s;
-            cursor: pointer;
-        }
-        .teaser-row:hover { background: rgba(255,255,255,0.04); }
+        #pill-tooltip.tip-visible { opacity: 1; transform: translateY(0); }
+        #pill-tooltip h4 { font-size: 11px; font-weight: 800; color: var(--text-card-title); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+        #pill-tooltip p { font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+
         /* Focus ticker card (M3 cross-module) */
         .focus-ticker-card {
             background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(99,102,241,0.08));
@@ -148,7 +134,7 @@
                 <div class="binary-alert px-4 py-3">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="text-[10px] font-black uppercase tracking-widest" style="color:#ef4444">⚡ Binary Risk Within 48h</span>
-                        <span class="text-[9px] text-zinc-500 font-mono" id="binary-alert-derated">auto-derated ×0.70</span>
+                        <span class="text-[9px] text-zinc-500 font-mono" id="binary-alert-derated" title="二元風險事件（如財報、議息、地緣政治）具有極大不確定性。為防止盲目追高，系統會自動對受影響產業的綜合得分進行 0.70x 係數降權，直至風險解除。">auto-derated ×0.70</span>
                     </div>
                     <div id="binary-alert-items" class="space-y-2"></div>
                 </div>
@@ -320,6 +306,8 @@
     <script src="i18n.js"></script>
     <script src="utils.js"></script>
     <script src="components.js"></script>
+    <div id="pill-tooltip" class="pointer-events-none opacity-0"></div>
+
     <script src="data-store.js"></script>
     <script src="analyze-queue.js"></script>
     <script src="script.js"></script>

@@ -223,25 +223,39 @@ function renderBinaryAlertIndex(risks) {
   const titleEl = section.querySelector('[style*="color:#ef4444"]');
   if (titleEl) titleEl.textContent = sp.binary_alert || '⚡ Binary Risk Within 48h';
   const deratedEl = document.getElementById('binary-alert-derated');
-  if (deratedEl) deratedEl.textContent = isZh ? '自動降權 ×0.70' : 'auto-derated ×0.70';
+  if (deratedEl) {
+    deratedEl.textContent = isZh ? '自動降權 ×0.70' : 'auto-derated ×0.70';
+    deratedEl.setAttribute('data-tip-key', 'binary_derated_tip');
+    deratedEl.removeAttribute('title');
+  }
 
   const dateLabel = (r) => r.days_until === 0 ? (sp.binary_today    || (isZh ? '今日' : 'TODAY'))
                          : r.days_until === 1 ? (sp.binary_tomorrow || (isZh ? '明日' : 'TOMORROW'))
                          : (r.date || '');
   const container = document.getElementById('binary-alert-items');
-  container.innerHTML = urgent.map(r => `
-    <div class="flex items-start gap-3">
-      <span class="binary-date-pill shrink-0 mt-0.5">${dateLabel(r)}</span>
-      <div class="flex-1 min-w-0">
-        <div class="text-[12px] font-semibold leading-snug" style="color:var(--text-main)">${r.event}</div>
-        ${r.affected_sectors?.length ? `
-        <div class="flex flex-wrap gap-1 mt-1.5">
-          ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${sectorLabelIndex(s)}</span>`).join('')}
-        </div>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
+  container.innerHTML = urgent.map(r => {
+    const isTomorrow = r.days_until === 1;
+    const lbl = dateLabel(r);
+
+    return `
+      <div class="binary-row">
+        <!-- Date Box: Fixed Width -->
+        <div class="binary-date-box">
+          <span class="binary-date-pill ${isTomorrow ? 'tomorrow' : ''}">${lbl}</span>
+        </div>
+
+        <!-- Content: Headline + Sectors -->
+        <div class="binary-content">
+          <div class="binary-headline">${r.event}</div>
+          ${r.affected_sectors?.length ? `
+            <div class="binary-sector-group">
+              ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${sectorLabelIndex(s)}</span>`).join('')}
+            </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  }
+
 
 // ── Layer 2b: Warning Flags strip ─────────────────────────────────────────
 function renderWarningFlagsIndex(market) {
@@ -270,29 +284,57 @@ const SECTOR_TO_GICS_IDX = {
   'Consumer_Staples':'Consumer Staples', 'Energy':'Energy',
 };
 
-function renderHotSectorsTeaser(sectors) {
+function renderHotSectorsTeaser(sectors, momentum) {
   const el = document.getElementById('hot-sectors-teaser');
   if (!el) return;
   const top = (sectors || []).slice().sort((a,b) => (b.score||0) - (a.score||0)).slice(0, 3);
   if (!top.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
+
   const VC_COL = { HOT:'#22c55e', WARM:'#eab308', COLD:'#ef4444', AVOID:'#71717a' };
+  const allMoms = (momentum || {}).rows || [];
+
   el.innerHTML = top.map(s => {
     const col = VC_COL[s.verdict] || '#71717a';
     const gics = SECTOR_TO_GICS_IDX[s.name] || '';
     const href = gics ? `momentum.html?sector=${encodeURIComponent(gics)}` : 'sector.html';
-    return `<a href="${href}" class="teaser-row block no-underline">
-      <span class="text-sm font-black tracking-tight shrink-0" style="color:${col}">${s.proxy_etf || s.name}</span>
-      <span class="text-[10px] text-zinc-500 truncate flex-1">${sectorLabelIndex(s.name || '')}</span>
-      <span class="text-[10px] font-black font-mono shrink-0" style="color:${col}">${s.score ?? '—'}</span>
-      <span class="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0" style="background:${col}18;color:${col}">${s.verdict}</span>
-    </a>`;
+
+    // Find top 3 stocks in this sector (sorted by score desc)
+    const sectorStocks = allMoms
+      .filter(r => r.sector === gics)
+      .slice(0, 3);
+
+    return `<div class="teaser-card no-underline mb-3 block" style="border-left: 3px solid ${col}">
+      <!-- Header: Sector Name + Score -->
+      <a href="${href}" class="flex items-center justify-between no-underline group">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${s.proxy_etf || s.name}</span>
+            <span class="text-[9px] font-black px-1.5 py-0.5 rounded mt-[-5px]" style="background:${col}1A;color:${col}">${s.verdict}</span>
+          </div>
+          <span class="text-[10px] text-zinc-500">${sectorLabelIndex(s.name || '')}</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="text-[14px] font-black font-mono" style="color:${col}">${s.score ?? '—'}</span>
+          <span class="text-[9px] text-zinc-500 group-hover:text-emerald-500 transition-all">→</span>
+        </div>
+      </a>
+
+      <!-- Lead Tickers: Horiz pills -->
+      <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-zinc-200/10 dark:border-zinc-800/40">
+        ${sectorStocks.length ? sectorStocks.map(r => {
+          const sCol = (r.score||0) >= 70 ? '#3b82f6' : (r.score||0) >= 50 ? '#22c55e' : '#eab308';
+          return `<a href="momentum.html?search=${r.ticker}" class="sector-ticker-pill no-underline">
+            <div class="score-dot" style="background:${sCol}"></div>
+            <span>${r.ticker}</span>
+            <span class="text-[8px] opacity-60">${r.score?.toFixed(0)}</span>
+          </a>`;
+        }).join('') : `<span class="text-[9px] text-zinc-600 italic">No tickers scanned</span>`}
+      </div>
+    </div>`;
   }).join('');
 }
 
 // ── Layer 3b: Latest News Verdicts Teaser ─────────────────────────────────
-// bridge.py exposes news[] with fields: impact (bullish|bearish|binary|neutral),
-// score (-5..+5), depth, review_status, headline_zh, etc. We show top 3
-// reviewed deep verdicts ordered by |score| (most impactful first).
 function renderNewsVerdictsTeaser(news) {
   const el = document.getElementById('news-verdicts-teaser');
   if (!el) return;
@@ -304,19 +346,40 @@ function renderNewsVerdictsTeaser(news) {
   pool.sort((a, b) => Math.abs(b.score || 0) - Math.abs(a.score || 0));
   const top = pool.slice(0, 3);
   if (!top.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
+
   const ICOL = { bullish:'#22c55e', bearish:'#ef4444', binary:'#f97316', neutral:'#a1a1aa' };
   const isZh = UI.currentLang === 'zh';
   const impactLbl = { bullish: isZh?'利多':'BULLISH', bearish: isZh?'利空':'BEARISH', binary: isZh?'變數':'BINARY', neutral: isZh?'中性':'NEUTRAL' };
+
   el.innerHTML = top.map(n => {
     const key = String(n.impact || 'neutral').toLowerCase();
     const col = ICOL[key] || '#a1a1aa';
     const scoreTxt = n.score != null ? `${n.score >= 0 ? '+' : ''}${Number(n.score).toFixed(1)}` : '';
     const label = impactLbl[key] || key.toUpperCase();
-    return `<a href="news.html" class="teaser-row block no-underline">
-      <span class="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0" style="background:${col}18;color:${col};border:1px solid ${col}40">${label}</span>
-      <span class="text-[10px] font-mono shrink-0" style="color:${col}">${scoreTxt}</span>
-      <span class="text-[10px] truncate flex-1" style="color:var(--text-muted)">${n.headline_zh || n.headline}</span>
-    </a>`;
+    
+    // Summary logic: take bull_case or bear_case based on impact
+    const reason = key === 'bearish' ? (n.bear_case || n.arbiter_reasoning) : (n.bull_case || n.arbiter_reasoning);
+    const sectors = (n.sectors || []).slice(0, 2).map(s => sectorLabelIndex(s));
+
+    return `<a href="news.html" class="news-teaser-card no-underline mb-3 block" style="border-left: 3px solid ${col}">
+      <!-- Header: Verdict + Score -->
+      <div class="flex items-center justify-between">
+        <span class="impact-badge" style="background:${col}1A;color:${col}">${label}</span>
+        <span class="text-[12px] font-black font-mono" style="color:${col}">${scoreTxt}</span>
+      </div>
+
+      <!-- Title: Headline -->
+      <h4 class="text-[11px] font-bold leading-tight" style="color:var(--text-card-title)">${n.headline_zh || n.headline}</h4>
+
+      <!-- Content: Core Reason (truncated) -->
+      ${reason ? `<p class="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed mt-1 italic">${reason}</p>` : ''}
+
+      <!-- Footer: Sectors -->
+      <div class="flex flex-wrap gap-1.5 mt-1 pt-2 border-t border-zinc-200/10 dark:border-zinc-800/40">
+        ${sectors.map(s => `<span class="news-sector-pill">${s}</span>`).join('')}
+      </div>
+      </a>`;
+
   }).join('');
 }
 
@@ -326,19 +389,61 @@ function renderMomentumTeaser(momentum, crossSet) {
   if (!el) return;
   const rows = ((momentum || {}).rows || []).slice(0, 3);
   if (!rows.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
-  el.innerHTML = rows.map(r => {
-    const labelColor = r.label === 'STRONGLY_BULLISH' ? '#22c55e' :
-                       r.label === 'BULLISH' ? '#86efac' :
-                       r.label === 'WEAK' ? '#fbbf24' :
-                       r.label === 'BEARISH' ? '#ef4444' : '#a1a1aa';
-    const star = crossSet && crossSet.has(r.ticker) ? `<span class="cross-signal-star" title="雙軍同向（動能榜 + 最近 BUY/EXECUTE）">⭐</span>` : '';
-    return `<a href="momentum.html" class="teaser-row block no-underline">
-      <span class="text-sm font-black tracking-tight shrink-0" style="color:var(--text-card-title)">${r.ticker}</span>${star}
-      <span class="text-[10px] text-zinc-500 font-mono shrink-0">$${r.price ? r.price.toFixed(2) : '—'}</span>
-      <span class="text-[10px] font-mono shrink-0 ml-auto" style="color:${labelColor}">${r.score ?? '—'}</span>
-      <span class="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0" style="background:${labelColor}18;color:${labelColor}">${r.stage ? r.stage.split(' ')[0] + ' ' + (r.stage.split(' ')[1]||'') : '—'}</span>
+
+  const isZh = UI.currentLang === 'zh';
+  const sigMap = window.i18n?.[UI.currentLang]?.momentum?.signals_map || {};
+  const warnMap = window.i18n?.[UI.currentLang]?.momentum?.warnings_map || {};
+
+  el.innerHTML = rows.map((r, i) => {
+    const rankNum = i + 1;
+    const score = Number(r.score) || 0;
+    const star = crossSet && crossSet.has(r.ticker) ? `<span class="cross-signal-star ml-1" title="雙軍同向">⭐</span>` : '';
+    
+    // Battery logic
+    const fullCells = Math.floor(score / 10);
+    const tierColor = fullCells >= 7 ? '#3b82f6' : fullCells >= 5 ? '#22c55e' : fullCells >= 3 ? '#eab308' : '#ef4444';
+    let cellsHTML = '';
+    for (let c=0; c<10; c++) cellsHTML += `<div class="cell" style="background:${c < fullCells ? tierColor : 'rgba(161,161,170,0.15)'}"></div>`;
+
+    // Pros & Cons (Take first 2 of each)
+    const pros = (r.signals || []).slice(0, 2).map(s => sigMap[s] || s.replace(/_/g, ' '));
+    const cons = (r.warnings || []).slice(0, 2).map(w => warnMap[w] || w.replace(/_/g, ' '));
+
+    return `<a href="momentum.html" class="teaser-card rank-card-${rankNum} no-underline mb-3 block">
+      <!-- Header: Rank + Ticker + Score -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="rank-badge rank-${rankNum}">${rankNum}</span>
+          <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${r.ticker}</span>
+          ${star}
+          <span class="text-[10px] text-zinc-500 font-mono ml-1">$${r.price ? r.price.toFixed(2) : '—'}</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="score-battery mb-1">${cellsHTML}</div>
+          <span class="score-num" style="color:${tierColor}">${score.toFixed(1)}</span>
+        </div>
+      </div>
+
+      <!-- Content: Pros & Cons -->
+      <div class="flex flex-col gap-1.5 mt-1">
+        ${pros.length ? `<div class="flex flex-wrap gap-1.5">
+          ${pros.map(p => `<span class="pc-pill pc-pro"><i data-lucide="check-circle-2" class="w-2.5 h-2.5"></i> ${p}</span>`).join('')}
+        </div>` : ''}
+        ${cons.length ? `<div class="flex flex-wrap gap-1.5">
+          ${cons.map(c => `<span class="pc-pill pc-con"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> ${c}</span>`).join('')}
+        </div>` : ''}
+      </div>
+
+      <!-- Footer: Sector & RSI -->
+      <div class="flex items-center justify-between mt-1 pt-2 border-t border-zinc-200/20 dark:border-zinc-800/50">
+        <span class="news-sector-pill">${r.sector || 'Unknown'}</span>
+        <span class="text-[9px] font-mono ${r.rsi_14 > 70 ? 'text-red-400' : r.rsi_14 < 30 ? 'text-blue-400' : 'text-zinc-500'}">RSI ${r.rsi_14?.toFixed(1) || '—'}</span>
+      </div>
     </a>`;
   }).join('');
+  
+  // Re-run icon hydration for the new cards
+  if (window.lucide) { lucide.createIcons(); }
 }
 
 // ── M3: Today's Focus Ticker (cross-module intersection) ──────────────────
@@ -421,7 +526,7 @@ async function updateDashboard() {
 
     // Layer 3: Deep-dive teasers + M3 focus ticker
     const crossSet = computeCrossSignalSet(data);
-    renderHotSectorsTeaser(data.sectors);
+    renderHotSectorsTeaser(data.sectors, data.momentum_screen);
     renderNewsVerdictsTeaser(data.news);
     renderMomentumTeaser(data.momentum_screen, crossSet);
     renderFocusTicker(data);
@@ -840,3 +945,58 @@ setInterval(updateDashboard, 60000);
 
 // Mount global analyze-queue widget inside Quick Launch engine card
 if (window.AnalyzeQueue) window.AnalyzeQueue.renderWidget('#analyze-queue-widget');
+
+// ── Shared Tooltip Engine (Ported from page-sector.js) ─────────────────────
+(function initGlobalTooltips() {
+  const tip = document.getElementById('pill-tooltip');
+  if (!tip) return;
+  let _hideTimer = null;
+
+  function showTip(target) {
+    const key = target.getAttribute('data-tip-key');
+    const isZh = UI.currentLang === 'zh';
+    const dict = isZh ? (window.i18n?.zh || {}) : (window.i18n?.en || {});
+    
+    // Search for content: top-level key OR sector_page logic
+    const body = dict[key] || dict.sector_page?.risk_flags?.[key] || key;
+    const title = isZh ? '解釋說明' : 'EXPLANATION';
+
+    tip.innerHTML = `<h4 class="text-[10px] font-black uppercase tracking-widest mb-1" style="color:#ef4444">${title}</h4><p class="text-[11px] leading-relaxed text-zinc-300">${body}</p>`;
+    tip.classList.add('tip-visible');
+
+    const rect = target.getBoundingClientRect();
+    let left = rect.left + rect.width / 2 - 140;
+    if (left < 10) left = 10;
+    if (left + 280 > window.innerWidth - 10) left = window.innerWidth - 290;
+    
+    // Default position: above
+    let top = rect.top - tip.offsetHeight - 12;
+    if (top < 10) {
+      // Fallback: below
+      top = rect.bottom + 12;
+    }
+
+    tip.style.top = top + 'px';
+    tip.style.left = left + 'px';
+    tip.style.opacity = '1';
+    tip.style.transform = 'translateY(0)';
+  }
+
+  function hideTip() {
+    tip.classList.remove('tip-visible');
+    tip.style.opacity = '0';
+    tip.style.transform = 'translateY(10px)';
+  }
+
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-tip-key]');
+    if (!el) return;
+    if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+    showTip(el);
+  });
+  document.addEventListener('mouseout', e => {
+    const el = e.target.closest('[data-tip-key]');
+    if (!el) return;
+    _hideTimer = setTimeout(hideTip, 80);
+  });
+})();

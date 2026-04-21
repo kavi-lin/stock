@@ -284,6 +284,31 @@
             background: #a78bfa; color: #fff; border-color: #a78bfa;
             transform: scale(1.1);
         }
+
+        /* Watchlist (non-SP500) row tint — purple accent on the left edge + faint background */
+        tr.row-watchlist-only  td { background: rgba(168,85,247,0.07); }
+        tr.row-watchlist-only:hover td { background: rgba(168,85,247,0.14); }
+        tr.row-watchlist-only  td:first-child {
+            box-shadow: inset 2px 0 0 #a855f7;
+        }
+
+        /* Watchlist management modal — chip styling */
+        .watchlist-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 10px; border-radius: 999px;
+            background: rgba(168,85,247,0.12);
+            border: 1px solid rgba(168,85,247,0.35);
+            color: #c4b5fd;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 600;
+            transition: all 0.12s;
+        }
+        .watchlist-chip .remove {
+            cursor: pointer; opacity: 0.5; transition: opacity 0.12s;
+            font-size: 14px; line-height: 1; padding: 0 2px;
+        }
+        .watchlist-chip .remove:hover { opacity: 1; color: #ef4444; }
+        .watchlist-chip.removing { opacity: 0.4; transform: scale(0.9); }
     </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="momentum">
@@ -302,6 +327,12 @@
                 <span id="snap-id" class="text-[10px] font-mono text-zinc-500"></span>
 
                 <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter">SYNCING...</span>
+                <button id="watchlist-btn" class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white px-3 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-purple-50 dark:hover:bg-purple-950 hover:border-purple-400 transition-all flex items-center gap-1.5"
+                        title="">
+                    <span>⭐</span>
+                    <span id="watchlist-btn-label">自選清單</span>
+                    <span id="watchlist-count" class="text-[10px] font-mono text-zinc-500">(—)</span>
+                </button>
                 <button id="refresh-momentum" class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all flex items-center gap-2"
                         title="">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -489,6 +520,12 @@
                             <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-excl-warn-label">排除警告</div>
                             <div id="f-warning-chips" class="flex flex-wrap gap-1.5"></div>
                         </div>
+
+                        <!-- Watchlist scope -->
+                        <div>
+                            <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-watchlist-scope-label">Watchlist 範圍</div>
+                            <div id="f-watchlist-scope" class="flex gap-1.5"></div>
+                        </div>
                     </div>
                 </details>
             </div>
@@ -615,6 +652,51 @@
                     </button>
                 </div>
                 <div id="stage-modal-body" class="space-y-4 text-xs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watchlist management modal -->
+    <div id="watchlist-modal" class="hidden">
+        <div class="mom-modal-bg" id="watchlist-modal-bg">
+            <div class="mom-modal" style="width:520px" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold"><span>⭐</span> <span id="watchlist-modal-title">自選清單</span></h3>
+                    <button id="watchlist-modal-close" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <p class="text-[11px] text-zinc-500 mb-3" id="watchlist-modal-hint">非 S&amp;P 500 的代號加進來，下次掃描會一起跑。</p>
+                <div class="flex gap-2 mb-4">
+                    <input id="watchlist-add-input" type="text" maxlength="6"
+                           class="flex-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono uppercase tracking-wide focus:border-purple-500 focus:outline-none"
+                           placeholder="NVAX" />
+                    <button id="watchlist-add-btn"
+                            class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                        + <span id="watchlist-add-label">加入</span>
+                    </button>
+                </div>
+                <div id="watchlist-error" class="text-[11px] text-red-400 font-mono mb-2 hidden"></div>
+                <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3">
+                    <div class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">
+                        <span id="watchlist-current-label">目前清單</span>
+                        <span id="watchlist-current-count" class="text-purple-500 font-mono">(0)</span>
+                    </div>
+                    <div id="watchlist-chips" class="flex flex-wrap gap-2 min-h-[32px]"></div>
+                </div>
+                <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 mt-4 text-[10px] text-zinc-500">
+                    💡 <span id="watchlist-footer-hint">儲存後會在下次重新掃描時納入。</span>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button id="watchlist-modal-done"
+                            class="bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm font-medium">
+                        <span id="watchlist-done-label">關閉</span>
+                    </button>
+                    <button id="watchlist-modal-rescan"
+                            class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        <span id="watchlist-rescan-label">關閉並立即重新掃描</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

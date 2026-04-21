@@ -156,11 +156,32 @@ Claude Code CLI（執行 3 個 protocol）
 
 | 類別 | Skills | 說明 |
 |---|---|---|
-| 🇺🇸 **us-equity**（9） | us-stock-analysis / short-contrarian-analyst / sector-analyst / market-breadth-analyzer / market-sentiment-analyzer / market-news-analyst / theme-detector / ftd-detector / market-top-detector | 綁定美股資料源（FMP / FINRA / GICS / TraderMonty 等），換市場需重寫 |
+| 🇺🇸 **us-equity**（11） | us-stock-analysis / short-contrarian-analyst / earnings-valuation-forecaster / supply-chain-event-analyst / sector-analyst / market-breadth-analyzer / market-sentiment-analyzer / market-news-analyst / theme-detector / ftd-detector / market-top-detector | 綁定美股資料源（FMP / FINRA / GICS / TraderMonty 等），換市場需重寫 |
 | 🌐 **market-agnostic**（4） | momentum-monitor / technical-analyst / tail-risk-analyzer / portfolio-risk-manager | 邏輯通用，未來可原樣套用台股 / 加密 |
 | 🌍 **global-macro**（1） | economic-calendar-fetcher | FMP 全球央行事件 |
 
 Protocol 內用 `<!-- [framework] -->` / `<!-- [domain:us-equity] -->` HTML 註解標示 phase 屬框架層還是美股專屬。新增第二市場：複製整份 protocol → 替換 `[domain:us-equity]` 段落 → 新市場版本。
+
+### Skills 完整速查（16 個）
+
+| Skill | 類別 | Scope | 作用 | 整合位置 |
+|---|---|---|---|---|
+| `us-stock-analysis` | 🇺🇸 | single-ticker | 個股財務 + 技術 + 估值完整分析 | investment Phase 2（Fundamentals） |
+| `short-contrarian-analyst` | 🇺🇸 | single-ticker | Burry Score 估值錨，FCF yield / EV/EBIT / D/E；&lt; 20 觸發 T4 veto | investment Phase 2（第 5 agent） |
+| `earnings-valuation-forecaster` | 🇺🇸 | single-ticker | 12 個月目標價 bull/base/bear + 3×3 敏感度 grid | 獨立使用（未整合 protocol） |
+| `supply-chain-event-analyst` | 🇺🇸 | single-ticker | 供應鏈上下游依賴圖、歷史事件與股價對照 | 獨立使用 |
+| `sector-analyst` | 🇺🇸 | sector-level | 各產業上升趨勢比例（finvizfinance CSV） | sector Phase 1 |
+| `market-breadth-analyzer` | 🇺🇸 | market-level | 廣度綜合分數 0–100（TraderMonty 6 組件，免 API） | sector Phase 0 層 A |
+| `market-sentiment-analyzer` | 🇺🇸 | market-level | VIX + SPY RSI + CNN F&G composite score | investment Phase 2 Sentiment；sector Phase 3 |
+| `market-news-analyst` | 🇺🇸 | news-scan | 過去 10 天重大新聞影響評估 | news protocol；investment Phase 2 News |
+| `theme-detector` | 🇺🇸 | theme-scan | 跨產業主題熱度 + 生命週期（Hot/Trending/Exhausting） | sector Phase 2；investment Phase 0 |
+| `ftd-detector` | 🇺🇸 | market-level | Follow-Through Day 狀態機（Rally/FTD/Distribution） | sector Phase 0 層 C（via `ftd_yfinance.py`） |
+| `market-top-detector` | 🇺🇸 | market-level | O'Neil 派發日 + Minervini 領頭股惡化 + 防禦輪動，0–100 分 | sector Phase 0 層 D（via `market_top_yfinance.py`） |
+| `momentum-monitor` | 🌐 | universe-scan | 量能動態 / MA cross / short interest / composite score | 動能選股頁（screen.py）；`動能 [TICKER]` |
+| `technical-analyst` | 🌐 | single-ticker | 週線圖型態、支撐壓力、趨勢評估（接受 chart image） | investment Phase 2（Technical） |
+| `tail-risk-analyzer` | 🌐 | single-ticker | 1 年日報酬 → kurt/skew/VaR/MaxDD → ROBUST/MODERATE/FRAGILE | investment Phase 4 Step 3；sector Phase 4b |
+| `portfolio-risk-manager` | 🌐 | portfolio-level | Vol-adjusted 倉位上限 + correlation multiplier | investment Phase 4 Step 2 |
+| `economic-calendar-fetcher` | 🌍 | event-scan | FMP 全球央行事件（FOMC/ECB/BOJ）+ 經濟數據發布日曆 | sector Phase 3；investment 事件檢查 |
 
 ---
 

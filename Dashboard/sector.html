@@ -69,29 +69,6 @@
             white-space: nowrap;
         }
 
-        /* Minimalist binary-risk strip — neutral card bg + thick red accent only */
-        .binary-alert {
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-left: 4px solid #ef4444;
-            border-radius: 8px;
-        }
-        .binary-sector-chip {
-            font-size: 10px; font-weight: 700;
-            padding: 3px 9px; border-radius: 4px;
-            background: rgba(239,68,68,0.22);
-            color: #fff;
-            border: 1px solid rgba(239,68,68,0.7);
-            white-space: nowrap;
-        }
-        .binary-date-pill {
-            font-size: 9px; font-weight: 900;
-            letter-spacing: 0.1em;
-            padding: 3px 8px; border-radius: 4px;
-            background: #ef4444; color: #fff;
-            white-space: nowrap;
-        }
-
         .handoff-quote {
             border-left: 4px solid var(--accent, #22c55e);
             background: linear-gradient(90deg, rgba(34,197,94,0.04), transparent);
@@ -118,8 +95,24 @@
             border: 1px solid rgba(255,255,255,0.06);
             gap: 3px;
         }
+        .status-pill[data-tip-key] { cursor: default; }
         .status-pill-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
         .status-pill-value { font-size: 14px; font-weight: 900; }
+
+        /* ── Pill hover tooltip ─────────────────────────────────── */
+        #pill-tooltip {
+            position: fixed; z-index: 9999; width: 280px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 13px 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            pointer-events: none;
+            opacity: 0; transition: opacity 0.12s;
+        }
+        #pill-tooltip.tip-visible { opacity: 1; }
+        .tip-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-card-title); margin-bottom: 5px; }
+        .tip-desc  { font-size: 11px; line-height: 1.5; color: var(--text-main); margin-bottom: 8px; }
+        .tip-scale { font-size: 10px; line-height: 1.7; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.07); padding-top: 7px; }
 
         .scenario-card {
             border-radius: 10px; padding: 14px;
@@ -214,7 +207,7 @@
                 <div class="binary-alert px-4 py-3">
                     <div class="flex items-center gap-2 mb-2">
                         <span id="binary-alert-title" class="text-[10px] font-black uppercase tracking-widest" style="color:#ef4444">⚡ Binary Risk Within 48h</span>
-                        <span class="text-[9px] text-zinc-500 font-mono">auto-derated ×0.70</span>
+                        <span class="text-[9px] text-zinc-500 font-mono" id="binary-alert-derated" title="二元風險事件（如財報、議息、地緣政治）具有極大不確定性。為防止盲目追高，系統會自動對受影響產業的綜合得分進行 0.70x 係數降權，直至風險解除。">auto-derated ×0.70</span>
                     </div>
                     <div id="binary-alert-items" class="space-y-2"></div>
                 </div>
@@ -222,13 +215,13 @@
 
             <!-- ── STATUS STRIP ──────────────────────────────────────── -->
             <div class="flex items-stretch gap-3 flex-wrap">
-                <div id="pill-regime"    class="status-pill"></div>
-                <div id="pill-breadth"   class="status-pill"></div>
-                <div id="pill-ftd"       class="status-pill"></div>
-                <div id="pill-exposure"  class="status-pill"></div>
-                <div id="pill-fg"        class="status-pill"></div>
-                <div id="pill-cycle"     class="status-pill"></div>
-                <div id="pill-vix"       class="status-pill"></div>
+                <div id="pill-regime"    class="status-pill" data-tip-key="regime"></div>
+                <div id="pill-breadth"   class="status-pill" data-tip-key="breadth"></div>
+                <div id="pill-ftd"       class="status-pill" data-tip-key="ftd"></div>
+                <div id="pill-exposure"  class="status-pill" data-tip-key="exposure"></div>
+                <div id="pill-fg"        class="status-pill" data-tip-key="fg"></div>
+                <div id="pill-cycle"     class="status-pill" data-tip-key="cycle"></div>
+                <div id="pill-vix"       class="status-pill" data-tip-key="vix"></div>
                 <div class="flex-1 flex flex-wrap gap-2 items-center justify-end" id="warning-flags-row"></div>
             </div>
 
@@ -381,6 +374,8 @@
         </div>
         <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
     </div>
+
+    <div id="pill-tooltip"></div>
 
     <script src="i18n.js"></script>
     <script src="utils.js"></script>

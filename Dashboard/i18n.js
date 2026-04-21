@@ -12,6 +12,7 @@ const i18n = {
     failed: "資料載入失敗",
     impact: "影響力評分",
     unknown: "未知",
+    binary_derated_tip: "二元風險事件（如財報、議息、地緣政治）具有極大不確定性。為防止盲目追高，系統會自動對受影響產業的綜合得分進行 0.70x 係數降權，直至風險解除。",
 
     // ── Nav ────────────────────────────────────────────────────────
     nav: {
@@ -60,6 +61,24 @@ const i18n = {
       vol_modal_warning:   "推估假設成交量線性分布；實際多為開盤與收盤集中，早盤估值常偏高。",
       vol_modal_too_early: "盤中經過比例過低或過高，推估不穩定，略過。",
       vol_modal_closed:    "當前非 ET 盤中（9:30–16:00），僅顯示收盤比率。",
+      vol_intraday_early:  "盤中 <30 分，量能判讀暫不可靠",
+      vol_intraday_scaled: "盤中量能已依經過時間推估為全日等值",
+      // Watchlist (non-SP500 tickers merged into scan)
+      watchlist_btn_label:       "自選清單",
+      watchlist_badge_tooltip:   "自選清單（非 S&P 500）",
+      watchlist_modal_title:     "自選清單",
+      watchlist_modal_hint:      "非 S&P 500 的代號加進來，下次掃描會一起跑。",
+      watchlist_add_placeholder: "代號（例: NVAX）",
+      watchlist_add_label:       "加入",
+      watchlist_current_label:   "目前清單",
+      watchlist_empty:           "尚未加入任何代號",
+      watchlist_footer_hint:     "儲存後會在下次重新掃描時納入。",
+      watchlist_done_label:      "關閉",
+      watchlist_rescan_label:    "關閉並立即重新掃描",
+      watchlist_scope_all:       "全部",
+      watchlist_scope_only:      "只看 Watchlist",
+      watchlist_scope_exclude:   "排除 Watchlist",
+      filter_watchlist_scope:    "Watchlist 範圍",
       // Stage classification popup
       stage_modal_title:       "階段分類解釋",
       stage_modal_current:     "目前階段",
@@ -628,6 +647,7 @@ const i18n = {
     failed: "Failed to load data",
     impact: "Impact Score",
     unknown: "Unknown",
+    binary_derated_tip: "Binary risks (earnings, FOMC, geopolitics) carry extreme uncertainty. To prevent chasing peaks, a 0.70x multiplier is auto-applied to affected sector scores until the event passes.",
 
     // ── Nav ────────────────────────────────────────────────────────
     nav: {
@@ -676,6 +696,24 @@ const i18n = {
       vol_modal_warning:   "Projection assumes linear volume distribution. Real sessions cluster at open/close — early projections often run high.",
       vol_modal_too_early: "Session barely started or nearly over; projection unstable, skipped.",
       vol_modal_closed:    "Market closed (outside 9:30–16:00 ET). Showing close ratio only.",
+      vol_intraday_early:  "Intraday <30m — volume read suppressed",
+      vol_intraday_scaled: "Intraday — ratio projected from elapsed session",
+      // Watchlist (non-SP500 tickers merged into scan)
+      watchlist_btn_label:       "Watchlist",
+      watchlist_badge_tooltip:   "Watchlist (not in S&P 500)",
+      watchlist_modal_title:     "Watchlist",
+      watchlist_modal_hint:      "Non-S&P-500 tickers added here will be scanned alongside the main universe.",
+      watchlist_add_placeholder: "Symbol (e.g. NVAX)",
+      watchlist_add_label:       "Add",
+      watchlist_current_label:   "Current list",
+      watchlist_empty:           "No tickers yet",
+      watchlist_footer_hint:     "Saved tickers are merged on next rescan.",
+      watchlist_done_label:      "Close",
+      watchlist_rescan_label:    "Close & rescan now",
+      watchlist_scope_all:       "All",
+      watchlist_scope_only:      "Watchlist only",
+      watchlist_scope_exclude:   "Exclude watchlist",
+      filter_watchlist_scope:    "Watchlist scope",
       // Stage classification popup
       stage_modal_title:       "Stage classification",
       stage_modal_current:     "Current stage",

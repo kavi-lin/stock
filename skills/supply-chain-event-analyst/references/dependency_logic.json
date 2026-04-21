@@ -1,0 +1,40 @@
+{
+  "sectors": {
+    "semiconductors": {
+      "nodes": ["EDA/IP", "Equipment", "Foundry", "Fabless/IDM", "OSAT", "End-Device"],
+      "critical_catalysts": ["lead_time", "utilization_rate", "export_control", "wafer_pricing"],
+      "dependency_weights": {
+        "equipment": 0.4,
+        "foundry": 0.35,
+        "eda_ip": 0.25
+      }
+    },
+    "energy": {
+      "nodes": ["Exploration", "Drilling", "Refining", "Storage", "Distribution"],
+      "critical_catalysts": ["wti_brent_spread", "crack_spread", "inventory_drawdown", "geopolitical_risk"],
+      "dependency_weights": {
+        "upstream_price": 0.5,
+        "refining_margin": 0.3,
+        "regulation": 0.2
+      }
+    },
+    "industrial": {
+      "nodes": ["Raw_Materials", "Components", "Assembly", "Logistics", "Sales"],
+      "critical_catalysts": ["pmi_data", "capital_expenditure", "freight_rates", "order_backlog"],
+      "dependency_weights": {
+        "components_availability": 0.4,
+        "logistics_cost": 0.3,
+        "end_demand": 0.3
+      }
+    },
+    "chemicals": {
+      "nodes": ["Feedstock", "Cracker", "Specialty_Chemicals", "Packaging", "Industrial_Use"],
+      "critical_catalysts": ["natural_gas_price", "feedstock_cost", "environmental_permit", "substitution_threat"],
+      "dependency_weights": {
+        "natural_gas": 0.45,
+        "feedstock_cost": 0.35,
+        "demand_cyclicality": 0.2
+      }
+    }
+  }
+}

@@ -16,11 +16,22 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import numpy as np
 import pandas as pd
 import yfinance as yf
+
+try:
+    from zoneinfo import ZoneInfo      # Python 3.9+
+    _ET = ZoneInfo("America/New_York")
+    _HAS_ZONEINFO = True
+except Exception:
+    _ET = timezone(timedelta(hours=-4))  # EDT fallback (approximate)
+    _HAS_ZONEINFO = False
+
+_SESSION_TOTAL_MIN = 390   # 9:30 → 16:00 ET
+_INTRADAY_EARLY_CUTOFF_MIN = 30  # < 30 min elapsed → too_early (vol signals suppressed)
 
 SCRIPT_DIR      = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR       = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
@@ -69,10 +80,49 @@ def _fetch_history(ticker, period="1y"):
     return hist, t
 
 
+def _intraday_state(hist):
+    """Classify the last bar's reliability vs today's ET session.
+
+    Returns (state, elapsed_min, projection_factor):
+      - 'complete'   : last bar is a full session (weekend/holiday/pre-market or today ≥ 16:00 ET)
+                       → projection_factor = 1.0
+      - 'too_early'  : today's session, 0 ≤ elapsed < 30 min
+                       → projection_factor = None (caller should suppress volume-based signals)
+      - 'partial'    : today's session, 30 ≤ elapsed < 390 min
+                       → projection_factor = 390 / elapsed_min (scale today_v → projected full-day)
+    """
+    now_et = datetime.now(_ET)
+    last_bar_ts = hist.index[-1]
+    last_bar_date = last_bar_ts.date() if hasattr(last_bar_ts, "date") else None
+    today_et = now_et.date()
+
+    # Last bar is a prior day (weekend / holiday / pre-market before first intraday tick) → complete
+    if last_bar_date is None or last_bar_date < today_et:
+        return ("complete", _SESSION_TOTAL_MIN, 1.0)
+
+    market_open  = now_et.replace(hour=9,  minute=30, second=0, microsecond=0)
+    market_close = now_et.replace(hour=16, minute=0,  second=0, microsecond=0)
+
+    if now_et >= market_close:
+        return ("complete", _SESSION_TOTAL_MIN, 1.0)
+
+    if now_et < market_open:
+        # Rare: yfinance stamped today but market hasn't opened — treat as too_early (0 elapsed)
+        return ("too_early", 0, None)
+
+    elapsed_min = int((now_et - market_open).total_seconds() // 60)
+    if elapsed_min < _INTRADAY_EARLY_CUTOFF_MIN:
+        return ("too_early", elapsed_min, None)
+    return ("partial", elapsed_min, _SESSION_TOTAL_MIN / float(elapsed_min))
+
+
 def _volume_block(hist):
     close  = hist["Close"]
     volume = hist["Volume"]
-    today_v = float(volume.iloc[-1])
+    today_v_raw = float(volume.iloc[-1])
+
+    state, elapsed_min, proj = _intraday_state(hist)
+
     # Average over the 20/50 sessions BEFORE today (exclude today itself) —
     # otherwise a spike inflates its own denominator and understates the ratio.
     def _avg_prev(n):
@@ -85,23 +135,39 @@ def _volume_block(hist):
         return 0.0 if m != m else m   # NaN → 0
     avg_20 = _avg_prev(20)
     avg_50 = _avg_prev(50)
-    ratio   = today_v / avg_20 if avg_20 > 0 else 0.0
 
-    if ratio >= 3.0:
+    # Effective "today_v" used for ratio_20d, spike detection, composite score.
+    # too_early → ratio is unreliable (too little of the session elapsed); caller
+    # should treat ratio_20d=None as neutral (no signal, no warning, neutral vol_score).
+    if state == "too_early":
+        today_v_effective = today_v_raw      # reported for transparency only
+        ratio = None
+    elif state == "partial":
+        today_v_effective = today_v_raw * proj  # project today → full-day equivalent
+        ratio = today_v_effective / avg_20 if avg_20 > 0 else 0.0
+    else:
+        today_v_effective = today_v_raw
+        ratio = today_v_effective / avg_20 if avg_20 > 0 else 0.0
+
+    if ratio is None:
+        spike = "UNKNOWN"
+    elif ratio >= 3.0:
         spike = "HEAVY_SPIKE"
     elif ratio >= 2.0:
         spike = "MILD_SPIKE"
     else:
         spike = "NORMAL"
 
-    # Count days in last 10 sessions where volume >= 2x avg_20
-    last10_vol = volume.tail(10)
+    # Count days in last 10 sessions where volume >= 2x avg_20 (history-only, today excluded)
+    hist_vol = volume.iloc[:-1].tail(10) if len(volume) > 1 else volume.tail(10)
     last10_avg = avg_20 if avg_20 > 0 else 1
-    spike_days = int((last10_vol / last10_avg >= 2.0).sum())
+    spike_days = int((hist_vol / last10_avg >= 2.0).sum())
 
-    # Simple volume trend: 5-day avg vs 10-day avg
-    v5   = float(volume.tail(5).mean())
-    v10  = float(volume.tail(10).mean())
+    # Volume trend: compare PRIOR 5-day avg vs PRIOR 10-day avg (both exclude today
+    # to keep the signal stable across intraday scans).
+    prior = volume.iloc[:-1] if len(volume) > 1 else volume
+    v5   = float(prior.tail(5).mean())  if len(prior) >= 5  else 0.0
+    v10  = float(prior.tail(10).mean()) if len(prior) >= 10 else 0.0
     if v10 == 0:
         trend = "stable"
     elif v5 / v10 >= 1.15:
@@ -112,13 +178,16 @@ def _volume_block(hist):
         trend = "stable"
 
     return {
-        "today":        int(today_v),
-        "avg_20d":      int(avg_20),
-        "avg_50d":      int(avg_50),
-        "ratio_20d":    round(ratio, 2),
-        "spike_label":  spike,
+        "today":             int(today_v_raw),                                # what yfinance actually reported
+        "today_effective":   int(today_v_effective) if today_v_effective else 0,
+        "avg_20d":           int(avg_20),
+        "avg_50d":           int(avg_50),
+        "ratio_20d":         round(ratio, 2) if ratio is not None else None,
+        "spike_label":       spike,
         "spike_days_last_10": spike_days,
-        "volume_trend": trend,
+        "volume_trend":      trend,
+        "intraday_state":    state,        # 'complete' | 'partial' | 'too_early'
+        "elapsed_min":       elapsed_min,  # 0-390; 390 for complete
     }
 
 
@@ -279,9 +348,10 @@ def _short_interest_block(t):
 
 def _composite(volume, ma, short_int):
     """Compute 0-100 composite score + label."""
-    # 1. volume_flow
+    # 1. volume_flow — neutral (55) when too early to read intraday
     r = volume["ratio_20d"]
-    if r >= 2.0:   vol_score = 95
+    if r is None:  vol_score = 55   # too_early: neutral, don't penalise
+    elif r >= 2.0: vol_score = 95
     elif r >= 1.5: vol_score = 80
     elif r >= 1.2: vol_score = 65
     elif r >= 1.0: vol_score = 55
@@ -376,12 +446,16 @@ def _signals_and_warnings(volume, ma, short_int, comp, rsi=None):
         signals.append("stage2_uptrend_intact")
     if ma["stage"] == "Stage 4 downtrend":
         warnings.append("stage4_downtrend")
-    if volume["ratio_20d"] >= 1.3 and volume["volume_trend"] == "expanding":
-        signals.append("volume_expansion")
-    if volume["ratio_20d"] < 0.7:
-        warnings.append("volume_dry_up")
-    if volume["spike_label"] == "HEAVY_SPIKE":
-        signals.append("heavy_volume_spike_today")
+    # Volume-based signals are suppressed when intraday reading is too_early
+    # (< 30 min elapsed) because today_v would be a tiny slice of a full session.
+    if volume["intraday_state"] != "too_early":
+        r20 = volume["ratio_20d"]
+        if r20 is not None and r20 >= 1.3 and volume["volume_trend"] == "expanding":
+            signals.append("volume_expansion")
+        if r20 is not None and r20 < 0.7:
+            warnings.append("volume_dry_up")
+        if volume["spike_label"] == "HEAVY_SPIKE":
+            signals.append("heavy_volume_spike_today")
     pct = short_int["short_pct_float"]
     if pct is not None:
         if pct < 3:    signals.append("low_short_interest")
