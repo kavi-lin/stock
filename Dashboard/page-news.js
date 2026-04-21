@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('news-run-icon').innerHTML = '<span class="text-emerald-400 font-bold">✓</span>';
     document.getElementById('news-run-title').textContent = msg || 'Done';
     document.getElementById('news-run-cancel').classList.add('hidden');
-    setTimeout(() => banner.classList.add('hidden'), 8000);
+    // Kept visible — user dismisses via the ✕ (#news-run-dismiss) button.
   }
 
   function setRunBannerError(msg) {
@@ -469,8 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refresh-news').addEventListener('click', async () => {
     const isZh = UI.currentLang === 'zh';
     const confirmMsg = isZh
-      ? '透過 Claude 執行「新聞分析 DIGEST」？（約 3-5 分鐘，消耗 tokens）'
-      : 'Run "新聞分析 DIGEST" via Claude? (~3-5 min, consumes tokens)';
+      ? '透過 Claude 執行「新聞分析 DIGEST」？（約 11-13 分鐘，~$2 tokens；超過 20 分鐘會被伺服器硬殺）'
+      : 'Run "新聞分析 DIGEST" via Claude? (~11-13 min, ~$2 tokens; server hard-kills after 20 min)';
     if (!confirm(confirmMsg)) return;
     triggerProtocol('news', {}, isZh ? '新聞 DIGEST 更新中' : 'News DIGEST running');
   });

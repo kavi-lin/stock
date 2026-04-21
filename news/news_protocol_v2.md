@@ -32,7 +32,7 @@ MODE : FLASH | DIGEST | REVIEW
    - Stage 1 只讀 RSS cache，不做任何 web 請求
    - Stage 2 WebFetch 硬上限 **5 則**
 3. **Theme Cache**（FRESH = mtime < 3h）：先讀 `skills/theme-detector/cache/theme_detector_*.json`；FRESH 直接載入（`theme_source: THEME_CACHE`），STALE 才跑 skill。
-4. **Cache Patch 時機**：**只有 Stage 2 深度辯論結論**能 patch cache。Stage 1 shallow 仍完整寫入 `news_logs/*_digest.json`（`depth: shallow`），不浪費已產出的觀點。
+4. **Cache Patch 時機**：**只有 Stage 2 深度辯論結論**能 patch cache。Stage 1 shallow 取 **top 10**（依 `|shallow_score|` 排序）寫入 `news_logs/*_digest.json`（`depth: shallow`）供 Dashboard 展示。MD 報告內的 Shallow Digest 區塊可展示前 20 則（給人看的，不進 JSON cache）。
 5. **FLASH**：單則直接進 Stage 2（跳 Stage 1），標記 `review_status: pending`（**不 patch cache**），等 REVIEW 升級後才 patch。
 6. **REVIEW**：讀 `review_status: pending` → 4 agent 擴展辯論（snap 30 字 → 完整 200+ 字）→ Arbiter 正式裁決（可覆寫 verdict / score）→ `pending → reviewed` → 執行 cache patch。
 7. **Output**：邏輯 JSON + 結論 Markdown Impact Card。
@@ -64,6 +64,21 @@ MODE : FLASH | DIGEST | REVIEW
 ---
 
 ## DIGEST MODE — 兩階段漏斗
+
+### 🚫 DIGEST mode 絕對硬規定（違反 = 偷懶，validator 會 reject）
+
+1. **必須執行 Stage 1 RSS triage**（不得憑印象跳過）
+   - 即使 raw.json 已存在且 mtime < 1h，**仍必須讀取並產出 71 則 shallow_verdicts**（或實際數量）的 triage 分類表
+   - Stage 1 輸出至少要有 ≥ 20 筆 shallow（sorted by `|score|`），不得只挑 5 則進 Stage 2 就收工
+2. **必須 dispatch 4 個 Agent tool_use** 跑 Stage 2 subagent（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst）
+   - **禁止** 在 thinking block 裡自己幻想 4 視角辯論
+   - **禁止** 只用單一 model inline generate 4-view snaps
+   - 每個 Agent 回傳必須含 `"agent": "<LANE>_Analyst"` + `"subagent_isolated": true` sentinel
+3. **必須 Write `news_logs/YYYY-MM-DD_digest.json`**（Phase 4），**timestamp 欄位必須是今天日期**
+   - validator 會檢查 `timestamp.startswith(today)` + mtime 在 2h 內
+   - 未重寫 digest.json → validator rc=1 → Phase 5 MD 報告**禁止輸出**
+4. **禁止「跳過 Stage 1/2 直接寫 MD 報告」** — 這是歷史 bug pattern：Claude 讀昨天 MD 當範本、在 thinking block 裡編 4-view、寫 18KB MD、跑 validator（讀昨天 digest 誤過關）→ **user 看到假 MD**。
+   - 新 validator 有 freshness gate 會擋，但 protocol 層也要明示
 
 ### STAGE 1 — RSS SHALLOW TRIAGE
 
@@ -277,40 +292,48 @@ Agent(
 
 Schema 完整定義：**`./digest_output_schema.md`**（本 protocol 不再內嵌 JSON 範本）。
 
-**重點**：
-- DIGEST：`verdicts[]` 必須包含全部 Stage 1 項目（shallow + deep 混合），不得丟棄 shallow
+**Shape 重點**：
+- DIGEST：`verdicts[]` 包含 deep（5 則）+ top-20 shallow，共最多 **25 筆**
 - FLASH：`stage1_count=0, stage2_count=1`；deep verdict `review_status=pending, cache_updated=false`
 - REVIEW：`review_status: pending → reviewed`
-- V2.1 新增：`fanout_mode` / `degraded_agents` / `subagent_isolated` sentinel
-
-**寫入完必須執行 validator**：
-```bash
-python3 news/scripts/validate_digest_output.py
-```
-rc=0 才可進 MD 階段。
+- V2.1 欄位：`fanout_mode` / `degraded_agents` / `subagent_isolated` sentinel
 
 ---
 
-### 🚨 寫入 digest.json 的強制規則（避免 API stream idle timeout）
+### Phase 4 寫入規則（極簡版）
 
-兩次歷史案例：Phase 4 用單一超大 tool call 噴整包 digest.json → Anthropic API 的 stream idle watchdog 中斷 → rc=1 + token 全浪費。
+**唯一可用模式：單次 Write 呼叫，完整 digest.json**
 
-**DO NOT**：
-- ❌ `Bash` + heredoc（`cat > file.json <<EOF ... EOF`、`python3 -c "json.dump(...)"`）一次灌入
-- ❌ 單一 `Write` 把整個 digest.json 當一個字串 argument 傳入
-- ❌ Phase 4 寫檔前又跑大量 `thinking` block（thinking 後接大 tool_use 最容易觸發 stream idle）
+| DO | DO NOT |
+|---|---|
+| **⚠️ 先 `Read news_logs/YYYY-MM-DD_digest.json`**（若已存在）| 不准用 `Bash` + heredoc（`cat > file <<EOF`）|
+| 用 `Write` 工具一次寫完（Read 滿足守門）| 不准建 `news_logs/YYYY-MM-DD_chunks/` 子資料夾 |
+| DIGEST 的 shallow 硬上限 **top 10**（依 `\|shallow_score\|` 排序取前 10，其餘丟棄）| 不准寫 `assemble_digest.py` / `digest_append_deep.py` 等輔助腳本 |
+| 若整包仍 > 25KB → 砍 shallow 到 top 5 | 不准分多次 Write / 不准多檔合併 |
+| 在 thinking 裡組好 JSON object → 一次 `Write` 丟出 | |
 
-**MUST**：
-1. 用 `Write` 工具（不是 `Bash`）
-2. **分塊寫**：>10 則或 >8KB 必須拆：
-   - 第 1 call：skeleton（top-level 欄位 + `"verdicts": [`）
-   - 第 2..N call：每次 append 5-10 筆 verdicts
-   - 最後 call：封檔（補 `]` + `session_macro_delta`）
-3. **推薦**：用 `Write` 寫 shallow-only 版本 → 再用 `Bash` 跑 merge script（`news/scripts/digest_append_deep.py`）分批加入 deep verdicts（每 call input_json 都很小）
-4. 寫完立刻跑 validator（rc=0 才算成功）
+**預期大小**：5 deep（每則 ~800B）+ 10 shallow（每則 ~300B）+ header ≈ **7-9KB**。單次 Write < 1 min 完成，不會觸發 stream idle。
 
-**撞到 Stream idle timeout**：
-不要重跑 protocol，改跑 **`news/scripts/salvage_digest.py`** 從 `scan_logs/news_*.log` 重組 digest.json（零 API 成本，只能救 deep verdicts）。
+**⚠️ Read 為什麼必做**：Claude Code 對「已存在檔案」有 Write-safety 守門（第一次 Write 會失敗跳 `File has not been read yet`），Claude 會自動重試 → 同樣 content 串流兩次 = 浪費 ~6 分鐘。**Phase 4 第一步必須 Read 一次 digest.json**（即使內容不看，純粹解鎖守門）。
+
+**為什麼砍 shallow 到 10**：歷史上 shallow 20 讓 digest.json ≥ 34KB，單次 Write 就要 ~3 min。降到 10 後檔案 < 10KB，Write < 1 min，Dashboard 仍有足夠豐富度展示（shallow 10 覆蓋當日 ~85% 影響力）。完整 shallow 四視角 snaps 保留在 MD 報告的 Shallow Digest 區塊給人閱讀。
+
+### Step by step
+
+```
+1. Read news_logs/YYYY-MM-DD_digest.json     ← 必做，解鎖 Write-safety 守門
+   （若檔案不存在會報錯，忽略繼續下一步即可）
+2. Write one call → news_logs/YYYY-MM-DD_digest.json（完整 JSON、shallow ≤ 10）
+3. Bash: python3 news/scripts/validate_digest_output.py
+4. 若 rc ≠ 0 → 一次 Edit 修 → 再跑一次 validator
+5. Bash: 單次 Python one-liner patch sector_intel.json（prepend top_catalysts）
+6. Bash: 單次 Python one-liner patch phase0.json（update macro_backdrop + binary_risks）
+7. 生 MD 報告（見下，shallow 20 則展示完整 4-view，不受 JSON cap 影響）
+```
+
+**硬規定**：Phase 4 總共 Bash / Write / Edit / Read 加起來 **≤ 9 次 tool call**。超過代表 over-engineering，停下重新規劃。
+
+**撞到 Stream idle timeout（極少發生）**：跑 `news/scripts/salvage_digest.py` 從 log 重組，不要重跑 protocol。
 
 ---
 
@@ -325,8 +348,9 @@ rc=0 才可進 MD 階段。
 1. **Triage Summary** — 一行式篩選表（Stage 1 所有 items，含 DEEP/SKIP 標籤）
 2. **Deep Analysis** — Stage 2 晉級項目的完整 Impact Card
 3. **Shallow Digest** — Stage 1 未晉級項目緊湊小卡
-   - 按 `|shallow_score|` 排序，**至少前 20 則**
+   - MD 報告內建議 **top 20 則**（純印給人看，不受 digest.json top-10 cap 限制）
    - 直接沿用 Stage 1 產出的 `bull_case / bear_case / sector_view / macro_view`（不額外產 token）
+   - 注意：digest.json 只存 top 10，因此 Dashboard 新聞卡片會少於 MD 報告
 
 **Shallow Digest 小卡格式**：
 ```markdown

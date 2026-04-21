@@ -316,6 +316,15 @@ function conditionRow(label, text, color = 'var(--status-bullish)') {
     </div>`;
 }
 
+// Build ticker→GICS-sector map from momentum_screen data (S&P 500 only).
+// Populated by loadWatchlist(); used to show sector subscript on each card.
+let _tickerSectorMap = {};
+function sectorBadgeLabel(gics) {
+    if (!gics) return '';
+    const m = window.i18n?.[UI.currentLang]?.momentum?.sectors_map || {};
+    return m[gics] || gics;
+}
+
 function buildCard(item) {
     const isExecute = isActiveDecision(item.decision);
     const isStaged = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY' || item.final_decision === 'STAGED_ENTRY';
@@ -324,6 +333,9 @@ function buildCard(item) {
     const wl = t.watchlist || {};
     const status  = t.status?.[item.decision] || item.decision;
     const horizon = item.time_horizon ? (t.horizon?.[item.time_horizon] || item.time_horizon) : null;
+    const sectorBadge = _tickerSectorMap[item.ticker]
+        ? `<span class="inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded" style="background:#e0e7ff;border:1px solid #93c5fd;color:#1e3a8a">${sectorBadgeLabel(_tickerSectorMap[item.ticker])}</span>`
+        : '';
 
     // Live position overlay
     const pos = t.positions || {};
@@ -460,8 +472,9 @@ function buildCard(item) {
         <!-- Header -->
         <div class="flex justify-between items-start mb-4">
             <div>
-                <div class="flex items-baseline gap-2">
+                <div class="flex items-baseline gap-2 flex-wrap">
                     <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}</h4>
+                    ${sectorBadge}
                     ${item.current_price != null ? (() => {
                         const cp = item.current_price;
                         const ap = item.analysis_price;
@@ -827,6 +840,12 @@ async function loadWatchlist() {
         const watchItems  = allAnalysis.filter(a => a.on_watchlist);
         const positions   = data.positions || [];
 
+        // Build ticker→GICS sector lookup from momentum_screen (S&P 500 universe)
+        _tickerSectorMap = {};
+        ((data.momentum_screen || {}).rows || []).forEach(r => {
+            if (r.ticker && r.sector && r.sector !== 'Unknown') _tickerSectorMap[r.ticker] = r.sector;
+        });
+
         window._allAnalysis   = allAnalysis;
         window._watchlistData = watchItems;
         window._positionsFlat = positions;
@@ -856,6 +875,16 @@ async function loadWatchlist() {
 
         renderCards(activeFilter);
         logToUI(`Decisions loaded: ${allAnalysis.length} analyses, ${watchItems.length} watched, ${positions.length} position lots`);
+
+        // Deep-link: ?ticker=XXX from index.html → auto-open history drill
+        const qpTicker = new URLSearchParams(window.location.search).get('ticker');
+        if (qpTicker && !window._tickerDeepLinkHandled) {
+            window._tickerDeepLinkHandled = true;
+            const upper = qpTicker.toUpperCase();
+            if (allAnalysis.some(a => a.ticker === upper)) {
+                setTimeout(() => openHistoryDrill(upper), 100);
+            }
+        }
     } catch (e) {
         logToUI(e.message, 'error');
         document.getElementById('watchlist-grid').innerHTML =

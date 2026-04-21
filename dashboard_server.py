@@ -57,17 +57,19 @@ CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
 # Idle Timeout, burning 2h+ of tokens for nothing).
 PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "1500"))
 PROTOCOL_TIMEOUT_OVERRIDES = {
-    "news":   int(os.getenv("NEWS_TIMEOUT_SEC",   "720")),   # 12 min
+    # DIGEST with "complete pipeline in one turn" prompt + chunked writes needs
+    # ~12-15 min with 60+ RSS items. 20 min gives breathing room.
+    "news":   int(os.getenv("NEWS_TIMEOUT_SEC",   "1200")),  # 20 min
     "flash":  int(os.getenv("FLASH_TIMEOUT_SEC",  "600")),   # 10 min
     "review": int(os.getenv("REVIEW_TIMEOUT_SEC", "600")),   # 10 min
 }
 
 PROTOCOL_PROMPTS = {
     "sector": "產業掃描",
-    "news":   "新聞分析 DIGEST",
+    "news":   "非互動模式 + 硬規定：\n1. **必須執行** Stage 1 RSS triage（讀 raw.json 產 ≥ 20 筆 shallow_verdicts 的 triage 表）\n2. **必須 dispatch 4 個 Agent tool_use**（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst），不得在 thinking block 裡自己幻想 4 視角\n3. **必須 Write news_logs/YYYY-MM-DD_digest.json**（timestamp 必須是今天日期），validator 有 freshness gate 會擋舊檔\n4. Stage 1 triage 表直接依 |shallow_score| 排序取前 5 則進 Stage 2 **不要停下等使用者確認**\n5. 跑完 Phase 3 Arbiter + Phase 4 cache patch + validator + 產出 reports/YYYY-MM-DD_news_digest.md\n6. **禁止**：讀昨天 MD 當範本、跳過 Stage 1/2 直接寫 MD、單 model 編 4-view 辯論\n7. 一個 turn 跑完整條 pipeline，不要中途停下。\n\n新聞分析 DIGEST",
     "invest": "SESSION CONFIG: RISK_TOLERANCE={risk_tolerance}\n非互動模式：照 protocol 規則直接執行，不要輸出「請確認」類摘要表停下來等候。Phase 0 cache 策略：< 3h 用現有、否則 L3 重跑。\n\n分析 {ticker}",
-    "flash":  "新聞分析 FLASH {ticker} 近期動態",
-    "review": "新聞分析 審核 \"{headline}\"",
+    "flash":  "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 產出 reports MD 報告，不要中途停下等使用者回話。\n\n新聞分析 FLASH {ticker} 近期動態",
+    "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。\n\n新聞分析 審核 \"{headline}\"",
 }
 PROTOCOL_LOG_DIRS = {
     "sector": "sector/scan_logs",
@@ -296,19 +298,28 @@ def run_protocol(name, params=None):
             lf = open(log_path, "w", buffering=1)
             lf.write(f"=== protocol={name} prompt={prompt!r} started={_now_iso()} ===\n")
             lf.flush()
-            # stream-json: every event is one line of JSON → naturally line-buffered
+            # stream-json: every event is one line of JSON → naturally line-buffered.
+            # Intentionally NOT passing --include-partial-messages: those emit char-by-char
+            # input_json_delta events (~4000 deltas per 34KB Write) which bloat the log
+            # without providing info we actually parse. tool_use/tool_result/result events
+            # arrive at block-level completion, which is plenty for event tracking.
             proc = subprocess.Popen(
                 [claude_bin, "-p", prompt,
                  "--output-format", "stream-json",
                  "--verbose",
-                 "--include-partial-messages",
                  "--permission-mode", "bypassPermissions"],
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                env={**os.environ, "PATH": os.environ.get("PATH", "") + ":/Users/kavi/.local/bin"},
+                env={
+                    **os.environ,
+                    "PATH": os.environ.get("PATH", "") + ":/Users/kavi/.local/bin",
+                    # Strict-mode validator timestamp: digest.json mtime must be ≥ this
+                    # to count as "written by this run". Catches Claude skipping Stage 1/2.
+                    "NEWS_RUN_START_MS": str(int(start.timestamp() * 1000)),
+                },
             )
             _protocol_proc["p"] = proc
 
@@ -608,9 +619,26 @@ def run_free_caches():
             try:
                 r = subprocess.run(cmd_parts, cwd=ROOT, capture_output=True, text=True, timeout=120)
                 if r.returncode != 0:
-                    _preflight_state["errors"].append(f"{key}: exit {r.returncode}")
+                    # Capture stderr + stdout tails so user can see what actually went wrong
+                    stderr_tail = (r.stderr or "")[-800:]
+                    stdout_tail = (r.stdout or "")[-400:]
+                    with _preflight_lock:
+                        _preflight_state["errors"].append({
+                            "key":         key,
+                            "rc":          r.returncode,
+                            "stderr_tail": stderr_tail,
+                            "stdout_tail": stdout_tail,
+                        })
+            except subprocess.TimeoutExpired:
+                with _preflight_lock:
+                    _preflight_state["errors"].append({
+                        "key": key, "rc": -1, "error": "timeout after 120s",
+                    })
             except Exception as e:
-                _preflight_state["errors"].append(f"{key}: {e}")
+                with _preflight_lock:
+                    _preflight_state["errors"].append({
+                        "key": key, "rc": None, "error": str(e),
+                    })
             with _preflight_lock:
                 _preflight_state["items_done"] += 1
 

@@ -304,6 +304,8 @@ def extract_market_data(s_data):
         "named_targets":    political.get("named_targets_today", []),
         "top_catalysts":    _normalize_catalysts(phase3.get("top_catalysts", [])),
         "today_verdict":    (s_data.get("_phase4c") or {}).get("today_verdict"),
+        "verdict_date":     s_data.get("verdict_date"),
+        "generated_at":     s_data.get("generated_at"),
         "notes":            s_data.get("session_notes", ""),
     }
 
@@ -371,12 +373,22 @@ def extract_binary_risks(s_data):
             days_until = (ev_date - today).days
         except Exception:
             pass
+        # Skip past events — the list is titled "Upcoming Binary Risks",
+        # and an expired event e.g. yesterday's ceasefire headline no longer
+        # belongs. Events with unparseable dates are kept (days_until=None)
+        # so data-quality problems stay visible.
+        if days_until is not None and days_until < 0:
+            continue
+        # Recompute within_48h from days_until so the banner auto-ages each
+        # bridge.py run instead of relying on the stale flag baked into
+        # sector_intel.json at scan time.
+        within_48h = days_until is not None and 0 <= days_until <= 2
         risks.append({
             "event":            ev.get("event", ""),
             "date":             ev_date_str,
             "days_until":       days_until,
             "affected_sectors": ev.get("affected_sectors", []),
-            "within_48h":       ev.get("within_48h", False),
+            "within_48h":       within_48h,
         })
     # Sort by date ascending
     risks.sort(key=lambda x: x["date"])

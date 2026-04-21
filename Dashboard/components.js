@@ -8,6 +8,110 @@
 
   window.Components = {
 
+    // ── Today's Verdict hero card ─────────────────────────────────────────
+    // Mutates #today-verdict-card and its tv-* children. Used by both
+    // index.html (總體儀表板) and sector.html (產業掃描).
+    // i18n pulled from sector_page namespace (both pages share it).
+    renderTodayVerdict(market) {
+      const card = document.getElementById('today-verdict-card');
+      if (!card || !market) return;
+      const tr   = window.i18n?.[UI.currentLang]?.sector_page || {};
+      const isZh = UI.currentLang === 'zh';
+
+      const STANCE_STYLE = {
+        AGGRESSIVE: { fg: '#22c55e', bg: 'rgba(34,197,94,0.15)', border: '#22c55e' },
+        NEUTRAL:    { fg: '#eab308', bg: 'rgba(234,179,8,0.15)', border: '#eab308' },
+        DEFENSIVE:  { fg: '#ef4444', bg: 'rgba(239,68,68,0.15)', border: '#ef4444' },
+      };
+      const ACTION_STYLE = {
+        overweight:  { fg: '#22c55e', icon: '🟢', label: tr.tv_action_overweight  || '加碼' },
+        underweight: { fg: '#fbbf24', icon: '🟠', label: tr.tv_action_underweight || '減碼' },
+        avoid:       { fg: '#ef4444', icon: '🔴', label: tr.tv_action_avoid       || '避開' },
+        wait:        { fg: '#eab308', icon: '🟡', label: tr.tv_action_wait        || '觀望' },
+        neutral:     { fg: '#a1a1aa', icon: '⚪', label: tr.tv_action_neutral     || '中性' },
+      };
+
+      const tv = market.today_verdict;
+      const $ = (id) => document.getElementById(id);
+
+      // Build staleness badge — same logic on both pages so user always sees freshness.
+      const vdateStr = market.verdict_date || (market.generated_at || '').slice(0, 10);
+      let stalenessHTML = '';
+      if (vdateStr) {
+        const vd = new Date(vdateStr + 'T00:00:00');
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const daysAgo = Math.round((today - vd) / 86400000);
+        let col, label;
+        if      (daysAgo <= 0)  { col = '#22c55e'; label = isZh ? '今日'        : 'today'; }
+        else if (daysAgo === 1) { col = '#eab308'; label = isZh ? '昨日'        : '1d ago'; }
+        else                    { col = '#ef4444'; label = isZh ? `${daysAgo} 天前` : `${daysAgo}d ago`; }
+        const dateLabel = market.generated_at || vdateStr;
+        stalenessHTML =
+          `<span class="text-[10px] font-mono px-2 py-0.5 rounded inline-flex items-center gap-1"
+                 style="background:${col}18;color:${col};border:1px solid ${col}40"
+                 title="${UI.escapeHTML(dateLabel)}">📅 ${UI.escapeHTML(dateLabel.slice(0, 16))} · ${label}</span>`;
+      }
+      const confEl = $('tv-confidence');
+
+      // Fallback path: no structured verdict — show session_notes prose if present
+      if (!tv) {
+        if (!market.notes) { card.classList.add('hidden'); return; }
+        card.classList.remove('hidden');
+        card.style.borderLeftColor = '#a1a1aa';
+        $('tv-stance') && ($('tv-stance').textContent = '—');
+        $('tv-headline') && ($('tv-headline').textContent = tr.tv_no_structured || '今日裁決（舊版快取，待下次掃描升級）');
+        $('tv-one-liner') && ($('tv-one-liner').textContent = '');
+        ['tv-takeaways','tv-actions','tv-watch'].forEach(id => { const el = $(id); if (el) el.innerHTML = ''; });
+        if (confEl) confEl.innerHTML = stalenessHTML;
+        const fb = $('tv-fallback');
+        if (fb) { fb.classList.remove('hidden'); $('tv-fallback-text') && ($('tv-fallback-text').textContent = market.notes); }
+        return;
+      }
+
+      // Structured path
+      card.classList.remove('hidden');
+      $('tv-fallback') && $('tv-fallback').classList.add('hidden');
+
+      const stance = tv.stance || 'NEUTRAL';
+      const sty = STANCE_STYLE[stance] || STANCE_STYLE.NEUTRAL;
+      card.style.borderLeftColor = sty.border;
+
+      const stanceEl = $('tv-stance');
+      if (stanceEl) {
+        stanceEl.textContent      = stance;
+        stanceEl.style.background = sty.bg;
+        stanceEl.style.color      = sty.fg;
+      }
+
+      $('tv-headline')  && ($('tv-headline').textContent  = tv.headline  || '');
+      $('tv-one-liner') && ($('tv-one-liner').textContent = tv.one_liner || '');
+
+      if (confEl) {
+        const confHTML = tv.confidence != null
+          ? `<span>conf ${(tv.confidence * 100).toFixed(0)}%</span>` : '';
+        confEl.innerHTML = `${stalenessHTML ? stalenessHTML + '&nbsp;&nbsp;' : ''}${confHTML}`;
+      }
+
+      $('tv-takeaways') && ($('tv-takeaways').innerHTML =
+        (tv.key_takeaways || []).map(k => `<li class="flex items-start gap-1.5"><span class="text-emerald-500 shrink-0">•</span><span>${UI.escapeHTML(k)}</span></li>`).join('') ||
+        `<li class="text-zinc-600 italic">—</li>`);
+
+      $('tv-actions') && ($('tv-actions').innerHTML =
+        (tv.sector_actions || []).map(a => {
+          const as = ACTION_STYLE[a.action] || ACTION_STYLE.neutral;
+          const conf = a.confidence ? `<span class="text-[9px] text-zinc-500 ml-1">(${UI.escapeHTML(a.confidence)})</span>` : '';
+          return `<li><div class="flex items-start gap-1.5"><span class="shrink-0">${as.icon}</span><div>
+            <span class="font-bold" style="color:${as.fg}">${as.label}</span>
+            <span class="font-medium" style="color:var(--text-main)">${UI.escapeHTML((a.sector||'').replace(/_/g,' '))}</span>${conf}
+            ${a.reason ? `<div class="text-[10px] text-zinc-500 leading-snug mt-0.5">${UI.escapeHTML(a.reason)}</div>` : ''}
+          </div></div></li>`;
+        }).join('') || `<li class="text-zinc-600 italic">—</li>`);
+
+      $('tv-watch') && ($('tv-watch').innerHTML =
+        (tv.watch_next || []).map(w => `<li class="flex items-start gap-1.5"><span class="text-zinc-500 shrink-0">▸</span><span>${UI.escapeHTML(w)}</span></li>`).join('') ||
+        `<li class="text-zinc-600 italic">—</li>`);
+    },
+
     // ── Progress Bar ──────────────────────────────────────────────────────
     // Returns an HTML string for a thin progress bar.
     progressBar(pct, color, height = '1.5') {
@@ -53,6 +157,11 @@
 
       if (compact) {
         el.className = 'glass-card px-4 py-3 flex items-center justify-between gap-4 hover:border-zinc-600/50 transition-all cursor-pointer';
+        // Click anywhere on card → jump to decisions center + open history drill for this ticker
+        el.addEventListener('click', (ev) => {
+          if (ev.target.closest('button, a')) return;
+          window.location.href = `decisions.html?ticker=${encodeURIComponent(item.ticker)}`;
+        });
         el.innerHTML = `
           <div class="flex items-center gap-3 min-w-0">
             <span class="text-lg font-black tracking-tighter shrink-0" style="color:var(--text-card-title)">${UI.escapeHTML(item.ticker)}</span>
@@ -64,7 +173,7 @@
           </div>
           <div class="flex items-center gap-3 shrink-0">
             <span class="text-xl font-black tracking-tighter font-mono" style="color:var(--text-card-title)">${UI.escapeHTML(String(item.score))}</span>
-            <button onclick="UI.viewReport('${UI.escapeHTML(item.report_url)}')"
+            <button onclick="event.stopPropagation(); UI.viewReport('${UI.escapeHTML(item.report_url)}')"
                     class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-zinc-800 text-emerald-600 dark:text-zinc-400 shadow-sm flex items-center justify-center hover:bg-emerald-500 hover:border-emerald-500 hover:text-white dark:hover:text-black hover:shadow-none transition-all">
               <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
             </button>

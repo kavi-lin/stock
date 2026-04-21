@@ -1217,12 +1217,8 @@ function showScanCard(status, phase, elapsedSec, progress, logTail) {
     if (status === 'done' || status === 'error') dismiss.classList.remove('hidden');
     else                                         dismiss.classList.add('hidden');
 
-    // Terminal auto-hide after a moment (respect user if they've expanded the log)
+    // Card stays up in terminal states — user dismisses via the ✕ (#scan-card-dismiss) button.
     if (_indicatorHideTimer) { clearTimeout(_indicatorHideTimer); _indicatorHideTimer = null; }
-    if (status === 'done' || status === 'error') {
-        const bodyOpen = !document.getElementById('scan-card-body').classList.contains('hidden');
-        if (!bodyOpen) _indicatorHideTimer = setTimeout(hideScanCard, 6000);
-    }
 }
 
 function hideScanCard() {

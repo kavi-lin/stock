@@ -11,6 +11,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Binary Risk strip (ported from sector page) */
+        .binary-alert {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+        }
+        .binary-sector-chip {
+            font-size: 10px; font-weight: 700;
+            padding: 3px 9px; border-radius: 4px;
+            background: rgba(239,68,68,0.22); color: #fff;
+            border: 1px solid rgba(239,68,68,0.7);
+            white-space: nowrap;
+        }
+        .binary-date-pill {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.1em;
+            padding: 3px 8px; border-radius: 4px;
+            background: #ef4444; color: #fff;
+            white-space: nowrap;
+        }
+        /* Teaser cards (Layer 3) */
+        .teaser-row {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 8px; border-radius: 6px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .teaser-row:hover { background: rgba(255,255,255,0.04); }
+        /* Focus ticker card (M3 cross-module) */
+        .focus-ticker-card {
+            background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(99,102,241,0.08));
+            border: 1px solid rgba(167,139,250,0.4);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        /* Star badge for cross-signal ticker */
+        .cross-signal-star {
+            display: inline-flex; align-items: center; gap: 2px;
+            font-size: 9px; font-weight: 900;
+            padding: 1px 5px; border-radius: 3px;
+            background: rgba(250,204,21,0.15); color: #facc15;
+            border: 1px solid rgba(250,204,21,0.35);
+            margin-left: 4px;
+        }
+    </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="index">
 
@@ -60,68 +107,92 @@
         <!-- Dashboard Grid -->
         <div class="p-6 space-y-5">
 
-            <!-- Row 1: Market Conviction Hero + Verdict -->
+            <!-- Layer 1: Today's AI Verdict HERO -->
+            <div id="today-verdict-card" class="hidden glass-card p-6" style="border-left:4px solid #22c55e;border-radius:8px">
+                <!-- Header: stance pill + headline + confidence -->
+                <div class="flex items-baseline gap-3 flex-wrap mb-3">
+                    <span id="tv-stance" class="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded" style="background:rgba(234,179,8,0.15);color:#eab308">NEUTRAL</span>
+                    <h2 id="tv-headline" class="text-lg font-bold flex-1" style="color:var(--text-card-title)">—</h2>
+                    <span id="tv-confidence" class="text-[10px] font-mono text-zinc-500">conf —</span>
+                </div>
+                <p id="tv-one-liner" class="text-[13px] leading-relaxed mb-4" style="color:var(--text-main)"></p>
+
+                <!-- 3-column: takeaways / sector actions / watch -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-takeaways-title">✦ 關鍵觀察</div>
+                        <ul id="tv-takeaways" class="space-y-1.5 text-[11px] leading-snug"></ul>
+                    </div>
+                    <div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-actions-title">✦ 產業操作建議</div>
+                        <ul id="tv-actions" class="space-y-1.5 text-[11px] leading-snug"></ul>
+                    </div>
+                    <div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-watch-title">✦ 接下來盯什麼</div>
+                        <ul id="tv-watch" class="space-y-1.5 text-[11px] leading-snug"></ul>
+                    </div>
+                </div>
+
+                <!-- Bottom: 3-signal mini gauge → synthesized exposure -->
+                <div id="three-signal-mini" class="mt-5 pt-4 border-t border-zinc-200/40 dark:border-zinc-800/60"></div>
+
+                <!-- Fallback prose (shown only when today_verdict missing) -->
+                <div id="tv-fallback" class="hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                    <div class="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2" id="tv-fallback-title">Session Notes</div>
+                    <p id="tv-fallback-text" class="text-[12px] leading-relaxed" style="color:var(--text-muted)"></p>
+                </div>
+            </div>
+
+            <!-- Layer 2a: Binary Risk 48h banner (conditional) -->
+            <div id="binary-alert-section" class="hidden">
+                <div class="binary-alert px-4 py-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest" style="color:#ef4444">⚡ Binary Risk Within 48h</span>
+                        <span class="text-[9px] text-zinc-500 font-mono" id="binary-alert-derated">auto-derated ×0.70</span>
+                    </div>
+                    <div id="binary-alert-items" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Layer 2b: Warning Flags strip (conditional) -->
+            <div id="warning-flags-row" class="flex flex-wrap gap-2"></div>
+
+            <!-- Layer 3: Cross-module Deep Dive (3-column teaser) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-                <!-- Composite Signal Hero (2/3) -->
-                <div class="lg:col-span-2 glass-card p-6" id="signal-hero">
-                    <div class="flex items-center gap-2 mb-5">
-                        <i data-lucide="crosshair" class="w-4 h-4 text-zinc-400"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" data-i18n="conviction_title">市場信心指標</span>
+                <!-- HOT Sectors Top 3 -->
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="flame" class="w-3.5 h-3.5 text-emerald-500"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="teaser-hot-title">熱門產業 TOP 3</span>
+                        <a href="sector.html" class="ml-auto text-[10px] text-zinc-500 hover:text-emerald-500 transition-all">→</a>
                     </div>
-                    <div class="flex items-center gap-6">
-                        <!-- Score Dial -->
-                        <div class="shrink-0 w-28 flex flex-col items-center">
-                            <div id="composite-score" class="text-6xl font-black tracking-tighter leading-none">–</div>
-                            <div class="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-800 mt-3 mb-2">
-                                <div id="composite-bar" class="h-2 rounded-full transition-all duration-700" style="width:0%"></div>
-                            </div>
-                            <div id="composite-label" class="text-[10px] font-black uppercase tracking-widest">LOADING</div>
-                        </div>
-                        <!-- Divider -->
-                        <div class="w-px self-stretch bg-zinc-200 dark:bg-zinc-800 shrink-0"></div>
-                        <!-- Component Breakdown -->
-                        <div class="flex-1 space-y-2.5" id="component-bars">
-                            <!-- JS rendered -->
-                        </div>
-                    </div>
-                    <p id="conviction-summary" class="text-[10px] text-zinc-500 mt-5 border-t border-zinc-800 pt-3 leading-relaxed"></p>
+                    <div id="hot-sectors-teaser" class="space-y-2"></div>
                 </div>
 
-                <!-- Verdict Card (1/3) -->
-                <div class="glass-card p-6 flex flex-col gap-4" id="verdict-card">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="shield" class="w-4 h-4 text-zinc-400"></i>
-                            <div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" data-i18n="action_posture">操作方向儀</span>
-                                <p class="text-[8px] text-zinc-700 leading-tight" data-i18n="action_posture_desc">根據體制 + 廣度 + 旗幟，決定倉位與激進程度</p>
-                            </div>
-                        </div>
+                <!-- Latest News Verdicts -->
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="newspaper" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="teaser-news-title">最新裁決新聞</span>
+                        <a href="news.html" class="ml-auto text-[10px] text-zinc-500 hover:text-blue-400 transition-all">→</a>
                     </div>
-                    <!-- Regime -->
-                    <div>
-                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest mb-1" data-i18n="regime_label">市場體制</p>
-                        <p class="text-lg font-black" id="regime-text" style="color:var(--primary)">–</p>
-                        <p class="text-[9px] text-zinc-700 mt-0.5 font-mono" id="regime-sub"></p>
+                    <div id="news-verdicts-teaser" class="space-y-2"></div>
+                </div>
+
+                <!-- Momentum Top + Today's Focus Ticker -->
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 text-violet-400"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="teaser-momentum-title">動能榜 TOP 3</span>
+                        <a href="momentum.html" class="ml-auto text-[10px] text-zinc-500 hover:text-violet-400 transition-all">→</a>
                     </div>
-                    <!-- Exposure Ceiling -->
-                    <div>
-                        <p class="text-[9px] text-zinc-600 uppercase tracking-widest mb-1" data-i18n="exposure_label">最高倉位上限</p>
-                        <p class="text-2xl font-black text-orange-400" id="exposure-ceiling-val">–</p>
-                        <p class="text-[8px] text-zinc-700 mt-0.5" data-i18n="exposure_hint">各訊號建議最保守值</p>
-                    </div>
-                    <!-- Flags -->
-                    <div id="flags-compact" class="space-y-1.5 mt-auto"></div>
+                    <!-- M3: Today's Focus Ticker (cross-module intersection) -->
+                    <div id="focus-ticker-card" class="hidden mb-3"></div>
+                    <div id="momentum-teaser" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- Row 2: 5 Signal Angle Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="signal-angle-grid">
-                <!-- JS rendered -->
-            </div>
-
-            <!-- Row 3: Recent Analysis + Quick Launch -->
+            <!-- Layer 4: Recent Analysis + Quick Launch -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
                 <!-- Recent Analysis -->
@@ -159,7 +230,10 @@
                                 <span id="launch-status-icon" class="shrink-0"></span>
                                 <span class="text-xs font-mono truncate" id="launch-status-text">Starting...</span>
                             </div>
-                            <span class="text-[10px] font-mono text-zinc-500 shrink-0" id="launch-elapsed">00:00</span>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-[10px] font-mono text-zinc-500" id="launch-elapsed">00:00</span>
+                                <button id="launch-status-dismiss" class="text-zinc-500 hover:text-zinc-300 text-xs px-1" title="關閉">✕</button>
+                            </div>
                         </div>
                         <p id="launch-status-hint" class="text-[9px] text-zinc-500 mt-1"></p>
                     </div>

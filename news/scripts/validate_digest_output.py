@@ -71,6 +71,43 @@ def main():
 
     errors = []
 
+    # ── 0. Freshness gate — digest.json must be rewritten THIS run ────────
+    # Prevents Claude from "passing" validator by leaving previous digest
+    # untouched. Two-level check:
+    #  (a) Default: timestamp must be today + mtime < 2h (loose).
+    #  (b) Strict mode: env NEWS_RUN_START_MS set → mtime must be ≥ start.
+    #      Server-triggered runs always use strict mode. Manual invocations
+    #      (e.g. post-salvage) use loose mode.
+    import os as _os, time as _t
+    today_iso = datetime.now().strftime("%Y-%m-%d")
+    ts_str = (data.get("timestamp") or "").strip()
+    if not ts_str.startswith(today_iso):
+        fail([
+            f"FRESHNESS FAIL: digest.json timestamp={ts_str!r} is not from today ({today_iso}).",
+            "Claude must rewrite news_logs/YYYY-MM-DD_digest.json with today's Phase 4 output.",
+            "Check: Stage 1 triage + Stage 2 four-subagent debate must run before Phase 4.",
+        ])
+    mtime_sec = _os.path.getmtime(path)
+    mtime_age_sec = _t.time() - mtime_sec
+    run_start_ms = _os.environ.get("NEWS_RUN_START_MS")
+    if run_start_ms:
+        try:
+            run_start_sec = int(run_start_ms) / 1000.0
+            if mtime_sec < run_start_sec - 5:  # 5s grace
+                delta_min = (run_start_sec - mtime_sec) / 60
+                fail([
+                    f"STRICT FRESHNESS FAIL: digest.json mtime is {delta_min:.1f} min BEFORE run start.",
+                    "This run did not rewrite digest.json → Claude likely skipped Stage 1 or Stage 2.",
+                    f"Required: Stage 1 RSS triage (≥20 shallow) + Stage 2 four-subagent debate + Phase 4 Write.",
+                ])
+        except ValueError:
+            pass
+    elif mtime_age_sec > 7200:  # 2 hours loose mode
+        fail([
+            f"FRESHNESS FAIL: digest.json mtime is {int(mtime_age_sec/60)} min old (>2h).",
+            "The file must be written by this run, not a stale previous artifact.",
+        ])
+
     # ── 1. Legacy V1 shape ────────────────────────────────────────────────
     if "items" in data and "verdicts" not in data:
         fail([
@@ -142,13 +179,26 @@ def main():
                 errors.append(f"REVIEW verdict review_status must be 'reviewed' (got {dv.get('review_status')!r})")
 
     elif mode == "DIGEST":
-        # Common laziness: dropping shallow — check that stage1_count matches
+        # Shallow is capped at top 10 by |shallow_score| (see news_protocol_v2.md Phase 4).
+        # Rationale: 34KB JSON → 3-min Write + retry; 10KB JSON → <1-min Write.
+        # MD report's Shallow Digest may still show top 20 (reader-facing only).
         s1 = data.get("stage1_count", 0)
         s2 = data.get("stage2_count", 0)
-        if s1 > 0 and shallow_count + deep_count < s1:
-            errors.append(f"DIGEST dropped shallow verdicts: stage1_count={s1}, stage2_count={s2}, but verdicts[] only has {shallow_count + deep_count} entries — shallow not persisted?")
         if deep_count != s2:
             errors.append(f"DIGEST deep count mismatch: stage2_count={s2} but verdicts[].filter(deep) = {deep_count}")
+        expected_shallow = min(10, max(0, s1 - s2))
+        if shallow_count < expected_shallow:
+            errors.append(
+                f"DIGEST shallow under-cap: stage1_count={s1}, stage2_count={s2} "
+                f"→ expect ≥ min(10, s1−s2)={expected_shallow} shallow verdicts, got {shallow_count}. "
+                f"Write top-{expected_shallow} by |shallow_score|."
+            )
+        # Hard ceiling to enforce the cap (reject bloat that slows Write)
+        if shallow_count > 15:
+            errors.append(
+                f"DIGEST shallow over-cap: got {shallow_count} shallow verdicts, max allowed = 15 "
+                f"(soft target 10). Trim to top 10 by |shallow_score|."
+            )
 
     # ── 5. fanout_mode consistency (V2.1) ────────────────────────────────
     fm = data.get("fanout_mode")

@@ -106,21 +106,31 @@ def extract_from_log(log_path):
                 for c in msg.get("content", []) or []:
                     if isinstance(c, dict) and c.get("type") == "text":
                         t = c.get("text", "") or ""
-                        if "NEWS TRIAGE" in t or "Stage 1 Triage" in t:
-                            triage_text = t
+                        # Accept both verbose (NEWS TRIAGE / Stage 1 Triage)
+                        # and compact ("Stage 1 triage selects top ... n008 (...)")
+                        if ("NEWS TRIAGE" in t or "Stage 1 Triage" in t or
+                            ("triage" in t.lower() and re.search(r"n\d+\s*\(", t))):
+                            # Keep the one with most deep items
+                            if len(t) > len(triage_text):
+                                triage_text = t
     return agents, triage_text
 
 
 def parse_triage(text):
-    """Extract deep-promoted items from the Stage 1 triage table.
-    Returns list of dicts: {news_id, shallow_score, headline_short, news_type, binary}."""
+    """Extract deep-promoted items from the Stage 1 triage output.
+    Supports two formats:
+      (A) Verbose table format (original):
+          ║  ✅ DEEP   n009  [BINARY -3.5]  Hormuz traffic halts 48h  geopolitical║
+      (B) Compact one-liner format (non-interactive mode):
+          Stage 1 triage selects top 5 by |shallow_score|:
+          n008 (Iran/Hormuz -4.0), n036 (QXO+TopBuild +3.2), n054 (Q1 earnings strong +3.0), ...
+    News_type defaults to 'default' when not extractable; arbiter will use equal weights."""
     items = []
-    # Examples of the triage line format in assistant text:
-    #   ║  ✅ DEEP   n009  [BINARY -3.5]  Hormuz traffic halts 48h  geopolitical║
-    pattern = re.compile(
+    # (A) Verbose table
+    table_re = re.compile(
         r"✅\s*DEEP\s+(n\d+)\s+\[(BINARY\s+)?([-+]?\d+(?:\.\d+)?)\]\s+(.+?)\s+(\w+)\s*║"
     )
-    for m in pattern.finditer(text):
+    for m in table_re.finditer(text):
         items.append({
             "news_id":        m.group(1),
             "binary":         bool(m.group(2)),
@@ -128,7 +138,34 @@ def parse_triage(text):
             "headline_short": m.group(4).strip(),
             "news_type":      m.group(5).strip().lower(),
         })
+    if items:
+        return items
+
+    # (B) Compact one-liner: "n008 (Iran/Hormuz -4.0), n036 (QXO+TopBuild +3.2), ..."
+    compact_re = re.compile(r"(n\d+)\s*\(([^()]+?)\s+([-+]?\d+(?:\.\d+)?)\)")
+    for m in compact_re.finditer(text):
+        short = m.group(2).strip()
+        nt = _infer_news_type(short)
+        score = float(m.group(3))
+        items.append({
+            "news_id":        m.group(1),
+            "binary":         "iran" in short.lower() or "hormuz" in short.lower() or abs(score) >= 3.5,
+            "shallow_score":  score,
+            "headline_short": short,
+            "news_type":      nt,
+        })
     return items
+
+
+def _infer_news_type(short):
+    """Heuristic: guess news_type from short headline keywords."""
+    s = (short or "").lower()
+    if any(k in s for k in ("iran","hormuz","taiwan","ceasefire","tariff","sanction","war","geopol")): return "geopolitical"
+    if any(k in s for k in ("earnings","q1","q2","q3","q4","guidance","revenue")):                     return "earnings"
+    if any(k in s for k in ("fomc","fed","rate","cpi","nfp","gdp","inflation")):                      return "macro_data"
+    if any(k in s for k in ("m&a","acquisition","merger","ipo","buyout","spinoff")):                  return "corporate"
+    if any(k in s for k in ("rally","record","vix","fear","greed","sentiment","7,000","7000")):       return "sentiment"
+    return "default"
 
 
 def load_raw(today_str):

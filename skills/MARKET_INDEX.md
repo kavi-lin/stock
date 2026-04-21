@@ -12,12 +12,13 @@
 
 ---
 
-## 🇺🇸 US-Equity (9 skills — hard-coded to US market)
+## 🇺🇸 US-Equity (10 skills — hard-coded to US market)
 
 | Skill | Scope | Data sources | Used by |
 |---|---|---|---|
 | `us-stock-analysis` | single-ticker | yfinance, FMP | investment (phase-level) |
 | `short-contrarian-analyst` | single-ticker | FMP, yfinance | investment Phase 2（第 5 agent, Burry） |
+| `earnings-valuation-forecaster` | single-ticker | FMP (/stable) | 獨立使用（未整合至 protocol）— 12M 目標價 scenario + 敏感度 grid |
 | `sector-analyst` | sector-level | finvizfinance, yfinance | sector protocol core |
 | `market-breadth-analyzer` | market-level | TraderMonty CSV | sector Phase 0 層 A |
 | `market-sentiment-analyzer` | market-level | yfinance (VIX/SPY), CNN F&G | investment Phase 2 fallback, sector Phase 3 |

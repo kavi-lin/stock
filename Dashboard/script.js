@@ -21,11 +21,23 @@ function applyTranslations() {
     const el = document.querySelector(`[data-i18n="${k}"]`);
     if (el && o[k]) el.textContent = o[k];
   });
+  // Layer 3 teaser titles
+  const setText = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  setText('teaser-hot-title',      o.teaser_hot);
+  setText('teaser-news-title',     o.teaser_news);
+  setText('teaser-momentum-title', o.teaser_momentum);
+  // Layer 1 today_verdict 3-col titles (shared strings from sector_page namespace)
+  const sp = t.sector_page || {};
+  setText('tv-takeaways-title', sp.tv_takeaways_title);
+  setText('tv-actions-title',   sp.tv_actions_title);
+  setText('tv-watch-title',     sp.tv_watch_title);
+  setText('tv-fallback-title',  sp.handoff_title);
 }
 
 // ── i18n helper ───────────────────────────────────────────────────────────
 function sig() { return window.i18n?.[UI.currentLang]?.signals || {}; }
 function ov()  { return window.i18n?.[UI.currentLang]?.overview || {}; }
+function tvT() { return window.i18n?.[UI.currentLang]?.sector_page || {}; }
 
 // ── Composite Signal Score ─────────────────────────────────────────────────
 function computeConviction(data) {
@@ -113,75 +125,281 @@ function computeConviction(data) {
   };
 }
 
-// ── Signal Angle Cards (Row 2) ─────────────────────────────────────────────
-function renderSignalAngles(data) {
-  const grid = document.getElementById('signal-angle-grid');
-  if (!grid) return;
-  const ftd = data.ftd || {}, br = data.breadth || {}, mkt = data.market || {}, mt = data.market_top || {};
-  const fg = mkt.fear_greed ?? 50;
-  const s  = sig();
-  const fgRaw    = fg < 25 ? 'Extreme Fear' : fg < 45 ? 'Fear' : fg < 55 ? 'Neutral' : fg < 75 ? 'Greed' : 'Extreme Greed';
-  const fgMap2   = s.fg_labels || {};
-  const fgLabel  = fgMap2[fgRaw] || fgRaw;
-  const fgSuffix = fgMap2.contrarian_suffix || ' (Ctr)';
-  const fgColor  = fg < 25 ? '#22c55e' : fg < 45 ? '#86efac' : fg < 55 ? '#eab308' : fg < 75 ? '#f97316' : '#ef4444';
+// Today's Verdict hero is a shared component — see components.js Components.renderTodayVerdict
 
-  const ftdStates2   = s.ftd_states   || {};
-  const topZones     = s.top_zones    || {};
-  const uptrendLbls  = s.uptrend_labels || {};
-  const cards        = s.cards         || {};
-  const topZoneClean = (mt.zone || '').replace(/\(.*\)/, '').trim();
-  const topColor     = (mt.composite_score ?? 0) <= 20 ? '#22c55e' : (mt.composite_score ?? 0) <= 40 ? '#eab308'
-                     : (mt.composite_score ?? 0) <= 60 ? '#f97316' : '#ef4444';
-  const uptrendRatio = mkt.uptrend_ratio ?? 0;
+// ── 3-signal mini gauge (bottom of hero) ──────────────────────────────────
+function renderThreeSignalMini(data) {
+  const el = document.getElementById('three-signal-mini');
+  if (!el) return;
+  const br  = data.breadth    || {};
+  const ftd = data.ftd        || {};
+  const mt  = data.market_top || {};
+  const mkt = data.market     || {};
 
-  const angles = [
-    {
-      icon: 'signal', label: cards.ftd || 'FTD Signal', link: 'sector.html',
-      val: ftd.quality_score != null ? ftd.quality_score : '–',
-      sub: ftdStates2[ftd.state] || ftdStates2.default || 'No Signal',
-      color: ftd.state === 'FTD_CONFIRMED' && !ftd.invalidated ? '#22c55e'
-           : ftd.state === 'FTD_WINDOW' || ftd.state === 'RALLY_ATTEMPT' ? '#eab308' : '#ef4444',
-      bar: ftd.quality_score ?? 0,
-    },
-    {
-      icon: 'alert-triangle', label: cards.top_risk || 'Top Risk', link: 'sector.html',
-      val: mt.composite_score != null ? mt.composite_score : '–',
-      sub: topZones[topZoneClean] || topZoneClean || '–',
-      color: topColor,
-      bar: mt.composite_score ?? 0,
-    },
-    {
-      icon: 'heart-pulse', label: cards.sentiment || 'Sentiment', link: 'news.html',
-      val: fg,
-      sub: fgLabel + fgSuffix,
-      color: fgColor,
-      bar: 100 - fg,
-    },
-    {
-      icon: 'trending-up', label: cards.uptrend || 'Uptrend %', link: 'sector.html',
-      val: Math.round(uptrendRatio * 100) + '%',
-      sub: uptrendRatio >= 0.6 ? (uptrendLbls.healthy || 'Healthy')
-         : uptrendRatio >= 0.4 ? (uptrendLbls.neutral || 'Neutral')
-                                : (uptrendLbls.weak    || 'Weak'),
-      color: uptrendRatio >= 0.6 ? '#22c55e' : uptrendRatio >= 0.4 ? '#eab308' : '#ef4444',
-      bar: Math.round(uptrendRatio * 100),
-    },
-  ];
+  const pm = s => { if (!s) return null; const n = String(s).replace(/%/g,'').split('-').map(Number).filter(x => !isNaN(x)); return n.length === 2 ? (n[0]+n[1])/2 : n.length === 1 ? n[0] : null; };
+  const mids = [br.exposure_ceiling, ftd.exposure_range, mt.risk_budget].map(pm).filter(v => v !== null);
+  const synth = mids.length ? Math.min(...mids) : null;
+  const synthLabel = synth !== null ? `${Math.round(synth)}%` : '—';
+  const synthColor = synth === null ? '#71717a' : synth >= 75 ? '#22c55e' : synth >= 50 ? '#f59e0b' : '#ef4444';
 
-  grid.innerHTML = angles.map(a => `
-    <a href="${a.link}" class="glass-card p-4 flex flex-col gap-2 hover:border-zinc-600/50 transition-all cursor-pointer group">
-      <div class="flex items-center justify-between">
-        <span class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">${a.label}</span>
-        <i data-lucide="${a.icon}" class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors"></i>
+  const zoneCol = (z) => {
+    if (!z) return '#71717a'; const zl = z.toLowerCase();
+    if (zl.includes('strong') || zl.includes('healthy') || zl.includes('normal') || zl.includes('early')) return '#22c55e';
+    if (zl.includes('weak')   || zl.includes('elevat')  || zl.includes('high'))    return '#f59e0b';
+    if (zl.includes('crit')   || zl.includes('top'))    return '#ef4444';
+    return '#71717a';
+  };
+  const ftdCol = (st) => { const s = String(st||'').toUpperCase();
+    if (s.includes('CONFIRMED')) return '#22c55e';
+    if (s.includes('WINDOW'))    return '#3b82f6';
+    if (s.includes('RALLY'))     return '#f59e0b';
+    if (s.includes('INVALID') || s.includes('CORRECTION')) return '#ef4444';
+    return '#71717a'; };
+
+  const tr = tvT();
+  el.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+      <div class="flex flex-col gap-0.5">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_breadth || 'Breadth'}</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl font-black" style="color:${zoneCol(br.zone)}">${br.score ?? '—'}</span>
+          <span class="text-[10px] text-zinc-500 truncate">${br.zone || ''}</span>
+        </div>
       </div>
-      <div class="text-2xl font-black tracking-tighter leading-none" style="color:${a.color}">${a.val}</div>
-      <div class="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
-        <div class="h-1.5 rounded-full transition-all duration-700" style="width:${Math.min(100, a.bar)}%;background-color:${a.color}"></div>
+      <div class="flex flex-col gap-0.5">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_ftd || 'FTD'}</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl font-black" style="color:${ftdCol(ftd.state)}">${ftd.quality_score ?? '—'}</span>
+          <span class="text-[10px] text-zinc-500 truncate">${(ftd.state||'').replace(/_/g,' ')}</span>
+        </div>
       </div>
-      <div class="text-[9px] font-bold uppercase tracking-wide" style="color:${a.color}">${a.sub}</div>
-    </a>
+      <div class="flex flex-col gap-0.5">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_top || 'Market Top'}</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl font-black" style="color:${zoneCol(mt.zone)}">${mt.composite_score ?? '—'}</span>
+          <span class="text-[10px] text-zinc-500 truncate">${(mt.zone||'').replace(/\(.*\)/,'').trim()}</span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-0.5 items-end md:border-l md:border-zinc-800 md:pl-3">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.synthesized_ceiling || 'Synthesized Ceiling'}</span>
+        <span class="text-xl font-black" style="color:${synthColor}">${synthLabel}</span>
+      </div>
+    </div>`;
+}
+
+// ── Layer 2a: Binary Risk 48h banner ──────────────────────────────────────
+// Translate sector keys (Energy, Consumer_Discretionary, …) into zh/en.
+const SECTOR_I18N = {
+  zh: {
+    Energy:'能源', Industrials:'工業', Financials:'金融', Utilities:'公用事業',
+    Technology:'科技', Materials:'基礎材料', Healthcare:'醫療保健',
+    Real_Estate:'房地產', Communication:'通訊服務', Communication_Services:'通訊服務',
+    Consumer_Staples:'必需消費', Consumer_Discretionary:'非必需消費', Consumer_Cyclical:'非必需消費',
+    Tanker_Shipping:'油輪運輸', Airlines:'航空', Chemicals:'化工', Transports:'運輸',
+  },
+  en: {
+    Energy:'Energy', Industrials:'Industrials', Financials:'Financials', Utilities:'Utilities',
+    Technology:'Technology', Materials:'Materials', Healthcare:'Healthcare',
+    Real_Estate:'Real Estate', Communication:'Communication', Communication_Services:'Communication',
+    Consumer_Staples:'Cons. Staples', Consumer_Discretionary:'Cons. Discr.', Consumer_Cyclical:'Cons. Discr.',
+    Tanker_Shipping:'Tankers', Airlines:'Airlines', Chemicals:'Chemicals', Transports:'Transports',
+  },
+};
+function sectorLabelIndex(key) {
+  const table = SECTOR_I18N[UI.currentLang] || SECTOR_I18N.en;
+  return table[key] || String(key).replace(/_/g, ' ');
+}
+
+function renderBinaryAlertIndex(risks) {
+  const urgent = (risks || []).filter(r => r.within_48h);
+  const section = document.getElementById('binary-alert-section');
+  if (!section) return;
+  if (!urgent.length) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+
+  const isZh = UI.currentLang === 'zh';
+  const sp = window.i18n?.[UI.currentLang]?.sector_page || {};
+  // Apply translated header strings
+  const titleEl = section.querySelector('[style*="color:#ef4444"]');
+  if (titleEl) titleEl.textContent = sp.binary_alert || '⚡ Binary Risk Within 48h';
+  const deratedEl = document.getElementById('binary-alert-derated');
+  if (deratedEl) deratedEl.textContent = isZh ? '自動降權 ×0.70' : 'auto-derated ×0.70';
+
+  const dateLabel = (r) => r.days_until === 0 ? (sp.binary_today    || (isZh ? '今日' : 'TODAY'))
+                         : r.days_until === 1 ? (sp.binary_tomorrow || (isZh ? '明日' : 'TOMORROW'))
+                         : (r.date || '');
+  const container = document.getElementById('binary-alert-items');
+  container.innerHTML = urgent.map(r => `
+    <div class="flex items-start gap-3">
+      <span class="binary-date-pill shrink-0 mt-0.5">${dateLabel(r)}</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-[12px] font-semibold leading-snug" style="color:var(--text-main)">${r.event}</div>
+        ${r.affected_sectors?.length ? `
+        <div class="flex flex-wrap gap-1 mt-1.5">
+          ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${sectorLabelIndex(s)}</span>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>
   `).join('');
+}
+
+// ── Layer 2b: Warning Flags strip ─────────────────────────────────────────
+function renderWarningFlagsIndex(market) {
+  const row = document.getElementById('warning-flags-row');
+  if (!row) return;
+  row.innerHTML = '';
+  const flags = market?.warning_flags || [];
+  if (!flags.length) return;
+  const tw = window.i18n?.[UI.currentLang]?.warnings?.flags || {};
+  flags.forEach(f => {
+    const label = tw[f] || f.replace(/_/g, ' ');
+    const isCrit = /Death_Cross|Extreme_Fear|Critical|Bearish/i.test(f);
+    const cls = isCrit ? 'bg-red-500/10 text-red-400 border-red-500/25'
+                       : 'bg-yellow-500/8 text-yellow-500 border-yellow-500/20';
+    row.insertAdjacentHTML('beforeend',
+      `<span class="text-[10px] font-bold px-2 py-1 rounded border ${cls}">⚠ ${label}</span>`);
+  });
+}
+
+// ── Layer 3a: HOT Sectors Teaser (top 3) ──────────────────────────────────
+const SECTOR_TO_GICS_IDX = {
+  'Industrials':'Industrials', 'Financials':'Financials', 'Utilities':'Utilities',
+  'Consumer_Discretionary':'Consumer Discretionary', 'Technology':'Information Technology',
+  'Materials':'Materials', 'Healthcare':'Health Care', 'Real_Estate':'Real Estate',
+  'Communication':'Communication Services', 'Communication_Services':'Communication Services',
+  'Consumer_Staples':'Consumer Staples', 'Energy':'Energy',
+};
+
+function renderHotSectorsTeaser(sectors) {
+  const el = document.getElementById('hot-sectors-teaser');
+  if (!el) return;
+  const top = (sectors || []).slice().sort((a,b) => (b.score||0) - (a.score||0)).slice(0, 3);
+  if (!top.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
+  const VC_COL = { HOT:'#22c55e', WARM:'#eab308', COLD:'#ef4444', AVOID:'#71717a' };
+  el.innerHTML = top.map(s => {
+    const col = VC_COL[s.verdict] || '#71717a';
+    const gics = SECTOR_TO_GICS_IDX[s.name] || '';
+    const href = gics ? `momentum.html?sector=${encodeURIComponent(gics)}` : 'sector.html';
+    return `<a href="${href}" class="teaser-row block no-underline">
+      <span class="text-sm font-black tracking-tight shrink-0" style="color:${col}">${s.proxy_etf || s.name}</span>
+      <span class="text-[10px] text-zinc-500 truncate flex-1">${sectorLabelIndex(s.name || '')}</span>
+      <span class="text-[10px] font-black font-mono shrink-0" style="color:${col}">${s.score ?? '—'}</span>
+      <span class="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0" style="background:${col}18;color:${col}">${s.verdict}</span>
+    </a>`;
+  }).join('');
+}
+
+// ── Layer 3b: Latest News Verdicts Teaser ─────────────────────────────────
+// bridge.py exposes news[] with fields: impact (bullish|bearish|binary|neutral),
+// score (-5..+5), depth, review_status, headline_zh, etc. We show top 3
+// reviewed deep verdicts ordered by |score| (most impactful first).
+function renderNewsVerdictsTeaser(news) {
+  const el = document.getElementById('news-verdicts-teaser');
+  if (!el) return;
+  const pool = (news || []).filter(n =>
+    (n.depth === 'deep' || n.depth == null) &&
+    (n.review_status === 'reviewed' || !n.review_status) &&
+    n.impact
+  );
+  pool.sort((a, b) => Math.abs(b.score || 0) - Math.abs(a.score || 0));
+  const top = pool.slice(0, 3);
+  if (!top.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
+  const ICOL = { bullish:'#22c55e', bearish:'#ef4444', binary:'#f97316', neutral:'#a1a1aa' };
+  const isZh = UI.currentLang === 'zh';
+  const impactLbl = { bullish: isZh?'利多':'BULLISH', bearish: isZh?'利空':'BEARISH', binary: isZh?'變數':'BINARY', neutral: isZh?'中性':'NEUTRAL' };
+  el.innerHTML = top.map(n => {
+    const key = String(n.impact || 'neutral').toLowerCase();
+    const col = ICOL[key] || '#a1a1aa';
+    const scoreTxt = n.score != null ? `${n.score >= 0 ? '+' : ''}${Number(n.score).toFixed(1)}` : '';
+    const label = impactLbl[key] || key.toUpperCase();
+    return `<a href="news.html" class="teaser-row block no-underline">
+      <span class="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0" style="background:${col}18;color:${col};border:1px solid ${col}40">${label}</span>
+      <span class="text-[10px] font-mono shrink-0" style="color:${col}">${scoreTxt}</span>
+      <span class="text-[10px] truncate flex-1" style="color:var(--text-muted)">${n.headline_zh || n.headline}</span>
+    </a>`;
+  }).join('');
+}
+
+// ── Layer 3c: Momentum Top 3 + M3 Focus Ticker ────────────────────────────
+function renderMomentumTeaser(momentum, crossSet) {
+  const el = document.getElementById('momentum-teaser');
+  if (!el) return;
+  const rows = ((momentum || {}).rows || []).slice(0, 3);
+  if (!rows.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
+  el.innerHTML = rows.map(r => {
+    const labelColor = r.label === 'STRONGLY_BULLISH' ? '#22c55e' :
+                       r.label === 'BULLISH' ? '#86efac' :
+                       r.label === 'WEAK' ? '#fbbf24' :
+                       r.label === 'BEARISH' ? '#ef4444' : '#a1a1aa';
+    const star = crossSet && crossSet.has(r.ticker) ? `<span class="cross-signal-star" title="雙軍同向（動能榜 + 最近 BUY/EXECUTE）">⭐</span>` : '';
+    return `<a href="momentum.html" class="teaser-row block no-underline">
+      <span class="text-sm font-black tracking-tight shrink-0" style="color:var(--text-card-title)">${r.ticker}</span>${star}
+      <span class="text-[10px] text-zinc-500 font-mono shrink-0">$${r.price ? r.price.toFixed(2) : '—'}</span>
+      <span class="text-[10px] font-mono shrink-0 ml-auto" style="color:${labelColor}">${r.score ?? '—'}</span>
+      <span class="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0" style="background:${labelColor}18;color:${labelColor}">${r.stage ? r.stage.split(' ')[0] + ' ' + (r.stage.split(' ')[1]||'') : '—'}</span>
+    </a>`;
+  }).join('');
+}
+
+// ── M3: Today's Focus Ticker (cross-module intersection) ──────────────────
+// Find a ticker that: (1) sits in a sector_actions.overweight sector
+// AND (2) is in momentum top N AND (3) has a BULLISH/STRONGLY_BULLISH label
+function renderFocusTicker(data) {
+  const el = document.getElementById('focus-ticker-card');
+  if (!el) { return; }
+  const tv = data.market?.today_verdict;
+  const moms = (data.momentum_screen?.rows) || [];
+  if (!tv || !moms.length) { el.classList.add('hidden'); return; }
+
+  const overweightSectors = new Set(
+    (tv.sector_actions || [])
+      .filter(a => a.action === 'overweight')
+      .map(a => SECTOR_TO_GICS_IDX[a.sector] || '')
+      .filter(Boolean)
+  );
+  if (!overweightSectors.size) { el.classList.add('hidden'); return; }
+
+  const candidates = moms
+    .filter(r => overweightSectors.has(r.sector))
+    .filter(r => r.label === 'STRONGLY_BULLISH' || r.label === 'BULLISH')
+    .slice(0, 20);
+  if (!candidates.length) { el.classList.add('hidden'); return; }
+
+  const pick = candidates.reduce((best, r) => (r.score || 0) > (best.score || 0) ? r : best, candidates[0]);
+
+  const isZh = UI.currentLang === 'zh';
+  const sectorName = pick.sector || '';
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="focus-ticker-card">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-[9px] font-black uppercase tracking-widest" style="color:#a78bfa">✨ ${isZh ? '今日焦點' : 'TODAY FOCUS'}</span>
+        <span class="text-[9px] text-zinc-500">${isZh ? '三軍同向（AI verdict + 產業 + 動能）' : 'Tri-signal alignment'}</span>
+      </div>
+      <div class="flex items-baseline gap-3 flex-wrap">
+        <span class="text-lg font-black tracking-tight" style="color:var(--text-card-title)">${pick.ticker}</span>
+        <span class="text-[10px] text-zinc-500 font-mono">$${pick.price ? pick.price.toFixed(2) : '—'}</span>
+        <span class="text-[10px] font-mono" style="color:#a78bfa">score ${pick.score ?? '—'}</span>
+        <button onclick="window.AnalyzeQueue && window.AnalyzeQueue.enqueue('${pick.ticker}')"
+                class="ml-auto text-[9px] font-black px-2 py-1 rounded" style="background:#a78bfa;color:#fff">
+          ${isZh ? '加入佇列' : 'ENQUEUE'}
+        </button>
+      </div>
+      <div class="text-[10px] text-zinc-500 mt-1 leading-snug">${sectorName} · ${isZh ? '來自 AI overweight 產業的動能領先股' : 'Momentum leader in an AI-overweight sector'}</div>
+    </div>`;
+}
+
+// ── M3: Cross-signal intersection set (momentum top 30 ∩ recent BUY/EXECUTE)
+function computeCrossSignalSet(data) {
+  const recentBuys = new Set(
+    (data.recent_analysis || [])
+      .filter(a => a.decision === 'BUY' || a.decision === 'EXECUTE')
+      .map(a => a.ticker)
+  );
+  const momTop30 = new Set(
+    ((data.momentum_screen || {}).rows || []).slice(0, 30).map(r => r.ticker)
+  );
+  return new Set([...recentBuys].filter(t => momTop30.has(t)));
 }
 
 // ── Dashboard Update ───────────────────────────────────────────────────────
@@ -193,89 +411,42 @@ async function updateDashboard() {
   try {
     data = await DataStore.get(true);
 
-    // 1. Composite Conviction Hero
-    const conv      = computeConviction(data);
-    const scoreEl   = document.getElementById('composite-score');
-    const barEl     = document.getElementById('composite-bar');
-    const labelEl   = document.getElementById('composite-label');
-    const summaryEl = document.getElementById('conviction-summary');
-    const compBars  = document.getElementById('component-bars');
+    // Layer 1: Today's AI Verdict hero + 3-signal mini gauge
+    Components.renderTodayVerdict(data.market);
+    renderThreeSignalMini(data);
 
-    if (scoreEl)   { scoreEl.textContent = conv.score; scoreEl.style.color = conv.color; }
-    if (barEl)     { barEl.style.width = conv.score + '%'; barEl.style.backgroundColor = conv.color; }
-    if (labelEl)   { labelEl.textContent = conv.label; labelEl.style.color = conv.color; }
-    if (summaryEl) summaryEl.textContent = conv.summary;
+    // Layer 2: Binary risk + warning flags
+    renderBinaryAlertIndex(data.binary_risks);
+    renderWarningFlagsIndex(data.market);
 
-    if (compBars) {
-      const comp2 = sig().components || {};
-      const wt = {
-        [comp2.ftd       || 'FTD Signal']:      35,
-        [comp2.breadth   || 'Market Breadth']:  25,
-        [comp2.sentiment || 'Sentiment (Ctr)']: 15,
-        [comp2.top_risk  || 'Top Risk (Inv)']:  15,
-        [comp2.uptrend   || 'Uptrend Ratio']:   10,
-      };
-      compBars.innerHTML = conv.components.map(c => {
-        const col = c.bull ? '#22c55e' : (c.pct >= 40 ? '#eab308' : '#ef4444');
-        return `
-        <div class="flex items-center gap-3">
-          <div class="w-28 shrink-0 flex items-center gap-1">
-            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wide truncate">${c.key}</span>
-            <span class="text-[8px] text-zinc-700 shrink-0">${wt[c.key] || 0}%</span>
-          </div>
-          <div class="flex-1 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800">
-            <div class="h-1.5 rounded-full transition-all duration-700" style="width:${Math.min(100,c.pct)}%;background-color:${col}"></div>
-          </div>
-          <span class="text-[10px] font-black font-mono w-7 text-right shrink-0" style="color:${col}">${c.raw}</span>
-          <span class="text-[9px] text-zinc-600 w-24 truncate shrink-0">${c.tag}</span>
-        </div>`;
-      }).join('');
-    }
+    // Layer 3: Deep-dive teasers + M3 focus ticker
+    const crossSet = computeCrossSignalSet(data);
+    renderHotSectorsTeaser(data.sectors);
+    renderNewsVerdictsTeaser(data.news);
+    renderMomentumTeaser(data.momentum_screen, crossSet);
+    renderFocusTicker(data);
 
-    // 2. Verdict Card
-    const regimeEl = document.getElementById('regime-text');
-    const expEl    = document.getElementById('exposure-ceiling-val');
-    const flagsEl  = document.getElementById('flags-compact');
-
-    if (regimeEl) {
-      const regimeKey  = data.market?.regime || '';
-      const regimeMap  = sig().regime || {};
-      const rCol       = { RISK_ON: '#22c55e', RISK_OFF: '#ef4444', VOLATILE: '#eab308', NEUTRAL: '#71717a' };
-      regimeEl.textContent = regimeMap[regimeKey] || regimeKey || '–';
-      regimeEl.style.color = rCol[regimeKey] || 'var(--primary)';
-      const regimeSubEl = document.getElementById('regime-sub');
-      if (regimeSubEl) regimeSubEl.textContent = regimeKey;
-    }
-    const expOptions = [data.ftd?.exposure_range, data.breadth?.exposure_ceiling, data.market?.exposure_ceiling].filter(Boolean);
-    if (expEl) expEl.textContent = expOptions[0] || '–';
-
-    if (flagsEl) {
-      const tw    = window.i18n?.[UI.currentLang]?.warnings || {};
-      const flags = data.market?.warning_flags || [];
-      if (flags.length) {
-        flagsEl.innerHTML =
-          `<p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-             <i data-lucide="alert-triangle" class="w-3 h-3 text-yellow-500"></i> ${flags.length} ${ov().flags_active || 'Flag(s) Active'}
-           </p>` +
-          flags.slice(0, 3).map(f => Components.flagBadge(f, tw.flags)).join('');
-      } else {
-        flagsEl.innerHTML = `<div class="text-[9px] font-bold text-emerald-500 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> ${ov().no_flags || 'No Active Flags'}</div>`;
-      }
-    }
-
-    // 3. Signal Angle Cards
-    renderSignalAngles(data);
-
-    // 4. Recent Analysis (compact list)
+    // Layer 4: Recent Analysis (compact list) — M3 ⭐ badge attached via crossSet
     const condensedGrid = document.getElementById('audit-grid-condensed');
     const fullGrid      = document.getElementById('audit-grid-full');
+    const decorate = (card, ticker) => {
+      if (!crossSet.has(ticker)) return card;
+      const title = card.querySelector('.font-black') || card.querySelector('span');
+      if (title && !title.querySelector('.cross-signal-star')) {
+        title.insertAdjacentHTML('afterend',
+          ` <span class="cross-signal-star" title="雙軍同向（動能榜 Top 30 + BUY/EXECUTE）">⭐</span>`);
+      }
+      return card;
+    };
     if (condensedGrid) {
       condensedGrid.innerHTML = '';
-      data.recent_analysis?.slice(0, 3).forEach(item => condensedGrid.appendChild(Components.renderAuditCard(item, true)));
+      data.recent_analysis?.slice(0, 3).forEach(item =>
+        condensedGrid.appendChild(decorate(Components.renderAuditCard(item, true), item.ticker)));
     }
     if (fullGrid) {
       fullGrid.innerHTML = '';
-      data.recent_analysis?.forEach(item => fullGrid.appendChild(Components.renderAuditCard(item, false)));
+      data.recent_analysis?.forEach(item =>
+        fullGrid.appendChild(decorate(Components.renderAuditCard(item, false), item.ticker)));
     }
 
   } catch (error) {
@@ -345,7 +516,7 @@ async function pollLaunchStatus() {
       if (_launchPollTimer) { clearInterval(_launchPollTimer); _launchPollTimer = null; }
       if (s.status === 'done') {
         setLaunchStatus('done', isZh ? '分析完成' : 'Done');
-        setTimeout(() => document.getElementById('launch-status')?.classList.add('hidden'), 8000);
+        // Banner stays up — user dismisses via the ✕ (#launch-status-dismiss) button.
       } else if (s.status === 'error' || s.status === 'cancelled') {
         setLaunchStatus('error', s.error || s.status);
       }
@@ -390,6 +561,9 @@ async function launchAnalysis() {
 
 document.getElementById('launch-btn')?.addEventListener('click', launchAnalysis);
 document.getElementById('ticker-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') launchAnalysis(); });
+document.getElementById('launch-status-dismiss')?.addEventListener('click', () => {
+  document.getElementById('launch-status')?.classList.add('hidden');
+});
 
 // Resume banner on page load if a protocol is already running.
 // For invest runs the analyze-queue widget handles the display; skip the banner.
@@ -563,12 +737,53 @@ document.getElementById('preflight-run-free')?.addEventListener('click', async (
       try {
         const r = await fetch('/api/preflight/status');
         const s = await r.json();
-        if (s.status !== 'running') {
-          clearInterval(pollId);
-          loadPreflightData(); // refresh the checklist
-          updateDashboard();   // refresh main dashboard
-          UI.showToast(isZh ? '免費項目更新完成' : 'Free caches updated', 'info', 4000);
+        // Live progress indicator during run
+        if (s.status === 'running') {
+          body.innerHTML =
+            `<div class="text-center py-8 text-blue-400 text-sm">
+               ${isZh ? '正在更新免費 cache...' : 'Updating free caches...'}
+               <div class="text-[11px] text-zinc-500 mt-2 font-mono">
+                 ${s.items_done || 0} / ${s.items_total || 0}
+               </div>
+             </div>`;
+          return;
         }
+        clearInterval(pollId);
+        updateDashboard();
+        loadPreflightData();
+        // After checklist re-renders, PREPEND an error panel if any script failed.
+        // This stays visible until user closes the modal (no auto-dismiss).
+        setTimeout(() => {
+          const errs = Array.isArray(s.errors) ? s.errors : [];
+          if (!errs.length) {
+            UI.showToast(isZh ? '✅ 免費項目更新完成' : '✅ Free caches updated', 'success', 4000);
+            return;
+          }
+          const items = errs.map(e => {
+            if (typeof e === 'string') {
+              return `<div class="text-red-400 text-xs font-mono">${UI.escapeHTML(e)}</div>`;
+            }
+            const header = `❌ ${e.key || '?'} (rc=${e.rc != null ? e.rc : 'n/a'})`;
+            const std = e.stderr_tail || e.error || '';
+            const out = e.stdout_tail || '';
+            return `
+              <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                <div class="text-red-400 font-bold text-xs mb-1">${UI.escapeHTML(header)}</div>
+                ${std ? `<pre class="text-red-300 whitespace-pre-wrap text-[10px] font-mono leading-snug">${UI.escapeHTML(std)}</pre>` : ''}
+                ${out ? `<details class="mt-1"><summary class="text-[10px] text-zinc-400 cursor-pointer">stdout tail</summary><pre class="text-zinc-500 whitespace-pre-wrap text-[10px] font-mono mt-1">${UI.escapeHTML(out)}</pre></details>` : ''}
+              </div>`;
+          }).join('');
+          const banner = `
+            <div class="mb-3 space-y-2">
+              <div class="text-xs font-bold text-red-400">
+                ${isZh ? `⚠ ${errs.length} 個項目更新失敗（手動關閉時消失，不會自動隱藏）` : `⚠ ${errs.length} preflight item(s) failed (sticky until you close)`}
+              </div>
+              ${items}
+            </div>`;
+          const bd = document.getElementById('preflight-body');
+          if (bd) bd.insertAdjacentHTML('afterbegin', banner);
+          UI.showToast(isZh ? `⚠ ${errs.length} 個項目更新失敗，詳情見 Modal` : `⚠ ${errs.length} failed — see modal`, 'error', 8000);
+        }, 200);
       } catch (e) { clearInterval(pollId); }
     }, 2000);
     body.innerHTML = `<div class="text-center py-8 animate-pulse text-blue-400 text-sm">${isZh ? '正在更新免費 cache...' : 'Updating free caches...'}</div>`;

@@ -286,6 +286,15 @@ const i18n = {
       no_flags:            "無活躍風險旗幟",
       flags_active:        "個風險旗幟啟動",
       backtest_pl:         "歷史回測",
+      // Layer 3 teaser titles (index.html)
+      teaser_hot:          "熱門產業 TOP 3",
+      teaser_news:         "最新裁決新聞",
+      teaser_momentum:     "動能榜 TOP 3",
+      focus_ticker_title:  "✨ 今日焦點",
+      focus_ticker_desc:   "三軍同向（AI verdict + 產業 + 動能）",
+      focus_ticker_reason: "來自 AI overweight 產業的動能領先股",
+      focus_ticker_cta:    "加入佇列",
+      cross_star_tooltip:  "雙軍同向（動能榜 Top 30 + BUY/EXECUTE）",
     },
 
     // ── Signals / Conviction (index.html dynamic) ─────────────────
@@ -892,6 +901,14 @@ const i18n = {
       no_flags:            "No Active Flags",
       flags_active:        "Flag(s) Active",
       backtest_pl:         "Backtest P/L",
+      teaser_hot:          "HOT Sectors TOP 3",
+      teaser_news:         "Latest News Verdicts",
+      teaser_momentum:     "Momentum TOP 3",
+      focus_ticker_title:  "✨ TODAY FOCUS",
+      focus_ticker_desc:   "Tri-signal alignment (AI verdict + sector + momentum)",
+      focus_ticker_reason: "Momentum leader in an AI-overweight sector",
+      focus_ticker_cta:    "ENQUEUE",
+      cross_star_tooltip:  "Cross-signal (Momentum top 30 + recent BUY/EXECUTE)",
     },
 
     // ── Signals / Conviction (index.html dynamic) ─────────────────

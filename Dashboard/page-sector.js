@@ -186,97 +186,10 @@ function renderBinaryAlert(risks) {
     `).join('');
 }
 
-/* ── Today's Verdict (hero card) ──────────────────────────────── */
-// Prefers the structured today_verdict block from _phase4c; falls back to
-// session_notes prose if the cache predates V1.4.
-function renderTodayVerdict(market) {
-    if (!market) return;
-    const card = document.getElementById('today-verdict-card');
-    if (!card) return;
-    const tv = market.today_verdict;
-    const tr = t();
-
-    // Stance palette (matches sector matrix verdict colours)
-    const STANCE_STYLE = {
-        AGGRESSIVE: { fg: '#22c55e', bg: 'rgba(34,197,94,0.15)', border: '#22c55e' },
-        NEUTRAL:    { fg: '#eab308', bg: 'rgba(234,179,8,0.15)', border: '#eab308' },
-        DEFENSIVE:  { fg: '#ef4444', bg: 'rgba(239,68,68,0.15)', border: '#ef4444' },
-    };
-    const ACTION_STYLE = {
-        overweight:   { fg: '#22c55e', icon: '🟢', label: tr.tv_action_overweight  || '加碼' },
-        underweight:  { fg: '#fbbf24', icon: '🟠', label: tr.tv_action_underweight || '減碼' },
-        avoid:        { fg: '#ef4444', icon: '🔴', label: tr.tv_action_avoid       || '避開' },
-        wait:         { fg: '#eab308', icon: '🟡', label: tr.tv_action_wait        || '觀望' },
-        neutral:      { fg: '#a1a1aa', icon: '⚪', label: tr.tv_action_neutral     || '中性' },
-    };
-
-    // Prefer structured verdict. Fallback: show session_notes prose in fallback block.
-    if (!tv) {
-        if (!market.notes) return;  // nothing to show at all
-        card.classList.remove('hidden');
-        card.style.borderLeftColor = '#a1a1aa';
-        document.getElementById('tv-stance').textContent   = '—';
-        document.getElementById('tv-headline').textContent = tr.tv_no_structured || '今日裁決（舊版快取，待下次掃描升級）';
-        document.getElementById('tv-one-liner').textContent = '';
-        document.getElementById('tv-takeaways').innerHTML = '';
-        document.getElementById('tv-actions').innerHTML   = '';
-        document.getElementById('tv-watch').innerHTML     = '';
-        const fb = document.getElementById('tv-fallback');
-        fb.classList.remove('hidden');
-        document.getElementById('tv-fallback-text').textContent = market.notes;
-        return;
-    }
-
-    // Structured path
-    card.classList.remove('hidden');
-    document.getElementById('tv-fallback').classList.add('hidden');
-
-    const stance = tv.stance || 'NEUTRAL';
-    const sty = STANCE_STYLE[stance] || STANCE_STYLE.NEUTRAL;
-    card.style.borderLeftColor = sty.border;
-
-    const stanceEl = document.getElementById('tv-stance');
-    stanceEl.textContent    = stance;
-    stanceEl.style.background = sty.bg;
-    stanceEl.style.color      = sty.fg;
-
-    document.getElementById('tv-headline').textContent  = tv.headline || '';
-    document.getElementById('tv-one-liner').textContent = tv.one_liner || '';
-    if (tv.confidence != null) {
-        document.getElementById('tv-confidence').textContent = `conf ${(tv.confidence * 100).toFixed(0)}%`;
-    }
-
-    // Takeaways
-    document.getElementById('tv-takeaways').innerHTML =
-        (tv.key_takeaways || []).map(t => `<li class="flex items-start gap-1.5"><span class="text-emerald-500 shrink-0">•</span><span>${t}</span></li>`).join('') ||
-        `<li class="text-zinc-600 italic">—</li>`;
-
-    // Sector actions
-    document.getElementById('tv-actions').innerHTML =
-        (tv.sector_actions || []).map(a => {
-            const as = ACTION_STYLE[a.action] || ACTION_STYLE.neutral;
-            const conf = a.confidence ? `<span class="text-[9px] text-zinc-500 ml-1">(${a.confidence})</span>` : '';
-            return `<li>
-              <div class="flex items-start gap-1.5">
-                <span class="shrink-0">${as.icon}</span>
-                <div>
-                  <span class="font-bold" style="color:${as.fg}">${as.label}</span>
-                  <span class="font-medium" style="color:var(--text-main)">${a.sector.replace(/_/g,' ')}</span>
-                  ${conf}
-                  ${a.reason ? `<div class="text-[10px] text-zinc-500 leading-snug mt-0.5">${a.reason}</div>` : ''}
-                </div>
-              </div>
-            </li>`;
-        }).join('') || `<li class="text-zinc-600 italic">—</li>`;
-
-    // Watch next
-    document.getElementById('tv-watch').innerHTML =
-        (tv.watch_next || []).map(w => `<li class="flex items-start gap-1.5"><span class="text-zinc-500 shrink-0">▸</span><span>${w}</span></li>`).join('') ||
-        `<li class="text-zinc-600 italic">—</li>`;
-}
-
-// Keep legacy name so existing callers don't break while we migrate.
-function renderHandoff(market) { renderTodayVerdict(market); }
+/* ── Today's Verdict (hero card) — shared component ──────────── */
+// Implementation moved to components.js (Components.renderTodayVerdict).
+// Keep the legacy `renderHandoff` alias so existing callers still work.
+function renderHandoff(market) { Components.renderTodayVerdict(market); }
 
 /* ── Sector Cards ────────────────────────────────────────────── */
 function renderSectorMatrix(sectors, lang) {
@@ -753,8 +666,7 @@ async function pollScanStatus() {
             if (s.status === 'done') {
                 // Wait for bridge.py (kicked off async after scan) then refresh page data
                 setTimeout(() => loadSectorData(), 3000);
-                // Auto-dismiss banner after 8s on success
-                setTimeout(() => hideScanBanner(), 8000);
+                // Banner stays up — user dismisses via the ✕ (#scan-dismiss-btn) button.
             }
         }
     } catch (e) {
