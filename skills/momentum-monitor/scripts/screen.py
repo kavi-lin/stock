@@ -34,18 +34,24 @@ from momentum import (  # noqa: E402
 
 UNIVERSE_DIR = os.path.join(SCRIPT_DIR, "universes")
 CACHE_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
-SECTOR_MAP_PATH = os.path.join(UNIVERSE_DIR, "sp500_sectors.json")
 
 
 def _load_sector_map():
-    """Return {ticker: GICS_sector} mapping; empty dict if file missing."""
-    if not os.path.exists(SECTOR_MAP_PATH):
-        return {}
-    try:
-        with open(SECTOR_MAP_PATH, "r", encoding="utf-8") as fp:
-            return json.load(fp)
-    except Exception:
-        return {}
+    """Return {ticker: GICS_sector} mapping by merging all *_sectors.json in universes dir."""
+    merged = {}
+    if not os.path.exists(UNIVERSE_DIR):
+        return merged
+    for filename in os.listdir(UNIVERSE_DIR):
+        if filename.endswith("_sectors.json"):
+            path = os.path.join(UNIVERSE_DIR, filename)
+            try:
+                with open(path, "r", encoding="utf-8") as fp:
+                    data = json.load(fp)
+                    if isinstance(data, dict):
+                        merged.update(data)
+            except Exception as e:
+                print(f"Warning: failed to load sector map {path}: {e}", file=sys.stderr)
+    return merged
 
 
 _SECTOR_MAP = _load_sector_map()
@@ -140,30 +146,36 @@ def _passes(payload, args):
 
 # ── Output ───────────────────────────────────────────────────────────────
 CSV_COLUMNS = [
-    "rank", "ticker", "in_sp500", "sector", "price", "score", "label", "stage",
+    "rank", "ticker", "in_sp500", "in_nasdaq100", "sector", "price", "score", "label", "stage",
     "volume_today", "avg_20d", "ratio_20d", "spike_label", "volume_trend",
     "intraday_state", "elapsed_min",
     "ma_20", "ma_50", "ma_200",
     "above_ma20_pct", "above_ma50_pct", "above_ma200_pct",
     "rsi_14", "rsi_zone",
+    "macd_line", "macd_signal", "macd_hist", "macd_bullish_cross", "macd_bearish_cross",
     "short_pct_float", "short_interpretation",
     "signals", "warnings",
     "cache_hit", "cache_age_sec",
 ]
 
 
-def _row_from_payload(rank, p, sp500_set=None):
+def _row_from_payload(rank, p, sp500_set=None, n100_set=None):
     v = p.get("volume", {})
     m = p.get("ma_structure", {})
     s = p.get("short_interest", {})
     c = p.get("momentum_composite", {})
     r = p.get("rsi", {})
     ticker = p.get("ticker")
-    in_sp500 = True if sp500_set is None else (ticker in sp500_set)
+    # If set is None, we assume it's NOT in that universe (unless it's a custom scan where we didn't check)
+    # Actually, better: if we have the ref set, use it.
+    in_sp500 = (ticker in sp500_set) if sp500_set is not None else False
+    in_n100  = (ticker in n100_set) if n100_set is not None else False
+
     return {
         "rank": rank,
         "ticker": ticker,
-        "in_sp500": int(in_sp500),   # CSV-friendly 1/0
+        "in_sp500": int(in_sp500),
+        "in_nasdaq100": int(in_n100),
         "sector": _SECTOR_MAP.get(ticker) or "Unknown",
         "price": p.get("price"),
         "score": c.get("score"),
@@ -184,6 +196,11 @@ def _row_from_payload(rank, p, sp500_set=None):
         "above_ma200_pct": m.get("above_ma200_pct"),
         "rsi_14":   r.get("rsi_14"),
         "rsi_zone": r.get("zone"),
+        "macd_line":         p.get("macd", {}).get("macd_line"),
+        "macd_signal":       p.get("macd", {}).get("signal_line"),
+        "macd_hist":         p.get("macd", {}).get("histogram"),
+        "macd_bullish_cross": p.get("macd", {}).get("bullish_cross", False),
+        "macd_bearish_cross": p.get("macd", {}).get("bearish_cross", False),
         "short_pct_float": s.get("short_pct_float"),
         "short_interpretation": s.get("interpretation"),
         "signals": "|".join(p.get("signals", [])),
@@ -232,8 +249,8 @@ def _render_md(rows, top, meta):
 # ── Main ─────────────────────────────────────────────────────────────────
 def main():
     ap = argparse.ArgumentParser(description="Batch momentum screener")
-    src = ap.add_mutually_exclusive_group(required=True)
-    src.add_argument("--universe", help="Universe name under scripts/universes/ (e.g. sp500)")
+    src = ap.add_mutually_exclusive_group(required=False)
+    src.add_argument("--universe", default="all", help="Universe name under scripts/universes/ (e.g. sp500, nasdaq100, all)")
     src.add_argument("--tickers", help="Comma-separated ticker list")
     src.add_argument("--tickers-file", help="Path to file with one ticker per line")
 
@@ -267,8 +284,14 @@ def main():
 
     # Primary universe selection
     if args.universe:
-        base_tickers = _load_universe(args.universe)
-        universe_desc = args.universe
+        if args.universe == "all":
+            u1 = _load_universe("sp500")
+            u2 = _load_universe("nasdaq100")
+            base_tickers = sorted(list(set(u1 + u2)))
+            universe_desc = "all (SP500 + Nasdaq100)"
+        else:
+            base_tickers = _load_universe(args.universe)
+            universe_desc = args.universe
     elif args.tickers:
         base_tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
         universe_desc = f"custom ({len(base_tickers)} tickers)"
@@ -276,11 +299,13 @@ def main():
         base_tickers = _load_tickers_file(args.tickers_file)
         universe_desc = f"file:{os.path.basename(args.tickers_file)}"
 
-    # Track SP500 membership BEFORE merging watchlist, so `in_sp500` remains a clean flag.
-    # Watchlist is only merged when the primary universe is 'sp500' (otherwise the
-    # concept of "in universe vs watchlist" is ambiguous for custom scans).
+    # Track membership for flagging.
+    sp500_ref = set(_load_universe("sp500"))
+    n100_ref  = set(_load_universe("nasdaq100"))
+
+    # Watchlist is merged when primary universe is a standard one
     base_set = set(base_tickers)
-    watchlist = _load_watchlist() if args.universe == "sp500" else []
+    watchlist = _load_watchlist() if args.universe in ("sp500", "nasdaq100", "all") else []
     extra = [t for t in watchlist if t not in base_set]
     tickers = base_tickers + extra
     if extra:
@@ -321,7 +346,7 @@ def main():
         )
     )
 
-    rows = [_row_from_payload(i + 1, p, sp500_set=base_set if args.universe == "sp500" else None)
+    rows = [_row_from_payload(i + 1, p, sp500_set=sp500_ref, n100_set=n100_ref)
             for i, p in enumerate(matched)]
 
     # Write CSV

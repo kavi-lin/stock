@@ -292,6 +292,13 @@
             box-shadow: inset 2px 0 0 #a855f7;
         }
 
+        /* Nasdaq-100 row tint — blue accent on the left edge + faint background */
+        tr.row-nasdaq-only  td { background: rgba(59,130,246,0.06); }
+        tr.row-nasdaq-only:hover td { background: rgba(59,130,246,0.12); }
+        tr.row-nasdaq-only  td:first-child {
+            box-shadow: inset 2px 0 0 #3b82f6;
+        }
+
         /* Watchlist management modal — chip styling */
         .watchlist-chip {
             display: inline-flex; align-items: center; gap: 6px;
@@ -309,6 +316,29 @@
         }
         .watchlist-chip .remove:hover { opacity: 1; color: #ef4444; }
         .watchlist-chip.removing { opacity: 0.4; transform: scale(0.9); }
+
+        /* ── Segmented Control (Sliding Toggle) ───────────────── */
+        .segmented-control {
+            display: inline-flex;
+            background: rgba(161,161,170,0.1);
+            border: 1px solid rgba(161,161,170,0.2);
+            border-radius: 10px;
+            padding: 2px;
+            gap: 1px;
+        }
+        .segmented-btn {
+            font-size: 10px; font-weight: 700;
+            padding: 4px 10px; border-radius: 8px;
+            cursor: pointer; user-select: none;
+            color: #71717a; transition: all 0.15s;
+            text-transform: uppercase; letter-spacing: 0.02em;
+        }
+        .segmented-btn:hover { color: #a1a1aa; background: rgba(161,161,170,0.05); }
+        .segmented-btn.active {
+            background: #27272a; color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .dark .segmented-btn.active { background: #3f3f46; }
     </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="momentum">
@@ -326,7 +356,7 @@
             <div class="flex items-center gap-4">
                 <span id="snap-id" class="text-[10px] font-mono text-zinc-500"></span>
 
-                <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter">SYNCING...</span>
+                <span id="last-update" class="inline-flex items-center"></span>
                 <button id="watchlist-btn" class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white px-3 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-purple-50 dark:hover:bg-purple-950 hover:border-purple-400 transition-all flex items-center gap-1.5"
                         title="">
                     <span>⭐</span>
@@ -424,6 +454,26 @@
                     </div>
                 </div>
 
+                <!-- Universe & Watchlist: Primary scope controls (moved outside) -->
+                <div class="flex flex-wrap items-center gap-8 p-3 mb-5 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800">
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider" id="filter-universe-label">Universe 範圍</label>
+                        <div id="f-universe-toggle" class="segmented-control">
+                            <button class="segmented-btn active" data-value="any">All</button>
+                            <button class="segmented-btn" data-value="sp500">S&P 500</button>
+                            <button class="segmented-btn" data-value="nasdaq100">Nasdaq 100</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider" id="filter-watchlist-scope-label">Watchlist 範圍</label>
+                        <div id="f-watchlist-toggle" class="segmented-control">
+                            <button class="segmented-btn active" data-value="all">Show All</button>
+                            <button class="segmented-btn" data-value="only">Only Watchlist</button>
+                            <button class="segmented-btn" data-value="exclude">Exclude Watchlist</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Preset strategies: hero row, full-width, prominent -->
                 <div id="f-presets" class="f-preset-grid mb-5"></div>
 
@@ -444,18 +494,23 @@
                         <span id="filter-advanced-label">進階篩選（RSI / 階段 / 產業 / 訊號 / 排除警告）</span>
                     </summary>
 
-                    <div class="pt-4 space-y-4">
-                        <!-- Sub-row: RSI + dropdowns + search -->
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    <div class="pt-4 space-y-5">
+                        <!-- Secondary filters: RSI + Volume + dropdowns + search -->
+                        <div class="grid grid-cols-1 md:grid-cols-8 gap-4">
                             <div>
                                 <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-rsi-label">RSI range</label>
                                 <div class="flex items-center gap-1.5">
                                     <input id="f-min-rsi" type="number" min="0" max="100" placeholder="—"
-                                           class="w-14 px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                           class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
                                     <span class="text-zinc-500 text-[10px]">to</span>
                                     <input id="f-max-rsi" type="number" min="0" max="100" placeholder="—"
-                                           class="w-14 px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                           class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
                                 </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-vol-label">最小量能比</label>
+                                <input id="f-min-vol" type="number" min="0" step="0.1" placeholder="1.2"
+                                       class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
                             </div>
                             <div>
                                 <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-stage-label">Stage</label>
@@ -482,6 +537,13 @@
                                     <option value="Utilities">Utilities</option>
                                     <option value="Real Estate">Real Estate</option>
                                     <option value="Materials">Materials</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-hot-label">Hot Sector</label>
+                                <select id="f-only-hot" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent font-bold text-orange-500">
+                                    <option value="false">全部產業</option>
+                                    <option value="true">🔥 僅看熱門</option>
                                 </select>
                             </div>
                             <div>
@@ -520,12 +582,6 @@
                             <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-excl-warn-label">排除警告</div>
                             <div id="f-warning-chips" class="flex flex-wrap gap-1.5"></div>
                         </div>
-
-                        <!-- Watchlist scope -->
-                        <div>
-                            <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-watchlist-scope-label">Watchlist 範圍</div>
-                            <div id="f-watchlist-scope" class="flex gap-1.5"></div>
-                        </div>
                     </div>
                 </details>
             </div>
@@ -544,6 +600,7 @@
                             <th class="mom-th text-right sortable" data-sort="ratio_20d"       id="th-volume">量比<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="rsi_14"          id="th-rsi">RSI<span class="sort-arrow"></span></th>
+                            <th class="mom-th text-right"                                        id="th-macd">MACD</th>
                             <th class="mom-th" id="th-signals">訊號</th>
                             <th class="mom-th text-right sortable" data-sort="short_pct_float" id="th-short">空方<span class="sort-arrow"></span></th>
                         </tr>

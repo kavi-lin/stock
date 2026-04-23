@@ -47,9 +47,12 @@ function defaultFilter() {
         maxScore: null,
         minRsi:   null,
         maxRsi:   null,
+        minVolumeRatio: null,
+        onlyHotSectors: false,
         stage:    'any',
         sector:   'any',
         label:    'any',
+        universe: 'any',
         requiredSignals:   new Set(),
         requiredWarnings:  new Set(),
         excludedWarnings:  new Set(),
@@ -72,6 +75,22 @@ function sectorLabel(key) {
 // Preset strategies — classic filter combos with a known rationale. Order matters
 // (rendered left-to-right). Each applies atomically (overwrites current filter).
 const PRESETS = {
+    leaders: {   // 🚀 "Momentum Leaders" - high score + stage 2 + volume + hot sector
+        filter: {
+            minScore: 75, maxScore: null, minRsi: null, maxRsi: null,
+            minVolumeRatio: 1.2, onlyHotSectors: true,
+            stage: 'Stage 2 uptrend', sector: 'any',
+            label: 'STRONGLY_BULLISH',
+            requiredSignals:  [],
+            requiredWarnings: [],
+            excludedWarnings: [],
+            search: '',
+        },
+        label_zh: '🚀 真動能領航者',
+        label_en: 'Momentum Leaders',
+        hint_zh: '高分(75+) + Stage 2 上升趨勢 + 強力買盤(1.2x+) + 處於熱門產業',
+        hint_en: 'Score 75+ / Stage 2 / Volume 1.2x+ / Hot Sector only'
+    },
     breakout: {   // 🔥 fresh 20/50 golden cross + volume confirmation on Stage 2 name
         filter: {
             minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
@@ -191,7 +210,9 @@ async function loadMomentumData() {
     UI.logToUI('Momentum: loading data...');
     try {
         const data = await DataStore.get();
-        document.getElementById('last-update').textContent = `SYNCED: ${data.last_updated}`;
+        UI.applySyncLight(document.getElementById('last-update'), data.last_updated, null, [
+            { label: '動能選股', ts: data?.momentum_screen?.generated_at, ttl: 1200, hint: '執行「動能選股」(screen.py)' },
+        ]);
 
         const ms = data.momentum_screen || { status: 'no_data' };
         if (ms.status !== 'success' || !ms.rows || ms.rows.length === 0) {
@@ -200,6 +221,7 @@ async function loadMomentumData() {
         }
 
         _state.rows = ms.rows;
+        _state.market = data.market || null;
         _state.history = ms.history_by_ticker || {};
         _state.journalStats = ms.journal?.stats || null;
 
@@ -321,22 +343,30 @@ function renderRequiredWarningChips() {
 }
 
 function renderWatchlistScope() {
-    const wrap = document.getElementById('f-watchlist-scope');
+    const wrap = document.getElementById('f-watchlist-toggle');
     if (!wrap) return;
-    const tr = t();
-    const modes = [
-        { key: 'all',     label: tr.watchlist_scope_all     || '全部' },
-        { key: 'only',    label: tr.watchlist_scope_only    || '只看 Watchlist' },
-        { key: 'exclude', label: tr.watchlist_scope_exclude || '排除 Watchlist' },
-    ];
     const current = _state.filter.watchlistMode || 'all';
-    wrap.innerHTML = modes.map(m =>
-        `<span class="filter-chip${m.key === current ? ' active' : ''}" data-wlmode="${m.key}">${m.label}</span>`
-    ).join('');
-    wrap.querySelectorAll('[data-wlmode]').forEach(el => {
-        el.onclick = () => {
-            _state.filter.watchlistMode = el.dataset.wlmode;
+    wrap.querySelectorAll('.segmented-btn').forEach(btn => {
+        const val = btn.dataset.value;
+        btn.classList.toggle('active', val === current);
+        btn.onclick = () => {
+            _state.filter.watchlistMode = val;
             renderWatchlistScope();
+            renderTable();
+        };
+    });
+}
+
+function renderUniverseToggle() {
+    const wrap = document.getElementById('f-universe-toggle');
+    if (!wrap) return;
+    const current = _state.filter.universe || 'any';
+    wrap.querySelectorAll('.segmented-btn').forEach(btn => {
+        const val = btn.dataset.value;
+        btn.classList.toggle('active', val === current);
+        btn.onclick = () => {
+            _state.filter.universe = val;
+            renderUniverseToggle();
             renderTable();
         };
     });
@@ -363,6 +393,8 @@ function renderFilterPanel() {
     document.getElementById('filter-score-val').textContent = `≥ ${_state.filter.minScore}`;
     document.getElementById('f-min-rsi').value = _state.filter.minRsi ?? '';
     document.getElementById('f-max-rsi').value = _state.filter.maxRsi ?? '';
+    document.getElementById('f-min-vol').value = _state.filter.minVolumeRatio ?? '';
+    document.getElementById('f-only-hot').value = _state.filter.onlyHotSectors ? 'true' : 'false';
     document.getElementById('f-stage').value = _state.filter.stage;
     document.getElementById('f-sector').value = _state.filter.sector;
     const labelSel = document.getElementById('f-label');
@@ -372,6 +404,7 @@ function renderFilterPanel() {
     renderSignalChips();
     renderRequiredWarningChips();
     renderWarningChips();
+    renderUniverseToggle();
     renderWatchlistScope();
     UI.icons();
 }
@@ -383,18 +416,41 @@ function matchesFilter(r) {
     if (f.maxScore != null && r.score > f.maxScore) return false;
     if (f.minRsi != null && (r.rsi_14 == null || r.rsi_14 < f.minRsi)) return false;
     if (f.maxRsi != null && (r.rsi_14 == null || r.rsi_14 > f.maxRsi)) return false;
+    
+    // Min Volume Ratio check
+    if (f.minVolumeRatio != null && (r.ratio_20d == null || r.ratio_20d < f.minVolumeRatio)) return false;
+
     if (f.stage  !== 'any' && r.stage  !== f.stage)  return false;
     if (f.sector !== 'any' && r.sector !== f.sector) return false;
+
+    // Only Hot Sectors check
+    if (f.onlyHotSectors) {
+        const market = _state.market;
+        const hot = market?.hot_sectors || [];
+        if (!hot.includes(r.sector)) return false;
+    }
+
     if (f.label  !== 'any' && r.label  !== f.label)  return false;
+
+    // Watchlist scope toggle — filters on origin regardless of other criteria
+    const isWatchlistOnly = r.in_sp500 === false && r.in_nasdaq100 === false;
+    if (f.watchlistMode === 'only'    && !isWatchlistOnly) return false;
+    if (f.watchlistMode === 'exclude' &&  isWatchlistOnly) return false;
+
+    // Universe filter: SP500 or Nasdaq100.
+    // "自選不管是目前是sp500 or nasdaq 100都要顯示在表上"
+    // -> If it is in the watchlist, we show it regardless of the universe filter.
+    if (!isWatchlistOnly) {
+        if (f.universe === 'sp500' && !r.in_sp500) return false;
+        if (f.universe === 'nasdaq100' && !r.in_nasdaq100) return false;
+    }
+
     const sigs = new Set(r.signals || []);
     for (const s of f.requiredSignals) if (!sigs.has(s)) return false;
     const warns = new Set(r.warnings || []);
     for (const w of f.requiredWarnings) if (!warns.has(w)) return false;
     for (const w of f.excludedWarnings) if (warns.has(w))  return false;
-    // Watchlist scope toggle — filters on origin regardless of other criteria
-    const isWatchlistOnly = r.in_sp500 === false;
-    if (f.watchlistMode === 'only'    && !isWatchlistOnly) return false;
-    if (f.watchlistMode === 'exclude' &&  isWatchlistOnly) return false;
+
     if (f.search && !(r.ticker || '').toUpperCase().includes(f.search.toUpperCase())) return false;
     return true;
 }
@@ -545,6 +601,22 @@ function rsiCell(v) {
     return `<span class="font-mono text-xs font-bold" style="color:${color};text-decoration:underline dotted rgba(161,161,170,0.4)">${v.toFixed(0)}</span>`;
 }
 
+// MACD cell: compact histogram-direction badge with cross marker.
+// Shows ⚡▲/⚡▼ on the day of a crossover, ▲/▼ otherwise.
+function macdCell(r) {
+    const hist = r.macd_hist;
+    if (hist == null) return '<span class="text-zinc-600 text-xs">—</span>';
+    const isBull  = hist >= 0;
+    const color   = isBull ? '#22c55e' : '#ef4444';
+    const arrow   = isBull ? '▲' : '▼';
+    const cross   = r.macd_bullish_cross || r.macd_bearish_cross ? '⚡' : '';
+    const mLine   = r.macd_line  != null ? r.macd_line.toFixed(3)  : '—';
+    const sLine   = r.macd_signal != null ? r.macd_signal.toFixed(3) : '—';
+    const hVal    = hist.toFixed(3);
+    const tip     = `MACD ${mLine} | Signal ${sLine} | Hist ${hVal}`;
+    return `<span class="font-mono text-xs font-bold" style="color:${color}" title="${tip}">${cross}${arrow}</span>`;
+}
+
 // Volume ratio color tier — mirrors popup logic
 //   ≥3.0 red (HEAVY_SPIKE) · ≥2.0 yellow (MILD_SPIKE) · ≥1.3 green (expansion)
 //   ≥0.7 neutral · <0.7 orange (drying up)
@@ -606,10 +678,17 @@ function rowHTML(r) {
     const sectorTxt = r.sector && r.sector !== 'Unknown'
         ? `<div class="text-[9px] font-normal leading-none mt-0.5 pill-clickable sector-subscript" data-pill-type="sector" data-pill-value="${r.sector}">${sectorLabel(r.sector)}</div>`
         : '';
-    const isWatchlistOnly = r.in_sp500 === false;
-    const rowClass = isWatchlistOnly ? 'mom-row row-watchlist-only' : 'mom-row';
-    const watchBadge = isWatchlistOnly
-        ? `<span class="text-[11px]" title="${t().watchlist_badge_tooltip || '自選清單（非 S&P 500）'}">⭐</span>`
+
+    // Priority: Watchlist (Purple) > Nasdaq100 (Blue) > SP500 (Base)
+    const isWatchlist = r.in_sp500 === false && r.in_nasdaq100 === false;
+    const isNasdaq    = r.in_nasdaq100 === true;
+
+    let rowClass = 'mom-row';
+    if (isWatchlist) rowClass += ' row-watchlist-only';
+    else if (isNasdaq) rowClass += ' row-nasdaq-only';
+
+    const watchBadge = isWatchlist
+        ? `<span class="text-[11px]" title="${t().watchlist_badge_tooltip || '自選清單'}">⭐</span>`
         : '';
     return `<tr class="${rowClass}" data-ticker="${r.ticker}">
         <td class="text-zinc-500 font-mono text-xs">${r.rank ?? '—'}</td>
@@ -630,13 +709,14 @@ function rowHTML(r) {
         <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_volCellColor(r)};font-weight:700" title="${_volCellTitle(r)}">${_volCellText(r)}</td>
         <td class="text-right font-mono text-xs" style="${above200Color}">${above200Txt}</td>
         <td class="text-right rsi-cell" data-ticker-rsi="${r.ticker}" style="cursor:pointer">${rsiCell(r.rsi_14)}</td>
+        <td class="text-right">${macdCell(r)}</td>
         <td>${sigHTML || '<span class="text-zinc-600 text-xs">—</span>'}</td>
         <td class="text-xs" style="color:${shortColor}">${shortTxt}</td>
     </tr>`;
 }
 
 function emptyRow() {
-    return `<tr><td colspan="11" class="text-center text-zinc-500 py-8 text-xs">
+    return `<tr><td colspan="12" class="text-center text-zinc-500 py-8 text-xs">
         ${t().no_data || 'No matches'}</td></tr>`;
 }
 
@@ -1337,10 +1417,11 @@ async function triggerRescan(overrideParams) {
     const origLabel = label.textContent;
     label.textContent = (t().banner_scanning || '掃描中…');
 
-    // Default: full S&P 500 scan. Watchlist rescan passes {tickers:'AAPL,NVDA,...'}.
+    // Default: full S&P 500 + Nasdaq 100 + Watchlist scan.
+    // Watchlist rescan passes {tickers:'AAPL,NVDA,...'}.
     const params = overrideParams
         ? { journal: true, ...overrideParams }
-        : { universe: 'sp500', journal: true };
+        : { universe: 'all', journal: true };
 
     try {
         const res = await fetch('/api/run-momentum-screen', {
@@ -1476,7 +1557,22 @@ function translate() {
     if (wlInput && tr.watchlist_add_placeholder) wlInput.placeholder = tr.watchlist_add_placeholder;
     // Re-render watchlist chips + scope chips on language toggle
     renderWatchlistScope();
+    renderUniverseToggle();
     if (document.getElementById('watchlist-chips')) _renderWatchlistChips();
+
+    // Re-label toggles based on i18n
+    const uniToggle = document.getElementById('f-universe-toggle');
+    if (uniToggle) {
+        uniToggle.querySelector('[data-value="any"]').textContent = tr.universe_all || 'All';
+        uniToggle.querySelector('[data-value="sp500"]').textContent = 'S&P 500';
+        uniToggle.querySelector('[data-value="nasdaq100"]').textContent = 'Nasdaq 100';
+    }
+    const wlToggle = document.getElementById('f-watchlist-toggle');
+    if (wlToggle) {
+        wlToggle.querySelector('[data-value="all"]').textContent     = tr.watchlist_scope_all     || 'Show All';
+        wlToggle.querySelector('[data-value="only"]').textContent    = tr.watchlist_scope_only    || 'Only Watchlist';
+        wlToggle.querySelector('[data-value="exclude"]').textContent = tr.watchlist_scope_exclude || 'Exclude Watchlist';
+    }
     // Translate label dropdown options via labels_map
     const labelSel = document.getElementById('f-label');
     if (labelSel) {
@@ -1547,6 +1643,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     rsiBind('f-min-rsi', 'minRsi');
     rsiBind('f-max-rsi', 'maxRsi');
+    document.getElementById('f-min-vol').addEventListener('input', e => {
+        const v = e.target.value.trim();
+        _state.filter.minVolumeRatio = v === '' ? null : Number(v);
+        renderTable();
+    });
+    document.getElementById('f-only-hot').addEventListener('change', e => {
+        _state.filter.onlyHotSectors = e.target.value === 'true';
+        renderTable();
+    });
     document.getElementById('f-stage').addEventListener('change', e => {
         _state.filter.stage = e.target.value;
         renderTable();
