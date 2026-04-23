@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V1.36.0';
+  const VERSION = 'V1.38.0';
 
   const NAV_ITEMS = [
     { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板' },
@@ -81,6 +81,101 @@
     // Defaults tuned per type: info 6s / warn 8s / error 10s — long enough to
     // actually read. A small ✕ on the right lets the user close early.
     // Pass ms=0 to make the toast persistent until manually dismissed.
+
+    // Renders a coloured status dot into `el` based on how old `lastUpdated` is,
+    // and attaches a hover tooltip explaining the colour + sync time.
+    applySyncLight(el, lastUpdated, customWhat, sourceTimestamps) {
+      if (!el) return;
+      const nowMs  = Date.now();
+      const syncMs = lastUpdated ? new Date(lastUpdated.replace(' ', 'T')).getTime() : 0;
+      const ageMin = syncMs ? Math.floor((nowMs - syncMs) / 60000) : Infinity;
+
+      // Compute per-source ages if provided; each item: { label, ts, ttl?, hint? }
+      // ttl = stale threshold in minutes (default 180). hint = action text shown when stale.
+      let staleSources = [];
+      if (Array.isArray(sourceTimestamps)) {
+        sourceTimestamps.forEach(({ label, ts, ttl = 180, hint }) => {
+          if (!ts) return;
+          const ms = new Date(ts.length <= 10 ? ts + 'T00:00:00' : ts.replace(' ', 'T')).getTime();
+          if (!ms || isNaN(ms)) return;
+          const srcMin = Math.floor((nowMs - ms) / 60000);
+          staleSources.push({ label, srcMin, ttl, hint });
+        });
+      }
+      // stale = exceeded its own ttl
+      const staleSrcItems = staleSources.filter(s => s.srcMin > s.ttl);
+      const oldestSrcMin  = staleSrcItems.length
+        ? Math.max(...staleSrcItems.map(s => s.srcMin))
+        : 0;
+
+      let color, label, reason, sourceNote = '';
+      if (!syncMs || ageMin > 720) {
+        color  = '#ef4444';
+        label  = UI.currentLang === 'zh' ? '資料過期' : 'Data stale';
+        reason = ageMin === Infinity
+          ? (UI.currentLang === 'zh' ? '尚未同步任何資料，請執行 bridge.py' : 'No sync yet — run bridge.py')
+          : (UI.currentLang === 'zh' ? `已超過 ${Math.floor(ageMin/60)} 小時未更新` : `Over ${Math.floor(ageMin/60)}h since last sync`);
+      } else if (ageMin > 180) {
+        color  = '#f59e0b';
+        label  = UI.currentLang === 'zh' ? '資料稍舊' : 'Data aging';
+        reason = UI.currentLang === 'zh'
+          ? `${Math.floor(ageMin/60)} 小時 ${ageMin % 60} 分前同步，建議重新執行 bridge.py`
+          : `Synced ${Math.floor(ageMin/60)}h ${ageMin % 60}m ago — consider re-running bridge.py`;
+      } else if (oldestSrcMin > 0) {
+        // data.json is fresh but some source caches exceeded their individual ttl
+        color  = '#f97316';
+        label  = UI.currentLang === 'zh' ? '來源已過期' : 'Sources stale';
+        reason = UI.currentLang === 'zh'
+          ? `data.json 已更新，但部分來源 cache 超過 ${Math.floor(oldestSrcMin/60)} 小時未更新`
+          : `data.json fresh, but source caches ${Math.floor(oldestSrcMin/60)}h+ old`;
+        const staleList = staleSrcItems
+          .map(s => {
+            const h = Math.floor(s.srcMin / 60), m = s.srcMin % 60;
+            const hintHtml = s.hint ? `<br><span style="color:#6b7280">→ ${s.hint}</span>` : '';
+            return `<span style="color:#fca5a5">${s.label}</span>：${h}h${m}m 前${hintHtml}`;
+          }).join('<br>');
+        if (staleList) sourceNote = `<div style="color:#a1a1aa;font-size:10px;margin-top:4px;border-top:1px solid #3f3f46;padding-top:4px">${staleList}</div>`;
+      } else {
+        color  = '#22c55e';
+        label  = UI.currentLang === 'zh' ? '資料新鮮' : 'Data fresh';
+        reason = ageMin < 2
+          ? (UI.currentLang === 'zh' ? '剛剛同步完成' : 'Just synced')
+          : (UI.currentLang === 'zh' ? `${ageMin} 分鐘前同步` : `Synced ${ageMin}m ago`);
+      }
+
+      const syncTimeStr = lastUpdated || (UI.currentLang === 'zh' ? '未知' : 'unknown');
+      const lastSyncLbl = UI.currentLang === 'zh' ? '上次同步' : 'Last sync';
+      const whatLbl = customWhat || (UI.currentLang === 'zh'
+        ? '同步內容：廣度分析 / FTD / 市場頂部 / 產業掃描 / 動能選股等所有 cache → data.json'
+        : 'Syncs: breadth / FTD / market top / sector scan / momentum → data.json');
+      const tipHtml = `
+        <div style="font-weight:700;color:${color};margin-bottom:4px">${label}</div>
+        <div style="color:#d4d4d8;margin-bottom:6px;font-size:11px">${reason}</div>
+        <div style="color:#a1a1aa;font-size:10px;margin-bottom:4px">${whatLbl}</div>
+        <div style="color:#71717a;font-size:10px">${lastSyncLbl}：${syncTimeStr}</div>
+        ${sourceNote}`;
+
+      el.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};box-shadow:0 0 5px ${color}99;flex-shrink:0"></span>`;
+      el.style.cssText = 'display:inline-flex;align-items:center;cursor:default';
+      el._syncTip = tipHtml;
+
+      let tip = document.getElementById('_sync_tooltip');
+      if (!tip) {
+        tip = document.createElement('div');
+        tip.id = '_sync_tooltip';
+        tip.style.cssText = 'position:fixed;z-index:9999;background:var(--bg-card,#18181b);border:1px solid #3f3f46;border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.6;pointer-events:none;opacity:0;transition:opacity 0.12s;max-width:240px';
+        document.body.appendChild(tip);
+      }
+      el.onmouseenter = function(e) {
+        tip.innerHTML = this._syncTip;
+        tip.style.opacity = '1';
+        const r = this.getBoundingClientRect();
+        tip.style.top  = (r.bottom + 8) + 'px';
+        tip.style.left = Math.max(8, r.right - 240) + 'px';
+      };
+      el.onmouseleave = () => { tip.style.opacity = '0'; };
+    },
+
     showToast(msg, type = 'info', ms = null) {
       if (ms === null) ms = type === 'error' ? 10000 : type === 'warn' ? 8000 : 6000;
       let host = document.getElementById('ui-toast-host');
