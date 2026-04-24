@@ -75,6 +75,45 @@
       "historical_percentile": 30,
       "divergence": 34.0
     },
-    "recorded_at": "2026-04-21 22:06:43"
+    "recorded_at": "2026-04-22 07:30:54"
+  },
+  {
+    "data_date": "2026-04-21",
+    "composite_score": 43.3,
+    "component_scores": {
+      "breadth_level_trend": 57,
+      "ma_crossover": 45,
+      "cycle_position": 45,
+      "bearish_signal": 25,
+      "historical_percentile": 30,
+      "divergence": 43.0
+    },
+    "recorded_at": "2026-04-23 18:43:21"
+  },
+  {
+    "data_date": "2026-04-22",
+    "composite_score": 43.3,
+    "component_scores": {
+      "breadth_level_trend": 57,
+      "ma_crossover": 45,
+      "cycle_position": 45,
+      "bearish_signal": 25,
+      "historical_percentile": 30,
+      "divergence": 43.0
+    },
+    "recorded_at": "2026-04-24 17:00:30"
+  },
+  {
+    "data_date": "2026-04-23",
+    "composite_score": 43.3,
+    "component_scores": {
+      "breadth_level_trend": 57,
+      "ma_crossover": 45,
+      "cycle_position": 45,
+      "bearish_signal": 25,
+      "historical_percentile": 30,
+      "divergence": 43.0
+    },
+    "recorded_at": "2026-04-25 00:29:56"
   }
 ]

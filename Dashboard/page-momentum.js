@@ -20,12 +20,285 @@ function labelText(key) {
     return t().labels_map?.[key] || key || '—';
 }
 
+// ── Signal / warning descriptions for pill hover tooltip ─────────────────
+// Each entry: {desc, hint} — desc = what the signal *means*, hint = actionable
+// context ("what to do with it"). Designed to replace the browser-native
+// title= tooltip which just showed the raw key name.
+const SIG_DESC_ZH = {
+    stage2_uptrend_intact:       { desc: '完整上升結構成立：MA20 > MA50 > MA200 且價格站上 MA20。技術面最健康的狀態。', hint: '趨勢跟隨派首選；回檔至 MA20 / MA50 可加碼。' },
+    fresh_golden_cross_20_50:    { desc: '過去 10 個交易日內 MA20 向上穿越 MA50。短期動能轉強訊號。', hint: '搭配量增 + Stage 2 最有效；單獨出現訊號強度有限。' },
+    fresh_golden_cross_50_200:   { desc: '過去 10 個交易日內 MA50 向上穿越 MA200。多頭市場大黃金交叉，結構級轉多訊號。', hint: '歷史上往往是長多起點；適合中長線布局。' },
+    volume_expansion:            { desc: '成交量比前 20 日均量放大 ≥ 30% 且 5 日均量 > 10 日均量。資金流入加速。', hint: '搭配價格突破或黃金交叉，可信度最高。' },
+    heavy_volume_spike_today:    { desc: '今日量比 ≥ 3 倍前 20 日均量。重大資金事件（新聞 / 業績 / 機構動作）。', hint: '先看方向：上漲 = 可能續強；下跌 = 警戒出貨。' },
+    low_short_interest:          { desc: '空單佔流通股比例 < 3%。市場對這檔沒有明顯看空共識。', hint: '偏中性訊息；搭配其他多頭訊號才有意義。' },
+    high_short_interest:         { desc: '空單佔流通股比例 > 10%。市場對這檔有顯著做空壓力。', hint: '若基本面轉佳可能引發軋空；也可能反映真的有問題。' },
+    squeeze_candidate:           { desc: '高空單（> 20%）+ 價格站上 MA20 > 5%。軋空燃料已堆疊。', hint: 'Catalyst 驅動型爆發候選，適合短線交易，停損要緊。' },
+    oversold_rsi:                { desc: 'RSI < 30 且處於 Stage 2 上升結構。強勢股的短期回檔買點。', hint: '只適用於上升股；下跌股 RSI < 30 是弱勢延續不是機會。' },
+    macd_bullish_cross:          { desc: 'MACD 線今日向上穿越 Signal 線。動能由空轉多的確認訊號。', hint: '零軸上方出現的黃金交叉可信度比零軸下方高。' },
+    macd_histogram_rising:       { desc: 'MACD 柱狀圖連續 3 日擴大。多頭動能持續加速。', hint: '最好的 follow-through 訊號；趨勢延續機率高。' },
+};
+const WARN_DESC_ZH = {
+    overbought_rsi:              { desc: 'RSI > 70。短期獲利了結壓力上升。', hint: '強勢股可在 70+ 停留數週；不要單憑 RSI 賣出。回檔至 65-70 才是加碼點。' },
+    parabolic_blowoff_risk:      { desc: '價格距 MA200 > 50%。拋物線式噴出，均值回歸壓力大。', hint: '非常接近頂部區；若已持有應鎖定部分利潤；未持有別追高。' },
+    stage4_downtrend:            { desc: '空頭排列：MA20 < MA50 < MA200 且價格跌破 MA20。技術面最弱狀態。', hint: '空頭市場「逆勢抄底」勝率極低；等 Stage 1 築底完成再說。' },
+    volume_dry_up:               { desc: '量比 < 0.7（較前 20 日均量縮減 30% 以上）。資金離場或觀望。', hint: '上升趨勢中的量縮是警訊；下跌中的量縮可能是洗盤。' },
+    fresh_death_cross_20_50:     { desc: '過去 10 個交易日內 MA20 向下跌破 MA50。短期動能轉弱。', hint: '通常是 Stage 2 → 3 轉換的早期訊號，應減倉觀望。' },
+    fresh_death_cross_50_200:    { desc: '過去 10 個交易日內 MA50 向下跌破 MA200。結構級轉空。', hint: '歷史上通常伴隨長空；技術派視為大型轉折點，不應硬撐。' },
+    macd_bearish_cross:          { desc: 'MACD 線今日向下跌破 Signal 線。動能由多轉空的確認訊號。', hint: '零軸下方的死叉殺傷力更強；若再伴隨跌破 MA200 要格外警戒。' },
+};
+const SIG_DESC_EN = {
+    stage2_uptrend_intact:       { desc: 'Full bullish MA stack: MA20 > MA50 > MA200 with price above MA20. The healthiest technical state.', hint: 'Prime trend-follower setup; pullbacks to MA20/MA50 are add-on points.' },
+    fresh_golden_cross_20_50:    { desc: 'MA20 crossed above MA50 in the last 10 sessions. Short-term momentum strengthening.', hint: 'Most reliable when paired with volume expansion + Stage 2.' },
+    fresh_golden_cross_50_200:   { desc: 'MA50 crossed above MA200 in the last 10 sessions. Structural bull-market cross.', hint: 'Historically marks long-cycle bottoms; suited for mid-to-long term.' },
+    volume_expansion:            { desc: 'Volume ≥ 1.3× 20-day avg AND 5-day avg > 10-day avg. Money flow accelerating.', hint: 'Pair with breakout or golden cross for highest conviction.' },
+    heavy_volume_spike_today:    { desc: 'Today volume ≥ 3× 20-day avg. Major capital event (news/earnings/institutional).', hint: 'Check direction first: up = continuation likely; down = distribution warning.' },
+    low_short_interest:          { desc: 'Short interest < 3% of float. No significant bearish consensus.', hint: 'Mildly supportive; meaningful only when combined with other bull signals.' },
+    high_short_interest:         { desc: 'Short interest > 10% of float. Notable bearish pressure.', hint: 'Can trigger squeezes on good news; may also reflect real trouble.' },
+    squeeze_candidate:           { desc: 'High short (>20%) + price >5% above MA20. Squeeze fuel stacked.', hint: 'Catalyst-driven breakout candidate; keep tight stops.' },
+    oversold_rsi:                { desc: 'RSI < 30 while in Stage 2 uptrend. Short-term pullback in a strong stock.', hint: 'Only applies to uptrends; oversold in a downtrend is weakness, not opportunity.' },
+    macd_bullish_cross:          { desc: 'MACD line crossed above Signal line today. Momentum shift from bear to bull confirmed.', hint: 'Crosses above the zero line carry more weight than below.' },
+    macd_histogram_rising:       { desc: 'MACD histogram rising for 3 consecutive days. Bull momentum accelerating.', hint: 'Best follow-through signal; trend-continuation probability is high.' },
+};
+const WARN_DESC_EN = {
+    overbought_rsi:              { desc: 'RSI > 70. Short-term profit-taking pressure rising.', hint: 'Strong names can hold 70+ for weeks; don\'t sell on RSI alone. Add on pullback to 65-70.' },
+    parabolic_blowoff_risk:      { desc: 'Price > 50% above MA200. Parabolic blow-off, mean-reversion risk high.', hint: 'Very close to a top; if held, lock in profits. If not held, don\'t chase.' },
+    stage4_downtrend:            { desc: 'Bearish stack: MA20 < MA50 < MA200 with price below MA20. Technically weakest state.', hint: 'Catching falling knives has low win rate; wait for Stage 1 base.' },
+    volume_dry_up:               { desc: 'Volume < 0.7× 20-day avg (≥30% drop). Money leaving or waiting.', hint: 'Dry-up in uptrend = warning; in downtrend = possibly shakeout.' },
+    fresh_death_cross_20_50:     { desc: 'MA20 crossed below MA50 in last 10 sessions. Short-term momentum weakening.', hint: 'Usually the early signal of Stage 2→3 transition; reduce exposure.' },
+    fresh_death_cross_50_200:    { desc: 'MA50 crossed below MA200 in last 10 sessions. Structural bearish cross.', hint: 'Historically precedes long bear phases; don\'t fight it.' },
+    macd_bearish_cross:          { desc: 'MACD line crossed below Signal line today. Momentum shift from bull to bear confirmed.', hint: 'Crosses below zero line are more severe; extra caution if MA200 also breaks.' },
+};
+
+function _pillTip(key, isWarning) {
+    const zh = isWarning ? WARN_DESC_ZH : SIG_DESC_ZH;
+    const en = isWarning ? WARN_DESC_EN : SIG_DESC_EN;
+    const dict = (UI.currentLang === 'en' ? en : zh);
+    return dict[key];
+}
+
+// ── Preset strategy tooltip content ──────────────────────────────────────
+// Each entry has: criteria (bullet list of filter rules), strategy (market
+// scenario the strategy captures), action (what to do with the results).
+// Rendered on hover over preset buttons.
+const PRESET_DETAIL_ZH = {
+    leaders: {
+        criteria: [
+            'Score ≥ 75',
+            'Stage 2 上升趨勢',
+            '量比 ≥ 1.2×（今日成交量 / 20 日均量）',
+            '僅熱門產業（HOT — 由每日產業掃描 protocol 動態標記，跟進階篩選的「產業」dropdown 不同）',
+            '綜合標籤 = 強多（composite score ≥ 80；動能、均線、空方、趨勢四維度加權）',
+        ],
+        strategy: '四重共振：基本面 + 技術面 + 資金面 + 產業面全部對齊。抓出當下市場最強的 5-15 檔領頭羊。',
+        action: '動能派核心持股候選；回檔至 MA20 / MA50 是加碼點。倉位可重、但要設停損（MA50 跌破 = 清倉訊號）。',
+    },
+    breakout: {
+        criteria: ['Stage 2', '10 日內 MA20/50 黃金交叉', '量能擴張訊號', '排除 RSI 超買'],
+        strategy: 'O\'Neil / Minervini 派經典突破進場點。黃金交叉是結構轉強、加上量能確認就是真突破。',
+        action: '當日或下一根 K 線市價 / 限價進。停損放前低或 MA20 下方 3-5%，R/R 至少 2:1。',
+    },
+    uptrend: {
+        criteria: ['Score ≥ 65', 'Stage 2', '排除 RSI 超買', '排除拋物線風險'],
+        strategy: '趨勢成熟的追蹤標的 — 已在上升段但還沒過熱。比突破晚進場但勝率穩。',
+        action: '適合偏保守資金；等 RSI 回落到 50-65 區間再進最佳。倉位可中等、別追當下最熱的。',
+    },
+    pullback: {
+        criteria: ['Stage 2', 'RSI 超賣回檔（< 30 但 Stage 2）'],
+        strategy: '強勢股短線回檔買點。**只適用於 Stage 2**；下跌股 RSI < 30 是弱勢延續，不是機會。',
+        action: '分批買進（3-5 天內 2-3 批），別 all-in 抄底。停損放回檔前低，確認反彈再加碼。',
+    },
+    squeeze: {
+        criteria: ['squeeze_candidate 訊號（空單 > 20% + 站上 MA20 > 5%）'],
+        strategy: '高空單 + 價格已反彈。若有 catalyst（財報 / 政策 / 併購）可能引爆軋空連鎖。',
+        action: '短線交易思維，停損緊（-5% 以內），目標 10-20% 快速獲利了結。別長抱、軋空結束很快。',
+    },
+    safe: {
+        criteria: ['Score ≥ 60', '排除超買', '排除拋物線'],
+        strategy: '新手友善、保守動能。不追強但避開過熱，適合建倉、長期追蹤。',
+        action: '小倉位分散持有；重視整體 portfolio 表現而非單檔爆發力。適合月級時間框架。',
+    },
+    all: {
+        criteria: ['無任何過濾'],
+        strategy: '重設所有 filter，看全 503 檔分布。用來了解市場整體狀況或自己手動挑。',
+        action: '搭配表頭排序（分數 / RSI / 量比）切換不同維度觀察。',
+    },
+    macd_breakout: {
+        criteria: ['Stage 2', 'MACD 剛黃金交叉', '量能擴張'],
+        strategy: '三訊號同時出現：結構 + 動能 + 資金。技術面最完整的進場點，勝率比單一訊號高。',
+        action: '黃金交叉當週內進場最佳，錯過 5 天以上訊號就衰退。停損 MA50 下方，目標前高。',
+    },
+    macd_accelerating: {
+        criteria: ['Score ≥ 60', 'MACD histogram 連續擴大'],
+        strategy: '趨勢中段動能加速階段 — 不是初升段也不是頂部。用 MACD 柱狀圖確認「動能持續累積」。',
+        action: '適合在已有持倉時加碼；新進場也可以但 R/R 比 breakout 略差。',
+    },
+    macd_reversal: {
+        criteria: ['RSI ≤ 40（超賣 / 偏弱）', 'MACD histogram 轉升'],
+        strategy: '超賣區底部搭配動能翻轉確認。避免接飛刀 — 光超賣不進，動能跡象出現才動。',
+        action: '只在 Stage 2 或 Stage 1 後期使用；Stage 3/4 的 MACD 反轉常是反彈不是反轉。分批進。',
+    },
+};
+const PRESET_DETAIL_EN = {
+    leaders: {
+        criteria: [
+            'Score ≥ 75',
+            'Stage 2 uptrend',
+            'Volume ratio ≥ 1.2× (today / 20-day avg)',
+            'Hot-sector tickers only (HOT = dynamic list from daily sector-scan protocol — NOT the manual "Sector" dropdown in advanced filters)',
+            'Composite label = Strongly Bullish (score ≥ 80; weighted volume + MA stage + squeeze + trend acceleration)',
+        ],
+        strategy: 'Four-way confluence: fundamentals + technicals + flow + sector aligned. Filters to the 5-15 strongest leaders in the market right now.',
+        action: 'Core momentum holdings. Add on pullbacks to MA20/MA50. Full-size allowed but set stop at MA50 break.',
+    },
+    breakout: {
+        criteria: ['Stage 2', 'MA20/50 golden cross within 10 days', 'Volume expansion signal', 'Exclude RSI overbought'],
+        strategy: 'Classic O\'Neil / Minervini breakout entry. Golden cross = structural strength; volume = confirmation of a real breakout.',
+        action: 'Enter same day or next bar (market or limit). Stop below prior pivot or 3-5% below MA20. R/R ≥ 2:1.',
+    },
+    uptrend: {
+        criteria: ['Score ≥ 65', 'Stage 2', 'Exclude RSI overbought', 'Exclude parabolic risk'],
+        strategy: 'Mature trend followers — already uptrending but not overheated. Later entry than breakout but more consistent win rate.',
+        action: 'Good for conservative capital. Best entry: wait for RSI to retrace to 50-65. Medium position size; avoid the hottest names.',
+    },
+    pullback: {
+        criteria: ['Stage 2', 'RSI oversold pullback (<30 while Stage 2)'],
+        strategy: 'Short-term dip in a strong uptrend. ONLY applies to Stage 2; RSI <30 in a downtrend is weakness continuation, not opportunity.',
+        action: 'Scale in (2-3 tranches over 3-5 days); don\'t all-in. Stop at prior pullback low. Add after bounce confirms.',
+    },
+    squeeze: {
+        criteria: ['squeeze_candidate signal (short >20% + above MA20 by >5%)'],
+        strategy: 'High short interest + price recovery. With a catalyst (earnings/policy/M&A) this can trigger a short squeeze.',
+        action: 'Short-term trade mindset. Tight stops (<-5%). Target 10-20% quick profit — squeezes end fast, don\'t hold long.',
+    },
+    safe: {
+        criteria: ['Score ≥ 60', 'Exclude overbought', 'Exclude parabolic'],
+        strategy: 'Beginner-friendly conservative momentum. Doesn\'t chase the strongest but avoids overheated — good for building positions.',
+        action: 'Small diversified positions. Focus on portfolio-level performance, not single-name explosiveness. Month-scale horizon.',
+    },
+    all: {
+        criteria: ['No filters'],
+        strategy: 'Reset all filters — see the full 503-stock distribution. For overall market assessment or manual discovery.',
+        action: 'Combine with column sorting (score / RSI / volume) to view from different angles.',
+    },
+    macd_breakout: {
+        criteria: ['Stage 2', 'Fresh MACD bullish cross', 'Volume expansion'],
+        strategy: 'Triple confirmation: structure + momentum + flow. Strongest technical entry — win rate exceeds any single signal.',
+        action: 'Enter within the week of the cross — signal decays after 5 days. Stop below MA50, target prior highs.',
+    },
+    macd_accelerating: {
+        criteria: ['Score ≥ 60', 'MACD histogram rising consecutively'],
+        strategy: 'Mid-trend momentum acceleration — not the initial rally, not the top. Histogram expansion confirms momentum is building.',
+        action: 'Good for adding to existing positions. New entries OK but slightly worse R/R than breakout.',
+    },
+    macd_reversal: {
+        criteria: ['RSI ≤ 40 (oversold / weak)', 'MACD histogram turning up'],
+        strategy: 'Oversold zone with momentum-flip confirmation. Avoids catching falling knives — don\'t buy on oversold alone, wait for momentum sign.',
+        action: 'Use only in Stage 2 or late Stage 1. In Stage 3/4 a MACD reversal is usually a bounce, not a true reversal. Scale in.',
+    },
+};
+
+function _presetTip(key) {
+    const dict = (UI.currentLang === 'en' ? PRESET_DETAIL_EN : PRESET_DETAIL_ZH);
+    return dict[key];
+}
+
+// Global hover tooltip for signal/warning pills — lifecycle:
+// mouseover pill → show tooltip positioned above (flips below near top edge)
+// mouseout       → hide after 80ms delay (so moving cursor into tooltip
+//                  wouldn't be needed anyway since pointer-events:none)
+(function initMomentumPillTooltip() {
+    let _hideTimer = null;
+    function _renderSignalTip(el, isWarning) {
+        const key = el.dataset.sigTip || el.dataset.warnTip;
+        const entry = _pillTip(key, isWarning);
+        if (!entry) return null;
+        const titleLabel = isWarning ? warnLabel(key) : sigLabel(key);
+        return {
+            cls: isWarning ? 'mpt-warning' : 'mpt-signal',
+            html: `
+              <div class="mpt-title">${titleLabel}</div>
+              <div class="mpt-desc">${entry.desc}</div>
+              ${entry.hint ? `<div class="mpt-hint">${entry.hint}</div>` : ''}
+            `,
+        };
+    }
+    function _renderPresetTip(el) {
+        const key = el.dataset.presetTip;
+        const entry = _presetTip(key);
+        if (!entry) return null;
+        const tr = t();
+        const i18nEntry = tr['preset_' + key] || {};
+        const title = i18nEntry.label || key;
+        const isEn = UI.currentLang === 'en';
+        const criteriaLbl = isEn ? 'Criteria' : '判斷標準';
+        const strategyLbl = isEn ? 'Strategy' : '策略意義';
+        const actionLbl   = isEn ? 'How to use' : '使用建議';
+        const criteriaList = entry.criteria.map(c => `<li>${c}</li>`).join('');
+        return {
+            cls: 'mpt-preset',
+            html: `
+              <div class="mpt-title">${title}</div>
+              <div class="mpt-section-label">${criteriaLbl}</div>
+              <ul class="mpt-criteria">${criteriaList}</ul>
+              <div class="mpt-section-label">${strategyLbl}</div>
+              <div class="mpt-desc">${entry.strategy}</div>
+              <div class="mpt-hint"><strong>${actionLbl}:</strong> ${entry.action}</div>
+            `,
+        };
+    }
+    function showTip(el) {
+        const tip = document.getElementById('mom-pill-tooltip');
+        if (!tip) return;
+        let content;
+        if (el.dataset.presetTip)      content = _renderPresetTip(el);
+        else if (el.dataset.warnTip)   content = _renderSignalTip(el, true);
+        else if (el.dataset.sigTip)    content = _renderSignalTip(el, false);
+        if (!content) return;
+        tip.className = content.cls;
+        tip.innerHTML = content.html;
+        // Position invisible first to measure height
+        tip.style.opacity = '0';
+        tip.style.top = '-9999px';
+        tip.classList.add('visible');
+        requestAnimationFrame(() => {
+            const rect = el.getBoundingClientRect();
+            const tRect = tip.getBoundingClientRect();
+            const gap = 8;
+            let top = rect.top - tRect.height - gap;
+            if (top < 8) top = rect.bottom + gap;  // flip below if near top edge
+            let left = rect.left + (rect.width - tRect.width) / 2;
+            left = Math.max(8, Math.min(left, window.innerWidth - tRect.width - 8));
+            tip.style.top = top + 'px';
+            tip.style.left = left + 'px';
+            tip.style.opacity = '';
+        });
+    }
+    function hideTip() {
+        const tip = document.getElementById('mom-pill-tooltip');
+        if (tip) tip.classList.remove('visible');
+    }
+    const SELECTOR = '[data-sig-tip], [data-warn-tip], [data-preset-tip]';
+    document.addEventListener('mouseover', e => {
+        const el = e.target.closest(SELECTOR);
+        if (!el) return;
+        if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+        showTip(el);
+    });
+    document.addEventListener('mouseout', e => {
+        const el = e.target.closest(SELECTOR);
+        if (!el) return;
+        _hideTimer = setTimeout(hideTip, 80);
+    });
+})();
+
 // Signal / warning chip lists — shown in the filter panel. Order matters (most useful first).
 const FILTER_SIGNALS = [
     'stage2_uptrend_intact',
     'volume_expansion',
     'fresh_golden_cross_20_50',
     'fresh_golden_cross_50_200',
+    'macd_bullish_cross',
+    'macd_histogram_rising',
     'heavy_volume_spike_today',
     'squeeze_candidate',
     'oversold_rsi',
@@ -39,6 +312,7 @@ const FILTER_WARNINGS = [
     'volume_dry_up',
     'fresh_death_cross_20_50',
     'fresh_death_cross_50_200',
+    'macd_bearish_cross',
 ];
 
 function defaultFilter() {
@@ -148,6 +422,42 @@ const PRESETS = {
     },
     all: {        // 📊 reset — see everything
         filter: null,  // resolved to defaultFilter() on apply
+    },
+    macd_breakout: {   // 📈 MACD bullish cross + Stage 2 + volume expansion
+        filter: {
+            minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
+            minVolumeRatio: null, onlyHotSectors: false,
+            stage: 'Stage 2 uptrend', sector: 'any',
+            label: 'any',
+            requiredSignals:  ['macd_bullish_cross', 'volume_expansion'],
+            requiredWarnings: [],
+            excludedWarnings: [],
+            search: '',
+        },
+    },
+    macd_accelerating: {   // ⚡ MACD histogram rising + score ≥ 60 (momentum building)
+        filter: {
+            minScore: 60, maxScore: null, minRsi: null, maxRsi: null,
+            minVolumeRatio: null, onlyHotSectors: false,
+            stage: 'any', sector: 'any',
+            label: 'any',
+            requiredSignals:  ['macd_histogram_rising'],
+            requiredWarnings: [],
+            excludedWarnings: [],
+            search: '',
+        },
+    },
+    macd_reversal: {   // 🔄 RSI oversold + MACD histogram rising (bottom reversal confirm)
+        filter: {
+            minScore: 0, maxScore: null, minRsi: null, maxRsi: 40,
+            minVolumeRatio: null, onlyHotSectors: false,
+            stage: 'any', sector: 'any',
+            label: 'any',
+            requiredSignals:  ['macd_histogram_rising'],
+            requiredWarnings: [],
+            excludedWarnings: [],
+            search: '',
+        },
     },
 };
 
@@ -379,8 +689,9 @@ function renderPresetRow() {
     wrap.innerHTML = Object.keys(PRESETS).map(key => {
         const entry = tr['preset_' + key] || {};
         const label = entry.label || key;
-        const tip   = entry.tip   || '';
-        return `<button class="preset-btn" data-preset="${key}" title="${tip}">${label}</button>`;
+        // Use custom hover tooltip (data-preset-tip) instead of browser-native title=.
+        // Tooltip content comes from PRESET_DETAIL_ZH/EN — shows criteria + strategy + action.
+        return `<button class="preset-btn" data-preset="${key}" data-preset-tip="${key}">${label}</button>`;
     }).join('');
     wrap.querySelectorAll('[data-preset]').forEach(el => {
         el.addEventListener('click', () => applyPreset(el.dataset.preset));
@@ -505,6 +816,14 @@ function renderTable() {
             if (r) openRsiPopup(r);
         });
     });
+    // MACD cell click
+    tbody.querySelectorAll('.macd-cell').forEach(td => {
+        td.addEventListener('click', e => {
+            e.stopPropagation();
+            const r = _state.rows.find(x => x.ticker === td.dataset.tickerMacd);
+            if (r) openMacdPopup(r);
+        });
+    });
     // Analyze button click → enqueue invest protocol
     tbody.querySelectorAll('.analyze-btn').forEach(btn => {
         btn.addEventListener('click', e => {
@@ -602,19 +921,16 @@ function rsiCell(v) {
 }
 
 // MACD cell: compact histogram-direction badge with cross marker.
-// Shows ⚡▲/⚡▼ on the day of a crossover, ▲/▼ otherwise.
+// Shows ⚡▲/⚡▼ on the day of a crossover, ▲/▼ otherwise. Click opens the
+// full MACD popup (like RSI) via the macd-cell handler in renderTable.
 function macdCell(r) {
     const hist = r.macd_hist;
     if (hist == null) return '<span class="text-zinc-600 text-xs">—</span>';
     const isBull  = hist >= 0;
     const color   = isBull ? '#22c55e' : '#ef4444';
     const arrow   = isBull ? '▲' : '▼';
-    const cross   = r.macd_bullish_cross || r.macd_bearish_cross ? '⚡' : '';
-    const mLine   = r.macd_line  != null ? r.macd_line.toFixed(3)  : '—';
-    const sLine   = r.macd_signal != null ? r.macd_signal.toFixed(3) : '—';
-    const hVal    = hist.toFixed(3);
-    const tip     = `MACD ${mLine} | Signal ${sLine} | Hist ${hVal}`;
-    return `<span class="font-mono text-xs font-bold" style="color:${color}" title="${tip}">${cross}${arrow}</span>`;
+    const cross   = r.macd_bullish_cross ? '⚡↑' : r.macd_bearish_cross ? '⚡↓' : '';
+    return `<span class="font-mono text-xs font-bold" style="color:${color};text-decoration:underline dotted rgba(161,161,170,0.4)">${cross || arrow}</span>`;
 }
 
 // Volume ratio color tier — mirrors popup logic
@@ -664,9 +980,9 @@ function rowHTML(r) {
                          : above200 >= 0 ? 'color:#86efac' : 'color:#fca5a5';
 
     const sigHTML = (r.signals || []).slice(0, 4)
-        .map(s => `<span class="signal-pill pill-clickable" data-pill-type="signal" data-pill-value="${s}" title="${s}">${sigLabel(s)}</span>`).join('')
+        .map(s => `<span class="signal-pill pill-clickable" data-pill-type="signal" data-pill-value="${s}" data-sig-tip="${s}">${sigLabel(s)}</span>`).join('')
       + (r.warnings || []).slice(0, 2)
-        .map(w => `<span class="warning-pill pill-clickable" data-pill-type="warning" data-pill-value="${w}" title="${w}">${warnLabel(w)}</span>`).join('');
+        .map(w => `<span class="warning-pill pill-clickable" data-pill-type="warning" data-pill-value="${w}" data-warn-tip="${w}">${warnLabel(w)}</span>`).join('');
 
     const shortTxt = r.short_pct_float == null ? '—'
                     : `${r.short_pct_float.toFixed(1)}%`;
@@ -709,7 +1025,7 @@ function rowHTML(r) {
         <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_volCellColor(r)};font-weight:700" title="${_volCellTitle(r)}">${_volCellText(r)}</td>
         <td class="text-right font-mono text-xs" style="${above200Color}">${above200Txt}</td>
         <td class="text-right rsi-cell" data-ticker-rsi="${r.ticker}" style="cursor:pointer">${rsiCell(r.rsi_14)}</td>
-        <td class="text-right">${macdCell(r)}</td>
+        <td class="text-right macd-cell" data-ticker-macd="${r.ticker}" style="cursor:pointer">${macdCell(r)}</td>
         <td>${sigHTML || '<span class="text-zinc-600 text-xs">—</span>'}</td>
         <td class="text-xs" style="color:${shortColor}">${shortTxt}</td>
     </tr>`;
@@ -875,6 +1191,195 @@ function openRsiPopup(r) {
 
 function closeRsiPopup() {
     document.getElementById('rsi-modal').classList.add('hidden');
+}
+
+/* ── MACD detail popup ──────────────────────────────────────── */
+// Mirrors the RSI popup structure: header values + visual + 4 regimes + your-situation.
+// MACD has 2 axes instead of RSI's 1:
+//   axis 1: MACD line above or below zero (bull/bear regime)
+//   axis 2: Histogram rising or falling (momentum accelerating or decelerating)
+// → 4 quadrants.
+const MACD_PALETTE = {
+    strongest_bull:  { rgb: '34,197,94',    hex: '#22c55e' },
+    weakening_bull:  { rgb: '234,179,8',    hex: '#eab308' },
+    reversal_bull:   { rgb: '59,130,246',   hex: '#3b82f6' },
+    strongest_bear:  { rgb: '239,68,68',    hex: '#ef4444' },
+};
+const MACD_REGIME = {
+    strongest_bull: {
+        tag: 'STRONGEST BULL',
+        title_zh: '最強多頭', title_en: 'Strongest Bull',
+        desc_zh: 'MACD 線在零軸上方 + 柱狀圖擴大。動能全面加速，趨勢延續機率最高。',
+        desc_en: 'MACD above zero + histogram rising. Fully accelerating bull momentum.',
+        advice_zh: '趨勢交易最佳狀態；已持倉可抱緊，未持倉回檔至 MA20 / 50 是加碼點。',
+        advice_en: 'Prime trend-following state. Hold existing positions; add on pullbacks to MA20/50.',
+    },
+    weakening_bull: {
+        tag: 'WEAKENING BULL',
+        title_zh: '多頭動能衰退', title_en: 'Weakening Bull',
+        desc_zh: 'MACD 線在零軸上方但柱狀圖縮短。趨勢仍多但動能放緩，常出現在頂部前夕。',
+        desc_en: 'MACD above zero but histogram shrinking. Still bull, but momentum decelerating — often precedes tops.',
+        advice_zh: '不急著賣但別加碼；注意是否跌破 MA20 + 出量，那就是 Stage 3 訊號。',
+        advice_en: "Don't rush to sell but stop adding. Watch for MA20 break on volume — that's the Stage-3 signal.",
+    },
+    reversal_bull: {
+        tag: 'REVERSAL BULL',
+        title_zh: '空頭轉多訊號', title_en: 'Bullish Reversal',
+        desc_zh: 'MACD 線在零軸下方但柱狀圖擴大。熊市末尾、築底反彈的早期訊號。',
+        desc_en: 'MACD below zero but histogram rising. Early signal of bottom-forming reversal.',
+        advice_zh: '不要搶先進場；等 MACD 上穿零軸 + 股價突破 MA50 才是確認訊號。',
+        advice_en: "Don't front-run. Wait for MACD to cross zero + price to break MA50 for confirmation.",
+    },
+    strongest_bear: {
+        tag: 'STRONGEST BEAR',
+        title_zh: '最強空頭', title_en: 'Strongest Bear',
+        desc_zh: 'MACD 線在零軸下方 + 柱狀圖擴大（負值變大）。空頭動能加速，下跌趨勢最強。',
+        desc_en: 'MACD below zero + histogram growing (more negative). Fully accelerating bear momentum.',
+        advice_zh: '持有中強烈建議減碼或止損。「逆勢抄底」歷史勝率極低，等 reversal_bull 出現再說。',
+        advice_en: 'Strong sell / stop-out signal. Catching falling knives has poor odds — wait for reversal signal.',
+    },
+};
+
+function _macdRegime(r) {
+    const hist = r.macd_hist;
+    const mLine = r.macd_line;
+    if (hist == null || mLine == null) return null;
+    const above_zero = mLine >= 0;   // true bull regime = MACD line above zero
+    // Histogram direction: use stored histogram_trend if available, else infer
+    // from hist sign + magnitude (rising = |hist| increasing → we don't have
+    // prior-bar hist in the row, so fall back to hist sign — hist > 0 is an
+    // approximation of "rising" when in bull territory).
+    const rising = hist >= 0;  // simplified: positive hist = "rising" in the quadrant sense
+    if (above_zero && rising)   return 'strongest_bull';
+    if (above_zero && !rising)  return 'weakening_bull';
+    if (!above_zero && rising)  return 'reversal_bull';
+    return 'strongest_bear';
+}
+
+function openMacdPopup(r) {
+    const isEn = UI.currentLang === 'en';
+    const titleKey = isEn ? 'title_en' : 'title_zh';
+    const descKey  = isEn ? 'desc_en'  : 'desc_zh';
+    const advKey   = isEn ? 'advice_en': 'advice_zh';
+
+    document.getElementById('macd-modal-title').textContent =
+        `${r.ticker} — ${isEn ? 'MACD Analysis' : 'MACD 分析'}`;
+
+    const body = document.getElementById('macd-modal-body');
+    const hist = r.macd_hist;
+    if (hist == null || r.macd_line == null) {
+        body.innerHTML = `<div class="text-zinc-500">${isEn ? 'MACD unavailable (insufficient history).' : 'MACD 無法判定（歷史資料不足）。'}</div>`;
+        document.getElementById('macd-modal').classList.remove('hidden');
+        UI.icons();
+        return;
+    }
+
+    const regime = _macdRegime(r);
+    const palette = MACD_PALETTE[regime];
+    const entry = MACD_REGIME[regime];
+    const mLine = r.macd_line;
+    const sLine = r.macd_signal;
+
+    // Zero-axis bar: map histogram value → 0-100% position on bar.
+    // Cap at ±5 for visual sanity; extreme outliers clip to edges.
+    const CAP = 5;
+    const clamped = Math.max(-CAP, Math.min(CAP, hist));
+    const pct = 50 + (clamped / CAP) * 50;   // 50% = zero axis
+
+    // Cross banner if fresh cross today
+    let crossBanner = '';
+    if (r.macd_bullish_cross) {
+        crossBanner = `<div class="text-[11px] p-2 rounded" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);color:#22c55e">
+            ⚡↑ ${isEn ? 'Bullish cross today (MACD crossed above Signal)' : '今日黃金交叉（MACD 上穿 Signal 線）'}
+          </div>`;
+    } else if (r.macd_bearish_cross) {
+        crossBanner = `<div class="text-[11px] p-2 rounded" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#ef4444">
+            ⚡↓ ${isEn ? 'Bearish cross today (MACD crossed below Signal)' : '今日死叉（MACD 下穿 Signal 線）'}
+          </div>`;
+    }
+
+    // 4-quadrant map — visual representation of the 4 regimes
+    const quadrants = [
+        { key: 'weakening_bull', pos: 'top-left'     },
+        { key: 'strongest_bull', pos: 'top-right'    },
+        { key: 'strongest_bear', pos: 'bottom-left'  },
+        { key: 'reversal_bull',  pos: 'bottom-right' },
+    ];
+    const quadHTML = quadrants.map(q => {
+        const p = MACD_PALETTE[q.key];
+        const e = MACD_REGIME[q.key];
+        const active = (q.key === regime);
+        return `<div class="macd-quad-cell ${active ? 'active' : ''}" style="--quad-rgb:${p.rgb}">
+            <div class="mq-tag">${e.tag}</div>
+            <div class="mq-title">${e[titleKey]}</div>
+            <div class="mq-desc">${e[descKey]}</div>
+          </div>`;
+    }).join('');
+
+    body.innerHTML = `
+      ${crossBanner}
+
+      <!-- Header: 3 core values -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="text-center">
+          <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">MACD ${isEn ? 'Line' : '線'}</div>
+          <div class="font-mono font-black" style="font-size:18px;color:${mLine >= 0 ? '#22c55e' : '#ef4444'}">${mLine.toFixed(3)}</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">Signal ${isEn ? 'Line' : '線'}</div>
+          <div class="font-mono font-black" style="font-size:18px;color:var(--text-main)">${sLine != null ? sLine.toFixed(3) : '—'}</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">Histogram</div>
+          <div class="font-mono font-black" style="font-size:18px;color:${hist >= 0 ? '#22c55e' : '#ef4444'}">${hist >= 0 ? '+' : ''}${hist.toFixed(3)}</div>
+        </div>
+      </div>
+
+      <!-- Zero-axis bar: histogram position relative to zero -->
+      <div>
+        <div class="flex items-baseline justify-between mb-0.5">
+          <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${isEn ? 'Histogram vs Zero' : 'Histogram 相對零軸'}</span>
+          <span class="text-[10px] text-zinc-500 font-mono">${isEn ? 'scaled to ±5' : '刻度 ±5'}</span>
+        </div>
+        <div class="macd-bar-wrap">
+          <span class="macd-bar-label zero">0</span>
+          <span class="macd-bar-label bear">${isEn ? 'BEAR' : '空頭'}</span>
+          <span class="macd-bar-label bull">${isEn ? 'BULL' : '多頭'}</span>
+          <div class="macd-bar-zero"></div>
+          <div class="macd-bar-marker" style="left:${pct}%;color:${palette.hex};background:${palette.hex}">
+            <div class="macd-bar-marker-label" style="color:${palette.hex}">${hist >= 0 ? '+' : ''}${hist.toFixed(2)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-quadrant regime map -->
+      <div>
+        <div class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">
+          ${isEn ? 'Four MACD Regimes' : '四個 MACD 狀態'}
+        </div>
+        <div class="macd-quadrant">${quadHTML}</div>
+      </div>
+
+      <!-- Personalised advice -->
+      <div class="pt-3 border-t border-zinc-200 dark:border-zinc-800">
+        <div class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">
+          ${isEn ? 'Your Situation' : '你目前的狀況'}
+        </div>
+        <div class="text-[11px] leading-relaxed mb-2" style="color:var(--text-main)">
+          <span class="font-bold" style="color:${palette.hex}">${entry[titleKey]}</span> — ${entry[descKey]}
+        </div>
+        <div class="text-[11px] leading-relaxed" style="color:var(--text-main)">
+          💡 ${entry[advKey]}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('macd-modal').classList.remove('hidden');
+    UI.icons();
+}
+
+function closeMacdPopup() {
+    document.getElementById('macd-modal').classList.add('hidden');
 }
 
 /* ── Stage classification popup ──────────────────────────────── */
@@ -1529,6 +2034,9 @@ function translate() {
     set('th-rsi',       tr.col_rsi);
     set('th-signals',   tr.col_signals);
     set('th-short',     tr.col_short);
+    set('th-macd',      tr.col_macd);
+    const macdTh = document.getElementById('th-macd');
+    if (macdTh && tr.col_macd_tip) macdTh.title = tr.col_macd_tip;
     set('no-data-text', tr.no_data);
     set('filter-title',          tr.filter_title);
     set('filter-reset-label',    tr.filter_reset);
@@ -1621,11 +2129,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('stage-modal-bg')?.addEventListener('click', closeStagePopup);
     document.getElementById('rsi-modal-close')?.addEventListener('click', closeRsiPopup);
     document.getElementById('rsi-modal-bg')?.addEventListener('click', closeRsiPopup);
+    document.getElementById('macd-modal-close')?.addEventListener('click', closeMacdPopup);
+    document.getElementById('macd-modal-bg')?.addEventListener('click', closeMacdPopup);
     // Scan card — expand log / dismiss
     document.getElementById('scan-card-expand')?.addEventListener('click', toggleScanCardBody);
     document.getElementById('scan-card-dismiss')?.addEventListener('click', hideScanCard);
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { closeHistory(); closeVolumePopup(); closeStagePopup(); closeRsiPopup(); }
+        if (e.key === 'Escape') { closeHistory(); closeVolumePopup(); closeStagePopup(); closeRsiPopup(); closeMacdPopup(); }
     });
 
     // ── Filter panel bindings ───────────────────────────────────

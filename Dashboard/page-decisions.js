@@ -129,19 +129,22 @@ async function deletePosition(posId) {
 // setTimeout race that silently failed when bridge.py took longer than 1.5s.
 async function awaitBridgeAndReload() {
     const startTs  = Date.now();
-    const deadline = startTs + 6000;   // 6s safety cap — bridge.py normally < 2s
+    const deadline = startTs + 15000;  // 15s cap — bridge can take 3-8s
+    // First wait briefly for bridge thread to start (it's launched async server-side)
+    await new Promise(res => setTimeout(res, 400));
     while (Date.now() < deadline) {
         try {
             const r = await fetch('/api/refresh_status');
             if (r.ok) {
                 const s = await r.json();
+                // Wait until bridge is no longer running AND last_ok is after our mutation
                 if (!s.in_progress && s.last_ok) {
                     const lastOkTs = new Date(s.last_ok).getTime();
-                    if (lastOkTs >= startTs - 500) break;   // bridge finished after our mutation
+                    if (lastOkTs >= startTs) break;
                 }
             }
         } catch {}
-        await new Promise(res => setTimeout(res, 200));
+        await new Promise(res => setTimeout(res, 300));
     }
     await loadWatchlist();
 }
@@ -269,6 +272,7 @@ const _viewParam = new URLSearchParams(window.location.search).get('view');
 const _viewMap = { active: 'execute', execute: 'execute', waiting: 'waiting',
                    historical: 'historical', positions: 'positions', all: 'all' };
 let activeFilter = _viewMap[_viewParam] || 'all';
+let searchQuery = '';
 document.getElementById('filter-tabs').addEventListener('click', e => {
     const btn = e.target.closest('[data-filter]');
     if (!btn) return;
@@ -279,6 +283,10 @@ document.getElementById('filter-tabs').addEventListener('click', e => {
             on ? 'bg-emerald-500 text-black border-emerald-500'
                : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400'}`;
     });
+    renderCards(activeFilter);
+});
+document.getElementById('ticker-search').addEventListener('input', e => {
+    searchQuery = e.target.value.trim().toUpperCase();
     renderCards(activeFilter);
 });
 // init tab styles (respect deep-link activeFilter)
@@ -643,6 +651,10 @@ function renderCards(filter) {
     // has every row, but the grid shows only the most recent snapshot.
     filtered = dedupeByTicker(filtered, all);
 
+    if (searchQuery) {
+        filtered = filtered.filter(i => (i.ticker || '').toUpperCase().includes(searchQuery));
+    }
+
     if (!filtered.length) {
         const noItems = (window.i18n?.[UI.currentLang]?.watchlist?.no_items) || 'No items match this filter.';
         grid.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-600">${noItems}</div>`;
@@ -834,7 +846,8 @@ async function loadWatchlist() {
     logToUI('Loading decisions data...');
     try {
         const data = await DataStore.get(true);   // force fresh read after mutations
-        document.getElementById('last-update').textContent = `SYNC: ${data.last_updated}`;
+        UI.applySyncLight(document.getElementById('last-update'), data.last_updated,
+            '同步內容：個股分析結果（history.json → data.json）\n每次執行「分析 TICKER」後需重跑 bridge.py 才會更新');
 
         const allAnalysis = data.recent_analysis || [];
         const watchItems  = allAnalysis.filter(a => a.on_watchlist);
@@ -1038,42 +1051,49 @@ function syncLockUI() {
     const running = _protoLock.running;
     const runningTicker = _protoLock.ticker;
     const elapsedStr = fmtElapsed(_protoLock.elapsed_sec);
+    
+    // Also get currently queued tickers from AnalyzeQueue
+    const queueState = (window.AnalyzeQueue && window.AnalyzeQueue.getQueueState) 
+        ? window.AnalyzeQueue.getQueueState() : { queue: [] };
+    const queuedTickers = new Set(queueState.queue.map(q => q.ticker));
 
     document.querySelectorAll('[data-refresh-ticker]').forEach(btn => {
         const btnTicker = btn.dataset.refreshTicker;
         const icon  = btn.querySelector('.refresh-icon');
         const timer = btn.querySelector('.timer-span');
-        if (!running) {
-            btn.disabled = false;
-            btn.classList.remove('opacity-40', 'pointer-events-none', 'border-blue-500/50', 'text-blue-400');
-            icon?.classList.remove('animate-spin');
-            timer?.classList.add('hidden');
-            const lbl = (window.i18n?.[UI.currentLang]?.watchlist?.refresh_btn) ||
-                        (UI.currentLang === 'zh' ? '重新分析' : 'Re-analyze');
-            btn.title = lbl;
-            return;
-        }
-        // Locked state
-        if (btnTicker === runningTicker) {
-            // This card is the one running — spin + show timer
+        
+        const isCurrentlyRunning = running && btnTicker === runningTicker;
+        const isQueued = queuedTickers.has(btnTicker);
+
+        if (isCurrentlyRunning) {
             btn.disabled = true;
-            btn.classList.remove('opacity-40');
             btn.classList.add('border-blue-500/50', 'text-blue-400');
+            btn.classList.remove('opacity-40', 'pointer-events-none');
             icon?.classList.add('animate-spin');
             if (timer) {
                 timer.textContent = elapsedStr;
                 timer.classList.remove('hidden');
             }
             btn.title = (UI.currentLang === 'zh' ? `分析中：${btnTicker}` : `Analyzing: ${btnTicker}`) + ` (${elapsedStr})`;
-        } else {
-            // Other cards — greyed out
+        } else if (isQueued) {
             btn.disabled = true;
-            btn.classList.add('opacity-40', 'pointer-events-none');
+            btn.classList.add('opacity-60', 'border-amber-500/50', 'text-amber-400');
+            btn.classList.remove('pointer-events-none');
             icon?.classList.remove('animate-spin');
             timer?.classList.add('hidden');
-            btn.title = (UI.currentLang === 'zh'
-                ? `執行中：${runningTicker || _protoLock.name} (${elapsedStr})`
-                : `Running: ${runningTicker || _protoLock.name} (${elapsedStr})`);
+            btn.title = (UI.currentLang === 'zh' ? '已在佇列中排隊' : 'In Queue...');
+        } else {
+            // System idle or other ticker running — allow enqueuing!
+            btn.disabled = false;
+            btn.classList.remove('pointer-events-none', 'border-blue-500/50', 'text-blue-400', 'border-amber-500/50', 'text-amber-400');
+            if (running) btn.classList.add('opacity-40');
+            else         btn.classList.remove('opacity-40');
+            
+            icon?.classList.remove('animate-spin');
+            timer?.classList.add('hidden');
+            const lbl = (window.i18n?.[UI.currentLang]?.watchlist?.refresh_btn) ||
+                        (UI.currentLang === 'zh' ? '重新分析' : 'Re-analyze');
+            btn.title = lbl;
         }
     });
 }

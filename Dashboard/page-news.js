@@ -33,9 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial placeholders (only if still showing the untranslated default)
     const lastSync = document.getElementById('last-sync-time');
-    if (lastSync && /^LAST SYNC: NONE$/i.test(lastSync.textContent)) {
-      lastSync.textContent = t.news_page?.last_sync_none || 'LAST SYNC: NONE';
-    }
+    if (lastSync) UI.applySyncLight(lastSync, null);
     const brList = document.getElementById('binary-risks-list');
     if (brList && brList.firstElementChild?.classList?.contains('animate-pulse')) {
       brList.innerHTML = `<div class="text-xs text-zinc-600 animate-pulse">${t.news_page?.loading || 'Loading...'}</div>`;
@@ -204,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('bull-news').textContent = counts.bullish;
       document.getElementById('bear-news').textContent = counts.bearish;
       document.getElementById('binary-news').textContent = counts.binary;
-      document.getElementById('last-sync-time').textContent = `${t.last_sync}: ${data.last_updated || 'N/A'}`;
+      UI.applySyncLight(document.getElementById('last-sync-time'), data.last_updated);
 
       // Binary Risks Sidebar
       const binaryList = document.getElementById('binary-risks-list');
@@ -446,15 +444,28 @@ document.addEventListener('DOMContentLoaded', () => {
     pollNewsRunStatus();
   }
 
-  // Check if a protocol is already running on page load
+  // Resume banner on page load. Covers running *and* recently-finished runs
+  // so navigating away mid-run and back doesn't lose the progress card / result.
+  // Terminal states (done/error) only resume if ended within the last 5 min.
   (async () => {
     try {
       const r = await fetch('/api/run-protocol/status');
       const s = await r.json();
-      if (s.status === 'running' && (s.name === 'news' || s.name === 'flash' || s.name === 'review')) {
-        const isZh = UI.currentLang === 'zh';
+      const isNews = s.name === 'news' || s.name === 'flash' || s.name === 'review';
+      if (!isNews) return;
+      const isZh = UI.currentLang === 'zh';
+      const RESUME_TERMINAL_WINDOW_MS = 5 * 60 * 1000;
+      const endedRecently = s.ended_at
+          && (Date.now() - new Date(s.ended_at).getTime()) < RESUME_TERMINAL_WINDOW_MS;
+      if (s.status === 'running') {
         showRunBanner(isZh ? `${s.name} 執行中...` : `${s.name} running...`, '');
         _newsPollTimer = setInterval(pollNewsRunStatus, 2000);
+      } else if (s.status === 'done' && endedRecently) {
+        showRunBanner(isZh ? `${s.name} 完成` : `${s.name} done`, '');
+        setRunBannerDone(isZh ? '分析完成，資料已更新' : 'Done — data refreshed');
+      } else if (s.status === 'error' && endedRecently) {
+        showRunBanner(isZh ? `${s.name} 失敗` : `${s.name} error`, '');
+        setRunBannerError(s.error || s.status);
       }
     } catch (e) { /* ignore */ }
   })();

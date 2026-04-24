@@ -48,6 +48,9 @@ const i18n = {
       preset_squeeze:  { label: "⚡ 軋空候選",   tip: "高空單 + 正向動能。catalyst-driven 潛在軋空爆發。" },
       preset_safe:     { label: "🎯 無過熱精選", tip: "分數 ≥ 60，排除超買與拋物線。新手友善、保守動能。" },
       preset_all:      { label: "📊 全部",       tip: "重設所有 filter，看全 503 檔分布。" },
+      preset_macd_breakout:     { label: "📈 MACD 突破確認", tip: "Stage 2 + MACD 剛黃金交叉 + 量能擴張。三訊號同時出現，技術面最完整的進場點。" },
+      preset_macd_accelerating: { label: "⚡ MACD 動能加速", tip: "分數 ≥ 60 + MACD histogram 連續走升。趨勢中段加速階段，動能正在累積。" },
+      preset_macd_reversal:     { label: "🔄 超賣 MACD 反轉", tip: "RSI ≤ 40 + MACD histogram 轉升。超賣區底部搭配動能翻轉確認，避免接飛刀。" },
       // Volume detail popup
       vol_modal_title:     "量比細項",
       vol_modal_today:     "今日成交量",
@@ -138,6 +141,8 @@ const i18n = {
       col_volume:      "量比",
       col_above_200:   "距 200MA",
       col_rsi:         "RSI",
+      col_macd:        "MACD",
+      col_macd_tip:    "MACD（指數平滑異同移動平均）\n▲ 綠色 = histogram > 0（多頭區）\n▼ 紅色 = histogram < 0（空頭區）\n⚡ = 今日剛發生交叉\n\n快線(12) 與 慢線(26) 的差值，signal 線為其 9 日 EMA。\nHistogram = MACD 線 − Signal 線，方向比數值更重要。",
       col_signals:     "訊號",
       col_short:       "空方",
       history_title:   "Score 30 日走勢",
@@ -175,6 +180,8 @@ const i18n = {
         high_short_interest:          "空單多",
         squeeze_candidate:            "軋空候選",
         oversold_rsi:                 "RSI 超賣回檔",
+        macd_bullish_cross:           "MACD 黃金交叉",
+        macd_histogram_rising:        "MACD 動能加速",
       },
       warnings_map: {
         parabolic_blowoff_risk:       "拋物線風險",
@@ -183,6 +190,7 @@ const i18n = {
         fresh_death_cross_20_50:      "剛死叉 20/50",
         fresh_death_cross_50_200:     "剛大死叉 50/200",
         overbought_rsi:               "RSI 超買",
+        macd_bearish_cross:           "MACD 死叉",
       },
       stages_map: {
         "Stage 1 basing":     "階段 1 基底",
@@ -687,6 +695,9 @@ const i18n = {
       preset_squeeze:  { label: "⚡ Squeeze",        tip: "High short interest + positive momentum. Catalyst-driven potential squeeze." },
       preset_safe:     { label: "🎯 Safe Quality",   tip: "Score ≥ 60, exclude overbought & parabolic. Conservative momentum — beginner-friendly." },
       preset_all:      { label: "📊 All",            tip: "Reset all filters — see the full 503-stock distribution." },
+      preset_macd_breakout:     { label: "📈 MACD Breakout",    tip: "Stage 2 + fresh MACD bullish cross + volume expansion. Triple-confirmation entry — strongest technical setup." },
+      preset_macd_accelerating: { label: "⚡ MACD Accelerating", tip: "Score ≥ 60 + MACD histogram rising. Mid-trend momentum build-up phase." },
+      preset_macd_reversal:     { label: "🔄 Oversold Reversal", tip: "RSI ≤ 40 + MACD histogram turning up. Oversold dip with momentum confirmation — avoids catching a falling knife." },
       // Volume detail popup
       vol_modal_title:     "Volume detail",
       vol_modal_today:     "Today's volume",
@@ -777,6 +788,8 @@ const i18n = {
       col_volume:      "Vol×",
       col_above_200:   "vs 200MA",
       col_rsi:         "RSI",
+      col_macd:        "MACD",
+      col_macd_tip:    "MACD (Moving Average Convergence Divergence)\n▲ Green = histogram > 0 (bullish zone)\n▼ Red = histogram < 0 (bearish zone)\n⚡ = crossover happened today\n\nFast(12) minus Slow(26) EMA. Signal line = 9-day EMA of MACD.\nHistogram = MACD − Signal. Direction matters more than value.",
       col_signals:     "Signals",
       col_short:       "Short",
       history_title:   "30-day score history",
@@ -814,6 +827,8 @@ const i18n = {
         high_short_interest:          "High short",
         squeeze_candidate:            "Squeeze candidate",
         oversold_rsi:                 "RSI oversold pullback",
+        macd_bullish_cross:           "MACD bullish cross",
+        macd_histogram_rising:        "MACD accelerating",
       },
       warnings_map: {
         parabolic_blowoff_risk:       "Parabolic risk",
@@ -822,6 +837,7 @@ const i18n = {
         fresh_death_cross_20_50:      "Fresh 20/50 death",
         fresh_death_cross_50_200:     "Fresh 50/200 death",
         overbought_rsi:               "RSI overbought",
+        macd_bearish_cross:           "MACD bearish cross",
       },
       stages_map: {
         "Stage 1 basing":     "Stage 1 basing",

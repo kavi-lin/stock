@@ -42,7 +42,21 @@ PHASE0_REQUIRED = [
     "market_regime", "cycle_phase", "uptrend_ratio_overall",
     "warning_flags", "exposure_ceiling", "regime_confidence",
     "ftd", "market_top", "synthesized_exposure", "signal_conflict",
+    # V1.4 — FRED Layer E (MUST-run)
+    "fred_available",
 ]
+
+FRED_SLIM_REQUIRED = [
+    "regime_label", "regime_confidence", "macro_scores_composite",
+    "yield_curve_inverted", "credit_stress_elevated", "financial_stress_above_avg",
+    "fed_rate_direction", "real_rate_preferred",
+    "sector_rotation_favor", "sector_rotation_avoid",
+]
+VALID_REGIMES = {
+    "Goldilocks", "Soft Landing", "Reflation", "Benign Easing", "Overheating",
+    "Late Cycle Tightening", "Stagflation", "Recession Easing", "Recession Risk",
+    "Transitional",
+}
 
 PHASE1_REQUIRED = ["phase", "sectors"]
 PHASE3_REQUIRED = ["phase", "top_catalysts", "political_overlay"]
@@ -101,6 +115,31 @@ def main():
         mt = p0.get("market_top") or {}
         if not mt or "composite_score" not in mt or "zone" not in mt:
             errors.append("_phase0.market_top missing composite_score/zone")
+
+        # V1.4 — FRED Layer E slim snapshot
+        fred_avail = p0.get("fred_available")
+        if fred_avail is True:
+            fs = p0.get("fred_snapshot")
+            if not isinstance(fs, dict):
+                errors.append("_phase0.fred_available=true but fred_snapshot missing or not dict")
+            else:
+                for k in FRED_SLIM_REQUIRED:
+                    if k not in fs:
+                        errors.append(f"_phase0.fred_snapshot missing {k}")
+                rl = fs.get("regime_label")
+                if rl is not None and rl not in VALID_REGIMES:
+                    errors.append(f"_phase0.fred_snapshot.regime_label={rl!r} not in {sorted(VALID_REGIMES)}")
+                rc = fs.get("regime_confidence")
+                if rc is not None and not (0.0 <= float(rc) <= 1.0):
+                    errors.append(f"_phase0.fred_snapshot.regime_confidence={rc!r} must be 0.0-1.0")
+                for lst_key in ("sector_rotation_favor", "sector_rotation_avoid"):
+                    if lst_key in fs and not isinstance(fs[lst_key], list):
+                        errors.append(f"_phase0.fred_snapshot.{lst_key} must be array")
+        elif fred_avail is False:
+            # fallback acceptable; snapshot can be null
+            pass
+        else:
+            errors.append(f"_phase0.fred_available must be true/false bool (got {fred_avail!r})")
 
     # ── 4. _phase1 structure ──────────────────────────────────────────────
     p1 = data.get("_phase1", {})

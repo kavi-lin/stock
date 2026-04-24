@@ -6,6 +6,11 @@ Reports volume dynamics (today vs 20/50D avg, spike detection), MA structure
 (Weinstein stage + cross events), short interest (% float, days-to-cover,
 squeeze potential), and a composite momentum score 0-100.
 
+Pure-computation primitives (MA structure, RSI, volume profile, stage
+classification, cross detection) live in `technical_core.py` — this file
+owns momentum-monitor-specific layers: short interest, composite scoring,
+signals/warnings, caching, CLI.
+
 Usage:
     python3 momentum.py TSLA
     python3 momentum.py TSLA --json-only
@@ -16,22 +21,32 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
-import numpy as np
-import pandas as pd
-import yfinance as yf
+# Pure computation primitives — shared with technical-analyst skill.
+from technical_core import (
+    fetch_history,
+    volume_profile,
+    ma_structure,
+    classify_stage,
+    detect_crosses,
+    rsi_14,
+    rsi_state,
+    intraday_state,
+    compute_macd,
+)
 
-try:
-    from zoneinfo import ZoneInfo      # Python 3.9+
-    _ET = ZoneInfo("America/New_York")
-    _HAS_ZONEINFO = True
-except Exception:
-    _ET = timezone(timedelta(hours=-4))  # EDT fallback (approximate)
-    _HAS_ZONEINFO = False
-
-_SESSION_TOTAL_MIN = 390   # 9:30 → 16:00 ET
-_INTRADAY_EARLY_CUTOFF_MIN = 30  # < 30 min elapsed → too_early (vol signals suppressed)
+# Backward-compat aliases — some existing callers may import the old
+# underscore-prefixed names. Keep them working by re-exporting the public
+# names here.
+_fetch_history   = fetch_history
+_volume_block    = volume_profile
+_ma_block        = ma_structure
+_classify_stage  = classify_stage
+_detect_crosses  = detect_crosses
+_rsi_14          = rsi_14
+_rsi_block       = rsi_state
+_intraday_state  = intraday_state
 
 SCRIPT_DIR      = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR       = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
@@ -57,6 +72,25 @@ def _load_cache(ticker, max_age_sec):
             payload.pop(k, None)
         payload["cache_hit"]     = True
         payload["cache_age_sec"] = age_sec
+        # Invalidate old cache entries that pre-date MACD field (treat as stale)
+        if "macd" not in payload:
+            return None
+        # Re-derive MACD signals from cached macd data if signals were generated
+        # before MACD signal detection was added (cheap: no network call needed).
+        macd = payload.get("macd") or {}
+        sigs = set(payload.get("signals", []))
+        warns = set(payload.get("warnings", []))
+        changed = False
+        if macd.get("bullish_cross") and "macd_bullish_cross" not in sigs:
+            sigs.add("macd_bullish_cross"); changed = True
+        if macd.get("bearish_cross") and "macd_bearish_cross" not in warns:
+            warns.add("macd_bearish_cross"); changed = True
+        if macd.get("histogram_trend") == "rising" and "macd_histogram_rising" not in sigs:
+            sigs.add("macd_histogram_rising"); changed = True
+        if changed:
+            payload["signals"]  = list(sigs)
+            payload["warnings"] = list(warns)
+            _write_cache(ticker, {**payload, "cache_hit": False, "cache_age_sec": 0})
         return payload
     except Exception:
         return None
@@ -71,241 +105,7 @@ def _write_cache(ticker, payload):
         print(f"[momentum] cache write failed: {e}", file=sys.stderr)
 
 
-# ── Core analysis ────────────────────────────────────────────────────────
-def _fetch_history(ticker, period="1y"):
-    t = yf.Ticker(ticker)
-    hist = t.history(period=period, auto_adjust=True)
-    if hist is None or hist.empty:
-        raise RuntimeError(f"no history data for {ticker}")
-    return hist, t
-
-
-def _intraday_state(hist):
-    """Classify the last bar's reliability vs today's ET session.
-
-    Returns (state, elapsed_min, projection_factor):
-      - 'complete'   : last bar is a full session (weekend/holiday/pre-market or today ≥ 16:00 ET)
-                       → projection_factor = 1.0
-      - 'too_early'  : today's session, 0 ≤ elapsed < 30 min
-                       → projection_factor = None (caller should suppress volume-based signals)
-      - 'partial'    : today's session, 30 ≤ elapsed < 390 min
-                       → projection_factor = 390 / elapsed_min (scale today_v → projected full-day)
-    """
-    now_et = datetime.now(_ET)
-    last_bar_ts = hist.index[-1]
-    last_bar_date = last_bar_ts.date() if hasattr(last_bar_ts, "date") else None
-    today_et = now_et.date()
-
-    # Last bar is a prior day (weekend / holiday / pre-market before first intraday tick) → complete
-    if last_bar_date is None or last_bar_date < today_et:
-        return ("complete", _SESSION_TOTAL_MIN, 1.0)
-
-    market_open  = now_et.replace(hour=9,  minute=30, second=0, microsecond=0)
-    market_close = now_et.replace(hour=16, minute=0,  second=0, microsecond=0)
-
-    if now_et >= market_close:
-        return ("complete", _SESSION_TOTAL_MIN, 1.0)
-
-    if now_et < market_open:
-        # Rare: yfinance stamped today but market hasn't opened — treat as too_early (0 elapsed)
-        return ("too_early", 0, None)
-
-    elapsed_min = int((now_et - market_open).total_seconds() // 60)
-    if elapsed_min < _INTRADAY_EARLY_CUTOFF_MIN:
-        return ("too_early", elapsed_min, None)
-    return ("partial", elapsed_min, _SESSION_TOTAL_MIN / float(elapsed_min))
-
-
-def _volume_block(hist):
-    close  = hist["Close"]
-    volume = hist["Volume"]
-    today_v_raw = float(volume.iloc[-1])
-
-    state, elapsed_min, proj = _intraday_state(hist)
-
-    # Average over the 20/50 sessions BEFORE today (exclude today itself) —
-    # otherwise a spike inflates its own denominator and understates the ratio.
-    def _avg_prev(n):
-        if len(volume) < 2:
-            return 0.0
-        prior = volume.iloc[-min(n + 1, len(volume)):-1]
-        if len(prior) == 0:
-            return 0.0
-        m = float(prior.mean())
-        return 0.0 if m != m else m   # NaN → 0
-    avg_20 = _avg_prev(20)
-    avg_50 = _avg_prev(50)
-
-    # Effective "today_v" used for ratio_20d, spike detection, composite score.
-    # too_early → ratio is unreliable (too little of the session elapsed); caller
-    # should treat ratio_20d=None as neutral (no signal, no warning, neutral vol_score).
-    if state == "too_early":
-        today_v_effective = today_v_raw      # reported for transparency only
-        ratio = None
-    elif state == "partial":
-        today_v_effective = today_v_raw * proj  # project today → full-day equivalent
-        ratio = today_v_effective / avg_20 if avg_20 > 0 else 0.0
-    else:
-        today_v_effective = today_v_raw
-        ratio = today_v_effective / avg_20 if avg_20 > 0 else 0.0
-
-    if ratio is None:
-        spike = "UNKNOWN"
-    elif ratio >= 3.0:
-        spike = "HEAVY_SPIKE"
-    elif ratio >= 2.0:
-        spike = "MILD_SPIKE"
-    else:
-        spike = "NORMAL"
-
-    # Count days in last 10 sessions where volume >= 2x avg_20 (history-only, today excluded)
-    hist_vol = volume.iloc[:-1].tail(10) if len(volume) > 1 else volume.tail(10)
-    last10_avg = avg_20 if avg_20 > 0 else 1
-    spike_days = int((hist_vol / last10_avg >= 2.0).sum())
-
-    # Volume trend: compare PRIOR 5-day avg vs PRIOR 10-day avg (both exclude today
-    # to keep the signal stable across intraday scans).
-    prior = volume.iloc[:-1] if len(volume) > 1 else volume
-    v5   = float(prior.tail(5).mean())  if len(prior) >= 5  else 0.0
-    v10  = float(prior.tail(10).mean()) if len(prior) >= 10 else 0.0
-    if v10 == 0:
-        trend = "stable"
-    elif v5 / v10 >= 1.15:
-        trend = "expanding"
-    elif v5 / v10 <= 0.85:
-        trend = "contracting"
-    else:
-        trend = "stable"
-
-    return {
-        "today":             int(today_v_raw),                                # what yfinance actually reported
-        "today_effective":   int(today_v_effective) if today_v_effective else 0,
-        "avg_20d":           int(avg_20),
-        "avg_50d":           int(avg_50),
-        "ratio_20d":         round(ratio, 2) if ratio is not None else None,
-        "spike_label":       spike,
-        "spike_days_last_10": spike_days,
-        "volume_trend":      trend,
-        "intraday_state":    state,        # 'complete' | 'partial' | 'too_early'
-        "elapsed_min":       elapsed_min,  # 0-390; 390 for complete
-    }
-
-
-def _detect_crosses(hist, window=30):
-    """Scan last `window` sessions for MA cross events."""
-    close = hist["Close"]
-    ma20  = close.rolling(20).mean()
-    ma50  = close.rolling(50).mean()
-    ma200 = close.rolling(200).mean()
-
-    crosses = []
-    today_idx = len(close) - 1
-    start_idx = max(200, today_idx - window)
-
-    for i in range(start_idx + 1, today_idx + 1):
-        # 20 vs 50
-        if pd.notna(ma20.iloc[i-1]) and pd.notna(ma50.iloc[i-1]):
-            prev_diff = ma20.iloc[i-1] - ma50.iloc[i-1]
-            curr_diff = ma20.iloc[i]   - ma50.iloc[i]
-            if prev_diff <= 0 and curr_diff > 0:
-                crosses.append({
-                    "type": "golden_cross_20_50",
-                    "date": str(close.index[i].date()),
-                    "days_ago": today_idx - i,
-                })
-            elif prev_diff >= 0 and curr_diff < 0:
-                crosses.append({
-                    "type": "death_cross_20_50",
-                    "date": str(close.index[i].date()),
-                    "days_ago": today_idx - i,
-                })
-        # 50 vs 200
-        if pd.notna(ma50.iloc[i-1]) and pd.notna(ma200.iloc[i-1]):
-            prev_diff = ma50.iloc[i-1] - ma200.iloc[i-1]
-            curr_diff = ma50.iloc[i]   - ma200.iloc[i]
-            if prev_diff <= 0 and curr_diff > 0:
-                crosses.append({
-                    "type": "golden_cross_50_200",
-                    "date": str(close.index[i].date()),
-                    "days_ago": today_idx - i,
-                })
-            elif prev_diff >= 0 and curr_diff < 0:
-                crosses.append({
-                    "type": "death_cross_50_200",
-                    "date": str(close.index[i].date()),
-                    "days_ago": today_idx - i,
-                })
-    return crosses
-
-
-def _classify_stage(price, ma20, ma50, ma200):
-    if any(pd.isna(x) for x in (ma20, ma50, ma200)):
-        return "unknown"
-    if ma20 > ma50 > ma200 and price > ma20:
-        return "Stage 2 uptrend"
-    if ma20 < ma50 < ma200 and price < ma20:
-        return "Stage 4 downtrend"
-    # Stage 3 top: price below 20MA but 50 still above 200
-    if ma50 > ma200 and price < ma20 and ma20 < ma50:
-        return "Stage 3 top"
-    # Stage 1 basing: flat around rising 200
-    return "Stage 1 basing"
-
-
-def _ma_block(hist):
-    close = hist["Close"]
-    price = float(close.iloc[-1])
-    # NaN when history shorter than the rolling window (e.g. new listings).
-    # bool(NaN) is truthy in Python, so we must filter NaN explicitly before any math.
-    def _clean(v):
-        fv = float(v)
-        return None if fv != fv else fv   # NaN != NaN is the classic NaN test
-    ma20  = _clean(close.rolling(20).mean().iloc[-1])
-    ma50  = _clean(close.rolling(50).mean().iloc[-1])
-    ma200 = _clean(close.rolling(200).mean().iloc[-1])
-
-    stage = _classify_stage(price, ma20, ma50, ma200)
-    above_20  = (price / ma20  - 1) * 100 if ma20  else None
-    above_50  = (price / ma50  - 1) * 100 if ma50  else None
-    above_200 = (price / ma200 - 1) * 100 if ma200 else None
-
-    return {
-        "ma_20":           round(ma20, 2)  if ma20  is not None else None,
-        "ma_50":           round(ma50, 2)  if ma50  is not None else None,
-        "ma_200":          round(ma200, 2) if ma200 is not None else None,
-        "stage":           stage,
-        "above_ma20_pct":  round(above_20, 2)  if above_20  is not None else None,
-        "above_ma50_pct":  round(above_50, 2)  if above_50  is not None else None,
-        "above_ma200_pct": round(above_200, 2) if above_200 is not None else None,
-        "recent_crosses":  _detect_crosses(hist),
-    }
-
-
-def _rsi_14(close, period=14):
-    """Classic Wilder RSI: first avg is SMA, subsequent use Wilder EMA."""
-    delta = close.diff()
-    gain = delta.clip(lower=0)
-    loss = -delta.clip(upper=0)
-    avg_gain = gain.ewm(alpha=1 / period, adjust=False, min_periods=period).mean()
-    avg_loss = loss.ewm(alpha=1 / period, adjust=False, min_periods=period).mean()
-    rs = avg_gain / avg_loss.replace(0, np.nan)
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-
-def _rsi_block(hist):
-    rsi = _rsi_14(hist["Close"])
-    latest = rsi.iloc[-1]
-    if pd.isna(latest):
-        return {"rsi_14": None, "zone": "unknown"}
-    v = float(latest)
-    if v >= 70:   zone = "overbought"
-    elif v >= 50: zone = "bullish"
-    elif v >= 30: zone = "neutral"
-    else:         zone = "oversold"
-    return {"rsi_14": round(v, 1), "zone": zone}
-
-
+# ── Momentum-specific layers ────────────────────────────────────────────
 def _short_interest_block(t):
     """Pull short interest from yfinance `info` dict. Fields can be None."""
     try:
@@ -325,7 +125,6 @@ def _short_interest_block(t):
         except Exception:
             pass
 
-    # Interpretation
     if pct is None:
         interp = "unknown"
     elif pct < 3:
@@ -350,7 +149,7 @@ def _composite(volume, ma, short_int):
     """Compute 0-100 composite score + label."""
     # 1. volume_flow — neutral (55) when too early to read intraday
     r = volume["ratio_20d"]
-    if r is None:  vol_score = 55   # too_early: neutral, don't penalise
+    if r is None:  vol_score = 55
     elif r >= 2.0: vol_score = 95
     elif r >= 1.5: vol_score = 80
     elif r >= 1.2: vol_score = 65
@@ -369,49 +168,27 @@ def _composite(volume, ma, short_int):
     # 3. short_squeeze_potential — high short + above-ma20 momentum = fuel
     pct = short_int["short_pct_float"]
     am20 = ma["above_ma20_pct"] or 0
-    if pct is None:
-        sq_score = 40
-    elif pct >= 20 and am20 > 5:
-        sq_score = 90
-    elif pct >= 20:
-        sq_score = 60
-    elif pct >= 10:
-        sq_score = 55
-    elif pct >= 3:
-        sq_score = 40
-    else:
-        sq_score = 20
+    if pct is None:                          sq_score = 40
+    elif pct >= 20 and am20 > 5:             sq_score = 90
+    elif pct >= 20:                          sq_score = 60
+    elif pct >= 10:                          sq_score = 55
+    elif pct >= 3:                           sq_score = 40
+    else:                                    sq_score = 20
 
     # 4. trend_acceleration — fresh golden cross bonus + above-ma200 health
     am200 = ma["above_ma200_pct"] or 0
-    has_fresh_golden_50_200 = any(
-        c["type"] == "golden_cross_50_200" and c["days_ago"] <= 10
-        for c in ma["recent_crosses"]
-    )
-    has_fresh_golden_20_50 = any(
-        c["type"] == "golden_cross_20_50" and c["days_ago"] <= 10
-        for c in ma["recent_crosses"]
-    )
-    has_fresh_death = any(
-        c["type"].startswith("death_cross") and c["days_ago"] <= 10
-        for c in ma["recent_crosses"]
-    )
-    if has_fresh_golden_50_200:
-        ta_score = 95
-    elif has_fresh_golden_20_50:
-        ta_score = 80
-    elif has_fresh_death:
-        ta_score = 15
-    elif 20 <= am200 <= 50:
-        ta_score = 75
-    elif 0 < am200 < 20:
-        ta_score = 60
-    elif am200 > 100:
-        ta_score = 30   # parabolic exhaustion
-    elif am200 > 50:
-        ta_score = 50
-    else:
-        ta_score = 35
+    has_fresh_golden_50_200 = any(c["type"] == "golden_cross_50_200" and c["days_ago"] <= 10 for c in ma["recent_crosses"])
+    has_fresh_golden_20_50  = any(c["type"] == "golden_cross_20_50"  and c["days_ago"] <= 10 for c in ma["recent_crosses"])
+    has_fresh_death         = any(c["type"].startswith("death_cross") and c["days_ago"] <= 10 for c in ma["recent_crosses"])
+
+    if has_fresh_golden_50_200:  ta_score = 95
+    elif has_fresh_golden_20_50: ta_score = 80
+    elif has_fresh_death:        ta_score = 15
+    elif 20 <= am200 <= 50:      ta_score = 75
+    elif 0 < am200 < 20:         ta_score = 60
+    elif am200 > 100:            ta_score = 30   # parabolic exhaustion
+    elif am200 > 50:             ta_score = 50
+    else:                        ta_score = 35
 
     composite = round((vol_score + ma_score + sq_score + ta_score) / 4, 1)
     if   composite >= 80: label = "STRONGLY_BULLISH"
@@ -432,22 +209,20 @@ def _composite(volume, ma, short_int):
     }
 
 
-def _signals_and_warnings(volume, ma, short_int, comp, rsi=None):
+def _signals_and_warnings(volume, ma, short_int, comp, rsi=None, macd=None):
     signals, warnings = [], []
     if rsi and rsi.get("rsi_14") is not None:
         v = rsi["rsi_14"]
         if v > 70:
             warnings.append("overbought_rsi")
         elif v < 30 and ma.get("stage") == "Stage 2 uptrend":
-            # Only flag oversold as a buy signal if the trend is still up
-            # (oversold in a downtrend is weakness, not opportunity)
+            # Oversold is a buy signal only while the trend is still up.
             signals.append("oversold_rsi")
     if ma["stage"] == "Stage 2 uptrend":
         signals.append("stage2_uptrend_intact")
     if ma["stage"] == "Stage 4 downtrend":
         warnings.append("stage4_downtrend")
-    # Volume-based signals are suppressed when intraday reading is too_early
-    # (< 30 min elapsed) because today_v would be a tiny slice of a full session.
+    # Volume-based signals suppressed when intraday reading is too_early (<30 min).
     if volume["intraday_state"] != "too_early":
         r20 = volume["ratio_20d"]
         if r20 is not None and r20 >= 1.3 and volume["volume_trend"] == "expanding":
@@ -471,19 +246,28 @@ def _signals_and_warnings(volume, ma, short_int, comp, rsi=None):
             if c["type"] == "golden_cross_50_200": signals.append("fresh_golden_cross_50_200")
             if c["type"] == "death_cross_20_50":   warnings.append("fresh_death_cross_20_50")
             if c["type"] == "death_cross_50_200":  warnings.append("fresh_death_cross_50_200")
+    # MACD-based signals
+    if macd:
+        if macd.get("bullish_cross"):
+            signals.append("macd_bullish_cross")
+        if macd.get("bearish_cross"):
+            warnings.append("macd_bearish_cross")
+        if macd.get("histogram_trend") == "rising":
+            signals.append("macd_histogram_rising")
     return signals, warnings
 
 
 # ── Main ────────────────────────────────────────────────────────────────
 def analyze(ticker):
-    hist, t = _fetch_history(ticker)
+    hist, t = fetch_history(ticker)
     price = round(float(hist["Close"].iloc[-1]), 2)
-    volume    = _volume_block(hist)
-    ma        = _ma_block(hist)
+    volume    = volume_profile(hist)
+    ma        = ma_structure(hist)
     short_int = _short_interest_block(t)
-    rsi       = _rsi_block(hist)
+    rsi       = rsi_state(hist)
+    macd      = compute_macd(hist["Close"])
     comp      = _composite(volume, ma, short_int)
-    signals, warnings = _signals_and_warnings(volume, ma, short_int, comp, rsi)
+    signals, warnings = _signals_and_warnings(volume, ma, short_int, comp, rsi, macd)
 
     return {
         "ticker":           ticker.upper(),
@@ -495,6 +279,7 @@ def analyze(ticker):
         "ma_structure":     ma,
         "short_interest":   short_int,
         "rsi":              rsi,
+        "macd":             macd,
         "momentum_composite": comp,
         "signals":          signals,
         "warnings":         warnings,
@@ -512,7 +297,6 @@ def main():
 
     ticker = args.ticker.strip().upper()
 
-    # Cache check
     if not args.no_cache:
         cached = _load_cache(ticker, args.max_age)
         if cached is not None:

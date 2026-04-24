@@ -105,15 +105,17 @@ class FMPClient:
                 self.retry_count = 0
                 return response.json()
             elif response.status_code == 429:
-                self.retry_count += 1
-                if self.retry_count <= self.max_retries:
-                    print("WARNING: Rate limit exceeded. Waiting 60 seconds...", file=sys.stderr)
-                    time.sleep(60)
-                    return self._rate_limited_get(url, params, quiet=quiet)
-                else:
-                    print("ERROR: Daily API rate limit reached.", file=sys.stderr)
-                    self.rate_limit_reached = True
-                    return None
+                # Short-circuit: quota exhausted means every subsequent call
+                # also returns 429. Sleeping 60s to retry is pointless when
+                # the daily cap is hit (resets at UTC midnight, not in 60s).
+                # Set flag immediately so the rest of this run skips FMP.
+                if not self.rate_limit_reached:
+                    print(
+                        "WARNING: FMP returned 429 (daily quota reached); skipping all further FMP calls this run",
+                        file=sys.stderr,
+                    )
+                self.rate_limit_reached = True
+                return None
             else:
                 if not quiet:
                     print(

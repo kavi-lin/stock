@@ -4,6 +4,13 @@
 
 > 當前檔案：`investment_protocol_v4_8.md`
 
+## V4.8 核心變更（Parallel Blind Analyst Subagents）
+
+- **D**：Phase 2 四個 analyst（Fundamentals / Sentiment / News / Technical）改為 **4 個平行 subagent（Agent tool, general-purpose）**，各自封閉 context、禁止互看輸出。這是針對 V4.7 仍殘留的「一人演四角」問題的結構性修正。
+- Burry 保留 inline（純 skill 呼叫，已是 deterministic，包 subagent 無加值）。
+- Red Team (Phase 2.8) 與 V4.7 相同，仍是獨立 subagent。
+- 繼承 V4.7 全部機制：Red-Team-gated Consensus Bonus / Penalty、Phase 2.8 Red Team、Burry OVERRIDE 成本化。
+
 ---
 
 ## 快速開始

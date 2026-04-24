@@ -88,6 +88,11 @@ class ETFScanner:
         self._rate_limit_sec = rate_limit_sec
         self._last_request_time = 0.0
         self._fmp_quote_cache: dict[str, dict] = {}  # normalized_symbol -> quote dict
+        # Once FMP returns 429 (quota exhausted) we flip this and skip all further
+        # FMP calls — fast-failing 200+ requests at ~0.7s each still burns ~2-3
+        # minutes. Flag lives only for this process (per-skill-run); resets on
+        # next daemon run since quotas reset at UTC midnight anyway.
+        self._fmp_exhausted: bool = False
         self._stats: dict[str, dict[str, int]] = {
             "stock": {"fmp_calls": 0, "fmp_failures": 0, "yf_calls": 0, "yf_fallbacks": 0},
             "etf": {"fmp_calls": 0, "fmp_failures": 0, "yf_calls": 0, "yf_fallbacks": 0},
@@ -142,6 +147,11 @@ class ETFScanner:
         """
         if not HAS_REQUESTS or not self._fmp_api_key:
             return None
+        # Once we've confirmed the account is over quota, skip the HTTP round-trip
+        # entirely — every call would return 429 and just waste ~0.7s each. Caller
+        # handles None exactly like a normal FMP miss (falls back to yfinance).
+        if self._fmp_exhausted:
+            return None
 
         params = {}
         if extra_params:
@@ -156,6 +166,16 @@ class ETFScanner:
                 resp = _requests_lib.get(
                     url, params=final_params, headers={"apikey": self._fmp_api_key}, timeout=15
                 )
+                if resp.status_code == 429:
+                    # Quota exhausted — set flag so subsequent calls short-circuit.
+                    if not self._fmp_exhausted:
+                        print(
+                            "WARNING: FMP returned 429 (quota exhausted); skipping all further FMP calls this run",
+                            file=sys.stderr,
+                        )
+                    self._fmp_exhausted = True
+                    self._stats[ctx]["fmp_failures"] += 1
+                    return None
                 if resp.status_code == 200:
                     data = resp.json()
                     if data:
@@ -400,17 +420,13 @@ class ETFScanner:
                 group_by="ticker",
                 threads=True,
                 progress=False,
+                timeout=15,
             )
         except Exception as e:
             print(f"WARNING: Batch download failed: {e}", file=sys.stderr)
             return [
-                {
-                    "symbol": s,
-                    "rsi_14": None,
-                    "dist_from_52w_high": None,
-                    "dist_from_52w_low": None,
-                    "pe_ratio": None,
-                }
+                {"symbol": s, "rsi_14": None, "dist_from_52w_high": None,
+                 "dist_from_52w_low": None, "pe_ratio": None}
                 for s in symbols
             ]
 
@@ -521,16 +537,50 @@ class ETFScanner:
     def batch_stock_metrics(self, symbols: list[str]) -> list[dict]:
         """Batch compute stock metrics with FMP -> yfinance symbol-level fallback.
 
-        Args:
-            symbols: List of ticker symbols
-
-        Returns:
-            List of dicts with keys: symbol, rsi_14, dist_from_52w_high,
-            dist_from_52w_low, pe_ratio. Values are None if unavailable.
+        Wraps the whole compute in a daemon-thread hard timeout because both
+        the FMP phase-2 per-symbol retry loop (up to N × 15s) and yfinance's
+        threaded download (timeout= ignored when threads=True) can pin the
+        caller for minutes when endpoints are slow. Abandoning returns Nones
+        so downstream scoring degrades gracefully instead of blocking the
+        whole sector protocol.
         """
         if not symbols:
             return []
 
+        import threading
+        result_bucket = {"out": None, "done": False}
+
+        def _compute():
+            try:
+                result_bucket["out"] = self._batch_stock_metrics_impl(symbols)
+            finally:
+                result_bucket["done"] = True
+
+        # Budget: roughly 1s per symbol (accounting for FMP phase-2 retries) +
+        # 30s floor, hard-capped at 120s. 74 symbols → 90s.
+        budget_sec = min(120, max(30, int(len(symbols) * 1.2)))
+        worker = threading.Thread(target=_compute, daemon=True)
+        worker.start()
+        worker.join(timeout=budget_sec)
+
+        if not result_bucket["done"]:
+            print(
+                f"WARNING: batch_stock_metrics exceeded {budget_sec}s budget for "
+                f"{len(symbols)} symbols; abandoning worker (daemon thread will die with process). "
+                f"Downstream scorer will see all-None metrics for these symbols.",
+                file=sys.stderr,
+            )
+            return [
+                {"symbol": s, "rsi_14": None, "dist_from_52w_high": None,
+                 "dist_from_52w_low": None, "pe_ratio": None}
+                for s in symbols
+            ]
+
+        return result_bucket["out"] or []
+
+    def _batch_stock_metrics_impl(self, symbols: list[str]) -> list[dict]:
+        """Inner impl — the original FMP→yfinance fallback body, now called
+        from the timeout-wrapped public entry."""
         self._current_stats_context = "stock"
         # Phase 1: FMP results (accept any non-empty result)
         fmp_results: dict[str, dict] = {}
@@ -640,14 +690,22 @@ class ETFScanner:
         return result
 
     def _get_pe_ratio(self, symbol: str) -> Optional[float]:
-        """Get trailing P/E ratio for a symbol via yfinance info."""
+        """Get trailing P/E via yfinance `.info` — wrapped in a hard timeout.
+
+        `yf.Ticker(sym).info` is a property that transparently fires multiple
+        HTTP requests (earnings / fundamentals / etc.) and does NOT accept a
+        timeout= kwarg. yfinance's default requests session has no socket
+        timeout either — so a slow Yahoo endpoint freezes the whole scanner
+        indefinitely. We force a hard ceiling via ThreadPoolExecutor."""
+        from concurrent.futures import ThreadPoolExecutor, TimeoutError as _TO
+        def _fetch():
+            return yf.Ticker(symbol).info.get("trailingPE")
         try:
-            ticker = yf.Ticker(symbol)
-            info = ticker.info
-            pe = info.get("trailingPE")
+            with ThreadPoolExecutor(max_workers=1) as ex:
+                pe = ex.submit(_fetch).result(timeout=8)
             if pe is not None:
                 return round(float(pe), 2)
-        except Exception:
+        except (_TO, Exception):
             pass
         return None
 
@@ -658,7 +716,7 @@ class ETFScanner:
             return self._cache[cache_key]
 
         try:
-            data = yf.download(symbol, period=period, progress=False)
+            data = yf.download(symbol, period=period, progress=False, timeout=10)
             self._cache[cache_key] = data
             return data
         except Exception as e:

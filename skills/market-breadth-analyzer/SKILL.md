@@ -47,6 +47,14 @@ Quantify market breadth health using a data-driven 6-component scoring system (0
 | Components | 6 scored dimensions | Visual pattern recognition |
 | Repeatability | Fully reproducible | Analyst-dependent |
 
+## Localization
+
+To support Dashboard integration, the following JSON fields **must be output in Traditional Chinese (zh-TW)**:
+- `composite.guidance`
+- `composite.actions` (array of strings)
+
+Technical terms (e.g., FTD, RSI, MA) may remain in English. All other analysis and documentation remain in English.
+
 ---
 
 ## Execution Workflow

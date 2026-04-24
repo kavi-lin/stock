@@ -77,9 +77,9 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `binary_classification` | `"positive" \| "unknown" \| "negative" \| "none"` | **必填** | |
 | `time_horizon` | `"short" \| "mid" \| "long"` | **必填** | HOLD 也要（反映再評窗口長度）|
 | `analysis_price` | float | **必填（V4.8+）** | 分析當下股價快照（從 Phase 2 Technical analyst 或 us-stock-analysis skill 抓取）。Dashboard 用來比較 vs 即時價的漂移 |
-| `macro_context` | string (1-3 句) | 填 | |
-| `watch_conditions` | object（鍵值為 trigger_name → description）| **必填，最少 3 條** | HOLD：填再評 / 退場觸發；BUY：填進場後監控 |
-| `key_risks` | array[string] snake_case tags | 填（3-8 條）| |
+| `macro_context` | string (1-3 句) **繁體中文** | 填 | |
+| `watch_conditions` | object（key: snake_case 英文識別名 → value: **繁體中文**描述）| **必填，最少 3 條** | HOLD：填再評 / 退場觸發；BUY：填進場後監控 |
+| `key_risks` | array[string] **繁體中文短描述**（非 snake_case）| 填（3-8 條）| 例：「RSI 98 拋物線過熱衰竭風險」|
 | `devils_advocate_filed` | bool | 填 | |
 | `trade_metadata` | `{trade_type, event_tag}` | **必填** | trade_type ∈ {event, trend, mean_reversion} |
 
@@ -144,12 +144,12 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
         "exit_stop": "跌破 $415 (MA50) + 放量 → 觸發退場"
       },
       "key_risks": [
-        "memory_cycle_peak_misread",
-        "insider_net_selling_cluster",
-        "AI_theme_exhausting_macro_overlay",
-        "52w_high_low_volume_rally",
-        "Iran_Hormuz_binary_48_72h",
-        "fragile_tail_risk_score_60"
+        "記憶體週期頂部誤判風險",
+        "內部人淨賣出群聚訊號",
+        "AI 主題動能衰退疊加宏觀壓制",
+        "52 週高點附近低量拉升",
+        "伊朗/霍爾木茲 48-72h 二元風險",
+        "尾部風險極高（脆弱分數 60）"
       ],
       "devils_advocate_filed": false,
       "trade_metadata": {

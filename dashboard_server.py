@@ -683,7 +683,7 @@ def _build_screen_cmd(params):
     elif params.get("tickers"):
         cmd += ["--tickers", str(params["tickers"])]
     else:
-        cmd += ["--universe", "sp500"]
+        cmd += ["--universe", "all"]
     if params.get("min_score") is not None:
         cmd += ["--min-score", str(params["min_score"])]
     if params.get("top") is not None:
@@ -898,6 +898,47 @@ def refresh_loop():
             _refresh_state["next_scheduled"] = (
                 datetime.now() + timedelta(seconds=REFRESH_INTERVAL_SEC)
             ).isoformat(timespec="seconds")
+
+
+# ── FRED macro cache refresh ──────────────────────────────────────────
+# Runs fred-macro/scripts/fetch.py every FRED_REFRESH_SEC to keep the shared
+# cache (skills/fred-macro/cache/fred_latest.json) warm. bridge.py reads from
+# that cache so Dashboard always has recent macro data. FRED is free (no quota
+# pressure) so we can afford a dedicated refresh cadence independent of the
+# main bridge loop.
+FRED_REFRESH_SEC = int(os.getenv("FRED_REFRESH_SEC", "3600"))  # 1 hour default — FRED daily series update at most once/day
+_FRED_SCRIPT = os.path.join(ROOT, "skills", "fred-macro", "scripts", "fetch.py")
+
+
+def run_fred_refresh(reason=""):
+    """Invoke fred-macro/scripts/fetch.py --no-cache to force a fresh pull.
+    Cached by the skill itself (atomic write); we just trigger the refresh."""
+    if not os.path.exists(_FRED_SCRIPT):
+        return
+    if not os.getenv("FRED_API_KEY"):
+        # Can't run without the key — skip silently (Dashboard still works via
+        # LLM-derived macro in the protocol layer).
+        return
+    try:
+        r = subprocess.run(
+            ["python3", _FRED_SCRIPT, "--json-only", "--no-cache"],
+            capture_output=True, text=True, timeout=30, cwd=ROOT,
+        )
+        if r.returncode == 0:
+            sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] FRED refresh ok ({reason})\n")
+        else:
+            sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] FRED refresh failed ({reason}): {r.stderr[:200]}\n")
+    except subprocess.TimeoutExpired:
+        sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] FRED refresh timed out ({reason})\n")
+    except Exception as e:
+        sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] FRED refresh error ({reason}): {e}\n")
+
+
+def fred_refresh_loop():
+    """Refresh FRED macro cache every FRED_REFRESH_SEC (15 min default).
+    Runs as daemon thread alongside the main bridge refresh loop."""
+    while not _shutdown.wait(FRED_REFRESH_SEC):
+        run_fred_refresh(reason=f"periodic {FRED_REFRESH_SEC}s")
 
 
 _positions_lock = threading.Lock()
@@ -1234,12 +1275,17 @@ if __name__ == "__main__":
     print(f"Serving files from: {DASHBOARD_DIR}")
     print(f"Positions file:     {POSITIONS}")
     print(f"Auto-refresh:       every {REFRESH_INTERVAL_SEC}s (bridge.py)")
+    print(f"FRED refresh:       every {FRED_REFRESH_SEC}s (fred-macro cache)")
 
     # Fresh prices on boot so the first Dashboard load is not stale
     run_bridge(reason="startup")
+    # Warm the FRED cache on startup so the first Dashboard load has macro data.
+    run_fred_refresh(reason="startup")
     # Background periodic refresh
     refresh_thread = threading.Thread(target=refresh_loop, daemon=True)
     refresh_thread.start()
+    fred_thread = threading.Thread(target=fred_refresh_loop, daemon=True)
+    fred_thread.start()
 
     try:
         srv.serve_forever()

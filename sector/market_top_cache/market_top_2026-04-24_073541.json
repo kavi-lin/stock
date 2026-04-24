@@ -1,0 +1,584 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-24 07:35:41",
+    "data_mode": "yfinance (no FMP API required)",
+    "api_calls": {
+      "api_calls_made": 31,
+      "cache_entries": 55,
+      "rate_limit_reached": false
+    },
+    "cli_inputs": {
+      "breadth_200dma": 58.17,
+      "breadth_200dma_source": "auto",
+      "breadth_200dma_auto_date": "2026-04-22",
+      "breadth_50dma": null,
+      "put_call_ratio": null,
+      "vix_term_structure": null,
+      "margin_debt_yoy_pct": null
+    },
+    "vix_term_auto": {
+      "vix": 19.31,
+      "vix3m": 21.48,
+      "ratio": 0.899,
+      "classification": "contango"
+    },
+    "index_data": {
+      "sp500_price": 7108.39990234375,
+      "sp500_year_high": 7147.77978515625,
+      "sp500_distance_from_high_pct": -0.55,
+      "qqq_price": 651.4199829101562,
+      "vix_level": 19.309999465942383
+    }
+  },
+  "composite": {
+    "composite_score": 32.6,
+    "zone": "Yellow (Early Warning)",
+    "zone_color": "yellow",
+    "risk_budget": "80-90%",
+    "guidance": "Early warning signs detected. Tighten stops and reduce new entries.",
+    "actions": [
+      "Tighten stop-losses by 10-20%",
+      "Reduce new position sizes by 25-50%",
+      "Review weakest positions for exits",
+      "Monitor distribution days closely"
+    ],
+    "strongest_warning": {
+      "component": "distribution_days",
+      "label": "Distribution Day Count",
+      "score": 100
+    },
+    "weakest_warning": {
+      "component": "defensive_rotation",
+      "label": "Defensive Sector Rotation",
+      "score": 0
+    },
+    "data_quality": {
+      "available_count": 6,
+      "total_components": 6,
+      "label": "Complete (6/6 components)",
+      "missing_components": []
+    },
+    "correlation_adjustment": [],
+    "component_scores": {
+      "distribution_days": {
+        "score": 100,
+        "adjusted_score": 100,
+        "weight": 0.25,
+        "weighted_contribution": 25.0,
+        "label": "Distribution Day Count"
+      },
+      "leading_stocks": {
+        "score": 6,
+        "adjusted_score": 6,
+        "weight": 0.2,
+        "weighted_contribution": 1.2,
+        "label": "Leading Stock Health"
+      },
+      "defensive_rotation": {
+        "score": 0,
+        "adjusted_score": 0,
+        "weight": 0.15,
+        "weighted_contribution": 0.0,
+        "label": "Defensive Sector Rotation"
+      },
+      "breadth_divergence": {
+        "score": 35,
+        "adjusted_score": 35,
+        "weight": 0.15,
+        "weighted_contribution": 5.2,
+        "label": "Market Breadth Divergence"
+      },
+      "index_technical": {
+        "score": 0,
+        "adjusted_score": 0,
+        "weight": 0.15,
+        "weighted_contribution": 0.0,
+        "label": "Index Technical Condition"
+      },
+      "sentiment": {
+        "score": 12,
+        "adjusted_score": 12,
+        "weight": 0.1,
+        "weighted_contribution": 1.2,
+        "label": "Sentiment & Speculation"
+      }
+    }
+  },
+  "components": {
+    "distribution_days": {
+      "score": 100,
+      "raw_score": 100,
+      "effective_count": 6.5,
+      "signal": "CRITICAL: Heavy distribution detected",
+      "clustering": {
+        "factor": 0.29,
+        "recent_count": 2,
+        "total_count": 7
+      },
+      "clustering_applied": false,
+      "primary_index": "NASDAQ",
+      "sp500": {
+        "distribution_days": 5,
+        "stalling_days": 1,
+        "effective_count": 5.5,
+        "details": [
+          {
+            "date": "2026-04-21",
+            "type": "distribution",
+            "pct_change": -0.63,
+            "volume_change": 10.7,
+            "window_index": 2
+          },
+          {
+            "date": "2026-04-07",
+            "type": "stalling",
+            "pct_change": 0.08,
+            "volume_change": 16.6,
+            "window_index": 12
+          },
+          {
+            "date": "2026-03-30",
+            "type": "distribution",
+            "pct_change": -0.39,
+            "volume_change": 2.9,
+            "window_index": 17
+          },
+          {
+            "date": "2026-03-27",
+            "type": "distribution",
+            "pct_change": -1.67,
+            "volume_change": 9.5,
+            "window_index": 18
+          },
+          {
+            "date": "2026-03-20",
+            "type": "distribution",
+            "pct_change": -1.51,
+            "volume_change": 67.8,
+            "window_index": 23
+          },
+          {
+            "date": "2026-03-19",
+            "type": "distribution",
+            "pct_change": -0.27,
+            "volume_change": 13.2,
+            "window_index": 24
+          }
+        ]
+      },
+      "nasdaq": {
+        "distribution_days": 6,
+        "stalling_days": 1,
+        "effective_count": 6.5,
+        "details": [
+          {
+            "date": "2026-04-23",
+            "type": "distribution",
+            "pct_change": -0.56,
+            "volume_change": 4.8,
+            "window_index": 0
+          },
+          {
+            "date": "2026-04-21",
+            "type": "distribution",
+            "pct_change": -0.38,
+            "volume_change": 6.6,
+            "window_index": 2
+          },
+          {
+            "date": "2026-04-07",
+            "type": "stalling",
+            "pct_change": 0.02,
+            "volume_change": 42.3,
+            "window_index": 12
+          },
+          {
+            "date": "2026-03-27",
+            "type": "distribution",
+            "pct_change": -1.95,
+            "volume_change": 1.5,
+            "window_index": 18
+          },
+          {
+            "date": "2026-03-26",
+            "type": "distribution",
+            "pct_change": -2.39,
+            "volume_change": 34.8,
+            "window_index": 19
+          },
+          {
+            "date": "2026-03-20",
+            "type": "distribution",
+            "pct_change": -1.85,
+            "volume_change": 21.7,
+            "window_index": 23
+          },
+          {
+            "date": "2026-03-19",
+            "type": "distribution",
+            "pct_change": -0.32,
+            "volume_change": 34.7,
+            "window_index": 24
+          }
+        ]
+      }
+    },
+    "leading_stocks": {
+      "score": 6,
+      "signal": "HEALTHY: Leadership intact",
+      "avg_deterioration": 6.0,
+      "etfs_evaluated": 10,
+      "etfs_deteriorating": 0,
+      "deteriorating_pct": 0.0,
+      "amplified": false,
+      "etf_details": {
+        "ICLN": {
+          "deterioration_score": 20,
+          "price": 20.139999389648438,
+          "year_high": 20.25,
+          "distance_from_high_pct": -0.5,
+          "flags": [
+            "Lower highs pattern detected"
+          ]
+        },
+        "PSI": {
+          "deterioration_score": 0,
+          "price": 127.0199966430664,
+          "year_high": 128.5,
+          "distance_from_high_pct": -1.2,
+          "flags": []
+        },
+        "SOXQ": {
+          "deterioration_score": 0,
+          "price": 79.33999633789062,
+          "year_high": 80.30999755859375,
+          "distance_from_high_pct": -1.2,
+          "flags": []
+        },
+        "SOXX": {
+          "deterioration_score": 0,
+          "price": 441.0,
+          "year_high": 446.6400146484375,
+          "distance_from_high_pct": -1.3,
+          "flags": []
+        },
+        "SMH": {
+          "deterioration_score": 0,
+          "price": 481.8500061035156,
+          "year_high": 488.0799865722656,
+          "distance_from_high_pct": -1.3,
+          "flags": []
+        },
+        "KOMP": {
+          "deterioration_score": 0,
+          "price": 65.61000061035156,
+          "year_high": 67.56999969482422,
+          "distance_from_high_pct": -2.9,
+          "flags": []
+        },
+        "XBI": {
+          "deterioration_score": 20,
+          "price": 134.49000549316406,
+          "year_high": 139.19000244140625,
+          "distance_from_high_pct": -3.4,
+          "flags": [
+            "Lower highs pattern detected"
+          ]
+        },
+        "FDN": {
+          "deterioration_score": 0,
+          "price": 259.9700012207031,
+          "year_high": 270.57000732421875,
+          "distance_from_high_pct": -3.9,
+          "flags": []
+        },
+        "TAN": {
+          "deterioration_score": 0,
+          "price": 58.599998474121094,
+          "year_high": 61.029998779296875,
+          "distance_from_high_pct": -4.0,
+          "flags": []
+        },
+        "ARKK": {
+          "deterioration_score": 20,
+          "price": 76.5,
+          "year_high": 80.5250015258789,
+          "distance_from_high_pct": -5.0,
+          "flags": [
+            "Lower highs pattern detected"
+          ]
+        }
+      },
+      "data_available": true,
+      "fetch_success_rate": 1.0,
+      "partial_data_count": 0,
+      "basket_mode": "dynamic",
+      "basket": [
+        "ICLN",
+        "PSI",
+        "SOXQ",
+        "SOXX",
+        "SMH",
+        "KOMP",
+        "XBI",
+        "FDN",
+        "TAN",
+        "ARKK"
+      ]
+    },
+    "defensive_rotation": {
+      "score": 0,
+      "signal": "HEALTHY: Growth leading",
+      "data_available": true,
+      "relative_performance": -5.86,
+      "defensive_avg_return": 3.25,
+      "offensive_avg_return": 9.11,
+      "defensive_details": {
+        "XLU": 1.86,
+        "XLP": 2.42,
+        "XLV": 0.0,
+        "VNQ": 8.71
+      },
+      "offensive_details": {
+        "XLK": 13.95,
+        "XLC": 5.34,
+        "XLY": 6.33,
+        "QQQ": 10.82
+      },
+      "lookback_days": 20,
+      "fetch_success_rate": 1.0,
+      "confirmation": "unconfirmed",
+      "multi_period": {
+        "10": {
+          "lookback": 10,
+          "defensive_avg": -0.34,
+          "offensive_avg": 5.9,
+          "relative": -6.24,
+          "score": 0,
+          "defensive_leading": false
+        },
+        "20": {
+          "lookback": 20,
+          "defensive_avg": 3.25,
+          "offensive_avg": 9.11,
+          "relative": -5.86,
+          "score": 0,
+          "defensive_leading": false
+        },
+        "40": {
+          "lookback": 40,
+          "defensive_avg": -3.23,
+          "offensive_avg": 4.18,
+          "relative": -7.41,
+          "score": 0,
+          "defensive_leading": false
+        }
+      }
+    },
+    "breadth_divergence": {
+      "score": 35,
+      "signal": "CAUTION: Mild breadth weakness",
+      "data_available": true,
+      "breadth_200dma": 58.17,
+      "breadth_50dma": null,
+      "index_near_highs": true,
+      "index_distance_from_high_pct": -0.6,
+      "divergence_detected": true,
+      "breadth_source": "auto",
+      "breadth_auto_date": "2026-04-22"
+    },
+    "index_technical": {
+      "score": 0,
+      "signal": "HEALTHY: Technical structure intact",
+      "sp500": {
+        "raw_score": 0,
+        "price": 7108.4,
+        "flags": [],
+        "mas": {
+          "ema21": 6893.96,
+          "ema50": 6822.06,
+          "sma200": 6701.08
+        },
+        "data_available": true
+      },
+      "nasdaq": {
+        "raw_score": 0,
+        "price": 651.42,
+        "flags": [],
+        "mas": {
+          "ema21": 622.08,
+          "ema50": 611.58,
+          "sma200": 599.54
+        },
+        "data_available": true
+      },
+      "data_available": true
+    },
+    "sentiment": {
+      "score": 12,
+      "signal": "MIXED: Moderate sentiment",
+      "data_available": true,
+      "total_points": 12,
+      "details": {
+        "put_call_ratio": {
+          "value": null,
+          "points": 0,
+          "interpretation": "No data"
+        },
+        "vix_level": {
+          "value": 19.31,
+          "points": 0,
+          "interpretation": "Normal range"
+        },
+        "vix_term_structure": {
+          "value": "contango",
+          "points": 12,
+          "interpretation": "Normal term structure"
+        }
+      }
+    }
+  },
+  "follow_through_day": {
+    "ftd_detected": false,
+    "applicable": false,
+    "reason": "Composite < 40 (Green/Yellow zone) - FTD monitoring not needed"
+  },
+  "historical_comparison": {
+    "closest_match": "2018 (Q4 Correction)",
+    "closest_ssd": 1905.9,
+    "comparisons": [
+      {
+        "name": "2018 (Q4 Correction)",
+        "ssd": 1905.9,
+        "scores": {
+          "distribution_days": 60,
+          "leading_stocks": 50,
+          "defensive_rotation": 40,
+          "breadth_divergence": 55,
+          "index_technical": 65,
+          "sentiment": 55
+        }
+      },
+      {
+        "name": "2022 (Rate Hike Bear)",
+        "ssd": 3532.1,
+        "scores": {
+          "distribution_days": 75,
+          "leading_stocks": 90,
+          "defensive_rotation": 60,
+          "breadth_divergence": 70,
+          "index_technical": 80,
+          "sentiment": 65
+        }
+      },
+      {
+        "name": "2007 (Financial Crisis)",
+        "ssd": 3571.6,
+        "scores": {
+          "distribution_days": 80,
+          "leading_stocks": 75,
+          "defensive_rotation": 85,
+          "breadth_divergence": 80,
+          "index_technical": 70,
+          "sentiment": 75
+        }
+      },
+      {
+        "name": "2000 (Dot-Com Bubble)",
+        "ssd": 3696.6,
+        "scores": {
+          "distribution_days": 90,
+          "leading_stocks": 85,
+          "defensive_rotation": 70,
+          "breadth_divergence": 95,
+          "index_technical": 60,
+          "sentiment": 90
+        }
+      }
+    ],
+    "narrative": "Closest to 2018 (Q4 Correction). Key differences: Distribution Days is 40pt higher than 2018 (Q4 Correction); Leading Stocks is 44pt lower than 2018 (Q4 Correction); Defensive Rotation is 40pt lower than 2018 (Q4 Correction); Breadth Divergence is 20pt lower than 2018 (Q4 Correction); Index Technical is 65pt lower than 2018 (Q4 Correction); Sentiment is 43pt lower than 2018 (Q4 Correction)."
+  },
+  "scenarios": [
+    {
+      "name": "Breadth Deterioration",
+      "description": "Breadth divergence worsens to 55+",
+      "changes": {
+        "breadth_divergence": 55
+      },
+      "new_score": 35.7,
+      "new_zone": "Yellow (Early Warning)",
+      "delta": 3.1
+    },
+    {
+      "name": "Distribution Reset",
+      "description": "Distribution days ease to 55 or less",
+      "changes": {
+        "distribution_days": 55
+      },
+      "new_score": 21.4,
+      "new_zone": "Yellow (Early Warning)",
+      "delta": -11.2
+    },
+    {
+      "name": "Full Deterioration",
+      "description": "3 weakest components each worsen by +20pt",
+      "changes": {
+        "defensive_rotation": 20,
+        "index_technical": 20,
+        "leading_stocks": 26
+      },
+      "new_score": 42.7,
+      "new_zone": "Orange (Elevated Risk)",
+      "delta": 10.1
+    },
+    {
+      "name": "Recovery",
+      "description": "2 strongest warning signals improve by -30pt",
+      "changes": {
+        "distribution_days": 70,
+        "breadth_divergence": 5
+      },
+      "new_score": 20.6,
+      "new_zone": "Yellow (Early Warning)",
+      "delta": -12.0
+    }
+  ],
+  "delta": {
+    "components": {
+      "distribution_days": {
+        "delta": 10,
+        "direction": "worsening",
+        "previous": 90
+      },
+      "leading_stocks": {
+        "delta": -1,
+        "direction": "stable",
+        "previous": 7
+      },
+      "defensive_rotation": {
+        "delta": 0,
+        "direction": "stable",
+        "previous": 0
+      },
+      "breadth_divergence": {
+        "delta": 0,
+        "direction": "stable",
+        "previous": 35
+      },
+      "index_technical": {
+        "delta": -5,
+        "direction": "improving",
+        "previous": 5
+      },
+      "sentiment": {
+        "delta": 0,
+        "direction": "stable",
+        "previous": 12
+      }
+    },
+    "composite_delta": 1.5,
+    "composite_direction": "stable",
+    "previous_date": "2026-04-23 21:45:51",
+    "previous_composite": 31.1
+  }
+}

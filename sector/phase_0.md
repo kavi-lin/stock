@@ -1,6 +1,4 @@
-# Phase 0
-
-<!-- [domain:us-equity] breadth (SPX), FTD (S&P+NDX), market-top (US distribution days), F&G (CNN), VIX — all US-specific. --> — Market Regime Check
+# Phase 0 — Market Regime Check
 
 **Agent**: Macro Regime Analyst
 
@@ -49,7 +47,29 @@
      ```
    - 讀取欄位：`composite.composite_score`、`composite.zone`、`composite.risk_budget`
 
-> **並行機會**：層 C + 層 D 兩個腳本完全獨立，可並行執行（節省 ~10 秒）
+> 層 C + 層 D 腳本完全獨立 → 並行執行。
+
+### 層 E — FRED Macro Snapshot（V1.4 新增，MUST-run）
+
+5. 取 `skills/fred-macro/cache/fred_latest.json` 最新檔（FRESH = mtime < 3600s；fred-macro 自帶 1 hr cache）
+   - **FRESH** → 直接讀取
+   - **STALE 或缺失** → 執行：
+     ```bash
+     python3 skills/fred-macro/scripts/fetch.py --json-only
+     ```
+   - 失敗（無 API key / 網路錯誤）→ `fred_available = false`，`fred_snapshot = null`，protocol 繼續跑不中斷
+
+6. **必讀**：`skills/fred-macro/SECTOR_ROTATION_GUIDE.md`（LLM instruction — 解釋 `favor` vs `adjustments` 兩層結構與衝突處理優先序）
+
+7. 寫入 `_phase0.fred_snapshot` **slim shape**（僅這 11 個欄位，完整 snapshot 仍在 cache 檔）：
+   ```
+   generated_at / regime_label / regime_confidence / macro_scores_composite /
+   yield_curve_value / yield_curve_inverted / credit_stress_elevated /
+   financial_stress_above_avg / fed_rate_direction / real_rate_preferred /
+   sector_rotation_favor[] / sector_rotation_avoid[] / velocity_highlights[]
+   ```
+
+> `velocity_highlights` 從 `change_velocity` 擷取 `velocity ∈ {accelerating, decelerating}` 的前 3 條 series，格式 `"SERIES_ID:velocity"`（e.g. `"NFCI:accelerating"`）。
 
 ---
 
@@ -70,36 +90,12 @@
 3. 衝突檢查：max - min > 30pp → `signal_conflict = true`
 4. `synthesized_exposure` = 對應最小中位數的**原始字串**
 
-### 計算範例 1 — 三訊號一致看多
-
-```
-Breadth:     "70-85%" → midpoint 77.5
-FTD:         "65-80%" → midpoint 72.5
-Market Top:  "60-80%" → midpoint 70
-
-min = 70, max = 77.5, diff = 7.5pp < 30pp
-→ signal_conflict = false
-→ synthesized_exposure = "60-80%"（Market Top 原始值）
-→ 三訊號一致，可採納 FTD/Breadth 進取範圍
-```
-
-### 計算範例 2 — 訊號衝突
-
-```
-Breadth:     "70-90%" → midpoint 80
-FTD:         "20-35%" → midpoint 27.5
-Market Top:  "55-75%" → midpoint 65
-
-min = 27.5, max = 80, diff = 52.5pp > 30pp
-→ signal_conflict = true ⚠️
-→ synthesized_exposure = "20-35%"（FTD 原始值）
-→ Phase 4c 最終 regime_stance 改為 NEUTRAL 或 DEFENSIVE
-```
-
-### Agent 評估要點
-- FTD 訊號 = 「底部確認」；若 Breadth 或 Market Top 同時轉弱 → FTD 積極訊號打折 50%
+### Agent 評估規則
+- FTD = 底部確認；Breadth 或 Market Top 同時轉弱 → FTD 積極訊號打折 50%
 - Market Top > 60 且 FTD 未確認 → 取 Market Top 保守值
-- 三訊號一致看多 → 採 FTD 進取範圍；三訊號衝突 → 強制降一等級，Phase 4c → NEUTRAL
+- 三訊號衝突（diff > 30pp）→ 強制降一等級，Phase 4c final_regime_stance ≤ NEUTRAL
+
+> 計算範例見 `README.md` §Phase 0 三訊號合成範例。
 
 ---
 

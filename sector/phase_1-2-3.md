@@ -1,6 +1,4 @@
-# Phase 1
-
-<!-- [domain:us-equity] iterates 11 GICS sectors + US sector ETFs via finvizfinance + yfinance. -->–3 執行細節
+# Phase 1–3 執行細節
 
 ---
 
@@ -19,14 +17,18 @@
 
 **Agent**: Theme Intelligence Analyst
 
-**執行前 Cache Check**（FRESH = mtime < 3 小時前 / 10800s）：
-1. 取 `skills/theme-detector/cache/theme_detector_*.json` 最新檔
-   - **FRESH** → 直接載入，`theme_source: THEME_CACHE`，跳過 skill 執行，前往輸出 JSON
-   - **STALE 或缺失** → 執行 `theme-detector` skill（FINVIZ Elite 優先，公開模式備用）
-     - JSON cache → `skills/theme-detector/cache/`
-     - MD 報告 → `reports/YYYYMMDD_theme_detector_HHMMSS.md`
+**執行指令**（script 自管 cache freshness，無需手動 check mtime）：
 
-> Phase 2 與 Phase 3 完全獨立，可**並行執行**（節省 ~20 秒）
+```bash
+python3 skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 10800
+```
+
+- Cache < 3h → script 立即 exit 0（< 1 秒），agent 讀 `skills/theme-detector/cache/theme_detector_*.json` 最新檔（`theme_source: THEME_CACHE`）
+- Cache stale 或缺失 → 正常執行 140–180 秒，新 cache 寫入 `skills/theme-detector/cache/`，再讀最新檔
+
+> ⚠️ Cache stale 時 FINVIZ scrape 約 **140-180s**。**禁止 `timeout < 240`**（會被殺 retry）。
+
+> Phase 2 與 Phase 3 完全獨立 → 並行執行。
 
 **JSON Schema** → 見 `schema.md` Phase 2
 
@@ -35,13 +37,32 @@
 ## PHASE 3 — NEWS CATALYST REVIEW
 
 **Agent**: News Catalyst Analyst
-**資料來源**: `market-news-analyst` / `economic-calendar-fetcher` / `market-sentiment-analyzer`
+**資料來源**: `market-sentiment-analyzer` + `economic-calendar-fetcher` + `earnings-calendar` + WebSearch（≤ 5 個，narrative 類）
 
-### ⚠️ Phase 3 強制執行規則（每次都跑，不可快取跳過）
+### ⚠️ 執行順序（強制）
 
-1. `market-sentiment-analyzer` skill — 取得即時情緒數值
-2. `market-news-analyst` skill — 取得近 10 天新聞（**禁止用訓練資料舊新聞**）
-3. `top_catalysts` 最少 5 筆，全部來自 skill WebSearch 結果
+```
+Step 1  market-sentiment-analyzer   → fear_greed / VIX / RSI / Put-Call
+Step 2  economic-calendar-fetcher   → FOMC / CPI / NFP / GDP 日期
+Step 3  earnings-calendar           → 本週 mid+ 大型股財報日
+Step 4  reuse _phase0.fred_snapshot → fed_rate_direction / yield (不再 search)
+Step 5  WebSearch HARD CAP ≤ 5     → 見 query 範本
+```
+
+> **禁止**用 WebSearch 抓 Step 1-4 已有的（FOMC/財報日期、利率、F&G、VIX）。
+> **禁止**同主題 ≥ 2 個查詢。
+
+### Step 5 WebSearch Query 範本（最多 5 個）
+
+```
+1. "stock market news today {DATE} S&P 500 close" — 當日 narrative（必）
+2. "Trump tariff statement {DATE} sector" — 若 named_targets 非空
+3. "Iran Israel oil news {DATE}" — 若 Energy/Defense ∈ HOT/WARM
+4. "this week mega cap earnings beat miss" — 財報 surprise narrative
+5. (預留給當日突發)
+```
+
+> 禁止查：Russia/Ukraine、FDA PDUFA、bank earnings dates、copper price、AI capex、DOJ Powell（個股層級，不在 sector 範圍）。
 
 ### 情緒數值提取（填入 `political_overlay`）
 
@@ -108,12 +129,16 @@ Trigger 條件：
 
 ---
 
-### Phase 3 執行清單
+### Phase 3 預算
 
-- `market-sentiment-analyzer` skill（取代 web search: CNN Fear & Greed）
-- `market-news-analyst`（10 天內市場新聞）
-- `economic-calendar-fetcher` 或 web search: "upcoming FOMC CPI NFP dates"
-- Web search: "Trump tariff statement today" / "Trump Truth Social market"
-- Web search: "sector named threat Trump today"（若有政治事件）
+| Step | Tool | 耗時 |
+|---|---|---|
+| 1 | `market-sentiment-analyzer` script | ~6s |
+| 2 | `economic-calendar-fetcher` script | ~5s |
+| 3 | `~/.claude/skills/earnings-calendar/scripts/fetch_earnings_fmp.py` | ~5s |
+| 4 | reuse `_phase0.fred_snapshot` | 0s |
+| 5 | WebSearch ≤ 5 | ~50s |
+
+**總預算 ≤ 80s**
 
 **JSON Schema** → 見 `schema.md` Phase 3

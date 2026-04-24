@@ -8,120 +8,87 @@ data_sources: [chart image or yfinance]
 
 # Technical Analyst
 
-## Overview
-
-This skill enables comprehensive technical analysis of weekly price charts. Analyze chart images to identify trends, support and resistance levels, moving average relationships, volume patterns, and develop probabilistic scenarios for future price movement. All analysis is conducted objectively using only chart data, without influence from news, fundamentals, or market sentiment.
+Weekly-chart-driven technical analysis → probabilistic scenarios + structured report. Pure chart analysis, no news/fundamental input. See `README.md` for example usage scenarios and pedagogy.
 
 ## Core Principles
 
-1. **Pure Chart Analysis**: Base all conclusions exclusively on technical data visible in the chart
-2. **Systematic Approach**: Follow a structured methodology for each chart analysis
-3. **Objective Assessment**: Avoid subjective bias; focus on observable patterns and data
-4. **Probabilistic Scenarios**: Express future possibilities as probability-weighted scenarios
-5. **Sequential Processing**: Analyze each chart individually and document findings immediately
+1. **Pure chart analysis** — conclusions from observable chart data only
+2. **Systematic approach** — follow the workflow steps, don't skip
+3. **Objective** — avoid subjective bias, present both bull + bear possibilities
+4. **Probabilistic scenarios** — express future as probability-weighted outcomes (not a single prediction)
+5. **Sequential processing** — analyze each chart individually, save each report before moving to the next
 
 ## Analysis Workflow
 
 ### Step 1: Receive Chart Images
 
-When the user provides one or more weekly chart images for analysis:
+Confirm receipt, count charts, note any user-requested focus areas. Process sequentially.
 
-1. Confirm receipt of all chart images
-2. Identify the number of charts to analyze
-3. Note any specific focus areas requested by the user
-4. Proceed to analyze charts sequentially, one at a time
+### Step 2: Load Framework
 
-### Step 2: Load Technical Analysis Framework
+**Read `references/technical_analysis_framework.md`** — covers trend classification, S/R identification, MA interpretation, volume analysis, chart patterns, scenario probability framework, objectivity discipline.
 
-Before beginning analysis, read the comprehensive technical analysis methodology:
+### Step 3: Per-Chart Systematic Analysis
 
-```
-Read: references/technical_analysis_framework.md
-```
+#### 3.1 Trend
+- Direction: uptrend / downtrend / sideways
+- Strength: strong / moderate / weak
+- Duration + potential exhaustion signals
+- Higher highs/lows vs lower highs/lows pattern
 
-This reference contains detailed guidance on:
-- Trend analysis and classification
-- Support and resistance identification
-- Moving average interpretation
-- Volume analysis
-- Chart patterns and candlestick analysis
-- Scenario development and probability assignment
-- Analysis discipline and objectivity
+#### 3.2 Support / Resistance
+- Horizontal support levels
+- Horizontal resistance levels
+- Trendline S/R
+- S/R role reversals
+- Confluence zones (multiple levels aligning)
 
-### Step 3: Analyze Each Chart Systematically
+#### 3.3 Moving Averages
+- Price vs 20W / 50W / 200W MAs
+- Alignment: bullish / bearish / neutral configuration
+- Slope: rising / falling / flat
+- Recent or pending crossovers
+- MAs as dynamic S/R
 
-For each chart image, conduct a systematic analysis following this sequence:
+#### 3.4 Volume
+- Trend: increasing / decreasing / stable
+- Spikes + context (at S/R? on breakout?)
+- Confirmation vs divergence with price
+- Climax / exhaustion patterns
 
-#### 3.1 Trend Analysis
-- Identify trend direction (uptrend, downtrend, sideways)
-- Assess trend strength (strong, moderate, weak)
-- Note trend duration and potential exhaustion signals
-- Examine higher highs/lows or lower highs/lows pattern
+#### 3.5 Patterns + Price Action
+- Reversal patterns (hammers, shooting stars, engulfing, H&S, double top/bottom)
+- Continuation patterns (flags, triangles)
+- Significant candlestick formations
+- Recent breakouts / breakdowns
 
-#### 3.2 Support and Resistance Analysis
-- Mark significant horizontal support levels
-- Mark significant horizontal resistance levels
-- Identify trendline support/resistance
-- Note any support-resistance role reversals
-- Assess confluence zones where multiple S/R levels align
+#### 3.6 Synthesize
+- Integrate all elements into coherent current assessment
+- Most significant factors
+- Conflicting signals or ambiguity
+- Key levels that will determine direction
 
-#### 3.3 Moving Average Analysis
-- Determine price position relative to 20-week, 50-week, and 200-week MAs
-- Assess MA alignment (bullish, bearish, or neutral configuration)
-- Note MA slope (rising, falling, flat)
-- Identify any recent or pending MA crossovers
-- Observe MAs acting as dynamic support or resistance
-
-#### 3.4 Volume Analysis
-- Assess overall volume trend (increasing, decreasing, stable)
-- Identify volume spikes and their context (at support/resistance, on breakouts)
-- Check for volume confirmation or divergence with price
-- Note any volume climax or exhaustion patterns
-
-#### 3.5 Chart Patterns and Price Action
-- Identify any reversal patterns (hammers, shooting stars, engulfing patterns, etc.)
-- Identify any continuation patterns (flags, triangles, etc.)
-- Note significant candlestick formations
-- Observe recent breakouts or breakdowns
-
-#### 3.6 Synthesize Observations
-- Integrate all technical elements into coherent current assessment
-- Identify the most significant factors influencing the chart
-- Note any conflicting signals or ambiguity
-- Establish key levels that will determine future direction
-
-### Step 4: Develop Probabilistic Scenarios
-
-For each analyzed chart, create 2-4 distinct scenarios for future price movement:
-
-#### Scenario Structure
+### Step 4: Probabilistic Scenarios (2-4)
 
 Each scenario must include:
-1. **Scenario Name**: Clear, descriptive title (e.g., "Bull Case: Breakout Above Resistance")
-2. **Probability Estimate**: Percentage likelihood based on technical factors (must sum to 100% across all scenarios)
-3. **Description**: What this scenario entails and how it would unfold
-4. **Supporting Factors**: Technical evidence supporting this scenario (minimum 2-3 factors)
-5. **Target Levels**: Expected price levels if scenario plays out
-6. **Invalidation Level**: Specific price level that would negate this scenario
+1. **Name** — descriptive (e.g. "Bull Case: Breakout Above Resistance")
+2. **Probability** — % likelihood (all scenarios must sum to 100%)
+3. **Description** — what this scenario entails + how it unfolds
+4. **Supporting factors** — technical evidence (min 2-3 factors)
+5. **Target levels** — expected price levels if scenario plays out
+6. **Invalidation level** — specific price that negates this scenario
 
-#### Typical Scenario Framework
+**Typical framework**:
+- Base Case (40-60%): most likely from current structure
+- Bull Case (20-40%): upside breakout scenario
+- Bear Case (20-40%): downside breakdown scenario
+- Alternative (5-15%): lower-probability but plausible
 
-- **Base Case Scenario (40-60%)**: Most likely outcome based on current structure
-- **Bull Case Scenario (20-40%)**: Optimistic scenario requiring upside breakout
-- **Bear Case Scenario (20-40%)**: Pessimistic scenario requiring downside breakdown
-- **Alternative Scenario (5-15%)**: Lower probability but technically plausible outcome
+Adjust probabilities by strength of supporting factors. Probabilities must sum to 100%.
 
-Adjust probabilities based on strength of supporting technical factors. Ensure probabilities are realistic and sum to 100%.
+### Step 5: Generate Report
 
-### Step 5: Generate Analysis Report
-
-For each chart analyzed, create a comprehensive markdown report using the template structure:
-
-```
-Read and use as template: assets/analysis_template.md
-```
-
-The report must include all sections:
+**Read `assets/analysis_template.md`** and populate all sections:
 1. Chart Overview
 2. Trend Analysis
 3. Support and Resistance Levels
@@ -133,109 +100,38 @@ The report must include all sections:
 9. Summary
 10. Disclaimer
 
-**File Naming Convention**: Save each analysis as `[SYMBOL]_technical_analysis_[YYYY-MM-DD].md`
+**File naming**: `[SYMBOL]_technical_analysis_[YYYY-MM-DD].md` (e.g. `SPY_technical_analysis_2025-11-02.md`)
 
-Example: `SPY_technical_analysis_2025-11-02.md`
+### Step 6: Multiple Charts
 
-### Step 6: Repeat for Multiple Charts
-
-If multiple charts are provided:
-
-1. Complete the full analysis workflow (Steps 3-5) for the first chart
-2. Save the analysis report
-3. Proceed to the next chart
-4. Repeat until all charts have been analyzed and documented
-
-Do not batch analyses. Complete and save each report before moving to the next chart.
+Complete full workflow + save report per chart **before** moving to next. Do not batch. Notify user when all charts done.
 
 ## Quality Standards
 
-### Objectivity Requirements
+**Objectivity**:
+- Strictly observable chart data only
+- No external info (news / fundamentals / sentiment)
+- No subjective language ("I think", "I feel")
+- Express uncertainty clearly when signals ambiguous
+- Always show both bull + bear possibilities
 
-- Base all analysis strictly on observable chart data
-- Avoid incorporating external information (news, fundamentals, sentiment)
-- Do not use subjective language like "I think" or "I feel"
-- Express uncertainty clearly when signals are ambiguous
-- Present both bullish and bearish possibilities to avoid confirmation bias
-
-### Completeness Requirements
-
-- Address all sections of the analysis template
-- Provide specific price levels for support, resistance, and targets
+**Completeness**:
+- Cover every section of the template
+- Specific price levels for support / resistance / targets (no vague descriptions)
 - Justify probability estimates with technical factors
-- Include invalidation levels for each scenario
-- Note any limitations or caveats to the analysis
+- Include invalidation levels per scenario
+- Note limitations / caveats
 
-### Clarity Requirements
-
-- Use precise technical terminology correctly
-- Write in clear, professional language
-- Structure information logically
-- Include specific price levels (not vague descriptions)
-- Make scenarios distinct and mutually exclusive
-
-## Example Usage Scenarios
-
-**Example 1: Single Chart Analysis**
-```
-User: "Please analyze this weekly chart of the S&P 500"
-[Provides chart image]
-
-Analyst:
-1. Confirms receipt of chart image
-2. Reads technical_analysis_framework.md for methodology
-3. Conducts systematic analysis (trend, S/R, MA, volume, patterns)
-4. Develops 3 scenarios with probabilities (e.g., 55% bullish continuation, 30% consolidation, 15% reversal)
-5. Generates comprehensive analysis report using template
-6. Saves as SPY_technical_analysis_2025-11-02.md
-```
-
-**Example 2: Multiple Chart Analysis**
-```
-User: "Analyze these three charts: Bitcoin, Ethereum, and Nasdaq"
-[Provides 3 chart images]
-
-Analyst:
-1. Confirms receipt of 3 charts
-2. Reads technical_analysis_framework.md
-3. Analyzes Bitcoin chart completely → Generates report → Saves as BTC_technical_analysis_2025-11-02.md
-4. Analyzes Ethereum chart completely → Generates report → Saves as ETH_technical_analysis_2025-11-02.md
-5. Analyzes Nasdaq chart completely → Generates report → Saves as NDX_technical_analysis_2025-11-02.md
-6. Notifies user that all three analyses are complete
-```
-
-**Example 3: Focused Analysis Request**
-```
-User: "I'm particularly interested in whether this stock will break above resistance. Analyze the chart."
-[Provides chart image]
-
-Analyst:
-1. Conducts full systematic analysis
-2. Pays special attention to resistance levels and breakout probability
-3. Develops scenarios with emphasis on breakout vs. rejection possibilities
-4. Assigns probabilities based on volume, trend strength, and proximity to resistance
-5. Generates complete report with focused scenario analysis
-```
+**Clarity**:
+- Precise technical terminology, correctly used
+- Professional tone
+- Logical structure
+- Specific price levels (no vague descriptions)
+- Scenarios distinct and mutually exclusive
 
 ## Resources
 
-This skill includes the following bundled resources:
-
-### references/technical_analysis_framework.md
-
-Comprehensive methodology for technical analysis including:
-- Trend analysis criteria and classification
-- Support and resistance identification techniques
-- Moving average interpretation guidelines
-- Volume analysis principles
-- Chart pattern recognition
-- Scenario development and probability assignment framework
-- Objectivity and discipline reminders
-
-**Usage**: Read this file before conducting analysis to ensure systematic, objective approach.
-
-### assets/analysis_template.md
-
-Structured template for technical analysis reports with all required sections.
-
-**Usage**: Use this template structure for every analysis report. Copy the format and populate with specific findings for each chart.
+| File | When | Contains |
+|---|---|---|
+| `references/technical_analysis_framework.md` | Always, before analysis | Full methodology (trend / S/R / MA / volume / patterns / scenario framework / objectivity discipline) |
+| `assets/analysis_template.md` | Every report | Full report structure with required sections |

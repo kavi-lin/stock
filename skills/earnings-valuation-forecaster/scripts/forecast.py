@@ -42,6 +42,20 @@ DEFAULT_TTL_SEC = 4 * 3600  # 4h
 FMP_BASE = "https://financialmodelingprep.com/stable"
 RATE_LIMIT = 0.25
 
+# Static peer fallback (used when FMP /stock-peers returns nothing)
+PEER_MAP = {
+    "MSFT": ["AAPL", "GOOGL", "AMZN", "META"],
+    "NVDA": ["AMD", "AVGO", "TSM", "MU"],
+    "AAPL": ["MSFT", "GOOGL", "SONY", "DELL"],
+    "GOOGL": ["META", "MSFT", "AMZN"],
+    "AMZN": ["WMT", "COST", "MSFT", "GOOGL"],
+    "TSLA": ["GM", "F", "RIVN", "NIO"],
+    "META": ["GOOGL", "SNAP", "PINS", "TTD"],
+    "JPM":  ["BAC", "GS", "MS", "WFC"],
+    "XOM":  ["CVX", "COP", "SLB", "OXY"],
+    "AMD":  ["NVDA", "INTC", "AVGO", "QCOM"],
+}
+
 
 # ── FMP client (stable endpoints) ─────────────────────────────────────────
 class FMP:
@@ -49,8 +63,14 @@ class FMP:
         self.api_key = api_key
         self.sess = requests.Session()
         self.last = 0.0
+        self.exhausted = False   # set when 429 confirms daily quota is hit
 
     def get(self, path, params=None):
+        # Short-circuit once quota is exhausted — daily quota doesn't reset in
+        # 60s. Previous code slept + recursed on 429, which guaranteed an
+        # infinite retry loop when the quota was actually hit.
+        if self.exhausted:
+            return None
         elapsed = time.time() - self.last
         if elapsed < RATE_LIMIT:
             time.sleep(RATE_LIMIT - elapsed)
@@ -60,9 +80,13 @@ class FMP:
             r = self.sess.get(f"{FMP_BASE}{path}", params=params, timeout=30)
             self.last = time.time()
             if r.status_code == 429:
-                print("WARN: FMP rate-limited, sleeping 60s", file=sys.stderr)
-                time.sleep(60)
-                return self.get(path, params)
+                if not self.exhausted:
+                    print(
+                        "WARN: FMP returned 429 (daily quota reached); skipping all further FMP calls this run",
+                        file=sys.stderr,
+                    )
+                self.exhausted = True
+                return None
             if r.status_code != 200:
                 return None
             data = r.json()
@@ -90,6 +114,9 @@ class FMP:
 
     def analyst_estimates(self, ticker):
         return self.get("/analyst-estimates", {"symbol": ticker, "period": "annual", "limit": 5})
+
+    def stock_peers(self, ticker):
+        return self.get("/stock-peers", {"symbol": ticker})
 
 
 # ── Cache ─────────────────────────────────────────────────────────────────
@@ -244,6 +271,152 @@ def pe_percentiles(ratios_annual):
     }
 
 
+# ── Peer PE blending (v1.1) ──────────────────────────────────────────────
+def _fetch_peer_pe(client, ticker):
+    """
+    Fetch median PE of peer group.
+    Tries FMP /stock-peers first; falls back to static PEER_MAP.
+    Returns (median_pe_or_None, peers_used_list, source_str).
+    """
+    peer_tickers = None
+    source = "none"
+
+    data = client.stock_peers(ticker)
+    if data and isinstance(data, list) and data:
+        first = data[0]
+        if isinstance(first, dict) and "peersList" in first:
+            peer_tickers = first["peersList"][:5]
+            source = "fmp_stock_peers"
+        elif isinstance(first, str):
+            peer_tickers = data[:5]
+            source = "fmp_stock_peers"
+
+    if not peer_tickers:
+        peer_tickers = PEER_MAP.get(ticker)
+        if peer_tickers:
+            source = "peer_map_static"
+
+    if not peer_tickers:
+        return None, [], "none"
+
+    pes, peers_used = [], []
+    for p in peer_tickers:
+        q = client.quote(p)
+        if q and q.get("pe"):
+            pe = q["pe"]
+            if 0 < pe < 200:
+                pes.append(pe)
+                peers_used.append(p)
+
+    if not pes:
+        return None, [], source
+
+    return round(stats.median(pes), 2), peers_used, source
+
+
+def blend_pe(own_pe, peer_median):
+    """Blend own-history PE range 70% + peer median 30%. Returns new dict."""
+    if peer_median is None:
+        return own_pe
+    result = dict(own_pe)
+    result["pe_p25"] = round(own_pe["pe_p25"] * 0.7 + peer_median * 0.3, 2)
+    result["pe_p50"] = round(own_pe["pe_p50"] * 0.7 + peer_median * 0.3, 2)
+    result["pe_p75"] = round(own_pe["pe_p75"] * 0.7 + peer_median * 0.3, 2)
+    return result
+
+
+# ── Rate adjustment (v1.1) ────────────────────────────────────────────────
+# Path: project_root/skills/fred-macro/cache/fred_latest.json
+_FRED_MACRO_CACHE = (
+    Path(__file__).resolve().parent.parent.parent / "fred-macro" / "cache" / "fred_latest.json"
+)
+
+
+def _load_real_rate():
+    """
+    Read real_rate_preferred (DFII10) from fred-macro cache.
+    Returns (rate_float, source_str). Fallback: 4.5%.
+    """
+    try:
+        if _FRED_MACRO_CACHE.exists():
+            data = json.loads(_FRED_MACRO_CACHE.read_text())
+            rs = data.get("regime_signals", {})
+            rate = rs.get("real_rate_preferred") or rs.get("real_rate_dfii10")
+            if rate is not None:
+                return float(rate), "fred_macro_cache"
+    except Exception:
+        pass
+    return 4.5, "fallback"
+
+
+def rate_adjust_pe(pe_range, real_rate):
+    """
+    Scale PE multiples by real interest rate regime (DFII10-based).
+      < 1.0%: accommodative → ×1.08
+      1–2%:   neutral       → ×1.00
+      2–3%:   elevated      → ×0.90
+      > 3%:   restrictive   → ×0.82
+    Returns (adjusted_pe_dict, multiplier, regime_label).
+    """
+    if real_rate < 1.0:
+        mul, regime = 1.08, "accommodative"
+    elif real_rate < 2.0:
+        mul, regime = 1.00, "neutral"
+    elif real_rate < 3.0:
+        mul, regime = 0.90, "elevated"
+    else:
+        mul, regime = 0.82, "restrictive"
+
+    result = dict(pe_range)
+    result["pe_p25"] = round(pe_range["pe_p25"] * mul, 2)
+    result["pe_p50"] = round(pe_range["pe_p50"] * mul, 2)
+    result["pe_p75"] = round(pe_range["pe_p75"] * mul, 2)
+    return result, mul, regime
+
+
+# ── Expected value + signal (v1.1) ───────────────────────────────────────
+def calc_expected_value(scenarios, confidence):
+    """
+    Probability-weighted target price. Probabilities reflect EPS forecast confidence:
+      HIGH:   bear=0.20 / base=0.60 / bull=0.20
+      MEDIUM: bear=0.25 / base=0.50 / bull=0.25
+      LOW:    bear=0.30 / base=0.40 / bull=0.30
+    Returns (expected_value, probability_dict).
+    """
+    probs_map = {
+        "HIGH":   {"bear": 0.20, "base": 0.60, "bull": 0.20},
+        "MEDIUM": {"bear": 0.25, "base": 0.50, "bull": 0.25},
+        "LOW":    {"bear": 0.30, "base": 0.40, "bull": 0.30},
+    }
+    probs = probs_map.get(confidence or "MEDIUM")
+    ev = (
+        scenarios["bear"]["target"] * probs["bear"]
+        + scenarios["base"]["target"] * probs["base"]
+        + scenarios["bull"]["target"] * probs["bull"]
+    )
+    return round(ev, 2), probs
+
+
+def valuation_signal(price, expected_value, base_target):
+    """
+    Advisory signal (not a trading instruction).
+      STRONG BUY : price < EV × 0.90   (> 10% margin of safety vs EV)
+      BUY        : price < EV
+      HOLD       : price within base ± 10%
+      TRIM       : price > base × 1.10 but ≤ base × 1.25
+      SELL       : price > base × 1.25
+    """
+    if price < expected_value * 0.90:
+        return "STRONG BUY"
+    elif price < expected_value:
+        return "BUY"
+    elif price <= base_target * 1.10:
+        return "HOLD"
+    elif price <= base_target * 1.25:
+        return "TRIM"
+    return "SELL"
+
+
 # ── Scenario builder ─────────────────────────────────────────────────────
 def build_scenarios(forward_eps, pe_range, current_price):
     p25, p50, p75 = pe_range["pe_p25"], pe_range["pe_p50"], pe_range["pe_p75"]
@@ -295,11 +468,29 @@ def to_markdown(p):
     grid = p["sensitivity_grid"]
     axes = p["sensitivity_axes"]
     fe = p["forward_eps"]
-    pm = p["multiple_range"]
+    pm_raw = p["multiple_range"]
+    pm_eff = p.get("multiple_range_effective", pm_raw)
+    ev = p.get("expected_value")
+    ev_up = p.get("expected_value_upside_pct")
+    sig = p.get("signal", "—")
+    rc = p.get("rate_context", {})
+    pi = p.get("peer_pe_info", {})
+
+    _SIGNAL_BADGE = {"STRONG BUY": "🟢", "BUY": "🟩", "HOLD": "🟡", "TRIM": "🟠", "SELL": "🔴"}
+    badge = _SIGNAL_BADGE.get(sig, "⬜")
+
+    ev_str = f"  ·  **EV**: ${ev} ({ev_up:+.1f}%)" if ev is not None and ev_up is not None else ""
+
     md = []
     md.append(f"# {p['ticker']} · 12-Month Valuation Scenarios")
     md.append("")
-    md.append(f"**Current**: ${p['current_price']}  ·  **TTM EPS**: ${p['ttm_eps']}  ·  **Forward EPS**: ${fe['value']} ({fe['confidence']} conf)")
+    md.append(
+        f"**Current**: ${p['current_price']}"
+        f"  ·  **Signal**: {badge} {sig}"
+        f"  ·  **TTM EPS**: ${p['ttm_eps']}"
+        f"  ·  **Forward EPS**: ${fe['value']} ({fe['confidence']} conf)"
+        f"{ev_str}"
+    )
     md.append("")
     md.append(f"_Generated {p['generated_at']}_")
     md.append("")
@@ -310,6 +501,8 @@ def to_markdown(p):
     md.append(f"| 🐂 Bull | ${s['bull']['target']} | {s['bull']['upside_pct']:+.1f}% | {s['bull']['pe']}× | +15% | ${s['bull']['eps']} |")
     md.append(f"| 📊 Base | ${s['base']['target']} | {s['base']['upside_pct']:+.1f}% | {s['base']['pe']}× |   0% | ${s['base']['eps']} |")
     md.append(f"| 🐻 Bear | ${s['bear']['target']} | {s['bear']['upside_pct']:+.1f}% | {s['bear']['pe']}× | −15% | ${s['bear']['eps']} |")
+    if ev is not None:
+        md.append(f"| ⚖️ EV   | ${ev} | {ev_up:+.1f}% | — | — | — |")
     md.append("")
     md.append("### Trigger Conditions")
     for name, icon in [("bull", "🐂"), ("base", "📊"), ("bear", "🐻")]:
@@ -330,11 +523,17 @@ def to_markdown(p):
         md.append(f"- **{k}**: {'$' + str(v) if v is not None else 'n/a'}")
     md.append(f"- **Adopted**: ${fe['value']} ({fe['confidence']} conf, ±{fe['spread_pct']}% spread)")
     md.append("")
-    md.append(f"## Multiple Range ({pm['window_years']}-year annual window, {pm['source']})")
+    md.append(f"## PE Multiple")
     md.append("")
-    md.append(f"- PE p25 (bear multiple): **{pm['pe_p25']}×**")
-    md.append(f"- PE p50 (base multiple): **{pm['pe_p50']}×**")
-    md.append(f"- PE p75 (bull multiple): **{pm['pe_p75']}×**")
+    md.append(f"_Raw (own 5Y history):_ p25={pm_raw['pe_p25']}× · p50={pm_raw['pe_p50']}× · p75={pm_raw['pe_p75']}×")
+    if pi.get("median_pe") is not None:
+        peers_str = ", ".join(pi.get("peers_used", [])) or "—"
+        md.append(f"_Peer median PE_: {pi['median_pe']}× (from {peers_str}, source: {pi.get('source','—')})")
+    rate_note = ""
+    if rc:
+        rate_note = f"Real rate: {rc.get('real_rate','?')}% ({rc.get('rate_regime','?')}) → ×{rc.get('rate_multiplier','?')}"
+        md.append(f"_Rate adjustment_: {rate_note}")
+    md.append(f"_Effective (used for scenarios):_ p25={pm_eff['pe_p25']}× · p50={pm_eff['pe_p50']}× · p75={pm_eff['pe_p75']}×")
     md.append("")
     md.append("## Caveats")
     for c in p.get("caveats", []):
@@ -387,7 +586,18 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC):
     if fwd_eps is None:
         return {"status": "error", "reason": "could not compute forward EPS from any method"}
 
-    scenarios, grid = build_scenarios(fwd_eps, pe_range, current_price)
+    # v1.1: peer blending + rate adjustment on PE range
+    peer_median, peers_used, peer_source = _fetch_peer_pe(client, ticker)
+    blended = blend_pe(pe_range, peer_median)
+    real_rate, rate_source = _load_real_rate()
+    effective_pe, rate_mul, rate_regime = rate_adjust_pe(blended, real_rate)
+
+    scenarios, grid = build_scenarios(fwd_eps, effective_pe, current_price)
+
+    # v1.1: expected value + advisory signal
+    ev, ev_probs = calc_expected_value(scenarios, confidence)
+    sig = valuation_signal(current_price, ev, scenarios["base"]["target"])
+    ev_upside = round((ev / current_price - 1) * 100, 1) if current_price > 0 else None
 
     payload = {
         "status":        "ok",
@@ -401,20 +611,38 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC):
             "confidence":  confidence,
             "spread_pct":  spread,
         },
-        "multiple_range":     pe_range,
+        "multiple_range":           pe_range,      # raw own-history (reference)
+        "multiple_range_effective": effective_pe,  # after peer blend + rate adjust (used for scenarios)
+        "peer_pe_info": {
+            "median_pe":  peer_median,
+            "peers_used": peers_used,
+            "source":     peer_source,
+        },
+        "rate_context": {
+            "real_rate":       real_rate,
+            "rate_multiplier": rate_mul,
+            "rate_regime":     rate_regime,
+            "source":          rate_source,
+        },
         "scenarios":          scenarios,
         "sensitivity_grid":   grid,
         "sensitivity_axes": {
-            "rows": [f"PE p25 ({pe_range['pe_p25']})",
-                     f"PE p50 ({pe_range['pe_p50']})",
-                     f"PE p75 ({pe_range['pe_p75']})"],
+            "rows": [f"PE p25 ({effective_pe['pe_p25']})",
+                     f"PE p50 ({effective_pe['pe_p50']})",
+                     f"PE p75 ({effective_pe['pe_p75']})"],
             "cols": ["EPS −15%", "EPS base", "EPS +15%"],
         },
+        "expected_value":               ev,
+        "expected_value_upside_pct":    ev_upside,
+        "expected_value_probabilities": ev_probs,
+        "signal":                       sig,
         "caveats": [
             "Multiple range uses company's own 5-year annual history — blind to sector regime shifts",
             "Forward EPS assumes business model continuity (secular disruption breaks all 3 methods)",
             "Earnings quality not adjusted (SBC, one-offs, GAAP vs non-GAAP ignored)",
-            "Not a replacement for DCF / intrinsic value analysis",
+            "Peer PE blend uses median of up to 5 peers — thin or mismatched peer groups reduce accuracy",
+            "Rate adjustment uses DFII10 real rate from fred-macro cache (stale if cache not refreshed)",
+            "Signal is advisory only — not a trading instruction",
             f"Multiple window: {pe_range['window_years']} years of annual PE history",
         ],
         "cache_hit":     False,

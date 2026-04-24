@@ -178,7 +178,12 @@ async function loadSectorData() {
         const data = await DataStore.get();
         const lang = UI.currentLang;
 
-        document.getElementById('last-update').textContent = `SYNCED: ${data.last_updated}`;
+        UI.applySyncLight(document.getElementById('last-update'), data.last_updated, null, [
+            { label: '產業掃描', ts: data?.market?.generated_at,                          ttl: 720, hint: '執行「產業掃描」' },
+            { label: '廣度分析', ts: data?.breadth?.generated_at || data?.breadth?.data_date, ttl: 180, hint: 'daily_update.sh Step 1' },
+            { label: 'FTD 偵測', ts: data?.ftd?.generated_at,                             ttl: 180, hint: 'daily_update.sh Step 2' },
+            { label: '市場頂部', ts: data?.market_top?.generated_at,                      ttl: 180, hint: 'daily_update.sh Step 3' },
+        ]);
 
         renderStatusStrip(data);
         renderBinaryAlert(data.binary_risks || []);
@@ -698,18 +703,28 @@ function hideScanBanner() {
 function setBannerStatus(status) {
     const card = document.getElementById('scan-banner');      // outer glass-card
     const st   = document.getElementById('scan-banner-status'); // status tag inside header row
+    const titleEl = document.getElementById('scan-banner-title');
     const sty  = STATUS_STYLES[status] || STATUS_STYLES.running;
-    // Color the card's left border via CSS variable — both the solid 6px band
-    // and the inset glow read from --scan-accent. Unified across momentum / sector / news.
+    
     if (card) card.style.setProperty('--scan-accent', sty.text);
     const pulse = document.getElementById('scan-banner-pulse');
     if (pulse) {
         pulse.style.background = sty.text;
-        // Stop the pulse in terminal states — steady dot reads as "not working anymore"
         pulse.classList.toggle('animate-pulse', status === 'running');
     }
+
+    const tr = t();
+    if (titleEl) {
+        const titleMap = {
+            running:   tr.scan_banner_title_running || (UI.currentLang === 'zh' ? '產業掃描執行中…' : 'Sector Intel Running…'),
+            done:      tr.scan_banner_title_done    || (UI.currentLang === 'zh' ? '產業掃描已完成' : 'Sector Intel Complete'),
+            error:     tr.scan_banner_title_err     || (UI.currentLang === 'zh' ? '掃描發生錯誤' : 'Scan Failed'),
+            cancelled: tr.scan_banner_title_err     || (UI.currentLang === 'zh' ? '掃描已取消' : 'Scan Cancelled'),
+        };
+        titleEl.textContent = titleMap[status] || titleMap.running;
+    }
+
     if (st) {
-        const tr = t();
         const labelMap = {
             running:   tr.scan_running   || 'RUNNING',
             done:      tr.scan_done      || 'DONE',
@@ -720,6 +735,14 @@ function setBannerStatus(status) {
         st.style.color      = sty.text;
         st.style.background = sty.bg;
     }
+
+    // Hide latest log preview on terminal states to reduce clutter
+    const latest = document.getElementById('scan-banner-latest');
+    if (latest) {
+        const isTerminal = (status === 'done' || status === 'error' || status === 'cancelled');
+        latest.closest('.min-w-0.relative')?.classList.toggle('hidden', isTerminal);
+    }
+
     // Cancel only while running; Dismiss for everything else
     document.getElementById('scan-cancel-btn')?.classList.toggle('hidden', status !== 'running');
     document.getElementById('scan-dismiss-btn')?.classList.toggle('hidden', status === 'running');
@@ -860,16 +883,33 @@ document.getElementById('scan-cancel-btn')?.addEventListener('click', cancelSect
 document.getElementById('scan-dismiss-btn')?.addEventListener('click', hideScanBanner);
 document.getElementById('scan-expand-btn')?.addEventListener('click', toggleScanPanel);
 
-// Resume banner on page load if a scan is already running
+// Resume banner on page load for in-flight *or* recently-finished scans.
+// Without this, navigating away mid-scan and back made the progress card vanish;
+// worse, a just-finished result disappeared before the user could read it.
+// Rule: always show the banner for running; show done/error if ended in the last 5 min.
 (async () => {
     try {
         const r = await fetch('/api/run-protocol/status');
         const s = await r.json();
+        if (s.name && s.name !== 'sector') return;  // banner belongs to another protocol
+        const RESUME_TERMINAL_WINDOW_MS = 5 * 60 * 1000;
+        const endedRecently = s.ended_at
+            && (Date.now() - new Date(s.ended_at).getTime()) < RESUME_TERMINAL_WINDOW_MS;
         if (s.status === 'running') {
             showScanBanner();
             setBannerStatus('running');
             _scanPollTimer = setInterval(pollScanStatus, 2000);
             pollScanStatus();
+        } else if ((s.status === 'done' || s.status === 'error') && endedRecently) {
+            showScanBanner();
+            setBannerStatus(s.status);
+            document.getElementById('scan-banner-elapsed').textContent =
+                formatElapsed(s.elapsed_sec || 0);
+            renderScanEvents(s.events || []);
+            if (s.status === 'error') {
+                const err = document.getElementById('scan-error');
+                if (err) { err.textContent = s.error || 'error'; err.classList.remove('hidden'); }
+            }
         }
     } catch (e) { /* ignore */ }
 })();

@@ -5,11 +5,7 @@
      data sources, analyst definitions, or tick/R-R conventions. See
      skills/MARKET_INDEX.md for the skill-level breakdown. -->
 
-> **V4.8 核心變更（Parallel Blind Analyst Subagents）**
-> - **D**：Phase 2 四個 analyst（Fundamentals / Sentiment / News / Technical）改為 **4 個平行 subagent（Agent tool, general-purpose）**，各自封閉 context、禁止互看輸出。這是針對 V4.7 仍殘留的「一人演四角」問題的結構性修正。
-> - Burry 保留 inline（純 skill 呼叫，已是 deterministic，包 subagent 無加值）。
-> - Red Team (Phase 2.8) 與 V4.7 相同，仍是獨立 subagent。
-> - 繼承 V4.7 全部機制：Red-Team-gated Consensus Bonus / Penalty、Phase 2.8 Red Team、Burry OVERRIDE 成本化。
+> V4.8 changelog / rationale moved to `investment/README.md`. This protocol file is execution-only.
 
 ## SESSION STARTUP
 <!-- [framework] session config + startup — market-agnostic -->
@@ -38,10 +34,11 @@ Ticker 由使用者在對話中指定。
    - L1: `../sector/sector_logs/*_sector_intel.json` 最新檔 FRESH → 提取 macro，跳過 search（`phase0_source: SECTOR_CACHE`）
    - L2: `./invest_logs/*_phase0.json` 最新檔 FRESH → 載入（`INVEST_CACHE`）
    - L3: 皆 STALE 或缺失 → web search，寫入 `./invest_logs/YYYY-MM-DD_phase0.json`（`FRESHLY_EXECUTED`）
-3. **Theme Cache**（FRESH = mtime < 3h）: 需主題熱度時先搜 `../skills/theme-detector/cache/theme_detector_*.json` 最新檔；FRESH → 載入；STALE 或缺失 → 執行 skill，cache 存回原路徑，MD 移至 `../reports/YYYYMMDD_theme_detector_HHMMSS.md`。
+3. **Theme Cache**（FRESH = mtime < 3h）: 執行 `python3 ../skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 10800`；script 自管 freshness — 快速 exit（< 1s）代表 cache fresh，慢速 exit（140-180s）代表重新抓取；兩種情況完成後都讀 `../skills/theme-detector/cache/theme_detector_*.json` 最新檔。
 4. **Prior Session**: 讀 `./invest_logs/history.json` 最近一筆（僅供 PM 參考，**不得** pass 進 Phase 2 subagent）。
 5. **Output**: 邏輯輸出 JSON；Markdown 僅用於 Final Viz Table。
 6. **key_factors**: 最多 3 條，每條 ≤ 8 英文字。
+6a. **語言規定（強制）**: 下列欄位**必須用繁體中文**輸出，不得使用英文：`watch_conditions`（鍵值的 description 部分）、`key_risks`（每條描述）、`macro_context`、`red_team_counter_thesis`、`red_team_kill_conditions`（每條）。`watch_conditions` 的 key 名稱保持 snake_case 英文（供程式識別用），value 描述必須是中文。
 7. **MD Report**（強制）: Phase 5 後存 `../reports/YYYYMMDD_TICKER.md`。不得省略。
 8. **Skill 執行強制規則（NO SIMULATION）**: 凡 protocol 內標示「**MUST run**」的 skill 指令，**必須實際執行 Bash 呼叫 python3 script 並解析 JSON 輸出**，嚴禁以語言模型自行估算／模擬數值代替。受此規則約束的 skill：
    - `market-sentiment-analyzer`（Phase 2 Sentiment subagent 內）
@@ -51,6 +48,7 @@ Ticker 由使用者在對話中指定。
    - `short-contrarian-analyst`（Phase 2 inline Burry）
    - `portfolio-risk-manager`（Phase 4 Step 2）
    - `tail-risk-analyzer`（Phase 4 Step 3）
+   - `fred-macro`（Phase 0 L4，V4.9 新增）— 失敗不阻斷流程，`fred_available: false` 繼續跑
    - 若某次執行 skill script 發生錯誤，必須在 Final Report 對應欄位標記 `skill_execution_failed: true` 並記錄 stderr，禁止靜默用估算值補上。
 9. **Red Team 獨立執行強制規則（V4.7）**: Phase 2.8 Red Team Adversary **必須以 Agent tool 呼叫 subagent 執行**（`subagent_type: "general-purpose"`），禁止 inline 推理代替。
 10. **Non-Interactive 執行強制規則（V4.8 新增）**: 當 protocol 被 Dashboard reverse-call（`claude -p` non-interactive）觸發時，Claude 不得向使用者發問或輸出「請確認…」的摘要表並等候。Protocol 本身的明確規則優先（e.g. RISK_TOLERANCE 預設 MEDIUM、Phase 0 三層 cache 依 TTL 決定）。**CLAUDE.md 的「實作前確認規則」僅適用於使用者要求的 code change，不適用於 protocol 自動產生的 reports/history/cache 等分析輸出檔案** — 這些是 protocol 正常執行產物，不得因檔案數量觸發確認流程。
@@ -93,6 +91,18 @@ Ticker 由使用者在對話中指定。
 
 > 檢查 mtime 可用 Bash `find path -name pattern -mmin -180` 或 `stat -f %m file`；Python `os.path.getmtime()`。
 
+**L4 — FRED macro snapshot（V4.9 新增；MUST run）**:
+
+不管 L1/L2/L3 哪層觸發，Phase 0 **一定額外跑** `fred-macro` skill 拿官方利率 / 通膨 / 就業 / 信用 / 壓力五類官方數據。FRED 免費無配額，用來**校正**下面的 `phase3_macro_multiplier`（見 blending 規則）。skill 自帶 15 min cache，連續分析多個 ticker 只打一次網路。
+
+```bash
+python3 skills/fred-macro/scripts/fetch.py --json-only
+```
+
+> ⚠️ **讀取輸出前必讀**：`skills/fred-macro/SECTOR_ROTATION_GUIDE.md`（LLM instruction set，非人類文件）
+
+取回 `fred_snapshot` 整個 object + `regime_signals` 區塊，寫入 phase0 JSON。若 skill 失敗（網路 / key 失效）→ `fred_snapshot: null` + `fred_available: false`，protocol 繼續跑不中斷，multiplier 回退純 LLM 查表值。
+
 ```json
 {
   "phase": 0,
@@ -116,21 +126,74 @@ Ticker 由使用者在對話中指定。
     "hot_sectors": [],
     "cold_sectors": []
   },
+
+  "fred_available": "true | false",
+  "fred_snapshot": {
+    "generated_at": "ISO timestamp from FRED fetch",
+    "yield_curve_value":          "float (T10Y2Y) — null if unavailable",
+    "yield_curve_inverted":       "bool — T10Y2Y < 0",
+    "yield_curve_steep":          "bool — T10Y2Y > 1.0",
+    "fed_funds_current":          "float — DFF latest %",
+    "fed_rate_direction":         "rising | falling | flat | unknown",
+    "real_rate_10y_estimate":     "float — DGS10 - CPIAUCSL YoY",
+    "credit_spread_pctile_1y":    "int 0-100 — HY spread percentile in last year",
+    "credit_stress_elevated":     "bool — HY pctile > 75",
+    "financial_stress_above_avg": "bool — NFCI > 0",
+    "cpi_yoy_pct":                "float — CPIAUCSL YoY",
+    "core_cpi_yoy_pct":           "float — CPILFESL YoY",
+    "unemployment_pct":           "float — UNRATE latest",
+    "series_fetched_count":       "int — how many of the 12 series succeeded"
+  },
+
   "phase3_macro_multiplier": "float",
+  "macro_multiplier_rationale": "string — one line explaining LLM baseline + FRED caps applied",
   "mandatory_risk_flags": [],
   "binary_risks": []
 }
 ```
 
-**macro_multiplier 查表**:
+**macro_multiplier 查表（LLM baseline）**:
 
-| macro_backdrop_score | multiplier |
+| macro_backdrop_score | baseline multiplier |
 |---|---|
 | ≥ +3 | 1.2 |
 | +1 to +3 | 1.0 |
 | -1 to +1 | 0.9 |
 | -3 to -1 | 0.75 |
 | < -3 | 0.6 |
+
+**V4.9 FRED blending rules**（套用到 baseline 上，取**最小值**為 final multiplier）:
+
+當 `fred_available == true`，逐條檢查，凡觸發的都算出上限值，最後 `final = min(baseline, 觸發的所有上限)`：
+
+| 觸發條件（FRED） | 意義 | 上限 cap |
+|---|---|---|
+| `yield_curve_inverted` (T10Y2Y < 0) | 12-18m 衰退前兆 | **0.75** |
+| `credit_stress_elevated` (HY pctile > 75) | 信用市場 risk-off | **0.85** |
+| `financial_stress_above_avg` (NFCI > 0) | 整體金融緊縮 | **0.9** |
+| `real_rate_10y_estimate > 2.0` | 實質利率 > 2% 屬壓抑區 | **0.9** |
+| `fred_available == false` | FRED 無資料 | baseline（無 FRED 校正） |
+
+**雙向 bonus**（選擇性，只觸發一條）:
+- 若 baseline ≥ 1.0 **且** 所有 FRED 條件均正常（無倒掛、credit pctile < 50、NFCI < 0、real_rate < 1）→ multiplier `× 1.05`（總 cap 仍為 1.25）
+
+**rationale 欄位**：必寫一行記錄決策過程，e.g.
+- `"LLM baseline 1.0 (score +1.5); no FRED caps triggered; × 1.05 bonus for all-clear → 1.05"`
+- `"LLM baseline 1.2 (score +3.5); capped to 0.75 (yield_curve_inverted, T10Y2Y=-0.12)"`
+- `"LLM baseline 0.9 (score -0.5); FRED unavailable, kept baseline → 0.9"`
+
+**Phase 0 Validator Gate（V4.9，MANDATORY）**:
+
+寫完 phase0 JSON 後 MUST 跑：
+```bash
+python3 investment/scripts/validate_phase0.py --ticker <TICKER>
+```
+
+rc ≠ 0 必須修正後重跑。常見失敗：
+- `fred_available` 欄位缺失（最常見 — LLM 直接跳過 L4）
+- `fred_snapshot` null 但 `fred_available=true`
+- `macro_multiplier_rationale` 缺失或無 FRED 引用
+- `regime_label` 不在 10 個合法值內
 
 ---
 
@@ -419,6 +482,12 @@ Agent(
   PHASE 0 MACRO:
   <paste macro_summary from Phase 0>
 
+  PHASE 0 FRED MACRO SNAPSHOT (V4.9，slim — 若 fred_available=false 顯示 "FRED unavailable"):
+  <paste fred_snapshot 11 個欄位：regime_label / regime_confidence / macro_scores_composite /
+   yield_curve_value / yield_curve_inverted / credit_stress_elevated / financial_stress_above_avg /
+   fed_rate_direction / real_rate_preferred / sector_rotation_favor[] / sector_rotation_avoid[] /
+   velocity_highlights[]>
+
   PHASE 2 ANALYST OUTPUTS (5 agents including Burry):
   <paste all 5 analyst JSONs>
 
@@ -427,11 +496,21 @@ Agent(
   2. 找出共識最脆弱的 1 個主論點，寫成 `counter_thesis`（1-2 句）。
   3. 產出 2-3 條 falsifiable kill_conditions：「IF <事件> WITHIN <天數> THEN <推翻論點>」。
      無效範例（不可驗證）：「IF 市場反轉」「IF 利空」
-  4. 評 counter_evidence_strength（1-5 整數）：
+  4. (V4.9) FRED 衝突挑戰規則 — 若 fred_snapshot 顯示與 thesis 衝突的訊號：
+       - yield_curve_inverted = true
+       - real_rate_preferred > 2.0
+       - credit_stress_elevated = true OR financial_stress_above_avg = true
+       - regime_label ∈ {Late Cycle Tightening, Stagflation, Recession Risk, Recession Easing}
+       - ticker 屬於 sector ∈ fred_snapshot.sector_rotation_avoid
+       - velocity_highlights 含「accelerating」於 NFCI / BAMLH0A0HYM2（金融緊縮加速）
+     → MUST 至少 1 條 kill_condition 引用 **具體 FRED 數值**
+       (e.g.「real_rate 2.15% > 2.0% threshold AND DGS10 trend rising 90d」)
+       不可寫 vague 的「macro 轉差」、「總體環境不佳」
+  5. 評 counter_evidence_strength（1-5 整數）：
      - 1-2 = 找不到有力反論
      - 3 = 有值得警惕的風險但無確切反證
-     - 4-5 = 有具體數據/事件強烈反駁
-  5. verdict 對照：
+     - 4-5 = 有具體數據/事件強烈反駁（**FRED 衝突訊號 ≥ 2 個自動 ≥ 4**）
+  6. verdict 對照：
      - strength ≤ 2 → NO_VIABLE_COUNTER
      - strength = 3 → MODERATE_COUNTER
      - strength ≥ 4 → STRONG_COUNTER

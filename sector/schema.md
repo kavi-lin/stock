@@ -47,9 +47,28 @@
     "source": "market_top_cache | not_available"
   },
   "synthesized_exposure": "string — 最保守曝險上限（三訊號最低者）",
-  "signal_conflict": "true | false"
+  "signal_conflict": "true | false",
+
+  "fred_available": "true | false — V1.4 新增（MUST-run Layer E）",
+  "fred_snapshot": {
+    "generated_at":            "ISO timestamp from FRED fetch",
+    "regime_label":            "Goldilocks | Soft Landing | Reflation | Benign Easing | Overheating | Late Cycle Tightening | Stagflation | Recession Easing | Recession Risk | Transitional",
+    "regime_confidence":       "float 0.20-0.95",
+    "macro_scores_composite":  "int 0-100 (latency-weighted)",
+    "yield_curve_value":       "float (T10Y2Y)",
+    "yield_curve_inverted":    "bool — T10Y2Y < 0",
+    "credit_stress_elevated":  "bool — HY pctile > 75",
+    "financial_stress_above_avg": "bool — NFCI > 0",
+    "fed_rate_direction":      "rising | falling | flat | unknown",
+    "real_rate_preferred":     "float — DFII10 if available else DGS10 - CPI YoY",
+    "sector_rotation_favor":   ["sector1", "sector2"],
+    "sector_rotation_avoid":   ["sector1", "sector2"],
+    "velocity_highlights":     ["series:velocity", "e.g. NFCI:accelerating"]
+  }
 }
 ```
+
+> `fred_snapshot` 為 **slim 版本**（~15 行），僅保留 Phase 4/Step 6 所需欄位。完整 snapshot 仍在 `skills/fred-macro/cache/fred_latest.json`。失敗時 `fred_available=false` + `fred_snapshot=null`。
 
 ---
 
@@ -145,7 +164,7 @@
   },
   "upcoming_binary_risks": [
     {
-      "event": "string",
+      "event": "string — 繁體中文，格式：事件名稱（影響方向；看多/看空哪些子產業）",
       "date": "YYYY-MM-DD",
       "affected_sectors": [],
       "within_48h": "true | false"
@@ -165,13 +184,15 @@
 ```json
 {
   "phase": "4a",
-  "agent": "Sector_Rotation_Analyst | Theme_Intelligence_Analyst | News_Catalyst_Analyst",
+  "agent": "Sector_Rotation_Analyst | Theme_Intelligence_Analyst | News_Catalyst_Analyst | FRED_Macro_Analyst",
   "top_conviction_hot": ["sector1", "sector2"],
   "top_conviction_cold": ["sector1", "sector2"],
   "key_rationale": "string — 最多 2 句",
   "subagent_isolated": "true | false (V1.3: true when produced by parallel subagent; false for inline fallback)"
 }
 ```
+
+> V1.4：Phase 4a 新增第 4 lane `FRED_Macro_Analyst`（當 `fred_available=true` 時必跑；`fred_available=false` 時跳過該 lane，`phase4_fanout_mode` 仍可為 PARALLEL_SUBAGENT 但 lane 數變 3）
 
 ---
 
@@ -314,7 +335,7 @@
     "top_catalysts": [
       {
         "rank": 1,
-        "event": "string",
+        "event": "string — 繁體中文",
         "type": "FOMC | earnings | geopolitical | macro_data | sector_specific | political",
         "impact_score": "1–5",
         "affected_sectors": ["sector1"],
@@ -342,7 +363,7 @@
     },
     "upcoming_binary_risks": [
       {
-        "event": "string",
+        "event": "string — 繁體中文，格式：事件名稱（影響方向；看多/看空哪些子產業）",
         "date": "YYYY-MM-DD",
         "affected_sectors": [],
         "within_48h": "true | false"
@@ -374,9 +395,17 @@
       "devils_advocate_note": "string if challenged",
       "tail_risk_label": "ANTIFRAGILE | RESILIENT | FRAGILE | EXTREMELY FRAGILE | N/A",
       "proxy_etf": "string",
-      "risk_flags": ["binary_risk_within_48h", "late_cycle", "overbought", "fat_tail_warning", "extreme_sentiment", "fragility_downgrade", "extreme_sentiment_fragile_combo"]
+      "risk_flags": ["binary_risk_within_48h", "late_cycle", "overbought", "fat_tail_warning", "extreme_sentiment", "fragility_downgrade", "extreme_sentiment_fragile_combo", "macro_theme_divergence"],
+      "step6_fred_multiplier": "float (V1.4) — FRED regime overlay applied to score; 1.0 = no-op"
     }
   ],
+  "step6_overlay": {
+    "applied":          "bool — true iff fred_available && Step 6 ran",
+    "replaces_step1":   "bool — true (always; documents that Step 1 was skipped)",
+    "regime_label":     "from fred_snapshot",
+    "regime_confidence":"float — used as gating factor",
+    "rationale":        "string — one line, e.g. 'Overheating regime, conf 0.71 → Energy ×1.10 (favor), Tech ×0.85 (avoid)'"
+  },
   "summary": {
     "hot_sectors": ["sector with verdict=HOT"],
     "warm_sectors": ["sector with verdict=WARM"],

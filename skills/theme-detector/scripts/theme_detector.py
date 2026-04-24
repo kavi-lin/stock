@@ -224,6 +224,26 @@ INDUSTRY_TO_SECTOR: dict[str, str] = {
 
 
 # ---------------------------------------------------------------------------
+# Cache freshness helper
+# ---------------------------------------------------------------------------
+def _find_latest_cache() -> tuple:
+    """Find the most recent theme_detector_*.json in skills/theme-detector/cache/.
+
+    Returns (path_str_or_None, age_seconds_or_None).
+    """
+    import glob as _glob
+
+    cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cache")
+    pattern = os.path.join(cache_dir, "theme_detector_*.json")
+    files = _glob.glob(pattern)
+    if not files:
+        return None, None
+    latest = max(files, key=os.path.getmtime)
+    age = time.time() - os.path.getmtime(latest)
+    return latest, age
+
+
+# ---------------------------------------------------------------------------
 # CLI argument parsing
 # ---------------------------------------------------------------------------
 def parse_args() -> argparse.Namespace:
@@ -248,8 +268,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="reports/",
-        help="Output directory for reports (default: reports/)",
+        default="skills/theme-detector/cache/",
+        help="Output directory for reports (default: skills/theme-detector/cache/)",
+    )
+    parser.add_argument(
+        "--skip-if-fresh",
+        type=int,
+        default=None,
+        metavar="SECONDS",
+        help="Skip run if cache is newer than SECONDS old (e.g. --skip-if-fresh 10800 = 3h). Exits 0 immediately if fresh.",
     )
     parser.add_argument(
         "--top",
@@ -451,6 +478,24 @@ def main():
     from uptrend_client import fetch_sector_uptrend_data, is_data_stale
 
     args = parse_args()
+
+    # --skip-if-fresh: script self-manages cache freshness, no external mtime check needed.
+    if args.skip_if_fresh is not None:
+        latest_cache, cache_age = _find_latest_cache()
+        if latest_cache is not None and cache_age is not None and cache_age < args.skip_if_fresh:
+            print(
+                f"Cache is fresh ({int(cache_age)}s old < {args.skip_if_fresh}s threshold): {latest_cache}",
+                file=sys.stderr,
+            )
+            print("Skipping run. Pass --skip-if-fresh 0 to force.", file=sys.stderr)
+            sys.exit(0)
+        elif latest_cache is not None:
+            print(
+                f"Cache is stale ({int(cache_age)}s old >= {args.skip_if_fresh}s threshold). Running...",
+                file=sys.stderr,
+            )
+        else:
+            print("No cache found. Running fresh...", file=sys.stderr)
 
     # -----------------------------------------------------------------------
     # Step 0: Load theme configuration (YAML or inline fallback)

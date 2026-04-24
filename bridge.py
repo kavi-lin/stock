@@ -43,7 +43,26 @@ REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
 POSITIONS_FILE = os.path.join(BASE_DIR, 'positions.json')
 MOMENTUM_CACHE = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'cache')
 MOMENTUM_JOURNAL = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'journal')
+FRED_CACHE     = os.path.join(BASE_DIR, 'skills', 'fred-macro', 'cache', 'fred_latest.json')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
+
+
+def load_fred_snapshot():
+    """Load the FRED macro cache (kept fresh by dashboard_server.py's 15-min
+    refresh thread). Returns the raw snapshot dict or None if missing/stale."""
+    if not os.path.exists(FRED_CACHE):
+        return None
+    try:
+        with open(FRED_CACHE, 'r') as f:
+            data = json.load(f)
+        # Wall-clock age for Dashboard UI — not the market-hours variant since
+        # FRED data updates on official release cadence (daily at earliest).
+        age_sec = int(datetime.now().timestamp() - os.path.getmtime(FRED_CACHE))
+        data['_cache_age_sec'] = age_sec
+        return data
+    except Exception as e:
+        print(f"[WARN] FRED cache read error: {e}")
+        return None
 
 
 def load_positions_by_ticker():
@@ -264,6 +283,7 @@ def extract_breadth_from_analyzer(raw):
         "key_levels":        raw.get("key_levels", {}),
         "data_date":         fresh.get("latest_date", ""),
         "days_old":          fresh.get("days_old"),
+        "generated_at":      raw.get("generated_at"),
         "source":            "market-breadth-analyzer",
         "notes":             "",
     }
@@ -508,22 +528,18 @@ def extract_audit_history(positions_by_ticker=None):
                 entry_aggr_display = _range_str(entry_aggr)
                 entry_cons_display = _range_str(entry_cons)
 
-                # Backtest P/L — prefer aggressive[0], fall back to legacy entry_range
+                # Backtest P/L — use yfinance live price (already fetched above)
                 perf = None
                 backtest_entry = entry_aggr if isinstance(entry_aggr, list) else meta.get("entry_range")
-                if FMP_API_KEY and isinstance(backtest_entry, list) and backtest_entry:
-                    try:
-                        res = requests.get(
-                            f"https://financialmodelingprep.com/api/v3/quote/{ticker}"
-                            f"?apikey={FMP_API_KEY}", timeout=5
-                        ).json()
-                        if res:
-                            curr  = res[0].get("price")
-                            ep    = float(str(backtest_entry[0]).replace("$", ""))
-                            chg   = ((curr - ep) / ep) * 100
-                            perf  = {"current": curr, "entry": ep, "change": round(chg, 2)}
-                    except Exception as e:
-                        print(f"[WARN] Backtest {ticker}: {e}")
+                if isinstance(backtest_entry, list) and backtest_entry:
+                    curr = live_prices.get(ticker)
+                    if curr and curr > 0:
+                        try:
+                            ep   = float(str(backtest_entry[0]).replace("$", ""))
+                            chg  = ((curr - ep) / ep) * 100
+                            perf = {"current": curr, "entry": ep, "change": round(chg, 2)}
+                        except Exception:
+                            pass
 
                 # ── Watchlist metadata ──────────────────────────────
                 watch_conditions     = meta.get("watch_conditions")
@@ -884,10 +900,10 @@ def ingest_momentum_screen():
     if not csv_files:
         return out
 
-    # Prefer the latest "substantial" scan (≥ 50 rows) from the last 72h as the
-    # Dashboard baseline. Tiny filtered snapshots (e.g. dev tests producing 5 rows)
-    # shouldn't override a weekend's full-universe 500-ticker baseline.
-    SUBSTANTIAL_ROWS = 50
+    # Prefer the latest "substantial" scan (≥ 500 rows) from the last 72h as the
+    # Dashboard baseline. Tiny filtered snapshots or single-index scans (100 rows)
+    # shouldn't override a consolidated 520+ ticker baseline.
+    SUBSTANTIAL_ROWS = 500
     LOOKBACK_SEC    = 72 * 3600
     now_ts = datetime.now().timestamp()
     def _row_count(p):
@@ -927,6 +943,7 @@ def ingest_momentum_screen():
             "rank":     int(row["rank"]) if row.get("rank") else None,
             "ticker":   row.get("ticker"),
             "in_sp500": row.get("in_sp500", "1") != "0",
+            "in_nasdaq100": row.get("in_nasdaq100", "0") != "0",
             "sector":   row.get("sector") or "Unknown",
             "price":    _safe_float(row.get("price")),
             "score":    _safe_float(row.get("score")),
@@ -946,6 +963,11 @@ def ingest_momentum_screen():
             "above_ma200_pct": _safe_float(row.get("above_ma200_pct")),
             "rsi_14":          _safe_float(row.get("rsi_14")),
             "rsi_zone":        row.get("rsi_zone"),
+            "macd_line":          _safe_float(row.get("macd_line")),
+            "macd_signal":        _safe_float(row.get("macd_signal")),
+            "macd_hist":          _safe_float(row.get("macd_hist")),
+            "macd_bullish_cross": row.get("macd_bullish_cross") in ("True", "1", "true"),
+            "macd_bearish_cross": row.get("macd_bearish_cross") in ("True", "1", "true"),
             "short_pct_float": _safe_float(row.get("short_pct_float")),
             "short_interpretation": row.get("short_interpretation"),
             "signals":  row.get("signals", "").split("|") if row.get("signals") else [],
@@ -1088,6 +1110,14 @@ def run_bridge():
     # 1b. Override breadth with market-breadth-analyzer cache (quantitative, higher precision)
     raw_breadth = load_breadth_cache()
     if raw_breadth:
+        # Inject file mtime as generated_at so the Dashboard sync light
+        # uses "when did we last run the scraper" (same as preflight_check),
+        # not data_date (last trading-day market data, which is always 1-day stale).
+        latest_breadth = get_latest_file(os.path.join(BREADTH_CACHE, "market_breadth_*.json"))
+        if latest_breadth and "generated_at" not in raw_breadth:
+            raw_breadth["generated_at"] = datetime.fromtimestamp(
+                os.path.getmtime(latest_breadth)
+            ).strftime("%Y-%m-%d %H:%M:%S")
         analyzer_breadth = extract_breadth_from_analyzer(raw_breadth)
         # Overwrite data.breadth entirely with quantitative data
         data["breadth"] = analyzer_breadth
@@ -1138,6 +1168,18 @@ def run_bridge():
     data["news"] = extract_news()
     print(f"[OK] News: {len(data['news'])} items")
 
+    # 3b. FRED macro snapshot (optional — skip silently if FRED_API_KEY not set)
+    fred = load_fred_snapshot()
+    if fred is not None:
+        data["fred_macro"] = fred
+        rs = fred.get("regime_signals", {})
+        age_min = (fred.get("_cache_age_sec", 0) or 0) // 60
+        print(f"[OK] FRED macro: curve={rs.get('yield_curve_value')} "
+              f"fed={rs.get('fed_funds_current')}({rs.get('fed_rate_direction')}) "
+              f"real={rs.get('real_rate_10y_estimate')}% | cache age={age_min}m")
+    else:
+        data["fred_macro"] = {"status": "unavailable"}
+
     # 4. Momentum screen (latest snapshot + history + journal stats)
     try:
         data["momentum_screen"] = ingest_momentum_screen()
@@ -1152,10 +1194,15 @@ def run_bridge():
     except Exception as e:
         print(f"[WARN] Momentum screen ingest: {e}")
 
-    # Write — strict JSON (no NaN/Infinity, which browsers reject)
+    # Write — strict JSON (no NaN/Infinity, which browsers reject).
+    # Atomic via tmp + os.replace so that a concurrent second run (sector scan
+    # finishing at the same moment as a momentum scan) can never leave a
+    # half-written data.json for the browser's JSON.parse to choke on.
     clean = _clean_nan(data)
-    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+    tmp = OUTPUT_FILE + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(clean, f, indent=2, ensure_ascii=False, allow_nan=False)
+    os.replace(tmp, OUTPUT_FILE)
 
     print(f"\n✅ Bridge complete → {OUTPUT_FILE}")
     print(f"   Regime     : {data['market'].get('regime')}  ({data['market'].get('cycle_phase')})")

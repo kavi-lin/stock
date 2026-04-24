@@ -35,7 +35,7 @@
                     </svg>
                     <span id="refresh-countdown" class="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold" style="color:var(--text-main)">--</span>
                 </div>
-                <span id="last-update" class="text-[10px] text-zinc-500 font-mono tracking-tighter">SYNCING...</span>
+                <span id="last-update" class="inline-flex items-center"></span>
                 <button id="add-position-btn" class="bg-emerald-500 text-black px-4 py-1.5 rounded-xl text-sm font-bold border border-emerald-500 hover:bg-emerald-400 transition-all flex items-center gap-2">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> <span id="add-position-label">新增持倉</span>
                 </button>
@@ -68,12 +68,15 @@
             </div>
 
             <!-- Filter Tabs -->
-            <div class="flex gap-2 flex-wrap" id="filter-tabs">
+            <div class="flex items-center gap-2 flex-wrap" id="filter-tabs">
                 <button data-filter="all"        class="filter-tab active px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="ftab-all">全部</button>
                 <button data-filter="execute"    class="filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="ftab-execute">進行中</button>
                 <button data-filter="waiting"    class="filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="ftab-waiting">等待中</button>
                 <button data-filter="historical" class="filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="ftab-historical">歷史</button>
                 <button data-filter="positions"  class="filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="ftab-positions">持倉</button>
+                <input id="ticker-search" type="text" placeholder="搜尋 ticker…"
+                       class="ml-auto px-3 py-1.5 rounded-lg text-xs font-mono border bg-transparent outline-none w-32 focus:w-44 transition-all"
+                       style="border-color:var(--border-card);color:var(--text-main);background:var(--bg-card)" />
             </div>
 
             <!-- Cards Grid / Positions Table -->

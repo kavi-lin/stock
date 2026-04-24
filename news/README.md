@@ -97,7 +97,7 @@ news/
 ├── fetch_news_rss.py                ← RSS 抓取腳本
 ├── scripts/
 │   ├── validate_digest_output.py    ← schema validator（rc=0 才可進 MD 階段）
-│   └── salvage_digest.py            ← API stream idle timeout 後的搶救工具
+│   └── (salvage_digest.py 已移至 archive/)  ← API stream idle timeout 後的搶救工具
 ├── news_logs/
 │   ├── YYYY-MM-DD_raw.json          ← RSS 原始資料
 │   └── YYYY-MM-DD_digest.json       ← 分析結果 cache（shallow + deep）
@@ -177,7 +177,7 @@ phase0.json        ← investment_protocol_v4_8 讀取（macro_backdrop + binary
 
 **萬一撞上**：不要重跑 protocol（會再燒同樣 tokens），改跑：
 ```bash
-python3 news/scripts/salvage_digest.py
+python3 archive/salvage_digest.py
 ```
 從 `scan_logs/news_*.log` 重組 digest.json（零 API 成本）。Salvage 只能救 deep verdicts — shallow 的 per-item 4 view snap 只存在加密 thinking block 裡無法還原。
 
@@ -193,7 +193,7 @@ python3 news/scripts/salvage_digest.py
 - **Stage 2 / REVIEW 改 per-agent batch subagent**：Bull/Bear/Sector/Macro 各自一個 Agent tool call，一次分析全部晉級項目，彼此 context 隔離 — 消除同 model 序列產生 4 視角的 anchoring
 - **Phase 4 digest.json schema 抽離**至 `digest_output_schema.md`，配 `validate_digest_output.py` 驗證（rc=0 才可進 MD 階段）
 - **新欄位**：`fanout_mode` / `degraded_agents` / `subagent_isolated` sentinel
-- **🚨 Phase 4 寫入防護**：禁止 Bash heredoc / 禁止單一超大 Write，必須分塊；配 `salvage_digest.py` 救援工具
+- **🚨 Phase 4 寫入防護**：禁止 Bash heredoc / 禁止單一超大 Write，必須分塊；配 `archive/salvage_digest.py` 救援工具
 - **server-side hard kill**：news/flash/review 獨立 timeout override
 
 ### V2.0

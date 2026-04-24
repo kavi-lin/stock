@@ -343,7 +343,13 @@ function renderNewsVerdictsTeaser(news) {
     (n.review_status === 'reviewed' || !n.review_status) &&
     n.impact
   );
-  pool.sort((a, b) => Math.abs(b.score || 0) - Math.abs(a.score || 0));
+  // Sort by date desc, then by impact score absolute value
+  pool.sort((a, b) => {
+    const da = a.date || '0000-00-00';
+    const db = b.date || '0000-00-00';
+    if (db !== da) return db.localeCompare(da);
+    return Math.abs(b.score || 0) - Math.abs(a.score || 0);
+  });
   const top = pool.slice(0, 3);
   if (!top.length) { el.innerHTML = `<p class="text-[10px] text-zinc-600 italic">—</p>`; return; }
 
@@ -560,7 +566,12 @@ async function updateDashboard() {
   } finally {
     UI.icons();
     const syncEl = document.getElementById('last-update');
-    if (syncEl && data?.last_updated) syncEl.textContent = `SYNC: ${data.last_updated}`;
+    if (syncEl) UI.applySyncLight(syncEl, data?.last_updated, null, [
+      { label: '廣度分析', ts: data?.breadth?.generated_at || data?.breadth?.data_date, ttl: 180, hint: 'daily_update.sh Step 1' },
+      { label: 'FTD 偵測', ts: data?.ftd?.generated_at,        ttl: 180, hint: 'daily_update.sh Step 2' },
+      { label: '市場頂部', ts: data?.market_top?.generated_at, ttl: 180, hint: 'daily_update.sh Step 3' },
+      { label: '產業掃描', ts: data?.market?.generated_at,     ttl: 720, hint: '執行「產業掃描」' },
+    ]);
     UI.logToUI('System update cycle complete.');
   }
 }

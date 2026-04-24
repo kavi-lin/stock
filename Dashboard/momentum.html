@@ -35,6 +35,56 @@
             display: inline-block; margin-right: 3px; margin-bottom: 2px;
         }
 
+        /* Custom hover tooltip for signal / warning pills — replaces the
+           native `title=` tooltip which was ugly and showed the raw key.
+           Positioned absolutely via JS; fades in/out. */
+        #mom-pill-tooltip {
+            position: fixed; z-index: 9999; max-width: 320px;
+            background: var(--bg-card, #18181b);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 11px 13px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+            pointer-events: none;
+            opacity: 0; transform: translateY(2px);
+            transition: opacity 0.12s, transform 0.12s;
+        }
+        #mom-pill-tooltip.visible { opacity: 1; transform: translateY(0); }
+        #mom-pill-tooltip .mpt-title {
+            font-size: 11px; font-weight: 800; letter-spacing: 0.04em;
+            margin-bottom: 5px;
+        }
+        #mom-pill-tooltip.mpt-signal  .mpt-title { color: #22c55e; }
+        #mom-pill-tooltip.mpt-warning .mpt-title { color: #ef4444; }
+        #mom-pill-tooltip.mpt-preset  .mpt-title { color: #a78bfa; font-size: 12px; }
+        /* Widen for preset tooltips — more content to fit */
+        #mom-pill-tooltip.mpt-preset  { max-width: 380px; }
+        #mom-pill-tooltip .mpt-section-label {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: #71717a;
+            margin-top: 8px; margin-bottom: 3px;
+        }
+        #mom-pill-tooltip .mpt-criteria {
+            font-size: 11px; line-height: 1.55;
+            color: var(--text-main, #d4d4d8);
+            padding-left: 16px; margin: 0 0 4px 0;
+            list-style: disc;
+        }
+        #mom-pill-tooltip .mpt-criteria li { margin-bottom: 1px; }
+        #mom-pill-tooltip.mpt-preset .mpt-hint::before { content: '🎯 '; }
+        #mom-pill-tooltip .mpt-desc {
+            font-size: 11px; line-height: 1.55;
+            color: var(--text-main, #d4d4d8);
+            margin-bottom: 6px;
+        }
+        #mom-pill-tooltip .mpt-hint {
+            font-size: 10px; line-height: 1.5;
+            color: var(--text-muted, #a1a1aa);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding-top: 6px;
+        }
+        #mom-pill-tooltip .mpt-hint::before { content: '💡 '; }
+
         /* Clickable pills — hover cue + filter-active state */
         .pill-clickable { cursor: pointer; transition: all 0.12s; }
         .pill-clickable:hover { filter: brightness(1.4); outline: 1px solid currentColor; }
@@ -260,6 +310,77 @@
             font-family: 'JetBrains Mono', monospace;
         }
         .rsi-tick { position: absolute; transform: translateX(-50%); top: 3px; }
+
+        /* MACD modal visualization — 2×2 quadrant map showing the 4 momentum
+           regimes (zero-axis × histogram direction). Current state gets a
+           glowing accent; other cells are dimmed. */
+        .macd-quadrant {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 6px; margin-top: 6px;
+        }
+        .macd-quad-cell {
+            border: 1px solid rgba(161,161,170,0.15);
+            border-radius: 8px; padding: 10px 12px;
+            background: rgba(161,161,170,0.04);
+            opacity: 0.5; transition: all 0.15s;
+            position: relative;
+        }
+        .macd-quad-cell.active {
+            opacity: 1;
+            background: rgba(var(--quad-rgb,34,197,94), 0.12);
+            border-color: rgba(var(--quad-rgb,34,197,94), 0.5);
+            box-shadow: 0 0 0 1px rgba(var(--quad-rgb,34,197,94), 0.35),
+                        inset 0 0 16px rgba(var(--quad-rgb,34,197,94), 0.08);
+        }
+        .macd-quad-cell .mq-tag {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: rgba(var(--quad-rgb, 161,161,170), 0.9);
+            margin-bottom: 4px;
+        }
+        .macd-quad-cell .mq-title {
+            font-size: 13px; font-weight: 700;
+            color: var(--text-card-title);
+            margin-bottom: 3px;
+        }
+        .macd-quad-cell .mq-desc {
+            font-size: 10px; line-height: 1.4;
+            color: var(--text-muted, #a1a1aa);
+        }
+
+        /* Zero-axis bar: horizontal bar with 0 at center, histogram value
+           plotted as a vertical marker. Bar width scales log-style to cap
+           extreme outliers (|h| > 10). */
+        .macd-bar-wrap {
+            position: relative; height: 52px;
+            background: linear-gradient(90deg,
+                rgba(239,68,68,0.10) 0%, rgba(239,68,68,0.10) 50%,
+                rgba(34,197,94,0.10) 50%, rgba(34,197,94,0.10) 100%);
+            border: 1px solid rgba(161,161,170,0.15);
+            border-radius: 6px; margin-top: 4px;
+        }
+        .macd-bar-zero {
+            position: absolute; top: 0; bottom: 0; left: 50%;
+            width: 1px; background: rgba(255,255,255,0.3);
+        }
+        .macd-bar-label {
+            position: absolute; font-size: 9px; font-family: 'JetBrains Mono', monospace;
+            color: #71717a; top: 2px;
+        }
+        .macd-bar-label.zero { left: 50%; transform: translateX(-50%); top: -14px; }
+        .macd-bar-label.bear { left: 6px;  color: #ef4444; }
+        .macd-bar-label.bull { right: 6px; color: #22c55e; }
+        .macd-bar-marker {
+            position: absolute; top: 8px; bottom: 8px;
+            width: 3px; border-radius: 2px;
+            box-shadow: 0 0 8px currentColor;
+        }
+        .macd-bar-marker-label {
+            position: absolute; top: -2px;
+            font-size: 11px; font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            transform: translateX(-50%);
+        }
 
         .stats-row td   { padding: 6px 10px; font-size: 12px;
                           border-bottom: 1px solid rgba(161,161,170,0.08); }
@@ -600,7 +721,7 @@
                             <th class="mom-th text-right sortable" data-sort="ratio_20d"       id="th-volume">量比<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="rsi_14"          id="th-rsi">RSI<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right"                                        id="th-macd">MACD</th>
+                            <th class="mom-th text-right sortable" data-sort="macd_hist" id="th-macd">MACD<span class="sort-arrow"></span></th>
                             <th class="mom-th" id="th-signals">訊號</th>
                             <th class="mom-th text-right sortable" data-sort="short_pct_float" id="th-short">空方<span class="sort-arrow"></span></th>
                         </tr>
@@ -679,6 +800,21 @@
                     </button>
                 </div>
                 <div id="rsi-modal-body" class="space-y-4 text-xs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MACD detail popup — same shell as RSI modal -->
+    <div id="macd-modal" class="hidden">
+        <div class="mom-modal-bg" id="macd-modal-bg">
+            <div class="mom-modal" style="width:580px" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-bold" id="macd-modal-title">—</h3>
+                    <button id="macd-modal-close" class="text-zinc-500 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="macd-modal-body" class="space-y-4 text-xs"></div>
             </div>
         </div>
     </div>
@@ -790,6 +926,9 @@
         </div>
         <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
     </div>
+
+    <!-- Hover tooltip for signal / warning pills (positioned via JS) -->
+    <div id="mom-pill-tooltip" aria-hidden="true"></div>
 
     <script src="i18n.js"></script>
     <script src="utils.js"></script>

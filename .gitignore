@@ -10,7 +10,14 @@ news/news_logs/*.json
 sector/sector_logs/*.json
 investment/invest_logs/history.json
 investment/invest_logs/*_phase0.json
+investment/invest_logs/*_phase0_*.json
 investment/invest_logs/*.md
+
+# Local exploration / planning notes (not part of protocol)
+Fincept_enhance/
+
+# Claude Code scheduled task lock (local state)
+.claude/scheduled_tasks.lock
 
 # Python bytecode
 __pycache__/
