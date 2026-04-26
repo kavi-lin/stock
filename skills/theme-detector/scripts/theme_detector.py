@@ -287,14 +287,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-themes",
         type=int,
-        default=10,
-        help="Maximum themes to analyze (default: 10)",
+        default=25,
+        help="Maximum themes to analyze (default: 25). Aligned with daily_update.sh "
+             "to avoid 10-theme regression when sector-protocol Phase 2 re-invokes the "
+             "skill without an explicit flag.",
     )
     parser.add_argument(
         "--max-stocks-per-theme",
         type=int,
-        default=10,
-        help="Maximum stocks per theme (default: 10)",
+        default=25,
+        help="Maximum stocks per theme (default: 25)",
     )
     parser.add_argument(
         "--themes-config",

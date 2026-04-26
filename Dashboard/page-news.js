@@ -202,7 +202,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('bull-news').textContent = counts.bullish;
       document.getElementById('bear-news').textContent = counts.bearish;
       document.getElementById('binary-news').textContent = counts.binary;
-      UI.applySyncLight(document.getElementById('last-sync-time'), data.last_updated);
+
+      // Pass news_content_date as a source so the sync light turns orange when digest is stale
+      const newsSources = data.news_content_date ? [{
+          label: UI.currentLang === 'en' ? 'News digest' : '新聞 digest',
+          ts:    data.news_content_date,
+          ttl:   1439,   // flag if older than 24h (i.e. not today)
+          hint:  UI.currentLang === 'en' ? 'Run "新聞分析 DIGEST" to refresh' : '執行「新聞分析 DIGEST」更新',
+      }] : [];
+      UI.applySyncLight(document.getElementById('last-sync-time'), data.last_updated, null, newsSources);
 
       // Binary Risks Sidebar
       const binaryList = document.getElementById('binary-risks-list');

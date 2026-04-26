@@ -55,7 +55,7 @@ OUTPUT（單一 JSON object）:
 |---|---|---|
 | **Sector Rotation** | `_phase1.sectors[]`（uptrend_ratio / rotation_signal / overbought_risk / ytd_perf_note）| INFLOW vs OUTFLOW 資金輪動、Late cycle overbought 風險 |
 | **Theme Intelligence** | Phase 2 theme-detector 輸出（lifecycle_stage / theme_heat / affected_sectors） | Accelerating / Trending 主題帶動的板塊、生命週期末期主題 |
-| **News Catalyst** | `_phase3.top_catalysts[]` + `sector_news_sentiment` + `upcoming_binary_risks[]` | 48h 內催化劑、財報窗口、政治事件受益/受損 |
+| **News Catalyst** | `_phase3.top_catalysts[]` + `sector_news_sentiment` + `upcoming_events[]` (filter `is_binary=true`) | 48h 內催化劑、財報窗口、政治事件受益/受損 |
 | **FRED Macro** (V1.4) | `_phase0.fred_snapshot`（regime_label / regime_confidence / sector_rotation_favor·avoid / yield_curve / credit_stress / real_rate / velocity_highlights） | 結構性 macro regime（Goldilocks/Overheating/Late Cycle Tightening 等）對應的 favor/avoid sectors；對齊 SECTOR_ROTATION_GUIDE 規則 |
 
 #### FRED Macro Lane Prompt（額外規則）
@@ -221,8 +221,8 @@ STEP D — Tail Risk Downgrades
     → risk_flags += "extreme_sentiment_fragile_combo"
 
 STEP E — Binary Risk
-  FOR EACH upcoming_binary_risk (timing = within_48h):
-    FOR EACH affected_sector:
+  FOR EACH ev IN upcoming_events WHERE ev.is_binary AND ev.within_48h:
+    FOR EACH sector IN ev.sectors:
       → composite_score × 0.70
       → risk_flags += "binary_risk_within_48h"
 
@@ -281,7 +281,7 @@ STEP H — Today Verdict（必填，繁中）
   - action=avoid       → verdict ∈ {COLD, AVOID}
   - action=wait        → verdict=WARM (高不確定性)
   - key_takeaways[0]   → 必須點出今日 stance 主因
-  - watch_next         → 必須涵蓋全部 upcoming_binary_risks(within_48h)
+  - watch_next         → 必須涵蓋全部 upcoming_events 中 is_binary=true AND within_48h=true 的事件
 ```
 
 **JSON Schema** → 見 `schema.md` Phase 4c

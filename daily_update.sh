@@ -71,7 +71,7 @@ fi
 echo ""
 
 # ── Step 5｜整合 → Dashboard/data.json ───────────────────────
-echo "[ 5/5 ]  整合所有 cache → Dashboard/data.json..."
+echo "[ 5/6 ]  整合所有 cache → Dashboard/data.json..."
 python3 bridge.py
 
 if [ $? -eq 0 ]; then
@@ -81,9 +81,66 @@ else
 fi
 
 echo ""
+
+# ── Step 5.5｜ETF Holdings Refresh Check (auto every 90 days) ───
+ETF_META="skills/thematic-screener/etf_meta.yaml"
+if [ -f "$ETF_META" ]; then
+  LAST_REFRESH=$(grep "etf_holdings_last_refreshed" "$ETF_META" | sed -E "s/.*: '?([0-9-]+)'?.*/\1/")
+  if [ -n "$LAST_REFRESH" ]; then
+    DAYS_OLD=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$LAST_REFRESH" "+%s" 2>/dev/null || date -d "$LAST_REFRESH" "+%s")) / 86400 ))
+    if [ $DAYS_OLD -ge 90 ]; then
+      echo "[ 5.5 ]  ETF holdings ${DAYS_OLD}d 舊 → 自動 refresh（每季一次）..."
+      set +e
+      python3 skills/thematic-screener/scripts/refresh_etf_holdings.py --top-n 25 2>&1 | tail -3
+      REFRESH_RC=$?
+      set -e
+      if [ $REFRESH_RC -eq 0 ]; then
+        echo "         ✅ ETF holdings refreshed → themes.yaml + etf_meta.yaml"
+        echo "         ⚠️  將同步重跑 theme-detector 以套用新 universe（下游 screen.py 用得到）"
+        python3 skills/theme-detector/scripts/theme_detector.py --max-themes 25 --max-stocks-per-theme 25 > /dev/null 2>&1
+      else
+        echo "         ⚠️  ETF refresh 失敗（非致命），用舊 holdings 繼續..."
+      fi
+    elif [ $DAYS_OLD -ge 60 ]; then
+      echo "[ 5.5 ]  ⚠ ETF holdings ${DAYS_OLD}d 舊（≥ 60d），90d 將自動 refresh"
+    else
+      echo "[ 5.5 ]  ✅ ETF holdings ${DAYS_OLD}d 舊（fresh）"
+    fi
+  fi
+fi
+
+echo ""
+
+# ── Step 6｜Thematic Screener (Tactical Opportunity Radar) ────
+echo "[ 6/6 ]  Thematic Screener — Tactical Opportunity Radar..."
+LATEST_THEME=$(ls -t skills/theme-detector/cache/theme_detector_*.json 2>/dev/null | head -1)
+if [ -z "$LATEST_THEME" ]; then
+  echo "         ⚠️  theme-detector cache 不存在，跳過（請先跑「產業掃描」生成 cache）"
+else
+  THEME_AGE_HR=$(( ($(date +%s) - $(stat -f %m "$LATEST_THEME" 2>/dev/null || stat -c %Y "$LATEST_THEME")) / 3600 ))
+  if [ $THEME_AGE_HR -gt 168 ]; then
+    echo "         ⚠️  theme-detector cache 已 ${THEME_AGE_HR}h 舊（> 7 天），跳過。請先跑「產業掃描」"
+  else
+    # 非致命：thematic-screener 失敗不中止整體流程
+    set +e
+    python3 skills/thematic-screener/scripts/screen.py --json-only > /dev/null 2>&1
+    SCREEN_RC=$?
+    set -e
+    if [ $SCREEN_RC -eq 0 ]; then
+      RECS_FILE="skills/thematic-screener/data/recommendations/${DATE}.json"
+      RECS_SIZE=$(ls -lh "$RECS_FILE" 2>/dev/null | awk '{print $5}')
+      echo "         ✅ 推薦輸出完成 → $RECS_FILE ($RECS_SIZE)"
+    else
+      echo "         ⚠️  thematic-screener 執行失敗（非致命），繼續..."
+    fi
+  fi
+fi
+
+echo ""
 echo "╔══════════════════════════════════════════════════════╗"
 echo "║  ✅ 全部完成  │  $DATE                    ║"
 echo "║  提醒：產業上升趨勢比例需另執行「產業掃描」才更新    ║"
 echo "║  提醒：FRED 宏觀數據已更新（個股分析將使用此 cache） ║"
+echo "║  提醒：每週末跑 weekly_review.py 評估推薦準確度      ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""

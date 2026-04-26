@@ -5,6 +5,9 @@
 # User portfolio data (never commit)
 positions.json
 
+# Persistent events archive — accumulates daily, regenerable from FMP/Fed feeds
+events_archive.json
+
 # Log files with sensitive data — keep structure but ignore actual content
 news/news_logs/*.json
 sector/sector_logs/*.json

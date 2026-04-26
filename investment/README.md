@@ -4,6 +4,13 @@
 
 > 當前檔案：`investment_protocol_v4_8.md`
 
+## V4.8.1 增量變更（Phase 1 Dual-Fetch Snapshot）
+
+- **新增 Phase 1 資料層**：PM inline 在 Phase 1 結束前呼叫 `skills/finnhub-client/scripts/dual_fetch.py`，取得 ticker 9 個 canonical scalar 的權威 snapshot（Finnhub 端為 scoring source、FMP 端為 audit）。
+- **新增 Phase 2 共通 prompt 段落**：`TICKER DATA BUNDLE` 緊接 `PHASE 0 MACRO CONTEXT` 之後，4 個 lane 共享同一份 snapshot，避免各自 fetch 造成 cross-lane 資料漂移。
+- **物理隔離契約**：`bundle["_audit"]` 嚴禁進入任何 subagent prompt / log / reasoning（與 V4.8 historical_bias 隔離規則同等強度）。違規→當前 ticker 分析作廢。
+- **Fundamentals subagent 新增 bundle 使用規則**：明示 9 個 scalar 中 `priceToBookRatio` 為近似值（跨 provider 10-30% 方法論差異），權重需低於 P/E；`dividendYield` 單位為 percent / indicated annual。
+
 ## V4.8 核心變更（Parallel Blind Analyst Subagents）
 
 - **D**：Phase 2 四個 analyst（Fundamentals / Sentiment / News / Technical）改為 **4 個平行 subagent（Agent tool, general-purpose）**，各自封閉 context、禁止互看輸出。這是針對 V4.7 仍殘留的「一人演四角」問題的結構性修正。

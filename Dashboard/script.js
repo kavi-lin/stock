@@ -159,28 +159,38 @@ function renderThreeSignalMini(data) {
   const tr = tvT();
   el.innerHTML = `
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
-      <div class="flex flex-col gap-0.5">
+      <div class="flex flex-col gap-0.5 px-1 -mx-1" data-signal-tip="breadth"
+           data-br-score="${br.score ?? ''}" data-br-zone="${br.zone || ''}"
+           data-br-ceiling="${br.exposure_ceiling || ''}">
         <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_breadth || 'Breadth'}</span>
         <div class="flex items-baseline gap-2">
           <span class="text-xl font-black" style="color:${zoneCol(br.zone)}">${br.score ?? '—'}</span>
           <span class="text-[10px] text-zinc-500 truncate">${br.zone || ''}</span>
         </div>
       </div>
-      <div class="flex flex-col gap-0.5">
+      <div class="flex flex-col gap-0.5 px-1 -mx-1" data-signal-tip="ftd"
+           data-ftd-state="${ftd.state || ''}" data-ftd-date="${ftd.ftd_date || ''}"
+           data-ftd-day="${ftd.days_since_ftd ?? ''}" data-ftd-status="${(ftd.ftd_status_text || '').replace(/"/g,'&quot;')}">
         <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_ftd || 'FTD'}</span>
         <div class="flex items-baseline gap-2">
           <span class="text-xl font-black" style="color:${ftdCol(ftd.state)}">${ftd.quality_score ?? '—'}</span>
           <span class="text-[10px] text-zinc-500 truncate">${(ftd.state||'').replace(/_/g,' ')}</span>
         </div>
+        ${ftd.ftd_date ? `<span class="text-[9px] text-zinc-500 font-mono mt-0.5">${ftd.ftd_date} · day ${ftd.days_since_ftd ?? '—'}</span>` : ''}
       </div>
-      <div class="flex flex-col gap-0.5">
+      <div class="flex flex-col gap-0.5 px-1 -mx-1" data-signal-tip="market_top"
+           data-mt-score="${mt.composite_score ?? ''}" data-mt-zone="${mt.zone || ''}"
+           data-mt-budget="${mt.risk_budget || ''}">
         <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_top || 'Market Top'}</span>
         <div class="flex items-baseline gap-2">
           <span class="text-xl font-black" style="color:${zoneCol(mt.zone)}">${mt.composite_score ?? '—'}</span>
           <span class="text-[10px] text-zinc-500 truncate">${(mt.zone||'').replace(/\(.*\)/,'').trim()}</span>
         </div>
       </div>
-      <div class="flex flex-col gap-0.5 items-end md:border-l md:border-zinc-800 md:pl-3">
+      <div class="flex flex-col gap-0.5 items-end md:border-l md:border-zinc-800 md:pl-3 px-1 -mx-1" data-signal-tip="synth"
+           data-synth-mid="${synth ?? ''}" data-synth-label="${synthLabel}"
+           data-br-ceiling="${br.exposure_ceiling || ''}" data-ftd-range="${ftd.exposure_range || ''}"
+           data-mt-budget="${mt.risk_budget || ''}">
         <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.synthesized_ceiling || 'Synthesized Ceiling'}</span>
         <span class="text-xl font-black" style="color:${synthColor}">${synthLabel}</span>
       </div>
@@ -1009,5 +1019,280 @@ if (window.AnalyzeQueue) window.AnalyzeQueue.renderWidget('#analyze-queue-widget
     const el = e.target.closest('[data-tip-key]');
     if (!el) return;
     _hideTimer = setTimeout(hideTip, 80);
+  });
+})();
+
+// ── Signal pill tooltip (FTD / etc.) — richer than pill-tooltip, mirrors radar UX ─
+(function initSignalTipTooltip() {
+  const tip = document.getElementById('signal-tip-tooltip');
+  if (!tip) return;
+  let _hideTimer = null;
+
+  const SIGNAL_TIPS = {
+    ftd: {
+      zh: {
+        title: 'FTD · 市場底部確認訊號',
+        desc:  '市場大跌觸底後開始反彈，從反彈第 1 天開始計算 rally day。若第 4-7 天主要指數出現「漲幅 ≥ +1% + 成交量比前日放大」→ 那天就標為 FTD，代表機構資金在這天介入抄底。從 FTD 起算，越早進場勝率越高（領導股剛起飛）；越晚進場屬於「補漲」性質，風險升高。',
+        stages: [
+          { key: 'prime',      range: [1,5],   range_label: 'day 1-5',   tag: '黃金期', action: '可以買', detail: '領導股剛起飛，新趨勢確立，標準倉位最高勝率' },
+          { key: 'standard',   range: [6,12],  range_label: 'day 6-12',  tag: '主升期', action: '仍可參與', detail: '主升段未終結，標準倉位 + 標準停損，選擇 RS 強的個股' },
+          { key: 'late_cycle', range: [13,20], range_label: 'day 13-20', tag: '補漲期', action: '晚但仍有機會', detail: '行情進入後段，補漲股風險上升 — 倉位降 25%、停損收緊 1pp' },
+          { key: 'exhausted',  range: [21,99], range_label: 'day 21+',   tag: '過熱期', action: '等下一輪', detail: '多數領導股已 stage 2 末期，倉位降 50% 或拒單，等下一波 FTD' },
+        ],
+        no_active: '尚未出現有效 FTD（rally 仍在 attempt 階段、或前次 FTD 已失效）',
+        hint: 'Reset 條件：跌破 swing low / 累積 6+ distribution days / 出現新一輪修正',
+      },
+      en: {
+        title: 'FTD · Market Bottom Signal',
+        desc:  'After a sell-off bottoms and a rally begins, count from rally day 1. If the index closes ≥+1% on heavier volume on rally days 4-7 → that day is marked as the FTD, signaling institutions are stepping in to buy. From that date, earlier entries have higher win rates (leadership stocks break out first); later entries become "chase trades" with elevated risk.',
+        stages: [
+          { key: 'prime',      range: [1,5],   range_label: 'day 1-5',   tag: 'Prime',     action: 'Buy zone',         detail: 'Leadership stocks just breaking out — full size, highest win rate' },
+          { key: 'standard',   range: [6,12],  range_label: 'day 6-12',  tag: 'Standard',  action: 'Still tradeable',  detail: 'Uptrend intact — standard size + stop, focus on high-RS names' },
+          { key: 'late_cycle', range: [13,20], range_label: 'day 13-20', tag: 'Late',      action: 'Chase, cut size',  detail: 'Late phase, chase trades — size −25%, stop tighter by 1pp' },
+          { key: 'exhausted',  range: [21,99], range_label: 'day 21+',   tag: 'Exhausted', action: 'Wait for next',    detail: 'Most leaders late stage 2 — size −50% or reject, wait for next FTD' },
+        ],
+        no_active: 'No active FTD (rally still in attempt phase, or previous FTD invalidated)',
+        hint: 'Reset triggers: close below swing low / 6+ distribution days / new correction begins',
+      },
+    },
+    breadth: {
+      zh: {
+        title: '市場廣度 · 多少股票還在強勢區',
+        desc:  '計算成分股「在 200 日均線之上的比例 + 8 日均線變化 + 突破/破底家數比 + 漲跌家數差」等多個指標，合成 0-100 分。分數高 = 大盤健康（不是只有少數權值股撐盤）；分數低 = 多數個股已轉弱、行情危險。建議倉位由分數決定。',
+        stages: [
+          { key: 'br_strong',    range: [75,100], range_label: 'score 75+',    tag: '健康強勢', action: '全力進攻', detail: '多數成分股健康突破，可以高倉位、新進不限制' },
+          { key: 'br_healthy',   range: [60,74],  range_label: 'score 60-75',  tag: '主升中段', action: '標準參與', detail: '行情仍在主升段，標準倉位 + 一般停損即可' },
+          { key: 'br_neutral',   range: [40,59],  range_label: 'score 40-60',  tag: '訊號混合', action: '選股、降倉', detail: '多空交雜，僅選 RS 強標的 + 倉位降 25%' },
+          { key: 'br_weakening', range: [25,39],  range_label: 'score 25-40',  tag: '走弱中',   action: '防禦為主',  detail: '個股普遍轉弱，避免新進、現有倉位收緊停損' },
+          { key: 'br_critical',  range: [0,24],   range_label: 'score < 25',   tag: '行情危險', action: '退守 cash', detail: '多數股票破位，cash 為王、保留資金等下次 FTD' },
+        ],
+        no_active: '廣度資料缺失或來源失敗',
+        hint: '資料源：TraderMonty CSV (每日盤後更新，盤前看到的可能是 D-1 收盤值)',
+      },
+      en: {
+        title: 'Market Breadth · How many stocks are still strong',
+        desc:  'Composite of "% stocks above 200-day MA + 8-day MA delta + new highs vs lows + advance/decline gap" → 0-100 score. High = market is healthy (not just a few mega-caps holding it up); low = most stocks already weakening, dangerous.',
+        stages: [
+          { key: 'br_strong',    range: [75,100], range_label: 'score 75+',    tag: 'Strong',     action: 'Full attack',  detail: 'Most stocks healthy & breaking out — full size, no entry restrictions' },
+          { key: 'br_healthy',   range: [60,74],  range_label: 'score 60-75',  tag: 'Healthy',    action: 'Standard',     detail: 'Uptrend intact — standard size + stop' },
+          { key: 'br_neutral',   range: [40,59],  range_label: 'score 40-60',  tag: 'Neutral',    action: 'Selective',    detail: 'Mixed signals — high-RS only + size −25%' },
+          { key: 'br_weakening', range: [25,39],  range_label: 'score 25-40',  tag: 'Weakening',  action: 'Defensive',    detail: 'Stocks broadly weakening — no new entries + tighten stops' },
+          { key: 'br_critical',  range: [0,24],   range_label: 'score < 25',   tag: 'Critical',   action: 'Cash priority',detail: 'Most stocks breaking down — cash priority, wait for next FTD' },
+        ],
+        no_active: 'Breadth data unavailable / source failed',
+        hint: 'Source: TraderMonty CSV (updated post-close — pre-market values may be D-1)',
+      },
+    },
+    synth: {
+      zh: {
+        title: '綜合曝險 · 三訊號合成的倉位上限',
+        desc:  '把廣度建議倉位、FTD 倉位、頂部風控三個來源的中位數取「最保守者（最小值）」 → 得出可承受倉位上限。意義：當三訊號彼此衝突時（例如 breadth 還健康但頂部風險爆表），系統會自動偏向最保守那一個，避免單一訊號誤判。實際個股建倉以這個上限為基準再乘 sector / FTD timeline / tail risk 等其他乘數。',
+        stages: [
+          { key: 'sy_aggressive', range: [75,100], range_label: '75-100%', tag: '進攻',     action: '滿倉操作',     detail: '三訊號全綠，可開高倉位、新進不限、停損標準' },
+          { key: 'sy_standard',   range: [50,74],  range_label: '50-75%',  tag: '標準',     action: '正常配置',     detail: '主升段或訊號小幅雜訊，一般倉位 + 一般停損' },
+          { key: 'sy_defensive',  range: [25,49],  range_label: '25-50%',  tag: '防守',     action: '降倉、選股',   detail: '至少一個訊號明顯轉弱，倉位降至 50% 以下、僅留高 conviction' },
+          { key: 'sy_crisis',     range: [0,24],   range_label: '0-25%',   tag: '危機模式', action: 'Cash 主導',    detail: '三訊號之一已 critical，幾乎不開新倉、保留資金等下次 FTD' },
+        ],
+        no_active: '至少一個訊號缺失，無法合成曝險上限',
+        hint: '計算：min( breadth_ceiling中位數, ftd_range中位數, market_top_budget中位數 )',
+      },
+      en: {
+        title: 'Synthesized Ceiling · Position cap from 3 signals',
+        desc:  'Takes the midpoint of breadth ceiling, FTD range, and market top budget — uses the most conservative (lowest) one as your position cap. Why: when signals disagree (e.g. breadth healthy but topping signals are loud), the system auto-defers to the most cautious. Per-trade size = this cap × sector / FTD-timeline / tail-risk multipliers downstream.',
+        stages: [
+          { key: 'sy_aggressive', range: [75,100], range_label: '75-100%', tag: 'Aggressive', action: 'Full size',    detail: 'All 3 signals green — full size, no entry restrictions, normal stops' },
+          { key: 'sy_standard',   range: [50,74],  range_label: '50-75%',  tag: 'Standard',   action: 'Normal',       detail: 'Uptrend or minor signal noise — normal size + stop' },
+          { key: 'sy_defensive',  range: [25,49],  range_label: '25-50%',  tag: 'Defensive',  action: 'Cut & select',  detail: 'At least one signal weakening — cut size <50%, high-conviction only' },
+          { key: 'sy_crisis',     range: [0,24],   range_label: '0-25%',   tag: 'Crisis',     action: 'Cash priority', detail: 'One signal is critical — barely any new entries, hold cash for next FTD' },
+        ],
+        no_active: 'At least one signal missing — cap cannot be synthesized',
+        hint: 'Formula: min( breadth_ceiling_mid, ftd_range_mid, market_top_budget_mid )',
+      },
+    },
+    market_top: {
+      zh: {
+        title: '頂部風險 · 大盤是否已過熱',
+        desc:  '綜合 distribution day（高量殺低天數）、領導股是否轉弱、防禦類股是否輪動進場、新高家數萎縮、Russell 2000 落後 SPY 程度等多類指標 → 合成 0-100 分。分數越高代表頂部訊號越多，需要降倉防範。與 breadth 互補：breadth 看「現在健康嗎」，這個看「快崩了嗎」。',
+        stages: [
+          { key: 'mt_normal',     range: [0,29],   range_label: 'score 0-30',   tag: '正常',     action: '可進攻',      detail: '暫無頂部訊號，廣度與領導同步，倉位上限可拉滿' },
+          { key: 'mt_warning',    range: [30,49],  range_label: 'score 30-50',  tag: '早期警告', action: '留意',        detail: '個別訊號出現（如 distribution day 累積），上限不變但需密切觀察' },
+          { key: 'mt_elevated',   range: [50,64],  range_label: 'score 50-65',  tag: '風險升高', action: '降倉、收緊',  detail: '訊號累積中，倉位上限調降至 60-80%、停損收緊' },
+          { key: 'mt_high',       range: [65,79],  range_label: 'score 65-80',  tag: '高機率頂部', action: '撤退中',     detail: '明確頂部訊號，倉位上限 40-60%、僅留高 conviction 標的' },
+          { key: 'mt_top',        range: [80,100], range_label: 'score 80+',    tag: '頂部成形', action: 'Cash 優先',  detail: '訊號全到位，倉位上限 ≤ 30%、現金為主等修正' },
+        ],
+        no_active: '頂部資料缺失或來源失敗',
+        hint: '組合內部：distribution day / leadership / defensive rotation / 新高萎縮 等子分數',
+      },
+      en: {
+        title: 'Market Top Risk · Is the market overheated',
+        desc:  'Composite of distribution days, leadership deterioration, defensive sector rotation, new-high contraction, Russell 2000 lagging SPY, etc. → 0-100 risk score. Higher = more topping signals stacked, time to de-risk. Complementary to breadth: breadth = "is it healthy now", market top = "is it about to crack".',
+        stages: [
+          { key: 'mt_normal',     range: [0,29],   range_label: 'score 0-30',   tag: 'Normal',         action: 'Attack',       detail: 'No topping signals, breadth + leadership aligned, full size OK' },
+          { key: 'mt_warning',    range: [30,49],  range_label: 'score 30-50',  tag: 'Early warning',  action: 'Watch',        detail: 'Isolated signals (e.g. distribution days) — size unchanged but monitor' },
+          { key: 'mt_elevated',   range: [50,64],  range_label: 'score 50-65',  tag: 'Elevated',       action: 'Cut & tighten',detail: 'Signals stacking — cap at 60-80%, tighten stops' },
+          { key: 'mt_high',       range: [65,79],  range_label: 'score 65-80',  tag: 'High risk',      action: 'Retreat',      detail: 'Clear top signals — cap at 40-60%, keep only high-conviction names' },
+          { key: 'mt_top',        range: [80,100], range_label: 'score 80+',    tag: 'Top formed',     action: 'Cash priority',detail: 'All signals tripped — cap ≤30%, cash priority, wait for correction' },
+        ],
+        no_active: 'Market top data unavailable / source failed',
+        hint: 'Sub-scores include: distribution days / leadership / defensive rotation / new-high contraction',
+      },
+    },
+  };
+
+  function classifyStage(stages, daysSince) {
+    if (daysSince == null || daysSince === '' || isNaN(daysSince)) return null;
+    const n = Number(daysSince);
+    return stages.find(s => n >= s.range[0] && n <= s.range[1]) || null;
+  }
+
+  const STAGE_DOTS = {
+    // FTD
+    prime: '🟢', standard: '🟡', late_cycle: '🟠', exhausted: '🔴',
+    // Breadth
+    br_strong: '🟢', br_healthy: '🟢', br_neutral: '🟡', br_weakening: '🟠', br_critical: '🔴',
+    // Market top
+    mt_normal: '🟢', mt_warning: '🟡', mt_elevated: '🟠', mt_high: '🟠', mt_top: '🔴',
+    // Synth ceiling
+    sy_aggressive: '🟢', sy_standard: '🟡', sy_defensive: '🟠', sy_crisis: '🔴',
+  };
+
+  function renderStageRows(stages, activeStage) {
+    return stages.map(s => {
+      const active = activeStage && s.key === activeStage.key;
+      return `<div class="stt-stage-row${active ? ' stt-stage-active' : ''}">
+        <span class="stt-stage-dot">${STAGE_DOTS[s.key] || '⚪'}</span>
+        <span class="stt-stage-range">${s.range_label}</span>
+        <span class="stt-stage-tag">${s.tag}</span>
+        <span class="stt-stage-action">${s.action}</span>
+        <div class="stt-stage-detail">${s.detail}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Per-signal live banner builders. Return { liveHTML, stage } for the active state.
+  function ftdLive(el, t, lang) {
+    const state = el.dataset.ftdState || '';
+    const date  = el.dataset.ftdDate || '';
+    const day   = el.dataset.ftdDay;
+    if (state !== 'FTD_CONFIRMED' || !date) return { liveHTML: `<div class="stt-live"><span>${t.no_active}</span></div>`, stage: null };
+    const stage = classifyStage(t.stages, day);
+    if (!stage) return { liveHTML: `<div class="stt-live"><span>${t.no_active}</span></div>`, stage: null };
+    const dayLabel = lang === 'en' ? `day ${day}` : `已過 ${day} 天`;
+    const liveHTML = `<div class="stt-live">
+      <span class="stt-live-dot">${STAGE_DOTS[stage.key] || '⚪'}</span>
+      <span>📅 ${date}</span>
+      <span class="stt-live-day">· ${dayLabel}</span>
+      <span class="stt-live-stage">${stage.tag} — ${stage.action}</span>
+    </div>`;
+    return { liveHTML, stage };
+  }
+
+  function breadthLive(el, t, lang) {
+    const score = el.dataset.brScore;
+    const zone  = el.dataset.brZone || '';
+    const ceil  = el.dataset.brCeiling || '';
+    if (score === '' || score == null) return { liveHTML: `<div class="stt-live"><span>${t.no_active}</span></div>`, stage: null };
+    const stage = classifyStage(t.stages, score);
+    const ceilLabel = lang === 'en' ? `ceiling ${ceil}` : `建議倉位 ${ceil}`;
+    const liveHTML = `<div class="stt-live">
+      <span class="stt-live-dot">${STAGE_DOTS[stage?.key] || '⚪'}</span>
+      <span>📊 ${Number(score).toFixed(1)}</span>
+      <span class="stt-live-day">· ${zone}</span>
+      <span class="stt-live-stage">${ceilLabel}</span>
+    </div>`;
+    return { liveHTML, stage };
+  }
+
+  function marketTopLive(el, t, lang) {
+    const score  = el.dataset.mtScore;
+    const zone   = (el.dataset.mtZone || '').replace(/\(.*\)/, '').trim();
+    const budget = el.dataset.mtBudget || '';
+    if (score === '' || score == null) return { liveHTML: `<div class="stt-live"><span>${t.no_active}</span></div>`, stage: null };
+    const stage = classifyStage(t.stages, score);
+    const budgetLabel = lang === 'en' ? `budget ${budget}` : `風控 ${budget}`;
+    const liveHTML = `<div class="stt-live">
+      <span class="stt-live-dot">${STAGE_DOTS[stage?.key] || '⚪'}</span>
+      <span>⚠️ ${Number(score).toFixed(1)}</span>
+      <span class="stt-live-day">· ${zone}</span>
+      <span class="stt-live-stage">${budgetLabel}</span>
+    </div>`;
+    return { liveHTML, stage };
+  }
+
+  function synthLive(el, t, lang) {
+    const mid    = el.dataset.synthMid;
+    const label  = el.dataset.synthLabel || '';
+    const brC    = el.dataset.brCeiling || '—';
+    const ftdR   = el.dataset.ftdRange || '—';
+    const mtB    = el.dataset.mtBudget || '—';
+    if (mid === '' || mid == null) return { liveHTML: `<div class="stt-live"><span>${t.no_active}</span></div>`, stage: null };
+    const stage = classifyStage(t.stages, mid);
+    const sourceLabel = lang === 'en'
+      ? `breadth ${brC} · FTD ${ftdR} · top ${mtB}`
+      : `廣度 ${brC} · FTD ${ftdR} · 頂部 ${mtB}`;
+    const liveHTML = `<div class="stt-live">
+      <span class="stt-live-dot">${STAGE_DOTS[stage?.key] || '⚪'}</span>
+      <span>🎯 ${label}</span>
+      <span class="stt-live-stage">${stage?.tag || ''} — ${stage?.action || ''}</span>
+    </div>
+    <div class="stt-live-sources">${sourceLabel}</div>`;
+    return { liveHTML, stage };
+  }
+
+  const LIVE_BUILDERS = { ftd: ftdLive, breadth: breadthLive, market_top: marketTopLive, synth: synthLive };
+
+  function buildSignalTipHTML(el, lang) {
+    const key = el.dataset.signalTip;
+    const tBundle = SIGNAL_TIPS[key];
+    if (!tBundle) return '';
+    const t = tBundle[lang === 'en' ? 'en' : 'zh'];
+    const builder = LIVE_BUILDERS[key];
+    const { liveHTML, stage } = builder ? builder(el, t, lang) : { liveHTML: '', stage: null };
+    return `
+      <div class="stt-title">${t.title}</div>
+      <div class="stt-desc">${t.desc}</div>
+      ${liveHTML}
+      <div class="stt-stages">${renderStageRows(t.stages, stage)}</div>
+      <div class="stt-hint">${t.hint}</div>
+    `;
+  }
+
+  function showSignalTip(el) {
+    const key = el.dataset.signalTip;
+    if (!SIGNAL_TIPS[key]) return;
+    const lang = UI.currentLang || 'zh';
+    tip.innerHTML = buildSignalTipHTML(el, lang);
+
+    tip.style.opacity = '0';
+    tip.style.top = '-9999px';
+    tip.classList.add('visible');
+    requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const tRect = tip.getBoundingClientRect();
+      const gap = 8;
+      let top = rect.bottom + gap;
+      if (top + tRect.height > window.innerHeight - 8) top = rect.top - tRect.height - gap;
+      let left = rect.left + (rect.width - tRect.width) / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - tRect.width - 8));
+      tip.style.top = top + 'px';
+      tip.style.left = left + 'px';
+      tip.style.opacity = '';
+    });
+  }
+
+  function hideSignalTip() {
+    tip.classList.remove('visible');
+  }
+
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-signal-tip]');
+    if (!el) return;
+    if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+    showSignalTip(el);
+  });
+  document.addEventListener('mouseout', e => {
+    const el = e.target.closest('[data-signal-tip]');
+    if (!el) return;
+    _hideTimer = setTimeout(hideSignalTip, 80);
   });
 })();

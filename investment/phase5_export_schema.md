@@ -73,6 +73,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `position_size_pct` | float 0-1 | HOLD 填 0.0 | |
 | `staged_split` | `{aggressive_pct, conservative_pct}` or `null` | 僅 STAGED_ENTRY 填 | |
 | `position_size_method` | `"VOL_ADJUSTED" \| "RULE_BASED"` | 填 | |
+| `ftd_timeline_gate` | `{applied, days_since_ftd, stage, sector_class, multiplier, stop_loss_adjustment_pp, rejection_triggered}` or `null` | **V4.9+ 必填**；`applied=false` 時其他欄位 null | Phase 4 Step 3.5 輸出，記錄 FTD timeline gate 決策軌跡 |
 | `fragility_label` | `"ROBUST" \| "MODERATE" \| "FRAGILE"` | **必填** | HOLD 也要（tail-risk-analyzer 輸出）|
 | `binary_classification` | `"positive" \| "unknown" \| "negative" \| "none"` | **必填** | |
 | `time_horizon` | `"short" \| "mid" \| "long"` | **必填** | HOLD 也要（反映再評窗口長度）|

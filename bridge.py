@@ -1,8 +1,10 @@
 import json
 import math
 import os
+import sys
 import glob
 import re
+import time
 import requests
 from datetime import datetime, date, timedelta, timezone
 
@@ -44,6 +46,7 @@ POSITIONS_FILE = os.path.join(BASE_DIR, 'positions.json')
 MOMENTUM_CACHE = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'cache')
 MOMENTUM_JOURNAL = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'journal')
 FRED_CACHE     = os.path.join(BASE_DIR, 'skills', 'fred-macro', 'cache', 'fred_latest.json')
+EVENTS_ARCHIVE_FILE = os.path.join(BASE_DIR, 'events_archive.json')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
 
 
@@ -420,6 +423,632 @@ def extract_divergence_watch(s_data):
 
 
 # ─────────────────────────────────────────────
+# UNIFIED UPCOMING EVENTS (calendar Coming Up)
+# Schema: reports/decision_review/UPCOMING_EVENTS_SCHEMA.md
+# Stage 1: only sector-protocol binary_risks. Future: + Finnhub/FMP/Fed/manual.
+# ─────────────────────────────────────────────
+
+import re as _re_events  # avoid shadowing module-level `re` use elsewhere
+
+
+def _slugify(text, max_len=30):
+    s = _re_events.sub(r'[^a-z0-9]+', '-', (text or '').lower()).strip('-')
+    return s[:max_len] or 'untitled'
+
+
+def _clean_event_text(raw_title):
+    """sector-protocol 目前產出格式如:
+       'AAPL 財報（binary；看多/看空 Technology）'
+       'FOMC 利率決議（binary；看多/看空 Real_Estate、Technology、Utilities、Financials）'
+       'DOJ ends Powell probe — Warsh Senate banking vote 4/29 (Pirro can reopen probe at any time; Fed independence binary)'
+
+    回傳 (clean_title, description, extracted_sectors_list)
+    - clean_title: 第一個括號／em-dash 之前的核心主標, 截短到 ~36 字元
+    - description: 括號內的非結構化補述（去掉 "binary;" 雜訊）
+    - extracted_sectors: 從 "看多/看空 X、Y、Z" 抽出的 GICS sector list
+    """
+    if not raw_title:
+        return '', None, []
+
+    # split on first "（" or " (" or " — " or " - "
+    split_re = _re_events.compile(r'\s*[（(]|\s+[—–-]\s+')
+    parts = split_re.split(raw_title, maxsplit=1)
+    head = parts[0].strip()
+
+    desc = None
+    sectors = []
+    if len(parts) > 1:
+        tail = parts[1].rstrip('）)').strip()
+        # 抽 sector list 自 "看多/看空 X、Y、Z" / "看多 X" / "looking bull/bear: X"
+        # 容忍「看多/看空」雙字組
+        SECTOR_PHRASE = r'看[多空](?:[/／]看[多空])?\s*([A-Za-z_、,\s]+)'
+        sm = _re_events.search(SECTOR_PHRASE, tail)
+        if sm:
+            raw_secs = sm.group(1)
+            sectors = [s.strip() for s in _re_events.split(r'[、,]', raw_secs) if s.strip()]
+        # 去掉 "binary;" / "binary；" 雜訊 + sector phrase 後剩下的當 desc
+        cleaned_tail = _re_events.sub(r'binary[；;]\s*', '', tail, flags=_re_events.I)
+        cleaned_tail = _re_events.sub(SECTOR_PHRASE, '', cleaned_tail).strip(' ；;,。.')
+        # 平衡未配對括號 (em-dash split 可能切到內括號)
+        if cleaned_tail.count('(') > cleaned_tail.count(')'):
+            cleaned_tail = cleaned_tail.replace('(', '', 1)
+        if cleaned_tail.count('（') > cleaned_tail.count('）'):
+            cleaned_tail = cleaned_tail.replace('（', '', 1)
+        cleaned_tail = cleaned_tail.strip(' ；;,。.')
+        if cleaned_tail:
+            desc = cleaned_tail
+
+    # 截短主標
+    if len(head) > 36:
+        head = head[:35].rstrip() + '…'
+
+    return head, desc, sectors
+
+
+def _event_dedupe_key(e):
+    """Per UPCOMING_EVENTS_SCHEMA.md: ticker present → (date, ticker, category)
+    else (date, None, category, slug)."""
+    if e.get("tickers"):
+        return (e["date"], e["tickers"][0], e["category"])
+    return (e["date"], None, e["category"], _slugify(e["title"]))
+
+
+def _impact_rank(i):  # higher = more impact, used to pick winner during merge
+    return {"high": 3, "med": 2, "low": 1}.get(i, 0)
+
+
+def _from_sector_protocol_new(s_data):
+    """sector-protocol `_phase3.upcoming_events` → schema list (新格式, LLM 直接吐 schema-compliant).
+
+    Returns None when `_phase3.upcoming_events` 不存在 (caller fallback to legacy regex cleaner).
+    """
+    p3 = s_data.get("_phase3", {})
+    events = p3.get("upcoming_events")
+    if not isinstance(events, list):
+        return None
+    today = date.today()
+    out = []
+    for ev in events:
+        ev_date = ev.get("date") or ""
+        # filter past
+        try:
+            if datetime.strptime(ev_date, "%Y-%m-%d").date() < today:
+                continue
+        except Exception:
+            pass
+        # Re-derive within_48h每次 bridge 跑都重算 (raw flag 可能 stale)
+        try:
+            days_until = (datetime.strptime(ev_date, "%Y-%m-%d").date() - today).days
+            within_48h = 0 <= days_until <= 2
+        except Exception:
+            within_48h = bool(ev.get("within_48h"))
+        # ensure source field tagged
+        rec = dict(ev)
+        rec["source"] = "sector-protocol"
+        rec["within_48h"] = within_48h
+        rec.setdefault("source_payload", {})["raw_event"] = ev
+        # 確保必填欄位存在 (LLM 偶爾漏)
+        rec.setdefault("title", "(untitled)")
+        rec.setdefault("category", "binary")
+        rec.setdefault("impact", "high" if rec.get("is_binary") else "med")
+        rec.setdefault("is_binary", rec.get("category") == "binary")
+        rec.setdefault("tickers", [])
+        rec.setdefault("sectors", [])
+        rec.setdefault("description", None)
+        rec.setdefault("time", None)
+        rec.setdefault("links", {})
+        if not rec.get("id"):
+            slug = rec["tickers"][0] if rec["tickers"] else _slugify(rec["title"])
+            rec["id"] = f"sector-protocol_{slug}_{ev_date}"
+        out.append(rec)
+    return out
+
+
+def _from_sector_protocol(s_data):
+    """sector-protocol `_phase3.upcoming_binary_risks` → schema list (legacy regex cleaner)."""
+    today = date.today()
+    out = []
+    for ev in s_data.get("_phase3", {}).get("upcoming_binary_risks", []):
+        ev_date = ev.get("date", "")
+        days_until = None
+        try:
+            days_until = (datetime.strptime(ev_date, "%Y-%m-%d").date() - today).days
+        except Exception:
+            pass
+        if days_until is not None and days_until < 0:
+            continue
+        raw_title = ev.get("event", "") or "(untitled)"
+        clean_title, description, extracted_sectors = _clean_event_text(raw_title)
+        title = clean_title or raw_title
+        # Heuristic: "AAPL", "NVDA" 等 ticker-style pattern at start of cleaned title.
+        # Blocklist common acronyms / agency names that aren't tickers.
+        _NOT_TICKER = {"DOJ", "FOMC", "FED", "FBI", "IRS", "SEC", "ECB", "BOJ", "PBOC",
+                       "OPEC", "NATO", "WHO", "IMF", "WTO", "EPA", "FAA", "FCC",
+                       "CPI", "PPI", "GDP", "NFP", "PMI", "ISM", "FY", "Q1", "Q2", "Q3", "Q4",
+                       "AI", "EV", "IPO", "ETF", "REIT", "SPAC", "OECD", "BRICS"}
+        ticker_match = _re_events.match(r'^([A-Z]{2,5})\b', title)
+        tickers = []
+        if ticker_match and ticker_match.group(1) not in _NOT_TICKER:
+            tickers = [ticker_match.group(1)]
+        # sectors: prefer protocol-supplied affected_sectors; fall back to extracted from title
+        sectors = ev.get("affected_sectors", []) or extracted_sectors or []
+        within_48h = days_until is not None and 0 <= days_until <= 2
+        # Category guess: if title mentions FOMC/Fed/Powell → macro; else binary
+        cat = "macro" if _re_events.search(r'FOMC|Fed|Powell|聯準會', title) \
+              else ("geopolitical" if _re_events.search(r'tariff|關稅|war|geopolit|聽證|truce|ceasefire', title, _re_events.I)
+                    else "binary")
+        ev_id = f"sector-protocol_{tickers[0] if tickers else _slugify(title)}_{ev_date}"
+        out.append({
+            "id":          ev_id,
+            "date":        ev_date,
+            "time":        None,
+            "category":    cat,
+            "title":       title,
+            "description": description,
+            "tickers":     tickers,
+            "sectors":     sectors,
+            "impact":      "high",          # binary_risks 預設都 high
+            "is_binary":   True,
+            "within_48h":  within_48h,
+            "source":      "sector-protocol",
+            "source_payload": {
+                "raw_title":         raw_title,
+                "raw_event":         ev,
+                "affected_sectors":  sectors,
+            },
+            "links": {},
+        })
+    return out
+
+
+def _merge_two(primary, other):
+    """Cross-source merge for same dedupe key. Primary = higher impact wins.
+    is_binary OR; tickers/sectors union; source_payload soft-merge."""
+    if _impact_rank(other["impact"]) > _impact_rank(primary["impact"]):
+        primary, other = other, primary  # swap so higher-impact is primary
+    primary["is_binary"] = bool(primary.get("is_binary")) or bool(other.get("is_binary"))
+    primary["tickers"]   = list(dict.fromkeys((primary.get("tickers") or []) + (other.get("tickers") or [])))
+    primary["sectors"]   = list(dict.fromkeys((primary.get("sectors") or []) + (other.get("sectors") or [])))
+    # source_payload merge (primary wins on key collision)
+    sp = dict(other.get("source_payload") or {})
+    sp.update(primary.get("source_payload") or {})
+    primary["source_payload"] = sp
+    primary.setdefault("source_payload", {})["_merged_from_sources"] = (
+        list(set((primary.get("source_payload", {}).get("_merged_from_sources") or [primary["source"]])
+                 + [other["source"]])))
+    return primary
+
+
+def _from_fed_calendar(today, horizon_days=60):
+    """讀 config/fed_calendar.yaml，輸出未來 horizon_days 內的 Fed 事件。"""
+    yaml_path = os.path.join(BASE_DIR, "config", "fed_calendar.yaml")
+    if not os.path.exists(yaml_path):
+        return []
+    try:
+        import yaml as _yaml
+    except ImportError:
+        print("[WARN] PyYAML not installed — skipping fed_calendar.yaml", file=sys.stderr)
+        return []
+    try:
+        with open(yaml_path, encoding="utf-8") as f:
+            cfg = _yaml.safe_load(f) or {}
+    except Exception as e:
+        print(f"[WARN] failed to parse fed_calendar.yaml: {e}", file=sys.stderr)
+        return []
+
+    out = []
+    horizon_end = today + timedelta(days=horizon_days)
+    section_to_category = {
+        "fomc_meetings_2026":  "macro",
+        "fomc_minutes_2026":   "macro",
+        "chair_speeches_2026": "macro",
+    }
+    def _stringify(obj):
+        """Recursively convert date/datetime to ISO string for JSON safety."""
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        if isinstance(obj, date):
+            return obj.isoformat()
+        if isinstance(obj, dict):
+            return {k: _stringify(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_stringify(x) for x in obj]
+        return obj
+
+    for section, category in section_to_category.items():
+        for ev in cfg.get(section, []) or []:
+            raw = ev.get("date")
+            try:
+                # PyYAML auto-converts YYYY-MM-DD to datetime.date
+                if isinstance(raw, date):
+                    ev_date = raw
+                elif isinstance(raw, datetime):
+                    ev_date = raw.date()
+                else:
+                    ev_date = datetime.strptime(str(raw), "%Y-%m-%d").date()
+            except Exception:
+                continue
+            if ev_date < today or ev_date > horizon_end:
+                continue
+            days_until = (ev_date - today).days
+            title = ev.get("title", "(untitled)")
+            slug = _slugify(title)
+            out.append({
+                "id":          f"fed-calendar_{slug}_{ev_date.isoformat()}",
+                "date":        ev_date.isoformat(),
+                "time":        ev.get("time"),
+                "category":    category,
+                "title":       title,
+                "description": ev.get("notes"),
+                "tickers":     [],
+                "sectors":     ["Financials", "Real_Estate", "Utilities", "Technology"],  # 利率敏感 sector
+                "impact":      ev.get("impact", "high"),
+                "is_binary":   bool(ev.get("is_binary", True)),
+                "within_48h":  days_until <= 2,
+                "source":      "fed-calendar",
+                "source_payload": _stringify({"raw_event": ev, "section": section}),
+                "links":       {},
+            })
+    return out
+
+
+def _from_fmp_econ(today, horizon_days=14):
+    """FMP /economic_calendar → schema list. 過濾美國 + importance>=2."""
+    api_key = os.environ.get("FMP_API_KEY")
+    if not api_key:
+        return []
+
+    cache_dir = os.path.join(BASE_DIR, ".cache_bridge")
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_path = os.path.join(cache_dir, f"fmp_econ_{today.isoformat()}.json")
+
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path) as f:
+                rows = json.load(f)
+        except Exception:
+            rows = None
+    else:
+        rows = None
+
+    if rows is None:
+        from_d = today.isoformat()
+        to_d = (today + timedelta(days=horizon_days)).isoformat()
+        # FMP v3 economic_calendar deprecated 2025-08; use stable
+        url = "https://financialmodelingprep.com/stable/economic-calendar"
+        try:
+            r = requests.get(url, params={"from": from_d, "to": to_d, "apikey": api_key}, timeout=15)
+            r.raise_for_status()
+            rows = r.json()
+            with open(cache_path, "w") as f:
+                json.dump(rows, f)
+        except Exception as e:
+            print(f"[WARN] FMP econ fetch failed: {e}", file=sys.stderr)
+            return []
+
+    if not isinstance(rows, list):
+        return []
+
+    HIGH_IMPACT_BINARY = {"CPI", "PCE", "Nonfarm Payrolls", "Unemployment Rate",
+                          "GDP", "FOMC", "Fed Interest Rate Decision",
+                          "ISM Manufacturing", "ISM Services"}
+
+    # 過濾舊月份修正資料：title 含 "(月份)"，月份 != 當月或前一月，視為 stale
+    current_month = today.month
+    prev_month = 12 if current_month == 1 else current_month - 1
+    month_names = {1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",
+                   7:"Jul",8:"Aug",9:"Sep",10:"Oct",11:"Nov",12:"Dec"}
+    stale_months = {month_names[m] for m in range(1, 13) if m not in (current_month, prev_month)}
+
+    out = []
+    seen = set()  # de-dup by (date, normalized_title)
+    for ev in rows:
+        if (ev.get("country") or "").upper() not in ("US", "USA", "UNITED STATES"):
+            continue
+        impact_raw = (ev.get("impact") or "").lower()
+        if impact_raw != "high":
+            continue  # 噪音太多, 只保留 high impact
+
+        impact = "high"
+
+        # date may be "YYYY-MM-DD HH:MM:SS"
+        date_str = (ev.get("date") or "")[:10]
+        time_str = (ev.get("date") or "")[11:16] + " ET" if len(ev.get("date") or "") >= 16 else None
+        try:
+            ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except Exception:
+            continue
+        if ev_date < today:
+            continue
+        days_until = (ev_date - today).days
+
+        title = (ev.get("event") or "").strip()
+        if not title:
+            continue
+        # skip stale-month tags ("Feb" reported in Apr/May etc.)
+        title_months = re.findall(r'\(([A-Z][a-z]{2})(?:\b|/)', title)
+        if title_months and any(m in stale_months for m in title_months):
+            continue
+        # de-dup near-identical events same day (e.g. "Press Conference" + "Fed Press Conference")
+        norm_key = (date_str, re.sub(r'[^a-z0-9]+', '', title.lower())[:25])
+        if norm_key in seen:
+            continue
+        seen.add(norm_key)
+
+        is_binary = any(k.lower() in title.lower() for k in HIGH_IMPACT_BINARY)
+
+        out.append({
+            "id":          f"fmp-econ_{_slugify(title)}_{date_str}",
+            "date":        date_str,
+            "time":        time_str,
+            "category":    "econ",
+            "title":       title[:36],
+            "description": (f"prev: {ev.get('previous')} / est: {ev.get('estimate')}"
+                            if ev.get("estimate") is not None or ev.get("previous") is not None else None),
+            "tickers":     [],
+            "sectors":     [],
+            "impact":      impact,
+            "is_binary":   is_binary,
+            "within_48h":  days_until <= 2,
+            "source":      "fmp-econ",
+            "source_payload": {
+                "country":  ev.get("country"),
+                "previous": ev.get("previous"),
+                "estimate": ev.get("estimate"),
+                "actual":   ev.get("actual"),
+                "currency": ev.get("currency"),
+                "raw_impact": impact_raw,
+            },
+            "links":       {},
+        })
+    return out
+
+
+# 「重大級」tickers — 觸發 is_binary=true（earnings 公布後大幅 move 風險高）
+# Finnhub /calendar/earnings 在實測中漏掉 CVX/XOM/V/MA 等大咖，因此改用 FMP 為主
+_BINARY_TICKERS = {
+    # Mag-7
+    'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'META', 'NVDA', 'AMZN', 'TSLA',
+    # Mega-tech extension
+    'AVGO', 'ORCL', 'CRM', 'AMD', 'NFLX', 'TSM',
+    # Mega-financials
+    'JPM', 'V', 'MA', 'GS', 'MS', 'BAC', 'WFC', 'C', 'BRK-B', 'BRK.B', 'AXP', 'BLK',
+    # Mega-pharma / healthcare
+    'LLY', 'JNJ', 'UNH', 'PFE', 'MRK', 'ABBV', 'NVO',
+    # Mega-energy / staples
+    'XOM', 'CVX', 'WMT', 'COST', 'PG', 'KO', 'PEP', 'PM', 'MO',
+    # Mega-industrials / discretionary
+    'BA', 'CAT', 'HD', 'LOW', 'MCD', 'DIS', 'NKE',
+}
+
+
+def _from_fmp_earnings(today, horizon_days=14):
+    """FMP /stable/earnings-calendar → schema list.
+
+    FMP 已預先過濾為「分析師覆蓋的大型公司」(56/60d), 比 Finnhub 完整覆蓋 CVX/XOM/V/MA 等大咖。
+    只保留 revenueEstimated >= $1B 避免極小型 noise。
+    """
+    api_key = os.environ.get("FMP_API_KEY")
+    if not api_key:
+        return []
+
+    cache_dir = os.path.join(BASE_DIR, ".cache_bridge")
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_path = os.path.join(cache_dir, f"fmp_earnings_{today.isoformat()}.json")
+
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path) as f:
+                rows = json.load(f)
+        except Exception:
+            rows = None
+    else:
+        rows = None
+
+    if rows is None:
+        from_d = today.isoformat()
+        to_d = (today + timedelta(days=horizon_days)).isoformat()
+        url = "https://financialmodelingprep.com/stable/earnings-calendar"
+        try:
+            r = requests.get(url, params={"from": from_d, "to": to_d, "apikey": api_key}, timeout=15)
+            r.raise_for_status()
+            rows = r.json()
+            with open(cache_path, "w") as f:
+                json.dump(rows, f)
+        except Exception as e:
+            print(f"[WARN] FMP earnings fetch failed: {e}", file=sys.stderr)
+            return []
+
+    if not isinstance(rows, list):
+        return []
+
+    out = []
+    for ev in rows:
+        symbol = (ev.get("symbol") or "").upper()
+        if not symbol:
+            continue
+        date_str = ev.get("date") or ""
+        try:
+            ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except Exception:
+            continue
+        if ev_date < today:
+            continue
+        days_until = (ev_date - today).days
+
+        rev_est = ev.get("revenueEstimated")
+        eps_est = ev.get("epsEstimated")
+        # 過濾極小 cap (revenue 估計 < $500M) 避免 noise
+        if rev_est is not None and rev_est < 5e8:
+            continue
+
+        hour = (ev.get("time") or "").lower()  # 'bmo'|'amc' or empty
+        time_str = "BMO" if hour == "bmo" else ("AMC" if hour == "amc" else None)
+
+        is_binary = symbol in _BINARY_TICKERS
+        # impact gating
+        if is_binary:
+            impact = "high"
+        elif rev_est and rev_est >= 1e10:   # ≥$10B revenue
+            impact = "high"
+        elif rev_est and rev_est >= 1e9:    # $1-10B
+            impact = "med"
+        else:
+            impact = "low"
+
+        title = f"{symbol} 財報"
+        desc_parts = []
+        if eps_est is not None:
+            desc_parts.append(f"EPS est. ${eps_est}")
+        if rev_est:
+            desc_parts.append(f"Rev est. ${rev_est/1e9:.1f}B")
+        description = " / ".join(desc_parts) if desc_parts else None
+
+        out.append({
+            "id":          f"fmp-earnings_{symbol}_{date_str}",
+            "date":        date_str,
+            "time":        time_str,
+            "category":    "earnings",
+            "title":       title,
+            "description": description,
+            "tickers":     [symbol],
+            "sectors":     [],
+            "impact":      impact,
+            "is_binary":   is_binary,
+            "within_48h":  days_until <= 2,
+            "source":      "fmp-earnings",
+            "source_payload": {
+                "symbol":            symbol,
+                "epsEstimated":      eps_est,
+                "revenueEstimated":  rev_est,
+                "time":              hour,
+            },
+            "links":       {},
+        })
+    return out
+
+
+def _load_events_archive():
+    """Load persistent events archive (past + known future events).
+
+    Archive accumulates over time so that events whose date passes (e.g. yesterday's
+    earnings) remain visible on the calendar. Returns list[event]; empty list if
+    file is missing or unreadable.
+    """
+    if not os.path.exists(EVENTS_ARCHIVE_FILE):
+        return []
+    try:
+        with open(EVENTS_ARCHIVE_FILE, 'r') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"[bridge] events_archive load failed: {e}", file=sys.stderr)
+        return []
+    if isinstance(data, dict):
+        return data.get("events", []) or []
+    if isinstance(data, list):
+        return data
+    return []
+
+
+def _save_events_archive(events):
+    """Atomic write of merged events archive (.tmp → os.replace)."""
+    payload = {
+        "schema_version": 1,
+        "updated_at":     datetime.now().isoformat(),
+        "events":         events,
+    }
+    tmp = EVENTS_ARCHIVE_FILE + ".tmp"
+    try:
+        with open(tmp, 'w') as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False, default=str)
+        os.replace(tmp, EVENTS_ARCHIVE_FILE)
+    except OSError as e:
+        print(f"[bridge] events_archive save failed: {e}", file=sys.stderr)
+
+
+def aggregate_upcoming_events(s_data):
+    """Returns list[UpcomingEvent] sorted by date — past events kept on the calendar.
+
+    Sources merged:
+      - Sector-protocol _phase3.upcoming_events[] (new) or upcoming_binary_risks (legacy)
+      - Fed calendar / FMP econ / FMP earnings (forward-looking only)
+      - **events_archive.json** (BASE_DIR) — persisted union of all past runs so events
+        whose date has passed don't disappear from the calendar.
+
+    The fresh feeds replace archive entries on dedupe match (newer source data takes
+    precedence; e.g. an earnings event's reported impact may upgrade after sector-protocol
+    re-runs). After merge, the archive is written back so the next run inherits state.
+    """
+    today = date.today()
+    raw = []
+    if s_data:
+        new_events = _from_sector_protocol_new(s_data)
+        if new_events is not None:
+            raw.extend(new_events)
+        else:
+            raw.extend(_from_sector_protocol(s_data))
+    # Tier 1 feeds
+    raw.extend(_from_fed_calendar(today))
+    raw.extend(_from_fmp_econ(today))
+    raw.extend(_from_fmp_earnings(today))
+
+    # Pass 0: load persisted archive (past + future events known so far)
+    archived = _load_events_archive()
+
+    # Pass 1: dedupe by (date, ticker, category) / (date, None, category, slug).
+    # Order matters: archive first (so fresh raw entries overwrite stale archive
+    # versions on dedupe match — newer source data is more accurate).
+    by_key = {}
+    for e in archived + raw:
+        k = _event_dedupe_key(e)
+        if k in by_key:
+            by_key[k] = _merge_two(by_key[k], e)
+        else:
+            by_key[k] = e
+
+    # Pass 2: cross-category merge for same (date, ticker) — sector-protocol may flag
+    # AAPL earnings as "binary" while fmp-earnings flags same as "earnings"; merge to
+    # one record (impact=max, is_binary=OR, prefer "earnings" category for normalcy).
+    by_ticker_date = {}
+    leftover = []  # 沒 ticker 的事件原樣保留
+    for ev in by_key.values():
+        if ev.get("tickers"):
+            tk = ev["tickers"][0]
+            tk_key = (ev["date"], tk)
+            if tk_key in by_ticker_date:
+                by_ticker_date[tk_key] = _merge_two(by_ticker_date[tk_key], ev)
+            else:
+                by_ticker_date[tk_key] = ev
+        else:
+            leftover.append(ev)
+
+    # 偏好 category=earnings (具體性) 高於 binary (抽象 catch-all)
+    for tk_key, ev in list(by_ticker_date.items()):
+        sources = (ev.get("source_payload") or {}).get("_merged_from_sources") or []
+        if "fmp-earnings" in sources or ev.get("source") == "fmp-earnings":
+            ev["category"] = "earnings"
+        by_ticker_date[tk_key] = ev
+
+    out = list(by_ticker_date.values()) + leftover
+
+    # Re-derive within_48h for every event from current `today` — archive entries
+    # carry whatever within_48h was true on the day they were first saved, which
+    # would now be stale (e.g. yesterday's earnings would still flag within_48h=true).
+    for ev in out:
+        try:
+            d = datetime.strptime(ev["date"], "%Y-%m-%d").date()
+            ev["within_48h"] = 0 <= (d - today).days <= 2
+        except (KeyError, ValueError, TypeError):
+            ev["within_48h"] = False
+
+    out.sort(key=lambda x: (x["date"], -_impact_rank(x["impact"]), x["title"]))
+
+    # Persist merged archive — past events stay visible on the calendar after their date passes
+    _save_events_archive(out)
+    return out
+
+
+# ─────────────────────────────────────────────
 # AUDIT HISTORY + WATCHLIST
 # ─────────────────────────────────────────────
 
@@ -693,6 +1322,7 @@ def extract_ftd_data(raw):
 
     sp_swing = sp.get("swing_low") or {}
     sp_rally = sp.get("rally_attempt") or {}
+    timeline = raw.get("ftd_timeline") or {}
 
     return {
         "state":              state,
@@ -706,6 +1336,9 @@ def extract_ftd_data(raw):
         "ftd_date":           ftd.get("ftd_date"),
         "ftd_day_number":     ftd.get("ftd_day_number"),
         "ftd_gain_pct":       ftd.get("gain_pct"),
+        # V1.5 timeline (BUG-006 mitigation — canonical day-counter for AI agents)
+        "days_since_ftd":     timeline.get("days_since_ftd"),
+        "ftd_status_text":    timeline.get("ftd_status_text"),
         # Swing low
         "swing_low_date":     sp_swing.get("swing_low_date"),
         "swing_low_price":    sp_swing.get("swing_low_price"),
@@ -876,7 +1509,14 @@ def extract_news():
             seen_headlines.add(h)
             deduped.append(item)
 
-    return deduped
+    # Derive latest content date from digest files (not bridge run time)
+    latest_digest = sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)
+    news_content_date = None
+    if latest_digest:
+        fname = os.path.basename(latest_digest[0])  # e.g. "2026-04-24_digest.json"
+        news_content_date = fname[:10]               # "2026-04-24"
+
+    return deduped, news_content_date
 
 
 # ─────────────────────────────────────────────
@@ -1058,6 +1698,33 @@ def ingest_momentum_screen():
     return out
 
 
+def load_tactical_recommendations():
+    """Load latest thematic-screener recommendations file. Returns dict for data['tactical']."""
+    rec_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "skills", "thematic-screener", "data", "recommendations")
+    if not os.path.isdir(rec_dir):
+        return {"status": "no_dir"}
+    files = sorted(glob.glob(os.path.join(rec_dir, "*.json")), reverse=True)
+    if not files:
+        return {"status": "no_files"}
+    latest = files[0]
+    age_sec = int(time.time() - os.path.getmtime(latest))
+    age_hr = age_sec / 3600
+    try:
+        with open(latest, 'r') as f:
+            payload = json.load(f)
+    except Exception as e:
+        return {"status": "parse_error", "error": str(e)}
+    payload["status"] = "success"
+    payload["_cache_age_sec"] = age_sec
+    payload["_cache_age_hr"] = round(age_hr, 1)
+    payload["_source_file"] = os.path.basename(latest)
+    payload["_freshness"] = "FRESH" if age_hr < 24 else ("STALE" if age_hr < 168 else "OLD")
+    # Count files for sample-size hint
+    payload["_total_log_days"] = len(files)
+    return payload
+
+
 def run_bridge():
     data = {
         "status":          "success",
@@ -1068,10 +1735,12 @@ def run_bridge():
         "market_top":      {},
         "sectors":         [],
         "binary_risks":    [],
+        "upcoming_events": [],
         "divergence_watch": [],
         "recent_analysis": [],
         "news":            [],
         "momentum_screen": {"status": "no_data"},
+        "tactical":        {"status": "no_data"},
     }
 
     # 1. Sector / Market / Breadth (base from sector_intel)
@@ -1083,6 +1752,7 @@ def run_bridge():
             data["market"]           = extract_market_data(s_data)
             data["sectors"]          = extract_sectors(s_data)
             data["binary_risks"]     = extract_binary_risks(s_data)
+            data["upcoming_events"]  = aggregate_upcoming_events(s_data)
             data["divergence_watch"] = extract_divergence_watch(s_data)
             # breadth sub-object: start with sector_intel estimates
             data["breadth"] = {
@@ -1165,8 +1835,8 @@ def run_bridge():
     print(f"[OK] Audit history: {len(data['recent_analysis'])} entries ({wl_count} watchlist, {live_count} live positions)")
 
     # 3. News
-    data["news"] = extract_news()
-    print(f"[OK] News: {len(data['news'])} items")
+    data["news"], data["news_content_date"] = extract_news()
+    print(f"[OK] News: {len(data['news'])} items | content_date={data['news_content_date']}")
 
     # 3b. FRED macro snapshot (optional — skip silently if FRED_API_KEY not set)
     fred = load_fred_snapshot()
@@ -1193,6 +1863,20 @@ def run_bridge():
             print("[INFO] No momentum screen CSV found yet")
     except Exception as e:
         print(f"[WARN] Momentum screen ingest: {e}")
+
+    # 5. Tactical Opportunity Radar (thematic-screener recommendations)
+    try:
+        data["tactical"] = load_tactical_recommendations()
+        t = data["tactical"]
+        if t.get("status") == "success":
+            n_themes = len(t.get("themes", []))
+            n_movers = sum(len(th.get("top_movers", [])) for th in t.get("themes", []))
+            print(f"[OK] Tactical: {n_themes} themes / {n_movers} movers "
+                  f"({t['_freshness']}, {t['_cache_age_hr']}h, log_days={t['_total_log_days']})")
+        else:
+            print(f"[INFO] No tactical recommendations: {t.get('status')}")
+    except Exception as e:
+        print(f"[WARN] Tactical ingest: {e}")
 
     # Write — strict JSON (no NaN/Infinity, which browsers reject).
     # Atomic via tmp + os.replace so that a concurrent second run (sector scan

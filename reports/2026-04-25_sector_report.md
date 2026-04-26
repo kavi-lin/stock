@@ -1,7 +1,7 @@
 # Sector Intelligence Report — 2026-04-25
 
-> **Protocol**: V1.3 · **Fan-out**: PARALLEL_SUBAGENT · **Regime Confidence**: 0.63
-> **Stance**: NEUTRAL · **Cycle**: Mid · **Generated**: 2026-04-25 00:50
+> **Protocol**: V1.3 · **Fan-out**: PARALLEL_SUBAGENT · **Regime Confidence**: 0.62
+> **Stance**: DEFENSIVE · **Cycle**: Mid · **Generated**: 2026-04-25 22:30
 > **Degraded Agents**: none
 
 ---
@@ -10,17 +10,17 @@
 
 | Sector | Verdict | Score | FRED× | Key Reasons (top 2) | Tail Risk | Proxy ETF | Risk Flags |
 |---|---|---|---|---|---|---|---|
-| Materials | **HOT** | 82.9 | 1.00 | 4-lane 一致 HOT 共識 · 銅 $13k + 金 $4.7k 主題延伸 | RESILIENT | XLB | commodity_blowoff_watch, consensus_warning |
-| Industrials | **HOT** | 80.7 | 0.96 | Rotation + Theme 雙 HOT · Defense 66 + Infra 63.9 主題 | RESILIENT | XLI | overbought, distribution_regime |
-| Technology | WARM | 60.6 | 0.90 | Rotation/Theme HOT 但 FRED avoid · real_rate 1.92% 接近 kill-threshold | RESILIENT | XLK | macro_theme_divergence, consensus_warning, overbought |
-| Energy | WARM | 54.3 | 1.00 | Hormuz WTI $97 地緣溢價 · FRED favor Overheating | RESILIENT | XLE | news_spike_without_breadth, geopolitical_premium |
-| Consumer_Discretionary | COLD | 48.0 | 0.90 | Rotation INFLOW 但 FRED avoid · China 50% 關稅威脅 | N/A | XLY | china_tariff_exposure, earnings_binary_pending |
-| Real_Estate | COLD | 47.2 | 0.93 | Rotation INFLOW 低基期 · FRED avoid 高利率壓力 | N/A | XLRE | fred_avoid, rate_sensitive |
-| Utilities | COLD | 42.6 | 1.00 | OUTFLOW + 下滑 · AI 電氣化主題僅間接受惠 | N/A | XLU | rotation_outflow |
-| Communication | COLD | 42.4 | 0.96 | uptrend 0.207 廣度弱 · GOOGL/META 財報 binary | N/A | XLC | earnings_binary_pending |
-| Financials | COLD | 38.4 | 1.00 | FRED favor 但主題 bearish XLF · Rotation 下於 MA10 | N/A | XLF | theme_vs_fred_divergence |
-| Healthcare | COLD | 37.65 | 1.00 | 藥品 100% 關稅 120-180 日生效 · XBI tail 下行 pattern | N/A | XLV | pharma_tariff_bearish |
-| Consumer_Staples | COLD | 32.0 | 1.00 | 全場 uptrend 最低 0.188 · bearish XLP 主題 | N/A | XLP | bearish_theme_active |
+| Technology | WARM | 67.5 | 0.90 | Intel +23% / NVDA $5T / Mag-7 4/29-30 catalyst · FRED Overheating avoid + RSI 87.4 overbought | RESILIENT | XLK | overbought, macro_theme_divergence |
+| Industrials | WARM | 64.5 | 0.96 | Top-1 uptrend 0.439 + INFLOW slope+0.030 · Robotics/Infra/Clean Energy themes Mature | RESILIENT | XLI | overbought, late_cycle |
+| Materials | WARM | 62.4 | 1.00 | FRED Overheating favor + Trending theme 55.6 · Top-3 uptrend 0.386 INFLOW | N/A | XLB | overbought |
+| Energy | WARM | 52.8 | 1.00 | FRED Overheating real-asset hedge favor · Oil&Gas 57.2 Trending bullish theme | RESILIENT | XLE | — |
+| Consumer_Discretionary | COLD | 48.4 | 0.90 | AMZN 4/30 財報 binary catalyst · FRED Overheating avoid override | N/A | XLY | macro_theme_divergence |
+| Communication | COLD | 41.5 | 0.96 | META/GOOGL 4/29 財報 catalyst · Comm Concentration bearish Accelerating | N/A | XLC | — |
+| Real_Estate | COLD | 40.5 | 0.93 | FRED Overheating avoid (duration-sensitive) · FOMC 4/29 binary 利率風險 | N/A | XLRE | macro_theme_divergence |
+| Healthcare | COLD | 40.2 | 1.00 | Pharma 100% tariff 7/31 結構性壓制 · Biotech 26.4 + GLP-1 21.8 雙 bearish | N/A | XLV | — |
+| Financials | COLD | 40.2 | 1.00 | FRED Overheating favor (NIM/spread 擴展) · Theme 熱度全市場最低 19.0 + Crypto bearish | N/A | XLF | — |
+| Utilities | COLD | 32.5 | 1.00 | Trend Down + OUTFLOW · Util Defensive bearish Accelerating | N/A | XLU | — |
+| Consumer_Staples | COLD | 28.9 | 1.00 | uptrend 0.162 全市場最弱 + Trend Down · Cons Defensive bearish Accelerating | N/A | XLP | — |
 
 ---
 
@@ -28,63 +28,62 @@
 
 ```text
 Market Regime: RISK_ON | Breadth Ceiling: 60-75% | Synthesized: 60-75% | Cycle: Mid
-FTD: FTD_CONFIRMED (quality 100) | Market Top: 29.6 Early_Warning | Breadth: 43.3 Neutral
-Sentiment: F&G [70.4 — Greed] | VIX: 18.74 | Put/Call: n/a | SPY RSI: 87.3
+FTD: FTD_CONFIRMED (quality 100) | Market Top: 29.2 Early_Warning | Breadth: 43.3 Neutral
+Sentiment: F&G [70.4 — Greed] | VIX: 18.71 | Put/Call: n/a | SPY RSI: 87.4
 Signal Conflict: No | Extreme Sentiment: No
 ```
 
-**TOP THEMES TODAY**: Basic Materials Sector Concentration (XLB, Trending, heat 64.3) · Infrastructure & Construction (PAVE/IFRA, Mature, heat 63.9) · Defense & Aerospace (ITA/PPA/XAR, Mature, heat 66.0)
+**TOP THEMES TODAY**: Robotics & Automation (heat 66.8, Industrials/Tech) · Infrastructure & Construction (heat 62.9, Industrials) · Oil & Gas (heat 57.2 Trending, Energy)
 
 ---
 
 ## Step 6 — FRED Regime Overlay
 
-- **Regime**: Overheating (confidence 0.7)
+- **Regime**: Overheating (confidence 0.71)
 - **Favor**: Energy, Materials, Financials
-- **Avoid**: Technology, Real_Estate, Consumer_Discretionary
-- **Velocity highlights**: NFCI:accelerating, BAMLH0A0HYM2:accelerating, CPIAUCSL:accelerating
-- **Rationale**: Overheating regime conf 0.70 → Energy/Materials/Financials ×1.05 favor、Technology/Real_Estate/Consumer_Discretionary ×0.90 avoid、cyclical base 0.95、defensive base 1.00；confidence-gated 至 step6_multiplier 範圍 0.899-1.000
+- **Avoid**: Technology, Real Estate, Consumer Discretionary
+- **Velocity highlights**: BAMLH0A0HYM2:accelerating, NFCI:accelerating, DFF:decelerating
+- **Rationale**: Overheating regime, conf 0.71 → favor: Materials/Energy/Financials ×0.998；avoid: Technology/Consumer_Discretionary ×0.897, Real_Estate ×0.929。
 
 ---
 
-## Today's Verdict — NEUTRAL (confidence 0.63)
+## Today's Verdict — DEFENSIVE (confidence 0.62)
 
-> **中性 — 廣度窄、兩個實物資產板塊領軍**
+> **防禦立場：FOMC + Mag-7 雙地雷週前夕，等過數據再加碼**
 > 
-> FTD 已確認但廣度僅 26 分位數，集中工業+原物料；科技受 FRED Overheating 與 real_rate 1.92% 逼近 2.0% 限制上限
+> FTD 確認 + 指數新高，但 RSI 87.4 / Greed 70.4 / FRED Overheating 三重警訊；無 HOT 板塊，Top 4 WARM (Tech/Indu/Mat/Energy) 維持中等部位待 4/29 FOMC 與 Mag-7 財報落地。
 
 ### Key Takeaways
-1. 集中工業 / 原物料配置：4-lane 共識加持（Score 80.7 / 82.9），ROBUST tail-risk 且主題熱度 > 60
-2. 限縮科技追高：FRED Overheating 列入 avoid，real_rate 1.92% 距 2.0% kill-threshold 僅 8bp
-3. SPY RSI 87.3 + 5 次 distribution day + 指數年高 = 短線過熱組合，新倉位務必分批勿追高
-4. 4/29 FOMC + MSFT/META/GOOGL/AMZN 財報 + 4/30 AAPL/GDP/PCE 是本週三連 binary，提前縮小部位
-5. 能源靠地緣溢價（Hormuz、WTI $97），輪動 OUTFLOW 未確認 — 只能 WARM，避免 $88 以下追貨
+1. 防禦立場：本週為 FOMC（4/29）+ Mag-7 財報（4/29-30）雙風險窗，新進倉位等過數據再評估
+2. Tech 雖技術面強勢但 FRED Overheating 列入 avoid，verdict 由 HOT 降級為 WARM，僅維持既有部位不加碼
+3. Industrials/Materials 因 Overbought HIGH + 主題 Mature 留 WARM；Energy 受 ceasefire 削弱仍有 FRED 利好
+4. Healthcare/Real_Estate/Financials/Utilities/Consumer_Staples 全 COLD，避免新建倉
+5. SPY RSI 87.4 + breadth pctile 26% narrow leadership 提示 mean-reversion 風險，停損點收緊 5-8%
 
 ### Sector Actions
-- **Overweight**: Industrials (high) — 4-lane 部分共識 + Defense/Infra 主題
-- **Overweight**: Materials (high) — 4-lane 共識 + 銅金創高 + ROBUST
-- **Wait**: Technology (med) — FRED avoid + RSI 87.3 等回檔
-- **Wait**: Energy (med) — 溢價驅動但輪動 OUTFLOW
-- **Avoid**: Healthcare (med) — 100% 藥品關稅 + 無主題
-- **Avoid**: Consumer_Staples (med) — 最弱廣度 + 熊主題 XLP
+- **Overweight**: Materials (med) — FRED favor + Trending 主題支撐
+- **Wait**: Technology (high) — FRED 規避 vs Mag-7 4/29-30 binary
+- **Wait**: Energy (med) — FRED favor 對沖 ceasefire 利空
+- **Neutral**: Industrials (med) — Overbought HIGH + 主題 Mature
+- **Underweight**: Real_Estate (med) — FRED 規避 + FOMC 利率風險
+- **Avoid**: Healthcare (high) — Pharma 100% tariff + 雙 bearish 主題
 
 ### Watch Next
-- 4/29 FOMC + Powell 記者會（本週鴿派 / 鷹派一言定調）
-- 4/29 MSFT/META/GOOGL/AMZN 財報（AI capex 是否兌現營收）
-- 4/30 AAPL 財報 + Q1 GDP 首估 + 3 月核心 PCE（滯脹三重擊）
-- SPY RSI 87.3 若觸發 ≥ 3% 回檔 → 觀察 breadth 是否同步回補
-- Hormuz 停火或 OPEC+ 5/3 增產 → Energy 溢價回吐風險
+- 4/29 FOMC 利率決議與點陣圖 — Powell 偏鷹則 Tech/Real_Estate 加速賣壓
+- 4/29 MSFT/GOOGL/META/AMZN 財報 — AI capex 2026 guidance 是 Tech 多空關鍵
+- 4/30 AAPL 財報 — iPhone/Services 動能與服務業毛利
+- 10Y real rate (DFII10) 1.92% → 突破 2.10% 觸發 duration-sensitive 賣壓
+- WTI 油價 — 跌破 $68 確認 ceasefire price-in，Energy WARM 論點推翻
 
 ---
 
-## Devil's Advocate Challenges (Accepted 3/4)
+## Devil's Advocate Challenges (Accepted 1/3)
 
 | Challenge | Status | Counter-Evidence |
 |---|---|---|
-| Technology — HOT | **Accepted** | 4-lane HOT consensus directly contradicts FRED Overheating conf 0.70 with Core PCE 2.97% above Fed target and real_rate 1.92 one tick below 2.00 kill-threshold where long-duration multiples historically compress; next CPI MoM can push real rates through 2.00. XLK also carries ... |
-| Materials — HOT | Rejected | Materials bull case rests on parabolic commodity prints (copper $13k 'record', gold $4.7k) layered onto Trending XLB 64.3 + cyclical INFLOW; but records made into SPY RSI 87.3 + year-high + breadth 43.3 Neutral (26th percentile) are exactly the setup where commodity blow-offs ... |
-| Energy — HOT | **Accepted** | Energy is the cleanest conflict: News + FRED HOT on Hormuz WTI $97 + Overheating rotation, but Sector_Rotation independently places Energy in COLD — inflow/MA10/slope machinery NOT confirming narrative, classic 'news spike without breadth' setup. XLE has WORST skew (-0.27) in ... |
-| ALL_HOT_CYCLICALS — HOT | **Accepted** | Entire Phase 4a edifice built ON TOP OF distribution_days=5+1 stalling + score 90/100 CRITICAL reading at SPY RSI 87.3 and S&P year-high — single most dangerous backdrop, and every HOT call ignores it. Breadth 26th historical percentile means index high made on narrow particip... |
+| Technology — HOT | **Accepted** | Tech 同時被 Rotation+News HOT，但 FRED Overheating (conf 0.71) 明確列入 sector_rotation_avoid — real_rate (DFII10) 1.92% 逼近 2.0% duration-killing threshold。SPY RSI=87.4 + Greed 70.4 + breadth pctile 26%，narrow leadership 而非 broad participation；NVDA $5T + Intel +23% 是 blow-off top 跡象。XL... |
+| Energy — HOT | Rejected | Energy 雖被 FRED+Theme 提名 HOT，但 News 明確 COLD — Israel-Lebanon ceasefire 直接消除地緣 risk premium。NFCI -0.50 accelerating easing 稀釋 Overheating 的 real-asset 論點。XLE excess_kurtosis=0.11 異常低暗示 distribution 已被 ceasefire 後低波動拉平 (calm-before-storm)。 |
+| Industrials — HOT | Rejected | Industrials 僅 Sector Rotation 單一 lane HOT，已標 Overbought HIGH；FRED 並未列入 favor，主題全 Mature 缺早期催化。breadth pctile 26% + bearish_signal_active 條件下，cyclicals INFLOW 可能是 late-cycle chase。XLI excess_kurtosis=1.05 三者最高，distribution 累積 outlier risk。 |
 
 ---
 
@@ -92,20 +91,21 @@ Signal Conflict: No | Extreme Sentiment: No
 
 | Sector | Signal | Action | Description |
 |---|---|---|---|
-| Energy | news_positive_price_negative | monitor | WTI +17% 至 $97 且 FRED Overheating favor，但 Sector Rotation 獨立顯示 OUTFLOW 與唯一 Down 趨勢 — 輪動機制未確認新聞溢價 |
-| Technology | news_positive_price_positive | reduce_exposure | Rotation + Theme + News 三 lane 看多但 FRED 結構性 avoid，1999 dotcom + 2021 SPAC 的主題抵銷宏觀訊號 — macro_theme_divergence 警戒 |
-| Financials | news_neutral_price_negative | monitor | FRED favor + Fed 獨立性 dovish 尾部預期，但 Rotation 跌破 MA10 且主題 bearish XLF/KRE — FRED 結構與市場認知背離 |
+| Technology | news_positive_price_negative | monitor | News bullish (Intel +23%/NVDA $5T) 但 FRED Overheating avoid + RSI 87.4 overbought 暗示 forward gap risk；Mag-7 財報 4/29-30 為決定性 catalyst。 |
+| Energy | news_negative_price_positive | monitor | News bearish (ceasefire) 但 FRED Overheating real-asset hedge + Trending Oil&Gas theme；trend Down 已確認 News 端壓力。 |
 
 ---
 
 ## Top Actionable Themes
 
-1. Basic Materials Sector Concentration (XLB, Trending, heat 64.3)
-2. Infrastructure & Construction (PAVE/IFRA, Mature, heat 63.9)
-3. Defense & Aerospace (ITA/PPA/XAR, Mature, heat 66.0)
+1. Robotics & Automation (heat 66.8, Industrials/Tech)
+2. Infrastructure & Construction (heat 62.9, Industrials)
+3. Oil & Gas (heat 57.2 Trending, Energy)
+4. Basic Materials Concentration (heat 55.6 Trending, Materials)
+5. Defense & Aerospace (heat 58.0, Industrials/Tech)
 
 ---
 
 ## HANDOFF TO INVESTMENT PROTOCOL
 
-> NEUTRAL 立場，focus Industrials(XLI) + Materials(XLB) 兩個 HOT；Tech/Energy 保留 WARM 但不追高。本週三連 binary：4/29 FOMC + 大型科技財報、4/30 AAPL + GDP + 核心 PCE。投資協議若要新建 cyclical long，限制 XLI/XLB 代表個股（CAT/DE/LIN/FCX/NUE）並縮小倉位至 DA kill-scenario 觀察週期（≤ 15 交易日）結束後再擴大。
+> DEFENSIVE 立場：4/29 FOMC + Mag-7 雙地雷週前夕，無 HOT 板塊；Top 4 WARM (Tech 受 G.5 cap、Industrials/Materials/Energy) 維持既有部位不加碼，新進倉位等過數據；SPY RSI 87.4 + Greed 70.4 提示 mean-reversion 風險。

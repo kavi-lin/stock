@@ -8,7 +8,9 @@ PORT=8080
 lsof -ti:$PORT 2>/dev/null | xargs kill -9 2>/dev/null || true
 
 echo "Starting Dashboard server at http://localhost:$PORT"
-python3 dashboard_server.py &
+# caffeinate -i prevents macOS from sleeping while server is running
+# (avoids Claude API stream timeouts when screen is locked during long analysis)
+caffeinate -i python3 dashboard_server.py &
 SERVER_PID=$!
 
 # Wait for server to start listening

@@ -97,3 +97,41 @@
     - 中間 Log 預覽區設為 `flex-1 min-w-0 overflow-hidden` 並強制 `truncate`。
     - 右側操作區固定寬度 `150px` 並向右對齊。
 - 移除標頭的 `flex-wrap`，確保內容始終保持在單行水平線上。
+
+---
+
+## [BUG-006] 產業掃描 FTD day-counter 幻覺（欄位語意混淆）
+- **嚴重程度 (Severity)**: High
+- **優先級 (Priority)**: High
+- **狀態**: Resolved (2026-04-26)
+- **發現日期**: 2026-04-26（gemini code review 觸發）
+- **修法**: `sector/ftd_yfinance.py` 新增 `ftd_timeline` 區塊輸出（含 `ftd_status_text` / `days_since_ftd` / `rally_day_count` / `ftd_day_number` 四欄）；`sector/phase_0.md` 層 C 加反幻覺規則，要求報告 FTD 狀態必須引用 `ftd_status_text` 原文；`sector/schema.md` Phase 0 / Phase 5 ftd block 補新欄位（V1.5 schema bump）。
+
+### 描述
+4/22 產業掃描報告寫 "FTD day 6"，但 4/21 報告寫 "FTD Day 14"。兩者皆指同一個 rally 週期內、僅相差 1 個交易日的時間點，物理上「day」應該每天 +1（4/21 是 N → 4/22 是 N+1），結果 AI 卻寫出反直覺的 14 → 6，引發 gemini 質疑「AI 抄歷史 JSON 當範本」。
+
+### 根因分析（gemini 的指控錯了，真因如下）
+底層 `ftd_detector` cache 同時提供三個語意完全不同的「Day」數字：
+
+| 欄位 | 語意 | 4/21 值 | 4/22 值 |
+|---|---|---|---|
+| `sp500.ftd.ftd_day_number` | FTD 在 rally 第幾天確認（fixed，永不增加） | 6 | 6 |
+| `sp500.rally_attempt.current_day_count` | rally 已進行幾個交易日（每天 +1） | 14 | 15 |
+| `quality_score.breakdown.base` 字串 | `"Day 6 FTD: +60 (prime window)"` — `6` 是 prime-window 評分依據，**不是** days-since-FTD | "Day 6 FTD" | "Day 6 FTD" |
+
+**phase_0.md / schema.md 完全沒規範 AI 該寫哪個**，於是兩天 AI 各自選不同欄位：
+- 4/21：抓 `current_day_count = 14` → 寫成 "FTD Day 14"
+- 4/22：抓 `quality_score.breakdown.base "Day 6 FTD"` → 直接抄成 "day 6"
+
+這不是「抄範本偷懶」，而是**欄位 semantic ambiguity 導致 AI 行為不一致**。Gemini 提的「禁止讀歷史 JSON 當範本」會誤傷正常的 cache 讀取流程，治不了這個 bug。
+
+附帶觀察：4/22 早上 breadth composite 仍是 42.4（與 4/21 同），原因是 TraderMonty CSV 上游每天約 22:00 後才更新前一日收盤資料，早上 7:30 跑只能拿到 4/20 數值。**這是上游資料 lag，不是 AI 抄襲**。
+
+### 解決方案
+1. **`sector/ftd_yfinance.py`** — 在輸出 JSON 加 `ftd_timeline` 區塊，提供 canonical 「FTD CONFIRMED, day {N} post-confirmation (rally-day {M}; FTD originally confirmed on rally-day {K})」字串供 AI 直接引用，並附 `_help` 欄位說明三個 day 的語意差異。
+2. **`sector/phase_0.md`** 層 C — 增「FTD 文字反幻覺規則」：必引用 `ftd_status_text` 原文，禁止從 `quality_score.breakdown.base` 反推 day-counter。
+3. **`sector/schema.md`** — Phase 0 / Phase 5 `_phase0` ftd block 加 `ftd_status_text` / `ftd_day_number` / `days_since_ftd` / `rally_day_count` 四欄（V1.5）。
+
+### 後續觀察點
+- 下次 sector_protocol 跑（4/27 早）應自動使用新 `ftd_status_text`；如果 AI 仍寫成「FTD Day N」格式，代表 prompt 沒讀進新規則，要再強化 phase_4-5.md 內的引用語法。
+- Validator 只驗 `state` + `quality_score`，新欄位 additive，不會破壞既有 sector_intel.json 通過率。

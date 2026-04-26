@@ -85,7 +85,7 @@ Ticker 由使用者在對話中指定。
 <!-- [domain:us-equity] pulls SPX breadth, FTD, market-top, VIX, F&G (all US indices / sentiment). -->
 
 **三層 cache（依序；FRESH = mtime < 3 小時前）**:
-1. `../sector/sector_logs/*_sector_intel.json` 取最新檔，`now - mtime < 10800s` → FRESH → 提取 `market_regime`, `exposure_ceiling`, `political_risk_summary`, `actionable_themes`, `session_notes` → Phase 1
+1. `../sector/sector_logs/*_sector_intel.json` 取最新檔，`now - mtime < 10800s` → FRESH → 提取 `market_regime`, `exposure_ceiling`, `political_risk_summary`, `actionable_themes`, `session_notes`, **`_phase0.ftd.days_since_ftd` / `_phase0.ftd.ftd_status_text`（V4.9 — Phase 4 Step 3.5 FTD timeline gate 必需）** → Phase 1
 2. `./invest_logs/*_phase0.json` 取最新檔，FRESH → 載入 → Phase 1
 3. 皆 STALE 或缺失 → 執行 `market-news-analyst` skill（或 web search），寫入 `./invest_logs/YYYY-MM-DD_phase0.json`
 
@@ -225,6 +225,30 @@ rc ≠ 0 必須修正後重跑。常見失敗：
 
 Contrarian (Burry) 不參與加權，僅作 T4 veto check。
 
+### Phase 1 資料層（V4.8.1 新增）— Dual-Fetch Snapshot
+
+Phase 1 結束前 PM **MUST** 執行下列步驟，產生供 Phase 2 全 4 個 lane 共享的 ticker 資料快照：
+
+1. **執行 dual_fetch**（一次性 per ticker per session）:
+   ```bash
+   bash skills/finnhub-client/scripts/run_dual_fetch.sh --tickers <TICKER>
+   ```
+   - 輸出：`skills/finnhub-client/data/<YYYY-MM-DD>/<TICKER>.json`
+   - 失敗判定（key 未設、network error、Finnhub 全部 500）→ Phase 1 設 `data_bundle_available: false`，分析照跑，Phase 2 共通 prompt 省略 `TICKER_DATA_BUNDLE` 段落
+   - FMP audit-side 失敗（quota_exceeded / unauthorized）**不算失敗** — `scoring.*` 仍完整，照常使用
+
+2. **讀取 scoring 段**（取得 9 個 canonical scalar 欄位）:
+   ```
+   bundle = json.load(open("skills/finnhub-client/data/<DATE>/<TICKER>.json"))
+   TICKER_DATA_BUNDLE = bundle["scoring"]   # 只取這個 key
+   ```
+
+3. **物理隔離契約**（與 V4.8 historical_bias 規則同等強度）:
+   - **禁止**讀取 `bundle["_audit"]` 任何欄位
+   - **禁止**將 audit 內容寫入任何 subagent prompt、log、reasoning
+   - PM context 若意外出現 `_audit.fmp.*` 或 `_audit.diff.*` → 視為 protocol 違規，當前 ticker 分析作廢，重啟 Phase 1
+   - 用途說明：`_audit` 是給 `audit_drift_check.py` 與人類稽核用，跨 provider 數字若灌進 LLM 會讓 score 混入「provider 加權」隨機性，破壞跨 session 可重現性
+
 ---
 
 ## PHASE 2 — PARALLEL BLIND ANALYST FAN-OUT (V4.8 核心)
@@ -253,6 +277,9 @@ TICKER: <TICKER>
 
 PHASE 0 MACRO CONTEXT (read-only, shared across all analysts):
 <paste Phase 0 macro_summary JSON>
+
+TICKER DATA BUNDLE (read-only, shared across all 4 analysts; canonical for 9 scalar fields):
+<paste TICKER_DATA_BUNDLE JSON — Phase 1 PM 提供；若 data_bundle_available: false 則整段省略並在 prompt 標註 "TICKER_DATA_BUNDLE: unavailable, fall back to skill-internal fetch">
 
 YOUR LANE RUBRIC:
 <RUBRIC_LANE>
@@ -285,6 +312,16 @@ OUTPUT (strict JSON, no prose):
   ```bash
   python3 skills/us-stock-analysis/scripts/analyze.py <TICKER> --json-only
   ```
+- **TICKER_DATA_BUNDLE 使用規則**（V4.8.1 新增）— 若 prompt 含 bundle:
+  - **以下 9 個 scalar 以 bundle 為權威來源**（已通過 dual-fetch audit）：`price`, `previousClose`, `dayHigh`, `dayLow`, `mktCap`, `peRatio`, `epsTTM`, `dividendYield`, `priceToBookRatio`
+  - 若 us-stock-analysis 輸出與 bundle 同一欄位**不一致**（差異 > 1%）→ 採用 bundle 值，並在 reasoning 註記「以 dual-fetch canonical 為準（FMP 端有方法論差異）」
+  - **估值評分權重建議**（在 P/E vs sector median 那條 rubric 內套用）:
+    - `peRatio`：主要估值依據，搭配 epsTTM 做合理性檢查（peRatio × epsTTM ≈ price）
+    - `dividendYield`：**單位是百分比**（e.g. 0.38 = 0.38%，不是 38%），定義為 indicated annual（前瞻）
+    - `priceToBookRatio`：⚠️ **視為近似值**。已知跨 provider 方法論差異 10-30%（書值 snapshot、goodwill 處理不同）。在估值打分中**權重應低於 P/E**。資產型公司（金融、REIT、保險）若 P/B 為主要估值依據，需在 reasoning 明示「依 Finnhub canonical book value，方法論為 ...」並接受 ±20% 模糊區間
+    - `mktCap` 用於 size cohort 判斷：mega > $200B / large $10B-$200B / mid $2B-$10B / small < $2B；不同 cohort 的 P/E 與成長預期 baseline 不同
+  - 若 bundle 某欄位為 `null`（e.g. ETF 沒 mktCap、新上市無 epsTTM）→ 用 us-stock-analysis 輸出補值；若皆無則該欄位排除於評分計算，不得猜測
+  - 若 prompt 標註 `TICKER_DATA_BUNDLE: unavailable` → 完全 fallback 到 us-stock-analysis 輸出，本段規則不適用
 
 #### Sentiment Subagent
 - **RUBRIC**:
@@ -695,6 +732,33 @@ python3 skills/tail-risk-analyzer/scripts/tail_risk.py <TICKER> --json-only
 | MODERATE | 30–60 | × 0.75 |
 | FRAGILE | ≥ 60 | × 0.5 |
 
+### Step 3.5 — FTD Timeline Gate（V4.9 新增 — BUG-006 follow-up）
+
+**動機**：Phase 0 的 `ftd.exposure_range` 給出總體曝險上限（如 `75-100%`），但**忽略了一個 ticker 是在 FTD 後第幾天進場**。O'Neil 統計：FTD 後第 1-5 天進場的 cyclical leaders 勝率最高，第 13 天才出現的 setup 屬「補漲」性質，失敗率約 2x。本 gate 把這個時間軸資訊變成具體乘數。
+
+**適用前提**：`phase0.ftd.state == "FTD_CONFIRMED"` 且 `phase0.ftd.days_since_ftd != null`。其他狀態（RALLY_ATTEMPT / NO_SIGNAL / FTD_INVALIDATED）此 gate 跳過（multiplier=1.0）。
+
+**Sector 分類**（cyclical / defensive — 沿用 sector protocol Phase 1 cyclical_or_defensive 欄位）：
+- **Cyclical**: Technology, Industrials, Materials, Financials, Consumer_Discretionary, Energy, Communication
+- **Defensive**: Utilities, Consumer_Staples, Healthcare, Real_Estate
+
+**Lookup 表**：
+
+| `days_since_ftd` | Stage（內部 enum）| Cyclical multiplier | Defensive multiplier | 停損調整 |
+|---|---|---|---|---|
+| 1-5 | `prime` — Prime entry window | × 1.0 | × 1.0 | 標準 |
+| 6-12 | `standard` — Standard window | × 0.90 | × 1.0 | 標準 |
+| 13-20 | `late_cycle` — Late cycle / distribution risk | **× 0.75** | × 0.95 | **-1%（cyclical only）** |
+| 21+  | `exhausted` — FTD exhausted / Stage 2 mature | **× 0.50** OR reject | × 0.85 | **-2%（cyclical only）** |
+
+**Day 21+ reject 條件**（cyclical only）：
+- IF `RS_rating < 90` OR `phase2.technical.distance_from_50ma > 15%` → 標 `decision = REJECT`，理由 `ftd_exhausted_late_entry`
+- ELSE `multiplier = 0.50`（仍允許但極少量）
+
+**輸出**：`ftd_timeline_gate` 區塊（見 Step 4 schema）
+
+---
+
 ### Step 4 — Risk Audit & Final Sizing
 
 ```
@@ -708,10 +772,16 @@ binary_adj   = macro_cap × 0.5–0.7  (if binary_classification in [unknown, ne
 burry_override_adj = binary_adj × 0.5  if phase2_5.t4_detail.resolution == "OVERRIDE_BURRY"
                    = binary_adj        otherwise
 
+# FTD Timeline Gate（V4.9 — Step 3.5 lookup 結果套入）
+ftd_adj = burry_override_adj × ftd_timeline_multiplier  # 1.0 / 0.95 / 0.90 / 0.75 / 0.50
+
 IF final_decision = STAGED_ENTRY:
-  final_position_size = burry_override_adj × 0.5
+  final_position_size = ftd_adj × 0.5
 ELSE:
-  final_position_size = burry_override_adj
+  final_position_size = ftd_adj
+
+# 停損套用 ftd_timeline 加扣 pp（cyclical only），上限不超過 -10%
+final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment
 ```
 
 **Binary risk 分類**:
@@ -738,6 +808,15 @@ ELSE:
     "binary_classification": "positive | unknown | negative | none",
     "burry_override_active": "true | false",
     "burry_override_multiplier": "0.5 | 1.0",
+    "ftd_timeline_gate": {
+      "applied": "bool — true iff phase0.ftd.state == 'FTD_CONFIRMED' AND days_since_ftd != null",
+      "days_since_ftd": "int | null — 從 phase0.ftd.days_since_ftd 帶入",
+      "stage": "prime | standard | late_cycle | exhausted | n/a",
+      "sector_class": "cyclical | defensive",
+      "multiplier": "1.0 | 0.95 | 0.9 | 0.75 | 0.5",
+      "stop_loss_adjustment_pp": "0 | -1 | -2 — 額外加扣 pp（cyclical only）",
+      "rejection_triggered": "bool — true iff stage=exhausted AND cyclical AND (RS<90 OR distance_50ma>15%)"
+    },
     "position_size_pct": "final float 0.00–0.10",
     "staged_entry_split": {
       "aggressive_pct": "float | null",

@@ -64,6 +64,9 @@ PROTOCOL_TIMEOUT_OVERRIDES = {
     "news":   int(os.getenv("NEWS_TIMEOUT_SEC",   "1200")),  # 20 min
     "flash":  int(os.getenv("FLASH_TIMEOUT_SEC",  "600")),   # 10 min
     "review": int(os.getenv("REVIEW_TIMEOUT_SEC", "600")),   # 10 min
+    # V4.8 invest protocol: Phase 0-5 with subagents typically takes 30-45 min.
+    # Default 25 min (1500s) is too short; 60 min gives comfortable headroom.
+    "invest": int(os.getenv("INVEST_TIMEOUT_SEC", "3600")),  # 60 min
 }
 
 PROTOCOL_PROMPTS = {
@@ -523,6 +526,17 @@ def _analyze_worker():
                     "ended_at": _now_iso(),
                 })
                 del _analyze_history[_ANALYZE_HISTORY_MAX:]
+
+            # Cooldown between queue items: reduce API rate-limit pressure.
+            # Each invest analysis burns heavily on 5-hour token limits.
+            # 3 min cooldown lets the rate-limit window partially recover.
+            INTER_ANALYSIS_COOLDOWN = int(os.getenv("INTER_ANALYSIS_COOLDOWN_SEC", "180"))
+            if INTER_ANALYSIS_COOLDOWN > 0:
+                with _analyze_queue_lock:
+                    has_more = bool(_analyze_queue)
+                if has_more:
+                    sys.stderr.write(f"[analyze_worker] cooldown {INTER_ANALYSIS_COOLDOWN}s before next ticker\n")
+                    time.sleep(INTER_ANALYSIS_COOLDOWN)
         except Exception as e:
             sys.stderr.write(f"[analyze_worker error] {e}\n")
             time.sleep(3)
@@ -1061,6 +1075,30 @@ class Handler(SimpleHTTPRequestHandler):
             state["log_tail"] = _tail_log(state.get("log_path"), lines=60)
             state["events"]   = _parse_events(state.get("log_path"), max_events=40)
             return self._json(200, state)
+
+        # Serve /decision_review/* from reports/decision_review/ (read-only)
+        if path.startswith("/decision_review/"):
+            rel = path[len("/decision_review/"):]
+            # Block path traversal
+            if ".." in rel or rel.startswith("/"):
+                self.send_error(400, "bad path")
+                return
+            full = os.path.join(ROOT, "reports", "decision_review", rel)
+            if os.path.isfile(full):
+                ctype = ("application/json; charset=utf-8" if full.endswith(".json")
+                         else "text/markdown; charset=utf-8" if full.endswith(".md")
+                         else "application/octet-stream")
+                with open(full, "rb") as f:
+                    body = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            self.send_error(404, "not found")
+            return
 
         # Intercept *.html to inject mtime cache-busters
         if path.endswith(".html") or path == "/" or path == "":

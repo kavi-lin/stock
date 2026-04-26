@@ -1,0 +1,77 @@
+# Short-Term Target — Recalibration Config
+# This file is hand-editable. Bump weights_version after every change.
+# Run `weekly_review.py` (Step 7) to get suggested adjustments.
+
+weights_version: v0.1.0
+
+# Per-horizon weights (per plan_short.md §12.A).
+# Each horizon has different drivers — DO NOT collapse to single set.
+horizon_weights:
+  "1d":
+    alpha_news: 0.6           # 1d high dependence on news + overnight
+    beta_sector_heat: 0.1     # short-term sector influence weak
+    gamma_momentum: 0.3
+    atr_multiplier: 1.0
+  "5d":
+    alpha_news: 0.3           # news decays
+    beta_sector_heat: 0.3     # sector rotation visible at 5d
+    gamma_momentum: 0.4       # main driver
+    atr_multiplier: 1.8
+  "15d":
+    alpha_news: 0.1           # marginal contribution
+    beta_sector_heat: 0.4     # theme persistence dominates
+    gamma_momentum: 0.3
+    atr_multiplier: 3.5
+    # institutional_flow factor reserved for future, not used in v0.1
+
+# Hard clamps to prevent cold-start absurd predictions (per §11.A).
+# Clamped output also drops confidence by 0.15 (see compute_confidence).
+max_pct_by_horizon:
+  "1d": 5.0
+  "5d": 15.0
+  "15d": 30.0
+
+# Per-horizon data freshness thresholds (per §12.E).
+# If any source exceeds → status = insufficient_data.
+freshness_thresholds:
+  "1d":
+    quote_min: 60             # quote must be < 60 minutes old
+    news_hr: 8                # news < 8 hours
+    atr_min_days: 5           # need 5+ trading days for ATR
+  "5d":
+    quote_min: 240            # 4 hours
+    news_hr: 24
+    sector_hr: 72             # sector_intel < 3 days
+    ohlcv_min_days: 5
+    atr_min_days: 14
+  "15d":
+    quote_min: 1440           # 24 hours
+    news_hr: 168              # 7 days
+    sector_hr: 168            # 7 days
+    ohlcv_min_days: 15
+    atr_min_days: 14
+    news_min_count_3w: 5
+
+# Sub-industry → benchmark ETF (per §12.B).
+# Used to compute implied_alpha vs sector ETF.
+benchmark_map:
+  Semiconductors: SOXX
+  "Software—Application": IGV
+  "Software—Infrastructure": IGV
+  Information_Technology_Services: IGV
+  Internet_Content_and_Information: QQQ
+  Consumer_Electronics: QQQ
+  Aerospace_Defense: ITA
+  "Independent_Power_Producers": NLR
+  "Utilities—Renewable": ICLN
+  "Utilities—Regulated_Electric": XLU
+  Banks_Diversified: KBE
+  Asset_Management: XLF
+  Capital_Markets: XLF
+  "Drug_Manufacturers—General": XLV
+  Healthcare_Plans: XLV
+  Specialty_Industrial_Machinery: XLI
+  Integrated_Freight_Logistics: IYT
+  "Oil_Gas_E_P": XLE
+  "Oil_Gas_Integrated": XLE
+  _default: SPY

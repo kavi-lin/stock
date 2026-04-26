@@ -25,6 +25,7 @@ python3 skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 10800
 
 - Cache < 3h → script 立即 exit 0（< 1 秒），agent 讀 `skills/theme-detector/cache/theme_detector_*.json` 最新檔（`theme_source: THEME_CACHE`）
 - Cache stale 或缺失 → 正常執行 140–180 秒，新 cache 寫入 `skills/theme-detector/cache/`，再讀最新檔
+- **Default `--max-themes=25` / `--max-stocks-per-theme=25`** 與 `daily_update.sh` 對齊（避免 sector protocol 觸發重跑時降回 10 themes 鎖住下游 thematic-screener）
 
 > ⚠️ Cache stale 時 FINVIZ scrape 約 **140-180s**。**禁止 `timeout < 240`**（會被殺 retry）。
 
@@ -142,3 +143,18 @@ Trigger 條件：
 **總預算 ≤ 80s**
 
 **JSON Schema** → 見 `schema.md` Phase 3
+
+---
+
+### Step 6 — 輸出 `_phase3.upcoming_events[]`
+
+從 Step 1-5 結果生成統一 schema 事件清單。**完整欄位定義** → `schema.md` Phase 3 + `reports/decision_review/UPCOMING_EVENTS_SCHEMA.md`。
+
+**必填**：`id` / `date` / `category` / `title` / `tickers` / `sectors` / `impact` / `is_binary` / `within_48h`
+
+**三個易踩坑**：
+- `title` ≤ 36 字短標；**禁止**塞「（binary；看多/看空 X、Y）」括號補述（補述放 `description`，sector 名單放 `sectors`）
+- `tickers[]` 只填**真實股票代號**；`DOJ` `FOMC` `CPI` `PMI` `NFP` 等機關/指標縮寫**禁止**塞 ticker（市場事件留空）
+- `sectors[]` 用 GICS 英文加底線：`Technology` / `Real_Estate` / `Consumer_Discretionary` / `Communication`，**不寫中文**
+
+**衍生 `upcoming_binary_risks[]`**（向後相容，bridge.py 優先讀新欄位）：對 `upcoming_events` 中 `is_binary=true` 的每筆，輸出 `{event: title, date, affected_sectors: sectors, within_48h}`。

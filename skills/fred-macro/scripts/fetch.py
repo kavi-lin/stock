@@ -1022,7 +1022,7 @@ def _top_risks(regime_label, rs, scores, series):
     credit_st = rs.get("credit_stress_elevated", False)
     inverted  = rs.get("yield_curve_inverted", False)
     fed_dir   = rs.get("fed_rate_direction", "unknown")
-    hy_pct    = rs.get("credit_spread_pctile_1y", 50)
+    hy_pct    = rs.get("credit_spread_pctile_1y") or 50
 
     inf_score = scores.get("inflation", 50)
     emp_score = scores.get("employment", 50)

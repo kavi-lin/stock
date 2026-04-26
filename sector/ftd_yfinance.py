@@ -189,6 +189,51 @@ def main():
     print("\nStep 4: Generating Reports")
     print("-" * 70)
 
+    # ── ftd_timeline: canonical day-counter block (BUG-006 mitigation) ───
+    # Resolves the ambiguity between three different "Day N" concepts that
+    # AI agents have historically misread when writing sector reports:
+    #   • ftd_day_number   — rally-day on which FTD was confirmed (FIXED, never increments)
+    #   • days_since_ftd   — trading days elapsed since the FTD date  (increments daily)
+    #   • rally_day_count  — trading days elapsed since rally low     (increments daily)
+    # AI MUST quote ftd_status_text verbatim instead of synthesising "Day N".
+    sp500_state  = market_state.get("sp500", {}) or {}
+    sp500_ftd    = sp500_state.get("ftd", {}) or {}
+    sp500_rally  = sp500_state.get("rally_attempt", {}) or {}
+
+    ftd_date         = sp500_ftd.get("ftd_date")
+    ftd_day_number   = sp500_ftd.get("ftd_day_number")
+    rally_day_count  = sp500_rally.get("current_day_count")
+
+    days_since_ftd = None
+    if ftd_date and sp500_history:
+        dates_newest_first = [row["date"] for row in sp500_history]
+        if ftd_date in dates_newest_first:
+            days_since_ftd = dates_newest_first.index(ftd_date)
+
+    if market_state["combined_state"] == "FTD_CONFIRMED" and days_since_ftd is not None:
+        ftd_status_text = (
+            f"FTD CONFIRMED, day {days_since_ftd} post-confirmation "
+            f"(rally-day {rally_day_count}; FTD originally confirmed on rally-day {ftd_day_number})"
+        )
+    else:
+        ftd_status_text = market_state["combined_state"]
+
+    ftd_timeline = {
+        "ftd_date":         ftd_date,
+        "ftd_day_number":   ftd_day_number,
+        "days_since_ftd":   days_since_ftd,
+        "rally_day_count":  rally_day_count,
+        "ftd_status_text":  ftd_status_text,
+        "_help": (
+            "ftd_day_number = rally-day on which FTD was confirmed (FIXED, never increments). "
+            "days_since_ftd = trading days since ftd_date (increments daily). "
+            "rally_day_count = trading days since rally low (increments daily). "
+            "Reports MUST quote ftd_status_text verbatim — do not synthesise 'FTD Day N' from quality_score.breakdown.base."
+        ),
+    }
+
+    print(f"  FTD Timeline: {ftd_status_text}")
+
     analysis = {
         "metadata": {
             "generated_at":  datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -206,6 +251,7 @@ def main():
         "sp500":                 _serialize_index(market_state["sp500"]),
         "nasdaq":                _serialize_index(market_state["nasdaq"]),
         "quality_score":         quality,
+        "ftd_timeline":          ftd_timeline,
         "post_ftd_distribution": dist,
         "ftd_invalidation":      inv,
         "power_trend":           pt,

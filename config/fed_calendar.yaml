@@ -1,0 +1,117 @@
+# Federal Reserve calendar — 手動維護
+# Schema: 對映 UpcomingEvent (見 reports/decision_review/UPCOMING_EVENTS_SCHEMA.md)
+# bridge.py:_from_fed_calendar() 讀取此檔
+#
+# 維護建議:
+# - 每年初更新 FOMC 8 次會議日期 (Fed 通常前一年 8 月公布)
+# - Minutes 釋出日 = 會議日 + 21 天 (3 週後), 14:00 ET
+# - Powell 預定演講 (Jackson Hole / Senate testimony 等) 確定後手動加入
+#
+# Tip: 留 source_payload.notes 給日後 LLM enrich (e.g. expected_bps / market_consensus)
+
+fomc_meetings_2026:
+  - date: 2026-01-28      # Day 2 (rate decision)
+    title: FOMC 利率決議
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+    notes: "Day 1 of meeting on 2026-01-27"
+
+  - date: 2026-03-18
+    title: FOMC 利率決議 (含 SEP)
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+    notes: "含 Summary of Economic Projections (季更新點陣圖)"
+
+  - date: 2026-04-29
+    title: FOMC 利率決議
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+
+  - date: 2026-06-17
+    title: FOMC 利率決議 (含 SEP)
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+    notes: "含 SEP"
+
+  - date: 2026-07-29
+    title: FOMC 利率決議
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+
+  - date: 2026-09-16
+    title: FOMC 利率決議 (含 SEP)
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+    notes: "含 SEP"
+
+  - date: 2026-10-28
+    title: FOMC 利率決議
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+
+  - date: 2026-12-09
+    title: FOMC 利率決議 (含 SEP)
+    time: "14:00 ET"
+    is_binary: true
+    impact: high
+    notes: "含 SEP, 年內最後會議"
+
+# FOMC Minutes 釋出 (會議後 3 週)
+fomc_minutes_2026:
+  - date: 2026-02-18      # Jan 28 + 21
+    title: FOMC 會議紀要 (Jan 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+  - date: 2026-04-08      # Mar 18 + 21
+    title: FOMC 會議紀要 (Mar 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+  - date: 2026-05-20      # Apr 29 + 21
+    title: FOMC 會議紀要 (Apr 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+  - date: 2026-07-08      # Jun 17 + 21
+    title: FOMC 會議紀要 (Jun 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+  - date: 2026-08-19      # Jul 29 + 21
+    title: FOMC 會議紀要 (Jul 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+  - date: 2026-10-07      # Sep 16 + 21
+    title: FOMC 會議紀要 (Sep 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+  - date: 2026-11-18      # Oct 28 + 21
+    title: FOMC 會議紀要 (Oct 會議)
+    time: "14:00 ET"
+    is_binary: false
+    impact: med
+
+# 預定的 Fed 主席演講 / 國會證詞 (確定後手動加)
+chair_speeches_2026:
+  - date: 2026-08-21      # Jackson Hole (typical Friday late Aug)
+    title: Jackson Hole 經濟政策研討會 (Powell 演講)
+    time: "10:00 ET"
+    is_binary: true
+    impact: high
+    notes: "歷年 Jackson Hole 演講常引導年底/隔年政策方向"

@@ -9,6 +9,10 @@
 > - 頂層：`phase4_fanout_mode` / `degraded_agents`（4a/4b subagent 執行狀態）
 > - Phase 4a: `subagent_isolated` sentinel
 > - Phase 4b: `subagent_isolated` sentinel；`risk_scenario` 要求 falsifiable 格式
+>
+> **V1.5 新增**（vs V1.3，BUG-006 修補）：
+> - Phase 0 / Phase 5 `_phase0` 的 `ftd` block 加 `ftd_status_text` / `ftd_day_number` / `days_since_ftd` / `rally_day_count` 四欄。
+> - **反幻覺**：報告 FTD 狀態必須引用 `ftd_status_text` 原文，禁止從 `quality_score.breakdown.base`（"Day 6 FTD..."）反推 day-counter。
 
 ---
 
@@ -38,6 +42,10 @@
     "state": "FTD_CONFIRMED | FTD_WINDOW | RALLY_ATTEMPT | CORRECTION | FTD_INVALIDATED | NO_SIGNAL",
     "quality_score": "float 0–100",
     "exposure_range": "0-20% | 20-40% | 40-65% | 65-100%",
+    "ftd_status_text":  "string — V1.5：必引用 cache 同名欄位原文。例：'FTD CONFIRMED, day 12 post-confirmation (rally-day 18; FTD originally confirmed on rally-day 6)'",
+    "ftd_day_number":   "int — V1.5：FTD 確認時 rally 第幾天 (FIXED, 永不增加)；不得當作 days-since-FTD 寫進報告",
+    "days_since_ftd":   "int — V1.5：距 FTD 確認日已過幾個 trading day（每天 +1）",
+    "rally_day_count":  "int — V1.5：rally 已進行幾個 trading day（每天 +1）",
     "source": "ftd_cache | not_available"
   },
   "market_top": {
@@ -162,12 +170,28 @@
     "sentiment_source": "SKILL_EXECUTED | WEB_SEARCH_FALLBACK",
     "extreme_sentiment_triggered": "true | false"
   },
+  "upcoming_events": [
+    {
+      "id": "string — 唯一鍵, 格式: <slug-or-ticker>_<date>，例如 'aapl-q2-earnings_2026-04-30'",
+      "date": "YYYY-MM-DD",
+      "time": "string | null — 'BMO' | 'AMC' | 'HH:MM ET' | 'ALL' | null",
+      "category": "string — earnings | macro | econ | binary | geopolitical | system | watchlist",
+      "title": "string — **短標** ≤ 36 字 (e.g. 'AAPL Q2 財報', 'FOMC 利率決議')",
+      "description": "string | null — 補述; 看多/看空 sector 列在 sectors 欄位, 不要塞 title",
+      "tickers": ["TICKER — 受影響個股, 全市場事件留空"],
+      "sectors": ["GICS sector name (Technology / Real_Estate / ...) — 用底線連字"],
+      "impact": "string — high | med | low",
+      "is_binary": "bool — true 會在 calendar 加紅框警示樣式",
+      "within_48h": "bool — 派生; date - today ≤ 2"
+    }
+  ],
   "upcoming_binary_risks": [
     {
-      "event": "string — 繁體中文，格式：事件名稱（影響方向；看多/看空哪些子產業）",
+      "_legacy_format": "保留供向後相容; 內容應由 upcoming_events (is_binary=true) 派生。新報告請優先填 upcoming_events。",
+      "event": "string — 同 upcoming_events.title (沿用舊格式時也可保留括號補述)",
       "date": "YYYY-MM-DD",
       "affected_sectors": [],
-      "within_48h": "true | false"
+      "within_48h": "bool"
     }
   ],
   "sector_news_sentiment": {
@@ -304,6 +328,10 @@
       "state": "FTD_CONFIRMED | FTD_WINDOW | RALLY_ATTEMPT | CORRECTION | FTD_INVALIDATED | NO_SIGNAL",
       "quality_score": "float 0–100",
       "exposure_range": "string",
+      "ftd_status_text":  "string — V1.5: bridge from _phase0.ftd.ftd_status_text",
+      "ftd_day_number":   "int — V1.5: rally-day FTD was confirmed (FIXED)",
+      "days_since_ftd":   "int — V1.5: trading days since FTD date (increments daily)",
+      "rally_day_count":  "int — V1.5: trading days since rally low (increments daily)",
       "source": "ftd_cache | not_available"
     },
     "market_top": {

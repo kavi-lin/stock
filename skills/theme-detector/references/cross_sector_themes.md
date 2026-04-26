@@ -131,9 +131,24 @@ This reference defines market themes by their constituent FINVIZ industries, sec
 - **Direction bias**: Bullish (typically in geopolitical tension)
 - **Industries**: Aerospace & Defense, Airlines, Security & Protection Services
 - **Sectors**: Industrials (primary)
-- **Proxy ETFs**: ITA, PPA, ROKT, ARKX
-- **Static stocks**: LMT, RTX, NOC, BA, GD, LHX, HII, TDG, HWM, AXON, LDOS, BWXT, KTOS, RKLB, SPR
+- **Proxy ETFs**: ITA, PPA
+- **Static stocks**: LMT, RTX, NOC, BA, GD, LHX, HII, TDG, HWM, AXON, LDOS, BWXT, KTOS, SPR, TXT
 - **Min matching industries**: 2
+
+**Note (v0.2 split)**: Pure-play space economy names (RKLB, ASTS, LUNR) moved to dedicated **Space Economy** theme below — different driver dynamics (commercial satellite/launch economy vs. military procurement cycles). BWXT remains in both because of its dual military-naval and commercial-nuclear exposure.
+
+---
+
+## Space Economy
+
+- **Direction bias**: Bullish (commercial space race, satellite constellation buildout)
+- **Industries**: Aerospace & Defense, Communication Equipment, Scientific & Technical Instruments
+- **Sectors**: Industrials, Communication Services, Technology
+- **Proxy ETFs**: ROKT, ARKX, UFO
+- **Static stocks**: RKLB, ASTS, LUNR, MAXR, GSAT, IRDM, PL, BWXT, RDW, KTOS, JOBY, RDW, ACHR, BKSY, MNTS
+- **Min matching industries**: 1
+
+**Note**: Narrow universe + small-cap dominated → high beta + low liquidity. Many constituents have <$5B market cap. Driver = launch cadence, satellite contracts, defense space spending — distinct from broader Defense & Aerospace. Min industries=1 because pure-play universe is small.
 
 ---
 
@@ -196,6 +211,45 @@ This reference defines market themes by their constituent FINVIZ industries, sec
 
 ---
 
+## Quantum Computing
+
+- **Direction bias**: Bullish (early-stage, high volatility — pure plays often >5% daily ATR)
+- **Industries**: Computer Hardware, Software - Infrastructure, Information Technology Services, Semiconductors
+- **Sectors**: Technology
+- **Proxy ETFs**: QTUM, ARKQ
+- **Static stocks**: IONQ, RGTI, QBTS, QUBT, ARQQ, IBM, GOOGL, MSFT, HON, INTC, NVDA
+- **Min matching industries**: 1
+
+**Note:** Pure-plays (IONQ / RGTI / QBTS / QUBT / ARQQ) are extremely volatile (~8% daily ATR not unusual). Mega-cap exposure (IBM, GOOGL, MSFT, NVDA, INTC) dilutes signal — they have quantum divisions but it's <5% of revenue. Theme score should weight pure-plays heavier. Min industries=1 because pure-play universe < 10 names.
+
+---
+
+## Robotics & Automation
+
+- **Direction bias**: Bullish (industrial automation + AI-physical-world integration)
+- **Industries**: Specialty Industrial Machinery, Medical Devices, Semiconductor Equipment & Materials, Computer Hardware, Industrial Distribution, Auto Parts
+- **Sectors**: Industrials, Healthcare, Technology
+- **Proxy ETFs**: BOTZ, ROBO, IRBO, ARKQ
+- **Static stocks**: ISRG, TER, ONTO, NVDA, ABBN, FANUY, ROK, EMR, KION, HEINY, MIDD, AME, COHR, IPGP, SYK
+- **Min matching industries**: 2
+
+**Note:** Robotics theme overlaps with AI & Semiconductors via NVDA / ONTO / TER. Differentiation: Robotics emphasizes physical-world execution (industrial machines, surgical robots, factory automation) while AI & Semiconductors emphasizes inference compute. Co-recommendations across these two themes are EXPECTED, not duplication.
+
+---
+
+## Utilities Defensive
+
+- **Direction bias**: Defensive (counter-cyclical, low beta — outperforms in risk-off / recession)
+- **Industries**: Utilities - Regulated Electric, Utilities - Diversified, Utilities - Regulated Gas, Utilities - Regulated Water
+- **Sectors**: Utilities (primary)
+- **Proxy ETFs**: XLU, IDU, VPU, FUTY
+- **Static stocks**: NEE, DUK, SO, AEP, XEL, ED, PEG, EXC, AEE, ETR, ES, EIX, SRE, AWK, AWR
+- **Min matching industries**: 2
+
+**Note:** Distinct from **Nuclear Energy** (which is offense — AI data center power demand thesis). Utilities Defensive is the canonical risk-off play: regulated returns, dividend-heavy, low beta (~0.4). Includes neither IPP names (CEG/VST — those are in Nuclear) nor renewable pure-plays (those are in Clean Energy & EV). Sample-bias counterweight: most other v0.2 themes (AI / Quantum / Space / Robotics) are high-beta growth — Utilities provides risk-on/risk-off coverage diversity.
+
+---
+
 ## Obesity & GLP-1
 
 - **Direction bias**: Bullish (medical innovation)
@@ -223,15 +277,19 @@ This reference defines market themes by their constituent FINVIZ industries, sec
 | Oil & Gas (Energy) | 6 | 1 | 3 | 15 | 2 |
 | Financial Services & Banks | 10 | 1 | 4 | 15 | 3 |
 | Healthcare & Pharma | 7 | 1 | 3 | 15 | 3 |
-| Defense & Aerospace | 3 | 1 | 4 | 15 | 2 |
+| Defense & Aerospace | 3 | 1 | 2 | 15 | 2 |
+| Space Economy | 3 | 3 | 3 | 14 | 1 |
 | Real Estate & REITs | 11 | 1 | 3 | 15 | 3 |
 | Retail & Consumer | 13 | 2 | 4 | 15 | 3 |
 | Crypto & Blockchain | 4 | 2 | 5 | 15 | 2 |
 | Nuclear Energy | 4 | 3 | 4 | 15 | 2 |
 | Uranium | 2 | 2 | 3 | 15 | 1 |
+| Quantum Computing | 4 | 1 | 2 | 11 | 1 |
+| Robotics & Automation | 6 | 3 | 4 | 15 | 2 |
+| Utilities Defensive | 4 | 1 | 4 | 15 | 2 |
 | Obesity & GLP-1 | 4 | 1 | 2 | 10 | 2 |
 
-**Total: 17 themes** covering all major market narratives.
+**Total: 21 themes** covering major market narratives + v0.2 expansion (Space, Quantum, Robotics, Utilities Defensive).
 
 ---
 
@@ -242,11 +300,22 @@ Some industries contribute to multiple themes. When scoring, each industry's dat
 | Industry | Themes |
 |----------|--------|
 | Software - Application | AI, Cybersecurity, Cloud, Crypto |
-| Software - Infrastructure | AI, Cybersecurity, Cloud |
+| Software - Infrastructure | AI, Cybersecurity, Cloud, Quantum |
 | Drug Manufacturers - General | Healthcare, Biotech, Obesity |
 | Biotechnology | Biotech, Obesity |
 | Capital Markets | Financial Services, Crypto |
 | Electrical Equipment & Parts | Clean Energy, Nuclear |
 | Uranium | Nuclear, Uranium |
+| Aerospace & Defense | Defense, Space |
+| Computer Hardware | AI, Quantum, Robotics |
+| Semiconductors | AI, Quantum, Robotics |
+| Specialty Industrial Machinery | Infrastructure, Nuclear, Robotics |
+| Medical Devices | Biotech, Healthcare, Obesity, Robotics |
+| Utilities - Regulated Electric | Utilities Defensive |
 
 This overlap is intentional - a strong software industry may boost multiple themes simultaneously, reflecting the interconnected nature of market narratives.
+
+**v0.2 cross-theme dynamics**:
+- BWXT appears in both Defense & Aerospace AND Nuclear Energy AND Space Economy (military naval reactors + commercial nuclear + space launch reactors). Triple-membership is correct, not error.
+- NVDA appears in AI & Semiconductors + Quantum Computing + Robotics & Automation. Reflects NVIDIA's positioning as compute backbone for all three.
+- ISRG appears only in Robotics & Automation (surgical robots). Despite Healthcare sector, it is NOT in Healthcare & Pharma to avoid sub-theme confusion.

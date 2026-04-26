@@ -35,7 +35,11 @@
      ```bash
      python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
      ```
-   - 讀取欄位：`market_state.combined_state`、`quality_score.total_score`、`quality_score.exposure_range`
+   - 讀取欄位：`market_state.combined_state`、`quality_score.total_score`、`quality_score.exposure_range`、`ftd_timeline.*`
+   - **⚠️ FTD 文字反幻覺規則（V1.5 — BUG-006）**：
+     - 報告 FTD 狀態時，**必須引用 `ftd_timeline.ftd_status_text` 原文**（含 day-counter），不得自由命名「FTD Day N」。
+     - `quality_score.breakdown.base` 的 `"Day 6 FTD: +60 (prime window)"` — 這個 `6` 是 **FTD 確認時的 rally-day**（永遠不變），**不是**「FTD 後過了幾天」。AI 若直接抄 `Day 6` 當作今天的 day-counter 即為幻覺。
+     - 三個易混淆 day 的語意：`ftd_timeline.ftd_day_number`（fixed）vs `ftd_timeline.days_since_ftd`（每天 +1）vs `ftd_timeline.rally_day_count`（每天 +1）。
 
 ### 層 D — Market Top Detector cache（量化頂部偵測）
 
