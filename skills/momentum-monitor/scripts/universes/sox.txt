@@ -1,0 +1,32 @@
+# PHLX Semiconductor Index (^SOX / 費半) — 30 constituents
+# Includes 2 ADRs: TSM, ASML
+ADI
+AMAT
+AMD
+ARM
+ASML
+AVGO
+AZTA
+COHR
+ENTG
+INTC
+IPGP
+KLAC
+LRCX
+MCHP
+MPWR
+MRVL
+MU
+NVDA
+NXPI
+ON
+ONTO
+QCOM
+QRVO
+RMBS
+SLAB
+SWKS
+TER
+TSM
+TXN
+WOLF

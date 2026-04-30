@@ -9,7 +9,7 @@ Invocation (from Phase 5 末尾):
         rc=1  → schema drift detected — see stderr
 
 What this catches (bridge.py depends on these):
-  1. Wrong protocol_version (must be V1.3 for sector v1.3)
+  1. Wrong protocol_version (must be V1.4 for sector v1.4)
   2. Missing `_phase0` / `_phase1` / `_phase3` sub-objects (bridge.py keys)
   3. Phase 0 synthesized_exposure / signal_conflict / ftd / market_top missing
   4. Phase 1 sectors[] empty or missing uptrend_ratio per sector
@@ -17,6 +17,8 @@ What this catches (bridge.py depends on these):
   6. V1.3 fan-out metadata: phase4_fanout_mode / degraded_agents
   7. HOT sector without proxy_etf (bridge.py uses this for Dashboard)
   8. sectors[] verdict values outside {HOT, WARM, COLD, AVOID}
+  9. V1.4 sector_valuation block on each _phase1.sectors[] (FMP MCP hard-required)
+ 10. V1.4 score_components.valuation_penalty on each top-level sectors[]
 """
 import glob
 import json
@@ -25,7 +27,12 @@ import sys
 
 ROOT     = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(ROOT, "sector/sector_logs")
-EXPECTED_VERSION = "V1.3"
+EXPECTED_VERSION = "V1.4"
+
+# V1.4 — sector valuation block required on each _phase1.sectors[]
+SECTOR_VALUATION_REQUIRED = [
+    "pe_ttm", "pe_zscore_1y", "rs_vs_spy_3m", "etf_volume_ratio_20d",
+]
 
 TOP_REQUIRED = [
     "verdict_date", "protocol_version", "generated_at",
@@ -154,6 +161,20 @@ def main():
             for req in ("name", "uptrend_ratio", "rotation_signal"):
                 if req not in s:
                     errors.append(f"_phase1.sectors[{i}] ({s.get('name','?')}): missing {req}")
+            # V1.4 — sector_valuation block (FMP MCP hard-required, no graceful fallback)
+            sv = s.get("sector_valuation")
+            if not isinstance(sv, dict):
+                errors.append(
+                    f"_phase1.sectors[{i}] ({s.get('name','?')}): missing sector_valuation block "
+                    f"(V1.4 hard-required — run sector/scripts/fetch_sector_valuation.py)"
+                )
+            else:
+                for k in SECTOR_VALUATION_REQUIRED:
+                    if k not in sv:
+                        errors.append(
+                            f"_phase1.sectors[{i}] ({s.get('name','?')}): "
+                            f"sector_valuation missing {k}"
+                        )
 
     # ── 5. _phase3 structure ──────────────────────────────────────────────
     p3 = data.get("_phase3", {})
@@ -163,6 +184,36 @@ def main():
     tc = p3.get("top_catalysts") if isinstance(p3, dict) else None
     if not isinstance(tc, list) or len(tc) < 5:
         errors.append(f"_phase3.top_catalysts must have ≥ 5 entries (protocol requirement) — got {len(tc) if isinstance(tc, list) else 0}")
+    # V1.4 — sector_earnings_pulse hard-required
+    sep = p3.get("sector_earnings_pulse") if isinstance(p3, dict) else None
+    if not isinstance(sep, dict) or not sep:
+        errors.append(
+            "_phase3.sector_earnings_pulse missing (V1.4 hard-required — "
+            "run sector/scripts/fetch_earnings_pulse.py)"
+        )
+    elif isinstance(sep, dict):
+        for sec_name, blk in sep.items():
+            if not isinstance(blk, dict):
+                errors.append(f"_phase3.sector_earnings_pulse[{sec_name}] must be dict")
+                continue
+            for k in ("report_count", "beat_rate_30d", "surprise_score_avg"):
+                if k not in blk:
+                    errors.append(f"_phase3.sector_earnings_pulse[{sec_name}] missing {k}")
+    # V1.4 — smart_money_signals hard-required
+    sms = p3.get("smart_money_signals") if isinstance(p3, dict) else None
+    if not isinstance(sms, dict) or not sms:
+        errors.append(
+            "_phase3.smart_money_signals missing (V1.4 hard-required — "
+            "run sector/scripts/fetch_smart_money.py)"
+        )
+    elif isinstance(sms, dict):
+        for sec_name, blk in sms.items():
+            if not isinstance(blk, dict):
+                errors.append(f"_phase3.smart_money_signals[{sec_name}] must be dict")
+                continue
+            for k in ("insider_acquired_disposed_ratio_q", "senate_net_buy_30d"):
+                if k not in blk:
+                    errors.append(f"_phase3.smart_money_signals[{sec_name}] missing {k}")
 
     # ── 6. V1.3 fan-out metadata ──────────────────────────────────────────
     fm = data.get("phase4_fanout_mode")
@@ -186,6 +237,13 @@ def main():
             cs = s.get("composite_score")
             if cs is None or not (0 <= float(cs) <= 100):
                 errors.append(f"sectors[{i}] ({s.get('name','?')}): composite_score must be in [0, 100] (got {cs!r})")
+            # V1.4 — score_components.valuation_penalty hard-required
+            sc = s.get("score_components") or {}
+            if "valuation_penalty" not in sc:
+                errors.append(
+                    f"sectors[{i}] ({s.get('name','?')}): score_components.valuation_penalty "
+                    f"missing (V1.4 hard-required)"
+                )
 
     # ── 8. summary consistency ────────────────────────────────────────────
     summary = data.get("summary", {})

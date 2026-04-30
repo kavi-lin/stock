@@ -50,9 +50,19 @@
     // ── State ─────────────────────────────────────────────────────────────
     let allDecisions = [];
     let upcomingEvents = [];           // from data.json upcoming_events[]
+    let earningsCacheMap = {};         // V1.71 — TICKER → {composite_score, verdict, report_path, ...}
     let generatedAt = '';
-    let todayIso = '';
-    let currentMonth = new Date(2026, 3, 1); // April 2026 (default)
+    let todayIso = '';                 // 瀏覽器當天，每次 load 都重算（不再吃 indexer 的 j.today）
+    let indexedAt = '';                // event_index.json 的 today（僅在 stats 顯示，做 staleness 提示）
+    function browserTodayIso() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    let currentMonth = (() => {
+        const d = new Date();
+        return new Date(d.getFullYear(), d.getMonth(), 1);
+    })();
+    let selectedDate = null;           // ISO date currently shown in inline detail panel
 
     // ── Filter state (toggle on/off; default = All mode) ──────────────────
     const ALL_SOURCES = [
@@ -135,16 +145,18 @@
     function wireControls() {
         document.getElementById('cal-prev').addEventListener('click', () => {
             currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+            closeDetailPanel();
             renderGrid();
         });
         document.getElementById('cal-next').addEventListener('click', () => {
             currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+            closeDetailPanel();
             renderGrid();
         });
-        document.getElementById('cal-drawer-close').addEventListener('click', closeDrawer);
+        document.getElementById('cal-detail-close').addEventListener('click', closeDetailPanel);
         document.getElementById('cal-llm-review').addEventListener('click', copyLlmReviewBundle);
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeDrawer();
+            if (e.key === 'Escape') closeDetailPanel();
         });
     }
 
@@ -193,26 +205,34 @@
             const j = await evRes.json();
             allDecisions = j.decisions || [];
             generatedAt = j.generated_at || '';
-            todayIso = j.today || '';
+            indexedAt = j.today || '';        // indexer 跑的當天（可能比實際今日舊）
+            todayIso = browserTodayIso();     // 始終用瀏覽器當天
 
             if (dashRes.ok) {
                 const dash = await dashRes.json();
                 upcomingEvents = Array.isArray(dash.upcoming_events) ? dash.upcoming_events : [];
+                // V1.71 — earnings-analyst cache index for inline cached-state chips
+                earningsCacheMap = {};
+                for (const ea of (dash.earnings_analyses || [])) {
+                    if (ea && ea.ticker) earningsCacheMap[ea.ticker.toUpperCase()] = ea;
+                }
             } else {
                 upcomingEvents = [];
+                earningsCacheMap = {};
             }
 
-            // 自動跳到今天所在月份
-            if (todayIso) {
-                const [y, m] = todayIso.split('-').map(Number);
-                currentMonth = new Date(y, m - 1, 1);
-            }
+            // 自動跳到今天所在月份（瀏覽器當天，非 indexer 當天）
+            const [y, m] = todayIso.split('-').map(Number);
+            currentMonth = new Date(y, m - 1, 1);
 
             document.getElementById('cal-no-data').classList.add('hidden');
             document.getElementById('cal-main').classList.remove('hidden');
             document.getElementById('cal-aggregate').classList.remove('hidden');
 
-            const stats = `${allDecisions.length} decisions · ${upcomingEvents.length} upcoming · today=${todayIso}`;
+            let stats = `${allDecisions.length} decisions · ${upcomingEvents.length} upcoming · today=${todayIso}`;
+            if (indexedAt && indexedAt !== todayIso) {
+                stats += ` · indexed=${indexedAt}`;
+            }
             document.getElementById('cal-stats').textContent = stats;
 
             renderGrid();
@@ -385,6 +405,7 @@
             if (isToday) cell.classList.add('cal-cell-today');
             else if (isPast) cell.classList.add('cal-cell-past');
             if (decisions.length === 0 && events.length === 0) cell.classList.add('cal-cell-no-events');
+            if (dateStr === selectedDate) cell.classList.add('cal-cell-selected');
             cell.dataset.date = dateStr;
 
             const dayNum = `<div class="cal-cell-day">
@@ -395,7 +416,10 @@
             cell.innerHTML = dayNum + renderBadges(decisions) + renderEventChips(events);
 
             if (decisions.length > 0 || events.length > 0) {
-                cell.addEventListener('click', () => openDrawer(dateStr, decisions, events));
+                cell.addEventListener('click', () => {
+                    if (selectedDate === dateStr) closeDetailPanel();
+                    else openDetailPanel(dateStr, decisions, events);
+                });
             }
             grid.appendChild(cell);
         }
@@ -471,24 +495,35 @@
         return html;
     }
 
-    // ── Drawer ────────────────────────────────────────────────────────────
-    function openDrawer(dateStr, decisions, events = []) {
+    // ── Inline Detail Panel (replaces drawer) ─────────────────────────────
+    function openDetailPanel(dateStr, decisions, events = []) {
         const isZh = UI.currentLang === 'zh';
-        document.getElementById('cal-drawer-date').textContent = dateStr;
+        const prevSelected = selectedDate;
+        selectedDate = dateStr;
+
+        // Update cell ring: clear previous, mark current
+        if (prevSelected) {
+            const prevCell = document.querySelector(`.cal-cell[data-date="${prevSelected}"]`);
+            if (prevCell) prevCell.classList.remove('cal-cell-selected');
+        }
+        const curCell = document.querySelector(`.cal-cell[data-date="${dateStr}"]`);
+        if (curCell) curCell.classList.add('cal-cell-selected');
+
+        document.getElementById('cal-detail-date').textContent = dateStr;
         const decLabel = isZh ? ' 筆 decisions' : ' decisions';
         const evLabel  = isZh ? ' 件 events'    : ' events';
         const parts = [];
         if (decisions.length) parts.push(decisions.length + decLabel);
         if (events.length)    parts.push(events.length + evLabel);
-        document.getElementById('cal-drawer-count').textContent =
+        document.getElementById('cal-detail-count').textContent =
             parts.length ? (isZh ? '共 ' : 'Total ') + parts.join(' · ') : '—';
 
-        const content = document.getElementById('cal-drawer-content');
+        const content = document.getElementById('cal-detail-content');
         let html = '';
 
         // Upcoming events section (rendered first — what to watch for the day)
         if (events.length) {
-            html += renderEventsDrawerSection(events, isZh);
+            html += renderEventsDetailSection(events, isZh);
         }
 
         // Past decisions, grouped by source
@@ -507,20 +542,34 @@
         }
         content.innerHTML = html;
 
-        const drawer = document.getElementById('cal-drawer');
-        drawer.classList.remove('hidden');
-        // Force reflow then add open class for transition
-        requestAnimationFrame(() => drawer.classList.add('cal-drawer-open'));
+        const panel = document.getElementById('cal-detail');
+        panel.classList.remove('hidden');
+        panel.setAttribute('aria-hidden', 'false');
+        // Force reflow then trigger expand transition
+        requestAnimationFrame(() => panel.classList.add('cal-detail-open'));
         UI.icons();
+
+        // Smoothly bring the panel into view if user clicked a cell scrolled high up
+        requestAnimationFrame(() => {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
     }
 
-    function closeDrawer() {
-        const drawer = document.getElementById('cal-drawer');
-        drawer.classList.remove('cal-drawer-open');
-        setTimeout(() => drawer.classList.add('hidden'), 280);
+    function closeDetailPanel() {
+        const panel = document.getElementById('cal-detail');
+        if (!panel) return;
+        panel.classList.remove('cal-detail-open');
+        panel.setAttribute('aria-hidden', 'true');
+        setTimeout(() => panel.classList.add('hidden'), 240);
+
+        if (selectedDate) {
+            const prevCell = document.querySelector(`.cal-cell[data-date="${selectedDate}"]`);
+            if (prevCell) prevCell.classList.remove('cal-cell-selected');
+        }
+        selectedDate = null;
     }
 
-    function renderEventsDrawerSection(events, isZh) {
+    function renderEventsDetailSection(events, isZh) {
         const impactOrder = { high: 0, med: 1, low: 2 };
         const sorted = [...events].sort((a, b) => {
             const ab = (b.is_binary ? 1 : 0) - (a.is_binary ? 1 : 0);
@@ -699,7 +748,7 @@
     // Schema: reports/decision_review/UPCOMING_EVENTS_SCHEMA.md
 
     function renderUpcoming() {
-        const today = new Date(todayIso || '2026-04-26');
+        const today = new Date(todayIso || browserTodayIso());
         const seven = new Date(today);
         seven.setDate(today.getDate() + 7);
 
@@ -812,6 +861,35 @@
         const tooltipText = ((e.source_payload && e.source_payload.raw_title) || e.title || '').replace(/"/g, '&quot;');
         const cls = e.is_binary ? 'cal-upcoming-card cal-upcoming-card-binary' : 'cal-upcoming-card';
 
+        // V1.71 — earnings event: append "📊 跑財報" / "📄 看報告" action button
+        const primaryTicker = (cat === 'earnings' && e.tickers && e.tickers.length) ? e.tickers[0].toUpperCase() : null;
+        let earningsActionRow = '';
+        if (primaryTicker) {
+            const cached = earningsCacheMap[primaryTicker];
+            if (cached && cached.composite_score != null) {
+                const verdict = cached.verdict || 'n/a';
+                const score = cached.composite_score;
+                const verdictClass = ({
+                    STRONG: 'text-emerald-400', SOLID: 'text-emerald-500',
+                    MIXED: 'text-amber-400', WEAK: 'text-orange-500',
+                    DETERIORATING: 'text-red-500',
+                }[verdict]) || 'text-zinc-400';
+                const reportLink = cached.report_path
+                    ? `<button class="cal-earnings-btn" onclick="event.stopPropagation();window.open('/${cached.report_path}','_blank')" title="${lang==='zh'?'開啟報告':'Open report'}">📄 ${lang==='zh'?'看報告':'Report'}</button>`
+                    : '';
+                const refreshBtn = `<button class="cal-earnings-btn cal-earnings-btn-refresh" onclick="event.stopPropagation();window.runEarningsAnalysis('${primaryTicker}')" title="${lang==='zh'?'重新分析(會排隊)':'Re-run (queues)'}">🔄</button>`;
+                earningsActionRow = `<div class="cal-earnings-action-row">
+                    <span class="cal-earnings-cached-badge ${verdictClass}" title="${lang==='zh'?'已有財報分析':'Cached analysis'}">${verdict} ${score}/100</span>
+                    ${reportLink}
+                    ${refreshBtn}
+                </div>`;
+            } else {
+                earningsActionRow = `<div class="cal-earnings-action-row">
+                    <button class="cal-earnings-btn cal-earnings-btn-run" onclick="event.stopPropagation();window.runEarningsAnalysis('${primaryTicker}')" title="${lang==='zh'?'排隊跑深度財報分析(5-10 分鐘)':'Queue earnings analysis (5-10 min)'}">📊 ${lang==='zh'?'跑財報分析':'Run earnings'}</button>
+                </div>`;
+            }
+        }
+
         return `<div class="${cls}" title="${tooltipText}">
             <span class="cal-upcoming-impact-dot ${impactClass}" title="${e.impact || 'low'} impact"></span>
             <span class="cal-upcoming-card-icon">${meta.icon}</span>
@@ -825,9 +903,37 @@
                     <span class="cal-upcoming-card-type">${typeLabel}</span>
                     ${tickerChips}${sectorChips}
                 </div>
+                ${earningsActionRow}
             </div>
         </div>`;
     }
+
+    // V1.71 — global handler for inline earnings buttons
+    window.runEarningsAnalysis = async function(ticker) {
+        ticker = (ticker || '').toUpperCase();
+        if (!ticker) return;
+        const lang = UI.currentLang;
+        try {
+            const r = await fetch('/api/protocol-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'earnings', ticker })
+            });
+            const body = await r.json();
+            if (r.status === 202 && body.queued) {
+                const pos = body.position || '?';
+                UI.showToast(lang === 'zh' ? `已排入財報分析:${ticker}(第 ${pos} 位)` : `Queued earnings: ${ticker} (#${pos})`, 'info');
+            } else if (r.status === 409 && body.reason === 'duplicate_active') {
+                UI.showToast(lang === 'zh' ? `${ticker} 財報分析已在執行中` : `${ticker} earnings already running`, 'warn');
+            } else if (r.status === 409 && body.reason === 'duplicate_pending') {
+                UI.showToast(lang === 'zh' ? `${ticker} 財報已在佇列` : `${ticker} earnings already queued`, 'warn');
+            } else {
+                UI.showToast(lang === 'zh' ? `加入失敗:${body.error || r.status}` : `Failed: ${body.error || r.status}`, 'error');
+            }
+        } catch (e) {
+            UI.showToast(lang === 'zh' ? `網路錯誤:${e.message}` : `Network error: ${e.message}`, 'error');
+        }
+    };
 
     // ── Bottom: Aggregate stat tiles (respects active filters) ───────────
     function renderAggregate() {

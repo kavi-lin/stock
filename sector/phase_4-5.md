@@ -103,6 +103,9 @@ Agent(
   PHASE 4b TAIL-RISK RESULTS（已執行 tail-risk-analyzer on top 3 HOT proxy_etf）:
   <paste tail_risk_checks[]>
 
+  PHASE 3 SMART MONEY SIGNALS (V1.4，from `sector/cache/sector_smart_money_<DATE>.json`):
+  <paste _phase3.smart_money_signals[hot_sector] for each HOT proposal>
+
   CONSENSUS_WARNING: <true | false>（若 true 表示該板塊在 rotation/theme/news 三方向全看多，你必須強力挑戰）
 
   TASK:
@@ -118,6 +121,13 @@ Agent(
        - sector ∈ fred_snapshot.sector_rotation_avoid
      → MUST 構造 kill_conditions 引用 **具體 FRED 數值**（"real_rate 1.92% > 2.0% threshold"），
        不可寫 vague 的「macro 轉差」或「總體環境不佳」
+  5. (V1.4) **Smart Money Divergence 強制檢查** — 讀 `_phase3.smart_money_signals`（若可用），
+     對每個 HOT 提案 sector 檢查：
+       - `insider_acquired_disposed_ratio_q < 0.5` (內部人賣多買少) AND/OR
+       - `senate_net_buy_30d < 0` (議員淨賣超)
+     → MUST 在 `challenge_targets` 加 **smart_money_divergence** challenge,
+       counter_evidence 必須引用具體數值(例 "insider ratio 0.41 < 0.5 threshold; senate net −3 in 30d")。
+     - smart money 與 HOT consensus 一致(ratio > 0.8 且 senate ≥ 0)→ 不必挑戰此項
 
   OUTPUT JSON:
   {

@@ -8,6 +8,7 @@
 |---|---|---|
 | `產業掃描` | `sector/sector_protocol_main.md` | Multi-file (Phase 0-5) |
 | `分析 [TICKER]` | `investment/investment_protocol_v4_8.md` | V4.8.1 Phase 1 含 dual_fetch；4 lane subagent + Burry + Red Team |
+| `財報 [TICKER]` | `skills/earnings-analyst/SKILL.md` | FMP 三表 8Q + 品質 flag + 0-100 composite。Cache key (TICKER, last_earnings_date) |
 | `新聞分析 DIGEST` | `news/news_protocol_v2.md` | RSS -> Triage -> Debate |
 | `新聞分析 FLASH [text]` | `news/news_protocol_v2.md` | Deep Debate only |
 | `動能 [TICKER]` | `skills/momentum-monitor/scripts/momentum.py` | Score + Signals |

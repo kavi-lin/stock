@@ -19,6 +19,7 @@
 | `us-stock-analysis` | single-ticker | yfinance, FMP | investment (phase-level) |
 | `short-contrarian-analyst` | single-ticker | FMP, yfinance | investment Phase 2（第 5 agent, Burry） |
 | `earnings-valuation-forecaster` | single-ticker | FMP (/stable) | 獨立使用（未整合至 protocol）— 12M 目標價 scenario + 敏感度 grid |
+| `earnings-analyst` | single-ticker | FMP HTTP REST | `財報 [TICKER]` trigger — 8Q 三表深度 + 品質 flag + 0-100 composite + Markdown report |
 | `supply-chain-event-analyst` | single-ticker/chain | WebSearch, FMP | 產業鏈上下游、供應鏈依賴度與歷史事件分析 |
 | `sector-analyst` | sector-level | finvizfinance, yfinance | sector protocol core |
 | `market-breadth-analyzer` | market-level | TraderMonty CSV | sector Phase 0 層 A |

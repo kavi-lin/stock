@@ -94,8 +94,21 @@
             background: var(--bg-card);
             border: 1px solid rgba(255,255,255,0.06);
             gap: 3px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
         }
-        .status-pill[data-tip-key] { cursor: default; }
+        /* Override the global [data-signal-tip]:hover (which was designed for
+           bg-less verdict pills on index). Sector pills keep their solid card
+           background and lift slightly for a 3D-feel hover affordance. */
+        .status-pill[data-signal-tip]:hover {
+            background: var(--bg-card);
+            border-color: rgba(255,255,255,0.20);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.32);
+        }
+        [data-theme="light"] .status-pill[data-signal-tip]:hover {
+            border-color: rgba(0,0,0,0.18);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.10);
+        }
         .status-pill-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
         .status-pill-value { font-size: 14px; font-weight: 900; }
 
@@ -231,13 +244,13 @@
 
             <!-- ── STATUS STRIP ──────────────────────────────────────── -->
             <div class="flex items-stretch gap-3 flex-wrap">
-                <div id="pill-regime"    class="status-pill" data-tip-key="regime"></div>
-                <div id="pill-breadth"   class="status-pill" data-tip-key="breadth"></div>
-                <div id="pill-ftd"       class="status-pill" data-tip-key="ftd"></div>
-                <div id="pill-exposure"  class="status-pill" data-tip-key="exposure"></div>
-                <div id="pill-fg"        class="status-pill" data-tip-key="fg"></div>
-                <div id="pill-cycle"     class="status-pill" data-tip-key="cycle"></div>
-                <div id="pill-vix"       class="status-pill" data-tip-key="vix"></div>
+                <div id="pill-regime"    class="status-pill" data-signal-tip="regime"></div>
+                <div id="pill-breadth"   class="status-pill" data-signal-tip="breadth"></div>
+                <div id="pill-ftd"       class="status-pill" data-signal-tip="ftd"></div>
+                <div id="pill-exposure"  class="status-pill" data-signal-tip="exposure"></div>
+                <div id="pill-fg"        class="status-pill" data-signal-tip="fg"></div>
+                <div id="pill-cycle"     class="status-pill" data-signal-tip="cycle"></div>
+                <div id="pill-vix"       class="status-pill" data-signal-tip="vix"></div>
                 <div class="flex-1 flex flex-wrap gap-2 items-center justify-end" id="warning-flags-row"></div>
             </div>
 
@@ -392,6 +405,7 @@
     </div>
 
     <div id="pill-tooltip"></div>
+    <div id="signal-tip-tooltip" aria-hidden="true"></div>
 
     <script src="i18n.js"></script>
     <script src="utils.js"></script>

@@ -236,6 +236,27 @@ function renderStatusStrip(data) {
         `;
     });
 
+    // Populate live data attributes for shared signal-tip engine (utils.js).
+    // Each pill exposes the metric so the rich tooltip can render the live banner
+    // and highlight the active stage row.
+    const setAttrs = (id, attrs) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v == null ? '' : String(v)));
+    };
+    setAttrs('pill-regime',   { 'data-regime': m.regime || '' });
+    setAttrs('pill-breadth',  { 'data-br-score':   br.score ?? m.breadth_score ?? '',
+                                'data-br-zone':    br.zone || '',
+                                'data-br-ceiling': br.exposure_ceiling || m.exposure_ceiling || '' });
+    setAttrs('pill-ftd',      { 'data-ftd-state': ftd.state || '',
+                                'data-ftd-date':  ftd.ftd_date || '',
+                                'data-ftd-day':   ftd.days_since_ftd ?? '' });
+    setAttrs('pill-exposure', { 'data-exposure': m.exposure_ceiling || '' });
+    setAttrs('pill-fg',       { 'data-fg-score': m.fear_greed ?? '',
+                                'data-fg-label': m.fear_greed_label || '' });
+    setAttrs('pill-cycle',    { 'data-cycle': m.cycle_phase || '' });
+    setAttrs('pill-vix',      { 'data-vix': mt.vix_level ?? '' });
+
     // Warning flags — clear first so language switches / reloads don't append duplicates
     const flagRow = document.getElementById('warning-flags-row');
     if (flagRow) {
@@ -827,7 +848,8 @@ async function _runPreflightIfStale() {
 
 async function triggerSectorScan() {
     const tr = t();
-    const confirmMsg = tr.scan_confirm || 'Run full sector scan via Claude? (~3-5 min, consumes tokens)';
+    const prefix = await UI.dailyUpdatePrefix();
+    const confirmMsg = prefix + (tr.scan_confirm || 'Run full sector scan via Claude? (~3-5 min, consumes tokens)');
     if (!confirm(confirmMsg)) return;
     showScanBanner();
     setBannerStatus('running');

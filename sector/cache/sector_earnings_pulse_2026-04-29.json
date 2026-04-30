@@ -1,0 +1,107 @@
+{
+  "as_of_date": "2026-04-29",
+  "lookback_days": 30,
+  "schema_version": "V1.4",
+  "universe_size": 131,
+  "sectors": {
+    "Technology": {
+      "report_count": 4,
+      "beats": 3,
+      "misses": 0,
+      "in_line": 1,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.3226,
+      "analyst_revision_net": null
+    },
+    "Healthcare": {
+      "report_count": 7,
+      "beats": 5,
+      "misses": 0,
+      "in_line": 2,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.0538,
+      "analyst_revision_net": null
+    },
+    "Energy": {
+      "report_count": 3,
+      "beats": 3,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.4127,
+      "analyst_revision_net": null
+    },
+    "Financials": {
+      "report_count": 12,
+      "beats": 11,
+      "misses": 1,
+      "in_line": 0,
+      "beat_rate_30d": 0.917,
+      "surprise_score_avg": 0.0648,
+      "analyst_revision_net": null
+    },
+    "Consumer_Discretionary": {
+      "report_count": 5,
+      "beats": 5,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.199,
+      "analyst_revision_net": null
+    },
+    "Consumer_Staples": {
+      "report_count": 6,
+      "beats": 6,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.0509,
+      "analyst_revision_net": null
+    },
+    "Industrials": {
+      "report_count": 9,
+      "beats": 8,
+      "misses": 1,
+      "in_line": 0,
+      "beat_rate_30d": 0.889,
+      "surprise_score_avg": 0.1377,
+      "analyst_revision_net": null
+    },
+    "Materials": {
+      "report_count": 7,
+      "beats": 6,
+      "misses": 0,
+      "in_line": 1,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.193,
+      "analyst_revision_net": null
+    },
+    "Utilities": {
+      "report_count": 2,
+      "beats": 2,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.0692,
+      "analyst_revision_net": null
+    },
+    "Real_Estate": {
+      "report_count": 7,
+      "beats": 7,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.395,
+      "analyst_revision_net": null
+    },
+    "Communication": {
+      "report_count": 6,
+      "beats": 5,
+      "misses": 1,
+      "in_line": 0,
+      "beat_rate_30d": 0.833,
+      "surprise_score_avg": 0.1404,
+      "analyst_revision_net": null
+    }
+  }
+}

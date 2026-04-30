@@ -1,0 +1,531 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "generated_at": "2026-04-26T08:31:59.975464",
+    "generator": "earnings-trade-analyzer",
+    "generator_version": "1.0.0",
+    "lookback_days": 5,
+    "total_screened": 11,
+    "min_market_cap": 500000000,
+    "min_gap": 0,
+    "entry_filter_applied": false,
+    "api_stats": {
+      "cache_entries": 13,
+      "api_calls_made": 23,
+      "max_api_calls": 200,
+      "rate_limit_reached": false
+    }
+  },
+  "results": [
+    {
+      "symbol": "INTC",
+      "company_name": "Intel Corporation",
+      "earnings_date": "2026-04-23",
+      "earnings_timing": "unknown",
+      "gap_pct": 23.09,
+      "composite_score": 88.0,
+      "grade": "A",
+      "current_price": 82.54,
+      "market_cap": 414434165400,
+      "sector": "Technology",
+      "components": {
+        "gap_size": {
+          "gap_pct": 23.09,
+          "gap_type": "up",
+          "base_price": 66.78,
+          "gap_price": 82.2,
+          "timing_used": "unknown",
+          "score": 100.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 41.54,
+          "trend_direction": "up",
+          "score": 100.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 1.12,
+          "recent_avg_volume": 110280259,
+          "longer_avg_volume": 98609342,
+          "score": 40.0
+        },
+        "ma200_position": {
+          "ma200": 38.45,
+          "distance_pct": 114.68,
+          "above_ma200": true,
+          "score": 100.0
+        },
+        "ma50_position": {
+          "ma50": 51.03,
+          "distance_pct": 61.74,
+          "above_ma50": true,
+          "score": 100.0
+        }
+      }
+    },
+    {
+      "symbol": "NOK",
+      "company_name": "Nokia Oyj",
+      "earnings_date": "2026-04-23",
+      "earnings_timing": "unknown",
+      "gap_pct": 3.1,
+      "composite_score": 80.8,
+      "grade": "B",
+      "current_price": 10.46,
+      "market_cap": 56466325860,
+      "sector": "Technology",
+      "components": {
+        "gap_size": {
+          "gap_pct": 3.1,
+          "gap_type": "up",
+          "base_price": 10.33,
+          "gap_price": 10.65,
+          "timing_used": "unknown",
+          "score": 55.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 22.83,
+          "trend_direction": "up",
+          "score": 100.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 1.35,
+          "recent_avg_volume": 83167184,
+          "longer_avg_volume": 61682872,
+          "score": 60.0
+        },
+        "ma200_position": {
+          "ma200": 6.35,
+          "distance_pct": 64.84,
+          "above_ma200": true,
+          "score": 100.0
+        },
+        "ma50_position": {
+          "ma50": 8.54,
+          "distance_pct": 22.47,
+          "above_ma50": true,
+          "score": 100.0
+        }
+      }
+    },
+    {
+      "symbol": "UNH",
+      "company_name": "UnitedHealth Group Incorporated",
+      "earnings_date": "2026-04-21",
+      "earnings_timing": "unknown",
+      "gap_pct": 1.41,
+      "composite_score": 65.5,
+      "grade": "C",
+      "current_price": 354.92,
+      "market_cap": 322152365920,
+      "sector": "Healthcare",
+      "components": {
+        "gap_size": {
+          "gap_pct": 1.41,
+          "gap_type": "up",
+          "base_price": 346.01,
+          "gap_price": 350.88,
+          "timing_used": "unknown",
+          "score": 35.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 28.31,
+          "trend_direction": "up",
+          "score": 100.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 0.86,
+          "recent_avg_volume": 8912795,
+          "longer_avg_volume": 10361640,
+          "score": 20.0
+        },
+        "ma200_position": {
+          "ma200": 313.64,
+          "distance_pct": 13.16,
+          "above_ma200": true,
+          "score": 85.0
+        },
+        "ma50_position": {
+          "ma50": 293.52,
+          "distance_pct": 20.92,
+          "above_ma50": true,
+          "score": 100.0
+        }
+      }
+    },
+    {
+      "symbol": "BA",
+      "company_name": "The Boeing Company",
+      "earnings_date": "2026-04-22",
+      "earnings_timing": "unknown",
+      "gap_pct": 0.1,
+      "composite_score": 56.2,
+      "grade": "C",
+      "current_price": 232.44,
+      "market_cap": 183232916880,
+      "sector": "Industrials",
+      "components": {
+        "gap_size": {
+          "gap_pct": 0.1,
+          "gap_type": "up",
+          "base_price": 231.28,
+          "gap_price": 231.51,
+          "timing_used": "unknown",
+          "score": 15.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 17.75,
+          "trend_direction": "up",
+          "score": 100.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 0.93,
+          "recent_avg_volume": 6563428,
+          "longer_avg_volume": 7049622,
+          "score": 20.0
+        },
+        "ma200_position": {
+          "ma200": 219.65,
+          "distance_pct": 5.82,
+          "above_ma200": true,
+          "score": 70.0
+        },
+        "ma50_position": {
+          "ma50": 218.59,
+          "distance_pct": 6.33,
+          "above_ma50": true,
+          "score": 80.0
+        }
+      }
+    },
+    {
+      "symbol": "TSLA",
+      "company_name": "Tesla, Inc.",
+      "earnings_date": "2026-04-22",
+      "earnings_timing": "unknown",
+      "gap_pct": -3.16,
+      "composite_score": 42.5,
+      "grade": "D",
+      "current_price": 376.3,
+      "market_cap": 1412039409000,
+      "sector": "Consumer Cyclical",
+      "components": {
+        "gap_size": {
+          "gap_pct": -3.16,
+          "gap_type": "down",
+          "base_price": 387.51,
+          "gap_price": 375.28,
+          "timing_used": "unknown",
+          "score": 55.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 1.17,
+          "trend_direction": "up",
+          "score": 50.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 1.08,
+          "recent_avg_volume": 68078098,
+          "longer_avg_volume": 63139826,
+          "score": 40.0
+        },
+        "ma200_position": {
+          "ma200": 400.86,
+          "distance_pct": -6.13,
+          "above_ma200": false,
+          "score": 15.0
+        },
+        "ma50_position": {
+          "ma50": 387.08,
+          "distance_pct": -2.78,
+          "above_ma50": false,
+          "score": 35.0
+        }
+      }
+    },
+    {
+      "symbol": "AAL",
+      "company_name": "American Airlines Group Inc.",
+      "earnings_date": "2026-04-23",
+      "earnings_timing": "unknown",
+      "gap_pct": 1.36,
+      "composite_score": 42.0,
+      "grade": "D",
+      "current_price": 12.1,
+      "market_cap": 8002758500,
+      "sector": "Industrials",
+      "components": {
+        "gap_size": {
+          "gap_pct": 1.36,
+          "gap_type": "up",
+          "base_price": 11.78,
+          "gap_price": 11.94,
+          "timing_used": "unknown",
+          "score": 35.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 9.68,
+          "trend_direction": "up",
+          "score": 70.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 0.87,
+          "recent_avg_volume": 57816522,
+          "longer_avg_volume": 66578590,
+          "score": 20.0
+        },
+        "ma200_position": {
+          "ma200": 12.94,
+          "distance_pct": -6.5,
+          "above_ma200": false,
+          "score": 15.0
+        },
+        "ma50_position": {
+          "ma50": 11.8,
+          "distance_pct": 2.55,
+          "above_ma50": true,
+          "score": 60.0
+        }
+      }
+    },
+    {
+      "symbol": "UAL",
+      "company_name": "United Airlines Holdings, Inc.",
+      "earnings_date": "2026-04-21",
+      "earnings_timing": "unknown",
+      "gap_pct": -1.15,
+      "composite_score": 37.5,
+      "grade": "D",
+      "current_price": 93,
+      "market_cap": 30185010000,
+      "sector": "Industrials",
+      "components": {
+        "gap_size": {
+          "gap_pct": -1.15,
+          "gap_type": "down",
+          "base_price": 97.13,
+          "gap_price": 96.01,
+          "timing_used": "unknown",
+          "score": 35.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": 3.37,
+          "trend_direction": "up",
+          "score": 50.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 1.08,
+          "recent_avg_volume": 8366506,
+          "longer_avg_volume": 7734722,
+          "score": 40.0
+        },
+        "ma200_position": {
+          "ma200": 100.71,
+          "distance_pct": -7.65,
+          "above_ma200": false,
+          "score": 15.0
+        },
+        "ma50_position": {
+          "ma50": 97.67,
+          "distance_pct": -4.78,
+          "above_ma50": false,
+          "score": 35.0
+        }
+      }
+    },
+    {
+      "symbol": "GE",
+      "company_name": "GE Aerospace",
+      "earnings_date": "2026-04-21",
+      "earnings_timing": "unknown",
+      "gap_pct": -0.03,
+      "composite_score": 27.5,
+      "grade": "D",
+      "current_price": 284.6,
+      "market_cap": 297358511560,
+      "sector": "Industrials",
+      "components": {
+        "gap_size": {
+          "gap_pct": -0.03,
+          "gap_type": "down",
+          "base_price": 286.73,
+          "gap_price": 286.65,
+          "timing_used": "unknown",
+          "score": 15.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": -1.65,
+          "trend_direction": "down",
+          "score": 30.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 1.02,
+          "recent_avg_volume": 5855550,
+          "longer_avg_volume": 5718620,
+          "score": 40.0
+        },
+        "ma200_position": {
+          "ma200": 297.56,
+          "distance_pct": -4.35,
+          "above_ma200": false,
+          "score": 35.0
+        },
+        "ma50_position": {
+          "ma50": 309.46,
+          "distance_pct": -8.03,
+          "above_ma50": false,
+          "score": 15.0
+        }
+      }
+    },
+    {
+      "symbol": "LMT",
+      "company_name": "Lockheed Martin Corporation",
+      "earnings_date": "2026-04-23",
+      "earnings_timing": "unknown",
+      "gap_pct": -0.9,
+      "composite_score": 19.0,
+      "grade": "D",
+      "current_price": 513.45,
+      "market_cap": 118250112746,
+      "sector": "Industrials",
+      "components": {
+        "gap_size": {
+          "gap_pct": -0.9,
+          "gap_type": "down",
+          "base_price": 529.79,
+          "gap_price": 525,
+          "timing_used": "unknown",
+          "score": 15.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": -15.12,
+          "trend_direction": "down",
+          "score": 15.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 0.81,
+          "recent_avg_volume": 1325580,
+          "longer_avg_volume": 1631547,
+          "score": 20.0
+        },
+        "ma200_position": {
+          "ma200": 523.11,
+          "distance_pct": -1.85,
+          "above_ma200": false,
+          "score": 35.0
+        },
+        "ma50_position": {
+          "ma50": 628.75,
+          "distance_pct": -18.34,
+          "above_ma50": false,
+          "score": 15.0
+        }
+      }
+    },
+    {
+      "symbol": "T",
+      "company_name": "AT&T Inc.",
+      "earnings_date": "2026-04-22",
+      "earnings_timing": "unknown",
+      "gap_pct": 0.54,
+      "composite_score": 19.0,
+      "grade": "D",
+      "current_price": 26.2,
+      "market_cap": 182969272000,
+      "sector": "Communication Services",
+      "components": {
+        "gap_size": {
+          "gap_pct": 0.54,
+          "gap_type": "up",
+          "base_price": 25.98,
+          "gap_price": 26.12,
+          "timing_used": "unknown",
+          "score": 15.0
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": -10.01,
+          "trend_direction": "down",
+          "score": 15.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 0.86,
+          "recent_avg_volume": 38620214,
+          "longer_avg_volume": 45035257,
+          "score": 20.0
+        },
+        "ma200_position": {
+          "ma200": 26.75,
+          "distance_pct": -2.07,
+          "above_ma200": false,
+          "score": 35.0
+        },
+        "ma50_position": {
+          "ma50": 27.73,
+          "distance_pct": -5.5,
+          "above_ma50": false,
+          "score": 15.0
+        }
+      }
+    },
+    {
+      "symbol": "HCA",
+      "company_name": "HCA Healthcare, Inc.",
+      "earnings_date": "2026-04-24",
+      "earnings_timing": "unknown",
+      "gap_pct": 0.0,
+      "composite_score": 12.2,
+      "grade": "D",
+      "current_price": 432.46,
+      "market_cap": 96684649740,
+      "sector": "Healthcare",
+      "components": {
+        "gap_size": {
+          "gap_pct": 0.0,
+          "gap_type": "up",
+          "base_price": 0.0,
+          "gap_price": 0.0,
+          "timing_used": "unknown",
+          "score": 0.0,
+          "warning": "No next trading day available for AMC gap calculation"
+        },
+        "pre_earnings_trend": {
+          "return_20d_pct": -9.96,
+          "trend_direction": "down",
+          "score": 15.0
+        },
+        "volume_trend": {
+          "vol_ratio_20_60": 0.91,
+          "recent_avg_volume": 989942,
+          "longer_avg_volume": 1083719,
+          "score": 20.0
+        },
+        "ma200_position": {
+          "ma200": 455.79,
+          "distance_pct": -5.12,
+          "above_ma200": false,
+          "score": 15.0
+        },
+        "ma50_position": {
+          "ma50": 506.72,
+          "distance_pct": -14.65,
+          "above_ma50": false,
+          "score": 15.0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "grade_a": 1,
+    "grade_b": 1,
+    "grade_c": 2,
+    "grade_d": 7
+  },
+  "sector_distribution": {
+    "Technology": 2,
+    "Healthcare": 2,
+    "Industrials": 5,
+    "Consumer Cyclical": 1,
+    "Communication Services": 1
+  }
+}

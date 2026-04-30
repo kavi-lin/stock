@@ -34,6 +34,9 @@ FEEDS = [
     ("CNBC Economy",   "https://www.cnbc.com/id/20910258/device/rss/rss.html",    "HIGH"),
     ("Seeking Alpha",  "https://seekingalpha.com/market_currents.xml",             "MEDIUM"),
     ("Investing.com",  "https://www.investing.com/rss/news_25.rss",                "MEDIUM"),
+    # PR Newswire financial press releases — typical latency 5-15 min from
+    # company release, much fresher than wire RSS index polls.
+    ("PR Newswire",    "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss", "MEDIUM"),
 ]
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"

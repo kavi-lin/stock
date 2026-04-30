@@ -50,6 +50,31 @@ EVENTS_ARCHIVE_FILE = os.path.join(BASE_DIR, 'events_archive.json')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
 
 
+# ── Shared news_id → published lookup (used by both extract_news and
+# extract_shallow_news). bridge.py is a one-shot script so module-level cache
+# is fine — process exits after main(). ──
+_raw_pub_cache = {}
+def _raw_pub_map(date_iso):
+    if date_iso in _raw_pub_cache:
+        return _raw_pub_cache[date_iso]
+    m = {}
+    raw_path = os.path.join(NEWS_LOGS, f"{date_iso}_raw.json")
+    if os.path.exists(raw_path):
+        try:
+            with open(raw_path, 'r') as f:
+                raw = json.load(f)
+            raw_items = raw if isinstance(raw, list) else raw.get('items') or raw.get('news') or []
+            for it in raw_items:
+                nid = it.get("news_id")
+                pub = it.get("published") or it.get("published_at")
+                if nid and pub:
+                    m[nid] = pub
+        except Exception as e:
+            print(f"[ERROR] raw.json {raw_path}: {e}")
+    _raw_pub_cache[date_iso] = m
+    return m
+
+
 def load_fred_snapshot():
     """Load the FRED macro cache (kept fresh by dashboard_server.py's 15-min
     refresh thread). Returns the raw snapshot dict or None if missing/stale."""
@@ -1381,6 +1406,89 @@ def load_market_top_cache():
         return None
 
 
+def extract_earnings_analyses():
+    """V1.71 — Index of all earnings-analyst cache files.
+
+    Reads skills/earnings-analyst/cache/<TICKER>_<DATE>.json (one per ticker,
+    keyed by last_earnings_date) and emits a thin summary per entry for
+    Dashboard discovery. Only includes ticker if cache file is < 90 days old
+    (matches earnings-analyst CACHE_TTL_DAYS).
+
+    Output: list of {ticker, last_earnings_date, as_of_date, next_earnings_est,
+                     composite_score, verdict, quality_flags,
+                     score_components, report_path, cache_age_days}
+    """
+    cache_dir = os.path.join(BASE_DIR, "skills", "earnings-analyst", "cache")
+    if not os.path.isdir(cache_dir):
+        return []
+
+    out = []
+    seen_tickers = set()
+    files = sorted(glob.glob(os.path.join(cache_dir, "*.json")), reverse=True)
+    for path in files:
+        fname = os.path.basename(path)
+        # Format: <TICKER>_<YYYY-MM-DD>.json
+        if "_" not in fname:
+            continue
+        ticker = fname.rsplit("_", 1)[0]
+        if ticker in seen_tickers:
+            continue  # take only the newest cache per ticker
+        seen_tickers.add(ticker)
+
+        age_days = round((time.time() - os.path.getmtime(path)) / 86400, 1)
+        if age_days > 90:
+            continue  # match earnings-analyst CACHE_TTL_DAYS
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                d = json.load(f)
+        except Exception:
+            continue
+
+        if "composite_score" not in d:
+            continue  # not analyzed yet
+
+        run_date = d.get("as_of_date")
+        report_path = None
+        if run_date:
+            cand = os.path.join(BASE_DIR, "reports", f"{run_date}_{ticker}_earnings.md")
+            if os.path.exists(cand):
+                report_path = os.path.relpath(cand, BASE_DIR)
+
+        # V1.71.1 — include margins_8q for inline sparkline rendering on Dashboard
+        derived = d.get("derived") or {}
+        margins_8q_slim = []
+        for q in (derived.get("margins_8q") or []):
+            margins_8q_slim.append({
+                "date":  q.get("date"),
+                "gross": q.get("gross"),
+            })
+
+        out.append({
+            "ticker":             ticker,
+            "last_earnings_date": d.get("last_earnings_date"),
+            "as_of_date":         run_date,
+            "next_earnings_est":  d.get("next_earnings_est"),
+            "composite_score":    d.get("composite_score"),
+            "verdict":            d.get("verdict"),
+            "quality_flags":      d.get("quality_flags") or [],
+            "score_components":   d.get("score_components") or {},
+            "report_path":        report_path,
+            "cache_age_days":     age_days,
+            # snapshot for sorting / display
+            "company_name":       (d.get("snapshot") or {}).get("companyName"),
+            "sector":             (d.get("snapshot") or {}).get("sector"),
+            "industry":           (d.get("snapshot") or {}).get("industry"),
+            "price":              (d.get("snapshot") or {}).get("price"),
+            # V1.71.1 — sparkline data (gross margin only, ~16 floats per ticker)
+            "margins_8q":         margins_8q_slim,
+        })
+
+    # Sort newest analysis first
+    out.sort(key=lambda r: r.get("as_of_date") or "", reverse=True)
+    return out
+
+
 def extract_market_top_data(raw):
     """Map market_top_detector JSON → data.market_top{}"""
     comp   = raw.get("composite", {})
@@ -1448,6 +1556,7 @@ def extract_news():
                 n_data = json.load(f)
             file_date = n_data.get("scan_date") or n_data.get("timestamp", "")[:10] or os.path.basename(news_file)[:10]
             news_dates_seen.add(file_date)
+            pub_map = _raw_pub_map(file_date)
             for v in n_data.get("verdicts", []):
                 # v2 protocol: skip shallow (Stage 1) items — they're preserved in
                 # the final MD's Shallow Digest section but should not clutter Dashboard.
@@ -1467,12 +1576,18 @@ def extract_news():
                 score_val = v.get("score") if v.get("score") is not None else v.get("net_impact_score")
                 # news_type: v2 uses "news_type", v1 used "type"
                 type_val = v.get("news_type") or v.get("type", "")
+                # Resolve published time: prefer verdict's own field (if pipeline
+                # threaded it), else look up via news_id in raw.json. Lets the UI
+                # show "Xh ago" instead of just YYYY-MM-DD on deep verdicts.
+                published = v.get("published") or v.get("published_at") \
+                            or pub_map.get(v.get("news_id", ""))
                 news.append({
                     "headline":          v.get("headline"),
                     "headline_zh":       v.get("headline_zh", ""),
                     "impact":            impact,
                     "score":             score_val,
                     "date":              v.get("date") or file_date,
+                    "published":         published,
                     "sectors":           sector_names,
                     "source":            "news_protocol",
                     "source_label":      v.get("source_label", ""),
@@ -1517,6 +1632,84 @@ def extract_news():
         news_content_date = fname[:10]               # "2026-04-24"
 
     return deduped, news_content_date
+
+
+def extract_shallow_news():
+    """Collect Stage-1 shallow verdicts for the news.html Triage tab.
+    Sources (latest 3 of each):
+      - *_digest.json verdicts where depth == 'shallow' (DIGEST output)
+      - *_triage.json verdicts (all shallow by definition — TRIAGE protocol output)
+    Dedupe by headline (digest takes precedence as it implies a fuller pipeline ran).
+    Sort by |net_impact_score| desc, cap at 60 (UI feed length).
+
+    Each output item also carries `published` (RSS publish time) joined from the
+    matching `*_raw.json` by news_id, used for freshness coloring on the UI.
+    """
+    items = []
+    seen = set()  # dedup key = headline
+
+    def _ingest(file_path, source_label):
+        try:
+            with open(file_path, 'r') as f:
+                payload = json.load(f)
+            file_date = payload.get("scan_date") or payload.get("timestamp", "")[:10] or os.path.basename(file_path)[:10]
+            pub_map = _raw_pub_map(file_date)
+            for v in payload.get("verdicts", []):
+                # For digest.json we only want shallow; for triage.json take everything (all are shallow).
+                if source_label == "digest" and v.get("depth") != "shallow":
+                    continue
+                h = (v.get("headline") or "").strip()
+                if not h or h in seen:
+                    continue
+                seen.add(h)
+                raw_sectors = v.get("affected_sectors", [])
+                if raw_sectors and isinstance(raw_sectors[0], dict):
+                    sector_names = [s.get("sector", "Unknown") for s in raw_sectors]
+                else:
+                    sector_names = [s if isinstance(s, str) else "Unknown" for s in raw_sectors]
+                impact_val = v.get("verdict") or v.get("impact") or "NEUTRAL"
+                impact = impact_val.lower() if isinstance(impact_val, str) else "neutral"
+                score_val = v.get("net_impact_score") if v.get("net_impact_score") is not None else v.get("score")
+                # Resolve published time: prefer verdict's own field (if pipeline
+                # threaded it), else look up via news_id in raw.json
+                published = v.get("published") or v.get("published_at") \
+                            or pub_map.get(v.get("news_id", ""))
+                items.append({
+                    "headline":          h,
+                    "headline_zh":       v.get("headline_zh", ""),
+                    "impact":            impact,
+                    "score":             score_val,
+                    "date":              v.get("date") or file_date,
+                    "published":         published,
+                    "sectors":           sector_names,
+                    "source":            source_label,
+                    "source_label":      v.get("source_label", ""),
+                    "type":              v.get("news_type") or v.get("type", ""),
+                    "bull_case":         v.get("bull_case", ""),
+                    "bear_case":         v.get("bear_case", ""),
+                    "sector_view":       v.get("sector_view", ""),
+                    "macro_view":        v.get("macro_view", ""),
+                    "binary_risk":       v.get("binary_risk", False),
+                    "within_48h":        v.get("within_48h", False),
+                    "tickers_mentioned": v.get("tickers_mentioned", []),
+                })
+        except Exception as e:
+            print(f"[ERROR] Shallow news {file_path}: {e}")
+
+    # digest.json first (so digest takes precedence on dedup)
+    for fp in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)[:3]:
+        _ingest(fp, "digest")
+    for fp in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_triage.json")), reverse=True)[:3]:
+        _ingest(fp, "triage")
+
+    # Sort by published desc (freshest first) — this is what makes triage actually
+    # work: user needs to spot what's NEW, not what's loud. Items missing
+    # `published` sink to the bottom; |score| breaks ties among same-timestamp.
+    def _sort_key(x):
+        pub = x.get("published") or ""
+        return (pub, abs(x.get("score") or 0))
+    items.sort(key=_sort_key, reverse=True)
+    return items[:60]
 
 
 # ─────────────────────────────────────────────
@@ -1584,6 +1777,7 @@ def ingest_momentum_screen():
             "ticker":   row.get("ticker"),
             "in_sp500": row.get("in_sp500", "1") != "0",
             "in_nasdaq100": row.get("in_nasdaq100", "0") != "0",
+            "in_sox": row.get("in_sox", "0") != "0",
             "sector":   row.get("sector") or "Unknown",
             "price":    _safe_float(row.get("price")),
             "score":    _safe_float(row.get("score")),
@@ -1837,6 +2031,12 @@ def run_bridge():
     # 3. News
     data["news"], data["news_content_date"] = extract_news()
     print(f"[OK] News: {len(data['news'])} items | content_date={data['news_content_date']}")
+    data["shallow_news"] = extract_shallow_news()
+    print(f"[OK] Shallow triage: {len(data['shallow_news'])} items")
+
+    # 3c. Earnings-analyst cache index (V1.71)
+    data["earnings_analyses"] = extract_earnings_analyses()
+    print(f"[OK] Earnings analyses: {len(data['earnings_analyses'])} cached tickers")
 
     # 3b. FRED macro snapshot (optional — skip silently if FRED_API_KEY not set)
     fred = load_fred_snapshot()

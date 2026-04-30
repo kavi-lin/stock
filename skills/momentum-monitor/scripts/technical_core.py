@@ -24,6 +24,7 @@ Public API (no underscore prefix):
 Nothing momentum-specific (composite score, short interest, signals,
 caching) lives here — those remain in momentum.py.
 """
+import os
 from datetime import datetime, timezone, timedelta
 
 import numpy as np
@@ -39,11 +40,76 @@ except Exception:
 SESSION_TOTAL_MIN = 390   # 9:30 → 16:00 ET regular session
 INTRADAY_EARLY_CUTOFF_MIN = 30  # < 30 min elapsed → too_early (vol signals suppressed)
 
+# v1.62 (I-PG): primary OHLC source switched to FMP /stable/historical-price-eod/full
+# (Starter plan unlocks this endpoint). yfinance kept as automatic fallback when
+# FMP_API_KEY is unset, returns 401, or response is malformed. The yf.Ticker handle
+# is still returned so downstream callers (momentum.py:_short_interest_block) can
+# read .info attributes.
+_PERIOD_DAYS = {
+    "1mo": 35, "3mo": 95, "6mo": 185, "1y": 370, "2y": 740, "5y": 1830,
+    "10y": 3650, "max": 10000,
+}
+
+
+def _fetch_fmp_ohlc(ticker, period):
+    """Fetch FMP /stable/historical-price-eod/full → DataFrame matching yfinance schema.
+    Returns None on any failure (caller falls back to yfinance)."""
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return None
+    days = _PERIOD_DAYS.get(period, 370)
+    end = datetime.now()
+    start = end - timedelta(days=days)
+    try:
+        import requests
+        r = requests.get(
+            "https://financialmodelingprep.com/stable/historical-price-eod/full",
+            params={
+                "symbol": ticker,
+                "from": start.date().isoformat(),
+                "to":   end.date().isoformat(),
+                "apikey": api_key,
+            },
+            timeout=30,
+        )
+        if r.status_code != 200:
+            return None
+        data = r.json()
+        if not isinstance(data, list) or not data:
+            return None
+        df = pd.DataFrame(data)
+        if df.empty or "date" not in df.columns:
+            return None
+        df["Date"] = pd.to_datetime(df["date"])
+        df = df.set_index("Date").sort_index()  # ascending date
+        df = df.rename(columns={
+            "open": "Open", "high": "High", "low": "Low",
+            "close": "Close", "volume": "Volume",
+        })
+        # FMP /stable/historical-price-eod returns split-adjusted (NOT dividend-adjusted)
+        # close. yfinance auto_adjust=True is dividend-adjusted. For RSI/MA/MACD pattern
+        # recognition the difference is ~1-2% accumulated dividends — does not affect
+        # technical signals. Dividend payers (KO/JNJ/PG) may show slightly higher MA
+        # readings vs yfinance, acceptable.
+        return df[["Open", "High", "Low", "Close", "Volume"]]
+    except Exception:
+        return None
+
 
 # ── Data fetch ─────────────────────────────────────────────────────────
 def fetch_history(ticker, period="1y"):
-    """Fetch OHLCV via yfinance. Raises RuntimeError if nothing returned."""
-    t = yf.Ticker(ticker)
+    """Fetch OHLCV. Tries FMP /stable/historical-price-eod/full first (Starter plan),
+    falls back to yfinance on any failure. Always returns (hist_df, yf.Ticker_handle)
+    so downstream code can still access yfinance metadata via the handle.
+    Raises RuntimeError if both providers fail."""
+    t = yf.Ticker(ticker)  # lazy — no API call until .info / .history accessed
+
+    # Primary: FMP
+    hist = _fetch_fmp_ohlc(ticker, period)
+    if hist is not None and not hist.empty:
+        return hist, t
+
+    # Fallback: yfinance
     hist = t.history(period=period, auto_adjust=True)
     if hist is None or hist.empty:
         raise RuntimeError(f"no history data for {ticker}")

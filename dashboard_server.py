@@ -31,6 +31,19 @@ POSITIONS     = os.path.join(ROOT, "positions.json")
 WATCHLIST_PATH = os.path.join(ROOT, "skills", "momentum-monitor", "scripts",
                               "universes", "watchlist.txt")
 PORT          = 8080
+
+# Lazy-import futu notification helper (optional — only used by /api/futu-notifications).
+# Kept inside try/except so the server still boots when the macOS Futu app isn't installed
+# (e.g. when running headless on a CI box for tests).
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
+try:
+    import parse_futu_notifications as _futu
+except Exception as _e:
+    _futu = None
+    sys.stderr.write(f"[boot] futu helper not loaded: {_e}\n")
+_futu_cache = {"ts": 0.0, "payload": None}
+_futu_cache_lock = threading.Lock()
+FUTU_CACHE_TTL_SEC = 5
 # Periodic bridge.py refresh interval (seconds). Override via DASH_REFRESH_SEC env.
 REFRESH_INTERVAL_SEC = int(os.getenv("DASH_REFRESH_SEC", "300"))
 BRIDGE_TIMEOUT_SEC   = 120
@@ -61,27 +74,39 @@ PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "1500"))
 PROTOCOL_TIMEOUT_OVERRIDES = {
     # DIGEST with "complete pipeline in one turn" prompt + chunked writes needs
     # ~12-15 min with 60+ RSS items. 20 min gives breathing room.
-    "news":   int(os.getenv("NEWS_TIMEOUT_SEC",   "1200")),  # 20 min
-    "flash":  int(os.getenv("FLASH_TIMEOUT_SEC",  "600")),   # 10 min
-    "review": int(os.getenv("REVIEW_TIMEOUT_SEC", "600")),   # 10 min
+    "news":       int(os.getenv("NEWS_TIMEOUT_SEC",        "1200")),  # 20 min
+    "flash":      int(os.getenv("FLASH_TIMEOUT_SEC",       "600")),   # 10 min
+    "flash_text": int(os.getenv("FLASH_TEXT_TIMEOUT_SEC",  "600")),   # 10 min
+    "review":     int(os.getenv("REVIEW_TIMEOUT_SEC",      "600")),   # 10 min
+    "triage":     int(os.getenv("TRIAGE_TIMEOUT_SEC",      "600")),   # 10 min (RSS fetch 30s + 60 條 shallow snap)
     # V4.8 invest protocol: Phase 0-5 with subagents typically takes 30-45 min.
     # Default 25 min (1500s) is too short; 60 min gives comfortable headroom.
-    "invest": int(os.getenv("INVEST_TIMEOUT_SEC", "3600")),  # 60 min
+    "invest":     int(os.getenv("INVEST_TIMEOUT_SEC",     "3600")),  # 60 min
 }
 
 PROTOCOL_PROMPTS = {
-    "sector": "產業掃描",
-    "news":   "非互動模式 + 硬規定：\n1. **必須執行** Stage 1 RSS triage（讀 raw.json 產 ≥ 20 筆 shallow_verdicts 的 triage 表）\n2. **必須 dispatch 4 個 Agent tool_use**（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst），不得在 thinking block 裡自己幻想 4 視角\n3. **必須 Write news_logs/YYYY-MM-DD_digest.json**（timestamp 必須是今天日期），validator 有 freshness gate 會擋舊檔\n4. Stage 1 triage 表直接依 |shallow_score| 排序取前 5 則進 Stage 2 **不要停下等使用者確認**\n5. 跑完 Phase 3 Arbiter + Phase 4 cache patch + validator + 產出 reports/YYYY-MM-DD_news_digest.md\n6. **禁止**：讀昨天 MD 當範本、跳過 Stage 1/2 直接寫 MD、單 model 編 4-view 辯論\n7. 一個 turn 跑完整條 pipeline，不要中途停下。\n\n新聞分析 DIGEST",
+    "sector": "非互動模式：依 sector_protocol_main.md GLOBAL RULES 直接執行 Phase 0→5 完整流程，"
+              "不要輸出「準備好進入 Phase X 嗎？」「請確認」這類停頓等候，一個 turn 完整收尾。"
+              "Cache 衝突自動處理：若 sector_intel.json 的 mtime 看起來新但內部 `generated_at` 距今 ≥ 3 小時 "
+              "（通常是 news protocol Phase 4 patch top_catalysts 造成的 mtime touch），"
+              "視為 STALE 必須重跑 Phase 0–1，不要當成 FRESH 跳過。\n\n產業掃描",
+    "news":   "非互動模式 + 硬規定：\n0. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json\n1. **必須執行** Stage 1 shallow triage（讀 raw.json 產 ≥ 20 筆 shallow_verdicts 的 triage 表）\n2. **必須 dispatch 4 個 Agent tool_use**（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst），不得在 thinking block 裡自己幻想 4 視角\n3. **必須 Write news_logs/YYYY-MM-DD_digest.json**（timestamp 必須是今天日期），validator 有 freshness gate 會擋舊檔\n4. Stage 1 triage 表直接依 |shallow_score| 排序取前 5 則進 Stage 2 **不要停下等使用者確認**\n5. 跑完 Phase 3 Arbiter + Phase 4 cache patch + validator + 產出 reports/YYYY-MM-DD_news_digest.md\n6. **禁止**：讀昨天 MD 當範本、跳過 Stage 1/2 直接寫 MD、單 model 編 4-view 辯論\n7. 一個 turn 跑完整條 pipeline，不要中途停下。\n8. **每筆 verdict（不論 shallow/deep）必須帶 `published` 欄位**（從 raw.json 對應 news_id 抄過來的 ISO timestamp）— UI 用此算「Xm/Xh ago」freshness。\n\n新聞分析 DIGEST",
     "invest": "SESSION CONFIG: RISK_TOLERANCE={risk_tolerance}\n非互動模式：照 protocol 規則直接執行，不要輸出「請確認」類摘要表停下來等候。Phase 0 cache 策略：< 3h 用現有、否則 L3 重跑。\n\n分析 {ticker}",
     "flash":  "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 產出 reports MD 報告，不要中途停下等使用者回話。\n\n新聞分析 FLASH {ticker} 近期動態",
-    "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。\n\n新聞分析 審核 \"{headline}\"",
+    "flash_text": "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 雙重 artifact 寫入，不要中途停下等使用者回話。輸入是富途推播原文（中英混排），請：\n1. 先抽出事件主體（公司/標的/ticker，若有）\n2. WebFetch 補上下文（最近 24h 相關報導）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter\n4. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_news_flash.md` — 完整 Impact Card（review_status: pending）\n   (b) `news/news_logs/YYYY-MM-DD_digest.json` — 讀現有 file，append 一筆 verdict 到 `verdicts[]` 陣列（不要覆寫整個檔）。verdict 必須含：news_id (next available `nNNN`), depth: \"deep\", review_status: \"pending\", headline, headline_zh, source_label, news_type, bull_case, bear_case, sector_view, macro_view, verdict (BULLISH/BEARISH/BINARY/NEUTRAL), net_impact_score (數字), arbiter_reasoning, binary_risk (bool), within_48h (bool), affected_sectors (string list), tickers_mentioned (string list), date (YYYY-MM-DD), published (ISO timestamp — 用 WebFetch 取得的原始發布時間，UI 拿來算 freshness)。**這條是 Dashboard「待審核」tab 顯示卡片的唯一來源 — 沒寫等於沒分析過。**\n\n新聞分析 FLASH \"{headline}\"",
+    "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。覆寫 verdict 時請保留原 `published` 欄位（若不存在，從對應 raw.json 補上）。\n\n新聞分析 審核 \"{headline}\"",
+    "triage": "非互動模式：只跑 Stage 1 shallow triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. 讀剛產出的 `news/news_logs/YYYY-MM-DD_raw.json`（已 dedupe + 按 published desc 排序）\n3. 對每則跑 shallow triage（30 字 snap，依 news_protocol_v2.md Stage 1 rubric 給 score -5~+5）\n4. **必須寫 `news/news_logs/YYYY-MM-DD_triage.json`**（不寫等於沒跑），結構：\n```\n{\n  \"timestamp\": ISO,\n  \"mode\": \"TRIAGE\",\n  \"raw_count\": N,\n  \"verdicts\": [{\n    \"news_id\": \"nNNN\", \"depth\": \"shallow\", \"review_status\": \"reviewed\",\n    \"headline\": str, \"headline_zh\": str, \"source_label\": str,\n    \"news_type\": str, \"bull_case\": str(<=30字), \"bear_case\": str(<=30字),\n    \"sector_view\": str(<=30字), \"macro_view\": str(<=30字),\n    \"verdict\": \"BULLISH\"|\"BEARISH\"|\"NEUTRAL\"|\"BINARY\",\n    \"net_impact_score\": float, \"binary_risk\": bool, \"within_48h\": bool,\n    \"affected_sectors\": [str], \"tickers_mentioned\": [str],\n    \"date\": \"YYYY-MM-DD\",\n    \"published\": str (從 raw.json 對應 news_id 抄過來的 ISO timestamp，UI 拿來算 freshness 顏色)\n  }, ...]\n}\n```\n5. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
+    "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 fetch + analyze + validate + render 4 步驟，不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n\n結束條件：reports/<DATE>_{ticker}_earnings.md 寫入完成 + validate rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
 }
 PROTOCOL_LOG_DIRS = {
-    "sector": "sector/scan_logs",
-    "news":   "news/scan_logs",
-    "invest": "investment/scan_logs",
-    "flash":  "news/scan_logs",
-    "review": "news/scan_logs",
+    "sector":     "sector/scan_logs",
+    "news":       "news/scan_logs",
+    "invest":     "investment/scan_logs",
+    "flash":      "news/scan_logs",
+    "flash_text": "news/scan_logs",
+    "review":     "news/scan_logs",
+    "triage":     "news/scan_logs",
+    "earnings":   "skills/earnings-analyst/cache",
 }
 
 _protocol_state = {
@@ -296,7 +321,12 @@ def run_protocol(name, params=None):
 
     def _run():
         start = datetime.now()
-        prompt = PROTOCOL_PROMPTS[name].format(**params)
+        # Manual token replacement instead of str.format(**params): some prompts
+        # embed JSON examples with literal {…}, which str.format would treat as
+        # placeholders and raise KeyError (e.g. KeyError: '\n  "timestamp"').
+        prompt = PROTOCOL_PROMPTS[name]
+        for _k, _v in (params or {}).items():
+            prompt = prompt.replace("{" + _k + "}", str(_v))
         claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
         rc = -1
         try:
@@ -386,69 +416,169 @@ def run_protocol(name, params=None):
     return job_id, None
 
 
-# ── Analyze Queue ─────────────────────────────────────────────────────────
-# Global sequential queue for per-ticker invest protocol runs.
-# - User enqueues from momentum/decisions pages
-# - Worker thread pops next when no protocol is running, calls run_protocol("invest")
-# - Duplicate tickers (queued OR currently running) are abandoned (409)
+# ── Protocol Queue ────────────────────────────────────────────────────────
+# Unified FIFO queue for ALL protocol runs (invest / news / flash / flash_text /
+# review / triage / sector). Worker pops next when no protocol is running.
+# v1.61: extended from invest-only to all protocols. Only 2 invest items in a row
+# trigger the 3-min cooldown — light news-side runs go back-to-back.
 #
-# Shape:
-#   _analyze_queue = [{"ticker":"NVDA","risk_tolerance":"MEDIUM","enqueued_at":"..."},
-#                     {"ticker":"AAPL",...}]
-_analyze_queue = []
-_analyze_queue_lock = threading.Lock()
-_analyze_history = []  # last 10 completions: {"ticker":"NVDA","status":"done|error","ended_at":"..."}
-_ANALYZE_HISTORY_MAX = 10
+# Entry shape:
+#   {"name": "triage", "params": {"ticker":"NVDA",...}, "enqueued_at": "...",
+#    "id": "triage_1714512345_abc",  # client-side dedup tag
+#    "label": "🗂 Triage" }            # for queue UI display
+_protocol_queue = []
+_protocol_queue_lock = threading.Lock()
+_protocol_history = []  # last 10 completions
+_PROTOCOL_HISTORY_MAX = 10
+
+# Backward-compat aliases (existing analyze-queue endpoints + worker name keep working)
+_analyze_queue        = _protocol_queue
+_analyze_queue_lock   = _protocol_queue_lock
+_analyze_history      = _protocol_history
+_ANALYZE_HISTORY_MAX  = _PROTOCOL_HISTORY_MAX
 
 
 def _currently_analyzing_ticker():
-    """Return ticker currently being analyzed via invest protocol, or None."""
+    """Return ticker currently being analyzed via invest protocol, or None.
+    (Backward-compat for analyze-queue.js widget that only cares about invest.)"""
     with _protocol_lock:
         if _protocol_state.get("status") != "running":
             return None
         if _protocol_state.get("name") != "invest":
             return None
-        # We stash the ticker on state at enqueue time (see _analyze_worker)
         return _protocol_state.get("analyze_ticker")
 
 
+def _label_for(name, params):
+    """Display label for queue UI — short, recognisable."""
+    p = params or {}
+    if name == "invest":
+        return f"🔬 {p.get('ticker', '?')}"
+    if name == "flash":
+        return f"⚡ FLASH {p.get('ticker', '?')}"
+    if name == "flash_text":
+        h = (p.get("headline") or "")[:24]
+        return f"⚡ FLASH «{h}»"
+    if name == "review":
+        h = (p.get("headline") or "")[:24]
+        return f"🧑‍⚖ REVIEW «{h}»"
+    if name == "news":
+        return "📰 DIGEST"
+    if name == "triage":
+        return "🗂 Triage"
+    if name == "sector":
+        return "🏭 Sector Scan"
+    if name == "earnings":
+        return f"📊 Earnings {p.get('ticker', '?')}"
+    return name
+
+
+def enqueue_protocol(name, params=None, source="direct"):
+    """Generic enqueue — accepts any protocol name in PROTOCOL_PROMPTS.
+    Returns (state, err). err='duplicate' for invest with same ticker pending.
+    state: {queued, position, total_ahead, label, id, enqueued_at}.
+    """
+    if name not in PROTOCOL_PROMPTS:
+        return None, f"unknown protocol: {name}"
+    params = dict(params or {})
+    label  = _label_for(name, params)
+
+    # invest dedup: same ticker queued or running → reject
+    if name == "invest":
+        ticker = (params.get("ticker") or "").upper().strip()
+        if not ticker:
+            return None, "missing ticker"
+        rt = (params.get("risk_tolerance") or "MEDIUM").upper().strip()
+        if rt not in ("LOW", "MEDIUM", "HIGH"):
+            rt = "MEDIUM"
+        params["ticker"] = ticker
+        params["risk_tolerance"] = rt
+        active = _currently_analyzing_ticker()
+        with _protocol_queue_lock:
+            if active == ticker:
+                return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
+            if any(q.get("name") == "invest" and (q.get("params") or {}).get("ticker") == ticker
+                   for q in _protocol_queue):
+                return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
+
+    # earnings dedup: same ticker queued or running → reject
+    if name == "earnings":
+        ticker = (params.get("ticker") or "").upper().strip()
+        if not ticker:
+            return None, "missing ticker"
+        params["ticker"] = ticker
+        with _protocol_lock:
+            cur = _protocol_state
+            if (cur.get("status") == "running" and cur.get("name") == "earnings"
+                    and (cur.get("ticker") or "").upper() == ticker):
+                return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
+        with _protocol_queue_lock:
+            if any(q.get("name") == "earnings" and (q.get("params") or {}).get("ticker") == ticker
+                   for q in _protocol_queue):
+                return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
+
+    entry = {
+        "id":          f"{name}_{int(time.time())}_{os.urandom(2).hex()}",
+        "name":        name,
+        "params":      params,
+        "label":       label,
+        "source":      source,
+        "enqueued_at": _now_iso(),
+    }
+    # Calc position: 1-indexed across (running + queued)
+    running = 0
+    with _protocol_lock:
+        if _protocol_state.get("status") == "running":
+            running = 1
+    with _protocol_queue_lock:
+        _protocol_queue.append(entry)
+        position    = running + len(_protocol_queue)   # 1-indexed: this entry's slot
+        total_ahead = position - 1                      # how many in front
+    return {
+        "queued":      True,
+        "id":          entry["id"],
+        "name":        name,
+        "label":       label,
+        "params":      params,
+        "position":    position,
+        "total_ahead": total_ahead,
+        "enqueued_at": entry["enqueued_at"],
+    }, None
+
+
 def enqueue_analysis(ticker, risk_tolerance="MEDIUM"):
-    """Enqueue a ticker. Returns (state, err). err='duplicate' when already
-    queued or currently running; caller should treat as 409."""
-    ticker = (ticker or "").upper().strip()
-    if not ticker:
-        return None, "missing ticker"
-    rt = (risk_tolerance or "MEDIUM").upper().strip()
-    if rt not in ("LOW", "MEDIUM", "HIGH"):
-        rt = "MEDIUM"
-
-    active = _currently_analyzing_ticker()
-    with _analyze_queue_lock:
-        if active == ticker:
-            return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
-        if any(q["ticker"] == ticker for q in _analyze_queue):
-            return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
-        entry = {"ticker": ticker, "risk_tolerance": rt, "enqueued_at": _now_iso()}
-        _analyze_queue.append(entry)
-        position = len(_analyze_queue)
-    return {"queued": True, "ticker": ticker, "position": position, "enqueued_at": entry["enqueued_at"]}, None
+    """Backward-compat wrapper for /api/analyze-queue (invest-only)."""
+    state, err = enqueue_protocol("invest", {"ticker": ticker, "risk_tolerance": risk_tolerance})
+    if state and state.get("queued"):
+        # Old endpoint returned different field names — translate
+        return {"queued": True, "ticker": ticker, "position": state["position"],
+                "enqueued_at": state["enqueued_at"]}, None
+    return state, err
 
 
-def remove_from_queue(ticker):
-    """Remove a pending ticker from queue. Cannot cancel the active run."""
-    ticker = (ticker or "").upper().strip()
-    with _analyze_queue_lock:
-        before = len(_analyze_queue)
-        _analyze_queue[:] = [q for q in _analyze_queue if q["ticker"] != ticker]
-        removed = before - len(_analyze_queue)
+def remove_from_queue(target_id_or_ticker):
+    """Remove pending entry by id (preferred) or by ticker (legacy invest path).
+    Cannot cancel active run."""
+    key = (target_id_or_ticker or "").strip()
+    with _protocol_queue_lock:
+        before = len(_protocol_queue)
+        _protocol_queue[:] = [
+            q for q in _protocol_queue
+            if q.get("id") != key
+            and (q.get("params") or {}).get("ticker", "").upper() != key.upper()
+        ]
+        removed = before - len(_protocol_queue)
     return removed > 0
 
 
 def get_queue_state():
-    """Return {active:{ticker,elapsed_sec}|None, queue:[...], recent:[...]}"""
+    """Return {active, queue, recent}.
+    active: {ticker, name, label, ...} of currently running (any protocol)
+    queue:  list of pending entries
+    recent: last 10 completions"""
     active = None
     with _protocol_lock:
-        if _protocol_state.get("status") == "running" and _protocol_state.get("name") == "invest":
+        if _protocol_state.get("status") == "running":
             started = _protocol_state.get("started_at")
             elapsed = 0
             if started:
@@ -457,88 +587,101 @@ def get_queue_state():
                 except Exception:
                     pass
             active = {
-                "ticker":      _protocol_state.get("analyze_ticker"),
+                "name":        _protocol_state.get("name"),
+                "ticker":      _protocol_state.get("analyze_ticker"),     # invest only
+                "label":       _protocol_state.get("queue_label"),        # set on dispatch
                 "job_id":      _protocol_state.get("job_id"),
                 "started_at":  started,
                 "elapsed_sec": elapsed,
                 "source":      _protocol_state.get("analyze_source", "direct"),
             }
-    with _analyze_queue_lock:
-        queue_snapshot = [dict(q) for q in _analyze_queue]
-        history_snapshot = list(_analyze_history)
+    with _protocol_queue_lock:
+        queue_snapshot = [dict(q) for q in _protocol_queue]
+        history_snapshot = list(_protocol_history)
     return {"active": active, "queue": queue_snapshot, "recent": history_snapshot}
 
 
 def _analyze_worker():
-    """Background loop: whenever queue has pending + no protocol running, start next."""
+    """Background loop: pull next entry off _protocol_queue, dispatch via run_protocol().
+    3-min cooldown only between two consecutive invest items (token rate-limit pressure)."""
+    last_finished_name = None
     while True:
         try:
             # Wait until queue has work AND no protocol is running
             with _protocol_lock:
                 proto_busy = _protocol_state.get("status") == "running"
-            with _analyze_queue_lock:
-                queue_empty = not _analyze_queue
+            with _protocol_queue_lock:
+                queue_empty = not _protocol_queue
             if proto_busy or queue_empty:
                 time.sleep(1.5)
                 continue
 
-            with _analyze_queue_lock:
-                if not _analyze_queue:
+            with _protocol_queue_lock:
+                if not _protocol_queue:
                     continue
-                entry = _analyze_queue.pop(0)
-            ticker = entry["ticker"]
-            rt     = entry.get("risk_tolerance", "MEDIUM")
+                entry = _protocol_queue.pop(0)
 
-            # Kick off the invest protocol; tag state with ticker for UI
-            job_id, err = run_protocol("invest", {"ticker": ticker, "risk_tolerance": rt})
+            name   = entry["name"]
+            params = entry.get("params") or {}
+            label  = entry.get("label", name)
+
+            # Cooldown only if BOTH last and current are invest
+            if last_finished_name == "invest" and name == "invest":
+                cooldown = int(os.getenv("INTER_ANALYSIS_COOLDOWN_SEC", "180"))
+                if cooldown > 0:
+                    sys.stderr.write(f"[protocol_worker] cooldown {cooldown}s before next invest\n")
+                    time.sleep(cooldown)
+
+            job_id, err = run_protocol(name, params)
             if err:
-                # Can't start (maybe race with another protocol) — record error and continue
-                with _analyze_queue_lock:
-                    _analyze_history.insert(0, {
-                        "ticker":   ticker,
+                with _protocol_queue_lock:
+                    _protocol_history.insert(0, {
+                        "name":     name,
+                        "label":    label,
+                        "ticker":   params.get("ticker"),
                         "status":   "error",
                         "error":    err,
                         "ended_at": _now_iso(),
                     })
-                    del _analyze_history[_ANALYZE_HISTORY_MAX:]
+                    del _protocol_history[_PROTOCOL_HISTORY_MAX:]
+                last_finished_name = None
                 continue
             with _protocol_lock:
-                _protocol_state["analyze_ticker"] = ticker
+                if name == "invest":
+                    _protocol_state["analyze_ticker"] = params.get("ticker")
                 _protocol_state["analyze_source"] = entry.get("source", "queue")
+                _protocol_state["queue_label"]   = label
+                _protocol_state["queue_id"]      = entry.get("id")
 
-            # Wait for the run to finish
+            # Wait for run to finish.
+            # Defensive: terminal status alone is enough (don't gate on ended_at).
+            # Previously required `ended_at` too, but if cancel_protocol left
+            # ended_at unset and _run thread hung in post-wait, worker would
+            # block forever blocking the rest of the queue.
             while True:
                 time.sleep(2)
                 with _protocol_lock:
                     s = _protocol_state.get("status")
-                    ended = _protocol_state.get("ended_at")
-                if s != "running" and ended:
+                if s in ("done", "error", "cancelled", "idle"):
                     break
 
             with _protocol_lock:
                 final_status = _protocol_state.get("status")
                 final_error  = _protocol_state.get("error")
-            with _analyze_queue_lock:
-                _analyze_history.insert(0, {
-                    "ticker":   ticker,
+            with _protocol_queue_lock:
+                _protocol_history.insert(0, {
+                    "name":     name,
+                    "label":    label,
+                    "ticker":   params.get("ticker"),
                     "status":   final_status,
                     "error":    final_error if final_status == "error" else None,
                     "ended_at": _now_iso(),
                 })
-                del _analyze_history[_ANALYZE_HISTORY_MAX:]
+                del _protocol_history[_PROTOCOL_HISTORY_MAX:]
 
-            # Cooldown between queue items: reduce API rate-limit pressure.
-            # Each invest analysis burns heavily on 5-hour token limits.
-            # 3 min cooldown lets the rate-limit window partially recover.
-            INTER_ANALYSIS_COOLDOWN = int(os.getenv("INTER_ANALYSIS_COOLDOWN_SEC", "180"))
-            if INTER_ANALYSIS_COOLDOWN > 0:
-                with _analyze_queue_lock:
-                    has_more = bool(_analyze_queue)
-                if has_more:
-                    sys.stderr.write(f"[analyze_worker] cooldown {INTER_ANALYSIS_COOLDOWN}s before next ticker\n")
-                    time.sleep(INTER_ANALYSIS_COOLDOWN)
+            last_finished_name = name
         except Exception as e:
-            sys.stderr.write(f"[analyze_worker error] {e}\n")
+            sys.stderr.write(f"[protocol_worker error] {e}\n")
             time.sleep(3)
 
 
@@ -571,6 +714,38 @@ PREFLIGHT_ITEMS = [
      "free": False, "protocol": "news"},
 ]
 
+def _content_timestamp_for(key, path):
+    """For cache files where mtime can be touched by *another* protocol's
+    cache-patch step (e.g. news Phase 4 prepends top_catalysts into
+    sector_intel.json, bumping mtime without updating internal timestamp),
+    read the content timestamp instead. Falls back to mtime on parse failure.
+    Returns float epoch seconds.
+    """
+    fallback = os.path.getmtime(path)
+    if key not in ("sector", "news"):
+        return fallback
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            obj = json.load(f)
+    except Exception:
+        return fallback
+    raw = obj.get("generated_at") if key == "sector" else obj.get("timestamp")
+    if not raw or not isinstance(raw, str):
+        return fallback
+    raw = raw.strip()
+    # Try common shapes: ISO with tz, ISO no tz, "YYYY-MM-DD HH:MM:SS", "YYYY-MM-DD HH:MM"
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S",
+                "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            dt = datetime.strptime(raw, fmt)
+            # Naive timestamps assumed local time (matches project convention
+            # — sector_intel.json/digest.json are written without tz).
+            return dt.timestamp()
+        except ValueError:
+            continue
+    return fallback
+
+
 def preflight_check():
     """Return cache freshness status for all monitored items."""
     results = []
@@ -589,7 +764,8 @@ def preflight_check():
             files = sorted(glob.glob(full_pattern), key=os.path.getmtime, reverse=True)
             latest = files[0] if files else None
         if latest:
-            age_sec = int(datetime.now().timestamp() - os.path.getmtime(latest))
+            ref_ts = _content_timestamp_for(item["key"], latest)
+            age_sec = int(datetime.now().timestamp() - ref_ts)
             status = "FRESH" if age_sec < CACHE_TTL_SEC else "STALE"
             if age_sec < 60:     age_str = f"{age_sec}s"
             elif age_sec < 3600: age_str = f"{age_sec // 60}m"
@@ -834,8 +1010,30 @@ def run_momentum_screen(params):
 def cancel_protocol():
     with _protocol_lock:
         if _protocol_state["status"] != "running":
+            # Recovery path: if previously cancelled but ended_at never got set
+            # (because _run thread got stuck in proc.wait/lf.close), allow a
+            # second cancel call to forcibly mark ended_at so the analyze worker
+            # can dispatch the next queued item.
+            if _protocol_state["status"] == "cancelled" and not _protocol_state.get("ended_at"):
+                _protocol_state["ended_at"] = _now_iso()
+                try:
+                    started = datetime.fromisoformat(_protocol_state["started_at"])
+                    _protocol_state["elapsed_sec"] = int((datetime.now() - started).total_seconds())
+                except Exception:
+                    pass
+                _protocol_proc["p"] = None
+                return True
             return False
         _protocol_state["status"] = "cancelled"
+        # Set ended_at immediately so worker can proceed even if _run thread
+        # gets stuck before its post-wait block runs (claude CLI sometimes
+        # ignores SIGTERM / pipes hang on close after kill).
+        _protocol_state["ended_at"] = _now_iso()
+        try:
+            started = datetime.fromisoformat(_protocol_state["started_at"])
+            _protocol_state["elapsed_sec"] = int((datetime.now() - started).total_seconds())
+        except Exception:
+            pass
     proc = _protocol_proc.get("p")
     if proc and proc.poll() is None:
         try:
@@ -1056,11 +1254,86 @@ class Handler(SimpleHTTPRequestHandler):
                 state["elapsed_sec"] = int(end - state["started_at"])
             return self._json(200, state)
 
-        if path == "/api/analyze-queue":
+        if path == "/api/analyze-queue" or path == "/api/protocol-queue":
             return self._json(200, get_queue_state())
 
         if path == "/api/momentum-watchlist":
             return self._json(200, {"tickers": load_watchlist()})
+
+        if path.startswith("/api/earnings-cache/"):
+            # GET /api/earnings-cache/<TICKER>  → cache existence + summary
+            ticker = path.split("/api/earnings-cache/", 1)[1].strip().upper()
+            if not ticker or "/" in ticker:
+                return self._json(400, {"error": "invalid ticker"})
+            cache_dir = os.path.join(ROOT, "skills", "earnings-analyst", "cache")
+            matches = sorted(glob.glob(os.path.join(cache_dir, f"{ticker}_*.json")))
+            if not matches:
+                return self._json(200, {"ticker": ticker, "cached": False})
+            latest = matches[-1]
+            try:
+                with open(latest, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception as e:
+                return self._json(200, {"ticker": ticker, "cached": False, "error": str(e)})
+
+            age_days = round((time.time() - os.path.getmtime(latest)) / 86400, 1)
+            last_earn = data.get("last_earnings_date")
+            run_date = data.get("as_of_date")
+            report_path = None
+            if run_date:
+                candidate = os.path.join(ROOT, "reports", f"{run_date}_{ticker}_earnings.md")
+                if os.path.exists(candidate):
+                    report_path = os.path.relpath(candidate, ROOT)
+            return self._json(200, {
+                "ticker":             ticker,
+                "cached":             True,
+                "last_earnings_date": last_earn,
+                "as_of_date":         run_date,
+                "next_earnings_est":  data.get("next_earnings_est"),
+                "composite_score":    data.get("composite_score"),
+                "verdict":            data.get("verdict"),
+                "quality_flags":      data.get("quality_flags") or [],
+                "score_components":   data.get("score_components") or {},
+                "report_path":        report_path,
+                "cache_age_days":     age_days,
+            })
+
+        if path == "/api/futu-notifications":
+            try:
+                qs = urlparse(self.path).query
+                params = dict(p.split("=", 1) for p in qs.split("&") if "=" in p)
+                limit = max(1, min(20, int(params.get("limit", "5"))))
+            except Exception:
+                limit = 5
+            if _futu is None:
+                return self._json(200, {"available": False, "notifications": [],
+                                        "error": "helper not loaded"})
+            now = time.time()
+            with _futu_cache_lock:
+                cached = _futu_cache["payload"]
+                fresh  = cached and (now - _futu_cache["ts"] < FUTU_CACHE_TTL_SEC) \
+                                and cached.get("limit") == limit
+            if fresh:
+                return self._json(200, cached["payload"])
+            try:
+                items, stats = _futu.load_notifications(
+                    limit=limit, filter_hk_cn=True, return_stats=True,
+                )
+                payload = {
+                    "available":      _futu.is_available(),
+                    "notifications":  items,
+                    "filter_hk_cn":   True,
+                    "filtered_count": stats.get("filtered_hk_cn", 0),
+                    "scanned":        stats.get("scanned", 0),
+                    "fetched_at":     _now_iso(),
+                }
+            except Exception as e:
+                return self._json(500, {"available": False, "notifications": [],
+                                        "error": str(e)})
+            with _futu_cache_lock:
+                _futu_cache["ts"]      = now
+                _futu_cache["payload"] = {"limit": limit, "payload": payload}
+            return self._json(200, payload)
 
         if path == "/api/run-protocol/status":
             with _protocol_lock:
@@ -1188,6 +1461,21 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(400, {"error": err})
             return self._json(202, state)
 
+        if path == "/api/protocol-queue":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            name = body.get("name", "").strip()
+            params = {k: v for k, v in body.items() if k != "name"}
+            state, err = enqueue_protocol(name, params)
+            if err == "duplicate":
+                return self._json(409, state)
+            if err:
+                return self._json(400, {"error": err})
+            return self._json(202, state)
+
         if path == "/api/run-protocol/cancel":
             ok = cancel_protocol()
             return self._json(200 if ok else 409, {"cancelled": ok})
@@ -1291,6 +1579,15 @@ class Handler(SimpleHTTPRequestHandler):
             if not removed:
                 return self._json(404, {"error": f"ticker not in pending queue: {ticker}"})
             return self._json(200, {"removed": ticker})
+
+        # New: cancel queued entry by id (e.g. triage_1714512345_abc)
+        m = re.match(r"^/api/protocol-queue/([A-Za-z0-9_\.\-]+)$", path)
+        if m:
+            qid = m.group(1)
+            removed = remove_from_queue(qid)
+            if not removed:
+                return self._json(404, {"error": f"queue entry not found: {qid}"})
+            return self._json(200, {"removed": qid})
 
         m = re.match(r"^/api/momentum-watchlist/([A-Za-z0-9\.\-]+)$", path)
         if m:

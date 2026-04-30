@@ -17,18 +17,78 @@ const t = () => (window.i18n?.[UI.currentLang]?.radar) || {};
 const $ = (id) => document.getElementById(id);
 
 // ── Term tooltip dictionary (zh + en) ─────────────────────────
+// Schema (mirrors AI verdict zone style on index/sector pages):
+//   title / desc / hint — required
+//   stages (optional)   — numeric tier table; each row {range:[lo,hi], range_label, tag, action, detail}
+//                         showRadarTip highlights the row matching `liveValue` when provided.
 const RADAR_TERMS = {
     mid_heat: {
-        zh: { title: '中期熱度 (MID)', desc: 'theme-detector 算的 1-3 月主題熱度（FINVIZ 產業 momentum + volume + breadth）。', hint: '<strong>0-100</strong>，>60 熱、30-60 溫、<30 冷。反映「有沒有資金在滾這個題材」。' },
-        en: { title: 'Mid-term Heat (MID)', desc: 'theme-detector\'s 1-3 month heat from FINVIZ industry momentum/volume/breadth.', hint: '<strong>0-100</strong>. >60 hot, 30-60 warm, <30 cool. "Is money flowing into this theme?"' },
+        zh: {
+            title: '中期熱度 · 1-3 月主題資金流',
+            desc: 'theme-detector 從 FINVIZ 產業 momentum + volume + breadth 合成的 1-3 月熱度分數，反映「有沒有資金在滾這個題材」。冷的題材即使個股漂亮也容易被同類拖累。',
+            stages: [
+                { key: 'mh_hot',  range: [60,100], range_label: '> 60',  tag: '熱',   action: '主追擊區', detail: '產業有資金共振，題材 movers 往往一起漲，順勢加碼勝率高' },
+                { key: 'mh_warm', range: [30,59],  range_label: '30-60', tag: '溫',   action: '選股',     detail: '題材未領跑但仍健康，挑高 RS 的 mover、避免重押' },
+                { key: 'mh_cool', range: [0,29],   range_label: '< 30',  tag: '冷',   action: '避開',     detail: '產業缺乏資金，個股漂亮也會被同類拖累，除非有 idiosyncratic catalyst' },
+            ],
+            hint: '與 short_bull 互補：mid_heat 看「題材熱不熱」，short_bull 看「movers 接下來漲不漲」',
+        },
+        en: {
+            title: 'Mid-term Heat · 1-3M theme money flow',
+            desc: 'theme-detector composite from FINVIZ industry momentum/volume/breadth — answers "is money flowing into this theme?". Cold themes drag even good single-name setups.',
+            stages: [
+                { key: 'mh_hot',  range: [60,100], range_label: '> 60',  tag: 'Hot',  action: 'Hunt zone', detail: 'Capital flowing in, movers tend to rally together — momentum-add wins' },
+                { key: 'mh_warm', range: [30,59],  range_label: '30-60', tag: 'Warm', action: 'Selective', detail: 'Theme not leading but still healthy — pick high-RS movers, avoid concentration' },
+                { key: 'mh_cool', range: [0,29],   range_label: '< 30',  tag: 'Cool', action: 'Avoid',     detail: 'No theme money — clean charts get dragged with peers (unless idiosyncratic catalyst)' },
+            ],
+            hint: 'Complementary to short_bull: mid_heat = "is theme hot?", short_bull = "will movers rally?"',
+        },
     },
     short_bull: {
-        zh: { title: '短期看多率', desc: '主題內 5 個 mover 中，5 日預測為「正報酬」的 % 比例。', hint: '<strong>100%</strong> = 全部 movers 預測上漲；<strong>40%</strong> = 5 個有 2 個漲。已套用 regime factor (大盤調整)。' },
-        en: { title: 'Short Bullish Breadth', desc: '% of theme\'s movers with positive 5d prediction.', hint: '<strong>100%</strong> = all movers predict up; <strong>40%</strong> = 2 of 5. Adjusted by regime factor.' },
+        zh: {
+            title: '短期看多率 · 5d 預測正報酬比例',
+            desc: '主題內 5 個 mover 中，5 日預測為正報酬的 % 比例（已套用 regime factor 大盤調整）。直接代表「這個題材接下來 1 週多空共識」。',
+            stages: [
+                { key: 'sb_full',     range: [80,100], range_label: '80-100%', tag: '一致看多', action: '全題材搶', detail: '5 movers 全綠，題材內共識最強，分散買 1-2 檔最穩' },
+                { key: 'sb_majority', range: [60,79],  range_label: '60-80%',  tag: '多數看多', action: '挑領頭',   detail: '5 中有 3-4 檔看多，挑 confidence 最高的 1 檔，避免重複曝險' },
+                { key: 'sb_split',    range: [40,59],  range_label: '40-60%',  tag: '分歧',     action: '保守',     detail: '一半半，建議只買最強那 1 檔，倉位降標準 -25%' },
+                { key: 'sb_bearish',  range: [0,39],   range_label: '< 40%',   tag: '看空',     action: '不進',     detail: '多數 movers 預測下跌，題材有問題，當週 skip' },
+            ],
+            hint: 'Theme card 預設按此 metric 排序；regime_factor < 1 時這個分數會被自動 dampen',
+        },
+        en: {
+            title: 'Short Bullish Breadth · % movers w/ + 5d prediction',
+            desc: '% of theme\'s 5 movers with positive 5d prediction (already adjusted by regime factor). Directly reflects 1-week directional consensus inside the theme.',
+            stages: [
+                { key: 'sb_full',     range: [80,100], range_label: '80-100%', tag: 'Unanimous', action: 'Spread bet',  detail: 'Nearly all movers green — strongest theme conviction, diversify across 1-2 names' },
+                { key: 'sb_majority', range: [60,79],  range_label: '60-80%',  tag: 'Majority',  action: 'Pick leader', detail: '3-4 of 5 bullish — pick highest-confidence name, avoid redundant exposure' },
+                { key: 'sb_split',    range: [40,59],  range_label: '40-60%',  tag: 'Split',     action: 'Cautious',    detail: 'Mixed — only buy the strongest, size −25%' },
+                { key: 'sb_bearish',  range: [0,39],   range_label: '< 40%',   tag: 'Bearish',   action: 'Skip',        detail: 'Most movers negative — theme broken, sit out this week' },
+            ],
+            hint: 'Theme cards sort by this metric by default; regime_factor < 1 auto-dampens it',
+        },
     },
     avg_conv: {
-        zh: { title: '平均信心', desc: '主題內 5 個 mover 的 5 日預測信心平均（0-1）。', hint: '<strong>>0.55</strong> 高信心；<strong>0.40-0.55</strong> 中等；<strong><0.40</strong> 低（模型本身不確定）。' },
-        en: { title: 'Avg Conviction', desc: 'Average 5d prediction confidence across the theme\'s movers (0-1).', hint: '<strong>>0.55</strong> high; <strong>0.40-0.55</strong> medium; <strong><0.40</strong> low (model uncertain).' },
+        zh: {
+            title: '平均信心 · theme 內模型確定度',
+            desc: '主題內 5 個 mover 的 5 日預測信心平均（0-1）。低 = 模型本身對這個題材的預測就沒把握；高 = 訊號穩定可信。',
+            stages: [
+                { key: 'ac_high', range: [0.55,1],    range_label: '> 0.55',    tag: '高',   action: '可重押',   detail: '模型訊號清晰，可考慮稍重倉位（仍守 stop）' },
+                { key: 'ac_med',  range: [0.40,0.54], range_label: '0.40-0.55', tag: '中等', action: '標準操作', detail: '訊號一般，依規則進場、標準倉位、不要 outsmart 模型' },
+                { key: 'ac_low',  range: [0,0.39],    range_label: '< 0.40',    tag: '低',   action: '不要進',   detail: '模型沒主見，幾乎隨機猜測，不應該下注' },
+            ],
+            hint: '與 confidence (個股) 區別：avg_conv 是同主題 5 movers 的平均、看題材整體可信度',
+        },
+        en: {
+            title: 'Avg Conviction · model certainty across theme',
+            desc: 'Average 5d prediction confidence across the theme\'s 5 movers (0-1). Low = model uncertain on this theme; high = signals stable and trustworthy.',
+            stages: [
+                { key: 'ac_high', range: [0.55,1],    range_label: '> 0.55',    tag: 'High', action: 'Size up',  detail: 'Clear signals — can size slightly larger (still respect stops)' },
+                { key: 'ac_med',  range: [0.40,0.54], range_label: '0.40-0.55', tag: 'Med',  action: 'Standard', detail: 'Normal — execute the rule, standard size, no outsmarting' },
+                { key: 'ac_low',  range: [0,0.39],    range_label: '< 0.40',    tag: 'Low',  action: 'Skip',     detail: 'Model has no conviction — essentially random, not actionable' },
+            ],
+            hint: 'Different from per-stock confidence: avg_conv = mean across 5 theme movers (theme-level trust)',
+        },
     },
     horizon_1d: {
         zh: { title: '1 日 Horizon', desc: '預測未來 1 個交易日的 target 與 range。', hint: '主要受新聞 + overnight gap 驅動。clamp 至 ±5%。' },
@@ -47,8 +107,26 @@ const RADAR_TERMS = {
         en: { title: 'Prediction Range', desc: 'target_low to target_high — model\'s ±1 ATR confidence band.', hint: 'Not a stop! Just "reasonable price range". For stop, see trading_meta.Stop.' },
     },
     confidence: {
-        zh: { title: 'Confidence (信心)', desc: '0-1 的綜合信心分數，由 7 個 component 加總而成（點開有 breakdown）。', hint: '<strong>>0.55</strong> 強訊號；<strong><0.40</strong> 模型不確定，預測值僅供參考。' },
-        en: { title: 'Confidence', desc: '0-1 composite confidence (sum of 7 components — expand for breakdown).', hint: '<strong>>0.55</strong> strong signal; <strong><0.40</strong> model uncertain, low weight.' },
+        zh: {
+            title: 'Confidence · 0-1 個股信心分數',
+            desc: '7 個 component 加總的個股 5 日預測信心（點開 expanded panel 有 breakdown）。低信心 = 模型自己也不確定，不應重押。',
+            stages: [
+                { key: 'cf_high', range: [0.55,1],    range_label: '> 0.55',    tag: '強訊號', action: '可加碼',     detail: '模型對這檔個股訊號明確，可考慮重倉（仍嚴守 stop）' },
+                { key: 'cf_med',  range: [0.40,0.54], range_label: '0.40-0.55', tag: '中等',   action: '標準操作',   detail: '訊號一般，依規則進場、標準倉位、不要 outsmart 模型' },
+                { key: 'cf_low',  range: [0,0.39],    range_label: '< 0.40',    tag: '弱',     action: '僅供參考',   detail: '模型不確定，預測值僅供參考，不下單或最低倉位' },
+            ],
+            hint: '7 component breakdown: news / sector / momentum / atr / breadth / regime / history',
+        },
+        en: {
+            title: 'Confidence · 0-1 per-stock signal strength',
+            desc: 'Composite from 7 components for the 5d prediction (expand for breakdown). Low = model itself uncertain, do not size up.',
+            stages: [
+                { key: 'cf_high', range: [0.55,1],    range_label: '> 0.55',    tag: 'Strong', action: 'Size up',     detail: 'Clear signal — can size larger (still respect stops)' },
+                { key: 'cf_med',  range: [0.40,0.54], range_label: '0.40-0.55', tag: 'Med',    action: 'Standard',    detail: 'Normal — execute the rule, standard size' },
+                { key: 'cf_low',  range: [0,0.39],    range_label: '< 0.40',    tag: 'Weak',   action: 'Reference',   detail: 'Model uncertain — informational only, no trade or minimum size' },
+            ],
+            hint: '7 components: news / sector / momentum / ATR / breadth / regime / history (expand mover card)',
+        },
     },
     driver_news: {
         zh: { title: 'News Driver (新聞)', desc: 'v0.1 用 volume × gap proxy 模擬新聞催化（v0.2 將接 Finnhub /company-news）。', hint: '<strong>>0.5</strong> 強正向催化；<strong><-0.5</strong> 負向。0 = 無明顯新聞訊號。' },
@@ -63,8 +141,26 @@ const RADAR_TERMS = {
         en: { title: 'Momentum Driver', desc: 'Momentum score from RSI + MA structure (MA20/50/200), range -1 to +1.', hint: 'Stage 2 + RSI 70-85 usually >0.5. RSI > 90 dampened to 0.3 (exhaustion warning).' },
     },
     driver_atr: {
-        zh: { title: 'ATR (波動度)', desc: 'Average True Range 14 日，以當前股價的 % 表示。', hint: '<strong>>5%</strong> 高波動 (Quantum/小型股) → confidence 自動降低；<strong><2%</strong> 低波動 (utility)。' },
-        en: { title: 'ATR (Volatility)', desc: '14-day Average True Range as % of current price.', hint: '<strong>>5%</strong> high vol → auto-lowers confidence; <strong><2%</strong> low vol (utilities).' },
+        zh: {
+            title: 'ATR · 14 日波動度',
+            desc: 'Average True Range 14 日，以當前股價的 % 表示。決定倉位大小：高 ATR = 小倉、低 ATR = 大倉（讓每筆 trade 的金額損失上限固定）。',
+            stages: [
+                { key: 'da_high', range: [5,100],  range_label: '> 5%', tag: '高波動', action: '小倉位',   detail: 'Quantum / 小型股 / earnings 前後常見，confidence 自動降低、停損距離拉開' },
+                { key: 'da_med',  range: [2,4.99], range_label: '2-5%', tag: '中等',   action: '標準倉位', detail: '一般 large-cap 範圍，可用標準倉位公式 (0.33 / ATR%)' },
+                { key: 'da_low',  range: [0,1.99], range_label: '< 2%', tag: '低波動', action: '大倉位',   detail: 'utilities / staples 等防禦類，可開大倉位但 upside 也有限' },
+            ],
+            hint: '個股建議倉位 = 0.33 / ATR%（cap 0.5-5%），假設你接受每筆 0.5% 投組風險',
+        },
+        en: {
+            title: 'ATR · 14-day volatility',
+            desc: '14-day ATR as % of price. Drives position size: high ATR → small size, low ATR → large size (so each trade has a fixed dollar-risk ceiling).',
+            stages: [
+                { key: 'da_high', range: [5,100],  range_label: '> 5%', tag: 'High',   action: 'Small size',   detail: 'Quantum / small-cap / pre-post earnings — auto-lowers confidence, wider stop' },
+                { key: 'da_med',  range: [2,4.99], range_label: '2-5%', tag: 'Medium', action: 'Standard',     detail: 'Typical large-cap range — use standard size formula (0.33 / ATR%)' },
+                { key: 'da_low',  range: [0,1.99], range_label: '< 2%', tag: 'Low',    action: 'Larger size',  detail: 'Utilities / staples — can size up, but upside also limited' },
+            ],
+            hint: 'Position = 0.33 / ATR% (cap 0.5-5%); assumes 0.5% portfolio risk per trade',
+        },
     },
     invalidation: {
         zh: { title: '失效條件', desc: '當下列任一情況觸發，這個 trade thesis 應視為失效。', hint: '<strong>建議用 alert</strong> 在 stop 點 / 條件達成時通知；不要被動持有期待反彈。' },
@@ -95,24 +191,122 @@ const RADAR_TERMS = {
         en: { title: 'FRED Macro Regime', desc: 'Composite regime label from FRED macro signals.', hint: '<strong>Expansion</strong> = normal yield curve + low credit spread; <strong>Caution</strong> = any risk lit up.' },
     },
     factor: {
-        zh: { title: 'Regime Factor (大盤調整係數)', desc: '依 SPY RSI 與 VIX 計算的 dampen/amplify 係數。', hint: '<strong>< 1.0</strong> 大盤過熱/恐慌 → 自動降所有 bullish_breadth；<strong>> 1.0</strong> 反彈機會 → amplify。1.0 = 正常。' },
-        en: { title: 'Regime Factor', desc: 'Dampen/amplify factor derived from SPY RSI + VIX.', hint: '<strong><1.0</strong> overbought/panic → reduce all bullish; <strong>>1.0</strong> rebound opportunity. 1.0 = normal.' },
+        zh: {
+            title: 'Regime Factor · 大盤調整係數',
+            desc: '依 SPY RSI 與 VIX 計算的 dampen/amplify 係數，作用在所有 bullish_breadth 訊號上。意義：「今天大盤適不適合做多」的乘數。',
+            stages: [
+                { key: 'rf_amplify', range: [1.01,5],    range_label: '> 1.0', tag: 'Amplify', action: '反彈機會', detail: 'VIX 高 + SPY RSI 超賣 → 大盤可能反彈，bullish 訊號被放大' },
+                { key: 'rf_normal',  range: [1,1],       range_label: '= 1.0', tag: '正常',    action: '不調整',   detail: 'VIX 與 RSI 都在中性區間，訊號照原值' },
+                { key: 'rf_dampen',  range: [0.5,0.99],  range_label: '< 1.0', tag: 'Dampen',  action: '降規模',   detail: 'SPY 過熱 (RSI > 70) 或 VIX 升高 → bullish 訊號自動降，避免追頂' },
+            ],
+            hint: '套用後的 short_bull 已經是 dampened 值，不需要再手動調整',
+        },
+        en: {
+            title: 'Regime Factor · macro multiplier',
+            desc: 'Dampen/amplify factor from SPY RSI + VIX, applied to all bullish_breadth signals. "Is today\'s tape right for going long?".',
+            stages: [
+                { key: 'rf_amplify', range: [1.01,5],    range_label: '> 1.0', tag: 'Amplify', action: 'Rebound chance', detail: 'High VIX + oversold SPY RSI → rebound likely, bullish signals amplified' },
+                { key: 'rf_normal',  range: [1,1],       range_label: '= 1.0', tag: 'Normal',  action: 'No adjust',      detail: 'VIX and RSI both neutral — signals at face value' },
+                { key: 'rf_dampen',  range: [0.5,0.99],  range_label: '< 1.0', tag: 'Dampen',  action: 'Cut size',       detail: 'SPY overbought (RSI > 70) or VIX spiking → bullish auto-dampened, avoid chasing tops' },
+            ],
+            hint: 'Applied short_bull is already dampened — no need to manually adjust',
+        },
     },
     spy_rsi: {
-        zh: { title: 'SPY RSI 14', desc: 'S&P 500 14 日相對強弱指標。', hint: '<strong>>85</strong> 極端超買；<strong>30-70</strong> 正常；<strong><25</strong> 極端超賣（contrarian buy 機會）。' },
-        en: { title: 'SPY RSI 14', desc: 'S&P 500 14-day RSI.', hint: '<strong>>85</strong> extreme overbought; <strong>30-70</strong> normal; <strong><25</strong> extreme oversold.' },
+        zh: {
+            title: 'SPY RSI 14 · S&P 500 短線強弱',
+            desc: 'S&P 500 14 日相對強弱指標 (0-100)。市場「累積動能」的衡量，極端值往往是反轉訊號。',
+            stages: [
+                { key: 'rsi_extreme_ob', range: [85,100], range_label: '> 85',  tag: '極端超買', action: '逆向防禦', detail: '歷史上 > 85 後 1-2 週多見修正，bullish 訊號夾雜頂部風險' },
+                { key: 'rsi_ob',         range: [70,84],  range_label: '70-85', tag: '超買',     action: '謹慎',     detail: '強勢趨勢中可持續，但不應追高，等回到 65-70 再入場' },
+                { key: 'rsi_normal',     range: [30,69],  range_label: '30-70', tag: '正常',     action: '主操作區', detail: '健康範圍，靠其他 driver 決策、不需額外 dampen' },
+                { key: 'rsi_os',         range: [25,29],  range_label: '25-30', tag: '超賣',     action: '可分批買', detail: '回調買入區，逐步進場、avoid all-in' },
+                { key: 'rsi_extreme_os', range: [0,24],   range_label: '< 25',  tag: '極端超賣', action: '逆向買點', detail: '崩盤級別 → 機構通常開始抄底，高勝率 contrarian 區（仍守 stop）' },
+            ],
+            hint: 'RSI 是短線指標 (14d)，不適合用來判斷大趨勢；配合 trend (MA200) 做最終決策',
+        },
+        en: {
+            title: 'SPY RSI 14 · S&P 500 short-term strength',
+            desc: 'S&P 500 14-day RSI (0-100). Measures market\'s "accumulated momentum" — extremes often mark reversals.',
+            stages: [
+                { key: 'rsi_extreme_ob', range: [85,100], range_label: '> 85',  tag: 'Extreme OB', action: 'Defensive',     detail: '> 85 historically followed by 1-2 week pullback, bullish signals mixed with top risk' },
+                { key: 'rsi_ob',         range: [70,84],  range_label: '70-85', tag: 'Overbought', action: 'Caution',       detail: 'Strong trend can persist, but no chasing — wait for return to 65-70' },
+                { key: 'rsi_normal',     range: [30,69],  range_label: '30-70', tag: 'Normal',     action: 'Main zone',     detail: 'Healthy range — trust other drivers, no extra dampening needed' },
+                { key: 'rsi_os',         range: [25,29],  range_label: '25-30', tag: 'Oversold',   action: 'Scale in',      detail: 'Pullback buy zone — scale in, avoid all-in entries' },
+                { key: 'rsi_extreme_os', range: [0,24],   range_label: '< 25',  tag: 'Extreme OS', action: 'Contrarian buy', detail: 'Crash-level → institutions usually step in, high-win-rate contrarian zone' },
+            ],
+            hint: 'RSI is short-term (14d); not for big-trend calls — pair with trend (MA200) for final decision',
+        },
     },
     vix: {
-        zh: { title: 'VIX (恐慌指數)', desc: 'CBOE 隱含波動率指數。', hint: '<strong><13</strong> 過度自滿；<strong>15-20</strong> 正常；<strong>>25</strong> 緊張；<strong>>40</strong> 投降底。' },
-        en: { title: 'VIX (Fear Index)', desc: 'CBOE implied volatility index.', hint: '<strong><13</strong> complacency; <strong>15-20</strong> normal; <strong>>25</strong> tension; <strong>>40</strong> capitulation.' },
+        zh: {
+            title: 'VIX · 30 日隱含波動率',
+            desc: 'CBOE 計算的 SPX 期權 30 日年化隱含波動率。意義：投資者對未來 30 天波動的「預期」。極端值是反轉訊號。',
+            stages: [
+                { key: 'vix_panic',    range: [40,200],   range_label: '> 40',  tag: '投降底', action: '反向佈局',   detail: '極端恐慌通常臨近底部，高勝率 contrarian zone（FTD confirm 後再大量進）' },
+                { key: 'vix_high',     range: [25,39.99], range_label: '25-40', tag: '緊張',   action: '防禦',       detail: '恐慌升溫，cash 至少 50%，僅持高 conviction，準備抄底訊號' },
+                { key: 'vix_elevated', range: [20,24.99], range_label: '20-25', tag: '升高',   action: '謹慎',       detail: '市場開始緊張，倉位降 20-30%、停損收緊、避免追高' },
+                { key: 'vix_normal',   range: [13,19.99], range_label: '13-20', tag: '正常',   action: '標準操作',   detail: '正常波動環境，無特別訊號，依其他指標決策' },
+                { key: 'vix_calm',     range: [0,12.99],  range_label: '< 13',  tag: '自滿',   action: '留意頂部',   detail: '波動低、市場自滿 — 「過於平靜」也是頂部訊號之一，密切觀察' },
+            ],
+            hint: '參考：5 年中位數約 16-18，> 30 多在崩盤期間，> 40 為極端恐慌（COVID, 2008, etc.）',
+        },
+        en: {
+            title: 'VIX · 30-day implied volatility',
+            desc: 'CBOE\'s 30-day annualized implied volatility on SPX options — what investors expect the next 30 days to look like. Extremes are reversal signals.',
+            stages: [
+                { key: 'vix_panic',    range: [40,200],   range_label: '> 40',  tag: 'Capitulation', action: 'Contrarian zone', detail: 'Extreme fear usually near bottom — high-win-rate zone (full size only after FTD confirms)' },
+                { key: 'vix_high',     range: [25,39.99], range_label: '25-40', tag: 'Tense',        action: 'Defensive',       detail: 'Fear rising, cash 50%+, high-conviction only, prep for capitulation buy' },
+                { key: 'vix_elevated', range: [20,24.99], range_label: '20-25', tag: 'Elevated',     action: 'Caution',         detail: 'Market getting tense — cut size 20-30%, tighten stops, no chasing' },
+                { key: 'vix_normal',   range: [13,19.99], range_label: '13-20', tag: 'Normal',       action: 'Standard',        detail: 'Normal vol environment — defer to other indicators' },
+                { key: 'vix_calm',     range: [0,12.99],  range_label: '< 13',  tag: 'Complacent',   action: 'Watch top',       detail: 'Low vol, complacent market — "too calm" is a topping signal itself' },
+            ],
+            hint: 'Reference: 5y median ~16-18, > 30 in crash periods, > 40 = extreme fear (COVID, 2008)',
+        },
     },
     yield_curve: {
-        zh: { title: '殖利率曲線 T10Y2Y', desc: '10 年公債殖利率 - 2 年公債殖利率（%）。', hint: '<strong>負值 (倒掛)</strong> = 12-18 個月衰退預警；<strong>>1.0</strong> = 健康陡峭。' },
-        en: { title: 'Yield Curve T10Y2Y', desc: '10Y minus 2Y Treasury yield (%).', hint: '<strong>Negative (inverted)</strong> = 12-18m recession warning; <strong>>1.0</strong> = healthy steepness.' },
+        zh: {
+            title: '殖利率曲線 T10Y2Y · 衰退領先指標',
+            desc: '10 年公債殖利率 - 2 年公債殖利率（%）。歷史上負值倒掛領先衰退 12-18 個月，是最可靠的衰退領先指標之一。',
+            stages: [
+                { key: 'yc_steep',    range: [1,10],     range_label: '> 1.0',     tag: '健康陡峭', action: '進攻',   detail: '經濟擴張期典型曲線，銀行利潤好、信用寬鬆，risk-on 環境' },
+                { key: 'yc_flat',     range: [0,0.99],   range_label: '0-1',       tag: '平坦',     action: '留意',   detail: '中性偏謹慎，曲線正在 flatten 中（未倒掛但有警訊）' },
+                { key: 'yc_inverted', range: [-5,-0.01], range_label: '< 0 (倒掛)', tag: '倒掛',     action: '降槓桿', detail: '12-18 個月衰退預警，歷史上 7/9 次倒掛後出現衰退（COVID 提早結束、1995 軟著陸是例外）' },
+            ],
+            hint: '倒掛 ≠ 立即崩盤；通常從倒掛到實際衰退有 12-18 月 lead time，這段期間股市仍可能上漲',
+        },
+        en: {
+            title: 'Yield Curve T10Y2Y · recession leading indicator',
+            desc: '10Y minus 2Y Treasury yield (%). Inversion historically leads recessions by 12-18 months — one of the most reliable leading indicators.',
+            stages: [
+                { key: 'yc_steep',    range: [1,10],     range_label: '> 1.0',     tag: 'Steep',    action: 'Attack',  detail: 'Typical expansion shape — bank profits good, credit easy, risk-on environment' },
+                { key: 'yc_flat',     range: [0,0.99],   range_label: '0-1',       tag: 'Flat',     action: 'Watch',   detail: 'Neutral-cautious, curve flattening (not yet inverted but warning)' },
+                { key: 'yc_inverted', range: [-5,-0.01], range_label: '< 0 (inv)', tag: 'Inverted', action: 'De-risk', detail: '12-18m recession warning — 7/9 inversions historically preceded recession (COVID, 1995 soft-landing exceptions)' },
+            ],
+            hint: 'Inversion ≠ immediate crash; usually 12-18m lead time before recession, market often rallies in between',
+        },
     },
     credit_spread: {
-        zh: { title: '信用利差百分位 (1Y)', desc: '高收益債利差在過去 1 年的百分位。', hint: '<strong>>75</strong> 信用市場緊縮 (risk-off 警示)；<strong><30</strong> 寬鬆。' },
-        en: { title: 'Credit Spread Percentile', desc: 'High-yield credit spread vs past year percentile.', hint: '<strong>>75</strong> credit stress (risk-off); <strong><30</strong> easy money.' },
+        zh: {
+            title: '信用利差百分位 · 信用市場壓力',
+            desc: '高收益債利差在過去 1 年的百分位。直接反映「市場願不願意借錢給弱信用公司」 — 高百分位 = 信用緊縮、risk-off 跡象。',
+            stages: [
+                { key: 'cs_easy',   range: [0,29],   range_label: '< 30',  tag: '寬鬆', action: '滿倉可',     detail: '市場願意承擔信用風險，risk-on 環境，公司債發行容易' },
+                { key: 'cs_normal', range: [30,74],  range_label: '30-75', tag: '正常', action: '標準操作',   detail: '信用市場中性，無特別風險訊號' },
+                { key: 'cs_stress', range: [75,100], range_label: '> 75',  tag: '緊縮', action: '降風險',     detail: '信用市場緊縮 (risk-off 警示)，弱信用公司發債困難，潛在違約風險上升' },
+            ],
+            hint: '信用利差通常領先股市轉折 1-2 月；歷史上 spread 暴衝多在 2008 / COVID / 2022 risk-off 期間',
+        },
+        en: {
+            title: 'Credit Spread Percentile (1Y) · credit stress',
+            desc: 'High-yield credit spread vs past year percentile. Direct read on "does the market want to lend to weak credits?" — high = credit tightening, risk-off.',
+            stages: [
+                { key: 'cs_easy',   range: [0,29],   range_label: '< 30',  tag: 'Easy',   action: 'Full size', detail: 'Market willing to take credit risk, risk-on, easy debt issuance' },
+                { key: 'cs_normal', range: [30,74],  range_label: '30-75', tag: 'Normal', action: 'Standard',  detail: 'Credit market neutral, no special risk signal' },
+                { key: 'cs_stress', range: [75,100], range_label: '> 75',  tag: 'Stress', action: 'De-risk',   detail: 'Credit tightening (risk-off warning), weak credits struggle to issue, default risk rising' },
+            ],
+            hint: 'Credit spreads often lead equity turns by 1-2 months; spikes historically in 2008 / COVID / 2022 risk-off periods',
+        },
     },
 };
 
@@ -121,7 +315,55 @@ function getTermTip(key) {
     return RADAR_TERMS[key]?.[lang] || null;
 }
 
-// Tooltip element handler (mirrors momentum's mom-pill-tooltip pattern)
+// ── Stage helpers (mirrors signal-tip-tooltip in utils.js) ──────────
+// Color dot per tier — same palette as the AI verdict zone tooltips for
+// visual consistency across pages.
+const RADAR_STAGE_DOTS = {
+    // mid_heat
+    mh_hot: '🟢', mh_warm: '🟡', mh_cool: '🔴',
+    // short_bull
+    sb_full: '🟢', sb_majority: '🟡', sb_split: '🟠', sb_bearish: '🔴',
+    // avg_conv / confidence
+    ac_high: '🟢', ac_med: '🟡', ac_low: '🔴',
+    cf_high: '🟢', cf_med: '🟡', cf_low: '🔴',
+    // driver_atr (high vol = caution; low vol = green for sizing)
+    da_high: '🟠', da_med: '🟡', da_low: '🟢',
+    // factor (amplify = good rebound, dampen = caution)
+    rf_amplify: '🟢', rf_normal: '🟡', rf_dampen: '🟠',
+    // SPY RSI (extreme contrarian zones tagged green for the contrarian opportunity, red for top risk)
+    rsi_extreme_ob: '🔴', rsi_ob: '🟠', rsi_normal: '🟢', rsi_os: '🟡', rsi_extreme_os: '🟢',
+    // VIX
+    vix_panic: '🟢', vix_high: '🟠', vix_elevated: '🟡', vix_normal: '🟢', vix_calm: '🟡',
+    // yield curve
+    yc_steep: '🟢', yc_flat: '🟡', yc_inverted: '🔴',
+    // credit spread
+    cs_easy: '🟢', cs_normal: '🟡', cs_stress: '🔴',
+};
+
+function classifyRadarStage(stages, value) {
+    if (value == null || value === '' || isNaN(value)) return null;
+    const n = Number(value);
+    return stages.find(s => n >= s.range[0] && n <= s.range[1]) || null;
+}
+
+function renderRadarStageRows(stages, activeStage) {
+    return stages.map(s => {
+        const active = activeStage && s.key === activeStage.key;
+        return `<div class="rtt-stage-row${active ? ' rtt-stage-active' : ''}">
+            <span class="rtt-stage-dot">${RADAR_STAGE_DOTS[s.key] || '⚪'}</span>
+            <span class="rtt-stage-range">${s.range_label}</span>
+            <span class="rtt-stage-tag">${s.tag}</span>
+            <span class="rtt-stage-action">${s.action}</span>
+            <div class="rtt-stage-detail">${s.detail}</div>
+        </div>`;
+    }).join('');
+}
+
+// Tooltip element handler (mirrors momentum's mom-pill-tooltip pattern).
+// When `entry.stages` is present, also render a stage-row table — the active
+// row is determined by the data-tip-value attribute (set by the renderer that
+// emits the hover target). For tips without a live numeric value, no row is
+// highlighted but the table still serves as a "interpretation guide".
 let _radarHideTimer = null;
 function showRadarTip(el) {
     const tip = $('radar-term-tooltip');
@@ -129,9 +371,16 @@ function showRadarTip(el) {
     const key = el.dataset.radarTip;
     const entry = getTermTip(key);
     if (!entry) return;
+    let stagesHTML = '';
+    if (Array.isArray(entry.stages) && entry.stages.length) {
+        const liveValue = el.dataset.tipValue;  // optional — set by renderer for live highlight
+        const active = classifyRadarStage(entry.stages, liveValue);
+        stagesHTML = `<div class="rtt-stages">${renderRadarStageRows(entry.stages, active)}</div>`;
+    }
     tip.innerHTML = `
         <div class="rtt-title">${escapeHtml(entry.title)}</div>
         <div class="rtt-desc">${entry.desc}</div>
+        ${stagesHTML}
         <div class="rtt-hint">${entry.hint}</div>
     `;
     tip.style.opacity = '0';

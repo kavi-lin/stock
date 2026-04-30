@@ -38,26 +38,29 @@
         /* Custom hover tooltip for signal / warning pills — replaces the
            native `title=` tooltip which was ugly and showed the raw key.
            Positioned absolutely via JS; fades in/out. */
+        /* Visual style aligned with #signal-tip-tooltip (AI verdict zone) for
+           cross-page consistency. */
         #mom-pill-tooltip {
-            position: fixed; z-index: 9999; max-width: 320px;
+            position: fixed; z-index: 9999; max-width: 360px;
             background: var(--bg-card, #18181b);
             border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 10px; padding: 11px 13px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+            border-radius: 8px; padding: 11px 13px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             pointer-events: none;
-            opacity: 0; transform: translateY(2px);
-            transition: opacity 0.12s, transform 0.12s;
+            font-size: 12px; line-height: 1.55;
+            opacity: 0; transform: translateY(4px);
+            transition: opacity 0.12s ease;
+            backdrop-filter: blur(8px);
         }
         #mom-pill-tooltip.visible { opacity: 1; transform: translateY(0); }
         #mom-pill-tooltip .mpt-title {
-            font-size: 11px; font-weight: 800; letter-spacing: 0.04em;
+            font-size: 12.5px; font-weight: 800; letter-spacing: 0.01em;
             margin-bottom: 5px;
         }
         #mom-pill-tooltip.mpt-signal  .mpt-title { color: #22c55e; }
         #mom-pill-tooltip.mpt-warning .mpt-title { color: #ef4444; }
-        #mom-pill-tooltip.mpt-preset  .mpt-title { color: #a78bfa; font-size: 12px; }
-        /* Widen for preset tooltips — more content to fit */
-        #mom-pill-tooltip.mpt-preset  { max-width: 380px; }
+        #mom-pill-tooltip.mpt-preset  .mpt-title { color: #a78bfa; font-size: 13px; }
+        #mom-pill-tooltip.mpt-preset  { max-width: 400px; }
         #mom-pill-tooltip .mpt-section-label {
             font-size: 9px; font-weight: 900;
             letter-spacing: 0.1em; text-transform: uppercase;
@@ -65,7 +68,7 @@
             margin-top: 8px; margin-bottom: 3px;
         }
         #mom-pill-tooltip .mpt-criteria {
-            font-size: 11px; line-height: 1.55;
+            font-size: 11.5px; line-height: 1.55;
             color: var(--text-main, #d4d4d8);
             padding-left: 16px; margin: 0 0 4px 0;
             list-style: disc;
@@ -73,15 +76,37 @@
         #mom-pill-tooltip .mpt-criteria li { margin-bottom: 1px; }
         #mom-pill-tooltip.mpt-preset .mpt-hint::before { content: '🎯 '; }
         #mom-pill-tooltip .mpt-desc {
-            font-size: 11px; line-height: 1.55;
+            font-size: 11.5px; line-height: 1.55;
             color: var(--text-main, #d4d4d8);
             margin-bottom: 6px;
         }
-        #mom-pill-tooltip .mpt-hint {
-            font-size: 10px; line-height: 1.5;
-            color: var(--text-muted, #a1a1aa);
-            border-top: 1px solid rgba(255,255,255,0.07);
+        /* Tier rows — same visual schema as stt-stage-row in style.css */
+        #mom-pill-tooltip .mpt-tiers {
+            margin: 6px 0;
+            border-top: 1px solid rgba(255,255,255,0.08);
             padding-top: 6px;
+        }
+        #mom-pill-tooltip .mpt-tier-row {
+            display: grid;
+            grid-template-columns: 14px 1fr;
+            gap: 6px;
+            align-items: start;
+            padding: 4px 0;
+            font-size: 10.5px; line-height: 1.5;
+        }
+        #mom-pill-tooltip .mpt-tier-dot { font-size: 11px; }
+        #mom-pill-tooltip .mpt-tier-text {
+            color: var(--text-main, #d4d4d8);
+        }
+        #mom-pill-tooltip .mpt-tier-text strong {
+            color: var(--text-main, #d4d4d8);
+            font-weight: 700;
+        }
+        #mom-pill-tooltip .mpt-hint {
+            font-size: 10.5px; line-height: 1.5;
+            color: var(--text-muted, #a1a1aa);
+            border-top: 1px dashed rgba(255,255,255,0.10);
+            padding-top: 6px; margin-top: 6px;
         }
         #mom-pill-tooltip .mpt-hint::before { content: '💡 '; }
 
@@ -583,6 +608,7 @@
                             <button class="segmented-btn active" data-value="any">All</button>
                             <button class="segmented-btn" data-value="sp500">S&P 500</button>
                             <button class="segmented-btn" data-value="nasdaq100">Nasdaq 100</button>
+                            <button class="segmented-btn" data-value="sox">費半 SOX</button>
                         </div>
                     </div>
                     <div>

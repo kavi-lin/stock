@@ -36,10 +36,18 @@
       const res = await fetch('/api/analyze-queue');
       if (!res.ok) return _state;
       const next = await res.json();
+      // v1.61: queue is now unified across all protocols. This widget cares
+      // about invest only (ticker analyses on index.html). Filter the rest out.
+      const isInvestEntry = q => q && (q.name === 'invest' || !q.name) && (q.ticker || (q.params || {}).ticker);
+      const investActive = next.active && (next.active.name === 'invest' || !next.active.name) && next.active.ticker;
+      const investQueue  = (Array.isArray(next.queue) ? next.queue : []).filter(isInvestEntry).map(q => ({
+        ...q, ticker: q.ticker || (q.params || {}).ticker,
+      }));
+      const investRecent = (Array.isArray(next.recent) ? next.recent : []).filter(r => r && r.ticker);
       _state = {
-        active: next.active || null,
-        queue:  Array.isArray(next.queue)  ? next.queue  : [],
-        recent: Array.isArray(next.recent) ? next.recent : [],
+        active: investActive ? next.active : null,
+        queue:  investQueue,
+        recent: investRecent,
       };
       _notify();
       return _state;

@@ -5,9 +5,26 @@
 ## PHASE 1 — SECTOR ROTATION SCAN
 
 **Agent**: Sector Rotation Analyst
-**資料來源**: `sector-analyst` CSV（不需 API key）
+**資料來源**: `sector-analyst` CSV（不需 API key）+ FMP 估值層（V1.4，FMP HTTP REST，hard-required）
 
-> Phase 1 完成後，將各產業 `uptrend_ratio` 的平均值回填至 `_phase0.uptrend_ratio_overall`。
+### Step 1 — uptrend_ratio (CSV)
+
+> Phase 1 完成 CSV pass 後，將各產業 `uptrend_ratio` 的平均值回填至 `_phase0.uptrend_ratio_overall`。
+
+### Step 2 — Sector Valuation Layer（V1.4 必跑）
+
+執行：
+
+```bash
+python3 sector/scripts/fetch_sector_valuation.py --date {SCAN_DATE}
+```
+
+- 輸出：`sector/cache/sector_valuation_<DATE>.json`
+- 失敗 = **HARD FAIL**：腳本 `sys.exit(1)` 並印 `[ERROR] FMP ...`。**Phase 1 中止，不繼續 Phase 2/3/4/5**。
+  - Fix：檢查 `$FMP_API_KEY`、FMP 服務狀態、rate limit。修好後重跑整個 protocol。
+- 成功後將每個 sector 的 valuation block（`pe_ttm` / `pe_zscore_1y` / `rs_vs_spy_3m` / `etf_volume_ratio_20d` / `etf` 等）寫入 `_phase1.sectors[i].sector_valuation`（schema.md 已定義）。
+
+> ⚠️ V1.4 的 FMP 估值層**不**像 FRED Layer E 是 graceful optional —— 缺它就無 valuation_penalty，最終 verdict 會缺 overbought/oversold 對照。protocol 必須 abort，由人介入。
 
 **JSON Schema** → 見 `schema.md` Phase 1
 
@@ -46,24 +63,60 @@ python3 skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 10800
 Step 1  market-sentiment-analyzer   → fear_greed / VIX / RSI / Put-Call
 Step 2  economic-calendar-fetcher   → FOMC / CPI / NFP / GDP 日期
 Step 3  earnings-calendar           → 本週 mid+ 大型股財報日
+Step 3b sector-earnings-pulse       → 過去 30d sector beat_rate / surprise (V1.4 必跑)
+Step 3c sector-smart-money          → insider / senate signals (V1.4 必跑)
+Step 3d sector-news-cache           → FMP /news/stock per-sector top 10 (V1.4 必跑;取代 WebSearch 主力)
 Step 4  reuse _phase0.fred_snapshot → fed_rate_direction / yield (不再 search)
-Step 5  WebSearch HARD CAP ≤ 5     → 見 query 範本
+Step 5  WebSearch HARD CAP ≤ 2     → 僅補 narrative-class 突發事件,不抓 Step 3d 已有的個股新聞
 ```
+
+### Step 3b — Sector Earnings Pulse（V1.4 必跑）
+
+```bash
+python3 sector/scripts/fetch_earnings_pulse.py --date {SCAN_DATE}
+```
+
+- 輸出：`sector/cache/sector_earnings_pulse_<DATE>.json`
+- 失敗 = HARD FAIL（同 Phase 1 sector_valuation 處理；中止 protocol）。
+- 成功後將 `sectors` block 寫入 `_phase3.sector_earnings_pulse`。
+- **Rubric 用法**：`news_catalyst` 元件 ±5
+  - `beat_rate_30d > 0.7 AND surprise_score_avg > 0`（且 report_count ≥ 5）→ +5
+  - `beat_rate_30d < 0.4`（且 report_count ≥ 5）→ −5
+  - `report_count < 5` → 樣本不足，skip 不調分
+
+### Step 3c — Smart Money Signals（V1.4 必跑）
+
+```bash
+python3 sector/scripts/fetch_smart_money.py --date {SCAN_DATE}
+```
+
+- 輸出：`sector/cache/sector_smart_money_<DATE>.json`
+- 失敗 = HARD FAIL。
+- 成功後將 `sectors` block 寫入 `_phase3.smart_money_signals`。
+- **Phase 4b 用法**：HOT consensus + insider ratio < 0.5 + senate net buy < 0 → 強制 divergence challenge（見 `phase_4-5.md` Step 2 規則 5）。
+
+### Step 3d — Sector News Cache（V1.4 必跑;取代 WebSearch 主力）
+
+```bash
+python3 sector/scripts/fetch_sector_news.py --date {SCAN_DATE} --lookback-days 2
+```
+
+- 輸出：`sector/cache/sector_news_<DATE>.json`(11 sectors × top 10 articles)
+- 失敗 = HARD FAIL。
+- 此 cache 是 `top_catalysts` 的主資料源 — 從每 sector 的 articles 抽取 catalyst 事件,引用 `url`/`publisher` 為 source
+- WebSearch step 5 縮減到 ≤2 query 只用於補 narrative-class(整體市場情緒、突發事件未被 FMP 索引)。**禁止**用 WebSearch 抓 Step 3d 已有的個股新聞
 
 > **禁止**用 WebSearch 抓 Step 1-4 已有的（FOMC/財報日期、利率、F&G、VIX）。
 > **禁止**同主題 ≥ 2 個查詢。
 
-### Step 5 WebSearch Query 範本（最多 5 個）
+### Step 5 WebSearch Query 範本（V1.4：HARD CAP ≤ 2）
 
 ```
 1. "stock market news today {DATE} S&P 500 close" — 當日 narrative（必）
-2. "Trump tariff statement {DATE} sector" — 若 named_targets 非空
-3. "Iran Israel oil news {DATE}" — 若 Energy/Defense ∈ HOT/WARM
-4. "this week mega cap earnings beat miss" — 財報 surprise narrative
-5. (預留給當日突發)
+2. (預留給當日突發 — Trump tariff / 地緣政治 / 突發 macro)
 ```
 
-> 禁止查：Russia/Ukraine、FDA PDUFA、bank earnings dates、copper price、AI capex、DOJ Powell（個股層級，不在 sector 範圍）。
+> 禁止查：個股新聞（已在 Step 3d sector_news cache）；FOMC/財報日期/利率/F&G/VIX（已在 Step 1-4）；Russia/Ukraine、FDA PDUFA、bank earnings dates、copper price、AI capex、DOJ Powell（個股層級，不在 sector 範圍）。
 
 ### 情緒數值提取（填入 `political_overlay`）
 

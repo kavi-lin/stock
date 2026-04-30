@@ -1,0 +1,911 @@
+{
+  "as_of_date": "2026-04-29",
+  "schema_version": "V1.4",
+  "lookback_days": 2,
+  "max_per_sector": 10,
+  "total_articles": 110,
+  "sectors": {
+    "Technology": [
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-04-29 14:13:00",
+        "publisher": "24/7 Wall Street",
+        "title": "Don't Call It a Laggard: Why NVIDIA Is Up 20% in April",
+        "excerpt": "Shares of NVIDIA (NASDAQ:NVDA | NVDA Price Prediction) are pulling back at midday Wednesday, with the stock down 2% to $209.40 after touching fresh all-time highs earlier this week.",
+        "url": "https://247wallst.com/investing/2026/04/29/dont-call-it-a-laggard-why-nvidia-is-up-20-in-april/"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-04-29 14:11:17",
+        "publisher": "Zacks Investment Research",
+        "title": "Apple's Q2 Earnings: Strong iPhone 17 Shipment to Aid Top-Line Growth",
+        "excerpt": "Apple's Q2 FY26 results may ride on iPhone 17 momentum, with new Macs and iPads also setting up modest segment growth.",
+        "url": "https://www.zacks.com/stock/news/2911172/apple-s-q2-earnings-strong-iphone-17-shipment-to-aid-top-line-growth?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_preview-2911172"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-29 14:11:11",
+        "publisher": "Zacks Investment Research",
+        "title": "Capitalizing on the AI Buildout: High-Conviction Stock Picks",
+        "excerpt": "Here, we have picked three AI stocks, NVDA, AVGO and MU, which are well-poised to benefit from AI's growing use and ability to solve complex problems.",
+        "url": "https://www.zacks.com/stock/news/2911174/capitalizing-on-the-ai-buildout-high-conviction-stock-picks?cid=CS-STOCKNEWSAPI-FT-artificial_intelligence_(ai)-2911174"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-04-29 13:43:21",
+        "publisher": "24/7 Wall Street",
+        "title": "Nvidia Stock Set for 8% Gain\u2014Bull Case",
+        "excerpt": "Let's get straight to the call. Our 24/7 Wall St. price target for NVIDIA (NASDAQ:NVDA | NVDA Price Prediction) is $235.01 over the next 12 months, implying 8.49% upside from $216.61.",
+        "url": "https://247wallst.com/investing/2026/04/29/nvidia-stock-set-for-8-gain-bull-case/"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-04-29 13:26:45",
+        "publisher": "Bloomberg Technology",
+        "title": "Apple to Add AI-Powered Photo-Editing Tools",
+        "excerpt": "Apple is planning a major overhaul of the built-in photo-editing features, powered by its Apple Intelligence platform, according to people familiar with the plans. Bloomberg's Mark Gurman joins Caroline Hyde and Ed Ludlow on \u201cBloomberg Tech.",
+        "url": "https://www.youtube.com/watch?v=-eMQzIyxycU"
+      },
+      {
+        "symbol": "AVGO",
+        "publishedDate": "2026-04-29 13:00:34",
+        "publisher": "Zacks Investment Research",
+        "title": "Broadcom Inc. (AVGO) Is Up 3.99% in One Week: What You Should Know",
+        "excerpt": "Does Broadcom Inc. (AVGO) have what it takes to be a top stock pick for momentum investors? Let's find out.",
+        "url": "https://www.zacks.com/stock/news/2911110/broadcom-inc-avgo-is-up-3-99-in-one-week-what-you-should-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_10-2911110"
+      },
+      {
+        "symbol": "AVGO",
+        "publishedDate": "2026-04-29 12:23:44",
+        "publisher": "24/7 Wall Street",
+        "title": "How This One AI Stock Became My Obsession",
+        "excerpt": "I keep buying Broadcom (NASDAQ:AVGO | AVGO Price Prediction) and I am not going to pretend otherwise.",
+        "url": "https://247wallst.com/investing/2026/04/29/how-this-one-ai-stock-became-my-obsession/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-04-29 12:12:25",
+        "publisher": "Finbold",
+        "title": "U.S. politician suspiciously dumps Nvidia (NVDA) stock",
+        "excerpt": "United States Rep. Tim Moore has dumped a notable number of shares, with his handling of a Nvidia (NASDAQ: NVDA) stake standing out.",
+        "url": "https://finbold.com/u-s-politician-suspiciously-dumps-nvidia-nvda-stock/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-04-29 12:09:01",
+        "publisher": "24/7 Wall Street",
+        "title": "I'd Buy This Stock If I Lost Everything Today",
+        "excerpt": "I keep buying NVIDIA (NASDAQ:NVDA | NVDA Price Prediction).",
+        "url": "https://247wallst.com/investing/2026/04/29/id-buy-this-stock-if-i-lost-everything-today/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-29 12:00:36",
+        "publisher": "Schwab Network",
+        "title": "MSFT More than 20% Below Record High: Can AI Growth Offer Rebound?",
+        "excerpt": "Microsoft (MSFT) needs to show its AI CapEx spending is paying off, says John Belton. His focus will be on Microsoft Azure cloud growth and ways Copilot plays a role in it.",
+        "url": "https://www.youtube.com/watch?v=L-qWJueKkpQ"
+      }
+    ],
+    "Healthcare": [
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-29 14:00:48",
+        "publisher": "Seeking Alpha",
+        "title": "Eli Lilly Stock Could Rise Sharply After Earnings",
+        "excerpt": "Eli Lilly and Company has declined over 20% since January despite strong anticipated Q1 results and has not participated in the recent market rally. Options market positioning is extremely bearish with high implied volatility, but this may set up a bullish reversal post-earnings ",
+        "url": "https://seekingalpha.com/article/4895971-eli-lilly-stock-could-rise-sharply-after-earnings"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-29 13:47:12",
+        "publisher": "Investopedia",
+        "title": "Here's How Much Traders Expect Eli Lilly Stock To Move After Earnings",
+        "excerpt": "Eli Lilly is scheduled to report its latest quarterly earnings ahead of the opening bell Thursday, with shares seen potentially falling to their lowest level in months following the report.",
+        "url": "https://www.investopedia.com/here-is-how-much-traders-expect-eli-lilly-stock-to-move-after-earnings-lly-q1-fy2026-11959963"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-04-29 13:36:09",
+        "publisher": "Zacks Investment Research",
+        "title": "Humana Beats Q1 Earnings Estimates on Increasing Premiums",
+        "excerpt": "HUM posts Q1 earnings beat as premiums surge and membership grows, but rising costs and benefit ratio pressure weigh on profit.",
+        "url": "https://www.zacks.com/stock/news/2911183/humana-beats-q1-earnings-estimates-on-increasing-premiums?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2911183"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-04-29 13:00:00",
+        "publisher": "Schwab Network",
+        "title": "The Big 3: UNH, EEM & GE",
+        "excerpt": "Don Kaufman, co-founder of @Theotrade, walks us through today's Big 3 trades. He points to UnitedHealth (UNH) as \"appetizing for a trade,\" noting explosive moves to the upside he sees running out of gas.",
+        "url": "https://www.youtube.com/watch?v=-biQ1t2tS1g"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-04-29 12:31:12",
+        "publisher": "Zacks Investment Research",
+        "title": "ABBV Beats on Q1 Earnings & Sales, Raises '26 EPS View",
+        "excerpt": "AbbVie tops Q1 estimates on strong Rinvoq and Skyrizi sales, lifts 2026 EPS outlook and gains premarket despite continued Humira and Imbruvica declines.",
+        "url": "https://www.zacks.com/stock/news/2911041/abbv-beats-on-q1-earnings-sales-raises-26-eps-view?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2911041"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-04-29 12:01:08",
+        "publisher": "Zacks Investment Research",
+        "title": "AbbVie (ABBV) Q1 Earnings: Taking a Look at Key Metrics Versus Estimates",
+        "excerpt": "Although the revenue and EPS for AbbVie (ABBV) give a sense of how its business performed in the quarter ended March 2026, it might be worth considering how some key metrics compare with Wall Street estimates and the year-ago numbers.",
+        "url": "https://www.zacks.com/stock/news/2911016/abbvie-abbv-q1-earnings-taking-a-look-at-key-metrics-versus-estimates?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911016"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-04-29 11:40:25",
+        "publisher": "Zacks Investment Research",
+        "title": "ABBV Seeks FDA Nod for Rinvoq Label Expansion in Alopecia Areata",
+        "excerpt": "AbbVie files for the FDA approval of Rinvoq in alopecia areata, backed by phase III data showing strong hair regrowth and durable results.",
+        "url": "https://www.zacks.com/stock/news/2910972/abbv-seeks-fda-nod-for-rinvoq-label-expansion-in-alopecia-areata?cid=CS-STOCKNEWSAPI-FT-analyst_blog|company_news_medical_sector-2910972"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-04-29 11:37:25",
+        "publisher": "24/7 Wall Street",
+        "title": "3 Dividend Kings That Have Outrun the Nasdaq Over 12 Months",
+        "excerpt": "The Nasdaq Index carries companies that are known for moving fast and breaking things.",
+        "url": "https://247wallst.com/investing/2026/04/29/3-dividend-kings-that-have-outrun-the-nasdaq-over-12-months/"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-04-29 11:31:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Big Boosts to Econ Growth from AI Investment, Inventories & More",
+        "excerpt": "For once, there is something even bigger than the Strait of Hormuz affecting investors' attitudes this morning.",
+        "url": "https://www.zacks.com/stock/news/2910966/big-boosts-to-econ-growth-from-ai-investment-inventories-more?cid=CS-STOCKNEWSAPI-FT-ahead_of_wall_street-2910966"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-29 11:13:00",
+        "publisher": "Seeking Alpha",
+        "title": "Artisan Global Opportunities Fund Q1 2026 Portfolio Activity",
+        "excerpt": "During the quarter, we initiated new positions in Edwards Lifesciences, Eli Lilly and Roblox. In addition to Linde, Shopify and Amazon, we also added to Woodward and Spotify during the quarter. We ended our investment campaigns in Netflix, Snowflake and RELX during the quarter.",
+        "url": "https://seekingalpha.com/article/4895820-artisan-global-opportunities-fund-q1-2026-portfolio-activity"
+      }
+    ],
+    "Energy": [
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-29 11:47:08",
+        "publisher": "Fool - Investing News",
+        "title": "FDVV vs. VYM: Same Dividend Focus, Very Different Sector Bets",
+        "excerpt": "One fund emphasizes tech-driven income, while the other prioritizes broader diversification and lower costs. Key differences shape their risk and return.",
+        "url": "https://www.fool.com/coverage/etfs/2026/04/29/fdvv-vs-vym-same-dividend-focus-very-different-sector-bets/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-04-29 11:08:00",
+        "publisher": "Fool - Investing News",
+        "title": "A Major Oil Executive Warns That the Global Oil Supply Disruption Could Last Into 2027. Here's What That Means for Oil Stocks.",
+        "excerpt": "The oil market won't return to normal any time soon.",
+        "url": "https://www.fool.com/investing/2026/04/29/a-major-oil-executive-warns-that-the-global-oil-su/"
+      },
+      {
+        "symbol": "EOG",
+        "publishedDate": "2026-04-29 11:02:33",
+        "publisher": "Zacks Investment Research",
+        "title": "Earnings Preview: SM Energy (SM) Q1 Earnings Expected to Decline",
+        "excerpt": "SM Energy (SM) doesn't possess the right combination of the two key ingredients for a likely earnings beat in its upcoming report. Get prepared with the key expectations.",
+        "url": "https://www.zacks.com/stock/news/2910906/earnings-preview-sm-energy-sm-q1-earnings-expected-to-decline?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_9-2910906"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-29 10:51:25",
+        "publisher": "Fool - Investing News",
+        "title": "Occidental Petroleum vs. Exxon Mobil: Comparing Scale in Quarterly Revenue",
+        "excerpt": "Quarterly results reveal a pronounced revenue gap and contrasting margin performance between these two energy giants. See how recent trends are shaping the race",
+        "url": "https://www.fool.com/coverage/charts/2026/04/29/occidental-petroleum-vs-exxon-mobil-comparing-scale-in-quarterly-revenue/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-04-29 10:45:20",
+        "publisher": "MarketBeat",
+        "title": "The Crude Reality: Pullback Creates High-Conviction Opportunity in Chevron",
+        "excerpt": "A technical pullback in the energy sector has reset valuations, creating a potential entry point for investors. Despite a recent capital rotation out of sector-tracking funds, the macroeconomic drivers for sustained energy prices remain firmly in place.",
+        "url": "https://www.marketbeat.com/originals/the-crude-reality-pullback-creates-high-conviction-opportunity-in-chevron/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-04-29 10:25:35",
+        "publisher": "Zacks Investment Research",
+        "title": "Is ConocoPhillips Set to Gain From Current Elevation in Crude Prices?",
+        "excerpt": "COP gains from rising crude prices amid Middle East tensions, strengthening its earnings outlook and cash flow potential.",
+        "url": "https://www.zacks.com/stock/news/2910955/is-conocophillips-set-to-gain-from-current-elevation-in-crude-prices?cid=CS-STOCKNEWSAPI-FT-analyst_blog|quick_take-2910955"
+      },
+      {
+        "symbol": "SLB",
+        "publishedDate": "2026-04-29 10:02:34",
+        "publisher": "Zacks Investment Research",
+        "title": "Investors Heavily Search SLB Limited (SLB): Here is What You Need to Know",
+        "excerpt": "Recently, Zacks.com users have been paying close attention to SLB (SLB). This makes it worthwhile to examine what the stock has in store.",
+        "url": "https://www.zacks.com/stock/news/2910563/investors-heavily-search-slb-limited-slb-here-is-what-you-need-to-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks_v1-2910563"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-29 07:37:00",
+        "publisher": "GuruFocus",
+        "title": "First Look: Fed Hold, Big Tech Earnings, Disney Keeps ESPN",
+        "excerpt": "Stock News UAE exits OPEC: As the United Arab Emirates quits OPEC effective May 1, oil-market coordination weakens and price control shifts, a development close",
+        "url": "https://www.gurufocus.com/news/8826399/first-look-fed-hold-big-tech-earnings-disney-keeps-espn"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-29 07:21:13",
+        "publisher": "Zacks Investment Research",
+        "title": "Is iShares Core S&P U.S. Value ETF (IUSV) a Strong ETF Right Now?",
+        "excerpt": "Launched on 07/24/2000, the iShares Core S&P U.S. Value ETF (IUSV) is a smart beta exchange traded fund offering broad exposure to the Style Box - All Cap Value category of the market.",
+        "url": "https://www.zacks.com/stock/news/2910395/is-ishares-core-s-p-u-s-value-etf-iusv-a-strong-etf-right-now?cid=CS-STOCKNEWSAPI-FT-smart_beta_etf-2910395"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-29 07:21:09",
+        "publisher": "Zacks Investment Research",
+        "title": "Should You Invest in the iShares U.S. Energy ETF (IYE)?",
+        "excerpt": "The iShares U.S. Energy ETF (IYE) was launched on June 12, 2000, and is a passively managed exchange traded fund designed to offer broad exposure to the Energy - Broad segment of the equity market.",
+        "url": "https://www.zacks.com/stock/news/2910393/should-you-invest-in-the-ishares-u-s-energy-etf-iye?cid=CS-STOCKNEWSAPI-FT-sector_etf-2910393"
+      }
+    ],
+    "Financials": [
+      {
+        "symbol": "GS",
+        "publishedDate": "2026-04-29 12:51:31",
+        "publisher": "Seeking Alpha",
+        "title": "The Goldman Sachs Group, Inc. (GS) Shareholder/Analyst Call Prepared Remarks Transcript",
+        "excerpt": "The Goldman Sachs Group, Inc. (GS) Shareholder/Analyst Call Prepared Remarks Transcript",
+        "url": "https://seekingalpha.com/article/4895960-the-goldman-sachs-group-inc-gs-shareholder-analyst-call-prepared-remarks-transcript"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-29 11:47:08",
+        "publisher": "Fool - Investing News",
+        "title": "FDVV vs. VYM: Same Dividend Focus, Very Different Sector Bets",
+        "excerpt": "One fund emphasizes tech-driven income, while the other prioritizes broader diversification and lower costs. Key differences shape their risk and return.",
+        "url": "https://www.fool.com/coverage/etfs/2026/04/29/fdvv-vs-vym-same-dividend-focus-very-different-sector-bets/"
+      },
+      {
+        "symbol": "GS",
+        "publishedDate": "2026-04-29 10:03:19",
+        "publisher": "Zacks Investment Research",
+        "title": "The Goldman Sachs Group, Inc. (GS) is Attracting Investor Attention: Here is What You Should Know",
+        "excerpt": "Zacks.com users have recently been watching Goldman (GS) quite a bit. Thus, it is worth knowing the facts that could determine the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2910577/the-goldman-sachs-group-inc-gs-is-attracting-investor-attention-here-is-what-you-should-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2910577"
+      },
+      {
+        "symbol": "GS",
+        "publishedDate": "2026-04-29 09:53:31",
+        "publisher": "Proactive Investors",
+        "title": "Ceres surges after Goldman Sachs ups target",
+        "excerpt": "Ceres Power Holdings PLC (LSE:CWR, OTC:CPWHF) shares surged 23% to 616p on Wednesday, without much concrete news.\u00a0 The only trigger for the strong gain was a report that Goldman Sachs had hiked its share price target to 670p from 530p.",
+        "url": "https://www.proactiveinvestors.co.uk/companies/news/1091427"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-29 08:07:00",
+        "publisher": "Market Watch",
+        "title": "JPMorgan's Jamie Dimon says a credit-led recession would be \u2018worse than people think'",
+        "excerpt": "JPMorgan Chase CEO Jamie Dimon says an economic downturn sparked by weakness in credit would encompass more than just the private credit segment and be worse than many expect.",
+        "url": "https://www.marketwatch.com/story/jpmorgans-jamie-dimon-says-a-credit-led-recession-would-be-worse-than-people-think-5a388e74"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-29 08:01:00",
+        "publisher": "GlobeNewsWire",
+        "title": "CORRECTION -- JPMorgan ETFs (Ireland) ICAV: Liquidation Announcement",
+        "excerpt": "The following amendment has been made to the replacement 'Liquidation' announcement released on 20 April 2026. A table including all impacted share classes has been added.",
+        "url": "https://www.globenewswire.com/news-release/2026/04/29/3283727/0/en/CORRECTION-JPMorgan-ETFs-Ireland-ICAV-Liquidation-Announcement.html"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-29 07:21:17",
+        "publisher": "Zacks Investment Research",
+        "title": "Should WisdomTree U.S. LargeCap Dividend ETF (DLN) Be on Your Investing Radar?",
+        "excerpt": "The WisdomTree U.S. LargeCap Dividend ETF (DLN) was launched on June 16, 2006, and is a passively managed exchange traded fund designed to offer broad exposure to the Large Cap Value segment of the US equity market.",
+        "url": "https://www.zacks.com/stock/news/2910398/should-wisdomtree-u-s-largecap-dividend-etf-dln-be-on-your-investing-radar?cid=CS-STOCKNEWSAPI-FT-style_box_etf-2910398"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-04-29 06:28:23",
+        "publisher": "Business Insider",
+        "title": "Why Warren Buffett's cash hoard looks wise \u2014 and Greg Abel must tread carefully",
+        "excerpt": "Warren Buffett's cash pile is a boon, Tom Russo said ahead of Berkshire Hathaway's annual meeting. The veteran investor shed light on how Buffett managed the firm from his Omaha office.",
+        "url": "https://www.businessinsider.com/warren-buffett-cash-pile-russo-berkshire-meeting-omaha-abel-deals-2026-4"
+      },
+      {
+        "symbol": "GS",
+        "publishedDate": "2026-04-29 06:07:00",
+        "publisher": "WSJ",
+        "title": "Goldman Sachs and Bain Lead Investment in AI Marketing Startup",
+        "excerpt": "The Trade Desk also invested in Hightouch, which is now valued at $2.75 billion.",
+        "url": "https://www.wsj.com/cmo-today/goldman-sachs-and-bain-lead-investment-in-ai-marketing-startup-871266b8"
+      },
+      {
+        "symbol": "WFC",
+        "publishedDate": "2026-04-29 05:30:00",
+        "publisher": "WSJ",
+        "title": "Wells Fargo's Long-Anticipated Wall Street Expansion Is Here",
+        "excerpt": "Freed from a regulatory cap, the bank is investing in trading.",
+        "url": "https://www.wsj.com/finance/banking/wells-fargos-long-anticipated-wall-street-expansion-is-here-459201d2"
+      }
+    ],
+    "Consumer_Discretionary": [
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 13:47:58",
+        "publisher": "Benzinga",
+        "title": "Meta, Amazon, Google Face AI Reality Check: Can New Revenue Justify Billions In Spending?",
+        "excerpt": "Big Tech earnings are set to test whether massive AI-driven investments are translating into real growth, with analysts focusing on revenue signals, spending discipline, and long-term monetization.",
+        "url": "https://www.benzinga.com/markets/tech/26/04/52143005/meta-amazon-google-face-ai-reality-check-can-new-revenue-justify-billions-in-spending"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-04-29 13:40:24",
+        "publisher": "MarketBeat",
+        "title": "Tesla's Cybercab Is Finally Real\u2014But Is It Enough?",
+        "excerpt": "Tesla Inc NASDAQ: TSLA has just taken a step it's been promising for years. It was reported last week that production of its long-awaited Cybercab is officially underway, moving the company's robotaxi vision from concept to reality.",
+        "url": "https://www.marketbeat.com/originals/teslas-cybercab-is-finally-realbut-is-it-enough/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 12:30:13",
+        "publisher": "Schwab Network",
+        "title": "AI Growth Crux of AMZN Earnings as 2026 CapEx Tops $200B",
+        "excerpt": "Marley Kayden narrows in on Amazon's (AMZN) earnings ahead of Wednesday night's earnings. She tells investors to watch revenue growth and explains why analysts are broadly positive regarding the Mag 7 giant's ecommerce and AI and AWS growth.",
+        "url": "https://www.youtube.com/watch?v=XPnicVTvo9w"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 12:00:01",
+        "publisher": "CNBC",
+        "title": "Amazon set to report first-quarter earnings after the bell",
+        "excerpt": "Amazon is slated to report first-quarter earnings after the close of trading, and analysts expect revenue growth of 14% Wall Street will be paying close attention to growth at Amazon Web Services and the company's AI spending forecast.",
+        "url": "https://www.cnbc.com/2026/04/29/amazon-amzn-q1-earnings-report-2026.html"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 11:31:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Big Boosts to Econ Growth from AI Investment, Inventories & More",
+        "excerpt": "For once, there is something even bigger than the Strait of Hormuz affecting investors' attitudes this morning.",
+        "url": "https://www.zacks.com/stock/news/2910966/big-boosts-to-econ-growth-from-ai-investment-inventories-more?cid=CS-STOCKNEWSAPI-FT-ahead_of_wall_street-2910966"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 11:20:00",
+        "publisher": "GlobeNewsWire",
+        "title": "DSCP Smart Fulfillment Expands Hybrid E-Commerce Solutions as Amazon FBA Fees Drive Brands to Diversify",
+        "excerpt": "Los Angeles, CA, April 29, 2026 (GLOBE NEWSWIRE) -- Los Angeles, CA - April 29, 2026 - - DSCP Smart Fulfillment, a US-based third-party logistics provider, reports increased demand for hybrid fulfillment for e-commerce brands as Amazon FBA fee increases push sellers to adopt mult",
+        "url": "https://www.globenewswire.com/news-release/2026/04/29/3284008/0/en/DSCP-Smart-Fulfillment-Expands-Hybrid-E-Commerce-Solutions-as-Amazon-FBA-Fees-Drive-Brands-to-Diversify.html"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 11:18:13",
+        "publisher": "Invezz",
+        "title": "Amazon stock rises 2% as AI spend, AWS growth face earnings test",
+        "excerpt": "Shares of Amazon rose about 2.3% on Wednesday as investors positioned ahead of the company's first-quarter earnings report, with markets closely watching cloud growth, artificial intelligence spending, and the potential impact of geopolitical tensions on consumer demand. The e-co",
+        "url": "https://invezz.com/news/2026/04/29/amazon-stock-rises-2-as-ai-spend-aws-growth-face-earnings-test/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 11:15:56",
+        "publisher": "24/7 Wall Street",
+        "title": "Semiconductor Stocks Tumble on OpenAI Warning. Google Says The Market Has It All Wrong",
+        "excerpt": "The market's latest artificial intelligence panic says more about investor psychology than it does about the future of AI.",
+        "url": "https://247wallst.com/investing/2026/04/29/semiconductor-stocks-tumble-on-openai-warning-google-says-the-market-has-it-all-wrong/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 11:13:00",
+        "publisher": "Seeking Alpha",
+        "title": "Artisan Global Opportunities Fund Q1 2026 Portfolio Activity",
+        "excerpt": "During the quarter, we initiated new positions in Edwards Lifesciences, Eli Lilly and Roblox. In addition to Linde, Shopify and Amazon, we also added to Woodward and Spotify during the quarter. We ended our investment campaigns in Netflix, Snowflake and RELX during the quarter.",
+        "url": "https://seekingalpha.com/article/4895820-artisan-global-opportunities-fund-q1-2026-portfolio-activity"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-29 10:54:05",
+        "publisher": "247 Wallst",
+        "title": "VIX Climbs as Fed Decision and Mega-Cap Earnings Keep Investors on Edge",
+        "excerpt": "The CBOE Volatility Index (^VIX) is hovering near 18 on Wednesday morning, up roughly 1% as traders position ahead of the Federal Reserve's afternoon policy decision and mega-cap technology earnings. The fear gauge closed at 17.83 on Tuesday, sitting inside the historically norma",
+        "url": "https://247wallst.com/investing/2026/04/29/vix-climbs-as-fed-decision-and-mega-cap-earnings-keep-investors-on-edge/"
+      }
+    ],
+    "Consumer_Staples": [
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-29 14:11:32",
+        "publisher": "Seeking Alpha",
+        "title": "The Coca-Cola Company (KO) Shareholder/Analyst Call Transcript",
+        "excerpt": "The Coca-Cola Company (KO) Shareholder/Analyst Call Transcript",
+        "url": "https://seekingalpha.com/article/4895826-the-coca-cola-company-ko-shareholder-analyst-call-transcript"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-29 11:18:30",
+        "publisher": "Benzinga",
+        "title": "Warren Buffett's Coca-Cola Bet Just Got $3.4 Billion Sweeter",
+        "excerpt": "Billionaire investor Warren Buffett bought Coca-Cola (NYSE:KO) stock for Berkshire Hathaway's (NYSE:BRK) (NYSE:BRK) investment portfolio back in 1988.",
+        "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/04/52135163/warren-buffett-coca-cola-bet-just-got-3-4-billion-sweeter"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-29 11:16:13",
+        "publisher": "Zacks Investment Research",
+        "title": "Coca-Cola's Beverage Portfolio Shift: Beyond Soda for Growth?",
+        "excerpt": "The Coca-Cola Company's KO evolving beverage portfolio underscores its transition from a traditional soda company to a broader \u201ctotal beverage\u201d player. While sparkling soft drinks still delivered 2% volume growth in first-quarter 2026, the company is increasingly leaning on faste",
+        "url": "https://www.zacks.com/stock/news/2911025/coca-cola-s-beverage-portfolio-shift-beyond-soda-for-growth?cid=CS-STOCKNEWSAPI-FT-analyst_blog|quick_take-2911025"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-29 10:47:24",
+        "publisher": "Zacks Investment Research",
+        "title": "Buy Walmart and 3 More Retail Stocks as Consumer Confidence Surges",
+        "excerpt": "Walmart and three other retailers get a confidence boost as April sentiment ticks up, even with gasoline and inflation pressures still looming.",
+        "url": "https://www.zacks.com/stock/news/2910769/buy-walmart-and-3-more-retail-stocks-as-consumer-confidence-surges?cid=CS-STOCKNEWSAPI-FT-analyst_blog|investment_ideas-2910769"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-29 10:32:48",
+        "publisher": "24/7 Wall Street",
+        "title": "BofA Raises Coca-Cola Price Target to $90 on 10% Organic Growth: Is the Defensive King Back in Vogue?",
+        "excerpt": "Bank of America (BofA) raised its price target on Coca-Cola (NYSE:KO | KO Price Prediction) stock to $90 from $88 and reiterated a Buy rating on April 29, following the beverage giant's \u201cimpressive\u201d 10% organic sales growth in Q1 2026.",
+        "url": "https://247wallst.com/investing/2026/04/29/bofa-raises-coca-cola-price-target-to-90-on-10-organic-growth-is-the-defensive-king-back-in-vogue/"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-04-29 09:47:00",
+        "publisher": "Fool - Investing News",
+        "title": "Costco vs. Walmart Stock: What's the Better Consumer Staples Buy?",
+        "excerpt": "Walmart is evolving into a high-margin advertising and data platform, giving it a more compelling near-term upside than Costco.",
+        "url": "https://www.fool.com/investing/2026/04/29/costco-vs-walmart-stock-whats-the-better-consumer/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-29 09:02:54",
+        "publisher": "Benzinga",
+        "title": "Axil Brands Climbs After Deepening Walmart Partnership",
+        "excerpt": "Axil Brands, Inc. (AMEX:AXIL) shares are trading higher Wednesday after the company announced that it expanded its partnership with Walmart to include the MX PRO and MX passive models for the retailer's online and in-store platforms.",
+        "url": "https://www.benzinga.com/trading-ideas/movers/26/04/52126714/axil-brands-climbs-after-deepening-walmart-partnership"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-29 09:00:00",
+        "publisher": "Business Wire",
+        "title": "Walmart Opens Third Owned and Operated Milk Processing Facility in Robinson, Texas, Creating More Than 400 New Jobs",
+        "excerpt": "ROBINSON, Texas--(BUSINESS WIRE)--Walmart today celebrated the grand opening of its third owned and operated milk processing facility in Robinson, Texas \u2014 a major milestone that will create more than 400 new jobs, strengthen Walmart's end-to-end supply chain for affordable, high-",
+        "url": "https://www.businesswire.com/news/home/20260429944713/en/Walmart-Opens-Third-Owned-and-Operated-Milk-Processing-Facility-in-Robinson-Texas-Creating-More-Than-400-New-Jobs/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-29 08:00:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Axil Brands Announces Expanded Partnership with Walmart",
+        "excerpt": "LOS ANGELES, April 29, 2026 (GLOBE NEWSWIRE) -- Axil Brands, Inc. (NYSE American: AXIL), a leader in advanced hearing protection and enhancement technology, today announced that Walmart will expand its offering of Axil Brands products to include the MX PRO and MX Passive models f",
+        "url": "https://www.globenewswire.com/news-release/2026/04/29/3283718/0/en/axil-brands-announces-expanded-partnership-with-walmart.html"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-29 07:50:05",
+        "publisher": "24/7 Wall Street",
+        "title": "Coke vs UPS: After Both Beat Q1 Earnings, Which Is the Better Buy for Retirement Investors?",
+        "excerpt": "Coca-Cola (NYSE: KO | KO Price Prediction) and United Parcel Service (NYSE: UPS) both beat Q1 2026 estimates on the morning of April 28, 2026.",
+        "url": "https://247wallst.com/investing/2026/04/29/coke-vs-ups-after-both-beat-q1-earnings-which-is-the-better-buy-for-retirement-investors/"
+      }
+    ],
+    "Industrials": [
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-04-29 13:15:45",
+        "publisher": "Zacks Investment Research",
+        "title": "UPS or UNP: Which Transportation Stock Holds an Edge Post Q1 Earnings?",
+        "excerpt": "Both\u00a0Union Pacific\u00a0UNP and\u00a0United Parcel Service\u00a0UPS delivered better-than-expected first-quarter 2026 results, but the quality and trajectory of growth diverged meaningfully.",
+        "url": "https://www.zacks.com/stock/news/2911137/ups-or-unp-which-transportation-stock-holds-an-edge-post-q1-earnings?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2911137"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-04-29 11:46:11",
+        "publisher": "Zacks Investment Research",
+        "title": "Defense ETFs to Buy as Global Military Spending Rises 2.9%",
+        "excerpt": "ETFs like ITA gain spotlight as global military spending hits $2.89T, rising 2.9%, with Europe leading growth.",
+        "url": "https://www.zacks.com/stock/news/2910983/defense-etfs-to-buy-as-global-military-spending-rises-2-9?cid=CS-STOCKNEWSAPI-FT-etf_news_and_commentary-2910983"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-04-29 10:03:24",
+        "publisher": "Zacks Investment Research",
+        "title": "RTX Corporation (RTX) is Attracting Investor Attention: Here is What You Should Know",
+        "excerpt": "RTX (RTX) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2910579/rtx-corporation-rtx-is-attracting-investor-attention-here-is-what-you-should-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks_v1-2910579"
+      },
+      {
+        "symbol": "GE",
+        "publishedDate": "2026-04-29 10:01:24",
+        "publisher": "Zacks Investment Research",
+        "title": "GE Aerospace (GE) Is a Trending Stock: Facts to Know Before Betting on It",
+        "excerpt": "Zacks.com users have recently been watching GE (GE) quite a bit. Thus, it is worth knowing the facts that could determine the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2910551/ge-aerospace-ge-is-a-trending-stock-facts-to-know-before-betting-on-it?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2910551"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-04-29 09:00:00",
+        "publisher": "PRNewsWire",
+        "title": "RTX recognized as global leader in patents and innovation",
+        "excerpt": "Rankings underscore company's sustained investment in advanced technology ARLINGTON, Va., April 29, 2026 /PRNewswire/ -- RTX (NYSE: RTX) has been recognized as a global leader in innovation, securing top rankings across several major patent and innovation organizations in 2026.",
+        "url": "https://www.prnewswire.com/news-releases/rtx-recognized-as-global-leader-in-patents-and-innovation-302756845.html"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-04-29 08:00:00",
+        "publisher": "Business Wire",
+        "title": "Ray Therapeutics Granted Priority Medicines (PRIME) Designation from the European Medicines Agency for RTx-015 in Retinitis Pigmentosa",
+        "excerpt": "BERKELEY, Calif.--(BUSINESS WIRE)--Ray Therapeutics (RayTx), an industry-leading clinical-stage biopharmaceutical company pioneering differentiated vision restoration therapies for those living with severe retinal degenerations, today announced that the European Medicines Agency ",
+        "url": "https://www.businesswire.com/news/home/20260429144139/en/Ray-Therapeutics-Granted-Priority-Medicines-PRIME-Designation-from-the-European-Medicines-Agency-for-RTx-015-in-Retinitis-Pigmentosa/"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-04-29 07:09:47",
+        "publisher": "Seeking Alpha",
+        "title": "Union Pacific: This High-Quality Railroad Stock Is A Long-Term Play",
+        "excerpt": "Union Pacific is the largest US railroad, commanding a 39% market share and demonstrating operational excellence. UNP delivered strong 1Q26 results: revenue up 3% YoY to $6.2B, net income up 5%, and significant efficiency gains across key metrics. I see the company's slight valua",
+        "url": "https://seekingalpha.com/article/4895639-union-pacific-high-quality-railroad-stock-long-term-play"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-28 14:39:15",
+        "publisher": "Investors Business Daily",
+        "title": "Dow Jones AI Leader Caterpillar, Nvidia Chipmaker TSMC In Buy Zones",
+        "excerpt": "Dow Jones AI leader Caterpillar and Nvidia chipmaker TSMC are in buy zones in the ongoing stock market rally.",
+        "url": "https://www.investors.com/stock-lists/stocks-near-a-buy-zone/dow-jones-cat-stock-tsmc-stock/"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-04-28 14:30:00",
+        "publisher": "Business Wire",
+        "title": "Union Pacific's Big Boy to Tour the Northeast for First Time in Honor of America's 250th Anniversary",
+        "excerpt": "OMAHA, Neb.--(BUSINESS WIRE)--Union Pacific's famed Big Boy No. 4014, the world's largest operating steam locomotive, will journey to the East Coast for the first time in collaboration with Norfolk Southern, as part of a historic coast-to-coast tour as both railroads celebrate Am",
+        "url": "https://www.businesswire.com/news/home/20260428506229/en/Union-Pacific%E2%80%99s-Big-Boy-to-Tour-the-Northeast-for-First-Time-in-Honor-of-America%E2%80%99s-250th-Anniversary/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-28 13:03:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Caterpillar is Set to Report Q1 Earnings: Buy, Sell or Hold the Stock?",
+        "excerpt": "CAT heads into Q1 earnings with rising revenue and EPS estimates, but higher costs and premium valuation make the near-term investment case less straightforward.",
+        "url": "https://www.zacks.com/stock/news/2909937/caterpillar-is-set-to-report-q1-earnings-buy-sell-or-hold-the-stock?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2909937"
+      }
+    ],
+    "Materials": [
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-04-29 12:00:00",
+        "publisher": "PRNewsWire",
+        "title": "Air Products to Expand Industrial Gas Supply for Samsung Electronics' Next-Generation Semiconductor Fab in South Korea",
+        "excerpt": "New investment underscores the company's long-term commitment to Korea and its leading role in the global semiconductor industry\u00a0 LEHIGH VALLEY, Pa., April 29, 2026 /PRNewswire/ -- Air Products (NYSE:APD), a world-leading industrial gases company\u00a0and serving Samsung globally, tod",
+        "url": "https://www.prnewswire.com/news-releases/air-products-to-expand-industrial-gas-supply-for-samsung-electronics-next-generation-semiconductor-fab-in-south-korea-302757497.html"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-04-29 11:13:00",
+        "publisher": "Seeking Alpha",
+        "title": "Artisan Global Opportunities Fund Q1 2026 Portfolio Activity",
+        "excerpt": "During the quarter, we initiated new positions in Edwards Lifesciences, Eli Lilly and Roblox. In addition to Linde, Shopify and Amazon, we also added to Woodward and Spotify during the quarter. We ended our investment campaigns in Netflix, Snowflake and RELX during the quarter.",
+        "url": "https://seekingalpha.com/article/4895820-artisan-global-opportunities-fund-q1-2026-portfolio-activity"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-04-29 10:02:14",
+        "publisher": "Zacks Investment Research",
+        "title": "Investors Heavily Search Freeport-McMoRan Inc. (FCX): Here is What You Need to Know",
+        "excerpt": "Zacks.com users have recently been watching Freeport-McMoRan (FCX) quite a bit. Thus, it is worth knowing the facts that could determine the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2910560/investors-heavily-search-freeport-mcmoran-inc-fcx-here-is-what-you-need-to-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2910560"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-29 09:56:34",
+        "publisher": "Zacks Investment Research",
+        "title": "Looking for Stocks with Positive Earnings Momentum? Check Out These 2 Basic Materials Names",
+        "excerpt": "Finding stocks expected to beat quarterly earnings estimates becomes an easier task with our Zacks Earnings ESP.",
+        "url": "https://www.zacks.com/stock/news/2910529/looking-for-stocks-with-positive-earnings-momentum-check-out-these-2-basic-materials-names?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_earnings_esp-2910529"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-29 08:00:00",
+        "publisher": "Business Wire",
+        "title": "Ecolab Life Sciences Expands Global Bioprocessing Capabilities With New Advanced Development and Applications Center in Korea",
+        "excerpt": "SEOUL, South Korea--(BUSINESS WIRE)--Building on the continued growth and strong performance of its Life Sciences business, Ecolab is further expanding its global bioprocessing capabilities to support biopharmaceutical manufacturers worldwide. Today, Ecolab Life Sciences announce",
+        "url": "https://www.businesswire.com/news/home/20260428290389/en/Ecolab-Life-Sciences-Expands-Global-Bioprocessing-Capabilities-With-New-Advanced-Development-and-Applications-Center-in-Korea/"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-04-29 07:00:00",
+        "publisher": "Newsfile Corp",
+        "title": "C3 Metals Continues to Intersect Broad Zones of Near-Surface Copper Mineralization at the Khaleesi Project, Peru",
+        "excerpt": "Toronto, Ontario--(Newsfile Corp. - April 29, 2026) - C3 Metals Inc. (TSXV: CCCM) (OTCQB: CUAUF) (\"C3 Metals\" or the \"Company\") is pleased to announce results from 11 additional holes drilled at its 100%-owned Khaleesi copper project (\"Khaleesi\" or \"the Project\") in southern Peru",
+        "url": "https://www.newsfilecorp.com/release/294813/C3-Metals-Continues-to-Intersect-Broad-Zones-of-NearSurface-Copper-Mineralization-at-the-Khaleesi-Project-Peru"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-29 02:08:00",
+        "publisher": "GuruFocus",
+        "title": "Ecolab Inc (ECL) Q1 2026 Earnings Call Highlights: Strong Growth Amidst Challenges",
+        "excerpt": "Adjusted Diluted EPS Growth: 13% growth in the first quarter.Organic Sales Growth: 4% increase, driven by 3% value pricing and 1% volume growth.Operating Incom",
+        "url": "https://www.gurufocus.com/news/8825880/ecolab-inc-ecl-q1-2026-earnings-call-highlights-strong-growth-amidst-challenges"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-28 16:21:44",
+        "publisher": "Seeking Alpha",
+        "title": "Ecolab Inc. (ECL) Q1 2026 Earnings Call Transcript",
+        "excerpt": "Ecolab Inc. (ECL) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4895320-ecolab-inc-ecl-q1-2026-earnings-call-transcript"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-28 14:21:09",
+        "publisher": "Zacks Investment Research",
+        "title": "ECL Stock Up in Pre-Market Post In-Line Q1 Earnings, Gross Margin Down",
+        "excerpt": "Ecolab posts in line first-quarter 2026 earnings as revenue beats expectations and Digital sales surge, while gross margin tightens and guidance is revised.",
+        "url": "https://www.zacks.com/stock/news/2910022/ecl-stock-up-in-pre-market-post-in-line-q1-earnings-gross-margin-down?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2910022"
+      },
+      {
+        "symbol": "SHW",
+        "publishedDate": "2026-04-28 13:51:39",
+        "publisher": "Seeking Alpha",
+        "title": "The Sherwin-Williams Company (SHW) Q1 2026 Earnings Call Transcript",
+        "excerpt": "The Sherwin-Williams Company (SHW) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4895176-the-sherwin-williams-company-shw-q1-2026-earnings-call-transcript"
+      }
+    ],
+    "Utilities": [
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-04-29 12:55:27",
+        "publisher": "Zacks Investment Research",
+        "title": "Public Service Enterprise to Release Q1 Earnings: What to Expect?",
+        "excerpt": "PEG heads into Q1 earnings with demand from data centers, rate gains and grid upgrades boosting outlook, though higher costs may weigh on results.",
+        "url": "https://www.zacks.com/stock/news/2911092/public-service-enterprise-to-release-q1-earnings-what-to-expect?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_preview-2911092"
+      },
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-04-29 12:50:20",
+        "publisher": "Zacks Investment Research",
+        "title": "DUK Likely to Beat Q1 Earnings Estimates: How to Play the Stock?",
+        "excerpt": "Duke Energy heads into Q1 earnings with modest growth forecasts and positive ESP, as demand gains and grid investments support results despite rising costs.",
+        "url": "https://www.zacks.com/stock/news/2911090/duk-likely-to-beat-q1-earnings-estimates-how-to-play-the-stock?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2911090"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-04-29 12:38:48",
+        "publisher": "Seeking Alpha",
+        "title": "Southern Company: Positive Long-Term Clean Energy Pivot",
+        "excerpt": "Much like the utility sector, Southern Company has seen better than average performance in 2026 so far as investors take a shine to safer stocks. Even though the stock is due short-term correction owing to its upcoming Q1 2026 results and elevated market multiples, the long-term ",
+        "url": "https://seekingalpha.com/article/4895911-southern-company-positive-long-term-clean-energy-pivot"
+      },
+      {
+        "symbol": "SRE",
+        "publishedDate": "2026-04-29 12:35:38",
+        "publisher": "Zacks Investment Research",
+        "title": "OKEOK Q1 Earnings Beat Estimates on Volume Growth, Guidance Up",
+        "excerpt": "OKE beats Q1 EPS estimates on higher volumes, then raises 2026 net income and EPS guidance.",
+        "url": "https://www.zacks.com/stock/news/2911056/okeok-q1-earnings-beat-estimates-on-volume-growth-guidance-up?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2911056"
+      },
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-04-29 11:02:36",
+        "publisher": "Zacks Investment Research",
+        "title": "NiSource (NI) Earnings Expected to Grow: Should You Buy?",
+        "excerpt": "NiSource (NI) possesses the right combination of the two key ingredients for a likely earnings beat in its upcoming report. Get prepared with the key expectations.",
+        "url": "https://www.zacks.com/stock/news/2910913/nisource-ni-earnings-expected-to-grow-should-you-buy?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_9-2910913"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-04-29 07:44:32",
+        "publisher": "Reuters",
+        "title": "Graphic Packaging, NextEra to build 250 MW solar plant in Texas",
+        "excerpt": "Graphic Packaging Holding said on Wednesday it has signed an agreement with NextEra Energy Resources to build a \u200b250-megawatt solar power plant in Texas, aiming to \u200csource renewable electricity and cut greenhouse gas emissions.",
+        "url": "https://www.reuters.com/business/energy/graphic-packaging-nextera-build-250-mw-solar-plant-texas-2026-04-29/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-04-29 07:37:00",
+        "publisher": "GuruFocus",
+        "title": "First Look: Fed Hold, Big Tech Earnings, Disney Keeps ESPN",
+        "excerpt": "Stock News UAE exits OPEC: As the United Arab Emirates quits OPEC effective May 1, oil-market coordination weakens and price control shifts, a development close",
+        "url": "https://www.gurufocus.com/news/8826399/first-look-fed-hold-big-tech-earnings-disney-keeps-espn"
+      },
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-04-29 06:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "Energy Stock Showdown: NextEra or Duke Energy -- Which One Wins Right Now?",
+        "excerpt": "Both companies could be good fits for a portfolio, so here's how you pick a winner.",
+        "url": "https://www.fool.com/investing/2026/04/29/energy-stock-showdown-nextera-or-duke-energy-which/"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-04-28 18:48:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Edison International (EIX) Surpasses Q1 Earnings and Revenue Estimates",
+        "excerpt": "Edison International (EIX) came out with quarterly earnings of $1.42 per share, beating the Zacks Consensus Estimate of $1.32 per share. This compares to earnings of $1.37 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2910146/edison-international-eix-surpasses-q1-earnings-and-revenue-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2910146"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-04-28 13:50:00",
+        "publisher": "PRNewsWire",
+        "title": "AEP Declares Quarterly Dividend on Common Stock",
+        "excerpt": "COLUMBUS, Ohio, April 28, 2026 /PRNewswire/ -- The Board of Directors of American Electric Power (Nasdaq: AEP) has declared a regular quarterly cash dividend of 95 cents per share on the company's common stock. The dividend is payable June 10, 2026, to shareholders of record as o",
+        "url": "https://www.prnewswire.com/news-releases/aep-declares-quarterly-dividend-on-common-stock-302756100.html"
+      }
+    ],
+    "Real_Estate": [
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-04-29 08:08:13",
+        "publisher": "Seeking Alpha",
+        "title": "American Tower: There's Nothing To Wake The Stock Up (Rating Downgrade)",
+        "excerpt": "American Tower Corporation (AMT) is downgraded to Hold despite solid fundamentals and a historically high 4% dividend yield. Q1-2026 results beat expectations, but guidance raises were largely driven by FX tailwinds rather than core business acceleration. Valuation is just fair, ",
+        "url": "https://seekingalpha.com/article/4895674-american-tower-theres-nothing-to-wake-the-stock-up-rating-downgrade"
+      },
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-04-28 19:01:20",
+        "publisher": "Zacks Investment Research",
+        "title": "Welltower (WELL) Q1 Earnings: How Key Metrics Compare to Wall Street Estimates",
+        "excerpt": "The headline numbers for Welltower (WELL) give insight into how the company performed in the quarter ended March 2026, but it may be worthwhile to compare some of its key metrics to Wall Street estimates and the year-ago actuals.",
+        "url": "https://www.zacks.com/stock/news/2910206/welltower-well-q1-earnings-how-key-metrics-compare-to-wall-street-estimates?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2910206"
+      },
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-04-28 18:46:20",
+        "publisher": "Zacks Investment Research",
+        "title": "Welltower (WELL) Q1 FFO and Revenues Beat Estimates",
+        "excerpt": "Welltower (WELL) came out with quarterly funds from operations (FFO) of $1.47 per share, beating the Zacks Consensus Estimate of $1.45 per share. This compares to FFO of $1.2 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2910102/welltower-well-q1-ffo-and-revenues-beat-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2910102"
+      },
+      {
+        "symbol": "PLD",
+        "publishedDate": "2026-04-28 17:00:00",
+        "publisher": "PRNewsWire",
+        "title": "PROLOGIS DECLARES QUARTERLY DIVIDEND",
+        "excerpt": "SAN FRANCISCO, April 28, 2026 /PRNewswire/ -- The Board of Directors of Prologis, Inc. (NYSE: PLD) declared a regular cash dividend for the quarter ending June 30, 2026, on the following securities: A dividend of $1.07 per share of the company's common stock, payable on June 30, ",
+        "url": "https://www.prnewswire.com/news-releases/prologis-declares-quarterly-dividend-302756285.html"
+      },
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-04-28 16:06:00",
+        "publisher": "PRNewsWire",
+        "title": "Welltower Issues Business Update",
+        "excerpt": "TOLEDO, Ohio, April 28, 2026 /PRNewswire/ -- Welltower\u00ae Inc. (NYSE: WELL) has issued the following business update which can be found at: https://welltower.com/apr-28-26-business-update\u00a0 About\u00a0Welltower Welltower Inc. (NYSE: WELL), an S&P 500 company, is positioned at the center ",
+        "url": "https://www.prnewswire.com/news-releases/welltower-issues-business-update-302756232.html"
+      },
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-04-28 16:05:00",
+        "publisher": "PRNewsWire",
+        "title": "Welltower Reports First Quarter 2026 Results",
+        "excerpt": "TOLEDO, Ohio, April 28, 2026 /PRNewswire/ -- Welltower Inc. (NYSE:WELL) today announced results for the quarter ended March 31, 2026. First Quarter and Other Recent Highlights Reported net income attributable to common stockholders of $1.02 per diluted share Reported quarterly no",
+        "url": "https://www.prnewswire.com/news-releases/welltower-reports-first-quarter-2026-results-302756203.html"
+      },
+      {
+        "symbol": "PLD",
+        "publishedDate": "2026-04-28 14:32:06",
+        "publisher": "Zacks Investment Research",
+        "title": "Ventas Q1 FFO & Revenues Beat Estimates on Strong SHOP Results",
+        "excerpt": "VTR posts Q1 FFO and revenue growth as senior housing demand lifted SHOP results, prompting higher 2026 guidance and a bigger investment plan.",
+        "url": "https://www.zacks.com/stock/news/2910027/ventas-q1-ffo-revenues-beat-estimates-on-strong-shop-results?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2910027"
+      },
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-04-28 12:51:41",
+        "publisher": "Seeking Alpha",
+        "title": "American Tower Corporation (AMT) Q1 2026 Earnings Call Transcript",
+        "excerpt": "American Tower Corporation (AMT) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4895085-american-tower-corporation-amt-q1-2026-earnings-call-transcript"
+      },
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-04-28 12:05:23",
+        "publisher": "Zacks Investment Research",
+        "title": "AMT Q1 FFO Beats Estimates on Higher Property Revenues",
+        "excerpt": "AMT's Q1 FFO tops estimates by 13.6% as property revenue growth lifts results, prompting higher 2026 outlook midpoints.",
+        "url": "https://www.zacks.com/stock/news/2909805/amt-q1-ffo-beats-estimates-on-higher-property-revenues?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2909805"
+      },
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-04-28 11:31:09",
+        "publisher": "Zacks Investment Research",
+        "title": "Compared to Estimates, American Tower (AMT) Q1 Earnings: A Look at Key Metrics",
+        "excerpt": "The headline numbers for American Tower (AMT) give insight into how the company performed in the quarter ended March 2026, but it may be worthwhile to compare some of its key metrics to Wall Street estimates and the year-ago actuals.",
+        "url": "https://www.zacks.com/stock/news/2909769/compared-to-estimates-american-tower-amt-q1-earnings-a-look-at-key-metrics?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2909769"
+      }
+    ],
+    "Communication": [
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-04-29 14:11:11",
+        "publisher": "Zacks Investment Research",
+        "title": "Capitalizing on the AI Buildout: High-Conviction Stock Picks",
+        "excerpt": "Here, we have picked three AI stocks, NVDA, AVGO and MU, which are well-poised to benefit from AI's growing use and ability to solve complex problems.",
+        "url": "https://www.zacks.com/stock/news/2911174/capitalizing-on-the-ai-buildout-high-conviction-stock-picks?cid=CS-STOCKNEWSAPI-FT-artificial_intelligence_(ai)-2911174"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-04-29 14:00:33",
+        "publisher": "Schwab Network",
+        "title": "Ca$htag$: GOOGL Surges on Exploding Cloud Growth",
+        "excerpt": "Landon Swan, co-founder of @LikeFolio, breaks down Alphabet's (GOOGL) strong performance as the stock hits new highs. A major drive was explosive growth in its cloud business with computing revenue up 48%.",
+        "url": "https://www.youtube.com/watch?v=Pj3CN6L9quw"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-04-29 13:51:31",
+        "publisher": "Reuters",
+        "title": "Broadcast group says FCC Disney license review creates significant uncertainty",
+        "excerpt": "A group representing major \u200bU.S. broadcasters called \u200cthe Federal Communications Commission decision \u200bto launch \u200ban early review of \u2060the eight \u200bABC local \u200bstation licenses owned by Disney \"nearly unprecedented\" and \u200badded th \u200bdecision \"creates significant uncertainty for \u200call \u2060br",
+        "url": "https://www.reuters.com/business/media-telecom/broadcast-group-says-fcc-disney-license-review-creates-significant-uncertainty-2026-04-29/"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-29 13:47:58",
+        "publisher": "Benzinga",
+        "title": "Meta, Amazon, Google Face AI Reality Check: Can New Revenue Justify Billions In Spending?",
+        "excerpt": "Big Tech earnings are set to test whether massive AI-driven investments are translating into real growth, with analysts focusing on revenue signals, spending discipline, and long-term monetization.",
+        "url": "https://www.benzinga.com/markets/tech/26/04/52143005/meta-amazon-google-face-ai-reality-check-can-new-revenue-justify-billions-in-spending"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-29 13:46:43",
+        "publisher": "Proactive Investors",
+        "title": "Meta expected to post strong earnings beat as AI monetization accelerates across platforms",
+        "excerpt": "Meta Platforms Inc (NASDAQ:META, XETRA:FB2A, SIX:FB) will report its latest quarterly earnings after Wednesday's closing bell, with Wall Street analysts largely expecting another quarter of solid revenue and earnings growth, supported by continued strength in digital advertising ",
+        "url": "https://www.proactiveinvestors.com/companies/news/1091442"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-04-29 13:20:53",
+        "publisher": "Bloomberg Technology",
+        "title": "FCC to Review Disney-Owned TV Licenses Early",
+        "excerpt": "The Federal Communications Commission said it would do an early review of the licenses for eight Disney-owned TV stations. The move is tied to an investigation into the company's diversity policy, but comes after a feud between President Donald Trump and ABC late-night host Jimmy",
+        "url": "https://www.youtube.com/watch?v=LQmJhFHwFX4"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-04-29 13:06:00",
+        "publisher": "The Motley Fool",
+        "title": "1 Reason I'd Buy Buffett's Final Favorite Stock And Never Sell",
+        "excerpt": "Berkshire's final big stock purchase under Buffett was Alphabet. Alphabet is one of the few companies that can own and monetize AI globally.",
+        "url": "https://www.fool.com/investing/2026/04/29/1-reason-id-buy-buffetts-final-favorite-stock-and/"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-04-29 12:45:35",
+        "publisher": "New York Post",
+        "title": "Jimmy Kimmel slams Trump again after FCC opens review of ABC TV licenses",
+        "excerpt": "\"Wait a minute, did he just make a joke about his death?\" Kimmel said.",
+        "url": "https://nypost.com/2026/04/29/media/jimmy-kimmel-slams-trump-again-after-fcc-opens-review-of-abc-tv-licenses/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-04-29 12:19:56",
+        "publisher": "New York Post",
+        "title": "Australia to require Google, Meta, TikTok to pay for local news \u2014 or face new tax",
+        "excerpt": "Dubbed the \u201cNews Bargaining Incentive,\u201d the proposed law would impose a 2.25% tax on the local revenues of the social media giants that are unable or unwilling to reach deals with news outlets.",
+        "url": "https://nypost.com/2026/04/29/business/australia-to-require-google-meta-tiktok-to-pay-for-local-news-or-face-new-tax/"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-04-29 12:12:16",
+        "publisher": "New York Post",
+        "title": "Disney makes major decision on the future of ESPN",
+        "excerpt": "Sources told Business Insider that CEO Josh D'Amaro has opted, for now, to retain ESPN inside Disney rather than turn it into a standalone company.",
+        "url": "https://nypost.com/2026/04/29/business/disney-makes-major-decision-on-the-future-of-espn/"
+      }
+    ]
+  }
+}

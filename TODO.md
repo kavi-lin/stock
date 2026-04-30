@@ -1,6 +1,6 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-04-25
+> **Last Updated**: 2026-04-30 (v1.71.3 — Preflight popup 對齊 sidebar：sector/news 看內部 timestamp 不看 mtime)
 
 ---
 
@@ -107,10 +107,101 @@ Tier 3（情境性，等需求出現再做）：
 - [ ] **[B-FEED-FED-WEB]** WebFetch Fed 官網 `/newsevents/calendar.htm` — 比 YAML 更即時（YAML 補不到的臨時 speeches）
 - [ ] **[B-FEED-POLICY]** WebFetch 白宮/USTR 公告 — tariff / executive order（sector-protocol Phase 3 已有 WebSearch 抓部分）
 
+### 路線 P — 富途牛牛推播即時整合
+**狀態**：v1.58.0 完成。lazy-fetch 版本（無背景 thread），5s cache。
+- [x] ~~**[P-TICKER]** `scripts/parse_futu_notifications.py`：中文股名 dict (~70 筆) + 英文 ticker regex + stopword 過濾。新增 `load_notifications()` / `is_available()` / `extract_tickers()` 純資料函式 + `--json` flag~~
+- [x] ~~**[P-BACKEND]** `dashboard_server.py`：`GET /api/futu-notifications?limit=5` lazy fetch + 5s 記憶體 cache（取消原規劃的背景 thread 設計）~~
+- [x] ~~**[P-CARD]** `Dashboard/index.html` Layer 5 卡片 + `script.js` IIFE：相對時間 + ticker pills + 60s 自動重整。Ticker pill 點擊只 prefill Quick Launch input（不直接入隊燒 token）~~
+
 ### 路線 C — Positions Tracker 強化
 - [ ] **[C-IMPORT]** `import_firstrade_csv.py` — 解析 Firstrade 月結單 CSV → `positions.json`（避免手動輸入，安全方式取代非官方 API）
 - [ ] **[C-CLOSE]** Dashboard 新增「平倉」動作：將 position status 改 closed，自動記錄 exit_price + realized_pl
 - [ ] **[C-ADD]** 同一 ticker 加碼時提示「併入現有 avg cost」vs「另開 lot」兩個選項
+- ❌ **[C-FT-PHASE1]** ~~`scripts/parse_firstrade_notifications.py` v0.1 discovery~~ — **已放棄**（v1.60.2）。Phase 1 跑出來 macOS NotificationCenter 30 天只 11 筆系統推播，Firstrade iPhone push 沒鏡像 (iOS 對金融類 app 不 relay 給 Continuity)；fallback Gmail MCP 也卡 insufficient auth scope。User 決定不繼續這條路線。Script 留在 repo（純讀 NC DB 工具，無副作用）作參考。
+- ❌ **[C-FT-PHASE2]** ~~watch/parser 自動 sync positions.json~~ — 隨 PHASE1 一同放棄
+
+### 路線 I — Invest Protocol V4.8 Refactor（移除多餘 + WebFetch→API）
+**狀態**：Review 完成（v1.61.x），plan 寫在 `~/.claude/plans/`。Smoke test 跑完，feasibility 已確認。
+**目標**：Phase 2 各 lane 把 web search 改 FMP/Finnhub API、Phase 1 dual_fetch 擴充欄位讓 Fundamentals lane 不重抓。每次 invest 從 30-45 min 降到 18-25 min。
+
+**API Smoke test 結果**（2026-04-30 測 NVDA，FMP 升 Starter 後）：
+
+| 廠商 | 可用 | 不可用 | 影響 |
+|---|---|---|---|
+| Finnhub free | quote / profile2 / metric / insider-transactions / insider-sentiment / recommendation / earnings(surprise) / calendar/earnings / company-news / splits / financials-reported | upgrade-downgrade / price-target / candle / dividend2（PREMIUM） | upgrade-downgrade + price-target 改用 FMP `/stable/` 替代 |
+| FMP Starter | `/stable/profile / key-metrics-ttm / key-metrics / ratios-ttm / income-statement / balance-sheet / cash-flow / earnings-calendar / economic-calendar / shares-float`、`grades-historical / grades-consensus / grades-news / price-target-consensus / price-target-summary`、**`insider-trading/latest` / `insider-trading/statistics`**、**`historical-price-eod/light`+`full`**、`historical-chart/1hour`、`news/stock`、`senate-trades`、`quote / quote-short` | `/api/v3/*` + `/api/v4/*` 全是 **Legacy 永遠拿不到**；`/stable/short-interest`/`short-volume` 仍 Premium-only | short interest 必須 fallback yfinance；其他全部有 stable 替代 |
+
+**子任務**：
+- [x] ~~**[I-PA]** dual_fetch.py 9 → 15 scalar：加 `forwardPE`/`pegRatio`/`roeTTM`/`debtToEquity`/`fcfPerShareTTM`（Finnhub `/stock/metric` 內已有）+ `nextEarningsDate`（Finnhub `/calendar/earnings`）。Fundamentals lane rubric 改「以 bundle 為權威，skill 只算衍生指標」。**~80 行 / 風險低**~~ ✅ v1.62.0
+- [x] ~~**[I-PB]** Sentiment lane 個股層 web search → 結構化 API：
+  - **Insider 季度統計（主）**：FMP Starter `/stable/insider-trading/statistics` — 給 `acquiredDisposedRatio` / `totalAcquired` / `totalDisposed` / `acquiredTransactions` / `disposedTransactions` 季度統計（NVDA Q1 ratio=0.163 即「insider 主要在賣」），signal 直接可用
+  - Insider 逐筆細節（補充）：Finnhub `/stock/insider-transactions`（free ✅）+ `/stock/insider-sentiment`（free ✅ MSPR score）
+  - **Short interest fallback**：FMP Starter 仍無 `/short-interest`；改 yfinance `info.shortPercentOfFloat`（bi-monthly 更新但免費）
+  - Reddit/X narrative 保留 web search（≤ 1 次，僅取 tone）
+  - **~120 行 / 風險低**~~ ✅ v1.64.0
+- [x] ~~**[I-PC]** News lane analyst rating → FMP `/stable/` 替代（Finnhub upgrade/price-target 都 PREMIUM）：
+  - Upgrade/downgrade：FMP `/stable/grades-historical`（含 newGrade/previousGrade/action/analyst）
+  - Price target：FMP `/stable/price-target-consensus`（high/low/median/consensus）+ `/stable/price-target-summary`（月/季/年 trend）
+  - Recommendation：FMP `/stable/grades-consensus`（strongBuy/buy/hold/sell/strongSell counts）
+  - Company news：Finnhub `/company-news`（free，含 sentiment/category）
+  - Grade news：FMP `/stable/grades-news`（補充）
+  - **~100 行 / 風險低**~~ ✅ v1.65.0
+- [x] ~~**[I-PD]** Phase 0 L3 fallback web search → skill chain（market-sentiment + market-breadth + ftd + market-top）。`investment_protocol_v4_8.md` 行 33-35 重寫。**~50 行 / 風險中（Phase 0 是 critical path）**~~ ✅ v1.66.0
+- [x] ~~**[I-PE]** Phase 0 schema 明列 `fear_greed_index` / `vix_current` / `spy_rsi_14` / `top_catalysts[]`；Phase 2 共通 prompt 直接 inline pass，避免 Phase 2 重抓。**~40 行 / 風險低**~~ ✅ v1.67.0
+- [x] ~~**[I-PF]** Phase 2 共通 prompt 加「FORBID raw web search」白名單：list 哪些事情必須用 bundle/API，僅哪些少數例外才能 web search（management commentary / supply chain rumors / Reddit narrative）。**~20 行 / 風險低**~~ ✅ v1.68.0
+- [x] ~~**[I-PG]** Technical lane 把 yfinance daily OHLC 換成 FMP `/stable/historical-price-eod/full`（Starter 解鎖）。優點：含 `vwap` 跟預算的 `change%`、結構化 API 比 scraping 穩、Starter 配額充裕。yfinance 保留作 fallback。**~40 行 / 風險低**~~ ✅ v1.63.0
+
+**API call budget per protocol**（單 ticker）：
+
+| Phase | 元件 | Finnhub calls | FMP calls | yfinance calls |
+|---|---|---|---|---|
+| Phase 0 | fred-macro / breadth / ftd / market-top | 0 | 0 | 5+（free） |
+| Phase 0 | market-sentiment-analyzer (15min cache) | 0 | 0 | 1（共用） |
+| Phase 1 | dual_fetch（既有 + I-PA 擴充） | 3（quote + metric + calendar/earnings） | 2（profile + key-metrics-ttm） | 0 |
+| Phase 2 Fundamentals | I-PA 改後讀 bundle | 0 | 0 | 0 |
+| Phase 2 Sentiment | I-PB | 1（insider-sentiment MSPR） | 1（insider-trading/statistics） | 1（shortPercentOfFloat） |
+| Phase 2 News | I-PC | 1（company-news） | 4（grades-hist + price-target-consensus + grades-consensus + grades-news） | 0 |
+| Phase 2 Technical | technical-analyst (I-PG 改後) | 0 | 1（historical-price-eod/full） | 0（fallback） |
+| Phase 4 | risk_manager + tail_risk | 0 | 0 | 1（共用） |
+| **Total** | — | **6** | **7** | **8** |
+
+**配額限制**：
+- Finnhub free 60 calls/min：6/ticker → 同時 10 ticker 才會撞 → **充裕**
+- FMP free 250 calls/day：6/ticker → 每天最多 ~40 ticker → **正常使用沒問題，週末批次掃要注意**
+- yfinance：無配額但有 IP rate limit，已有 cache 機制
+
+**改進效果預估**：
+- 每次 invest 時間 30-45 min → 18-25 min（Phase 2 lane 平行內 lane 自身省時）
+- 結構化資料替代 web search 結果，subagent 數字 hallucination 風險大幅降低
+- regression test：v1.39 既有 ticker 跑出來的 final_score 不變超過 ±0.5
+
+### 路線 FE — Fincept Strategy Extraction（短期訊號強化）
+**背景**：從 `Fincept_enhance/FinceptTerminal` 掃描出可直接提取的短期交易算法，分三組工作：
+(A) Renaissance 動能/均值回歸算法 → 整合進 `short-term-target`
+(B) PLAN.md 原定的 Earnings Quality Analyzer → 整合進 Burry Agent
+(C) 純算式 indicators 補齊 `short-term-target` 特徵集
+
+**Source files**：
+- `Fincept_enhance/FinceptTerminal/fincept-qt/scripts/agents/hedgeFundAgents/renaissance_technologies_hedge_fund_agent/strategies/`
+- `Fincept_enhance/FinceptTerminal/fincept-qt/scripts/strategies/MACDTrendAlgorithm.py`
+- `Fincept_enhance/FinceptTerminal/fincept-qt/scripts/algo_trading/indicators.py`
+- `Fincept_enhance/PLAN.md`（Beneish M-Score 等算法規格）
+
+#### Group A — 短期訊號算法（接進 short-term-target）
+- [ ] **[FE-A1]** 提取 `momentum.py` 三層訊號：Optimal Lookback（5/10/20/40/60d Sharpe-like）、Trend Strength（R²）、Acceleration（short 5d − long 20d momentum）→ 包成 `skills/short-term-target/scripts/momentum_signals.py`，輸出 `{"acceleration": float, "trend_r2": float, "optimal_lookback": int, "signal": -1|0|1}`
+- [ ] **[FE-A2]** 提取 `mean_reversion.py` 三層指標：Z-score（60d mean/std）、Hurst exponent、OU half-life → 包成 `skills/short-term-target/scripts/mean_reversion_signals.py`，輸出 `{"z_score": float, "hurst": float, "half_life_days": float|null, "is_mean_reverting": bool}`
+- [ ] **[FE-A3]** 整合 A1+A2 到 `predict.py`：新增 `fincept_momentum` + `fincept_mean_reversion` 兩個 feature，並在 `weights.yaml` 加入對應權重欄位（預設 0，等 outcome log 累積後校準）
+- [ ] **[FE-A4]** `statistical_arbitrage.py` regime detector → 接進 `predict.py` regime filter：regime=BULL 升 momentum 權重、regime=SIDEWAYS 升 mean_reversion 權重
+
+#### Group B — Earnings Quality Analyzer（接進 Burry Agent）
+> 延續 `Fincept_enhance/PLAN.md` 原定計畫，已確認 source 算法位置
+
+- [ ] **[FE-B1]** 實作 `skills/earnings-quality-analyzer/scripts/quality.py`：提取 Beneish M-Score（8 factor）、Accrual Ratio（NI-OCF/TA）、CFO/NI、FCF/NI、Intangible Concentration、DSO 六個指標；FMP-native 無 BaseAnalyzer 依賴；輸出 JSON + `quality_label: CLEAN|CAUTION|RED_FLAG`
+- [ ] **[FE-B2]** 實作 `skills/earnings-quality-analyzer/scripts/ratios.py`：多年度 key metrics 陣列（Revenue CAGR、GM%趨勢、ROIC 趨勢）；與 quality.py 共用 FMP raw cache
+- [ ] **[FE-B3]** Protocol 整合：Phase 2 Burry inline 新增 `quality_label` 欄位；`macro_multiplier_rationale` 遇 RED_FLAG 時強制 Burry score penalty
+
+#### Group C — 待評估（低優先）
+- [ ] **[FE-C1]** 評估 `indicators.py` 的 Hurst + RSI + ADX 組合是否值得直接接進 `technical-analyst` skill（替換或補充 yfinance TA-Lib 輸出）
 
 ### 路線 D — 效能優化（低優先）
 - [ ] **[ARCH-11]** `lucide.createIcons()` debounce（`requestAnimationFrame` 批次）

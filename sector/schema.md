@@ -1,9 +1,16 @@
 # JSON Schema Reference
 
-> **Schema Version**: `V1.3`
+> **Schema Version**: `V1.4`
 > 所有 Phase 的 JSON 輸出 schema。執行各 Phase 寫入 JSON 時按需查閱。
 > ⚠️ Phase 5 的 `_phase0`、`_phase1`、`_phase3` key 名稱不可更換（bridge.py 依賴）。
 > ⚠️ Phase 5 末尾必須執行 `sector/scripts/validate_sector_intel.py`（rc=0 才算完成）。
+>
+> **V1.4 新增**（vs V1.3，FMP MCP 估值層 + 財報脈動 + smart money 三層 hard-required）：
+> - Phase 1 `sectors[]` 新增 `sector_valuation` block（pe_ttm / pe_zscore_1y / rs_vs_spy_3m / etf_volume_ratio_20d）— 由 `sector/scripts/fetch_sector_valuation.py` 產出
+> - Phase 3 `_phase3.sector_earnings_pulse`（per sector：beat_rate_30d / surprise_score_avg / report_count）— 由 `sector/scripts/fetch_earnings_pulse.py` 產出
+> - Phase 3 `_phase3.smart_money_signals`（per sector：insider_acquired_disposed_ratio_q / senate_net_buy_30d / form13f_top10_delta=null）— 由 `sector/scripts/fetch_smart_money.py` 產出；Phase 4b 強制 divergence check
+> - Phase 5 `sectors[].score_components` 新增 `valuation_penalty`（−10 至 +5；overbought distribution / oversold value 的 deterministic overlay）
+> - FMP MCP 失敗 = hard fail（無 graceful fallback；與 V1.3 的 FRED Layer E optional 模式不同）
 >
 > **V1.3 新增**（vs V1.2）：
 > - 頂層：`phase4_fanout_mode` / `degraded_agents`（4a/4b subagent 執行狀態）
@@ -96,7 +103,16 @@
       "cyclical_or_defensive": "cyclical | defensive",
       "rotation_signal": "INFLOW | NEUTRAL | OUTFLOW",
       "overbought_risk": "HIGH | MEDIUM | LOW",
-      "oversold_opportunity": "HIGH | MEDIUM | LOW"
+      "oversold_opportunity": "HIGH | MEDIUM | LOW",
+      "sector_valuation": {
+        "pe_ttm":               "float — V1.4：當日 PE TTM（NASDAQ + NYSE 簡單平均）",
+        "pe_ttm_nasdaq":        "float | null — V1.4：NASDAQ exchange PE",
+        "pe_ttm_nyse":          "float | null — V1.4：NYSE exchange PE",
+        "pe_zscore_1y":         "float — V1.4：vs 自身 1y daily 平均的 z-score（兩 exchange 各算後平均）",
+        "rs_vs_spy_3m":         "float — V1.4：sector ETF 3M return − SPY 3M return（小數，0.04 = +4%）",
+        "etf_volume_ratio_20d": "float — V1.4：今日 ETF 成交量 / 過去 20 個交易日均量",
+        "etf":                  "string — sector ETF symbol (XLK / XLF 等)"
+      }
     }
   ],
   "hot_sectors": ["sector1", "sector2"],
@@ -104,6 +120,8 @@
   "rotation_theme": "string — 一句話描述當前輪動方向"
 }
 ```
+
+> ⚠️ V1.4：`sector_valuation` block 為 **hard-required**。由 `sector/scripts/fetch_sector_valuation.py` 產出（FMP HTTP REST，cache 至 `sector/cache/sector_valuation_<DATE>.json`），Phase 1 fetch 失敗 → 中止 protocol（不繼續 Phase 4/5）。
 
 ---
 
@@ -169,6 +187,31 @@
     "spy_rsi": "float",
     "sentiment_source": "SKILL_EXECUTED | WEB_SEARCH_FALLBACK",
     "extreme_sentiment_triggered": "true | false"
+  },
+  "sector_earnings_pulse": {
+    "_comment": "V1.4 hard-required — by sector_name → block; produced by fetch_earnings_pulse.py",
+    "Technology": {
+      "report_count":       "int — mega-cap reports in last 30d window",
+      "beats":              "int",
+      "misses":             "int",
+      "in_line":            "int",
+      "beat_rate_30d":      "float | null — beats / (beats+misses); null if 0",
+      "surprise_score_avg": "float | null — mean of clipped (actual-est)/|est|, ±100% cap",
+      "analyst_revision_net": "null — V1.4 P2 ships without; future P2.5 work"
+    }
+  },
+  "smart_money_signals": {
+    "_comment": "V1.4 hard-required — by sector_name → block; produced by fetch_smart_money.py",
+    "Technology": {
+      "insider_acquired_q":              "int — quarter-aggregate acquired transactions across mega-cap universe",
+      "insider_disposed_q":              "int — quarter-aggregate disposed transactions",
+      "insider_acquired_disposed_ratio_q": "float | null — < 0.5 bearish / > 1.0 bullish (Phase 4b divergence trigger)",
+      "insider_sample_size":             "int — number of mega-caps that returned data",
+      "senate_purchases_30d":            "int",
+      "senate_sales_30d":                "int",
+      "senate_net_buy_30d":              "int — purchases − sales (Phase 4b divergence trigger if < 0 + insider ratio < 0.5)",
+      "form13f_top10_delta":             "null — V1.4 P3 ships without; future P3.5 work (paid plan)"
+    }
   },
   "upcoming_events": [
     {
@@ -297,7 +340,7 @@
 ```json
 {
   "verdict_date": "YYYY-MM-DD",
-  "protocol_version": "V1.3",
+  "protocol_version": "V1.4",
   "phase4_fanout_mode": "PARALLEL_SUBAGENT | PARTIAL_FALLBACK | FULL_FALLBACK | INLINE",
   "degraded_agents": ["Sector_Rotation_Analyst | Theme_Intelligence_Analyst | News_Catalyst_Analyst | Devils_Advocate (empty array in normal runs)"],
   "generated_at": "YYYY-MM-DD HH:MM",
@@ -417,7 +460,8 @@
         "breadth_momentum": "0–25",
         "theme_heat": "0–25",
         "news_catalyst": "0–25",
-        "rotation_signal": "0–25"
+        "rotation_signal": "0–25",
+        "valuation_penalty": "int −10 to +5 (V1.4 hard-required) — pe_zscore>2 & uptrend_ratio>0.7 → −10; pe_zscore<−1 & uptrend_ratio<0.3 → +5; else 0"
       },
       "key_reasons": ["max 3 items, max 10 words each"],
       "devils_advocate_note": "string if challenged",

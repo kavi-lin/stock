@@ -301,6 +301,53 @@ def render_divergence(d):
     return lines
 
 
+def render_valuation_snapshot(d):
+    """V1.4 — Sector Valuation Snapshot (PE TTM, 1y z-score, RS vs SPY 3M, vol ratio)."""
+    p1 = d.get("_phase1") or {}
+    rows = p1.get("sectors") or []
+    valuation_rows = [s for s in rows if isinstance(s.get("sector_valuation"), dict)]
+    if not valuation_rows:
+        return []
+
+    header = "| Sector | PE TTM | 1y z-score | RS vs SPY 3M | ETF Vol/20d | Flag |"
+    sep = "|" + "|".join(["---"] * 6) + "|"
+    lines = ["## Sector Valuation Snapshot (V1.4)", "", header, sep]
+
+    def fmt_pct(v):
+        return f"{v*100:+.1f}%" if isinstance(v, (int, float)) else "—"
+
+    def fmt_z(v):
+        return f"{v:+.2f}" if isinstance(v, (int, float)) else "—"
+
+    for s in valuation_rows:
+        sv = s["sector_valuation"]
+        pe   = sv.get("pe_ttm")
+        z    = sv.get("pe_zscore_1y")
+        rs   = sv.get("rs_vs_spy_3m")
+        vol  = sv.get("etf_volume_ratio_20d")
+        ur   = s.get("uptrend_ratio")
+
+        flag = ""
+        if isinstance(z, (int, float)) and isinstance(ur, (int, float)):
+            if z > 2.0 and ur > 0.7:
+                flag = "🔴 OVERBOUGHT"
+            elif z < -1.0 and ur < 0.3:
+                flag = "🟢 OVERSOLD VALUE"
+
+        lines.append(
+            f"| {s.get('name','?')} "
+            f"| {fmt(pe)} "
+            f"| {fmt_z(z)} "
+            f"| {fmt_pct(rs)} "
+            f"| {fmt(vol)} "
+            f"| {flag} |"
+        )
+    lines.append("")
+    lines.append("> z-score>2 + uptrend>0.7 → valuation_penalty −10；z-score<−1 + uptrend<0.3 → +5。完整 raw 數據見 `sector/cache/sector_valuation_<DATE>.json`。")
+    lines.append("")
+    return lines
+
+
 def render_themes(d):
     themes = d.get("actionable_themes") or []
     if not themes:
@@ -330,6 +377,7 @@ def render(d):
         render_verdict_table(d),
         render_macro_block(d),
         render_step6_block(d),
+        render_valuation_snapshot(d),
         render_today_verdict(d),
         render_devils_advocate(d),
         render_divergence(d),

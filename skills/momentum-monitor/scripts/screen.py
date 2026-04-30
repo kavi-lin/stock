@@ -8,6 +8,7 @@ ranks by composite score, and writes both a CSV and a Markdown table.
 
 Usage:
     python3 screen.py --universe sp500 --min-score 70
+    python3 screen.py --universe sox --min-score 60          # 費半 30 檔（含 TSM/ASML ADR）
     python3 screen.py --tickers AAPL,MSFT,NVDA,AMD --min-score 60
     python3 screen.py --tickers-file my_watchlist.txt --signal fresh_golden_cross_20_50
     python3 screen.py --universe sp500 --stage "Stage 2 uptrend" --exclude-warning parabolic_blowoff_risk --top 25
@@ -146,7 +147,7 @@ def _passes(payload, args):
 
 # ── Output ───────────────────────────────────────────────────────────────
 CSV_COLUMNS = [
-    "rank", "ticker", "in_sp500", "in_nasdaq100", "sector", "price", "score", "label", "stage",
+    "rank", "ticker", "in_sp500", "in_nasdaq100", "in_sox", "sector", "price", "score", "label", "stage",
     "volume_today", "avg_20d", "ratio_20d", "spike_label", "volume_trend",
     "intraday_state", "elapsed_min",
     "ma_20", "ma_50", "ma_200",
@@ -159,7 +160,7 @@ CSV_COLUMNS = [
 ]
 
 
-def _row_from_payload(rank, p, sp500_set=None, n100_set=None):
+def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
     v = p.get("volume", {})
     m = p.get("ma_structure", {})
     s = p.get("short_interest", {})
@@ -169,13 +170,15 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None):
     # If set is None, we assume it's NOT in that universe (unless it's a custom scan where we didn't check)
     # Actually, better: if we have the ref set, use it.
     in_sp500 = (ticker in sp500_set) if sp500_set is not None else False
-    in_n100  = (ticker in n100_set) if n100_set is not None else False
+    in_n100  = (ticker in n100_set)  if n100_set  is not None else False
+    in_sox   = (ticker in sox_set)   if sox_set   is not None else False
 
     return {
         "rank": rank,
         "ticker": ticker,
         "in_sp500": int(in_sp500),
         "in_nasdaq100": int(in_n100),
+        "in_sox": int(in_sox),
         "sector": _SECTOR_MAP.get(ticker) or "Unknown",
         "price": p.get("price"),
         "score": c.get("score"),
@@ -250,7 +253,7 @@ def _render_md(rows, top, meta):
 def main():
     ap = argparse.ArgumentParser(description="Batch momentum screener")
     src = ap.add_mutually_exclusive_group(required=False)
-    src.add_argument("--universe", default="all", help="Universe name under scripts/universes/ (e.g. sp500, nasdaq100, all)")
+    src.add_argument("--universe", default="all", help="Universe name under scripts/universes/ (e.g. sp500, nasdaq100, sox, all)")
     src.add_argument("--tickers", help="Comma-separated ticker list")
     src.add_argument("--tickers-file", help="Path to file with one ticker per line")
 
@@ -287,8 +290,9 @@ def main():
         if args.universe == "all":
             u1 = _load_universe("sp500")
             u2 = _load_universe("nasdaq100")
-            base_tickers = sorted(list(set(u1 + u2)))
-            universe_desc = "all (SP500 + Nasdaq100)"
+            u3 = _load_universe("sox")
+            base_tickers = sorted(list(set(u1 + u2 + u3)))
+            universe_desc = "all (SP500 + Nasdaq100 + SOX)"
         else:
             base_tickers = _load_universe(args.universe)
             universe_desc = args.universe
@@ -302,10 +306,11 @@ def main():
     # Track membership for flagging.
     sp500_ref = set(_load_universe("sp500"))
     n100_ref  = set(_load_universe("nasdaq100"))
+    sox_ref   = set(_load_universe("sox"))
 
     # Watchlist is merged when primary universe is a standard one
     base_set = set(base_tickers)
-    watchlist = _load_watchlist() if args.universe in ("sp500", "nasdaq100", "all") else []
+    watchlist = _load_watchlist() if args.universe in ("sp500", "nasdaq100", "sox", "all") else []
     extra = [t for t in watchlist if t not in base_set]
     tickers = base_tickers + extra
     if extra:
@@ -346,7 +351,7 @@ def main():
         )
     )
 
-    rows = [_row_from_payload(i + 1, p, sp500_set=sp500_ref, n100_set=n100_ref)
+    rows = [_row_from_payload(i + 1, p, sp500_set=sp500_ref, n100_set=n100_ref, sox_set=sox_ref)
             for i, p in enumerate(matched)]
 
     # Write CSV

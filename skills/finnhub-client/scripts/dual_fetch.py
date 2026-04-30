@@ -44,9 +44,14 @@ DEFAULT_TICKERS = [
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 CANONICAL_FIELDS = [
+    # Tier 1: real-time quote (4)
     "price", "previousClose", "dayHigh", "dayLow",
+    # Tier 2: profile / valuation (5)
     "mktCap", "peRatio", "epsTTM",
     "dividendYield", "priceToBookRatio",
+    # Tier 3: forward / quality / earnings (6) — added v1.62 (I-PA)
+    "forwardPE", "pegRatio", "roeTTM",
+    "debtToEquity", "fcfPerShareTTM", "nextEarningsDate",
 ]
 
 
@@ -71,16 +76,50 @@ def fetch_finnhub(ticker, client):
     except FinnhubError as e:
         print(f"WARN: Finnhub profile {ticker}: {e}", file=sys.stderr)
 
+    # Single /stock/metric call serves both Tier 2 and Tier 3 fields below —
+    # Finnhub returns ~100 keys per ticker, no extra API cost.
     try:
-        km = adapters.metric_to_fmp_key_metrics(client.metric(ticker))
+        raw_metric = client.metric(ticker)
+        m_dict = (raw_metric or {}).get("metric", {}) if isinstance(raw_metric, dict) else {}
+        km = adapters.metric_to_fmp_key_metrics(raw_metric)
         if km:
             m = km[0]
             out["peRatio"] = m.get("peRatio")
             out["epsTTM"] = m.get("epsTTM")
             out["dividendYield"] = m.get("dividendYield")
             out["priceToBookRatio"] = m.get("priceToBookRatio")
+
+        # Tier 3: forward / quality (v1.62 I-PA additions) — read directly from raw metric dict
+        out["forwardPE"]    = m_dict.get("forwardPE")
+        out["pegRatio"]     = m_dict.get("pegTTM")
+        out["roeTTM"]       = m_dict.get("roeTTM")
+        out["debtToEquity"] = m_dict.get("totalDebt/totalEquityAnnual")
+        # FCF per share — Finnhub gives price/FCF (`pfcfShareTTM`); derive fcfPerShare = price / (price/fcf)
+        pfcf = m_dict.get("pfcfShareTTM")
+        if pfcf and out.get("price"):
+            try:
+                out["fcfPerShareTTM"] = round(float(out["price"]) / float(pfcf), 4)
+            except (TypeError, ValueError, ZeroDivisionError):
+                out["fcfPerShareTTM"] = None
+        else:
+            out["fcfPerShareTTM"] = None
     except FinnhubError as e:
         print(f"WARN: Finnhub metric {ticker}: {e}", file=sys.stderr)
+
+    # nextEarningsDate — separate /calendar/earnings call. Returns nearest upcoming.
+    try:
+        from_date = datetime.date.today().isoformat()
+        to_date   = (datetime.date.today() + datetime.timedelta(days=120)).isoformat()
+        cal = client.earnings_calendar(from_date, to_date, ticker)
+        items = (cal or {}).get("earningsCalendar", []) if isinstance(cal, dict) else []
+        # Pick earliest upcoming (already sorted by date asc in Finnhub response)
+        out["nextEarningsDate"] = items[0]["date"] if items and items[0].get("date") else None
+    except FinnhubError as e:
+        print(f"WARN: Finnhub earnings calendar {ticker}: {e}", file=sys.stderr)
+        out["nextEarningsDate"] = None
+    except AttributeError:
+        # client may not yet expose earnings_calendar method — fall through
+        out["nextEarningsDate"] = None
 
     return out
 
@@ -131,17 +170,43 @@ def fetch_fmp(ticker, api_key, session):
         # FMP returns decimal (0.0038); Finnhub returns percent (0.38). Scale to match.
         if m.get("dividendYieldTTM") is not None:
             out["dividendYield"] = m["dividendYieldTTM"] * 100
+        # Tier 3 audit fields (v1.62 I-PA)
+        # forwardPE: FMP doesn't expose direct trailing→forward P/E ratio in /stable/ratios-ttm.
+        #            Skip on audit side (Finnhub canonical only).
+        # pegRatio: FMP has forward PEG; Finnhub has trailing PEG (pegTTM). Different methodology
+        #          → store but flag as approximate (audit-only diff will be high; expected).
+        if m.get("forwardPriceToEarningsGrowthRatioTTM") is not None:
+            out["pegRatio"] = m["forwardPriceToEarningsGrowthRatioTTM"]
+        if m.get("debtToEquityRatioTTM") is not None:
+            out["debtToEquity"] = m["debtToEquityRatioTTM"]
+        if m.get("freeCashFlowPerShareTTM") is not None:
+            out["fcfPerShareTTM"] = m["freeCashFlowPerShareTTM"]
+
+    # nextEarningsDate via /stable/earnings-calendar — filter to ticker-specific
+    cal = _get("earnings-calendar", {"from": datetime.date.today().isoformat(),
+                                     "to":   (datetime.date.today() + datetime.timedelta(days=120)).isoformat()})
+    if isinstance(cal, list) and cal:
+        upcoming = [c for c in cal if c.get("symbol") == ticker.upper() and c.get("date")]
+        if upcoming:
+            upcoming.sort(key=lambda x: x["date"])
+            out["nextEarningsDate"] = upcoming[0]["date"]
 
     return out, status
 
 
 def compute_diff(scoring, fmp):
-    """Per-field % diff (fmp relative to finnhub/scoring)."""
+    """Per-field % diff (fmp relative to finnhub/scoring).
+    Date fields (e.g. nextEarningsDate) compared as match/mismatch, not %.
+    """
     out = {}
+    DATE_FIELDS = {"nextEarningsDate"}
     for f in CANONICAL_FIELDS:
         s = scoring.get(f)
         fv = fmp.get(f)
         if s is None or fv is None:
+            continue
+        if f in DATE_FIELDS:
+            out[f"{f}_match"] = (str(s) == str(fv))
             continue
         try:
             s_n = float(s)

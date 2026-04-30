@@ -31,16 +31,72 @@ const SIG_DESC_ZH = {
     volume_expansion:            { desc: '成交量比前 20 日均量放大 ≥ 30% 且 5 日均量 > 10 日均量。資金流入加速。', hint: '搭配價格突破或黃金交叉，可信度最高。' },
     heavy_volume_spike_today:    { desc: '今日量比 ≥ 3 倍前 20 日均量。重大資金事件（新聞 / 業績 / 機構動作）。', hint: '先看方向：上漲 = 可能續強；下跌 = 警戒出貨。' },
     low_short_interest:          { desc: '空單佔流通股比例 < 3%。市場對這檔沒有明顯看空共識。', hint: '偏中性訊息；搭配其他多頭訊號才有意義。' },
-    high_short_interest:         { desc: '空單佔流通股比例 > 10%。市場對這檔有顯著做空壓力。', hint: '若基本面轉佳可能引發軋空；也可能反映真的有問題。' },
-    squeeze_candidate:           { desc: '高空單（> 20%）+ 價格站上 MA20 > 5%。軋空燃料已堆疊。', hint: 'Catalyst 驅動型爆發候選，適合短線交易，停損要緊。' },
-    oversold_rsi:                { desc: 'RSI < 30 且處於 Stage 2 上升結構。強勢股的短期回檔買點。', hint: '只適用於上升股；下跌股 RSI < 30 是弱勢延續不是機會。' },
-    macd_bullish_cross:          { desc: 'MACD 線今日向上穿越 Signal 線。動能由空轉多的確認訊號。', hint: '零軸上方出現的黃金交叉可信度比零軸下方高。' },
+    high_short_interest:         {
+        desc: '空單佔流通股比例 > 10%。市場對這檔有顯著做空壓力。**雙刃劍**：可能是軋空燃料、也可能反映真的有結構性問題。',
+        tiers: [
+            { dot: '🟢', label: '軋空候選', text: '基本面轉佳 / 有正面 catalyst → 空單回補引爆，短期爆發力高（搭配 squeeze_candidate 訊號最強）' },
+            { dot: '🟡', label: '中性',     text: '無明確催化，純粹高空單，要看其他訊號決定方向' },
+            { dot: '🟠', label: '結構性問題', text: '基本面持續惡化、營收下滑 → 空方可能是對的，硬抄底是接刀子' },
+        ],
+        hint: '判斷關鍵：「為什麼這麼多人放空？」如果你能找出市場錯誤的點 = 機會；找不到 = 跟著對手盤站',
+    },
+    squeeze_candidate:           {
+        desc: '高空單（> 20%）+ 價格站上 MA20 > 5%。軋空燃料已堆疊，等 catalyst 點火。',
+        tiers: [
+            { dot: '🟢', label: '強訊號', text: '搭配近期正面 catalyst (財報 beat / 產業利多) → 短期爆發力高，可重押短線' },
+            { dot: '🟡', label: '標準',   text: '單獨出現無 catalyst → 空單壓力存在但需等火種，可小倉位埋伏' },
+            { dot: '🟠', label: '弱',     text: '價格已大漲 + 距 MA50 過遠 → 軋空可能已經發生過，後續吸引力有限' },
+        ],
+        hint: '此類交易**停損要緊** (1 ATR 內)，因為若 catalyst 沒出現，價格會 drift 回去；屬高 R/R 短線',
+    },
+    oversold_rsi:                {
+        desc: 'RSI < 30 且處於 Stage 2 上升結構。強勢股的短期回檔買點。',
+        tiers: [
+            { dot: '🟢', label: 'Stage 2 + 量縮', text: '上升趨勢中的健康回檔（量縮回測 MA50）→ 經典 buy-the-dip，勝率高' },
+            { dot: '🟡', label: 'Stage 2 + 量增', text: '回檔伴隨量增 = 可能有結構性問題，等 RSI 回 40 + 量恢復' },
+            { dot: '🟠', label: 'Stage 3-4',     text: '下跌趨勢中的 oversold = 弱勢延續訊號，**不是機會**，反彈即賣' },
+        ],
+        hint: '**只在上升股有效**。「RSI < 30 = 買點」是新手陷阱 — 趨勢方向才是主軸',
+    },
+    macd_bullish_cross:          {
+        desc: 'MACD 線今日向上穿越 Signal 線。動能由空轉多的確認訊號。',
+        tiers: [
+            { dot: '🟢', label: '零線上方', text: 'MACD > 0 處出現黃金交叉 → 強勢延續訊號，可信度最高，標準倉位' },
+            { dot: '🟡', label: '零線附近', text: 'MACD ≈ 0 → 中性轉多，可分批進場、設緊停損' },
+            { dot: '🟠', label: '零線下方', text: 'MACD < 0 處的反彈訊號 → 多為下跌中反彈，**不應視為趨勢轉多**，等再次穿越零軸' },
+        ],
+        hint: '配合 MA structure (Stage 2 必要) + 量增可信度更高；單獨 MACD 訊號雜訊很多',
+    },
     macd_histogram_rising:       { desc: 'MACD 柱狀圖連續 3 日擴大。多頭動能持續加速。', hint: '最好的 follow-through 訊號；趨勢延續機率高。' },
 };
 const WARN_DESC_ZH = {
-    overbought_rsi:              { desc: 'RSI > 70。短期獲利了結壓力上升。', hint: '強勢股可在 70+ 停留數週；不要單憑 RSI 賣出。回檔至 65-70 才是加碼點。' },
-    parabolic_blowoff_risk:      { desc: '價格距 MA200 > 50%。拋物線式噴出，均值回歸壓力大。', hint: '非常接近頂部區；若已持有應鎖定部分利潤；未持有別追高。' },
-    stage4_downtrend:            { desc: '空頭排列：MA20 < MA50 < MA200 且價格跌破 MA20。技術面最弱狀態。', hint: '空頭市場「逆勢抄底」勝率極低；等 Stage 1 築底完成再說。' },
+    overbought_rsi:              {
+        desc: 'RSI > 70。短期獲利了結壓力上升，**但不一定要賣**。',
+        tiers: [
+            { dot: '🟢', label: '強勢股延續', text: '主升段強勢股可在 70+ 停留 2-4 週（NVDA/META 等），不要單憑 RSI 出場' },
+            { dot: '🟡', label: '一般持倉',   text: '可考慮鎖部分利潤、收緊停損；回檔至 65-70 是加碼點' },
+            { dot: '🟠', label: '已過熱',     text: 'RSI > 80 + 距 MA50 > 30% → 拋物線末段，**不要追高**，已持有可分批出' },
+        ],
+        hint: '「RSI > 70 賣出」是另一個新手陷阱。配合 trend (MA200 角度) + 量能判斷才有意義',
+    },
+    parabolic_blowoff_risk:      {
+        desc: '價格距 MA200 > 50%。拋物線式噴出，均值回歸壓力極大。',
+        tiers: [
+            { dot: '🟢', label: '無短側機會', text: '純粹「不追」訊號 — 但若你**已持有**，這是重要的部分停利訊號' },
+            { dot: '🟡', label: '考慮鎖利',   text: '若已持有 > 30% 獲利，建議出 1/3-1/2，剩餘 trailing stop' },
+            { dot: '🔴', label: '高風險',     text: '距 MA200 > 80% 或拋物線斜率陡峭 → 隨時可能崩跌 50%+，不應該再加碼' },
+        ],
+        hint: '歷史 case: TSLA 2021 $1200、NVDA 2023 $500 → 都在這訊號出現後 30-50% 修正',
+    },
+    stage4_downtrend:            {
+        desc: '空頭排列：MA20 < MA50 < MA200 且價格跌破 MA20。技術面最弱狀態。',
+        tiers: [
+            { dot: '🟠', label: '初期',     text: '剛進入 Stage 4，可能有反彈但下檔未止 — 可短做反彈但不長持' },
+            { dot: '🔴', label: '深度下跌', text: 'MA200 持續下傾 > 1 月 → 持續走弱機率高，不應該有新進部位' },
+            { dot: '🟡', label: '築底跡象', text: '價格不再破前低 + 量縮 + RSI 走高 → 觀察 Stage 1 完成再考慮，**不要搶左側**' },
+        ],
+        hint: '「逆勢抄底」是大部分散戶虧最多的單型；等 Stage 1 base 完成 + FTD 才是入場時機',
+    },
     volume_dry_up:               { desc: '量比 < 0.7（較前 20 日均量縮減 30% 以上）。資金離場或觀望。', hint: '上升趨勢中的量縮是警訊；下跌中的量縮可能是洗盤。' },
     fresh_death_cross_20_50:     { desc: '過去 10 個交易日內 MA20 向下跌破 MA50。短期動能轉弱。', hint: '通常是 Stage 2 → 3 轉換的早期訊號，應減倉觀望。' },
     fresh_death_cross_50_200:    { desc: '過去 10 個交易日內 MA50 向下跌破 MA200。結構級轉空。', hint: '歷史上通常伴隨長空；技術派視為大型轉折點，不應硬撐。' },
@@ -53,16 +109,72 @@ const SIG_DESC_EN = {
     volume_expansion:            { desc: 'Volume ≥ 1.3× 20-day avg AND 5-day avg > 10-day avg. Money flow accelerating.', hint: 'Pair with breakout or golden cross for highest conviction.' },
     heavy_volume_spike_today:    { desc: 'Today volume ≥ 3× 20-day avg. Major capital event (news/earnings/institutional).', hint: 'Check direction first: up = continuation likely; down = distribution warning.' },
     low_short_interest:          { desc: 'Short interest < 3% of float. No significant bearish consensus.', hint: 'Mildly supportive; meaningful only when combined with other bull signals.' },
-    high_short_interest:         { desc: 'Short interest > 10% of float. Notable bearish pressure.', hint: 'Can trigger squeezes on good news; may also reflect real trouble.' },
-    squeeze_candidate:           { desc: 'High short (>20%) + price >5% above MA20. Squeeze fuel stacked.', hint: 'Catalyst-driven breakout candidate; keep tight stops.' },
-    oversold_rsi:                { desc: 'RSI < 30 while in Stage 2 uptrend. Short-term pullback in a strong stock.', hint: 'Only applies to uptrends; oversold in a downtrend is weakness, not opportunity.' },
-    macd_bullish_cross:          { desc: 'MACD line crossed above Signal line today. Momentum shift from bear to bull confirmed.', hint: 'Crosses above the zero line carry more weight than below.' },
+    high_short_interest:         {
+        desc: 'Short interest > 10% of float. Notable bearish pressure. **Double-edged**: can be squeeze fuel, or reflect real structural problems.',
+        tiers: [
+            { dot: '🟢', label: 'Squeeze candidate', text: 'Improving fundamentals / positive catalyst → short cover ignites, high short-term explosiveness (best paired with squeeze_candidate signal)' },
+            { dot: '🟡', label: 'Neutral',           text: 'No clear catalyst, just high short — direction depends on other signals' },
+            { dot: '🟠', label: 'Structural problem', text: 'Fundamentals deteriorating, revenue declining → shorts likely correct, knife-catch will hurt' },
+        ],
+        hint: 'Key question: "Why are so many shorting?" If you can pinpoint the market\'s mistake = opportunity; if not = trading against the right side',
+    },
+    squeeze_candidate:           {
+        desc: 'High short (>20%) + price >5% above MA20. Squeeze fuel stacked, awaiting catalyst.',
+        tiers: [
+            { dot: '🟢', label: 'Strong', text: 'Recent positive catalyst (earnings beat / sector tailwind) → high short-term explosiveness, can size up' },
+            { dot: '🟡', label: 'Standard', text: 'No catalyst yet → short pressure exists but needs a spark, small starter position' },
+            { dot: '🟠', label: 'Weak',     text: 'Already extended, far from MA50 → squeeze may have already occurred, limited upside' },
+        ],
+        hint: 'These trades **need tight stops** (~1 ATR) — without catalyst, price drifts back. High R/R short-term setup',
+    },
+    oversold_rsi:                {
+        desc: 'RSI < 30 while in Stage 2 uptrend. Short-term pullback in a strong stock.',
+        tiers: [
+            { dot: '🟢', label: 'Stage 2 + low vol', text: 'Healthy pullback in uptrend (low-vol retest of MA50) → classic buy-the-dip, high win rate' },
+            { dot: '🟡', label: 'Stage 2 + heavy vol', text: 'Pullback with rising volume = possible structural issue, wait for RSI > 40 + volume normalize' },
+            { dot: '🟠', label: 'Stage 3-4',          text: 'Oversold in downtrend = weakness continuation, **not opportunity** — sell into bounces' },
+        ],
+        hint: '**Only valid in uptrends**. "RSI < 30 = buy" is a beginner trap — trend direction is the master variable',
+    },
+    macd_bullish_cross:          {
+        desc: 'MACD line crossed above Signal line today. Momentum shift from bear to bull confirmed.',
+        tiers: [
+            { dot: '🟢', label: 'Above zero', text: 'MACD > 0 cross → strong continuation signal, highest reliability, standard size' },
+            { dot: '🟡', label: 'Near zero',  text: 'MACD ≈ 0 → neutral-to-bull, scale in, tight stops' },
+            { dot: '🟠', label: 'Below zero', text: 'Cross below zero = bounce within downtrend, **not a trend reversal** — wait for re-cross above zero' },
+        ],
+        hint: 'Pair with MA structure (Stage 2 required) + volume expansion for highest reliability; standalone MACD is noisy',
+    },
     macd_histogram_rising:       { desc: 'MACD histogram rising for 3 consecutive days. Bull momentum accelerating.', hint: 'Best follow-through signal; trend-continuation probability is high.' },
 };
 const WARN_DESC_EN = {
-    overbought_rsi:              { desc: 'RSI > 70. Short-term profit-taking pressure rising.', hint: 'Strong names can hold 70+ for weeks; don\'t sell on RSI alone. Add on pullback to 65-70.' },
-    parabolic_blowoff_risk:      { desc: 'Price > 50% above MA200. Parabolic blow-off, mean-reversion risk high.', hint: 'Very close to a top; if held, lock in profits. If not held, don\'t chase.' },
-    stage4_downtrend:            { desc: 'Bearish stack: MA20 < MA50 < MA200 with price below MA20. Technically weakest state.', hint: 'Catching falling knives has low win rate; wait for Stage 1 base.' },
+    overbought_rsi:              {
+        desc: 'RSI > 70. Short-term profit-taking pressure rising, **but not a sell signal alone**.',
+        tiers: [
+            { dot: '🟢', label: 'Strong stock continuation', text: 'Leading uptrends can hold 70+ for 2-4 weeks (NVDA, META) — don\'t exit on RSI alone' },
+            { dot: '🟡', label: 'Normal hold',               text: 'Lock partial profits, tighten stops; add on pullback to 65-70' },
+            { dot: '🟠', label: 'Overheated',                text: 'RSI > 80 + 30%+ above MA50 → late-stage parabolic, **don\'t chase**, scale out if held' },
+        ],
+        hint: '"RSI > 70 = sell" is another beginner trap. Trend angle (MA200) + volume context matters more',
+    },
+    parabolic_blowoff_risk:      {
+        desc: 'Price > 50% above MA200. Parabolic blow-off, mean-reversion risk extreme.',
+        tiers: [
+            { dot: '🟢', label: 'No new long',  text: 'Pure "do not chase" signal — but if **already holding**, this is a critical partial-profit trigger' },
+            { dot: '🟡', label: 'Lock profits', text: 'If holding > 30% gains, scale out 1/3-1/2, trail stop on the rest' },
+            { dot: '🔴', label: 'High risk',    text: '> 80% above MA200 or steep parabolic angle → 50%+ crash possible any time, do not add' },
+        ],
+        hint: 'Historical cases: TSLA 2021 $1200, NVDA 2023 $500 → 30-50% drawdowns shortly after this signal fired',
+    },
+    stage4_downtrend:            {
+        desc: 'Bearish stack: MA20 < MA50 < MA200 with price below MA20. Technically weakest state.',
+        tiers: [
+            { dot: '🟠', label: 'Early stage', text: 'Just entered Stage 4, bounces possible but downside not done — short bounces, don\'t hold long' },
+            { dot: '🔴', label: 'Deep down',   text: 'MA200 trending down >1 month → continuation likely, no new long positions' },
+            { dot: '🟡', label: 'Basing',      text: 'Higher lows + low volume + rising RSI → watch for Stage 1 completion, **don\'t buy left side**' },
+        ],
+        hint: '"Catching the falling knife" is the costliest retail trade. Wait for Stage 1 base + FTD before entering',
+    },
     volume_dry_up:               { desc: 'Volume < 0.7× 20-day avg (≥30% drop). Money leaving or waiting.', hint: 'Dry-up in uptrend = warning; in downtrend = possibly shakeout.' },
     fresh_death_cross_20_50:     { desc: 'MA20 crossed below MA50 in last 10 sessions. Short-term momentum weakening.', hint: 'Usually the early signal of Stage 2→3 transition; reduce exposure.' },
     fresh_death_cross_50_200:    { desc: 'MA50 crossed below MA200 in last 10 sessions. Structural bearish cross.', hint: 'Historically precedes long bear phases; don\'t fight it.' },
@@ -208,6 +320,16 @@ function _presetTip(key) {
 //                  wouldn't be needed anyway since pointer-events:none)
 (function initMomentumPillTooltip() {
     let _hideTimer = null;
+    function _renderTierRows(tiers) {
+        if (!Array.isArray(tiers) || !tiers.length) return '';
+        const rows = tiers.map(tier => `
+            <div class="mpt-tier-row">
+              <span class="mpt-tier-dot">${tier.dot || '⚪'}</span>
+              <span class="mpt-tier-text"><strong>${tier.label}</strong> — ${tier.text}</span>
+            </div>
+        `).join('');
+        return `<div class="mpt-tiers">${rows}</div>`;
+    }
     function _renderSignalTip(el, isWarning) {
         const key = el.dataset.sigTip || el.dataset.warnTip;
         const entry = _pillTip(key, isWarning);
@@ -218,6 +340,7 @@ function _presetTip(key) {
             html: `
               <div class="mpt-title">${titleLabel}</div>
               <div class="mpt-desc">${entry.desc}</div>
+              ${_renderTierRows(entry.tiers)}
               ${entry.hint ? `<div class="mpt-hint">${entry.hint}</div>` : ''}
             `,
         };
@@ -744,16 +867,16 @@ function matchesFilter(r) {
     if (f.label  !== 'any' && r.label  !== f.label)  return false;
 
     // Watchlist scope toggle — filters on origin regardless of other criteria
-    const isWatchlistOnly = r.in_sp500 === false && r.in_nasdaq100 === false;
+    const isWatchlistOnly = r.in_sp500 === false && r.in_nasdaq100 === false && r.in_sox === false;
     if (f.watchlistMode === 'only'    && !isWatchlistOnly) return false;
     if (f.watchlistMode === 'exclude' &&  isWatchlistOnly) return false;
 
-    // Universe filter: SP500 or Nasdaq100.
-    // "自選不管是目前是sp500 or nasdaq 100都要顯示在表上"
-    // -> If it is in the watchlist, we show it regardless of the universe filter.
+    // Universe filter: SP500 / Nasdaq100 / SOX.
+    // Watchlist tickers always show regardless of universe filter (preserved behavior).
     if (!isWatchlistOnly) {
         if (f.universe === 'sp500' && !r.in_sp500) return false;
         if (f.universe === 'nasdaq100' && !r.in_nasdaq100) return false;
+        if (f.universe === 'sox' && !r.in_sox) return false;
     }
 
     const sigs = new Set(r.signals || []);
@@ -996,7 +1119,7 @@ function rowHTML(r) {
         : '';
 
     // Priority: Watchlist (Purple) > Nasdaq100 (Blue) > SP500 (Base)
-    const isWatchlist = r.in_sp500 === false && r.in_nasdaq100 === false;
+    const isWatchlist = r.in_sp500 === false && r.in_nasdaq100 === false && r.in_sox === false;
     const isNasdaq    = r.in_nasdaq100 === true;
 
     let rowClass = 'mom-row';
@@ -2074,6 +2197,8 @@ function translate() {
         uniToggle.querySelector('[data-value="any"]').textContent = tr.universe_all || 'All';
         uniToggle.querySelector('[data-value="sp500"]').textContent = 'S&P 500';
         uniToggle.querySelector('[data-value="nasdaq100"]').textContent = 'Nasdaq 100';
+        const soxBtn = uniToggle.querySelector('[data-value="sox"]');
+        if (soxBtn) soxBtn.textContent = (UI.currentLang === 'zh') ? '費半 SOX' : 'PHLX SOX';
     }
     const wlToggle = document.getElementById('f-watchlist-toggle');
     if (wlToggle) {

@@ -1,0 +1,119 @@
+{
+  "as_of_date": "2026-04-29",
+  "schema_version": "V1.4",
+  "lookback_days": 30,
+  "universe_size": 131,
+  "senate_rows_in_window": 100,
+  "sectors": {
+    "Technology": {
+      "insider_acquired_q": 253,
+      "insider_disposed_q": 442,
+      "insider_acquired_disposed_ratio_q": 0.572,
+      "insider_sample_size": 16,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Healthcare": {
+      "insider_acquired_q": 329,
+      "insider_disposed_q": 289,
+      "insider_acquired_disposed_ratio_q": 1.138,
+      "insider_sample_size": 13,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Energy": {
+      "insider_acquired_q": 191,
+      "insider_disposed_q": 302,
+      "insider_acquired_disposed_ratio_q": 0.632,
+      "insider_sample_size": 12,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Financials": {
+      "insider_acquired_q": 169,
+      "insider_disposed_q": 121,
+      "insider_acquired_disposed_ratio_q": 1.397,
+      "insider_sample_size": 13,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Consumer_Discretionary": {
+      "insider_acquired_q": 115,
+      "insider_disposed_q": 93,
+      "insider_acquired_disposed_ratio_q": 1.237,
+      "insider_sample_size": 12,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 1,
+      "senate_net_buy_30d": -1,
+      "form13f_top10_delta": null
+    },
+    "Consumer_Staples": {
+      "insider_acquired_q": 47,
+      "insider_disposed_q": 48,
+      "insider_acquired_disposed_ratio_q": 0.979,
+      "insider_sample_size": 12,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Industrials": {
+      "insider_acquired_q": 164,
+      "insider_disposed_q": 173,
+      "insider_acquired_disposed_ratio_q": 0.948,
+      "insider_sample_size": 12,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 1,
+      "senate_net_buy_30d": -1,
+      "form13f_top10_delta": null
+    },
+    "Materials": {
+      "insider_acquired_q": 78,
+      "insider_disposed_q": 45,
+      "insider_acquired_disposed_ratio_q": 1.733,
+      "insider_sample_size": 10,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Utilities": {
+      "insider_acquired_q": 209,
+      "insider_disposed_q": 137,
+      "insider_acquired_disposed_ratio_q": 1.526,
+      "insider_sample_size": 10,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Real_Estate": {
+      "insider_acquired_q": 90,
+      "insider_disposed_q": 75,
+      "insider_acquired_disposed_ratio_q": 1.2,
+      "insider_sample_size": 10,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    },
+    "Communication": {
+      "insider_acquired_q": 173,
+      "insider_disposed_q": 176,
+      "insider_acquired_disposed_ratio_q": 0.983,
+      "insider_sample_size": 11,
+      "senate_purchases_30d": 0,
+      "senate_sales_30d": 0,
+      "senate_net_buy_30d": 0,
+      "form13f_top10_delta": null
+    }
+  }
+}

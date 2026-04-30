@@ -311,8 +311,14 @@ function isActiveDecision(d) {
 }
 
 function riskTag(risk) {
-    const clean = risk.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    return `<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 whitespace-nowrap">${clean}</span>`;
+    // Title-case latin words but leave CJK / punctuation intact.
+    // `\b\w` matches word boundaries which include CJK transitions, so we limit
+    // to ASCII via [a-zA-Z] to avoid accidentally lowercasing the rest of a long
+    // mixed-language risk (e.g. "FRED Overheating + sector_rotation_avoid …").
+    const clean = risk.replace(/_/g, ' ').replace(/\b[a-zA-Z]/g, c => c.toUpperCase());
+    // Long risks (e.g. multi-clause sector rotation reasons) must wrap inside
+    // the pill — `whitespace-nowrap` previously caused overflow past the card.
+    return `<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 leading-relaxed max-w-full break-words">${clean}</span>`;
 }
 
 function conditionRow(label, text, color = 'var(--status-bullish)') {
@@ -558,9 +564,10 @@ function buildCard(item) {
 
 async function goFlash(ticker) {
     const isZh = UI.currentLang === 'zh';
-    const confirmMsg = isZh
+    const prefix = await UI.dailyUpdatePrefix();
+    const confirmMsg = prefix + (isZh
         ? `透過 Claude 執行「新聞分析 FLASH ${ticker}」？（約 2-3 分鐘，消耗 tokens）`
-        : `Run "FLASH ${ticker}" via Claude? (~2-3 min, consumes tokens)`;
+        : `Run "FLASH ${ticker}" via Claude? (~2-3 min, consumes tokens)`);
     if (!confirm(confirmMsg)) return;
     try {
         const res = await fetch('/api/run-protocol', {
@@ -1100,9 +1107,10 @@ function syncLockUI() {
 
 async function refreshTicker(ticker) {
     const isZh = UI.currentLang === 'zh';
-    const confirmMsg = isZh
+    const prefix = await UI.dailyUpdatePrefix();
+    const confirmMsg = prefix + (isZh
         ? `加入個股分析佇列：${ticker}（risk=${UI.riskTolerance}）？\nV4.8 每檔約 10-15 分鐘，~$4 tokens。已在佇列/分析中的重複請求會被忽略。`
-        : `Enqueue invest analysis for ${ticker} (risk=${UI.riskTolerance})?\nV4.8 ~10-15 min per ticker, ~$4 tokens. Duplicates (queued or active) are abandoned.`;
+        : `Enqueue invest analysis for ${ticker} (risk=${UI.riskTolerance})?\nV4.8 ~10-15 min per ticker, ~$4 tokens. Duplicates (queued or active) are abandoned.`);
     if (!confirm(confirmMsg)) return;
 
     if (window.AnalyzeQueue) {

@@ -148,16 +148,106 @@ def label_for(score: float) -> str:
     return "Extreme Fear"
 
 
+# ── Ticker-specific signals (v1.64 / I-PB) ─────────────────────────────────
+# Replaces Phase 2 Sentiment lane "個股層 web search Reddit/X/short interest/insider activity"
+# with structured API. Reddit/X narrative is left to subagent (still allowed; no API).
+def _fetch_ticker_signals(ticker: str) -> dict:
+    """Pull insider statistics (FMP), insider sentiment MSPR (Finnhub), short
+    interest (yfinance fallback) for a single ticker. Each sub-call has its own
+    try/except — partial result is acceptable; subagent should handle nulls."""
+    out = {
+        "ticker": ticker.upper(),
+        "insider_stats": None,        # FMP /stable/insider-trading/statistics
+        "insider_sentiment": None,    # Finnhub /stock/insider-sentiment (MSPR trend)
+        "short_pct_float": None,      # yfinance shortPercentOfFloat
+        "short_pct_float_source": None,
+    }
+
+    fmp_key = os.getenv("FMP_API_KEY")
+    fh_key  = os.getenv("FINNHUB_API_KEY")
+
+    # 1) FMP insider statistics (quarterly aggregated)
+    if fmp_key:
+        try:
+            r = requests.get(
+                "https://financialmodelingprep.com/stable/insider-trading/statistics",
+                params={"symbol": ticker, "apikey": fmp_key},
+                timeout=TIMEOUT,
+            )
+            if r.status_code == 200:
+                arr = r.json()
+                if isinstance(arr, list) and arr:
+                    # Most recent quarter first; pick top 4 quarters for trend
+                    arr.sort(key=lambda x: (x.get("year", 0), x.get("quarter", 0)), reverse=True)
+                    out["insider_stats"] = [{
+                        "year": x.get("year"), "quarter": x.get("quarter"),
+                        "acquired_disposed_ratio": x.get("acquiredDisposedRatio"),
+                        "total_acquired_shares": x.get("totalAcquired"),
+                        "total_disposed_shares": x.get("totalDisposed"),
+                        "acquired_transactions": x.get("acquiredTransactions"),
+                        "disposed_transactions": x.get("disposedTransactions"),
+                    } for x in arr[:4]]
+        except Exception as e:
+            print(f"[sentiment] FMP insider stats error: {e}", file=sys.stderr)
+
+    # 2) Finnhub insider sentiment (MSPR per month, last 6 months)
+    if fh_key:
+        try:
+            from datetime import timedelta as _td
+            today = datetime.now().date()
+            r = requests.get(
+                "https://finnhub.io/api/v1/stock/insider-sentiment",
+                params={"symbol": ticker,
+                        "from": (today - _td(days=180)).isoformat(),
+                        "to":   today.isoformat(),
+                        "token": fh_key},
+                timeout=TIMEOUT,
+            )
+            if r.status_code == 200:
+                data = r.json()
+                items = (data or {}).get("data", []) if isinstance(data, dict) else []
+                if items:
+                    # MSPR (Monthly Share Purchase Ratio) -100 to +100
+                    items.sort(key=lambda x: (x.get("year", 0), x.get("month", 0)))
+                    out["insider_sentiment"] = {
+                        "monthly_mspr": [{
+                            "year": x.get("year"), "month": x.get("month"),
+                            "mspr": x.get("mspr"),
+                            "change_shares": x.get("change"),
+                        } for x in items[-6:]],
+                        "latest_mspr": items[-1].get("mspr") if items else None,
+                    }
+        except Exception as e:
+            print(f"[sentiment] Finnhub insider sentiment error: {e}", file=sys.stderr)
+
+    # 3) Short interest fallback — yfinance .info (bi-monthly FINRA snapshot)
+    try:
+        info = yf.Ticker(ticker).info or {}
+        sp = info.get("shortPercentOfFloat")
+        if sp is not None:
+            out["short_pct_float"] = round(float(sp) * 100, 2)  # 0.012 → 1.2%
+            out["short_pct_float_source"] = "yfinance.info (FINRA bi-monthly)"
+    except Exception as e:
+        print(f"[sentiment] yfinance short interest error: {e}", file=sys.stderr)
+
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json-only", action="store_true")
     ap.add_argument("--no-cache", action="store_true", help="force fresh compute (bypass cache)")
     ap.add_argument("--max-age", type=int, default=DEFAULT_TTL_SEC,
                     help=f"cache TTL in seconds (default {DEFAULT_TTL_SEC})")
+    ap.add_argument("--ticker", default=None,
+                    help="If set, also include per-ticker insider statistics (FMP), "
+                         "insider sentiment MSPR (Finnhub), short interest (yfinance). "
+                         "Replaces Phase 2 Sentiment lane individual-stock web search.")
     args = ap.parse_args()
 
-    # Cache check (skipped with --no-cache)
-    if not args.no_cache:
+    # Cache check (skipped with --no-cache, OR when --ticker is set since
+    # ticker-specific signals are not in the market-level cache).
+    if not args.no_cache and not args.ticker:
         cached = _load_cache(args.max_age)
         if cached is not None:
             print(json.dumps(cached, ensure_ascii=False, indent=2))
@@ -226,11 +316,24 @@ def main():
         "cache_age_sec": 0,
     }
 
-    _write_cache(out)
+    # Don't cache when ticker-specific block is present — that's per-ticker, not market-wide
+    if not args.ticker:
+        _write_cache(out)
+
+    # Per-ticker structured signals (insider stats / MSPR / short interest)
+    if args.ticker:
+        out["ticker_signals"] = _fetch_ticker_signals(args.ticker)
 
     print(json.dumps(out, ensure_ascii=False, indent=2))
     if not args.json_only:
-        print(f"\n→ fresh compute │ composite {composite} ({out['label']}) │ VIX {vix_now:.1f} {vix_regime} │ SPY RSI {spy_rsi:.1f}", file=sys.stderr)
+        msg = f"\n→ fresh compute │ composite {composite} ({out['label']}) │ VIX {vix_now:.1f} {vix_regime} │ SPY RSI {spy_rsi:.1f}"
+        if args.ticker and out.get("ticker_signals"):
+            ts = out["ticker_signals"]
+            stats = (ts.get("insider_stats") or [None])[0]
+            ratio = stats.get("acquired_disposed_ratio") if stats else None
+            short_pct = ts.get("short_pct_float")
+            msg += f" │ {args.ticker} insider_ratio={ratio} short={short_pct}%"
+        print(msg, file=sys.stderr)
 
 
 if __name__ == "__main__":

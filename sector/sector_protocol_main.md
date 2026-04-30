@@ -1,4 +1,4 @@
-# Pre-Market Sector Intelligence Protocol (V1.3)
+# Pre-Market Sector Intelligence Protocol (V1.4)
 
 ## 子檔案載入順序
 
@@ -22,7 +22,11 @@ FOCUS_DATE     : [留空 = 今日]
 ## GLOBAL RULES
 
 1. **Phase Execution Order**: 0 → 1 → 2 → 3 → 4 → 5。絕不跳過順序。
-2. **Cache**（FRESH = mtime < 3 小時前 / 10800 秒）: 取 `./sector_logs/*_sector_intel.json` 最新檔。FRESH → 載入跳過 Phase 0–1，直接從 Phase 2 開始。STALE 或缺失 → 完整執行 Phase 0–1。**Phase 3 永遠重新執行，不可因快取跳過**。
+2. **Cache** （FRESH 判定）: 取 `./sector_logs/*_sector_intel.json` 最新檔。
+   - **以內部 `generated_at` 為準，不看 mtime**：news protocol Phase 4 會 patch `top_catalysts` 進此檔，導致 mtime 被刷新但 `generated_at` 不變 — 只看 mtime 會誤判 FRESH。
+   - **FRESH 條件**：解析 `generated_at` (ISO timestamp 或 `YYYY-MM-DD HH:MM`)，距今 < 3 小時 (10800 秒) 才算 FRESH。
+   - FRESH → 載入跳過 Phase 0–1，直接從 Phase 2 開始。STALE 或缺失或 `generated_at` parse 失敗 → 完整執行 Phase 0–1。
+   - **Phase 3 永遠重新執行，不可因快取跳過**。
    - **FTD/Market Top 新鮮度補丁**：即使走快取，仍需檢查 `./ftd_cache/` 與 `./market_top_cache/` 最新檔 FRESH 狀態。若有 FRESH 檔 → 覆寫 `_phase0.ftd`、`_phase0.market_top`、`_phase0.synthesized_exposure` 後再繼續。
 3. **Debate Requirement**: Phase 4 必須有至少一個反方論點，禁止純多頭共識。
 4. **Extreme Sentiment Trigger**: Phase 3 執行 `market-sentiment-analyzer` 後，`composite_score > 80` 或 `< 20` → `extreme_sentiment_triggered = true`。觸發後所有 HOT 產業 `risk_flags` 加入 `extreme_sentiment`；詳細級聯動作見 `phase_1-2-3.md`。
@@ -85,6 +89,18 @@ cycle_phase = Late/Recession + Cyclical sector → Score × 0.85   # only if Ste
 binary_risk_within_48h（affected sector）     → Score × 0.70
 Score_adjusted: cap [0, 100]
 ```
+
+**Step 5b — Valuation Penalty Overlay**（V1.4 新增；deterministic、不依賴 LLM 心算）
+
+讀取 `_phase1.sectors[].sector_valuation`（由 `fetch_sector_valuation.py` 產出）後加總 penalty：
+
+| 條件 | valuation_penalty |
+|---|---|
+| `pe_zscore_1y > 2.0` 且 `uptrend_ratio > 0.7` | **−10**（overbought distribution risk） |
+| `pe_zscore_1y < −1.0` 且 `uptrend_ratio < 0.3` | **+5**（oversold value opportunity） |
+| 其他 | 0 |
+
+`Score_final = Score_adjusted + valuation_penalty`，再做 [0, 100] cap。`score_components.valuation_penalty` 必填（V1.4 hard）。
 
 **Step 6 — FRED Regime Overlay**（`fred_available=true` 時取代 Step 1）
 

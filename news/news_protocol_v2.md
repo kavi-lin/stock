@@ -80,12 +80,20 @@ MODE : FLASH | DIGEST | REVIEW
 4. **禁止「跳過 Stage 1/2 直接寫 MD 報告」** — 這是歷史 bug pattern：Claude 讀昨天 MD 當範本、在 thinking block 裡編 4-view、寫 18KB MD、跑 validator（讀昨天 digest 誤過關）→ **user 看到假 MD**。
    - 新 validator 有 freshness gate 會擋，但 protocol 層也要明示
 
-### STAGE 1 — RSS SHALLOW TRIAGE
+### STAGE 1 — SHALLOW TRIAGE
 
-**資料來源**：
+**資料來源**（v1.70.0+ 由 4 個源合併）：
 1. 檢查 `news/news_logs/YYYY-MM-DD_raw.json` 是否存在
-2. 不存在或 `mtime > 1h` → 執行 `python3 news/fetch_news_rss.py --hours 24 --output news/news_logs/`
-3. 讀取 raw.json 取得 30–50 則標題 + 摘要
+2. 不存在或 `mtime > 1h` → 執行 `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/`
+   - Orchestrator 平行跑 4 個 fetcher：
+     - `fetch_news_rss.py` — 9 個公開 RSS（CNBC / MarketWatch / Yahoo / Seeking Alpha / Investing.com / PR Newswire 等）
+     - `fetch_finnhub_news.py` — Finnhub `/news?category=general`（1-5 min latency，需 `FINNHUB_API_KEY`）
+     - `fetch_fmp_news.py` — FMP `/news/general-latest` + `/news/stock-latest`（5-30 min，需 `FMP_API_KEY`）
+     - `fetch_sec_edgar.py` — SEC EDGAR 8-K Atom feed（0-15 min material events，無 key）
+   - 4 個源寫各自的 intermediate `*_<provider>_raw.json`（保留 audit），合併後覆寫 canonical `*_raw.json`
+   - Dedupe 採 URL fingerprint + headline tokens，HIGH credibility 優先
+   - 任一 source 失敗不影響其他源（graceful degradation）
+3. 讀取 unified raw.json 取得 ~150-300 則標題 + 摘要（已按 published desc 排序）
 
 **Stage 1 輸出**：
 

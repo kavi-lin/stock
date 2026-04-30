@@ -87,9 +87,22 @@ Ticker 由使用者在對話中指定。
 **三層 cache（依序；FRESH = mtime < 3 小時前）**:
 1. `../sector/sector_logs/*_sector_intel.json` 取最新檔，`now - mtime < 10800s` → FRESH → 提取 `market_regime`, `exposure_ceiling`, `political_risk_summary`, `actionable_themes`, `session_notes`, **`_phase0.ftd.days_since_ftd` / `_phase0.ftd.ftd_status_text`（V4.9 — Phase 4 Step 3.5 FTD timeline gate 必需）** → Phase 1
 2. `./invest_logs/*_phase0.json` 取最新檔，FRESH → 載入 → Phase 1
-3. 皆 STALE 或缺失 → 執行 `market-news-analyst` skill（或 web search），寫入 `./invest_logs/YYYY-MM-DD_phase0.json`
+3. 皆 STALE 或缺失 → **跑 4 個 skill 組成 chain**（V4.9 / I-PD：取代「web search」這條 fallback，可重現、節省 LLM token）：
+
+   ```bash
+   # 4 個 skill 平行可、序列也行；任何一個失敗不阻斷 protocol（marker null）
+   python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json-only
+   python3 skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py --output-dir sector/breadth_cache/
+   python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
+   python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
+   ```
+
+   合成這 4 個 skill 輸出 + L4 `fred-macro` 結果 → `phase0.json`；不需要 LLM 自行 web search 抓 VIX / F&G / breadth / FTD / market-top。**僅 `key_themes` / `bullish_signals` / `bearish_signals` 文字面**保留 LLM 摘要（市場敘事是 LLM 強項，數字是 API 強項）。
+
+   寫入 `./invest_logs/YYYY-MM-DD_phase0.json` (`phase0_source: SKILL_CHAIN`)
 
 > 檢查 mtime 可用 Bash `find path -name pattern -mmin -180` 或 `stat -f %m file`；Python `os.path.getmtime()`。
+> Skill chain 失敗時 fallback：若 ≥ 2 個 skill 失敗，protocol 才 fallback 到 LLM web search，並在 `phase0_source` 標 `WEB_SEARCH_FALLBACK`。
 
 **L4 — FRED macro snapshot（V4.9 新增；MUST run）**:
 
@@ -125,6 +138,20 @@ python3 skills/fred-macro/scripts/fetch.py --json-only
     "key_themes": [],
     "hot_sectors": [],
     "cold_sectors": []
+  },
+
+  "_market_signals": {
+    "// V4.9 / I-PE — explicit fields so Phase 2 lanes don't re-fetch": "",
+    "fear_greed_index":     "float 0-100 (from market-sentiment-analyzer / CNN endpoint, null if missing)",
+    "vix_current":          "float (from yfinance ^VIX or sentiment skill)",
+    "vix_regime":           "LOW | NORMAL | ELEVATED | CRISIS",
+    "spy_rsi_14":           "float 0-100 (from sentiment skill)",
+    "spy_pct_above_ma200":  "float % (positive = above MA200)",
+    "breadth_composite":    "int 0-100 (from market-breadth-analyzer)",
+    "ftd_status":           "FTD_CONFIRMED | RALLY_ATTEMPT | NO_SIGNAL | DISTRIBUTION (from ftd-detector)",
+    "ftd_days_since":       "int — days since last FTD (sector_intel _phase0.ftd 欄位)",
+    "market_top_score":     "int 0-100 — top risk score (from market-top-detector)",
+    "top_catalysts":        "list of {date, ticker?, headline, source} from sector_intel.top_catalysts; Phase 2 News lane 應該先檢查再決定要不要重抓"
   },
 
   "fred_available": "true | false",
@@ -249,6 +276,51 @@ Phase 1 結束前 PM **MUST** 執行下列步驟，產生供 Phase 2 全 4 個 l
    - PM context 若意外出現 `_audit.fmp.*` 或 `_audit.diff.*` → 視為 protocol 違規，當前 ticker 分析作廢，重啟 Phase 1
    - 用途說明：`_audit` 是給 `audit_drift_check.py` 與人類稽核用，跨 provider 數字若灌進 LLM 會讓 score 混入「provider 加權」隨機性，破壞跨 session 可重現性
 
+### Phase 1 資料層（V1.71 新增）— Earnings-Analyst Cache 機會式讀取
+
+Phase 1 末段 PM **可選**檢查 earnings-analyst skill 的歷史 cache，補充 Fundamentals lane 的深度財報視野(成本:1 次 file read,**0 FMP call**)。
+
+1. **檢查 cache 是否存在**:
+   ```bash
+   ls skills/earnings-analyst/cache/<TICKER>_*.json 2>/dev/null
+   ```
+   找到最新的 `<TICKER>_<YYYY-MM-DD>.json` 檔。
+
+2. **新鮮度判斷**(必須兩條件都符合):
+   - cache 檔含 `composite_score` 欄位(代表 analyze.py 已跑完)
+   - 距 cache 檔 mtime ≤ 90 天(對齊 earnings-analyst CACHE_TTL_DAYS)
+
+3. **若 cache 新鮮 → PM 抽 thin 摘要進 EARNINGS_ANALYST_BUNDLE**:
+   ```python
+   ea = json.load(open("skills/earnings-analyst/cache/<TICKER>_<DATE>.json"))
+   EARNINGS_ANALYST_BUNDLE = {
+     "last_earnings_date":  ea["last_earnings_date"],
+     "next_earnings_est":   ea.get("next_earnings_est"),
+     "composite_score":     ea["composite_score"],
+     "verdict":             ea["verdict"],
+     "score_components":    ea["score_components"],
+     "quality_flags":       ea.get("quality_flags") or [],
+     "margins_8q":          (ea.get("derived") or {}).get("margins_8q"),       # 8Q gross/op/net margin trend
+     "yoy_growth":          (ea.get("derived") or {}).get("yoy_growth"),       # rev/earnings YoY + acceleration label
+     "balance_health":      (ea.get("derived") or {}).get("balance_health"),
+     "cash_flow_quality":   (ea.get("derived") or {}).get("cash_flow_quality"),
+     "valuation": {
+       "dcf_intrinsic":          (ea.get("valuation") or {}).get("dcf_intrinsic"),
+       "dcf_vs_price_pct":       (ea.get("valuation") or {}).get("dcf_vs_price_pct"),
+       "price_target_consensus": (ea.get("valuation") or {}).get("price_target_consensus"),
+       "pt_upside_pct":          (ea.get("valuation") or {}).get("pt_upside_pct")
+     },
+     "report_path":         "reports/<DATE>_<TICKER>_earnings.md"
+   }
+   ```
+
+4. **若 cache 不存在或過期** → 整段省略,Phase 2 Fundamentals lane 標註 "EARNINGS_ANALYST_BUNDLE: not available — pure dual-fetch + skill output";**禁止**僅為了補 cache 而 enqueue 一次 `財報` protocol(那是 user 主動觸發層,不該由 PM 自動排隊)。
+
+5. **物理隔離契約同 dual-fetch**:
+   - 不得修改 cache 內容
+   - 不得讓 Fundamentals 以外的 lane 使用 `EARNINGS_ANALYST_BUNDLE.composite_score / verdict`(避免 lane 間互相 anchor)
+   - Sentiment / News / Technical lane 的 prompt **不得**包含此 bundle
+
 ---
 
 ## PHASE 2 — PARALLEL BLIND ANALYST FAN-OUT (V4.8 核心)
@@ -276,10 +348,36 @@ ISOLATION CONTRACT:
 TICKER: <TICKER>
 
 PHASE 0 MACRO CONTEXT (read-only, shared across all analysts):
-<paste Phase 0 macro_summary JSON>
+<paste Phase 0 macro_summary JSON + Phase 0._market_signals (含 fear_greed_index/vix_current/vix_regime/spy_rsi_14/spy_pct_above_ma200/breadth_composite/ftd_status/market_top_score/top_catalysts)>
 
-TICKER DATA BUNDLE (read-only, shared across all 4 analysts; canonical for 9 scalar fields):
+TICKER DATA BUNDLE (read-only, shared across all 4 analysts; canonical for 15 scalar fields — V4.9 I-PA):
 <paste TICKER_DATA_BUNDLE JSON — Phase 1 PM 提供；若 data_bundle_available: false 則整段省略並在 prompt 標註 "TICKER_DATA_BUNDLE: unavailable, fall back to skill-internal fetch">
+
+EARNINGS-ANALYST BUNDLE (read-only, **Fundamentals lane only** — V1.71):
+<僅在 Fundamentals subagent prompt 出現;其他 3 個 lane 不得包含此段。
+若 EARNINGS_ANALYST_BUNDLE 為 None(cache 不存在或過期 > 90d)→ 整段省略並標註 "EARNINGS_ANALYST_BUNDLE: not available — pure dual-fetch + skill output";否則 paste Phase 1 收集到的 EARNINGS_ANALYST_BUNDLE JSON。
+**用途**:Fundamentals 可以引用 8Q margin trend / cash flow quality / DCF upside 強化估值與品質判斷;**禁止**將 composite_score 直接 mirror 為 lane score(各 lane 須維持獨立評分)>
+
+DATA SOURCE DISCIPLINE (V4.9 / I-PF — STRICT):
+
+  ❌ FORBIDDEN web search — 以下資料**已在 Phase 0 _market_signals / TICKER DATA BUNDLE / 你的 lane skill 輸出裡**，禁止 web search 重抓 / 用 web 結果覆寫：
+    Quote / Valuation: price, peRatio, forwardPE, pegRatio, epsTTM, mktCap, dividendYield, priceToBookRatio
+    Quality / Forward: roeTTM, debtToEquity, fcfPerShareTTM, nextEarningsDate
+    Market signals: VIX, fear_greed_index, SPY RSI, breadth, FTD status, market_top_score
+    Insider / short: insider_transactions, MSPR, short_pct_float, acquired_disposed_ratio
+    Analyst: rating consensus (strongBuy/buy/hold/sell counts), price target high/low/median, upgrade/downgrade history
+    Filings: 10-K / 10-Q / 8-K dates and links
+    Company news headlines（已由 fetch.py 提供 finviz + yfinance + Finnhub 三來源 deduped）
+    OHLC / RSI / MACD / MA（已由 technical-analyst skill 提供）
+    
+  ✅ ALLOWED web search — 僅以下情境可用 ≤ 1 次 web search call，且只取 narrative tone，不可從中抽結構化數字：
+    - Reddit / X / StockTwits 個股討論氛圍（hype / bearish / split）
+    - Conference call transcript 段落引用 / management commentary
+    - 即時 supply chain rumors / 地緣政治新聞（API 無）
+    - 競爭格局 / market share narrative（API 無）
+    - Product reviews / user-level sentiment
+
+  違規處理：subagent 輸出若引用 web search 來的數字而非結構化 source，PM 在 Phase 2.5 conflict resolution 時 **自動扣 confidence 0.2**；連續 3 次違規該 lane 視為 degraded。
 
 YOUR LANE RUBRIC:
 <RUBRIC_LANE>
@@ -312,36 +410,72 @@ OUTPUT (strict JSON, no prose):
   ```bash
   python3 skills/us-stock-analysis/scripts/analyze.py <TICKER> --json-only
   ```
-- **TICKER_DATA_BUNDLE 使用規則**（V4.8.1 新增）— 若 prompt 含 bundle:
-  - **以下 9 個 scalar 以 bundle 為權威來源**（已通過 dual-fetch audit）：`price`, `previousClose`, `dayHigh`, `dayLow`, `mktCap`, `peRatio`, `epsTTM`, `dividendYield`, `priceToBookRatio`
-  - 若 us-stock-analysis 輸出與 bundle 同一欄位**不一致**（差異 > 1%）→ 採用 bundle 值，並在 reasoning 註記「以 dual-fetch canonical 為準（FMP 端有方法論差異）」
-  - **估值評分權重建議**（在 P/E vs sector median 那條 rubric 內套用）:
+- **TICKER_DATA_BUNDLE 使用規則**（V4.9 — I-PA 擴充至 15 scalar）— 若 prompt 含 bundle:
+  - **15 個 scalar 以 bundle 為權威來源**（已通過 dual-fetch audit）：
+    - **Quote (4)**: `price`, `previousClose`, `dayHigh`, `dayLow`
+    - **Profile / valuation (5)**: `mktCap`, `peRatio`, `epsTTM`, `dividendYield`, `priceToBookRatio`
+    - **Forward / quality / earnings (6, NEW)**: `forwardPE`, `pegRatio`, `roeTTM`, `debtToEquity`, `fcfPerShareTTM`, `nextEarningsDate`
+  - **Skill 應該優先讀 bundle，不要重打 yfinance / FMP 抓相同欄位**。us-stock-analysis 改成「給定 bundle，計算衍生指標（P/E vs sector median、FCF yield、預期成長率分位）」，不重抓 raw scalar
+  - 若 us-stock-analysis 輸出與 bundle 同一欄位**不一致**（差異 > 1%）→ 採用 bundle 值，並在 reasoning 註記「以 dual-fetch canonical 為準」
+  - **估值評分權重建議**:
     - `peRatio`：主要估值依據，搭配 epsTTM 做合理性檢查（peRatio × epsTTM ≈ price）
+    - `forwardPE`：前瞻估值（用 sell-side EPS estimate），對成長股**比 trailing peRatio 更具預測力**；若兩者差距 > 20% 表示 sell-side 預期 EPS 大幅變化（成長預期 / 衰退預期）
+    - `pegRatio`：trailing PEG（peTTM ÷ EPS 5Y 成長率），<1 一般視為合理；⚠️ pegRatio 對非穩態成長公司易失真，不要當主要 signal
+    - `roeTTM`：資本效率，>15% 視為優質、>25% 是 wide moat 候選；金融股例外（杠桿放大）
+    - `debtToEquity`：< 0.5 健康 / 0.5-1.5 中性 / > 1.5 槓桿偏高；資本密集行業（utilities/REIT/銀行）放寬
+    - `fcfPerShareTTM`：FCF 直接除股本；**FCF yield = fcfPerShareTTM ÷ price**，> 5% 通常是價值訊號；負值需在 reasoning 解釋（投資期 / 一次性 capex）
+    - `nextEarningsDate`：若距今 ≤ 7 天 → 進 binary risk window，rubric 的「conviction」打分自動 ×0.7（避免 earnings whipsaw 後悔）；若 ≤ 2 天 ×0.5
     - `dividendYield`：**單位是百分比**（e.g. 0.38 = 0.38%，不是 38%），定義為 indicated annual（前瞻）
     - `priceToBookRatio`：⚠️ **視為近似值**。已知跨 provider 方法論差異 10-30%（書值 snapshot、goodwill 處理不同）。在估值打分中**權重應低於 P/E**。資產型公司（金融、REIT、保險）若 P/B 為主要估值依據，需在 reasoning 明示「依 Finnhub canonical book value，方法論為 ...」並接受 ±20% 模糊區間
     - `mktCap` 用於 size cohort 判斷：mega > $200B / large $10B-$200B / mid $2B-$10B / small < $2B；不同 cohort 的 P/E 與成長預期 baseline 不同
-  - 若 bundle 某欄位為 `null`（e.g. ETF 沒 mktCap、新上市無 epsTTM）→ 用 us-stock-analysis 輸出補值；若皆無則該欄位排除於評分計算，不得猜測
+  - 若 bundle 某欄位為 `null`（e.g. ETF 沒 mktCap、新上市無 epsTTM、無發放股利時 dividendYield=null）→ 用 us-stock-analysis 輸出補值；若皆無則該欄位排除於評分計算，不得猜測
   - 若 prompt 標註 `TICKER_DATA_BUNDLE: unavailable` → 完全 fallback 到 us-stock-analysis 輸出，本段規則不適用
+- **EARNINGS_ANALYST_BUNDLE 使用規則**(V1.71)— 若 prompt 含此 bundle:
+  - **8Q margins / yoy_growth / cash_flow_quality** 是 Fundamentals 計分的「深層證據」— 引用具體數字(e.g. "gross margin 8Q 從 60% 擴張到 75% — operating leverage 持續發酵")
+  - `quality_flags` 觸發強訊號:`accruals_warning` / `negative_fcf` / `capex_outpaces_ocf` 任何一條 → score 至少 -1;乾淨(空 list)且 composite ≥ 80 → 至少 +1
+  - `valuation.dcf_intrinsic` + `valuation.pt_upside_pct` 是品質校驗:dual-fetch peRatio 與 DCF intrinsic vs price 兩相對照(e.g. peRatio 35 偏高,但 DCF +20% upside → 估值不極端)
+  - **絕對禁止**:把 `composite_score / verdict` 直接 copy 為 lane score。Fundamentals 維持獨立評分,只用 bundle 當輔助證據
+  - 若 prompt 標註 `EARNINGS_ANALYST_BUNDLE: not available` → 完全 fallback 到 us-stock-analysis 輸出 + dual-fetch bundle,本段不適用
 
 #### Sentiment Subagent
 - **RUBRIC**:
-  - 市場層：優先從 Phase 0 macro 的 `fear_greed_status`；若無，MUST run：
+  - **市場層**（V4.9 / I-PE 優化）：**優先讀 Phase 0 `_market_signals`**（已含 `fear_greed_index` / `vix_current` / `spy_rsi_14` / `breadth_composite`）— 不要重跑 sentiment.py 抓市場數字。
+  - **個股層 + 補充市場層**（若 Phase 0 缺欄位才打）：
     ```bash
-    python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json-only
+    python3 skills/market-sentiment-analyzer/scripts/sentiment.py --ticker <TICKER> --json-only
     ```
-    取回 `composite_score`（0–100）、`vix.current`、`spy_momentum.rsi_14`、`extreme_sentiment_triggered`
-    > **V4.8 自動 cache（TTL 900s / 15 min）**：市場層是 ticker-agnostic，連續分析多個 ticker 時第 2+ 個 Sentiment subagent 會拿到 cache hit（JSON 輸出含 `cache_hit: true` + `cache_age_sec`），跳過 yfinance 下載，節省約 $0.1/ticker。若需即時值可改呼叫 `sentiment.py --json-only --no-cache`。
-  - 個股層：web search Reddit/X、short interest、insider activity
-  - 融合公式：`Sentiment Score = 0.4 × stock_specific + 0.6 × (market_composite/10 − 5)`
-- **額外輸出欄位**：`market_sentiment_composite`, `vix_current`
+    回傳：
+    - 市場層 fallback（Phase 0 沒有時用）：`composite_score`, `vix.current`, `spy_momentum.rsi_14`, `fear_greed_index`, `extreme_sentiment_triggered`
+    - 個股層 `ticker_signals`：
+      - `insider_stats[]`（FMP `/stable/insider-trading/statistics`，最近 4 季）— 每季含 `acquired_disposed_ratio`, `total_acquired_shares`, `total_disposed_shares`, `acquired_transactions`, `disposed_transactions`
+        - **`acquired_disposed_ratio` 是 acquired_count / disposed_count**（按 transaction 個數，非股數）：< 0.3 = insider 顯著在賣，0.3-0.7 = mixed，> 1.0 = insider 在買
+      - `insider_sentiment.latest_mspr`（Finnhub `/stock/insider-sentiment` MSPR 最近一個月）—  -100 ~ +100 score。Null 不一定壞訊號（小型股 / 該月無 transaction）
+      - `short_pct_float`（yfinance `info.shortPercentOfFloat`）— **百分比**（e.g. 1.22 = 1.22%）。FINRA bi-monthly 更新較慢（2 週週期）
+      > **V4.9 重要規則**：個股層**禁止 web search Reddit/X/insider/short**。Reddit/X **narrative tone** 仍可保留 ≤ 1 次 web search，但**數字必須來自上述 API**。LLM 不得從 web search 結果猜短利率 / 內部人活動。
+      > 市場層 ticker-agnostic 部分**仍有 15 min cache**（連續分析多 ticker 自動 hit）；個股層每 ticker 都重抓（per-ticker session-scope）。
+  - 融合公式：`Sentiment Score = 0.5 × stock_specific + 0.5 × (market_composite/10 − 5)`
+    - **stock_specific** 計分（-5 到 +5）：
+      - insider ratio < 0.3 → -1（賣壓）；> 1.0 → +1（買進）；MSPR > +30 → +1；< -30 → -1
+      - short_pct_float > 20% → -2（重壓且 squeeze 風險）；10-20% → -1；< 5% → +1
+      - Reddit/X tone（單次 search 取整體傾向）→ ±1
+- **額外輸出欄位**：`market_sentiment_composite`, `vix_current`, `insider_signal`, `short_pct_float`, `mspr_latest`
 
 #### News Subagent
-- **RUBRIC**: 過去 48h company news + analyst rating changes + cross-ref Phase 0 macro themes。重大 upgrade / downgrade / 8-K / 併購傳聞明顯偏向。
-- **SKILL**:
+- **RUBRIC**: 過去 48h company news + analyst rating changes + price target trend + cross-ref Phase 0 macro themes。重大 upgrade / downgrade / 8-K / 併購傳聞明顯偏向。
+- **SKILL** (V4.9 / I-PC 擴充：FMP grades-historical + price-target-consensus + grades-consensus + grades-news + Finnhub /company-news):
   ```bash
   python3 skills/market-news-analyst/scripts/fetch.py <TICKER> --hours 48 --json-only
   ```
-  或若 `sector_intel.json.top_catalysts` 涵蓋該票則直接引用。
+- **回傳結構化欄位**（subagent 應優先用，**禁止** 用 web search 重抓 analyst rating / target 數字）：
+  - `analyst_actions[]`：FMP `/stable/grades-historical` 過去 30 天 upgrade/downgrade/initiate，每筆含 `action`, `firm`, `new_grade`, `previous_grade`。`analyst_actions_source` 標 `fmp_grades_historical`（主）/ `finviz_fallback`（FMP 空時）
+  - `analyst_consensus`：FMP `/stable/grades-consensus` 當前評等分布 `{strong_buy, buy, hold, sell, strong_sell, consensus}`。**評分權重**：consensus="Strong Buy"+1.5、"Buy"+1、"Hold"0、"Sell"-1、"Strong Sell"-2
+  - `price_target`：FMP 高/低/median/consensus + 月/季/年期間平均 target trend。比較 `target_consensus` vs `current_price`：>20% 折價 → +1，>20% 溢價 → -1
+  - `analyst_news[]`：FMP `/stable/grades-news` 評等變動相關新聞含 publisher/URL（補 narrative）
+  - `headlines[]`：finviz + yfinance + **Finnhub `/company-news`**（含 sentiment + category）三來源 deduped
+  - `sec_filings_recent[]`：FMP `/stable/sec-filings-financials` 取代 legacy v3 endpoint
+  - `data_quality.fmp_calls` / `fmp_failures` 顯示資料 freshness 跟可靠性
+- **優先檢查 Phase 0 `_market_signals.top_catalysts[]`**（V4.9 / I-PE）：若該票已在裡面，subagent 應引用既有 catalyst（避免重抓）；只有「Phase 0 缺該票 catalyst」OR「需 24h 內最新」才跑 fetch.py
+- 若 `data_quality.sparse: true` AND `analyst_actions: []` → subagent 可 ≤ 1 次 web search 補 narrative，但 **數字仍以 fetch.py 回傳為準**
 
 #### Technical Subagent
 - **RUBRIC**: 20/50/200MA 結構、RSI(14)、MACD histogram、volume vs 20D avg、最近 support/resistance。完整 stage 2 上升結構（20>50>200，RSI 40-70，量放大）給 +3 以上；下降結構（跌破 200MA + 量放大）給 -3 以下。
