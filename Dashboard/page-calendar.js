@@ -49,11 +49,16 @@
 
     // ── State ─────────────────────────────────────────────────────────────
     let allDecisions = [];
+    let recentAnalysis = [];           // raw from data.json:recent_analysis[] (primary source)
+    let watchlistTickers = new Set();  // tickers with on_watchlist=true (drives event filter)
+    let logoMap = {};                  // ticker → image URL (from recent_analysis + upcoming earnings)
     let upcomingEvents = [];           // from data.json upcoming_events[]
     let earningsCacheMap = {};         // V1.71 — TICKER → {composite_score, verdict, report_path, ...}
     let generatedAt = '';
     let todayIso = '';                 // 瀏覽器當天，每次 load 都重算（不再吃 indexer 的 j.today）
     let indexedAt = '';                // event_index.json 的 today（僅在 stats 顯示，做 staleness 提示）
+    let earningsDensity = 'high';      // 'high' = high impact + watchlist intersect; 'all' = every earnings
+    let llmReviewPollTimer = null;     // setInterval handle for status polling while llm_review job is running
     function browserTodayIso() {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -119,6 +124,8 @@
 
     function rerenderAll() {
         renderGrid();
+        renderMonthlySummary();
+        renderUpcomingStrip();
         renderAggregate();
     }
 
@@ -154,10 +161,43 @@
             renderGrid();
         });
         document.getElementById('cal-detail-close').addEventListener('click', closeDetailPanel);
-        document.getElementById('cal-llm-review').addEventListener('click', copyLlmReviewBundle);
+        const backdrop = document.getElementById('cal-detail-backdrop');
+        if (backdrop) backdrop.addEventListener('click', closeDetailPanel);
+        document.getElementById('cal-llm-review').addEventListener('click', requestLlmReview);
+        const reviewRefresh = document.getElementById('cal-llm-review-refresh');
+        if (reviewRefresh) reviewRefresh.addEventListener('click', requestLlmReview);
+        const densityBtn = document.getElementById('cal-density-toggle');
+        if (densityBtn) {
+            densityBtn.addEventListener('click', () => {
+                earningsDensity = earningsDensity === 'high' ? 'all' : 'high';
+                try { localStorage.setItem('cal_earnings_density', earningsDensity); } catch {}
+                updateDensityToggleLabel();
+                renderGrid();
+                renderUpcomingStrip();
+            });
+        }
+        try {
+            const saved = localStorage.getItem('cal_earnings_density');
+            if (saved === 'all' || saved === 'high') earningsDensity = saved;
+        } catch {}
+        updateDensityToggleLabel();
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeDetailPanel();
         });
+    }
+
+    function updateDensityToggleLabel() {
+        const lbl = document.getElementById('cal-density-toggle-label');
+        const btn = document.getElementById('cal-density-toggle');
+        if (!lbl || !btn) return;
+        const isZh = UI.currentLang === 'zh';
+        if (earningsDensity === 'high') {
+            lbl.textContent = isZh ? 'High + 觀察清單' : 'High + Watchlist';
+            btn.classList.add('is-on');
+        } else {
+            lbl.textContent = isZh ? '所有 earnings' : 'All earnings';
+            btn.classList.remove('is-on');
+        }
     }
 
     // ── i18n ──────────────────────────────────────────────────────────────
@@ -181,14 +221,21 @@
         set('cal-filter-sources-label',   t.legend_sources  || (isZh ? '來源' : 'Sources'));
         set('cal-filter-verdicts-label',  t.legend_verdicts || (isZh ? '判讀' : 'Verdicts'));
         set('cal-filter-events-label',    isZh ? '事件' : 'Events');
-        set('cal-aggregate-title',        t.aggregate       || (isZh ? '依來源彙總' : 'Aggregate by Source'));
-        set('cal-aggregate-hint',         t.aggregate_hint  || (isZh ? 'verdict 分布 + 命中率' : 'verdict distribution + hit rate'));
+        set('cal-aggregate-title',        t.verdict_review_title || (isZh ? '命中率回顧（依來源）' : 'Verdict Review by Source'));
+        set('cal-aggregate-hint',         t.verdict_review_hint  || (isZh ? '點開展開詳細命中率' : 'click to expand hit rate'));
+        set('cal-monthly-summary-title',  isZh ? '近 30 天分析' : 'Past 30 Days');
+        set('cal-monthly-summary-hint',   isZh ? '分析過的公司' : 'companies analyzed');
+        set('cal-upcoming-strip-title',   isZh ? '未來 7 天事件' : 'Coming Up Next 7 Days');
+        set('cal-upcoming-strip-hint',    isZh ? 'earnings + 經濟事件' : 'earnings + macro events');
 
         rebuildFilterBar();
+        updateDensityToggleLabel();
 
         // Re-render data-driven sections so translated strings apply
-        if (allDecisions.length) {
+        if (allDecisions.length || recentAnalysis.length) {
             renderGrid();
+            renderMonthlySummary();
+            renderUpcomingStrip();
             renderAggregate();
         }
     }
@@ -196,38 +243,115 @@
     // ── Data load ─────────────────────────────────────────────────────────
     async function loadAndRender() {
         try {
-            // Parallel: event_index for past decisions + data.json for upcoming events
+            // Parallel: event_index for past decisions verdicts + data.json for live decisions + upcoming events
             const [evRes, dashRes] = await Promise.all([
-                fetch(EVENT_INDEX_URL, { cache: 'no-store' }),
+                fetch(EVENT_INDEX_URL, { cache: 'no-store' }).catch(() => null),
                 fetch(DASHBOARD_DATA_URL, { cache: 'no-store' }),
             ]);
-            if (!evRes.ok) throw new Error('event_index not found');
-            const j = await evRes.json();
-            allDecisions = j.decisions || [];
-            generatedAt = j.generated_at || '';
-            indexedAt = j.today || '';        // indexer 跑的當天（可能比實際今日舊）
-            todayIso = browserTodayIso();     // 始終用瀏覽器當天
 
-            if (dashRes.ok) {
-                const dash = await dashRes.json();
-                upcomingEvents = Array.isArray(dash.upcoming_events) ? dash.upcoming_events : [];
-                // V1.71 — earnings-analyst cache index for inline cached-state chips
-                earningsCacheMap = {};
-                for (const ea of (dash.earnings_analyses || [])) {
-                    if (ea && ea.ticker) earningsCacheMap[ea.ticker.toUpperCase()] = ea;
-                }
-            } else {
-                upcomingEvents = [];
-                earningsCacheMap = {};
+            let indexDecisions = [];
+            if (evRes && evRes.ok) {
+                const j = await evRes.json();
+                indexDecisions = j.decisions || [];
+                generatedAt = j.generated_at || '';
+                indexedAt = j.today || '';
+            }
+            todayIso = browserTodayIso();
+
+            if (!dashRes.ok) throw new Error('data.json not found');
+            const dash = await dashRes.json();
+            recentAnalysis = Array.isArray(dash.recent_analysis) ? dash.recent_analysis : [];
+            upcomingEvents = Array.isArray(dash.upcoming_events) ? dash.upcoming_events : [];
+
+            // V1.71 — earnings-analyst cache index for inline cached-state chips
+            earningsCacheMap = {};
+            for (const ea of (dash.earnings_analyses || [])) {
+                if (ea && ea.ticker) earningsCacheMap[ea.ticker.toUpperCase()] = ea;
             }
 
-            // 自動跳到今天所在月份（瀏覽器當天，非 indexer 當天）
+            // Build watchlist + logo map from recent_analysis (primary) and upcoming earnings (secondary)
+            watchlistTickers = new Set();
+            logoMap = {};
+            for (const a of recentAnalysis) {
+                if (!a.ticker) continue;
+                const tk = a.ticker.toUpperCase();
+                if (a.on_watchlist) watchlistTickers.add(tk);
+                if (a.profile_image && !logoMap[tk]) logoMap[tk] = a.profile_image;
+            }
+            for (const e of upcomingEvents) {
+                if (e.profile_image && Array.isArray(e.tickers) && e.tickers.length) {
+                    const tk = e.tickers[0].toUpperCase();
+                    if (!logoMap[tk]) logoMap[tk] = e.profile_image;
+                }
+            }
+
+            // Merge: recent_analysis[] -> unified decision shape, then layer event_index verdicts
+            const indexByKey = {};
+            for (const d of indexDecisions) {
+                if (!d.decision_date) continue;
+                const tk = (d.tickers && d.tickers[0]) ? d.tickers[0].toUpperCase() : null;
+                indexByKey[`${d.decision_date}|${tk || d.source}`] = d;
+            }
+
+            const mergedFromRecent = recentAnalysis
+                .filter(a => a.ticker && a.time)
+                .map(a => {
+                    const tk = a.ticker.toUpperCase();
+                    const dateIso = (a.time || '').slice(0, 10);
+                    const key = `${dateIso}|${tk}`;
+                    const indexed = indexByKey[key];
+                    // verdict comes from event_index when available; otherwise unknown→pending/n/a
+                    const verdict = indexed && indexed.verdict
+                        ? indexed.verdict
+                        : { label: 'pending', rationale: '' };
+                    return {
+                        source: 'deep-dive',
+                        decision_date: dateIso,
+                        tickers: [tk],
+                        verdict,
+                        // primary fields preserved for detail panel
+                        decision_content: indexed?.decision_content || {
+                            final_action: a.decision,
+                            final_score: a.score,
+                            final_decision: a.final_decision,
+                            macro_regime: null,
+                            trader_proposal: a.targets || {},
+                        },
+                        agent_breakdown: indexed?.agent_breakdown || [],
+                        reality_at_eval: indexed?.reality_at_eval || {},
+                        tuning_hooks: indexed?.tuning_hooks || {},
+                        raw_path: a.report_url ? '/' + a.report_url : (indexed?.raw_path || null),
+                        summary: a.decision || '',
+                        // calendar render hints (not in event_index schema)
+                        _logo: a.profile_image || logoMap[tk] || null,
+                        _live_decision: a.decision,
+                        _on_watchlist: !!a.on_watchlist,
+                        _from_recent: true,
+                    };
+                });
+
+            // Build allDecisions = merged recent_analysis ∪ index decisions that aren't already covered
+            const seenKeys = new Set(mergedFromRecent.map(d => `${d.decision_date}|${d.tickers[0]}`));
+            const indexExtras = indexDecisions.filter(d => {
+                if (!d.decision_date) return false;
+                const tk = (d.tickers && d.tickers[0]) ? d.tickers[0].toUpperCase() : null;
+                return !tk || !seenKeys.has(`${d.decision_date}|${tk}`);
+            }).map(d => {
+                const tk = (d.tickers && d.tickers[0]) ? d.tickers[0].toUpperCase() : null;
+                return Object.assign({}, d, {
+                    _logo: tk ? (logoMap[tk] || null) : null,
+                });
+            });
+            allDecisions = mergedFromRecent.concat(indexExtras);
+
+            // Auto-jump to current month
             const [y, m] = todayIso.split('-').map(Number);
             currentMonth = new Date(y, m - 1, 1);
 
             document.getElementById('cal-no-data').classList.add('hidden');
             document.getElementById('cal-main').classList.remove('hidden');
-            document.getElementById('cal-aggregate').classList.remove('hidden');
+            const aggEl = document.getElementById('cal-aggregate');
+            if (aggEl) aggEl.classList.remove('hidden');
 
             let stats = `${allDecisions.length} decisions · ${upcomingEvents.length} upcoming · today=${todayIso}`;
             if (indexedAt && indexedAt !== todayIso) {
@@ -236,14 +360,74 @@
             document.getElementById('cal-stats').textContent = stats;
 
             renderGrid();
-            renderUpcoming();
+            renderMonthlySummary();
+            renderUpcomingStrip();
             renderAggregate();
+            // Show last LLM Review (if any) on page load + resume poll if a job is running
+            loadLatestReview();
+            checkLlmReviewRunning();
         } catch (e) {
             console.error('[calendar] load failed', e);
             document.getElementById('cal-no-data').classList.remove('hidden');
             document.getElementById('cal-main').classList.add('hidden');
-            document.getElementById('cal-aggregate').classList.add('hidden');
+            const aggEl = document.getElementById('cal-aggregate');
+            if (aggEl) aggEl.classList.add('hidden');
         }
+    }
+
+    // ── Logo helpers ──────────────────────────────────────────────────────
+    function monogramColorFromTicker(t) {
+        // Stable hash → HSL hue. Same ticker always gets same color.
+        let h = 0;
+        for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+        const hue = h % 360;
+        return `hsl(${hue}, 55%, 35%)`;
+    }
+    function renderTickerLogo(ticker, opts = {}) {
+        const size = opts.size || 18;
+        const ringColor = opts.ringColor || 'transparent';
+        const ringWidth = opts.ringWidth || 0;
+        const tk = (ticker || '').toUpperCase();
+        const url = logoMap[tk];
+        const mono = (tk.slice(0, 2) || '?').toUpperCase();
+        const bg = monogramColorFromTicker(tk || '?');
+        const ringStyle = ringWidth ? `box-shadow: 0 0 0 ${ringWidth}px ${ringColor};` : '';
+        // <img> with onerror → swap to monogram span sibling shown via display swap
+        const id = `logo-${tk}-${Math.random().toString(36).slice(2, 8)}`;
+        if (url) {
+            return `<span class="cal-ticker-logo" style="width:${size}px;height:${size}px;${ringStyle}">
+                <img src="${url}" alt="${tk}" loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+                <span class="cal-monogram-fallback" style="background:${bg};display:none">${mono}</span>
+            </span>`;
+        }
+        return `<span class="cal-ticker-logo" style="width:${size}px;height:${size}px;${ringStyle}">
+            <span class="cal-monogram-fallback" style="background:${bg}">${mono}</span>
+        </span>`;
+    }
+    function ringColorForDecision(dec, verdictLabel) {
+        // verdict overrides decision tint (event_index post-eval)
+        if (verdictLabel === 'hit') return 'rgba(34, 197, 94, 0.85)';
+        if (verdictLabel === 'miss') return 'rgba(239, 68, 68, 0.85)';
+        if (verdictLabel === 'neutral') return 'rgba(234, 179, 8, 0.85)';
+        // live decision tint
+        if (dec === 'EXECUTE') return 'rgba(34, 197, 94, 0.7)';
+        if (dec === 'STAGED') return 'rgba(245, 158, 11, 0.7)';
+        if (dec === 'CANCEL') return 'rgba(239, 68, 68, 0.7)';
+        return 'rgba(113, 113, 122, 0.55)';
+    }
+    function renderLogoStack(items, opts = {}) {
+        // items: [{ticker, ringColor}]; cell size + overlap configurable
+        const size = opts.size || 18;
+        const overlap = opts.overlap != null ? opts.overlap : 6;
+        const max = opts.max || 3;
+        const visible = items.slice(0, max);
+        const extra = items.length - visible.length;
+        const html = visible.map((it, i) => `<span class="cal-logo-stack-slot" style="margin-left:${i === 0 ? 0 : -overlap}px;z-index:${visible.length - i}">${renderTickerLogo(it.ticker, { size, ringColor: it.ringColor || 'transparent', ringWidth: it.ringColor ? 2 : 0 })}</span>`).join('');
+        const more = extra > 0
+            ? `<span class="cal-logo-stack-more" style="margin-left:${-overlap}px;width:${size}px;height:${size}px;line-height:${size}px">+${extra}</span>`
+            : '';
+        return `<span class="cal-logo-stack">${html}${more}</span>`;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
@@ -351,11 +535,20 @@
     }
 
     // ── Upcoming events ↔ date map (for in-cell rendering) ────────────────
+    function eventPassesDensity(e) {
+        // Earnings density filter: 'high' = high-impact OR ticker in watchlist; 'all' = any
+        if (e.category !== 'earnings') return true;
+        if (earningsDensity === 'all') return true;
+        if (e.impact === 'high') return true;
+        const tks = (e.tickers || []).map(t => t.toUpperCase());
+        return tks.some(t => watchlistTickers.has(t));
+    }
     function upcomingEventsByDate() {
         const m = {};
         for (const e of upcomingEvents) {
             if (!e.date) continue;
             if (!eventPasses(e)) continue;
+            if (!eventPassesDensity(e)) continue;
             (m[e.date] = m[e.date] || []).push(e);
         }
         return m;
@@ -413,7 +606,7 @@
                 ${isToday ? `<span class="cal-cell-today-tag">${(window.i18n?.[UI.currentLang]?.calendar?.today_tag) || 'today'}</span>` : ''}
             </div>`;
 
-            cell.innerHTML = dayNum + renderBadges(decisions) + renderEventChips(events);
+            cell.innerHTML = dayNum + renderDecisionLogoGroup(decisions) + renderEventLogoGroup(events);
 
             if (decisions.length > 0 || events.length > 0) {
                 cell.addEventListener('click', () => {
@@ -427,72 +620,96 @@
         UI.icons();
     }
 
-    // Compact category-grouped chips for upcoming events on a calendar date.
-    // Each chip: <icon><count>; binary/high-impact get tinted styles. Up to 4
-    // categories shown — overflow shows "+N" tail. Click cell → drawer.
-    function renderEventChips(events) {
-        if (!events.length) return '';
-
+    // ── In-cell event row: category-grouped logo stack + ticker text ───────
+    // Pattern per row: [category icon] [logo stack OR text]. Same icon never
+    // repeats within a cell. Single line per category; max 2 categories shown.
+    function renderEventLogoGroup(events) {
+        // Always render slot (empty case) so dashed-line baseline stays aligned across all cells
+        if (!events.length) return '<div class="cal-cell-event-rows is-empty"></div>';
         const byCat = {};
         for (const e of events) {
             const cat = e.category || 'system';
             (byCat[cat] = byCat[cat] || []).push(e);
         }
-
-        // Order: categories with binary first, then high-impact, then by count
-        const ordered = Object.entries(byCat).sort((a, b) => {
-            const aBin = a[1].some(e => e.is_binary) ? 1 : 0;
-            const bBin = b[1].some(e => e.is_binary) ? 1 : 0;
-            if (aBin !== bBin) return bBin - aBin;
-            const aHigh = a[1].some(e => e.impact === 'high') ? 1 : 0;
-            const bHigh = b[1].some(e => e.impact === 'high') ? 1 : 0;
-            if (aHigh !== bHigh) return bHigh - aHigh;
-            return b[1].length - a[1].length;
-        });
-
-        const VISIBLE = 4;
-        let chips = '';
-        for (const [cat, arr] of ordered.slice(0, VISIBLE)) {
+        const order = ['earnings', 'macro', 'binary', 'econ', 'geopolitical', 'watchlist', 'system'];
+        const sorted = order.filter(c => byCat[c]).map(c => [c, byCat[c]]);
+        const VISIBLE = 2;
+        let html = '<div class="cal-cell-event-rows">';
+        for (const [cat, arr] of sorted.slice(0, VISIBLE)) {
             const meta = CATEGORY_META[cat] || { icon: '📅' };
             const hasBin = arr.some(e => e.is_binary);
             const hasHigh = arr.some(e => e.impact === 'high');
-            const cls = hasBin ? 'cal-cell-event-chip-binary'
-                      : hasHigh ? 'cal-cell-event-chip-high'
-                      : '';
-            const titlesArr = arr.map(e => {
-                const t = e.title || '';
-                const tk = (e.tickers && e.tickers[0]) ? `[${e.tickers[0]}] ` : '';
-                return tk + t;
-            });
-            const tooltip = titlesArr.join(' · ').replace(/"/g, '&quot;');
-            const countTag = arr.length > 1
-                ? `<span class="cal-cell-event-count">${arr.length}</span>`
-                : '';
-            chips += `<span class="cal-cell-event-chip ${cls}" title="${tooltip}">${meta.icon}${countTag}</span>`;
+            const rowCls = hasBin ? 'cal-cell-event-row-binary'
+                         : hasHigh ? 'cal-cell-event-row-high' : '';
+            // Tickered events → logo stack; non-ticker → first title text
+            const tickered = arr.filter(e => Array.isArray(e.tickers) && e.tickers.length);
+            const non = arr.filter(e => !(Array.isArray(e.tickers) && e.tickers.length));
+            let body;
+            if (tickered.length) {
+                const stackItems = tickered.map(e => ({
+                    ticker: e.tickers[0].toUpperCase(),
+                    ringColor: e.is_binary ? 'rgba(239, 68, 68, 0.85)' : (e.impact === 'high' ? 'rgba(245, 158, 11, 0.7)' : 'transparent'),
+                }));
+                const tickers = tickered.slice(0, 3).map(e => e.tickers[0].toUpperCase()).join('·');
+                const more = tickered.length > 3 ? ` +${tickered.length - 3}` : '';
+                body = `${renderLogoStack(stackItems, { size: 16, max: 3 })}<span class="cal-cell-event-tickers">${tickers}${more}</span>`;
+            } else {
+                const first = (non[0] && non[0].title) ? non[0].title : '';
+                const short = first.length > 22 ? first.slice(0, 21) + '…' : first;
+                const cnt = non.length > 1 ? ` (${non.length})` : '';
+                body = `<span class="cal-cell-event-text">${short}${cnt}</span>`;
+            }
+            html += `<div class="cal-cell-event-row ${rowCls}">
+                <span class="cal-cell-event-cat-icon">${meta.icon}</span>
+                ${body}
+            </div>`;
         }
-
-        if (ordered.length > VISIBLE) {
-            const extra = ordered.slice(VISIBLE).reduce((sum, [, arr]) => sum + arr.length, 0);
-            chips += `<span class="cal-cell-event-more">+${extra}</span>`;
-        }
-
-        return `<div class="cal-cell-events">${chips}</div>`;
-    }
-
-    function renderBadges(decisions) {
-        if (!decisions.length) return '';
-        const bySrc = groupBySource(decisions);
-        const ordered = Object.entries(bySrc).sort((a, b) => b[1].length - a[1].length);
-        let html = '<div class="cal-badge-row">';
-        for (const [src, arr] of ordered) {
-            const meta = SOURCE_META[src] || { icon: '?' };
-            const v = aggregateVerdictColor(arr);
-            const vMeta = VERDICT_META[v];
-            const count = arr.length > 1 ? `<span class="cal-badge-count">${arr.length}</span>` : '';
-            html += `<span class="cal-badge ${vMeta.badgeClass}" title="${src} (${arr.length}) — ${v}">${meta.icon}${count}</span>`;
+        if (sorted.length > VISIBLE) {
+            const extraCats = sorted.slice(VISIBLE);
+            const extra = extraCats.reduce((s, [, a]) => s + a.length, 0);
+            html += `<div class="cal-cell-event-row-more">+${extra} more</div>`;
         }
         html += '</div>';
         return html;
+    }
+
+    // ── In-cell decision row: logo stack + ticker text ─────────────────────
+    function renderDecisionLogoGroup(decisions) {
+        // Always render slot so events row stays anchored at bottom (consistent cell layout)
+        if (!decisions.length) return '<div class="cal-cell-decision-row is-empty"></div>';
+        // Sort: live deep-dive (from recent_analysis) first, then by source priority
+        const sorted = [...decisions].sort((a, b) => {
+            if (!!b._from_recent !== !!a._from_recent) return (b._from_recent ? 1 : 0) - (a._from_recent ? 1 : 0);
+            return 0;
+        });
+        const stackItems = sorted.map(d => {
+            const tk = (d.tickers && d.tickers[0]) ? d.tickers[0].toUpperCase() : '';
+            return {
+                ticker: tk,
+                ringColor: ringColorForDecision(d._live_decision || (d.decision_content || {}).final_action, d.verdict?.label),
+            };
+        }).filter(it => it.ticker);
+        if (!stackItems.length) {
+            // Fallback for source-only decisions (no ticker) — keep old badge style
+            const bySrc = groupBySource(decisions);
+            let h = '<div class="cal-badge-row">';
+            for (const [src, arr] of Object.entries(bySrc)) {
+                const meta = SOURCE_META[src] || { icon: '?' };
+                const v = aggregateVerdictColor(arr);
+                const vMeta = VERDICT_META[v];
+                const count = arr.length > 1 ? `<span class="cal-badge-count">${arr.length}</span>` : '';
+                h += `<span class="cal-badge ${vMeta.badgeClass}" title="${src} (${arr.length}) — ${v}">${meta.icon}${count}</span>`;
+            }
+            h += '</div>';
+            return h;
+        }
+        const tickers = stackItems.slice(0, 3).map(it => it.ticker).join('·');
+        const extra = stackItems.length - 3;
+        const more = extra > 0 ? ` +${extra}` : '';
+        return `<div class="cal-cell-decision-row">
+            ${renderLogoStack(stackItems, { size: 18, max: 3 })}
+            <span class="cal-cell-decision-tickers">${tickers}${more}</span>
+        </div>`;
     }
 
     // ── Inline Detail Panel (replaces drawer) ─────────────────────────────
@@ -543,23 +760,32 @@
         content.innerHTML = html;
 
         const panel = document.getElementById('cal-detail');
+        const backdrop = document.getElementById('cal-detail-backdrop');
         panel.classList.remove('hidden');
         panel.setAttribute('aria-hidden', 'false');
-        // Force reflow then trigger expand transition
+        if (backdrop) {
+            backdrop.classList.remove('hidden');
+            requestAnimationFrame(() => backdrop.classList.add('cal-detail-backdrop-open'));
+        }
+        // Lock body scroll while modal open
+        document.body.classList.add('cal-detail-locked');
+        // Force reflow then trigger scale-in transition
         requestAnimationFrame(() => panel.classList.add('cal-detail-open'));
         UI.icons();
-
-        // Smoothly bring the panel into view if user clicked a cell scrolled high up
-        requestAnimationFrame(() => {
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        });
     }
 
     function closeDetailPanel() {
         const panel = document.getElementById('cal-detail');
+        const backdrop = document.getElementById('cal-detail-backdrop');
         if (!panel) return;
         panel.classList.remove('cal-detail-open');
         panel.setAttribute('aria-hidden', 'true');
+        if (backdrop) {
+            backdrop.classList.remove('cal-detail-backdrop-open');
+            backdrop.setAttribute('aria-hidden', 'true');
+            setTimeout(() => backdrop.classList.add('hidden'), 240);
+        }
+        document.body.classList.remove('cal-detail-locked');
         setTimeout(() => panel.classList.add('hidden'), 240);
 
         if (selectedDate) {
@@ -611,7 +837,7 @@
 
         const ticker = (d.tickers || [])[0] || '';
         const headerLeft = ticker
-            ? `<span class="font-mono font-bold text-sm">${ticker}</span>`
+            ? `<span class="cal-card-header-logo">${renderTickerLogo(ticker, { size: 22 })}</span><span class="font-mono font-bold text-sm">${ticker}</span>`
             : `<span class="text-xs text-zinc-400 truncate" style="max-width:280px">${d.summary || ''}</span>`;
 
         return `<div class="cal-card pl-4">
@@ -833,7 +1059,7 @@
         const typeLabel = (typeLabels[cat] || { zh: cat, en: cat })[lang === 'zh' ? 'zh' : 'en'];
 
         const tickerChips = (e.tickers && e.tickers.length)
-            ? e.tickers.slice(0, 3).map(t => `<span class="cal-upcoming-ticker-chip">${t}</span>`).join('')
+            ? e.tickers.slice(0, 3).map(t => `<span class="cal-upcoming-ticker-chip">${renderTickerLogo(t, { size: 14 })}<span>${t}</span></span>`).join('')
             : '';
 
         // Sector chips (smaller, different tone). 顯示前 3 個避免擠爆。
@@ -1000,32 +1226,316 @@
             `<div class="cal-aggregate-grid">${html}</div>`;
     }
 
-    // ── LLM Review button ────────────────────────────────────────────────
-    async function copyLlmReviewBundle() {
-        try {
-            const [pr, ir] = await Promise.all([
-                fetch(REVIEW_PROMPT_URL, { cache: 'no-store' }),
-                fetch(EVENT_INDEX_URL, { cache: 'no-store' }),
-            ]);
-            const promptText = await pr.text();
-            const idxText = await ir.text();
+    // ── Monthly Summary (Past 30d analyses pill cloud) ────────────────────
+    function renderMonthlySummary() {
+        const host = document.getElementById('cal-monthly-summary-body');
+        if (!host) return;
+        const isZh = UI.currentLang === 'zh';
+        const todayD = new Date(todayIso);
+        const cutoff = new Date(todayD); cutoff.setDate(todayD.getDate() - 30);
 
-            const bundle =
-                promptText +
-                '\n\n---\n\n' +
-                '# Event Index Data\n\n' +
-                '```json\n' + idxText + '\n```\n';
+        const recent = recentAnalysis.filter(a => {
+            if (!a.time) return false;
+            const d = new Date(a.time.slice(0, 10));
+            return d >= cutoff && d <= todayD;
+        });
 
-            await navigator.clipboard.writeText(bundle);
-            UI.showToast(
-                UI.currentLang === 'zh'
-                    ? '已複製 prompt + 最新 event_index 到 clipboard, 貼到新 Claude 對話即可'
-                    : 'Copied prompt + latest event_index to clipboard. Paste into a new Claude conversation.',
-                'info', 5000);
-        } catch (e) {
-            console.error('[calendar] copy failed', e);
-            UI.showToast('Copy failed: ' + e.message, 'error', 4000);
+        if (!recent.length) {
+            host.innerHTML = `<div class="text-xs text-zinc-500 italic">${isZh ? '近 30 天無分析記錄' : 'No analyses in last 30 days'}</div>`;
+            return;
         }
+
+        const buckets = { EXECUTE: 0, STAGED: 0, CANCEL: 0, OTHER: 0 };
+        for (const a of recent) {
+            const k = (a.decision || '').toUpperCase();
+            if (k in buckets) buckets[k]++; else buckets.OTHER++;
+        }
+
+        const summaryLine = isZh
+            ? `<span class="cal-monthly-stat-num">${recent.length}</span> 筆 · <span class="text-emerald-400">${buckets.EXECUTE} EXECUTE</span> / <span class="text-amber-400">${buckets.STAGED} STAGED</span> / <span class="text-red-400">${buckets.CANCEL} CANCEL</span>`
+            : `<span class="cal-monthly-stat-num">${recent.length}</span> decisions · <span class="text-emerald-400">${buckets.EXECUTE} EXECUTE</span> / <span class="text-amber-400">${buckets.STAGED} STAGED</span> / <span class="text-red-400">${buckets.CANCEL} CANCEL</span>`;
+
+        // Dedupe by ticker; latest decision wins. Sort by time desc.
+        const byTicker = {};
+        for (const a of recent) {
+            const tk = (a.ticker || '').toUpperCase();
+            if (!tk) continue;
+            const prev = byTicker[tk];
+            if (!prev || new Date(a.time) > new Date(prev.time)) byTicker[tk] = a;
+        }
+        const tickers = Object.values(byTicker).sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        const pills = tickers.map(a => {
+            const tk = a.ticker.toUpperCase();
+            const dec = (a.decision || '').toUpperCase();
+            const tone = dec === 'EXECUTE' ? 'is-execute'
+                       : dec === 'STAGED' ? 'is-staged'
+                       : dec === 'CANCEL' ? 'is-cancel' : 'is-other';
+            const url = a.report_url ? '/' + a.report_url : '';
+            const open = url ? `onclick="window.open('${url}','_blank')"` : '';
+            const date = (a.time || '').slice(5, 10);
+            return `<span class="cal-monthly-pill ${tone}" title="${tk} ${dec} · ${a.time}" ${open}>
+                ${renderTickerLogo(tk, { size: 16 })}
+                <span class="cal-monthly-pill-ticker">${tk}</span>
+                <span class="cal-monthly-pill-date">${date}</span>
+            </span>`;
+        }).join('');
+
+        host.innerHTML = `<div class="cal-monthly-summary-line">${summaryLine}</div>
+            <div class="cal-monthly-pill-cloud">${pills}</div>`;
+    }
+
+    // ── Coming Up Strip (Next 7 days) — replaces hidden right-rail ────────
+    function renderUpcomingStrip() {
+        const host = document.getElementById('cal-upcoming-strip-body');
+        if (!host) return;
+        const isZh = UI.currentLang === 'zh';
+        const today = new Date(todayIso);
+        const seven = new Date(today); seven.setDate(today.getDate() + 7);
+
+        const events = upcomingEvents.filter(e => {
+            if (!e.date) return false;
+            if (!eventPassesDensity(e)) return false;
+            const dt = new Date(e.date);
+            return dt >= today && dt <= seven;
+        });
+
+        if (!events.length) {
+            host.innerHTML = `<div class="text-xs text-zinc-500 italic">${isZh ? '未來 7 天無重要事件（已套用 high-impact + 觀察清單篩選）' : 'No high-impact events in next 7 days'}</div>`;
+            return;
+        }
+
+        // Group by date
+        const byDate = {};
+        for (const e of events) (byDate[e.date] = byDate[e.date] || []).push(e);
+        const dates = Object.keys(byDate).sort();
+
+        const dows = isZh ? ['日', '一', '二', '三', '四', '五', '六']
+                          : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        const rows = dates.map(dateStr => {
+            const items = byDate[dateStr];
+            const dt = new Date(dateStr);
+            const offset = Math.round((dt - today) / 86400000);
+            const rel = offset === 0 ? (isZh ? '今天' : 'Today')
+                      : offset === 1 ? (isZh ? '明天' : 'Tomorrow')
+                      : (isZh ? '週' : '') + dows[dt.getDay()];
+            const dateBadge = `${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getDate().toString().padStart(2, '0')}`;
+
+            // Group by category for compact display
+            const byCat = {};
+            for (const e of items) (byCat[e.category || 'system'] = byCat[e.category || 'system'] || []).push(e);
+            const catOrder = ['earnings', 'macro', 'binary', 'econ', 'geopolitical', 'system'];
+            const catCells = catOrder.filter(c => byCat[c]).map(c => {
+                const arr = byCat[c];
+                const meta = CATEGORY_META[c] || { icon: '📅' };
+                const tickered = arr.filter(e => Array.isArray(e.tickers) && e.tickers.length);
+                const non = arr.filter(e => !(Array.isArray(e.tickers) && e.tickers.length));
+                let body;
+                if (tickered.length) {
+                    const stackItems = tickered.map(e => ({
+                        ticker: e.tickers[0].toUpperCase(),
+                        ringColor: e.is_binary ? 'rgba(239, 68, 68, 0.85)' : (e.impact === 'high' ? 'rgba(245, 158, 11, 0.7)' : 'transparent'),
+                    }));
+                    const labels = tickered.slice(0, 4).map(e => e.tickers[0].toUpperCase()).join(' ');
+                    const more = tickered.length > 4 ? ` +${tickered.length - 4}` : '';
+                    body = `${renderLogoStack(stackItems, { size: 18, max: 4 })}<span class="cal-up-strip-tickers">${labels}${more}</span>`;
+                } else {
+                    const titles = non.slice(0, 2).map(e => e.title || '').join(' · ');
+                    const more = non.length > 2 ? ` +${non.length - 2}` : '';
+                    body = `<span class="cal-up-strip-text">${titles}${more}</span>`;
+                }
+                return `<span class="cal-up-strip-cat" title="${c}">
+                    <span class="cal-up-strip-cat-icon">${meta.icon}</span>${body}
+                </span>`;
+            }).join('');
+
+            return `<div class="cal-up-strip-row">
+                <div class="cal-up-strip-date">
+                    <span class="cal-up-strip-rel">${rel}</span>
+                    <span class="cal-up-strip-mmdd">${dateBadge}</span>
+                </div>
+                <div class="cal-up-strip-cells">${catCells}</div>
+            </div>`;
+        }).join('');
+
+        host.innerHTML = rows;
+    }
+
+    // ── LLM Review (backend queue + status poll + result render) ──────────
+    async function requestLlmReview() {
+        const isZh = UI.currentLang === 'zh';
+        const confirmMsg = isZh
+            ? 'LLM 檢討會跑 ~10–15 分鐘並消耗 Claude API tokens（event_index 約 300KB + 三步驟推論）。確定要排入佇列？'
+            : 'LLM Review takes ~10–15 min and consumes Claude API tokens (event_index ≈ 300KB + 3-step reasoning). Queue it?';
+        if (!window.confirm(confirmMsg)) return;
+        try {
+            const r = await fetch('/api/protocol-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'llm_review' })
+            });
+            const body = await r.json();
+            if (r.status === 202 && body.queued) {
+                const pos = body.position || '?';
+                UI.showToast(isZh ? `已排入 LLM 檢討（第 ${pos} 位，~10-15 min）` : `Queued LLM Review (#${pos}, ~10-15 min)`, 'info', 4000);
+                startLlmReviewPoll();
+            } else if (r.status === 409 && body.reason === 'duplicate_active') {
+                UI.showToast(isZh ? 'LLM 檢討執行中' : 'LLM Review already running', 'warn', 3000);
+                startLlmReviewPoll();
+            } else if (r.status === 409 && body.reason === 'duplicate_pending') {
+                UI.showToast(isZh ? 'LLM 檢討已在佇列' : 'LLM Review already queued', 'warn', 3000);
+                startLlmReviewPoll();
+            } else {
+                UI.showToast(isZh ? `加入失敗：${body.error || r.status}` : `Failed: ${body.error || r.status}`, 'error', 4000);
+            }
+        } catch (e) {
+            UI.showToast(isZh ? `網路錯誤：${e.message}` : `Network error: ${e.message}`, 'error', 4000);
+        }
+    }
+
+    function startLlmReviewPoll() {
+        if (llmReviewPollTimer) return;
+        setLlmReviewBtnRunning(0);
+        llmReviewPollTimer = setInterval(pollLlmReviewStatus, 3000);
+        pollLlmReviewStatus();
+    }
+    function stopLlmReviewPoll() {
+        if (llmReviewPollTimer) clearInterval(llmReviewPollTimer);
+        llmReviewPollTimer = null;
+        setLlmReviewBtnIdle();
+    }
+
+    async function pollLlmReviewStatus() {
+        const isZh = UI.currentLang === 'zh';
+        try {
+            const r = await fetch('/api/run-protocol/status', { cache: 'no-store' });
+            if (!r.ok) return;
+            const s = await r.json();
+            // Only react when the *currently active* protocol is llm_review
+            if (s.name !== 'llm_review') return;
+            if (s.status === 'running') {
+                setLlmReviewBtnRunning(s.elapsed_sec || 0);
+            } else if (s.status === 'done') {
+                stopLlmReviewPoll();
+                UI.showToast(isZh ? 'LLM 檢討完成，正在載入結果…' : 'LLM Review done, loading…', 'info', 3000);
+                await loadLatestReview();
+            } else if (s.status === 'error') {
+                stopLlmReviewPoll();
+                const tail = (s.log_tail || '').slice(-300);
+                UI.showToast(isZh ? `LLM 檢討失敗：${tail}` : `LLM Review failed: ${tail}`, 'error', 8000);
+            }
+        } catch (e) {
+            // Network blip; let interval retry
+        }
+    }
+
+    async function checkLlmReviewRunning() {
+        try {
+            const r = await fetch('/api/run-protocol/status', { cache: 'no-store' });
+            if (!r.ok) return;
+            const s = await r.json();
+            if (s.name === 'llm_review' && s.status === 'running') startLlmReviewPoll();
+        } catch {}
+    }
+
+    function setLlmReviewBtnRunning(elapsed) {
+        const btn = document.getElementById('cal-llm-review');
+        const lbl = document.getElementById('cal-llm-btn-text');
+        const refreshBtn = document.getElementById('cal-llm-review-refresh');
+        if (!btn || !lbl) return;
+        btn.disabled = true;
+        btn.classList.add('cal-llm-review-running');
+        const isZh = UI.currentLang === 'zh';
+        lbl.textContent = isZh ? `檢討中… ${elapsed}s` : `Reviewing… ${elapsed}s`;
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.classList.add('cal-llm-review-running');
+        }
+    }
+    function setLlmReviewBtnIdle() {
+        const btn = document.getElementById('cal-llm-review');
+        const lbl = document.getElementById('cal-llm-btn-text');
+        const refreshBtn = document.getElementById('cal-llm-review-refresh');
+        if (!btn || !lbl) return;
+        btn.disabled = false;
+        btn.classList.remove('cal-llm-review-running');
+        const isZh = UI.currentLang === 'zh';
+        lbl.textContent = isZh ? '請 LLM 檢討' : 'Ask LLM Review';
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+            refreshBtn.classList.remove('cal-llm-review-running');
+        }
+    }
+
+    async function loadLatestReview() {
+        const host = document.getElementById('cal-llm-review-body');
+        const meta = document.getElementById('cal-llm-review-meta');
+        if (!host) return;
+        const isZh = UI.currentLang === 'zh';
+        // Try today first, walk back up to 14 days for fallback
+        const today = new Date(todayIso || browserTodayIso());
+        for (let offset = 0; offset < 14; offset++) {
+            const d = new Date(today); d.setDate(today.getDate() - offset);
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const url = `/decision_review/REVIEW_${iso}.md`;
+            try {
+                const r = await fetch(url, { cache: 'no-store' });
+                if (!r.ok) continue;
+                const md = await r.text();
+                host.innerHTML = renderReviewMarkdown(md);
+                // Extract summary metadata: decisions_analyzed + pattern count + recommendation count
+                const decsMatch = md.match(/_decisions_analyzed:\s*(\d+)/);
+                const idxAtMatch = md.match(/_event_index_at:\s*([\dT:\.\-]+)/);
+                const patternCount = (md.match(/^### .+?\(n=\d+/gm) || []).length;
+                const recCount = ((md.split(/^## +Adjustment Recommendations\b/m)[1] || '').match(/^### /gm) || []).length;
+                if (meta) {
+                    const parts = [isZh ? `${iso} 產出` : `${iso}`];
+                    if (decsMatch) parts.push(isZh ? `${decsMatch[1]} 筆決策` : `${decsMatch[1]} decisions`);
+                    if (patternCount) parts.push(isZh ? `${patternCount} patterns` : `${patternCount} patterns`);
+                    if (recCount) parts.push(isZh ? `${recCount} 建議` : `${recCount} recs`);
+                    meta.textContent = parts.join(' · ');
+                }
+                document.getElementById('cal-llm-review-section')?.classList.add('cal-llm-review-has-result');
+                return;
+            } catch {}
+        }
+        host.innerHTML = `<div class="cal-llm-review-empty">${isZh ? '尚未跑過 LLM 檢討。點右上角「請 LLM 檢討」觸發。' : 'No LLM Review yet. Click "Ask LLM Review" at top-right.'}</div>`;
+        if (meta) meta.textContent = isZh ? '尚未產出' : 'no review yet';
+    }
+
+    // Hand-rolled markdown → safe HTML.
+    // Supports: # / ## / ### headers, - / * bullets, **bold**, `inline code`, paragraphs, hr (---).
+    // Intentionally minimal — review output uses these patterns and nothing more.
+    function renderReviewMarkdown(md) {
+        const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+        const inlines = (s) => escapeHtml(s)
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/_([^_]+)_/g, '<em>$1</em>');
+        const lines = md.split(/\r?\n/);
+        const out = [];
+        let inList = false;
+        const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+        for (const raw of lines) {
+            const line = raw.trimEnd();
+            if (!line.trim()) { closeList(); out.push(''); continue; }
+            if (/^---+\s*$/.test(line)) { closeList(); out.push('<hr>'); continue; }
+            const h = line.match(/^(#{1,6})\s+(.+)$/);
+            if (h) { closeList(); const lvl = h[1].length; out.push(`<h${lvl}>${inlines(h[2])}</h${lvl}>`); continue; }
+            const li = line.match(/^[\-\*]\s+(.+)$/);
+            if (li) {
+                if (!inList) { out.push('<ul>'); inList = true; }
+                out.push(`<li>${inlines(li[1])}</li>`);
+                continue;
+            }
+            closeList();
+            out.push(`<p>${inlines(line)}</p>`);
+        }
+        closeList();
+        return out.join('\n');
     }
 
 })();

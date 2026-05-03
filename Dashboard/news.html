@@ -5,11 +5,192 @@
     <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>即時新聞情報 | AI 投資委員會</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* ── News page UX (V1.71.x) — Editorial × Newsroom ─── */
+
+        /* Compact hero stat strip */
+        .news-hero {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .news-tile {
+            position: relative;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid rgba(161,161,170,0.18);
+            overflow: hidden;
+            transition: border-color 0.18s, transform 0.18s;
+        }
+        .news-tile:hover { border-color: rgba(99,102,241,0.40); transform: translateY(-1px); }
+        .news-tile-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+        .news-tile-accent-zinc    { background: linear-gradient(180deg, rgba(161,161,170,0.5) 0%, transparent 100%); }
+        .news-tile-accent-emerald { background: linear-gradient(180deg, #10b981 0%, transparent 100%); }
+        .news-tile-accent-rose    { background: linear-gradient(180deg, #ef4444 0%, transparent 100%); }
+        .news-tile-accent-amber   { background: linear-gradient(180deg, #f59e0b 0%, transparent 100%); }
+        .news-tile-label {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: #71717a; margin-bottom: 4px;
+        }
+        .news-tile-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 26px; font-weight: 800;
+            line-height: 1; letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+        }
+        .news-tile-value-bull { color: #22c55e; }
+        .news-tile-value-bear { color: #ef4444; }
+        .news-tile-value-warn { color: #f59e0b; }
+
+        /* Sticky filter container — sits below header on scroll */
+        .news-controls {
+            position: sticky;
+            top: 64px; /* matches header h-16 */
+            z-index: 9;
+            backdrop-filter: blur(10px);
+            background: color-mix(in srgb, var(--bg-main) 88%, transparent);
+            padding: 10px 0;
+            margin: 0 -8px;
+            padding-left: 8px; padding-right: 8px;
+            border-bottom: 1px solid rgba(161,161,170,0.10);
+        }
+
+        /* Tab w/ count badge */
+        .news-tab {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(161,161,170,0.25);
+            background: transparent;
+            color: #71717a;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .news-tab:hover {
+            border-color: rgba(99,102,241,0.40);
+            color: var(--text-main);
+        }
+        .news-tab.active {
+            background: rgba(59,130,246,0.12);
+            border-color: rgba(59,130,246,0.55);
+            color: #60a5fa;
+        }
+        .news-tab-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px; font-weight: 800;
+            padding: 1px 6px; border-radius: 999px;
+            background: rgba(161,161,170,0.18);
+            color: #a1a1aa;
+            font-variant-numeric: tabular-nums;
+            min-width: 18px; text-align: center;
+        }
+        .news-tab.active .news-tab-count {
+            background: rgba(59,130,246,0.22);
+            color: #60a5fa;
+        }
+
+        /* Search + verdict chip row */
+        .news-search-wrap {
+            position: relative; flex: 1; max-width: 380px;
+        }
+        .news-search-input {
+            width: 100%;
+            padding: 6px 12px 6px 32px;
+            border-radius: 8px;
+            border: 1px solid rgba(161,161,170,0.25);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .news-search-input:focus {
+            border-color: rgba(59,130,246,0.55);
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.16);
+        }
+        .news-search-icon {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            color: #71717a; pointer-events: none;
+        }
+        .news-search-clear {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: #71717a;
+            cursor: pointer; padding: 2px;
+            display: none;
+        }
+        .news-search-input:not(:placeholder-shown) + .news-search-clear { display: inline-flex; }
+
+        .news-vchip {
+            font-size: 9.5px; font-weight: 800;
+            letter-spacing: 0.06em;
+            padding: 3px 9px; border-radius: 999px;
+            border: 1px solid rgba(161,161,170,0.30);
+            background: transparent;
+            cursor: pointer; transition: all 0.15s;
+            user-select: none;
+        }
+        .news-vchip span { color: inherit; }
+        .news-vchip:hover { border-color: currentColor; filter: brightness(1.1); }
+        /* Active = verdict color background + dark text (high contrast) */
+        .news-vchip.active { border-color: currentColor; }
+        .news-vchip.active span { color: #0a0a0a; font-weight: 900; }
+
+        .news-vchip-bullish        { color: #22c55e; }
+        .news-vchip-bullish.active { background: #22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,0.3); }
+        .news-vchip-bearish        { color: #ef4444; }
+        .news-vchip-bearish.active { background: #ef4444; box-shadow: 0 0 0 1px rgba(239,68,68,0.3); }
+        .news-vchip-binary         { color: #f59e0b; }
+        .news-vchip-binary.active  { background: #f59e0b; box-shadow: 0 0 0 1px rgba(245,158,11,0.3); }
+        .news-vchip-neutral        { color: #a1a1aa; }
+        .news-vchip-neutral.active { background: #d4d4d8; box-shadow: 0 0 0 1px rgba(161,161,170,0.3); }
+
+        .news-controls-reset {
+            font-size: 9px; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 6px;
+            background: transparent;
+            border: 1px solid rgba(161,161,170,0.30);
+            color: #71717a; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .news-controls-reset:hover { color: var(--text-main); border-color: var(--text-main); }
+        .news-match-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 800;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
+        .news-match-count .total { opacity: 0.45; font-weight: 500; }
+
+        /* News card left-edge verdict stripe (overlay on existing glass-card) */
+        #news-feed-detailed > .glass-card {
+            position: relative;
+            overflow: hidden;
+        }
+        #news-feed-detailed > .glass-card::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+            background: rgba(161,161,170,0.4);
+            transition: background 0.2s;
+        }
+        #news-feed-detailed > .glass-card[data-verdict="bullish"]::before { background: linear-gradient(180deg, #22c55e, #16a34a); box-shadow: 0 0 12px rgba(34,197,94,0.30); }
+        #news-feed-detailed > .glass-card[data-verdict="bearish"]::before { background: linear-gradient(180deg, #ef4444, #dc2626); box-shadow: 0 0 12px rgba(239,68,68,0.30); }
+        #news-feed-detailed > .glass-card[data-verdict="binary"]::before  { background: linear-gradient(180deg, #f59e0b, #d97706); }
+        #news-feed-detailed > .glass-card[data-verdict="neutral"]::before { background: linear-gradient(180deg, rgba(161,161,170,0.4), transparent); }
+
+        /* Reclaim main column when right rail is empty */
+        .news-2col[data-rail="empty"] .news-rail { display: none; }
+        .news-2col[data-rail="empty"] .news-main { width: 100%; }
+    </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="news">
 
@@ -49,24 +230,28 @@
                 </div>
             </div>
 
-            <!-- News Stats Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div class="glass-card p-4">
-                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="total">Total Items</span>
-                  <div class="text-2xl font-bold" id="total-news">0</div>
-              </div>
-              <div class="glass-card p-4 border-l-4 border-l-green-600">
-                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="bull">Bullish Signals</span>
-                  <div class="text-2xl font-bold text-green-500" id="bull-news">0</div>
-              </div>
-              <div class="glass-card p-4 border-l-4 border-l-red-600">
-                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="bear">Bearish Signals</span>
-                  <div class="text-2xl font-bold text-red-500" id="bear-news">0</div>
-              </div>
-              <div class="glass-card p-4 border-l-4 border-l-yellow-600">
-                  <span class="text-[10px] font-bold text-zinc-500 uppercase" data-stat-label="binary">Binary Risk</span>
-                  <div class="text-2xl font-bold text-yellow-500" id="binary-news">0</div>
-              </div>
+            <!-- Compact hero stat strip -->
+            <div class="news-hero mb-5">
+                <div class="news-tile">
+                    <div class="news-tile-accent news-tile-accent-zinc"></div>
+                    <div class="news-tile-label" data-stat-label="total">Total Items</div>
+                    <div class="news-tile-value" id="total-news">0</div>
+                </div>
+                <div class="news-tile">
+                    <div class="news-tile-accent news-tile-accent-emerald"></div>
+                    <div class="news-tile-label" data-stat-label="bull">Bullish Signals</div>
+                    <div class="news-tile-value news-tile-value-bull" id="bull-news">0</div>
+                </div>
+                <div class="news-tile">
+                    <div class="news-tile-accent news-tile-accent-rose"></div>
+                    <div class="news-tile-label" data-stat-label="bear">Bearish Signals</div>
+                    <div class="news-tile-value news-tile-value-bear" id="bear-news">0</div>
+                </div>
+                <div class="news-tile">
+                    <div class="news-tile-accent news-tile-accent-amber"></div>
+                    <div class="news-tile-label" data-stat-label="binary">Binary Risk</div>
+                    <div class="news-tile-value news-tile-value-warn" id="binary-news">0</div>
+                </div>
             </div>
 
             <!-- Protocol Run Banner (DIGEST/FLASH/REVIEW) — same inline expandable card pattern as momentum/sector -->
@@ -125,18 +310,54 @@
                 }
             </style>
 
-            <!-- Review Filter Tabs -->
-            <div class="flex gap-2 flex-wrap mb-6 items-center" id="news-filter-tabs">
-                <button data-filter="all"      class="news-filter-tab active px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-all">全部</button>
-                <button data-filter="reviewed"  class="news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-reviewed">已審核 ✅</button>
-                <button data-filter="pending"   class="news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-pending">待審核 ⏳</button>
-                <span class="mx-1 text-zinc-600">|</span>
-                <button data-filter="triage"    class="news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all" id="nf-triage" data-i18n="triage_tab">🗂 Triage</button>
+            <!-- Sticky filter container: tabs + search + verdict chips -->
+            <div class="news-controls mb-4">
+                <!-- Row 1: review status tabs with count badges -->
+                <div class="flex gap-2 flex-wrap items-center mb-2.5" id="news-filter-tabs">
+                    <button data-filter="all" class="news-tab active" id="nf-all">
+                        <span data-i18n-tab="all">全部</span><span class="news-tab-count" id="nf-all-count">0</span>
+                    </button>
+                    <button data-filter="reviewed" class="news-tab" id="nf-reviewed">
+                        <span data-i18n-tab="reviewed">已審核 ✅</span><span class="news-tab-count" id="nf-reviewed-count">0</span>
+                    </button>
+                    <button data-filter="pending" class="news-tab" id="nf-pending">
+                        <span data-i18n-tab="pending">待審核 ⏳</span><span class="news-tab-count" id="nf-pending-count">0</span>
+                    </button>
+                    <span class="mx-1 text-zinc-600">|</span>
+                    <button data-filter="triage" class="news-tab" id="nf-triage" data-i18n="triage_tab">
+                        <span>🗂 Triage</span><span class="news-tab-count" id="nf-triage-count">0</span>
+                    </button>
+                </div>
+
+                <!-- Row 2: search + verdict chip filters + reset + match count -->
+                <div class="flex gap-3 flex-wrap items-center">
+                    <div class="news-search-wrap">
+                        <i data-lucide="search" class="w-3.5 h-3.5 news-search-icon"></i>
+                        <input id="news-search" type="text" class="news-search-input"
+                               placeholder="搜尋 ticker / headline..." spellcheck="false" autocomplete="off" />
+                        <button id="news-search-clear" class="news-search-clear" type="button" title="clear">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex gap-1.5 items-center">
+                        <button class="news-vchip news-vchip-bullish active" data-verdict="bullish" type="button"><span>BULLISH</span></button>
+                        <button class="news-vchip news-vchip-bearish active" data-verdict="bearish" type="button"><span>BEARISH</span></button>
+                        <button class="news-vchip news-vchip-binary active" data-verdict="binary" type="button"><span>BINARY</span></button>
+                        <button class="news-vchip news-vchip-neutral active" data-verdict="neutral" type="button"><span>NEUTRAL</span></button>
+                    </div>
+
+                    <button id="news-controls-reset" class="news-controls-reset" type="button">Reset</button>
+
+                    <div class="ml-auto news-match-count">
+                        <span id="news-match-now">0</span><span class="total"> / <span id="news-match-total">0</span></span>
+                    </div>
+                </div>
             </div>
 
             <!-- Two-column: feed + binary risks sidebar -->
-            <div class="flex gap-6 items-start">
-                <div class="flex-1 space-y-6 min-w-0">
+            <div class="flex gap-6 items-start news-2col">
+                <div class="flex-1 space-y-6 min-w-0 news-main">
                     <!-- Deep verdicts feed (all/pending/reviewed tabs render here) -->
                     <div id="news-feed-detailed" class="space-y-6">
                         <!-- Data goes here -->
@@ -147,7 +368,7 @@
 
                 <!-- Right sidebar: Trump Trade Signals
                      (Binary Risks moved to calendar.html "Coming Up", per UPCOMING_EVENTS_SCHEMA) -->
-                <div class="w-72 shrink-0 space-y-6" id="news-side-rail">
+                <div class="w-72 shrink-0 space-y-6 news-rail" id="news-side-rail">
                     <div class="space-y-3" id="trump-signals-section" style="display:none">
                         <div class="flex items-center gap-2">
                             <i data-lucide="landmark" class="w-4 h-4 text-blue-400"></i>

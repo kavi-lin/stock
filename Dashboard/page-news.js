@@ -59,6 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.querySelector(`[data-i18n="${k}"]`);
       if (el && o[k]) el.textContent = o[k];
     });
+
+    // V1.71.x — filter tab labels + search placeholder + reset button
+    const isZh = UI.currentLang === 'zh';
+    const tabLabels = isZh
+      ? { all: '全部', reviewed: '已審核 ✅', pending: '待審核 ⏳' }
+      : { all: 'All',  reviewed: 'Reviewed ✅', pending: 'Pending ⏳' };
+    document.querySelectorAll('.news-tab[data-i18n-tab]').forEach(b => {
+      const span = b.querySelector('[data-i18n-tab]');
+      if (span) span.textContent = tabLabels[span.dataset.i18nTab] || span.textContent;
+    });
+    const searchInput = document.getElementById('news-search');
+    if (searchInput) searchInput.placeholder = isZh ? '搜尋 ticker / 標題...' : 'Search ticker / headline...';
+    const resetBtn = document.getElementById('news-controls-reset');
+    if (resetBtn) resetBtn.textContent = isZh ? '重置' : 'Reset';
   }
 
   async function loadNews() {
@@ -171,6 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'glass-card p-5 hover:border-zinc-500/50 transition-all mb-4';
         card.dataset.reviewStatus = reviewStatus;
+        // V1.71.x — verdict for left-edge stripe + chip filter
+        card.dataset.verdict = (item.verdict || '').toLowerCase();
+        // Searchable key: headline + headline_zh + tickers + sectors (lowercased)
+        const tickers = Array.isArray(item.tickers_mentioned) ? item.tickers_mentioned.join(' ') : '';
+        const sectors = Array.isArray(item.affected_sectors) ? item.affected_sectors.join(' ') : '';
+        card.dataset.searchKey = `${item.headline||''} ${item.headline_zh||''} ${tickers} ${sectors}`.toLowerCase();
         card.innerHTML = `
           <!-- Header row -->
           <div class="flex items-start justify-between gap-3 mb-3">
@@ -318,32 +338,104 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Review Filter Tabs ───────────────────────────────────────
+  // ── Review Filter Tabs + Search + Verdict Chips (V1.71.x) ────
   let activeNewsFilter = 'all';
+  // Verdict chip state — restore from localStorage; default = all 4 active
+  const VERDICT_KEYS = ['bullish', 'bearish', 'binary', 'neutral'];
+  const verdictFilter = new Set(
+    (() => {
+      try {
+        const v = JSON.parse(localStorage.getItem('news_verdicts') || 'null');
+        return Array.isArray(v) ? v : VERDICT_KEYS;
+      } catch { return VERDICT_KEYS; }
+    })()
+  );
+  let searchTerm = (localStorage.getItem('news_search') || '').toLowerCase();
 
   function applyNewsFilter() {
     const deepFeed   = document.getElementById('news-feed-detailed');
     const triageFeed = document.getElementById('news-triage-feed');
     if (activeNewsFilter === 'triage') {
       // Switch to triage view: hide deep feed, show triage feed.
-      // Force re-render every activation so freshness "Xm/Xh ago" stays accurate
-      // (else a tab left open would show stale relative times).
       if (deepFeed)   deepFeed.classList.add('hidden');
       if (triageFeed) {
         triageFeed.classList.remove('hidden');
         renderTriageFeed();
       }
+      updateMatchCount(0, 0);
       return;
     }
     // Default: deep feed visible, triage feed hidden
     if (deepFeed)   deepFeed.classList.remove('hidden');
     if (triageFeed) triageFeed.classList.add('hidden');
+
     const cards = document.querySelectorAll('#news-feed-detailed > .glass-card');
+    let shown = 0;
     cards.forEach(c => {
       const st = c.dataset.reviewStatus || 'reviewed';
-      if (activeNewsFilter === 'all') c.style.display = '';
-      else c.style.display = (st === activeNewsFilter) ? '' : 'none';
+      const v = (c.dataset.verdict || 'neutral').toLowerCase();
+      const sk = c.dataset.searchKey || '';
+
+      const reviewOK = activeNewsFilter === 'all' || activeNewsFilter === st;
+      const verdictOK = verdictFilter.has(v) || (!VERDICT_KEYS.includes(v) && verdictFilter.has('neutral'));
+      const searchOK = !searchTerm || sk.includes(searchTerm);
+
+      if (reviewOK && verdictOK && searchOK) {
+        c.style.display = '';
+        shown++;
+      } else {
+        c.style.display = 'none';
+      }
     });
+    updateMatchCount(shown, cards.length);
+  }
+
+  function updateMatchCount(now, total) {
+    const nowEl = document.getElementById('news-match-now');
+    const totEl = document.getElementById('news-match-total');
+    if (nowEl) nowEl.textContent = now;
+    if (totEl) totEl.textContent = total;
+  }
+
+  function updateTabCounts() {
+    const cards = document.querySelectorAll('#news-feed-detailed > .glass-card');
+    let total = 0, reviewed = 0, pending = 0;
+    cards.forEach(c => {
+      total++;
+      const st = c.dataset.reviewStatus || 'reviewed';
+      if (st === 'reviewed') reviewed++;
+      else if (st === 'pending') pending++;
+    });
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('nf-all-count', total);
+    set('nf-reviewed-count', reviewed);
+    set('nf-pending-count', pending);
+
+    // Triage count from data.shallow_news (best-effort)
+    if (window.DataStore?._cache?.shallow_news) {
+      set('nf-triage-count', window.DataStore._cache.shallow_news.length);
+    }
+  }
+
+  function refreshActiveTabClass() {
+    document.querySelectorAll('.news-tab[data-filter]').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === activeNewsFilter);
+    });
+  }
+
+  function refreshVerdictChips() {
+    document.querySelectorAll('.news-vchip[data-verdict]').forEach(b => {
+      b.classList.toggle('active', verdictFilter.has(b.dataset.verdict));
+    });
+  }
+
+  // Right-rail collapse: when Trump signals empty, mark 2col data attr
+  function updateRailVisibility() {
+    const wrap = document.querySelector('.news-2col');
+    if (!wrap) return;
+    const trumpSection = document.getElementById('trump-signals-section');
+    const trumpVisible = trumpSection && trumpSection.style.display !== 'none';
+    wrap.dataset.rail = trumpVisible ? 'has' : 'empty';
   }
 
   // ── Triage Feed (Stage-1 shallow verdicts from data.shallow_news) ─────
@@ -566,26 +658,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ── Filter wiring (V1.71.x: tabs + search + verdict chips) ────
   document.getElementById('news-filter-tabs')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-filter]');
     if (!btn) return;
     activeNewsFilter = btn.dataset.filter;
-    document.querySelectorAll('.news-filter-tab').forEach(b => {
-      const on = b.dataset.filter === activeNewsFilter;
-      b.className = `news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-        on ? 'bg-emerald-500 text-black border-emerald-500'
-           : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400'}`;
+    refreshActiveTabClass();
+    applyNewsFilter();
+  });
+  refreshActiveTabClass();
+
+  // Search input — debounced to 120ms
+  const searchInput = document.getElementById('news-search');
+  if (searchInput) {
+    searchInput.value = searchTerm;
+    let _searchT;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(_searchT);
+      _searchT = setTimeout(() => {
+        searchTerm = (searchInput.value || '').toLowerCase().trim();
+        localStorage.setItem('news_search', searchTerm);
+        applyNewsFilter();
+      }, 120);
     });
+  }
+  document.getElementById('news-search-clear')?.addEventListener('click', () => {
+    if (!searchInput) return;
+    searchInput.value = '';
+    searchTerm = '';
+    localStorage.removeItem('news_search');
+    applyNewsFilter();
+    searchInput.focus();
+  });
+
+  // Verdict chip toggles
+  document.querySelectorAll('.news-vchip[data-verdict]').forEach(b => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.verdict;
+      if (verdictFilter.has(v)) verdictFilter.delete(v);
+      else verdictFilter.add(v);
+      localStorage.setItem('news_verdicts', JSON.stringify([...verdictFilter]));
+      refreshVerdictChips();
+      applyNewsFilter();
+    });
+  });
+  refreshVerdictChips();
+
+  // Reset button
+  document.getElementById('news-controls-reset')?.addEventListener('click', () => {
+    activeNewsFilter = 'all';
+    VERDICT_KEYS.forEach(k => verdictFilter.add(k));
+    searchTerm = '';
+    if (searchInput) searchInput.value = '';
+    localStorage.removeItem('news_search');
+    localStorage.removeItem('news_verdicts');
+    refreshActiveTabClass();
+    refreshVerdictChips();
     applyNewsFilter();
   });
 
-  // Init tab styles
-  document.querySelectorAll('.news-filter-tab').forEach(b => {
-    const on = b.dataset.filter === activeNewsFilter;
-    b.className = `news-filter-tab px-4 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-      on ? 'bg-emerald-500 text-black border-emerald-500'
-         : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400'}`;
+  // After every render, refresh tab counts + match count + rail visibility
+  // Hook into a MutationObserver on the deep feed so any re-render updates counts.
+  const _newsFeedObserver = new MutationObserver(() => {
+    updateTabCounts();
+    updateRailVisibility();
+    applyNewsFilter();  // re-apply filter to newly added cards
   });
+  const _deepFeedEl = document.getElementById('news-feed-detailed');
+  if (_deepFeedEl) _newsFeedObserver.observe(_deepFeedEl, { childList: true });
 
   window.copyReviewPrompt = async function(btnEl, headline) {
     const isZh = UI.currentLang === 'zh';

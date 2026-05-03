@@ -1,0 +1,365 @@
+{
+  "as_of": "2026-05-01T17:21:59.836902Z",
+  "ticker": "AAPL",
+  "probes": {
+    "financial-scores": {
+      "status": 200,
+      "count": 1,
+      "sample_keys": [
+        "altmanZScore",
+        "ebit",
+        "marketCap",
+        "piotroskiScore",
+        "reportedCurrency",
+        "retainedEarnings",
+        "revenue",
+        "symbol",
+        "totalAssets",
+        "totalLiabilities",
+        "workingCapital"
+      ],
+      "label": "altman_z + piotroski_f",
+      "class": "P0"
+    },
+    "owner-earnings": {
+      "status": 200,
+      "count": 5,
+      "sample_keys": [
+        "averagePPE",
+        "date",
+        "fiscalYear",
+        "growthCapex",
+        "maintenanceCapex",
+        "ownersEarnings",
+        "ownersEarningsPerShare",
+        "period",
+        "reportedCurrency",
+        "symbol"
+      ],
+      "label": "buffett owner earnings",
+      "class": "P0"
+    },
+    "insider-trading/statistics": {
+      "status": 200,
+      "count": 93,
+      "sample_keys": [
+        "acquiredDisposedRatio",
+        "acquiredTransactions",
+        "averageAcquired",
+        "averageDisposed",
+        "cik",
+        "disposedTransactions",
+        "quarter",
+        "symbol",
+        "totalAcquired",
+        "totalDisposed",
+        "totalPurchases",
+        "totalSales",
+        "year"
+      ],
+      "label": "insider quarterly stats",
+      "class": "P1"
+    },
+    "institutional-ownership/symbol-positions-summary": {
+      "status": 200,
+      "count": 1,
+      "sample_keys": [
+        "cik",
+        "closedPositions",
+        "closedPositionsChange",
+        "date",
+        "increasedPositions",
+        "increasedPositionsChange",
+        "investorsHolding",
+        "investorsHoldingChange",
+        "lastClosedPositions",
+        "lastIncreasedPositions",
+        "lastInvestorsHolding",
+        "lastNewPositions",
+        "lastNumberOf13Fshares",
+        "lastOwnershipPercent",
+        "lastPutCallRatio",
+        "lastReducedPositions",
+        "lastTotalCalls",
+        "lastTotalInvested",
+        "lastTotalPuts",
+        "newPositions"
+      ],
+      "label": "institutional QoQ",
+      "class": "P2"
+    },
+    "senate-trades": {
+      "status": 200,
+      "count": 274,
+      "sample_keys": [
+        "amount",
+        "assetDescription",
+        "assetType",
+        "capitalGainsOver200USD",
+        "comment",
+        "disclosureDate",
+        "district",
+        "firstName",
+        "lastName",
+        "link",
+        "office",
+        "owner",
+        "symbol",
+        "transactionDate",
+        "type"
+      ],
+      "label": "senate trades",
+      "class": "P3"
+    },
+    "house-trades": {
+      "status": 200,
+      "count": 491,
+      "sample_keys": [
+        "amount",
+        "assetDescription",
+        "assetType",
+        "capitalGainsOver200USD",
+        "comment",
+        "disclosureDate",
+        "district",
+        "firstName",
+        "lastName",
+        "link",
+        "office",
+        "owner",
+        "symbol",
+        "transactionDate",
+        "type"
+      ],
+      "label": "house trades",
+      "class": "P3"
+    },
+    "mergers-acquisitions-latest": {
+      "status": 200,
+      "count": 5,
+      "sample_keys": [
+        "acceptedDate",
+        "cik",
+        "companyName",
+        "link",
+        "symbol",
+        "targetedCik",
+        "targetedCompanyName",
+        "targetedSymbol",
+        "transactionDate"
+      ],
+      "label": "M&A latest",
+      "class": "P3"
+    },
+    "sec-filings-8k": {
+      "status": 200,
+      "count": 5,
+      "sample_keys": [
+        "acceptedDate",
+        "cik",
+        "filingDate",
+        "finalLink",
+        "formType",
+        "hasFinancials",
+        "link",
+        "symbol"
+      ],
+      "label": "8-K filings",
+      "class": "P2"
+    },
+    "news/stock": {
+      "status": 200,
+      "count": 5,
+      "sample_keys": [
+        "image",
+        "publishedDate",
+        "publisher",
+        "site",
+        "symbol",
+        "text",
+        "title",
+        "url"
+      ],
+      "label": "FMP stock news",
+      "class": "P2"
+    },
+    "news/press-releases": {
+      "status": 200,
+      "count": 5,
+      "sample_keys": [
+        "image",
+        "publishedDate",
+        "publisher",
+        "site",
+        "symbol",
+        "text",
+        "title",
+        "url"
+      ],
+      "label": "press releases",
+      "class": "P2"
+    },
+    "industry-performance-snapshot": {
+      "status": 200,
+      "count": 128,
+      "sample_keys": [
+        "averageChange",
+        "date",
+        "exchange",
+        "industry"
+      ],
+      "label": "industry perf snapshot",
+      "class": "P1"
+    },
+    "historical-industry-performance": {
+      "status": 200,
+      "count": 0,
+      "label": "industry perf historical",
+      "class": "P1"
+    },
+    "sector-performance-snapshot": {
+      "status": 200,
+      "count": 11,
+      "sample_keys": [
+        "averageChange",
+        "date",
+        "exchange",
+        "sector"
+      ],
+      "label": "sector perf snapshot",
+      "class": "P1"
+    },
+    "historical-chart/1hour": {
+      "status": 200,
+      "count": 432,
+      "sample_keys": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "label": "intraday 1h bars",
+      "class": "P4"
+    },
+    "esg-ratings": {
+      "status": 200,
+      "count": 32,
+      "sample_keys": [
+        "ESGRiskRating",
+        "cik",
+        "companyName",
+        "fiscalYear",
+        "industry",
+        "industryRank",
+        "symbol"
+      ],
+      "label": "ESG rating",
+      "class": "P4"
+    },
+    "esg-disclosures": {
+      "status": 200,
+      "count": 129,
+      "sample_keys": [
+        "ESGScore",
+        "acceptedDate",
+        "cik",
+        "companyName",
+        "date",
+        "environmentalScore",
+        "formType",
+        "governanceScore",
+        "socialScore",
+        "symbol",
+        "url"
+      ],
+      "label": "ESG disclosures",
+      "class": "P4"
+    },
+    "analyst-estimates": {
+      "status": 200,
+      "count": 3,
+      "sample_keys": [
+        "date",
+        "ebitAvg",
+        "ebitHigh",
+        "ebitLow",
+        "ebitdaAvg",
+        "ebitdaHigh",
+        "ebitdaLow",
+        "epsAvg",
+        "epsHigh",
+        "epsLow",
+        "netIncomeAvg",
+        "netIncomeHigh",
+        "netIncomeLow",
+        "numAnalystsEps",
+        "numAnalystsRevenue",
+        "revenueAvg",
+        "revenueHigh",
+        "revenueLow",
+        "sgaExpenseAvg",
+        "sgaExpenseHigh"
+      ],
+      "label": "analyst estimates annual",
+      "class": "P4"
+    },
+    "commitment-of-traders-analysis": {
+      "status": 200,
+      "count": 536,
+      "sample_keys": [
+        "changeInNetPosition",
+        "currentLongMarketSituation",
+        "currentShortMarketSituation",
+        "date",
+        "exchange",
+        "marketSentiment",
+        "marketSituation",
+        "name",
+        "netPostion",
+        "previousLongMarketSituation",
+        "previousMarketSituation",
+        "previousNetPosition",
+        "previousShortMarketSituation",
+        "reversalTrend",
+        "sector",
+        "symbol"
+      ],
+      "label": "COT analysis",
+      "class": "P4"
+    }
+  },
+  "_summary": {
+    "pass": [
+      "financial-scores",
+      "owner-earnings",
+      "insider-trading/statistics",
+      "institutional-ownership/symbol-positions-summary",
+      "senate-trades",
+      "house-trades",
+      "mergers-acquisitions-latest",
+      "sec-filings-8k",
+      "news/stock",
+      "news/press-releases",
+      "industry-performance-snapshot",
+      "sector-performance-snapshot",
+      "historical-chart/1hour",
+      "esg-ratings",
+      "esg-disclosures",
+      "analyst-estimates",
+      "commitment-of-traders-analysis"
+    ],
+    "fail": [
+      {
+        "path": "historical-industry-performance",
+        "class": "P1",
+        "status": 200,
+        "count": 0,
+        "err": ""
+      }
+    ],
+    "pass_count": 17,
+    "fail_count": 1
+  }
+}

@@ -44,7 +44,32 @@ NEWS_LOGS     = os.path.join(BASE_DIR, 'news', 'news_logs')
 REPORTS_DIR   = os.path.join(BASE_DIR, 'reports')
 POSITIONS_FILE = os.path.join(BASE_DIR, 'positions.json')
 MOMENTUM_CACHE = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'cache')
+
+# V2.1: sector RS rank map (filled by ingest_momentum_screen())
+_SECTOR_RS_RANK: dict = {}
 MOMENTUM_JOURNAL = os.path.join(BASE_DIR, 'skills', 'momentum-monitor', 'journal')
+
+SHARED_CACHE_DIR = os.path.join(BASE_DIR, 'skills', '_shared', 'cache')
+
+
+def _read_logo_url(ticker):
+    """Return FMP image CDN URL for ticker. Frontend handles 404 via onerror→monogram fallback.
+    Cached profile.image takes precedence when present (handles edge tickers like BRK-B with custom paths)."""
+    if not ticker or ticker == 'UNKNOWN':
+        return None
+    p = os.path.join(SHARED_CACHE_DIR, f"{ticker}_profile.json")
+    if os.path.exists(p):
+        try:
+            with open(p, 'r') as f:
+                prof = json.load(f)
+            if isinstance(prof, dict):
+                url = prof.get('image')
+                if url and isinstance(url, str):
+                    return url
+        except Exception:
+            pass
+    # Synthesize FMP CDN URL — same pattern that get_profile() returns
+    return f"https://images.financialmodelingprep.com/symbol/{ticker}.png"
 FRED_CACHE     = os.path.join(BASE_DIR, 'skills', 'fred-macro', 'cache', 'fred_latest.json')
 EVENTS_ARCHIVE_FILE = os.path.join(BASE_DIR, 'events_archive.json')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
@@ -247,20 +272,47 @@ def extract_breadth_from_analyzer(raw):
         cycle_phase = "Mid"
 
     # ── warning_flags from quantitative triggers ──
+    # Two parallel outputs:
+    #   warning_flags     : legacy string[] consumed by page-sector.js
+    #   warning_flags_v2  : richer object[] consumed by index.html (severity + metric_value)
     warning_flags = []
-    if comps.get("bearish_signal", {}).get("signal_active"):
+    warning_flags_v2 = []
+
+    def _add_v2(key, severity, metric_value):
+        warning_flags_v2.append({"key": key, "severity": severity, "metric_value": metric_value})
+
+    bear = comps.get("bearish_signal", {})
+    if bear.get("signal_active"):
         warning_flags.append("Bearish_Signal_Active")
-    if comps.get("ma_crossover", {}).get("gap", 0) < 0:
+        _add_v2("Bearish_Signal_Active", "critical", {
+            "bearish_score": bear.get("score"),
+            "signal":        bear.get("signal", ""),
+        })
+
+    gap = comps.get("ma_crossover", {}).get("gap")
+    if gap is not None and gap < 0:
         warning_flags.append("Below_200MA")
-    if comps.get("historical_percentile", {}).get("percentile_rank", 50) < 30:
+        _add_v2("Below_200MA", "warning", {"gap_pct": round(gap * 100, 2)})
+
+    pct = comps.get("historical_percentile", {}).get("percentile_rank")
+    if pct is not None and pct < 30:
         warning_flags.append("Low_Historical_Percentile")
+        _add_v2("Low_Historical_Percentile", "warning", {"percentile": round(pct, 1)})
+
     if comps.get("divergence", {}).get("early_warning"):
         warning_flags.append("Early_Warning_Divergence")
+        _add_v2("Early_Warning_Divergence", "warning", {
+            "signal": comps.get("divergence", {}).get("signal", "")
+        })
+
     zone = comp.get("zone", "")
+    score_round = round(comp.get("composite_score", 0) or 0, 1)
     if zone == "Critical":
         warning_flags.append("Critical_Zone")
+        _add_v2("Critical_Zone", "critical", {"breadth_score": score_round})
     elif zone == "Weakening":
         warning_flags.append("Weakening_Zone")
+        _add_v2("Weakening_Zone", "caution", {"breadth_score": score_round})
 
     # ── backward-compat 4-field breadth_components ──
     components_compat = {
@@ -304,6 +356,7 @@ def extract_breadth_from_analyzer(raw):
         "current_200ma":     comps.get("breadth_level_trend", {}).get("current_200ma"),
         "cycle_phase":       cycle_phase,
         "warning_flags":     warning_flags,
+        "warning_flags_v2":  warning_flags_v2,
         "regime_confidence": regime_confidence,
         "trend_direction":   trend.get("direction", "stable"),
         "trend_entries":     trend.get("entries", []),
@@ -1068,6 +1121,14 @@ def aggregate_upcoming_events(s_data):
 
     out.sort(key=lambda x: (x["date"], -_impact_rank(x["impact"]), x["title"]))
 
+    # Inject ticker logo URL for earnings events (cache-only, fails open).
+    # Calendar UI overlays logo + verdict ring; missing → frontend uses monogram fallback.
+    for ev in out:
+        if ev.get("category") == "earnings":
+            tks = ev.get("tickers") or []
+            if tks:
+                ev["profile_image"] = _read_logo_url(tks[0])
+
     # Persist merged archive — past events stay visible on the calendar after their date passes
     _save_events_archive(out)
     return out
@@ -1208,6 +1269,33 @@ def extract_audit_history(positions_by_ticker=None):
                 macro_alignment      = meta.get("macro_alignment")          # ALIGNED | CONTRARIAN
                 staged_split         = meta.get("staged_split")             # {aggressive_pct, conservative_pct}
                 binary_class         = meta.get("binary_classification")    # positive|unknown|negative|none
+                # Version-specific fields for version-aware decision card UI
+                protocol_version     = item.get("session_export_version") or "legacy"
+                fragility_label      = meta.get("fragility_label")          # ROBUST|MODERATE|FRAGILE
+                # V4.7+ Red Team
+                red_team_verdict     = meta.get("red_team_verdict")         # NO_VIABLE_COUNTER|MODERATE_COUNTER|STRONG_COUNTER
+                red_team_thesis      = meta.get("red_team_counter_thesis")
+                red_team_kill        = meta.get("red_team_kill_conditions") or []
+                red_team_failed      = meta.get("red_team_execution_failed", False)
+                # V4.8+ Phase 2 fanout & burry override
+                phase2_fanout_mode   = meta.get("phase2_fanout_mode")       # PARALLEL_SUBAGENT|PARTIAL_FALLBACK|FULL_FALLBACK
+                degraded_analysts    = meta.get("degraded_analysts") or []
+                burry_override       = meta.get("burry_override_active", False)
+                burry_recheck        = meta.get("burry_override_recheck_date")
+                ftd_timeline_gate    = meta.get("ftd_timeline_gate")        # {applied, days_since_ftd, stage, multiplier, ...}
+                # V5.0 Valuation lane + fair value summary
+                valuation_lane       = meta.get("valuation_lane")           # {signal, score, confidence, weighted_fair_value, vs_current_pct}
+                fair_value_summary   = meta.get("fair_value_summary")       # {anchors, weights_used, weighted_fair_value, verdict_band, confidence, ...}
+                # V2.10.0 Det shadow (post-processor) — polarization label + agreement flags
+                det_shadow           = meta.get("det_shadow")               # {signal_polarization, valuation_score_det, val_agreement, red_team_verdict_det, red_team_agreement, ...}
+                # V2.13.0 — Phase 2 lane outputs (Technical / Fundamentals / News) + Phase 3 PM 整合層
+                technical_lane       = meta.get("technical_lane")
+                fundamentals_lane    = meta.get("fundamentals_lane")
+                news_lane            = meta.get("news_lane")
+                institutional_lens   = meta.get("institutional_lens")
+                decision_confidence_pct = meta.get("decision_confidence_pct")
+                scenario_odds        = meta.get("scenario_odds")
+                action_label         = meta.get("action_label")
 
                 # Join active positions (open) for this ticker
                 active_positions = positions_by_ticker.get(ticker, [])
@@ -1246,6 +1334,7 @@ def extract_audit_history(positions_by_ticker=None):
                     "score":            round(float(score), 2) if score is not None else 0.0,
                     "time":             date_raw,
                     "report_url":       report_path,
+                    "profile_image":    _read_logo_url(ticker),
                     "performance":      perf,
                     "targets":          {
                         "tp": tp, "sl": sl, "watch": watch,
@@ -1267,6 +1356,33 @@ def extract_audit_history(positions_by_ticker=None):
                     "macro_alignment":  macro_alignment,
                     "staged_split":     staged_split,
                     "binary_class":     binary_class,
+                    "fragility_label":  fragility_label,
+                    # Protocol version (drives version-aware card UI)
+                    "protocol_version": protocol_version,
+                    # V4.7+ Red Team
+                    "red_team_verdict": red_team_verdict,
+                    "red_team_thesis":  red_team_thesis,
+                    "red_team_kill":    red_team_kill,
+                    "red_team_failed":  red_team_failed,
+                    # V4.8+ Phase 2 fanout / burry override / ftd gate
+                    "phase2_fanout_mode": phase2_fanout_mode,
+                    "degraded_analysts":  degraded_analysts,
+                    "burry_override":     burry_override,
+                    "burry_recheck":      burry_recheck,
+                    "ftd_timeline_gate":  ftd_timeline_gate,
+                    # V5.0 Valuation lane / fair value summary
+                    "valuation_lane":     valuation_lane,
+                    "fair_value_summary": fair_value_summary,
+                    # V2.10.0 Det shadow + polarization
+                    "det_shadow":         det_shadow,
+                    # V2.13.0 lane outputs + PM integration fields
+                    "technical_lane":     technical_lane,
+                    "fundamentals_lane":  fundamentals_lane,
+                    "news_lane":          news_lane,
+                    "institutional_lens": institutional_lens,
+                    "decision_confidence_pct": decision_confidence_pct,
+                    "scenario_odds":      scenario_odds,
+                    "action_label":       action_label,
                     # Price fields (current = yfinance live; analysis = snapshot at decision time)
                     "current_price":    live_prices.get(ticker),
                     "analysis_price":   meta.get("analysis_price"),
@@ -1295,6 +1411,7 @@ def extract_audit_history(positions_by_ticker=None):
                         "score":        0.0,
                         "time":         date_fmt,
                         "report_url":   os.path.join('reports', fname),
+                        "profile_image": _read_logo_url(t_part),
                         "on_watchlist": False,
                         "key_risks":    [],
                     })
@@ -1424,7 +1541,13 @@ def extract_earnings_analyses():
 
     out = []
     seen_tickers = set()
-    files = sorted(glob.glob(os.path.join(cache_dir, "*.json")), reverse=True)
+    # V1.73 — exclude *.infographic.json sibling files (V1.0 narrative layer);
+    # we only want the V1.0 data-layer cache here.
+    files = sorted(
+        (p for p in glob.glob(os.path.join(cache_dir, "*.json"))
+         if not p.endswith(".infographic.json")),
+        reverse=True,
+    )
     for path in files:
         fname = os.path.basename(path)
         # Format: <TICKER>_<YYYY-MM-DD>.json
@@ -1464,11 +1587,28 @@ def extract_earnings_analyses():
                 "gross": q.get("gross"),
             })
 
+        # V1.73 — flag indicates whether sibling infographic.json exists
+        # (Dashboard can show "Infographic ready" badge on grid cards)
+        infographic_path = path.replace(".json", ".infographic.json")
+        has_infographic = os.path.exists(infographic_path)
+        # V2.8.4 — also lift fiscal_label out of infographic.json so listing card
+        # can show "Q4 FY26 · 2026-01-25" instead of bare ISO date.
+        fiscal_label = None
+        if has_infographic:
+            try:
+                with open(infographic_path, "r", encoding="utf-8") as ifg:
+                    fiscal_label = json.load(ifg).get("fiscal_label")
+            except Exception:
+                fiscal_label = None
+
         out.append({
             "ticker":             ticker,
             "last_earnings_date": d.get("last_earnings_date"),
             "as_of_date":         run_date,
-            "next_earnings_est":  d.get("next_earnings_est"),
+            "next_earnings_est":              d.get("next_earnings_est"),
+            "next_earnings_source":           d.get("next_earnings_source"),
+            "next_earnings_eps_estimate":     d.get("next_earnings_eps_estimate"),
+            "next_earnings_revenue_estimate": d.get("next_earnings_revenue_estimate"),
             "composite_score":    d.get("composite_score"),
             "verdict":            d.get("verdict"),
             "quality_flags":      d.get("quality_flags") or [],
@@ -1482,6 +1622,10 @@ def extract_earnings_analyses():
             "price":              (d.get("snapshot") or {}).get("price"),
             # V1.71.1 — sparkline data (gross margin only, ~16 floats per ticker)
             "margins_8q":         margins_8q_slim,
+            # V1.73 — infographic page availability
+            "has_infographic":    has_infographic,
+            # V2.8.4 — fiscal label from infographic ("Q4 FY26" etc.)
+            "fiscal_label":       fiscal_label,
         })
 
     # Sort newest analysis first
@@ -1716,6 +1860,49 @@ def extract_shallow_news():
 # MAIN
 # ─────────────────────────────────────────────
 
+def _load_sector_rs_rank():
+    """Read latest sector_intel.json → {sector_name (CSV style): rank} 1-indexed by composite_score desc.
+
+    sector_intel uses internal names (Technology, Communication, Healthcare, ...) while
+    momentum CSV uses GICS canonical names (Information Technology, Communication Services, ...).
+    We expand both spellings into the rank map so lookup hits regardless of source."""
+    # GICS canonical → sector_intel internal name
+    INTEL_TO_GICS = {
+        "Technology":             "Information Technology",
+        "Communication":          "Communication Services",
+        "Healthcare":             "Health Care",
+        "Real_Estate":            "Real Estate",
+        "Consumer_Discretionary": "Consumer Discretionary",
+        "Consumer_Staples":       "Consumer Staples",
+    }
+    sector_logs = os.path.join(BASE_DIR, "sector", "sector_logs")
+    if not os.path.isdir(sector_logs):
+        return {}
+    files = sorted(f for f in os.listdir(sector_logs) if f.endswith("_sector_intel.json"))
+    if not files:
+        return {}
+    latest = os.path.join(sector_logs, files[-1])
+    try:
+        with open(latest, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        sectors = data.get("sectors") or []
+        if not isinstance(sectors, list):
+            return {}
+        sectors_sorted = sorted(sectors, key=lambda s: s.get("composite_score") or 0, reverse=True)
+        out = {}
+        for i, s in enumerate(sectors_sorted):
+            name = s.get("name")
+            if not name:
+                continue
+            rank = i + 1
+            out[name] = rank   # internal name (Technology)
+            if name in INTEL_TO_GICS:
+                out[INTEL_TO_GICS[name]] = rank   # GICS canonical (Information Technology)
+        return out
+    except Exception:
+        return {}
+
+
 def ingest_momentum_screen():
     """
     Read the latest momentum screen CSV + up to 30 days of history + journal stats.
@@ -1727,6 +1914,10 @@ def ingest_momentum_screen():
     out = {"status": "no_data"}
     if not os.path.isdir(MOMENTUM_CACHE):
         return out
+
+    # V2.1: load sector RS rank once per ingest call (reused inside _build_row)
+    global _SECTOR_RS_RANK
+    _SECTOR_RS_RANK = _load_sector_rs_rank()
 
     csv_files = sorted(glob.glob(os.path.join(MOMENTUM_CACHE, "screen_*.csv")),
                        key=os.path.getmtime)
@@ -1804,6 +1995,23 @@ def ingest_momentum_screen():
             "macd_bearish_cross": row.get("macd_bearish_cross") in ("True", "1", "true"),
             "short_pct_float": _safe_float(row.get("short_pct_float")),
             "short_interpretation": row.get("short_interpretation"),
+            # V2.1 leader-finder fields (NHP / RS / VCP / Vol pattern / EPS / DTC)
+            "nhp_pct":           _safe_float(row.get("nhp_pct")),
+            "is_new_high":       row.get("is_new_high") in ("True", "1", "true"),
+            "weeks_since_high":  _safe_float(row.get("weeks_since_high")),
+            "rs_3m_pct":         _safe_float(row.get("rs_3m_pct")),
+            "rs_6m_pct":         _safe_float(row.get("rs_6m_pct")),
+            "rs_rating":         _safe_float(row.get("rs_rating")),
+            "vcp_ratio":         _safe_float(row.get("vcp_ratio")),
+            "vcp_compressed":    row.get("vcp_compressed") in ("True", "1", "true"),
+            "vol_5d_vs_20d":     _safe_float(row.get("vol_5d_vs_20d")),
+            "vol_today_vs_20d":  _safe_float(row.get("vol_today_vs_20d")),
+            "vol_dryup_spike":   row.get("vol_dryup_spike") in ("True", "1", "true"),
+            "eps_yoy_pct":       _safe_float(row.get("eps_yoy_pct")),
+            "eps_acceleration":  row.get("eps_acceleration"),
+            "days_to_cover":     _safe_float(row.get("days_to_cover")),
+            "dtc_tier":          row.get("dtc_tier"),
+            "sector_rs_rank":    _SECTOR_RS_RANK.get(row.get("sector")) if row.get("sector") else None,
             "signals":  row.get("signals", "").split("|") if row.get("signals") else [],
             "warnings": row.get("warnings", "").split("|") if row.get("warnings") else [],
         }
@@ -1873,6 +2081,24 @@ def ingest_momentum_screen():
         except Exception as e:
             print(f"[WARN] momentum stats: {e}")
 
+    # Read last line of journal.jsonl to expose the most recent snap_date.
+    # Used by the frontend to show a stale banner when today's journal hasn't run.
+    last_snap_date = None
+    journal_file = os.path.join(MOMENTUM_JOURNAL, "journal.jsonl")
+    if os.path.exists(journal_file):
+        try:
+            fsize = os.path.getsize(journal_file)
+            with open(journal_file, "rb") as fp:
+                fp.seek(max(0, fsize - 4096))
+                tail = fp.read().decode("utf-8", errors="ignore")
+            for line in reversed(tail.splitlines()):
+                line = line.strip()
+                if line:
+                    last_snap_date = json.loads(line).get("snap_date")
+                    break
+        except Exception as e:
+            print(f"[WARN] journal tail read: {e}")
+
     out = {
         "status":       "success",
         "snap_id":      snap_id,
@@ -1884,8 +2110,9 @@ def ingest_momentum_screen():
         "rows":         latest_rows,
         "history_by_ticker": history_by_ticker,
         "journal": {
-            "total_entries": journal_total,
-            "stats":         stats,
+            "total_entries":  journal_total,
+            "stats":          stats,
+            "last_snap_date": last_snap_date,
         },
         "snapshot_count": len(csv_files),
     }
@@ -1990,6 +2217,7 @@ def run_bridge():
         data["market"]["breadth_components"] = analyzer_breadth["components"]
         data["market"]["uptrend_ratio"]      = analyzer_breadth["uptrend_ratio"]
         data["market"]["warning_flags"]      = analyzer_breadth["warning_flags"]
+        data["market"]["warning_flags_v2"]   = analyzer_breadth["warning_flags_v2"]
         data["market"]["cycle_phase"]        = analyzer_breadth["cycle_phase"]
         data["market"]["regime_confidence"]  = analyzer_breadth["regime_confidence"]
         data["market"]["exposure_ceiling"]   = analyzer_breadth["exposure_ceiling"]

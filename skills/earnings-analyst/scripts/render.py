@@ -251,6 +251,8 @@ def render_valuation(d):
         f"PE TTM: {fmt_num(ttm.get('priceToEarningsRatioTTM'))}  ·  "
         f"PB TTM: {fmt_num(ttm.get('priceToBookRatioTTM'))}",
         f"- EV/EBITDA TTM: {fmt_num(km.get('evToEBITDATTM'))}  ·  "
+        f"EV/FCF TTM: {fmt_num(km.get('evToFreeCashFlowTTM'))}  ·  "
+        f"EV/Sales TTM: {fmt_num(km.get('evToSalesTTM'))}  ·  "
         f"P/FCF TTM: {fmt_num(ttm.get('priceToFreeCashFlowRatioTTM'))}  ·  "
         f"Net Debt/EBITDA TTM: {fmt_num(km.get('netDebtToEBITDATTM'))}",
         f"- **DCF Intrinsic**: {fmt_money(val.get('dcf_intrinsic'))}  ·  "

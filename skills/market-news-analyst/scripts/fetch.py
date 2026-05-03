@@ -94,10 +94,13 @@ def _finviz_analyst_actions(ticker: str, since: datetime):
         d = r.get("Date")
         if d is None:
             continue
-        if hasattr(d, "tz_localize") and d.tz is None:
-            d = d.tz_localize(_UTC)
-        elif hasattr(d, "replace") and getattr(d, "tzinfo", None) is None:
-            d = d.replace(tzinfo=_UTC)
+        try:
+            if hasattr(d, "tz_localize") and d.tz is None:
+                d = d.tz_localize(_UTC)
+            elif isinstance(d, datetime) and d.tzinfo is None:
+                d = d.replace(tzinfo=_UTC)
+        except Exception:
+            pass
         try:
             if d.to_pydatetime() < since if hasattr(d, "to_pydatetime") else d < since:
                 continue
@@ -281,6 +284,95 @@ def _fmp_grades_news(ticker: str, api_key: str, since: datetime):
     return rows
 
 
+def _fmp_sec_8k_filings(ticker: str, api_key: str, since: datetime, limit: int = 50):
+    """FMP /stable/sec-filings-search/symbol filtered to 8-K — material event
+    filings (M&A, leadership changes, restructuring) supplementing
+    sec-filings-financials (10-K/Q only).
+    """
+    if not api_key:
+        return []
+    data = _fmp_get(
+        "sec-filings-search/symbol",
+        api_key,
+        {"symbol": ticker,
+         "from": since.date().isoformat(),
+         "to":   datetime.now(_UTC).date().isoformat(),
+         "limit": limit},
+    )
+    if not isinstance(data, list):
+        return []
+    out = []
+    for f in data:
+        if f.get("formType") != "8-K":
+            continue
+        out.append({
+            "filing_date":  f.get("filingDate"),
+            "accepted_date": f.get("acceptedDate"),
+            "form_type":    f.get("formType"),
+            "url":          f.get("finalLink") or f.get("link"),
+            "_provider":    "fmp_sec_8k",
+        })
+    return out
+
+
+def _fmp_news_stock(ticker: str, api_key: str, since: datetime, limit: int = 30):
+    """FMP /stable/news/stock — structured ticker-tagged news (v1.82).
+    Replaces finviz HTML scrape as PRIMARY headline source; finviz/yf/finnhub
+    remain in 4-way dedup for coverage.
+    Fields: symbol, publishedDate, publisher, title, site, text, url, image.
+    """
+    if not api_key:
+        return []
+    data = _fmp_get("news/stock", api_key, {"symbols": ticker, "limit": limit})
+    if not isinstance(data, list):
+        return []
+    out = []
+    for it in data:
+        try:
+            pd = it.get("publishedDate")
+            ts = datetime.strptime(pd, "%Y-%m-%d %H:%M:%S").replace(tzinfo=_UTC) if pd else None
+        except Exception:
+            ts = None
+        if ts and ts < since:
+            continue
+        out.append({
+            "date":   pd,
+            "title":  it.get("title"),
+            "source": it.get("site") or it.get("publisher"),
+            "url":    it.get("url"),
+            "summary": (it.get("text") or "")[:280],
+            "_provider": "fmp_news_stock",
+        })
+    return out
+
+
+def _fmp_press_releases(ticker: str, api_key: str, since: datetime, limit: int = 10):
+    """FMP /stable/news/press-releases — official ticker press releases."""
+    if not api_key:
+        return []
+    data = _fmp_get("news/press-releases", api_key, {"symbol": ticker, "limit": limit})
+    if not isinstance(data, list):
+        return []
+    out = []
+    for it in data:
+        try:
+            pd = it.get("date") or it.get("publishedDate")
+            ts = datetime.strptime(pd, "%Y-%m-%d %H:%M:%S").replace(tzinfo=_UTC) if pd else None
+        except Exception:
+            ts = None
+        if ts and ts < since:
+            continue
+        out.append({
+            "date":   pd,
+            "title":  it.get("title"),
+            "source": "press-release",
+            "url":    it.get("url"),
+            "summary": (it.get("text") or "")[:280],
+            "_provider": "fmp_press_release",
+        })
+    return out
+
+
 def _fmp_sec_filings(ticker: str, api_key: str, since: datetime):
     """Recent SEC filings via /stable/sec-filings-financials (replaces broken
     /api/v3/sec_filings Legacy 403). Returns (rows, failed_bool).
@@ -362,31 +454,38 @@ def fetch(ticker: str, hours: int, use_fmp: bool = True):
     news_since    = now - timedelta(hours=hours)
     analyst_since = now - timedelta(days=30)   # analyst actions looked back 30d
 
-    # Headlines: finviz + yfinance + Finnhub /company-news
-    finviz_news = _finviz_news(ticker, news_since)
-    yf_items    = _yf_news(ticker, news_since)
-    fh_news     = _finnhub_company_news(ticker, news_since)
-    headlines   = _dedupe_headlines(finviz_news + yf_items + fh_news)
+    api_key = os.getenv("FMP_API_KEY") if use_fmp else None
+
+    # Headlines: FMP news/stock (PRIMARY) + finviz + yfinance + Finnhub /company-news (4-way dedup)
+    fmp_stock_news = _fmp_news_stock(ticker, api_key, news_since) if api_key else []
+    fmp_releases   = _fmp_press_releases(ticker, api_key, news_since) if api_key else []
+    finviz_news    = _finviz_news(ticker, news_since)
+    yf_items       = _yf_news(ticker, news_since)
+    fh_news        = _finnhub_company_news(ticker, news_since)
+    headlines      = _dedupe_headlines(
+        fmp_stock_news + fmp_releases + finviz_news + yf_items + fh_news
+    )
 
     # finviz analyst actions kept as fallback when FMP grades-historical empty
     finviz_analyst_actions = _finviz_analyst_actions(ticker, analyst_since)
 
-    api_key = os.getenv("FMP_API_KEY") if use_fmp else None
     fmp_calls, fmp_failures = 0, 0
     fmp_analyst_grades = []
     fmp_consensus = None
     fmp_price_target = None
     fmp_grades_news = []
     sec_filings = []
+    sec_8k_filings = []
     if api_key:
-        # 5 FMP calls: grades-historical, grades-consensus, price-target-consensus,
-        # price-target-summary (folded into _fmp_price_target), grades-news, sec-filings
+        # FMP calls: news/stock + press-releases + grades-historical + grades-consensus
+        # + price-target (2 calls) + grades-news + sec-filings + sec-filings-8k = 9
         fmp_analyst_grades = _fmp_grades_historical(ticker, api_key, analyst_since)
         fmp_consensus      = _fmp_grades_consensus(ticker, api_key)
         fmp_price_target   = _fmp_price_target(ticker, api_key)        # 2 calls
         fmp_grades_news    = _fmp_grades_news(ticker, api_key, news_since)
         sec_filings, failed = _fmp_sec_filings(ticker, api_key, now - timedelta(days=14))
-        fmp_calls = 6
+        sec_8k_filings     = _fmp_sec_8k_filings(ticker, api_key, now - timedelta(days=30))
+        fmp_calls = 9
         if failed:
             fmp_failures = 1
 
@@ -419,15 +518,20 @@ def fetch(ticker: str, hours: int, use_fmp: bool = True):
         "price_target":         fmp_price_target,
         "analyst_news":         fmp_grades_news,
         "sec_filings_recent":   sec_filings,
+        "sec_8k_filings":       sec_8k_filings,
         "warnings":             warnings,
         "data_quality": {
+            "fmp_stock_news_count":  len(fmp_stock_news),
+            "fmp_press_release_count": len(fmp_releases),
             "finviz_news_count":     len(finviz_news),
             "finviz_analyst_count":  len(finviz_analyst_actions),
             "yf_news_count":         len(yf_items),
             "finnhub_news_count":    len(fh_news),
             "fmp_grades_count":      len(fmp_analyst_grades),
             "fmp_grades_news_count": len(fmp_grades_news),
+            "fmp_sec_8k_count":      len(sec_8k_filings),
             "headlines_total_dedup": len(headlines),
+            "headlines_primary_source": "fmp_news_stock" if fmp_stock_news else "fallback_chain",
             "fmp_calls":             fmp_calls,
             "fmp_failures":          fmp_failures,
             "sparse":                sparse,

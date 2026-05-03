@@ -1,0 +1,142 @@
+{
+  "ticker": "AAPL",
+  "as_of_date": "2026-05-02",
+  "cache_key": "AAPL_2026-05-02",
+  "schema_version": "V1.0",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 11.641198512670787,
+    "piotroskiScore": 9,
+    "altman_zone": "safe",
+    "piotroski_strength": "strong",
+    "workingCapital": 9473000000,
+    "totalAssets": 371082000000,
+    "retainedEarnings": 12359000000,
+    "ebit": 147722000000,
+    "totalLiabilities": 264591000000,
+    "revenue": 451442000000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q2",
+    "as_of_date": "2026-03-28",
+    "ownersEarnings": 28861994500,
+    "ownersEarningsPerShare": 1.95,
+    "maintenanceCapex": 159994500,
+    "growthCapex": -2130994500,
+    "averagePPE": 0.13466,
+    "qoq_growth": -0.4672,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0.1786,
+        "total_acquired_shares": 272855,
+        "total_disposed_shares": 507750,
+        "acquired_transactions": 5,
+        "disposed_transactions": 28,
+        "total_purchases": 0,
+        "total_sales": 8
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 1.5,
+        "total_acquired_shares": 76696,
+        "total_disposed_shares": 102492,
+        "acquired_transactions": 15,
+        "disposed_transactions": 10,
+        "total_purchases": 0,
+        "total_sales": 0
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.1818,
+        "total_acquired_shares": 578243,
+        "total_disposed_shares": 1113027,
+        "acquired_transactions": 6,
+        "disposed_transactions": 33,
+        "total_purchases": 0,
+        "total_sales": 15
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "acquired_disposed_ratio": 2,
+        "total_acquired_shares": 391455,
+        "total_disposed_shares": 125256,
+        "acquired_transactions": 6,
+        "disposed_transactions": 3,
+        "total_purchases": 0,
+        "total_sales": 2
+      }
+    ],
+    "latest_trend": "distributing",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {
+    "as_of_date": "2025-12-31",
+    "year": 2025,
+    "quarter": 4,
+    "ownership_percent": 64.6023,
+    "last_ownership_percent": 61.5737,
+    "ownership_pct_change_qoq": 3.0286,
+    "investors_holding": 6288,
+    "investors_holding_change": 434,
+    "num_13f_shares": 9527647599,
+    "num_13f_shares_change": 323299257,
+    "total_invested_usd": 2978148074344,
+    "total_invested_change_usd": 630644431539,
+    "new_positions": 656,
+    "increased_positions": 2730,
+    "reduced_positions": 2960,
+    "closed_positions": 218,
+    "put_call_ratio": 0.8411,
+    "put_call_ratio_change_qoq": 0.3598,
+    "accumulation_signal": "accumulating",
+    "source": "FMP /stable/institutional-ownership/symbol-positions-summary"
+  },
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 12,
+    "house_count": 18,
+    "buy_count": 15,
+    "sell_count": 15,
+    "net_signal": "neutral",
+    "most_recent_date": "2026-04-08",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {
+    "latest_disclosure": {
+      "date": "2026-03-28",
+      "form_type": "8-K",
+      "environmental_score": 66.29,
+      "social_score": 45.21,
+      "governance_score": 58.87,
+      "total_esg_score": 56.79
+    },
+    "latest_rating": {
+      "fiscal_year": 2025,
+      "esg_risk_rating": "B",
+      "industry": "CONSUMER ELECTRONICS",
+      "industry_rank": null
+    },
+    "source": "FMP /stable/esg-disclosures + esg-ratings"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 9,
+    "fmp_failures": 0,
+    "cached": false
+  }
+}

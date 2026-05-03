@@ -1,0 +1,214 @@
+{
+  "ticker": "GOOGL",
+  "as_of_date": "2026-05-02",
+  "cache_key": "GOOGL_2026-05-02",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 14.860478529140838,
+    "piotroskiScore": 7,
+    "altman_zone": "safe",
+    "piotroski_strength": "strong",
+    "workingCapital": 102565000000,
+    "totalAssets": 703919000000,
+    "retainedEarnings": 384024000000,
+    "ebit": 195684000000,
+    "totalLiabilities": 225173000000,
+    "revenue": 422566000000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q1",
+    "as_of_date": "2026-03-31",
+    "ownersEarnings": 29202603980,
+    "ownersEarningsPerShare": 2.39,
+    "maintenanceCapex": -6947396020,
+    "growthCapex": -10249603980,
+    "averagePPE": 0.52129,
+    "qoq_growth": -0.1318,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2027,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 0,
+        "total_disposed_shares": 683,
+        "acquired_transactions": 0,
+        "disposed_transactions": 1,
+        "total_purchases": 0,
+        "total_sales": 0
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0.375,
+        "total_acquired_shares": 393012,
+        "total_disposed_shares": 65437,
+        "acquired_transactions": 9,
+        "disposed_transactions": 24,
+        "total_purchases": 0,
+        "total_sales": 14
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0.4326,
+        "total_acquired_shares": 2971563.3,
+        "total_disposed_shares": 4058513,
+        "acquired_transactions": 61,
+        "disposed_transactions": 141,
+        "total_purchases": 0,
+        "total_sales": 95
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.3878,
+        "total_acquired_shares": 2073613.0900000003,
+        "total_disposed_shares": 5935052,
+        "acquired_transactions": 57,
+        "disposed_transactions": 147,
+        "total_purchases": 0,
+        "total_sales": 102
+      }
+    ],
+    "latest_trend": "distributing",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {
+    "as_of_date": "2025-12-31",
+    "year": 2025,
+    "quarter": 4,
+    "ownership_percent": 37.7544,
+    "last_ownership_percent": 36.2508,
+    "ownership_pct_change_qoq": 1.5036,
+    "investors_holding": 5832,
+    "investors_holding_change": 519,
+    "num_13f_shares": 4558092269,
+    "num_13f_shares_change": 163774691,
+    "total_invested_usd": 1617649050679,
+    "total_invested_change_usd": 549531289087,
+    "new_positions": 732,
+    "increased_positions": 2693,
+    "reduced_positions": 2514,
+    "closed_positions": 213,
+    "put_call_ratio": 1.1063,
+    "put_call_ratio_change_qoq": 9.8813,
+    "accumulation_signal": "accumulating",
+    "source": "FMP /stable/institutional-ownership/symbol-positions-summary"
+  },
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 9,
+    "house_count": 28,
+    "buy_count": 21,
+    "sell_count": 16,
+    "net_signal": "neutral",
+    "most_recent_date": "2026-04-08",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {
+    "latest_disclosure": {
+      "date": "2026-03-31",
+      "form_type": "8-K",
+      "environmental_score": 66.8,
+      "social_score": 61.57,
+      "governance_score": 63.43,
+      "total_esg_score": 63.93
+    },
+    "latest_rating": {
+      "fiscal_year": 2025,
+      "esg_risk_rating": "B",
+      "industry": "INTERNET CONTENT & INFORMATION",
+      "industry_rank": null
+    },
+    "source": "FMP /stable/esg-disclosures + esg-ratings"
+  },
+  "executive_compensation": {
+    "latest_year": 2025,
+    "top_5_executives": [
+      {
+        "name": "Philipp Schindler Senior Vice President, Chief Business Officer, Google",
+        "year": 2025,
+        "salary": 1003846,
+        "bonus": 0,
+        "stock_award": 40577554,
+        "option_award": 0,
+        "total": 42201551
+      },
+      {
+        "name": "Anat Ashkenazi Senior Vice President, Chief Financial Officer, Alphabet and Google, as of July 31, 2024",
+        "year": 2025,
+        "salary": 1003846,
+        "bonus": 0,
+        "stock_award": 30171070,
+        "option_award": 0,
+        "total": 31259031
+      },
+      {
+        "name": "Ruth M. Porat President and Chief Investment Officer, Alphabet and Google;",
+        "year": 2025,
+        "salary": 1003846,
+        "bonus": 0,
+        "stock_award": 28123532,
+        "option_award": 0,
+        "total": 29139128
+      },
+      {
+        "name": "Kent Walker President, Global Affairs, Chief Legal Officer, and Secretary, Alphabet and Google",
+        "year": 2025,
+        "salary": 1003846,
+        "bonus": 0,
+        "stock_award": 28123532,
+        "option_award": 0,
+        "total": 29139128
+      },
+      {
+        "name": "Sundar Pichai Chief Executive Officer, Alphabet and Google, and Director",
+        "year": 2025,
+        "salary": 2007692,
+        "bonus": 0,
+        "stock_award": 0,
+        "option_award": 0,
+        "total": 10906079
+      }
+    ],
+    "ceo_total_latest": 10906079,
+    "ceo_yoy_pct": 1.0,
+    "ceo_red_flag": false,
+    "source": "FMP /stable/governance-executive-compensation"
+  },
+  "comp_benchmark": {
+    "industry_title": "ABRASIVE, ASBESTOS & MISC NONMETALLIC MINERAL PRODS",
+    "year": 2024,
+    "average_compensation": 784407.5555555555,
+    "median_compensation": null,
+    "ceo_overpaid_vs_median_pct": null,
+    "source": "FMP /stable/executive-compensation-benchmark"
+  },
+  "employee_history": {
+    "latest_period": "2025-12-31",
+    "latest_count": 190820,
+    "one_year_pct": 4.1,
+    "cagr_5y_pct": 5.1,
+    "expansion_signal": false,
+    "layoff_signal": false,
+    "data_points": 11,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 0,
+    "cached": false
+  }
+}

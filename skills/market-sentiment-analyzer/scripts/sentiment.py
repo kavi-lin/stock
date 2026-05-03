@@ -166,8 +166,21 @@ def _fetch_ticker_signals(ticker: str) -> dict:
     fmp_key = os.getenv("FMP_API_KEY")
     fh_key  = os.getenv("FINNHUB_API_KEY")
 
-    # 1) FMP insider statistics (quarterly aggregated)
-    if fmp_key:
+    # 1) Insider statistics — bundle-first: same-day FMP_SUPP_BUNDLE cache wins,
+    #    fallback to direct fetch if no shared cache or no cache hit.
+    insider_loaded = False
+    try:
+        from skills._shared.fmp_supplementary import get_supplementary_bundle
+        supp = get_supplementary_bundle(ticker)
+        rows = ((supp or {}).get("insider_summary") or {}).get("quarters") or []
+        if rows:
+            out["insider_stats"] = rows
+            out["insider_stats_source"] = "FMP_SUPP_BUNDLE"
+            insider_loaded = True
+    except Exception as e:
+        print(f"[sentiment] FMP_SUPP_BUNDLE read failed: {e}", file=sys.stderr)
+
+    if not insider_loaded and fmp_key:
         try:
             r = requests.get(
                 "https://financialmodelingprep.com/stable/insider-trading/statistics",
@@ -177,7 +190,6 @@ def _fetch_ticker_signals(ticker: str) -> dict:
             if r.status_code == 200:
                 arr = r.json()
                 if isinstance(arr, list) and arr:
-                    # Most recent quarter first; pick top 4 quarters for trend
                     arr.sort(key=lambda x: (x.get("year", 0), x.get("quarter", 0)), reverse=True)
                     out["insider_stats"] = [{
                         "year": x.get("year"), "quarter": x.get("quarter"),
@@ -187,6 +199,7 @@ def _fetch_ticker_signals(ticker: str) -> dict:
                         "acquired_transactions": x.get("acquiredTransactions"),
                         "disposed_transactions": x.get("disposedTransactions"),
                     } for x in arr[:4]]
+                    out["insider_stats_source"] = "FMP direct"
         except Exception as e:
             print(f"[sentiment] FMP insider stats error: {e}", file=sys.stderr)
 

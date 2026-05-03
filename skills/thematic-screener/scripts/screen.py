@@ -33,6 +33,14 @@ THEME_CACHE = ROOT / "skills" / "theme-detector" / "cache"
 FRED_CACHE = ROOT / "skills" / "fred-macro" / "cache"
 PREDICT_SCRIPT = ROOT / "skills" / "short-term-target" / "scripts" / "predict.py"
 
+# v0.3 — per-mover enrichment (market_cap_tier + earnings/quality/smart-money/analyst)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    from enrich import enrich_movers
+    HAS_ENRICH = True
+except ImportError:
+    HAS_ENRICH = False
+
 
 # ---------- data loaders (unchanged from v0.1) ----------
 
@@ -202,8 +210,12 @@ def compute_regime_factor(regime):
 
 # ---------- per-theme short-term metrics ----------
 
-def select_top_movers_ranked(theme, all_predictions, top_n):
-    """Rank theme's mover predictions by (5d target_pct × confidence) desc, take top N."""
+def select_top_movers_ranked(theme, all_predictions, top_n, enrichments=None):
+    """Rank theme's mover predictions by (5d target_pct × confidence × enrichment_multiplier) desc.
+
+    enrichments: dict {ticker: enrichment_dict} from enrich_movers(); if None,
+    multiplier defaults to 1.0 and behavior matches v0.2.
+    """
     candidates = []
     for ticker in (theme.get("representative_stocks") or []):
         pred = all_predictions.get(ticker)
@@ -212,8 +224,11 @@ def select_top_movers_ranked(theme, all_predictions, top_n):
         h5 = pred.get("horizons", {}).get("5d", {})
         if h5.get("status") != "ok":
             continue
-        score = (h5.get("target_central_pct") or 0) * (h5.get("confidence") or 0)
-        candidates.append((score, ticker, pred))
+        raw_score = (h5.get("target_central_pct") or 0) * (h5.get("confidence") or 0)
+        enrich = (enrichments or {}).get(ticker) or {}
+        mult = enrich.get("enrichment_multiplier", 1.0) if isinstance(enrich, dict) else 1.0
+        final_score = raw_score * mult
+        candidates.append((final_score, raw_score, ticker, pred))
     candidates.sort(key=lambda x: x[0], reverse=True)
     return candidates[:top_n]
 
@@ -381,10 +396,23 @@ def main():
             print(f"  ... {i}/{len(all_tickers)}", file=sys.stderr)
         all_predictions[t] = run_short_term_target(t)
 
+    # v0.3 — enrich every ticker (cap tier + earnings landmines + quality + smart-money + analyst)
+    enrichments = {}
+    if HAS_ENRICH:
+        # Restrict to tickers that have a usable prediction (skip noise)
+        ok_tickers = [t for t in all_tickers
+                      if all_predictions.get(t) and not all_predictions[t].get("error")]
+        print(f"Enriching {len(ok_tickers)} tickers (caches first, light FMP fetches as needed)...",
+              file=sys.stderr)
+        try:
+            enrichments = enrich_movers(ok_tickers)
+        except Exception as e:
+            print(f"WARN: enrich failed (continuing without): {e}", file=sys.stderr)
+
     # Build per-theme blocks
     themes_block = []
     for theme in all_themes:
-        ranked = select_top_movers_ranked(theme, all_predictions, args.top_movers)
+        ranked = select_top_movers_ranked(theme, all_predictions, args.top_movers, enrichments)
         # Breadth/conviction over ALL constituents (per user feedback v0.2.1)
         st = compute_theme_short_term(theme, all_predictions, factor_info["factor"])
         themes_block.append({
@@ -397,8 +425,16 @@ def main():
             "proxy_etfs": theme.get("proxy_etfs", []),
             "short_term": st,
             "top_movers": [
-                {"ticker": tk, "short_term": pred, "concentration_flag": None}
-                for _, tk, pred in ranked
+                {
+                    "ticker": tk,
+                    "short_term": pred,
+                    "concentration_flag": None,
+                    # v0.3 — enrichment fields (always present, may be {} if unavailable)
+                    "enrichment": enrichments.get(tk) or {},
+                    "raw_score": round(raw_score, 4),
+                    "final_score": round(final_score, 4),
+                }
+                for final_score, raw_score, tk, pred in ranked
             ],
         })
     themes_block = tag_concentration(themes_block)
@@ -412,7 +448,7 @@ def main():
     out = {
         "as_of": datetime.datetime.utcnow().isoformat() + "Z",
         "experimental": True,
-        "framework": "Tactical Opportunity Radar v0.2 (thematic-screener)",
+        "framework": "Tactical Opportunity Radar v0.3 (thematic-screener)",
         "regime_snapshot": regime_snapshot,
         "regime_badges": badges,
         "regime_factor": factor_info,

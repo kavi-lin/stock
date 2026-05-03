@@ -5,6 +5,12 @@
 > ⚠️ Phase 5 的 `_phase0`、`_phase1`、`_phase3` key 名稱不可更換（bridge.py 依賴）。
 > ⚠️ Phase 5 末尾必須執行 `sector/scripts/validate_sector_intel.py`（rc=0 才算完成）。
 >
+> **V2.9.0 新增**（純加 fields；rubric / scoring 公式不動）：
+> - Phase 1 `sector_valuation` 加 `rs_vs_spy_5d` / `rs_vs_spy_20d`（多週期 RS；零新增 API call，重用既有 3M chart）
+> - Phase 3 `sector_earnings_pulse` 加 `analyst_pt_upside_median_pct` / `pt_sample_size`（PT consensus；soft-fail）
+> - Phase 3 `smart_money_signals` 加 `institutional_holders_qoq_delta` / `institutional_ownership_pct_delta` / `institutional_sample_size`（13F Q-on-Q；soft-fail）
+> - 新訊號用於 Phase 4b divergence challenge 提示，**不寫進 score 公式**（向後相容；V2.8.x 報告分數可重現）
+>
 > **V1.4 新增**（vs V1.3，FMP MCP 估值層 + 財報脈動 + smart money 三層 hard-required）：
 > - Phase 1 `sectors[]` 新增 `sector_valuation` block（pe_ttm / pe_zscore_1y / rs_vs_spy_3m / etf_volume_ratio_20d）— 由 `sector/scripts/fetch_sector_valuation.py` 產出
 > - Phase 3 `_phase3.sector_earnings_pulse`（per sector：beat_rate_30d / surprise_score_avg / report_count）— 由 `sector/scripts/fetch_earnings_pulse.py` 產出
@@ -110,6 +116,8 @@
         "pe_ttm_nyse":          "float | null — V1.4：NYSE exchange PE",
         "pe_zscore_1y":         "float — V1.4：vs 自身 1y daily 平均的 z-score（兩 exchange 各算後平均）",
         "rs_vs_spy_3m":         "float — V1.4：sector ETF 3M return − SPY 3M return（小數，0.04 = +4%）",
+        "rs_vs_spy_20d":        "float | null — V2.9.0：20 trading-day RS vs SPY",
+        "rs_vs_spy_5d":         "float | null — V2.9.0：5 trading-day RS vs SPY；3M vs 20d vs 5d 三窗對照可顯示動能耗盡（3M 強但 5d/20d 轉弱）",
         "etf_volume_ratio_20d": "float — V1.4：今日 ETF 成交量 / 過去 20 個交易日均量",
         "etf":                  "string — sector ETF symbol (XLK / XLF 等)"
       }
@@ -197,7 +205,9 @@
       "in_line":            "int",
       "beat_rate_30d":      "float | null — beats / (beats+misses); null if 0",
       "surprise_score_avg": "float | null — mean of clipped (actual-est)/|est|, ±100% cap",
-      "analyst_revision_net": "null — V1.4 P2 ships without; future P2.5 work"
+      "analyst_revision_net":         "int | null — V1.71+：sum of (strongBuy+buy)−(sell+strongSell) across SECTOR_TOP_5 via /stable/grades-consensus; soft-fail",
+      "analyst_pt_upside_median_pct": "float | null — V2.9.0：median of (targetMedian-currentPrice)/currentPrice across SECTOR_TOP_5（小數，0.05 = 5% upside）；soft-fail",
+      "pt_sample_size":               "int — V2.9.0：number of SECTOR_TOP_5 tickers with PT consensus successfully fetched"
     }
   },
   "smart_money_signals": {
@@ -210,7 +220,10 @@
       "senate_purchases_30d":            "int",
       "senate_sales_30d":                "int",
       "senate_net_buy_30d":              "int — purchases − sales (Phase 4b divergence trigger if < 0 + insider ratio < 0.5)",
-      "form13f_top10_delta":             "null — V1.4 P3 ships without; future P3.5 work (paid plan)"
+      "institutional_holders_qoq_delta": "int | null — V2.9.0：sum of investorsHoldingChange（13F filer 數量 QoQ 增減）across SECTOR_UNIVERSE；正值 = 新增機構淨流入",
+      "institutional_ownership_pct_delta": "float | null — V2.9.0：median of ownershipPercentChange（機構持股 % QoQ 變化）；負值 = 機構淨流出",
+      "institutional_sample_size":       "int — V2.9.0：number of mega-caps that returned 13F summary",
+      "form13f_top10_delta":             "null — V2.9.0+：deprecated；已被 institutional_* 取代，欄位保留向後相容（永遠 null）"
     }
   },
   "upcoming_events": [
@@ -501,3 +514,24 @@
   "session_notes": "string — PM 給 investment_protocol 的一句話 handoff"
 }
 ```
+
+---
+
+## Validator Coverage
+
+`sector/scripts/validate_sector_intel.py` 在 Phase 5 末尾執行（rc=0 才算完成）。它檢查的項目（bridge.py 的下游依賴）：
+
+1. `protocol_version == "V1.4"`
+2. `_phase0` / `_phase1` / `_phase3` 三個 sub-object 存在（bridge.py keys）
+3. Phase 0：`synthesized_exposure` / `signal_conflict` / `ftd` / `market_top` 必填
+4. Phase 0 V1.4：`fred_available` 必填；若 `true` 則 `fred_snapshot` 須含 FRED_SLIM_REQUIRED 全部欄位
+5. Phase 1：`sectors[]` 非空；每筆有 `uptrend_ratio`
+6. Phase 1 V1.4：每筆 `_phase1.sectors[]` 有完整 `sector_valuation` block（`pe_ttm` / `pe_zscore_1y` / `rs_vs_spy_3m` / `etf_volume_ratio_20d`）
+7. Phase 3：`top_catalysts` ≥ 5
+8. V1.3 fan-out：`phase4_fanout_mode ∈ {PARALLEL_SUBAGENT, PARTIAL_FALLBACK, FULL_FALLBACK, INLINE}` + `degraded_agents` 結構
+9. 頂層 `sectors[]`：HOT 必有 `proxy_etf`（Dashboard 顯示用）
+10. 頂層 `sectors[]`：`verdict ∈ {HOT, WARM, COLD, AVOID}`、`final_regime_stance ∈ {AGGRESSIVE, NEUTRAL, DEFENSIVE}`
+11. 頂層 `sectors[]` V1.4：`score_components.valuation_penalty` 必填（int，-10 至 +5）
+
+> V2.9.0 新增的軟性欄位（`rs_vs_spy_5d` / `rs_vs_spy_20d` / `analyst_pt_upside_median_pct` / `pt_sample_size` / `institutional_holders_qoq_delta` / `institutional_ownership_pct_delta` / `institutional_sample_size`）**不**做硬性檢查（皆為 soft-fail 訊號，可為 null），僅供 Phase 4b divergence challenge 與 Phase 5 narrative 使用。
+

@@ -17,30 +17,63 @@
 | `earnings-trade-analyzer` | post-earnings gap/趨勢 5 因子評分 | earnings 後 |
 | **`earnings-analyst`(本)** | **8 季三表結構化趨勢 + 品質 flag + 0-100 composite score** | `財報 [TICKER]` |
 
-## 執行流程
+## 執行流程 (V1.73 — 6 步驟,含 LLM narrate phase)
 
 ```bash
-# Step 1 — Fetch:呼叫 12 個 FMP endpoint,寫 cache(若已有 cache 且 last_earnings_date 未變,skip)
+# Step 1 — Fetch:呼叫 17 個 FMP endpoint(含 5 個 V1.73 infographic 層),寫 cache
 python3 skills/earnings-analyst/scripts/fetch.py NVDA
 
 # Step 2 — Analyze:derive 邊際/成長/品質 + composite scoring(in-place 寫回 cache)
 python3 skills/earnings-analyst/scripts/analyze.py NVDA
 
-# Step 3 — Render:cache JSON → reports/<DATE>_<TICKER>_earnings.md
-python3 skills/earnings-analyst/scripts/render.py NVDA
-
-# Step 4 — Validate:schema gate(rc=0 才算完成)
+# Step 3 — Validate cache schema(rc=0 才能進 narrate phase)
 python3 skills/earnings-analyst/scripts/validate.py NVDA
 ```
 
-或一次跑完(`財報 [TICKER]` trigger 對應的執行序列):
+### Step 4 — Narrate (LLM in-conversation phase, NEW)
+
+**由 Claude Code 在 conversation 內執行,不寫 python orchestrator**(50K 字 transcript 抽取)。
+
+Claude 用 Read 工具讀取:
+1. `skills/earnings-analyst/cache/<TICKER>_<DATE>.json` 全文
+2. 內含 `transcript.content` 字串(~50K 字),為 CFO 季度電話會議逐字稿
+
+接著用 Write 工具寫出 `skills/earnings-analyst/cache/<TICKER>_<DATE>.infographic.json`,schema 見 `schema.md` 的「Infographic Cache (V1.0)」section。
+
+**必抽欄位**(transcript 有時):
+- `headline_oneliner` — 整體一句話摘要
+- `surprise.*` — 從 `cache.earnings_surprises[0]` 計算 beat/miss + surprise_pct
+- `segments_q.items[]` — **從 transcript CFO 段落抽季度數字**(infographic 上的 569.9/309.8 億等),抽不到才退化用 `cache.segments.product_fy[0]` + `is_fy_fallback=true`
+- `geographic_q.items[]` — 同上邏輯
+- `capital_returns.{buyback_authorization_usd, dividend_per_share_*, dividend_hike_pct, announcements[]}` — 從 transcript 抓 "authorized $X buyback"、"raising our dividend by Y% to $Z" 等句子
+- `ceo_quote.{speaker, title, quote, context}` — 挑 1-2 句最能表達本季 narrative 的 CEO 引述
+- `key_highlights[]`(≥3) — icon + title + body,涵蓋成長/產品/區域/資本/風險 等面向
+- `summary[]`(≥2) — tldr 條列
+
+**transcript=null 時**(fallback):
+- `transcript_used=false`,省略 `ceo_quote`
+- `segments_q.is_fy_fallback=true`,用 FY 年度
+- `capital_returns.announcements=[]`,只填 `cash_flow[0]` 上有的執行金額
+- `key_highlights` 從 `quarterly_pnl yoy + quality_flags` 合成
+
+```bash
+# Step 5 — Render:既有 markdown 報告(細節 reference,不變)
+python3 skills/earnings-analyst/scripts/render.py NVDA
+
+# Step 6 — Validate infographic schema(rc=0 才算完成)
+python3 skills/earnings-analyst/scripts/validate_infographic.py NVDA
+```
+
+### 一次跑完(`財報 [TICKER]` trigger)
 
 ```bash
 T=NVDA && \
   python3 skills/earnings-analyst/scripts/fetch.py "$T" && \
   python3 skills/earnings-analyst/scripts/analyze.py "$T" && \
   python3 skills/earnings-analyst/scripts/validate.py "$T" && \
-  python3 skills/earnings-analyst/scripts/render.py "$T"
+  echo "→ Step 4: Claude reads cache+transcript, writes infographic.json" && \
+  python3 skills/earnings-analyst/scripts/render.py "$T" && \
+  python3 skills/earnings-analyst/scripts/validate_infographic.py "$T"
 ```
 
 ## Cache 設計

@@ -1,0 +1,286 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-02 20:27:23",
+    "data_source": "TraderMonty Market Breadth CSV",
+    "detail_url": "https://tradermonty.github.io/market-breadth-analysis/market_breadth_data.csv",
+    "summary_url": "https://tradermonty.github.io/market-breadth-analysis/market_breadth_summary.csv",
+    "total_rows": 2513,
+    "data_freshness": {
+      "is_fresh": true,
+      "latest_date": "2026-04-30",
+      "days_old": 2,
+      "last_modified": "2026-05-01 22:45 UTC",
+      "warning": null
+    }
+  },
+  "composite": {
+    "composite_score": 33.1,
+    "zone": "Weakening",
+    "zone_color": "orange",
+    "exposure_guidance": "40-60%",
+    "guidance": "Breadth deteriorating. Begin profit-taking and raise cash allocation.",
+    "actions": [
+      "Take profits on weakest 25-40% of positions",
+      "No new momentum entries",
+      "Raise cash allocation significantly",
+      "Consider defensive sector rotation (XLU, XLP, XLV)",
+      "Watch for cycle trough signal for re-entry"
+    ],
+    "strongest_health": {
+      "component": "breadth_level_trend",
+      "label": "Current Breadth Level & Trend",
+      "score": 52
+    },
+    "weakest_health": {
+      "component": "cycle_position",
+      "label": "Peak/Trough Cycle Position",
+      "score": 15
+    },
+    "excluded_components": [],
+    "data_quality": {
+      "available_count": 6,
+      "total_components": 6,
+      "label": "Complete (6/6 components)",
+      "missing_components": []
+    },
+    "component_scores": {
+      "breadth_level_trend": {
+        "score": 52,
+        "weight": 0.25,
+        "effective_weight": 0.25,
+        "weighted_contribution": 13.0,
+        "data_available": true,
+        "label": "Current Breadth Level & Trend"
+      },
+      "ma_crossover": {
+        "score": 35,
+        "weight": 0.2,
+        "effective_weight": 0.2,
+        "weighted_contribution": 7.0,
+        "data_available": true,
+        "label": "8MA vs 200MA Crossover"
+      },
+      "cycle_position": {
+        "score": 15,
+        "weight": 0.2,
+        "effective_weight": 0.2,
+        "weighted_contribution": 3.0,
+        "data_available": true,
+        "label": "Peak/Trough Cycle Position"
+      },
+      "bearish_signal": {
+        "score": 25,
+        "weight": 0.15,
+        "effective_weight": 0.15,
+        "weighted_contribution": 3.8,
+        "data_available": true,
+        "label": "Bearish Signal Status"
+      },
+      "historical_percentile": {
+        "score": 30,
+        "weight": 0.1,
+        "effective_weight": 0.1,
+        "weighted_contribution": 3.0,
+        "data_available": true,
+        "label": "Historical Percentile"
+      },
+      "divergence": {
+        "score": 34.0,
+        "weight": 0.1,
+        "effective_weight": 0.1,
+        "weighted_contribution": 3.4,
+        "data_available": true,
+        "label": "S&P 500 vs Breadth Divergence"
+      }
+    }
+  },
+  "components": {
+    "breadth_level_trend": {
+      "score": 52,
+      "signal": "NEUTRAL: 8MA=0.576 in downtrend - mixed signals",
+      "data_available": true,
+      "current_8ma": 0.5761707995396395,
+      "current_200ma": 0.601639622521565,
+      "trend": -1,
+      "level_score": 65,
+      "trend_score": 20,
+      "date": "2026-04-30",
+      "ma8_direction": "falling",
+      "direction_modifier": 0
+    },
+    "ma_crossover": {
+      "score": 35,
+      "signal": "NEGATIVE: 8MA below 200MA (gap=-0.025, 8MA falling)",
+      "data_available": true,
+      "gap": -0.025468822981925543,
+      "gap_score": 35,
+      "current_8ma": 0.5761707995396395,
+      "current_200ma": 0.601639622521565,
+      "ma8_5d_ago": 0.5792354340704791,
+      "ma8_direction": "falling",
+      "direction_modifier": 0,
+      "date": "2026-04-30"
+    },
+    "cycle_position": {
+      "score": 15,
+      "signal": "PEAK (40d ago): gradual decline, 8MA falling",
+      "data_available": true,
+      "latest_marker_type": "PEAK",
+      "days_since_marker": 40,
+      "ma8_trend": "falling",
+      "current_8ma": 0.5761707995396395,
+      "extreme_trough": false,
+      "date": "2026-04-30"
+    },
+    "bearish_signal": {
+      "score": 25,
+      "signal": "WARNING (muted): Bearish signal active in downtrend, but 8MA=0.576 still relatively strong [PINK ZONE]",
+      "data_available": true,
+      "signal_active": true,
+      "trend": -1,
+      "current_8ma": 0.5761707995396395,
+      "current_200ma": 0.601639622521565,
+      "in_pink_zone": true,
+      "pink_zone_days": 35,
+      "base_score": 10,
+      "context_adjustment": 15,
+      "pink_zone_adjustment": 0,
+      "date": "2026-04-30"
+    },
+    "historical_percentile": {
+      "score": 30,
+      "signal": "LOW: 26th percentile - below average breadth",
+      "data_available": true,
+      "current_8ma": 0.5761707995396395,
+      "percentile_rank": 25.70632709908476,
+      "base_score": 30,
+      "adjustment": 0,
+      "avg_peak": 0.714,
+      "avg_trough": 0.231,
+      "total_observations": 2513,
+      "date": "2026-04-30"
+    },
+    "divergence": {
+      "score": 34.0,
+      "signal": "Dangerous bearish divergence: S&P +5.0%, Breadth 8MA -0.103 over 60d",
+      "data_available": true,
+      "sp500_pct_change": 5.02,
+      "breadth_change": -0.1033,
+      "sp500_latest": 718.66,
+      "sp500_past": 684.32,
+      "ma8_latest": 0.5761707995396395,
+      "ma8_past": 0.6794640218882828,
+      "lookback_days": 60,
+      "divergence_type": "Dangerous bearish divergence",
+      "date": "2026-04-30",
+      "window_60d": {
+        "score": 10,
+        "divergence_type": "Dangerous bearish divergence",
+        "sp500_pct_change": 5.02,
+        "breadth_change": -0.1033,
+        "lookback_days": 60
+      },
+      "window_20d": {
+        "score": 70,
+        "divergence_type": "Healthy alignment (both rising)",
+        "sp500_pct_change": 9.58,
+        "breadth_change": 0.0919,
+        "lookback_days": 20
+      },
+      "early_warning": false
+    }
+  },
+  "trend_summary": {
+    "delta": -9.3,
+    "direction": "deteriorating",
+    "entries": [
+      {
+        "data_date": "2026-04-24",
+        "composite_score": 42.4,
+        "component_scores": {
+          "breadth_level_trend": 57,
+          "ma_crossover": 45,
+          "cycle_position": 45,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 34.0
+        },
+        "recorded_at": "2026-04-28 19:25:31"
+      },
+      {
+        "data_date": "2026-04-27",
+        "composite_score": 42.4,
+        "component_scores": {
+          "breadth_level_trend": 57,
+          "ma_crossover": 45,
+          "cycle_position": 45,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 34.0
+        },
+        "recorded_at": "2026-04-29 17:27:02"
+      },
+      {
+        "data_date": "2026-04-28",
+        "composite_score": 43.3,
+        "component_scores": {
+          "breadth_level_trend": 57,
+          "ma_crossover": 45,
+          "cycle_position": 45,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 43.0
+        },
+        "recorded_at": "2026-04-30 18:10:41"
+      },
+      {
+        "data_date": "2026-04-29",
+        "composite_score": 33.1,
+        "component_scores": {
+          "breadth_level_trend": 52,
+          "ma_crossover": 35,
+          "cycle_position": 15,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 34.0
+        },
+        "recorded_at": "2026-05-01 17:25:39"
+      },
+      {
+        "data_date": "2026-04-30",
+        "composite_score": 33.1,
+        "component_scores": {
+          "breadth_level_trend": 52,
+          "ma_crossover": 35,
+          "cycle_position": 15,
+          "bearish_signal": 25,
+          "historical_percentile": 30,
+          "divergence": 34.0
+        },
+        "recorded_at": "2026-05-02 20:27:23"
+      }
+    ]
+  },
+  "key_levels": {
+    "200MA Level": {
+      "value": "0.6016",
+      "significance": "Key support/resistance for 8MA. 8MA crossing below is an early warning of deterioration, not a standalone bearish signal."
+    },
+    "Extreme Weakness (0.40)": {
+      "value": "0.4000",
+      "significance": "8MA below 0.40 marks extreme weakness. Historically, troughs at this level precede significant rallies."
+    },
+    "Healthy Threshold (0.60)": {
+      "value": "0.6000",
+      "significance": "8MA above 0.60 indicates broad participation. Below 0.60 = selective market, above = inclusive rally."
+    },
+    "Historical Avg Peak": {
+      "value": "0.714",
+      "significance": "Average peak level. Approaching this level suggests breadth may be near a cyclical high."
+    },
+    "Historical Avg Trough": {
+      "value": "0.231",
+      "significance": "Average extreme trough level. Reaching this level is a potential contrarian buy signal."
+    }
+  }
+}

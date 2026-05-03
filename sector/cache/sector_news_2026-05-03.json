@@ -1,0 +1,839 @@
+{
+  "as_of_date": "2026-05-03",
+  "schema_version": "V1.4",
+  "lookback_days": 2,
+  "max_per_sector": 10,
+  "total_articles": 101,
+  "sectors": {
+    "Technology": [
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-03 06:43:40",
+        "publisher": "Seeking Alpha",
+        "title": "Microsoft Doesn't Need To Win The AI Race, It Needs The AI Race To Be Brutal",
+        "excerpt": "Microsoft is rated a Buy with 14.4% upside to a $473.80 target, as Azure's infrastructure positioning captures disproportionate value from AI model commoditization. Falling model prices accelerate enterprise Azure adoption, expanding total addressable workload regardless of which",
+        "url": "https://seekingalpha.com/article/4897835-microsoft-doesnt-need-to-win-the-ai-race-it-needs-ai-race-to-be-brutal"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-03 06:24:44",
+        "publisher": "Finbold",
+        "title": "Trading expert sets date Nvidia (NVDA) stock will crash to $110",
+        "excerpt": "As Nvidia (NASDAQ: NVDA) stock experiences volatile trading sessions, a trading expert has warned that the equity is overvalued and could potentially crash to $110 in the coming months.",
+        "url": "https://finbold.com/trading-expert-sets-date-nvidia-nvda-stock-will-crash-to-110/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-03 06:24:44",
+        "publisher": "Finbold",
+        "title": "Trading expert sets date when Nvidia (NVDA) stock will crash to $110",
+        "excerpt": "As Nvidia (NASDAQ: NVDA) stock experiences volatile trading sessions, a trading expert has warned that the equity is overvalued and could potentially crash to $110 in the coming months.",
+        "url": "https://finbold.com/trading-expert-sets-date-when-nvidia-nvda-stock-will-crash-to-110/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-03 03:21:00",
+        "publisher": "Fool - Investing News",
+        "title": "Is Nvidia's Deal With Oklo a Game Changer?",
+        "excerpt": "Nvidia and Oklo recently joined forces as reliable energy sources become the new bottleneck for artificial intelligence data centers.",
+        "url": "https://www.fool.com/investing/2026/05/03/is-nvidias-deal-with-oklo-a-game-changer/"
+      },
+      {
+        "symbol": "AVGO",
+        "publishedDate": "2026-05-03 02:02:51",
+        "publisher": "Fool - Investing News",
+        "title": "Alphabet Is Dropping $190 Billion on AI Infrastructure: 3 Semiconductor Stocks Set to Win Big",
+        "excerpt": "Don't overthink the AI spending spree.",
+        "url": "https://www.fool.com/investing/2026/05/03/alphabet-dropping-190-billion-on-ai-infrastructure/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-03 01:12:00",
+        "publisher": "Fool - Investing News",
+        "title": "My Top 5 Stocks to Buy in May",
+        "excerpt": "The AI build-out is driving many stocks higher.",
+        "url": "https://www.fool.com/investing/2026/05/03/my-top-5-stocks-to-buy-in-may/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-02 21:31:00",
+        "publisher": "The Motley Fool",
+        "title": "Alphabet Is Outgrowing Amazon and Microsoft Where It Matters Most -- Why This Makes Alphabet Stock a Buy",
+        "excerpt": "Google Cloud grew 63% in the first quarter, well ahead of Microsoft Azure's 40% and AWS's 28%. Google Cloud's backlog nearly doubled in three months to over $460 billion.",
+        "url": "https://www.fool.com/investing/2026/05/02/alphabet-is-outgrowing-amazon-and-microsoft-where/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-02 16:30:00",
+        "publisher": "Fool - Investing News",
+        "title": "Major Hyperscalers Just Reported Earnings. Nvidia Was The Winner",
+        "excerpt": "Nvidia's shareholders should be celebrating.",
+        "url": "https://www.fool.com/investing/2026/05/02/major-hyperscalers-just-reported-earnings-nvidia-w/"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-05-02 16:19:30",
+        "publisher": "Fool - Investing News",
+        "title": "Why Apple Stock Climbed This Week",
+        "excerpt": "Blockbuster iPhone sales and new, budget-friendly Macs are boosting the technology giant's profits.",
+        "url": "https://www.fool.com/investing/2026/05/02/why-apple-stock-is-up/"
+      },
+      {
+        "symbol": "ORCL",
+        "publishedDate": "2026-05-02 14:45:00",
+        "publisher": "Fool - Investing News",
+        "title": "Investors Should Buy the Stocks of These 3 OpenAI Partners Regardless of What Happens to OpenAI",
+        "excerpt": "Amazon, CoreWeave, and Oracle can thrive with or without deals from OpenAI.",
+        "url": "https://www.fool.com/investing/2026/05/02/investors-should-buy-the-stocks-of-these-3-openai/"
+      }
+    ],
+    "Healthcare": [
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-02 23:36:26",
+        "publisher": "The Motley Fool",
+        "title": "What's Going on With UnitedHealth Stock?",
+        "excerpt": "UnitedHealth (UNH 0.46%) increased prices to offset the higher costs of serving customers.",
+        "url": "https://www.fool.com/investing/2026/05/02/whats-going-on-with-unitedhealth-stock/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-02 09:49:37",
+        "publisher": "Seeking Alpha",
+        "title": "Merck's LOE Risks Mitigated - R&D And M&As Are Paying Off",
+        "excerpt": "Merck once again suffers the mixed optics from the updated FY2026 adjusted EPS guidance, attributed to the IPR&D charges related to two recent acquisitions. Their in-house capabilities remain excellent, with the patient transition to KEYTRUDA QLEX working out as expected, aided b",
+        "url": "https://seekingalpha.com/article/4897749-mercks-loe-risks-mitigated-r-and-d-and-m-and-as-are-paying-off"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-05-02 08:45:17",
+        "publisher": "MarketBeat",
+        "title": "The Most Important Part of These 3 Big Pharma Earnings Reports Wasn't the Beat",
+        "excerpt": "Earnings season is in full swing, and on April 29, three Big Pharma mainstays reported Q1 2026 earnings. Investors were looking for strong results\u2014and strong guidance\u2014that could serve as a sorely needed tailwind for the healthcare sector.",
+        "url": "https://www.marketbeat.com/stock-ideas/the-most-important-part-of-these-3-big-pharma-earnings-reports-wasnt-the-beat/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-02 08:00:00",
+        "publisher": "Seeking Alpha",
+        "title": "5 Relatively Secure And Cheap Dividend Stocks, Yields Up To 8% (May 2026)",
+        "excerpt": "This article is part of our monthly series where we highlight five large-cap, relatively safe, dividend-paying companies offering significant discounts to their historical norms. We go over our filtering process to select just five conservative DGI stocks from more than 7,500 com",
+        "url": "https://seekingalpha.com/article/4895289-5-relatively-secure-and-cheap-dividend-stocks-yields-up-to-8-percent-may-2026"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-05-02 07:36:00",
+        "publisher": "GuruFocus",
+        "title": "Weekend Morning Brew: Big Tech AI Capex Surges as Oil Spikes",
+        "excerpt": "Weekly Market HighlightsWeekly breadth was moderately positive with 4,963 advancers versus 4,504 decliners, including 918 stocks up more than 10% and 855 stock",
+        "url": "https://www.gurufocus.com/news/8838901/weekend-morning-brew-big-tech-ai-capex-surges-as-oil-spikes"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-02 04:00:02",
+        "publisher": "Bloomberg Markets and Finance",
+        "title": "J&J's $1.7 Billion Drug Ushers in Age of Psychedelic Medicine",
+        "excerpt": "Spravato, the ketamine-derived nasal spray from Johnson & Johnson, was once seen as a long shot. It was difficult to deliver, heavily regulated and slow to catch on.",
+        "url": "https://www.youtube.com/watch?v=0nvPZ1ilFhE"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-01 23:13:35",
+        "publisher": "The Motley Fool",
+        "title": "Is UnitedHealth Stock an Undervalued Stock to Buy?",
+        "excerpt": "UnitedHealth (UNH 0.46%) stock investors are hoping 2026 will be better than 2025.",
+        "url": "https://www.fool.com/investing/2026/05/01/is-unitedhealth-stock-an-undervalued-stock-to-buy/"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-05-01 15:05:33",
+        "publisher": "Wall Street Journal",
+        "title": "AbbVie's Earnings Beat Wall Street's Estimates. Investors Are Still Worried",
+        "excerpt": "AbbVie delivered a strong earnings beat this week, driven by its immunology portfolio. WSJ's David Wainer explains why Wall Street is still jittery.",
+        "url": "https://www.youtube.com/shorts/SPRvdrXpYUk"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-01 12:45:29",
+        "publisher": "Zacks Investment Research",
+        "title": "Why Johnson & Johnson (JNJ) is a Top Dividend Stock for Your Portfolio",
+        "excerpt": "Dividends are one of the best benefits to being a shareholder, but finding a great dividend stock is no easy task. Does Johnson & Johnson (JNJ) have what it takes?",
+        "url": "https://www.zacks.com/stock/news/2913259/why-johnson-johnson-jnj-is-a-top-dividend-stock-for-your-portfolio?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_5-2913259"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-01 12:37:54",
+        "publisher": "24/7 Wall Street",
+        "title": "Goldman Sachs Adds UnitedHealth to Its Conviction List: Is the Managed Care Comeback Real?",
+        "excerpt": "Goldman Sachs (NYSE:GS | GS Price Prediction) added UnitedHealth Group (NYSE:UNH) stock to its U.S.",
+        "url": "https://247wallst.com/investing/2026/05/01/goldman-sachs-adds-unitedhealth-to-its-conviction-list-is-the-managed-care-comeback-real/"
+      }
+    ],
+    "Energy": [
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-02 23:10:00",
+        "publisher": "Seeking Alpha",
+        "title": "Chevron: A Big Timing Issue (Rating Upgrade)",
+        "excerpt": "Chevron (CVX) presents a long-term opportunity for buy-and-hold investors. Recent earnings weakness, especially in International Downstream, stemmed from mark-to-market and inventory accounting. Hedging losses and LIFO inventory effects are non-cash and should reverse or net out ",
+        "url": "https://seekingalpha.com/article/4897813-chevron-a-big-timing-issue-rating-upgrade"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-02 21:15:00",
+        "publisher": "The Motley Fool",
+        "title": "The Strait of Hormuz Is Choking the World's Oil Supply. These Stocks Could Win.",
+        "excerpt": "BP just announced strong first-quarter earnings, driven at least in part by rising oil prices. The company's results likely reflect only a partial impact from the oil price spike.",
+        "url": "https://www.fool.com/investing/2026/05/02/the-strait-of-hormuz-is-choking-the-worlds-oil-sup/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-02 17:15:00",
+        "publisher": "The Motley Fool",
+        "title": "Better Oil Stock: Diamondback Energy vs. Chevron",
+        "excerpt": "Diamondback Energy is a large onshore U.S. oil and gas producer. Chevron is a globally diversified integrated energy giant.",
+        "url": "https://www.fool.com/investing/2026/05/02/better-oil-stock-diamondback-energy-vs-chevron/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-02 13:05:00",
+        "publisher": "The Motley Fool",
+        "title": "Chevron's Production Soared Along With Oil Prices in the First Quarter, But Its Profits Fell. What Happened With the Oil Stock?",
+        "excerpt": "Chevron's earnings fell in the first quarter due to supply disruptions and timing issues. Those headwinds should fade in the coming months.",
+        "url": "https://www.fool.com/investing/2026/05/02/chevrons-production-soared-along-with-oil-prices-i/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-02 09:57:15",
+        "publisher": "Seeking Alpha",
+        "title": "Chevron: The Market Was Not Prepared For The New Equilibrium",
+        "excerpt": "Chevron's Q1 results came as a disappointment to most investors and the market reacted accordingly. The short-term headwinds will dissipate over the coming quarters, but the share price already reflects that. There's no longer a short-term opportunity to capitalize on, but the at",
+        "url": "https://seekingalpha.com/article/4897750-chevron-the-market-was-not-prepared-for-the-new-equilibrium"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-02 09:00:00",
+        "publisher": "The Motley Fool",
+        "title": "While Oil Prices Skyrocketed in the First Quarter, ExxonMobil's Profits Fell. Here's What Happened.",
+        "excerpt": "Supply disruptions and timing impacted Exxon's first-quarter earnings. Those timing issues will resolve in future quarters, while most of the supply disruptions should ease as the Strait of Hormuz reopens.",
+        "url": "https://www.fool.com/investing/2026/05/02/while-oil-prices-skyrocketed-in-the-first-quarter/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-02 07:36:00",
+        "publisher": "GuruFocus",
+        "title": "Weekend Morning Brew: Big Tech AI Capex Surges as Oil Spikes",
+        "excerpt": "Weekly Market HighlightsWeekly breadth was moderately positive with 4,963 advancers versus 4,504 decliners, including 918 stocks up more than 10% and 855 stock",
+        "url": "https://www.gurufocus.com/news/8838901/weekend-morning-brew-big-tech-ai-capex-surges-as-oil-spikes"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-02 06:15:00",
+        "publisher": "The Motley Fool",
+        "title": "Oil Could Hit $150 or Higher, Experts Warn. These Energy Stocks Are Built for the Shock.",
+        "excerpt": "JPMorgan warned that oil could top $150 a barrel if the Strait of Hormuz remains closed through mid-May. The global economy is currently burning through emergency stockpiles to offset the supply disruption, which it can't do indefinitely.",
+        "url": "https://www.fool.com/investing/2026/05/02/oil-could-hit-150-or-higher-experts-warn-these-ene/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-02 04:09:09",
+        "publisher": "Seeking Alpha",
+        "title": "Exxon Mobil: Middle East Disruptions Easily Handled",
+        "excerpt": "Exxon Mobil is effectively mitigating Middle East disruptions through a diversified global project pipeline. Replacement projects, such as LNG in Papua New Guinea and Golden Pass in the U.S., are advancing and offsetting potential regional losses. Upstream production rose 8% (bef",
+        "url": "https://seekingalpha.com/article/4897713-exxon-mobil-middle-east-disruptions-easily-handled"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-02 02:03:00",
+        "publisher": "GuruFocus",
+        "title": "Exxon Mobil Corp (XOM) Q1 2026 Earnings Call Highlights: Record Production and Strategic Advancements Amidst Global Challenges",
+        "excerpt": "Permian Production: Increased year over year, with a target of 1.8 million oil equivalent barrels in 2026.Guyana Production: Achieved record levels of producti",
+        "url": "https://www.gurufocus.com/news/8838843/exxon-mobil-corp-xom-q1-2026-earnings-call-highlights-record-production-and-strategic-advancements-amidst-global-challenges"
+      }
+    ],
+    "Financials": [
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-03 08:31:21",
+        "publisher": "Business Insider",
+        "title": "I flew to Berkshire Hathaway's first big bash without Warren Buffett as host. I found an event with an uncertain future.",
+        "excerpt": "I flew to Omaha for Berkshire Hathaway's first shareholder meeting with Greg Abel as CEO. Several attendees cast doubt on the annual gathering's future without Warren Buffett hosting it.",
+        "url": "https://www.businessinsider.com/omaha-trip-warren-buffett-berkshire-shareholder-meeting-weekend-abel-future-2026-5"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-03 08:15:00",
+        "publisher": "Seeking Alpha",
+        "title": "Berkshire Hathaway Begins A New Era, Embracing AI Even As Buffett Keeps Swinging",
+        "excerpt": "Berkshire Hathaway delivered robust Q1 2026 results, with operating earnings rising from $9.64B to $11.35B. Shares have become more attractively valued, with price-to-book and EV/book multiples at multi-year lows, supporting a strong buy rating. The management transition to Greg ",
+        "url": "https://seekingalpha.com/article/4897815-berkshire-hathaway-begins-a-new-era-embracing-ai-even-as-buffett-keeps-swinging"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-03 07:04:43",
+        "publisher": "CNBC",
+        "title": "Greg Abel rules out Berkshire break-up, stresses continuity with Buffett's legacy at annual meeting",
+        "excerpt": "New CEO Greg Abel did most of the talking at his first Berkshire Hathaway shareholders meeting, but Warren Buffett was still a major presence.",
+        "url": "https://www.cnbc.com/2026/05/03/berkshire-annual-meeting-greg-abel-rules-out-break-up-stressing-continuity-with-buffett.html"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-03 07:03:52",
+        "publisher": "Business Insider",
+        "title": "What it's like meeting Warren Buffett \u2014 and why his Berkshire bash is unique",
+        "excerpt": "Warren Buffett was a trailblazer in using media to build a business, Sahil Bloom says. The wealth guru said Buffett's letters and annual meeting helped to grow his and Berkshire's brands.",
+        "url": "https://www.businessinsider.com/warren-buffett-berkshire-shareholder-meeting-sahil-bloom-media-abel-advice-2026-5"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-03 06:02:57",
+        "publisher": "Reuters",
+        "title": "Berkshire shareholders like Greg Abel, but following Warren Buffett is tough",
+        "excerpt": "\"Abel may grow into it. But he's no Warren Buffett.",
+        "url": "https://www.reuters.com/sustainability/boards-policy-regulation/berkshire-shareholders-like-greg-abel-following-warren-buffett-is-tough-2026-05-03/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-02 19:37:20",
+        "publisher": "CNBC Television",
+        "title": "Watch Greg Abel preside over the full 2026 Berkshire Hathaway annual shareholder meeting",
+        "excerpt": "Berkshire Hathaway CEO Greg Abel presides over the 2026 Berkshire Hathaway annual meeting.",
+        "url": "https://www.youtube.com/watch?v=mGbVNMchrmQ"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-02 16:00:17",
+        "publisher": "CNBC Television",
+        "title": "Greg Abel doesn't see a single successor to Charlie Munger as his top adviser",
+        "excerpt": "Asked who will play the Charlie Munger to his Warren Buffett, new CEO Greg Abel didn't name a single person but talked about the team that surrounds him. \u201cYou surround yourself with great people, and they're already here,\u201d he said.",
+        "url": "https://www.youtube.com/shorts/Sc2GD-BlJfM"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-02 15:58:19",
+        "publisher": "CNBC Television",
+        "title": "Berkshire's 2026 annual shareholder meeting: Watch the full afternoon session",
+        "excerpt": "Berkshire Hathaway CEO Greg Abel presides over the 2026 Berkshire Hathaway annual meeting.",
+        "url": "https://www.youtube.com/watch?v=D0kpoZZM1ug"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-02 15:56:55",
+        "publisher": "Reuters",
+        "title": "Berkshire shareholders reject report on workforce oversight, approve say-on-pay",
+        "excerpt": "Berkshire Hathaway shareholders on Saturday overwhelmingly rejected a proposal \u200bto publish a report discussing how the \u200cconglomerate oversees its more than 387,000 employees at nearly 200 businesses.",
+        "url": "https://www.reuters.com/business/world-at-work/berkshire-shareholders-reject-report-workforce-oversight-approve-say-on-pay-2026-05-02/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-02 15:21:33",
+        "publisher": "CNBC Television",
+        "title": "Berkshire's 2026 annual shareholder meeting: Watch the full morning session",
+        "excerpt": "Berkshire Hathaway CEO Greg Abel presides over the 2026 Berkshire Hathaway annual meeting.",
+        "url": "https://www.youtube.com/watch?v=4VwLwtiuxVQ"
+      }
+    ],
+    "Consumer_Discretionary": [
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-03 08:33:02",
+        "publisher": "24/7 Wall Street",
+        "title": "Rivian Tops Q1 Estimates, but Investors Investors Rightly Remain Wary",
+        "excerpt": "Electric vehicle stocks have faced a bumpy road lately, with softening demand, tariff worries, and high interest rates testing even the strongest players.",
+        "url": "https://247wallst.com/investing/2026/05/03/rivian-tops-q1-estimates-but-investors-investors-rightly-remain-wary/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-03 08:27:41",
+        "publisher": "Finbold",
+        "title": "2 stocks to hit $2 trillion market cap by Q4 2026",
+        "excerpt": "Amid the rising value of the stock market, several companies are positioning themselves for the next major valuation milestone, showing the potential to hit the $2 trillion market cap mark.",
+        "url": "https://finbold.com/2-stocks-to-hit-2-trillion-market-cap-by-q4-2026/"
+      },
+      {
+        "symbol": "MCD",
+        "publishedDate": "2026-05-03 06:51:16",
+        "publisher": "Seeking Alpha",
+        "title": "Wall Street Week Ahead",
+        "excerpt": "Listen on the go! A daily podcast of Wall Street Breakfast will be available by 8:00 a.m.",
+        "url": "https://seekingalpha.com/article/4897841-wall-street-week-ahead"
+      },
+      {
+        "symbol": "MCD",
+        "publishedDate": "2026-05-03 06:25:45",
+        "publisher": "Investopedia",
+        "title": "What to Expect in Markets This Week: April Jobs Report, Host of Earnings From Consumer Giants Coming Up",
+        "excerpt": "This week is all about the American pocketbook, with a new jobs report offering a view of the labor market and earnings from food and travel giants shedding light on how people are spending.",
+        "url": "https://www.investopedia.com/what-to-expect-in-markets-this-week-april-jobs-report-host-of-earnings-from-consumer-giants-coming-up-11962014"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-03 01:12:00",
+        "publisher": "Fool - Investing News",
+        "title": "My Top 5 Stocks to Buy in May",
+        "excerpt": "The AI build-out is driving many stocks higher.",
+        "url": "https://www.fool.com/investing/2026/05/03/my-top-5-stocks-to-buy-in-may/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-03 01:05:00",
+        "publisher": "Fool - Investing News",
+        "title": "SpaceX IPO: Is This the 10X Stock You've Been Waiting For?",
+        "excerpt": "The SpaceX IPO should be one of the biggest in history.",
+        "url": "https://www.fool.com/investing/2026/05/03/spacex-ipo-is-this-the-10x-stock-youve-been-waitin/"
+      },
+      {
+        "symbol": "NKE",
+        "publishedDate": "2026-05-03 00:30:00",
+        "publisher": "The Motley Fool",
+        "title": "Why Nike Stock Lost 16% in April",
+        "excerpt": "Nike's turnaround woes continued as revenue was flat and profits tumbled in its fiscal third-quarter earnings report. The company dialed back its forecast to return to revenue growth.",
+        "url": "https://www.fool.com/investing/2026/05/03/why-nike-stock-lost-16-in-april/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-02 21:31:00",
+        "publisher": "The Motley Fool",
+        "title": "Alphabet Is Outgrowing Amazon and Microsoft Where It Matters Most -- Why This Makes Alphabet Stock a Buy",
+        "excerpt": "Google Cloud grew 63% in the first quarter, well ahead of Microsoft Azure's 40% and AWS's 28%. Google Cloud's backlog nearly doubled in three months to over $460 billion.",
+        "url": "https://www.fool.com/investing/2026/05/02/alphabet-is-outgrowing-amazon-and-microsoft-where/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-02 18:30:00",
+        "publisher": "Fool - Investing News",
+        "title": "Prediction: This Will be Amazon's Next Big Move",
+        "excerpt": "The company is already generating billions of dollars thanks to the AI boom.",
+        "url": "https://www.fool.com/investing/2026/05/02/prediction-this-will-be-amazons-next-big-move/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-02 16:30:00",
+        "publisher": "Fool - Investing News",
+        "title": "Major Hyperscalers Just Reported Earnings. Nvidia Was The Winner",
+        "excerpt": "Nvidia's shareholders should be celebrating.",
+        "url": "https://www.fool.com/investing/2026/05/02/major-hyperscalers-just-reported-earnings-nvidia-w/"
+      }
+    ],
+    "Consumer_Staples": [
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-03 08:27:41",
+        "publisher": "Finbold",
+        "title": "2 stocks to hit $2 trillion market cap by Q4 2026",
+        "excerpt": "Amid the rising value of the stock market, several companies are positioning themselves for the next major valuation milestone, showing the potential to hit the $2 trillion market cap mark.",
+        "url": "https://finbold.com/2-stocks-to-hit-2-trillion-market-cap-by-q4-2026/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-03 08:21:15",
+        "publisher": "Seeking Alpha",
+        "title": "6 April Raises With 1 High Yield Giving 20% And 1 Cut",
+        "excerpt": "The Rose Income Garden (RIG) portfolio, with 73 dividend-paying holdings, yields 6% and is up 8.21% YTD, outperforming SPY. I view KO, WPC, and XEL as quality income holdings but consider KO and WPC overvalued, maintaining them as holds, while XEL is a buy on dips. GPC and KMB ar",
+        "url": "https://seekingalpha.com/article/4897845-6-april-raises-with-1-high-yield-giving-20-percent-1-cut"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-02 16:16:00",
+        "publisher": "GlobeNewsWire",
+        "title": "High Point University Celebrates Class of 2026 with Former Walmart International CEO",
+        "excerpt": "HIGH POINT, N.C., May 02, 2026 (GLOBE NEWSWIRE) -- High Point University celebrated the Class of 2026 and honored more than 1,000 undergraduate students who crossed the stage today during two Commencement ceremonies inside the Nido and Mariana Qubein Arena and Conference Center.",
+        "url": "https://www.globenewswire.com/news-release/2026/05/02/3286328/0/en/High-Point-University-Celebrates-Class-of-2026-with-Former-Walmart-International-CEO.html"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-02 15:46:00",
+        "publisher": "The Motley Fool",
+        "title": "Top 3 Unstoppable Dividend Growth Stocks to Buy (and Hold) for the Next Decade",
+        "excerpt": "Coca-Cola has raised its dividend for 64 consecutive years and just lifted its 2026 earnings outlook. American Express boosted its quarterly dividend by 16% in March.",
+        "url": "https://www.fool.com/investing/2026/05/02/top-3-unstoppable-dividend-growth-stocks-to-buy-fo/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-02 15:00:00",
+        "publisher": "The Motley Fool",
+        "title": "Is This Dividend King a Buy Near Its All-Time High?",
+        "excerpt": "Coca-Cola posted excellent first-quarter results, sending the stock sharply higher. The company's business is showing its resilience, a major selling point in the current landscape.",
+        "url": "https://www.fool.com/investing/2026/05/02/is-this-dividend-king-a-buy-near-its-all-time-high/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-02 13:21:12",
+        "publisher": "247 Wallst",
+        "title": "\u2018Traders Need to Be Really Careful Here\u2019: Schwab on the Fed Decision and Powell\u2019s Uncertain Future",
+        "excerpt": "Charles Schwab's market update Wednesday morning landed on a single piece of guidance for clients heading into the Fed decision: \"Traders need to be really careful here, in my view.\" The caution makes sense. The Federal Open Market Committee is widely expected to pause in the 3.5",
+        "url": "https://247wallst.com/investing/2026/05/02/traders-need-to-be-really-careful-here-schwab-on-the-fed-decision-and-powells-uncertain-future/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-02 09:46:00",
+        "publisher": "24/7 Wall Street",
+        "title": "Warren Buffett's Parting Gift to Investors Is Crushing the Market 6 Months Later",
+        "excerpt": "For nearly 60 years, investors have measured themselves against one benchmark: Warren Buffett.",
+        "url": "https://247wallst.com/investing/2026/05/02/warren-buffetts-parting-gift-to-investors-is-crushing-the-market-6-months-later/"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-02 09:32:56",
+        "publisher": "24/7 Wall Street",
+        "title": "Want $1,150 in Passive Income? Invest $10,000 Into These 3 Dividend Aristocrats",
+        "excerpt": "Dividend Aristocrats deliver income that grows quietly, raising payouts year after year.",
+        "url": "https://247wallst.com/investing/2026/05/02/want-1150-in-passive-income-invest-10000-into-these-3-dividend-aristocrats/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-02 05:45:01",
+        "publisher": "Business Insider",
+        "title": "I got a behind-the-scenes look at Walmart's new digital price tags that are sparking controversy",
+        "excerpt": "Walmart is rolling out digital price tags in its US stores, and public reaction has been mixed. I visited two locations to see how the tech works for employees and customers.",
+        "url": "https://www.businessinsider.com/walmart-digital-price-tag-shelf-labels-behind-the-scenes-2026-4"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-02 01:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "Soda Is Back! Is Now the Time to Buy Coca-Cola Stock?",
+        "excerpt": "Coca-Cola is seeing the benefits of increasing soda popularity.",
+        "url": "https://www.fool.com/investing/2026/05/02/soda-is-back-is-now-the-time-to-buy-coca-cola-stoc/"
+      }
+    ],
+    "Industrials": [
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-03 05:05:00",
+        "publisher": "The Motley Fool",
+        "title": "Forget This Trump eVTOL Darling: A Diversified Defense Contractor Is the Smarter Long\u2011Term Holding",
+        "excerpt": "Vertical Aerospace is making progress with its VX4 eVTOL aircraft -- but is still years away from commercialization. RTX Corp. is profitable now, and generating billions of dollars of free cash flow already.",
+        "url": "https://www.fool.com/investing/2026/05/03/forget-this-trump-evol-darling-a-diversified-defen/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-02 07:40:00",
+        "publisher": "Fool - Investing News",
+        "title": "April Was the Best Month for the Market Since 2020. Here's What's Driving It.",
+        "excerpt": "Massive AI infrastructure spending is driving revenues and profits higher across multiple industries.",
+        "url": "https://www.fool.com/investing/2026/05/02/april-best-month-for-market-since-2020/"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-01 12:51:26",
+        "publisher": "Fool - Investing News",
+        "title": "The U.S. Has 9 Damaged Military Bases to Rebuild in the Middle East. Is Now the Time to Buy Defense Stocks?",
+        "excerpt": "Defense stocks appear to be a volatile play right now.",
+        "url": "https://www.fool.com/investing/2026/05/01/the-us-has-9-damaged-military-bases-to-rebuild/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-01 12:16:44",
+        "publisher": "24/7 Wall Street",
+        "title": "Morgan Stanley Doubles Caterpillar Price Target to $915: Is This the Most Underrated Industrial of 2026?",
+        "excerpt": "Morgan Stanley raised its price target on Caterpillar (NYSE:CAT | CAT Price Prediction) to $915 from $430, while upgrading the stock to Equal Weight from Underweight.",
+        "url": "https://247wallst.com/investing/2026/05/01/morgan-stanley-doubles-caterpillar-price-target-to-915-is-this-the-most-underrated-industrial-of-2026/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-01 08:40:00",
+        "publisher": "Barrons",
+        "title": "Caterpillar Stock Can Rise Another 30%. Here's How.",
+        "excerpt": "Baird analyst Mig Dobre put a fresh bullish pick on Cat stock and raised his price target to a Street-high $1,165 a share.",
+        "url": "https://www.barrons.com/articles/caterpillar-stock-rally-2084ccab"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-01 07:59:20",
+        "publisher": "247 Wallst",
+        "title": "Here Are Friday\u2019s Top Wall Street Analyst Research Calls: Avis Budget, Caterpillar, Celestica, Commvault Systems, Ciena, Dutch Bros. e.l.f. Beauty, Hershey, Roblox, and More",
+        "excerpt": "Pre-Market Stock Futures: Futures are trading mixed as we get ready to finish off another wild week. What a difference a day makes: after a flat-to-down Wednesday, all the major indices exploded higher on Thursday and closed solidly in the green. Big earnings for members of the M",
+        "url": "https://247wallst.com/investing/2026/05/01/here-are-fridays-top-wall-street-analyst-research-calls-avis-budget-caterpillar-celestica-commvault-systems-ciena-dutch-bros-e-l-f-beauty-hershey-roblox-and-more/"
+      }
+    ],
+    "Materials": [
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-02 02:02:00",
+        "publisher": "GuruFocus",
+        "title": "Linde PLC (LIN) Q1 2026 Earnings Call Highlights: Strong EPS Growth and Strategic Acquisitions Propel Performance",
+        "excerpt": "EPS: $4.33, a 10% increase year-over-year.Operating Margin: 30%.Return on Capital: 23.8%.Revenue: $8.8 billion, up 8% year-over-year.Operating Profit: $2.6 bil",
+        "url": "https://www.gurufocus.com/news/8838831/linde-plc-lin-q1-2026-earnings-call-highlights-strong-eps-growth-and-strategic-acquisitions-propel-performance"
+      },
+      {
+        "symbol": "SHW",
+        "publishedDate": "2026-05-01 18:16:08",
+        "publisher": "Seeking Alpha",
+        "title": "Sherwin-Williams: Premium Valuation Meets Softening Demand Reality",
+        "excerpt": "The Sherwin-Williams Company is rated Sell due to a premium valuation unsupported by near-term fundamentals and softening end-market demand. Q1 '26 results showed headline growth, but organic constant-currency growth was weak, with volumes declining and acquisitions/FX driving mo",
+        "url": "https://seekingalpha.com/article/4897630-sherwin-williams-premium-valuation-meets-softening-demand-reality"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-01 15:30:41",
+        "publisher": "Zacks Investment Research",
+        "title": "Linde Q1 Earnings Beat Estimates, Revenues Rise Y/Y, Dividend Raised",
+        "excerpt": "LIN's bottom line beat Q1 estimates as pricing and project start-ups drive growth, with revenues up 8% and EPS rising 10% year over year.",
+        "url": "https://www.zacks.com/stock/news/2913353/linde-q1-earnings-beat-estimates-revenues-rise-y-y-dividend-raised?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2913353"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-01 14:51:36",
+        "publisher": "Seeking Alpha",
+        "title": "Linde plc (LIN) Q1 2026 Earnings Call Transcript",
+        "excerpt": "Linde plc (LIN) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4897467-linde-plc-lin-q1-2026-earnings-call-transcript"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-05-01 13:49:00",
+        "publisher": "PRNewsWire",
+        "title": "Air Products to Showcase Technology Solutions for Sustainable Iron and Steel Production at AISTech2026",
+        "excerpt": "Air Products Foundation will Donate up to $15,000 to the AIST Foundation LEHIGH VALLEY, Pa., May 1, 2026 /PRNewswire/ -- Air Products (NYSE:APD) will showcase industrial gas solutions for all phases of iron and steel production at AISTech2026 from May 4-7 at the David L.",
+        "url": "https://www.prnewswire.com/news-releases/air-products-to-showcase-technology-solutions-for-sustainable-iron-and-steel-production-at-aistech2026-302760380.html"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-01 12:13:00",
+        "publisher": "GuruFocus",
+        "title": "Linde (LIN) Q1 2026: Adjusted EPS $4.33 vs $4.23 est (beat), Revenue $8.78B vs $8.89B est (miss) -- Overvalued by 8.5%? GF Score 94/100",
+        "excerpt": "On May 1, 2026, Linde PLC (LIN) released its 8-K filing detailing first-quarter 2026 results. The company reported sales of $8.78 billion, operating profit of $",
+        "url": "https://www.gurufocus.com/news/8836935/linde-lin-q1-2026-adjusted-eps-433-vs-423-est-beat-revenue-878b-vs-889b-est-miss-overvalued-by-85-gf-score-94100"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-01 10:31:14",
+        "publisher": "Zacks Investment Research",
+        "title": "Linde (LIN) Reports Q1 Earnings: What Key Metrics Have to Say",
+        "excerpt": "While the top- and bottom-line numbers for Linde (LIN) give a sense of how the business performed in the quarter ended March 2026, it could be worth looking at how some of its key metrics compare to Wall Street estimates and year-ago values.",
+        "url": "https://www.zacks.com/stock/news/2913044/linde-lin-reports-q1-earnings-what-key-metrics-have-to-say?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2913044"
+      },
+      {
+        "symbol": "SHW",
+        "publishedDate": "2026-05-01 09:00:15",
+        "publisher": "MarketBeat",
+        "title": "Sherwin-Williams: The Boring Beauty Play on Housing Recovery",
+        "excerpt": "Sherwin-Williams NYSE: SHW\u00a0fell about 3.5% the day the company delivered its\u00a0Q1 2026 earnings report.\u00a0At a time when most investors are attuned to look beyond the\u00a0headline numbers, the company's guidance came in flat.",
+        "url": "https://www.marketbeat.com/originals/sherwin-williams-the-boring-beauty-play-on-housing-recovery/"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-01 08:10:46",
+        "publisher": "Zacks Investment Research",
+        "title": "Linde (LIN) Q1 Earnings and Revenues Surpass Estimates",
+        "excerpt": "Linde (LIN) came out with quarterly earnings of $4.33 per share, beating the Zacks Consensus Estimate of $4.27 per share. This compares to earnings of $3.95 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2912853/linde-lin-q1-earnings-and-revenues-surpass-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2912853"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-05-01 07:59:20",
+        "publisher": "247 Wallst",
+        "title": "Here Are Friday\u2019s Top Wall Street Analyst Research Calls: Avis Budget, Caterpillar, Celestica, Commvault Systems, Ciena, Dutch Bros. e.l.f. Beauty, Hershey, Roblox, and More",
+        "excerpt": "Pre-Market Stock Futures: Futures are trading mixed as we get ready to finish off another wild week. What a difference a day makes: after a flat-to-down Wednesday, all the major indices exploded higher on Thursday and closed solidly in the green. Big earnings for members of the M",
+        "url": "https://247wallst.com/investing/2026/05/01/here-are-fridays-top-wall-street-analyst-research-calls-avis-budget-caterpillar-celestica-commvault-systems-ciena-dutch-bros-e-l-f-beauty-hershey-roblox-and-more/"
+      }
+    ],
+    "Utilities": [
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-03 08:15:00",
+        "publisher": "The Motley Fool",
+        "title": "Better Dividend Stock: NextEra Energy vs. Black Hills",
+        "excerpt": "Black Hills is one of a small number of utilities that have achieved Dividend King status. NextEra Energy is a utility that has an impressive history of dividend growth.",
+        "url": "https://www.fool.com/investing/2026/05/03/better-dividend-stock-nextera-energy-vs-black-hill/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-02 19:15:00",
+        "publisher": "The Motley Fool",
+        "title": "My Top 3 Green Energy Stocks for May 2026",
+        "excerpt": "The green energy transition has taken a back seat to excitement over high oil prices. The growing demand for cleaner energy alternatives has not abated.",
+        "url": "https://www.fool.com/investing/2026/05/02/my-top-3-green-energy-stocks-for-may-2026/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-02 13:15:00",
+        "publisher": "Fool - Investing News",
+        "title": "The Energy Transition Isn't Dead. These 3 Renewable Stocks Are Built to Last Decades.",
+        "excerpt": "The world is focused on oil, but don't forget about the ongoing shift toward cleaner alternatives.",
+        "url": "https://www.fool.com/investing/2026/05/02/the-energy-transition-isnt-dead-these-3-renewable/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-02 08:15:00",
+        "publisher": "The Motley Fool",
+        "title": "NextEra Energy vs. Constellation Energy: Which Utility Stock Is Built for This Market?",
+        "excerpt": "Constellation Energy sells power under long-term contracts on the open market. NextEra Energy operates a large regulated utility business and a large clean energy business.",
+        "url": "https://www.fool.com/investing/2026/05/02/nextera-energy-vs-constellation-energy-which-utili/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-02 00:15:00",
+        "publisher": "The Motley Fool",
+        "title": "Don't Panic -- Buy These Dividend Stocks Instead",
+        "excerpt": "The geopolitical conflict in the Middle East has investors worried about oil prices and the risk of a recession. These three dividend stocks have strong track records and attractive businesses.",
+        "url": "https://www.fool.com/investing/2026/05/02/dont-panic-buy-these-dividend-stocks-instead/"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-01 11:15:00",
+        "publisher": "Fool - Investing News",
+        "title": "Want Decades of Passive Income? 2 Stocks to Buy Right Now",
+        "excerpt": "With attractive yields and impressive dividend histories, these two high-yield stocks could be passive income cornerstones.",
+        "url": "https://www.fool.com/investing/2026/05/01/want-decades-of-passive-income-2-stocks-to-buy-rig/"
+      },
+      {
+        "symbol": "SRE",
+        "publishedDate": "2026-05-01 10:11:14",
+        "publisher": "Zacks Investment Research",
+        "title": "Sempra Energy Poised to Gain From LNG and Infrastructure Investments",
+        "excerpt": "SRE ramps up LNG export projects and pours billions into grid upgrades and renewables to meet rising power demand across North America.",
+        "url": "https://www.zacks.com/stock/news/2912967/sempra-energy-poised-to-gain-from-lng-and-infrastructure-investments?cid=CS-STOCKNEWSAPI-FT-analyst_blog|zer_report_update-2912967"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-01 05:16:00",
+        "publisher": "Fool - Investing News",
+        "title": "3 Multi-Energy Stocks to Consider for Powering the Future",
+        "excerpt": "Focusing on total energy demand could be key in finding the best long-term energy stocks to own.",
+        "url": "https://www.fool.com/investing/2026/05/01/multi-energy-stocks-consider-power-future/"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-01 02:18:00",
+        "publisher": "GuruFocus",
+        "title": "Southern Co (SO) Q1 2026 Earnings Call Highlights: Strong Growth and Strategic Advances",
+        "excerpt": "Adjusted EPS: $1.32 per share, $0.09 higher than Q1 2025 and $0.12 above estimate.Retail Electricity Sales Growth: 2.3% higher than Q1 2025.Residential Custome",
+        "url": "https://www.gurufocus.com/news/8836408/southern-co-so-q1-2026-earnings-call-highlights-strong-growth-and-strategic-advances"
+      }
+    ],
+    "Real_Estate": [
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-05-01 13:11:09",
+        "publisher": "Investors Business Daily",
+        "title": "Welltower Crushed The S&P 500 Since The 2020 Stock Market Low; These Fundamentals Explain Why",
+        "excerpt": "Welltower stock has grown as the company has addressed a strong desire by human beings to enjoy a comfortable environment.",
+        "url": "https://www.investors.com/stock-lists/ibd-50/welltower-well-stock-real-estate-investment-trust-reit-ibd-50/"
+      },
+      {
+        "symbol": "CCI",
+        "publishedDate": "2026-05-01 09:27:00",
+        "publisher": "Business Wire",
+        "title": "Strengthening the Digital Infrastructure Backbone for AI: Zayo Completes Acquisition of Crown Castle's Fiber Solutions Business",
+        "excerpt": "DENVER--(BUSINESS WIRE)--Zayo (\u201cthe Company\u201d), a leading digital infrastructure provider, today announced the successful closing of its acquisition of Crown Castle's Fiber Solutions business, significantly expanding its metro fiber footprint and enterprise reach across key U.S. m",
+        "url": "https://www.businesswire.com/news/home/20260429316551/en/Strengthening-the-Digital-Infrastructure-Backbone-for-AI-Zayo-Completes-Acquisition-of-Crown-Castle%E2%80%99s-Fiber-Solutions-Business/"
+      },
+      {
+        "symbol": "CCI",
+        "publishedDate": "2026-05-01 09:23:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Arium Networks Launches Following Completion of EQT's Acquisition of Crown Castle's Small Cell Solutions Business",
+        "excerpt": "CHARLOTTE, N.C., May 01, 2026 (GLOBE NEWSWIRE) -- Arium Networks (the \u201cCompany\u201d) today announced its official launch as a standalone company following the completion of EQT Active Core Infrastructure\u2018s (\u201cEQT\u201d) acquisition of Crown Castle's Small Cell & Venue business.",
+        "url": "https://www.globenewswire.com/news-release/2026/05/01/3285986/0/en/Arium-Networks-Launches-Following-Completion-of-EQT-s-Acquisition-of-Crown-Castle-s-Small-Cell-Solutions-Business.html"
+      },
+      {
+        "symbol": "CCI",
+        "publishedDate": "2026-05-01 09:19:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Crown Castle Announces Closing of Sale of Fiber and Small Cell Businesses and Updates Full Year 2026 Outlook",
+        "excerpt": "HOUSTON, May 01, 2026 (GLOBE NEWSWIRE) -- Crown Castle Inc. (NYSE: CCI) (\"Crown Castle\") today announced the successful close of the transaction to sell its Fiber Solutions business to Zayo Group Holdings Inc. (\"Zayo\") and its Small Cell business to Arium Networks, an EQT Active ",
+        "url": "https://www.globenewswire.com/news-release/2026/05/01/3285983/7657/en/Crown-Castle-Announces-Closing-of-Sale-of-Fiber-and-Small-Cell-Businesses-and-Updates-Full-Year-2026-Outlook.html"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-01 07:12:43",
+        "publisher": "24/7 Wall Street",
+        "title": "Hyperscalers Hit $700 Billion in 2026 AI Spending Plans",
+        "excerpt": "On the latest Reuters Morning Bid podcast segment Powell era ends, hawks rise, the host flagged a milestone that sums up the entire 2026 market story: \u201cthe total spend now for 2026 from these big hyperscalers has now topped $700 billion.",
+        "url": "https://247wallst.com/investing/2026/05/01/hyperscalers-hit-700-billion-in-2026-ai-spending-plans/"
+      },
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-05-01 05:27:45",
+        "publisher": "Seeking Alpha",
+        "title": "Welltower: A Premium REIT At An Overextended Price",
+        "excerpt": "Welltower Inc. is a top-tier REIT with strong fundamentals, robust FFO growth, and disciplined capital allocation. WELL's SHO segment drove Q1'26 FFO up 23% YoY, with same-store NOI growth of 22.1% and occupancy at 88.8%. Despite operational excellence, WELL trades at a 33x P/FFO",
+        "url": "https://seekingalpha.com/article/4897288-welltower-a-premium-reit-at-an-overextended-price"
+      }
+    ],
+    "Communication": [
+      {
+        "symbol": "TMUS",
+        "publishedDate": "2026-05-03 08:40:22",
+        "publisher": "MarketBeat",
+        "title": "Q1 2026 Telecom Wars: Analyst Eye 30% Gains in T-Mobile Post-Earnings",
+        "excerpt": "AT&T NYSE: T, Verizon Communications NYSE: VZ, and T-Mobile US NASDAQ: TMUS are the three dominant players in the United States telecom industry. These firms battle fiercely for customers across mobile phone connectivity and home and business internet solutions.",
+        "url": "https://www.marketbeat.com/stock-ideas/q1-2026-telecom-wars-analyst-eye-30-gains-in-t-mobile-post-earnings/"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-05-03 06:51:16",
+        "publisher": "Seeking Alpha",
+        "title": "Wall Street Week Ahead",
+        "excerpt": "Listen on the go! A daily podcast of Wall Street Breakfast will be available by 8:00 a.m.",
+        "url": "https://seekingalpha.com/article/4897841-wall-street-week-ahead"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-05-03 06:25:45",
+        "publisher": "Investopedia",
+        "title": "What to Expect in Markets This Week: April Jobs Report, Host of Earnings From Consumer Giants Coming Up",
+        "excerpt": "This week is all about the American pocketbook, with a new jobs report offering a view of the labor market and earnings from food and travel giants shedding light on how people are spending.",
+        "url": "https://www.investopedia.com/what-to-expect-in-markets-this-week-april-jobs-report-host-of-earnings-from-consumer-giants-coming-up-11962014"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-03 04:17:01",
+        "publisher": "Business Insider",
+        "title": "How Google made peace with war",
+        "excerpt": "On April 27, more than 600 Google employees signed a letter urging CEO Sundar Pichai to prevent the Pentagon from using the company's AI products for classified operations. Google had spent the previous months building a closer relationship with the US Defense Department after a ",
+        "url": "https://www.businessinsider.com/google-made-peace-war-protests-trump-defense-tech-2026-5"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-03 02:02:51",
+        "publisher": "Fool - Investing News",
+        "title": "Alphabet Is Dropping $190 Billion on AI Infrastructure: 3 Semiconductor Stocks Set to Win Big",
+        "excerpt": "Don't overthink the AI spending spree.",
+        "url": "https://www.fool.com/investing/2026/05/03/alphabet-dropping-190-billion-on-ai-infrastructure/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-03 01:12:00",
+        "publisher": "Fool - Investing News",
+        "title": "My Top 5 Stocks to Buy in May",
+        "excerpt": "The AI build-out is driving many stocks higher.",
+        "url": "https://www.fool.com/investing/2026/05/03/my-top-5-stocks-to-buy-in-may/"
+      },
+      {
+        "symbol": "NFLX",
+        "publishedDate": "2026-05-02 23:34:53",
+        "publisher": "The Motley Fool",
+        "title": "Why Is Everyone Talking About Netflix Stock?",
+        "excerpt": "Netflix (NFLX 1.74%) learned a lot from the almost-acquisition of a major rival.",
+        "url": "https://www.fool.com/investing/2026/05/02/why-is-everyone-talking-about-netflix-stock/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-02 21:31:00",
+        "publisher": "The Motley Fool",
+        "title": "Alphabet Is Outgrowing Amazon and Microsoft Where It Matters Most -- Why This Makes Alphabet Stock a Buy",
+        "excerpt": "Google Cloud grew 63% in the first quarter, well ahead of Microsoft Azure's 40% and AWS's 28%. Google Cloud's backlog nearly doubled in three months to over $460 billion.",
+        "url": "https://www.fool.com/investing/2026/05/02/alphabet-is-outgrowing-amazon-and-microsoft-where/"
+      },
+      {
+        "symbol": "NFLX",
+        "publishedDate": "2026-05-02 18:05:25",
+        "publisher": "Forbes",
+        "title": "\u2018Man On Fire' Could Be Netflix's Next Big Hit For \u2018Night Agent' Fans",
+        "excerpt": "For viewers craving a gripping, adrenaline-fueled binge, Netflix's new political thriller Man on Fire from writer and showrunner Kyle Killen, delivers. The seven-episode series, based on A.J.",
+        "url": "https://www.forbes.com/sites/danafeldman/2026/05/02/man-on-fire-could-be-netflixs-next-big-hit-for-night-agent-fans/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-02 16:30:00",
+        "publisher": "Fool - Investing News",
+        "title": "Major Hyperscalers Just Reported Earnings. Nvidia Was The Winner",
+        "excerpt": "Nvidia's shareholders should be celebrating.",
+        "url": "https://www.fool.com/investing/2026/05/02/major-hyperscalers-just-reported-earnings-nvidia-w/"
+      }
+    ]
+  }
+}

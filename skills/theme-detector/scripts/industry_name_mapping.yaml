@@ -1,0 +1,103 @@
+# Finviz industry name → FMP industry name mapping.
+# Generated: 2026-05-03 from dry-run snapshots
+#   reports/theme_dry_run_2026-05-03.md
+#   skills/theme-detector/cache/fmp_industry/snapshot_*.json
+# Source counts: 73 directly-matched + 71 finviz-only + 55 fmp-only
+# Post-mapping coverage: 144/144 finviz keys = 100%, plus 6 new FMP-only signals.
+
+version: 1
+generated_date: "2026-05-03"
+
+# Tier A — 1:1 rename (high confidence; schema/wording change only)
+rename:
+  "Apparel Manufacturing":              "Apparel - Manufacturers"
+  "Apparel Retail":                     "Apparel - Retail"
+  "Footwear & Accessories":             "Apparel - Footwear & Accessories"
+  "Auto & Truck Dealerships":           "Auto - Dealerships"
+  "Auto Manufacturers":                 "Auto - Manufacturers"
+  "Auto Parts":                         "Auto - Parts"
+  "Recreational Vehicles":              "Auto - Recreational Vehicles"
+  "Banks - Diversified":                "Banks"
+  "Capital Markets":                    "Financial - Capital Markets"
+  "Financial Conglomerates":            "Financial - Conglomerates"
+  "Financial Data & Stock Exchanges":   "Financial - Data & Stock Exchanges"
+  "Credit Services":                    "Financial - Credit Services"
+  "Mortgage Finance":                   "Financial - Mortgages"
+  "Asset Management":                   "Investment - Banking & Investment Services"
+  "Insurance Brokers":                  "Insurance - Brokers"
+  "Building Materials":                 "Construction Materials"
+  "Building Products & Equipment":      "Construction"
+  "Specialty Chemicals":                "Chemicals - Specialty"
+  "Diagnostics & Research":             "Medical - Diagnostics & Research"
+  "Health Information Services":        "Medical - Healthcare Information Services"
+  "Healthcare Plans":                   "Medical - Healthcare Plans"
+  "Medical Care Facilities":            "Medical - Care Facilities"
+  "Medical Devices":                    "Medical - Devices"
+  "Medical Distribution":               "Medical - Distribution"
+  "Medical Instruments & Supplies":     "Medical - Instruments & Supplies"
+  "Industrial Distribution":            "Industrial - Distribution"
+  "Specialty Industrial Machinery":     "Industrial - Machinery"
+  "Farm & Heavy Construction Machinery": "Industrial - Machinery"
+  "Pollution & Treatment Controls":     "Industrial - Pollution & Treatment Controls"
+  "Metal Fabrication":                  "Manufacturing - Metal Fabrication"
+  "Tools & Accessories":                "Manufacturing - Tools & Accessories"
+  "Lodging":                            "Travel Lodging"
+  "Home Improvement Retail":            "Home Improvement"
+  "Personal Services":                  "Personal Products & Services"
+  "Telecom Services":                   "Telecommunications Services"
+  "Electronic Components":              "Hardware, Equipment & Parts"
+  "Electronics & Computer Distribution": "Technology Distributors"
+  "Real Estate Services":               "Real Estate - Services"
+  "Farm Products":                      "Agricultural Farm Products"
+  "Oil & Gas E&P":                      "Oil & Gas Exploration & Production"
+  "Oil & Gas Drilling":                 "Oil & Gas Energy"
+  "Utilities - Diversified":            "Diversified Utilities"
+  "Utilities - Regulated Electric":     "Regulated Electric"
+  "Utilities - Regulated Water":        "Regulated Water"
+  "Utilities - Renewable":              "Renewable Utilities"
+  "Other Precious Metals & Mining":     "Other Precious Metals"
+  "Other Industrial Metals & Mining":   "Industrial Materials"
+
+# Tier B — Many-to-one (Finviz finer split, FMP collapses)
+# Both Finviz keys read the same FMP industry value. Downstream consumer
+# should weight-blend or pick max when both present.
+collapse:
+  "Airlines":                           "Airlines, Airports & Air Services"
+  "Airports & Air Services":            "Airlines, Airports & Air Services"
+  "Gambling":                           "Gambling, Resorts & Casinos"
+  "Resorts & Casinos":                  "Gambling, Resorts & Casinos"
+  "Coking Coal":                        "Coal"
+  "Thermal Coal":                       "Coal"
+  "Lumber & Wood Production":           "Paper, Lumber & Forest Products"
+  "Paper & Paper Products":             "Paper, Lumber & Forest Products"
+
+# Tier C — Finviz-only (no FMP equivalent; keep Finviz as data source for these)
+# These industries are absent from FMP's classification. Theme-detector should
+# fall back to the Finviz scrape ONLY for these names; everything else uses FMP.
+finviz_only:
+  - "Aluminum"
+  - "Copper"
+  - "Silver"
+  - "Uranium"
+  - "Internet Retail"
+  - "Department Stores"
+  - "Confectioners"
+  - "Beverages - Brewers"
+  - "Textile Manufacturing"
+  - "Pharmaceutical Retailers"
+  - "REIT - Office"
+  - "REIT - Residential"
+  - "Semiconductor Equipment & Materials"
+  - "Scientific & Technical Instruments"
+  - "Utilities - Independent Power Producers"
+  - "Utilities - Regulated Gas"
+
+# Tier D — FMP-only (no Finviz equivalent; new signals to surface post-migration)
+# Include these in theme scoring for finer-grained industry coverage.
+fmp_only:
+  - "Agricultural - Machinery"
+  - "Industrial Materials"           # NOTE: also target of "Other Industrial Metals & Mining" rename — verify no double-count
+  - "Medical - Equipment & Services"
+  - "Medical - Pharmaceuticals"
+  - "Real Estate - General"
+  - "Software - Services"

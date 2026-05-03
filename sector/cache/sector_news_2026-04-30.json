@@ -1,0 +1,911 @@
+{
+  "as_of_date": "2026-04-30",
+  "schema_version": "V1.4",
+  "lookback_days": 2,
+  "max_per_sector": 10,
+  "total_articles": 110,
+  "sectors": {
+    "Technology": [
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-30 11:40:26",
+        "publisher": "24/7 Wall Street",
+        "title": "Microsoft Falls 5% Despite Q3 Beat: Why $190 Billion in AI Spending Has Investors Worried",
+        "excerpt": "Shares of Microsoft (NASDAQ:MSFT | MSFT Price Prediction) are down 5% in midday trading Thursday, changing hands near $402 after closing Wednesday at $424.46.",
+        "url": "https://247wallst.com/investing/2026/04/30/microsoft-falls-5-despite-q3-beat-why-190-billion-in-ai-spending-has-investors-worried/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-30 11:24:31",
+        "publisher": "24/7 Wall Street",
+        "title": "Wall Street Splits on Microsoft After Earnings: Is the Azure Acceleration Worth the CapEx?",
+        "excerpt": "Wall Street is divided on Microsoft (NASDAQ:MSFT | MSFT Price Prediction) after the company's fiscal Q3 2026 report.",
+        "url": "https://247wallst.com/investing/2026/04/30/wall-street-splits-on-microsoft-after-earnings-is-the-azure-acceleration-worth-the-capex/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-30 11:21:11",
+        "publisher": "Schwab Network",
+        "title": "META Pressure, GOOGL Gains and a \"Mixed Picture on Data",
+        "excerpt": "Markets are attempting to make sense of GDP, PCE and Jobless Claims data while also weighing the earnings reports from Alphabet (GOOGL), Meta Platforms (META), Microsoft (MSFT) and Amazon (AMZN). Kevin Green is watching the $600 level for META saying that could be a key level for",
+        "url": "https://www.youtube.com/watch?v=cq_x1DjZtXQ"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-30 11:15:19",
+        "publisher": "Seeking Alpha",
+        "title": "Microsoft's AI Engine Just Switched Gears",
+        "excerpt": "Revenue reached $82.9B (+18% YoY), while operating income rose 20% to $38.4B, with margins expanding to ~46%. Microsoft's Azure grew 40% YoY, with management confirming demand exceeds supply, signaling constrained rather than slowing growth. AI business surpassed $37B run rate (+",
+        "url": "https://seekingalpha.com/article/4896452-microsoft-stock-q3-ai-engine-just-switched-gears"
+      },
+      {
+        "symbol": "ORCL",
+        "publishedDate": "2026-04-30 11:11:14",
+        "publisher": "24/7 Wall Street",
+        "title": "Oracle's Recent Pullback Creates a Compelling Entry Point for Long-Term Investors",
+        "excerpt": "Oracle (NYSE: ORCL | ORCL Price Prediction) has been one of the most volatile mega-caps in the market over the past year, surging from the $130s into the $300s before unwinding back to the mid-$160s.",
+        "url": "https://247wallst.com/investing/2026/04/30/oracles-recent-pullback-creates-a-compelling-entry-point-for-long-term-investors/"
+      },
+      {
+        "symbol": "AVGO",
+        "publishedDate": "2026-04-30 11:09:53",
+        "publisher": "24/7 Wall Street",
+        "title": "I Was Wrong. Broadcom Is Far From Topping Out.",
+        "excerpt": "I keep hitting the buy button on Broadcom (NASDAQ:AVGO | AVGO Price Prediction), and I am here to admit my earlier bearish stance was wrong.",
+        "url": "https://247wallst.com/investing/2026/04/30/i-was-wrong-broadcom-is-far-from-topping-out/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-30 10:51:50",
+        "publisher": "Schaeffers Research",
+        "title": "Meta, Microsoft Stock Stalled by Capex Obstacles",
+        "excerpt": "Big Tech is the focus on Wall Street today.",
+        "url": "https://www.schaeffersresearch.com/content/news/2026/04/30/meta-microsoft-stock-stalled-by-capex-obstacles"
+      },
+      {
+        "symbol": "ORCL",
+        "publishedDate": "2026-04-30 10:50:17",
+        "publisher": "Zacks Investment Research",
+        "title": "Why Oracle (ORCL) is a Top Momentum Stock for the Long-Term",
+        "excerpt": "Whether you're a value, growth, or momentum investor, finding strong stocks becomes easier with the Zacks Style Scores, a top feature of the Zacks Premium research service.",
+        "url": "https://www.zacks.com/stock/news/2912046/why-oracle-orcl-is-a-top-momentum-stock-for-the-long-term?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_momentum_score-2912046"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-04-30 10:46:56",
+        "publisher": "24/7 Wall Street",
+        "title": "NVIDIA Falls 4% on Rotation Concerns: How Strong Profitability Could Save the Bull Case",
+        "excerpt": "Shares of NVIDIA (NASDAQ:NVDA | NVDA Price Prediction) are trading near $201 in mid-morning action on Thursday, down roughly 4% from Wednesday's close of $209.25.",
+        "url": "https://247wallst.com/investing/2026/04/30/nvidia-falls-4-on-rotation-concerns-how-strong-profitability-could-save-the-bull-case/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-04-30 10:43:24",
+        "publisher": "Invezz",
+        "title": "Microsoft stock slips 5% after earnings, but analysts are hiking targets",
+        "excerpt": "Shares of Microsoft fell sharply on Thursday, dropping around 5% to $402.37 in early trading, as investors reacted to the company's elevated capital spending outlook despite strong cloud growth and an earnings beat. The decline came even as broader markets showed mixed performanc",
+        "url": "https://invezz.com/news/2026/04/30/microsoft-stock-slips-5-after-earnings-but-analysts-are-hiking-targets/"
+      }
+    ],
+    "Healthcare": [
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 11:16:34",
+        "publisher": "Investopedia",
+        "title": "Demand for Weight-Loss Drugs Drove Blockbuster Results for Eli Lilly. Its Stock Is Surging.",
+        "excerpt": "Eli Lilly's stock is powering higher on fresh signs of booming demand for its weight-loss drugs. Will it be enough to drive a recovery for the stock?",
+        "url": "https://www.investopedia.com/demand-for-weight-loss-drugs-drove-blockbuster-results-for-eli-lilly-its-stock-is-surging-lly-11961907"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 11:02:15",
+        "publisher": "CNBC",
+        "title": "FDA proposes excluding Novo, Lilly weight loss drugs from bulk compounding list in win for the companies",
+        "excerpt": "The \u2060Food and Drug \u2060Administration proposed \u200bexcluding the active ingredients in Novo Nordisk \u200cand Eli Lilly's blockbuster obesity and diabetes medications from the \u2060list \u2060of drugs that outsourcing facilities can use for \u200bcompounding. If that proposal is finalized, the exclusion ",
+        "url": "https://www.cnbc.com/2026/04/30/fda-novo-lilly-glp-1s-compounding.html"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-04-30 10:40:26",
+        "publisher": "24/7 Wall Street",
+        "title": "Price Prediction: Why AbbVie's Post-Humira Pivot Makes It a Strong Buy",
+        "excerpt": "Our AbbVie (NYSE:ABBV | ABBV Price Prediction) call lands on the constructive side of the ledger after a noisy but encouraging Q1 earnings report.",
+        "url": "https://247wallst.com/investing/2026/04/30/price-prediction-why-abbvies-post-humira-pivot-makes-it-a-strong-buy/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-04-30 10:36:13",
+        "publisher": "Zacks Investment Research",
+        "title": "Merck (MRK) Q1 Earnings: Taking a Look at Key Metrics Versus Estimates",
+        "excerpt": "Although the revenue and EPS for Merck (MRK) give a sense of how its business performed in the quarter ended March 2026, it might be worth considering how some key metrics compare with Wall Street estimates and the year-ago numbers.",
+        "url": "https://www.zacks.com/stock/news/2911928/merck-mrk-q1-earnings-taking-a-look-at-key-metrics-versus-estimates?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911928"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 10:35:54",
+        "publisher": "Zacks Investment Research",
+        "title": "Compared to Estimates, Lilly (LLY) Q1 Earnings: A Look at Key Metrics",
+        "excerpt": "The headline numbers for Lilly (LLY) give insight into how the company performed in the quarter ended March 2026, but it may be worthwhile to compare some of its key metrics to Wall Street estimates and the year-ago actuals.",
+        "url": "https://www.zacks.com/stock/news/2911904/compared-to-estimates-lilly-lly-q1-earnings-a-look-at-key-metrics?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911904"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 10:24:18",
+        "publisher": "Schwab Network",
+        "title": "QCOM Rally, RCL Regains Bookings Pace, LLY Soars",
+        "excerpt": "While Mag 7 names take a lot of the headlines after earnings, the moves from Qualcomm (QCOM), Royal Caribbean (RCL) and Eli Lilly (LLY) are on Diane King Hall's radar following Thursday's open. She breaks down the numbers behind this trio of movers, including Royal Caribbean's \"r",
+        "url": "https://www.youtube.com/watch?v=nBRA3lqX7Ig"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 09:54:13",
+        "publisher": "Reuters",
+        "title": "US FDA proposes excluding weight-loss drugs from compounding list",
+        "excerpt": "The U.S. Food and Drug Administration on \u200bThursday proposed excluding active ingredients for Novo \u200cNordisk and Eli Lilly's weight-loss drugs on the list of drugs \u200boutsourcing facilities can use \u200bfor compounding.",
+        "url": "https://www.reuters.com/business/healthcare-pharmaceuticals/us-fda-proposes-excluding-weight-loss-drugs-compounding-list-2026-04-30/"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 09:09:32",
+        "publisher": "24/7 Wall Street",
+        "title": "S&P 500 Rides Tech Earnings Wave Despite Inflation Warning Shot",
+        "excerpt": "The S&P 500 (^GSPC) is off to the races this morning, up 0.50% thanks to tailwinds from mega-cap earnings beats and a sharp pullback in oil prices, even as the Fed's preferred inflation gauge ran hotter than expected.",
+        "url": "https://247wallst.com/investing/2026/04/30/sp-500-rides-tech-earnings-wave-despite-inflation-warning-shot/"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-04-30 09:00:00",
+        "publisher": "PRNewsWire",
+        "title": "Allergan Aesthetics Launches Philanthropic Effort in Recognition of Skin Cancer Awareness Month",
+        "excerpt": "Through its loyalty rewards program All\u0113, Allergan Aesthetics will donate to The Skin Cancer Foundation $10 for every new member who joins from a referral in May, up to $100,000. IRVINE, Calif.",
+        "url": "https://www.prnewswire.com/news-releases/allergan-aesthetics-launches-philanthropic-effort-in-recognition-of-skin-cancer-awareness-month-302757937.html"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-04-30 08:55:51",
+        "publisher": "Zacks Investment Research",
+        "title": "Eli Lilly (LLY) Beats Q1 Earnings and Revenue Estimates",
+        "excerpt": "Eli Lilly (LLY) came out with quarterly earnings of $8.55 per share, beating the Zacks Consensus Estimate of $7.06 per share. This compares to earnings of $3.34 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911646/eli-lilly-lly-beats-q1-earnings-and-revenue-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911646"
+      }
+    ],
+    "Energy": [
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-30 11:40:18",
+        "publisher": "Zacks Investment Research",
+        "title": "ExxonMobil's Q1 Earnings on Deck: Should You Bet on the Stock?",
+        "excerpt": "XOM to report Q1 2026 on May 1; EPS seen at $1.07 on $81.5B sales as filings flag upstream lift from higher liquids and gas prices.",
+        "url": "https://www.zacks.com/stock/news/2912244/exxonmobil-s-q1-earnings-on-deck-should-you-bet-on-the-stock?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2912244"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-04-30 10:40:24",
+        "publisher": "Zacks Investment Research",
+        "title": "Are Oils-Energy Stocks Lagging ConocoPhillips (COP) This Year?",
+        "excerpt": "Here is how ConocoPhillips (COP) and Equinor (EQNR) have performed compared to their sector so far this year.",
+        "url": "https://www.zacks.com/stock/news/2911963/are-oils-energy-stocks-lagging-conocophillips-cop-this-year?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_1-2911963"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-04-30 10:26:16",
+        "publisher": "Zacks Investment Research",
+        "title": "ConocoPhillips (COP) Q1 Earnings and Revenues Surpass Estimates",
+        "excerpt": "ConocoPhillips (COP) came out with quarterly earnings of $1.89 per share, beating the Zacks Consensus Estimate of $1.73 per share. This compares to earnings of $2.09 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911849/conocophillips-cop-q1-earnings-and-revenues-surpass-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911849"
+      },
+      {
+        "symbol": "EOG",
+        "publishedDate": "2026-04-30 10:16:40",
+        "publisher": "Zacks Investment Research",
+        "title": "What Analyst Projections for Key Metrics Reveal About EOG Resources (EOG) Q1 Earnings",
+        "excerpt": "Besides Wall Street's top-and-bottom-line estimates for EOG Resources (EOG), review projections for some of its key metrics to gain a deeper understanding of how the company might have fared during the quarter ended March 2026.",
+        "url": "https://www.zacks.com/stock/news/2911832/what-analyst-projections-for-key-metrics-reveal-about-eog-resources-eog-q1-earnings?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm_preview-2911832"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-30 10:06:42",
+        "publisher": "Invezz",
+        "title": "ExxonMobil earnings may miss again as Hormuz conflict hits revenue",
+        "excerpt": "ExxonMobil, the world's largest publicly traded energy giant, is set to release its fiscal first-quarter 2026 earnings report before the US market opens on May 1.\u00a0 These will be the company's first full quarterly results since the outbreak of the Hormuz conflict, with investors k",
+        "url": "https://invezz.com/news/2026/04/30/exxonmobil-earnings-may-miss-again-as-hormuz-conflict-hits-revenue/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-30 07:59:00",
+        "publisher": "Invezz",
+        "title": "These two energy stocks will benefit from UAE's decision to leave OPEC",
+        "excerpt": "The United Arab Emirates' impending exit from OPEC and OPEC+ on May 1 marks a seismic shift in the global energy landscape, dismantling a decades-long framework of production quotas that has governed market supply. As the cartel's third-largest producer, the UAE's pivot toward un",
+        "url": "https://invezz.com/news/2026/04/30/these-two-energy-stocks-will-benefit-from-uaes-decision-to-leave-opec/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-04-30 07:54:00",
+        "publisher": "WSJ",
+        "title": "ConocoPhillips Cuts Outlook, Logs Lower Earnings",
+        "excerpt": "ConocoPhillips reported a first-quarter profit of $2.18 billion, or $1.78 a share, down from a year earlier, amid lower gas prices in Permian and lower volumes.",
+        "url": "https://www.wsj.com/business/retail/conocophillips-cuts-outlook-logs-lower-earnings-1cb39673"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-04-30 07:36:00",
+        "publisher": "Barrons",
+        "title": "ConocoPhillips Earnings Beat Expectations. Why the Stock Is Falling.",
+        "excerpt": "ConocoPhillips earnings were ahead of analysts' forecasts but it expects slightly lower production in the current quarter.",
+        "url": "https://www.barrons.com/articles/conocophillips-earnings-stock-price-593686e7"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-04-30 07:28:32",
+        "publisher": "Benzinga",
+        "title": "How To Earn $500 A Month From Chevron Stock Ahead Of Q1 Earnings",
+        "excerpt": "Chevron Corporation (NYSE:CVX) will release earnings for its first quarter before the opening bell on Friday, May 1.",
+        "url": "https://www.benzinga.com/trading-ideas/dividends/26/04/52165531/how-to-earn-500-a-month-from-chevron-stock-ahead-of-q1-earnings"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-04-30 07:21:16",
+        "publisher": "Zacks Investment Research",
+        "title": "Should iShares S&P 500 Value ETF (IVE) Be on Your Investing Radar?",
+        "excerpt": "Looking for broad exposure to the Large Cap Value segment of the US equity market? You should consider the iShares S&P 500 Value ETF (IVE), a passively managed exchange traded fund launched on May 22, 2000.",
+        "url": "https://www.zacks.com/stock/news/2911573/should-ishares-s-p-500-value-etf-ive-be-on-your-investing-radar?cid=CS-STOCKNEWSAPI-FT-style_box_etf-2911573"
+      }
+    ],
+    "Financials": [
+      {
+        "symbol": "GS",
+        "publishedDate": "2026-04-30 10:40:34",
+        "publisher": "Zacks Investment Research",
+        "title": "Here's Why Goldman Sachs (GS) is a Strong Value Stock",
+        "excerpt": "The Zacks Style Scores offers investors a way to easily find top-rated stocks based on their investing style. Here's why you should take advantage.",
+        "url": "https://www.zacks.com/stock/news/2911998/here-s-why-goldman-sachs-gs-is-a-strong-value-stock?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_value_score-2911998"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-04-30 10:15:30",
+        "publisher": "Business Insider",
+        "title": "What longtime attendees expect from Berkshire's first big bash without Warren Buffett as host",
+        "excerpt": "For the first time, Warren Buffett won't be hosting Berkshire Hathaway's shareholder meeting. New CEO Greg Abel will take center stage this weekend and field hours of questions instead.",
+        "url": "https://www.businessinsider.com/warren-buffett-berkshire-hathaway-meeting-greg-abel-omaha-expectation-2026-4"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-04-30 10:00:22",
+        "publisher": "CNBC",
+        "title": "Greg Abel Will Take The Stage From Warren Buffett At Berkshire Meeting",
+        "excerpt": "Investors will be closely watching this year's Berkshire Hathaway Annual Shareholders Meeting on Saturday as Greg Abel takes center stage as the company's new leader. Abel, who took the baton from Warren Buffett in January, will host the annual gathering for the first time as CEO",
+        "url": "https://www.youtube.com/watch?v=EjRIfA30neg"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-30 09:53:09",
+        "publisher": "New York Post",
+        "title": "Citi paid ex-JPMorgan banker $52M despite allegations of bullying, abusive behavior: report",
+        "excerpt": "Vis Raghavan was hired by Citigroup in 2024 as its head of banking, just days after JPMorgan Chase told him he had no long-term future at the firm.",
+        "url": "https://nypost.com/2026/04/30/business/citi-paid-ex-jpmorgan-banker-52m-bullying-allegations-report/"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-30 08:27:20",
+        "publisher": "Finbold",
+        "title": "Banking giant downgrades Meta stock on massive earnings plunge",
+        "excerpt": "JPMorgan's (NYSE: JPM) reaction to Meta Platforms' (NASDAQ: META) latest earnings report appears largely in line with the actual results achieved in the first quarter (Q1) of 2026, but also somewhat more measured than the market's.",
+        "url": "https://finbold.com/banking-giant-downgrades-meta-stock-on-massive-earnings-plunge/"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-04-30 08:02:41",
+        "publisher": "Finbold",
+        "title": "JPMorgan stock edges lower as executive faces misconduct lawsuit",
+        "excerpt": "JPMorgan Chase (NYSE: JPM) shares edged lower in pre-market trading on Thursday, April 30, as a lawsuit accusing one of the bank's executives of misconduct drew attention online.",
+        "url": "https://finbold.com/jpmorgan-stock-edges-lower-as-executive-faces-misconduct-lawsuit/"
+      },
+      {
+        "symbol": "BAC",
+        "publishedDate": "2026-04-30 08:00:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Elicio Therapeutics to Present at the Bank of America Healthcare Conference",
+        "excerpt": "BOSTON, April 30, 2026 (GLOBE NEWSWIRE) -- Elicio Therapeutics, Inc. (Nasdaq: ELTX, \u201cElicio\u201d or the \u201cCompany\u201d), a clinical-stage biotechnology company developing a pipeline of novel immunotherapies for the treatment of cancer, today announced that Robert Connelly, Chief Executive",
+        "url": "https://www.globenewswire.com/news-release/2026/04/30/3284801/0/en/elicio-therapeutics-to-present-at-the-bank-of-america-healthcare-conference.html"
+      },
+      {
+        "symbol": "GS",
+        "publishedDate": "2026-04-30 07:40:26",
+        "publisher": "Reuters",
+        "title": "Italy's Dolomiti Energia picks Intesa, Goldman Sachs to lead potential IPO, sources say",
+        "excerpt": "Italian regional utility Dolomiti Energia has lined up banks for an initial public offering (IPO) later \u200bthis year that could value the group at more \u200cthan 3 billion euros ($3.50 billion), two sources familiar with the matter told Reuters.",
+        "url": "https://www.reuters.com/business/energy/italys-dolomiti-energia-picks-intesa-goldman-sachs-lead-potential-ipo-sources-2026-04-30/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-04-30 06:10:47",
+        "publisher": "Reuters",
+        "title": "Warren Buffett has stepped aside. Berkshire is now Greg Abel's show.",
+        "excerpt": "Berkshire Hathaway shareholders making the pilgrimage to Omaha, Nebraska, for the conglomerate's annual shareholder weekend will find much that looks familiar.",
+        "url": "https://www.reuters.com/world/china/warren-buffett-has-stepped-aside-berkshire-is-now-greg-abels-show-2026-04-30/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-04-30 06:06:32",
+        "publisher": "Reuters",
+        "title": "Berkshire Hathaway at a glance",
+        "excerpt": "Berkshire Hathaway is hosting its annual shareholder weekend in Omaha, Nebraska, the first since Warren Buffett ended his 60-year tenure as the conglomerate's CEO. The gathering is the largest in corporate America and includes Berkshire's annual meeting on Saturday.",
+        "url": "https://www.reuters.com/legal/transactional/berkshire-hathaway-glance-2026-04-30/"
+      }
+    ],
+    "Consumer_Discretionary": [
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 11:17:38",
+        "publisher": "MarketBeat",
+        "title": "Amazon's Earnings Just Sent the Stock to New Highs\u2014What's Next?",
+        "excerpt": "Shares of tech giant Amazon.com Inc NASDAQ: AMZN opened at a fresh all-time high on Thursday, 30 April, following their earnings report the previous night. It's the latest leg in a strong rally that's seen the stock gain more than 35% since the end of March.",
+        "url": "https://www.marketbeat.com/originals/amazons-earnings-just-sent-the-stock-to-new-highswhats-next/"
+      },
+      {
+        "symbol": "MCD",
+        "publishedDate": "2026-04-30 11:06:47",
+        "publisher": "Zacks Investment Research",
+        "title": "McDonald's (MCD) Earnings Expected to Grow: Should You Buy?",
+        "excerpt": "McDonald's (MCD) doesn't possess the right combination of the two key ingredients for a likely earnings beat in its upcoming report. Get prepared with the key expectations.",
+        "url": "https://www.zacks.com/stock/news/2912187/mcdonald-s-mcd-earnings-expected-to-grow-should-you-buy?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_9-2912187"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 10:50:52",
+        "publisher": "PYMNTS",
+        "title": "Amazon Sellers Gain Sales and Cut Costs With AI Tools",
+        "excerpt": "Independent sellers in Amazon's store saved time and money by adopting artificial intelligence (AI) tools in 2025, the company said in a report released Thursday (April 30). Amazon outlined this and other trends among sellers in a press release outlining findings from its latest ",
+        "url": "https://www.pymnts.com/amazon/2026/amazon-sellers-gain-sales-and-cut-costs-with-ai-tools/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 10:49:46",
+        "publisher": "Schaeffers Research",
+        "title": "Amazon Stock Suffers Post-Earnings Dip Despite New Peak",
+        "excerpt": "Amazon.com Inc (NASDAQ:AMZN) shares are down 1.1% to trade at $260.06 at last glance, even after the tech titan reported adjusted first-quarter earnings of $2.78 per share on $181.52 billion in revenue, both of which surpassed estimates.",
+        "url": "https://www.schaeffersresearch.com/content/news/2026/04/30/amazon-stock-suffers-post-earnings-dip-despite-new-peak"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 10:07:00",
+        "publisher": "PRNewsWire",
+        "title": "AUDIBLE OPENS DOORS TO FIRST-EVER BOOKLESS BOOKSTORE",
+        "excerpt": "Audible Story House, a Listening Lounge and Community Hub, Will Be Open to the Public from May 1 to May 31 in New York City Dozens of Events and Panels to Feature Luminaries such as Lily Chu, Matt James, Leon Neyfakh and More NEW YORK, April 30, 2026 /PRNewswire/ -- Audible, the ",
+        "url": "https://www.prnewswire.com/news-releases/audible-opens-doors-to-first-ever-bookless-bookstore-302758939.html"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 10:04:58",
+        "publisher": "24/7 Wall Street",
+        "title": "Amazon vs. Meta: Which Stock Will Win Over the Next Decade?",
+        "excerpt": "Amazon (NASDAQ: AMZN | AMZN Price Prediction) and Meta (NASDAQ: META) both recently dropped Q1 2026 results, and the earnings reports could not have framed two more different empires.",
+        "url": "https://247wallst.com/investing/2026/04/30/amazon-vs-meta-which-stock-will-win-over-the-next-decade/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 10:01:48",
+        "publisher": "Zacks Investment Research",
+        "title": "Big Techs Assure Lasting AI Frenzy - Which Stocks Will Gain?",
+        "excerpt": "NVDA, MU, AVGO, WDC, VRT and peers stand to gain as Big Tech lifts AI capex to $725B by 2026, fueling demand for chips, memory, and data center infrastructure.",
+        "url": "https://www.zacks.com/stock/news/2912174/big-techs-assure-lasting-ai-frenzy-which-stocks-will-gain?cid=CS-STOCKNEWSAPI-FT-analyst_blog|investment_ideas-2912174"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 09:55:07",
+        "publisher": "Benzinga",
+        "title": "Dow Jumps 300 POints; Amazon Posts Upbeat Earnings",
+        "excerpt": "U.S. stocks traded mixed this morning, with the Dow Jones index gaining around 300 points on Thursday.",
+        "url": "https://www.benzinga.com/news/26/04/52172052/dow-jumps-300-points-amazon-posts-upbeat-earnings"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-04-30 09:47:04",
+        "publisher": "24/7 Wall Street",
+        "title": "Forget Tesla's Robotaxi Promises \u2014 BYD Already Has What Investors Really Want",
+        "excerpt": "Shares of Tesla (NASDAQ:TSLA | TSLA Price Prediction) are once again dominating the financial press, with Elon Musk insisting that robotaxis, Optimus humanoids, and a coming wave of artificial intelligence will turn the company into something far bigger than a carmaker.",
+        "url": "https://247wallst.com/investing/2026/04/30/forget-teslas-robotaxi-promises-byd-already-has-what-investors-really-want/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-04-30 09:43:32",
+        "publisher": "24/7 Wall Street",
+        "title": "AI Data Center Spending Rushes Toward $800 Billion",
+        "excerpt": "As Microsoft (NASDAQ: MSFT | MSFT Price Prediction), Meta, Alphabet, and Amazon (NASDAQ: AMZN) announced earnings, they reiterated the amounts they would spend on AI data centers, and some said they were committed to continued growth.",
+        "url": "https://247wallst.com/investing/2026/04/30/ai-data-center-spending-rushes-toward-800-billion/"
+      }
+    ],
+    "Consumer_Staples": [
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-30 11:22:40",
+        "publisher": "24/7 Wall Street",
+        "title": "Why I Can't Stop Buying This Dividend King",
+        "excerpt": "I keep buying Coca-Cola (NYSE:KO | KO Price Prediction) and am not embarrassed about it.",
+        "url": "https://247wallst.com/investing/2026/04/30/why-i-cant-stop-buying-this-dividend-king/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-30 11:20:30",
+        "publisher": "Zacks Investment Research",
+        "title": "Sprouts Farmers Q1 Earnings Top Estimates on New Stores and E-commerce",
+        "excerpt": "SFM beats Q1 estimates as new stores and 10% e-commerce growth lift sales, even with comps down and margins pressured.",
+        "url": "https://www.zacks.com/stock/news/2912230/sprouts-farmers-q1-earnings-top-estimates-on-new-stores-and-e-commerce?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2912230"
+      },
+      {
+        "symbol": "PEP",
+        "publishedDate": "2026-04-30 10:38:37",
+        "publisher": "24/7 Wall Street",
+        "title": "3 Dividend Aristocrats I'd Rather Own Than the S&P 500 Right Now",
+        "excerpt": "The S&P 500 is up nearly 13% in the middle of an enormous crisis, but you should never get too complacent with the current environment.",
+        "url": "https://247wallst.com/investing/2026/04/30/3-dividend-aristocrats-id-rather-own-than-the-sp-500-right-now/"
+      },
+      {
+        "symbol": "PEP",
+        "publishedDate": "2026-04-30 10:01:03",
+        "publisher": "Zacks Investment Research",
+        "title": "PepsiCo, Inc. (PEP) Is a Trending Stock: Facts to Know Before Betting on It",
+        "excerpt": "PepsiCo (PEP) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2911775/pepsico-inc-pep-is-a-trending-stock-facts-to-know-before-betting-on-it?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2911775"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-30 10:00:00",
+        "publisher": "GlobeNewsWire",
+        "title": "NFWF Announces $5.4 Million in Grants from Walmart's Acres for America Program",
+        "excerpt": "Seven new grants will help protect natural resources, create opportunities for outdoor recreation and improve landscape connectivity for the benefit of wildlife Seven new grants will help protect natural resources, create opportunities for outdoor recreation and improve landscape",
+        "url": "https://www.globenewswire.com/news-release/2026/04/30/3285057/0/en/NFWF-Announces-5-4-Million-in-Grants-from-Walmart-s-Acres-for-America-Program.html"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-04-30 08:52:44",
+        "publisher": "24/7 Wall Street",
+        "title": "I Can't Stop Buying COST Stock. Here's Why.",
+        "excerpt": "I keep returning to Costco (NASDAQ:COST | COST Price Prediction) for the same reason a friend of mine keeps eating at the same diner: the value proposition has not budged in twenty years, the regulars keep showing up, and the owner keeps quietly getting richer.",
+        "url": "https://247wallst.com/investing/2026/04/30/i-cant-stop-buying-cost-stock-heres-why/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-04-30 07:42:49",
+        "publisher": "24/7 Wall Street",
+        "title": "3 Unstoppable Growth Stocks For Years Of Passive Income",
+        "excerpt": "Passive income separates a paycheck from a portfolio. Earned income stops when you stop working, but dividends landing quarterly do not.",
+        "url": "https://247wallst.com/investing/2026/04/30/3-unstoppable-growth-stocks-for-years-of-passive-income/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-04-30 07:21:07",
+        "publisher": "Zacks Investment Research",
+        "title": "Should Invesco S&P 500 Revenue ETF (RWL) Be on Your Investing Radar?",
+        "excerpt": "Looking for broad exposure to the Large Cap Value segment of the US equity market? You should consider the Invesco S&P 500 Revenue ETF (RWL), a passively managed exchange traded fund launched on February 22, 2008.",
+        "url": "https://www.zacks.com/stock/news/2911576/should-invesco-s-p-500-revenue-etf-rwl-be-on-your-investing-radar?cid=CS-STOCKNEWSAPI-FT-style_box_etf-2911576"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-04-29 18:46:31",
+        "publisher": "Zacks Investment Research",
+        "title": "Murphy USA (MUSA) Surpasses Q1 Earnings and Revenue Estimates",
+        "excerpt": "Murphy USA (MUSA) came out with quarterly earnings of $7.28 per share, beating the Zacks Consensus Estimate of $5.37 per share. This compares to earnings of $2.63 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911250/murphy-usa-musa-surpasses-q1-earnings-and-revenue-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911250"
+      },
+      {
+        "symbol": "PEP",
+        "publishedDate": "2026-04-29 16:32:00",
+        "publisher": "Fool - Investing News",
+        "title": "3 Best Consumer Staples Stocks to Buy and Hold for Decades",
+        "excerpt": "These consumer companies have served customers for decades, and their stocks trade at attractive levels.",
+        "url": "https://www.fool.com/investing/2026/04/29/3-best-consumer-staples-stocks-to-buy-and-hold-for/"
+      }
+    ],
+    "Industrials": [
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 10:57:07",
+        "publisher": "Schaeffers Research",
+        "title": "More Records for Caterpillar Stock After Blowout Earnings",
+        "excerpt": "Caterpillar Inc \u00a0(NYSE:CAT)\u00a0stock is leading the Dow Jones Industrial Average (DJI) higher today, last seen up 8.7% to trade at $880.17, after earlier scoring a record high of $888.38.",
+        "url": "https://www.schaeffersresearch.com/content/news/2026/04/30/more-records-for-caterpillar-stock-after-blowout-earnings"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 10:35:53",
+        "publisher": "Zacks Investment Research",
+        "title": "Compared to Estimates, Caterpillar (CAT) Q1 Earnings: A Look at Key Metrics",
+        "excerpt": "While the top- and bottom-line numbers for Caterpillar (CAT) give a sense of how the business performed in the quarter ended March 2026, it could be worth looking at how some of its key metrics compare to Wall Street estimates and year-ago values.",
+        "url": "https://www.zacks.com/stock/news/2911906/compared-to-estimates-caterpillar-cat-q1-earnings-a-look-at-key-metrics?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911906"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 09:13:58",
+        "publisher": "Invezz",
+        "title": "Caterpillar jumps on earnings beat as AI-driven demand adds to growth",
+        "excerpt": "Caterpillar reported stronger-than-expected first-quarter earnings on Thursday, driven by robust demand across its construction and power generation businesses, with shares rising nearly 6% in premarket trading. The industrial giant, widely viewed as a bellwether for global econo",
+        "url": "https://invezz.com/news/2026/04/30/caterpillar-jumps-on-earnings-beat-as-ai-driven-demand-adds-to-growth/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 09:09:32",
+        "publisher": "24/7 Wall Street",
+        "title": "S&P 500 Rides Tech Earnings Wave Despite Inflation Warning Shot",
+        "excerpt": "The S&P 500 (^GSPC) is off to the races this morning, up 0.50% thanks to tailwinds from mega-cap earnings beats and a sharp pullback in oil prices, even as the Fed's preferred inflation gauge ran hotter than expected.",
+        "url": "https://247wallst.com/investing/2026/04/30/sp-500-rides-tech-earnings-wave-despite-inflation-warning-shot/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 08:54:00",
+        "publisher": "Market Watch",
+        "title": "Caterpillar handily beat Wall Street estimates \u2014 not for the first time",
+        "excerpt": "The construction manufacturer reported a 38% rise in sales in its construction industries arm.",
+        "url": "https://www.marketwatch.com/story/caterpillar-handily-beat-wall-street-estimates-not-for-the-first-time-2d144758"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 08:41:12",
+        "publisher": "Zacks Investment Research",
+        "title": "Caterpillar (CAT) Q1 Earnings and Revenues Beat Estimates",
+        "excerpt": "Caterpillar (CAT) came out with quarterly earnings of $5.54 per share, beating the Zacks Consensus Estimate of $4.55 per share. This compares to earnings of $4.25 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911628/caterpillar-cat-q1-earnings-and-revenues-beat-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911628"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-04-30 07:45:00",
+        "publisher": "Business Wire",
+        "title": "Creating America's First Transcontinental Railroad: Union Pacific and Norfolk Southern's Amended STB Merger Application Estimates Shippers Will Save $3.5 Billion Annually",
+        "excerpt": "OMAHA, Neb. & ATLANTA--(BUSINESS WIRE)--Union Pacific Corporation (NYSE: UNP) and Norfolk Southern Corporation (NYSE: NSC) today submitted an amended merger application to the Surface Transportation Board (STB) seeking approval to create America's first transcontinental railroad.",
+        "url": "https://www.businesswire.com/news/home/20260430887534/en/Creating-America%E2%80%99s-First-Transcontinental-Railroad-Union-Pacific-and-Norfolk-Southern%E2%80%99s-Amended-STB-Merger-Application-Estimates-Shippers-Will-Save-3.5-Billion-Annually/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 07:01:00",
+        "publisher": "WSJ",
+        "title": "Caterpillar Profit Climbs, Sales Jump on Continued Demand",
+        "excerpt": "Caterpillar notched a higher profit and jump in sales during the first quarter, driven by continued demand for its construction equipment, as well as its engines and generators.",
+        "url": "https://www.wsj.com/business/earnings/caterpillar-profit-climbs-sales-jump-on-continued-demand-aa7e847d"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-30 06:30:00",
+        "publisher": "PRNewsWire",
+        "title": "Caterpillar Reports First-Quarter 2026 Results",
+        "excerpt": "First-quarter 2026 sales and revenues increased 22% to $17.4 billion First-quarter 2026 profit per share of $5.47; adjusted profit per share of $5.54 \u00a0\u00a0 Deployed $5.7 billion of cash for share repurchases and dividends in the first quarter First Quarter ($ in billions except prof",
+        "url": "https://www.prnewswire.com/news-releases/caterpillar-reports-first-quarter-2026-results-302758655.html"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-04-29 16:15:00",
+        "publisher": "PRNewsWire",
+        "title": "PROPWR Secures Strategic Framework Agreement with Caterpillar Inc.",
+        "excerpt": "Agreement Enables Acquisition of Up to 2.1 Gigawatts of Incremental Power Generation Capacity by 2031 IRVING, Texas, April 29, 2026 /PRNewswire/ -- ProPetro Holding Corp. (NYSE: PUMP) (\"ProPetro\") today announced that its PROPWR business unit has entered into a strategic framewor",
+        "url": "https://www.prnewswire.com/news-releases/propwr-secures-strategic-framework-agreement-with-caterpillar-inc-302757772.html"
+      }
+    ],
+    "Materials": [
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-04-30 10:35:52",
+        "publisher": "Zacks Investment Research",
+        "title": "Compared to Estimates, Air Products and Chemicals (APD) Q2 Earnings: A Look at Key Metrics",
+        "excerpt": "The headline numbers for Air Products and Chemicals (APD) give insight into how the company performed in the quarter ended March 2026, but it may be worthwhile to compare some of its key metrics to Wall Street estimates and the year-ago actuals.",
+        "url": "https://www.zacks.com/stock/news/2911902/compared-to-estimates-air-products-and-chemicals-apd-q2-earnings-a-look-at-key-metrics?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911902"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-04-30 08:11:21",
+        "publisher": "Zacks Investment Research",
+        "title": "Air Products and Chemicals (APD) Tops Q2 Earnings and Revenue Estimates",
+        "excerpt": "Air Products and Chemicals (APD) came out with quarterly earnings of $3.2 per share, beating the Zacks Consensus Estimate of $3.05 per share. This compares to earnings of $2.69 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911608/air-products-and-chemicals-apd-tops-q2-earnings-and-revenue-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911608"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-04-30 07:45:13",
+        "publisher": "MarketBeat",
+        "title": "Freeport Tanks Again on Mine Delay\u2014Long Term Outlook Stays Strong",
+        "excerpt": "For copper mining giant Freeport McMoRan NYSE: FCX, 2025 proved to be a very strong year. The stock delivered a total return of over 35%, marking its best annual performance since 2021.",
+        "url": "https://www.marketbeat.com/originals/freeport-tanks-again-on-mine-delaylong-term-outlook-stays-strong/"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-04-30 07:02:24",
+        "publisher": "Reuters",
+        "title": "Air Products lifts 2026 profit forecast amid stronger helium prices",
+        "excerpt": "Industrial gases maker Air Products raised its full-year earnings forecast on stronger pricing as well as benefits from higher \u200bhelium prices and new assets coming online later in \u200cthe year.",
+        "url": "https://www.reuters.com/business/energy/air-products-lifts-2026-profit-forecast-amid-stronger-helium-prices-2026-04-30/"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-04-30 06:00:00",
+        "publisher": "PRNewsWire",
+        "title": "Air Products Reports Fiscal 2026 Second Quarter Results",
+        "excerpt": "Delivered strong underlying performance | Positioned for helium supply chain resilience | New wins in Electronics and AerospaceContinued focus on key priorities: unlock earnings growth, optimize large projects, maintain capital disciplineRaising fiscal 2026 full-year adjusted EPS",
+        "url": "https://www.prnewswire.com/news-releases/air-products-reports-fiscal-2026-second-quarter-results-302758631.html"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-29 17:00:00",
+        "publisher": "Business Wire",
+        "title": "Ecolab to Webcast Annual Meeting on May 7, 2026",
+        "excerpt": "ST. PAUL, Minn.--(BUSINESS WIRE)--Ecolab will host a live webcast of its annual meeting of stockholders. As indicated in our proxy statement, the 2026 Annual Meeting of Stockholders will be a virtual-only meeting. Details for the public webcast are as follows: TIME: 9:30 a.m. Cen",
+        "url": "https://www.businesswire.com/news/home/20260429419671/en/Ecolab-to-Webcast-Annual-Meeting-on-May-7-2026/"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-29 15:23:16",
+        "publisher": "Defense World",
+        "title": "Comerica Bank Trims Stock Position in Ecolab Inc. $ECL",
+        "excerpt": "Comerica Bank reduced its stake in shares of Ecolab Inc. (NYSE: ECL) by 6.5% during the fourth quarter, according to the company in its most recent 13F filing with the Securities and Exchange Commission. The firm owned 63,721 shares of the basic materials company's stock after se",
+        "url": "https://www.defenseworld.net/2026/04/29/comerica-bank-trims-stock-position-in-ecolab-inc-ecl.html"
+      },
+      {
+        "symbol": "ECL",
+        "publishedDate": "2026-04-29 14:44:49",
+        "publisher": "Defense World",
+        "title": "Concurrent Investment Advisors LLC Buys 2,533 Shares of Ecolab Inc. $ECL",
+        "excerpt": "Concurrent Investment Advisors LLC lifted its stake in Ecolab Inc. (NYSE: ECL) by 38.2% in the fourth quarter, according to its most recent Form 13F filing with the Securities and Exchange Commission (SEC). The firm owned 9,159 shares of the basic materials company's stock after ",
+        "url": "https://www.defenseworld.net/2026/04/29/concurrent-investment-advisors-llc-buys-2533-shares-of-ecolab-inc-ecl.html"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-04-29 14:04:54",
+        "publisher": "Fool - Investing News",
+        "title": "Higher Yield or Long-Term Dividend Growth? FDVV vs. NOBL",
+        "excerpt": "The Fidelity High Dividend ETF (FDVV) and the ProShares S&P 500 Dividend Aristocrats ETF (NOBL) both focus on dividend-paying U.S. stocks, but their portfolios are built very differently. That difference can shape not just how much income investors receive, but how reliable that ",
+        "url": "https://www.fool.com/coverage/etfs/2026/04/29/higher-yield-or-long-term-dividend-growth-fdvv-vs-nobl/"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-04-29 12:00:00",
+        "publisher": "PRNewsWire",
+        "title": "Air Products to Expand Industrial Gas Supply for Samsung Electronics' Next-Generation Semiconductor Fab in South Korea",
+        "excerpt": "New investment underscores the company's long-term commitment to Korea and its leading role in the global semiconductor industry\u00a0 LEHIGH VALLEY, Pa., April 29, 2026 /PRNewswire/ -- Air Products (NYSE:APD), a world-leading industrial gases company\u00a0and serving Samsung globally, tod",
+        "url": "https://www.prnewswire.com/news-releases/air-products-to-expand-industrial-gas-supply-for-samsung-electronics-next-generation-semiconductor-fab-in-south-korea-302757497.html"
+      }
+    ],
+    "Utilities": [
+      {
+        "symbol": "SRE",
+        "publishedDate": "2026-04-30 11:06:39",
+        "publisher": "Zacks Investment Research",
+        "title": "Sempra (SRE) Reports Next Week: Wall Street Expects Earnings Growth",
+        "excerpt": "Sempra (SRE) possesses the right combination of the two key ingredients for a likely earnings beat in its upcoming report. Get prepared with the key expectations.",
+        "url": "https://www.zacks.com/stock/news/2912167/sempra-sre-reports-next-week-wall-street-expects-earnings-growth?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_9-2912167"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-04-30 10:36:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Compared to Estimates, Southern Co. (SO) Q1 Earnings: A Look at Key Metrics",
+        "excerpt": "While the top- and bottom-line numbers for Southern Co. (SO) give a sense of how the business performed in the quarter ended March 2026, it could be worth looking at how some of its key metrics compare to Wall Street estimates and year-ago values.",
+        "url": "https://www.zacks.com/stock/news/2911924/compared-to-estimates-southern-co-so-q1-earnings-a-look-at-key-metrics?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911924"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-04-30 10:30:37",
+        "publisher": "Zacks Investment Research",
+        "title": "Southern Co. (SO) Q1 Earnings and Revenues Surpass Estimates",
+        "excerpt": "Southern Co. (SO) came out with quarterly earnings of $1.32 per share, beating the Zacks Consensus Estimate of $1.21 per share. This compares to earnings of $1.23 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911869/southern-co-so-q1-earnings-and-revenues-surpass-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911869"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-04-30 10:16:23",
+        "publisher": "Zacks Investment Research",
+        "title": "Countdown to AEP (AEP) Q1 Earnings: A Look at Estimates Beyond Revenue and EPS",
+        "excerpt": "Looking beyond Wall Street's top-and-bottom-line estimate forecasts for AEP (AEP), delve into some of its key metrics to gain a deeper insight into the company's potential performance for the quarter ended March 2026.",
+        "url": "https://www.zacks.com/stock/news/2911817/countdown-to-aep-aep-q1-earnings-a-look-at-estimates-beyond-revenue-and-eps?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm_preview-2911817"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-04-30 08:13:25",
+        "publisher": "Reuters",
+        "title": "Southern Co beats first-quarter profit estimates as power demand soars",
+        "excerpt": "Southern Co beat analysts' estimates for first-quarter profit on Thursday, helped by an \u200bincrease in power demand.",
+        "url": "https://www.reuters.com/business/energy/southern-co-beats-first-quarter-profit-estimates-power-demand-soars-2026-04-30/"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-04-30 07:30:00",
+        "publisher": "PRNewsWire",
+        "title": "Southern Company reports first-quarter 2026 earnings",
+        "excerpt": "ATLANTA, April 30, 2026 /PRNewswire/ -- Southern Company today reported first-quarter earnings of $1.4 billion, or $1.21 per share, in 2026 compared with earnings of $1.3 billion, or $1.21 per share, in the first quarter of 2025. Excluding the items described under \"Net Income \u2013 ",
+        "url": "https://www.prnewswire.com/news-releases/southern-company-reports-first-quarter-2026-earnings-302758132.html"
+      },
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-04-30 07:21:17",
+        "publisher": "Zacks Investment Research",
+        "title": "Should You Invest in the State Street Utilities Select Sector SPDR ETF (XLU)?",
+        "excerpt": "Looking for broad exposure to the Utilities - Broad segment of the equity market? You should consider the State Street Utilities Select Sector SPDR ETF (XLU), a passively managed exchange traded fund launched on December 16, 1998.",
+        "url": "https://www.zacks.com/stock/news/2911586/should-you-invest-in-the-state-street-utilities-select-sector-spdr-etf-xlu?cid=CS-STOCKNEWSAPI-FT-sector_etf-2911586"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-04-30 07:21:15",
+        "publisher": "Zacks Investment Research",
+        "title": "Should You Invest in the iShares U.S. Power Infrastructure ETF (POWR)?",
+        "excerpt": "Launched on January 31, 2012, the iShares U.S. Power Infrastructure ETF (POWR) is a passively managed exchange traded fund designed to provide a broad exposure to the Utilities - Infrastructure segment of the equity market.",
+        "url": "https://www.zacks.com/stock/news/2911577/should-you-invest-in-the-ishares-u-s-power-infrastructure-etf-powr?cid=CS-STOCKNEWSAPI-FT-sector_etf-2911577"
+      },
+      {
+        "symbol": "SRE",
+        "publishedDate": "2026-04-29 14:23:19",
+        "publisher": "Defense World",
+        "title": "Comerica Bank Sells 19,290 Shares of Sempra Energy $SRE",
+        "excerpt": "Comerica Bank decreased its holdings in Sempra Energy (NYSE: SRE) by 11.8% in the undefined quarter, according to the company in its most recent 13F filing with the SEC. The fund owned 143,571 shares of the utilities provider's stock after selling 19,290 shares during the quarter",
+        "url": "https://www.defenseworld.net/2026/04/29/comerica-bank-sells-19290-shares-of-sempra-energy-sre.html"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-04-29 14:20:50",
+        "publisher": "Defense World",
+        "title": "American Electric Power Company, Inc. $AEP Shares Bought by D.A. Davidson & CO.",
+        "excerpt": "D.A. Davidson and CO. lifted its stake in shares of American Electric Power Company, Inc. (NASDAQ: AEP) by 12.1% in the fourth quarter, according to its most recent Form 13F filing with the Securities and Exchange Commission. The institutional investor owned 51,446 shares of the ",
+        "url": "https://www.defenseworld.net/2026/04/29/american-electric-power-company-inc-aep-shares-bought-by-d-a-davidson-co.html"
+      }
+    ],
+    "Real_Estate": [
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-30 02:31:36",
+        "publisher": "Seeking Alpha",
+        "title": "Equinix, Inc. (EQIX) Q1 2026 Earnings Call Transcript",
+        "excerpt": "Equinix, Inc. (EQIX) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4896217-equinix-inc-eqix-q1-2026-earnings-call-transcript"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-30 02:19:00",
+        "publisher": "GuruFocus",
+        "title": "Equinix Inc (EQIX) Q1 2026 Earnings Call Highlights: Record Sales and Strategic Growth Amidst Challenges",
+        "excerpt": "Recurring Revenue: Grew 10% on a normalized and constant currency basis, reaching $2.3 billion.Total Revenue: Increased 8% year over year to $2.4 billion.Adjus",
+        "url": "https://www.gurufocus.com/news/8831083/equinix-inc-eqix-q1-2026-earnings-call-highlights-record-sales-and-strategic-growth-amidst-challenges"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-29 19:01:17",
+        "publisher": "Zacks Investment Research",
+        "title": "Compared to Estimates, Equinix (EQIX) Q1 Earnings: A Look at Key Metrics",
+        "excerpt": "While the top- and bottom-line numbers for Equinix (EQIX) give a sense of how the business performed in the quarter ended March 2026, it could be worth looking at how some of its key metrics compare to Wall Street estimates and year-ago values.",
+        "url": "https://www.zacks.com/stock/news/2911311/compared-to-estimates-equinix-eqix-q1-earnings-a-look-at-key-metrics?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2911311"
+      },
+      {
+        "symbol": "PLD",
+        "publishedDate": "2026-04-29 18:33:00",
+        "publisher": "PRNewsWire",
+        "title": "FIBRA Prologis Announces First Quarter 2026 Earnings Results",
+        "excerpt": "MEXICO CITY, April 29, 2026 /PRNewswire/ -- FIBRA Prologis (BMV:FIBRAPL 14), a leading owner and operator of Class-A industrial real estate in Mexico, today reported results for the first quarter 2026. HIGHLIGHTS FROM THE QUARTER: Net effective rents on rollover were 59.6 percent",
+        "url": "https://www.prnewswire.com/news-releases/fibra-prologis-announces-first-quarter-2026-earnings-results-302758038.html"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-29 18:21:23",
+        "publisher": "Zacks Investment Research",
+        "title": "Equinix (EQIX) Lags Q1 FFO and Revenue Estimates",
+        "excerpt": "Equinix (EQIX) came out with quarterly funds from operations (FFO) of $10.79 per share, missing the Zacks Consensus Estimate of $10.89 per share. This compares to FFO of $9.67 per share a year ago.",
+        "url": "https://www.zacks.com/stock/news/2911232/equinix-eqix-lags-q1-ffo-and-revenue-estimates?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_4-2911232"
+      },
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-04-29 16:21:34",
+        "publisher": "Seeking Alpha",
+        "title": "Welltower Inc. (WELL) Q1 2026 Earnings Call Transcript",
+        "excerpt": "Welltower Inc. (WELL) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4895866-welltower-inc-well-q1-2026-earnings-call-transcript"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-29 16:10:00",
+        "publisher": "PRNewsWire",
+        "title": "Equinix Declares Quarterly Dividend on Its Common Stock",
+        "excerpt": "REDWOOD CITY, Calif., April 29, 2026 /PRNewswire/ --\u00a0 Equinix, Inc. (Nasdaq: EQIX), the world's digital infrastructure company\u00ae, today announced that its Board of Directors has declared a quarterly cash dividend of $5.16 per share on its common stock.",
+        "url": "https://www.prnewswire.com/news-releases/equinix-declares-quarterly-dividend-on-its-common-stock-302757578.html"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-29 16:05:00",
+        "publisher": "PRNewsWire",
+        "title": "Equinix Reports First-Quarter Results and Raises Full-Year Financial Outlook",
+        "excerpt": "Grew monthly recurring revenue 12% on an as-reported basis and 10% on a normalized and constant currency basis year over year Delivered largest first-quarter annualized gross bookings in company's history, leading to a record backlog \u00a0 Increased stabilized assets' revenues 9% on ",
+        "url": "https://www.prnewswire.com/news-releases/equinix-reports-first-quarter-results-and-raises-full-year-financial-outlook-302757572.html"
+      },
+      {
+        "symbol": "PLD",
+        "publishedDate": "2026-04-29 14:41:06",
+        "publisher": "Zacks Investment Research",
+        "title": "Welltower's Q1 FFO Beat Estimates on Strong SHO NOI Growth",
+        "excerpt": "WELL tops Q1 FFO estimates as SHO NOI surges, occupancy improves and 2026 guidance increases on strong operating leverage.",
+        "url": "https://www.zacks.com/stock/news/2911187/welltower-s-q1-ffo-beat-estimates-on-strong-sho-noi-growth?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2911187"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-04-29 14:10:51",
+        "publisher": "Defense World",
+        "title": "Equinix, Inc. $EQIX Shares Acquired by Concurrent Investment Advisors LLC",
+        "excerpt": "Concurrent Investment Advisors LLC grew its holdings in Equinix, Inc. (NASDAQ: EQIX) by 22.3% in the fourth quarter, according to its most recent disclosure with the Securities and Exchange Commission. The fund owned 3,241 shares of the financial services provider's stock after b",
+        "url": "https://www.defenseworld.net/2026/04/29/equinix-inc-eqix-shares-acquired-by-concurrent-investment-advisors-llc.html"
+      }
+    ],
+    "Communication": [
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 11:39:00",
+        "publisher": "Market Watch",
+        "title": "Meta embodies everything Wall Street hates about AI right now",
+        "excerpt": "Meta is increasing spending faster than revenue, and some on Wall Street aren't sure that the company's investments will pay off.",
+        "url": "https://www.marketwatch.com/story/meta-embodies-everything-wall-street-hates-about-ai-right-now-35cd1c2e"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 11:32:24",
+        "publisher": "Seeking Alpha",
+        "title": "Meta: Aggressive 'AI Arms Race' Strategy Paying Off",
+        "excerpt": "Meta Platforms delivered strong Q1'26 results, beating top and bottom line estimates and maintaining robust free cash flow despite ramped-up CapEx. META's 33% year-over-year revenue growth and strategic AI investments reinforce its position as a top value play among Big Tech peer",
+        "url": "https://seekingalpha.com/article/4896700-meta-aggressive-ai-arms-race-strategy-paying-off"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 11:27:41",
+        "publisher": "Benzinga",
+        "title": "Alphabet Soars, Meta Sinks As Big Tech Splits \u2014 ETFs Let You Pick The Right Side",
+        "excerpt": "The latest earnings from Microsoft Corp (NASDAQ:MSFT), Meta Platforms Inc (NASDAQ:META), Amazon.com Inc (NASDAQ:AMZN), and Alphabet, Inc (NASDAQ:GOOGL) (NASDAQ:GOOG) didn't just move stocks, they challenged the once-unified \"Magnificent Seven\" trade. For ETF investors, that split",
+        "url": "https://www.benzinga.com/etfs/sector-etfs/26/04/52178697/alphabet-soars-meta-sinks-as-big-tech-splits-etfs-let-you-pick-the-right-side"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-04-30 11:23:38",
+        "publisher": "Benzinga",
+        "title": "Alphabet's 'Phenomenal' Quarter Powers Biggest Stock Breakout Since 2004",
+        "excerpt": "Alphabet Inc. (NASDAQ:GOOGL) (NASDAQ:GOOG) drew largely bullish reactions from Wall Street after first-quarter results showed accelerating Search growth, a sharp Google Cloud ramp and evidence that AI investments are translating into revenue momentum.",
+        "url": "https://www.benzinga.com/markets/tech/26/04/52178444/alphabet-phenomenal-quarter-powers-biggest-stock-rally-since-2004"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 11:21:11",
+        "publisher": "Schwab Network",
+        "title": "META Pressure, GOOGL Gains and a \"Mixed Picture on Data",
+        "excerpt": "Markets are attempting to make sense of GDP, PCE and Jobless Claims data while also weighing the earnings reports from Alphabet (GOOGL), Meta Platforms (META), Microsoft (MSFT) and Amazon (AMZN). Kevin Green is watching the $600 level for META saying that could be a key level for",
+        "url": "https://www.youtube.com/watch?v=cq_x1DjZtXQ"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-04-30 11:16:30",
+        "publisher": "24/7 Wall Street",
+        "title": "Forget STX's 13% Pop \u2014 Alphabet Is Where AI Infrastructure Investors Should Actually Be",
+        "excerpt": "Seagate Technology (NASDAQ:STX | STX Price Prediction) is the name lighting up screens this morning after a 17.13% earnings beat sent shares up roughly 13% after the close.",
+        "url": "https://247wallst.com/investing/2026/04/30/forget-stxs-13-pop-alphabet-is-where-ai-infrastructure-investors-should-actually-be/"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 11:12:46",
+        "publisher": "PYMNTS",
+        "title": "Meta Begins Offering Stablecoin Payments to Creators",
+        "excerpt": "Meta\u00a0has begun offering stablecoin payouts to a limited group of creators. The feature is now available to creators in Colombia and the Philippines, according to a\u00a0post\u00a0in the tech giant's Business Help Center.",
+        "url": "https://www.pymnts.com/cryptocurrency/2026/meta-begins-offering-stablecoin-payments-to-creators/"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-04-30 11:01:16",
+        "publisher": "Zacks Investment Research",
+        "title": "Earnings Preview: Liberty Media Corporation - Liberty Formula One Series A (FWONA) Q1 Earnings Expected to Decline",
+        "excerpt": "Liberty Media Corporation - Liberty Formula One Series A (FWONA) doesn't possess the right combination of the two key ingredients for a likely earnings beat in its upcoming report. Get prepared with the key expectations.",
+        "url": "https://www.zacks.com/stock/news/2912079/earnings-preview-liberty-media-corporation-liberty-formula-one-series-a-fwona-q1-earnings-expected-to-decline?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_9-2912079"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 10:51:50",
+        "publisher": "Schaeffers Research",
+        "title": "Meta, Microsoft Stock Stalled by Capex Obstacles",
+        "excerpt": "Big Tech is the focus on Wall Street today.",
+        "url": "https://www.schaeffersresearch.com/content/news/2026/04/30/meta-microsoft-stock-stalled-by-capex-obstacles"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-04-30 10:40:51",
+        "publisher": "MarketBeat",
+        "title": "Meta Posted Its Best Sales Growth Since 2021\u2014So Why Did Shares Fall?",
+        "excerpt": "On a day where a plethora of Magnificent Seven companies reported earnings, it appears that Meta Platforms NASDAQ: META got the short end of the stick.",
+        "url": "https://www.marketbeat.com/originals/meta-posted-its-best-sales-growth-since-2021so-why-did-shares-fall/"
+      }
+    ]
+  }
+}

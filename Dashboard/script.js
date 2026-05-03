@@ -156,45 +156,302 @@ function renderThreeSignalMini(data) {
     if (s.includes('INVALID') || s.includes('CORRECTION')) return '#ef4444';
     return '#71717a'; };
 
+  // Build a 10-cell .score-battery for any 0-100 score with a colour tint
+  // (reused style from Momentum teaser at line ~520 — identical visual language).
+  const battery = (val, color) => {
+    const v = Math.max(0, Math.min(100, Number(val) || 0));
+    const filled = Math.round(v / 10);
+    let cells = '';
+    for (let c = 0; c < 10; c++) {
+      const bg = c < filled ? color : 'rgba(161,161,170,0.18)';
+      cells += `<div class="cell" style="background:${bg}"></div>`;
+    }
+    return `<div class="score-battery mt-1">${cells}</div>`;
+  };
+
   const tr = tvT();
+  const brColor    = zoneCol(br.zone);
+  const ftdColor   = ftdCol(ftd.state);
+  const mtColor    = zoneCol(mt.zone);
+
   el.innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-start">
       <div class="flex flex-col gap-0.5 px-1 -mx-1" data-signal-tip="breadth"
-           data-br-score="${br.score ?? ''}" data-br-zone="${br.zone || ''}"
-           data-br-ceiling="${br.exposure_ceiling || ''}">
-        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_breadth || 'Breadth'}</span>
+           data-br-score="${UI.escapeHTML(br.score ?? '')}" data-br-zone="${UI.escapeHTML(br.zone || '')}"
+           data-br-ceiling="${UI.escapeHTML(br.exposure_ceiling || '')}">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${UI.escapeHTML(tr.signal_breadth || 'Breadth')}</span>
         <div class="flex items-baseline gap-2">
-          <span class="text-xl font-black" style="color:${zoneCol(br.zone)}">${br.score ?? '—'}</span>
-          <span class="text-[10px] text-zinc-500 truncate">${br.zone || ''}</span>
+          <span class="text-xl font-black" style="color:${brColor}">${UI.escapeHTML(br.score ?? '—')}</span>
+          <span class="text-[10px] text-zinc-500 truncate">${UI.escapeHTML(br.zone || '')}</span>
         </div>
+        ${br.score != null ? battery(br.score, brColor) : ''}
       </div>
       <div class="flex flex-col gap-0.5 px-1 -mx-1" data-signal-tip="ftd"
-           data-ftd-state="${ftd.state || ''}" data-ftd-date="${ftd.ftd_date || ''}"
-           data-ftd-day="${ftd.days_since_ftd ?? ''}" data-ftd-status="${(ftd.ftd_status_text || '').replace(/"/g,'&quot;')}">
-        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_ftd || 'FTD'}</span>
+           data-ftd-state="${UI.escapeHTML(ftd.state || '')}" data-ftd-date="${UI.escapeHTML(ftd.ftd_date || '')}"
+           data-ftd-day="${UI.escapeHTML(ftd.days_since_ftd ?? '')}" data-ftd-status="${UI.escapeHTML(ftd.ftd_status_text || '')}">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${UI.escapeHTML(tr.signal_ftd || 'FTD')}</span>
         <div class="flex items-baseline gap-2">
-          <span class="text-xl font-black" style="color:${ftdCol(ftd.state)}">${ftd.quality_score ?? '—'}</span>
-          <span class="text-[10px] text-zinc-500 truncate">${(ftd.state||'').replace(/_/g,' ')}</span>
+          <span class="text-xl font-black" style="color:${ftdColor}">${UI.escapeHTML(ftd.quality_score ?? '—')}</span>
+          <span class="text-[10px] text-zinc-500 truncate">${UI.escapeHTML((ftd.state||'').replace(/_/g,' '))}</span>
         </div>
-        ${ftd.ftd_date ? `<span class="text-[9px] text-zinc-500 font-mono mt-0.5">${ftd.ftd_date} · day ${ftd.days_since_ftd ?? '—'}</span>` : ''}
+        ${ftd.quality_score != null ? battery(ftd.quality_score, ftdColor) : ''}
+        ${ftd.ftd_date ? `<span class="text-[9px] text-zinc-500 font-mono mt-0.5">${UI.escapeHTML(ftd.ftd_date)} · day ${UI.escapeHTML(ftd.days_since_ftd ?? '—')}</span>` : ''}
       </div>
       <div class="flex flex-col gap-0.5 px-1 -mx-1" data-signal-tip="market_top"
-           data-mt-score="${mt.composite_score ?? ''}" data-mt-zone="${mt.zone || ''}"
-           data-mt-budget="${mt.risk_budget || ''}">
-        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.signal_top || 'Market Top'}</span>
+           data-mt-score="${UI.escapeHTML(mt.composite_score ?? '')}" data-mt-zone="${UI.escapeHTML(mt.zone || '')}"
+           data-mt-budget="${UI.escapeHTML(mt.risk_budget || '')}">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${UI.escapeHTML(tr.signal_top || 'Market Top')}</span>
         <div class="flex items-baseline gap-2">
-          <span class="text-xl font-black" style="color:${zoneCol(mt.zone)}">${mt.composite_score ?? '—'}</span>
-          <span class="text-[10px] text-zinc-500 truncate">${(mt.zone||'').replace(/\(.*\)/,'').trim()}</span>
+          <span class="text-xl font-black" style="color:${mtColor}">${UI.escapeHTML(mt.composite_score ?? '—')}</span>
+          <span class="text-[10px] text-zinc-500 truncate">${UI.escapeHTML((mt.zone||'').replace(/\(.*\)/,'').trim())}</span>
         </div>
+        ${mt.composite_score != null ? battery(mt.composite_score, mtColor) : ''}
       </div>
       <div class="flex flex-col gap-0.5 items-end md:border-l md:border-zinc-800 md:pl-3 px-1 -mx-1" data-signal-tip="synth"
-           data-synth-mid="${synth ?? ''}" data-synth-label="${synthLabel}"
-           data-br-ceiling="${br.exposure_ceiling || ''}" data-ftd-range="${ftd.exposure_range || ''}"
-           data-mt-budget="${mt.risk_budget || ''}">
-        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${tr.synthesized_ceiling || 'Synthesized Ceiling'}</span>
-        <span class="text-xl font-black" style="color:${synthColor}">${synthLabel}</span>
+           data-synth-mid="${UI.escapeHTML(synth ?? '')}" data-synth-label="${UI.escapeHTML(synthLabel)}"
+           data-br-ceiling="${UI.escapeHTML(br.exposure_ceiling || '')}" data-ftd-range="${UI.escapeHTML(ftd.exposure_range || '')}"
+           data-mt-budget="${UI.escapeHTML(mt.risk_budget || '')}">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${UI.escapeHTML(tr.synthesized_ceiling || 'Synthesized Ceiling')}</span>
+        <span class="text-xl font-black" style="color:${synthColor}">${UI.escapeHTML(synthLabel)}</span>
+        ${synth != null ? battery(synth, synthColor) : ''}
       </div>
     </div>`;
+}
+
+// ── V1.73.4 — Sector status row (8 circular gauges) — promoted from page-sector.js ──
+function _gaugeColor(score, polarity) {
+    const s = Number(score) || 0;
+    if (polarity === 'amber') {
+        if (s >= 70) return '#d97706';
+        if (s >= 40) return '#f59e0b';
+        return '#fbbf24';
+    }
+    if (polarity === 'amber-bell') {
+        if (s < 15 || s > 85) return '#d97706';
+        if (s < 30 || s > 75) return '#f59e0b';
+        return '#fbbf24';
+    }
+    if (polarity === 'negative') {
+        if (s >= 70) return '#ef4444';
+        if (s >= 40) return '#f59e0b';
+        return '#22c55e';
+    }
+    if (polarity === 'bell') {
+        if (s < 15 || s > 85) return '#ef4444';
+        if (s < 30 || s > 75) return '#f59e0b';
+        return '#22c55e';
+    }
+    if (s >= 70) return '#22c55e';
+    if (s >= 40) return '#f59e0b';
+    return '#ef4444';
+}
+
+function _gaugeHTML({ value, label, suffix, color, valueDisplay, max = 100, displaySize = 'lg' }) {
+    const v = Number.isFinite(value) ? value : null;
+    const pct = v == null ? 0 : Math.max(0, Math.min(100, (v / max) * 100));
+    const C = 264;
+    const dash = (pct / 100) * C;
+    const display = valueDisplay != null ? valueDisplay : (v == null ? '--' : Math.round(v));
+    const sizeClass = displaySize === 'sm' ? 'sector-gauge-value-sm'
+                    : displaySize === 'md' ? 'sector-gauge-value-md' : '';
+    return `
+        <div class="sector-gauge" style="--gauge-color:${color}">
+            <svg class="sector-gauge-svg" viewBox="0 0 100 100">
+                <circle class="sector-gauge-track" cx="50" cy="50" r="42"></circle>
+                <circle class="sector-gauge-fill"  cx="50" cy="50" r="42"
+                        stroke-dasharray="${dash.toFixed(1)} ${C}"></circle>
+            </svg>
+            <div class="sector-gauge-center">
+                <div class="sector-gauge-value ${sizeClass}">${display}</div>
+                ${suffix ? `<div class="sector-gauge-suffix">${suffix}</div>` : ''}
+            </div>
+            <div class="sector-gauge-label">${label}</div>
+        </div>`;
+}
+
+function _gaugeSegmentedHTML({ segments, activeIndex, label, valueDisplay, color, displaySize = 'sm' }) {
+    const N = segments.length;
+    const C = 264;
+    const gapPx = 5;
+    const segLen = (C - N * gapPx) / N;
+    const segsHTML = segments.map((seg, i) => {
+        const offset = -(i * (segLen + gapPx));
+        const isActive = i === activeIndex;
+        const stroke = isActive ? (color || '#22c55e') : 'rgba(161,161,170,0.18)';
+        return `<circle class="sector-gauge-seg ${isActive ? 'active' : ''}"
+                cx="50" cy="50" r="42"
+                stroke="${stroke}"
+                stroke-dasharray="${segLen.toFixed(1)} ${(C - segLen).toFixed(1)}"
+                stroke-dashoffset="${offset.toFixed(1)}"></circle>`;
+    }).join('');
+    const sizeClass = displaySize === 'sm' ? 'sector-gauge-value-sm' : 'sector-gauge-value-md';
+    const display = valueDisplay
+        || (activeIndex >= 0 && segments[activeIndex] ? (segments[activeIndex].label || segments[activeIndex]) : '--');
+    return `
+        <div class="sector-gauge" style="--gauge-color:${color || '#22c55e'}">
+            <svg class="sector-gauge-svg" viewBox="0 0 100 100">
+                ${segsHTML}
+            </svg>
+            <div class="sector-gauge-center">
+                <div class="sector-gauge-value ${sizeClass}">${display}</div>
+            </div>
+            <div class="sector-gauge-label">${label}</div>
+        </div>`;
+}
+
+function renderSectorStatusStrip(data) {
+    const m   = data.market || {};
+    const br  = data.breadth || {};
+    const ftd = data.ftd     || {};
+    const mt  = data.market_top || {};
+    const isZh = UI.currentLang === 'zh';
+    const tr = (window.i18n?.[UI.currentLang]?.sector_page) || {};
+
+    // ── 4 numeric gauges ─────────────────────────────────────────
+    const breadthScore = br.score ?? m.breadth_score;
+    const breadthEl = document.getElementById('pill-breadth');
+    if (breadthEl) {
+        breadthEl.innerHTML = _gaugeHTML({
+            value: breadthScore,
+            label: tr.pill_breadth || (isZh ? '廣度分數' : 'Breadth'),
+            color: _gaugeColor(breadthScore, 'positive'),
+        });
+    }
+
+    const ftdScore = ftd.quality_score;
+    const ftdEl = document.getElementById('pill-ftd');
+    if (ftdEl) {
+        ftdEl.innerHTML = _gaugeHTML({
+            value: ftdScore,
+            label: tr.pill_ftd || (isZh ? 'FTD 狀態' : 'FTD'),
+            color: ftd.state === 'FTD_CONFIRMED' ? '#22c55e'
+                 : _gaugeColor(ftdScore, 'positive'),
+        });
+    }
+
+    const mtScore = mt.composite_score ?? mt.score ?? m.market_top_score;
+    const mtopEl = document.getElementById('pill-marketop');
+    if (mtopEl) {
+        mtopEl.innerHTML = _gaugeHTML({
+            value: mtScore,
+            label: tr.pill_marketop || (isZh ? '頂部風險' : 'Market Top'),
+            color: _gaugeColor(mtScore, 'amber'),
+        });
+    }
+
+    const fgScore = m.fear_greed ?? m.fear_greed_index;
+    const fgEl = document.getElementById('pill-fg');
+    if (fgEl) {
+        fgEl.innerHTML = _gaugeHTML({
+            value: fgScore,
+            label: tr.pill_fg || (isZh ? '恐懼貪婪' : 'Fear & Greed'),
+            color: _gaugeColor(fgScore, 'amber-bell'),
+        });
+    }
+
+    // ── 4 categorical / scaled gauges ────────────────────────────
+    const regimeEl = document.getElementById('pill-regime');
+    if (regimeEl) {
+        const REGIME_SEG = [
+            { key: 'BULL',     label: 'BULL',     color: '#22c55e', map: ['BULL', 'RISK_ON'] },
+            { key: 'SIDEWAYS', label: 'SIDE',     color: '#eab308', map: ['SIDEWAYS'] },
+            { key: 'VOLATILE', label: 'VOL',      color: '#f97316', map: ['VOLATILE'] },
+            { key: 'BEAR',     label: 'BEAR',     color: '#ef4444', map: ['BEAR', 'RISK_OFF'] },
+        ];
+        const cur = (m.regime || '').toUpperCase();
+        const activeIdx = REGIME_SEG.findIndex(s => s.map.includes(cur));
+        const activeColor = activeIdx >= 0 ? REGIME_SEG[activeIdx].color : '#71717a';
+        regimeEl.innerHTML = _gaugeSegmentedHTML({
+            segments: REGIME_SEG,
+            activeIndex: activeIdx,
+            label: tr.pill_regime || (isZh ? '市場體制' : 'Regime'),
+            valueDisplay: cur || '--',
+            color: activeColor,
+            displaySize: 'sm',
+        });
+    }
+
+    const cycleEl = document.getElementById('pill-cycle');
+    if (cycleEl) {
+        const CYCLE_SEG = [
+            { key: 'Early',     label: 'EARLY', color: '#22c55e' },
+            { key: 'Mid',       label: 'MID',   color: '#84cc16' },
+            { key: 'Late',      label: 'LATE',  color: '#f59e0b' },
+            { key: 'Recession', label: 'REC',   color: '#ef4444' },
+        ];
+        const cur = m.cycle_phase || '';
+        const activeIdx = CYCLE_SEG.findIndex(s => s.key.toLowerCase() === cur.toLowerCase());
+        const activeColor = activeIdx >= 0 ? CYCLE_SEG[activeIdx].color : '#71717a';
+        cycleEl.innerHTML = _gaugeSegmentedHTML({
+            segments: CYCLE_SEG,
+            activeIndex: activeIdx,
+            label: tr.pill_cycle || (isZh ? '週期位置' : 'Cycle'),
+            valueDisplay: (cur || '--').toUpperCase(),
+            color: activeColor,
+            displaySize: 'sm',
+        });
+    }
+
+    const exposureEl = document.getElementById('pill-exposure');
+    if (exposureEl) {
+        const raw = m.exposure_ceiling || '';
+        const m1 = raw.match(/(\d+)\s*-\s*(\d+)/);
+        const single = raw.match(/(\d+)/);
+        let midPct = null, displayStr = '--';
+        if (m1) {
+            midPct = (Number(m1[1]) + Number(m1[2])) / 2;
+            displayStr = `${m1[1]}-${m1[2]}<span class="sector-gauge-unit">%</span>`;
+        } else if (single) {
+            midPct = Number(single[1]);
+            displayStr = `${single[1]}<span class="sector-gauge-unit">%</span>`;
+        }
+        exposureEl.innerHTML = _gaugeHTML({
+            value: midPct,
+            label: tr.pill_exposure || (isZh ? '曝險上限' : 'Exposure'),
+            valueDisplay: displayStr,
+            color: '#a78bfa',
+            displaySize: 'md',
+        });
+    }
+
+    const vixEl = document.getElementById('pill-vix');
+    if (vixEl) {
+        const vix = mt.vix_level;
+        const vixColor = vix == null ? '#71717a'
+                       : vix >= 25 ? '#ef4444'
+                       : vix >= 18 ? '#f59e0b'
+                       : '#22c55e';
+        const display = vix != null ? Number(vix).toFixed(1) : '--';
+        vixEl.innerHTML = _gaugeHTML({
+            value: vix,
+            max: 40,
+            label: tr.pill_vix || (isZh ? '波動指數' : 'VIX'),
+            valueDisplay: display,
+            color: vixColor,
+            displaySize: 'md',
+        });
+    }
+
+    // Data attrs for shared signal-tip engine (utils.js)
+    const setAttrs = (id, attrs) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v == null ? '' : String(v)));
+    };
+    setAttrs('pill-regime',   { 'data-regime': m.regime || '' });
+    setAttrs('pill-breadth',  { 'data-br-score':   br.score ?? m.breadth_score ?? '',
+                                'data-br-zone':    br.zone || '',
+                                'data-br-ceiling': br.exposure_ceiling || m.exposure_ceiling || '' });
+    setAttrs('pill-ftd',      { 'data-ftd-state': ftd.state || '',
+                                'data-ftd-date':  ftd.ftd_date || '',
+                                'data-ftd-day':   ftd.days_since_ftd ?? '' });
+    setAttrs('pill-marketop', { 'data-mt-score': mt.composite_score ?? '',
+                                'data-mt-zone':  mt.zone || '' });
+    setAttrs('pill-exposure', { 'data-exposure': m.exposure_ceiling || '' });
+    setAttrs('pill-fg',       { 'data-fg-score': m.fear_greed ?? '',
+                                'data-fg-label': m.fear_greed_label || '' });
+    setAttrs('pill-cycle',    { 'data-cycle': m.cycle_phase || '' });
+    setAttrs('pill-vix',      { 'data-vix': mt.vix_level ?? '' });
 }
 
 // ── Layer 2a: Binary Risk 48h banner ──────────────────────────────────────
@@ -220,17 +477,45 @@ function sectorLabelIndex(key) {
   return table[key] || String(key).replace(/_/g, ' ');
 }
 
+// V1.73.4 — #risk-overview now contains the 8-gauge status row (always populated when data
+// loaded), so unconditionally unhide it. binary-alert-section is sibling and manages its own.
+function updateRiskOverviewVisibility() {
+  const wrap = document.getElementById('risk-overview');
+  if (!wrap) return;
+  // Status row pills are always rendered after data loads → keep visible
+  wrap.classList.remove('hidden');
+
+  // Apply translated title each time (covers both initial render and language toggle)
+  const titleEl = document.getElementById('risk-overview-title-text');
+  const w = window.i18n?.[UI.currentLang]?.warnings || {};
+  if (titleEl && w.risk_overview_title) titleEl.textContent = w.risk_overview_title;
+
+  // Count badge — total active flags (state-driven only; binary_alert is event-driven)
+  const countEl = document.getElementById('risk-overview-count');
+  if (countEl) {
+    const n = flags ? flags.children.length : 0;
+    if (n > 0) {
+      const isZh = UI.currentLang === 'zh';
+      countEl.textContent = isZh ? `${n} 項` : `${n} active`;
+      countEl.classList.remove('hidden');
+    } else {
+      countEl.classList.add('hidden');
+    }
+  }
+}
+
+// V1.73.4 — Adaptive binary alert (≤2 inline / 3-5 grid / ≥6 collapsible) — ported from sector page
 function renderBinaryAlertIndex(risks) {
   const urgent = (risks || []).filter(r => r.within_48h);
   const section = document.getElementById('binary-alert-section');
-  if (!section) return;
-  if (!urgent.length) { section.classList.add('hidden'); return; }
+  if (!section) { return; }
+  if (!urgent.length) { section.classList.add('hidden'); updateRiskOverviewVisibility(); return; }
   section.classList.remove('hidden');
 
   const isZh = UI.currentLang === 'zh';
   const sp = window.i18n?.[UI.currentLang]?.sector_page || {};
-  // Apply translated header strings
-  const titleEl = section.querySelector('[style*="color:#ef4444"]');
+  // Translated header strings
+  const titleEl = document.getElementById('binary-alert-title');
   if (titleEl) titleEl.textContent = sp.binary_alert || '⚡ Binary Risk Within 48h';
   const deratedEl = document.getElementById('binary-alert-derated');
   if (deratedEl) {
@@ -242,47 +527,161 @@ function renderBinaryAlertIndex(risks) {
   const dateLabel = (r) => r.days_until === 0 ? (sp.binary_today    || (isZh ? '今日' : 'TODAY'))
                          : r.days_until === 1 ? (sp.binary_tomorrow || (isZh ? '明日' : 'TOMORROW'))
                          : (r.date || '');
-  const container = document.getElementById('binary-alert-items');
-  container.innerHTML = urgent.map(r => {
-    const isTomorrow = r.days_until === 1;
+  const renderRow = (r) => {
     const lbl = dateLabel(r);
-
+    const cls = r.days_until === 0 ? '' : r.days_until === 1 ? 'tomorrow' : 'future';
+    const sectorTxt = (r.affected_sectors && r.affected_sectors.length)
+      ? r.affected_sectors.slice(0, 3).map(s => sectorLabelIndex(s)).join(' · ')
+      : '';
     return `
-      <div class="binary-row">
-        <!-- Date Box: Fixed Width -->
-        <div class="binary-date-box">
-          <span class="binary-date-pill ${isTomorrow ? 'tomorrow' : ''}">${lbl}</span>
-        </div>
-
-        <!-- Content: Headline + Sectors -->
-        <div class="binary-content">
-          <div class="binary-headline">${r.event}</div>
-          ${r.affected_sectors?.length ? `
-            <div class="binary-sector-group">
-              ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${sectorLabelIndex(s)}</span>`).join('')}
-            </div>` : ''}
-        </div>
+      <div class="binary-adaptive-row">
+        <span class="binary-day-pill ${cls}">${UI.escapeHTML(lbl)}</span>
+        <span class="binary-event-text" title="${UI.escapeHTML(r.event || '')}">${UI.escapeHTML(r.event || '')}</span>
+        ${sectorTxt ? `<span class="binary-sectors-inline">${UI.escapeHTML(sectorTxt)}</span>` : ''}
       </div>`;
-  }).join('');
+  };
+
+  const N = urgent.length;
+  const list = document.getElementById('binary-alert-items');
+  const countEl = document.getElementById('binary-alert-count');
+  if (countEl) countEl.textContent = N === 1 ? '1 event' : `${N} events`;
+
+  if (N <= 2) {
+    list.dataset.density = 'compact';
+    list.innerHTML = urgent.map(renderRow).join('');
+  } else if (N <= 5) {
+    list.dataset.density = 'grid';
+    list.innerHTML = urgent.map(renderRow).join('');
+  } else {
+    list.dataset.density = 'compact';
+    const first = urgent.slice(0, 2);
+    const rest  = urgent.slice(2);
+    const moreLabel = isZh ? `展開更多 ${rest.length}` : `Show ${rest.length} more`;
+    const lessLabel = isZh ? '收合' : 'Collapse';
+    list.innerHTML = `
+      ${first.map(renderRow).join('')}
+      <details class="binary-collapsible">
+        <summary class="binary-collapsible-summary">
+          <span class="caret">▸</span>
+          <span class="open-label">${UI.escapeHTML(moreLabel)}</span>
+          <span class="close-label" style="display:none">${UI.escapeHTML(lessLabel)}</span>
+        </summary>
+        ${rest.map(renderRow).join('')}
+      </details>
+    `;
+    const det = list.querySelector('.binary-collapsible');
+    det?.addEventListener('toggle', () => {
+      const ol = det.querySelector('.open-label');
+      const cl = det.querySelector('.close-label');
+      if (ol) ol.style.display = det.open ? 'none' : '';
+      if (cl) cl.style.display = det.open ? '' : 'none';
+    });
+  }
+
+  updateRiskOverviewVisibility();
   }
 
 
-// ── Layer 2b: Warning Flags strip ─────────────────────────────────────────
+// ── Layer 2b: Severity-tiered Warning Flags strip ─────────────────────────
+// Schema: prefer `market.warning_flags_v2` (object[] from bridge.py with key/severity/metric_value).
+// Fall back to legacy `market.warning_flags` (string[]) so old data.json still renders.
+const WARN_SEVERITY_DEFAULT = {
+  Bearish_Signal_Active:     'critical',
+  Critical_Zone:             'critical',
+  Death_Cross_SP500:         'critical',
+  Extreme_Fear_Sentiment:    'critical',
+  Below_200MA:               'warning',
+  Low_Historical_Percentile: 'warning',
+  Early_Warning_Divergence:  'warning',
+  Narrowing_Breadth:         'warning',
+  Mean_Reversion_Risk:       'warning',
+  Late_Cycle:                'caution',
+  High_Selectivity:          'caution',
+  Overbought:                'caution',
+  Oversold:                  'caution',
+  Weakening_Zone:            'caution',
+};
+const WARN_SEVERITY_RANK = { critical: 0, warning: 1, caution: 2 };
+
+function _formatFlagMetric(key, mv) {
+  if (!mv || typeof mv !== 'object') return '';
+  if (key === 'Below_200MA' && mv.gap_pct != null) {
+    const g = Number(mv.gap_pct);
+    return `gap ${g >= 0 ? '+' : ''}${g.toFixed(2)}%`;
+  }
+  if (key === 'Low_Historical_Percentile' && mv.percentile != null) {
+    return `pct ${Number(mv.percentile).toFixed(0)}%`;
+  }
+  if ((key === 'Weakening_Zone' || key === 'Critical_Zone') && mv.breadth_score != null) {
+    return `score ${Number(mv.breadth_score).toFixed(1)}`;
+  }
+  if (key === 'Bearish_Signal_Active' && mv.bearish_score != null) {
+    return `risk ${Number(mv.bearish_score).toFixed(0)}`;
+  }
+  if (key === 'Early_Warning_Divergence' && mv.signal) {
+    return String(mv.signal).toLowerCase();
+  }
+  return '';
+}
+
+// V1.73.4 — Flags already encoded in Breadth gauge (now on dashboard) — filter to avoid dup
+const REDUNDANT_FLAGS_DASH = new Set(['Below_200MA', 'Critical_Zone', 'Weakening_Zone']);
+
+// V1.73.4 — Map flag key → SIGNAL_TIPS key so shared #signal-tip-tooltip engine renders
+const FLAG_TIP_KEY_DASH = {
+  Bearish_Signal_Active:     'bearish_signal',
+  Low_Historical_Percentile: 'low_historical_percentile',
+  Early_Warning_Divergence:  'divergence',
+};
+
 function renderWarningFlagsIndex(market) {
   const row = document.getElementById('warning-flags-row');
   if (!row) return;
   row.innerHTML = '';
-  const flags = market?.warning_flags || [];
-  if (!flags.length) return;
-  const tw = window.i18n?.[UI.currentLang]?.warnings?.flags || {};
-  flags.forEach(f => {
-    const label = tw[f] || f.replace(/_/g, ' ');
-    const isCrit = /Death_Cross|Extreme_Fear|Critical|Bearish/i.test(f);
-    const cls = isCrit ? 'bg-red-500/10 text-red-400 border-red-500/25'
-                       : 'bg-yellow-500/8 text-yellow-500 border-yellow-500/20';
-    row.insertAdjacentHTML('beforeend',
-      `<span class="text-[10px] font-bold px-2 py-1 rounded border ${cls}">⚠ ${label}</span>`);
-  });
+
+  // Normalize to object[] regardless of schema
+  let flags = [];
+  if (Array.isArray(market?.warning_flags_v2) && market.warning_flags_v2.length) {
+    flags = market.warning_flags_v2;
+  } else if (Array.isArray(market?.warning_flags) && market.warning_flags.length) {
+    flags = market.warning_flags.map(k => ({ key: k, severity: WARN_SEVERITY_DEFAULT[k] || 'caution', metric_value: null }));
+  }
+  // V1.73.4 — Filter flags already encoded in Breadth circular gauge (avoid duplicate signal)
+  flags = flags.filter(f => f.key && !REDUNDANT_FLAGS_DASH.has(f.key));
+
+  if (!flags.length) { updateRiskOverviewVisibility(); return; }
+
+  // Sort: critical → warning → caution; preserve original order within tier
+  flags = flags.map((f, i) => ({ ...f, _ix: i }))
+               .sort((a, b) => (WARN_SEVERITY_RANK[a.severity] ?? 9) - (WARN_SEVERITY_RANK[b.severity] ?? 9) || a._ix - b._ix);
+
+  const tw = window.i18n?.[UI.currentLang]?.warnings || {};
+  const flagNames = tw.flags || {};
+
+  // V1.73.4 — route to #signal-tip-tooltip engine (rich style, matches gauges)
+  const html = flags.map(f => {
+    const key      = f.key || '';
+    const severity = f.severity || WARN_SEVERITY_DEFAULT[key] || 'caution';
+    const name     = flagNames[key] || key.replace(/_/g, ' ');
+    const metric   = _formatFlagMetric(key, f.metric_value);
+    const tipKey   = FLAG_TIP_KEY_DASH[key] || '';
+    const tipAttr  = tipKey ? `data-signal-tip="${tipKey}"` : '';
+    return `<div class="risk-flag-card risk-flag-sector sev-${UI.escapeHTML(severity)}"
+                 ${tipAttr}
+                 data-flag-key="${UI.escapeHTML(key)}"
+                 data-flag-severity="${UI.escapeHTML(severity)}"
+                 data-flag-name="${UI.escapeHTML(name)}"
+                 data-flag-metric="${UI.escapeHTML(metric)}">
+              <span class="rfc-dot"></span>
+              <div class="rfc-text">
+                <span class="rfc-name">${UI.escapeHTML(name)}</span>
+                ${metric ? `<span class="rfc-metric">${UI.escapeHTML(metric)}</span>` : ''}
+              </div>
+            </div>`;
+  }).join('');
+
+  row.innerHTML = html;
+  updateRiskOverviewVisibility();
 }
 
 // ── Layer 3a: HOT Sectors Teaser (top 3) ──────────────────────────────────
@@ -315,16 +714,16 @@ function renderHotSectorsTeaser(sectors, momentum) {
 
     return `<div class="teaser-card no-underline mb-3 block" style="border-left: 3px solid ${col}">
       <!-- Header: Sector Name + Score -->
-      <a href="${href}" class="flex items-center justify-between no-underline group">
+      <a href="${UI.escapeHTML(href)}" class="flex items-center justify-between no-underline group">
         <div class="flex flex-col">
           <div class="flex items-center gap-2">
-            <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${s.proxy_etf || s.name}</span>
-            <span class="text-[9px] font-black px-1.5 py-0.5 rounded mt-[-5px]" style="background:${col}1A;color:${col}">${s.verdict}</span>
+            <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${UI.escapeHTML(s.proxy_etf || s.name)}</span>
+            <span class="text-[9px] font-black px-1.5 py-0.5 rounded mt-[-5px]" style="background:${col}1A;color:${col}">${UI.escapeHTML(s.verdict)}</span>
           </div>
-          <span class="text-[10px] text-zinc-500">${sectorLabelIndex(s.name || '')}</span>
+          <span class="text-[10px] text-zinc-500">${UI.escapeHTML(sectorLabelIndex(s.name || ''))}</span>
         </div>
         <div class="flex flex-col items-end">
-          <span class="text-[14px] font-black font-mono" style="color:${col}">${s.score ?? '—'}</span>
+          <span class="text-[14px] font-black font-mono" style="color:${col}">${UI.escapeHTML(s.score ?? '—')}</span>
           <span class="text-[9px] text-zinc-500 group-hover:text-emerald-500 transition-all">→</span>
         </div>
       </a>
@@ -333,10 +732,10 @@ function renderHotSectorsTeaser(sectors, momentum) {
       <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-zinc-200/10 dark:border-zinc-800/40">
         ${sectorStocks.length ? sectorStocks.map(r => {
           const sCol = (r.score||0) >= 70 ? '#3b82f6' : (r.score||0) >= 50 ? '#22c55e' : '#eab308';
-          return `<a href="momentum.html?search=${r.ticker}" class="sector-ticker-pill no-underline">
+          return `<a href="momentum.html?search=${encodeURIComponent(r.ticker || '')}" class="sector-ticker-pill no-underline">
             <div class="score-dot" style="background:${sCol}"></div>
-            <span>${r.ticker}</span>
-            <span class="text-[8px] opacity-60">${r.score?.toFixed(0)}</span>
+            <span>${UI.escapeHTML(r.ticker)}</span>
+            <span class="text-[8px] opacity-60">${UI.escapeHTML(r.score?.toFixed(0) ?? '')}</span>
           </a>`;
         }).join('') : `<span class="text-[9px] text-zinc-600 italic">No tickers scanned</span>`}
       </div>
@@ -380,19 +779,19 @@ function renderNewsVerdictsTeaser(news) {
     return `<a href="news.html" class="news-teaser-card no-underline mb-3 block" style="border-left: 3px solid ${col}">
       <!-- Header: Verdict + Score -->
       <div class="flex items-center justify-between">
-        <span class="impact-badge" style="background:${col}1A;color:${col}">${label}</span>
-        <span class="text-[12px] font-black font-mono" style="color:${col}">${scoreTxt}</span>
+        <span class="impact-badge" style="background:${col}1A;color:${col}">${UI.escapeHTML(label)}</span>
+        <span class="text-[12px] font-black font-mono" style="color:${col}">${UI.escapeHTML(scoreTxt)}</span>
       </div>
 
       <!-- Title: Headline -->
-      <h4 class="text-[11px] font-bold leading-tight" style="color:var(--text-card-title)">${n.headline_zh || n.headline}</h4>
+      <h4 class="text-[11px] font-bold leading-tight" style="color:var(--text-card-title)">${UI.escapeHTML(n.headline_zh || n.headline || '')}</h4>
 
       <!-- Content: Core Reason (truncated) -->
-      ${reason ? `<p class="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed mt-1 italic">${reason}</p>` : ''}
+      ${reason ? `<p class="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed mt-1 italic">${UI.escapeHTML(reason)}</p>` : ''}
 
       <!-- Footer: Sectors -->
       <div class="flex flex-wrap gap-1.5 mt-1 pt-2 border-t border-zinc-200/10 dark:border-zinc-800/40">
-        ${sectors.map(s => `<span class="news-sector-pill">${s}</span>`).join('')}
+        ${sectors.map(s => `<span class="news-sector-pill">${UI.escapeHTML(s)}</span>`).join('')}
       </div>
       </a>`;
 
@@ -430,9 +829,9 @@ function renderMomentumTeaser(momentum, crossSet) {
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="rank-badge rank-${rankNum}">${rankNum}</span>
-          <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${r.ticker}</span>
+          <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${UI.escapeHTML(r.ticker)}</span>
           ${star}
-          <span class="text-[10px] text-zinc-500 font-mono ml-1">$${r.price ? r.price.toFixed(2) : '—'}</span>
+          <span class="text-[10px] text-zinc-500 font-mono ml-1">$${r.price ? Number(r.price).toFixed(2) : '—'}</span>
         </div>
         <div class="flex flex-col items-end">
           <div class="score-battery mb-1">${cellsHTML}</div>
@@ -443,16 +842,16 @@ function renderMomentumTeaser(momentum, crossSet) {
       <!-- Content: Pros & Cons -->
       <div class="flex flex-col gap-1.5 mt-1">
         ${pros.length ? `<div class="flex flex-wrap gap-1.5">
-          ${pros.map(p => `<span class="pc-pill pc-pro"><i data-lucide="check-circle-2" class="w-2.5 h-2.5"></i> ${p}</span>`).join('')}
+          ${pros.map(p => `<span class="pc-pill pc-pro"><i data-lucide="check-circle-2" class="w-2.5 h-2.5"></i> ${UI.escapeHTML(p)}</span>`).join('')}
         </div>` : ''}
         ${cons.length ? `<div class="flex flex-wrap gap-1.5">
-          ${cons.map(c => `<span class="pc-pill pc-con"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> ${c}</span>`).join('')}
+          ${cons.map(c => `<span class="pc-pill pc-con"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> ${UI.escapeHTML(c)}</span>`).join('')}
         </div>` : ''}
       </div>
 
       <!-- Footer: Sector & RSI -->
       <div class="flex items-center justify-between mt-1 pt-2 border-t border-zinc-200/20 dark:border-zinc-800/50">
-        <span class="news-sector-pill">${r.sector || 'Unknown'}</span>
+        <span class="news-sector-pill">${UI.escapeHTML(r.sector || 'Unknown')}</span>
         <span class="text-[9px] font-mono ${r.rsi_14 > 70 ? 'text-red-400' : r.rsi_14 < 30 ? 'text-blue-400' : 'text-zinc-500'}">RSI ${r.rsi_14?.toFixed(1) || '—'}</span>
       </div>
     </a>`;
@@ -490,6 +889,10 @@ function renderFocusTicker(data) {
 
   const isZh = UI.currentLang === 'zh';
   const sectorName = pick.sector || '';
+  // Defence-in-depth: tickers are A-Z0-9.- in our universe; strip anything else
+  // before splicing into the inline onclick string. The data fields are still
+  // escaped via UI.escapeHTML for HTML attribute / text contexts.
+  const safeTicker = String(pick.ticker || '').replace(/[^A-Za-z0-9.\-]/g, '');
   el.classList.remove('hidden');
   el.innerHTML = `
     <div class="focus-ticker-card">
@@ -498,15 +901,15 @@ function renderFocusTicker(data) {
         <span class="text-[9px] text-zinc-500">${isZh ? '三軍同向（AI verdict + 產業 + 動能）' : 'Tri-signal alignment'}</span>
       </div>
       <div class="flex items-baseline gap-3 flex-wrap">
-        <span class="text-lg font-black tracking-tight" style="color:var(--text-card-title)">${pick.ticker}</span>
-        <span class="text-[10px] text-zinc-500 font-mono">$${pick.price ? pick.price.toFixed(2) : '—'}</span>
-        <span class="text-[10px] font-mono" style="color:#a78bfa">score ${pick.score ?? '—'}</span>
-        <button onclick="window.AnalyzeQueue && window.AnalyzeQueue.enqueue('${pick.ticker}')"
+        <span class="text-lg font-black tracking-tight" style="color:var(--text-card-title)">${UI.escapeHTML(safeTicker)}</span>
+        <span class="text-[10px] text-zinc-500 font-mono">$${pick.price ? Number(pick.price).toFixed(2) : '—'}</span>
+        <span class="text-[10px] font-mono" style="color:#a78bfa">score ${UI.escapeHTML(pick.score ?? '—')}</span>
+        <button onclick="window.AnalyzeQueue && window.AnalyzeQueue.enqueue('${safeTicker}')"
                 class="ml-auto text-[9px] font-black px-2 py-1 rounded" style="background:#a78bfa;color:#fff">
           ${isZh ? '加入佇列' : 'ENQUEUE'}
         </button>
       </div>
-      <div class="text-[10px] text-zinc-500 mt-1 leading-snug">${sectorName} · ${isZh ? '來自 AI overweight 產業的動能領先股' : 'Momentum leader in an AI-overweight sector'}</div>
+      <div class="text-[10px] text-zinc-500 mt-1 leading-snug">${UI.escapeHTML(sectorName)} · ${isZh ? '來自 AI overweight 產業的動能領先股' : 'Momentum leader in an AI-overweight sector'}</div>
     </div>`;
 }
 
@@ -532,11 +935,11 @@ async function updateDashboard() {
   try {
     data = await DataStore.get(true);
 
-    // Layer 1: Today's AI Verdict hero + 3-signal mini gauge
+    // Layer 1: Today's AI Verdict hero (4-bar mini gauge replaced by sector-status-row below)
     Components.renderTodayVerdict(data.market);
-    renderThreeSignalMini(data);
 
-    // Layer 2: Binary risk + warning flags
+    // V1.73.4: 8-gauge status row + binary alert (adaptive) + warning flags
+    renderSectorStatusStrip(data);
     renderBinaryAlertIndex(data.binary_risks);
     renderWarningFlagsIndex(data.market);
 
@@ -670,11 +1073,29 @@ async function launchAnalysis() {
   if (!input) return;
   const ticker = input.value.trim().toUpperCase();
   if (!ticker) return;
+
+  // 檢查是否已在佇列或正在進行中
+  if (window.AnalyzeQueue) {
+    const state = window.AnalyzeQueue.state || {};
+    const isActive = state.active && state.active.ticker === ticker;
+    const isQueued = (state.queue || []).some(q => q.ticker === ticker);
+
+    if (isActive || isQueued) {
+      const tr = window.i18n?.[UI.currentLang]?.analyze_queue || {};
+      const msg = isActive
+        ? (tr.toast_dup_active || `${ticker} 正在分析中`)
+        : (tr.toast_dup_pending || `${ticker} 已在佇列中`);
+      UI.showToast(msg.replace('{tk}', ticker), 'warning');
+      input.value = '';
+      return;
+    }
+  }
+
   const isZh = UI.currentLang === 'zh';
   const prefix = await UI.dailyUpdatePrefix();
   const confirmMsg = prefix + (isZh
-    ? `加入個股分析佇列：${ticker}（risk=${UI.riskTolerance}）？\nV4.8 每檔約 10-15 分鐘，~$4 tokens。重複者（排隊中或分析中）會被忽略。`
-    : `Enqueue invest analysis for ${ticker} (risk=${UI.riskTolerance})?\nV4.8 ~10-15 min per ticker, ~$4 tokens. Duplicates are abandoned.`);
+    ? `加入個股分析佇列：${ticker}（risk=${UI.riskTolerance}）？\nV4.8 每檔約 10-15 分鐘，~$4 tokens。`
+    : `Enqueue invest analysis for ${ticker} (risk=${UI.riskTolerance})?\nV4.8 ~10-15 min per ticker, ~$4 tokens.`);
   if (!confirm(confirmMsg)) return;
 
   try {
@@ -805,7 +1226,9 @@ document.getElementById('preflight-close')?.addEventListener('click', closePrefl
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreflight(); });
 
 async function loadPreflightData() {
-  const body = document.getElementById('preflight-body');
+  // V2.7.17 — render checklist into #preflight-checklist (not #preflight-body)
+  // so the new chain UI in #preflight-chain coexists in the same modal.
+  const body = document.getElementById('preflight-checklist') || document.getElementById('preflight-body');
   const btnFree = document.getElementById('preflight-run-free');
   const btnAll  = document.getElementById('preflight-run-all');
   if (!body) return;
@@ -1016,6 +1439,152 @@ async function runPreflightQueue(items, isZh) {
   setTimeout(() => { updateDashboard(); loadPreflightData(); }, 2000);
 }
 
+// ── V2.7.17 — Pre-market check chain orchestrator ──────────────────────────
+// Phase 1 (parallel): bash daily_update.sh + news Claude protocol
+// Phase 2 (after both Phase 1 done): sector Claude protocol
+// Phase 3 (auto): bridge.py refresh → AI verdict pills auto-update
+let _chainPollTimers = { daily: null, proto: null };
+let _chainState = { phase: 0, dailyDone: false, newsDone: false, sectorDone: false };
+const ZH = () => UI.currentLang === 'zh';
+
+function _setRow(rowKey, icon, meta, barPct) {
+  const ic = document.getElementById(`preflight-icon-${rowKey}`);
+  const mt = document.getElementById(`preflight-meta-${rowKey}`);
+  const bar = document.getElementById(`preflight-bar-${rowKey}`);
+  if (ic) ic.textContent = icon;
+  if (mt) mt.textContent = meta;
+  if (bar) bar.style.width = `${Math.max(0, Math.min(100, barPct || 0))}%`;
+}
+function _fmtSec(s) {
+  if (s == null) return '—';
+  const m = Math.floor(s / 60), x = s % 60;
+  return m ? `${m}m ${String(x).padStart(2,'0')}s` : `${x}s`;
+}
+
+async function runPremarketChain() {
+  const isZh = ZH();
+  // Show chain UI, hide checklist
+  document.getElementById('preflight-chain')?.classList.remove('hidden');
+  document.getElementById('preflight-checklist')?.classList.add('hidden');
+  document.getElementById('preflight-run-chain').setAttribute('disabled', 'true');
+
+  _chainState = { phase: 1, dailyDone: false, newsDone: false, sectorDone: false };
+  _setRow('daily', '🔄', isZh ? '啟動中…' : 'starting…', 0);
+  _setRow('news',  '🔄', isZh ? '啟動中…' : 'starting…', 0);
+  _setRow('sector','⏳', isZh ? '等 Phase 1' : 'waiting Phase 1', 0);
+  _setRow('verdict','⏳', isZh ? '等 Phase 2' : 'waiting Phase 2', 0);
+
+  // Phase 1 — fire both in parallel
+  const [dailyRes, newsRes] = await Promise.allSettled([
+    fetch('/api/run-daily-update', { method: 'POST' }).then(r => r.json()),
+    fetch('/api/protocol-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'news' }),
+    }).then(r => r.json()),
+  ]);
+  if (dailyRes.status === 'rejected' || (dailyRes.value && dailyRes.value.error && !dailyRes.value.job_id)) {
+    _setRow('daily', '❌', `${isZh?'啟動失敗':'failed'}: ${dailyRes.value?.error || dailyRes.reason}`, 0);
+  }
+  if (newsRes.status === 'rejected' || (newsRes.value && newsRes.value.error)) {
+    _setRow('news', '❌', `${isZh?'啟動失敗':'failed'}: ${newsRes.value?.error || newsRes.reason}`, 0);
+  }
+
+  // Start poll loops (independent timers)
+  if (_chainPollTimers.daily) clearInterval(_chainPollTimers.daily);
+  if (_chainPollTimers.proto) clearInterval(_chainPollTimers.proto);
+  _chainPollTimers.daily = setInterval(_pollDailyUpdate, 2500);
+  _chainPollTimers.proto = setInterval(_pollProtoForChain, 2500);
+  _pollDailyUpdate();
+  _pollProtoForChain();
+}
+
+async function _pollDailyUpdate() {
+  const isZh = ZH();
+  try {
+    const r = await fetch('/api/run-daily-update/status', { cache: 'no-store' });
+    if (!r.ok) return;
+    const s = await r.json();
+    if (s.status === 'running') {
+      const step = s.current_step || 0;
+      const tot  = s.total_steps  || 6;
+      const pct  = (step / tot) * 100;
+      _setRow('daily', '🔄', `step ${step}/${tot} · ${_fmtSec(s.elapsed_sec)}`, pct);
+    } else if (s.status === 'done') {
+      _setRow('daily', '✅', `${isZh?'完成':'done'} · ${_fmtSec(s.elapsed_sec)}`, 100);
+      if (!_chainState.dailyDone) { _chainState.dailyDone = true; _maybeStartPhase2(); }
+      clearInterval(_chainPollTimers.daily);
+    } else if (s.status === 'error') {
+      _setRow('daily', '❌', `${isZh?'錯誤':'error'}: ${(s.error || s.log_tail || '').slice(0, 80)}`, 100);
+      clearInterval(_chainPollTimers.daily);
+    }
+  } catch {}
+}
+
+async function _pollProtoForChain() {
+  const isZh = ZH();
+  try {
+    const r = await fetch('/api/run-protocol/status', { cache: 'no-store' });
+    if (!r.ok) return;
+    const s = await r.json();
+    // Map active job by name
+    const target = (_chainState.phase === 1 && !_chainState.newsDone) ? 'news'
+                 : (_chainState.phase === 2 && !_chainState.sectorDone) ? 'sector'
+                 : null;
+    if (!target) return;
+    if (s.name !== target) return;
+    if (s.status === 'running') {
+      _setRow(target, '🔄', `running · ${_fmtSec(s.elapsed_sec)}`, Math.min(95, (s.elapsed_sec || 0) / 9));
+    } else if (s.status === 'done') {
+      _setRow(target, '✅', `${isZh?'完成':'done'} · ${_fmtSec(s.elapsed_sec)}`, 100);
+      if (target === 'news') {
+        _chainState.newsDone = true;
+        _maybeStartPhase2();
+      } else if (target === 'sector') {
+        _chainState.sectorDone = true;
+        _finalizeChain();
+      }
+    } else if (s.status === 'error') {
+      _setRow(target, '❌', `${isZh?'錯誤':'error'}: ${(s.error || '').slice(0, 80)}`, 100);
+      // halt chain
+      clearInterval(_chainPollTimers.proto);
+      document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+    }
+  } catch {}
+}
+
+async function _maybeStartPhase2() {
+  if (!_chainState.dailyDone || !_chainState.newsDone) return;
+  const isZh = ZH();
+  _chainState.phase = 2;
+  _setRow('sector', '🔄', isZh ? '啟動中…' : 'starting…', 0);
+  try {
+    await fetch('/api/protocol-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'sector' }),
+    });
+  } catch (e) {
+    _setRow('sector', '❌', `${isZh?'啟動失敗':'failed to start'}: ${e.message}`, 0);
+  }
+}
+
+function _finalizeChain() {
+  const isZh = ZH();
+  clearInterval(_chainPollTimers.proto);
+  _chainState.phase = 3;
+  _setRow('verdict', '🔄', isZh ? '刷新中…' : 'refreshing…', 50);
+  // bridge.py auto-runs in protocol worker after sector done; wait ~5s then refresh dashboard
+  setTimeout(() => {
+    _setRow('verdict', '✅', isZh ? 'Dashboard 更新完成' : 'dashboard updated', 100);
+    updateDashboard();
+    document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+    UI.showToast(isZh ? '盤前檢查完成' : 'Pre-market check complete', 'success', 5000);
+  }, 5000);
+}
+
+document.getElementById('preflight-run-chain')?.addEventListener('click', runPremarketChain);
+
 // ── Boot ───────────────────────────────────────────────────────────────────
 const _activePage = document.body.dataset.page || 'index';
 UI.boot(_activePage, { translate: applyTranslations, reload: updateDashboard });
@@ -1035,12 +1604,49 @@ if (window.AnalyzeQueue) window.AnalyzeQueue.renderWidget('#analyze-queue-widget
     const key = target.getAttribute('data-tip-key');
     const isZh = UI.currentLang === 'zh';
     const dict = isZh ? (window.i18n?.zh || {}) : (window.i18n?.en || {});
-    
+
+    // Special-case: severity-tiered warning flag (Layer 2b on index.html).
+    // Build a rich body from i18n.warnings.tooltips.<flag_key> + the flag's
+    // own data-* attributes (name, severity, formatted metric).
+    if (key === 'warning_flag') {
+      const flagKey  = target.getAttribute('data-flag-key') || '';
+      const severity = target.getAttribute('data-flag-severity') || 'caution';
+      const name     = target.getAttribute('data-flag-name') || flagKey;
+      const metric   = target.getAttribute('data-flag-metric') || '';
+      const w        = (dict.warnings || {});
+      const sevLabel = (w.severity && w.severity[severity]) || severity.toUpperCase();
+      const tooltip  = (w.tooltips && w.tooltips[flagKey]) || {};
+      const def      = tooltip.definition || '';
+      const hint     = tooltip.hint || '';
+
+      tip.innerHTML = `
+        <h4 class="text-[10px] font-black uppercase tracking-widest mb-1 rft-title-${UI.escapeHTML(severity)}">
+          ${UI.escapeHTML(sevLabel)} · ${UI.escapeHTML(name)}
+        </h4>
+        ${def ? `<p class="text-[11px] leading-relaxed text-zinc-300">${UI.escapeHTML(def)}</p>` : ''}
+        ${metric ? `<div class="rft-metric-row"><span>${UI.escapeHTML(metric)}</span></div>` : ''}
+        ${hint ? `<div class="rft-hint">${UI.escapeHTML(hint)}</div>` : ''}
+      `;
+      tip.classList.add('tip-visible');
+
+      const rect2 = target.getBoundingClientRect();
+      let left2 = rect2.left + rect2.width / 2 - 140;
+      if (left2 < 10) left2 = 10;
+      if (left2 + 280 > window.innerWidth - 10) left2 = window.innerWidth - 290;
+      let top2 = rect2.top - tip.offsetHeight - 12;
+      if (top2 < 10) top2 = rect2.bottom + 12;
+      tip.style.top = top2 + 'px';
+      tip.style.left = left2 + 'px';
+      tip.style.opacity = '1';
+      tip.style.transform = 'translateY(0)';
+      return;
+    }
+
     // Search for content: top-level key OR sector_page logic
     const body = dict[key] || dict.sector_page?.risk_flags?.[key] || key;
     const title = isZh ? '解釋說明' : 'EXPLANATION';
 
-    tip.innerHTML = `<h4 class="text-[10px] font-black uppercase tracking-widest mb-1" style="color:#ef4444">${title}</h4><p class="text-[11px] leading-relaxed text-zinc-300">${body}</p>`;
+    tip.innerHTML = `<h4 class="text-[10px] font-black uppercase tracking-widest mb-1" style="color:#ef4444">${UI.escapeHTML(title)}</h4><p class="text-[11px] leading-relaxed text-zinc-300">${UI.escapeHTML(body)}</p>`;
     tip.classList.add('tip-visible');
 
     const rect = target.getBoundingClientRect();

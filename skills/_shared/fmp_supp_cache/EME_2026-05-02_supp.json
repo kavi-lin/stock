@@ -1,0 +1,161 @@
+{
+  "ticker": "EME",
+  "as_of_date": "2026-05-02",
+  "cache_key": "EME_2026-05-02",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 7.837542500220008,
+    "piotroskiScore": 6,
+    "altman_zone": "safe",
+    "piotroski_strength": "moderate",
+    "workingCapital": 1252994000,
+    "totalAssets": 9508107000,
+    "retainedEarnings": 6293411000,
+    "ebit": 1902273000,
+    "totalLiabilities": 5640531000,
+    "revenue": 17750861000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q1",
+    "as_of_date": "2026-03-31",
+    "ownersEarnings": 2492431,
+    "ownersEarningsPerShare": 0.05532465,
+    "maintenanceCapex": 1934431,
+    "growthCapex": -30646431,
+    "averagePPE": 0.04027862,
+    "qoq_growth": -0.9952,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 24,
+        "total_disposed_shares": 0,
+        "acquired_transactions": 5,
+        "disposed_transactions": 0,
+        "total_purchases": 0,
+        "total_sales": 0
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 1.4286,
+        "total_acquired_shares": 10643,
+        "total_disposed_shares": 51713,
+        "acquired_transactions": 10,
+        "disposed_transactions": 7,
+        "total_purchases": 0,
+        "total_sales": 2
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 2,
+        "total_acquired_shares": 177,
+        "total_disposed_shares": 1574.32,
+        "acquired_transactions": 6,
+        "disposed_transactions": 3,
+        "total_purchases": 0,
+        "total_sales": 2
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 23,
+        "total_disposed_shares": 0,
+        "acquired_transactions": 5,
+        "disposed_transactions": 0,
+        "total_purchases": 0,
+        "total_sales": 0
+      }
+    ],
+    "latest_trend": "distributing",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {
+    "as_of_date": "2025-12-31",
+    "year": 2025,
+    "quarter": 4,
+    "ownership_percent": 95.1205,
+    "last_ownership_percent": 91.7823,
+    "ownership_pct_change_qoq": 3.3382,
+    "investors_holding": 1109,
+    "investors_holding_change": 27,
+    "num_13f_shares": 42646003,
+    "num_13f_shares_change": 1496650,
+    "total_invested_usd": 27593931221,
+    "total_invested_change_usd": 955825860,
+    "new_positions": 167,
+    "increased_positions": 582,
+    "reduced_positions": 373,
+    "closed_positions": 142,
+    "put_call_ratio": 0.906,
+    "put_call_ratio_change_qoq": 29.6283,
+    "accumulation_signal": "accumulating",
+    "source": "FMP /stable/institutional-ownership/symbol-positions-summary"
+  },
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 0,
+    "house_count": 6,
+    "buy_count": 5,
+    "sell_count": 1,
+    "net_signal": "bullish",
+    "most_recent_date": "2026-03-10",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {
+    "latest_disclosure": {
+      "date": "2026-03-31",
+      "form_type": "10-Q",
+      "environmental_score": 76.99,
+      "social_score": 67.72,
+      "governance_score": 74.42,
+      "total_esg_score": 73.04
+    },
+    "latest_rating": {
+      "fiscal_year": 2025,
+      "esg_risk_rating": "B",
+      "industry": "ENGINEERING & CONSTRUCTION",
+      "industry_rank": null
+    },
+    "source": "FMP /stable/esg-disclosures + esg-ratings"
+  },
+  "executive_compensation": {},
+  "comp_benchmark": {
+    "industry_title": "ABRASIVE, ASBESTOS & MISC NONMETALLIC MINERAL PRODS",
+    "year": 2024,
+    "average_compensation": 784407.5555555555,
+    "median_compensation": null,
+    "ceo_overpaid_vs_median_pct": null,
+    "source": "FMP /stable/executive-compensation-benchmark"
+  },
+  "employee_history": {
+    "latest_period": "2025-12-31",
+    "latest_count": 44000,
+    "one_year_pct": 8.9,
+    "cagr_5y_pct": 6.7,
+    "expansion_signal": false,
+    "layoff_signal": false,
+    "data_points": 30,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 1,
+    "cached": false
+  }
+}

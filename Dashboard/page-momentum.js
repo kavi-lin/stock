@@ -68,6 +68,50 @@ const SIG_DESC_ZH = {
         hint: '配合 MA structure (Stage 2 必要) + 量增可信度更高；單獨 MACD 訊號雜訊很多',
     },
     macd_histogram_rising:       { desc: 'MACD 柱狀圖連續 3 日擴大。多頭動能持續加速。', hint: '最好的 follow-through 訊號；趨勢延續機率高。' },
+    // V2.1 leader-finder signals
+    at_52w_new_high: {
+        desc: '收盤距 52 週高點 ≤ 0.5%（含創新高）。O\'Neil「new high begets new high」核心訊號。',
+        tiers: [
+            { dot: '🟢', label: '量增突破',   text: '今日量比 ≥ 1.3x 突破前高 → 真突破，動能延續機率高' },
+            { dot: '🟡', label: '無量試探',   text: '量比 < 1x 緩步創新高 → 等量增確認再進' },
+            { dot: '🟠', label: '拋物線末端', text: '已連 5+ 日創高 + 距 MA50 > 30% → 過熱風險高' },
+        ],
+        hint: '搭配 RS leader 訊號最強。新高股一年內續強機率約 60% (CAN SLIM 統計)',
+    },
+    near_52w_high: {
+        desc: '收盤距 52 週高點 ≤ 5%。準備突破或剛突破回測。',
+        hint: '比 at_52w_new_high 寬鬆，更廣的高位池；搭配 VCP setup 訊號最有突破動能',
+    },
+    rs_leader_3m: {
+        desc: '3 個月 ticker 報酬 vs SPY 報酬 ≥ +15pp。RS rating 約 ≥ 75（top 25%）。',
+        hint: 'O\'Neil 派核心：相對強弱才是動能本質。長期看跑贏 SPY 是 alpha 來源',
+    },
+    vcp_compressed: {
+        desc: 'Minervini VCP — 過去 4 週價格震幅 < 過去 12 週震幅的 55%。設定收斂、壓縮 → 即將突破。',
+        tiers: [
+            { dot: '🟢', label: '完美 VCP',   text: 'Stage 2 + 量縮 + 4w/12w < 0.5 → 突破前夜經典 setup' },
+            { dot: '🟡', label: '部分 VCP',   text: '4w/12w 0.5-0.55 → 仍在收斂但尚未完成；觀察 1-2 週' },
+            { dot: '🟠', label: '假 VCP',     text: 'Stage 4 / 大跌後的整理 ≠ VCP，是延續下跌的旗形整理，不要錯認' },
+        ],
+        hint: 'VCP 是突破**前**訊號，比 fresh golden cross 早 2-4 週；Mark Minervini SEPA 派核心',
+    },
+    vol_dryup_spike: {
+        desc: '近 5 日均量 < 20 日均量 × 0.75（dry up）AND 今日量 > 20 日均量 × 1.5（spike）。「累積後突破」最高訊噪比的量能 pattern。',
+        hint: '比單純 volume_expansion 精準很多；通常是機構吸籌完成、開始拉升的關鍵起手式',
+    },
+    eps_accelerating: {
+        desc: 'CAN SLIM C 法則：最新 Q YoY EPS growth > 上 Q YoY growth。盈餘加速 = 真正領頭股核心特徵。',
+        hint: '需要 earnings-analyst cache（90 天內）；無 cache 此訊號不會觸發。Bill O\'Neil 統計：歷史大牛股 95% 在突破前都有 EPS 加速',
+    },
+    dtc_squeeze_candidate: {
+        desc: 'Days-to-Cover ≥ 5（空單回補需 5+ 個交易日）AND 站上 MA50。比純高空單更精準的軋空候選。',
+        tiers: [
+            { dot: '🟢', label: '強訊號', text: 'DTC ≥ 10 + Stage 2 + 有 catalyst → 軋空爆發力極強' },
+            { dot: '🟡', label: '一般',   text: 'DTC 5-10 + 站上 MA50 → 軋空燃料存在，等火種' },
+            { dot: '🟠', label: '弱',     text: 'DTC ≥ 5 但 Stage 4 / 跌破 MA50 → 空方可能對的' },
+        ],
+        hint: 'DTC > short% float — 後者只看比例，DTC 看「實際回補需要幾天」更實用',
+    },
 };
 const WARN_DESC_ZH = {
     overbought_rsi:              {
@@ -146,6 +190,50 @@ const SIG_DESC_EN = {
         hint: 'Pair with MA structure (Stage 2 required) + volume expansion for highest reliability; standalone MACD is noisy',
     },
     macd_histogram_rising:       { desc: 'MACD histogram rising for 3 consecutive days. Bull momentum accelerating.', hint: 'Best follow-through signal; trend-continuation probability is high.' },
+    // V2.1 leader-finder signals
+    at_52w_new_high: {
+        desc: 'Within 0.5% of 52-week high (or new high). O\'Neil "new high begets new high" core signal.',
+        tiers: [
+            { dot: '🟢', label: 'Volume breakout', text: 'Vol ratio ≥ 1.3x breaking prior high → real breakout, momentum likely continues' },
+            { dot: '🟡', label: 'Quiet test',      text: 'Vol < 1x slowly making new highs → wait for volume confirmation' },
+            { dot: '🟠', label: 'Parabolic late',  text: '5+ consecutive new highs + 30%+ above MA50 → overheating risk' },
+        ],
+        hint: 'Best paired with RS leader. New-high stocks continue strong ~60% of next year (CAN SLIM stat)',
+    },
+    near_52w_high: {
+        desc: 'Within 5% of 52-week high. Pre-breakout setup or post-breakout retest.',
+        hint: 'Broader than at_52w_new_high; pair with VCP setup signal for highest breakout potential',
+    },
+    rs_leader_3m: {
+        desc: '3-month return outperforms SPY by ≥ +15pp. RS rating ~75+ (top 25%).',
+        hint: 'O\'Neil core: relative strength IS momentum. Long-term, beating SPY is the alpha source',
+    },
+    vcp_compressed: {
+        desc: 'Minervini VCP — 4-week price range < 55% of 12-week range. Setup contracting → imminent breakout.',
+        tiers: [
+            { dot: '🟢', label: 'Perfect VCP',  text: 'Stage 2 + dry-up + 4w/12w < 0.5 → classic pre-breakout setup' },
+            { dot: '🟡', label: 'Partial VCP',  text: '4w/12w 0.5-0.55 → still contracting, observe 1-2 weeks' },
+            { dot: '🟠', label: 'False VCP',    text: 'Stage 4 / post-crash consolidation ≠ VCP, it\'s a flag pattern continuing down' },
+        ],
+        hint: 'VCP is a PRE-breakout signal, ~2-4 weeks earlier than fresh golden cross. Mark Minervini SEPA core',
+    },
+    vol_dryup_spike: {
+        desc: '5-day avg vol < 20-day avg × 0.75 (dry up) AND today vol > 20-day avg × 1.5 (spike). "Accumulation then breakout" — best signal-to-noise volume pattern.',
+        hint: 'Much sharper than plain volume_expansion. Usually means institutional accumulation finished, ramp starting',
+    },
+    eps_accelerating: {
+        desc: 'CAN SLIM C law: latest Q YoY EPS growth > prior Q YoY growth. Earnings acceleration = true leader trait.',
+        hint: 'Requires earnings-analyst cache (within 90d); won\'t fire without cache. Bill O\'Neil stat: 95% of historical big winners had EPS acceleration before breakout',
+    },
+    dtc_squeeze_candidate: {
+        desc: 'Days-to-Cover ≥ 5 (shorts need 5+ trading days to cover) AND price above MA50. Sharper squeeze candidate than raw short %.',
+        tiers: [
+            { dot: '🟢', label: 'Strong', text: 'DTC ≥ 10 + Stage 2 + catalyst → extremely high squeeze explosiveness' },
+            { dot: '🟡', label: 'Standard', text: 'DTC 5-10 + above MA50 → fuel exists, awaiting spark' },
+            { dot: '🟠', label: 'Weak',   text: 'DTC ≥ 5 but Stage 4 / below MA50 → shorts likely correct' },
+        ],
+        hint: 'DTC > short% float — the latter is just ratio, DTC tells you "how many days to cover" which is more actionable',
+    },
 };
 const WARN_DESC_EN = {
     overbought_rsi:              {
@@ -193,119 +281,156 @@ function _pillTip(key, isWarning) {
 // scenario the strategy captures), action (what to do with the results).
 // Rendered on hover over preset buttons.
 const PRESET_DETAIL_ZH = {
-    leaders: {
+    // V2.2 PRESETS — leader-finder oriented
+    nh_leaders: {
         criteria: [
-            'Score ≥ 75',
+            'RS Rating ≥ 75（3M vs SPY top 25%）',
+            '距 52w 高點 ≤ 5%',
             'Stage 2 上升趨勢',
-            '量比 ≥ 1.2×（今日成交量 / 20 日均量）',
-            '僅熱門產業（HOT — 由每日產業掃描 protocol 動態標記，跟進階篩選的「產業」dropdown 不同）',
-            '綜合標籤 = 強多（composite score ≥ 80；動能、均線、空方、趨勢四維度加權）',
+            '僅 Top 4 產業（按 sector_intel composite_score 排序）',
         ],
-        strategy: '四重共振：基本面 + 技術面 + 資金面 + 產業面全部對齊。抓出當下市場最強的 5-15 檔領頭羊。',
-        action: '動能派核心持股候選；回檔至 MA20 / MA50 是加碼點。倉位可重、但要設停損（MA50 跌破 = 清倉訊號）。',
+        strategy: 'O\'Neil「new high begets new high」精髓 — 強勢股 + 高位 + 強勢產業三重確認，篩出「當下市場最強領頭羊」。',
+        action: '動能派核心持股候選；突破當下進場，停損放 MA20 下方。回檔至 MA50 是加碼點。',
+    },
+    vcp_setup: {
+        criteria: [
+            'VCP 4w/12w 壓縮比 < 0.55（震幅收斂）',
+            '量縮 (5D < 0.75×20D) + 今日爆量 (>1.5×20D)',
+        ],
+        strategy: 'Minervini SEPA setup hunter — VCP 是突破**前**訊號，比 fresh golden cross 早 2-4 週。能在突破前夜布局。',
+        action: '小倉位埋伏（突破前 setup 失敗率約 30%），突破當日加碼到目標倉位。停損 VCP 區間下緣。',
+    },
+    dual_engine: {
+        criteria: [
+            'EPS 加速（CAN SLIM C 法則：最新 Q YoY > 上 Q YoY）',
+            'RS Rating ≥ 60',
+            'Stage 2 上升趨勢',
+        ],
+        strategy: '技術 + 基本面雙引擎確認。Bill O\'Neil 統計：95% 歷史大牛股都有 EPS 加速。RS 過濾跟漲弱勢，留下真正領頭羊。',
+        action: '中長線標的，倉位可重；持有至 EPS 不再加速或跌破 MA50。需 earnings-analyst cache（90 天內）。',
     },
     breakout: {
         criteria: ['Stage 2', '10 日內 MA20/50 黃金交叉', '量能擴張訊號', '排除 RSI 超買'],
         strategy: 'O\'Neil / Minervini 派經典突破進場點。黃金交叉是結構轉強、加上量能確認就是真突破。',
         action: '當日或下一根 K 線市價 / 限價進。停損放前低或 MA20 下方 3-5%，R/R 至少 2:1。',
     },
-    uptrend: {
-        criteria: ['Score ≥ 65', 'Stage 2', '排除 RSI 超買', '排除拋物線風險'],
-        strategy: '趨勢成熟的追蹤標的 — 已在上升段但還沒過熱。比突破晚進場但勝率穩。',
-        action: '適合偏保守資金；等 RSI 回落到 50-65 區間再進最佳。倉位可中等、別追當下最熱的。',
+    dtc_squeeze: {
+        criteria: [
+            'Days-to-Cover ≥ 5（空單回補需 5+ 個交易日）',
+            'dtc_squeeze_candidate 訊號（DTC 高 + 站上 MA50）',
+        ],
+        strategy: '比純高空單更精準的軋空候選。DTC 看「實際回補需要幾天」，比 short% float 更 actionable。站上 MA50 = 空方已開始痛。',
+        action: '短線交易思維，停損緊（-5% 以內），目標 10-20% 快速獲利。catalyst（財報 / 政策）出現是引爆點。',
     },
-    pullback: {
-        criteria: ['Stage 2', 'RSI 超賣回檔（< 30 但 Stage 2）'],
-        strategy: '強勢股短線回檔買點。**只適用於 Stage 2**；下跌股 RSI < 30 是弱勢延續，不是機會。',
-        action: '分批買進（3-5 天內 2-3 批），別 all-in 抄底。停損放回檔前低，確認反彈再加碼。',
+    rs_pullback: {
+        criteria: [
+            'RS Rating ≥ 70',
+            'RSI 30-50（超賣回檔）',
+            'Stage 2 上升趨勢',
+        ],
+        strategy: '強勢股短線回檔精準版。RS 過濾掉「弱勢股 oversold」的假機會，只留真正領頭股的健康回檔。',
+        action: '分批買進（3-5 天內 2-3 批），停損放回檔前低。RSI 回升 50+ 確認反彈再加碼。',
     },
-    squeeze: {
-        criteria: ['squeeze_candidate 訊號（空單 > 20% + 站上 MA20 > 5%）'],
-        strategy: '高空單 + 價格已反彈。若有 catalyst（財報 / 政策 / 併購）可能引爆軋空連鎖。',
-        action: '短線交易思維，停損緊（-5% 以內），目標 10-20% 快速獲利了結。別長抱、軋空結束很快。',
+    near_high_pool: {
+        criteria: ['距 52w 高點 ≤ 10%'],
+        strategy: '廣義 high-flyer 候選池。比 nh_leaders 寬鬆很多，搭配其他 filter 縮小範圍 — 用來建立「強勢股觀察名單」。',
+        action: '不直接進場，當作 watchlist 來源；搭配 EPS / VCP 等其他 filter 才有交易意義。',
     },
-    safe: {
-        criteria: ['Score ≥ 60', '排除超買', '排除拋物線'],
-        strategy: '新手友善、保守動能。不追強但避開過熱，適合建倉、長期追蹤。',
+    safe_quality: {
+        criteria: ['Score ≥ 60', '排除 RSI 超買', '排除拋物線風險'],
+        strategy: '新手友善、保守動能。不追最強但避開過熱，適合建倉、長期追蹤。',
         action: '小倉位分散持有；重視整體 portfolio 表現而非單檔爆發力。適合月級時間框架。',
-    },
-    all: {
-        criteria: ['無任何過濾'],
-        strategy: '重設所有 filter，看全 503 檔分布。用來了解市場整體狀況或自己手動挑。',
-        action: '搭配表頭排序（分數 / RSI / 量比）切換不同維度觀察。',
     },
     macd_breakout: {
         criteria: ['Stage 2', 'MACD 剛黃金交叉', '量能擴張'],
         strategy: '三訊號同時出現：結構 + 動能 + 資金。技術面最完整的進場點，勝率比單一訊號高。',
         action: '黃金交叉當週內進場最佳，錯過 5 天以上訊號就衰退。停損 MA50 下方，目標前高。',
     },
-    macd_accelerating: {
+    macd_accel: {
         criteria: ['Score ≥ 60', 'MACD histogram 連續擴大'],
         strategy: '趨勢中段動能加速階段 — 不是初升段也不是頂部。用 MACD 柱狀圖確認「動能持續累積」。',
         action: '適合在已有持倉時加碼；新進場也可以但 R/R 比 breakout 略差。',
     },
-    macd_reversal: {
-        criteria: ['RSI ≤ 40（超賣 / 偏弱）', 'MACD histogram 轉升'],
-        strategy: '超賣區底部搭配動能翻轉確認。避免接飛刀 — 光超賣不進，動能跡象出現才動。',
-        action: '只在 Stage 2 或 Stage 1 後期使用；Stage 3/4 的 MACD 反轉常是反彈不是反轉。分批進。',
+    all: {
+        criteria: ['無任何過濾'],
+        strategy: '重設所有 filter，看全部分布。用來了解市場整體狀況或自己手動挑。',
+        action: '搭配表頭排序（分數 / RS / 量比 / NHP）切換不同維度觀察。',
     },
 };
 const PRESET_DETAIL_EN = {
-    leaders: {
+    nh_leaders: {
         criteria: [
-            'Score ≥ 75',
+            'RS Rating ≥ 75 (3M vs SPY top 25%)',
+            'Within 5% of 52w high',
             'Stage 2 uptrend',
-            'Volume ratio ≥ 1.2× (today / 20-day avg)',
-            'Hot-sector tickers only (HOT = dynamic list from daily sector-scan protocol — NOT the manual "Sector" dropdown in advanced filters)',
-            'Composite label = Strongly Bullish (score ≥ 80; weighted volume + MA stage + squeeze + trend acceleration)',
+            'Top 4 sectors only (by sector_intel composite_score)',
         ],
-        strategy: 'Four-way confluence: fundamentals + technicals + flow + sector aligned. Filters to the 5-15 strongest leaders in the market right now.',
-        action: 'Core momentum holdings. Add on pullbacks to MA20/MA50. Full-size allowed but set stop at MA50 break.',
+        strategy: 'O\'Neil "new high begets new high" core — strong stock + high price + strong sector triple-confirm. Filters to the strongest leaders right now.',
+        action: 'Core momentum holdings. Enter on breakout, stop below MA20. Pullbacks to MA50 are add-on points.',
+    },
+    vcp_setup: {
+        criteria: [
+            'VCP 4w/12w compression < 0.55 (volatility contracting)',
+            'Volume dry-up (5D < 0.75×20D) AND today spike (>1.5×20D)',
+        ],
+        strategy: 'Minervini SEPA setup hunter — VCP is a PRE-breakout signal, ~2-4 weeks earlier than fresh golden cross. Position the night before breakout.',
+        action: 'Small starter (pre-breakout fail rate ~30%); add to full size on actual breakout day. Stop below VCP range low.',
+    },
+    dual_engine: {
+        criteria: [
+            'EPS accelerating (CAN SLIM C law: latest Q YoY > prior Q YoY)',
+            'RS Rating ≥ 60',
+            'Stage 2 uptrend',
+        ],
+        strategy: 'Technical + fundamental dual confirmation. Bill O\'Neil stat: 95% of historical big winners had EPS acceleration. RS filter removes weak rallies, keeps true leaders.',
+        action: 'Mid-to-long term holdings, can size up. Hold until EPS no longer accelerates or breaks MA50. Requires earnings-analyst cache (within 90d).',
     },
     breakout: {
         criteria: ['Stage 2', 'MA20/50 golden cross within 10 days', 'Volume expansion signal', 'Exclude RSI overbought'],
         strategy: 'Classic O\'Neil / Minervini breakout entry. Golden cross = structural strength; volume = confirmation of a real breakout.',
         action: 'Enter same day or next bar (market or limit). Stop below prior pivot or 3-5% below MA20. R/R ≥ 2:1.',
     },
-    uptrend: {
-        criteria: ['Score ≥ 65', 'Stage 2', 'Exclude RSI overbought', 'Exclude parabolic risk'],
-        strategy: 'Mature trend followers — already uptrending but not overheated. Later entry than breakout but more consistent win rate.',
-        action: 'Good for conservative capital. Best entry: wait for RSI to retrace to 50-65. Medium position size; avoid the hottest names.',
+    dtc_squeeze: {
+        criteria: [
+            'Days-to-Cover ≥ 5 (shorts need 5+ trading days to cover)',
+            'dtc_squeeze_candidate signal (high DTC + above MA50)',
+        ],
+        strategy: 'Sharper squeeze candidate than raw short %. DTC tells you "actual days to cover" — more actionable than short% float. Above MA50 = shorts already hurting.',
+        action: 'Short-term trade mindset. Tight stops (<-5%). Target 10-20% quick profit. Catalyst (earnings/policy) is the spark.',
     },
-    pullback: {
-        criteria: ['Stage 2', 'RSI oversold pullback (<30 while Stage 2)'],
-        strategy: 'Short-term dip in a strong uptrend. ONLY applies to Stage 2; RSI <30 in a downtrend is weakness continuation, not opportunity.',
-        action: 'Scale in (2-3 tranches over 3-5 days); don\'t all-in. Stop at prior pullback low. Add after bounce confirms.',
+    rs_pullback: {
+        criteria: [
+            'RS Rating ≥ 70',
+            'RSI 30-50 (oversold pullback)',
+            'Stage 2 uptrend',
+        ],
+        strategy: 'Sharper pullback hunter. RS filter removes "weak stock oversold" false opportunities, keeps only true leaders\' healthy retracements.',
+        action: 'Scale in (2-3 tranches over 3-5 days). Stop at prior pullback low. Add when RSI recovers above 50 confirming bounce.',
     },
-    squeeze: {
-        criteria: ['squeeze_candidate signal (short >20% + above MA20 by >5%)'],
-        strategy: 'High short interest + price recovery. With a catalyst (earnings/policy/M&A) this can trigger a short squeeze.',
-        action: 'Short-term trade mindset. Tight stops (<-5%). Target 10-20% quick profit — squeezes end fast, don\'t hold long.',
+    near_high_pool: {
+        criteria: ['Within 10% of 52w high'],
+        strategy: 'Broad high-flyer pool. Much wider than nh_leaders; combine with other filters to narrow — use as "strong stock watchlist" source.',
+        action: 'Not for direct entry; treat as watchlist source. Combine with EPS / VCP / other filters for actual trade signals.',
     },
-    safe: {
+    safe_quality: {
         criteria: ['Score ≥ 60', 'Exclude overbought', 'Exclude parabolic'],
         strategy: 'Beginner-friendly conservative momentum. Doesn\'t chase the strongest but avoids overheated — good for building positions.',
         action: 'Small diversified positions. Focus on portfolio-level performance, not single-name explosiveness. Month-scale horizon.',
-    },
-    all: {
-        criteria: ['No filters'],
-        strategy: 'Reset all filters — see the full 503-stock distribution. For overall market assessment or manual discovery.',
-        action: 'Combine with column sorting (score / RSI / volume) to view from different angles.',
     },
     macd_breakout: {
         criteria: ['Stage 2', 'Fresh MACD bullish cross', 'Volume expansion'],
         strategy: 'Triple confirmation: structure + momentum + flow. Strongest technical entry — win rate exceeds any single signal.',
         action: 'Enter within the week of the cross — signal decays after 5 days. Stop below MA50, target prior highs.',
     },
-    macd_accelerating: {
+    macd_accel: {
         criteria: ['Score ≥ 60', 'MACD histogram rising consecutively'],
         strategy: 'Mid-trend momentum acceleration — not the initial rally, not the top. Histogram expansion confirms momentum is building.',
         action: 'Good for adding to existing positions. New entries OK but slightly worse R/R than breakout.',
     },
-    macd_reversal: {
-        criteria: ['RSI ≤ 40 (oversold / weak)', 'MACD histogram turning up'],
-        strategy: 'Oversold zone with momentum-flip confirmation. Avoids catching falling knives — don\'t buy on oversold alone, wait for momentum sign.',
-        action: 'Use only in Stage 2 or late Stage 1. In Stage 3/4 a MACD reversal is usually a bounce, not a true reversal. Scale in.',
+    all: {
+        criteria: ['No filters'],
+        strategy: 'Reset all filters — see the full distribution. For overall market assessment or manual discovery.',
+        action: 'Combine with column sorting (score / RS / volume / NHP) to view from different angles.',
     },
 };
 
@@ -427,6 +552,14 @@ const FILTER_SIGNALS = [
     'oversold_rsi',
     'low_short_interest',
     'high_short_interest',
+    // V2.1 leader-finder signals
+    'at_52w_new_high',
+    'near_52w_high',
+    'rs_leader_3m',
+    'vcp_compressed',
+    'vol_dryup_spike',
+    'eps_accelerating',
+    'dtc_squeeze_candidate',
 ];
 const FILTER_WARNINGS = [
     'overbought_rsi',
@@ -455,6 +588,16 @@ function defaultFilter() {
         excludedWarnings:  new Set(),
         watchlistMode: 'all',   // 'all' | 'only' | 'exclude'
         search:   '',
+        // V2.1 leader-finder filters (null = inactive)
+        minNhp: null,
+        minRs: null,
+        minRs3mPct: null,
+        requireVcp: false,
+        requireVolDryupSpike: false,
+        minEpsYoy: null,
+        requireEpsAccel: false,
+        minDtc: null,
+        topSectors: null,   // 1-N int; only keep tickers in top-N sectors
     };
 }
 
@@ -471,116 +614,95 @@ function sectorLabel(key) {
 
 // Preset strategies — classic filter combos with a known rationale. Order matters
 // (rendered left-to-right). Each applies atomically (overwrites current filter).
+// V2.2 PRESETS — leader-finder oriented. Each filter follows defaultFilter() shape.
+// Helper: build filter dict with null defaults; only specify keys that differ.
+function _mkFilter(overrides) {
+    return {
+        minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
+        minVolumeRatio: null, onlyHotSectors: false,
+        stage: 'any', sector: 'any', label: 'any', universe: 'any',
+        requiredSignals: [], requiredWarnings: [], excludedWarnings: [],
+        watchlistMode: 'all', search: '',
+        minNhp: null, minRs: null, minRs3mPct: null,
+        requireVcp: false, requireVolDryupSpike: false,
+        minEpsYoy: null, requireEpsAccel: false,
+        minDtc: null, topSectors: null,
+        ...overrides,
+    };
+}
+
 const PRESETS = {
-    leaders: {   // 🚀 "Momentum Leaders" - high score + stage 2 + volume + hot sector
-        filter: {
-            minScore: 75, maxScore: null, minRsi: null, maxRsi: null,
-            minVolumeRatio: 1.2, onlyHotSectors: true,
-            stage: 'Stage 2 uptrend', sector: 'any',
-            label: 'STRONGLY_BULLISH',
-            requiredSignals:  [],
-            requiredWarnings: [],
-            excludedWarnings: [],
-            search: '',
-        },
-        label_zh: '🚀 真動能領航者',
-        label_en: 'Momentum Leaders',
-        hint_zh: '高分(75+) + Stage 2 上升趨勢 + 強力買盤(1.2x+) + 處於熱門產業',
-        hint_en: 'Score 75+ / Stage 2 / Volume 1.2x+ / Hot Sector only'
+    // ── Featured (V2.2 — uses V2.1 leader-finder indicators) ───────────────
+    nh_leaders: {
+        // 🚀 New-high leaders: RS top 25% + within 5% of 52w high + Stage 2 + top 4 sectors
+        filter: _mkFilter({
+            minRs: 75, minNhp: -5, stage: 'Stage 2 uptrend', topSectors: 4,
+        }),
     },
-    breakout: {   // 🔥 fresh 20/50 golden cross + volume confirmation on Stage 2 name
-        filter: {
-            minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
-            stage: 'Stage 2 uptrend', sector: 'any',
-            label: 'any',
-            requiredSignals:  ['fresh_golden_cross_20_50', 'volume_expansion'],
-            requiredWarnings: [],
+    vcp_setup: {
+        // 🎯 VCP breakout setup: VCP compressed + dry-up + spike (price breakout precursor)
+        filter: _mkFilter({
+            requireVcp: true, requireVolDryupSpike: true,
+        }),
+    },
+    dual_engine: {
+        // 💎 Dual engine: EPS accelerating + RS leader (fundamental + technical confluence)
+        filter: _mkFilter({
+            requireEpsAccel: true, minRs: 60, stage: 'Stage 2 uptrend',
+        }),
+    },
+    breakout: {
+        // 🔥 Breakout: fresh 20/50 golden cross + volume expansion + not overbought
+        filter: _mkFilter({
+            stage: 'Stage 2 uptrend',
+            requiredSignals: ['fresh_golden_cross_20_50', 'volume_expansion'],
             excludedWarnings: ['overbought_rsi'],
-            search: '',
-        },
+        }),
     },
-    uptrend: {    // 💪 established trend, score ≥65, not overextended
-        filter: {
-            minScore: 65, maxScore: null, minRsi: null, maxRsi: null,
-            stage: 'Stage 2 uptrend', sector: 'any',
-            label: 'any',
-            requiredSignals:  [],
-            requiredWarnings: [],
+    dtc_squeeze: {
+        // ⚡ DTC squeeze: days-to-cover ≥ 5 + above MA50 (squeeze candidate confirmed)
+        filter: _mkFilter({
+            minDtc: 5,
+            requiredSignals: ['dtc_squeeze_candidate'],
+        }),
+    },
+
+    // ── Secondary (expand panel) ────────────────────────────────────────────
+    rs_pullback: {
+        // 🎢 Strong-stock pullback: RS leader + RSI 30-50 (oversold) + Stage 2
+        filter: _mkFilter({
+            minRs: 70, minRsi: 30, maxRsi: 50, stage: 'Stage 2 uptrend',
+        }),
+    },
+    near_high_pool: {
+        // 📈 52w high-flyer pool: NHP ≥ -10% (broader high-flyer candidate set)
+        filter: _mkFilter({
+            minNhp: -10,
+        }),
+    },
+    safe_quality: {
+        // 🎯 Safe quality: score ≥ 60, exclude overbought + parabolic
+        filter: _mkFilter({
+            minScore: 60,
             excludedWarnings: ['overbought_rsi', 'parabolic_blowoff_risk'],
-            search: '',
-        },
+        }),
     },
-    pullback: {   // 📉 oversold RSI in a still-uptrending stock
-        filter: {
-            minScore: 45, maxScore: null, minRsi: null, maxRsi: null,
-            stage: 'Stage 2 uptrend', sector: 'any',
-            label: 'any',
-            requiredSignals:  ['oversold_rsi'],
-            requiredWarnings: [],
-            excludedWarnings: [],
-            search: '',
-        },
+    macd_breakout: {
+        // 📊 MACD breakout: MACD bullish + volume expansion + Stage 2
+        filter: _mkFilter({
+            stage: 'Stage 2 uptrend',
+            requiredSignals: ['macd_bullish_cross', 'volume_expansion'],
+        }),
     },
-    squeeze: {    // ⚡ short-squeeze candidates (high short + positive momentum)
-        filter: {
-            minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
-            stage: 'any', sector: 'any',
-            label: 'any',
-            requiredSignals:  ['squeeze_candidate'],
-            requiredWarnings: [],
-            excludedWarnings: [],
-            search: '',
-        },
+    macd_accel: {
+        // ⚡ MACD accelerating: score ≥ 60 + histogram rising
+        filter: _mkFilter({
+            minScore: 60,
+            requiredSignals: ['macd_histogram_rising'],
+        }),
     },
-    safe: {       // 🎯 score ≥60, no overbought / parabolic — conservative quality
-        filter: {
-            minScore: 60, maxScore: null, minRsi: null, maxRsi: null,
-            stage: 'any', sector: 'any',
-            label: 'any',
-            requiredSignals:  [],
-            requiredWarnings: [],
-            excludedWarnings: ['overbought_rsi', 'parabolic_blowoff_risk'],
-            search: '',
-        },
-    },
-    all: {        // 📊 reset — see everything
+    all: {
         filter: null,  // resolved to defaultFilter() on apply
-    },
-    macd_breakout: {   // 📈 MACD bullish cross + Stage 2 + volume expansion
-        filter: {
-            minScore: 0, maxScore: null, minRsi: null, maxRsi: null,
-            minVolumeRatio: null, onlyHotSectors: false,
-            stage: 'Stage 2 uptrend', sector: 'any',
-            label: 'any',
-            requiredSignals:  ['macd_bullish_cross', 'volume_expansion'],
-            requiredWarnings: [],
-            excludedWarnings: [],
-            search: '',
-        },
-    },
-    macd_accelerating: {   // ⚡ MACD histogram rising + score ≥ 60 (momentum building)
-        filter: {
-            minScore: 60, maxScore: null, minRsi: null, maxRsi: null,
-            minVolumeRatio: null, onlyHotSectors: false,
-            stage: 'any', sector: 'any',
-            label: 'any',
-            requiredSignals:  ['macd_histogram_rising'],
-            requiredWarnings: [],
-            excludedWarnings: [],
-            search: '',
-        },
-    },
-    macd_reversal: {   // 🔄 RSI oversold + MACD histogram rising (bottom reversal confirm)
-        filter: {
-            minScore: 0, maxScore: null, minRsi: null, maxRsi: 40,
-            minVolumeRatio: null, onlyHotSectors: false,
-            stage: 'any', sector: 'any',
-            label: 'any',
-            requiredSignals:  ['macd_histogram_rising'],
-            requiredWarnings: [],
-            excludedWarnings: [],
-            search: '',
-        },
     },
 };
 
@@ -669,13 +791,14 @@ async function loadMomentumData() {
         document.getElementById('no-data-banner').classList.add('hidden');
         document.getElementById('meta-strip').classList.remove('hidden');
         document.getElementById('filter-bar').classList.remove('hidden');
-        document.getElementById('table-wrap').classList.remove('hidden');
+        document.getElementById('table-section').classList.remove('hidden');
         document.getElementById('journal-section').classList.remove('hidden');
 
         renderMeta(ms);
         renderFilterPanel();
         renderTable();
         renderJournalStats(ms.journal);
+        _syncTableCollapseLabel();
 
         UI.icons();
     } catch (e) {
@@ -688,11 +811,34 @@ function showEmptyState() {
     document.getElementById('no-data-banner').classList.remove('hidden');
     document.getElementById('meta-strip').classList.add('hidden');
     document.getElementById('filter-bar').classList.add('hidden');
-    document.getElementById('table-wrap').classList.add('hidden');
+    document.getElementById('table-section').classList.add('hidden');
     document.getElementById('journal-section').classList.add('hidden');
     document.getElementById('no-data-text').textContent = t().no_data || '尚未有掃描結果';
     document.getElementById('snap-id').textContent = '';
     UI.icons();
+}
+
+/* ── Table collapse ────────────────────────────────────────────── */
+const _TABLE_COLLAPSE_KEY = 'mom_table_collapsed';
+
+function toggleMomTable() {
+    const wrap = document.getElementById('table-wrap');
+    const chevron = document.getElementById('table-chevron');
+    const collapsed = wrap.classList.toggle('hidden');
+    chevron.style.transform = collapsed ? 'rotate(-90deg)' : '';
+    try { localStorage.setItem(_TABLE_COLLAPSE_KEY, collapsed ? '1' : '0'); } catch (_) {}
+    _syncTableCollapseLabel();
+}
+
+function _syncTableCollapseLabel() {
+    const wrap = document.getElementById('table-wrap');
+    const chevron = document.getElementById('table-chevron');
+    if (!wrap || !chevron) return;
+    // Restore saved state (default: expanded)
+    let collapsed = false;
+    try { collapsed = localStorage.getItem(_TABLE_COLLAPSE_KEY) === '1'; } catch (_) {}
+    wrap.classList.toggle('hidden', collapsed);
+    chevron.style.transform = collapsed ? 'rotate(-90deg)' : '';
 }
 
 /* ── Meta strip ────────────────────────────────────────────────── */
@@ -727,7 +873,7 @@ function renderSignalChips() {
     const wrap = document.getElementById('f-signal-chips');
     wrap.innerHTML = FILTER_SIGNALS.map(sig => {
         const active = _state.filter.requiredSignals.has(sig);
-        return `<span class="filter-chip${active ? ' active' : ''}" data-sig="${sig}" title="${sig}">${sigLabel(sig)}</span>`;
+        return `<span class="filter-chip${active ? ' active' : ''}" data-sig="${sig}" data-sig-tip="${sig}" title="${sig}">${sigLabel(sig)}</span>`;
     }).join('');
     wrap.querySelectorAll('[data-sig]').forEach(el => {
         el.onclick = () => {
@@ -744,7 +890,7 @@ function renderWarningChips() {
     const wrap = document.getElementById('f-warning-chips');
     wrap.innerHTML = FILTER_WARNINGS.map(w => {
         const active = _state.filter.excludedWarnings.has(w);
-        return `<span class="filter-chip warn${active ? ' active' : ''}" data-warn="${w}" title="${w}">${warnLabel(w)}</span>`;
+        return `<span class="filter-chip warn${active ? ' active' : ''}" data-warn="${w}" data-warn-tip="${w}" title="${w}">${warnLabel(w)}</span>`;
     }).join('');
     wrap.querySelectorAll('[data-warn]').forEach(el => {
         el.onclick = () => {
@@ -762,7 +908,7 @@ function renderRequiredWarningChips() {
     if (!wrap) return;
     wrap.innerHTML = FILTER_WARNINGS.map(w => {
         const active = _state.filter.requiredWarnings.has(w);
-        return `<span class="filter-chip${active ? ' active' : ''}" data-reqwarn="${w}" title="${w}">${warnLabel(w)}</span>`;
+        return `<span class="filter-chip${active ? ' active' : ''}" data-reqwarn="${w}" data-warn-tip="${w}" title="${w}">${warnLabel(w)}</span>`;
     }).join('');
     wrap.querySelectorAll('[data-reqwarn]').forEach(el => {
         el.onclick = () => {
@@ -805,26 +951,138 @@ function renderUniverseToggle() {
     });
 }
 
+// V1.71.x — Featured presets (5 most strategic) vs Secondary (5 in More dropdown)
+// V2.2: 5 featured + 6 secondary (was 5 + 5; now leader-finder oriented)
+const FEATURED_PRESETS  = ['nh_leaders', 'vcp_setup', 'dual_engine', 'breakout', 'dtc_squeeze'];
+const SECONDARY_PRESETS = ['rs_pullback', 'near_high_pool', 'safe_quality', 'macd_breakout', 'macd_accel', 'all'];
+
+// Compute match count for a given preset (without mutating active filter state)
+function _countMatchesForPreset(key) {
+    const p = PRESETS[key];
+    if (!p) return 0;
+    const eff = (p.filter === null) ? defaultFilter() : {
+        ...p.filter,
+        requiredSignals:  new Set(p.filter.requiredSignals  || []),
+        requiredWarnings: new Set(p.filter.requiredWarnings || []),
+        excludedWarnings: new Set(p.filter.excludedWarnings || []),
+    };
+    // Preserve scope-related filters (universe / watchlistMode) from current state —
+    // count should reflect "if I switch to this preset under my current scope"
+    eff.universe       = _state.filter.universe;
+    eff.watchlistMode  = _state.filter.watchlistMode;
+    const saved = _state.filter;
+    _state.filter = eff;
+    let n = 0;
+    try { for (const r of _state.rows) if (matchesFilter(r)) n++; }
+    finally { _state.filter = saved; }
+    return n;
+}
+
+// Return the preset key whose filter "looks like" the current _state.filter (best-effort match)
+function _activePresetKey() {
+    const f = _state.filter;
+    // Helper: numeric or null comparison (treats undefined/null/0/null-numeric equally where appropriate)
+    const _numEq = (a, b) => {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return Number(a) === Number(b);
+    };
+    for (const key of [...FEATURED_PRESETS, ...SECONDARY_PRESETS]) {
+        const p = PRESETS[key];
+        const target = (p.filter === null) ? defaultFilter() : p.filter;
+        if (Number(f.minScore || 0) !== Number(target.minScore || 0)) continue;
+        if ((f.stage || 'any') !== (target.stage || 'any')) continue;
+        if ((f.label || 'any') !== (target.label || 'any')) continue;
+        if (Boolean(f.onlyHotSectors) !== Boolean(target.onlyHotSectors)) continue;
+        const sigA = [...(f.requiredSignals || [])].sort().join(',');
+        const sigB = [...(target.requiredSignals || [])].sort().join(',');
+        if (sigA !== sigB) continue;
+        const exA = [...(f.excludedWarnings || [])].sort().join(',');
+        const exB = [...(target.excludedWarnings || [])].sort().join(',');
+        if (exA !== exB) continue;
+        // V2.1 leader-finder fields — required to disambiguate presets with same V2.0 signature
+        if (!_numEq(f.minNhp,        target.minNhp))        continue;
+        if (!_numEq(f.minRs,         target.minRs))         continue;
+        if (!_numEq(f.minRs3mPct,    target.minRs3mPct))    continue;
+        if (!_numEq(f.minDtc,        target.minDtc))        continue;
+        if (!_numEq(f.minEpsYoy,     target.minEpsYoy))     continue;
+        if (!_numEq(f.minRsi,        target.minRsi))        continue;
+        if (!_numEq(f.maxRsi,        target.maxRsi))        continue;
+        if (!_numEq(f.topSectors,    target.topSectors))    continue;
+        if (Boolean(f.requireVcp)            !== Boolean(target.requireVcp))            continue;
+        if (Boolean(f.requireVolDryupSpike)  !== Boolean(target.requireVolDryupSpike))  continue;
+        if (Boolean(f.requireEpsAccel)       !== Boolean(target.requireEpsAccel))       continue;
+        return key;
+    }
+    return null;
+}
+
 function renderPresetRow() {
-    const wrap = document.getElementById('f-presets');
-    if (!wrap) return;
     const tr = t();
-    wrap.innerHTML = Object.keys(PRESETS).map(key => {
-        const entry = tr['preset_' + key] || {};
-        const label = entry.label || key;
-        // Use custom hover tooltip (data-preset-tip) instead of browser-native title=.
-        // Tooltip content comes from PRESET_DETAIL_ZH/EN — shows criteria + strategy + action.
-        return `<button class="preset-btn" data-preset="${key}" data-preset-tip="${key}">${label}</button>`;
-    }).join('');
-    wrap.querySelectorAll('[data-preset]').forEach(el => {
-        el.addEventListener('click', () => applyPreset(el.dataset.preset));
-    });
+    const activeKey = _activePresetKey();
+
+    // Featured tabs
+    const featWrap = document.getElementById('f-presets-featured');
+    if (featWrap) {
+        featWrap.innerHTML = FEATURED_PRESETS.map(key => {
+            const entry = tr['preset_' + key] || {};
+            const label = entry.label || key;
+            const active = key === activeKey ? 'active' : '';
+            const cnt = _state.rows.length ? _countMatchesForPreset(key) : 0;
+            return `<button class="mom-preset-tab ${active}" data-preset="${key}" data-preset-tip="${key}" type="button">
+                <span>${label}</span>
+                <span class="mom-tab-count">${cnt}</span>
+            </button>`;
+        }).join('');
+        featWrap.querySelectorAll('[data-preset]').forEach(el => {
+            el.addEventListener('click', () => applyPreset(el.dataset.preset));
+        });
+    }
+
+    // Secondary in More dropdown
+    const moreMenu = document.getElementById('f-presets-more-menu');
+    const moreWrap = document.getElementById('f-presets-more');
+    const moreLabel = document.getElementById('f-presets-more-label');
+    if (moreMenu) {
+        moreMenu.innerHTML = SECONDARY_PRESETS.map(key => {
+            const entry = tr['preset_' + key] || {};
+            const label = entry.label || key;
+            const active = key === activeKey ? 'active' : '';
+            const cnt = _state.rows.length ? _countMatchesForPreset(key) : 0;
+            return `<button class="mom-preset-more-item ${active}" data-preset="${key}" data-preset-tip="${key}" type="button">
+                <span>${label}</span>
+                <span class="mom-tab-count">${cnt}</span>
+            </button>`;
+        }).join('');
+        moreMenu.querySelectorAll('[data-preset]').forEach(el => {
+            el.addEventListener('click', () => {
+                applyPreset(el.dataset.preset);
+                moreWrap?.classList.remove('open');
+            });
+        });
+    }
+    // Highlight More button if a secondary preset is active
+    const moreBtn = document.getElementById('f-presets-more-btn');
+    if (moreBtn) {
+        const isSecondary = SECONDARY_PRESETS.includes(activeKey);
+        moreBtn.style.borderColor = isSecondary ? 'rgba(16,185,129,0.55)' : '';
+        moreBtn.style.color = isSecondary ? '#10b981' : '';
+        if (moreLabel) {
+            const isZh = UI.currentLang === 'zh';
+            if (isSecondary) {
+                const entry = tr['preset_' + activeKey] || {};
+                moreLabel.textContent = entry.label || activeKey;
+            } else {
+                moreLabel.textContent = isZh ? '更多' : 'More';
+            }
+        }
+    }
 }
 
 function renderFilterPanel() {
     // Populate controls from state (called once after load + after preset apply + after reset)
     document.getElementById('f-min-score').value = _state.filter.minScore;
-    document.getElementById('filter-score-val').textContent = `≥ ${_state.filter.minScore}`;
+    document.getElementById('filter-score-val').textContent = `${_state.filter.minScore}`;
     document.getElementById('f-min-rsi').value = _state.filter.minRsi ?? '';
     document.getElementById('f-max-rsi').value = _state.filter.maxRsi ?? '';
     document.getElementById('f-min-vol').value = _state.filter.minVolumeRatio ?? '';
@@ -834,6 +1092,17 @@ function renderFilterPanel() {
     const labelSel = document.getElementById('f-label');
     if (labelSel) labelSel.value = _state.filter.label;
     document.getElementById('search-ticker').value = _state.filter.search;
+    // V2.1 leader-finder controls (guard: not all may exist if HTML not loaded)
+    const _setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+    const _setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+    _setVal('f-min-nhp',     _state.filter.minNhp);
+    _setVal('f-min-rs',      _state.filter.minRs);
+    _setVal('f-min-dtc',     _state.filter.minDtc);
+    _setVal('f-min-eps-yoy', _state.filter.minEpsYoy);
+    _setChk('f-require-vcp',         _state.filter.requireVcp);
+    _setChk('f-require-vol-dryup',   _state.filter.requireVolDryupSpike);
+    _setChk('f-require-eps-accel',   _state.filter.requireEpsAccel);
+    _setVal('f-top-sectors',         _state.filter.topSectors);
     renderPresetRow();
     renderSignalChips();
     renderRequiredWarningChips();
@@ -886,6 +1155,18 @@ function matchesFilter(r) {
     for (const w of f.excludedWarnings) if (warns.has(w))  return false;
 
     if (f.search && !(r.ticker || '').toUpperCase().includes(f.search.toUpperCase())) return false;
+
+    // ── V2.1 leader-finder filter chain ────────────────────────────────────
+    if (f.minNhp != null && (r.nhp_pct == null || r.nhp_pct < f.minNhp)) return false;
+    if (f.minRs != null && (r.rs_rating == null || r.rs_rating < f.minRs)) return false;
+    if (f.minRs3mPct != null && (r.rs_3m_pct == null || r.rs_3m_pct < f.minRs3mPct)) return false;
+    if (f.requireVcp && !r.vcp_compressed) return false;
+    if (f.requireVolDryupSpike && !r.vol_dryup_spike) return false;
+    if (f.minEpsYoy != null && (r.eps_yoy_pct == null || r.eps_yoy_pct < f.minEpsYoy)) return false;
+    if (f.requireEpsAccel && r.eps_acceleration !== 'accelerating') return false;
+    if (f.minDtc != null && (r.days_to_cover == null || r.days_to_cover < f.minDtc)) return false;
+    if (f.topSectors != null && (r.sector_rs_rank == null || r.sector_rs_rank > f.topSectors)) return false;
+
     return true;
 }
 
@@ -906,11 +1187,14 @@ function renderTable() {
 
     const countTxt = `${visible.length} / ${_state.rows.length}`;
     document.getElementById('table-count').textContent = countTxt;
-    // Hero count: big number on its own, total as subtle side label
+    // V1.71.x — hero count: number-only spans (slash lives in HTML)
     const matchEl  = document.getElementById('filter-match-count');
     const totalEl  = document.getElementById('filter-match-total');
     if (matchEl)  matchEl.textContent  = visible.length;
-    if (totalEl)  totalEl.textContent  = `/ ${_state.rows.length}`;
+    if (totalEl)  totalEl.textContent  = _state.rows.length;
+
+    // V1.71.x — refresh preset count badges (universe / score changes shift counts)
+    if (_state.rows.length) renderPresetRow();
 
     tbody.querySelectorAll('.mom-row').forEach(tr => {
         tr.addEventListener('click', () => openHistory(tr.dataset.ticker));
@@ -965,6 +1249,10 @@ function renderTable() {
             _togglePillFilter(type, value);
         });
     });
+
+    // Update collapse button label with current count
+    const colLabel = document.getElementById('table-collapse-label');
+    if (colLabel) colLabel.textContent = `選股結果（${visible.length} 筆）`;
 }
 
 // Toggle inclusive filter based on pill type + value.
@@ -1840,10 +2128,10 @@ function closeHistory() {
 
 /* ── Journal stats ────────────────────────────────────────────── */
 function renderJournalStats(journal) {
+    renderJournalStaleBanner(journal);
     const tr = t();
     document.getElementById('journal-title').textContent = tr.journal_title || 'Journal stats';
     document.getElementById('journal-note').textContent  = tr.journal_note || '';
-    document.getElementById('stats-signal-title').textContent = tr.stats_signal || 'By signal (20d win rate)';
     document.getElementById('stats-bin-title').textContent    = tr.stats_bin || 'By score bin';
     document.getElementById('stats-col-signal').textContent   = 'Signal';
     document.getElementById('stats-col-n').textContent        = tr.stats_n || 'n';
@@ -1852,26 +2140,36 @@ function renderJournalStats(journal) {
     document.getElementById('stats-col-median').textContent   = tr.stats_median || 'Median';
 
     const stats = journal?.stats;
-    const hasData = stats && stats.by_signal
-                  && Object.values(stats.by_signal).some(s => s['20d']?.n > 0);
+    const fills = stats?.fill_counts || {};
+    // Pick best available horizon: prefer 20d, fall back to 5d
+    const bestHorizon = (fills['20d'] > 0) ? '20d' : (fills['5d'] > 0) ? '5d' : null;
+    const hasData = bestHorizon != null
+                  && Object.values(stats.by_signal || {}).some(s => (s[bestHorizon]?.n || 0) >= 3);
 
     if (!hasData) {
         document.getElementById('journal-empty').classList.remove('hidden');
         document.getElementById('journal-content').classList.add('hidden');
-        document.getElementById('journal-empty-text').textContent = tr.journal_empty || 'No data yet';
+        const msg = fills['5d'] === 0
+            ? (tr.journal_empty || 'No data yet — run journal update to fill forward returns')
+            : 'Waiting for 20d fills…';
+        document.getElementById('journal-empty-text').textContent = msg;
         return;
     }
     document.getElementById('journal-empty').classList.add('hidden');
     document.getElementById('journal-content').classList.remove('hidden');
 
+    // Update section titles to reflect current horizon
+    const horizonLabel = bestHorizon === '5d' ? '5d' : bestHorizon === '20d' ? '20d' : bestHorizon;
+    document.getElementById('stats-signal-title').textContent =
+        (tr.stats_signal || 'By signal') + ` (${horizonLabel} win rate)`;
     document.getElementById('journal-fills-label').textContent =
-        `${tr.fills_label || 'Filled'}: 20d=${stats.fill_counts?.['20d'] || 0}`;
+        `Filled: 5d=${fills['5d'] || 0}  20d=${fills['20d'] || 0}  60d=${fills['60d'] || 0}`;
 
-    // By signal
+    // By signal — use best horizon
     const sigRows = [];
     Object.entries(stats.by_signal || {}).forEach(([sig, byH]) => {
-        const d20 = byH['20d'];
-        if (d20 && d20.n >= 3) sigRows.push([sig, d20]);
+        const d = byH[bestHorizon];
+        if (d && d.n >= 3) sigRows.push([sig, d]);
     });
     sigRows.sort((a, b) => b[1].win_rate - a[1].win_rate);
     document.getElementById('stats-signal-tbody').innerHTML = sigRows.slice(0, 12).map(([sig, d]) => {
@@ -1916,6 +2214,97 @@ function renderJournalStats(journal) {
             <td class="text-right font-mono text-xs">${fmt(d60.mean)}</td>
         </tr>`;
     }).join('');
+}
+
+/* ── Journal stale banner + run-now action ───────────────────── */
+function renderJournalStaleBanner(journal) {
+    const banner = document.getElementById('journal-stale-banner');
+    if (!banner) return;
+
+    const lastSnapDate = journal?.last_snap_date;
+    const today = new Date().toISOString().slice(0, 10);
+    const isStale = !lastSnapDate || lastSnapDate < today;
+
+    banner.classList.toggle('hidden', !isStale);
+
+    if (isStale) {
+        const text = document.getElementById('journal-stale-text');
+        if (text) {
+            text.textContent = lastSnapDate
+                ? `Journal 最後快照: ${lastSnapDate}（今日尚未記錄）`
+                : 'Journal 尚未記錄今日快照';
+        }
+    }
+}
+
+async function runJournalNow() {
+    const btn = document.getElementById('journal-run-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '執行中…'; }
+    try {
+        const resp = await fetch('/api/run-momentum-screen', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ journal: true }),
+        });
+        const j = await resp.json();
+        if (resp.status === 202) {
+            UI.logToUI('Journal 快照已啟動，完成後頁面將自動更新', 'info');
+        } else {
+            UI.logToUI('Journal 啟動失敗: ' + (j.error || resp.status), 'error');
+            if (btn) { btn.disabled = false; btn.textContent = '▶ Run Journal Now'; }
+        }
+    } catch (e) {
+        UI.logToUI('Journal 啟動失敗: ' + e.message, 'error');
+        if (btn) { btn.disabled = false; btn.textContent = '▶ Run Journal Now'; }
+    }
+}
+
+async function updateJournalReturns() {
+    const btn = document.getElementById('journal-update-btn');
+    const label = document.getElementById('journal-update-btn-label');
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = '更新中…';
+    try {
+        const resp = await fetch('/api/journal-update', { method: 'POST' });
+        if (resp.status === 202) {
+            UI.logToUI('Forward returns 更新中（約 1-2 分鐘）…', 'info');
+            _pollJournalUpdate();
+        } else {
+            const j = await resp.json().catch(() => ({}));
+            UI.logToUI('Journal update 失敗: ' + (j.error || resp.status), 'error');
+            if (btn) btn.disabled = false;
+            if (label) label.textContent = '更新收益';
+        }
+    } catch (e) {
+        UI.logToUI('Journal update 失敗: ' + e.message, 'error');
+        if (btn) btn.disabled = false;
+        if (label) label.textContent = '更新收益';
+    }
+}
+
+function _pollJournalUpdate() {
+    const t = setInterval(async () => {
+        try {
+            const r = await fetch('/api/journal-update/status');
+            const s = await r.json();
+            const btn = document.getElementById('journal-update-btn');
+            const label = document.getElementById('journal-update-btn-label');
+            if (s.status === 'done') {
+                clearInterval(t);
+                UI.logToUI('Forward returns 已更新，重新載入資料…', 'info');
+                if (btn) btn.disabled = false;
+                if (label) label.textContent = '更新收益';
+                if (typeof loadMomentumData === 'function') loadMomentumData();
+            } else if (s.status === 'error') {
+                clearInterval(t);
+                UI.logToUI('Journal update 失敗: ' + (s.error || '未知錯誤'), 'error');
+                if (btn) btn.disabled = false;
+                if (label) label.textContent = '更新收益';
+            } else if (s.phase) {
+                if (label) label.textContent = s.phase;
+            }
+        } catch (_) { /* ignore poll errors */ }
+    }, 4000);
 }
 
 /* ── Refresh action (async + polling) ────────────────────────── */
@@ -2266,9 +2655,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Filter panel bindings ───────────────────────────────────
     document.getElementById('f-min-score').addEventListener('input', e => {
         _state.filter.minScore = Number(e.target.value);
-        document.getElementById('filter-score-val').textContent = `≥ ${_state.filter.minScore}`;
+        document.getElementById('filter-score-val').textContent = `${_state.filter.minScore}`;
         renderTable();
     });
+
+    // V1.71.x — More preset dropdown toggle
+    const moreWrap = document.getElementById('f-presets-more');
+    const moreBtn = document.getElementById('f-presets-more-btn');
+    if (moreBtn && moreWrap) {
+        moreBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            moreWrap.classList.toggle('open');
+        });
+        document.addEventListener('click', e => {
+            if (!moreWrap.contains(e.target)) moreWrap.classList.remove('open');
+        });
+    }
+
+    // V1.71.x — Table column toggle (More columns)
+    const colToggle = document.getElementById('mom-col-toggle');
+    const momTable = document.getElementById('mom-table');
+    if (colToggle && momTable) {
+        // Restore from localStorage
+        const saved = localStorage.getItem('momentum_cols_extra');
+        if (saved === 'on') {
+            momTable.dataset.colsExtra = 'on';
+            colToggle.classList.add('expanded');
+            colToggle.dataset.state = 'on';
+        }
+        colToggle.addEventListener('click', () => {
+            const next = momTable.dataset.colsExtra === 'on' ? 'off' : 'on';
+            momTable.dataset.colsExtra = next;
+            colToggle.dataset.state = next;
+            colToggle.classList.toggle('expanded', next === 'on');
+            localStorage.setItem('momentum_cols_extra', next);
+            const lbl = document.getElementById('mom-col-toggle-label');
+            const isZh = UI.currentLang === 'zh';
+            if (lbl) lbl.textContent = next === 'on'
+                ? (isZh ? '隱藏額外欄位' : 'Hide extra columns')
+                : (isZh ? '更多欄位' : 'More columns');
+        });
+    }
     const rsiBind = (id, key) => {
         document.getElementById(id).addEventListener('input', e => {
             const v = e.target.value.trim();
@@ -2303,6 +2730,34 @@ document.addEventListener('DOMContentLoaded', () => {
         _state.filter.search = e.target.value;
         renderTable();
     });
+
+    // V2.1 leader-finder bindings (guard: HTML may not have all elements)
+    const _bindNum = (id, key) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', e => {
+            const v = e.target.value.trim();
+            _state.filter[key] = v === '' ? null : Number(v);
+            renderTable();
+        });
+    };
+    const _bindChk = (id, key) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', e => {
+            _state.filter[key] = e.target.checked;
+            renderTable();
+        });
+    };
+    _bindNum('f-min-nhp',     'minNhp');
+    _bindNum('f-min-rs',      'minRs');
+    _bindNum('f-min-dtc',     'minDtc');
+    _bindNum('f-min-eps-yoy', 'minEpsYoy');
+    _bindChk('f-require-vcp',         'requireVcp');
+    _bindChk('f-require-vol-dryup',   'requireVolDryupSpike');
+    _bindChk('f-require-eps-accel',   'requireEpsAccel');
+    _bindNum('f-top-sectors',         'topSectors');
+
     document.getElementById('filter-reset').addEventListener('click', () => {
         _state.filter = defaultFilter();
         renderFilterPanel();

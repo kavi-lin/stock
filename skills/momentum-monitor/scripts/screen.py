@@ -108,7 +108,7 @@ def _scan_one(ticker, use_cache, max_age):
 
 
 # ── Filters ──────────────────────────────────────────────────────────────
-def _passes(payload, args):
+def _passes(payload, args, sector_rs_set=None):
     comp = payload.get("momentum_composite", {})
     score = comp.get("score", 0)
     if score < args.min_score:
@@ -142,7 +142,73 @@ def _passes(payload, args):
     if args.label and label != args.label:
         return False
 
+    # ── V2.1 leader-finder filters ──────────────────────────────────────
+    nhp = payload.get("nhp") or {}
+    nhp_pct = nhp.get("pct_from_52w_high")
+    if args.min_nhp is not None and (nhp_pct is None or nhp_pct < args.min_nhp):
+        return False
+
+    rs = payload.get("rs_vs_spy") or {}
+    rs_rating = rs.get("rs_rating")
+    if args.min_rs is not None and (rs_rating is None or rs_rating < args.min_rs):
+        return False
+    rs_3m = rs.get("rs_3m_pct")
+    if args.min_rs_3m_pct is not None and (rs_3m is None or rs_3m < args.min_rs_3m_pct):
+        return False
+
+    vcp = payload.get("vcp") or {}
+    if args.require_vcp and not vcp.get("is_compressed"):
+        return False
+
+    vol_pattern = payload.get("volume_pattern") or {}
+    if args.require_volume_dryup_spike and not vol_pattern.get("pattern_active"):
+        return False
+
+    eps_acc = payload.get("eps_acceleration") or {}
+    if args.min_eps_yoy is not None:
+        v = eps_acc.get("latest_q_yoy_pct")
+        if v is None or v < args.min_eps_yoy:
+            return False
+    if args.require_eps_accelerating and eps_acc.get("growth_acceleration") != "accelerating":
+        return False
+
+    dtc = payload.get("days_to_cover") or {}
+    if args.min_dtc is not None:
+        v = dtc.get("days_to_cover")
+        if v is None or v < args.min_dtc:
+            return False
+
+    # Sector RS pre-filter (top-N sectors by composite_score from sector_intel.json)
+    if args.top_sectors and sector_rs_set is not None:
+        ticker = payload.get("ticker")
+        sector = _SECTOR_MAP.get(ticker)
+        if sector not in sector_rs_set:
+            return False
+
     return True
+
+
+def _load_top_sector_set(top_n):
+    """Read latest sector_intel.json → set of top-N sector names by composite_score."""
+    sector_logs = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "..", "sector", "sector_logs"))
+    if not os.path.exists(sector_logs):
+        return None
+    files = sorted([f for f in os.listdir(sector_logs) if f.endswith("_sector_intel.json")])
+    if not files:
+        return None
+    latest = os.path.join(sector_logs, files[-1])
+    try:
+        with open(latest, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        sectors = data.get("sectors") or []
+        if not isinstance(sectors, list):
+            return None
+        sectors_sorted = sorted(sectors, key=lambda s: s.get("composite_score") or 0, reverse=True)
+        top = {s.get("name") for s in sectors_sorted[:top_n] if s.get("name")}
+        return top
+    except Exception as e:
+        print(f"[screen] WARN: load_top_sector_set failed: {e}", file=sys.stderr)
+        return None
 
 
 # ── Output ───────────────────────────────────────────────────────────────
@@ -155,6 +221,13 @@ CSV_COLUMNS = [
     "rsi_14", "rsi_zone",
     "macd_line", "macd_signal", "macd_hist", "macd_bullish_cross", "macd_bearish_cross",
     "short_pct_float", "short_interpretation",
+    # V2.1 leader-finder columns
+    "nhp_pct", "is_new_high", "weeks_since_high",
+    "rs_3m_pct", "rs_6m_pct", "rs_rating",
+    "vcp_ratio", "vcp_compressed",
+    "vol_5d_vs_20d", "vol_today_vs_20d", "vol_dryup_spike",
+    "eps_yoy_pct", "eps_acceleration",
+    "days_to_cover", "dtc_tier",
     "signals", "warnings",
     "cache_hit", "cache_age_sec",
 ]
@@ -172,6 +245,13 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
     in_sp500 = (ticker in sp500_set) if sp500_set is not None else False
     in_n100  = (ticker in n100_set)  if n100_set  is not None else False
     in_sox   = (ticker in sox_set)   if sox_set   is not None else False
+
+    nhp_block = p.get("nhp") or {}
+    rs_block  = p.get("rs_vs_spy") or {}
+    vcp_block = p.get("vcp") or {}
+    vp_block  = p.get("volume_pattern") or {}
+    eps_block = p.get("eps_acceleration") or {}
+    dtc_block = p.get("days_to_cover") or {}
 
     return {
         "rank": rank,
@@ -206,6 +286,22 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
         "macd_bearish_cross": p.get("macd", {}).get("bearish_cross", False),
         "short_pct_float": s.get("short_pct_float"),
         "short_interpretation": s.get("interpretation"),
+        # V2.1 leader-finder columns
+        "nhp_pct":          nhp_block.get("pct_from_52w_high"),
+        "is_new_high":      int(bool(nhp_block.get("is_new_high"))),
+        "weeks_since_high": nhp_block.get("weeks_since_high"),
+        "rs_3m_pct":        rs_block.get("rs_3m_pct"),
+        "rs_6m_pct":        rs_block.get("rs_6m_pct"),
+        "rs_rating":        rs_block.get("rs_rating"),
+        "vcp_ratio":        vcp_block.get("compression_ratio"),
+        "vcp_compressed":   int(bool(vcp_block.get("is_compressed"))),
+        "vol_5d_vs_20d":    vp_block.get("avg_5d_vs_20d"),
+        "vol_today_vs_20d": vp_block.get("today_vs_20d"),
+        "vol_dryup_spike":  int(bool(vp_block.get("pattern_active"))),
+        "eps_yoy_pct":      eps_block.get("latest_q_yoy_pct"),
+        "eps_acceleration": eps_block.get("growth_acceleration"),
+        "days_to_cover":    dtc_block.get("days_to_cover"),
+        "dtc_tier":         dtc_block.get("tier"),
         "signals": "|".join(p.get("signals", [])),
         "warnings": "|".join(p.get("warnings", [])),
         "cache_hit": p.get("cache_hit"),
@@ -230,18 +326,22 @@ def _render_md(rows, top, meta):
         f"- Filters: {meta['filters'] or '_none_'}",
         f"- Elapsed: {meta['elapsed_sec']}s │ cache hits: {meta['cache_hits']}/{meta['scanned']}",
         "",
-        "| # | Ticker | Price | Score | Label | Stage | Vol× | Above 200MA | RSI | Signals |",
-        "|---|--------|-------|-------|-------|-------|------|-------------|-----|---------|",
+        "| # | Ticker | Price | Score | Label | NHP% | RS3M | VCP | EPS YoY | DTC | Signals |",
+        "|---|--------|-------|-------|-------|------|------|-----|---------|-----|---------|",
     ]
     for r in rows[:top]:
         sig = r["signals"].replace("|", ", ") or "—"
-        am200 = r["above_ma200_pct"]
-        am200_txt = f"{am200:+.1f}%" if am200 is not None else "—"
-        rsi_txt = f"{r['rsi_14']:.0f}" if r.get("rsi_14") is not None else "—"
+        nhp_txt = f"{r['nhp_pct']:+.1f}%" if r.get("nhp_pct") is not None else "—"
+        rs3m_txt = f"{r['rs_3m_pct']:+.1f}%" if r.get("rs_3m_pct") is not None else "—"
+        vcp_txt = f"{r['vcp_ratio']}" if r.get("vcp_ratio") is not None else "—"
+        if r.get("vcp_compressed"):
+            vcp_txt = f"**{vcp_txt}**"
+        eps_txt = f"{r['eps_yoy_pct']:+.0f}%" if r.get("eps_yoy_pct") is not None else "—"
+        dtc_txt = f"{r['days_to_cover']:.1f}d" if r.get("days_to_cover") is not None else "—"
         lines.append(
             f"| {r['rank']} | **{r['ticker']}** | ${r['price']} | "
-            f"{r['score']} | {r['label']} | {r['stage']} | "
-            f"{r['ratio_20d']}× | {am200_txt} | {rsi_txt} | {sig} |"
+            f"{r['score']} | {r['label']} | {nhp_txt} | {rs3m_txt} | "
+            f"{vcp_txt} | {eps_txt} | {dtc_txt} | {sig} |"
         )
     if len(rows) > top:
         lines.append("")
@@ -269,6 +369,26 @@ def main():
     ap.add_argument("--exclude-signal", action="append", default=[])
     ap.add_argument("--exclude-warning", action="append", default=[],
                     help="Exclude tickers with this warning (repeatable)")
+
+    # V2.1 leader-finder filters
+    ap.add_argument("--min-nhp", type=float, default=None,
+                    help="Min 52w-high proximity %% (-5 = within 5%% of high; 0 = at high)")
+    ap.add_argument("--min-rs", type=int, default=None,
+                    help="Min RS rating (0-99); e.g. 75 = top 25%% momentum vs SPY 3M")
+    ap.add_argument("--min-rs-3m-pct", type=float, default=None,
+                    help="Min absolute RS 3M %% (ticker - SPY return); e.g. 15 = +15pp over SPY")
+    ap.add_argument("--require-vcp", action="store_true",
+                    help="Require VCP compression (4w/12w range ratio < 0.55)")
+    ap.add_argument("--require-volume-dryup-spike", action="store_true",
+                    help="Require volume dry-up (5D < 0.75×20D) AND today spike (>1.5×20D)")
+    ap.add_argument("--min-eps-yoy", type=float, default=None,
+                    help="Min latest-Q EPS YoY %% (from earnings-analyst cache)")
+    ap.add_argument("--require-eps-accelerating", action="store_true",
+                    help="Require growth_acceleration == accelerating (CAN SLIM C law)")
+    ap.add_argument("--min-dtc", type=float, default=None,
+                    help="Min days-to-cover (5+ = squeeze candidate)")
+    ap.add_argument("--top-sectors", type=int, default=None,
+                    help="Only keep tickers in top-N sectors by sector_intel composite_score")
 
     # Execution
     ap.add_argument("--workers", type=int, default=15)
@@ -342,8 +462,14 @@ def main():
                 print(f"[screen] {done}/{len(tickers)} ({len(errors)} errors, {cache_hits} cache hits)",
                       file=sys.stderr)
 
+    # Sector RS pre-filter set (loaded once, reused for every ticker)
+    sector_rs_set = _load_top_sector_set(args.top_sectors) if args.top_sectors else None
+    if args.top_sectors and sector_rs_set:
+        print(f"[screen] sector RS pre-filter: top {args.top_sectors} = {sorted(sector_rs_set)}",
+              file=sys.stderr)
+
     # Filter + rank
-    matched = [p for p in results if _passes(p, args)]
+    matched = [p for p in results if _passes(p, args, sector_rs_set=sector_rs_set)]
     matched.sort(
         key=lambda p: (
             -(p.get("momentum_composite", {}).get("score") or 0),
@@ -379,6 +505,16 @@ def main():
         filter_bits.append(f"-sig:{s}")
     for w in args.exclude_warning:
         filter_bits.append(f"-warn:{w}")
+    # V2.1 leader-finder filter bits
+    if args.min_nhp is not None:       filter_bits.append(f"nhp≥{args.min_nhp}%")
+    if args.min_rs is not None:        filter_bits.append(f"rs≥{args.min_rs}")
+    if args.min_rs_3m_pct is not None: filter_bits.append(f"rs_3m≥{args.min_rs_3m_pct}%")
+    if args.require_vcp:               filter_bits.append("vcp")
+    if args.require_volume_dryup_spike: filter_bits.append("vol_dryup_spike")
+    if args.min_eps_yoy is not None:   filter_bits.append(f"eps_yoy≥{args.min_eps_yoy}%")
+    if args.require_eps_accelerating:  filter_bits.append("eps_accel")
+    if args.min_dtc is not None:       filter_bits.append(f"dtc≥{args.min_dtc}")
+    if args.top_sectors:               filter_bits.append(f"top_sectors={args.top_sectors}")
 
     meta = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),

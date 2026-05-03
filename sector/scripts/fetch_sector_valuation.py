@@ -1,17 +1,7 @@
-"""
-Sector Valuation Fetcher (V1.4 hard-required)
+"""Sector valuation fetcher (V1.4 hard-required).
 
-Pulls per-sector PE TTM, 1y PE z-score, RS vs SPY 3M, ETF 20d volume ratio
-via FMP HTTP REST (FMP MCP is the design reference; HTTP is the runtime path
-because Python scripts cannot call MCP tools directly).
-
-Output: sector/cache/sector_valuation_<DATE>.json
-
-Hard fail (sys.exit(1)) on any FMP error per V1.4 protocol decision —
-no graceful fallback. Fix MCP/API key and re-run.
-
-Usage:
-    python3 sector/scripts/fetch_sector_valuation.py [--date YYYY-MM-DD]
+Output: sector/cache/sector_valuation_<DATE>.json. Hard-fails on FMP error.
+詳見 sector/scripts/README.md。
 """
 from __future__ import annotations
 
@@ -19,17 +9,12 @@ import argparse
 import json
 import os
 import sys
-import time
 from datetime import date, datetime, timedelta
 from statistics import mean, pstdev
 
-import requests
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from sector.lib.fmp_client import cache_path, fmp_get  # noqa: E402
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CACHE_DIR = os.path.join(BASE_DIR, "sector", "cache")
-os.makedirs(CACHE_DIR, exist_ok=True)
-
-# FMP "sector" string → project canonical sector name
 FMP_TO_PROJECT = {
     "Basic Materials":        "Materials",
     "Communication Services": "Communication",
@@ -44,7 +29,6 @@ FMP_TO_PROJECT = {
     "Utilities":              "Utilities",
 }
 
-# Project sector → SPDR ETF
 SECTOR_ETF = {
     "Technology":             "XLK",
     "Healthcare":              "XLV",
@@ -60,36 +44,12 @@ SECTOR_ETF = {
 }
 
 EXCHANGES = ["NASDAQ", "NYSE"]
-FMP_BASE = "https://financialmodelingprep.com"
-
-
-def _fmp_get(path: str, params: dict, *, retries: int = 2, timeout: int = 15):
-    """GET with light retry. Hard-fail on persistent error."""
-    api_key = os.environ.get("FMP_API_KEY")
-    if not api_key:
-        sys.exit("[ERROR] FMP_API_KEY not set — sector valuation cannot be computed.")
-    url = f"{FMP_BASE}{path}"
-    full = {**params, "apikey": api_key}
-    last_exc = None
-    for attempt in range(retries + 1):
-        try:
-            r = requests.get(url, params=full, timeout=timeout)
-            if r.status_code == 429:
-                time.sleep(2 ** attempt)
-                continue
-            r.raise_for_status()
-            return r.json()
-        except Exception as e:
-            last_exc = e
-            time.sleep(0.5)
-    sys.exit(f"[ERROR] FMP {path} failed after {retries+1} tries: {last_exc}")
 
 
 def fetch_pe_snapshot(d: str) -> dict:
-    """Returns {project_sector: {'NASDAQ': pe, 'NYSE': pe}}."""
     out: dict = {v: {} for v in FMP_TO_PROJECT.values()}
     for exch in EXCHANGES:
-        rows = _fmp_get("/stable/sector-pe-snapshot", {"date": d, "exchange": exch})
+        rows = fmp_get("/stable/sector-pe-snapshot", {"date": d, "exchange": exch}, timeout=15)
         if not isinstance(rows, list) or not rows:
             sys.exit(f"[ERROR] FMP sector-pe-snapshot returned empty for {d}/{exch}")
         for row in rows:
@@ -100,13 +60,13 @@ def fetch_pe_snapshot(d: str) -> dict:
 
 
 def fetch_pe_history(from_d: str, to_d: str) -> dict:
-    """Returns {project_sector: {'NASDAQ': [pe...], 'NYSE': [pe...]}} (1y daily)."""
     out: dict = {v: {"NASDAQ": [], "NYSE": []} for v in FMP_TO_PROJECT.values()}
     for fmp_name, proj in FMP_TO_PROJECT.items():
         for exch in EXCHANGES:
-            rows = _fmp_get(
+            rows = fmp_get(
                 "/stable/historical-sector-pe",
                 {"sector": fmp_name, "from": from_d, "to": to_d, "exchange": exch},
+                timeout=15,
             )
             if not isinstance(rows, list) or not rows:
                 sys.exit(f"[ERROR] FMP historical-sector-pe empty for {fmp_name}/{exch}")
@@ -115,15 +75,14 @@ def fetch_pe_history(from_d: str, to_d: str) -> dict:
 
 
 def fetch_eod_chart(symbol: str, from_d: str, to_d: str) -> list:
-    """Returns list of {'date','price','volume'} sorted oldest→newest."""
-    rows = _fmp_get(
+    rows = fmp_get(
         "/stable/historical-price-eod/light",
         {"symbol": symbol, "from": from_d, "to": to_d},
+        timeout=15,
     )
     if not isinstance(rows, list) or not rows:
         sys.exit(f"[ERROR] FMP historical-price-eod/light empty for {symbol}")
-    rows = sorted(rows, key=lambda r: r["date"])
-    return rows
+    return sorted(rows, key=lambda r: r["date"])
 
 
 def compute_zscore(current: float, history: list[float]) -> float | None:
@@ -137,12 +96,23 @@ def compute_zscore(current: float, history: list[float]) -> float | None:
 
 
 def compute_3m_return(rows: list) -> float | None:
-    """3M ≈ 63 trading days. Falls back to longest available if shorter."""
+    # 3M ≈ 63 trading days. Falls back to longest available if shorter.
     if not rows or len(rows) < 30:
         return None
     end = float(rows[-1]["price"])
-    idx = max(0, len(rows) - 64)  # 63 bars back ≈ today's close vs 63d ago
+    idx = max(0, len(rows) - 64)
     start = float(rows[idx]["price"])
+    if start == 0:
+        return None
+    return round(end / start - 1, 4)
+
+
+def compute_n_day_return(rows: list, n: int) -> float | None:
+    """N-trading-day return; None if fewer than n+1 rows available."""
+    if not rows or len(rows) < n + 1:
+        return None
+    end = float(rows[-1]["price"])
+    start = float(rows[-(n + 1)]["price"])
     if start == 0:
         return None
     return round(end / start - 1, 4)
@@ -169,17 +139,15 @@ def main() -> int:
 
     print(f"[fetch_sector_valuation] as_of={as_of}", file=sys.stderr)
 
-    # 1) Current PE snapshot (2 calls: NASDAQ + NYSE)
     pe_snap = fetch_pe_snapshot(as_of)
-
-    # 2) 1y PE history (22 calls: 11 sectors × 2 exchanges)
     pe_hist = fetch_pe_history(one_year_ago, as_of)
 
-    # 3) ETF + SPY 3M EOD (12 calls)
     spy_chart = fetch_eod_chart("SPY", three_m_ago, as_of)
     spy_3m_ret = compute_3m_return(spy_chart)
     if spy_3m_ret is None:
         sys.exit("[ERROR] Could not compute SPY 3M return — insufficient EOD bars")
+    spy_5d_ret = compute_n_day_return(spy_chart, 5)
+    spy_20d_ret = compute_n_day_return(spy_chart, 20)
 
     sectors_out: dict = {}
     for proj_name, etf in SECTOR_ETF.items():
@@ -197,6 +165,12 @@ def main() -> int:
         etf_chart = fetch_eod_chart(etf, three_m_ago, as_of)
         etf_3m_ret = compute_3m_return(etf_chart)
         rs_vs_spy = round(etf_3m_ret - spy_3m_ret, 4) if etf_3m_ret is not None else None
+        etf_5d_ret = compute_n_day_return(etf_chart, 5)
+        rs_vs_spy_5d = (round(etf_5d_ret - spy_5d_ret, 4)
+                        if (etf_5d_ret is not None and spy_5d_ret is not None) else None)
+        etf_20d_ret = compute_n_day_return(etf_chart, 20)
+        rs_vs_spy_20d = (round(etf_20d_ret - spy_20d_ret, 4)
+                         if (etf_20d_ret is not None and spy_20d_ret is not None) else None)
         vol_ratio = compute_volume_ratio_20d(etf_chart)
 
         sectors_out[proj_name] = {
@@ -206,6 +180,8 @@ def main() -> int:
             "pe_ttm":        round(pe_avg, 2) if pe_avg is not None else None,
             "pe_zscore_1y":  pe_z,
             "rs_vs_spy_3m":  rs_vs_spy,
+            "rs_vs_spy_20d": rs_vs_spy_20d,
+            "rs_vs_spy_5d":  rs_vs_spy_5d,
             "etf_volume_ratio_20d": vol_ratio,
         }
 
@@ -216,7 +192,7 @@ def main() -> int:
         "sectors": sectors_out,
     }
 
-    out_path = os.path.join(CACHE_DIR, f"sector_valuation_{as_of}.json")
+    out_path = cache_path("sector_valuation", as_of)
     with open(out_path, "w") as f:
         json.dump(payload, f, indent=2)
 

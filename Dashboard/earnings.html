@@ -5,6 +5,7 @@
     <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 投資委員會 | 財報分析</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="style.css">
@@ -119,18 +120,45 @@
 
         /* ── Filter chip bar ─────────────────────────────────────── */
         .ea-filter-row {
-            display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-            padding: 14px 18px;
-            border-radius: 14px;
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 8px 12px;
+            border-radius: 10px;
             background: var(--bg-card);
             border: 1px solid rgba(161,161,170,0.18);
         }
-        .ea-filter-group { display: flex; align-items: center; gap: 8px; }
+        .ea-filter-group { display: flex; align-items: center; gap: 4px; }
         .ea-filter-label {
             font-size: 9px; font-weight: 900;
             letter-spacing: 0.14em; text-transform: uppercase;
             color: #71717a;
         }
+        /* V2.8.2 — ticker search input */
+        .ea-search-wrap {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(161,161,170,0.08);
+            border: 1px solid rgba(161,161,170,0.22);
+            min-width: 150px;
+        }
+        .ea-search-wrap:focus-within {
+            border-color: rgba(16,185,129,0.5);
+            background: rgba(16,185,129,0.06);
+        }
+        .ea-search-icon {
+            width: 12px; height: 12px;
+            color: #71717a; flex-shrink: 0;
+        }
+        .ea-search-input {
+            background: transparent;
+            border: none; outline: none;
+            font-size: 11px; font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-main);
+            width: 100%;
+            letter-spacing: 0.04em;
+        }
+        .ea-search-input::placeholder { color: #a1a1aa; font-weight: 500; }
         .ea-segmented {
             display: inline-flex;
             background: rgba(161,161,170,0.08);
@@ -142,7 +170,7 @@
         .ea-segmented-btn {
             font-family: 'JetBrains Mono', monospace;
             font-size: 10px; font-weight: 700;
-            padding: 4px 10px; border-radius: 8px;
+            padding: 3px 7px; border-radius: 6px;
             cursor: pointer; user-select: none;
             color: #71717a;
             transition: all 0.15s;
@@ -155,9 +183,9 @@
         }
         [data-theme='dark'] .ea-segmented-btn.active { background: #fafafa; color: #18181b; }
         .ea-chip {
-            font-size: 10px; font-weight: 800;
-            letter-spacing: 0.06em;
-            padding: 4px 10px; border-radius: 999px;
+            font-size: 9.5px; font-weight: 800;
+            letter-spacing: 0.04em;
+            padding: 3px 7px; border-radius: 999px;
             border: 1px solid rgba(161,161,170,0.30);
             background: transparent;
             color: #a1a1aa;
@@ -313,6 +341,14 @@
             background: rgba(99,102,241,0.10);
             color: #818cf8;
         }
+        .ea-pill-date-next {
+            background: rgba(168,85,247,0.10);
+            color: #a78bfa;
+            border: 1px dashed rgba(168,85,247,0.30);
+        }
+        /* V2.8.4 — score component bars: hover affordance + tooltip pointer */
+        .ea-comp { cursor: help; transition: background 0.15s; padding: 2px 4px; border-radius: 4px; }
+        .ea-comp:hover { background: rgba(99,102,241,0.04); }
         .ea-pill-flag {
             background: rgba(239,68,68,0.10);
             color: #ef4444;
@@ -329,7 +365,8 @@
             width: 100%; height: 32px;
             margin-top: 2px;
         }
-        .ea-sparkline path { fill: none; stroke-width: 1.6; }
+        .ea-sparkline path,
+        .ea-sparkline polyline { fill: none; stroke-width: 1.6; }
         .ea-sparkline-fill { opacity: 0.18; stroke: none; }
         .ea-sparkline-label {
             font-size: 9px; font-weight: 700;
@@ -507,8 +544,13 @@
 
             <!-- Filter chip bar -->
             <div class="ea-filter-row">
+                <div class="ea-search-wrap">
+                    <i data-lucide="search" class="ea-search-icon"></i>
+                    <input id="ea-search-input" type="text" class="ea-search-input"
+                           placeholder="搜尋 ticker..." autocomplete="off" spellcheck="false" />
+                </div>
+
                 <div class="ea-filter-group">
-                    <span class="ea-filter-label" id="ea-sort-label">Sort</span>
                     <div id="ea-sort-segmented" class="ea-segmented">
                         <button class="ea-segmented-btn active" data-sort="score-desc">Score ↓</button>
                         <button class="ea-segmented-btn" data-sort="score-asc">Score ↑</button>
@@ -518,13 +560,11 @@
                 </div>
 
                 <div class="ea-filter-group">
-                    <span class="ea-filter-label" id="ea-verdict-label">Verdict</span>
-                    <div id="ea-verdict-chips" class="flex items-center gap-1.5"></div>
+                    <div id="ea-verdict-chips" class="flex items-center gap-1"></div>
                 </div>
 
                 <div class="ea-filter-group">
-                    <span class="ea-filter-label" id="ea-flags-label">Flags</span>
-                    <div id="ea-flags-chips" class="flex items-center gap-1.5"></div>
+                    <div id="ea-flags-chips" class="flex items-center gap-1"></div>
                 </div>
 
                 <button id="ea-filter-reset" class="ea-filter-reset" type="button">Reset</button>
@@ -533,6 +573,10 @@
                     <span id="ea-match-now">0</span><span class="total"> / <span id="ea-match-total">0</span></span>
                 </div>
             </div>
+            <!-- hidden labels kept for legacy applyTranslations() — page-earnings.js writes into them -->
+            <span id="ea-sort-label" class="hidden"></span>
+            <span id="ea-verdict-label" class="hidden"></span>
+            <span id="ea-flags-label" class="hidden"></span>
 
             <!-- Empty state -->
             <div id="ea-empty" class="hidden">
@@ -579,6 +623,9 @@
         </div>
         <div id="log-output" class="space-y-1 max-h-80 overflow-y-auto custom-scrollbar"></div>
     </div>
+
+    <!-- V2.8.4 — sector-style rich tooltip layer (driven by [data-signal-tip] attr) -->
+    <div id="signal-tip-tooltip" aria-hidden="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="i18n.js"></script>

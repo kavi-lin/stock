@@ -5,6 +5,7 @@
     <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 投資委員會 | Momentum Screener</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="style.css">
@@ -485,6 +486,284 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .dark .segmented-btn.active { background: #3f3f46; }
+
+        /* ── V1.71.x — Editorial × Financial Terminal pass ─────── */
+
+        /* Compact meta tile (replaces oversized 4-card meta-strip) */
+        .mom-hero { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .mom-tile {
+            position: relative;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid rgba(161,161,170,0.18);
+            overflow: hidden;
+            transition: border-color 0.18s, transform 0.18s;
+        }
+        .mom-tile:hover { border-color: rgba(99,102,241,0.40); transform: translateY(-1px); }
+        .mom-tile-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+        .mom-tile-accent-emerald { background: linear-gradient(180deg, #10b981 0%, transparent 100%); }
+        .mom-tile-accent-zinc    { background: linear-gradient(180deg, rgba(161,161,170,0.5) 0%, transparent 100%); }
+        .mom-tile-accent-violet  { background: linear-gradient(180deg, #8b5cf6 0%, transparent 100%); }
+        .mom-tile-accent-amber   { background: linear-gradient(180deg, #f59e0b 0%, transparent 100%); }
+        .mom-tile-label {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: #71717a; margin-bottom: 4px;
+        }
+        .mom-tile-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px; font-weight: 800;
+            line-height: 1.05; letter-spacing: -0.02em;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
+        .mom-tile-sub { font-size: 10px; color: #71717a; margin-top: 2px; }
+
+        /* Sticky filter hero */
+        .mom-filter-hero {
+            position: sticky;
+            top: 64px;
+            z-index: 9;
+            backdrop-filter: blur(10px);
+            background: color-mix(in srgb, var(--bg-main) 90%, transparent);
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(161,161,170,0.16);
+            display: flex; flex-direction: column; gap: 14px;
+        }
+
+        /* Preset rail (tab-style with count badge) */
+        .mom-preset-rail {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+        .mom-preset-tab {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 7px 13px;
+            border-radius: 10px;
+            border: 1px solid rgba(161,161,170,0.25);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .mom-preset-tab:hover {
+            border-color: rgba(16,185,129,0.45);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+        .mom-preset-tab.active {
+            background: linear-gradient(135deg, rgba(16,185,129,0.22), rgba(34,197,94,0.14));
+            border-color: rgba(16,185,129,0.55);
+            color: #10b981;
+            box-shadow: 0 4px 14px -6px rgba(16,185,129,0.45);
+        }
+        .mom-preset-tab .mom-tab-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px; font-weight: 800;
+            padding: 1px 6px; border-radius: 999px;
+            background: rgba(161,161,170,0.18);
+            color: #a1a1aa;
+            font-variant-numeric: tabular-nums;
+            min-width: 18px; text-align: center;
+        }
+        .mom-preset-tab.active .mom-tab-count {
+            background: rgba(16,185,129,0.22);
+            color: #10b981;
+        }
+        .mom-preset-more {
+            position: relative;
+        }
+        .mom-preset-more-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 7px 11px; border-radius: 10px;
+            border: 1px dashed rgba(161,161,170,0.35);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .mom-preset-more-btn:hover { border-color: rgba(16,185,129,0.45); color: var(--text-main); }
+        .mom-preset-more-menu {
+            position: absolute; top: calc(100% + 6px); right: 0;
+            min-width: 240px;
+            background: var(--bg-card);
+            border: 1px solid rgba(161,161,170,0.30);
+            border-radius: 10px;
+            padding: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.30);
+            z-index: 11;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .mom-preset-more.open .mom-preset-more-menu { display: flex; }
+        .mom-preset-more-item {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 7px 10px; border-radius: 7px;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-main);
+            background: transparent; border: none; cursor: pointer;
+            text-align: left;
+            transition: background 0.12s;
+        }
+        .mom-preset-more-item:hover { background: rgba(16,185,129,0.10); }
+        .mom-preset-more-item.active { background: rgba(16,185,129,0.16); color: #10b981; }
+        .mom-preset-more-item .mom-tab-count {
+            background: rgba(161,161,170,0.15); padding: 1px 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 800;
+            border-radius: 999px;
+        }
+
+        /* Hero score row (prominent slider with battery) */
+        .mom-score-hero {
+            display: flex; align-items: center; gap: 14px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(16,185,129,0.04);
+            border: 1px solid rgba(16,185,129,0.14);
+        }
+        .mom-score-hero-label {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: #71717a;
+        }
+        .mom-score-hero-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px; font-weight: 900;
+            line-height: 1; letter-spacing: -0.03em;
+            color: #10b981; font-variant-numeric: tabular-nums;
+            min-width: 60px;
+        }
+        .mom-score-hero-num-suffix { font-size: 12px; opacity: 0.5; font-weight: 600; }
+        .mom-score-hero input[type="range"] {
+            flex: 1; max-width: 320px; accent-color: #10b981;
+        }
+
+        /* Cmdbar style search */
+        .mom-cmdbar {
+            display: flex; align-items: center;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid rgba(161,161,170,0.20);
+            transition: border-color 0.15s, box-shadow 0.15s;
+            min-width: 220px;
+            flex: 1;
+            max-width: 360px;
+        }
+        .mom-cmdbar:focus-within {
+            border-color: rgba(16,185,129,0.55);
+            box-shadow: 0 0 0 2px rgba(16,185,129,0.14);
+        }
+        .mom-cmdbar-prompt {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px; font-weight: 700;
+            color: #10b981; margin-right: 8px;
+        }
+        .mom-cmdbar-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; font-weight: 700;
+            color: var(--text-main);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .mom-cmdbar-input::placeholder { color: #71717a; opacity: 0.55; font-weight: 500; }
+
+        /* Filter row 2 layout: scope segmented + cmdbar + reset */
+        .mom-filter-row {
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .mom-filter-row-label {
+            font-size: 9px; font-weight: 900;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: #71717a; margin-right: 4px;
+        }
+        .mom-reset-btn {
+            font-size: 9px; font-weight: 800;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 5px 10px; border-radius: 7px;
+            background: transparent;
+            border: 1px solid rgba(161,161,170,0.30);
+            color: #71717a; cursor: pointer;
+            transition: all 0.15s;
+            margin-left: auto;
+        }
+        .mom-reset-btn:hover { color: var(--text-main); border-color: var(--text-main); }
+
+        /* Advanced filter group (3-section) */
+        .mom-adv-group + .mom-adv-group {
+            margin-top: 18px; padding-top: 16px;
+            border-top: 1px dashed rgba(161,161,170,0.18);
+        }
+        .mom-adv-group-label {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 9.5px; font-weight: 900;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--text-muted); opacity: 0.75;
+            margin-bottom: 10px;
+        }
+        .mom-adv-group-label::before {
+            content: ''; width: 14px; height: 1px;
+            background: currentColor; opacity: 0.5;
+        }
+        .mom-adv-prefix {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8.5px; font-weight: 900;
+            letter-spacing: 0.14em;
+            padding: 1.5px 6px; border-radius: 4px;
+            margin-right: 7px; vertical-align: middle;
+        }
+        .mom-adv-prefix-must { background: rgba(16,185,129,0.14); color: #10b981; }
+        .mom-adv-prefix-warn { background: rgba(245,158,11,0.16); color: #f59e0b; }
+        .mom-adv-prefix-not  { background: rgba(239,68,68,0.14);  color: #ef4444; }
+
+        /* Column toggle button (table) */
+        .mom-col-toggle {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 7px;
+            background: transparent;
+            border: 1px solid rgba(161,161,170,0.25);
+            color: var(--text-muted);
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .mom-col-toggle:hover { border-color: rgba(16,185,129,0.45); color: var(--text-main); }
+        .mom-col-toggle.expanded {
+            background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.40); color: #10b981;
+        }
+        /* Hidden columns (controlled by data-cols-extra="off") */
+        /* th: explicit .col-extra class | td: nth-child positions
+           Cols (1-indexed): rank=1, ticker=2, price=3, score=4, label=5, stage=6, volume=7,
+           above_ma200=8, rsi=9, macd=10, signals=11, short=12 */
+        .mom-table[data-cols-extra="off"] thead .col-extra,
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(8),
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(9),
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(10),
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(12) { display: none; }
+
+        /* Active sort header — emerald accent */
+        .mom-th.active-sort { color: #10b981 !important; }
+        .mom-th.active-sort .sort-arrow { color: #10b981 !important; opacity: 1 !important; }
+        .sortable .sort-arrow svg { width: 12px; height: 12px; }
+
+        /* Row hover with left accent */
+        .mom-row { position: relative; }
+        .mom-row:hover { background: color-mix(in srgb, #10b981 5%, transparent) !important; }
+        .mom-row:hover td:first-child { box-shadow: inset 2px 0 0 #10b981; }
+
+        /* Match count display */
+        .mom-match-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 800;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
+        .mom-match-count .accent { color: #10b981; font-size: 14px; font-weight: 900; }
+        .mom-match-count .total { opacity: 0.45; font-weight: 500; }
     </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="momentum">
@@ -550,192 +829,271 @@
                 </div>
             </div>
 
-            <!-- Meta strip -->
-            <div id="meta-strip" class="grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
-                <div class="meta-card">
-                    <div class="meta-label" id="meta-time-label">掃描時間</div>
-                    <div class="meta-value" id="meta-time">—</div>
-                    <div class="meta-sub" id="meta-time-sub"></div>
+            <!-- Meta strip — V1.71.x compact inline tiles -->
+            <div id="meta-strip" class="mom-hero hidden">
+                <div class="mom-tile">
+                    <div class="mom-tile-accent mom-tile-accent-zinc"></div>
+                    <div class="mom-tile-label" id="meta-time-label">掃描時間</div>
+                    <div class="mom-tile-value" id="meta-time">—</div>
+                    <div class="mom-tile-sub" id="meta-time-sub"></div>
                 </div>
-                <div class="meta-card">
-                    <div class="meta-label" id="meta-matched-label">符合筆數</div>
-                    <div class="meta-value" id="meta-matched">—</div>
-                    <div class="meta-sub" id="meta-matched-sub"></div>
+                <div class="mom-tile">
+                    <div class="mom-tile-accent mom-tile-accent-emerald"></div>
+                    <div class="mom-tile-label" id="meta-matched-label">符合筆數</div>
+                    <div class="mom-tile-value" id="meta-matched">—</div>
+                    <div class="mom-tile-sub" id="meta-matched-sub"></div>
                 </div>
-                <div class="meta-card">
-                    <div class="meta-label" id="meta-journal-label">Journal 累積</div>
-                    <div class="meta-value" id="meta-journal">—</div>
-                    <div class="meta-sub" id="meta-journal-sub"></div>
+                <div class="mom-tile">
+                    <div class="mom-tile-accent mom-tile-accent-violet"></div>
+                    <div class="mom-tile-label" id="meta-journal-label">Journal 累積</div>
+                    <div class="mom-tile-value" id="meta-journal">—</div>
+                    <div class="mom-tile-sub" id="meta-journal-sub"></div>
                 </div>
-                <div class="meta-card">
-                    <div class="meta-label" id="meta-snaps-label">歷史快照</div>
-                    <div class="meta-value" id="meta-snaps">—</div>
-                    <div class="meta-sub" id="meta-snaps-sub"></div>
+                <div class="mom-tile">
+                    <div class="mom-tile-accent mom-tile-accent-amber"></div>
+                    <div class="mom-tile-label" id="meta-snaps-label">歷史快照</div>
+                    <div class="mom-tile-value" id="meta-snaps">—</div>
+                    <div class="mom-tile-sub" id="meta-snaps-sub"></div>
                 </div>
             </div>
 
-            <!-- Filter panel (client-side, instant) -->
-            <div id="filter-bar" class="hidden glass-card p-5">
+            <!-- Filter panel — V1.71.x sticky hero + advanced 3-group -->
+            <div id="filter-bar" class="hidden">
 
-                <!-- Hero row: match count prominent, presets label + reset -->
-                <div class="flex items-end justify-between mb-5 gap-4">
-                    <div class="flex items-baseline gap-3">
-                        <i data-lucide="sliders-horizontal" class="w-4 h-4 text-emerald-500"></i>
-                        <div>
-                            <div class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="filter-title">篩選條件</div>
-                            <div id="filter-preset-label" class="text-xs text-zinc-400 mt-0.5">先從預設策略開始</div>
+                <!-- Sticky hero: preset rail + score + scope + search -->
+                <div class="mom-filter-hero">
+                    <!-- Row 1: Preset rail (5 featured + More dropdown for 5 secondary) -->
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div class="mom-preset-rail" id="f-presets-featured"></div>
+                        <div class="mom-preset-more" id="f-presets-more">
+                            <button class="mom-preset-more-btn" type="button" id="f-presets-more-btn">
+                                <span id="f-presets-more-label">More</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            </button>
+                            <div class="mom-preset-more-menu" id="f-presets-more-menu"></div>
                         </div>
                     </div>
-                    <div class="flex items-baseline gap-4">
-                        <div class="text-right">
-                            <div class="flex items-baseline gap-1">
-                                <span id="filter-match-count" class="text-2xl font-black font-mono text-emerald-500">—</span>
-                                <span id="filter-match-total" class="text-xs text-zinc-500">/ —</span>
-                            </div>
-                            <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500" id="filter-match-label">符合筆數</div>
-                        </div>
-                        <button id="filter-reset" class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 hover:text-emerald-500 transition-all">
-                            <span id="filter-reset-label">重設</span>
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Universe & Watchlist: Primary scope controls (moved outside) -->
-                <div class="flex flex-wrap items-center gap-8 p-3 mb-5 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800">
-                    <div>
-                        <label class="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider" id="filter-universe-label">Universe 範圍</label>
+                    <!-- Row 2: Score hero -->
+                    <div class="mom-score-hero">
+                        <span class="mom-score-hero-label" id="filter-score-label">Composite Score ≥</span>
+                        <span class="mom-score-hero-num"><span id="filter-score-val">50</span><span class="mom-score-hero-num-suffix">/100</span></span>
+                        <input id="f-min-score" type="range" min="0" max="100" step="5" value="50">
+                    </div>
+
+                    <!-- Row 3: Scope segmented + cmdbar search + reset + match count -->
+                    <div class="mom-filter-row">
+                        <span class="mom-filter-row-label" id="filter-universe-label">Universe</span>
                         <div id="f-universe-toggle" class="segmented-control">
                             <button class="segmented-btn active" data-value="any">All</button>
                             <button class="segmented-btn" data-value="sp500">S&P 500</button>
                             <button class="segmented-btn" data-value="nasdaq100">Nasdaq 100</button>
-                            <button class="segmented-btn" data-value="sox">費半 SOX</button>
+                            <button class="segmented-btn" data-value="sox">SOX</button>
                         </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider" id="filter-watchlist-scope-label">Watchlist 範圍</label>
+
+                        <span class="mom-filter-row-label" id="filter-watchlist-scope-label">Watchlist</span>
                         <div id="f-watchlist-toggle" class="segmented-control">
-                            <button class="segmented-btn active" data-value="all">Show All</button>
-                            <button class="segmented-btn" data-value="only">Only Watchlist</button>
-                            <button class="segmented-btn" data-value="exclude">Exclude Watchlist</button>
+                            <button class="segmented-btn active" data-value="all">All</button>
+                            <button class="segmented-btn" data-value="only">Only WL</button>
+                            <button class="segmented-btn" data-value="exclude">Exclude</button>
+                        </div>
+
+                        <div class="mom-cmdbar">
+                            <span class="mom-cmdbar-prompt">›</span>
+                            <input id="search-ticker" type="text" class="mom-cmdbar-input"
+                                   placeholder="NVDA / AAPL ..." autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <button id="filter-reset" class="mom-reset-btn" type="button">
+                            <span id="filter-reset-label">Reset</span>
+                        </button>
+
+                        <div class="mom-match-count">
+                            <span class="accent" id="filter-match-count">—</span><span class="total"> / <span id="filter-match-total">—</span></span>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500 ml-1" id="filter-match-label">符合</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Preset strategies: hero row, full-width, prominent -->
-                <div id="f-presets" class="f-preset-grid mb-5"></div>
-
-                <!-- Primary filter: score slider -->
-                <div class="mb-4 p-3 rounded-lg" style="background:rgba(161,161,170,0.04);border:1px solid rgba(161,161,170,0.12)">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-[11px] font-bold text-zinc-400" id="filter-score-label">Composite Score ≥</label>
-                        <span id="filter-score-val" class="text-sm font-mono font-black text-emerald-500">50</span>
-                    </div>
-                    <input id="f-min-score" type="range" min="0" max="100" step="5" value="50"
-                           class="w-full accent-emerald-500">
-                </div>
-
-                <!-- Advanced filters (collapsed by default) -->
-                <details id="filter-advanced">
+                <!-- Advanced filters (collapsed by default) — 3 logical groups -->
+                <details id="filter-advanced" class="mt-3 glass-card p-5">
                     <summary class="filter-advanced-summary">
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 filter-advanced-caret"></i>
-                        <span id="filter-advanced-label">進階篩選（RSI / 階段 / 產業 / 訊號 / 排除警告）</span>
+                        <span id="filter-advanced-label">進階篩選</span>
                     </summary>
 
-                    <div class="pt-4 space-y-5">
-                        <!-- Secondary filters: RSI + Volume + dropdowns + search -->
-                        <div class="grid grid-cols-1 md:grid-cols-8 gap-4">
-                            <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-rsi-label">RSI range</label>
-                                <div class="flex items-center gap-1.5">
-                                    <input id="f-min-rsi" type="number" min="0" max="100" placeholder="—"
+                    <div class="pt-4">
+                        <!-- Group 1: Technical -->
+                        <div class="mom-adv-group">
+                            <div class="mom-adv-group-label" id="filter-adv-tech-label">Technical</div>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-rsi-label">RSI range</label>
+                                    <div class="flex items-center gap-1.5">
+                                        <input id="f-min-rsi" type="number" min="0" max="100" placeholder="—"
+                                               class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                        <span class="text-zinc-500 text-[10px]">to</span>
+                                        <input id="f-max-rsi" type="number" min="0" max="100" placeholder="—"
+                                               class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-vol-label">最小量能比</label>
+                                    <input id="f-min-vol" type="number" min="0" step="0.1" placeholder="1.2"
                                            class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
-                                    <span class="text-zinc-500 text-[10px]">to</span>
-                                    <input id="f-max-rsi" type="number" min="0" max="100" placeholder="—"
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-stage-label">Stage</label>
+                                    <select id="f-stage" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                        <option value="any">Any</option>
+                                        <option value="Stage 1 basing">Stage 1 basing</option>
+                                        <option value="Stage 2 uptrend">Stage 2 uptrend</option>
+                                        <option value="Stage 3 top">Stage 3 top</option>
+                                        <option value="Stage 4 downtrend">Stage 4 downtrend</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-label-label">Label</label>
+                                    <select id="f-label" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                        <option value="any">Any</option>
+                                        <option value="STRONGLY_BULLISH">Strongly Bullish</option>
+                                        <option value="BULLISH">Bullish</option>
+                                        <option value="NEUTRAL">Neutral</option>
+                                        <option value="WEAK">Weak</option>
+                                        <option value="BEARISH">Bearish</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- V2.1 Group: Leader Finder (NHP / RS / VCP / EPS / DTC / Top Sectors) -->
+                        <div class="mom-adv-group">
+                            <div class="mom-adv-group-label" id="filter-adv-leader-label">🚀 Leader Finder (V2.1)</div>
+                            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-min-nhp-label">52w 高點折扣 ≥ %</label>
+                                    <input id="f-min-nhp" type="number" step="1" placeholder="-5"
                                            class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-min-rs-label">RS Rating ≥</label>
+                                    <input id="f-min-rs" type="number" min="0" max="99" step="5" placeholder="75"
+                                           class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-min-dtc-label">空單天數 ≥</label>
+                                    <input id="f-min-dtc" type="number" min="0" step="0.5" placeholder="5"
+                                           class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-min-eps-yoy-label">EPS YoY ≥ %</label>
+                                    <input id="f-min-eps-yoy" type="number" step="5" placeholder="25"
+                                           class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-top-sectors-label">僅 Top 產業</label>
+                                    <select id="f-top-sectors" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                        <option value="">關閉</option>
+                                        <option value="3">Top 3</option>
+                                        <option value="4">Top 4</option>
+                                        <option value="5">Top 5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+                                    <input type="checkbox" id="f-require-vcp" class="accent-emerald-500">
+                                    <span data-i18n="filter_require_vcp">VCP 壓縮 setup</span>
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+                                    <input type="checkbox" id="f-require-vol-dryup" class="accent-emerald-500">
+                                    <span data-i18n="filter_require_vol_dryup">量縮後爆量</span>
+                                </label>
+                                <label class="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+                                    <input type="checkbox" id="f-require-eps-accel" class="accent-emerald-500">
+                                    <span data-i18n="filter_require_eps_accel">EPS 加速</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group 2: Sector & Signal -->
+                        <div class="mom-adv-group">
+                            <div class="mom-adv-group-label" id="filter-adv-sector-label">Sector & Signal</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-sector-label">Sector</label>
+                                    <select id="f-sector" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
+                                        <option value="any">Any</option>
+                                        <option value="Information Technology">Information Technology</option>
+                                        <option value="Financials">Financials</option>
+                                        <option value="Health Care">Health Care</option>
+                                        <option value="Consumer Discretionary">Consumer Discretionary</option>
+                                        <option value="Communication Services">Communication Services</option>
+                                        <option value="Industrials">Industrials</option>
+                                        <option value="Consumer Staples">Consumer Staples</option>
+                                        <option value="Energy">Energy</option>
+                                        <option value="Utilities">Utilities</option>
+                                        <option value="Real Estate">Real Estate</option>
+                                        <option value="Materials">Materials</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-hot-label">Hot Sector</label>
+                                    <select id="f-only-hot" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent font-bold text-orange-500">
+                                        <option value="false">全部產業</option>
+                                        <option value="true">🔥 僅看熱門</option>
+                                    </select>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-vol-label">最小量能比</label>
-                                <input id="f-min-vol" type="number" min="0" step="0.1" placeholder="1.2"
-                                       class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-stage-label">Stage</label>
-                                <select id="f-stage" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
-                                    <option value="any">Any</option>
-                                    <option value="Stage 1 basing">Stage 1 basing</option>
-                                    <option value="Stage 2 uptrend">Stage 2 uptrend</option>
-                                    <option value="Stage 3 top">Stage 3 top</option>
-                                    <option value="Stage 4 downtrend">Stage 4 downtrend</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-sector-label">Sector</label>
-                                <select id="f-sector" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
-                                    <option value="any">Any</option>
-                                    <option value="Information Technology">Information Technology</option>
-                                    <option value="Financials">Financials</option>
-                                    <option value="Health Care">Health Care</option>
-                                    <option value="Consumer Discretionary">Consumer Discretionary</option>
-                                    <option value="Communication Services">Communication Services</option>
-                                    <option value="Industrials">Industrials</option>
-                                    <option value="Consumer Staples">Consumer Staples</option>
-                                    <option value="Energy">Energy</option>
-                                    <option value="Utilities">Utilities</option>
-                                    <option value="Real Estate">Real Estate</option>
-                                    <option value="Materials">Materials</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-hot-label">Hot Sector</label>
-                                <select id="f-only-hot" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent font-bold text-orange-500">
-                                    <option value="false">全部產業</option>
-                                    <option value="true">🔥 僅看熱門</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-label-label">Label</label>
-                                <select id="f-label" class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent">
-                                    <option value="any">Any</option>
-                                    <option value="STRONGLY_BULLISH">Strongly Bullish</option>
-                                    <option value="BULLISH">Bullish</option>
-                                    <option value="NEUTRAL">Neutral</option>
-                                    <option value="WEAK">Weak</option>
-                                    <option value="BEARISH">Bearish</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-zinc-500 block mb-1" id="filter-search-label">搜尋</label>
-                                <input id="search-ticker" type="text"
-                                       class="w-full px-2 py-1 text-xs rounded border border-zinc-300 dark:border-zinc-700 bg-transparent"
-                                       placeholder="代號…">
+                                <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-req-sig-label">
+                                    <span class="mom-adv-prefix mom-adv-prefix-must">MUST</span>必含訊號（同時滿足）
+                                </div>
+                                <div id="f-signal-chips" class="flex flex-wrap gap-1.5"></div>
                             </div>
                         </div>
 
-                        <!-- Required signals -->
-                        <div>
-                            <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-req-sig-label">必含訊號（同時滿足）</div>
-                            <div id="f-signal-chips" class="flex flex-wrap gap-1.5"></div>
-                        </div>
-
-                        <!-- Required warnings (inclusive — "show more like this") -->
-                        <div>
-                            <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-req-warn-label">必含警告（同時滿足）</div>
-                            <div id="f-required-warning-chips" class="flex flex-wrap gap-1.5"></div>
-                        </div>
-
-                        <!-- Excluded warnings -->
-                        <div>
-                            <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-excl-warn-label">排除警告</div>
-                            <div id="f-warning-chips" class="flex flex-wrap gap-1.5"></div>
+                        <!-- Group 3: Warnings (positive + exclusion split with verdict colors) -->
+                        <div class="mom-adv-group">
+                            <div class="mom-adv-group-label" id="filter-adv-warnings-label">Warnings</div>
+                            <div class="mb-4">
+                                <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-req-warn-label">
+                                    <span class="mom-adv-prefix mom-adv-prefix-warn">MUST</span>必含警告（同時滿足）
+                                </div>
+                                <div id="f-required-warning-chips" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] font-bold text-zinc-500 mb-1.5" id="filter-excl-warn-label">
+                                    <span class="mom-adv-prefix mom-adv-prefix-not">EXCLUDE</span>排除警告
+                                </div>
+                                <div id="f-warning-chips" class="flex flex-wrap gap-1.5"></div>
+                            </div>
                         </div>
                     </div>
                 </details>
             </div>
 
-            <!-- Table -->
-            <div id="table-wrap" class="glass-card overflow-x-auto hidden">
-                <table class="w-full">
+            <!-- Table (collapsible) -->
+            <div id="table-section" class="hidden mt-4">
+                <!-- Collapse toggle bar -->
+                <button id="table-collapse-btn"
+                    class="w-full flex items-center justify-between px-4 py-2.5 glass-card rounded-xl text-sm font-semibold text-zinc-300 hover:text-white transition-colors mb-0"
+                    onclick="toggleMomTable()" style="border-bottom-left-radius:0;border-bottom-right-radius:0">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="list" class="w-4 h-4 text-emerald-500"></i>
+                        <span id="table-collapse-label">選股結果</span>
+                    </span>
+                    <i data-lucide="chevron-down" id="table-chevron" class="w-4 h-4 transition-transform duration-200"></i>
+                </button>
+                <div id="table-wrap" class="glass-card overflow-x-auto" style="border-top-left-radius:0;border-top-right-radius:0">
+                <!-- Table toolbar: column toggle -->
+                <div class="flex items-center justify-end gap-2 px-4 py-2 border-b border-zinc-200 dark:border-zinc-800">
+                    <button id="mom-col-toggle" class="mom-col-toggle" type="button" data-state="off">
+                        <i data-lucide="columns-3" class="w-3 h-3"></i>
+                        <span id="mom-col-toggle-label">More columns</span>
+                    </button>
+                </div>
+                <table class="w-full mom-table" id="mom-table" data-cols-extra="off">
                     <thead>
                         <tr>
                             <th class="mom-th" id="th-rank">#</th>
@@ -745,24 +1103,45 @@
                             <th class="mom-th" id="th-label">標籤</th>
                             <th class="mom-th sortable"            data-sort="stage"           id="th-stage">階段<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="ratio_20d"       id="th-volume">量比<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="rsi_14"          id="th-rsi">RSI<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="macd_hist" id="th-macd">MACD<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-extra text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-extra text-right sortable" data-sort="rsi_14"          id="th-rsi">RSI<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-extra text-right sortable" data-sort="macd_hist" id="th-macd">MACD<span class="sort-arrow"></span></th>
                             <th class="mom-th" id="th-signals">訊號</th>
-                            <th class="mom-th text-right sortable" data-sort="short_pct_float" id="th-short">空方<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-extra text-right sortable" data-sort="short_pct_float" id="th-short">空方<span class="sort-arrow"></span></th>
                         </tr>
                     </thead>
                     <tbody id="mom-tbody"></tbody>
                 </table>
                 <div id="table-count" class="px-4 py-2 text-[10px] text-zinc-500 border-t border-zinc-200 dark:border-zinc-800"></div>
-            </div>
+                </div><!-- /table-wrap -->
+            </div><!-- /table-section -->
 
             <!-- Journal stats section -->
             <div id="journal-section" class="hidden space-y-4">
+
+                <!-- Stale banner: shown when last_snap_date < today -->
+                <div id="journal-stale-banner" class="hidden flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="clock-alert" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                        <span id="journal-stale-text">Journal 尚未記錄今日快照</span>
+                    </div>
+                    <button id="journal-run-btn"
+                        class="px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/40 border border-amber-500/40 text-amber-200 text-[11px] font-semibold transition-colors whitespace-nowrap"
+                        onclick="runJournalNow()">
+                        ▶ Run Journal Now
+                    </button>
+                </div>
+
                 <div class="flex items-center gap-2">
                     <i data-lucide="chart-bar" class="w-4 h-4 text-emerald-500"></i>
                     <h3 id="journal-title" class="text-sm font-bold">Journal 統計（前向收益）</h3>
                     <span id="journal-note" class="text-[10px] text-zinc-500"></span>
+                    <button id="journal-update-btn"
+                        class="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-zinc-700 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/40 transition-colors"
+                        onclick="updateJournalReturns()" title="更新 forward returns 並重算統計">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                        <span id="journal-update-btn-label">更新收益</span>
+                    </button>
                 </div>
 
                 <div id="journal-empty" class="hidden">

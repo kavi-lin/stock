@@ -201,111 +201,10 @@ async function loadSectorData() {
     }
 }
 
-/* ── Status Strip ────────────────────────────────────────────── */
-function renderStatusStrip(data) {
-    const m   = data.market || {};
-    const br  = data.breadth || {};
-    const ftd = data.ftd    || {};
-    const mt  = data.market_top || {};
 
-    const regimeColor = { BULL:'#22c55e', VOLATILE:'#f97316', BEAR:'#ef4444', SIDEWAYS:'#eab308', RISK_OFF:'#ef4444', RISK_ON:'#22c55e' };
-    const zoneColor   = { Strong:'#22c55e', Healthy:'#22c55e', Neutral:'#eab308', Weakening:'#f97316', Critical:'#ef4444' };
-    const ftdColor    = ftd.state === 'FTD_CONFIRMED' ? '#22c55e' : ftd.state === 'RALLY_ATTEMPT' ? '#eab308' : '#ef4444';
-    const fgColor     = (m.fear_greed||50) < 25 ? '#ef4444' : (m.fear_greed||50) < 45 ? '#f97316' : (m.fear_greed||50) < 55 ? '#eab308' : '#22c55e';
-
-    const tr = t();
-    const ftdVal = ftd.state === 'FTD_CONFIRMED'
-        ? (tr.ftd_confirmed || '✓ Confirmed')
-        : (ftd.state?.replace(/_/g,' ') || '--');
-    const pills = [
-        { id:'pill-regime',   label: tr.pill_regime   || 'Regime',      value: m.regime||'--',                     color: regimeColor[m.regime] || '#eab308' },
-        { id:'pill-breadth',  label: tr.pill_breadth  || 'Breadth',     value: (br.score||m.breadth_score||'--'),  color: zoneColor[br.zone] || '#eab308' },
-        { id:'pill-ftd',      label: tr.pill_ftd      || 'FTD State',   value: ftdVal,                             color: ftdColor },
-        { id:'pill-exposure', label: tr.pill_exposure || 'Exposure Cap',value: m.exposure_ceiling||'--',           color: '#a78bfa' },
-        { id:'pill-fg',       label: tr.pill_fg       || 'Fear & Greed',value: `${m.fear_greed||'--'} ${m.fear_greed_label||''}`, color: fgColor },
-        { id:'pill-cycle',    label: tr.pill_cycle    || 'Cycle',       value: m.cycle_phase||'--',                color: '#60a5fa' },
-        { id:'pill-vix',      label: tr.pill_vix      || 'VIX',         value: data.market_top?.vix_level != null ? Number(data.market_top.vix_level).toFixed(1) : '--', color: '#a78bfa' },
-    ];
-
-    pills.forEach(p => {
-        const el = document.getElementById(p.id);
-        if (!el) return;
-        el.innerHTML = `
-            <span class="status-pill-label">${p.label}</span>
-            <span class="status-pill-value" style="color:${p.color}">${p.value}</span>
-        `;
-    });
-
-    // Populate live data attributes for shared signal-tip engine (utils.js).
-    // Each pill exposes the metric so the rich tooltip can render the live banner
-    // and highlight the active stage row.
-    const setAttrs = (id, attrs) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v == null ? '' : String(v)));
-    };
-    setAttrs('pill-regime',   { 'data-regime': m.regime || '' });
-    setAttrs('pill-breadth',  { 'data-br-score':   br.score ?? m.breadth_score ?? '',
-                                'data-br-zone':    br.zone || '',
-                                'data-br-ceiling': br.exposure_ceiling || m.exposure_ceiling || '' });
-    setAttrs('pill-ftd',      { 'data-ftd-state': ftd.state || '',
-                                'data-ftd-date':  ftd.ftd_date || '',
-                                'data-ftd-day':   ftd.days_since_ftd ?? '' });
-    setAttrs('pill-exposure', { 'data-exposure': m.exposure_ceiling || '' });
-    setAttrs('pill-fg',       { 'data-fg-score': m.fear_greed ?? '',
-                                'data-fg-label': m.fear_greed_label || '' });
-    setAttrs('pill-cycle',    { 'data-cycle': m.cycle_phase || '' });
-    setAttrs('pill-vix',      { 'data-vix': mt.vix_level ?? '' });
-
-    // Warning flags — clear first so language switches / reloads don't append duplicates
-    const flagRow = document.getElementById('warning-flags-row');
-    if (flagRow) {
-        flagRow.innerHTML = '';
-        (m.warning_flags || []).forEach(f => {
-            const label = flagLabel(f);
-            flagRow.insertAdjacentHTML('beforeend', `
-                <div class="text-[8px] font-black px-2 py-1 rounded border bg-yellow-500/8 text-yellow-500 border-yellow-500/20 tracking-tight">${label}</div>
-            `);
-        });
-    }
-
-    // Scan date
-    const sd = document.getElementById('scan-date');
-    if (sd) sd.textContent = data.last_updated ? `SCAN: ${data.last_updated.split(' ')[0]}` : '';
-}
-
-/* ── Binary Alert (minimalist strip) ─────────────────────────── */
-function renderBinaryAlert(risks) {
-    const urgent = risks.filter(r => r.within_48h);
-    const section = document.getElementById('binary-alert-section');
-    if (!urgent.length) { section?.classList.add('hidden'); return; }
-    section.classList.remove('hidden');
-    const tr = t();
-    const dateLabel = (r) => {
-        if (r.days_until === 0) return tr.binary_today    || 'TODAY';
-        if (r.days_until === 1) return tr.binary_tomorrow || 'TOMORROW';
-        return r.date || '';
-    };
-    const container = document.getElementById('binary-alert-items');
-    container.innerHTML = urgent.map(r => {
-        const isTomorrow = r.days_until === 1;
-        const lbl = dateLabel(r);
-        return `
-        <div class="binary-row">
-            <div class="binary-date-box">
-                <span class="binary-date-pill ${isTomorrow ? 'tomorrow' : ''}">${lbl}</span>
-            </div>
-            <div class="binary-content">
-                <div class="binary-headline">${r.event}</div>
-                ${r.affected_sectors?.length ? `
-                <div class="binary-sector-group">
-                    ${r.affected_sectors.map(s => `<span class="binary-sector-chip">${s.replace(/_/g,' ')}</span>`).join('')}
-                </div>` : ''}
-            </div>
-        </div>`;
-    }).join('');
-    }
-
+/* ── V1.73.4 — Status strip + binary alert + 8 gauge helpers + REDUNDANT_FLAGS_DASH render moved to script.js (dashboard) ── */
+function renderStatusStrip(data) { /* no-op: lives on dashboard */ }
+function renderBinaryAlert(risks) { /* no-op: lives on dashboard */ }
 
 /* ── Today's Verdict (hero card) — shared component ──────────── */
 // Implementation moved to components.js (Components.renderTodayVerdict).
@@ -691,10 +590,10 @@ function applyTranslations() {
     set('tv-actions-title',     tr.tv_actions_title);
     set('tv-watch-title',       tr.tv_watch_title);
     set('tv-fallback-title',    tr.handoff_title);
-    set('three-signal-title',   tr.three_signal_title);
     set('catalyst-title',       tr.catalyst_title);
     set('divergence-title',     tr.divergence_title);
     set('themes-title',         tr.themes_title);
+    set('heatmap-title',        tr.heatmap_title);
 }
 
 /* ── Reverse-call: trigger Claude to run sector scan ─────────── */
@@ -938,6 +837,434 @@ document.getElementById('scan-expand-btn')?.addEventListener('click', toggleScan
 UI.boot('sector', {
     translate: applyTranslations,
     reload: loadSectorData,
-    onThemeChange: () => loadSectorData(),
+    onThemeChange: () => { loadSectorData(); recolorHeatmap(); },
 });
 loadSectorData();
+
+/* ════════════════════════════════════════════════════════════════════
+ * S&P 500 + NDX 100 LIVE HEATMAP
+ * - Polls /api/heatmap/data every 3 min (visibility-aware)
+ * - Treemap: Sector → Industry → Ticker, sized by market cap
+ * - Hover: instant tooltip (cached fields); 3s debounce → fetch news
+ * ════════════════════════════════════════════════════════════════════ */
+
+const HEATMAP_POLL_MS    = 180000;   // 3 min
+const HEATMAP_TOOLTIP_DELAY_MS = 3000;  // user-confirmed: only fetch news after 3s sustained hover
+
+let _heatmapData      = null;
+let _heatmapBuiltKey  = null;        // cache key for layout (changes when universe rebuilt)
+let _heatmapTimer     = null;
+let _tooltipDebounce  = null;
+let _newsAbort        = null;
+let _heatmapHoverEl   = null;        // currently hovered ticker (for tooltip news fill)
+
+function _heatmapColorFor(changePct) {
+    if (changePct === null || changePct === undefined || isNaN(changePct)) return '#d4d4d8';
+    // 7-stop divergent scale: 螢光紅 → 紅 → 紅淺灰 → 淺灰 → 綠淺灰 → 綠 → 螢光綠
+    // Center is light gray (zinc-300), small moves stay near gray, large moves saturate.
+    const clamped = Math.max(-3, Math.min(3, changePct));
+    const t = Math.abs(clamped) / 3;        // 0 → light gray, 1 → vivid color
+    const center = [212, 212, 216];         // zinc-300 淺灰
+    let mid, peak;
+    if (clamped >= 0) {
+        mid  = [134, 239, 172];             // green-300 綠淺灰 (mid stop)
+        peak = [16, 185, 129];              // emerald-500 螢光綠
+    } else {
+        mid  = [252, 165, 165];             // red-300 紅淺灰 (mid stop)
+        peak = [239, 68, 68];               // red-500 螢光紅
+    }
+    // Two-segment piecewise: center → mid (0..0.5) → peak (0.5..1)
+    let r, g, b;
+    if (t < 0.5) {
+        const lt = t / 0.5;
+        r = center[0] + (mid[0] - center[0]) * lt;
+        g = center[1] + (mid[1] - center[1]) * lt;
+        b = center[2] + (mid[2] - center[2]) * lt;
+    } else {
+        const lt = (t - 0.5) / 0.5;
+        r = mid[0] + (peak[0] - mid[0]) * lt;
+        g = mid[1] + (peak[1] - mid[1]) * lt;
+        b = mid[2] + (peak[2] - mid[2]) * lt;
+    }
+    return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+function _heatmapTextColor(changePct) {
+    if (changePct === null || isNaN(changePct)) return '#52525b';   // zinc-600 dark on light gray
+    // Light gray and pale-tint backgrounds need dark text; only saturated extremes get white
+    return Math.abs(changePct) >= 1.8 ? '#ffffff' : '#18181b';
+}
+
+function _truncateForWidth(text, availPx, charPx) {
+    if (!text) return '';
+    const maxChars = Math.floor(availPx / charPx);
+    if (maxChars < 2) return '';
+    if (text.length <= maxChars) return text;
+    return text.slice(0, Math.max(1, maxChars - 1)) + '…';
+}
+
+function _formatMarketCap(mcap) {
+    if (!mcap) return '--';
+    if (mcap >= 1e12) return (mcap / 1e12).toFixed(2) + 'T';
+    if (mcap >= 1e9)  return (mcap / 1e9).toFixed(1)  + 'B';
+    if (mcap >= 1e6)  return (mcap / 1e6).toFixed(0)  + 'M';
+    return mcap.toFixed(0);
+}
+
+function _formatVolume(v) {
+    if (!v) return '--';
+    if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+    if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+    return String(v);
+}
+
+async function loadHeatmap() {
+    try {
+        const r = await fetch('/api/heatmap/data');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        _heatmapData = data;
+
+        // Update status row
+        const tr = t();
+        const statusEl = document.getElementById('heatmap-market-status');
+        const updateEl = document.getElementById('heatmap-last-update');
+        if (statusEl) {
+            statusEl.textContent = data.market_open
+                ? (tr.heatmap_market_open || 'MARKET OPEN')
+                : (tr.heatmap_market_closed || 'MARKET CLOSED');
+            statusEl.style.color = data.market_open ? '#22c55e' : '#71717a';
+        }
+        if (updateEl && data.last_update) {
+            const dt = new Date(data.last_update);
+            updateEl.textContent = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        // Decide if we need full layout rebuild
+        const needRebuild = (data.universe_built_at !== _heatmapBuiltKey)
+                            || !document.querySelector('#heatmap-container svg');
+        renderHeatmap(data, needRebuild);
+        if (needRebuild) _heatmapBuiltKey = data.universe_built_at;
+    } catch (e) {
+        if (window.logToUI) logToUI('Heatmap load error: ' + e.message, 'error');
+    }
+}
+
+function renderHeatmap(data, fullRebuild) {
+    const container = document.getElementById('heatmap-container');
+    if (!container || !window.d3) return;
+    const tickers = (data.tickers || []).filter(t => t && t.market_cap > 0);
+    if (!tickers.length) return;
+
+    // Hide loading placeholder once we have data
+    const loading = document.getElementById('heatmap-loading');
+    if (loading) loading.style.display = 'none';
+
+    if (!fullRebuild) {
+        // Color-only update path (~10ms): rect fill + cell-ticker fill + cell-pct text & fill
+        const byTicker = new Map(tickers.map(t => [t.ticker, t]));
+        d3.select(container).selectAll('g.cell').each(function(d) {
+            const next = byTicker.get(d.data.ticker);
+            if (!next) return;
+            d.data.price       = next.price;
+            d.data.change_pct  = next.change_pct;
+            d.data.day_low     = next.day_low;
+            d.data.day_high    = next.day_high;
+            d.data.volume      = next.volume;
+            d.data.prev_close  = next.prev_close;
+            const fill = _heatmapTextColor(next.change_pct);
+            d3.select(this).select('rect').attr('fill', _heatmapColorFor(next.change_pct));
+            d3.select(this).select('.cell-ticker').attr('fill', fill);
+            d3.select(this).select('.cell-pct')
+                .text(next.change_pct == null ? '--' : (next.change_pct >= 0 ? '+' : '') + next.change_pct.toFixed(2) + '%')
+                .attr('fill', fill);
+        });
+        return;
+    }
+
+    // FULL REBUILD ─────────────────────────────────────────────────
+    container.innerHTML = '';
+    const width  = container.clientWidth;
+    const height = container.clientHeight;
+    if (width <= 0 || height <= 0) return;
+
+    // Build hierarchy: root → sector → industry → ticker
+    const bySector = d3.group(tickers, d => d.sector || 'Other', d => d.industry || 'Other');
+    const root = {
+        name: 'root',
+        children: Array.from(bySector, ([sector, industries]) => ({
+            name: sector,
+            children: Array.from(industries, ([industry, items]) => ({
+                name: industry,
+                children: items.map(item => ({ ...item, name: item.ticker }))
+            }))
+        }))
+    };
+
+    const hierarchy = d3.hierarchy(root)
+        .sum(d => d.market_cap || 0)
+        .sort((a, b) => (b.value || 0) - (a.value || 0));
+
+    d3.treemap()
+        .size([width, height])
+        .paddingTop(d => d.depth === 1 ? 18 : (d.depth === 2 ? 12 : 0))
+        .paddingInner(d => d.depth === 1 ? 2 : 1)
+        .paddingOuter(2)
+        .round(true)(hierarchy);
+
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .style('display', 'block')
+        .style('font-family', 'Inter, sans-serif');
+
+    // Sector labels (depth 1) — truncate to fit width, hide if too small
+    svg.selectAll('text.sector-label')
+        .data(hierarchy.descendants().filter(d => d.depth === 1 && (d.x1 - d.x0) >= 50))
+        .enter()
+        .append('text')
+        .attr('class', 'sector-label')
+        .attr('x', d => d.x0 + 4)
+        .attr('y', d => d.y0 + 13)
+        .attr('font-size', 11)
+        .attr('font-weight', 800)
+        .attr('fill', '#fafafa')
+        .text(d => {
+            const sectorPct = _sectorAvgChange(d);
+            const pctStr = sectorPct == null ? '' : '  ' + (sectorPct >= 0 ? '+' : '') + sectorPct.toFixed(2) + '%';
+            const full = d.data.name + pctStr;
+            return _truncateForWidth(full, (d.x1 - d.x0) - 8, 6.5);
+        });
+
+    // Industry labels (depth 2) — truncate to fit, only if min space
+    svg.selectAll('text.industry-label')
+        .data(hierarchy.descendants().filter(d => d.depth === 2 && (d.x1 - d.x0) >= 40 && (d.y1 - d.y0) >= 24))
+        .enter()
+        .append('text')
+        .attr('class', 'industry-label')
+        .attr('x', d => d.x0 + 3)
+        .attr('y', d => d.y0 + 10)
+        .attr('font-size', 9)
+        .attr('font-weight', 600)
+        .attr('fill', '#a1a1aa')
+        .text(d => _truncateForWidth(d.data.name, (d.x1 - d.x0) - 6, 5.2));
+
+    // Ticker cells (depth 3)
+    const cells = svg.selectAll('g.cell')
+        .data(hierarchy.descendants().filter(d => d.depth === 3))
+        .enter()
+        .append('g')
+        .attr('class', 'cell')
+        .attr('transform', d => `translate(${d.x0},${d.y0})`)
+        .style('cursor', 'pointer');
+
+    cells.append('rect')
+        .attr('width',  d => Math.max(0, d.x1 - d.x0))
+        .attr('height', d => Math.max(0, d.y1 - d.y0))
+        .attr('fill', d => _heatmapColorFor(d.data.change_pct))
+        .attr('stroke', 'rgba(0,0,0,0.4)')
+        .attr('stroke-width', 0.5);
+
+    // Ticker + % rendering: pick orientation per cell shape
+    //   wide enough → horizontal (ticker on top, % below if room)
+    //   narrow but tall → vertical 90° rotation
+    //   too small either way → no label
+    cells.each(function(d) {
+        const w = d.x1 - d.x0, h = d.y1 - d.y0;
+        const ticker = d.data.ticker || '';
+        const pct = d.data.change_pct;
+        const pctStr = pct == null ? '--' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+        const fill = _heatmapTextColor(pct);
+        const g = d3.select(this);
+
+        // Estimate font scale by box area
+        const baseSize = Math.min(13, Math.max(8, Math.sqrt(w * h) / 5.5));
+        const charPx = baseSize * 0.62;
+        const tickerWHor = ticker.length * charPx;
+        const tickerWVer = ticker.length * charPx;  // when rotated, length runs along height
+
+        const fitsHor = w >= tickerWHor + 4 && h >= baseSize + 4;
+        const fitsVer = !fitsHor && h >= tickerWVer + 4 && w >= baseSize + 4;
+
+        if (fitsHor) {
+            // Horizontal: centered ticker, optional % below
+            const showPct = h >= baseSize * 2 + 6 && w >= (pctStr.length * baseSize * 0.55) + 4;
+            const dy = showPct ? -2 : (baseSize / 3);
+            g.append('text')
+                .attr('x', w / 2)
+                .attr('y', h / 2 + dy)
+                .attr('class', 'cell-ticker')
+                .attr('text-anchor', 'middle')
+                .attr('font-size', baseSize)
+                .attr('font-weight', 800)
+                .attr('fill', fill)
+                .text(ticker);
+            if (showPct) {
+                g.append('text')
+                    .attr('class', 'cell-pct')
+                    .attr('x', w / 2)
+                    .attr('y', h / 2 + baseSize)
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', baseSize * 0.78)
+                    .attr('font-weight', 600)
+                    .attr('fill', fill)
+                    .text(pctStr);
+            }
+        } else if (fitsVer) {
+            // Vertical: rotate text 90° around cell center
+            const fs = Math.min(baseSize, w - 2);
+            g.append('text')
+                .attr('class', 'cell-ticker')
+                .attr('text-anchor', 'middle')
+                .attr('font-size', fs)
+                .attr('font-weight', 800)
+                .attr('fill', fill)
+                .attr('transform', `translate(${w / 2}, ${h / 2}) rotate(90)`)
+                .text(ticker);
+        }
+        // else: cell too small, leave as colored block only
+    });
+
+    // Hover handlers
+    cells.on('mouseenter', function(event, d) { onHeatmapEnter(event, d.data); })
+         .on('mousemove',  function(event)    { positionTooltip(event); })
+         .on('mouseleave', function()         { onHeatmapLeave(); });
+}
+
+function _sectorAvgChange(sectorNode) {
+    const leaves = sectorNode.leaves().filter(l => l.data.change_pct != null);
+    if (!leaves.length) return null;
+    const totalCap = leaves.reduce((s, l) => s + (l.data.market_cap || 0), 0);
+    if (totalCap <= 0) return null;
+    const weighted = leaves.reduce((s, l) => s + (l.data.change_pct || 0) * (l.data.market_cap || 0), 0);
+    return weighted / totalCap;
+}
+
+function recolorHeatmap() {
+    if (!_heatmapData) return;
+    renderHeatmap(_heatmapData, false);
+}
+
+/* ── Tooltip ────────────────────────────────────────────────── */
+function onHeatmapEnter(event, ticker) {
+    _heatmapHoverEl = ticker.ticker;
+    showHeatmapTooltip(ticker, event);
+
+    // 3s debounce: fetch news only if user keeps hovering
+    clearTimeout(_tooltipDebounce);
+    _tooltipDebounce = setTimeout(() => {
+        if (_heatmapHoverEl !== ticker.ticker) return;  // moved away
+        if (_newsAbort) _newsAbort.abort();
+        _newsAbort = new AbortController();
+        fetch(`/api/heatmap/news/${ticker.ticker}`, { signal: _newsAbort.signal })
+            .then(r => r.json())
+            .then(payload => {
+                if (_heatmapHoverEl !== ticker.ticker) return;  // moved away mid-fetch
+                appendNewsToTooltip(payload.items || []);
+            })
+            .catch(() => {});  // ignore aborts
+    }, HEATMAP_TOOLTIP_DELAY_MS);
+}
+
+function onHeatmapLeave() {
+    _heatmapHoverEl = null;
+    clearTimeout(_tooltipDebounce);
+    if (_newsAbort) { _newsAbort.abort(); _newsAbort = null; }
+    hideHeatmapTooltip();
+}
+
+function showHeatmapTooltip(ticker, event) {
+    const tip = document.getElementById('heatmap-tooltip');
+    if (!tip) return;
+    const tr = t();
+    const pct = ticker.change_pct;
+    const pctColor = pct == null ? '#a1a1aa' : (pct >= 0 ? '#22c55e' : '#ef4444');
+    const pctStr   = pct == null ? '--' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+    const priceStr = ticker.price == null ? '--' : '$' + ticker.price.toFixed(2);
+    const rangeStr = (ticker.day_low != null && ticker.day_high != null)
+        ? `$${ticker.day_low.toFixed(2)} – $${ticker.day_high.toFixed(2)}` : '--';
+
+    tip.innerHTML = `
+        <div class="text-[10px] text-zinc-500 mb-1">${escapeHtml(ticker.sector)} · ${escapeHtml(ticker.industry)}</div>
+        <div class="flex items-baseline gap-2 mb-2">
+            <span class="text-base font-black" style="color: var(--text-main)">${escapeHtml(ticker.ticker)}</span>
+            <span class="text-[10px] text-zinc-400 truncate">${escapeHtml(ticker.name || '')}</span>
+        </div>
+        <div class="space-y-1 text-[11px]">
+            <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_price || 'Price'}</span><span class="font-mono font-bold" style="color: var(--text-main)">${priceStr}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_change || 'Change'}</span><span class="font-mono font-bold" style="color: ${pctColor}">${pctStr}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_marketcap || 'Market Cap'}</span><span class="font-mono">${_formatMarketCap(ticker.market_cap)}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_dayrange || 'Day Range'}</span><span class="font-mono">${rangeStr}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_volume || 'Volume'}</span><span class="font-mono">${_formatVolume(ticker.volume)}</span></div>
+        </div>
+        <div id="heatmap-news-slot" class="mt-2 pt-2 border-t border-zinc-700/40 text-[10px] text-zinc-500 italic">
+            ${escapeHtml(tr.heatmap_news_hint || '停留 3 秒讀新聞…')}
+        </div>
+    `;
+    tip.classList.remove('hidden');
+    tip.style.opacity = '1';
+    positionTooltip(event);
+}
+
+function appendNewsToTooltip(items) {
+    const slot = document.getElementById('heatmap-news-slot');
+    if (!slot) return;
+    const tr = t();
+    if (!items.length) {
+        slot.innerHTML = `<span class="italic text-zinc-500">${escapeHtml(tr.heatmap_no_news || '無近期新聞')}</span>`;
+        return;
+    }
+    slot.classList.remove('italic');
+    slot.innerHTML = items.map(n => {
+        const url = n.url ? `href="${escapeAttr(n.url)}" target="_blank" rel="noopener"` : '';
+        const title = n.title || '(無標題)';
+        return `<div class="mb-1 leading-snug"><a ${url} class="hover:underline" style="color: var(--text-main); pointer-events: auto">${escapeHtml(title.slice(0, 110))}</a><span class="ml-1 text-[9px] text-zinc-500">${escapeHtml(n.source || '')}</span></div>`;
+    }).join('');
+    // Re-enable pointer events on links (tooltip itself is pointer-events: none)
+    slot.style.pointerEvents = 'auto';
+}
+
+function positionTooltip(event) {
+    const tip = document.getElementById('heatmap-tooltip');
+    if (!tip || tip.classList.contains('hidden')) return;
+    const rect = tip.getBoundingClientRect();
+    const margin = 12;
+    let x = event.clientX + 14;
+    let y = event.clientY + 14;
+    if (x + rect.width  > window.innerWidth  - margin) x = event.clientX - rect.width  - 14;
+    if (y + rect.height > window.innerHeight - margin) y = event.clientY - rect.height - 14;
+    tip.style.left = Math.max(margin, x) + 'px';
+    tip.style.top  = Math.max(margin, y) + 'px';
+}
+
+function hideHeatmapTooltip() {
+    const tip = document.getElementById('heatmap-tooltip');
+    if (tip) tip.classList.add('hidden');
+}
+
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+/* ── Polling (visibility-aware) ─────────────────────────────── */
+function startHeatmapPolling() {
+    if (_heatmapTimer) clearInterval(_heatmapTimer);
+    _heatmapTimer = setInterval(() => {
+        if (document.visibilityState === 'visible') loadHeatmap();
+    }, HEATMAP_POLL_MS);
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') loadHeatmap();
+});
+
+window.addEventListener('resize', () => {
+    // Re-render on resize since treemap uses container width
+    if (_heatmapData) renderHeatmap(_heatmapData, true);
+});
+
+// Bootstrap: kick off after page settles
+setTimeout(() => { loadHeatmap(); startHeatmapPolling(); }, 800);

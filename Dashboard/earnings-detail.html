@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | 財報詳情</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- V2.7.15 — Chart.js for trend infographic row -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="flex min-h-screen transition-all" data-page="earnings">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <!-- Main -->
+    <main class="ml-64 flex-1 flex flex-col">
+
+        <!-- Top header (back + ticker title + fiscal pill + as-of) -->
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center px-8 sticky top-0 backdrop-blur-md z-10" style="background-color: rgba(0,0,0,0.40)">
+            <div class="ed-header w-full">
+                <a href="earnings.html" class="ed-back-btn" id="ed-back">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.back_btn">返回財報列表</span>
+                </a>
+                <div class="ed-title-block">
+                    <span class="ed-title-ticker" id="ed-title-ticker">—</span>
+                </div>
+                <span class="ed-fiscal-pill" id="ed-fiscal-pill" hidden></span>
+                <span class="ed-asof-pill" id="ed-asof-pill"></span>
+                <span class="ml-auto text-[10px] text-zinc-500 font-mono" id="ed-status-msg"></span>
+            </div>
+        </header>
+
+        <!-- Loading state -->
+        <div id="ed-loading" class="ed-page">
+            <div class="text-center py-16 text-zinc-500 text-sm">
+                <i data-lucide="loader-2" class="w-5 h-5 inline-block animate-spin mr-2"></i>
+                <span data-i18n-key="earnings_detail.loading">載入中…</span>
+            </div>
+        </div>
+
+        <!-- Empty state (infographic.json missing) -->
+        <div id="ed-empty-state" class="ed-page" hidden>
+            <div class="ed-empty-state">
+                <p class="ed-empty-state-msg" id="ed-empty-msg" data-i18n-key="earnings_detail.empty_state_msg">
+                    尚未生成 Infographic — 需執行一次 LLM Narrate phase
+                </p>
+                <button id="ed-empty-rerun-btn" class="ed-empty-state-btn">
+                    <i data-lucide="play" class="w-3 h-3"></i>
+                    <span id="ed-empty-rerun-label">重跑「財報 X」</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content (rendered after fetch success) -->
+        <div id="ed-content" class="ed-page" hidden>
+
+            <!-- Hero -->
+            <section id="ed-hero" class="ed-hero">
+                <img id="ed-hero-logo" class="ed-hero-logo" alt="" />
+                <div class="ed-hero-text">
+                    <div id="ed-hero-company" class="ed-hero-company">—</div>
+                    <p id="ed-hero-oneliner" class="ed-hero-oneliner"></p>
+                    <div id="ed-hero-verdict-row" class="ed-hero-verdict-row"></div>
+                </div>
+            </section>
+
+            <!-- 4 metric cards -->
+            <section class="ed-section">
+                <div class="ed-section-head">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_metrics">本季數字 vs 預期</span>
+                </div>
+                <div id="ed-metric-cards" class="ed-metric-grid"></div>
+            </section>
+
+            <!-- V2.7.15 — Trend infographic row (6 charts × 5-8Q history) -->
+            <section class="ed-section ed-charts-section">
+                <div class="ed-section-head">
+                    <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_trends">趨勢圖</span>
+                    <span class="ed-charts-hint" data-i18n-key="earnings_detail.section_trends_hint">最近 5 季</span>
+                </div>
+                <div class="ed-charts-grid">
+                    <div class="ed-chart-card" data-signal-tip="ed_chart_revenue_ni">
+                        <div class="ed-chart-title" data-i18n-key="earnings_detail.chart_revenue_ni">Revenue · Net Income</div>
+                        <div class="ed-chart-canvas-wrap"><canvas id="ed-chart-revni"></canvas></div>
+                        <div class="ed-chart-summary" id="ed-chart-summary-revni"></div>
+                    </div>
+                    <div class="ed-chart-card" data-signal-tip="ed_chart_eps">
+                        <div class="ed-chart-title" data-i18n-key="earnings_detail.chart_eps">EPS</div>
+                        <div class="ed-chart-canvas-wrap"><canvas id="ed-chart-eps"></canvas></div>
+                        <div class="ed-chart-summary" id="ed-chart-summary-eps"></div>
+                    </div>
+                    <div class="ed-chart-card" data-signal-tip="ed_chart_cashflow">
+                        <div class="ed-chart-title" data-i18n-key="earnings_detail.chart_cashflow">OCF · FCF</div>
+                        <div class="ed-chart-canvas-wrap"><canvas id="ed-chart-cashflow"></canvas></div>
+                        <div class="ed-chart-summary" id="ed-chart-summary-cashflow"></div>
+                    </div>
+                    <div class="ed-chart-card" data-signal-tip="ed_chart_margins">
+                        <div class="ed-chart-title" data-i18n-key="earnings_detail.chart_margins">Gross · Operating Margin</div>
+                        <div class="ed-chart-canvas-wrap"><canvas id="ed-chart-margins"></canvas></div>
+                        <div class="ed-chart-summary" id="ed-chart-summary-margins"></div>
+                    </div>
+                    <div class="ed-chart-card" data-signal-tip="ed_chart_segment_growth">
+                        <div class="ed-chart-title" data-i18n-key="earnings_detail.chart_segment_growth">Segment YoY Growth</div>
+                        <div class="ed-chart-canvas-wrap"><canvas id="ed-chart-seggrowth"></canvas></div>
+                        <div class="ed-chart-summary" id="ed-chart-summary-seggrowth"></div>
+                    </div>
+                    <div class="ed-chart-card" id="ed-chart-card-geogrowth" data-signal-tip="ed_chart_geo_growth">
+                        <div class="ed-chart-title" data-i18n-key="earnings_detail.chart_geo_growth">Geography YoY Growth</div>
+                        <div class="ed-chart-canvas-wrap"><canvas id="ed-chart-geogrowth"></canvas></div>
+                        <div class="ed-chart-summary" id="ed-chart-summary-geogrowth"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Segments -->
+            <section class="ed-section">
+                <div class="ed-section-head">
+                    <i data-lucide="package" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_segments">分部業績</span>
+                    <span class="ed-fy-fallback-tag" id="ed-segments-fallback" hidden
+                          data-i18n-key="earnings_detail.fy_fallback_tag">FY 年度</span>
+                </div>
+                <div id="ed-segment-grid" class="ed-segment-grid"></div>
+            </section>
+
+            <!-- Geographic (only when ≥3 regions) -->
+            <section class="ed-section" id="ed-geo-section" hidden>
+                <div class="ed-section-head">
+                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_geographic">地理分部</span>
+                    <span class="ed-fy-fallback-tag" id="ed-geo-fallback" hidden
+                          data-i18n-key="earnings_detail.fy_fallback_tag">FY 年度</span>
+                </div>
+                <div id="ed-geo-grid" class="ed-segment-grid"></div>
+            </section>
+
+            <!-- Capital return -->
+            <section class="ed-section" id="ed-capret-section">
+                <div class="ed-section-head">
+                    <i data-lucide="circle-dollar-sign" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_capital">資本回報</span>
+                </div>
+                <div id="ed-capret-card" class="ed-capital-card"></div>
+            </section>
+
+            <!-- CEO quote -->
+            <section class="ed-section" id="ed-quote-section" hidden>
+                <div class="ed-section-head">
+                    <i data-lucide="quote" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_quote">管理層發言</span>
+                </div>
+                <div id="ed-quote-card" class="ed-quote-card"></div>
+            </section>
+
+            <!-- Key Highlights -->
+            <section class="ed-section">
+                <div class="ed-section-head">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_highlights">Key Highlights</span>
+                </div>
+                <ul id="ed-highlight-list" class="ed-highlight-list"></ul>
+            </section>
+
+            <!-- Summary -->
+            <section class="ed-section">
+                <div class="ed-section-head">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                    <span data-i18n-key="earnings_detail.section_summary">重點總結</span>
+                </div>
+                <ul id="ed-summary-list" class="ed-summary-list"></ul>
+            </section>
+
+            <!-- Detail markdown collapse -->
+            <details id="ed-detail-collapse" class="ed-detail-collapse">
+                <summary data-i18n-key="earnings_detail.detail_collapse_label">展開詳細財報報告 (Markdown)</summary>
+                <div id="ed-detail-md-body" class="ed-detail-md"></div>
+            </details>
+
+        </div>
+
+    </main>
+
+    <!-- V2.7.16 — sector-style rich tooltip layer (driven by [data-signal-tip] attribute) -->
+    <div id="signal-tip-tooltip" aria-hidden="true"></div>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="data-store.js"></script>
+    <script src="page-earnings-detail.js"></script>
+</body>
+</html>

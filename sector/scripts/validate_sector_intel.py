@@ -1,24 +1,9 @@
 #!/usr/bin/env python3
-"""
-Validate the most recent `sector_logs/YYYY-MM-DD_sector_intel.json` against
-the schema documented in `sector/schema.md`.
+"""Validate latest sector_logs/YYYY-MM-DD_sector_intel.json against sector/schema.md.
 
-Invocation (from Phase 5 末尾):
-    python3 sector/scripts/validate_sector_intel.py
-        rc=0  → pass
-        rc=1  → schema drift detected — see stderr
-
-What this catches (bridge.py depends on these):
-  1. Wrong protocol_version (must be V1.4 for sector v1.4)
-  2. Missing `_phase0` / `_phase1` / `_phase3` sub-objects (bridge.py keys)
-  3. Phase 0 synthesized_exposure / signal_conflict / ftd / market_top missing
-  4. Phase 1 sectors[] empty or missing uptrend_ratio per sector
-  5. Phase 3 top_catalysts < 5 entries (protocol requires ≥ 5)
-  6. V1.3 fan-out metadata: phase4_fanout_mode / degraded_agents
-  7. HOT sector without proxy_etf (bridge.py uses this for Dashboard)
-  8. sectors[] verdict values outside {HOT, WARM, COLD, AVOID}
-  9. V1.4 sector_valuation block on each _phase1.sectors[] (FMP MCP hard-required)
- 10. V1.4 score_components.valuation_penalty on each top-level sectors[]
+Invocation: `python3 sector/scripts/validate_sector_intel.py` — rc=0 pass, rc=1 drift.
+Coverage matrix (what this script catches) is documented in sector/schema.md
+"Validator Coverage" section.
 """
 import glob
 import json

@@ -5,12 +5,14 @@
     <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 投資委員會 | Sector Intelligence</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         /* ── Sector Page Custom Styles ─────────────────────────── */
         .verdict-HOT   { --vc: #22c55e; --vc-bg: rgba(34,197,94,0.08);  --vc-border: rgba(34,197,94,0.25); }
@@ -167,6 +169,9 @@
         .scan-card-log:empty::before {
             content: 'Waiting for log output…'; color: #52525b; font-style: italic;
         }
+
+        /* V1.73.4 — sector-status-row / sector-gauge* / sector-chip* / binary-adaptive*
+           promoted to shared style.css (used by both index.html dashboard + sector page) */
     </style>
 </head>
 <body class="flex min-h-screen transition-all overflow-hidden font-inter" data-page="sector">
@@ -231,65 +236,47 @@
                 </div>
             </div>
 
-            <!-- ── BINARY RISK ALERT (minimalist) ───────────────────── -->
-            <div id="binary-alert-section" class="hidden">
-                <div class="binary-alert px-4 py-3">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span id="binary-alert-title" class="text-[10px] font-black uppercase tracking-widest" style="color:#ef4444">⚡ Binary Risk Within 48h</span>
-                        <span class="text-[9px] text-zinc-500 font-mono" id="binary-alert-derated" title="二元風險事件（如財報、議息、地緣政治）具有極大不確定性。為防止盲目追高，系統會自動對受影響產業的綜合得分進行 0.70x 係數降權，直至風險解除。">auto-derated ×0.70</span>
+            <!-- ── LIVE HEATMAP (S&P 500 + NDX 100) — moved to top per UX ────────── -->
+            <div id="heatmap-section" class="glass-card p-5 mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="grid-3x3" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        <span id="heatmap-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">S&amp;P 500 + NDX 100 LIVE HEATMAP</span>
                     </div>
-                    <div id="binary-alert-items" class="space-y-2"></div>
+                    <div class="flex items-center gap-3">
+                        <span id="heatmap-market-status" class="text-[10px] font-mono text-zinc-500"></span>
+                        <span id="heatmap-last-update" class="text-[10px] font-mono text-zinc-500">--</span>
+                    </div>
+                </div>
+                <div id="heatmap-container" style="height: 640px; position: relative; overflow: hidden;">
+                    <div id="heatmap-loading" class="absolute inset-0 flex items-center justify-center text-xs text-zinc-500">
+                        <span data-i18n="sector.heatmap_loading">載入中…</span>
+                    </div>
+                </div>
+                <!-- Color legend -->
+                <div class="flex items-center justify-center gap-2 mt-2 text-[9px] font-mono text-zinc-500">
+                    <span>-3%</span>
+                    <div class="flex h-2 w-48 rounded overflow-hidden">
+                        <div class="flex-1" style="background: linear-gradient(to right, #ef4444, #fca5a5, #d4d4d8, #86efac, #10b981);"></div>
+                    </div>
+                    <span>+3%</span>
                 </div>
             </div>
 
-            <!-- ── STATUS STRIP ──────────────────────────────────────── -->
-            <div class="flex items-stretch gap-3 flex-wrap">
-                <div id="pill-regime"    class="status-pill" data-signal-tip="regime"></div>
-                <div id="pill-breadth"   class="status-pill" data-signal-tip="breadth"></div>
-                <div id="pill-ftd"       class="status-pill" data-signal-tip="ftd"></div>
-                <div id="pill-exposure"  class="status-pill" data-signal-tip="exposure"></div>
-                <div id="pill-fg"        class="status-pill" data-signal-tip="fg"></div>
-                <div id="pill-cycle"     class="status-pill" data-signal-tip="cycle"></div>
-                <div id="pill-vix"       class="status-pill" data-signal-tip="vix"></div>
-                <div class="flex-1 flex flex-wrap gap-2 items-center justify-end" id="warning-flags-row"></div>
-            </div>
+            <!-- ── BINARY RISK ALERT / STATUS STRIP stubs (no-op — lives on index.html) ── -->
+            <div id="binary-alert-section" class="hidden"></div>
+            <div id="warning-flags-row" class="hidden"></div>
 
-            <!-- ── TODAY'S VERDICT (hero card) ──────────────────────── -->
-            <!-- Populated from _phase4c.today_verdict; falls back to session_notes prose when older caches lack the structured block. -->
-            <div id="today-verdict-card" class="hidden glass-card p-6 border-l-4" style="border-left-color:#22c55e">
-                <!-- Header: stance pill + headline one-liner -->
-                <div class="flex items-baseline gap-3 flex-wrap mb-3">
-                    <span id="tv-stance" class="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded" style="background:rgba(34,197,94,0.15);color:#22c55e">NEUTRAL</span>
-                    <h2 id="tv-headline" class="text-lg font-bold flex-1" style="color:var(--text-card-title)">—</h2>
-                    <span id="tv-confidence" class="text-[10px] font-mono text-zinc-500">conf —</span>
-                </div>
-                <p id="tv-one-liner" class="text-[13px] leading-relaxed mb-4" style="color:var(--text-main)"></p>
-
-                <!-- Three-column: takeaways / sector actions / watch -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div>
-                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-takeaways-title">✦ 關鍵觀察</div>
-                        <ul id="tv-takeaways" class="space-y-1.5 text-[11px] leading-snug"></ul>
-                    </div>
-                    <div>
-                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-actions-title">✦ 產業操作建議</div>
-                        <ul id="tv-actions" class="space-y-1.5 text-[11px] leading-snug"></ul>
-                    </div>
-                    <div>
-                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-watch-title">✦ 接下來盯什麼</div>
-                        <ul id="tv-watch" class="space-y-1.5 text-[11px] leading-snug"></ul>
-                    </div>
-                </div>
-
-                <!-- Fallback prose (shown only when today_verdict missing; hidden otherwise) -->
-                <div id="tv-fallback" class="hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                    <div class="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2" id="tv-fallback-title">Portfolio Strategist · Session Notes（原始散文）</div>
-                    <p id="tv-fallback-text" class="text-[12px] leading-relaxed" style="color:var(--text-muted)"></p>
-                </div>
-            </div>
-
-            <!-- Legacy handoff-section kept as a no-op stub so page-sector.js selectors don't fail -->
+            <!-- Today's Verdict + handoff stubs (no-op — lives on index.html dashboard) -->
+            <div id="today-verdict-card" class="hidden"></div>
             <div id="handoff-section" class="hidden"><p id="handoff-text" class="hidden"></p><span id="handoff-title" class="hidden"></span></div>
+            <!-- Legacy tv-* stubs so Components.renderTodayVerdict sub-selectors don't error -->
+            <span id="tv-stance" class="hidden"></span><h2 id="tv-headline" class="hidden"></h2>
+            <span id="tv-confidence" class="hidden"></span><p id="tv-one-liner" class="hidden"></p>
+            <span id="tv-takeaways-title" class="hidden"></span><ul id="tv-takeaways" class="hidden"></ul>
+            <span id="tv-watch-title" class="hidden"></span><ul id="tv-watch" class="hidden"></ul>
+            <ul id="tv-actions" class="hidden"></ul><span id="tv-actions-title" class="hidden"></span>
+            <div id="tv-fallback" class="hidden"><span id="tv-fallback-title" class="hidden"></span><p id="tv-fallback-text" class="hidden"></p></div>
 
             <!-- ── SECTOR VERDICT MATRIX ─────────────────────────────── -->
             <div>
@@ -342,19 +329,10 @@
                 </div>
             </div>
 
-            <!-- ── BOTTOM THREE-COLUMN ROW ────────────────────────────── -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 pb-8">
+            <!-- ── BOTTOM TWO-COLUMN ROW ─────────────────────────────── -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-8">
 
-                <!-- COL 1: Three-Signal Synthesis -->
-                <div class="glass-card p-5" id="three-signal-panel">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span id="three-signal-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Three-Signal Synthesis</span>
-                    </div>
-                    <div id="three-signal-content" class="space-y-3"></div>
-                </div>
-
-                <!-- COL 2: Catalysts & Political Signals -->
+                <!-- COL 1: Catalysts & Political Signals -->
                 <div class="glass-card p-5">
                     <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="radio" class="w-3.5 h-3.5 text-orange-400"></i>
@@ -363,7 +341,7 @@
                     <div class="space-y-2.5" id="catalyst-feed"></div>
                 </div>
 
-                <!-- COL 3: Divergence Watch + Themes -->
+                <!-- COL 2: Divergence Watch + Themes -->
                 <div class="glass-card p-5 space-y-5">
                     <!-- Divergence -->
                     <div>
@@ -387,6 +365,10 @@
 
         </div>
     </main>
+
+    <!-- Heatmap tooltip (positioned dynamically by page-sector.js on hover) -->
+    <div id="heatmap-tooltip" class="hidden fixed w-72 rounded-lg border p-3 pointer-events-none"
+         style="z-index: 9999; background: var(--bg-card); border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: opacity 0.12s;"></div>
 
     <!-- Scan progress card — moved inside content flow below; see #scan-banner there -->
 

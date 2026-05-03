@@ -24,7 +24,9 @@ import sys
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
-EXPECTED_VERSION = "V4.8"
+# V5.0+: accept V4.8 (legacy) and V5.0 (current) — V4.8 lives until pre-V5.0 entries decay
+ACCEPTED_VERSIONS = ("V4.8", "V5.0")
+CURRENT_VERSION   = "V5.0"
 
 TOP_REQUIRED = [
     "session_export_version", "export_date", "ticker", "final_action",
@@ -53,6 +55,12 @@ TRADE_REQUIRED = [
     "trade_metadata",
     # Price snapshot at decision time (V4.8+)
     "analysis_price",
+]
+
+# V5.0+ additional required fields (only enforced when entry is V5.0)
+TRADE_REQUIRED_V5 = [
+    "valuation_lane",       # 5th lane (Valuation Specialist) output
+    "fair_value_summary",   # Phase 4.5 deterministic anchor blend
 ]
 
 
@@ -97,8 +105,8 @@ def main():
 
     # ── 2. Version check ─────────────────────────────────────────────────
     ver = entry.get("session_export_version")
-    if ver != EXPECTED_VERSION:
-        errors.append(f"session_export_version = {ver!r}, expected {EXPECTED_VERSION!r}")
+    if ver not in ACCEPTED_VERSIONS:
+        errors.append(f"session_export_version = {ver!r}, expected one of {ACCEPTED_VERSIONS}")
 
     # ── 3. Top-level required keys ───────────────────────────────────────
     for k in TOP_REQUIRED:
@@ -120,6 +128,36 @@ def main():
     for k in TRADE_REQUIRED:
         if k not in trade:
             errors.append(f"trades_this_session[0]: missing key {k}")
+
+    # V5.0+ requires fair_value_summary + valuation_lane
+    if ver == "V5.0":
+        for k in TRADE_REQUIRED_V5:
+            if k not in trade:
+                errors.append(f"trades_this_session[0]: missing V5.0 key {k}")
+        # Validate fair_value_summary structure
+        fvs = trade.get("fair_value_summary")
+        if isinstance(fvs, dict):
+            for k in ("anchors", "weighted_fair_value", "current_price",
+                      "vs_current_pct", "verdict_band", "confidence", "anchors_available"):
+                if k not in fvs:
+                    errors.append(f"fair_value_summary: missing key {k}")
+            vb = fvs.get("verdict_band")
+            if vb not in (None, "extreme_undervalued", "undervalued", "fairly_valued",
+                          "overvalued", "extreme_overvalued"):
+                errors.append(f"fair_value_summary.verdict_band invalid: {vb!r}")
+            conf = fvs.get("confidence")
+            if conf not in (None, "high", "medium", "low"):
+                errors.append(f"fair_value_summary.confidence invalid: {conf!r}")
+        # Validate valuation_lane structure
+        vl = trade.get("valuation_lane")
+        if isinstance(vl, dict):
+            for k in ("signal", "score", "confidence"):
+                if k not in vl:
+                    errors.append(f"valuation_lane: missing key {k}")
+        # Validate active_weights includes Valuation
+        weights = entry.get("active_weights_end_of_session") or {}
+        if "Valuation" not in weights:
+            errors.append("active_weights_end_of_session: missing Valuation weight (V5.0 5-lane requirement)")
 
     # ── 6. Observation fields must be non-null even for HOLD ─────────────
     for k in ("macro_alignment", "fragility_label", "binary_classification",
@@ -151,7 +189,7 @@ def main():
 
     ticker = trade.get("ticker", "?")
     decision = trade.get("final_decision", "?")
-    print(f"[validate_session_export] ✓ V4.8 schema compliant — {ticker} / {decision}")
+    print(f"[validate_session_export] ✓ {ver} schema compliant — {ticker} / {decision}")
     sys.exit(0)
 
 

@@ -14,6 +14,21 @@ function applyTranslations() {
     document.getElementById('page-title').textContent    = wl.title;
     document.getElementById('page-subtitle').textContent = wl.subtitle;
     document.getElementById('refresh-label').textContent = UI.currentLang === 'zh' ? '更新' : 'Refresh';
+
+    // V1.74 cmdbar i18n
+    const dc = t.decisions || {};
+    const setText = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+    document.querySelectorAll('[data-i18n="decisions.cmdbar_run"]').forEach(el => {
+        if (dc.cmdbar_run) el.textContent = dc.cmdbar_run;
+    });
+    document.querySelectorAll('[data-i18n="decisions.cmdbar_recent_label"]').forEach(el => {
+        if (dc.cmdbar_recent_label) el.textContent = dc.cmdbar_recent_label;
+    });
+    document.querySelectorAll('[data-i18n="decisions.cmdbar_risk_hint"]').forEach(el => {
+        if (dc.cmdbar_risk_hint) el.textContent = dc.cmdbar_risk_hint;
+    });
+    const dcInput = document.getElementById('dc-ticker-input');
+    if (dcInput && dc.cmdbar_placeholder) dcInput.placeholder = dc.cmdbar_placeholder;
     document.getElementById('lbl-active').textContent    = wl.active_label;
     document.getElementById('lbl-waiting').textContent   = wl.waiting_label;
     document.getElementById('lbl-conf').textContent      = wl.avg_conf;
@@ -339,6 +354,477 @@ function sectorBadgeLabel(gics) {
     return m[gics] || gics;
 }
 
+/* ── Rich pill tooltips (matches sector page #pill-tooltip pattern) ─── */
+const DECISION_TIPS = {
+    tp_sl: {
+        zh: {
+            title: '止盈 / 止損 · 出場目標',
+            desc: 'TP 觸及代表 thesis 兌現、部分或全部出場；SL 觸及代表 thesis 失敗、無條件出場。R/R = (TP − 進場) ÷ (進場 − SL)，越大代表潛在報酬相對於風險越值得。',
+            scale: '🟢 TP (Take Profit / 止盈) — 目標價，觸及後出場\n🔴 SL (Stop Loss / 止損) — 停損價，跌破無條件出場',
+        },
+        en: {
+            title: 'Take Profit / Stop Loss · Exit Targets',
+            desc: 'TP confirms thesis works → exit (full or partial). SL means thesis broke → unconditional exit. R/R = (TP − entry) ÷ (entry − SL), the higher the better.',
+            scale: '🟢 TP (Take Profit) — target hit → exit\n🔴 SL (Stop Loss) — price breached → cut',
+        },
+    },
+    dual_track: {
+        zh: {
+            title: '雙軌進場 (Dual-Track Entry)',
+            desc: '把建倉拆兩段下，避免 timing 全押單一價位。同時保有趨勢敞口與回測機會。',
+            scale: '🟢 AGG (積極) — 上半段先進，搶趨勢\n🟡 CONS (保守) — 下半段等回測或更好價位',
+        },
+        en: {
+            title: 'Dual-Track Entry',
+            desc: 'Split the position in two so timing is not bet on one price. Captures trend exposure plus retest opportunity.',
+            scale: '🟢 AGG (Aggressive) — upper half, chases trend\n🟡 CONS (Conservative) — lower half, waits for retest',
+        },
+    },
+    da_filed: {
+        zh: {
+            title: '反向論點已提交 (DA Filed)',
+            desc: '投資長啟動 Devils Advocate 流程，書面記錄反對 thesis 的論述。代表決策經過刻意挑戰，是 quality flag。',
+            scale: '⚖ 觸發條件：final_score 靠近邊界 OR 共識過於一致時強制提交',
+        },
+        en: {
+            title: 'Devils Advocate Filed',
+            desc: "PM officially logged a written counter-thesis. Quality flag — decision survived deliberate challenge.",
+            scale: '⚖ Triggered when final_score near boundary OR consensus too uniform',
+        },
+    },
+    contrarian: {
+        zh: {
+            title: '逆勢訊號 (Contrarian)',
+            desc: '此分析違反當下 macro regime（如 RISK_OFF 仍 BUY、或多頭轉折時 SELL）。需特別小心 thesis 假設與 macro 條件的相容性。',
+            scale: '🎯 CONTRARIAN：方向 ≠ macro_alignment\n✅ ALIGNED：方向跟大環境一致（不顯示 badge）',
+        },
+        en: {
+            title: 'Contrarian Signal',
+            desc: 'Analysis runs against current macro regime (e.g. BUY in RISK_OFF). Watch thesis assumptions vs macro context carefully.',
+            scale: '🎯 CONTRARIAN: direction ≠ macro_alignment\n✅ ALIGNED: matches macro (no badge shown)',
+        },
+    },
+    pos_binary: {
+        zh: {
+            title: '正向二元事件 (Positive Binary)',
+            desc: '48 小時內有確定的正向 catalyst（財報、法規裁決、併購投票等）。預期結果落地會大幅推升價格，倉位可較積極，但需準備錯邊的對沖。',
+        },
+        en: {
+            title: 'Positive Binary Catalyst',
+            desc: 'Confirmed positive catalyst within 48h (earnings / ruling / M&A vote). Outcome likely drives price up — sizing can be more aggressive, but hedge for wrong-side risk.',
+        },
+    },
+    neg_binary: {
+        zh: {
+            title: '負向二元事件 (Negative Binary)',
+            desc: '48 小時內有確定下行 catalyst。建議嚴控倉位、考慮避開直到事件落地、或用 protective put 對沖。',
+        },
+        en: {
+            title: 'Negative Binary Catalyst',
+            desc: 'Confirmed downside catalyst within 48h. Tighten size, consider waiting it out, or use protective puts.',
+        },
+    },
+    consensus: {
+        zh: {
+            title: '共識加權 ×1.15',
+            desc: '四個分析師（Bull / Bear / Sector / Macro）方向一致 → 模型分數 ×1.15 加權，提高決策信心。',
+            scale: 'V4.7+：需通過 Red Team 審核才會啟用',
+        },
+        en: {
+            title: 'Consensus Bonus ×1.15',
+            desc: 'All 4 analysts (Bull/Bear/Sector/Macro) align → score multiplied by 1.15 for higher confidence.',
+            scale: 'V4.7+: gated by Red Team review',
+        },
+    },
+    fragility_robust: {
+        zh: {
+            title: '論點穩健度：穩健',
+            desc: 'Tail-risk 三維評估：論點建立在多支柱（基本面 + 技術 + 估值）之上，容忍負面驚奇能力高。可採標準倉位上限。',
+            scale: '🟢 ROBUST  穩健 — 多支柱 thesis\n🟡 MODERATE 中等脆弱 — 對特定變數敏感\n🔴 FRAGILE  脆弱 — 高度依賴單一 narrative',
+        },
+        en: {
+            title: 'Thesis Fragility: Robust',
+            desc: 'Tail-risk 3-dim assessment: thesis stands on multiple pillars (fundamentals + technical + valuation), high tolerance to negative surprises. Standard sizing cap OK.',
+            scale: '🟢 ROBUST    multi-pillar\n🟡 MODERATE  sensitive to certain vars\n🔴 FRAGILE   single-narrative dependence',
+        },
+    },
+    fragility_moderate: {
+        zh: {
+            title: '論點穩健度：中等脆弱',
+            desc: 'Tail-risk 三維評估：論點對部分變數敏感，少數負面 catalyst 即可動搖。建議倉位降一檔。',
+            scale: '🟢 ROBUST  穩健 — 多支柱 thesis\n🟡 MODERATE 中等脆弱 — 對特定變數敏感\n🔴 FRAGILE  脆弱 — 高度依賴單一 narrative',
+        },
+        en: {
+            title: 'Thesis Fragility: Moderate',
+            desc: 'Tail-risk 3-dim assessment: thesis sensitive to certain variables; minor negative catalyst can shake R/R. Reduce sizing one notch.',
+            scale: '🟢 ROBUST    multi-pillar\n🟡 MODERATE  sensitive to certain vars\n🔴 FRAGILE   single-narrative dependence',
+        },
+    },
+    fragility_fragile: {
+        zh: {
+            title: '論點穩健度：脆弱',
+            desc: 'Tail-risk 三維評估：論點高度依賴單一驅動或 narrative，一個負面驚奇就會大幅減損 R/R。倉位需大砍，或考慮先觀望。',
+            scale: '🟢 ROBUST  穩健 — 多支柱 thesis\n🟡 MODERATE 中等脆弱 — 對特定變數敏感\n🔴 FRAGILE  脆弱 — 高度依賴單一 narrative',
+        },
+        en: {
+            title: 'Thesis Fragility: Fragile',
+            desc: 'Tail-risk 3-dim: thesis hinges on single driver / narrative — one negative surprise materially impairs R/R. Cut sizing significantly, or consider waiting.',
+            scale: '🟢 ROBUST    multi-pillar\n🟡 MODERATE  sensitive to certain vars\n🔴 FRAGILE   single-narrative dependence',
+        },
+    },
+    phase2_fanout: {
+        zh: {
+            title: 'Phase 2 fanout 降級',
+            desc: 'Parallel subagent 多 lane 平行分析有部分沒跑完（PARTIAL_FALLBACK 或 FULL_FALLBACK）。最終分數的多視角驗證減弱，宜降低信心。',
+        },
+        en: {
+            title: 'Phase 2 Fanout Degraded',
+            desc: "Parallel subagent fanout did not fully complete (PARTIAL/FULL_FALLBACK). Final score lacks full multi-viewpoint validation — discount confidence.",
+        },
+    },
+    degraded_lanes: {
+        zh: {
+            title: 'Lane 降級警告',
+            desc: '部分分析師 lane 沒跑成（fallback 或 timeout），最終分數可能少了 1-2 視角的權重。',
+        },
+        en: {
+            title: 'Degraded Analyst Lanes',
+            desc: 'One or more analyst lanes failed or fell back. Final score may lack 1-2 viewpoints\' weight.',
+        },
+    },
+    burry_override: {
+        zh: {
+            title: 'Burry 覆寫啟動',
+            desc: 'Burry 模型（深度價值）推翻共識 BUY → 自動把倉位砍半，並在指定交易日後重新檢視。代表基本面有重大警訊，不該滿倉進。',
+        },
+        en: {
+            title: 'Burry Override Active',
+            desc: 'Burry deep-value model overrode consensus BUY — position halved with mandatory recheck date. Indicates major fundamental flag.',
+        },
+    },
+};
+
+(function initDecisionTip() {
+    const tip = document.getElementById('decision-tip');
+    if (!tip) return;
+    if (tip._init) return;
+    tip._init = true;
+    let _hideTimer = null;
+
+    function showTip(el) {
+        const key = el.dataset.tipKey;
+        const lang = (typeof UI !== 'undefined' && UI.currentLang === 'en') ? 'en' : 'zh';
+        const data = DECISION_TIPS[key]?.[lang];
+        if (!data) return;
+        let html = `<div class="tip-title">${data.title}</div>`;
+        html += `<div class="tip-desc">${data.desc}</div>`;
+        if (data.scale) html += `<div class="tip-scale">${data.scale}</div>`;
+        tip.innerHTML = html;
+        tip.style.opacity = '0';
+        tip.style.top = '-9999px';
+        tip.classList.add('tip-visible');
+        requestAnimationFrame(() => {
+            const rect  = el.getBoundingClientRect();
+            const tRect = tip.getBoundingClientRect();
+            const gap   = 8;
+            let top  = rect.top - tRect.height - gap;
+            if (top < 8) top = rect.bottom + gap;
+            let left = rect.left + (rect.width - tRect.width) / 2;
+            left = Math.max(8, Math.min(left, window.innerWidth - tRect.width - 8));
+            tip.style.top  = top + 'px';
+            tip.style.left = left + 'px';
+            tip.style.opacity = '';
+        });
+    }
+    function hideTip() { tip.classList.remove('tip-visible'); }
+
+    document.addEventListener('mouseover', e => {
+        const el = e.target.closest('[data-tip-key]');
+        if (!el) return;
+        if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+        showTip(el);
+    });
+    document.addEventListener('mouseout', e => {
+        const el = e.target.closest('[data-tip-key]');
+        if (!el) return;
+        _hideTimer = setTimeout(hideTip, 80);
+    });
+})();
+
+/* ── Version detection + UI helpers ─────────────────────────── */
+function detectProtocolVersion(item) {
+    // Trust bridge.py if it set protocol_version (from session_export_version)
+    if (item.protocol_version && item.protocol_version !== 'legacy') {
+        // Normalize: "V5.0" / "V4.8" / "V4.7" / "V4.6" / "V4.5" → keep as-is
+        return String(item.protocol_version).toUpperCase();
+    }
+    // Fallback heuristic for older entries with no version stamp
+    if (item.valuation_lane || item.fair_value_summary) return 'V5.0';
+    if (item.degraded_analysts != null && item.phase2_fanout_mode) return 'V4.8';
+    if (item.red_team_verdict) return 'V4.7';
+    return 'LEGACY';
+}
+
+const VERSION_COLOR = {
+    'V5.0':   { bg: 'rgba(16,185,129,0.18)',  border: 'rgba(16,185,129,0.55)',  fg: '#34d399', label: 'V5.0'   },
+    'V4.8':   { bg: 'rgba(59,130,246,0.18)',  border: 'rgba(59,130,246,0.55)',  fg: '#60a5fa', label: 'V4.8'   },
+    'V4.7':   { bg: 'rgba(245,158,11,0.18)',  border: 'rgba(245,158,11,0.55)',  fg: '#fbbf24', label: 'V4.7'   },
+    'V4.6':   { bg: 'rgba(161,161,170,0.16)', border: 'rgba(161,161,170,0.45)', fg: '#a1a1aa', label: 'V4.6'   },
+    'V4.5':   { bg: 'rgba(161,161,170,0.16)', border: 'rgba(161,161,170,0.45)', fg: '#a1a1aa', label: 'V4.5'   },
+    'LEGACY': { bg: 'rgba(82,82,91,0.18)',    border: 'rgba(82,82,91,0.45)',    fg: '#71717a', label: 'ARCHIVE'},
+};
+
+function buildVersionBookmark(version) {
+    const c = VERSION_COLOR[version] || VERSION_COLOR['LEGACY'];
+    return `
+    <div class="version-bookmark" title="Protocol ${c.label}"
+         style="position:absolute; top:0; right:8px; z-index:2;
+                padding:2px 7px 3px; font-size:8px; font-weight:800; letter-spacing:0.06em;
+                border:1px solid ${c.border}; border-top:0;
+                border-bottom-left-radius:5px; border-bottom-right-radius:5px;
+                background:${c.bg}; color:${c.fg};
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2); opacity: 0.85;">
+        ${c.label}
+    </div>`;
+}
+
+/* ── V5.0 — Valuation Lane + Fair Value Summary ──────────────── */
+const ANCHOR_INFO = {
+    dcf_unlevered: {
+        label: 'DCF-U',
+        tip_zh: '無槓桿 DCF — Unlevered Free Cash Flow 折現後減淨債務',
+        tip_en: 'Unlevered DCF — UFCF discounted, then minus net debt',
+    },
+    dcf_levered: {
+        label: 'DCF-L',
+        tip_zh: '有槓桿 DCF — 直接折現 Levered FCF',
+        tip_en: 'Levered DCF — direct LFCF discount',
+    },
+    analyst_pt_consensus: {
+        label: 'Analyst PT',
+        tip_zh: '賣方分析師 12 個月目標價共識（FMP）',
+        tip_en: '12-month sell-side analyst price target consensus (FMP)',
+    },
+    peer_pe_implied: {
+        label: 'Peer P/E',
+        tip_zh: '同業中位數 P/E × ticker EPS',
+        tip_en: 'Peer-group median P/E × ticker EPS',
+    },
+    owner_earnings_mult: {
+        label: 'Owner E.',
+        tip_zh: '巴菲特 Owner Earnings — (淨利 + 折舊 - 維持性 capex) × 倍數',
+        tip_en: 'Buffett Owner Earnings — (NI + D&A − maintenance capex) × multiple',
+    },
+    forecaster_blend: {
+        label: 'Forecaster',
+        tip_zh: 'earnings-valuation-forecaster skill 的 12 個月 blended fair value',
+        tip_en: '12-month blended fair value from earnings-valuation-forecaster skill',
+    },
+};
+
+function buildV5ValuationBlock(item, wl) {
+    const fvs = item.fair_value_summary;
+    const lane = item.valuation_lane;
+    if (!fvs && !lane) return '';
+    const bandLabels = {
+        extreme_undervalued: { fg: '#10b981', text: wl.fv_extreme_under   || '極度低估' },
+        undervalued:         { fg: '#22c55e', text: wl.fv_undervalued     || '低估' },
+        fairly_valued:       { fg: '#a1a1aa', text: wl.fv_fair            || '合理' },
+        overvalued:          { fg: '#f97316', text: wl.fv_overvalued      || '高估' },
+        extreme_overvalued:  { fg: '#ef4444', text: wl.fv_extreme_over    || '極度高估' },
+    };
+    const band = (fvs && fvs.verdict_band) ? (bandLabels[fvs.verdict_band] || { fg:'#a1a1aa', text: fvs.verdict_band }) : null;
+    const fv   = fvs?.weighted_fair_value ?? lane?.weighted_fair_value;
+    const pct  = fvs?.vs_current_pct ?? lane?.vs_current_pct;
+    const conf = fvs?.confidence ?? lane?.confidence;
+    const anchorCount = fvs?.anchors_available;
+    const tipKey = (typeof UI !== 'undefined' && UI.currentLang === 'zh') ? 'tip_zh' : 'tip_en';
+    const anchorChips = fvs?.anchors
+        ? Object.entries(fvs.anchors).filter(([_, v]) => v != null)
+              .map(([k, _]) => {
+                  const info = ANCHOR_INFO[k] || { label: k, tip_zh: k, tip_en: k };
+                  return `<span class="text-[10px] px-2.5 py-1 rounded-md bg-zinc-700/40 text-zinc-100 border border-zinc-500/40 font-mono" title="${escapeHtmlDc(info[tipKey])}">${info.label}</span>`;
+              }).join(' ')
+        : '';
+    const pctStr = pct != null ? `${pct >= 0 ? '+' : ''}${Number(pct).toFixed(1)}%` : '--';
+    const pctColor = pct == null ? '#a1a1aa' : (pct >= 0 ? '#22c55e' : '#ef4444');
+
+    return `
+    <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
+        <p class="text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-1" style="color:#34d399">
+            <i data-lucide="scale" class="w-3 h-3"></i>
+            ${wl.fv_block_title || 'Valuation · Fair Value'}
+            ${band ? `<span class="ml-auto text-[9px] font-black px-1.5 py-0.5 rounded" style="background:color-mix(in srgb,${band.fg},transparent 85%);color:${band.fg};border:1px solid color-mix(in srgb,${band.fg},transparent 65%)">${band.text}</span>` : ''}
+        </p>
+        <div class="grid grid-cols-3 gap-2 mb-2">
+            <div>
+                <div class="text-[10px] text-zinc-300 font-bold uppercase tracking-wide">${wl.fv_fair_value || 'Fair Value'}</div>
+                <div class="text-sm font-mono font-bold" style="color:var(--text-card-title)">${fv != null ? '$' + Number(fv).toFixed(2) : '--'}</div>
+            </div>
+            <div>
+                <div class="text-[10px] text-zinc-300 font-bold uppercase tracking-wide">${wl.fv_vs_current || 'vs Current'}</div>
+                <div class="text-sm font-mono font-bold" style="color:${pctColor}">${pctStr}</div>
+            </div>
+            <div>
+                <div class="text-[10px] text-zinc-300 font-bold uppercase tracking-wide">${wl.fv_confidence || 'Confidence'}</div>
+                <div class="text-sm font-bold capitalize" style="color:var(--text-card-title)">${conf || '--'}</div>
+            </div>
+        </div>
+        ${anchorChips ? `<div class="flex flex-wrap gap-1.5 items-center">${anchorChips}${anchorCount != null ? `<span class="text-[10px] text-zinc-300 ml-1 font-mono">${anchorCount}/6</span>` : ''}</div>` : ''}
+        ${fvs?.methodology_note ? `<div class="text-[10px] text-zinc-400 italic mt-2 leading-relaxed">${escapeHtmlDc(fvs.methodology_note)}</div>` : ''}
+    </div>`;
+}
+
+/* ── V4.7+ — Red Team challenge block ───────────────────────── */
+function buildRedTeamBlock(item, wl) {
+    if (!item.red_team_verdict) return '';
+    const verdictColor = {
+        'NO_VIABLE_COUNTER': '#22c55e',
+        'MODERATE_COUNTER':  '#eab308',
+        'STRONG_COUNTER':    '#ef4444',
+    };
+    const fg = verdictColor[item.red_team_verdict] || '#a1a1aa';
+    const verdictText = (wl[`rt_${item.red_team_verdict.toLowerCase()}`]) || item.red_team_verdict.replace(/_/g, ' ');
+    const kill = item.red_team_kill || [];
+    const thesis = item.red_team_thesis;
+    const failed = item.red_team_failed;
+    return `
+    <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
+        <p class="text-[9px] font-black uppercase tracking-widest mb-2 flex items-center gap-1" style="color:${fg}">
+            <i data-lucide="swords" class="w-3 h-3"></i>
+            ${wl.rt_block_title || 'Red Team Challenge'}
+            <span class="ml-auto text-[8px] px-1.5 py-0.5 rounded" style="background:color-mix(in srgb,${fg},transparent 85%);color:${fg};border:1px solid color-mix(in srgb,${fg},transparent 65%)">${verdictText}</span>
+        </p>
+        ${failed ? `<div class="text-[9px] text-amber-600 dark:text-amber-400 mb-1.5">⚠ ${wl.rt_failed || 'Red Team execution degraded'}</div>` : ''}
+        ${thesis ? `<details class="mb-1.5"><summary class="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100">${wl.rt_thesis || 'Counter thesis'}</summary><p class="text-[11px] mt-1 leading-relaxed" style="color:var(--text-main)">${escapeHtmlDc(thesis)}</p></details>` : ''}
+        ${kill.length ? `<div><div class="text-[9px] font-black uppercase mb-1 text-zinc-700 dark:text-zinc-400">${wl.rt_kill || 'Kill conditions'}</div><ol class="text-[11px] list-decimal list-inside space-y-0.5 leading-relaxed" style="color:var(--text-main)">${kill.slice(0,3).map(k => `<li>${escapeHtmlDc(k)}</li>`).join('')}</ol></div>` : ''}
+    </div>`;
+}
+
+/* ── V4.8 status pills (degraded analysts, fanout, burry override) ─── */
+function buildV48StatusPills(item, wl) {
+    const pills = [];
+    const isZh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
+    if (item.phase2_fanout_mode && item.phase2_fanout_mode !== 'PARALLEL_SUBAGENT') {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold" data-tip-key="phase2_fanout">⚠ ${item.phase2_fanout_mode.replace(/_/g,' ')}</span>`);
+    }
+    if (item.degraded_analysts && item.degraded_analysts.length) {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold" data-tip-key="degraded_lanes">⚠ ${wl.degraded_lanes || 'Degraded'}: ${item.degraded_analysts.length}</span>`);
+    }
+    if (item.burry_override) {
+        const recheck = item.burry_recheck ? ` (recheck ${item.burry_recheck})` : '';
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 font-bold" data-tip-key="burry_override">${wl.burry_override || 'BURRY OVERRIDE'}${recheck}</span>`);
+    }
+    if (item.fragility_label) {
+        const fragColor = { ROBUST: '#22c55e', MODERATE: '#eab308', FRAGILE: '#ef4444', RESILIENT: '#22c55e' }[item.fragility_label] || '#a1a1aa';
+        const fragLabelMap = isZh
+            ? { ROBUST: '穩健', MODERATE: '中等脆弱', FRAGILE: '脆弱', RESILIENT: '穩健' }
+            : { ROBUST: 'ROBUST', MODERATE: 'MODERATE', FRAGILE: 'FRAGILE', RESILIENT: 'RESILIENT' };
+        const tipKey = (item.fragility_label === 'FRAGILE') ? 'fragility_fragile'
+                      : (item.fragility_label === 'MODERATE') ? 'fragility_moderate'
+                      : 'fragility_robust';
+        const label = fragLabelMap[item.fragility_label] || item.fragility_label;
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${tipKey}" style="background:color-mix(in srgb,${fragColor},transparent 88%);color:${fragColor};border:1px solid color-mix(in srgb,${fragColor},transparent 70%)">${label}</span>`);
+    }
+    // V2.10.0 — det_shadow polarization + agreement
+    const ds = item.det_shadow || {};
+    if (ds.signal_polarization === 'BIPOLAR') {
+        const tip = isZh ? 'Lane 訊號兩極（強空＋強多並存）→ verdict 重跑會晃；不該重押任一邊'
+                         : 'Lanes are extremely polarized (strong long + strong short coexist) → verdict will swing on rerun; avoid heavy sizing';
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#a855f7,transparent 88%);color:#a855f7;border:1px solid color-mix(in srgb,#a855f7,transparent 70%)">${isZh ? '訊號兩極' : 'BIPOLAR'}</span>`);
+    } else if (ds.signal_polarization === 'MIXED') {
+        const tip = isZh ? 'Lane 訊號分歧（一正一負，未到極端）'
+                         : 'Lanes mixed (some positive, some negative, less extreme)';
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#0ea5e9,transparent 88%);color:#0ea5e9;border:1px solid color-mix(in srgb,#0ea5e9,transparent 70%)">${isZh ? '訊號分歧' : 'MIXED'}</span>`);
+    }
+    if (ds.red_team_agreement === 'DISAGREE') {
+        const det = ds.red_team_verdict_det || '';
+        const tip = isZh
+            ? `LLM Red Team = ${item.red_team_verdict || 'N/A'}，但量化規則 = ${det}（${ds.red_team_detail?.kill_count ?? '?'} 條 kill trigger 觸發）→ LLM 比量化寬鬆，警覺`
+            : `LLM=${item.red_team_verdict || 'N/A'} vs deterministic=${det} (${ds.red_team_detail?.kill_count ?? '?'} kill triggers) → LLM softer than rules`;
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? 'Red Team 不一致' : 'RT DISAGREE'}</span>`);
+    }
+    if (ds.val_agreement === 'DISAGREE') {
+        const llm = item.valuation_lane?.score;
+        const det = ds.valuation_score_det;
+        const tip = isZh
+            ? `LLM Val score = ${llm}，但純 FV/price 算的 det = ${det} → LLM 在 valuation 上比純算數 ${(llm < det) ? '更悲觀' : '更樂觀'}`
+            : `LLM Val=${llm} vs deterministic FV-vs-price=${det} → LLM is ${(llm < det) ? 'more bearish' : 'more bullish'}`;
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#f59e0b,transparent 88%);color:#f59e0b;border:1px solid color-mix(in srgb,#f59e0b,transparent 70%)">${isZh ? 'Val 不一致' : 'VAL DISAGREE'}</span>`);
+    }
+    // V2.13.0 — action_label (ATTACK / WAIT / DEFENSIVE)
+    if (item.action_label) {
+        const actionMap = {
+            ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip_zh: '立即進場：訊號明確且確信度高',                  tip_en: 'Immediate entry: clear signals with high confidence' },
+            WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip_zh: '等 pullback / 條件觸發再進場',                tip_en: 'Wait for pullback / condition trigger' },
+            DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip_zh: '訊號矛盾或下行偏多，主動避開或縮倉',         tip_en: 'Conflicting/bearish signals; avoid or downsize' },
+        };
+        const a = actionMap[item.action_label];
+        if (a) {
+            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${isZh ? a.tip_zh : a.tip_en}" style="background:color-mix(in srgb,${a.color},transparent 86%);color:${a.color};border:1px solid color-mix(in srgb,${a.color},transparent 65%)">${isZh ? a.label_zh : a.label_en}</span>`);
+        }
+    }
+    // V2.13.0 — moat_assessment (Fundamentals lane)
+    const moat = item.fundamentals_lane?.moat_assessment;
+    if (moat && moat.level && moat.level !== 'INSUFFICIENT_DATA') {
+        const moatMap = {
+            WIDE:    { color: '#eab308', label_zh: '寬護城河', label_en: 'WIDE MOAT' },
+            NARROW:  { color: '#a1a1aa', label_zh: '窄護城河', label_en: 'NARROW MOAT' },
+            ERODING: { color: '#ef4444', label_zh: '護城河侵蝕', label_en: 'ERODING MOAT' },
+            NONE:    { color: '#71717a', label_zh: '無護城河', label_en: 'NO MOAT' },
+        };
+        const m = moatMap[moat.level];
+        if (m) {
+            const tip = `${moat.type || ''} — ${moat.evidence_one_line || ''}`.replace(/^—\s*/, '').replace(/\s*—\s*$/, '');
+            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${escapeHtmlDc(tip || moat.level)}" style="background:color-mix(in srgb,${m.color},transparent 86%);color:${m.color};border:1px solid color-mix(in srgb,${m.color},transparent 65%)">${isZh ? m.label_zh : m.label_en}</span>`);
+        }
+    }
+    // V2.13.0 — Technical pattern_taxonomy
+    const pat = item.technical_lane?.pattern_taxonomy;
+    if (pat && pat.pattern && pat.pattern !== 'INSUFFICIENT_DATA') {
+        const patternZh = {
+            uptrend_breakout:        '突破',
+            uptrend_continuation:    '續漲',
+            consolidation:           '整理',
+            pullback_in_uptrend:     '回踩',
+            false_breakout:          '假突破',
+            topping_pattern:         '頂部',
+            downtrend:               '下降',
+            oversold_bounce_attempt: '超賣反彈',
+        };
+        const isUp = pat.pattern.startsWith('uptrend') || pat.pattern === 'pullback_in_uptrend' || pat.pattern === 'oversold_bounce_attempt';
+        const isDown = pat.pattern === 'topping_pattern' || pat.pattern === 'downtrend' || pat.pattern === 'false_breakout';
+        const color = isUp ? '#22c55e' : (isDown ? '#ef4444' : '#a1a1aa');
+        const label = isZh ? (patternZh[pat.pattern] || pat.pattern) : pat.pattern.replace(/_/g, ' ');
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${escapeHtmlDc(pat.confirmation_criteria || '')}" style="background:color-mix(in srgb,${color},transparent 86%);color:${color};border:1px solid color-mix(in srgb,${color},transparent 65%)">${escapeHtmlDc(label)}</span>`);
+    }
+    // V2.13.0 — Technical market_strength
+    const strength = item.technical_lane?.market_strength;
+    if (strength && strength !== 'INSUFFICIENT_DATA') {
+        const strengthMap = {
+            STRONG:  { color: '#22c55e', label_zh: '盤面強', label_en: 'STRONG' },
+            NEUTRAL: { color: '#a1a1aa', label_zh: '盤面中性', label_en: 'NEUTRAL' },
+            WEAK:    { color: '#ef4444', label_zh: '盤面弱', label_en: 'WEAK' },
+        };
+        const s = strengthMap[strength];
+        if (s) {
+            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,${s.color},transparent 86%);color:${s.color};border:1px solid color-mix(in srgb,${s.color},transparent 65%)">${isZh ? s.label_zh : s.label_en}</span>`);
+        }
+    }
+    // V2.13.0 — decision_confidence_pct
+    if (typeof item.decision_confidence_pct === 'number') {
+        const c = item.decision_confidence_pct;
+        const color = c >= 70 ? '#22c55e' : (c >= 50 ? '#eab308' : '#71717a');
+        const tip = isZh ? '決策信心度（V2.13.0 PM 整合層輸出）' : 'Decision confidence (V2.13.0 PM synthesis)';
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-mono font-bold" title="${tip}" style="color:${color};border:1px solid color-mix(in srgb,${color},transparent 70%)">${c}%</span>`);
+    }
+    return pills.join(' ');
+}
+
+function escapeHtmlDc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
 function buildCard(item) {
     const isExecute = isActiveDecision(item.decision);
     const isStaged = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY' || item.final_decision === 'STAGED_ENTRY';
@@ -347,6 +833,7 @@ function buildCard(item) {
     const wl = t.watchlist || {};
     const status  = t.status?.[item.decision] || item.decision;
     const horizon = item.time_horizon ? (t.horizon?.[item.time_horizon] || item.time_horizon) : null;
+    const version = detectProtocolVersion(item);
     const sectorBadge = _tickerSectorMap[item.ticker]
         ? `<span class="inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded" style="background:#e0e7ff;border:1px solid #93c5fd;color:#1e3a8a">${sectorBadgeLabel(_tickerSectorMap[item.ticker])}</span>`
         : '';
@@ -386,29 +873,37 @@ function buildCard(item) {
     }
 
     // V4.6 badges: consensus bonus, macro alignment, binary class
+    const isZhDc = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
     const badgesHtml = [
-        item.consensus_bonus ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">${wl.badge_consensus || '×1.15 CONSENSUS'}</span>` : '',
-        item.macro_alignment === 'CONTRARIAN' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">${wl.badge_contrarian || 'CONTRARIAN'}</span>` : '',
-        item.binary_class === 'positive' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">${wl.badge_pos_binary || 'POS BINARY'}</span>` : '',
-        item.binary_class === 'negative' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-bold">${wl.badge_neg_binary || 'NEG BINARY'}</span>` : '',
+        item.consensus_bonus ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold" data-tip-key="consensus">${wl.badge_consensus || '×1.15 CONSENSUS'}</span>` : '',
+        item.macro_alignment === 'CONTRARIAN' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 font-bold" data-tip-key="contrarian">${wl.badge_contrarian || 'CONTRARIAN'}</span>` : '',
+        item.binary_class === 'positive' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold" data-tip-key="pos_binary">${wl.badge_pos_binary || 'POS BINARY'}</span>` : '',
+        item.binary_class === 'negative' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 font-bold" data-tip-key="neg_binary">${wl.badge_neg_binary || 'NEG BINARY'}</span>` : '',
+        // V4.8+ status pills (fragility / degraded / burry override / fanout)
+        buildV48StatusPills(item, wl),
     ].filter(Boolean).join(' ');
+
+    // Version-specific extras
+    const v5BlockHtml      = (version === 'V5.0') ? buildV5ValuationBlock(item, wl) : '';
+    const redTeamBlockHtml = (version === 'V5.0' || version === 'V4.8' || version === 'V4.7') ? buildRedTeamBlock(item, wl) : '';
+    const bookmarkHtml     = buildVersionBookmark(version);
 
     // Entry targets block — V4.6 supports dual-track
     const tgt = item.targets || {};
     let targetHtml = '';
     if (tgt.tp || tgt.sl) {
         targetHtml = `
-        <div class="flex gap-4 pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
-            ${tgt.tp ? `<div><p class="text-[8px] text-zinc-600 font-bold uppercase">TP</p><p class="text-xs font-mono font-bold" style="color:var(--status-bullish)">$${tgt.tp}</p></div>` : ''}
-            ${tgt.sl ? `<div class="border-l border-zinc-200 dark:border-zinc-900/50 pl-4"><p class="text-[8px] text-zinc-600 font-bold uppercase">SL</p><p class="text-xs font-mono font-bold" style="color:var(--status-bearish)">$${tgt.sl}</p></div>` : ''}
-            ${!tgt.entry_aggressive && tgt.entry ? `<div class="border-l border-zinc-200 dark:border-zinc-900/50 pl-4"><p class="text-[8px] text-zinc-600 font-bold uppercase">Entry</p><p class="text-xs font-mono font-bold" style="color:var(--status-binary)">${tgt.entry}</p></div>` : ''}
+        <div class="flex gap-4 pt-3 border-t border-zinc-200 dark:border-zinc-900/50" data-tip-key="tp_sl">
+            ${tgt.tp ? `<div><p class="text-[9px] text-zinc-700 dark:text-zinc-400 font-bold uppercase">TP</p><p class="text-xs font-mono font-bold" style="color:var(--status-bullish)">$${tgt.tp}</p></div>` : ''}
+            ${tgt.sl ? `<div class="border-l border-zinc-200 dark:border-zinc-900/50 pl-4"><p class="text-[9px] text-zinc-700 dark:text-zinc-400 font-bold uppercase">SL</p><p class="text-xs font-mono font-bold" style="color:var(--status-bearish)">$${tgt.sl}</p></div>` : ''}
+            ${!tgt.entry_aggressive && tgt.entry ? `<div class="border-l border-zinc-200 dark:border-zinc-900/50 pl-4"><p class="text-[9px] text-zinc-700 dark:text-zinc-400 font-bold uppercase">Entry</p><p class="text-xs font-mono font-bold" style="color:var(--status-binary)">${tgt.entry}</p></div>` : ''}
         </div>`;
     } else if (tgt.watch || tgt.entry) {
         const val = tgt.watch || tgt.entry;
         const lbl = tgt.watch ? 'Watch' : 'Entry';
         targetHtml = `
         <div class="pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
-            <p class="text-[8px] text-zinc-600 font-bold uppercase">${lbl}</p>
+            <p class="text-[9px] text-zinc-700 dark:text-zinc-400 font-bold uppercase">${lbl}</p>
             <p class="text-xs font-mono font-bold" style="color:var(--status-binary)">${val}</p>
         </div>`;
     }
@@ -421,7 +916,7 @@ function buildCard(item) {
         const consPct = split.conservative_pct != null ? ` (${Math.round(split.conservative_pct * 100)}%)` : '';
         dualTrackHtml = `
         <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50 space-y-2">
-            <p class="text-[9px] font-black uppercase tracking-widest flex items-center gap-1" style="color:var(--status-binary)">
+            <p class="text-[10px] font-black uppercase tracking-widest flex items-center gap-1" data-tip-key="dual_track" style="color:var(--status-binary)">
                 <i data-lucide="git-fork" class="w-3 h-3"></i> ${wl.dual_track || 'Dual-Track Entry'}
             </p>
             ${tgt.entry_aggressive ? `
@@ -482,13 +977,13 @@ function buildCard(item) {
     const refreshLbl = wl.refresh_btn || (UI.currentLang === 'zh' ? '重新分析' : 'Re-analyze');
 
     return `
-    <div class="glass-card p-6 flex flex-col gap-0 ${statusGlow} hover:border-zinc-500/50 transition-all cursor-pointer" data-history-ticker="${item.ticker}">
+    <div class="glass-card dc-card-hover p-6 flex flex-col gap-0 ${statusGlow} cursor-pointer" data-history-ticker="${item.ticker}" data-protocol-version="${version}" style="position:relative;">
+        ${bookmarkHtml}
         <!-- Header -->
         <div class="flex justify-between items-start mb-4">
-            <div>
-                <div class="flex items-baseline gap-2 flex-wrap">
+            <div class="min-w-0 flex-1">
+                <div class="flex items-baseline gap-3 flex-wrap">
                     <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}</h4>
-                    ${sectorBadge}
                     ${item.current_price != null ? (() => {
                         const cp = item.current_price;
                         const ap = item.analysis_price;
@@ -498,17 +993,18 @@ function buildCard(item) {
                             if (Math.abs(pct) >= 0.5) {
                                 const sign = pct >= 0 ? '+' : '';
                                 const color = pct >= 0 ? 'var(--status-bullish)' : 'var(--status-bearish)';
-                                drift = `<span class="text-[10px] font-mono font-bold" style="color:${color}">${sign}${pct.toFixed(1)}%</span>`;
+                                drift = `<span class="text-[10px] font-mono font-bold ml-1" style="color:${color}">${sign}${pct.toFixed(1)}%</span>`;
                             }
                         }
-                        return `<span class="text-sm font-mono font-bold" style="color:var(--text-main)">$${cp}</span>${drift}`;
+                        return `<span class="text-base font-mono font-bold" style="color:var(--text-main)">$${cp}</span>${drift}`;
                     })() : ''}
                 </div>
-                <p class="text-[10px] text-zinc-500 font-mono flex items-center gap-2">
+                <div class="text-[10px] text-zinc-500 font-mono flex items-center gap-2 mt-1.5 flex-wrap">
+                    ${sectorBadge}
                     <span>${item.time}</span>
                     ${item.analysis_price != null ? `<span class="text-zinc-600" title="${wl.analysis_price_hint || 'Price at analysis time'}">@ $${item.analysis_price}</span>` : ''}
                     ${item._history_count > 1 ? `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[8px] font-bold" title="${wl.history_hint || 'Click card to see previous analyses'}"><i data-lucide="history" class="w-2.5 h-2.5"></i>+${item._history_count - 1}</span>` : ''}
-                </p>
+                </div>
             </div>
             <div class="flex items-start gap-2">
                 <button type="button" data-refresh-ticker="${item.ticker}"
@@ -522,7 +1018,7 @@ function buildCard(item) {
                         style="background:color-mix(in srgb,${statusColor},transparent 90%);border-color:color-mix(in srgb,${statusColor},transparent 75%);color:${statusColor}">
                         ${status}
                     </span>
-                    ${item.da_filed ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold">${wl.da_filed || 'DA Filed'}</span>` : ''}
+                    ${item.da_filed ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 font-bold" data-tip-key="da_filed">${wl.da_filed || 'DA Filed'}</span>` : ''}
                 </div>
             </div>
         </div>
@@ -540,6 +1036,8 @@ function buildCard(item) {
 
         ${targetHtml}
         ${dualTrackHtml}
+        ${v5BlockHtml}
+        ${redTeamBlockHtml}
         ${livePosHtml}
         ${condHtml}
         ${risksHtml}
@@ -687,7 +1185,8 @@ function renderCards(filter) {
             return;
         }
         // Ignore clicks on interactive footer buttons (FLASH / Add / View Report / delete-lot)
-        if (e.target.closest('button, a, input, select, textarea')) return;
+        // and disclosure widgets (<details>/<summary>) so they toggle without opening drill.
+        if (e.target.closest('button, a, input, select, textarea, summary, details')) return;
         // Card body → drill
         const card = e.target.closest('[data-history-ticker]');
         if (card) openHistoryDrill(card.dataset.historyTicker);
@@ -915,6 +1414,103 @@ async function loadWatchlist() {
 document.getElementById('refresh-btn').addEventListener('click', loadWatchlist);
 UI.boot('decisions', { translate: applyTranslations, reload: loadWatchlist });
 loadWatchlist();
+
+// ─── V1.74 Invest cmdbar (terminal-style quick-launch) ─────────────────
+const DC_RECENT_LS = 'dc_recent_invest_tickers';
+const DC_RECENT_MAX = 5;
+
+function dcGetRecent() {
+    try {
+        const raw = localStorage.getItem(DC_RECENT_LS) || '[]';
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr.filter(s => typeof s === 'string') : [];
+    } catch { return []; }
+}
+function dcSetRecent(list) {
+    localStorage.setItem(DC_RECENT_LS, JSON.stringify(list.slice(0, DC_RECENT_MAX)));
+}
+function dcPushRecent(ticker) {
+    const t = String(ticker || '').toUpperCase();
+    if (!t) return;
+    const cur = dcGetRecent().filter(x => x !== t);
+    cur.unshift(t);
+    dcSetRecent(cur);
+    dcRenderRecent();
+}
+function dcRenderRecent() {
+    const wrap = document.getElementById('dc-recent-chips-wrap');
+    const host = document.getElementById('dc-recent-chips');
+    if (!wrap || !host) return;
+    const list = dcGetRecent();
+    if (!list.length) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    host.innerHTML = list.map(t =>
+        `<span class="ea-recent-chip" data-dc-recent-ticker="${UI.escapeHTML(t)}">${UI.escapeHTML(t)}</span>`
+    ).join('');
+}
+function dcRefreshRiskHint() {
+    const valEl = document.getElementById('dc-risk-value');
+    if (valEl) valEl.textContent = (window.UI && window.UI.riskTolerance) || 'MEDIUM';
+}
+
+async function dcRunInvest(rawTicker) {
+    const ticker = String(rawTicker || '').trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, '');
+    const tr = window.i18n?.[UI.currentLang]?.decisions || {};
+    if (!ticker) {
+        UI.showToast?.(tr.cmdbar_empty || (UI.currentLang === 'zh' ? '請輸入 ticker' : 'Please enter a ticker'), 'error');
+        return;
+    }
+    const risk = (window.UI && window.UI.riskTolerance) || 'MEDIUM';
+    try {
+        const r = await fetch('/api/protocol-queue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: 'invest', ticker, risk_tolerance: risk })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (r.status === 202) {
+            dcPushRecent(ticker);
+            const tpl = tr.cmdbar_queued || (UI.currentLang === 'zh'
+                ? '已加入 invest 佇列：{ticker}（risk={risk}）'
+                : 'Queued invest analysis: {ticker} (risk={risk})');
+            UI.showToast?.(tpl.replace('{ticker}', ticker).replace('{risk}', risk), 'success');
+            // Clear input after successful enqueue
+            const input = document.getElementById('dc-ticker-input');
+            if (input) input.value = '';
+        } else if (r.status === 409) {
+            const tpl = tr.cmdbar_duplicate || (UI.currentLang === 'zh'
+                ? '{ticker} 已在佇列或執行中'
+                : '{ticker} already queued or running');
+            UI.showToast?.(tpl.replace('{ticker}', ticker), 'warn');
+        } else {
+            UI.showToast?.(`Failed: ${j.error || r.status}`, 'error');
+        }
+    } catch (e) {
+        UI.showToast?.(`Failed: ${e.message}`, 'error');
+    }
+}
+
+(function wireCmdbar() {
+    const input = document.getElementById('dc-ticker-input');
+    const btn   = document.getElementById('dc-run-btn');
+    if (!input || !btn) return;
+    btn.addEventListener('click', () => dcRunInvest(input.value));
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); dcRunInvest(input.value); }
+    });
+    input.addEventListener('focus', dcRefreshRiskHint);
+    window.addEventListener('focus', dcRefreshRiskHint);
+    // Recent chip click → re-run
+    const chips = document.getElementById('dc-recent-chips');
+    if (chips) {
+        chips.addEventListener('click', e => {
+            const c = e.target.closest('[data-dc-recent-ticker]');
+            if (c) dcRunInvest(c.dataset.dcRecentTicker);
+        });
+    }
+    dcRefreshRiskHint();
+    dcRenderRecent();
+})();
 
 // ── Position modal wiring ──────────────────────────────────────
 document.getElementById('add-position-btn').addEventListener('click', () => openPositionModal());

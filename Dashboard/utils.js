@@ -8,17 +8,26 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V1.71.3';
+  const VERSION = 'V2.13.0';
 
+  // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
-    { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板' },
-    { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心' },
-    { id: 'sector',    href: 'sector.html',    icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描' },
-    { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股' },
-    { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達' },
-    { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞' },
-    { id: 'earnings',  href: 'earnings.html',  icon: 'bar-chart-3',      i18n: 'nav_earnings',  zh: '財報分析' },
-    { id: 'calendar',  href: 'calendar.html',  icon: 'calendar-days',    i18n: 'nav_calendar',  zh: '決策日曆' },
+    { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板', group: 'market' },
+    { id: 'sector',    href: 'sector.html',    icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描',   group: 'market' },
+    { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞',   group: 'market' },
+
+    { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股',   group: 'stock' },
+    { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達',   group: 'stock' },
+    { id: 'earnings',  href: 'earnings.html',  icon: 'bar-chart-3',      i18n: 'nav_earnings',  zh: '財報分析',   group: 'stock' },
+
+    { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心',   group: 'portfolio' },
+    { id: 'calendar',  href: 'calendar.html',  icon: 'calendar-days',    i18n: 'nav_calendar',  zh: '決策日曆',   group: 'portfolio' },
+  ];
+
+  const NAV_GROUPS = [
+    { key: 'market',    zh: '市場',  en: 'MARKET',    icon: 'globe-2' },
+    { key: 'stock',     zh: '個股',  en: 'STOCK',     icon: 'target' },
+    { key: 'portfolio', zh: '組合',  en: 'PORTFOLIO', icon: 'briefcase' },
   ];
 
   window.UI = {
@@ -66,6 +75,12 @@
       document.querySelectorAll('[data-i18n^="nav_"]').forEach(el => {
         const key = el.getAttribute('data-i18n').replace('nav_', '');
         if (nav[key]) el.textContent = nav[key];
+      });
+      // V1.71.x — sidebar group section labels + brand subtitle (custom data attrs)
+      document.querySelectorAll('[data-nav-group], [data-nav-brand-sub]').forEach(el => {
+        el.textContent = UI.currentLang === 'zh'
+          ? (el.dataset.zh || el.textContent)
+          : (el.dataset.en || el.textContent);
       });
     },
 
@@ -376,43 +391,73 @@
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     },
 
-    // ── Sidebar Render ─────────────────────────────────────────────────────
+    // ── Sidebar Render (V1.71.x — grouped, polished active, compact footer) ─
     renderSidebar(activePage) {
       const aside = document.getElementById('sidebar');
       if (!aside) return;
+      const isZh = UI.currentLang === 'zh';
 
-      const navHTML = NAV_ITEMS.map(n => `
-        <a href="${n.href}" class="sidebar-item${n.id === activePage ? ' active' : ''} flex items-center gap-3 px-3 py-2 rounded-md transition-all">
-          <i data-lucide="${n.icon}" class="w-4 h-4"></i>
-          <span data-i18n="${n.i18n}">${n.zh}</span>
-        </a>`).join('');
+      // Build grouped nav HTML
+      const groupsHTML = NAV_GROUPS.map(g => {
+        const items = NAV_ITEMS.filter(n => n.group === g.key);
+        if (!items.length) return '';
+        const itemsHTML = items.map(n => `
+          <a href="${n.href}" class="sidebar-item${n.id === activePage ? ' active' : ''}">
+            <i data-lucide="${n.icon}" class="sidebar-item-icon w-4 h-4"></i>
+            <span data-i18n="${n.i18n}">${n.zh}</span>
+          </a>`).join('');
+        return `
+          <div class="sidebar-group">
+            <div class="sidebar-group-label" data-nav-group="${g.key}" data-zh="${g.zh}" data-en="${g.en}">${isZh ? g.zh : g.en}</div>
+            ${itemsHTML}
+          </div>`;
+      }).join('');
 
       aside.innerHTML = `
-        <div class="p-4 flex items-center justify-between gap-1">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shrink-0">
-              <i data-lucide="activity" class="text-black w-5 h-5"></i>
+        <!-- Header: brand + theme toggle (V1.71.x — AUGUR / 識微 brand) -->
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <div class="sidebar-brand-mark" aria-label="AUGUR logo" title="AUGUR · 識微">
+              <!-- Augur's-eye diamond / compass: rotated square + cross + concentric pupil -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-linejoin="round">
+                <!-- Outer diamond (rotated square) -->
+                <path d="M12 2.5 L21.5 12 L12 21.5 L2.5 12 Z" fill="#ecfdf5" stroke="#052e16" stroke-width="1.8"/>
+                <!-- Compass cross -->
+                <path d="M12 6 L12 18 M6 12 L18 12" stroke="#065f46" stroke-width="1.3" stroke-linecap="round"/>
+                <!-- Augur's eye (concentric pupil) -->
+                <circle cx="12" cy="12" r="2.6" fill="#065f46"/>
+                <circle cx="12" cy="12" r="1.05" fill="#fef3c7"/>
+              </svg>
             </div>
-            <h1 class="text-base font-black tracking-tighter uppercase italic line-clamp-1 pr-2">INTEL<span class="text-green-500">COMMAND</span></h1>
+            <div class="sidebar-brand-textwrap">
+              <h1 class="sidebar-brand-text">A<span class="sidebar-brand-accent">UGUR</span></h1>
+              <div class="sidebar-brand-sub" data-nav-brand-sub data-zh="識微 · AI 投資委員會" data-en="AI Investment Committee">${isZh ? '識微 · AI 投資委員會' : 'AI Investment Committee'}</div>
+            </div>
           </div>
-          <button id="theme-toggle" class="p-1.5 rounded-lg border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/50 transition-all group/theme">
-            <i data-lucide="moon" class="w-3.5 h-3.5 text-zinc-500 group-hover/theme:text-yellow-500 transition-colors" id="theme-icon"></i>
+          <button id="theme-toggle" class="sidebar-icon-btn" title="${isZh ? '切換主題' : 'Toggle theme'}">
+            <i data-lucide="moon" class="w-3.5 h-3.5" id="theme-icon"></i>
           </button>
         </div>
-        <nav class="flex-1 px-4 space-y-1">${navHTML}</nav>
-        <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
-          <button id="lang-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-xs font-bold text-zinc-400">
-            <span id="lang-text">English</span>
-            <i data-lucide="languages" class="w-3 h-3"></i>
+
+        <!-- Nav (grouped) -->
+        <nav class="sidebar-nav">${groupsHTML}</nav>
+
+        <!-- Footer: prominent risk pill + icon row + version -->
+        <div class="sidebar-footer">
+          <button id="risk-toggle" class="sidebar-risk" title="${isZh ? '點擊循環 LOW → MEDIUM → HIGH' : 'Click to cycle LOW → MEDIUM → HIGH'}">
+            <span class="sidebar-risk-label">${isZh ? '風險容忍' : 'RISK'}</span>
+            <span id="risk-chip" class="sidebar-risk-chip">${UI.riskTolerance}</span>
           </button>
-          <button id="show-logs" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
-            <span>System Logs</span><i data-lucide="terminal" class="w-3 h-3"></i>
-          </button>
-          <button id="risk-toggle" class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-[10px] font-bold uppercase tracking-tighter" title="Click to cycle LOW → MEDIUM → HIGH">
-            <span class="text-zinc-500" id="risk-label">Risk</span>
-            <span id="risk-chip" class="px-2 py-0.5 rounded text-[9px] font-black border">${UI.riskTolerance}</span>
-          </button>
-          <div class="pt-2 px-3 text-[8px] text-zinc-400 dark:text-zinc-700 font-mono tracking-widest border-t border-zinc-200 dark:border-zinc-900/50 mt-2">${VERSION}</div>
+          <div class="sidebar-icon-row">
+            <button id="lang-toggle" class="sidebar-icon-btn sidebar-icon-btn-wide" title="${isZh ? '切換語言' : 'Toggle language'}">
+              <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+              <span id="lang-text" class="text-[10px] font-bold">English</span>
+            </button>
+            <button id="show-logs" class="sidebar-icon-btn" title="${isZh ? '系統日誌' : 'System logs'}">
+              <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div class="sidebar-version">${VERSION}</div>
         </div>`;
 
       // Wire sidebar buttons immediately after DOM insertion
@@ -421,7 +466,7 @@
       document.getElementById('show-logs')?.addEventListener('click',    () =>
         document.getElementById('debug-console')?.classList.toggle('hidden'));
       document.getElementById('risk-toggle')?.addEventListener('click',  () => UI.cycleRiskTolerance());
-      UI._paintRiskChip();  // initial colors
+      UI._paintRiskChip();
     },
 
     // ── Risk Tolerance (sent with every invest protocol invocation) ──────
@@ -442,11 +487,7 @@
       if (!chip) return;
       const v = UI.riskTolerance;
       chip.textContent = v;
-      chip.className = 'px-2 py-0.5 rounded text-[9px] font-black border';
-      const color = v === 'LOW'    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : v === 'MEDIUM' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
-                                    /* HIGH */ : 'bg-red-500/10 border-red-500/30 text-red-400';
-      chip.className += ' ' + color;
+      chip.className = 'sidebar-risk-chip risk-' + v.toLowerCase();
     },
 
     // ── Page Boot ──────────────────────────────────────────────────────────
@@ -567,6 +608,8 @@
         const suffix = s.status === 'done' ? `completed in ${timeStr}` : (s.error || s.status);
         UI.logToUI(`protocol ${s.name} [${s.job_id}] — ${suffix}`, type);
         localStorage.setItem(PROTO_SEEN_JOB, thisJob);
+        // Force DataStore refresh so earnings/sector cards reflect new cache immediately
+        if (s.status === 'done') setTimeout(() => window.DataStore?.refresh(), 3000);
       } else if (s.status === 'running' && thisJob !== seenJob) {
         // Log start once
         UI.logToUI(`protocol ${s.name} started [${s.job_id}]`, 'info');
@@ -576,6 +619,96 @@
   }
   setInterval(pollProtocolStateMonitor, 3000);
   setTimeout(pollProtocolStateMonitor, 1500);
+
+  // ── V2.7.16 — Global protocol status pill (cross-page persistent indicator) ──
+  // Floating bottom-right pill that surfaces current running protocol + queue
+  // count on every page so user doesn't lose visibility after navigating away
+  // from earnings.html or wherever they queued the job.
+  function ensureProtoPill() {
+    let pill = document.getElementById('proto-status-pill');
+    if (pill) return pill;
+    pill = document.createElement('div');
+    pill.id = 'proto-status-pill';
+    pill.className = 'proto-status-pill hidden';
+    pill.innerHTML = `
+      <div class="proto-pill-main">
+        <span class="proto-pill-icon">🔄</span>
+        <div class="proto-pill-text">
+          <div class="proto-pill-label" id="proto-pill-label">—</div>
+          <div class="proto-pill-meta" id="proto-pill-meta">—</div>
+        </div>
+        <button class="proto-pill-toggle" id="proto-pill-toggle" title="展開詳情">
+          <i data-lucide="chevron-up" class="w-3 h-3"></i>
+        </button>
+      </div>
+      <div class="proto-pill-detail hidden" id="proto-pill-detail"></div>`;
+    document.body.appendChild(pill);
+    pill.querySelector('#proto-pill-toggle').addEventListener('click', () => {
+      const det = pill.querySelector('#proto-pill-detail');
+      det.classList.toggle('hidden');
+      const ic = pill.querySelector('#proto-pill-toggle i');
+      if (ic) ic.setAttribute('data-lucide', det.classList.contains('hidden') ? 'chevron-up' : 'chevron-down');
+      if (window.lucide) lucide.createIcons();
+    });
+    return pill;
+  }
+
+  function fmtElapsed(sec) {
+    if (sec == null) return '—';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    if (m === 0) return `${s}s`;
+    return `${m}m ${String(s).padStart(2, '0')}s`;
+  }
+
+  async function pollProtoPill() {
+    try {
+      const r = await fetch('/api/protocol-queue', { cache: 'no-store' });
+      if (!r.ok) return;
+      const state = await r.json();
+      const pill = ensureProtoPill();
+      const active = state.active;
+      const queue = state.queue || [];
+      const lbl = pill.querySelector('#proto-pill-label');
+      const meta = pill.querySelector('#proto-pill-meta');
+      const det = pill.querySelector('#proto-pill-detail');
+
+      if (!active && queue.length === 0) {
+        pill.classList.add('hidden');
+        pill.classList.remove('proto-pill-running');
+        return;
+      }
+      pill.classList.remove('hidden');
+
+      if (active) {
+        const name = active.name || '?';
+        const ticker = active.ticker || active.label || '';
+        lbl.innerHTML = ticker
+          ? `<strong>${name}</strong> · <span class="proto-pill-ticker">${ticker}</span>`
+          : `<strong>${name}</strong>`;
+        meta.textContent = `running · ${fmtElapsed(active.elapsed_sec)}` +
+                           (queue.length ? ` · queue +${queue.length}` : '');
+        pill.classList.add('proto-pill-running');
+      } else {
+        lbl.innerHTML = `<strong>queue</strong>`;
+        meta.textContent = `${queue.length} pending`;
+        pill.classList.remove('proto-pill-running');
+      }
+
+      // Detail panel: list active log_tail (truncated) + pending queue items
+      const lines = [];
+      if (active) {
+        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">▶</span><span><strong>${active.name}</strong>${active.ticker ? ' · ' + active.ticker : ''} · ${fmtElapsed(active.elapsed_sec)}</span></div>`);
+      }
+      for (const q of queue.slice(0, 5)) {
+        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">⏳</span><span><strong>${q.name || '?'}</strong>${q.params?.ticker ? ' · ' + q.params.ticker : ''}</span></div>`);
+      }
+      if (queue.length > 5) lines.push(`<div class="proto-pill-row proto-pill-row-more">+${queue.length - 5} more</div>`);
+      det.innerHTML = lines.join('');
+    } catch { /* silent */ }
+  }
+  setInterval(pollProtoPill, 5000);
+  setTimeout(pollProtoPill, 1200);
 
 })();
 
@@ -840,6 +973,191 @@
           hint: 'Reference: 5-year median ~16-18, >30 typical of crash periods, >40 = extreme panic',
         },
       },
+      // ── Warning flag tooltips (V1.72.8 — for sector page risk-flag-cards) ──
+      bearish_signal: {
+        zh: {
+          title: '空頭信號啟動 · CRITICAL',
+          desc:  '系統內建的空頭觸發子系統偵測到風險訊號(可能是 distribution day 累積、領導股 breakdown、或多重技術破位疊加)。注意:這個訊號跟廣度分數 Breadth 是**獨立計算**,Breadth 健康時也可能觸發。',
+          stages: [],
+          hint: '應對:降低新建倉、收緊既有部位停損、保留現金等更明確的市場底部訊號(FTD)。',
+        },
+        en: {
+          title: 'Bearish Signal Active · CRITICAL',
+          desc:  'Internal bearish trigger subsystem detected risk signals (e.g. distribution day count, leadership breakdown, multi-indicator breaks). Note: this signal is **computed independently** from the Breadth score — can fire even when Breadth looks healthy.',
+          stages: [],
+          hint: 'Action: cut new entries, tighten stops, hold cash and wait for a confirmed bottom signal (FTD).',
+        },
+      },
+      low_historical_percentile: {
+        zh: {
+          title: '歷史低百分位 · WARNING',
+          desc:  '當前廣度分數在過去 5 年的分布中處於低位(<30 percentile)。提供「歷史相對位置」這個獨立 dimension(不同於當下 breadth 絕對分數)。歷史低點通常會接著震盪 + 反彈,但也可能是更大跌段的中繼。',
+          stages: [],
+          hint: '參考:歷史低分後 60 天內,約 75% 機率出現反彈,但反轉訊號要靠 FTD 才確認。',
+        },
+        en: {
+          title: 'Low Historical Percentile · WARNING',
+          desc:  'Current breadth score sits in the bottom 30 percentile of its 5-year distribution. Adds a "historical relative position" dimension separate from the absolute Breadth score. Historic lows usually precede chop + bounce, but can also be a midpoint in larger declines.',
+          stages: [],
+          hint: 'Reference: ~75% of historical lows see a bounce within 60 days, but actual reversal needs FTD confirmation.',
+        },
+      },
+      divergence: {
+        zh: {
+          title: '早期背離警告 · WARNING',
+          desc:  '價格在創新高(或維持高位),但廣度 / 動能等內部指標已在下滑 — 「指數在飛、底下個股已倒一片」的典型 distribution 前兆。並非馬上要崩,但領先指標已轉弱。',
+          stages: [],
+          hint: '應對:選股提高 RS 門檻、避開 stage 3 標的、降低槓桿曝險。',
+        },
+        en: {
+          title: 'Early Warning Divergence · WARNING',
+          desc:  'Price makes (or holds) new highs while internal breadth/momentum indicators slope down — the classic "index flies while stocks die underneath" distribution precursor. Not an imminent crash signal, but leading indicators have rolled over.',
+          stages: [],
+          hint: 'Action: raise RS bar on entries, avoid stage-3 names, reduce leverage exposure.',
+        },
+      },
+      // ── V2.7.16 — Earnings detail trend chart tips ─────────────────
+      ed_chart_revenue_ni: {
+        zh: {
+          title: '營收 · 淨利 · 5 季趨勢',
+          desc:  '**Revenue（營收）**：當季總賣多少。**Net Income（淨利）**：扣完所有費用 + 稅後最終賺多少。看雙條趨勢能判斷「規模是否擴張 + 利潤同步增長」。健康公司兩條同向上、距離保持；若 Revenue 上但 Net Income 下 → 成本失控（毛利侵蝕、SG&A 暴增、稅務 / 一次性費用）。',
+          stages: [],
+          hint: '看點：兩條斜率是否一致 / Net Income / Revenue 比率（即 net margin）是否擴張。Apple 通常 Net Income 約 25-27% Revenue。',
+        },
+        en: {
+          title: 'Revenue · Net Income · 5Q Trend',
+          desc:  '**Revenue**: total quarterly sales. **Net Income**: profit after all costs and taxes. Both trending up + spread holding = scaling cleanly. If Revenue rises but Net Income falls → costs running away (margin compression, SG&A spike, one-time charges).',
+          stages: [],
+          hint: 'Watch: slope alignment + Net/Revenue ratio (net margin) trend. Apple typically nets ~25-27%.',
+        },
+      },
+      ed_chart_eps: {
+        zh: {
+          title: 'EPS · 5 季趨勢',
+          desc:  '**Earnings Per Share（每股盈餘）** = Net Income ÷ 流通股數。是「股東實際分到的單位獲利」，市場最看的就是這條。EPS 趨勢上揚 + buyback 縮股本（分母縮小）= 雙重利多。EPS 跳水但 Net Income 沒跳 → 可能是新股增發稀釋。EPS 比 Net Income 還重要因為它直接綁估值（PE = Price / EPS）。',
+          stages: [],
+          hint: '財報日 surprise 比預期多 1-2% 都可能漲，比預期少甚至持平就跌。看點：YoY EPS 增速、是否符合 forward PE 暗示成長率。',
+        },
+        en: {
+          title: 'EPS · 5Q Trend',
+          desc:  '**Earnings Per Share** = Net Income ÷ shares outstanding. The "per-shareholder profit" — what the market actually prices. EPS up + buybacks shrinking share count = double tailwind. EPS dropping while Net Income flat → likely share dilution. EPS matters more than Net Income because valuation directly anchors to it (PE = Price / EPS).',
+          stages: [],
+          hint: 'On report day, beating estimates by 1-2% can pump; meeting or missing typically drops. Watch YoY EPS growth vs forward PE-implied growth.',
+        },
+      },
+      ed_chart_cashflow: {
+        zh: {
+          title: 'OCF · FCF · 5 季趨勢',
+          desc:  '**OCF（Operating Cash Flow，營業現金流）**：本業實際收進來的現金。比 Net Income 真，因為排除非現金科目（折舊、應收灌水）。\n\n**FCF（Free Cash Flow，自由現金流）** = OCF − CapEx（資本支出）。「股東可自由運用」的現金，用來算 buyback / dividend / 還債 / DCF 估值。\n\nFCF 強且穩 = 公司有護城河、護城河賺錢、且不需要狂砸錢維持。FCF 為負 = 燒錢成長期或結構問題。',
+          stages: [],
+          hint: 'OCF 和 Net Income 差很多時要警覺（盈餘品質問題）。FCF / Revenue 比率叫 FCF margin，30%+ 屬軟體業，10-20% 為健康製造業。',
+        },
+        en: {
+          title: 'OCF · FCF · 5Q Trend',
+          desc:  '**OCF (Operating Cash Flow)**: actual cash from core business. More truthful than Net Income — excludes non-cash items (depreciation, AR inflation).\n\n**FCF (Free Cash Flow)** = OCF − CapEx. The "shareholder-free" cash used for buybacks / dividends / debt paydown / DCF valuation.\n\nStrong stable FCF = real moat with cash conversion. Negative FCF = growth-stage burn or structural problem.',
+          stages: [],
+          hint: 'Big OCF vs Net Income gap = earnings quality red flag. FCF / Revenue (FCF margin) ≥30% = software-class, 10-20% healthy industrials.',
+        },
+      },
+      ed_chart_margins: {
+        zh: {
+          title: '毛利率 · 營業利益率 · 5 季趨勢',
+          desc:  '**Gross Margin（毛利率，GM）** = (Revenue − COGS) / Revenue。產品本身賺不賺。NVDA 75%+ 屬軟體級護城河，傳產 20-30%。\n\n**Operating Margin（營業利益率，OM）** = Operating Income / Revenue。扣完 R&D + SG&A 後的營運效率。同業比 OM 比 GM 直接，因為 OM 反映「整家公司」的執行力。\n\n趨勢看點：GM 突然下滑 → 成本端出問題（COGS 漲、產品 mix 惡化、降價競爭）；GM 穩但 OM 下滑 → R&D / SG&A 暴增（可能擴張中或浪費）。',
+          stages: [],
+          hint: 'Apple GM 約 45-49%、OM 約 30-32%。Margin 連 2 季下滑是早期警訊；連 3 季 = 結構性問題。',
+        },
+        en: {
+          title: 'Gross · Operating Margin · 5Q Trend',
+          desc:  '**Gross Margin (GM)** = (Revenue − COGS) / Revenue. Product-level profitability. NVDA 75%+ = software-class moat, industrials 20-30%.\n\n**Operating Margin (OM)** = Operating Income / Revenue. After R&D + SG&A — full-company execution. OM is more direct than GM for peer comparison.\n\nGM dropping → cost-side problem (COGS up, mix worse, price competition). GM stable but OM dropping → R&D / SG&A spiking (expansion or waste).',
+          stages: [],
+          hint: 'Apple GM ~45-49%, OM ~30-32%. Two consecutive quarters of margin decline = early warning; three = structural.',
+        },
+      },
+      ed_chart_segment_growth: {
+        zh: {
+          title: '分部 YoY 成長 · 哪個業務在拉車',
+          desc:  '把當季營收按產品線 / 業務分部拆開，看每塊的同期年增率（YoY %）。例如 Apple：iPhone +21.7%、Services +16.3%、Mac +5.7%。\n\n用法：找出**主成長引擎**（哪塊 +20%+）vs **拖累項**（哪塊負成長）。新引擎冒出 = 估值重估理由；舊主力萎縮 = 結構性風險。\n\n資料來自 transcript（CFO 段）LLM 抽，比 FMP 結構化資料多了 Q-level 細粒度。',
+          stages: [],
+          hint: '單季數字波動大，要看 2-3 季趨勢才確認；單一業務 +50% 也可能是 base 效應。',
+        },
+        en: {
+          title: 'Segment YoY Growth · Who\'s pulling the wagon',
+          desc:  'Quarterly revenue split by product line / segment with YoY %. E.g. Apple: iPhone +21.7%, Services +16.3%, Mac +5.7%.\n\nUsage: identify **growth engines** (which segments +20%+) vs **drags** (negative). New engines emerging = re-rating thesis; legacy core shrinking = structural risk.\n\nData extracted from transcript CFO commentary by LLM — finer-grained than FMP structured data.',
+          stages: [],
+          hint: 'Single quarter is noisy — confirm with 2-3 quarter trend. +50% in one segment may just be base effect.',
+        },
+      },
+      // ── V2.8.4 — Earnings card 4-component score bar tips ───────────
+      ed_score_quality: {
+        zh: {
+          title: 'QUALITY · 體質分數 (0-30)',
+          desc:  '衡量公司**財報體質乾淨度**。看 4 大項：\n\n**1. Margin 趨勢**：毛利率 / 營業利益率 8Q 是否穩定或下滑\n**2. Accruals**：應計項佔資產比，過高 = 盈餘灌水嫌疑\n**3. Cash Conversion**：OCF / Net Income，偏低 = 帳面獲利沒變現金\n**4. Altman-Z**：破產風險指標，>3 安全 / <1.8 危險\n\n滿分 30 = 全部 4 項 clean。低於 20 = 至少 1 項紅燈，要看 quality_flags 條目。',
+          stages: [],
+          hint: 'Quality 與 Growth 同時高分 = 罕見的「乾淨成長股」。Quality 高 + Growth 低 = 成熟現金牛。',
+        },
+        en: {
+          title: 'QUALITY · Financial Hygiene (0-30)',
+          desc:  'Measures **how clean the financials are**. 4 sub-components:\n\n**1. Margin Trend**: 8Q gross/op margin stability or compression\n**2. Accruals**: accrual ratio (asset-scaled); high = earnings inflation suspect\n**3. Cash Conversion**: OCF / Net Income; low = paper profits not converting to cash\n**4. Altman-Z**: bankruptcy risk; >3 safe / <1.8 distress\n\nFull 30 = all 4 clean. Below 20 = ≥1 red flag, check quality_flags chips.',
+          stages: [],
+          hint: 'High Quality + High Growth = rare clean compounder. High Quality + low Growth = mature cash cow.',
+        },
+      },
+      ed_score_growth: {
+        zh: {
+          title: 'GROWTH · 成長分數 (0-30)',
+          desc:  '衡量**多軸成長動能**：\n\n**1. YoY Revenue 成長**：當季 vs 去年同季營收增幅\n**2. YoY EPS 成長**：每股盈餘年增率\n**3. Segment / Geo 成長**：transcript 抽出的分部 / 地理 YoY%（哪塊在拉、哪塊在拖）\n**4. 加速度**：QoQ 成長是否在加速 (re-rating signal) 還是減速 (saturation)\n\n滿分 30 = 多軸都 +20%+。20-25 = 健康成長。<15 = 成長疲軟或衰退。',
+          stages: [],
+          hint: 'Growth 30 + Quality 25+ = 黃金組合（NVDA、LLY 等型）。Growth 30 + Quality <15 = 成長代價高（燒錢、accrual 灌水）。',
+        },
+        en: {
+          title: 'GROWTH · Growth Momentum (0-30)',
+          desc:  'Multi-axis growth scoring:\n\n**1. YoY Revenue**: current quarter vs same quarter last year\n**2. YoY EPS**: earnings per share growth\n**3. Segment / Geographic Growth**: transcript-extracted segment & region YoY% (what\'s pulling vs dragging)\n**4. Acceleration**: QoQ growth — accelerating (re-rating) vs decelerating (saturation)\n\nFull 30 = all axes +20%+. 20-25 = healthy. <15 = stalling or shrinking.',
+          stages: [],
+          hint: 'Growth 30 + Quality 25+ = compounder gold (NVDA, LLY style). Growth 30 + Quality <15 = growth at a cost (cash burn, accrual inflation).',
+        },
+      },
+      ed_score_value: {
+        zh: {
+          title: 'VALUE · 估值分數 (0-25)',
+          desc:  '衡量**目前股價相對基本面便宜或貴**：\n\n**1. PE Ratio**：目前股價 / EPS，越低越便宜\n**2. PB Ratio**：股價 / 帳面價值\n**3. DCF Fair Value**：現金流折現算合理價，目前股價 vs 合理價差距\n**4. FCF Yield**：FCF / Market Cap，越高代表單位市值產生越多現金\n\n滿分 25 = 多指標顯示便宜（很少見，通常市場有原因）。15-20 = 合理估值。<10 = 估值偏貴 / 已 priced in 成長。',
+          stages: [],
+          hint: '高成長股 Value 通常 5-15（市場已 priced in）。傳產 / 金融常 20-25。VALUE 高 ≠ 便宜貨機會，要配 Quality / Growth 看是否 value trap。',
+        },
+        en: {
+          title: 'VALUE · Valuation Score (0-25)',
+          desc:  'Measures **how cheap or expensive the current price is vs fundamentals**:\n\n**1. PE Ratio**: price / EPS — lower = cheaper\n**2. PB Ratio**: price / book value\n**3. DCF Fair Value**: discounted cash flow vs current price gap\n**4. FCF Yield**: FCF / Market Cap — higher = more cash per market cap dollar\n\nFull 25 = multi-indicator cheap (rare, usually for a reason). 15-20 = fair. <10 = expensive / growth priced in.',
+          stages: [],
+          hint: 'High-growth names usually score 5-15 on Value (priced in). Industrials / financials often 20-25. High Value alone ≠ buy — must pair with Quality/Growth or risk value trap.',
+        },
+      },
+      ed_score_analyst: {
+        zh: {
+          title: 'ANALYST · 分析師共識 (0-15)',
+          desc:  '衡量**Wall Street 對此股的信心**：\n\n**1. Consensus PT**：分析師目標價 vs 現價的隱含 upside%\n**2. Rating Distribution**：strong buy / buy / hold / sell 比例\n**3. Recent Surprise**：最近 4 季 EPS 是否 beat estimate\n**4. PT Revisions**：最近 30 天目標價上調 vs 下調家數\n\n滿分 15 = 分析師強烈看多 + 連續 beat + 目標價持續上調。中位數 8-12。<5 = 分析師偏空或下調潮。',
+          stages: [],
+          hint: '分析師滿分要小心 — 通常代表已是 consensus long，邊際 surprise 空間小。Analyst 低 + Quality/Growth 高 = contrarian opportunity。',
+        },
+        en: {
+          title: 'ANALYST · Wall Street Consensus (0-15)',
+          desc:  'Measures **how bullish analysts are**:\n\n**1. Consensus Price Target**: implied upside % vs current price\n**2. Rating Distribution**: strong buy / buy / hold / sell mix\n**3. Recent Surprise**: last 4 quarters EPS beat rate\n**4. PT Revisions**: 30-day upgrade vs downgrade count\n\nFull 15 = analysts strongly bullish + serial beats + PT trending up. Median 8-12. <5 = bearish or downgrade wave.',
+          stages: [],
+          hint: 'Max Analyst score = caution: already consensus long, marginal surprise room limited. Low Analyst + high Quality/Growth = contrarian setup.',
+        },
+      },
+      ed_chart_geo_growth: {
+        zh: {
+          title: '地理 YoY 成長 · 哪個地區在貢獻',
+          desc:  '把當季營收按地理區域拆開（USA / EU / Greater China / Japan / APAC），看每地區同期年增率。\n\n用法：偵測**地緣 / 匯率 / 區域消費風險**。中國 -20% + 美國 +10% = 中國市場萎縮（policy / consumer），不是全公司有問題。對 AAPL 特別重要：iPhone 在 Greater China 變化幅度通常領先全球。\n\n注意：FMP 只給 FY 年度資料，Q-level 須從 transcript 抽（Apple CFO 段通常會講「Greater China revenue down 8%」這種數字）。',
+          stages: [],
+          hint: '地理 YoY 缺值 = 該季 transcript 沒講具體數字（Apple CFO 偶爾不講）。對中國市場敏感的公司（消費電子、汽車、奢侈品）這條最關鍵。',
+        },
+        en: {
+          title: 'Geography YoY Growth · Where is the demand',
+          desc:  'Quarterly revenue split by region (USA / EU / Greater China / Japan / APAC) with YoY %.\n\nUsage: detect **geopolitical / FX / regional demand risk**. China −20% + US +10% = China softness (policy / consumer), not company-wide problem. Especially key for AAPL: iPhone Greater China leads global.\n\nNote: FMP only provides FY annual; Q-level pulled from transcript (Apple CFO usually states "Greater China revenue down 8%").',
+          stages: [],
+          hint: 'Missing YoY = transcript didn\'t state explicit numbers that quarter (Apple CFO sometimes omits). Most critical for China-sensitive names (consumer electronics, autos, luxury).',
+        },
+      },
     };
 
     function classifyStage(stages, daysSince) {
@@ -1027,9 +1345,25 @@
       return { liveHTML, stage };
     }
 
+    // V1.72.8 — Warning flag live builders (read data-flag-metric, single-line banner)
+    function _flagMetricLive(emoji) {
+        return function(el, t, lang) {
+            const metric = el.dataset.flagMetric || '';
+            if (!metric) return { liveHTML: noActiveHTML(t), stage: null };
+            const liveHTML = `<div class="stt-live">
+                <span class="stt-live-dot">⚠</span>
+                <span>${emoji} ${metric}</span>
+            </div>`;
+            return { liveHTML, stage: null };
+        };
+    }
+
     const LIVE_BUILDERS = {
       ftd: ftdLive, breadth: breadthLive, market_top: marketTopLive, synth: synthLive,
       regime: regimeLive, exposure: exposureLive, fg: fgLive, cycle: cycleLive, vix: vixLive,
+      bearish_signal:            _flagMetricLive('🚨'),
+      low_historical_percentile: _flagMetricLive('📊'),
+      divergence:                _flagMetricLive('↘'),
     };
 
     function buildSignalTipHTML(el, lang) {

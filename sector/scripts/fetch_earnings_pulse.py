@@ -1,23 +1,7 @@
-"""
-Sector Earnings Pulse Fetcher (V1.4 P2 hard-required)
+"""Sector earnings pulse (V1.4 P2 hard-required).
 
-Aggregates last-30d EPS beat/miss + surprise across mega-cap members of each sector
-via FMP /stable/earnings-calendar. Writes per-sector pulse to:
-  sector/cache/sector_earnings_pulse_<DATE>.json
-
-Hard fail (sys.exit(1)) on FMP error per V1.4 protocol.
-
-Note: V1.4 P2 ships with `beat_rate_30d` + `surprise_score_avg` only.
-`analyst_revision_net` deferred (per-ticker historical-grades cost too high
-on free FMP tier). Future work: integrate `mcp__fmp__analyst grades-summary`
-batch when paid plan / cache layer added.
-
-Universe: hardcoded mega-cap members per project sector (covers SPDR sector ETF
-top holdings; ~75 tickers total). Other sectors' tickers in the 30d window are
-ignored — small-cap noise would distort the beat rate.
-
-Usage:
-    python3 sector/scripts/fetch_earnings_pulse.py [--date YYYY-MM-DD] [--lookback-days 30]
+Output: sector/cache/sector_earnings_pulse_<DATE>.json. Hard-fails on FMP error.
+詳見 sector/scripts/README.md。
 """
 from __future__ import annotations
 
@@ -25,82 +9,28 @@ import argparse
 import json
 import os
 import sys
-import time
-from datetime import date, datetime, timedelta
-from statistics import mean
+from datetime import date
+from statistics import mean, median
 
-import requests
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CACHE_DIR = os.path.join(BASE_DIR, "sector", "cache")
-os.makedirs(CACHE_DIR, exist_ok=True)
-
-FMP_BASE = "https://financialmodelingprep.com"
-
-# Mega-cap universe per project sector (SPDR ETF top-10ish + obvious peers).
-# Designed to capture earnings sentiment for the sector without small-cap noise.
-SECTOR_UNIVERSE = {
-    "Technology":             ["AAPL", "MSFT", "NVDA", "AVGO", "ORCL", "CRM", "ADBE",
-                                "AMD", "INTC", "CSCO", "IBM", "QCOM", "TXN", "NOW", "INTU", "AMAT"],
-    "Healthcare":             ["LLY", "UNH", "JNJ", "ABBV", "MRK", "TMO", "ABT", "PFE",
-                                "DHR", "BMY", "AMGN", "ELV", "GILD"],
-    "Energy":                 ["XOM", "CVX", "COP", "EOG", "SLB", "OXY", "PXD", "PSX",
-                                "MPC", "VLO", "KMI", "WMB"],
-    "Financials":             ["BRK-B", "JPM", "BAC", "WFC", "GS", "MS", "C", "BLK",
-                                "SCHW", "AXP", "SPGI", "PGR", "CB"],
-    "Consumer_Discretionary": ["AMZN", "TSLA", "HD", "MCD", "NKE", "LOW", "TJX", "SBUX",
-                                "BKNG", "CMG", "F", "GM"],
-    "Consumer_Staples":       ["PG", "COST", "KO", "PEP", "WMT", "PM", "MO", "MDLZ",
-                                "CL", "KMB", "GIS", "TGT"],
-    "Industrials":            ["GE", "CAT", "RTX", "HON", "UNP", "BA", "LMT", "DE",
-                                "UPS", "ETN", "ADP", "MMM"],
-    "Materials":              ["LIN", "SHW", "FCX", "APD", "ECL", "NEM", "DOW", "DD",
-                                "NUE", "PPG"],
-    "Utilities":              ["NEE", "SO", "DUK", "AEP", "SRE", "D", "EXC", "XEL",
-                                "PCG", "WEC"],
-    "Real_Estate":            ["PLD", "AMT", "EQIX", "WELL", "CCI", "PSA", "SPG", "O",
-                                "DLR", "EXR"],
-    "Communication":          ["GOOGL", "GOOG", "META", "NFLX", "DIS", "CMCSA", "TMUS",
-                                "VZ", "T", "CHTR", "WBD"],
-}
-
-# Build reverse lookup ticker → sector
-TICKER_TO_SECTOR: dict = {}
-for sec, syms in SECTOR_UNIVERSE.items():
-    for s in syms:
-        TICKER_TO_SECTOR[s] = sec
-
-
-def _fmp_get(path: str, params: dict, *, retries: int = 2, timeout: int = 20):
-    api_key = os.environ.get("FMP_API_KEY")
-    if not api_key:
-        sys.exit("[ERROR] FMP_API_KEY not set — earnings pulse cannot be computed.")
-    url = f"{FMP_BASE}{path}"
-    full = {**params, "apikey": api_key}
-    last_exc = None
-    for attempt in range(retries + 1):
-        try:
-            r = requests.get(url, params=full, timeout=timeout)
-            if r.status_code == 429:
-                time.sleep(2 ** attempt)
-                continue
-            r.raise_for_status()
-            return r.json()
-        except Exception as e:
-            last_exc = e
-            time.sleep(0.5)
-    sys.exit(f"[ERROR] FMP {path} failed after {retries+1} tries: {last_exc}")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from sector.lib.date_utils import lookback_window  # noqa: E402
+from sector.lib.fmp_client import (  # noqa: E402
+    SECTOR_TOP_5,
+    SECTOR_UNIVERSE,
+    TICKER_TO_SECTOR,
+    cache_path,
+    fmp_get,
+)
 
 
 def fetch_earnings_window(from_d: str, to_d: str) -> list:
-    rows = _fmp_get("/stable/earnings-calendar", {"from": from_d, "to": to_d})
+    rows = fmp_get("/stable/earnings-calendar", {"from": from_d, "to": to_d})
     if not isinstance(rows, list):
         sys.exit(f"[ERROR] FMP earnings-calendar non-list response for {from_d}..{to_d}")
     return rows
 
 
 def aggregate_pulse(rows: list) -> dict:
-    """Return {sector: {beat_rate_30d, surprise_score_avg, report_count, beats, misses, in_line}}."""
     by_sector: dict = {sec: {"beats": 0, "misses": 0, "in_line": 0, "surprises": []}
                        for sec in SECTOR_UNIVERSE}
 
@@ -119,7 +49,7 @@ def aggregate_pulse(rows: list) -> dict:
         except (TypeError, ValueError):
             continue
         if est == 0:
-            continue  # cannot compute surprise%
+            continue
 
         surprise_pct = (actual - est) / abs(est)
         by_sector[sec]["surprises"].append(surprise_pct)
@@ -148,9 +78,95 @@ def aggregate_pulse(rows: list) -> dict:
             "beats":              beats,
             "misses":             misses,
             "in_line":            in_line,
-            "beat_rate_30d":      beat_rate,        # beats / (beats + misses)
-            "surprise_score_avg": surprise_avg,     # mean of (actual - est)/|est|
-            "analyst_revision_net": None,           # V1.4 P2.5 future work
+            "beat_rate_30d":      beat_rate,
+            "surprise_score_avg": surprise_avg,
+            "analyst_revision_net":         None,
+            "analyst_pt_upside_median_pct": None,
+            "pt_sample_size":               0,
+        }
+    return out
+
+
+def fetch_grades_consensus_for_sectors() -> dict:
+    """Best-effort net analyst rating per sector via /stable/grades-consensus on
+    SECTOR_TOP_5. Returns {sector: net_int | None}. Soft-fail per ticker."""
+    out: dict = {}
+    for sec, syms in SECTOR_TOP_5.items():
+        net = 0
+        seen = 0
+        for sym in syms:
+            rows = fmp_get(
+                "/stable/grades-consensus",
+                {"symbol": sym},
+                hard_fail=False,
+                timeout=10,
+            )
+            if not isinstance(rows, list) or not rows:
+                continue
+            row = rows[0]
+            try:
+                sb = int(row.get("strongBuy") or 0)
+                bu = int(row.get("buy") or 0)
+                sl = int(row.get("sell") or 0)
+                ss = int(row.get("strongSell") or 0)
+            except (TypeError, ValueError):
+                continue
+            net += (sb + bu) - (sl + ss)
+            seen += 1
+        out[sec] = net if seen > 0 else None
+    return out
+
+
+def fetch_pt_upside_for_sectors() -> dict:
+    """Per-sector median analyst PT upside vs current price across SECTOR_TOP_5.
+
+    Returns: {sector: {"median_upside_pct": float | None, "sample_size": int}}.
+    Soft-fail per ticker. Single batch call gets all 55 prices.
+    """
+    all_syms = sorted({s for syms in SECTOR_TOP_5.values() for s in syms})
+    quotes = fmp_get(
+        "/stable/batch-quote-short",
+        {"symbols": ",".join(all_syms)},
+        hard_fail=False,
+        timeout=15,
+    )
+    price_by_sym: dict = {}
+    if isinstance(quotes, list):
+        for q in quotes:
+            sym = q.get("symbol")
+            try:
+                p = float(q.get("price"))
+            except (TypeError, ValueError):
+                continue
+            if sym and p > 0:
+                price_by_sym[sym] = p
+
+    out: dict = {}
+    for sec, syms in SECTOR_TOP_5.items():
+        upsides: list[float] = []
+        for sym in syms:
+            current = price_by_sym.get(sym)
+            if current is None:
+                continue
+            rows = fmp_get(
+                "/stable/price-target-consensus",
+                {"symbol": sym},
+                hard_fail=False,
+                timeout=10,
+            )
+            if not isinstance(rows, list) or not rows:
+                continue
+            target = rows[0].get("targetMedian")
+            try:
+                target = float(target) if target is not None else None
+            except (TypeError, ValueError):
+                target = None
+            if not target or target <= 0:
+                continue
+            upsides.append((target - current) / current)
+        out[sec] = {
+            "median_upside_pct": round(median(upsides), 4) if upsides else None,
+            "sample_size":      len(upsides),
         }
     return out
 
@@ -159,16 +175,36 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=date.today().isoformat())
     ap.add_argument("--lookback-days", type=int, default=30)
+    ap.add_argument("--skip-analyst", action="store_true",
+                    help="Skip analyst grades-consensus + price-target-consensus passes (saves ~111 calls)")
+    ap.add_argument("--skip-grades", action="store_true",
+                    help="Alias for --skip-analyst (deprecated)")
     args = ap.parse_args()
 
+    skip_analyst = args.skip_analyst or args.skip_grades
+
     as_of = args.date
-    from_d = (datetime.strptime(as_of, "%Y-%m-%d").date() - timedelta(days=args.lookback_days)).isoformat()
+    from_d, _ = lookback_window(as_of, args.lookback_days)
 
     print(f"[fetch_earnings_pulse] window={from_d}..{as_of}", file=sys.stderr)
     rows = fetch_earnings_window(from_d, as_of)
     print(f"[fetch_earnings_pulse] earnings-calendar rows: {len(rows)}", file=sys.stderr)
 
     pulse = aggregate_pulse(rows)
+
+    if not skip_analyst:
+        print("[fetch_earnings_pulse] fetching grades-consensus for SECTOR_TOP_5...", file=sys.stderr)
+        grades = fetch_grades_consensus_for_sectors()
+        for sec, net in grades.items():
+            if sec in pulse:
+                pulse[sec]["analyst_revision_net"] = net
+
+        print("[fetch_earnings_pulse] fetching price-target-consensus for SECTOR_TOP_5...", file=sys.stderr)
+        pt = fetch_pt_upside_for_sectors()
+        for sec, info in pt.items():
+            if sec in pulse:
+                pulse[sec]["analyst_pt_upside_median_pct"] = info["median_upside_pct"]
+                pulse[sec]["pt_sample_size"] = info["sample_size"]
 
     payload = {
         "as_of_date": as_of,
@@ -178,7 +214,7 @@ def main() -> int:
         "sectors": pulse,
     }
 
-    out_path = os.path.join(CACHE_DIR, f"sector_earnings_pulse_{as_of}.json")
+    out_path = cache_path("sector_earnings_pulse", as_of)
     with open(out_path, "w") as f:
         json.dump(payload, f, indent=2)
 

@@ -21,7 +21,7 @@ import sys
 import time
 import subprocess
 import threading
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
@@ -47,6 +47,31 @@ FUTU_CACHE_TTL_SEC = 5
 # Periodic bridge.py refresh interval (seconds). Override via DASH_REFRESH_SEC env.
 REFRESH_INTERVAL_SEC = int(os.getenv("DASH_REFRESH_SEC", "300"))
 BRIDGE_TIMEOUT_SEC   = 120
+
+# ── Heatmap (S&P 500 + NDX 100 live treemap) ─────────────────────────
+# Background polling thread refreshes batch quotes every 3 min during US market
+# hours and serves /api/heatmap/data + /api/heatmap/news/<ticker> endpoints.
+HEATMAP_REFRESH_SEC      = int(os.getenv("HEATMAP_REFRESH_SEC", "180"))   # 3 min
+HEATMAP_NEWS_TTL_SEC     = int(os.getenv("HEATMAP_NEWS_TTL_SEC", "1800"))  # 30 min
+HEATMAP_UNIVERSE_TTL_SEC = int(os.getenv("HEATMAP_UNIVERSE_TTL_SEC", "64800"))  # 18h
+HEATMAP_OUTPUT_FILE      = os.path.join(ROOT, "Dashboard", "heatmap.json")
+_HEATMAP_TICKER_RE       = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
+
+_heatmap_state = {
+    "last_update":         None,   # ISO timestamp (last quote refresh)
+    "universe_built_at":   None,   # ISO timestamp (last universe rebuild)
+    "tickers":             {},     # ticker → {sector, industry, market_cap, name, price, change_pct, day_low, day_high, volume, prev_close}
+    "error":               None,
+}
+_heatmap_lock      = threading.Lock()
+_heatmap_news_cache = {}           # ticker → {ts: epoch, items: [{title, url, published, source}, ...]}
+# V2.12.0 — intraday 5-min OHLCV cache for radar K-line drill-down
+_heatmap_intraday_cache = {}       # ticker → {ts: epoch, data: {symbol, bars: [...], market_open}}
+HEATMAP_INTRADAY_TTL_SEC_OPEN   = int(os.getenv("HEATMAP_INTRADAY_TTL_SEC_OPEN",   "15"))
+HEATMAP_INTRADAY_TTL_SEC_CLOSED = int(os.getenv("HEATMAP_INTRADAY_TTL_SEC_CLOSED", "300"))
+# V2.12.0 — per-theme mini-heatmap composite cache (theme-detector + heatmap quotes)
+_theme_heatmap_cache = {"data": None, "ts": 0}
+THEME_HEATMAP_TTL_SEC = int(os.getenv("THEME_HEATMAP_TTL_SEC", "180"))   # 3 min
 
 _shutdown = threading.Event()
 
@@ -82,6 +107,9 @@ PROTOCOL_TIMEOUT_OVERRIDES = {
     # V4.8 invest protocol: Phase 0-5 with subagents typically takes 30-45 min.
     # Default 25 min (1500s) is too short; 60 min gives comfortable headroom.
     "invest":     int(os.getenv("INVEST_TIMEOUT_SEC",     "3600")),  # 60 min
+    # LLM Review of decision_review/event_index — 3-step statistical analysis,
+    # event_index can be 300KB+ JSON, expect deeper reasoning pass.
+    "llm_review": int(os.getenv("LLM_REVIEW_TIMEOUT_SEC", "900")),   # 15 min
 }
 
 PROTOCOL_PROMPTS = {
@@ -96,7 +124,8 @@ PROTOCOL_PROMPTS = {
     "flash_text": "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 雙重 artifact 寫入，不要中途停下等使用者回話。輸入是富途推播原文（中英混排），請：\n1. 先抽出事件主體（公司/標的/ticker，若有）\n2. WebFetch 補上下文（最近 24h 相關報導）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter\n4. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_news_flash.md` — 完整 Impact Card（review_status: pending）\n   (b) `news/news_logs/YYYY-MM-DD_digest.json` — 讀現有 file，append 一筆 verdict 到 `verdicts[]` 陣列（不要覆寫整個檔）。verdict 必須含：news_id (next available `nNNN`), depth: \"deep\", review_status: \"pending\", headline, headline_zh, source_label, news_type, bull_case, bear_case, sector_view, macro_view, verdict (BULLISH/BEARISH/BINARY/NEUTRAL), net_impact_score (數字), arbiter_reasoning, binary_risk (bool), within_48h (bool), affected_sectors (string list), tickers_mentioned (string list), date (YYYY-MM-DD), published (ISO timestamp — 用 WebFetch 取得的原始發布時間，UI 拿來算 freshness)。**這條是 Dashboard「待審核」tab 顯示卡片的唯一來源 — 沒寫等於沒分析過。**\n\n新聞分析 FLASH \"{headline}\"",
     "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。覆寫 verdict 時請保留原 `published` 欄位（若不存在，從對應 raw.json 補上）。\n\n新聞分析 審核 \"{headline}\"",
     "triage": "非互動模式：只跑 Stage 1 shallow triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. 讀剛產出的 `news/news_logs/YYYY-MM-DD_raw.json`（已 dedupe + 按 published desc 排序）\n3. 對每則跑 shallow triage（30 字 snap，依 news_protocol_v2.md Stage 1 rubric 給 score -5~+5）\n4. **必須寫 `news/news_logs/YYYY-MM-DD_triage.json`**（不寫等於沒跑），結構：\n```\n{\n  \"timestamp\": ISO,\n  \"mode\": \"TRIAGE\",\n  \"raw_count\": N,\n  \"verdicts\": [{\n    \"news_id\": \"nNNN\", \"depth\": \"shallow\", \"review_status\": \"reviewed\",\n    \"headline\": str, \"headline_zh\": str, \"source_label\": str,\n    \"news_type\": str, \"bull_case\": str(<=30字), \"bear_case\": str(<=30字),\n    \"sector_view\": str(<=30字), \"macro_view\": str(<=30字),\n    \"verdict\": \"BULLISH\"|\"BEARISH\"|\"NEUTRAL\"|\"BINARY\",\n    \"net_impact_score\": float, \"binary_risk\": bool, \"within_48h\": bool,\n    \"affected_sectors\": [str], \"tickers_mentioned\": [str],\n    \"date\": \"YYYY-MM-DD\",\n    \"published\": str (從 raw.json 對應 news_id 抄過來的 ISO timestamp，UI 拿來算 freshness 顏色)\n  }, ...]\n}\n```\n5. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
-    "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 fetch + analyze + validate + render 4 步驟，不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n\n結束條件：reports/<DATE>_{ticker}_earnings.md 寫入完成 + validate rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
+    "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker}` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
+    "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict 計算）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（含三步驟流程 + 輸出 schema 要求）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 三步驟執行：\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
 }
 PROTOCOL_LOG_DIRS = {
     "sector":     "sector/scan_logs",
@@ -107,6 +136,7 @@ PROTOCOL_LOG_DIRS = {
     "review":     "news/scan_logs",
     "triage":     "news/scan_logs",
     "earnings":   "skills/earnings-analyst/cache",
+    "llm_review": "reports/decision_review",
 }
 
 _protocol_state = {
@@ -121,6 +151,25 @@ _protocol_state = {
 }
 _protocol_lock = threading.Lock()
 _protocol_proc = {"p": None}  # mutable holder so cancel can reach it
+
+# V2.7.17 — daily_update.sh shell pipeline state (parallel to Claude protocol queue)
+# Tracks the bash daily_update.sh subprocess used by the new pre-market check
+# orchestrator. Independent from Claude protocols so it can run in parallel
+# with news / sector queue jobs.
+_daily_update_state = {
+    "job_id":      None,
+    "status":      "idle",     # idle | running | done | error
+    "started_at":  None,
+    "ended_at":    None,
+    "log_path":    None,
+    "returncode":  None,
+    "current_step": 0,
+    "total_steps":  6,
+    "elapsed_sec": 0,
+    "log_tail":    "",
+}
+_daily_update_lock = threading.Lock()
+_daily_update_proc = {"p": None}
 
 
 def _now_iso():
@@ -588,7 +637,7 @@ def get_queue_state():
                     pass
             active = {
                 "name":        _protocol_state.get("name"),
-                "ticker":      _protocol_state.get("analyze_ticker"),     # invest only
+                "ticker":      _protocol_state.get("analyze_ticker"),     # any ticker-scoped protocol; None for DIGEST/sector
                 "label":       _protocol_state.get("queue_label"),        # set on dispatch
                 "job_id":      _protocol_state.get("job_id"),
                 "started_at":  started,
@@ -647,8 +696,12 @@ def _analyze_worker():
                 last_finished_name = None
                 continue
             with _protocol_lock:
-                if name == "invest":
-                    _protocol_state["analyze_ticker"] = params.get("ticker")
+                # Always overwrite analyze_ticker — None for ticker-less protocols
+                # (news/DIGEST, sector, triage, flash_text, review). Conditional set
+                # caused stale-ticker leak: a prior invest CRWV would persist into
+                # the next news run's proto-pill ("news · CRWV") because the field
+                # wasn't cleared on dispatch. Bug 2026-05-03.
+                _protocol_state["analyze_ticker"] = params.get("ticker")
                 _protocol_state["analyze_source"] = entry.get("source", "queue")
                 _protocol_state["queue_label"]   = label
                 _protocol_state["queue_id"]      = entry.get("id")
@@ -847,6 +900,85 @@ def run_free_caches():
     return len(stale_free), None
 
 
+# V2.7.17 — daily_update.sh shell pipeline runner
+_DAILY_UPDATE_STEP_RE = re.compile(r"\[\s*(\d+(?:\.\d+)?)\s*/\s*(\d+)\s*\]")
+
+def run_daily_update():
+    """Spawn bash daily_update.sh in a background thread, parse [N/6] step
+    markers from stdout, expose status via _daily_update_state. Used by the
+    pre-market check Phase 1 orchestrator (parallel to news Claude protocol)."""
+    script = os.path.join(ROOT, "daily_update.sh")
+    if not os.path.exists(script):
+        return None, f"daily_update.sh not found at {script}"
+
+    job_id = "daily_update_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_dir = os.path.join(ROOT, "sector", "scan_logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_path = os.path.join(log_dir, f"{job_id}.log")
+
+    with _daily_update_lock:
+        _daily_update_state.update({
+            "job_id":       job_id,
+            "status":       "running",
+            "started_at":   _now_iso(),
+            "ended_at":     None,
+            "log_path":     log_path,
+            "returncode":   None,
+            "current_step": 0,
+            "total_steps":  6,
+            "elapsed_sec":  0,
+            "log_tail":     "",
+            "error":        None,
+        })
+
+    def _run():
+        try:
+            with open(log_path, "w", encoding="utf-8") as logf:
+                proc = subprocess.Popen(
+                    ["/bin/bash", script],
+                    cwd=ROOT,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1,
+                    env={**os.environ, "PATH": os.environ.get("PATH", "")},
+                )
+                _daily_update_proc["p"] = proc
+                # Stream stdout line-by-line; parse [N/6] step markers
+                for line in proc.stdout:
+                    logf.write(line)
+                    logf.flush()
+                    m = _DAILY_UPDATE_STEP_RE.search(line)
+                    if m:
+                        try:
+                            step_num = float(m.group(1))
+                            total    = int(m.group(2))
+                            with _daily_update_lock:
+                                # Sub-steps like 5.5 → floor for progress bar
+                                _daily_update_state["current_step"] = int(step_num)
+                                _daily_update_state["total_steps"]  = total
+                        except Exception:
+                            pass
+                rc = proc.wait()
+            with _daily_update_lock:
+                _daily_update_state["returncode"] = rc
+                _daily_update_state["ended_at"]   = _now_iso()
+                _daily_update_state["status"]     = "done" if rc == 0 else "error"
+                if rc != 0:
+                    _daily_update_state["error"] = f"daily_update.sh exited rc={rc}"
+                _daily_update_state["current_step"] = _daily_update_state["total_steps"]
+        except Exception as e:
+            with _daily_update_lock:
+                _daily_update_state["status"]   = "error"
+                _daily_update_state["ended_at"] = _now_iso()
+                _daily_update_state["error"]    = str(e)
+        finally:
+            _daily_update_proc["p"] = None
+
+    threading.Thread(target=_run, daemon=True).start()
+    return job_id, None
+
+
 _momentum_lock = threading.Lock()
 _MOM_PROGRESS_RE = re.compile(r'\[screen\]\s+(\d+)/(\d+)\s+\((\d+)\s+errors,\s+(\d+)\s+cache hits\)')
 _momentum_state = {
@@ -983,6 +1115,20 @@ def run_momentum_screen(params):
                 })
             return
 
+        # Auto-regenerate stats.json so bridge.py picks up fresh data
+        if params.get("journal"):
+            with _momentum_lock:
+                _momentum_state["phase"] = "computing journal stats…"
+            try:
+                subprocess.run(
+                    [sys.executable,
+                     os.path.join(ROOT, "skills", "momentum-monitor", "scripts", "journal.py"),
+                     "stats"],
+                    cwd=ROOT, capture_output=True, text=True, timeout=120,
+                )
+            except Exception as e:
+                print(f"[momentum-screen] journal stats failed: {e}", flush=True)
+
         with _momentum_lock:
             _momentum_state.update({
                 "status":   "bridging",
@@ -1005,6 +1151,45 @@ def run_momentum_screen(params):
 
     threading.Thread(target=_worker, daemon=True).start()
     return _momentum_state.copy(), None
+
+
+_journal_update_lock = threading.Lock()
+_journal_update_state = {"status": "idle", "phase": None, "ended_at": None, "error": None}
+
+JOURNAL_PY = os.path.join(ROOT, "skills", "momentum-monitor", "scripts", "journal.py")
+
+
+def run_journal_update():
+    """Fill forward returns + regenerate stats.json + refresh bridge, in background."""
+    with _journal_update_lock:
+        if _journal_update_state["status"] == "running":
+            return _journal_update_state.copy(), "running"
+        _journal_update_state.update({"status": "running", "phase": "updating returns…", "error": None})
+
+    def _worker():
+        try:
+            with _journal_update_lock:
+                _journal_update_state["phase"] = "filling forward returns…"
+            subprocess.run([sys.executable, JOURNAL_PY, "update"],
+                           cwd=ROOT, capture_output=True, text=True, timeout=300)
+            with _journal_update_lock:
+                _journal_update_state["phase"] = "computing stats…"
+            subprocess.run([sys.executable, JOURNAL_PY, "stats"],
+                           cwd=ROOT, capture_output=True, text=True, timeout=120)
+            with _journal_update_lock:
+                _journal_update_state["phase"] = "refreshing data…"
+            subprocess.run([sys.executable, os.path.join(ROOT, "bridge.py")],
+                           cwd=ROOT, capture_output=True, text=True, timeout=BRIDGE_TIMEOUT_SEC)
+            with _journal_update_lock:
+                _journal_update_state.update({"status": "done", "phase": "complete",
+                                               "ended_at": datetime.now().timestamp()})
+        except Exception as e:
+            with _journal_update_lock:
+                _journal_update_state.update({"status": "error", "error": str(e),
+                                               "ended_at": datetime.now().timestamp()})
+
+    threading.Thread(target=_worker, daemon=True).start()
+    return _journal_update_state.copy(), None
 
 
 def cancel_protocol():
@@ -1153,6 +1338,392 @@ def fred_refresh_loop():
         run_fred_refresh(reason=f"periodic {FRED_REFRESH_SEC}s")
 
 
+# ── Heatmap helpers (FMP batch quotes + per-ticker news) ─────────────
+# Polling thread keeps Dashboard/heatmap.json warm during US market hours.
+# Universe = S&P 500 ∪ NDX 100 deduped (~550 tickers), profile fetched once a day.
+
+try:
+    from zoneinfo import ZoneInfo as _ZoneInfo
+    _HEATMAP_ET = _ZoneInfo("America/New_York")
+except ImportError:
+    from datetime import timezone as _tz
+    _HEATMAP_ET = _tz(timedelta(hours=-4))
+
+
+def _is_us_market_hours():
+    """True if current ET time is Mon-Fri 09:30-16:00."""
+    now_et = datetime.now(_HEATMAP_ET)
+    if now_et.weekday() >= 5:
+        return False
+    open_t  = now_et.replace(hour=9,  minute=30, second=0, microsecond=0)
+    close_t = now_et.replace(hour=16, minute=0,  second=0, microsecond=0)
+    return open_t <= now_et <= close_t
+
+
+def _heatmap_atomic_write(payload):
+    """Write Dashboard/heatmap.json atomically (tmp + rename)."""
+    tmp = HEATMAP_OUTPUT_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False)
+    os.replace(tmp, HEATMAP_OUTPUT_FILE)
+
+
+def _heatmap_load_from_cache():
+    """Warm up state from Dashboard/heatmap.json on startup so /api/heatmap/data
+    returns prior-session data immediately instead of an empty dict (especially
+    important after-hours / weekends when we wait for next market open)."""
+    if not os.path.exists(HEATMAP_OUTPUT_FILE):
+        return False
+    try:
+        with open(HEATMAP_OUTPUT_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        tickers = {(t.get("ticker") or "").upper(): t for t in data.get("tickers", []) if t.get("ticker")}
+        if not tickers:
+            return False
+        with _heatmap_lock:
+            _heatmap_state["tickers"] = tickers
+            _heatmap_state["last_update"]       = data.get("last_update")
+            _heatmap_state["universe_built_at"] = data.get("universe_built_at")
+        sys.stderr.write(f"[heatmap] cache loaded: {len(tickers)} tickers (last_update={data.get('last_update')})\n")
+        return True
+    except (OSError, ValueError) as e:
+        sys.stderr.write(f"[heatmap] cache read error: {e}\n")
+        return False
+
+
+def _heatmap_has_quote_data(min_fraction=0.5):
+    """True if at least `min_fraction` of universe has a non-zero market_cap.
+    Used to decide whether startup needs a quote refresh."""
+    with _heatmap_lock:
+        rows = list(_heatmap_state["tickers"].values())
+    if not rows:
+        return False
+    populated = sum(1 for r in rows if (r.get("market_cap") or 0) > 0 and r.get("price") is not None)
+    return populated >= len(rows) * min_fraction
+
+
+def _fmp_get_json(url, timeout=20):
+    """Stdlib HTTP GET → parse JSON. Returns None on failure."""
+    from urllib.request import Request, urlopen
+    from urllib.error  import URLError, HTTPError
+    try:
+        req = Request(url, headers={"User-Agent": "ai-invest-dashboard/heatmap"})
+        with urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except (URLError, HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        sys.stderr.write(f"[heatmap] HTTP error: {type(e).__name__}: {str(e)[:100]}\n")
+        return None
+
+
+def _heatmap_build_universe():
+    """Fetch S&P 500 + NDX 100 constituent lists (FMP stable). Each list already
+    contains symbol/name/sector/subSector → no separate profile fetch needed.
+    Market cap arrives later via batch-quote."""
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        sys.stderr.write("[heatmap] FMP_API_KEY not set; skipping universe build\n")
+        return False
+
+    base = "https://financialmodelingprep.com/stable"
+    sp500  = _fmp_get_json(f"{base}/sp500-constituent?apikey={api_key}")    or []
+    ndx100 = _fmp_get_json(f"{base}/nasdaq-constituent?apikey={api_key}")   or []
+
+    profiles = {}
+    for entry in sp500 + ndx100:
+        sym = (entry.get("symbol") or "").strip().upper()
+        if not sym or not _HEATMAP_TICKER_RE.match(sym):
+            continue
+        if sym in profiles:
+            continue  # dedupe (S&P 500 ∪ NDX 100)
+        profiles[sym] = {
+            "ticker":      sym,
+            "name":        entry.get("name")      or sym,
+            "sector":      entry.get("sector")    or "Other",
+            "industry":    entry.get("subSector") or entry.get("sector") or "Other",
+            "market_cap":  0.0,  # filled by batch-quote
+            "price":       None,
+            "change_pct":  None,
+            "day_low":     None,
+            "day_high":    None,
+            "volume":      None,
+            "prev_close":  None,
+        }
+
+    if not profiles:
+        sys.stderr.write("[heatmap] universe fetch returned 0 rows\n")
+        return False
+
+    with _heatmap_lock:
+        # Preserve existing quote fields if ticker is still in universe
+        existing = _heatmap_state["tickers"]
+        for sym, prof in profiles.items():
+            if sym in existing:
+                for k in ("price", "change_pct", "day_low", "day_high", "volume", "prev_close", "market_cap"):
+                    if existing[sym].get(k) not in (None, 0, 0.0):
+                        prof[k] = existing[sym][k]
+        _heatmap_state["tickers"] = profiles
+        _heatmap_state["universe_built_at"] = _now_iso()
+        _heatmap_state["error"] = None
+
+    sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] [heatmap] universe built: {len(profiles)} tickers\n")
+    return True
+
+
+def _heatmap_refresh_quotes():
+    """Batch-fetch quotes for current universe via FMP stable batch-quote
+    (200 tickers/call, ~3 calls for 550 tickers, ~4 sec total).
+    batch-quote returns market_cap so we update that too."""
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return False
+
+    with _heatmap_lock:
+        symbols = list(_heatmap_state["tickers"].keys())
+    if not symbols:
+        return False
+
+    base = "https://financialmodelingprep.com/stable"
+    BATCH = 200
+    updated = 0
+    for i in range(0, len(symbols), BATCH):
+        chunk = symbols[i:i + BATCH]
+        url = f"{base}/batch-quote?symbols={','.join(chunk)}&apikey={api_key}"
+        data = _fmp_get_json(url) or []
+        with _heatmap_lock:
+            for q in data:
+                sym = (q.get("symbol") or "").strip().upper()
+                row = _heatmap_state["tickers"].get(sym)
+                if not row:
+                    continue
+                row["price"]      = q.get("price")
+                row["change_pct"] = q.get("changePercentage")
+                row["day_low"]    = q.get("dayLow")
+                row["day_high"]   = q.get("dayHigh")
+                row["volume"]     = q.get("volume")
+                row["prev_close"] = q.get("previousClose")
+                mcap = q.get("marketCap")
+                if mcap:
+                    row["market_cap"] = float(mcap)
+                updated += 1
+
+    with _heatmap_lock:
+        _heatmap_state["last_update"] = _now_iso()
+        snapshot = {
+            "last_update":       _heatmap_state["last_update"],
+            "universe_built_at": _heatmap_state["universe_built_at"],
+            "market_open":       _is_us_market_hours(),
+            "tickers":           list(_heatmap_state["tickers"].values()),
+        }
+
+    try:
+        _heatmap_atomic_write(snapshot)
+    except OSError as e:
+        sys.stderr.write(f"[heatmap] write error: {e}\n")
+        return False
+
+    sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] [heatmap] quotes refreshed: {updated}/{len(symbols)}\n")
+    return True
+
+
+def _fetch_heatmap_news(ticker, limit=2):
+    """Fetch up to `limit` recent news items for a single ticker via FMP stable.
+    Returns list of {title, url, published, source}."""
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return []
+    url = (f"https://financialmodelingprep.com/stable/news/stock"
+           f"?symbols={ticker}&limit={limit}&apikey={api_key}")
+    data = _fmp_get_json(url, timeout=10) or []
+    items = []
+    for n in data[:limit]:
+        items.append({
+            "title":     n.get("title") or "",
+            "url":       n.get("url")   or "",
+            "published": n.get("publishedDate") or "",
+            "source":    n.get("site") or n.get("publisher") or "",
+        })
+    return items
+
+
+def _build_theme_heatmap_payload():
+    """Compose per-theme mini-heatmap data: read latest theme-detector cache,
+    take each theme's representative_stocks, join against _heatmap_state.tickers
+    for live quote / market_cap / sector / industry. Tickers not in heatmap state
+    are skipped (we don't add new FMP calls; coverage degrades gracefully)."""
+    import glob
+    cache_dir = os.path.join(ROOT, "skills", "theme-detector", "cache")
+    files = sorted(glob.glob(os.path.join(cache_dir, "theme_detector_*.json")))
+    if not files:
+        return {"themes": [], "error": "no theme-detector cache found",
+                "as_of": _now_iso(), "market_open": _is_us_market_hours()}
+    latest = files[-1]
+    try:
+        with open(latest, "r", encoding="utf-8") as f:
+            td_data = json.load(f)
+    except Exception as e:
+        return {"themes": [], "error": f"theme-detector cache read failed: {e}",
+                "as_of": _now_iso(), "market_open": _is_us_market_hours()}
+
+    all_themes = (td_data.get("themes") or {}).get("all") or []
+    with _heatmap_lock:
+        ticker_lookup = dict(_heatmap_state["tickers"])  # snapshot
+
+    themes_out = []
+    for th in all_themes:
+        rep = th.get("representative_stocks") or []
+        details = th.get("stock_details") or []
+        # Build per-ticker list with whatever quote data we have
+        tickers = []
+        for sym in rep:
+            sym = (sym or "").strip().upper()
+            if not sym:
+                continue
+            q = ticker_lookup.get(sym)
+            if not q:
+                continue   # ticker not in heatmap universe; skip rather than fetch
+            tickers.append({
+                "ticker":      q.get("ticker", sym),
+                "name":        q.get("name") or sym,
+                "sector":      q.get("sector") or "",
+                "industry":    q.get("industry") or "",
+                "price":       q.get("price"),
+                "change_pct":  q.get("change_pct"),
+                "volume":      q.get("volume"),
+                "market_cap":  q.get("market_cap") or 0,
+            })
+        if not tickers:
+            continue   # theme has no covered ticker
+
+        themes_out.append({
+            "name":            th.get("name", ""),
+            "direction":       th.get("direction", ""),
+            "heat":            th.get("heat"),
+            "heat_label":      th.get("heat_label"),
+            "lifecycle_stage": th.get("stage") or th.get("lifecycle_stage"),
+            "confidence":      th.get("confidence"),
+            "industries":      th.get("industries") or [],
+            "proxy_etfs":      th.get("proxy_etfs") or [],
+            "representative_count": len(rep),
+            "covered_count":   len(tickers),
+            "tickers":         tickers,
+        })
+
+    return {
+        "as_of":               _now_iso(),
+        "market_open":         _is_us_market_hours(),
+        "theme_detector_at":   td_data.get("generated_at"),
+        "heatmap_last_update": _heatmap_state.get("last_update"),
+        "themes":              themes_out,
+    }
+
+
+def _fetch_heatmap_intraday(ticker):
+    """Fetch today's 5-minute OHLCV bars via FMP /stable/historical-chart/5min.
+
+    Returns {symbol, as_of, market_open, bars: [{time, o, h, l, c, v}, ...]}.
+    On weekend / pre-market when today is empty, falls back to last 7 days.
+    """
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return {"symbol": ticker, "error": "FMP_API_KEY not set", "bars": [],
+                "as_of": _now_iso(), "market_open": False}
+
+    today = date.today().isoformat()
+    url = (f"https://financialmodelingprep.com/stable/historical-chart/5min"
+           f"?symbol={ticker}&from={today}&to={today}&apikey={api_key}")
+    rows = _fmp_get_json(url, timeout=10)
+
+    if not isinstance(rows, list) or not rows:
+        # Empty response (weekend / pre-market / holiday) — pull last 7 days
+        seven_ago = (date.today() - timedelta(days=7)).isoformat()
+        url = (f"https://financialmodelingprep.com/stable/historical-chart/5min"
+               f"?symbol={ticker}&from={seven_ago}&to={today}&apikey={api_key}")
+        rows = _fmp_get_json(url, timeout=10) or []
+
+    bars = []
+    for r in (rows or []):
+        try:
+            bars.append({
+                "time": r.get("date"),
+                "o":    float(r.get("open", 0)),
+                "h":    float(r.get("high", 0)),
+                "l":    float(r.get("low", 0)),
+                "c":    float(r.get("close", 0)),
+                "v":    int(r.get("volume", 0)),
+            })
+        except (TypeError, ValueError):
+            continue
+    # FMP returns newest-first → reverse to oldest-first for chart rendering
+    bars.reverse()
+
+    return {
+        "symbol":      ticker,
+        "as_of":       _now_iso(),
+        "market_open": _is_us_market_hours(),
+        "bars":        bars,
+    }
+
+
+def heatmap_refresh_loop():
+    """Background daemon: rebuild universe daily, refresh quotes every 3 min during market hours.
+    On startup: warm up from cache file → ensure we have at least one quote snapshot
+    (even after-hours, since FMP returns last close which is what the heatmap should
+    show until the next session opens)."""
+    if _shutdown.wait(5):
+        return  # Server shutting down before we even start
+
+    # 1) Warm up from cache so /api/heatmap/data is responsive instantly after restart
+    cache_loaded = _heatmap_load_from_cache()
+
+    # 2) Universe build (cheap — 2 calls; preserves cached quote fields per-ticker)
+    try:
+        _heatmap_build_universe()
+    except Exception as e:
+        sys.stderr.write(f"[heatmap] startup universe error: {e}\n")
+        with _heatmap_lock:
+            _heatmap_state["error"] = str(e)
+
+    # 3) Quote refresh on startup if we don't already have usable data.
+    #    Honors user spec: "if after-hours and no prior-day data, fetch a snapshot".
+    #    During market hours we always refresh on startup so the first user sees current data.
+    need_initial_quotes = _is_us_market_hours() or not _heatmap_has_quote_data()
+    if need_initial_quotes:
+        try:
+            _heatmap_refresh_quotes()
+        except Exception as e:
+            sys.stderr.write(f"[heatmap] startup quote error: {e}\n")
+            with _heatmap_lock:
+                _heatmap_state["error"] = str(e)
+    else:
+        sys.stderr.write(f"[heatmap] startup: using cache (market closed, {len(_heatmap_state['tickers'])} tickers ready)\n")
+
+    while not _shutdown.is_set():
+        if _shutdown.wait(HEATMAP_REFRESH_SEC):
+            break
+        try:
+            # Universe rebuild once per HEATMAP_UNIVERSE_TTL_SEC (~18h)
+            with _heatmap_lock:
+                last_built = _heatmap_state["universe_built_at"]
+            need_rebuild = True
+            if last_built:
+                try:
+                    last_dt = datetime.fromisoformat(last_built)
+                    age_sec = (datetime.now() - last_dt).total_seconds()
+                    need_rebuild = age_sec >= HEATMAP_UNIVERSE_TTL_SEC
+                except ValueError:
+                    need_rebuild = True
+            if need_rebuild:
+                _heatmap_build_universe()
+
+            # Quote refresh only during market hours
+            if _is_us_market_hours():
+                _heatmap_refresh_quotes()
+        except Exception as e:
+            sys.stderr.write(f"[heatmap] loop error: {e}\n")
+            with _heatmap_lock:
+                _heatmap_state["error"] = str(e)
+
+
 _positions_lock = threading.Lock()
 
 
@@ -1254,6 +1825,66 @@ class Handler(SimpleHTTPRequestHandler):
                 state["elapsed_sec"] = int(end - state["started_at"])
             return self._json(200, state)
 
+        if path == "/api/journal-update/status":
+            with _journal_update_lock:
+                return self._json(200, _journal_update_state.copy())
+
+        if path == "/api/heatmap/data":
+            with _heatmap_lock:
+                payload = {
+                    "last_update":       _heatmap_state["last_update"],
+                    "universe_built_at": _heatmap_state["universe_built_at"],
+                    "tickers":           list(_heatmap_state["tickers"].values()),
+                    "market_open":       _is_us_market_hours(),
+                    "error":             _heatmap_state["error"],
+                }
+            return self._json(200, payload)
+
+        if path.startswith("/api/heatmap/news/"):
+            ticker = path.rsplit("/", 1)[-1].strip().upper()
+            if not _HEATMAP_TICKER_RE.match(ticker):
+                return self._json(400, {"error": "invalid ticker"})
+            cached = _heatmap_news_cache.get(ticker)
+            if cached and (time.time() - cached["ts"]) < HEATMAP_NEWS_TTL_SEC:
+                return self._json(200, {"items": cached["items"], "cached": True})
+            items = _fetch_heatmap_news(ticker, limit=2)
+            _heatmap_news_cache[ticker] = {"ts": time.time(), "items": items}
+            return self._json(200, {"items": items, "cached": False})
+
+        if path == "/api/theme-heatmap":
+            now = time.time()
+            cached = _theme_heatmap_cache
+            if cached["data"] and (now - cached["ts"]) < THEME_HEATMAP_TTL_SEC:
+                payload = dict(cached["data"])
+                payload["cached"] = True
+                return self._json(200, payload)
+            data = _build_theme_heatmap_payload()
+            # Only cache non-empty results (heatmap state may not be warm yet on startup)
+            if data.get("themes"):
+                _theme_heatmap_cache["data"] = data
+                _theme_heatmap_cache["ts"]   = now
+            payload = dict(data)
+            payload["cached"] = False
+            return self._json(200, payload)
+
+        if path.startswith("/api/heatmap/intraday/"):
+            ticker = path.rsplit("/", 1)[-1].strip().upper()
+            if not _HEATMAP_TICKER_RE.match(ticker):
+                return self._json(400, {"error": "invalid ticker"})
+            # Cache TTL: 15s when market open, 5min when closed
+            ttl = (HEATMAP_INTRADAY_TTL_SEC_OPEN if _is_us_market_hours()
+                   else HEATMAP_INTRADAY_TTL_SEC_CLOSED)
+            cached = _heatmap_intraday_cache.get(ticker)
+            if cached and (time.time() - cached["ts"]) < ttl:
+                payload = dict(cached["data"])
+                payload["cached"] = True
+                return self._json(200, payload)
+            data = _fetch_heatmap_intraday(ticker)
+            _heatmap_intraday_cache[ticker] = {"ts": time.time(), "data": data}
+            payload = dict(data)
+            payload["cached"] = False
+            return self._json(200, payload)
+
         if path == "/api/analyze-queue" or path == "/api/protocol-queue":
             return self._json(200, get_queue_state())
 
@@ -1266,7 +1897,9 @@ class Handler(SimpleHTTPRequestHandler):
             if not ticker or "/" in ticker:
                 return self._json(400, {"error": "invalid ticker"})
             cache_dir = os.path.join(ROOT, "skills", "earnings-analyst", "cache")
-            matches = sorted(glob.glob(os.path.join(cache_dir, f"{ticker}_*.json")))
+            # Filter out *.infographic.json (V1.73 sibling) — only V1.0 data-layer
+            matches = sorted(p for p in glob.glob(os.path.join(cache_dir, f"{ticker}_*.json"))
+                             if not p.endswith(".infographic.json"))
             if not matches:
                 return self._json(200, {"ticker": ticker, "cached": False})
             latest = matches[-1]
@@ -1296,6 +1929,71 @@ class Handler(SimpleHTTPRequestHandler):
                 "score_components":   data.get("score_components") or {},
                 "report_path":        report_path,
                 "cache_age_days":     age_days,
+            })
+
+        if path.startswith("/api/earnings-infographic/"):
+            # GET /api/earnings-infographic/<TICKER>  → V1.73 infographic page payload
+            # Returns merged cache (subset) + full infographic.json + report_path
+            ticker = path.split("/api/earnings-infographic/", 1)[1].strip().upper()
+            if not ticker or "/" in ticker:
+                return self._json(400, {"error": "invalid ticker"})
+            cache_dir = os.path.join(ROOT, "skills", "earnings-analyst", "cache")
+            inf_matches = sorted(glob.glob(os.path.join(cache_dir, f"{ticker}_*.infographic.json")))
+            if not inf_matches:
+                return self._json(404, {"ticker": ticker, "error": "infographic not generated"})
+            inf_latest = inf_matches[-1]
+            # Pair with same-date V1.0 data-layer cache
+            base_cache = inf_latest.replace(".infographic.json", ".json")
+            cache_payload = {}
+            if os.path.exists(base_cache):
+                try:
+                    with open(base_cache, "r", encoding="utf-8") as f:
+                        cache_payload = json.load(f)
+                except Exception as e:
+                    print(f"[infographic] base cache read fail: {e}", file=sys.stderr)
+            try:
+                with open(inf_latest, "r", encoding="utf-8") as f:
+                    inf_payload = json.load(f)
+            except Exception as e:
+                return self._json(500, {"ticker": ticker, "error": f"infographic read fail: {e}"})
+            run_date = cache_payload.get("as_of_date") or inf_payload.get("as_of_date")
+            report_path = None
+            if run_date:
+                cand = os.path.join(ROOT, "reports", f"{run_date}_{ticker}_earnings.md")
+                if os.path.exists(cand):
+                    report_path = os.path.relpath(cand, ROOT)
+            # V2.7.15 — slim trend slices (last 8Q) for infographic chart row
+            qpnl_slim = [
+                {"date": q.get("date"), "period": q.get("period"),
+                 "fiscalYear": q.get("fiscalYear"),
+                 "revenue": q.get("revenue"), "netIncome": q.get("netIncome"),
+                 "eps": q.get("eps"), "epsDiluted": q.get("epsDiluted")}
+                for q in (cache_payload.get("quarterly_pnl") or [])[:8]
+            ]
+            cf_slim = [
+                {"date": q.get("date"), "period": q.get("period"),
+                 "operatingCashFlow": q.get("operatingCashFlow"),
+                 "freeCashFlow": q.get("freeCashFlow")}
+                for q in (cache_payload.get("cash_flow") or [])[:8]
+            ]
+            margins_slim = list((cache_payload.get("derived") or {}).get("margins_8q") or [])[:8]
+            return self._json(200, {
+                "ticker":      ticker,
+                "infographic": inf_payload,
+                "cache": {
+                    "snapshot":           cache_payload.get("snapshot"),
+                    "verdict":            cache_payload.get("verdict"),
+                    "composite_score":    cache_payload.get("composite_score"),
+                    "score_components":   cache_payload.get("score_components"),
+                    "quality_flags":      cache_payload.get("quality_flags"),
+                    "as_of_date":         run_date,
+                    "last_earnings_date": cache_payload.get("last_earnings_date"),
+                    "report_path":        report_path,
+                    # Trend slices for chart row (V2.7.15)
+                    "quarterly_pnl":      qpnl_slim,
+                    "cash_flow":          cf_slim,
+                    "margins_8q":         margins_slim,
+                },
             })
 
         if path == "/api/futu-notifications":
@@ -1347,6 +2045,20 @@ class Handler(SimpleHTTPRequestHandler):
                     pass
             state["log_tail"] = _tail_log(state.get("log_path"), lines=60)
             state["events"]   = _parse_events(state.get("log_path"), max_events=40)
+            return self._json(200, state)
+
+        # V2.7.17 — daily_update.sh shell-pipeline status
+        if path == "/api/run-daily-update/status":
+            with _daily_update_lock:
+                state = dict(_daily_update_state)
+            if state.get("status") == "running" and state.get("started_at"):
+                try:
+                    state["elapsed_sec"] = int(
+                        (datetime.now() - datetime.fromisoformat(state["started_at"])).total_seconds()
+                    )
+                except Exception:
+                    pass
+            state["log_tail"] = _tail_log(state.get("log_path"), lines=40)
             return self._json(200, state)
 
         # Serve /decision_review/* from reports/decision_review/ (read-only)
@@ -1433,6 +2145,20 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(409, {"error": err})
             return self._json(202, {"stale_items": count, "status": "running"})
 
+        # V2.7.17 — pre-market check Phase 1: spawn bash daily_update.sh
+        if path == "/api/run-daily-update":
+            with _daily_update_lock:
+                if _daily_update_state.get("status") == "running":
+                    return self._json(409, {
+                        "error": "duplicate_active",
+                        "job_id": _daily_update_state.get("job_id"),
+                        "started_at": _daily_update_state.get("started_at"),
+                    })
+            job_id, err = run_daily_update()
+            if err:
+                return self._json(500, {"error": err})
+            return self._json(202, {"job_id": job_id, "name": "daily_update"})
+
         if path == "/api/run-protocol":
             length = int(self.headers.get("Content-Length", 0))
             try:
@@ -1490,6 +2216,16 @@ class Handler(SimpleHTTPRequestHandler):
             if err:
                 return self._json(409, {"error": err, "state": state})
             return self._json(202, {"status": "running", "state": state})
+
+        if path == "/api/journal-update":
+            state, err = run_journal_update()
+            if err:
+                return self._json(409, {"error": err, "state": state})
+            return self._json(202, {"status": "running", "state": state})
+
+        if path == "/api/journal-update/status":
+            with _journal_update_lock:
+                return self._json(200, _journal_update_state.copy())
 
         if path == "/api/momentum-watchlist":
             length = int(self.headers.get("Content-Length", 0))
@@ -1611,6 +2347,7 @@ if __name__ == "__main__":
     print(f"Positions file:     {POSITIONS}")
     print(f"Auto-refresh:       every {REFRESH_INTERVAL_SEC}s (bridge.py)")
     print(f"FRED refresh:       every {FRED_REFRESH_SEC}s (fred-macro cache)")
+    print(f"Heatmap refresh:    every {HEATMAP_REFRESH_SEC}s (S&P 500 + NDX 100, market hours)")
 
     # Fresh prices on boot so the first Dashboard load is not stale
     run_bridge(reason="startup")
@@ -1621,6 +2358,8 @@ if __name__ == "__main__":
     refresh_thread.start()
     fred_thread = threading.Thread(target=fred_refresh_loop, daemon=True)
     fred_thread.start()
+    heatmap_thread = threading.Thread(target=heatmap_refresh_loop, daemon=True)
+    heatmap_thread.start()
 
     try:
         srv.serve_forever()

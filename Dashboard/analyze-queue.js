@@ -134,26 +134,46 @@
       return;
     }
 
+    // Protocol-name → display icon + short label (V2.7.18 — prevent confusing
+    // earnings-analyst runs with invest deep-dive runs in the recent line).
+    const _protoMeta = (name) => {
+      const map = {
+        invest:     { icon: '🔬', label: '分析' },
+        earnings:   { icon: '📊', label: '財報' },
+        news:       { icon: '📰', label: '新聞' },
+        sector:     { icon: '🌐', label: '產業' },
+        llm_review: { icon: '🤖', label: '檢討' },
+        flash:      { icon: '⚡', label: 'flash' },
+        triage:     { icon: '🔍', label: 'triage' },
+      };
+      return map[name] || { icon: '·', label: name || '' };
+    };
+
     // Active line (or a neutral pending-only line when no active)
     let activeLine = '';
     if (s.active && s.active.ticker) {
+      const am = _protoMeta(s.active.name || 'invest');
       activeLine = `
         <div class="flex items-center gap-2 text-[11px]">
           <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
           <span class="font-black text-emerald-400">${tr.now_analyzing || '分析中'}</span>
+          <span title="${am.label}">${am.icon}</span>
           <span class="font-black tracking-tight" style="color: var(--text-card-title)">${s.active.ticker}</span>
           <span class="ml-auto font-mono text-emerald-300">${_fmtElapsed(s.active.elapsed_sec)}</span>
         </div>`;
     }
 
-    // Pending queue pills — tight row
+    // Pending queue pills — tight row (V2.7.18: prefix protocol icon)
     let queueLine = '';
     if (s.queue.length) {
-      const pills = s.queue.map(q => `
-        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-zinc-800/60 border border-zinc-700/50" style="color: var(--text-main)">
-          ${q.ticker}
+      const pills = s.queue.map(q => {
+        const pm = _protoMeta(q.name || 'invest');
+        return `
+        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-zinc-800/60 border border-zinc-700/50" style="color: var(--text-main)" title="${pm.label} ${q.ticker}">
+          <span>${pm.icon}</span>${q.ticker}
           <button data-aq-remove="${q.ticker}" class="text-zinc-500 hover:text-red-400 leading-none" title="${tr.remove_tooltip || '從佇列移除'}">✕</button>
-        </span>`).join('');
+        </span>`;
+      }).join('');
       queueLine = `
         <div class="flex items-center gap-1.5 flex-wrap text-[10px]">
           <span class="font-black uppercase tracking-wider text-zinc-500">${tr.pending || '待分析'}（${s.queue.length}）</span>
@@ -161,13 +181,16 @@
         </div>`;
     }
 
-    // Recent history — one compact inline line
+    // Recent history — one compact inline line.
+    // V2.7.18: prefix each ticker with protocol icon so user sees whether the
+    // recent run was 分析 (invest) vs 財報 (earnings) vs other.
     let recentLine = '';
     if (s.recent.length) {
       const items = s.recent.slice(0, 4).map(r => {
         const color = r.status === 'done' ? '#22c55e' : r.status === 'error' ? '#ef4444' : '#71717a';
-        const icon  = r.status === 'done' ? '✓' : r.status === 'error' ? '✗' : '○';
-        return `<span class="font-mono" style="color:${color}">${icon}${r.ticker}</span>`;
+        const stIc  = r.status === 'done' ? '✓' : r.status === 'error' ? '✗' : '○';
+        const pm = _protoMeta(r.name || 'invest');
+        return `<span class="font-mono" style="color:${color}" title="${pm.label} ${r.ticker}">${stIc}<span style="margin:0 1px">${pm.icon}</span>${r.ticker}</span>`;
       }).join(' · ');
       recentLine = `
         <div class="flex items-center gap-1.5 text-[10px] text-zinc-500">

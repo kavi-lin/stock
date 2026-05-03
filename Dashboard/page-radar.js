@@ -624,13 +624,25 @@ function renderThemeGrid(tac) {
                 <span>${UI.currentLang === 'zh' ? '主題股數' : 'constituents'}: ${nTotal}</span>
             </div>
 
+            <!-- V2.12.0 — mini intraday heatmap (filled by loadThemeHeatmap) -->
+            <div class="mini-heatmap-slot" data-theme-name="${escapeHtml(theme.name)}"
+                 style="height: 110px; margin-top: 6px; position: relative; border-radius: 4px; overflow: hidden;">
+                <div class="text-[9px] text-zinc-600 absolute inset-0 flex items-center justify-center">即時熱力圖載入中…</div>
+            </div>
+
             <div class="flex items-center justify-end text-[9px] mt-1 pt-1 border-t border-zinc-800/50">
                 <span class="text-indigo-400">${escapeHtml(isExpanded ? (t().card_movers_close || '▲ close') : (t().card_movers_open || '▼ movers'))}</span>
             </div>
         `;
-        card.addEventListener('click', () => toggleExpand(theme.name));
+        // Click on card body (not on heatmap tile) toggles expansion
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.mini-heatmap-slot')) return;   // ticker tile handles its own click
+            toggleExpand(theme.name);
+        });
         grid.appendChild(card);
     });
+    // After theme cards mount, fill mini heatmaps
+    if (_lastThemeHeatmap) renderAllThemeMiniHeatmaps(_lastThemeHeatmap.themes);
 }
 
 // ── Expand / collapse one theme ───────────────────────────────
@@ -663,12 +675,104 @@ function renderExpanded(themeName, tac) {
     }
     const wrap = $('radar-expanded-movers');
     const noMovers = UI.currentLang === 'zh' ? '無 movers' : 'No movers found.';
-    wrap.innerHTML = (theme.top_movers || []).map(m => renderMoverCard(m)).join('') ||
-        `<div class="text-zinc-500 text-sm">${noMovers}</div>`;
+    // V2.12.0 — explanation banner (user feedback: 不知道 top 5 movers 意義)
+    const isZh = UI.currentLang === 'zh';
+    const explainText = isZh
+        ? '排序方式：模型對該主題內個股的「未來 5 日預期報酬 × 信心度」由高到低排序，取前 5。代表「玩這個主題最乾淨的進場點」。'
+        : 'Ranked by model\'s 5-day predicted return × confidence (descending). The top 5 represent the cleanest entry candidates within this theme.';
+    const explainHtml = `
+        <div class="col-span-full mb-2 p-2 rounded border border-indigo-400/20 bg-indigo-500/5 text-[10px] text-zinc-400 leading-relaxed flex items-start gap-2">
+            <i data-lucide="info" class="w-3 h-3 text-indigo-400 mt-0.5 shrink-0"></i>
+            <span>${explainText}</span>
+        </div>`;
+    const moversHtml = (theme.top_movers || []).map(m => renderMoverCard(m)).join('');
+    wrap.innerHTML = explainHtml + (moversHtml || `<div class="text-zinc-500 text-sm">${noMovers}</div>`);
     if (window.lucide?.createIcons) window.lucide.createIcons();
 }
 
 // ── Per-mover card (strict §11.D) ─────────────────────────────
+// V2.12.0 — enrichment pill row (market_cap_tier + earnings/quality/smart-money/analyst)
+function renderEnrichmentPills(enr, finalScore, rawScore) {
+    if (!enr || Object.keys(enr).length === 0) return '';
+    const isZh = UI.currentLang === 'zh';
+    const pills = [];
+
+    // Market-cap tier — small/micro highlighted (user wants to spot these in top picks)
+    const tier = enr.market_cap_tier;
+    if (tier && tier !== 'unknown') {
+        const tierMap = {
+            large_cap:  { label: isZh ? '大型股' : 'Large',  bg: 'rgba(100,116,139,0.15)', fg: '#94a3b8' },
+            mid_cap:    { label: isZh ? '中型股' : 'Mid',    bg: 'rgba(59,130,246,0.18)',  fg: '#60a5fa' },
+            small_cap:  { label: isZh ? '⚡小型股' : '⚡Small', bg: 'rgba(245,158,11,0.22)', fg: '#fbbf24' },
+            micro_cap:  { label: isZh ? '⚡⚡微型股' : '⚡⚡Micro', bg: 'rgba(239,68,68,0.20)', fg: '#fca5a5' },
+        };
+        const tinfo = tierMap[tier] || tierMap.large_cap;
+        const mcUsd = enr.market_cap_usd;
+        const mcStr = mcUsd ? (mcUsd >= 1e12 ? `$${(mcUsd/1e12).toFixed(2)}T`
+                               : mcUsd >= 1e9 ? `$${(mcUsd/1e9).toFixed(1)}B`
+                               : `$${(mcUsd/1e6).toFixed(0)}M`) : '';
+        const tip = isZh ? `市值 ${mcStr}` : `Market cap ${mcStr}`;
+        pills.push(`<span class="enr-pill" title="${escapeHtml(tip)}" style="background:${tinfo.bg};color:${tinfo.fg};font-weight:700">${escapeHtml(tinfo.label)} ${mcStr}</span>`);
+    }
+
+    // Earnings landmine
+    const e = enr.earnings || {};
+    if (e.within_5d) {
+        const t = isZh ? `📅 ${e.days_to_earnings}d 內財報` : `📅 Earnings in ${e.days_to_earnings}d`;
+        pills.push(`<span class="enr-pill" title="${escapeHtml(e.next_date || '')}" style="background:rgba(239,68,68,0.20);color:#fca5a5;font-weight:700">${escapeHtml(t)}</span>`);
+    } else if (e.within_10d) {
+        const t = isZh ? `📅 ${e.days_to_earnings}d` : `📅 ${e.days_to_earnings}d`;
+        pills.push(`<span class="enr-pill" title="${escapeHtml(e.next_date || '')}" style="background:rgba(245,158,11,0.18);color:#fbbf24">${escapeHtml(t)}</span>`);
+    }
+
+    // Quality
+    const q = enr.quality || {};
+    if (q.red_flag) {
+        const tip = `Altman Z=${q.altmanZScore?.toFixed(1) ?? '?'}, Piotroski F=${q.piotroskiScore ?? '?'}`;
+        pills.push(`<span class="enr-pill" title="${escapeHtml(tip)}" style="background:rgba(239,68,68,0.18);color:#fca5a5">${isZh ? '⚠ 品質紅旗' : '⚠ Quality risk'}</span>`);
+    } else if (q.premium) {
+        const tip = `Altman Z=${q.altmanZScore?.toFixed(1) ?? '?'}, Piotroski F=${q.piotroskiScore ?? '?'}`;
+        pills.push(`<span class="enr-pill" title="${escapeHtml(tip)}" style="background:rgba(34,197,94,0.18);color:#86efac">${isZh ? '✓ 品質佳' : '✓ Premium quality'}</span>`);
+    }
+
+    // Smart money
+    const sm = enr.smart_money || {};
+    if (sm.insider_signal === 'buying') {
+        pills.push(`<span class="enr-pill" style="background:rgba(34,197,94,0.18);color:#86efac" title="Insider net-buy 90d">${isZh ? '💰 內部人買' : '💰 Insider buy'}</span>`);
+    } else if (sm.insider_signal === 'selling') {
+        pills.push(`<span class="enr-pill" style="background:rgba(245,158,11,0.18);color:#fbbf24" title="Insider net-sell 90d">${isZh ? '↓ 內部人賣' : '↓ Insider sell'}</span>`);
+    }
+    if (sm.institutional_accumulation) {
+        const t = isZh ? '🏦 機構加碼' : '🏦 Inst accum';
+        pills.push(`<span class="enr-pill" style="background:rgba(34,197,94,0.15);color:#86efac" title="Institutional QoQ +${sm.institutional_pct_delta?.toFixed(1) || '?'}%">${escapeHtml(t)}</span>`);
+    }
+
+    // Analyst
+    const a = enr.analyst || {};
+    if (a.upside_pct != null) {
+        const up = a.upside_pct;
+        const color = up >= 10 ? '#86efac' : up >= 0 ? '#a1a1aa' : '#fca5a5';
+        const bg = up >= 10 ? 'rgba(34,197,94,0.15)' : up >= 0 ? 'rgba(100,116,139,0.15)' : 'rgba(239,68,68,0.15)';
+        const tip = a.pt_target ? `PT $${a.pt_target} vs $${a.current_price}` : '';
+        pills.push(`<span class="enr-pill" title="${escapeHtml(tip)}" style="background:${bg};color:${color}">PT ${up >= 0 ? '+' : ''}${up.toFixed(1)}%</span>`);
+    }
+    if (a.tailwind) {
+        pills.push(`<span class="enr-pill" style="background:rgba(34,197,94,0.15);color:#86efac" title="Recent rating upgrades > downgrades">${isZh ? '↑ 評等升' : '↑ Upgrades'}</span>`);
+    }
+
+    // Score multiplier indicator (small grey, only when meaningful)
+    const m = enr.enrichment_multiplier;
+    if (m != null && Math.abs(m - 1.0) > 0.05 && finalScore != null && rawScore != null) {
+        const tip = isZh
+            ? `原始 ${rawScore.toFixed(2)} × 加成 ${m.toFixed(2)} = ${finalScore.toFixed(2)}`
+            : `Raw ${rawScore.toFixed(2)} × ${m.toFixed(2)} = ${finalScore.toFixed(2)}`;
+        const color = m > 1.0 ? '#86efac' : '#fbbf24';
+        pills.push(`<span class="enr-pill" title="${escapeHtml(tip)}" style="background:rgba(63,63,70,0.5);color:${color};font-family:monospace;font-size:9px">×${m.toFixed(2)}</span>`);
+    }
+
+    return pills.join('');
+}
+
 function renderMoverCard(mover) {
     const ticker = mover.ticker || '?';
     const st = mover.short_term || {};
@@ -689,6 +793,9 @@ function renderMoverCard(mover) {
     const tm = st.trading_meta || {};
     const cf = mover.concentration_flag;
     const current = st.current_price;
+    // V2.12.0 — enrichment pills (market cap tier + earnings/quality/smart-money/analyst)
+    const enr = mover.enrichment || {};
+    const enrPills = renderEnrichmentPills(enr, mover.final_score, mover.raw_score);
 
     return `
         <div class="glass-card p-3 space-y-3 mover-card-radar">
@@ -705,6 +812,8 @@ function renderMoverCard(mover) {
                     </button>
                 </div>
             </div>
+
+            ${enrPills ? `<div class="enrichment-pills flex flex-wrap gap-1">${enrPills}</div>` : ''}
 
             <div class="horizon-bar">
                 ${renderHorizon('1d', horizons['1d'], false)}
@@ -932,4 +1041,401 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(render)
             .catch(err => console.error('Radar data load failed:', err));
     }
+
+    // V2.12.0 — bootstrap per-theme mini heatmaps (after theme grid renders)
+    setTimeout(() => { loadThemeHeatmap(); startThemeHeatmapPolling(); }, 800);
+});
+
+
+/* ════════════════════════════════════════════════════════════════════
+ * V2.12.0 — Per-theme Mini Heatmap + K-line drill (radar page)
+ *
+ * Each theme card embeds a small D3 treemap of its representative_stocks
+ * (from theme-detector cache, joined with /api/heatmap/data quotes).
+ * Data source: /api/theme-heatmap (server-side composite, 3min cache).
+ *
+ * Click ticker tile → /api/heatmap/intraday/<TICKER> → Chart.js K-line +
+ * volume; 15s polling while market open, single-watcher (new click cancels).
+ * ════════════════════════════════════════════════════════════════════ */
+
+const THEME_HEATMAP_POLL_MS = 180000;   // 3 min
+const RADAR_KLINE_POLL_MS   = 15000;    // 15s open / 5min closed (server enforces TTL)
+
+let _lastThemeHeatmap   = null;          // {themes: [...], market_open, ...}
+let _themeHeatmapTimer  = null;
+
+let _radarKlineTicker   = null;
+let _radarKlineTimer    = null;
+let _radarKlineChart    = null;
+let _radarVolumeChart   = null;
+
+function _radarHeatmapColorFor(changePct) {
+    if (changePct === null || changePct === undefined || isNaN(changePct)) return '#d4d4d8';
+    const clamped = Math.max(-3, Math.min(3, changePct));
+    const t = Math.abs(clamped) / 3;
+    const center = [212, 212, 216];
+    let mid, peak;
+    if (clamped >= 0) {
+        mid  = [134, 239, 172];
+        peak = [16, 185, 129];
+    } else {
+        mid  = [252, 165, 165];
+        peak = [239, 68, 68];
+    }
+    let r, g, b;
+    if (t < 0.5) {
+        const lt = t / 0.5;
+        r = center[0] + (mid[0] - center[0]) * lt;
+        g = center[1] + (mid[1] - center[1]) * lt;
+        b = center[2] + (mid[2] - center[2]) * lt;
+    } else {
+        const lt = (t - 0.5) / 0.5;
+        r = mid[0] + (peak[0] - mid[0]) * lt;
+        g = mid[1] + (peak[1] - mid[1]) * lt;
+        b = mid[2] + (peak[2] - mid[2]) * lt;
+    }
+    return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+function _radarHeatmapTextColor(changePct) {
+    if (changePct === null || isNaN(changePct)) return '#52525b';
+    return Math.abs(changePct) >= 1.8 ? '#ffffff' : '#18181b';
+}
+
+function _radarTruncate(text, availPx, charPx) {
+    if (!text) return '';
+    const maxChars = Math.floor(availPx / charPx);
+    if (maxChars < 2) return '';
+    if (text.length <= maxChars) return text;
+    return text.slice(0, Math.max(1, maxChars - 1)) + '…';
+}
+
+function _radarFormatMcap(mcap) {
+    if (!mcap) return '--';
+    if (mcap >= 1e12) return (mcap / 1e12).toFixed(2) + 'T';
+    if (mcap >= 1e9)  return (mcap / 1e9).toFixed(1)  + 'B';
+    if (mcap >= 1e6)  return (mcap / 1e6).toFixed(0)  + 'M';
+    return mcap.toFixed(0);
+}
+
+function _radarFormatVol(v) {
+    if (!v) return '--';
+    if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+    if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+    if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+    return String(v);
+}
+
+async function loadThemeHeatmap() {
+    try {
+        const r = await fetch('/api/theme-heatmap');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        _lastThemeHeatmap = data;
+        renderAllThemeMiniHeatmaps(data.themes || []);
+    } catch (e) {
+        console.error('Theme heatmap load error:', e.message);
+    }
+}
+
+function renderAllThemeMiniHeatmaps(themes) {
+    const byName = new Map(themes.map(t => [t.name, t]));
+    document.querySelectorAll('.mini-heatmap-slot').forEach(slot => {
+        const name = slot.dataset.themeName;
+        const theme = byName.get(name);
+        if (!theme || !theme.tickers || !theme.tickers.length) {
+            slot.innerHTML = `<div class="text-[9px] text-zinc-600 absolute inset-0 flex items-center justify-center">無覆蓋資料</div>`;
+            return;
+        }
+        renderThemeMiniHeatmap(slot, theme);
+    });
+}
+
+function renderThemeMiniHeatmap(container, theme) {
+    if (!window.d3) return;
+    container.innerHTML = '';
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if (w <= 0 || h <= 0) return;
+
+    const root = {
+        name: theme.name,
+        children: theme.tickers.map(t => ({ ...t, name: t.ticker })),
+    };
+    const hierarchy = d3.hierarchy(root)
+        // Use sqrt of market_cap so smaller-cap tiles aren't crushed; +1 floor avoids 0
+        .sum(d => Math.sqrt(Math.max(1, d.market_cap || 1)))
+        .sort((a, b) => (b.value || 0) - (a.value || 0));
+
+    d3.treemap()
+        .size([w, h])
+        .paddingInner(1)
+        .paddingOuter(1)
+        .round(true)(hierarchy);
+
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('width', w).attr('height', h)
+        .style('display', 'block')
+        .style('font-family', 'Inter, sans-serif');
+
+    const cells = svg.selectAll('g.cell')
+        .data(hierarchy.leaves())
+        .enter().append('g')
+        .attr('class', 'cell')
+        .attr('transform', d => `translate(${d.x0},${d.y0})`)
+        .style('cursor', 'pointer');
+
+    cells.append('rect')
+        .attr('width', d => Math.max(0, d.x1 - d.x0))
+        .attr('height', d => Math.max(0, d.y1 - d.y0))
+        .attr('fill', d => _radarHeatmapColorFor(d.data.change_pct))
+        .attr('stroke', 'rgba(0,0,0,0.4)')
+        .attr('stroke-width', 0.5);
+
+    cells.each(function(d) {
+        const cw = d.x1 - d.x0, ch = d.y1 - d.y0;
+        const ticker = d.data.ticker || '';
+        if (cw < 18 || ch < 12) return;       // too small for label
+        const baseSize = Math.min(11, Math.max(7, Math.sqrt(cw * ch) / 4.5));
+        const fill = _radarHeatmapTextColor(d.data.change_pct);
+        const pct = d.data.change_pct;
+        const showPct = ch >= baseSize * 2 + 4 && cw >= 30;
+        if (showPct) {
+            d3.select(this).append('text')
+                .attr('x', cw / 2).attr('y', ch / 2 - 1)
+                .attr('text-anchor', 'middle').attr('font-size', baseSize)
+                .attr('font-weight', 800).attr('fill', fill)
+                .text(ticker);
+            d3.select(this).append('text')
+                .attr('x', cw / 2).attr('y', ch / 2 + baseSize - 1)
+                .attr('text-anchor', 'middle').attr('font-size', baseSize * 0.78)
+                .attr('font-weight', 600).attr('fill', fill)
+                .text(pct == null ? '--' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%');
+        } else {
+            d3.select(this).append('text')
+                .attr('x', cw / 2).attr('y', ch / 2 + baseSize / 3)
+                .attr('text-anchor', 'middle').attr('font-size', baseSize)
+                .attr('font-weight', 800).attr('fill', fill).text(ticker);
+        }
+    });
+
+    cells.on('mouseenter', function(event, d) { _radarShowTooltip(d.data, event); event.stopPropagation(); })
+         .on('mousemove',  function(event)    { _radarPositionTooltip(event); })
+         .on('mouseleave', function()         { _radarHideTooltip(); })
+         .on('click',      function(event, d) {
+             event.stopPropagation();    // don't trigger card's toggleExpand
+             selectRadarKline(d.data);
+         });
+}
+
+function _radarShowTooltip(ticker, event) {
+    const tip = document.getElementById('radar-heatmap-tooltip');
+    if (!tip) return;
+    const pct = ticker.change_pct;
+    const pctColor = pct == null ? '#a1a1aa' : (pct >= 0 ? '#22c55e' : '#ef4444');
+    const pctStr   = pct == null ? '--' : (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+    const priceStr = ticker.price == null ? '--' : '$' + ticker.price.toFixed(2);
+    const rangeStr = (ticker.day_low != null && ticker.day_high != null)
+        ? `$${ticker.day_low.toFixed(2)} – $${ticker.day_high.toFixed(2)}` : '--';
+    tip.innerHTML = `
+        <div class="text-[10px] text-zinc-500 mb-1">${_radarEsc(ticker.sector)} · ${_radarEsc(ticker.industry)}</div>
+        <div class="flex items-baseline gap-2 mb-2">
+            <span class="text-base font-black text-white">${_radarEsc(ticker.ticker)}</span>
+            <span class="text-[10px] text-zinc-400 truncate">${_radarEsc(ticker.name || '')}</span>
+        </div>
+        <div class="space-y-1 text-[11px] text-zinc-300">
+            <div class="flex justify-between"><span class="text-zinc-500">現價</span><span class="font-mono font-bold text-white">${priceStr}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">漲跌</span><span class="font-mono font-bold" style="color: ${pctColor}">${pctStr}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">市值</span><span class="font-mono">${_radarFormatMcap(ticker.market_cap)}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">日內區間</span><span class="font-mono">${rangeStr}</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">成交量</span><span class="font-mono">${_radarFormatVol(ticker.volume)}</span></div>
+        </div>
+        <div class="mt-2 pt-2 border-t border-zinc-700/40 text-[10px] text-zinc-400 italic">
+            點擊看 5min K 線 + 成交量
+        </div>`;
+    tip.classList.remove('hidden');
+    _radarPositionTooltip(event);
+}
+
+function _radarPositionTooltip(event) {
+    const tip = document.getElementById('radar-heatmap-tooltip');
+    if (!tip || tip.classList.contains('hidden')) return;
+    const rect = tip.getBoundingClientRect();
+    const margin = 12;
+    let x = event.clientX + 14;
+    let y = event.clientY + 14;
+    if (x + rect.width  > window.innerWidth  - margin) x = event.clientX - rect.width  - 14;
+    if (y + rect.height > window.innerHeight - margin) y = event.clientY - rect.height - 14;
+    tip.style.left = Math.max(margin, x) + 'px';
+    tip.style.top  = Math.max(margin, y) + 'px';
+}
+
+function _radarHideTooltip() {
+    const tip = document.getElementById('radar-heatmap-tooltip');
+    if (tip) tip.classList.add('hidden');
+}
+
+function _radarEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+/* ── K-line drill ─────────────────────────────────────────────────── */
+function selectRadarKline(tickerData) {
+    const isNewTicker = (_radarKlineTicker !== tickerData.ticker);
+    _radarKlineTicker = tickerData.ticker;
+    const panel = document.getElementById('radar-kline-panel');
+    if (panel) panel.classList.remove('hidden');
+    document.getElementById('radar-kline-ticker').textContent = tickerData.ticker;
+    document.getElementById('radar-kline-name').textContent   = tickerData.name || '';
+    if (tickerData.price != null) {
+        document.getElementById('radar-kline-price').textContent = '$' + tickerData.price.toFixed(2);
+    } else {
+        document.getElementById('radar-kline-price').textContent = '—';
+    }
+    const pct = tickerData.change_pct;
+    const chgEl = document.getElementById('radar-kline-change');
+    if (pct != null) {
+        chgEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+        chgEl.style.color = pct >= 0 ? '#22c55e' : '#ef4444';
+    } else {
+        chgEl.textContent = '—';
+        chgEl.style.color = '';
+    }
+    document.getElementById('radar-kline-status').textContent = '載入中…';
+    document.getElementById('radar-kline-updated').textContent = '';
+    if (window.lucide) lucide.createIcons();
+
+    // V2.12.0 — when switching to a different ticker, immediately clear the
+    // previous chart so user doesn't see stale data during the 1-3s fetch.
+    if (isNewTicker) {
+        if (_radarKlineChart)  { _radarKlineChart.destroy();  _radarKlineChart  = null; }
+        if (_radarVolumeChart) { _radarVolumeChart.destroy(); _radarVolumeChart = null; }
+        const overlay = document.getElementById('radar-kline-loading');
+        const overlayTicker = document.getElementById('radar-kline-loading-ticker');
+        if (overlayTicker) overlayTicker.textContent = tickerData.ticker;
+        if (overlay) overlay.classList.remove('hidden');
+    }
+
+    if (_radarKlineTimer) clearInterval(_radarKlineTimer);
+    loadRadarKline();
+    _radarKlineTimer = setInterval(() => {
+        if (document.visibilityState === 'visible' && _radarKlineTicker) loadRadarKline();
+    }, RADAR_KLINE_POLL_MS);
+}
+
+async function loadRadarKline() {
+    if (!_radarKlineTicker) return;
+    try {
+        const r = await fetch(`/api/heatmap/intraday/${_radarKlineTicker}`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        renderRadarKline(data);
+    } catch (e) {
+        console.error('Radar K-line load error:', e.message);
+    }
+}
+
+function renderRadarKline(data) {
+    const bars = data.bars || [];
+    // Hide loading overlay (data arrived; even empty bars means fetch completed)
+    const overlay = document.getElementById('radar-kline-loading');
+    if (overlay) overlay.classList.add('hidden');
+    if (!bars.length) {
+        document.getElementById('radar-kline-status').textContent = '無資料';
+        return;
+    }
+    const labels = bars.map(b => (b.time || '').slice(11, 16));   // HH:MM
+    const closes = bars.map(b => b.c);
+    const vols   = bars.map(b => b.v);
+    const colors = bars.map((b, i) => {
+        const prev = i === 0 ? b.o : bars[i-1].c;
+        return b.c >= prev ? 'rgba(34,197,94,0.7)' : 'rgba(239,68,68,0.7)';
+    });
+
+    document.getElementById('radar-kline-status').textContent =
+        data.market_open ? '盤中 · 15s 更新' : '收盤 · 5min 更新';
+    if (data.as_of) {
+        const dt = new Date(data.as_of);
+        document.getElementById('radar-kline-updated').textContent =
+            'updated ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    // Price line chart
+    const priceCanvas = document.getElementById('radar-kline-canvas');
+    if (_radarKlineChart) _radarKlineChart.destroy();
+    _radarKlineChart = new Chart(priceCanvas, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: data.symbol,
+                data: closes,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.08)',
+                fill: true,
+                pointRadius: 0,
+                borderWidth: 1.5,
+                tension: 0.15,
+            }],
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+            scales: {
+                x: { ticks: { maxTicksLimit: 8, color: '#71717a', font: { size: 9 } }, grid: { color: 'rgba(82,82,91,0.15)' } },
+                y: { ticks: { color: '#71717a', font: { size: 9 } }, grid: { color: 'rgba(82,82,91,0.15)' } },
+            },
+        },
+    });
+
+    // Volume bar chart
+    const volCanvas = document.getElementById('radar-volume-canvas');
+    if (_radarVolumeChart) _radarVolumeChart.destroy();
+    _radarVolumeChart = new Chart(volCanvas, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Volume', data: vols, backgroundColor: colors, borderWidth: 0 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false,
+                callbacks: { label: (ctx) => 'Vol: ' + _radarFormatVol(ctx.raw) } } },
+            scales: {
+                x: { display: false },
+                y: { ticks: { color: '#71717a', font: { size: 8 }, callback: (v) => _radarFormatVol(v) },
+                     grid: { color: 'rgba(82,82,91,0.15)' } },
+            },
+        },
+    });
+}
+
+function closeRadarKline() {
+    _radarKlineTicker = null;
+    if (_radarKlineTimer) { clearInterval(_radarKlineTimer); _radarKlineTimer = null; }
+    if (_radarKlineChart) { _radarKlineChart.destroy(); _radarKlineChart = null; }
+    if (_radarVolumeChart) { _radarVolumeChart.destroy(); _radarVolumeChart = null; }
+    const panel = document.getElementById('radar-kline-panel');
+    if (panel) panel.classList.add('hidden');
+}
+
+/* ── Polling ──────────────────────────────────────────────────────── */
+function startThemeHeatmapPolling() {
+    if (_themeHeatmapTimer) clearInterval(_themeHeatmapTimer);
+    _themeHeatmapTimer = setInterval(() => {
+        if (document.visibilityState === 'visible') loadThemeHeatmap();
+    }, THEME_HEATMAP_POLL_MS);
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        loadThemeHeatmap();
+        if (_radarKlineTicker) loadRadarKline();
+    }
+});
+
+window.addEventListener('resize', () => {
+    if (_lastThemeHeatmap) renderAllThemeMiniHeatmaps(_lastThemeHeatmap.themes || []);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('radar-kline-close')?.addEventListener('click', closeRadarKline);
 });

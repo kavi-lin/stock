@@ -33,6 +33,91 @@ except Exception:
 FMP_BASE = "https://financialmodelingprep.com"
 
 
+# ── EARNINGS_ANALYST_BUNDLE bundle-first reader (v1.84) ────────────────────
+def _bundle_path_for(ticker: str):
+    """Locate latest earnings-analyst cache for ticker, if any.
+    Format: skills/earnings-analyst/cache/<TICKER>_<DATE>.json
+    """
+    import glob
+    repo_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..")
+    )
+    pat = os.path.join(repo_root, "skills", "earnings-analyst", "cache",
+                       f"{ticker.upper()}_*.json")
+    candidates = sorted([p for p in glob.glob(pat) if "infographic" not in p])
+    return candidates[-1] if candidates else None
+
+
+def _load_bundle(ticker: str):
+    """Read and return latest earnings-analyst bundle, or None."""
+    p = _bundle_path_for(ticker)
+    if not p:
+        return None
+    try:
+        with open(p) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _derive_from_bundle(bundle: dict) -> dict:
+    """Map EARNINGS_ANALYST_BUNDLE fields onto the same shape that analyze()
+    fills via yfinance. Used when bundle is fresh — avoids redundant yfinance
+    network call for fields that earnings-analyst already cached.
+
+    Returns a dict of {block_name: {field: value}} that can be merged into the
+    normal analyze() output.
+    """
+    if not bundle:
+        return {}
+    q0 = (bundle.get("quarterly_pnl") or [{}])[0] if bundle.get("quarterly_pnl") else {}
+    cf0 = (bundle.get("cash_flow") or [{}])[0] if bundle.get("cash_flow") else {}
+    bs0 = (bundle.get("balance_sheet") or [{}])[0] if bundle.get("balance_sheet") else {}
+    ttm = bundle.get("ttm_metrics", {}) or {}
+    km  = ttm.get("from_key_metrics_ttm", {}) or {}
+    rat = ttm.get("from_ratios_ttm", {}) or {}
+    ev  = bundle.get("enterprise_value", {}) or {}
+    # next_earnings_est is a string like "2026-06-27" in current schema
+    nx_raw = bundle.get("next_earnings_est")
+    nx_date = nx_raw if isinstance(nx_raw, str) else (nx_raw or {}).get("date")
+
+    ev_to_ebitda = km.get("evToEBITDATTM") or rat.get("enterpriseValueMultipleTTM")
+    pe          = rat.get("priceToEarningsRatioTTM")
+    pb          = rat.get("priceToBookRatioTTM")
+    dt_eq       = rat.get("debtToEquityRatioTTM")
+    net_margin  = rat.get("netProfitMarginTTM")
+    op_margin   = rat.get("operatingProfitMarginTTM")
+    gross_margin = rat.get("grossProfitMarginTTM")
+    fcf_yield_decimal = km.get("freeCashFlowYieldTTM")
+
+    derived: dict = {
+        "valuation": {
+            "pe_ratio":  pe,
+            "pb_ratio":  pb,
+            "ev_ebitda": ev_to_ebitda,
+        },
+        "balance_sheet": {
+            "debt_to_equity": dt_eq,
+        },
+        "margins_cash": {
+            "gross_margin_pct":     round(gross_margin * 100, 2) if gross_margin else None,
+            "operating_margin_pct": round(op_margin * 100, 2) if op_margin else None,
+            "net_margin_pct":       round(net_margin * 100, 2) if net_margin else None,
+            "fcf_yield_pct":        round(fcf_yield_decimal * 100, 2)
+                                    if fcf_yield_decimal else None,
+        },
+        "earnings_calendar": {
+            "next_earnings_date": nx_date,
+        },
+        "_bundle_meta": {
+            "source": "EARNINGS_ANALYST_BUNDLE",
+            "as_of": bundle.get("as_of_date") or bundle.get("last_earnings_date"),
+            "ticker": bundle.get("ticker"),
+        },
+    }
+    return derived
+
+
 # ── FMP supplement (optional) ───────────────────────────────────────────
 def _fmp_sector_pe(sector: str, api_key: str):
     """Return sector-median trailing P/E via FMP `/stable/sector-pe-snapshot`.
@@ -220,8 +305,10 @@ def _warnings(margins: dict, valuation: dict, balance: dict, growth: dict):
 
 
 # ── Main ────────────────────────────────────────────────────────────────
-def analyze(ticker: str, use_fmp: bool = True):
+def analyze(ticker: str, use_fmp: bool = True, use_bundle: bool = True):
     ticker = ticker.upper()
+    bundle = _load_bundle(ticker) if use_bundle else None
+
     tk = yf.Ticker(ticker)
     info = tk.info or {}
 
@@ -248,13 +335,29 @@ def analyze(ticker: str, use_fmp: bool = True):
     earnings  = _earnings_calendar_block(tk)
     analyst   = _analyst_block(info)
 
+    # Bundle-first override: prefer EARNINGS_ANALYST_BUNDLE values where present,
+    # since those are FMP-sourced canonical TTM metrics. yfinance still provides
+    # fields the bundle doesn't carry (price block, growth/EPS forward, analyst).
+    bundle_overrides = _derive_from_bundle(bundle) if bundle else {}
+    if bundle_overrides:
+        for block_name, block_data in bundle_overrides.items():
+            if block_name.startswith("_"):
+                continue
+            target = locals().get(block_name)
+            if isinstance(target, dict):
+                for k, v in block_data.items():
+                    if v is not None:
+                        target[k] = v
+
     if growth.get("eps_growth_forward_consensus_pct") is None:
         missing.append("eps_growth_forward_consensus_pct")
 
     return {
         "ticker": ticker,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "data_source": "mixed" if (fmp_calls > 0 and fmp_failures == 0) else "yfinance",
+        "data_source": "bundle+yfinance" if bundle else (
+            "mixed" if (fmp_calls > 0 and fmp_failures == 0) else "yfinance"
+        ),
         "price":              price,
         "valuation":          valuation,
         "growth":             growth,
@@ -266,7 +369,9 @@ def analyze(ticker: str, use_fmp: bool = True):
         "data_quality": {
             "fmp_calls":       fmp_calls,
             "fmp_failures":    fmp_failures,
-            "yf_fallbacks":    1,   # we always ran yfinance for the core data
+            "yf_fallbacks":    1,
+            "bundle_used":     bool(bundle),
+            "bundle_meta":     bundle_overrides.get("_bundle_meta"),
             "missing_fields":  missing,
         },
     }
@@ -279,10 +384,14 @@ def main():
                     help="Output JSON only; no human summary")
     ap.add_argument("--no-fmp", action="store_true",
                     help="Skip FMP probe entirely (sector-median P/E will be null)")
+    ap.add_argument("--no-bundle", action="store_true",
+                    help="Skip EARNINGS_ANALYST_BUNDLE consult (force yfinance for all fields)")
     args = ap.parse_args()
 
     try:
-        payload = analyze(args.ticker, use_fmp=not args.no_fmp)
+        payload = analyze(args.ticker,
+                          use_fmp=not args.no_fmp,
+                          use_bundle=not args.no_bundle)
     except Exception as e:
         err = {"ticker": args.ticker.upper(), "error": f"{type(e).__name__}: {e}"}
         print(json.dumps(err, indent=2), file=sys.stdout)

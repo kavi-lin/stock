@@ -124,10 +124,29 @@ Agent(
   5. (V1.4) **Smart Money Divergence 強制檢查** — 讀 `_phase3.smart_money_signals`（若可用），
      對每個 HOT 提案 sector 檢查：
        - `insider_acquired_disposed_ratio_q < 0.5` (內部人賣多買少) AND/OR
-       - `senate_net_buy_30d < 0` (議員淨賣超)
+       - `senate_net_buy_30d < 0` (議員淨賣超) AND/OR
+       - (V2.9.0) `institutional_holders_qoq_delta < 0` AND `institutional_ownership_pct_delta < 0`
+         AND `institutional_sample_size >= 3`（13F filer 與機構持股 % 都 QoQ 下降）
      → MUST 在 `challenge_targets` 加 **smart_money_divergence** challenge,
-       counter_evidence 必須引用具體數值(例 "insider ratio 0.41 < 0.5 threshold; senate net −3 in 30d")。
-     - smart money 與 HOT consensus 一致(ratio > 0.8 且 senate ≥ 0)→ 不必挑戰此項
+       counter_evidence 必須引用具體數值(例 "insider ratio 0.41 < 0.5 threshold; senate net −3 in 30d;
+       13F holders QoQ −12, ownership % −0.45 in Q4 2025")。
+     - smart money 與 HOT consensus 一致(ratio > 0.8 且 senate ≥ 0 且 institutional_holders_qoq_delta ≥ 0)→ 不必挑戰此項
+
+  6. (V2.9.0) **Forward Valuation Divergence**（PT consensus）— 讀 `_phase3.sector_earnings_pulse`，
+     對每個 HOT 提案 sector 檢查：
+       - `analyst_pt_upside_median_pct < 0.03`（中位 PT 上行空間 < 3%）
+       - AND `pt_sample_size >= 3`（樣本足）
+     → MUST 在 `challenge_targets` 加 **pt_target_exhausted** challenge,
+       counter_evidence 引用具體數值(例 "PT median upside 1.8% < 3% threshold across 5 mega-caps")。
+     - PT upside ≥ 3% 或樣本不足 → 不必挑戰此項
+
+  7. (V2.9.0) **動能耗盡 Divergence**（多週期 RS）— 讀 `_phase1.sectors[].sector_valuation`，
+     對每個 HOT 提案 sector 檢查：
+       - `rs_vs_spy_3m > 0.05`（3M RS 強勢，> +5%）
+       - AND `rs_vs_spy_5d < 0` AND `rs_vs_spy_20d < 0`（近 5d 與 20d 皆轉弱）
+     → MUST 在 `challenge_targets` 加 **momentum_exhaustion** challenge,
+       counter_evidence 引用具體數值(例 "3M RS +8.1% but 20d −2.3% / 5d −0.7% — short-term reversal")。
+     - 三窗口同向（皆正或皆負）→ 不必挑戰此項
 
   OUTPUT JSON:
   {

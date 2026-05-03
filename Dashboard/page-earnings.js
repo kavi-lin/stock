@@ -24,6 +24,7 @@
         sort:         localStorage.getItem('ea_sort')         || 'score-desc',
         verdicts:     new Set(JSON.parse(localStorage.getItem('ea_verdicts') || JSON.stringify(VERDICTS))),
         flags:        localStorage.getItem('ea_flags')        || 'any', // 'any' | 'clean' | 'has'
+        search:       '',  // V2.8.2 — ticker substring filter
     };
 
     const RECENT_KEY = 'ea_recent_tickers';
@@ -221,12 +222,24 @@
             filterState.sort = 'score-desc';
             filterState.verdicts = new Set(VERDICTS);
             filterState.flags = 'any';
+            filterState.search = '';
             localStorage.removeItem('ea_sort');
             localStorage.removeItem('ea_verdicts');
             localStorage.removeItem('ea_flags');
+            const si = document.getElementById('ea-search-input');
+            if (si) si.value = '';
             renderFilterBar();
             renderGrid();
         });
+
+        // V2.8.2 — ticker search input
+        const searchInput = document.getElementById('ea-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                filterState.search = (e.target.value || '').trim();
+                renderGrid();
+            });
+        }
     }
 
     // ── Command bar ──────────────────────────────────────────────────────
@@ -335,6 +348,12 @@
     function getFilteredSorted() {
         let rows = allAnalyses.slice();
 
+        // V2.8.2 — ticker substring search
+        if (filterState.search) {
+            const q = filterState.search.toUpperCase();
+            rows = rows.filter(r => (r.ticker || '').toUpperCase().includes(q));
+        }
+
         // Verdict
         rows = rows.filter(r => filterState.verdicts.has(r.verdict));
 
@@ -397,17 +416,52 @@
         const flagsRow = renderFlagsRow(r.quality_flags, isZh);
         // Freshness
         const fresh = renderFreshness(r.cache_age_days, isZh);
-        // Buttons
-        const reportBtn = r.report_path
-            ? `<button class="ea-act-btn ea-act-btn-primary" data-action="view" data-path="${r.report_path}">📄 ${isZh?'看報告':'Report'}</button>`
-            : '';
+        // Buttons (V1.73 — primary now opens infographic page; markdown moved to inline collapse)
+        const reportBtn = `<button class="ea-act-btn ea-act-btn-primary" data-action="infographic" data-ticker="${r.ticker}">📊 ${isZh?'Infographic':'Infographic'}${r.has_infographic === false ? ' *' : ''}</button>`;
         const rerunBtn = `<button class="ea-act-btn" data-action="rerun" data-ticker="${r.ticker}">🔄 ${isZh?'重跑':'Re-run'}</button>`;
 
         // Meta pills
         const metaPills = [];
         if (r.sector)            metaPills.push(`<span class="ea-pill">${r.sector}</span>`);
         if (r.industry && r.industry !== r.sector) metaPills.push(`<span class="ea-pill">${r.industry}</span>`);
-        if (r.last_earnings_date) metaPills.push(`<span class="ea-pill ea-pill-date" title="${isZh?'最新財報':'Last earnings'}">📅 ${r.last_earnings_date}</span>`);
+        // V2.8.4 — last earnings pill with fiscal label fallback
+        if (r.last_earnings_date) {
+            const fiscalPart = r.fiscal_label ? `${r.fiscal_label} · ` : '';
+            const lastLabel = isZh ? '最新財報' : 'Last earnings';
+            metaPills.push(
+                `<span class="ea-pill ea-pill-date" title="${lastLabel}">📅 ${fiscalPart}${r.last_earnings_date}</span>`
+            );
+        }
+        // Next earnings — FMP confirmed (📅) or +91d heuristic fallback (🔮)
+        if (r.next_earnings_est) {
+            // Bump fiscal quarter by 1 if we know last quarter (e.g. Q4 FY26 → Q1 FY27)
+            let nextFiscal = '';
+            if (r.fiscal_label) {
+                const m = String(r.fiscal_label).match(/Q(\d)\s*FY\s*(\d+)/i);
+                if (m) {
+                    const q = parseInt(m[1], 10);
+                    const fy = parseInt(m[2], 10);
+                    const nq = q === 4 ? 1 : q + 1;
+                    const nfy = q === 4 ? fy + 1 : fy;
+                    nextFiscal = `Q${nq} FY${nfy} · `;
+                }
+            }
+            const isConfirmed = r.next_earnings_source === 'fmp_confirmed';
+            const icon  = isConfirmed ? '📅' : '🔮';
+            const label = isConfirmed
+                ? (isZh ? '下次財報' : 'Next earnings')
+                : (isZh ? '下次預估' : 'Next earnings (est.)');
+            let tip = label;
+            if (isConfirmed && r.next_earnings_eps_estimate != null) {
+                tip += ` · EPS est ${r.next_earnings_eps_estimate}`;
+                if (r.next_earnings_revenue_estimate != null) {
+                    tip += ` · Rev est $${(r.next_earnings_revenue_estimate / 1e9).toFixed(2)}B`;
+                }
+            }
+            metaPills.push(
+                `<span class="ea-pill ea-pill-date-next" title="${tip}">${icon} ${nextFiscal}${r.next_earnings_est}</span>`
+            );
+        }
 
         return `<div class="ea-card" style="animation-delay:${idx * 60}ms" data-ticker="${r.ticker}">
             <div class="ea-card-stripe ea-card-stripe-${vKey}"></div>
@@ -491,18 +545,21 @@
     }
 
     function renderComponentBars(sc) {
+        // V2.8.4 — each row gets data-signal-tip pointing to ed_score_<key> in
+        // utils.js SIGNAL_TIPS, so hover triggers sector-style explanation card.
         const items = [
-            { key: 'quality',   label: 'QUALITY',  val: sc.quality   ?? 0, max: 30, fill: 'q' },
-            { key: 'growth',    label: 'GROWTH',   val: sc.growth    ?? 0, max: 30, fill: 'g' },
-            { key: 'valuation', label: 'VALUE',    val: sc.valuation ?? 0, max: 25, fill: 'v' },
-            { key: 'analyst',   label: 'ANALYST',  val: sc.analyst   ?? 0, max: 15, fill: 'a' },
+            { key: 'quality',   tip: 'ed_score_quality', label: 'QUALITY',  val: sc.quality   ?? 0, max: 30, fill: 'q' },
+            { key: 'growth',    tip: 'ed_score_growth',  label: 'GROWTH',   val: sc.growth    ?? 0, max: 30, fill: 'g' },
+            { key: 'valuation', tip: 'ed_score_value',   label: 'VALUE',    val: sc.valuation ?? 0, max: 25, fill: 'v' },
+            { key: 'analyst',   tip: 'ed_score_analyst', label: 'ANALYST',  val: sc.analyst   ?? 0, max: 15, fill: 'a' },
         ];
         return items.map(it => {
             const pct = Math.max(0, Math.min(100, (it.val / it.max) * 100));
-            return `<div class="ea-comp">
+            const pctStr = pct.toFixed(0);
+            return `<div class="ea-comp" data-signal-tip="${it.tip}">
                 <div class="ea-comp-row">
                     <span class="ea-comp-name">${it.label}</span>
-                    <span class="ea-comp-val">${it.val}<span class="max">/${it.max}</span></span>
+                    <span class="ea-comp-val">${it.val}<span class="max">/${it.max} · ${pctStr}%</span></span>
                 </div>
                 <div class="ea-comp-bar">
                     <div class="ea-comp-fill ea-comp-fill-${it.fill}" style="width:${pct.toFixed(1)}%"></div>
@@ -543,16 +600,14 @@
         return { cls, label: ageLabel, tooltip: isZh ? '財報快取新鮮度' : 'Cache freshness' };
     }
 
-    // ── Action delegation (view report / re-run) ─────────────────────────
+    // ── Action delegation (infographic detail page / re-run) ─────────────
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('.ea-act-btn');
         if (!btn) return;
         const action = btn.dataset.action;
-        if (action === 'view') {
-            const path = btn.dataset.path;
-            if (path && window.UI?.viewReport) {
-                window.UI.viewReport(path);
-            }
+        if (action === 'infographic') {
+            const t = btn.dataset.ticker;
+            if (t) window.location.href = `earnings-detail.html?ticker=${encodeURIComponent(t)}`;
         } else if (action === 'rerun') {
             runEarnings(btn.dataset.ticker);
         }

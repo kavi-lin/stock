@@ -5,6 +5,7 @@
     <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 投資委員會 | Command Center</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="style.css">
@@ -119,8 +120,9 @@
                     </div>
                 </div>
 
-                <!-- Bottom: 3-signal mini gauge → synthesized exposure -->
-                <div id="three-signal-mini" class="mt-5 pt-4 border-t border-zinc-200/40 dark:border-zinc-800/60"></div>
+                <!-- V1.73.4 — three-signal-mini removed; replaced by sector-status-row hero (8 circular gauges + warning flags) below.
+                     Stub kept hidden so script.js renderThreeSignalMini calls don't error. -->
+                <div id="three-signal-mini" class="hidden"></div>
 
                 <!-- Fallback prose (shown only when today_verdict missing) -->
                 <div id="tv-fallback" class="hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
@@ -129,19 +131,38 @@
                 </div>
             </div>
 
-            <!-- Layer 2a: Binary Risk 48h banner (conditional) -->
+            <!-- ── V1.73.4 — Binary risk (adaptive) — promoted from sector page (was older simple list) -->
             <div id="binary-alert-section" class="hidden">
-                <div class="binary-alert px-4 py-3">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-[10px] font-black uppercase tracking-widest" style="color:#ef4444">⚡ Binary Risk Within 48h</span>
-                        <span class="text-[9px] text-zinc-500 font-mono" id="binary-alert-derated" title="二元風險事件（如財報、議息、地緣政治）具有極大不確定性。為防止盲目追高，系統會自動對受影響產業的綜合得分進行 0.70x 係數降權，直至風險解除。">auto-derated ×0.70</span>
+                <div class="binary-adaptive">
+                    <div class="binary-adaptive-header">
+                        <span class="binary-adaptive-title" id="binary-alert-title">⚡ Binary Risk Within 48h</span>
+                        <span class="binary-adaptive-derated" id="binary-alert-derated" title="二元風險事件（如財報、議息、地緣政治）具有極大不確定性。為防止盲目追高，系統會自動對受影響產業的綜合得分進行 0.70x 係數降權，直至風險解除。">auto-derated ×0.70</span>
+                        <span class="binary-adaptive-count" id="binary-alert-count"></span>
                     </div>
-                    <div id="binary-alert-items" class="space-y-2"></div>
+                    <div id="binary-alert-items" class="binary-adaptive-list" data-density="compact"></div>
                 </div>
             </div>
 
-            <!-- Layer 2b: Warning Flags strip (conditional) -->
-            <div id="warning-flags-row" class="flex flex-wrap gap-2"></div>
+            <!-- ── V1.73.4 — Status row hero: 8 circular gauges + warning flags (promoted from sector page) ── -->
+            <section id="risk-overview" class="hidden">
+                <div class="sector-status-row">
+                    <!-- 4 numeric gauges -->
+                    <div id="pill-breadth"   data-signal-tip="breadth"></div>
+                    <div id="pill-ftd"       data-signal-tip="ftd"></div>
+                    <div id="pill-marketop"  data-signal-tip="market_top"></div>
+                    <div id="pill-fg"        data-signal-tip="fg"></div>
+                    <!-- 4 categorical / scaled gauges -->
+                    <div id="pill-regime"    data-signal-tip="regime"></div>
+                    <div id="pill-cycle"     data-signal-tip="cycle"></div>
+                    <div id="pill-exposure"  data-signal-tip="exposure"></div>
+                    <div id="pill-vix"       data-signal-tip="vix"></div>
+                    <!-- Warning flags (severity-tiered cards) — render-order tail -->
+                    <div class="flex-1 flex flex-wrap gap-2 items-center justify-end" id="warning-flags-row"></div>
+                </div>
+            </section>
+
+            <!-- M3: Today's Focus Ticker (cross-module intersection, full-width attention strip) -->
+            <div id="focus-ticker-card" class="hidden focus-ticker-promoted"></div>
 
             <!-- Layer 3: Cross-module Deep Dive (3-column teaser) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -165,15 +186,13 @@
                     <div id="news-verdicts-teaser" class="space-y-2"></div>
                 </div>
 
-                <!-- Momentum Top + Today's Focus Ticker -->
+                <!-- Momentum Top -->
                 <div class="glass-card p-4">
                     <div class="flex items-center gap-2 mb-3">
                         <i data-lucide="zap" class="w-3.5 h-3.5 text-violet-400"></i>
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="teaser-momentum-title">動能榜 TOP 3</span>
                         <a href="momentum.html" class="ml-auto text-[10px] text-zinc-500 hover:text-violet-400 transition-all">→</a>
                     </div>
-                    <!-- M3: Today's Focus Ticker (cross-module intersection) -->
-                    <div id="focus-ticker-card" class="hidden mb-3"></div>
                     <div id="momentum-teaser" class="space-y-2"></div>
                 </div>
             </div>
@@ -203,8 +222,11 @@
                         <span class="text-[10px] text-zinc-500 truncate" data-i18n="launch_desc">輸入 Ticker 或選擇指令進行自動化分析</span>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="ticker-input" placeholder="e.g. MSFT" class="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-all uppercase" maxlength="6">
-                        <button id="launch-btn" class="bg-green-600 hover:bg-green-500 text-black font-bold px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5">
+                        <div class="ticker-input-wrap">
+                            <i data-lucide="search" class="ti-icon w-3.5 h-3.5"></i>
+                            <input type="text" id="ticker-input" placeholder="e.g. MSFT" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-400 rounded-lg py-2 text-sm focus:outline-none focus:border-green-500 transition-all uppercase" maxlength="6">
+                        </div>
+                        <button id="launch-btn" class="cta-launch bg-green-600 hover:bg-green-500 text-black font-bold px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5">
                             <i data-lucide="play" class="w-3.5 h-3.5"></i>
                             <span data-i18n="start_btn">分析</span>
                         </button>
@@ -243,14 +265,78 @@
                 </h3>
                 <button id="preflight-close" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white text-xs font-bold px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800">ESC</button>
             </div>
-            <div id="preflight-body" class="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
-                <div class="animate-pulse text-zinc-500 text-sm text-center py-8">Checking caches...</div>
+            <div id="preflight-body" class="modal-scroll-shadow px-6 pt-6 pb-8 space-y-3 max-h-[72vh] overflow-y-auto">
+                <!-- V2.7.17 — 3-phase pre-market chain UI (visible after click 「開始盤前檢查」) -->
+                <div id="preflight-chain" class="hidden space-y-4">
+                    <div class="preflight-phase" id="preflight-phase-1">
+                        <div class="preflight-phase-head">
+                            <span class="preflight-phase-num">Phase 1</span>
+                            <span class="preflight-phase-title" data-i18n-key="preflight.phase1_title">平行執行</span>
+                            <span class="preflight-phase-hint" data-i18n-key="preflight.phase1_hint">~15 min</span>
+                        </div>
+                        <div class="preflight-row" id="preflight-row-daily">
+                            <span class="preflight-row-icon" id="preflight-icon-daily">⏳</span>
+                            <div class="preflight-row-text">
+                                <div class="preflight-row-label">daily_update.sh</div>
+                                <div class="preflight-row-meta" id="preflight-meta-daily">pending</div>
+                            </div>
+                            <div class="preflight-row-bar"><div class="preflight-row-bar-fill" id="preflight-bar-daily"></div></div>
+                        </div>
+                        <div class="preflight-row" id="preflight-row-news">
+                            <span class="preflight-row-icon" id="preflight-icon-news">⏳</span>
+                            <div class="preflight-row-text">
+                                <div class="preflight-row-label">news protocol</div>
+                                <div class="preflight-row-meta" id="preflight-meta-news">pending</div>
+                            </div>
+                            <div class="preflight-row-bar"><div class="preflight-row-bar-fill" id="preflight-bar-news"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="preflight-phase" id="preflight-phase-2">
+                        <div class="preflight-phase-head">
+                            <span class="preflight-phase-num">Phase 2</span>
+                            <span class="preflight-phase-title" data-i18n-key="preflight.phase2_title">等 Phase 1 完成</span>
+                            <span class="preflight-phase-hint" data-i18n-key="preflight.phase2_hint">~12 min</span>
+                        </div>
+                        <div class="preflight-row" id="preflight-row-sector">
+                            <span class="preflight-row-icon" id="preflight-icon-sector">⏳</span>
+                            <div class="preflight-row-text">
+                                <div class="preflight-row-label">sector protocol</div>
+                                <div class="preflight-row-meta" id="preflight-meta-sector" data-i18n-key="preflight.waiting_phase1">等 Phase 1</div>
+                            </div>
+                            <div class="preflight-row-bar"><div class="preflight-row-bar-fill" id="preflight-bar-sector"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="preflight-phase" id="preflight-phase-3">
+                        <div class="preflight-phase-head">
+                            <span class="preflight-phase-num">Phase 3</span>
+                            <span class="preflight-phase-title" data-i18n-key="preflight.phase3_title">Dashboard 自動刷新</span>
+                            <span class="preflight-phase-hint" data-i18n-key="preflight.phase3_hint">auto</span>
+                        </div>
+                        <div class="preflight-row" id="preflight-row-verdict">
+                            <span class="preflight-row-icon" id="preflight-icon-verdict">⏳</span>
+                            <div class="preflight-row-text">
+                                <div class="preflight-row-label" data-i18n-key="preflight.ai_verdict">AI 裁決面板</div>
+                                <div class="preflight-row-meta" id="preflight-meta-verdict" data-i18n-key="preflight.waiting_phase2">等 Phase 2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Default: existing freshness checklist + free/all-stale buttons (compat) -->
+                <div id="preflight-checklist">
+                    <div class="animate-pulse text-zinc-500 text-sm text-center py-8">Checking caches...</div>
+                </div>
             </div>
-            <div class="border-t border-zinc-200 dark:border-zinc-900 px-6 py-4 flex gap-3 justify-end">
-                <button id="preflight-run-free" class="px-4 py-2 rounded-lg bg-emerald-500 text-black text-xs font-bold hover:bg-emerald-400 transition-all flex items-center gap-1.5 hidden">
+            <div class="border-t border-zinc-200 dark:border-zinc-900 px-6 py-4 flex gap-3 justify-end flex-wrap">
+                <button id="preflight-run-chain" class="px-4 py-2 rounded-lg bg-emerald-500 text-black text-xs font-bold hover:bg-emerald-400 transition-all flex items-center gap-1.5">
+                    <i data-lucide="play" class="w-3 h-3"></i> <span data-i18n-key="preflight.run_chain">開始盤前檢查</span>
+                </button>
+                <button id="preflight-run-free" class="px-3 py-2 rounded-lg bg-zinc-700 text-white text-xs font-bold hover:bg-zinc-600 transition-all flex items-center gap-1.5 hidden">
                     <i data-lucide="zap" class="w-3 h-3"></i> <span id="preflight-free-label">更新免費項目</span>
                 </button>
-                <button id="preflight-run-all" class="px-4 py-2 rounded-lg bg-blue-500 text-white text-xs font-bold hover:bg-blue-400 transition-all flex items-center gap-1.5 hidden">
+                <button id="preflight-run-all" class="px-3 py-2 rounded-lg bg-zinc-700 text-white text-xs font-bold hover:bg-zinc-600 transition-all flex items-center gap-1.5 hidden">
                     <i data-lucide="refresh-cw" class="w-3 h-3"></i> <span id="preflight-all-label">更新全部過期</span>
                 </button>
             </div>
@@ -283,7 +369,7 @@
                 </h3>
                 <button id="close-modal" class="transition-all text-xs font-bold px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800" style="color: var(--text-muted)">CLOSE [ESC]</button>
             </div>
-            <div id="report-content" class="flex-1 overflow-y-auto" style="background-color: var(--bg-card)">
+            <div id="report-content" class="modal-scroll-shadow flex-1 overflow-y-auto" style="background-color: var(--bg-card)">
                 <!-- MD Content or iFrame here -->
             </div>
         </div>

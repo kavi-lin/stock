@@ -1,0 +1,50 @@
+{
+    "phase": 5,
+    "ticker": "VRT",
+    "session_date": "2026-05-02",
+    "session_type": "full_protocol_v4_8",
+    "phase0_source": "SECTOR_CACHE (2026-05-01_phase0.json)",
+    "phase0_macro_multiplier": 0.9,
+    "phase0_regime": "Overheating",
+    "phase2_fundamentals_score": 8.1,
+    "phase2_sentiment_score": 6.2,
+    "phase2_news_score": 8.2,
+    "phase2_technical_score": 7.2,
+    "phase2_blended_score": 7.47,
+    "phase2_8_red_team_score": 6.5,
+    "phase3_risk_adjusted_score": 6.72,
+    "final_recommendation": "HOLD",
+    "position_sizing": "10-15%",
+    "stop_loss": "295.48 (-10% from 328.31)",
+    "take_profit_1": "345 (30% trim)",
+    "take_profit_2": "360+ (30% trim)",
+    "trailing_reserve": "40% for upside capture",
+    "next_earnings_date": "2026-07-28",
+    "days_to_earnings": 87,
+    "key_catalysts": [
+        "Earnings beat/miss (88 days)",
+        "Market breadth recovery (monitor daily)",
+        "Insider buying inflection (monthly)",
+        "FRED rate changes (macro risk)"
+    ],
+    "key_risks": [
+        "EPS growth deceleration below 100%",
+        "Market breadth collapse below 20%",
+        "Insider selling acceleration (ratio > 2.0)",
+        "FTD reversal (current day 16)"
+    ],
+    "protocol_completion": {
+        "phase_0_cache_validation": true,
+        "phase_1_dual_fetch": true,
+        "phase_2_4lane_execution": true,
+        "phase_2_8_red_team": true,
+        "phase_3_blending": true,
+        "phase_4_risk_mgmt": true,
+        "phase_5_report": true
+    },
+    "output_files": [
+        "reports/2026-05-02_VRT.md",
+        "skills/finnhub-client/data/2026-05-02/VRT.json",
+        "investment/invest_logs/2026-05-01_phase0.json (reused)"
+    ]
+}

@@ -20,11 +20,13 @@ import csv
 import io
 import json
 import math
+import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -406,6 +408,100 @@ def estimate_cycle_phase(sectors: list[SectorData]) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# FMP Overlay (optional valuation + price-momentum complement)
+# ---------------------------------------------------------------------------
+
+# FMP "Financial Services" maps to TraderMonty "Financial".
+_FMP_SECTOR_RENAME = {"Financial Services": "Financial"}
+
+
+def _fmp_get(path: str, params: dict, timeout: int = 12) -> list | None:
+    """Read-only FMP REST. Returns None on any failure (graceful no-op)."""
+    api_key = os.environ.get("FMP_API_KEY")
+    if not api_key:
+        return None
+    qs = urllib.parse.urlencode({**params, "apikey": api_key})
+    url = f"https://financialmodelingprep.com/stable/{path}?{qs}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "sector-analyst/1.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if resp.status != 200:
+                return None
+            return json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, OSError, ValueError):
+        return None
+
+
+def _last_n_business_days(n: int) -> list[str]:
+    out, d = [], date.today()
+    while len(out) < n:
+        if d.weekday() < 5:
+            out.append(d.isoformat())
+        d -= timedelta(days=1)
+    return out
+
+
+def _aggregate_by_sector(rows: list, value_key: str) -> dict[str, float]:
+    """Average `value_key` across exchanges per sector. Renames to TraderMonty labels."""
+    bucket: dict[str, list[float]] = {}
+    for r in rows or []:
+        sec = r.get("sector")
+        v = r.get(value_key)
+        if sec is None or v is None:
+            continue
+        sec = _FMP_SECTOR_RENAME.get(sec, sec)
+        bucket.setdefault(sec, []).append(float(v))
+    return {sec: round(sum(vals) / len(vals), 4) for sec, vals in bucket.items()}
+
+
+def fetch_fmp_sector_overlay(days_back: int = 5) -> dict:
+    """Fetch FMP sector PE + rolling performance overlay.
+
+    Returns:
+      {
+        "as_of_date": "<today>",
+        "lookback_days": <days_back>,
+        "pe_by_sector":           {<sector>: <pe>},
+        "perf_1d_pct_by_sector":  {<sector>: <%>},
+        "perf_rolling_pct_by_sector": {<sector>: <%>},
+        "source": "FMP /stable/sector-pe-snapshot + sector-performance-snapshot",
+      }
+    Empty dict on no API key / fetch failure (skill stays usable).
+    """
+    if not os.environ.get("FMP_API_KEY"):
+        return {}
+
+    days = _last_n_business_days(days_back + 1)[1:]  # skip today (likely empty intraday)
+    if not days:
+        return {}
+
+    pe = _fmp_get("sector-pe-snapshot", {"date": days[0]}) or []
+    pe_map = _aggregate_by_sector(pe, "pe")
+
+    rolling: dict[str, float] = {}
+    perf_1d: dict[str, float] = {}
+    for idx, d in enumerate(days):
+        snap = _fmp_get("sector-performance-snapshot", {"date": d}) or []
+        per_sector = _aggregate_by_sector(snap, "averageChange")
+        if idx == 0:
+            perf_1d = per_sector
+        for sec, v in per_sector.items():
+            rolling[sec] = round(rolling.get(sec, 0.0) + v, 4)
+
+    if not (pe_map or perf_1d or rolling):
+        return {}
+
+    return {
+        "as_of_date": date.today().isoformat(),
+        "lookback_days": days_back,
+        "pe_by_sector": pe_map,
+        "perf_1d_pct_by_sector": perf_1d,
+        "perf_rolling_pct_by_sector": rolling,
+        "source": "FMP /stable/sector-pe-snapshot + sector-performance-snapshot",
+    }
+
+
+# ---------------------------------------------------------------------------
 # Output Formatters
 # ---------------------------------------------------------------------------
 
@@ -517,6 +613,7 @@ def format_json(
     trends: dict,
     cycle: dict,
     freshness: dict | None,
+    fmp_overlay: dict | None = None,
 ) -> str:
     """Format analysis results as JSON."""
     data = {
@@ -531,6 +628,7 @@ def format_json(
         "overbought": overbought,
         "oversold": oversold,
         "trends": trends,
+        "fmp_overlay": fmp_overlay or {},
     }
     return json.dumps(data, indent=2, ensure_ascii=False)
 
@@ -723,11 +821,40 @@ def main() -> None:
     trends = analyze_trends(sectors)
     cycle = estimate_cycle_phase(sectors)
 
+    # 3b. FMP overlay (optional valuation + price-momentum complement)
+    fmp_overlay = fetch_fmp_sector_overlay(days_back=5)
+    if fmp_overlay:
+        print(
+            f"FMP overlay: {len(fmp_overlay.get('pe_by_sector', {}))} sector PEs, "
+            f"{len(fmp_overlay.get('perf_rolling_pct_by_sector', {}))} rolling perfs",
+            file=sys.stderr,
+        )
+
     # 4. Format output
     if args.json:
-        output = format_json(ranking, groups, overbought, oversold, trends, cycle, freshness)
+        output = format_json(ranking, groups, overbought, oversold, trends, cycle,
+                             freshness, fmp_overlay)
     else:
         output = format_human(ranking, groups, overbought, oversold, trends, cycle, freshness)
+        # Append FMP overlay block to human output (read-only context, no breakage)
+        if fmp_overlay:
+            extra = ["", "## FMP Overlay (Valuation + Rolling Perf)", ""]
+            pe = fmp_overlay.get("pe_by_sector", {})
+            roll = fmp_overlay.get("perf_rolling_pct_by_sector", {})
+            extra.append("| Sector | PE | Rolling 5d % |")
+            extra.append("|---|---:|---:|")
+            for sec in sorted(set(pe) | set(roll)):
+                pe_v = pe.get(sec)
+                roll_v = roll.get(sec)
+                extra.append(
+                    f"| {sec} | {pe_v:.1f} | {roll_v:+.2f} |"
+                    if pe_v is not None and roll_v is not None
+                    else f"| {sec} | {pe_v if pe_v is not None else 'N/A'} | "
+                         f"{roll_v if roll_v is not None else 'N/A'} |"
+                )
+            extra.append("")
+            extra.append(f"_Source: {fmp_overlay.get('source')}_")
+            output += "\n" + "\n".join(extra)
 
     print(output)
 

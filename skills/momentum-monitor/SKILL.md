@@ -65,6 +65,57 @@ python3 skills/momentum-monitor/scripts/screen.py \
 | `--label BULLISH` | Composite label match |
 | `--signal X` (repeatable, AND) | Required signal in `.signals[]` |
 | `--exclude-signal X` / `--exclude-warning X` | Negative filters |
+| `--min-rsi N` / `--max-rsi N` | RSI-14 bounds |
+
+### V2.1 Leader-finder filters (NEW — replace overly-strict legacy criteria)
+
+| Flag | Effect | Replaces |
+|---|---|---|
+| `--min-nhp N` | 52w high proximity %; e.g. `-5` = within 5% of 52w high | `parabolic_blowoff_risk` exclusion (which over-filters winners) |
+| `--min-rs N` | Min RS rating (0-99) vs SPY 3M; e.g. `75` = top 25% momentum | `--stage "Stage 2 uptrend"` exact-string match |
+| `--min-rs-3m-pct N` | Min absolute RS 3M %; e.g. `15` = +15pp over SPY in 3M | (additive) |
+| `--require-vcp` | Require VCP compression (4w/12w range ratio < 0.55) | `fresh_golden_cross_50_200` (lagging) |
+| `--require-volume-dryup-spike` | Require dry-up (5D < 0.75×20D) AND spike (today >1.5×20D) | `volume_expansion` (too loose) |
+| `--min-eps-yoy N` | Min latest-Q EPS YoY %; reads `earnings-analyst` cache | (NEW — adds fundamental confirmation) |
+| `--require-eps-accelerating` | Require `growth_acceleration == accelerating` (CAN SLIM C law) | (NEW) |
+| `--min-dtc N` | Min days-to-cover; `5+` = squeeze candidate | better than `--signal high_short_interest` |
+| `--top-sectors N` | Only keep tickers in top-N sectors by `sector_intel.json` composite_score | (NEW — strength-pre-filter) |
+
+### V2.1 New signals (auto-promoted into `signals[]`)
+
+| Signal | Trigger |
+|---|---|
+| `at_52w_new_high` | Price within 0.5% of 52w high |
+| `near_52w_high` | Price within 5% of 52w high |
+| `rs_leader_3m` | RS 3M ≥ +15pp vs SPY |
+| `vcp_compressed` | 4w/12w range ratio < 0.55 |
+| `vol_dryup_spike` | 5D vol < 0.75×20D + today > 1.5×20D |
+| `eps_accelerating` | earnings-analyst cache shows accelerating |
+| `dtc_squeeze_candidate` | DTC ≥ 5 + price > MA50 |
+
+### V2.1 Example: leader-finder (replaces over-strict default)
+
+```bash
+# Find true momentum leaders (RS top 25% in top-4 sectors, near 52w high, accelerating EPS)
+python3 skills/momentum-monitor/scripts/screen.py \
+  --universe sp500 \
+  --top-sectors 4 \
+  --min-rs 75 \
+  --min-nhp -5 \
+  --require-eps-accelerating
+
+# VCP setup hunter (compression + dry-up spike = breakout setup)
+python3 skills/momentum-monitor/scripts/screen.py \
+  --universe sp500 \
+  --require-vcp \
+  --require-volume-dryup-spike
+
+# Squeeze candidates with momentum confirmation
+python3 skills/momentum-monitor/scripts/screen.py \
+  --universe sp500 \
+  --min-dtc 5 \
+  --signal stage2_uptrend_intact
+```
 
 ### Execution flags
 | Flag | Default | Effect |
