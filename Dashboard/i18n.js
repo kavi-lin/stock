@@ -265,6 +265,7 @@ const i18n = {
       col_rank:        "#",
       col_ticker:      "代號",
       col_price:       "價格",
+      col_pe:          "本益比",
       col_score:       "分數",
       col_label:       "標籤",
       col_stage:       "階段",
@@ -383,6 +384,7 @@ const i18n = {
       EXECUTE: "執行建倉", CANCEL: "不予執行", ARCHIVE: "存檔觀察",
       HOLD: "持續觀望", BUY: "執行買入", SELL: "執行賣出",
       STAGED: "分批建倉", STAGED_ENTRY: "分批進場", STAGED_EXIT: "分批出場",
+      PREVIEW: "財報前瞻",
     },
 
     // ── Positions form + table (zh) ────────────────────────────
@@ -426,6 +428,10 @@ const i18n = {
       sentiment:      "情緒指標",
       recent_audit:   "最近審查個股",
       catalyst:       "市場催化劑",
+      watchlist_title:      "結構性轉變候選",
+      watchlist_badge:      "WATCHLIST",
+      watchlist_subtitle:   "14 天內 ≥2 source 提及結構性 keyword (sold out / capacity constrained / supercycle / 供不應求)，metadata 預警 — 不入投資決策。",
+      watchlist_disclaimer: "V2.19 設計：純警覺看板，Phase 3 不讀此檔做 modulation。需 earnings-analyst 確認 CONFIRMED tier 才入決策。",
       quick_launch:   "快速啟動引擎",
       preflight_btn:  "盤前檢查",
       preflight_title: "盤前狀態檢查",
@@ -1191,6 +1197,7 @@ const i18n = {
       col_rank:        "#",
       col_ticker:      "Ticker",
       col_price:       "Price",
+      col_pe:          "P/E",
       col_score:       "Score",
       col_label:       "Label",
       col_stage:       "Stage",
@@ -1309,6 +1316,7 @@ const i18n = {
       EXECUTE: "EXECUTE", CANCEL: "CANCEL", ARCHIVE: "ARCHIVE",
       HOLD: "HOLD", BUY: "BUY", SELL: "SELL",
       STAGED: "STAGED", STAGED_ENTRY: "STAGED ENTRY", STAGED_EXIT: "STAGED EXIT",
+      PREVIEW: "PREVIEW",
     },
 
     // ── Positions form + table (en) ────────────────────────────
@@ -1352,6 +1360,10 @@ const i18n = {
       sentiment:      "Sentiment Index",
       recent_audit:   "Recent Audits",
       catalyst:       "Market Catalysts",
+      watchlist_title:      "Structural Shift Watchlist",
+      watchlist_badge:      "WATCHLIST",
+      watchlist_subtitle:   "Tickers cited with structural keywords (sold out / capacity constrained / supercycle) by ≥2 sources within 14 days. Metadata advisory — does NOT drive investment decisions.",
+      watchlist_disclaimer: "V2.19 by design: advisory dashboard only. Phase 3 modulation does not read this file. Earnings-analyst CONFIRMED tier is required for decision-layer impact.",
       quick_launch:   "Quick Launch",
       preflight_btn:  "Pre-Market Check",
       preflight_title: "Pre-Market Status Check",

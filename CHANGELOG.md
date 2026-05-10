@@ -10,6 +10,51 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [2.19.1] — 2026-05-10
+### Added — Structural Watchlist UI + archival 接線（為未來 backtest 準備）
+
+### Added
+- `news/scripts/build_structural_watchlist.py`:
+  - `_write_history_snapshot()` — 每日寫 `news/news_logs/watchlist_history/<DATE>.json` snapshot（atomic）
+  - `_emit_lifecycle_events()` — append-only `news/news_logs/watchlist_lifecycle.jsonl` 事件記錄
+  - 事件 enum: `first_seen / continued / evicted / graduated_candidate / graduated_confirmed`
+  - graduation 對 earnings-analyst cache `structural_shift.tier` 即時偵測（CANDIDATE/CONFIRMED）
+- `bridge.py`:
+  - `load_structural_watchlist()` — 讀 `news/news_logs/structural_watchlist.json`，注入 `data.json.structural_watchlist` (top 10 candidates + hot_sectors + decay_rules + freshness)
+  - main flow Step 6 接線（Tactical Step 5 之後）
+- `Dashboard/index.html`:
+  - Layer 5 — `<section id="structural-watchlist">` 新增 watchlist tile（藏起來預設，data 有才秀）
+  - i18n key: `watchlist_title / watchlist_badge / watchlist_subtitle / watchlist_disclaimer`（中英文）
+- `Dashboard/script.js`:
+  - `renderStructuralWatchlist(sw)` — 渲染 candidates 卡片（ticker / sector / hits / credibility / days_since_last / keywords / first_observed），點擊跳到 decisions.html
+  - `decorate()` 擴充：crossSet ⭐ 之外加 `watchlistSet` ⚡ 黃色 lightning badge
+- `Dashboard/i18n.js` — 中英 4 個 watchlist label
+- `investment/scripts/backtest_watchlist.py` (新檔):
+  - 讀 lifecycle.jsonl + earnings cache
+  - `compute_tier_lead_time()` — first_seen → graduation lead time stats
+  - 4 outcome 分類: confirmed / candidate / still_active / evicted_no_graduation
+  - Forward return stub (V2.20 寫 FMP 整合)
+  - 輸出 `reports/WATCHLIST_BACKTEST_<DATE>.md` + JSON
+
+### Why
+- V2.19.0 watchlist 每天 atomic rename 蓋掉舊檔 → 沒歷史資料 → 2 週後想 backtest 沒 raw data 可用
+- V2.19.1 補 archival 緊急修補：每日 snapshot + append-only lifecycle log，**不做的話未來無法驗證 watchlist signal 質量**
+- UI 接線：watchlist 從 metadata-only file 變成 dashboard 看板上的早警示，user 可以提早注意 paradigm shift 候選股
+- backtest skeleton 兩週後就能跑：tier graduation rate（hit rate） + lead time（多早預警）+ 後續 V2.20 加 forward returns（alpha 對比 SPY/sector ETF）
+
+### Smoke
+- `python3 news/scripts/build_structural_watchlist.py` → 7 candidates / 1 hot sectors / 9 lifecycle events（含 NVDA→graduated_candidate / MU→graduated_confirmed）
+- `python3 bridge.py` → `[OK] Watchlist: 7 candidates / 1 hot sectors (0.1h)` 注入 data.json
+- `python3 investment/scripts/backtest_watchlist.py` → `7 tickers / 1 CONFIRMED / 1 CANDIDATE` rc=0
+- compile-check：build_structural_watchlist.py + backtest_watchlist.py 全 OK
+
+### Out of Scope (V2.20)
+- backtest_watchlist.py forward returns 部分（FMP price fetch + SPY/sector ETF alpha）
+- watchlist → earnings-analyst tier 觸發 tie-breaker（需先 backtest 證明 signal 質量）
+- decisions.html / earnings.html 個股級 ⚡ badge（目前只在 index.html audit cards 上）
+
+---
+
 ## [2.19.0] — 2026-05-10
 ### Added — Lane Cross-Talk Wiring (Phase 3 polarization + Red Team anti-spoof + News watchlist)
 

@@ -30,9 +30,11 @@ import tempfile
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-ROOT       = Path(__file__).resolve().parents[2]
-LOGS_DIR   = ROOT / "news" / "news_logs"
-OUTPUT     = LOGS_DIR / "structural_watchlist.json"
+ROOT             = Path(__file__).resolve().parents[2]
+LOGS_DIR         = ROOT / "news" / "news_logs"
+OUTPUT           = LOGS_DIR / "structural_watchlist.json"
+HISTORY_DIR      = LOGS_DIR / "watchlist_history"            # V2.19.1 — daily snapshots
+LIFECYCLE_LOG    = LOGS_DIR / "watchlist_lifecycle.jsonl"    # V2.19.1 — append-only events
 
 HIT_WINDOW_DAYS    = 14
 EVICTION_DAYS      = 21
@@ -239,6 +241,115 @@ def _atomic_write(path: Path, payload: dict) -> None:
         raise
 
 
+def _load_yesterday_candidates() -> dict[str, dict]:
+    """V2.19.1 — load previous day's snapshot to compute transitions.
+
+    Returns {ticker: candidate_dict} from the most recent watchlist_history entry
+    that is *not* today (so today's build can compare against yesterday).
+    """
+    if not HISTORY_DIR.exists():
+        return {}
+    today_iso = date.today().isoformat()
+    snaps = sorted(HISTORY_DIR.glob("*.json"))
+    for path in reversed(snaps):
+        if path.stem == today_iso:
+            continue
+        try:
+            with path.open("r", encoding="utf-8") as fp:
+                d = json.load(fp)
+            return {c["ticker"]: c for c in (d.get("candidates") or []) if c.get("ticker")}
+        except (OSError, json.JSONDecodeError):
+            continue
+    return {}
+
+
+def _earnings_tier_for(ticker: str) -> str | None:
+    """V2.19.1 — read latest earnings-analyst cache for ticker, return shift tier
+    (NONE / CANDIDATE / CONFIRMED / INSUFFICIENT_DATA / None if no cache)."""
+    cache_dir = ROOT / "skills" / "earnings-analyst" / "cache"
+    if not cache_dir.exists():
+        return None
+    files = sorted(
+        p for p in cache_dir.glob(f"{ticker}_*.json")
+        if ".infographic." not in p.name
+    )
+    if not files:
+        return None
+    try:
+        with files[-1].open("r", encoding="utf-8") as fp:
+            d = json.load(fp)
+        return (d.get("structural_shift") or {}).get("tier")
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _write_history_snapshot(payload: dict) -> None:
+    """V2.19.1 — write daily snapshot copy to watchlist_history/<DATE>.json.
+    Idempotent: same-day overwrite is OK (multiple runs same day).
+    """
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    snap = HISTORY_DIR / f"{date.today().isoformat()}.json"
+    _atomic_write(snap, payload)
+
+
+def _emit_lifecycle_events(today_payload: dict) -> int:
+    """V2.19.1 — diff today vs yesterday, append transition events to lifecycle log.
+
+    Events:
+      - first_seen        : ticker appears today, not yesterday
+      - continued         : ticker present both days
+      - evicted           : ticker present yesterday, not today (timed out by decay)
+      - graduated_candidate : ticker present today, earnings tier became CANDIDATE
+      - graduated_confirmed : ticker present today, earnings tier became CONFIRMED
+
+    Returns number of events written.
+    """
+    today_iso = date.today().isoformat()
+    today_set = {c["ticker"]: c for c in (today_payload.get("candidates") or []) if c.get("ticker")}
+    yesterday_set = _load_yesterday_candidates()
+
+    events: list[dict] = []
+    for tkr, cur in today_set.items():
+        if tkr not in yesterday_set:
+            events.append({
+                "date": today_iso, "ticker": tkr, "event": "first_seen",
+                "sector": cur.get("sector"), "hit_count_14d": cur.get("hit_count_14d"),
+                "credibility": cur.get("source_credibility_max"),
+                "first_observed": cur.get("first_observed"),
+            })
+        else:
+            events.append({
+                "date": today_iso, "ticker": tkr, "event": "continued",
+                "hit_count_14d": cur.get("hit_count_14d"),
+                "first_observed": cur.get("first_observed"),
+            })
+        # Earnings tier graduation check (V2.19.1) — fires whenever ticker is on
+        # the watchlist AND earnings cache shows CANDIDATE/CONFIRMED.
+        tier = _earnings_tier_for(tkr)
+        if tier == "CANDIDATE":
+            events.append({"date": today_iso, "ticker": tkr,
+                           "event": "graduated_candidate", "earnings_tier": tier})
+        elif tier == "CONFIRMED":
+            events.append({"date": today_iso, "ticker": tkr,
+                           "event": "graduated_confirmed", "earnings_tier": tier})
+
+    for tkr in yesterday_set:
+        if tkr not in today_set:
+            events.append({
+                "date": today_iso, "ticker": tkr, "event": "evicted",
+                "last_seen_yesterday": yesterday_set[tkr].get("last_observed"),
+            })
+
+    if not events:
+        return 0
+
+    LIFECYCLE_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with LIFECYCLE_LOG.open("a", encoding="utf-8") as fp:
+        for ev in events:
+            fp.write(json.dumps(ev, ensure_ascii=False) + "\n")
+    return len(events)
+
+
 def main() -> int:
     try:
         watchlist = build_watchlist()
@@ -266,9 +377,23 @@ def main() -> int:
               file=sys.stderr)
         return 1
 
+    # V2.19.1 — daily snapshot + lifecycle event log (for future backtest)
+    n_events = 0
+    try:
+        _write_history_snapshot(watchlist)
+    except OSError as e:
+        print(f"[build_structural_watchlist] WARN: snapshot failed ({e}); continuing",
+              file=sys.stderr)
+    try:
+        n_events = _emit_lifecycle_events(watchlist)
+    except Exception as e:
+        print(f"[build_structural_watchlist] WARN: lifecycle log failed ({e}); continuing",
+              file=sys.stderr)
+
     n_cand = len(watchlist.get("candidates") or [])
     n_sect = sum(1 for s in (watchlist.get("sectors") or []) if s.get("hot"))
-    print(f"[build_structural_watchlist] ✓ {n_cand} candidates, {n_sect} hot sectors → {OUTPUT.name}",
+    print(f"[build_structural_watchlist] ✓ {n_cand} candidates, {n_sect} hot sectors, "
+          f"{n_events} lifecycle events → {OUTPUT.name}",
           file=sys.stderr)
     return 0
 

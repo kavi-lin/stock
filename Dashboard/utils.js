@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V2.19.0';
+  const VERSION = 'V2.19.1';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
