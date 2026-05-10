@@ -134,15 +134,47 @@ def breadth_signal_score(positive_ratio: Optional[float], industry_count: int = 
     return min(100.0, max(0.0, raw))
 
 
+def structural_shift_bonus(tier_hits: dict) -> float:
+    """V2.19.2 — additive bonus to theme heat from sector EPS momentum.
+
+    Inputs:
+        tier_hits = {"CONFIRMED": int, "CANDIDATE": int}  (counts of representative
+                    stocks with V2.18 structural_shift tier upgrade)
+
+    Bonus rule (additive, capped at +15 to avoid drowning out price/volume signals):
+        +10 if any CONFIRMED rep stock
+        +5  elif any CANDIDATE rep stock
+        +5  per *additional* CONFIRMED beyond first (max +5 stack)
+        cap +15 total
+
+    Theme score 0-100, this lifts up to +15 → still clamped at 100. Cleaner than
+    V2.18.0 which only altered lifecycle stage label (heat itself was unchanged).
+    """
+    n_conf = int(tier_hits.get("CONFIRMED") or 0) if isinstance(tier_hits, dict) else 0
+    n_cand = int(tier_hits.get("CANDIDATE") or 0) if isinstance(tier_hits, dict) else 0
+    bonus = 0.0
+    if n_conf >= 1:
+        bonus += 10.0
+        if n_conf >= 2:
+            bonus += 5.0  # stack +5 for additional CONFIRMED breadth
+    elif n_cand >= 1:
+        bonus += 5.0
+    return min(15.0, bonus)
+
+
 def calculate_theme_heat(
     momentum: Optional[float],
     volume: Optional[float],
     uptrend: Optional[float],
     breadth: Optional[float],
+    structural_tier_hits: Optional[dict] = None,
 ) -> float:
-    """Weighted sum of sub-scores, clamped 0-100.
+    """Weighted sum of sub-scores + V2.19.2 structural shift bonus, clamped 0-100.
 
     Any None input defaults to 50.0.
+
+    V2.19.2: structural_tier_hits = {"CONFIRMED": n, "CANDIDATE": n} from
+    representative stocks' earnings-analyst caches; adds 0 / +5 / +10 / +15 bonus.
     """
     m = momentum if momentum is not None else 50.0
     v = volume if volume is not None else 50.0
@@ -155,5 +187,9 @@ def calculate_theme_heat(
         + u * HEAT_WEIGHTS["uptrend"]
         + b * HEAT_WEIGHTS["breadth"]
     )
+
+    # V2.19.2 — structural shift bonus
+    if structural_tier_hits:
+        raw += structural_shift_bonus(structural_tier_hits)
 
     return float(min(100.0, max(0.0, raw)))

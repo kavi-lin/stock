@@ -387,21 +387,25 @@ def _get_representative_stocks(
     return static, details
 
 
-def _theme_has_structural_shift(stocks: list[str]) -> tuple[bool, list[str]]:
-    """V2.18.0 — scan representative stocks' earnings-analyst cache; return
-    (override_flag, hit_tickers). override_flag is True if any rep stock has
-    structural_shift.tier ∈ {CANDIDATE, CONFIRMED}.
+def _theme_has_structural_shift(stocks: list[str]) -> tuple[bool, list[str], dict]:
+    """V2.18.0 / V2.19.2 — scan representative stocks' earnings-analyst cache.
 
-    Used to lift lifecycle thresholds so paradigm-shift sectors (e.g. HBM
-    super-cycle Semis) don't get auto-classified as "Exhausting" purely from
-    price extremes."""
+    Returns (override_flag, hit_tickers, tier_counts).
+    - override_flag (V2.18): True if any rep stock has CANDIDATE/CONFIRMED.
+                             Used by lifecycle_calculator.classify_stage to lift
+                             Exhausting threshold (paradigm-shift protection).
+    - hit_tickers   (V2.18): ["MU:CONFIRMED", "NVDA:CANDIDATE", ...]
+    - tier_counts   (V2.19.2): {"CONFIRMED": int, "CANDIDATE": int} for additive
+                             heat bonus via structural_shift_bonus().
+    """
     cache_dir = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         "earnings-analyst", "cache",
     )
     if not os.path.isdir(cache_dir):
-        return False, []
-    hits = []
+        return False, [], {"CONFIRMED": 0, "CANDIDATE": 0}
+    hits: list[str] = []
+    counts = {"CONFIRMED": 0, "CANDIDATE": 0}
     for tkr in stocks or []:
         files = sorted(
             f for f in glob.glob(os.path.join(cache_dir, f"{tkr}_*.json"))
@@ -415,9 +419,10 @@ def _theme_has_structural_shift(stocks: list[str]) -> tuple[bool, list[str]]:
             tier = (data.get("structural_shift") or {}).get("tier")
             if tier in ("CANDIDATE", "CONFIRMED"):
                 hits.append(f"{tkr}:{tier}")
+                counts[tier] = counts.get(tier, 0) + 1
         except Exception:
             continue
-    return bool(hits), hits
+    return bool(hits), hits, counts
 
 
 def detect_divergence(heat_breakdown: dict, direction: str) -> dict | None:
@@ -790,13 +795,22 @@ def main():
         n_industries = len(theme.get("matching_industries", []))
         breadth = breadth_signal_score(breadth_ratio, industry_count=n_industries)
 
-        heat = calculate_theme_heat(momentum, volume, uptrend, breadth)
+        # V2.19.2 — fundamental override + tier counts for heat bonus
+        fundamental_override, shift_hits, tier_counts = _theme_has_structural_shift(stocks)
+
+        heat = calculate_theme_heat(momentum, volume, uptrend, breadth,
+                                    structural_tier_hits=tier_counts)
+
+        from calculators.heat_calculator import structural_shift_bonus
+        sshift_bonus_applied = structural_shift_bonus(tier_counts)
 
         heat_breakdown = {
             "momentum_strength": round(momentum, 2),
             "volume_intensity": round(volume, 2) if volume is not None else 50.0,
             "uptrend_signal": round(uptrend, 2) if uptrend is not None else 50.0,
             "breadth_signal": round(breadth, 2),
+            "structural_shift_bonus": round(sshift_bonus_applied, 2),
+            "structural_tier_counts": tier_counts,
         }
 
         # --- Divergence detection ---
@@ -837,10 +851,8 @@ def main():
         maturity = calculate_lifecycle_maturity(
             duration, extremity, price_extreme, valuation, etf_prolif
         )
-        # V2.18.0 — fundamental override: if any representative stock has
-        # earnings-analyst structural_shift CANDIDATE/CONFIRMED, lift maturity
-        # thresholds so paradigm-shift earnings don't get masked as "Exhausting"
-        fundamental_override, shift_hits = _theme_has_structural_shift(stocks)
+        # V2.18.0 — fundamental override: lift "Exhausting" threshold when
+        # paradigm-shift earnings are present (computed earlier this loop)
         stage = classify_stage(maturity, fundamental_override=fundamental_override)
 
         maturity_breakdown = {

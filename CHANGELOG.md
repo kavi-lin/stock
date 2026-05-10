@@ -10,6 +10,47 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [2.19.2] — 2026-05-10
+### Added — V2.19.X 補強：⚡ badge 跨頁、backtest forward returns、theme heat bonus
+
+### Added
+- `Dashboard/page-decisions.js` + `page-earnings.js`:
+  - 個股名旁 ⚡ amber lightning badge if ticker ∈ `data.structural_watchlist.candidates`
+  - 兩頁各自在 data load 處 populate `window.UI.watchlistSet`
+- `investment/scripts/backtest_watchlist.py`:
+  - `_fetch_price_series()` — FMP `/stable/historical-price-eod/light` endpoint，cache by ticker
+  - `_close_at_or_after()` — 跳過週末 / 假期，找下一個交易日
+  - `fetch_forward_returns()` — 完整實作（取代 V2.19.1 stub）：
+    - T+5d / T+15d / T+45d / T+90d 報酬
+    - α_SPY (絕對 alpha vs SPY) + α_sector (相對 alpha vs sector ETF)
+    - SECTOR_ETF_MAP：Memory Semis→SOXX、Energy→XLE、Healthcare→XLV…
+    - 未到的 horizon 寫 None；status: ok / partial / no_data / api_unavailable
+  - 改 `collapse_by_ticker` 用 `first_observed`（news 首次提及日）為 backtest anchor，不用 event date
+  - render_markdown 加 forward returns table + 15d alpha aggregate (mean / hit_rate)
+  - JSON 輸出 加 forward_returns block
+- `skills/theme-detector/scripts/calculators/heat_calculator.py`:
+  - `structural_shift_bonus()` — 加性 bonus +0/+5/+10/+15 cap
+    - `+10` if 任一 rep stock CONFIRMED；`+5` if 多個 CONFIRMED stack；`+5` if CANDIDATE 但無 CONFIRMED
+  - `calculate_theme_heat()` 加新參數 `structural_tier_hits` 並加進 final raw
+- `skills/theme-detector/scripts/theme_detector.py`:
+  - `_theme_has_structural_shift()` 改回傳 3-tuple 含 `tier_counts: {CONFIRMED, CANDIDATE}`
+  - main scoring loop 把 tier_counts 餵 calculate_theme_heat → heat 真的會升
+  - heat_breakdown 新欄位 `structural_shift_bonus` + `structural_tier_counts`
+  - 移除舊 fundamental_override 重複 call（V2.18 寫了兩次）
+
+### Why
+- V2.18 只 hack lifecycle stage label，heat score 本身沒動 → ranking 沒反映 paradigm shift
+- V2.19.2 直接動 heat → ranking 跟著改（AI&Semis 從第 3 升第 1，heat 52.8→62.8 +10 bonus）
+- 個股 ⚡ badge 在 V2.19.1 只在 index.html audit cards 上，decisions/earnings 主頁面看不到 — 補完
+- backtest forward returns 從 stub 變實做：今天就跑得出 directional sanity（n=7 17 天 mean SPY-alpha +18.4%）
+
+### Smoke
+- `python3 investment/scripts/backtest_watchlist.py` → 7 candidates 全 partial data，15d SPY-relative mean +18.4% hit_rate 7/7，sector-relative mean +4.6% hit_rate 4/7（caveat: n 小 + 單一 sector + lookback bias）
+- `python3 skills/theme-detector/scripts/theme_detector.py` → AI&Semis heat 52.8→62.8 (+10 MU+NVDA bonus)、Quantum Computing 52.7→62.7 (+10 MU bonus)
+- `python3 -m py_compile` 全 OK
+
+---
+
 ## [2.19.1] — 2026-05-10
 ### Added — Structural Watchlist UI + archival 接線（為未來 backtest 準備）
 
