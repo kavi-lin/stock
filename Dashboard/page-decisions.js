@@ -394,14 +394,14 @@ const DECISION_TIPS = {
     },
     contrarian: {
         zh: {
-            title: '逆勢訊號 (Contrarian)',
-            desc: '此分析違反當下 macro regime（如 RISK_OFF 仍 BUY、或多頭轉折時 SELL）。需特別小心 thesis 假設與 macro 條件的相容性。',
-            scale: '🎯 CONTRARIAN：方向 ≠ macro_alignment\n✅ ALIGNED：方向跟大環境一致（不顯示 badge）',
+            title: '🎯 逆勢訊號（CONTRARIAN）',
+            desc: '此檔的方向跟**當下大環境（macro regime）相反** — 例如 RISK_OFF 仍 BUY、或多頭時 SELL。\n\n**意義**：thesis 必須假設 macro 會改變，或這檔有獨立 catalyst 抗 macro。任一假設破功，論點立刻失效。\n\n**建議**：倉位降一檔；多盯 macro 條件變化（FRED real rate / breadth zone / regime flag），任一惡化先出。',
+            scale: '🎯 CONTRARIAN  方向 ≠ macro 環境（顯示此 badge）\n✅ ALIGNED      方向跟大環境一致（不顯示 badge）',
         },
         en: {
-            title: 'Contrarian Signal',
-            desc: 'Analysis runs against current macro regime (e.g. BUY in RISK_OFF). Watch thesis assumptions vs macro context carefully.',
-            scale: '🎯 CONTRARIAN: direction ≠ macro_alignment\n✅ ALIGNED: matches macro (no badge shown)',
+            title: '🎯 Contrarian Signal',
+            desc: 'Direction conflicts with **current macro regime** (e.g. BUY in RISK_OFF, SELL in bull leg).\n\n**Implication**: thesis assumes macro flips or stock has standalone catalyst overriding macro. Either assumption breaking → thesis dies.\n\n**Sizing**: cut one notch; monitor macro (real rate / breadth / regime flag) closely — any deterioration → exit.',
+            scale: '🎯 CONTRARIAN  direction ≠ macro (shows badge)\n✅ ALIGNED      matches macro (no badge)',
         },
     },
     pos_binary: {
@@ -438,38 +438,38 @@ const DECISION_TIPS = {
     },
     fragility_robust: {
         zh: {
-            title: '論點穩健度：穩健',
-            desc: 'Tail-risk 三維評估：論點建立在多支柱（基本面 + 技術 + 估值）之上，容忍負面驚奇能力高。可採標準倉位上限。',
-            scale: '🟢 ROBUST  穩健 — 多支柱 thesis\n🟡 MODERATE 中等脆弱 — 對特定變數敏感\n🔴 FRAGILE  脆弱 — 高度依賴單一 narrative',
+            title: '🟢 論點穩健（ROBUST）',
+            desc: 'Tail-risk 三維評估結論：bull case **同時靠多個支柱**（基本面 + 技術 + 估值都站住）。任一單點打折還有其他支撐，容錯空間大。\n\n**建議**：可上**標準倉位上限**；停損維持規範值即可。',
+            scale: '🟢 ROBUST    多支柱 thesis（標準倉位）← 目前\n🟡 MODERATE  對特定變數敏感（倉位降一檔）\n🔴 FRAGILE   依賴單一 narrative（倉位大砍 / 觀望）',
         },
         en: {
-            title: 'Thesis Fragility: Robust',
-            desc: 'Tail-risk 3-dim assessment: thesis stands on multiple pillars (fundamentals + technical + valuation), high tolerance to negative surprises. Standard sizing cap OK.',
-            scale: '🟢 ROBUST    multi-pillar\n🟡 MODERATE  sensitive to certain vars\n🔴 FRAGILE   single-narrative dependence',
+            title: '🟢 Thesis Fragility: Robust',
+            desc: 'Tail-risk 3-D check: bull case rests on **multiple pillars** (fundamentals + technical + valuation). One pillar wobbling still leaves backup support — high error tolerance.\n\n**Sizing**: standard upper cap OK; default stop distance.',
+            scale: '🟢 ROBUST    multi-pillar (standard size) ← active\n🟡 MODERATE  sensitive to specific vars (cut 1 notch)\n🔴 FRAGILE   single-narrative dependence (cut hard / wait)',
         },
     },
     fragility_moderate: {
         zh: {
-            title: '論點穩健度：中等脆弱',
-            desc: 'Tail-risk 三維評估：論點對部分變數敏感，少數負面 catalyst 即可動搖。建議倉位降一檔。',
-            scale: '🟢 ROBUST  穩健 — 多支柱 thesis\n🟡 MODERATE 中等脆弱 — 對特定變數敏感\n🔴 FRAGILE  脆弱 — 高度依賴單一 narrative',
+            title: '🟡 中等脆弱（MODERATE）',
+            desc: '論點站住，但**對某幾個變數特別敏感**（例如：guidance 不能再下修、毛利率不能再壓、某客戶不能掉單）。少數負面 catalyst 就會動搖 R/R。\n\n**建議**：倉位**降一檔**（標準上限 × 0.7-0.8）；對敏感變數設明確 review trigger（出現即重評，不等月底）。',
+            scale: '🟢 ROBUST    多支柱 thesis（標準倉位）\n🟡 MODERATE  對特定變數敏感（倉位降一檔）← 目前\n🔴 FRAGILE   依賴單一 narrative（倉位大砍 / 觀望）',
         },
         en: {
-            title: 'Thesis Fragility: Moderate',
-            desc: 'Tail-risk 3-dim assessment: thesis sensitive to certain variables; minor negative catalyst can shake R/R. Reduce sizing one notch.',
-            scale: '🟢 ROBUST    multi-pillar\n🟡 MODERATE  sensitive to certain vars\n🔴 FRAGILE   single-narrative dependence',
+            title: '🟡 Thesis Fragility: Moderate',
+            desc: 'Thesis valid but **sensitive to specific variables** (e.g. guidance can\'t cut again, margin can\'t compress further, certain customer can\'t leave). A small negative catalyst can shake R/R.\n\n**Sizing**: cut **one notch** (standard cap × 0.7-0.8); set explicit review triggers on sensitive variables — fire = immediate reassess, not month-end.',
+            scale: '🟢 ROBUST    multi-pillar (standard size)\n🟡 MODERATE  sensitive to specific vars (cut 1 notch) ← active\n🔴 FRAGILE   single-narrative dependence (cut hard / wait)',
         },
     },
     fragility_fragile: {
         zh: {
-            title: '論點穩健度：脆弱',
-            desc: 'Tail-risk 三維評估：論點高度依賴單一驅動或 narrative，一個負面驚奇就會大幅減損 R/R。倉位需大砍，或考慮先觀望。',
-            scale: '🟢 ROBUST  穩健 — 多支柱 thesis\n🟡 MODERATE 中等脆弱 — 對特定變數敏感\n🔴 FRAGILE  脆弱 — 高度依賴單一 narrative',
+            title: '🔴 脆弱（FRAGILE）',
+            desc: '整個 thesis 高度依賴**單一驅動或 narrative** — 一個負面驚奇（earnings miss / guidance cut / 主管異動 / 對手降價）就大幅打折 R/R。\n\n**建議**：倉位**大砍**（標準上限 × 0.4-0.5）甚至**先觀望**；如果還是要進，要有明確 OFFRAMP（止損 + 計畫好的部分減碼節點），不能 hope-and-hold。',
+            scale: '🟢 ROBUST    多支柱 thesis（標準倉位）\n🟡 MODERATE  對特定變數敏感（倉位降一檔）\n🔴 FRAGILE   依賴單一 narrative（倉位大砍 / 觀望）← 目前',
         },
         en: {
-            title: 'Thesis Fragility: Fragile',
-            desc: 'Tail-risk 3-dim: thesis hinges on single driver / narrative — one negative surprise materially impairs R/R. Cut sizing significantly, or consider waiting.',
-            scale: '🟢 ROBUST    multi-pillar\n🟡 MODERATE  sensitive to certain vars\n🔴 FRAGILE   single-narrative dependence',
+            title: '🔴 Thesis Fragility: Fragile',
+            desc: 'Thesis hinges on a **single driver / narrative**. One negative surprise (earnings miss, guide cut, mgmt change, competitor price cut) materially impairs R/R.\n\n**Sizing**: cut **hard** (standard cap × 0.4-0.5) — or wait. If still entering, set up clear OFFRAMP (firm stop + pre-planned partial trims), not hope-and-hold.',
+            scale: '🟢 ROBUST    multi-pillar (standard size)\n🟡 MODERATE  sensitive to specific vars (cut 1 notch)\n🔴 FRAGILE   single-narrative dependence (cut hard / wait) ← active',
         },
     },
     phase2_fanout: {
@@ -502,27 +502,253 @@ const DECISION_TIPS = {
             desc: 'Burry deep-value model overrode consensus BUY — position halved with mandatory recheck date. Indicates major fundamental flag.',
         },
     },
+    // ── V2.17.8 — det_shadow polarization / agreement ──────────────────
+    signal_polarization_bipolar: {
+        zh: { title: '🟣 訊號兩極（BIPOLAR）',
+              desc: '5 個 lane 同時給出**極端相反訊號** — 例如 Fundamentals +3（基本面強）但 Sentiment -3（情緒崩盤），絕對差 ≥ 5。\n\n**意義**：lane 之間沒有共識，verdict 重跑會明顯晃動，不是 high-confidence 訊號。重押任一邊都是賭；本質上是「市場意見分裂」的訊號。\n\n**建議**：倉位**大砍**或先觀望，等其中一邊 lane 翻邊形成共識再進。',
+              scale: '🟣 BIPOLAR  極端兩極（|diff| ≥ 5）→ 大幅降倉位 ← 目前\n🔵 MIXED    一般分歧（一正一負）→ 微幅降倉位\n⚪ ALIGNED   方向一致 → 標準倉位' },
+        en: { title: '🟣 Signal Polarization: BIPOLAR',
+              desc: '5 lanes give **diametrically opposed signals** — e.g. Fundamentals +3 (strong) but Sentiment -3 (collapsing), |diff| ≥ 5.\n\n**Implication**: no lane consensus. Verdict will swing on rerun — heavy sizing on either side is a coin flip. Fundamentally a "split market opinion" signal.\n\n**Sizing**: cut **hard** or wait until one side resolves.',
+              scale: '🟣 BIPOLAR  extreme split (|diff| ≥ 5) → cut hard ← active\n🔵 MIXED    mild split (one side +, other −) → small cut\n⚪ ALIGNED   coherent direction → standard size' },
+    },
+    signal_polarization_mixed: {
+        zh: { title: '🔵 訊號分歧（MIXED）',
+              desc: 'Lane 之間有些正、有些負，但**沒到 BIPOLAR 那麼極端**（絕對差 < 5）。共識度比 ALIGNED 低，但不算嚴重分裂。\n\n**建議**：倉位**微幅降一點**（標準上限 × 0.85），多盯轉折 lane 是否惡化（轉惡 = 升級為 BIPOLAR）。',
+              scale: '🟣 BIPOLAR  極端兩極（|diff| ≥ 5）→ 大幅降倉位\n🔵 MIXED    一般分歧（一正一負）→ 微幅降倉位 ← 目前\n⚪ ALIGNED   方向一致 → 標準倉位' },
+        en: { title: '🔵 Signal Polarization: MIXED',
+              desc: 'Some lanes positive, some negative — **less extreme than BIPOLAR** (|diff| < 5). Less consensus than ALIGNED but not severe split.\n\n**Sizing**: small cut (standard cap × 0.85); watch the borderline lane — deterioration = escalation to BIPOLAR.',
+              scale: '🟣 BIPOLAR  extreme split (|diff| ≥ 5) → cut hard\n🔵 MIXED    mild split (one side +, other −) → small cut ← active\n⚪ ALIGNED   coherent direction → standard size' },
+    },
+    red_team_disagree: {
+        zh: { title: '🟠 Red Team 不一致（LLM vs 量化）',
+              desc: 'Red Team 有兩條判定路徑：(a) **LLM** 看完所有資料給出的反方論述、(b) **量化規則 (DET)** 直接撞 6 條 kill trigger（Altman-Z 破產、D/E 過高、FCF yield 過低、insider 大賣、短壓、FRED sector avoid）。\n\n兩者結論差距大代表 **LLM 比量化寬鬆** — LLM 可能被 narrative 帶過去某些紅旗。\n\n**建議**：以**較保守的那條**為準（通常 = DET）；倉位降一檔，重看 LLM 漏看了哪幾條。',
+              scale: 'DET 觸發 6 項 kill trigger 中：\n  ≥ 2 條 → STRONG_COUNTER（強反方）\n  1 條   → MODERATE（中等反方）\n  0 條   → NO_VIABLE（無有效反方）\n\nLLM verdict 跟 DET tier 不同層 → 顯示此 badge' },
+        en: { title: '🟠 Red Team Disagreement (LLM vs Deterministic)',
+              desc: 'Red Team runs two paths: (a) **LLM** counter-thesis from full context, (b) **Rules (DET)** hard-checks against 6 kill triggers (Altman-Z bankruptcy, D/E too high, FCF yield too low, insider selling, short interest, FRED sector avoid).\n\nA gap means **LLM is softer than rules** — narrative may have papered over hard flags.\n\n**Sizing**: defer to the **stricter path** (usually DET); cut one notch and re-examine which trigger LLM missed.',
+              scale: 'DET kill triggers fired (out of 6):\n  ≥ 2 → STRONG_COUNTER\n  1   → MODERATE\n  0   → NO_VIABLE\n\nLLM verdict tier ≠ DET tier → badge shows' },
+    },
+    val_disagree: {
+        zh: { title: '🟡 Valuation 不一致（LLM vs 純算）',
+              desc: 'Valuation 有兩條：(a) **LLM Valuation Specialist** 給的 score（看完六種估值錨）、(b) **純算 DET**（fair_value 加權 vs 現價直接套公式）。\n\n兩者差距大代表 LLM **可能過度寬鬆或過度保守**：\n  • LLM > DET（LLM 更樂觀）→ 注意 narrative bias，是不是被故事帶過去\n  • LLM < DET（LLM 更悲觀）→ 可能怕過頭，看 LLM reasoning 有沒有合理擔憂\n\n**建議**：兩條公約數為準；倉位降半檔，重讀 LLM val_lane 細節。',
+              scale: 'LLM > DET → LLM 偏多（warning：narrative bias 風險）\nLLM < DET → LLM 偏空（warning：可能過度保守）\n|LLM − DET| 顯著 → 顯示此 badge' },
+        en: { title: '🟡 Valuation Disagreement (LLM vs Deterministic)',
+              desc: 'Valuation has two paths: (a) **LLM Valuation Specialist** synthesizes 6 anchors into a score, (b) **DET (pure math)** = weighted fair_value vs price.\n\nA gap means LLM is **either too soft or too hard**:\n  • LLM > DET (LLM bullish) → watch for narrative bias\n  • LLM < DET (LLM bearish) → may be over-cautious — check reasoning\n\n**Sizing**: defer to the more conservative path; half-notch cut and re-read val_lane reasoning.',
+              scale: 'LLM > DET → LLM bullish (narrative bias risk)\nLLM < DET → LLM bearish (over-caution risk)\n|LLM − DET| material → badge shows' },
+    },
+    // ── V2.13.0 action_label ────────────────────────────────────────────
+    action_attack: {
+        zh: { title: '🔥 進攻（ATTACK）',
+              desc: 'Phase 3 PM 整合 5 lane 後做的**操作層判定**（非 final_decision，而是「現在該怎麼進」）：訊號明確、確信度高、技術突破已成型 — **立即進場**，不等 pullback。\n\n**意義**：ATTACK 對應現有 position_size 上限，是 PM 給的綠燈。但 final_decision 還是會看 fragility / 違反 macro 等再修。\n\n**搭配看**：confidence > 70% + market_strength = STRONG + thesis ROBUST 三項打勾才理想。',
+              scale: '🔥 ATTACK     立即進場 — 高確信 + 突破明確 ← 目前\n⏳ WAIT       等 pullback / catalyst — 訊號未到位\n🛡 DEFENSIVE  訊號矛盾 / 偏空 — 避開或縮倉' },
+        en: { title: '🔥 Action: ATTACK',
+              desc: 'Phase 3 PM **operation-layer call** (not final_decision, but "how to enter now"): signals clear, high conviction, breakout confirmed — **enter immediately**, no waiting for pullback.\n\n**Implication**: ATTACK aligns with the upper position_size cap — green light from PM. final_decision still adjusted for fragility / macro misalignment.\n\n**Look together**: confidence > 70% + market_strength = STRONG + thesis ROBUST — 3 checks ideal.',
+              scale: '🔥 ATTACK     immediate entry — high conviction + clear breakout ← active\n⏳ WAIT       wait for pullback / catalyst\n🛡 DEFENSIVE  signals conflicting / bearish — avoid or trim' },
+    },
+    action_wait: {
+        zh: { title: '⏳ 等待（WAIT）',
+              desc: 'Phase 3 PM 操作層判定：thesis 成立、邏輯通順，但**現在不是好的進場價位**（剛追高 / 等 catalyst / 等技術形態完成）。\n\n**意義**：不是放棄，是 timing 問題。**Watch List** 區會列出具體進場條件（例如「破 $200 收盤站穩 + 量 ≥ 1.5×20MA」）— 條件達成再進。\n\n**警示**：WAIT 期間 thesis 可能變質（macro / 基本面），別一直等不重評。',
+              scale: '🔥 ATTACK     立即進場 — 高確信 + 突破明確\n⏳ WAIT       等 pullback / catalyst — 訊號未到位 ← 目前\n🛡 DEFENSIVE  訊號矛盾 / 偏空 — 避開或縮倉' },
+        en: { title: '⏳ Action: WAIT',
+              desc: 'Phase 3 PM operation call: thesis is valid, but **current entry is suboptimal** (chasing / awaiting catalyst / waiting for setup completion).\n\n**Implication**: not abandonment, just timing. **Watch List** specifies entry triggers (e.g. "close above $200 + vol ≥ 1.5× 20MA"). Enter when condition fires.\n\n**Warning**: thesis can deteriorate during WAIT (macro / fundamentals) — don\'t wait indefinitely without re-evaluation.',
+              scale: '🔥 ATTACK     immediate entry — high conviction + clear breakout\n⏳ WAIT       wait for pullback / catalyst — signals not aligned ← active\n🛡 DEFENSIVE  signals conflicting / bearish — avoid or trim' },
+    },
+    action_defensive: {
+        zh: { title: '🛡 防守（DEFENSIVE）',
+              desc: 'Phase 3 PM 操作層判定：lane 之間訊號矛盾、或多數 lane 偏空 — 進場勝率不佳。**即使 final_decision = BUY，PM 仍判定先觀察**比進場好。\n\n**為什麼會 BUY 但又 DEFENSIVE**：final_decision 主要看 score 是否過閾值，DEFENSIVE 看的是 lane 共識度 + 進場時機。score 達到但進場條件不到位 → BUY + DEFENSIVE。\n\n**建議**：實際操作以 DEFENSIVE 為準 — 不進、或上**極小試單** + 緊停損；用後續 Watch trigger 決定升級到 ATTACK / WAIT 才正式建倉。',
+              scale: '🔥 ATTACK     立即進場 — 高確信 + 突破明確\n⏳ WAIT       等 pullback / catalyst — 訊號未到位\n🛡 DEFENSIVE  訊號矛盾 / 偏空 — 避開或縮倉 ← 目前' },
+        en: { title: '🛡 Action: DEFENSIVE',
+              desc: 'Phase 3 PM op-layer call: lane signals conflicting or majority bearish — entry odds poor. **Even if final_decision = BUY, PM says wait** beats entering.\n\n**Why BUY + DEFENSIVE**: final_decision is threshold-driven on score; DEFENSIVE looks at lane consensus + entry timing. Score crosses threshold but entry conditions weak → BUY + DEFENSIVE.\n\n**In practice**: defer to DEFENSIVE — skip, or take a **tiny pilot** with tight stop; upgrade to real position only when Watch triggers fire and PM call shifts to ATTACK / WAIT.',
+              scale: '🔥 ATTACK     immediate entry — high conviction + clear breakout\n⏳ WAIT       wait for pullback / catalyst\n🛡 DEFENSIVE  signals conflicting / bearish — avoid or trim ← active' },
+    },
+    // ── V2.13.0 moat_assessment (Fundamentals lane) ─────────────────────
+    moat_wide: {
+        zh: { title: '寬護城河（WIDE MOAT）',
+              desc: 'Fundamentals lane 判定：公司有強大持續競爭優勢（品牌 / IP / 切換成本 / 規模 / 網絡效應 / 法規）。Buffett 經典定義 — 多年抵抗競爭，FCF margin 穩定 + ROIC > WACC。',
+              scale: '🟡 WIDE     多年抗競 — 標準持有窗口可長\n⚪ NARROW   有 1-2 條優勢 — 隨時間可能失守\n🔴 ERODING  優勢正在失去 — 警示\n⚫ NONE     無持續優勢 — 純 commodity' },
+        en: { title: 'WIDE MOAT',
+              desc: 'Fundamentals lane: durable competitive advantage (brand / IP / switching cost / scale / network / regulation). Buffett-style — withstands competition for years, stable FCF margin + ROIC > WACC.',
+              scale: '🟡 WIDE     durable advantage\n⚪ NARROW   1-2 advantages, may erode\n🔴 ERODING  losing advantage — flag\n⚫ NONE     no durable edge — commodity' },
+    },
+    moat_narrow: {
+        zh: { title: '⚪ 窄護城河（NARROW MOAT）',
+              desc: 'Fundamentals lane 判定：公司有 1-2 條競爭優勢，但**不夠深、不夠穩** — 例如只靠技術領先 + 規模，缺品牌 / IP / 高切換成本。\n\n**意義**：競爭加劇就可能被趕上 — 隨時間 ROIC 會被壓縮回 WACC 附近，valuation re-rate 風險偏高。**不是長線抱不放**的標的，**進場時機**比 WIDE 名單更重要（買得太貴沒人挽救）。\n\n**建議**：適合 swing / 中線 trade，看技術面進場 + 設明確止損；長線持有需確認下一條 moat 正在形成（新產品 / 新切換成本）。',
+              scale: '🟡 WIDE     多年抗競 — 標準長期持有\n⚪ NARROW   有 1-2 條優勢但易失守 — entry timing 重要 ← 目前\n🔴 ERODING  優勢正在失去 — 警示\n⚫ NONE     無持續優勢 — 純 commodity' },
+        en: { title: '⚪ NARROW MOAT',
+              desc: 'Fundamentals lane: 1-2 competitive edges but **shallow / unstable** — e.g. tech lead + scale only, no brand / IP / high switching cost.\n\n**Implication**: catch-up risk as competition intensifies — ROIC compresses toward WACC over time, multiple re-rate risk elevated. **Not a buy-and-hold name**; entry timing matters more than for WIDE moat (overpaying = no rescue).\n\n**Trading approach**: swing / mid-term with technical entry + firm stop; long hold only if you can identify the **next** moat forming (new product line, new switching cost).',
+              scale: '🟡 WIDE     durable advantage — standard long hold\n⚪ NARROW   1-2 advantages, may erode — entry timing matters ← active\n🔴 ERODING  losing advantage — flag\n⚫ NONE     no durable edge — commodity' },
+    },
+    moat_eroding: {
+        zh: { title: '🔴 護城河侵蝕（ERODING）',
+              desc: 'Fundamentals lane 警示：公司原有優勢正在失去（market share 流失、margin 持續壓縮、新進入者搶走客戶）。即使其他指標正面，也要降倉。',
+              scale: 'See WIDE tooltip 完整 scale' },
+        en: { title: '🔴 ERODING MOAT',
+              desc: 'Fundamentals lane flag: original edge is being lost (market share leakage, margin compression, new entrants stealing customers). Cut size even if other lanes positive.',
+              scale: 'See WIDE for full scale' },
+    },
+    moat_none: {
+        zh: { title: '無護城河（NO MOAT）',
+              desc: 'Fundamentals lane：公司無持續競爭優勢 — 純 commodity 業務或單純 first-mover 短利。Trade 邏輯不能靠 thesis 持有，純技術 / event-driven 進出。',
+              scale: 'See WIDE tooltip 完整 scale' },
+        en: { title: 'NO MOAT',
+              desc: 'Fundamentals lane: no durable edge — pure commodity or first-mover short-lived. Cannot trade as thesis; only technical / event-driven entries.',
+              scale: 'See WIDE for full scale' },
+    },
+    // ── V2.13.0 Technical pattern_taxonomy ──────────────────────────────
+    pattern_breakout: {
+        zh: { title: '突破（uptrend_breakout）',
+              desc: 'Technical lane：價格已穿越關鍵阻力（前高 / 整理上沿）+ 量能放大。對應 Stage 2 早期 — 風報比最佳。',
+              scale: '✅ Confirm: 收盤站穩突破點 ≥ 2 天 + 量 ≥ 1.5×20MA\n⚠ Failed: 一日穿越後立即拉回 → 假突破' },
+        en: { title: 'Pattern: Breakout',
+              desc: 'Technical lane: price crossed key resistance (prior high / consolidation upper bound) on volume expansion. Stage 2 early — best R/R.',
+              scale: '✅ Confirm: ≥ 2 closes above pivot + vol ≥ 1.5× 20MA\n⚠ Failed: same-day fade → false breakout' },
+    },
+    pattern_continuation: {
+        zh: { title: '續漲（uptrend_continuation）',
+              desc: 'Technical lane：已在上升趨勢中持續推升，新高為健康橫推 / 旗形整理後續推。風報比稍低於 breakout 但仍可進。' },
+        en: { title: 'Pattern: Continuation',
+              desc: 'Technical lane: established uptrend grinding higher with healthy flag / pennant patterns. R/R slightly worse than fresh breakout but still tradeable.' },
+    },
+    pattern_consolidation: {
+        zh: { title: '整理（consolidation）',
+              desc: 'Technical lane：價格在區間內橫盤 — 還未決定方向。建議等突破方向確認再進。' },
+        en: { title: 'Pattern: Consolidation',
+              desc: 'Technical lane: price ranging — direction undecided. Wait for resolution before entering.' },
+    },
+    pattern_pullback: {
+        zh: { title: '回踩（pullback_in_uptrend）',
+              desc: 'Technical lane：上升趨勢中的回測（通常拉回 5-15% 觸 MA20 / MA50）。是進場好價位，但要確認趨勢未破。',
+              scale: '✅ Healthy: 帶量反彈 + MA50 / MA20 不破\n⚠ Risk: 跌破 MA50 + 量縮 → 趨勢可能轉為 downtrend' },
+        en: { title: 'Pattern: Pullback in Uptrend',
+              desc: 'Technical lane: dip within uptrend (typically 5-15% to MA20 / MA50). Good entry but confirm uptrend intact.',
+              scale: '✅ Healthy: rebound on volume + MA50/MA20 hold\n⚠ Risk: break MA50 + low vol → may flip to downtrend' },
+    },
+    pattern_false_breakout: {
+        zh: { title: '🔴 假突破（FALSE BREAKOUT）',
+              desc: 'Technical lane 警示：價格穿越阻力（前高 / 整理上沿）後**立即拉回原區間** — 典型 bull trap。\n\n**為什麼危險**：突破吸引追價買盤，買盤吸光後賣壓集中釋放，常引發**急跌反向**。Failed breakout 之後跌破 base 下沿 → 通常進入 stage 4 下降。\n\n**規則**：\n  • **不追價** — 即使再次嘗試突破，要等收盤站穩 ≥ 2 天 + 量能 ≥ 1.5×20MA 才算 confirmed\n  • 已持有 → 緊縮停損到突破點下方，跌破即出\n  • Watch 反指標：新高沒量 / RSI 不跟新高 → 假突破前兆',
+              scale: '✅ Confirmed breakout: 收盤站穩 ≥ 2 天 + 量能放大\n⚠ Failed breakout: 一日穿越後立即拉回原區間\n🔴 False breakout: failed + 跌破前 base 下沿 → bull trap 確立 ← 目前' },
+        en: { title: '🔴 False Breakout',
+              desc: 'Technical lane flag: price broke resistance (prior high / consolidation top) then **faded back into range** — classic bull trap.\n\n**Why dangerous**: breakout pulls in chase-buying; once that buying is absorbed, selling pressure concentrates → **sharp reversal**. Failed breakout often segues into stage 4 (downtrend) once base low breaks.\n\n**Rules**:\n  • **No chasing** — even on re-attempt, wait for ≥ 2 closes above pivot + vol ≥ 1.5× 20MA before "confirmed"\n  • Already holding → tighten stop just below pivot; exit on break\n  • Watch reverse: new high on weak vol / RSI not confirming → precursor to fail',
+              scale: '✅ Confirmed: ≥ 2 closes above pivot + vol expansion\n⚠ Failed: same-day fade back to range\n🔴 False breakout: failed + base low breach → bull trap confirmed ← active' },
+    },
+    pattern_topping: {
+        zh: { title: '🔴 頂部型態（topping_pattern）',
+              desc: 'Technical lane 警示：出現頭肩頂 / 雙頂 / 圓弧頂等反轉訊號。趨勢可能由多轉空。',
+              scale: '✅ Confirm: 頸線跌破 + 量放大\n⚠ Watch: 三尊頭、divergence (價創新高但 RSI 不跟)' },
+        en: { title: '🔴 Topping Pattern',
+              desc: 'Technical lane flag: head-and-shoulders / double-top / rounding-top reversal patterns. Trend may flip bearish.',
+              scale: '✅ Confirm: neckline break + volume expansion\n⚠ Watch: triple top, divergence (price new high but RSI not)' },
+    },
+    pattern_downtrend: {
+        zh: { title: '🔴 下降趨勢（downtrend）',
+              desc: 'Technical lane：價格在下降通道中（lower highs + lower lows + 跌破 MA50/200）。除非 FTD 確認反彈，否則不抄底。' },
+        en: { title: '🔴 Downtrend',
+              desc: 'Technical lane: price in descending channel (lower highs + lower lows + below MA50/200). No bottom-fishing unless FTD confirms reversal.' },
+    },
+    pattern_oversold_bounce: {
+        zh: { title: '超賣反彈（oversold_bounce_attempt）',
+              desc: 'Technical lane：價格在強烈超賣後嘗試反彈（RSI < 30 + 觸前低 / Fibonacci 0.618）。風險：可能只是 dead cat bounce，需 FTD 確認。' },
+        en: { title: 'Pattern: Oversold Bounce Attempt',
+              desc: 'Technical lane: bounce after sharp selloff (RSI < 30 + tested prior low / 0.618 fib). Risk: may be dead-cat bounce — need FTD confirmation.' },
+    },
+    // ── V2.13.0 Technical market_strength ────────────────────────────────
+    market_strong: {
+        zh: { title: '盤面強（STRONG）',
+              desc: 'Technical lane：個股相對大盤強勢 — RS rating 高 + above MA20/50/200 + 量能配合。常見於 leadership 名單。' },
+        en: { title: 'Market Strength: STRONG',
+              desc: 'Technical lane: stock outperforming index — high RS rating + above MA20/50/200 + supportive volume. Typical of leadership names.' },
+    },
+    market_neutral: {
+        zh: { title: '盤面中性（NEUTRAL）',
+              desc: 'Technical lane：個股表現與大盤同步，無顯著超額。需配合其他訊號（基本面 / catalyst）才有 edge。' },
+        en: { title: 'Market Strength: NEUTRAL',
+              desc: 'Technical lane: stock tracks index — no clear outperformance. Need other signals (fundamentals / catalyst) for edge.' },
+    },
+    market_weak: {
+        zh: { title: '🔴 盤面弱（WEAK）',
+              desc: 'Technical lane 警示：個股**相對大盤明顯弱勢** — RS rating 低 + 跌破關鍵 MA20/50/200 + 量能未配合。\n\n**意義**：大盤拉抬時這檔跟不上、大盤回檔時跌得比大盤多 — 機構在 distribute（賣超），不是 accumulate。即使大盤健康，這檔也**不該成為 long 主力**。\n\n**操作層面**：\n  • Long thesis 強烈 → 至少等 RS rating 翻正 + 站回 MA50 再進，**不該逆勢抄底**\n  • 已持有 → 嚴守原 stop，跌破不僥倖加碼\n  • 配對 short / hedge candidate（如果產業 / sector 同步轉弱）',
+              scale: '🟢 STRONG    相對大盤強勢 — leadership 名單、可領 long\n⚪ NEUTRAL   跟大盤同步 — 需配合其他訊號才有 edge\n🔴 WEAK      落後大盤 — 不該領先 long ← 目前' },
+        en: { title: '🔴 Market Strength: WEAK',
+              desc: 'Technical lane flag: stock **clearly lagging index** — low RS + below MA20/50/200 + weak volume.\n\n**Implication**: doesn\'t keep up on index up days, drops more on down days — institutions are distributing, not accumulating. Even with healthy market, this **shouldn\'t lead longs**.\n\n**Practical**:\n  • Strong long thesis → wait for RS to flip positive + reclaim MA50 first, **don\'t bottom-fish against trend**\n  • Already holding → respect original stop, no bargain-hunting on breakdowns\n  • Pair-short / hedge candidate if industry weakens too',
+              scale: '🟢 STRONG    outperforming index — leadership, can lead longs\n⚪ NEUTRAL   tracks index — need other signals for edge\n🔴 WEAK      lagging index — should not lead longs ← active' },
+    },
+    // ── V2.13.0 decision_confidence_pct ──────────────────────────────────
+    decision_confidence: {
+        zh: { title: '🎯 決策信心度（Decision Confidence）',
+              desc: 'Phase 3 PM 整合層輸出的**單一信心 %**，把以下訊號合併算成一個數字：\n  • 5 個 lane scores（Fundamentals / Sentiment / News / Technical / Valuation）\n  • Burry deep-value score\n  • Red Team verdict tier\n  • Scenario odds（bull / base / bear 機率分佈）\n  • Lane consensus / polarization\n\n**用法**：是 sizing 的核心 input。配合 fragility / market_strength 一起看，才知道倉位該下到哪。\n\n**重要**：≥ 70% 不代表「絕對會漲」，是「以目前資訊重跑 100 次有 70 次方向相同」的概念。',
+              scale: '🟢 ≥ 70%   高信心 — 可上標準倉位\n🟡 50-70%  中等信心 — 倉位降一檔\n⚪ < 50%   低信心 — 觀望或極小試單（高 fragility 直接觀望）' },
+        en: { title: '🎯 Decision Confidence',
+              desc: 'Phase 3 PM **single confidence %** — fuses these signals into one number:\n  • 5 lane scores (Fundamentals / Sentiment / News / Technical / Valuation)\n  • Burry deep-value score\n  • Red Team verdict tier\n  • Scenario odds (bull / base / bear distribution)\n  • Lane consensus / polarization\n\n**Usage**: core input to sizing. Read alongside fragility / market_strength to land final position size.\n\n**Note**: ≥ 70% doesn\'t mean "will go up" — it\'s "rerun 100× on current info, 70 land same direction".',
+              scale: '🟢 ≥ 70%   high — standard size\n🟡 50-70%  medium — cut one notch\n⚪ < 50%   low — wait or tiny pilot (high fragility → just wait)' },
+    },
+    // ── Protocol version bookmarks ──────────────────────────────────────
+    version_v50: {
+        zh: { title: 'Protocol V5.0（最新）',
+              desc: '5 lane subagent (Fundamentals / Sentiment / News / Technical / **Valuation Specialist**) + Burry + Red Team + **Phase 4.5 fair_value_summary** (6 anchor weighted blend) + **Phase 5.5 thesis registry**。完整版。' },
+        en: { title: 'Protocol V5.0 (current)',
+              desc: '5-lane subagents (Fund / Sent / News / Tech / **Valuation Specialist**) + Burry + Red Team + **Phase 4.5 fair_value_summary** (6-anchor weighted blend) + **Phase 5.5 thesis registry**.' },
+    },
+    version_v48: {
+        zh: { title: 'Protocol V4.8',
+              desc: '4 lane subagent (Fundamentals / Sentiment / News / Technical) + Burry + Red Team + parallel fanout。**沒有** Valuation Specialist + 沒有 fair_value_summary。' },
+        en: { title: 'Protocol V4.8',
+              desc: '4-lane subagents + Burry + Red Team + parallel fanout. **No** Valuation Specialist or fair_value_summary.' },
+    },
+    version_v47: {
+        zh: { title: 'Protocol V4.7',
+              desc: '4 lane + Burry override + 第一版 Red Team kill conditions。沒有 parallel fanout。' },
+        en: { title: 'Protocol V4.7',
+              desc: '4-lane + Burry override + first-gen Red Team kill conditions. No parallel fanout.' },
+    },
+    version_v46: {
+        zh: { title: 'Protocol V4.6',
+              desc: '舊版 — 4 lane + 基本 Burry。早期決策已歸檔。' },
+        en: { title: 'Protocol V4.6',
+              desc: 'Legacy — 4-lane + basic Burry. Older decisions, archive only.' },
+    },
+    version_legacy: {
+        zh: { title: 'Protocol Archive (LEGACY)',
+              desc: '極舊版本，schema 已不支援。僅供歷史追溯。' },
+        en: { title: 'Protocol Archive (LEGACY)',
+              desc: 'Pre-V4 schema — kept for historical tracing only.' },
+    },
 };
 
 (function initDecisionTip() {
-    const tip = document.getElementById('decision-tip');
+    // V2.17.9 — render into shared #signal-tip-tooltip with .stt-* classes
+    // (same visual as sector page status pills) instead of legacy #decision-tip.
+    const tip = document.getElementById('signal-tip-tooltip');
     if (!tip) return;
-    if (tip._init) return;
-    tip._init = true;
+    if (tip._decision_init) return;
+    tip._decision_init = true;
     let _hideTimer = null;
+
+    // Lightweight markdown: **bold** and \n → <br>. Mirrors sector page's
+    // _renderTipMarkdown so descriptions can use **emphasis** + line breaks.
+    function _md(s) {
+        if (!s) return '';
+        return s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+    }
 
     function showTip(el) {
         const key = el.dataset.tipKey;
         const lang = (typeof UI !== 'undefined' && UI.currentLang === 'en') ? 'en' : 'zh';
         const data = DECISION_TIPS[key]?.[lang];
         if (!data) return;
-        let html = `<div class="tip-title">${data.title}</div>`;
-        html += `<div class="tip-desc">${data.desc}</div>`;
-        if (data.scale) html += `<div class="tip-scale">${data.scale}</div>`;
+        let html = `<div class="stt-title">${data.title}</div>`;
+        html += `<div class="stt-desc"><p>${_md(data.desc)}</p></div>`;
+        if (data.scale) {
+            html += `<div class="stt-hint" style="border-top:1px solid var(--border);padding-top:7px;margin-top:4px;font-size:11px;color:var(--text-muted);white-space:pre-line;letter-spacing:0.01em">${data.scale}</div>`;
+        }
         tip.innerHTML = html;
+        tip.classList.add('visible');
         tip.style.opacity = '0';
         tip.style.top = '-9999px';
-        tip.classList.add('tip-visible');
         requestAnimationFrame(() => {
             const rect  = el.getBoundingClientRect();
             const tRect = tip.getBoundingClientRect();
@@ -536,7 +762,7 @@ const DECISION_TIPS = {
             tip.style.opacity = '';
         });
     }
-    function hideTip() { tip.classList.remove('tip-visible'); }
+    function hideTip() { tip.classList.remove('visible'); }
 
     document.addEventListener('mouseover', e => {
         const el = e.target.closest('[data-tip-key]');
@@ -576,14 +802,25 @@ const VERSION_COLOR = {
 
 function buildVersionBookmark(version) {
     const c = VERSION_COLOR[version] || VERSION_COLOR['LEGACY'];
+    // V2.17.8 — version bookmark gets rich tooltip via data-tip-key
+    const tipKeyMap = {
+        'V5.0':   'version_v50',
+        'V4.8':   'version_v48',
+        'V4.7':   'version_v47',
+        'V4.6':   'version_v46',
+        'V4.5':   'version_v46',     // share scale doc
+        'LEGACY': 'version_legacy',
+    };
+    const tipKey = tipKeyMap[version] || 'version_legacy';
     return `
-    <div class="version-bookmark" title="Protocol ${c.label}"
+    <div class="version-bookmark" data-tip-key="${tipKey}"
          style="position:absolute; top:0; right:8px; z-index:2;
                 padding:2px 7px 3px; font-size:8px; font-weight:800; letter-spacing:0.06em;
                 border:1px solid ${c.border}; border-top:0;
                 border-bottom-left-radius:5px; border-bottom-right-radius:5px;
                 background:${c.bg}; color:${c.fg};
-                box-shadow: 0 1px 3px rgba(0,0,0,0.2); opacity: 0.85;">
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2); opacity: 0.85;
+                cursor: help;">
         ${c.label}
     </div>`;
 }
@@ -727,96 +964,97 @@ function buildV48StatusPills(item, wl) {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${tipKey}" style="background:color-mix(in srgb,${fragColor},transparent 88%);color:${fragColor};border:1px solid color-mix(in srgb,${fragColor},transparent 70%)">${label}</span>`);
     }
     // V2.10.0 — det_shadow polarization + agreement
+    // V2.17.8 — native title= upgraded to data-tip-key (rich DECISION_TIPS)
+    // V2.20.0 — polarization 升 4-tier (BIPOLAR/OUTLIER/MIXED/ALIGNED) + red_team_basis 4-tier
     const ds = item.det_shadow || {};
     if (ds.signal_polarization === 'BIPOLAR') {
-        const tip = isZh ? 'Lane 訊號兩極（強空＋強多並存）→ verdict 重跑會晃；不該重押任一邊'
-                         : 'Lanes are extremely polarized (strong long + strong short coexist) → verdict will swing on rerun; avoid heavy sizing';
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#a855f7,transparent 88%);color:#a855f7;border:1px solid color-mix(in srgb,#a855f7,transparent 70%)">${isZh ? '訊號兩極' : 'BIPOLAR'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="signal_polarization_bipolar" style="background:color-mix(in srgb,#a855f7,transparent 88%);color:#a855f7;border:1px solid color-mix(in srgb,#a855f7,transparent 70%)" title="${isZh ? '5 lane 勢均力敵衝突 (range≥4 + 雙邊各≥2 lane)' : 'Lane scores prove deadlock (range≥4 + ≥2 each side)'}">${isZh ? '訊號兩極' : 'BIPOLAR'}</span>`);
+    } else if (ds.signal_polarization === 'OUTLIER') {
+        // V2.20.0 — 新 4-vs-1 outlier 級
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#a78bfa,transparent 88%);color:#a78bfa;border:1px solid color-mix(in srgb,#a78bfa,transparent 70%)" title="${isZh ? '單一 lane 站對立面 (4-vs-1 離群)' : '1 lane on minority side (4-vs-1 outlier)'}">${isZh ? '訊號離群' : 'OUTLIER'}</span>`);
     } else if (ds.signal_polarization === 'MIXED') {
-        const tip = isZh ? 'Lane 訊號分歧（一正一負，未到極端）'
-                         : 'Lanes mixed (some positive, some negative, less extreme)';
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#0ea5e9,transparent 88%);color:#0ea5e9;border:1px solid color-mix(in srgb,#0ea5e9,transparent 70%)">${isZh ? '訊號分歧' : 'MIXED'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="signal_polarization_mixed" style="background:color-mix(in srgb,#0ea5e9,transparent 88%);color:#0ea5e9;border:1px solid color-mix(in srgb,#0ea5e9,transparent 70%)">${isZh ? '訊號分歧' : 'MIXED'}</span>`);
+    }
+    // V2.20.0 — red_team_basis 4-tier badge (Anti-spoofing classifier output)
+    if (ds.red_team_basis === 'pure_mean_reversion') {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#dc2626,transparent 88%);color:#dc2626;border:1px solid color-mix(in srgb,#dc2626,transparent 70%)" title="${isZh ? 'Red Team 純歷史均值回歸攻擊 (V2.19 anti-spoofing)' : 'Red Team used pure mean-reversion attack (V2.19 anti-spoofing)'}">${isZh ? 'RT 歷史攻擊' : 'RT MR-ONLY'}</span>`);
+    } else if (ds.red_team_basis === 'contaminated') {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#ea580c,transparent 88%);color:#ea580c;border:1px solid color-mix(in srgb,#ea580c,transparent 70%)" title="${isZh ? 'Red Team 偷渡均值回歸 (forward + mr 並存)' : 'Red Team smuggled mean-reversion (forward + mr both present)'}">${isZh ? 'RT 污染' : 'RT CONTAM'}</span>`);
+    } else if (ds.red_team_basis === 'pure_forward') {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#16a34a,transparent 88%);color:#16a34a;border:1px solid color-mix(in srgb,#16a34a,transparent 70%)" title="${isZh ? 'Red Team 純 forward mechanism 攻擊（健康）' : 'Red Team pure forward mechanism attack (clean)'}">${isZh ? 'RT 前瞻' : 'RT FWD'}</span>`);
     }
     if (ds.red_team_agreement === 'DISAGREE') {
-        const det = ds.red_team_verdict_det || '';
-        const tip = isZh
-            ? `LLM Red Team = ${item.red_team_verdict || 'N/A'}，但量化規則 = ${det}（${ds.red_team_detail?.kill_count ?? '?'} 條 kill trigger 觸發）→ LLM 比量化寬鬆，警覺`
-            : `LLM=${item.red_team_verdict || 'N/A'} vs deterministic=${det} (${ds.red_team_detail?.kill_count ?? '?'} kill triggers) → LLM softer than rules`;
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? 'Red Team 不一致' : 'RT DISAGREE'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="red_team_disagree" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? 'Red Team 不一致' : 'RT DISAGREE'}</span>`);
     }
     if (ds.val_agreement === 'DISAGREE') {
-        const llm = item.valuation_lane?.score;
-        const det = ds.valuation_score_det;
-        const tip = isZh
-            ? `LLM Val score = ${llm}，但純 FV/price 算的 det = ${det} → LLM 在 valuation 上比純算數 ${(llm < det) ? '更悲觀' : '更樂觀'}`
-            : `LLM Val=${llm} vs deterministic FV-vs-price=${det} → LLM is ${(llm < det) ? 'more bearish' : 'more bullish'}`;
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${tip}" style="background:color-mix(in srgb,#f59e0b,transparent 88%);color:#f59e0b;border:1px solid color-mix(in srgb,#f59e0b,transparent 70%)">${isZh ? 'Val 不一致' : 'VAL DISAGREE'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="val_disagree" style="background:color-mix(in srgb,#f59e0b,transparent 88%);color:#f59e0b;border:1px solid color-mix(in srgb,#f59e0b,transparent 70%)">${isZh ? 'Val 不一致' : 'VAL DISAGREE'}</span>`);
     }
     // V2.13.0 — action_label (ATTACK / WAIT / DEFENSIVE)
     if (item.action_label) {
         const actionMap = {
-            ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip_zh: '立即進場：訊號明確且確信度高',                  tip_en: 'Immediate entry: clear signals with high confidence' },
-            WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip_zh: '等 pullback / 條件觸發再進場',                tip_en: 'Wait for pullback / condition trigger' },
-            DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip_zh: '訊號矛盾或下行偏多，主動避開或縮倉',         tip_en: 'Conflicting/bearish signals; avoid or downsize' },
+            ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip: 'action_attack' },
+            WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip: 'action_wait' },
+            DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip: 'action_defensive' },
         };
         const a = actionMap[item.action_label];
         if (a) {
-            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${isZh ? a.tip_zh : a.tip_en}" style="background:color-mix(in srgb,${a.color},transparent 86%);color:${a.color};border:1px solid color-mix(in srgb,${a.color},transparent 65%)">${isZh ? a.label_zh : a.label_en}</span>`);
+            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${a.tip}" style="background:color-mix(in srgb,${a.color},transparent 86%);color:${a.color};border:1px solid color-mix(in srgb,${a.color},transparent 65%)">${isZh ? a.label_zh : a.label_en}</span>`);
         }
     }
     // V2.13.0 — moat_assessment (Fundamentals lane)
     const moat = item.fundamentals_lane?.moat_assessment;
     if (moat && moat.level && moat.level !== 'INSUFFICIENT_DATA') {
         const moatMap = {
-            WIDE:    { color: '#eab308', label_zh: '寬護城河', label_en: 'WIDE MOAT' },
-            NARROW:  { color: '#a1a1aa', label_zh: '窄護城河', label_en: 'NARROW MOAT' },
-            ERODING: { color: '#ef4444', label_zh: '護城河侵蝕', label_en: 'ERODING MOAT' },
-            NONE:    { color: '#71717a', label_zh: '無護城河', label_en: 'NO MOAT' },
+            WIDE:    { color: '#eab308', label_zh: '寬護城河', label_en: 'WIDE MOAT', tip: 'moat_wide' },
+            NARROW:  { color: '#a1a1aa', label_zh: '窄護城河', label_en: 'NARROW MOAT', tip: 'moat_narrow' },
+            ERODING: { color: '#ef4444', label_zh: '護城河侵蝕', label_en: 'ERODING MOAT', tip: 'moat_eroding' },
+            NONE:    { color: '#71717a', label_zh: '無護城河', label_en: 'NO MOAT', tip: 'moat_none' },
         };
         const m = moatMap[moat.level];
         if (m) {
-            const tip = `${moat.type || ''} — ${moat.evidence_one_line || ''}`.replace(/^—\s*/, '').replace(/\s*—\s*$/, '');
-            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${escapeHtmlDc(tip || moat.level)}" style="background:color-mix(in srgb,${m.color},transparent 86%);color:${m.color};border:1px solid color-mix(in srgb,${m.color},transparent 65%)">${isZh ? m.label_zh : m.label_en}</span>`);
+            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${m.tip}" style="background:color-mix(in srgb,${m.color},transparent 86%);color:${m.color};border:1px solid color-mix(in srgb,${m.color},transparent 65%)">${isZh ? m.label_zh : m.label_en}</span>`);
         }
     }
     // V2.13.0 — Technical pattern_taxonomy
     const pat = item.technical_lane?.pattern_taxonomy;
     if (pat && pat.pattern && pat.pattern !== 'INSUFFICIENT_DATA') {
-        const patternZh = {
-            uptrend_breakout:        '突破',
-            uptrend_continuation:    '續漲',
-            consolidation:           '整理',
-            pullback_in_uptrend:     '回踩',
-            false_breakout:          '假突破',
-            topping_pattern:         '頂部',
-            downtrend:               '下降',
-            oversold_bounce_attempt: '超賣反彈',
+        const patternMeta = {
+            uptrend_breakout:        { zh: '突破',     tip: 'pattern_breakout' },
+            uptrend_continuation:    { zh: '續漲',     tip: 'pattern_continuation' },
+            consolidation:           { zh: '整理',     tip: 'pattern_consolidation' },
+            pullback_in_uptrend:     { zh: '回踩',     tip: 'pattern_pullback' },
+            false_breakout:          { zh: '假突破',   tip: 'pattern_false_breakout' },
+            topping_pattern:         { zh: '頂部',     tip: 'pattern_topping' },
+            downtrend:               { zh: '下降',     tip: 'pattern_downtrend' },
+            oversold_bounce_attempt: { zh: '超賣反彈', tip: 'pattern_oversold_bounce' },
         };
         const isUp = pat.pattern.startsWith('uptrend') || pat.pattern === 'pullback_in_uptrend' || pat.pattern === 'oversold_bounce_attempt';
         const isDown = pat.pattern === 'topping_pattern' || pat.pattern === 'downtrend' || pat.pattern === 'false_breakout';
         const color = isUp ? '#22c55e' : (isDown ? '#ef4444' : '#a1a1aa');
-        const label = isZh ? (patternZh[pat.pattern] || pat.pattern) : pat.pattern.replace(/_/g, ' ');
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" title="${escapeHtmlDc(pat.confirmation_criteria || '')}" style="background:color-mix(in srgb,${color},transparent 86%);color:${color};border:1px solid color-mix(in srgb,${color},transparent 65%)">${escapeHtmlDc(label)}</span>`);
+        const meta = patternMeta[pat.pattern];
+        const label = isZh ? (meta?.zh || pat.pattern) : pat.pattern.replace(/_/g, ' ');
+        const tipKey = meta?.tip || '';
+        const tipAttr = tipKey ? `data-tip-key="${tipKey}"` : '';
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" ${tipAttr} style="background:color-mix(in srgb,${color},transparent 86%);color:${color};border:1px solid color-mix(in srgb,${color},transparent 65%)">${escapeHtmlDc(label)}</span>`);
     }
     // V2.13.0 — Technical market_strength
     const strength = item.technical_lane?.market_strength;
     if (strength && strength !== 'INSUFFICIENT_DATA') {
         const strengthMap = {
-            STRONG:  { color: '#22c55e', label_zh: '盤面強', label_en: 'STRONG' },
-            NEUTRAL: { color: '#a1a1aa', label_zh: '盤面中性', label_en: 'NEUTRAL' },
-            WEAK:    { color: '#ef4444', label_zh: '盤面弱', label_en: 'WEAK' },
+            STRONG:  { color: '#22c55e', label_zh: '盤面強', label_en: 'STRONG', tip: 'market_strong' },
+            NEUTRAL: { color: '#a1a1aa', label_zh: '盤面中性', label_en: 'NEUTRAL', tip: 'market_neutral' },
+            WEAK:    { color: '#ef4444', label_zh: '盤面弱', label_en: 'WEAK', tip: 'market_weak' },
         };
         const s = strengthMap[strength];
         if (s) {
-            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,${s.color},transparent 86%);color:${s.color};border:1px solid color-mix(in srgb,${s.color},transparent 65%)">${isZh ? s.label_zh : s.label_en}</span>`);
+            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${s.tip}" style="background:color-mix(in srgb,${s.color},transparent 86%);color:${s.color};border:1px solid color-mix(in srgb,${s.color},transparent 65%)">${isZh ? s.label_zh : s.label_en}</span>`);
         }
     }
     // V2.13.0 — decision_confidence_pct
     if (typeof item.decision_confidence_pct === 'number') {
         const c = item.decision_confidence_pct;
         const color = c >= 70 ? '#22c55e' : (c >= 50 ? '#eab308' : '#71717a');
-        const tip = isZh ? '決策信心度（V2.13.0 PM 整合層輸出）' : 'Decision confidence (V2.13.0 PM synthesis)';
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-mono font-bold" title="${tip}" style="color:${color};border:1px solid color-mix(in srgb,${color},transparent 70%)">${c}%</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-mono font-bold" data-tip-key="decision_confidence" style="color:${color};border:1px solid color-mix(in srgb,${color},transparent 70%)">${c}%</span>`);
     }
     return pills.join(' ');
 }
@@ -983,7 +1221,7 @@ function buildCard(item) {
         <div class="flex justify-between items-start mb-4">
             <div class="min-w-0 flex-1">
                 <div class="flex items-baseline gap-3 flex-wrap">
-                    <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}</h4>
+                    <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}${(window.UI?.watchlistSet?.has?.(item.ticker)) ? ` <span class="watchlist-bolt" title="V2.19 結構性轉變候選 (news keyword leading signal)" style="color:#f59e0b;font-size:0.55em;vertical-align:0.4em">⚡</span>` : ''}</h4>
                     ${item.current_price != null ? (() => {
                         const cp = item.current_price;
                         const ap = item.analysis_price;
@@ -1364,6 +1602,10 @@ async function loadWatchlist() {
         ((data.momentum_screen || {}).rows || []).forEach(r => {
             if (r.ticker && r.sector && r.sector !== 'Unknown') _tickerSectorMap[r.ticker] = r.sector;
         });
+
+        // V2.19.2 — populate watchlist set for ⚡ badge in card render
+        window.UI = window.UI || {};
+        window.UI.watchlistSet = new Set(((data.structural_watchlist || {}).candidates || []).map(c => c.ticker));
 
         window._allAnalysis   = allAnalysis;
         window._watchlistData = watchItems;

@@ -221,6 +221,14 @@ function renderThreeSignalMini(data) {
 // ── V1.73.4 — Sector status row (8 circular gauges) — promoted from page-sector.js ──
 function _gaugeColor(score, polarity) {
     const s = Number(score) || 0;
+    if (polarity === 'positive') {
+        // Mirrors breadth tooltip 5-tier semantic in utils.js (br_strong/healthy/neutral/weakening/critical)
+        if (s >= 75) return '#16a34a';   // 健康強勢
+        if (s >= 60) return '#22c55e';   // 主升中段
+        if (s >= 40) return '#facc15';   // 訊號混合 🟡
+        if (s >= 25) return '#f59e0b';   // 走弱中 🟠
+        return '#ef4444';                 // 行情危險 🔴
+    }
     if (polarity === 'amber') {
         if (s >= 70) return '#d97706';
         if (s >= 40) return '#f59e0b';
@@ -318,34 +326,87 @@ function renderSectorStatusStrip(data) {
         });
     }
 
-    const ftdScore = ftd.quality_score;
+    // V2.17.10 — FTD gauge surfaces ACTIVE STAGE (黃金 / 主升 / 補漲 / 過熱) instead of
+    // the static quality_score=100 + green ring that user saw for days. Uses
+    // days_since_ftd to bucket into 4 stages with distinct color + day-count display.
     const ftdEl = document.getElementById('pill-ftd');
     if (ftdEl) {
+        const FTD_STAGES = [
+            { range: [1, 5],   tag_zh: '黃金期', tag_en: 'PRIME',     color: '#22c55e', pct: 100 },
+            { range: [6, 12],  tag_zh: '主升期', tag_en: 'STANDARD',  color: '#eab308', pct: 78  },
+            { range: [13, 20], tag_zh: '補漲期', tag_en: 'LATE',      color: '#f97316', pct: 52  },
+            { range: [21, 999], tag_zh: '過熱期', tag_en: 'EXHAUSTED', color: '#ef4444', pct: 22  },
+        ];
+        const day = ftd.days_since_ftd;
+        const isConfirmed = ftd.state === 'FTD_CONFIRMED' && day != null && day >= 1;
+        const stage = isConfirmed
+            ? (FTD_STAGES.find(s => day >= s.range[0] && day <= s.range[1]) || FTD_STAGES[3])
+            : null;
+        let valueDisplay, suffix, color, pctValue;
+        if (isConfirmed) {
+            valueDisplay = `Day ${day}`;
+            suffix = isZh ? stage.tag_zh : stage.tag_en;
+            color = stage.color;
+            pctValue = stage.pct;  // gauge fill represents "remaining momentum window"
+        } else if (ftd.state === 'FTD_INVALIDATED') {
+            valueDisplay = isZh ? '失效' : 'INVAL';
+            suffix = isZh ? '等下一輪' : 'wait';
+            color = '#ef4444';
+            pctValue = 8;
+        } else if (ftd.state === 'RALLY_ATTEMPT') {
+            const rd = ftd.rally_day_count;
+            valueDisplay = rd != null ? `D${rd}` : (isZh ? '等' : 'wait');
+            suffix = isZh ? '反彈中' : 'rally';
+            color = '#a1a1aa';
+            pctValue = 30;
+        } else {
+            valueDisplay = isZh ? '等' : 'wait';
+            suffix = isZh ? '無 FTD' : 'no FTD';
+            color = '#71717a';
+            pctValue = 0;
+        }
         ftdEl.innerHTML = _gaugeHTML({
-            value: ftdScore,
+            value: pctValue,
+            valueDisplay,
+            suffix,
             label: tr.pill_ftd || (isZh ? 'FTD 狀態' : 'FTD'),
-            color: ftd.state === 'FTD_CONFIRMED' ? '#22c55e'
-                 : _gaugeColor(ftdScore, 'positive'),
+            color,
+            displaySize: 'md',  // shrink slightly so "Day 21" + suffix both fit alongside other gauges
         });
     }
 
     const mtScore = mt.composite_score ?? mt.score ?? m.market_top_score;
     const mtopEl = document.getElementById('pill-marketop');
     if (mtopEl) {
+        // Mirrors market-top tooltip 5-tier semantic (utils.js mt_normal/warning/elevated/high/top)
+        const s = Number(mtScore);
+        const mtColor = !Number.isFinite(s) ? '#71717a'
+                      : s >= 80 ? '#ef4444'    // mt_top 🔴
+                      : s >= 65 ? '#f97316'    // mt_high 🟠
+                      : s >= 50 ? '#f59e0b'    // mt_elevated 🟠
+                      : s >= 30 ? '#eab308'    // mt_warning 🟡
+                      : '#22c55e';              // mt_normal 🟢
         mtopEl.innerHTML = _gaugeHTML({
             value: mtScore,
             label: tr.pill_marketop || (isZh ? '頂部風險' : 'Market Top'),
-            color: _gaugeColor(mtScore, 'amber'),
+            color: mtColor,
         });
     }
 
     const fgScore = m.fear_greed ?? m.fear_greed_index;
     const fgEl = document.getElementById('pill-fg');
     if (fgEl) {
+        // Mirrors F&G tooltip 5-tier contrarian semantic (utils.js fg_extreme_fear/fear/neutral/greed/extreme_greed)
+        const s = Number(fgScore);
+        const fgColor = !Number.isFinite(s) ? '#71717a'
+                      : s >= 75 ? '#ef4444'    // extreme_greed 🔴
+                      : s >= 55 ? '#f59e0b'    // greed 🟠
+                      : s >= 25 ? '#eab308'    // fear / neutral 🟡
+                      : '#22c55e';              // extreme_fear 🟢 (contrarian buy)
         fgEl.innerHTML = _gaugeHTML({
             value: fgScore,
             label: tr.pill_fg || (isZh ? '恐懼貪婪' : 'Fear & Greed'),
-            color: _gaugeColor(fgScore, 'amber-bell'),
+            color: fgColor,
         });
     }
 
@@ -373,14 +434,16 @@ function renderSectorStatusStrip(data) {
 
     const cycleEl = document.getElementById('pill-cycle');
     if (cycleEl) {
+        // Mirrors cycle tooltip 4-tier (utils.js cy_early/mid/late/distribution).
+        // `map` accepts both legacy "Recession" and canonical "Distribution".
         const CYCLE_SEG = [
-            { key: 'Early',     label: 'EARLY', color: '#22c55e' },
-            { key: 'Mid',       label: 'MID',   color: '#84cc16' },
-            { key: 'Late',      label: 'LATE',  color: '#f59e0b' },
-            { key: 'Recession', label: 'REC',   color: '#ef4444' },
+            { key: 'Early',        label: 'EARLY', color: '#22c55e', map: ['early'] },                       // 🟢
+            { key: 'Mid',          label: 'MID',   color: '#eab308', map: ['mid'] },                         // 🟡
+            { key: 'Late',         label: 'LATE',  color: '#f59e0b', map: ['late'] },                        // 🟠
+            { key: 'Distribution', label: 'DIST',  color: '#ef4444', map: ['distribution', 'recession'] },   // 🔴
         ];
-        const cur = m.cycle_phase || '';
-        const activeIdx = CYCLE_SEG.findIndex(s => s.key.toLowerCase() === cur.toLowerCase());
+        const cur = (m.cycle_phase || '').toLowerCase();
+        const activeIdx = CYCLE_SEG.findIndex(s => s.map.includes(cur));
         const activeColor = activeIdx >= 0 ? CYCLE_SEG[activeIdx].color : '#71717a';
         cycleEl.innerHTML = _gaugeSegmentedHTML({
             segments: CYCLE_SEG,
@@ -405,11 +468,17 @@ function renderSectorStatusStrip(data) {
             midPct = Number(single[1]);
             displayStr = `${single[1]}<span class="sector-gauge-unit">%</span>`;
         }
+        // Mirrors exposure tooltip 4-tier semantic (utils.js br_strong/healthy/neutral/critical)
+        const expColor = midPct == null ? '#a78bfa'
+                       : midPct >= 85 ? '#22c55e'   // 85-100 滿倉 🟢
+                       : midPct >= 60 ? '#eab308'   // 60-85 標準 🟡
+                       : midPct >= 30 ? '#f59e0b'   // 30-60 防禦 🟠
+                       : '#ef4444';                  // 0-30 極低 🔴
         exposureEl.innerHTML = _gaugeHTML({
             value: midPct,
             label: tr.pill_exposure || (isZh ? '曝險上限' : 'Exposure'),
             valueDisplay: displayStr,
-            color: '#a78bfa',
+            color: expColor,
             displaySize: 'md',
         });
     }
@@ -417,10 +486,12 @@ function renderSectorStatusStrip(data) {
     const vixEl = document.getElementById('pill-vix');
     if (vixEl) {
         const vix = mt.vix_level;
+        // Mirrors VIX tooltip 5-tier (utils.js vx_calm/normal/elevated/high/panic)
         const vixColor = vix == null ? '#71717a'
-                       : vix >= 25 ? '#ef4444'
-                       : vix >= 18 ? '#f59e0b'
-                       : '#22c55e';
+                       : vix >= 40 ? '#ef4444'   // vx_panic 🔴
+                       : vix >= 30 ? '#f97316'   // vx_high 🟠
+                       : vix >= 20 ? '#eab308'   // vx_elevated 🟡
+                       : '#22c55e';               // vx_calm + vx_normal (<20) 🟢
         const display = vix != null ? Number(vix).toFixed(1) : '--';
         vixEl.innerHTML = _gaugeHTML({
             value: vix,
@@ -950,15 +1021,19 @@ async function updateDashboard() {
     renderMomentumTeaser(data.momentum_screen, crossSet);
     renderFocusTicker(data);
 
-    // Layer 4: Recent Analysis (compact list) — M3 ⭐ badge attached via crossSet
+    // Layer 4: Recent Analysis (compact list) — M3 ⭐ badge + V2.19.1 ⚡ watchlist badge
     const condensedGrid = document.getElementById('audit-grid-condensed');
     const fullGrid      = document.getElementById('audit-grid-full');
+    const watchlistSet = new Set((data.structural_watchlist?.candidates || []).map(c => c.ticker));
     const decorate = (card, ticker) => {
-      if (!crossSet.has(ticker)) return card;
       const title = card.querySelector('.font-black') || card.querySelector('span');
-      if (title && !title.querySelector('.cross-signal-star')) {
+      if (crossSet.has(ticker) && title && !title.querySelector('.cross-signal-star')) {
         title.insertAdjacentHTML('afterend',
           ` <span class="cross-signal-star" title="雙軍同向（動能榜 Top 30 + BUY/EXECUTE）">⭐</span>`);
+      }
+      if (watchlistSet.has(ticker) && title && !title.querySelector('.watchlist-bolt')) {
+        title.insertAdjacentHTML('afterend',
+          ` <span class="watchlist-bolt" title="V2.19 結構性轉變候選（news keyword leading signal）" style="color:#f59e0b;font-weight:700">⚡</span>`);
       }
       return card;
     };
@@ -972,6 +1047,9 @@ async function updateDashboard() {
       data.recent_analysis?.forEach(item =>
         fullGrid.appendChild(decorate(Components.renderAuditCard(item, false), item.ticker)));
     }
+
+    // Layer 5: Structural Watchlist (V2.19.1) — paradigm-shift candidates from news
+    renderStructuralWatchlist(data.structural_watchlist);
 
   } catch (error) {
     UI.logToUI(error.message, 'error');
@@ -987,6 +1065,65 @@ async function updateDashboard() {
     ]);
     UI.logToUI('System update cycle complete.');
   }
+}
+
+// ── Structural Watchlist (V2.19.1) — paradigm-shift candidates from news keywords ─
+function renderStructuralWatchlist(sw) {
+  const wrap = document.getElementById('structural-watchlist');
+  const grid = document.getElementById('watchlist-grid');
+  const asOf = document.getElementById('watchlist-as-of');
+  if (!wrap || !grid) return;
+
+  if (!sw || sw.status !== 'success' || !(sw.candidates || []).length) {
+    wrap.classList.add('hidden');
+    return;
+  }
+
+  wrap.classList.remove('hidden');
+  if (asOf) asOf.textContent = sw.as_of ? `as of ${sw.as_of}` : '';
+
+  const credColor = (c) => c === 'HIGH' ? 'text-amber-400' : 'text-zinc-400';
+  const credLabel = (c) => c === 'HIGH' ? '⚡⚡' : '⚡';
+
+  grid.innerHTML = '';
+  (sw.candidates || []).forEach(c => {
+    const ticker = c.ticker || '?';
+    const sector = c.sector || '';
+    const hits   = c.hit_count_14d ?? 0;
+    const cred   = c.source_credibility_max || '';
+    const days   = c.days_since_last_hit ?? '?';
+    const kws    = (c.keyword_hits || []).slice(0, 3).join(' · ');
+
+    // V2.20.0 — trajectory badges
+    const traj = c.trajectory || {};
+    let trajBadges = '';
+    if (traj.graduated_confirmed) {
+      trajBadges = `<span style="background:#dc2626;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="Earnings 已確認 CONFIRMED tier">✓ CONFIRMED</span>`;
+    } else if (traj.graduated_candidate) {
+      trajBadges = `<span style="background:#f59e0b;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="Earnings 已升 CANDIDATE tier">✓ CANDIDATE</span>`;
+    } else if (traj.continued_count >= 5) {
+      trajBadges = `<span style="background:#64748b;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="持續 watchlist 中 ${traj.continued_count}+ 天，但未升 tier — 可能是 false positive 老化">AGING</span>`;
+    } else if (traj.n_events <= 2) {
+      trajBadges = `<span style="background:#22c55e;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="新進 watchlist (≤2 events)">NEW</span>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'rounded-lg p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 hover:border-amber-500/50 transition-all cursor-pointer';
+    card.onclick = () => window.location.href = `decisions.html?ticker=${ticker}`;
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-1">
+        <span class="font-mono font-bold text-sm">${ticker}</span>
+        <span class="${credColor(cred)} text-[10px]" title="source credibility: ${cred}">${credLabel(cred)} ${hits}</span>
+      </div>
+      <div class="text-[10px] text-zinc-500 truncate mb-1">${sector}</div>
+      <div class="text-[9px] text-amber-600 dark:text-amber-400 font-mono truncate" title="${(c.keyword_hits||[]).join(', ')}">${kws}</div>
+      <div class="flex items-center justify-between mt-1">
+        <span class="text-[9px] text-zinc-500">${days}d ago · first ${c.first_observed || '?'}</span>
+        ${trajBadges}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
 }
 
 // ── Launch Engine (reverse-call to Claude via /api/run-protocol) ──────────
@@ -1443,8 +1580,9 @@ async function runPreflightQueue(items, isZh) {
 // Phase 1 (parallel): bash daily_update.sh + news Claude protocol
 // Phase 2 (after both Phase 1 done): sector Claude protocol
 // Phase 3 (auto): bridge.py refresh → AI verdict pills auto-update
-let _chainPollTimers = { daily: null, proto: null };
-let _chainState = { phase: 0, dailyDone: false, newsDone: false, sectorDone: false };
+// V2.13.11 — only one server-status poll timer kept (`proto`); _chainState
+// removed (server holds the canonical state, frontend just renders).
+let _chainPollTimers = { proto: null };
 const ZH = () => UI.currentLang === 'zh';
 
 function _setRow(rowKey, icon, meta, barPct) {
@@ -1461,129 +1599,142 @@ function _fmtSec(s) {
   return m ? `${m}m ${String(x).padStart(2,'0')}s` : `${x}s`;
 }
 
+// V2.13.11 — chain orchestration moved to server (`/api/run-premarket-chain`).
+// Frontend just kicks it off and polls aggregated status. Eliminates the race
+// where news done → sector enqueue could be missed if the 'done' transition
+// fell between 2.5s polls (resulted in sector never starting earlier).
 async function runPremarketChain() {
   const isZh = ZH();
-  // Show chain UI, hide checklist
   document.getElementById('preflight-chain')?.classList.remove('hidden');
   document.getElementById('preflight-checklist')?.classList.add('hidden');
   document.getElementById('preflight-run-chain').setAttribute('disabled', 'true');
 
-  _chainState = { phase: 1, dailyDone: false, newsDone: false, sectorDone: false };
-  _setRow('daily', '🔄', isZh ? '啟動中…' : 'starting…', 0);
-  _setRow('news',  '🔄', isZh ? '啟動中…' : 'starting…', 0);
+  _setRow('daily', '⏳', isZh ? '排隊中…' : 'queued…', 0);
+  _setRow('news',  '⏳', isZh ? '排隊中…' : 'queued…', 0);
   _setRow('sector','⏳', isZh ? '等 Phase 1' : 'waiting Phase 1', 0);
   _setRow('verdict','⏳', isZh ? '等 Phase 2' : 'waiting Phase 2', 0);
 
-  // Phase 1 — fire both in parallel
-  const [dailyRes, newsRes] = await Promise.allSettled([
-    fetch('/api/run-daily-update', { method: 'POST' }).then(r => r.json()),
-    fetch('/api/protocol-queue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'news' }),
-    }).then(r => r.json()),
-  ]);
-  if (dailyRes.status === 'rejected' || (dailyRes.value && dailyRes.value.error && !dailyRes.value.job_id)) {
-    _setRow('daily', '❌', `${isZh?'啟動失敗':'failed'}: ${dailyRes.value?.error || dailyRes.reason}`, 0);
-  }
-  if (newsRes.status === 'rejected' || (newsRes.value && newsRes.value.error)) {
-    _setRow('news', '❌', `${isZh?'啟動失敗':'failed'}: ${newsRes.value?.error || newsRes.reason}`, 0);
-  }
-
-  // Start poll loops (independent timers)
-  if (_chainPollTimers.daily) clearInterval(_chainPollTimers.daily);
-  if (_chainPollTimers.proto) clearInterval(_chainPollTimers.proto);
-  _chainPollTimers.daily = setInterval(_pollDailyUpdate, 2500);
-  _chainPollTimers.proto = setInterval(_pollProtoForChain, 2500);
-  _pollDailyUpdate();
-  _pollProtoForChain();
-}
-
-async function _pollDailyUpdate() {
-  const isZh = ZH();
+  // Kick off server-side chain. 409 → already running, just attach poll.
   try {
-    const r = await fetch('/api/run-daily-update/status', { cache: 'no-store' });
-    if (!r.ok) return;
-    const s = await r.json();
-    if (s.status === 'running') {
-      const step = s.current_step || 0;
-      const tot  = s.total_steps  || 6;
-      const pct  = (step / tot) * 100;
-      _setRow('daily', '🔄', `step ${step}/${tot} · ${_fmtSec(s.elapsed_sec)}`, pct);
-    } else if (s.status === 'done') {
-      _setRow('daily', '✅', `${isZh?'完成':'done'} · ${_fmtSec(s.elapsed_sec)}`, 100);
-      if (!_chainState.dailyDone) { _chainState.dailyDone = true; _maybeStartPhase2(); }
-      clearInterval(_chainPollTimers.daily);
-    } else if (s.status === 'error') {
-      _setRow('daily', '❌', `${isZh?'錯誤':'error'}: ${(s.error || s.log_tail || '').slice(0, 80)}`, 100);
-      clearInterval(_chainPollTimers.daily);
-    }
-  } catch {}
-}
-
-async function _pollProtoForChain() {
-  const isZh = ZH();
-  try {
-    const r = await fetch('/api/run-protocol/status', { cache: 'no-store' });
-    if (!r.ok) return;
-    const s = await r.json();
-    // Map active job by name
-    const target = (_chainState.phase === 1 && !_chainState.newsDone) ? 'news'
-                 : (_chainState.phase === 2 && !_chainState.sectorDone) ? 'sector'
-                 : null;
-    if (!target) return;
-    if (s.name !== target) return;
-    if (s.status === 'running') {
-      _setRow(target, '🔄', `running · ${_fmtSec(s.elapsed_sec)}`, Math.min(95, (s.elapsed_sec || 0) / 9));
-    } else if (s.status === 'done') {
-      _setRow(target, '✅', `${isZh?'完成':'done'} · ${_fmtSec(s.elapsed_sec)}`, 100);
-      if (target === 'news') {
-        _chainState.newsDone = true;
-        _maybeStartPhase2();
-      } else if (target === 'sector') {
-        _chainState.sectorDone = true;
-        _finalizeChain();
-      }
-    } else if (s.status === 'error') {
-      _setRow(target, '❌', `${isZh?'錯誤':'error'}: ${(s.error || '').slice(0, 80)}`, 100);
-      // halt chain
-      clearInterval(_chainPollTimers.proto);
+    const res = await fetch('/api/run-premarket-chain', { method: 'POST' });
+    if (!res.ok && res.status !== 409) {
+      const err = await res.json().catch(() => ({}));
+      _setRow('daily', '❌', `${isZh?'啟動失敗':'start failed'}: ${err.error || res.status}`, 0);
       document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+      return;
+    }
+  } catch (e) {
+    _setRow('daily', '❌', `${isZh?'網路錯誤':'network error'}: ${e.message}`, 0);
+    document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+    return;
+  }
+
+  // Single poller: aggregated server status (no race; daemon thread on server
+  // tracks transitions via _protocol_history, never misses 'done').
+  if (_chainPollTimers.proto) clearInterval(_chainPollTimers.proto);
+  _chainPollTimers.proto = setInterval(_pollPremarketChain, 2000);
+  _pollPremarketChain();
+}
+
+async function _pollPremarketChain() {
+  const isZh = ZH();
+  try {
+    const r = await fetch('/api/run-premarket-chain/status', { cache: 'no-store' });
+    if (!r.ok) return;
+    const s = await r.json();
+    const items = s.items || {};
+
+    // ── per-row render ──
+    const renderItem = (key) => {
+      const it = items[key] || {};
+      const elapsed = _fmtSec(it.elapsed_sec || 0);
+      switch (it.status) {
+        case 'skipped':
+          _setRow(key, '✅', isZh ? `已新鮮 · 跳過 (${it.reason || ''})` : `fresh · skipped`, 100);
+          break;
+        case 'queued':
+          _setRow(key, '⏳', isZh ? '排隊中…' : 'queued…', 5);
+          break;
+        case 'running': {
+          // For daily we use step pct; for news/sector use crude elapsed-as-progress
+          let pct = Math.min(95, (it.elapsed_sec || 0) / 6);
+          _setRow(key, '🔄', `${isZh?'執行中':'running'} · ${elapsed}`, pct);
+          break;
+        }
+        case 'done':
+          _setRow(key, '✅', `${isZh?'完成':'done'} · ${elapsed}`, 100);
+          break;
+        case 'error':
+          _setRow(key, '❌', `${isZh?'錯誤':'error'}: ${(it.error || '').slice(0, 80)}`, 100);
+          break;
+        default:
+          // idle — keep prior state
+          break;
+      }
+    };
+    renderItem('daily');
+    renderItem('news');
+    renderItem('sector');
+
+    // ── chain terminal state ──
+    if (s.status === 'done') {
+      clearInterval(_chainPollTimers.proto);
+      _setRow('verdict', '🔄', isZh ? '刷新中…' : 'refreshing…', 50);
+      setTimeout(() => {
+        _setRow('verdict', '✅', isZh ? 'Dashboard 更新完成' : 'dashboard updated', 100);
+        updateDashboard();
+        document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+        UI.showToast(isZh ? '盤前檢查完成' : 'Pre-market check complete', 'success', 5000);
+        // V2.17.6 — auto-dismiss preflight modal 4s after dashboard update so
+        // user sees the ✅ result then UI returns to normal without requiring
+        // manual ESC click.
+        setTimeout(() => {
+          if (typeof closePreflight === 'function') closePreflight();
+          else document.getElementById('preflight-modal')?.classList.add('hidden');
+        }, 4000);
+      }, 3000);
+    } else if (s.status === 'error') {
+      clearInterval(_chainPollTimers.proto);
+      _setRow('verdict', '❌', `${isZh?'鏈條失敗':'chain error'}: ${(s.error || '').slice(0, 80)}`, 100);
+      document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
+      UI.showToast(isZh ? `盤前檢查失敗: ${s.error}` : `Pre-market check failed: ${s.error}`, 'error', 8000);
     }
   } catch {}
 }
 
-async function _maybeStartPhase2() {
-  if (!_chainState.dailyDone || !_chainState.newsDone) return;
-  const isZh = ZH();
-  _chainState.phase = 2;
-  _setRow('sector', '🔄', isZh ? '啟動中…' : 'starting…', 0);
-  try {
-    await fetch('/api/protocol-queue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'sector' }),
-    });
-  } catch (e) {
-    _setRow('sector', '❌', `${isZh?'啟動失敗':'failed to start'}: ${e.message}`, 0);
-  }
-}
-
-function _finalizeChain() {
-  const isZh = ZH();
-  clearInterval(_chainPollTimers.proto);
-  _chainState.phase = 3;
-  _setRow('verdict', '🔄', isZh ? '刷新中…' : 'refreshing…', 50);
-  // bridge.py auto-runs in protocol worker after sector done; wait ~5s then refresh dashboard
-  setTimeout(() => {
-    _setRow('verdict', '✅', isZh ? 'Dashboard 更新完成' : 'dashboard updated', 100);
-    updateDashboard();
-    document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
-    UI.showToast(isZh ? '盤前檢查完成' : 'Pre-market check complete', 'success', 5000);
-  }, 5000);
-}
+// V2.13.11 — _finalizeChain / _maybeStartPhase2 / _pollDailyUpdate /
+// _pollProtoForChain removed; chain terminal state now handled inline in
+// _pollPremarketChain when server reports `status: done|error`.
 
 document.getElementById('preflight-run-chain')?.addEventListener('click', runPremarketChain);
+
+// Resume chain on page load if server reports it's still running. Avoids the
+// "user reloaded mid-chain → UI thinks idle but server is still processing"
+// trap. Terminal states (done/error <5min ago) also resume so user sees the
+// last result without having to re-trigger.
+(async () => {
+  try {
+    const r = await fetch('/api/run-premarket-chain/status');
+    if (!r.ok) return;
+    const s = await r.json();
+    const isZh = ZH();
+    const RESUME_WINDOW_MS = 5 * 60 * 1000;
+    const endedRecently = s.ended_at
+        && (Date.now() - new Date(s.ended_at).getTime()) < RESUME_WINDOW_MS;
+    if (s.status === 'running' || (s.status !== 'idle' && endedRecently)) {
+      document.getElementById('preflight-chain')?.classList.remove('hidden');
+      document.getElementById('preflight-checklist')?.classList.add('hidden');
+      document.getElementById('preflight-run-chain')?.setAttribute('disabled', 'true');
+      _setRow('daily', '⏳', isZh ? '恢復狀態…' : 'resuming…', 0);
+      _setRow('news',  '⏳', isZh ? '恢復狀態…' : 'resuming…', 0);
+      _setRow('sector','⏳', isZh ? '恢復狀態…' : 'resuming…', 0);
+      _setRow('verdict','⏳', isZh ? '恢復狀態…' : 'resuming…', 0);
+      if (_chainPollTimers.proto) clearInterval(_chainPollTimers.proto);
+      _chainPollTimers.proto = setInterval(_pollPremarketChain, 2000);
+      _pollPremarketChain();
+    }
+  } catch {}
+})();
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 const _activePage = document.body.dataset.page || 'index';

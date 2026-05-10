@@ -10,6 +10,86 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [2.20.0] — 2026-05-10
+### Added — V2.20.0：UI Decision Layer 完整化 + Backtest 深化 + Decision Logic 動態化
+
+### Added (A — UI Decision Layer)
+- `bridge.py` `extract_audit_history`：`recent_analysis[].det_shadow` 已含 polarization + red_team_basis（從 V2.19 history.json 經 apply_det_shadow 重跑後注入）
+- `bridge.py` `extract_earnings_analyses`：每筆 entry 加 `structural_shift` 欄位（從 cache directly），給 earnings card badge 用
+- `bridge.py` `load_theme_overrides()` (新)：讀 theme-detector cache 過濾出 `structural_shift_override=True` 的 themes，注入 `data.theme_overrides`
+- `Dashboard/page-decisions.js`:
+  - Polarization badge 升 4-tier (BIPOLAR / **OUTLIER** 新增 / MIXED / ALIGNED 不顯)
+  - Red Team basis 4-tier badge：**RT MR-ONLY** 紅 / **RT CONTAM** 橘 / **RT FWD** 綠（pure_forward 健康才綠）/ unclassified 不顯
+- `Dashboard/page-earnings.js`：earnings card 加 **SHIFT⚡⚡** (CONFIRMED 紅) / **SHIFT⚡** (CANDIDATE 黃) badge
+- `Dashboard/page-sector.js` `renderThemes`：themes 列表加 ⚡ icon + tooltip（來自 `data.theme_overrides`，含 hits + bonus）
+
+### Added (B — Backtest 深化)
+- `investment/scripts/backtest_watchlist.py`:
+  - `RANDOM_SECTOR_TICKERS`：14 sector ETF 各 5 個代表性 ticker（共 70 個 universe）
+  - `compute_random_baseline()` (B1)：null hypothesis test — 比較 watchlist alpha vs random 同 sector 5 ticker 的 alpha
+  - `compute_per_keyword()` (B2)：14 個 keyword 拆解 — 哪幾個 keyword 帶 signal、哪幾個是 noise
+  - `compute_per_credibility()` (B3)：HIGH vs MEDIUM source 切片
+  - `compute_horizon_sweep()` (B4)：5d/15d/45d/90d 全 horizon mean alpha + hit rate
+  - render_markdown 4 個新區塊
+  - `--dry-run` flag (D2)：純 stdout 不寫檔
+- 今天跑出來：**watchlist +4.4pp 過 random sector baseline (35 samples)** → 證明非純 sector momentum；`super-cycle` keyword 最強 (+23.4% mean α)；`supply tight` 最弱 (+5.1% — 疑似 boilerplate)
+
+### Added (C — Decision Logic)
+- `investment/investment_protocol_v5_0.md` Phase 3 Step 4 — **Dynamic Decision Threshold**：
+  - CONFIRMED + ALIGNED → buy_threshold 1.0（更敢進）
+  - CANDIDATE + ALIGNED → 1.1
+  - BIPOLAR → 1.5（更嚴）
+  - OUTLIER → 1.3
+  - default 1.2 （staged_threshold 永遠 = buy − 0.4）
+- `investment/scripts/apply_det_shadow.py` `compute_lane_freshness_penalty()` (C2)：
+  - 5 lane 各自 fresh window：news 2d / sentiment 1d / technical 1d / fundamentals 90d / valuation 90d
+  - 4 級 multiplier：fresh ×1.0 / 1-2x ×0.9 / 2-3x ×0.8 / >3x ×0.7
+  - 寫入 `det_shadow.lane_freshness` block
+  - 114/123 historical entries 套上 freshness penalty (大多 sentiment/technical lane 略過 fresh window)
+- `investment/scripts/apply_det_shadow.py` `classify_red_team_basis_detail()` (Gemini review #1)：
+  - V2.20.0 metadata：mr_hits / fw_hits / mr_keywords / fw_keywords / mr_density / fw_density per 1000 chars
+  - 不改 basis label binary 4-tier 契約，純為 V2.21+ density-weighted calibration 留資料
+
+### Added (D — UX)
+- `bridge.py` `load_structural_watchlist()` 加 trajectory：每個 candidate 帶 `n_events / first_seen_event / graduated_candidate / graduated_confirmed / continued_count`
+- `Dashboard/script.js` `renderStructuralWatchlist`：加 lifecycle badge — **NEW** (≤2 events 綠) / **AGING** (≥5 continued 灰) / **CANDIDATE** (黃) / **CONFIRMED** (紅)
+
+### Backfill (cumulative cross-version delta in this commit)
+本 commit 也含 V2.19.1 + V2.19.2 在這些 file 累積的部分（無法乾淨切到前面 commit）：
+- `bridge.py` V2.19.1 `load_structural_watchlist()` + V2.20.0 theme_overrides / trajectory / earnings shift
+- `Dashboard/script.js` V2.19.1 `renderStructuralWatchlist` + V2.20.0 trajectory badges
+- `Dashboard/page-decisions.js` V2.19.2 ⚡ + V2.20.0 OUTLIER + RT basis
+- `Dashboard/page-earnings.js` V2.19.2 ⚡ + V2.20.0 SHIFT
+- `investment/scripts/backtest_watchlist.py` V2.19.1 skeleton + V2.19.2 forward returns + V2.20.0 B1-B4 + dry-run
+
+### Why
+- V2.18+V2.19 加了 protocol 改動，但 UI 沒 surface → user 看不到 polarization / red_team_basis / structural_shift tier 起作用
+- V2.20.0 把所有改動 surface 到 dashboard 三頁（decisions / earnings / sector），user 一目了然
+- Backtest 從 V2.19.2 的「跑得起來」深化到「拆解 signal 來源」：random baseline 證明 watchlist 真有 edge，per-keyword 找出 noise vs signal
+- Dynamic threshold 解決固定 1.2 對 paradigm-shift 太嚴、對 chaotic 太鬆的問題
+
+### Smoke
+- `python3 bridge.py` → `[OK] Theme overrides: 3 paradigm-shift themes` + watchlist 注入
+- `python3 investment/scripts/apply_det_shadow.py --inplace history.json` → 114/123 entries 套 freshness penalty
+- `python3 investment/scripts/backtest_watchlist.py` →
+  - SOXX watchlist mean α 15d = +18.4% vs random baseline +14.0% = **+4.4pp edge**
+  - Per-keyword: super-cycle +23.4%（5 hits）/ 供不應求 +18.4%（7 hits）/ supply tight +5.1%（3 hits）
+  - Horizon: 5d +0.1% 沒動；15d peak +18.4%；45/90d 還沒到
+- `python3 investment/scripts/backtest_watchlist.py --dry-run` → stdout 全 markdown，不寫檔
+
+### Out of Scope (V2.20.X — 等 watchlist accrue)
+- E1-E3 backtest 真實驗證（lifecycle ≥30 events / 3+ sector / 5+ evicted samples）
+- F1 thesis_registry concentration check（Phase 4 sizing）
+- F2 sector protocol 反向加權
+- Lane-specific freshness mtime（Gemini review #2 — 取代 session-level penalty）
+
+### Out of Scope (V2.21+ — 大改)
+- News provisional → tier modulation（需 V2.20.X backtest 結果）
+- Modulation 參數 auto-calibration（需 n>50 sample）
+- macro_multiplier sector × duration sensitivity matrix
+
+---
+
 ## [2.19.2] — 2026-05-10
 ### Added — V2.19.X 補強：⚡ badge 跨頁、backtest forward returns、theme heat bonus
 

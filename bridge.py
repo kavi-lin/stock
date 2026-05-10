@@ -431,12 +431,54 @@ def _normalize_catalysts(items, limit=10):
     return out
 
 
+def _extract_sector_competitors():
+    """V2.17.1 — for each sector in SECTOR_TOP_5, return list of 5 ticker profile
+    dicts (24h cached via skills/_shared/company_context). Used by Dashboard
+    sector cards to surface top-5 competitive landscape inline.
+
+    Returns: dict[sector_name, list[{ticker, company, market_cap, industry, ceo, price}]]
+    Graceful: if company_context import fails, returns {}; if individual ticker
+    fetch fails, that ticker's slot has dict with everything None except `ticker`.
+    """
+    try:
+        sys.path.insert(0, os.path.join(BASE_DIR, "skills", "_shared"))
+        from company_context import SECTOR_TOP_5, get_profile  # noqa: E402
+    except Exception as e:
+        print(f"[bridge] WARN: sector competitors disabled ({e})", file=sys.stderr)
+        return {}
+
+    out = {}
+    for sector_name, tickers in SECTOR_TOP_5.items():
+        rows = []
+        for t in tickers:
+            try:
+                p = get_profile(t) or {}
+            except Exception as e:
+                print(f"[bridge] WARN: get_profile({t}) failed: {e}", file=sys.stderr)
+                p = {}
+            mc = p.get("marketCap")
+            price = p.get("price")
+            rows.append({
+                "ticker":     t,
+                "company":    p.get("companyName") or None,
+                "industry":   p.get("industry") or None,
+                "ceo":        p.get("ceo") or None,
+                "market_cap": float(mc) if isinstance(mc, (int, float)) else None,
+                "price":      float(price) if isinstance(price, (int, float)) else None,
+            })
+        out[sector_name] = rows
+    return out
+
+
 def extract_sectors(s_data):
     """Merge phase-4 verdicts with phase-1 rotation signals"""
     # Build lookup from _phase1 per sector name
     p1_map = {}
     for s in s_data.get("_phase1", {}).get("sectors", []):
         p1_map[s["name"]] = s
+
+    # V2.17.1 — competitive landscape per sector (top 5 by market cap)
+    competitors_map = _extract_sector_competitors()
 
     result = []
     for s in s_data.get("sectors", []):
@@ -458,6 +500,8 @@ def extract_sectors(s_data):
             "uptrend_ratio":    p1.get("uptrend_ratio"),
             "overbought_risk":  p1.get("overbought_risk", ""),
             "ytd_perf_note":    p1.get("ytd_perf_note", ""),
+            # V2.17.1 — top-5 competitive landscape (24h cached profile data)
+            "competitors":      competitors_map.get(name) or [],
         })
     return result
 
@@ -900,11 +944,45 @@ _BINARY_TICKERS = {
 }
 
 
+_CALENDAR_UNIVERSE_CACHE = None
+
+def _load_calendar_universe():
+    """V2.15.4 — restrict FMP earnings calendar to S&P500 ∪ Nasdaq100 ∪ SOX
+    (~641 tickers). Files are momentum-monitor's existing maintained lists.
+    `watchlist.txt` adds manual overrides (recent IPOs / out-of-index names like CRWV).
+    Cached at module level — read once per process.
+    """
+    global _CALENDAR_UNIVERSE_CACHE
+    if _CALENDAR_UNIVERSE_CACHE is not None:
+        return _CALENDAR_UNIVERSE_CACHE
+    base = os.path.join(BASE_DIR, "skills", "momentum-monitor", "scripts", "universes")
+    universe = set()
+    for name in ("sp500.txt", "nasdaq100.txt", "sox.txt", "watchlist.txt"):
+        path = os.path.join(base, name)
+        if not os.path.exists(path):
+            print(f"[bridge] WARN universe file missing: {path}", file=sys.stderr)
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                for ln in fp:
+                    t = ln.strip().upper()
+                    if t and not t.startswith("#"):
+                        universe.add(t)
+        except OSError as e:
+            print(f"[bridge] WARN universe load failed {path}: {e}", file=sys.stderr)
+    _CALENDAR_UNIVERSE_CACHE = universe
+    return universe
+
+
 def _from_fmp_earnings(today, horizon_days=14):
     """FMP /stable/earnings-calendar → schema list.
 
-    FMP 已預先過濾為「分析師覆蓋的大型公司」(56/60d), 比 Finnhub 完整覆蓋 CVX/XOM/V/MA 等大咖。
-    只保留 revenueEstimated >= $1B 避免極小型 noise。
+    V2.15.4 changes:
+      - Universe filter: only S&P500 ∪ Nasdaq100 ∪ SOX (~641 tickers) — kills
+        ~95% of noise (was 4000 rows / 2840 events; now ~150-300 events)
+      - 4h cache TTL: FMP adds last-minute earnings throughout the day (e.g.
+        ARM 2026-05-06 only appeared after our 00:03 fetch). Stale cache is
+        re-fetched after 4h.
     """
     api_key = os.environ.get("FMP_API_KEY")
     if not api_key:
@@ -913,37 +991,70 @@ def _from_fmp_earnings(today, horizon_days=14):
     cache_dir = os.path.join(BASE_DIR, ".cache_bridge")
     os.makedirs(cache_dir, exist_ok=True)
     cache_path = os.path.join(cache_dir, f"fmp_earnings_{today.isoformat()}.json")
+    CACHE_TTL_SEC = 4 * 3600
 
+    rows = None
     if os.path.exists(cache_path):
-        try:
-            with open(cache_path) as f:
-                rows = json.load(f)
-        except Exception:
-            rows = None
-    else:
-        rows = None
+        cache_age = time.time() - os.path.getmtime(cache_path)
+        if cache_age < CACHE_TTL_SEC:
+            try:
+                with open(cache_path) as f:
+                    rows = json.load(f)
+            except Exception:
+                rows = None
+        # else: cache stale, fall through to refetch
 
     if rows is None:
-        from_d = today.isoformat()
-        to_d = (today + timedelta(days=horizon_days)).isoformat()
+        # V2.15.4 — chunk into 3 windows. FMP /stable/earnings-calendar caps
+        # at ~4000 rows; 14-day single fetch saturates and drops the earliest
+        # dates entirely (today's events vanish). Splitting into smaller windows
+        # keeps each response well under the cap.
         url = "https://financialmodelingprep.com/stable/earnings-calendar"
+        chunks = [
+            (today - timedelta(days=1), today + timedelta(days=4)),                       # past-1d → +4d
+            (today + timedelta(days=5), today + timedelta(days=9)),                       # +5d → +9d
+            (today + timedelta(days=10), today + timedelta(days=horizon_days)),           # +10d → +horizon
+        ]
+        rows = []
+        seen = set()
+        for chunk_from, chunk_to in chunks:
+            if chunk_from > chunk_to:
+                continue
+            try:
+                r = requests.get(url, params={"from": chunk_from.isoformat(),
+                                              "to":   chunk_to.isoformat(),
+                                              "apikey": api_key}, timeout=15)
+                r.raise_for_status()
+                chunk_data = r.json()
+                if not isinstance(chunk_data, list):
+                    continue
+                for ev in chunk_data:
+                    key = (ev.get("symbol"), ev.get("date"))
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    rows.append(ev)
+            except Exception as e:
+                print(f"[WARN] FMP earnings chunk {chunk_from}→{chunk_to} failed: {e}", file=sys.stderr)
         try:
-            r = requests.get(url, params={"from": from_d, "to": to_d, "apikey": api_key}, timeout=15)
-            r.raise_for_status()
-            rows = r.json()
             with open(cache_path, "w") as f:
                 json.dump(rows, f)
         except Exception as e:
-            print(f"[WARN] FMP earnings fetch failed: {e}", file=sys.stderr)
-            return []
+            print(f"[WARN] FMP earnings cache write failed: {e}", file=sys.stderr)
 
     if not isinstance(rows, list):
         return []
 
+    universe = _load_calendar_universe()
     out = []
     for ev in rows:
         symbol = (ev.get("symbol") or "").upper()
         if not symbol:
+            continue
+        # V2.15.4 — universe gate: only S&P500 ∪ Nasdaq100 ∪ SOX. If the universe
+        # files failed to load (set is empty), fall through and let the revenue
+        # filter alone catch noise (graceful degrade).
+        if universe and symbol not in universe:
             continue
         date_str = ev.get("date") or ""
         try:
@@ -1108,6 +1219,21 @@ def aggregate_upcoming_events(s_data):
         by_ticker_date[tk_key] = ev
 
     out = list(by_ticker_date.values()) + leftover
+
+    # V2.15.4 — final universe gate for earnings events. The archive accumulates
+    # over time and may carry stale entries from prior bridge runs (before the
+    # universe filter was added). Drop any earnings event whose primary ticker
+    # is outside SP500 ∪ Nasdaq100 ∪ SOX. Non-earnings categories pass through.
+    universe = _load_calendar_universe()
+    if universe:
+        filtered = []
+        for ev in out:
+            if ev.get("category") == "earnings":
+                tks = ev.get("tickers") or []
+                if tks and tks[0].upper() not in universe:
+                    continue
+            filtered.append(ev)
+        out = filtered
 
     # Re-derive within_48h for every event from current `today` — archive entries
     # carry whatever within_48h was true on the day they were first saved, which
@@ -1396,26 +1522,36 @@ def extract_audit_history(positions_by_ticker=None):
             print(f"[ERROR] history.json: {e}")
 
     # Fallback: scan reports/ for unlisted tickers
+    # V2.17.2 — pre_earnings reports get their own dedupe key so they show up
+    # alongside existing investment-protocol entries for the same ticker. Without
+    # this, a ticker that already has a `*_<T>.md` analysis silently swallows all
+    # `*_<T>_pre_earnings.md` runs and the user can't see the preview reports.
     try:
         for rep in sorted(glob.glob(os.path.join(REPORTS_DIR, "*_*.*")), reverse=True):
             fname  = os.path.basename(rep)
+            is_preview = fname.endswith("_pre_earnings.md")
             parts  = fname.split("_")
             if len(parts) >= 2:
                 t_part = parts[1].split(".")[0]
-                if t_part not in audit_map and len(t_part) <= 6 and t_part.isupper():
-                    d_part   = parts[0]
-                    date_fmt = f"{d_part[:4]}-{d_part[4:6]}-{d_part[6:8]}" if len(d_part) == 8 else d_part
-                    audits.append({
-                        "ticker":       t_part,
-                        "decision":     "ARCHIVE",
-                        "score":        0.0,
-                        "time":         date_fmt,
-                        "report_url":   os.path.join('reports', fname),
-                        "profile_image": _read_logo_url(t_part),
-                        "on_watchlist": False,
-                        "key_risks":    [],
-                    })
-                    audit_map[t_part] = True
+                if not (len(t_part) <= 6 and t_part.isupper()):
+                    continue
+                d_part   = parts[0]
+                date_fmt = f"{d_part[:4]}-{d_part[4:6]}-{d_part[6:8]}" if len(d_part) == 8 else d_part
+                dedupe_key = (t_part, "pre_earnings", date_fmt) if is_preview else t_part
+                if dedupe_key in audit_map:
+                    continue
+                audits.append({
+                    "ticker":       t_part,
+                    "decision":     "PREVIEW" if is_preview else "ARCHIVE",
+                    "score":        0.0,
+                    "time":         date_fmt,
+                    "report_url":   os.path.join('reports', fname),
+                    "report_type":  "pre_earnings" if is_preview else "analysis",
+                    "profile_image": _read_logo_url(t_part),
+                    "on_watchlist": False,
+                    "key_risks":    [],
+                })
+                audit_map[dedupe_key] = True
     except Exception as e:
         print(f"[ERROR] Scanning reports/: {e}")
 
@@ -1539,6 +1675,27 @@ def extract_earnings_analyses():
     if not os.path.isdir(cache_dir):
         return []
 
+    # V2.13.12 — load forward_pe + ev_ebitda lookup from heatmap.json (filled by
+    # dashboard_server's ratios-ttm + analyst-estimates daemon). Earnings cache
+    # has its own pe_ttm + ev_ebitda already; forward_pe must come from heatmap.
+    pe_lookup_fwd = {}
+    pe_lookup_ev  = {}
+    try:
+        hm_path = os.path.join(BASE_DIR, "Dashboard", "heatmap.json")
+        if os.path.isfile(hm_path):
+            with open(hm_path, "r", encoding="utf-8") as f:
+                hm = json.load(f)
+            for t in (hm.get("tickers") or []):
+                sym = (t.get("ticker") or "").strip().upper()
+                if not sym:
+                    continue
+                if t.get("forward_pe") is not None:
+                    pe_lookup_fwd[sym] = t.get("forward_pe")
+                if t.get("ev_ebitda") is not None:
+                    pe_lookup_ev[sym] = t.get("ev_ebitda")
+    except Exception:
+        pass
+
     out = []
     seen_tickers = set()
     # V1.73 — exclude *.infographic.json sibling files (V1.0 narrative layer);
@@ -1601,6 +1758,24 @@ def extract_earnings_analyses():
             except Exception:
                 fiscal_label = None
 
+        # V2.13.10/12 — valuation triplet from earnings cache + heatmap PE lookup
+        ttm = (d.get("ttm_metrics") or {})
+        pe_ttm = (ttm.get("from_ratios_ttm") or {}).get("priceToEarningsRatioTTM")
+        ev_ebitda = (ttm.get("from_key_metrics_ttm") or {}).get("evToEBITDATTM")
+        def _round(v, n=2):
+            try:
+                return round(float(v), n) if v is not None else None
+            except (TypeError, ValueError):
+                return None
+        pe_ttm    = _round(pe_ttm,    2)
+        ev_ebitda = _round(ev_ebitda, 2)
+        # Forward PE: borrow from heatmap.json lookup (filled by server's
+        # ratios-ttm + analyst-estimates daemon). Available for S&P-500 tickers.
+        forward_pe = pe_lookup_fwd.get(ticker.upper())
+        # If earnings cache lacks ev_ebitda, fall back to heatmap lookup
+        if ev_ebitda is None:
+            ev_ebitda = pe_lookup_ev.get(ticker.upper())
+
         out.append({
             "ticker":             ticker,
             "last_earnings_date": d.get("last_earnings_date"),
@@ -1626,6 +1801,13 @@ def extract_earnings_analyses():
             "has_infographic":    has_infographic,
             # V2.8.4 — fiscal label from infographic ("Q4 FY26" etc.)
             "fiscal_label":       fiscal_label,
+            # V2.13.10 — PE TTM (priceToEarningsRatioTTM from FMP ratios-ttm)
+            "pe_ttm":             pe_ttm,
+            # V2.13.12 — forward PE + EV/EBITDA TTM (cross-cycle valuation)
+            "forward_pe":         forward_pe,
+            "ev_ebitda":          ev_ebitda,
+            # V2.20.0 — structural_shift tier (NONE/CANDIDATE/CONFIRMED) for badge UI
+            "structural_shift":   d.get("structural_shift"),
         })
 
     # Sort newest analysis first
@@ -1919,6 +2101,26 @@ def ingest_momentum_screen():
     global _SECTOR_RS_RANK
     _SECTOR_RS_RANK = _load_sector_rs_rank()
 
+    # V2.13.10/12 — load valuation lookup from heatmap.json (filled by
+    # dashboard_server's ratios-ttm + analyst-estimates daemon).
+    pe_lookup     = {}
+    pe_lookup_fwd = {}
+    pe_lookup_ev  = {}
+    try:
+        hm_path = os.path.join(BASE_DIR, "Dashboard", "heatmap.json")
+        if os.path.isfile(hm_path):
+            with open(hm_path, "r", encoding="utf-8") as f:
+                hm = json.load(f)
+            for t in (hm.get("tickers") or []):
+                sym = (t.get("ticker") or "").strip().upper()
+                if not sym:
+                    continue
+                if t.get("pe") is not None:         pe_lookup[sym]     = t.get("pe")
+                if t.get("forward_pe") is not None: pe_lookup_fwd[sym] = t.get("forward_pe")
+                if t.get("ev_ebitda") is not None:  pe_lookup_ev[sym]  = t.get("ev_ebitda")
+    except Exception:
+        pe_lookup, pe_lookup_fwd, pe_lookup_ev = {}, {}, {}
+
     csv_files = sorted(glob.glob(os.path.join(MOMENTUM_CACHE, "screen_*.csv")),
                        key=os.path.getmtime)
     if not csv_files:
@@ -1963,6 +2165,7 @@ def ingest_momentum_screen():
         return rows
 
     def _build_row(row):
+        ticker_up = (row.get("ticker") or "").strip().upper()
         return {
             "rank":     int(row["rank"]) if row.get("rank") else None,
             "ticker":   row.get("ticker"),
@@ -1971,6 +2174,10 @@ def ingest_momentum_screen():
             "in_sox": row.get("in_sox", "0") != "0",
             "sector":   row.get("sector") or "Unknown",
             "price":    _safe_float(row.get("price")),
+            # V2.13.10/12 — valuation triplet joined from heatmap.json
+            "pe":         pe_lookup.get(ticker_up),
+            "forward_pe": pe_lookup_fwd.get(ticker_up),
+            "ev_ebitda":  pe_lookup_ev.get(ticker_up),
             "score":    _safe_float(row.get("score")),
             "label":    row.get("label"),
             "stage":    row.get("stage"),
@@ -2117,6 +2324,106 @@ def ingest_momentum_screen():
         "snapshot_count": len(csv_files),
     }
     return out
+
+
+def load_theme_overrides():
+    """V2.20.0 — load latest theme-detector cache, filter themes with V2.18+
+    structural_shift_override=True. Used by sector.html "Paradigm Shift Themes"
+    panel. Falls back to empty list if cache missing/stale."""
+    cache_dir = os.path.join(BASE_DIR, "skills", "theme-detector", "cache")
+    if not os.path.isdir(cache_dir):
+        return []
+    files = sorted(glob.glob(os.path.join(cache_dir, "theme_detector_*.json")), reverse=True)
+    if not files:
+        return []
+    try:
+        with open(files[0], "r", encoding="utf-8") as f:
+            d = json.load(f)
+    except Exception:
+        return []
+    themes = d.get("themes")
+    if isinstance(themes, dict):
+        themes = themes.get("all") or themes.get("bullish") or []
+    if not isinstance(themes, list):
+        return []
+    out = []
+    for t in themes:
+        if t.get("structural_shift_override"):
+            out.append({
+                "name":     t.get("name"),
+                "heat":     t.get("heat"),
+                "stage":    t.get("stage"),
+                "hits":     t.get("structural_shift_hits") or [],
+                "bonus":    (t.get("heat_breakdown") or {}).get("structural_shift_bonus", 0),
+                "tier_counts": (t.get("heat_breakdown") or {}).get("structural_tier_counts") or {},
+            })
+    out.sort(key=lambda x: -(x.get("heat") or 0))
+    return out
+
+
+def load_structural_watchlist():
+    """V2.19.1 — load news/news_logs/structural_watchlist.json for data['structural_watchlist'].
+
+    Returns trimmed dict (top 10 candidates) or {"status": "no_data"} if file
+    missing / unreadable. Watchlist is metadata-only (not a Phase 3 modulation
+    trigger in V2.19) — UI displays for early-warning visibility.
+    """
+    path = os.path.join(NEWS_LOGS, "structural_watchlist.json")
+    if not os.path.exists(path):
+        return {"status": "no_data", "reason": "file_missing"}
+    try:
+        with open(path, "r", encoding="utf-8") as fp:
+            d = json.load(fp)
+    except (OSError, json.JSONDecodeError) as e:
+        return {"status": "no_data", "reason": f"read_error: {e}"}
+
+    cands = (d.get("candidates") or [])[:10]
+    sectors = d.get("sectors") or []
+    age_sec = (datetime.now().timestamp() - os.path.getmtime(path))
+
+    # V2.20.0 — load lifecycle log for per-ticker trajectory (last 30 events / ticker)
+    lifecycle_path = os.path.join(NEWS_LOGS, "watchlist_lifecycle.jsonl")
+    per_ticker_events: dict = {}
+    if os.path.exists(lifecycle_path):
+        try:
+            with open(lifecycle_path, "r", encoding="utf-8") as fp:
+                for line in fp:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        ev = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    t = ev.get("ticker")
+                    if not t:
+                        continue
+                    per_ticker_events.setdefault(t, []).append(ev)
+        except OSError:
+            pass
+
+    # Decorate each candidate with trajectory summary (V2.20.0)
+    for c in cands:
+        t = c.get("ticker")
+        evs = per_ticker_events.get(t) or []
+        c["trajectory"] = {
+            "n_events":            len(evs),
+            "first_seen_event":    next((e["date"] for e in evs if e.get("event") == "first_seen"), None),
+            "graduated_candidate": any(e.get("event") == "graduated_candidate" for e in evs),
+            "graduated_confirmed": any(e.get("event") == "graduated_confirmed" for e in evs),
+            "continued_count":     sum(1 for e in evs if e.get("event") == "continued"),
+        }
+
+    return {
+        "status": "success",
+        "as_of": d.get("as_of"),
+        "candidates": cands,
+        "candidate_count": len(d.get("candidates") or []),
+        "hot_sectors": [s for s in sectors if s.get("hot")],
+        "decay_rules": d.get("decay_rules"),
+        "stats": d.get("stats"),
+        "_freshness_hr": round(age_sec / 3600, 1),
+    }
 
 
 def load_tactical_recommendations():
@@ -2305,6 +2612,30 @@ def run_bridge():
             print(f"[INFO] No tactical recommendations: {t.get('status')}")
     except Exception as e:
         print(f"[WARN] Tactical ingest: {e}")
+
+    # 7. Theme overrides (V2.20.0 — paradigm-shift themes from theme-detector)
+    try:
+        data["theme_overrides"] = load_theme_overrides()
+        n_to = len(data["theme_overrides"])
+        if n_to:
+            print(f"[OK] Theme overrides: {n_to} paradigm-shift themes")
+    except Exception as e:
+        print(f"[WARN] Theme overrides ingest: {e}")
+        data["theme_overrides"] = []
+
+    # 6. Structural Watchlist (V2.19.1 — paradigm-shift candidates from news keyword aggregation)
+    try:
+        data["structural_watchlist"] = load_structural_watchlist()
+        sw = data["structural_watchlist"]
+        if sw.get("status") == "success":
+            n_cand = sw.get("candidate_count", 0)
+            n_hot = len(sw.get("hot_sectors") or [])
+            print(f"[OK] Watchlist: {n_cand} candidates / {n_hot} hot sectors "
+                  f"({sw.get('_freshness_hr')}h)")
+        else:
+            print(f"[INFO] No structural watchlist: {sw.get('reason', sw.get('status'))}")
+    except Exception as e:
+        print(f"[WARN] Watchlist ingest: {e}")
 
     # Write — strict JSON (no NaN/Infinity, which browsers reject).
     # Atomic via tmp + os.replace so that a concurrent second run (sector scan

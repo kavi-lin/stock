@@ -187,6 +187,10 @@ async function loadSectorData() {
 
         renderStatusStrip(data);
         renderBinaryAlert(data.binary_risks || []);
+        // V2.20.0 — populate theme override map for renderThemes ⚡ icon
+        window.UI = window.UI || {};
+        window.UI._themeOverrides = data.theme_overrides || [];
+
         renderHandoff(data.market);
         renderSectorMatrix(data.sectors || [], lang);
         renderThreeSignal(data.breadth, data.ftd, data.market_top);
@@ -302,6 +306,45 @@ function buildSectorCard(s, lang) {
     const clickAttrs = gicsSector
         ? `data-sector-jump="${gicsSector}" style="cursor:pointer" title="${t().jump_to_momentum || '查看此產業的動能選股結果'}"`
         : '';
+
+    // V2.17.1 — Top-5 competitive landscape (collapsible). Data sourced from
+    // bridge.py extract_sector_competitors() via SECTOR_TOP_5 + 24h profile cache.
+    // V2.17.2 — rich tooltip (signal-tip style) on row hover via data-comp-tip.
+    // Hidden when sector has no competitors (graceful skip).
+    const competitors = Array.isArray(s.competitors) ? s.competitors : [];
+    const compRows = competitors.map(c => {
+        const mc = c.market_cap;
+        const mcStr = mc == null ? '—'
+                    : mc >= 1e12 ? `$${(mc/1e12).toFixed(2)}T`
+                    : mc >= 1e9  ? `$${(mc/1e9).toFixed(0)}B`
+                    : `$${(mc/1e6).toFixed(0)}M`;
+        const company = (c.company || '—').replace(/"/g, '&quot;');
+        // Pack metadata into data-* attrs for the rich tooltip handler below.
+        const tipData = JSON.stringify({
+            ticker:    c.ticker,
+            company:   c.company || null,
+            industry:  c.industry || null,
+            ceo:       c.ceo || null,
+            price:     c.price != null ? c.price : null,
+            market_cap: mc != null ? mc : null,
+            sector:    s.name,
+            verdict:   s.verdict,
+        }).replace(/"/g, '&quot;');
+        const jumpTo = gicsSector
+            ? `momentum.html?sector=${encodeURIComponent(gicsSector)}&ticker=${encodeURIComponent(c.ticker)}`
+            : `momentum.html?ticker=${encodeURIComponent(c.ticker)}`;
+        return `<tr class="sec-comp-row" data-comp-tip="${tipData}">
+            <td class="sec-comp-ticker"><a href="${jumpTo}" onclick="event.stopPropagation()">${c.ticker}</a></td>
+            <td class="sec-comp-company">${company}</td>
+            <td class="sec-comp-mc">${mcStr}</td>
+        </tr>`;
+    }).join('');
+    const competitorsBlock = compRows
+        ? `<details class="sec-comp" onclick="event.stopPropagation()">
+              <summary class="sec-comp-summary">📊 ${lang==='zh'?'Top 5 競品':'Top 5'}</summary>
+              <table class="sec-comp-table"><tbody>${compRows}</tbody></table>
+           </details>`
+        : '';
     return `
     <div class="sector-card verdict-${v} flex flex-col gap-2" ${clickAttrs}>
         <!-- Header row -->
@@ -338,6 +381,9 @@ function buildSectorCard(s, lang) {
 
         <!-- DA note -->
         ${daNote}
+
+        <!-- V2.17.1 — Top 5 競品 collapsible -->
+        ${competitorsBlock}
     </div>`;
 }
 
@@ -561,11 +607,37 @@ function renderDivergence(divs) {
 function renderThemes(themes) {
     const container = document.getElementById('themes-feed');
     if (!themes.length) { container.innerHTML = `<p class="text-[10px] text-zinc-600">${t().no_themes || 'No active themes.'}</p>`; return; }
-    container.innerHTML = themes.map((t, i) => `
+
+    // V2.20.0 — overlay paradigm-shift theme overrides from theme-detector cache.
+    // Renders ⚡ icon + tooltip with hits (e.g. MU:CONFIRMED, NVDA:CANDIDATE).
+    const overrides = (window.UI?._themeOverrides) || [];
+    const overrideMap = new Map();
+    overrides.forEach(o => {
+        const norm = (o.name || '').toLowerCase().replace(/[\s_&]+/g, '');
+        if (norm) overrideMap.set(norm, o);
+    });
+    const _matchOverride = (themeName) => {
+        const norm = (themeName || '').toLowerCase().replace(/[\s_&]+/g, '');
+        // Try exact match first; fall back to substring (sector themes use varied naming)
+        if (overrideMap.has(norm)) return overrideMap.get(norm);
+        for (const [key, val] of overrideMap.entries()) {
+            if (norm.includes(key) || key.includes(norm)) return val;
+        }
+        return null;
+    };
+
+    container.innerHTML = themes.map((th, i) => {
+        const themeStr = (typeof th === 'string') ? th : (th.name || String(th));
+        const ovr = _matchOverride(themeStr);
+        const boltHtml = ovr
+            ? ` <span style="color:#f59e0b;font-weight:700" title="V2.18 結構性轉變 — bonus +${ovr.bonus} (${(ovr.hits||[]).join(', ')})">⚡</span>`
+            : '';
+        return `
         <div class="flex items-start gap-2 p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/15">
             <span class="text-[9px] font-black text-violet-500 shrink-0">${String(i+1).padStart(2,'0')}</span>
-            <span class="text-[10px] font-medium leading-snug" style="color:var(--text-muted)">${t.replace(/_/g,' ')}</span>
-        </div>`).join('');
+            <span class="text-[10px] font-medium leading-snug" style="color:var(--text-muted)">${themeStr.replace(/_/g,' ')}${boltHtml}</span>
+        </div>`;
+    }).join('');
 }
 
 /* ── Bootstrap ───────────────────────────────────────────────── */
@@ -973,6 +1045,9 @@ function renderHeatmap(data, fullRebuild) {
             d.data.day_high    = next.day_high;
             d.data.volume      = next.volume;
             d.data.prev_close  = next.prev_close;
+            d.data.pe          = next.pe;
+            d.data.forward_pe  = next.forward_pe;
+            d.data.ev_ebitda   = next.ev_ebitda;
             const fill = _heatmapTextColor(next.change_pct);
             d3.select(this).select('rect').attr('fill', _heatmapColorFor(next.change_pct));
             d3.select(this).select('.cell-ticker').attr('fill', fill);
@@ -1185,6 +1260,27 @@ function showHeatmapTooltip(ticker, event) {
     const priceStr = ticker.price == null ? '--' : '$' + ticker.price.toFixed(2);
     const rangeStr = (ticker.day_low != null && ticker.day_high != null)
         ? `$${ticker.day_low.toFixed(2)} – $${ticker.day_high.toFixed(2)}` : '--';
+    // V2.13.10/12 — valuation triplet: PE TTM + Forward PE + EV/EBITDA
+    function _peColor(v) {
+        if (v == null) return '#a1a1aa';
+        if (v < 0)        return '#f87171';
+        if (v < 15)       return '#4ade80';
+        if (v > 30)       return '#fbbf24';
+        return 'var(--text-main)';
+    }
+    function _evColor(v) {
+        if (v == null) return '#a1a1aa';
+        if (v < 0)        return '#f87171';
+        if (v < 10)       return '#4ade80';
+        if (v > 20)       return '#fbbf24';
+        return 'var(--text-main)';
+    }
+    const pe       = ticker.pe;
+    const fwdPe    = ticker.forward_pe;
+    const evEbitda = ticker.ev_ebitda;
+    const peStr    = pe       != null ? pe.toFixed(1)       : '--';
+    const fwdPeStr = fwdPe    != null ? fwdPe.toFixed(1)    : '--';
+    const evStr    = evEbitda != null ? evEbitda.toFixed(1) : '--';
 
     tip.innerHTML = `
         <div class="text-[10px] text-zinc-500 mb-1">${escapeHtml(ticker.sector)} · ${escapeHtml(ticker.industry)}</div>
@@ -1195,6 +1291,9 @@ function showHeatmapTooltip(ticker, event) {
         <div class="space-y-1 text-[11px]">
             <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_price || 'Price'}</span><span class="font-mono font-bold" style="color: var(--text-main)">${priceStr}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_change || 'Change'}</span><span class="font-mono font-bold" style="color: ${pctColor}">${pctStr}</span></div>
+            <div class="flex justify-between" title="TTM 含一次性項目可能扭曲；負值常為一次性虧損"><span class="text-zinc-500">P/E TTM</span><span class="font-mono font-bold" style="color: ${_peColor(pe)}">${peStr}</span></div>
+            <div class="flex justify-between" title="Forward P/E (next FY consensus EPS) — 排除一次性 hit"><span class="text-zinc-500">Fwd P/E</span><span class="font-mono font-bold" style="color: ${_peColor(fwdPe)}">${fwdPeStr}</span></div>
+            <div class="flex justify-between" title="EV/EBITDA TTM — 跨資本結構可比，&lt;10 便宜、&gt;20 高估"><span class="text-zinc-500">EV/EBITDA</span><span class="font-mono font-bold" style="color: ${_evColor(evEbitda)}">${evStr}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_marketcap || 'Market Cap'}</span><span class="font-mono">${_formatMarketCap(ticker.market_cap)}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_dayrange || 'Day Range'}</span><span class="font-mono">${rangeStr}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">${tr.heatmap_volume || 'Volume'}</span><span class="font-mono">${_formatVolume(ticker.volume)}</span></div>
@@ -1268,3 +1367,109 @@ window.addEventListener('resize', () => {
 
 // Bootstrap: kick off after page settles
 setTimeout(() => { loadHeatmap(); startHeatmapPolling(); }, 800);
+
+
+/* ── V2.17.2 — Top-5 競品 row rich tooltip (signal-tip style) ────────────
+ * Reuses #signal-tip-tooltip element + its .stt-* CSS so visual matches
+ * the existing 7 status pill tooltips. Distinct trigger attribute
+ * (`data-comp-tip`) so it doesn't conflict with the SIGNAL_TIPS engine.
+ */
+(function initCompetitorTooltip() {
+    function init() {
+        const tip = document.getElementById('signal-tip-tooltip');
+        if (!tip) return;
+        let _hideTimer = null;
+
+        function _fmtMC(mc) {
+            if (mc == null) return '—';
+            if (mc >= 1e12) return `$${(mc/1e12).toFixed(2)}T`;
+            if (mc >= 1e9)  return `$${(mc/1e9).toFixed(1)}B`;
+            if (mc >= 1e6)  return `$${(mc/1e6).toFixed(0)}M`;
+            return `$${mc.toFixed(0)}`;
+        }
+
+        function _renderContent(data, lang) {
+            const isZh = lang === 'zh';
+            const title = `${data.ticker}${data.company ? ' · ' + data.company : ''}`;
+            const subTitle = data.industry || '—';
+            const rows = [];
+            if (data.sector) {
+                rows.push({
+                    k: isZh ? '所屬產業' : 'Sector',
+                    v: `${data.sector} · ${data.verdict || ''}`,
+                });
+            }
+            if (data.market_cap != null) {
+                rows.push({ k: isZh ? '市值'    : 'Market cap', v: _fmtMC(data.market_cap) });
+            }
+            if (data.price != null) {
+                rows.push({ k: isZh ? '股價'    : 'Price',      v: `$${data.price.toFixed(2)}` });
+            }
+            if (data.ceo) {
+                rows.push({ k: 'CEO', v: data.ceo });
+            }
+            const stages = rows.map(r => `
+                <div class="stt-stage-row">
+                    <span class="stt-stage-tag">${r.k}</span>
+                    <span class="stt-stage-action" style="grid-column:2 / -1;font-style:normal;color:var(--text-main)">${r.v}</span>
+                </div>`).join('');
+            const hint = isZh
+                ? `點擊 ticker → 跳 momentum 頁套用該 sector 過濾`
+                : `Click ticker → momentum page with sector filter`;
+            return `
+                <div class="stt-title">${title}</div>
+                <div class="stt-desc">${subTitle}</div>
+                <div class="stt-stages">${stages}</div>
+                <div class="stt-hint">${hint}</div>`;
+        }
+
+        function showCompTip(el) {
+            let data;
+            try {
+                data = JSON.parse(el.dataset.compTip || '{}');
+            } catch { return; }
+            const lang = (window.UI && window.UI.currentLang) || 'zh';
+            tip.innerHTML = _renderContent(data, lang);
+            tip.style.opacity = '0';
+            tip.style.top = '-9999px';
+            tip.classList.add('visible');
+            requestAnimationFrame(() => {
+                const rect  = el.getBoundingClientRect();
+                const tRect = tip.getBoundingClientRect();
+                const gap   = 8;
+                // Prefer right of the row, then above, then below
+                let left = rect.right + gap;
+                let top  = rect.top - 4;
+                if (left + tRect.width > window.innerWidth - 8) {
+                    // Fallback: above the row centered
+                    left = rect.left + (rect.width - tRect.width) / 2;
+                    top  = rect.top - tRect.height - gap;
+                    if (top < 8) top = rect.bottom + gap;
+                }
+                left = Math.max(8, Math.min(left, window.innerWidth - tRect.width - 8));
+                tip.style.top = top + 'px';
+                tip.style.left = left + 'px';
+                tip.style.opacity = '';
+            });
+        }
+
+        function hideCompTip() { tip.classList.remove('visible'); }
+
+        document.addEventListener('mouseover', e => {
+            const el = e.target.closest('[data-comp-tip]');
+            if (!el) return;
+            if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+            showCompTip(el);
+        });
+        document.addEventListener('mouseout', e => {
+            const el = e.target.closest('[data-comp-tip]');
+            if (!el) return;
+            _hideTimer = setTimeout(hideCompTip, 80);
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

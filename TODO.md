@@ -1,10 +1,68 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-05-03 (v2.12.0)
+> **Last Updated**: 2026-05-10 (v2.19.2)
 
 ---
 
 ## 🎯 活動 Backlog (Pending)
+
+### 路線 V20 — V2.20 規劃 ⭐ 焦點
+
+**前提**：V2.18 (Structural Shift Modulation) + V2.19 (Lane Cross-Talk Wiring) + V2.19.1 (Watchlist Archival) + V2.19.2 (UI ⚡ + Backtest forward returns + Theme heat bonus) 已完工。下一階段 **聚焦 UI 補齊 + Backtest 深化**，**不搶做需 backtest 結果的功能**。
+
+#### V2.20.0 — 1-2 週可做（低風險）
+
+##### A. UI Decision Layer 完整化
+
+- [ ] **[V20-A1]** Polarization 4-tier badge in `decisions.html` — `det_shadow.signal_polarization` (BIPOLAR/OUTLIER/MIXED/ALIGNED) 已存 data.json，UI 沒秀
+- [ ] **[V20-A2]** Red Team basis badge in `decisions.html` — `red_team_basis` (pure_forward/pure_mean_reversion/contaminated/unclassified) 已存，user 看不到 anti-spoofing 偵測結果
+- [ ] **[V20-A3]** structural_shift tier badge in earnings card (`page-earnings.js`) — CANDIDATE/CONFIRMED 視覺化
+- [ ] **[V20-A4]** Theme-detector structural_shift override icon in `sector.html` — `tier_counts` 已寫進 theme JSON
+- [ ] **[V20-A5]** `bridge.py` 加 polarization / red_team_basis 注入 `recent_analysis[]` — 給 A1/A2 用
+
+##### B. Backtest 深化（先補分析維度，accrual 等不及）
+
+- [ ] **[V20-B1]** Random sector baseline 對照 — 現在 alpha vs SPY 看起來好 (+18.4% mean) 但可能只是 Memory Semi sector momentum，需 random 同 sector 5 ticker baseline 驗證 watchlist 真的 outperform
+- [ ] **[V20-B2]** Per-keyword breakdown — 14 個 keyword 哪幾個是 noise (e.g. "supply tight" 通用)？哪幾個是 signal (e.g. "supercycle" 罕見)？砍 noise 提訊噪比
+- [ ] **[V20-B3]** Per-credibility 切片 — HIGH 命中 alpha vs MEDIUM 有差嗎？沒差 → credibility 是 false signal
+- [ ] **[V20-B4]** Time-window sweep — 5d/15d/45d/90d 哪窗 alpha 最高 → 決定 optimal hold horizon
+
+##### C. Decision Logic 小修
+
+- [ ] **[V20-C1]** Dynamic decision threshold — BUY≥1.2 / STAGED≥0.8 是死的。CONFIRMED + ALIGNED → BUY 降到 1.0；BIPOLAR + chaotic → BUY 拉到 1.5
+- [ ] **[V20-C2]** (可延後) Lane freshness weighting — News 48h vs Earnings 80d 同權重不對；lane cache mtime > N 天 → confidence ×0.8
+
+##### D. UX 補齊
+
+- [ ] **[V20-D1]** Watchlist tile 顯示 lifecycle 軌跡（first_seen / 已 graduated / evicted）— 給 user 一目了然每個 watchlist ticker 軌跡
+- [ ] **[V20-D2]** `backtest_watchlist.py` 加 `--dry-run` flag
+
+#### V2.20.X — 3-4 週後可做（需 watchlist accrual）
+
+##### E. Backtest 真實驗證（必須等 lifecycle log 累積）
+
+- [ ] **[V20-E1]** lifecycle ≥ 30 events，覆蓋 ≥ 3 sector → 跑完整 backtest 驗 signal 非 lookback bias
+- [ ] **[V20-E2]** ≥ 5 個 evicted_no_graduation 樣本 → 算 false positive rate；rate > 50% → 砍 keyword whitelist 或廢 watchlist 概念
+- [ ] **[V20-E3]** ≥ 3 個 自然 graduated_confirmed → 算真 lead time（不是 lookback 假 17 天）
+
+##### F. Phase 5.5 Cross-Protocol Wiring
+
+- [ ] **[V20-F1]** `thesis_registry` concentration check — Phase 4 sizing：同 sector ≥3 active CONFIRMED → 第 4 個減半。防 sector concentration risk
+- [ ] **[V20-F2]** Sector protocol 讀 thesis_registry 反向加權 — `sector_intel.json` 加 `active_thesis_count[sector]`，下次 sector 跑時 sector heat 拉
+
+#### V2.21+ — 大改，**不要塞 V2.20**
+
+- [ ] **[V21-G1]** News provisional → 直接驅動 tier modulation — 必須先 V2.20.X backtest 證明 watchlist signal 質量
+- [ ] **[V21-G2]** Modulation 參數 auto-calibration（V2.18 ×0.3 PT / 0.5 RT 折半 / 0.95 floor / 50% cap 全是猜）— 需 backtest sample n>50
+- [ ] **[V21-G3]** macro_multiplier sector × duration sensitivity matrix — 5+ 年 macro/sector data + multicollinearity 處理，**不是兩週工作量**
+- [ ] **[V21-G4]** Position size 連續 sizing（取代 binary tier cap）— 需 G2 結果
+- [ ] **[V21-G5]** Phase 3 Step 1.5 + 1.7 modulation cap 改 backtest 校準值 — 需 G2
+
+#### 紀律提醒
+
+1. **V2.20 不能塞 News provisional → tier modulation**（G1）— V2.18+V2.19 anti-spoofing 鐵律寫過：未經 backtest 驗證的 leading signal 不能進決策層
+2. **V2.20 不能搶 parameter calibration**（G2）— sample 不足會把噪音當 signal 寫進公式
+3. **V2.20 焦點 = UI surface + backtest signal 拆解**
 
 ### 路線 H — thematic-screener v0.3 enrichment 後續
 - [ ] **[H-1]** Backtest v0.2 vs v0.3：過去 30d/60d 推薦在 5d realized return / hit-rate 上差異
@@ -62,6 +120,26 @@
 ---
 
 ## 📦 已完成任務詳情 (Archived Tasks)
+
+### 路線 SS — Structural Shift Modulation (V2.18 → V2.19.2)
+- [x] ~~**[SS-V2.18-EARNINGS]** `earnings-analyst/scripts/analyze.py` `compute_structural_shift()` — EPS QoQ ≥30% + GM ≥hist+2σ + rev YoY accel → tier NONE/CANDIDATE/CONFIRMED~~
+- [x] ~~**[SS-V2.18-PHASE3]** Phase 3 Step 1.5 modulation：CONFIRMED 解除 analyst-PT/sector_avoid/RT mean-reversion；CANDIDATE 折半 + cap 50%~~
+- [x] ~~**[SS-V2.18-THEME]** theme-detector `lifecycle_calculator.classify_stage` 加 `fundamental_override`：paradigm-shift sector 不誤判 Exhausting~~
+- [x] ~~**[SS-V2.18-REGISTRY]** `register_thesis.py` 接收 structural_shift 進 thesis_data~~
+- [x] ~~**[SS-V2.19-POLAR]** `compute_polarization` 升 4-tier (BIPOLAR/OUTLIER/MIXED/ALIGNED)，BIPOLAR 加 direction count 條件防 4-vs-1 outlier 誤判（Gemini case `[+4,+3,+3,+2,-2]`）~~
+- [x] ~~**[SS-V2.19-RTBASIS]** Red Team anti-spoofing classifier：pure_forward / pure_mean_reversion / contaminated / unclassified；CONFIRMED 下 contaminated 視同 mr 觸發降級~~
+- [x] ~~**[SS-V2.19-PHASE3-1.7]** Phase 3 Step 1.7 polarization modulation：BIPOLAR ×0.5 conf+cap25 / OUTLIER ×0.85 / MIXED ×0.75~~
+- [x] ~~**[SS-V2.19-RTPROMPT]** Phase 2.8 Red Team prompt 加 STRUCTURAL_SHIFT_TIER input + 條件指令~~
+- [x] ~~**[SS-V2.19-WATCHLIST]** News Phase 4.5 structural_watchlist：14d hit window + 21d eviction + ≥2 sources gate + dedup~~
+- [x] ~~**[SS-V2.19-DAILY]** `daily_update.sh` Step 7 接線~~
+- [x] ~~**[SS-V2.19-VALIDATOR]** `validate_v219.py` 16 fixture (含 Gemini outlier + contamination spoof)；`validate_session_export.py` 加 polarization + red_team_basis enum 檢查~~
+- [x] ~~**[SS-V2.19.1-ARCHIVAL]** `build_structural_watchlist.py` 加 daily snapshot (`watchlist_history/`) + append-only `watchlist_lifecycle.jsonl` + 5-event enum (first_seen/continued/evicted/graduated_candidate/graduated_confirmed)~~
+- [x] ~~**[SS-V2.19.1-BRIDGE]** `bridge.py` `load_structural_watchlist()` 注入 `data.json.structural_watchlist`~~
+- [x] ~~**[SS-V2.19.1-UI]** Dashboard `index.html` Layer 5 watchlist tile + `script.js` `renderStructuralWatchlist()` + audit card ⚡ badge + i18n 4 label~~
+- [x] ~~**[SS-V2.19.1-BACKTEST-SKEL]** `backtest_watchlist.py` skeleton：tier graduation rate + lead time stats + outcome 4-classify~~
+- [x] ~~**[SS-V2.19.2-UIBADGE]** decisions.html / earnings.html 個股名旁 ⚡ amber badge if ticker ∈ watchlist~~
+- [x] ~~**[SS-V2.19.2-FORWARD-RETURNS]** `backtest_watchlist.py` 補完 forward returns：FMP `/stable/historical-price-eod/light` + SECTOR_ETF_MAP (13 sector) + α_SPY + α_sector + 4 horizon (5/15/45/90d) + 15d alpha aggregate~~
+- [x] ~~**[SS-V2.19.2-HEAT]** theme-detector `calculate_theme_heat` 加 `structural_shift_bonus` (+0/+5/+10/+15)，AI&Semis heat 52.8→62.8 + ranking 動 (V2.18 只動 stage label)~~
 
 ### 路線 F — Finnhub 雙抓架構
 - [x] ~~**[F-PR1]** `skills/finnhub-client/`：60/min throttle + cache + retry + 17 endpoints + 5 個 FMP-shape adapter~~
@@ -131,3 +209,7 @@
 - **V4.6 投資協議**：雙軌 entry、STAGED 狀態、Consensus bonus。
 - **Sector Protocol V1.2**：主子檔拆分、三層訊號合成、決策樹。
 - **Server 與 Infrastructure**：dashboard_server.py CRUD、自動 mtime cache-busting。
+- **V2.18 Structural Shift Modulation**：MU/QCOM 超級週期錯失 systemic fix；earnings tier (NONE/CANDIDATE/CONFIRMED) → Phase 3 Step 1.5 modulation 解除 backward-looking lane 三重壓制。
+- **V2.19 Lane Cross-Talk Wiring**：polarization 4-tier (含 OUTLIER 防 4-vs-1 誤判) → Step 1.7 modulation；Red Team anti-spoofing classifier (contaminated 不是 mixed) → mr 一票否決；structural_watchlist 14d/21d decay。
+- **V2.19.1 Watchlist Archival**：daily snapshot + append-only lifecycle log（5 event enum），建立 backtest 基礎建設。
+- **V2.19.2 UI + Backtest Forward Returns**：⚡ badge 跨 3 頁；FMP price + SPY/sector ETF α；theme heat bonus 動 ranking（不只 stage label）。

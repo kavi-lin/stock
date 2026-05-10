@@ -699,15 +699,43 @@ Burry 不納入 Step 1 加權。VOLATILE regime 不重複扣分（已計入 macr
 2. **OUTLIER 不誤殺**：4-vs-1 不是真衝突，confidence × 0.85（不像 BIPOLAR 砍倉位）
 3. **雙層防偽**：prompt 限制 + post-filter classifier，不單靠 LLM 自律
 
-### 決策閾值
+### 決策閾值（V2.20.0 — Dynamic Threshold）
 
-| final_score | decision |
+**Step 4 — Dynamic Threshold (V2.20.0)**：
+
+```
+buy_threshold = 1.2  (default)
+
+# Lower threshold (更敢進) for high-conviction paradigm-shift consensus
+IF structural_shift.tier = CONFIRMED AND polarization = ALIGNED:
+    buy_threshold = 1.0
+ELIF structural_shift.tier = CANDIDATE AND polarization = ALIGNED:
+    buy_threshold = 1.1
+
+# Raise threshold (更嚴) for chaotic / lane-conflict scenarios
+ELIF polarization = BIPOLAR:
+    buy_threshold = 1.5
+ELIF polarization = OUTLIER:
+    buy_threshold = 1.3
+
+# All other combinations use default 1.2
+
+staged_threshold = max(0.6, buy_threshold - 0.4)   # always 0.4 below buy
+```
+
+| final_score | decision (default buy=1.2 staged=0.8) |
 |---|---|
-| ≥ +1.2 | BUY |
-| +0.8 ~ +1.2 | STAGED_ENTRY |
-| -0.8 ~ +0.8 | HOLD |
-| -1.2 ~ -0.8 | STAGED_EXIT |
-| ≤ -1.2 | SELL |
+| ≥ buy_threshold | BUY |
+| staged_threshold ~ buy_threshold | STAGED_ENTRY |
+| -staged_threshold ~ +staged_threshold | HOLD |
+| -buy_threshold ~ -staged_threshold | STAGED_EXIT |
+| ≤ -buy_threshold | SELL |
+
+**設計理由**：
+- 固定 +1.2 BUY 對 5-lane ALIGNED + CONFIRMED 太嚴（白白錯失 super-cycle 進場），對 BIPOLAR 衝突太鬆（容易誤判 BUY）
+- Tier × polarization 矩陣 4 種組合對應不同信心 → threshold 動態化
+- staged_threshold 永遠 = buy − 0.4 維持比例
+- 其他組合（CONFIRMED + MIXED、CANDIDATE + OUTLIER、NONE + ALIGNED 等）走 default — 漸進式 conviction，不所有 tier 都改
 
 ### Auto REJECT
 - `risk_reward_ratio < 2.0`
@@ -745,6 +773,11 @@ Burry 不納入 Step 1 加權。VOLATILE regime 不重複扣分（已計入 macr
     },
     "red_team_basis": "pure_forward | pure_mean_reversion | contaminated | unclassified — V2.19 classifier",
     "red_team_auto_downgrade": "bool — V2.19; true if mr-spoofing 觸發 STRONG→MODERATE 降級",
+    "dynamic_threshold": {
+      "buy_threshold":    "float — V2.20 dynamic (1.0/1.1/1.2/1.3/1.5)",
+      "staged_threshold": "float — buy_threshold − 0.4",
+      "rationale":        "string — e.g. 'CONFIRMED+ALIGNED → 1.0' / 'BIPOLAR → 1.5' / 'default 1.2'"
+    },
     "red_team_verdict": "...",
     "bonus_applied": "bool", "penalty_applied": "bool",
     "raw_after_bonus": "float",

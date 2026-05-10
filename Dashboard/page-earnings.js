@@ -17,6 +17,10 @@
     // ── State ────────────────────────────────────────────────────────────
     let allAnalyses = [];
     let lastUpdatedAt = null;
+    // V2.15.1 — ticker → {date, days_until} for upcoming earnings (fmp_confirmed).
+    // Built from data.json upcoming_events on each load. Used by the command-bar
+    // input listener to morph button + show hint as user types.
+    let upcomingEarningsMap = {};
 
     const VERDICTS = ['STRONG', 'SOLID', 'MIXED', 'WEAK', 'DETERIORATING'];
 
@@ -30,6 +34,14 @@
     const RECENT_KEY = 'ea_recent_tickers';
     const RECENT_MAX = 5;
 
+    // V2.13.7 — earnings-scoped run banner state
+    let _eaPollTimer    = null;
+    let _eaActiveJobId  = null;
+    let _eaActiveTicker = null;
+    // V2.15.3 — track which mode is active so done banner can show the right
+    // post-success affordance (重新整理 for earnings vs 看前瞻報告 for preview).
+    let _eaActiveMode   = null;  // 'earnings' | 'earnings_preview' | null
+
     // ── Bootstrap ────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
         UI.logToUI?.('Initializing System...');
@@ -41,6 +53,9 @@
         wireFilterBar();
         wireEmptyStateSamples();
         wireReportModal();
+        wirePreviewModal();
+        wireEarningsRunBanner();
+        resumeEarningsRunBanner();
 
         await loadAndRender();
 
@@ -48,10 +63,35 @@
             window.DataStore.subscribe((data) => {
                 allAnalyses = Array.isArray(data?.earnings_analyses) ? data.earnings_analyses : [];
                 lastUpdatedAt = data?.last_updated;
+                rebuildUpcomingEarningsMap(data?.upcoming_events);
                 renderAll();
             });
         }
     });
+
+    // V2.15.1 — build ticker → nearest-future-earnings-date map from data.json
+    // upcoming_events. Source events come from FMP earnings calendar (all
+    // fmp_confirmed by definition). Multiple future events → keep nearest.
+    function rebuildUpcomingEarningsMap(upcomingEvents) {
+        upcomingEarningsMap = {};
+        if (!Array.isArray(upcomingEvents)) return;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        for (const e of upcomingEvents) {
+            if (e.category !== 'earnings' || !e.date) continue;
+            const evd = new Date(e.date);
+            if (isNaN(evd.getTime())) continue;
+            const days = Math.round((evd - today) / 86400000);
+            if (days < 0) continue;  // past — skip
+            for (const t of (Array.isArray(e.tickers) ? e.tickers : [])) {
+                const key = String(t).toUpperCase();
+                const prev = upcomingEarningsMap[key];
+                if (!prev || days < prev.days_until) {
+                    upcomingEarningsMap[key] = { date: e.date, days_until: days };
+                }
+            }
+        }
+    }
 
     async function loadAndRender() {
         try {
@@ -60,6 +100,10 @@
                 : await fetch('data.json', { cache: 'no-store' }).then(r => r.json());
             allAnalyses = Array.isArray(data?.earnings_analyses) ? data.earnings_analyses : [];
             lastUpdatedAt = data?.last_updated;
+            rebuildUpcomingEarningsMap(data?.upcoming_events);
+            // V2.19.2 — populate watchlist set for ⚡ badge in card render
+            window.UI = window.UI || {};
+            window.UI.watchlistSet = new Set(((data?.structural_watchlist || {}).candidates || []).map(c => c.ticker));
         } catch (e) {
             console.error('[earnings] load failed:', e);
             allAnalyses = [];
@@ -246,6 +290,8 @@
     function wireCommandBar() {
         const input = document.getElementById('ea-ticker-input');
         const btn = document.getElementById('ea-run-btn');
+        const label = document.getElementById('ea-run-label');
+        const hint = document.getElementById('ea-cmd-hint');
         const placeholders = ['NVDA', 'AAPL', 'MSFT', 'AVGO', 'META'];
         let phIdx = Math.floor(Math.random() * placeholders.length);
         input.placeholder = placeholders[phIdx];
@@ -255,20 +301,76 @@
             input.placeholder = placeholders[phIdx];
         }, 3500);
 
+        // V2.15.1 — morph button + show hint based on upcomingEarningsMap match
+        // Mode buckets:
+        //   "preview" — fmp_confirmed earnings within 0-7 days → button=📋 amber + hint
+        //   "soon"    — fmp_confirmed earnings within 8-30 days → button=🔄 default + info hint
+        //   "post"    — no upcoming match → button=🔄 default + analyze-last-quarter hint
+        //   "empty"   — input empty → reset
+        function syncMode() {
+            const t = (input.value || '').trim().toUpperCase();
+            if (!t) {
+                label.textContent = UI.currentLang === 'zh' ? '執行' : 'Run';
+                btn.classList.remove('ea-cmdbar-btn-preview');
+                btn.dataset.mode = 'post';
+                if (hint) { hint.textContent = ''; hint.dataset.mode = 'empty'; }
+                return;
+            }
+            const isZh = UI.currentLang === 'zh';
+            const match = upcomingEarningsMap[t];
+            if (match && match.days_until >= 0 && match.days_until <= 7) {
+                label.textContent = isZh ? '📋 財報前瞻' : '📋 Preview';
+                btn.classList.add('ea-cmdbar-btn-preview');
+                btn.dataset.mode = 'preview';
+                if (hint) {
+                    hint.textContent = isZh
+                        ? `⚡ ${t} 下次財報 ${match.date}（${match.days_until}d）→ 跑前瞻 cheat sheet`
+                        : `⚡ Next ${t} earnings ${match.date} (${match.days_until}d) → run preview cheat sheet`;
+                    hint.dataset.mode = 'preview';
+                }
+            } else if (match && match.days_until <= 30) {
+                label.textContent = isZh ? '執行' : 'Run';
+                btn.classList.remove('ea-cmdbar-btn-preview');
+                btn.dataset.mode = 'post';
+                if (hint) {
+                    hint.textContent = isZh
+                        ? `📅 ${t} 下次財報 ${match.date}（${match.days_until}d）→ 跑分析上季（前瞻在 7d 內才開放）`
+                        : `📅 Next ${t} earnings ${match.date} (${match.days_until}d) → run last-quarter analysis (preview opens at ≤7d)`;
+                    hint.dataset.mode = 'soon';
+                }
+            } else {
+                label.textContent = isZh ? '執行' : 'Run';
+                btn.classList.remove('ea-cmdbar-btn-preview');
+                btn.dataset.mode = 'post';
+                if (hint) {
+                    hint.textContent = isZh
+                        ? `📊 ${t} 無近期 FMP 確認財報日 → 跑分析上季`
+                        : `📊 No FMP-confirmed upcoming earnings for ${t} → run last-quarter analysis`;
+                    hint.dataset.mode = 'post';
+                }
+            }
+        }
+
         const trigger = () => {
             const t = (input.value || '').trim().toUpperCase();
             if (!t) {
                 UI.showToast(UI.currentLang === 'zh' ? '請先輸入 ticker' : 'Enter a ticker first', 'warn');
                 return;
             }
+            const mode = btn.dataset.mode;
             input.value = '';
-            runEarnings(t);
+            syncMode();
+            if (mode === 'preview') runEarningsPreview(t);
+            else                    runEarnings(t);
         };
 
         btn.addEventListener('click', trigger);
+        input.addEventListener('input', syncMode);
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') { e.preventDefault(); trigger(); }
         });
+        // Initial state
+        syncMode();
     }
 
     function getRecentTickers() {
@@ -304,6 +406,43 @@
         });
     }
 
+    // V2.15.0 — fork of runEarnings for pre-earnings preview mode (forecaster --pre-earnings).
+    // Routes through SCRIPT_PROTOCOLS path on server (no Claude turn).
+    async function runEarningsPreview(ticker) {
+        ticker = (ticker || '').toUpperCase();
+        if (!ticker) return;
+        const lang = UI.currentLang;
+        try {
+            const r = await fetch('/api/protocol-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'earnings_preview', ticker })
+            });
+            const body = await r.json();
+            if (r.status === 202 && body.queued) {
+                pushRecentTicker(ticker);
+                const pos = body.position || '?';
+                UI.showToast(lang === 'zh' ? `已排入財報前瞻:${ticker}(第 ${pos} 位)` : `Queued preview: ${ticker} (#${pos})`, 'info');
+                _eaActiveJobId  = body.id;
+                _eaActiveTicker = ticker;
+                _eaActiveMode   = 'earnings_preview';
+                if (pos === 1 && (body.total_ahead || 0) === 0) {
+                    eaShowRunBanner(ticker, lang === 'zh' ? '財報前瞻啟動中…' : 'Preview starting…');
+                }
+                if (_eaPollTimer) clearInterval(_eaPollTimer);
+                _eaPollTimer = setInterval(pollEarningsRunStatus, 2000);
+            } else if (r.status === 409 && body.reason === 'duplicate_active') {
+                UI.showToast(lang === 'zh' ? `${ticker} 前瞻已在執行中` : `${ticker} preview already running`, 'warn');
+            } else if (r.status === 409 && body.reason === 'duplicate_pending') {
+                UI.showToast(lang === 'zh' ? `${ticker} 前瞻已在佇列` : `${ticker} preview already queued`, 'warn');
+            } else {
+                UI.showToast(lang === 'zh' ? `加入失敗:${body.error || r.status}` : `Failed: ${body.error || r.status}`, 'error');
+            }
+        } catch (e) {
+            UI.showToast(lang === 'zh' ? `網路錯誤:${e.message}` : `Network error: ${e.message}`, 'error');
+        }
+    }
+
     async function runEarnings(ticker) {
         ticker = (ticker || '').toUpperCase();
         if (!ticker) return;
@@ -319,6 +458,14 @@
                 pushRecentTicker(ticker);
                 const pos = body.position || '?';
                 UI.showToast(lang === 'zh' ? `已排入財報分析:${ticker}(第 ${pos} 位)` : `Queued earnings: ${ticker} (#${pos})`, 'info');
+                _eaActiveJobId  = body.id;
+                _eaActiveTicker = ticker;
+                _eaActiveMode   = 'earnings';
+                if (pos === 1 && (body.total_ahead || 0) === 0) {
+                    eaShowRunBanner(ticker, lang === 'zh' ? '啟動中…' : 'Starting…');
+                }
+                if (_eaPollTimer) clearInterval(_eaPollTimer);
+                _eaPollTimer = setInterval(pollEarningsRunStatus, 2000);
             } else if (r.status === 409 && body.reason === 'duplicate_active') {
                 UI.showToast(lang === 'zh' ? `${ticker} 財報分析已在執行中` : `${ticker} earnings already running`, 'warn');
             } else if (r.status === 409 && body.reason === 'duplicate_pending') {
@@ -329,6 +476,438 @@
         } catch (e) {
             UI.showToast(lang === 'zh' ? `網路錯誤:${e.message}` : `Network error: ${e.message}`, 'error');
         }
+    }
+
+    // ── Run banner (V2.13.7) ─────────────────────────────────────────────
+    function eaFormatElapsed(sec) {
+        const m = String(Math.floor((sec || 0) / 60)).padStart(2, '0');
+        const s = String((sec || 0) % 60).padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function eaShowRunBanner(ticker, detail) {
+        const banner = document.getElementById('ea-run-banner');
+        if (!banner) return;
+        const isZh = UI.currentLang === 'zh';
+        const isPreview = _eaActiveMode === 'earnings_preview';
+        banner.classList.remove('hidden', 'border-l-emerald-500', 'border-l-red-500');
+        document.getElementById('ea-run-icon').innerHTML =
+            '<span class="inline-block w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>';
+        document.getElementById('ea-run-title').textContent =
+            (isPreview ? (isZh ? '財報前瞻中 · ' : 'Preview · ')
+                       : (isZh ? '財報分析中 · ' : 'Earnings · ')) + (ticker || '');
+        document.getElementById('ea-run-detail').textContent = detail || '';
+        document.getElementById('ea-run-elapsed').textContent = '00:00';
+        document.getElementById('ea-run-cancel').classList.remove('hidden');
+        document.getElementById('ea-run-reload')?.classList.add('hidden');
+        document.getElementById('ea-run-view-report')?.classList.add('hidden');
+    }
+
+    // V2.15.3 — done banner branches by mode:
+    //   earnings_preview → show 📄 看前瞻報告 link (opens reports/<DATE>_<T>_pre_earnings.md)
+    //   earnings         → show 重新整理 button (existing behaviour, picks up new card)
+    function eaSetRunBannerDone(ticker) {
+        const banner = document.getElementById('ea-run-banner');
+        if (!banner) return;
+        const isZh = UI.currentLang === 'zh';
+        const isPreview = _eaActiveMode === 'earnings_preview';
+        banner.classList.remove('border-l-blue-500', 'border-l-red-500');
+        banner.classList.add('border-l-emerald-500');
+        document.getElementById('ea-run-icon').innerHTML =
+            '<span class="text-emerald-400 font-bold">✓</span>';
+        document.getElementById('ea-run-title').textContent =
+            (isPreview ? (isZh ? '財報前瞻完成 · ' : 'Preview done · ')
+                       : (isZh ? '財報分析完成 · ' : 'Earnings done · ')) + (ticker || '');
+        document.getElementById('ea-run-detail').textContent = '';
+        document.getElementById('ea-run-cancel').classList.add('hidden');
+
+        const reloadBtn = document.getElementById('ea-run-reload');
+        const viewBtn   = document.getElementById('ea-run-view-report');
+        if (isPreview && ticker && viewBtn) {
+            // V2.16.0 — clicks open card-view modal (not raw MD). Convert <a> to button-style behavior.
+            viewBtn.removeAttribute('href');
+            viewBtn.removeAttribute('target');
+            viewBtn.style.cursor = 'pointer';
+            viewBtn.onclick = (e) => { e.preventDefault(); openPreviewModal(ticker.toUpperCase()); };
+            const lbl = document.getElementById('ea-run-view-report-label');
+            if (lbl) lbl.textContent = isZh ? '看前瞻報告' : 'View report';
+            viewBtn.classList.remove('hidden');
+            reloadBtn?.classList.add('hidden');
+        } else {
+            viewBtn?.classList.add('hidden');
+            reloadBtn?.classList.remove('hidden');
+        }
+    }
+
+    function eaSetRunBannerError(msg) {
+        const banner = document.getElementById('ea-run-banner');
+        if (!banner) return;
+        banner.classList.remove('border-l-blue-500', 'border-l-emerald-500');
+        banner.classList.add('border-l-red-500');
+        document.getElementById('ea-run-icon').innerHTML =
+            '<span class="text-red-400 font-bold">✗</span>';
+        document.getElementById('ea-run-title').textContent = msg || 'Error';
+        document.getElementById('ea-run-detail').textContent = '';
+        document.getElementById('ea-run-cancel').classList.add('hidden');
+        document.getElementById('ea-run-reload')?.classList.remove('hidden');
+    }
+
+    async function pollEarningsRunStatus() {
+        try {
+            const r = await fetch('/api/run-protocol/status');
+            if (!r.ok) return;
+            const s = await r.json();
+            // Gate: only react when the running protocol is earnings AND it's
+            // either our queued job (matching id) or — at minimum — earnings.
+            // queue_id may not be exposed; fall back to name + ticker match.
+            const isEarnings = s.name === 'earnings' || s.name === 'earnings_preview';
+            const matchesId  = _eaActiveJobId && s.queue_id === _eaActiveJobId;
+            const matchesTicker = _eaActiveTicker && (s.analyze_ticker === _eaActiveTicker || s.ticker === _eaActiveTicker);
+            if (!isEarnings || (!matchesId && !matchesTicker)) {
+                // Not my job yet — keep polling silently while queued.
+                return;
+            }
+            // It's my earnings run. Show banner if not yet visible.
+            const banner = document.getElementById('ea-run-banner');
+            if (banner && banner.classList.contains('hidden') && s.status === 'running') {
+                eaShowRunBanner(_eaActiveTicker || s.analyze_ticker || s.ticker, UI.currentLang === 'zh' ? 'Claude 處理中…' : 'Claude is processing…');
+            }
+            document.getElementById('ea-run-elapsed').textContent = eaFormatElapsed(s.elapsed_sec || 0);
+            const logEl = document.getElementById('ea-run-log');
+            if (logEl && typeof s.log_tail === 'string' && s.log_tail !== logEl.textContent) {
+                const pinned = Math.abs(logEl.scrollHeight - logEl.clientHeight - logEl.scrollTop) < 40;
+                logEl.textContent = s.log_tail;
+                if (pinned) logEl.scrollTop = logEl.scrollHeight;
+            }
+            if (s.status !== 'running') {
+                if (_eaPollTimer) { clearInterval(_eaPollTimer); _eaPollTimer = null; }
+                if (s.status === 'done') {
+                    // Backfill mode from server name if banner was resumed without it
+                    if (!_eaActiveMode && s.name) _eaActiveMode = s.name;
+                    eaSetRunBannerDone(_eaActiveTicker || s.analyze_ticker || s.ticker);
+                    // Skip data.json reload for preview — it doesn't update earnings_analyses
+                    if (_eaActiveMode !== 'earnings_preview') {
+                        setTimeout(() => loadAndRender(), 2500);
+                    }
+                } else {
+                    eaSetRunBannerError(s.error || s.status);
+                }
+                _eaActiveJobId  = null;
+                _eaActiveTicker = null;
+                // Don't clear _eaActiveMode here — done banner stays visible until
+                // user dismisses; clearing would break re-render of the right button.
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    function wireEarningsRunBanner() {
+        document.getElementById('ea-run-expand')?.addEventListener('click', () => {
+            const panel = document.getElementById('ea-run-panel');
+            const btn   = document.getElementById('ea-run-expand');
+            if (!panel) return;
+            const open = panel.classList.toggle('hidden') === false;
+            if (btn) btn.textContent = open ? '收起' : '展開';
+            if (open) {
+                const log = document.getElementById('ea-run-log');
+                if (log) log.scrollTop = log.scrollHeight;
+            }
+        });
+        document.getElementById('ea-run-cancel')?.addEventListener('click', async () => {
+            try { await fetch('/api/run-protocol/cancel', { method: 'POST' }); } catch (e) { /* ignore */ }
+        });
+        document.getElementById('ea-run-dismiss')?.addEventListener('click', () => {
+            document.getElementById('ea-run-banner')?.classList.add('hidden');
+            _eaActiveMode = null;
+            try { sessionStorage.setItem('ea_banner_dismissed', String(Date.now())); } catch (e) { /* ignore */ }
+        });
+        document.getElementById('ea-run-reload')?.addEventListener('click', () => {
+            try { sessionStorage.setItem('ea_banner_dismissed', String(Date.now())); } catch (e) { /* ignore */ }
+            location.reload();
+        });
+    }
+
+    // Resume banner on page load when an earnings run is currently in flight
+    // (e.g. user reloaded the tab during a long analysis).
+    async function resumeEarningsRunBanner() {
+        try {
+            const dismissedAt = parseInt(sessionStorage.getItem('ea_banner_dismissed') || '0', 10);
+            if (dismissedAt && (Date.now() - dismissedAt) < 30000) {
+                sessionStorage.removeItem('ea_banner_dismissed');
+                return;
+            }
+            const r = await fetch('/api/run-protocol/status');
+            if (!r.ok) return;
+            const s = await r.json();
+            if (s.status === 'running' && s.name === 'earnings') {
+                _eaActiveTicker = s.analyze_ticker || s.ticker || null;
+                eaShowRunBanner(_eaActiveTicker, UI.currentLang === 'zh' ? 'Claude 處理中…' : 'Claude is processing…');
+                if (_eaPollTimer) clearInterval(_eaPollTimer);
+                _eaPollTimer = setInterval(pollEarningsRunStatus, 2000);
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // ── V2.16.0 Pre-earnings Preview Modal ───────────────────────────────
+    function wirePreviewModal() {
+        const modal = document.getElementById('ea-preview-modal');
+        if (!modal) return;
+        document.getElementById('ea-preview-close')?.addEventListener('click', closePreviewModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closePreviewModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display !== 'none') closePreviewModal();
+        });
+    }
+
+    function closePreviewModal() {
+        const modal = document.getElementById('ea-preview-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        }
+    }
+
+    function openPreviewModal(ticker) {
+        ticker = (ticker || '').toUpperCase();
+        if (!ticker) return;
+        const modal = document.getElementById('ea-preview-modal');
+        const body  = document.getElementById('ea-preview-body');
+        const titleEl = document.getElementById('ea-preview-modal-title');
+        const mdLink  = document.getElementById('ea-preview-md-link');
+        if (!modal || !body) return;
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+        const isZh = UI.currentLang === 'zh';
+        titleEl.textContent = `${ticker} · ${isZh ? '財報前瞻' : 'Pre-Earnings Preview'}`;
+        body.innerHTML = `<div class="ea-pv-error">${isZh ? '載入中…' : 'Loading…'}</div>`;
+        if (mdLink) {
+            const now = new Date();
+            const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+            mdLink.href = `/reports/${stamp}_${ticker}_pre_earnings.md`;
+            mdLink.classList.remove('hidden');
+        }
+        fetch(`/api/preview-cache/${encodeURIComponent(ticker)}`)
+            .then(r => {
+                if (r.status === 404) throw new Error('no-cache');
+                if (!r.ok) throw new Error(`http ${r.status}`);
+                return r.json();
+            })
+            .then(data => renderPreviewModal(body, data, isZh))
+            .catch(err => {
+                const msg = err.message === 'no-cache'
+                    ? (isZh ? '前瞻 cache 不存在 — 先點「📋 財報前瞻」跑一次再回來' : 'No preview cache — run preview first then reopen')
+                    : (isZh ? `載入失敗:${err.message}` : `Load failed: ${err.message}`);
+                body.innerHTML = `<div class="ea-pv-error">${msg}</div>`;
+            });
+    }
+
+    function renderPreviewModal(body, data, isZh) {
+        const ticker = data.ticker;
+        const pe   = data.pre_earnings || {};
+        const nxt  = pe.next_earnings || {};
+        const seas = pe.seasonality_4q || [];
+        const watch = pe.watch_metrics || [];
+        const scenarios = data.scenarios;  // null when negative_eps
+        const isNeg = !!data.negative_eps;
+
+        // Header card
+        const days = nxt.days_until;
+        const cdClass = (days === 0) ? 'ea-pv-cd-today' : '';
+        const cdLabel = (days == null) ? (isZh ? '無確認日期' : 'Date unknown')
+                       : (days === 0)  ? (isZh ? '今天' : 'Today')
+                       : (days === 1)  ? (isZh ? '明天' : 'Tomorrow')
+                       :                 (isZh ? `${days} 天後` : `In ${days}d`);
+        const dateStr = nxt.date || '—';
+        const headerCard = `
+            <div class="ea-pv-section">
+                <div class="ea-pv-header-card">
+                    <div class="ea-pv-header-logo">${ticker.slice(0,4)}</div>
+                    <div class="ea-pv-header-meta">
+                        <div class="ea-pv-header-ticker">${ticker}</div>
+                        <div class="ea-pv-header-name">${isZh?'下次財報':'Next earnings'}: ${dateStr}</div>
+                        <div class="ea-pv-countdown ${cdClass}">📅 ${cdLabel}</div>
+                    </div>
+                    <div class="ea-pv-price">
+                        $${data.current_price ?? '—'}
+                        <div class="ea-pv-price-sub">${isZh?'TTM EPS':'TTM EPS'}: $${data.ttm_eps ?? '—'}${isNeg ? ' ⚠' : ''}</div>
+                    </div>
+                </div>
+            </div>`;
+
+        // Consensus card
+        const epsE = nxt.eps_estimated;
+        const revE = nxt.rev_estimated;
+        const epsCls = (epsE != null && epsE < 0) ? 'ea-pv-neg' : '';
+        const consensusCard = `
+            <div class="ea-pv-section">
+                <div class="ea-pv-section-label">${isZh?'Street 共識（本季）':'Street Consensus (this Q)'}</div>
+                <div class="ea-pv-stats">
+                    <div class="ea-pv-stat">
+                        <div class="ea-pv-stat-label">EPS estimate</div>
+                        <div class="ea-pv-stat-value ${epsCls}">${epsE != null ? '$'+epsE : '—'}</div>
+                    </div>
+                    <div class="ea-pv-stat">
+                        <div class="ea-pv-stat-label">Revenue estimate</div>
+                        <div class="ea-pv-stat-value">${revE != null ? '$'+(revE/1e9).toFixed(2)+'B' : '—'}</div>
+                    </div>
+                </div>
+            </div>`;
+
+        // Seasonality SVG (revenue bars + GM% line)
+        const seasonalityCard = renderSeasonalitySection(seas, isZh);
+
+        // Watch list chips
+        const chipIcons = ['📊','🎯','💼','🔮','🧩','📈'];
+        const watchChips = watch.length === 0
+            ? `<div class="ea-pv-chip-hint">${isZh?'無 watch list':'No watch metrics'}</div>`
+            : watch.map((w, i) => {
+                const [zh, en, hint] = Array.isArray(w) ? w : [w, w, ''];
+                const title = isZh ? zh : en;
+                return `<div class="ea-pv-chip" title="${(hint||'').replace(/"/g,'&quot;')}">
+                    <div class="ea-pv-chip-title">${chipIcons[i % chipIcons.length]} ${title}</div>
+                    <div class="ea-pv-chip-hint">${hint || ''}</div>
+                </div>`;
+            }).join('');
+        const watchCard = `
+            <div class="ea-pv-section">
+                <div class="ea-pv-section-label">${isZh?'本季 Watch List':'This Quarter Watch List'}</div>
+                <div class="ea-pv-watch-chips">${watchChips}</div>
+            </div>`;
+
+        // 12M Scenarios (PE-based by default; P/S-based when negative-EPS path supplies method='ps')
+        let scenariosCard;
+        if (scenarios) {
+            const fmtUp = (p) => (p > 0 ? '+' : '') + p.toFixed(1) + '%';
+            const isPS = scenarios.method === 'ps';
+            const sectionLabel = isPS
+                ? (isZh ? '12M Target Price · P/S 法（負 EPS）' : '12M Target Price · P/S method (negative EPS)')
+                : '12M Target Price';
+            const psMeta = isPS
+                ? `<div class="ea-pv-chip-hint" style="margin-bottom:8px">${isZh
+                    ? `TTM 營收 $${scenarios.ttm_revenue_b}B · 當前 P/S ${scenarios.current_ps}x · 近期 YoY ${scenarios.recent_yoy_pct}%`
+                    : `TTM rev $${scenarios.ttm_revenue_b}B · current P/S ${scenarios.current_ps}x · recent YoY ${scenarios.recent_yoy_pct}%`}</div>`
+                : '';
+            scenariosCard = `
+                <div class="ea-pv-section">
+                    <div class="ea-pv-section-label">${sectionLabel}</div>
+                    ${psMeta}
+                    <div class="ea-pv-scenarios">
+                        <div class="ea-pv-scen ea-pv-scen-bull">
+                            <div class="ea-pv-scen-icon">🐂</div>
+                            <div class="ea-pv-scen-name">Bull</div>
+                            <div class="ea-pv-scen-target">$${scenarios.bull.target}</div>
+                            <div class="ea-pv-scen-upside">${fmtUp(scenarios.bull.upside_pct)}</div>
+                            <div class="ea-pv-scen-trigger">${scenarios.bull.achieves_if || '—'}</div>
+                        </div>
+                        <div class="ea-pv-scen ea-pv-scen-base">
+                            <div class="ea-pv-scen-icon">📊</div>
+                            <div class="ea-pv-scen-name">Base</div>
+                            <div class="ea-pv-scen-target">$${scenarios.base.target}</div>
+                            <div class="ea-pv-scen-upside">${fmtUp(scenarios.base.upside_pct)}</div>
+                            <div class="ea-pv-scen-trigger">${scenarios.base.achieves_if || '—'}</div>
+                        </div>
+                        <div class="ea-pv-scen ea-pv-scen-bear">
+                            <div class="ea-pv-scen-icon">🐻</div>
+                            <div class="ea-pv-scen-name">Bear</div>
+                            <div class="ea-pv-scen-target">$${scenarios.bear.target}</div>
+                            <div class="ea-pv-scen-upside">${fmtUp(scenarios.bear.upside_pct)}</div>
+                            <div class="ea-pv-scen-trigger">${scenarios.bear.achieves_if || '—'}</div>
+                        </div>
+                    </div>
+                </div>`;
+        } else {
+            scenariosCard = `
+                <div class="ea-pv-section">
+                    <div class="ea-pv-section-label">12M Target Price</div>
+                    <div class="ea-pv-scen-na">⚠ ${isZh?'TTM EPS ≤ 0 且 P/S 推算數據不足 — 跳過':'TTM EPS ≤ 0 and P/S inputs unavailable — skipped'}</div>
+                </div>`;
+        }
+
+        // Caveats
+        const caveatsCard = `
+            <details class="ea-pv-caveats">
+                <summary>${isZh?'⚠ Caveats':'⚠ Caveats'}</summary>
+                <div style="margin-top:8px">
+                  • ${isZh?'Consensus EPS / Rev 來源 FMP `/earnings`，不含 whisper number':'Consensus EPS / Rev sourced from FMP /earnings — whisper numbers not available on free tier'}<br>
+                  • ${isZh?'Watch list 來源：earnings-analyst cache（若有）+ generic fallback':'Watch list source: earnings-analyst cache (if present) + generic fallback'}<br>
+                  • ${isZh?'12M target 為長期估值參考，不直接預測本季 beat/miss':'12M target is long-term valuation reference, not a beat/miss predictor'}<br>
+                  • ${isZh?'Generated':'Generated'} ${data.generated_at || '—'} · cache age ${Math.round((data.cache_age_sec || 0)/60)}m
+                </div>
+            </details>`;
+
+        body.innerHTML = headerCard + consensusCard + seasonalityCard + watchCard + scenariosCard + caveatsCard;
+    }
+
+    function renderSeasonalitySection(seas, isZh) {
+        if (!seas.length) {
+            return `<div class="ea-pv-section">
+                <div class="ea-pv-section-label">${isZh?'過去 4Q Seasonality':'Past 4Q Seasonality'}</div>
+                <div class="ea-pv-chip-hint">${isZh?'無季度數據':'No quarterly data'}</div>
+            </div>`;
+        }
+        // Compute SVG dimensions
+        const W = 760, H = 130, padL = 36, padR = 36, padT = 18, padB = 30;
+        const innerW = W - padL - padR;
+        const innerH = H - padT - padB;
+        const n = seas.length;
+        const barGap = innerW / n;
+        const barW = barGap * 0.55;
+        const revs = seas.map(q => q.revenue || 0);
+        const gms  = seas.map(q => q.gross_margin_pct);
+        const maxRev = Math.max(...revs, 1);
+        const minGm = Math.min(...gms.filter(v => v != null), 100);
+        const maxGm = Math.max(...gms.filter(v => v != null), 0);
+        const gmSpan = Math.max(maxGm - minGm, 1);
+
+        // Bar rectangles + labels
+        const bars = seas.map((q, i) => {
+            const x = padL + i * barGap + (barGap - barW) / 2;
+            const h = (q.revenue || 0) / maxRev * innerH;
+            const y = padT + innerH - h;
+            const revB = (q.revenue / 1e9).toFixed(2);
+            return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" fill="rgba(251,191,36,0.55)" />
+                    <text x="${x + barW/2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="#fbbf24" font-family="JetBrains Mono">$${revB}B</text>
+                    <text x="${x + barW/2}" y="${H - padB + 14}" text-anchor="middle" font-size="9" fill="#a1a1aa" font-family="JetBrains Mono">${q.period || ''}</text>`;
+        }).join('');
+
+        // GM% polyline (mapped to inner area, separate Y-scale)
+        const points = seas.map((q, i) => {
+            if (q.gross_margin_pct == null) return null;
+            const x = padL + i * barGap + barGap / 2;
+            const yPct = (q.gross_margin_pct - minGm) / gmSpan;
+            const y = padT + innerH - yPct * innerH * 0.7 - innerH * 0.15; // GM% sits in top 70% region
+            return `${x},${y}`;
+        }).filter(Boolean).join(' ');
+        const gmCircles = seas.map((q, i) => {
+            if (q.gross_margin_pct == null) return '';
+            const x = padL + i * barGap + barGap / 2;
+            const yPct = (q.gross_margin_pct - minGm) / gmSpan;
+            const y = padT + innerH - yPct * innerH * 0.7 - innerH * 0.15;
+            // Bar revenue label sits at (barTop - 4). Place GM% label below circle when
+            // it would otherwise crowd the bar-top label (within ~14px). Otherwise above.
+            const barH = (q.revenue || 0) / maxRev * innerH;
+            const barTopY = padT + innerH - barH;
+            const above = (y > barTopY + 14);  // safe to put label above circle
+            const labelY = above ? (y - 6) : (y + 12);
+            return `<circle cx="${x}" cy="${y}" r="3" fill="#10b981" />
+                    <text x="${x + 8}" y="${labelY}" font-size="9" fill="#10b981" font-family="JetBrains Mono">${q.gross_margin_pct.toFixed(0)}%</text>`;
+        }).join('');
+
+        const svg = `<svg class="ea-pv-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+            ${bars}
+            <polyline points="${points}" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 2" />
+            ${gmCircles}
+        </svg>
+        <div class="ea-pv-chart-legend">
+            <span><span class="ea-pv-chart-legend-dot" style="background:rgba(251,191,36,0.55)"></span>${isZh?'營收 (USD)':'Revenue (USD)'}</span>
+            <span><span class="ea-pv-chart-legend-dot" style="background:#10b981;border-radius:50%"></span>${isZh?'毛利率 %':'Gross Margin %'}</span>
+        </div>`;
+
+        return `<div class="ea-pv-section">
+            <div class="ea-pv-section-label">${isZh?'過去 4Q Seasonality':'Past 4Q Seasonality'}</div>
+            ${svg}
+        </div>`;
     }
 
     // ── Report modal wiring ──────────────────────────────────────────────
@@ -418,12 +997,52 @@
         const fresh = renderFreshness(r.cache_age_days, isZh);
         // Buttons (V1.73 — primary now opens infographic page; markdown moved to inline collapse)
         const reportBtn = `<button class="ea-act-btn ea-act-btn-primary" data-action="infographic" data-ticker="${r.ticker}">📊 ${isZh?'Infographic':'Infographic'}${r.has_infographic === false ? ' *' : ''}</button>`;
-        const rerunBtn = `<button class="ea-act-btn" data-action="rerun" data-ticker="${r.ticker}">🔄 ${isZh?'重跑':'Re-run'}</button>`;
+        // V2.15.0 — morph 重跑 → 📋 財報前瞻 when next earnings is fmp_confirmed AND ≤ 7 days
+        let actionBtn;
+        if (r.next_earnings_source === 'fmp_confirmed' && r.next_earnings_est) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const ne = new Date(r.next_earnings_est);
+            const daysUntil = Math.round((ne - today) / 86400000);
+            if (daysUntil >= 0 && daysUntil <= 7) {
+                const tipZh = `下次財報 ${r.next_earnings_est}（${daysUntil}d）— 跑前瞻 cheat sheet（forecaster --pre-earnings）`;
+                const tipEn = `Next earnings ${r.next_earnings_est} (${daysUntil}d) — run pre-earnings cheat sheet`;
+                actionBtn = `<button class="ea-act-btn ea-act-btn-preview" data-action="preview" data-ticker="${r.ticker}" title="${isZh?tipZh:tipEn}">📋 ${isZh?'財報前瞻':'Preview'}</button>`;
+            }
+        }
+        const rerunBtn = actionBtn || `<button class="ea-act-btn" data-action="rerun" data-ticker="${r.ticker}">🔄 ${isZh?'重跑':'Re-run'}</button>`;
 
         // Meta pills
         const metaPills = [];
         if (r.sector)            metaPills.push(`<span class="ea-pill">${r.sector}</span>`);
         if (r.industry && r.industry !== r.sector) metaPills.push(`<span class="ea-pill">${r.industry}</span>`);
+        // V2.13.10/12 — valuation pills (PE TTM + Forward PE + EV/EBITDA)
+        const _peStyle = (v) => {
+            if (v == null) return '';
+            if (v < 0)        return 'background:rgba(239,68,68,0.10);color:#f87171;border-color:rgba(239,68,68,0.30)';
+            if (v < 15)       return 'background:rgba(34,197,94,0.10);color:#4ade80;border-color:rgba(34,197,94,0.30)';
+            if (v > 30)       return 'background:rgba(234,179,8,0.10);color:#fbbf24;border-color:rgba(234,179,8,0.30)';
+            return '';
+        };
+        const _evStyle = (v) => {
+            if (v == null) return '';
+            if (v < 0)        return 'background:rgba(239,68,68,0.10);color:#f87171;border-color:rgba(239,68,68,0.30)';
+            if (v < 10)       return 'background:rgba(34,197,94,0.10);color:#4ade80;border-color:rgba(34,197,94,0.30)';
+            if (v > 20)       return 'background:rgba(234,179,8,0.10);color:#fbbf24;border-color:rgba(234,179,8,0.30)';
+            return '';
+        };
+        if (r.pe_ttm != null) {
+            const tip = isZh ? '本益比 (TTM)' : 'P/E ratio (TTM)';
+            metaPills.push(`<span class="ea-pill" style="${_peStyle(r.pe_ttm)}" title="${tip}">P/E ${r.pe_ttm.toFixed(1)}</span>`);
+        }
+        if (r.forward_pe != null) {
+            const tip = isZh ? '預估本益比（次年共識 EPS）' : 'Forward P/E (next-FY consensus EPS)';
+            metaPills.push(`<span class="ea-pill" style="${_peStyle(r.forward_pe)}" title="${tip}">Fwd ${r.forward_pe.toFixed(1)}</span>`);
+        }
+        if (r.ev_ebitda != null) {
+            const tip = isZh ? 'EV/EBITDA TTM — 跨資本結構估值' : 'EV/EBITDA TTM — capital-structure neutral';
+            metaPills.push(`<span class="ea-pill" style="${_evStyle(r.ev_ebitda)}" title="${tip}">EV/EBITDA ${r.ev_ebitda.toFixed(1)}</span>`);
+        }
         // V2.8.4 — last earnings pill with fiscal label fallback
         if (r.last_earnings_date) {
             const fiscalPart = r.fiscal_label ? `${r.fiscal_label} · ` : '';
@@ -478,8 +1097,14 @@
 
             <div class="ea-data-col">
                 <div class="ea-ticker-row">
-                    <span class="ea-ticker">${r.ticker}</span>
+                    <span class="ea-ticker">${r.ticker}${(window.UI?.watchlistSet?.has?.(r.ticker)) ? ` <span class="watchlist-bolt" title="V2.19 結構性轉變候選 (news keyword leading signal)" style="color:#f59e0b;font-size:0.55em;vertical-align:0.4em">⚡</span>` : ''}</span>
                     <span class="ea-company" title="${company}">${company}</span>
+                    ${(() => {
+                        const tier = (r.structural_shift || {}).tier;
+                        if (tier === 'CONFIRMED') return `<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:#dc2626;color:white;letter-spacing:0.5px" title="V2.18 Structural Shift CONFIRMED — 連 2 季 EPS QoQ ≥30% + GM σ-breakout + revenue accel">SHIFT⚡⚡</span>`;
+                        if (tier === 'CANDIDATE') return `<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:#f59e0b;color:white;letter-spacing:0.5px" title="V2.18 Structural Shift CANDIDATE — 1 季 EPS QoQ ≥30% + GM σ-breakout / revenue accel (≥2 of 3 signals)">SHIFT⚡</span>`;
+                        return '';
+                    })()}
                 </div>
                 <div class="ea-meta-pills">${metaPills.join('')}</div>
                 ${flagsRow}
@@ -600,7 +1225,7 @@
         return { cls, label: ageLabel, tooltip: isZh ? '財報快取新鮮度' : 'Cache freshness' };
     }
 
-    // ── Action delegation (infographic detail page / re-run) ─────────────
+    // ── Action delegation (infographic detail page / re-run / preview) ───
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('.ea-act-btn');
         if (!btn) return;
@@ -610,6 +1235,8 @@
             if (t) window.location.href = `earnings-detail.html?ticker=${encodeURIComponent(t)}`;
         } else if (action === 'rerun') {
             runEarnings(btn.dataset.ticker);
+        } else if (action === 'preview') {
+            runEarningsPreview(btn.dataset.ticker);
         }
     });
 

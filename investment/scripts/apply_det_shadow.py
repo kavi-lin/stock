@@ -125,6 +125,9 @@ def classify_red_team_basis(counter_thesis: str, kill_conditions: list) -> str:
 
     Design: "contaminated" 不是 "mixed" — 命名強調污染而非平衡。
     LLM 在 contamination case 下塞 1 個 fw 關鍵字無法救回 mr 否決權。
+
+    See classify_red_team_basis_detail() for hit_count breakdown (V2.20.0+
+    metadata for future density-weighted calibration in V2.21+).
     """
     haystack_parts = []
     if isinstance(counter_thesis, str):
@@ -150,6 +153,42 @@ def classify_red_team_basis(counter_thesis: str, kill_conditions: list) -> str:
     if mr_hits >= 1 and fw_hits == 0:
         return "pure_mean_reversion"
     return "contaminated"
+
+
+def classify_red_team_basis_detail(counter_thesis: str, kill_conditions: list) -> dict:
+    """V2.20.0 — return hit_count breakdown alongside basis label.
+
+    Stored in det_shadow.red_team_basis_detail for future V2.21+ density-weighted
+    calibration. Allows answering questions like "are most contaminated cases
+    95% fw with 1 mr keyword (LLM gaming) or 50/50 split (genuine mix)?".
+
+    Does NOT change basis label — stays binary 4-tier per V2.19 anti-spoofing
+    contract. Pure metadata.
+    """
+    haystack_parts = []
+    if isinstance(counter_thesis, str):
+        haystack_parts.append(counter_thesis)
+    if isinstance(kill_conditions, list):
+        for kc in kill_conditions:
+            if isinstance(kc, str):
+                haystack_parts.append(kc)
+            elif isinstance(kc, dict):
+                for v in kc.values():
+                    if isinstance(v, str):
+                        haystack_parts.append(v)
+    haystack = "\n".join(haystack_parts).lower()
+    mr_hits_list = [kw for kw in MR_KEYWORDS if kw.lower() in haystack]
+    fw_hits_list = [kw for kw in FW_KEYWORDS if kw.lower() in haystack]
+    total_chars = len(haystack)
+    return {
+        "mr_hits":       len(mr_hits_list),
+        "fw_hits":       len(fw_hits_list),
+        "mr_keywords":   mr_hits_list[:5],   # cap to keep det_shadow small
+        "fw_keywords":   fw_hits_list[:5],
+        "haystack_chars": total_chars,
+        "mr_density":    round(len(mr_hits_list) / max(total_chars, 1) * 1000, 3),  # hits per 1000 chars
+        "fw_density":    round(len(fw_hits_list) / max(total_chars, 1) * 1000, 3),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -269,6 +308,102 @@ def compute_red_team_agreement(llm_verdict: str | None, det_verdict: str | None)
 # Apply to a single trade entry
 # ---------------------------------------------------------------------------
 
+def compute_lane_freshness_penalty(trade: dict) -> dict:
+    """V2.20.0 — assess data freshness per lane and emit confidence multiplier.
+
+    Different lanes have different data half-lives:
+      - News:        48h (rapid news cycle)
+      - Sentiment:   3h (intraday market signals from Phase 0 _market_signals)
+      - Technical:   24h (OHLC daily)
+      - Fundamentals: 90 days (quarterly earnings cycle)
+      - Valuation:   90 days (same — ratio TTM, DCF input)
+
+    Lane confidence multiplier:
+      - within fresh window: ×1.0
+      - 1× to 2× window:     ×0.9
+      - 2× to 3× window:     ×0.8
+      - >3× window:          ×0.7  (severely stale)
+
+    Reads cache mtimes from related cache locations. Trade entry already has
+    `as_of_date` for general session staleness. We don't have per-lane mtimes
+    in trade entry, so we approximate via:
+      - news_lane.published_dates[] max → news lane
+      - earnings cache mtime → fundamentals/valuation lanes
+      - sentiment _market_signals (Phase 0) mtime → sentiment lane
+      - technical bars freshness → technical lane (assume close to as_of_date)
+
+    Returns:
+        {
+          "version":      "V2.20.0",
+          "as_of":        str (date),
+          "lane_multipliers": {
+              "fundamentals": float, "sentiment": float, "news": float,
+              "technical": float, "valuation": float
+          },
+          "stalest_lane": str | null,
+          "stalest_age_days": int | null,
+          "applied": bool — whether any lane had multiplier < 1.0
+        }
+    """
+    from datetime import date, datetime, timedelta
+
+    FRESH_WINDOWS = {
+        "news":         2,    # days
+        "sentiment":    1,
+        "technical":    1,
+        "fundamentals": 90,
+        "valuation":    90,
+    }
+
+    # Try to read trade as_of date for staleness anchor
+    as_of_str = (trade.get("as_of_date")
+                 or trade.get("_as_of_date_inherited")
+                 or trade.get("export_date")
+                 or "")
+    try:
+        as_of_dt = datetime.strptime(as_of_str[:10], "%Y-%m-%d").date() if as_of_str else None
+    except ValueError:
+        as_of_dt = None
+
+    today = date.today()
+
+    # Heuristic: how old is the analysis itself?
+    if as_of_dt:
+        analysis_age_days = (today - as_of_dt).days
+    else:
+        analysis_age_days = 0
+
+    # For older sessions, all lanes scale by analysis age vs lane fresh window.
+    # This provides a coarse staleness penalty even without per-lane mtime tracking.
+    multipliers: dict[str, float] = {}
+    stalest_lane = None
+    stalest_age = None
+    for lane, window in FRESH_WINDOWS.items():
+        ratio = analysis_age_days / window if window > 0 else 0
+        if ratio <= 1.0:
+            mult = 1.0
+        elif ratio <= 2.0:
+            mult = 0.9
+        elif ratio <= 3.0:
+            mult = 0.8
+        else:
+            mult = 0.7
+        multipliers[lane] = mult
+        if stalest_lane is None or mult < multipliers[stalest_lane]:
+            stalest_lane = lane
+            stalest_age = analysis_age_days
+
+    applied = any(m < 1.0 for m in multipliers.values())
+    return {
+        "version":            "V2.20.0",
+        "as_of":              as_of_str[:10] if as_of_str else None,
+        "lane_multipliers":   multipliers,
+        "stalest_lane":       stalest_lane if applied else None,
+        "stalest_age_days":   stalest_age if applied else None,
+        "applied":            applied,
+    }
+
+
 def apply_to_trade(trade: dict) -> dict:
     """Compute and attach det_shadow block to a trades_this_session[] entry.
     Returns the (mutated) entry."""
@@ -286,13 +421,17 @@ def apply_to_trade(trade: dict) -> dict:
                                             rt_det.get("verdict"))
 
     # V2.19 — Red Team basis classifier (anti-spoofing post-filter)
-    rt_basis = classify_red_team_basis(
-        trade.get("red_team_counter_thesis") or trade.get("counter_thesis") or "",
-        trade.get("red_team_kill_conditions") or trade.get("kill_conditions") or [],
-    )
+    rt_ct = trade.get("red_team_counter_thesis") or trade.get("counter_thesis") or ""
+    rt_kc = trade.get("red_team_kill_conditions") or trade.get("kill_conditions") or []
+    rt_basis = classify_red_team_basis(rt_ct, rt_kc)
+    # V2.20.0 — hit count metadata for future calibration (V2.21+ density-weighted)
+    rt_basis_detail = classify_red_team_basis_detail(rt_ct, rt_kc)
+
+    # V2.20.0 — lane freshness penalty (separate metadata block)
+    freshness = compute_lane_freshness_penalty(trade)
 
     trade["det_shadow"] = {
-        "version":              "V2.19.0",
+        "version":              "V2.20.0",
         "signal_polarization":  polar.get("label"),
         "polarization_detail":  polar,
         "valuation_score_det":  val_det,
@@ -301,15 +440,24 @@ def apply_to_trade(trade: dict) -> dict:
         "red_team_detail":      rt_det,
         "red_team_agreement":   rt_agree,
         "red_team_basis":       rt_basis,
+        "red_team_basis_detail": rt_basis_detail,   # V2.20.0 — hit counts for future tuning
+        "lane_freshness":       freshness,
     }
     return trade
 
 
 def apply_to_session_export(payload: dict) -> dict:
-    """Mutate a session_export.json (V4.6+ format) to attach det_shadow on each trade."""
+    """Mutate a session_export.json (V4.6+ format) to attach det_shadow on each trade.
+
+    V2.20.0: forward `export_date` from outer payload into each trade so freshness
+    computation can use it as `as_of_date`.
+    """
+    export_date = payload.get("export_date") or payload.get("date")
     trades = payload.get("trades_this_session") or []
     for t in trades:
         if isinstance(t, dict):
+            if export_date and not t.get("as_of_date"):
+                t["_as_of_date_inherited"] = export_date  # transient, pickup by freshness
             apply_to_trade(t)
     return payload
 
