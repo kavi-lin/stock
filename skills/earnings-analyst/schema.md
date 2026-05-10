@@ -26,6 +26,7 @@
 
   "derived":             { ... },                  // analyze.py output (margins / quality / growth / score)
   "quality_flags":       [ "string", ... ],
+  "structural_shift":    { ... },                  // V2.18.0 — paradigm-shift earnings detection
   "composite_score":     "int 0-100",
   "verdict":             "STRONG | SOLID | MIXED | WEAK | DETERIORATING",
   "score_components":    {
@@ -226,6 +227,45 @@
 | `debt_buildup` | totalDebt 環比增 > 15% 連 2 季 |
 
 無 flag → 空 list `[]`(品質乾淨)。
+
+## structural_shift (V2.18.0 — paradigm-shift detection)
+
+`analyze.py` 用最新 Q + 8Q 歷史推算三個 signal，給投資 protocol Phase 3 用來抑制 backward-looking 模型(過時 analyst PT、歷史 mean-reversion)的攻擊力。
+
+```json
+{
+  "tier":  "NONE | CANDIDATE | CONFIRMED | INSUFFICIENT_DATA",
+  "candidate": "bool — tier ∈ {CANDIDATE, CONFIRMED}",
+  "signals": {
+    "eps_qoq_jump":  "bool — EPS QoQ ≥ 30%",
+    "gm_breakout":   "bool — gross margin ≥ historical mean + 2σ (歷史 8Q [1:9])",
+    "rev_accel":     "bool — revenue YoY ≥ 25% AND YoY 比上一季 YoY 高 ≥ 5pp"
+  },
+  "metrics": {
+    "eps_qoq":      "float | null",
+    "gm_latest":    "float | null",
+    "gm_hist_mean": "float | null",
+    "gm_hist_std":  "float | null",
+    "gm_z_score":   "float | null",
+    "rev_yoy":      "float | null",
+    "prior_q_yoy":  "float | null"
+  },
+  "prior_quarter_candidate": "bool — prior Q signals 也達 ≥ 2/3"
+}
+```
+
+**Tier 規則**：
+| tier | 條件 |
+|---|---|
+| `INSUFFICIENT_DATA` | income / margins 不足 5 季 |
+| `NONE` | 最新 Q signals 0 ~ 1 個成立 |
+| `CANDIDATE` | 最新 Q signals ≥ 2 個成立 |
+| `CONFIRMED` | 最新 Q **AND** 上一 Q 都 CANDIDATE（連續兩季結構性跳躍） |
+
+**設計原則**：
+- 只判定發訊，不更動 composite_score 或 verdict —— 不破壞既有評分體系
+- 下游(`investment_protocol_v5_0.md` Phase 3 V2.18.0)讀 `tier` 套用估值/Red Team/Macro 的 modulation
+- CONFIRMED 比 CANDIDATE 多 unanchor 估值錨點 + 解除 sector_avoid
 
 ## verdict 對應
 

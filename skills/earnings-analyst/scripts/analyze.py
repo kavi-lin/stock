@@ -154,6 +154,93 @@ def compute_cf_quality(cashflow: list, income: list) -> dict:
     }
 
 
+def compute_structural_shift(income: list, margins_8q: list) -> dict:
+    """Detect paradigm-shift earnings: EPS QoQ jump + GM σ-breakout + revenue accel.
+
+    CANDIDATE: ≥2 of 3 signals satisfied in latest quarter.
+    CONFIRMED: latest quarter CANDIDATE AND prior quarter also CANDIDATE.
+
+    Tier consumed by investment_protocol Phase 3 to dampen valuation/red-team
+    backward-looking attacks during super-cycles (V2.18.0).
+    """
+    def _signals_for_idx(idx: int) -> dict:
+        if idx + 4 >= len(income) or idx >= len(margins_8q):
+            return {"candidate": False, "signals": {}, "metrics": {}}
+        cur = income[idx]
+        prior_q = income[idx + 1] if idx + 1 < len(income) else None
+        prior_y = income[idx + 4] if idx + 4 < len(income) else None
+
+        eps_qoq = None
+        if prior_q:
+            cur_eps = cur.get("epsDiluted") if cur.get("epsDiluted") is not None else cur.get("eps")
+            pq_eps = prior_q.get("epsDiluted") if prior_q.get("epsDiluted") is not None else prior_q.get("eps")
+            if cur_eps is not None and pq_eps is not None and pq_eps > 0:
+                eps_qoq = (cur_eps - pq_eps) / pq_eps
+        sig_a = eps_qoq is not None and eps_qoq >= 0.30
+
+        cur_gm = margins_8q[idx].get("gross") if idx < len(margins_8q) else None
+        hist_gms = [m.get("gross") for m in margins_8q[idx + 1: idx + 9] if m.get("gross") is not None]
+        gm_mean = gm_std = gm_z = None
+        if cur_gm is not None and len(hist_gms) >= 3:
+            gm_mean = sum(hist_gms) / len(hist_gms)
+            var = sum((x - gm_mean) ** 2 for x in hist_gms) / len(hist_gms)
+            gm_std = var ** 0.5
+            gm_z = (cur_gm - gm_mean) / gm_std if gm_std > 0 else 0.0
+        sig_b = gm_z is not None and gm_z >= 2.0
+
+        rev_yoy = None
+        if prior_y and (prior_y.get("revenue") or 0) > 0:
+            rev_yoy = ((cur.get("revenue") or 0) - prior_y.get("revenue")) / prior_y.get("revenue")
+        prior_q_yoy = None
+        if idx + 5 < len(income) and prior_q:
+            pqy = income[idx + 5]
+            if (pqy.get("revenue") or 0) > 0:
+                prior_q_yoy = ((prior_q.get("revenue") or 0) - pqy.get("revenue")) / pqy.get("revenue")
+        sig_c = (rev_yoy is not None and rev_yoy >= 0.25
+                 and prior_q_yoy is not None and rev_yoy > prior_q_yoy + 0.05)
+
+        return {
+            "candidate": sum([sig_a, sig_b, sig_c]) >= 2,
+            "signals": {"eps_qoq_jump": sig_a, "gm_breakout": sig_b, "rev_accel": sig_c},
+            "metrics": {
+                "eps_qoq":      round(eps_qoq, 4)     if eps_qoq is not None else None,
+                "gm_latest":    round(cur_gm, 4)      if cur_gm is not None else None,
+                "gm_hist_mean": round(gm_mean, 4)     if gm_mean is not None else None,
+                "gm_hist_std":  round(gm_std, 4)      if gm_std is not None else None,
+                "gm_z_score":   round(gm_z, 2)        if gm_z is not None else None,
+                "rev_yoy":      round(rev_yoy, 4)     if rev_yoy is not None else None,
+                "prior_q_yoy":  round(prior_q_yoy, 4) if prior_q_yoy is not None else None,
+            },
+        }
+
+    if len(income) < 5 or len(margins_8q) < 5:
+        return {
+            "tier": "INSUFFICIENT_DATA",
+            "candidate": False,
+            "signals": {},
+            "metrics": {},
+            "prior_quarter_candidate": False,
+        }
+
+    latest = _signals_for_idx(0)
+    prior = _signals_for_idx(1) if len(income) >= 6 else {"candidate": False}
+
+    if latest["candidate"] and prior.get("candidate"):
+        tier = "CONFIRMED"
+    elif latest["candidate"]:
+        tier = "CANDIDATE"
+    else:
+        tier = "NONE"
+
+    return {
+        "tier": tier,
+        "candidate": tier in ("CANDIDATE", "CONFIRMED"),
+        "signals": latest["signals"],
+        "metrics": latest["metrics"],
+        "prior_quarter_candidate": prior.get("candidate", False),
+    }
+
+
 def compute_quality_flags(income: list, balance: list, cashflow: list, cf_q: dict) -> list[str]:
     flags = []
 
@@ -321,6 +408,7 @@ def analyze(bundle: dict) -> dict:
     bh = compute_balance_health(balance)
     cf_q = compute_cf_quality(cashflow, income)
     flags = compute_quality_flags(income, balance, cashflow, cf_q)
+    structural = compute_structural_shift(income, margins_8q)
 
     sc_quality = score_quality(flags, ttm, cf_q)
     sc_growth = score_growth(yoy, growth)
@@ -344,6 +432,7 @@ def analyze(bundle: dict) -> dict:
         "cash_flow_quality":  cf_q,
     }
     bundle["quality_flags"]    = flags
+    bundle["structural_shift"] = structural
     bundle["composite_score"]  = composite
     bundle["verdict"]          = verdict_for(composite)
     bundle["score_components"] = {
@@ -380,6 +469,7 @@ def main() -> int:
 
     print(f"[analyze] {bundle['ticker']}: composite={bundle['composite_score']}/100 "
           f"verdict={bundle['verdict']} "
+          f"shift={bundle['structural_shift']['tier']} "
           f"flags={bundle['quality_flags'] or 'clean'} "
           f"(Q{bundle['score_components']['quality']}/30 "
           f"G{bundle['score_components']['growth']}/30 "

@@ -10,6 +10,1189 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [2.19.0] — 2026-05-10
+### Added — Lane Cross-Talk Wiring (Phase 3 polarization + Red Team anti-spoof + News watchlist)
+
+### Added
+- `investment/scripts/apply_det_shadow.py`:
+  - `compute_polarization()` 升 4-tier (BIPOLAR/OUTLIER/MIXED/ALIGNED)。BIPOLAR 規則加 `pos_strong ≥ 2 AND neg_strong ≥ 2` direction count，避免 4-vs-1 outlier 誤判（例 `[+4,+3,+3,+2,-2]` 修前 BIPOLAR、修後 OUTLIER）
+  - `classify_red_team_basis()` — V2.19 anti-spoofing classifier。4-tier basis：`pure_forward / pure_mean_reversion / contaminated / unclassified`。LLM 偷渡 mr (塞 1 個 fw keyword 偽裝) → 標 `contaminated`，CONFIRMED tier 下視同純 mr 觸發降級
+  - `apply_to_trade()` 寫 `red_team_basis` 入 det_shadow block
+- `investment/scripts/validate_v219.py` — 16 fixture (10 polarization + 6 basis)，含 Gemini outlier case 與 contamination spoof test
+- `investment/investment_protocol_v5_0.md`:
+  - Phase 3 **Step 1.7** Lane Polarization Modulation (4-tier，BIPOLAR ×0.5 confidence + cap 25% + BUY→STAGED_ENTRY；OUTLIER ×0.85；MIXED ×0.75；ALIGNED 不動)
+  - Phase 3 **Step 2** anti-spoofing 邏輯：CONFIRMED + (pure_mr OR contaminated) → STRONG_COUNTER auto-downgrade MODERATE + penalty 折半
+  - Phase 2.8 Red Team prompt 加 `STRUCTURAL_SHIFT_TIER` input + 條件指令 (CONFIRMED 必引 forward mechanism)
+  - Phase 4 Step 4 Sizing 加 `polar_adj` 串聯 (BIPOLAR 強制 ×0.25 跟 V2.18 shift_adj 串接)
+  - Phase 3 JSON shape 加 `polarization_modulation` + `red_team_basis` + `red_team_auto_downgrade` 欄位
+- `investment/phase5_export_schema.md`:
+  - det_shadow 升 V2.19 schema：`signal_polarization` 4 值、`pos_strong/neg_strong`、`red_team_basis` 4-tier
+  - 新增 Phase 3 Step 1.7 modulation 對照表 + Red Team basis 判定規則
+- `investment/scripts/validate_session_export.py`:
+  - 新增 `det_shadow.signal_polarization` enum 檢查（V2.19 4-tier）
+  - 新增 `det_shadow.red_team_basis` enum 檢查
+  - det_shadow 缺欄 → schema fail
+- `news/news_protocol_v2.md` Phase 4.5 — Structural Watchlist 段落（schema、decay rules、daily cron 規範、V2.19 約束 metadata-only）
+- `news/scripts/build_structural_watchlist.py` (新檔):
+  - 14 keyword whitelist (sold out / capacity constrained / supercycle / 供不應求 ...)
+  - 14d hit window + 21d eviction + ≥2 sources first-hit gate + url stem / 8-gram dedup
+  - sector aggregation + atomic temp+rename + failure non-fatal
+  - 已 smoke 跑通：7 candidates / 1 hot sector (TSM/MU/NVDA/ASML 在 Memory Semis)
+- `daily_update.sh` — Step 7 接線 (1/6 → 1/7 全部更新)，failure non-fatal
+
+### Why
+- V2.18.0 解 MU/QCOM 超級週期錯失只是繃帶；user 反思指出「lanes 各自為政」病根沒治
+- Gemini 三提案 critical eval：
+  - **#1 News provisional 強版 REJECT** — IR boilerplate / reflexive loop / mosaic violation；輕量版 (watchlist metadata-only) DO
+  - **#2 Cross-lane divergence DO 但簡化** — `compute_polarization` 已存在，Gemini stdev 提案是重造輪子
+  - **#3 Red Team dynamic prompt DO 雙層** — prompt + post-filter classifier 防 LLM jailbreak
+- V2.19 = wiring + hardening release，不是 feature release。把 V2.18 留下的 dangling hook (`red_team_basis="mean_reversion_only"` 行 604) + 現存沒接線的 `compute_polarization` 串起來
+- 三條 anti-adversarial 鐵律：
+  1. **mr 一票否決**：mean-reversion keyword 一旦出現都觸發 dampening（contaminated 不是 mixed）
+  2. **OUTLIER 不誤殺**：4-vs-1 outlier 不是真衝突 (×0.85 不像 BIPOLAR 砍倉)
+  3. **Watchlist 強制衰減**：14d/21d 防幽靈數據，single-source 不入榜
+
+### Smoke
+- `python3 investment/scripts/validate_v219.py` → PASSED 10 polarization + 6 basis fixtures (含 Gemini outlier + contamination spoof)
+- `python3 news/scripts/build_structural_watchlist.py` → 7 candidates / 1 hot sector (Memory Semis: TSM/MU/NVDA/ASML)
+- compile-check：apply_det_shadow.py / validate_v219.py / validate_session_export.py / build_structural_watchlist.py 全 OK
+
+### Out of Scope (V2.20)
+- News provisional → 直接驅動 tier modulation（須先 backtest watchlist 是否能可靠當 leading indicator）
+- backtest 餵回 V2.18/V2.19 modulation 參數 auto-tune
+- macro_multiplier 改 sector × duration sensitivity matrix
+- Theme-detector heat 公式納入 sector aggregate EPS momentum (V2.18 只 hack lifecycle stage)
+
+---
+
+## [2.18.0] — 2026-05-10
+### Added — Structural Shift Modulation: 解 MU/QCOM 超級週期錯失 systemic bug
+
+### Added
+- `skills/earnings-analyst/scripts/analyze.py` — `compute_structural_shift()`：偵測 EPS QoQ ≥30% / GM ≥ historical+2σ / revenue YoY ≥25% AND accelerating 三 signal，≥2 → CANDIDATE，連 2 季 → CONFIRMED。獨立 signal，不影響 composite_score
+- `skills/earnings-analyst/schema.md` + `SKILL.md` — `structural_shift` 區塊文件化（tier / signals / metrics / 設計理由）
+- `investment/scripts/register_thesis.py` — `_read_structural_shift()`：thesis registry 自動接收 latest earnings cache 的 structural_shift block，存入 thesis_data
+- `investment/investment_protocol_v5_0.md` Phase 3 **Step 1.5 Structural Shift Modulation**：
+  - CONFIRMED → analyst-PT weight ×0、Red Team mean-reversion attack BLOCKED、shift_macro_floor=1.00、position_cap=100%
+  - CANDIDATE → analyst-PT ×0.3、STRONG_COUNTER penalty 折半、shift_macro_floor=0.95、position_cap=50%
+  - NONE/INSUFFICIENT_DATA → 標準規則
+- Phase 3 JSON shape 加 `calculation_steps.structural_shift_modulation`（tier/applied_adjustments/shift_macro_floor/position_size_cap_pct/red_team_mean_reversion_blocked）
+- Phase 4 Step 4 Sizing 加入 `shift_adj = ftd_adj × (position_size_cap_pct/100)`，將 shift cap 套在所有其他乘數之後
+- `skills/theme-detector/scripts/calculators/lifecycle_calculator.py` `classify_stage()` — 新增 `fundamental_override` param：true 時門檻整體往後拉（80→95 才算 Exhausting），避免 paradigm-shift sector 被技術面過熱誤判
+- `skills/theme-detector/scripts/theme_detector.py` `_theme_has_structural_shift()` — 掃 representative stocks 的 earnings cache，命中 CANDIDATE/CONFIRMED 即觸發 fundamental_override；scored_theme 額外輸出 `structural_shift_override` + `structural_shift_hits`
+
+### Why
+- MU/QCOM 案例復盤：超級週期股票被三個 backward-looking 模型同時壓制 → DEFENSIVE HOLD，錯失主升段
+  - Valuation lane：被滯後 analyst PT 拖累（MU 4/24 Q2 blowout 後 PT 還停在 $455 / 算出合理價 $549 vs 市價 $714）
+  - Red Team：用「記憶體歷史 GM 30-35%、現在 74% 是 Peak Cycle」mean-reversion 攻擊
+  - Macro：Theme Detector 把 Semis 標 Exhausting → Phase 0 sector_avoid → multiplier ×0.9
+- 機制設計（不是 override，是 dampening）：
+  - 1Q earnings blowout 即可觸發 CANDIDATE（避免 2Q 確認太慢，主升段已過）
+  - 但 CANDIDATE position cap 50% 防止單季 noise 變 bubble-top BUY
+  - CONFIRMED 才完全解除錨點，且 Red Team 必須 forward mechanism breakage 攻擊（不接受純歷史均值論證）
+- 對稱性：missing top = bounded loss、buying top = unbounded loss → tier 階梯保護後者
+- 校準：MU=CONFIRMED (eps_qoq +163%/gm z=4.18/rev_yoy +196%)、NVDA=CANDIDATE、AAPL/AMD/ARM=NONE
+
+### Smoke
+- `python3 skills/earnings-analyst/scripts/analyze.py MU` → composite=80/100 verdict=STRONG **shift=CONFIRMED**
+- `python3 skills/earnings-analyst/scripts/analyze.py NVDA` → composite=86/100 verdict=STRONG **shift=CANDIDATE**
+- `python3 skills/earnings-analyst/scripts/analyze.py AAPL` → composite=70/100 verdict=SOLID shift=NONE
+- `_read_structural_shift()` & `_theme_has_structural_shift()` 直接 import 測通
+
+---
+
+## [2.17.26] — 2026-05-10
+### Fixed — verdict_deep_dive 方向推論支援 V5.0 動詞 action（STAGED_ENTRY / EXECUTE）
+
+### Fixed
+- `scripts/verdict_rules.py` `verdict_deep_dive` — substring matching 換成 V5-aware 顯式 mapping：
+  - **BUY 類**：`{BUY, LONG, EXECUTE, STAGED_ENTRY, STAGED}` → direction = "buy"
+  - **SELL 類**：`{SELL, SHORT, STAGED_EXIT}` → direction = "sell"
+  - **HOLD 類**：HOLD / CANCEL / unknown → direction = "hold"
+  - 保留 substring 兜底（cover 多字串如 `BUY (T2)`）
+
+### Smoke result
+| metric | baseline | 修後 |
+|---|---|---|
+| MU 6 staged/execute records | all miss | all **hit** ✓ |
+| STAGED_ENTRY miss_rate | 72% (21/29) | **17%** (5/29) ✓ |
+| EXECUTE miss_rate | 75% (6/8) | **25%** (2/8) ✓ |
+| 整體 deep-dive hit_rate | 40% (44/109) | **55%** (60/109) ✓ |
+| 整體 deep-dive miss_rate | 54% (59/109) | **37%** (40/109) ✓ |
+
+### Why
+- User 觀察 MU 幾乎全 miss，例：2026-05-01 STAGED_ENTRY score 1.22 / 9 天 +37.73% 卻判 miss
+- Root cause：V2.17.18 parser 修完後 final_action 正確帶到 V5 verbs，但 verdict 邏輯沒同步 — V5 verbs 不含 `BUY` substring，全 fallthrough 到 hold → 觀望 + 正報酬 = "錯過上漲" 假 miss
+- 影響：REVIEW_2026-05-09 Pattern 1（mega-cap repeat-miss：AMD / MU / NBIS / GOOGL）有大半是這個 verdict bug 製造的 artifact，不是真策略失敗
+- 修法：純 verdict label 邏輯，不動策略本身。下週 REVIEW Pattern 1 會大幅縮水，Hypothesis A（Bull regime under-call）需用乾淨資料重評
+
+### Ledger
+- `ADJUSTMENT_LEDGER.md` 新增 entry 追蹤本修法 metrics
+
+---
+
+## [2.17.25] — 2026-05-10
+### Fixed — theme-detector extractor 升級到 header-name lookup（解決 0 themes detected）
+
+### Fixed
+- `scripts/extractors/theme_detector_extractor.py` `_find_themes` — 重寫成 header-driven column resolution：
+  - 偵測 Theme Dashboard table 第一行 header
+  - 用名稱映射（"theme"/"direction"/"heat"/"stage"/"confidence" + alias 如 "dir"）找到每個欄位的 cell 索引
+  - 後續資料 row 用索引取值，不再依賴固定欄位順序
+  - skip markdown separator row（`|---|---|...`）
+- 新格式（V2 2026-04-23+）`Theme | Origin | Direction | Heat | Maturity | Stage | Confidence` 7 欄、無 # 索引
+- 舊格式 V1 / 中英雙語 header `# | Theme 主題 | Dir 方向 | Heat 熱度 | Stage 階段 | Confidence 信心` 也通
+
+### Smoke
+| report | before | after |
+|---|---|---|
+| theme_detector_2026-04-11 | 0 themes | **10 themes** ✓ |
+| theme_detector_2026-04-23_220833 | 0 themes | **10 themes** ✓ |
+| theme_detector_2026-04-25_004154 | 0 themes | **10 themes** ✓ |
+
+verdict 全 5 筆現在算出真實 hit/miss/neutral：4/11 miss (3/9 跑贏)、4/23 neutral 4/7、4/23 hit 6/9 ×2、4/25 hit 6/9。
+
+### Why
+- User 截圖：theme-detector drill 5 筆「0 themes detected」+ verdict 全 PENDING/MISS — root cause: extractor 寫死「第一格必須是數字 #」，新報告把 # 列拿掉 → 全 skip
+- 修法：header-name 映射不依賴欄位順序 / 個數，未來 schema 再加欄位也不會破
+
+### 規則重申（user 問）
+- Window 10 個交易日
+- 對每個 LEAD 主題：proxy_etf 5d/10d 跑贏 SPY → hit；輸 SPY → miss
+- 聚合：hit_rate ≥ 60% HIT / ≤ 40% MISS / 中間 NEUTRAL
+- LAG 主題（看空）目前 verdict 沒評，待後續加 symmetric check
+
+---
+
+## [2.17.24] — 2026-05-10
+### Fixed — Drill row 現實行覆蓋更多 source（thematic / theme / momentum / earnings）
+
+### Fixed
+- `Dashboard/page-calendar.js` `_drillRealityLine` — 原本只處理 `ticker_reality` + `spy_return_pct`，多數 market-wide source 顯示「—」。新增分支：
+  - `mover_returns`（thematic-screener）→ 顯示「X/Y 方向對」+ 前 5 檔 mover ±%（hit 綠 / miss 紅）
+  - `etf_returns`（theme-detector / sector-scan）→ SPY 報酬 + 前 4 檔 ETF rel-to-SPY
+  - `ticker_returns`（earnings-analyzer）→ 前 4 檔 ticker ±%
+  - `per_ticker`（momentum-screen）→ N/總 命中比率（綠/黃/紅 by hit rate）
+- 仍保留 `ticker_reality`（deep-dive）+ `spy_return_pct`（news-digest）+ pending fallback
+
+### Why
+- User 截圖：thematic-screener 5 筆 row「現實」全是「—」但 verdict 已是 NEUTRAL/MISS，讓人疑惑判定基礎
+- root cause：mover_returns 已寫進 reality_at_eval（每筆 19-20 個 ticker），但 row renderer 沒讀
+- 修後 row 直接顯示 movers 命中比 + 前 5 檔對齊狀況
+
+### 雷達評斷規則（user 問）
+- Window 5 個交易日
+- 每檔 mover：target_5d_pct 方向 × actual_5d 方向 對 → hit
+- 聚合：hit_rate ≥ 60% HIT / ≤ 40% MISS / 中間 NEUTRAL
+- 只看方向不看幅度；mover_returns 缺 → PENDING
+
+---
+
+## [2.17.23] — 2026-05-10
+### Fixed — Drill modal 改用 CSS vars 跟頁面 theme 連動（不再硬寫深色）
+
+### Changed
+- `Dashboard/style.css` drill modal CSS：
+  - `cal-drill-shell` / `cal-drill-header` / `cal-drill-body` / `cal-drill-row` 全部從 hardcoded 顏色改成 `var(--bg-card)` / `var(--bg-main)` / `var(--bg-header)` / `var(--text-main)` / `var(--text-card-title)` / `var(--text-muted)` / `var(--border)` / `var(--border-hover)` / `var(--sidebar-active-bg)` / `var(--primary)` / `var(--danger)`
+  - 移除所有 `!important` 硬蓋（不再需要對抗 page theme）
+  - 移除 `.cal-drill-modal .text-zinc-* / text-green-400 / text-red-400` 強制改寫（既然跟 theme 連動就不需）
+  - badge 顏色 layered：default 適合淺色背景的深綠/深紅/深琥珀（light theme readable），`[data-theme="dark"]` override 為亮綠/亮紅/亮黃（dark theme readable）
+  - reason highlight box 顏色同樣 dual-theme：light 用 `#92400e` (amber-800)，dark 用 `#fde68a` (amber-200)，背景半透明 amber 對兩 theme 都通
+  - heat chip 同 dual-theme handling
+
+### Why
+- User 反問：page 是 light theme 為什麼 modal 硬選深色？
+- Root cause：先前修法為了解決「page color leak」直接 hardcode 深色 + `!important` 蓋掉，違反 theme 一致性 — light 頁面開深色 modal 視覺斷裂
+- 正解：用 CSS vars，site theme 切換自動 propagate；保留先前的 layout 結構，只換顏色 token
+- 副作用：dark mode 下會用 `[data-theme="dark"]` override 提供亮色 badge，light 不需 override 直接用 default
+
+---
+
+## [2.17.22] — 2026-05-10
+### Fixed — Stale price → pending（不再誤判 HIT）+ drill modal 配色變淺更舒適
+
+### Fixed
+- `scripts/build_event_index.py` `compute_reality_for_ticker` — 偵測 yfinance fallback 把 eval bar 對齊到 decision-day 的情況（`e_key == d_key`）→ 回傳 None 強制下游 verdict 變 `pending`
+  - 影響：本日後 deep-dive（window 未完成且無新 bar）不再被算成 +0% HIT；MU / CRWV / NEE 2026-05-08 三筆從 hit → pending（價格 746.81 → 746.81 0% 那種）
+  - **報告本身也跟著更新**（event_index 重跑後所有 source 同步）；下週 REVIEW 跑 Step 0 protocol 會自動讀新 JSON
+
+### Changed
+- `Dashboard/style.css` drill modal 配色重設：
+  - shell `#18181b` → `#2a2d36`（slate-tinted, 不再純黑）
+  - row `#27272a` → `#383b46`（拉淺一階對比 shell）
+  - row hover `#3f3f46` → `#43475a`
+  - border `#3f3f46` → `#474b58`
+  - reason 行字色 `#fbbf24` → `#fde68a`（柔和琥珀 amber-200）
+  - tailwind utility hard-overrides 全部 +1 階亮度（zinc-400 → #b8bdc9 等）
+  - backdrop 從 zinc → slate tint，blur 4 → 6px 更柔
+  - header 用 slate gradient
+
+### Why
+- User 截圖 V2.17.21：MU/CRWV/NEE 2026-05-08 顯 ✅ HIT，實際 746.81 → 746.81 +0.00% 是 yfinance 沒新 bar → reuse decision-day price 假裝有 return
+- Root cause：`closest_price(prices, eval_date, "before")` fallback 到最後一個有 bar 的日期；當 eval 在 today 且 today 沒收盤 → e_key == d_key
+- 修法：data 層直接判 e_key==d_key → return None → 走 verdict_deep_dive 既有 None branch → pending
+- 配色：原 #18181b/#27272a 太重，user feedback「底色太深」，改 slate-tinted 中間調
+
+### Side effect
+- aggregate 計數變動：deep-dive hit 50→44 / miss 60→59 / neutral 7→6 / pending 11→3（pending 集中到「真窗口未到」+「stale price 三筆」），餘 6 筆原 pending 為 parser 修好後可評估的，自動轉 hit/miss
+
+---
+
+## [2.17.21] — 2026-05-10
+### Fixed — Drill-down row 顏色 cascade leak（rows 全部黑底看不見內容）
+
+### Fixed
+- `Dashboard/style.css`：
+  - 所有 row selectors scope 加 `.cal-drill-modal` 前綴，阻擋 page light-mode 層級規則洩漏
+  - `.cal-drill-shell` 加 `color: #e4e4e7` 強制 base text
+  - row bg 從 `rgba(39,39,42,0.55)` 改 solid `#27272a`（zinc-800），跟 modal shell `#18181b` 對比夠
+  - 所有 row 內 text-color rules 加 `!important` 抗 Tailwind utility（`text-zinc-*` / `text-green-400` / `text-red-400`）
+  - row 加 `min-height: 86px` 避免 flex 收縮成幾乎不可見
+  - reason 行新增 `background: rgba(251,191,36,0.08)` + 左 border 2px 變 highlight box
+  - tailwind utility colors（`text-zinc-400/500/600` / `text-green-400` / `text-red-400`）在 modal 內 hard-override 為深色背景下看得到的色階
+
+### Why
+- User V2.17.20 截圖：modal 一片黑、128 row 縮成一條條細線、無 text 可見
+- Root cause：page 在 light mode → body 套 `color: #18181b` 繼承到 modal；modal 用 dark bg 但 text 顏色被 page rule 蓋成黑色 → 黑底黑字
+- row bg `rgba(39,39,42,0.55)` alpha 過低，跟 `#18181b` modal shell 視覺幾乎一致 → row 邊界看不清
+- 解法：每條 rule 加 `.cal-drill-modal` scope + 文字 `!important`，CSS specificity 提升一級超過 page 規則
+
+---
+
+## [2.17.20] — 2026-05-10
+### Fixed — Drill-down modal UI 重做（compact row, no raw button, prominent reason）
+
+### Changed
+- `Dashboard/page-calendar.js`：
+  - 廢棄 `renderDecisionCard` reuse（cal-card light-mode 顏色在 dark modal 顯不出 + 帶 raw button）
+  - 新增 `renderDrillRow(d)` + `_drillDecisionLine(d)` + `_drillRealityLine(d)` per-source 一行抽 decision / reality 摘要（9 source 全覆蓋）
+  - 每筆 row：左色帶 + verdict pill badge + source icon + ticker logo + date + window 進度 + decision 行 + reality 行 + **reason 行（橘色 prominent）** + heat chip
+  - 移除 raw 報告 link
+- `Dashboard/style.css` — 新 `.cal-drill-row*` styles（自帶深色背景 + verdict badge 4 色 + reason 黃橘色強調行 + chip）
+
+### Why
+- User 截圖：reuse `renderDecisionCard` 後在 modal 顯示成「白色空 pill」— root cause: `cal-card` 用 `var(--bg-card)` 是頁面 theme 變數（light mode = white），dark modal 上看起來像空白；body text 顏色 inherit 也錯亂
+- User 不需 raw button（占空間 + 干擾），但要看「簡單原因」 — verdict.rationale 提到 row 中央用橘色行顯示
+- 每筆 row 高度約 90-110px，128 筆 dollar-friendly scroll；4 行布局 (head / decision / reality / reason / chip) 一眼看完
+
+### Layout 規格（每筆）
+```
+║ [✅ HIT] 📈 [logo] AMD 2026-04-15           w 115% (23/20d)
+   DECISION  BUY · score 1.21 · pos 5%
+   REALITY   192.50 → 295.00  +53.20%   max +63 / dd -2
+   REASON    return ≥ 30% within 20d → HIT
+   🔥 Semiconductors · sector #1 · top 30%
+```
+
+---
+
+## [2.17.19] — 2026-05-10
+### Added — Decision-review category drill-down modal
+
+### Added
+- `Dashboard/calendar.html` — `<div id="cal-drill-modal">` 容器（modal shell + header + filter + sort + close + body）
+- `Dashboard/style.css` — modal / backdrop / header / filter pill / sort dropdown / close button / heat chip styles（~135 行）
+- `Dashboard/page-calendar.js`：
+  - `cal-stat-tile` 加 `data-drill-source` + click/keyboard handler → `openDrillDown(source)`
+  - `openDrillDown` / `closeDrillDown` / `renderDrillDown` / `wireDrillDown` — fullscreen modal with verdict filter pills、sort dropdown（date/return/score）、ESC + outside click close
+  - `renderHeatChip` — V2.17.16 `sub_industry_heat` 取出 industry / sector_rank / top_30%? 視覺 chip（hot/cold 兩態），append 到每張 card 末
+  - 直接 reuse 既有 `renderDecisionCard` → 9 source body 自動覆蓋（deep-dive / sector-scan / news-digest / theme-detector / momentum-screen / thematic-screener / earnings-analyzer / short-term-weekly / postmortem）
+
+### Why
+- User 看到「深度分析 128 筆」summary tile 想點進去看每筆當初決策 + 現實 + verdict
+- 既有 `renderDecisionCard` 已含 verdict 色帶 + emoji badge + per-source body + raw_path link，drill-down 直接 reuse 不重寫；只補：modal shell / 篩選 pill / sort / 視覺化 industry heat chip
+- chip 利用 V2.17.16 sub_industry_heat instrumentation：top 30% sub-industry 顯橘紅 🔥；其他 cool 灰，一眼看出是不是熱門族群的決策（可解釋 miss 為何集中）
+- 9 類全自動覆蓋（不分流）— 任何新 source 接到 calendar 都自動有 drill-down
+
+### 互動細節
+- tile hover：浮起 + 陰影
+- modal: backdrop blur, animate-in scale + slide
+- filter pills 顯示 verdict count；count=0 自動隱藏（除 "all"）
+- sort: date↓/↑、return↓/↑、score↓
+- ESC / 點 backdrop / 點 ✕ 都關閉
+
+---
+
+## [2.17.18] — 2026-05-10
+### Fixed — Decision-review parsers 跟上 V5.0 schema（Rec 1 + Rec 4）
+
+### Fixed
+- `scripts/extractors/deep_dive_extractor.py` `_find_decision` — 新增 V5.0 patterns：
+  - `**Final Decision**` / `**最終決議**` 表頭（值可加粗或不加粗）
+  - `**Action Label**`（DEFENSIVE / OFFENSIVE / NEUTRAL …）
+  - 內文裸 `EXECUTE` / `STAGED_ENTRY` / `STAGED_EXIT` 動詞
+  - parenthetical secondary action 自動剝（`HOLD (CANCEL)` → `HOLD`）
+- `scripts/extractors/deep_dive_extractor.py` `_find_final_score` — 新增 V5 table row + case-insensitive body form + 全形冒號 + table cell `| final score | 2.055 |`
+- `scripts/extractors/news_digest_extractor.py` `_find_macro_delta` — 新增 `(session_macro_delta +0.20)` parenthetical + JSON-ish 形式 + Greek `Δ` headers（May 2026+ digests 改用 Δ 不再是 "Delta"）
+
+### Smoke result
+| metric | baseline | 修後 |
+|---|---|---|
+| deep-dive `final_action is null` | 52% (58/112) | **2.7%** (3/112) ✓ |
+| deep-dive `final_score is null` | ~16% (~18/112) | **6.2%** (7/112) ✓ |
+| news `macro_delta is null` | 59% (13/22) | **27.3%** (6/22) ✓ |
+
+殘留：3 筆 deep-dive + 6 筆 news 全屬 v1/legacy protocol 格式（legit n/a，非 parser bug）。
+
+### Why
+- REVIEW_2026-05-09 Hypothesis B + Rec 1 / Rec 4 標 high conf prerequisite — 不修這兩個解析器，所有 strategy-level pattern 數字都被污染（unknown 跟 n/a 拉爆 hit/miss 比率），無法評估 Rec 2 / 3.5 等策略 Rec 是否該 apply
+- 純 instrumentation 修法：parser 跟上現實格式，**完全不動決策邏輯** → 下週 deep-dive / news-digest 報告**內容跟本週一樣**，但 REVIEW 看到的數字會是真的
+- Ledger 新增 Rec 1 + Rec 4 entries，下週 REVIEW Step 0 會自動跑 evaluation_history 比對
+
+---
+
+## [2.17.17] — 2026-05-09
+### Changed — `llm_review` protocol prompt 同步 4-step REVIEW flow
+
+### Changed
+- `dashboard_server.py` `SCRIPT_PROTOCOLS["llm_review"]` — protocol prompt 從「三步驟」改「四步驟」，明加 Step 0 Adjustment Evaluation；Step 1 加引用 `industry_rollup` + `sub_industry_heat`；Markdown 輸出 schema 加「## 0. Adjustment Evaluation」+「## Industry Rollup」表頭範本；Step 0 indexer rebuild 描述加 `industry_rollup` + `adjustment_ledger_active` 兩個新 top-level 欄位
+
+### Why
+- V2.17.16 改了 `REVIEW_PROMPT.md` 變 4-step 但 `dashboard_server.py` 內嵌的 protocol prompt 還寫「依 REVIEW_PROMPT 三步驟執行」 → 用戶按「請 LLM 檢討」按鈕觸發的 LLM 會跳過 Step 0 Adjustment Evaluation
+- 兩處 prompt 必須同步，否則 ledger evaluation 形同虛設
+- V2.17.17 後按按鈕 → server `subprocess` 跑 `build_event_index.py`（Step 0 已寫入 protocol）→ LLM 收 prompt 自動跑 4-step → write `REVIEW_<DATE>.md`，不需手動串接
+
+---
+
+## [2.17.16] — 2026-05-09
+### Added — Decision review: sub_industry_heat + industry rollup + adjustment ledger
+
+### Added
+- `scripts/_sector_heat.py` (NEW) — `enrich_ticker_heat(ticker)` 共用 join helper：合 latest `sector_intel` (sector composite_score / rank) + `theme_detector` (theme heat / direction) + `fmp_industry/snapshot` (industry averageChange / rank) + `company_context.get_profile` (sector / industry resolve)
+- `scripts/build_event_index.py` `_build_industry_rollup` — 把 deep-dive verdict 按 `tuning_hooks.sub_industry_heat.ticker_industry` 聚類，輸出 `event_index.industry_rollup`（n / hit / miss / miss_rate / avg_miss_return / industry_top_30pct）
+- `scripts/build_event_index.py` `_load_adjustment_ledger` — parse `ADJUSTMENT_LEDGER.md` 中 `status: active` 的 Rec entries，注入 `event_index.adjustment_ledger_active`
+- `reports/decision_review/ADJUSTMENT_LEDGER.md` (NEW) — 系統調整 ledger，含 Rec 7 / Rec 8 / Pill alignment 三筆 entry
+- `reports/decision_review/ADJUSTMENT_LEDGER_SCHEMA.md` (NEW) — schema + 維護規範
+- `event_index.json` schema bump v1.0 → v1.1（新增 industry_rollup + adjustment_ledger_active 兩個 top-level 欄位）
+
+### Changed
+- `scripts/extractors/deep_dive_extractor.py` — `tuning_hooks` 加 `sub_industry_heat` 欄位（fail-soft：若 join helper 失敗只寫 `{"error": "..."}`，不影響其他欄位）
+- `reports/decision_review/REVIEW_PROMPT.md`：
+  - 新增 Step 0「Adjustment Evaluation」— LLM 開頭先讀 ledger，對每筆 active Rec 比對 metric 變化下 improved / no_change / regressed 判斷
+  - 輸出格式新增「## 0. Adjustment Evaluation」表 + 「## 1.5 Industry Rollup」表
+
+### Why
+- User 觀察：本週 CPU+memory 市場共識強 / 光通訊+SaaS 弱，但 REVIEW_2026-05-09 的 Pattern 1 只看 ticker（AMD/MU/INTC repeat-miss），沒做 sub-industry rollup → sector heat asymmetry 完全沒進系統考量
+- Root cause：`tuning_hooks` 沒 industry context 欄位 → REVIEW 只能用 ticker 名單表達 pattern，無法量化 sector tail-wind 跟 deep-dive miss 的關聯
+- Rec 7 補 instrumentation（純資料注入，不改決策邏輯），下週 REVIEW 即可跑 industry rollup
+- Rec 8 把 rollup 做進 build_event_index post-process，讓 REVIEW 開段就能引用
+- Adjustment Ledger 解決「系統調整不被回測」的 meta-bug — 之前 Rec 應用後沒檔案紀錄，每次 REVIEW 等於從零開始無法評估前次調整是否有效。Ledger 把每筆 Rec 變成可追溯的實驗（hypothesis + target_metric + evaluation_history）
+
+### 樣本驗證（smoke）
+- `python3 scripts/_sector_heat.py AMD MU` → 兩檔正確 resolve 為 Technology / Semiconductors / sector_top_3=true / industry_top_30pct=true
+- `_build_industry_rollup` 用 fake records 測試：Semiconductors bucket n=2 miss_rate=1.0 avg_miss_return=50.45 ✓
+- `_load_adjustment_ledger` 從 ADJUSTMENT_LEDGER.md parse 出 3 個 active entry ✓
+
+---
+
+## [2.17.15] — 2026-05-09
+### Fixed — Sector pill ring 全面對齊 tooltip 5-tier 語義
+
+### Fixed
+- `Dashboard/script.js` `pill-marketop` — 改 inline 5-tier 對齊 tooltip：≥80 紅 / ≥65 橙 / ≥50 琥珀 / ≥30 黃 / <30 綠（原本 `'amber'` polarity 全 amber，0-29 normal 應綠卻黃、80+ top 應紅卻 amber）
+- `Dashboard/script.js` `pill-fg` — 改 inline 5-tier contrarian：≥75 紅 / ≥55 橙 / ≥25 黃 / <25 綠（原本 `'amber-bell'` 全 amber，extreme_fear 應綠 contrarian buy / extreme_greed 應紅卻都 amber）
+- `Dashboard/script.js` `pill-cycle` — Mid 顏色 `#84cc16` lime → `#eab308` yellow 對齊 cy_mid 🟡；新增 `map` 欄位，`Distribution` 為 canonical key（保留 `recession` legacy alias）；segment label `REC`→`DIST`
+- `Dashboard/script.js` `pill-vix` — 3-tier (18/25) → 5-tier (20/30/40) 對齊 vx_calm/normal/elevated/high/panic：≥40 紅 / ≥30 橙 / ≥20 黃 / <20 綠（原本 VIX 19 應綠卻 amber、VIX 32 應 amber 卻紅）
+
+### Why
+- User 看到 33 廣度分（5/8 修）後追問「所有 pill 一起檢查」
+- 全 audit 發現 4 個 pill colors 跟 tooltip dot 顏色（🟢🟡🟠🔴）不對齊
+- `_gaugeColor(s, 'amber')` 對 marketop 來說語義錯：tooltip 兩端有 🟢 跟 🔴，但 'amber' polarity 永遠回 amber 系列
+- `_gaugeColor(s, 'amber-bell')` 同問題：F&G 是 contrarian（fear=綠/buy, greed=紅/sell），bell-shape amber 把方向都丟了
+- VIX tooltip 是 5-tier 但 code 只 3-tier，邊界值（VIX 17-19、30-39）顏色錯
+- Cycle 的 `Recession` key 跟 tooltip `cy_distribution` 不對齊，data 帶 `Distribution` 進來時 segment 不會 highlight
+
+### 已 OK（無改動）
+- `pill-breadth`（V2.17.14 已修 `'positive'`）
+- `pill-ftd`（FTD_STAGES 4-tier 對 prime/standard/late_cycle/exhausted ✓）
+- `pill-regime`（4 segment 對 RISK_ON/NEUTRAL/VOLATILE/RISK_OFF ✓）
+- `pill-exposure`（V2.17.14 hardcode 紫修為 4-tier ✓）
+
+---
+
+## [2.17.14] — 2026-05-09
+### Fixed — 廣度分數 ring 顏色跟 tooltip 5-tier 不一致
+
+### Fixed
+- `Dashboard/script.js` `_gaugeColor` — 新增 `polarity === 'positive'` 分支，對齊 breadth tooltip 5-tier 語義：≥75 深綠 / ≥60 綠 / ≥40 黃 / ≥25 琥珀 / <25 紅
+- 原本 `'positive'` 字串不匹配任何分支，fall through 到 default 3-tier（40 / 70）→ score 33.1 < 40 → 紅，但 tooltip 同樣 33.1 是 `br_weakening` 🟠 琥珀，視覺矛盾
+- `Dashboard/script.js` `pill-exposure` — hardcoded `#a78bfa` 紫 → 改 4-tier 對齊 exposure tooltip：≥85 綠 / ≥60 黃 / ≥30 琥珀 / <30 紅（midPct=50 從紫變正確的琥珀）
+
+### Why
+- User 截圖：score 33.1 落在 25-40 「走弱中」（tooltip 🟠 琥珀），但卡片 ring 顯示紅色
+- Root cause：`_gaugeColor(s, 'positive')` 在原 function 沒有對應 branch → 走 fallback `s>=70 綠 / s>=40 黃 / else 紅`，跟 5-tier tooltip thresholds 不對齊
+- Exposure ring 一律紫色（hardcode）跟 tooltip 4-tier 完全不對齊，狀態看不出
+- 影響範圍：只有 breadth + exposure 兩處 call
+
+---
+
+## [2.17.13] — 2026-05-08
+### Fixed — Heatmap 全頁掛掉（FMP 402 Restricted Endpoint）
+
+### Changed
+- `dashboard_server.py` `_heatmap_build_universe` — 改 load `Dashboard/heatmap_universe.json`（static），不再呼叫 FMP `sp500-constituent` / `nasdaq-constituent`
+- `dashboard_server.py` `_heatmap_refresh_quotes` — 改 ThreadPool fan-out single `stable/quote`（20 workers default），不再呼叫 `batch-quote`
+- `HEATMAP_REFRESH_SEC` default 180 → 600（3 min → 10 min），降低 daily call 量
+- 新增 env `HEATMAP_QUOTE_WORKERS`（default 20）
+
+### Added
+- `Dashboard/heatmap_universe.json` — 517 ticker static universe（symbol/name/sector/industry），bootstrapped from `Dashboard/heatmap.json` 既有 cache。季度手動 sync。
+
+### Why
+- FMP 把 `sp500-constituent` / `nasdaq-constituent` / `batch-quote` 移到高 tier plan → 當前 plan 直接 402 「Restricted Endpoint」，不是 quota 問題（FMP dashboard 看不到用量）
+- v3 endpoints 也已 retired (2025-08-31, 403 Legacy)
+- heatmap 完全跑不起來（universe 0 rows → quotes 0/517）
+- Probe 結果：`stable/quote`（單檔）/ `ratios-ttm` / `key-metrics-ttm` / `analyst-estimates` / `news/stock` / `historical-chart/5min` 仍 200 → 改用 fan-out 可繼續用，PE warmup / news hover / radar K-line 不受影響
+- 每 10 min × 6.5h × 517 ≈ 20k calls/day，落在合法 daily 範圍
+
+---
+
+## [2.17.12] — 2026-05-08
+### Fixed — 短期雷達 bearish theme top movers 全是 + 預測（方向矛盾）
+
+### Fixed
+- `skills/thematic-screener/scripts/screen.py` `select_top_movers_ranked()` — 加 direction-aware 排序：
+  - bullish theme → DESC（top-N **最正** target_pct，long candidates）← 既有行為
+  - **bearish theme → ASC**（top-N **最負** target_pct，short candidates / 跌勢預期最強名單）← 新增
+  - 其他（neutral / unknown）→ DESC
+
+### Why
+- User 觀察：「短期雷達的 1d 5d 15d 預測區間怎麼都是+的」— 270 筆預測 232 筆正、37 筆負（86% 正向）
+- Root cause：`select_top_movers_ranked` 不論 theme direction 都 sort DESC → bearish 主題（Cybersecurity、Clean Energy & EV、Cloud / SaaS 等）的 top 5 movers **全是該主題裡 5d_pct 最高的**，跟 theme bearish call 自相矛盾
+- 例：Clean Energy & EV `direction=bearish` 但 movers 全 + (ORA +1.75 / HASI +1.65 / FSLR +1.84 / ON +2.12 / RIO +1.06)
+- 修後 bearish theme 會 surface 跌最兇的 representative_stocks，雷達會出現預期下行的 movers，方向跟主題對齊
+- predict.py 模型本身偏多（gamma_momentum × 6 主導，stage 2 stocks 都會給正分）— 這是另一個議題；本 patch 先讓**選股階段**對齊主題方向，方向矛盾的視覺先解掉
+
+---
+
+## [2.17.11] — 2026-05-08
+### Fixed — Chain pill terminal 後不消失
+
+### Fixed
+- `Dashboard/utils.js` `pollChainPill` — terminal grace 改成從 `s.ended_at` 直接算 age（每 3s tick 算一次），取代原 setTimeout-based 邏輯。原本 timer fire 後 hide pill，但下一次 poll 看到 `status='done'`（server 保留 terminal state 到下次 chain）就 unconditionally 把 `hidden` class 移除 → pill 又跳回來。改 server-side timestamp 算 age：`Date.now() - ended_at > 60000` → 永久 hide 直到下次 chain 跑
+
+### Why
+- User 反饋 chain 跑完 ✅ 都顯示完成後 pill 還在右下角不消失
+- setTimeout 模型的 race：timer 一次性 fire，但 polling 每 3s 又 unconditionally re-show pill
+- Server-side `ended_at` 是真理：以它為基準算 age，每次 poll 都計算同一答案，不需要客戶端 state 追蹤
+
+---
+
+## [2.17.10] — 2026-05-08
+### Changed — FTD gauge 顯示 ACTIVE STAGE 取代靜態 100 + 綠圈
+
+### Changed
+- `Dashboard/script.js` `renderSectorStatusStrip` FTD gauge — 之前固定顯示 `quality_score=100` + 綠色滿環，user 看好幾天都一樣不知道 FTD 走到哪一段。改為依 `days_since_ftd` 分 4 stage：
+  - **Day 1-5（黃金期 PRIME）** — 綠 #22c55e、ring 100%
+  - **Day 6-12（主升期 STANDARD）** — 黃 #eab308、ring 78%
+  - **Day 13-20（補漲期 LATE）** — 橘 #f97316、ring 52%
+  - **Day 21+（過熱期 EXHAUSTED）** — 紅 #ef4444、ring 22%
+- 主體顯示 `Day N` 取代 `100`（讓 user 直接看到 FTD 已過幾天）
+- Suffix 顯示 stage tag（黃金期 / 主升期 / 補漲期 / 過熱期）
+- `displaySize` 改 `md` 讓 `Day N` + suffix 兩行排得下
+- 非 confirmed state 也分別處理：FTD_INVALIDATED → 紅色「失效」、RALLY_ATTEMPT → 灰色「Day N · 反彈中」、其他 → 灰「無 FTD」
+
+### Why
+- User 反饋：FTD gauge 永遠顯示 100 + 綠圈，看好幾天都不變，**沒辦法知道現在是黃金 / 主升 / 補漲 / 過熱期**。tooltip 內容對但 gauge 本體沒呼應 → 視覺被誤導
+- `quality_score=100` 是 FTD detector 的 binary confidence (FTD 確認 = 100)，不適合直接餵 gauge — 真正動態資訊在 `days_since_ftd` 對應的 stage
+- Ring 填滿百分比改 reflect「剩下多少 momentum window」（prime 100% → exhausted 22%），視覺上一眼看出能量衰減
+
+---
+
+## [2.17.9] — 2026-05-08
+### Changed — Decisions page tooltip 統一 sector 視覺 + 重寫關鍵 chip 解釋
+
+### Changed
+- `Dashboard/decisions.html` — 移除 `<div id="decision-tip">`，改加 `<div id="signal-tip-tooltip" aria-hidden="true">` 跟 sector / index page 共用同一個 tooltip element
+- `Dashboard/page-decisions.js` `initDecisionTip` — 改 render 進 `#signal-tip-tooltip`，使用 `.stt-title` / `.stt-desc` / `.stt-hint` classes 取代舊 `.tip-title` / `.tip-desc` / `.tip-scale`，並加 visible class 觸發顯示。新增 `_md()` helper 支援 `**bold**` + 換行 markdown
+- `Dashboard/style.css` — 移除 `#decision-tip` + `.tip-*` legacy rules（已由 `#signal-tip-tooltip` + `.stt-*` 取代）
+- `Dashboard/page-decisions.js` `DECISION_TIPS` — 重寫以下 chip 的 desc / scale 文字，用 user-facing 語言（操作建議、為什麼重要、警示）取代過去純定義式描述：
+  - `contrarian` — 解釋方向 ≠ macro 的兩種 thesis 假設 + sizing 建議
+  - `fragility_robust / moderate / fragile` — 三層級各自的「下一步怎麼操作」（standard cap / 降一檔 / 大砍 + OFFRAMP）
+  - `signal_polarization_bipolar / mixed` — lane 共識度 + 為什麼 verdict 會晃 + sizing 對應
+  - `red_team_disagree` — 解釋 LLM vs DET 雙路徑 + 6 條 kill trigger 細節
+  - `val_disagree` — LLM > DET vs LLM < DET 各自的警示
+  - `action_attack / wait / defensive` — 操作層判定（非 final_decision）+ 為什麼會 BUY + DEFENSIVE
+  - `moat_narrow` — 為什麼 entry timing 比 WIDE 重要 + swing vs long-hold 操作差異
+  - `pattern_false_breakout` — bull trap 機制 + 不追價規則 + 反指標
+  - `market_weak` — institutional distribution 訊號 + 該怎麼處理已持有
+  - `decision_confidence` — 70% 不是「會漲」是「重跑 100 次有 70 次同方向」+ 跟其他 chip 怎麼一起讀
+
+### Why
+- User 反饋 ALAB 卡片 chip 的 tooltip 風格沒跟 sector page 統一，且**解釋寫得太籠統 / 過於技術定義式**，看不出「我接下來該怎麼做」
+- Visual：`#decision-tip` 跟 `#signal-tip-tooltip` 雖然 base 都是 `var(--bg-card)`，但 stt-* 系列 padding / radius / shadow / visible-class 都是 sector page 已調好的版本；統一可避免 cross-page 風格漂移
+- 內容：原 desc 多是「Tail-risk 三維評估：論點建立在多支柱之上」這種定義句 — user 看完還是不知道倉位該不該降。重寫後每個 chip 都包 (1) 機制 / 為什麼觸發 (2) 對 sizing / 操作的具體含義 (3) 跟其他 chip 怎麼搭配看
+- markdown helper 讓 desc 能用 `**bold**` 強調操作要點 + `\n\n` 段落分隔，可讀性大幅提升
+
+---
+
+## [2.17.8] — 2026-05-07
+### Added — 決策日曆卡片 17 個 label 加 rich tooltip + 修 V4.8 mis-stamp guard
+
+**動機**：User 觀察 TSM 卡片顯示「V4.8」標籤但專案已到 V5.0；卡片上「中等脆弱 / 訊號兩極 / Red Team 不一致」等 pill 用原生 `title=` 沒有富格式說明。
+
+### Added
+- `Dashboard/page-decisions.js` `DECISION_TIPS`：17 個新 entries（zh+en）涵蓋所有 pill：
+  - **det_shadow**: signal_polarization_bipolar / mixed, red_team_disagree, val_disagree（4）
+  - **action_label**: action_attack / action_wait / action_defensive（3）
+  - **moat_assessment**: moat_wide / moat_narrow / moat_eroding / moat_none（4）
+  - **technical pattern**: pattern_breakout / continuation / consolidation / pullback / false_breakout / topping / downtrend / oversold_bounce（8）
+  - **market_strength**: market_strong / market_neutral / market_weak（3）
+  - **decision_confidence_pct**: decision_confidence（1）
+  - **protocol version bookmark**: version_v50 / v48 / v47 / v46 / legacy（5）
+  - 每筆都含 `title` + `desc` + 可選 `scale` 三段（reuse 既有 `#decision-tip` rich tooltip render path，跟 fragility tip 同視覺）
+
+### Changed
+- `Dashboard/page-decisions.js` `buildV48StatusPills`：所有 native `title="..."` 換成 `data-tip-key="..."` reference 對應上述 entries
+- `Dashboard/page-decisions.js` `buildVersionBookmark`：加 `tipKeyMap` 讓 V5.0 / V4.8 / V4.7 / V4.6 / LEGACY 各對應 rich tooltip + cursor:help
+- `investment/scripts/validate_session_export.py`：新增 V4.8 mis-stamp guard — entry 若有 V5.0-only fields (`valuation_lane` / `fair_value_summary`) 但 stamp 為 `V4.8` → fail，附 patch 指示
+
+### Fixed
+- `investment/invest_logs/history.json` — 今天 TSM (2026-05-07) entry `session_export_version` `V4.8` → `V5.0`（entry 完整 V5.0 fields 都齊全，是 Phase 5 寫 history 時誤標）
+
+### Why
+- 每張 pill 都有清楚 scale + 量化邊界，user hover 一眼看完含義 + 何時該擔心；不再依賴記憶 / 翻 SKILL.md
+- mis-stamp guard 是長期 hygiene：未來若 Claude 在 Phase 5 又寫錯版本，validator 會立刻擋下來（之前 V4.8 / V5.0 兩者都收 → 沒抓出來）
+- 老 V4.8 真實 entries（71 筆 4/18-5/02）全部沒 V5.0 fields → 新 guard 不會誤殺
+
+---
+
+## [2.17.7] — 2026-05-07
+### Fixed — Tooltip 內 `**bold**` markdown 真正渲染為粗體 + 段落分行
+
+**動機**：User screenshot — earnings 頁 QUALITY tooltip 顯示 `**1. Margin 趨勢**` 字面 markdown，沒被解析為粗體；4 個 sub-component 也沒換行擠成連續一段。30+ 個 SIGNAL_TIPS 都受影響（FTD / Breadth / Market Top / 4 個 ed_score_* / EPS / Revenue / Geographic / Segment 等）。
+
+### Fixed
+- `Dashboard/utils.js` `buildSignalTipHTML`：
+  - 新 `_renderTipMarkdown(s)` helper：先 escape HTML（defense-in-depth）→ 轉 `**bold**` 為 `<strong>`（non-greedy `[^*]+?` 避免跨段吃字）→ 拆 `\n\n` 為 `<p>...</p>` 段落 → 殘餘 `\n` 為 `<br>`
+  - `t.desc` / `t.hint` 都套用此 helper（單行字串自動跳過 `<p>` wrap，不影響短描述）
+- `Dashboard/style.css` `#signal-tip-tooltip`：新 `.stt-desc p` / `.stt-hint p` margin reset (0 0 6px 0, last-child 0)；`.stt-desc strong` / `.stt-hint strong` font-weight 700 + 同 var(--text-main) 顏色
+
+### Verified
+- helper 單元 case：`衡量公司**財報體質乾淨度**。\\n\\n**1. Margin 趨勢**：毛利率\\n**2. Accruals**：應計項` → `<p>衡量公司<strong>財報體質乾淨度</strong>。</p><p><strong>1. Margin 趨勢</strong>：毛利率<br><strong>2. Accruals</strong>：應計項</p>`
+- JS syntax check rc=0
+- 影響範圍：30+ 個 tooltip（涵蓋 index.html status pills、earnings.html 4 score bars、earnings-detail.html 8 chart tips）— **0 source string 重寫**
+
+### Why
+Source string 維持 markdown 風格易讀易維護；render layer 一處修補對所有 tooltip 生效，未來新加 tooltip 直接用同 markdown 風格 → 無需另寫 HTML escape boilerplate。
+
+---
+
+## [2.17.6] — 2026-05-07
+### Fixed — 盤前檢查 Phase 1 真正並行 + modal 完成後自動關閉
+
+**動機**：User 觀察 51m 53s 總時間 = 16:27 + 17:35 + 17:46，三段順序排隊（標籤雖寫「平行執行」實際 sequential）；且 chain 完成後 modal 不自動關閉，需手動 ESC。
+
+### Fixed
+- `dashboard_server.py` `run_premarket_chain._run()` Phase 1：改為 daily + news 兩 thread `start() + join()` 真正並行。`phase1_errors` list 收集兩條任一失敗 → raise 中止整 chain。Phase 2 sector 等兩條都結束才開始
+- `Dashboard/script.js` `_pollPremarketChain` done 分支：updateDashboard + showToast 完成後再延遲 4s 自動 `closePreflight()`（user 來得及看 ✅ 結果再回正常 UI）
+
+### Why
+- daily_update.sh 抓 breadth/FTD/macro → 寫 data.json；news protocol 抓 RSS / Finnhub / FMP / SEC → 寫 digest.json。**兩者獨立**，sequential 等於浪費 wall-clock 時間
+- daily 跟 news 用**不同 state machine**（`_daily_update_state` vs `_protocol_state`），並行無 lock conflict
+- sector 真的 depend 兩者，必須等 Phase 1 全部完成才能跑
+
+### Expected impact
+- 之前：Phase 1 wall = daily 16m + news 17m = ~33min；總 chain ~51min
+- 之後：Phase 1 wall ≈ max(daily, news) ≈ 17min；總 chain ≈ 17 + sector 18 = **~35min**（省 16 分鐘）
+
+---
+
+## [2.17.5] — 2026-05-07
+### Added — 盤前檢查跨頁狀態 pill（atomic 三段式）
+
+### Added
+- `Dashboard/utils.js` — 新 `ensureChainPill()` + `pollChainPill()`：每 3s 拉 `/api/run-premarket-chain/status`，當 chain 非 idle 且 preflight modal **不在 open 狀態**時，於右下角浮出單一 pill；包含 daily / news / sector 三個 sub-row（icon + label + meta）。Terminal `done`/`error` 後 60s 自動消失
+- `Dashboard/style.css` — `.chain-status-pill` + 配套 `.chain-pill-*` rules：amber 色框（呼應 📋 前瞻 button），固定底右 18px / 18px。當 `proto-status-pill` 同時可見，自動加 `.has-proto-pill` 抬到 92px 上方（疊接，不重疊）
+
+### Why
+- User reflow：盤前檢查 chain 跑 ~25-30 分鐘，user 不可能整段保持 modal 開。關掉 modal 後就「看不到 chain 在跑哪一段」。Pill 解決可視性
+- **單一 pill 內含 3 行**而非 3 顆獨立 pill：chain 是 atomic operation（daily → news → sector 順序強制），不應允許 user 個別 dismiss / 誤判單段已結束 → 全 chain 結束才 auto-hide
+- Modal 開時隱藏 pill 避免 UI 重複（modal 內已有完整 chain 列；pill 是 modal 關閉後的 fallback view）
+
+---
+
+## [2.17.4] — 2026-05-07
+### Fixed — pre_earnings 報告在 recent_analysis 隱形
+
+### Fixed
+- `bridge.py` `extract_audit_history()` fallback scan — `*_pre_earnings.md` 檔現在用 compound dedupe key `(ticker, "pre_earnings", date)`，不再被同 ticker 既有 investment-protocol 條目蓋掉。新增 `decision: "PREVIEW"` + `report_type: "pre_earnings"` 標記
+- `Dashboard/i18n.js` — 新增 `status.PREVIEW` 翻譯（zh: 「財報前瞻」/ en: 「PREVIEW」）
+- `Dashboard/components.js` `renderAuditCard()` — 識別 `decision === 'PREVIEW'` 或 `report_type === 'pre_earnings'`，狀態色用 amber `#f59e0b`（與 📋 前瞻 button 視覺一致），不再跌回灰色 `var(--text-muted)`
+
+### Why
+- User 跑 CRWV / ARM 前瞻後產出 `reports/<DATE>_<T>_pre_earnings.md`，但 dashboard recent_analysis 都不顯示。Root cause：bridge fallback 用 `if t_part not in audit_map` 純 ticker key dedupe，CRWV 既有 history.json 條目 → pre_earnings 全被靜默丟棄
+- Compound dedupe key 讓同 ticker 可同時保留 investment-protocol 決策 + pre_earnings 報告（多份 pre_earnings 也按日期分開保留）
+- Amber 視覺色與既有 📋 前瞻 button 一致，user 一眼能分辨 PREVIEW 不是正式分析
+
+---
+
+## [2.17.3] — 2026-05-07
+### Changed — Top 5 競品 row 改用 signal-tip 風格 rich tooltip
+
+**動機**：v2.17.2 競品 row 用原生 `title=` 屬性，跟 sector page 其他元素（status pills / FTD / Breadth 等）的 frosted dark tooltip 視覺不一致。改為 reuse `#signal-tip-tooltip` element + `.stt-*` CSS classes。
+
+### Changed
+- `Dashboard/page-sector.js`:
+  - 競品 row 移除 `title=`，改帶 `data-comp-tip="<json>"`（packed: ticker / company / industry / ceo / price / market_cap / sector / verdict）
+  - 新 `initCompetitorTooltip()` IIFE 在檔尾：mouseover/mouseout listener `[data-comp-tip]` → 解析 JSON → 用 `.stt-title / .stt-desc / .stt-stages / .stt-hint` 結構 render → reuse `#signal-tip-tooltip` element + 同 CSS（dark frame + backdrop blur）
+  - Position：偏好 row 右側 →（fallback above → fallback below），與其他 tooltip 行為一致
+  - 與既有 SIGNAL_TIPS engine 不衝突：trigger 屬性不同（`data-comp-tip` vs `data-signal-tip`）
+
+### Why
+視覺一致性 — sector page 上 7 個 status pill + 競品 row 都用同一套 tooltip 樣式；無新增 DOM 元素 / 無新增 CSS（純 reuse）。
+
+---
+
+## [2.17.2] — 2026-05-07
+### Added — Dashboard sector card 內嵌 Top 5 競品 collapsible
+
+**動機**：v2.17.0 競品地圖只在 `reports/<DATE>_sector_report.md` MD 檔，user 要 surface 到 Dashboard sector page 卡片內方便瀏覽。
+
+### Added
+- `bridge.py` — 新 `_extract_sector_competitors()` (~50 行)：iterate `SECTOR_TOP_5` + reuse `get_profile()` (24h cache)，回傳 dict[sector → 5 × {ticker, company, market_cap, industry, ceo, price}]。`extract_sectors()` 把 `competitors[]` field 附到每個 sector entry → data.json
+- `Dashboard/page-sector.js` `buildSectorCard` — 新 `competitorsBlock`：`<details>` 預設摺疊 + mini table（Ticker / Company / Market Cap），industry/CEO/price 進 row title tooltip。Click ticker `<a>` 跳 `momentum.html?sector=<gics>&ticker=<T>`，event.stopPropagation 避免觸發外層卡片 jump
+- `Dashboard/sector.html` 內嵌 CSS — `.sec-comp*` mini-table style：dashed top border / amber summary chevron / row hover / ticker link 用 sector verdict color
+
+### Why
+- bridge 端 reuse 現成 24h profile cache，0 新 FMP call cost
+- UI 端預設摺疊不佔卡片空間，點開才看；row tooltip 補完整 metadata（industry/CEO/price）避免 table 過寬
+- 跳 momentum 沿用既有 `data-sector-jump` 模式 + 加 ticker query param
+
+### Verified
+- bridge.py 跑完 data.json Technology sector competitors 5 個 (AAPL $4.2T / MSFT $3.1T / NVDA $5.1T / AVGO $2.0T / ORCL $0.6T)
+- JS syntax check rc=0
+
+---
+
+## [2.17.1] — 2026-05-07
+### Fixed — preflight UI 計時、CRWV 財報日曆過濾、pre-earnings 資訊密度
+
+### Fixed
+- `dashboard_server.py` — `run_premarket_chain._run()` daily polling 改從 `_daily_update_state["started_at"]` 直接算 elapsed，不再依賴從未被寫入的 `elapsed_sec` 欄位（UI Phase 1 daily 卡 `0s` 不動）
+- `dashboard_server.py` — `_wait_protocol_completion()` 同 pattern 修：news / sector phase 的 `_protocol_state["elapsed_sec"]` 只在收尾才寫，poller 改算 `started_at` diff
+- `bridge.py` — `_load_calendar_universe()` 新增 `watchlist.txt` 為第 4 個 universe source；CRWV 等 IPO / out-of-index 名稱可手動 append 即被收進 earnings calendar，不再被 SP500∪Nasdaq100∪SOX gate 砍掉
+- `skills/momentum-monitor/scripts/universes/watchlist.txt` — 建檔，預載 CRWV
+- `skills/earnings-valuation-forecaster/scripts/forecast.py`：
+  - `FMP.income_quarter` limit 5→8（pre-earnings watch_metrics 算 YoY 需 ≥5Q）
+  - `_next_earnings_info()` 過濾條件 `date > today` → `date >= today AND epsActual is None`，**今日報財報的 ticker** consensus card 不再是空的
+  - 新 `_watch_metrics_computed(income_q)` — 從 income_q 計算 **實值** Watch List：Revenue YoY + accel/decel、GM% 4Q trend + QoQ bps、OpM% trend、EPS trend；取代純文字 hint 模板
+  - 新 `build_ps_scenarios()` — TTM EPS ≤ 0 時改用 P/S × forward revenue 法產 12M target（之前直接顯示「不適用 — 請改用 P/S 或 EV/Sales」全空）
+  - 新 `_merged_watch_metrics()` — earnings-analyst cache（segments / quality flags） + computed real values 合併 dedupe，capped 6 chips
+- `Dashboard/page-earnings.js`：
+  - 12M target 區塊 method-aware label（PE 法 / P/S 法（負 EPS））+ TTM rev / 當前 P/S / 近期 YoY meta line
+  - seasonality SVG GM% 標籤 collision 防撞：當 GM% circle 落在 bar top label 14px 內，label 自動 flip 到 circle 下方（之前 $1.21B 與 74% 重疊）
+
+### Why
+- Preflight UI 卡 `0s`：daily_update.sh 跑得好好的（log streaming 有 `[N/6]` step），但 `elapsed_sec` 從未被寫入 → user 以為 chain 卡死。Fix at consumer side（poller 自算）比加 ticker thread 簡單
+- CRWV 2025-03 IPO，今天（2026-05-07）報財報但被 SP500∪Nasdaq100∪SOX universe gate 砍掉，calendar 看不到、財報分析輸入欄 filter 也濾掉。Watchlist mechanism 給 user 後續加 IPO / out-of-index 名稱的乾淨 override
+- pre-earnings 卡片之前對 CRWV 顯示：consensus EPS/Rev = `—`、Watch List 全是 generic 模板字（「QoQ ±100bps 看 mix / pricing」沒實值）、12M target 全空。User 反饋「看不出資訊」。三個洞各自 fix：consensus filter、watch_metrics computed、P/S scenarios
+
+---
+
+## [2.17.0] — 2026-05-07
+### Added — Phase D + B-2 batch（institutional format / TAM block / 競品地圖 / Write 隔離）
+
+**動機**：Gemini cross-check 顯示 reference/financial-services 還有 4 個小強化點未做 — 機構級報告長度規範、個股 fundamentals lane TAM block、sector report 競品比較表、news subagent Write 隔離 doc。詳見 plan file Phase D。
+
+### Added
+- `skills/earnings-analyst/SKILL.md` — 「Institutional Format Standards」section：8-12 頁 / 3,000-5,000 字 / 1-3 summary tables / 8-12 charts / 24-48h turnaround / NEW info focus / format checklist（仿 reference equity-research/earnings-analysis SKILL.md）
+- `investment/investment_protocol_v5_0.md` Phase 2 Fundamentals subagent — 新 V2.17.0 sub-block「TAM / Market Position」必填：tam_usd / industry_5y_cagr_pct / company_revenue_share_pct / position_label / competitive_moat_evidence。**禁止 LLM 自編 TAM 數字**，缺資料 → null + 註記
+- `investment/phase5_export_schema.md` `fundamentals_lane.market_position` schema 新增（V2.17 optional，validator 不擋向下相容）
+- `news/news_protocol_v2.md` — 新「TOOL BOUNDARIES — Write Isolation」section：tool 權限矩陣（triage / 4-view subagent reader-only，arbiter 持 Write）+ Agent tool prompt 強制首句約束 + PM 驗證機制
+- `sector/scripts/render_sector_report.py` — 新 `render_competitive_landscape()`：reuse `SECTOR_TOP_5` + `get_profile()` (24h cache)，per-sector 渲染 top-5 比較表（Ticker / Company / Industry / Market Cap / Price / CEO / Differentiator placeholder）。Sector 顯示順序依 Phase 5 verdict score 由高到低。`_HAS_COMPETITIVE` graceful skip 若 company_context import 失敗
+
+### Why
+- D-1：reference earnings-analysis 是機構標準格式範本，加長度規範可讓 render.py 後續加 lint 檢查（未做）
+- D-2：sector report 缺最後一塊「sector 內哪個 stock 大」直觀比較；reuse `SECTOR_TOP_5` 0 維護成本，0 額外 FMP call（cache 24h）
+- D-3：fundamentals lane 之前只看 P/E + FCF + moat，**缺市場層級 sizing**（TAM / share），這正是 reference sector-overview pattern 的核心。加進去後 fundamentals lane 視野完整覆蓋公司 ↔ 產業
+- B-2 #7：news 是攻擊面最大 protocol（untrusted RSS / scraped headlines），formalize Write 隔離 pattern 是長期 security 投資；當前實作無破壞性，純文件規範 + spawn-time prompt 約束
+
+### Verified
+- render_sector_report.py --stdout：11 sectors × 5 tickers 全 render（GOOGL Alphabet $4.81T / etc.），sector 排序依 verdict score
+- 既有 sector validator 不需動（純 render 層改動）
+
+### Phase D 完成度
+- ✅ D-1 / D-2 / D-3 + B-2 #7 doc-level
+- 待做：B-2 #7 真正 spawn Agent tool 時加 prompt 約束（在 news protocol 實際執行時生效，不需 code 改動）
+
+---
+
+## [2.16.0] — 2026-05-06
+### Added — 財報前瞻 popup card modal（圖形化視覺優化）
+
+**動機**：v2.15.3 「看前瞻報告」開新分頁顯示 raw MD，user 要 popup card view 易讀 + 圖形化。
+
+### Added
+- `dashboard_server.py` — 新 endpoint `GET /api/preview-cache/<TICKER>` 讀 forecaster cache JSON 回傳（404 若 cache 無 pre_earnings block；500 若 IO 錯誤）
+- `Dashboard/earnings.html`:
+  - 新 modal scaffold `#ea-preview-modal`（amber accent bar + close button + raw MD fallback link）
+  - 內嵌 ~220 行 CSS：section card frame / header card / stats row / SVG chart frame / watch chips / 12M scenario columns / caveats `<details>` / responsive media query
+- `Dashboard/page-earnings.js`:
+  - `wirePreviewModal()` + `openPreviewModal(ticker)` + `closePreviewModal()`：fetch endpoint → render 5 sections
+  - `renderPreviewModal()`：Header card（ticker + countdown badge today/明天/Xd + price）+ Consensus（EPS / Revenue 大數字並排）+ Seasonality（SVG bar chart + GM% line overlay）+ Watch chips（icon + title + hover hint）+ 12M Scenarios（bull/base/bear 3-col + target 大字 + upside %）+ Caveats `<details>` 預設摺疊
+  - `renderSeasonalitySection()`：純 SVG 760×130，amber bars + emerald GM% polyline + dashed legend
+  - `eaSetRunBannerDone` preview 分支：button onClick 改呼叫 `openPreviewModal()` 而非開新 tab；保留 raw MD fallback link 在 modal header
+
+### Visual design
+- amber `#fbbf24` accent（跟 morph button 一致辨識）
+- bull `#10b981` / base `#a1a1aa` / bear `#f87171` 三色 scenario
+- countdown badge：今天 = 紅 `#f87171`，> 0 天 = amber
+- watch chip hover 變 amber outline + bg
+- responsive：< 640px stats / scenarios 變 1-col stack
+
+### Negative-EPS handle
+12M section 顯示「⚠ TTM EPS ≤ 0，PE 估值不適用」灰色 placeholder，其他 section 照樣 render。
+
+### Verified
+- CRWV cache shape OK (`pre_earnings` block 含 next_earnings / seasonality_4q / watch_metrics / scenarios=null)
+- JS syntax check rc=0
+
+---
+
+## [2.15.4] — 2026-05-06
+### Fixed — 財報日曆 ARM missing + 過濾 SP500/Nasdaq100/SOX universe
+
+**動機**：User 發現 FMP `/stable/earnings-calendar` 直接打有 ARM 5/6 row，但 Dashboard 財報日曆沒出現；且整體 2840 個 earnings events 太雜。Root cause 兩個 bug：
+
+1. **Cache stale**：`.cache_bridge/fmp_earnings_<date>.json` 凌晨 00:03 抓的，FMP 後續才 add ARM 5/6 → cache 整天不更新 → ARM 永遠不在
+2. **FMP 4000-row cap**：bridge 用 `from=today, to=today+14d` 14-day window 撞 FMP 響應 4000 行上限，**API 從最早日期開始截**（drop today/tomorrow），ARM 5/6 整段被 skip
+
+### Changed
+- `bridge.py` `_from_fmp_earnings`:
+  - **Cache TTL 4h**（之前永久 day-key cache）— FMP 整天會陸續 add 新 ticker，4h 重 fetch 抓到 ARM 這類 last-minute add
+  - **Chunked fetch 3 段**：`(today-1, today+4)` → `(today+5, today+9)` → `(today+10, today+horizon)`，dedup by `(symbol, date)`。每段遠低於 4000 cap → 完整覆蓋
+  - **Universe filter**：新 `_load_calendar_universe()` 讀 `skills/momentum-monitor/scripts/universes/{sp500,nasdaq100,sox}.txt` (~530 unique tickers)，`symbol not in universe → skip`
+- `bridge.py` `aggregate_upcoming_events`:
+  - **Final universe gate**：archive 累積的歷史 events 也用同一 universe 過濾，避免舊 entry 漏網
+
+### Verified
+- 4000 raw rows → 93 fresh events → final 139 (含 archive)，下降 ~95%
+- ARM 5/6 出現 in data.json upcoming_events ✓
+- VZ / GM / KO / V / HOOD 等 blue chip 仍在 calendar
+
+### Why
+Universe sets 是現成 `momentum-monitor` 維護的官方 index 成員 list，零維護成本。chunking 一次 daily_update +3 calls 對 250/day FMP free tier 無壓力。
+
+---
+
+## [2.15.3] — 2026-05-06
+### Changed — 財報前瞻 done banner 加「📄 看前瞻報告」link button
+
+**動機**：v2.15.0 跑完前瞻 banner 雖 ✓ Done，但 user 看不到產出 MD（earnings 頁卡片只列 post-earnings cache，pre-earnings 寫到 `reports/<DATE>_<T>_pre_earnings.md` 後沒 surface）。
+
+### Added
+- `Dashboard/earnings.html` — 新 banner button `#ea-run-view-report`（amber `<a target=_blank>` link，預設 hidden）
+- `Dashboard/page-earnings.js`:
+  - 新 module-level state `_eaActiveMode`：`'earnings' | 'earnings_preview' | null`
+  - `runEarningsPreview` / `runEarnings` 起跑時各自 set mode
+  - `eaShowRunBanner` title 依 mode 切 `財報前瞻中` vs `財報分析中`
+  - `eaSetRunBannerDone` 依 mode 分流 affordance：
+    - preview → 顯示「📄 看前瞻報告」連到 `/reports/<TODAY YYYYMMDD>_<TICKER>_pre_earnings.md`
+    - earnings → 維持「重新整理」button
+  - poller done 分支：preview mode 不跑 `loadAndRender()`（earnings_analyses 不會更新）；earnings mode 仍 reload data.json 拿新卡片
+  - banner 隱藏 / dismiss 時清掉 `_eaActiveMode`
+  - 補：banner 從 server status 回填 `_eaActiveMode = s.name`（page refresh 中途 resume 也能正確 render button）
+
+### Why
+B 方案（手動 click 看報告 vs 自動開新 tab）：尊重 user 是否想立刻看，避免分心。amber 色與既有 morph button 一致辨識「前瞻 = 黃色」。
+
+---
+
+## [2.15.2] — 2026-05-06
+### Fixed — `--pre-earnings` 對 negative-EPS ticker (CRWV / RIVN / SOFI) 不再 abort
+
+**動機**：user 跑 CRWV 財報前瞻 → forecaster 因 TTM EPS = -2.49 直接 return `unsupported` rc=1 → server SCRIPT_PROTOCOLS 標 error。但 pre-earnings cheat sheet（consensus / seasonality / watch list）**根本不需要 positive EPS**——只有 12M target price section 才要 PE math。
+
+### Changed
+- `skills/earnings-valuation-forecaster/scripts/forecast.py`:
+  - Negative TTM EPS + `--pre-earnings` flag → 改回傳 `status: "ok_partial"` 含 `pre_earnings` block + `scenarios: null` + `negative_eps: true`，而非整個 abort
+  - `to_markdown_pre_earnings()` 偵測 `negative_eps` → header 加 ⚠ 警告 + skip Forward EPS line + 12M section 替換為 explanation 註解（指向 P/S / EV/Sales 替代）
+  - `main()` 接受 `ok_partial` 為 success rc=0（僅 pre-earnings mode；plain mode 仍嚴格 require positive EPS）
+
+### Why
+unprofitable growth tech（CRWV / RIVN / SOFI / RDDT）仍有 quarterly earnings reports，pre-earnings cheat sheet 對這類名單照樣有用：consensus EPS（即使 -$0.89）+ revenue trajectory + GM% trend + 待觀察 metric 都是有用 input。**前瞻 ≠ 估值**，沒理由因 negative EPS 全 reject。
+
+### Verified
+- CRWV `--pre-earnings` → rc=0，產出完整 cheat sheet（next earnings 1d / consensus / 4Q seasonality + revenue 0.98→1.57B 成長軌跡 / 12M section graceful skip）
+- NVDA `--pre-earnings` → rc=0，仍正常產出 12M scenarios（regression OK）
+
+---
+
+## [2.15.1] — 2026-05-06
+### Changed — Earnings command bar 即時 morph + 模式 hint
+
+**動機**：V2.15.0 morph 邏輯只在卡片上生效；user 從 input bar 手動輸入 ticker 也應該即時 reflect 模式（前瞻 vs 分析上季），不要等按下執行才知道跑哪一個。
+
+### Added
+- `Dashboard/page-earnings.js`:
+  - 新 `upcomingEarningsMap` (ticker → `{date, days_until}`) — 從 data.json `upcoming_events`（已是 FMP confirmed）抽 future earnings，nearest-date wins
+  - `rebuildUpcomingEarningsMap()` 在 `loadAndRender()` + DataStore subscribe 都呼叫
+  - `wireCommandBar()` 新 `syncMode()` — input listener 每次 keystroke 比對 map：
+    - `0 ≤ days ≤ 7` → button 變 amber「📋 財報前瞻」+ hint「⚡ 下次財報 X（Yd）→ 跑前瞻 cheat sheet」
+    - `8 ≤ days ≤ 30` → button 維持 default「執行」+ hint「📅 下次財報 X（Yd）→ 跑分析上季（前瞻在 7d 內才開放）」
+    - 其他 → button「執行」+ hint「📊 無近期確認財報日 → 跑分析上季」
+  - `trigger()` 改依 `btn.dataset.mode` 分派 `runEarningsPreview` vs `runEarnings`
+- `Dashboard/earnings.html` + 內嵌 CSS：
+  - cmdbar 下方加 `#ea-cmd-hint` span
+  - `.ea-cmdbar-btn-preview` amber 變體
+  - `.ea-cmd-hint[data-mode="preview"]` amber / `soon` slate / `post` zinc 三色
+
+### Why
+User 觀察：「假如我輸入的是七天內的 ticker, 應該要註明是財報前瞻」。直接 reuse `data.json.upcoming_events`（calendar cache 同源），無需新 endpoint，0 額外 FMP 呼叫。Map 在 page load 一次建好，每次 keystroke 是 in-memory lookup（O(1)），延遲 0ms。
+
+---
+
+## [2.15.0] — 2026-05-06
+### Added — Pre-earnings 前瞻 mode + Dashboard 7-day morph button (Phase B-1)
+
+**動機**：reference/financial-services equity-research vertical 有 `earnings-preview` skill；本專案決定以**擴充既有 forecaster** 達成（避免新 skill 維護成本）+ Dashboard UI 在財報 ≤ 7 天時自動 morph 出「📋 前瞻」button，跑 forecaster --pre-earnings cheat sheet。**option Z 邏輯**：≤7d 用 forecaster（最準）、>7d 維持 earnings-analyst（看上季品質），兩 skill 互補不重疊。詳見 `~/.claude/plans/refernce-finanical-services-mcp-server-snazzy-canyon.md`。
+
+### Added
+- `skills/earnings-valuation-forecaster/scripts/forecast.py` — `--pre-earnings` flag (~150 行)：
+  - 新 FMP method `earnings_upcoming()` → `/earnings?symbol=` future-dated row 抓 `epsEstimated` / `revenueEstimated`
+  - `_seasonality_4q()` — last 4Q revenue / EPS dil. / GM% chronological 表
+  - `_watch_metrics_from_cache()` + `_watch_metrics_default()` — 從 earnings-analyst cache 抽 segment names + quality_flags 強化 watch list；無 cache fallback 5 條 generic
+  - 新 MD layout `to_markdown_pre_earnings()` — cheat sheet at top, seasonality middle, 12M scenarios demoted to bottom supplementary
+  - 輸出 `reports/<DATE>_<TICKER>_pre_earnings.md`（與 plain `_valuation.md` 區分；cache key 也分離）
+- `dashboard_server.py` — `SCRIPT_PROTOCOLS` 新基礎設施（~120 行）：
+  - 新 dict 註冊純 subprocess 協議（不走 Claude turn，省 ~$0.02/click + ~30s）
+  - `_run_script_protocol()` 鏡像 `run_protocol` 的 state machine（status / log / cancel / banner 全相容）
+  - `enqueue_protocol` + `_label_for` + `run_protocol` 都加 SCRIPT_PROTOCOLS 分支
+  - 註冊 `earnings_preview` 路由 forecast.py --pre-earnings，timeout 180s
+
+### Changed
+- `Dashboard/page-earnings.js` — 卡片 render 計算 `daysTo(next_earnings_est)`，`fmp_confirmed` 且 `0 ≤ days ≤ 7` → swap 重跑 button 為「📋 財報前瞻」（amber 色）。新 `runEarningsPreview()` handler、click 分派 action='preview'、poller 接受 `name='earnings_preview'`
+- `Dashboard/page-calendar.js` — Option Z 4-quadrant 邏輯：
+  - ≤7d + nocache → 「📋 前瞻」單 button（forecaster 最準時機，post-earnings 跑會吃舊 cache）
+  - ≤7d + cached → 看報告 + 📋 前瞻 + 🔄（上季 / 下季 / 重跑上季 三事權各對應一鈕）
+  - \>7d + nocache → 📊 跑財報分析（維持，user 可主動分析上季）
+  - \>7d + cached → 看報告 + 🔄（維持）
+  - 新 `window.runEarningsPreview()` global handler
+- `Dashboard/earnings.html` + `Dashboard/style.css` — `ea-act-btn-preview` + `cal-earnings-btn-preview` amber 色 (`#fbbf24`) variant
+- `skills/earnings-valuation-forecaster/SKILL.md` — 「Pre-Earnings Mode (V2.15.0+)」section：output schema / 適用條件 / UI 觸發規則 / 不適用場景
+- `CLAUDE.md` — trigger 表加「財報前瞻」+ Ops Shortcuts 加 `--pre-earnings` CLI
+
+### Why
+forecaster 距離 earnings 越近越準（fresh consensus + whisper 出爐 + management commentary cues）；earnings-analyst cache key = `last_earnings_date` 不會因下次財報未發布而更新，跑了浪費資源。Option Z 把兩 skill 在時間軸上互補：7 天內 forecaster 主導，7 天外 earnings-analyst 主導。Dashboard morph 讓 user 不用記 trigger，UI 自動出最適 button。
+
+### Architecture note
+`SCRIPT_PROTOCOLS` 是新類別的 protocol —— 不走 Claude conversation。長期可把其他純腳本工作（e.g. `daily_update.sh` step、`build_event_index.py`）也搬進來，省 LLM cost。目前先收 earnings_preview 一個。
+
+---
+
+## [2.14.0] — 2026-05-06
+### Added — reference/financial-services Phase A 移植（IC-memo + thesis registry + skills linter + hyperlink discipline）
+
+**動機**：對照 Anthropic 官方 `reference/financial-services/` 找出 4 個高 ROI 低成本的強化點：機構級 IC-memo 結構、thesis 生命週期串接、skills cross-ref linter、earnings 報告強制 EDGAR/IR clickable hyperlinks。詳細決策見 `~/.claude/plans/refernce-finanical-services-mcp-server-snazzy-canyon.md`。
+
+### Added
+- `investment/scripts/register_thesis.py` (104L) — Phase 5.5 wire-up，把 history.json 最後一筆 register 進 trader-memory-core，回填 `thesis_id` + `thesis_registered_at`。Idempotent + non-fatal（trader-memory-core 不在 / dep 缺失時 graceful skip）。State 寫到 `investment/invest_logs/theses/`。
+- `scripts/check_skills.py` (160L) — skills/*/SKILL.md frontmatter + cross-ref linter。Lenient mode 預設（rc=0 always），`--strict` 旗標 CI 用。檢查 frontmatter name/description、referenced script files exist、cross-skill references 有效、cache/ dir 一致性。22 skills 全 pass 0 warnings。
+
+### Changed
+- `skills/earnings-analyst/SKILL.md` — 新增「Citations & Hyperlinks ⭐⭐⭐ MANDATORY」section（仿 reference equity-research/earnings-analysis）。MD 報告所有財務數字必須掛 markdown clickable link 指向 SEC EDGAR / IR / FMP source page。提供 7 類內容對應 URL 模板。
+- `investment/investment_protocol_v5_0.md`：
+  - Phase 5 Step 4 OUTPUT 結構強化 §7-§8（V2.14.0 IC-memo pattern）：
+    - §7 Red Team 拆 Consensus View / Differentiated View / Counter Thesis / Numbered Kill Conditions（強制 numbered list，禁 free-form）
+    - §8 進場計畫拆 Base / Bull / Bear case 三檔
+  - 新增 Phase 5 Step 6 = Phase 5.5 thesis registry wire-up（呼叫 `register_thesis.py`，non-fatal）
+- `investment/phase5_export_schema.md` — `trades_this_session[]` 加 optional `thesis_id` + `thesis_registered_at` 欄位 + FULL EXAMPLE 範例值
+- `investment/scripts/validate_session_export.py` — 接受 V2.14.0 optional thesis 欄位（type-check string-or-null，不強制存在）
+- `CLAUDE.md` — 更新 trigger 表（Phase 5.5 + hyperlink 強制）+ Ops Shortcuts 加兩條（register_thesis.py + check_skills.py）
+
+### Why
+Reference repo 的 IC-memo / hyperlink discipline / lifecycle tracker 是機構研究室標配；本專案投資 protocol 已成熟但缺這幾片。Phase A 全 doc-level + 一個小 script，無破壞性改動：所有改動 backward-compatible（V5.0 entries 仍 valid，optional 欄位缺失不擋 validator）。
+
+---
+
+## [2.13.13] — 2026-05-06
+### Fixed — daily_update.sh Step 6 進度可見化
+
+**動機**：`daily_update.sh` 跑到 `[ 6/6 ] Thematic Screener` 完全靜默 3-8 分鐘，使用者誤以為當機。Root cause：`screen.py --json-only > /dev/null 2>&1` 把 stderr 進度（每 10 tickers 一行 `[HH:MM:SS] ... i/N (elapsed Ns)`）也吞了。
+
+### Changed
+- `daily_update.sh` Step 6:
+  - 跑前先讀 theme-detector cache 算 unique ticker 數，印 `▶ predicting ~N unique tickers（4h cache 命中數秒；冷跑 3-8 分鐘）` 預期 hint
+  - stderr 改用 process substitution stream：`2> >(sed 's/^/         │ /' >&2)`，預測進度即時縮排輸出
+  - 完成 / 失敗訊息附 wall-clock elapsed 秒數
+  - stdout 仍 `> /dev/null`（不汙染 terminal — 大量 JSON 已寫到 `data/recommendations/`）
+
+### Why
+無 progress feedback 的長時操作 = bad UX。screen.py 早已 flush stderr `_log()`，只是被 shell redirect 吃掉。修 shell 層即可，不動 screen.py。
+
+---
+
+## [2.13.12] — 2026-05-05
+### Added — Forward P/E + EV/EBITDA TTM（補 PE TTM 不足）
+
+**動機**：HPE PE TTM = -253 因 Q2 2025 一次性 -$1.05B 拖累，但公司實際 ongoing 賺錢。User 詢問「PE / P/B 哪個更有參考價值」— 結論 Forward P/E + EV/EBITDA 比 TTM PE 與 P/B 都更實用。
+
+**Server (dashboard_server.py)**
+- `_fetch_pe_ttm` 改回 valuation bundle，每 ticker 3 次 FMP 呼叫：
+  - `/stable/ratios-ttm` → `priceToEarningsRatioTTM`
+  - `/stable/key-metrics-ttm` → `evToEBITDATTM`
+  - `/stable/analyst-estimates?period=annual` → 最近未來年度 `epsAvg`（forward EPS）
+- `_heatmap_pe_cache` 改存 dict `{pe_ttm, ev_ebitda, fwd_eps}`
+- `_heatmap_refresh_quotes` + `_heatmap_refresh_pe_universe` + `_fetch_theme_extra_quotes` 都attach `pe`、`ev_ebitda`、`forward_pe`（forward_pe 即時用 row.price / fwd_eps 算，價格漂移仍即時）
+- Theme heatmap payload 多帶兩欄
+
+**Bridge (bridge.py)**
+- `extract_earnings_analyses` + `ingest_momentum_screen` 從 `Dashboard/heatmap.json` 讀 forward_pe + ev_ebitda lookup
+- earnings row 新增 `forward_pe` + `ev_ebitda`（earnings cache 已有 ev_ebitda from key-metrics-ttm；forward_pe 借 heatmap）
+- momentum row 新增 `forward_pe` + `ev_ebitda`（資料齊但目前 UI 不顯示，留 future 用）
+
+**Frontend**
+- `page-sector.js` heatmap tooltip：新增 Fwd P/E + EV/EBITDA 兩 row（同 4 段染色 + tooltip 解釋）。增量 update path 同步加欄
+- `page-radar.js` tooltip 同樣新增兩 row
+- `page-earnings.js` card meta-pills：PE pill 之後加 Fwd Pill + EV/EBITDA pill，皆染色 + hover 解釋
+
+**色階**
+- P/E（TTM 與 Forward 同）：< 0 紅 / < 15 綠 / 15-30 白 / > 30 黃
+- EV/EBITDA：< 0 紅 / < 10 綠 / 10-20 白 / > 20 黃
+
+### Why
+P/E TTM 易被一次性項目扭曲，P/B 對輕資產（科技、軟體、品牌）幾乎無參考價值。Forward P/E 排除一次性 hit、看分析師共識，與 EV/EBITDA（跨資本結構可比）為實務最常用兩個補充指標。HPE 案例驗證：TTM PE = -253，但 Forward PE 預期應在 17-20 範圍。
+
+FMP `/stable/key-metrics-ttm.evToEBITDATTM` 與 `/stable/analyst-estimates.epsAvg` 都按 ticker 單獨呼叫，所以 PE daemon 從原本 600 calls/24h 變成 1800 calls/24h；ThreadPool(10) 估 ~3 min 完成，仍可接受。
+
+### How to apply
+- Restart `dashboard_server.py`，等 stderr `[heatmap-pe] done: N/N`（~3min）
+- 重跑 `bridge.py` 讓 earnings / momentum 拿到新欄位
+- Hard refresh sector / radar / earnings 各 page
+
+---
+
+## [2.13.11] — 2026-05-05
+### Changed — 盤前檢查 chain 從前端搬到 server-side orchestrator（修「sector 從未啟動」race）
+
+**Server (dashboard_server.py)**
+- 新 `_premarket_chain_state` + `_premarket_chain_lock`，shape：`{status, started_at, ended_at, phase, elapsed_sec, items: {daily/news/sector: {status, elapsed_sec, reason, error}}, error}`
+- 新 `run_premarket_chain()` daemon thread sequencer：
+  - Phase 1a daily：`preflight_check` 全 free FRESH → skip；否則 `run_daily_update()` + 輪詢 `_daily_update_state.status` 至 done/error
+  - Phase 1b news：`news` key FRESH → skip；否則 `enqueue_protocol("news")` + `_wait_protocol_completion()` 透過 **`_protocol_history`** 偵測完成（durable record，不會錯過瞬間 transition）
+  - Phase 2 sector：`sector` key FRESH → skip；否則 enqueue + wait
+- 新 `_wait_protocol_completion(name, history_baseline, timeout, on_progress)` helper
+- 新 endpoints：
+  - `POST /api/run-premarket-chain` → 啟動（409 duplicate_active 含當前 phase）
+  - `GET /api/run-premarket-chain/status` → 完整 state
+
+**Frontend (Dashboard/script.js)**
+- `runPremarketChain` 簡化為 thin POST + 起 2s poll loop
+- 新 `_pollPremarketChain` — 單一 endpoint 取 server aggregated state、render 三 row（daily / news / sector）+ verdict
+- 移除 `_pollDailyUpdate` / `_pollProtoForChain` / `_maybeStartPhase2` / `_finalizeChain` / `_chainState`（現由 server 持有 canonical state）
+- 新 page-load resume IIFE：若 server 端 chain `running` 或 5min 內 `done/error`，自動 attach poll，user 重整不丟進度
+
+### Why
+原 chain 邏輯純前端 polling `/api/run-protocol/status` 2.5s 一次。發現的問題：
+1. **Race**：news done 後 server 端 `_protocol_state` 立即被 sector 覆蓋（worker 切下個 job），如果 frontend 沒在那瞬間 catch 到 `name=news status=done` 就永遠不會設 `newsDone=true`、Phase 2 永遠不 fire（今天觀察到「2 次 chain 都失敗，sector 從未啟動」即此症狀）。
+2. **Tab close kill**：browser 關 tab → chain 整個失效。Server 端有 daily 跑完、news 跑完，但 sector 永遠 enqueue 不到。
+
+Server-side daemon thread 用 `_protocol_history`（持久 完成記錄）偵測 transition，不依賴瞬時狀態；user 關 tab 也能繼續完成。Frontend 只負責 render，重整即 resume。
+
+### How to apply
+- Restart `dashboard_server.py`
+- Hard refresh dashboard
+- 試：點「開始盤前檢查」→ 應依序看到 daily（skip 或 running→done）→ news（skip 或 running→done）→ sector（skip 或 running→done）→ verdict ✅。中途關 tab 重開應自動恢復進度。
+
+---
+
+## [2.13.10] — 2026-05-05
+### Added — 個股 PE TTM 全 Dashboard 顯示（heatmap tooltip / radar / earnings card / momentum row）
+
+**新基建（dashboard_server.py）**
+- `_heatmap_pe_cache: {sym: (ts, pe)}` + `_heatmap_pe_lock` + `HEATMAP_PE_TTL_SEC=86400`（24h）
+- `_fetch_pe_ttm(ticker, api_key)`：FMP `/stable/ratios-ttm` 單支抓 `priceToEarningsRatioTTM`
+- `_heatmap_refresh_pe_universe(max_workers=10)`：ThreadPool 10 平行刷整個 universe，啟動時跑一次 daemon thread
+- `_heatmap_refresh_quotes` 每次 batch-quote 後從 PE cache 補 `row["pe"]`
+- `_fetch_theme_extra_quotes` 對 radar small/mid cap 也帶 `pe`，缺 PE 的 ticker 在背景 thread pool lazy fetch
+
+**Bridge.py**
+- `extract_earnings_analyses` 加 `pe_ttm`（從 earnings cache `ttm_metrics.from_ratios_ttm.priceToEarningsRatioTTM`）
+- `ingest_momentum_screen` 載入 `Dashboard/heatmap.json` 建 `pe_lookup` → 每 row 加 `pe`
+
+**Frontend**
+- `page-sector.js` heatmap tooltip：加「P/E (TTM)」row（color 分級：<0 紅、<15 綠、>30 黃、其他白）。ticker 增量 update 也帶 pe
+- `page-radar.js` `_radarShowTooltip` 同樣加 PE row
+- `page-earnings.js` card meta-pills 加 `P/E xx.x` 染色 pill
+- `page-momentum.js` table 加 P/E 欄（價格右側）+ sort 支援；header 翻譯 `col_pe` zh「本益比」/ en「P/E」；emptyRow colspan 12 → 13
+- `momentum.html` 加 `<th id="th-pe" data-sort="pe">P/E</th>`
+
+### Why
+個股 PE 之前完全沒在 Dashboard 任何 list / hover 出現，只在 invest deep-dive 報告 markdown 內。User 平時看 heatmap / earnings / momentum 都看不到 valuation 資訊。
+
+FMP `/stable/batch-quote` 與 `/stable/quote` 已 drop `pe` 欄位（測試確認），改走 `/stable/ratios-ttm`（每 ticker 單獨 fetch、24h TTL cache）。Universe ~600 ticker × 24h refresh × ThreadPool(10) ≈ 60s，FMP usage 可承受。
+
+色階沿用財務分析常識：< 15 便宜 / 15-30 fair / > 30 高估 / < 0 虧損。User 一眼看 hover / card / row 就能判斷估值區間。
+
+### How to apply
+- Restart `dashboard_server.py`（PE daemon 啟動 + 補欄 quote refresh）
+- 等 1-2 分鐘 PE universe fetch 完（看 stderr `[heatmap-pe] done: N/N`）
+- Hard refresh 各 page
+
+---
+
+## [2.13.9] — 2026-05-05
+### Added — 盤前檢查 chain 加 freshness skip（外部跑過 daily_update.sh 不重跑）
+
+- `dashboard_server.py::POST /api/run-daily-update`：先跑 `preflight_check()`，若所有 `free=true` 項目皆 `FRESH` → 200 `{skipped: true, reason: "all_free_caches_fresh", items, ages}`。否則維持 202 啟 daily_update.sh。Defensive：preflight_check 自身錯時 fall-through 到實跑（不誤跳）。
+- `Dashboard/script.js::runPremarketChain`：
+  - 開跑前一次 `/api/preflight` 撈 freshness，記錄 `newsFresh` / `sectorFresh`。
+  - Phase 1 daily 收 `{skipped: true}` → row 顯「已新鮮 · 跳過」綠勾，不啟 poll。
+  - Phase 1 news：`newsFresh === true` → 不打 `/api/protocol-queue`，row 直接綠勾。
+  - Phase 1 兩個都 skip → 立即進 Phase 2，不啟 daily/proto poll loop。
+  - Phase 2 sector：`sectorFresh === true` → 不打 protocol-queue，row 直接綠勾、`_finalizeChain()`。
+  - 啟動的 timer 只針對 actually-launched job（之前無條件啟兩個 timer）。
+
+### Why
+User 已在 shell 跑過 `./daily_update.sh`，回 dashboard 點「開始盤前檢查」應 detect cache 全 fresh 直接跳過。原本無條件 fire daily_update.sh + news Claude + sector Claude，浪費 ~5min + tokens。同邏輯延伸至 news / sector Claude protocol — 今日 digest / sector_intel 若 < 3h 視為 fresh，使用者一個 session 內按多次也只跑第一次。
+
+也順便處理「我沒按開始盤前檢查就自己開始跑了」的副作用：即使誤觸按鈕，全 fresh → chain 秒結束、不消耗資源。
+
+### How to apply
+- Restart `dashboard_server.py` + hard refresh index 頁。
+- 跑前可先 `./daily_update.sh` 在 shell，回 UI 按「開始盤前檢查」應全部顯「跳過」3 秒內完成。
+
+---
+
+## [2.13.8] — 2026-05-05
+### Fixed — thematic-screener 加 socket timeout + 進度 log（修 65min hang）
+
+- `skills/thematic-screener/scripts/screen.py`：
+  - `socket.setdefaulttimeout(15)` 模組頂層 — 任何 yfinance / FMP socket op 15s 沒回就 raise，避免 SYN_SENT 無限 hang。
+  - 新 `_log(msg)` helper（HH:MM:SS prefix + `flush=True`）讓 daily_update.sh 的 stderr tail 即時看到進度。
+  - Predict loop 加每 10 ticker batch 進度 + 個別 > 5s 的單筆 log + TIMEOUT 標籤。
+  - Predict + Enrich 階段印總 elapsed。
+
+### Why
+今日 daily_update.sh PID 31623（screen.py）卡 65 分鐘。診斷：`lsof` 看到 1 個 socket 在 `SYN_SENT` 對 ec2 host（FMP / yfinance proxy 之一），對方無回應 → Python socket 預設無 timeout → 阻塞 IO 等到 OS 自己 RST。Predict loop 順序跑 249 tickers，1 個 ticker hang 整個 pipeline 死。
+
+加 `socket.setdefaulttimeout(15)` 強制每個 op 上限；progress log 讓 user 下次能立即定位是哪個 ticker / 階段慢。
+
+### How to apply
+- 立刻生效（Python module-level 改）。下次 `./daily_update.sh` Step 6 stderr 會出時間戳記日誌。
+
+---
+
+## [2.13.7] — 2026-05-05
+### Added — earnings page 專屬 run banner（分離自 news scan-card）
+
+- `Dashboard/earnings.html`：在 hero strip 與 command bar 之間插入 `#ea-run-banner`（紫色 accent，`scan-card-frame` reuse）。含 expand / cancel / dismiss / reload 按鈕 + 即時日誌 pre。
+- `Dashboard/style.css`：`scan-card-frame` + `scan-card-log` styles 從 news.html inline 搬到全域，所有 page 共用。
+- `Dashboard/page-earnings.js`：
+  - `runEarnings` 排隊成功後記 `_eaActiveJobId` + `_eaActiveTicker`、起 2s poll。
+  - `pollEarningsRunStatus`：fetch `/api/run-protocol/status`，gate by `name === 'earnings'` AND (`queue_id === _eaActiveJobId` OR `analyze_ticker === _eaActiveTicker`)；只有自家 job 才 render banner。
+  - `done` 翻 emerald + 自動 `loadAndRender()` 補資料；`error` 翻 red 顯示錯誤訊息。
+  - `resumeEarningsRunBanner`：page load 時若 server 端正跑 earnings 直接接續顯示 banner（重整不會丟進度）。
+
+### Why
+User 點「財報分析」時觀察到右下角 protocol pill 顯 `news · 📰 DIGEST`，因為當時 server 端真的在跑 news（earnings 排在 queue 後面）。News page 有 scan-card 顯活 log → 看起來像 news 取代了 earnings。問題不是 pill 標錯，而是 **earnings page 沒有自己的 banner**，user 不知道自己的 job 排在哪、哪時候會跑。新增 earnings-scoped banner 解決：
+1. queue 排隊期間 toast 提示位置；
+2. 輪到自己跑 → banner 顯示 ticker / elapsed / 即時 log；
+3. 完成自動 reload 資料 + 顯示綠色完成框；error 紅色 + 錯誤訊息。
+
+### How to apply
+- Hard refresh earnings 頁。
+- 排一個 earnings job 觀察 banner 從 hidden → 紫色 running → 綠色 done。
+
+---
+
+## [2.13.6] — 2026-05-04
+### Fixed — radar K 線 tail label 格式 + header 文字重複
+
+- `Dashboard/page-radar.js`：tail label / header `updated` 改 `toLocaleTimeString('en-GB', { hour12: false })` → 24h `HH:MM:SS`，避免 zh-TW 加「下午/上午」與 bar label 的 `HH:MM` 風格混搭。
+- Header `updated` field 在 tick 模式下從 `tick HH:MM:SS` 改成純 `HH:MM:SS`，避免和 status `15s tick` 的 `tick` 字重複。
+
+### Why
+盤中截圖顯示 bar label `10:45` 與 tail label `下午10:58:37` 風格不一致 + status 區出現 `15s tick · tick 下午10:58:52` 重複字。和 5-min bar 沒到 10:50/10:55 無關（那是 FMP 個別 bar commit 慢於 wall-clock，下次 base poll 就會補上）。
+
+---
+
+## [2.13.5] — 2026-05-04
+### Added — radar K 線 live tail（FMP `/quote` 每 15s tick 疊在 5-min bars 後）
+
+- `dashboard_server.py`：新 `/api/heatmap/quote/<TICKER>` endpoint + `_fetch_heatmap_quote()`（FMP `/stable/quote`，5s TTL `_heatmap_quote_cache`）。回 `{symbol, price, change_pct, volume, as_of, market_open}`。
+- `Dashboard/page-radar.js`：
+  - 拆兩個 polling：base bars 60s（`/api/heatmap/intraday/`，原本 15s）+ live tick 15s（新 `/api/heatmap/quote/`）。
+  - `_radarTickTail` 維護 ≤25 個 tick（25 × 15s = 6.25min 上限），每 tick `{t: HH:MM:SS, price}`。新 5-min bar 出現（base re-fetch 偵測 `lastBarTime` 變化）→ 清空 tail。
+  - `renderRadarKline` 加第二個 dataset：dashed amber line + 1.8px points，從最後一根 bar close 接續延伸。Volume chart 不疊 tail（quote 不帶該 bar 累計 volume）。
+  - Header price + change_pct 改用 quote tick 即時更新（比 5-min bar close 即時）。
+  - `visibilitychange` 切回 tab 同時觸發 base + tick 各一次。
+
+### Why
+v2.13.4 拿掉 visibility gate 但 chart 視覺仍每 5min 才動 — 因 FMP 5-min bars 在 boundary 之間沒新資料。User 質疑「15s API 沒意義」。改用雙 endpoint：粗 bars 走 `/historical-chart/5min`、細 ticks 走 `/quote`，base 不漂移、tail 即時延長，5-min boundary 自動 reset。20 ticks/min × 1 ticker FMP 用量輕。
+
+### How to apply
+- Restart `dashboard_server.py`（新 endpoint）+ hard refresh radar 頁。
+- 盤中點 ticker tile，5-min bar 後應每 15s 看到黃色虛線往右延一段。每 5min 黃線歸零、新 indigo bar 出現。
+
+---
+
+## [2.13.4] — 2026-05-04
+### Fixed — radar K 線 polling 拿掉 visibility gate（不切 tab 也會自更新）
+
+- `Dashboard/page-radar.js:1322`：移除 `setInterval` 內 `document.visibilityState === 'visible'` 條件，只保留 `_radarKlineTicker` 存在性檢查。
+
+### Why
+原 gate 是省 FMP/server 用量設計，但 1 ticker × 15s 對 server 無負擔（且 server 端 `HEATMAP_INTRADAY_TTL_SEC_OPEN=15` 已 TTL coalesce）。Browser visibility 在 macOS Stage Manager / 其他 app 全屏覆蓋 / Chrome Memory Saver 下會誤判 `hidden`，user 看著頁面但 polling 卻被 skip → 體感「切 tab 才更新」。
+
+注意：chart bars 是 FMP 5-min OHLCV，視覺形狀仍每 5 分鐘才換新；header `updated HH:MM:SS` 每 15s 跳秒可確認 polling 在跑。
+
+### How to apply
+- Hard refresh radar 頁（cache busting 已由 mtime 注入處理）。
+
+---
+
+## [2.13.3] — 2026-05-04
+### Fixed — radar 熱力圖補抓非 S&P 500 ticker（修「主題股數 5 卻只看到 1 檔」）
+
+- `dashboard_server.py::_build_theme_heatmap_payload`：第一輪掃 TD theme `representative_stocks` 收集所有不在 `_heatmap_state["tickers"]` 的 ticker，呼叫新 helper `_fetch_theme_extra_quotes(symbols)` 用 FMP `batch-quote` 一次撈齊（單 request、TTL 180s in-process cache）。第二輪 join lookup 用 `_resolve(sym)` 包含 heatmap state + extra fetch 結果。FMP miss / 無 API key → 該 ticker skip（舊行為）。
+- 新增 `_theme_extra_quote_cache` + `THEME_EXTRA_QUOTE_TTL_SEC=180`。
+
+### Why
+TD theme universe 涵蓋 small/mid cap，heatmap state universe 只 S&P 500（517 tickers）。例：Gold & Precious Metals 5 檔 representative_stocks（NEM/CDE/AU/GFI/HL）只有 NEM 在 S&P 500 → 4 檔被 skip → tile 只剩 NEM 一個。Card body top movers 不受影響因 thematic-screener 用 FMP 直接抓自己的 prediction。
+
+擴 universe 太重；最少改動方案：render 時補抓缺的 ticker quote、cache 3min。實測 17 themes 平均缺 ~25 ticker，1 個 batch-quote call 即解決，不影響整體 latency。
+
+### How to apply
+- Restart `dashboard_server.py`。
+- Smoke test：`/api/theme-heatmap` 回傳 Gold theme `tickers` length 應 = 5。
+
+---
+
+## [2.13.2] — 2026-05-04
+### Fixed — radar 熱力圖 pin 到 recommendations.json 同源 TD cache（修「無覆蓋資料」假空白）
+
+- `dashboard_server.py::_build_theme_heatmap_payload`：先讀 `skills/thematic-screener/data/recommendations/<latest>.json` 的 `theme_detector_meta.file`，找到對應 TD cache 才 join `_heatmap_state`。recommendations 缺檔或 meta 缺欄位 → fallback 最新 TD cache（舊行為）。
+- 回傳 payload 增加 `theme_detector_file` + `pin_source`（debug 用，前端不需動）。
+
+### Why
+今日 radar 觀察到 17 個 theme 卡片中 4 個顯「無覆蓋資料」，但點開卡片底部 top movers 有資料。根因：thematic-screener 21:06 跑時讀 TD-03 cache 寫 recommendations.json，22:00 跑 `產業掃描` 時 sector Phase 2 又重寫一份 TD-04（`--skip-if-fresh 10800` 觸發），thematic-screener 沒跟著重跑。`/api/theme-heatmap` 一直 glob 抓最新 TD（TD-04）；前端 card body 的 theme.name 來自 recommendations.json（指 TD-03）。兩份 TD 的 sector concentration 系列 theme 名字不同（TD-03 `Financial Sector Concentration` ↔ TD-04 `Financial Services & Banks`），strict name match 失敗 → 4 個 theme heatmap slot 顯空白。
+
+Pin 到同源 TD 後 card body 與熱力圖看的 theme 結構一致；tile 顏色（漲跌幅）仍取自 live `_heatmap_state`，不受影響。
+
+### How to apply
+- Restart `dashboard_server.py`。
+- 之後若想長期解 TD/screener cache 不同步，要在 sector protocol Phase 2 重寫 TD 後接 thematic-screener re-run（單獨另案）。
+
+---
+
+## [2.13.1] — 2026-05-04
+### Fixed — protocol 完成判定加 validator gate（修「綠燈 + 空 dashboard」假成功）
+
+- `dashboard_server.py`：新增 `PROTOCOL_VALIDATORS` map（`sector` → `validate_sector_intel.py`、`news` → `validate_digest_output.py`）。`run_protocol` 跑完且 subprocess `rc=0` 時，再跑對應 validator；validator rc≠0 → 狀態翻 `error` + error 訊息塞前 5 行（含完整輸出 append 到 scan log）。
+
+### Why
+今天跑 `產業掃描` 觀察到 banner 顯示綠燈 DONE，但 Dashboard index 市場機制 / 熱門產業 top3 / sector hot/warm/cold / 政治訊號 / 背離觀察全空白。實際 `2026-05-04_sector_intel.json` 缺 top-level `market_regime` / `summary` / `actionable_themes` / `_phase3.political_overlay` / `_phase3.top_catalysts` — Phase 5 emit + validator gate 從未執行。
+
+根因：`_run` 只看 Claude subprocess 的 `rc`，turn 正常結束就標 done，**完全沒驗證產出物**。Schema 規定 Phase 5 末尾 mandatory `validate_sector_intel.py rc=0`，但 server 沒接這條繩。新 gate 直接補上，未來這類 stop-mid-protocol 會以 error 紅色 banner 呈現 + bridge.py 不會被誤觸發。
+
+### How to apply
+- Python 3 syntax-only 改動，restart `dashboard_server.py` 即生效。
+- 若要新增其他 protocol 的 gate（invest 用 `validate_session_export.py` 等），加進 `PROTOCOL_VALIDATORS` 即可。
+
+---
+
 ## [2.13.0] — 2026-05-03
 ### Added — invest protocol V5.0 subagent 對齊「外部專業分析師 prompt 模板」+ 新 PM 整合層欄位
 

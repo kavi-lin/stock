@@ -142,12 +142,32 @@ def has_sufficient_lifecycle_data(
     return not (extremity is None and price_extreme is None and valuation is None)
 
 
-def classify_stage(maturity: float) -> str:
+def classify_stage(maturity: float, fundamental_override: bool = False) -> str:
     """Classify lifecycle stage from maturity score.
 
-    0-20: Emerging, 20-40: Accelerating, 40-60: Trending,
-    60-80: Mature, 80-100: Exhausting
+    Default thresholds (price/technical only):
+        0-20: Emerging, 20-40: Accelerating, 40-60: Trending,
+        60-80: Mature, 80-100: Exhausting
+
+    V2.18.0 — fundamental_override=True (theme has ≥1 representative stock with
+    earnings-analyst structural_shift tier ∈ {CANDIDATE, CONFIRMED}) lifts
+    thresholds: paradigm-shift earnings momentum reclassifies what would
+    otherwise be "Exhausting" as still "Mature":
+        0-30: Emerging, 30-50: Accelerating, 50-70: Trending,
+        70-95: Mature, 95-100: Exhausting
     """
+    if fundamental_override:
+        if maturity < 30:
+            return "Emerging"
+        elif maturity < 50:
+            return "Accelerating"
+        elif maturity < 70:
+            return "Trending"
+        elif maturity < 95:
+            return "Mature"
+        else:
+            return "Exhausting"
+
     if maturity < 20:
         return "Emerging"
     elif maturity < 40:

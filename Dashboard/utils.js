@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V2.13.0';
+  const VERSION = 'V2.19.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -710,6 +710,101 @@
   setInterval(pollProtoPill, 5000);
   setTimeout(pollProtoPill, 1200);
 
+  // ── V2.17.5 — Premarket chain status pill (single unit with 3 sub-rows) ──
+  // Surfaces /api/run-premarket-chain/status across every page so when user
+  // closes the preflight modal mid-run, they still see daily/news/sector
+  // progress as ONE pill (cannot dismiss individual rows — chain is atomic).
+  function ensureChainPill() {
+    let pill = document.getElementById('chain-status-pill');
+    if (pill) return pill;
+    pill = document.createElement('div');
+    pill.id = 'chain-status-pill';
+    pill.className = 'chain-status-pill hidden';
+    pill.innerHTML = `
+      <div class="chain-pill-head">
+        <span class="chain-pill-head-icon">🔄</span>
+        <span class="chain-pill-head-title">盤前檢查</span>
+        <span class="chain-pill-head-elapsed" id="chain-pill-elapsed">—</span>
+      </div>
+      <div class="chain-pill-rows">
+        <div class="chain-pill-row" data-key="daily">
+          <span class="chain-pill-row-icon">⏳</span>
+          <span class="chain-pill-row-label">daily</span>
+          <span class="chain-pill-row-meta">—</span>
+        </div>
+        <div class="chain-pill-row" data-key="news">
+          <span class="chain-pill-row-icon">⏳</span>
+          <span class="chain-pill-row-label">news</span>
+          <span class="chain-pill-row-meta">—</span>
+        </div>
+        <div class="chain-pill-row" data-key="sector">
+          <span class="chain-pill-row-icon">⏳</span>
+          <span class="chain-pill-row-label">sector</span>
+          <span class="chain-pill-row-meta">—</span>
+        </div>
+      </div>`;
+    document.body.appendChild(pill);
+    return pill;
+  }
+
+  const _CHAIN_GLYPH = { skipped: '✅', queued: '⏳', running: '🔄', done: '✅', error: '❌' };
+  function _chainMeta(it, isZh) {
+    const el = fmtElapsed(it.elapsed_sec || 0);
+    switch (it.status) {
+      case 'skipped': return isZh ? '已新鮮 · 跳過' : 'fresh · skipped';
+      case 'queued':  return isZh ? '排隊中' : 'queued';
+      case 'running': return `${isZh ? '執行中' : 'running'} · ${el}`;
+      case 'done':    return `${isZh ? '完成' : 'done'} · ${el}`;
+      case 'error':   return (it.error || '').slice(0, 60) || (isZh ? '錯誤' : 'error');
+      default:        return '—';
+    }
+  }
+
+  // V2.17.11 — terminal-state auto-hide is computed each tick from server's
+  // `ended_at` (no setTimeout needed). Previous setTimeout-based approach kept
+  // re-showing the pill after the timer fired because the next poll saw
+  // status='done' (server keeps the terminal state until next chain run) and
+  // unconditionally removed the hidden class. Computing the age fresh per tick
+  // gives a stable "show while running, then 60s, then hide forever" behavior.
+  const TERMINAL_GRACE_MS = 60000;
+  async function pollChainPill() {
+    try {
+      const r = await fetch('/api/run-premarket-chain/status', { cache: 'no-store' });
+      if (!r.ok) return;
+      const s = await r.json();
+      const pill = ensureChainPill();
+      const isZh = (window.UI && UI.currentLang === 'zh') || (document.documentElement.lang || '').startsWith('zh');
+
+      const modalOpen = !document.getElementById('preflight-modal')?.classList.contains('hidden');
+      const terminal  = (s.status === 'done' || s.status === 'error');
+      const terminalAgedOut = terminal && s.ended_at &&
+        (Date.now() - new Date(s.ended_at).getTime()) > TERMINAL_GRACE_MS;
+
+      if (s.status === 'idle' || modalOpen || terminalAgedOut) {
+        pill.classList.add('hidden');
+        return;
+      }
+      pill.classList.remove('hidden');
+
+      const protoPill = document.getElementById('proto-status-pill');
+      pill.classList.toggle('has-proto-pill', !!protoPill && !protoPill.classList.contains('hidden'));
+
+      pill.querySelector('.chain-pill-head-title').textContent = isZh ? '盤前檢查' : 'Pre-market check';
+      pill.querySelector('#chain-pill-elapsed').textContent = fmtElapsed(s.elapsed_sec || 0);
+
+      const items = s.items || {};
+      for (const k of ['daily', 'news', 'sector']) {
+        const row = pill.querySelector(`.chain-pill-row[data-key="${k}"]`);
+        if (!row) continue;
+        const it = items[k] || {};
+        row.querySelector('.chain-pill-row-icon').textContent = _CHAIN_GLYPH[it.status] || '⏳';
+        row.querySelector('.chain-pill-row-meta').textContent = _chainMeta(it, isZh);
+      }
+    } catch { /* silent */ }
+  }
+  setInterval(pollChainPill, 3000);
+  setTimeout(pollChainPill, 1400);
+
 })();
 
 
@@ -1366,6 +1461,28 @@
       divergence:                _flagMetricLive('↘'),
     };
 
+    // V2.17.7 — markdown → HTML for tooltip body text. Tooltip source uses
+    // `**bold**` + `\n\n` paragraph + `\n` line breaks; previously injected raw
+    // so `**1. Margin 趨勢**` rendered literally. Pipeline: escape HTML first
+    // (defense-in-depth even though source is dev-controlled), then add back
+    // trusted markup.
+    function _escapeTipHTML(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function _renderTipMarkdown(s) {
+      if (s == null) return '';
+      let html = _escapeTipHTML(s);
+      // **bold** — non-greedy, single pair (avoid eating across paragraphs)
+      html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+      // \n\n → paragraph break, \n → <br>
+      const paragraphs = html.split(/\n\n+/).map(p => p.replace(/\n/g, '<br>'));
+      return paragraphs.length > 1
+        ? paragraphs.map(p => `<p>${p}</p>`).join('')
+        : paragraphs[0];
+    }
+
     function buildSignalTipHTML(el, lang) {
       const key = el.dataset.signalTip;
       const tBundle = SIGNAL_TIPS[key];
@@ -1375,10 +1492,10 @@
       const { liveHTML, stage } = builder ? builder(el, t, lang) : { liveHTML: '', stage: null };
       return `
         <div class="stt-title">${t.title}</div>
-        <div class="stt-desc">${t.desc}</div>
+        <div class="stt-desc">${_renderTipMarkdown(t.desc)}</div>
         ${liveHTML}
         <div class="stt-stages">${renderStageRows(t.stages, stage)}</div>
-        <div class="stt-hint">${t.hint}</div>
+        <div class="stt-hint">${_renderTipMarkdown(t.hint)}</div>
       `;
     }
 

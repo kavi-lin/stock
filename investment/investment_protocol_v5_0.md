@@ -278,6 +278,30 @@ OUTPUT (strict JSON):
 
 > 以上**必填**；缺資料寫 `INSUFFICIENT_DATA` 而非 null。`bull/bear thesis` 是 narrative summary，不替代 lane score。
 
+##### V2.17.0 Fundamentals lane TAM / Market Position 必填 sub-block
+
+對應 reference equity-research/sector-overview pattern（market sizing layer）。Phase 2 Fundamentals subagent **必填**：
+
+4. **`market_position`**（必填）：
+   - `tam_usd`：Total Addressable Market 估算（USD billions），來源：公司 IR 投資人簡報 / sell-side primer / WebSearch（標 source link）
+   - `industry_5y_cagr_pct`：產業未來 5y 預期 CAGR（%），來源同上
+   - `company_revenue_share_pct`：公司營收佔 TAM 比例（公司營收 ÷ TAM × 100），算術可推
+   - `position_label`：`leader | challenger | niche | follower`（依 market share + growth vs industry）
+   - `competitive_moat_evidence`：1-2 句 — 為什麼 share 守得住 / 拿不下（pricing power / switching cost / scale），引 PEER_BUNDLE 數字
+   - 例：
+     ```json
+     {
+       "tam_usd": 350,
+       "industry_5y_cagr_pct": 12.4,
+       "company_revenue_share_pct": 18.5,
+       "position_label": "leader",
+       "competitive_moat_evidence": "scale economies — capex/rev 17% vs peer median 9%（PEER_BUNDLE），3 年內無 challenger 能複製"
+     }
+     ```
+
+> **資料缺失處理**：TAM / CAGR 找不到第三方來源 → `tam_usd: null` + reasoning 註記「TAM 數據缺失，share 估算降級為 revenue rank in peer set」。**禁止**用 LLM 自己編 TAM 數字。
+> **不重複 sector_protocol**：sector_protocol 給 sector 層 valuation / breadth；本 block 給**個股**在 sector 內的位置。兩者互補不矛盾。
+
 #### Sentiment Subagent
 - **Rubric**: 市場層 + 個股層融合 → `Sentiment Score = 0.5 × stock_specific + 0.5 × (market_composite/10 − 5)`
 - **Market layer**: 優先讀 Phase 0 `_market_signals`（fear_greed / vix / spy_rsi / breadth）— 不重跑
@@ -524,6 +548,7 @@ TICKER: <T>
 TENTATIVE CONSENSUS DIRECTION: <BULLISH | BEARISH | MIXED>
 PHASE 0 MACRO + FRED slim
 PHASE 2 ANALYST OUTPUTS (6: 5 lanes + Burry)
+STRUCTURAL_SHIFT_TIER: <NONE | CANDIDATE | CONFIRMED | INSUFFICIENT_DATA>     ← V2.19 NEW
 
 TASK:
 1. 找共識最脆弱 1 個主論點 → counter_thesis (1-2 句)
@@ -534,17 +559,33 @@ TASK:
    3 = 有風險但無確切反證
    4-5 = 有具體數據強烈反駁（FRED 衝突訊號 ≥ 2 個自動 ≥ 4）
 5. verdict: ≤2 NO_VIABLE_COUNTER / =3 MODERATE_COUNTER / ≥4 STRONG_COUNTER
+
+V2.19 — STRUCTURAL_SHIFT_TIER 條件指令 (anti-spoofing):
+  IF STRUCTURAL_SHIFT_TIER = CONFIRMED:
+    - MUST cite forward mechanism breakage in counter_thesis + kill_conditions:
+      competitor capacity addition / customer inventory rebuild / demand saturation /
+      technology substitution / share loss to next-gen
+    - 禁止使用 mean-reversion 純歷史論證作為攻擊主線：
+      "歷史均值 / 週期見頂 / Peak Cycle / 歷史毛利 / 回歸歷史中位"
+    - 後驗 classifier (`classify_red_team_basis`) 偵測 mr 關鍵字 → STRONG_COUNTER 自動降級為 MODERATE_COUNTER
+    - 即使搭配 1-2 個 forward 關鍵字 (contaminated)，仍視同 mr 觸發降級
+  IF STRUCTURAL_SHIFT_TIER = CANDIDATE:
+    - mr 論證仍可用但效力減半（penalty 0.85 → 0.925）
+  IF STRUCTURAL_SHIFT_TIER = NONE / INSUFFICIENT_DATA:
+    - 標準攻擊模式，無限制
 ```
 
 ### Phase 3 影響對照
 
-| red_team_verdict | Phase 3 Step 2 |
-|---|---|
-| `NO_VIABLE_COUNTER` | consensus bonus × 1.15 可觸發（5 同向 + Burry 未 veto） |
-| `MODERATE_COUNTER` | 無 bonus 無 penalty |
-| `STRONG_COUNTER` | raw_total × 0.85 penalty，bonus 禁用 |
+| red_team_verdict | red_team_basis (V2.19) | structural_shift.tier | Phase 3 Step 2 |
+|---|---|---|---|
+| `NO_VIABLE_COUNTER` | any | any | consensus bonus × 1.15 可觸發 |
+| `MODERATE_COUNTER` | any | any | 無 bonus 無 penalty |
+| `STRONG_COUNTER` | `pure_forward` / `unclassified` | any | raw_total × 0.85 penalty |
+| `STRONG_COUNTER` | any | CANDIDATE | penalty 折半 → × 0.925 |
+| `STRONG_COUNTER` | `pure_mean_reversion` / `contaminated` | CONFIRMED | **auto-downgrade 為 MODERATE_COUNTER + penalty × 0.925** |
 
-失敗（timeout / parse error）→ `red_team_execution_failed: true`，verdict 固定 `MODERATE_COUNTER`。
+失敗（timeout / parse error）→ `red_team_execution_failed: true`，verdict 固定 `MODERATE_COUNTER`，basis 固定 `unclassified`。
 
 ---
 
@@ -557,17 +598,71 @@ Step 1 (Raw):
   raw_total = Σ(Weight_i × Score_i × Confidence_i)
   weights default: Fund 0.25, Sent 0.15, News 0.20, Tech 0.25, Valuation 0.15
 
-Step 2 (Red-Team-Gated Bonus/Penalty):
+Step 1.5 (Structural Shift Modulation — V2.18.0):
+  Read latest earnings-analyst cache `structural_shift.tier` for ticker.
+  IF tier = CONFIRMED:
+    - Valuation lane analyst-PT contribution × 0  (full unanchor; stale PT)
+    - Red Team mean-reversion attack BLOCKED — cannot trigger STRONG_COUNTER
+      via "歷史均值回歸 / 週期見頂" arguments alone; must cite forward
+      mechanism breakage (具體論證為何結構性改善會逆轉)
+    - shift_macro_floor = 1.00 (sector_avoid 對個股失效)
+    - position_size_cap_pct = 100
+  ELIF tier = CANDIDATE:
+    - Valuation lane analyst-PT contribution × 0.3 (stale flag)
+    - Red Team STRONG_COUNTER penalty 折半 (0.85 → 0.925)
+    - shift_macro_floor = 0.95
+    - position_size_cap_pct = 50
+  ELSE (NONE / null / INSUFFICIENT_DATA):
+    - shift_macro_floor = 0; no modulation; standard rules apply
+
+Step 1.7 (Lane Polarization Modulation — V2.19.0):
+  Compute polarization via `apply_det_shadow.compute_polarization(lane_scores, val_score)`.
+  Read `det_shadow.signal_polarization` 4-tier label: BIPOLAR / OUTLIER / MIXED / ALIGNED.
+
+  IF polarization = BIPOLAR (range ≥ 4 AND ≥2 lanes ≥ +1 AND ≥2 lanes ≤ -1 AND has +2/-2):
+    - avg_confidence × 0.5
+    - position_size_cap_pct = min(cap, 25)
+    - decision band: BUY → STAGED_ENTRY 強制降階
+    - 例外：IF structural_shift.tier = CONFIRMED AND macro = bull
+            → confidence × 0.7 (paradigm shift 期間衝突是預期，但仍降一點)
+  ELIF polarization = OUTLIER (range ≥ 4 但只有 1 lane 站對立面):
+    - avg_confidence × 0.85
+    - position cap 不動
+    - 標記 outlier_lane_id（哪個 lane 站對立面）便於 user 檢視
+  ELIF polarization = MIXED (range ≥ 3 雙邊都有但無極端):
+    - avg_confidence × 0.75
+    - position cap 不動
+  ELSE (ALIGNED):
+    - no modulation
+
+Step 2 (Red-Team-Gated Bonus/Penalty — V2.19 anti-spoofing):
+  Read red_team_basis from det_shadow (V2.19 classifier output).
+  basis ∈ {pure_forward, pure_mean_reversion, contaminated, unclassified}
+
   IF all 5 signals same direction AND Burry.veto_flag = false AND red_team_verdict = NO_VIABLE_COUNTER:
     raw_after_bonus = raw_total × 1.15
+
   ELIF red_team_verdict = STRONG_COUNTER:
-    raw_after_bonus = raw_total × 0.85
+    # V2.19: anti-spoofing — mr 偷渡偵測
+    IF shift_tier = CONFIRMED AND red_team_basis IN {pure_mean_reversion, contaminated}:
+      # mr 一票否決：即使 LLM 塞 fw keyword 試圖救回，仍降級
+      effective_verdict = MODERATE_COUNTER
+      penalty = 0.925
+      raw_after_bonus = raw_total × penalty
+      auto_downgrade_logged = true
+    ELIF shift_tier = CANDIDATE:
+      penalty = 0.925
+      raw_after_bonus = raw_total × penalty
+    ELSE:
+      penalty = 0.85
+      raw_after_bonus = raw_total × penalty
   ELSE:
     raw_after_bonus = raw_total
 
 Step 3 (Directional Macro Multiplier):
+  effective_macro_mult = max(macro_multiplier, shift_macro_floor)
   IF sign(raw_after_bonus) == sign(macro_backdrop_score):
-    final_score = raw_after_bonus × macro_multiplier
+    final_score = raw_after_bonus × effective_macro_mult
     macro_alignment = ALIGNED
   ELSE:
     final_score = raw_after_bonus
@@ -575,6 +670,34 @@ Step 3 (Directional Macro Multiplier):
 ```
 
 Burry 不納入 Step 1 加權。VOLATILE regime 不重複扣分（已計入 macro_backdrop_score）。
+
+### V2.18.0 — Structural Shift Modulation 設計理由
+
+**痛點**：MU/QCOM 案例顯示 Valuation Lane（被過時 analyst PT 拖累）+ Red Team（用歷史週期 mean-reversion 攻擊）+ Macro（sector_avoid 一視同仁壓 multiplier）三個 backward-looking 模型同時壓制 forward signal，導致超級週期股票被迫 `DEFENSIVE HOLD`，錯失主升段。
+
+**機制**：earnings-analyst (`compute_structural_shift`) 偵測 EPS QoQ ≥30% + GM 歷史 +2σ + revenue 加速三個 signal，≥2 過 → CANDIDATE，連 2 季 → CONFIRMED。Phase 3 讀此 tier 對症給予豁免。
+
+**安全閥**：
+- CANDIDATE 只放寬不解除，position cap 50% — 避免單季 noise 導致 bubble-top BUY
+- CONFIRMED 才完全解除估值錨點，但仍要求 Red Team 必須以 forward mechanism breakage 攻擊（不接受純歷史均值論證）
+- Tier 不影響 Step 1 raw_total — 個別 lane 仍然獨立評分；modulation 只動 Step 2/3 的 backward-looking 折扣
+
+**對稱性原則**：missing top 是 bounded loss（少賺）；buying top 是 unbounded loss（套牢）。Tier 階梯 + position cap 把後者風險壓住。
+
+### V2.19.0 — Lane Polarization + Red Team Anti-Spoofing 設計理由
+
+**痛點 1 — Lane 各自為政**：5 lane 獨立評分後 PM 加權平均，但加權平均把「集體看多」(ALIGNED +2) 和「兩極衝突」(+3 +3 -3 -3 +1) 都壓平成中性數字，喪失「lane 衝突 = 系統不確定性」的訊號。Phase 3 沒做 divergence detection。
+
+**痛點 2 — Red Team 偷渡 mean-reversion**：V2.18 在 PM 端 post-filter，但 Red Team prompt 仍用標準歷史攻擊；LLM 常塞 1 個 forward 關鍵字（"客戶庫存"）但本質是 mean-reversion 論證（"歷史均值"），表面 mixed 實則污染。
+
+**機制 1 — Polarization 4-tier**：reuse 既存 `apply_det_shadow.compute_polarization`，加 OUTLIER 級避免 4-vs-1 outlier 誤判 BIPOLAR。Phase 3 Step 1.7 對應 confidence multiplier 0.5/0.85/0.75/1.0。
+
+**機制 2 — Red Team basis classifier**：deterministic keyword scan（mr_keywords + fw_keywords）→ 4 級 basis（pure_forward / pure_mean_reversion / contaminated / unclassified）。CONFIRMED 狀態下 contaminated 跟 pure_mean_reversion 同等對待 → STRONG_COUNTER 自動降 MODERATE。
+
+**Anti-Adversarial 鐵律**：
+1. **mr 一票否決**：mr keyword 出現即觸發 dampening，無論搭配多少 fw keyword
+2. **OUTLIER 不誤殺**：4-vs-1 不是真衝突，confidence × 0.85（不像 BIPOLAR 砍倉位）
+3. **雙層防偽**：prompt 限制 + post-filter classifier，不單靠 LLM 自律
 
 ### 決策閾值
 
@@ -603,10 +726,30 @@ Burry 不納入 Step 1 加權。VOLATILE regime 不重複扣分（已計入 macr
     "tech": "0.25 × score × conf = result",
     "val":  "0.15 × score × conf = result",
     "raw_total": "float",
+    "structural_shift_modulation": {
+      "tier": "NONE | CANDIDATE | CONFIRMED | INSUFFICIENT_DATA | null",
+      "applied_adjustments": [ "string", ... ],
+      "shift_macro_floor": "float — 0/0.95/1.00",
+      "position_size_cap_pct": "int — 100/50/100",
+      "red_team_mean_reversion_blocked": "bool"
+    },
+    "polarization_modulation": {
+      "label": "BIPOLAR | OUTLIER | MIXED | ALIGNED — V2.19",
+      "lane_range": "float",
+      "pos_strong": "int — count of lanes >= +1",
+      "neg_strong": "int — count of lanes <= -1",
+      "outlier_lane_id": "string | null — which lane is on minority side",
+      "applied_adjustments": [ "string", ... ],
+      "confidence_multiplier": "float — 0.5/0.85/0.75/1.0",
+      "position_cap_after": "int"
+    },
+    "red_team_basis": "pure_forward | pure_mean_reversion | contaminated | unclassified — V2.19 classifier",
+    "red_team_auto_downgrade": "bool — V2.19; true if mr-spoofing 觸發 STRONG→MODERATE 降級",
     "red_team_verdict": "...",
     "bonus_applied": "bool", "penalty_applied": "bool",
     "raw_after_bonus": "float",
     "macro_multiplier": "float", "macro_alignment": "ALIGNED | CONTRARIAN",
+    "effective_macro_mult": "float — max(macro_multiplier, shift_macro_floor)",
     "final_score": "float"
   },
   "avg_confidence": "float",
@@ -706,9 +849,19 @@ binary_adj = macro_cap × 0.5-0.7  if binary_classification ∈ [unknown, negati
            = macro_cap            otherwise
 burry_override_adj = binary_adj × 0.5 if t4.resolution == OVERRIDE_BURRY else binary_adj
 ftd_adj    = burry_override_adj × ftd_timeline_multiplier
-final_position_size = ftd_adj × 0.5 if final_decision == STAGED_ENTRY else ftd_adj
+shift_adj  = ftd_adj × (position_size_cap_pct / 100)   # V2.18.0 — CANDIDATE 強制 ×0.5
+polar_adj  = shift_adj × (polar_position_cap_pct / 100)  # V2.19.0 — BIPOLAR 強制 ×0.25
+final_position_size = polar_adj × 0.5 if final_decision == STAGED_ENTRY else polar_adj
 final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment   # 上限 -10%
 ```
+
+> V2.18.0: `position_size_cap_pct` 來自 Phase 3 Step 1.5 structural_shift_modulation。
+> CONFIRMED → 100（不縮）；CANDIDATE → 50（強制半倉）；NONE → 100（一般規則接管）。
+>
+> V2.19.0: `polar_position_cap_pct` 來自 Phase 3 Step 1.7 polarization_modulation。
+> BIPOLAR → 25（砍 1/4）；OUTLIER → 100；MIXED → 100；ALIGNED → 100。
+>
+> 兩個 cap 串聯（multiply）— BIPOLAR + CANDIDATE = 0.25 × 0.50 = 0.125 倍 → 極小試水單。
 
 **Binary risk**: positive (歷史 beat ≥ 70%) → 不減倉；unknown (FOMC / 地緣) → 48h 內減倉；negative (已知壞消息) → 減 50%
 
@@ -883,15 +1036,24 @@ Agent(
     4. Final Visualization Table (5 lanes + Burry + Red Team)
     5. 詳細評分 (key_factors / risk_flags per lane)
     6. **合理股價估算 (V5.0 新 section)**: anchors 6 行 + weighted_fair_value + verdict_band + confidence
-    7. Red Team Counter Thesis + Kill Conditions
-    8. 雙軌進場計畫 + R/R + position_size
-    9. 關鍵風險
-    10. Watch / re-eval 觸發條件
+    7. **Red Team Counter Thesis (V2.14.0 IC-memo 結構強化)**:
+       - **Consensus View (市場共識)**: 1-2 句 — 主流分析師 / 媒體普遍認同的看法（從 Phase 2 News + Sentiment lane 抽）
+       - **Differentiated View (本委員會差異化判斷)**: 1-2 句 — 本次分析跟 consensus 哪裡不同、為什麼（from final_decision + final_score 的關鍵 driver）
+       - **Counter Thesis**: red_team_counter_thesis 全文
+       - **Numbered Kill Conditions**: 必須 numbered list（1. / 2. / 3.），每條 falsifiable + 可量化（red_team_kill_conditions 直接照搬 + 編號）。禁 free-form 段落
+    8. **進場計畫 (V2.14.0 Returns Profile 三檔)**:
+       - **Base Case**: 進場區間 + TP1 / TP2 + SL + R/R（雙軌 staged_split）+ position_size_pct
+       - **Bull Case (1-2 句)**: 若 base case 觸發後 follow-through，下一個 TP3 / 加碼條件 / 持有窗口（從 fair_value_summary verdict_band + watch_conditions 推）
+       - **Bear Case (1-2 句)**: 若 SL 觸發 / kill condition 命中 → exit 行為 + 不再進場條件
+    9. 關鍵風險（key_risks 條列）
+    10. Watch / re-eval 觸發條件（watch_conditions dict 全列，加觀察 metric）
 
   寫入 `../reports/<YYYYMMDD>_<TICKER>.md`，回傳檔案路徑。
   """
 )
 ```
+
+> **V2.14.0 IC-memo 強化動機**：對齊機構級投資決策備忘錄 (PE 業界標準 ic-memo skill pattern) — 強迫呈現「consensus vs differentiated view」避免 echo chamber，Kill Conditions numbered 加強執行紀律，Returns Profile 三檔給未來 thesis review 一致對照基準。所有欄位來源**仍是** Phase 2-4 已產出 JSON，formatter 不重新評分。
 
 > **成本**: Sonnet 4.6 vs Opus → 每次節省 ~$0.4-0.7。違反 hard constraints → PM reject 並 retry 1 次；再失敗 → PM inline 寫 MD (照 V5.0 template，禁 freestyle)。
 
@@ -904,6 +1066,22 @@ python3 investment/scripts/validate_markdown_export.py
 - 再失敗 → PM inline 覆寫 + 重跑 validator，rc=0 才結束 protocol
 
 **禁止**：跳過 validator、接受 rc=1 報告、把 freestyle MD 寫進 reports/ 標 done。
+
+### Step 6 — Phase 5.5: Thesis Registry Wire-up (V2.14.0+, non-fatal)
+
+把本次 session 自動 register 進 trader-memory-core thesis 生命週期，產出 `thesis_id` 寫回 `history.json` 最後一筆。
+
+```bash
+python3 investment/scripts/register_thesis.py
+```
+
+- **rc=0 + 「✓ registered」**：成功 register，`history.json[-1].trades_this_session[0].thesis_id` 已填。後續 review queue / postmortem 都靠此 ID 串接。
+- **rc=0 + 「unavailable」**：trader-memory-core 模組缺 dep / 不在路徑。**non-fatal** — `thesis_id` 留 null，不擋 protocol 結束。
+- **rc=1**：`thesis_store.register()` 真的炸了（state dir 寫不進去 / 資料 corrupt）。報錯後 PM 可選擇手動 register 或 skip。
+
+**Idempotent**：若 last entry 已有 thesis_id（同一 protocol run 重跑），script 直接 rc=0 退出，不重複 register。
+
+**State 位置**：`investment/invest_logs/theses/`（project-local，不汙染 global trader-memory-core state）。
 
 ---
 

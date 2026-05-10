@@ -15,6 +15,7 @@ Usage:
 """
 
 import argparse
+import glob
 import json
 import os
 import sys
@@ -384,6 +385,39 @@ def _get_representative_stocks(
         for s in static
     ]
     return static, details
+
+
+def _theme_has_structural_shift(stocks: list[str]) -> tuple[bool, list[str]]:
+    """V2.18.0 — scan representative stocks' earnings-analyst cache; return
+    (override_flag, hit_tickers). override_flag is True if any rep stock has
+    structural_shift.tier ∈ {CANDIDATE, CONFIRMED}.
+
+    Used to lift lifecycle thresholds so paradigm-shift sectors (e.g. HBM
+    super-cycle Semis) don't get auto-classified as "Exhausting" purely from
+    price extremes."""
+    cache_dir = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "earnings-analyst", "cache",
+    )
+    if not os.path.isdir(cache_dir):
+        return False, []
+    hits = []
+    for tkr in stocks or []:
+        files = sorted(
+            f for f in glob.glob(os.path.join(cache_dir, f"{tkr}_*.json"))
+            if ".infographic." not in os.path.basename(f)
+        )
+        if not files:
+            continue
+        try:
+            with open(files[-1], "r", encoding="utf-8") as fp:
+                data = json.load(fp)
+            tier = (data.get("structural_shift") or {}).get("tier")
+            if tier in ("CANDIDATE", "CONFIRMED"):
+                hits.append(f"{tkr}:{tier}")
+        except Exception:
+            continue
+    return bool(hits), hits
 
 
 def detect_divergence(heat_breakdown: dict, direction: str) -> dict | None:
@@ -803,7 +837,11 @@ def main():
         maturity = calculate_lifecycle_maturity(
             duration, extremity, price_extreme, valuation, etf_prolif
         )
-        stage = classify_stage(maturity)
+        # V2.18.0 — fundamental override: if any representative stock has
+        # earnings-analyst structural_shift CANDIDATE/CONFIRMED, lift maturity
+        # thresholds so paradigm-shift earnings don't get masked as "Exhausting"
+        fundamental_override, shift_hits = _theme_has_structural_shift(stocks)
+        stage = classify_stage(maturity, fundamental_override=fundamental_override)
 
         maturity_breakdown = {
             "duration_estimate": round(duration, 2),
@@ -857,6 +895,8 @@ def main():
             "theme_origin": theme.get("theme_origin", "seed"),
             "name_confidence": theme.get("name_confidence", "high"),
             "divergence": divergence,
+            "structural_shift_override": fundamental_override,
+            "structural_shift_hits": shift_hits,
         }
         scored_themes.append(scored_theme)
 

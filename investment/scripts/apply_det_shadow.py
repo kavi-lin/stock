@@ -30,12 +30,19 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 def compute_polarization(lane_scores: dict, val_score: float | None) -> dict:
-    """Returns {label, range, max, min, missing_lanes}.
+    """Returns {label, range, max, min, missing_lanes, lane_score_array}.
 
-    Rule:
-      - BIPOLAR  : range >= 4 AND any lane >= +2 AND any lane <= -2
-      - MIXED    : range >= 3 (at least one lane positive AND one negative, less extreme)
+    Rule (V2.19 — asymmetric threshold):
+      - BIPOLAR  : range >= 4 AND any >= +2 AND any <= -2
+                   AND >= 2 lanes >= +1 AND >= 2 lanes <= -1
+                   (real conflict: both sides have weight, not 4-vs-1 outlier)
+      - OUTLIER  : range >= 4 AND has extreme but minority side has only 1 lane
+                   (e.g. [+4,+3,+3,+2,-2] — single dissenter, not deadlock)
+      - MIXED    : range >= 3 AND has positive AND has negative (no extremes)
       - ALIGNED  : everything else
+
+    OUTLIER is V2.19-new; sits between BIPOLAR (×0.5 confidence) and ALIGNED (×1.0).
+    Phase 3 Step 1.7 maps: BIPOLAR ×0.5 / OUTLIER ×0.85 / MIXED ×0.75 / ALIGNED ×1.0.
     """
     scores = []
     missing = []
@@ -58,9 +65,13 @@ def compute_polarization(lane_scores: dict, val_score: float | None) -> dict:
     rng = mx - mn
     has_pos2 = any(s >= 2.0 for s in scores)
     has_neg2 = any(s <= -2.0 for s in scores)
+    pos_strong = sum(1 for s in scores if s >= 1.0)
+    neg_strong = sum(1 for s in scores if s <= -1.0)
 
-    if rng >= 4.0 and has_pos2 and has_neg2:
+    if rng >= 4.0 and has_pos2 and has_neg2 and pos_strong >= 2 and neg_strong >= 2:
         label = "BIPOLAR"
+    elif rng >= 4.0 and (has_pos2 or has_neg2):
+        label = "OUTLIER"
     elif rng >= 3.0 and any(s > 0 for s in scores) and any(s < 0 for s in scores):
         label = "MIXED"
     else:
@@ -71,8 +82,74 @@ def compute_polarization(lane_scores: dict, val_score: float | None) -> dict:
         "range":         round(rng, 2),
         "max":           round(mx, 2),
         "min":           round(mn, 2),
+        "pos_strong":    pos_strong,
+        "neg_strong":    neg_strong,
         "missing_lanes": missing,
     }
+
+
+# ---------------------------------------------------------------------------
+# (1b) V2.19 — Red Team basis classifier (anti-spoofing)
+# ---------------------------------------------------------------------------
+
+# Mean-reversion attack keywords (Chinese + English).
+# 一旦出現任何一個 → mr_hits ≥ 1 → 視為 backward-looking attack。
+MR_KEYWORDS = (
+    "歷史均值", "mean revert", "mean reversion", "週期見頂", "週期峰值",
+    "週期高點", "Peak Cycle", "P/E ceiling", "回到歷史中位", "歷史毛利",
+    "historical median", "cycle peak", "regression to mean", "歷史平均",
+    "回歸到歷史", "歷史 P/E", "歷史本益比", "週期頂部",
+)
+
+# Forward mechanism breakage keywords — describe future-state catalysts.
+FW_KEYWORDS = (
+    "competitor", "客戶庫存", "supply addition", "量產", "需求飽和",
+    "技術替代", "demand saturation", "capacity addition", "inventory days",
+    "下游庫存", "新進入者", "next-gen", "庫存日數", "替代技術",
+    "新產能", "新對手", "市佔流失", "share loss",
+)
+
+
+def classify_red_team_basis(counter_thesis: str, kill_conditions: list) -> str:
+    """V2.19 — classify Red Team attack basis (anti-spoofing).
+
+    Returns one of:
+      - pure_forward          : fw_hits >= 1 AND mr_hits == 0
+                                (唯一可保 STRONG_COUNTER 殺傷力)
+      - pure_mean_reversion   : mr_hits >= 1 AND fw_hits == 0
+                                (純歷史攻擊，CONFIRMED tier 下自動降級)
+      - contaminated          : mr_hits >= 1 AND fw_hits >= 1
+                                (LLM 偷渡 mr — fw 救不回否決權，視同 mr)
+      - unclassified          : mr_hits == 0 AND fw_hits == 0
+                                (無關鍵字命中，退回原 verdict 邏輯)
+
+    Design: "contaminated" 不是 "mixed" — 命名強調污染而非平衡。
+    LLM 在 contamination case 下塞 1 個 fw 關鍵字無法救回 mr 否決權。
+    """
+    haystack_parts = []
+    if isinstance(counter_thesis, str):
+        haystack_parts.append(counter_thesis)
+    if isinstance(kill_conditions, list):
+        for kc in kill_conditions:
+            if isinstance(kc, str):
+                haystack_parts.append(kc)
+            elif isinstance(kc, dict):
+                # kill_condition entries may be {if:..., then:...} dicts
+                for v in kc.values():
+                    if isinstance(v, str):
+                        haystack_parts.append(v)
+
+    haystack = "\n".join(haystack_parts).lower()
+    mr_hits = sum(1 for kw in MR_KEYWORDS if kw.lower() in haystack)
+    fw_hits = sum(1 for kw in FW_KEYWORDS if kw.lower() in haystack)
+
+    if mr_hits == 0 and fw_hits == 0:
+        return "unclassified"
+    if mr_hits == 0 and fw_hits >= 1:
+        return "pure_forward"
+    if mr_hits >= 1 and fw_hits == 0:
+        return "pure_mean_reversion"
+    return "contaminated"
 
 
 # ---------------------------------------------------------------------------
@@ -208,8 +285,14 @@ def apply_to_trade(trade: dict) -> dict:
     rt_agree = compute_red_team_agreement(trade.get("red_team_verdict"),
                                             rt_det.get("verdict"))
 
+    # V2.19 — Red Team basis classifier (anti-spoofing post-filter)
+    rt_basis = classify_red_team_basis(
+        trade.get("red_team_counter_thesis") or trade.get("counter_thesis") or "",
+        trade.get("red_team_kill_conditions") or trade.get("kill_conditions") or [],
+    )
+
     trade["det_shadow"] = {
-        "version":              "V2.10.0",
+        "version":              "V2.19.0",
         "signal_polarization":  polar.get("label"),
         "polarization_detail":  polar,
         "valuation_score_det":  val_det,
@@ -217,6 +300,7 @@ def apply_to_trade(trade: dict) -> dict:
         "red_team_verdict_det": rt_det.get("verdict"),
         "red_team_detail":      rt_det,
         "red_team_agreement":   rt_agree,
+        "red_team_basis":       rt_basis,
     }
     return trade
 

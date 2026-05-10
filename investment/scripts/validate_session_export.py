@@ -63,6 +63,10 @@ TRADE_REQUIRED_V5 = [
     "fair_value_summary",   # Phase 4.5 deterministic anchor blend
 ]
 
+# V2.14.0+ optional thesis lifecycle fields (Phase 5.5 trader-memory-core register)
+# Not in TRADE_REQUIRED — protocol may skip register step gracefully.
+TRADE_OPTIONAL_THESIS = ("thesis_id", "thesis_registered_at")
+
 
 def fail(errors):
     print("[validate_session_export] ✗ schema drift:", file=sys.stderr)
@@ -107,6 +111,20 @@ def main():
     ver = entry.get("session_export_version")
     if ver not in ACCEPTED_VERSIONS:
         errors.append(f"session_export_version = {ver!r}, expected one of {ACCEPTED_VERSIONS}")
+
+    # ── 2b. V4.8 mis-stamp guard (V2.17.8) ───────────────────────────────
+    # If entry has V5.0-only fields (valuation_lane / fair_value_summary) but
+    # is stamped V4.8, that's a stamping bug — Claude wrote the wrong version
+    # in Phase 5. V4.8 schema doesn't include these fields by definition.
+    if ver == "V4.8":
+        trade_first = ((entry.get("trades_this_session") or [{}])[0]) or {}
+        v5_only_fields = [k for k in ("valuation_lane", "fair_value_summary")
+                          if trade_first.get(k)]
+        if v5_only_fields:
+            errors.append(
+                f"session_export_version='V4.8' but entry has V5.0-only fields {v5_only_fields} — "
+                f"this is a Phase 5 stamping bug. Patch session_export_version to 'V5.0'."
+            )
 
     # ── 3. Top-level required keys ───────────────────────────────────────
     for k in TOP_REQUIRED:
@@ -158,6 +176,31 @@ def main():
         weights = entry.get("active_weights_end_of_session") or {}
         if "Valuation" not in weights:
             errors.append("active_weights_end_of_session: missing Valuation weight (V5.0 5-lane requirement)")
+
+    # ── 5c. V2.19.0 — det_shadow polarization + red_team_basis ───────────
+    # 後處理 (apply_det_shadow.py) 必跑；缺欄 → schema fail
+    ds = trade.get("det_shadow")
+    if ds is None:
+        errors.append("det_shadow missing — run apply_det_shadow.py post-process before export (V2.19+)")
+    elif isinstance(ds, dict):
+        sp = ds.get("signal_polarization")
+        if sp not in (None, "ALIGNED", "MIXED", "OUTLIER", "BIPOLAR"):
+            errors.append(f"det_shadow.signal_polarization invalid (V2.19 4-tier): {sp!r}")
+        rtb = ds.get("red_team_basis")
+        if rtb not in (None, "pure_forward", "pure_mean_reversion", "contaminated", "unclassified"):
+            errors.append(
+                f"det_shadow.red_team_basis invalid (V2.19): {rtb!r} — "
+                "expected pure_forward / pure_mean_reversion / contaminated / unclassified"
+            )
+
+    # ── 5b. V2.14.0 optional thesis lifecycle type checks ────────────────
+    # If present, enforce type contract. Absence is OK (Phase 5.5 may have skipped).
+    tid = trade.get("thesis_id")
+    if tid is not None and not isinstance(tid, str):
+        errors.append(f"thesis_id must be string or null, got {type(tid).__name__}")
+    tra = trade.get("thesis_registered_at")
+    if tra is not None and not isinstance(tra, str):
+        errors.append(f"thesis_registered_at must be ISO 8601 string or null, got {type(tra).__name__}")
 
     # ── 6. Observation fields must be non-null even for HOLD ─────────────
     for k in ("macro_alignment", "fragility_label", "binary_classification",
