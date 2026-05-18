@@ -161,6 +161,12 @@
                 </div>
             </section>
 
+            <!-- Market sentiment trend (compact) — rendered by TrendChart (trend-chart.js).
+                 Click through to break-news.html for the full chart. -->
+            <a href="break-news.html" class="glass-card block p-4 no-underline" id="sentiment-trend-card">
+                <div id="index-trend-mount"></div>
+            </a>
+
             <!-- M3: Today's Focus Ticker (cross-module intersection, full-width attention strip) -->
             <div id="focus-ticker-card" class="hidden focus-ticker-promoted"></div>
 
@@ -417,6 +423,7 @@
 
     <script src="data-store.js"></script>
     <script src="analyze-queue.js"></script>
+    <script src="trend-chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

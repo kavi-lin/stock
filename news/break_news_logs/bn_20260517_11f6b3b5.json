@@ -1,0 +1,613 @@
+{
+  "news_id": "bn_20260517_11f6b3b5",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T12:19:45Z",
+  "last_activity_ts": "2026-05-17T12:33:54Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/17/opening-strait-of-hormuz-is-of-utmost-importance-eurogroup-head.html",
+    "feed_fingerprint": "g7 finance ministers meet amid warning economic consequences",
+    "published": "2026-05-17T12:14:30+00:00",
+    "url_hash": "sha1:3b628d0e292cd3a590d5649ad8c5ea6d99695436"
+  },
+  "headline": "G7 finance ministers to meet amid warning of economic consequences of prolonged Strait of Hormuz closure",
+  "headline_zh": null,
+  "raw_summary": "G7 finance ministers are due to meet in Paris on Monday and Tuesday as long-term borrowing costs surge.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 2.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T12:32:06Z",
+      "latency_ms": 23468,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是**宏觀地緣**事件,非個股題材。荷莫茲海峽若長期封鎖,全球約20%海運原油受阻,**油價短期可飆至三位數**,直接利多上游 **XOM/CVX/OXY** 與油輪股 **FRO**。但真正關鍵在第二行字:**長天期借貸成本同步飆升**——G7 急開會正是因油價推升通膨預期、壓垮債市,**TLT 久期受重擊**。對大盤是雙殺:能源成本+利率雙漲擠壓非能源企業毛利與估值。航空 **DAL/UAL** 燃油成本首當其衝。防務 **LMT/RTX** 受惠地緣緊張。此為風險情緒事件,classifier 標 sentiment 偏低估其衝擊。",
+        "bull_points": [
+          "油價飆升直接利多 XOM/CVX/OXY 上游",
+          "海運中斷推升油輪運價,FRO 受惠",
+          "地緣緊張支撐防務股 LMT/RTX 訂單"
+        ],
+        "bear_points": [
+          "長天期殖利率飆升重擊 TLT 久期",
+          "油價+利率雙漲擠壓非能源企業估值",
+          "航空 DAL/UAL 燃油成本首當其衝"
+        ],
+        "final_take": "看空大盤、看多能源與防務,緊盯債市利率失控風險",
+        "entities": {
+          "tickers": [
+            "XOM",
+            "CVX",
+            "OXY",
+            "FRO",
+            "TLT",
+            "LMT",
+            "RTX",
+            "DAL",
+            "UAL",
+            "SPY"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials",
+            "Financials",
+            "Materials"
+          ],
+          "themes": [
+            "oil supply shock",
+            "geopolitical risk",
+            "rising rates",
+            "inflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-supply-shock"
+          },
+          {
+            "subject": "ticker:OXY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-supply-shock"
+          },
+          {
+            "subject": "ticker:FRO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hormuz-closure"
+          },
+          {
+            "subject": "ticker:LMT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:geopolitical-risk"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          },
+          {
+            "subject": "ticker:DAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil-supply-shock"
+          },
+          {
+            "subject": "ticker:SPY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "地緣油價+利率雙重衝擊,classifier 低估"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T12:32:21Z",
+      "latency_ms": 14378,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了能源與通膨風險，市場更應關注**供應鏈彈性**。若荷莫茲海峽長期受阻，全球電子與工業物流將面臨嚴峻的**準時制 (Just-in-Time) 運輸瓶頸**。半導體上游原料與關鍵零組件的運輸延誤，將迫使代工廠如 **TSM** 或終端設備廠重新審視庫存策略，導致營運成本激增。這種地緣物流的不確定性，不僅推升運價，更會透過成本傳導，抑制科技業在 AI 與雲端基礎設施上的**資本支出 (CapEx) 兌現速度**。",
+        "bull_points": [
+          "國防與軍事工業需求因地緣緊張而獲得長期支撐。",
+          "國際物流混亂推升運價，航運業短期獲利預期改善。"
+        ],
+        "bear_points": [
+          "供應鏈斷鏈導致半導體與組裝交期延誤，毛利承壓。",
+          "通膨預期壓抑科技公司長期的資本支出預算。"
+        ],
+        "final_take": "地緣物流風險惡化，科技供應鏈成本與回補週期面臨修正。",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "ZIM",
+            "LMT",
+            "RTX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Technology"
+          ],
+          "themes": [
+            "Supply Chain",
+            "Geopolitical Risk",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Semiconductor",
+            "Logistics",
+            "Inventory"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:geopolitical_risk"
+          },
+          {
+            "subject": "ticker:ZIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:geopolitical_risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充半導體供應鏈受物流衝擊的二階效應，與能源論點區隔。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T12:32:52Z",
+      "latency_ms": 31598,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前串聚焦原油、利率、半導體物流,**漏掉荷莫茲另一個被低估的貨物:LNG**。該海峽承載全球約20%液化天然氣,等於卡達(Qatar)幾乎全部出口。封鎖一旦延長,亞洲與歐洲天然氣現貨價將比原油更劇烈跳升——卡達無管線繞道,**運輸風險近乎100%傳導**。第二順位受惠者是美國墨西哥灣 LNG 出口商 **LNG (Cheniere)**,北美氣源不經荷莫茲,反成替代供給贏家。但需一個**反方校正**:沙烏地 East-West 與阿聯 Habshan-Fujairah 管線合計可繞道約6-7 mbpd 原油,實際海運中斷量遠低於市場直覺的「20%全失」,油價三位數情境恐被高估。真正無解的是 LNG,不是原油。",
+        "bull_points": [
+          "卡達 LNG 無管線繞道,氣價彈升幅度大於油價",
+          "美國灣岸出口商 LNG (Cheniere) 替代供給直接受惠",
+          "歐亞天然氣現貨跳價,利多美天然氣上游"
+        ],
+        "bear_points": [
+          "沙烏地/阿聯繞道管線可分流6-7 mbpd,油價衝擊被高估",
+          "歷史上海峽封鎖多為短暫,情緒過度定價",
+          "氣價飆升推升歐洲工業成本,擴大通膨外溢"
+        ],
+        "final_take": "看多 LNG 出口鏈,但原油斷供幅度勿照單全收",
+        "entities": {
+          "tickers": [
+            "LNG",
+            "CVX",
+            "XOM"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities"
+          ],
+          "themes": [
+            "LNG export",
+            "Strait of Hormuz",
+            "energy supply shock"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:LNG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hormuz-lng-disruption"
+          },
+          {
+            "subject": "ticker:CVX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:energy-supply-shock"
+          },
+          {
+            "subject": "narrative:saudi-bypass-pipeline",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil-price-spike"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增 LNG 卡達斷供角度+繞道管線反方校正,前串皆未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T12:33:05Z",
+      "latency_ms": 12527,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "探討一個被忽視的二階影響：**海洋保險與戰爭險保費飆升**。荷莫茲海峽危機不僅推升運價，更迫使航運業面臨天文數字的戰爭險溢價，這是結構性成本的暴增。**再保險巨頭如 BRK.B (Berkshire) 或 ACGL (Arch Capital) 成為獲利關鍵受惠者**。反之，此類高額保費透過物流鏈傳導，將進一步侵蝕零售與非必須消費品的毛利率，形成繼能源與運費後的「第三層成本通膨」壓力，進一步削弱市場對於聯準會降息空間的預期。",
+        "bull_points": [
+          "再保險商保費收入與定價權顯著提升。",
+          "防禦型金融股具備抗通膨配置價值。"
+        ],
+        "bear_points": [
+          "物流成本增加削弱非必須消費品毛利。",
+          "航運保險惡性循環推升全球通膨壓力。"
+        ],
+        "final_take": "戰爭險溢價將是隱形的通膨推手，利多金融再保。",
+        "entities": {
+          "tickers": [
+            "BRK.B",
+            "ACGL",
+            "CB"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "Geopolitical risk",
+            "Inflation",
+            "Insurance"
+          ],
+          "tech_keywords": [
+            "Logistics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BRK.B",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:war_risk_premiums"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "納入戰爭險溢價作為物流成本結構的二階效應分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T12:33:43Z",
+      "latency_ms": 37856,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前串論及上游、油輪、LNG、再保險,**漏掉中游煉油廠的裂解價差 (crack spread)**。荷莫茲一旦受阻,中東中重質原油供應斷檔,具複雜裝置、可吃多種原油等級的美灣煉油廠 **VLO / MPC / PSX** 反受惠——成品油(汽柴油)漲幅快於原油,裂解價差爆走,煉油利潤率擴張。第二個被忽略的二階效應:封鎖直接砸向沙烏地、阿聯、卡達出口收入,當地**主權財富基金 (PIF / ADIA / QIA)** 恐被迫變現海外持股補國內財政缺口,對美股大型權值股構成隱性賣壓。反方校正:伊朗自身石油出口同樣依賴荷莫茲,長期自我封鎖等於自斷財源;史上即便兩伊「油輪戰」期間海峽從未真正全封,「長期封鎖」情境機率恐被高估。",
+        "bull_points": [
+          "煉油廠 VLO/MPC/PSX 裂解價差爆走、利潤率擴張",
+          "美灣複雜煉油裝置可吃多元原油,供應斷檔下更具彈性"
+        ],
+        "bear_points": [
+          "中東主權財富基金或被迫變現美股持股,隱性賣壓",
+          "伊朗自斷財源,長期全封鎖機率被市場高估"
+        ],
+        "final_take": "看多美灣煉油廠,但封鎖恐短於市場預期",
+        "entities": {
+          "tickers": [
+            "VLO",
+            "MPC",
+            "PSX"
+          ],
+          "sectors": [
+            "Energy",
+            "Financials"
+          ],
+          "themes": [
+            "oil supply shock",
+            "crack spread",
+            "sovereign wealth fund liquidity"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:crack-spread-blowout"
+          },
+          {
+            "subject": "ticker:MPC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:crack-spread-blowout"
+          },
+          {
+            "subject": "ticker:PSX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:crack-spread-blowout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.6,
+        "rationale_short": "煉油裂解價差與主權基金賣壓為新角度,封鎖時長仍存疑"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T12:33:54Z",
+      "latency_ms": 11843,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了煉油與能源，市場極度低估了荷莫茲海峽對**全球農業肥料供應鏈**的毀滅性潛力。中東不僅是原油與天然氣中心，更是全球氨 (Ammonia) 與尿素 (Urea) 的核心供應源。若封鎖發生，天然氣價格飆升將直接導致氮肥生產成本爆發，徹底打亂全球農業運作。這對北美肥料大廠如 **CF (CF Industries)** 與 **MOS (Mosaic)** 而言是雙面刃，短期內因天然氣供應優勢與替代供給需求而受益，取得極高的定價權，但長期恐因農業生產成本過高而導致下游需求疲軟。",
+        "bull_points": [
+          "北美肥料商 CF/MOS 獲替代供給議價權",
+          "氣源成本差異推升肥料獲利空間"
+        ],
+        "bear_points": [
+          "全球肥料成本飆升損害農民種植意願",
+          "肥料價格過高引發糧食通膨壓力"
+        ],
+        "final_take": "能源通膨外，需密切監控氮肥供給風險與農業成本。",
+        "entities": {
+          "tickers": [
+            "CF",
+            "MOS",
+            "NTR"
+          ],
+          "sectors": [
+            "Materials",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "Food security",
+            "Agri-supply chain"
+          ],
+          "tech_keywords": [
+            "Ammonia",
+            "Urea",
+            "Natural Gas"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CF",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:natural_gas_price_hike"
+          },
+          {
+            "subject": "ticker:MOS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:natural_gas_price_hike"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補足了農業肥料供應鏈與天然氣價格連結的二階影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ACGL",
+        "BRK.B",
+        "CB",
+        "CF",
+        "CVX",
+        "DAL",
+        "FRO",
+        "LMT",
+        "LNG",
+        "MOS",
+        "MPC",
+        "NTR",
+        "OXY",
+        "PSX",
+        "RTX",
+        "SPY",
+        "TLT",
+        "TSM",
+        "UAL",
+        "VLO",
+        "XOM",
+        "ZIM"
+      ],
+      "sectors": [
+        "Consumer Staples",
+        "Energy",
+        "Financials",
+        "Industrials",
+        "Materials",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Agri-supply chain",
+        "Food security",
+        "Geopolitical Risk",
+        "Geopolitical risk",
+        "Inflation",
+        "Insurance",
+        "LNG export",
+        "Strait of Hormuz",
+        "Supply Chain",
+        "crack spread",
+        "energy supply shock",
+        "geopolitical risk",
+        "inflation",
+        "oil supply shock",
+        "rising rates",
+        "sovereign wealth fund liquidity"
+      ],
+      "tech_keywords": [
+        "Ammonia",
+        "Inventory",
+        "Logistics",
+        "Natural Gas",
+        "Semiconductor",
+        "Urea"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-supply-shock"
+      },
+      {
+        "subject": "ticker:OXY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-supply-shock"
+      },
+      {
+        "subject": "ticker:FRO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hormuz-closure"
+      },
+      {
+        "subject": "ticker:LMT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:geopolitical-risk"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil-supply-shock"
+      },
+      {
+        "subject": "ticker:SPY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:geopolitical_risk"
+      },
+      {
+        "subject": "ticker:ZIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:geopolitical_risk"
+      },
+      {
+        "subject": "ticker:LNG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hormuz-lng-disruption"
+      },
+      {
+        "subject": "ticker:CVX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:energy-supply-shock"
+      },
+      {
+        "subject": "narrative:saudi-bypass-pipeline",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil-price-spike"
+      },
+      {
+        "subject": "ticker:BRK.B",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:war_risk_premiums"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:crack-spread-blowout"
+      },
+      {
+        "subject": "ticker:MPC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:crack-spread-blowout"
+      },
+      {
+        "subject": "ticker:PSX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:crack-spread-blowout"
+      },
+      {
+        "subject": "ticker:CF",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:natural_gas_price_hike"
+      },
+      {
+        "subject": "ticker:MOS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:natural_gas_price_hike"
+      }
+    ],
+    "bull_summary": [
+      "油價飆升直接利多 XOM/CVX/OXY 上游",
+      "海運中斷推升油輪運價,FRO 受惠",
+      "地緣緊張支撐防務股 LMT/RTX 訂單",
+      "國防與軍事工業需求因地緣緊張而獲得長期支撐。",
+      "國際物流混亂推升運價，航運業短期獲利預期改善。",
+      "卡達 LNG 無管線繞道,氣價彈升幅度大於油價"
+    ],
+    "bear_summary": [
+      "長天期殖利率飆升重擊 TLT 久期",
+      "油價+利率雙漲擠壓非能源企業估值",
+      "航空 DAL/UAL 燃油成本首當其衝",
+      "供應鏈斷鏈導致半導體與組裝交期延誤，毛利承壓。",
+      "通膨預期壓抑科技公司長期的資本支出預算。",
+      "沙烏地/阿聯繞道管線可分流6-7 mbpd,油價衝擊被高估"
+    ],
+    "final_take": "能源通膨外，需密切監控氮肥供給風險與農業成本。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T12:33:54Z",
+    "close_reason": "max_rounds",
+    "divergence_note": ""
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

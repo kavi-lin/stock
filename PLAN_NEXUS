@@ -1,0 +1,373 @@
+ Ready to code?                                                                                                                                                                                             
+                                                                                                                                                                                                            
+ Here is Claude's plan:                                                                                                                                                                                     
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Project Nexus V3.0 — Knowledge Graph Layer for AI 投資委員會                                                                                                                                               
+                                                                                                                                                                                                            
+ Context                                  
+                                                                                                                                                                                                            
+ User want Obsidian-style force-directed knowledge graph layer on top of existing V2.20 AI 投資委員會 system. Reference: 5 screenshots showing dark canvas with pale-grey nodes (tickers MSFT/TSM/AVGO +
+ concept nodes capex_supercycle, ai-supply-chain, hbm_base_die_n3_pull_through), edges between them, node size by centrality.
+                                          
+ Why now: existing V2.X analyzes individual stocks well, but lacks 全域空間感知 (global spatial awareness). Daily news + theme detector + sector intel + deep dives already produce structured artifacts —
+ what's missing is the edge layer that surfaces 2nd-order beneficiaries (e.g., NVDA capex story → VRT/COHR/GLW supply chain) and renders narrative共振 visually before financial outcomes confirm them.
+                                     
+ Intended outcome: new /graph.html Dashboard page showing the knowledge graph; daily-refreshed via daily_update.sh Step 7; centrality scores readable via /api/graph/centrality/<TICKER>. Decision-layer
+ untouched in MVP (exploration phase per user preference — graph is for human eyeballing first, Arbiter wiring deferred to V3.1).
+
+ Core Principle (Project Identity)
+
+ Nexus is news- + financial-analysis-driven, not a stock-screener add-on. Its job: synthesize sector intel + news digests + deep-dive narratives + earnings transcripts + thematic reports through LLM
+ analysis to surface 1st-order / 2nd-order / 3rd-order relationships between tickers, themes, and catalysts.
+
+ - 1st-order: ticker ↔ direct catalyst (e.g., NVDA ← FY27Q1 earnings)
+ - 2nd-order: ticker ↔ supply-chain / theme共振 beneficiary (e.g., NVDA capex → VRT cooling, COHR optics)
+ - 3rd-order: cross-theme bridge (e.g., AI capex → power grid bottleneck → GEV / VST utility uplift)
+
+ Tier 3 LLM is the heart, not a supplement. Tier 1 (structured JSON) anchors the graph; Tier 2 (regex) cheap-fills the gaps; Tier 3 carries the structural discovery load — it reads the prose where
+ 2nd/3rd-order relationships actually live (deep-dive narratives, news debate_notes, sector divergence sections).
+
+ Locked Design Decisions
+
+ ┌─────┬──────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  #  │     Decision     │                                           Choice                                            │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 1   │ MVP scope        │ Visualization + Centrality read-only (no Arbiter wiring)                                    │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 2   │ Render library   │ force-graph v1.43 by Vasturiano (canvas, ~100KB CDN)                                        │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 3   │ Extraction tiers │ All three — Tier 1 (structured JSON) + Tier 2 (regex) + Tier 3 (Haiku 4.5 LLM NER)          │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 4   │ LLM              │ Haiku 4.5 batched with prompt caching (~$0.05/day)                                          │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 5   │ Refresh          │ Daily auto via new daily_update.sh Step 7                                                   │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 6   │ Visual           │ Obsidian monochrome — pale grey nodes, size = √(degree centrality), hover glows --secondary │
+ ├─────┼──────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ 7   │ Version bump     │ V2.20.x → V3.0.0 (major — Nexus = structural architectural layer per user directive)        │
+ └─────┴──────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ Phase A — Graph data model + Tier 1 builder
+
+ Files (new):
+ - scripts/nexus/__init__.py (~5 lines)
+ - scripts/nexus/schema.py (~100 lines) — node/edge dataclasses, edge-type enum, node-type enum
+ - scripts/nexus/config.yaml (~60 lines) — DECAY_STRATEGIES map per node type, tier confidence multipliers, min_edge_weight: 0.05, max_nodes: 800, tier toggles, ticker/theme alias map
+ - scripts/nexus/build_graph.py (~400 lines) — orchestrator: Tier 1+2+3 merge → multi-dim decay → confidence-weighted → centrality → prune → emit Dashboard/nexus_graph.json
+ - scripts/nexus/tier1_loaders.py (~250 lines) — one loader per structured source
+ - scripts/nexus/pagerank_lite.py (~30 lines) — Power Iteration PageRank fallback when networkx unavailable
+
+ Node id namespace: ticker:NVDA, theme:capex_supercycle, catalyst:NVDA_FY27Q1_EARNINGS_2026-05-21, sector:semiconductors, narrative:hbm_base_die_n3_pull_through, thesis:NVDA-001.
+
+ Edge types: MENTIONED_IN, BELONGS_TO_THEME, BELONGS_TO_SECTOR, CATALYST_FOR, PEER_OF, BULL_CASE_FOR, BEAR_CASE_FOR, OUTCOME_FOR, SUPPLY_CHAIN_HOP.
+
+ JSON shape:
+ {
+   "nodes": [{"id": "ticker:NVDA", "type": "ticker", "label": "NVDA",
+              "weight": 0.0421, "pagerank": 0.0387,
+              "mentions": 47, "last_seen": "2026-05-12",
+              "metadata": {"sector": "semiconductors", "theme_count": 6}}],
+   "edges": [{"source": "ticker:NVDA", "target": "theme:capex_supercycle",
+              "type": "BELONGS_TO_THEME", "weight": 0.84,
+              "last_seen": "2026-05-12",
+              "sources": ["theme_detector:2026-05-12", "deep_dive:20260510_NVDA"]}],
+   "meta": {"generated_at": "...", "half_life_days": 21,
+            "decay_anchor_date": "2026-05-13",
+            "counts": {"nodes_by_type": {...}, "edges_by_type": {...}}}
+ }
+
+ Tier 1 sources (reuse existing extractors where possible):
+
+ ┌──────────────────────┬────────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────┐
+ │        Source        │                                  Path                                  │                            Yields                             │
+ ├──────────────────────┼────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────┤
+ │ theme-detector cache │ skills/theme-detector/cache/theme_detector_*.json (latest)             │ theme nodes + BELONGS_TO_THEME edges                          │
+ ├──────────────────────┼────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────┤
+ │ event index          │ reports/decision_review/event_index_latest.json                        │ ticker nodes + theme/sector edges + OUTCOME_FOR from verdicts │
+ ├──────────────────────┼────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────┤
+ │ thesis registry      │ investment/invest_logs/theses/*.json (guard os.path.exists)            │ thesis nodes + BULL_CASE_FOR/BEAR_CASE_FOR                    │
+ ├──────────────────────┼────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────┤
+ │ news digests JSON    │ news/news_logs/*_digest.json (tickers_mentioned[], affected_sectors[]) │ catalyst nodes + MENTIONED_IN                                 │
+ ├──────────────────────┼────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────┤
+ │ earnings cache       │ Dashboard/data.json earnings_analyses[] (pre-extracted)                │ ticker→catalyst CATALYST_FOR                                  │
+ ├──────────────────────┼────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────┤
+ │ sector reports       │ reports/*_sector_report.md via scripts/extractors/sector_extractor.py  │ sector nodes; weight = recency-decayed mention count          │
+ └──────────────────────┴────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────┘
+
+ Multi-dimensional time decay (per Gemini enhancement #1) — different node types have different "narrative inertia":
+
+ ┌──────────────────────────────────┬───────────┬─────────────────────────────────────────────────────────────────────────┐
+ │         Node / Edge type         │ Half-life │                                Rationale                                │
+ ├──────────────────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────┤
+ │ catalyst (dated event)           │ 7 days    │ Catalysts expire fast — earnings miss matters this week, not next month │
+ ├──────────────────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────┤
+ │ narrative / theme (default)      │ 21 days   │ Standard market-narrative lifespan                                      │
+ ├──────────────────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────┤
+ │ structural_shift (V2.18 concept) │ 90 days   │ AI Supercycle, energy transition — long共振, slow fade                  │
+ ├──────────────────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────┤
+ │ peer_of / supply_chain_hop       │ 45 days   │ Industrial relationships shift over quarters, not weeks                 │
+ ├──────────────────────────────────┼───────────┼─────────────────────────────────────────────────────────────────────────┤
+ │ outcome_for (verdict edge)       │ 30 days   │ Decision-outcome links useful for ~1 month                              │
+ └──────────────────────────────────┴───────────┴─────────────────────────────────────────────────────────────────────────┘
+
+ Defined in config.yaml as DECAY_STRATEGIES map. Applied per-edge based on edge type (or target node type for ambiguous cases).
+
+ Confidence-weighted edge formula (per Gemini enhancement #5):
+
+ final_weight = (tier_confidence × raw_frequency) × decay_factor(edge_type, age_days)
+
+ tier_confidence:
+   Tier 1 (structured JSON): 1.0
+   Tier 2 (regex):           0.7
+   Tier 3 (LLM NER):         0.85
+
+ Prevents Tier 3 hallucinations from drowning out Tier 1 anchors while still letting LLM-found 2nd/3rd-order edges compete fairly with regex-found ones.
+
+ Centrality: prefer networkx.degree_centrality + pagerank(weight="final_weight", alpha=0.85, max_iter=50, tol=1e-4). Gemini diagnosis: networkx is NOT installed in current env — fallback chain:
+
+ 1. Try import networkx → use it.
+ 2. If unavailable → scripts/nexus/pagerank_lite.py Power Iteration PageRank (~20 lines, no deps):
+ def pagerank_lite(edges, alpha=0.85, iters=50, tol=1e-4):
+     # Build adjacency dict, normalize, iterate r = (1-α)/N + α·M·r
+     ...
+ 3. Worst case → degree-only centrality (O(E), zero deps).
+
+ Also add pip install networkx --quiet as a soft check in daily_update.sh Step 7 wrapper (non-fatal — Step 7 continues with fallback if install fails).
+
+ Verify Phase A:
+ python3 scripts/nexus/build_graph.py --tier 1 --dry-run    # prints counts, writes nothing
+ python3 scripts/nexus/build_graph.py --tier 1
+ ls -lh Dashboard/nexus_graph.json    # expect <2MB
+ python3 -c "import json; g=json.load(open('Dashboard/nexus_graph.json')); print(len(g['nodes']), 'nodes /', len(g['edges']), 'edges')"
+
+ Phase B — Tier 2 regex enrichment
+
+ File (new): scripts/nexus/tier2_regex.py (~200 lines) — wraps existing scripts/extractors/deep_dive_extractor.py + news_digest_extractor.py to get parsed MD slices, then runs nexus-specific regex.
+
+ Patterns (compiled once):
+ - Catalyst: r"(?i)\b(FOMC|CPI|FY\d+Q\d+ earnings|GTC \d{4}|Computex|WWDC \d{4})\b.*?(\d{4}-\d{2}-\d{2})?"
+ - Peer mentions: universe from Dashboard/heatmap_universe.json (517 tickers)
+ - Supply-chain phrases: r"(supply chain|pull-through|wafer allocation|HBM base die|N3|N2)\b"
+
+ Emits (src_id, edge_type, tgt_id, weight, source_path) tuples merged into graph. Idempotent.
+
+ Verify Phase B:
+ python3 scripts/nexus/tier2_regex.py --since 30d --print    # expect 200-500 triples
+ python3 scripts/nexus/build_graph.py --tier 1,2             # PEER_OF / SUPPLY_CHAIN_HOP edges present
+
+ Phase C — Tier 3 LLM NER (Haiku 4.5)
+
+ Files (new):
+ - scripts/nexus/tier3_llm_ner.py (~250 lines)
+ - scripts/nexus/prompts/ner_system.md (~80 lines) — fixed ontology + few-shot examples (cached as cache_control: ephemeral)
+ - scripts/nexus/cache/ (gitignored) — {sha256}.json per source MD
+
+ SDK call (Anthropic Python SDK, prompt caching):
+ client.messages.create(
+     model="claude-haiku-4-5",
+     max_tokens=1500,
+     system=[{"type":"text","text": ONTOLOGY,
+              "cache_control":{"type":"ephemeral"}}],
+     messages=[{"role":"user","content":[{"type":"text","text": MD_SLICE}]}]
+ )
+
+ Input scope: past 30 days of reports/*_news_digest.md, reports/*_sector_report.md, deep-dive MDs, postmortems. Strip frontmatter, window to 6k tokens per slice.
+
+ Output schema (LLM must emit JSON):
+ {"entities": [{"id":"theme:hbm_base_die_n3_pull_through","label":"...","type":"narrative"}],
+  "triples":  [{"source":"ticker:NVDA","edge":"CATALYST_FOR",
+                "target":"catalyst:GTC_2026","confidence":0.92}]}
+
+ Idempotency + cost:
+ - Cache key = sha256(md_path + mtime_ns). Cached MDs skip API. Re-running same day costs $0.
+ - Daily steady-state budget: ~40 MDs × ~3k tokens × system-prompt cache hit → ~$0.05/day.
+ - First-run backfill containment (Gemini risk #2): on first invocation, 30 days × ~40 reports/day × ~3k tokens ≈ 3.6M input tokens. To avoid first-day cost spike:
+   - --backfill-limit N flag (default 10 reports/run) — backfill spread over ~30 days
+   - OR --backfill-since DATE to bound the window
+   - Worst case full backfill at Haiku 4.5 rates: ≈$3 one-time, still bounded
+ - Canonicalize labels via re.sub(r"\W+","_", lower()) + alias map in config.yaml.
+
+ Alias canonicalization guard (per Gemini enhancement #2, mandatory two-stage post-process):
+
+ Stage 1 — Hard canonicalization against existing project sources:
+ 1. Load skills/_shared/industry_name_mapping.yaml (if exists) + Dashboard/heatmap_universe.json (517 tickers) + skills/_shared/company_context.py SECTOR_UNIVERSE
+ 2. Any LLM-emitted entity matching by alias (case-insensitive, fuzzy rapidfuzz.ratio > 90) → forced canonical id (e.g., "Taiwan Semi" / "TSMC" / "台積電" → ticker:TSM)
+ 3. Build alias map cache at scripts/nexus/cache/alias_resolved.json for hit-replay
+
+ Stage 2 — Provisional vs. promoted classification:
+ - LLM emits an entity that does NOT match any known ticker / theme / sector
+ → default to type: narrative (NOT ticker)
+ → marked status: provisional
+ - Entity only "promoted" to first-class node (e.g., narrative → recognized theme, or recognized as ticker candidate) after appearing in ≥3 independent source documents (different MD paths, not same-day
+ duplicates)
+ - Provisional nodes still render but with reduced visual weight + warning hover badge
+
+ Rejected triples (failed Stage 1 ticker whitelist) → scripts/nexus/cache/rejected.jsonl for manual review.
+
+ Verify Phase C:
+ ANTHROPIC_API_KEY=... python3 scripts/nexus/tier3_llm_ner.py --since 7d --limit 5
+ # Expect: 5 cache misses, JSON triples printed
+ # Rerun: 5 cache hits, 0 API calls
+ ls scripts/nexus/cache/ | wc -l
+
+ Phase D — Daily integration
+
+ File (modify): daily_update.sh — insert Step 7 after Step 6 ｜ Thematic Screener. Also bump _daily_update_state["total_steps"] in dashboard_server.py from 6 to 7.
+
+ echo "[ 7/7 ]  Nexus 知識圖譜（Tier 1+2+3）..."
+ python3 scripts/nexus/build_graph.py --tier 1,2,3 --full
+ if [ $? -eq 0 ]; then
+   echo "         ✅ Nexus graph 更新完成 → Dashboard/nexus_graph.json"
+ else
+   echo "         ⚠️   Nexus 更新失敗（非致命），繼續執行..."
+ fi
+
+ Non-fatal (no set -e escape). Target: <60s added wall time when Tier 3 fully cached.
+
+ Verify Phase D:
+ bash daily_update.sh 2>&1 | tail -20    # Step 7 visible
+
+ Phase E — Dashboard graph page
+
+ Files (new + modify):
+ - Dashboard/graph.html (~120 lines, new) — clone shell from Dashboard/earnings.html
+ - Dashboard/page-graph.js (~400 lines, new)
+ - Dashboard/utils.js (modify) — add nav item to NAV_ITEMS:
+ { id: 'graph', href: 'graph.html', icon: 'network', i18n: 'nav_graph', zh: '知識圖譜', group: 'portfolio' }
+ - Dashboard/i18n.js (modify) — add nav_graph zh/en keys
+
+ CDN in graph.html: <script src="https://unpkg.com/force-graph@1.43"></script>
+
+ Render outline (page-graph.js):
+ const graph = ForceGraph()(container)
+   .graphData(data)
+   .nodeRelSize(4)
+   .nodeVal(n => Math.sqrt(n.weight * 1000))
+   .nodeLabel(n => `${n.label} · ${n.type} · deg=${n.weight.toFixed(3)}`)
+   .nodeColor(n => hoveredNode === n
+        ? getCSSVar('--secondary')        // hover glow
+        : 'rgba(161,161,170,0.55)')       // pale grey monochrome
+   .linkColor(() => 'rgba(113,113,122,0.18)')
+   .linkWidth(l => Math.max(0.5, l.weight * 2))
+   .onNodeHover(setHovered)
+   .onNodeClick(n => UI.openNodePanel(n))
+   .cooldownTicks(80);
+
+ Controls (left rail, reuses .sidebar-* patterns):
+ - Search box → fuzzy-match node label, camera-pan + ring-flash on match
+ - Node-type checkboxes (ticker / theme / catalyst / sector / narrative / thesis); provisional narratives toggled separately
+ - Time-decay slider (7d–120d global multiplier on DECAY_STRATEGIES) → re-fetch from /api/graph/data?decay_mult=N OR client-side recompute on cached raw edges
+ - Hover side-panel: degree, pagerank, top 5 neighbors, last_seen, source links, provisional/promoted badge
+
+ Narrative Flow path-tracing (per Gemini enhancement #3 — directly addresses the proposal's 全域空間感知 pain point):
+
+ Click a ticker (e.g., NVDA) → page-graph.js runs a BFS up to 3 hops from clicked node:
+ - 1st-hop neighbors highlighted bright (full opacity)
+ - 2nd-hop highlighted medium (0.6 opacity)
+ - 3rd-hop dim (0.3 opacity)
+ - All other nodes dim to 0.08 opacity
+ - Edges along the BFS frontier rendered with --secondary (blue) glow + linkDirectionalParticles: 3 animated flow
+ - Side-panel lists the actual paths: e.g.,
+   - NVDA → capex_supercycle → VRT (cooling beneficiary)
+   - NVDA → SUPPLY_CHAIN_HOP → COHR (optics)
+   - NVDA → MENTIONED_WITH → GLW (photonics)
+   - NVDA → capex_supercycle → power_grid_bottleneck → GEV (3rd-order)
+ - Click "Reset" or click empty canvas → restore default view
+
+ This is the killer feature for surfacing 2nd-order beneficiaries before financial outcomes confirm them.
+
+ Theming: respects data-theme="light" via getComputedStyle(document.documentElement).getPropertyValue('--secondary').
+
+ Verify Phase E:
+ python3 dashboard_server.py
+ # Visit http://localhost:8080/graph.html
+ # Expect: monochrome force graph, hover glows blue, search jumps node,
+ # sidebar shows "知識圖譜" under PORTFOLIO group with `network` lucide icon.
+
+ Phase F — Centrality API
+
+ File (modify): dashboard_server.py — +60 lines inside do_GET /api/... dispatch chain near line 2502 (follows existing /api/positions pattern):
+
+ if path.startswith("/api/graph/centrality/"):
+     ticker = path.rsplit("/", 1)[-1].upper()
+     return self._serve_centrality(ticker)
+ if path == "/api/graph/data":
+     return self._serve_file("Dashboard/nexus_graph.json", "application/json")
+
+ _serve_centrality(ticker) reads Dashboard/nexus_graph.json once per request (<5MB acceptable), filters edges touching ticker:{TICKER}, returns:
+
+ {"ticker": "NVDA",
+  "degree_centrality": 0.0421, "pagerank": 0.0387,
+  "connected_themes": [{"id":"theme:capex_supercycle","weight":0.84}],
+  "connected_catalysts": [...],
+  "last_seen": "2026-05-12"}
+
+ Important: no Arbiter / investment_protocol changes. Pure inspection per locked decision #1.
+
+ Verify Phase F:
+ curl -s http://localhost:8080/api/graph/centrality/NVDA | python3 -m json.tool
+ curl -sI http://localhost:8080/api/graph/data | head -5
+
+ Phase G — Version + docs
+
+ Files (modify):
+ - VERSION → 3.0.0
+ - Dashboard/utils.js:11 → 'V3.0.0'
+ - CHANGELOG.md → new ## [3.0.0] — 2026-05-13 — Project Nexus (Knowledge Graph) block with ### Added (knowledge graph layer, /graph.html page, Tier 1+2+3 extraction pipeline, daily Step 7, centrality
+ API), ### Why (major version jump: Nexus introduces a structural new layer — graph-shaped entity store + visualization — atop the existing V2.X analytical pipeline, enabling 2nd-order beneficiary
+ discovery + narrative共振 visualization)
+ - README.md → update top-line architecture diagram + version badge to V3.0.0; add brief Nexus paragraph in feature list
+ - CLAUDE.md → new "Knowledge Graph (Nexus)" subsection (~15 lines) documenting /graph.html page, daily refresh cadence, /api/graph/centrality/<TICKER> endpoint, explicit note that Arbiter integration is
+  deferred to a future minor (V3.1+)
+
+ Verify Phase G:
+ grep -E "3\\.0\\.0|V3\\.0\\.0" VERSION Dashboard/utils.js CHANGELOG.md    # three matches aligned
+
+ Critical Files Referenced (existing, to be reused)
+
+ - scripts/extractors/deep_dive_extractor.py — parsing of deep-dive MDs
+ - scripts/extractors/news_digest_extractor.py — news MD parsing
+ - scripts/extractors/theme_detector_extractor.py — theme MD parsing
+ - scripts/extractors/sector_extractor.py — sector MD parsing
+ - scripts/build_event_index.py — pattern for daily aggregation script
+ - investment/scripts/register_thesis.py — thesis JSON writer (graph reads its output)
+ - Dashboard/heatmap_universe.json — ticker whitelist (517 names)
+ - Dashboard/utils.js (NAV_ITEMS, VERSION constant)
+ - dashboard_server.py (line ~172 SCRIPT_PROTOCOLS, line ~215 total_steps, line ~2502 API dispatch)
+
+ End-to-end Verification
+
+ 1. python3 scripts/nexus/build_graph.py --tier 1,2,3 --full runs clean, emits Dashboard/nexus_graph.json <5MB
+ 2. bash daily_update.sh shows [ 7/7 ]  Nexus 知識圖譜 step succeeding
+ 3. Visit http://localhost:8080/graph.html → force-directed monochrome graph renders, MSFT/TSM/AVGO appear as larger nodes, hover glows --secondary blue, click opens side-panel with neighbors, search
+ jumps to ticker
+ 4. curl http://localhost:8080/api/graph/centrality/NVDA returns valid centrality JSON
+ 5. grep -E "3\.0\.0|V3\.0\.0" VERSION Dashboard/utils.js CHANGELOG.md — three aligned matches
+ 6. Re-run daily_update.sh next day: Tier 3 LLM cache hits ≥90%, daily cost <$0.10
+ 7. Existing pages (/decisions.html, /sector.html, /earnings.html) unaffected — no V2.20 regression
+
+ Top 4 Risks + Mitigations
+
+ 1. Tier 3 LLM hallucinates / fragments nodes (Taiwan Semi vs TSM vs TSMC as separate nodes) → graph noise + misleading centrality.
+   - Mitigation: two-stage canonicalization in Phase C (hard alias + ≥3-doc promotion rule). All Tier 3 entities default to provisional narrative type until proven. Rejected →
+ scripts/nexus/cache/rejected.jsonl.
+ 2. nexus_graph.json balloons past 5MB → frontend force-graph stalls / browser hangs (Gemini risk #1).
+   - Mitigation: pruning pipeline in build_graph.py AFTER decay AND BEFORE centrality:
+       - Drop isolated leaf nodes (degree 1 AND final_weight < 0.05)
+     - Drop provisional narratives with mention_count < 3
+     - Sort remaining edges by final_weight desc, hard cap at max_nodes: 800
+     - assert len(json.dumps(graph)) < 5_000_000 before write
+   - Output ledger: log dropped-node + dropped-edge counts to scripts/nexus/cache/build_log_<DATE>.json for audit.
+ 3. First-day LLM cost spike on 30-day backfill (Gemini risk #2).
+   - Mitigation: --backfill-limit 10 flag (default); SHA256 cache makes each MD a one-time cost; spread backfill across ~30 days of daily runs. Worst case full backfill ≈$3 one-time.
+ 4. networkx not installed in current env (Gemini diagnostic).
+   - Mitigation: triple fallback — networkx → pagerank_lite.py (Power Iteration, ~20 lines, no deps) → degree-only. daily_update.sh attempts pip install networkx --quiet once; if fails, fallback engages
+ silently. Step 7 non-fatal.
+
+ Out of Scope (V3.1+ candidates — NOT in this plan)
+
+ - Wiring centrality into investment_protocol Phase 3 Arbiter (二階衍生推薦 + 紅隊打折) — deferred per user choice (target V3.1)
+ - Neo4j / dedicated graph DB — networkx + JSON sufficient for current volume
+ - 3D / WebGL renderer — force-graph 2D is enough for first cut
+ - Real-time WebSocket updates — daily refresh adequate at exploration phase
+ - Backtest of "did graph centrality predict outperformance?" — wait until 60+ days of graph snapshots exist

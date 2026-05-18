@@ -193,6 +193,32 @@
 
     </main>
 
+    <!-- V2.17.19 — Drill-down modal: tile click → list all decisions for that source -->
+    <div id="cal-drill-modal" class="cal-drill-modal hidden" aria-hidden="true">
+        <div class="cal-drill-backdrop"></div>
+        <div class="cal-drill-shell" role="dialog" aria-modal="true" aria-labelledby="cal-drill-title">
+            <header class="cal-drill-header">
+                <div class="cal-drill-titlewrap">
+                    <span class="cal-drill-icon" id="cal-drill-icon">📈</span>
+                    <h2 class="cal-drill-title" id="cal-drill-title">deep-dive</h2>
+                    <span class="cal-drill-count" id="cal-drill-count">0 / 0</span>
+                </div>
+                <div class="cal-drill-controls">
+                    <div class="cal-drill-filter" id="cal-drill-filter"></div>
+                    <select class="cal-drill-sort" id="cal-drill-sort">
+                        <option value="date_desc">📅 ↓ date</option>
+                        <option value="date_asc">📅 ↑ date</option>
+                        <option value="return_desc">📊 ↓ return</option>
+                        <option value="return_asc">📊 ↑ return</option>
+                        <option value="score_desc">⭐ ↓ score</option>
+                    </select>
+                    <button class="cal-drill-close" id="cal-drill-close" aria-label="close">✕</button>
+                </div>
+            </header>
+            <div class="cal-drill-body" id="cal-drill-body"></div>
+        </div>
+    </div>
+
     <script src="i18n.js"></script>
     <script src="utils.js"></script>
     <script src="page-calendar.js"></script>

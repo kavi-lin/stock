@@ -1,0 +1,727 @@
+{
+  "news_id": "bn_20260514_83a6ae0e",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T08:12:44Z",
+  "last_activity_ts": "2026-05-14T08:29:24Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/4041c8f12779",
+    "feed_fingerprint": "futu:CSCO,NVDA:7efb048790",
+    "published": "2026-05-14T16:05:57+08:00",
+    "url_hash": "sha1:3981a43edfd38fe8af3c6ba1b6656fc15b214507"
+  },
+  "headline": "思科美股盤前暴漲近20%，本季和全年指引全面超預期、AI訂單大幅上調",
+  "headline_zh": null,
+  "raw_summary": "思科美股盤前暴漲近20%，本季和全年指引全面超預期、AI訂單大幅上調；英偉達漲2.5%，路透稱美國批准向10家中國公司出售H200芯片。邁威爾科技、諾基亞盤前續漲約4%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T08:23:53Z",
+      "latency_ms": 25002,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**思科 (CSCO) 盤前 +20%** 是這則新聞最大訊號 — 不是情緒題，是 **AI networking capex 確認題**。本季 + 全年指引雙超 + AI 訂單上調，代表企業級 AI infra 已從 hyperscaler 外溢到 enterprise data center switching 層。讀法：**Arista (ANET) 是直接受惠 read-through**（同樣吃 800G / AI back-end fabric），**Marvell (MRVL) +4% 與 Nokia (NOK) +4%** 是 optical / DCI 連動。**NVDA +2.5% + H200 批准賣 10 家中國公司**是另一條獨立 catalyst — 邊際解禁有助於 Q2 China revenue 但量級不大 (H200 非旗艦)。風險：CSCO 暴漲後**已透支** ANET 同步上漲空間，明天 ANET 開盤若 gap-up 過大反而是減碼點，不是追價點。",
+        "bull_points": [
+          "CSCO 指引超預期確認企業級 AI networking 需求外溢",
+          "ANET / MRVL / NOK 同題材直接 read-through 受惠",
+          "H200 解禁邊際利多 NVDA 中國 Q2 營收"
+        ],
+        "bear_points": [
+          "CSCO +20% 已 price-in，ANET gap-up 追價風險高",
+          "H200 非旗艦，10 家中國公司量級對 NVDA 不大",
+          "盤前情緒過熱，留意當日收盤是否守住漲幅"
+        ],
+        "final_take": "看多 AI networking 鏈，但 ANET 避免追高",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "ANET",
+            "NVDA",
+            "MRVL",
+            "NOK"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Equipment",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "AI networking",
+            "Enterprise AI infrastructure",
+            "China semiconductor export"
+          ],
+          "tech_keywords": [
+            "800G Ethernet",
+            "H200",
+            "AI back-end fabric",
+            "DCI",
+            "Silicon Photonics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_networking_capex"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_networking_capex"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_networking_capex"
+          },
+          {
+            "subject": "ticker:NOK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_networking_capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200_china_export_approval"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ANET"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:enterprise_ai_infra"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "CSCO 指引超預期 = AI networking 外溢訊號，read-through 明確"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T08:26:00Z",
+      "latency_ms": 127194,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "思科 (CSCO) 的 AI 網絡設備需求強勁，這不僅是自身業績的亮點，更是對其關鍵供應商的積極訊號。**Broadcom (AVGO)** 作為企業級 AI 交換器核心晶片的主要供應商，預計將直接受惠於此波設備升級潮。企業數據中心對更高性能網絡的投資正加速，這代表著 AI 基礎設施的擴張正深入至企業端，為 AVGO 帶來新的增長動能。",
+        "bull_points": [
+          "Broadcom (AVGO) 受惠於企業 AI 網絡晶片需求。",
+          "AI 基礎設施擴張至企業端。"
+        ],
+        "bear_points": [
+          "Broadcom 股價預期已部分反映。",
+          "AI 數據中心建設瓶頸仍存。"
+        ],
+        "final_take": "觀察 AVGO 伺服器與網路晶片組合表現。",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "ANET",
+            "MRVL",
+            "NOK",
+            "NVDA",
+            "AVGO"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors and Semiconductor Equipment",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Enterprise AI Infrastructure",
+            "AI Networking"
+          ],
+          "tech_keywords": [
+            "AI networking",
+            "switching chips",
+            "enterprise data center",
+            "ASIC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Enterprise AI Infrastructure"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Networking"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "指出 Broadcom (AVGO) 作為關鍵晶片供應商。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T08:26:22Z",
+      "latency_ms": 21608,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪覆蓋 ANET / AVGO / MRVL / NOK，補一個**被忽略的二階節點**：**Coherent (COHR) 與 Lumentum (LITE)** — 800G / 1.6T optical transceiver 的 laser chip 供應商。CSCO Silicon One + AI fabric pluggable optics 訂單上調，**transceiver attach rate** 同步放大。**Credo (CRDO) 是另一條暗線** — AEC (Active Electrical Cable) 在 enterprise top-of-rack 取代 DAC，CSCO enterprise switching 上量直接推 CRDO ASP。**Contra-argument**：CSCO 指引超預期可能含**一次性 backlog 補單**（過去兩季 supply constraint 鬆綁），未必是 run-rate；要看 Q3 book-to-bill 是否 >1 才能確認 enterprise AI capex 是**結構性**而非 catch-up。另**Juniper (JNPR) 因 HPE 併購已 frozen**，CSCO 等於少了一個競爭對手在搶單，share gain 比看起來更乾淨。",
+        "bull_points": [
+          "COHR / LITE optical transceiver attach rate 同步放大",
+          "CRDO AEC 在 enterprise ToR 取代 DAC，直接受惠",
+          "JNPR 被 HPE 併購凍結，CSCO share gain 更乾淨"
+        ],
+        "bear_points": [
+          "指引超預期可能含 backlog catch-up，非 run-rate",
+          "需看 Q3 book-to-bill >1 才確認結構性需求"
+        ],
+        "final_take": "看多光通訊二階受惠，但 CSCO 本身待 book-to-bill 驗證",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "COHR",
+            "LITE",
+            "CRDO",
+            "JNPR",
+            "HPE",
+            "AVGO",
+            "ANET"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "enterprise AI infrastructure",
+            "optical networking"
+          ],
+          "tech_keywords": [
+            "800G",
+            "1.6T",
+            "AEC",
+            "Silicon One",
+            "pluggable optics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:CRDO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-ai-infrastructure"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jnpr-hpe-merger-freeze"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:800g-transceiver-attach"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "補光通訊二階 + JNPR 凍結 share gain + book-to-bill 驗證點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T08:26:41Z",
+      "latency_ms": 18536,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "思科 (CSCO) 在企業級 AI 網絡設備上的強勁表現，不僅推升了自身股價，也帶動了供應鏈的相關業者。然而，更深層次的影響在於企業自行建置 AI 基礎設施的趨勢。這意味著對 **AI 工作負載管理與可觀察性 (observability)** 工具的需求將同步增長。**Datadog (DDOG)** 等平台，專注於提供跨雲端和內部部署環境的監控、分析與自動化解決方案，預計將從企業加速 AI 基礎設施部署中獲益，以確保這些複雜網絡的效能與穩定性。",
+        "bull_points": [
+          "企業 AI 基礎設施擴張，帶動管理工具需求。",
+          "DDOG 等監控平台可受益於複雜 AI 網絡。"
+        ],
+        "bear_points": [
+          "DDOG 股價已反映雲端監控成長預期。",
+          "新興 AI 平台可能挑戰現有監控業者。"
+        ],
+        "final_take": "企業 AI 佈局加速，管理與可觀察性是關鍵。",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "DDOG"
+          ],
+          "sectors": [
+            "Technology",
+            "Software & Services"
+          ],
+          "themes": [
+            "Enterprise AI",
+            "AI Infrastructure",
+            "Observability"
+          ],
+          "tech_keywords": [
+            "AI Workload Management",
+            "Network Observability"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Enterprise AI Infrastructure"
+          },
+          {
+            "subject": "ticker:DDOG",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Observability for AI Workloads"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充企業 AI 基礎設施興起帶動的軟體管理與可觀察性工具需求。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T08:27:03Z",
+      "latency_ms": 22853,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個**被遺漏的需求側驗證點**：**Vertiv (VRT) 與 Eaton (ETN)** — enterprise AI switching 上量等同 **rack power density 從 8-15kW 跳到 30-50kW**，CSCO 訂單放大直接推 **liquid cooling + busway PDU attach rate**。VRT Q1 已警告 enterprise pipeline 落後 hyperscaler 6-9 個月，CSCO 指引超預期等於**校準 VRT enterprise lane 拐點提前**。另一個**真正的 contra**：CSCO 客戶集中度 — 若上調 AI 訂單主要來自 **2-3 家 sovereign / neocloud**（非 broad-based enterprise），則 read-through 到 ANET/AVGO 的乘數要打 0.6 折，不是 1:1。**Pure Storage (PSTG) / NetApp (NTAP)** 是另一條被市場忽略的 read-through — AI fabric 升級必伴隨 **all-flash NVMe-oF storage refresh**，但要等 CSCO earnings call 確認 backlog mix 才能進場。",
+        "bull_points": [
+          "VRT/ETN 受惠 enterprise rack power density 升級",
+          "JNPR 凍結讓 CSCO share gain 更乾淨溢出 ANET",
+          "AI fabric 升級拉動 all-flash storage refresh (PSTG/NTAP)"
+        ],
+        "bear_points": [
+          "CSCO AI 訂單若集中 2-3 大客戶 read-through 打 0.6 折",
+          "Backlog 補單性質未明 須等 Q3 book-to-bill >1 驗證",
+          "VRT enterprise pipeline 落後 6-9 月 拐點時序未必對齊"
+        ],
+        "final_take": "結構性看多但 read-through 要分層 須驗客戶集中度",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "VRT",
+            "ETN",
+            "PSTG",
+            "NTAP",
+            "ANET",
+            "AVGO"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "enterprise AI infrastructure",
+            "liquid cooling",
+            "rack power density"
+          ],
+          "tech_keywords": [
+            "800G",
+            "1.6T",
+            "NVMe-oF",
+            "liquid cooling",
+            "busway PDU",
+            "Silicon One"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-rack-power-density"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-rack-power-density"
+          },
+          {
+            "subject": "ticker:PSTG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-fabric-storage-refresh"
+          },
+          {
+            "subject": "ticker:NTAP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-fabric-storage-refresh"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:enterprise-ai-capex"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:enterprise-ai-capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補需求側 power/storage 二階節點 + 客戶集中度 contra"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T08:29:24Z",
+      "latency_ms": 140927,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "思科 (CSCO) 在企業級 AI 網絡設備的強勁訂單增長，預示著基礎設施部署的加速，這直接帶動了對高性能網絡組件的需求。為確保這些高速組件（如交換器、光模組）的品質與可靠性，**Viavi Solutions (VIAV)** 所提供的先進測試測量解決方案將扮演關鍵角色。VIAV 的設備對於驗證這些關鍵零組件的性能至關重要，使其成為 enterprise AI capex 擴張下，一個被低估但重要的受益者。",
+        "bull_points": [
+          "企業AI部署推升網絡測試需求",
+          "VIAV提供關鍵的高速網絡驗證"
+        ],
+        "bear_points": [
+          "測試設備營收週期性較強",
+          "市場對此類供應鏈關注度低"
+        ],
+        "final_take": "網絡測試設備商將隨AI基建擴張而增長。",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "VIAV"
+          ],
+          "sectors": [
+            "Communications Equipment",
+            "Electronic Equipment, Instruments & Components"
+          ],
+          "themes": [
+            "Enterprise AI capex",
+            "AI infrastructure scaling",
+            "Network testing & validation"
+          ],
+          "tech_keywords": [
+            "High-speed networking",
+            "Test & Measurement"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:Enterprise AI capex"
+          },
+          {
+            "subject": "ticker:VIAV",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI infrastructure scaling"
+          },
+          {
+            "subject": "ticker:VIAV",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:High-speed networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "關注網絡設備驗證環節的新視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ANET",
+        "AVGO",
+        "COHR",
+        "CRDO",
+        "CSCO",
+        "DDOG",
+        "ETN",
+        "HPE",
+        "JNPR",
+        "LITE",
+        "MRVL",
+        "NOK",
+        "NTAP",
+        "NVDA",
+        "PSTG",
+        "VIAV",
+        "VRT"
+      ],
+      "sectors": [
+        "Communication Equipment",
+        "Communications Equipment",
+        "Electronic Equipment, Instruments & Components",
+        "Industrials",
+        "Information Technology",
+        "Semiconductors",
+        "Semiconductors and Semiconductor Equipment",
+        "Software & Services",
+        "Technology"
+      ],
+      "themes": [
+        "AI Infrastructure",
+        "AI Networking",
+        "AI capex",
+        "AI infrastructure scaling",
+        "AI networking",
+        "China semiconductor export",
+        "Enterprise AI",
+        "Enterprise AI Infrastructure",
+        "Enterprise AI capex",
+        "Enterprise AI infrastructure",
+        "Network testing & validation",
+        "Observability",
+        "enterprise AI infrastructure",
+        "liquid cooling",
+        "optical networking",
+        "rack power density"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "800G",
+        "800G Ethernet",
+        "AEC",
+        "AI Workload Management",
+        "AI back-end fabric",
+        "AI networking",
+        "ASIC",
+        "DCI",
+        "H200",
+        "High-speed networking",
+        "NVMe-oF",
+        "Network Observability",
+        "Silicon One",
+        "Silicon Photonics",
+        "Test & Measurement",
+        "busway PDU",
+        "enterprise data center",
+        "liquid cooling",
+        "pluggable optics",
+        "switching chips"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_networking_capex"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_networking_capex"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_networking_capex"
+      },
+      {
+        "subject": "ticker:NOK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_networking_capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200_china_export_approval"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ANET"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:enterprise_ai_infra"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Enterprise AI Infrastructure"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Networking"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:CRDO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-ai-infrastructure"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jnpr-hpe-merger-freeze"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:800g-transceiver-attach"
+      },
+      {
+        "subject": "ticker:DDOG",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Observability for AI Workloads"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-rack-power-density"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-rack-power-density"
+      },
+      {
+        "subject": "ticker:PSTG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-fabric-storage-refresh"
+      },
+      {
+        "subject": "ticker:NTAP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-fabric-storage-refresh"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:enterprise-ai-capex"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:enterprise-ai-capex"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:Enterprise AI capex"
+      },
+      {
+        "subject": "ticker:VIAV",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI infrastructure scaling"
+      },
+      {
+        "subject": "ticker:VIAV",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:High-speed networking"
+      }
+    ],
+    "bull_summary": [
+      "CSCO 指引超預期確認企業級 AI networking 需求外溢",
+      "ANET / MRVL / NOK 同題材直接 read-through 受惠",
+      "H200 解禁邊際利多 NVDA 中國 Q2 營收",
+      "Broadcom (AVGO) 受惠於企業 AI 網絡晶片需求。",
+      "AI 基礎設施擴張至企業端。",
+      "COHR / LITE optical transceiver attach rate 同步放大"
+    ],
+    "bear_summary": [
+      "CSCO +20% 已 price-in，ANET gap-up 追價風險高",
+      "H200 非旗艦，10 家中國公司量級對 NVDA 不大",
+      "盤前情緒過熱，留意當日收盤是否守住漲幅",
+      "Broadcom 股價預期已部分反映。",
+      "AI 數據中心建設瓶頸仍存。",
+      "指引超預期可能含 backlog catch-up，非 run-rate"
+    ],
+    "final_take": "網絡測試設備商將隨AI基建擴張而增長。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T08:29:24Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

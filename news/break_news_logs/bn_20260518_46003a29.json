@@ -1,0 +1,523 @@
+{
+  "news_id": "bn_20260518_46003a29",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T00:02:03Z",
+  "last_activity_ts": "2026-05-18T00:06:33Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/ryan-cohen-slams-ebay-board-223053302.html",
+    "feed_fingerprint": "ryan cohen slams ebay board after gamestop s",
+    "published": "2026-05-17T22:30:53+00:00",
+    "url_hash": "sha1:f7af508bcd27a89f18c7b6b99646c6e1cffa3cfa"
+  },
+  "headline": "Ryan Cohen Slams eBay Board After GameStop's $56 Billion Bid Rejected, Says Shareholders Should Vote On His Offer: 'Run By A Bunch Of Losers'",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T00:04:48Z",
+      "latency_ms": 29657,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**GME 對 EBAY 的 560 億美元收購提案被董事會否決**，Ryan Cohen 公開嗆董事會「一群輸家」並要求股東直接表決——這是典型的**敵意收購 + 委託書爭奪戰 (proxy fight)** 劇本。對 EBAY：收購價隱含溢價，股價短線受套利資金推升，但董事會已拒絕、無交易確定性。對 GME：把巨額現金 (增發募來) 投入收購是把「meme 股」轉成真正營運實體的豪賭，惟 Cohen 在 GME 本業的營運成績乏善可陳，市場會質疑出價過高與整合能力。兩者皆屬 Consumer Discretionary／網路零售，無實質科技節點題材。事件偏**事件驅動波動**，非基本面轉折。",
+        "bull_points": [
+          "EBAY 獲收購要約，隱含溢價支撐股價",
+          "活躍股東施壓有望逼董事會釋放價值",
+          "GME 動用現金收購可分散 meme 股風險"
+        ],
+        "bear_points": [
+          "董事會已否決，交易確定性極低",
+          "Cohen GME 本業營運紀錄差,整合存疑",
+          "560 億出價偏高,GME 恐增發稀釋"
+        ],
+        "final_take": "事件驅動波動為主,交易確定性低,觀望",
+        "entities": {
+          "tickers": [
+            "GME",
+            "EBAY"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "activist investing",
+            "M&A arbitrage",
+            "hostile takeover"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:GME",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EBAY"
+          },
+          {
+            "subject": "ticker:EBAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:takeover-bid"
+          },
+          {
+            "subject": "ticker:GME",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:overpayment-risk"
+          },
+          {
+            "subject": "narrative:activist-proxy-fight",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:EBAY"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "敵意收購已遭否決,交易確定性低,屬事件驅動波動"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T00:04:59Z",
+      "latency_ms": 11491,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這場敵意收購不僅是單純的代理權爭奪，更凸顯了 GME 面臨的**轉型極度焦慮**。市場不應僅關注收購溢價，而應警惕 GME 試圖透過「購併成長」來掩蓋本業衰退的風險。這屬於經典的**帝國擴張 (empire building)** 策略，在 Amazon 與 TikTok Shop 的電商夾擊下，這種非核心業務的豪賭極可能加速 GME 自身價值的重估，而非創造實質的協同效應。",
+        "bull_points": [
+          "具備收購實力與電商版圖擴張潛力",
+          "激進風格可能迫使 EBAY 進行業務優化"
+        ],
+        "bear_points": [
+          "資本配置恐因失敗的購併而嚴重減損",
+          "零售本業衰退無法單靠資本運作挽救",
+          "Cohen 的跨業整合經驗受市場質疑"
+        ],
+        "final_take": "這是實體零售商的背水一戰，風險遠大於收益。",
+        "entities": {
+          "tickers": [
+            "GME",
+            "EBAY",
+            "AMZN"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Retail Consolidation",
+            "Management Strategy"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:GME",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EBAY"
+          },
+          {
+            "subject": "ticker:GME",
+            "predicate": "HEADWIND_FROM",
+            "object": "sector:Consumer Discretionary"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充購併動機與帝國擴張策略之潛在資本風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T00:05:32Z",
+      "latency_ms": 32478,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前一輪聚焦劇本與帝國擴張風險,但漏了**最硬的死結:出價根本湊不出錢**。EBAY 市值約 300 億美元、GME 手上現金加市值合計遠不及 **560 億美元**規模——這代表 Cohen 要嘛靠天量增發稀釋現有股東,要嘛背巨額債務,而提案至今**沒有任何 committed financing**。沒有銀行承諾函的敵意收購,本質是**壓力工具 (stalking horse)**,不是真要成交。觀察訊號很簡單:看併購套利價差——若 EBAY 股價與隱含收購價的 spread 持續維持很寬,就是套利資金集體不信。另一個對照組是 Cohen 的 CHWY 戰績遠優於 GME,市場會用這點質疑他在 GME 的資本配置紀律。",
+        "bull_points": [
+          "EBAY 收到非請自來高溢價報價,短線吸引事件套利資金",
+          "Cohen 在 CHWY 有成功營運紀錄,提供少數信任基礎"
+        ],
+        "bear_points": [
+          "560 億美元遠超 GME 籌資能力,需天量增發或舉債",
+          "提案無 committed financing,屬施壓而非真實成交意圖",
+          "併購套利價差預料維持極寬,反映市場集體不信"
+        ],
+        "final_take": "看空 GME,出價無融資支撐純屬施壓噱頭",
+        "entities": {
+          "tickers": [
+            "GME",
+            "EBAY",
+            "CHWY",
+            "AMZN"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Communication Services"
+          ],
+          "themes": [
+            "M&A arbitrage",
+            "proxy fight",
+            "meme stock",
+            "hostile takeover"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:GME",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:financing-gap"
+          },
+          {
+            "subject": "ticker:EBAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:takeover-premium"
+          },
+          {
+            "subject": "ticker:GME",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EBAY"
+          },
+          {
+            "subject": "ticker:CHWY",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:cohen-track-record"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增融資缺口與套利價差訊號,前輪未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T00:05:44Z",
+      "latency_ms": 12127,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了財務上的天方夜譚，Cohen 的激進語調實則是對 EBAY 董事會的一記警鐘。無論 GME 併購能否成真，這場衝突已將 EBAY 的**治理脆弱性**直接暴露給機構股東。這將迫使 EBAY 管理層為了自保，必須加速採取極端手段（如分拆非核心業務、大幅提高股利回購）來緩解治理壓力，以防真正有實力的「白衣騎士」跟進。這不是簡單的收購案，而是觸發 EBAY 進入**強制價值釋放期**的治理催化劑。",
+        "bull_points": [
+          "迫使 EBAY 加速分拆非核心資產以釋放價值。",
+          "提升機構投資者對 EBAY 董事會的監督密度。"
+        ],
+        "bear_points": [
+          "粗糙的溝通方式導致與 board 的敵對，降低未來協議收購機率。",
+          "股價波動增加，對 EBAY 造成資本市場不確定性。"
+        ],
+        "final_take": "重點已轉向 EBAY 內部的治理壓力與後續結構性調整。",
+        "entities": {
+          "tickers": [
+            "GME",
+            "EBAY"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Corporate Governance",
+            "Activism"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:GME",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:governance_restructuring"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "指出 Cohen 的激進行為觸發了對 EBAY 的治理壓力，導致後續潛在的結構性調整。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T00:06:21Z",
+      "latency_ms": 37088,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面三輪都漏了一個**人格信用對照組**:Cohen 上一個激進案例是 **Bed Bath & Beyond (BBBY)**——RC Ventures 高調進場、推改革,結果 Cohen 在 BBBY 破產前出清持股,散戶套牢。前面拿 **CHWY** 當正面戰績,但 BBBY 才是 meme + 激進的真實對照,結局是清算。第二個被忽略的死結:GME 帳上現金有相當比例已換成 **Bitcoin treasury**,流動性與市價波動都打折,真要湊 560 億美元的籌碼又比帳面更薄。最後一個反方論點:董事會否決一個用 meme 溢價股當貨幣、財務未承諾的出價,其實是**履行受託義務**的正確決定,「一群輸家」是輿論施壓話術,不是治理失靈的證據。事件仍屬套利波動,GME 端風險大於 EBAY。",
+        "bull_points": [
+          "EBAY 暴露治理議題,可能引白衣騎士抬估值",
+          "拒絕劣質出價代表董事會守住受託紀律"
+        ],
+        "bear_points": [
+          "Cohen 前案 BBBY 以破產收場,信用存疑",
+          "GME 現金部分轉入 Bitcoin,籌資能力更弱",
+          "560 億出價無承諾融資,成交機率極低"
+        ],
+        "final_take": "看空 GME 資本配置,EBAY 僅事件套利",
+        "entities": {
+          "tickers": [
+            "GME",
+            "EBAY",
+            "CHWY",
+            "BBBY"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "meme stock",
+            "activist investor",
+            "M&A arbitrage",
+            "hostile takeover",
+            "Bitcoin treasury"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:GME",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bitcoin-treasury-illiquidity"
+          },
+          {
+            "subject": "ticker:BBBY",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:cohen-activist-track-record"
+          },
+          {
+            "subject": "ticker:EBAY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:hostile-takeover"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 BBBY 信用對照、Bitcoin 籌資死結、董事會否決合理性反方論點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T00:06:33Z",
+      "latency_ms": 12081,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前幾輪討論忽略了這類「噪音」對 EBAY **核心產品藍圖的侵蝕**。EBAY 目前正處於透過 AI 優化搜尋與鑑定服務的關鍵轉型期，Ryan Cohen 的鬧劇迫使管理層分散精力於防禦性公關與法律博弈，而非持續推進 eBay 的 **AI-driven marketplace**。這不只是單純的治理問題，更是營運資源被這種僵局「殭屍化」的風險。若此爭議拖延，將嚴重干擾 eBay 對抗 Amazon 與 Temu 等跨境電商的技術迭代速度。",
+        "bull_points": [
+          "迫使 eBay 重新審視資本配置紀律",
+          "激發大型機構關注 eBay 內在價值"
+        ],
+        "bear_points": [
+          "干擾 eBay AI 搜尋與技術迭代節奏",
+          "管理層陷入防禦性決策，拖累營運"
+        ],
+        "final_take": "鬧劇損耗經營動能，EBAY 應速戰速決以保技術藍圖。",
+        "entities": {
+          "tickers": [
+            "GME",
+            "EBAY"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "AI-driven search"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GME",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EBAY"
+          },
+          {
+            "subject": "ticker:EBAY",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:GME"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "指出收購噪音對 EBAY 技術轉型與產品藍圖的干擾，這是前幾輪未涉及的運作層面風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMZN",
+        "BBBY",
+        "CHWY",
+        "EBAY",
+        "GME"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Consumer Discretionary"
+      ],
+      "themes": [
+        "AI capex",
+        "Activism",
+        "Bitcoin treasury",
+        "Corporate Governance",
+        "M&A arbitrage",
+        "Management Strategy",
+        "Retail Consolidation",
+        "activist investing",
+        "activist investor",
+        "hostile takeover",
+        "meme stock",
+        "proxy fight"
+      ],
+      "tech_keywords": [
+        "AI-driven search"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:GME",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:EBAY"
+      },
+      {
+        "subject": "ticker:EBAY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:takeover-bid"
+      },
+      {
+        "subject": "ticker:GME",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:overpayment-risk"
+      },
+      {
+        "subject": "narrative:activist-proxy-fight",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:EBAY"
+      },
+      {
+        "subject": "ticker:GME",
+        "predicate": "HEADWIND_FROM",
+        "object": "sector:Consumer Discretionary"
+      },
+      {
+        "subject": "ticker:GME",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:financing-gap"
+      },
+      {
+        "subject": "ticker:EBAY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:takeover-premium"
+      },
+      {
+        "subject": "ticker:CHWY",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:cohen-track-record"
+      },
+      {
+        "subject": "ticker:GME",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:governance_restructuring"
+      },
+      {
+        "subject": "ticker:GME",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bitcoin-treasury-illiquidity"
+      },
+      {
+        "subject": "ticker:BBBY",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:cohen-activist-track-record"
+      },
+      {
+        "subject": "ticker:EBAY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:hostile-takeover"
+      },
+      {
+        "subject": "ticker:EBAY",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:GME"
+      }
+    ],
+    "bull_summary": [
+      "EBAY 獲收購要約，隱含溢價支撐股價",
+      "活躍股東施壓有望逼董事會釋放價值",
+      "GME 動用現金收購可分散 meme 股風險",
+      "具備收購實力與電商版圖擴張潛力",
+      "激進風格可能迫使 EBAY 進行業務優化",
+      "EBAY 收到非請自來高溢價報價,短線吸引事件套利資金"
+    ],
+    "bear_summary": [
+      "董事會已否決，交易確定性極低",
+      "Cohen GME 本業營運紀錄差,整合存疑",
+      "560 億出價偏高,GME 恐增發稀釋",
+      "資本配置恐因失敗的購併而嚴重減損",
+      "零售本業衰退無法單靠資本運作挽救",
+      "Cohen 的跨業整合經驗受市場質疑"
+    ],
+    "final_take": "鬧劇損耗經營動能，EBAY 應速戰速決以保技術藍圖。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T00:06:33Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -75,9 +75,8 @@ EVENTS_ARCHIVE_FILE = os.path.join(BASE_DIR, 'events_archive.json')
 OUTPUT_FILE   = os.path.join(BASE_DIR, 'Dashboard', 'data.json')
 
 
-# ── Shared news_id → published lookup (used by both extract_news and
-# extract_shallow_news). bridge.py is a one-shot script so module-level cache
-# is fine — process exits after main(). ──
+# ── Shared news_id → published lookup (used by extract_news). bridge.py is a
+# one-shot script so module-level cache is fine — process exits after main(). ──
 _raw_pub_cache = {}
 def _raw_pub_map(date_iso):
     if date_iso in _raw_pub_cache:
@@ -1960,83 +1959,6 @@ def extract_news():
     return deduped, news_content_date
 
 
-def extract_shallow_news():
-    """Collect Stage-1 shallow verdicts for the news.html Triage tab.
-    Sources (latest 3 of each):
-      - *_digest.json verdicts where depth == 'shallow' (DIGEST output)
-      - *_triage.json verdicts (all shallow by definition — TRIAGE protocol output)
-    Dedupe by headline (digest takes precedence as it implies a fuller pipeline ran).
-    Sort by |net_impact_score| desc, cap at 60 (UI feed length).
-
-    Each output item also carries `published` (RSS publish time) joined from the
-    matching `*_raw.json` by news_id, used for freshness coloring on the UI.
-    """
-    items = []
-    seen = set()  # dedup key = headline
-
-    def _ingest(file_path, source_label):
-        try:
-            with open(file_path, 'r') as f:
-                payload = json.load(f)
-            file_date = payload.get("scan_date") or payload.get("timestamp", "")[:10] or os.path.basename(file_path)[:10]
-            pub_map = _raw_pub_map(file_date)
-            for v in payload.get("verdicts", []):
-                # For digest.json we only want shallow; for triage.json take everything (all are shallow).
-                if source_label == "digest" and v.get("depth") != "shallow":
-                    continue
-                h = (v.get("headline") or "").strip()
-                if not h or h in seen:
-                    continue
-                seen.add(h)
-                raw_sectors = v.get("affected_sectors", [])
-                if raw_sectors and isinstance(raw_sectors[0], dict):
-                    sector_names = [s.get("sector", "Unknown") for s in raw_sectors]
-                else:
-                    sector_names = [s if isinstance(s, str) else "Unknown" for s in raw_sectors]
-                impact_val = v.get("verdict") or v.get("impact") or "NEUTRAL"
-                impact = impact_val.lower() if isinstance(impact_val, str) else "neutral"
-                score_val = v.get("net_impact_score") if v.get("net_impact_score") is not None else v.get("score")
-                # Resolve published time: prefer verdict's own field (if pipeline
-                # threaded it), else look up via news_id in raw.json
-                published = v.get("published") or v.get("published_at") \
-                            or pub_map.get(v.get("news_id", ""))
-                items.append({
-                    "headline":          h,
-                    "headline_zh":       v.get("headline_zh", ""),
-                    "impact":            impact,
-                    "score":             score_val,
-                    "date":              v.get("date") or file_date,
-                    "published":         published,
-                    "sectors":           sector_names,
-                    "source":            source_label,
-                    "source_label":      v.get("source_label", ""),
-                    "type":              v.get("news_type") or v.get("type", ""),
-                    "bull_case":         v.get("bull_case", ""),
-                    "bear_case":         v.get("bear_case", ""),
-                    "sector_view":       v.get("sector_view", ""),
-                    "macro_view":        v.get("macro_view", ""),
-                    "binary_risk":       v.get("binary_risk", False),
-                    "within_48h":        v.get("within_48h", False),
-                    "tickers_mentioned": v.get("tickers_mentioned", []),
-                })
-        except Exception as e:
-            print(f"[ERROR] Shallow news {file_path}: {e}")
-
-    # digest.json first (so digest takes precedence on dedup)
-    for fp in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_digest.json")), reverse=True)[:3]:
-        _ingest(fp, "digest")
-    for fp in sorted(glob.glob(os.path.join(NEWS_LOGS, "*_triage.json")), reverse=True)[:3]:
-        _ingest(fp, "triage")
-
-    # Sort by published desc (freshest first) — this is what makes triage actually
-    # work: user needs to spot what's NEW, not what's loud. Items missing
-    # `published` sink to the bottom; |score| breaks ties among same-timestamp.
-    def _sort_key(x):
-        pub = x.get("published") or ""
-        return (pub, abs(x.get("score") or 0))
-    items.sort(key=_sort_key, reverse=True)
-    return items[:60]
-
 
 # ─────────────────────────────────────────────
 # MAIN
@@ -2566,8 +2488,6 @@ def run_bridge():
     # 3. News
     data["news"], data["news_content_date"] = extract_news()
     print(f"[OK] News: {len(data['news'])} items | content_date={data['news_content_date']}")
-    data["shallow_news"] = extract_shallow_news()
-    print(f"[OK] Shallow triage: {len(data['shallow_news'])} items")
 
     # 3c. Earnings-analyst cache index (V1.71)
     data["earnings_analyses"] = extract_earnings_analyses()

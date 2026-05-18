@@ -1,0 +1,248 @@
+{
+  "news_id": "bn_20260515_700e70a8",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T14:50:08Z",
+  "last_activity_ts": "2026-05-15T14:59:22Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/gm-plans-advantage-rare-ford-143500564.html",
+    "feed_fingerprint": "how gm plans take advantage rare ford weakness",
+    "published": "2026-05-15T14:35:00+00:00",
+    "url_hash": "sha1:bfe28a628ebddad6087783ac2270a7806d5b986d"
+  },
+  "headline": "How GM Plans to Take Advantage of Rare Ford Weakness",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sector_news",
+    "shallow_score": -1.0,
+    "bull_case": "板塊動能向上",
+    "bear_case": "個股分化加劇",
+    "sector_view": "輪動信號出現",
+    "macro_view": "相對強度追蹤",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:59:05Z",
+      "latency_ms": 4848,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 540,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "2555d28c-0444-4360-a3d2-34bb1c53836a",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "57e6e379-05dc-4427-8650-29b50213d9ce"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:59:17Z",
+      "latency_ms": 12267,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "GM 試圖利用 **Ford** 近期的營運瑕疵，特別是在產品品質成本與電動車虧損上的困境，精準進行市場蠶食。相較於 **Ford** 在轉型期面臨的高額保固費用與電動車部門虧損，**GM** 的 **Ultium** 平台已逐步邁入規模經濟，這讓其在調整定價與補貼策略時擁有更佳的資本彈性。若 **GM** 能有效穩住獲利核心 **Silverado** 系列，這將不僅是單純的市佔爭奪，更是對於傳統汽車製造商在轉型期『資本配置效率』的一次關鍵檢驗。",
+        "bull_points": [
+          "Ultium 平台已達規模化，生產成本具優勢",
+          "核心卡車產品獲利穩定，支撐轉型彈性"
+        ],
+        "bear_points": [
+          "市場對電動車需求預期持續降溫",
+          "全產業價格戰嚴重壓縮整車利潤率"
+        ],
+        "final_take": "看多 GM 的規模化能力，但需警惕整體汽車銷售週期的下行風險。",
+        "entities": {
+          "tickers": [
+            "GM",
+            "F"
+          ],
+          "sectors": [
+            "Consumer Cyclical",
+            "Automotive"
+          ],
+          "themes": [
+            "EV transition",
+            "Auto margin"
+          ],
+          "tech_keywords": [
+            "Ultium"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GM",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:F"
+          },
+          {
+            "subject": "ticker:GM",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech:Ultium"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "從資本配置效率與規模化生產角度切入，避開了單純的市佔率分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:59:22Z",
+      "latency_ms": 5118,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 512,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "0fdf11b2-1646-4a87-8f63-eda4922bb9d6",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "27a3da5f-8cfe-48da-89ae-3197d80b5ccb"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "F",
+        "GM"
+      ],
+      "sectors": [
+        "Automotive",
+        "Consumer Cyclical"
+      ],
+      "themes": [
+        "Auto margin",
+        "EV transition"
+      ],
+      "tech_keywords": [
+        "Ultium"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:GM",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:F"
+      },
+      {
+        "subject": "ticker:GM",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech:Ultium"
+      }
+    ],
+    "bull_summary": [
+      "Ultium 平台已達規模化，生產成本具優勢",
+      "核心卡車產品獲利穩定，支撐轉型彈性"
+    ],
+    "bear_summary": [
+      "市場對電動車需求預期持續降溫",
+      "全產業價格戰嚴重壓縮整車利潤率"
+    ],
+    "final_take": "看多 GM 的規模化能力，但需警惕整體汽車銷售週期的下行風險。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T14:59:22Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, COMPETES_WITH"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T14:59:05Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T14:59:22Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

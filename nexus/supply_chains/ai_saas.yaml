@@ -1,0 +1,476 @@
+id: ai_saas
+title: AI SaaS 應用層價值鏈
+theme: AI SaaS
+generated_at: '2026-05-17T16:52:35Z'
+generated_by: claude
+status: draft
+layers:
+- compute_infra
+- model_foundation
+- data_dev_platform
+- ai_saas_application
+- deployment_gtm
+modules:
+  compute_infra:
+  - id: accelerators
+    label: AI 加速器 / ASIC
+  - id: cloud_hyperscaler
+    label: 超大規模雲
+  - id: gpu_cloud
+    label: Neocloud / GPU-as-a-Service
+  model_foundation:
+  - id: frontier_labs
+    label: 前沿模型實驗室
+  - id: inference_serving
+    label: 推論 / 模型託管
+  - id: model_hub
+    label: 模型倉庫 / 開放權重
+  data_dev_platform:
+  - id: data_platform
+    label: 資料 / 分析平台
+  - id: vector_retrieval
+    label: 向量 / 檢索
+  - id: mlops_observability
+    label: MLOps 與可觀測性
+  ai_saas_application:
+  - id: horizontal_productivity
+    label: 橫向生產力 SaaS
+  - id: vertical_ai_saas
+    label: 垂直 AI SaaS
+  - id: code_agents
+    label: 程式碼 / Agent 平台
+  - id: cx_marketing
+    label: 客戶互動 / 行銷
+  deployment_gtm:
+  - id: system_integrators
+    label: 系統整合商
+  - id: security_governance
+    label: AI 安全與治理
+spine:
+- nvda
+- openai
+- databricks
+- crm
+- acn
+nodes:
+- id: nvda
+  label: NVIDIA
+  layer: compute_infra
+  module: accelerators
+  role: GPU 加速器 — AI 訓練/推論算力基礎
+  ticker: NVDA
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: amd
+  label: AMD
+  layer: compute_infra
+  module: accelerators
+  role: MI 系列 GPU — 第二來源加速器
+  ticker: AMD
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: avgo
+  label: Broadcom
+  layer: compute_infra
+  module: accelerators
+  role: 客製 ASIC + 網路晶片
+  ticker: AVGO
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: msft
+  label: Microsoft
+  layer: compute_infra
+  module: cloud_hyperscaler
+  role: Azure — 模型訓練與 SaaS 託管雲
+  ticker: MSFT
+  listing: us_listed
+  stage: revenue
+  note: 亦為 OpenAI 主要投資人與算力供應方
+- id: amzn
+  label: Amazon
+  layer: compute_infra
+  module: cloud_hyperscaler
+  role: AWS + Trainium — Anthropic 主力雲
+  ticker: AMZN
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: googl
+  label: Alphabet
+  layer: compute_infra
+  module: cloud_hyperscaler
+  role: GCP + TPU — 自研模型與外部租賃
+  ticker: GOOGL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: orcl
+  label: Oracle
+  layer: compute_infra
+  module: cloud_hyperscaler
+  role: OCI — Stargate 算力擴張
+  ticker: ORCL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: crwv
+  label: CoreWeave
+  layer: compute_infra
+  module: gpu_cloud
+  role: GPU 專用雲 — 模型實驗室外包算力
+  ticker: CRWV
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: nbis
+  label: Nebius
+  layer: compute_infra
+  module: gpu_cloud
+  role: AI-native GPU 雲基礎設施
+  ticker: NBIS
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: openai
+  label: OpenAI
+  layer: model_foundation
+  module: frontier_labs
+  role: GPT 系列前沿模型 — SaaS API 核心供應方
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: anthropic
+  label: Anthropic
+  layer: model_foundation
+  module: frontier_labs
+  role: Claude 系列模型 — 企業/程式碼場景主力
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: xai
+  label: xAI
+  layer: model_foundation
+  module: frontier_labs
+  role: Grok 模型 — 前沿實驗室
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: together
+  label: Together AI
+  layer: model_foundation
+  module: inference_serving
+  role: 開放權重模型推論 / 微調平台
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: fireworks
+  label: Fireworks AI
+  layer: model_foundation
+  module: inference_serving
+  role: 低延遲推論服務 — SaaS 後端
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: huggingface
+  label: Hugging Face
+  layer: model_foundation
+  module: model_hub
+  role: 開放模型倉庫與資料集分發
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: snow
+  label: Snowflake
+  layer: data_dev_platform
+  module: data_platform
+  role: 雲資料倉儲 — AI 應用資料底座
+  ticker: SNOW
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: databricks
+  label: Databricks
+  layer: data_dev_platform
+  module: data_platform
+  role: Lakehouse + Mosaic — 資料與模型開發平台
+  ticker: null
+  listing: pre_ipo
+  stage: revenue
+  note: ''
+- id: mdb
+  label: MongoDB
+  layer: data_dev_platform
+  module: data_platform
+  role: 營運型資料庫 — AI app 狀態儲存
+  ticker: MDB
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: estc
+  label: Elastic
+  layer: data_dev_platform
+  module: vector_retrieval
+  role: 向量搜尋 + RAG 檢索引擎
+  ticker: ESTC
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: pinecone
+  label: Pinecone
+  layer: data_dev_platform
+  module: vector_retrieval
+  role: 託管向量資料庫 — RAG 記憶層
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: ddog
+  label: Datadog
+  layer: data_dev_platform
+  module: mlops_observability
+  role: LLM 可觀測性與監控
+  ticker: DDOG
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: crm
+  label: Salesforce
+  layer: ai_saas_application
+  module: horizontal_productivity
+  role: Agentforce — CRM 內建 AI agent
+  ticker: CRM
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: now
+  label: ServiceNow
+  layer: ai_saas_application
+  module: horizontal_productivity
+  role: 工作流程平台 + Now Assist AI
+  ticker: NOW
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: pltr
+  label: Palantir
+  layer: ai_saas_application
+  module: vertical_ai_saas
+  role: AIP — 企業/政府營運 AI 平台
+  ticker: PLTR
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: veev
+  label: Veeva Systems
+  layer: ai_saas_application
+  module: vertical_ai_saas
+  role: 生命科學垂直 SaaS + AI 模組
+  ticker: VEEV
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: gtlb
+  label: GitLab
+  layer: ai_saas_application
+  module: code_agents
+  role: DevSecOps 平台 + Duo AI
+  ticker: GTLB
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: cursor
+  label: Anysphere (Cursor)
+  layer: ai_saas_application
+  module: code_agents
+  role: AI 程式碼編輯器 / coding agent
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: twlo
+  label: Twilio
+  layer: ai_saas_application
+  module: cx_marketing
+  role: 通訊 API + AI 客服 agent
+  ticker: TWLO
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: acn
+  label: Accenture
+  layer: deployment_gtm
+  module: system_integrators
+  role: 企業 AI 導入與 SaaS 整合服務
+  ticker: ACN
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: ibm
+  label: IBM
+  layer: deployment_gtm
+  module: system_integrators
+  role: 顧問 + watsonx 部署整合
+  ticker: IBM
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: crwd
+  label: CrowdStrike
+  layer: deployment_gtm
+  module: security_governance
+  role: AI 工作負載端點防護 + Charlotte AI
+  ticker: CRWD
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: panw
+  label: Palo Alto Networks
+  layer: deployment_gtm
+  module: security_governance
+  role: AI 應用存取安全與資料治理
+  ticker: PANW
+  listing: us_listed
+  stage: revenue
+  note: ''
+edges:
+- from: nvda
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: amzn
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: orcl
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: crwv
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: nbis
+  rel: SUPPLIES_TO
+  note: ''
+- from: amd
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: avgo
+  to: googl
+  rel: CO_DEVELOPS_WITH
+  note: TPU 客製 ASIC
+- from: msft
+  to: openai
+  rel: SUPPLIES_TO
+  note: Azure 算力 + 投資
+- from: amzn
+  to: anthropic
+  rel: SUPPLIES_TO
+  note: AWS/Trainium + 投資
+- from: googl
+  to: anthropic
+  rel: INVESTOR_IN
+  note: ''
+- from: orcl
+  to: openai
+  rel: SUPPLIES_TO
+  note: OCI / Stargate
+- from: crwv
+  to: openai
+  rel: SUPPLIES_TO
+  note: ''
+- from: nbis
+  to: together
+  rel: SUPPLIES_TO
+  note: ''
+- from: huggingface
+  to: together
+  rel: SUPPLIES_TO
+  note: 開放權重模型
+- from: together
+  to: fireworks
+  rel: SUPPLIES_TO
+  note: 同層推論服務生態
+- from: openai
+  to: crm
+  rel: SUPPLIES_TO
+  note: 模型 API
+- from: openai
+  to: now
+  rel: SUPPLIES_TO
+  note: ''
+- from: openai
+  to: cursor
+  rel: SUPPLIES_TO
+  note: ''
+- from: openai
+  to: twlo
+  rel: SUPPLIES_TO
+  note: ''
+- from: anthropic
+  to: cursor
+  rel: SUPPLIES_TO
+  note: ''
+- from: anthropic
+  to: gtlb
+  rel: SUPPLIES_TO
+  note: ''
+- from: anthropic
+  to: pltr
+  rel: SUPPLIES_TO
+  note: ''
+- from: databricks
+  to: crm
+  rel: SUPPLIES_TO
+  note: 資料平台底座
+- from: snow
+  to: pltr
+  rel: SUPPLIES_TO
+  note: ''
+- from: mdb
+  to: cursor
+  rel: SUPPLIES_TO
+  note: ''
+- from: pinecone
+  to: twlo
+  rel: SUPPLIES_TO
+  note: RAG 檢索
+- from: estc
+  to: now
+  rel: SUPPLIES_TO
+  note: ''
+- from: ddog
+  to: crm
+  rel: SUPPLIES_TO
+  note: LLM 可觀測性
+- from: crm
+  to: acn
+  rel: SUPPLIES_TO
+  note: ACN 為導入/整合夥伴
+- from: now
+  to: acn
+  rel: SUPPLIES_TO
+  note: ''
+- from: pltr
+  to: ibm
+  rel: SUPPLIES_TO
+  note: ''
+- from: crm
+  to: crwd
+  rel: SUPPLIES_TO
+  note: AI app 安全防護
+- from: now
+  to: panw
+  rel: SUPPLIES_TO
+  note: ''

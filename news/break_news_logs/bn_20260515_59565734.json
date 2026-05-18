@@ -1,0 +1,242 @@
+{
+  "news_id": "bn_20260515_59565734",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T15:30:24Z",
+  "last_activity_ts": "2026-05-15T15:31:27Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/ai-chip-rally-masking-dangerous-151532878.html",
+    "feed_fingerprint": "ai chip rally masking dangerous truth half s",
+    "published": "2026-05-15T15:15:32+00:00",
+    "url_hash": "sha1:34a091c3f769687c3af684ec2e039e74ec1a341a"
+  },
+  "headline": "The AI Chip Rally Is Masking a Dangerous Truth. Half the S&P 500 Is Being Left Behind",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sector_news",
+    "shallow_score": 1.0,
+    "bull_case": "板塊動能向上",
+    "bear_case": "個股分化加劇",
+    "sector_view": "輪動信號出現",
+    "macro_view": "相對強度追蹤",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:31:12Z",
+      "latency_ms": 7029,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 684,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "1da43ea8-202d-4b75-9de5-40c6c246d2f4",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "7e55a488-260d-4195-86ab-31c831fced23"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:31:23Z",
+      "latency_ms": 10835,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場廣度惡化不僅是 AI 類股掩蓋問題，核心在於**資本成本結構的兩極化**。AI 龍頭握有龐大現金流，能自我支撐 AI capex，但廣大中小型企業在目前利率環境下，融資成本難以負荷。這種 divergence 不僅是短期的 rally 遮蔽，長期恐削弱非科技板塊的創新韌性，導致市場在風險溢價評估上產生嚴重失衡，投資人應警惕資金過度集中導致的系統性脆弱。",
+        "bull_points": [
+          "AI 龍頭具備強大現金流自我融資",
+          "AI capex 預期提升中長期生產力"
+        ],
+        "bear_points": [
+          "非 AI 企業受高利率融資成本壓抑",
+          "市場過度集中引發結構性風險"
+        ],
+        "final_take": "市場廣度極端分化，建議避開對利率敏感的非 AI 曝險。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "AAPL",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Technology",
+            "Financials",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "themes:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "強調高利率環境對非 AI 企業融資的排擠效應。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:31:27Z",
+      "latency_ms": 3566,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 660,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "5cb59113-6e11-4447-9215-b93d4f3e63a2",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "9aaa471b-ed8b-410e-b5eb-1f7b1de091e8"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "GOOGL",
+        "MSFT",
+        "NVDA"
+      ],
+      "sectors": [
+        "Financials",
+        "Industrials",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex"
+      ],
+      "tech_keywords": [
+        "Blackwell"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "themes:AI capex"
+      }
+    ],
+    "bull_summary": [
+      "AI 龍頭具備強大現金流自我融資",
+      "AI capex 預期提升中長期生產力"
+    ],
+    "bear_summary": [
+      "非 AI 企業受高利率融資成本壓抑",
+      "市場過度集中引發結構性風險"
+    ],
+    "final_take": "市場廣度極端分化，建議避開對利率敏感的非 AI 曝險。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T15:31:27Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T15:31:12Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T15:31:27Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

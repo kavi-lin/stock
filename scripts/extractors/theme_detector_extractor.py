@@ -61,33 +61,77 @@ def _proxy_etf(theme_name: str) -> list[str]:
 
 
 def _find_themes(text: str) -> list[dict]:
-    themes = []
+    """Parse the Theme Dashboard markdown table.
+
+    Two known formats:
+      - Old (V1): `# | Theme | Direction | Heat | Stage | Confidence`
+      - New (V2 2026-04-23+): `Theme | Origin | Direction | Heat | Maturity | Stage | Confidence`
+
+    Resolves columns by header-name lookup so future column additions don't
+    break the parser silently.
+    """
+    themes: list[dict] = []
     in_dashboard = False
+    col_idx: dict[str, int] = {}        # logical → cell index in this table
+    seen_separator = False               # true once we cross the |---|---| row
+
+    def _norm(s: str) -> str:
+        return re.sub(r"[^a-z]", "", s.lower())
+
+    LOGICAL = {
+        "name":       ("theme", "name"),
+        "direction":  ("direction", "dir"),
+        "heat":       ("heat",),
+        "stage":      ("stage",),
+        "confidence": ("confidence", "conf"),
+    }
+
     for line in text.splitlines():
         if "Theme Dashboard" in line:
             in_dashboard = True
+            col_idx = {}
+            seen_separator = False
             continue
         if not in_dashboard:
             continue
         if line.startswith("##") and "Dashboard" not in line:
             break
-        cells = [c.strip() for c in line.split("|") if c.strip()]
-        if len(cells) < 6:
+
+        cells = [c.strip() for c in line.split("|") if c.strip() != ""]
+        if len(cells) < 5:
             continue
-        # 第一格通常是 #（數字）, 第二格主題名
-        if not cells[0].isdigit():
+
+        # Header row — populate col_idx; data rows come after the separator
+        if not seen_separator:
+            normalized = [_norm(c) for c in cells]
+            for logical, aliases in LOGICAL.items():
+                for i, n in enumerate(normalized):
+                    if any(a in n for a in aliases):
+                        col_idx[logical] = i
+                        break
+            # Header detected if at least name + direction resolved
+            if "name" in col_idx and "direction" in col_idx:
+                seen_separator = True   # next non-separator row is data
             continue
-        name = re.sub(r"[^一-鿿A-Za-z& /]+", "", cells[1]).strip()
-        # direction: LEAD ↑ / LAG ↓
-        dir_raw = cells[2].upper()
+
+        # Skip the markdown `---|---|---` separator row
+        if all(set(c) <= set("-: ") for c in cells):
+            continue
+
+        # Data row
+        def _g(key, default=""):
+            i = col_idx.get(key)
+            return cells[i] if (i is not None and i < len(cells)) else default
+
+        name = re.sub(r"[^一-鿿A-Za-z& /]+", "", _g("name")).strip()
+        if not name:
+            continue
+        dir_raw = _g("direction").upper()
         direction = "LEAD" if "LEAD" in dir_raw else ("LAG" if "LAG" in dir_raw else None)
-        # heat
-        heat_match = re.search(r"([\d.]+)", cells[3])
+        heat_match = re.search(r"([\d.]+)", _g("heat"))
         heat = float(heat_match.group(1)) if heat_match else None
-        # stage
-        stage = re.sub(r"[^A-Za-z一-鿿 ]", "", cells[4]).strip()
-        # confidence
-        conf = re.sub(r"[*⚠️]", "", cells[5]).strip()
+        stage = re.sub(r"[^A-Za-z一-鿿 ]", "", _g("stage")).strip()
+        conf = re.sub(r"[*⚠️]", "", _g("confidence")).strip()
 
         themes.append({
             "name": name,

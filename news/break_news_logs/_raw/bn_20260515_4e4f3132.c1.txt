@@ -1,0 +1,82 @@
+{
+  "session_id": "78e58824-ded4-4e61-af42-d22593884888",
+  "response": "I have created an implementation plan for your request in `/plans/analyze-news.md`.\n\nPlease review the plan. If it meets your expectations, I am ready to move to **Phase 2: Project Exploration** (identifying the stock and formulating the commentary) and then eventually exit Plan Mode to provide the required JSON output. Do you approve of this approach?",
+  "stats": {
+    "models": {
+      "gemini-3.1-flash-lite": {
+        "api": {
+          "totalRequests": 3,
+          "totalErrors": 0,
+          "totalLatencyMs": 14150
+        },
+        "tokens": {
+          "input": 16190,
+          "prompt": 39728,
+          "candidates": 593,
+          "total": 41494,
+          "cached": 23538,
+          "thoughts": 1173,
+          "tool": 0
+        },
+        "roles": {
+          "main": {
+            "totalRequests": 3,
+            "totalErrors": 0,
+            "totalLatencyMs": 14150,
+            "tokens": {
+              "input": 16190,
+              "prompt": 39728,
+              "candidates": 593,
+              "total": 41494,
+              "cached": 23538,
+              "thoughts": 1173,
+              "tool": 0
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "totalCalls": 2,
+      "totalSuccess": 2,
+      "totalFail": 0,
+      "totalDurationMs": 16,
+      "totalDecisions": {
+        "accept": 2,
+        "reject": 0,
+        "modify": 0,
+        "auto_accept": 0
+      },
+      "byName": {
+        "update_topic": {
+          "count": 1,
+          "success": 1,
+          "fail": 0,
+          "durationMs": 5,
+          "decisions": {
+            "accept": 1,
+            "reject": 0,
+            "modify": 0,
+            "auto_accept": 0
+          }
+        },
+        "write_file": {
+          "count": 1,
+          "success": 1,
+          "fail": 0,
+          "durationMs": 11,
+          "decisions": {
+            "accept": 1,
+            "reject": 0,
+            "modify": 0,
+            "auto_accept": 0
+          }
+        }
+      }
+    },
+    "files": {
+      "totalLinesAdded": 25,
+      "totalLinesRemoved": 0
+    }
+  }
+}

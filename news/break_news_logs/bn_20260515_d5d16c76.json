@@ -1,0 +1,550 @@
+{
+  "news_id": "bn_20260515_d5d16c76",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T16:00:34Z",
+  "last_activity_ts": "2026-05-15T16:17:48Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/nuscale-power-smr-one-best-154749753.html",
+    "feed_fingerprint": "nuscale power smr one best uranium stocks buy",
+    "published": "2026-05-15T15:47:49+00:00",
+    "url_hash": "sha1:11accf7414c2dfd41477fcc449b8df4307491990"
+  },
+  "headline": "Is NuScale Power (SMR) One of the Best Uranium Stocks to Buy Despite a Revenue Decline?",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T16:16:08Z",
+      "latency_ms": 27361,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "把 **NuScale (SMR)** 歸類為「鈾礦股」本身就誤導 — SMR 是**小型模組化反應爐 (SMR) 設計商**，不挖鈾、不賣燃料，營收與鈾價脫鉤。對這類 pre-commercial 公司，「營收下滑」幾乎無意義：真正的估值錨是 NRC 對 US460 設計的審批進度、RoPower 羅馬尼亞首案，以及 AI 資料中心對基載電力的結構性需求。市場給 SMR 的是 2030 年後的選擇權溢價，不是當期現金流。風險在現金燃燒與增資稀釋 — 首座商轉爐前公司持續燒錢，股本擴張壓低每股價值。這是高 beta 主題股,情緒驅動,波動遠大於鈾礦同業。",
+        "bull_points": [
+          "AI 資料中心基載電力需求結構性利多 SMR",
+          "US460 設計獲 NRC 推進降低監管不確定性",
+          "RoPower 羅馬尼亞首案提供商轉路徑驗證"
+        ],
+        "bear_points": [
+          "pre-revenue 公司持續燒錢 增資稀釋風險高",
+          "首座商轉爐約 2030 才落地 兌現期長",
+          "估值純靠主題情緒 缺當期現金流支撐"
+        ],
+        "final_take": "主題看多但屬高風險選擇權,留意稀釋與審批節點",
+        "entities": {
+          "tickers": [
+            "SMR",
+            "CCJ",
+            "OKLO",
+            "LEU"
+          ],
+          "sectors": [
+            "Utilities",
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "nuclear power",
+            "SMR",
+            "AI capex",
+            "datacenter power demand"
+          ],
+          "tech_keywords": [
+            "US460",
+            "small modular reactor"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SMR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:datacenter-power-demand"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:smr-deployment"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:OKLO"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:nuclear-power"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "SMR 非鈾礦股,估值靠審批與 AI 電力主題,非當期營收"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T16:16:20Z",
+      "latency_ms": 11230,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前分析師已點出營收與鈾價之區隔。然而，SMR 的關鍵博弈在於能否成為 **Hyperscalers** (如 Amazon、Microsoft、Google) 爭奪的「專屬電力基礎設施夥伴」。對於追求 24/7 潔淨能源的 AI 資料中心而言，SMR 提供的微電網解決方案極具吸引力。SMR 的勝負關鍵不僅在於 NRC 審批，而是誰能率先與這些大廠簽訂具備長期購電協議 (PPA) 的商用示範案，將公司定位從「發電設備商」轉變為「AI 資料中心電力支柱」。",
+        "bull_points": [
+          "Hyperscaler 電力結盟價值極高",
+          "微電網解決方案適應性強",
+          "AI 算力中心電力剛需強勁"
+        ],
+        "bear_points": [
+          "商用化落地資金需求龐大",
+          "需應對嚴格的核能監管風險",
+          "面臨其他 SMR 技術競爭壓力"
+        ],
+        "final_take": "重點在於能否憑藉微電網技術成為 AI 資料中心的首選電力合作夥伴。",
+        "entities": {
+          "tickers": [
+            "SMR"
+          ],
+          "sectors": [
+            "Utilities",
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Nuclear Energy",
+            "Data Center"
+          ],
+          "tech_keywords": [
+            "SMR",
+            "Microgrid"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SMR",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充 Hyperscaler 作為 SMR 策略合作夥伴的結構性價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T16:16:52Z",
+      "latency_ms": 32271,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面沒談的供應鏈節點：**燃料**。多數 SMR 設計（X-energy、Oklo）需要 **HALEU**（高純度低濃縮鈾），而美國 HALEU 產能幾乎全卡在 **Centrus Energy (LEU)** 一家，2026 年仍是嚴重瓶頸。反觀 NuScale US460 用標準 **<5% LEU**，現有輕水爐燃料體系即可供應 — 這是被市場忽略的隱性護城河：別人卡燃料時 SMR 不卡。把標題的「鈾礦股」反過來看，真正直接吃到 SMR 擴建紅利的其實是上游濃縮商與礦商（CCJ、LEU），而非 NuScale 本身。投資人若想押注核能主題，需分清「設計商選擇權」與「燃料循環現金流」是兩種完全不同的風險報酬。",
+        "bull_points": [
+          "US460 用標準LEU，避開HALEU供應瓶頸",
+          "燃料體系成熟，商轉時程不受濃縮產能拖累",
+          "核能主題擴建直接利多上游LEU、CCJ"
+        ],
+        "bear_points": [
+          "真正吃紅利的是濃縮商礦商，非SMR本身",
+          "RoPower外客戶稀少，訂單能見度低",
+          "HALEU對手X-energy若解套將縮小優勢"
+        ],
+        "final_take": "燃料簡單是隱性護城河，但主題紅利更偏上游",
+        "entities": {
+          "tickers": [
+            "SMR",
+            "LEU",
+            "CCJ",
+            "OKLO"
+          ],
+          "sectors": [
+            "Utilities",
+            "Energy",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "nuclear power",
+            "SMR",
+            "uranium fuel cycle"
+          ],
+          "tech_keywords": [
+            "HALEU",
+            "LEU",
+            "US460",
+            "SMR reactor"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LEU",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:haleu-bottleneck"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:standard-leu-fuel"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:OKLO"
+          },
+          {
+            "subject": "ticker:CCJ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nuclear-buildout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增燃料供應鏈角度：HALEU瓶頸與LEU節點，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T16:17:04Z",
+      "latency_ms": 11793,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面提到的燃料護城河雖有道理，但忽略了 SMR 在地緣政治上的**戰略價值**。SMR 不僅是電廠，更是美國能源外交的核心支柱。在開發中國家與歐盟東翼，核能市場面臨 Rosatom 與中國 CNNC 的強力競爭。NuScale 的標準化與美國政府的支持（如 Ex-Im Bank 金融擔保），使其具備抗衡威權國家「核外交」的關鍵地位。這種「戰略溢價」可能為 NuScale 爭取到非商業性的補貼與保護，這是單純商業分析中容易被忽略的動態護城河。",
+        "bull_points": [
+          "具備抗衡俄中核技術出口的戰略外交屬性",
+          "可獲得美國 Ex-Im Bank 等政府金融機構力挺"
+        ],
+        "bear_points": [
+          "地緣政治依賴性高，易受美國外交政策波動衝擊",
+          "國際專案執行流程複雜，極易受區域衝突牽制"
+        ],
+        "final_take": "核能外交競賽中的關鍵棋子，但政治風險極高。",
+        "entities": {
+          "tickers": [
+            "SMR"
+          ],
+          "sectors": [
+            "Utilities"
+          ],
+          "themes": [
+            "Energy Diplomacy",
+            "Geopolitics"
+          ],
+          "tech_keywords": [
+            "SMR",
+            "US460"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SMR",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Geopolitics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入地緣政治中的「核外交」維度，與單純商業分析區隔。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T16:17:35Z",
+      "latency_ms": 30956,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面談了燃料、PPA、地緣，漏掉**價值鏈分潤**這個關鍵。NuScale 與大股東 Fluor 設立的 **ENTRA1 Energy** 才是實際的電廠開發、擁有與營運方 — NuScale 本身只授權技術。這意味市場若用「電力支柱」估值 SMR，可能高估其分潤比例：技術授權商吃的是權利金，不是 PPA 的長期現金流，後者多落入 ENTRA1。第二個被忽略的是 **Fluor (FLR) 持股懸頂** — Fluor 為多數股東且已表態要貨幣化持股，這是獨立於增資稀釋之外的「二級市場供給壓力」，會長期壓抑股價彈性。投資人該問的不是 SMR 賣不賣得出反應爐,而是它在自己主導的價值鏈裡到底分到幾成。",
+        "bull_points": [
+          "技術授權模式資本支出輕，毛利率高於 EPC 承包",
+          "ENTRA1 由 Fluor 背書，加速商用部署落地"
+        ],
+        "bear_points": [
+          "ENTRA1 攔截 PPA 現金流，NuScale 僅收權利金",
+          "Fluor 表態減持，持股懸頂壓抑股價彈性",
+          "市場用「電力支柱」估值恐高估其價值鏈分潤"
+        ],
+        "final_take": "看空估值錯配 — 授權商非營運商，分潤遠低於市場想像",
+        "entities": {
+          "tickers": [
+            "SMR",
+            "FLR"
+          ],
+          "sectors": [
+            "Utilities",
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "AI capex",
+            "nuclear SMR",
+            "data center power"
+          ],
+          "tech_keywords": [
+            "US460",
+            "LEU",
+            "PPA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FLR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:SMR"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:entra1-energy"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fluor-stake-overhang"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增價值鏈分潤與 Fluor 持股懸頂角度，前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T16:17:48Z",
+      "latency_ms": 13076,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前分析師點出了 NuScale 作為技術授權商的價值鏈困境。我認為關鍵瓶頸在於**反應爐部件的製造與精密鍛造能力**。設計再好，若缺乏符合 ASME N-stamp 標準的核級重型設備製造能力（如反應爐壓力容器），SMR 根本無法落地。這使得 **BWX Technologies (BWXT)** 成為整個 SMR 產業鏈中真正的「關鍵賣鏟人」。相比 **SMR** 的技術風險與 **Fluor** 的持股壓力，**BWXT** 具備更穩定的製造護城河，是核能擴建週期中最直接的資本支撐者。",
+        "bull_points": [
+          "BWXT 掌握核級組件製造，SMR 擴建勢必推升其獲利。",
+          "具備高技術壁壘的核級焊接與鍛造能力，取代性低。"
+        ],
+        "bear_points": [
+          "製造業擴產資本支出大，可能影響短期現金流。",
+          "製造產能瓶頸可能反而成為整個 SMR 部署的拖油瓶。"
+        ],
+        "final_take": "投資核能硬資產而非純設計概念，BWXT 具備更佳的風險配置。",
+        "entities": {
+          "tickers": [
+            "BWXT",
+            "SMR",
+            "FLR"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "SMR"
+          ],
+          "tech_keywords": [
+            "Nuclear Fabrication",
+            "ASME N-stamp"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:SMR"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "轉向核能製造供應鏈(BWXT)的硬資產視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BWXT",
+        "CCJ",
+        "FLR",
+        "LEU",
+        "OKLO",
+        "SMR"
+      ],
+      "sectors": [
+        "Energy",
+        "Industrials",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Data Center",
+        "Energy Diplomacy",
+        "Geopolitics",
+        "Nuclear Energy",
+        "SMR",
+        "data center power",
+        "datacenter power demand",
+        "nuclear SMR",
+        "nuclear power",
+        "uranium fuel cycle"
+      ],
+      "tech_keywords": [
+        "ASME N-stamp",
+        "HALEU",
+        "LEU",
+        "Microgrid",
+        "Nuclear Fabrication",
+        "PPA",
+        "SMR",
+        "SMR reactor",
+        "US460",
+        "small modular reactor"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:SMR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:datacenter-power-demand"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:smr-deployment"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:OKLO"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:nuclear-power"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:LEU",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:haleu-bottleneck"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:standard-leu-fuel"
+      },
+      {
+        "subject": "ticker:CCJ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-buildout"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Geopolitics"
+      },
+      {
+        "subject": "ticker:FLR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:SMR"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:entra1-energy"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fluor-stake-overhang"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:SMR"
+      }
+    ],
+    "bull_summary": [
+      "AI 資料中心基載電力需求結構性利多 SMR",
+      "US460 設計獲 NRC 推進降低監管不確定性",
+      "RoPower 羅馬尼亞首案提供商轉路徑驗證",
+      "Hyperscaler 電力結盟價值極高",
+      "微電網解決方案適應性強",
+      "AI 算力中心電力剛需強勁"
+    ],
+    "bear_summary": [
+      "pre-revenue 公司持續燒錢 增資稀釋風險高",
+      "首座商轉爐約 2030 才落地 兌現期長",
+      "估值純靠主題情緒 缺當期現金流支撐",
+      "商用化落地資金需求龐大",
+      "需應對嚴格的核能監管風險",
+      "面臨其他 SMR 技術競爭壓力"
+    ],
+    "final_take": "投資核能硬資產而非純設計概念，BWXT 具備更佳的風險配置。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T16:17:48Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

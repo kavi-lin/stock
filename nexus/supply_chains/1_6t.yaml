@@ -1,0 +1,450 @@
+id: 1_6t
+title: 1.6T 光通訊供應鏈 (1.6Tbps AI 資料中心光網路)
+theme: 1.6T
+generated_at: '2026-05-18T09:10:05Z'
+generated_by: claude
+status: draft
+layers:
+- chips
+- optical_module
+- networking_systems
+- end_customer
+modules:
+  chips:
+  - id: dsp_connectivity
+    label: DSP / Retimer / Connectivity
+  - id: laser_optics
+    label: EML/CW 雷射晶片
+  - id: switch_photonics
+    label: Switch ASIC & 矽光子
+  optical_module:
+  - id: branded_module
+    label: 1.6T 光收發模組廠
+  - id: contract_mfg
+    label: 光模組代工 (EMS/CM)
+  networking_systems:
+  - id: switch_oem
+    label: 交換器系統原廠
+  - id: white_box
+    label: White-Box ODM
+  end_customer:
+  - id: hyperscaler
+    label: 超大規模雲端業者
+  - id: neocloud
+    label: AI 雲 / Neocloud
+spine:
+- marvell
+- innolight
+- arista
+- microsoft
+nodes:
+- id: marvell
+  label: Marvell Technology
+  layer: chips
+  module: dsp_connectivity
+  role: 1.6T 光學 PAM4 DSP (Ara 平台) — 模組核心晶片
+  ticker: MRVL
+  listing: us_listed
+  stage: sampling
+  note: 200G/lane 1.6T DSP 已發表並送樣
+- id: credo
+  label: Credo Technology
+  layer: chips
+  module: dsp_connectivity
+  role: AEC 主動銅纜 + line-card retimer + 高速 SerDes IP
+  ticker: CRDO
+  listing: us_listed
+  stage: production
+  note: AEC 已於超大規模業者量產出貨
+- id: astera_labs
+  label: Astera Labs
+  layer: chips
+  module: dsp_connectivity
+  role: scale-up fabric / retimer (Aries/Scorpio) — 連接層晶片
+  ticker: ALAB
+  listing: us_listed
+  stage: production
+  note: ''
+- id: furukawa_electric
+  label: Furukawa Electric
+  layer: chips
+  module: laser_optics
+  role: EML / CW 雷射晶片 (200G/lane)
+  ticker: null
+  listing: foreign_listed
+  stage: sampling
+  note: 東京上市
+- id: sumitomo_electric
+  label: Sumitomo Electric
+  layer: chips
+  module: laser_optics
+  role: EML 雷射晶片 — 1.6T 模組光源供應
+  ticker: null
+  listing: foreign_listed
+  stage: sampling
+  note: 東京上市
+- id: poet_technologies
+  label: POET Technologies
+  layer: chips
+  module: laser_optics
+  role: Optical Interposer 光學引擎 / 多通道光源平台
+  ticker: POET
+  listing: us_listed
+  stage: sampling
+  note: ''
+- id: broadcom
+  label: Broadcom
+  layer: chips
+  module: switch_photonics
+  role: Tomahawk 6 (102.4T) switch ASIC + 1.6T 光學 DSP + CPO
+  ticker: AVGO
+  listing: us_listed
+  stage: production
+  note: Tomahawk 6 支援 1.6T port，CPO Bailly 為共封裝路線
+- id: globalfoundries
+  label: GlobalFoundries
+  layer: chips
+  module: switch_photonics
+  role: 矽光子晶圓代工 (SiPh foundry)
+  ticker: GFS
+  listing: us_listed
+  stage: production
+  note: ''
+- id: intel
+  label: Intel
+  layer: chips
+  module: switch_photonics
+  role: 矽光子 / 光學運算互連 (OCI)
+  ticker: INTC
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: coherent
+  label: Coherent
+  layer: optical_module
+  module: branded_module
+  role: 垂直整合 1.6T 收發模組 + 自有 EML/InP 晶片
+  ticker: COHR
+  listing: us_listed
+  stage: sampling
+  note: OFC 已展示 1.6T transceiver
+- id: lumentum
+  label: Lumentum
+  layer: optical_module
+  module: branded_module
+  role: 1.6T 收發模組 + InP EML 雷射
+  ticker: LITE
+  listing: us_listed
+  stage: sampling
+  note: ''
+- id: innolight
+  label: Innolight (Zhongji InnoLight)
+  layer: optical_module
+  module: branded_module
+  role: 全球光模組出貨第一 — 1.6T 收發模組量產主力
+  ticker: null
+  listing: foreign_listed
+  stage: sampling
+  note: 深圳上市 300308
+- id: eoptolink
+  label: Eoptolink Technology
+  layer: optical_module
+  module: branded_module
+  role: 1.6T 收發模組 — 第二大供應商
+  ticker: null
+  listing: foreign_listed
+  stage: sampling
+  note: 深圳上市 300502
+- id: applied_optoelectronics
+  label: Applied Optoelectronics
+  layer: optical_module
+  module: branded_module
+  role: 資料中心收發模組 + 自有雷射晶片
+  ticker: AAOI
+  listing: us_listed
+  stage: unknown
+  note: 1.6T 路線圖未明確
+- id: fabrinet
+  label: Fabrinet
+  layer: optical_module
+  module: contract_mfg
+  role: 光模組精密代工 — 1.6T 模組組裝主力
+  ticker: FN
+  listing: us_listed
+  stage: production
+  note: ''
+- id: jabil
+  label: Jabil
+  layer: optical_module
+  module: contract_mfg
+  role: 光子 / 網路硬體 EMS 代工
+  ticker: JBL
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: arista
+  label: Arista Networks
+  layer: networking_systems
+  module: switch_oem
+  role: 資料中心交換器 — Tomahawk 6 基礎 1.6T 平台
+  ticker: ANET
+  listing: us_listed
+  stage: qualification
+  note: ''
+- id: nvidia
+  label: NVIDIA
+  layer: networking_systems
+  module: switch_oem
+  role: Spectrum-X / Quantum 網路平台 — 1.6T 光學需求驅動者
+  ticker: NVDA
+  listing: us_listed
+  stage: qualification
+  note: ''
+- id: cisco
+  label: Cisco Systems
+  layer: networking_systems
+  module: switch_oem
+  role: Silicon One 交換器 + 1.6T 光學
+  ticker: CSCO
+  listing: us_listed
+  stage: qualification
+  note: ''
+- id: hpe_juniper
+  label: HPE (Juniper Networks)
+  layer: networking_systems
+  module: switch_oem
+  role: AI 資料中心交換器系統
+  ticker: HPE
+  listing: us_listed
+  stage: unknown
+  note: HPE 2025 完成併購 Juniper
+- id: celestica
+  label: Celestica
+  layer: networking_systems
+  module: white_box
+  role: 超大規模業者 white-box 交換器 ODM
+  ticker: CLS
+  listing: us_listed
+  stage: qualification
+  note: ''
+- id: accton_technology
+  label: Accton Technology
+  layer: networking_systems
+  module: white_box
+  role: white-box 交換器 ODM 主力
+  ticker: null
+  listing: foreign_listed
+  stage: qualification
+  note: 台灣上市 2345
+- id: wiwynn
+  label: Wiwynn
+  layer: networking_systems
+  module: white_box
+  role: 超大規模業者交換器 / 系統 ODM
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  note: 台灣上市 6669
+- id: microsoft
+  label: Microsoft
+  layer: end_customer
+  module: hyperscaler
+  role: Azure AI 資料中心 — 1.6T 光網路採用者
+  ticker: MSFT
+  listing: us_listed
+  stage: design_partner
+  note: ''
+- id: meta
+  label: Meta Platforms
+  layer: end_customer
+  module: hyperscaler
+  role: AI 訓練叢集 — 1.6T 網路採用者
+  ticker: META
+  listing: us_listed
+  stage: design_partner
+  note: ''
+- id: amazon
+  label: Amazon (AWS)
+  layer: end_customer
+  module: hyperscaler
+  role: AWS AI 基礎設施 — 1.6T 光網路採用者
+  ticker: AMZN
+  listing: us_listed
+  stage: design_partner
+  note: ''
+- id: alphabet
+  label: Alphabet (Google)
+  layer: end_customer
+  module: hyperscaler
+  role: Google Cloud / TPU 叢集 — 1.6T 網路採用者
+  ticker: GOOGL
+  listing: us_listed
+  stage: design_partner
+  note: ''
+- id: oracle
+  label: Oracle
+  layer: end_customer
+  module: neocloud
+  role: OCI AI 超級叢集 — 1.6T 網路採用者
+  ticker: ORCL
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: coreweave
+  label: CoreWeave
+  layer: end_customer
+  module: neocloud
+  role: GPU 雲服務 — 1.6T 網路採用者
+  ticker: CRWV
+  listing: us_listed
+  stage: unknown
+  note: ''
+edges:
+- from: marvell
+  to: innolight
+  rel: SUPPLIES_TO
+  note: 1.6T DSP
+- from: marvell
+  to: coherent
+  rel: SUPPLIES_TO
+  note: ''
+- from: marvell
+  to: eoptolink
+  rel: SUPPLIES_TO
+  note: ''
+- from: broadcom
+  to: innolight
+  rel: SUPPLIES_TO
+  note: 1.6T 光學 DSP
+- from: broadcom
+  to: arista
+  rel: SUPPLIES_TO
+  note: Tomahawk 6 ASIC
+- from: broadcom
+  to: cisco
+  rel: SUPPLIES_TO
+  note: ''
+- from: broadcom
+  to: hpe_juniper
+  rel: SUPPLIES_TO
+  note: ''
+- from: globalfoundries
+  to: broadcom
+  rel: SUPPLIES_TO
+  note: 矽光子晶圓
+- from: credo
+  to: arista
+  rel: SUPPLIES_TO
+  note: AEC
+- from: credo
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: astera_labs
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: ''
+- from: furukawa_electric
+  to: innolight
+  rel: SUPPLIES_TO
+  note: EML 雷射
+- from: furukawa_electric
+  to: eoptolink
+  rel: SUPPLIES_TO
+  note: ''
+- from: sumitomo_electric
+  to: innolight
+  rel: SUPPLIES_TO
+  note: EML 雷射
+- from: innolight
+  to: arista
+  rel: SUPPLIES_TO
+  note: ''
+- from: innolight
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: ''
+- from: eoptolink
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: ''
+- from: coherent
+  to: arista
+  rel: SUPPLIES_TO
+  note: ''
+- from: coherent
+  to: cisco
+  rel: SUPPLIES_TO
+  note: ''
+- from: lumentum
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: applied_optoelectronics
+  to: amazon
+  rel: SUPPLIES_TO
+  note: ''
+- from: applied_optoelectronics
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: fabrinet
+  to: coherent
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: fabrinet
+  to: lumentum
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: fabrinet
+  to: nvidia
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: jabil
+  to: cisco
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: arista
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: arista
+  to: meta
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: oracle
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: coreweave
+  rel: SUPPLIES_TO
+  note: ''
+- from: cisco
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: celestica
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: celestica
+  to: meta
+  rel: SUPPLIES_TO
+  note: ''
+- from: accton_technology
+  to: meta
+  rel: SUPPLIES_TO
+  note: ''
+- from: accton_technology
+  to: amazon
+  rel: SUPPLIES_TO
+  note: ''
+- from: wiwynn
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''

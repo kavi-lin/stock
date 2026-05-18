@@ -1,0 +1,605 @@
+{
+  "news_id": "bn_20260515_3d37f97b",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T16:00:34Z",
+  "last_activity_ts": "2026-05-15T16:13:21Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/energy/articles/constellation-energy-ceg-posts-64-154512090.html",
+    "feed_fingerprint": "constellation energy ceg posts 64 revenue jump raises",
+    "published": "2026-05-15T15:45:12+00:00",
+    "url_hash": "sha1:c5cb5b63f33d70c5cda7524be4cfd6be971d7651"
+  },
+  "headline": "Constellation Energy (CEG) Posts a 64% Revenue Jump and Raises Its Full-Year Outlook",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T16:11:36Z",
+      "latency_ms": 24458,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Constellation (**CEG**) 營收年增 64%、上調全年財測，核心驅動是 **AI 資料中心電力需求**——這是把核電從「防禦型公用事業」重估為「AI 基建賣鏟人」的關鍵敘事。CEG 手握全美最大核電機隊，無碳基載電力正好對接超大規模業者 24/7 PPA 合約（如先前與 Microsoft 的 Three Mile Island 重啟協議）。但 64% 增幅需拆解：多少來自電價/容量市場上漲、多少來自實際簽約量；公用事業營收波動大，毛利與受監管報酬率才是重點。估值上 CEG 本益比已遠離傳統公用事業區間，**利多在價格中兌現程度高**。需觀察 PPA pipeline 與機組延役獲批進度。",
+        "bull_points": [
+          "核電無碳基載對接 AI 資料中心 24/7 用電",
+          "全美最大核電機隊，超大規模業者長約稀缺資產",
+          "上調全年財測，現金流可見度提升"
+        ],
+        "bear_points": [
+          "64% 增幅含電價上漲，非全為簽約量成長",
+          "估值已脫離公用事業區間，利多多在價中",
+          "受監管報酬率與機組延役審批為變數"
+        ],
+        "final_take": "結構性看多 AI 電力主題，但 CEG 估值偏貴需回檔布局",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "VST",
+            "TLN",
+            "NRG",
+            "MSFT"
+          ],
+          "sectors": [
+            "Utilities",
+            "Energy"
+          ],
+          "themes": [
+            "AI capex",
+            "AI power demand",
+            "nuclear power",
+            "datacenter electrification"
+          ],
+          "tech_keywords": [
+            "nuclear baseload",
+            "PPA",
+            "SMR"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-power-demand"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:datacenter-electrification"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:CEG"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:VST"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "AI 電力敘事強，但 CEG 估值已反映多數利多"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T16:11:48Z",
+      "latency_ms": 11463,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "CLAUDE 點出了核能的重估價值，但我認為市場忽略了**電網傳輸瓶頸 (Transmission Bottleneck)** 的實質制約。CEG 雖然握有電能，但將電力有效輸送至高耗能 AI 資料中心，需高度依賴輸電網的建設與升級。目前的 PPA 熱潮若缺乏電網互連容量 (Interconnection Capacity) 配套，恐造成「有電難送」的局面。此外，這對同屬擁有核資產或在變電基礎設施佈局的公用事業（如 ETR, SO）亦是關鍵的競爭賽局指標。",
+        "bull_points": [
+          "核電 PPA 議價能力持續攀升",
+          "長約挹注穩健營運現金流"
+        ],
+        "bear_points": [
+          "電網互連容量成為交付瓶頸",
+          "跨區域輸電設施升級成本高昂"
+        ],
+        "final_take": "需求強勁無疑，但電網基礎設施交付速度是關鍵變數。",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "ETR",
+            "SO"
+          ],
+          "sectors": [
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "Nuclear Power"
+          ],
+          "tech_keywords": [
+            "PPA",
+            "Grid Interconnection",
+            "Baseload Power"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI_datacenter_demand"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:grid_bottleneck"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充電網傳輸瓶頸與基礎設施交付風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T16:12:20Z",
+      "latency_ms": 31777,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文都漏掉的具體監管節點：**FERC 對 behind-the-meter co-location 的審查**。CEG 的 PPA pipeline 不只受電網瓶頸限制，更卡在 FERC 是否核准資料中心「直連核電廠」的併網結構——先前 Talen 與 Amazon 的 Susquehanna ISA 修正案就遭 FERC 駁回，理由是把負載移到表後會把電網成本轉嫁給其他用戶。這代表市場把 co-location 商業模式視為理所當然，但它本質上是**監管未定案**。值得注意 CEG 與 Microsoft 的 TMI 重啟協議屬 front-of-meter（電力先入網再賣），受此風險較小,這是 CEG 相對 Talen 的結構優勢。另一個被忽略的下檔保護是 IRA 給核電的 PTC 地板價（約 $43.75/MWh),讓 64% 營收即便遇電價回落也有支撐——但代價是綁上 IRA 政治存續風險。",
+        "bull_points": [
+          "TMI 協議為 front-of-meter,規避 FERC co-location 駁回風險",
+          "IRA 核電 PTC 提供約 $43.75/MWh 營收地板價"
+        ],
+        "bear_points": [
+          "FERC 已駁回 Talen co-location 案,直連模式監管未定案",
+          "PTC 地板保護綁定 IRA 政治存續風險"
+        ],
+        "final_take": "看多,但 co-location 商業模式須等 FERC 定調才算落地",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "TLN",
+            "AMZN",
+            "MSFT"
+          ],
+          "sectors": [
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "nuclear power",
+            "data center power"
+          ],
+          "tech_keywords": [
+            "behind-the-meter co-location",
+            "front-of-meter PPA",
+            "nuclear PTC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ferc-colocation-review"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nuclear-ptc-floor"
+          },
+          {
+            "subject": "ticker:TLN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ferc-colocation-review"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TLN"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增 FERC co-location 監管風險與 PTC 地板價,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T16:12:33Z",
+      "latency_ms": 13779,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了監管與傳輸瓶頸，我認為 CEG 必須面對**動態負載平衡 (Dynamic Load Balancing)** 的營運挑戰。AI 資料中心的負載具有高度突發與不確定性，核能作為穩定基載 (Baseload)，如何與這類尖峰負載進行「高精度匹配」是關鍵。CEG 若無法利用先進的智慧電網管理系統 (DERMS) 來調度這種 volatile load，核電機組將面臨頻繁調降頻率與設備磨損的風險。這是核能供應商從傳統基載提供者，轉型為 AI 算力基礎設施賣鏟人的隱形技術門檻。",
+        "bull_points": [
+          "核能基載具調度潛力，可優化資料中心電能成本。",
+          "高營收挹注，具備升級智慧電網(DERMS)資本。"
+        ],
+        "bear_points": [
+          "動態負載匹配不當，恐造成核電機組設備磨損。",
+          "高度依賴複雜軟體調度，營運技術門檻極高。"
+        ],
+        "final_take": "關鍵在於能否成功轉型為 AI 動態負載的智慧供應者。",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "MSFT",
+            "AMZN"
+          ],
+          "sectors": [
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "DERMS",
+            "Smart Grid",
+            "Baseload"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "themes:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出動態負載調度門檻，補齊技術營運風險視野。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T16:13:09Z",
+      "latency_ms": 35972,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前文聚焦電網與監管，漏掉**燃料端**。CEG 的核電機隊要持續運轉，需穩定的濃縮鈾供應，而美國約 1/4 濃縮鈾仰賴俄羅斯 Rosatom——2024 年俄鈾進口禁令雖有 2028 年前豁免窗口，但已推升 SWU（分離功）與 enriched uranium 現貨價。這是 64% 營收敘事下被忽略的**成本端逆風**：營收看 AI 電力需求，毛利卻看燃料採購曲線。受惠的反而是美國本土唯一濃縮商 **Centrus Energy (LEU)** 與鈾礦商 **Cameco (CCJ)**。CEG 多年長約鎖定燃料可緩衝近期，但機組延役等於把燃料風險拉長 20 年。投資人重估核電「賣鏟人」價值時，應同時把鏟子的原料成本算進去。",
+        "bull_points": [
+          "CEG 燃料多採多年長約，近期成本已鎖定",
+          "機組延役獲批延長無碳基載稀缺溢價",
+          "AI 電力需求讓核電議價權結構性上升"
+        ],
+        "bear_points": [
+          "美國濃縮鈾約 1/4 靠俄羅斯，禁令推升燃料成本",
+          "機組延役把燃料供應風險拉長 20 年",
+          "64% 營收敘事掩蓋濃縮鈾現貨漲價的毛利侵蝕"
+        ],
+        "final_take": "看多 AI 電力敘事，但燃料成本端是被低估的逆風",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "LEU",
+            "CCJ",
+            "TLN",
+            "ETR",
+            "SO"
+          ],
+          "sectors": [
+            "Utilities",
+            "Energy"
+          ],
+          "themes": [
+            "AI capex",
+            "nuclear power",
+            "AI datacenter power",
+            "uranium supply chain"
+          ],
+          "tech_keywords": [
+            "HALEU",
+            "enriched uranium",
+            "SWU",
+            "PPA",
+            "co-location"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:LEU"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:CCJ"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:russian-uranium-ban"
+          },
+          {
+            "subject": "ticker:LEU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:uranium-supply-chain"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-datacenter-power"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增燃料端：濃縮鈾供應與 LEU/CCJ 受惠，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T16:13:21Z",
+      "latency_ms": 11544,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦於電網與燃料供應，但我認為**水資源風險 (Water Security)** 是被嚴重低估的隱形成本。核能發電需龐大水源進行冷卻，而 AI 資料中心亦為極度耗水之設施，兩者需求疊加對選址與環境審查形成嚴苛挑戰。特別在面臨乾旱風險的地區，CEG 欲推進機組延役或重啟，將面臨更複雜的水權衝突與環評壓力，這將直接推高項目的隱性資本支出 (CapEx) 並拖慢投產進度，這是市場在估值核能賣鏟人敘事時最易忽略的技術門檻。",
+        "bull_points": [
+          "強勁自由現金流支持長期機組延役。",
+          "無碳電力供應獨佔性維持定價優勢。"
+        ],
+        "bear_points": [
+          "資料中心與核電疊加的水資源消耗衝突。",
+          "資源分配引發的環評延長審查風險。"
+        ],
+        "final_take": "核電重估雖合理，但水資源缺口與選址限制將是下一波隱形天花板。",
+        "entities": {
+          "tickers": [
+            "CEG"
+          ],
+          "sectors": [
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Water Security"
+          ],
+          "tech_keywords": [
+            "Nuclear Cooling",
+            "Data Center Efficiency"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Water Security"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新增水資源消耗對機組延役與選址的隱形制約，構成新的營運風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMZN",
+        "CCJ",
+        "CEG",
+        "ETR",
+        "LEU",
+        "MSFT",
+        "NRG",
+        "SO",
+        "TLN",
+        "VST"
+      ],
+      "sectors": [
+        "Energy",
+        "Information Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "AI datacenter power",
+        "AI power demand",
+        "Nuclear Power",
+        "Water Security",
+        "data center power",
+        "datacenter electrification",
+        "nuclear power",
+        "uranium supply chain"
+      ],
+      "tech_keywords": [
+        "Baseload",
+        "Baseload Power",
+        "DERMS",
+        "Data Center Efficiency",
+        "Grid Interconnection",
+        "HALEU",
+        "Nuclear Cooling",
+        "PPA",
+        "SMR",
+        "SWU",
+        "Smart Grid",
+        "behind-the-meter co-location",
+        "co-location",
+        "enriched uranium",
+        "front-of-meter PPA",
+        "nuclear PTC",
+        "nuclear baseload"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-power-demand"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:datacenter-electrification"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:CEG"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:VST"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI_datacenter_demand"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:grid_bottleneck"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ferc-colocation-review"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-ptc-floor"
+      },
+      {
+        "subject": "ticker:TLN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ferc-colocation-review"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TLN"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "themes:AI capex"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:LEU"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:CCJ"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:russian-uranium-ban"
+      },
+      {
+        "subject": "ticker:LEU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:uranium-supply-chain"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-datacenter-power"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Water Security"
+      }
+    ],
+    "bull_summary": [
+      "核電無碳基載對接 AI 資料中心 24/7 用電",
+      "全美最大核電機隊，超大規模業者長約稀缺資產",
+      "上調全年財測，現金流可見度提升",
+      "核電 PPA 議價能力持續攀升",
+      "長約挹注穩健營運現金流",
+      "TMI 協議為 front-of-meter,規避 FERC co-location 駁回風險"
+    ],
+    "bear_summary": [
+      "64% 增幅含電價上漲，非全為簽約量成長",
+      "估值已脫離公用事業區間，利多多在價中",
+      "受監管報酬率與機組延役審批為變數",
+      "電網互連容量成為交付瓶頸",
+      "跨區域輸電設施升級成本高昂",
+      "FERC 已駁回 Talen co-location 案,直連模式監管未定案"
+    ],
+    "final_take": "核電重估雖合理，但水資源缺口與選址限制將是下一波隱形天花板。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T16:13:21Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

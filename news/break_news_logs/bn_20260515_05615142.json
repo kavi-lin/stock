@@ -1,0 +1,534 @@
+{
+  "news_id": "bn_20260515_05615142",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T15:40:27Z",
+  "last_activity_ts": "2026-05-15T15:44:05Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/morgan-stanley-cuts-figma-price-152952428.html",
+    "feed_fingerprint": "morgan stanley cuts figma price target despite 46",
+    "published": "2026-05-15T15:29:52+00:00",
+    "url_hash": "sha1:bbc1768cc0cfeb4198637378982b952511da2f9b"
+  },
+  "headline": "Morgan Stanley Cuts Figma Price Target Despite 46% Revenue Growth: Is AI Competition the Risk?",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -2.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:42:09Z",
+      "latency_ms": 24597,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Morgan Stanley 砍 **Figma (FIG)** 目標價卻同時承認 46% 營收成長，這種「強基本面、弱評價」的拆解值得拆開看。重點不在當季數字，而在大行開始把 **AI capex** 對 SaaS 的衝擊由「順風」重新定價為「逆風」——生成式 AI 同時壓縮設計工具的單位經濟與護城河。Figma 的 seat-based 訂閱模式面對 AI-native 競品（如各家 prompt-to-design 工具）易被 disrupt，且 AI 功能本身推高運算成本、稀釋毛利。46% 成長若伴隨 AI 競爭加劇，市場會要求更高折現率，PT 下修是估值 multiple 收斂、非營收見頂。對 **ADBE** 亦是同一敘事的鏡像參照。",
+        "bull_points": [
+          "46% 營收高速成長，需求端未見鬆動",
+          "設計協作網絡效應仍構成轉換成本護城河",
+          "PT 下修屬估值收斂，非基本面惡化"
+        ],
+        "bear_points": [
+          "生成式 AI 壓縮設計工具單位經濟與護城河",
+          "AI-native prompt-to-design 競品威脅 seat 訂閱模式",
+          "AI 功能推高運算成本，稀釋未來毛利率"
+        ],
+        "final_take": "看多基本面但估值 multiple 易受 AI 競爭壓縮，須觀察續約率",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "ADBE"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Software"
+          ],
+          "themes": [
+            "AI capex",
+            "Generative AI disruption",
+            "SaaS valuation derating"
+          ],
+          "tech_keywords": [
+            "prompt-to-design",
+            "AI-native design tools"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FIG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:generative-ai-disruption"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADBE"
+          },
+          {
+            "subject": "ticker:ADBE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-native-design-tools"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "強營收弱估值拆解，AI 競爭重定價設計 SaaS multiple"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:42:24Z",
+      "latency_ms": 14718,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "雖然 AI 創作能力的確對 SaaS 毛利構成挑戰，但我們必須釐清「生成」與「協作」的差異。Figma 的護城河不在於草圖繪製，而在於 **Dev Mode** 所構建的設計到開發（Design-to-Code）工作流閉環。許多 AI 原生工具擅長單點生成，卻無法取代企業級協作系統的流程黏著度。摩根士丹利下調目標價，更多是反映在競爭加劇下，SaaS 定價能力的邊際衰減，而非否定 Figma 在協作平台的領導地位。對 **ADBE** 而言，這同樣提醒市場，僅靠 AI 功能整合不足以維持高溢價，企業工作流的不可或缺性才是估值的終極支撐。",
+        "bull_points": [
+          "Dev Mode 構建不可替代的設計開發協作閉環。",
+          "企業級工作流深度整合提供較強黏著力。"
+        ],
+        "bear_points": [
+          "AI 競爭導致 SaaS 定價權邊際衰減。",
+          "營運成本攀升將持續稀釋軟體業者毛利。"
+        ],
+        "final_take": "估值收斂是市場對 SaaS 定價權的重新審視，而非 Figma 產品護城河崩潰。",
+        "entities": {
+          "tickers": [
+            "ADBE"
+          ],
+          "sectors": [
+            "Software",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Enterprise SaaS"
+          ],
+          "tech_keywords": [
+            "Dev Mode",
+            "Design-to-Code"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ADBE",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:figma"
+          },
+          {
+            "subject": "ticker:ADBE",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充 Figma 的 Dev Mode 協作護城河，提供與 AI 輔助生成的對比觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:43:01Z",
+      "latency_ms": 36642,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面兩位都聚焦「AI 競品搶客」，但漏了更隱蔽的二階效應：**seat-based 訂閱本身被自己的客戶侵蝕**。即使 Figma 一個客戶都沒流失，當企業導入 AI 設計代理、設計師人均產出翻倍，客戶端的設計團隊人頭就會縮編——付費 seat 數隨之下滑。這是**席次通縮 (seat deflation)**，與「被競品取代」是兩條獨立的逆風。Morgan Stanley 砍 PT 還有個少被提的脈絡：FIG 是 2025 年新 IPO、上市定價偏貴，大行（很可能是承銷團之一）下修，更像 IPO 後 multiple 向 ADBE、NOW 等 SaaS 同業正常化收斂。Dev Mode 閉環確實是護城河，但護城河擋得住「換工具」，擋不住「客戶不再需要那麼多 seat」。計價模式若不從 seat 轉向 usage/outcome，46% 成長的續航力存疑。",
+        "bull_points": [
+          "Dev Mode 設計到開發閉環提供企業流程黏著",
+          "若轉向 usage/outcome 計價可重捕 AI 創造的價值",
+          "46% 營收成長證實需求端未見頂"
+        ],
+        "bear_points": [
+          "AI 代理縮編客戶設計團隊，付費 seat 數淨通縮",
+          "2025 新 IPO 定價偏貴，PT 下修屬 multiple 正常化",
+          "承銷團大行自砍目標價是偏空訊號"
+        ],
+        "final_take": "偏空，seat 通縮未解前 46% 成長難線性外推",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "ADBE",
+            "NOW"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Software"
+          ],
+          "themes": [
+            "AI capex",
+            "SaaS seat deflation",
+            "IPO valuation reset"
+          ],
+          "tech_keywords": [
+            "generative AI",
+            "AI design agents",
+            "prompt-to-design"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FIG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:seat-deflation"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ipo-valuation-reset"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADBE"
+          },
+          {
+            "subject": "narrative:ai-design-agents",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:seat-deflation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "席次通縮與 IPO 估值重置為前文未觸及之新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:43:13Z",
+      "latency_ms": 12430,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論皆聚焦於「席次」銷售，但漏了 Figma **海量專有設計數據 (Proprietary Design Data)** 的戰略價值。Figma 不僅是設計工具，更是 AI 時代的「視覺資產圖譜」。這些結構化的協作數據是訓練垂直行業 AI 模型最核心的素材，其透過數據網絡構建的護城河，足以讓其從「訂閱模式」轉型為「AI 工作流的數據基礎」，此數據資產價值在目前的席次折現模型中被嚴重低估。",
+        "bull_points": [
+          "專有設計數據具備極高 AI 訓練價值",
+          "具備轉型為 AI 數據基礎設施潛力"
+        ],
+        "bear_points": [
+          "席次通縮對短期財報衝擊顯著",
+          "上市後估值折價壓力持續"
+        ],
+        "final_take": "Figma 應加速從 SaaS 席次模式轉向數據資產變現。",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "ADBE"
+          ],
+          "sectors": [
+            "Software"
+          ],
+          "themes": [
+            "AI capex",
+            "SaaS"
+          ],
+          "tech_keywords": [
+            "Proprietary Data",
+            "Design-to-Code"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FIG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:proprietary_design_data"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADBE"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入 Figma 專有數據資產化視角，作為跳脫席次通縮敘事的新護城河。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T15:43:50Z",
+      "latency_ms": 37381,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面把 Figma 當成 AI 破壞的**被害者**或被動數據持有者，漏了它其實也是**進攻方**。2025 Config 推出的 **Figma Make**（prompt-to-app）把產品線從設計 seat 延伸到 app-building，這是對「席次通縮」的直接對沖——人均產出翻倍會壓 seat 數，但 Make 把營收基礎從「設計師人頭」換成「產出的 app 數量」，等於自己先做 usage-based 轉型。另一個少提的近端機械因素：FIG 是 2025 新 IPO，**lock-up 解禁**帶來籌碼供給壓力，Morgan Stanley 砍 PT 的時點與其說是基本面轉空，不如說是估值在解禁前先收斂。真正該追蹤的是 Make 的附加率與留存，而非當季 46%。",
+        "bull_points": [
+          "Figma Make 把營收基礎從 seat 轉向 app 產出量",
+          "自建 prompt-to-app 等於主動 usage-based 轉型對沖席次通縮",
+          "TAM 從設計工具擴張到 app-building 市場"
+        ],
+        "bear_points": [
+          "2025 IPO lock-up 解禁帶來籌碼供給壓力",
+          "Make 附加率未驗證,TAM 擴張仍是敘事",
+          "進攻新品線同時推高運算成本稀釋毛利"
+        ],
+        "final_take": "看多但需驗證 Figma Make 附加率與 lock-up 後籌碼消化",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "ADBE"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "generative AI",
+            "SaaS monetization",
+            "IPO lockup"
+          ],
+          "tech_keywords": [
+            "prompt-to-app",
+            "Dev Mode"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FIG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:figma-make-tam-expansion"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ipo-lockup-supply-overhang"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增進攻方視角 (Figma Make) 與 lock-up 籌碼面,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T15:44:05Z",
+      "latency_ms": 14332,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面的討論集中在價格策略與 seat deflation，但我們忽略了**企業級 AI 法規風險與版權治理 (Governance)**。在 Enterprise 客戶眼裡，設計工具不僅是生產力軟體，更是**企業法律合規的邊界**。採用零散的 AI 工具（如單點 prompt-to-design）伴隨嚴重的版權與 IP 外洩風險；Figma 若能將 AI 納入企業合規管理閉環，其價值將從「設計工具」轉型為「AI 內容合規中樞」。這才是其在 AI 時代抵禦低價競品、實現客單價轉型的根本，而非僅僅是功能的堆疊。",
+        "bull_points": [
+          "轉型為企業級 AI 合規架構中心，加固護城河",
+          "提供企業級 IP 安全保障，優於外部單點 AI 工具",
+          "專屬治理功能有助於維持企業客戶的 seat 穩定性"
+        ],
+        "bear_points": [
+          "企業 AI 合規整合複雜，若產生誤判將重挫信譽",
+          "若 AI 生成內容法規變更，平台法律成本極高"
+        ],
+        "final_take": "Figma 需加速將「內容治理」貨幣化，才能鎖定高價值企業客戶。",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "ADBE",
+            "NOW"
+          ],
+          "sectors": [
+            "Software",
+            "IT Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Enterprise Governance",
+            "IP Liability"
+          ],
+          "tech_keywords": [
+            "Figma Make",
+            "Enterprise AI",
+            "Design-to-Code"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FIG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise_governance"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補強了 AI 競品與 SaaS 平台在「法律責任與合規」層面的差異化競爭價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "ADBE",
+        "FIG",
+        "NOW"
+      ],
+      "sectors": [
+        "IT Services",
+        "Information Technology",
+        "Software"
+      ],
+      "themes": [
+        "AI capex",
+        "Enterprise Governance",
+        "Enterprise SaaS",
+        "Generative AI disruption",
+        "IP Liability",
+        "IPO lockup",
+        "IPO valuation reset",
+        "SaaS",
+        "SaaS monetization",
+        "SaaS seat deflation",
+        "SaaS valuation derating",
+        "generative AI"
+      ],
+      "tech_keywords": [
+        "AI design agents",
+        "AI-native design tools",
+        "Design-to-Code",
+        "Dev Mode",
+        "Enterprise AI",
+        "Figma Make",
+        "Proprietary Data",
+        "generative AI",
+        "prompt-to-app",
+        "prompt-to-design"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:FIG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:generative-ai-disruption"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ADBE"
+      },
+      {
+        "subject": "ticker:ADBE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-native-design-tools"
+      },
+      {
+        "subject": "ticker:ADBE",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:figma"
+      },
+      {
+        "subject": "ticker:ADBE",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:seat-deflation"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ipo-valuation-reset"
+      },
+      {
+        "subject": "narrative:ai-design-agents",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:seat-deflation"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:proprietary_design_data"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:figma-make-tam-expansion"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ipo-lockup-supply-overhang"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise_governance"
+      }
+    ],
+    "bull_summary": [
+      "46% 營收高速成長，需求端未見鬆動",
+      "設計協作網絡效應仍構成轉換成本護城河",
+      "PT 下修屬估值收斂，非基本面惡化",
+      "Dev Mode 構建不可替代的設計開發協作閉環。",
+      "企業級工作流深度整合提供較強黏著力。",
+      "Dev Mode 設計到開發閉環提供企業流程黏著"
+    ],
+    "bear_summary": [
+      "生成式 AI 壓縮設計工具單位經濟與護城河",
+      "AI-native prompt-to-design 競品威脅 seat 訂閱模式",
+      "AI 功能推高運算成本，稀釋未來毛利率",
+      "AI 競爭導致 SaaS 定價權邊際衰減。",
+      "營運成本攀升將持續稀釋軟體業者毛利。",
+      "AI 代理縮編客戶設計團隊，付費 seat 數淨通縮"
+    ],
+    "final_take": "Figma 需加速將「內容治理」貨幣化，才能鎖定高價值企業客戶。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T15:44:05Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

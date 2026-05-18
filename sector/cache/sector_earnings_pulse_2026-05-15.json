@@ -1,0 +1,129 @@
+{
+  "as_of_date": "2026-05-15",
+  "lookback_days": 30,
+  "schema_version": "V1.4",
+  "universe_size": 131,
+  "sectors": {
+    "Technology": {
+      "report_count": 2,
+      "beats": 2,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.0481,
+      "analyst_revision_net": 289,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Healthcare": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 136,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Energy": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 173,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Financials": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 111,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Consumer_Discretionary": {
+      "report_count": 1,
+      "beats": 1,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.0328,
+      "analyst_revision_net": 201,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Consumer_Staples": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 149,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Industrials": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 101,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Materials": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 115,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Utilities": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 85,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Real_Estate": {
+      "report_count": 1,
+      "beats": 1,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": 1.0,
+      "surprise_score_avg": 0.0137,
+      "analyst_revision_net": 145,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    },
+    "Communication": {
+      "report_count": 0,
+      "beats": 0,
+      "misses": 0,
+      "in_line": 0,
+      "beat_rate_30d": null,
+      "surprise_score_avg": null,
+      "analyst_revision_net": 252,
+      "analyst_pt_upside_median_pct": null,
+      "pt_sample_size": 0
+    }
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "news_id": "bn_20260514_63919d83",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:34:37Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/8edad35ff970",
+    "feed_fingerprint": "futu:NVDA:934067265c",
+    "published": "2026-05-14T21:49:45+08:00",
+    "url_hash": "sha1:0587defd448c272b9a5783d18e86b0c4775b6156"
+  },
+  "headline": "英偉達盤初漲超3%，股價再創歷史新高，7個交易日累漲超18%，市值爲5.64萬億美元",
+  "headline_zh": null,
+  "raw_summary": "英偉達盤初漲超3%，股價再創歷史新高，7個交易日累漲超18%，市值爲5.64萬億美元。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:32:20Z",
+      "latency_ms": 4196,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 555,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "0a06b38a-d39e-4278-a62f-57ed7a62a0d9",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "65ca27fa-6104-4a14-8753-e2e0020dc029"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:34:33Z",
+      "latency_ms": 133084,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "英偉達 (NVDA) 股價續創歷史新高，顯示其在AI領域的領導地位依然穩固。Blackwell 架構的推出和HBM3e 記憶體的強勁需求，持續推動公司營收與市值飆升，達到5.64兆美元。儘管股價已大幅上漲，但市場對其AI GPU的強勁需求預期，仍支撐著其高估值。然而，日益加劇的競爭和潛在的供應鏈風險，是投資者需要持續關注的關鍵。",
+        "bull_points": [
+          "Blackwell 架構引領AI運算新紀元",
+          "AI GPU市場龍頭地位難以撼動",
+          "持續的AI資本支出帶動需求"
+        ],
+        "bear_points": [
+          "極高本益比，估值面臨修正壓力",
+          "AMD 等競爭對手加速追趕",
+          "地緣政治風險恐影響供應鏈"
+        ],
+        "final_take": "股價續強，但高漲勢伴隨高風險。",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "AI hardware"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e",
+            "GPU"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:HBM3e"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Blackwell"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "分析英偉達股價創新高，提供最新觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:34:37Z",
+      "latency_ms": 4564,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 655,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "aedd17ca-a8d6-420b-8e74-91b5fb3b037c",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "f3770d64-3766-430a-9d75-f9581917128c"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sectors": [
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI hardware"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "GPU",
+        "HBM3e"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:HBM3e"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Blackwell"
+      }
+    ],
+    "bull_summary": [
+      "Blackwell 架構引領AI運算新紀元",
+      "AI GPU市場龍頭地位難以撼動",
+      "持續的AI資本支出帶動需求"
+    ],
+    "bear_summary": [
+      "極高本益比，估值面臨修正壓力",
+      "AMD 等競爭對手加速追趕",
+      "地緣政治風險恐影響供應鏈"
+    ],
+    "final_take": "股價續強，但高漲勢伴隨高風險。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:34:37Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:32:20Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:34:37Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

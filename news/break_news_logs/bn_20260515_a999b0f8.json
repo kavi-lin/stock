@@ -1,0 +1,611 @@
+{
+  "news_id": "bn_20260515_a999b0f8",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T14:09:55Z",
+  "last_activity_ts": "2026-05-15T14:29:09Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/b315703195ec",
+    "feed_fingerprint": "futu:ADBE,CRM,SNOW:36d100935c",
+    "published": "2026-05-15T22:06:28+08:00",
+    "url_hash": "sha1:356b2666a9922325e37d2008c9f9cb26305a64eb"
+  },
+  "headline": "美股部分AI應用軟件股逆市上漲，Figma績後大漲近14%，ServiceNow、賽富時漲超3%，Applovin、Adobe、Snowflake漲近3%",
+  "headline_zh": null,
+  "raw_summary": "美股部分AI應用軟件股逆市上漲，Figma績後大漲近14%，ServiceNow、賽富時漲超3%，Applovin、Adobe、Snowflake漲近3%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:27:16Z",
+      "latency_ms": 30422,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是典型的 **AI 投資敘事從硬體往應用層輪動**訊號。Figma 績後大漲近 14%，市場在驗證 AI-native 設計工具的**變現能力**，而非只看 token 用量。ServiceNow、賽富時、Adobe、Snowflake 同步走強，代表資金開始買「能把 AI 算力轉成訂閱收入」的軟體公司，這類標的毛利結構遠優於資本支出沉重的半導體鏈。值得注意的是「**逆市**」二字——大盤偏弱時軟體逆勢上漲，反映防禦性與成長性兼具的偏好。但需留意：單日輪動不等於趨勢確立，且這批軟體股估值多已不便宜，AI 功能的真實定價權仍待後續 ARR 與 net retention 數據兌現。",
+        "bull_points": [
+          "AI 敘事由硬體往應用層輪動，軟體變現獲驗證",
+          "Figma 績後跳漲，AI-native 工具訂閱模式被認可",
+          "軟體毛利結構優於資本支出沉重的半導體鏈"
+        ],
+        "bear_points": [
+          "單日逆市輪動，趨勢未確立恐曇花一現",
+          "ServiceNow、Adobe 等估值偏貴，容錯空間小",
+          "AI 功能定價權待 ARR 與 net retention 兌現"
+        ],
+        "final_take": "看多軟體輪動，但需等 ARR 數據確認非單日噪音",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "NOW",
+            "CRM",
+            "APP",
+            "ADBE",
+            "SNOW"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Software"
+          ],
+          "themes": [
+            "AI capex",
+            "AI monetization",
+            "AI application layer",
+            "software rotation"
+          ],
+          "tech_keywords": [
+            "agentic AI",
+            "generative AI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FIG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-monetization"
+          },
+          {
+            "subject": "ticker:NOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-application-layer"
+          },
+          {
+            "subject": "ticker:CRM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-application-layer"
+          },
+          {
+            "subject": "sector:Software",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:software-rotation"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:software-rotation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "輪動訊號明確，但單日數據不足以確認趨勢"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:27:28Z",
+      "latency_ms": 12853,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了 Claude 提到的輪動，市場正在獎勵那些能將**自有企業數據 (Proprietary Data)** 與 **AI Agents** 深度整合的平台。與單純的「Copilot」不同，如 Salesforce (CRM) 或 ServiceNow (NOW) 透過 RAG 技術將 AI 嵌入工作流，形成難以替代的數據護城河。這種「平台化」與「自動化」價值，讓資本願意給予較高的長期溢價，這才是軟體鏈價值重估的核心邏輯。",
+        "bull_points": [
+          "企業自有數據構建護城河",
+          "AI Agents 提升用戶黏著度",
+          "平台化加速營運自動化"
+        ],
+        "bear_points": [
+          "軟體股估值溢價過高風險",
+          "AI 變現初期營收貢獻緩慢"
+        ],
+        "final_take": "軟體股進入驗證期，重點在能否從 Copilot 邁向 Agents。",
+        "entities": {
+          "tickers": [
+            "CRM",
+            "NOW",
+            "ADBE",
+            "SNOW",
+            "APPN"
+          ],
+          "sectors": [
+            "Software",
+            "IT"
+          ],
+          "themes": [
+            "AI agents",
+            "Data Moats"
+          ],
+          "tech_keywords": [
+            "RAG",
+            "AI-native"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CRM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:agentic_workflows"
+          },
+          {
+            "subject": "ticker:NOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech:RAG"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "點出自有數據與 AI Agents 的平台護城河邏輯，而非僅是應用輪動。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:28:07Z",
+      "latency_ms": 39006,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面沒提的**反向風險**:這批 SaaS 多採「席位制 (seat-based)」收費,而 AI Agent 的本質是**取代人力席位**——客戶用 Agentforce 自動化客服後,反而會砍掉 CRM 的付費 seat。Salesforce 已被迫把 Agentforce 改成 **consumption pricing**(每次對話計費),NOW、ADBE 也面臨同樣轉型。短期看是利多,但定價模型重構期 ARR 能見度會下降,net retention 可能先惡化再改善。另外提醒:**Applovin 被錯誤歸類**——它是 adtech/手遊廣告股,上漲驅動是廣告投放 AI(AXON),與企業軟體輪動無關,別混為一談。Figma 與 Adobe 同步漲也耐人尋味——兩者是直接競品(Adobe 收購案曾告吹)。",
+        "bull_points": [
+          "Agent 變現帶動軟體股估值重估",
+          "consumption pricing 拉高用量天花板"
+        ],
+        "bear_points": [
+          "AI Agent 取代席位侵蝕 seat-based 營收",
+          "定價模型重構期 ARR 能見度下降",
+          "Applovin 非軟體股,訊號被誤讀放大"
+        ],
+        "final_take": "輪動成立但須防席位制自我侵蝕",
+        "entities": {
+          "tickers": [
+            "FIG",
+            "NOW",
+            "CRM",
+            "ADBE",
+            "SNOW",
+            "APP"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "agentic AI",
+            "SaaS pricing model shift",
+            "AI capex rotation"
+          ],
+          "tech_keywords": [
+            "AI agents",
+            "RAG",
+            "consumption-based pricing",
+            "Agentforce"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NOW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:seat-based-pricing-erosion"
+          },
+          {
+            "subject": "ticker:CRM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:seat-based-pricing-erosion"
+          },
+          {
+            "subject": "ticker:FIG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADBE"
+          },
+          {
+            "subject": "ticker:APP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:adtech-ai"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增席位制侵蝕風險與 Applovin 錯誤歸類,皆前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:28:20Z",
+      "latency_ms": 12862,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "先前的討論忽略了開源 LLM 帶來的結構性威脅。儘管 CRM 或 Adobe 強調私有數據護城河，但如 Llama 3 等開源模型正快速拉平企業應用層的開發門檻。這對 SaaS Incumbents 而言，意味著單純「疊加 AI」已無法長期維持高定價權。相較之下，市場青睞 Figma 主要是因其深度的「協作工作流」，這才是難以被通用模型直接取代的護城河。市場在軟體層面將加速分化，具工作流黏著度的標的才能在未來保有議價空間。",
+        "bull_points": [
+          "Figma 驗證高黏著度工作流價值",
+          "企業數據護城河仍有利於大型龍頭"
+        ],
+        "bear_points": [
+          "開源 LLM 普及壓縮 AI 軟體功能溢價",
+          "Incumbents 面臨垂直新創的產品侵蝕"
+        ],
+        "final_take": "應用軟體分化加劇，具工作流黏著度者勝出。",
+        "entities": {
+          "tickers": [
+            "ADBE",
+            "CRM",
+            "NOW",
+            "SNOW",
+            "META"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI SaaS",
+            "Open Source AI"
+          ],
+          "tech_keywords": [
+            "LLM",
+            "Workflow"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:META",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADBE"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入開源模型競爭觀點，探討 SaaS 護城河脆弱性。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:28:56Z",
+      "latency_ms": 35586,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面都聚焦營收端（ARR、定價、護城河），漏了**成本端**的二階效應。這批 SaaS 內嵌生成式 AI，等於變成推論算力的**買方**——Figma、Adobe Firefly、CRM 每次 AI 互動都要付 NVDA/雲廠的 inference 帳單，COGS 結構性墊高，**毛利率會被稀釋**。市場現在給 AI 溢價，但 80%+ 的 SaaS 毛利率神話正面臨重定價。另一個被忽略的分歧：Snowflake 與其他標的**不同類**——它本來就是 consumption pricing，AI Agent 跑得越兇、資料準備與查詢越多，Snowflake credit 消耗越大，是 AI 活動的**淨受惠者**；這跟 CRM 的 seat 被自動化吃掉是相反方向。同一籃子內，定價模型決定誰受惠、誰受傷。",
+        "bull_points": [
+          "Snowflake consumption 計費，AI Agent 越活躍 credit 消耗越多",
+          "資料層標的受惠 AI 工作負載，與 seat-based 風險脫鉤"
+        ],
+        "bear_points": [
+          "內嵌生成式 AI 使 SaaS 變推論算力買方，COGS 墊高",
+          "80%+ 高毛利率神話面臨 inference 成本重定價",
+          "市場給 AI 溢價卻未折現毛利稀釋風險"
+        ],
+        "final_take": "看分化：資料層淨受惠，seat-based 軟體毛利承壓",
+        "entities": {
+          "tickers": [
+            "SNOW",
+            "ADBE",
+            "CRM",
+            "NOW",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Software"
+          ],
+          "themes": [
+            "AI capex",
+            "AI inference cost",
+            "SaaS gross margin"
+          ],
+          "tech_keywords": [
+            "generative AI",
+            "consumption pricing",
+            "RAG"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-inference-workload"
+          },
+          {
+            "subject": "ticker:ADBE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-inference-cost"
+          },
+          {
+            "subject": "ticker:CRM",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:NOW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:saas-gross-margin-compression"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增成本端毛利稀釋與 SNOW consumption 受惠分歧，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:29:09Z",
+      "latency_ms": 13110,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了技術護城河與成本結構，市場低估了**「合規與企業治理」**對 AI 軟體股的關鍵驅動作用。在金融、醫療與政府等高度受監管產業，企業導入 AI Agent 絕非僅考量效率，更看重數據隱私與治理架構 (Data Governance)。ServiceNow 與 Salesforce 真正的核心護城河，在於其已內建符合各國法規的 **compliance-ready 框架**。這使得它們能在嚴格的法律邊界內讓企業使用 AI，這是任何開源 LLM 或單純的應用層軟體難以跨越的信任門檻。對於大企業，這種「受管制的信任」比單純的工具黏著度更具溢價空間。",
+        "bull_points": [
+          "高度監管行業依賴平台的合規架構。",
+          "封閉式平台提供無法被開源模型取代的監管信任感。"
+        ],
+        "bear_points": [
+          "AI 出現合規漏洞將導致平台承擔鉅額法律責任。",
+          "嚴格的治理流程可能拖累 AI 功能的迭代與創新速度。"
+        ],
+        "final_take": "AI 進入治理為王階段，合規性是軟體巨頭的最強護城河。",
+        "entities": {
+          "tickers": [
+            "CRM",
+            "NOW",
+            "ADBE"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI Governance",
+            "Enterprise SaaS"
+          ],
+          "tech_keywords": [
+            "RAG",
+            "Compliance-ready AI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CRM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-governance"
+          },
+          {
+            "subject": "ticker:NOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-governance"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "轉向企業 AI 治理與合規護城河，分析軟體巨頭獨有優勢。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ADBE",
+        "APP",
+        "APPN",
+        "CRM",
+        "FIG",
+        "META",
+        "NOW",
+        "NVDA",
+        "SNOW"
+      ],
+      "sectors": [
+        "Communication Services",
+        "IT",
+        "Information Technology",
+        "Software"
+      ],
+      "themes": [
+        "AI Governance",
+        "AI SaaS",
+        "AI agents",
+        "AI application layer",
+        "AI capex",
+        "AI capex rotation",
+        "AI inference cost",
+        "AI monetization",
+        "Data Moats",
+        "Enterprise SaaS",
+        "Open Source AI",
+        "SaaS gross margin",
+        "SaaS pricing model shift",
+        "agentic AI",
+        "software rotation"
+      ],
+      "tech_keywords": [
+        "AI agents",
+        "AI-native",
+        "Agentforce",
+        "Compliance-ready AI",
+        "LLM",
+        "RAG",
+        "Workflow",
+        "agentic AI",
+        "consumption pricing",
+        "consumption-based pricing",
+        "generative AI"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:FIG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-monetization"
+      },
+      {
+        "subject": "ticker:NOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-application-layer"
+      },
+      {
+        "subject": "ticker:CRM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-application-layer"
+      },
+      {
+        "subject": "sector:Software",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:software-rotation"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:software-rotation"
+      },
+      {
+        "subject": "ticker:CRM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:agentic_workflows"
+      },
+      {
+        "subject": "ticker:NOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech:RAG"
+      },
+      {
+        "subject": "ticker:NOW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:seat-based-pricing-erosion"
+      },
+      {
+        "subject": "ticker:CRM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:seat-based-pricing-erosion"
+      },
+      {
+        "subject": "ticker:FIG",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ADBE"
+      },
+      {
+        "subject": "ticker:APP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:adtech-ai"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ADBE"
+      },
+      {
+        "subject": "ticker:SNOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-inference-workload"
+      },
+      {
+        "subject": "ticker:ADBE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-inference-cost"
+      },
+      {
+        "subject": "ticker:CRM",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NOW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:saas-gross-margin-compression"
+      },
+      {
+        "subject": "ticker:CRM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-governance"
+      },
+      {
+        "subject": "ticker:NOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-governance"
+      }
+    ],
+    "bull_summary": [
+      "AI 敘事由硬體往應用層輪動，軟體變現獲驗證",
+      "Figma 績後跳漲，AI-native 工具訂閱模式被認可",
+      "軟體毛利結構優於資本支出沉重的半導體鏈",
+      "企業自有數據構建護城河",
+      "AI Agents 提升用戶黏著度",
+      "平台化加速營運自動化"
+    ],
+    "bear_summary": [
+      "單日逆市輪動，趨勢未確立恐曇花一現",
+      "ServiceNow、Adobe 等估值偏貴，容錯空間小",
+      "AI 功能定價權待 ARR 與 net retention 兌現",
+      "軟體股估值溢價過高風險",
+      "AI 變現初期營收貢獻緩慢",
+      "AI Agent 取代席位侵蝕 seat-based 營收"
+    ],
+    "final_take": "AI 進入治理為王階段，合規性是軟體巨頭的最強護城河。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T14:29:09Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CUSTOMER_OF, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,915 @@
+{
+  "news_id": "bn_20260513_92307413",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T17:01:15Z",
+  "last_activity_ts": "2026-05-13T23:49:52Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/why-a-buzzy-fund-that-advertised-stakes-in-hot-startups-like-anthropic-suddenly-plunged-be26beb8?mod=mw_rss_topstories",
+    "feed_fingerprint": "why buzzy fund advertised stakes hot startups like",
+    "published": "2026-05-13T16:23:00+00:00",
+    "url_hash": "sha1:ce24f868b0ef83f6e2e8a312d0c64bb7076755de"
+  },
+  "headline": "Why a buzzy fund that advertised stakes in hot startups like Anthropic suddenly plunged",
+  "headline_zh": null,
+  "raw_summary": "Shares of closed-end fund Destiny Tech100 have been whipsawed this week, reflecting the promise and peril of trying to access stocks before their IPOs.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T17:15:13Z",
+      "latency_ms": 17960,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Destiny Tech100 (DXYZ) plunge spotlights **pre-IPO closed-end fund NAV premium collapse risk**. Fund traded at 400-800% premium to stated NAV — retail bid up scarcity access to Anthropic, SpaceX, Stripe, OpenAI stakes. Sudden drop = premium compression, not underlying startup mark-down. Read-throughs: (1) Secondary-market AI unicorn valuations face reality check — Anthropic/OpenAI tender offers anchoring $150-300B marks may face skepticism. (2) Negative signal for **other pre-IPO access vehicles** (ARKVX/ARK Venture, Fundrise Innovation Fund). (3) IPO window pressure — if private marks soften, late-stage names (Stripe, SpaceX, Databricks) may accelerate public listings. (4) Minor tailwind for public AI proxies (MSFT/NVDA/GOOGL) as retail rotates from synthetic exposure back to liquid names. Watch ARKK retail flow as sentiment proxy.",
+        "entities": {
+          "tickers": [
+            "DXYZ",
+            "ARKK",
+            "MSFT",
+            "NVDA",
+            "GOOGL",
+            "AMZN"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "pre-IPO access",
+            "AI unicorn valuations",
+            "closed-end fund premium",
+            "retail speculation",
+            "private market liquidity"
+          ],
+          "tech_keywords": [
+            "Anthropic Claude",
+            "OpenAI GPT",
+            "SpaceX Starlink",
+            "Stripe payments"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:closed-end-premium-collapse"
+          },
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:pre-ipo-access"
+          },
+          {
+            "subject": "ticker:ARKK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:retail-speculation-cooling"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rotation-to-liquid-ai-proxies"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rotation-to-liquid-ai-proxies"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "DXYZ premium collapse = retail pre-IPO access vehicle stress, not Anthropic fundamental mark-down. Read-through to ARK Venture peers + late-stage IPO timing pressure."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T17:15:31Z",
+      "latency_ms": 18252,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The Destiny Tech100 fund's plunge underscores the speculative froth in pre-IPO markets, as the premium to NAV evaporated. While retail flows to liquid AI proxies like NVIDIA (NVDA) are noted, this event might herald a broader recalibration of expectations for AI's economic returns. If the lofty valuations of generative AI pioneers like Anthropic and OpenAI are indeed questioned, it could dampen the anticipated demand for their exceptionally capital-intensive compute infrastructure. This implies a potential moderation in the growth trajectory for high-end AI hardware such as NVIDIA's HBM3e memory and Blackwell GPUs, creating a subtle but significant headwind for even dominant suppliers.",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "Generative AI",
+            "Compute demand",
+            "Valuation risk"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Valuation risk in generative AI"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:HBM3e"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Blackwell"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "DXYZ plunge may temper compute demand as AI valuations are reassessed."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-13T17:15:50Z",
+      "latency_ms": 19238,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **venture capital GP marks under audit pressure**. DXYZ premium collapse hands LPs an ammunition: public quote contradicts GP-held private marks on same names (Anthropic, SpaceX). Expect Q2 audit cycle pushback — **Tiger Global, Coatue, Lightspeed** face LP demand for mark-down or independent 409A re-strike. 2nd-order: **HLNE (Hamilton Lane), STEP (StepStone), OWL (Blue Owl)** — alt-asset managers with growing secondaries books — actually *benefit*: NAV-discount sellers create deal flow at attractive entry. Contra to Gemini's Blackwell-demand thesis: hyperscaler capex (MSFT/META/GOOGL/AMZN) is funded from operating cash, **not** private-market sentiment — NVDA HBM3e order book decouples from unicorn marks. Real supply-chain tell: watch **Forge Global (FRGE)** secondary platform volume — if bid-ask widens, signals broader private mark capitulation, not just DXYZ idiosyncratic.",
+        "entities": {
+          "tickers": [
+            "DXYZ",
+            "HLNE",
+            "STEP",
+            "OWL",
+            "FRGE",
+            "NVDA",
+            "MSFT",
+            "META",
+            "GOOGL",
+            "AMZN"
+          ],
+          "sectors": [
+            "Financials",
+            "Asset Management",
+            "Information Technology"
+          ],
+          "themes": [
+            "pre-IPO secondary markets",
+            "VC mark-to-market",
+            "private credit secondaries",
+            "AI capex resilience"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell",
+            "409A valuation"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:HLNE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:secondaries-deal-flow"
+          },
+          {
+            "subject": "ticker:STEP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:secondaries-deal-flow"
+          },
+          {
+            "subject": "ticker:OWL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:secondaries-deal-flow"
+          },
+          {
+            "subject": "ticker:FRGE",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:private-mark-capitulation"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hyperscaler-capex-decoupling"
+          },
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:nav-premium-collapse"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "New angle: LP-driven VC mark-down cycle + secondaries-manager beneficiaries (HLNE/STEP/OWL) + FRGE as real tell. Contra Gemini: hyperscaler capex funds NVDA, not unicorn sentiment."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T23:46:15Z",
+      "latency_ms": 22773,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **structured-product issuer risk + tax-loss harvesting cascade**. DXYZ is wrapped inside several **defined-outcome ETFs and retail structured notes** issued by JPM, GS, and Innovator — buffer products referencing \"AI access\" baskets quietly stuffed DXYZ alongside ARKVX. A 50%+ single-name drawdown trips knock-in barriers, forcing dealer delta-hedge unwinds into thin closed-end fund liquidity (vicious-cycle). 2nd-order: **Interactive Brokers (IBKR) and Robinhood (HOOD)** face margin-call revenue spike but reputational drag — DXYZ was a top-20 retail margin holding per Jan disclosure. Contra-Gemini further: tax-loss season (Nov-Dec) means holders crystallize losses by rotating into **wash-sale-safe proxies** — likely BKCH, ARKW, or direct MSTR/COIN — not back to NVDA. Watch **CBOE** single-stock options open interest on DXYZ for forced-deleveraging signal.",
+        "entities": {
+          "tickers": [
+            "DXYZ",
+            "IBKR",
+            "HOOD",
+            "JPM",
+            "GS",
+            "ARKW",
+            "BKCH",
+            "MSTR",
+            "COIN",
+            "CBOE",
+            "ARKVX"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets",
+            "Asset Management"
+          ],
+          "themes": [
+            "pre-IPO access",
+            "structured products knock-in",
+            "tax-loss harvesting",
+            "retail margin unwind"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:structured_product_knockin"
+          },
+          {
+            "subject": "ticker:IBKR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:retail_margin_call_spike"
+          },
+          {
+            "subject": "ticker:HOOD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dxyz_retail_drawdown"
+          },
+          {
+            "subject": "ticker:CBOE",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:forced_deleveraging_signal"
+          },
+          {
+            "subject": "ticker:MSTR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tax_loss_rotation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Structured-product knock-in + retail margin/tax-loss rotation mechanics — distinct from prior NAV/GP-mark/supply-chain angles."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T23:48:18Z",
+      "latency_ms": 122874,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The Destiny Tech100 fund's sharp decline, fueled by pre-IPO premium collapse, highlights a significant risk to the broader venture capital fundraising ecosystem. When funds promising access to highly valued private companies like Anthropic experience such steep markdowns, it erodes investor confidence in reported valuations. This could complicate future fundraising for VCs, as Limited Partners may demand greater transparency and more conservative marks. Consequently, this may slow the deployment of capital into early-stage and growth-stage technology companies, particularly those reliant on substantial compute infrastructure for AI development.",
+        "entities": {
+          "tickers": [
+            "DXYZ"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "Pre-IPO valuation risk",
+            "VC fundraising challenges",
+            "AI investment slowdown"
+          ],
+          "tech_keywords": [
+            "Anthropic",
+            "OpenAI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Pre-IPO valuation risk"
+          },
+          {
+            "subject": "theme:Pre-IPO valuation risk",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:VC fundraising challenges"
+          },
+          {
+            "subject": "theme:VC fundraising challenges",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:AI investment slowdown"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "DXYZ plunge signals pre-IPO risk, impacting VC fundraising and thus AI investment pace."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-13T23:48:41Z",
+      "latency_ms": 23491,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **insurance-company general account exposure**. Lifecos (MET, PRU, AIG) and reinsurers run sizable private-asset sleeves where pre-IPO unicorns sit at GP-blessed marks inside Schedule BA. NAIC's 2024 RBC overhaul already raised capital charges on Schedule BA equity — DXYZ provides the **first liquid mark-to-market datapoint** regulators can cite. Expect NAIC SAPWG to fast-track guidance forcing lifecos to discount Anthropic/SpaceX SI carrying values, denting Q4 statutory surplus. 2nd-order: **Athene/Apollo (APO), KKR, Brookfield Reinsurance (BNRE)** — insurance-linked alt-managers — face spread compression as discounted private books shrink float earnings power. Specific node to watch: **iCapital and CAIS** feeder-platform redemption queues; if RIA channel gates open, expect cascading secondary-market discounts on Anthropic SPVs trading 30-50% below last primary mark.",
+        "entities": {
+          "tickers": [
+            "MET",
+            "PRU",
+            "AIG",
+            "APO",
+            "KKR",
+            "BNRE"
+          ],
+          "sectors": [
+            "Financials",
+            "Insurance",
+            "Asset Management"
+          ],
+          "themes": [
+            "pre-IPO mark-to-market",
+            "insurance regulatory capital",
+            "private-asset transparency",
+            "feeder-platform redemption risk"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:naic_schedule_ba_revaluation"
+          },
+          {
+            "subject": "ticker:PRU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:naic_schedule_ba_revaluation"
+          },
+          {
+            "subject": "ticker:APO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:private_mark_compression"
+          },
+          {
+            "subject": "ticker:KKR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:private_mark_compression"
+          },
+          {
+            "subject": "ticker:BNRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:insurance_alt_spread_compression"
+          },
+          {
+            "subject": "ticker:AIG",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:lifeco_private_asset_exposure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Insurance Schedule BA / NAIC capital angle and iCapital/CAIS feeder redemption node not raised; distinct from VC-LP, structured-product, and AI-hardware threads."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c6",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-13T23:49:19Z",
+      "latency_ms": 37087,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The Destiny Tech100 fund's valuation shockwaves may ripple beyond AI unicorn marks to the critical semiconductor manufacturing supply chain. A recalibration of AI compute infrastructure build-out, stemming from tempered private market expectations for generative AI pioneers, could soften order books for advanced packaging solutions like TSMC's CoWoS-L. While hyperscalers' capex is resilient, the sustained pace of investment in next-generation AI silicon hinges on downstream demand visibility. This creates a distinct headwind for key equipment providers such as ASML and AMAT, whose growth is intrinsically linked to ambitious AI chip roadmaps, even as direct AI chip vendors may see more stable demand from established public players.",
+        "entities": {
+          "tickers": [
+            "TSMC",
+            "ASML",
+            "AMAT",
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI compute demand moderation",
+            "Semiconductor supply chain"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "advanced packaging"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI_compute_demand_moderation"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI_compute_demand_moderation"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI_compute_demand_moderation"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "Extends impact to semiconductor manufacturing and equipment providers, a distinct supply-chain risk."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c7",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-13T23:49:37Z",
+      "latency_ms": 18507,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **prime-brokerage and ATS market-structure tell**. DXYZ trades on NYSE but its true price-discovery venue is the **off-exchange grey market** — Forge, EquityZen, Hiive, Nasdaq Private Market. When listed CEF premium collapses faster than ATS quotes, **bid-stuffing arb desks** at JEF, Jefferies Cap Markets, and Cantor get squeezed on locate. Watch **NDAQ** (Nasdaq Private Market revenue line) and **VIRT** (Virtu market-making) — Virtu disclosed CEF/OEF arb as a growing strategy in 1Q deck. 2nd-order: **MS and GS prime-brokerage units** that finance pre-IPO SPV stacks face haircut resets — collateral schedules referencing DXYZ as comp will re-strike, forcing family-office deleveraging. Tertiary: **Carta** (private) IPO timing pushed right — its own 409A business loses pricing power if public CEF marks become the new anchor.",
+        "entities": {
+          "tickers": [
+            "NDAQ",
+            "VIRT",
+            "MS",
+            "GS",
+            "JEF",
+            "DXYZ"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets"
+          ],
+          "themes": [
+            "pre-IPO secondary market",
+            "market microstructure",
+            "prime brokerage collateral",
+            "private market price discovery"
+          ],
+          "tech_keywords": [
+            "ATS",
+            "409A valuation",
+            "CEF arbitrage",
+            "SPV haircut"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NDAQ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:private-market-price-discovery"
+          },
+          {
+            "subject": "ticker:VIRT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cef-premium-collapse"
+          },
+          {
+            "subject": "ticker:MS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:spv-collateral-reset"
+          },
+          {
+            "subject": "ticker:GS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:spv-collateral-reset"
+          },
+          {
+            "subject": "ticker:JEF",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:cef-arb-squeeze"
+          },
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:409a-anchor-reset"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "Market-microstructure angle (ATS price discovery, prime-broker collateral, 409A anchor) absent from prior thread; names NDAQ/VIRT/MS/GS/JEF specifically."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c8",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-13T23:49:52Z",
+      "latency_ms": 14559,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The Destiny Tech100 fund's sharp plunge serves as a stark warning for the broader employee equity landscape in pre-IPO tech. As the premium for accessing private AI darlings like Anthropic and OpenAI evaporates, the perceived value of employee stock options diminishes significantly. This could directly impact morale and retention efforts for these critical talent pools, potentially forcing startups to reconsider compensation structures or face increased attrition. Such a shift could rebalance the power dynamic in the tech talent market, making established public tech giants with liquid equity more attractive compared to the uncertain rewards of pre-IPO ventures.",
+        "entities": {
+          "tickers": [
+            "DXYZ"
+          ],
+          "sectors": [],
+          "themes": [
+            "Employee retention",
+            "Startup compensation",
+            "Pre-IPO equity valuation",
+            "Tech talent market"
+          ],
+          "tech_keywords": [
+            "Stock options",
+            "Private valuations",
+            "AI startups"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:talent retention in pre-IPO tech"
+          },
+          {
+            "subject": "narrative:private valuations",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:employee stock options"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "New angle on employee equity valuation and talent retention in pre-IPO tech due to DXYZ's plunge."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AIG",
+        "AMAT",
+        "AMZN",
+        "APO",
+        "ARKK",
+        "ARKVX",
+        "ARKW",
+        "ASML",
+        "BKCH",
+        "BNRE",
+        "CBOE",
+        "COIN",
+        "DXYZ",
+        "FRGE",
+        "GOOGL",
+        "GS",
+        "HLNE",
+        "HOOD",
+        "IBKR",
+        "JEF",
+        "JPM",
+        "KKR",
+        "MET",
+        "META",
+        "MS",
+        "MSFT",
+        "MSTR",
+        "NDAQ",
+        "NVDA",
+        "OWL",
+        "PRU",
+        "STEP",
+        "TSMC",
+        "VIRT"
+      ],
+      "sectors": [
+        "Asset Management",
+        "Capital Markets",
+        "Financials",
+        "Information Technology",
+        "Insurance",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex resilience",
+        "AI compute demand moderation",
+        "AI infrastructure",
+        "AI investment slowdown",
+        "AI unicorn valuations",
+        "Compute demand",
+        "Employee retention",
+        "Generative AI",
+        "Pre-IPO equity valuation",
+        "Pre-IPO valuation risk",
+        "Semiconductor supply chain",
+        "Startup compensation",
+        "Tech talent market",
+        "VC fundraising challenges",
+        "VC mark-to-market",
+        "Valuation risk",
+        "closed-end fund premium",
+        "feeder-platform redemption risk",
+        "insurance regulatory capital",
+        "market microstructure",
+        "pre-IPO access",
+        "pre-IPO mark-to-market",
+        "pre-IPO secondary market",
+        "pre-IPO secondary markets",
+        "prime brokerage collateral",
+        "private credit secondaries",
+        "private market liquidity",
+        "private market price discovery",
+        "private-asset transparency",
+        "retail margin unwind",
+        "retail speculation",
+        "structured products knock-in",
+        "tax-loss harvesting"
+      ],
+      "tech_keywords": [
+        "409A valuation",
+        "AI startups",
+        "ATS",
+        "Anthropic",
+        "Anthropic Claude",
+        "Blackwell",
+        "CEF arbitrage",
+        "CoWoS-L",
+        "HBM3e",
+        "OpenAI",
+        "OpenAI GPT",
+        "Private valuations",
+        "SPV haircut",
+        "SpaceX Starlink",
+        "Stock options",
+        "Stripe payments",
+        "advanced packaging"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:closed-end-premium-collapse"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:pre-ipo-access"
+      },
+      {
+        "subject": "ticker:ARKK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:retail-speculation-cooling"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rotation-to-liquid-ai-proxies"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rotation-to-liquid-ai-proxies"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Valuation risk in generative AI"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:HBM3e"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Blackwell"
+      },
+      {
+        "subject": "ticker:HLNE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:secondaries-deal-flow"
+      },
+      {
+        "subject": "ticker:STEP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:secondaries-deal-flow"
+      },
+      {
+        "subject": "ticker:OWL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:secondaries-deal-flow"
+      },
+      {
+        "subject": "ticker:FRGE",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:private-mark-capitulation"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hyperscaler-capex-decoupling"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:nav-premium-collapse"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:structured_product_knockin"
+      },
+      {
+        "subject": "ticker:IBKR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:retail_margin_call_spike"
+      },
+      {
+        "subject": "ticker:HOOD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dxyz_retail_drawdown"
+      },
+      {
+        "subject": "ticker:CBOE",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:forced_deleveraging_signal"
+      },
+      {
+        "subject": "ticker:MSTR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tax_loss_rotation"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Pre-IPO valuation risk"
+      },
+      {
+        "subject": "theme:Pre-IPO valuation risk",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:VC fundraising challenges"
+      },
+      {
+        "subject": "theme:VC fundraising challenges",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:AI investment slowdown"
+      },
+      {
+        "subject": "ticker:MET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:naic_schedule_ba_revaluation"
+      },
+      {
+        "subject": "ticker:PRU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:naic_schedule_ba_revaluation"
+      },
+      {
+        "subject": "ticker:APO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:private_mark_compression"
+      },
+      {
+        "subject": "ticker:KKR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:private_mark_compression"
+      },
+      {
+        "subject": "ticker:BNRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:insurance_alt_spread_compression"
+      },
+      {
+        "subject": "ticker:AIG",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:lifeco_private_asset_exposure"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI_compute_demand_moderation"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI_compute_demand_moderation"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI_compute_demand_moderation"
+      },
+      {
+        "subject": "ticker:NDAQ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:private-market-price-discovery"
+      },
+      {
+        "subject": "ticker:VIRT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cef-premium-collapse"
+      },
+      {
+        "subject": "ticker:MS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:spv-collateral-reset"
+      },
+      {
+        "subject": "ticker:GS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:spv-collateral-reset"
+      },
+      {
+        "subject": "ticker:JEF",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:cef-arb-squeeze"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:409a-anchor-reset"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:talent retention in pre-IPO tech"
+      },
+      {
+        "subject": "narrative:private valuations",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:employee stock options"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-13T23:49:52Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-13T23:45:22Z",
+      "where": "startup_sweep",
+      "msg": "reset from debating after 23372s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

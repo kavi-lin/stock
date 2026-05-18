@@ -1,0 +1,509 @@
+{
+  "news_id": "bn_20260518_119ff60d",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T09:22:06Z",
+  "last_activity_ts": "2026-05-18T09:29:44Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/healthcare/articles/compass-therapeutics-cmpx-reports-q1-045005286.html",
+    "feed_fingerprint": "compass therapeutics cmpx reports q1 2026 net loss",
+    "published": "2026-05-18T04:50:05+00:00",
+    "url_hash": "sha1:1559040fff66bccf227d8e35801e7c9d4a67cea4"
+  },
+  "headline": "Compass Therapeutics (CMPX) Reports Q1 2026 Net Loss of $18.3M",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:28:07Z",
+      "latency_ms": 22611,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Compass Therapeutics 屬**臨床期生技**，淨損 $18.3M 對尚無營收公司屬常態，本身不是利空訊號。真正關鍵不在虧損數字，而在**現金跑道 (cash runway)** 與管線進度——CMPX 主力資產 tovecimig (CTX-009) 為膽道癌雙特異抗體，需確認季末現金能否撐到下一個關鍵數據讀出，否則面臨增資稀釋風險。pre-triage 把它歸為 sentiment、給 -1.0 分過度反應；季度淨損是預期內事件，市場通常已 price-in。對大盤、Healthcare 板塊**無外溢效應**，純屬單一小型股事件，交易應聚焦現金與催化劑時程而非損益表。",
+        "bull_points": [
+          "臨床期生技淨損屬常態，非營運惡化",
+          "市場多已 price-in 季度虧損",
+          "tovecimig 膽道癌數據為潛在催化劑"
+        ],
+        "bear_points": [
+          "現金跑道若偏短面臨增資稀釋",
+          "無營收，估值全押單一管線成敗",
+          "小型生技流動性低、波動劇烈"
+        ],
+        "final_take": "中性偏觀望，需先確認季末現金跑道",
+        "entities": {
+          "tickers": [
+            "CMPX"
+          ],
+          "sectors": [
+            "Health Care",
+            "Biotechnology"
+          ],
+          "themes": [
+            "clinical-stage biotech",
+            "cash runway",
+            "oncology"
+          ],
+          "tech_keywords": [
+            "bispecific antibody",
+            "tovecimig",
+            "CTX-009",
+            "biliary tract cancer"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:q1-2026-net-loss"
+          },
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:tovecimig-biliary-cancer-data"
+          },
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cash-runway-dilution-risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "季度淨損屬臨床期生技常態，焦點應在現金跑道與管線催化劑"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:28:20Z",
+      "latency_ms": 13241,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "同意前一位分析師對現金流的判斷。然而，CMPX 的長期價值還需考量膽道癌 (BTC) 領域激烈的競爭格局。目前 **AZN** 的 Imfinzi 聯合療法已確立了該適應症的標準治療地位。CMPX 的關鍵不僅是現金儲備，更在於 **CTX-009** 作為雙特異性抗體，能否在臨床數據上證明其相較於現有免疫療法能顯著提升患者存活率。若數據無法提供足夠的差異化優勢，即便融資無虞，其併購或授權價值仍面臨挑戰。",
+        "bull_points": [
+          "雙特異抗體具克服免疫耐藥潛力",
+          "臨床數據若成功將大幅提升資產估值"
+        ],
+        "bear_points": [
+          "AZN 在膽道癌市場已樹立強大門檻",
+          "小型生技公司在臨床數據需達標壓力"
+        ],
+        "final_take": "須密切關注臨床數據相對優勢，非僅看財務。",
+        "entities": {
+          "tickers": [
+            "CMPX",
+            "AZN"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Biotech",
+            "Clinical-stage"
+          ],
+          "tech_keywords": [
+            "Bispecific antibody",
+            "Immunotherapy"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AZN"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充競爭對手 (AZN) 在膽道癌的數據護城河與臨床壓力。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:28:49Z",
+      "latency_ms": 28607,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面兩位都漏掉的結構性節點：CTX-009 (tovecimig) **並非 CMPX 原生資產**，而是自韓國 **ABL Bio** 授權引進的雙特異抗體。這代表即便未來 BTC 數據成功、走到對外授權或併購，CMPX 能拿到的價值需**先扣除回付 ABL Bio 的里程碑金與權利金**，淨經濟利益被稀釋——估值時不能直接用 peak sales 推回。第二個被忽略的點：tovecimig 已取得 FDA **孤兒藥資格**，這對現金跑道是隱性利多——孤兒藥可享臨床費用稅抵與上市後 7 年市場專營權，等於用較少現金換較長保護期。所以真正的交易框架是：現金 × 催化劑時程 × **授權條款分成比例**三者並列，市場只盯淨損反而錯估。",
+        "bull_points": [
+          "tovecimig 具 FDA 孤兒藥資格，享稅抵與7年專營",
+          "孤兒藥地位降低單位臨床現金消耗",
+          "BTC 為高度未滿足需求適應症"
+        ],
+        "bear_points": [
+          "CTX-009 自 ABL Bio 授權，里程碑金分食未來價值",
+          "對外授權淨利益低於 peak sales 直推估值",
+          "小型生技仍依賴 ATM 增資補跑道"
+        ],
+        "final_take": "中性偏謹慎，估值須先扣 ABL Bio 分成條款",
+        "entities": {
+          "tickers": [
+            "CMPX"
+          ],
+          "sectors": [
+            "Health Care",
+            "Biotechnology"
+          ],
+          "themes": [
+            "clinical-stage biotech",
+            "cash runway",
+            "out-licensing economics"
+          ],
+          "tech_keywords": [
+            "bispecific antibody",
+            "CTX-009",
+            "tovecimig",
+            "orphan drug designation"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "company:abl_bio"
+          },
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:orphan_drug_designation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增 ABL Bio 授權來源與孤兒藥資格兩個前文未提節點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:28:59Z",
+      "latency_ms": 10380,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了前面分析的財務與授權，CTX-009 作為 **DLL4/VEGF-A 雙特異性抗體**，其機制並非單純的免疫檢查點抑制劑（如 Imfinzi），而是透過同時阻斷腫瘤血管生成的關鍵路徑。這使其在理論上能服務那些**對現有 PD-1/PD-L1 療法產生耐藥性或無反應的患者族群**，提供了一條不同的臨床路徑。若最終臨床數據能證實此種機制帶來的差異化優勢，即便未來營收需與 ABL Bio 分成，其在精準醫療與後線治療的長期價值仍具備差異化潛力，值得持續監控臨床數據讀出。",
+        "bull_points": [
+          "雙靶向機制 (DLL4/VEGF-A) 可能開拓 PD-1 耐藥市場",
+          "針對血管生成路徑提供相較傳統免疫治療的差異化優勢"
+        ],
+        "bear_points": [
+          "DLL4 標靶相關毒性 (on-target toxicity) 可能限制給藥劑量",
+          "需驗證雙特異機制相較聯合療法的臨床存活期邊際獲益"
+        ],
+        "final_take": "關鍵在於臨床數據是否能證明雙靶向機制的差異化潛力。",
+        "entities": {
+          "tickers": [
+            "CMPX",
+            "AZN"
+          ],
+          "sectors": [
+            "Biotechnology"
+          ],
+          "themes": [
+            "Oncology",
+            "Bispecifics"
+          ],
+          "tech_keywords": [
+            "DLL4",
+            "VEGF-A",
+            "Bispecific Antibody"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AZN"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充了 CTX-009 特殊作用機制 (DLL4/VEGF-A) 相較於現有 PD-1 療法的技術差異點與市場利基。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:29:28Z",
+      "latency_ms": 29060,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面三輪把現金、授權分成、機制差異都講了，補一個 bull case 刻意略過的**反方節點**：DLL4 這個標靶本身有一段難看的臨床安全史。OncoMed 當年的 demcizumab、enoticumab 兩支 DLL4 抗體都不是死在療效，而是栽在**安全性**——肺動脈高壓、心臟毒性、血管異常增生。Gemini 把 DLL4/VEGF 雙重阻斷講成純利多的差異化機制，但同一個機制也是**class-specific 風險**：VEGF 端帶出血與腸穿孔風險，DLL4 端帶血管病變。tovecimig 就算 BTC 療效數據漂亮，FDA 對這個 class 的安全門檻會更嚴，後線病人耐受度也是未知數。所以交易框架要再加一條:臨床讀出不只看 ORR，要看**安全性訊號**——機制是雙面刃，不是單純利多。",
+        "bull_points": [
+          "孤兒藥 7 年專營權換較長保護,降低現金壓力",
+          "DLL4/VEGF 機制可切入 PD-1 耐藥後線病人"
+        ],
+        "bear_points": [
+          "DLL4 class 安全史差:demcizumab、enoticumab 皆栽安全性",
+          "VEGF 端帶出血/腸穿孔,DLL4 端帶血管病變風險",
+          "FDA 對此 class 安全門檻更嚴,讀出不能只看 ORR"
+        ],
+        "final_take": "看空略偏,機制是雙面刃需盯安全性訊號",
+        "entities": {
+          "tickers": [
+            "CMPX",
+            "AZN"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "bispecific antibody",
+            "biliary tract cancer",
+            "clinical-stage biotech"
+          ],
+          "tech_keywords": [
+            "DLL4/VEGF bispecific",
+            "tovecimig",
+            "CTX-009"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dll4-class-safety-history"
+          },
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:tovecimig-btc-readout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "DLL4 標靶安全史差,屬前文漏掉的反方節點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:29:44Z",
+      "latency_ms": 15282,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述分析已完整涵蓋現金流、授權結構與機制風險，但我補充一個隱性營運挑戰：**Bispecific Antibodies** 的 **CMC (化學製造與控制) 門檻**。與傳統 mAb 相比，雙抗在細胞株開發、純化與穩定性上的技術難度極高。CMPX 作為小型藥廠，若 tovecimig 推進大規模臨床，其製造成本與供應鏈管理恐面臨巨大挑戰，這不僅是臨床端風險，更是嚴重的資金消耗點。",
+        "bull_points": [
+          "雙抗機制若證實有效，具備顯著臨床差異化。",
+          "若能授權大型藥廠，可轉移部分製造端壓力。"
+        ],
+        "bear_points": [
+          "雙抗製程複雜，恐大幅增加 CMC 開發成本。",
+          "DLL4 標靶歷史安全性紀錄不佳，臨床門檻高。"
+        ],
+        "final_take": "關注臨床數據同時，須審慎評估其製程放大時的成本控管能力。",
+        "entities": {
+          "tickers": [
+            "CMPX",
+            "AZN"
+          ],
+          "sectors": [
+            "Biotechnology"
+          ],
+          "themes": [
+            "Biotech",
+            "Bispecifics",
+            "Cash Burn"
+          ],
+          "tech_keywords": [
+            "Bispecific Antibodies",
+            "CMC",
+            "DLL4/VEGF-A"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cmc"
+          },
+          {
+            "subject": "ticker:CMPX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:orphan_drug_status"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "引入雙抗藥物特有的 CMC 製造複雜度與成本挑戰，為前述臨床風險補充營運面向。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AZN",
+        "CMPX"
+      ],
+      "sectors": [
+        "Biotechnology",
+        "Health Care",
+        "Healthcare"
+      ],
+      "themes": [
+        "Biotech",
+        "Bispecifics",
+        "Cash Burn",
+        "Clinical-stage",
+        "Oncology",
+        "biliary tract cancer",
+        "bispecific antibody",
+        "cash runway",
+        "clinical-stage biotech",
+        "oncology",
+        "out-licensing economics"
+      ],
+      "tech_keywords": [
+        "Bispecific Antibodies",
+        "Bispecific Antibody",
+        "Bispecific antibody",
+        "CMC",
+        "CTX-009",
+        "DLL4",
+        "DLL4/VEGF bispecific",
+        "DLL4/VEGF-A",
+        "Immunotherapy",
+        "VEGF-A",
+        "biliary tract cancer",
+        "bispecific antibody",
+        "orphan drug designation",
+        "tovecimig"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:q1-2026-net-loss"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:tovecimig-biliary-cancer-data"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cash-runway-dilution-risk"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AZN"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "company:abl_bio"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:orphan_drug_designation"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dll4-class-safety-history"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:tovecimig-btc-readout"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cmc"
+      },
+      {
+        "subject": "ticker:CMPX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:orphan_drug_status"
+      }
+    ],
+    "bull_summary": [
+      "臨床期生技淨損屬常態，非營運惡化",
+      "市場多已 price-in 季度虧損",
+      "tovecimig 膽道癌數據為潛在催化劑",
+      "雙特異抗體具克服免疫耐藥潛力",
+      "臨床數據若成功將大幅提升資產估值",
+      "tovecimig 具 FDA 孤兒藥資格，享稅抵與7年專營"
+    ],
+    "bear_summary": [
+      "現金跑道若偏短面臨增資稀釋",
+      "無營收，估值全押單一管線成敗",
+      "小型生技流動性低、波動劇烈",
+      "AZN 在膽道癌市場已樹立強大門檻",
+      "小型生技公司在臨床數據需達標壓力",
+      "CTX-009 自 ABL Bio 授權，里程碑金分食未來價值"
+    ],
+    "final_take": "關注臨床數據同時，須審慎評估其製程放大時的成本控管能力。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T09:29:44Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH, MENTIONED_IN; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

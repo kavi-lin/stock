@@ -1,0 +1,418 @@
+id: poet
+title: POET Technologies — 光子整合 / 共封裝光學 (CPO) 價值鏈
+theme: POET
+generated_at: '2026-05-18T00:00:00Z'
+generated_by: claude
+status: draft
+layers:
+- materials
+- engine_ip
+- module_assembly
+- systems
+modules:
+  materials:
+  - id: laser_sources
+    label: 雷射光源 (DFB / CW / EML Laser)
+  - id: photonic_foundry
+    label: 矽光子代工
+  - id: signal_chips
+    label: DSP / Retimer / 訊號鏈晶片
+  engine_ip:
+  - id: interposer_platform
+    label: 光學內插板平台
+  - id: cpo_engine_peers
+    label: CPO 光引擎同業
+  module_assembly:
+  - id: transceiver_oem
+    label: 光收發模組 OEM
+  - id: contract_mfg
+    label: 光學代工組裝
+  - id: advanced_packaging
+    label: 先進封裝 / 共封裝 OSAT
+  systems:
+  - id: switch_systems
+    label: 交換機 / AI 系統
+  - id: hyperscaler_customers
+    label: 雲端超大規模業者
+spine:
+- lumentum
+- poet
+- innolight
+- nvidia
+nodes:
+- id: lumentum
+  label: Lumentum
+  layer: materials
+  module: laser_sources
+  role: 資料中心用 CW / DFB 雷射晶片供應
+  ticker: LITE
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: coherent
+  label: Coherent
+  layer: materials
+  module: laser_sources
+  role: 雷射晶片 + 垂直整合光元件
+  ticker: COHR
+  listing: us_listed
+  stage: unknown
+  note: 亦為下游收發模組大廠，產業地位橫跨多層
+- id: mitsubishi_electric
+  label: Mitsubishi Electric
+  layer: materials
+  module: laser_sources
+  role: 高速 EML / DFB 雷射晶片
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  note: 東京證交所上市 (6503.T)
+- id: ntt_innovative
+  label: NTT Innovative Devices
+  layer: materials
+  module: laser_sources
+  role: InP EML / 雷射晶片與光元件
+  ticker: null
+  listing: foreign_listed
+  stage: design_partner
+  note: NTT 集團子公司；POET 2025 公開宣布合作 (telecom / 1.6T fronthaul)
+- id: globalfoundries
+  label: GlobalFoundries
+  layer: materials
+  module: photonic_foundry
+  role: 矽光子 (SiPho) 晶圓代工
+  ticker: GFS
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: tower_semi
+  label: Tower Semiconductor
+  layer: materials
+  module: photonic_foundry
+  role: 矽光子 / 化合物半導體特殊製程代工
+  ticker: TSEM
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: marvell
+  label: Marvell Technology
+  layer: materials
+  module: signal_chips
+  role: 800G / 1.6T 光 DSP / PAM4 晶片
+  ticker: MRVL
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: broadcom
+  label: Broadcom
+  layer: materials
+  module: signal_chips
+  role: 光 DSP + 自研 CPO 交換矽 (Bailly)
+  ticker: AVGO
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: semtech
+  label: Semtech
+  layer: materials
+  module: signal_chips
+  role: TIA / driver / CDR 類比訊號鏈元件
+  ticker: SMTC
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: credo
+  label: Credo Technology
+  layer: materials
+  module: signal_chips
+  role: 光模組 DSP / Retimer / AEC — AI 光互連訊號鏈
+  ticker: CRDO
+  listing: us_listed
+  stage: unknown
+  note: 生態系玩家，與 POET 無直接公開關係
+- id: poet
+  label: POET Technologies
+  layer: engine_ip
+  module: interposer_platform
+  role: 晶圓級光學內插板平台 — 整合雷射/光波導/被動光學成光引擎
+  ticker: POET
+  listing: us_listed
+  stage: unknown
+  note: Nasdaq + TSX 雙掛牌；主題核心標的 (spine 主體)
+- id: denselight
+  label: DenseLight Semiconductors
+  layer: engine_ip
+  module: interposer_platform
+  role: InP 雷射 / 光放大器晶片，供 POET 光引擎
+  ticker: null
+  listing: private
+  stage: production
+  note: POET 全資子公司 (新加坡) — 內部已量產供料
+- id: super_photonics
+  label: Super Photonics Xiamen
+  layer: engine_ip
+  module: interposer_platform
+  role: POET 光引擎量產合資公司
+  ticker: null
+  listing: private
+  stage: production
+  note: POET 與三安光電合資 (廈門) — 量產合資
+- id: celestial_ai
+  label: Celestial AI
+  layer: engine_ip
+  module: cpo_engine_peers
+  role: Photonic Fabric 光互連，CPO 同業競品
+  ticker: null
+  listing: private
+  stage: unknown
+  note: 未上市，AMD / Fidelity 等投資
+- id: ayar_labs
+  label: Ayar Labs
+  layer: engine_ip
+  module: cpo_engine_peers
+  role: 光 I/O chiplet (TeraPHY)，CPO 同業競品
+  ticker: null
+  listing: private
+  stage: unknown
+  note: 未上市，NVIDIA / Intel 等戰略投資
+- id: innolight
+  label: Innolight (中際旭創)
+  layer: module_assembly
+  module: transceiver_oem
+  role: 全球最大 800G/1.6T 光收發模組廠
+  ticker: null
+  listing: foreign_listed
+  stage: design_partner
+  note: 深圳證交所上市 (300308.SZ)
+- id: eoptolink
+  label: Eoptolink (新易盛)
+  layer: module_assembly
+  module: transceiver_oem
+  role: 高速光收發模組 OEM
+  ticker: null
+  listing: foreign_listed
+  stage: design_partner
+  note: 深圳證交所上市 (300502.SZ)
+- id: luxshare
+  label: Luxshare Precision (立訊精密)
+  layer: module_assembly
+  module: transceiver_oem
+  role: 400G / 800G transceiver 量產 — POET 公開合作路徑
+  ticker: null
+  listing: foreign_listed
+  stage: design_partner
+  note: 深圳證交所上市 (002475.SZ)；POET 已公開合作 400G/800G transceiver
+- id: foxconn_interconnect
+  label: Foxconn Interconnect Technology
+  layer: module_assembly
+  module: transceiver_oem
+  role: 800G + 1.6T transceiver — POET design win
+  ticker: null
+  listing: foreign_listed
+  stage: design_partner
+  note: 香港上市 (FIT Hon Teng, 6088.HK)；POET 公開 800G/1.6T design win
+- id: fabrinet
+  label: Fabrinet
+  layer: module_assembly
+  module: contract_mfg
+  role: 光學模組精密代工組裝 (OEM 廠)
+  ticker: FN
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: ase
+  label: Advanced Semiconductor Engineering (ASE)
+  layer: module_assembly
+  module: advanced_packaging
+  role: CPO 共封裝 / OSAT — 光引擎與交換 ASIC 的封裝、散熱、組裝
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  note: 台灣證交所上市 (3711.TW)，亦有美 ADR (ASX)；CPO 量產卡關常在此層
+- id: nvidia
+  label: NVIDIA
+  layer: systems
+  module: switch_systems
+  role: AI GPU 系統 + 矽光子交換機 (Quantum-X / Spectrum-X Photonics)
+  ticker: NVDA
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: arista
+  label: Arista Networks
+  layer: systems
+  module: switch_systems
+  role: 資料中心 AI 交換機系統
+  ticker: ANET
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: microsoft
+  label: Microsoft
+  layer: systems
+  module: hyperscaler_customers
+  role: Azure AI 資料中心 — 光互連終端買家
+  ticker: MSFT
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: meta
+  label: Meta Platforms
+  layer: systems
+  module: hyperscaler_customers
+  role: AI 訓練叢集 — 光互連終端買家
+  ticker: META
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: google
+  label: Google (Alphabet)
+  layer: systems
+  module: hyperscaler_customers
+  role: TPU + optical scale-out — CPO / optical 最大潛在買家之一
+  ticker: GOOGL
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: aws
+  label: Amazon Web Services
+  layer: systems
+  module: hyperscaler_customers
+  role: 自研 Trainium / Inferentia 叢集 — 光互連潛在終端買家
+  ticker: AMZN
+  listing: us_listed
+  stage: unknown
+  note: ''
+edges:
+- from: lumentum
+  to: poet
+  rel: SUPPLIES_TO
+  note: CW 雷射光源
+- from: coherent
+  to: poet
+  rel: SUPPLIES_TO
+  note: 雷射 / 光元件
+- from: mitsubishi_electric
+  to: poet
+  rel: SUPPLIES_TO
+  note: EML 雷射晶片
+- from: ntt_innovative
+  to: poet
+  rel: SUPPLIES_TO
+  note: InP EML 雷射 (2025 合作)
+- from: denselight
+  to: poet
+  rel: SUPPLIES_TO
+  note: 子公司供 InP 雷射
+- from: super_photonics
+  to: poet
+  rel: CONTRACT_MFG_FOR
+  note: 光引擎量產合資
+- from: globalfoundries
+  to: marvell
+  rel: SUPPLIES_TO
+  note: 矽光子晶圓代工
+- from: tower_semi
+  to: innolight
+  rel: SUPPLIES_TO
+  note: 特殊製程晶圓
+- from: marvell
+  to: innolight
+  rel: SUPPLIES_TO
+  note: 光 DSP
+- from: broadcom
+  to: innolight
+  rel: SUPPLIES_TO
+  note: 光 DSP
+- from: semtech
+  to: eoptolink
+  rel: SUPPLIES_TO
+  note: TIA / driver
+- from: credo
+  to: innolight
+  rel: SUPPLIES_TO
+  note: DSP / Retimer
+- from: credo
+  to: eoptolink
+  rel: SUPPLIES_TO
+  note: DSP / Retimer / AEC
+- from: poet
+  to: innolight
+  rel: SUPPLIES_TO
+  note: 光引擎 / 光源模組
+- from: poet
+  to: eoptolink
+  rel: SUPPLIES_TO
+  note: 光引擎 / 光源模組
+- from: poet
+  to: luxshare
+  rel: SUPPLIES_TO
+  note: 光引擎 — POET 公開合作路徑
+- from: poet
+  to: foxconn_interconnect
+  rel: SUPPLIES_TO
+  note: 光引擎 — 800G/1.6T design win
+- from: ase
+  to: innolight
+  rel: CONTRACT_MFG_FOR
+  note: CPO 共封裝 / OSAT
+- from: innolight
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: 800G/1.6T 收發模組
+- from: innolight
+  to: arista
+  rel: SUPPLIES_TO
+  note: 收發模組
+- from: eoptolink
+  to: arista
+  rel: SUPPLIES_TO
+  note: 收發模組
+- from: luxshare
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: 400G/800G transceiver
+- from: foxconn_interconnect
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: 800G/1.6T transceiver
+- from: fabrinet
+  to: arista
+  rel: SUPPLIES_TO
+  note: 代工組裝模組
+- from: celestial_ai
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: 光互連 fabric
+- from: nvidia
+  to: ayar_labs
+  rel: INVESTOR_IN
+  note: CPO 光 I/O 戰略投資
+- from: nvidia
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: AI 系統
+- from: nvidia
+  to: meta
+  rel: SUPPLIES_TO
+  note: AI 系統
+- from: nvidia
+  to: google
+  rel: SUPPLIES_TO
+  note: AI 系統
+- from: nvidia
+  to: aws
+  rel: SUPPLIES_TO
+  note: AI 系統
+- from: arista
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: 交換機系統
+- from: arista
+  to: meta
+  rel: SUPPLIES_TO
+  note: 交換機系統
+- from: arista
+  to: google
+  rel: SUPPLIES_TO
+  note: 交換機系統

@@ -1,0 +1,312 @@
+id: cpo
+title: 共同封裝光學 (CPO) 供應鏈
+theme: CPO
+generated_at: '2026-05-17T13:51:29Z'
+generated_by: claude
+status: draft
+layers:
+- materials
+- photonics
+- electronics
+- integration
+- systems
+modules:
+  materials:
+  - id: laser_source
+    label: CW 雷射光源
+  - id: fiber_connector
+    label: 光纖連接器
+  photonics:
+  - id: silicon_photonics
+    label: 矽光子設計
+  - id: photonics_foundry
+    label: 矽光子代工
+  electronics:
+  - id: dsp_interconnect
+    label: DSP / SerDes 互連
+  - id: driver_tia
+    label: 驅動器 / TIA
+  integration:
+  - id: switch_asic
+    label: 交換晶片 ASIC
+  - id: cpo_assembly
+    label: CPO 組裝代工
+  - id: advanced_packaging
+    label: 先進封裝
+  systems:
+  - id: switch_oem
+    label: 交換器 OEM
+  - id: hyperscaler
+    label: 雲端超大規模客戶
+spine:
+- lumentum
+- tsmc
+- macom
+- broadcom
+- microsoft
+nodes:
+- id: coherent
+  label: Coherent
+  layer: materials
+  module: laser_source
+  role: 磷化銦 CW DFB 雷射與光源材料供應商
+  ticker: COHR
+  listing: us_listed
+  note: CPO 用外部雷射光源主力
+- id: lumentum
+  label: Lumentum
+  layer: materials
+  module: laser_source
+  role: CPO 用 CW 雷射陣列與光源模組
+  ticker: LITE
+  listing: us_listed
+  note: ''
+- id: sumitomo_electric
+  label: Sumitomo Electric
+  layer: materials
+  module: laser_source
+  role: 高功率 CW DFB 雷射晶粒
+  ticker: null
+  listing: foreign_listed
+  note: 東證上市 (5802.T)
+- id: usconec
+  label: US Conec
+  layer: materials
+  module: fiber_connector
+  role: MPO 光纖連接器與 fiber shuffle，CPO 光介面標準件
+  ticker: null
+  listing: private
+  note: PRIZM MT / MMC 連接器
+- id: intel
+  label: Intel
+  layer: photonics
+  module: silicon_photonics
+  role: 矽光子整合與 OCI 光學運算互連 chiplet
+  ticker: INTC
+  listing: us_listed
+  note: ''
+- id: ayar_labs
+  label: Ayar Labs
+  layer: photonics
+  module: silicon_photonics
+  role: 封裝內光學 I/O 光學 chiplet (TeraPHY)
+  ticker: null
+  listing: private
+  note: NVIDIA / Intel 投資，CPO-in-package 關鍵新創
+- id: globalfoundries
+  label: GlobalFoundries
+  layer: photonics
+  module: photonics_foundry
+  role: 矽光子晶圓代工平台 (Fotonix)
+  ticker: GFS
+  listing: us_listed
+  note: Ayar Labs PIC 代工
+- id: tsmc
+  label: TSMC
+  layer: photonics
+  module: photonics_foundry
+  role: COUPE 矽光子整合平台，光引擎晶圓與封裝代工
+  ticker: null
+  listing: foreign_listed
+  note: 台股上市 (2330.TW)，亦有 ADR
+- id: marvell
+  label: Marvell
+  layer: electronics
+  module: dsp_interconnect
+  role: 光學 DSP 與客製 CPO 互連晶片
+  ticker: MRVL
+  listing: us_listed
+  note: ''
+- id: credo
+  label: Credo Technology
+  layer: electronics
+  module: dsp_interconnect
+  role: SerDes / AEC 與低功耗連接 IP
+  ticker: CRDO
+  listing: us_listed
+  note: ''
+- id: macom
+  label: MACOM
+  layer: electronics
+  module: driver_tia
+  role: 雷射驅動器與 TIA，光引擎類比前端
+  ticker: MTSI
+  listing: us_listed
+  note: ''
+- id: broadcom
+  label: Broadcom
+  layer: integration
+  module: switch_asic
+  role: Tomahawk CPO 交換 ASIC (Bailly) 與整合矽光子光引擎
+  ticker: AVGO
+  listing: us_listed
+  note: CPO 交換平台領導者
+- id: fabrinet
+  label: Fabrinet
+  layer: integration
+  module: cpo_assembly
+  role: 光學模組與 CPO 子系統合約製造
+  ticker: FN
+  listing: us_listed
+  note: ''
+- id: celestica
+  label: Celestica
+  layer: integration
+  module: cpo_assembly
+  role: 雲端交換器 ODM 與 CPO 系統組裝
+  ticker: CLS
+  listing: us_listed
+  note: ''
+- id: amkor
+  label: Amkor Technology
+  layer: integration
+  module: advanced_packaging
+  role: 光電共封裝先進封裝與測試
+  ticker: AMKR
+  listing: us_listed
+  note: ''
+- id: arista
+  label: Arista Networks
+  layer: systems
+  module: switch_oem
+  role: 資料中心交換器 OEM，採用 CPO 交換平台
+  ticker: ANET
+  listing: us_listed
+  note: ''
+- id: cisco
+  label: Cisco Systems
+  layer: systems
+  module: switch_oem
+  role: 矽光子交換器 OEM (Silicon One)
+  ticker: CSCO
+  listing: us_listed
+  note: 併購 Acacia / Luxtera
+- id: nvidia
+  label: NVIDIA
+  layer: systems
+  module: switch_oem
+  role: Quantum-X / Spectrum-X CPO 交換系統
+  ticker: NVDA
+  listing: us_listed
+  note: ''
+- id: microsoft
+  label: Microsoft
+  layer: systems
+  module: hyperscaler
+  role: Azure AI 資料中心 CPO 網路終端採用者
+  ticker: MSFT
+  listing: us_listed
+  note: ''
+- id: meta
+  label: Meta Platforms
+  layer: systems
+  module: hyperscaler
+  role: AI 訓練叢集 CPO 網路終端採用者
+  ticker: META
+  listing: us_listed
+  note: ''
+edges:
+- from: coherent
+  to: intel
+  rel: SUPPLIES_TO
+  note: CW 雷射光源
+- from: lumentum
+  to: broadcom
+  rel: SUPPLIES_TO
+  note: CW 雷射陣列
+- from: sumitomo_electric
+  to: broadcom
+  rel: SUPPLIES_TO
+  note: 高功率 DFB 雷射晶粒
+- from: usconec
+  to: fabrinet
+  rel: SUPPLIES_TO
+  note: MPO 光纖連接器
+- from: usconec
+  to: celestica
+  rel: SUPPLIES_TO
+  note: ''
+- from: globalfoundries
+  to: ayar_labs
+  rel: CONTRACT_MFG_FOR
+  note: Fotonix 矽光子代工
+- from: tsmc
+  to: broadcom
+  rel: CONTRACT_MFG_FOR
+  note: COUPE 光引擎晶圓與封裝
+- from: tsmc
+  to: nvidia
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: ayar_labs
+  to: nvidia
+  rel: CO_DEVELOPS_WITH
+  note: 封裝內光學 I/O
+- from: intel
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: OCI 光學互連
+- from: macom
+  to: broadcom
+  rel: SUPPLIES_TO
+  note: 雷射驅動器 / TIA
+- from: macom
+  to: fabrinet
+  rel: SUPPLIES_TO
+  note: ''
+- from: marvell
+  to: celestica
+  rel: SUPPLIES_TO
+  note: 光學 DSP
+- from: credo
+  to: arista
+  rel: SUPPLIES_TO
+  note: SerDes / AEC
+- from: credo
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: broadcom
+  to: arista
+  rel: SUPPLIES_TO
+  note: CPO 交換 ASIC
+- from: broadcom
+  to: cisco
+  rel: SUPPLIES_TO
+  note: ''
+- from: fabrinet
+  to: broadcom
+  rel: CONTRACT_MFG_FOR
+  note: CPO 模組組裝
+- from: amkor
+  to: broadcom
+  rel: CONTRACT_MFG_FOR
+  note: 光電共封裝
+- from: fabrinet
+  to: arista
+  rel: SUPPLIES_TO
+  note: ''
+- from: celestica
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: 交換器 ODM
+- from: arista
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: arista
+  to: meta
+  rel: SUPPLIES_TO
+  note: ''
+- from: cisco
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: meta
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''

@@ -1,0 +1,555 @@
+{
+  "news_id": "bn_20260518_0001cab5",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T02:49:46Z",
+  "last_activity_ts": "2026-05-18T02:52:41Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/e8e9fcac55a1",
+    "feed_fingerprint": "futu:EWY,KORU,KOSPI,SK:55b56fe0de",
+    "published": "2026-05-18T08:20:03+08:00",
+    "url_hash": "sha1:3d8617438eef977acd3033723b68883586b678b2"
+  },
+  "headline": "韓國KOSPI指數跌幅擴大至逾4%，權重股三星電子跌超3%，SK海力士跌3.5%",
+  "headline_zh": null,
+  "raw_summary": "韓國KOSPI指數跌幅擴大至逾4%，權重股三星電子跌超3%，SK海力士跌3.5%。在美上市韓國ETF EWY美股夜盤跌近5%、KORU跌近14%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -4.5,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T02:50:42Z",
+      "latency_ms": 21006,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "KOSPI單日跌逾4%、**SK海力士跌3.5%**是關鍵訊號。SK海力士是NVDA **HBM3e**主力供應商，海力士走弱通常領先反映AI記憶體訂單能見度疑慮，而非單純情緒。需區分兩種劇本：若為韓國本地因素（韓元、政治、外資撤離），則屬國別風險、對美股AI鏈傳染有限；若為記憶體報價或**HBM4**認證進度雜訊，才會外溢到NVDA、AVGO供應鏈。**KORU夜盤跌近14%**僅反映3倍槓桿放大，不代表基本面惡化14%。半導體記憶體為高Beta資產，KOSPI回檔常是全球風險偏好的同步指標而非單獨利空。",
+        "bull_points": [
+          "跌幅恐為韓國國別因素，AI鏈基本面未變",
+          "KORU暴跌僅3倍槓桿放大、非基本面訊號",
+          "記憶體高Beta、回檔後反彈彈性大"
+        ],
+        "bear_points": [
+          "SK海力士走弱常領先HBM訂單能見度疑慮",
+          "若為HBM4認證雜訊恐外溢NVDA供應鏈",
+          "KOSPI同步反映全球風險偏好轉弱"
+        ],
+        "final_take": "看跌情緒短期、但須先確認是否為HBM需求訊號",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "MU",
+            "EWY",
+            "KORU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "memory pricing",
+            "country risk"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:hbm4"
+          },
+          {
+            "subject": "ticker:EWY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:country-risk"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:memory-pricing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.58,
+        "rationale_short": "訊號性質未明，國別風險與HBM需求兩劇本待分辨"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T02:50:57Z",
+      "latency_ms": 14476,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了先前討論的HBM供應風險，**三星電子與SK海力士的評價分化**更應被視為指標。市場恐慌導致兩者同步修正，但核心問題在於**HBM3e**認證的進度差異。若三星在技術迭代（如yield率提升）持續滯後，NVDA將面臨單一供應商過度依賴的結構性風險，這對AI供應鏈的韌性是一大隱憂。此波修正若非基本面變質，反而是重新檢視NVDA供應商多元化佈局與良率提升速度的關鍵節點。",
+        "bull_points": [
+          "記憶體供應結構性緊張",
+          "領先者獲市佔擴張優勢"
+        ],
+        "bear_points": [
+          "HBM供應鏈集中度風險升高",
+          "三星認證進度不確定性"
+        ],
+        "final_take": "短期供應焦慮，長期關注認證分化。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "SSNLF",
+            "HXSCF"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "N3P"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:HXSCF",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:SSNLF",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:HXSCF"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "點出三星與海力士HBM認證分化對NVDA供應鏈單一化的影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T02:51:33Z",
+      "latency_ms": 36644,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦HBM供應與三星/海力士評價分化，但漏了**最乾淨的美股讀數**：美光 **MU**。海力士是HBM主力，美光卻是美國唯一的記憶體純做股——若這波是記憶體景氣循環見頂疑慮，MU美股開盤的缺口會比 EWY 更能說明問題。觀察重點：MU 盤前若**幾乎持平**，代表 KOSPI 4% 重挫是韓元、外資撤離、程式賣盤的本地/機械性因素，AI鏈傳染有限；MU 若同步重挫，才是 **HBM3e/HBM4** 與標準型 DRAM 報價的基本面警訊。值得注意的反向劇本：若海力士走弱源於良率或認證瓶頸，對 MU 反而是**競爭面利多**——搶下 NVDA 第二供應商席位的機會。單日無明確催化劑的整數跌幅，通常指向去槓桿而非訂單變質。",
+        "bull_points": [
+          "海力士良率瓶頸反成MU搶NVDA二供機會",
+          "無催化劑整數跌幅偏向去槓桿非訂單惡化",
+          "MU盤前持平即可證偽記憶體景氣見頂說"
+        ],
+        "bear_points": [
+          "MU若同步重挫示警HBM與DRAM報價轉弱",
+          "韓元走弱與外資撤離恐外溢全球半導體risk-off",
+          "記憶體高Beta屬性放大下一段美股波動"
+        ],
+        "final_take": "看MU盤前缺口定調：持平則韓國本地事件，重挫才是記憶體警訊",
+        "entities": {
+          "tickers": [
+            "MU",
+            "NVDA",
+            "EWY"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "memory cycle"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "DRAM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hynix-yield-shortfall"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:memory-cycle-peak"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:kospi-selloff"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增MU作美股記憶體純做讀數，前文未提此票與證偽路徑"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T02:51:46Z",
+      "latency_ms": 13115,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了記憶體本身的供需或認證，需關注此波修正是否引發**記憶體廠下修資本支出 (CAPEX)**。SKH 與 Samsung 佔據全球設備需求重要份額，若記憶體價格雜訊迫使廠方縮減 **WFE (Wafer Fab Equipment)** 採購，對 **AMAT**、**KLAC** 等設備龍頭是更具結構性的利空。相比 MU 是記憶體競品，設備商才是 AI 基礎建設的槓桿，這也是市場目前尚未完全定價的風險。",
+        "bull_points": [
+          "記憶體報價修正，長期利於 NVDA 採購成本降低",
+          "MU 若因替代效應吸引資金，可支撐板塊情緒"
+        ],
+        "bear_points": [
+          "記憶體廠恐縮減 CAPEX，壓抑 WFE 設備需求",
+          "設備龍頭 AMAT/KLAC 若遭傳染，AI 基礎設施擴張將受阻"
+        ],
+        "final_take": "關注記憶體廠 CAPEX 調整，若傳染至設備商則風險加劇。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "AMAT",
+            "KLAC"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "WFE",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:memory_capex_cuts"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入設備商(WFE) CAPEX 視角，剖析記憶體廠下修資本支出的二階連鎖效應。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T02:52:25Z",
+      "latency_ms": 38801,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述串討論HBM供應、三星/海力士評價分化、MU乾淨讀數、WFE設備商，但都默認「海力士走弱=AI記憶體訂單能見度惡化」這個前提。**這個前提本身值得反駁**：NVDA的HBM3e/HBM4產能是透過**長約 (LTA) 加預付款**鎖定到2026甚至更久，屬take-or-pay性質——單日股價波動在機制上無法反映已簽訂的訂單能見度。真正的訂單訊號要看季度法說的LTA金額與預付款變動，不是KOSPI夜盤缺口。另一個被忽略的二階效應：海力士、三星正把標準型DRAM晶圓產能**轉換**去做HBM，這反而**收緊**了commodity DRAM供給、撐住報價——所以韓股走弱未必等於記憶體景氣見頂，部分情境下對MU的傳統DRAM業務是利多。此外KOSPI權值高度集中於三星+海力士，指數跌4%本質上就是這兩檔的合成,不算獨立的基本面確認訊號。",
+        "bull_points": [
+          "NVDA HBM長約+預付款鎖定到2026,訂單能見度不受單日股價影響",
+          "DRAM晶圓轉產HBM收緊commodity供給,撐住傳統DRAM報價",
+          "良率/認證瓶頸下MU有望搶NVDA第二供應商席位"
+        ],
+        "bear_points": [
+          "KOSPI權值過度集中,指數重挫主要反映韓元與外資撤離",
+          "若LTA預付款於下季法說下修,才是真正訂單警訊"
+        ],
+        "final_take": "看多AI鏈,韓股單日重挫屬機械性去槓桿非訂單變質",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "DRAM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm-lta-prepayment-lockin"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:dram-capacity-conversion-to-hbm"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:hbm-second-source"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增LTA預付款鎖單反駁論點與DRAM轉產二階效應,前串未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T02:52:41Z",
+      "latency_ms": 16268,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "之前的分析集中於 AI 記憶體與設備開支，但忽略了三星電子龐大的**消費電子與行動裝置**事業部。KOSPI 4% 的跌幅，很可能反映了非 AI 領域（如智慧型手機、傳統 PC 市場）復甦乏力對權重股的拖累。相較於 AI 市場的 **HBM3e** 高成長，三星的標準型 DRAM 與 NAND 需求與宏觀經濟敏感度極高。這波修正或許不是對 AI 供應鏈的否定，而是市場對『AI 繁榮 vs. 傳統消費電子疲軟』雙軌經濟體系重新定價的過程。",
+        "bull_points": [
+          "轉移標準 DRAM 產能至 HBM 有助支撐記憶體均價",
+          "若此為非 AI 業務修正，AI 供應鏈反是加碼點"
+        ],
+        "bear_points": [
+          "傳統消費電子復甦乏力將壓低三星整體獲利",
+          "KOSPI 暴跌可能觸發外資對韓國市場的恐慌性贖回"
+        ],
+        "final_take": "應將 AI 記憶體與消費電子需求視為雙軌定價。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "SSNLF"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "Consumer Electronics"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "DRAM",
+            "NAND"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SSNLF",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:SSNLF",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Consumer Electronics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入三星消費業務需求不振的觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "AVGO",
+        "EWY",
+        "HXSCF",
+        "KLAC",
+        "KORU",
+        "MU",
+        "NVDA",
+        "SSNLF"
+      ],
+      "sectors": [
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "Consumer Electronics",
+        "HBM3e",
+        "country risk",
+        "memory cycle",
+        "memory pricing"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "DRAM",
+        "HBM3e",
+        "HBM4",
+        "N3P",
+        "NAND",
+        "WFE"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:hbm4"
+      },
+      {
+        "subject": "ticker:EWY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:country-risk"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:memory-pricing"
+      },
+      {
+        "subject": "ticker:HXSCF",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:SSNLF",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:HXSCF"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hynix-yield-shortfall"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:memory-cycle-peak"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:kospi-selloff"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:memory_capex_cuts"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm-lta-prepayment-lockin"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:dram-capacity-conversion-to-hbm"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:hbm-second-source"
+      },
+      {
+        "subject": "ticker:SSNLF",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:SSNLF",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Consumer Electronics"
+      }
+    ],
+    "bull_summary": [
+      "跌幅恐為韓國國別因素，AI鏈基本面未變",
+      "KORU暴跌僅3倍槓桿放大、非基本面訊號",
+      "記憶體高Beta、回檔後反彈彈性大",
+      "記憶體供應結構性緊張",
+      "領先者獲市佔擴張優勢",
+      "海力士良率瓶頸反成MU搶NVDA二供機會"
+    ],
+    "bear_summary": [
+      "SK海力士走弱常領先HBM訂單能見度疑慮",
+      "若為HBM4認證雜訊恐外溢NVDA供應鏈",
+      "KOSPI同步反映全球風險偏好轉弱",
+      "HBM供應鏈集中度風險升高",
+      "三星認證進度不確定性",
+      "MU若同步重挫示警HBM與DRAM報價轉弱"
+    ],
+    "final_take": "應將 AI 記憶體與消費電子需求視為雙軌定價。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T02:52:41Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

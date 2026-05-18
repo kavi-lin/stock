@@ -1,0 +1,600 @@
+{
+  "news_id": "bn_20260515_ce349e7d",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T15:40:27Z",
+  "last_activity_ts": "2026-05-15T15:46:13Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://www.investors.com/news/boeing-stock-china-order-deliveries-ba-defense-aerospace-stocks-buy-point-rklb-lunr-rdw-hwm-gd/?src=A00220&yptr=yahoo",
+    "feed_fingerprint": "boeing eases after china order deliveries fall short",
+    "published": "2026-05-15T15:11:45+00:00",
+    "url_hash": "sha1:677e9412fcb40fee50862131cb79db7703a44c89"
+  },
+  "headline": "Boeing Eases After China Order, Deliveries Fall Short. Space Stocks Rally.",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:44:27Z",
+      "latency_ms": 22343,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**波音 (BA)** 中國訂單回歸是地緣解凍訊號，但交付量不及預期暴露真正瓶頸——產線爬坡與供應鏈，而非需求。訂單是遠期收入，交付才是現金流與營收認列關鍵，市場小幅回落反應合理。值得注意是**太空股 (RKLB, LUNR, RDW)** 同步走強，這與波音敘事脫鉤——更像國防預算與商業太空獨立題材輪動。供應鏈面 **HWM (Howmet)** 為引擎與緊固件關鍵供應商，交付加速最直接受惠；**GD** 則偏國防曝險。我視此為訂單面利多、執行面未解的混合訊號，BA 本身仍須觀察月度交付數據兌現。",
+        "bull_points": [
+          "中國訂單回歸，地緣緊張緩解訊號",
+          "HWM 等供應鏈交付加速直接受惠",
+          "太空股獨立題材輪動，國防預算支撐"
+        ],
+        "bear_points": [
+          "交付不及預期，產線爬坡瓶頸未解",
+          "訂單屬遠期收入，現金流未實質改善",
+          "供應鏈中斷風險仍壓制交付節奏"
+        ],
+        "final_take": "訂單利多但看執行，須觀察月度交付兌現",
+        "entities": {
+          "tickers": [
+            "BA",
+            "RKLB",
+            "LUNR",
+            "RDW",
+            "HWM",
+            "GD"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "China trade thaw",
+            "Commercial space",
+            "Defense spending",
+            "Aerospace supply chain"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-trade-thaw"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:delivery-shortfall"
+          },
+          {
+            "subject": "ticker:HWM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:commercial-space"
+          },
+          {
+            "subject": "ticker:GD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:defense-spending"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "訂單面利多明確，但交付執行風險未解，混合訊號"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:44:38Z",
+      "latency_ms": 11066,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述分析對供應鏈的描述尚屬宏觀，關鍵缺口在於 **Spirit AeroSystems (SPR)** 的生產瓶頸。波音若要真正落實積壓訂單，解決SPR的品質控制與產線整合難題遠比中國訂單回歸更具急迫性。這解釋了市場為何對交付數據如此敏感——訂單僅是遠期目標，SPR的生產效率才是當下決定波音現金流的實質變數。",
+        "bull_points": [
+          "中國訂單回歸緩解長期積壓需求。",
+          "太空板塊資金動能強勁，支撐國防工業情緒。"
+        ],
+        "bear_points": [
+          "SPR產線品質問題直接導致BA交付不及預期。",
+          "交付數據滯後可能導致短期自由現金流惡化。"
+        ],
+        "final_take": "關注BA與SPR的垂直整合進展，產能恢復才是實質轉捩點。",
+        "entities": {
+          "tickers": [
+            "BA",
+            "SPR",
+            "RKLB",
+            "LUNR",
+            "RDW"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Aerospace & Defense"
+          ],
+          "tech_keywords": [
+            "Aerostructures"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SPR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:SPR"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充SPR作為BA核心瓶頸的關鍵節點，區分產能與需求的本質差異。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:45:06Z",
+      "latency_ms": 28250,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述聚焦 **SPR** 機體瓶頸，但漏了同等關鍵的**發動機節點**——737 MAX 唯一動力來源 LEAP 由 CFM (GE Aerospace + Safran) 供應，**GE** 的 LEAP 產能爬坡同樣是交付的硬約束。SPR 機體與 GE 發動機是**雙瓶頸**，光解 SPR 不夠。第二層效應上，中國訂單利多須對沖一個結構風險：**COMAC C919** 國產化正逐步侵蝕中國窄體機需求，這批訂單更像地緣籌碼而非穩定長約。GE 反而是純受惠者——交付加速直接拉動其售後 MRO 高毛利現金流，曝險比 BA 本身乾淨。",
+        "bull_points": [
+          "GE 發動機售後 MRO 現金流隨交付加速放量",
+          "中國訂單回歸象徵窄體機需求地緣解凍"
+        ],
+        "bear_points": [
+          "LEAP 發動機產能與 SPR 機體形成雙瓶頸",
+          "COMAC C919 國產化長期侵蝕中國訂單基礎"
+        ],
+        "final_take": "供應鏈玩 GE 優於 BA，但留意 C919 結構威脅",
+        "entities": {
+          "tickers": [
+            "BA",
+            "GE",
+            "SPR",
+            "HWM",
+            "GD",
+            "RKLB",
+            "LUNR",
+            "RDW"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "aerospace supply chain",
+            "narrowbody recovery",
+            "geopolitical thaw"
+          ],
+          "tech_keywords": [
+            "LEAP engine",
+            "737 MAX",
+            "C919"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GE",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:GE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:narrowbody-recovery"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:c919-localization"
+          },
+          {
+            "subject": "ticker:SPR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增 GE/LEAP 發動機雙瓶頸與 C919 結構風險，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:45:24Z",
+      "latency_ms": 17390,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "上述分析專注於供應鏈瓶頸，實屬關鍵。我欲補充市場針對 **BA** **防務部門**與 **New Space** 題材的資產輪動。儘管波音在商用機交付受挫，市場資金卻大幅流向 **RKLB** 與 **LUNR** 等純粹化太空標的。這顯示投資人對於傳統軍工國防的增長乏力感到疲憊，轉而追逐高頻率發射與商業載荷帶來的結構性成長。波音在國防預算爭奪中面臨嚴重成本超支，這種「硬體製造」與「太空服務」的估值分化，將是航空航太產業的長期趨勢。",
+        "bull_points": [
+          "商業化太空服務需求激增",
+          "資金轉向高成長太空標的"
+        ],
+        "bear_points": [
+          "BA 防務部門利潤持續受壓",
+          "傳統國防股面臨資金邊緣化"
+        ],
+        "final_take": "投資焦點正從傳統國防製造，轉向高成長商業太空服務。",
+        "entities": {
+          "tickers": [
+            "BA",
+            "RKLB",
+            "LUNR"
+          ],
+          "sectors": [
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Defense spending",
+            "Space economy"
+          ],
+          "tech_keywords": [
+            "Small-sat",
+            "Launch systems"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:RKLB"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Space economy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "分析傳統國防與商業太空的資產輪動與估值分化。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T15:46:01Z",
+      "latency_ms": 37006,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述把 **SPR** 當成獨立瓶頸變數，但漏了結構轉折：波音正**重新收購 Spirit AeroSystems**，垂直整併把品質控管收回自家。這改變賽局——SPR 不再是「外部供應商」而是波音資產負債表的一部分，瓶頸帳算進自己頭上。同時 **Airbus (EADSY)** 切走 Spirit 的 A220／A350 機體工作包，意味這樁交易是雙邊分拆、非單純波音利多。更該盯的是**現金流與信評**：BA 淨債務逾 500 億美元、自由現金流仍為負，併購 Spirit 再添整合成本，投資級評等緊繃。中國訂單是遠期收入，救不了當下現金消耗。我視 BA 為**併購整合風險未定價**，太空股輪動則與此完全脫鉤。",
+        "bull_points": [
+          "Spirit 併回自家，品控與產線整合可直接掌控",
+          "垂直整併長期消除供應商利潤外漏與議價摩擦",
+          "中國訂單回歸補強遠期積壓訂單能見度"
+        ],
+        "bear_points": [
+          "BA 淨債務逾 500 億、FCF 為負，投資級評等緊繃",
+          "併購 Spirit 短期添整合成本與資產負債表壓力",
+          "Airbus 切走 Spirit 機體工作包,交易非單邊利多"
+        ],
+        "final_take": "偏空，併購整合與信評風險尚未被定價",
+        "entities": {
+          "tickers": [
+            "BA",
+            "SPR",
+            "EADSY",
+            "GE",
+            "HWM",
+            "GD",
+            "RKLB",
+            "LUNR",
+            "RDW"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "vertical integration",
+            "supply chain",
+            "balance sheet risk",
+            "New Space"
+          ],
+          "tech_keywords": [
+            "LEAP",
+            "737 MAX",
+            "A220",
+            "A350"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:SPR"
+          },
+          {
+            "subject": "ticker:EADSY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:spirit-breakup"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:balance-sheet-risk"
+          },
+          {
+            "subject": "ticker:SPR",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:vertical-integration"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增 Spirit 併購整併與信評現金流角度，前文未及"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T15:46:13Z",
+      "latency_ms": 12429,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦於供應鏈與整合，忽略了波音在中國市場的**監管准入滯後**。中國訂單中 737 MAX 的交付，不僅取決於產能，更受制於中國民航局 (CAAC) 的審核節奏。這種非技術性的政治審核，往往被用作地緣談判籌碼。即便波音解決了製造瓶頸，這種「監管不確定性」依舊是 BA 現金流認列的一個巨大風險貼現，這與太空股純粹的產業成長週期截然不同。",
+        "bull_points": [
+          "中國市場重啟訂單顯示地緣關係仍有空間",
+          "737 MAX 若能順利交付將釋放庫存價值"
+        ],
+        "bear_points": [
+          "交付節奏受制於中國民航局的高度不確定性",
+          "政治因素可能導致中國隨時轉向採購 C919"
+        ],
+        "final_take": "莫對中國訂單的現金流兌現過度樂觀。",
+        "entities": {
+          "tickers": [
+            "BA",
+            "RKLB",
+            "LUNR"
+          ],
+          "sectors": [
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Geopolitics",
+            "Supply Chain"
+          ],
+          "tech_keywords": [
+            "737 MAX"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Geopolitics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入「CAAC 監管不確定性」作為 BA 交付瓶頸的非技術變數。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BA",
+        "EADSY",
+        "GD",
+        "GE",
+        "HWM",
+        "LUNR",
+        "RDW",
+        "RKLB",
+        "SPR"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Industrials"
+      ],
+      "themes": [
+        "Aerospace & Defense",
+        "Aerospace supply chain",
+        "China trade thaw",
+        "Commercial space",
+        "Defense spending",
+        "Geopolitics",
+        "New Space",
+        "Space economy",
+        "Supply Chain",
+        "aerospace supply chain",
+        "balance sheet risk",
+        "geopolitical thaw",
+        "narrowbody recovery",
+        "supply chain",
+        "vertical integration"
+      ],
+      "tech_keywords": [
+        "737 MAX",
+        "A220",
+        "A350",
+        "Aerostructures",
+        "C919",
+        "LEAP",
+        "LEAP engine",
+        "Launch systems",
+        "Small-sat"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-trade-thaw"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:delivery-shortfall"
+      },
+      {
+        "subject": "ticker:HWM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:commercial-space"
+      },
+      {
+        "subject": "ticker:GD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:defense-spending"
+      },
+      {
+        "subject": "ticker:SPR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:SPR"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:narrowbody-recovery"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:c919-localization"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:RKLB"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Space economy"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:SPR"
+      },
+      {
+        "subject": "ticker:EADSY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:spirit-breakup"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:balance-sheet-risk"
+      },
+      {
+        "subject": "ticker:SPR",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:vertical-integration"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Geopolitics"
+      }
+    ],
+    "bull_summary": [
+      "中國訂單回歸，地緣緊張緩解訊號",
+      "HWM 等供應鏈交付加速直接受惠",
+      "太空股獨立題材輪動，國防預算支撐",
+      "中國訂單回歸緩解長期積壓需求。",
+      "太空板塊資金動能強勁，支撐國防工業情緒。",
+      "GE 發動機售後 MRO 現金流隨交付加速放量"
+    ],
+    "bear_summary": [
+      "交付不及預期，產線爬坡瓶頸未解",
+      "訂單屬遠期收入，現金流未實質改善",
+      "供應鏈中斷風險仍壓制交付節奏",
+      "SPR產線品質問題直接導致BA交付不及預期。",
+      "交付數據滯後可能導致短期自由現金流惡化。",
+      "LEAP 發動機產能與 SPR 機體形成雙瓶頸"
+    ],
+    "final_take": "莫對中國訂單的現金流兌現過度樂觀。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T15:46:13Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, MENTIONED_IN; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

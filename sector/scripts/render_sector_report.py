@@ -28,6 +28,19 @@ ROOT      = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR  = os.path.join(ROOT, "sector/sector_logs")
 REPORT_DIR = os.path.join(ROOT, "reports")
 
+# V2.17.0 — competitive landscape needs top-5 ticker list + profile data.
+# Imports lazily-evaluated; if company_context unavailable (e.g. unit test),
+# section degrades to skip.
+sys.path.insert(0, os.path.join(ROOT, "skills", "_shared"))
+try:
+    from company_context import SECTOR_TOP_5, get_profile  # noqa: E402
+    _HAS_COMPETITIVE = True
+except Exception as _imp_err:
+    SECTOR_TOP_5 = {}
+    def get_profile(_t): return None
+    _HAS_COMPETITIVE = False
+    print(f"[render_sector_report] WARN: competitive landscape disabled ({_imp_err})", file=sys.stderr)
+
 ACTION_ORDER = ["overweight", "wait", "neutral", "underweight", "avoid"]
 ACTION_LABEL = {
     "overweight":  "Overweight",
@@ -371,6 +384,85 @@ def render_handoff(d):
     ]
 
 
+def _fmt_market_cap(mc):
+    """Render market cap as $X.XT / $X.XB / $X.XM."""
+    if not mc:
+        return "—"
+    try:
+        v = float(mc)
+    except (TypeError, ValueError):
+        return "—"
+    if v >= 1e12:
+        return f"${v/1e12:.2f}T"
+    if v >= 1e9:
+        return f"${v/1e9:.1f}B"
+    if v >= 1e6:
+        return f"${v/1e6:.0f}M"
+    return f"${v:.0f}"
+
+
+def _truncate(s, n=42):
+    if not s:
+        return "—"
+    s = str(s)
+    return s if len(s) <= n else s[:n - 1] + "…"
+
+
+def render_competitive_landscape(d):
+    """V2.17.0 — per-sector top-5 stock comparison table.
+    Reuses SECTOR_TOP_5 (company_context) + cached profile data (24h TTL).
+    Section ordered by Final Verdict Table (hot → cold). Skipped silently if
+    company_context import failed.
+    """
+    if not _HAS_COMPETITIVE or not SECTOR_TOP_5:
+        return []
+
+    # Order sectors by their score from Phase 5 verdict table (high → low)
+    p5 = (d.get("_phase5") or {}).get("sectors") or d.get("sectors") or []
+    if not isinstance(p5, list) or not p5:
+        # Fall back to SECTOR_TOP_5 dict ordering
+        ordered = list(SECTOR_TOP_5.keys())
+    else:
+        scored = [(s.get("name"), s.get("score") or 0) for s in p5 if s.get("name")]
+        scored.sort(key=lambda t: -t[1])
+        ordered = [n for n, _ in scored if n in SECTOR_TOP_5]
+        # Append any sectors not in p5
+        for n in SECTOR_TOP_5:
+            if n not in ordered:
+                ordered.append(n)
+
+    out = ["## 競品地圖 (Competitive Landscape, V2.17.0)",
+           "",
+           "_每 sector top-5 by market cap rank_。Profile 24h cache（reuse `skills/_shared/company_context.py`）。"
+           " Differentiator 欄位待 LLM 補強（Phase D 後續）。",
+           ""]
+
+    for sector_name in ordered:
+        tickers = SECTOR_TOP_5.get(sector_name) or []
+        if not tickers:
+            continue
+        out.append(f"### {sector_name}")
+        out.append("")
+        out.append("| Ticker | Company | Industry | Market Cap | Price | CEO | Differentiator |")
+        out.append("|---|---|---|---|---|---|---|")
+        for t in tickers:
+            try:
+                p = get_profile(t) or {}
+            except Exception as e:
+                p = {}
+                print(f"[render_competitive] {t} profile fetch failed: {e}", file=sys.stderr)
+            company = _truncate(p.get("companyName") or "—", 28)
+            industry = _truncate(p.get("industry") or "—", 22)
+            mc = _fmt_market_cap(p.get("marketCap"))
+            price = p.get("price")
+            price_s = f"${price:.2f}" if isinstance(price, (int, float)) else "—"
+            ceo = _truncate(p.get("ceo") or "—", 22)
+            out.append(f"| **{t}** | {company} | {industry} | {mc} | {price_s} | {ceo} | _TBD_ |")
+        out.append("")
+
+    return out
+
+
 def render(d):
     blocks = [
         render_header(d),
@@ -378,6 +470,7 @@ def render(d):
         render_macro_block(d),
         render_step6_block(d),
         render_valuation_snapshot(d),
+        render_competitive_landscape(d),  # V2.17.0
         render_today_verdict(d),
         render_devils_advocate(d),
         render_divergence(d),

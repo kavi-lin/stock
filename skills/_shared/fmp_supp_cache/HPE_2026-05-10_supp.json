@@ -1,0 +1,117 @@
+{
+  "ticker": "HPE",
+  "as_of_date": "2026-05-10",
+  "cache_key": "HPE_2026-05-10",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 0.8773091007744412,
+    "piotroskiScore": 4,
+    "altman_zone": "danger",
+    "piotroski_strength": "moderate",
+    "workingCapital": 846000000,
+    "totalAssets": 75768000000,
+    "retainedEarnings": -2593000000,
+    "ebit": -555000000,
+    "totalLiabilities": 50994000000,
+    "revenue": 35787000000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q1",
+    "as_of_date": "2026-01-31",
+    "ownersEarnings": 941552640,
+    "ownersEarningsPerShare": 0.69436,
+    "maintenanceCapex": -236447360,
+    "growthCapex": -332552640,
+    "averagePPE": 0.22304,
+    "qoq_growth": -0.5505,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 1.5882,
+        "total_acquired_shares": 266163.93169999996,
+        "total_disposed_shares": 458821.20719999995,
+        "acquired_transactions": 27,
+        "disposed_transactions": 17,
+        "total_purchases": 0,
+        "total_sales": 5
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 1.5,
+        "total_acquired_shares": 353384.2318,
+        "total_disposed_shares": 898364,
+        "acquired_transactions": 21,
+        "disposed_transactions": 14,
+        "total_purchases": 0,
+        "total_sales": 6
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.8676,
+        "total_acquired_shares": 3736449.3115000003,
+        "total_disposed_shares": 2901597,
+        "acquired_transactions": 59,
+        "disposed_transactions": 68,
+        "total_purchases": 0,
+        "total_sales": 11
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "acquired_disposed_ratio": 2.1538,
+        "total_acquired_shares": 3158861.6986000007,
+        "total_disposed_shares": 1615372,
+        "acquired_transactions": 28,
+        "disposed_transactions": 13,
+        "total_purchases": 0,
+        "total_sales": 6
+      }
+    ],
+    "latest_trend": "accumulating",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {},
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 0,
+    "house_count": 0,
+    "buy_count": 0,
+    "sell_count": 0,
+    "net_signal": "neutral",
+    "most_recent_date": null,
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {},
+  "executive_compensation": {},
+  "comp_benchmark": {},
+  "employee_history": {
+    "latest_period": "2025-10-31",
+    "latest_count": 67000,
+    "one_year_pct": 9.8,
+    "cagr_5y_pct": 2.6,
+    "expansion_signal": false,
+    "layoff_signal": false,
+    "data_points": 11,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 3,
+    "cached": false
+  }
+}

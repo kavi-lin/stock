@@ -629,8 +629,9 @@ function renderThemes(themes) {
     container.innerHTML = themes.map((th, i) => {
         const themeStr = (typeof th === 'string') ? th : (th.name || String(th));
         const ovr = _matchOverride(themeStr);
+        const hitsLabel = ovr ? (ovr.hits || []).slice(0, 3).join(' · ') : '';
         const boltHtml = ovr
-            ? ` <span style="color:#f59e0b;font-weight:700" title="V2.18 結構性轉變 — bonus +${ovr.bonus} (${(ovr.hits||[]).join(', ')})">⚡</span>`
+            ? ` <span data-signal-tip="theme_override_bolt" style="color:#f59e0b;font-weight:700">⚡</span><span class="text-[8px] text-amber-500/80 ml-1">${hitsLabel}</span>`
             : '';
         return `
         <div class="flex items-start gap-2 p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/15">

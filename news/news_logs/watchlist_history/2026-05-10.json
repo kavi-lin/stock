@@ -1,0 +1,123 @@
+{
+  "as_of": "2026-05-10",
+  "decay_rules": {
+    "hit_window_days": 14,
+    "eviction_after_days": 21,
+    "eviction_basis": "last_observed_date",
+    "first_hit_gate_min_sources": 2
+  },
+  "candidates": [
+    {
+      "ticker": "TSM",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "supply tight",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-07",
+      "days_since_last_hit": 3,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "supply tight",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-07",
+      "days_since_last_hit": 3,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "ASML",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "supply tight",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-07",
+      "days_since_last_hit": 3,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "MU",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-01",
+      "days_since_last_hit": 9,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "DELL",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-01",
+      "days_since_last_hit": 9,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "WDC",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-01",
+      "days_since_last_hit": 9,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "STX",
+      "sector": "Memory Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-04-23",
+      "last_observed": "2026-05-01",
+      "days_since_last_hit": 9,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    }
+  ],
+  "sectors": [
+    {
+      "sector": "Memory Semiconductors",
+      "hot": true,
+      "ticker_count": 7
+    }
+  ],
+  "stats": {
+    "candidates_in": 7,
+    "candidates_evicted": 0,
+    "first_hit_filtered": 47,
+    "digests_scanned": 28
+  }
+}

@@ -1,0 +1,612 @@
+{
+  "news_id": "bn_20260518_f58bde57",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T00:13:19Z",
+  "last_activity_ts": "2026-05-18T03:01:09Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/meet-the-nvidias-of-power-5-stocks-winning-big-techs-700-billion-ai-energy-grab-9226157a?mod=mw_rss_topstories",
+    "feed_fingerprint": "meet nvidias power 5 stocks winning big tech",
+    "published": "2026-05-17T19:10:00+00:00",
+    "url_hash": "sha1:a3f0310d6dfafa005e4c70a1fddda91cc5658904"
+  },
+  "headline": "Meet the Nvidias of power — 5 stocks winning Big Tech’s $700 billion AI energy grab",
+  "headline_zh": null,
+  "raw_summary": "Infrastructure giants such as GE Vernova and Bloom Energy are the new gatekeepers of the AI grid.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T02:59:29Z",
+      "latency_ms": 22496,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "AI 敘事正從**算力**向**電力**擴散。資料中心電力缺口是真實瓶頸——**Blackwell** 機櫃功耗較前代翻倍，單一 AI 園區動輒 GW 級用電。**GE Vernova (GEV)** 的燃氣輪機與電網設備訂單能見度已排到 2028+，**Bloom Energy (BE)** 的固態燃料電池則卡位「電網等不及、就地發電」的剛需。但要警惕：本文是 MarketWatch 的 thematic 選股稿，題材已被市場充分定價，GEV 今年漲幅驚人、估值不再便宜。電力股的真實 catalyst 是**長約簽訂與毛利兌現**,不是媒體標題。建議區分「賣鏟子」的設備商與估值已透支的純題材股。",
+        "bull_points": [
+          "AI 資料中心電力缺口為結構性剛需，非情緒",
+          "GEV 燃氣輪機訂單能見度已達 2028 年後",
+          "BE 燃料電池卡位就地發電、繞過電網瓶頸"
+        ],
+        "bear_points": [
+          "GEV 估值已大幅擴張，題材充分定價",
+          "MarketWatch 選股稿屬追高訊號非領先指標",
+          "訂單轉毛利有交付週期，兌現風險未反映"
+        ],
+        "final_take": "看多電力主題但 GEV 估值偏貴，等回檔或看長約兌現",
+        "entities": {
+          "tickers": [
+            "GEV",
+            "BE",
+            "VST",
+            "CEG",
+            "ETN",
+            "NVDA"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "AI power demand",
+            "data center buildout",
+            "electrification"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "solid oxide fuel cell",
+            "gas turbine"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_power_demand"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_power_demand"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:data_center_buildout"
+          },
+          {
+            "subject": "narrative:ai_capex",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:GEV"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:ai_power_demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "電力剛需真實，但題材股估值已透支，需區分設備商與純題材"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T02:59:44Z",
+      "latency_ms": 15102,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補充一個 Claude 沒提到的維度：**智慧電網軟體與保護裝置**。除了發電端的 GEV 和 BE，資料中心對「電網可靠度」的要求極高，這讓 **Eaton (ETN)** 等專注於電氣設備數位化與電力管理系統的廠商更具長期韌性。電力供應不僅是「發電量」，更關乎「極短時間內的電力品質控制」，這是 AI 負載對電網的隱形壓力，也是市場對這類基礎工業股評價提升的關鍵因子。需留意，若電力基建進度受制於「輸電線路冗長的環境審批」，可能會形成營收認列的時間差風險。",
+        "bull_points": [
+          "ETN 在電力管理軟體擁有極高技術護城河。",
+          "資料中心對電力品質要求提升，帶動智慧配電需求。"
+        ],
+        "bear_points": [
+          "輸電基建受限於複雜審批與監管，訂單兌現風險高。",
+          "工業電力股估值已處於歷史高點，短期追價空間有限。"
+        ],
+        "final_take": "看好基建軟體化，但關注基建審批瓶頸風險。",
+        "entities": {
+          "tickers": [
+            "ETN",
+            "GEV",
+            "BE"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "AI power",
+            "AI infrastructure"
+          ],
+          "tech_keywords": [
+            "Smart Grid",
+            "Power Distribution"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI power"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充智慧配電與管理系統對電力穩定性的關鍵價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T03:00:13Z",
+      "latency_ms": 28842,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面兩位聚焦設備端（GEV、BE）與電氣數位化（ETN），漏了最硬的一塊：**既有核電基載**。Microsoft 已包下 Constellation 的 Three Mile Island 重啟、Amazon 簽 Talen 的 behind-the-meter 核電 PPA——這是真正「已簽長約、現成 baseload」的剛需兌現，正是 Claude Round 0 想看的 catalyst。**Constellation (CEG)**、**Vistra (VST)**、**Talen (TLN)** 直接受惠：核電是唯一能提供 24/7 無碳基載、滿足 hyperscaler RE100 承諾的選項，PPA 訂價含明顯溢價。風險在 SMR 商轉要等 2030 年代、舊機組重啟有 NRC 審批與燃料供應變數。但相較媒體題材股，這批已有實際合約現金流支撐。",
+        "bull_points": [
+          "微軟、亞馬遜已簽核電 PPA，長約現金流落地",
+          "核電唯一 24/7 無碳基載，滿足 RE100 承諾",
+          "behind-the-meter 直供繞過電網塞車瓶頸"
+        ],
+        "bear_points": [
+          "SMR 要 2030 年代才商轉，遠水救不了近火",
+          "舊機組重啟卡 NRC 審批與燃料供應",
+          "核電股已大漲，PPA 溢價部分已被定價"
+        ],
+        "final_take": "看多 CEG/VST/TLN，核電基載已有實簽長約支撐",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "VST",
+            "TLN",
+            "GEV",
+            "BE",
+            "ETN"
+          ],
+          "sectors": [
+            "Utilities",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "AI power demand",
+            "nuclear baseload",
+            "data center buildout"
+          ],
+          "tech_keywords": [
+            "SMR",
+            "behind-the-meter",
+            "PPA",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-power-demand"
+          },
+          {
+            "subject": "ticker:TLN",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:hyperscaler-nuclear-ppa"
+          },
+          {
+            "subject": "ticker:VST",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nuclear-baseload"
+          },
+          {
+            "subject": "narrative:nrc-approval",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:CEG"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "新增核電基載 PPA 角度，CEG/VST/TLN 前序未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T03:00:24Z",
+      "latency_ms": 11006,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論多聚焦於發電設備、核電與智慧電網，但 AI 能源結構中，能源消耗的最終環節——**熱管理 (Thermal Management)** 與**資料中心液冷系統**同等關鍵。**Vertiv (VRT)** 作為資料中心冷卻解決方案的龍頭，是 AI 能源效率的最直接受益者；透過先進的液冷技術降低熱耗損，本身就是減輕電力負荷最有效的途徑。市場過度關注電力「供給」，卻忽略了「電力使用效率 (PUE)」提升，對大規模算力部署具備極高槓桿作用。",
+        "bull_points": [
+          "液冷方案顯著降低資料中心 PUE。",
+          "AI 伺服器高發熱帶來冷卻剛需。",
+          "VRT 在關鍵冷卻技術具壟斷性。"
+        ],
+        "bear_points": [
+          "冷卻組件供應鏈交付週期仍長。",
+          "液冷技術競爭對手持續增加。",
+          "AI 資本支出若轉向可能影響進度。"
+        ],
+        "final_take": "能源管理應從「增加供給」轉向「提升效率」，冷卻商具備長線紅利。",
+        "entities": {
+          "tickers": [
+            "VRT"
+          ],
+          "sectors": [
+            "Industrials",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Liquid Cooling",
+            "Thermal Management",
+            "PUE"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "納入電力使用效率（PUE）管理的冷卻系統視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T03:00:57Z",
+      "latency_ms": 33277,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已覆蓋發電端、核電、智慧電網與液冷,但漏掉兩個更上游的卡點。第一是**電網 EPC 與輸電工程**:核電 PPA、燃氣機組簽了約,實體輸電線、變電站仍要人蓋——**Quanta Services (PWR)** 是最大受益的施工承包商,大型電力變壓器全球缺貨、交期已拉到 2-3 年,這才是真瓶頸。第二是**燃料端二階效應**:GEV 燃氣輪機賣得越多,天然氣需求結構性上行,管線商 **Williams (WMB)** 與上游 **EQT** 跟著受惠。最後一個被忽略的反方風險:資料中心搶電會推高一般家庭電費,正在引發各州監管與選民反彈,可能拖慢併網審批與費率核准——這是純題材股沒定價的政治尾部風險。",
+        "bull_points": [
+          "PWR 卡輸電施工剛需,訂單能見度高",
+          "大型變壓器缺貨 2-3 年,設備商議價力強",
+          "燃氣機組放量帶動 WMB/EQT 天然氣需求"
+        ],
+        "bear_points": [
+          "電費上漲引發選民反彈,監管恐拖慢併網",
+          "輸電審批冗長,營收認列時間差風險",
+          "EPC 為勞力密集,人力與工料成本侵蝕毛利"
+        ],
+        "final_take": "看多輸電 EPC 與燃料二階,但盯州級監管風險",
+        "entities": {
+          "tickers": [
+            "PWR",
+            "WMB",
+            "EQT",
+            "GEV"
+          ],
+          "sectors": [
+            "Industrials",
+            "Energy",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "AI power demand",
+            "grid buildout"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "large power transformer"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:PWR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-grid-buildout"
+          },
+          {
+            "subject": "ticker:WMB",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:gas-fired-power"
+          },
+          {
+            "subject": "ticker:EQT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-power-demand"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:WMB"
+          },
+          {
+            "subject": "narrative:ratepayer-backlash",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI power demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增輸電 EPC、變壓器缺貨、燃料二階與電費監管反方,皆前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T03:01:09Z",
+      "latency_ms": 12245,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論已涵蓋電力供應的「心臟」（核電、天然氣）與「血管」（輸電、變壓器），但漏掉了確保 AI 資料中心極致供電穩定性中的「緩衝器」：**電池儲能系統 (BESS)**。隨著 AI 訓練負載呈現高頻率波動，單靠傳統基載供電難以應對瞬時尖峰，**Fluence Energy (FLNC)** 這類廠商提供的 Utility-scale BESS，已成為資料中心確保「電力韌性」與「頻率調節」的最後一哩路。透過與大型電網或微電網整合，BESS 能在電力價格波動時進行套利，並在電力中斷時提供即時緩衝，這對 Hyperscaler 而言是不可或缺的風險對沖與穩定工具。",
+        "bull_points": [
+          "BESS 補足基載對瞬時 AI 高負載的響應缺口。",
+          "智慧電網整合能優化資料中心的電力成本與波動。"
+        ],
+        "bear_points": [
+          "電池原物料價格波動可能壓縮系統集成商毛利。",
+          "BESS 部署面臨與傳統備援發電的成本替代性挑戰。"
+        ],
+        "final_take": "儲能系統是穩定 AI 負載的核心，將成為資料中心基礎設施的新標配。",
+        "entities": {
+          "tickers": [
+            "FLNC"
+          ],
+          "sectors": [
+            "Utilities",
+            "Energy Storage"
+          ],
+          "themes": [
+            "AI capex",
+            "Energy Infrastructure"
+          ],
+          "tech_keywords": [
+            "BESS",
+            "Grid Stability",
+            "Frequency Regulation"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FLNC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:energy_storage"
+          },
+          {
+            "subject": "ticker:FLNC",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:hyperscaler"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "討論已涵蓋供電、輸電、冷卻，補上關鍵的電力調節與緩衝端儲能系統 (BESS)。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BE",
+        "CEG",
+        "EQT",
+        "ETN",
+        "FLNC",
+        "GEV",
+        "NVDA",
+        "PWR",
+        "TLN",
+        "VRT",
+        "VST",
+        "WMB"
+      ],
+      "sectors": [
+        "Energy",
+        "Energy Storage",
+        "Industrials",
+        "Information Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "AI infrastructure",
+        "AI power",
+        "AI power demand",
+        "Energy Infrastructure",
+        "data center buildout",
+        "electrification",
+        "grid buildout",
+        "nuclear baseload"
+      ],
+      "tech_keywords": [
+        "BESS",
+        "Blackwell",
+        "Frequency Regulation",
+        "Grid Stability",
+        "Liquid Cooling",
+        "PPA",
+        "PUE",
+        "Power Distribution",
+        "SMR",
+        "Smart Grid",
+        "Thermal Management",
+        "behind-the-meter",
+        "gas turbine",
+        "large power transformer",
+        "solid oxide fuel cell"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_power_demand"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_power_demand"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:data_center_buildout"
+      },
+      {
+        "subject": "narrative:ai_capex",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:GEV"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:ai_power_demand"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI power"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-power-demand"
+      },
+      {
+        "subject": "ticker:TLN",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:hyperscaler-nuclear-ppa"
+      },
+      {
+        "subject": "ticker:VST",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-baseload"
+      },
+      {
+        "subject": "narrative:nrc-approval",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:CEG"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:PWR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-grid-buildout"
+      },
+      {
+        "subject": "ticker:WMB",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:gas-fired-power"
+      },
+      {
+        "subject": "ticker:EQT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-power-demand"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:WMB"
+      },
+      {
+        "subject": "narrative:ratepayer-backlash",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI power demand"
+      },
+      {
+        "subject": "ticker:FLNC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:energy_storage"
+      },
+      {
+        "subject": "ticker:FLNC",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:hyperscaler"
+      }
+    ],
+    "bull_summary": [
+      "AI 資料中心電力缺口為結構性剛需，非情緒",
+      "GEV 燃氣輪機訂單能見度已達 2028 年後",
+      "BE 燃料電池卡位就地發電、繞過電網瓶頸",
+      "ETN 在電力管理軟體擁有極高技術護城河。",
+      "資料中心對電力品質要求提升，帶動智慧配電需求。",
+      "微軟、亞馬遜已簽核電 PPA，長約現金流落地"
+    ],
+    "bear_summary": [
+      "GEV 估值已大幅擴張，題材充分定價",
+      "MarketWatch 選股稿屬追高訊號非領先指標",
+      "訂單轉毛利有交付週期，兌現風險未反映",
+      "輸電基建受限於複雜審批與監管，訂單兌現風險高。",
+      "工業電力股估值已處於歷史高點，短期追價空間有限。",
+      "SMR 要 2030 年代才商轉，遠水救不了近火"
+    ],
+    "final_take": "儲能系統是穩定 AI 負載的核心，將成為資料中心基礎設施的新標配。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T03:01:09Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CUSTOMER_OF, HEADWIND_FROM, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

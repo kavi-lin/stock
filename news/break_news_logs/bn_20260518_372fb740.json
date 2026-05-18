@@ -1,0 +1,504 @@
+{
+  "news_id": "bn_20260518_372fb740",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T00:02:03Z",
+  "last_activity_ts": "2026-05-18T00:04:18Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/commodities/articles/wheaton-precious-metals-wpm-raises-192154070.html",
+    "feed_fingerprint": "wheaton precious metals wpm raises dividend again cash",
+    "published": "2026-05-17T19:21:54+00:00",
+    "url_hash": "sha1:31da02ff3bd085ab5f7614eef5e3b4c087fd950a"
+  },
+  "headline": "Wheaton Precious Metals (WPM) Raises Its Dividend Again As Cash Flow Strengthens",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "corporate",
+    "shallow_score": 3.0,
+    "bull_case": "營運效率改善",
+    "bear_case": "股權稀釋隱憂",
+    "sector_view": "同業估值參考",
+    "macro_view": "現金使用決策",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T00:02:39Z",
+      "latency_ms": 22008,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "WPM 是**串流/權利金 (streaming/royalty) 商業模式**，不挖礦只買未來金屬產量，因此本質是**對金銀價格的高槓桿、低資本支出曝險**。本次加息股息核心訊號是金銀價走強推升營運現金流——這不是公司效率突破，而是**貴金屬週期 beta**。WPM 股息政策本就綁定前四季營運現金流固定比例，加息屬機械式結果，分類器的「股權稀釋」bear snap 並不適用：串流模式無持續稀釋壓力。真正觀察點是金銀價能否守住高檔；一旦貴金屬回落，現金流與股息成長同步收斂。對防禦型/抗通膨配置者，WPM 提供低營運風險的金屬曝險，但**殖利率本身偏低**，定位是成長型而非高息標的。",
+        "bull_points": [
+          "串流模式低資本支出、無探勘風險、毛利率高",
+          "金銀價走強直接放大營運現金流",
+          "股息綁定現金流公式，加息有紀律性"
+        ],
+        "bear_points": [
+          "現金流與股息成長純由貴金屬週期驅動",
+          "WPM 殖利率偏低，非真正高息標的",
+          "金銀價回落時股息成長同步收斂"
+        ],
+        "final_take": "看多但本質是金銀價 beta，須盯貴金屬高檔能否守住",
+        "entities": {
+          "tickers": [
+            "WPM"
+          ],
+          "sectors": [
+            "Materials"
+          ],
+          "themes": [
+            "precious metals streaming",
+            "dividend growth",
+            "inflation hedge",
+            "gold",
+            "silver"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:precious-metals-prices"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:dividend-growth"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:gold-silver-price-pullback"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "加息屬機械式現金流結果，本質是貴金屬週期 beta，非效率突破。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T00:02:53Z",
+      "latency_ms": 13880,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了前述的商品 beta 效應，WPM 在當前環境的**資本配置**角色值得關注。礦業公司面臨設備與能源的通膨壓力，傳統融資成本高昂，使得 WPM 提供的「權利金預付款」在礦商資本結構中更具吸引力。這不僅是股價的被動反映，WPM 具備**主動篩選低成本資產**並獲取長期承諾的能力，這使其能比傳統礦商更好地對沖通膨，將潛在的談判紅利轉化為未來的現金流增長。",
+        "bull_points": [
+          "礦商融資需求迫切，WPM 議價能力提升",
+          "預付款模式有助鎖定低成本金屬產量",
+          "避開礦業 CAPEX 通膨與直接營運壓力"
+        ],
+        "bear_points": [
+          "高度依賴金銀價格，缺乏價格主導權",
+          "若合作礦商減產，預期現金流將受阻"
+        ],
+        "final_take": "看多，其融資談判優勢是隱性的長期催化劑。",
+        "entities": {
+          "tickers": [
+            "WPM"
+          ],
+          "sectors": [
+            "Materials"
+          ],
+          "themes": [
+            "Gold",
+            "Silver",
+            "CAPEX"
+          ],
+          "tech_keywords": [
+            "Precious Metals"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:high_cost_of_capital_for_miners"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充 WPM 作為資本提供者在礦業高成本環境下的戰略議價價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T00:03:24Z",
+      "latency_ms": 31439,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面漏掉的關鍵：WPM 股息成長**不是純價格 beta**。WPM 既有量增管線——Goose、Blackwater、Platreef、Mineral Park 等新串流陸續投產，公司導引 2028 年前產量約 +40%。意即即使金銀價持平，營運現金流仍有**結構性 volume ramp** 推升空間，這直接修正 Round 0「機械式週期結果」的定調。另一觀察點是同業分化：**FNV** 受 Cobre Panama 停產拖累、**RGLD** 近期靠併購補量,WPM 則靠自有 organic pipeline,資產品質與交易對手風險較分散。風險在於新礦如期投產的執行力,以及高金價可能誘發礦商行使 **stream buyback** 條款、侵蝕長尾選擇權。",
+        "bull_points": [
+          "2028 年前產量導引 +40%,股息成長有量增底氣",
+          "新串流 organic pipeline,非靠併購補量",
+          "資產分散,交易對手風險低於 FNV 單一礦"
+        ],
+        "bear_points": [
+          "新礦投產執行風險,延誤即拖累量增",
+          "高金價恐誘礦商行使 stream buyback 條款",
+          "同業 FNV Cobre Panama 停產示警串流模式非無風險"
+        ],
+        "final_take": "看多,量增管線支撐股息成長非純價格 beta",
+        "entities": {
+          "tickers": [
+            "WPM",
+            "FNV",
+            "RGLD",
+            "VALE"
+          ],
+          "sectors": [
+            "Materials"
+          ],
+          "themes": [
+            "precious metals streaming",
+            "inflation hedge",
+            "gold"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:production-growth-pipeline"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:FNV"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:stream-buyback-clause"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 volume ramp 與同業分化角度,前文僅談價格 beta"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T00:03:37Z",
+      "latency_ms": 12669,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了貴金屬的 Beta 與產量管線，WPM 的營收組合中包含顯著的**工業金屬副產品 (by-product)** 曝險。這在當前 AI 資料中心建設導致銅需求激增的背景下，構成了一種隱性優勢。相較於 FNV 或傳統礦商，WPM 的資產組合透過這些副產品，實際上捕捉了綠色能源轉型的結構性需求。然而，投資人必須關注風險：若礦商為了極大化銅獲利而變更開採順序，可能擾動貴金屬的產出節奏，這對串流模式的穩定性構成潛在的非系統性風險。",
+        "bull_points": [
+          "工業副產（銅/鈷）曝險受益 AI 基建需求",
+          "具備綠色能源轉型的結構性需求對沖能力"
+        ],
+        "bear_points": [
+          "工業金屬波動可能削弱防禦特性",
+          "礦商採礦策略調整可能擾動產出穩定性"
+        ],
+        "final_take": "WPM 不只是貴金屬槓桿，其副產組合是兼具抗通膨與綠能基建的戰略配置。",
+        "entities": {
+          "tickers": [
+            "WPM",
+            "FNV"
+          ],
+          "sectors": [
+            "Materials"
+          ],
+          "themes": [
+            "AI capex",
+            "Copper demand"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:copper_demand"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:FNV"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補述 WPM 的工業金屬副產品（銅、鈷）曝險及其對 AI 與綠能轉型的影響與風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T00:04:05Z",
+      "latency_ms": 27701,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面把金價定調成「純週期 beta」漏掉的反向結構點：本輪金價走強的主力買盤是**各國央行**——PBOC 與新興市場央行為去美元化持續增持黃金,這是多年期的結構性需求轉移,不是 Round 0 所說「回落即同步收斂」的單純循環。央行買盤替金價設下需求地板,意味 **WPM** 營運現金流的下檔保護比傳統週期股厚。但反過來看,這也代表現價金價已內含央行溢價,**WPM** 的 P/NAV 本就高於礦商,股息加息不改其估值偏貴的事實——買的是高品質但不便宜的曝險。另補白銀端:WPM 銀佔比高,光伏 (solar) 需求是與銅不同的獨立結構性拉力。",
+        "bull_points": [
+          "央行去美元化購金為金價設結構性需求地板",
+          "白銀光伏需求獨立拉動,非僅貴金屬 beta",
+          "現金流下檔保護厚於傳統週期股"
+        ],
+        "bear_points": [
+          "現價金價已內含央行買盤溢價",
+          "WPM P/NAV 估值高於礦商,加息不改其偏貴"
+        ],
+        "final_take": "看多結構需求,但估值偏貴宜等回檔",
+        "entities": {
+          "tickers": [
+            "WPM",
+            "FNV",
+            "RGLD"
+          ],
+          "sectors": [
+            "Materials"
+          ],
+          "themes": [
+            "central bank gold buying",
+            "de-dollarization",
+            "solar demand"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:central-bank-gold-buying"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:solar-silver-demand"
+          },
+          {
+            "subject": "ticker:WPM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:premium-valuation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "央行購金+白銀光伏=結構性需求,反駁純週期定調"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T00:04:18Z",
+      "latency_ms": 13356,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "WPM 的核心優勢在於**規避了運營商的直接 ESG 負擔**。隨著全球礦業在審批程序與環保合規上的阻力加大，營運商面臨日益嚴苛的環境修復責任 (remediation) 與 ESG 合規成本，這嚴重拖累了傳統礦商的自由現金流。WPM 身為串流商，無需直接承擔這些環境修復責任或處理複雜的在地社區爭端，使其在資本投入與現金流回收上，比礦場營運商擁有更高的經營韌性與成本控管優勢。這種「資產輕量化」模式，在 ESG 篩選極嚴的機構投資環境中，具備顯著的比較優勢與替代價值。",
+        "bull_points": [
+          "規避礦場環境修復與社會責任直接風險",
+          "資產輕量化符合機構ESG配置要求",
+          "規避礦山營運的通膨性監管成本"
+        ],
+        "bear_points": [
+          "若合作礦場因ESG事件被迫停產，將面臨斷供風險",
+          "對礦場運營商的ESG合規條款制約力有限"
+        ],
+        "final_take": "雖殖利率不高，但WPM的ESG抗風險能力使其具備護城河。",
+        "entities": {
+          "tickers": [
+            "WPM"
+          ],
+          "sectors": [
+            "Materials"
+          ],
+          "themes": [
+            "ESG",
+            "Mining"
+          ],
+          "tech_keywords": [
+            "Streaming"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:ESG"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討ESG許可風險與環境負債如何構成串流商的經營優勢。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "FNV",
+        "RGLD",
+        "VALE",
+        "WPM"
+      ],
+      "sectors": [
+        "Materials"
+      ],
+      "themes": [
+        "AI capex",
+        "CAPEX",
+        "Copper demand",
+        "ESG",
+        "Gold",
+        "Mining",
+        "Silver",
+        "central bank gold buying",
+        "de-dollarization",
+        "dividend growth",
+        "gold",
+        "inflation hedge",
+        "precious metals streaming",
+        "silver",
+        "solar demand"
+      ],
+      "tech_keywords": [
+        "Precious Metals",
+        "Streaming"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:precious-metals-prices"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:dividend-growth"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:gold-silver-price-pullback"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:high_cost_of_capital_for_miners"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:production-growth-pipeline"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:FNV"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:stream-buyback-clause"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:copper_demand"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:central-bank-gold-buying"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:solar-silver-demand"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:premium-valuation"
+      },
+      {
+        "subject": "ticker:WPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:ESG"
+      }
+    ],
+    "bull_summary": [
+      "串流模式低資本支出、無探勘風險、毛利率高",
+      "金銀價走強直接放大營運現金流",
+      "股息綁定現金流公式，加息有紀律性",
+      "礦商融資需求迫切，WPM 議價能力提升",
+      "預付款模式有助鎖定低成本金屬產量",
+      "避開礦業 CAPEX 通膨與直接營運壓力"
+    ],
+    "bear_summary": [
+      "現金流與股息成長純由貴金屬週期驅動",
+      "WPM 殖利率偏低，非真正高息標的",
+      "金銀價回落時股息成長同步收斂",
+      "高度依賴金銀價格，缺乏價格主導權",
+      "若合作礦商減產，預期現金流將受阻",
+      "新礦投產執行風險,延誤即拖累量增"
+    ],
+    "final_take": "雖殖利率不高，但WPM的ESG抗風險能力使其具備護城河。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T00:04:18Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

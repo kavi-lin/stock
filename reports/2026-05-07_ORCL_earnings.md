@@ -1,0 +1,131 @@
+# ORCL 財報分析 — Oracle Corporation
+
+> Run: 2026-05-07  ·  Last Earnings: 2026-02-28 (2026 Q3)  ·  Next ≈ 2026-06-10
+> Source: FMP HTTP REST  ·  Schema V1.0
+
+## 1. Snapshot
+
+- **Oracle Corporation** (New York Stock Exchange) — Technology / Software - Infrastructure
+- Price: **$193.99**  ·  Market Cap: $557.92B
+- CEO: Michael D. Sicilia  ·  Employees: 159000  ·  IPO: 1986-03-12
+
+## 2. Quarterly P&L Trend (last 8 Q)
+
+| Q | Period | Revenue | Gross | Op Inc | Net Inc | EPS | GM | OM | NM |
+|---|---|---|---|---|---|---|---|---|---|
+| 2026-02-28 | 2026 Q3 | $17.19B | $10.69B | $5.64B | $3.72B | $1.27 | 62.2% | 32.8% | 21.6% |
+| 2025-11-30 | 2026 Q2 | $16.06B | $10.68B | $4.73B | $6.13B | $2.10 | 66.5% | 29.5% | 38.2% |
+| 2025-08-31 | 2026 Q1 | $14.93B | $10.04B | $4.28B | $2.93B | $1.01 | 67.3% | 28.7% | 19.6% |
+| 2025-05-31 | 2025 Q4 | $15.90B | $11.16B | $5.11B | $3.43B | $1.19 | 70.2% | 32.1% | 21.5% |
+| 2025-02-28 | 2025 Q3 | $14.13B | $9.94B | $4.36B | $2.94B | $1.02 | 70.3% | 30.8% | 20.8% |
+| 2024-11-30 | 2025 Q2 | $14.06B | $9.97B | $4.22B | $3.15B | $1.10 | 70.9% | 30.0% | 22.4% |
+| 2024-08-31 | 2025 Q1 | $13.31B | $9.40B | $3.99B | $2.93B | $1.03 | 70.6% | 30.0% | 22.0% |
+| 2024-05-31 | 2024 Q4 | $14.29B | $10.36B | $4.69B | $3.14B | $1.11 | 72.5% | 32.8% | 22.0% |
+
+**YoY**: revenue +21.7%  ·  operating +29.3%  ·  earnings +26.7%
+**QoQ**: revenue +7.0%  ·  acceleration: **accelerating**
+
+## 3. Balance Sheet Health (latest Q)
+
+- Total Assets: **$245.24B**  ·  Total Liabilities: $206.19B  ·  Total Equity: $39.05B
+- Working Capital: **$14.14B**  ·  Current Ratio: 1.35
+- Total Debt: $162.16B  ·  D/E: **4.15**  ·  Net Cash (cash+ST inv − debt): **$-123.03B**
+- Cash + ST Investments: $39.13B  ·  Inventory: $0.00  ·  Receivables: $10.72B
+
+## 4. Cash Flow Quality
+
+- Latest Q: OpCF $7.15B  ·  FCF **$-11.48B**  ·  CapEx $-18.64B
+- TTM: OpCF $23.51B  ·  NI $16.21B
+- **FCF Margin (latest Q)**: -66.8%  ·  **Cash Conversion (TTM OpCF/NI)**: 1.45  ·  CapEx Intensity: 108.4%
+- Stock Buybacks (latest Q): $-2.0M  ·  Dividends: $-1.44B
+- SBC (latest Q): $2.48B
+
+## 5. Profitability & Efficiency
+
+8Q margin trend (newest → oldest):
+
+| Q | Gross | Operating | Net |
+|---|---|---|---|
+| 2026-02-28 Q3 | 62.2% | 32.8% | 21.6% |
+| 2025-11-30 Q2 | 66.5% | 29.5% | 38.2% |
+| 2025-08-31 Q1 | 67.3% | 28.7% | 19.6% |
+| 2025-05-31 Q4 | 70.2% | 32.1% | 21.5% |
+| 2025-02-28 Q3 | 70.3% | 30.8% | 20.8% |
+| 2024-11-30 Q2 | 70.9% | 30.0% | 22.4% |
+| 2024-08-31 Q1 | 70.6% | 30.0% | 22.0% |
+| 2024-05-31 Q4 | 72.5% | 32.8% | 22.0% |
+
+**TTM Ratios** — Gross 66.4%  ·  Operating 30.8%  ·  Net 25.3%  ·  EBIT 35.1%
+**Capital Efficiency** — Income Quality TTM: 1.45  ·  FCF Yield: -4.4%  ·  CapEx/OCF: 205.2%  ·  DSO: 61.1d
+
+## 6. Growth Trajectory
+
+- **Latest YoY**: revenue +21.7%  ·  earnings +26.7%  ·  operating +29.3%
+- Acceleration: **accelerating** (vs prior-Q YoY)
+
+Annual growth rates (newest → oldest):
+
+| FY | Revenue | NetIncome | OpIncome | FCF |
+|---|---|---|---|---|
+| 2025 | +8.4% | +18.9% | +15.1% | -103.3% |
+| 2024 | +6.0% | +23.1% | +17.3% | +39.4% |
+| 2023 | +17.7% | +26.6% | +19.8% | +68.5% |
+| 2022 | +4.8% | -51.1% | -28.2% | -63.4% |
+| 2021 | +3.6% | +35.6% | +9.5% | +18.8% |
+
+**Per-share CAGR** — 3y rev: +30.9%  ·  5y rev: +69.2%  ·  5y NI: +41.3%
+
+## 7. Valuation
+
+- Price: **$193.99**  ·  PE TTM: 34.17  ·  PB TTM: 14.39
+- EV/EBITDA TTM: 23.26  ·  EV/FCF TTM: -27.56  ·  EV/Sales TTM: 10.64  ·  P/FCF TTM: -22.56  ·  Net Debt/EBITDA TTM: 4.22
+- **DCF Intrinsic**: $46.17  ·  Upside vs Price: **-76.2%**
+- FCF Yield TTM: -4.4%
+
+**Ratings Snapshot** (FMP composite, 1-5):
+- Overall: **B** (3/5)
+- DCF: 3/5  ·  PE: 3/5  ·  PB: 1/5  ·  D/E: 1/5  ·  ROE: 5/5  ·  ROA: 4/5
+
+## 8. Analyst Consensus
+
+- Price: $193.99  →  PT consensus **$257.19** (median $240.00, high $400.00, low $160.00)
+- **PT Upside vs Price**: +32.6%
+
+Monthly grades trend (newest → oldest):
+
+| Date | StrongBuy | Buy | Hold | Sell | StrongSell |
+|---|---|---|---|---|---|
+| 2026-05-01 | 7 | 28 | 8 | 1 | 0 |
+| 2026-04-01 | 7 | 28 | 9 | 1 | 0 |
+| 2026-03-01 | 7 | 28 | 10 | 1 | 0 |
+| 2026-02-01 | 6 | 27 | 10 | 2 | 0 |
+| 2026-01-01 | 6 | 26 | 11 | 2 | 0 |
+| 2025-12-01 | 6 | 25 | 11 | 3 | 0 |
+
+> Forward EPS estimate: paid-plan only;use `skills/earnings-valuation-forecaster` 3-method 自算可補(若需)。
+
+## 9. Quality Flags(deterministic)
+
+- 🟡 **Accruals warning** — TTM \|NI − OpCF\| / \|NI\| > 30%(盈餘品質可疑)
+- 🔴 **CapEx outpaces OCF** — 最新 Q OpCF 不夠覆蓋 CapEx(燒錢)
+- 🟠 **Gross margin compression** — 最新 4 季毛利率連續下滑
+- 🔴 **Negative FCF** — 最新 Q 自由現金流為負
+- 🟠 **Debt buildup** — 總債務環比連 2 季 > 15%
+
+## 10. Bottom Line
+
+### 🟡 **MIXED** — Composite Score: **54/100**
+
+| 元件 | 分數 | 滿分 |
+|---|---|---|
+| Quality | 10 | 30 |
+| Growth | 27 | 30 |
+| Valuation | 2 | 25 |
+| Analyst | 15 | 15 |
+| **Total** | **54** | **100** |
+
+> Verdict 對照: 80+ STRONG / 65+ SOLID / 50+ MIXED / 35+ WEAK / <35 DETERIORATING
+
+---
+
+> Generated by `skills/earnings-analyst` from FMP HTTP REST.  Cache: `skills/earnings-analyst/cache/ORCL_2026-02-28.json`

@@ -1,0 +1,260 @@
+{
+  "news_id": "bn_20260515_4ad2ed45",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T14:19:59Z",
+  "last_activity_ts": "2026-05-15T14:47:54Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/b5f8d79124a6",
+    "feed_fingerprint": "futu:NVDA:7c3a474194",
+    "published": "2026-05-15T18:09:19+08:00",
+    "url_hash": "sha1:6ddb7271f38d48dc8966fb82340072e1ea39967b"
+  },
+  "headline": "深度綁定OpenAI，「英偉達挑戰者」Cerebras System上市首日大漲68%",
+  "headline_zh": null,
+  "raw_summary": "深度綁定OpenAI，「英偉達挑戰者」Cerebras System上市首日大漲68%；Tower半導體漲超33%，「最大硅光客戶」13億美元鎖定產能；Rocket Lab漲近26%，訂單積壓揭示行業高景氣>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:47:38Z",
+      "latency_ms": 4234,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 495,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "c18c34ff-7a30-441b-91ff-d30043c106aa",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "55e22ab9-3663-4f66-97ba-26a312de8f95"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:47:50Z",
+      "latency_ms": 11258,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場焦點多集中在 Cerebras 的 AI 晶片創新，但我認為 **Tower Semiconductor (TSEM)** 的 **Silicon Photonics (硅光子)** 技術才是隱形的大贏家。隨著 AI 模型運算規模呈指數級擴張，數據傳輸能效已成數據中心擴建的主要瓶頸。TSEM 通過 13 億美元的長期產能鎖定，顯著增強了其在高速數據傳輸基建中的關鍵地位。相較於純粹的算力競爭，TSEM 在互連技術（Interconnect）上的突破，是解決 AI 基礎設施大規模能耗挑戰的核心路徑，長期價值極具看點。",
+        "bull_points": [
+          "TSEM硅光技術顯著降低傳輸功耗",
+          "長期訂單鎖定確保營收穩定性",
+          "AI 推升光 interconnect 需求"
+        ],
+        "bear_points": [
+          "先進封裝技術整合難度高",
+          "短期股價估值波動風險"
+        ],
+        "final_take": "關注硅光子技術對 AI 基建的長期降本效應。",
+        "entities": {
+          "tickers": [
+            "CBRS",
+            "TSEM",
+            "RKLB",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Hardware",
+            "Aerospace"
+          ],
+          "themes": [
+            "AI capex",
+            "Silicon Photonics"
+          ],
+          "tech_keywords": [
+            "Silicon Photonics",
+            "Interconnects",
+            "Data Center"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSEM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon-photonics"
+          },
+          {
+            "subject": "ticker:CBRS",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "補充硅光子技術對 AI 數據傳輸瓶頸的關鍵意義。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:47:54Z",
+      "latency_ms": 4399,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 534,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "d41a2581-303b-4da8-a134-5257250d18db",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "b4eb1ca8-bc82-4a95-a8b7-804c8ca71155"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "CBRS",
+        "NVDA",
+        "RKLB",
+        "TSEM"
+      ],
+      "sectors": [
+        "Aerospace",
+        "Hardware",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "Silicon Photonics"
+      ],
+      "tech_keywords": [
+        "Data Center",
+        "Interconnects",
+        "Silicon Photonics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSEM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon-photonics"
+      },
+      {
+        "subject": "ticker:CBRS",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      }
+    ],
+    "bull_summary": [
+      "TSEM硅光技術顯著降低傳輸功耗",
+      "長期訂單鎖定確保營收穩定性",
+      "AI 推升光 interconnect 需求"
+    ],
+    "bear_summary": [
+      "先進封裝技術整合難度高",
+      "短期股價估值波動風險"
+    ],
+    "final_take": "關注硅光子技術對 AI 基建的長期降本效應。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T14:47:54Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, COMPETES_WITH"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T14:47:38Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T14:47:54Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

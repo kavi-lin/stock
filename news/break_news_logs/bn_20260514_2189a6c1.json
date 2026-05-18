@@ -1,0 +1,797 @@
+{
+  "news_id": "bn_20260514_2189a6c1",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T15:49:29Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://www.barrons.com/articles/ford-motor-stock-ai-data-center-877b9c0d?siteid=yhoof2&yptr=yahoo",
+    "feed_fingerprint": "ford stock ripping again suddenly s ai data",
+    "published": "2026-05-14T15:22:00+00:00",
+    "url_hash": "sha1:e9d6e6a248141a1eea5b7260d7ac686c6d397cf9"
+  },
+  "headline": "Ford Stock Is Ripping Again. Suddenly, It’s a AI Data Center Stock.",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:44:38Z",
+      "latency_ms": 24723,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Ford 被重新定價為 **AI 資料中心題材股**，邏輯來自其商用車 / Super Duty / E-Transit 進入 hyperscaler 園區的後勤車隊 + 自家 River Rouge 廠區可能轉型成 **on-site power / backup generator 供應商**（Ford 有大型 ICE 引擎 + genset 製造能力）。這是典型的 **late-cycle narrative stretch** — AI capex 主軸從 GPU / HBM 一路擴散到電力、冷卻、現在連 OEM 車廠都被掛上 AI 標籤。短線情緒利多，但 Ford 本業仍是 **EV 轉型虧損 + UAW 成本 + 中國電動車競爭**三重逆風，這條敘事無法改變 Q2 EPS 結構。需警惕 meme 化定價：若 Tesla / GM 沒跟漲，代表 narrative 只停留在 Ford ticker 層級，反轉風險高。",
+        "bull_points": [
+          "AI capex 外溢至電力 / 商用車後勤受益",
+          "Super Duty + E-Transit 供 hyperscaler 車隊",
+          "ICE 引擎產線可轉產 backup genset"
+        ],
+        "bear_points": [
+          "本業 EV 虧損 + UAW 成本未解",
+          "Narrative stretch 屬 late-cycle 訊號",
+          "缺乏實質訂單 / 合約佐證"
+        ],
+        "final_take": "情緒利多但敘事過薄，不追高",
+        "entities": {
+          "tickers": [
+            "F",
+            "GM",
+            "TSLA",
+            "NVDA",
+            "VRT",
+            "ETN",
+            "CEG"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Industrials",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "AI data center power",
+            "EV transition",
+            "Narrative stretch"
+          ],
+          "tech_keywords": [
+            "backup genset",
+            "on-site power",
+            "hyperscaler fleet"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:F",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:ai-capex-spillover"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ev-transition-loss"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:GM"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "narrative 過薄，本業逆風未解，屬情緒交易"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:46:47Z",
+      "latency_ms": 128325,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此篇討論將 Ford 定位為 AI 資料中心基礎設施供應商，但此敘事存在「牽強」疑慮。相較於此，Ford 自身在車用 AI 技術（如 ADAS、自動駕駛）及軟體定義汽車的投資，才更具備成為「AI 概念股」的長期潛力。這些內部 AI 發展能開拓軟體服務營收，其價值遠超其作為資料中心後勤支援的角色。市場當前可能過度聚焦於外延敘事，而忽略了 Ford 在汽車 AI 核心技術的深耕。",
+        "bull_points": [
+          "擁抱車用 AI 技術，開拓軟體營收新藍海。",
+          "內部 AI 研發比供應鏈角色更有長期價值。"
+        ],
+        "bear_points": [
+          "「AI 資料中心股」標籤與本業關聯性薄弱。",
+          "易造成市場對 EV 轉型困境的忽視。"
+        ],
+        "final_take": "AI 標籤應回歸汽車軟體與自駕技術。",
+        "entities": {
+          "tickers": [
+            "F",
+            "TSLA",
+            "NVDA"
+          ],
+          "sectors": [
+            "Automobiles",
+            "Technology"
+          ],
+          "themes": [
+            "AI in Automotive",
+            "Software-Defined Vehicles",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "ADAS",
+            "Autonomous Driving",
+            "AI Software",
+            "AI Data Center Infrastructure"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:F",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI_in_Automotive"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TSLA"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:AI_data_center_infrastructure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦 Ford 自身 AI 軟體實力，而非外延敘事。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:47:12Z",
+      "latency_ms": 25756,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪已點出 narrative stretch + 內生 ADAS 價值，補一個**真正的 2nd-order trade**：若市場真把 Ford 當 AI 資料中心後勤車隊概念，最大受益**不是 F**，而是 **Cummins (CMI)** 和 **Generac (GNRC)** — Ford Super Duty 的柴油動力總成大量採用 Cummins 6.7L engine，而 hyperscaler 園區 backup power 真正的 incumbent 是 CMI 的 Power Systems segment + GNRC 的 industrial genset。Ford 只是**載具皮層**，動力心臟在 Cummins。第二層思考：若敘事真成立，**Caterpillar (CAT) Electric Power** 和 **Vertiv (VRT)** 才是 pure-play，F 反而會被 rotation 拋下。第三：留意 **PACCAR (PCAR)** 商用車隊也會分流 hyperscaler 車隊訂單 — F-Series 並非唯一選項。F 的 ripping 是 narrative spillover，**真標的在供應鏈上游**。",
+        "bull_points": [
+          "敘事擴散利好 CMI 柴油動力 + GNRC genset 業務",
+          "Hyperscaler 後勤車隊需求帶動 PCAR / F 商用車訂單",
+          "AI 電力主題尚未完全 price-in CMI Power Systems"
+        ],
+        "bear_points": [
+          "F 僅為載具皮層，rotation 一旦發生先被拋",
+          "CAT Electric Power / VRT 才是 pure-play 競品",
+          "Super Duty 動力心臟 Cummins，F 抽租金有限"
+        ],
+        "final_take": "看空 F 敘事永續性，看多 CMI / GNRC 上游卡位。",
+        "entities": {
+          "tickers": [
+            "F",
+            "CMI",
+            "GNRC",
+            "CAT",
+            "VRT",
+            "PCAR",
+            "TSLA",
+            "GM"
+          ],
+          "sectors": [
+            "Industrials",
+            "Consumer Discretionary",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "AI data center power",
+            "backup generation",
+            "hyperscaler logistics"
+          ],
+          "tech_keywords": [
+            "diesel genset",
+            "Power Systems",
+            "Electric Power",
+            "Super Duty"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:F"
+          },
+          {
+            "subject": "ticker:CMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          },
+          {
+            "subject": "ticker:GNRC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          },
+          {
+            "subject": "ticker:CAT",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CMI"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          },
+          {
+            "subject": "ticker:PCAR",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:F"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:ai-data-center-logistics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補供應鏈上游真標的 CMI/GNRC/CAT/VRT，F 僅皮層"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:48:18Z",
+      "latency_ms": 65652,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場將 Ford 定價為 AI 資料中心概念股，基於其商用車隊提供後勤支援與 ICE 備援。此敘事忽略了 AI 數據中心日益增長的可持續能源需求。Ford 自身 EV 技術（如 E-Transit）更符合綠色 AI 基礎設施趨勢。儘管 EV 部門盈利承壓，但其技術路線與長期趨勢契合。市場對 ICE 敘事的側重，可能忽視了 Ford 在綠色能源轉型中的真正潛力。",
+        "bull_points": [
+          "Ford E-Transit 具備綠色車隊的長期潛力。",
+          "EV 技術發展或可轉向數據中心級能源服務。"
+        ],
+        "bear_points": [
+          "僅聚焦 ICE 備援，與 AI 綠色數據中心趨勢不符。",
+          "Ford EV 業務盈利困境削弱其綠色 AI 敘事。",
+          "市場可能低估了可持續能源在 AI 基礎設施中的角色。"
+        ],
+        "final_take": "短期題材，長期關注綠色 AI 佈局。",
+        "entities": {
+          "tickers": [
+            "FORD",
+            "CMI",
+            "GNRC",
+            "CAT",
+            "VRT",
+            "PCAR"
+          ],
+          "sectors": [
+            "Automotive",
+            "Industrial Machinery",
+            "Electric Utilities",
+            "Energy Management",
+            "IT Services"
+          ],
+          "themes": [
+            "AI capex",
+            "EV transition",
+            "Sustainable Energy",
+            "Fleet Management",
+            "Green AI Infrastructure"
+          ],
+          "tech_keywords": [
+            "ICE",
+            "EV",
+            "Genset",
+            "Data Center Power",
+            "V2G"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FORD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Sustainable Energy"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "CUSTOMER_OF",
+            "object": "tech_keyword:EV"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CMI"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:GNRC"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CAT"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:PCAR"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "theme:Green AI Infrastructure",
+            "predicate": "MENTIONED_IN",
+            "object": "commentary:Ford's EV technology"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出 Ford EV 技術與綠色 AI 基礎設施的潛在連結。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:48:52Z",
+      "latency_ms": 33936,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪已覆蓋 narrative stretch、ADAS 內生價值、CMI/GNRC/VRT 上游 picks、EV 綠能對比。補一個**被完全忽略的 3rd-order 風險**：Ford 信評與**資本結構**。若市場真把 F 重定價為 AI infra 股，會誘使管理層在 **2026 H2 發行 high-yield bond / convertible** 來「投資 AI-ready manufacturing capacity」(類似 INTC / RIVN 玩法)。但 Ford Credit 旗下 **auto loan ABS exposure** 在 sub-prime delinquency 仍在 cycle high，**Moody's Baa2 / S&P BBB-** 已是投資級邊緣。Narrative-driven capex announcement 反而會讓 **rating agency 啟動 negative watch**，CDS spread 走闊。**真正的 contra trade 是 short F 5Y CDS 或做空 Ford Credit ABS 次順位 tranche**。另一個 missed node：**Eaton (ETN)** — hyperscaler 園區的 **switchgear / busway** 才是電力分配卡脖子環節，比 genset 更稀缺，pricing power 遠勝 F。",
+        "bull_points": [
+          "narrative spillover 可推升 F 短線 momentum",
+          "管理層可能順勢宣布 AI-ready capex 計畫"
+        ],
+        "bear_points": [
+          "Ford Credit ABS sub-prime delinquency cycle high",
+          "Baa2/BBB- 評級邊緣，capex 加碼恐觸發 negative watch",
+          "ETN switchgear 才是電力卡脖子，F 非真受益者"
+        ],
+        "final_take": "看空 F 信用面，做多 ETN switchgear 才是真 AI infra trade",
+        "entities": {
+          "tickers": [
+            "F",
+            "ETN",
+            "CMI",
+            "GNRC",
+            "VRT",
+            "CAT",
+            "PCAR",
+            "RIVN",
+            "INTC"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "AI data center power",
+            "credit cycle",
+            "narrative stretch"
+          ],
+          "tech_keywords": [
+            "switchgear",
+            "busway",
+            "genset",
+            "backup power",
+            "ABS sub-prime"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-data-center-power"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:credit-rating-watch"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:hyperscaler-fleet"
+          },
+          {
+            "subject": "ticker:CMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:F"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補信用評級與 ETN switchgear 卡脖子兩個前輪未提角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:49:29Z",
+      "latency_ms": 36816,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "文章將 Ford 定位為 AI 資料中心相關概念股，主因在於其商用車隊（如 Super Duty）為雲端巨頭的實體資料中心提供後勤支援，並可能供應備援電力。然而，此敘事忽略了 Ford 先進商用車輛本身所蘊藏的**強大數據生成與分析潛力**。當這些車隊深入雲端巨頭的營運網絡，它們便化身為活躍的**邊緣 AI 應用平台**。這些車輛產生的數據流，能驅動更精準的車隊管理、前瞻性的預測維護，以及營運效率的全面優化。這將 Ford 的角色從單純的硬體供應商，提升至 AI 驅動營運智慧的關鍵賦能者，使其更貼近 AI 數據生態系的核心。",
+        "bull_points": [
+          "Ford 車輛是邊緣 AI 的數據與應用平台。",
+          "強化車隊智慧管理與預測性維護。",
+          "數據驅動營運智慧，整合 AI 生態。"
+        ],
+        "bear_points": [
+          "核心價值仍次於純 AI 晶片與軟體。",
+          "數據處理與安全對雲端巨頭構成挑戰。",
+          "Ford 自身電動車轉型的財務壓力依然存在。"
+        ],
+        "final_take": "數據平台新解讀，但核心 AI 價值待落實。",
+        "entities": {
+          "tickers": [
+            "F"
+          ],
+          "sectors": [
+            "Automotive",
+            "Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "Edge AI",
+            "Fleet Management",
+            "Data Monetization",
+            "AI Infrastructure",
+            "Operational Intelligence"
+          ],
+          "tech_keywords": [
+            "Edge Computing",
+            "Data Generation",
+            "AI Platforms",
+            "Fleet Analytics",
+            "Predictive Maintenance"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:F",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:edge_ai_fleet_data"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "SUPPLIES_TO",
+            "object": "sector:Technology"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "CUSTOMER_OF",
+            "object": "narrative:hyperscaler_operations"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "從後勤支援到數據平台，AI 邊緣應用新視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "CAT",
+        "CEG",
+        "CMI",
+        "ETN",
+        "F",
+        "FORD",
+        "GM",
+        "GNRC",
+        "INTC",
+        "NVDA",
+        "PCAR",
+        "RIVN",
+        "TSLA",
+        "VRT"
+      ],
+      "sectors": [
+        "Automobiles",
+        "Automotive",
+        "Consumer Discretionary",
+        "Electric Utilities",
+        "Energy Management",
+        "IT Services",
+        "Industrial Machinery",
+        "Industrials",
+        "Information Technology",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI Infrastructure",
+        "AI capex",
+        "AI data center power",
+        "AI in Automotive",
+        "Data Monetization",
+        "EV transition",
+        "Edge AI",
+        "Fleet Management",
+        "Green AI Infrastructure",
+        "Narrative stretch",
+        "Operational Intelligence",
+        "Software-Defined Vehicles",
+        "Sustainable Energy",
+        "backup generation",
+        "credit cycle",
+        "hyperscaler logistics",
+        "narrative stretch"
+      ],
+      "tech_keywords": [
+        "ABS sub-prime",
+        "ADAS",
+        "AI Data Center Infrastructure",
+        "AI Platforms",
+        "AI Software",
+        "Autonomous Driving",
+        "Data Center Power",
+        "Data Generation",
+        "EV",
+        "Edge Computing",
+        "Electric Power",
+        "Fleet Analytics",
+        "Genset",
+        "ICE",
+        "Power Systems",
+        "Predictive Maintenance",
+        "Super Duty",
+        "V2G",
+        "backup genset",
+        "backup power",
+        "busway",
+        "diesel genset",
+        "genset",
+        "hyperscaler fleet",
+        "on-site power",
+        "switchgear"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:F",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:ai-capex-spillover"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ev-transition-loss"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:GM"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI_in_Automotive"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TSLA"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:AI_data_center_infrastructure"
+      },
+      {
+        "subject": "ticker:CMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:F"
+      },
+      {
+        "subject": "ticker:CMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:GNRC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:CAT",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CMI"
+      },
+      {
+        "subject": "ticker:PCAR",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:F"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:ai-data-center-logistics"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Sustainable Energy"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "CUSTOMER_OF",
+        "object": "tech_keyword:EV"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CMI"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:GNRC"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CAT"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:PCAR"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "theme:Green AI Infrastructure",
+        "predicate": "MENTIONED_IN",
+        "object": "commentary:Ford's EV technology"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:credit-rating-watch"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:hyperscaler-fleet"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:edge_ai_fleet_data"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "SUPPLIES_TO",
+        "object": "sector:Technology"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "CUSTOMER_OF",
+        "object": "narrative:hyperscaler_operations"
+      }
+    ],
+    "bull_summary": [
+      "AI capex 外溢至電力 / 商用車後勤受益",
+      "Super Duty + E-Transit 供 hyperscaler 車隊",
+      "ICE 引擎產線可轉產 backup genset",
+      "擁抱車用 AI 技術，開拓軟體營收新藍海。",
+      "內部 AI 研發比供應鏈角色更有長期價值。",
+      "敘事擴散利好 CMI 柴油動力 + GNRC genset 業務"
+    ],
+    "bear_summary": [
+      "本業 EV 虧損 + UAW 成本未解",
+      "Narrative stretch 屬 late-cycle 訊號",
+      "缺乏實質訂單 / 合約佐證",
+      "「AI 資料中心股」標籤與本業關聯性薄弱。",
+      "易造成市場對 EV 轉型困境的忽視。",
+      "F 僅為載具皮層，rotation 一旦發生先被拋"
+    ],
+    "final_take": "數據平台新解讀，但核心 AI 價值待落實。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T15:49:29Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: HEADWIND_FROM; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

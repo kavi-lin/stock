@@ -8,7 +8,37 @@
 
 ---
 
-## 資料來源（優先順序）
+## ⚡ V2.20.2 — Phase 0 Unified Reader（推薦，省 5-8 個 turn）
+
+**一次跑取所有 5 層 cache** + 同時判斷新鮮度：
+
+```bash
+python3 sector/scripts/phase0_read_caches.py
+```
+
+stdout 輸出單一 JSON：
+```
+{
+  "layers": {
+    "breadth":    {available, age_hr, fresh, data: {composite, components, trend_summary, key_levels}},
+    "ftd":        {available, age_hr, fresh, data: {market_state, ftd_timeline, quality_score}},
+    "market_top": {available, age_hr, fresh, data: {composite, components}},
+    "fred":       {available, age_hr, fresh, data: {regime_label, regime_confidence, macro_scores_composite, ...slim 11 fields}}
+  },
+  "stale_layers":   [...],
+  "missing_layers": [...]
+}
+```
+
+**用法**：一次 Bash → pipe 到 python -c 解析 → 一個 turn 拿到所有資料。**取代下方層 A-E 各自讀 cache 的舊流程**（每層 1 turn × LLM overhead ~3-5s → 5-8 個 turn 省掉）。
+
+**Fallback**：`stale_layers` 或 `missing_layers` 非空 → 跑下方對應 layer script 重整 cache → 再跑一次 reader。
+
+`fred_latest.json` 內部 1h cache（fresh_window 3600s）；其他層 fresh_window 10800s。
+
+---
+
+## 資料來源（優先順序）— 舊流程備援
 
 ### 層 A — market-breadth-analyzer（優先，量化）
 

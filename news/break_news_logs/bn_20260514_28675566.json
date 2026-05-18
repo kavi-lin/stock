@@ -1,0 +1,717 @@
+{
+  "news_id": "bn_20260514_28675566",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T16:04:05Z",
+  "last_activity_ts": "2026-05-14T16:29:47Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/0c45458a1560",
+    "feed_fingerprint": "futu:POET:abe48418b2",
+    "published": "2026-05-14T19:14:22+08:00",
+    "url_hash": "sha1:13ebc3a5c5a158950c79fea27621243641c3796d"
+  },
+  "headline": "POET Technologies美股盤前直線拉升，現漲超9%",
+  "headline_zh": null,
+  "raw_summary": "POET Technologies美股盤前直線拉升，現漲超9%；公司和Lumilens推動晶圓級光子集成技術，助力下一代人工智能光學網絡發展。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 4.5,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:25:54Z",
+      "latency_ms": 25053,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "POET Technologies 盤前急拉 9%+，催化劑為與 Lumilens 合作推進**晶圓級光子集成 (wafer-scale photonic integration)**，切入下一代 AI 光網絡。此屬 **co-packaged optics (CPO) / silicon photonics** 賽道——AI 資料中心 scale-up/scale-out 頻寬瓶頸下，光互連取代銅互連已成共識。NVDA Blackwell NVL72 已導入 CPO 路線圖，BRCM、MRVL、CIEN、AVGO、COHR 等屬一級供應鏈。POET 為 small-cap (<$500M 市值) speculative play，9% 盤前 pop 多屬 PR-driven narrative trade，**缺乏實際營收兌現**——歷史上 POET 多次發 PR 後股價回吐。AI 光學 theme 本身具長線結構性 tailwind，但個股應優先布局已 ramp 出貨的 BRCM/AVGO/COHR，POET 屬 lottery ticket。",
+        "bull_points": [
+          "AI 資料中心頻寬瓶頸推動 CPO/silicon photonics 結構性需求",
+          "Lumilens 合作有具體 wafer-scale 技術落地路徑",
+          "光互連 theme 帶動同類股 COHR/LITE 共振"
+        ],
+        "bear_points": [
+          "POET 小市值無營收兌現，PR 行情容易回吐",
+          "盤前 9% 拉升缺乏成交量驗證，易被套利打回",
+          "AI 光學受惠主流仍是 BRCM/AVGO 非 POET"
+        ],
+        "final_take": "Theme 看多但 POET 個股偏投機，優先布局 BRCM/AVGO/COHR",
+        "entities": {
+          "tickers": [
+            "POET",
+            "NVDA",
+            "AVGO",
+            "BRCM",
+            "MRVL",
+            "COHR",
+            "CIEN",
+            "LITE"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "silicon photonics",
+            "co-packaged optics",
+            "AI datacenter interconnect"
+          ],
+          "tech_keywords": [
+            "CPO",
+            "silicon photonics",
+            "wafer-scale photonic integration",
+            "Blackwell",
+            "NVL72"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon-photonics"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "entity:Lumilens"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon-photonics"
+          },
+          {
+            "subject": "ticker:BRCM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Theme 結構利多但 POET 個股 PR 驅動，需驗證量能"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:26:16Z",
+      "latency_ms": 22031,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "POET Technologies 與 Lumilens 合作，推進**晶圓級光子集成**以強化 AI 光網絡。此技術高度依賴**先進封裝**，如 TSMC 的 CoWoS-L，這正是 NVIDIA 等巨頭爭奪的關鍵產能。對 POET 這類小型公司而言，**先進封裝產能的稀缺性**將是其量產擴張的重大風險與成本壓力點，而非僅是技術本身的問題。",
+        "bull_points": [
+          "先進封裝協同效應，推動 CPO 技術成熟。",
+          "POET 的晶圓級集成，有望簡化光學模組生產。"
+        ],
+        "bear_points": [
+          "先進封裝產能瓶頸，限制 POET 量產擴張。",
+          "小型公司難與巨頭爭奪稀缺封裝資源。"
+        ],
+        "final_take": "先進封裝是關鍵，POET 需克服產能挑戰。",
+        "entities": {
+          "tickers": [
+            "POET",
+            "NVDA",
+            "BRCM",
+            "MRVL",
+            "AVGO",
+            "COHR"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Optical Networking",
+            "Advanced Packaging"
+          ],
+          "tech_keywords": [
+            "wafer-scale photonic integration",
+            "CPO",
+            "silicon photonics",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:wafer-scale photonic integration"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Advanced Packaging"
+          },
+          {
+            "subject": "theme:Advanced Packaging",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          },
+          {
+            "subject": "tech_keyword:CoWoS-L",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "先進封裝瓶頸是 POET 的關鍵風險點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:26:41Z",
+      "latency_ms": 25131,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前輪沒提的角度：**POET 的核心 IP 是 Optical Interposer 平台**，與主流 silicon photonics (Intel/GlobalFoundries SiPh PDK) 路線不同——用 dielectric waveguide 而非 SOI，理論上可繞過 GFS 12LP+ / TSMC SiPh 產能瓶頸。但這也是雙面刃：**Optical Interposer 至今無一家 hyperscaler qualify**，AVGO/MRVL CPO 已進入 NVDA/GOOGL 200G/lane roadmap，POET 連 customer design-win 都尚未公告。第二序效應更值得關注——若 wafer-scale photonic 真量產，**衝擊最大的是現役 pluggable optics 廠 LITE、AAOI、FN**（800G/1.6T DR/FR 模組會被 CPO 蠶食），而非受惠。POET 9% pop 屬 thematic flow spillover，真正 follow-through 要看 Lumilens 是否帶來具名 foundry partner (e.g. SilTerra, Tower)。",
+        "bull_points": [
+          "Optical Interposer 架構繞開 SiPh 產能瓶頸",
+          "AI 光互連長線 TAM 結構性擴張",
+          "Lumilens 合作可能帶具名 foundry partner"
+        ],
+        "bear_points": [
+          "至今零 hyperscaler design-win 公告",
+          "LITE/AAOI/FN pluggable optics 被 CPO 蠶食",
+          "Dielectric waveguide 未經量產驗證"
+        ],
+        "final_take": "看空 POET 個股，看多 CPO theme 應買 AVGO/COHR",
+        "entities": {
+          "tickers": [
+            "POET",
+            "AVGO",
+            "COHR",
+            "MRVL",
+            "LITE",
+            "AAOI",
+            "FN",
+            "NVDA",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "co-packaged optics",
+            "silicon photonics",
+            "optical interconnect"
+          ],
+          "tech_keywords": [
+            "Optical Interposer",
+            "dielectric waveguide",
+            "SOI",
+            "CPO",
+            "800G",
+            "1.6T DR/FR",
+            "wafer-scale photonics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LITE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:AAOI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:FN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:silicon-photonics"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:co-packaged-optics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 pluggable optics 受害方 + Optical Interposer 技術差異化角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:29:01Z",
+      "latency_ms": 140091,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "POET Technologies (POT) 盤前跳漲，雖受惠於與 Lumilens 合作推動**晶圓級光子集成**，但其介電波導技術與主流矽光子 (SiPh) 的**整合複雜性**，以及 Lumilens 本身缺乏大型客戶驗證，均為其投機性敘事增添了不確定性。",
+        "bull_points": [
+          "AI 數據中心對高頻寬光互連的需求。",
+          "POET 介電波導的潛在低損耗/成本優勢。"
+        ],
+        "bear_points": [
+          "介電波導與主流 SiPh 整合的技術複雜性。",
+          "Lumilens 合作夥伴的客戶驗證不足。",
+          "POT 股價高度依賴市場敘事，營收兌現遙遙無期。"
+        ],
+        "final_take": "POT 題材吸引人，但技術整合與客戶驗證是關鍵。",
+        "entities": {
+          "tickers": [
+            "POET",
+            "NVDA",
+            "BRCM",
+            "AVGO",
+            "MRVL",
+            "LITE",
+            "AAOI",
+            "FN",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Optical interconnects",
+            "Advanced Packaging"
+          ],
+          "tech_keywords": [
+            "wafer-scale photonic integration",
+            "CPO",
+            "silicon photonics",
+            "dielectric waveguide",
+            "Optical Interposer",
+            "pluggable optics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:dielectric waveguide",
+            "predicate": "COMPETES_WITH",
+            "object": "tech:silicon photonics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "引入整合複雜性及合作夥伴驗證不足。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:29:26Z",
+      "latency_ms": 24425,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "再補一個被忽略的**第二序受害者**：**OFS / Corning (GLW) optical fiber 廠**。CPO / wafer-scale photonic 整合的終局，是把 laser source 從模組移到 co-packaged die 旁，**single-mode fiber jumper 用量會結構性下降**——單一 server rack 內 fiber count 從 800G pluggable 時代每 GPU 8-16 條 SMF，CPO 時代可能砍半 (external laser source 共享 + on-package routing)。GLW Optical Communications 部門 2025 Q1 already guide AI fiber demand strong，但 2027+ CPO penetration >20% 時 ASP/volume mix 會反轉。另一個被遺漏節點：**POET 的 Optical Interposer 需要 InP / GaAs laser die 來源**，IIVI/COHR 的 indium phosphide laser diode 供應實際是 enabler 而非受害者——若 POET 真量產，**COHR 反而是 picks-and-shovels 受惠者**，不是 CLAUDE Round 0 暗示的競爭對手。POET 本身仍 lottery ticket。",
+        "bull_points": [
+          "COHR 為 InP laser die 上游 picks-and-shovels 受惠者",
+          "CPO 路線確立帶動 GLW AI fiber 短期需求續強",
+          "POET 介電波導若驗證可繞過 SiPh 產能瓶頸"
+        ],
+        "bear_points": [
+          "CPO 滲透率 >20% 後 SMF jumper 用量結構性下降衝擊 GLW mix",
+          "POET 無 hyperscaler design-win 仍是致命空缺",
+          "9% pop 為 thematic spillover 非基本面催化"
+        ],
+        "final_take": "POET 觀望；COHR / IIVI 才是 CPO 真受惠者",
+        "entities": {
+          "tickers": [
+            "POET",
+            "COHR",
+            "IIVI",
+            "GLW",
+            "LITE",
+            "AAOI",
+            "FN",
+            "AVGO",
+            "MRVL",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Equipment",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI optical networking",
+            "Co-packaged optics",
+            "Silicon photonics",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "CPO",
+            "Optical Interposer",
+            "InP laser",
+            "Single-mode fiber",
+            "Wafer-scale photonic integration",
+            "800G",
+            "1.6T"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:cpo-laser-source"
+          },
+          {
+            "subject": "ticker:GLW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cpo-fiber-displacement"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:COHR"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cpo-pluggable-cannibalization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增 GLW fiber 第二序衝擊 + COHR laser die picks-and-shovels 角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:29:47Z",
+      "latency_ms": 21688,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "POET Technologies (POT) 的晶圓級光子集成技術若要實現其在 AI 光網絡中的潛力，嚴格的驗證是關鍵。Viavi Solutions (VIAV) 等公司在此扮演了重要角色，提供先進的光學測試與量測設備，確保這些複雜光子集成電路（PICs）的性能與可靠性，這對 AI 資料中心日益增長的需求至關重要。隨著 AI 基礎設施的推進，精確的驗證基礎設施成為支持 POET 等創新技術的關鍵一環。",
+        "bull_points": [
+          "AI 基礎設施擴張推動光學驗證需求。",
+          "VIAV 設備是驗證新光子技術的關鍵。"
+        ],
+        "bear_points": [
+          "POT 的投機性可能限制 VIAV 的短期需求。",
+          "總體市場放緩或影響設備銷售。"
+        ],
+        "final_take": "先進光子技術需可靠驗證。",
+        "entities": {
+          "tickers": [
+            "POT",
+            "VIAV"
+          ],
+          "sectors": [
+            "Technology",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI data center infrastructure",
+            "Optical testing",
+            "Photonics validation"
+          ],
+          "tech_keywords": [
+            "Optical testing",
+            "Photonics IC",
+            "CPO",
+            "Wafer-scale photonic integration",
+            "Photonic integrated circuits"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VIAV",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI data center infrastructure"
+          },
+          {
+            "subject": "ticker:VIAV",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:Photonics validation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "先前討論集中於供應鏈，忽略了測試設備商。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAOI",
+        "AVGO",
+        "BRCM",
+        "CIEN",
+        "COHR",
+        "FN",
+        "GLW",
+        "GOOGL",
+        "IIVI",
+        "LITE",
+        "MRVL",
+        "NVDA",
+        "POET",
+        "POT",
+        "VIAV"
+      ],
+      "sectors": [
+        "Communication Equipment",
+        "Communications Equipment",
+        "Information Technology",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI data center infrastructure",
+        "AI datacenter interconnect",
+        "AI optical networking",
+        "Advanced Packaging",
+        "Co-packaged optics",
+        "Optical Networking",
+        "Optical interconnects",
+        "Optical testing",
+        "Photonics validation",
+        "Silicon photonics",
+        "co-packaged optics",
+        "optical interconnect",
+        "silicon photonics"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "1.6T DR/FR",
+        "800G",
+        "Blackwell",
+        "CPO",
+        "CoWoS-L",
+        "InP laser",
+        "NVL72",
+        "Optical Interposer",
+        "Optical testing",
+        "Photonic integrated circuits",
+        "Photonics IC",
+        "SOI",
+        "Single-mode fiber",
+        "Wafer-scale photonic integration",
+        "dielectric waveguide",
+        "pluggable optics",
+        "silicon photonics",
+        "wafer-scale photonic integration",
+        "wafer-scale photonics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon-photonics"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "entity:Lumilens"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon-photonics"
+      },
+      {
+        "subject": "ticker:BRCM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:wafer-scale photonic integration"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Advanced Packaging"
+      },
+      {
+        "subject": "theme:Advanced Packaging",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "tech_keyword:CoWoS-L",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:AAOI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:FN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:silicon-photonics"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "narrative:dielectric waveguide",
+        "predicate": "COMPETES_WITH",
+        "object": "tech:silicon photonics"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:cpo-laser-source"
+      },
+      {
+        "subject": "ticker:GLW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cpo-fiber-displacement"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:COHR"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cpo-pluggable-cannibalization"
+      },
+      {
+        "subject": "ticker:VIAV",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI data center infrastructure"
+      },
+      {
+        "subject": "ticker:VIAV",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:Photonics validation"
+      }
+    ],
+    "bull_summary": [
+      "AI 資料中心頻寬瓶頸推動 CPO/silicon photonics 結構性需求",
+      "Lumilens 合作有具體 wafer-scale 技術落地路徑",
+      "光互連 theme 帶動同類股 COHR/LITE 共振",
+      "先進封裝協同效應，推動 CPO 技術成熟。",
+      "POET 的晶圓級集成，有望簡化光學模組生產。",
+      "Optical Interposer 架構繞開 SiPh 產能瓶頸"
+    ],
+    "bear_summary": [
+      "POET 小市值無營收兌現，PR 行情容易回吐",
+      "盤前 9% 拉升缺乏成交量驗證，易被套利打回",
+      "AI 光學受惠主流仍是 BRCM/AVGO 非 POET",
+      "先進封裝產能瓶頸，限制 POET 量產擴張。",
+      "小型公司難與巨頭爭奪稀缺封裝資源。",
+      "至今零 hyperscaler design-win 公告"
+    ],
+    "final_take": "先進光子技術需可靠驗證。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:29:47Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH, CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

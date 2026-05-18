@@ -1,0 +1,503 @@
+{
+  "news_id": "bn_20260515_fbd28eff",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T15:50:30Z",
+  "last_activity_ts": "2026-05-15T16:01:12Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://www.wsj.com/finance/commodities-futures/gold-prices-rise-on-strong-demand-5f105c7e?siteid=yhoof2&yptr=yahoo",
+    "feed_fingerprint": "silver plunges inflation worries",
+    "published": "2026-05-15T15:28:00+00:00",
+    "url_hash": "sha1:102ff6e813180cdeebce18f144aa0f215a6219f0"
+  },
+  "headline": "Silver Plunges on Inflation Worries",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "macro_data",
+    "shallow_score": -2.0,
+    "bull_case": "經濟動能疲軟",
+    "bear_case": "衰退擔憂加重",
+    "sector_view": "防守股相對強勢",
+    "macro_view": "降息預期升溫",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:59:03Z",
+      "latency_ms": 39542,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "白銀今日大跌、黃金卻同步走高，這個**金銀比擴大**才是真正訊號。通膨疑慮推升市場對 Fed 維持鷹派的預期，**實質利率走高**對不孳息貴金屬不利；但黃金抗住、白銀獨弱，反映白銀**工業屬性**被衰退擔憂拖累——白銀近半需求來自太陽能光電與電子。換言之這不是純粹的通膨交易，而是**停滯性通膨**情境下「保值需求撐金、工業需求殺銀」的分裂。對 AG、PAAS、WPM 等白銀礦商是逆風；反向看，白銀為太陽能電池銀漿主要成本，銀價回落反而**利好 FSLR 等光電廠商毛利**。留意金銀比是否衝破歷史極端區。",
+        "bull_points": [
+          "金銀比拉到極端，白銀具均值回歸反彈空間",
+          "銀價走低降低太陽能銀漿成本，利好 FSLR",
+          "光電與電子用銀為結構性長期需求"
+        ],
+        "bear_points": [
+          "實質利率走高壓抑不孳息貴金屬",
+          "衰退擔憂殺工業用銀需求，礦商承壓",
+          "白銀獨弱、黃金抗住，動能結構轉空"
+        ],
+        "final_take": "看空白銀礦商，但金銀比極端化值得反向關注",
+        "entities": {
+          "tickers": [
+            "SLV",
+            "AG",
+            "PAAS",
+            "WPM",
+            "HL",
+            "FSLR"
+          ],
+          "sectors": [
+            "Materials",
+            "Energy"
+          ],
+          "themes": [
+            "precious metals",
+            "inflation hedge",
+            "solar PV",
+            "stagflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SLV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-real-rates"
+          },
+          {
+            "subject": "ticker:AG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:recession-fear"
+          },
+          {
+            "subject": "ticker:FSLR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silver-cost-decline"
+          },
+          {
+            "subject": "ticker:SLV",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:gold-safe-haven"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "金銀分裂走勢顯示停滯性通膨、工業需求疑慮為核心"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:59:16Z",
+      "latency_ms": 13093,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了太陽能，需關注電子產業中銀漿作為互連材料的隱性成本轉移。白銀下跌對消費電子與**半導體封裝**成本壓力有緩解作用，但若因通膨擔憂致使終端需求疲軟，這種成本利多可能被銷售衰退完全抵銷。此外，金銀比擴大往往預示市場對經濟衰退的避險需求大於單純的通膨對沖，這對近期強勢的銅等工業金屬亦是潛在的資金抽離訊號，需提防工業金屬板塊整體估值修正。",
+        "bull_points": [
+          "電子組件與封裝成本結構性改善",
+          "半導體製造商毛利空間有望隨成本下降"
+        ],
+        "bear_points": [
+          "終端消費需求疲軟將抵銷成本利多",
+          "市場避險資金可能持續抽離工業金屬領域"
+        ],
+        "final_take": "白銀下跌反映工業需求疲軟，成本優勢恐不敵終端衰退壓力。",
+        "entities": {
+          "tickers": [
+            "SLV",
+            "XLK",
+            "COPX"
+          ],
+          "sectors": [
+            "Materials",
+            "Information Technology"
+          ],
+          "themes": [
+            "Inflation",
+            "Industrial Demand",
+            "Stagflation"
+          ],
+          "tech_keywords": [
+            "conductive paste",
+            "semiconductor packaging"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SLV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:industrial_demand_slowdown"
+          },
+          {
+            "subject": "ticker:XLK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower_input_costs"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "補充了半導體封裝成本與工業金屬資金抽離的宏觀觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:59:59Z",
+      "latency_ms": 43280,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前一輪說銀價回落利好 **FSLR 毛利**——這點需修正。FSLR 用的是**碲化鎘 (CdTe) 薄膜**技術，全程不使用銀漿金屬化，銀價漲跌對其成本幾乎零影響。真正受惠的是用銀漿的**晶矽組件廠**，美股對應 JKS、CSIQ，且 HJT/TOPCon 新製程單片耗銀量比舊 PERC 更高，銀價回落對它們的邊際利好更明顯。另一個被忽略的二階效應：全球約七成白銀是銅、鉛鋅、金礦的**副產品**，礦商不會因銀價跌而減產——供給高度無彈性，這代表即使 AG、PAAS 等原生銀礦商承壓減產，副產銀仍源源流出，結構性壓低銀價反彈空間。這讓白銀的下行比黃金更難自我修復。",
+        "bull_points": [
+          "晶矽組件廠 JKS、CSIQ 銀漿成本下降",
+          "HJT/TOPCon 耗銀量高，銀價跌邊際利好更大"
+        ],
+        "bear_points": [
+          "七成白銀為副產品，供給無彈性難減產",
+          "副產銀續流，銀價反彈結構性受壓",
+          "FSLR 用 CdTe 薄膜，銀價利多對它無效"
+        ],
+        "final_take": "看空白銀:副產供給無彈性,反彈空間有限",
+        "entities": {
+          "tickers": [
+            "FSLR",
+            "JKS",
+            "CSIQ",
+            "AG",
+            "PAAS"
+          ],
+          "sectors": [
+            "Materials",
+            "Information Technology"
+          ],
+          "themes": [
+            "solar",
+            "silver",
+            "byproduct supply"
+          ],
+          "tech_keywords": [
+            "CdTe",
+            "HJT",
+            "TOPCon",
+            "silver paste"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:JKS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cheap-silver-paste"
+          },
+          {
+            "subject": "ticker:CSIQ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cheap-silver-paste"
+          },
+          {
+            "subject": "ticker:FSLR",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:cdte-no-silver"
+          },
+          {
+            "subject": "ticker:AG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:byproduct-supply-inelastic"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "修正 FSLR 薄膜不用銀,並加副產品供給無彈性二階效應"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T16:00:16Z",
+      "latency_ms": 16362,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "銀價下跌帶來的成本紅利，應特別聚焦於**被動元件 (MLCC)** 產業。MLCC 生產過程中大量使用貴金屬電極，特別是高容值、車用級 MLCC，白銀成本佔比不容小覷。雖前述封裝成本轉移已提及，但 MLCC 廠商如 **VSH** 等，在面臨終端庫存回補與車用需求時，銀價下降確實能提供毛利率的額外緩衝空間。",
+        "bull_points": [
+          "銀價下跌優化被動元件材料成本。",
+          "車用電子需求仍具備長線支撐。"
+        ],
+        "bear_points": [
+          "宏觀通膨擔憂恐限制終端消費需求。",
+          "庫存去化緩慢拖累被動元件出貨。"
+        ],
+        "final_take": "留意車用被動元件毛利優化機會。",
+        "entities": {
+          "tickers": [
+            "VSH"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "EV adoption",
+            "Passive Components"
+          ],
+          "tech_keywords": [
+            "MLCC",
+            "Ceramic Capacitors"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VSH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silver_price_decline"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "補足被動元件 MLCC 的白銀成本敏感度分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T16:00:55Z",
+      "latency_ms": 39540,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪把 **WPM 與 AG、PAAS 並列為逆風**，這需要修正。WPM 是**串流商 (streamer)** 而非礦商——它以合約鎖定每盎司約 4-5 美元的固定取得成本，銀價下跌時毛利壓縮遠小於開採成本浮動的原生銀礦 AG、PAAS。換言之同一則新聞對「礦商」與「串流商」的衝擊不對稱，不該混為一談。另一個被忽略的二階效應：白銀**期貨投機淨多單**槓桿極高，COMEX 管理基金一旦觸發停損，紙銀拋售會放大現貨跌幅，使單日跌勢超過基本面該有的幅度——這也意味反彈時同樣會因空頭回補而劇烈。留意 SLV 的資金流出是否加速。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T16:01:12Z",
+      "latency_ms": 16460,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "白銀除工業需求外，**珠寶與實物銀飾需求**在價格下跌時具有顯著的**價格彈性**。與銅或鋁等純工業金屬不同，當工業需求因衰退隱憂而疲軟時，印度與中國市場的實物購置需求往往會在低檔提供強勁的**支撐下限**。這種「消費性需求」作為跌勢緩衝，是純工業金屬板塊（如銅）所不具備的特性。對於以**實物資產為基礎的 ETF（如 SLV, PSLV）**而言，這種實物需求底蘊將限制其長期下行空間。",
+        "bull_points": [
+          "印度與中國實物購置需求在低檔提供支撐。",
+          "實物資產屬性提供純工業金屬缺失的跌勢緩衝。"
+        ],
+        "bear_points": [
+          "全球衰退風險恐導致消費者可支配所得縮減。",
+          "消費性實物需求在高通膨下可能被生活成本排擠。"
+        ],
+        "final_take": "白銀具備工業與消費雙重屬性，實物支撐將限制跌勢。",
+        "entities": {
+          "tickers": [
+            "SLV",
+            "PSLV"
+          ],
+          "sectors": [
+            "Materials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Commodity demand",
+            "Retail demand"
+          ],
+          "tech_keywords": [
+            "Physical bullion"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SLV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:physical_demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "揭示珠寶實物需求提供的價格支撐，區隔純工業金屬。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AG",
+        "COPX",
+        "CSIQ",
+        "FSLR",
+        "HL",
+        "JKS",
+        "PAAS",
+        "PSLV",
+        "SLV",
+        "VSH",
+        "WPM",
+        "XLK"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Energy",
+        "Information Technology",
+        "Materials"
+      ],
+      "themes": [
+        "Commodity demand",
+        "EV adoption",
+        "Industrial Demand",
+        "Inflation",
+        "Passive Components",
+        "Retail demand",
+        "Stagflation",
+        "byproduct supply",
+        "inflation hedge",
+        "precious metals",
+        "silver",
+        "solar",
+        "solar PV",
+        "stagflation"
+      ],
+      "tech_keywords": [
+        "CdTe",
+        "Ceramic Capacitors",
+        "HJT",
+        "MLCC",
+        "Physical bullion",
+        "TOPCon",
+        "conductive paste",
+        "semiconductor packaging",
+        "silver paste"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:SLV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-real-rates"
+      },
+      {
+        "subject": "ticker:AG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:recession-fear"
+      },
+      {
+        "subject": "ticker:FSLR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silver-cost-decline"
+      },
+      {
+        "subject": "ticker:SLV",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:gold-safe-haven"
+      },
+      {
+        "subject": "ticker:SLV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:industrial_demand_slowdown"
+      },
+      {
+        "subject": "ticker:XLK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower_input_costs"
+      },
+      {
+        "subject": "ticker:JKS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cheap-silver-paste"
+      },
+      {
+        "subject": "ticker:CSIQ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cheap-silver-paste"
+      },
+      {
+        "subject": "ticker:FSLR",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:cdte-no-silver"
+      },
+      {
+        "subject": "ticker:AG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:byproduct-supply-inelastic"
+      },
+      {
+        "subject": "ticker:VSH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silver_price_decline"
+      },
+      {
+        "subject": "ticker:SLV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:physical_demand"
+      }
+    ],
+    "bull_summary": [
+      "金銀比拉到極端，白銀具均值回歸反彈空間",
+      "銀價走低降低太陽能銀漿成本，利好 FSLR",
+      "光電與電子用銀為結構性長期需求",
+      "電子組件與封裝成本結構性改善",
+      "半導體製造商毛利空間有望隨成本下降",
+      "晶矽組件廠 JKS、CSIQ 銀漿成本下降"
+    ],
+    "bear_summary": [
+      "實質利率走高壓抑不孳息貴金屬",
+      "衰退擔憂殺工業用銀需求，礦商承壓",
+      "白銀獨弱、黃金抗住，動能結構轉空",
+      "終端消費需求疲軟將抵銷成本利多",
+      "市場避險資金可能持續抽離工業金屬領域",
+      "七成白銀為副產品，供給無彈性難減產"
+    ],
+    "final_take": "白銀具備工業與消費雙重屬性，實物支撐將限制跌勢。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T16:01:12Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

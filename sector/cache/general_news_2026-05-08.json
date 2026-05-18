@@ -1,0 +1,169 @@
+{
+  "as_of_date": "2026-05-08",
+  "schema_version": "V1.71",
+  "available": true,
+  "limit": 20,
+  "total_articles": 20,
+  "articles": [
+    {
+      "publishedDate": "2026-05-08 04:26:50",
+      "publisher": "WSJ",
+      "title": "Stock Market Today: Dow Futures Climb as Investors Await Jobs Report",
+      "excerpt": "Oil prices edge higher, with Brent above $101",
+      "url": "https://www.wsj.com/livecoverage/april-jobs-report-stock-market-05-08-2026",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-08 04:21:00",
+      "publisher": "Market Watch",
+      "title": "Momentum stocks just saw one of the biggest reversals in five years. What usually happens next.",
+      "excerpt": "There had been ample warnings that stocks with price momentum had shot up too quickly, and on Thursday gravity reasserted itself.",
+      "url": "https://www.marketwatch.com/story/momentum-stocks-just-saw-one-of-the-biggest-reversals-in-five-years-what-usually-happens-next-37c222bd",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-08 04:02:54",
+      "publisher": "Bloomberg Markets and Finance",
+      "title": "Why the Iran War is Hitting Indian Stocks Harder Than Other Markets",
+      "excerpt": "Record foreign outflows and surging energy costs are battering India's economy and the rupee. While geopolitical tensions drive crude prices higher, some sectors show resilience amid the volatility.",
+      "url": "https://www.youtube.com/watch?v=M8l9mUAKv6g",
+      "site": "youtube.com"
+    },
+    {
+      "publishedDate": "2026-05-08 03:35:00",
+      "publisher": "Seeking Alpha",
+      "title": "MWC 2026: Non-Terrestrial Networks Shift From Hype To Commercial Reality",
+      "excerpt": "In the near term, D2D may remain a niche service for messaging and emergencies rather than a true extension of the mobile broadband experience. According to GSMA Intelligence, as of December 2025, 118 mobile operators had established satellite service partnerships, with 33 of tho",
+      "url": "https://seekingalpha.com/article/4901180-mwc-2026-non-terrestrial-networks-shift-from-hype-to-commercial-reality",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-08 03:33:30",
+      "publisher": "Bloomberg Markets and Finance",
+      "title": "Earnings Boost Before Stagflation Fears: 3-Minutes MLIV",
+      "excerpt": "Anna Edwards, Guy Johnson, Tom Mackenzie and Mark Cudmore break down today's key themes for analysts and investors on \"Bloomberg: The Opening Trade.\" Chapters: 00:00:00 - MLIV 00:00:08 - Brent Crude Levels, Oil Prices 00:00:55 - US Fires on Iranian Targets 00:01:49 - Earnings Sea",
+      "url": "https://www.youtube.com/watch?v=ir6gjMXV5CY",
+      "site": "youtube.com"
+    },
+    {
+      "publishedDate": "2026-05-08 03:32:28",
+      "publisher": "CNBC",
+      "title": "Trump threatens EU with \u2018much higher' tariffs if no trade deal signed by new deadline",
+      "excerpt": "Trump said he will give the European Union until July 4 to ratify its trade agreement with the U.S. The president warned tariffs \"would immediately jump to much higher levels\" if the bloc failed to do so.",
+      "url": "https://www.cnbc.com/2026/05/08/trump-tariffs-trade-eu-europe-deal.html",
+      "site": "cnbc.com"
+    },
+    {
+      "publishedDate": "2026-05-08 03:22:08",
+      "publisher": "Bloomberg Markets and Finance",
+      "title": "Earnings Resilience Amid Iran Risk: Markets Snapshot",
+      "excerpt": "The shape-shifting artificial intelligence trade and the ongoing conflict in the Middle East dominated conversations in a week that saw strong earnings results. The Opening Trade spoke with leading market voices and company executives to get their take.",
+      "url": "https://www.youtube.com/watch?v=W_-aYhqYQDU",
+      "site": "youtube.com"
+    },
+    {
+      "publishedDate": "2026-05-08 03:10:00",
+      "publisher": "Seeking Alpha",
+      "title": "U.S. Bank Stocks Follow The Broader Market Higher In April",
+      "excerpt": "The 205 banks in an S&P Global Market Intelligence analysis had a median total return of 6.2% in April. Thirty-nine of the banks recorded a double-digit percentage gain last month, led by Bedminster, New Jersey-based Peapack-Gladstone Financial Corp. at 18.6%.",
+      "url": "https://seekingalpha.com/article/4901168-us-bank-stocks-follow-broader-market-higher-in-april",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-08 02:30:00",
+      "publisher": "Barrons",
+      "title": "The Trump Administration's Picks Are Beating the Market. One Name Accounts for Most of the Gain.",
+      "excerpt": "The government has taken equity stakes in eight public companies since January 2025. Five have outperformed the S&P 500 since the deals were announced.",
+      "url": "https://www.barrons.com/articles/trump-stock-picks-beat-market-intel-88a8bd30",
+      "site": "barrons.com"
+    },
+    {
+      "publishedDate": "2026-05-08 02:27:13",
+      "publisher": "CNBC",
+      "title": "Tech stocks could offer their best value in years after another stellar earnings season, analysts say",
+      "excerpt": "Whether tech stocks can continue generating stellar earnings into the future is a hot topic among analysts at present. Morningstar found that the AI theme is trading at its largest discount since 2019.",
+      "url": "https://www.cnbc.com/2026/05/08/us-tech-stocks-cheap-stellar-earnings-where-next.html",
+      "site": "cnbc.com"
+    },
+    {
+      "publishedDate": "2026-05-08 01:55:00",
+      "publisher": "WSJ",
+      "title": "U.K. Shop Visits Dip as Inflation Bites into Spending",
+      "excerpt": "Visits to retail shops dropped 10.7% on year in the in April, the weakest performance in more than five years, according to a report from the British Retail Consortium.",
+      "url": "https://www.wsj.com/business/retail/u-k-shop-visits-dip-as-inflation-bites-into-spending-c95177d8",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-08 01:54:00",
+      "publisher": "WSJ",
+      "title": "IMF Warns That Evolving AI Threat Could Upend Financial Markets",
+      "excerpt": "Advances in artificial-intelligence can strengthen markets' defense against cyber threats but the technology now has the capacity to cause a macro-financial shock too, the IMF warns.",
+      "url": "https://www.wsj.com/tech/ai/imf-warns-that-evolving-ai-threat-could-upend-financial-markets-5735e27b",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-08 01:10:41",
+      "publisher": "Invezz",
+      "title": "Asian stock markets dip as geopolitical risks weigh on investors",
+      "excerpt": "Asian stock markets eased slightly on Friday after a week of strong gains driven by chipmakers and artificial intelligence-linked stocks, while oil prices surged following renewed military exchanges between the United States and Iran. MSCI's broadest index of Asian shares outside",
+      "url": "https://invezz.com/news/2026/05/08/asia-stocks-slip-as-iran-truce-doubts-jolt-sentiment/",
+      "site": "invezz.com"
+    },
+    {
+      "publishedDate": "2026-05-08 00:20:00",
+      "publisher": "Seeking Alpha",
+      "title": "Insurance Brokers Q1 2026 Update",
+      "excerpt": "Insurance brokers are currently in a world of pain as the halcyon days of the hard market are clearly behind us. Every broker reported sharper property declines.",
+      "url": "https://seekingalpha.com/article/4901105-insurance-brokers-q1-2026-update",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-08 00:15:03",
+      "publisher": "Fox Business",
+      "title": "Warsh is \u2018BIG' on reducing the balance sheet: CIO of Winthrop Capital Management",
+      "excerpt": "Winthrop Capital Management CIO Adam Coons outlines the Federal Reserve's future policy direction and more on \u2018Making Money.' #fox #media #breakingnews #us #usa #new #news #breaking #foxbusiness #makingmoney #fed #federalreserve #economy #finance #markets #banking #inflation #int",
+      "url": "https://www.youtube.com/watch?v=l1eQBxASaQk",
+      "site": "youtube.com"
+    },
+    {
+      "publishedDate": "2026-05-07 21:00:00",
+      "publisher": "WSJ",
+      "title": "Rupert Murdoch's High-Stakes Blitz Against the NFL",
+      "excerpt": "Fox founder lobbies Trump to preserve air rights for broadcasters as powerful streamers encroach on their turf.",
+      "url": "https://www.wsj.com/business/media/murdoch-nfl-television-fight-35aa3587",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-07 20:56:49",
+      "publisher": "CNBC",
+      "title": "Iran focus at Trump-Xi summit may delay progress on tariffs, rare earths",
+      "excerpt": "Iran war may dominate the first U.S. presidential visit to China since 2017. U.S. business delegation may be smaller than those other countries have brought to China recently, according to a source familiar with the matter.",
+      "url": "https://www.cnbc.com/2026/05/08/iran-focus-at-trump-xi-summit-may-delay-progress-on-tariffs-rare-earths.html",
+      "site": "cnbc.com"
+    },
+    {
+      "publishedDate": "2026-05-07 20:56:16",
+      "publisher": "Reuters",
+      "title": "Biotech firm Odyssey raises $279 million in upsized US IPO",
+      "excerpt": "Biopharmaceutical \u200bcompany \u200cOdyssey Therapeutics \u200bhas \u200braised $279 \u2060million \u200bin its \u200bupsized U.S. \u200binitial \u200bpublic offering, \u200cthe \u2060company said \u200bon \u200bThursday.",
+      "url": "https://www.reuters.com/business/healthcare-pharmaceuticals/biotech-firm-odyssey-raises-279-million-upsized-us-ipo-2026-05-08/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-07 18:57:17",
+      "publisher": "Seeking Alpha",
+      "title": "The AI Arms Race: Running On Fumes And Borrowed Money",
+      "excerpt": "Big Tech\u2014Amazon, Alphabet, Meta, Microsoft\u2014faces unprecedented liquidity and leverage pressures as AI-driven capex now rivals or exceeds operating cash flows. Rapid debt accumulation and creative, opaque financing structures are reshaping risk profiles, raising concerns about sus",
+      "url": "https://seekingalpha.com/article/4900805-the-ai-arms-race-running-on-fumes-and-borrowed-money",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-07 18:41:00",
+      "publisher": "Market Watch",
+      "title": "There's a new worry keeping Treasury yields and borrowing costs higher",
+      "excerpt": "Oil, the Iran war and inflation risks are putting a new floor under longer-duration Treasury yields",
+      "url": "https://www.marketwatch.com/story/theres-a-new-worry-keeping-treasury-yields-and-borrowing-costs-higher-d3595fe1",
+      "site": "marketwatch.com"
+    }
+  ]
+}

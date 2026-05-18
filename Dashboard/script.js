@@ -1033,7 +1033,7 @@ async function updateDashboard() {
       }
       if (watchlistSet.has(ticker) && title && !title.querySelector('.watchlist-bolt')) {
         title.insertAdjacentHTML('afterend',
-          ` <span class="watchlist-bolt" title="V2.19 結構性轉變候選（news keyword leading signal）" style="color:#f59e0b;font-weight:700">⚡</span>`);
+          ` <span class="watchlist-bolt" data-signal-tip="watchlist_bolt" style="color:#f59e0b;font-weight:700">⚡</span>`);
       }
       return card;
     };
@@ -1087,24 +1087,26 @@ function renderStructuralWatchlist(sw) {
 
   grid.innerHTML = '';
   (sw.candidates || []).forEach(c => {
-    const ticker = c.ticker || '?';
+    if (!c.ticker) return;  // V2.20.0 — skip incomplete entries instead of rendering '?'
+    const ticker = c.ticker;
     const sector = c.sector || '';
     const hits   = c.hit_count_14d ?? 0;
     const cred   = c.source_credibility_max || '';
-    const days   = c.days_since_last_hit ?? '?';
+    const days   = (c.days_since_last_hit != null) ? `${c.days_since_last_hit}d` : '—';
+    const firstSeen = c.first_observed || '—';
     const kws    = (c.keyword_hits || []).slice(0, 3).join(' · ');
 
-    // V2.20.0 — trajectory badges
+    // V2.20.0 — trajectory badges (data-signal-tip pattern, consistent with earnings card)
     const traj = c.trajectory || {};
     let trajBadges = '';
     if (traj.graduated_confirmed) {
-      trajBadges = `<span style="background:#dc2626;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="Earnings 已確認 CONFIRMED tier">✓ CONFIRMED</span>`;
+      trajBadges = `<span data-signal-tip="watchlist_traj_confirmed" style="background:#dc2626;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700">✓ CONFIRMED</span>`;
     } else if (traj.graduated_candidate) {
-      trajBadges = `<span style="background:#f59e0b;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="Earnings 已升 CANDIDATE tier">✓ CANDIDATE</span>`;
+      trajBadges = `<span data-signal-tip="watchlist_traj_candidate" style="background:#f59e0b;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700">✓ CANDIDATE</span>`;
     } else if (traj.continued_count >= 5) {
-      trajBadges = `<span style="background:#64748b;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="持續 watchlist 中 ${traj.continued_count}+ 天，但未升 tier — 可能是 false positive 老化">AGING</span>`;
+      trajBadges = `<span data-signal-tip="watchlist_traj_aging" style="background:#64748b;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700">AGING</span>`;
     } else if (traj.n_events <= 2) {
-      trajBadges = `<span style="background:#22c55e;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700" title="新進 watchlist (≤2 events)">NEW</span>`;
+      trajBadges = `<span data-signal-tip="watchlist_traj_new" style="background:#22c55e;color:white;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:700">NEW</span>`;
     }
 
     const card = document.createElement('div');
@@ -1113,12 +1115,12 @@ function renderStructuralWatchlist(sw) {
     card.innerHTML = `
       <div class="flex items-center justify-between mb-1">
         <span class="font-mono font-bold text-sm">${ticker}</span>
-        <span class="${credColor(cred)} text-[10px]" title="source credibility: ${cred}">${credLabel(cred)} ${hits}</span>
+        <span class="${credColor(cred)} text-[10px]">${credLabel(cred)} ${hits}</span>
       </div>
       <div class="text-[10px] text-zinc-500 truncate mb-1">${sector}</div>
-      <div class="text-[9px] text-amber-600 dark:text-amber-400 font-mono truncate" title="${(c.keyword_hits||[]).join(', ')}">${kws}</div>
+      <div class="text-[9px] text-amber-600 dark:text-amber-400 font-mono truncate">${kws}</div>
       <div class="flex items-center justify-between mt-1">
-        <span class="text-[9px] text-zinc-500">${days}d ago · first ${c.first_observed || '?'}</span>
+        <span class="text-[9px] text-zinc-500">${days} ago · first ${firstSeen}</span>
         ${trajBadges}
       </div>
     `;
@@ -1744,6 +1746,15 @@ setInterval(updateDashboard, 60000);
 
 // Mount global analyze-queue widget inside Quick Launch engine card
 if (window.AnalyzeQueue) window.AnalyzeQueue.renderWidget('#analyze-queue-widget');
+
+// Compact market-sentiment trend widget (full chart lives on break-news.html)
+if (window.TrendChart) {
+  const _trendMount = document.getElementById('index-trend-mount');
+  if (_trendMount) {
+    const _idxTrend = TrendChart.mount({ root: _trendMount, compact: true, withSelector: false });
+    setInterval(() => _idxTrend.reload(), 60000);
+  }
+}
 
 // ── Shared Tooltip Engine (Ported from page-sector.js) ─────────────────────
 (function initGlobalTooltips() {

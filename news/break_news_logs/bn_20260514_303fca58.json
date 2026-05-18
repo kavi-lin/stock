@@ -1,0 +1,258 @@
+{
+  "news_id": "bn_20260514_303fca58",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T16:04:05Z",
+  "last_activity_ts": "2026-05-14T16:30:11Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-vertiv-buy-half-154020597.html",
+    "feed_fingerprint": "jim cramer vertiv you buy half then you",
+    "published": "2026-05-14T15:40:20+00:00",
+    "url_hash": "sha1:0d4e8fbf87762ecceb0ab68a2b81fb68e397edf9"
+  },
+  "headline": "Jim Cramer on Vertiv: “You Buy Half and Then You Wait for a Decline”",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:29:52Z",
+      "latency_ms": 5810,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 951,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "7675c027-7cd7-4c9f-82d0-e3d80eb19788",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "f4a687de-307d-40a8-be77-6cbb2462bf45"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:30:06Z",
+      "latency_ms": 14630,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Jim Cramer 對 Vertiv「先買一半，再待時機」的建議，暗示其當前估值偏高或預期短期股價回調。此謹慎態度，即便在 AI 驅動的資料中心擴張帶來強勁順風之際，仍顯示市場可能過熱，或投資者需等待更佳的切入點。",
+        "bull_points": [
+          "AI 浪潮推動資料中心需求。",
+          "Vertiv 關鍵基礎設施龍頭。"
+        ],
+        "bear_points": [
+          "Cramer 警示高估值風險。",
+          "短期股價或面臨回調。"
+        ],
+        "final_take": "審慎分批佈局，等待合理價位。",
+        "entities": {
+          "tickers": [
+            "VRT"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Data center infrastructure",
+            "Valuation risk"
+          ],
+          "tech_keywords": [
+            "Data center cooling",
+            "Power distribution"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Data center infrastructure"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Valuation risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "Cramer 提醒投資人勿追高。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:30:11Z",
+      "latency_ms": 4976,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 636,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "4d7de394-2de5-46b0-bc5c-9f1b043f98ca",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "976cd396-9256-40cb-98de-1716e46555b7"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "VRT"
+      ],
+      "sectors": [
+        "Information Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "Data center infrastructure",
+        "Valuation risk"
+      ],
+      "tech_keywords": [
+        "Data center cooling",
+        "Power distribution"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Data center infrastructure"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Valuation risk"
+      }
+    ],
+    "bull_summary": [
+      "AI 浪潮推動資料中心需求。",
+      "Vertiv 關鍵基礎設施龍頭。"
+    ],
+    "bear_summary": [
+      "Cramer 警示高估值風險。",
+      "短期股價或面臨回調。"
+    ],
+    "final_take": "審慎分批佈局，等待合理價位。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:30:11Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, HEADWIND_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:29:52Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:30:11Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

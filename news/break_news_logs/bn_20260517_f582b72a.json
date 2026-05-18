@@ -1,0 +1,596 @@
+{
+  "news_id": "bn_20260517_f582b72a",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T16:09:48Z",
+  "last_activity_ts": "2026-05-17T16:20:11Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-sp500-nasdaq-nvidia-walmart-earnings/?src=A00220&yptr=yahoo",
+    "feed_fingerprint": "dow jones futures nvidia due yields oil prices",
+    "published": "2026-05-17T13:21:09+00:00",
+    "url_hash": "sha1:64000c35d281acfe1fa7150f41254dd3dc739a67"
+  },
+  "headline": "Dow Jones Futures: Nvidia Due As Yields, Oil Prices Pressure Rally; What To Do Now",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sector_news",
+    "shallow_score": 1.0,
+    "bull_case": "板塊動能向上",
+    "bear_case": "個股分化加劇",
+    "sector_view": "輪動信號出現",
+    "macro_view": "相對強度追蹤",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T16:18:29Z",
+      "latency_ms": 22691,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是典型的「指數到關鍵阻力、等大型權值股財報定方向」格局。**殖利率與油價同步走高**才是核心壓力——前者壓估值倍數、後者重燃通膨擔憂，雙殺成長股。NVDA 財報是這週唯一能單獨扭轉大盤情緒的事件，市場焦點會落在 **Blackwell 出貨爬坡**與資料中心毛利率指引；若指引穩,可暫時蓋過宏觀雜訊。但須留意 pre-triage 點出的「個股分化」:指數靠少數權值撐盤,廣度未跟上,Walmart 財報則是消費韌性的對照組。財報前減碼、等兌現再追,風險報酬較佳。",
+        "bull_points": [
+          "NVDA Blackwell 出貨爬坡可望蓋過宏觀雜訊",
+          "AI capex 結構需求未見鬆動",
+          "Walmart 財報若穩印證消費韌性"
+        ],
+        "bear_points": [
+          "殖利率走高直接壓縮成長股估值倍數",
+          "油價反彈重燃通膨與升息預期",
+          "指數靠少數權值撐盤、市場廣度不足"
+        ],
+        "final_take": "中性偏謹慎,NVDA 財報前不追高",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "WMT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Consumer Staples",
+            "Energy"
+          ],
+          "themes": [
+            "AI capex",
+            "rising yields",
+            "oil prices",
+            "market breadth"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-yields"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech:blackwell"
+          },
+          {
+            "subject": "ticker:WMT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:consumer-resilience"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "宏觀逆風明確,但 NVDA 財報為短線唯一變數"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T16:18:42Z",
+      "latency_ms": 12908,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前一位分析師點出了宏觀壓力與NVDA的重要性。但我認為需更細膩檢視 **Blackwell 的供應鏈瓶頸**。儘管需求強勁，但 **HBM3e 封裝產能 (如 CoWoS-L)** 的爬坡速度是否能跟上預期，才是財報指引能否「蓋過宏觀雜訊」的關鍵。若供應受限，即便指引樂觀，盤中也可能因獲利了結出現震盪。此外，資金若因油價壓力持續從 AI 權值股外溢，短期應觀察能源或防禦性板塊 (如 **Health Care**) 是否出現明顯買盤結構，這才是市場廣度與輪動的真實反映。",
+        "bull_points": [
+          "Blackwell 需求依然強勁，支撐 AI 成長信心。",
+          "財報若超預期，能有效抵抗宏觀壓力。"
+        ],
+        "bear_points": [
+          "封裝產能 (CoWoS-L/HBM3e) 瓶頸限制出貨節奏。",
+          "油價通膨壓力驅使資金轉向能源與防禦板塊。"
+        ],
+        "final_take": "財報指引若未能突破供應瓶頸，短期恐面臨獲利回吐。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "WMT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Energy",
+            "Health Care"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補強供應鏈瓶頸細節與資金輪動的觀察。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T16:19:12Z",
+      "latency_ms": 29516,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已談宏觀雙殺與 **Blackwell / HBM3e** 供應，補一個被忽略的變數：**中國資料中心營收的政策懸念**。NVDA 這次財報市場會緊盯 **H20 出口管制**後的中國貢獻度與是否再提列庫存減損——這塊佔比雖降,卻是指引「不確定性折價」的來源,即使 Blackwell 強,China 一句保守措辭就足以引發 sell-the-news。第二層效應更關鍵:NVDA 選擇權隱含波動已price-in 約 8-10% 單日波動,**部位極度擁擠**,就算財報beat,獲利了結也可能讓指數不漲反跌,大型權值股無法獨力扛起廣度缺口。殖利率走高同時把資金推向貨幣基金與短債,這才是與股市真實爭奪流動性的對手。",
+        "bull_points": [
+          "Blackwell 需求強,中國佔比下滑反降低政策風險",
+          "若管理層給 H20 明確口徑,不確定性折價可收斂"
+        ],
+        "bear_points": [
+          "H20 出口管制恐再觸發中國庫存減損",
+          "選擇權已price-in 8-10%波動,擁擠部位易 sell-the-news",
+          "殖利率走高使短債/貨幣基金分流股市資金"
+        ],
+        "final_take": "偏中性,財報前減碼,等 China 口徑明朗再評估",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "WMT",
+            "TSM",
+            "MU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "AI capex",
+            "China export controls",
+            "liquidity competition"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e",
+            "CoWoS-L",
+            "H20"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-export-controls"
+          },
+          {
+            "subject": "narrative:rising-yields",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:liquidity-competition"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:index-direction"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增中國 H20 管制與擁擠部位 sell-the-news 風險角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T16:19:24Z",
+      "latency_ms": 12248,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面分析已觸及基本面與技術面，我補充一點**指數權重被動流動性風險**。NVDA 目前在 S&P 500 與 Nasdaq 100 中佔據極高權重，無論財報後波動方向為何，皆會引發被動型基金與指數追蹤 ETF (如 SPY, QQQ) 的自動再平衡與 Hedging 需求。這不僅是基本面博弈，更是**量化交易與演算法套利帶來的流動性擾動**；即使財報指引亮眼，單純的技術性賣壓亦可能讓大型科技股集體承壓。這種結構性波動，會與當前殖利率帶來的宏觀估值壓力產生共振，擴大財報後的震盪幅度。",
+        "bull_points": [
+          "AI 產業長期資本支出邏輯未變",
+          "超預期財報可作為市場多頭燈塔"
+        ],
+        "bear_points": [
+          "權重過高加劇被動基金再平衡拋售風險",
+          "量化套利可能引發盤中連鎖技術性賣壓"
+        ],
+        "final_take": "財報後極易引發權重板塊震盪，建議避開被動基金再平衡帶來的流動性風險。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "SPY",
+            "QQQ"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:index_volatility"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補述財報後 NVDA 指數權重引發的被動基金流動性風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T16:19:59Z",
+      "latency_ms": 35130,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已談宏觀雙殺、**HBM3e/CoWoS-L** 供應、China H20、選擇權擁擠與被動再平衡。補一個結構性反方:**超大型客戶自研晶片正在分食加速器 capex**。AVGO 替 Google **TPU**、Meta **MTIA** 操刀,MRVL 吃 Amazon **Trainium**,這些 ASIC 在四大買家的內部占比逐季升。市場只盯 **Blackwell** 出貨,卻忽略 NVDA 資料中心毛利率 guide 才是地雷——若維持 70%+ 高檔,反而凸顯客戶集中度風險:四大買家同時是自研競爭者。即使本季 beat,一旦「毛利率見頂」敘事成形,估值倍數壓縮會比殖利率更傷。重點觀察法說會上 NVDA 如何回應 ASIC 替代威脅。",
+        "bull_points": [
+          "前沿模型訓練仍鎖定 NVDA CUDA 生態,自研難取代",
+          "Blackwell 需求量級遠超現階段 ASIC 供給"
+        ],
+        "bear_points": [
+          "超大型客戶自研晶片加速分食 capex",
+          "四大買家兼自研競爭者,客戶集中度成風險",
+          "毛利率見頂敘事壓估值倍數,比殖利率更傷"
+        ],
+        "final_take": "中性偏空,毛利率指引比 Blackwell 數字更關鍵",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "MRVL",
+            "GOOGL",
+            "AMZN",
+            "META"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "custom silicon"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "TPU",
+            "Trainium",
+            "MTIA",
+            "CUDA",
+            "HBM3e",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:GOOGL"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:AMZN"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:custom-silicon"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增自研 ASIC 分食敘事,反方論點,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T16:20:11Z",
+      "latency_ms": 11928,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了 ASIC 的競爭外，市場忽略了**能源成本**對 AI 資料中心長期 CAPEX 的邊際效應。高油價與能源成本直接拉高營運支出 (Opex)，這不僅降低資料中心的 ROI，更在物理層面上對**大規模數據中心**的擴張構成限制。若電力基礎設施無法同步提升，即便 NVDA 的 **Blackwell** 晶片效能再強，四大雲端巨頭（MSFT, GOOGL, META, AMZN）在法說會上可能轉向「更謹慎的擴容節奏」。能源效率將成為 NVDA 與客戶談判的關鍵籌碼，而非單純的算力競賽。",
+        "bull_points": [
+          "NVDA 能源效率方案具競爭優勢",
+          "電力基礎設施與綠能板塊受惠"
+        ],
+        "bear_points": [
+          "高能源支出削弱數據中心 ROI",
+          "電力缺口限制 AI 資本擴張速度"
+        ],
+        "final_take": "關注能源成本對數據中心 ROI 的長期邊際壓力。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "GOOGL",
+            "META",
+            "AMZN"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Energy",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "Energy constraint"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "ASIC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "narrative:Energy constraint",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入電力基礎設施瓶頸作為數據中心擴張的物理限制因子。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMZN",
+        "AVGO",
+        "GOOGL",
+        "META",
+        "MRVL",
+        "MSFT",
+        "MU",
+        "NVDA",
+        "QQQ",
+        "SPY",
+        "TSM",
+        "WMT"
+      ],
+      "sectors": [
+        "Consumer Staples",
+        "Energy",
+        "Health Care",
+        "Information Technology",
+        "Semiconductors",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "China export controls",
+        "Energy constraint",
+        "HBM3e",
+        "custom silicon",
+        "liquidity competition",
+        "market breadth",
+        "oil prices",
+        "rising yields"
+      ],
+      "tech_keywords": [
+        "ASIC",
+        "Blackwell",
+        "CUDA",
+        "CoWoS-L",
+        "H20",
+        "HBM3e",
+        "MTIA",
+        "TPU",
+        "Trainium"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-yields"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech:blackwell"
+      },
+      {
+        "subject": "ticker:WMT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:consumer-resilience"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-export-controls"
+      },
+      {
+        "subject": "narrative:rising-yields",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:liquidity-competition"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:index-direction"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:index_volatility"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:GOOGL"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:AMZN"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:custom-silicon"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "narrative:Energy constraint",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:AI capex"
+      }
+    ],
+    "bull_summary": [
+      "NVDA Blackwell 出貨爬坡可望蓋過宏觀雜訊",
+      "AI capex 結構需求未見鬆動",
+      "Walmart 財報若穩印證消費韌性",
+      "Blackwell 需求依然強勁，支撐 AI 成長信心。",
+      "財報若超預期，能有效抵抗宏觀壓力。",
+      "Blackwell 需求強,中國佔比下滑反降低政策風險"
+    ],
+    "bear_summary": [
+      "殖利率走高直接壓縮成長股估值倍數",
+      "油價反彈重燃通膨與升息預期",
+      "指數靠少數權值撐盤、市場廣度不足",
+      "封裝產能 (CoWoS-L/HBM3e) 瓶頸限制出貨節奏。",
+      "油價通膨壓力驅使資金轉向能源與防禦板塊。",
+      "H20 出口管制恐再觸發中國庫存減損"
+    ],
+    "final_take": "關注能源成本對數據中心 ROI 的長期邊際壓力。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T16:20:11Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, CO_DEVELOPS_WITH, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,513 @@
+{
+  "news_id": "bn_20260518_d52a99cd",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T09:22:06Z",
+  "last_activity_ts": "2026-05-18T09:38:08Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/healthcare/articles/rocket-pharmaceuticals-rckt-reports-q1-045018587.html",
+    "feed_fingerprint": "rocket pharmaceuticals rckt reports q1 2026 net loss",
+    "published": "2026-05-18T04:50:18+00:00",
+    "url_hash": "sha1:315228a6069a38a2a2903bfb1f5ec3f8e0b2ff98"
+  },
+  "headline": "Rocket Pharmaceuticals (RCKT) Reports Q1 2026 Net Loss of $47.6M",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:36:22Z",
+      "latency_ms": 29480,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**RCKT 是臨床期基因治療公司，無產品營收** — 季度淨損本就是常態，單看 $47.6M 虧損意義不大，真正關鍵是**現金 runway**。$47.6M 季燒錢以 AAV 基因治療標準算中低位，受控；但新聞未揭露現金水位，無法判斷能否撐到關鍵臨床讀數。RCKT 的 Danon 病 AAV 項目先前曾傳安全事件與臨床暫停疑慮，pipeline 風險尚未完全解除。Pre-triage 把例行 10-Q 標成「情緒」訊號是**誤分類** — 這是財報事件，非情緒反轉。小型生技對利率與基因治療融資寒冬高度敏感。",
+        "bull_points": [
+          "季燒錢 $47.6M 以 AAV 基因治療標準屬中低位，消耗受控",
+          "若現金水位充足，runway 可撐到關鍵臨床讀數"
+        ],
+        "bear_points": [
+          "臨床期生技無營收，淨損常態，須看現金 runway 而非虧損額",
+          "Danon 病 AAV 項目曾傳安全事件，pipeline 風險未解",
+          "小型生技對利率與融資寒冬高度敏感"
+        ],
+        "final_take": "季損屬例行，關鍵看現金 runway 與 AAV 安全數據",
+        "entities": {
+          "tickers": [
+            "RCKT"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "gene therapy",
+            "cash runway",
+            "clinical-stage biotech"
+          ],
+          "tech_keywords": [
+            "AAV"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cash-burn"
+          },
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "MENTIONED_IN",
+            "object": "theme:gene-therapy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "財報事件非情緒；缺現金水位數據，判斷需 runway 佐證"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:36:33Z",
+      "latency_ms": 11033,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了燒錢速度，關鍵在於**Danon病治療的長期療效與FDA對基因治療持久性的質疑**。RCKT雖然在Danon病上具有先行者優勢，但基因治療領域近期面臨**嚴格的安全性監管風暴**。若後續數據無法展現顯著優於傳統療法的存活期改善，其技術平台在大型藥廠眼中的併購價值將大幅折損。這不僅是現金流問題，更是技術驗證的關鍵窗口。",
+        "bull_points": [
+          "Danon病領域具先行者優勢。",
+          "技術平台具備大型藥廠併購潛力。"
+        ],
+        "bear_points": [
+          "基因治療領域監管安全性審查嚴格。",
+          "臨床數據若未顯著改善，再募資風險極高。"
+        ],
+        "final_take": "專注於臨床數據是否能滿足FDA對基因療效耐久性的要求。",
+        "entities": {
+          "tickers": [
+            "RCKT"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Gene Therapy",
+            "M&A"
+          ],
+          "tech_keywords": [
+            "Gene Therapy",
+            "AAV"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:M&A"
+          },
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:regulatory_risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充監管與併購視角，超越純財務燒錢觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:37:04Z",
+      "latency_ms": 31137,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前討論漏掉的點：市場把 RCKT 當成「單一 AAV / Danon 病公司」看是**過度簡化**。RCKT 其實有**雙平台**——in-vivo AAV（出事的 RP-A501 Danon）與 ex-vivo 慢病毒（lentiviral）兩條技術線。慢病毒平台如 LAD-I 的 Kresladi、Fanconi 貧血、PKD 項目**不帶 capsid 免疫原性風險**，與 AAV 的安全疑慮完全脫鉤。Kresladi 先前收到的是 CMC（製程）相關 CRL，屬可修正問題，非療效失敗。其次，淨損的真正二階效應是**稀釋**：無營收 + 現金吃緊的臨床期生技，幾乎注定要增發股票或可轉債融資，現有股東面臨攤薄。判斷 RCKT 不能只看 $47.6M，要拆兩個平台分開估值。",
+        "bull_points": [
+          "雙平台分散：慢病毒線不受 AAV 安全疑慮拖累",
+          "Kresladi CRL 屬製程問題，可修正非療效失敗",
+          "多個罕病項目提供 pipeline 估值緩衝"
+        ],
+        "bear_points": [
+          "無營收+現金緊，增發融資恐攤薄股東",
+          "市場仍以 AAV 出事事件定價整家公司",
+          "罕病小市場限制單一項目峰值營收"
+        ],
+        "final_take": "偏中性，拆平台估值、留意年內增發稀釋",
+        "entities": {
+          "tickers": [
+            "RCKT"
+          ],
+          "sectors": [
+            "Health Care",
+            "Biotechnology"
+          ],
+          "themes": [
+            "gene therapy",
+            "AAV gene therapy",
+            "biotech financing"
+          ],
+          "tech_keywords": [
+            "AAV",
+            "lentiviral",
+            "RP-A501",
+            "Kresladi"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:aav-safety-risk"
+          },
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lentiviral-platform"
+          },
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:equity-dilution"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增雙平台拆分與增發稀釋二階效應，前討論未涵蓋"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:37:22Z",
+      "latency_ms": 18739,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論集中於現金流與技術風險，漏掉了**CMC（化學、製造與控制）在基因治療商業化過程中的槓桿效應**。RCKT 的慢病毒平台若能率先解決 CMC 難題，將建立顯著的「製造技術護城河」。FDA 近期對基因治療製程的嚴格化不僅是門檻，更是篩選器；能在大規模生產中保持穩定的企業，將成為大型藥廠併購的首選目標，這比單純的臨床數據更能定義長期競爭力。",
+        "bull_points": [
+          "製程技術領先可建立商業化護城河",
+          "CMC 穩定性提升併購價值"
+        ],
+        "bear_points": [
+          "CMC 製程瓶頸可能導致合規延誤",
+          "製程優化成本增加燒錢壓力"
+        ],
+        "final_take": "重點在製程標準化能否轉化為併購護城河。",
+        "entities": {
+          "tickers": [
+            "RCKT"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Biotechnology",
+            "Gene Therapy"
+          ],
+          "tech_keywords": [
+            "CMC",
+            "Lentiviral"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:CMC"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充 CMC 製程優化作為併購護城河的觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:37:51Z",
+      "latency_ms": 28624,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前討論都踩到、但沒人點破的會計盲點：**淨損 ≠ 現金燒錢**。R0 直接把 $47.6M 當「季燒錢」是不精確的——臨床期生技的淨損常含大量**非現金項目**：股權薪酬 (SBC)、warrant 公允價值重估、in-process R&D 減損。真正決定 runway 的是**營運現金流出**與**現金變動表**，兩者通常比帳面淨損低 20-40%。所以「$47.6M 受控」這個結論本身建立在錯的分母上。第二個新角度:RCKT 屬 **XBI 等權重小型生技 ETF** 成分,股價低檔時被動資金的權重縮減會放大賣壓,與基本面脫鉤。要判斷 RCKT,先去抓 10-Q 的 cash flow statement,不是 income statement。",
+        "bull_points": [
+          "非現金費用佔比高，真實現金燒錢低於帳面淨損",
+          "SBC 攤銷不耗現金，runway 實際比表面長"
+        ],
+        "bear_points": [
+          "XBI 等權重 ETF 被動減持放大低檔賣壓",
+          "市場誤用淨損估 runway，現金部位恐被高估",
+          "warrant 重估若反向，未來季度淨損波動加劇"
+        ],
+        "final_take": "看法中性，須以現金流量表而非淨損重估 runway",
+        "entities": {
+          "tickers": [
+            "RCKT",
+            "XBI"
+          ],
+          "sectors": [
+            "Health Care",
+            "Biotechnology"
+          ],
+          "themes": [
+            "gene therapy",
+            "clinical-stage biotech funding",
+            "passive ETF flows"
+          ],
+          "tech_keywords": [
+            "AAV",
+            "lentiviral",
+            "RP-A501",
+            "CMC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:cash-burn-vs-net-loss"
+          },
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:passive-etf-outflow"
+          },
+          {
+            "subject": "ticker:XBI",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:small-cap-biotech-flows"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增會計盲點(淨損≠現金燒錢)+被動資金角度，前討論未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:38:08Z",
+      "latency_ms": 16402,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了上述臨床與製程討論，還需關注 RCKT **「平台化收購 (Platform-based M&A)」** 的戰略價值。在當前生物製藥業趨勢下，大型藥廠 (如 **BMY**, **RHHBY**) 已不再單純追求單一管線資產，而是偏向併購具備「即插即用」功能的**製造平台**。RCKT 的慢病毒平台，若能在 CMC 上證明其針對多種罕見病的重複擴展性 (Scalability)，其價值將不僅限於 LAD-I 或 Danon 病。目前市場可能仍將 RCKT 定價為單一研發風險公司，未完全計入其作為**「基因治療基礎設施」**的戰略溢價；這類平台在融資寒冬中往往更具併購吸引力，這是區別於其他單點生技公司的關鍵資產重估視角。",
+        "bull_points": [
+          "慢病毒平台具備多管線擴展的基礎設施溢價。",
+          "具備被大型藥廠收購以強化製程能力的潛在價值。"
+        ],
+        "bear_points": [
+          "平台價值須經多次臨床成功驗證才具規模效益。",
+          "融資環境限制下，研發支出需與平台建置平衡。"
+        ],
+        "final_take": "關注平台戰略價值，而非僅盯單一研發成果。",
+        "entities": {
+          "tickers": [
+            "RCKT",
+            "BMY",
+            "RHHBY"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Gene Therapy",
+            "Biotech M&A"
+          ],
+          "tech_keywords": [
+            "Lentiviral",
+            "CMC",
+            "AAV"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RCKT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Gene Therapy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入平台化併購視角，討論其作為基因治療基礎設施的戰略溢價，而非僅看單一管線。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "BMY",
+        "RCKT",
+        "RHHBY",
+        "XBI"
+      ],
+      "sectors": [
+        "Biotechnology",
+        "Health Care",
+        "Healthcare"
+      ],
+      "themes": [
+        "AAV gene therapy",
+        "Biotech M&A",
+        "Biotechnology",
+        "Gene Therapy",
+        "M&A",
+        "biotech financing",
+        "cash runway",
+        "clinical-stage biotech",
+        "clinical-stage biotech funding",
+        "gene therapy",
+        "passive ETF flows"
+      ],
+      "tech_keywords": [
+        "AAV",
+        "CMC",
+        "Gene Therapy",
+        "Kresladi",
+        "Lentiviral",
+        "RP-A501",
+        "lentiviral"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cash-burn"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "MENTIONED_IN",
+        "object": "theme:gene-therapy"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:M&A"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:regulatory_risk"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:aav-safety-risk"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lentiviral-platform"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:equity-dilution"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:CMC"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:cash-burn-vs-net-loss"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:passive-etf-outflow"
+      },
+      {
+        "subject": "ticker:XBI",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:small-cap-biotech-flows"
+      },
+      {
+        "subject": "ticker:RCKT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Gene Therapy"
+      }
+    ],
+    "bull_summary": [
+      "季燒錢 $47.6M 以 AAV 基因治療標準屬中低位，消耗受控",
+      "若現金水位充足，runway 可撐到關鍵臨床讀數",
+      "Danon病領域具先行者優勢。",
+      "技術平台具備大型藥廠併購潛力。",
+      "雙平台分散：慢病毒線不受 AAV 安全疑慮拖累",
+      "Kresladi CRL 屬製程問題，可修正非療效失敗"
+    ],
+    "bear_summary": [
+      "臨床期生技無營收，淨損常態，須看現金 runway 而非虧損額",
+      "Danon 病 AAV 項目曾傳安全事件，pipeline 風險未解",
+      "小型生技對利率與融資寒冬高度敏感",
+      "基因治療領域監管安全性審查嚴格。",
+      "臨床數據若未顯著改善，再募資風險極高。",
+      "無營收+現金緊，增發融資恐攤薄股東"
+    ],
+    "final_take": "關注平台戰略價值，而非僅盯單一研發成果。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T09:38:08Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

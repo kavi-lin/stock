@@ -14,7 +14,18 @@
 
 ---
 
-## 任務（三步驟）
+## 任務（四步驟）
+
+### Step 0 — Adjustment Ledger 評估（先做）
+
+JSON 內 `adjustment_ledger_active` 列出目前 active 的系統調整（Rec entries）。
+**對每一筆 active Rec**：
+- 從 `event_index.industry_rollup` / `decisions[*].tuning_hooks` / 外部資料拉出 `target_metric` 當週數值
+- 對照該 Rec 的 `evaluation_history` 上次值（若有），下 `improved / no_change / regressed` 判斷
+- 寫進輸出 markdown 的「## Adjustment Evaluation」段
+- 若 metric 連續 3 週 no_change → 建議 `paused`；若 regressed → 建議 `rolled-back`
+
+完整 ledger 詳見 `reports/decision_review/ADJUSTMENT_LEDGER.md`，schema 詳見 `ADJUSTMENT_LEDGER_SCHEMA.md`。
 
 ### Step 1 — 找 verdict 模式（資料驅動，不要先入為主）
 
@@ -55,8 +66,21 @@
 ```markdown
 # Weekly Review — <today>
 
+## 0. Adjustment Evaluation
+| Rec | applied_date | target_metric | last_value | this_week_value | judgement |
+|---|---|---|---|---|---|
+| Rec 7 | 2026-05-09 | sub_industry_heat 非 null 比例 ≥ 80% | — | 92% | improved |
+| ... |
+
+對每筆 regressed/no_change 給一段說明 + 建議下一步（continue / paused / rolled-back）。
+
 ## 1. Verdict 統計
 | source | n | hit | miss | neutral | pending | n/a |
+| ... |
+
+## 1.5. Industry Rollup（讀 `event_index.industry_rollup`）
+| industry | sector | n | miss_rate | avg_miss_return | tickers | top_30%? |
+|---|---|---|---|---|---|---|
 | ... |
 
 ## 2. 觀察到的 Patterns

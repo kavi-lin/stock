@@ -1430,6 +1430,14 @@ function rowHTML(r) {
             ${sectorTxt}
         </td>
         <td class="text-right font-mono">$${r.price != null ? r.price.toFixed(2) : '—'}</td>
+        <td class="text-right font-mono text-xs" style="${(() => {
+            const pe = r.pe;
+            if (pe == null) return 'color:#52525b';
+            if (pe < 0)        return 'color:#f87171;font-weight:700';
+            if (pe < 15)       return 'color:#4ade80;font-weight:700';
+            if (pe > 30)       return 'color:#fbbf24;font-weight:700';
+            return 'color:var(--text-main)';
+        })()}" title="P/E (TTM)">${r.pe != null ? r.pe.toFixed(1) : '—'}</td>
         <td class="text-right score-cell">${scoreBatteryHTML(r.score)}</td>
         <td><span class="mlabel label-${r.label || 'NEUTRAL'} pill-clickable" data-pill-type="label" data-pill-value="${r.label || ''}" title="${r.label || ''}">${labelText(r.label)}</span></td>
         <td class="text-xs text-zinc-400 stage-cell" data-ticker-stage="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4)" title="${r.stage || ''}">${stageLabel(r.stage)}</td>
@@ -1443,7 +1451,7 @@ function rowHTML(r) {
 }
 
 function emptyRow() {
-    return `<tr><td colspan="12" class="text-center text-zinc-500 py-8 text-xs">
+    return `<tr><td colspan="13" class="text-center text-zinc-500 py-8 text-xs">
         ${t().no_data || 'No matches'}</td></tr>`;
 }
 
@@ -2538,6 +2546,7 @@ function translate() {
     set('th-rank',      tr.col_rank);
     set('th-ticker',    tr.col_ticker);
     set('th-price',     tr.col_price);
+    set('th-pe',        tr.col_pe);
     set('th-score',     tr.col_score);
     set('th-label',     tr.col_label);
     set('th-stage',     tr.col_stage);

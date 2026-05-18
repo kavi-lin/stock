@@ -1,0 +1,705 @@
+{
+  "news_id": "bn_20260514_3896d2de",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T15:46:35Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/why-doximity-stock-plunged-today-152328249.html",
+    "feed_fingerprint": "why doximity stock plunged today",
+    "published": "2026-05-14T15:23:28+00:00",
+    "url_hash": "sha1:4d2fe33118b3b63b4692a84a51aa908845d15cb0"
+  },
+  "headline": "Why Doximity Stock Plunged Today",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:44:37Z",
+      "latency_ms": 23352,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Doximity (**DOCS**) 盤中急殺，典型 **earnings miss / guide-down** 反應 — 公司剛公布 FY26 Q4 財報。核心壓力點：**Pharma ad spend** 放緩（GLP-1 廠商 Lilly/Novo 預算已過 peak）、**AI tools (Doximity GPT)** 商業化進度低於預期，subscription 續約率走弱。SaaS healthcare vertical 估值前高（forward P/S > 10x），margin of safety 薄，miss 即殺估值。連動 **Veeva (VEEV)**、**Teladoc (TDOC)**、**Hims (HIMS)** 等 digital health 同業情緒受拖累。需區分：這是 **公司 specific execution 問題** 還是 **pharma DTC ad 結構性放緩**？若後者，Trade Desk (**TTD**)、Meta (**META**) 的 health vertical 也要 watch。",
+        "bull_points": [
+          "回檔後 forward P/S 重置，長線 AI 醫療 TAM 仍在",
+          "Doximity GPT 滲透率長期看仍是 moat",
+          "Network effect 醫師覆蓋率 80%+ 難複製"
+        ],
+        "bear_points": [
+          "GLP-1 廣告高峰已過，pharma ad budget 結構性放緩",
+          "SaaS healthcare 高估值殺估值風險未結束",
+          "AI 商業化進度低於 sell-side 預期"
+        ],
+        "final_take": "短期看空，等 pharma ad 訂單能見度回升再評估",
+        "entities": {
+          "tickers": [
+            "DOCS",
+            "VEEV",
+            "TDOC",
+            "HIMS",
+            "LLY",
+            "NVO",
+            "TTD",
+            "META"
+          ],
+          "sectors": [
+            "Health Care",
+            "Communication Services",
+            "Information Technology"
+          ],
+          "themes": [
+            "digital health",
+            "pharma advertising",
+            "GLP-1",
+            "AI SaaS",
+            "healthcare IT"
+          ],
+          "tech_keywords": [
+            "Doximity GPT",
+            "telehealth",
+            "EHR integration"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:pharma-ad-slowdown"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1-ad-peak"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-saas-healthcare"
+          },
+          {
+            "subject": "ticker:VEEV",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:DOCS"
+          },
+          {
+            "subject": "ticker:LLY",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:DOCS"
+          },
+          {
+            "subject": "ticker:NVO",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:DOCS"
+          },
+          {
+            "subject": "ticker:TTD",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:pharma-ad-slowdown"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Headline 無細節，推論基於 SaaS healthcare 典型殺估值 pattern"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:45:05Z",
+      "latency_ms": 27877,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了先前討論的藥廠廣告支出放緩與 Doximity GPT 商業化進度不彰外，另一層面值得關注的是，製藥巨頭正大幅增加對**真實世界證據 (RWE)** 分析平台的投資。相較於 Doximity 聚焦於醫師互動廣告與診斷工具，IQVIA 等專業 RWE 數據公司正提供更深入的市場洞察與藥物開發支援。這可能導致藥廠的預算與策略重點從 Doximity 的平台轉移，對其長期營收增長構成結構性挑戰。Doximity 的 AI 戰略若未能快速拓展至 RWE 數據分析領域，將面臨嚴峻競爭。",
+        "bull_points": [
+          "Doximity 醫師網絡仍具強大觸及力",
+          "AI 潛力可轉向 RWE 數據分析"
+        ],
+        "bear_points": [
+          "RWE 數據公司吸引藥廠預算",
+          "DOCS AI 缺乏 RWE 深度分析"
+        ],
+        "final_take": "藥廠預算轉向 RWE，DOCS 需革新 AI 戰略。",
+        "entities": {
+          "tickers": [
+            "DOCS",
+            "IQV"
+          ],
+          "sectors": [
+            "Pharmaceuticals",
+            "Healthcare Technology"
+          ],
+          "themes": [
+            "Real-World Evidence"
+          ],
+          "tech_keywords": [
+            "Physician Data Analytics",
+            "RWE Analytics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:IQV"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "藥廠預算轉向 RWE 數據分析，Doximity 恐面臨新競爭。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:45:28Z",
+      "latency_ms": 23765,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**physician-targeted ad budget 轉向 point-of-care (POC) 通路**。Pharma 廣告主近兩季把預算從 Doximity 這類 physician social network 移向 **WebMD/Medscape (Internet Brands 私有) + Phreesia (PHR)** — 後者直接在診間 tablet/check-in 流程觸及 patient，conversion attribution 比 Doximity 的 feed-based ad 清楚。**Phreesia (PHR)** 是直接受益者，pharma life-sciences segment 連續四季 >20% YoY，與 DOCS 形成 zero-sum。第二層：DOCS 若被迫加碼 sales force 搶單，operating margin 從 40%+ 壓回 30% 區間，**DCF 估值再下修一輪**。另需注意 **DOCS 內部人 Q3 已連續賣超**（Form 4），管理層自己對 guidance 心裡有數。",
+        "bull_points": [
+          "估值殺到 forward P/S 6x 或下，risk/reward 對稱",
+          "Doximity GPT 若 FY27 落地仍有 AI re-rating 機會",
+          "醫師滲透率 80%+ 護城河短期不易被取代"
+        ],
+        "bear_points": [
+          "Phreesia POC 通路搶走 pharma ad 預算",
+          "Operating margin 從 40% 滑向 30% 區間",
+          "內部人 Form 4 連續賣超 signal 負面"
+        ],
+        "final_take": "結構性逆風，反彈不追、等 margin 落底再評估",
+        "entities": {
+          "tickers": [
+            "DOCS",
+            "PHR",
+            "VEEV",
+            "TDOC",
+            "HIMS",
+            "TTD",
+            "META",
+            "IQV"
+          ],
+          "sectors": [
+            "Health Care",
+            "Communication Services"
+          ],
+          "themes": [
+            "pharma ad spend",
+            "digital health",
+            "point-of-care marketing",
+            "RWE analytics"
+          ],
+          "tech_keywords": [
+            "Doximity GPT",
+            "Form 4 insider selling"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:PHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:point-of-care-pharma-ad-shift"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:point-of-care-pharma-ad-shift"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:PHR"
+          },
+          {
+            "subject": "ticker:IQV",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:DOCS"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:insider-selling-form4"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "PHR 點對點通路+內部人賣超為前討論未提之新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:45:51Z",
+      "latency_ms": 22286,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了先前財報不如預期、藥廠廣告支出放緩、Doximity GPT 商業化緩慢、以及轉向 POC 通路等因素外，此次 Doximity 股價重挫更凸顯產業轉向**價值醫療 (value-based care)** 與**臨床成果導向**的營銷策略。現行 **Doximity** 平台雖提供醫師社群與廣告機會，但其核心價值似乎與藥廠日益重視的實際治療成效追蹤、患者支持計畫整合等趨勢漸行漸遠。相較於專業的真實世界證據 (RWE) 分析平台，Doximity 在數據深度與實際市場洞察的賦能上，可能面臨更嚴峻的挑戰，導致其平台對藥廠的戰略吸引力下降。",
+        "bull_points": [
+          "Doximity 醫師社群規模仍大",
+          "AI 工具潛力待釋放"
+        ],
+        "bear_points": [
+          "價值醫療轉向，營銷模式挑戰",
+          "RWE 數據分析深度不足",
+          "醫師參與度是隱憂"
+        ],
+        "final_take": "價值醫療衝擊 Doximity 模式",
+        "entities": {
+          "tickers": [
+            "DOCS",
+            "IQVIA"
+          ],
+          "sectors": [
+            "Healthcare Technology",
+            "Pharmaceuticals"
+          ],
+          "themes": [
+            "Value-based care",
+            "Pharma marketing evolution",
+            "Real World Evidence"
+          ],
+          "tech_keywords": [
+            "RWE",
+            "AI in healthcare"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Physician network engagement"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Value-based care marketing"
+          },
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:IQVIA"
+          },
+          {
+            "subject": "theme:Value-based care marketing",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Real World Evidence"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "產業轉向價值醫療，Doximity 核心模式受衝擊。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:46:14Z",
+      "latency_ms": 22791,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**telehealth prescribing rule** 即將到期 — DEA 在 2026 年初將正式收緊 controlled substance 遠距開藥規範（Ryan Haight Act 過渡期 2026 年底結束）。這直接衝擊 Doximity 旗下 **Dialer / Telehealth tool** 給醫師遠距開藥使用情境，**telehealth visit volume 結構性下滑**將拖累該 segment 的 ad inventory 與醫師日活 (DAU)。連帶受害：**Hims & Hers (HIMS)**（GLP-1 / mental health 遠距開藥模式）、**LifeMD (LFMD)**、**Teladoc BetterHelp**。反向受益：**CVS / Walgreens (WBA)** 實體診所 MinuteClinic / VillageMD（病人被迫回實體 in-person visit）、**Privia Health (PRVA)** 等醫師集團平台。此為 DOCS DAU 下滑的監管層 catalyst — 比 pharma ad cyclical slowdown 更難逆轉。",
+        "bull_points": [
+          "DOCS 現金流仍正，FCF margin >30% 提供 buyback 空間",
+          "醫師 verified network 仍是 pharma 高 ROI 觸及管道",
+          "估值修正後 forward P/S 接近歷史下緣"
+        ],
+        "bear_points": [
+          "DEA 遠距開藥規範收緊壓 Dialer 使用量",
+          "Telehealth DAU 下滑連帶 ad inventory 縮水",
+          "監管 catalyst 比週期性放緩更難逆轉"
+        ],
+        "final_take": "看空，監管 + 結構雙殺，反彈視為減碼點",
+        "entities": {
+          "tickers": [
+            "DOCS",
+            "HIMS",
+            "LFMD",
+            "TDOC",
+            "WBA",
+            "PRVA",
+            "CVS",
+            "PHR",
+            "VEEV"
+          ],
+          "sectors": [
+            "Health Care",
+            "Communication Services"
+          ],
+          "themes": [
+            "telehealth regulation",
+            "GLP-1",
+            "physician marketing",
+            "value-based care"
+          ],
+          "tech_keywords": [
+            "Ryan Haight Act",
+            "DEA controlled substance rule",
+            "Dialer",
+            "RWE"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:telehealth_regulation"
+          },
+          {
+            "subject": "ticker:HIMS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:telehealth_regulation"
+          },
+          {
+            "subject": "ticker:LFMD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:telehealth_regulation"
+          },
+          {
+            "subject": "ticker:WBA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:in_person_visit_rebound"
+          },
+          {
+            "subject": "ticker:PRVA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:in_person_visit_rebound"
+          },
+          {
+            "subject": "ticker:CVS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:in_person_visit_rebound"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "DEA 遠距開藥規範到期為 DOCS 第三層監管利空"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:46:35Z",
+      "latency_ms": 21298,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Doximity (DOCS) 股價大幅下跌，不僅是因藥廠廣告預算從醫師端轉移，更關鍵是藥廠正將資源投入**患者端數位行銷**，例如 **GoodRx (GDRX)** 等平台已成為藥廠接觸病患、推廣藥物、提升遵從性的重要管道。Doximity 在此患者中心策略上的相對缺席，使其長期成長潛力受限，因為藥廠越來越重視能直接影響最終消費者的行銷佈局，Doximity 的醫師社群網絡在此顯得觸及面不足。",
+        "bull_points": [
+          "醫師社群黏著度仍為優勢",
+          "AI 佈局具未來想像空間"
+        ],
+        "bear_points": [
+          "錯失患者端數位行銷商機",
+          "藥廠預算重心轉向終端消費者",
+          "平台價值受限於醫師端互動"
+        ],
+        "final_take": "DOCS 應快速拓展患者端生態系。",
+        "entities": {
+          "tickers": [
+            "DOCS",
+            "GDRX"
+          ],
+          "sectors": [
+            "Healthcare Technology",
+            "Pharmaceuticals"
+          ],
+          "themes": [
+            "Patient Engagement",
+            "Direct-to-Patient Marketing (DTP)",
+            "Physician Engagement"
+          ],
+          "tech_keywords": [
+            "Digital Health",
+            "AI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DOCS",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:GDRX"
+          },
+          {
+            "subject": "ticker:GDRX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Patient-Centric Marketing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "藥廠行銷轉向患者端，DOCS 缺席新興管道。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "CVS",
+        "DOCS",
+        "GDRX",
+        "HIMS",
+        "IQV",
+        "IQVIA",
+        "LFMD",
+        "LLY",
+        "META",
+        "NVO",
+        "PHR",
+        "PRVA",
+        "TDOC",
+        "TTD",
+        "VEEV",
+        "WBA"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Health Care",
+        "Healthcare Technology",
+        "Information Technology",
+        "Pharmaceuticals"
+      ],
+      "themes": [
+        "AI SaaS",
+        "Direct-to-Patient Marketing (DTP)",
+        "GLP-1",
+        "Patient Engagement",
+        "Pharma marketing evolution",
+        "Physician Engagement",
+        "RWE analytics",
+        "Real World Evidence",
+        "Real-World Evidence",
+        "Value-based care",
+        "digital health",
+        "healthcare IT",
+        "pharma ad spend",
+        "pharma advertising",
+        "physician marketing",
+        "point-of-care marketing",
+        "telehealth regulation",
+        "value-based care"
+      ],
+      "tech_keywords": [
+        "AI",
+        "AI in healthcare",
+        "DEA controlled substance rule",
+        "Dialer",
+        "Digital Health",
+        "Doximity GPT",
+        "EHR integration",
+        "Form 4 insider selling",
+        "Physician Data Analytics",
+        "RWE",
+        "RWE Analytics",
+        "Ryan Haight Act",
+        "telehealth"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:pharma-ad-slowdown"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1-ad-peak"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-saas-healthcare"
+      },
+      {
+        "subject": "ticker:VEEV",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:DOCS"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:DOCS"
+      },
+      {
+        "subject": "ticker:NVO",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:DOCS"
+      },
+      {
+        "subject": "ticker:TTD",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:pharma-ad-slowdown"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:IQV"
+      },
+      {
+        "subject": "ticker:PHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:point-of-care-pharma-ad-shift"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:point-of-care-pharma-ad-shift"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:PHR"
+      },
+      {
+        "subject": "ticker:IQV",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:DOCS"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:insider-selling-form4"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Physician network engagement"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Value-based care marketing"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:IQVIA"
+      },
+      {
+        "subject": "theme:Value-based care marketing",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Real World Evidence"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:telehealth_regulation"
+      },
+      {
+        "subject": "ticker:HIMS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:telehealth_regulation"
+      },
+      {
+        "subject": "ticker:LFMD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:telehealth_regulation"
+      },
+      {
+        "subject": "ticker:WBA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:in_person_visit_rebound"
+      },
+      {
+        "subject": "ticker:PRVA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:in_person_visit_rebound"
+      },
+      {
+        "subject": "ticker:CVS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:in_person_visit_rebound"
+      },
+      {
+        "subject": "ticker:DOCS",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:GDRX"
+      },
+      {
+        "subject": "ticker:GDRX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Patient-Centric Marketing"
+      }
+    ],
+    "bull_summary": [
+      "回檔後 forward P/S 重置，長線 AI 醫療 TAM 仍在",
+      "Doximity GPT 滲透率長期看仍是 moat",
+      "Network effect 醫師覆蓋率 80%+ 難複製",
+      "Doximity 醫師網絡仍具強大觸及力",
+      "AI 潛力可轉向 RWE 數據分析",
+      "估值殺到 forward P/S 6x 或下，risk/reward 對稱"
+    ],
+    "bear_summary": [
+      "GLP-1 廣告高峰已過，pharma ad budget 結構性放緩",
+      "SaaS healthcare 高估值殺估值風險未結束",
+      "AI 商業化進度低於 sell-side 預期",
+      "RWE 數據公司吸引藥廠預算",
+      "DOCS AI 缺乏 RWE 深度分析",
+      "Phreesia POC 通路搶走 pharma ad 預算"
+    ],
+    "final_take": "DOCS 應快速拓展患者端生態系。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T15:46:35Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

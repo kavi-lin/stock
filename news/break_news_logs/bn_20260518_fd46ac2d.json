@@ -1,0 +1,633 @@
+{
+  "news_id": "bn_20260518_fd46ac2d",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T00:13:19Z",
+  "last_activity_ts": "2026-05-18T03:03:03Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/fbf8dac523d8",
+    "feed_fingerprint": "futu:COIN,INTC,MU,NVDA,SNDK:024facb8bd",
+    "published": "2026-05-18T08:11:11+08:00",
+    "url_hash": "sha1:575dfe2f1d4c3a444f84e9015f217fc97770b27f"
+  },
+  "headline": "美股光通信、加密貨幣、存儲概念、半導體股夜盤多數下跌，POET跌超9%，Strategy跌近5%，閃迪、Lumentum跌近4%，Circle、Coinbase、英特爾、康寧跌超3%，美光科技跌近3%，英偉達跌近2%",
+  "headline_zh": null,
+  "raw_summary": "美股光通信、加密貨幣、存儲概念、半導體股夜盤多數下跌，POET跌超9%，Strategy跌近5%，閃迪、Lumentum跌近4%，Circle、Coinbase、英特爾、康寧跌超3%，美光科技跌近3%，英偉達跌近2%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -3.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T03:01:10Z",
+      "latency_ms": 27305,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "夜盤薄量時段的**跨主題齊跌**，本質是 risk-off 倉位調節而非單一基本面利空。跌幅排序很關鍵：**POET -9%** 這類小型光通信投機股領跌，Strategy(BTC 代理) -5%、儲存/光通信 -3~4%，而 **NVDA 僅 -2%**——這是典型「高 beta 投機股先被砍、權值龍頭相對抗跌」的去槓桿型態。光通信(Lumentum/POET)、加密(Coinbase/Circle)、存儲(美光/閃迪)同向下殺，顯示是 **AI 相關高估值族群的相關性 unwind**。康寧 -3% 把光纖玻璃也拖下水。單一夜盤不構成趨勢,須看次日現貨盤開盤是否守住、量能是否放大確認。",
+        "bull_points": [
+          "NVDA 僅跌 2%，AI 權值龍頭相對抗跌",
+          "薄量夜盤殺低，投機股 beta 性質非基本面",
+          "回檔提供高估值 AI 族群再進場觀察點"
+        ],
+        "bear_points": [
+          "光通信/存儲/加密齊跌＝AI 高估值族群相關性 unwind",
+          "POET -9% 顯示投機資金先撤離訊號",
+          "加密代理股 Strategy/Circle 重挫拖累風險情緒"
+        ],
+        "final_take": "偏中性偏空，等次日現貨盤確認是否止穩",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "INTC",
+            "GLW",
+            "COIN",
+            "POET",
+            "LITE",
+            "MSTR",
+            "CRCL",
+            "SNDK"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "optical networking",
+            "crypto",
+            "memory storage"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "800G optical",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:risk-off-unwind"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-high-valuation-selloff"
+          },
+          {
+            "subject": "ticker:MSTR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:crypto"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:memory-storage-selloff"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:optical-networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.6,
+        "rationale_short": "夜盤薄量跨主題齊跌，去槓桿型態，須次日現貨盤確認"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T03:01:24Z",
+      "latency_ms": 13937,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補充觀察：除了倉位調節，需留意光通信與存儲股領跌所隱含的**「AI 基礎建設同步率」風險**。當計算力(NVDA Blackwell)大幅升級時，若網路互聯(如 Lumentum, GLW 相關供應鏈)的擴容速度無法跟上運算規模，將導致數據中心建置出現「節奏性錯位」。這並非需求消失，而是 AI Capex 在實體基礎設施的投入上，邊際效應因瓶頸而出現衰減風險，導致資金轉向觀望。",
+        "bull_points": [
+          "MU 與存儲產業週期復甦邏輯未變",
+          "NVDA Blackwell 需求韌性仍強"
+        ],
+        "bear_points": [
+          "網路互聯擴容速度恐滯後於計算力需求",
+          "高 beta 投機族群對流動性緊縮極敏感"
+        ],
+        "final_take": "觀察 Blackwell 交付節奏是否受限於基礎設施瓶頸。",
+        "entities": {
+          "tickers": [
+            "POET",
+            "LUMENTUM",
+            "COIN",
+            "INTC",
+            "MU",
+            "NVDA",
+            "GLW"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Communication Equipment",
+            "Financial Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Crypto",
+            "Optical Networking"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:AI_capex"
+          },
+          {
+            "subject": "ticker:LUMENTUM",
+            "predicate": "SUPPLIES_TO",
+            "object": "infrastructure:AI_Data_Center"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出運算力與互聯基礎設施之間的節奏錯位風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T03:01:58Z",
+      "latency_ms": 33825,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文漏掉的**跨資產判讀**：加密族群(Strategy、Circle、Coinbase)同步下殺，跟 AI capex 瓶頸**毫無關係**——這點與 Gemini 的「AI 基礎建設同步率」框架其實相牴觸。真正的共同因子是**持股結構**:POET、Strategy、Circle 這些被 Futu 歸為「概念股」的標的,共通點是**高散戶/高槓桿/高選擇權持倉**,而非共同基本面。夜盤齊跌更像是**保證金去槓桿的連鎖反應**,訊號要去看 DXY、10Y 殖利率與隔夜資金利率,而不是 datacenter 訂單。換言之這是**流動性事件**,範圍比 AI 敘事更廣。POET -9% 領跌正是高 beta 投機浮額先被斷頭的指紋。NVDA -2% 抗跌,反證龍頭非賣壓核心。",
+        "bull_points": [
+          "純流動性去槓桿,非基本面利空,現貨盤易回補",
+          "NVDA 僅 -2% 顯示龍頭籌碼穩、賣壓集中投機股",
+          "加密下跌與 AI capex 無關,AI 需求面未受傷"
+        ],
+        "bear_points": [
+          "若為資金利率/DXY 走升驅動,跌勢恐延續非一次性",
+          "高散戶高槓桿持倉股易觸發保證金連環斷頭",
+          "光通信+加密+存儲共振放大跨資產相關性風險"
+        ],
+        "final_take": "偏中性:流動性事件,觀察次日 DXY 與資金利率定方向",
+        "entities": {
+          "tickers": [
+            "POET",
+            "MSTR",
+            "CRCL",
+            "COIN",
+            "INTC",
+            "GLW",
+            "MU",
+            "LITE",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "crypto liquidity",
+            "margin de-leveraging",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSTR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:margin-deleveraging"
+          },
+          {
+            "subject": "ticker:COIN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:crypto-liquidity"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:margin-deleveraging"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:risk-off-unwind"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增跨資產角度:加密同跌證為流動性事件而非 AI 瓶頸"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T03:02:11Z",
+      "latency_ms": 13116,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場對於這輪夜盤下殺的解釋仍聚焦於流動性與倉位調節，但忽略了**存儲循環 (Commodity Cycle) 與 AI 需求之間的關鍵錯位**。美光 (MU) 與閃迪 (WDC) 的領跌，預示著市場開始審慎評估「非 AI 領域」傳統終端需求（如手機、筆電）的庫存去化進度，而非單純討論 AI 基礎設施瓶頸。當總體經濟面臨壓力，高 Beta 的週期性存儲股對「存儲景氣」的邊際敏感度遠高於 NVDA。這種差異化下殺，反映機構資金正對 AI 概念股進行細緻「分流」，將那些過度依賴非 AI 週期循環的標的從核心配置中剔除。",
+        "bull_points": [
+          "NVDA 相對抗跌，證明核心 AI 需求穩固。",
+          "若傳統週期數據復甦，存儲股估值具回升空間。"
+        ],
+        "bear_points": [
+          "非 AI 終端需求庫存去化進度可能不如預期。",
+          "資金棄守高 Beta 標的，週期股流動性風險高。"
+        ],
+        "final_take": "重點在於市場區分了「AI 原生」與「存儲週期」，波動將持續分化。",
+        "entities": {
+          "tickers": [
+            "MU",
+            "WDC",
+            "NVDA",
+            "INTC",
+            "GLW",
+            "POET"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Memory cycle"
+          ],
+          "tech_keywords": [
+            "DRAM",
+            "NAND",
+            "Data Center"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:WDC"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "themes:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入存儲週期循環視角，區分 AI 原生與傳統終端需求波動差異。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T03:02:51Z",
+      "latency_ms": 39250,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文都沒提的**機制性放大器**:POET、Strategy、Circle 這類標的近年都掛了單股槓桿 ETF（daily-reset 2x 類產品）。這類 ETF 每日收盤後須依當日漲跌**同向再平衡**——下跌日必須「賣更多」維持槓桿比例,夜盤薄量時段這筆機械賣壓被放大數倍,正好解釋 POET -9% 的非線性跌幅。另一個反證:真正的 AI 網路 ASIC 龍頭 **AVGO 不在下殺名單**,若這是 AI capex 基本面利空,AVGO 不可能缺席。這坐實了流動性/去槓桿判讀,而非存儲循環。次日現貨盤若槓桿 ETF 反向回補,反而可能出現急彈。",
+        "bull_points": [
+          "AVGO 缺席下殺名單,反證非 AI capex 基本面利空",
+          "槓桿 ETF 次日反向回補,現貨盤或現急彈",
+          "夜盤機械賣壓,非真實需求消失"
+        ],
+        "bear_points": [
+          "單股槓桿 ETF 同向再平衡放大下跌日賣壓",
+          "高散戶/高槓桿浮額仍有續砍空間",
+          "薄量夜盤跌幅失真,次日開盤恐補確認"
+        ],
+        "final_take": "流動性事件主導,等次日量能與槓桿 ETF 回補確認",
+        "entities": {
+          "tickers": [
+            "POET",
+            "MSTR",
+            "CRCL",
+            "COIN",
+            "NVDA",
+            "AVGO",
+            "MU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "leveraged single-stock ETF",
+            "deleveraging"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:leveraged-etf-rebalance"
+          },
+          {
+            "subject": "ticker:MSTR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:leveraged-etf-rebalance"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:ai-capex-deleveraging"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增單股槓桿 ETF 再平衡機制 + AVGO 缺席反證,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T03:03:03Z",
+      "latency_ms": 12117,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "分析師們討論了流動性與槓桿觸發的賣壓，但忽略了**傳統巨頭的「轉型陣痛期」疊加庫存週期**。英特爾 (INTC) 與康寧 (GLW) 的同步下殺不純是流動性，而是市場對於這兩家公司在「AI 溢價」與「傳統業務下滑」之間**估值裂口 (Valuation Gap)** 的強烈修正。英特爾的 Foundry 轉型持續燒錢，且光纖基礎建設需求回升不及預期，顯示這類「轉型中標的」在市場風險偏好降低時，最先被基本面現實「去泡沫」。",
+        "bull_points": [
+          "轉型標的若出現營運拐點，潛在估值修復空間極大。",
+          "NVDA 龍頭抗跌性證實核心資金流向並未潰散。"
+        ],
+        "bear_points": [
+          "英特爾 Foundry 轉型燒錢與折舊壓力沉重。",
+          "康寧傳統光纖與顯示業務庫存去化緩慢。",
+          "高利率環境壓抑資本密集型轉型業務的淨利。"
+        ],
+        "final_take": "關注傳統轉型巨頭的現金流轉換效率，勝過單純看流動性指標。",
+        "entities": {
+          "tickers": [
+            "INTC",
+            "GLW",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI transformation",
+            "Capital Expenditure"
+          ],
+          "tech_keywords": [
+            "Foundry",
+            "Optical Fiber"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:INTC",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI transformation"
+          },
+          {
+            "subject": "ticker:GLW",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Capital Expenditure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入轉型中傳統巨頭在流動性緊縮時的估值修正邏輯。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AVGO",
+        "COIN",
+        "CRCL",
+        "GLW",
+        "INTC",
+        "LITE",
+        "LUMENTUM",
+        "MSTR",
+        "MU",
+        "NVDA",
+        "POET",
+        "SNDK",
+        "WDC"
+      ],
+      "sectors": [
+        "Communication Equipment",
+        "Communications Equipment",
+        "Financial Services",
+        "Financials",
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "AI transformation",
+        "Capital Expenditure",
+        "Crypto",
+        "HBM3e",
+        "Memory cycle",
+        "Optical Networking",
+        "crypto",
+        "crypto liquidity",
+        "deleveraging",
+        "leveraged single-stock ETF",
+        "margin de-leveraging",
+        "memory storage",
+        "optical networking"
+      ],
+      "tech_keywords": [
+        "800G optical",
+        "Blackwell",
+        "DRAM",
+        "Data Center",
+        "Foundry",
+        "HBM3e",
+        "NAND",
+        "Optical Fiber"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:risk-off-unwind"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-high-valuation-selloff"
+      },
+      {
+        "subject": "ticker:MSTR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:crypto"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:memory-storage-selloff"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:optical-networking"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:AI_capex"
+      },
+      {
+        "subject": "ticker:LUMENTUM",
+        "predicate": "SUPPLIES_TO",
+        "object": "infrastructure:AI_Data_Center"
+      },
+      {
+        "subject": "ticker:MSTR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:margin-deleveraging"
+      },
+      {
+        "subject": "ticker:COIN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:crypto-liquidity"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:margin-deleveraging"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:risk-off-unwind"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:WDC"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "themes:AI capex"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:leveraged-etf-rebalance"
+      },
+      {
+        "subject": "ticker:MSTR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:leveraged-etf-rebalance"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:ai-capex-deleveraging"
+      },
+      {
+        "subject": "ticker:INTC",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI transformation"
+      },
+      {
+        "subject": "ticker:GLW",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Capital Expenditure"
+      }
+    ],
+    "bull_summary": [
+      "NVDA 僅跌 2%，AI 權值龍頭相對抗跌",
+      "薄量夜盤殺低，投機股 beta 性質非基本面",
+      "回檔提供高估值 AI 族群再進場觀察點",
+      "MU 與存儲產業週期復甦邏輯未變",
+      "NVDA Blackwell 需求韌性仍強",
+      "純流動性去槓桿,非基本面利空,現貨盤易回補"
+    ],
+    "bear_summary": [
+      "光通信/存儲/加密齊跌＝AI 高估值族群相關性 unwind",
+      "POET -9% 顯示投機資金先撤離訊號",
+      "加密代理股 Strategy/Circle 重挫拖累風險情緒",
+      "網路互聯擴容速度恐滯後於計算力需求",
+      "高 beta 投機族群對流動性緊縮極敏感",
+      "若為資金利率/DXY 走升驅動,跌勢恐延續非一次性"
+    ],
+    "final_take": "關注傳統轉型巨頭的現金流轉換效率，勝過單純看流動性指標。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T03:03:03Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN; gemini-only: CATALYST_FOR, COMPETES_WITH, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

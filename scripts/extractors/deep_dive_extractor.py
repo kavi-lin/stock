@@ -5,7 +5,14 @@ lenient regex over section headers; missing fields default to None.
 """
 from __future__ import annotations
 import re
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+try:
+    from _sector_heat import enrich_ticker_heat                              # type: ignore
+except Exception:                                                            # pragma: no cover
+    enrich_ticker_heat = None                                                # type: ignore
 
 FILENAME_RE = re.compile(r"(\d{8})_([A-Z][A-Z0-9]+)")
 
@@ -20,11 +27,18 @@ def _parse_filename(path: Path) -> tuple[str | None, str | None]:
 
 
 def _find_final_score(text: str) -> float | None:
-    # 嘗試多種 pattern: V4.8 用 "Final Score" / V4.x 用 final_score JSON / decision table
+    # V5.0 / V4.8 / V4.x 多版本：JSON / "Final Score" 表頭 / 表格範本
     patterns = [
         r"\"final_score\"\s*:\s*([+-]?\d+\.?\d*)",
+        # V5.0 explicit table row: | **Final Score** | 0.462 / 3.0 |
+        r"\|\s*\*\*Final Score\*\*\s*\|\s*([+\-]?\d+\.?\d*)",
         r"Final Score[*:\s|]*\**\s*([+-]?\d+\.?\d*)",
         r"\*\*Final\*\*[^|]*\|[^|]*\|\s*\*\*([+-]?\d+\.?\d*)\*\*",
+        # V4.x body forms: "final_score 0.558", "Phase 3 final score**：1.175"
+        # — case-insensitive, accepts both ASCII and full-width colon.
+        r"(?i)final[_ ]score\**[\s:：|]+\**\s*([+\-]?\d+\.?\d*)",
+        # V4.x table cell: | final score | 2.055 |
+        r"(?i)\|\s*final score\s*\|\s*([+\-]?\d+\.?\d*)",
     ]
     for p in patterns:
         m = re.search(p, text)
@@ -37,16 +51,33 @@ def _find_final_score(text: str) -> float | None:
 
 
 def _find_decision(text: str) -> str | None:
+    """V4.x + V5.0 decision extractor.
+
+    V5.0 reports use `| **Final Decision** | HOLD (CANCEL — 不建倉) |` or the
+    Chinese `| **最終決議** | HOLD |` — value cell is *not* bolded so the older
+    `\\| **HOLD** \\|` pattern misses. Patterns are tried in priority order;
+    parenthetical secondary actions (`HOLD (CANCEL)`) are stripped to the
+    primary verb.
+    """
     patterns = [
         r"\"decision\"\s*:\s*\"([A-Z_]+)\"",
         r"\"final_action\"\s*:\s*\"([A-Z_]+)\"",
+        # V5.0 — primary decision row, English or Chinese label.
+        # Value may be bare (`HOLD`) or bolded (`**HOLD**`); leading `**` is optional.
+        r"\|\s*\*\*(?:Final Decision|最終決議)\*\*\s*\|\s*\**\s*([A-Z_]+)",
+        # V5.0 — secondary "Action Label" row (DEFENSIVE / OFFENSIVE / NEUTRAL …)
+        r"\|\s*\*\*Action Label\*\*\s*\|\s*\**\s*([A-Z_]+)",
         r"\*\*Action\*\*[:\s]*([A-Z_/() ]+?)[\n\|]",
-        r"\| \*\*(BUY|HOLD|SELL|CANCEL|EXECUTE)\*\* \|",
+        # Older V4 form with bolded value
+        r"\| \*\*(BUY|HOLD|SELL|CANCEL|EXECUTE|STAGED_ENTRY|STAGED_EXIT)\*\* \|",
+        # Last resort — V5.0 verb-form decisions appearing inline
+        r"\b(EXECUTE|STAGED_ENTRY|STAGED_EXIT)\b",
     ]
     for p in patterns:
         m = re.search(p, text)
         if m:
-            return m.group(1).strip()
+            val = m.group(1).strip().split("(")[0].strip()
+            return val or None
     return None
 
 
@@ -207,5 +238,12 @@ def extract(path: Path) -> dict:
             "max_agent_confidence": max((a["confidence"] for a in agents), default=None),
         },
     }
+    # Rec 7 (V2.17.16) — sub-industry heat overlay so weekly review can group
+    # repeat-misses by sector/industry instead of only by ticker. Fail-soft.
+    if enrich_ticker_heat is not None and ticker:
+        try:
+            record["tuning_hooks"]["sub_industry_heat"] = enrich_ticker_heat(ticker)
+        except Exception as e:                                              # pragma: no cover
+            record["tuning_hooks"]["sub_industry_heat"] = {"error": str(e)[:120]}
     record["decision_id"] = f"deep-dive_{ticker}_{decision_date}"
     return record

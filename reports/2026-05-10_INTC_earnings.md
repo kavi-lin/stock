@@ -1,0 +1,130 @@
+# INTC 財報分析 — Intel Corporation
+
+> Run: 2026-05-10  ·  Last Earnings: 2026-03-28 (2026 Q1)  ·  Next ≈ 2026-07-23
+> Source: FMP HTTP REST  ·  Schema V1.0
+
+## 1. Snapshot
+
+- **Intel Corporation** (NASDAQ Global Select) — Technology / Semiconductors
+- Price: **$124.92**  ·  Market Cap: $627.85B
+- CEO: Lip-Bu Tan  ·  Employees: 85100  ·  IPO: 1980-03-17
+
+## 2. Quarterly P&L Trend (last 8 Q)
+
+| Q | Period | Revenue | Gross | Op Inc | Net Inc | EPS | GM | OM | NM |
+|---|---|---|---|---|---|---|---|---|---|
+| 2026-03-28 | 2026 Q1 | $13.58B | $5.35B | $-3.14B | $-3.73B | $-0.73 | 39.4% | -23.1% | -27.5% |
+| 2025-12-27 | 2025 Q4 | $13.67B | $4.94B | $550.0M | $-591.0M | $-0.12 | 36.1% | 4.0% | -4.3% |
+| 2025-09-27 | 2025 Q3 | $13.65B | $5.22B | $683.0M | $4.06B | $0.90 | 38.2% | 5.0% | 29.8% |
+| 2025-06-28 | 2025 Q2 | $12.86B | $3.54B | $-3.18B | $-2.92B | $-0.67 | 27.5% | -24.7% | -22.7% |
+| 2025-03-29 | 2025 Q1 | $12.67B | $4.67B | $-301.0M | $-821.0M | $-0.19 | 36.9% | -2.4% | -6.5% |
+| 2024-12-28 | 2024 Q4 | $14.26B | $5.58B | $412.0M | $-126.0M | $-0.03 | 39.2% | 2.9% | -0.9% |
+| 2024-09-28 | 2024 Q3 | $13.28B | $2.00B | $-9.06B | $-16.64B | $-3.88 | 15.0% | -68.2% | -125.3% |
+| 2024-06-29 | 2024 Q2 | $12.83B | $4.55B | $-1.96B | $-1.61B | $-0.38 | 35.4% | -15.3% | -12.5% |
+
+**YoY**: revenue +7.2%  ·  operating -941.9%  ·  earnings -354.1%
+**QoQ**: revenue -0.7%  ·  acceleration: **accelerating**
+
+## 3. Balance Sheet Health (latest Q)
+
+- Total Assets: **$205.33B**  ·  Total Liabilities: $80.34B  ·  Total Equity: $124.99B
+- Working Capital: **$35.27B**  ·  Current Ratio: 2.31
+- Total Debt: $45.03B  ·  D/E: **0.36**  ·  Net Cash (cash+ST inv − debt): **$-12.24B**
+- Cash + ST Investments: $32.79B  ·  Inventory: $0.00  ·  Receivables: $4.07B
+
+## 4. Cash Flow Quality
+
+- Latest Q: OpCF $1.10B  ·  FCF **$-2.54B**  ·  CapEx $-3.64B
+- TTM: OpCF $9.98B  ·  NI $-3.17B
+- **FCF Margin (latest Q)**: -18.7%  ·  **Cash Conversion (TTM OpCF/NI)**: -3.14  ·  CapEx Intensity: 26.8%
+- Stock Buybacks (latest Q): $0.00  ·  Dividends: $0.00
+- SBC (latest Q): $621.0M
+
+## 5. Profitability & Efficiency
+
+8Q margin trend (newest → oldest):
+
+| Q | Gross | Operating | Net |
+|---|---|---|---|
+| 2026-03-28 Q1 | 39.4% | -23.1% | -27.5% |
+| 2025-12-27 Q4 | 36.1% | 4.0% | -4.3% |
+| 2025-09-27 Q3 | 38.2% | 5.0% | 29.8% |
+| 2025-06-28 Q2 | 27.5% | -24.7% | -22.7% |
+| 2025-03-29 Q1 | 36.9% | -2.4% | -6.5% |
+| 2024-12-28 Q4 | 39.2% | 2.9% | -0.9% |
+| 2024-09-28 Q3 | 15.0% | -68.2% | -125.3% |
+| 2024-06-29 Q2 | 35.4% | -15.3% | -12.5% |
+
+**TTM Ratios** — Gross 35.4%  ·  Operating -9.4%  ·  Net -5.9%  ·  EBIT -1.4%
+**Capital Efficiency** — Income Quality TTM: -3.55  ·  FCF Yield: -0.5%  ·  CapEx/OCF: 131.3%  ·  DSO: 27.6d
+
+## 6. Growth Trajectory
+
+- **Latest YoY**: revenue +7.2%  ·  earnings -354.1%  ·  operating -941.9%
+- Acceleration: **accelerating** (vs prior-Q YoY)
+
+Annual growth rates (newest → oldest):
+
+| FY | Revenue | NetIncome | OpIncome | FCF |
+|---|---|---|---|---|
+| 2025 | -0.5% | +98.6% | +99.8% | +68.4% |
+| 2024 | -2.1% | -1210.5% | -12657.0% | -9.6% |
+| 2023 | -14.0% | -78.9% | -96.0% | -48.5% |
+| 2022 | -20.2% | -59.7% | -88.0% | -205.4% |
+| 2021 | +1.5% | -4.9% | -17.8% | -56.4% |
+
+**Per-share CAGR** — 3y rev: -29.1%  ·  5y rev: -41.3%  ·  5y NI: -101.1%
+
+## 7. Valuation
+
+- Price: **$124.92**  ·  PE TTM: -200.05  ·  PB TTM: 5.70
+- EV/EBITDA TTM: 57.50  ·  EV/FCF TTM: -210.21  ·  EV/Sales TTM: 12.19  ·  P/FCF TTM: -201.30  ·  Net Debt/EBITDA TTM: 2.44
+- **DCF Intrinsic**: $2.94  ·  Upside vs Price: **-97.7%**
+- FCF Yield TTM: -0.5%
+
+**Ratings Snapshot** (FMP composite, 1-5):
+- Overall: **C** (2/5)
+- DCF: 1/5  ·  PE: 1/5  ·  PB: 4/5  ·  D/E: 2/5  ·  ROE: 1/5  ·  ROA: 1/5
+
+## 8. Analyst Consensus
+
+- Price: $124.92  →  PT consensus **$79.55** (median $77.50, high $118.00, low $45.00)
+- **PT Upside vs Price**: -36.3%
+
+Monthly grades trend (newest → oldest):
+
+| Date | StrongBuy | Buy | Hold | Sell | StrongSell |
+|---|---|---|---|---|---|
+| 2026-05-01 | 2 | 11 | 30 | 3 | 3 |
+| 2026-04-01 | 2 | 11 | 34 | 3 | 4 |
+| 2026-03-01 | 1 | 8 | 33 | 2 | 4 |
+| 2026-02-01 | 1 | 8 | 33 | 2 | 4 |
+| 2026-01-01 | 1 | 8 | 33 | 4 | 4 |
+| 2025-12-01 | 1 | 4 | 34 | 4 | 3 |
+
+> Forward EPS estimate: paid-plan only;use `skills/earnings-valuation-forecaster` 3-method 自算可補(若需)。
+
+## 9. Quality Flags(deterministic)
+
+- 🟡 **Accruals warning** — TTM \|NI − OpCF\| / \|NI\| > 30%(盈餘品質可疑)
+- 🔴 **CapEx outpaces OCF** — 最新 Q OpCF 不夠覆蓋 CapEx(燒錢)
+- 🟠 **DSO slowdown** — 應收帳款天數連 4 季上升(收款放緩)
+- 🔴 **Negative FCF** — 最新 Q 自由現金流為負
+
+## 10. Bottom Line
+
+### 🔴 **DETERIORATING** — Composite Score: **27/100**
+
+| 元件 | 分數 | 滿分 |
+|---|---|---|
+| Quality | 9 | 30 |
+| Growth | 16 | 30 |
+| Valuation | 0 | 25 |
+| Analyst | 2 | 15 |
+| **Total** | **27** | **100** |
+
+> Verdict 對照: 80+ STRONG / 65+ SOLID / 50+ MIXED / 35+ WEAK / <35 DETERIORATING
+
+---
+
+> Generated by `skills/earnings-analyst` from FMP HTTP REST.  Cache: `skills/earnings-analyst/cache/INTC_2026-03-28.json`

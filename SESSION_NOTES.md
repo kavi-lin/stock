@@ -1,7 +1,69 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-03 (v2.13.0)
+> **Last Updated**: 2026-05-19 (v3.8.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.8.0 → v3.8.1) — Break News 辯論氣泡左右/配色修正
+
+使用者問:為何 break news 中 codex ↔ gemini 辯論兩邊都靠右、都藍方角色。查 `renderThreadBubble` (`Dashboard/news_components.js`):左右 + 配色用 `agent === 'claude'` 硬判,只有 claude 走左/橘,其餘 model 全部右/藍。多模型治理層 (V3.7.0) 後辯論配對可為任意兩 model,配對非 claude(codex ↔ gemini)時兩邊都判非 claude → 都右、都藍。對比 `debater.py._role_for` side 本就用位置判 (idx==0→A 否則 B)。修法:`debater.py` comment record 新增 `side` (`"A"`/`"B"`) 欄(後端位置真相,schema validate 用 subset 不擋);前端改讀 `comment.side` 決定左右+配色(A=左/橘、B=右/藍),舊資料無 side 時 fallback 解析 role label 再退回舊 heuristic;avatar 改 model 查表 (claude🤖/gemini💎/codex🧠)。bump 3.8.0→3.8.1。
+
+## 🟢 Session Note (v3.7.1 → v3.8.0) — Break News 免費社群/趨勢源
+
+使用者要求在 break-news 頁面多加 source,包含社群,探勘市場趨勢。先查現況:poller 只有 9 RSS + Futu,Dashboard raw stream 已能承接未閘來源。實作低摩擦免費版:新增 `scripts/break_news/social_sources.py`,輸出與 RSS 相同 normalized shape,接 Reddit subreddit RSS、HN Algolia、Google Trends RSS；Bluesky public search adapter 保留但預設關閉(真實 dry-run 回 403,需 `BREAK_NEWS_BLUESKY_ENABLED=1` 才測)。`poller.py` 新增 `BREAK_NEWS_SOCIAL_ENABLED` + `BREAK_NEWS_SOCIAL_GATE_MIN_SCORE`；社群/趨勢 item 預設進未閘 Raw 流,但 auto-debate 門檻提高,避免雜訊吃每日 debate budget。raw entry 加 `is_social` / `source_meta`;state 加 `items_added_social` / `social_enabled` / `feed_stats`。真實網路 dry-run:Reddit 20,HN 10,Google Trends 0(市場關鍵詞過濾後),Bluesky disabled。X/Stocktwits/Product Hunt 不做 P0: X pay-per-use、Stocktwits 新 app 註冊暫停、Product Hunt token+商用限制,留 TODO optional。bump 3.7.1→3.8.0。
+
+## 🟢 Session Note (v3.7.0 → v3.7.1) — Break News 辯論獨立配對
+
+codex code review 指出 v3.7.0 漏了:Break News debater 跟通用路由共用 primary/secondary,改 dashboard 設定會同時動兩邊。修 4 個 finding:(1) `config/llm_config.json` 加 `break_news: {primary,secondary}` 區段;(2) `llm_drivers.load_llm_config()` 解析它 + 新 `break_news_pair()`,`debater._turn_order()` 改讀此區;(3) `POST /api/llm-config` 接受 `break_news`(merge);(4) sidebar 加「突發辯論配對」子區 A/B 下拉。另修辯論身分標籤:debater turn fallback 換模型後用 `res.model_used` 重貼 role label(side A/B 仍位置固定)。取捨:保留 tertiary(通用 fallback 鏈,v3.7.0 已核准),Break News 配對與它並存非取代。bump 3.7.0→3.7.1。
+
+3 個模型 CLI(claude/gemini/codex)過去無 fallback、無預算/quota 感知、協定寫死 claude → claude 額度掛了全停。建治理層:`scripts/_shared/model_router.py`(新)— `run_role()`/`run_with_fallback()` 走 fallback 鏈(primary→secondary→tertiary),跳過停用/超預算/quota cooldown,失敗或撞 quota 自動降級;`config/llm_usage.json` 記每模型每日 calls + cooldown(UTC 日界重置);quota 偵測 = best-effort 比對 rate-limit/429/quota 字樣。`config/llm_config.json` 擴充 tertiary/enabled/budgets/cooldown_hours(舊 schema 相容),`llm_drivers.load_llm_config()` 回傳完整 config + 新 `model_chain()`。消費者接 governor:debater(每回合 `run_with_fallback`,模型掛了換不 abort)、supply_chain。協定:`run_protocol` 用 `pick_model()` 選模型(claude 優先,gemini/codex 頂替)+ `_protocol_command()` per-model 指令 + `note_run()` 記帳。dashboard:`/api/llm-config` GET 回 config+status、POST merge;sidebar 加備援下拉 + 每模型用量/冷卻顯示,codex 解鎖。注意:`run_codex` 之前已由 codex 自己寫好(非 stub)。協定跑非-claude 模型品質未驗證,故 claude 永遠排第一。bump 3.6.3→3.7.0。
+
+使用者回報情緒趨勢圖在寬螢幕上「線太粗、字太大」(還重疊)。根因:`trend-chart.js` SVG viewBox 固定 760,圖 `width:100%` 撐滿 → 寬容器上整體放大 ~2.6×,`stroke-width` 與 SVG `<text>` 等比爆大。修:(1) 所有 stroke 加 `vector-effect="non-scaling-stroke"` → 線寬恆 1.3px;(2) x 軸日期 + 「現在」標籤從 SVG `<text>` 改 HTML overlay span(`.trend-xaxis`/`.trend-xlabel`/`.trend-nowlabel`,固定 9px/8px);(3) 日期標籤碰撞檢查(<8% 距離略過);(4) now 圓點 r 2.8→2.2。單檔 `trend-chart.js`。bump 3.6.2→3.6.3。
+
+使用者反映情緒趨勢圖 x 軸 `5/15 18h` 難看懂。單檔改 `Dashboard/trend-chart.js`:x 軸由「4 個任意 1/3 位置 tick」改成「按本地日界」— `_dayTicks()` 偵測午夜,每個日界畫極淡垂直分隔線 + 標「日期+星期」(`fmtDay()` → `5/16 六`/`Sat`)。±0.5 參考格線 `rgba(255,255,255,0.05)`(淺色主題看不見)改 theme-safe `rgba(128,128,128,0.12)`。修最右標籤裁切(估寬 clamp)。最新點加極淡「現在/now」標記。padB 16→20。hover tooltip `13h`→`13:00`。線條/顏色/資料/endpoint 不動。break-news.html 與 index.html 兩處 mount 同步受惠。靜態 JS,硬重載即可。
+
+## 🟢 Session Note (v3.6.0 → v3.6.1) — sector 協定 turn-bloat 重構
+
+2026-05-18 sector run 跑 33 分(52 turns)超過 30 分 timeout 被砍 — 但其實已成功。診斷(讀 `sector/scan_logs/sector_20260518_102854.log`):非 429(log 裡的 429 字串是 phase_1-2-3.md 內文被 Read 的誤命中)、非子代理 — 是 parent agent turn 太碎:手寫整個 15+ key 巢狀 `sector_intel.json`(實際還寫 `/tmp/build_intel.py` Edit ×2)、逐檔 `python3 -c` peek、validator retry。修法:把機械組裝移進 committed 腳本。新 `sector/scripts/build_sector_intel.py`(從 phase cache + 精簡 decision JSON 組出完整 intel,decision schema 見腳本 docstring)+ `sector/scripts/sector_digest.py`(一次印 macro + 11-sector 決策表)。協定 MD 改寫:phase_1-2-3(不再手抄 cache 欄位)、phase_4-5(Phase 5 改寫 decision JSON→跑 build script;Phase 4a 並行 launch 升級硬規則)、sector_protocol_main GLOBAL RULE 7、schema.md 指向。`SECTOR_TIMEOUT_SEC` 1800→2700。子代理建構交 general-purpose agent(已測:build→validate rc=0→render rc=0)。bump 3.6.0→3.6.1。
+
+## 🟢 Session Note (v3.5.3 → v3.6.0) — 可設定主要/次要 LLM
+
+使用者要能在設定面板切換 LLM(主要用於生成、次要用於辯論/未來 review),預設 3 個 CLI:claude/gemini/codex。先收到一份 Gemini 寫的 plan,但其「bridge.py 即時新聞」項已過時(`extract_shallow_news` v3.4.0 已移除、即時 raw 新聞已是 break-news「未閘 Raw 流」v3.3.2)— 略過;其「supply_chain `--agent`」項泛化納入。最終做中等版:**server-side config + sidebar 設定面板**(不做 web review 層)。`config/llm_config.json`(新,server-side — Python script 讀得到,localStorage 不行)。`llm_drivers.py`:`run_codex` graceful stub(codex 未接線,rc=1 不 crash)、`_RUNNERS` registry + `run_llm()` dispatcher、`load_llm_config/primary_model/secondary_model`。`dashboard_server.py`:`GET/POST /api/llm-config`(POST 驗證 + 寫檔)。`utils.js` renderSidebar footer 加可展開「⚙ 設定」面板(主要/次要下拉,Codex disabled「即將支援」),change → POST + toast;`style.css` 加 `.sidebar-settings`。`supply_chain.generate(theme, agent=None)` 走 primary + 新 `--agent` CLI 旗標;`debater.py` `TURN_ORDER` 改由 config 解析 `[primary, secondary]`(缺失 fallback claude↔gemini)。預設 config = 舊行為零回歸。驗證:endpoints GET/POST/400 正常、`--agent codex` graceful 失敗不寫檔、debate turn order 預設 claude-gemini。Codex 預留:填 CLI flags + 解除 disabled 即可。6 檔。
+
+## 🟢 Session Note (v3.5.2 → v3.5.3) — heatmap 429 熔斷器
+
+使用者回報 server log 狂噴 `[heatmap] HTTP error: 429`(沒開 heatmap 頁也噴)。診斷:`heatmap_refresh_loop` 是常駐背景 daemon(保溫 `heatmap.json`,與頁面無關),盤中每 10 分 fan-out ~517 個 FMP `stable/quote` 呼叫(20 workers),FMP 方案被限流 → 全 429,每輪噴 ~500 行。修:`dashboard_server.py` 加 429 熔斷器 — `_fmp_get_json` 收 429 設 `_heatmap_ratelimit_until = now+1800` 且只首次 log;`_heatmap_refresh_quotes`/`_heatmap_refresh_pe_universe` 開頭檢查熔斷器冷卻中就跳過整批;`_fetch_one`/`_fetch_pe_ttm` 逐一檢查 → 跳閘後排隊 symbol 不再打 API。429 風暴從每 10 分 ~500 行 → 每 30 分窗 ~1-2 行。單檔改動。bump 3.5.2→3.5.3。
+
+使用者回報供應鏈圖節點卡:卡片重疊、溢出 module 框、badge 中英不一致。根因:卡片用 `min-height` 但 2 行 role + badge 列實際撐高到 ~90px+,佈局卻以固定 68px 排版 → 重疊 + 溢出。修:卡片改固定 `height`,`NODE_H` 68→100,`.sc-role` `flex:1`、`.sc-badges` `flex-shrink:0` 錨底 → 等高卡、間距一致、面板精準。badge:新增 `groundingLabel`/`heatLabel`/`listingLabel` 隨 `isZh()` 切換,節點卡 + detail panel 全本地化(原本顯示原始 enum LLM_ONLY/VERIFIED)。`NODE_W` 174→198 減少名稱截斷。bump 3.5.1→3.5.2。
+
+供應鏈頁底部 9 個圖例 pill 無說明。沿用 `sector.html` pill tooltip 模式:`page-supply-chain.js` 加 `SC_PILL_TIPS`(zh/en × 9:us/fl/pi/pv/verified/seen/llm/heat/stage)+ `initPillTooltip()`(mouseover/out 事件委派、量高翻轉定位);`supply-chain.html` 加 `#pill-tooltip` CSS + 元素,每個 `.sc-legend-item` 加 `data-tip-key` + `cursor:help`。熱度/商用階段 tooltip 含等級說明。bump 3.5.0→3.5.1。
+
+## 🟢 Session Note (v3.4.1 → v3.5.0) — 供應鏈商用化階段 stage 標記層
+
+User 在供應鏈探索頁建了 POET 鏈,外部檢討(ChatGPT)指缺量產 OEM/客戶(Luxshare/Foxconn Interconnect/Credo/Google/AWS/ASE/NTT)且缺「商用化階段」標記層。問題:資料量不足 vs 漏分析?3 Explore agent 勘查確認:`generate(theme)` 公司清單 **100% 來自 LLM 草稿**,專案 DB(nexus_graph/universe)從不參與選公司,只做事後 grounding → 缺公司是**生成/分析缺口**(prompt 硬上限 8–20 node + 「omit rather than guess」壓廣度),非資料量不足。stage 層則純缺功能。實作:(1) node 級 `stage` 欄(design_partner→revenue+unknown)— `supply_chain.py _STAGES`+`_normalise` 驗證、prompt schema、`page-supply-chain.js` STAGE 色階+node badge+詳情列、`supply-chain.html` CSS+圖例。(2) prompt 提完整度:node 8–20→12–32、模塊 2–3→2–4、omit 規則限上游、OEM+客戶層要求完整。(3) POET 鏈:**直接手動擴充**(非跑 LLM 重生成 — 會蓋掉現有中文校對)20→27 node,補 7 家 + 每 node 標 stage,新增 advanced_packaging 模塊。驗證:_normalise 27 node 全帶 stage、33 edge 無 drop、server 送出 enriched 鏈。grounding-assist(讓 generate 看 nexus 候選)刻意不做 — nexus 對光通訊 niche 太薄。5 檔。
+
+## 🟢 Session Note (v3.4.0 → v3.4.1) — 供應鏈 stage 內模塊分組 + 邊線修正
+
+供應鏈頁 stage 過去扁平一欄。使用者要求每 stage 分 2-3 個產業模塊(silicon → CPU/GPU加速器/記憶體/網通)。資料模型加 `modules: {layerId:[{id,label}]}` + node `module` 欄,`_normalise` 驗證、舊 YAML 隱式 `_default` 向後相容,prompt 要 LLM 每層產 2-3 模塊。`page-supply-chain.js` `layout()` 改兩層:stage 欄內 module 子面板垂直堆疊、欄頂對齊;`renderDiagram()` 畫帶框 `.sc-module` 面板,stage band 弱化為虛線。重生 cpo/hbm/openai/spacex 帶模塊。同時修兩個邊線 bug:(1) 隱形 spine 線 — 共用 objectBoundingBox 漸層在水平邊退化 → 改 per-edge userSpaceOnUse 漸層;(2) 同 stage 邊鼓圈 — 新增 `sidePath()` 同欄邊走右側 C 形虛線連接器。保留既有 edge corroboration(✓N)。Files:supply_chain.py + prompts/supply_chain_system.md + SCHEMA.md + page-supply-chain.js + supply-chain.html + 4 條 yaml 重生。bump 3.4.0→3.4.1。
+
+## 🟢 Session Note (v3.3.2 → v3.4.0) — 新聞層整併 + 情緒趨勢上首頁 + 供應鏈佐證
+
+User 質疑兩條新聞 pipeline(委員會 digest `news.html` / break-news 探索層)重複,且 break-news 趨勢圖該不該上首頁、digest 該不該餵趨勢圖、知識庫/供應鏈怎麼用 break-news 輸出。3 個 Explore agent 勘查後決策(user 全選推薦案):**不合併 pipeline,改移除冗餘的 Triage tab**。Phase 1:刪 `news.html` 🗂 Triage tab + `page-news.js` `renderTriageFeed/wireTriageButtons`(~270 行)+ `bridge.py extract_shallow_news`(`_raw_pub_map` 保留)。`news.html` 純委員會 digest;break-news「未閘 Raw 流」= 唯一未辯論新聞面。Phase 2:趨勢圖抽成 `Dashboard/trend-chart.js`(`window.TrendChart` module,自帶 CSS/i18n/30s fetch cache,compact 模式),break-news 用完整版、index.html `#risk-overview` 下方加精簡 widget(連往 break-news)。Phase 3:`trend_rollup.py compute_trends()` 加讀 `*_digest.json`,deep verdict ×1.8,headline fingerprint 對 bn 去重。Phase 4:`supply_chain.py enrich()` 加讀 `nexus_graph.json` ticker↔ticker edges(已含 break-news 關係),供應鏈邊標 `corroboration`,`page-supply-chain.js` 加 ✓N badge。關鍵發現:Nexus Tier1 `load_break_news()` 早已吃 break-news 實體+關係,Phase 4 是強化非新接線。驗證:bridge.py 後 data.json 無 `shallow_news`;trends API log_count 118 / 25 entities;supply-chain openai 鏈 6/24 邊佐證;trend-chart.js 200。RSS 抓取重工依 user 決定不動。10 檔。
+
+## 🟢 Session Note (v3.3.1 → v3.3.2) — Break News 未閘 Raw 流 + 手動辯論觸發
+
+突發辯論室 (`break-news.html`) 冷門時段空窗:poller 只把過 score gate(`|score|≥2`)的項變辯論項,週末/盤後沒新聞過閘 → 頁面停在舊資料看似壞掉(實為 server 隔夜停機 + 冷門時段)。先誤把 plan 套到「新聞戰情室」Triage tab 改 `bridge.py` — user 澄清後全 rollback,目標是突發辯論頁。最終做法:加一條**未閘 raw 流**。poller `run_once` 對每則非重複 item 收集 raw entry(含完整 triage + gate 結果 + `key`),寫 rolling `_raw_stream.json`(cap 150 / 汰 24h / dedupe);bn-creation 上限由 `break` 改 `continue` 讓 raw 捕捉不被截。新 `store.load_raw_stream/save_raw_stream/mark_raw_promoted`。新 API `GET /api/break-news/raw-stream`、`POST /api/break-news/raw/debate`(繞 gate `init_item` → `pending_debate` + 背景 `_bn_kick_debate_scan` 立即起辯論)。`break-news.html` trend strip 與雙欄間插可收合「未閘 Raw 流」面板,每卡 score/過閘狀態/age/來源 + 🔥 辯論鈕,`page-break-news.js` `loadRawStream()` 納 poll cycle。score gate **保留**,raw 流純探索層展示。測試:poller 跑出 11 entries(10 gated/1 passed),兩 API 端點 202/400 正常,手動觸發後 bn item 進 `debating` advance_reason=`manual_raw`。5 檔(store.py / poller.py / dashboard_server.py / break-news.html / page-break-news.js)。i18n.js 未動 — break-news 頁用自帶 `t()` helper。
+
+## 🟢 Session Note (v3.3.0 → v3.3.1) — Supply-Chain 頁視覺強化
+
+V3.3.0 的供應鏈頁功能完整但視覺弱(配色 ad-hoc、light 主題壞掉、節點扁平)。套 frontend-design 做大膽強化,純改 2 檔(`supply-chain.html` inline style + `page-supply-chain.js` render markup),layout 數學/資料流不動。改:(1) 配色全改 `var(--*)` token + `color-mix`,修好雙主題;(2) 控制列 → `.ea-cmdbar` 指令列風(`>` prompt、mono input、focus 翠綠光暈);(3) canvas 加點陣格背景,每層 = 帶色塊欄 + 編號 header chip;(4) 邊:spine 邊翠綠→琥珀漸層 stroke + `<animateMotion>` 流動粒子(上游→下游);(5) 節點卡:漸層 listing 色條、heat → 外發光(hot 紅/warm 琥珀/cold 藍)、hover 抬升、staggered reveal、badge 改 9px uppercase pill;(6) detail panel 改浮動卡 + listing 色條 header + 上下游邊列。bump 3.3.0→3.3.1。
+
+## 🟢 Session Note (v3.2.0 → v3.3.0) — Supply-Chain Explorer
+
+User 看 Nexus 知識圖譜(`graph.html`)覺得太雜(800 節點/3895 邊,MENTIONED_IN 佔 50% = hairball)。釐清後發現要的不是清理 hairball — 是「依主題探索美股供應鏈」(例:CPO 上下游價值鏈)。Nexus 無法服務:有向供應鏈邊 count=0,私有/外股玩家根本不在圖裡。決策:做獨立的 **Supply-Chain Explorer**,Nexus 自動圖不動。`scripts/nexus/supply_chain.py`(新)`generate(theme)` 用 Claude(reuse break_news `llm_drivers.run_claude`)草擬分層價值鏈 → 存可編輯 YAML `nexus/supply_chains/<slug>.yaml`;`enrich()` 即時加 grounding(verified=在 universe / seen=在 Nexus / llm_only)+ heat(Nexus 提及數)。新 API `/api/supply-chain/{list,themes,<slug>}` + `POST /generate`。新頁 `supply-chain.html` + `page-supply-chain.js`:分層 upstream→downstream 圖(每層一欄,HTML 節點卡疊在 SVG 邊層上,有向 bezier 箭頭,spine 高亮),節點 4 badge(可投資性色條/grounding/層級/熱度),選擇器 + 主題自由輸入 + 生成鈕。sidebar 加「供應鏈」入口。Seed `cpo.yaml`(18 公司 5 層 21 邊)。生成方式 = LLM 草稿 + Nexus 驗證 hybrid。維持紀律:Nexus 探索層,此頁為 curated view。Files:supply_chain.py + prompts/supply_chain_system.md + dashboard_server.py + supply-chain.html + page-supply-chain.js + utils.js + i18n.js + cpo.yaml(新)。
+
+## 🟢 Session Note (v3.1.2 → v3.2.0) — Break News 3 日情緒趨勢圖
+
+突發新聞辯論室的辯論 log 過去是孤立快照,看不出敘事「方向」隨時間怎麼演化。User 要的是「每收到一則新聞就修正當下趨勢往上/往下」的軌跡。先做了提及量排行榜,user 釐清後 pivot 成**情緒指數軌跡**:每則 debate = 帶正負號事件(BULLISH +1 / BEARISH −1 / NEUTRAL·SPLIT 0)× 影響力權重(shallow_score × 來源可信度),72 個每小時 bucket 經時間衰減 EMA(12h half-life)串成軌跡,`tanh(S/scale)` 限縮 [−1,+1] 且 scale 每實體自適應(各線用滿範圍)。無新聞時線自然衰回 0。`scripts/break_news/trend_rollup.py`(新)`compute_trends()` 算市場整體 / 各 sector / 各 theme 的 series。新 GET `/api/break-news/trends`(60s TTL)。`break-news.html` 頂部 `.bn-trend-strip`:`<select>` 實體選擇器 + 手刻 SVG area chart(零基線綠上紅下、clipPath 填色、時間軸刻度、hover 游標)+ 即時數值讀數。一次畫一條 = 不糾纏。維持探索層紀律:trend 面板不進 investment_protocol 決策。Files:trend_rollup.py(新) + dashboard_server.py + break-news.html + page-break-news.js。
 
 ## 🟢 Session Note (v2.12.0 → v2.13.0) — invest protocol subagent 對齊外部「專業分析師」模板
 

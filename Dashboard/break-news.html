@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>突發新聞辯論室 | AI 投資委員會</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      /* Break News specific layout */
+      .bn-status-bar {
+        display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+        padding: 10px 14px; border-radius: 10px;
+        background: var(--bg-card); border: 1px solid rgba(161,161,170,0.18);
+        margin-bottom: 16px; font-size: 11px;
+      }
+      .bn-status-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 10px; border-radius: 999px;
+        background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.35);
+        color: #60a5fa; font-weight: 700; font-size: 10px; letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .bn-status-dot {
+        width: 8px; height: 8px; border-radius: 999px;
+        background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.6);
+        animation: bn-pulse 2s infinite;
+      }
+      @keyframes bn-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      .bn-status-metric { color: var(--text-muted); }
+      .bn-status-metric strong { color: var(--text-main); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+      .bn-grid {
+        display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 1100px) { .bn-grid { grid-template-columns: 1fr; } }
+      /* 3-day sentiment-trend chart — card wrapper; inner markup + .trend-*
+         styles are owned by trend-chart.js (TrendChart module). */
+      .bn-trend-strip {
+        background: var(--bg-card); border: 1px solid rgba(161,161,170,0.18);
+        border-radius: 12px; padding: 14px; margin-bottom: 16px;
+      }
+      /* Un-gated raw breaking-news stream */
+      .bn-raw-strip {
+        background: var(--bg-card); border: 1px solid rgba(161,161,170,0.18);
+        border-radius: 12px; padding: 14px; margin-bottom: 16px;
+      }
+      .bn-raw-head {
+        display: flex; align-items: center; gap: 10px; cursor: pointer;
+        user-select: none;
+      }
+      .bn-raw-title {
+        font-size: 12px; font-weight: 800; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--text-main);
+      }
+      .bn-raw-count {
+        font-family: 'JetBrains Mono', monospace; font-size: 10px;
+        font-weight: 700; padding: 1px 7px; border-radius: 999px;
+        background: rgba(99,102,241,0.18); color: #818cf8;
+      }
+      .bn-raw-hint { font-size: 10px; color: var(--text-muted); }
+      .bn-raw-chevron {
+        width: 15px; height: 15px; margin-left: auto; color: var(--text-muted);
+        transition: transform 0.15s;
+      }
+      .bn-raw-strip.collapsed .bn-raw-body { display: none; }
+      .bn-raw-strip.collapsed .bn-raw-chevron { transform: rotate(-90deg); }
+      .bn-raw-body { margin-top: 10px; }
+      .bn-raw-list { max-height: 320px; overflow-y: auto; display: flex;
+        flex-direction: column; gap: 6px; }
+      .bn-raw-empty {
+        text-align: center; color: var(--text-muted);
+        font-size: 11px; padding: 22px 20px;
+      }
+      .bn-raw-card {
+        display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+        border: 1px solid rgba(161,161,170,0.14); border-radius: 8px;
+        background: rgba(255,255,255,0.02);
+      }
+      .bn-raw-card.gated { opacity: 0.62; }
+      .bn-raw-card.promoted { border-color: rgba(59,130,246,0.45); }
+      .bn-raw-score {
+        font-family: 'JetBrains Mono', monospace; font-size: 10px;
+        font-weight: 800; padding: 1px 6px; border-radius: 5px; flex-shrink: 0;
+        min-width: 34px; text-align: center;
+      }
+      .bn-raw-headline {
+        font-size: 12px; color: var(--text-main); flex: 1; min-width: 0;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .bn-raw-meta {
+        font-size: 9.5px; color: var(--text-muted); flex-shrink: 0;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .bn-raw-gate {
+        font-size: 8.5px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
+        flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.04em;
+      }
+      .bn-raw-gate.pass { background: rgba(34,197,94,0.16); color: #4ade80; }
+      .bn-raw-gate.block { background: rgba(161,161,170,0.14); color: var(--text-muted); }
+      .bn-raw-debate-btn {
+        font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+        border: 1px solid rgba(99,102,241,0.4); color: #818cf8;
+        background: transparent; cursor: pointer; flex-shrink: 0;
+        transition: background 0.15s, color 0.15s;
+      }
+      .bn-raw-debate-btn:hover { background: #6366f1; color: #fff; }
+      .bn-raw-debate-btn:disabled { opacity: 0.5; cursor: default; }
+      .bn-thread-panel {
+        position: sticky; top: 96px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        border: 1px solid rgba(161,161,170,0.18);
+        border-radius: 12px;
+        background: var(--bg-card);
+        padding: 14px;
+      }
+      .bn-thread-empty {
+        text-align: center; color: var(--text-muted);
+        padding: 40px 20px; font-size: 12px;
+      }
+      .bn-card { transition: border-color 0.15s, transform 0.15s; }
+      .bn-card:hover { border-color: rgba(99,102,241,0.45); transform: translateY(-1px); }
+      .bn-card.bn-selected { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+      .bn-filter-tab {
+        font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+        text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text-muted); cursor: pointer; transition: all 0.12s;
+      }
+      .bn-filter-tab:hover { color: var(--text-main); }
+      .bn-filter-tab.active { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.5); color: #60a5fa; }
+      .bn-thread-header {
+        display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+        padding-bottom: 10px; margin-bottom: 12px;
+        border-bottom: 1px solid rgba(161,161,170,0.18);
+      }
+      .bn-summary-block {
+        margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+        background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.25);
+        font-size: 12px;
+      }
+      .bn-replay-btn {
+        font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+        text-transform: uppercase; padding: 4px 10px; border-radius: 6px;
+        border: 1px solid rgba(161,161,170,0.30); background: transparent;
+        color: var(--text-muted); cursor: pointer;
+      }
+      .bn-replay-btn:hover { color: var(--text-main); border-color: #3b82f6; }
+    </style>
+</head>
+<body class="flex min-h-screen transition-all" data-page="break-news">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="ml-64 flex-1 flex flex-col">
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-10">
+            <div class="flex items-center gap-3">
+                <i data-lucide="radio" class="w-5 h-5 text-blue-400"></i>
+                <h2 id="bn-title" class="text-lg font-bold">突發新聞辯論室</h2>
+                <span id="bn-subtitle" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden sm:block">Break News War Room</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="bn-refresh-btn" class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-1.5 rounded-xl text-sm font-medium border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span id="bn-refresh-label">立即輪詢</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <!-- Status / health bar -->
+            <div class="bn-status-bar" id="bn-status-bar">
+                <span class="bn-status-pill">
+                    <span class="bn-status-dot" id="bn-health-dot"></span>
+                    <span id="bn-health-label">LIVE</span>
+                </span>
+                <span class="bn-status-metric"><span id="bn-next-label">Next poll</span>: <strong id="bn-next-poll">--</strong></span>
+                <span class="bn-status-metric"><span id="bn-queue-label">Queue</span>: <strong id="bn-queue-depth">0</strong></span>
+                <span class="bn-status-metric"><span id="bn-flight-label">In flight</span>: <strong id="bn-in-flight">0</strong></span>
+                <span class="bn-status-metric"><span id="bn-budget-label">Daily budget left</span>: <strong id="bn-budget-left">--</strong></span>
+                <span class="bn-status-metric" style="margin-left:auto;color:#71717a;">
+                    <span id="bn-last-poll-label">last poll</span> <strong id="bn-last-poll">--</strong>
+                </span>
+            </div>
+
+            <!-- Filter strip -->
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+                <div class="bn-filter-tab active" data-filter="all">All</div>
+                <div class="bn-filter-tab" data-filter="debating">Debating</div>
+                <div class="bn-filter-tab" data-filter="closed">Closed</div>
+                <div class="bn-filter-tab" data-filter="pending_debate">Queued</div>
+                <div class="bn-filter-tab" data-filter="failed">Failed</div>
+            </div>
+
+            <!-- 3-day sentiment-trend chart — rendered by TrendChart (trend-chart.js) -->
+            <div class="bn-trend-strip" id="bn-trend-mount"></div>
+
+            <!-- Un-gated raw breaking-news stream -->
+            <div class="bn-raw-strip collapsed" id="bn-raw-strip">
+                <div class="bn-raw-head" id="bn-raw-toggle">
+                    <span class="bn-raw-title" id="bn-raw-title">未閘 Raw 流</span>
+                    <span class="bn-raw-count" id="bn-raw-count">0</span>
+                    <span class="bn-raw-hint" id="bn-raw-hint">所有抓到的新聞，繞過 score gate</span>
+                    <i data-lucide="chevron-down" class="bn-raw-chevron" id="bn-raw-chevron"></i>
+                </div>
+                <div class="bn-raw-body" id="bn-raw-body">
+                    <div class="bn-raw-empty" id="bn-raw-empty">Loading…</div>
+                    <div class="bn-raw-list" id="bn-raw-list"></div>
+                </div>
+            </div>
+
+            <!-- Two-column: stream + thread panel -->
+            <div class="bn-grid">
+                <div id="bn-stream">
+                    <div style="text-align:center;padding:60px 20px;color:var(--text-muted);font-size:12px;">
+                        <span id="bn-loading-label">Loading break news feed…</span>
+                    </div>
+                </div>
+                <div class="bn-thread-panel" id="bn-thread-panel">
+                    <div class="bn-thread-empty" id="bn-thread-empty">
+                        <i data-lucide="message-circle" class="w-8 h-8 mx-auto mb-3 text-zinc-600"></i>
+                        <div id="bn-thread-empty-label">點選左側新聞卡查看 Claude × Gemini 辯論</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="news_components.js"></script>
+    <script src="trend-chart.js"></script>
+    <script src="page-break-news.js"></script>
+</body>
+</html>

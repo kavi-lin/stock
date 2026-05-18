@@ -1,0 +1,708 @@
+{
+  "news_id": "bn_20260514_5f418345",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T15:59:00Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/97ac61278fac",
+    "feed_fingerprint": "futu:AVGO,CSCO,NVDA,ORCL:c474bec896",
+    "published": "2026-05-14T23:25:27+08:00",
+    "url_hash": "sha1:74589bf19e5700fb748c071dc8b850c6be2d1fa6"
+  },
+  "headline": "三大指數刷新日內高點，納指漲超1%，標普、道指漲超0.8%",
+  "headline_zh": null,
+  "raw_summary": "三大指數刷新日內高點，納指漲超1%，標普、道指漲超0.8%；成分股中博通、甲骨文漲超5%，英偉達漲超4%，思科漲超15%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 3.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:54:56Z",
+      "latency_ms": 21737,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "盤中三大指數同創日高，**思科 +15%** 為最大亮點 — 大概率是 FQ3 財報 beat + AI infra capex guidance 上修觸發。**博通 / 甲骨文 +5%、NVDA +4%** 三者同步走強，訊號很明確：市場在重新定價 **AI infra 第二波** — 從 GPU 單點押注擴散到 networking (AVGO Tomahawk / 思科 Silicon One)、雲端 capex 受益方 (ORCL OCI)。思科這種被視為 legacy networking 的標的單日 +15%，代表 sell-side 對 **enterprise AI 網路升級** 的 TAM 假設正在被重估。短期需留意這是 short squeeze 還是 fundamental re-rating — 後續 AVGO 8/28 財報 & ORCL OCI revenue run-rate 是驗證錨。",
+        "bull_points": [
+          "思科+15%確認enterprise AI networking需求落地",
+          "AI infra行情從GPU擴散到networking第二波",
+          "AVGO/ORCL同步上漲代表廣度而非單點"
+        ],
+        "bear_points": [
+          "單日大漲常見短軋空回補非基本面",
+          "情緒過熱後一週易有獲利了結",
+          "思科+15%已price-in多季beat空間有限"
+        ],
+        "final_take": "結構性看多AI networking但需等回踩確認",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "AVGO",
+            "ORCL",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Equipment",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "AI networking",
+            "enterprise AI",
+            "cloud infra"
+          ],
+          "tech_keywords": [
+            "Silicon One",
+            "Tomahawk",
+            "OCI",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-networking"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-networking"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AVGO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "AI infra廣度擴散訊號明確但需驗證持續性"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:57:03Z",
+      "latency_ms": 127466,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "三大指數走強，特別是 NVDA、AVGO、ORCL 的上漲，明確顯示市場對 AI 基礎設施（包含 GPU、Networking、Cloud）的第二波需求重新定價。此趨勢向上游延伸，將直接推升 **TSMC** 等晶圓代工龍頭的營收動能，其 **N3P** 工藝節點與 **CoWoS-L** 先進封裝產能，是支撐這些高階晶片（如 Blackwell 架構）的關鍵。關注點應從晶片設計端擴散至製造端，確保供應鏈的實際產能瓶頸能對應市場預期。",
+        "bull_points": [
+          "TSMC 營收成長有望受惠",
+          "N3P / CoWoS-L 需求持穩"
+        ],
+        "bear_points": [
+          "地緣政治風險影響供應鏈",
+          "終端需求成長可能減速"
+        ],
+        "final_take": "AI 供應鏈潛力仍在，但製造端風險不容忽視。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "ORCL",
+            "TSMC"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Semiconductor manufacturing"
+          ],
+          "tech_keywords": [
+            "N3P",
+            "CoWoS-L",
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI infra capex"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:AVGO"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:HBM3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "延續 AI 基礎設施需求，聚焦關鍵製造環節。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:57:27Z",
+      "latency_ms": 24246,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前兩輪覆蓋 networking + 晶圓代工。補一個被漏掉的**2nd-order 角度：電力 / 散熱供應鏈**。思科 +15%、AVGO +5% 若代表 AI infra TAM 重估，**液冷 (Vertiv VRT)、電源 (Eaton ETN, GE Vernova GEV)、HVAC (Carrier CARR)** 為下一波 capex 兌現節點 — Blackwell GB200 機櫃單櫃功耗 120kW+，傳統氣冷無解，**direct-to-chip liquid cooling** 滲透率 2026 拉升中。另一個 contra：**思科 +15% 是 8 月以來首次跳空**，前一輪 FQ2 guidance 才剛被砍，今天爆量可能含 short cover 成分 — short interest ~2.5%，不算極端，但盤前 catalyst 不明確下宜留意明早 follow-through。若 AVGO / ORCL 不能延續，思科單日 +15% 易回吐。",
+        "bull_points": [
+          "AI infra 第二波擴散至電力散熱：VRT/ETN/GEV/CARR 直接受益",
+          "GB200 機櫃 120kW+ 強迫 direct-to-chip 液冷滲透率 2026 跳升",
+          "AVGO Tomahawk / 思科 Silicon One 為 GPU 互連必要節點"
+        ],
+        "bear_points": [
+          "思科 +15% 含 short cover 成分，fundamental re-rating 待驗證",
+          "FQ2 guidance 才被砍，單日跳空缺乏明確 catalyst",
+          "若 AVGO/ORCL 不延續，思科漲幅易回吐"
+        ],
+        "final_take": "看多 AI 電力散熱第二波，思科漲幅需 AVGO 財報背書",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "AVGO",
+            "ORCL",
+            "NVDA",
+            "VRT",
+            "ETN",
+            "GEV",
+            "CARR",
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "AI infrastructure",
+            "Liquid cooling",
+            "Data center power"
+          ],
+          "tech_keywords": [
+            "GB200",
+            "Blackwell",
+            "Silicon One",
+            "Tomahawk",
+            "CoWoS-L",
+            "direct-to-chip cooling"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:liquid-cooling"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:data-center-power"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:data-center-power"
+          },
+          {
+            "subject": "ticker:CARR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:liquid-cooling"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:gb200-deployment"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:short-squeeze-risk"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:CSCO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補電力散熱 2nd-order + 思科 short cover contra"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:58:10Z",
+      "latency_ms": 42758,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "延續前兩輪對 AI 基礎設施（GPU、Networking、Cloud）與上游製造（TSMC）的關注，本次三大指數的強勢，特別是 NVDA、AVGO、ORCL、CSCO 的同步上漲，更能體現市場對「企業 AI 應用落地」的預期升溫。這股需求將直接推升如 Palantir (PLTR) 等 AI 平台軟體商的業務動能，因其提供將 AI 運算能力轉化為實際企業價值的關鍵解決方案。因此，除了硬體供應鏈，軟體應用端亦是下一波 AI 趨勢的重要受惠者。",
+        "bull_points": [
+          "企業 AI 落地趨勢明確，PLTR 有望受惠。",
+          "AI 平台商 PLTR 乘載運算升級紅利。"
+        ],
+        "bear_points": [
+          "PLTR 執行風險及高估值仍是牽絆。",
+          "AI 平台市場競爭激烈，技術迭代快速。"
+        ],
+        "final_take": "PLTR 乘 AI 應用東風，但股價需基本面支撐。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "ORCL",
+            "CSCO",
+            "PLTR"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors",
+            "Software & Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Enterprise AI",
+            "AI Platforms"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e",
+            "N3P",
+            "CoWoS-L",
+            "Networking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:PLTR",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Enterprise AI"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充 AI 軟體平台商視角，關注應用端受益者。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:58:41Z",
+      "latency_ms": 30459,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前四輪覆蓋 networking、晶圓代工、電力散熱、AI 軟體平台。補一個被漏掉的**memory 角度 + 一個 contra**：(1) **HBM 供應鏈 — SK Hynix / Micron (MU) / Samsung** 是 Blackwell GB200 / AMD MI300 真正的瓶頸。**HBM3e 12-Hi** 良率仍卡在 SK Hynix 手上，**MU** 已將 2025 HBM 產能 sold out，2026 大部分也已 booked — 思科 / AVGO 上漲若反映 AI 第二波，MU 的 forward HBM ASP 重估才剛開始。(2) **Contra：今天領漲股 (CSCO +15%, AVGO +5%, ORCL +5%) 沒有 NVDA 領跑，反而是 NVDA 落後 (+4%)** — 這是 rotation within AI complex 而非 broad-based risk-on。若這是 **NVDA 從 GPU 獨佔敘事被稀釋**的開始 (CSCO/AVGO 搶走 networking share、ORCL 自建 OCI 減少 NVDA 直採)，那 NVDA forward multiple 反而要 derate。短期看多 AI infra 廣度，但 NVDA single-name beta 要打折。",
+        "bull_points": [
+          "HBM3e 12-Hi 產能 sold out，MU forward ASP 重估剛開始",
+          "AI infra 廣度擴散，networking + memory 同步受惠",
+          "ORCL OCI 自建提升 hyperscaler capex 多元化"
+        ],
+        "bear_points": [
+          "NVDA 落後領漲股，GPU 獨佔敘事被稀釋",
+          "CSCO +15% 含 short cover 風險，需 follow-through 驗證",
+          "HBM 集中度高，SK Hynix 良率事件即單點崩盤"
+        ],
+        "final_take": "看多 AI infra 廣度，但 NVDA single-name beta 要打折",
+        "entities": {
+          "tickers": [
+            "MU",
+            "NVDA",
+            "AVGO",
+            "CSCO",
+            "ORCL",
+            "AMD"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology",
+            "Memory"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM supply",
+            "AI infra rotation"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM3e 12-Hi",
+            "Blackwell",
+            "GB200",
+            "MI300",
+            "OCI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-infra-rotation"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CSCO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補 HBM 供應鏈 + NVDA rotation contra"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:59:00Z",
+      "latency_ms": 19396,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此輪 AI 基礎設施的廣泛投資與受益者擴張，預示著雲端 AI 服務的需求將持續攀升。Amazon Web Services (AWS) 等主要雲端供應商，作為企業 AI 採用的關鍵推手，將顯著受益。不斷提升的運算與網絡能力，直接增強了 AWS 提供先進 AI/ML 解決方案的實力，進而帶動各產業的應用動能。",
+        "bull_points": [
+          "雲端 AI 服務需求激增",
+          "AWS 受益於基礎設施擴張",
+          "企業 AI 落地加速"
+        ],
+        "bear_points": [
+          "雲端業者競爭激烈",
+          "hyperscalers 營運成本高漲"
+        ],
+        "final_take": "雲端業者是 AI 基礎設施的重要受惠者",
+        "entities": {
+          "tickers": [
+            "AMZN",
+            "NVDA",
+            "ORCL"
+          ],
+          "sectors": [
+            "Technology",
+            "Cloud Computing"
+          ],
+          "themes": [
+            "Cloud AI Services",
+            "Enterprise AI Adoption",
+            "AI Infrastructure"
+          ],
+          "tech_keywords": [
+            "LLM",
+            "AI/ML"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMZN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Cloud AI Services"
+          },
+          {
+            "subject": "theme:Enterprise AI Adoption",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:Cloud AI Services"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "雲端 AI 服務為 AI 基礎設施擴張的必然延伸"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMD",
+        "AMZN",
+        "AVGO",
+        "CARR",
+        "CSCO",
+        "ETN",
+        "GEV",
+        "MU",
+        "NVDA",
+        "ORCL",
+        "PLTR",
+        "TSM",
+        "TSMC",
+        "VRT"
+      ],
+      "sectors": [
+        "Cloud Computing",
+        "Communication Equipment",
+        "Industrials",
+        "Information Technology",
+        "Memory",
+        "Semiconductors",
+        "Software & Services",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI Infrastructure",
+        "AI Platforms",
+        "AI capex",
+        "AI infra rotation",
+        "AI infrastructure",
+        "AI networking",
+        "Cloud AI Services",
+        "Data center power",
+        "Enterprise AI",
+        "Enterprise AI Adoption",
+        "HBM supply",
+        "Liquid cooling",
+        "Semiconductor manufacturing",
+        "cloud infra",
+        "enterprise AI"
+      ],
+      "tech_keywords": [
+        "AI/ML",
+        "Blackwell",
+        "CoWoS-L",
+        "GB200",
+        "HBM3e",
+        "HBM3e 12-Hi",
+        "LLM",
+        "MI300",
+        "N3P",
+        "Networking",
+        "OCI",
+        "Silicon One",
+        "Tomahawk",
+        "direct-to-chip cooling"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-networking"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-networking"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI infra capex"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:HBM3e"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:liquid-cooling"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:data-center-power"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:data-center-power"
+      },
+      {
+        "subject": "ticker:CARR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:liquid-cooling"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:gb200-deployment"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:short-squeeze-risk"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:PLTR",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Enterprise AI"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-infra-rotation"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:AMZN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Cloud AI Services"
+      },
+      {
+        "subject": "theme:Enterprise AI Adoption",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:Cloud AI Services"
+      }
+    ],
+    "bull_summary": [
+      "思科+15%確認enterprise AI networking需求落地",
+      "AI infra行情從GPU擴散到networking第二波",
+      "AVGO/ORCL同步上漲代表廣度而非單點",
+      "TSMC 營收成長有望受惠",
+      "N3P / CoWoS-L 需求持穩",
+      "AI infra 第二波擴散至電力散熱：VRT/ETN/GEV/CARR 直接受益"
+    ],
+    "bear_summary": [
+      "單日大漲常見短軋空回補非基本面",
+      "情緒過熱後一週易有獲利了結",
+      "思科+15%已price-in多季beat空間有限",
+      "地緣政治風險影響供應鏈",
+      "終端需求成長可能減速",
+      "思科 +15% 含 short cover 成分，fundamental re-rating 待驗證"
+    ],
+    "final_take": "雲端業者是 AI 基礎設施的重要受惠者",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T15:59:00Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

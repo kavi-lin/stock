@@ -1,0 +1,863 @@
+{
+  "as_of_date": "2026-05-15",
+  "schema_version": "V1.4",
+  "lookback_days": 2,
+  "max_per_sector": 10,
+  "total_articles": 104,
+  "sectors": {
+    "Technology": [
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-15 10:18:29",
+        "publisher": "24/7 Wall Street",
+        "title": "Bill Ackman Just Bought Microsoft Stock \u2014 Here's Why It Could Be His Biggest Bet Yet",
+        "excerpt": "The market has been anything but subtle in its treatment of Microsoft ( NASDAQ:MSFT | MSFT Price Prediction ) in 2026.",
+        "url": "https://247wallst.com/investing/2026/05/15/bill-ackman-just-bought-microsoft-stock-heres-why-it-could-be-his-biggest-bet-yet/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-15 10:17:41",
+        "publisher": "Invezz",
+        "title": "Why Nvidia stock is crashing around 4% on Friday",
+        "excerpt": "Shares of Nvidia (NVDA) fell sharply on Friday, pulling back after an explosive rally that had pushed the chipmaker close to another record valuation milestone. The stock dropped around 4% to $226.80 in early trading after gaining roughly 20% over the previous seven sessions.",
+        "url": "https://invezz.com/news/2026/05/15/why-nvidia-stock-is-crashing-around-4-on-friday/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-15 10:16:09",
+        "publisher": "Zacks Investment Research",
+        "title": "Nvidia (NVDA) Q1 Earnings Preview: What You Should Know Beyond the Headline Estimates",
+        "excerpt": "Besides Wall Street's top-and-bottom-line estimates for Nvidia (NVDA), review projections for some of its key metrics to gain a deeper understanding of how the company might have fared during the quarter ended April 2026.",
+        "url": "https://www.zacks.com/stock/news/2921831/nvidia-nvda-q1-earnings-preview-what-you-should-know-beyond-the-headline-estimates?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm_preview-2921831"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-15 10:13:06",
+        "publisher": "24/7 Wall Street",
+        "title": "Forget the Trump Beijing Trade. This Stock Has 27 Consecutive Quarters Above 30% Revenue Growth and Nobody Is Talking About It",
+        "excerpt": "NVIDIA (NASDAQ:NVDA | NVDA Price Prediction) is back on every screen this week, riding a 19.96% one-month rally as traders front-run the agentic AI narrative and position around President Trump's trip to Beijing.",
+        "url": "https://247wallst.com/investing/2026/05/15/forget-the-trump-beijing-trade-this-stock-has-27-consecutive-quarters-above-30-revenue-growth-and-nobody-is-talking-about-it/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-15 10:07:57",
+        "publisher": "GeekWire",
+        "title": "Microsoft adds more former Ai2 researchers, bolstering its Superintelligence team",
+        "excerpt": "At least 10 former Allen Institute for AI staffers and researchers have joined Microsoft's Superintelligence team, including the core of the institute's OLMo open-source model effort.",
+        "url": "https://www.geekwire.com/2026/microsoft-adds-more-former-ai2-researchers-to-its-superintelligence-team/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-15 10:06:51",
+        "publisher": "Seeking Alpha",
+        "title": "Nvidia Earnings Could Reset The Entire AI Trade",
+        "excerpt": "Nvidia Corporation revenue estimates surged 36 times higher recently, while Q1 sales expectations climbed toward roughly $79.2 billion sequentially. Blackwell demand, hyperscaler AI spending, and networking expansion continue signaling supply-constrained infrastructure growth rat",
+        "url": "https://seekingalpha.com/article/4905210-nvidia-earnings-could-reset-the-entire-ai-trade"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-15 10:00:51",
+        "publisher": "Zacks Investment Research",
+        "title": "ETFs to Follow Amid U.S.-China Summit",
+        "excerpt": "U.S.-China summit revived hopes for trade, AI chip access and Boeing deals, lifting prospects for China tech, semis and aerospace ETFs.",
+        "url": "https://www.zacks.com/stock/news/2921776/etfs-to-follow-amid-u-s-china-summit?cid=CS-STOCKNEWSAPI-FT-etf_news_and_commentary-2921776"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-05-15 10:00:39",
+        "publisher": "Zacks Investment Research",
+        "title": "Apple Inc. (AAPL) Is a Trending Stock: Facts to Know Before Betting on It",
+        "excerpt": "Zacks.com users have recently been watching Apple (AAPL) quite a bit. Thus, it is worth knowing the facts that could determine the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2921808/apple-inc-aapl-is-a-trending-stock-facts-to-know-before-betting-on-it?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921808"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-05-15 09:56:49",
+        "publisher": "24/7 Wall Street",
+        "title": "CDL Delivers Capital Gains Alongside Income as Rates Hover Near 4.4%",
+        "excerpt": "The VictoryShares US Large Cap High Div Volatility Wtd ETF (NASDAQ:CDL) pulls its distribution from dividends paid by large U.S.",
+        "url": "https://247wallst.com/investing/2026/05/15/cdl-delivers-capital-gains-alongside-income-as-rates-hover-near-4-4/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-15 09:54:51",
+        "publisher": "Seeking Alpha",
+        "title": "Nvidia: I'm Loading Up Before Q1 Earnings",
+        "excerpt": "Nvidia remains a compelling Strong Buy ahead of Q1 earnings, with AI demand accelerating and China demand potentially returning. NVDA could see a 10-15% revenue upside if China sales resume, as recent approvals suggest $10\u201316 billion in added sales. Key earnings catalysts include",
+        "url": "https://seekingalpha.com/article/4905199-nvidia-im-loading-up-before-q1-earnings"
+      }
+    ],
+    "Healthcare": [
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-05-15 10:00:27",
+        "publisher": "Zacks Investment Research",
+        "title": "Eli Lilly and Company (LLY) Is a Trending Stock: Facts to Know Before Betting on It",
+        "excerpt": "Lilly (LLY) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2921795/eli-lilly-and-company-lly-is-a-trending-stock-facts-to-know-before-betting-on-it?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921795"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-14 23:49:28",
+        "publisher": "Seeking Alpha",
+        "title": "UnitedHealth: TrumpRx Is A Nothingburger",
+        "excerpt": "UnitedHealth Group is rated a slim Buy following a 59% recovery from March lows, driven by strong Q1 results and a favorable 2027 CMS rate decision. Q1 revenue reached $111.72B with EPS of $7.23, prompting management to raise full-year EPS guidance to over $18.25 and authorize a ",
+        "url": "https://seekingalpha.com/article/4905044-unitedhealth-stock-trumprx-is-a-nothingburger"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-14 16:01:00",
+        "publisher": "PRNewsWire",
+        "title": "Groundbreaking global survey captures the significant patient burden experienced with current standard-of-care bladder cancer treatments, underscoring urgency for continued innovation",
+        "excerpt": "More than 90% of patients surveyed who underwent bladder removal or received BCG report negative impact on most aspects of their lives Among patients treated with BCG, three- quarters describe managing the treatment- related physical symptoms as humiliating Patients and urologist",
+        "url": "https://www.prnewswire.com/news-releases/groundbreaking-global-survey-captures-the-significant-patient-burden-experienced-with-current-standard-of-care-bladder-cancer-treatments-underscoring-urgency-for-continued-innovation-302771604.html"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-05-14 13:34:41",
+        "publisher": "24/7 Wall Street",
+        "title": "Is Eli Lilly Going To $1,100?",
+        "excerpt": "Eli Lilly (NYSE:LLY | LLY Price Prediction) just delivered one of the most impressive quarters in big pharma history, and the stock is responding.",
+        "url": "https://247wallst.com/investing/2026/05/14/is-eli-lilly-going-to-1100/"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-14 13:13:00",
+        "publisher": "24/7 Wall Street",
+        "title": "Forget UnitedHealth: Two Stocks To Buy Now",
+        "excerpt": "UnitedHealth Group (NYSE:UNH | UNH Price Prediction) is back in every headline, riding a 31.24% one-month bounce off a 9.38% Q1 EPS beat that had Reddit cheering a \u201cUnitedHealth +7% premarket\u201d rally on April 21.",
+        "url": "https://247wallst.com/investing/2026/05/14/forget-unitedhealth-two-stocks-to-buy-now/"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-14 12:31:11",
+        "publisher": "Zacks Investment Research",
+        "title": "Why Is Johnson & Johnson (JNJ) Down 3.5% Since Last Earnings Report?",
+        "excerpt": "Johnson & Johnson (JNJ) reported earnings 30 days ago. What's next for the stock?",
+        "url": "https://www.zacks.com/stock/news/2921412/why-is-johnson-johnson-jnj-down-3-5-since-last-earnings-report?cid=CS-STOCKNEWSAPI-FT-realtime_blog-2921412"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-14 11:09:11",
+        "publisher": "Seeking Alpha",
+        "title": "UnitedHealth: Beaten Down, Not Broken",
+        "excerpt": "UnitedHealth Group Incorporated has surged 18% since my last update, outperforming the benchmark and reinforcing my Strong Buy rating. Despite the recent rally, I still view UNH as undervalued and well-positioned to outperform over the long term. Recent solid double-beat earnings",
+        "url": "https://seekingalpha.com/article/4904576-unitedhealth-beaten-down-not-broken"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-14 11:05:55",
+        "publisher": "24/7 Wall Street",
+        "title": "Cardinal Health Was Supposed to Beat UnitedHealth. Did It? Will It?",
+        "excerpt": "Roughly a year ago, 24/7 Wall St. ran a piece titled Forget UnitedHealth.",
+        "url": "https://247wallst.com/investing/2026/05/14/cardinal-health-was-supposed-to-beat-unitedhealth-did-it-will-it/"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-14 10:51:07",
+        "publisher": "Zacks Investment Research",
+        "title": "Here's Why UnitedHealth Group (UNH) is a Strong Momentum Stock",
+        "excerpt": "Wondering how to pick strong, market-beating stocks for your investment portfolio? Look no further than the Zacks Style Scores.",
+        "url": "https://www.zacks.com/stock/news/2921264/here-s-why-unitedhealth-group-unh-is-a-strong-momentum-stock?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_momentum_score-2921264"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-14 10:01:37",
+        "publisher": "Zacks Investment Research",
+        "title": "Investors Heavily Search UnitedHealth Group Incorporated (UNH): Here is What You Need to Know",
+        "excerpt": "UnitedHealth (UNH) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2921104/investors-heavily-search-unitedhealth-group-incorporated-unh-here-is-what-you-need-to-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921104"
+      }
+    ],
+    "Energy": [
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-15 09:36:08",
+        "publisher": "Zacks Investment Research",
+        "title": "4 Reasons to Buy Petrobras Stock Despite Mixed Q1 Earnings",
+        "excerpt": "Petrobras missed Q1 estimates but hit record output, stronger refining profits, $3.9B free cash flow and an early P-79 start at Buzios.",
+        "url": "https://www.zacks.com/stock/news/2921860/4-reasons-to-buy-petrobras-stock-despite-mixed-q1-earnings?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2921860"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-15 06:32:00",
+        "publisher": "The Motley Fool",
+        "title": "Chevron vs. TotalEnergies: What's the Better Energy Buy?",
+        "excerpt": "Chevron and TotalEnergies are two of the world's largest energy companies. While both have diversified operations, TotalEnergies is investing heavily to expand its power production capacity.",
+        "url": "https://www.fool.com/investing/2026/05/15/chevron-vs-totalenergies-whats-the-better-energy-b/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-14 21:46:37",
+        "publisher": "Reuters",
+        "title": "Exxon Mobil not liable to investors over Canadian oil sands, gas assets, jury says",
+        "excerpt": "A Texas jury on Wednesday found Exxon Mobil not \u200bliable on claims it defrauded \u200cinvestors through disclosures tied to its Canadian oil sands and Rocky \u200bMountain gas operations.",
+        "url": "https://www.reuters.com/sustainability/boards-policy-regulation/exxon-mobil-not-liable-investors-over-canadian-oil-sands-gas-assets-jury-says-2026-05-15/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-14 15:30:52",
+        "publisher": "Zacks Investment Research",
+        "title": "ConocoPhillips (COP) Reports Q1 Earnings: What Key Metrics Have to Say",
+        "excerpt": "Although the revenue and EPS for ConocoPhillips (COP) give a sense of how its business performed in the quarter ended March 2026, it might be worth considering how some key metrics compare with Wall Street estimates and the year-ago numbers.",
+        "url": "https://www.zacks.com/stock/news/2921555/conocophillips-cop-reports-q1-earnings-what-key-metrics-have-to-say?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2921555"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-14 12:47:46",
+        "publisher": "24/7 Wall Street",
+        "title": "Could the Trump NACHO Trade Send Energy Stocks Through the Roof?",
+        "excerpt": "First, there was the TACO trade (Trump Always Chickens Out) amid rising tariff fears in the months and quarters that followed Liberation Day.",
+        "url": "https://247wallst.com/investing/2026/05/14/could-the-trump-nacho-trade-send-energy-stocks-through-the-roof/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-14 12:41:05",
+        "publisher": "Zacks Investment Research",
+        "title": "COP or WHD: Which Is the Better Value Stock Right Now?",
+        "excerpt": "Investors looking for stocks in the Oil and Gas - Integrated - United States sector might want to consider either ConocoPhillips (COP) or Cactus, Inc. (WHD). But which of these two stocks is more attractive to value investors?",
+        "url": "https://www.zacks.com/stock/news/2921419/cop-or-whd-which-is-the-better-value-stock-right-now?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_3-2921419"
+      },
+      {
+        "symbol": "EOG",
+        "publishedDate": "2026-05-14 10:41:27",
+        "publisher": "Zacks Investment Research",
+        "title": "Why EOG Resources (EOG) is a Top Value Stock for the Long-Term",
+        "excerpt": "Wondering how to pick strong, market-beating stocks for your investment portfolio? Look no further than the Zacks Style Scores.",
+        "url": "https://www.zacks.com/stock/news/2921249/why-eog-resources-eog-is-a-top-value-stock-for-the-long-term?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_value_score-2921249"
+      },
+      {
+        "symbol": "EOG",
+        "publishedDate": "2026-05-14 09:00:18",
+        "publisher": "Seeking Alpha",
+        "title": "My Top 10 Dividend Stocks For May",
+        "excerpt": "This dividend growth portfolio optimizes for payout ratios, EBITDA yield, and dividend growth, focusing on Dow Dividend 100 constituents. EOG Resources, Comcast, and Accenture receive the highest portfolio weights based on a multi-factor scoring system. The weighted portfolio off",
+        "url": "https://seekingalpha.com/article/4904359-my-top-10-dividend-stocks-for-may"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-14 09:00:00",
+        "publisher": "Business Wire",
+        "title": "ExxonMobil to Speak at Bernstein 42nd Annual Strategic Decisions Conference",
+        "excerpt": "SPRING, Texas--(BUSINESS WIRE)--Exxon Mobil Corporation (NYSE: XOM) today announced Neil Chapman, Senior Vice President, will conduct a fireside chat at the Bernstein 42nd Annual Strategic Decisions Conference in New York on May 28, 2026, at 9:00 a.m. ET. To access the live webca",
+        "url": "https://www.businesswire.com/news/home/20260514183192/en/ExxonMobil-to-Speak-at-Bernstein-42nd-Annual-Strategic-Decisions-Conference/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-14 03:40:00",
+        "publisher": "WSJ",
+        "title": "Chevron to Sell Some Asia-Pacific Assets to Japan's Eneos for $2.17 Billion",
+        "excerpt": "Chevron has agreed to sell several Asia-Pacific refining and retail assets to Japan's Eneos for $2.17 billion, as it continues to streamline its international portfolio.",
+        "url": "https://www.wsj.com/business/deals/chevron-to-sell-some-asia-pacific-assets-to-japans-eneos-for-2-17-billion-13aeec6b"
+      }
+    ],
+    "Financials": [
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-15 09:03:00",
+        "publisher": "GlobeNewsWire",
+        "title": "JPMorgan ETFs (Ireland) ICAV: Dividend Declaration",
+        "excerpt": "DUBLIN, Ireland, May 15, 2026 (GLOBE NEWSWIRE) -- JPMorgan ETFs (Ireland) ICAV RE: Dividends The Directors of JPMorgan ETFs (Ireland) ICAV (the \u201cCompany\u201d) wish to announce the following dividends which are ex dividend as of the 21 May 2026, record date as of the 22 May 2026 & pay",
+        "url": "https://www.globenewswire.com/news-release/2026/05/15/3295909/0/en/JPMorgan-ETFs-Ireland-ICAV-Dividend-Declaration.html"
+      },
+      {
+        "symbol": "WFC",
+        "publishedDate": "2026-05-15 08:59:02",
+        "publisher": "24/7 Wall Street",
+        "title": "Prediction. The Warsh Fed Trade Is Just Getting Started and These 3 Bank Stocks Under $55 Have the Most to Gain",
+        "excerpt": "Treasury yields are climbing as traders position for the Kevin Warsh appointment to the Federal Reserve, with markets pricing in a more growth-friendly path that could steepen the yield curve and reprice fixed-rate bank assets at higher levels.",
+        "url": "https://247wallst.com/investing/2026/05/15/prediction-the-warsh-fed-trade-is-just-getting-started-and-these-3-bank-stocks-under-55-have-the-most-to-gain/"
+      },
+      {
+        "symbol": "WFC",
+        "publishedDate": "2026-05-15 08:00:00",
+        "publisher": "Business Wire",
+        "title": "Wells Fargo & Company Declares Cash Dividends on Preferred Stock",
+        "excerpt": "SAN FRANCISCO--(BUSINESS WIRE)--Wells Fargo & Company (NYSE: WFC) today announced dividends on six series of preferred stock. A quarterly cash dividend of $18.75 per share was declared on its 7.50% noncumulative perpetual convertible class A preferred stock, Series L, liquidation",
+        "url": "https://www.businesswire.com/news/home/20260515781965/en/Wells-Fargo-Company-Declares-Cash-Dividends-on-Preferred-Stock/"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-14 21:42:16",
+        "publisher": "PYMNTS",
+        "title": "Chase Opens 18 Branches in May Amid Multibillion-Dollar Expansion",
+        "excerpt": "By the end of May, Chase will have opened 18 new branches this month and 52 new branches this year. The bank will have also renovated more than 160 branches since January, it said in a Thursday (May 14) press release.",
+        "url": "https://www.pymnts.com/news/banking/2026/chase-opens-18-branches-in-may-amid-multibillion-dollar-expansion/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-14 12:45:37",
+        "publisher": "24/7 Wall Street",
+        "title": "Berkshire Hathaway's Cash, Earnings and Optionality Make It the Ultimate Value Play",
+        "excerpt": "Berkshire Hathaway (NYSE:BRK-B | BRK-B Price Prediction) is a stock built to own for decades because its structural design, a diversified industrial conglomerate sitting atop the largest discretionary cash pile in corporate America, is purpose-built to compound through every cycl",
+        "url": "https://247wallst.com/investing/2026/05/14/berkshire-hathaways-cash-earnings-and-optionality-make-it-the-ultimate-value-play/"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-14 12:31:12",
+        "publisher": "Zacks Investment Research",
+        "title": "Why Is JPMorgan Chase & Co. (JPM) Down 1.9% Since Last Earnings Report?",
+        "excerpt": "JPMorgan Chase & Co. (JPM) reported earnings 30 days ago. What's next for the stock?",
+        "url": "https://www.zacks.com/stock/news/2921413/why-is-jpmorgan-chase-co-jpm-down-1-9-since-last-earnings-report?cid=CS-STOCKNEWSAPI-FT-realtime_blog-2921413"
+      },
+      {
+        "symbol": "WFC",
+        "publishedDate": "2026-05-14 12:31:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Wells Fargo (WFC) Down 8.4% Since Last Earnings Report: Can It Rebound?",
+        "excerpt": "Wells Fargo (WFC) reported earnings 30 days ago. What's next for the stock?",
+        "url": "https://www.zacks.com/stock/news/2921411/wells-fargo-wfc-down-8-4-since-last-earnings-report-can-it-rebound?cid=CS-STOCKNEWSAPI-FT-realtime_blog-2921411"
+      },
+      {
+        "symbol": "WFC",
+        "publishedDate": "2026-05-14 10:55:51",
+        "publisher": "Zacks Investment Research",
+        "title": "Wells Fargo Revenues Are Rising, But Can It Bend the Cost Curve?",
+        "excerpt": "WFC's revenues rise 6% y/y in Q1, but rising compensation and tech costs are testing how quickly the bank can improve efficiency.",
+        "url": "https://www.zacks.com/stock/news/2921357/wells-fargo-revenues-are-rising-but-can-it-bend-the-cost-curve?cid=CS-STOCKNEWSAPI-FT-analyst_blog|company_news_finance_sector-2921357"
+      },
+      {
+        "symbol": "BAC",
+        "publishedDate": "2026-05-14 10:51:27",
+        "publisher": "Zacks Investment Research",
+        "title": "After a 63.3% Surge in a Year, Is C Stock Worth Holding on to Now?",
+        "excerpt": "Can Citigroup sustain its strong rally as transformation gains, AI investments and buybacks offset rising credit risks? Let us find out.",
+        "url": "https://www.zacks.com/stock/news/2921352/after-a-63-3-surge-in-a-year-is-c-stock-worth-holding-on-to-now?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2921352"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-14 10:31:27",
+        "publisher": "Zacks Investment Research",
+        "title": "JPMorgan vs. Truist: A Battle of Scale, Stability and Growth",
+        "excerpt": "JPM's scale, $4.9T assets and dividend firepower face off with Truist's discounted valuation and recovery plan. Who has the edge?",
+        "url": "https://www.zacks.com/stock/news/2921140/jpmorgan-vs-truist-a-battle-of-scale-stability-and-growth?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2921140"
+      }
+    ],
+    "Consumer_Discretionary": [
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-15 10:00:32",
+        "publisher": "Zacks Investment Research",
+        "title": "Here is What to Know Beyond Why Amazon.com, Inc. (AMZN) is a Trending Stock",
+        "excerpt": "Amazon (AMZN) has received quite a bit of attention from Zacks.com users lately. Therefore, it is wise to be aware of the facts that can impact the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2921797/here-is-what-to-know-beyond-why-amazon-com-inc-amzn-is-a-trending-stock?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921797"
+      },
+      {
+        "symbol": "HD",
+        "publishedDate": "2026-05-15 10:00:31",
+        "publisher": "Zacks Investment Research",
+        "title": "Is Most-Watched Stock The Home Depot, Inc. (HD) Worth Betting on Now?",
+        "excerpt": "Zacks.com users have recently been watching Home Depot (HD) quite a bit. Thus, it is worth knowing the facts that could determine the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2921798/is-most-watched-stock-the-home-depot-inc-hd-worth-betting-on-now?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921798"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-15 08:47:15",
+        "publisher": "24/7 Wall Street",
+        "title": "Trump Bought Up to $5 Million of Nvidia Stock \u2014 Then OK'd AI Export Deals That Sent Shares Soaring",
+        "excerpt": "For years, Washington treated advanced AI chips like strategic weapons.",
+        "url": "https://247wallst.com/investing/2026/05/15/trump-bought-up-to-5-million-of-nvidia-stock-then-okd-ai-export-deals-that-sent-shares-soaring/"
+      },
+      {
+        "symbol": "MCD",
+        "publishedDate": "2026-05-15 08:30:00",
+        "publisher": "Seeking Alpha",
+        "title": "McDonald's: Buy For Long-Term Investors As Shares Could Re-Rate Due To Accelerating Store Growth",
+        "excerpt": "McDonald's remains a buy despite recent double-digit declines and margin pressures from consumer affordability and tariffs. MCD trades below its five-year average at ~20x earnings, with long-term upside potential as growth accelerates and store openings target 50,000 by next year",
+        "url": "https://seekingalpha.com/article/4904776-mcdonalds-buy-for-long-term-investors-as-shares-could-re-rate-due-to-accelerating-store-growth"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-15 08:27:54",
+        "publisher": "Proactive Investors",
+        "title": "UBS warns AI stocks are overheating as growth expectations collide with history",
+        "excerpt": "UBS said the April rally in US equities was a 2.8 standard deviation event over the past 25 years, while its own crowding data shows mega-cap tech stocks remain heavily crowded long positions. The bank's quantitative research found that every one of the Magnificent Seven stocks, ",
+        "url": "https://www.proactiveinvestors.co.uk/companies/news/1092377"
+      },
+      {
+        "symbol": "MCD",
+        "publishedDate": "2026-05-15 08:18:01",
+        "publisher": "24/7 Wall Street",
+        "title": "Don't Look Now, but 4 Blue-Chip Giants Could Be the Newest Dividend Kings",
+        "excerpt": "Companies that have raised dividends for shareholders for 50 years or more are the kinds of investments passive income investors need to own.",
+        "url": "https://247wallst.com/investing/2026/05/15/dont-look-now-but-4-blue-chip-giants-could-be-the-newest-dividend-kings/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-15 08:06:56",
+        "publisher": "24/7 Wall Street",
+        "title": "Anthropic's CFO Reveals the Compute Gamble That Could Sink Any AI Company. Here's Why Nvidia, Amazon, and Google Are All in Play",
+        "excerpt": "Happy Friday, all. Here's some only-in-2026 math for you.",
+        "url": "https://247wallst.com/investing/2026/05/15/anthropics-cfo-reveals-the-compute-gamble-that-could-sink-any-ai-company-heres-why-nvidia-amazon-and-google-are-all-in-play/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-15 07:36:27",
+        "publisher": "24/7 Wall Street",
+        "title": "Bill Ackman Bought Google After the ChatGPT Panic (Up 300%). He Bought Amazon After Liberation Day (Up 36%).",
+        "excerpt": "Although Wall Street has spent the better part of two years lecturing investors that the AI trade is crowded, the capex bill is unpayable, and the mega-caps have run out of room to grow, Bill Ackman keeps surfacing at exactly those moments to buy.",
+        "url": "https://247wallst.com/investing/2026/05/15/bill-ackman-bought-google-after-the-chatgpt-panic-up-300-he-bought-amazon-after-liberation-day-up-36-now-hes-backing-up-the-truck-again/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-15 07:30:45",
+        "publisher": "24/7 Wall Street",
+        "title": "Here's Why Amazon (AMZN) Might Be the Ultimate Hard-Asset and AI Infrastructure Stock",
+        "excerpt": "Most mega-cap and Mag 7 names are either asset-light platforms or asset-heavy industrials.",
+        "url": "https://247wallst.com/investing/2026/05/15/heres-why-amazon-amzn-might-be-the-ultimate-hard-asset-and-ai-infrastructure-stock/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-15 07:27:00",
+        "publisher": "Barrons",
+        "title": "Tesla Stock Aims For 3 Weekly Gains. Trump's China Failure Could Stop It.",
+        "excerpt": "Heading into Friday trading, Tesla stock has risen for two consecutive weeks and three of the past four.",
+        "url": "https://www.barrons.com/articles/tesla-stock-trump-china-musk-c7ed7953"
+      }
+    ],
+    "Consumer_Staples": [
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-15 10:12:43",
+        "publisher": "MarketBeat",
+        "title": "Vita Coco Says Coconut Water Demand, Walmart Gains Are Fueling Raised Outlook",
+        "excerpt": "Vita Coco NASDAQ: COCO executives said the company is benefiting from accelerating demand for coconut water, broader distribution gains and increasing consumer interest in functional hydration, following a first quarter in which the company reported 37% top-line growth and raised",
+        "url": "https://www.marketbeat.com/instant-alerts/vita-coco-says-coconut-water-demand-walmart-gains-are-fueling-raised-outlook-2026-05-15/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-15 10:01:32",
+        "publisher": "CNBC",
+        "title": "Walmart is overhauling packaging for 10,000 Great Value products",
+        "excerpt": "Walmart's largest private brand, Great Value, is getting a fresh look. CNBC's Melissa Repko has the details.",
+        "url": "https://www.youtube.com/shorts/vknn0wwmhAo"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-15 10:00:25",
+        "publisher": "Zacks Investment Research",
+        "title": "Investors Heavily Search Walmart Inc. (WMT): Here is What You Need to Know",
+        "excerpt": "Walmart (WMT) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2921793/investors-heavily-search-walmart-inc-wmt-here-is-what-you-need-to-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921793"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-15 09:55:26",
+        "publisher": "Zacks Investment Research",
+        "title": "Why Investors Need to Take Advantage of These 2 Retail and Wholesale Stocks Now",
+        "excerpt": "Finding stocks expected to beat quarterly earnings estimates becomes an easier task with our Zacks Earnings ESP.",
+        "url": "https://www.zacks.com/stock/news/2921780/why-investors-need-to-take-advantage-of-these-2-retail-and-wholesale-stocks-now?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_earnings_esp-2921780"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-14 14:43:00",
+        "publisher": "PRNewsWire",
+        "title": "DISCOVERY+ NOW AVAILABLE TO SPECTRUM TV CUSTOMERS AT NO EXTRA COST",
+        "excerpt": "Customers Can Unlock More Than $125/Month in Streaming App Value with Eligible Spectrum TV Plans Key Takeaways: Spectrum TV customers with eligible plans now receive ad-supported discovery+, featuring popular reality and lifestyle shows plus documentaries from HGTV, Food Network,",
+        "url": "https://www.prnewswire.com/news-releases/discovery-now-available-to-spectrum-tv-customers-at-no-extra-cost-302772786.html"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-14 13:13:00",
+        "publisher": "24/7 Wall Street",
+        "title": "Forget UnitedHealth: Two Stocks To Buy Now",
+        "excerpt": "UnitedHealth Group (NYSE:UNH | UNH Price Prediction) is back in every headline, riding a 31.24% one-month bounce off a 9.38% Q1 EPS beat that had Reddit cheering a \u201cUnitedHealth +7% premarket\u201d rally on April 21.",
+        "url": "https://247wallst.com/investing/2026/05/14/forget-unitedhealth-two-stocks-to-buy-now/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-14 12:53:06",
+        "publisher": "The Motley Fool",
+        "title": "Warren Buffett Has Beaten the Market Over a 60-Year Stretch. Here Are 3 of the Billionaire's Favorite Stocks.",
+        "excerpt": "Coca-Cola, American Express, and Apple represent the core of Buffett's investment philosophy -- wide moats, durable brands, and loyal customers. Despite trimming his Apple position in recent years, the tech giant remains Berkshire's largest equity holding at nearly 23% of the por",
+        "url": "https://www.fool.com/investing/2026/05/14/billionaire-warren-buffett-favorite-stocks/"
+      },
+      {
+        "symbol": "KO",
+        "publishedDate": "2026-05-14 12:47:08",
+        "publisher": "24/7 Wall Street",
+        "title": "Prediction: Up 16% YTD, Coca-Cola Has More Upside",
+        "excerpt": "Our Coca-Cola (NYSE:KO | KO Price Prediction) outlook leans constructive after a clean Q1 2026 beat, a raised full-year EPS guide, and a stock that has quietly logged a 15.59% year-to-date gain.",
+        "url": "https://247wallst.com/investing/2026/05/14/prediction-up-16-ytd-coca-cola-has-more-upside/"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-14 11:27:14",
+        "publisher": "24/7 Wall Street",
+        "title": "Inflation Just Hit 3.8% and Nine Out of Ten Costco Members Re-Up Every Year. Here Is Why That Math Matters.",
+        "excerpt": "The long-term case for Costco rests on the fact that its membership model strengthens when inflation squeezes household budgets, and the data entering mid-2026 says that squeeze is back.",
+        "url": "https://247wallst.com/investing/2026/05/14/inflation-just-hit-3-8-and-nine-out-of-ten-costco-members-re-up-every-year-here-is-why-that-math-matters/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-14 11:12:13",
+        "publisher": "24/7 Wall Street",
+        "title": "Richest Family In The World Just Got Richer",
+        "excerpt": "The rich get richer in two ways. One way is the way Elon Musk and Warren Buffett did.",
+        "url": "https://247wallst.com/investing/2026/05/14/richest-family-in-the-world-just-got-richer/"
+      }
+    ],
+    "Industrials": [
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-15 08:00:00",
+        "publisher": "PRNewsWire",
+        "title": "RTX Chairman and CEO to present at the 2026 Bernstein Strategic Decisions Conference",
+        "excerpt": "ARLINGTON, Va., May 15, 2026 /PRNewswire/ -- RTX (NYSE: RTX) Chairman and CEO Chris Calio will speak at the 2026 Bernstein Strategic Decisions Conference on Friday, May 29 at 10:00 a.m.",
+        "url": "https://www.prnewswire.com/news-releases/rtx-chairman-and-ceo-to-present-at-the-2026-bernstein-strategic-decisions-conference-302772090.html"
+      },
+      {
+        "symbol": "HON",
+        "publishedDate": "2026-05-15 02:55:00",
+        "publisher": "Seeking Alpha",
+        "title": "The Broyhill Q1 2026 Portfolio Strategy And Positioning",
+        "excerpt": "Valvoline was Broyhill's largest contributor in the quarter, as the underlying unit economics are intact, while unit growth, service mix, and price continue moving in the same direction. Honeywell management accelerated the aerospace spin-off to the end of June, leaving behind a ",
+        "url": "https://seekingalpha.com/article/4905090-the-broyhill-q1-2026-portfolio-strategy-and-positioning"
+      },
+      {
+        "symbol": "GE",
+        "publishedDate": "2026-05-14 23:59:31",
+        "publisher": "Reuters",
+        "title": "GE Aerospace CEO Larry Culp visits China's state planner headquarters",
+        "excerpt": "GE Aerospace CEO Larry Culp was \u200bseen on Friday in Beijing leaving a \u200cmeeting at the headquarters of China's powerful state planner, the National Development and Reform Commission, according to \u200ba Reuters witness.",
+        "url": "https://www.reuters.com/business/aerospace-defense/ge-aerospace-ceo-larry-culp-visits-chinas-state-planner-headquarters-2026-05-15/"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-05-14 16:15:00",
+        "publisher": "Business Wire",
+        "title": "Union Pacific Corporation Declares Second Quarter 2026 Dividend",
+        "excerpt": "OMAHA, Neb.--(BUSINESS WIRE)--The Board of Directors of Union Pacific Corporation (NYSE: UNP) has declared a quarterly dividend of $1.38 per share on the company's common stock, payable June 30, 2026, to shareholders of record May 29, 2026. Union Pacific has paid dividends on its",
+        "url": "https://www.businesswire.com/news/home/20260514250096/en/Union-Pacific-Corporation-Declares-Second-Quarter-2026-Dividend/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-14 14:14:18",
+        "publisher": "Benzinga",
+        "title": "Stocks For Navigating Inflation Stress",
+        "excerpt": "With the deadlock in the Strait of Hormuz refusing to break, should investors adapt their strategy for a sustained period of high inflation on Wall Street?",
+        "url": "https://www.benzinga.com/Opinion/26/05/52575112/stocks-for-navigating-inflation-stress"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-05-14 13:16:10",
+        "publisher": "Zacks Investment Research",
+        "title": "3 Railroad Stocks to Watch From the Challenging Industry",
+        "excerpt": "Headwinds, including high fuel costs, tariff-related tensions, and lingering supply-chain disruptions, hurt the Zacks Transportation -Railroad industry. UNP, CSX and CP are likely to stand out.",
+        "url": "https://www.zacks.com/commentary/2921349/3-railroad-stocks-to-watch-from-the-challenging-industry?cid=CS-STOCKNEWSAPI-FT-industry_outlook-2921349"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-14 10:01:36",
+        "publisher": "Zacks Investment Research",
+        "title": "Investors Heavily Search RTX Corporation (RTX): Here is What You Need to Know",
+        "excerpt": "RTX (RTX) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2921105/investors-heavily-search-rtx-corporation-rtx-here-is-what-you-need-to-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks_v1-2921105"
+      },
+      {
+        "symbol": "GE",
+        "publishedDate": "2026-05-14 10:01:30",
+        "publisher": "Zacks Investment Research",
+        "title": "GE Aerospace (GE) is Attracting Investor Attention: Here is What You Should Know",
+        "excerpt": "Recently, Zacks.com users have been paying close attention to GE (GE). This makes it worthwhile to examine what the stock has in store.",
+        "url": "https://www.zacks.com/stock/news/2921086/ge-aerospace-ge-is-attracting-investor-attention-here-is-what-you-should-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921086"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-05-14 08:00:00",
+        "publisher": "Business Wire",
+        "title": "Union Pacific Corporation CEO Jim Vena to Address the RBC Canadian Industrials Conference",
+        "excerpt": "OMAHA, Neb.--(BUSINESS WIRE)--Jim Vena, chief executive officer of Union Pacific Corporation (NYSE: UNP) will address the RBC Canadian Industrials Conference on Thursday, May 21, 2026, at 12:00 p.m. ET. A live webcast of the presentation will be available in the investor relation",
+        "url": "https://www.businesswire.com/news/home/20260514363427/en/Union-Pacific-Corporation-CEO-Jim-Vena-to-Address-the-RBC-Canadian-Industrials-Conference/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-13 13:56:33",
+        "publisher": "Seeking Alpha",
+        "title": "Caterpillar: Solving AI's Time-To-Power Bottleneck, But I'm Buying Its Rivals Instead",
+        "excerpt": "I like simple stories. AI needs power fast, and Caterpillar can help solve that bottleneck. I'm not surprised by CAT's rerate over the past year, as the market now sees this once-boring cyclical stock as a key player in AI power (both backup and primary). That said, the Power Gen",
+        "url": "https://seekingalpha.com/article/4904008-caterpillar-solving-ais-time-to-power-bottleneck-but-im-buying-its-rivals-instead"
+      }
+    ],
+    "Materials": [
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-15 07:50:45",
+        "publisher": "Seeking Alpha",
+        "title": "Freeport-McMoRan Inc. (FCX) Presents at Bank of America Global Metals, Mining & Steel Conference 2026 Transcript",
+        "excerpt": "Freeport-McMoRan Inc. (FCX) Presents at Bank of America Global Metals, Mining & Steel Conference 2026 Transcript",
+        "url": "https://seekingalpha.com/article/4905175-freeport-mcmoran-inc-fcx-presents-at-bank-of-america-global-metals-mining-and-steel"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-14 13:06:10",
+        "publisher": "Zacks Investment Research",
+        "title": "3 Non-Ferrous Metal Mining Stocks to Watch in a Challenging Industry",
+        "excerpt": "Despite the Zacks Mining - Non Ferrous industry's weak near-term outlook, stocks like SCCO, FCX and LUNMF are worth keeping an eye on given their growth potential.",
+        "url": "https://www.zacks.com/commentary/2921005/3-non-ferrous-metal-mining-stocks-to-watch-in-a-challenging-industry?cid=CS-STOCKNEWSAPI-FT-industry_outlook-2921005"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-14 10:56:05",
+        "publisher": "Zacks Investment Research",
+        "title": "Grasberg Disruptions Weigh on FCX's Q1 Volumes: What Lies Ahead?",
+        "excerpt": "FCX cuts 2026 copper sales outlook after Grasberg disruptions hit volumes, despite stronger copper and gold prices boosting Q1 results.",
+        "url": "https://www.zacks.com/stock/news/2921355/grasberg-disruptions-weigh-on-fcx-s-q1-volumes-what-lies-ahead?cid=CS-STOCKNEWSAPI-FT-analyst_blog|quick_take-2921355"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-14 10:01:35",
+        "publisher": "Zacks Investment Research",
+        "title": "Freeport-McMoRan Inc. (FCX) Is a Trending Stock: Facts to Know Before Betting on It",
+        "excerpt": "Freeport-McMoRan (FCX) has received quite a bit of attention from Zacks.com users lately. Therefore, it is wise to be aware of the facts that can impact the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2921092/freeport-mcmoran-inc-fcx-is-a-trending-stock-facts-to-know-before-betting-on-it?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921092"
+      },
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-13 23:00:00",
+        "publisher": "The Motley Fool",
+        "title": "3 Stocks That Could Benefit From the SpaceX IPO",
+        "excerpt": "SpaceX could raise $75 billion in capital with its IPO, giving it more cash to spend on various projects. The IPO gives an opportunity for this early investor to sell stock and redeploy cash in high-return opportunities.",
+        "url": "https://www.fool.com/investing/2026/05/13/3-stocks-that-could-benefit-from-the-spacex-ipo/"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-13 12:30:00",
+        "publisher": "Newsfile Corp",
+        "title": "Max Enters Debt and Option Agreements with Bolt Metals for Its Flor\u00e1lia High-Purity Iron Property in Brazil",
+        "excerpt": "Vancouver, British Columbia--(Newsfile Corp. - May 13, 2026) - MAX RESOURCE CORP.\u00a0(TSXV: MAX) (\"Max\" or the \"Company\")\u00a0is pleased to announce that, further to the letter of intent dated October 23, 2025, the Company has entered into a debt settlement agreement (the \"Debt Settleme",
+        "url": "https://www.newsfilecorp.com/release/297341/Max-Enters-Debt-and-Option-Agreements-with-Bolt-Metals-for-Its-Florlia-HighPurity-Iron-Property-in-Brazil"
+      },
+      {
+        "symbol": "APD",
+        "publishedDate": "2026-05-13 12:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "3 Materials Stocks to Buy Before the Next Industrial Boom",
+        "excerpt": "The materials sector is flying high this year, and if an all-out industrial revolution arrives, these three stocks could benefit.",
+        "url": "https://www.fool.com/investing/2026/05/13/3-materials-stocks-to-buy-before-next-industrial/"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-13 10:46:21",
+        "publisher": "Zacks Investment Research",
+        "title": "Here's Why Freeport-McMoRan (FCX) is a Strong Growth Stock",
+        "excerpt": "Whether you're a value, growth, or momentum investor, finding strong stocks becomes easier with the Zacks Style Scores, a top feature of the Zacks Premium research service.",
+        "url": "https://www.zacks.com/stock/news/2920492/here-s-why-freeport-mcmoran-fcx-is-a-strong-growth-stock?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|zacks_education_growth_score-2920492"
+      },
+      {
+        "symbol": "SHW",
+        "publishedDate": "2026-05-13 07:14:00",
+        "publisher": "GuruFocus",
+        "title": "Is SHW Overvalued? DCF Says Worth $218",
+        "excerpt": "On May 13, 2026, we delve into the DCF analysis for Sherwin-Williams Co (SHW), a company that has experienced a challenging price performance recently, with a y",
+        "url": "https://www.gurufocus.com/news/8854872/is-shw-overvalued-dcf-says-worth-218"
+      }
+    ],
+    "Utilities": [
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-05-15 09:56:49",
+        "publisher": "24/7 Wall Street",
+        "title": "CDL Delivers Capital Gains Alongside Income as Rates Hover Near 4.4%",
+        "excerpt": "The VictoryShares US Large Cap High Div Volatility Wtd ETF (NASDAQ:CDL) pulls its distribution from dividends paid by large U.S.",
+        "url": "https://247wallst.com/investing/2026/05/15/cdl-delivers-capital-gains-alongside-income-as-rates-hover-near-4-4/"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-15 07:00:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Koryx Copper Announces Further Significant Drill Results for the Haib Copper Project, Southern Namibia",
+        "excerpt": "Highlights\u00a0 17 drill holes reported with consistent, wide intercepts up to 599m in width. CuEq Grades exceeding average MRE grade with pockets of higher-grade Au and Mo.",
+        "url": "https://www.globenewswire.com/news-release/2026/05/15/3295728/0/en/Koryx-Copper-Announces-Further-Significant-Drill-Results-for-the-Haib-Copper-Project-Southern-Namibia.html"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-14 14:11:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Toll Brothers Announces Final Opportunity to Purchase a New Home at The Cove at Encinitas in Coastal Southern California",
+        "excerpt": "ENCINITAS, Calif., May 14, 2026 (GLOBE NEWSWIRE) -- Toll Brothers, Inc. (NYSE:TOL), the nation's leading builder of luxury homes, today announced the final opportunity to purchase a new home at\u00a0The Cove at Encinitas, an exclusive all-electric community in Encinitas, California. T",
+        "url": "https://www.globenewswire.com/news-release/2026/05/14/3295279/1924/en/Toll-Brothers-Announces-Final-Opportunity-to-Purchase-a-New-Home-at-The-Cove-at-Encinitas-in-Coastal-Southern-California.html"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-14 14:10:00",
+        "publisher": "GlobeNewsWire",
+        "title": "The Southern Banc Company, Inc. Announces Third Quarter Earnings",
+        "excerpt": "GADSDEN, Ala., May 14, 2026 (GLOBE NEWSWIRE) -- The Southern Banc Company, Inc. (OTCBB: SRNN), the holding company for The Southern Bank Company (the \u201cBank\u201d), announced net income of approximately $363,000, or $0.48 per basic and diluted share, for the quarter ended March 31, 202",
+        "url": "https://www.globenewswire.com/news-release/2026/05/14/3295277/0/en/The-Southern-Banc-Company-Inc-Announces-Third-Quarter-Earnings.html"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-05-14 12:30:12",
+        "publisher": "Benzinga",
+        "title": "The AI Power Infrastructure Trade Has Never Been Stronger, But One Space Race Could Change That",
+        "excerpt": "The AI power infrastructure trade is no longer a side bet. Two deals from the first week of May 2026 confirm that the $725 billion AI buildout runs on land, grid access, and energy storage.",
+        "url": "https://www.benzinga.com/Opinion/26/05/52570584/the-ai-power-infrastructure-trade-has-never-been-stronger-but-one-space-race-could-change-that"
+      },
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-05-14 10:01:33",
+        "publisher": "Zacks Investment Research",
+        "title": "Duke Energy Corporation (DUK) Is a Trending Stock: Facts to Know Before Betting on It",
+        "excerpt": "Duke Energy (DUK) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2921097/duke-energy-corporation-duk-is-a-trending-stock-facts-to-know-before-betting-on-it?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks_v1-2921097"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-05-13 17:15:00",
+        "publisher": "GuruFocus",
+        "title": "American Electric Power Co Inc (AEP) Stock Down 3.0% but Still Overvalued -- GF Score: 82/100",
+        "excerpt": "On May 13, 2026, American Electric Power Co Inc (AEP) shares fell 3.0% to a current price of $127.95. The stock has seen a 52-week range between $97.46 and $139",
+        "url": "https://www.gurufocus.com/news/8856558/american-electric-power-co-inc-aep-stock-down-30-but-still-overvalued-gf-score-82100"
+      },
+      {
+        "symbol": "SRE",
+        "publishedDate": "2026-05-13 13:00:00",
+        "publisher": "GuruFocus",
+        "title": "Sempra Declares Common Dividend",
+        "excerpt": "Sempra Declares Common Dividend PR Newswire SAN DIEGO, May 13, 2026 SAN DIEGO, May",
+        "url": "https://www.gurufocus.com/news/8855871/sempra-declares-common-dividend"
+      },
+      {
+        "symbol": "DUK",
+        "publishedDate": "2026-05-13 13:00:00",
+        "publisher": "GuruFocus",
+        "title": "90-degree heat on the way: Take these steps now to keep your home comfortable and manage energy use",
+        "excerpt": "90-degree heat on the way: Take these steps now to keep your home comfortable and manage energy use PR Newswire",
+        "url": "https://www.gurufocus.com/news/8855869/90degree-heat-on-the-way-take-these-steps-now-to-keep-your-home-comfortable-and-manage-energy-use"
+      },
+      {
+        "symbol": "SRE",
+        "publishedDate": "2026-05-13 12:57:00",
+        "publisher": "PRNewsWire",
+        "title": "Sempra Declares Common Dividend",
+        "excerpt": "SAN DIEGO, May 13, 2026 /PRNewswire/ -- Sempra (NYSE: SRE) today announced that its board of directors has declared a $0.6575 per share quarterly dividend on the company's common stock, which is payable July 15, 2026, to common stock shareholders of record at the close of busines",
+        "url": "https://www.prnewswire.com/news-releases/sempra-declares-common-dividend-302771305.html"
+      }
+    ],
+    "Real_Estate": [
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-05-14 12:10:53",
+        "publisher": "Seeking Alpha",
+        "title": "American Tower Corporation (AMT) Presents at MoffettNathanson's Media, Internet & Communications Conference Transcript",
+        "excerpt": "American Tower Corporation (AMT) Presents at MoffettNathanson's Media, Internet & Communications Conference Transcript",
+        "url": "https://seekingalpha.com/article/4904597-american-tower-corporation-amt-presents-at-moffettnathansons-media-internet-and"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-14 08:01:00",
+        "publisher": "PRNewsWire",
+        "title": "Equinix Puts Enterprises in Control of Data Sovereignty Across Hybrid Multicloud Environments",
+        "excerpt": "Announces global expansion of Fabric Geo Zones across five continents, the first network-level, multicloud sovereignty solution REDWOOD CITY, Calif., May 14, 2026 /PRNewswire/ -- Equinix, Inc. (Nasdaq: EQIX), the world's digital infrastructure company\u00ae, today announced the global",
+        "url": "https://www.prnewswire.com/news-releases/equinix-puts-enterprises-in-control-of-data-sovereignty-across-hybrid-multicloud-environments-302771894.html"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-13 15:57:32",
+        "publisher": "24/7 Wall Street",
+        "title": "Real Estate ETF XLRE Offers Steady Dividends With One Major Caution",
+        "excerpt": "The Real Estate Select Sector SPDR Fund (NYSEARCA:XLRE | XLRE Price Prediction) trades around $45 with roughly $7.71 billion in assets and a trailing distribution yield of 3.4%.",
+        "url": "https://247wallst.com/investing/2026/05/13/real-estate-etf-xlre-offers-steady-dividends-with-one-major-caution/"
+      },
+      {
+        "symbol": "PLD",
+        "publishedDate": "2026-05-13 12:48:08",
+        "publisher": "Seeking Alpha",
+        "title": "Prologis: Likely To Outperform Blackstone Industrial Funds",
+        "excerpt": "Prologis demonstrates superior value creation versus Blackstone industrial funds, as evidenced by a recent $195.9 million portfolio sale to BX. PLD strategically avoids low-return stabilized acquisitions, focusing instead on high-IRR development projects, leveraging its $5 billio",
+        "url": "https://seekingalpha.com/article/4903955-prologis-likely-to-outperform-blackstone-industrial-funds"
+      },
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-05-13 07:03:00",
+        "publisher": "GuruFocus",
+        "title": "Is AMT Overvalued? DCF Says Worth $134",
+        "excerpt": "On May 13, 2026, we delve into the DCF analysis for American Tower Corp (AMT), a company that has seen a mixed performance in the market recently. The stock pri",
+        "url": "https://www.gurufocus.com/news/8854853/is-amt-overvalued-dcf-says-worth-134"
+      }
+    ],
+    "Communication": [
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-15 10:15:15",
+        "publisher": "Seeking Alpha",
+        "title": "Alphabet Taps The Bond Market, High Bar Into Google I/O, Raising My Target",
+        "excerpt": "Alphabet remains a top GARP play, with a reiterated \"Buy\" rating and upside potential to $425\u2013$430. Q1 results exceeded expectations: EPS of $5.11, revenue of $109.9 billion, and Google Cloud revenue up 63%. High capex and AI investments are driving growth, but margin and free ca",
+        "url": "https://seekingalpha.com/article/4905213-alphabet-taps-the-bond-market-high-bar-into-google-io-raising-my-target"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-15 10:05:01",
+        "publisher": "Business Insider",
+        "title": "Google has been quietly gaining AI customers, even before big releases next week",
+        "excerpt": "A version of this story originally appeared in the BI Tech Memo newsletter. Sign up for the weekly BI Tech Memo newsletter here.",
+        "url": "https://www.businessinsider.com/google-gemini-flash-model-quietly-winning-ai-customers-2026-5"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-15 10:00:28",
+        "publisher": "Zacks Investment Research",
+        "title": "Meta Platforms, Inc. (META) is Attracting Investor Attention: Here is What You Should Know",
+        "excerpt": "Meta Platforms (META) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+        "url": "https://www.zacks.com/stock/news/2921794/meta-platforms-inc-meta-is-attracting-investor-attention-here-is-what-you-should-know?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921794"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-15 10:00:23",
+        "publisher": "Zacks Investment Research",
+        "title": "Here is What to Know Beyond Why Alphabet Inc. (GOOGL) is a Trending Stock",
+        "excerpt": "Alphabet (GOOGL) has received quite a bit of attention from Zacks.com users lately. Therefore, it is wise to be aware of the facts that can impact the stock's prospects.",
+        "url": "https://www.zacks.com/stock/news/2921792/here-is-what-to-know-beyond-why-alphabet-inc-googl-is-a-trending-stock?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|most_searched_stocks-2921792"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-15 09:23:04",
+        "publisher": "The Motley Fool",
+        "title": "Meta vs. Snap: What Do Their Quarterly Revenue Trends Tell Investors?",
+        "excerpt": "Meta maintains a larger scale in revenue generation than Snap, consistently reporting higher totals across all tracked quarters. Both companies exhibit cyclical quarter-over-quarter revenue patterns marked by late-year peaks and subsequent declines, though Meta displays a wider o",
+        "url": "https://www.fool.com/coverage/charts/2026/05/15/meta-vs-snap-what-do-their-quarterly-revenue-trends-tell-investors/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-15 09:01:51",
+        "publisher": "24/7 Wall Street",
+        "title": "Anthropic Valuation Is Key For Alphabet",
+        "excerpt": "Anthropic's valuation is nearing $1 trillion, an astonishing figure for a private company.",
+        "url": "https://247wallst.com/investing/2026/05/15/anthropic-valuation-is-key-for-alphabet/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-15 08:27:54",
+        "publisher": "Proactive Investors",
+        "title": "UBS warns AI stocks are overheating as growth expectations collide with history",
+        "excerpt": "UBS said the April rally in US equities was a 2.8 standard deviation event over the past 25 years, while its own crowding data shows mega-cap tech stocks remain heavily crowded long positions. The bank's quantitative research found that every one of the Magnificent Seven stocks, ",
+        "url": "https://www.proactiveinvestors.co.uk/companies/news/1092377"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-15 08:06:56",
+        "publisher": "24/7 Wall Street",
+        "title": "Anthropic's CFO Reveals the Compute Gamble That Could Sink Any AI Company. Here's Why Nvidia, Amazon, and Google Are All in Play",
+        "excerpt": "Happy Friday, all. Here's some only-in-2026 math for you.",
+        "url": "https://247wallst.com/investing/2026/05/15/anthropics-cfo-reveals-the-compute-gamble-that-could-sink-any-ai-company-heres-why-nvidia-amazon-and-google-are-all-in-play/"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-15 07:36:27",
+        "publisher": "24/7 Wall Street",
+        "title": "Bill Ackman Bought Google After the ChatGPT Panic (Up 300%). He Bought Amazon After Liberation Day (Up 36%).",
+        "excerpt": "Although Wall Street has spent the better part of two years lecturing investors that the AI trade is crowded, the capex bill is unpayable, and the mega-caps have run out of room to grow, Bill Ackman keeps surfacing at exactly those moments to buy.",
+        "url": "https://247wallst.com/investing/2026/05/15/bill-ackman-bought-google-after-the-chatgpt-panic-up-300-he-bought-amazon-after-liberation-day-up-36-now-hes-backing-up-the-truck-again/"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-15 07:34:52",
+        "publisher": "247 Wallst",
+        "title": "The Professor Who Tracks Every US IPO Just Issued a Warning on SpaceX: \"Most of the Time, Things Don\u2019t Go According to Plan.\"",
+        "excerpt": "Wall Street braces for what could be the largest stock market debut in history, but the most cited academic on US IPO performance is warning buyers to sit on their hands. SpaceX is reportedly targeting a valuation of roughly $1.75 trillion in its planned offering, and Reuters thi",
+        "url": "https://247wallst.com/investing/2026/05/15/the-professor-who-tracks-every-us-ipo-just-issued-a-warning-on-spacex-most-of-the-time-things-dont-go-according-to-plan/"
+      }
+    ]
+  }
+}

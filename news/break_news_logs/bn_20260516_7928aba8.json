@@ -1,0 +1,518 @@
+{
+  "news_id": "bn_20260516_7928aba8",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-16T14:21:59Z",
+  "last_activity_ts": "2026-05-16T14:36:05Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/snail-returns-profitability-q1-revenue-140000436.html",
+    "feed_fingerprint": "snail returns profitability q1 revenue surges icymi",
+    "published": "2026-05-16T14:00:00+00:00",
+    "url_hash": "sha1:a86d5d0b0e29a54eaebffd5a63840836a117936b"
+  },
+  "headline": "Snail returns to profitability in Q1 as revenue surges - ICYMI",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T14:34:28Z",
+      "latency_ms": 20000,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**Snail (SNAL)** Q1 轉虧為盈、營收跳增，屬遊戲發行小型股的單一公司事件。轉盈多半受 **ARK: Survival Ascended** 等舊 IP 重製與 DLC 遞延收入入帳推動，並非結構性成長。SNAL 流通市值小、自由流通股少，財報後易出現高波動投機性跳空，散戶情緒驅動明顯。對整體市場與遊戲類股板塊**外溢效果極低**——這不是 EA、TTWO、RBLX 等級的指標。重點觀察：營收跳增是一次性 catalogue 入帳還是有新作 pipeline 支撐，以及毛利率與獲利能否連續兩季維持。在 catalyst 真實兌現前，視為事件交易而非投資級訊號。",
+        "bull_points": [
+          "Q1 轉虧為盈，營收顯著跳增",
+          "ARK IP 重製帶動 DLC 與遞延收入",
+          "小市值低流通，利多時跳空彈性大"
+        ],
+        "bear_points": [
+          "微型股單一事件，無板塊外溢",
+          "轉盈恐為一次性舊作入帳非結構性",
+          "低流通造成財報後高波動投機風險"
+        ],
+        "final_take": "事件交易級利多，須觀察獲利能否連兩季維持",
+        "entities": {
+          "tickers": [
+            "SNAL",
+            "EA",
+            "TTWO",
+            "RBLX"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "video game publishing",
+            "small-cap earnings turnaround",
+            "live-service gaming"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:small-cap-earnings-turnaround"
+          },
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ark-ip-remaster"
+          },
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TTWO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "微型遊戲股單一財報事件，市場外溢低，屬投機性事件交易"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T14:34:41Z",
+      "latency_ms": 13737,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了 Claude 提到的營收結構問題外，SNAL 的轉盈更反映了小型發行商在當前高利率環境下，被迫採取的「生存策略」。透過縮減行銷與研發支出（S&M/R&D），強制達成帳面獲利。這可能成為其他中小型遊戲股（如 **U**）在成長放緩下效仿的典範。然而，這種成本導向的改善，犧牲了長期的 User Acquisition 與 Pipeline 擴張。投資者需警惕這並非「成長的起點」，而是「縮編保利」的終點，缺乏長期競爭力的基礎。",
+        "bull_points": [
+          "成本優化顯著，短期現金流改善",
+          "展示小型 IP 資產變現效率"
+        ],
+        "bear_points": [
+          "犧牲未來研發與行銷預算",
+          "缺乏持續性的成長動能"
+        ],
+        "final_take": "短期財務優化，但長期研發潛力堪憂。",
+        "entities": {
+          "tickers": [
+            "SNAL",
+            "U"
+          ],
+          "sectors": [
+            "Communication Services"
+          ],
+          "themes": [
+            "Gaming",
+            "Cost Optimization"
+          ],
+          "tech_keywords": [
+            "Live Services"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:U"
+          },
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:cost_optimization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "加入了高利率環境下遊戲產業「縮編保利」的趨勢觀察，補足產業視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T14:35:09Z",
+      "latency_ms": 27688,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文漏掉的**具名節點**：SNAL 旗下有遊戲伺服器代管商 **Nitrado**，**ARK** 系列大量私人伺服器靠它承載。這塊是訂閱制的**經常性收入**，比 catalogue DLC 遞延入帳更具黏性——若 Q1 轉盈有一部分來自 Nitrado 量增，那「一次性」的定性就要打折，這是被忽略的結構面。但反方要點同樣具名：**ARK 2**(原與 Vin Diesel 合作那款)已多次跳票，真正的新作 pipeline 仍是空窗。另外 6 月 **Russell 微型股指數年度重組**在即，轉盈+股價跳動可能影響其指數成份去留，被動資金流是低流通股的額外波動源。整體仍是事件交易，但 Nitrado 訂閱質地值得單獨追。",
+        "bull_points": [
+          "Nitrado 伺服器代管屬訂閱制經常性收入，黏性高",
+          "若轉盈含 Nitrado 量增，非純一次性入帳",
+          "6月Russell重組或帶來被動買盤"
+        ],
+        "bear_points": [
+          "ARK 2 多次跳票，新作 pipeline 空窗",
+          "低流通股遇指數重組波動雙向放大",
+          "Nitrado 收入占比未揭露，黏性僅屬假設"
+        ],
+        "final_take": "事件交易，盯 Nitrado 訂閱是否撐起結構性收入",
+        "entities": {
+          "tickers": [
+            "SNAL",
+            "EA",
+            "TTWO",
+            "U"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Interactive Entertainment"
+          ],
+          "themes": [
+            "live-service gaming",
+            "recurring revenue",
+            "Russell reconstitution"
+          ],
+          "tech_keywords": [
+            "game server hosting",
+            "Nitrado",
+            "ARK Survival Ascended"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nitrado-recurring-revenue"
+          },
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ark2-delay"
+          },
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:russell-reconstitution"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Nitrado 訂閱收入與 Russell 重組為前文未提之新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T14:35:21Z",
+      "latency_ms": 12207,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補足一個 **Survival/Craft** 遊戲領域的競爭視角：SNAL 處於極度擁擠的賽道。除 Nitrado 的訂閱支撐外，該 genre 目前正面臨 **Palworld** 或 **Manor Lords** 等現象級競品的流量排擠。SNAL 轉盈後的長期挑戰在於如何維持 **Live Services** 的用戶黏著度，而在行銷支出縮減下，面對持續進化的生存類遊戲生態，獲客成本（CAC）反彈風險極高，難以構成穩定增長。",
+        "bull_points": [
+          "Nitrado 訂閱制奠定營收穩定度",
+          "ARK IP 在生存類型遊戲具品牌辨識度"
+        ],
+        "bear_points": [
+          "生存遊戲紅海競爭，市場份額易受瓜分",
+          "縮減行銷預算將加劇獲客成本(CAC)壓力"
+        ],
+        "final_take": "轉盈歸轉盈，在生存遊戲紅海中長線動能仍顯薄弱。",
+        "entities": {
+          "tickers": [
+            "SNAL"
+          ],
+          "sectors": [
+            "Communication Services"
+          ],
+          "themes": [
+            "Gaming",
+            "Survival-craft"
+          ],
+          "tech_keywords": [
+            "Live Services"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "COMPETES_WITH",
+            "object": "theme:survival-craft"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "從生存遊戲競品壓力與獲客成本角度，補充 SNAL 結構性風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T14:35:52Z",
+      "latency_ms": 30641,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文全漏的**公司治理 + 資本結構**角度：SNAL 是雙層股權架構，創辦人 **Hai Shi** 透過 Class B 超級投票權實質控盤，公眾 Class A 股東幾乎無治理話語權——這正是流通股稀少、易被拉抬的根因之一。更關鍵的 2nd-order 效果：小型股「轉虧為盈」頭條配上財報後跳空，往往是管理層啟動 **ATM(at-the-market)增發**的最佳時間窗——趁股價與情緒高點稀釋募資補血。Nitrado 訂閱質地縱使真實，也擋不住控股方在高波動時點低成本發新股的稀釋風險。投資人除了追 catalogue 一次性入帳，更該盯 SEC 後續 S-3/424B 文件與在外股數變化。",
+        "bull_points": [
+          "轉盈後或脫離 going-concern 疑慮,估值有重評空間",
+          "Nitrado 訂閱收入質地若放大,稀釋仍有基本面承接"
+        ],
+        "bear_points": [
+          "雙層股權:Hai Shi 控盤,公眾股東無治理話語權",
+          "跳空後恐啟動 ATM 增發,趁高點稀釋募資",
+          "需緊盯 SEC S-3/424B 與在外股數變動"
+        ],
+        "final_take": "看空偏中性,事件交易留意增發稀釋窗口",
+        "entities": {
+          "tickers": [
+            "SNAL",
+            "U",
+            "EA",
+            "TTWO",
+            "RBLX"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Interactive Media & Entertainment"
+          ],
+          "themes": [
+            "small-cap gaming",
+            "share dilution",
+            "dual-class governance"
+          ],
+          "tech_keywords": [
+            "ARK Survival Ascended",
+            "Nitrado"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:atm-dilution"
+          },
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dual-class-control"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "雙層股權+ATM增發稀釋窗口為前文未提的結構面新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T14:36:05Z",
+      "latency_ms": 12914,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論已涵蓋營運面與資本結構。針對 SNAL 類型的微型發行商，必須補充**「Steam 演算依賴」**的結構性脆弱。SNAL 的營收高度依賴 Steam 平台的演算法推播與曝光路徑。當行銷預算縮減時，遊戲在 Steam 的「發現率」會隨平台演算法的微調而急劇衰減。這不僅是競品排擠，而是**平台流量槓桿**的風險：營收高度集中於極少數曝光機會，這使得 Q1 的優異表現難以線性外推，屬不可控的外部風險。",
+        "bull_points": [
+          "Steam 平台促銷期間流量槓桿效益極高。",
+          "舊 IP 維持長尾獲客成本相對較低。"
+        ],
+        "bear_points": [
+          "對 Steam 演算推播過度依賴，營收預測性極低。",
+          "缺乏行銷支撐下，難以持續獲取新流量。",
+          "平台分成與政策變動隨時可能侵蝕利潤。"
+        ],
+        "final_take": "平台演算推播依賴過高，獲利轉盈難以維持結構性增長。",
+        "entities": {
+          "tickers": [
+            "SNAL"
+          ],
+          "sectors": [
+            "Communication Services"
+          ],
+          "themes": [
+            "Platform Risk",
+            "Game-as-a-Service"
+          ],
+          "tech_keywords": [
+            "Recommendation Algorithm",
+            "Live Services"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "platform:steam_algorithm"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析微型發行商對 Steam 演算法依賴的結構性風險，屬平台生態層面的利空因素。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "EA",
+        "RBLX",
+        "SNAL",
+        "TTWO",
+        "U"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Consumer Discretionary",
+        "Interactive Entertainment",
+        "Interactive Media & Entertainment"
+      ],
+      "themes": [
+        "Cost Optimization",
+        "Game-as-a-Service",
+        "Gaming",
+        "Platform Risk",
+        "Russell reconstitution",
+        "Survival-craft",
+        "dual-class governance",
+        "live-service gaming",
+        "recurring revenue",
+        "share dilution",
+        "small-cap earnings turnaround",
+        "small-cap gaming",
+        "video game publishing"
+      ],
+      "tech_keywords": [
+        "ARK Survival Ascended",
+        "Live Services",
+        "Nitrado",
+        "Recommendation Algorithm",
+        "game server hosting"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:small-cap-earnings-turnaround"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ark-ip-remaster"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TTWO"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:U"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:cost_optimization"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nitrado-recurring-revenue"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ark2-delay"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:russell-reconstitution"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "COMPETES_WITH",
+        "object": "theme:survival-craft"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:atm-dilution"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dual-class-control"
+      },
+      {
+        "subject": "ticker:SNAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "platform:steam_algorithm"
+      }
+    ],
+    "bull_summary": [
+      "Q1 轉虧為盈，營收顯著跳增",
+      "ARK IP 重製帶動 DLC 與遞延收入",
+      "小市值低流通，利多時跳空彈性大",
+      "成本優化顯著，短期現金流改善",
+      "展示小型 IP 資產變現效率",
+      "Nitrado 伺服器代管屬訂閱制經常性收入，黏性高"
+    ],
+    "bear_summary": [
+      "微型股單一事件，無板塊外溢",
+      "轉盈恐為一次性舊作入帳非結構性",
+      "低流通造成財報後高波動投機風險",
+      "犧牲未來研發與行銷預算",
+      "缺乏持續性的成長動能",
+      "ARK 2 多次跳票，新作 pipeline 空窗"
+    ],
+    "final_take": "平台演算推播依賴過高，獲利轉盈難以維持結構性增長。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-16T14:36:05Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

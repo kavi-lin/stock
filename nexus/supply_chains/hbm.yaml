@@ -1,0 +1,348 @@
+id: hbm
+title: HBM 高頻寬記憶體供應鏈
+theme: HBM
+generated_at: '2026-05-17T13:53:48Z'
+generated_by: claude
+status: draft
+layers:
+- materials_equipment
+- memory_foundry
+- advanced_packaging
+- compute_silicon
+- end_customer
+modules:
+  materials_equipment:
+  - id: wfe
+    label: 晶圓製造設備
+  - id: bonding_test
+    label: 堆疊鍵合 / 測試
+  - id: silicon_wafer
+    label: 矽晶圓材料
+  memory_foundry:
+  - id: hbm_dram
+    label: HBM DRAM 製造
+  - id: logic_foundry
+    label: 邏輯晶圓代工
+  advanced_packaging:
+  - id: osat
+    label: OSAT 封測
+  - id: substrate
+    label: ABF 載板
+  compute_silicon:
+  - id: gpu
+    label: GPU 加速器
+  - id: custom_asic
+    label: 客製化 AI ASIC
+  end_customer:
+  - id: hyperscaler
+    label: 雲端超大規模業者
+  - id: server_oem
+    label: 伺服器 OEM
+spine:
+- asml
+- skhynix
+- amkor
+- nvidia
+- microsoft
+nodes:
+- id: asml
+  label: ASML
+  layer: materials_equipment
+  module: wfe
+  role: EUV/DUV 微影設備，先進 DRAM 製程關鍵
+  ticker: ASML
+  listing: us_listed
+  note: Nasdaq 掛牌；HBM DRAM 微縮製程依賴 EUV
+- id: amat
+  label: Applied Materials
+  layer: materials_equipment
+  module: wfe
+  role: 薄膜沉積與 TSV 製程設備
+  ticker: AMAT
+  listing: us_listed
+  note: ''
+- id: lam
+  label: Lam Research
+  layer: materials_equipment
+  module: wfe
+  role: 蝕刻與 TSV（矽穿孔）設備龍頭
+  ticker: LRCX
+  listing: us_listed
+  note: HBM 堆疊核心的 TSV 蝕刻
+- id: besi
+  label: BE Semiconductor (Besi)
+  layer: materials_equipment
+  module: bonding_test
+  role: 混合鍵合（hybrid bonding）設備，HBM4 關鍵
+  ticker: null
+  listing: foreign_listed
+  note: Euronext Amsterdam 掛牌
+- id: asmpt
+  label: ASMPT
+  layer: materials_equipment
+  module: bonding_test
+  role: TC bonder 熱壓鍵合機，HBM 堆疊主力設備
+  ticker: null
+  listing: foreign_listed
+  note: 香港掛牌 0522.HK
+- id: shinetsu
+  label: Shin-Etsu Chemical
+  layer: materials_equipment
+  module: silicon_wafer
+  role: 矽晶圓供應，DRAM 與邏輯晶圓基材
+  ticker: null
+  listing: foreign_listed
+  note: 東京掛牌
+- id: skhynix
+  label: SK Hynix
+  layer: memory_foundry
+  module: hbm_dram
+  role: HBM3e/HBM4 領導廠，NVIDIA 主力供應商
+  ticker: null
+  listing: foreign_listed
+  note: 韓國掛牌；HBM 市佔第一
+- id: samsung
+  label: Samsung Electronics
+  layer: memory_foundry
+  module: hbm_dram
+  role: HBM DRAM 製造，亦自有晶圓代工
+  ticker: null
+  listing: foreign_listed
+  note: 韓國掛牌
+- id: micron
+  label: Micron Technology
+  layer: memory_foundry
+  module: hbm_dram
+  role: HBM3e 供應商，唯一美國掛牌 HBM 廠
+  ticker: MU
+  listing: us_listed
+  note: ''
+- id: tsmc
+  label: TSMC
+  layer: memory_foundry
+  module: logic_foundry
+  role: 加速器邏輯晶片代工 + HBM4 base die + CoWoS 2.5D 封裝
+  ticker: TSM
+  listing: us_listed
+  note: NYSE ADR；CoWoS 產能為 HBM 整合瓶頸
+- id: amkor
+  label: Amkor Technology
+  layer: advanced_packaging
+  module: osat
+  role: 2.5D/3D 先進封裝與測試外包
+  ticker: AMKR
+  listing: us_listed
+  note: ''
+- id: aseh
+  label: ASE Technology
+  layer: advanced_packaging
+  module: osat
+  role: 封測代工，扇出型與 2.5D 封裝產能
+  ticker: ASX
+  listing: us_listed
+  note: NYSE ADR
+- id: ibiden
+  label: Ibiden
+  layer: advanced_packaging
+  module: substrate
+  role: ABF 載板，高階 AI 晶片封裝基板
+  ticker: null
+  listing: foreign_listed
+  note: 東京掛牌
+- id: nvidia
+  label: NVIDIA
+  layer: compute_silicon
+  module: gpu
+  role: AI GPU（Blackwell/Rubin），HBM 最大採購方
+  ticker: NVDA
+  listing: us_listed
+  note: ''
+- id: amd
+  label: AMD
+  layer: compute_silicon
+  module: gpu
+  role: Instinct MI 系列 GPU，搭載 HBM3e
+  ticker: AMD
+  listing: us_listed
+  note: ''
+- id: broadcom
+  label: Broadcom
+  layer: compute_silicon
+  module: custom_asic
+  role: 客製化 AI ASIC，與雲端業者共同開發
+  ticker: AVGO
+  listing: us_listed
+  note: Google TPU 合作夥伴
+- id: marvell
+  label: Marvell Technology
+  layer: compute_silicon
+  module: custom_asic
+  role: 客製化運算晶片與 HBM 互連 IP
+  ticker: MRVL
+  listing: us_listed
+  note: ''
+- id: microsoft
+  label: Microsoft
+  layer: end_customer
+  module: hyperscaler
+  role: Azure 雲端資料中心，AI 加速器終端買家
+  ticker: MSFT
+  listing: us_listed
+  note: ''
+- id: alphabet
+  label: Alphabet (Google)
+  layer: end_customer
+  module: hyperscaler
+  role: Google Cloud，自研 TPU 終端部署方
+  ticker: GOOGL
+  listing: us_listed
+  note: ''
+- id: supermicro
+  label: Super Micro Computer
+  layer: end_customer
+  module: server_oem
+  role: AI 伺服器系統整合，出貨予雲端業者
+  ticker: SMCI
+  listing: us_listed
+  note: ''
+edges:
+- from: asml
+  to: skhynix
+  rel: SUPPLIES_TO
+  note: EUV 微影用於先進 DRAM
+- from: asml
+  to: micron
+  rel: SUPPLIES_TO
+  note: ''
+- from: asml
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: amat
+  to: skhynix
+  rel: SUPPLIES_TO
+  note: ''
+- from: amat
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: lam
+  to: micron
+  rel: SUPPLIES_TO
+  note: TSV 蝕刻
+- from: lam
+  to: skhynix
+  rel: SUPPLIES_TO
+  note: ''
+- from: besi
+  to: skhynix
+  rel: SUPPLIES_TO
+  note: HBM4 混合鍵合
+- from: besi
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: asmpt
+  to: micron
+  rel: SUPPLIES_TO
+  note: TC bonder 堆疊
+- from: asmpt
+  to: skhynix
+  rel: SUPPLIES_TO
+  note: ''
+- from: shinetsu
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: shinetsu
+  to: micron
+  rel: SUPPLIES_TO
+  note: ''
+- from: skhynix
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: HBM3e 主力供應
+- from: micron
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: ''
+- from: samsung
+  to: amd
+  rel: SUPPLIES_TO
+  note: ''
+- from: skhynix
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: HBM 於 CoWoS 整合
+- from: skhynix
+  to: amkor
+  rel: SUPPLIES_TO
+  note: HBM 堆疊送往封測
+- from: tsmc
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: 邏輯晶圓代工 + CoWoS
+- from: tsmc
+  to: amd
+  rel: SUPPLIES_TO
+  note: ''
+- from: tsmc
+  to: broadcom
+  rel: SUPPLIES_TO
+  note: ''
+- from: tsmc
+  to: marvell
+  rel: SUPPLIES_TO
+  note: ''
+- from: amkor
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: ''
+- from: amkor
+  to: amd
+  rel: SUPPLIES_TO
+  note: ''
+- from: aseh
+  to: broadcom
+  rel: SUPPLIES_TO
+  note: ''
+- from: aseh
+  to: marvell
+  rel: SUPPLIES_TO
+  note: ''
+- from: ibiden
+  to: nvidia
+  rel: SUPPLIES_TO
+  note: ABF 載板
+- from: ibiden
+  to: amkor
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: alphabet
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvidia
+  to: supermicro
+  rel: SUPPLIES_TO
+  note: ''
+- from: amd
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: ''
+- from: broadcom
+  to: alphabet
+  rel: CO_DEVELOPS_WITH
+  note: 共同開發 Google TPU
+- from: marvell
+  to: microsoft
+  rel: CO_DEVELOPS_WITH
+  note: 客製化運算晶片
+- from: supermicro
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: AI 伺服器系統

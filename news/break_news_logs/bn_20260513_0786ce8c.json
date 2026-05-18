@@ -1,0 +1,433 @@
+{
+  "news_id": "bn_20260513_0786ce8c",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T17:01:15Z",
+  "last_activity_ts": "2026-05-13T23:52:59Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://www.investors.com/news/oklo-earnings-q1-oklo-stock-nuclear-stocks/?src=A00220&yptr=yahoo",
+    "feed_fingerprint": "nuclear reactor startup oklo reports wider losses amid",
+    "published": "2026-05-13T16:09:31+00:00",
+    "url_hash": "sha1:7cce809b8b6ebf5bf65183544bd0d5fb23441353"
+  },
+  "headline": "Nuclear Reactor Startup Oklo Reports Wider Losses Amid AI Boom",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T17:06:14Z",
+      "latency_ms": 17988,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Oklo Q1 loss widened but thesis intact — pre-revenue SMR developer burning cash to hit 2027-2028 first deployment. **AI hyperscaler power demand** is the real signal: Oracle's 12 GW Oklo MOU + DOE Idaho site progress matter more than quarterly EPS. Read-through bullish for nuclear cohort (NNE, SMR, CCJ, LEU, BWXT) — AI datacenter power scarcity narrative reinforced. Watch for: (1) NRC licensing timeline slippage risk, (2) cash runway vs dilution (likely secondary offering), (3) hyperscaler PPA conversion from MOU to binding. Negative read for natgas peakers (VST, CEG already priced in) if SMR timeline accelerates. Uranium fuel (CCJ, UEC) benefits regardless of which SMR wins. Pre-revenue valuation entirely narrative-driven — high beta to AI capex sentiment.",
+        "entities": {
+          "tickers": [
+            "OKLO",
+            "NNE",
+            "SMR",
+            "CCJ",
+            "LEU",
+            "BWXT",
+            "VST",
+            "CEG",
+            "ORCL",
+            "UEC"
+          ],
+          "sectors": [
+            "Utilities",
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "AI power demand",
+            "SMR nuclear",
+            "datacenter capex",
+            "uranium fuel cycle",
+            "pre-revenue narrative stocks"
+          ],
+          "tech_keywords": [
+            "SMR",
+            "Aurora reactor",
+            "HALEU fuel",
+            "NRC Part 53",
+            "fast reactor",
+            "MOU-to-PPA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:OKLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-power-demand"
+          },
+          {
+            "subject": "ticker:OKLO",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:ORCL"
+          },
+          {
+            "subject": "ticker:CCJ",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:smr-fuel-cycle"
+          },
+          {
+            "subject": "ticker:OKLO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NNE"
+          },
+          {
+            "subject": "ticker:OKLO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:nrc-licensing-delay"
+          },
+          {
+            "subject": "narrative:smr-nuclear",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:utilities"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Pre-revenue SMR story — loss widening expected, narrative driver is AI datacenter power demand + hyperscaler MOU conversion, not EPS."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T17:06:33Z",
+      "latency_ms": 18502,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The increasing demand for AI computing power, highlighted by Oklo's growth thesis, underscores a critical need for robust grid infrastructure. Beyond just generation sources like SMRs, the reliable delivery of massive, often fluctuating, power to AI data centers requires significant investment in grid modernization and advanced energy management. This creates a second-order beneficiary in companies like Eaton (ETN), which provides essential power management and grid automation solutions. As hyperscalers and utilities scramble to meet AI's energy appetite, the development of a more intelligent and resilient grid becomes paramount, positioning technology providers in this space for substantial growth. This overlooked segment of the AI energy supply chain is crucial for enabling the next wave of AI innovation.",
+        "entities": {
+          "tickers": [
+            "ETN"
+          ],
+          "sectors": [
+            "Electrical Equipment"
+          ],
+          "themes": [
+            "AI data center power infrastructure",
+            "Grid modernization"
+          ],
+          "tech_keywords": [
+            "Grid automation",
+            "Power management systems"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI data center power infrastructure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focuses on grid infrastructure companies benefiting from AI power demand, a new angle beyond Oklo's generation focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-13T23:52:36Z",
+      "latency_ms": 23279,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前討論漏掉**冷卻水與廢熱排放**這條 chokepoint。SMR 雖小型化，single-unit thermal output 仍需 ~150-300 MW 散熱，內陸 site 必須靠 dry cooling 或 hybrid cooling tower — 這是 **SPX Technologies (SPXC)** 的核心業務（占 cooling tower 北美市場 ~40%）。Oklo Idaho site 已確定用 air-cooled design，未來 hyperscaler co-located SMR 因水資源限制（DOE 已警告 datacenter 用水衝突）幾乎必走 dry cooling。\n\n第二個被忽略的 contra：**SMR 經濟性對 natgas 價格極度敏感**。若 Henry Hub 持續低於 $3.5/MMBtu，2028 後 SMR LCOE (~$80-100/MWh) 仍輸給 combined cycle (~$45-60/MWh)。Oklo MOU 條款若無 take-or-pay 保護，hyperscaler 可在 2027 重新議價或轉向 GE Vernova (GEV) 的 H-class turbine。GEV 是真正的 hedged play — SMR 慢就賣 turbine，SMR 快就賣 BOP equipment。",
+        "entities": {
+          "tickers": [
+            "SPXC",
+            "GEV",
+            "OKLO",
+            "NNE",
+            "SMR",
+            "CCJ",
+            "BWXT",
+            "LEU",
+            "UEC",
+            "VST",
+            "CEG",
+            "ETN"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Energy"
+          ],
+          "themes": [
+            "AI datacenter power",
+            "SMR deployment",
+            "grid bottleneck",
+            "datacenter water scarcity"
+          ],
+          "tech_keywords": [
+            "dry cooling tower",
+            "H-class turbine",
+            "combined cycle LCOE",
+            "Henry Hub natgas"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SPXC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:datacenter-water-scarcity"
+          },
+          {
+            "subject": "ticker:SPXC",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:smr-dry-cooling"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:OKLO"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-power-demand"
+          },
+          {
+            "subject": "ticker:OKLO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:low-henry-hub-natgas"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "冷卻水 chokepoint + natgas LCOE contra 為新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-13T23:52:59Z",
+      "latency_ms": 23330,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "AI 算力需求激增，正推動對先進半導體製造的需求，這同樣需要高度專業化的精密加工及特殊合金。SMR 的建置亦仰賴這些關鍵製程與材料，例如先進耐高溫合金。這意味著像 **ATI Inc. (ATI)** 這類提供高性能材料的公司，將面臨來自 AI 伺服器、GPU 產線升級與 SMR 組件製造的雙重壓力。這種資源的雙向爭奪，可能加劇關鍵材料供應的瓶頸，進而影響 SMR 專案的預期時程。",
+        "entities": {
+          "tickers": [
+            "ATI"
+          ],
+          "sectors": [
+            "Basic Materials"
+          ],
+          "themes": [
+            "AI capex",
+            "SMR development",
+            "Supply chain constraints"
+          ],
+          "tech_keywords": [
+            "Specialized alloys",
+            "Advanced materials",
+            "High-performance materials"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ATI",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:ATI",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:SMR development"
+          },
+          {
+            "subject": "theme:AI capex",
+            "predicate": "COMPETES_WITH",
+            "object": "theme:SMR development"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "先進材料供應商面臨雙重需求壓力"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ATI",
+        "BWXT",
+        "CCJ",
+        "CEG",
+        "ETN",
+        "GEV",
+        "LEU",
+        "NNE",
+        "OKLO",
+        "ORCL",
+        "SMR",
+        "SPXC",
+        "UEC",
+        "VST"
+      ],
+      "sectors": [
+        "Basic Materials",
+        "Electrical Equipment",
+        "Energy",
+        "Industrials",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "AI data center power infrastructure",
+        "AI datacenter power",
+        "AI power demand",
+        "Grid modernization",
+        "SMR deployment",
+        "SMR development",
+        "SMR nuclear",
+        "Supply chain constraints",
+        "datacenter capex",
+        "datacenter water scarcity",
+        "grid bottleneck",
+        "pre-revenue narrative stocks",
+        "uranium fuel cycle"
+      ],
+      "tech_keywords": [
+        "Advanced materials",
+        "Aurora reactor",
+        "Grid automation",
+        "H-class turbine",
+        "HALEU fuel",
+        "Henry Hub natgas",
+        "High-performance materials",
+        "MOU-to-PPA",
+        "NRC Part 53",
+        "Power management systems",
+        "SMR",
+        "Specialized alloys",
+        "combined cycle LCOE",
+        "dry cooling tower",
+        "fast reactor"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:OKLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-power-demand"
+      },
+      {
+        "subject": "ticker:OKLO",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:ORCL"
+      },
+      {
+        "subject": "ticker:CCJ",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:smr-fuel-cycle"
+      },
+      {
+        "subject": "ticker:OKLO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NNE"
+      },
+      {
+        "subject": "ticker:OKLO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:nrc-licensing-delay"
+      },
+      {
+        "subject": "narrative:smr-nuclear",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:utilities"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI data center power infrastructure"
+      },
+      {
+        "subject": "ticker:SPXC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:datacenter-water-scarcity"
+      },
+      {
+        "subject": "ticker:SPXC",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:smr-dry-cooling"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:OKLO"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-power-demand"
+      },
+      {
+        "subject": "ticker:OKLO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:low-henry-hub-natgas"
+      },
+      {
+        "subject": "ticker:ATI",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:ATI",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:SMR development"
+      },
+      {
+        "subject": "theme:AI capex",
+        "predicate": "COMPETES_WITH",
+        "object": "theme:SMR development"
+      }
+    ],
+    "rounds_completed": 1,
+    "closed_at": "2026-05-13T23:52:59Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CUSTOMER_OF, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

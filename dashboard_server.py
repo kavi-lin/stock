@@ -30,7 +30,7 @@ DASHBOARD_DIR = os.path.join(ROOT, "Dashboard")
 POSITIONS     = os.path.join(ROOT, "positions.json")
 WATCHLIST_PATH = os.path.join(ROOT, "skills", "momentum-monitor", "scripts",
                               "universes", "watchlist.txt")
-PORT          = 8080
+PORT          = int(os.environ.get("DASHBOARD_PORT", "8080"))
 
 # Lazy-import futu notification helper (optional — only used by /api/futu-notifications).
 # Kept inside try/except so the server still boots when the macOS Futu app isn't installed
@@ -49,13 +49,21 @@ REFRESH_INTERVAL_SEC = int(os.getenv("DASH_REFRESH_SEC", "300"))
 BRIDGE_TIMEOUT_SEC   = 120
 
 # ── Heatmap (S&P 500 + NDX 100 live treemap) ─────────────────────────
-# Background polling thread refreshes batch quotes every 3 min during US market
-# hours and serves /api/heatmap/data + /api/heatmap/news/<ticker> endpoints.
-HEATMAP_REFRESH_SEC      = int(os.getenv("HEATMAP_REFRESH_SEC", "180"))   # 3 min
+# Background polling thread refreshes single-ticker quotes (fan-out) every 10 min
+# during US market hours. Universe loaded from static Dashboard/heatmap_universe.json
+# (FMP `sp500-constituent` / `nasdaq-constituent` / `batch-quote` are 402 on the
+# current plan — see V2.15.x changelog for the migration).
+HEATMAP_REFRESH_SEC      = int(os.getenv("HEATMAP_REFRESH_SEC", "600"))   # 10 min
 HEATMAP_NEWS_TTL_SEC     = int(os.getenv("HEATMAP_NEWS_TTL_SEC", "1800"))  # 30 min
 HEATMAP_UNIVERSE_TTL_SEC = int(os.getenv("HEATMAP_UNIVERSE_TTL_SEC", "64800"))  # 18h
 HEATMAP_OUTPUT_FILE      = os.path.join(ROOT, "Dashboard", "heatmap.json")
+HEATMAP_UNIVERSE_FILE    = os.path.join(ROOT, "Dashboard", "heatmap_universe.json")
+HEATMAP_QUOTE_WORKERS    = int(os.getenv("HEATMAP_QUOTE_WORKERS", "20"))
 _HEATMAP_TICKER_RE       = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
+# 429 circuit breaker — when FMP rate-limits, pause quote refresh for this long
+# instead of re-firing ~500 calls every cycle (and flooding the log).
+HEATMAP_RATELIMIT_COOLDOWN = int(os.getenv("HEATMAP_RATELIMIT_COOLDOWN", "1800"))  # 30 min
+_heatmap_ratelimit_until = 0.0   # epoch; quote refresh skipped until this time
 
 _heatmap_state = {
     "last_update":         None,   # ISO timestamp (last quote refresh)
@@ -72,6 +80,22 @@ HEATMAP_INTRADAY_TTL_SEC_CLOSED = int(os.getenv("HEATMAP_INTRADAY_TTL_SEC_CLOSED
 # V2.12.0 — per-theme mini-heatmap composite cache (theme-detector + heatmap quotes)
 _theme_heatmap_cache = {"data": None, "ts": 0}
 THEME_HEATMAP_TTL_SEC = int(os.getenv("THEME_HEATMAP_TTL_SEC", "180"))   # 3 min
+# V2.13.3 — per-ticker quote cache for theme-heatmap fallback fetch (covers
+# small/mid caps in theme-detector representative_stocks that aren't in the
+# S&P-500-based heatmap universe). Keyed by ticker, single TTL.
+_theme_extra_quote_cache = {}                                            # {sym: (ts, dict)}
+THEME_EXTRA_QUOTE_TTL_SEC = int(os.getenv("THEME_EXTRA_QUOTE_TTL_SEC", "180"))
+# V2.13.10 — per-ticker PE TTM cache. FMP /stable/ratios-ttm has no batch
+# endpoint, so cache aggressively (24h). Filled by background daemon for the
+# heatmap universe and lazy-fetched on demand for radar extras.
+_heatmap_pe_cache = {}                                                   # {sym: (ts, {pe_ttm, ev_ebitda, fwd_eps})}
+_heatmap_pe_lock  = threading.Lock()
+HEATMAP_PE_TTL_SEC = int(os.getenv("HEATMAP_PE_TTL_SEC", "86400"))       # 24h
+# V2.13.5 — fast live-quote cache for radar K-line tail (5s TTL, single ticker
+# per request, FMP quote-short endpoint). Decoupled from intraday-bars cache so
+# the K-line popup can build a 15s tick tail between 5-min bar boundaries.
+_heatmap_quote_cache = {}                                                # {sym: (ts, dict)}
+HEATMAP_QUOTE_TTL_SEC = int(os.getenv("HEATMAP_QUOTE_TTL_SEC", "5"))
 
 _shutdown = threading.Event()
 
@@ -88,15 +112,46 @@ _refresh_state = {
 _state_lock = threading.Lock()
 
 # ── Reverse-call to Claude CLI (protocol runner) ─────────────────────────
-# Lets the Dashboard trigger Claude to execute a protocol (sector/news/invest).
+# Lets the Dashboard trigger a model CLI to execute a protocol (sector/news/invest).
 # Single-job lock: one protocol at a time to avoid runaway token burn.
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
+GEMINI_BIN = os.environ.get("GEMINI_BIN") or "/usr/local/bin/gemini"
+CODEX_BIN  = os.environ.get("CODEX_BIN")  or "/usr/local/bin/codex"
+
+# Multi-model governance — protocols route through the governor (claude first;
+# gemini/codex only as quota fallback). Soft-import so the server still boots
+# if the module is missing.
+try:
+    from scripts._shared import model_router as _mrouter
+    MODEL_ROUTER_AVAILABLE = True
+except Exception as _mr_e:
+    MODEL_ROUTER_AVAILABLE = False
+    sys.stderr.write(f"[model_router] load failed: {_mr_e}\n")
+
+
+def _protocol_command(model, prompt):
+    """Build the CLI argv for running an agentic protocol on `model`.
+    The stdout reader just pipes to the log, so only the command differs."""
+    if model == "gemini":
+        return [GEMINI_BIN, "-p", prompt,
+                "--output-format", "stream-json", "--approval-mode", "yolo"]
+    if model == "codex":
+        return [CODEX_BIN, "exec", prompt, "--json", "-C", ROOT,
+                "--dangerously-bypass-approvals-and-sandbox", "--color", "never"]
+    claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
+    return [claude_bin, "-p", prompt,
+            "--output-format", "stream-json", "--verbose",
+            "--permission-mode", "bypassPermissions"]
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been
 # pathological (e.g. Claude looping on a Bash-heredoc write that hits Stream
 # Idle Timeout, burning 2h+ of tokens for nothing).
 PROTOCOL_TIMEOUT_SEC = int(os.getenv("PROTOCOL_TIMEOUT_SEC", "1500"))
 PROTOCOL_TIMEOUT_OVERRIDES = {
+    # V3.6.1 — a 2026-05-18 run hit 33 min (52 turns) and got killed despite
+    # succeeding. The build_sector_intel.py refactor should pull turn count back
+    # down; 45 min cap is headroom so a slow-but-valid run is never killed.
+    "sector":     int(os.getenv("SECTOR_TIMEOUT_SEC",     "2700")),  # 45 min
     # DIGEST with "complete pipeline in one turn" prompt + chunked writes needs
     # ~12-15 min with 60+ RSS items. 20 min gives breathing room.
     "news":       int(os.getenv("NEWS_TIMEOUT_SEC",        "1200")),  # 20 min
@@ -125,7 +180,7 @@ PROTOCOL_PROMPTS = {
     "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。覆寫 verdict 時請保留原 `published` 欄位（若不存在，從對應 raw.json 補上）。\n\n新聞分析 審核 \"{headline}\"",
     "triage": "非互動模式：只跑 Stage 1 shallow triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. 讀剛產出的 `news/news_logs/YYYY-MM-DD_raw.json`（已 dedupe + 按 published desc 排序）\n3. 對每則跑 shallow triage（30 字 snap，依 news_protocol_v2.md Stage 1 rubric 給 score -5~+5）\n4. **必須寫 `news/news_logs/YYYY-MM-DD_triage.json`**（不寫等於沒跑），結構：\n```\n{\n  \"timestamp\": ISO,\n  \"mode\": \"TRIAGE\",\n  \"raw_count\": N,\n  \"verdicts\": [{\n    \"news_id\": \"nNNN\", \"depth\": \"shallow\", \"review_status\": \"reviewed\",\n    \"headline\": str, \"headline_zh\": str, \"source_label\": str,\n    \"news_type\": str, \"bull_case\": str(<=30字), \"bear_case\": str(<=30字),\n    \"sector_view\": str(<=30字), \"macro_view\": str(<=30字),\n    \"verdict\": \"BULLISH\"|\"BEARISH\"|\"NEUTRAL\"|\"BINARY\",\n    \"net_impact_score\": float, \"binary_risk\": bool, \"within_48h\": bool,\n    \"affected_sectors\": [str], \"tickers_mentioned\": [str],\n    \"date\": \"YYYY-MM-DD\",\n    \"published\": str (從 raw.json 對應 news_id 抄過來的 ISO timestamp，UI 拿來算 freshness 顏色)\n  }, ...]\n}\n```\n5. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
     "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker}` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
-    "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict 計算）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（含三步驟流程 + 輸出 schema 要求）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 三步驟執行：\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
+    "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict、新增 `industry_rollup` + `adjustment_ledger_active` 兩個 top-level 欄位）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（**四步驟**：Step 0 Adjustment Evaluation + Step 1 Pattern + Step 2 Root Cause + Step 3 Recommendations）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合 + industry_rollup + adjustment_ledger_active，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 四步驟執行：\n   - **Step 0 — Adjustment Evaluation（先做）**：對 `adjustment_ledger_active` 中每筆 active Rec，從 industry_rollup / decisions / 外部資料拉出 `target_metric` 當週數值，對照 ledger 的 `evaluation_history` 上次值，下 improved / no_change / regressed 判斷。連 3 週 no_change 建議 paused；regressed 建議 rolled-back。完整 ledger 在 `reports/decision_review/ADJUSTMENT_LEDGER.md`，schema 在 `ADJUSTMENT_LEDGER_SCHEMA.md`\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime / sub_industry_heat 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)。**必看 `industry_rollup`** 找 sub-industry / sector 集中性\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## 0. Adjustment Evaluation\n| Rec | applied_date | target_metric | last_value | this_week_value | judgement |\n|---|---|---|---|---|---|\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Industry Rollup\n| industry | sector | n | miss_rate | avg_miss_return | tickers | top_30%? |\n|---|---|---|---|---|---|---|\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跳過 Adjustment Evaluation、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
 }
 PROTOCOL_LOG_DIRS = {
     "sector":     "sector/scan_logs",
@@ -137,6 +192,31 @@ PROTOCOL_LOG_DIRS = {
     "triage":     "news/scan_logs",
     "earnings":   "skills/earnings-analyst/cache",
     "llm_review": "reports/decision_review",
+    "earnings_preview": "skills/earnings-valuation-forecaster/cache",
+}
+
+# V2.15.0 — Script protocols: bypass Claude conversation, run a Python script
+# directly. Cheaper (~$0/run vs $0.02-0.05 per Claude turn) and faster (~30s vs
+# 30-60s Claude wrap). Reuses the same _protocol_queue / _protocol_state /
+# status polling infra so UX is identical to other protocols (banner / cancel /
+# history). The cmd is a list with `{ticker}` placeholders substituted at
+# dispatch time.
+SCRIPT_PROTOCOLS = {
+    "earnings_preview": {
+        "cmd": ["python3", "skills/earnings-valuation-forecaster/scripts/forecast.py",
+                "--pre-earnings", "--output-dir", "reports/", "{ticker}"],
+        "label_template": "📋 Preview {ticker}",
+        "timeout": int(os.getenv("PREVIEW_TIMEOUT_SEC", "180")),  # 3 min
+        "requires": ["ticker"],
+    },
+}
+
+# Post-run validator gate. Catches Claude returning rc=0 while leaving the
+# protocol artifact incomplete (e.g. sector run halts after Phase 4 without
+# emitting Phase 5 synthesis). If validator rc≠0, status flips to "error".
+PROTOCOL_VALIDATORS = {
+    "sector": ["sector/scripts/validate_sector_intel.py"],
+    "news":   ["news/scripts/validate_digest_output.py"],
 }
 
 _protocol_state = {
@@ -326,10 +406,120 @@ def _extract_error_from_log(log_path, rc):
         return f"exit code {rc} (log parse failed: {e})"
 
 
+def _run_script_protocol(name, params=None):
+    """V2.15.0 — dispatch a SCRIPT_PROTOCOLS entry as a plain subprocess.
+    Mirrors run_protocol's state machine (status / log / cancel hook) so the
+    Dashboard banner / polling / queue history all work identically.
+    """
+    spec = SCRIPT_PROTOCOLS[name]
+    params = params or {}
+    for req in spec.get("requires", []):
+        if not params.get(req):
+            return None, f"protocol '{name}' requires '{req}'"
+
+    with _protocol_lock:
+        if _protocol_state["status"] == "running":
+            return None, f"another protocol is running: {_protocol_state['name']}"
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        job_id = f"{name}_{ts}"
+        log_dir = os.path.join(ROOT, PROTOCOL_LOG_DIRS[name])
+        os.makedirs(log_dir, exist_ok=True)
+        log_path = os.path.join(log_dir, f"{job_id}.log")
+
+        _protocol_state.update({
+            "job_id":      job_id,
+            "name":        name,
+            "status":      "running",
+            "started_at":  _now_iso(),
+            "ended_at":    None,
+            "log_path":    log_path,
+            "error":       None,
+            "elapsed_sec": 0,
+            "ticker":      params.get("ticker"),
+        })
+
+    def _run():
+        start = datetime.now()
+        # Substitute placeholders in cmd
+        cmd = []
+        for tok in spec["cmd"]:
+            for k, v in params.items():
+                tok = tok.replace("{" + k + "}", str(v))
+            cmd.append(tok)
+        rc = -1
+        try:
+            lf = open(log_path, "w", buffering=1)
+            lf.write(f"=== script_protocol={name} cmd={cmd!r} started={_now_iso()} ===\n")
+            lf.flush()
+            proc = subprocess.Popen(
+                cmd, cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True, bufsize=1,
+                env={**os.environ, "PATH": os.environ.get("PATH", "") + ":/Users/kavi/.local/bin"},
+            )
+            _protocol_proc["p"] = proc
+
+            def _reader():
+                try:
+                    for line in iter(proc.stdout.readline, ''):
+                        if not line: break
+                        lf.write(line); lf.flush()
+                except Exception as re:
+                    try: lf.write(f"[reader error: {re}]\n")
+                    except Exception: pass
+                finally:
+                    try: proc.stdout.close()
+                    except Exception: pass
+
+            rt = threading.Thread(target=_reader, daemon=True)
+            rt.start()
+            try:
+                rc = proc.wait(timeout=spec.get("timeout", 180))
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                rc = -1
+                with _protocol_lock:
+                    _protocol_state["error"] = f"timeout after {spec.get('timeout', 180)}s (hard kill)"
+            rt.join(timeout=3)
+            lf.write(f"\n=== ended={_now_iso()} rc={rc} ===\n")
+            lf.close()
+
+            with _protocol_lock:
+                _protocol_state["ended_at"]    = _now_iso()
+                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                if _protocol_state["status"] == "cancelled":
+                    pass
+                elif rc == 0:
+                    _protocol_state["status"] = "done"
+                else:
+                    _protocol_state["status"] = "error"
+                    if not _protocol_state["error"]:
+                        _protocol_state["error"] = f"script exited rc={rc}"
+            _protocol_proc["p"] = None
+            # No bridge re-run for script protocols — they don't change data.json
+        except Exception as e:
+            with _protocol_lock:
+                _protocol_state["status"]      = "error"
+                _protocol_state["error"]       = str(e)
+                _protocol_state["ended_at"]    = _now_iso()
+                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+            _protocol_proc["p"] = None
+
+    threading.Thread(target=_run, daemon=True).start()
+    return job_id, None
+
+
 def run_protocol(name, params=None):
     """Spawn `claude -p "<prompt>"` in a daemon thread. Single-job lock.
     params: optional dict for template substitution (e.g. {ticker: "NVDA"}).
+
+    V2.15.0: when name is in SCRIPT_PROTOCOLS, dispatch via _run_script_protocol
+    instead of spawning Claude — bypasses LLM for pure subprocess work.
     """
+    if name in SCRIPT_PROTOCOLS:
+        return _run_script_protocol(name, params)
     if name not in PROTOCOL_PROMPTS:
         return None, f"unknown protocol: {name}"
     # Validate ticker-scoped protocols
@@ -376,11 +566,13 @@ def run_protocol(name, params=None):
         prompt = PROTOCOL_PROMPTS[name]
         for _k, _v in (params or {}).items():
             prompt = prompt.replace("{" + _k + "}", str(_v))
-        claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
+        # Governor picks the model — claude first, gemini/codex only when
+        # claude is over budget / in a quota cooldown.
+        proto_model = _mrouter.pick_model("protocol") if MODEL_ROUTER_AVAILABLE else "claude"
         rc = -1
         try:
             lf = open(log_path, "w", buffering=1)
-            lf.write(f"=== protocol={name} prompt={prompt!r} started={_now_iso()} ===\n")
+            lf.write(f"=== protocol={name} model={proto_model} prompt={prompt!r} started={_now_iso()} ===\n")
             lf.flush()
             # stream-json: every event is one line of JSON → naturally line-buffered.
             # Intentionally NOT passing --include-partial-messages: those emit char-by-char
@@ -388,10 +580,7 @@ def run_protocol(name, params=None):
             # without providing info we actually parse. tool_use/tool_result/result events
             # arrive at block-level completion, which is plenty for event tracking.
             proc = subprocess.Popen(
-                [claude_bin, "-p", prompt,
-                 "--output-format", "stream-json",
-                 "--verbose",
-                 "--permission-mode", "bypassPermissions"],
+                _protocol_command(proto_model, prompt),
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -437,17 +626,50 @@ def run_protocol(name, params=None):
             lf.write(f"\n=== ended={_now_iso()} rc={rc} ===\n")
             lf.close()
 
+            # Record this run against the model's daily budget; a quota wall in
+            # the log tail trips its cooldown so the next run routes elsewhere.
+            if MODEL_ROUTER_AVAILABLE:
+                try:
+                    with open(log_path, "r", encoding="utf-8", errors="ignore") as _lf:
+                        _tail = _lf.read()[-4000:]
+                    _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail)
+                except Exception:
+                    pass
+
+            # Validator gate: rc=0 alone is not enough — Claude can finish a
+            # turn without emitting the required artifact. Run the per-protocol
+            # validator and downgrade to "error" when rc≠0.
+            validator_err = None
+            if rc == 0 and name in PROTOCOL_VALIDATORS:
+                try:
+                    vr = subprocess.run(
+                        [sys.executable, *[os.path.join(ROOT, p) for p in PROTOCOL_VALIDATORS[name]]],
+                        cwd=ROOT, capture_output=True, text=True, timeout=60,
+                    )
+                    if vr.returncode != 0:
+                        tail = (vr.stdout or vr.stderr or "").strip().splitlines()
+                        head_lines = "; ".join(tail[:5])[:400]
+                        validator_err = f"validator rc={vr.returncode}: {head_lines}"
+                        try:
+                            with open(log_path, "a") as _lf:
+                                _lf.write(f"\n=== validator FAILED rc={vr.returncode} ===\n")
+                                _lf.write((vr.stdout or "") + (vr.stderr or ""))
+                        except Exception:
+                            pass
+                except Exception as ve:
+                    validator_err = f"validator exception: {ve}"
+
             with _protocol_lock:
                 _protocol_state["ended_at"]    = _now_iso()
                 _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
                 if _protocol_state["status"] == "cancelled":
                     pass
-                elif rc == 0:
+                elif rc == 0 and validator_err is None:
                     _protocol_state["status"] = "done"
                 else:
                     _protocol_state["status"] = "error"
                     if not _protocol_state["error"]:
-                        _protocol_state["error"] = _extract_error_from_log(log_path, rc)
+                        _protocol_state["error"] = validator_err or _extract_error_from_log(log_path, rc)
             _protocol_proc["p"] = None
 
             # Success → refresh data.json so Dashboard picks up new state
@@ -519,6 +741,9 @@ def _label_for(name, params):
         return "🏭 Sector Scan"
     if name == "earnings":
         return f"📊 Earnings {p.get('ticker', '?')}"
+    if name in SCRIPT_PROTOCOLS:
+        tpl = SCRIPT_PROTOCOLS[name].get("label_template", name)
+        return tpl.replace("{ticker}", str(p.get("ticker", "?")))
     return name
 
 
@@ -527,10 +752,29 @@ def enqueue_protocol(name, params=None, source="direct"):
     Returns (state, err). err='duplicate' for invest with same ticker pending.
     state: {queued, position, total_ahead, label, id, enqueued_at}.
     """
-    if name not in PROTOCOL_PROMPTS:
+    if name not in PROTOCOL_PROMPTS and name not in SCRIPT_PROTOCOLS:
         return None, f"unknown protocol: {name}"
     params = dict(params or {})
     label  = _label_for(name, params)
+
+    # Script protocols: validate required params + dedup by ticker
+    if name in SCRIPT_PROTOCOLS:
+        spec = SCRIPT_PROTOCOLS[name]
+        for req in spec.get("requires", []):
+            if not params.get(req):
+                return None, f"missing {req}"
+        ticker = (params.get("ticker") or "").upper().strip()
+        if ticker:
+            params["ticker"] = ticker
+            with _protocol_lock:
+                cur = _protocol_state
+                if (cur.get("status") == "running" and cur.get("name") == name
+                        and (cur.get("ticker") or "").upper() == ticker):
+                    return {"queued": False, "reason": "duplicate_active", "ticker": ticker}, "duplicate"
+            with _protocol_queue_lock:
+                if any(q.get("name") == name and (q.get("params") or {}).get("ticker") == ticker
+                       for q in _protocol_queue):
+                    return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
 
     # invest dedup: same ticker queued or running → reject
     if name == "invest":
@@ -997,6 +1241,208 @@ _momentum_state = {
 }
 
 
+# V2.13.11 — server-side pre-market chain orchestrator. Replaces the old
+# frontend-driven chain in script.js::runPremarketChain which was race-prone
+# (could miss the 'done' transition between news → sector and never enqueue
+# sector). State machine runs in a daemon thread, polls _daily_update_state +
+# _protocol_history (durable record of completions), so transitions can't be
+# missed even if the UI tab is closed.
+_premarket_chain_lock = threading.Lock()
+_premarket_chain_state = {
+    "status":      "idle",     # idle | running | done | error
+    "started_at":  None,
+    "ended_at":    None,
+    "phase":       None,       # phase_1 | phase_2 | done
+    "elapsed_sec": 0,
+    "items": {
+        "daily":  {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
+        "news":   {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
+        "sector": {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
+    },
+    "error":       None,
+}
+
+
+def _wait_protocol_completion(name, history_baseline, timeout_sec, on_progress=None):
+    """Block until a fresh entry for protocol `name` appears in _protocol_history
+    (i.e. completion happened AFTER history_baseline). Calls on_progress(running,
+    elapsed) every 2s while waiting. Returns the history entry dict on success,
+    raises RuntimeError on timeout."""
+    t0 = time.time()
+    while True:
+        time.sleep(2)
+        with _protocol_lock:
+            cur_name    = _protocol_state.get("name")
+            cur_status  = _protocol_state.get("status")
+            cur_started = _protocol_state.get("started_at")
+        cur_elapsed = (
+            int((datetime.now() - datetime.fromisoformat(cur_started)).total_seconds())
+            if cur_started else 0
+        )
+        with _protocol_queue_lock:
+            history = list(_protocol_history)
+        # New completions are at index [0..N-baseline)
+        new_completions = history[: max(0, len(history) - history_baseline)]
+        match = next((h for h in new_completions if h.get("name") == name), None)
+        if match:
+            return match
+        if on_progress:
+            running = (cur_name == name and cur_status == "running")
+            on_progress(running, cur_elapsed if running else int(time.time() - t0))
+        if time.time() - t0 > timeout_sec:
+            raise RuntimeError(f"{name} timeout (>{timeout_sec}s)")
+
+
+def run_premarket_chain():
+    """Server-side daily → news → sector orchestrator with freshness skip per item.
+    Idempotent: returns ("duplicate_active", reason) if already running.
+    Spawns a daemon thread; immediately returns ("started", None)."""
+    with _premarket_chain_lock:
+        if _premarket_chain_state.get("status") == "running":
+            return None, "duplicate_active"
+        _premarket_chain_state.update({
+            "status":      "running",
+            "started_at":  _now_iso(),
+            "ended_at":    None,
+            "phase":       "phase_1",
+            "elapsed_sec": 0,
+            "items": {
+                "daily":  {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
+                "news":   {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
+                "sector": {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
+            },
+            "error":       None,
+        })
+
+    def _set_item(key, **kv):
+        with _premarket_chain_lock:
+            _premarket_chain_state["items"][key].update(kv)
+            _premarket_chain_state["elapsed_sec"] = int(
+                (datetime.now() - datetime.fromisoformat(_premarket_chain_state["started_at"])).total_seconds()
+            )
+
+    def _run():
+        start = datetime.now()
+        try:
+            # ── Phase 1: daily_update + news (concurrent) ──────────
+            # V2.17.6 — daily_update.sh and news protocol are independent
+            # (daily writes data.json, news fetches RSS/Finnhub/FMP/SEC; no
+            # cross-dependency). Run them in parallel to halve Phase 1 wall
+            # clock. Phase 2 sector waits for both.
+            phase1_errors = []
+
+            def _run_daily():
+                checks = preflight_check()
+                free = [c for c in checks if c.get("free")]
+                free_stale = [c for c in free if c.get("status") != "FRESH"]
+                if free and not free_stale:
+                    _set_item("daily", status="skipped", reason="all_free_caches_fresh")
+                    return
+                _set_item("daily", status="running")
+                try:
+                    run_daily_update()
+                except Exception as e:
+                    _set_item("daily", status="error", error=str(e))
+                    phase1_errors.append(("daily", str(e)))
+                    return
+                while True:
+                    time.sleep(2)
+                    with _daily_update_lock:
+                        s = _daily_update_state.get("status")
+                        sa = _daily_update_state.get("started_at")
+                    elapsed = int((datetime.now() - datetime.fromisoformat(sa)).total_seconds()) if sa else 0
+                    _set_item("daily", elapsed_sec=elapsed)
+                    if s in ("done", "error"):
+                        break
+                with _daily_update_lock:
+                    final = _daily_update_state.get("status")
+                    err = _daily_update_state.get("error")
+                _set_item("daily", status=final, error=err)
+                if final == "error":
+                    phase1_errors.append(("daily", err or "unknown"))
+
+            def _run_news():
+                news_check = next((c for c in preflight_check() if c["key"] == "news"), None)
+                if news_check and news_check.get("status") == "FRESH":
+                    _set_item("news", status="skipped", reason="today_digest_fresh")
+                    return
+                with _protocol_queue_lock:
+                    history_baseline = len(_protocol_history)
+                try:
+                    state, err = enqueue_protocol("news", source="premarket_chain")
+                    if err and err != "duplicate":
+                        raise RuntimeError(f"news enqueue failed: {err}")
+                except Exception as e:
+                    _set_item("news", status="error", error=str(e))
+                    phase1_errors.append(("news", str(e)))
+                    return
+                _set_item("news", status="queued")
+                done_entry = _wait_protocol_completion(
+                    "news", history_baseline, timeout_sec=1500,
+                    on_progress=lambda running, sec: _set_item(
+                        "news", status="running" if running else "queued", elapsed_sec=sec),
+                )
+                _set_item("news",
+                          status=done_entry.get("status") or "done",
+                          error=done_entry.get("error"))
+                if done_entry.get("status") == "error":
+                    phase1_errors.append(("news", done_entry.get("error") or "unknown"))
+
+            t_daily = threading.Thread(target=_run_daily, daemon=True, name="premarket_daily")
+            t_news  = threading.Thread(target=_run_news,  daemon=True, name="premarket_news")
+            t_daily.start()
+            t_news.start()
+            t_daily.join()
+            t_news.join()
+            if phase1_errors:
+                # Both items have already had their state set to "error"; stop the chain.
+                first = phase1_errors[0]
+                raise RuntimeError(f"phase 1 failed ({first[0]}): {first[1]}")
+
+            # ── Phase 2: sector ─────────────────────────────────
+            with _premarket_chain_lock:
+                _premarket_chain_state["phase"] = "phase_2"
+            sector_check = next((c for c in preflight_check() if c["key"] == "sector"), None)
+            if sector_check and sector_check.get("status") == "FRESH":
+                _set_item("sector", status="skipped", reason="today_intel_fresh")
+            else:
+                with _protocol_queue_lock:
+                    history_baseline = len(_protocol_history)
+                state, err = enqueue_protocol("sector", source="premarket_chain")
+                if err and err != "duplicate":
+                    raise RuntimeError(f"sector enqueue failed: {err}")
+                _set_item("sector", status="queued")
+                # V2.20.1 — sector V1.4 PARALLEL_SUBAGENT typically takes 15-21 min
+                # (p95 ~21 min). Old 1200s/20min cap was too tight, hit timeout on 5/10
+                # despite sector still running. Bumped to 1800s/30min for headroom.
+                done_entry = _wait_protocol_completion(
+                    "sector", history_baseline, timeout_sec=1800,
+                    on_progress=lambda running, sec: _set_item(
+                        "sector", status="running" if running else "queued", elapsed_sec=sec),
+                )
+                _set_item("sector",
+                          status=done_entry.get("status") or "done",
+                          error=done_entry.get("error"))
+                if done_entry.get("status") == "error":
+                    raise RuntimeError(f"sector failed: {done_entry.get('error')}")
+
+            # ── Done ────────────────────────────────────────────
+            with _premarket_chain_lock:
+                _premarket_chain_state["phase"]      = "done"
+                _premarket_chain_state["status"]     = "done"
+                _premarket_chain_state["ended_at"]   = _now_iso()
+                _premarket_chain_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+        except Exception as e:
+            with _premarket_chain_lock:
+                _premarket_chain_state["status"]     = "error"
+                _premarket_chain_state["error"]      = str(e)
+                _premarket_chain_state["ended_at"]   = _now_iso()
+                _premarket_chain_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+
+    threading.Thread(target=_run, daemon=True).start()
+    return "started", None
+
+
 def _build_screen_cmd(params):
     # Note: no --md-only; we parse stderr summary for CSV path
     cmd = [sys.executable, os.path.join(ROOT, "skills", "momentum-monitor", "scripts", "screen.py")]
@@ -1403,44 +1849,67 @@ def _heatmap_has_quote_data(min_fraction=0.5):
 
 
 def _fmp_get_json(url, timeout=20):
-    """Stdlib HTTP GET → parse JSON. Returns None on failure."""
+    """Stdlib HTTP GET → parse JSON. Returns None on failure.
+
+    On HTTP 429 (rate-limited) it trips the heatmap circuit breaker
+    (`_heatmap_ratelimit_until`) and logs only once per cooldown window — so a
+    fan-out of ~500 calls all 429-ing produces one line, not 500."""
+    global _heatmap_ratelimit_until
     from urllib.request import Request, urlopen
     from urllib.error  import URLError, HTTPError
     try:
         req = Request(url, headers={"User-Agent": "ai-invest-dashboard/heatmap"})
         with urlopen(req, timeout=timeout) as r:
             return json.loads(r.read().decode("utf-8"))
-    except (URLError, HTTPError, TimeoutError, json.JSONDecodeError) as e:
+    except HTTPError as e:
+        if getattr(e, "code", None) == 429:
+            now = time.time()
+            with _heatmap_lock:
+                first = now >= _heatmap_ratelimit_until
+                _heatmap_ratelimit_until = now + HEATMAP_RATELIMIT_COOLDOWN
+            if first:
+                sys.stderr.write(f"[heatmap] FMP rate-limited (429) — pausing quote "
+                                 f"refresh {HEATMAP_RATELIMIT_COOLDOWN}s\n")
+        else:
+            sys.stderr.write(f"[heatmap] HTTP error: HTTPError {getattr(e, 'code', '?')}\n")
+        return None
+    except (URLError, TimeoutError, json.JSONDecodeError) as e:
         sys.stderr.write(f"[heatmap] HTTP error: {type(e).__name__}: {str(e)[:100]}\n")
         return None
 
 
 def _heatmap_build_universe():
-    """Fetch S&P 500 + NDX 100 constituent lists (FMP stable). Each list already
-    contains symbol/name/sector/subSector → no separate profile fetch needed.
-    Market cap arrives later via batch-quote."""
-    api_key = os.getenv("FMP_API_KEY")
-    if not api_key:
-        sys.stderr.write("[heatmap] FMP_API_KEY not set; skipping universe build\n")
+    """Load S&P 500 ∪ NDX 100 universe from static Dashboard/heatmap_universe.json.
+    Migrated from FMP `sp500-constituent` + `nasdaq-constituent` (402 on the
+    current plan) — refresh the static file manually each quarter."""
+    if not os.path.exists(HEATMAP_UNIVERSE_FILE):
+        sys.stderr.write(f"[heatmap] static universe file missing: {HEATMAP_UNIVERSE_FILE}\n")
+        return False
+    try:
+        with open(HEATMAP_UNIVERSE_FILE, "r", encoding="utf-8") as f:
+            doc = json.load(f)
+    except (OSError, ValueError) as e:
+        sys.stderr.write(f"[heatmap] static universe read error: {e}\n")
         return False
 
-    base = "https://financialmodelingprep.com/stable"
-    sp500  = _fmp_get_json(f"{base}/sp500-constituent?apikey={api_key}")    or []
-    ndx100 = _fmp_get_json(f"{base}/nasdaq-constituent?apikey={api_key}")   or []
+    entries = doc.get("tickers") if isinstance(doc, dict) else doc
+    if not isinstance(entries, list):
+        sys.stderr.write("[heatmap] static universe: unexpected schema\n")
+        return False
 
     profiles = {}
-    for entry in sp500 + ndx100:
-        sym = (entry.get("symbol") or "").strip().upper()
+    for entry in entries:
+        sym = (entry.get("ticker") or entry.get("symbol") or "").strip().upper()
         if not sym or not _HEATMAP_TICKER_RE.match(sym):
             continue
         if sym in profiles:
-            continue  # dedupe (S&P 500 ∪ NDX 100)
+            continue
         profiles[sym] = {
             "ticker":      sym,
-            "name":        entry.get("name")      or sym,
-            "sector":      entry.get("sector")    or "Other",
-            "industry":    entry.get("subSector") or entry.get("sector") or "Other",
-            "market_cap":  0.0,  # filled by batch-quote
+            "name":        entry.get("name")     or sym,
+            "sector":      entry.get("sector")   or "Other",
+            "industry":    entry.get("industry") or entry.get("subSector") or entry.get("sector") or "Other",
+            "market_cap":  0.0,
             "price":       None,
             "change_pct":  None,
             "day_low":     None,
@@ -1450,7 +1919,7 @@ def _heatmap_build_universe():
         }
 
     if not profiles:
-        sys.stderr.write("[heatmap] universe fetch returned 0 rows\n")
+        sys.stderr.write("[heatmap] static universe parsed 0 rows\n")
         return False
 
     with _heatmap_lock:
@@ -1470,11 +1939,16 @@ def _heatmap_build_universe():
 
 
 def _heatmap_refresh_quotes():
-    """Batch-fetch quotes for current universe via FMP stable batch-quote
-    (200 tickers/call, ~3 calls for 550 tickers, ~4 sec total).
-    batch-quote returns market_cap so we update that too."""
+    """Fan-out single-ticker `stable/quote` calls via thread pool.
+    Migrated from `batch-quote` (402 on the current plan). `quote` returns
+    marketCap, so we still patch market_cap inline."""
     api_key = os.getenv("FMP_API_KEY")
     if not api_key:
+        return False
+
+    # 429 circuit breaker — skip the whole ~500-call fan-out while cooling down.
+    if time.time() < _heatmap_ratelimit_until:
+        sys.stderr.write("[heatmap] skip quote refresh — FMP rate-limit cooldown\n")
         return False
 
     with _heatmap_lock:
@@ -1483,28 +1957,61 @@ def _heatmap_refresh_quotes():
         return False
 
     base = "https://financialmodelingprep.com/stable"
-    BATCH = 200
+
+    def _fetch_one(sym):
+        # If a 429 trips the breaker mid-fan-out, stop hitting the API for the
+        # remaining (still-queued) symbols instead of firing them all.
+        if time.time() < _heatmap_ratelimit_until:
+            return sym, None
+        rows = _fmp_get_json(f"{base}/quote?symbol={sym}&apikey={api_key}", timeout=10) or []
+        return sym, (rows[0] if isinstance(rows, list) and rows else None)
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    quotes = {}
+    with ThreadPoolExecutor(max_workers=HEATMAP_QUOTE_WORKERS) as ex:
+        futs = [ex.submit(_fetch_one, s) for s in symbols]
+        for fut in as_completed(futs):
+            try:
+                sym, q = fut.result()
+            except Exception:
+                continue
+            if q:
+                quotes[sym] = q
+
     updated = 0
-    for i in range(0, len(symbols), BATCH):
-        chunk = symbols[i:i + BATCH]
-        url = f"{base}/batch-quote?symbols={','.join(chunk)}&apikey={api_key}"
-        data = _fmp_get_json(url) or []
-        with _heatmap_lock:
-            for q in data:
-                sym = (q.get("symbol") or "").strip().upper()
-                row = _heatmap_state["tickers"].get(sym)
-                if not row:
-                    continue
-                row["price"]      = q.get("price")
-                row["change_pct"] = q.get("changePercentage")
-                row["day_low"]    = q.get("dayLow")
-                row["day_high"]   = q.get("dayHigh")
-                row["volume"]     = q.get("volume")
-                row["prev_close"] = q.get("previousClose")
-                mcap = q.get("marketCap")
-                if mcap:
-                    row["market_cap"] = float(mcap)
-                updated += 1
+    with _heatmap_lock:
+        for sym, q in quotes.items():
+            row = _heatmap_state["tickers"].get(sym)
+            if not row:
+                continue
+            row["price"]      = q.get("price")
+            row["change_pct"] = q.get("changePercentage")
+            row["day_low"]    = q.get("dayLow")
+            row["day_high"]   = q.get("dayHigh")
+            row["volume"]     = q.get("volume")
+            row["prev_close"] = q.get("previousClose")
+            mcap = q.get("marketCap")
+            if mcap:
+                row["market_cap"] = float(mcap)
+            # Attach cached valuation bundle (filled by _heatmap_refresh_pe_universe).
+            # Forward PE is computed live (price / fwd_eps) so price drift within
+            # 24h cache window stays accurate.
+            with _heatmap_pe_lock:
+                pe_entry = _heatmap_pe_cache.get(sym)
+            if pe_entry and isinstance(pe_entry[1], dict):
+                val = pe_entry[1]
+                row["pe"]        = val.get("pe_ttm")
+                row["ev_ebitda"] = val.get("ev_ebitda")
+                fwd_eps = val.get("fwd_eps")
+                p = q.get("price")
+                if fwd_eps and fwd_eps != 0 and p:
+                    try:
+                        row["forward_pe"] = round(float(p) / float(fwd_eps), 2)
+                    except (TypeError, ValueError, ZeroDivisionError):
+                        row["forward_pe"] = None
+                else:
+                    row["forward_pe"] = None
+            updated += 1
 
     with _heatmap_lock:
         _heatmap_state["last_update"] = _now_iso()
@@ -1545,20 +2052,123 @@ def _fetch_heatmap_news(ticker, limit=2):
     return items
 
 
+def _fetch_theme_extra_quotes(symbols):
+    """Batch-fetch quotes for tickers outside the heatmap universe (small/mid
+    caps in TD representative_stocks). Returns {sym: quote-dict} in the same
+    shape as `_heatmap_state["tickers"]` rows. Per-ticker TTL cache keeps FMP
+    usage low (1 batch call per render at most). FMP miss = sym omitted."""
+    if not symbols:
+        return {}
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return {}
+
+    now = time.time()
+    out = {}
+    to_fetch = []
+    for sym in symbols:
+        cached = _theme_extra_quote_cache.get(sym)
+        if cached and (now - cached[0]) < THEME_EXTRA_QUOTE_TTL_SEC:
+            out[sym] = cached[1]
+        else:
+            to_fetch.append(sym)
+    if not to_fetch:
+        return out
+
+    base = "https://financialmodelingprep.com/stable"
+    BATCH = 200
+    fetched_syms = []
+    for i in range(0, len(to_fetch), BATCH):
+        chunk = to_fetch[i:i + BATCH]
+        url = f"{base}/batch-quote?symbols={','.join(chunk)}&apikey={api_key}"
+        rows = _fmp_get_json(url, timeout=15) or []
+        for q in rows:
+            sym = (q.get("symbol") or "").strip().upper()
+            if not sym:
+                continue
+            with _heatmap_pe_lock:
+                pe_entry = _heatmap_pe_cache.get(sym)
+            val = pe_entry[1] if pe_entry and isinstance(pe_entry[1], dict) else {}
+            price = q.get("price")
+            fwd_eps = val.get("fwd_eps")
+            forward_pe = None
+            if fwd_eps and fwd_eps != 0 and price:
+                try:
+                    forward_pe = round(float(price) / float(fwd_eps), 2)
+                except (TypeError, ValueError, ZeroDivisionError):
+                    forward_pe = None
+            row = {
+                "ticker":     sym,
+                "name":       q.get("name") or sym,
+                "sector":     "",
+                "industry":   "",
+                "price":      price,
+                "change_pct": q.get("changePercentage"),
+                "volume":     q.get("volume"),
+                "market_cap": float(q.get("marketCap")) if q.get("marketCap") else 0,
+                "pe":         val.get("pe_ttm"),
+                "ev_ebitda":  val.get("ev_ebitda"),
+                "forward_pe": forward_pe,
+            }
+            _theme_extra_quote_cache[sym] = (now, row)
+            out[sym] = row
+            if not pe_entry:
+                fetched_syms.append(sym)
+
+    # Lazy PE fetch for newly-seen symbols (background — populates next render)
+    if fetched_syms:
+        def _bg():
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            with ThreadPoolExecutor(max_workers=5) as ex:
+                futs = {ex.submit(_fetch_pe_ttm, s, api_key): s for s in fetched_syms}
+                for fut in as_completed(futs):
+                    s = futs[fut]
+                    try:
+                        pe = fut.result()
+                    except Exception:
+                        pe = None
+                    with _heatmap_pe_lock:
+                        _heatmap_pe_cache[s] = (time.time(), pe)
+        threading.Thread(target=_bg, daemon=True).start()
+    return out
+
+
 def _build_theme_heatmap_payload():
-    """Compose per-theme mini-heatmap data: read latest theme-detector cache,
-    take each theme's representative_stocks, join against _heatmap_state.tickers
-    for live quote / market_cap / sector / industry. Tickers not in heatmap state
-    are skipped (we don't add new FMP calls; coverage degrades gracefully)."""
+    """Compose per-theme mini-heatmap data: pin to the same theme-detector cache
+    that the latest recommendations.json was generated from (so radar-page card
+    bodies and the heatmap show identical theme names + tickers). Falls back to
+    the newest TD cache when recommendations meta is missing.
+
+    Tickers not in `_heatmap_state.tickers` are skipped — quote data stays live;
+    only the theme structure is pinned."""
     import glob
     cache_dir = os.path.join(ROOT, "skills", "theme-detector", "cache")
     files = sorted(glob.glob(os.path.join(cache_dir, "theme_detector_*.json")))
     if not files:
         return {"themes": [], "error": "no theme-detector cache found",
                 "as_of": _now_iso(), "market_open": _is_us_market_hours()}
-    latest = files[-1]
+
+    # Pin to the TD cache the latest recommendations.json points at.
+    pinned_path = None
+    pinned_source = "latest"
+    rec_dir = os.path.join(ROOT, "skills", "thematic-screener", "data", "recommendations")
+    rec_files = sorted(glob.glob(os.path.join(rec_dir, "*.json")))
+    if rec_files:
+        try:
+            with open(rec_files[-1], "r", encoding="utf-8") as rf:
+                rec_meta = (json.load(rf) or {}).get("theme_detector_meta") or {}
+            td_filename = rec_meta.get("file")
+            if td_filename:
+                candidate = os.path.join(cache_dir, td_filename)
+                if os.path.isfile(candidate):
+                    pinned_path = candidate
+                    pinned_source = f"pinned_to_recommendations:{os.path.basename(rec_files[-1])}"
+        except Exception:
+            pass  # rec read failed — fall through to latest TD
+
+    chosen = pinned_path or files[-1]
     try:
-        with open(latest, "r", encoding="utf-8") as f:
+        with open(chosen, "r", encoding="utf-8") as f:
             td_data = json.load(f)
     except Exception as e:
         return {"themes": [], "error": f"theme-detector cache read failed: {e}",
@@ -1568,19 +2178,35 @@ def _build_theme_heatmap_payload():
     with _heatmap_lock:
         ticker_lookup = dict(_heatmap_state["tickers"])  # snapshot
 
+    # Pass 1 — collect tickers in TD themes that aren't in the S&P-500-based
+    # heatmap universe. Theme-detector covers small/mid-cap (e.g. CDE/AU/GFI/HL
+    # in Gold & Precious Metals), so theme cards otherwise look near-empty.
+    missing = set()
+    for th in all_themes:
+        for sym in (th.get("representative_stocks") or []):
+            sym = (sym or "").strip().upper()
+            if sym and sym not in ticker_lookup:
+                missing.add(sym)
+
+    # Fetch missing quotes via FMP batch-quote (single call, TTL-cached). Failure
+    # is non-fatal — those tickers stay skipped.
+    extra_lookup = _fetch_theme_extra_quotes(missing) if missing else {}
+
+    def _resolve(sym):
+        return ticker_lookup.get(sym) or extra_lookup.get(sym)
+
     themes_out = []
     for th in all_themes:
         rep = th.get("representative_stocks") or []
         details = th.get("stock_details") or []
-        # Build per-ticker list with whatever quote data we have
         tickers = []
         for sym in rep:
             sym = (sym or "").strip().upper()
             if not sym:
                 continue
-            q = ticker_lookup.get(sym)
+            q = _resolve(sym)
             if not q:
-                continue   # ticker not in heatmap universe; skip rather than fetch
+                continue   # quote unavailable (FMP miss / not in any cache)
             tickers.append({
                 "ticker":      q.get("ticker", sym),
                 "name":        q.get("name") or sym,
@@ -1590,6 +2216,9 @@ def _build_theme_heatmap_payload():
                 "change_pct":  q.get("change_pct"),
                 "volume":      q.get("volume"),
                 "market_cap":  q.get("market_cap") or 0,
+                "pe":          q.get("pe"),
+                "forward_pe":  q.get("forward_pe"),
+                "ev_ebitda":   q.get("ev_ebitda"),
             })
         if not tickers:
             continue   # theme has no covered ticker
@@ -1612,6 +2241,8 @@ def _build_theme_heatmap_payload():
         "as_of":               _now_iso(),
         "market_open":         _is_us_market_hours(),
         "theme_detector_at":   td_data.get("generated_at"),
+        "theme_detector_file": os.path.basename(chosen),
+        "pin_source":          pinned_source,
         "heatmap_last_update": _heatmap_state.get("last_update"),
         "themes":              themes_out,
     }
@@ -1664,6 +2295,137 @@ def _fetch_heatmap_intraday(ticker):
     }
 
 
+def _fetch_pe_ttm(ticker, api_key):
+    """Single-ticker valuation bundle: PE TTM + EV/EBITDA TTM + forward EPS
+    estimate (next fiscal year). Three FMP calls per ticker, cache 24h.
+
+    Returns {"pe_ttm", "ev_ebitda", "fwd_eps"} (any field may be None on miss).
+    Forward PE is computed live in quote refresh (price / fwd_eps), so price
+    drift within the 24h cache window stays accurate."""
+    base = "https://financialmodelingprep.com/stable"
+    out = {"pe_ttm": None, "ev_ebitda": None, "fwd_eps": None}
+    # honor the 429 breaker — skip the 3 calls if cooling down
+    if time.time() < _heatmap_ratelimit_until:
+        return out
+
+    def _safe_round(v, n=2):
+        try:
+            return round(float(v), n) if v is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    # 1) PE TTM
+    rows = _fmp_get_json(f"{base}/ratios-ttm?symbol={ticker}&apikey={api_key}", timeout=10) or []
+    if isinstance(rows, list) and rows:
+        out["pe_ttm"] = _safe_round(rows[0].get("priceToEarningsRatioTTM"), 2)
+
+    # 2) EV/EBITDA TTM
+    rows = _fmp_get_json(f"{base}/key-metrics-ttm?symbol={ticker}&apikey={api_key}", timeout=10) or []
+    if isinstance(rows, list) and rows:
+        out["ev_ebitda"] = _safe_round(rows[0].get("evToEBITDATTM"), 2)
+
+    # 3) Forward EPS (closest future fiscal year, sorted asc)
+    rows = _fmp_get_json(
+        f"{base}/analyst-estimates?symbol={ticker}&period=annual&limit=4&apikey={api_key}",
+        timeout=10,
+    ) or []
+    if isinstance(rows, list) and rows:
+        today_iso = date.today().isoformat()
+        future = sorted(
+            [r for r in rows if (r.get("date") or "") > today_iso],
+            key=lambda r: r.get("date") or "",
+        )
+        if future:
+            out["fwd_eps"] = _safe_round(future[0].get("epsAvg"), 4)
+
+    return out
+
+
+def _heatmap_refresh_pe_universe(max_workers=10):
+    """Daily refresh of PE TTM for entire heatmap universe. Uses thread pool to
+    parallelise the 600 single-ticker calls (FMP has no batch ratios-ttm)."""
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return False
+    if time.time() < _heatmap_ratelimit_until:
+        sys.stderr.write("[heatmap-pe] skip — FMP rate-limit cooldown\n")
+        return False
+    with _heatmap_lock:
+        symbols = list(_heatmap_state["tickers"].keys())
+    if not symbols:
+        return False
+    now = time.time()
+    todo = []
+    with _heatmap_pe_lock:
+        for sym in symbols:
+            cached = _heatmap_pe_cache.get(sym)
+            if not cached or (now - cached[0]) >= HEATMAP_PE_TTL_SEC:
+                todo.append(sym)
+    if not todo:
+        return True
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] [heatmap-pe] fetching {len(todo)} tickers...\n")
+    fetched = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+        futures = {ex.submit(_fetch_pe_ttm, sym, api_key): sym for sym in todo}
+        for fut in as_completed(futures):
+            sym = futures[fut]
+            try:
+                pe = fut.result()
+            except Exception:
+                pe = None
+            with _heatmap_pe_lock:
+                _heatmap_pe_cache[sym] = (time.time(), pe)
+            fetched += 1
+    sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] [heatmap-pe] done: {fetched}/{len(todo)}\n")
+
+    # Patch _heatmap_state ticker rows with new valuation bundle. forward_pe
+    # computed live from row's current price + cached fwd_eps.
+    with _heatmap_pe_lock:
+        val_snapshot = {s: v[1] for s, v in _heatmap_pe_cache.items()
+                        if isinstance(v[1], dict)}
+    with _heatmap_lock:
+        for sym, row in _heatmap_state["tickers"].items():
+            val = val_snapshot.get(sym)
+            if not val:
+                continue
+            row["pe"]        = val.get("pe_ttm")
+            row["ev_ebitda"] = val.get("ev_ebitda")
+            fwd_eps = val.get("fwd_eps")
+            p = row.get("price")
+            if fwd_eps and fwd_eps != 0 and p:
+                try:
+                    row["forward_pe"] = round(float(p) / float(fwd_eps), 2)
+                except (TypeError, ValueError, ZeroDivisionError):
+                    row["forward_pe"] = None
+            else:
+                row["forward_pe"] = None
+    return True
+
+
+def _fetch_heatmap_quote(ticker):
+    """Live last-price + change_pct for a single ticker via FMP /stable/quote.
+    Used by radar K-line tail (15s tick between 5-min bar boundaries). Single
+    ticker per call, ~500 bytes payload."""
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key:
+        return {"symbol": ticker, "error": "FMP_API_KEY not set",
+                "as_of": _now_iso(), "market_open": False}
+    url = (f"https://financialmodelingprep.com/stable/quote"
+           f"?symbol={ticker}&apikey={api_key}")
+    rows = _fmp_get_json(url, timeout=8) or []
+    row = rows[0] if isinstance(rows, list) and rows else {}
+    return {
+        "symbol":      ticker,
+        "price":       row.get("price"),
+        "change_pct":  row.get("changePercentage"),
+        "volume":      row.get("volume"),
+        "as_of":       _now_iso(),
+        "market_open": _is_us_market_hours(),
+    }
+
+
 def heatmap_refresh_loop():
     """Background daemon: rebuild universe daily, refresh quotes every 3 min during market hours.
     On startup: warm up from cache file → ensure we have at least one quote snapshot
@@ -1696,6 +2458,11 @@ def heatmap_refresh_loop():
                 _heatmap_state["error"] = str(e)
     else:
         sys.stderr.write(f"[heatmap] startup: using cache (market closed, {len(_heatmap_state['tickers'])} tickers ready)\n")
+
+    # 4) PE TTM warm-up — runs in its own thread so server stays responsive
+    #    (~600 sequential calls capped to 10-thread pool ≈ 60s). 24h TTL means
+    #    one full refresh per day; subsequent loop iterations no-op until expiry.
+    threading.Thread(target=_heatmap_refresh_pe_universe, daemon=True).start()
 
     while not _shutdown.is_set():
         if _shutdown.wait(HEATMAP_REFRESH_SEC):
@@ -1770,6 +2537,118 @@ def save_watchlist(tickers):
         os.replace(tmp, WATCHLIST_PATH)
 
 
+# ── Break News (RSS poller + Claude/Gemini debate) ───────────────────
+# Periodic RSS pull every BREAK_NEWS_INTERVAL_SEC (default 600s = 10 min).
+# Surviving items get a Claude<->Gemini debate written into per-item JSON at
+# news/break_news_logs/<news_id>.json. Has its own dedicated lock pool so it
+# never blocks the existing Claude protocol queue.
+BREAK_NEWS_INTERVAL_SEC = int(os.getenv("BREAK_NEWS_INTERVAL_SEC", "600"))
+GEMINI_BIN = os.environ.get("GEMINI_BIN") or "/usr/local/bin/gemini"
+_break_news_state = {
+    "last_poll": None,
+    "last_debate_scan": None,
+    "in_flight": [],
+    "last_error": None,
+}
+_break_news_lock = threading.Lock()
+_break_news_dispatch_lock = threading.Lock()   # serializes calls into debater scan
+
+try:
+    sys.path.insert(0, ROOT)
+    from scripts.break_news import store as _bn_store
+    from scripts.break_news import poller as _bn_poller
+    from scripts.break_news import debater as _bn_debater
+    from scripts.break_news import trend_rollup as _bn_trend
+    BREAK_NEWS_AVAILABLE = True
+except Exception as _bn_e:
+    BREAK_NEWS_AVAILABLE = False
+    sys.stderr.write(f"[break_news] module load failed: {_bn_e}\n")
+
+# 3-day trend leaderboard — computed on-demand, behind a short TTL cache.
+_bn_trend_cache = {"data": None, "ts": 0.0}
+BN_TREND_TTL_SEC = 60
+
+# Supply-chain explorer — LLM-drafted value chains + live grounding.
+try:
+    from scripts.nexus import supply_chain as _sc
+    SUPPLY_CHAIN_AVAILABLE = True
+except Exception as _sc_e:
+    SUPPLY_CHAIN_AVAILABLE = False
+    sys.stderr.write(f"[supply_chain] module load failed: {_sc_e}\n")
+_sc_cache = {}            # slug -> {"data": enriched_chain, "ts": float}
+SC_TTL_SEC = 60
+_sc_slug_re = re.compile(r"^[a-z0-9_]{1,48}$")
+
+
+def break_news_poll_loop():
+    """Poll RSS feeds every BREAK_NEWS_INTERVAL_SEC. Stops on _shutdown.
+    First poll fires immediately at boot so `_state.poller.next_run` is seeded
+    fresh — otherwise the UI shows a stale `next_run` left over from the
+    previous process for up to BREAK_NEWS_INTERVAL_SEC."""
+    if not BREAK_NEWS_AVAILABLE:
+        return
+    def _one(reason):
+        try:
+            res = _bn_poller.run_once()
+            with _break_news_lock:
+                _break_news_state["last_poll"] = datetime.now().isoformat(timespec="seconds")
+                _break_news_state["last_error"] = (res or {}).get("last_error")
+        except Exception as e:
+            with _break_news_lock:
+                _break_news_state["last_error"] = str(e)[:300]
+            sys.stderr.write(f"[break_news] poll error ({reason}): {e}\n")
+    # Boot poll — short delay so http.server has finished binding first.
+    if _shutdown.wait(10):
+        return
+    _one("startup")
+    while not _shutdown.wait(BREAK_NEWS_INTERVAL_SEC):
+        _one("periodic")
+
+
+def break_news_debate_loop():
+    """Continuously scan for pending_debate items and run debates. One scan
+    per BREAK_NEWS_INTERVAL_SEC (paced so cost doesn't run away)."""
+    if not BREAK_NEWS_AVAILABLE:
+        return
+    # Run one scan ~30s after server boot, then every BREAK_NEWS_INTERVAL_SEC.
+    if _shutdown.wait(30):
+        return
+    while True:
+        try:
+            with _break_news_dispatch_lock:
+                res = _bn_debater.scan_and_debate(verbose=False)
+            with _break_news_lock:
+                _break_news_state["last_debate_scan"] = datetime.now().isoformat(timespec="seconds")
+                _break_news_state["last_error"] = None
+        except Exception as e:
+            with _break_news_lock:
+                _break_news_state["last_error"] = str(e)[:300]
+            sys.stderr.write(f"[break_news] debate scan error: {e}\n")
+        if _shutdown.wait(BREAK_NEWS_INTERVAL_SEC):
+            return
+
+
+def _bn_kick_debate_scan():
+    """Run one debate scan in the background. Used by the manual raw-debate
+    trigger so a freshly-promoted item starts debating without waiting for the
+    periodic debate loop."""
+    if not BREAK_NEWS_AVAILABLE:
+        return
+    try:
+        with _break_news_dispatch_lock:
+            _bn_debater.scan_and_debate(verbose=False)
+        with _break_news_lock:
+            _break_news_state["last_debate_scan"] = datetime.now().isoformat(timespec="seconds")
+    except Exception as e:
+        with _break_news_lock:
+            _break_news_state["last_error"] = str(e)[:300]
+        sys.stderr.write(f"[break_news] manual debate kick error: {e}\n")
+
+
+_BREAK_NEWS_ID_RE = re.compile(r"^bn_\d{8}_[0-9a-f]{6,16}$")
+_BREAK_NEWS_KEY_RE = re.compile(r"^[0-9a-f]{40}$")   # raw-stream entry key = sha1 hex
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
@@ -1809,6 +2688,21 @@ class Handler(SimpleHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/positions":
             return self._json(200, load_positions())
+        if path == "/api/llm-config":
+            # Full governance config + live per-model usage/status.
+            if MODEL_ROUTER_AVAILABLE:
+                try:
+                    cfg = _mrouter.load_llm_config()
+                    return self._json(200, {**cfg, "status": _mrouter.model_status()})
+                except Exception as e:
+                    sys.stderr.write(f"[llm-config] status error: {e}\n")
+            cfg_path = os.path.join(ROOT, "config", "llm_config.json")
+            try:
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+            except (OSError, json.JSONDecodeError):
+                cfg = {"primary": "claude", "secondary": "gemini"}
+            return self._json(200, cfg)
         if path == "/api/refresh_status":
             with _state_lock:
                 return self._json(200, dict(_refresh_state))
@@ -1839,6 +2733,78 @@ class Handler(SimpleHTTPRequestHandler):
                     "error":             _heatmap_state["error"],
                 }
             return self._json(200, payload)
+
+        # ── Project Nexus V3.0 — Knowledge Graph ────────────────────────
+        if path == "/api/graph/data":
+            graph_path = os.path.join(DASHBOARD_DIR, "nexus_graph.json")
+            if not os.path.exists(graph_path):
+                return self._json(404, {"error": "nexus_graph.json not built yet",
+                                        "hint": "run scripts/nexus/build_graph.py"})
+            try:
+                with open(graph_path, "r", encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except (OSError, json.JSONDecodeError) as e:
+                return self._json(500, {"error": str(e)})
+
+        if path.startswith("/api/graph/centrality/"):
+            ticker = path.rsplit("/", 1)[-1].strip().upper()
+            if not re.match(r"^[A-Z][A-Z0-9.\-]{0,8}$", ticker):
+                return self._json(400, {"error": "invalid ticker"})
+            graph_path = os.path.join(DASHBOARD_DIR, "nexus_graph.json")
+            if not os.path.exists(graph_path):
+                return self._json(404, {"error": "nexus_graph.json not built yet"})
+            try:
+                with open(graph_path, "r", encoding="utf-8") as f:
+                    graph = json.load(f)
+            except (OSError, json.JSONDecodeError) as e:
+                return self._json(500, {"error": str(e)})
+            tk_id = f"ticker:{ticker}"
+            node = next((n for n in graph.get("nodes", []) if n.get("id") == tk_id), None)
+            if not node:
+                return self._json(404, {"error": f"{ticker} not in graph"})
+            connected_themes = []
+            connected_catalysts = []
+            connected_narratives = []
+            connected_peers = []
+            for e in graph.get("edges", []):
+                other = None
+                if e.get("source") == tk_id:
+                    other = e.get("target")
+                elif e.get("target") == tk_id:
+                    other = e.get("source")
+                if not other:
+                    continue
+                other_node = next((n for n in graph.get("nodes", []) if n.get("id") == other), None)
+                if not other_node:
+                    continue
+                rec = {"id": other, "label": other_node.get("label"),
+                       "weight": e.get("weight"), "type": e.get("type")}
+                ot = other_node.get("type")
+                if ot == "theme":
+                    connected_themes.append(rec)
+                elif ot == "catalyst":
+                    connected_catalysts.append(rec)
+                elif ot == "narrative":
+                    connected_narratives.append(rec)
+                elif ot == "ticker":
+                    connected_peers.append(rec)
+            connected_themes.sort(key=lambda r: r["weight"] or 0, reverse=True)
+            connected_catalysts.sort(key=lambda r: r["weight"] or 0, reverse=True)
+            connected_narratives.sort(key=lambda r: r["weight"] or 0, reverse=True)
+            connected_peers.sort(key=lambda r: r["weight"] or 0, reverse=True)
+            return self._json(200, {
+                "ticker": ticker,
+                "degree_centrality": node.get("weight"),
+                "pagerank": node.get("pagerank"),
+                "mentions": node.get("mentions"),
+                "last_seen": node.get("last_seen"),
+                "status": node.get("status"),
+                "connected_themes": connected_themes[:20],
+                "connected_catalysts": connected_catalysts[:20],
+                "connected_narratives": connected_narratives[:20],
+                "connected_peers": connected_peers[:20],
+                "graph_generated_at": graph.get("generated_at"),
+            })
 
         if path.startswith("/api/heatmap/news/"):
             ticker = path.rsplit("/", 1)[-1].strip().upper()
@@ -1885,11 +2851,147 @@ class Handler(SimpleHTTPRequestHandler):
             payload["cached"] = False
             return self._json(200, payload)
 
+        if path.startswith("/api/heatmap/quote/"):
+            ticker = path.rsplit("/", 1)[-1].strip().upper()
+            if not _HEATMAP_TICKER_RE.match(ticker):
+                return self._json(400, {"error": "invalid ticker"})
+            cached = _heatmap_quote_cache.get(ticker)
+            if cached and (time.time() - cached[0]) < HEATMAP_QUOTE_TTL_SEC:
+                payload = dict(cached[1])
+                payload["cached"] = True
+                return self._json(200, payload)
+            data = _fetch_heatmap_quote(ticker)
+            _heatmap_quote_cache[ticker] = (time.time(), data)
+            payload = dict(data)
+            payload["cached"] = False
+            return self._json(200, payload)
+
+        # ── Break News API ────────────────────────────────────────
+        if path == "/api/break-news/feed":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            qs = urlparse(self.path).query
+            params = {}
+            for kv in qs.split("&"):
+                if "=" in kv:
+                    k, v = kv.split("=", 1)
+                    params[k] = v
+            try:
+                limit = max(1, min(int(params.get("limit", "50")), 200))
+            except ValueError:
+                limit = 50
+            states_param = params.get("state", "")
+            states = [s for s in states_param.split(",") if s] if states_param else None
+            items = _bn_store.list_items_by_state(states)[:limit]
+            return self._json(200, {
+                "items": items, "count": len(items),
+                "state_filter": states,
+            })
+        if path.startswith("/api/break-news/item/"):
+            tail = path[len("/api/break-news/item/"):]
+            if not _BREAK_NEWS_ID_RE.match(tail):
+                return self._json(400, {"error": "invalid news_id"})
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            d = _bn_store.load_item(tail)
+            if d is None:
+                return self._json(404, {"error": "not found"})
+            return self._json(200, d)
+        if path == "/api/break-news/raw-stream":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            qs = urlparse(self.path).query
+            params = {}
+            for kv in qs.split("&"):
+                if "=" in kv:
+                    k, v = kv.split("=", 1)
+                    params[k] = v
+            try:
+                limit = max(1, min(int(params.get("limit", "100")), 200))
+            except ValueError:
+                limit = 100
+            items = _bn_store.load_raw_stream()[:limit]
+            return self._json(200, {"items": items, "count": len(items)})
+        if path == "/api/break-news/state":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            persisted = _bn_store.load_state()
+            with _break_news_lock:
+                live = dict(_break_news_state)
+            return self._json(200, {
+                "live": live, "persisted": persisted,
+                "interval_sec": BREAK_NEWS_INTERVAL_SEC,
+            })
+        if path == "/api/break-news/trends":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            now_ts = time.time()
+            cache = _bn_trend_cache
+            if cache["data"] and (now_ts - cache["ts"]) < BN_TREND_TTL_SEC:
+                return self._json(200, {**cache["data"], "cached": True})
+            try:
+                data = _bn_trend.compute_trends()
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+            cache["data"] = data
+            cache["ts"] = now_ts
+            return self._json(200, {**data, "cached": False})
+
+        # ── Supply-Chain Explorer API ──────────────────────────────
+        if path == "/api/supply-chain/list":
+            if not SUPPLY_CHAIN_AVAILABLE:
+                return self._json(503, {"error": "supply_chain module not loaded"})
+            return self._json(200, {"chains": _sc.list_chains()})
+        if path == "/api/supply-chain/themes":
+            if not SUPPLY_CHAIN_AVAILABLE:
+                return self._json(503, {"error": "supply_chain module not loaded"})
+            return self._json(200, {"themes": _sc.nexus_themes()})
+        if path.startswith("/api/supply-chain/"):
+            slug = path[len("/api/supply-chain/"):]
+            if not _sc_slug_re.match(slug):
+                return self._json(400, {"error": "invalid slug"})
+            if not SUPPLY_CHAIN_AVAILABLE:
+                return self._json(503, {"error": "supply_chain module not loaded"})
+            now_ts = time.time()
+            hit = _sc_cache.get(slug)
+            if hit and (now_ts - hit["ts"]) < SC_TTL_SEC:
+                return self._json(200, {**hit["data"], "cached": True})
+            chain = _sc.load(slug)
+            if chain is None:
+                return self._json(404, {"error": "chain not found"})
+            try:
+                chain = _sc.enrich(chain)
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+            _sc_cache[slug] = {"data": chain, "ts": now_ts}
+            return self._json(200, {**chain, "cached": False})
+
         if path == "/api/analyze-queue" or path == "/api/protocol-queue":
             return self._json(200, get_queue_state())
 
         if path == "/api/momentum-watchlist":
             return self._json(200, {"tickers": load_watchlist()})
+
+        if path.startswith("/api/preview-cache/"):
+            # V2.16.0 — GET /api/preview-cache/<TICKER> → forecaster --pre-earnings cache JSON
+            # Used by Dashboard preview modal. Returns the cached payload (status, ticker,
+            # current_price, ttm_eps, pre_earnings.{next_earnings,seasonality_4q,watch_metrics},
+            # scenarios) — same shape as forecast.py --json-only output.
+            ticker = path.split("/api/preview-cache/", 1)[1].strip().upper()
+            if not ticker or "/" in ticker:
+                return self._json(400, {"error": "invalid ticker"})
+            cache_path = os.path.join(ROOT, "skills", "earnings-valuation-forecaster", "cache", f"{ticker}.json")
+            if not os.path.exists(cache_path):
+                return self._json(404, {"error": "no preview cache for ticker", "ticker": ticker})
+            try:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception as e:
+                return self._json(500, {"error": f"failed to read cache: {e}"})
+            if not data.get("pre_earnings"):
+                return self._json(404, {"error": "cache exists but lacks pre_earnings block (run forecast.py --pre-earnings first)", "ticker": ticker})
+            data["cache_age_sec"] = int(time.time() - os.path.getmtime(cache_path))
+            return self._json(200, data)
 
         if path.startswith("/api/earnings-cache/"):
             # GET /api/earnings-cache/<TICKER>  → cache existence + summary
@@ -2047,6 +3149,20 @@ class Handler(SimpleHTTPRequestHandler):
             state["events"]   = _parse_events(state.get("log_path"), max_events=40)
             return self._json(200, state)
 
+        # V2.13.11 — server-side pre-market chain status (replaces frontend polling)
+        if path == "/api/run-premarket-chain/status":
+            with _premarket_chain_lock:
+                state = dict(_premarket_chain_state)
+                state["items"] = {k: dict(v) for k, v in state["items"].items()}
+            if state.get("status") == "running" and state.get("started_at"):
+                try:
+                    state["elapsed_sec"] = int(
+                        (datetime.now() - datetime.fromisoformat(state["started_at"])).total_seconds()
+                    )
+                except Exception:
+                    pass
+            return self._json(200, state)
+
         # V2.7.17 — daily_update.sh shell-pipeline status
         if path == "/api/run-daily-update/status":
             with _daily_update_lock:
@@ -2107,6 +3223,67 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+        if path == "/api/llm-config":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            valid = {"claude", "gemini", "codex"}
+            # Merge onto existing config so a partial POST (e.g. only the
+            # dropdowns) keeps budgets / enabled / cooldown intact.
+            cfg_path = os.path.join(ROOT, "config", "llm_config.json")
+            try:
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                if not isinstance(cfg, dict):
+                    cfg = {}
+            except (OSError, json.JSONDecodeError):
+                cfg = {}
+            for key in ("primary", "secondary", "tertiary"):
+                if key not in body:
+                    continue
+                v = str(body.get(key, "")).lower().strip()
+                if v not in valid:
+                    return self._json(400, {"error": f"invalid {key}: {body.get(key)!r}"})
+                cfg[key] = v
+            if isinstance(body.get("enabled"), dict):
+                cfg.setdefault("enabled", {})
+                for m in valid:
+                    if m in body["enabled"]:
+                        cfg["enabled"][m] = bool(body["enabled"][m])
+            if isinstance(body.get("budgets"), dict):
+                cfg.setdefault("budgets", {})
+                for m in valid:
+                    mb = body["budgets"].get(m)
+                    if isinstance(mb, dict) and "daily_max_calls" in mb:
+                        try:
+                            cfg["budgets"].setdefault(m, {})["daily_max_calls"] = \
+                                max(0, int(mb["daily_max_calls"]))
+                        except (TypeError, ValueError):
+                            return self._json(400, {"error": f"invalid budget for {m}"})
+            if "cooldown_hours" in body:
+                try:
+                    ch = float(body["cooldown_hours"])
+                    if ch > 0:
+                        cfg["cooldown_hours"] = ch
+                except (TypeError, ValueError):
+                    return self._json(400, {"error": "invalid cooldown_hours"})
+            if isinstance(body.get("break_news"), dict):
+                cfg.setdefault("break_news", {})
+                for key in ("primary", "secondary"):
+                    if key not in body["break_news"]:
+                        continue
+                    v = str(body["break_news"].get(key, "")).lower().strip()
+                    if v not in valid:
+                        return self._json(400, {"error": f"invalid break_news.{key}"})
+                    cfg["break_news"][key] = v
+            try:
+                with open(cfg_path, "w", encoding="utf-8") as f:
+                    json.dump(cfg, f, ensure_ascii=False, indent=2)
+            except OSError as e:
+                return self._json(500, {"error": f"write failed: {e}"})
+            return self._json(200, cfg)
         if path == "/api/positions":
             length = int(self.headers.get("Content-Length", 0))
             try:
@@ -2145,7 +3322,22 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(409, {"error": err})
             return self._json(202, {"stale_items": count, "status": "running"})
 
+        # V2.13.11 — server-side pre-market chain (daily → news → sector with skip)
+        if path == "/api/run-premarket-chain":
+            res, err = run_premarket_chain()
+            if err == "duplicate_active":
+                with _premarket_chain_lock:
+                    snapshot = dict(_premarket_chain_state)
+                return self._json(409, {
+                    "error": "duplicate_active",
+                    "started_at": snapshot.get("started_at"),
+                    "phase": snapshot.get("phase"),
+                })
+            return self._json(202, {"status": "started"})
+
         # V2.7.17 — pre-market check Phase 1: spawn bash daily_update.sh
+        # V2.13.9 — skip when all free caches already fresh (user already ran
+        # daily_update.sh externally → don't re-burn 5min + FMP usage).
         if path == "/api/run-daily-update":
             with _daily_update_lock:
                 if _daily_update_state.get("status") == "running":
@@ -2154,10 +3346,113 @@ class Handler(SimpleHTTPRequestHandler):
                         "job_id": _daily_update_state.get("job_id"),
                         "started_at": _daily_update_state.get("started_at"),
                     })
+            # Idempotency guard: if every "free" preflight item is FRESH, skip.
+            # Surfaces as `{skipped: true, reason}` so the chain UI can mark
+            # Phase 1 ✓ and proceed to Phase 2 instead of re-running.
+            try:
+                checks = preflight_check()
+                free = [c for c in checks if c.get("free")]
+                free_stale = [c for c in free if c.get("status") != "FRESH"]
+                if free and not free_stale:
+                    return self._json(200, {
+                        "skipped":   True,
+                        "reason":    "all_free_caches_fresh",
+                        "items":     [c["key"] for c in free],
+                        "ages":      {c["key"]: c.get("age_str") for c in free},
+                    })
+            except Exception as e:
+                # Soft-fail: if freshness check itself errors, fall through to
+                # actually run daily_update (safer than skipping incorrectly).
+                sys.stderr.write(f"[run-daily-update] freshness check failed: {e}\n")
             job_id, err = run_daily_update()
             if err:
                 return self._json(500, {"error": err})
             return self._json(202, {"job_id": job_id, "name": "daily_update"})
+
+        if path == "/api/break-news/refresh":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            try:
+                res = _bn_poller.run_once()
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:300]})
+            return self._json(202, res)
+
+        if path == "/api/supply-chain/generate":
+            if not SUPPLY_CHAIN_AVAILABLE:
+                return self._json(503, {"error": "supply_chain module not loaded"})
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            theme = (body.get("theme") or "").strip()
+            if not theme:
+                return self._json(400, {"error": "missing theme"})
+            try:
+                chain = _sc.enrich(_sc.generate(theme))
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:300]})
+            _sc_cache[chain["id"]] = {"data": chain, "ts": time.time()}
+            return self._json(200, {**chain, "cached": False})
+        if path == "/api/break-news/raw/debate":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            key = (body.get("key") or "").strip()
+            if not _BREAK_NEWS_KEY_RE.match(key):
+                return self._json(400, {"error": "invalid key"})
+            entry = next((e for e in _bn_store.load_raw_stream()
+                          if e.get("key") == key), None)
+            if entry is None:
+                return self._json(404, {"error": "raw item not found"})
+            if entry.get("news_id"):
+                # already a debate item — just re-queue it
+                _bn_store.set_state(entry["news_id"], "pending_debate")
+                nid = entry["news_id"]
+            else:
+                triage = {
+                    "news_type":      entry.get("news_type"),
+                    "shallow_score":  entry.get("shallow_score"),
+                    "bull_case":      entry.get("bull_case"),
+                    "bear_case":      entry.get("bear_case"),
+                    "sector_view":    entry.get("sector_view"),
+                    "macro_view":     entry.get("macro_view"),
+                    "binary_flag":    entry.get("binary_flag"),
+                    "advance_reason": "manual_raw",
+                }
+                source = {
+                    "name":             entry.get("source"),
+                    "credibility":      entry.get("credibility"),
+                    "url":              entry.get("url"),
+                    "feed_fingerprint": entry.get("feed_fingerprint"),
+                    "published":        entry.get("published"),
+                }
+                nid = _bn_store.init_item(
+                    source=source, triage=triage,
+                    headline=(entry.get("headline") or "")[:200],
+                    raw_summary=(entry.get("raw_summary") or "")[:400],
+                )
+                _bn_store.mark_raw_promoted(key, nid)
+            threading.Thread(target=_bn_kick_debate_scan, daemon=True).start()
+            return self._json(202, {"news_id": nid, "state": "pending_debate"})
+
+        if path.startswith("/api/break-news/item/") and path.endswith("/replay"):
+            tail = path[len("/api/break-news/item/"):-len("/replay")]
+            if not _BREAK_NEWS_ID_RE.match(tail):
+                return self._json(400, {"error": "invalid news_id"})
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            d = _bn_store.load_item(tail)
+            if d is None:
+                return self._json(404, {"error": "not found"})
+            # Reset to pending_debate so the next debate scan picks it up.
+            _bn_store.set_state(tail, "pending_debate")
+            return self._json(202, {"news_id": tail, "state": "pending_debate"})
 
         if path == "/api/run-protocol":
             length = int(self.headers.get("Content-Length", 0))
@@ -2347,7 +3642,7 @@ if __name__ == "__main__":
     print(f"Positions file:     {POSITIONS}")
     print(f"Auto-refresh:       every {REFRESH_INTERVAL_SEC}s (bridge.py)")
     print(f"FRED refresh:       every {FRED_REFRESH_SEC}s (fred-macro cache)")
-    print(f"Heatmap refresh:    every {HEATMAP_REFRESH_SEC}s (S&P 500 + NDX 100, market hours)")
+    print(f"Heatmap refresh:    every {HEATMAP_REFRESH_SEC}s, fan-out {HEATMAP_QUOTE_WORKERS} workers (static universe, market hours)")
 
     # Fresh prices on boot so the first Dashboard load is not stale
     run_bridge(reason="startup")
@@ -2360,6 +3655,25 @@ if __name__ == "__main__":
     fred_thread.start()
     heatmap_thread = threading.Thread(target=heatmap_refresh_loop, daemon=True)
     heatmap_thread.start()
+
+    # Break News (RSS poller + Claude/Gemini debate scanner)
+    if BREAK_NEWS_AVAILABLE:
+        try:
+            reset = _bn_store.sweep_stuck_debating()
+            if reset:
+                print(f"break_news startup sweep: reset {reset} stuck debating items")
+        except Exception as e:
+            sys.stderr.write(f"[break_news] startup sweep failed: {e}\n")
+        bn_poll_thread = threading.Thread(target=break_news_poll_loop, daemon=True,
+                                          name="break_news_poll")
+        bn_poll_thread.start()
+        bn_debate_thread = threading.Thread(target=break_news_debate_loop, daemon=True,
+                                            name="break_news_debate")
+        bn_debate_thread.start()
+        print(f"Break News:         poll every {BREAK_NEWS_INTERVAL_SEC}s "
+              f"(Claude + Gemini CLI debate)")
+    else:
+        sys.stderr.write("[break_news] disabled (module not loaded)\n")
 
     try:
         srv.serve_forever()

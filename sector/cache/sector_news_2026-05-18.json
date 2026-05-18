@@ -1,0 +1,734 @@
+{
+  "as_of_date": "2026-05-18",
+  "schema_version": "V1.4",
+  "lookback_days": 2,
+  "max_per_sector": 10,
+  "total_articles": 88,
+  "sectors": {
+    "Technology": [
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 09:32:29",
+        "publisher": "Seeking Alpha",
+        "title": "Nvidia: You Snooze, You Lose",
+        "excerpt": "Nvidia Corporation remains well positioned into its upcoming Q1 earnings report, driven by underappreciated levers beyond expectations of fundamental outperformance. Potential China H200 monetization, the Vera Rubin platform ramp, and expanding networking revenue could catalyze a",
+        "url": "https://seekingalpha.com/article/4906010-nvidia-you-snooze-you-lose"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 09:30:08",
+        "publisher": "24/7 Wall Street",
+        "title": "Should You Invest in Bitcoin or AI Stocks Right Now?",
+        "excerpt": "Bitcoin ( CRYPTO: BTC ) ran to a new ATH of $126,000 in October 2025 before falling to $62,000 on February 6.",
+        "url": "https://247wallst.com/investing/2026/05/18/should-you-invest-in-bitcoin-or-ai-stocks-right-now/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-18 09:30:00",
+        "publisher": "Seeking Alpha",
+        "title": "Microsoft: Low-Hanging Fruit For Long-Term Dividend Growth Investors",
+        "excerpt": "Founded in 1975, Microsoft is now a $3.1 trillion (by market cap) tech behemoth employing approximately 230,000 people. Microsoft has increased its dividend for 24 consecutive years. It's on track to become a Dividend Aristocrat next year. MSFT's balance sheet is a fortress. Prof",
+        "url": "https://seekingalpha.com/article/4906007-microsoft-stock-low-hanging-fruit-long-term-dividend-growth-investors"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 09:15:26",
+        "publisher": "FXEmpire",
+        "title": "NVDA, AMD and INTC Forecasts \u2013 Microchips Looking for Buyers Early on Monday",
+        "excerpt": "Microchips continue to be in focus, as the AI trade is still in play for most on Wall Street. A recovery looks like it is trying to get going in premarket trading.",
+        "url": "https://www.fxempire.com/forecasts/article/nvda-amd-and-intc-forecasts-microchips-looking-for-buyers-early-on-monday-1598533"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 09:15:26",
+        "publisher": "24/7 Wall Street",
+        "title": "Michael Burry Says Today's Top 10 Stocks Surged 784% in a Year. The Pre-Dot-Com Number Was 622%.",
+        "excerpt": "I've been writing about stocks and personal finance for 20+ years. I believe all great companies are tech companies in the long run, and I invest accordingly.",
+        "url": "https://247wallst.com/investing/2026/05/18/michael-burry-says-todays-top-10-stocks-surged-784-in-a-year-the-pre-dot-com-number-was-622/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 09:01:00",
+        "publisher": "WSJ",
+        "title": "Startup Makes Switching AI Chips Easier\u2014and Nvidia Is a New Investor",
+        "excerpt": "Decart's valuation hit nearly $4 billion as investors pour capital into startups making AI computing more efficient.",
+        "url": "https://www.wsj.com/tech/ai/startup-makes-switching-ai-chips-easierand-nvidia-is-a-new-investor-c78e3a54"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-18 09:00:08",
+        "publisher": "Forbes",
+        "title": "How Microsoft Stock Can Climb To $600",
+        "excerpt": "Microsoft (MSFT) shares are currently priced around $410 each, boasting a market capitalization of $3.0 trillion and a trailing price-to-earnings (P/E) ratio estimated at approximately 24.3. This valuation is considerably conservative when compared to its three-year average ratio",
+        "url": "https://www.forbes.com/sites/greatspeculations/2026/05/18/how-microsoft-stock-can-climb-to-600/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 08:58:16",
+        "publisher": "Finbold",
+        "title": "Leopold Aschenbrenner just updated his stock portfolio",
+        "excerpt": "Leopold Aschenbrenner, one of the youngest billionaire investors and a former OpenAI researcher, has revealed updated holdings for his Situational Awareness Fund.",
+        "url": "https://finbold.com/leopold-aschenbrenner-just-updated-his-stock-portfolio/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-18 08:50:27",
+        "publisher": "24/7 Wall Street",
+        "title": "Bill Ackman's Microsoft Buy Just Told Everyone The Real Story on Nvidia's Geopolitical Risk",
+        "excerpt": "NVIDIA (NASDAQ:NVDA | NVDA Price Prediction) is the stock everyone wants to talk about right now, riding a 65.53% one-year run and a $5.46 trillion market cap into another blockbuster earnings cycle.",
+        "url": "https://247wallst.com/investing/2026/05/18/bill-ackmans-microsoft-buy-just-told-everyone-the-real-story-on-nvidias-geopolitical-risk/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-18 08:42:03",
+        "publisher": "24/7 Wall Street",
+        "title": "This Fast-Rising Fund Has Been Crushing the Market \u2014 Nvidia, Micron and TSMC are Reasons Why",
+        "excerpt": "Watching what the hedge funds and top investment managers do in any given quarter can be a great source of ideas in just about any market.",
+        "url": "https://247wallst.com/investing/2026/05/18/this-fast-rising-fund-has-been-crushing-the-market-nvidia-micron-and-tsmc-are-reasons-why/"
+      }
+    ],
+    "Healthcare": [
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-18 09:15:24",
+        "publisher": "Benzinga",
+        "title": "Why Is UnitedHealth Stock Trading Lower On Monday?",
+        "excerpt": "UnitedHealth Group Inc. (NYSE:UNH) stock is trading lower during Monday's premarket session following Berkshire Hathaway's (NYSE:BRK) (NYSE:BRK)disclosure that it liquidated its entire position in the U.S. insurance giant.",
+        "url": "https://www.benzinga.com/trading-ideas/movers/26/05/52632603/why-is-unitedhealth-stock-trading-lower-on-monday"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-18 09:01:08",
+        "publisher": "Reuters",
+        "title": "UnitedHealth falls after Berkshire sells stake in health insurer",
+        "excerpt": "UnitedHealth shares fell 3% on Monday after Berkshire Hathaway disclosed it had sold its stake in the healthcare conglomerate as a part of a portfolio reshuffling in \u200bthe first quarter under CEO Greg Abel.",
+        "url": "https://www.reuters.com/legal/transactional/unitedhealth-falls-after-berkshire-sells-stake-health-insurer-2026-05-18/"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-05-18 08:17:10",
+        "publisher": "Proactive Investors",
+        "title": "Novo Nordisk's Wegovy pill maintains strong lead over Eli Lilly rival despite weekly dip, Citi says",
+        "excerpt": "Novo\u00a0Nordisk's (NYSE:NVO)\u00a0oral version of its blockbuster weight-loss\u00a0drug Wegovy continues to outpace its main competitor despite a slight weekly decline in prescriptions, according to Citi's latest tracking data. The bank's weekly prescription tracker, based on IQVIA data, show",
+        "url": "https://www.proactiveinvestors.co.uk/companies/news/1092461"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-18 08:00:00",
+        "publisher": "Business Wire",
+        "title": "UnitedHealthcare Community Plan of D.C. Earns NCQA LTSS Distinction",
+        "excerpt": "--(BUSINESS WIRE)--UnitedHealthcare Community Plan of D.C. has earned the Long-Term Services and Supports (LTSS) Distinction by the National Committee for Quality Assurance (NCQA). NCQA is a private, non-profit organization dedicated to improving health care quality. NCQA's LTSS ",
+        "url": "https://www.businesswire.com/news/home/20260518772249/en/UnitedHealthcare-Community-Plan-of-D.C.-Earns-NCQA-LTSS-Distinction/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-18 07:35:19",
+        "publisher": "24/7 Wall Street",
+        "title": "7 Healthcare AI Stocks Under $50 With Huge Upside Potential",
+        "excerpt": "Healthcare AI stocks have been hammered in 2026, with several names down 30% to 65% year to date even as their underlying platforms keep maturing.",
+        "url": "https://247wallst.com/investing/2026/05/18/7-healthcare-ai-stocks-under-50-with-huge-upside-potential/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-18 07:28:00",
+        "publisher": "Barrons",
+        "title": "Regeneron Stock Sinks as Key Melanoma Drug Trial Fails to Beat Merck's Keytruda",
+        "excerpt": "A late-stage trial evaluating Regeneron's fianlimab, a skin cancer drug, fails to meet its primary endpoint.",
+        "url": "https://www.barrons.com/articles/regeneron-stock-melanoma-drug-trial-merck-keytruda-99d0d160"
+      },
+      {
+        "symbol": "UNH",
+        "publishedDate": "2026-05-18 07:24:00",
+        "publisher": "Barrons",
+        "title": "UnitedHealth, Delta Show a Berkshire After Buffett Can Still Move Stocks",
+        "excerpt": "The health insurer's shares fell early Monday after Berkshire disclosed it exited its position in the company in the first quarter.",
+        "url": "https://www.barrons.com/articles/unitedhealth-stock-delta-warren-buffett-berkshire-848714ed"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-18 07:10:00",
+        "publisher": "GuruFocus",
+        "title": "Is JNJ Overvalued? DCF Says Worth $122",
+        "excerpt": "On May 18, 2026, we delve into the DCF analysis for Johnson and Johnson (JNJ), a company that has shown a remarkable price performance over the past year with a g",
+        "url": "https://www.gurufocus.com/news/8865947/is-jnj-overvalued-dcf-says-worth-122"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-18 06:51:51",
+        "publisher": "Reuters",
+        "title": "Merck's endometrial cancer drug meets late-stage trial goals",
+        "excerpt": "Merck said on Monday its experimental endometrial cancer drug met the main goals of a late-stage trial.",
+        "url": "https://www.reuters.com/business/healthcare-pharmaceuticals/mercks-endometrial-cancer-drug-meets-late-stage-trial-goals-2026-05-18/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-18 06:28:05",
+        "publisher": "Benzinga",
+        "title": "Why Is Regeneron Stock Sinking Monday?",
+        "excerpt": "Regeneron melanoma combo trial missed its main goal against Keytruda despite longer progression-free survival in the high-dose arm.",
+        "url": "https://www.benzinga.com/news/health-care/26/05/52628573/why-is-regeneron-stock-sinking-monday"
+      }
+    ],
+    "Energy": [
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-18 07:29:27",
+        "publisher": "Reuters",
+        "title": "Alaska LNG secures supply deal with ConocoPhillips for pipeline project",
+        "excerpt": "Glenfarne's Alaska LNG said on Monday it \u200bhad signed a long-term natural \u200cgas supply deal with ConocoPhillips and that it now had agreements for enough \u200bvolumes to support a \u200bfinal investment decision for Phase One \u2060of its project and \u200bmeet Alaska's in-state natural gas needs.",
+        "url": "https://www.reuters.com/business/energy/alaska-lng-secures-supply-deal-with-conocophillips-pipeline-project-2026-05-18/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-18 07:00:00",
+        "publisher": "Business Wire",
+        "title": "Glenfarne, ConocoPhillips Sign North Slope Gas Sales Precedent Agreement for Alaska LNG",
+        "excerpt": "ANCHORAGE, Alaska--(BUSINESS WIRE)--Today Glenfarne Alaska LNG LLC, a subsidiary of Glenfarne Group, and ConocoPhillips (NYSE: COP) Alaska announced the companies have signed a gas sales precedent agreement to supply natural gas produced on Alaska's North Slope for Phase One of t",
+        "url": "https://www.businesswire.com/news/home/20260518664708/en/Glenfarne-ConocoPhillips-Sign-North-Slope-Gas-Sales-Precedent-Agreement-for-Alaska-LNG/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-16 14:15:00",
+        "publisher": "Fool - Investing News",
+        "title": "Devon Energy vs. Chevron: Here's the Better Oil Stock to Own Right Now",
+        "excerpt": "Oil prices are high right now, which is a huge benefit for Devon Energy, but Chevron may have a stronger business model.",
+        "url": "https://www.fool.com/investing/2026/05/16/devon-energy-vs-chevron-heres-the-better-oil-stock/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-16 11:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "Chevron's CEO Is Warning of a 1970s-Style Oil Crisis. These 3 Energy Stocks Could Surge Before Summer.",
+        "excerpt": "Before you're stuck in a gas line, here's how to profit from Mike Wirth's downbeat forecast.",
+        "url": "https://www.fool.com/investing/2026/05/16/chevron-ceo-is-warning-of-a-1970s-style-oil-crisis/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-16 07:05:00",
+        "publisher": "Fool - Investing News",
+        "title": "3 Monster Energy Stocks to Hold for the Next 10 Years",
+        "excerpt": "Chevron, Williams, and Brookfield Renewable are all reliable long-term energy plays.",
+        "url": "https://www.fool.com/investing/2026/05/16/x-monster-stocks-to-hold-for-the-next-10-years/"
+      }
+    ],
+    "Financials": [
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-18 09:35:59",
+        "publisher": "MarketBeat",
+        "title": "Willing and Abel: Berkshire's New CEO Makes Huge Portfolio Changes in Q1",
+        "excerpt": "It only takes one look at Berkshire Hathaway's NYSE: BRK.B latest 13F filing to know that someone new is in charge. Warren Buffett retired as CEO at the end of 2025, and Greg Abel succeeded him.",
+        "url": "https://www.marketbeat.com/originals/willing-and-abel-berkshires-new-ceo-makes-huge-portfolio-changes-in-q1/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-18 09:01:08",
+        "publisher": "Reuters",
+        "title": "UnitedHealth falls after Berkshire sells stake in health insurer",
+        "excerpt": "UnitedHealth shares fell 3% on Monday after Berkshire Hathaway disclosed it had sold its stake in the healthcare conglomerate as a part of a portfolio reshuffling in \u200bthe first quarter under CEO Greg Abel.",
+        "url": "https://www.reuters.com/legal/transactional/unitedhealth-falls-after-berkshire-sells-stake-health-insurer-2026-05-18/"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-18 09:00:01",
+        "publisher": "CNBC",
+        "title": "JPMorgan's summer reading list for the wealthy includes books on AI, leadership and lemons",
+        "excerpt": "The top summer reading list for the wealthy this year includes books on artificial intelligence, longevity, Keith Haring and lemon recipes. JPMorgan's annual summer reading list, which has become the go-to selection of beach books for the wealthy, has 14 titles this year.",
+        "url": "https://www.cnbc.com/2026/05/18/jpmorgan-summer-reading-list.html"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-18 09:00:00",
+        "publisher": "PRNewsWire",
+        "title": "J.P. Morgan Announces 2026 Summer Reading List and NextList Summer Series",
+        "excerpt": "J.P. Morgan's 27th annual Summer Reading List features 14 titles across leadership, AI, geopolitics, performance and longevity, curated by client advisors from around the globe. The\u00a0NextList Summer Series returns for its second year, taking readers from a Broadway stage to the Sw",
+        "url": "https://www.prnewswire.com/news-releases/jp-morgan-announces-2026-summer-reading-list-and-nextlist-summer-series-302774249.html"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-18 08:26:07",
+        "publisher": "CNBC",
+        "title": "Trump's Iran threat, Berkshire's airline bet, Lululemon's proxy battle and more in Morning Squawk",
+        "excerpt": "Here are five key things investors need to know to start the trading day.",
+        "url": "https://www.cnbc.com/2026/05/18/5-things-to-know-before-the-market-opens.html"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-18 08:10:50",
+        "publisher": "24/7 Wall Street",
+        "title": "Greg Abel Channeled His Inner Warren Buffett With Legacy and Dividend Stock Buys in Q1",
+        "excerpt": "Warren Buffett stepped down as CEO of Berkshire Hathaway (NYSE: BRK-B | BRK-B Price Prediction) on December 31, 2025, after six decades leading the conglomerate he transformed from a struggling textile mill into a $1 trillion empire.",
+        "url": "https://247wallst.com/investing/2026/05/18/greg-abel-channeled-his-inner-warren-buffett-with-legacy-and-dividend-stock-buys-in-q1/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-18 07:24:00",
+        "publisher": "Barrons",
+        "title": "UnitedHealth, Delta Show a Berkshire After Buffett Can Still Move Stocks",
+        "excerpt": "The health insurer's shares fell early Monday after Berkshire disclosed it exited its position in the company in the first quarter.",
+        "url": "https://www.barrons.com/articles/unitedhealth-stock-delta-warren-buffett-berkshire-848714ed"
+      },
+      {
+        "symbol": "JPM",
+        "publishedDate": "2026-05-18 07:08:00",
+        "publisher": "GuruFocus",
+        "title": "Is JPM Undervalued? DCF Says Worth $428",
+        "excerpt": "On May 18, 2026, we delve into the discounted cash flow (DCF) analysis for JPMorgan Chase and Co (JPM). The stock has seen a price performance of -1.4% over the p",
+        "url": "https://www.gurufocus.com/news/8865943/is-jpm-undervalued-dcf-says-worth-428"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-18 06:42:39",
+        "publisher": "CNBC",
+        "title": "Berkshire has revamped its portfolio \u2014 here's how the new stocks are trading",
+        "excerpt": "Berkshire Hathaway has revamped its investment portfolio of U.S. stocks under new CEO Greg Abel. It took a $2.6 billion stake in Delta Airlines, while increasing its Alphabet shares by 224%.",
+        "url": "https://www.cnbc.com/2026/05/18/berkshire-portfolio-revamp-delta-airlines-macys-unitedhealth.html"
+      },
+      {
+        "symbol": "BAC",
+        "publishedDate": "2026-05-18 03:53:00",
+        "publisher": "The Motley Fool",
+        "title": "Best Bank Stocks to Buy in 2026",
+        "excerpt": "Credit conditions are expected to further deteriorate in the second half of 2026. The uncertain environment will favor larger banks.",
+        "url": "https://www.fool.com/investing/2026/05/18/best-bank-stocks-to-buy-in-2026/"
+      }
+    ],
+    "Consumer_Discretionary": [
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-18 09:41:12",
+        "publisher": "Zacks Investment Research",
+        "title": "Buy Cisco as a New Leader of the AI Networking Infrastructure Space",
+        "excerpt": "Cisco rides booming AI networking demand as hyperscaler orders surge, driving record revenues and stronger fiscal 2026 guidance.",
+        "url": "https://www.zacks.com/stock/news/2922572/buy-cisco-as-a-new-leader-of-the-ai-networking-infrastructure-space?cid=CS-STOCKNEWSAPI-FT-analyst_blog|investment_ideas-2922572"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-18 09:13:11",
+        "publisher": "24/7 Wall Street",
+        "title": "Could Amazon Really Hit $375 This Year? Here's Why It's Possible",
+        "excerpt": "Amazon (NASDAQ:AMZN | AMZN Price Prediction) just delivered a quarter that should make every bear reconsider.",
+        "url": "https://247wallst.com/investing/2026/05/18/could-amazon-really-hit-375-this-year-heres-why-its-possible/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-18 09:11:26",
+        "publisher": "Investors Business Daily",
+        "title": "Elon Musk Provides New Timeline For Tesla Robotaxi Expansion",
+        "excerpt": "Elon Musk said Tesla robotaxis will be 'widespread' in the U.S. by the end of the year. The stock just formed a new, lower entry point.",
+        "url": "https://www.investors.com/news/tesla-elon-musk-robotaxi-cybercab-self-driving-cars-electric-vehicles/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-18 09:01:25",
+        "publisher": "Seeking Alpha",
+        "title": "Amazon: Better Revenue Visibility, But The Easy Money Is Over",
+        "excerpt": "Amazon delivered AWS revenue growth of 28% YoY, the fastest in 15 quarters, driven by AI infrastructure and cloud demand. The AWS backlog stands at $364 billion with a 5.5-year weighted average life, providing strong revenue visibility and partially offsetting capex and free cash",
+        "url": "https://seekingalpha.com/article/4905999-amazon-stock-better-revenue-visibility-but-the-easy-money-is-over"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-18 08:42:03",
+        "publisher": "24/7 Wall Street",
+        "title": "This Fast-Rising Fund Has Been Crushing the Market \u2014 Nvidia, Micron and TSMC are Reasons Why",
+        "excerpt": "Watching what the hedge funds and top investment managers do in any given quarter can be a great source of ideas in just about any market.",
+        "url": "https://247wallst.com/investing/2026/05/18/this-fast-rising-fund-has-been-crushing-the-market-nvidia-micron-and-tsmc-are-reasons-why/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-18 07:03:00",
+        "publisher": "GuruFocus",
+        "title": "AMZN DCF Analysis: Intrinsic Value $199 vs Price $264",
+        "excerpt": "On May 18, 2026, we delve into the DCF analysis for Amazon.com Inc (AMZN), a company that has seen a price performance of +28.5% over the past year and +14.2% y",
+        "url": "https://www.gurufocus.com/news/8865937/amzn-dcf-analysis-intrinsic-value-199-vs-price-264"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-18 06:58:42",
+        "publisher": "247 Wallst",
+        "title": "SpaceX To Go Public June 12, As Speculation Rises",
+        "excerpt": "Rumors are largely gone. Insiders have leaked that the SpaceX IPO trigger will get pulled on June 12. Elon Musk's company will try to raise $80 billion at a valuation north of $1.75 tillion. Some speculate that the figure will be closer to $2 trillion, making it as valuable as Te",
+        "url": "https://247wallst.com/investing/2026/05/18/spacex-to-go-public-june-12-as-speculation-rises/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-18 06:50:40",
+        "publisher": "Invezz",
+        "title": "Tesla expands robotaxi ambitions as Elon Musk predicts AI-led driving future",
+        "excerpt": "Elon Musk said on Monday that fully self-driving vehicles operating without human safety monitors are expected to become more common across the United States later this year, following their introduction in Texas. Speaking via video link at the Smart Mobility Summit in Tel Aviv, ",
+        "url": "https://invezz.com/news/2026/05/18/tesla-expands-robotaxi-ambitions-as-elon-musk-predicts-ai-led-driving-future/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-18 06:45:54",
+        "publisher": "Business Insider",
+        "title": "This tech exec sued Tesla over its Full Self-Driving promises \u2014 and won",
+        "excerpt": "Ben Gawiser, an Oracle executive, sued Tesla after waiting years for fully autonomous driving. Gawiser is one of many Tesla owners whose vehicles are too old to support unsupervised full self-driving.",
+        "url": "https://www.businessinsider.com/tech-exec-sued-tesla-full-self-driving-promises-model-3-2026-5"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-18 06:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "Is the SpaceX IPO Overpriced? Here's How Much It Could Be Worth, According to a Valuation Expert.",
+        "excerpt": "Aswath Damodaran looks at the future of the enormous Elon Musk company.",
+        "url": "https://www.fool.com/investing/2026/05/18/is-the-spacex-ipo-overpriced-heres-how-much-it-cou/"
+      }
+    ],
+    "Consumer_Staples": [
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-18 09:33:24",
+        "publisher": "24/7 Wall Street",
+        "title": "Forget Walmart. The Grocer Beating It on Trust and Margin Trades at a Third of the Multiple",
+        "excerpt": "Walmart (NYSE:WMT | WMT Price Prediction) is the grocery story everyone wants to own right now, with a $1.047 trillion market cap and a stock that has climbed 34.53% over the past year.",
+        "url": "https://247wallst.com/investing/2026/05/18/forget-walmart-the-grocer-beating-it-on-trust-and-margin-trades-at-a-third-of-the-multiple/"
+      },
+      {
+        "symbol": "PEP",
+        "publishedDate": "2026-05-18 08:48:13",
+        "publisher": "Seeking Alpha",
+        "title": "PepsiCo: Fairly Priced, But Not A Deal Compared To Peers",
+        "excerpt": "PepsiCo trades at 17x forward earnings and is maintaining a premium valuation versus consumer staples peers despite sector-wide headwinds. PEP's revenue growth, international diversification, and A+ S&P credit rating are positives that help underpin a stronger stock price floor. ",
+        "url": "https://seekingalpha.com/article/4905994-pepsico-stock-fairly-priced-but-not-a-deal-compared-to-peers"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-18 08:00:00",
+        "publisher": "PRNewsWire",
+        "title": "PERMIAN BASIN ROYALTY TRUST ANNOUNCES MAY CASH DISTRIBUTION, EXCESS COST POSITION ON WADDELL RANCH PROPERTIES, AND RESULTS OF HEARING",
+        "excerpt": "DALLAS, May 18, 2026 /PRNewswire/ -- Argent Trust Company, as Trustee of the Permian Basin Royalty Trust (NYSE: PBT) (\"Permian\" or the \"Trust\") today declared a cash distribution to the holders of its units of beneficial interest of $0.020355 per unit, payable on June 12, 2026, t",
+        "url": "https://www.prnewswire.com/news-releases/permian-basin-royalty-trust-announces-may-cash-distribution-excess-cost-position-on-waddell-ranch-properties-and-results-of-hearing-302772108.html"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-18 07:12:00",
+        "publisher": "GuruFocus",
+        "title": "COST DCF Analysis: Intrinsic Value $409 vs Price $1049",
+        "excerpt": "On May 18, 2026, we present a DCF analysis for Costco Wholesale Corp (COST). The company has shown strong price performance, with a year-to-date increase of 21.",
+        "url": "https://www.gurufocus.com/news/8865949/cost-dcf-analysis-intrinsic-value-409-vs-price-1049"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-18 07:06:00",
+        "publisher": "GuruFocus",
+        "title": "WMT DCF Analysis: Intrinsic Value $34 vs Price $131",
+        "excerpt": "On May 18, 2026, we present a discounted cash flow (DCF) analysis for Walmart Inc (WMT). The stock has shown a positive price performance, with a year-to-date i",
+        "url": "https://www.gurufocus.com/news/8865941/wmt-dcf-analysis-intrinsic-value-34-vs-price-131"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-18 06:26:06",
+        "publisher": "Seeking Alpha",
+        "title": "Buda Juice: The Velocity Test Starts Now",
+        "excerpt": "Buda Juice (BUDA) secures Walmart distribution for its Cherry Limeade SKU, expanding to 246 stores across 9 states, testing its cold-chain logistics at scale. Despite this Walmart deal, BUDA's revenue growth potential is limited in the near term, with projections adding only ~$1 ",
+        "url": "https://seekingalpha.com/article/4905964-buda-juice-the-velocity-test-starts-now"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-18 06:21:17",
+        "publisher": "24/7 Wall Street",
+        "title": "Prediction: Procter & Gamble Will Trade At This Price in 2027",
+        "excerpt": "Our 24/7 Wall St. price target for Procter & Gamble (NYSE:PG | PG Price Prediction) is $163.50, implying a 14.95% upside from today's price.",
+        "url": "https://247wallst.com/investing/2026/05/18/prediction-procter-gamble-will-trade-at-this-price-in-2027/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-18 02:50:00",
+        "publisher": "The Motley Fool",
+        "title": "3 Dividend Stocks to Buy Right Now and Never Sell",
+        "excerpt": "Walmart's business is growing well beyond its traditional retail operation. Coca-Cola's longevity has much to do with its ability to adjust to changing consumer preferences.",
+        "url": "https://www.fool.com/investing/2026/05/18/3-dividend-stocks-to-buy-right-now-and-never-sell/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-18 01:11:52",
+        "publisher": "Seeking Alpha",
+        "title": "VDC: Consumer Staples Look Good Ahead Of Walmart's Earnings",
+        "excerpt": "The Vanguard Consumer Staples ETF maintains a \"Buy\" rating, offering access to high-quality, cash-flow-rich US large caps at a fair 23x forward P/E. VDC's top holdings\u2014WMT and COST\u2014comprise nearly 30% of the portfolio, making their fundamentals and technicals critical for near-te",
+        "url": "https://seekingalpha.com/article/4905909-vdc-consumer-staples-look-good-ahead-of-walmarts-earnings"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-17 19:30:00",
+        "publisher": "The Motley Fool",
+        "title": "3 Dividend Stocks Warren Buffett Would Buy in a Market Crash",
+        "excerpt": "A stock market crash doesn't appear imminent, but there's no harm in being prepared. Many investors will head for the hills in a market downturn, but Warren Buffett would capitalize on the opportunity.",
+        "url": "https://www.fool.com/investing/2026/05/17/3-dividend-stocks-warren-buffett-would-buy-in-a-ma/"
+      }
+    ],
+    "Industrials": [
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-18 09:00:00",
+        "publisher": "PRNewsWire",
+        "title": "RTX's Raytheon completes design review of Landsat Next space instruments",
+        "excerpt": "Earth observation sensors will offer advanced and more frequent views of Earth EL SEGUNDO, Calif., May 18, 2026 /PRNewswire/ --\u00a0Raytheon, an\u00a0RTX (NYSE: RTX) business, has successfully completed the preliminary design review for NASA's Landsat Next Instrument Suite (LandIS).",
+        "url": "https://www.prnewswire.com/news-releases/rtxs-raytheon-completes-design-review-of-landsat-next-space-instruments-302770937.html"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-18 08:00:00",
+        "publisher": "PRNewsWire",
+        "title": "RTX's Raytheon awarded contract to further develop next-generation software-defined radar capability",
+        "excerpt": "New software gives naval radars multi-mission flexibility and improved spectrum sharing with 5G ARLINGTON, Va., May 18, 2026 /PRNewswire/ --\u00a0Raytheon, an RTX (NYSE: RTX) business, has been awarded a contract from the Office of Naval Research to further develop advanced radar soft",
+        "url": "https://www.prnewswire.com/news-releases/rtxs-raytheon-awarded-contract-to-further-develop-next-generation-software-defined-radar-capability-302771209.html"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-18 07:13:00",
+        "publisher": "GuruFocus",
+        "title": "Is CAT Overvalued? DCF Says Worth $531",
+        "excerpt": "On May 18, 2026, we delve into the discounted cash flow (DCF) analysis for Caterpillar Inc (CAT), a company that has shown remarkable price performance with a y",
+        "url": "https://www.gurufocus.com/news/8865951/is-cat-overvalued-dcf-says-worth-531"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-17 21:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "Iran War Fallout: Kuwait Hires 3 Pentagon Contractors to Build It a $2.5 Billion Defense System",
+        "excerpt": "Citing emergency conditions in the context of the Iraq war, the State Department supports selling advanced defense tech to Kuwait.",
+        "url": "https://www.fool.com/investing/2026/05/17/iran-war-fallout-kuwait-hires-3-pentagon-contracto/"
+      },
+      {
+        "symbol": "GE",
+        "publishedDate": "2026-05-17 10:28:09",
+        "publisher": "247 Wallst",
+        "title": "Todd Graves\u2019 Billion-Dollar Chicken Chain Started With the Worst Grade in Business School",
+        "excerpt": "Todd Graves told Masters of Scale host Jeff Berman that his Raising Cane's business plan earned the worst grade in his partner's business class, despite being painstakingly detailed. \"The professor said, the plan's exceptional. I mean, I knew details. I knew exactly what our apro",
+        "url": "https://247wallst.com/personal-finance/2026/05/17/todd-graves-billion-dollar-chicken-chain-started-with-the-worst-grade-in-business-school/"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-17 09:09:00",
+        "publisher": "Fool - Investing News",
+        "title": "Think $151 Billion Is Expensive for Golden Dome? Try $1.2 Trillion.",
+        "excerpt": "The more I look at it, the more Golden Dome looks like a white elephant.",
+        "url": "https://www.fool.com/investing/2026/05/17/151-billion-golden-dome-could-cost-12-trillion/"
+      },
+      {
+        "symbol": "GE",
+        "publishedDate": "2026-05-17 08:00:00",
+        "publisher": "Seeking Alpha",
+        "title": "Dividend Investing Is A Lifelong Process",
+        "excerpt": "Dividend investing is a continual, cyclical process requiring active monitoring and regular portfolio maintenance to ensure sustained performance. Relying solely on historical dividend growth or set-and-forget strategies exposes investors to risks from inflation, market volatilit",
+        "url": "https://seekingalpha.com/article/4904790-dividend-investing-is-a-lifelong-process"
+      },
+      {
+        "symbol": "HON",
+        "publishedDate": "2026-05-16 20:00:00",
+        "publisher": "The Motley Fool",
+        "title": "Up 231%, Is RTX Proving Why It Was a Mistake for Honeywell to Replace RTX in the Dow Jones Industrial Average?",
+        "excerpt": "Investor expectations for pure-play stocks like RTX tend to be more straightforward than those of companies with a lot of moving parts. Honeywell's spinoffs could pay off even if it gets removed from the Dow.",
+        "url": "https://www.fool.com/investing/2026/05/16/rtx-honeywell-stock-dow-jones-industrial-average/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-16 08:10:00",
+        "publisher": "Seeking Alpha",
+        "title": "Our Top 10 High Growth Dividend Stocks - May 2026",
+        "excerpt": "The article provides a methodology for selecting high-growth dividend-paying stocks, focusing on dividend growth and sustainability rather than high current yield. We use our proprietary models to rate both quantitatively and qualitatively and select the top 10 names from an init",
+        "url": "https://seekingalpha.com/article/4903367-our-top-10-high-growth-dividend-stocks-may-2026"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-16 05:05:00",
+        "publisher": "Fool - Investing News",
+        "title": "Iran War Fallout: Qatar Needs $4 Billion Worth of Patriot Missiles",
+        "excerpt": "The Iran war is on pause, and for Qatar, it's time to reload its air defense missile stockpile.",
+        "url": "https://www.fool.com/investing/2026/05/16/iran-war-fallout-qatar-needs-4-billion-worth-of-pa/"
+      }
+    ],
+    "Materials": [],
+    "Utilities": [
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 09:33:57",
+        "publisher": "Invezz",
+        "title": "Dominion Energy surges as NextEra acquires company in $66.8B mega deal",
+        "excerpt": "Shares of Dominion Energy surged in trading on Monday after utility giant NextEra Energy announced plans to acquire the company in a $66.8 billion deal that would create the largest electric utility operator in the United States. Dominion shares (D) rose about 10% following the a",
+        "url": "https://invezz.com/news/2026/05/18/dominion-energy-surges-as-nextera-acquires-company-in-66-8b-mega-deal/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 08:46:32",
+        "publisher": "Forbes",
+        "title": "NextEra Will Buy Dominion Energy For $67 Billion As AI Spending Accelerates",
+        "excerpt": "This is a developing story.",
+        "url": "https://www.forbes.com/sites/tylerroush/2026/05/18/nextera-will-buy-dominion-energy-for-67-billion-as-ai-spending-accelerates/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 08:31:00",
+        "publisher": "Business Wire",
+        "title": "NEE Stock Alert: Halper Sadeh LLC is Investigating Whether NextEra Energy, Inc. is Obtaining a Fair Price for its Shareholders",
+        "excerpt": "NEW YORK--(BUSINESS WIRE)--Halper Sadeh LLC, an investor rights law firm, is investigating the merger of NextEra Energy, Inc. (NYSE: NEE) and Dominion Energy, Inc. Upon closing of the proposed transaction, NextEra shareholders will own approximately 74.5% of the combined company.",
+        "url": "https://www.businesswire.com/news/home/20260518965727/en/NEE-Stock-Alert-Halper-Sadeh-LLC-is-Investigating-Whether-NextEra-Energy-Inc.-is-Obtaining-a-Fair-Price-for-its-Shareholders/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 08:06:59",
+        "publisher": "Proactive Investors",
+        "title": "NextEra-Dominion $190bn merger creates world's largest regulated utility as AI power race intensifies",
+        "excerpt": "NextEra Energy Inc's (NYSE:NEE)\u00a0$190 billion\u00a0all-stock takeover of Dominion Energy Inc (NYSE:D) announced on Monday would create the world's largest regulated electric utility and marks the most significant consolidation yet in the scramble to meet surging electricity demand from",
+        "url": "https://www.proactiveinvestors.com/companies/news/1092467"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 07:49:00",
+        "publisher": "Barrons",
+        "title": "NextEra to Buy Dominion. Deal Creates the World's Largest Regulated Utility.",
+        "excerpt": "The combined company will trade under the NextEra Energy name when the all-stock deal closes.",
+        "url": "https://www.barrons.com/articles/dominion-energy-stock-nextera-acquisition-bd03d88b"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 07:40:00",
+        "publisher": "WSJ",
+        "title": "NextEra to Buy Dominion Energy in $67 Billion Deal",
+        "excerpt": "The deal would combine two of the largest U.S. utilities into an East Coast energy titan with territory in Florida, the Carolinas and Virginia.",
+        "url": "https://www.wsj.com/business/energy-oil/nextera-to-buy-dominion-energy-in-67-billion-deal-cc3c94b0"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 07:39:49",
+        "publisher": "CNBC",
+        "title": "NextEra Energy and Dominion to merge, combining two key players in the race to power AI data centers",
+        "excerpt": "Dominion powers the world's largest data center market in Northern Virginia. NextEra is the biggest renewable energy developer in the U.S.",
+        "url": "https://www.cnbc.com/2026/05/18/nextera-nee-dominion-energy-d-data-center-ai.html"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 07:34:50",
+        "publisher": "Reuters",
+        "title": "NextEra Energy to buy Dominion in $66.8 billion US power deal amid AI boom",
+        "excerpt": "NextEra Energy will buy Dominion Energy in a $66.8 billion deal, the companies said on \u200bMonday, in one of the largest acquisitions in the \u200cU.S. power industry as utilities chase surging electricity demand from AI-driven data centers.",
+        "url": "https://www.reuters.com/legal/litigation/nextera-energy-buy-dominion-668-billion-us-power-deal-2026-05-18/"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 07:30:00",
+        "publisher": "PRNewsWire",
+        "title": "NextEra Energy and Dominion Energy to Combine, Creating the World's Largest Regulated Electric Utility Business and North America's Premier Energy Infrastructure Platform Benefiting Customers",
+        "excerpt": "Creates the world's\u00a0largest regulated electric utility\u00a0business by market capitalization and one of the world's largest energy infrastructure companies with an unmatched operating platform benefiting customers Combined company's customers will benefit over time from its enhanced ",
+        "url": "https://www.prnewswire.com/news-releases/nextera-energy-and-dominion-energy-to-combine-creating-the-worlds-largest-regulated-electric-utility-business-and-north-americas-premier-energy-infrastructure-platform-benefiting-customers-302774600.html"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-18 07:05:47",
+        "publisher": "Seeking Alpha",
+        "title": "Wall Street Breakfast Podcast: Next Era Of Power",
+        "excerpt": "NextEra Energy (NEE) is in advanced talks to acquire Dominion Energy (D) in a mostly stock deal valuing Dominion at roughly $66 billion. The proposed merger would create the largest utility acquisition on record, expanding NEE's footprint in the PJM Interconnection grid and targe",
+        "url": "https://seekingalpha.com/article/4905982-wall-street-breakfast-podcast-next-era-of-power"
+      }
+    ],
+    "Real_Estate": [
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-05-18 07:00:00",
+        "publisher": "Seeking Alpha",
+        "title": "Data Center REITs: One Of My Highest-Conviction Calls",
+        "excerpt": "Data center REITs have delivered sector-leading, consistent outperformance, driven by secular tailwinds like AI, cloud computing, and digital transformation. DLR, EQIX, and IRM are trading at premium valuations, reflecting strong fundamentals, but current multiples suggest waitin",
+        "url": "https://seekingalpha.com/article/4905932-data-center-reits-one-of-my-highest-conviction-calls"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-18 05:03:55",
+        "publisher": "Reuters",
+        "title": "Equinix faces challenge to Cape Town data centres over environmental concerns",
+        "excerpt": "A plan by U.S.-listed Equinix to build two data centres in Cape \u200bTown should not be approved without full disclosure of its water, power and environmental \u200cimpact, a formal objection lodged with city planners and seen by Reuters showed.",
+        "url": "https://www.reuters.com/business/energy/equinix-faces-challenge-cape-town-data-centres-over-environmental-concerns-2026-05-18/"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-16 07:15:00",
+        "publisher": "Seeking Alpha",
+        "title": "The REIT Repricing Cycle Is Nearing A Turning Point",
+        "excerpt": "REITs may be emerging from a brutal multi-year downturn. Falling supply and stabilizing rates could drive recovery. Valuations and buyouts signal strong upside ahead.",
+        "url": "https://seekingalpha.com/article/4902981-the-reit-repricing-cycle-is-nearing-a-turning-point"
+      }
+    ],
+    "Communication": [
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-18 09:30:00",
+        "publisher": "Seeking Alpha",
+        "title": "Meta's Selloff Looks Like A Major Misread",
+        "excerpt": "Meta Platforms (META) remains a Buy, as AI-driven CAPEX is already translating into real revenue and earnings growth. META's ad impressions rose 19% YoY and average ad price increased 12%, fueling a 33% YoY revenue jump to $56.31 billion. Despite a CAPEX guidance hike to $125-145",
+        "url": "https://seekingalpha.com/article/4905998-metas-selloff-looks-like-a-major-misread"
+      },
+      {
+        "symbol": "NFLX",
+        "publishedDate": "2026-05-18 09:16:29",
+        "publisher": "24/7 Wall Street",
+        "title": "Netflix Price Prediction: Why a 270% Jump By The End of 2027 Is Possible",
+        "excerpt": "Our Netflix (NASDAQ:NFLX | NFLX Price Prediction) 24/7 Wall St.",
+        "url": "https://247wallst.com/investing/2026/05/18/netflix-price-prediction-why-a-270-jump-by-the-end-of-2027-is-possible/"
+      },
+      {
+        "symbol": "NFLX",
+        "publishedDate": "2026-05-18 08:20:09",
+        "publisher": "Finbold",
+        "title": "Wall Street sets Netflix stock price target for next 12 months",
+        "excerpt": "Despite Netflix (NASDAQ: NFLX) stock failing to retain its March momentum and being, at its press time price of $86.85, 7.37% down year-to-date (YTD), Bank of America (NYSE: BAC) appears to be sufficiently impressed by business results to issue a highly bullish forecast.",
+        "url": "https://finbold.com/wall-street-sets-netflix-stock-price-target-for-next-12-months-2/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-18 08:10:50",
+        "publisher": "24/7 Wall Street",
+        "title": "Greg Abel Channeled His Inner Warren Buffett With Legacy and Dividend Stock Buys in Q1",
+        "excerpt": "Warren Buffett stepped down as CEO of Berkshire Hathaway (NYSE: BRK-B | BRK-B Price Prediction) on December 31, 2025, after six decades leading the conglomerate he transformed from a struggling textile mill into a $1 trillion empire.",
+        "url": "https://247wallst.com/investing/2026/05/18/greg-abel-channeled-his-inner-warren-buffett-with-legacy-and-dividend-stock-buys-in-q1/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-18 08:09:35",
+        "publisher": "24/7 Wall Street",
+        "title": "Prediction: Wall Street May Be Sleeping on Google's Next Big Move",
+        "excerpt": "Few mega-caps have shifted the narrative as decisively as Google (NASDAQ:GOOG | GOOG Price Prediction) has over the past year.",
+        "url": "https://247wallst.com/investing/2026/05/18/prediction-wall-street-may-be-sleeping-on-googles-next-big-move/"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-18 08:00:01",
+        "publisher": "CNBC",
+        "title": "Meta layoffs starting this week stress harsh AI reality inside Zuckerberg's company",
+        "excerpt": "Meta is slated to start its latest round of layoffs this week, with a total of 8,000 projected job cuts. More layoffs are expected this year, including a potential round in August and another in the fall, according to people with knowledge of the matter.",
+        "url": "https://www.cnbc.com/2026/05/18/metas-layoffs-starting-this-week-underscore-zuckerbergs-ai-reality-.html"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-18 07:52:16",
+        "publisher": "24/7 Wall Street",
+        "title": "2 Big AI Spenders Poised to Actually Get the Payoff \u2014 Perhaps Sooner Rather Than Later",
+        "excerpt": "With big tech's CapEx in the hundreds of billions and the potential for them to test the $1 trillion in the next year, investors, many of whom are starting to get just a little bit worried about a potential bubble forming in AI or AI chips, are going to want to see more in the wa",
+        "url": "https://247wallst.com/investing/2026/05/18/2-big-ai-spenders-poised-to-actually-get-the-payoff-perhaps-sooner-rather-than-later/"
+      },
+      {
+        "symbol": "NFLX",
+        "publishedDate": "2026-05-18 07:14:00",
+        "publisher": "GuruFocus",
+        "title": "Is NFLX Undervalued? DCF Says Worth $97",
+        "excerpt": "On May 18, 2026, we delve into the DCF analysis for Netflix Inc (NFLX), a company that has faced notable price fluctuations recently. Over the past year, NFLX h",
+        "url": "https://www.gurufocus.com/news/8865952/is-nflx-undervalued-dcf-says-worth-97"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-18 07:05:00",
+        "publisher": "GuruFocus",
+        "title": "META DCF Analysis: Intrinsic Value $868 vs Price $614",
+        "excerpt": "On May 18, 2026, we conducted a discounted cash flow (DCF) analysis for Meta Platforms Inc (META) to assess its intrinsic value in the context of its recent pri",
+        "url": "https://www.gurufocus.com/news/8865940/meta-dcf-analysis-intrinsic-value-868-vs-price-614"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-18 07:01:00",
+        "publisher": "GuruFocus",
+        "title": "GOOGL DCF Analysis: Intrinsic Value $304 vs Price $397",
+        "excerpt": "On May 18, 2026, we delve into the DCF analysis for Alphabet Inc (GOOGL), a company that has shown remarkable price performance over the past year, with a 142.8",
+        "url": "https://www.gurufocus.com/news/8865934/googl-dcf-analysis-intrinsic-value-304-vs-price-397"
+      }
+    ]
+  }
+}

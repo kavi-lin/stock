@@ -1,0 +1,575 @@
+{
+  "news_id": "bn_20260518_7ac49361",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T02:49:46Z",
+  "last_activity_ts": "2026-05-18T02:59:06Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/18/s-korea-market-volatility-near-record-as-foreigners-sell-13-billion.html",
+    "feed_fingerprint": "south korea market volatility nears record high after",
+    "published": "2026-05-18T02:37:40+00:00",
+    "url_hash": "sha1:7538d9becddeb994e291c4d13a817a1acfe34b2b"
+  },
+  "headline": "South Korea market volatility nears record high after $13 billion foreign investor selloff",
+  "headline_zh": null,
+  "raw_summary": "South Korea's stock market volatility surged near record highs on Monday after foreign investors dumped $13.2 billion worth of local equities last week.",
+  "triage": {
+    "news_type": "sector_news",
+    "shallow_score": 1.0,
+    "bull_case": "板塊動能向上",
+    "bear_case": "個股分化加劇",
+    "sector_view": "輪動信號出現",
+    "macro_view": "相對強度追蹤",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T02:57:18Z",
+      "latency_ms": 27934,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "韓股單週遭外資淨賣 **132億美元**、波動度逼近歷史高點，這是亞洲科技情緒的領先警訊。KOSPI 權重高度集中於記憶體（Samsung、SK Hynix）與造船、電池，外資撤離通常先反映**韓元走弱 + 風險趨避**，而非 HBM3e 終端需求轉壞。關鍵在於分辨：這是 AI 記憶體大漲後的獲利了結與 FX 套利平倉，還是市場開始定價**記憶體價格見頂**。對美股的傳導路徑——NVDA 的 HBM3e 供應主力即 SK Hynix，若韓股賣壓只是資金面、基本面未鬆動，**MU** 反而可能受惠於「供應分散」敘事。短線亞洲科技 beta（**EWY**）承壓，但須等韓元與外資流向止穩才確認是否為系統性外溢。",
+        "bull_points": [
+          "外資撤離多為韓元貶值與獲利了結，非需求轉壞",
+          "HBM3e 終端 AI capex 需求未見鬆動",
+          "供應分散敘事利多 MU 搶單"
+        ],
+        "bear_points": [
+          "132億美元單週外流恐外溢至亞洲科技風險偏好",
+          "波動度逼近紀錄高點壓抑 EWY 等 EM beta",
+          "若市場開始定價記憶體價格見頂則殺估值"
+        ],
+        "final_take": "短線看空亞洲科技情緒，但HBM3e基本面未變",
+        "entities": {
+          "tickers": [
+            "EWY",
+            "MU",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "foreign capital outflow",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:EWY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:foreign-outflow"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "narrative:hbm3e-supply"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "資金面外溢訊號明確，但記憶體基本面尚待確認"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T02:57:31Z",
+      "latency_ms": 13889,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了分析師 A 提到的基本面因素，我們需警惕韓國市場內在的**結構性流動性風險**。韓國市場龐大的 **ELS（股權連結證券）**與零售槓桿倉位在跌勢中極易觸發強制平倉，這種「負反饋迴路」（Negative Feedback Loop）導致賣壓非理性放大，而非單純由外資基本面變更驅動。當 KOSPI 波動率逼近臨界點，機構投資者被迫回補衍生品倉位，這將對整體科技板塊 beta 產生短期劇烈震盪。即使 HBM3e 需求穩固，這類**結構性流動性衝擊**導致的溢價退潮，仍是導致波動率無法快速收斂的核心因素。",
+        "bull_points": [
+          "政策干預可能穩定市場情緒",
+          "HBM3e 基本面需求支撐強勁"
+        ],
+        "bear_points": [
+          "ELS 結構化商品觸發強制平倉",
+          "零售融資槓桿放大拋售壓力"
+        ],
+        "final_take": "防範韓國衍生品槓桿平倉帶來的系統性流動性風險。",
+        "entities": {
+          "tickers": [
+            "EWY",
+            "NVDA",
+            "SKM",
+            "MU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "volatility",
+            "liquidity risk"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:EWY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:margin_unwinding"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "強調韓國 ELS 衍生品觸發的槓桿平倉效應，這是加劇波動的次級流動性因子。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T02:57:59Z",
+      "latency_ms": 27092,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的**二階效應**：外資撤離壓低韓元，這對 DRAM 定價是**雙面刃**。Samsung、SK Hynix 成本以韓元計、售價以美元計，弱韓元讓兩家韓廠能在美元報價上更激進殺價，反而**壓縮 MU 的記憶體漲價紅利**——這直接反駁我自己 Round 0 說的「MU 受惠供應分散」。第二點是**被動資金的板塊輪動**：KOSPI 佔 MSCI EM 約 11-12%，外資贖回會機械式減碼韓國、相對加碼台灣，**TSM** 與 **EWT** 是結構受益方。所以這不只是韓元與風險趨避，還牽動 EM 指數權重重分配。觀察重點：韓元若續貶，留意 Q2 DRAM 合約價是否被韓廠帶頭下修。",
+        "bull_points": [
+          "EM 被動資金韓→台輪動，TSM、EWT 結構受惠",
+          "弱韓元屬 FX 面，HBM3e 終端需求未鬆動"
+        ],
+        "bear_points": [
+          "弱韓元讓韓廠美元殺價,壓縮 MU 漲價紅利",
+          "Q2 DRAM 合約價恐遭韓廠帶頭下修",
+          "MSCI EM 機械減碼放大 KOSPI 賣壓"
+        ],
+        "final_take": "看空 MU 定價力,看多台股相對輪動",
+        "entities": {
+          "tickers": [
+            "MU",
+            "TSM",
+            "EWY",
+            "EWT",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "EM passive flows",
+            "FX risk-off",
+            "DRAM pricing"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "DRAM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:krw-weakness-dram-pricing"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:em-passive-rotation"
+          },
+          {
+            "subject": "ticker:EWT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:em-passive-rotation"
+          },
+          {
+            "subject": "ticker:EWY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:foreign-selloff"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增弱韓元壓 MU 定價力 + EM 被動資金韓→台輪動兩個新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T02:58:13Z",
+      "latency_ms": 14357,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了資金面與 DRAM 定價，需警惕**中游供應鏈 execution 風險**。南韓半導體板塊的流動性危機不僅波及巨頭，更衝擊中小型**設備與材料廠商**。這些次級供應商是 HBM3e 擴產所需的關鍵節點（如精密蝕刻與檢測）。若韓元貶值與信用緊縮導致這些廠商出現融資困難，將直接拖累 **Samsung** 與 **SK Hynix** 的 HBM3e 產能爬坡進度。這對全球 AI 記憶體供給是潛在的**結構性瓶頸**，風險程度遠高於單純的價格波動。",
+        "bull_points": [
+          "市場恐慌性拋售有助冷卻半導體板塊過熱情緒",
+          "產能擴張若受阻，短期內供給失衡恐進一步支撐 DRAM 價格"
+        ],
+        "bear_points": [
+          "中小型設備/材料商面臨嚴重的融資與營運現金流壓力",
+          "HBM3e 關鍵設備交期恐因供應鏈財務風險而延遲",
+          "產能爬坡不及預期將影響整體 AI 記憶體供給節奏"
+        ],
+        "final_take": "須高度警惕供應鏈二階風險導致 HBM3e 產能爬坡不及預期。",
+        "entities": {
+          "tickers": [
+            "SSNLF",
+            "HXSCL",
+            "MU"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SSNLF",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:HBM3e"
+          },
+          {
+            "subject": "ticker:HXSCL",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:HBM3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充中小型半導體供應鏈流動性危機對 HBM3e 產能爬坡的結構性負面影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T02:58:52Z",
+      "latency_ms": 39524,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個直指美股的新傳導點：前面討論集中在韓元、DRAM 定價與韓國中小供應商，但漏了**美系晶圓設備廠的營收曝險**。韓國佔全球 WFE（晶圓廠設備）支出逾兩成，**Samsung 與 SK Hynix 是 LRCX、AMAT、KLAC 的前段大客戶**。若韓元貶值疊加信用緊縮迫使韓廠遞延 HBM3e 與先進製程 capex，受傷的不只是韓國次級供應商，而是直接砍到美系 semicap 的 Q3-Q4 訂單能見度。另一個被忽略的反方制衡：韓國有 **NPS 國民年金 + 企業 Value-up 計畫**這類政策後盾，過往韓股急殺常見年金逆勢承接，這使波動率可能比 Gemini 描述的『負反饋迴路無法收斂』更快均值回歸。觀察點：韓廠法說的 capex 指引是否鬆動。",
+        "bull_points": [
+          "韓國 NPS 年金 + Value-up 政策後盾，急殺常見逆勢承接",
+          "賣壓若屬資金面，KOSPI 波動率可能快速均值回歸",
+          "韓廠 capex 若維持，美系 semicap 訂單能見度不受損"
+        ],
+        "bear_points": [
+          "韓國佔全球 WFE 逾兩成，capex 遞延直擊 LRCX/AMAT/KLAC",
+          "弱韓元 + 信用緊縮恐迫韓廠下修 HBM3e 擴產 capex",
+          "美系設備廠 Q3-Q4 訂單能見度面臨下修風險"
+        ],
+        "final_take": "偏中性，緊盯韓廠法說 capex 指引是否鬆動",
+        "entities": {
+          "tickers": [
+            "LRCX",
+            "AMAT",
+            "KLAC",
+            "MU",
+            "TSM",
+            "EWY"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "semicap equipment",
+            "EM fund flows"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "WFE",
+            "DRAM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:korea-capex-delay"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:korea-capex-delay"
+          },
+          {
+            "subject": "ticker:KLAC",
+            "predicate": "SUPPLIES_TO",
+            "object": "entity:samsung"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "SUPPLIES_TO",
+            "object": "entity:sk-hynix"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增美系晶圓設備廠 WFE 曝險 + 韓國政策後盾反方制衡"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T02:59:06Z",
+      "latency_ms": 13786,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "之前的討論均聚焦於半導體供應鏈，卻忽略了韓國金融體系的另一面：**金融控股公司（如 KB Financial, Shinhan）**。它們是韓國「Value-up 政策」的核心，具有高殖利率與低 P/B 特性，是外資過往加碼的重點。此次大規模賣壓中，這類板塊同樣遭受流動性砍殺，呈現出「優質價值股與 AI 成長股被不分青紅皂白地同時拋售」的現象。這種錯殺為長期投資者創造了價值重估的機會，與半導體供應鏈的結構性受損形成鮮明對比。若韓元續貶導致賣壓持續，金融股的股息回報率將飆升，可能吸引本土內資與年金（NPS）提前進場防禦，提供市場支撐。",
+        "bull_points": [
+          "金融控股公司遭錯殺，殖利率極具吸引力。",
+          "金融股具 Value-up 政策護航，防禦性較高。"
+        ],
+        "bear_points": [
+          "市場高波動環境可能增加金融板塊信貸壞帳風險。",
+          "外資若持續贖回，大型價值股仍面臨沉重拋售壓力。"
+        ],
+        "final_take": "金融股被錯殺提供長期機會，但需等待韓元匯率止穩。",
+        "entities": {
+          "tickers": [
+            "KB",
+            "SHG",
+            "EWY"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "Value-up"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:value_up",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:KB"
+          },
+          {
+            "subject": "narrative:value_up",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:SHG"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "指出金融板塊被錯殺的價值機會，補足了前述對科技與半導體供應鏈過度集中之討論。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "EWT",
+        "EWY",
+        "HXSCL",
+        "KB",
+        "KLAC",
+        "LRCX",
+        "MU",
+        "NVDA",
+        "SHG",
+        "SKM",
+        "SSNLF",
+        "TSM"
+      ],
+      "sectors": [
+        "Financials",
+        "Information Technology",
+        "Semiconductors",
+        "Semiconductors & Semiconductor Equipment"
+      ],
+      "themes": [
+        "AI capex",
+        "DRAM pricing",
+        "EM fund flows",
+        "EM passive flows",
+        "FX risk-off",
+        "HBM3e",
+        "Value-up",
+        "foreign capital outflow",
+        "liquidity risk",
+        "semicap equipment",
+        "volatility"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "CoWoS-L",
+        "DRAM",
+        "HBM3e",
+        "WFE"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:EWY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:foreign-outflow"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "narrative:hbm3e-supply"
+      },
+      {
+        "subject": "ticker:EWY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:margin_unwinding"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:krw-weakness-dram-pricing"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:em-passive-rotation"
+      },
+      {
+        "subject": "ticker:EWT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:em-passive-rotation"
+      },
+      {
+        "subject": "ticker:EWY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:foreign-selloff"
+      },
+      {
+        "subject": "ticker:SSNLF",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:HBM3e"
+      },
+      {
+        "subject": "ticker:HXSCL",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:HBM3e"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:korea-capex-delay"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:korea-capex-delay"
+      },
+      {
+        "subject": "ticker:KLAC",
+        "predicate": "SUPPLIES_TO",
+        "object": "entity:samsung"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "SUPPLIES_TO",
+        "object": "entity:sk-hynix"
+      },
+      {
+        "subject": "narrative:value_up",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:KB"
+      },
+      {
+        "subject": "narrative:value_up",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:SHG"
+      }
+    ],
+    "bull_summary": [
+      "外資撤離多為韓元貶值與獲利了結，非需求轉壞",
+      "HBM3e 終端 AI capex 需求未見鬆動",
+      "供應分散敘事利多 MU 搶單",
+      "政策干預可能穩定市場情緒",
+      "HBM3e 基本面需求支撐強勁",
+      "EM 被動資金韓→台輪動，TSM、EWT 結構受惠"
+    ],
+    "bear_summary": [
+      "132億美元單週外流恐外溢至亞洲科技風險偏好",
+      "波動度逼近紀錄高點壓抑 EWY 等 EM beta",
+      "若市場開始定價記憶體價格見頂則殺估值",
+      "ELS 結構化商品觸發強制平倉",
+      "零售融資槓桿放大拋售壓力",
+      "弱韓元讓韓廠美元殺價,壓縮 MU 漲價紅利"
+    ],
+    "final_take": "金融股被錯殺提供長期機會，但需等待韓元匯率止穩。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T02:59:06Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, CUSTOMER_OF; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

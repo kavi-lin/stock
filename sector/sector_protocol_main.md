@@ -32,6 +32,13 @@ FOCUS_DATE     : [留空 = 今日]
 4. **Extreme Sentiment Trigger**: Phase 3 執行 `market-sentiment-analyzer` 後，`composite_score > 80` 或 `< 20` → `extreme_sentiment_triggered = true`。觸發後所有 HOT 產業 `risk_flags` 加入 `extreme_sentiment`；詳細級聯動作見 `phase_1-2-3.md`。
 5. **Output Format**: 邏輯輸出為 JSON（schema 見 `schema.md`）。**Markdown 報告由 `sector/scripts/render_sector_report.py` 從 JSON 直接渲染，Phase 5 不再由模型重寫文字**（V1.4）。
 6. **Skills Integration**: 各 phase 標明對應外部 skill，可直接調用其輸出。
+7. **No hand-authored JSON / no ad-hoc cache peeks**（V1.4.1 — turn 預算紀律）：
+   - 完整 `sector_intel.json` 由 `sector/scripts/build_sector_intel.py` 組裝；模型只
+     寫精簡 decision JSON（Phase 5 Step 1）。**禁止** Write 手刻巢狀 intel、禁止臨時
+     寫 `/tmp/build_*.py` 再 Edit。
+   - 要看 cache 數字做判斷：跑 `sector/scripts/sector_digest.py`（一次印完）。
+     **禁止**對同一份 cache 反覆 `python3 -c "import json…"` peek。
+   - Phase 4a 的 N 個 lane subagent **必須在同一則 assistant message 內**發出（並行）。
 
 ---
 

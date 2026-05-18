@@ -1,0 +1,504 @@
+{
+  "news_id": "bn_20260518_b1c425ee",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:42:31Z",
+  "last_activity_ts": "2026-05-18T10:54:39Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/energy/articles/solaris-energy-infrastructure-sei-delivers-101928853.html",
+    "feed_fingerprint": "solaris energy infrastructure sei delivers strong q1 raises",
+    "published": "2026-05-18T10:19:28+00:00",
+    "url_hash": "sha1:b966a7f95ab4208b40bd0d6c4ec53214c63b219e"
+  },
+  "headline": "Solaris Energy Infrastructure (SEI) Delivers Strong Q1, Raises Q2 Guidance",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 3.0,
+    "bull_case": "收益超預期提振前景",
+    "bear_case": "高基期+競爭加劇",
+    "sector_view": "受惠產業擴張",
+    "macro_view": "利率敏感性降低",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:53:03Z",
+      "latency_ms": 27101,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Solaris (SEI) 已從油氣壓裂砂物流公司，轉型為**資料中心臨時供電**供應商——以行動式燃氣渦輪機租賃方式，為等不及電網接入的 hyperscaler 提供橋接電力。Q1 強勁加上**上調 Q2 指引**，反映其電力設備機隊 (power fleet) 利用率與日租金同步走高，這是 **AI capex** 從晶片外溢到「電力瓶頸」主題的直接受惠者。重點不在單季 EPS，而在指引上調代表訂單能見度延伸——若機隊擴張的 capex 與簽約 backlog 同步揭露，估值才有重評價空間。後續須盯渦輪機交付前置期 (GE Vernova 排程已滿到 2028) 是否卡住擴張速度。",
+        "bull_points": [
+          "資料中心電網接入塞車，橋接供電需求結構性上升",
+          "上調 Q2 指引代表機隊日租金與利用率雙升",
+          "油氣轉型電力，客戶從鑽探商換成 hyperscaler"
+        ],
+        "bear_points": [
+          "渦輪機交付前置期長，機隊擴張受 GEV 排程牽制",
+          "臨時供電屬過渡需求，電網到位後恐反轉"
+        ],
+        "final_take": "看多 AI 電力瓶頸主題，但須驗機隊 backlog 兌現",
+        "entities": {
+          "tickers": [
+            "SEI",
+            "GEV",
+            "VRT",
+            "ETN",
+            "PWR",
+            "TLN",
+            "VST"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "data center power",
+            "distributed generation",
+            "grid bottleneck"
+          ],
+          "tech_keywords": [
+            "mobile gas turbine",
+            "behind-the-meter power",
+            "bridge power"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SEI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:data-center-power"
+          },
+          {
+            "subject": "ticker:SEI",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:GEV"
+          },
+          {
+            "subject": "ticker:SEI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:SEI",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:VRT"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "指引上調證 AI 電力需求外溢，惟須看 backlog 與交付前置期"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:53:15Z",
+      "latency_ms": 12327,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "SEI 解決了短期電力短缺，但投資人需關注「橋接」時效的風險。若 Hyperscaler 大舉投資輸配電網（如與 **NEE**, **SO** 合作的永久接入工程），此類租賃業務的長尾效應恐不如預期。長期來看，SEI 必須證明其能作為「分散式能源管理平台」，而不僅是過渡時期的發電機租賃，否則將面臨公用事業公司反攻帶來的監管與接入競爭。",
+        "bull_points": [
+          "短期行動供電能迅速填補電力缺口",
+          "Hyperscaler 為維持進度願意支付高租金"
+        ],
+        "bear_points": [
+          "永久電網接入方案加速會縮短過渡期價值",
+          "分散式發電面臨來自大型公用事業的監管挑戰"
+        ],
+        "final_take": "看多短期動能，但需密切觀察公用事業永久接入方案的推進進度。",
+        "entities": {
+          "tickers": [
+            "SEI",
+            "NEE",
+            "SO"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "Bridge power"
+          ],
+          "tech_keywords": [
+            "Natural gas turbines"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SEI",
+            "predicate": "COMPETES_WITH",
+            "object": "sector:Utilities"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充長期策略風險：永久接入方案對過渡期業務的潛在擠壓。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:53:45Z",
+      "latency_ms": 29698,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前序聚焦需求面與「橋接 vs 永久電網」之爭，漏了**資金面**這個關鍵變數。SEI 要把機隊從目前規模衝到吃下 hyperscaler 訂單，渦輪機單機資本支出極高——擴張只能靠舉債或增發股票。**AI capex** 受惠股的甜蜜點在於「訂單能見度上修同時資產負債表不惡化」;若 Q2 指引上調卻伴隨淨負債跳升或股數稀釋,重評價空間會被融資成本吃掉。另一個沒被點到的競爭節點是**燃料電池**:Bloom Energy (BE) 主打資料中心現地發電,與 SEI 的行動式燃氣渦輪機在「等不及電網」這塊正面交鋒;CAT、CMI 的大型 genset 也在搶同一張訂單。關鍵看 SEI 揭露的合約是短租還是 take-or-pay——後者才撐得起槓桿。",
+        "bull_points": [
+          "渦輪機機隊為實體資產,可作融資抵押品",
+          "若簽 take-or-pay 長約,投資級客戶背書降低舉債風險",
+          "現地發電需求外溢,BE/CAT 同受惠驗證主題夠大"
+        ],
+        "bear_points": [
+          "機隊擴張靠舉債或增發,槓桿與稀釋侵蝕重評價",
+          "BE 燃料電池、CAT/CMI genset 搶同一批 hyperscaler 訂單",
+          "若多為短租合約,現金流續航力撐不起資本支出"
+        ],
+        "final_take": "看多但須確認合約為 take-or-pay 且擴張不靠稀釋",
+        "entities": {
+          "tickers": [
+            "SEI",
+            "BE",
+            "CAT",
+            "CMI",
+            "GEV"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "data center power",
+            "bridge power"
+          ],
+          "tech_keywords": [
+            "mobile gas turbine",
+            "fuel cell",
+            "natural gas genset"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SEI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:data-center-power"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:SEI"
+          },
+          {
+            "subject": "ticker:CAT",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:SEI"
+          },
+          {
+            "subject": "ticker:CMI",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:SEI"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:SEI"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增資金面槓桿/稀釋風險與 BE/CAT 競爭節點,前序未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:53:57Z",
+      "latency_ms": 12641,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "SEI 的高成長極度依賴特定地區的電網瓶頸，特別是 Texas/ERCOT 區域。若這些關鍵地區的電網改善速度快於預期，或是當地法規針對天然氣發電的碳排限制收緊，SEI 的資產週轉率將面臨顯著壓力。SEI 目前的高估值隱含了「電力供不應求」的長期假設，但此業務具有高度的區域性市場風險，而非全國性的標準化基礎設施，這在長期成長能見度上埋下隱憂。",
+        "bull_points": [
+          "AI 資料中心電力缺口延續，SEI 享有強大定價權。"
+        ],
+        "bear_points": [
+          "ERCOT 電網基礎設施升級若加速，將削弱橋接電力需求。",
+          "天然氣發電受 ESG 法規限制，長期許可與合規風險增加。"
+        ],
+        "final_take": "短期看多，但需警惕特定區域電力瓶頸改善的潛在風險。",
+        "entities": {
+          "tickers": [
+            "SEI"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "Bridge power"
+          ],
+          "tech_keywords": [
+            "Natural Gas Turbines"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SEI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:grid_upgrade"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充了區域電網瓶頸消除帶來的市場結構風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:54:28Z",
+      "latency_ms": 30377,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前序四輪把需求、橋接時效、融資稀釋、燃料電池競爭、ERCOT 區域風險都掃過了,但全部聚焦在**電力輸出端**,沒人談 SEI 行動式燃氣渦輪機的**燃料輸入端**。這些渦輪機要燒大量天然氣,而資料中心常蓋在偏遠、管線末端的低電價區——這帶出兩個被漏掉的點:一、**二階受惠者是天然氣中游管線商** (WMB、KMI、ET),分散式燃氣發電把氣需求拉到 hyperscaler 廠址,利多 takeaway 管容;二、這同時是 SEI 的**反方風險**:若合約是固定日租而燃料成本由 SEI 吸收,Henry Hub 氣價一旦因 LNG 出口拉升而走高,毛利會被侵蝕。關鍵看 Q2 揭露的合約是否把燃料成本 pass-through 給客戶。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:54:39Z",
+      "latency_ms": 11148,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論涵蓋了電網接入戰、資本結構與燃料成本，漏了一個關鍵的**運營護城河：維修服務生態系 (Maintenance Ecosystem)**。行動式燃氣渦輪機需頻繁檢修以維持極高稼動率。SEI 若能建立內部的快速機組翻新與零件供應鏈，將大幅提升資產稼動率，形成區隔於單純「買設備來租」同業的競爭門檻。若 Q2 揭露其維修成本佔營收比例下降，顯示**營運槓桿**啟動，這比單純搶租約更具長期價值。",
+        "bull_points": [
+          "垂直整合維修鏈可拉高毛利率",
+          "資產稼動率提升帶動營運槓桿"
+        ],
+        "bear_points": [
+          "自建維修體系恐增加龐大資本支出",
+          "依賴特定機型恐受原廠維修技術限制"
+        ],
+        "final_take": "看多，觀察維修成本佔比以確認營運槓桿。",
+        "entities": {
+          "tickers": [
+            "SEI",
+            "GEV"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "Power infrastructure"
+          ],
+          "tech_keywords": [
+            "Gas turbines",
+            "Fleet management"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SEI",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech:Fleet management"
+          },
+          {
+            "subject": "ticker:SEI",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:GEV"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "提出維修護城河與營運槓桿觀點，補足資產維運環節。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BE",
+        "CAT",
+        "CMI",
+        "ETN",
+        "GEV",
+        "NEE",
+        "PWR",
+        "SEI",
+        "SO",
+        "TLN",
+        "VRT",
+        "VST"
+      ],
+      "sectors": [
+        "Energy",
+        "Industrials",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Bridge power",
+        "Power infrastructure",
+        "bridge power",
+        "data center power",
+        "distributed generation",
+        "grid bottleneck"
+      ],
+      "tech_keywords": [
+        "Fleet management",
+        "Gas turbines",
+        "Natural Gas Turbines",
+        "Natural gas turbines",
+        "behind-the-meter power",
+        "bridge power",
+        "fuel cell",
+        "mobile gas turbine",
+        "natural gas genset"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:SEI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:data-center-power"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:GEV"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:VRT"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "COMPETES_WITH",
+        "object": "sector:Utilities"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:SEI"
+      },
+      {
+        "subject": "ticker:CAT",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:SEI"
+      },
+      {
+        "subject": "ticker:CMI",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:SEI"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:SEI"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:grid_upgrade"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech:Fleet management"
+      },
+      {
+        "subject": "ticker:SEI",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:GEV"
+      }
+    ],
+    "bull_summary": [
+      "資料中心電網接入塞車，橋接供電需求結構性上升",
+      "上調 Q2 指引代表機隊日租金與利用率雙升",
+      "油氣轉型電力，客戶從鑽探商換成 hyperscaler",
+      "短期行動供電能迅速填補電力缺口",
+      "Hyperscaler 為維持進度願意支付高租金",
+      "渦輪機機隊為實體資產,可作融資抵押品"
+    ],
+    "bear_summary": [
+      "渦輪機交付前置期長，機隊擴張受 GEV 排程牽制",
+      "臨時供電屬過渡需求，電網到位後恐反轉",
+      "永久電網接入方案加速會縮短過渡期價值",
+      "分散式發電面臨來自大型公用事業的監管挑戰",
+      "機隊擴張靠舉債或增發,槓桿與稀釋侵蝕重評價",
+      "BE 燃料電池、CAT/CMI genset 搶同一批 hyperscaler 訂單"
+    ],
+    "final_take": "看多，觀察維修成本佔比以確認營運槓桿。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:54:39Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, SUPPLIES_TO; gemini-only: HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

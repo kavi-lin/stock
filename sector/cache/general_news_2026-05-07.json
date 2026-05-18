@@ -1,0 +1,169 @@
+{
+  "as_of_date": "2026-05-07",
+  "schema_version": "V1.71",
+  "available": true,
+  "limit": 20,
+  "total_articles": 20,
+  "articles": [
+    {
+      "publishedDate": "2026-05-07 09:19:00",
+      "publisher": "Market Watch",
+      "title": "Americans are behaving like they're in a recession, this storied appliance maker warns",
+      "excerpt": "Whirlpool's stock is sinking as customers dramatically cut back on discretionary appliance purchases.",
+      "url": "https://www.marketwatch.com/story/americans-are-behaving-like-theyre-in-a-recession-this-storied-appliance-maker-warns-d900b283",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-07 09:03:57",
+      "publisher": "Reuters",
+      "title": "Focus: Wall Street banks plan final push on capital rules",
+      "excerpt": "Wall Street banks will push again to shrink capital charges on credit card lines and globally important U.S. lenders as they make a final bid to win further capital relief before \u200bthe U.S. November election, said four industry officials familiar with the industry discussions.",
+      "url": "https://www.reuters.com/sustainability/boards-policy-regulation/wall-street-banks-plan-final-push-capital-rules-2026-05-07/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:59:36",
+      "publisher": "CNBC",
+      "title": "Paul Tudor Jones says AI bull market has 'another year or two to run'",
+      "excerpt": "Paul Tudor Jones said the artificial intelligence-fueled bull market still has further to run, adding that he recently bought more related stocks as he looked for parallels to earlier tech booms.",
+      "url": "https://www.cnbc.com/2026/05/07/paul-tudor-jones-says-ai-bull-market-has-another-year-or-two-to-run.html",
+      "site": "cnbc.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:57:57",
+      "publisher": "CNBC Television",
+      "title": "The K-shaped gap widens: Here's what to know",
+      "excerpt": "CNBC's Steve Liesman joins 'Squawk Box' to discuss the widening gap between the earnings of higher and lower income groups.",
+      "url": "https://www.youtube.com/watch?v=b1sKlSJ0Czk",
+      "site": "youtube.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:57:47",
+      "publisher": "Reuters",
+      "title": "US productivity slows further in first quarter",
+      "excerpt": "U.S. worker productivity growth slowed further in the first quarter, but a reversal was \u200blikely as businesses invest heavily in artificial \u200cintelligence.",
+      "url": "https://www.reuters.com/business/world-at-work/us-productivity-slows-further-first-quarter-2026-05-07/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:53:51",
+      "publisher": "Seeking Alpha",
+      "title": "The Pendulum Swings From Extreme Fear To Greed",
+      "excerpt": "New all-time highs keep coming, as investors focus on robust earnings reports. A new proposal to end the war from the Trump administration sits in the balance.",
+      "url": "https://seekingalpha.com/article/4900152-pendulum-swings-from-extreme-fear-to-greed",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:50:00",
+      "publisher": "WSJ",
+      "title": "U.S Jobless Claims Rose Last Week",
+      "excerpt": "U.S. jobless claims rose last week but remained relatively low as employers held back from widespread layoffs despite economic uncertainty tied to the war in Iran.",
+      "url": "https://www.wsj.com/economy/jobs/u-s-jobless-claims-rose-last-week-c94d4793",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:39:00",
+      "publisher": "Market Watch",
+      "title": "Are businesses really starting to hire again? The April jobs report will help clue us in.",
+      "excerpt": "Are companies adding more workers after an unusually weak stretch of hiring? The jury is out, but signs of recovery in the labor market are emerging.",
+      "url": "https://www.marketwatch.com/story/are-businesses-really-starting-to-hire-again-the-april-jobs-report-will-help-clue-us-in-97c1730e",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:38:15",
+      "publisher": "Reuters",
+      "title": "US jobless claims increase less than expected amid low layoffs",
+      "excerpt": "The number of Americans filing claims for unemployment benefits increased less than expected last week amid low layoffs that are helping to anchor the labor market.",
+      "url": "https://www.reuters.com/business/world-at-work/us-jobless-claims-increase-less-than-expected-amid-low-layoffs-2026-05-07/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-07 08:04:17",
+      "publisher": "FXEmpire",
+      "title": "Nasdaq 100, Dow Jones 30 and S&P 500 Forecasts \u2013 US Indices Continues to Look Hot",
+      "excerpt": "The move in the stock market has been exacerbated. It almost looks like a short squeeze at this point in time.",
+      "url": "https://www.fxempire.com/forecasts/article/nasdaq-100-dow-jones-30-and-sp-500-forecasts-us-indices-continues-to-look-hot-1596407",
+      "site": "fxempire.com"
+    },
+    {
+      "publishedDate": "2026-05-07 07:55:00",
+      "publisher": "Market Watch",
+      "title": "Kevin Warsh's undisclosed wealth leaves a $100 million mystery at the top of the Federal Reserve",
+      "excerpt": "The U.S. Senate will vote on May 11 to invoke cloture on the nomination of Kevin Maxwell Warsh as the 17th chair of the Federal Reserve.",
+      "url": "https://www.marketwatch.com/story/kevin-warshs-undisclosed-wealth-leaves-a-100-million-mystery-atop-the-federal-reserve-19f0dc78",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-07 07:10:00",
+      "publisher": "Barrons",
+      "title": "This Stock Market Rally Has Run on Both Faith and Fact. One Has Mattered More.",
+      "excerpt": "\u2018Blind faith' has been driving stock markets higher, says an economist. That could be risky.",
+      "url": "https://www.barrons.com/articles/stock-market-rally-iran-trump-oil-bonds-d31115d5",
+      "site": "barrons.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:55:08",
+      "publisher": "Reuters",
+      "title": "Morning Bid: Chip frenzy goes global",
+      "excerpt": "What matters in U.S. and global markets today",
+      "url": "https://www.reuters.com/commentary/reuters-open-interest/global-markets-view-usa-2026-05-07/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:55:00",
+      "publisher": "Market Watch",
+      "title": "Bitcoin's rare technical action points to a crypto bull market, says Fundstrat's Tom Lee",
+      "excerpt": "Fundstrat's Tom Lee says activity in recent months point to a bullish phase for cryptocurrencies.",
+      "url": "https://www.marketwatch.com/story/bitcoins-rare-technical-action-points-to-a-crypto-bull-market-says-fundstrats-tom-lee-4e44bfb7",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:48:00",
+      "publisher": "Barrons",
+      "title": "Iran Talks, Fed Rates, Jobs Data, Inflation. This Market Rally Faces Big Tests Soon.",
+      "excerpt": "Arm beats expectations, Apple stock hits a record, gasoline prices could weigh on consumer spending, and more news to start your day.",
+      "url": "https://www.barrons.com/articles/stock-market-rally-iran-fed-jobs-inflation-things-to-know-today-4369c82c",
+      "site": "barrons.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:37:35",
+      "publisher": "Reuters",
+      "title": "Swiss-based Terra Quantum lands US Air Force deal ahead of Nasdaq listing",
+      "excerpt": "Swiss-German firm Terra Quantum said on Thursday it had won a U.S. Air Force contract to supply \u200bsoftware that simulates secure military communications in \u200bcontested battlefield conditions, ahead of a Nasdaq listing valuing \u2060it at $3.25 billion.",
+      "url": "https://www.reuters.com/technology/swiss-based-terra-quantum-lands-us-air-force-deal-ahead-nasdaq-listing-2026-05-07/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:32:12",
+      "publisher": "Proactive Investors",
+      "title": "\u2018Sell in May' adage breaks down as Trump-era markets reward risk, but not for FTSE 100",
+      "excerpt": "The old market mantra of \u201csell in May and go away\u201d looks increasingly irrelevant\u00a0in the Trump era. Analysis from IG shows the S&P 500 has delivered average gains of 9.5% between May and October during Donald Trump's presidency.",
+      "url": "https://www.proactiveinvestors.co.uk/companies/news/1091891",
+      "site": "proactiveinvestors.co.uk"
+    },
+    {
+      "publishedDate": "2026-05-07 06:30:00",
+      "publisher": "Market Watch",
+      "title": "Top-performing Nasdaq stocks are partying like they did near the peak of the dot-com bubble \u2014 maybe even harder",
+      "excerpt": "Semiconductor stocks have been on fire, helping to fuel the technology-heavy Nasdaq Composite Index to a new all-time peak on Wednesday.",
+      "url": "https://www.marketwatch.com/story/top-performing-nasdaq-stocks-are-partying-like-they-did-near-the-peak-of-the-dot-com-bubble-maybe-even-harder-29e46c66",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:30:00",
+      "publisher": "Seeking Alpha",
+      "title": "The U.S.-Iran Hormuz Deal: Last Chance To Prevent Oil Spike To $200",
+      "excerpt": "The US and Iran are negotiating an agreement to negotiate, which could open the Strait of Hormuz. This could be the last chance to strike a deal to prevent oil spiking to $200, with consequent inflationary shock and subsequent global recession.",
+      "url": "https://seekingalpha.com/article/4899999-the-us-iran-hormuz-deal-last-chance-to-prevent-oil-spike-to-200",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-07 06:03:15",
+      "publisher": "Reuters",
+      "title": "Wall Street bonuses seen flat to slightly positive in 2026 as Iran war and private credit turmoil hurt",
+      "excerpt": "Wall Street bonuses are likely to be flat to slightly positive \u200cin 2026, as geopolitical tensions due to the Iran war and the private credit turmoil could slow the economy and incentives, compensation consultancy Johnson Associates said.",
+      "url": "https://www.reuters.com/sustainability/boards-policy-regulation/wall-street-bonuses-seen-flat-slightly-positive-2026-iran-war-private-credit-2026-05-07/",
+      "site": "reuters.com"
+    }
+  ]
+}

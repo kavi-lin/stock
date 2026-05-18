@@ -350,6 +350,12 @@
 
 ## Phase 5 Schema（sector_intel.json 完整結構）
 
+> ⚡ **V1.4.1**：完整 `sector_intel.json` 不再由模型手寫 — 由
+> `sector/scripts/build_sector_intel.py` 從 phase cache + 一個精簡 **decision
+> JSON** 組裝。模型只寫 decision JSON（`sector/cache/sector_decision_<DATE>.json`）。
+> decision JSON 的 authoritative schema 見 `build_sector_intel.py` 檔頭 docstring。
+> 下方完整結構僅供理解 / renderer 參考。
+
 ```json
 {
   "verdict_date": "YYYY-MM-DD",

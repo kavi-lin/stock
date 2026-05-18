@@ -1,0 +1,602 @@
+{
+  "news_id": "bn_20260518_b8f5e7e8",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T09:22:06Z",
+  "last_activity_ts": "2026-05-18T09:35:52Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/currencies/articles/dollar-firms-oil-climbs-bond-013142882.html",
+    "feed_fingerprint": "dollar dips rising oil bond yields temper losses",
+    "published": "2026-05-18T07:12:17+00:00",
+    "url_hash": "sha1:dd127dac4aabf4040eef5d97faf22a6e3dfa5f76"
+  },
+  "headline": "Dollar dips; rising oil and bond yields temper losses",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:34:15Z",
+      "latency_ms": 20278,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是**宏觀交叉訊號**，不是單純情緒題材。美元走弱通常利多美股大型出口商與大宗商品，但這次被**油價與債券殖利率同步上行**抵銷——殖利率走高壓抑高估值成長股與長存續期資產，油價走高則推升通膨預期、延後 Fed 降息。淨效果偏中性偏緊。受惠端是能源（XOM、CVX）與海外營收佔比高的科技股（AAPL、MSFT 因美元貶值有匯兌順風）；受壓端是對利率敏感的不動產（REITs）、公用事業與未獲利成長股。建議觀察 10 年期殖利率是否站穩 4.5% 以上——那才是真正的股市逆風訊號。",
+        "bull_points": [
+          "美元走弱利多美股跨國企業匯兌收益",
+          "油價上行直接推升能源類股獲利預期",
+          "殖利率上行反映經濟需求仍具韌性"
+        ],
+        "bear_points": [
+          "殖利率走高壓抑高估值成長股評價",
+          "油價上行推升通膨、延後 Fed 降息",
+          "利率敏感族群 REITs、公用事業承壓"
+        ],
+        "final_take": "中性偏緊，盯 10 年殖利率能否守穩 4.5% 關卡",
+        "entities": {
+          "tickers": [
+            "XOM",
+            "CVX",
+            "AAPL",
+            "MSFT",
+            "USO",
+            "TLT"
+          ],
+          "sectors": [
+            "Energy",
+            "Information Technology",
+            "Real Estate",
+            "Utilities"
+          ],
+          "themes": [
+            "US dollar weakness",
+            "rising bond yields",
+            "oil price rally",
+            "Fed rate path"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-price-rally"
+          },
+          {
+            "subject": "ticker:CVX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-price-rally"
+          },
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-dollar-weakness"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-bond-yields"
+          },
+          {
+            "subject": "sector:Real Estate",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-bond-yields"
+          },
+          {
+            "subject": "narrative:oil-price-rally",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:fed-rate-path"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "宏觀交叉訊號，多空力量互抵，淨效果中性偏緊。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:34:27Z",
+      "latency_ms": 12017,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "美元微幅回調，但**金價反應遲鈍**，顯示市場焦點已從單純的貨幣價值轉向對「長期高利率」的恐懼。殖利率與油價的雙重拉扯，使得航空、物流類股（如 **DAL**、**FDX**）面臨燃料成本壓力大於匯率優勢的困境。投資人需留意，若殖利率未見回落，資金流向將持續由成長股向防禦性紅利股重組，傳統避險資產的屬性已產生質變。",
+        "bull_points": [
+          "航空物流業享海外營收匯兌獲益",
+          "能源類股受惠油價上行趨勢"
+        ],
+        "bear_points": [
+          "高利率環境抑制長存續期資產",
+          "高油價轉嫁能力壓縮運輸獲利"
+        ],
+        "final_take": "殖利率主導市場，美元疲軟邊際效應遞減。",
+        "entities": {
+          "tickers": [
+            "DAL",
+            "FDX",
+            "XOM",
+            "CVX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "inflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_prices"
+          },
+          {
+            "subject": "ticker:FDX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:dollar_weakness"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析黃金非關聯性與運輸業之成本匯率權衡。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:34:54Z",
+      "latency_ms": 27109,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已覆蓋能源、科技匯兌、REITs、航空物流，補一個被漏掉的**第二層效應**:長天期殖利率上行直接衝擊**地區型銀行**。2023 年 SVB 事件的核心是 AFS/HTM 債券部位未實現虧損,殖利率每往上墊一階,銀行帳上浮虧就再擴大,壓抑帳面淨值與資本緩衝。**KRE** 成分股(KEY、CFG、ZION)對此最敏感。但要平衡看:殖利率曲線陡化同時利多銀行淨利差(NIM),大型銀行如 **JPM** 受惠存放利差。所以這不是單向利空——分水嶺在於存款是否再度外流。另一個沒人提的點:油價走高推升通膨,實質壓抑消費者可支配所得,對非必需消費(零售、餐飲)是隱性逆風。",
+        "bull_points": [
+          "曲線陡化擴大銀行淨利差,JPM 等大行受惠",
+          "美元貶值仍給跨國企業匯兌順風"
+        ],
+        "bear_points": [
+          "長天期殖利率上行擴大地區銀行 AFS 債券浮虧",
+          "KRE 成分股恐重燃 SVB 式存款外流疑慮",
+          "油價推升通膨壓抑可支配所得,衝擊非必需消費"
+        ],
+        "final_take": "偏空地區銀行,看多大型銀行,觀察存款流向",
+        "entities": {
+          "tickers": [
+            "KRE",
+            "KEY",
+            "CFG",
+            "ZION",
+            "JPM"
+          ],
+          "sectors": [
+            "Financials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "rising yields",
+            "regional bank stress",
+            "AFS unrealized losses",
+            "net interest margin"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:KRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-yields"
+          },
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:net-interest-margin"
+          },
+          {
+            "subject": "ticker:ZION",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:afs-unrealized-losses"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "補地區銀行 AFS 浮虧第二層效應,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:35:05Z",
+      "latency_ms": 10811,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦於銀行業與消費動能，漏掉了保險業（Insurance）在高殖利率環境下的特殊地位。相較於區域銀行因未實現虧損面臨的流動性壓力，大型壽險公司（如 MET、PRU）在高利率環境下，其長期固定收益資產的**再投資收益（Reinvestment Yield）**會顯著提升，這對穩定其長線配息與獲利結構具有正面助益。雖然短期需承受債券帳面評價損失，但資產負債管理（ALM）的改善使得這類大型金融機構的抗風險能力優於依賴存放利差的傳統銀行。",
+        "bull_points": [
+          "高殖利率提升壽險業者長期再投資收益",
+          "資產負債久期匹配改善獲利穩定度"
+        ],
+        "bear_points": [
+          "短期債券投資組合評價損失壓力大",
+          "高利環境可能拖累新增保險契約銷售"
+        ],
+        "final_take": "保險業優於區域銀行，高殖利率環境是長期獲利助力。",
+        "entities": {
+          "tickers": [
+            "MET",
+            "PRU",
+            "HIG"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "Insurance"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:higher_yields"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析前述未提及的高利率對保險業再投資收益的正面影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:35:36Z",
+      "latency_ms": 31629,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已覆蓋能源、科技匯兌、REITs、區域銀行、保險、航空物流——補一個**完全沒提到的利率傳導鏈**:美國 30 年期房貸利率緊貼 10 年期殖利率走。殖利率墊高直接推升房貸成本,在房價可負擔性已極度緊繃下,**住宅建商**首當其衝——DHI、LEN、PHM 訂單與取消率對房貸利率彈性極高,且建商靠利率補貼(rate buydown)促銷會侵蝕毛利。第二層:房市降溫拖累家居零售與建材(HD、LOW、SHW)。另一個被漏的供應鏈節點:油價走高真正的純度受惠者不是整合型油商,而是**油田服務商 SLB、HAL**——鑽探活動隨油價回升,營收槓桿更純。建議盯住 MBA 房貸申請指數,那是殖利率衝擊實體經濟的最早領先訊號。",
+        "bull_points": [
+          "油價回升帶動鑽探活動,SLB、HAL 營收槓桿純度高於整合油商",
+          "美元走弱提升美國跨國企業海外獲利換匯入帳"
+        ],
+        "bear_points": [
+          "殖利率推升房貸利率,DHI、LEN 訂單與取消率承壓",
+          "建商利率補貼促銷侵蝕毛利",
+          "房市降溫外溢至 HD、LOW 家居零售與建材需求"
+        ],
+        "final_take": "偏空住宅鏈,盯 MBA 房貸申請指數確認衝擊",
+        "entities": {
+          "tickers": [
+            "DHI",
+            "LEN",
+            "PHM",
+            "HD",
+            "LOW",
+            "SHW",
+            "SLB",
+            "HAL"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Energy",
+            "Materials"
+          ],
+          "themes": [
+            "rising yields",
+            "mortgage rates",
+            "oil prices",
+            "housing affordability"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-yields"
+          },
+          {
+            "subject": "ticker:LEN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-rates"
+          },
+          {
+            "subject": "ticker:SLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-prices"
+          },
+          {
+            "subject": "ticker:HAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-prices"
+          },
+          {
+            "subject": "ticker:HD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:housing-affordability"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "新增房貸利率傳導鏈(建商/家居)與油服商純度節點,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:35:52Z",
+      "latency_ms": 15735,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "高油價與高殖利率對**清潔能源與電力基礎設施**造成了極為複雜的雙重影響。從理論上講，高油價提升了替代能源的相對經濟效益，但這些資本密集型的綠能專案（如太陽能開發商 ENPH、公用事業 NEE）極度仰賴債務融資。當 10 年期殖利率持續走高，其專案回報率（IRR）會遭到嚴重的資金成本侵蝕。這不僅限制了擴張速度，甚至可能導致部分專案出現「叫好不叫座」的延遲交付。此外，隨著能源轉型需面對更高的融資門檻，市場將更傾向於選擇現金流穩健、具備自有資本儲備的營運商，而非高槓桿的成長型綠能供應商。",
+        "bull_points": [
+          "高油價提升替代能源長期競爭力",
+          "能源轉型需求仍具剛性支撐"
+        ],
+        "bear_points": [
+          "綠能專案融資成本隨殖利率飆升",
+          "高槓桿開發商面臨專案延遲風險"
+        ],
+        "final_take": "綠能板塊面臨利多利空拉鋸，精選高現金流業者為宜",
+        "entities": {
+          "tickers": [
+            "NEE",
+            "ENPH"
+          ],
+          "sectors": [
+            "Utilities",
+            "Energy"
+          ],
+          "themes": [
+            "Energy transition"
+          ],
+          "tech_keywords": [
+            "Renewables"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NEE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond_yields"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討高利率對綠能資本支出的雙重擠壓。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "CFG",
+        "CVX",
+        "DAL",
+        "DHI",
+        "ENPH",
+        "FDX",
+        "HAL",
+        "HD",
+        "HIG",
+        "JPM",
+        "KEY",
+        "KRE",
+        "LEN",
+        "LOW",
+        "MET",
+        "MSFT",
+        "NEE",
+        "PHM",
+        "PRU",
+        "SHW",
+        "SLB",
+        "TLT",
+        "USO",
+        "XOM",
+        "ZION"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Energy",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "Materials",
+        "Real Estate",
+        "Utilities"
+      ],
+      "themes": [
+        "AFS unrealized losses",
+        "Energy transition",
+        "Fed rate path",
+        "Insurance",
+        "US dollar weakness",
+        "housing affordability",
+        "inflation",
+        "mortgage rates",
+        "net interest margin",
+        "oil price rally",
+        "oil prices",
+        "regional bank stress",
+        "rising bond yields",
+        "rising yields"
+      ],
+      "tech_keywords": [
+        "Renewables"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-price-rally"
+      },
+      {
+        "subject": "ticker:CVX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-price-rally"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-dollar-weakness"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-bond-yields"
+      },
+      {
+        "subject": "sector:Real Estate",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-bond-yields"
+      },
+      {
+        "subject": "narrative:oil-price-rally",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:fed-rate-path"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_prices"
+      },
+      {
+        "subject": "ticker:FDX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:dollar_weakness"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-yields"
+      },
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:net-interest-margin"
+      },
+      {
+        "subject": "ticker:ZION",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:afs-unrealized-losses"
+      },
+      {
+        "subject": "ticker:MET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:higher_yields"
+      },
+      {
+        "subject": "ticker:DHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-yields"
+      },
+      {
+        "subject": "ticker:LEN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-rates"
+      },
+      {
+        "subject": "ticker:SLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-prices"
+      },
+      {
+        "subject": "ticker:HAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-prices"
+      },
+      {
+        "subject": "ticker:HD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:housing-affordability"
+      },
+      {
+        "subject": "ticker:NEE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond_yields"
+      }
+    ],
+    "bull_summary": [
+      "美元走弱利多美股跨國企業匯兌收益",
+      "油價上行直接推升能源類股獲利預期",
+      "殖利率上行反映經濟需求仍具韌性",
+      "航空物流業享海外營收匯兌獲益",
+      "能源類股受惠油價上行趨勢",
+      "曲線陡化擴大銀行淨利差,JPM 等大行受惠"
+    ],
+    "bear_summary": [
+      "殖利率走高壓抑高估值成長股評價",
+      "油價上行推升通膨、延後 Fed 降息",
+      "利率敏感族群 REITs、公用事業承壓",
+      "高利率環境抑制長存續期資產",
+      "高油價轉嫁能力壓縮運輸獲利",
+      "長天期殖利率上行擴大地區銀行 AFS 債券浮虧"
+    ],
+    "final_take": "綠能板塊面臨利多利空拉鋸，精選高現金流業者為宜",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T09:35:52Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

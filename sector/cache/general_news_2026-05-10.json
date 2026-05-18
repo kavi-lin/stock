@@ -1,0 +1,169 @@
+{
+  "as_of_date": "2026-05-10",
+  "schema_version": "V1.71",
+  "available": true,
+  "limit": 20,
+  "total_articles": 20,
+  "articles": [
+    {
+      "publishedDate": "2026-05-10 09:00:00",
+      "publisher": "Market Watch",
+      "title": "Stocks are walking a tightrope to fresh record highs \u2014 as a handful of names do most of the heavy lifting",
+      "excerpt": "Investors are caught on a tightrope \u2014 watching a very narrow band of tech stocks lift the stock market to fresh record highs, while looking down below for signs of trouble.",
+      "url": "https://www.marketwatch.com/story/stocks-are-walking-a-tightrope-to-fresh-record-highs-as-a-handful-of-names-do-most-of-the-heavy-lifting-fe5a166a",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-10 08:22:02",
+      "publisher": "CNBC",
+      "title": "SEC delay on prediction markets ETFs echoes a long-fought bitcoin fund battle",
+      "excerpt": "The first prediction markets exchange-traded funds were anticipated to launch as early as last week, but the Securities and Exchange Commission delayed approval, a situation evoking memories of the long battle fought over spot bitcoin ETFs during the Biden presidency. Prediction ",
+      "url": "https://www.cnbc.com/2026/05/10/sec-prediction-markets-etfs-trading-launch-delay.html",
+      "site": "cnbc.com"
+    },
+    {
+      "publishedDate": "2026-05-10 08:16:39",
+      "publisher": "Forbes",
+      "title": "Health Insurers Performing Better But There's Potential Trouble Ahead",
+      "excerpt": "Health insurance companies including UnitedHealthcare, CVS Health's Aetna, Centene and Blue Cross and Blue Shield plans owned by Elevance Health are seeing lower costs from patients submitting claims.",
+      "url": "https://www.forbes.com/sites/brucejapsen/2026/05/10/health-insurers-performing-better-but-theres-potential-trouble-ahead/",
+      "site": "forbes.com"
+    },
+    {
+      "publishedDate": "2026-05-10 04:00:00",
+      "publisher": "Barrons",
+      "title": "The Fed Could Keep Rates on Hold Forever. What It Means for Your Cash.",
+      "excerpt": "Increasingly economists are contemplating a scenario where the central bank makes no change to rates.",
+      "url": "https://www.barrons.com/articles/fed-rates-tbills-cash-61393766",
+      "site": "barrons.com"
+    },
+    {
+      "publishedDate": "2026-05-10 03:21:03",
+      "publisher": "Reuters",
+      "title": "Swiss Air CEO says no immediate fuel shortage, eyes contingency plans",
+      "excerpt": "Swiss International Air Lines has sufficient jet fuel supplies for the next six weeks, its CEO \u200btold the NZZ newspaper on Saturday, but is exploring \u200ccontingencies like \"tankering\" amid industry warnings of fuel shortages tied to the Iran war.",
+      "url": "https://www.reuters.com/business/energy/swiss-air-ceo-says-no-immediate-fuel-shortage-eyes-contingency-plans-2026-05-10/",
+      "site": "reuters.com"
+    },
+    {
+      "publishedDate": "2026-05-10 00:30:00",
+      "publisher": "Seeking Alpha",
+      "title": "S&P 500 Snapshot: Index Flirts With 7,400",
+      "excerpt": "The S&P 500 capped the week off with another record high, flirting with the 7,400 milestone. Over the past 20 days, the average percent change from the intraday low to the intraday high is 0.80%.",
+      "url": "https://seekingalpha.com/article/4901856-sp-500-snapshot-index-flirts-with-7400",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 23:00:00",
+      "publisher": "WSJ",
+      "title": "Private Credit Isn't a Major Threat\u2014Probably",
+      "excerpt": "The question is whether trouble in the sector could spill into the wider economy or\u2014disaster\u2014the wider financial system.",
+      "url": "https://www.wsj.com/finance/investing/private-credit-financial-system-6039b39e",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-09 21:45:47",
+      "publisher": "Seeking Alpha",
+      "title": "The 1-Minute Market Report, May 10, 2026",
+      "excerpt": "The equity market is on a 6-week winning streak, with tech\u2014especially the Mag 7 and semiconductors\u2014driving gains. Momentum, high beta, and growth stocks are leading, while value, defensive sectors, and commodities like oil have lagged.",
+      "url": "https://seekingalpha.com/article/4902146-the-1-minute-market-report-may-10-2026",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 12:45:54",
+      "publisher": "Seeking Alpha",
+      "title": "Weekly Commentary: Rapscallions Crowding Out",
+      "excerpt": "The S&P 500 has now rallied 17% from March 30th lows, a relatively feeble rally compared to melt-up dynamics that have taken hold in key indices and markets. Nasdaq 100 has surged almost 28% from March lows, while the MAG7 has jumped 27%.",
+      "url": "https://seekingalpha.com/article/4901985-weekly-commentary-rapscallions-crowding-out",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 10:02:47",
+      "publisher": "Finbold",
+      "title": "Michael Burry warns markets \u2018feeling like the last months' of Dot-com bubble",
+      "excerpt": "Famed investor Michael Burry has warned that the stock market's growing fixation on artificial intelligence is beginning to resemble the final stages of the late 1990s Dot-com bubble.",
+      "url": "https://finbold.com/michael-burry-warns-markets-feeling-like-the-last-months-of-dot-com-bubble/",
+      "site": "finbold.com"
+    },
+    {
+      "publishedDate": "2026-05-09 09:00:00",
+      "publisher": "Market Watch",
+      "title": "The unsinkable U.S. economy cruises on, despite headwinds from the Iran war",
+      "excerpt": "The economy keeps expanding in the face of macro obstacles.",
+      "url": "https://www.marketwatch.com/story/the-unsinkable-u-s-economy-cruises-on-despite-headwinds-from-the-iran-war-dac45af5",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-09 08:45:00",
+      "publisher": "Seeking Alpha",
+      "title": "April Jobs Report: Scratch This Surface",
+      "excerpt": "The labor market report for April was a pleasant surprise, with the unemployment rate unchanged and additions to non-farm payrolls, but scratch below the surface and the weakness begins to show. Continued contraction in the labor force and weak revisions to past non-farm payroll ",
+      "url": "https://seekingalpha.com/article/4901925-april-jobs-report-scratch-this-surface",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 08:30:00",
+      "publisher": "Seeking Alpha",
+      "title": "I Traced The AI Capex, And Found 6 Profit Pools (One Is An Asymmetric Bet)",
+      "excerpt": "AI is fundamentally reshaping the economy, with hyperscalers driving the revolution through massive capex investments. I distinguish between companies benefiting from AI on the cost line (Type A) versus those seeing gains on the revenue line (Type B).",
+      "url": "https://seekingalpha.com/article/4901703-i-traced-the-ai-capex-i-found-6-profit-pools-one-is-an-asymmetric-bet",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 08:01:13",
+      "publisher": "Fox Business",
+      "title": "IRAN ATTACKS & WALL STREET EXODUS: The week that SHOOK the markets | Recap",
+      "excerpt": "It's been a week of high-stakes geopolitics and massive economic shifts. From the escalation in the Middle East to the \"War on Success\" in New York City, FOX Business broke down the biggest stories that defined this week's news cycle.",
+      "url": "https://www.youtube.com/watch?v=frBmVuaq5sU",
+      "site": "youtube.com"
+    },
+    {
+      "publishedDate": "2026-05-09 08:00:56",
+      "publisher": "The Guardian",
+      "title": "Spiritless summer: Americans feel squeeze of costly fuel amid busy travel season",
+      "excerpt": "Soaring oil prices have left many Americans with higher costs and fewer options for travel amid the Iran war",
+      "url": "https://www.theguardian.com/us-news/2026/may/09/travelers-feel-squeeze-summer-travel-iran-war-fuel",
+      "site": "theguardian.com"
+    },
+    {
+      "publishedDate": "2026-05-09 08:00:00",
+      "publisher": "Market Watch",
+      "title": "These smaller tech stocks are punching well above their weight",
+      "excerpt": "Shares of small-cap tech stocks have outperformed their large-cap peers by an extreme magnitude.",
+      "url": "https://www.marketwatch.com/story/these-smaller-tech-stocks-are-punching-well-above-their-weight-acefe98d",
+      "site": "marketwatch.com"
+    },
+    {
+      "publishedDate": "2026-05-09 08:00:00",
+      "publisher": "Seeking Alpha",
+      "title": "5 Numbers The Markets Are Ignoring But Investors Should Not",
+      "excerpt": "The current market rally is dangerously top-heavy, driven by AI names like NVDA, INTC, AMD but with equity concentration at historic bubble levels. Commercial real estate is becoming concerning, especially the multi-family sector, which faces surging delinquency rates and falling",
+      "url": "https://seekingalpha.com/article/4901888-5-numbers-the-markets-are-ignoring-but-investors-should-not",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 07:00:00",
+      "publisher": "WSJ",
+      "title": "China's Cars Aren't in the U.S., but Its Auto Parts Are Everywhere",
+      "excerpt": "Chinese companies have amassed ownership stakes in about 10,000 auto suppliers in America.",
+      "url": "https://www.wsj.com/business/autos/chinas-cars-arent-in-the-u-s-but-its-auto-parts-are-everywhere-9fd408e5",
+      "site": "wsj.com"
+    },
+    {
+      "publishedDate": "2026-05-09 06:35:44",
+      "publisher": "Seeking Alpha",
+      "title": "What Moved Markets This Week",
+      "excerpt": "Wall Street finished the week sharply higher as investors weighed a stronger-than-expected U.S. jobs report, upbeat semiconductor earnings, and escalating geopolitical tensions in the Middle East.",
+      "url": "https://seekingalpha.com/article/4901933-what-moved-markets-this-week",
+      "site": "seekingalpha.com"
+    },
+    {
+      "publishedDate": "2026-05-09 05:02:24",
+      "publisher": "NYTimes",
+      "title": "Which Trump Tariffs Are in Place, in the Works or Ruled Illegal",
+      "excerpt": "The president has reworked his tariffs repeatedly \u2014 sometimes because they have been declared illegal \u2014 with more updates still to come.",
+      "url": "https://www.nytimes.com/2026/05/09/business/economy/trump-tariff-timeline.html",
+      "site": "nytimes.com"
+    }
+  ]
+}

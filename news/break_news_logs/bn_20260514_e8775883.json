@@ -1,0 +1,687 @@
+{
+  "news_id": "bn_20260514_e8775883",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T00:48:00Z",
+  "last_activity_ts": "2026-05-14T00:58:53Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/bb80cccb16e8",
+    "feed_fingerprint": "futu:CSCO:7f683d706c",
+    "published": "2026-05-14T04:11:12+08:00",
+    "url_hash": "sha1:cfb7275f2a3e65070dc843475b7337046c49dd4f"
+  },
+  "headline": "思科盤後漲超11%，2026財年Q3營收158億美元，同比增長12%",
+  "headline_zh": null,
+  "raw_summary": "思科盤後漲超11%，2026財年Q3營收158億美元，同比增長12%；調整後EPS1.06美元，同比增長10%。",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 3.0,
+    "bull_case": "現金流改善空間",
+    "bear_case": "成長放緩風險",
+    "sector_view": "行業內相對強弱",
+    "macro_view": "成本控制關鍵",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:57:06Z",
+      "latency_ms": 23155,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco F3Q26 beat is meaningful — $15.8B revenue +12% YoY is the strongest top-line growth in years, signaling AI infrastructure orders finally converting to revenue. Splunk integration accretive, but the real tell is enterprise networking re-acceleration. AI orders from webscale ($1B+ run-rate guided earlier) now landing in P&L. Read-through bullish for **ANET** (competitive read on Ethernet-for-AI), **JNPR** (HPE deal close pending), and silicon suppliers **AVGO** / **MRVL** (Tomahawk/Jericho switching ASICs ship into Cisco boxes). Optical names **CIEN** / **COHR** benefit from datacenter interconnect pull-through. Watch for ANET reaction — if Cisco won share in Ethernet AI fabric, ANET premium compresses. Sector tailwind for networking; mild headwind for legacy SDN/security pure-plays that Cisco bundles against. EPS +10% < revenue +12% suggests margin pressure from Splunk amortization — monitor mix.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "ANET",
+            "JNPR",
+            "AVGO",
+            "MRVL",
+            "CIEN",
+            "COHR",
+            "HPE",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Ethernet-for-AI",
+            "Enterprise networking refresh",
+            "Datacenter interconnect"
+          ],
+          "tech_keywords": [
+            "Ethernet AI fabric",
+            "Tomahawk",
+            "Jericho",
+            "Silicon One",
+            "800G optics",
+            "Splunk observability"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-networking-orders"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:splunk-integration"
+          },
+          {
+            "subject": "ticker:CIEN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:datacenter-interconnect"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ethernet-for-ai"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Earnings beat + 12% growth signals AI networking inflection. Read-through to ANET/AVGO/MRVL/CIEN clear. Margin watch on Splunk amortization."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:57:28Z",
+      "latency_ms": 21678,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco's robust revenue growth, fueled by AI infrastructure demand and enterprise networking re-acceleration, likely extends to its own integrated security portfolio. While CLAUDE noted Cisco's bundling strategies create headwinds for pure-play security vendors, this demand surge may organically pull through Cisco's security solutions as enterprises increasingly favor unified platforms. The company's ability to cross-sell security alongside booming networking hardware is a key differentiator that could help offset Splunk-related margin pressures and add higher-value recurring revenue.",
+        "entities": {
+          "tickers": [
+            "CSCO"
+          ],
+          "sectors": [
+            "Technology",
+            "Cybersecurity",
+            "Network Infrastructure"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "Enterprise networking",
+            "Integrated security",
+            "Cybersecurity consolidation",
+            "Unified platforms",
+            "Cross-selling",
+            "Recurring revenue"
+          ],
+          "tech_keywords": [
+            "Ethernet-for-AI",
+            "Splunk",
+            "Networking hardware"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI infrastructure demand"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Enterprise networking re-acceleration"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:pure-play security vendors"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:integrated security solutions"
+          },
+          {
+            "subject": "narrative:integrated security solutions",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:demand for unified platforms"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:enterprises seeking unified platforms"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:recurring revenue"
+          }
+        ],
+        "done": true,
+        "confidence": 0.9,
+        "rationale_short": "Focused on Cisco's integrated security strategy and recurring revenue benefits, distinct from component suppliers or pure-play headwinds."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:57:47Z",
+      "latency_ms": 18590,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **power & thermal supply chain** is the under-covered 2nd-order beneficiary. Cisco's 12% growth implies real AI switch shipments — each 51.2T Tomahawk-5/Silicon One box draws 1.5-2kW, demanding 800V HVDC PSUs and liquid-cooling manifolds. Watch **VRT** (Vertiv) for rack-level power/cooling pull-through and **FLEX** (Flextronics) as Cisco's contract manufacturer for switching gear — FLEX's CEC segment is directly levered. Contra to Gemini's security cross-sell thesis: Cisco's security ARR growth has been mid-single-digits for 6 quarters; Splunk is observability, not security primary — the bundle narrative is more marketing than P&L reality. Also flag **co-packaged optics** risk: if Cisco's AI wins use CPO, **LITE** / **FN** transceiver demand bifurcates vs **COHR** integrated optics.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "VRT",
+            "FLEX",
+            "LITE",
+            "FN",
+            "COHR",
+            "ANET"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI datacenter power",
+            "liquid cooling",
+            "co-packaged optics",
+            "contract manufacturing"
+          ],
+          "tech_keywords": [
+            "Tomahawk-5",
+            "Silicon One",
+            "800V HVDC",
+            "CPO",
+            "51.2T switching",
+            "liquid cooling manifold"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_switch_power_density"
+          },
+          {
+            "subject": "ticker:FLEX",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cpo_adoption"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ai_networking_buildout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Power/cooling (VRT) + CM (FLEX) 2nd-order plays untouched; CPO bifurcation risk for optical names; contra Gemini security thesis with ARR data."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:58:17Z",
+      "latency_ms": 30163,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While the focus rightly remains on Cisco's core networking silicon and optics, the substantial growth in AI infrastructure shipments implies a critical, yet often overlooked, beneficiary: the high-bandwidth cabling sector. Each new wave of 800G and future 1.6T ports deployed in AI fabrics necessitates a commensurate increase in specialized, high-integrity cabling. Companies like CommScope (COMM) and Belden (BDC), major players in advanced copper and fiber optic solutions, are poised to benefit significantly from this demand. This infrastructure build-out is essential for maintaining signal integrity across sprawling data centers, making these cabling providers a vital second-order positive for the AI hardware ecosystem.",
+        "entities": {
+          "tickers": [
+            "CISCO",
+            "COMM",
+            "BDC"
+          ],
+          "sectors": [
+            "Communications Equipment",
+            "Technology Hardware, Storage & Peripherals",
+            "Electrical Equipment"
+          ],
+          "themes": [
+            "AI infrastructure build-out",
+            "Data center scaling",
+            "High-speed networking",
+            "Supply chain beneficiaries"
+          ],
+          "tech_keywords": [
+            "800G",
+            "1.6T",
+            "AI fabric",
+            "Data center cabling"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CISCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI infrastructure build-out"
+          },
+          {
+            "subject": "ticker:COMM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:High-bandwidth cabling demand"
+          },
+          {
+            "subject": "ticker:BDC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:High-bandwidth cabling demand"
+          },
+          {
+            "subject": "ticker:CISCO",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:High-bandwidth cabling demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Added cabling infrastructure as a new supply chain beneficiary."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:58:36Z",
+      "latency_ms": 19402,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: **memory-side read-through and channel inventory signal**. Cisco's $15.8B print with +12% YoY implies the enterprise channel finally cleared the 2024 hangover — **ARW** and **SNX** (distributors) get a margin tailwind as backlog converts. More importantly, AI switch ASICs pair with on-package **HBM and high-speed SRAM**: Silicon One G200 and Tomahawk-5 carry deep packet buffers — read-through to **MU** HBM3e allocations and **CRUS/MCHP** for power management ICs around the switch tray. Contra to the bullish networking pile-on: Cisco's **product orders +20%** earlier hinted, but if guidance only matched, the multiple won't rerate — this is a catch-up quarter, not a step-function. Also flag **NTAP/PSTG** negative read: enterprises bundling Cisco AI pods may defer standalone storage refreshes.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "ARW",
+            "SNX",
+            "MU",
+            "CRUS",
+            "MCHP",
+            "NTAP",
+            "PSTG"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Technology Distribution"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "channel inventory normalization",
+            "enterprise networking refresh",
+            "HBM demand"
+          ],
+          "tech_keywords": [
+            "Silicon One G200",
+            "Tomahawk-5",
+            "HBM3e",
+            "deep packet buffer",
+            "PMIC",
+            "51.2T switch"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ARW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-channel-clear"
+          },
+          {
+            "subject": "ticker:SNX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-channel-clear"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          },
+          {
+            "subject": "ticker:NTAP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cisco-ai-pod-bundle"
+          },
+          {
+            "subject": "ticker:PSTG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cisco-ai-pod-bundle"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "Distributor margin recovery, HBM/PMIC silicon read-through, and storage-bundling headwind not raised by either analyst in prior rounds."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:58:53Z",
+      "latency_ms": 16821,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco's strong AI infrastructure revenue growth highlights a critical, often overlooked, beneficiary: advanced semiconductor packaging. The push for higher performance in AI switches, coupled with advanced memory and interconnects, necessitates sophisticated packaging solutions for thermal management and signal integrity. Amkor Technology (AMKR), a leading OSAT provider, stands to gain significantly as chip manufacturers scale production. AMKR's expertise in wafer-level packaging and multi-chip modules is essential for the high-density components powering these networks. This represents a vital second-order supply chain impact from Cisco's substantial AI hardware orders, enabling more powerful and efficient networking infrastructure.",
+        "entities": {
+          "tickers": [
+            "AMKR"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "Semiconductor packaging"
+          ],
+          "tech_keywords": [
+            "OSAT",
+            "HBM",
+            "Advanced Packaging",
+            "Wafer-level packaging"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMKR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Cisco AI infrastructure growth"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces advanced semiconductor packaging (AMKR) as a key second-order beneficiary of Cisco's AI hardware demand, focusing on specialized manufacturing needs."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMKR",
+        "ANET",
+        "ARW",
+        "AVGO",
+        "BDC",
+        "CIEN",
+        "CISCO",
+        "COHR",
+        "COMM",
+        "CRUS",
+        "CSCO",
+        "FLEX",
+        "FN",
+        "HPE",
+        "JNPR",
+        "LITE",
+        "MCHP",
+        "MRVL",
+        "MU",
+        "NTAP",
+        "NVDA",
+        "PSTG",
+        "SNX",
+        "VRT"
+      ],
+      "sectors": [
+        "Communications Equipment",
+        "Cybersecurity",
+        "Electrical Equipment",
+        "Industrials",
+        "Information Technology",
+        "Network Infrastructure",
+        "Semiconductors",
+        "Technology",
+        "Technology Distribution",
+        "Technology Hardware, Storage & Peripherals"
+      ],
+      "themes": [
+        "AI capex",
+        "AI datacenter power",
+        "AI infrastructure",
+        "AI infrastructure build-out",
+        "Cross-selling",
+        "Cybersecurity consolidation",
+        "Data center scaling",
+        "Datacenter interconnect",
+        "Enterprise networking",
+        "Enterprise networking refresh",
+        "Ethernet-for-AI",
+        "HBM demand",
+        "High-speed networking",
+        "Integrated security",
+        "Recurring revenue",
+        "Semiconductor packaging",
+        "Supply chain beneficiaries",
+        "Unified platforms",
+        "channel inventory normalization",
+        "co-packaged optics",
+        "contract manufacturing",
+        "enterprise networking refresh",
+        "liquid cooling"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "51.2T switch",
+        "51.2T switching",
+        "800G",
+        "800G optics",
+        "800V HVDC",
+        "AI fabric",
+        "Advanced Packaging",
+        "CPO",
+        "Data center cabling",
+        "Ethernet AI fabric",
+        "Ethernet-for-AI",
+        "HBM",
+        "HBM3e",
+        "Jericho",
+        "Networking hardware",
+        "OSAT",
+        "PMIC",
+        "Silicon One",
+        "Silicon One G200",
+        "Splunk",
+        "Splunk observability",
+        "Tomahawk",
+        "Tomahawk-5",
+        "Wafer-level packaging",
+        "deep packet buffer",
+        "liquid cooling manifold"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-networking-orders"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:splunk-integration"
+      },
+      {
+        "subject": "ticker:CIEN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:datacenter-interconnect"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ethernet-for-ai"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI infrastructure demand"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Enterprise networking re-acceleration"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:pure-play security vendors"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:integrated security solutions"
+      },
+      {
+        "subject": "narrative:integrated security solutions",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:demand for unified platforms"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:enterprises seeking unified platforms"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:recurring revenue"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_switch_power_density"
+      },
+      {
+        "subject": "ticker:FLEX",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cpo_adoption"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ai_networking_buildout"
+      },
+      {
+        "subject": "ticker:CISCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI infrastructure build-out"
+      },
+      {
+        "subject": "ticker:COMM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:High-bandwidth cabling demand"
+      },
+      {
+        "subject": "ticker:BDC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:High-bandwidth cabling demand"
+      },
+      {
+        "subject": "ticker:CISCO",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:High-bandwidth cabling demand"
+      },
+      {
+        "subject": "ticker:ARW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-channel-clear"
+      },
+      {
+        "subject": "ticker:SNX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-channel-clear"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:NTAP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cisco-ai-pod-bundle"
+      },
+      {
+        "subject": "ticker:PSTG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cisco-ai-pod-bundle"
+      },
+      {
+        "subject": "ticker:AMKR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Cisco AI infrastructure growth"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:58:53Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

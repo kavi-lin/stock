@@ -1,0 +1,543 @@
+{
+  "news_id": "bn_20260517_271316eb",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T17:12:01Z",
+  "last_activity_ts": "2026-05-17T17:14:19Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/taiwan-semiconductor-manufacturing-tsm-one-163857253.html",
+    "feed_fingerprint": "taiwan semiconductor manufacturing tsm one best fundamentally strong",
+    "published": "2026-05-17T16:38:57+00:00",
+    "url_hash": "sha1:3e2a63d96241588bbf6170ed84062649f7f3ee22"
+  },
+  "headline": "Taiwan Semiconductor Manufacturing (TSM): One of the Best Fundamentally Strong Stocks to Buy Now",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T17:12:42Z",
+      "latency_ms": 24600,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是一篇典型「值得買的好股」清單文，本身**無新催化劑**，pre-triage 標 geopolitical 是誤判——內容偏基本面。真正可討論的是 TSM 結構優勢：AI 加速器幾乎全數壓在台積電先進製程與封裝，**N3P 量產順、N2 即將放量**，CoWoS-L 產能仍是 NVDA Blackwell 的瓶頸關鍵，定價權持續轉嫁。風險面則是估值已反映多數樂觀預期、智慧型手機循環疲弱、Arizona 廠成本稀釋毛利，加上地緣與客戶集中度。對市場意義有限,屬**確認既有多頭敘事**,不是新訊號。",
+        "bull_points": [
+          "AI 加速器全壓台積電先進製程,訂單能見度高",
+          "CoWoS-L 封裝產能仍是 Blackwell 出貨瓶頸",
+          "N2 即將放量 + 定價權支撐毛利"
+        ],
+        "bear_points": [
+          "估值已反映樂觀預期,缺新催化劑",
+          "Arizona 海外廠成本稀釋毛利率",
+          "地緣風險 + 客戶集中度偏高"
+        ],
+        "final_take": "看多基本面,但此文無新訊號,不追價",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "NVDA",
+            "AMD",
+            "AAPL",
+            "ASML"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "advanced packaging",
+            "foundry pricing power"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "N3P",
+            "N2",
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:AMD"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "CATALYST_FOR",
+            "object": "tech:cowos-l"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "基本面紮實但此文屬清單文,無新催化劑可交易"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T17:12:52Z",
+      "latency_ms": 10230,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了既有的產能瓶頸，我們更應關注 **TSM** 在客戶資本配置上的權力遊戲。隨著 **NVDA** 與 **AMD** 等大客戶對 CoWoS 產能的需求劇增，TSM 正利用其獨佔地位強制客戶採用更昂貴的技術節點綁定，這不僅是產能稀缺，更是一種**獲利組合的結構性提升**。此外，這導致次級供應鏈中，例如測試載板與散熱模組供應商的利潤結構發生質變，市場低估了這種「生態系稅」對 TSM 毛利率的長期保護效應。",
+        "bull_points": [
+          "TSM 透過技術綁定強化高毛利製程銷售",
+          "生態系定價權確立，有效轉嫁通膨成本",
+          "客戶為確保份額接受更激進的長期合約"
+        ],
+        "bear_points": [
+          "客戶集中度過高，面臨單一產業循環風險",
+          "地緣政治導致美國廠營運成本持續墊高",
+          "若 AI 終端需求成長放緩，庫存修正壓力大"
+        ],
+        "final_take": "TSM 具備獨特生態系定價權，惟需警惕高估值下的成長鈍化風險。",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "NVDA",
+            "AMD"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Supply Chain"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "N3P",
+            "N2"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "themes:AI capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:TSM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補足了關於客戶分配策略對 TSM 議價能力與供應鏈獲利結構的第二階效應。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T17:13:19Z",
+      "latency_ms": 26748,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面兩輪聚焦製程領先與「生態系稅」毛利保護，漏掉一個**反向且可量化**的近期變數：**新台幣升值**。TSM 以新台幣記帳，2025 下半年起 TWD 對美元明顯走強，管理層明確指引——每升值 1%，毛利率約被侵蝕 **0.4 個百分點**。這正好抵銷部分 N2、CoWoS-L 的定價轉嫁紅利。換言之 Gemini 講的「生態系稅」是真的，但匯率正在從另一端課稅。第二序效應是 TSM 2026 年 wafer 漲價有一部分其實是匯率補貼、而非純粹需求定價權——市場若把漲價全記成 pricing power 會高估結構利多。這對清單文的「基本面無敵」敘事是必要的修正註腳。",
+        "bull_points": [
+          "wafer 漲價含匯率補貼，定價機制仍有效",
+          "N2 放量 + CoWoS-L 瓶頸維持議價地位"
+        ],
+        "bear_points": [
+          "TWD 每升 1% 侵蝕毛利率約 0.4pp",
+          "匯率紅利抵銷部分先進製程轉嫁利得",
+          "市場恐把匯率漲價誤記為純定價權"
+        ],
+        "final_take": "結構多頭不變，但匯率正侵蝕毛利、漲價含金量被高估",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "FX headwind"
+          ],
+          "tech_keywords": [
+            "N2",
+            "CoWoS-L",
+            "N3P"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:twd-appreciation"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:wafer-price-hike-2026"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "補匯率反向變數：TWD 升值侵蝕毛利、漲價含金量被高估"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T17:13:33Z",
+      "latency_ms": 14374,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "TSM 在先進製程的統治力無庸置疑，但市場常忽略其成熟製程 (mature nodes) 面臨的結構性壓力。隨著 **SMIC** 與其他中國代工廠在大規模補貼下快速擴張 28nm 及以上節點，TSM 在非 AI 應用領域的定價權正在被侵蝕。這部分業務長期以來是支撐資本支出的現金牛，若成熟製程面臨價格戰，將削弱 TSM 內部融資先進製程擴張的能力，這點在「基本面無敵」的敘事中被嚴重低估。",
+        "bull_points": [
+          "先進製程具備壟斷定價權",
+          "AI 需求驅動長線成長"
+        ],
+        "bear_points": [
+          "成熟製程受陸廠產能競爭",
+          "成熟節點營收流失風險"
+        ],
+        "final_take": "看好 AI 主導地位，但需警惕成熟製程競爭壓力。",
+        "entities": {
+          "tickers": [
+            "TSM"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "mature nodes"
+          ],
+          "tech_keywords": [
+            "N3P",
+            "N2",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "COMPETES_WITH",
+            "object": "competitor:SMIC"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充成熟製程競爭對毛利率的長期結構性風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T17:14:04Z",
+      "latency_ms": 31183,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面談製程、生態系稅、匯率、成熟製程價格戰，漏掉一個會直接咬進 P&L 的**結構性逆風：折舊**。TSM 2026 capex 指引衝上約 **520 億美元**新高，N2、CoWoS-L 與 Arizona 廠的設備折舊在營收完全放量前就先入帳——這是典型**成本前置**。先進製程折舊佔營收比重持續攀升，即便定價權與 N2 溢價真實存在，毛利率上行空間也被折舊曲線壓住，這也是管理層長期毛利率只敢指引 53%+ 的原因。第二序效應：High-NA EUV 單台逾 3.8 億美元、且只有 **ASML** 一家能供，A14 世代資本密度只會更高。所以「基本面無敵」的清單文，應改寫成「現金流強、但毛利被自己的擴張節奏課稅」。",
+        "bull_points": [
+          "N2 溢價與先進封裝定價權支撐長期現金流",
+          "資本密度高反成進入障礙，鞏固獨佔地位"
+        ],
+        "bear_points": [
+          "2026 capex 衝 520 億美元，折舊成本前置入帳",
+          "折舊佔營收比攀升，壓住毛利率上行空間",
+          "High-NA EUV 單台逾 3.8 億美元，A14 資本密度更高"
+        ],
+        "final_take": "長線看多，但 2026 毛利受折舊壓抑，別當無敵股",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "ASML",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "semiconductor depreciation cycle"
+          ],
+          "tech_keywords": [
+            "N2",
+            "CoWoS-L",
+            "High-NA EUV",
+            "A14"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:depreciation-drag"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:ASML"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "折舊前置與 capex 創高為前文未提之可量化毛利逆風"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T17:14:19Z",
+      "latency_ms": 14067,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦財報與製程，忽略了**能源物理瓶頸**。TSM 擴建 CoWoS 與先進製程對電力需求極高，台電供電穩定性與綠能分配已成為實質產能硬上限。若電力配額無法跟上先進封裝擴充速度，不僅限制營收成長，更將衍生額外的電價與升級成本，這對「基本面無敵」的預期構成潛在供應風險。",
+        "bull_points": [
+          "能源管理系統優化有助ESG長期價值"
+        ],
+        "bear_points": [
+          "台電供電吃緊將限制產能擴張上限",
+          "電力調度成本轉嫁可能壓縮毛利"
+        ],
+        "final_take": "產能擴張已面臨電力物理硬限制。",
+        "entities": {
+          "tickers": [
+            "TSM"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "CoWoS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:energy_constraints"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討能源瓶頸對TSM產能的實質限制。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "AMD",
+        "ASML",
+        "NVDA",
+        "TSM"
+      ],
+      "sectors": [
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "FX headwind",
+        "Supply Chain",
+        "advanced packaging",
+        "foundry pricing power",
+        "mature nodes",
+        "semiconductor depreciation cycle"
+      ],
+      "tech_keywords": [
+        "A14",
+        "Blackwell",
+        "CoWoS",
+        "CoWoS-L",
+        "HBM3e",
+        "High-NA EUV",
+        "N2",
+        "N3P"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:AMD"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "CATALYST_FOR",
+        "object": "tech:cowos-l"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "themes:AI capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:twd-appreciation"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:wafer-price-hike-2026"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "COMPETES_WITH",
+        "object": "competitor:SMIC"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:depreciation-drag"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:ASML"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:energy_constraints"
+      }
+    ],
+    "bull_summary": [
+      "AI 加速器全壓台積電先進製程,訂單能見度高",
+      "CoWoS-L 封裝產能仍是 Blackwell 出貨瓶頸",
+      "N2 即將放量 + 定價權支撐毛利",
+      "TSM 透過技術綁定強化高毛利製程銷售",
+      "生態系定價權確立，有效轉嫁通膨成本",
+      "客戶為確保份額接受更激進的長期合約"
+    ],
+    "bear_summary": [
+      "估值已反映樂觀預期,缺新催化劑",
+      "Arizona 海外廠成本稀釋毛利率",
+      "地緣風險 + 客戶集中度偏高",
+      "客戶集中度過高，面臨單一產業循環風險",
+      "地緣政治導致美國廠營運成本持續墊高",
+      "若 AI 終端需求成長放緩，庫存修正壓力大"
+    ],
+    "final_take": "產能擴張已面臨電力物理硬限制。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T17:14:19Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, SUPPLIES_TO; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,634 @@
+{
+  "news_id": "bn_20260513_5e8f37f2",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:16:04Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/warsh-faces-rate-pressure-as-aprils-inflation-spike-leaves-the-fed-with-zero-excuses-9610ddb6?mod=mw_rss_topstories",
+    "feed_fingerprint": "april s inflation spike leaves warsh fed zero",
+    "published": "2026-05-13T20:58:00+00:00",
+    "url_hash": "sha1:10c58c21d527ee5e2ca6bb57c019247c427db2b7"
+  },
+  "headline": "April’s inflation spike leaves Warsh and the Fed zero excuses not to raise rates",
+  "headline_zh": null,
+  "raw_summary": "Bond markets won’t wait for the central bank to combat inflation.",
+  "triage": {
+    "news_type": "monetary_policy",
+    "shallow_score": 2.0,
+    "bull_case": "成本壓力升高",
+    "bear_case": "通膨抑制買氣",
+    "sector_view": "週期股承壓",
+    "macro_view": "實質利率抬升",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:12:57Z",
+      "latency_ms": 19651,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "April CPI hot print + Warsh hawkish tilt = bond market already pricing terminal rate higher. **Duration trade is dead near-term.** Long-end UST selloff steepens curve, repricing risk assets off discounted cash flow. Hits: long-duration tech (unprofitable SaaS, hyper-growth), REITs (XLRE, O, PLD — cap rate expansion), regional banks (held-to-maturity bond marks redux à la SVB). Benefits: money-center banks (JPM, BAC — NIM expansion), energy (XLE, XOM, CVX — inflation hedge + supply-tight), short-duration value, USD strength → headwind for mega-cap multinationals (AAPL, MSFT FX translation). Gold (GLD) bifurcated: real-yield headwind vs. fiscal-credibility bid. Watch 10Y > 4.75% as breakpoint for SPX P/E compression. Mag-7 valuation premium vulnerable if 2026 cut path fully erased. Theme: stagflation-lite return — nominal pricing power > growth optionality.",
+        "entities": {
+          "tickers": [
+            "JPM",
+            "BAC",
+            "WFC",
+            "XOM",
+            "CVX",
+            "XLE",
+            "XLRE",
+            "XLF",
+            "O",
+            "PLD",
+            "GLD",
+            "TLT",
+            "AAPL",
+            "MSFT",
+            "NVDA"
+          ],
+          "sectors": [
+            "Financials",
+            "Energy",
+            "Real Estate",
+            "Information Technology",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "sticky inflation",
+            "rate-cut repricing",
+            "curve steepener",
+            "stagflation-lite",
+            "duration risk",
+            "NIM expansion",
+            "real-yield shock"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nim-expansion"
+          },
+          {
+            "subject": "ticker:XLE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:sticky-inflation"
+          },
+          {
+            "subject": "ticker:XLRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rate-cut-repricing"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:duration-risk"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:real-yield-shock"
+          },
+          {
+            "subject": "sector:Financials",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:curve-steepener"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Hot CPI + Warsh hawkish = bond-led repricing. Curve steepener favors banks/energy, hurts duration (REITs, long-dated tech). Stagflation-lite regime risk."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:13:18Z",
+      "latency_ms": 20283,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Beyond the immediate impact on risk assets and financials, persistent inflation and the prospect of further Fed rate hikes pose a significant, albeit lagged, challenge for capital-intensive, debt-laden sectors like utilities. Companies in the XLU ETF, which rely on substantial leverage for infrastructure investment and expansion, will likely see their borrowing costs escalate. This could compress profit margins and diminish the appeal of their dividend yields against rising risk-free rates, representing a material second-order effect that warrants attention.",
+        "entities": {
+          "tickers": [
+            "XLU"
+          ],
+          "sectors": [
+            "Utilities"
+          ],
+          "themes": [
+            "higher_borrowing_costs",
+            "interest_rate_sensitivity",
+            "dividend_sustainability"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:XLU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher_borrowing_costs"
+          },
+          {
+            "subject": "ticker:XLU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Fed_rate_hikes"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Highlights second-order impact on leveraged utility sector (XLU) from rising borrowing costs and Fed hikes."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:13:39Z",
+      "latency_ms": 21435,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**New angle: EM debt + USD wrecking ball, plus private credit stress.** Prior thread covered DM rates impact but missed the EM sovereign/corporate dollar-debt squeeze. A higher-for-longer USD + UST yields = repeat of 2022 EM FX crisis vector — watch EMB, EEM, and frontier sovereigns (Turkey, Egypt, Argentina rollover risk). Second under-covered node: **private credit / BDC stress** (ARCC, MAIN, BXSL). Floating-rate loan books look like NIM winners on paper, but borrower coverage ratios crack as SOFR resets compound — expect non-accruals to spike with a 2-3 quarter lag. Direct lending vintages from 2024-2025 underwrote to a cut path that's now dead. Also: **CMBS office maturity wall** (~$900B refi 2026-27) becomes uninvestable at 7%+ take-out rates → regional bank CRE exposure (KRE) is the SVB sequel, not just HTM marks.",
+        "entities": {
+          "tickers": [
+            "EMB",
+            "EEM",
+            "ARCC",
+            "MAIN",
+            "BXSL",
+            "KRE"
+          ],
+          "sectors": [
+            "Financials",
+            "Real Estate"
+          ],
+          "themes": [
+            "EM dollar debt stress",
+            "private credit cycle turn",
+            "CMBS refi wall",
+            "stagflation-lite"
+          ],
+          "tech_keywords": [
+            "SOFR reset",
+            "non-accruals",
+            "CRE refi wall"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:EMB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:usd-strength-em-debt"
+          },
+          {
+            "subject": "ticker:ARCC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:private-credit-borrower-stress"
+          },
+          {
+            "subject": "ticker:KRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cmbs-refi-wall"
+          },
+          {
+            "subject": "ticker:BXSL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:sofr-reset-coverage-crack"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Prior thread missed EM dollar-debt vector, BDC/private-credit lagged stress, and CMBS office refi wall as distinct from HTM bank marks."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:15:31Z",
+      "latency_ms": 112102,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The April inflation spike and subsequent Fed rate hike pressure create a significant second-order headwind for the semiconductor equipment (SME) sector. Elevated borrowing costs stemming from higher rates can prompt major chipmakers to delay or reduce capital expenditures for advanced fabrication facilities. Companies like Applied Materials (AMAT) and Lam Research (LRCX), heavily reliant on this CapEx cycle, face potential revenue and growth slowdowns. This nuanced impact on a critical technology supply chain deserves attention, distinct from broader market or utility sector concerns previously raised.",
+        "entities": {
+          "tickers": [
+            "AMAT",
+            "LRCX"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "Semiconductor CapEx",
+            "High-interest-rate environment",
+            "Inflationary pressures"
+          ],
+          "tech_keywords": [
+            "Semiconductor manufacturing equipment",
+            "Wafer fabrication"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:High-interest-rate environment"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:High-interest-rate environment"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Identifies a new second-order effect on semiconductor equipment manufacturers due to rising interest rates impacting chipmaker CapEx."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:15:50Z",
+      "latency_ms": 18417,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**Munis + insurer ALM crack — under-covered.** Prior thread hit banks/CMBS/private credit, but missed **municipal bond market dysfunction**. Higher-for-longer kills muni issuance economics (TFI, MUB) just as state/local pension funding ratios re-stress on duration losses. Watch Illinois, NJ GO spreads widening. Second node: **life insurer ALM mismatch redux** — MET, PRU, LNC sit on commercial mortgage whole loans + private placements marked to a dead 2026-cut curve. Variable annuity hedging desks face gamma squeeze if SPX vol regime-shifts on 10Y > 4.75%. Third: **homebuilder mortgage rate-buydown subsidy economics** (DHL, LEN, KBH) — incentive cost was ~6% of ASP at 7% mortgages; at 7.5%+, builder margin compression accelerates while cancellation rates climb. The buydown game has a math limit.",
+        "entities": {
+          "tickers": [
+            "TFI",
+            "MUB",
+            "MET",
+            "PRU",
+            "LNC",
+            "DHI",
+            "LEN",
+            "KBH"
+          ],
+          "sectors": [
+            "Municipals",
+            "Insurance",
+            "Homebuilders"
+          ],
+          "themes": [
+            "muni dysfunction",
+            "insurer ALM mismatch",
+            "mortgage buydown ceiling",
+            "higher-for-longer"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:TFI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher-for-longer"
+          },
+          {
+            "subject": "ticker:MET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:insurer-alm-mismatch"
+          },
+          {
+            "subject": "ticker:PRU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:insurer-alm-mismatch"
+          },
+          {
+            "subject": "ticker:LNC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:insurer-alm-mismatch"
+          },
+          {
+            "subject": "ticker:DHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-buydown-ceiling"
+          },
+          {
+            "subject": "ticker:LEN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-buydown-ceiling"
+          },
+          {
+            "subject": "ticker:KBH",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-buydown-ceiling"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Munis, life insurer ALM, and homebuilder rate-buydown math are three distinct under-covered nodes not touched by prior rounds on banks/CMBS/SME/utilities/EM/private-credit."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:16:04Z",
+      "latency_ms": 14511,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The persistent inflation and hawkish Fed outlook imply a higher cost of capital, directly impacting the economics of aggressive AI infrastructure build-out. Companies like NVIDIA and AMD, whose growth relies on sustained demand for advanced AI compute and memory, face increased financing expenses for their massive CapEx plans. This could temper demand for critical components such as HBM3e and advanced packaging like CoWoS-L, potentially leading to a valuation reassessment for firms whose expansion is predicated on continuous AI capability scaling. This highlights a direct financial constraint on the AI investment cycle, beyond just equipment supply.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "cost of capital for AI"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher_interest_rates"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher_interest_rates"
+          },
+          {
+            "subject": "narrative:ai_capex",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher_interest_rates"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:blackwell"
+          },
+          {
+            "subject": "narrative:hbm3e",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai_capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "New angle on AI infrastructure financing costs impacting demand for advanced components."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "AMAT",
+        "AMD",
+        "ARCC",
+        "BAC",
+        "BXSL",
+        "CVX",
+        "DHI",
+        "EEM",
+        "EMB",
+        "GLD",
+        "JPM",
+        "KBH",
+        "KRE",
+        "LEN",
+        "LNC",
+        "LRCX",
+        "MAIN",
+        "MET",
+        "MSFT",
+        "MUB",
+        "NVDA",
+        "O",
+        "PLD",
+        "PRU",
+        "TFI",
+        "TLT",
+        "WFC",
+        "XLE",
+        "XLF",
+        "XLRE",
+        "XLU",
+        "XOM"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Energy",
+        "Financials",
+        "Homebuilders",
+        "Information Technology",
+        "Insurance",
+        "Municipals",
+        "Real Estate",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "CMBS refi wall",
+        "EM dollar debt stress",
+        "High-interest-rate environment",
+        "Inflationary pressures",
+        "NIM expansion",
+        "Semiconductor CapEx",
+        "cost of capital for AI",
+        "curve steepener",
+        "dividend_sustainability",
+        "duration risk",
+        "higher-for-longer",
+        "higher_borrowing_costs",
+        "insurer ALM mismatch",
+        "interest_rate_sensitivity",
+        "mortgage buydown ceiling",
+        "muni dysfunction",
+        "private credit cycle turn",
+        "rate-cut repricing",
+        "real-yield shock",
+        "stagflation-lite",
+        "sticky inflation"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "CRE refi wall",
+        "CoWoS-L",
+        "HBM3e",
+        "SOFR reset",
+        "Semiconductor manufacturing equipment",
+        "Wafer fabrication",
+        "non-accruals"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nim-expansion"
+      },
+      {
+        "subject": "ticker:XLE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:sticky-inflation"
+      },
+      {
+        "subject": "ticker:XLRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rate-cut-repricing"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:duration-risk"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:real-yield-shock"
+      },
+      {
+        "subject": "sector:Financials",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:curve-steepener"
+      },
+      {
+        "subject": "ticker:XLU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher_borrowing_costs"
+      },
+      {
+        "subject": "ticker:XLU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Fed_rate_hikes"
+      },
+      {
+        "subject": "ticker:EMB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:usd-strength-em-debt"
+      },
+      {
+        "subject": "ticker:ARCC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:private-credit-borrower-stress"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cmbs-refi-wall"
+      },
+      {
+        "subject": "ticker:BXSL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:sofr-reset-coverage-crack"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:High-interest-rate environment"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:High-interest-rate environment"
+      },
+      {
+        "subject": "ticker:TFI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher-for-longer"
+      },
+      {
+        "subject": "ticker:MET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:insurer-alm-mismatch"
+      },
+      {
+        "subject": "ticker:PRU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:insurer-alm-mismatch"
+      },
+      {
+        "subject": "ticker:LNC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:insurer-alm-mismatch"
+      },
+      {
+        "subject": "ticker:DHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-buydown-ceiling"
+      },
+      {
+        "subject": "ticker:LEN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-buydown-ceiling"
+      },
+      {
+        "subject": "ticker:KBH",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-buydown-ceiling"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher_interest_rates"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher_interest_rates"
+      },
+      {
+        "subject": "narrative:ai_capex",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher_interest_rates"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:blackwell"
+      },
+      {
+        "subject": "narrative:hbm3e",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai_capex"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:16:04Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR; gemini-only: SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

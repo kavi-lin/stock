@@ -1,0 +1,236 @@
+{
+  "news_id": "bn_20260515_6ae9aea0",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T15:20:22Z",
+  "last_activity_ts": "2026-05-15T15:31:26Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/d22a34702b51",
+    "feed_fingerprint": "futu:AAPL:0fbd5acff2",
+    "published": "2026-05-15T23:15:03+08:00",
+    "url_hash": "sha1:908db43fe579bedf090cda1c60a298a66976fbab"
+  },
+  "headline": "蘋果股價逆勢上漲1.35%，報302.22美元/股，股價創歷史新高，總市值報4.44萬億美元",
+  "headline_zh": null,
+  "raw_summary": "蘋果股價逆勢上漲1.35%，報302.22美元/股，股價創歷史新高，總市值報4.44萬億美元。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:31:12Z",
+      "latency_ms": 7025,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 713,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "d780f447-59c6-407e-95ed-0cad0757b62c",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "88d4677e-c668-4263-a904-38582613b2bc"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:31:22Z",
+      "latency_ms": 9966,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "蘋果市值突破4.44萬億美元不僅是硬體銷售的功勞，市場更在押注 **Apple Intelligence** 在服務端的變現能力。相較於競爭對手在 AI 基礎設施的高額資本支出，蘋果採取生態系整合策略，將 AI 融入裝置端，這可能降低對單一硬體週期性的依賴。未來關鍵在於其訂閱制服務能否透過 AI 加值，進一步拉升平均每用戶貢獻度，這才是支撐高估值的關鍵結構性驅動力。",
+        "bull_points": [
+          "裝置端AI落地提升生態系黏著度",
+          "服務業務高毛利受惠於 AI 加值",
+          "市值規模持續吸引長線資金配置"
+        ],
+        "bear_points": [
+          "AI功能若無顯著體驗提升恐影響換機",
+          "反壟斷壓力可能影響服務收入占比",
+          "硬體硬需求受總經環境波動影響"
+        ],
+        "final_take": "股價創高後，下階段焦點在於AI服務變現效率。",
+        "entities": {
+          "tickers": [
+            "AAPL"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Apple Intelligence"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Apple Intelligence"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "深入剖析 AAPL 市值創高背後的 AI 變現策略與結構性挑戰。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:31:26Z",
+      "latency_ms": 3736,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 536,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "30c35985-a3eb-413a-97a4-9328acaeae29",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "e679bf29-1432-43af-be3a-def4a4068bf1"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sectors": [
+        "Technology"
+      ],
+      "themes": [
+        "AI capex"
+      ],
+      "tech_keywords": [
+        "Apple Intelligence"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Apple Intelligence"
+      }
+    ],
+    "bull_summary": [
+      "裝置端AI落地提升生態系黏著度",
+      "服務業務高毛利受惠於 AI 加值",
+      "市值規模持續吸引長線資金配置"
+    ],
+    "bear_summary": [
+      "AI功能若無顯著體驗提升恐影響換機",
+      "反壟斷壓力可能影響服務收入占比",
+      "硬體硬需求受總經環境波動影響"
+    ],
+    "final_take": "股價創高後，下階段焦點在於AI服務變現效率。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T15:31:26Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T15:31:12Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T15:31:26Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

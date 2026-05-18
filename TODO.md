@@ -6,6 +6,12 @@
 
 ## 🎯 活動 Backlog (Pending)
 
+### 路線 BN — Break News source expansion
+
+- [ ] **[BN-1]** Optional paid/token adapters：X recent search / Product Hunt / official Google Trends API alpha。只在 user 提供 token 或明確接受成本後接入。
+- [ ] **[BN-2]** Stocktwits adapter：等 developer registration reopen 或確認現有可用 credential 後再做。
+- [ ] **[BN-3]** Social source quality backtest：比較社群 raw item 被手動辯論後的 verdict hit-rate，調 `BREAK_NEWS_SOCIAL_GATE_MIN_SCORE`。
+
 ### 路線 V20 — V2.20 規劃 ⭐ 焦點
 
 **前提**：V2.18 (Structural Shift Modulation) + V2.19 (Lane Cross-Talk Wiring) + V2.19.1 (Watchlist Archival) + V2.19.2 (UI ⚡ + Backtest forward returns + Theme heat bonus) 已完工。下一階段 **聚焦 UI 補齊 + Backtest 深化**，**不搶做需 backtest 結果的功能**。

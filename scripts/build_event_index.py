@@ -127,6 +127,11 @@ def compute_reality_for_ticker(ticker: str, decision_date: date, eval_date: date
     e_key, p_eval = closest_price(prices, eval_date, "before")
     if p_dec is None or p_eval is None:
         return None
+    # V2.17.22 — when eval price falls back to decision-day bar (yfinance
+    # has no later bar yet), the window is genuinely incomplete. Treat as
+    # pending so verdict layer downgrades it.
+    if e_key == d_key:
+        return None
 
     in_window = {k: v for k, v in prices.items() if d_key <= k <= (e_key or d_key)}
     if not in_window:
@@ -276,6 +281,91 @@ EXTRACTOR_DISPATCH = {
 }
 
 
+# Rec 8 (V2.17.16) — industry rollup so REVIEW can surface "CPU/memory: 3 ticker / +63% miss"
+# instead of only ticker-level repeat-miss lists.
+def _build_industry_rollup(records: list[dict]) -> list[dict]:
+    """Group deep-dive records by sub_industry_heat.ticker_industry (fallback to
+    ticker_sector). Returns rows sorted by descending count."""
+    buckets: dict[str, dict] = {}
+    for r in records:
+        if r.get("source") != "deep-dive":
+            continue
+        th = r.get("tuning_hooks") or {}
+        heat = th.get("sub_industry_heat") or {}
+        key = heat.get("ticker_industry") or heat.get("ticker_sector") or "Unknown"
+        b = buckets.setdefault(key, {
+            "industry":              key,
+            "sector":                heat.get("ticker_sector"),
+            "n":                     0,
+            "hit":                   0,
+            "miss":                  0,
+            "neutral":               0,
+            "pending":               0,
+            "tickers":               set(),
+            "miss_returns":          [],
+            "industry_top_30pct":    heat.get("industry_top_30pct"),
+            "sector_top_3":          heat.get("sector_top_3"),
+            "sector_composite_score": heat.get("sector_composite_score"),
+        })
+        b["n"] += 1
+        if r.get("tickers"):
+            b["tickers"].add(r["tickers"][0])
+        v = (r.get("verdict") or {}).get("label") or "n/a"
+        if v in ("hit", "miss", "neutral", "pending"):
+            b[v] = b.get(v, 0) + 1
+        if v == "miss":
+            rl = ((r.get("reality_at_eval") or {}).get("ticker_reality") or {})
+            ret = rl.get("return_pct")
+            if ret is not None:
+                b["miss_returns"].append(round(float(ret), 2))
+
+    rows = []
+    for b in buckets.values():
+        n = b["n"]
+        miss = b.get("miss", 0)
+        miss_returns = b["miss_returns"]
+        rows.append({
+            "industry":               b["industry"],
+            "sector":                 b["sector"],
+            "n":                      n,
+            "hit":                    b.get("hit", 0),
+            "miss":                   miss,
+            "neutral":                b.get("neutral", 0),
+            "pending":                b.get("pending", 0),
+            "miss_rate":              round(miss / n, 3) if n else None,
+            "tickers":                sorted(b["tickers"]),
+            "avg_miss_return_pct":    round(sum(miss_returns) / len(miss_returns), 2) if miss_returns else None,
+            "max_miss_return_pct":    max(miss_returns) if miss_returns else None,
+            "industry_top_30pct":     b["industry_top_30pct"],
+            "sector_top_3":           b["sector_top_3"],
+            "sector_composite_score": b["sector_composite_score"],
+        })
+    rows.sort(key=lambda r: (-r["n"], -(r["miss"] or 0)))
+    return rows
+
+
+def _load_adjustment_ledger() -> list[dict]:
+    """Read reports/decision_review/ADJUSTMENT_LEDGER.md and surface active
+    Rec entries' summary header so REVIEW pass can evaluate them. Format-tolerant:
+    we only look for ## Rec N ... blocks with status: active."""
+    ledger = ROOT / "reports/decision_review/ADJUSTMENT_LEDGER.md"
+    if not ledger.exists():
+        return []
+    text = ledger.read_text(encoding="utf-8")
+    entries: list[dict] = []
+    blocks = re.split(r"\n## (?=Rec )", text)
+    for blk in blocks[1:]:
+        first = blk.splitlines()[0].strip()
+        meta: dict = {"title": first}
+        for k in ("applied_date", "applied_version", "status", "target_metric", "rec_source"):
+            m = re.search(rf"^- \*\*{k}\*\*:\s*(.+)$", blk, re.MULTILINE)
+            if m:
+                meta[k] = m.group(1).strip().rstrip("`").lstrip("`")
+        if (meta.get("status") or "").lower() == "active":
+            entries.append(meta)
+    return entries
+
+
 def main(today: date):
     print(f"Building event_index (today = {today})", file=sys.stderr)
     sources = discover_sources()
@@ -302,11 +392,16 @@ def main(today: date):
             except Exception as e:
                 print(f"  !! {p.name}: {e}", file=sys.stderr)
 
+    industry_rollup = _build_industry_rollup(out_records)
+    adjustment_ledger = _load_adjustment_ledger()
+
     out = {
-        "version": "1.0",
+        "version": "1.1",
         "generated_at": datetime.now().isoformat(),
         "today": today.isoformat(),
         "decision_count": len(out_records),
+        "industry_rollup": industry_rollup,
+        "adjustment_ledger_active": adjustment_ledger,
         "decisions": out_records,
     }
     out_dir = ROOT / "reports/decision_review"

@@ -1,0 +1,306 @@
+{
+  "news_id": "bn_20260514_4bfe0dca",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:31:05Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/658fcf992958",
+    "feed_fingerprint": "futu:AVGO,NVDA,TSM:5ccab78404",
+    "published": "2026-05-14T22:43:20+08:00",
+    "url_hash": "sha1:f2bc923f140fba3c5aa03c1420dad3cf198bd852"
+  },
+  "headline": "美股部分半導體股漲勢擴大，邁威爾科技、台積電漲超5%，英偉達漲超4%，盤中股價均創歷史新高",
+  "headline_zh": null,
+  "raw_summary": "美股部分半導體股漲勢擴大，邁威爾科技、台積電漲超5%，英偉達漲超4%，盤中股價均創歷史新高；博通漲近5%逼近歷史高位。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:30:45Z",
+      "latency_ms": 4638,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 701,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "9373e2d0-35a2-4ce2-8d38-2a4d7ac9ae4b",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "32ae87fa-288e-4ca2-a962-ded777084b63"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:31:00Z",
+      "latency_ms": 15114,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "美股半導體股延續強勢，英偉達、台積電、邁威爾、博通紛紛創下新高。值得注意的是，邁威爾科技（MRVL）的亮眼表現，突顯了市場對AI數據中心客製化晶片（ASIC）及高效能網路解決方案的需求日趨強勁。這不僅是GPU獨霸的局面，更顯示AI基礎設施支出正朝向更多元化的供應鏈擴展，為整體AI生態系注入新動能。",
+        "bull_points": [
+          "邁威爾表現反映AI基建需求多元化",
+          "客製化AI晶片市場潛力巨大"
+        ],
+        "bear_points": [
+          "半導體估值普遍偏高",
+          "地緣政治風險仍存"
+        ],
+        "final_take": "AI支出廣度擴張，但需警惕估值過熱",
+        "entities": {
+          "tickers": [
+            "MRVL",
+            "TSM",
+            "NVDA",
+            "AVGO"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware & Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Custom Silicon",
+            "Data Center Infrastructure"
+          ],
+          "tech_keywords": [
+            "AI chips",
+            "networking solutions"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:Data Center Infrastructure"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:AI chips"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keywords:networking solutions"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦邁威爾，擴大AI基建多元性分析"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:31:05Z",
+      "latency_ms": 5322,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 631,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "d9d3bdbd-a160-4260-b830-32023895d20b",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "00dd2d9a-b5d3-4d56-9aac-043b81f48092"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AVGO",
+        "MRVL",
+        "NVDA",
+        "TSM"
+      ],
+      "sectors": [
+        "Semiconductors",
+        "Technology Hardware & Equipment"
+      ],
+      "themes": [
+        "AI capex",
+        "Custom Silicon",
+        "Data Center Infrastructure"
+      ],
+      "tech_keywords": [
+        "AI chips",
+        "networking solutions"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:Data Center Infrastructure"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:AI chips"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keywords:networking solutions"
+      }
+    ],
+    "bull_summary": [
+      "邁威爾表現反映AI基建需求多元化",
+      "客製化AI晶片市場潛力巨大"
+    ],
+    "bear_summary": [
+      "半導體估值普遍偏高",
+      "地緣政治風險仍存"
+    ],
+    "final_take": "AI支出廣度擴張，但需警惕估值過熱",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:31:05Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, SUPPLIES_TO"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:30:45Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:31:05Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

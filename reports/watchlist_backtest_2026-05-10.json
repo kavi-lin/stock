@@ -1,0 +1,169 @@
+{
+  "as_of": "2026-05-10",
+  "n_tickers": 7,
+  "stats": {
+    "confirmed": [
+      {
+        "ticker": "MU",
+        "lead_days": 17,
+        "sector": "Memory Semiconductors"
+      }
+    ],
+    "candidate": [
+      {
+        "ticker": "NVDA",
+        "lead_days": 17,
+        "sector": "Memory Semiconductors"
+      }
+    ],
+    "still_active": [
+      {
+        "ticker": "TSM",
+        "continued_count": 0,
+        "sector": "Memory Semiconductors"
+      },
+      {
+        "ticker": "ASML",
+        "continued_count": 0,
+        "sector": "Memory Semiconductors"
+      },
+      {
+        "ticker": "DELL",
+        "continued_count": 0,
+        "sector": "Memory Semiconductors"
+      },
+      {
+        "ticker": "WDC",
+        "continued_count": 0,
+        "sector": "Memory Semiconductors"
+      },
+      {
+        "ticker": "STX",
+        "continued_count": 0,
+        "sector": "Memory Semiconductors"
+      }
+    ],
+    "evicted": []
+  },
+  "forward_returns": {
+    "TSM": {
+      "r_5d": 2.53,
+      "r_15d": 7.58,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": 2.07,
+      "alpha_spy_15d": 3.47,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": 3.05,
+      "alpha_sector_15d": -10.4,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 382.66,
+      "_status": "partial"
+    },
+    "NVDA": {
+      "r_5d": 6.78,
+      "r_15d": 7.79,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": 6.32,
+      "alpha_spy_15d": 3.68,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": 7.3,
+      "alpha_sector_15d": -10.19,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 199.64,
+      "_status": "partial"
+    },
+    "ASML": {
+      "r_5d": -2.34,
+      "r_15d": 12.29,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": -2.8,
+      "alpha_spy_15d": 8.17,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": -1.83,
+      "alpha_sector_15d": -5.69,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 1417.8,
+      "_status": "partial"
+    },
+    "MU": {
+      "r_5d": 4.69,
+      "r_15d": 55.03,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": 4.23,
+      "alpha_spy_15d": 50.91,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": 5.2,
+      "alpha_sector_15d": 37.05,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 481.72,
+      "_status": "partial"
+    },
+    "DELL": {
+      "r_5d": -2.93,
+      "r_15d": 22.78,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": -3.38,
+      "alpha_spy_15d": 18.66,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": -2.41,
+      "alpha_sector_15d": 4.8,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 212.14,
+      "_status": "partial"
+    },
+    "WDC": {
+      "r_5d": -3.01,
+      "r_15d": 19.07,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": -3.47,
+      "alpha_spy_15d": 14.95,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": -2.49,
+      "alpha_sector_15d": 1.09,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 403.12,
+      "_status": "partial"
+    },
+    "STX": {
+      "r_5d": -1.46,
+      "r_15d": 33.19,
+      "r_45d": null,
+      "r_90d": null,
+      "alpha_spy_5d": -1.92,
+      "alpha_spy_15d": 29.07,
+      "alpha_spy_45d": null,
+      "alpha_spy_90d": null,
+      "alpha_sector_5d": -0.94,
+      "alpha_sector_15d": 15.21,
+      "alpha_sector_45d": null,
+      "alpha_sector_90d": null,
+      "sector_etf": "SOXX",
+      "base_close": 587.62,
+      "_status": "partial"
+    }
+  }
+}

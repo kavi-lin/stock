@@ -1,0 +1,504 @@
+{
+  "news_id": "bn_20260515_7b55fb77",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T14:04:35Z",
+  "last_activity_ts": "2026-05-15T14:24:32Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/917f11e7602c",
+    "feed_fingerprint": "futu:AMD,BIDU,INTC,NVDA:5958bf1767",
+    "published": "2026-05-15T21:30:57+08:00",
+    "url_hash": "sha1:ed54d5f83a13ef2539b8e497d89a661b8cee327f"
+  },
+  "headline": "道指開市跌0.27%，納指跌1.3%，標普500跌0.75%",
+  "headline_zh": null,
+  "raw_summary": "道指開市跌0.27%，納指跌1.3%，標普500跌0.75%。明星科技股英特爾跌5.3%，美國超微公司跌3.64%，英偉達跌2.54%。納斯達克中國金龍指數跌1.71%，百度跌3.83%，嗶哩嗶哩跌3.74%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:22:46Z",
+      "latency_ms": 25068,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "今日跌勢**集中在科技與半導體**——道指僅跌0.27%、標普跌0.75%，但納指跌1.3%，呈現明顯的**指數分歧**。領跌的是半導體：INTC跌5.3%、AMD跌3.64%、NVDA跌2.54%,跌幅與市值權重成正比,屬於 **AI capex 估值獲利了結**而非基本面惡化。值得注意的是中國金龍指數同步跌1.71%(BIDU、BILI領跌),顯示弱勢同時觸及**中概股風險溢價**。開市跳空尚未確認方向,需觀察尾盤是否收復——若道指守穩、半導體單獨破位,則更像板塊輪動而非系統性 risk-off。",
+        "bull_points": [
+          "道指僅跌0.27%,大盤未現系統性恐慌",
+          "半導體回調屬估值消化,基本面未變",
+          "跌勢集中科技,防禦與價值股相對抗跌"
+        ],
+        "bear_points": [
+          "AI capex 領導股同步走弱,動能轉弱訊號",
+          "中概股與美科技同跌,風險偏好全面收縮",
+          "開市跳空低開,尾盤恐擴大賣壓"
+        ],
+        "final_take": "板塊輪動偏空,需看半導體尾盤能否止穩",
+        "entities": {
+          "tickers": [
+            "INTC",
+            "AMD",
+            "NVDA",
+            "BIDU",
+            "BILI"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "China ADR risk",
+            "sector rotation"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-capex-derating"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-capex-derating"
+          },
+          {
+            "subject": "ticker:INTC",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:semiconductor-selloff"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-adr-risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.6,
+        "rationale_short": "半導體領跌,大盤分歧,屬輪動非系統性崩跌"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:22:59Z",
+      "latency_ms": 13161,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了估值修正，本次納指領跌反映了市場對「利率高位震盪」的重新定價。高本益比科技股對無風險利率的敏感度極高，即便基本面如 HBM3e 需求依舊強勁，宏觀流動性緊縮預期仍迫使資金進行防禦性輪動。當下科技板塊的下跌更像是對利率路徑的敏感性測試，而非產業結構出現質變。需觀察債市波動是否平復，作為確認反彈的指標。",
+        "bull_points": [
+          "AI 產業需求剛性強，結構性成長未變。",
+          "半導體板塊下跌提供長期資產重新配置機會。"
+        ],
+        "bear_points": [
+          "利率預期持續不確定，科技股短期壓力大。",
+          "資金流向防禦類股，加劇成長股修正風險。"
+        ],
+        "final_take": "市場正在進行宏觀折價，科技股短期波動難免。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "INTC"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "interest rate risk"
+          ],
+          "tech_keywords": [
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入「利率敏感度」機制，說明納指與道指分歧原因。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:23:33Z",
+      "latency_ms": 34508,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前序把 INTC、AMD、NVDA 一起歸為「**AI capex 估值獲利了結**」其實是分類錯誤。INTC 不在 Blackwell/HBM3e 供應鏈,本益比已是 turnaround 等級的低檔,對無風險利率敏感度遠低於高倍數成長股——它跌 5.3% **跑贏大盤跌幅一倍以上**,更像是 18A 製程良率與代工接單的**個股 idiosyncratic 風險**,而非板塊 de-rating。真正的 AI capex 標的是 AMD、NVDA。把 INTC 混入同一籃會誤判訊號。另一面看,道指僅跌 0.27% 代表 value/equal-weight 仍撐住,RSP 相對 SPY 的廣度未破,系統性 risk-off 證據不足。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:23:44Z",
+      "latency_ms": 10342,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前兩輪分析集中於宏觀與個股，但忽略了**AI權重股動能一致性（momentum consensus）的崩解**。當 NVDA 與 AMD 同步回落，反映的不僅是利率風險，而是**高集中度（high-concentration）趨勢交易的籌碼鬆動**。即使基本面如 HBM3e 需求未變，交易層面的擁擠（positioning crowding）導致資金在短線波動中出現一致性拋售，這造成了科技股相對於價值股（道指）的非理性溢價收斂。此外，中概股（BIDU、BILI）的同步走弱，顯示全球資金正進行全面的流動性收縮，非僅限於 AI 板塊。",
+        "bull_points": [
+          "道指守穩代表價值股具支撐。",
+          "半導體基本面需求結構未變。"
+        ],
+        "bear_points": [
+          "高集中度導致籌碼鬆動，加劇波動。",
+          "科技股擁擠交易正經歷去槓桿。"
+        ],
+        "final_take": "動能交易籌碼面臨修正，短期波動加劇，觀察美債殖利率平復狀況。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "BIDU",
+            "BILI"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Concentration risk"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:concentration_risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出科技股「高擁擠度交易」與「籌碼修正」這一市場結構性新觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:24:17Z",
+      "latency_ms": 33184,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的**對照組訊號**:這則推播的輸家名單**全是晶片端**(INTC/AMD/NVDA),卻沒有任何超大型雲端股(MSFT/GOOGL/META/AMZN)。若真是 **AI capex** 敘事 de-rating,買晶片的 hyperscaler 理應同步領跌——它們缺席,反證這是**晶片供給側的個股/籌碼事件**,而非需求面崩解,支持 CLAUDE 的板塊輪動論。真正的診斷節點是 **TSM 與 CoWoS-L 封裝產能**:若台積電 ADR 守穩,代表 NVDA 回落是 positioning 而非訂單轉弱;若 TSM 同步破位才需警惕。建議盯 TSM、AMAT/LRCX 半導體設備股作為二階確認,而非只看指數。",
+        "bull_points": [
+          "雲端股 MSFT/GOOGL/META 缺席輸家名單,需求未動搖",
+          "跌勢侷限晶片供給側,非 AI 終端需求崩解",
+          "TSM 守穩即可確認 NVDA 回落屬籌碼非訂單"
+        ],
+        "bear_points": [
+          "若 TSM ADR 同步破位則 supply chain 全面轉弱",
+          "半導體設備股 AMAT/LRCX 若領跌代表 capex 真降溫"
+        ],
+        "final_take": "看多晶片需求,但需 TSM 守穩確認非訂單轉弱",
+        "entities": {
+          "tickers": [
+            "INTC",
+            "AMD",
+            "NVDA",
+            "TSM",
+            "MSFT",
+            "GOOGL",
+            "META",
+            "AMAT",
+            "LRCX",
+            "BIDU",
+            "BILI"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cowos-l"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "雲端股缺席輸家名單+TSM/設備股為二階診斷節點,前序未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:24:32Z",
+      "latency_ms": 15117,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論正確區分了硬體與雲端巨頭的差異。補充一個視角：目前軟體與 SaaS 板塊（如 MSFT、CRM）相對硬體（NVDA/AMD）的抗跌性，顯示市場並非在進行「去 AI 化」或利率敏感型拋售，而是在區分「AI 資本支出（硬體）」與「AI 變現能力（軟體）」。硬體端的獲利了結與產能緊繃效應，迫使資金流向估值雖高但現金流穩定、且不受硬體產能瓶頸影響的軟體服務商。這並非全面的科技股修正，而是硬體基礎建設的階段性估值回調。",
+        "bull_points": [
+          "軟體與雲端服務股展現較強抗跌韌性",
+          "AI 變現能力板塊成為避險成長標的"
+        ],
+        "bear_points": [
+          "硬體供應鏈短期籌碼風險尚未出清",
+          "CoWoS 產能瓶頸仍是半導體短期估值壓制因素"
+        ],
+        "final_take": "硬體端經歷籌碼洗盤，市場資金正集中轉進 AI 軟體變現潛力股。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "INTC",
+            "MSFT",
+            "CRM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "AI monetization"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AMD"
+          },
+          {
+            "subject": "sector:Information Technology",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "市場未全面拋售成長股，而是出現硬體與軟體的二元分化，軟體標的顯示抗跌。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "AMD",
+        "BIDU",
+        "BILI",
+        "CRM",
+        "GOOGL",
+        "INTC",
+        "LRCX",
+        "META",
+        "MSFT",
+        "NVDA",
+        "TSM"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Information Technology",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI monetization",
+        "China ADR risk",
+        "Concentration risk",
+        "interest rate risk",
+        "sector rotation"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "CoWoS-L",
+        "HBM3e"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-capex-derating"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-capex-derating"
+      },
+      {
+        "subject": "ticker:INTC",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:semiconductor-selloff"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-adr-risk"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:concentration_risk"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cowos-l"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AMD"
+      },
+      {
+        "subject": "sector:Information Technology",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI capex"
+      }
+    ],
+    "bull_summary": [
+      "道指僅跌0.27%,大盤未現系統性恐慌",
+      "半導體回調屬估值消化,基本面未變",
+      "跌勢集中科技,防禦與價值股相對抗跌",
+      "AI 產業需求剛性強，結構性成長未變。",
+      "半導體板塊下跌提供長期資產重新配置機會。",
+      "道指守穩代表價值股具支撐。"
+    ],
+    "bear_summary": [
+      "AI capex 領導股同步走弱,動能轉弱訊號",
+      "中概股與美科技同跌,風險偏好全面收縮",
+      "開市跳空低開,尾盤恐擴大賣壓",
+      "利率預期持續不確定，科技股短期壓力大。",
+      "資金流向防禦類股，加劇成長股修正風險。",
+      "高集中度導致籌碼鬆動，加劇波動。"
+    ],
+    "final_take": "硬體端經歷籌碼洗盤，市場資金正集中轉進 AI 軟體變現潛力股。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T14:24:32Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, MENTIONED_IN, SUPPLIES_TO; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

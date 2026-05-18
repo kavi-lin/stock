@@ -1,0 +1,250 @@
+{
+  "news_id": "bn_20260515_343e5eda",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T15:10:17Z",
+  "last_activity_ts": "2026-05-15T15:20:10Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/rtds-drive-corby-spirit-wine-145300693.html",
+    "feed_fingerprint": "rtds drive corby spirit wine record q3 numbers",
+    "published": "2026-05-15T14:53:00+00:00",
+    "url_hash": "sha1:c35030084925419f1da29045e689f573928e3409"
+  },
+  "headline": "RTDs drive Corby Spirit and Wine to “record” Q3 numbers",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:19:52Z",
+      "latency_ms": 4738,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 618,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "d33274b0-a7f0-43c2-bb3b-2bd662525a30",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "b78aec11-c9e1-4305-9691-9537f92f6f36"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:20:06Z",
+      "latency_ms": 13811,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "RTD（即飲飲料）強勁成長不僅顯示 Corby Spirit 的成功，更揭示了 beverage 行業結構性轉變。**便利性與低酒精門檻**促使消費者快速轉向 RTD，這已成為 STZ 和 BUD 等巨頭必須積極爭奪的關鍵戰場。此趨勢長期有利於具備強大通路與品牌行銷能力的飲料公司，但也對傳統啤酒銷售構成結構性替代壓力，飲料產業的行銷預算勢必將更多向 RTD 傾斜。",
+        "bull_points": [
+          "RTD 產品具備高毛利與高用戶黏性",
+          "符合現代消費者追求便利與多樣化需求",
+          "品牌強大的飲料巨頭可透過此產品線擴張市場"
+        ],
+        "bear_points": [
+          "傳統啤酒銷量面臨結構性替代威脅",
+          "RTD 市場競爭日趨激烈，行銷與推廣成本上升",
+          "監管風險可能針對此類產品加強限制"
+        ],
+        "final_take": "RTD 結構性成長態勢確立，對飲料巨頭而言既是機會也是必須面臨的通路與銷售轉型挑戰。",
+        "entities": {
+          "tickers": [
+            "STZ",
+            "BUD",
+            "PEP",
+            "KO"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "RTD",
+            "Consumer Behavior"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:STZ",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:RTD"
+          },
+          {
+            "subject": "narrative:RTD",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:Consumer Staples"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "強調 RTD 對 beverage 整體板塊的結構性影響，不僅限於單一公司表現。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:20:10Z",
+      "latency_ms": 4298,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 545,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "6c02d80d-1592-45cf-8855-356ae03c1971",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "13a59690-6cb0-4ec8-95f2-fbbc2a991780"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "NEUTRAL",
+    "merged_entities": {
+      "tickers": [
+        "BUD",
+        "KO",
+        "PEP",
+        "STZ"
+      ],
+      "sectors": [
+        "Consumer Staples"
+      ],
+      "themes": [
+        "Consumer Behavior",
+        "RTD"
+      ],
+      "tech_keywords": []
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:STZ",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:RTD"
+      },
+      {
+        "subject": "narrative:RTD",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:Consumer Staples"
+      }
+    ],
+    "bull_summary": [
+      "RTD 產品具備高毛利與高用戶黏性",
+      "符合現代消費者追求便利與多樣化需求",
+      "品牌強大的飲料巨頭可透過此產品線擴張市場"
+    ],
+    "bear_summary": [
+      "傳統啤酒銷量面臨結構性替代威脅",
+      "RTD 市場競爭日趨激烈，行銷與推廣成本上升",
+      "監管風險可能針對此類產品加強限制"
+    ],
+    "final_take": "RTD 結構性成長態勢確立，對飲料巨頭而言既是機會也是必須面臨的通路與銷售轉型挑戰。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T15:20:10Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: CATALYST_FOR, COMPETES_WITH"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T15:19:52Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T15:20:10Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,256 @@
+{
+  "news_id": "bn_20260515_bed2ec2a",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T14:50:08Z",
+  "last_activity_ts": "2026-05-15T14:59:23Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/technology/articles/applied-materials-q2-2026-earnings-143615849.html",
+    "feed_fingerprint": "applied materials q2 2026 earnings beat ai demand",
+    "published": "2026-05-15T14:36:15+00:00",
+    "url_hash": "sha1:1e676364d9817426eaa330cf11605cf8fdd99ed9"
+  },
+  "headline": "Applied Materials Q2 2026 earnings beat on AI demand",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 1.5,
+    "bull_case": "收益超預期提振前景",
+    "bear_case": "高基期+競爭加劇",
+    "sector_view": "受惠產業擴張",
+    "macro_view": "利率敏感性降低",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:59:05Z",
+      "latency_ms": 4893,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 517,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "0cdc317d-c2e7-4839-a500-5a24c9c34466",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "73814874-e6f9-4353-b336-248ed1499237"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:59:19Z",
+      "latency_ms": 13741,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "AMAT 的財報亮眼不僅是因為 AI 需求，更反映了其在 **Gate-All-Around (GAA)** 以及 **Advanced Packaging** 技術的壟斷性優勢。當業界聚焦於邏輯晶片微縮時，AMAT 透過材料工程解決了關鍵的散熱與互連挑戰。這顯示 AI 資本支出已從單純的 GPU 採購，深化至基礎晶圓製造設備的軍備競賽，AMAT 處於此核心節點。未來需觀察其在非記憶體領域的良率提升是否能進一步拉開與競爭對手的技術鴻溝。",
+        "bull_points": [
+          "先進封裝材料護城河極深",
+          "GAA 微縮製程需求強勁",
+          "AI 資本支出持續轉化營收"
+        ],
+        "bear_points": [
+          "非 AI 應用復甦遲緩",
+          "地緣政治帶來潛在供應鏈風險",
+          "高本益比面臨獲利回吐壓力"
+        ],
+        "final_take": "技術領先帶動營收，但須留意非 AI 領域的復甦速度。",
+        "entities": {
+          "tickers": [
+            "AMAT",
+            "TSM"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Semiconductor equipment"
+          ],
+          "tech_keywords": [
+            "Gate-All-Around",
+            "Advanced Packaging",
+            "Hybrid Bonding"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keywords:Advanced Packaging"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "強調 AMAT 在材料工程的技術護城河為 AI 轉型之核心。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:59:23Z",
+      "latency_ms": 4424,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 593,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "fb68df85-a816-4677-b4cd-7be5a46e8a51",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "a4919f3b-be11-49ba-bf85-02424ecaf286"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "TSM"
+      ],
+      "sectors": [
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "Semiconductor equipment"
+      ],
+      "tech_keywords": [
+        "Advanced Packaging",
+        "Gate-All-Around",
+        "Hybrid Bonding"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keywords:Advanced Packaging"
+      }
+    ],
+    "bull_summary": [
+      "先進封裝材料護城河極深",
+      "GAA 微縮製程需求強勁",
+      "AI 資本支出持續轉化營收"
+    ],
+    "bear_summary": [
+      "非 AI 應用復甦遲緩",
+      "地緣政治帶來潛在供應鏈風險",
+      "高本益比面臨獲利回吐壓力"
+    ],
+    "final_take": "技術領先帶動營收，但須留意非 AI 領域的復甦速度。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T14:59:23Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, SUPPLIES_TO"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T14:59:05Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T14:59:23Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

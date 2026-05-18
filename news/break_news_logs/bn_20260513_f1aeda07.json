@@ -1,0 +1,663 @@
+{
+  "news_id": "bn_20260513_f1aeda07",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:20:44Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/13/mortgage-rates-jump-to-highest-level-since-march.html",
+    "feed_fingerprint": "mortgage rates jump highest level since march hotter",
+    "published": "2026-05-13T18:25:30+00:00",
+    "url_hash": "sha1:c33ec3d3d5062f205110118495d76696ce2d0681"
+  },
+  "headline": "Mortgage rates jump to highest level since March on hotter inflation reports",
+  "headline_zh": null,
+  "raw_summary": "Mortgage rates surged to the highest level since March in reaction to two hotter-than-expected inflation reports.",
+  "triage": {
+    "news_type": "macro_data",
+    "shallow_score": 2.0,
+    "bull_case": "經濟動能疲軟",
+    "bear_case": "衰退擔憂加重",
+    "sector_view": "防守股相對強勢",
+    "macro_view": "降息預期升溫",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:18:33Z",
+      "latency_ms": 20589,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Hotter CPI/PPI push 30Y mortgage back near YTD highs — direct hit on **rate-sensitive housing complex**. Homebuilders (DHL, LEN, PHM, TOL, NVR) face affordability ceiling re-tightening; backlog cancellation risk + incentive burn margin compression. **Mortgage originators** (RKT, UWMC) lose refi pipeline. **Building products** (BLDR, MAS, WHR) bear secondary demand drag. REITs split — residential (AVB, EQR) headwind via cap-rate repricing, but apartment demand may actually firm as home-buying deferred. **Regional banks** (KRE) get NIM benefit but CRE stress amplifier. Real signal = sticky inflation re-prices Fed cut path → long-duration tech (software / unprofitable growth) takes multiple compression. Watch 10Y yield breakout above 4.5% as confirmation. Gold/USD bid; small caps (IWM) underperform on funding cost.",
+        "entities": {
+          "tickers": [
+            "DHI",
+            "LEN",
+            "PHM",
+            "TOL",
+            "NVR",
+            "RKT",
+            "UWMC",
+            "BLDR",
+            "MAS",
+            "WHR",
+            "AVB",
+            "EQR",
+            "KRE",
+            "XHB",
+            "ITB",
+            "IWM",
+            "TLT"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Financials",
+            "Real Estate",
+            "Materials"
+          ],
+          "themes": [
+            "housing affordability",
+            "sticky inflation",
+            "rate-cut repricing",
+            "duration compression",
+            "regional bank NIM"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-rate-spike"
+          },
+          {
+            "subject": "ticker:LEN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-rate-spike"
+          },
+          {
+            "subject": "ticker:RKT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-rate-spike"
+          },
+          {
+            "subject": "ticker:UWMC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-rate-spike"
+          },
+          {
+            "subject": "ticker:KRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:higher-for-longer-NIM"
+          },
+          {
+            "subject": "ticker:AVB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rental-demand-shift"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:sticky-inflation"
+          },
+          {
+            "subject": "ticker:IWM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher-for-longer"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Mortgage rate spike = direct housing/builder/originator hit + duration compression spillover to growth equities. Sticky CPI repricing Fed path is dominant transmission channel."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:18:52Z",
+      "latency_ms": 19091,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Beyond the immediate impact on borrowers and homebuilders, the sustained rise in mortgage rates due to persistent inflation poses significant second-order risks to the secondary mortgage market infrastructure. Government-sponsored enterprises like Fannie Mae and Freddie Mac are directly exposed to shifts in mortgage origination volume and the valuation of mortgage-backed securities. Increased volatility and potential deleveraging in the housing market could strain their balance sheets, impacting their ability to provide liquidity. This illustrates how inflationary pressures and rising rates can create systemic risks by affecting crucial market participants that underpin housing finance.",
+        "entities": {
+          "tickers": [
+            "FNMA",
+            "FMCC"
+          ],
+          "sectors": [
+            "Financials (Capital Markets)"
+          ],
+          "themes": [
+            "secondary mortgage market",
+            "GSE stability",
+            "mortgage-backed securities volatility",
+            "housing finance liquidity"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:FNMA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:volatile mortgage rates"
+          },
+          {
+            "subject": "ticker:FMCC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:volatile mortgage rates"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Highlights systemic risks to GSEs from volatile mortgage rates, an angle not yet discussed."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:19:10Z",
+      "latency_ms": 17643,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle prior thread missed: **title insurance + transaction-volume complex**. Sustained 7%+ mortgage rates collapse existing-home turnover (lock-in effect — 70%+ of mortgages sit below 5%). Direct hit on **FNF, FAF, STC** (title insurers — revenue scales with closings, not price), **Z, RDFN, OPEN** (portals/iBuyers — listing volume starved), and **realtor commission complex post-NAR settlement**. Secondary: **HD/LOW** thesis bifurcates — repair/remodel resilient (aging-in-place), but big-ticket discretionary (kitchen reno financed via HELOC) compresses as HELOC rates track prime. Contra to GEMINI's GSE point: FNMA/FMCC actually benefit from g-fee stability + lower prepay speeds extending MBS duration income. Watch **MBS OAS spread** — if widens past 150bp, signals real stress vs just rate move.",
+        "entities": {
+          "tickers": [
+            "FNF",
+            "FAF",
+            "STC",
+            "Z",
+            "RDFN",
+            "OPEN",
+            "HD",
+            "LOW",
+            "FNMA",
+            "FMCC"
+          ],
+          "sectors": [
+            "Financials",
+            "Real Estate",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "lock-in effect",
+            "transaction volume collapse",
+            "MBS duration extension",
+            "HELOC compression"
+          ],
+          "tech_keywords": [
+            "MBS OAS spread",
+            "g-fee",
+            "prepay speed",
+            "30Y conforming"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FNF",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:lock-in-effect"
+          },
+          {
+            "subject": "ticker:Z",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:transaction-volume-collapse"
+          },
+          {
+            "subject": "ticker:OPEN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:transaction-volume-collapse"
+          },
+          {
+            "subject": "ticker:FNMA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:mbs-duration-extension"
+          },
+          {
+            "subject": "ticker:LOW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:heloc-compression"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Title insurers + iBuyers + lock-in effect on transaction volume not raised. Contra GSE take: duration extension is net positive for retained portfolio NIM."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:20:06Z",
+      "latency_ms": 56808,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The surge in mortgage rates due to sticky inflation introduces a critical, under-discussed headwind for **developer financing**. Increased borrowing costs directly impact the economic feasibility of new residential construction projects, especially for specialized builders like Cavco Industries (CVCO) focused on modular and prefabricated homes. Their order books are directly tied to new starts; higher financing expenses for developers reduce the pipeline of projects, creating significant revenue pressure for CVCO. This reveals a key supply-side constraint exacerbated by persistent inflationary pressures, distinct from consumer affordability impacts.",
+        "entities": {
+          "tickers": [
+            "CVCO"
+          ],
+          "sectors": [
+            "Real Estate",
+            "Industrials"
+          ],
+          "themes": [
+            "Developer financing",
+            "Reduced new construction starts",
+            "Modular construction",
+            "Sticky inflation"
+          ],
+          "tech_keywords": [
+            "Modular construction",
+            "Prefabricated housing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:sticky inflation",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:higher mortgage rates"
+          },
+          {
+            "subject": "narrative:higher mortgage rates",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:developer financing"
+          },
+          {
+            "subject": "ticker:CVCO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:developer financing"
+          },
+          {
+            "subject": "ticker:CVCO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:reduced new construction starts"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "Focuses on developer financing costs and modular construction supply chain."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:20:28Z",
+      "latency_ms": 21260,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: **manufactured housing + land bank arbitrage**. With site-built affordability broken, **SKY (Skyline Champion)** and **LGIH (entry-level builder)** see *demand mix shift up* — opposite to CVCO thesis Gemini raised. SKY's ASP ~$95K vs site-built $420K = the only segment where monthly payment math still works at 7%+ rates. Second hidden node: **furniture/mattress destocking re-acceleration** — RH, WSM, LZB, TPX, MLKN. Housing turnover drives ~40% of furniture demand; lock-in effect extends destocking cycle into 2027. Contra Claude Round 0 on apartment REITs firming: watch **single-family rental** operators **INVH, AMH** — they capture the deferred-buyer cohort at better unit economics than multifamily (no concession war). Specific catalyst node: **MBA Purchase Index** weekly print — sub-130 reading confirms demand destruction beyond rate-shock noise.",
+        "entities": {
+          "tickers": [
+            "SKY",
+            "LGIH",
+            "CVCO",
+            "RH",
+            "WSM",
+            "LZB",
+            "TPX",
+            "MLKN",
+            "INVH",
+            "AMH"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Real Estate",
+            "Industrials"
+          ],
+          "themes": [
+            "affordability compression",
+            "lock-in effect",
+            "manufactured housing arbitrage",
+            "SFR vs multifamily"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SKY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:affordability-mix-shift"
+          },
+          {
+            "subject": "ticker:LGIH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:entry-level-payment-math"
+          },
+          {
+            "subject": "ticker:RH",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:housing-turnover-collapse"
+          },
+          {
+            "subject": "ticker:TPX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:furniture-destocking"
+          },
+          {
+            "subject": "ticker:INVH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:deferred-buyer-rental-cohort"
+          },
+          {
+            "subject": "ticker:AMH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:sfr-pricing-power"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Manufactured housing benefits + furniture destocking + SFR vs multifamily split — all absent from prior thread."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:20:44Z",
+      "latency_ms": 16006,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The sustained surge in mortgage rates beyond 7% will create a pronounced headwind for the appliance sector, a segment not fully explored. Companies like Whirlpool (WHR) and the appliance divisions of Home Depot (HD) and Lowe's (LOW) are highly sensitive to both new home construction volumes and existing home turnover. The 'lock-in effect' from higher rates, coupled with reduced new builds, means fewer appliance purchases for new homes and delayed replacements/renovation-driven upgrades in existing properties. This distinct demand destruction in consumer durables warrants attention, as it represents a significant second-order impact on discretionary spending within the housing ecosystem.",
+        "entities": {
+          "tickers": [
+            "WHR",
+            "HD",
+            "LOW"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Consumer Durables"
+          ],
+          "themes": [
+            "Housing affordability crisis",
+            "Interest rate sensitivity",
+            "Consumer durables demand pullback"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:WHR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:housing_turnover_decline"
+          },
+          {
+            "subject": "sector:Consumer_Durables",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:housing_affordability_crisis"
+          },
+          {
+            "subject": "ticker:HD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:appliance_upgrade_deferral"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Appliance sector (WHR, HD/LOW) faces distinct demand destruction from reduced housing turnover and new builds due to elevated mortgage rates."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMH",
+        "AVB",
+        "BLDR",
+        "CVCO",
+        "DHI",
+        "EQR",
+        "FAF",
+        "FMCC",
+        "FNF",
+        "FNMA",
+        "HD",
+        "INVH",
+        "ITB",
+        "IWM",
+        "KRE",
+        "LEN",
+        "LGIH",
+        "LOW",
+        "LZB",
+        "MAS",
+        "MLKN",
+        "NVR",
+        "OPEN",
+        "PHM",
+        "RDFN",
+        "RH",
+        "RKT",
+        "SKY",
+        "STC",
+        "TLT",
+        "TOL",
+        "TPX",
+        "UWMC",
+        "WHR",
+        "WSM",
+        "XHB",
+        "Z"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Consumer Durables",
+        "Financials",
+        "Financials (Capital Markets)",
+        "Industrials",
+        "Materials",
+        "Real Estate"
+      ],
+      "themes": [
+        "Consumer durables demand pullback",
+        "Developer financing",
+        "GSE stability",
+        "HELOC compression",
+        "Housing affordability crisis",
+        "Interest rate sensitivity",
+        "MBS duration extension",
+        "Modular construction",
+        "Reduced new construction starts",
+        "SFR vs multifamily",
+        "Sticky inflation",
+        "affordability compression",
+        "duration compression",
+        "housing affordability",
+        "housing finance liquidity",
+        "lock-in effect",
+        "manufactured housing arbitrage",
+        "mortgage-backed securities volatility",
+        "rate-cut repricing",
+        "regional bank NIM",
+        "secondary mortgage market",
+        "sticky inflation",
+        "transaction volume collapse"
+      ],
+      "tech_keywords": [
+        "30Y conforming",
+        "MBS OAS spread",
+        "Modular construction",
+        "Prefabricated housing",
+        "g-fee",
+        "prepay speed"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:DHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-rate-spike"
+      },
+      {
+        "subject": "ticker:LEN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-rate-spike"
+      },
+      {
+        "subject": "ticker:RKT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-rate-spike"
+      },
+      {
+        "subject": "ticker:UWMC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-rate-spike"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:higher-for-longer-NIM"
+      },
+      {
+        "subject": "ticker:AVB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rental-demand-shift"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:sticky-inflation"
+      },
+      {
+        "subject": "ticker:IWM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher-for-longer"
+      },
+      {
+        "subject": "ticker:FNMA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:volatile mortgage rates"
+      },
+      {
+        "subject": "ticker:FMCC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:volatile mortgage rates"
+      },
+      {
+        "subject": "ticker:FNF",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:lock-in-effect"
+      },
+      {
+        "subject": "ticker:Z",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:transaction-volume-collapse"
+      },
+      {
+        "subject": "ticker:OPEN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:transaction-volume-collapse"
+      },
+      {
+        "subject": "ticker:FNMA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:mbs-duration-extension"
+      },
+      {
+        "subject": "ticker:LOW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:heloc-compression"
+      },
+      {
+        "subject": "narrative:sticky inflation",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:higher mortgage rates"
+      },
+      {
+        "subject": "narrative:higher mortgage rates",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:developer financing"
+      },
+      {
+        "subject": "ticker:CVCO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:developer financing"
+      },
+      {
+        "subject": "ticker:CVCO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:reduced new construction starts"
+      },
+      {
+        "subject": "ticker:SKY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:affordability-mix-shift"
+      },
+      {
+        "subject": "ticker:LGIH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:entry-level-payment-math"
+      },
+      {
+        "subject": "ticker:RH",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:housing-turnover-collapse"
+      },
+      {
+        "subject": "ticker:TPX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:furniture-destocking"
+      },
+      {
+        "subject": "ticker:INVH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:deferred-buyer-rental-cohort"
+      },
+      {
+        "subject": "ticker:AMH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:sfr-pricing-power"
+      },
+      {
+        "subject": "ticker:WHR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:housing_turnover_decline"
+      },
+      {
+        "subject": "sector:Consumer_Durables",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:housing_affordability_crisis"
+      },
+      {
+        "subject": "ticker:HD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:appliance_upgrade_deferral"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:20:44Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

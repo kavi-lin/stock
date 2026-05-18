@@ -1,0 +1,674 @@
+{
+  "news_id": "bn_20260513_9e142184",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T17:01:15Z",
+  "last_activity_ts": "2026-05-13T23:49:39Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/news/43-million-etf-buy-signals-164409525.html",
+    "feed_fingerprint": "43 million etf buy signals growing confidence overseas",
+    "published": "2026-05-13T16:44:09+00:00",
+    "url_hash": "sha1:eb0b35f8bf46f19d10b3c8d3918dec0906451e0a"
+  },
+  "headline": "This $43 Million ETF Buy Signals Growing Confidence in Overseas Stocks",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T17:15:32Z",
+      "latency_ms": 20823,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "$43M institutional ETF buy into ex-US equities — small absolute size but **signal value** matters. Tracks broader 2026 rotation: USD weakness + Fed cut path + US mega-cap concentration fatigue pushing flows toward EFA/VEA/IEFA (Europe, Japan) and EEM/VWO (EM). Watch **DXY** as the master variable — every 1% DXY drop ≈ 1.5-2% tailwind for unhedged intl ETFs. Japan reflation (7203, 8058, 6758) and European defense/industrials (RHM.DE, AIR.PA proxy via EUFN, EZU) are the cleanest sleeves. EM split: India (INDA) structural, China (MCHI/KWEB) tactical bounce only. **Risk**: if this is late-cycle catch-up rather than regime shift, mean-reversion to US tech leadership snaps back fast. Single $43M print ≠ trend — need 4-week persistence in EPFR flow data to confirm.",
+        "entities": {
+          "tickers": [
+            "EFA",
+            "VEA",
+            "IEFA",
+            "EEM",
+            "VWO",
+            "EZU",
+            "EWJ",
+            "INDA",
+            "MCHI",
+            "KWEB",
+            "EUFN",
+            "SPY",
+            "UUP"
+          ],
+          "sectors": [
+            "Financials",
+            "Industrials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "ex-US rotation",
+            "USD weakness",
+            "Japan reflation",
+            "EM recovery",
+            "concentration unwind"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:EFA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ex-us-rotation"
+          },
+          {
+            "subject": "ticker:VEA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:usd-weakness"
+          },
+          {
+            "subject": "ticker:EWJ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:japan-reflation"
+          },
+          {
+            "subject": "ticker:SPY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:concentration-unwind"
+          },
+          {
+            "subject": "ticker:UUP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:usd-weakness"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "Small $43M print but directionally aligned with DXY weakness + US concentration fatigue. Need flow persistence to confirm regime shift vs late-cycle catch-up."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T23:46:16Z",
+      "latency_ms": 23381,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle prior thread missed: **currency-hedged vs unhedged ETF spread** as the smart-money tell. If institutions buying **DBEF/HEFA/DXJ** (hedged) instead of EFA/VEA/DXJ-unhedged, signal = pure equity beta conviction, not DXY trade. Inverse also true — unhedged flows mean FX is half the thesis. Second-order play overlooked: **US-listed ADR plumbing** (BK, STT custody fees) benefits from cross-border flow regardless of direction; State Street's SPDR intl ETF AUM growth = direct EPS lever. Contra: ex-US earnings revisions still negative YoY ex-Japan (MSCI EAFE FY26 EPS cut 3% since Jan); flows front-running fundamentals that haven't turned. Watch **EWG vs EWU** spread — German DAX pricing reflation, FTSE pricing stagflation. Divergence = thesis fracture.",
+        "entities": {
+          "tickers": [
+            "DBEF",
+            "HEFA",
+            "DXJ",
+            "EFA",
+            "VEA",
+            "EWG",
+            "EWU",
+            "BK",
+            "STT"
+          ],
+          "sectors": [
+            "Financials",
+            "International Equity"
+          ],
+          "themes": [
+            "currency-hedged rotation",
+            "ex-US earnings revisions",
+            "ADR custody plumbing"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:STT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:intl-etf-aum-growth"
+          },
+          {
+            "subject": "ticker:BK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cross-border-custody"
+          },
+          {
+            "subject": "ticker:DBEF",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EFA"
+          },
+          {
+            "subject": "ticker:EWG",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:european-reflation"
+          },
+          {
+            "subject": "ticker:EWU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:uk-stagflation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Hedged-vs-unhedged spread + custody beneficiaries (STT/BK) + EWG/EWU divergence — distinct from prior DXY/regional sleeve framing."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T23:48:25Z",
+      "latency_ms": 129415,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Building on the macro rotation, this $43M ETF buy suggests a growing institutional focus on the global AI hardware supply chain. As markets increasingly prioritize de-risking and resilience in AI infrastructure, there's a clear shift towards international players offering critical advanced packaging services and specialized manufacturing equipment. This strategic diversification moves beyond US chip dominance, aiming to create a more robust and distributed AI ecosystem. The investment might signal a new phase where supply chain integrity and geographic diversity are key drivers for future AI buildouts.",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI Hardware Supply Chain",
+            "Global AI Buildout",
+            "Supply Chain Resilience"
+          ],
+          "tech_keywords": [
+            "Advanced Packaging",
+            "Semiconductor Manufacturing Equipment"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:43 Million ETF Buy",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:AI Hardware Supply Chain"
+          },
+          {
+            "subject": "theme:AI Hardware Supply Chain",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Global AI Buildout"
+          },
+          {
+            "subject": "theme:AI Hardware Supply Chain",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Supply Chain Resilience"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces AI hardware supply chain diversification and resilience as new themes, distinct from prior macro and currency focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-13T23:48:44Z",
+      "latency_ms": 19370,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Gemini's AI supply-chain framing opens a specific overlooked node: **Japanese semicap + advanced packaging beneficiaries that don't trade as US ADRs**, only accessible via EWJ/DXJ or direct. **Tokyo Electron (8035.T)**, **Disco (6146.T — CoWoS dicing/grinding monopoly, ~80% share)**, **Advantest (6857.T — HBM3e/HBM4 test, sole-source for NVDA validation)**, and **Ibiden (4062.T — ABF substrate)** are the cleanest plays. $43M into broad EAFE doesn't capture this — but if flow data shows **EWJ premium to NAV widening** or **DXJ creation units spiking**, that's the smart-money tell for Japan-AI-capex specifically, not generic reflation. Contra to my own prior point: this dilutes the \"pure DXY trade\" read — semicap names have USD-revenue mix >60%, so weak yen actually *helps* reported earnings. Watch 6146.T vs ASML spread as relative AI-packaging conviction gauge.",
+        "entities": {
+          "tickers": [
+            "EWJ",
+            "DXJ",
+            "ASML",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "advanced packaging",
+            "Japan reflation",
+            "semicap localization"
+          ],
+          "tech_keywords": [
+            "CoWoS",
+            "HBM3e",
+            "HBM4",
+            "ABF substrate",
+            "wafer dicing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:EWJ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:japan-ai-capex"
+          },
+          {
+            "subject": "ticker:DXJ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:yen-hedged-japan-flow"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:semicap-localization"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "narrative:advanced-packaging-japan"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "New angle: Japan semicap/packaging names (Disco 6146, Advantest 6857, Ibiden 4062) as specific AI supply-chain nodes inside the EWJ/DXJ flow — not surfaced by prior thread."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-13T23:49:05Z",
+      "latency_ms": 20212,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While Japan's role in advanced packaging and testing is crucial for AI hardware, this ETF buy may also reflect increasing institutional confidence in European semiconductor players. Companies like Infineon (IFX) and STMicroelectronics (STM) are vital suppliers of power semiconductors and other essential components underpinning AI data centers and edge computing. The EU Chips Act is a significant tailwind, incentivizing localized production and innovation, thereby bolstering supply chain resilience and offering a strategic diversification play beyond US and Asian dominance. This adds a critical European dimension to the global AI hardware buildout, complementing existing narratives on Asian capacity.",
+        "entities": {
+          "tickers": [
+            "IFX",
+            "STM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "Supply chain diversification",
+            "EU industrial policy",
+            "Geopolitical risk mitigation"
+          ],
+          "tech_keywords": [
+            "Power semiconductors",
+            "AI hardware"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:IFX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:EU industrial policy"
+          },
+          {
+            "subject": "ticker:STM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI infrastructure demand"
+          },
+          {
+            "subject": "ticker:IFX",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:AI data centers"
+          },
+          {
+            "subject": "ticker:STM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:AI edge devices"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces European AI infrastructure players benefiting from policy and diversification."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-13T23:49:22Z",
+      "latency_ms": 17823,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **Korea is the missing leg** in the Japan/Europe AI-supply-chain framing. EWY exposure captures **Samsung Electronics (005930.KS — HBM3e ramp catching SK Hynix, NVDA qualification pending Q2)** and **SK Hynix (000660.KS — HBM3e incumbent, 50%+ share)**, neither available as clean US ADR. $43M into broad ex-US ETFs structurally underweights this — but **EWY vs EWJ relative flow** is the cleaner AI-memory-vs-logic tell than DXJ alone. 2nd-order contra: Korean won strength (KRW < 1350) compresses HBM export margins ~80bps per 1% move — opposite of Japan semicap dynamic. Specific node prior thread missed: **Hanmi Semiconductor (042700.KS)** — sole HBM TC bonder supplier to SK Hynix, ~90% share, pure-play AI-memory capex proxy with zero US listing. Watch EWY creation units + KRW basis swap.",
+        "entities": {
+          "tickers": [
+            "EWY",
+            "EWJ",
+            "DXJ",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "ex-US rotation",
+            "supply chain diversification"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "TC bonder",
+            "advanced packaging"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:EWY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:EWY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:krw_strength"
+          },
+          {
+            "subject": "ticker:EWJ",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EWY"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Korea/HBM leg absent from prior thread; Hanmi Semi as specific TC-bonder node + EWY-vs-EWJ flow tell + KRW contra-dynamic all novel."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c6",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-13T23:49:39Z",
+      "latency_ms": 16953,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While the focus has been on AI hardware supply chains, this ETF buy could signal increasing institutional conviction in global industrial automation leaders like Siemens AG (SIE.DE). As capital shifts overseas, investors may be identifying companies enabling AI adoption in critical sectors. Siemens is a prime example, driving digitalization, smart factories, and AI-optimized infrastructure worldwide. Their role in enhancing global operational efficiency and supply chain resilience represents a vital, less-discussed demand-side driver for AI capabilities. This moves beyond upstream chip manufacturing to the practical, large-scale deployment of AI in foundational industries.",
+        "entities": {
+          "tickers": [
+            "SIE.DE"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "Global AI adoption",
+            "Smart Factories",
+            "Supply Chain Optimization"
+          ],
+          "tech_keywords": [
+            "Industrial AI",
+            "Digitalization"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SIE.DE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:global industrial ai adoption"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focuses on AI enablers in global industries, a new angle beyond chip manufacturing."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ASML",
+        "BK",
+        "DBEF",
+        "DXJ",
+        "EEM",
+        "EFA",
+        "EUFN",
+        "EWG",
+        "EWJ",
+        "EWU",
+        "EWY",
+        "EZU",
+        "HEFA",
+        "IEFA",
+        "IFX",
+        "INDA",
+        "KWEB",
+        "MCHI",
+        "NVDA",
+        "SIE.DE",
+        "SPY",
+        "STM",
+        "STT",
+        "UUP",
+        "VEA",
+        "VWO"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "International Equity",
+        "Semiconductors"
+      ],
+      "themes": [
+        "ADR custody plumbing",
+        "AI Hardware Supply Chain",
+        "AI capex",
+        "AI infrastructure",
+        "EM recovery",
+        "EU industrial policy",
+        "Geopolitical risk mitigation",
+        "Global AI Buildout",
+        "Global AI adoption",
+        "HBM3e",
+        "Japan reflation",
+        "Smart Factories",
+        "Supply Chain Optimization",
+        "Supply Chain Resilience",
+        "Supply chain diversification",
+        "USD weakness",
+        "advanced packaging",
+        "concentration unwind",
+        "currency-hedged rotation",
+        "ex-US earnings revisions",
+        "ex-US rotation",
+        "semicap localization",
+        "supply chain diversification"
+      ],
+      "tech_keywords": [
+        "ABF substrate",
+        "AI hardware",
+        "Advanced Packaging",
+        "CoWoS",
+        "Digitalization",
+        "HBM3e",
+        "HBM4",
+        "Industrial AI",
+        "Power semiconductors",
+        "Semiconductor Manufacturing Equipment",
+        "TC bonder",
+        "advanced packaging",
+        "wafer dicing"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:EFA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ex-us-rotation"
+      },
+      {
+        "subject": "ticker:VEA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:usd-weakness"
+      },
+      {
+        "subject": "ticker:EWJ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:japan-reflation"
+      },
+      {
+        "subject": "ticker:SPY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:concentration-unwind"
+      },
+      {
+        "subject": "ticker:UUP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:usd-weakness"
+      },
+      {
+        "subject": "ticker:STT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:intl-etf-aum-growth"
+      },
+      {
+        "subject": "ticker:BK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cross-border-custody"
+      },
+      {
+        "subject": "ticker:DBEF",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:EFA"
+      },
+      {
+        "subject": "ticker:EWG",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:european-reflation"
+      },
+      {
+        "subject": "ticker:EWU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:uk-stagflation"
+      },
+      {
+        "subject": "narrative:43 Million ETF Buy",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:AI Hardware Supply Chain"
+      },
+      {
+        "subject": "theme:AI Hardware Supply Chain",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Global AI Buildout"
+      },
+      {
+        "subject": "theme:AI Hardware Supply Chain",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Supply Chain Resilience"
+      },
+      {
+        "subject": "ticker:EWJ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:japan-ai-capex"
+      },
+      {
+        "subject": "ticker:DXJ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:yen-hedged-japan-flow"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:semicap-localization"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "narrative:advanced-packaging-japan"
+      },
+      {
+        "subject": "ticker:IFX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:EU industrial policy"
+      },
+      {
+        "subject": "ticker:STM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI infrastructure demand"
+      },
+      {
+        "subject": "ticker:IFX",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:AI data centers"
+      },
+      {
+        "subject": "ticker:STM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:AI edge devices"
+      },
+      {
+        "subject": "ticker:EWY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:EWY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:krw_strength"
+      },
+      {
+        "subject": "ticker:EWJ",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:EWY"
+      },
+      {
+        "subject": "ticker:SIE.DE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:global industrial ai adoption"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-13T23:49:39Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, CUSTOMER_OF, HEADWIND_FROM, MENTIONED_IN; gemini-only: CATALYST_FOR, SUPPLIES_TO"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-13T23:45:22Z",
+      "where": "startup_sweep",
+      "msg": "reset from debating after 23390s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,461 @@
+{
+  "news_id": "bn_20260516_f54b1351",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-16T13:51:46Z",
+  "last_activity_ts": "2026-05-16T13:57:58Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/16/senior-community-service-employment-program.html",
+    "feed_fingerprint": "federal program trains older workers trump administration wants",
+    "published": "2026-05-16T13:30:01+00:00",
+    "url_hash": "sha1:51cb624a4027d431b5a3801d5de090a88c064e86"
+  },
+  "headline": "This federal program trains older workers. The Trump administration wants to cut it",
+  "headline_zh": null,
+  "raw_summary": "The Senior Community Service Employment Program provides older, low-income individuals with an opportunity to train for work. But its future is uncertain.",
+  "triage": {
+    "news_type": "monetary_policy",
+    "shallow_score": -2.0,
+    "bull_case": "流動性寬鬆刺激增長",
+    "bear_case": "通膨風險捲土重來",
+    "sector_view": "防守股受惠",
+    "macro_view": "美元走弱利美股",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T13:56:24Z",
+      "latency_ms": 21690,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "先說清楚：**pre-triage 把這條歸成 monetary_policy 是誤判**。SCSEP（高齡社區服務就業計畫）是規模僅約 4 億美元的小型聯邦勞動計畫，與聯準會利率、流動性完全無關，bull/bear snap（流動性寬鬆/通膨）套錯框架。對股市的**直接衝擊近乎零**——無上市公司營收依賴此計畫。真要找邊際關聯，只有兩條極弱線索：一是行政部門持續削減非國防自由裁量支出，延續財政緊縮基調；二是高齡低收入勞動力被擠出，對折扣零售（**DG**、**DLTR**）客群是極微負面。本質是政策新聞，非交易訊號，建議下游 UI 標記為低訊號、不納入投資決策層。",
+        "bull_points": [
+          "削減自由裁量支出，呼應財政紀律敘事",
+          "計畫規模太小，市場無實質下行風險"
+        ],
+        "bear_points": [
+          "高齡低收入族群消費力受損，微利空折扣零售",
+          "持續砍社福支出，反映就業市場底層轉弱"
+        ],
+        "final_take": "非交易訊號，pre-triage 分類錯誤，建議標低訊號略過",
+        "entities": {
+          "tickers": [
+            "DG",
+            "DLTR"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "fiscal austerity",
+            "labor market",
+            "low-income consumer"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:low-income-consumer-weakness"
+          },
+          {
+            "subject": "ticker:DLTR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:low-income-consumer-weakness"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "小型勞動計畫新聞，市場影響近乎零，分類遭誤判"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T13:56:37Z",
+      "latency_ms": 12938,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "分析師 A 點出此計畫規模小且對總經影響有限，然而需補充一關鍵視角：此計畫實為資深勞動力進入「Silver Economy」服務鏈的重要緩衝。若該聯邦補助遭削減，勞動密集型服務產業（特別是**零售、餐飲與低階照護**）將面臨更嚴峻的資深勞動力招募缺口。長期而言，這將迫使相關企業在低階職位上被迫加速導入自動化技術，或投入更多成本於員工培訓系統，對**人力資源科技平台 (如 ADP)** 而言可能是長期的邊際利多，但對短期依賴廉價勞力的實體零售商則為人事成本的隱性壓力。",
+        "bull_points": [
+          "推動企業加速導入自動化解決方案",
+          "提升對人力資源科技優化平台需求"
+        ],
+        "bear_points": [
+          "勞動密集產業面臨更高的薪資成本",
+          "資深勞工退出就業市場可能影響服務穩定性"
+        ],
+        "final_take": "勞動密集產業的結構性人力風險將隨政策緊縮而增加。",
+        "entities": {
+          "tickers": [
+            "DG",
+            "DLTR",
+            "ADP"
+          ],
+          "sectors": [
+            "Consumer Services",
+            "Industrials"
+          ],
+          "themes": [
+            "Labor force participation",
+            "Silver Economy",
+            "Automation"
+          ],
+          "tech_keywords": [
+            "HR-tech"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:labor_cost"
+          },
+          {
+            "subject": "narrative:automation",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:Industrials"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補足政策對勞動密集型服務業在缺工與自動化推動力上的潛在風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T13:57:09Z",
+      "latency_ms": 32148,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面兩位都沒碰的**反向視角**：SCSEP 本質是政府對低薪高齡勞動力的**就業補貼**——它把原本不會進入勞動市場的人推進職場。削減它，等於從最底層**抽走一小撮勞動供給**，方向上是讓低薪勞動池更緊、而非更鬆。規模當然微不足道（4 億美元、約數萬人），但有趣的是：這恰好**反證了 pre-triage 那個錯誤的『通膨』bear-snap**——真要算總經帳，這條政策邊際上偏**抗通縮**，不是寬鬆。對 **ADP**、**PAYX** 這類低薪時薪客群的薪資處理量，影響趨近於零。結論不變：政策新聞，非交易訊號，UI 應標低訊號。重點是別讓下游把方向算反。",
+        "bull_points": [
+          "削減屬象徵性，財政緊縮基調延續但金額微小",
+          "對 ADP/PAYX 低薪客群薪資處理量影響趨近零"
+        ],
+        "bear_points": [
+          "抽走底層勞動補貼，邊際上微幅收緊低薪勞動池",
+          "方向偏抗通縮——pre-triage『通膨』框架算反了"
+        ],
+        "final_take": "非交易訊號，但別讓下游把通膨方向算反",
+        "entities": {
+          "tickers": [
+            "ADP",
+            "PAYX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "fiscal austerity",
+            "labor supply",
+            "low-wage inflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:scsep-cut",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fiscal-austerity"
+          },
+          {
+            "subject": "narrative:scsep-cut",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:low-wage-labor-tightening"
+          }
+        ],
+        "done": false,
+        "confidence": 0.42,
+        "rationale_short": "新增反向視角：削減就業補貼方向偏抗通縮，反證錯誤通膨框架"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T13:57:24Z",
+      "latency_ms": 14509,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了勞動力供給議題外，本案更值得關注的是對**非營利組織（Non-profits）**生態系的間接排擠。此計畫多委由地方性非營利機構執行，經費削減不僅影響資深勞工的職訓機會，更會直接削弱這些機構在社區服務與人力執行上的運作韌性。對於高度依賴聯邦補助以維持營運的社會服務體系而言，這是明確的**營運壓力**。這進一步突顯了行政部門持續削減社會性支出的財政政策基調，但對於資本市場而言，此類小規模、在地化的預算調整，仍不構成足以改變市場流動性的實質投資驅動力。",
+        "bull_points": [
+          "減少聯邦預算赤字，符合財政紀律目標。",
+          "行政管理流程簡化，降低資源浪費。"
+        ],
+        "bear_points": [
+          "嚴重削弱非營利機構的營運韌性。",
+          "擴大社區服務資源缺口，造成社會成本隱憂。"
+        ],
+        "final_take": "僅具政治象徵意義，非市場交易訊號。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Public Sector",
+            "Non-Profit"
+          ],
+          "themes": [
+            "Fiscal Policy"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:non_profits",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fiscal_tightening"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補述此計畫削減對非營利組織營運之負面影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T13:57:47Z",
+      "latency_ms": 23226,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "三輪討論已收斂：誤分類、Silver Economy 缺工、勞動供給抗通縮、非營利排擠四角度都已覆蓋，市場結論一致——**SCSEP 約 4 億美元規模，無上市公司營收依賴，非交易訊號**。我找不到具實質市場含意的新銘柄或二階效應。唯一仍有價值的「新角度」屬流程層而非市場層：**pre-triage 把勞動補貼計畫誤標為 monetary_policy 已是重複性缺陷**，下游應把這條當作 triage false-positive 樣本回饋校準，而非投資決策輸入。市場面我同意前述全部，無新增。UI 標記低訊號、排除於決策層即可。",
+        "bull_points": [
+          "削減非國防自由裁量支出延續財政紀律基調"
+        ],
+        "bear_points": [
+          "低階服務業資深缺工長期推升人事成本",
+          "在地非營利執行機構營運韌性受損"
+        ],
+        "final_take": "市場面已無新角度，純政策新聞應排除於決策層",
+        "entities": {
+          "tickers": [
+            "ADP",
+            "PAYX",
+            "DG",
+            "DLTR"
+          ],
+          "sectors": [
+            "Industrials",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "fiscal tightening",
+            "Silver Economy",
+            "labor supply"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:scsep-cut",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:fiscal-tightening"
+          }
+        ],
+        "done": true,
+        "confidence": 0.82,
+        "rationale_short": "四角度已覆蓋，無實質新市場含意，市場結論一致"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T13:57:58Z",
+      "latency_ms": 11247,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此討論已窮盡邊際分析，針對 SCSEP 的辯論核心不應在於營收影響（因為幾乎為零），而是在於**分類錯誤的修正**。雖然部分高齡勞工可能因補助消失而被迫轉向 **Gig Economy** 平台（如 **UBER**, **DASH**）尋求靈活收入，但從總量與企業財報視角看，這類人力流動極為邊際。建議將此新聞標記為 **Triage False-Positive** 處理，並針對此類非營利計畫的歸類邏輯進行算法調整，而非在投資組合中納入任何對應部位。",
+        "bull_points": [
+          "勞力外溢，邊際提升零工平台人力供給。"
+        ],
+        "bear_points": [
+          "社區服務人力鏈中斷，隱性增加地方社會成本。"
+        ],
+        "final_take": "政策影響微乎其微，應作為分類錯誤案例處理。",
+        "entities": {
+          "tickers": [
+            "UBER",
+            "DASH"
+          ],
+          "sectors": [
+            "Industrials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Labor market"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:UBER",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:labor_supply"
+          }
+        ],
+        "done": true,
+        "confidence": 0.95,
+        "rationale_short": "討論已窮盡所有邊際效應，建議標記為無訊號。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "ADP",
+        "DASH",
+        "DG",
+        "DLTR",
+        "PAYX",
+        "UBER"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Consumer Services",
+        "Consumer Staples",
+        "Industrials",
+        "Non-Profit",
+        "Public Sector"
+      ],
+      "themes": [
+        "Automation",
+        "Fiscal Policy",
+        "Labor force participation",
+        "Labor market",
+        "Silver Economy",
+        "fiscal austerity",
+        "fiscal tightening",
+        "labor market",
+        "labor supply",
+        "low-income consumer",
+        "low-wage inflation"
+      ],
+      "tech_keywords": [
+        "HR-tech"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:DG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:low-income-consumer-weakness"
+      },
+      {
+        "subject": "ticker:DLTR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:low-income-consumer-weakness"
+      },
+      {
+        "subject": "ticker:DG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:labor_cost"
+      },
+      {
+        "subject": "narrative:automation",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:Industrials"
+      },
+      {
+        "subject": "narrative:scsep-cut",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fiscal-austerity"
+      },
+      {
+        "subject": "narrative:scsep-cut",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:low-wage-labor-tightening"
+      },
+      {
+        "subject": "narrative:non_profits",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fiscal_tightening"
+      },
+      {
+        "subject": "narrative:scsep-cut",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:fiscal-tightening"
+      },
+      {
+        "subject": "ticker:UBER",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:labor_supply"
+      }
+    ],
+    "bull_summary": [
+      "削減自由裁量支出，呼應財政紀律敘事",
+      "計畫規模太小，市場無實質下行風險",
+      "推動企業加速導入自動化解決方案",
+      "提升對人力資源科技優化平台需求",
+      "削減屬象徵性，財政緊縮基調延續但金額微小",
+      "對 ADP/PAYX 低薪客群薪資處理量影響趨近零"
+    ],
+    "bear_summary": [
+      "高齡低收入族群消費力受損，微利空折扣零售",
+      "持續砍社福支出，反映就業市場底層轉弱",
+      "勞動密集產業面臨更高的薪資成本",
+      "資深勞工退出就業市場可能影響服務穩定性",
+      "抽走底層勞動補貼，邊際上微幅收緊低薪勞動池",
+      "方向偏抗通縮——pre-triage『通膨』框架算反了"
+    ],
+    "final_take": "政策影響微乎其微，應作為分類錯誤案例處理。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-16T13:57:58Z",
+    "close_reason": "both_done",
+    "divergence_note": "claude-only: MENTIONED_IN; gemini-only: BENEFITS_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

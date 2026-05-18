@@ -1,0 +1,508 @@
+{
+  "news_id": "bn_20260516_fe9cd3b2",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-16T15:02:16Z",
+  "last_activity_ts": "2026-05-16T15:12:14Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/hold-stocks-or-fold-em-former-world-series-of-poker-champion-annie-duke-tells-you-how-to-decide-6ded9e52?mod=mw_rss_topstories",
+    "feed_fingerprint": "what former poker champion turned investing coach annie",
+    "published": "2026-05-16T14:59:00+00:00",
+    "url_hash": "sha1:1f648424fe3ec4da86cefff350076823ec8d8b1a"
+  },
+  "headline": "What former poker champion turned investing coach Annie Duke says most of us get wrong about risk",
+  "headline_zh": null,
+  "raw_summary": "The author of ‘Quit’ talks about market bubbles, costly investing mistakes and why investors freeze at the worst time.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T15:10:33Z",
+      "latency_ms": 22156,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是一則**行為金融**觀點文，非事件型催化劑，對個股無直接定價影響。但 Annie Duke 的核心論點值得當前市場警惕：投資人最常犯的錯是把「結果」當「決策品質」(resulting),且在高波動時**凍結**——該停損時不停、該加碼時不敢。當下美股在 **AI capex** 敘事推動下估值偏高,正是 Duke 所說的泡沫情境。她的「sunk cost 不該影響去留」框架,提醒持有 **NVDA**、輝達鏈高 beta 部位者:該用前瞻機率而非帳面成本決定續抱與否。實務意義:文章本身不可交易,但可作為紀律檢查清單。",
+        "bull_points": [
+          "提供決策紀律框架,降低追高殺低行為損耗",
+          "提醒用前瞻機率評估持股,利於汰弱留強"
+        ],
+        "bear_points": [
+          "文章點名泡沫,暗示市場情緒已過熱",
+          "投資人高波動時凍結,放大回檔時拋售壓力"
+        ],
+        "final_take": "中性偏防禦,當作紀律檢查而非交易訊號",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "SPY",
+            "QQQ"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "behavioral finance",
+            "market bubble",
+            "risk management"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:market-bubble",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:behavioral-finance"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "情緒觀點文,無事件催化,僅紀律參考價值"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T15:10:47Z",
+      "latency_ms": 13770,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Annie Duke 的建議在個體層面具備啟發性，但在**機構化交易**已佔主流的市場，我們必須探討「行為紀律的外包」。現代投資組合日益依賴**算法決策與自動化執行**，這本質上是一種消除「恐懼與遲疑」的結構化手段。然而，這種決策路徑可能將個體的「賭徒行為」轉化為系統的「算法趨同風險」。當市場震盪觸發跨機制的系統性減碼時，所有自動化程式可能在同一瞬間凍結或拋售，這種**隱性集體行為**，才是應對Duke所言之風險時，更需警惕的現代挑戰。",
+        "bull_points": [
+          "系統化自動交易減少情緒幹擾。",
+          "嚴格風險係數預設了停損機制。"
+        ],
+        "bear_points": [
+          "算法趨同引發市場流動性枯竭。",
+          "系統化決策無法應對模型外之黑天鵝事件。"
+        ],
+        "final_take": "應將行為心理學與量化風險模型整合，預防算法同步導致的群體性盲點。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "Algorithmic Trading",
+            "Behavioral Finance"
+          ],
+          "tech_keywords": [
+            "Automated Execution"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:Algorithmic_Trading",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:Market_Volatility"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "探討算法交易如何結構化地解決個體行為偏差，同時引入系統性風險，與前一位分析師形成互補。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T15:11:19Z",
+      "latency_ms": 32315,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前兩輪聚焦個人紀律與算法趨同，漏了**利益結構**這層。Annie Duke 寫《Quit》的反諷在於：整個理財產業幾乎沒有誘因叫客戶「賣」。資產管理商（**BLK**、買方）收的是 AUM 比例費，客戶留倉愈久、規模愈大，費用愈高——勸退等於砍自己營收，這是制度性的「不准 quit」偏誤。另一個被忽略的二階效果：散戶「凍結」時資金多半坐回現金，券商（**SCHW**、**IBKR**）靠 cash sweep 淨利息照賺，凍結對它們不是風險而是收入。所以 Duke 講的決策瑕疵，部分不是投資人不理性，而是被收費模式餵養出來的。**AI capex** 泡沫若真破，AUM 縮水的 BLK 比高 beta 的 NVDA 更晚反應、卻更難回補。",
+        "bull_points": [
+          "SCHW/IBKR 散戶凍結期靠閒置現金淨利息穩定獲利",
+          "AUM 模式讓買方營收黏性高、空頭中防禦性優於個股"
+        ],
+        "bear_points": [
+          "BLK 等買方有制度誘因壓抑「賣出」建議，放大客戶套牢風險",
+          "AI capex 泡沫破裂時 AUM 縮水拖累資管股，回補速度慢於高 beta",
+          "券商靠凍結獲利，與客戶利益錯位削弱長期信任"
+        ],
+        "final_take": "風險不全在投資人，收費模式才是隱形偏誤源",
+        "entities": {
+          "tickers": [
+            "BLK",
+            "SCHW",
+            "IBKR",
+            "NVDA"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "behavioral finance",
+            "AUM fee model"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:retail-freeze-cash-sweep"
+          },
+          {
+            "subject": "ticker:IBKR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:retail-freeze-cash-sweep"
+          },
+          {
+            "subject": "ticker:BLK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-capex-bubble-unwind"
+          },
+          {
+            "subject": "ticker:BLK",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:aum-fee-incentive-bias"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增收費結構誘因偏誤 + 券商靠凍結獲利的二階效果"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T15:11:32Z",
+      "latency_ms": 12236,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Duke 的框架在主動操作上固然有力，但忽略了現代市場的**被動化結構**。當前資金大規模湧入被動指數型 ETF (如 **VOO**, **QQQ**)，這導致「退出」在指數層面變得結構性困難。被動基金經理人受限於追蹤誤差，無法運用 Duke 所提的「損益成本歸零法」來調整部位。這種機制使得 **AI capex** 龍頭在高估值時仍有指數強制買盤支撐，造成了「結構性不准退」的現象。這不僅是個體心態問題，而是資本配置被演算法寫死的結構缺陷。",
+        "bull_points": [
+          "被動基金強制買盤支撐龍頭估值",
+          "結構性長期資金降低市場恐慌賣壓"
+        ],
+        "bear_points": [
+          "被動基金無彈性，無法執行前瞻決策",
+          "價格發現機制失靈，泡沫調整時間拉長"
+        ],
+        "final_take": "被動結構限制了主動退出，市場泡沫可能持續更久。",
+        "entities": {
+          "tickers": [
+            "VOO",
+            "QQQ",
+            "SPY"
+          ],
+          "sectors": [
+            "Financial Services",
+            "Information Technology"
+          ],
+          "themes": [
+            "Passive Investing",
+            "Market Structure"
+          ],
+          "tech_keywords": [
+            "Index Tracking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VOO",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:price_stickiness"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "切入被動投資對「決策退出」的結構性限制。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T15:12:00Z",
+      "latency_ms": 28016,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已談個人紀律、算法趨同、收費誘因、被動化結構,還漏了**稅務鎖定**這個真實摩擦。長抱 **NVDA** 經數年大漲後,帳面未實現利益龐大,賣出即觸發資本利得稅——這不是 Duke 所說的非理性偏誤,而是稅後數學:賣掉換倉的隱含成本可能吃掉 20%+ 本金,使「不 quit」在課稅帳戶內部分是**理性**選擇。這也是對 Duke 框架的反論:她把「凍結」一律歸為決策瑕疵,但稅負、交易成本、再買回的時點風險,讓 buy-and-hold 慣性有其正當性。更尖銳的一點:Duke 現在斷言市場是泡沫,本身就帶有她最反對的 resulting 色彩——泡沫只有事後才證實。紀律清單該雙向用,別讓「該賣」的敘事變成另一種偏誤。",
+        "bull_points": [
+          "課稅帳戶長抱避稅,延後實現利得是理性選擇",
+          "buy-and-hold 慣性省下交易與再買回時點成本"
+        ],
+        "bear_points": [
+          "稅務鎖定放大高估值部位的下行曝險",
+          "Duke 斷言泡沫本身帶事後歸因偏誤,不應照單全收"
+        ],
+        "final_take": "中性偏謹慎,但賣出決策須計稅後數學非僅心態",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "behavioral finance",
+            "tax lock-in"
+          ],
+          "tech_keywords": [
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:capital-gains-tax-lock-in"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:ai-capex-bubble"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增稅務鎖定摩擦與對 Duke 泡沫斷言的 resulting 反論,前文未提。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T15:12:14Z",
+      "latency_ms": 14207,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了個人紀律與市場結構，忽略了**企業回購 (Share Buybacks)** 對「持有 vs. 退出」決策的扭曲。AI 巨頭如 **AAPL**, **MSFT**, **GOOGL** 擁有龐大現金流，透過持續回購創造結構性買盤，這不僅是資本配置，更是在變相「鎖死」流通股本。對於投資人而言，這與 Duke 所謂「冷靜決策」相悖：企業透過回購人工撐盤，等於強制為投資人「拒絕 quit」。這讓散戶面臨的不僅是心理偏差，而是與坐擁數千億現金的企業對賭，增加了脫手時機的判斷難度。",
+        "bull_points": [
+          "企業庫藏股提供強大底部支撐",
+          "回購有效提升EPS與股東價值"
+        ],
+        "bear_points": [
+          "回購可能掩蓋資本支出盲目性",
+          "犧牲研發資金損害長期創新"
+        ],
+        "final_take": "回購削弱了退出訊號，投資人需區分股價動力源自基本面或企業回購。",
+        "entities": {
+          "tickers": [
+            "AAPL",
+            "MSFT",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "N3P"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:buyback"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:buyback"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入企業回購行為作為決策阻礙，補充了公司治理與資本配置層面的新視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "BLK",
+        "GOOGL",
+        "IBKR",
+        "MSFT",
+        "NVDA",
+        "QQQ",
+        "SCHW",
+        "SPY",
+        "VOO"
+      ],
+      "sectors": [
+        "Capital Markets",
+        "Financial Services",
+        "Financials",
+        "Information Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AUM fee model",
+        "Algorithmic Trading",
+        "Behavioral Finance",
+        "Market Structure",
+        "Passive Investing",
+        "behavioral finance",
+        "market bubble",
+        "risk management",
+        "tax lock-in"
+      ],
+      "tech_keywords": [
+        "Automated Execution",
+        "Blackwell",
+        "Index Tracking",
+        "N3P"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "narrative:market-bubble",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:behavioral-finance"
+      },
+      {
+        "subject": "theme:Algorithmic_Trading",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:Market_Volatility"
+      },
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:retail-freeze-cash-sweep"
+      },
+      {
+        "subject": "ticker:IBKR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:retail-freeze-cash-sweep"
+      },
+      {
+        "subject": "ticker:BLK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-capex-bubble-unwind"
+      },
+      {
+        "subject": "ticker:BLK",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:aum-fee-incentive-bias"
+      },
+      {
+        "subject": "ticker:VOO",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:price_stickiness"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:capital-gains-tax-lock-in"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:ai-capex-bubble"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:buyback"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:buyback"
+      }
+    ],
+    "bull_summary": [
+      "提供決策紀律框架,降低追高殺低行為損耗",
+      "提醒用前瞻機率評估持股,利於汰弱留強",
+      "系統化自動交易減少情緒幹擾。",
+      "嚴格風險係數預設了停損機制。",
+      "SCHW/IBKR 散戶凍結期靠閒置現金淨利息穩定獲利",
+      "AUM 模式讓買方營收黏性高、空頭中防禦性優於個股"
+    ],
+    "bear_summary": [
+      "文章點名泡沫,暗示市場情緒已過熱",
+      "投資人高波動時凍結,放大回檔時拋售壓力",
+      "算法趨同引發市場流動性枯竭。",
+      "系統化決策無法應對模型外之黑天鵝事件。",
+      "BLK 等買方有制度誘因壓抑「賣出」建議，放大客戶套牢風險",
+      "AI capex 泡沫破裂時 AUM 縮水拖累資管股，回補速度慢於高 beta"
+    ],
+    "final_take": "回購削弱了退出訊號，投資人需區分股價動力源自基本面或企業回購。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-16T15:12:14Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, HEADWIND_FROM, MENTIONED_IN; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

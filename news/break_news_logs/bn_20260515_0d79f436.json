@@ -1,0 +1,165 @@
+{
+  "news_id": "bn_20260515_0d79f436",
+  "schema_version": 1,
+  "state": "partial_closed",
+  "fetched_at": "2026-05-15T06:48:26Z",
+  "last_activity_ts": "2026-05-15T10:59:52Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/15/singapore-airlines-hurt-by-air-india-losses-investment-could-pay-off.html",
+    "feed_fingerprint": "singapore airlines sticking air india long game despite",
+    "published": "2026-05-15T05:59:57+00:00",
+    "url_hash": "sha1:d9fccab3196ba39c64773acb40653669d0387a61"
+  },
+  "headline": "Singapore Airlines sticking with Air India for the \"long game\" despite losses",
+  "headline_zh": null,
+  "raw_summary": "Air India has been a big drag on SIA's earnings, but the airline says its investment is part of the \"long game\"",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": -1.5,
+    "bull_case": "現金流改善空間",
+    "bear_case": "成長放緩風險",
+    "sector_view": "行業內相對強弱",
+    "macro_view": "成本控制關鍵",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T10:59:52Z",
+      "latency_ms": 801074,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新加坡航空與 Air India 的整併虧損是 **SGX 上市標的**，對美股直接傳導極弱——這是第一個要點。真正的美股切口在**機隊更新供應鏈**：Air India 先前對 Boeing 下了 737 MAX + 787 的超大單，SIA 集團本身也是 787 / 777X 客戶。SIA 願意吞短期虧損打「長線」，等於替印度航空需求**背書產能與訂單延續性**，對 **BA** 交付節奏與 **GE** 航空引擎售後是溫和利多。風險面：整併虧損拖累 SIA 獲利反映印度航空票價戰與單位成本失控，若 Tata 增資縮手，訂單遞延風險上升。對美股投資人這是**主題觀察級**新聞，非交易催化劑。",
+        "bull_points": [
+          "Air India 機隊更新撐 BA 787/MAX 訂單能見度",
+          "印度航空需求成長利多 GE 引擎售後現金流",
+          "SIA 願認虧打長線=替印度市場需求背書"
+        ],
+        "bear_points": [
+          "標的在 SGX，美股無直接交易催化",
+          "整併虧損反映印度票價戰、單位成本失控",
+          "Tata 若縮手增資，Boeing 訂單恐遞延"
+        ],
+        "final_take": "美股僅 BA/GE 供應鏈溫和受惠，屬主題觀察非催化劑",
+        "entities": {
+          "tickers": [
+            "BA",
+            "GE"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "India aviation growth",
+            "airline consolidation",
+            "fleet renewal"
+          ],
+          "tech_keywords": [
+            "737 MAX",
+            "787 Dreamliner",
+            "777X"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:india-aviation-growth"
+          },
+          {
+            "subject": "ticker:GE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:india-aviation-growth"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:fleet-renewal"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:airline-consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "新加坡上市標的，美股僅供應鏈間接受惠，傳導力弱。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BA",
+        "GE"
+      ],
+      "sectors": [
+        "Industrials"
+      ],
+      "themes": [
+        "India aviation growth",
+        "airline consolidation",
+        "fleet renewal"
+      ],
+      "tech_keywords": [
+        "737 MAX",
+        "777X",
+        "787 Dreamliner"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:india-aviation-growth"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:india-aviation-growth"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:fleet-renewal"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:airline-consolidation"
+      }
+    ],
+    "bull_summary": [
+      "Air India 機隊更新撐 BA 787/MAX 訂單能見度",
+      "印度航空需求成長利多 GE 引擎售後現金流",
+      "SIA 願認虧打長線=替印度市場需求背書"
+    ],
+    "bear_summary": [
+      "標的在 SGX，美股無直接交易催化",
+      "整併虧損反映印度票價戰、單位成本失控",
+      "Tata 若縮手增資，Boeing 訂單恐遞延"
+    ],
+    "final_take": "美股僅 BA/GE 供應鏈溫和受惠，屬主題觀察非催化劑",
+    "final_take_by": "claude",
+    "rounds_completed": 1,
+    "closed_at": "2026-05-15T10:59:52Z",
+    "close_reason": "timeout",
+    "divergence_note": ""
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

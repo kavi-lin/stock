@@ -1,0 +1,497 @@
+{
+  "news_id": "bn_20260518_c4b376c3",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:42:31Z",
+  "last_activity_ts": "2026-05-18T10:56:27Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/energy/articles/venture-global-vg-delivers-strong-102107644.html",
+    "feed_fingerprint": "venture global vg delivers strong q1 results raises",
+    "published": "2026-05-18T10:21:07+00:00",
+    "url_hash": "sha1:a2226f6034f20914b0e9a0045c9ae1bddbb313c0"
+  },
+  "headline": "Venture Global (VG) Delivers Strong Q1 Results, Raises 2026 Guidance",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 3.0,
+    "bull_case": "收益超預期提振前景",
+    "bear_case": "高基期+競爭加劇",
+    "sector_view": "受惠產業擴張",
+    "macro_view": "利率敏感性降低",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:54:48Z",
+      "latency_ms": 22765,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260518_c4b376c3.c0.txt",
+      "parsed": {
+        "commentary": "```json\n{\n  \"commentary\": \"**Venture Global (VG)** Q1 超預期並上調 2026 全年指引，反映其 LNG 出口在歐洲補庫存與亞洲長約需求雙軌支撐下產能利用率高檔。**Plaquemines** 一期超前投產是這次 beat 的主因，**CP2** 進度將決定 2027 後成長曲線。利多在於歐洲擺脫俄氣後對美 LNG 結構性依賴、Henry Hub",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:55:01Z",
+      "latency_ms": 13362,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了項目投產進度，Venture Global 的核心競爭力在於其**模組化液化技術 (modular liquefaction technology)**。這種模式不僅有效壓低單一液化產線的建造資本支出，更透過標準化組件大幅縮短從最終投資決策 (FID) 到實際營運的週期。在當前資本成本高昂且工期不確定性增加的能源環境下，此技術路徑對 **Cheniere (LNG)** 等傳統大型同業構成了顯著的成本競爭壓力。投資者需關注在產能快速擴張的同時，其高負債槓桿結構在未來能源價格波動時的財務韌性。",
+        "bull_points": [
+          "模組化技術大幅縮短建設週期，提升資產周轉率。",
+          "成本競爭力對傳統大型 LNG 項目構成替代優勢。",
+          "指引上調彰顯全球能源基礎設施長期需求依舊強勁。"
+        ],
+        "bear_points": [
+          "大規模基建帶來的資本支出壓力，在現行利率下較重。",
+          "能源價格大幅波動可能影響長約客戶的履約意願。",
+          "快速擴張可能導致債務槓桿比率攀升，增加財務風險。"
+        ],
+        "final_take": "模組化模式確立競爭優勢，需監控財務槓桿風險。",
+        "entities": {
+          "tickers": [
+            "LNG"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "Energy infrastructure",
+            "LNG"
+          ],
+          "tech_keywords": [
+            "Modular liquefaction"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VG",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:LNG"
+          },
+          {
+            "subject": "ticker:VG",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech:modular_liquefaction"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充其技術核心「模組化」帶來的建設週期優勢與槓桿風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:55:27Z",
+      "latency_ms": 26005,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論漏掉 VG 最大爭議點：**Plaquemines / Calcasieu Pass** 長期刻意維持「調試 (commissioning) 狀態」，把本該交付給 **Shell**、**BP**、Edison 等基礎長約客戶的貨櫃轉賣高價現貨市場，已引發逾 50 億美元仲裁索賠。這次 Q1 beat 與上調指引，有相當比例靠的是現貨套利收益，並非穩定長約現金流——一旦仲裁敗訴須回吐賠償，獲利品質要打折。更關鍵的二階效應：客戶信任受損會直接墊高 **CP2** 後續長約 (offtake) 的議價難度，而 CP2 的 SPA 簽約進度才是 2027 後成長與融資的命脈。指引漂亮，但須分辨「現貨運氣」與「結構產能」。",
+        "bull_points": [
+          "現貨價高檔，調試貨櫃套利推升短期獲利",
+          "Plaquemines 提前放量，產能爬坡領先同業"
+        ],
+        "bear_points": [
+          "逾50億美元仲裁索賠恐回吐獲利",
+          "違約轉賣損及客戶信任，CP2長約議價變難",
+          "beat 靠現貨套利,長約現金流品質存疑"
+        ],
+        "final_take": "指引亮眼但獲利品質存疑，看仲裁與CP2簽約",
+        "entities": {
+          "tickers": [
+            "VG",
+            "LNG",
+            "SHEL",
+            "BP"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "LNG export",
+            "European gas security",
+            "spot arbitrage"
+          ],
+          "tech_keywords": [
+            "modular liquefaction",
+            "CP2",
+            "Plaquemines"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:offtake-arbitration"
+          },
+          {
+            "subject": "ticker:SHEL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:VG"
+          },
+          {
+            "subject": "ticker:VG",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:cp2-offtake-signing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "仲裁與獲利品質為前文未提之關鍵反方角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:55:46Z",
+      "latency_ms": 18955,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "針對前述爭議與技術分析，補充一個重要的**結構性影響**：Venture Global 的產能激進擴張，正深刻改變美國天然氣市場的**基差 (Basis) 結構**。特別是墨西哥灣沿岸的集氣與管線需求，已使該區天然氣與 Henry Hub 的溢價持續拉大，導致管線運營商如 **WMB** 等受惠於更高的輸氣需求與設施建設投報率。此外，VG 的需求不僅是出口，更在於對上游產地如 **EQT** 的強勁拉貨，這改變了頁岩氣開發商的銷售策略，讓上游企業能部分避開產區內的供應過剩風險。然而，這同樣帶來了管線建設必須跟上、否則將面臨頻繁的運輸瓶頸 (bottleneck) 風險。",
+        "bull_points": [
+          "墨西哥灣氣價溢價擴大，推升管線運營商投報率。",
+          "對 EQT 等上游供應商形成穩定且強勁的拉貨需求。"
+        ],
+        "bear_points": [
+          "若基礎管線擴容無法同步，將構成嚴重的輸氣瓶頸。"
+        ],
+        "final_take": "獲利源於產能擴張，但需觀察 Gulf Coast 基差風險與管線瓶頸。",
+        "entities": {
+          "tickers": [
+            "VG",
+            "WMB",
+            "EQT",
+            "LNG"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "Energy Infrastructure"
+          ],
+          "tech_keywords": [
+            "LNG"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VG",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:LNG_export"
+          },
+          {
+            "subject": "ticker:WMB",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:VG"
+          },
+          {
+            "subject": "ticker:EQT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:VG"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "延伸至供應鏈生態：討論產能擴張對管線與上游開採端的基差影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:56:12Z",
+      "latency_ms": 26466,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面三輪聚焦下游基差與上游拉貨，漏掉**設備端**這個明確供應鏈節點：VG 的模組化液化列車核心冷媒壓縮機與燃氣輪機由 **Baker Hughes (BKR)** 供應。Plaquemines 與 CP2 的快速擴產等於把 BKR 的 LNG 設備訂單能見度鎖到 2028 之後，這是被市場低估的二階受惠者。另一個被忽略的催化劑是政策面——美國 DOE 2025 年解除 LNG 出口許可凍結，CP2 的非自由貿易協定出口批文才得以推進，這是指引能上調的制度前提。但須注意 VG 為 2025 年初新上市股，IPO 後內部人鎖倉到期與高槓桿同時施壓估值。",
+        "bull_points": [
+          "BKR 設備訂單能見度鎖至 2028 後",
+          "DOE 解除出口許可凍結利 CP2 批文",
+          "模組化擴產帶動設備供應商長約能見度"
+        ],
+        "bear_points": [
+          "IPO 鎖倉到期恐釋出賣壓",
+          "高槓桿在能源價格波動下放大估值風險",
+          "政策若反轉將威脅 CP2 出口批文"
+        ],
+        "final_take": "結構受惠真，但留意鎖倉到期與槓桿雙重壓估值",
+        "entities": {
+          "tickers": [
+            "VG",
+            "BKR",
+            "LNG"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials"
+          ],
+          "themes": [
+            "LNG export",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "modular liquefaction",
+            "gas turbine",
+            "refrigerant compressor"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BKR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:VG"
+          },
+          {
+            "subject": "ticker:VG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:doe-lng-export-permit"
+          },
+          {
+            "subject": "ticker:VG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ipo-lockup-expiry"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "補設備供應商 BKR、DOE 許可政策與 IPO 鎖倉三個未提角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:56:27Z",
+      "latency_ms": 14522,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了設備與長約爭議，VG 模組化液化產線的**電力需求強度 (power intensity)** 被市場嚴重低估。作為大型工業用戶，Plaquemines 與未來的 CP2 設施對區域電網形成巨大負載。這種需求激勵了 VG 與區域電力公用事業 (如 **Entergy, ETR**) 發展更深度的電網基建合作或自備微電網，以確保高負債下的運營可靠度。此一電力採購不僅是成本結構的關鍵，更在 ESG 壓力下成為 VG 是否需採購再生能源或綠電來降低碳強度的隱形成本風險。",
+        "bull_points": [
+          "推動區域電力基建投資與合作",
+          "與公用事業簽訂長期穩定電力協議"
+        ],
+        "bear_points": [
+          "電力需求劇增導致營運成本不確定",
+          "ESG 對清潔電力採購構成隱形成本壓力"
+        ],
+        "final_take": "VG 的高耗電特性使其成為區域能源基建變數，須留意電力成本對獲利能力的潛在影響。",
+        "entities": {
+          "tickers": [
+            "VG",
+            "ETR"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities"
+          ],
+          "themes": [
+            "LNG capacity",
+            "Power intensity",
+            "ESG"
+          ],
+          "tech_keywords": [
+            "modular liquefaction",
+            "captive power"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VG",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:ETR"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充分析 LNG 液化設施對區域電網的負載壓力及隱形成本風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BKR",
+        "BP",
+        "EQT",
+        "ETR",
+        "LNG",
+        "SHEL",
+        "VG",
+        "WMB"
+      ],
+      "sectors": [
+        "Energy",
+        "Industrials",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "ESG",
+        "Energy Infrastructure",
+        "Energy infrastructure",
+        "European gas security",
+        "LNG",
+        "LNG capacity",
+        "LNG export",
+        "Power intensity",
+        "spot arbitrage"
+      ],
+      "tech_keywords": [
+        "CP2",
+        "LNG",
+        "Modular liquefaction",
+        "Plaquemines",
+        "captive power",
+        "gas turbine",
+        "modular liquefaction",
+        "refrigerant compressor"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:VG",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:LNG"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech:modular_liquefaction"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:offtake-arbitration"
+      },
+      {
+        "subject": "ticker:SHEL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:VG"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:cp2-offtake-signing"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:LNG_export"
+      },
+      {
+        "subject": "ticker:WMB",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:VG"
+      },
+      {
+        "subject": "ticker:EQT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:VG"
+      },
+      {
+        "subject": "ticker:BKR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:VG"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:doe-lng-export-permit"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ipo-lockup-expiry"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:ETR"
+      }
+    ],
+    "bull_summary": [
+      "模組化技術大幅縮短建設週期，提升資產周轉率。",
+      "成本競爭力對傳統大型 LNG 項目構成替代優勢。",
+      "指引上調彰顯全球能源基礎設施長期需求依舊強勁。",
+      "現貨價高檔，調試貨櫃套利推升短期獲利",
+      "Plaquemines 提前放量，產能爬坡領先同業",
+      "墨西哥灣氣價溢價擴大，推升管線運營商投報率。"
+    ],
+    "bear_summary": [
+      "大規模基建帶來的資本支出壓力，在現行利率下較重。",
+      "能源價格大幅波動可能影響長約客戶的履約意願。",
+      "快速擴張可能導致債務槓桿比率攀升，增加財務風險。",
+      "逾50億美元仲裁索賠恐回吐獲利",
+      "違約轉賣損及客戶信任，CP2長約議價變難",
+      "beat 靠現貨套利,長約現金流品質存疑"
+    ],
+    "final_take": "VG 的高耗電特性使其成為區域能源基建變數，須留意電力成本對獲利能力的潛在影響。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:56:27Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, HEADWIND_FROM; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

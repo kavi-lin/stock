@@ -177,6 +177,42 @@ Written to `reports/YYYYMMDD_<TICKER>_valuation.md`:
 ...
 ```
 
+## Pre-Earnings Mode (V2.15.0+)
+
+`--pre-earnings` flag pivots output to a **pre-earnings cheat sheet** focused on the **next** scheduled earnings event (≤ 7d typical). Best-by-design when financial-mode-cycle calendar shows fmp_confirmed earnings within a week.
+
+```bash
+python3 skills/earnings-valuation-forecaster/scripts/forecast.py NVDA --pre-earnings
+python3 skills/earnings-valuation-forecaster/scripts/forecast.py AMD --pre-earnings --output-dir reports/
+```
+
+### What it adds beyond plain mode
+
+- **Next earnings**: FMP `/earnings` future-dated row → `{date, days_until, eps_estimated, rev_estimated}`. `source: fmp_confirmed`. Returns `null` if FMP has nothing.
+- **Past 4Q seasonality table**: revenue / EPS diluted / GM% per quarter (chronological L→R)
+- **Watch list (4-6 items)**:
+  - **Enriched** when `skills/earnings-analyst/cache/<TICKER>_<DATE>.json` exists — pulls segment names from `segments.product_fy[0].products` + recent `quality_flags`
+  - **Generic fallback** otherwise: 5 items (Revenue YoY, GM%, OpMargin, Forward guide, Segment mix)
+- **12M target price**: still produced, but demoted to "supplementary" section (1 condensed table; not the headline)
+
+### Output
+
+- **Path**: `reports/<YYYYMMDD>_<TICKER>_pre_earnings.md` (suffix differs from `_valuation.md` to avoid overwriting plain mode)
+- **Layout**: cheat-sheet at top (consensus + days_until + watch list), seasonality table middle, 12M scenarios at bottom
+- **Cache**: separate cache key — pre-earnings payload has `pre_earnings: {…}` block; plain-mode cache won't be picked up by `--pre-earnings` (and vice versa)
+
+### When NOT to use
+
+- Earnings > 7 days away — consensus / whisper still moves; data not yet final
+- Earnings already passed — use plain `earnings-analyst` for post-earnings deep-dive
+- TTM EPS < 0 — same constraint as plain mode (skill refuses)
+
+### UI integration
+
+Triggered automatically by Dashboard 「📋 財報前瞻」button on `earnings.html` and `calendar.html` upcoming events when:
+- `next_earnings_source === 'fmp_confirmed'`
+- `0 <= days_until <= 7`
+
 ## Cache
 
 Per-ticker cache at `cache/<ticker>.json`, TTL 4 hours (default).

@@ -1,0 +1,767 @@
+{
+  "as_of_date": "2026-05-10",
+  "schema_version": "V1.4",
+  "lookback_days": 2,
+  "max_per_sector": 10,
+  "total_articles": 92,
+  "sectors": {
+    "Technology": [
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-10 09:00:10",
+        "publisher": "24/7 Wall Street",
+        "title": "The AI Threat Google Couldn't Mount: Why This Expert Says Microsoft's $70 Billion Cash Cow Is Vulnerable Now",
+        "excerpt": "On the We Study Billionaires podcast (episode TIP813), Stig Brodersen laid out a bear case that puts Microsoft's Office cash cow squarely in the crosshairs of generative AI.",
+        "url": "https://247wallst.com/investing/2026/05/10/the-ai-threat-google-couldnt-mount-why-this-expert-says-microsofts-70-billion-cash-cow-is-vulnerable-now/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-10 07:30:03",
+        "publisher": "24/7 Wall Street",
+        "title": "Chip Stocks Are Soaring While Software Slows. Is a Reversal Looming?",
+        "excerpt": "The 2026 tape has split in two. Semiconductor stocks have ripped higher on AI infrastructure demand, while software names that powered the last cycle have stalled or rolled over.",
+        "url": "https://247wallst.com/investing/2026/05/10/chip-stocks-are-soaring-while-software-slows-is-a-reversal-looming/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-10 07:30:01",
+        "publisher": "Fool - Investing News",
+        "title": "SCHB and SPTM Are Both Excellent Broad Market Funds. Here's How to Choose.",
+        "excerpt": "Both ETFs charge just 0.03%, but differ in holdings, sector weightings, and risk profiles. See how their approaches impact long-term portfolio construction.",
+        "url": "https://www.fool.com/coverage/etfs/2026/05/10/schb-and-sptm-are-both-excellent-broad-market-funds-here-s-how-to-choose/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-10 06:31:00",
+        "publisher": "Fool - Investing News",
+        "title": "Prediction: This Nvidia-Backed Artificial Intelligence (AI) Company Might Be the Next Meme Stock. Here's Why It's Actually a Buy at $13 Per Share.",
+        "excerpt": "Back in October, Nvidia invested $1 billion into Nokia.",
+        "url": "https://www.fool.com/investing/2026/05/10/prediction-this-nvidia-backed-artificial-intellige/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-10 05:38:00",
+        "publisher": "The Motley Fool",
+        "title": "Prediction: Nvidia Will Outperform Alphabet and Amazon Combined Over the Next 3 Years",
+        "excerpt": "Nvidia is rapidly growing due to huge demand for AI processing power. Amazon and Alphabet are expanding long-term cloud infrastructure businesses that will thrive long after the AI build-out is complete.",
+        "url": "https://www.fool.com/investing/2026/05/10/prediction-nvidia-will-outperform-alphabet-and-ama/"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-05-10 05:11:00",
+        "publisher": "The Motley Fool",
+        "title": "Is Apple Stock Back in Style?",
+        "excerpt": "iPhone sales grew by more than 20% in Apple's latest fiscal quarter. The stock still trades at a premium.",
+        "url": "https://www.fool.com/investing/2026/05/10/is-apple-stock-back-in-style/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-10 04:48:00",
+        "publisher": "Fool - Investing News",
+        "title": "Nvidia Stock Investors Just Got Great News From Wall Street Experts (Hint: It Could Be a $20 Trillion Company)",
+        "excerpt": "Nvidia is currently a $5 trillion company, but certain analysts see triple-digit upside in the coming years.",
+        "url": "https://www.fool.com/investing/2026/05/10/nvidia-stock-good-news-wall-street-20-trillion/"
+      },
+      {
+        "symbol": "NVDA",
+        "publishedDate": "2026-05-10 04:05:00",
+        "publisher": "Fool - Investing News",
+        "title": "Stock-Split Follow-Up: How Nvidia, Alphabet, Amazon, Netflix, and Tesla Have Performed Since Their Historic Splits",
+        "excerpt": "History shows us a key trend.",
+        "url": "https://www.fool.com/investing/2026/05/10/stock-split-follow-up-how-nvidia-alphabet-perform/"
+      },
+      {
+        "symbol": "AAPL",
+        "publishedDate": "2026-05-09 22:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "The Memory Shortage Is Coming for Big Tech's Bottom Line. This Company Will Hold Up Better Than Anyone Else.",
+        "excerpt": "Which big tech company is best positioned to absorb higher memory pricing?",
+        "url": "https://www.fool.com/investing/2026/05/09/the-memory-shortage-is-coming-for-big-techs-bottom/"
+      },
+      {
+        "symbol": "MSFT",
+        "publishedDate": "2026-05-09 20:13:40",
+        "publisher": "The Motley Fool",
+        "title": "Great News for Microsoft Stock Investors",
+        "excerpt": "Microsoft's (MSFT 1.33%) management team said the magic words every shareholder loves to hear.",
+        "url": "https://www.fool.com/investing/2026/05/09/great-news-for-microsoft-stock-investors/"
+      }
+    ],
+    "Healthcare": [
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-05-10 07:11:38",
+        "publisher": "Seeking Alpha",
+        "title": "Eli Lilly: 'Strong Buy' Raised Revenue Guidance By $2 Billion For 2026 And Label Expansions",
+        "excerpt": "Eli Lilly remains a 'strong buy' as I see robust revenue growth across obesity, diabetes, immunology, and oncology franchises. LLY's MOUNJARO and ZEPBOUND delivered Q1 2026 revenues of $8.66B [+125%] and $4.16B [+80%] respectively, driving a 56% YoY total revenue increase. Pipeli",
+        "url": "https://seekingalpha.com/article/4902192-eli-lilly-strong-buy-raised-revenue-guidance-by-2-billion-for-2026-and-label-expansions"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-09 11:30:09",
+        "publisher": "247 Wallst",
+        "title": "A $500,000 Dividend Portfolio That Pays More Than a Full-Time Minimum Wage Job",
+        "excerpt": "A full-time federal minimum wage worker in the United States earns $7.25 an hour, or about $15,080 a year before taxes, working 40 hours a week for 52 weeks. The question for anyone with capital: what does it take to clear that bar without having to ask anyone, \"Do you want fries",
+        "url": "https://247wallst.com/personal-finance/2026/05/09/a-500000-dividend-portfolio-that-pays-more-than-a-full-time-minimum-wage-job/"
+      },
+      {
+        "symbol": "ABBV",
+        "publishedDate": "2026-05-09 10:08:50",
+        "publisher": "MarketBeat",
+        "title": "AbbVie Touts Record Sales and Pipeline Momentum at Annual Meeting",
+        "excerpt": "AbbVie NYSE: ABBV told shareholders at its annual meeting that 2025 was \u201canother excellent year\u201d for the company, citing record sales, stronger-than-expected revenue and continued investment in its drug pipeline and business development.",
+        "url": "https://www.marketbeat.com/instant-alerts/abbvie-touts-record-sales-and-pipeline-momentum-at-annual-meeting-2026-05-09/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-08 13:30:00",
+        "publisher": "The Motley Fool",
+        "title": "2 Dividend Stocks to Double Up On Right Now",
+        "excerpt": "Amgen is handling a recent patent cliff pretty well. Merck is well prepared for its own upcoming patent cliff.",
+        "url": "https://www.fool.com/investing/2026/05/08/2-dividend-stocks-to-double-up-on-right-now/"
+      },
+      {
+        "symbol": "MRK",
+        "publishedDate": "2026-05-08 13:22:00",
+        "publisher": "GuruFocus",
+        "title": "Merck Faces Gardasil Trial After $8.9 Billion Sales Peak",
+        "excerpt": "Merck (MRK) is moving toward a potentially high-stakes courtroom test over Gardasil, its HPV vaccine, as personal injury lawyers try to convince a Los Angeles j",
+        "url": "https://www.gurufocus.com/news/8846384/merck-faces-gardasil-trial-after-89-billion-sales-peak"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-08 12:41:26",
+        "publisher": "247 Wallst",
+        "title": "Nationwide Survey: 83% of Americans Are Worried Social Security Won\u2019t Survive, and Here\u2019s What to Do About It",
+        "excerpt": "The fear is loud, and the data backs it up. According to the Nationwide Retirement Institute's 2025 Social Security Survey, 83% of Americans currently receiving or expecting to receive Social Security are concerned about the program's future. That worry is not happening in a vacu",
+        "url": "https://247wallst.com/personal-finance/2026/05/08/nationwide-survey-83-of-americans-are-worried-social-security-wont-survive-and-heres-what-to-do-about-it/"
+      },
+      {
+        "symbol": "LLY",
+        "publishedDate": "2026-05-08 08:58:25",
+        "publisher": "Reuters",
+        "title": "Lilly's obesity pill tops 7,000 prescriptions in fourth week, signals modest uptake",
+        "excerpt": "Eli Lilly's new oral weight-loss drug, Foundayo, was prescribed 7,335 times in the U.S. in \u200bthe fourth week, a modest uptake compared to rival \u200cNovo Nordisk's Wegovy pill, analysts said.",
+        "url": "https://www.reuters.com/legal/litigation/lillys-obesity-pill-tops-7000-prescriptions-fourth-week-signals-modest-uptake-2026-05-08/"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-08 08:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "3 Unstoppable Dividend King Stocks to Buy Right Now for Less Than $550",
+        "excerpt": "These companies pay some of the world's most bankable dividends.",
+        "url": "https://www.fool.com/investing/2026/05/08/3-unstoppable-dividend-king-stocks-to-buy-right-no/"
+      },
+      {
+        "symbol": "JNJ",
+        "publishedDate": "2026-05-08 07:50:08",
+        "publisher": "24/7 Wall Street",
+        "title": "Warren Buffett and Berkshire Hathaway Own 2 Dividend Kings That Will Never Be Sold",
+        "excerpt": "Warren Buffett stepped down as CEO of Berkshire Hathaway (BRK-B | BRK.B Price Prediction) on December 31, 2025, after six decades leading the conglomerate he transformed from a struggling textile mill into a $1 trillion empire.",
+        "url": "https://247wallst.com/investing/2026/05/08/warren-buffett-and-berkshire-hathaway-own-2-dividend-aristocrats-that-will-never-be-sold/"
+      }
+    ],
+    "Energy": [
+      {
+        "symbol": "EOG",
+        "publishedDate": "2026-05-10 04:07:28",
+        "publisher": "MarketBeat",
+        "title": "EOG Resources Q1 Earnings Call Highlights",
+        "excerpt": "EOG Resources NYSE: EOG said it opened 2026 with stronger-than-expected operational and financial results, while shifting more capital toward oil-weighted assets in response to higher crude prices and softer natural gas markets.",
+        "url": "https://www.marketbeat.com/instant-alerts/eog-resources-q1-earnings-call-highlights-2026-05-10/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-10 02:00:00",
+        "publisher": "The Motley Fool",
+        "title": "Chevron Has Returned Over $5 Billion to Shareholders for 16 Consecutive Quarters. Is CVX the Ultimate Oil Stock to Own Right Now?",
+        "excerpt": "Oil stocks have surged amid the ongoing conflict in Iran. Chevron has a long history of returning capital to shareholders, including a 39-year history of increasing its annual dividend.",
+        "url": "https://www.fool.com/investing/2026/05/10/chevron-has-returned-over-5-billion-to-shareholder/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-09 17:07:19",
+        "publisher": "24/7 Wall Street",
+        "title": "What Chevron's CEO Just Said About Global \u2018Supply Outages' Could Derail Trump's Economic Momentum",
+        "excerpt": "The stock market keeps acting like nothing can go wrong.",
+        "url": "https://247wallst.com/investing/2026/05/09/what-chevrons-ceo-just-said-about-global-supply-outages-could-derail-trumps-economic-momentum/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-09 13:15:00",
+        "publisher": "Fool - Investing News",
+        "title": "My Top 3 Energy Stocks for May 2026",
+        "excerpt": "Given the lofty price of oil, energy investors should probably think about what happens when oil prices fall.",
+        "url": "https://www.fool.com/investing/2026/05/09/my-top-3-energy-stocks-for-may-2026/"
+      },
+      {
+        "symbol": "XOM",
+        "publishedDate": "2026-05-09 08:37:28",
+        "publisher": "Invezz",
+        "title": "Oil majors post mixed Q1 as Iran war distorts profits, product flows",
+        "excerpt": "The world's biggest oil companies delivered a turbulent set of first\u2011quarter earnings, underscoring how the war in Iran and the closure of the Strait of Hormuz have distorted both profits and physical flows.\u00a0 While Shell and BP beat expectations on the back of strong trading and ",
+        "url": "https://invezz.com/news/2026/05/09/oil-majors-post-mixed-q1-as-iran-war-distorts-profits-product-flows/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-09 08:15:00",
+        "publisher": "Seeking Alpha",
+        "title": "$5,000 Monthly Passive Income For Financial Freedom",
+        "excerpt": "In this article, we will discuss why financial independence is important, not just for retirees but for anyone aspiring for a stress-free and secure financial life. We present a buy-and-hold, easy-to-maintain portfolio formed with only nine funds. The portfolio is income-focused ",
+        "url": "https://seekingalpha.com/article/4899045-5000-monthly-passive-income-for-financial-freedom"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-08 17:43:00",
+        "publisher": "The Motley Fool",
+        "title": "What Is One of the Best Energy Stocks to Buy and Hold for 10 Years?",
+        "excerpt": "Chevron operates in all three phases of the oil and gas value chain. Chevron has increased its dividend for 39 straight years.",
+        "url": "https://www.fool.com/investing/2026/05/08/what-is-one-of-the-best-energy-stocks-to-buy-and-h/"
+      },
+      {
+        "symbol": "COP",
+        "publishedDate": "2026-05-08 15:30:00",
+        "publisher": "Fool - Investing News",
+        "title": "Shell's CEO Says the Oil Market Is Short 1 Billion Barrels and Getting Worse. Here's What Investors Should Do Now.",
+        "excerpt": "The world is facing a growing oil supply shortfall.",
+        "url": "https://www.fool.com/investing/2026/05/08/shells-ceo-says-the-oil-market-is-short-1-billion/"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-08 11:41:35",
+        "publisher": "Zacks Investment Research",
+        "title": "Can Chevron's South Asian LNG Strategy Drive Long-Term Growth?",
+        "excerpt": "Chevron strengthens LNG as a stable cash engine, backed by massive projects, long-term contracts and expanding U.S. export commitments.",
+        "url": "https://www.zacks.com/stock/news/2918194/can-chevron-s-south-asian-lng-strategy-drive-long-term-growth?cid=CS-STOCKNEWSAPI-FT-analyst_blog|quick_take-2918194"
+      },
+      {
+        "symbol": "CVX",
+        "publishedDate": "2026-05-08 10:31:07",
+        "publisher": "Zacks Investment Research",
+        "title": "Chevron (CVX) Reports Q1 Earnings: What Key Metrics Have to Say",
+        "excerpt": "The headline numbers for Chevron (CVX) give insight into how the company performed in the quarter ended March 2026, but it may be worthwhile to compare some of its key metrics to Wall Street estimates and the year-ago actuals.",
+        "url": "https://www.zacks.com/stock/news/2917966/chevron-cvx-reports-q1-earnings-what-key-metrics-have-to-say?cid=CS-STOCKNEWSAPI-FT-fundamental_analysis|nfm-2917966"
+      }
+    ],
+    "Financials": [
+      {
+        "symbol": "BAC",
+        "publishedDate": "2026-05-10 07:17:10",
+        "publisher": "Seeking Alpha",
+        "title": "Wall Street Week Ahead",
+        "excerpt": "Listen on the go! A daily podcast of Wall Street Breakfast will be available by 8:00 a.m.",
+        "url": "https://seekingalpha.com/article/4902203-wall-street-week-ahead"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-10 06:03:49",
+        "publisher": "Seeking Alpha",
+        "title": "Berkshire Hathaway: Be Patient Like Mr. Buffett And You Might Get A Chance To Buy At Book Value",
+        "excerpt": "Berkshire Hathaway remains a hold, as I await a market correction to buy more aggressively. BRK.B trades at 1.4x book value, with nearly 40% of its market cap in cash, raising concerns about overpaying for idle assets. Recent underperformance is driven by the evaporation of the W",
+        "url": "https://seekingalpha.com/article/4902187-berkshire-hathaway-be-patient-like-warren-buffett-you-might-get-chance-to-buy-at-book-value"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-09 18:00:00",
+        "publisher": "The Motley Fool",
+        "title": "Warren Buffett's Successor Greg Abel Just Broke This 13-Quarter Streak at Berkshire Hathaway. Could This Be a Turning Point for the Stock Market?",
+        "excerpt": "Warren Buffett sold more stock than he bought for Berkshire Hathaway in each of his last 13 quarters in charge of the company. Abel ended that streak with the help of a big acquisition.",
+        "url": "https://www.fool.com/investing/2026/05/09/warren-buffetts-successor-greg-abel-just-broke-thi/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-09 12:25:00",
+        "publisher": "The Motley Fool",
+        "title": "Berkshire Hathaway Is Buying Back Stock Again. Here's What That Signal Means for Investors.",
+        "excerpt": "New CEO Greg Abel is sending a message right out of the gate. Most external assessments agree with Abel's and Berkshire's other managers' bullish stance.",
+        "url": "https://www.fool.com/investing/2026/05/09/berkshire-hathaway-is-buying-back-stock-again-here/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-09 09:15:00",
+        "publisher": "The Motley Fool",
+        "title": "This Financial Stock Could Help Set You Up for Life",
+        "excerpt": "Berkshire Hathaway's longtime CEO, Warren Buffett, retired at the end of 2025. New CEO Greg Abel just held his coming-out party at the company's annual meeting.",
+        "url": "https://www.fool.com/investing/2026/05/09/this-financial-stock-could-help-set-you-up-for-lif/"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-09 08:24:26",
+        "publisher": "CNBC",
+        "title": "Greg Abel knows Berkshire cold, but some miss the Buffett magic",
+        "excerpt": "Greg Abel is getting decent, if not spectacular, reviews for leading his first annual shareholders meeting as CEO.",
+        "url": "https://www.cnbc.com/2026/05/09/greg-abel-knows-berkshire-cold-but-some-miss-the-buffett-magic.html"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-09 06:47:01",
+        "publisher": "Business Insider",
+        "title": "I flew 4,400 miles to Warren Buffett's big bash. Even after retiring, he's still the main attraction, and his legacy will live on.",
+        "excerpt": "I traveled for 18 hours to Omaha, Warren Buffett's hometown, for his annual meeting. I wanted to see what Buffett stepping down as CEO meant for the city, his company, and his legacy.",
+        "url": "https://www.businessinsider.com/warren-buffett-legacy-omaha-berkshire-shareholder-meeting-weekend-abel-home-2026-5"
+      },
+      {
+        "symbol": "BRK-B",
+        "publishedDate": "2026-05-08 17:37:00",
+        "publisher": "Business Wire",
+        "title": "San Miguel de Allende-Based Berkshire Hathaway HomeServices Broker Greg Gunter Sells Record-Price Starchitect Legorreta Estate",
+        "excerpt": "SAN MIGUEL DE ALLENDE, Mexico--(BUSINESS WIRE)-- #SanMigueldeAllende--The historic UNESCO village of San Miguel de Allende hosts only one Starchitect listing\u2014a home designed by a star architect, like a Frank Lloyd Wright\u2014and local Berkshire Hathaway HomeServices Broker Greg Gunte",
+        "url": "https://www.businesswire.com/news/home/20260508513380/en/San-Miguel-de-Allende-Based-Berkshire-Hathaway-HomeServices-Broker-Greg-Gunter-Sells-Record-Price-Starchitect-Legorreta-Estate/"
+      },
+      {
+        "symbol": "BAC",
+        "publishedDate": "2026-05-08 16:45:59",
+        "publisher": "Reuters",
+        "title": "Bank of America taps tech dealmaker Richard Hardegree as vice chair of M&A, memo shows",
+        "excerpt": "Bank of America has hired UBS investment banker Richard Hardegree to serve as the Wall Street titan's vice \u200bchair of mergers and acquisitions, according to an \u200cinternal memo seen by Reuters on Friday.",
+        "url": "https://www.reuters.com/legal/transactional/bank-america-taps-tech-dealmaker-richard-hardegree-vice-chair-ma-memo-shows-2026-05-08/"
+      },
+      {
+        "symbol": "BAC",
+        "publishedDate": "2026-05-08 15:34:00",
+        "publisher": "Fool - Investing News",
+        "title": "Want SpaceX Stock Before the IPO? These 3 Plays Give You a Back Door In.",
+        "excerpt": "These companies have what investors want.",
+        "url": "https://www.fool.com/investing/2026/05/08/want-spacex-stock-before-the-ipo-these-3-plays-giv/"
+      }
+    ],
+    "Consumer_Discretionary": [
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-10 05:47:01",
+        "publisher": "Business Insider",
+        "title": "An Amazon worker balanced her day job and side hustle without burning out. She got laid off and had a backup plan.",
+        "excerpt": "Tejal Rives had a side hustle while working at Amazon. When she was laid off from Amazon, she turned her attention to the business.",
+        "url": "https://www.businessinsider.com/side-hustle-balance-day-job-laid-off-backup-plan-2026-5"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-10 05:38:00",
+        "publisher": "The Motley Fool",
+        "title": "Prediction: Nvidia Will Outperform Alphabet and Amazon Combined Over the Next 3 Years",
+        "excerpt": "Nvidia is rapidly growing due to huge demand for AI processing power. Amazon and Alphabet are expanding long-term cloud infrastructure businesses that will thrive long after the AI build-out is complete.",
+        "url": "https://www.fool.com/investing/2026/05/10/prediction-nvidia-will-outperform-alphabet-and-ama/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-10 04:05:00",
+        "publisher": "Fool - Investing News",
+        "title": "Stock-Split Follow-Up: How Nvidia, Alphabet, Amazon, Netflix, and Tesla Have Performed Since Their Historic Splits",
+        "excerpt": "History shows us a key trend.",
+        "url": "https://www.fool.com/investing/2026/05/10/stock-split-follow-up-how-nvidia-alphabet-perform/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-10 01:00:43",
+        "publisher": "Bloomberg Technology",
+        "title": "How Waymo's Driverless Strategy Compares to Tesla's",
+        "excerpt": "Srikanth Thirumalai, vice president of onboard software at Waymo, explains the company's full-stack approach drive simulator, its safety-critique, and how it stacks up against Tesla's strategy. He speaks to Bloomberg's Tom Mackenzie.",
+        "url": "https://www.youtube.com/watch?v=lZRzz1fW4GA"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-09 20:11:39",
+        "publisher": "The Motley Fool",
+        "title": "What's Going on With Amazon Stock?",
+        "excerpt": "AI is getting so much attention; this is an underappreciated part of Amazon's (AMZN +0.55%) business.",
+        "url": "https://www.fool.com/investing/2026/05/09/whats-going-on-with-amazon-stock/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-09 20:05:00",
+        "publisher": "The Motley Fool",
+        "title": "Is Now a Good Time to Buy Amazon Stock?",
+        "excerpt": "Amazon is the second-best-performing \"Magnificent Seven\" stock this year through May 7. AWS should continue to grow impressively due to increased cloud and AI demand.",
+        "url": "https://www.fool.com/investing/2026/05/09/is-now-a-good-time-to-buy-amazon-stock/"
+      },
+      {
+        "symbol": "TSLA",
+        "publishedDate": "2026-05-09 19:05:00",
+        "publisher": "The Motley Fool",
+        "title": "EVs Are Out of the Headlines and That's Exactly Why These 2 Stocks Are Buys",
+        "excerpt": "Robotaxis could be a $10 trillion opportunity. EV manufacturers are uniquely positioned to benefit.",
+        "url": "https://www.fool.com/investing/2026/05/09/evs-are-out-of-the-headlines-and-thats-exactly-why/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-09 18:10:57",
+        "publisher": "247 Wallst",
+        "title": "Paul Tudor Jones Warns Trump-Era Market Boom Could End in a 35% Crash. Here\u2019s Why He\u2019s Still Buying Stocks",
+        "excerpt": "Wall Street has embraced the return of pro-growth economic policies, lighter regulation, and an AI spending boom, helping push U.S. stocks to record territory again under President Donald Trump. Yet as warning signs pile up, legendary investor Paul Tudor Jones says the same force",
+        "url": "https://247wallst.com/investing/2026/05/09/paul-tudor-jones-warns-trump-era-market-boom-could-end-in-a-35-crash-heres-why-hes-still-buying-stocks/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-09 17:45:00",
+        "publisher": "Fool - Investing News",
+        "title": "Amazon CEO Andy Jassy Has Good News and Bad News for Nvidia Investors",
+        "excerpt": "Amazon is seeing accelerating demand for AI services, but it's not all going to Nvidia.",
+        "url": "https://www.fool.com/investing/2026/05/09/amazon-ceo-andy-jassy-has-good-news-and-bad-news-f/"
+      },
+      {
+        "symbol": "AMZN",
+        "publishedDate": "2026-05-09 16:00:00",
+        "publisher": "Fool - Investing News",
+        "title": "7 Reasons to Buy Amazon Stock Right Now",
+        "excerpt": "Here are seven, but there are many more.",
+        "url": "https://www.fool.com/investing/2026/05/09/7-reasons-to-buy-amazon-stock-right-now/"
+      }
+    ],
+    "Consumer_Staples": [
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-10 08:00:01",
+        "publisher": "CNBC",
+        "title": "Target is trying to win back busy families from Walmart, starting with the baby aisle",
+        "excerpt": "Target is trying to woo new parents and win back lapsed customers starting with the baby aisle. This spring, the big-box retailer has opened \"baby boutiques\" in about 200 stores, which include popular and higher-end brands like UPPAbaby, Stokke and Bugaboo.",
+        "url": "https://www.cnbc.com/2026/05/10/target.html"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-10 07:00:04",
+        "publisher": "Fool - Investing News",
+        "title": "XLP vs. PBJ: A Low-Cost Staples Giant Against a Concentrated Food-and-Beverage Specialist",
+        "excerpt": "Expense ratio, dividend yield, and portfolio breadth set these consumer staples ETFs apart-see how their strategies and holdings compare.",
+        "url": "https://www.fool.com/coverage/etfs/2026/05/10/xlp-vs-pbj-a-low-cost-staples-giant-against-a-concentrated-food-and-beverage-specialist/"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-10 05:32:01",
+        "publisher": "Business Insider",
+        "title": "Costco is a big winner of the gas price chaos",
+        "excerpt": "Average gas prices above $4.50 a gallon are prompting more drivers to fill up at warehouse clubs like Costco. The company saw a 3% boost in comparable fuel sales last month.",
+        "url": "https://www.businessinsider.com/costco-big-winner-sales-boost-drivers-flock-cheaper-gas-2026-5"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-09 11:30:09",
+        "publisher": "247 Wallst",
+        "title": "A $500,000 Dividend Portfolio That Pays More Than a Full-Time Minimum Wage Job",
+        "excerpt": "A full-time federal minimum wage worker in the United States earns $7.25 an hour, or about $15,080 a year before taxes, working 40 hours a week for 52 weeks. The question for anyone with capital: what does it take to clear that bar without having to ask anyone, \"Do you want fries",
+        "url": "https://247wallst.com/personal-finance/2026/05/09/a-500000-dividend-portfolio-that-pays-more-than-a-full-time-minimum-wage-job/"
+      },
+      {
+        "symbol": "WMT",
+        "publishedDate": "2026-05-08 15:30:00",
+        "publisher": "Fool - Investing News",
+        "title": "Amazon vs. Microsoft: Which Tech Giant Looks Better After Its Earnings Report?",
+        "excerpt": "Cloud revenue is just one part of the story for both tech giants.",
+        "url": "https://www.fool.com/investing/2026/05/08/amazon-vs-microsoft-which-tech-giant-looks-better/"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-08 14:31:00",
+        "publisher": "The Motley Fool",
+        "title": "The 2 Best Consumer Staples Stocks to Buy and Hold for Decades",
+        "excerpt": "Companies like Procter & Gamble and Colgate-Palmolive have embedded themselves so deeply into daily habits that buying their products stops feeling like a decision at all. Their growth narratives are less about convincing people to switch and more about scaling trust and upgradin",
+        "url": "https://www.fool.com/investing/2026/05/08/the-2-best-consumer-staples-stocks-to-buy-and-hold/"
+      },
+      {
+        "symbol": "PEP",
+        "publishedDate": "2026-05-08 13:50:08",
+        "publisher": "Forbes",
+        "title": "Fast Food Chains\u2014McDonald's, Taco Bell, Burger King\u2014Win As Low-Income Diners Crack Under Rising Gas Prices",
+        "excerpt": "\u201cThey're literally running out of money at the end of the month,\u201d Kraft Heinz's new CEO Steve Cahillane told Bloomberg. \u201cWe're seeing negative cash flows in the lower-income brackets where they're dipping into savings.",
+        "url": "https://www.forbes.com/sites/aliciapark/2026/05/08/fast-food-chains-mcdonalds-taco-bell-burger-king-win-as-low-income-diners-crack-under-rising-gas-prices/"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-08 13:01:24",
+        "publisher": "Zacks Investment Research",
+        "title": "Sally Beauty Gears Up to Report Q2 Earnings: What's in the Offing?",
+        "excerpt": "SBH is set to report Q2 results, with sales seen edging higher as resilient hair color demand and LCOD support traffic, even as earnings may dip year over year.",
+        "url": "https://www.zacks.com/stock/news/2918390/sally-beauty-gears-up-to-report-q2-earnings-what-s-in-the-offing?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_preview-2918390"
+      },
+      {
+        "symbol": "COST",
+        "publishedDate": "2026-05-08 12:52:08",
+        "publisher": "New York Post",
+        "title": "Costco plots major California expansion as it announces new store openings",
+        "excerpt": "Costco is planning an expansion of its stores in California with two new stores set to open soon.",
+        "url": "https://nypost.com/2026/05/08/business/costco-to-open-new-california-stores-in-major-expansion/"
+      },
+      {
+        "symbol": "PG",
+        "publishedDate": "2026-05-08 12:41:26",
+        "publisher": "247 Wallst",
+        "title": "Nationwide Survey: 83% of Americans Are Worried Social Security Won\u2019t Survive, and Here\u2019s What to Do About It",
+        "excerpt": "The fear is loud, and the data backs it up. According to the Nationwide Retirement Institute's 2025 Social Security Survey, 83% of Americans currently receiving or expecting to receive Social Security are concerned about the program's future. That worry is not happening in a vacu",
+        "url": "https://247wallst.com/personal-finance/2026/05/08/nationwide-survey-83-of-americans-are-worried-social-security-wont-survive-and-heres-what-to-do-about-it/"
+      }
+    ],
+    "Industrials": [
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-09 21:31:00",
+        "publisher": "Fool - Investing News",
+        "title": "Why Caterpillar Could Be the AI Stock of the Year",
+        "excerpt": "Data center construction is driving the demand for Caterpillar's products.",
+        "url": "https://www.fool.com/investing/2026/05/09/why-caterpillar-could-be-the-ai-stock-of-the-year/"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-05-09 12:47:07",
+        "publisher": "Zacks Investment Research",
+        "title": "Are You Looking for a High-Growth Dividend Stock?",
+        "excerpt": "Dividends are one of the best benefits to being a shareholder, but finding a great dividend stock is no easy task. Does Union Pacific (UNP) have what it takes?",
+        "url": "https://www.zacks.com/stock/news/2918285/are-you-looking-for-a-high-growth-dividend-stock?cid=CS-STOCKNEWSAPI-FT-tale_of_the_tape|yseop_template_5-2918285"
+      },
+      {
+        "symbol": "HON",
+        "publishedDate": "2026-05-08 16:16:36",
+        "publisher": "Reuters",
+        "title": "Honeywell's Quantinuum makes US IPO filing public",
+        "excerpt": "Industrial giant Honeywell's \u200cquantum computing company, Quantinuum, on Friday \u200bmade public \u200bits paperwork for \u2060an initial public \u200boffering in \u200bthe United States.",
+        "url": "https://www.reuters.com/technology/honeywells-quantinuum-makes-us-ipo-filing-public-2026-05-08/"
+      },
+      {
+        "symbol": "HON",
+        "publishedDate": "2026-05-08 16:11:00",
+        "publisher": "PRNewsWire",
+        "title": "HONEYWELL ANNOUNCES QUANTINUUM'S FILING OF REGISTRATION STATEMENT FOR PROPOSED INITIAL PUBLIC OFFERING",
+        "excerpt": "CHARLOTTE, N.C., May 8, 2026 /PRNewswire/ --\u00a0Honeywell (NASDAQ: HON) today announced that Quantinuum, a leading, full-stack quantum computing company, has publicly filed a registration statement on Form S-1 with the U.S. Securities and Exchange Commission (the \"SEC\") relating to ",
+        "url": "https://www.prnewswire.com/news-releases/honeywell-announces-quantinuums-filing-of-registration-statement-for-proposed-initial-public-offering-302767312.html"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-08 09:43:15",
+        "publisher": "Fool - Investing News",
+        "title": "Got $5,000? Rocket Lab Stock Could Be the Space Launch Upstart Investors Kick Themselves for Ignoring by 2035",
+        "excerpt": "Wall Street thinks Rocket Lab could grow revenue 10x in 10 years. That could be conservative.",
+        "url": "https://www.fool.com/investing/2026/05/08/got-5000-rocket-lab-space-launch-upstart-by-2035/"
+      },
+      {
+        "symbol": "CAT",
+        "publishedDate": "2026-05-08 09:31:34",
+        "publisher": "24/7 Wall Street",
+        "title": "2 Home Run Stocks I'd Buy With $1,000 Today",
+        "excerpt": "This article explores the growth experienced by Bloom Energy ( $BE ) and Caterpillar( $CAT ) over the past year.",
+        "url": "https://247wallst.com/investing/2026/05/08/2-home-run-stocks-id-buy-with-1000-today/"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-08 09:00:00",
+        "publisher": "PRNewsWire",
+        "title": "RTX's Pratt & Whitney completes fully digital assembly readiness review for NGAP engine",
+        "excerpt": "Platform-agnostic XA103 engine being built for test EAST HARTFORD, Conn., May 8, 2026 /PRNewswire/ -- Pratt & Whitney, an RTX (NYSE: RTX) business, has completed a fully digital technical assessment of its XA103 engine for the U.S. Air Force's Next Generation Adaptive Propulsion ",
+        "url": "https://www.prnewswire.com/news-releases/rtxs-pratt--whitney-completes-fully-digital-assembly-readiness-review-for-ngap-engine-302765712.html"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-05-08 08:45:00",
+        "publisher": "Fool - Investing News",
+        "title": "3 Transportation Stocks Built for the Long Haul",
+        "excerpt": "Transportation stocks are decidedly old-line industrial fare, but that status could work in favor of long-term investors.",
+        "url": "https://www.fool.com/investing/2026/05/08/3-transportation-stocks-built-for-the-long-haul/"
+      },
+      {
+        "symbol": "RTX",
+        "publishedDate": "2026-05-08 07:07:00",
+        "publisher": "The Motley Fool",
+        "title": "Forget the Iran War. Threats from Russia and China Just Won RTX an $833 Million Missile Contract.",
+        "excerpt": "The U.S. Navy awarded RTX $833 million to build SeaSparrow anti-air missiles over the next five years. SeaSparrows are ideal for defense against cruise missiles, drones, and even speedboats.",
+        "url": "https://www.fool.com/investing/2026/05/08/forget-the-iran-war-threats-from-russia-and-china/"
+      },
+      {
+        "symbol": "UNP",
+        "publishedDate": "2026-05-08 01:00:00",
+        "publisher": "Seeking Alpha",
+        "title": "Which Railroad Belongs In Your Dividend Portfolio?",
+        "excerpt": "Railroads are a textbook sector for dividend investors. Wide moats, irreplaceable networks, pricing power above inflation, and cash flow that keeps showing up quarter after quarter. Three names dominate the North American market - Canadian Pacific Kansas City, Canadian National R",
+        "url": "https://seekingalpha.com/article/4901117-which-railroad-belongs-in-your-dividend-portfolio"
+      }
+    ],
+    "Materials": [
+      {
+        "symbol": "LIN",
+        "publishedDate": "2026-05-09 08:15:00",
+        "publisher": "Seeking Alpha",
+        "title": "$5,000 Monthly Passive Income For Financial Freedom",
+        "excerpt": "In this article, we will discuss why financial independence is important, not just for retirees but for anyone aspiring for a stress-free and secure financial life. We present a buy-and-hold, easy-to-maintain portfolio formed with only nine funds. The portfolio is income-focused ",
+        "url": "https://seekingalpha.com/article/4899045-5000-monthly-passive-income-for-financial-freedom"
+      },
+      {
+        "symbol": "FCX",
+        "publishedDate": "2026-05-08 10:06:15",
+        "publisher": "Zacks Investment Research",
+        "title": "Freeport-McMoRan's Shares Up 48% in 6 Months: How to Play the Stock?",
+        "excerpt": "FCX has surged 48% in six months on strong copper prices and earnings, but higher costs and weaker volumes cloud its near-term outlook.",
+        "url": "https://www.zacks.com/stock/news/2918157/freeport-mcmoran-s-shares-up-48-in-6-months-how-to-play-the-stock?cid=CS-STOCKNEWSAPI-FT-analyst_blog|most_popular_stocks-2918157"
+      },
+      {
+        "symbol": "SHW",
+        "publishedDate": "2026-05-08 09:45:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Sherwin-Williams Increases Freight Utilization by 11% with Retail Store Delivery Solution by ITS Logistics",
+        "excerpt": "-- Partnership proves private fleets can improve utilization, protect brand standards, and scale for peak demand with strategic purchased transportation solutions. -- -- Partnership proves private fleets can improve utilization, protect brand standards, and scale for peak demand ",
+        "url": "https://www.globenewswire.com/news-release/2026/05/08/3291167/0/en/Sherwin-Williams-Increases-Freight-Utilization-by-11-with-Retail-Store-Delivery-Solution-by-ITS-Logistics.html"
+      }
+    ],
+    "Utilities": [
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-09 15:04:30",
+        "publisher": "24/7 Wall Street",
+        "title": "BlackRock's Larry Fink Says AI Is Creating a New Trillion Dollar Asset Class \u2014 And Trump's Policies May Accelerate It",
+        "excerpt": "Artificial intelligence has already reshaped the stock market.",
+        "url": "https://247wallst.com/investing/2026/05/09/blackrocks-larry-fink-says-ai-is-creating-a-new-trillion-dollar-asset-class-and-trumps-policies-may-accelerate-it/"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-08 16:26:00",
+        "publisher": "GlobeNewsWire",
+        "title": "Koryx Copper Files Technical Report with Updated Mineral Resource Estimate for the Haib Copper Project, Southern Namibia",
+        "excerpt": "LUXEMBOURG, May 08, 2026 (GLOBE NEWSWIRE) -- Koryx Copper S.A. (TSX:KRY.V) (NSX:KYX) (OTCQB:KRYXF) (\u201cKoryx\u201d or the \"Company\") is pleased to announce that it has publicly filed on SEDAR+ its new technical report with the updated mineral resource estimate (\u201cMRE\u201d) titled \u2018NI 43-101\u00a0",
+        "url": "https://www.globenewswire.com/news-release/2026/05/08/3291345/0/en/Koryx-Copper-Files-Technical-Report-with-Updated-Mineral-Resource-Estimate-for-the-Haib-Copper-Project-Southern-Namibia.html"
+      },
+      {
+        "symbol": "AEP",
+        "publishedDate": "2026-05-08 12:30:00",
+        "publisher": "PRNewsWire",
+        "title": "AEP Names Andy Gurgol Vice President of Investor Relations",
+        "excerpt": "Darcy Reese to Retire at End of Year COLUMBUS, Ohio, May 8, 2026 /PRNewswire/ -- American Electric Power (Nasdaq: AEP) has named Andy Gurgol vice president of Investor Relations, effective May 9. He will succeed Darcy Reese, who will retire at the end of the year.",
+        "url": "https://www.prnewswire.com/news-releases/aep-names-andy-gurgol-vice-president-of-investor-relations-302767110.html"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-08 11:45:00",
+        "publisher": "Fool - Investing News",
+        "title": "4 Dividend Stocks to Double Up on Right Now",
+        "excerpt": "Energy Transfer, Enbridge, Duke Energy, and NextEra Energy are all positioned to meet increasing power demands and pay shareholders respectable dividends in the process.",
+        "url": "https://www.fool.com/investing/2026/05/08/4-dividend-stocks-to-double-up-on-right-now/"
+      },
+      {
+        "symbol": "SO",
+        "publishedDate": "2026-05-08 09:26:10",
+        "publisher": "Zacks Investment Research",
+        "title": "Southern Company Q1 Earnings Beat on Rising Power Usage",
+        "excerpt": "SO beat Q1 EPS and revenues as weather-normal sales rose, led by a 42% surge in data center usage.",
+        "url": "https://www.zacks.com/stock/news/2917953/southern-company-q1-earnings-beat-on-rising-power-usage?cid=CS-STOCKNEWSAPI-FT-analyst_blog|earnings_article-2917953"
+      },
+      {
+        "symbol": "NEE",
+        "publishedDate": "2026-05-08 03:44:59",
+        "publisher": "Seeking Alpha",
+        "title": "NextEra Energy: The Utility Built For The Data Center Power Crunch",
+        "excerpt": "I am rating NextEra Energy a Strong Buy, because I believe the market is underestimating its role in solving AI's growing power constraint. NEE's growth should be driven by FPL's large-load demand, Energy Resources' 33 GW Backlog and data center hub that has grown to more than 60",
+        "url": "https://seekingalpha.com/article/4901162-nextera-energy-the-utility-built-for-the-data-center-power-crunch"
+      }
+    ],
+    "Real_Estate": [
+      {
+        "symbol": "WELL",
+        "publishedDate": "2026-05-10 06:31:16",
+        "publisher": "Seeking Alpha",
+        "title": "WELL Health Technologies Corp. (WELL:CA) Q1 2026 Earnings Call Transcript",
+        "excerpt": "WELL Health Technologies Corp. (WELL:CA) Q1 2026 Earnings Call Transcript",
+        "url": "https://seekingalpha.com/article/4902197-well-health-technologies-corp-well-ca-q1-2026-earnings-call-transcript"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-08 09:13:14",
+        "publisher": "The Motley Fool",
+        "title": "The Best Dividend Stocks to Buy and Hold Forever in 2026",
+        "excerpt": "REITs could be well-positioned for excellent total returns over the next few years. As interest rates gravitate lower, it should be a positive catalyst for REIT outperformance.",
+        "url": "https://www.fool.com/investing/2026/05/08/the-best-dividend-stocks-to-buy-and-hold-forever-i/"
+      },
+      {
+        "symbol": "AMT",
+        "publishedDate": "2026-05-08 08:19:00",
+        "publisher": "GuruFocus",
+        "title": "AMT DCF Analysis: Intrinsic Value $134 vs Price $180",
+        "excerpt": "On May 08, 2026, we delve into the DCF analysis for American Tower Corp (AMT), a company currently trading at $179.77. The stock has experienced a mixed perform",
+        "url": "https://www.gurufocus.com/news/8846003/amt-dcf-analysis-intrinsic-value-134-vs-price-180"
+      },
+      {
+        "symbol": "EQIX",
+        "publishedDate": "2026-05-08 07:37:00",
+        "publisher": "GuruFocus",
+        "title": "Is EQIX Overvalued? DCF Says Worth $383",
+        "excerpt": "On May 08, 2026, we delve into the DCF analysis for Equinix Inc (EQIX), a company that has shown notable price performance with a year-to-date increase of 40.0%",
+        "url": "https://www.gurufocus.com/news/8845878/is-eqix-overvalued-dcf-says-worth-383"
+      }
+    ],
+    "Communication": [
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-10 09:00:01",
+        "publisher": "CNBC",
+        "title": "Meet the YouTube whisperers, a booming class of advisors behind MrBeast and other million-dollar channels",
+        "excerpt": "With thousands of YouTube creators relying on the platform for income, many are turning to strategists as essential advisors on how to keep videos viral. Sports YouTube creator Jesser credits strategist Paddy Galloway for revolutionizing his video craft and allowing him to surge ",
+        "url": "https://www.cnbc.com/2026/05/10/youtube-advisors-mrbeast-top-creators-platform-viewership.html"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-10 08:00:01",
+        "publisher": "CNBC",
+        "title": "Alphabet's 160% rally in a year reflects value of owning 'most of the stack' in AI",
+        "excerpt": "Alphabet briefly surpassed Nvidia by market cap in after-hours trading this week. Wall Street is increasingly bullish on the company's ability to win in AI at various levels, whether it's in the battle for the top model or at the cloud infrastructure layer.",
+        "url": "https://www.cnbc.com/2026/05/10/alphabet-160percent-rally-in-year-reflects-value-of-owning-most-of-ai-stack.html"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-05-10 07:29:25",
+        "publisher": "CNBC",
+        "title": "Retailers are on a hiring spree. But consumers are sending warning signs",
+        "excerpt": "The retail trades added nearly 22,000 jobs in April, accounting for almost one-fifth of total job growth. In March, retailers posted their largest number of monthly job openings since 2023.",
+        "url": "https://www.cnbc.com/2026/05/10/retailer-hiring-consumer-warning-jobs-report.html"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-10 06:08:22",
+        "publisher": "247 Wallst",
+        "title": "Uh-Oh! President Trump\u2019s Landmark Tax Cuts Bill Could Be What Kills the Trump Bull Market",
+        "excerpt": "The stock market has been on a tear during President Donald Trump's second term. Since Jan. 20, 2025, the S&P 500 has climbed 23.4%. More stunningly, it has surged 48.5% since the April 8, 2025 tariff panic low, as investors decided the White House's trade fights were survivable ",
+        "url": "https://247wallst.com/investing/2026/05/10/uh-oh-president-trumps-landmark-tax-cuts-bill-could-be-what-kills-the-trump-bull-market/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-10 05:38:00",
+        "publisher": "The Motley Fool",
+        "title": "Prediction: Nvidia Will Outperform Alphabet and Amazon Combined Over the Next 3 Years",
+        "excerpt": "Nvidia is rapidly growing due to huge demand for AI processing power. Amazon and Alphabet are expanding long-term cloud infrastructure businesses that will thrive long after the AI build-out is complete.",
+        "url": "https://www.fool.com/investing/2026/05/10/prediction-nvidia-will-outperform-alphabet-and-ama/"
+      },
+      {
+        "symbol": "NFLX",
+        "publishedDate": "2026-05-10 04:05:00",
+        "publisher": "Fool - Investing News",
+        "title": "Stock-Split Follow-Up: How Nvidia, Alphabet, Amazon, Netflix, and Tesla Have Performed Since Their Historic Splits",
+        "excerpt": "History shows us a key trend.",
+        "url": "https://www.fool.com/investing/2026/05/10/stock-split-follow-up-how-nvidia-alphabet-perform/"
+      },
+      {
+        "symbol": "DIS",
+        "publishedDate": "2026-05-09 22:06:40",
+        "publisher": "MarketBeat",
+        "title": "Walt Disney Q2 Earnings Call Highlights",
+        "excerpt": "Walt Disney NYSE: DIS executives said the company outperformed its fiscal second-quarter guidance, citing stronger-than-expected revenue growth and continued progress in streaming, parks, sports and technology initiatives.",
+        "url": "https://www.marketbeat.com/instant-alerts/walt-disney-q2-earnings-call-highlights-2026-05-09/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-09 20:14:20",
+        "publisher": "Fool - Investing News",
+        "title": "Huge News for Alphabet Stock Investors",
+        "excerpt": "Alphabet gained market share in the cloud services segment in its recently completed quarter.",
+        "url": "https://www.fool.com/investing/2026/05/09/huge-news-for-alphabet-stock-investors/"
+      },
+      {
+        "symbol": "META",
+        "publishedDate": "2026-05-09 18:10:57",
+        "publisher": "247 Wallst",
+        "title": "Paul Tudor Jones Warns Trump-Era Market Boom Could End in a 35% Crash. Here\u2019s Why He\u2019s Still Buying Stocks",
+        "excerpt": "Wall Street has embraced the return of pro-growth economic policies, lighter regulation, and an AI spending boom, helping push U.S. stocks to record territory again under President Donald Trump. Yet as warning signs pile up, legendary investor Paul Tudor Jones says the same force",
+        "url": "https://247wallst.com/investing/2026/05/09/paul-tudor-jones-warns-trump-era-market-boom-could-end-in-a-35-crash-heres-why-hes-still-buying-stocks/"
+      },
+      {
+        "symbol": "GOOGL",
+        "publishedDate": "2026-05-09 17:45:00",
+        "publisher": "Fool - Investing News",
+        "title": "Amazon CEO Andy Jassy Has Good News and Bad News for Nvidia Investors",
+        "excerpt": "Amazon is seeing accelerating demand for AI services, but it's not all going to Nvidia.",
+        "url": "https://www.fool.com/investing/2026/05/09/amazon-ceo-andy-jassy-has-good-news-and-bad-news-f/"
+      }
+    ]
+  }
+}

@@ -323,10 +323,6 @@
                     <button data-filter="pending" class="news-tab" id="nf-pending">
                         <span data-i18n-tab="pending">待審核 ⏳</span><span class="news-tab-count" id="nf-pending-count">0</span>
                     </button>
-                    <span class="mx-1 text-zinc-600">|</span>
-                    <button data-filter="triage" class="news-tab" id="nf-triage" data-i18n="triage_tab">
-                        <span>🗂 Triage</span><span class="news-tab-count" id="nf-triage-count">0</span>
-                    </button>
                 </div>
 
                 <!-- Row 2: search + verdict chip filters + reset + match count -->
@@ -362,8 +358,6 @@
                     <div id="news-feed-detailed" class="space-y-6">
                         <!-- Data goes here -->
                     </div>
-                    <!-- Shallow triage feed (Triage tab renders here, hidden by default) -->
-                    <div id="news-triage-feed" class="space-y-3 hidden"></div>
                 </div>
 
                 <!-- Right sidebar: Trump Trade Signals
@@ -398,6 +392,7 @@
 
     <script src="i18n.js"></script>
     <script src="utils.js"></script>
+    <script src="news_components.js"></script>
     <script src="data-store.js"></script>
     <script src="page-news.js"></script>
 </body>

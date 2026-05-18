@@ -37,6 +37,74 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.15), 0 0 0 1px var(--vc, #eab308);
         }
 
+        /* V2.17.1 — Top 5 競品 collapsible block inside sector card */
+        .sec-comp {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(161,161,170,0.20);
+            cursor: default;
+        }
+        .sec-comp-summary {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.10em;
+            color: #a1a1aa;
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+            padding: 2px 0;
+        }
+        .sec-comp-summary::-webkit-details-marker { display: none; }
+        .sec-comp-summary:before {
+            content: '▸ ';
+            display: inline-block;
+            transition: transform 0.12s;
+        }
+        .sec-comp[open] .sec-comp-summary:before { transform: rotate(90deg); }
+        .sec-comp-summary:hover { color: var(--vc, #eab308); }
+        .sec-comp-table {
+            width: 100%;
+            margin-top: 6px;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+        .sec-comp-row {
+            border-bottom: 1px solid rgba(161,161,170,0.10);
+        }
+        .sec-comp-row:last-child { border-bottom: none; }
+        .sec-comp-row:hover {
+            background: rgba(161,161,170,0.06);
+        }
+        .sec-comp-ticker {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            padding: 4px 6px 4px 0;
+            width: 18%;
+        }
+        .sec-comp-ticker a {
+            color: var(--vc, #a1a1aa);
+            text-decoration: none;
+        }
+        .sec-comp-ticker a:hover {
+            text-decoration: underline;
+        }
+        .sec-comp-company {
+            color: var(--text-muted);
+            padding: 4px 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 0;
+        }
+        .sec-comp-mc {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-main);
+            text-align: right;
+            padding: 4px 0 4px 6px;
+            width: 22%;
+        }
+
         .score-ring {
             width: 62px; height: 62px;
             border-radius: 50%;

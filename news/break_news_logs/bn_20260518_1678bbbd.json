@@ -1,0 +1,250 @@
+{
+  "news_id": "bn_20260518_1678bbbd",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:02:19Z",
+  "last_activity_ts": "2026-05-18T10:11:01Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/options/articles/bunching-charitable-giving-single-401-094500857.html",
+    "feed_fingerprint": "bunching charitable giving into single 401 k tax",
+    "published": "2026-05-18T09:45:00+00:00",
+    "url_hash": "sha1:83845eb1627d84c37893b2bd4db315bf47d7455b"
+  },
+  "headline": "Bunching Charitable Giving Into a Single 401(k) Tax Year: The $37,120 Move Most High Earners Miss",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:10:19Z",
+      "latency_ms": 18851,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這則**不是市場新聞**。內容為個人稅務規劃技巧——把多年慈善捐贈集中到單一年度 (bunching)，搭配 401(k) 提撥拉高當年列舉扣除額門檻效益，標題的 $37,120 是 2026 年 401(k) catch-up 上限附近的數字噱頭。**對股價、產業、指數零直接影響**。Pre-triage 把它標成 sentiment 是關鍵字誤判 (catch 到 giving/tax/move)。硬要連結：高所得者稅務優化長期利多**捐贈者建議基金 (DAF)** 平台，間接沾邊資產管理商如 **SCHW**、**FIDELITY (未上市)**,但訊號極弱、不可交易。建議下游直接歸類 noise、不進 knowledge graph 主圖。",
+        "bull_points": [
+          "稅務優化內容長期帶動 DAF 平台資金流入",
+          "資產管理商 SCHW 為慈善基金受惠邊緣標的"
+        ],
+        "bear_points": [
+          "純個人理財教學,無任何市場催化",
+          "pre-triage sentiment 標籤為關鍵字誤判,應視為 noise"
+        ],
+        "final_take": "非市場新聞,歸類 noise 不可交易",
+        "entities": {
+          "tickers": [
+            "SCHW"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "tax planning",
+            "charitable giving",
+            "donor-advised funds"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:donor-advised-funds"
+          }
+        ],
+        "done": false,
+        "confidence": 0.88,
+        "rationale_short": "個人稅務文章,無市場影響,triage 誤標 sentiment"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:10:30Z",
+      "latency_ms": 10604,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這項稅務策略雖能優化高淨值人士的稅務規劃，但在宏觀市場層面幾乎毫無影響。正如前述，其僅對資產管理平台的 DAF 業務有微弱邊際效應，不足以作為投資訊號。這類「個人理財建議」歸類為噪音極為精準，不應納入市場動態追蹤體系。",
+        "bull_points": [
+          "稅務優化有利於推升資產管理平台管理資產規模。"
+        ],
+        "bear_points": [
+          "對個人資產配置影響極大，但對企業營收影響微乎其微。"
+        ],
+        "final_take": "純屬個人稅務規劃，對市場無實質參考價值。",
+        "entities": {
+          "tickers": [
+            "SCHW"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tax_planning"
+          }
+        ],
+        "done": true,
+        "confidence": 1.0,
+        "rationale_short": "純屬個人稅務規劃，前分析師已充分涵蓋，無後續市場價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:10:50Z",
+      "latency_ms": 20611,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪雙方已收斂——這是**個人稅務規劃內容**，非市場新聞。補一個結構性觀察支持 `done`:bunching 本質是把多年捐贈**時間挪移**到單一年度,跨週期淨流量為零,對資產管理 AUM 或 DAF 平台沒有新增資金,只是 timing 重分配,連『微弱邊際利多』都談不上。另注意原始 URL 路徑含 `markets/options`,屬 Yahoo 程式化內容農場的版位誤掛,進一步證實 pre-triage 的 sentiment 標記是雙重誤判。建議下游直接 drop,不寫入 knowledge graph,不佔 debate 配額。",
+        "bull_points": [
+          "高所得稅務優化長期墊高 DAF 滲透率"
+        ],
+        "bear_points": [
+          "捐贈時間挪移,跨週期淨流量為零,無新增 AUM",
+          "URL 屬程式化內容農場,非真實市場事件",
+          "訊號強度為零,不可交易"
+        ],
+        "final_take": "確認 noise,建議 drop 不入圖譜。",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": true,
+        "rationale_short": "雙方已收斂為 noise,僅補淨流量為零與 URL 誤掛兩點佐證,無可交易角度。",
+        "confidence": 0.93
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:11:01Z",
+      "latency_ms": 10415,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這類新聞頻繁因「401(k)」或「Tax」等關鍵字被演算法誤判為市場動態，進而被歸類至 `markets/options` 版位。除了前述的時程挪移效應外，這更凸顯了內容農場利用標題黨與自動歸類獲取流量的現象。對投資決策而言，這屬於典型的無效噪音，無法產生任何具市場影響力的投資訊號。經確認無新的 substantive 市場結構性論點，故應將此類內容歸類為無效噪音。",
+        "bull_points": [
+          "媒體透過演算法分類增加流量。",
+          "稅務規劃屬於高淨值客戶服務範疇。"
+        ],
+        "bear_points": [
+          "新聞標題與市場實際動態脫鉤。",
+          "對資本市場無實質影響。"
+        ],
+        "final_take": "應將此類內容歸類為無效噪音，無需納入監控。",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": true,
+        "confidence": 1.0,
+        "rationale_short": "無新的市場觀點，且前輪已充分論證其為噪音。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "SCHW"
+      ],
+      "sectors": [
+        "Financials"
+      ],
+      "themes": [
+        "charitable giving",
+        "donor-advised funds",
+        "tax planning"
+      ],
+      "tech_keywords": []
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:donor-advised-funds"
+      },
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tax_planning"
+      }
+    ],
+    "bull_summary": [
+      "稅務優化內容長期帶動 DAF 平台資金流入",
+      "資產管理商 SCHW 為慈善基金受惠邊緣標的",
+      "稅務優化有利於推升資產管理平台管理資產規模。",
+      "高所得稅務優化長期墊高 DAF 滲透率",
+      "媒體透過演算法分類增加流量。",
+      "稅務規劃屬於高淨值客戶服務範疇。"
+    ],
+    "bear_summary": [
+      "純個人理財教學,無任何市場催化",
+      "pre-triage sentiment 標籤為關鍵字誤判,應視為 noise",
+      "對個人資產配置影響極大，但對企業營收影響微乎其微。",
+      "捐贈時間挪移,跨週期淨流量為零,無新增 AUM",
+      "URL 屬程式化內容農場,非真實市場事件",
+      "訊號強度為零,不可交易"
+    ],
+    "final_take": "應將此類內容歸類為無效噪音，無需納入監控。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-18T10:11:01Z",
+    "close_reason": "both_done",
+    "divergence_note": ""
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

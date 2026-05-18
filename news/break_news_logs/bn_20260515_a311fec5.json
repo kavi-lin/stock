@@ -1,0 +1,236 @@
+{
+  "news_id": "bn_20260515_a311fec5",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T15:30:24Z",
+  "last_activity_ts": "2026-05-15T15:31:45Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4593959-lifeward-expects-2026-revenue-similar-to-2025-following-oratech-acquisition-and-10m?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "lifeward expects 2026 revenue similar 2025 following oratech",
+    "published": "2026-05-15T15:21:48+00:00",
+    "url_hash": "sha1:6820b7e6d6582548269aa107f1cdc1a458547f99"
+  },
+  "headline": "Lifeward expects 2026 revenue similar to 2025 following Oratech acquisition and $10M convertible note financing",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "corporate",
+    "shallow_score": 1.5,
+    "bull_case": "整合效益釋放",
+    "bear_case": "交易風險存在",
+    "sector_view": "產業整併加速",
+    "macro_view": "槓桿率抬升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:31:30Z",
+      "latency_ms": 3448,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 596,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "27c49d8f-78a0-4c39-bb88-412d155b6061",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "ca6f0a25-3edb-4193-aa52-592e11240d69"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:31:41Z",
+      "latency_ms": 10866,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Lifeward (LFWD) 的營收成長預期平淡，顯示收購 Oratech 的整合綜效尚待觀察，且 1,000 萬美元的可轉債融資凸顯了中小型 MedTech 公司面臨的資金消耗壓力。市場對此類機器人醫療裝置的長期 adoption 仍有疑慮，特別是在保險給付環境未明顯改善下，未來需密切監控其 burn rate 與 Oratech 產品線的 scaling 能力。",
+        "bull_points": [
+          "收購 Oratech 擴張產品組合與市場覆蓋。",
+          "取得 1,000 萬美元融資保障營運現金流。"
+        ],
+        "bear_points": [
+          "營收展望平淡，顯示短期成長乏力。",
+          "可轉債可能導致後續股權稀釋風險。",
+          "醫療機器人產品推廣仍面臨保險支付挑戰。"
+        ],
+        "final_take": "營收成長疲弱且具稀釋風險，短期建議保守以待。",
+        "entities": {
+          "tickers": [
+            "LFWD"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Medical Robotics",
+            "Wearable Tech"
+          ],
+          "tech_keywords": [
+            "Wearable Robotics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LFWD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dilution_risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析財務稀釋風險與醫療機器人市場採用阻力。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:31:45Z",
+      "latency_ms": 3469,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 579,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "dd86738a-c345-414f-8bc0-9901737cff99",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "cfdeec50-2c2a-4137-8a78-c139124c43cb"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "LFWD"
+      ],
+      "sectors": [
+        "Healthcare"
+      ],
+      "themes": [
+        "Medical Robotics",
+        "Wearable Tech"
+      ],
+      "tech_keywords": [
+        "Wearable Robotics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:LFWD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dilution_risk"
+      }
+    ],
+    "bull_summary": [
+      "收購 Oratech 擴張產品組合與市場覆蓋。",
+      "取得 1,000 萬美元融資保障營運現金流。"
+    ],
+    "bear_summary": [
+      "營收展望平淡，顯示短期成長乏力。",
+      "可轉債可能導致後續股權稀釋風險。",
+      "醫療機器人產品推廣仍面臨保險支付挑戰。"
+    ],
+    "final_take": "營收成長疲弱且具稀釋風險，短期建議保守以待。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T15:31:45Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: HEADWIND_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T15:31:30Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T15:31:45Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

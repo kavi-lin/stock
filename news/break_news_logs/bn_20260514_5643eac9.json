@@ -1,0 +1,602 @@
+{
+  "news_id": "bn_20260514_5643eac9",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T00:45:43Z",
+  "last_activity_ts": "2026-05-14T00:55:03Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/20-stocks-in-the-s-p-500-of-companies-with-soaring-sales-and-improving-profit-margins-eb74005a?mod=mw_rss_topstories",
+    "feed_fingerprint": "20 stocks s p 500 companies soaring sales",
+    "published": "2026-05-14T00:43:00+00:00",
+    "url_hash": "sha1:63d1422bfaed345d47f652e7ad9ab874878db9f5"
+  },
+  "headline": "20 stocks in the S&P 500 of companies with soaring sales and improving profit margins",
+  "headline_zh": null,
+  "raw_summary": "This earnings season’s big winners include makers of AI-oriented hardware, but the list also includes some surprises.",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 1.5,
+    "bull_case": "現金流改善空間",
+    "bear_case": "成長放緩風險",
+    "sector_view": "行業內相對強弱",
+    "macro_view": "成本控制關鍵",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:53:06Z",
+      "latency_ms": 19489,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "MarketWatch screen filters S&P 500 for accelerating revenue + margin expansion — classic operating-leverage signal late in earnings season. AI hardware names dominate (NVDA, AVGO, MU, VRT, SMCI, ANET, DELL) where HBM3e pricing, CoWoS-L allocation, and Blackwell ramp drove gross margin step-ups. Real surprises sit outside semis: hyperscaler-adjacent power/cooling (VRT, ETN), GLP-1 beneficiaries (LLY) with mix shift lifting margin, and select retail/consumer names showing SG&A discipline. Read-through: screen confirms earnings breadth widening beyond Mag-7 into AI infra second-derivative (power, networking, ODM). Risk — list is backward-looking; soaring sales comps get tougher into 2H26, and margin peak is typically 1-2 quarters after revenue peak. Watch concentration: if AI capex names still dominate the list, breadth thesis weakens.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "MU",
+            "VRT",
+            "SMCI",
+            "ANET",
+            "DELL",
+            "ETN",
+            "LLY"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials",
+            "Health Care",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "AI infra second-derivative",
+            "power & cooling",
+            "GLP-1",
+            "operating leverage",
+            "margin expansion"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell",
+            "liquid cooling",
+            "400G/800G ethernet",
+            "ODM AI server"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:blackwell-ramp"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:power-cooling"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:power-cooling"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:LLY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:glp-1"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:DELL",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai-capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Screen confirms AI infra margin expansion + early breadth into power/GLP-1; backward-looking, comps harder 2H26."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:53:23Z",
+      "latency_ms": 16666,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While the list is dominated by AI chipmakers, Arista Networks (ANET) represents a crucial second-order beneficiary. The immense data movement required for training and inference in large AI models necessitates high-bandwidth, low-latency networking. ANET's advanced Ethernet switches are vital for building these interconnected AI data centers. This sustained demand allows them to command favorable pricing and achieve economies of scale, directly contributing to their impressive sales growth and expanding profit margins. Their inclusion underscores the breadth of the AI infrastructure build-out, extending beyond just accelerators to the essential communication fabric.",
+        "entities": {
+          "tickers": [
+            "ANET",
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI Networking Infrastructure",
+            "Data Center Interconnects",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "400GbE",
+            "800GbE",
+            "Ethernet"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI_Networking_Infrastructure"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Data_Center_Interconnects"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "Adds Arista Networks as a key AI networking beneficiary beyond AI chips."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:53:43Z",
+      "latency_ms": 20142,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: the **margin-expansion** half of the screen is quietly flagging a **memory super-cycle inflection** that ANET/accelerator commentary glosses over. MU's gross margin is re-rating from sub-20% trough to mid-30s because HBM3e is sold out through 2026 at LTA pricing — a structural shift, not cyclical. Second-order: this squeezes **commodity DRAM/NAND wafer supply** (HBM consumes ~3x wafers per bit vs DDR5), forcing PC/handset OEMs to absorb cost — watch DELL/HPQ margin commentary next quarter. Contra-risk nobody's pricing: **Samsung HBM3e qualification at NVDA** (rumored 1H26) breaks Hynix/Micron duopoly pricing power. If qualified, spot HBM ASPs roll over 15-20% — MU's margin peak arrives earlier than the screen implies. Supply-chain node to watch: **Advantest (6857.T) HBM testers** — bottleneck for any new entrant ramp.",
+        "entities": {
+          "tickers": [
+            "MU",
+            "DELL",
+            "HPQ",
+            "NVDA",
+            "ANET"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "HBM super-cycle",
+            "AI capex second-derivative",
+            "memory pricing inflection",
+            "margin peak risk"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "DDR5",
+            "NAND",
+            "LTA pricing",
+            "HBM testers",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e-lta-pricing"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:samsung-hbm-qualification"
+          },
+          {
+            "subject": "ticker:DELL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dram-wafer-squeeze"
+          },
+          {
+            "subject": "ticker:HPQ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dram-wafer-squeeze"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:MU"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "New angle: HBM wafer crowding-out effect on commodity DRAM + Samsung qualification contra-risk to MU margin peak — supply-chain specifics absent from prior thread."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:53:59Z",
+      "latency_ms": 16259,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Beyond the direct AI chipmakers and networking providers, the exceptional performance highlighted by this screen underscores the critical role of advanced semiconductor manufacturing. Taiwan Semiconductor Manufacturing Company (TSMC) is the linchpin here. As the primary foundry for leading AI chip designers like NVIDIA and AMD, TSMC directly benefits from the surging demand for accelerators. Its ability to produce these complex chips at scale, leveraging advanced nodes and packaging technologies like CoWoS-L, is fundamental to the entire AI hardware ecosystem's success. TSMC's robust sales and margin expansion would be a direct reflection of the sustained AI capex across hyperscalers and enterprises.",
+        "entities": {
+          "tickers": [
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI Hardware Manufacturing",
+            "Semiconductor Foundry",
+            "AI Capex"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "advanced nodes"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI hardware manufacturing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Highlights TSMC as a key enabler of AI hardware growth, benefiting from foundry demand."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:54:37Z",
+      "latency_ms": 37227,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle prior thread missed: **power-grid transformer bottleneck** as the binding constraint on the entire AI infra trade. Screen flagged ETN/VRT margin expansion, but real chokepoint sits one layer deeper at **GEV (GE Vernova)** — large power transformer (LPT) lead times blew out from 50 weeks to 120+ weeks, and GEV's grid-equipment backlog crossed $50B with pricing up double-digits. Second-order: hyperscaler data-center commissioning slips 6-9 months in PJM/ERCOT not from chip supply but from substation gear. Contra to the AI capex bull case — **Eaton's order book shows decelerating book-to-bill** (1.2x vs 1.4x peak), suggesting hyperscaler CapEx pull-forward already peaked. Supply-chain node to watch: **Hitachi Energy (private, but Hitachi 6501.T proxy)** controls ~40% of HVDC converter market — true bottleneck for gigawatt-scale AI campuses.",
+        "entities": {
+          "tickers": [
+            "GEV",
+            "ETN",
+            "VRT",
+            "NVDA",
+            "AVGO",
+            "MU",
+            "DELL",
+            "ANET"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "power grid bottleneck",
+            "data center buildout",
+            "electrification"
+          ],
+          "tech_keywords": [
+            "large power transformer",
+            "HVDC",
+            "substation",
+            "PJM",
+            "ERCOT",
+            "gigawatt campus"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:grid-bottleneck"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:capex-pull-forward-peak"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai-datacenter-buildout"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:hyperscaler-commissioning-delay"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Power-grid LPT/HVDC bottleneck + Eaton book-to-bill decel — neither raised. GEV named, contra-risk on capex peak added."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:55:03Z",
+      "latency_ms": 26362,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Beyond the AI hardware narrative and distinct healthcare trends, a critical 'surprise' winner category likely includes industrial automation and digital transformation enablers, such as Honeywell (HON). These companies are experiencing robust demand driven by secular shifts towards operational efficiency, IoT integration, and smart building technologies across manufacturing, energy, and commercial sectors. Their ability to leverage scale, offer integrated solutions, and provide high-margin software and services contributes significantly to expanding profit margins, showcasing a different, but equally powerful, engine of growth beyond the current AI hype cycle.",
+        "entities": {
+          "tickers": [
+            "HON"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "Industrial Automation",
+            "Digital Transformation",
+            "Energy Efficiency",
+            "IoT"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:HON",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:industrial automation demand"
+          },
+          {
+            "subject": "ticker:HON",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:digital transformation trends"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces industrial automation as a surprise growth driver beyond AI hardware."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ANET",
+        "AVGO",
+        "DELL",
+        "ETN",
+        "GEV",
+        "HON",
+        "HPQ",
+        "LLY",
+        "MU",
+        "NVDA",
+        "SMCI",
+        "TSM",
+        "VRT"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Health Care",
+        "Industrials",
+        "Information Technology",
+        "Semiconductors",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI Capex",
+        "AI Hardware Manufacturing",
+        "AI Networking Infrastructure",
+        "AI capex",
+        "AI capex second-derivative",
+        "AI infra second-derivative",
+        "Data Center Interconnects",
+        "Digital Transformation",
+        "Energy Efficiency",
+        "GLP-1",
+        "HBM super-cycle",
+        "Industrial Automation",
+        "IoT",
+        "Semiconductor Foundry",
+        "data center buildout",
+        "electrification",
+        "margin expansion",
+        "margin peak risk",
+        "memory pricing inflection",
+        "operating leverage",
+        "power & cooling",
+        "power grid bottleneck"
+      ],
+      "tech_keywords": [
+        "400G/800G ethernet",
+        "400GbE",
+        "800GbE",
+        "Blackwell",
+        "CoWoS-L",
+        "DDR5",
+        "ERCOT",
+        "Ethernet",
+        "HBM testers",
+        "HBM3e",
+        "HVDC",
+        "LTA pricing",
+        "NAND",
+        "ODM AI server",
+        "PJM",
+        "advanced nodes",
+        "gigawatt campus",
+        "large power transformer",
+        "liquid cooling",
+        "substation"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:blackwell-ramp"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:power-cooling"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:power-cooling"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:glp-1"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:DELL",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI_Networking_Infrastructure"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Data_Center_Interconnects"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e-lta-pricing"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:samsung-hbm-qualification"
+      },
+      {
+        "subject": "ticker:DELL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dram-wafer-squeeze"
+      },
+      {
+        "subject": "ticker:HPQ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dram-wafer-squeeze"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:MU"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI hardware manufacturing"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:grid-bottleneck"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:capex-pull-forward-peak"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai-datacenter-buildout"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:hyperscaler-commissioning-delay"
+      },
+      {
+        "subject": "ticker:HON",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:industrial automation demand"
+      },
+      {
+        "subject": "ticker:HON",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:digital transformation trends"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:55:03Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CUSTOMER_OF, HEADWIND_FROM, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

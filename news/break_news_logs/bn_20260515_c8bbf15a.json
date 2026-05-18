@@ -1,0 +1,84 @@
+{
+  "news_id": "bn_20260515_c8bbf15a",
+  "schema_version": 1,
+  "state": "partial_closed",
+  "fetched_at": "2026-05-15T06:48:26Z",
+  "last_activity_ts": "2026-05-15T14:00:49Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/15/honda-shares-rise-even-after-company-reports-operating-losses-.html",
+    "feed_fingerprint": "honda shares rise over 7 investors shrug off",
+    "published": "2026-05-15T04:26:49+00:00",
+    "url_hash": "sha1:b33fd1e9e7796b5fa49de41cad56121d3413f45e"
+  },
+  "headline": "Honda shares rise over 7% as investors shrug off first operating loss in nearly 70 years",
+  "headline_zh": null,
+  "raw_summary": "Honda Motor rose over 7% on Friday, even after posting its first annual operating loss in nearly 70 years.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:00:49Z",
+      "latency_ms": 9921564,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260515_c8bbf15a.c0.txt",
+      "parsed": {
+        "commentary": "",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": -1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "NEUTRAL",
+    "merged_entities": {
+      "tickers": [],
+      "sectors": [],
+      "themes": [],
+      "tech_keywords": []
+    },
+    "merged_relations": [],
+    "bull_summary": [],
+    "bear_summary": [],
+    "final_take": null,
+    "final_take_by": null,
+    "rounds_completed": 1,
+    "closed_at": "2026-05-15T14:00:49Z",
+    "close_reason": "timeout",
+    "divergence_note": ""
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T14:00:49Z",
+      "where": "round0.claude",
+      "msg": "rc=-1 err=timeout after 180s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

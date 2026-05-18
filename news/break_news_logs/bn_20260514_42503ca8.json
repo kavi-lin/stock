@@ -1,0 +1,270 @@
+{
+  "news_id": "bn_20260514_42503ca8",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:30:40Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/5e7634000e5f",
+    "feed_fingerprint": "futu:TSM:2a3bf2a0c5",
+    "published": "2026-05-14T22:21:25+08:00",
+    "url_hash": "sha1:780519fd69ba48de9c025b1593829611b10ce494"
+  },
+  "headline": "台積電漲超4%逼近歷史新高，繼黃仁勳後臺積電又拋出「三層蛋糕」理論",
+  "headline_zh": null,
+  "raw_summary": "台積電漲超4%逼近歷史新高，繼黃仁勳後臺積電又拋出「三層蛋糕」理論>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 4.5,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:30:19Z",
+      "latency_ms": 7860,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 863,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "db85b511-0421-41c6-a603-ad8942510b5f",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "b4957401-a8d3-4176-8962-a11c8b513fca"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:30:33Z",
+      "latency_ms": 14093,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "台積電股價逼近歷史新高，顯示市場對其先進製程與AI相關業務的高度信心。黃仁勳提出的「三層蛋糕」理論，精準描繪了AI晶片從GPU核心、先進封裝到晶圓製造的垂直整合藍圖，台積電在這三大關鍵環節皆佔據核心地位。此輪股價上漲不僅證明其技術領先，更預示著AI硬體需求的持續強勁增長。",
+        "bull_points": [
+          "AI 需求強勁，推升先進製程與封裝營收。",
+          "台積電 N3P 製程及 CoWoS-L 封裝技術領先。",
+          "為 NVIDIA 等 AI 巨頭提供關鍵製造支持。"
+        ],
+        "bear_points": [
+          "地緣政治風險是長期隱憂。",
+          "先進封裝產能仍是潛在瓶頸。",
+          "三星等競爭者持續追趕。"
+        ],
+        "final_take": "看多 AI 趨勢，但需審慎評估風險。",
+        "entities": {
+          "tickers": [
+            "TSMC",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "AI hardware",
+            "Advanced Packaging"
+          ],
+          "tech_keywords": [
+            "N3P",
+            "CoWoS-L",
+            "Blackwell",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI hardware"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "股價走勢強勁，反映AI超級週期前景。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:30:40Z",
+      "latency_ms": 6672,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 563,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "8e3f9944-e482-4b74-a18c-9336c2661cf0",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "8e25e917-d683-4474-b2ff-0b238e447fb5"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "NVDA",
+        "TSMC"
+      ],
+      "sectors": [
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI hardware",
+        "Advanced Packaging"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "CoWoS-L",
+        "HBM3e",
+        "N3P"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI hardware"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      }
+    ],
+    "bull_summary": [
+      "AI 需求強勁，推升先進製程與封裝營收。",
+      "台積電 N3P 製程及 CoWoS-L 封裝技術領先。",
+      "為 NVIDIA 等 AI 巨頭提供關鍵製造支持。"
+    ],
+    "bear_summary": [
+      "地緣政治風險是長期隱憂。",
+      "先進封裝產能仍是潛在瓶頸。",
+      "三星等競爭者持續追趕。"
+    ],
+    "final_take": "看多 AI 趨勢，但需審慎評估風險。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:30:40Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, SUPPLIES_TO"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:30:19Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:30:40Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

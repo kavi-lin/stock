@@ -1,0 +1,730 @@
+{
+  "news_id": "bn_20260514_838e47dc",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T09:43:16Z",
+  "last_activity_ts": "2026-05-14T09:59:49Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/a-look-at-which-assets-are-following-the-script-and-which-arent-on-day-75-of-the-war-bdd52fba?mod=mw_rss_topstories",
+    "feed_fingerprint": "stock market breaking rules inflation playbook here what",
+    "published": "2026-05-14T09:38:00+00:00",
+    "url_hash": "sha1:4c9d21004775d28b3774980d79c1bed4d5c7401c"
+  },
+  "headline": "The stock market is breaking the rules of the inflation playbook. Here is what is different this time",
+  "headline_zh": null,
+  "raw_summary": "A look at which assets are following the script, and which aren’t, on day 75 of the war",
+  "triage": {
+    "news_type": "macro_data",
+    "shallow_score": 2.0,
+    "bull_case": "經濟動能疲軟",
+    "bear_case": "衰退擔憂加重",
+    "sector_view": "防守股相對強勢",
+    "macro_view": "降息預期升溫",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T09:54:48Z",
+      "latency_ms": 26197,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**通膨劇本失靈**第 75 天：傳統 risk-off 腳本 (long bond rally / USD bid / gold spike / equity dump) 部分失準。**股債正相關**回歸顯示市場定價的是**stagflation-lite**而非 pure recession — 名目殖利率黏在 4%+ 但 breakeven 沒崩，real yield 撐住。**Gold + BTC 同步創高**代表 debasement trade > flight-to-safety trade，受惠標的偏向**hard asset + 抗匯率貶值現金流**：NEM / GLD / 大宗商品 producer (FCX, XOM)。傳統 defensive (XLU, XLP) 表現反而落後 — rate-sensitive bucket 被 sticky inflation 卡住。AI capex 巨頭 (NVDA, MSFT) 維持相對強勢因 **pricing power + 美元計價海外營收 hedge**。劇本破裂的真實風險是 **Fed put 失效** — 若通膨二次抬頭，cut 預期被 repricing，long-duration tech 估值首當其衝。",
+        "bull_points": [
+          "Hard asset + 商品 producer 受惠 debasement trade",
+          "AI mega-cap pricing power 抗通膨黏性",
+          "Real yield 未失控，risk asset 仍有 carry"
+        ],
+        "bear_points": [
+          "股債正相關回歸，60/40 對沖失效",
+          "Fed put 重新定價風險壓 long-duration",
+          "傳統 defensive sector 在 stagflation 下雙殺"
+        ],
+        "final_take": "偏多 hard asset + AI 巨頭，減碼 rate-sensitive defensive",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "NEM",
+            "GLD",
+            "FCX",
+            "XOM",
+            "XLU",
+            "XLP",
+            "TLT"
+          ],
+          "sectors": [
+            "Materials",
+            "Energy",
+            "Information Technology",
+            "Utilities",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "stagflation",
+            "debasement trade",
+            "AI capex",
+            "Fed put repricing",
+            "stock-bond correlation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:NEM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:debasement-trade"
+          },
+          {
+            "subject": "ticker:GLD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:debasement-trade"
+          },
+          {
+            "subject": "ticker:FCX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:stagflation"
+          },
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:stagflation"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:XLU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:sticky-inflation"
+          },
+          {
+            "subject": "ticker:XLP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:sticky-inflation"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fed-put-repricing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "macro 框架題，無 hard catalyst，confidence 中等"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T09:57:48Z",
+      "latency_ms": 180018,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_838e47dc.c1.txt",
+      "parsed": {
+        "commentary": "",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": -1
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T09:58:13Z",
+      "latency_ms": 25242,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的 **2nd-order 受害者** — **regional banks (KRE)** 與 **CRE-heavy REITs (BXP, VNO)**。劇本失靈的真正暗雷不在大盤 index，而在**殖利率曲線陡峭化 + 信用利差未擴張**的詭異組合：銀行 NIM 看似改善，但**商辦再融資牆 2026-2027 集中到期**，sticky inflation 意味 refi rate 鎖在 7%+，**CMBS delinquency rate 已破 GFC 高點**。另一個沒人提的 contra — **USD DXY 跌但新興市場股 (EEM) 沒接到棒**，顯示這次不是 risk-on rotation 而是 **US fiscal credibility discount**，資金外流去 gold/BTC 而非 EM equity。供應鏈節點看 **CoWoS-L 產能** (TSM/AMAT)：若 Fed put 失效觸發 tech 估值殺，AI capex order 遞延，**ASML EUV backlog visibility** 是第一個 leading indicator。",
+        "bull_points": [
+          "Gold/BTC debasement trade 受惠 hard asset producer (FCX/NEM)",
+          "AI mega cap 海外營收美元 hedge + pricing power 抗通膨"
+        ],
+        "bear_points": [
+          "KRE/CRE REIT 撞 2026-27 refi wall + CMBS 違約破 GFC 高",
+          "EEM 沒接 USD 弱棒 = US fiscal credibility 折價非 risk-on",
+          "CoWoS-L 訂單若鬆動 = AI capex 拐點 leading signal"
+        ],
+        "final_take": "看空 regional bank + CRE REIT，AI capex 觀察 CoWoS-L backlog",
+        "entities": {
+          "tickers": [
+            "KRE",
+            "BXP",
+            "VNO",
+            "EEM",
+            "TSM",
+            "AMAT",
+            "ASML",
+            "NVDA",
+            "FCX",
+            "NEM",
+            "GLD"
+          ],
+          "sectors": [
+            "Regional Banks",
+            "Commercial Real Estate",
+            "Semiconductors",
+            "Emerging Markets"
+          ],
+          "themes": [
+            "debasement trade",
+            "CRE refi wall",
+            "US fiscal credibility discount",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "EUV",
+            "CMBS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:KRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cre_refi_wall"
+          },
+          {
+            "subject": "ticker:BXP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cre_refi_wall"
+          },
+          {
+            "subject": "ticker:EEM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us_fiscal_credibility_discount"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ai_capex"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai_capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補 CRE/regional bank 2nd-order 暗雷 + EM 沒接美元弱棒 contra"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T09:58:35Z",
+      "latency_ms": 22184,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "文章聚焦於傳統通膨劇本失靈，以及如黃金、比特幣與 AI 巨頭 (NVDA) 等非典型受惠者。然而，此討論忽略了另一股正在崛起的、獨立於 AI 敘事的強勁成長動力：GLP-1 藥物。以諾和諾德 (NVO) 為例，這類藥物不僅顯著改善了製藥公司的營收前景，也代表了一種新的、與利率和傳統通膨指標關聯性較低的消費結構性轉變。市場目前對此趨勢的潛在影響力，以及其獨立於 AI 資本支出週期的特性，可能尚未充分定價。",
+        "bull_points": [
+          "GLP-1 藥物驅動醫療保健產業新成長",
+          "製藥商營收展望因 GLP-1 顯著提升"
+        ],
+        "bear_points": [
+          "GLP-1 藥物需求可持續性與競爭",
+          "潛在的藥價監管與替代療法風險"
+        ],
+        "final_take": "GLP-1 勢頭強勁，留意其產業獨特性。",
+        "entities": {
+          "tickers": [
+            "NVO"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "GLP-1",
+            "Healthcare Innovation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:GLP-1"
+          },
+          {
+            "subject": "theme:GLP-1",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:breaking inflation playbook"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "補充 GLP-1 藥物主題，強調其與 AI 獨立的成長性。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T09:59:04Z",
+      "latency_ms": 28413,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Gemini 點出 **GLP-1** 是好補位，但漏掉**二階受害者鏈**：肥胖症藥消除需求 → **食品/速食/含糖飲料 (KO, MDLZ, MCD)** EPS 被結構性下修，**洗腎 (DVA)** 與**骨科植入 (SYK, ZBH)** 長線 TAM 萎縮。更關鍵的**供應鏈節點**：GLP-1 是**胜肽藥**，依賴**自動化合成肽 CDMO** — **Bachem (BANB.SW) 與 Polypeptide (PPL.SW)** 產能已賣到 2027，**Catalent (now NVO 子公司)** 是 Wegovy fill-finish 瓶頸。美股 pure play 看 **Eli Lilly (LLY)** — Zepbound + Mounjaro 雙引擎，**口服 orforglipron Ph3 readout 2026 H2**，若成功直接 disrupt 注射劑龍頭 NVO。另一個被忽略的 contra：GLP-1 與**通膨劇本失靈**其實**互斥** — 若 Fed put 失效觸發 risk-off，**高 P/E healthcare growth (LLY fwd P/E ~55x)** 估值殺幅不會比 tech 小。",
+        "bull_points": [
+          "LLY orforglipron 口服劑 2026 H2 readout 為下個催化",
+          "肽 CDMO (Bachem/Polypeptide) 產能滿載至 2027",
+          "GLP-1 結構性需求獨立於利率週期"
+        ],
+        "bear_points": [
+          "LLY fwd P/E 55x 對 rate shock 敏感度高",
+          "食品/洗腎/骨科 TAM 被結構性侵蝕",
+          "口服劑成功反噬 NVO 注射劑護城河"
+        ],
+        "final_take": "看多 LLY 但需控制部位、避開 GLP-1 二階受害者",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "NVO",
+            "KO",
+            "MDLZ",
+            "MCD",
+            "DVA",
+            "SYK",
+            "ZBH"
+          ],
+          "sectors": [
+            "Health Care",
+            "Consumer Staples",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "GLP-1",
+            "obesity drugs",
+            "peptide CDMO",
+            "stagflation-lite"
+          ],
+          "tech_keywords": [
+            "orforglipron",
+            "Zepbound",
+            "Mounjaro",
+            "Wegovy",
+            "peptide synthesis"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:LLY",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVO"
+          },
+          {
+            "subject": "ticker:KO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:MDLZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:MCD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:DVA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:SYK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "narrative:orforglipron_ph3",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:LLY"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "補 GLP-1 二階受害鏈 + 肽 CDMO 供應節點 + LLY 估值風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T09:59:49Z",
+      "latency_ms": 45100,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場聚焦 AI 巨頭 (NVDA) 與生技新藥 (LLY, NVO) 趨勢，卻可能忽略了地緣政治衝突對工業原物料的持續影響。汽車產業（如福特 F、通用 GM）仰賴的關鍵金屬（銅、鎳等）價格波動與供應鏈脆弱性，並非單純通膨或利率問題，而是直接的地緣政治風險。這種難以預測的成本壓力與供應瓶頸，對依賴穩定生產的汽車製造商構成了不同於 AI 週期或生技趨勢的獨特考驗。",
+        "bull_points": [
+          "電動車革命提供長期動能。",
+          "產業整合有助效率提升。"
+        ],
+        "bear_points": [
+          "地緣政治干擾原物料供應。",
+          "汽車利率敏感性高。",
+          "供應鏈斷鏈風險未解。"
+        ],
+        "final_take": "汽車產業面臨多重結構性逆風。",
+        "entities": {
+          "tickers": [
+            "F",
+            "GM",
+            "VALE"
+          ],
+          "sectors": [
+            "Automotive",
+            "Basic Materials",
+            "Metals & Mining"
+          ],
+          "themes": [
+            "Geopolitical Commodity Volatility",
+            "Supply Chain Fragility",
+            "EV Transition"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:F",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Geopolitical Commodity Volatility"
+          },
+          {
+            "subject": "ticker:GM",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Geopolitical Commodity Volatility"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:EV Transition"
+          },
+          {
+            "subject": "ticker:GM",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:EV Transition"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "點出汽車產業受地緣政治與原物料波動的影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "ASML",
+        "BXP",
+        "DVA",
+        "EEM",
+        "F",
+        "FCX",
+        "GLD",
+        "GM",
+        "KO",
+        "KRE",
+        "LLY",
+        "MCD",
+        "MDLZ",
+        "MSFT",
+        "NEM",
+        "NVDA",
+        "NVO",
+        "SYK",
+        "TLT",
+        "TSM",
+        "VALE",
+        "VNO",
+        "XLP",
+        "XLU",
+        "XOM",
+        "ZBH"
+      ],
+      "sectors": [
+        "Automotive",
+        "Basic Materials",
+        "Commercial Real Estate",
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Emerging Markets",
+        "Energy",
+        "Health Care",
+        "Healthcare",
+        "Information Technology",
+        "Materials",
+        "Metals & Mining",
+        "Regional Banks",
+        "Semiconductors",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "CRE refi wall",
+        "EV Transition",
+        "Fed put repricing",
+        "GLP-1",
+        "Geopolitical Commodity Volatility",
+        "Healthcare Innovation",
+        "Supply Chain Fragility",
+        "US fiscal credibility discount",
+        "debasement trade",
+        "obesity drugs",
+        "peptide CDMO",
+        "stagflation",
+        "stagflation-lite",
+        "stock-bond correlation"
+      ],
+      "tech_keywords": [
+        "CMBS",
+        "CoWoS-L",
+        "EUV",
+        "Mounjaro",
+        "Wegovy",
+        "Zepbound",
+        "orforglipron",
+        "peptide synthesis"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NEM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:debasement-trade"
+      },
+      {
+        "subject": "ticker:GLD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:debasement-trade"
+      },
+      {
+        "subject": "ticker:FCX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:stagflation"
+      },
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:stagflation"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:XLU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:sticky-inflation"
+      },
+      {
+        "subject": "ticker:XLP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:sticky-inflation"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fed-put-repricing"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cre_refi_wall"
+      },
+      {
+        "subject": "ticker:BXP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cre_refi_wall"
+      },
+      {
+        "subject": "ticker:EEM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us_fiscal_credibility_discount"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ai_capex"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai_capex"
+      },
+      {
+        "subject": "ticker:NVO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:GLP-1"
+      },
+      {
+        "subject": "theme:GLP-1",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:breaking inflation playbook"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVO"
+      },
+      {
+        "subject": "ticker:KO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:MDLZ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:MCD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:DVA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:SYK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "narrative:orforglipron_ph3",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:LLY"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Geopolitical Commodity Volatility"
+      },
+      {
+        "subject": "ticker:GM",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Geopolitical Commodity Volatility"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:EV Transition"
+      },
+      {
+        "subject": "ticker:GM",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:EV Transition"
+      }
+    ],
+    "bull_summary": [
+      "Hard asset + 商品 producer 受惠 debasement trade",
+      "AI mega-cap pricing power 抗通膨黏性",
+      "Real yield 未失控，risk asset 仍有 carry",
+      "Gold/BTC debasement trade 受惠 hard asset producer (FCX/NEM)",
+      "AI mega cap 海外營收美元 hedge + pricing power 抗通膨",
+      "GLP-1 藥物驅動醫療保健產業新成長"
+    ],
+    "bear_summary": [
+      "股債正相關回歸，60/40 對沖失效",
+      "Fed put 重新定價風險壓 long-duration",
+      "傳統 defensive sector 在 stagflation 下雙殺",
+      "KRE/CRE REIT 撞 2026-27 refi wall + CMBS 違約破 GFC 高",
+      "EEM 沒接 USD 弱棒 = US fiscal credibility 折價非 risk-on",
+      "CoWoS-L 訂單若鬆動 = AI capex 拐點 leading signal"
+    ],
+    "final_take": "汽車產業面臨多重結構性逆風。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T09:59:49Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, SUPPLIES_TO; gemini-only: MENTIONED_IN"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T09:57:48Z",
+      "where": "round0.gemini",
+      "msg": "rc=-1 err=timeout after 180s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

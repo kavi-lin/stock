@@ -1,0 +1,648 @@
+{
+  "news_id": "bn_20260518_bceb8078",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T08:51:55Z",
+  "last_activity_ts": "2026-05-18T08:55:34Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/d2f4d9bccd10",
+    "feed_fingerprint": "futu:AAOI,AXTI,MU,POET,SNDK:5c99c07db2",
+    "published": "2026-05-18T16:48:52+08:00",
+    "url_hash": "sha1:e1eafd6588bfc9c5b12f6e85559c84db83f80cd9"
+  },
+  "headline": "美股存儲、光通信概念股盤前震盪拉升，美光科技漲超3%，閃迪、西部數據轉漲",
+  "headline_zh": null,
+  "raw_summary": "美股存儲、光通信概念股盤前震盪拉升，美光科技漲超3%，閃迪、西部數據轉漲；POET大漲逾10%，AAOI、AXTI漲超3%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T08:53:44Z",
+      "latency_ms": 23772,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**盤前震盪拉升、且為情緒型題材**，先打個折扣看。但兩條主線值得拆開：(1) 存儲端 — **MU**、**SNDI**、**WDC** 同步走強，反映 HBM3e/HBM4 與 NAND 報價築底回升的 memory 上行週期延續，這是有基本面支撐的；(2) 光通信 — **POET** 漲逾 10%、**AAOI**/**AXTI** 走強，押的是 AI 資料中心 scale-out 對 800G/1.6T 光模組與 CPO（共封裝光學）的拉貨。後者 beta 高、市值小，盤前急拉常見隔日回吐。我會把存儲視為趨勢確認、光通信視為消息面投機，兩者倉位紀律不同。真正要看的是下週 MU 是否有報價或 capex 增量數據兌現。",
+        "bull_points": [
+          "HBM3e/NAND 報價築底回升，記憶體上行週期延續",
+          "AI 資料中心 scale-out 拉動 1.6T 光模組與 CPO 需求",
+          "MU、WDC 走強有 memory 基本面支撐非純情緒"
+        ],
+        "bear_points": [
+          "盤前情緒型拉升，缺實質催化易隔日回吐",
+          "POET、AAOI 小市值高 beta，急漲後波動大",
+          "光通信題材投機成分高於基本面驗證"
+        ],
+        "final_take": "存儲看多可續抱，光通信偏投機需控倉",
+        "entities": {
+          "tickers": [
+            "MU",
+            "SNDI",
+            "WDC",
+            "POET",
+            "AAOI",
+            "AXTI"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "memory cycle",
+            "optical interconnect",
+            "co-packaged optics"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "NAND",
+            "CPO",
+            "1.6T optics",
+            "800G"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:WDC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nand-pricing"
+          },
+          {
+            "subject": "ticker:SNDI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nand-pricing"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:AAOI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-datacenter-optics"
+          },
+          {
+            "subject": "ticker:AXTI",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:optical-interconnect"
+          },
+          {
+            "subject": "narrative:optical-interconnect",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.58,
+        "rationale_short": "存儲有基本面、光通信偏情緒，盤前拉升須折價"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T08:53:56Z",
+      "latency_ms": 11309,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了前述觀點，光通信的拉升更反映了一個關鍵的**二階效應**：隨 Blackwell 架構擴散，資料中心功耗密度已達極限，這迫使數據中心加速從傳統電傳輸向「光 I/O」架構升級以降低能耗。**POET** 與 **AAOI** 的技術進展，實際上是在為 NVDA 下一代架構部署所需的低能耗傳輸「鋪路」，而不僅僅是頻寬擴容。這提升了光模組的戰略重要性，使其從可選配件轉為核心技術瓶頸。",
+        "bull_points": [
+          "光 I/O 架構能顯著降低高密度 AI 機櫃傳輸能耗。",
+          "光模組從周邊配置轉變為系統核心技術瓶頸。"
+        ],
+        "bear_points": [
+          "小市值股供應鏈議價權弱，易受大廠技術轉向衝擊。"
+        ],
+        "final_take": "光通信需觀察技術導入是否能支撐高評價持續性。",
+        "entities": {
+          "tickers": [
+            "POET",
+            "AAOI",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "CPO",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:energy_efficiency"
+          },
+          {
+            "subject": "ticker:AAOI",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補足光通信在降低傳輸能耗、緩解 Blackwell 功耗瓶頸的戰略角色。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T08:54:29Z",
+      "latency_ms": 33682,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面漏掉的分歧點:**存儲這條線內部其實不同質**。MU 同時吃 HBM(DRAM)與 NAND,但 **SNDI**(去年從 WDC 分拆)與 **WDC** 幾乎是純 NAND 曝險,**完全不沾 HBM3e/HBM4**。把三檔當「memory 上行週期」一起看會誤判 — NAND 的築底靠的是企業級 SSD(AI 資料中心冷/溫資料層)需求加上原廠減產紀律,跟 HBM 的 capex 拉貨是兩套供需。另外光通信若要看「可機構配置」的版本,真正放量的是 **COHR**、**LITE** 這種 800G/1.6T 雷射與收發器主力供應商,POET/AAOI 只是高 beta 投機尾巴。盤前急拉把 NAND、HBM、光模組混為一談,反而是分清主線的好時機。",
+        "bull_points": [
+          "NAND 報價靠企業級 SSD + 原廠減產雙撐",
+          "COHR/LITE 為光模組實際放量主力,非投機尾巴",
+          "MU 獨家橫跨 HBM 與 NAND 雙引擎"
+        ],
+        "bear_points": [
+          "SNDI/WDC 零 HBM 曝險,易被題材誤定價",
+          "NAND 與 HBM 供需脫鉤,齊漲恐錯殺邏輯",
+          "POET/AAOI 高 beta,盤前急拉隔日回吐風險"
+        ],
+        "final_take": "看多 MU 與 COHR,但 SNDI/WDC 須與 HBM 題材切割看",
+        "entities": {
+          "tickers": [
+            "MU",
+            "SNDI",
+            "WDC",
+            "COHR",
+            "LITE",
+            "POET",
+            "AAOI",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "NAND pricing",
+            "optical interconnect"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "NAND",
+            "800G",
+            "1.6T",
+            "enterprise SSD"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNDI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:hbm-misattribution"
+          },
+          {
+            "subject": "ticker:WDC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nand-pricing"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:optical-interconnect"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:optical-interconnect"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.71,
+        "rationale_short": "新增 NAND/HBM 曝險切割 + COHR/LITE 機構級光通信節點,前文未提。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T08:54:44Z",
+      "latency_ms": 14915,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "分析師的討論已聚焦於 HBM 與資料中心光模組，但我認為**存儲與光通信的同步拉升，忽略了終端消費電子（PC/手機）的復甦力道**。市場過度關注 AI 伺服器需求，卻忽略了 **MU** 等供應商在 PC/手機端的庫存去化已近尾聲，這塊長尾需求反彈可能是盤前波動的隱形推手。此外，需警惕中國存儲大廠（如長存 YMTC）在 NAND 價格紅海戰中的壓制力，這對 **WDC** 等純 NAND 曝險廠構成了潛在的長期價格壓力，而非僅靠 AI 資料中心一己之力就能消化。",
+        "bull_points": [
+          "PC/手機存儲需求出現轉機",
+          "消費端庫存去化進入尾聲"
+        ],
+        "bear_points": [
+          "NAND面臨中國廠商價格競爭",
+          "純NAND廠獲利結構仍脆弱"
+        ],
+        "final_take": "短線AI題材狂熱，但需留意終端消費復甦力道。",
+        "entities": {
+          "tickers": [
+            "MU",
+            "WDC",
+            "SNDI"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Memory Cycle"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "NAND",
+            "DRAM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WDC",
+            "predicate": "HEADWIND_FROM",
+            "object": "org:YMTC"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:consumer_recovery"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "納入終端消費復甦與中國競爭風險因子。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T08:55:19Z",
+      "latency_ms": 34984,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個供給端被忽略的**二階效應 — HBM 排擠 wafer 產能**。HBM3e/HBM4 單顆 die 面積遠大於標準 DRAM、良率又低,原廠每多投一片 HBM wafer,等於抽走數倍 bit 的 commodity DRAM 供給。這意味即使 PC/手機終端需求平平,DDR5 現貨報價仍會因**供給結構性緊縮**而走強 — 這才是 **MU** 盤前強勢更扎實的底層理由,而非純情緒。風險面點名 **POET**:micro-cap、長期靠增發融資、實質營收尚未放量,盤前 +10% 的題材股很容易變成下一輪 dilution 的出貨窗口。光通信真正可配置的訂單能見度仍在 **COHR/LITE**。",
+        "bull_points": [
+          "HBM 排擠 wafer 產能,結構性收緊 commodity DRAM 供給",
+          "DDR5 現貨報價可不靠終端需求即走強",
+          "供給面邏輯讓 MU 盤前強勢更具基本面支撐"
+        ],
+        "bear_points": [
+          "POET 為 micro-cap,長期靠增發融資、營收未放量",
+          "題材股急拉常成為下一輪 dilution 出貨窗口",
+          "光通信訂單能見度集中 COHR/LITE,POET 僅題材 beta"
+        ],
+        "final_take": "看多 MU 的供給緊縮邏輯,光通信題材股保持距離",
+        "entities": {
+          "tickers": [
+            "MU",
+            "POET",
+            "COHR",
+            "LITE",
+            "WDC"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "memory upcycle"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "DDR5",
+            "NAND"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm-wafer-crowding-out"
+          },
+          {
+            "subject": "narrative:hbm-wafer-crowding-out",
+            "predicate": "CATALYST_FOR",
+            "object": "tech_keyword:DDR5"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:equity-dilution-risk"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增 HBM 排擠 wafer 的供給端二階效應 + POET 增發風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T08:55:34Z",
+      "latency_ms": 14565,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論了記憶體供給與光模組技術，但忽略了**電力與熱管理作為底層關鍵限制**。NVDA Blackwell / Rubin 架構的高運算密度對記憶體頻寬與光 I/O 需求極高，但這一切的基礎在於液冷與電力分配系統 (PDU) 能否及時擴容。如果數據中心無法解決電力瓶頸，記憶體與光模組的拉貨需求可能會因基礎設施的「硬上限」而在中期面臨修正風險，而非單純的需求衰退。這使得 **VERT** 這類基礎設施供應商，成為存儲與光通訊題材真正的「先行指標」。",
+        "bull_points": [
+          "液冷系統升級突破散熱極限，支撐高階記憶體長期需求",
+          "電力基礎建設升級為 AI 資本支出排程的優先級"
+        ],
+        "bear_points": [
+          "電力與冷卻基礎設施若延遲，將導致伺服器部署受阻",
+          "基礎設施資本支出排擠效應，可能壓抑光模組採購預算"
+        ],
+        "final_take": "看多 AI 算力基建，需監控電力瓶頸對記憶體/光模組需求的節奏影響。",
+        "entities": {
+          "tickers": [
+            "MU",
+            "VERT",
+            "NVDA",
+            "COHR"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Electrical Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Data center cooling"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Liquid Cooling",
+            "PDU"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VERT",
+            "predicate": "SUPPLIES_TO",
+            "object": "AI_datacenter"
+          },
+          {
+            "subject": "theme:power_constraints",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:AI_capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入電力與冷卻基礎設施瓶頸作為記憶體與光模組需求的「二階限制」，填補前述討論缺失的硬體基礎面視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAOI",
+        "AXTI",
+        "COHR",
+        "LITE",
+        "MU",
+        "NVDA",
+        "POET",
+        "SNDI",
+        "VERT",
+        "WDC"
+      ],
+      "sectors": [
+        "Electrical Equipment",
+        "Information Technology",
+        "Semiconductors",
+        "Technology Hardware"
+      ],
+      "themes": [
+        "AI capex",
+        "Data center cooling",
+        "HBM3e",
+        "Memory Cycle",
+        "NAND pricing",
+        "co-packaged optics",
+        "memory cycle",
+        "memory upcycle",
+        "optical interconnect"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "1.6T optics",
+        "800G",
+        "Blackwell",
+        "CPO",
+        "DDR5",
+        "DRAM",
+        "HBM3e",
+        "HBM4",
+        "Liquid Cooling",
+        "NAND",
+        "PDU",
+        "enterprise SSD"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:WDC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nand-pricing"
+      },
+      {
+        "subject": "ticker:SNDI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nand-pricing"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:AAOI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-datacenter-optics"
+      },
+      {
+        "subject": "ticker:AXTI",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:optical-interconnect"
+      },
+      {
+        "subject": "narrative:optical-interconnect",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:energy_efficiency"
+      },
+      {
+        "subject": "ticker:AAOI",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:SNDI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:hbm-misattribution"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:optical-interconnect"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:optical-interconnect"
+      },
+      {
+        "subject": "ticker:WDC",
+        "predicate": "HEADWIND_FROM",
+        "object": "org:YMTC"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:consumer_recovery"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm-wafer-crowding-out"
+      },
+      {
+        "subject": "narrative:hbm-wafer-crowding-out",
+        "predicate": "CATALYST_FOR",
+        "object": "tech_keyword:DDR5"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:equity-dilution-risk"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:VERT",
+        "predicate": "SUPPLIES_TO",
+        "object": "AI_datacenter"
+      },
+      {
+        "subject": "theme:power_constraints",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:AI_capex"
+      }
+    ],
+    "bull_summary": [
+      "HBM3e/NAND 報價築底回升，記憶體上行週期延續",
+      "AI 資料中心 scale-out 拉動 1.6T 光模組與 CPO 需求",
+      "MU、WDC 走強有 memory 基本面支撐非純情緒",
+      "光 I/O 架構能顯著降低高密度 AI 機櫃傳輸能耗。",
+      "光模組從周邊配置轉變為系統核心技術瓶頸。",
+      "NAND 報價靠企業級 SSD + 原廠減產雙撐"
+    ],
+    "bear_summary": [
+      "盤前情緒型拉升，缺實質催化易隔日回吐",
+      "POET、AAOI 小市值高 beta，急漲後波動大",
+      "光通信題材投機成分高於基本面驗證",
+      "小市值股供應鏈議價權弱，易受大廠技術轉向衝擊。",
+      "SNDI/WDC 零 HBM 曝險,易被題材誤定價",
+      "NAND 與 HBM 供需脫鉤,齊漲恐錯殺邏輯"
+    ],
+    "final_take": "看多 AI 算力基建，需監控電力瓶頸對記憶體/光模組需求的節奏影響。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T08:55:34Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

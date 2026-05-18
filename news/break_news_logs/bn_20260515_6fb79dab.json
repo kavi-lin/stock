@@ -1,0 +1,258 @@
+{
+  "news_id": "bn_20260515_6fb79dab",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T14:19:59Z",
+  "last_activity_ts": "2026-05-15T14:48:25Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/news/global-equity-funds-draw-eighth-135423433.html",
+    "feed_fingerprint": "global equity funds draw eighth weekly inflow ai",
+    "published": "2026-05-15T13:54:23+00:00",
+    "url_hash": "sha1:d0bebaa349b85c1fc0bc398f84dda4dd10b42dd4"
+  },
+  "headline": "Global equity funds draw eighth weekly inflow as AI rally lifts tech",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sector_news",
+    "shallow_score": 1.0,
+    "bull_case": "板塊動能向上",
+    "bear_case": "個股分化加劇",
+    "sector_view": "輪動信號出現",
+    "macro_view": "相對強度追蹤",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:48:11Z",
+      "latency_ms": 4094,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 554,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "a75e0801-a185-47aa-8916-98f14ae2ec12",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "5bb73dc9-b066-4fd9-9f1d-995f07e6d894"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:48:21Z",
+      "latency_ms": 10001,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場資金連續八週湧入，顯見投資人對 AI 的長期成長性仍具高度信心。值得注意的是，這波買盤已不侷限於傳統巨頭，資金正明顯外溢至 **AI Power** 及 **Thermal Management** 相關供應鏈，如電力管理方案與液冷散熱技術廠商。這顯示市場已開始進行更深度的結構性配置，從單純追逐算力成長，轉向更重視基礎設施的耐用度與效能需求。",
+        "bull_points": [
+          "全球資金持續回流股市",
+          "AI基礎設施需求具長期韌性",
+          "資金配置廣度增加至二線供應鏈"
+        ],
+        "bear_points": [
+          "科技股整體估值處於高位",
+          "資金輪動過快恐引發短期震盪",
+          "總體經濟數據若走弱將抑制追價意願"
+        ],
+        "final_take": "資金結構改善，看好電力與散熱供應鏈的補漲機會。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "ETN",
+            "VRT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "Thermal Management"
+          ],
+          "tech_keywords": [
+            "Power electronics",
+            "Liquid cooling"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI capex"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出從算力向基礎設施(電力/散熱)外溢的新觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:48:25Z",
+      "latency_ms": 4179,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 637,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "55525d13-85a6-4cc2-b170-d819011e6530",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "a69d7539-9dec-4394-a33b-1ba896013b3e"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMD",
+        "ETN",
+        "NVDA",
+        "VRT"
+      ],
+      "sectors": [
+        "Industrials",
+        "Information Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "Thermal Management"
+      ],
+      "tech_keywords": [
+        "Liquid cooling",
+        "Power electronics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI capex"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI capex"
+      }
+    ],
+    "bull_summary": [
+      "全球資金持續回流股市",
+      "AI基礎設施需求具長期韌性",
+      "資金配置廣度增加至二線供應鏈"
+    ],
+    "bear_summary": [
+      "科技股整體估值處於高位",
+      "資金輪動過快恐引發短期震盪",
+      "總體經濟數據若走弱將抑制追價意願"
+    ],
+    "final_take": "資金結構改善，看好電力與散熱供應鏈的補漲機會。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T14:48:25Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T14:48:11Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T14:48:25Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,491 @@
+{
+  "news_id": "bn_20260513_ab1ff64c",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T17:01:15Z",
+  "last_activity_ts": "2026-05-13T23:53:45Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/in-pushing-for-rush-hour-4-trump-is-acting-like-a-shadow-executive-producer-f28ec120?mod=mw_rss_topstories",
+    "feed_fingerprint": "pushing rush hour 4 trump acting like shadow",
+    "published": "2026-05-13T16:52:00+00:00",
+    "url_hash": "sha1:7908127f416991d61ad12b259ab735c6d22b864a"
+  },
+  "headline": "In pushing for ‘Rush Hour 4,’ Trump is acting like a shadow executive producer",
+  "headline_zh": null,
+  "raw_summary": "The “Rush Hour” franchise, starring Chris Tucker and Jackie Chan, has been dormant since 2007, but President Donald Trump has been pushing to get a fourth installment made.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": -1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T23:49:56Z",
+      "latency_ms": 16927,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Low-signal entertainment story, not geopolitical despite classifier tag. Pre-triage mislabeled — no supply chain or tariff angle. Direct read: marginal positive for **Paramount Global (PARA)** — owns Rush Hour IP via Paramount Pictures/New Line catalog tangle, plus current Skydance merger overhang makes any greenlight catalyst incremental. Secondary: **Comcast (CMCSA)** if distribution flips, **Netflix (NFLX)** as potential streaming buyer. Broader theme: Trump's personal franchise-pushing extends 'shadow executive' pattern (cf. Kennedy Center, TikTok deals) — political-IP intersection becoming recurring 2026 motif but not yet sized. No actionable sector trade. Real watch: whether studios start greenlighting nostalgia IP to curry favor — soft bullish legacy-catalog holders (**WBD**, **PARA**). Position size: zero. Headline risk only.",
+        "entities": {
+          "tickers": [
+            "PARA",
+            "CMCSA",
+            "NFLX",
+            "WBD",
+            "DIS"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "legacy IP revival",
+            "political-media intersection",
+            "nostalgia franchise"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:PARA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rush-hour-4-greenlight"
+          },
+          {
+            "subject": "ticker:WBD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:legacy-ip-revival"
+          },
+          {
+            "subject": "ticker:PARA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:political-media-intersection"
+          }
+        ],
+        "done": false,
+        "confidence": 0.35,
+        "rationale_short": "Low-signal entertainment news. PARA owns IP, marginal greenlight option value. Pre-triage geopolitical tag is wrong. No tradable edge."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T23:52:16Z",
+      "latency_ms": 139265,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The prior analysis correctly identifies Paramount Global (PARA) and Warner Bros. Discovery (WBD) as potential beneficiaries of the 'Rush Hour' IP. However, the narrative's emphasis on incremental upside overlooks a significant risk for WBD. As the primary holder of New Line Cinema's catalog, WBD faces a HEADWIND_FROM political interference. President Trump's direct push for 'Rush Hour 4' could compromise creative integrity and dilute the franchise's appeal, leading to production issues and uncertain audience reception. This qualitative risk to brand equity and creative execution is a distinct point not fully explored, adding a layer of caution beyond general catalog monetization for WBD.",
+        "entities": {
+          "tickers": [
+            "WBD",
+            "PARA"
+          ],
+          "sectors": [
+            "Media",
+            "Entertainment"
+          ],
+          "themes": [
+            "Political influence on creative IP",
+            "Franchise revival risks",
+            "Legacy catalog management"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:WBD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:political-interference-in-creative-decisions"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "Highlights WBD's creative risk from political interference in 'Rush Hour 4', adding a contrarian view to prior upside focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-13T23:52:33Z",
+      "latency_ms": 16975,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **Jackie Chan exposure routes through HK-listed Emperor Motion Pictures and Alibaba Pictures (1060.HK)** — not US-tradable, but signals the *China co-production* dimension nobody raised. Rush Hour's original China-friendly buddy formula needs MPA China quota approval; current US-China film thaw is near zero (only ~25 US films cleared in 2025). Trump pushing this IP creates a **contra-signal for IMAX (IMAX)** and **AMC** — a greenlit Rush Hour 4 without China release is a domestic-only mid-budget play, materially worse unit economics than 2007's $258M global gross (57% intl). Second-order: if Trump bundles this into a broader US-China entertainment trade ask, watch **DIS** and **WBD** China-revenue lines as the real tell, not the IP holder. Paramount/Skydance angle stays primary but the China-quota gating is the unspoken kill switch.",
+        "entities": {
+          "tickers": [
+            "IMAX",
+            "AMC",
+            "DIS",
+            "WBD",
+            "PARA"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "US-China film quota",
+            "Legacy IP revival",
+            "Political-entertainment intersection"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:IMAX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-film-quota-freeze"
+          },
+          {
+            "subject": "ticker:AMC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:domestic-only-midbudget-economics"
+          },
+          {
+            "subject": "ticker:DIS",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:us-china-entertainment-trade"
+          },
+          {
+            "subject": "ticker:WBD",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:us-china-entertainment-trade"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "China co-production quota gating + Jackie Chan HK exposure overlooked. IMAX/AMC contra-read on domestic-only economics is a fresh 2nd-order angle."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-13T23:53:00Z",
+      "latency_ms": 27441,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "President Trump's direct push for 'Rush Hour 4' exemplifies a growing trend where political influence increasingly sways IP greenlighting decisions. This dynamic acts as a catalyst for entertainment M&A volatility, introducing 'political risk premiums' for companies. For **Lionsgate (LGF.A)**, navigating its own sale, this means valuation uncertainty and potential disruption to strategic content pipelines, as studios might prioritize politically expedient projects over organic growth. This pattern could hinder long-term franchise building within the sector.",
+        "entities": {
+          "tickers": [
+            "LGF.A",
+            "PARA",
+            "WBD"
+          ],
+          "sectors": [
+            "Communication Services"
+          ],
+          "themes": [
+            "Political influence on IP greenlighting",
+            "Entertainment M&A volatility",
+            "Distraction from strategic IP growth"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:LGF.A",
+            "predicate": "FACES_HEADWIND_FROM",
+            "object": "theme:Entertainment M&A volatility"
+          },
+          {
+            "subject": "theme:Political influence on IP greenlighting",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:Entertainment M&A volatility"
+          },
+          {
+            "subject": "theme:Political influence on IP greenlighting",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:Distraction from strategic IP growth"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "The focus is on how political influence creates M&A volatility and distracts from strategic IP growth, impacting companies like LGF.A."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-13T23:53:19Z",
+      "latency_ms": 18714,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Untouched angle: **talent-agency and insurance layer**. Rush Hour 4 reboot at 70+ year-old Chan + 53-year-old Tucker triggers **completion-bond and cast-insurance** repricing — Fireman's Fund/**Chubb (CB)** and **AIG** underwrite A-list productions; aging-talent tentpoles run 8-12% premium vs. baseline. Second-order: **WME parent Endeavor (private post-Silver Lake)** and **CAA** book the packaging fee, but the public proxy is **Live Nation (LYV)** only loosely. Real tradable: **production-services REITs** — **Hudson Pacific Properties (HPP)** owns Sunset Studios LA + Quixote; any nostalgia-IP greenlight wave lifts soundstage occupancy off 2024 trough lows (~70%). HPP trades distressed (~$3), high-beta to greenlight volume. Contra to prior China-quota point: domestic-only shoot actually *helps* HPP vs. runaway production to Vancouver/Atlanta.",
+        "entities": {
+          "tickers": [
+            "CB",
+            "AIG",
+            "LYV",
+            "HPP",
+            "PARA",
+            "WBD"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Financials",
+            "Real Estate"
+          ],
+          "themes": [
+            "nostalgia IP revival",
+            "political-IP intersection",
+            "soundstage occupancy recovery",
+            "aging-talent insurance"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:HPP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nostalgia-ip-greenlight-wave"
+          },
+          {
+            "subject": "ticker:CB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:aging-talent-insurance-premium"
+          },
+          {
+            "subject": "ticker:AIG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:aging-talent-insurance-premium"
+          },
+          {
+            "subject": "ticker:HPP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:domestic-production-shift"
+          }
+        ],
+        "done": false,
+        "confidence": 0.42,
+        "rationale_short": "Production-services REIT (HPP) + completion-bond insurance (CB/AIG) angle untouched by prior rounds; HPP distressed price = highest optionality on greenlight wave."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-13T23:53:45Z",
+      "latency_ms": 26201,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While previous analyses correctly identified potential IP holders like Paramount Global (PARA) and Warner Bros. Discovery (WBD), the unique risk here lies in the *creative execution* itself. President Trump's 'shadow executive' role could steer 'Rush Hour 4' away from its established comedic buddy-cop formula. A script influenced by political agendas, rather than franchise authenticity, risks alienating the core fanbase that cherishes the original films' tone and chemistry. This divergence could lead to a critical and commercial failure, tarnishing the IP's legacy and undermining its long-term value beyond immediate distribution deals or brand equity concerns. The focus should shift to the potential for a fundamental creative mismatch.",
+        "entities": {
+          "tickers": [
+            "PARA",
+            "WBD"
+          ],
+          "sectors": [
+            "Communication Services"
+          ],
+          "themes": [
+            "Nostalgia franchise risk",
+            "Political influence on creative content",
+            "Genre tonal shift",
+            "Creative execution risk"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:PARA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:political_interference_in_creative_direction"
+          },
+          {
+            "subject": "ticker:WBD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:political_interference_in_creative_direction"
+          },
+          {
+            "subject": "narrative:political_interference_in_creative_direction",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:franchise_comedic_appeal"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "New angle on creative execution risk and tonal mismatch impacting franchise value."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AIG",
+        "AMC",
+        "CB",
+        "CMCSA",
+        "DIS",
+        "HPP",
+        "IMAX",
+        "LGF.A",
+        "LYV",
+        "NFLX",
+        "PARA",
+        "WBD"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Consumer Discretionary",
+        "Entertainment",
+        "Financials",
+        "Media",
+        "Real Estate"
+      ],
+      "themes": [
+        "Creative execution risk",
+        "Distraction from strategic IP growth",
+        "Entertainment M&A volatility",
+        "Franchise revival risks",
+        "Genre tonal shift",
+        "Legacy IP revival",
+        "Legacy catalog management",
+        "Nostalgia franchise risk",
+        "Political influence on IP greenlighting",
+        "Political influence on creative IP",
+        "Political influence on creative content",
+        "Political-entertainment intersection",
+        "US-China film quota",
+        "aging-talent insurance",
+        "legacy IP revival",
+        "nostalgia IP revival",
+        "nostalgia franchise",
+        "political-IP intersection",
+        "political-media intersection",
+        "soundstage occupancy recovery"
+      ],
+      "tech_keywords": []
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:PARA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rush-hour-4-greenlight"
+      },
+      {
+        "subject": "ticker:WBD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:legacy-ip-revival"
+      },
+      {
+        "subject": "ticker:PARA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:political-media-intersection"
+      },
+      {
+        "subject": "ticker:WBD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:political-interference-in-creative-decisions"
+      },
+      {
+        "subject": "ticker:IMAX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-film-quota-freeze"
+      },
+      {
+        "subject": "ticker:AMC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:domestic-only-midbudget-economics"
+      },
+      {
+        "subject": "ticker:DIS",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:us-china-entertainment-trade"
+      },
+      {
+        "subject": "ticker:WBD",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:us-china-entertainment-trade"
+      },
+      {
+        "subject": "ticker:LGF.A",
+        "predicate": "FACES_HEADWIND_FROM",
+        "object": "theme:Entertainment M&A volatility"
+      },
+      {
+        "subject": "theme:Political influence on IP greenlighting",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:Entertainment M&A volatility"
+      },
+      {
+        "subject": "theme:Political influence on IP greenlighting",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:Distraction from strategic IP growth"
+      },
+      {
+        "subject": "ticker:HPP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nostalgia-ip-greenlight-wave"
+      },
+      {
+        "subject": "ticker:CB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:aging-talent-insurance-premium"
+      },
+      {
+        "subject": "ticker:AIG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:aging-talent-insurance-premium"
+      },
+      {
+        "subject": "ticker:HPP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:domestic-production-shift"
+      },
+      {
+        "subject": "ticker:PARA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:political_interference_in_creative_direction"
+      },
+      {
+        "subject": "ticker:WBD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:political_interference_in_creative_direction"
+      },
+      {
+        "subject": "narrative:political_interference_in_creative_direction",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:franchise_comedic_appeal"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-13T23:53:45Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, MENTIONED_IN; gemini-only: CATALYST_FOR, COMPETES_WITH, FACES_HEADWIND_FROM, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

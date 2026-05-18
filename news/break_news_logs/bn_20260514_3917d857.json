@@ -1,0 +1,717 @@
+{
+  "news_id": "bn_20260514_3917d857",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T03:41:16Z",
+  "last_activity_ts": "2026-05-14T03:47:56Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4592630-shoulder-innovations-forecasts-65m-68m-2026-net-revenue-as-it-raises-guidance-following-q1?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "shoulder innovations forecasts 65m 68m 2026 net revenue",
+    "published": "2026-05-14T03:32:28+00:00",
+    "url_hash": "sha1:7c9cc9433ffe6393469595eebe003f6555f8d772"
+  },
+  "headline": "Shoulder Innovations forecasts $65M-$68M 2026 net revenue as it raises guidance following Q1 growth",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 3.0,
+    "bull_case": "收益超預期提振前景",
+    "bear_case": "高基期+競爭加劇",
+    "sector_view": "受惠產業擴張",
+    "macro_view": "利率敏感性降低",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T03:44:04Z",
+      "latency_ms": 23214,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Shoulder Innovations 上調 2026 全年指引至 **$65M-$68M**，Q1 成長強勁推升能見度。此為**小型醫材純股**(IPO 後)，市場意涵集中在 **shoulder arthroplasty (肩關節置換)** 利基市場，直接對標 **SN (Stryker)**、**ZBH (Zimmer Biomet)**、**SYK** 等大廠肩部產品線。Guidance raise 反映：(1) 高齡化 + 運動傷害驅動 shoulder replacement procedure volume 持續雙位數成長；(2) **stemless implant** 設計在 ASC (ambulatory surgical center) outpatient migration 趨勢下取得份額。風險：營收絕對值仍小($65M 規模)，毛利率未揭露，且 ZBH/SYK 同類產品線降價壓力大。對 large-cap orthopedic 影響有限 (single-digit % of segment)，但**確認 ortho recon 高齡需求 thesis 未鬆動**，間接利多 ZBH/SYK 整體 implants segment narrative。",
+        "bull_points": [
+          "上調 guidance 確認 shoulder recon 需求強勁",
+          "Stemless 設計受惠 ASC outpatient migration",
+          "高齡化長期 secular tailwind 未鬆動"
+        ],
+        "bear_points": [
+          "營收基期小 $65M，scaling 風險未驗證",
+          "ZBH/SYK 大廠價格戰擠壓利基玩家",
+          "毛利率未揭露，profitability path 不明"
+        ],
+        "final_take": "間接利多 ZBH/SYK ortho recon thesis，個股本身規模太小",
+        "entities": {
+          "tickers": [
+            "ZBH",
+            "SYK",
+            "JNJ",
+            "MDT"
+          ],
+          "sectors": [
+            "Health Care",
+            "Medical Devices"
+          ],
+          "themes": [
+            "orthopedic reconstruction",
+            "aging demographics",
+            "ASC migration",
+            "outpatient surgery"
+          ],
+          "tech_keywords": [
+            "stemless shoulder implant",
+            "shoulder arthroplasty",
+            "reverse shoulder"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ZBH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:orthopedic-recon-demand"
+          },
+          {
+            "subject": "ticker:SYK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:asc-outpatient-migration"
+          },
+          {
+            "subject": "ticker:ZBH",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:stemless-shoulder-implant"
+          },
+          {
+            "subject": "ticker:SYK",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:stemless-shoulder-implant"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "小型醫材確認 ortho 需求，但對大廠影響有限"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T03:46:15Z",
+      "latency_ms": 131034,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Shoulder Innovations 上調 2026 年財測，其創新的**無柄植入物 (stemless implant)** 在**微創手術中心 (ASC)** 的成功，不僅印證了**肩關節置換 (shoulder arthroplasty)** 的強勁需求，更凸顯了**先進製造技術**，特別是**3D 列印**的關鍵作用。當 SI 這類小型創新公司擴大規模時，對能提供複雜幾何設計與高效生產的製造夥伴需求將隨之增長，這對 **3D Systems (DDD)** 這類在骨科醫療設備製造領域的領導者來說，意味著潛在的成長動能。",
+        "bull_points": [
+          "3D 列印技術助推複雜骨科植入物設計。",
+          "骨科手術微創化帶動先進製造需求。"
+        ],
+        "bear_points": [
+          "SI 營收基數小，市場影響力有限。",
+          "DDD 面臨眾多先進製造供應商的競爭。"
+        ],
+        "final_take": "先進製造商受益於骨科產業創新。",
+        "entities": {
+          "tickers": [
+            "DDD",
+            "SN",
+            "ZBH",
+            "SYK"
+          ],
+          "sectors": [
+            "Medical Devices",
+            "Industrials"
+          ],
+          "themes": [
+            "Additive Manufacturing",
+            "Orthopedic Reconstruction",
+            "Outpatient Surgery"
+          ],
+          "tech_keywords": [
+            "3D printing for implants",
+            "Stemless implant"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DDD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Innovation in orthopedic implants"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦先進製造視角，連結成長中的骨科創新。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T03:46:40Z",
+      "latency_ms": 24764,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**ASC 通路** (ambulatory surgical center) 才是這則新聞最被低估的 2nd-order tell。SI guidance raise 不單純是 shoulder demand 強，更是 **site-of-service shift** 從 hospital inpatient 流向 ASC outpatient 的加速證據 — CMS 自 2024 起把 total shoulder arthroplasty 納入 ASC payable list，是真正結構性催化。直接受益者不是 ZBH/SYK 大廠 (他們 ASC penetration 還在追趕)，而是 **USPH (US Physical Therapy)** 與 **SGRY (Surgery Partners)** 這類 ASC operator — outpatient ortho case mix 上升 = ASC facility fee margin expansion。**反向角度**：對 **HCA / THC / UHS** 醫院系統反而是 headwind，high-margin ortho case 流失。另也留意 **NUVA (NuVasive→Globus)** 的 enabling tech (navigation / robotics) 在 ASC 落地 — 小型 ASC 買不起 Mako，需要更輕量化 navigation 方案。**SI 本身**: $65-68M 對 $5B+ 的 US shoulder TAM 仍是 <2% 份額，valuation 取決於 GM 軌跡而非 topline。",
+        "bull_points": [
+          "CMS 把 shoulder arthroplasty 納入 ASC payable，site-shift 結構催化",
+          "ASC operator (SGRY/USPH) 拿到 outpatient ortho case mix 上升紅利",
+          "輕量化 navigation/robotics 在 ASC 滲透，利好次世代 enabling tech"
+        ],
+        "bear_points": [
+          "HCA/THC/UHS 醫院系統 high-margin ortho case 外流為 headwind",
+          "SI 營收 <2% TAM，毛利率未揭露，valuation 缺安全邊際",
+          "ZBH/SYK ASC penetration 仍落後，大廠未必首波受惠"
+        ],
+        "final_take": "看多 ASC 結構轉移主題，SGRY/SI 直接受益；醫院端為輸家。",
+        "entities": {
+          "tickers": [
+            "SGRY",
+            "USPH",
+            "HCA",
+            "THC",
+            "UHS",
+            "ZBH",
+            "SYK",
+            "GMED"
+          ],
+          "sectors": [
+            "Health Care",
+            "Health Care Facilities",
+            "Health Care Equipment"
+          ],
+          "themes": [
+            "ASC site-of-service shift",
+            "outpatient migration",
+            "shoulder arthroplasty",
+            "ortho enabling tech"
+          ],
+          "tech_keywords": [
+            "stemless implant",
+            "surgical navigation",
+            "CMS ASC payable list"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SGRY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:asc-site-shift"
+          },
+          {
+            "subject": "ticker:USPH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:outpatient-ortho"
+          },
+          {
+            "subject": "ticker:HCA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asc-site-shift"
+          },
+          {
+            "subject": "ticker:THC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asc-site-shift"
+          },
+          {
+            "subject": "ticker:UHS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asc-site-shift"
+          },
+          {
+            "subject": "ticker:GMED",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:asc-enabling-tech"
+          },
+          {
+            "subject": "narrative:cms-asc-payable",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:asc-site-shift"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 ASC site-shift 與醫院 headwind 角度，前輪未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T03:47:12Z",
+      "latency_ms": 31958,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "肩關節置換術的無柄植入物趨勢，不僅推動對先進材料與 3D 列印技術的需求，也為像 Xometry (XMTR) 這類客製化製造平台帶來新機遇。然而，對複雜醫材而言，確保長期的供應穩定性、交貨時程與嚴格的品管，將是 SI 擴大規模時的關鍵考驗。",
+        "bull_points": [
+          "客製化製造平台 (XMTR) 迎來新應用。",
+          "先進醫材製造商的潛在成長動能。"
+        ],
+        "bear_points": [
+          "複雜醫材的供應鏈穩定性挑戰。",
+          "長交期恐影響 SI 擴張速度。"
+        ],
+        "final_take": "供應鏈瓶頸考驗 SI 成長潛力。",
+        "entities": {
+          "tickers": [
+            "SI",
+            "XMTR",
+            "SN",
+            "ZBH",
+            "SYK",
+            "DDD"
+          ],
+          "sectors": [
+            "Medical Devices",
+            "Industrials",
+            "Healthcare"
+          ],
+          "themes": [
+            "Additive Manufacturing for Healthcare",
+            "Supply chain resilience",
+            "Medical device manufacturing",
+            "Custom manufacturing platforms"
+          ],
+          "tech_keywords": [
+            "Stemless implants",
+            "Porous titanium",
+            "Metal 3D printing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SI",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Stemless implants"
+          },
+          {
+            "subject": "ticker:SI",
+            "predicate": "CUSTOMER_OF",
+            "object": "theme:Medical device manufacturing"
+          },
+          {
+            "subject": "ticker:XMTR",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:Medical device manufacturing"
+          },
+          {
+            "subject": "theme:Medical device manufacturing",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Metal 3D printing"
+          },
+          {
+            "subject": "ticker:SI",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Supply chain resilience"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入供應商與製造平台角度，探討供應鏈風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T03:47:36Z",
+      "latency_ms": 23952,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**保險端 reimbursement risk** 才是 SI 這類純股最被忽略的 tail risk。CMS 2026 OPPS proposed rule 已暗示 ASC ortho bundle payment rate 可能下修 3-5%，**UNH / ELV / HUM** 等 payor 也在 prior-authorization 加碼 — outpatient shoulder arthroplasty 雖在 ASC payable list，但 commercial payor 對 stemless implant 的 medical necessity 認定仍分歧。**第二角度**：SI 上調指引也間接揭示 **competitive moat 脆弱** — Q1 強增長若主要來自 **DJO (Enovis, ENOV)** 與 **CNMD (CONMED)** 既有 shoulder 客戶流失，反而是中型 ortho 公司 share loss signal，**ENOV** 該檢視最新 segment guide。**第三**：stemless implant 高度仰賴 **Ti-6Al-4V titanium alloy powder**，**ATI Inc (ATI)** 與 **CRS (Carpenter Technology)** 是 medical-grade titanium 主要供應商，small-cap ortho 擴產直接利多。",
+        "bull_points": [
+          "ATI/CRS 醫療級鈦粉供應商受惠 stemless 擴產",
+          "ENOV/CNMD shoulder 段 share 流失若確認，再分配利多大廠",
+          "ASC payable 結構性 tailwind 仍在早期"
+        ],
+        "bear_points": [
+          "CMS 2026 OPPS 可能下修 ASC ortho bundle 3-5%",
+          "Commercial payor prior-auth 加碼，stemless 認定不一",
+          "SI $65-68M 仍 sub-scale，GM 未揭露估值難立"
+        ],
+        "final_take": "結構利多但 reimbursement tail risk 須盯 CMS final rule",
+        "entities": {
+          "tickers": [
+            "ATI",
+            "CRS",
+            "ENOV",
+            "CNMD",
+            "UNH",
+            "ELV",
+            "HUM",
+            "ZBH",
+            "SYK"
+          ],
+          "sectors": [
+            "Health Care",
+            "Materials"
+          ],
+          "themes": [
+            "ASC migration",
+            "Reimbursement risk",
+            "Medical-grade titanium",
+            "Shoulder arthroplasty"
+          ],
+          "tech_keywords": [
+            "stemless implant",
+            "Ti-6Al-4V",
+            "CMS OPPS",
+            "prior authorization"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ATI",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:medical-grade-titanium"
+          },
+          {
+            "subject": "ticker:CRS",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:medical-grade-titanium"
+          },
+          {
+            "subject": "ticker:ENOV",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:shoulder-arthroplasty"
+          },
+          {
+            "subject": "ticker:CNMD",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:shoulder-arthroplasty"
+          },
+          {
+            "subject": "ticker:UNH",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asc-migration"
+          },
+          {
+            "subject": "narrative:cms-opps-2026",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asc-migration"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 reimbursement / 中型 ortho share loss / 鈦粉供應鏈三軸"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T03:47:56Z",
+      "latency_ms": 20339,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "隆重創新的手術量成長，特別是透過微創手術中心 (ASC) 的推展，直接帶動了術後復健與物理治療服務的龐大需求。這不僅是手術量的擴張，更是醫療服務生態系的自然延伸，確保病患能獲得完整療程。此趨勢將使專注於提供高品質術後復健照護的服務商，如 U.S. Physical Therapy (USPH)，成為重要的下游受益者。",
+        "bull_points": [
+          "術後復健需求激增，推升物理治療服務量能。",
+          "USPH 等專業復健機構將迎來營運成長契機。"
+        ],
+        "bear_points": [
+          "物理治療的保險給付費率面臨潛在壓力。",
+          "復健市場的競爭可能隨之加劇。"
+        ],
+        "final_take": "術後復健商機浮現，看好 USPH 營運新動能。",
+        "entities": {
+          "tickers": [
+            "SI",
+            "USPH"
+          ],
+          "sectors": [
+            "Health Care",
+            "Health Care Providers & Services"
+          ],
+          "themes": [
+            "Post-operative care",
+            "Physical therapy"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:stemless implant adoption",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:increased post-operative rehabilitation demand"
+          },
+          {
+            "subject": "ticker:USPH",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:increased post-operative rehabilitation demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新角度：復健服務需求成長，看好 USPH。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ATI",
+        "CNMD",
+        "CRS",
+        "DDD",
+        "ELV",
+        "ENOV",
+        "GMED",
+        "HCA",
+        "HUM",
+        "JNJ",
+        "MDT",
+        "SGRY",
+        "SI",
+        "SN",
+        "SYK",
+        "THC",
+        "UHS",
+        "UNH",
+        "USPH",
+        "XMTR",
+        "ZBH"
+      ],
+      "sectors": [
+        "Health Care",
+        "Health Care Equipment",
+        "Health Care Facilities",
+        "Health Care Providers & Services",
+        "Healthcare",
+        "Industrials",
+        "Materials",
+        "Medical Devices"
+      ],
+      "themes": [
+        "ASC migration",
+        "ASC site-of-service shift",
+        "Additive Manufacturing",
+        "Additive Manufacturing for Healthcare",
+        "Custom manufacturing platforms",
+        "Medical device manufacturing",
+        "Medical-grade titanium",
+        "Orthopedic Reconstruction",
+        "Outpatient Surgery",
+        "Physical therapy",
+        "Post-operative care",
+        "Reimbursement risk",
+        "Shoulder arthroplasty",
+        "Supply chain resilience",
+        "aging demographics",
+        "ortho enabling tech",
+        "orthopedic reconstruction",
+        "outpatient migration",
+        "outpatient surgery",
+        "shoulder arthroplasty"
+      ],
+      "tech_keywords": [
+        "3D printing for implants",
+        "CMS ASC payable list",
+        "CMS OPPS",
+        "Metal 3D printing",
+        "Porous titanium",
+        "Stemless implant",
+        "Stemless implants",
+        "Ti-6Al-4V",
+        "prior authorization",
+        "reverse shoulder",
+        "shoulder arthroplasty",
+        "stemless implant",
+        "stemless shoulder implant",
+        "surgical navigation"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:ZBH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:orthopedic-recon-demand"
+      },
+      {
+        "subject": "ticker:SYK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:asc-outpatient-migration"
+      },
+      {
+        "subject": "ticker:ZBH",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:stemless-shoulder-implant"
+      },
+      {
+        "subject": "ticker:SYK",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:stemless-shoulder-implant"
+      },
+      {
+        "subject": "ticker:DDD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Innovation in orthopedic implants"
+      },
+      {
+        "subject": "ticker:SGRY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:asc-site-shift"
+      },
+      {
+        "subject": "ticker:USPH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:outpatient-ortho"
+      },
+      {
+        "subject": "ticker:HCA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asc-site-shift"
+      },
+      {
+        "subject": "ticker:THC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asc-site-shift"
+      },
+      {
+        "subject": "ticker:UHS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asc-site-shift"
+      },
+      {
+        "subject": "ticker:GMED",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:asc-enabling-tech"
+      },
+      {
+        "subject": "narrative:cms-asc-payable",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:asc-site-shift"
+      },
+      {
+        "subject": "ticker:SI",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Stemless implants"
+      },
+      {
+        "subject": "ticker:SI",
+        "predicate": "CUSTOMER_OF",
+        "object": "theme:Medical device manufacturing"
+      },
+      {
+        "subject": "ticker:XMTR",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:Medical device manufacturing"
+      },
+      {
+        "subject": "theme:Medical device manufacturing",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Metal 3D printing"
+      },
+      {
+        "subject": "ticker:SI",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Supply chain resilience"
+      },
+      {
+        "subject": "ticker:ATI",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:medical-grade-titanium"
+      },
+      {
+        "subject": "ticker:CRS",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:medical-grade-titanium"
+      },
+      {
+        "subject": "ticker:ENOV",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:shoulder-arthroplasty"
+      },
+      {
+        "subject": "ticker:CNMD",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:shoulder-arthroplasty"
+      },
+      {
+        "subject": "ticker:UNH",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asc-migration"
+      },
+      {
+        "subject": "narrative:cms-opps-2026",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asc-migration"
+      },
+      {
+        "subject": "narrative:stemless implant adoption",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:increased post-operative rehabilitation demand"
+      },
+      {
+        "subject": "ticker:USPH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:increased post-operative rehabilitation demand"
+      }
+    ],
+    "bull_summary": [
+      "上調 guidance 確認 shoulder recon 需求強勁",
+      "Stemless 設計受惠 ASC outpatient migration",
+      "高齡化長期 secular tailwind 未鬆動",
+      "3D 列印技術助推複雜骨科植入物設計。",
+      "骨科手術微創化帶動先進製造需求。",
+      "CMS 把 shoulder arthroplasty 納入 ASC payable，site-shift 結構催化"
+    ],
+    "bear_summary": [
+      "營收基期小 $65M，scaling 風險未驗證",
+      "ZBH/SYK 大廠價格戰擠壓利基玩家",
+      "毛利率未揭露，profitability path 不明",
+      "SI 營收基數小，市場影響力有限。",
+      "DDD 面臨眾多先進製造供應商的競爭。",
+      "HCA/THC/UHS 醫院系統 high-margin ortho case 外流為 headwind"
+    ],
+    "final_take": "術後復健商機浮現，看好 USPH 營運新動能。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T03:47:56Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

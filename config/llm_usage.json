@@ -1,0 +1,20 @@
+{
+  "date": "2026-05-18",
+  "models": {
+    "claude": {
+      "calls": 7,
+      "cooldown_until": null,
+      "last_error": null
+    },
+    "gemini": {
+      "calls": 11,
+      "cooldown_until": null,
+      "last_error": null
+    },
+    "codex": {
+      "calls": 6,
+      "cooldown_until": null,
+      "last_error": null
+    }
+  }
+}

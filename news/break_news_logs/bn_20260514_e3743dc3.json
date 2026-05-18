@@ -1,0 +1,646 @@
+{
+  "news_id": "bn_20260514_e3743dc3",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:43:31Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/63aa83f444fb",
+    "feed_fingerprint": "futu:POET:fa9cc7ba15",
+    "published": "2026-05-14T21:35:43+08:00",
+    "url_hash": "sha1:2a3d53ad8fb60fdb1dfb4e820222d79778178aea"
+  },
+  "headline": "光引擎突現重磅訂單：POET斬獲5000萬美元採購合同，股價飆升逾30%創歷史新高",
+  "headline_zh": null,
+  "raw_summary": "光引擎突現重磅訂單：POET斬獲5000萬美元採購合同，股價飆升逾30%創歷史新高>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:39:05Z",
+      "latency_ms": 4659,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 649,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "35b57086-fe05-4b6b-8bcf-6cc1e3185ddd",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "8ff69738-0b22-4a3b-86a9-e760ae9197a0"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:41:19Z",
+      "latency_ms": 133720,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "POET此次獲得5000萬美元訂單，顯示其光引擎技術在AI數據中心擴張中扮演關鍵角色。隨著AI算力需求指數級增長，高速、低功耗的數據傳輸解決方案（如光引擎）將是關鍵瓶頸，POET的技術潛力因而受到市場高度關注。此筆訂單不僅驗證了其產品的市場吸引力，也預示著光互連技術在未來數據架構中的重要性日益提升。",
+        "bull_points": [
+          "光引擎技術是AI擴張的關鍵。",
+          "POET技術獲市場高度認可。",
+          "單筆訂單驗證產品市場吸引力。"
+        ],
+        "bear_points": [
+          "過度依賴單一客戶或項目。",
+          "光互連領域競爭激烈。",
+          "技術實際部署與擴產挑戰。"
+        ],
+        "final_take": "光引擎前景亮眼，惟需觀察長期成長動能。",
+        "entities": {
+          "tickers": [
+            "POET"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Optical Networking",
+            "Data Center Infrastructure"
+          ],
+          "tech_keywords": [
+            "Optical Engines",
+            "High-Bandwidth Data Transmission",
+            "Co-Packaged Optics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Optical Networking"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Optical Engines"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新增光引擎的戰略重要性及市場競爭探討。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:41:46Z",
+      "latency_ms": 27028,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Gemini已點出POET光引擎在AI datacenter的需求面。補充**二階效應**：5000萬訂單對POET年營收（2024 TTM <500萬）是**10x量級跳躍**，但需檢視**客戶集中度風險**——單一客戶占比可能>80%，類似早期AEHR Test Systems case。更值得關注的是**競爭格局**：POET的Optical Interposer架構與**LITE (Lumentum)、COHR (Coherent)、AAOI**的傳統pluggable方案路線不同，若此訂單來自**hyperscaler（AMZN/GOOGL/META）內部CPO計畫**，則直接威脅**MRVL Inphi DSP**與**MU/SK Hynix HBM-CPO整合**生態。另一個被忽略的angle：POET產能在新加坡（SUTD園區），**TSM CoWoS-L bottleneck**外溢的封裝需求可能間接受惠，但POET自身**毛利率與量產yield**未經大規模驗證，30%單日漲幅已price-in過多樂觀預期。",
+        "bull_points": [
+          "5000萬訂單對POET營收為10x跳躍，驗證CPO商用化拐點",
+          "Optical Interposer差異化路線可繞開CoWoS-L產能瓶頸",
+          "若客戶為hyperscaler，後續rolling order潛力大"
+        ],
+        "bear_points": [
+          "客戶集中度恐>80%，單一客戶流失即崩盤",
+          "量產yield與毛利率未驗證，小公司執行風險高",
+          "30%單日漲幅已透支樂觀情境，估值脫離基本面"
+        ],
+        "final_take": "結構性看多CPO主題，但POET個股需待Q2出貨驗證",
+        "entities": {
+          "tickers": [
+            "POET",
+            "LITE",
+            "COHR",
+            "AAOI",
+            "MRVL",
+            "MU",
+            "AMZN",
+            "GOOGL",
+            "META",
+            "TSM"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Communications Equipment",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "CPO",
+            "Optical Interconnect",
+            "Hyperscaler datacenter"
+          ],
+          "tech_keywords": [
+            "Optical Interposer",
+            "CPO",
+            "CoWoS-L",
+            "HBM",
+            "Pluggable Optics",
+            "DSP"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cpo_adoption"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:LITE"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:COHR"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AAOI"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:customer_concentration"
+          },
+          {
+            "subject": "narrative:cpo_adoption",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:MRVL"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:cowos_l_bottleneck"
+          },
+          {
+            "subject": "narrative:cpo_adoption",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:POET"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補客戶集中度+競爭格局+CoWoS外溢三新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:42:41Z",
+      "latency_ms": 55071,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**POET**光引擎的成功訂單，不僅證明了其在AI數據中心扮演的關鍵角色，更可能加速光互連技術的整合。此舉若能推動更廣泛的應用，將帶動如 **Broadcom (AVGO)** 等網絡設備龍頭對高頻寬光模組的需求，並可能影響未來AI ASIC與光引擎的協同設計藍圖。這顯示了光引擎不僅是傳輸介質，更是未來AI基礎設施中，連接運算與網絡的關鍵節點。",
+        "bull_points": [
+          "推動光引擎技術更廣泛採用。",
+          "增強與先進網絡 ASIC 的協同效應。"
+        ],
+        "bear_points": [
+          "量產良率與毛利率仍待嚴格考驗。",
+          "整合複雜性考驗潛在客戶。"
+        ],
+        "final_take": "光引擎前景看好，但整合挑戰仍存。",
+        "entities": {
+          "tickers": [
+            "POET",
+            "AVGO"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "Optical interconnects",
+            "Data center networking"
+          ],
+          "tech_keywords": [
+            "Silicon Photonics",
+            "Co-Packaged Optics (CPO)",
+            "High-Bandwidth Networking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Data center networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "為 POET 訂單帶來的網絡協同效應，提供新視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:43:05Z",
+      "latency_ms": 24321,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪已覆蓋客戶集中度、CPO競爭格局、AVGO網絡端受惠。補一個被忽略的**反向角度**：POET合約**收入認列時程**。5000萬訂單通常分階段交付（POC → pilot → volume ramp），實際2026年認列可能僅**1500-2000萬**，且**毛利率稀釋**——早期客戶往往要求**cost-plus或NRE分攤**而非標準ASP。更關鍵的**第三方受惠者**：POET的**SOI晶圓供應商TOWER (TSEM)** 與**封測代工GLOBALFOUNDRIES (GFS)** 的silicon photonics線（Fab 8 Malta），單筆訂單放大GFS光電業務曝險。另**MACOM (MTSI)** 的TIA驅動IC通常與光引擎pairing，若POET導入CPO會直接拉動MTSI需求。風險面：**POET歷史增資紀錄頻繁**（過去5年累計稀釋>40%），30%單日噴出後極可能觸發**ATM增發**，這是小型光通訊股**典型pump-and-dilute模式**。",
+        "bull_points": [
+          "TSEM/GFS silicon photonics代工二階受惠",
+          "MTSI TIA驅動IC配對需求拉抬",
+          "驗證新加坡產能在CoWoS-L外溢的承接力"
+        ],
+        "bear_points": [
+          "5000萬訂單分階段認列，2026實際入帳恐不到4成",
+          "POET歷史增資稀釋>40%,噴出後易觸發ATM",
+          "早期客戶cost-plus定價稀釋毛利率"
+        ],
+        "final_take": "短線過熱,看好供應鏈二階(TSEM/MTSI)更勝POET本身",
+        "entities": {
+          "tickers": [
+            "POET",
+            "TSEM",
+            "GFS",
+            "MTSI",
+            "AVGO",
+            "MRVL",
+            "LITE",
+            "COHR",
+            "AAOI"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Optical Networking",
+            "Foundry"
+          ],
+          "themes": [
+            "AI capex",
+            "CPO",
+            "Silicon Photonics",
+            "Optical Interconnect"
+          ],
+          "tech_keywords": [
+            "Optical Interposer",
+            "CPO",
+            "TIA",
+            "SOI wafer",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSEM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:POET"
+          },
+          {
+            "subject": "ticker:GFS",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:POET"
+          },
+          {
+            "subject": "ticker:MTSI",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:cpo"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:atm-dilution"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補供應鏈二階(TSEM/GFS/MTSI)+稀釋風險,反向角度未被覆蓋"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:43:31Z",
+      "latency_ms": 25517,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "POET 斬獲 5000 萬美元訂單，其整合式光引擎的成功，**潛藏 MACOM (MTSI) 等關鍵零組件供應商的戰略價值**。若 POET 採用 MACOM 的 **InP 雷射**技術，能解決矽光子整合的雷射光源瓶頸，為 AI 數據中心帶來更高效率的傳輸方案。此舉不僅驗證了 POET 的技術，也為 MACOM 等關鍵元件廠開闢新藍海，凸顯供應鏈協同創新的重要性。",
+        "bull_points": [
+          "MACOM 關鍵 InP 雷射技術，助力 POET 光引擎整合。",
+          "POET 訂單為 MACOM 帶來 AI 數據中心新成長契機。"
+        ],
+        "bear_points": [
+          "InP 雷射整合良率與成本尚待驗證。",
+          "POET 供應鏈對 MACOM 依賴度潛藏風險。"
+        ],
+        "final_take": "MACOM 雷射技術成 POET 訂單關鍵，但風險猶存。",
+        "entities": {
+          "tickers": [
+            "POET",
+            "MTSI"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Photonics"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced Interconnects"
+          ],
+          "tech_keywords": [
+            "Silicon Photonics",
+            "InP Lasers",
+            "Optical Interposer"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:MTSI"
+          },
+          {
+            "subject": "ticker:MTSI",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:lasers_for_silicon_photonics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "點出 MACOM 供應 InP 雷射，為 POET 核心元件，並提示供應鏈風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAOI",
+        "AMZN",
+        "AVGO",
+        "COHR",
+        "GFS",
+        "GOOGL",
+        "LITE",
+        "META",
+        "MRVL",
+        "MTSI",
+        "MU",
+        "POET",
+        "TSEM",
+        "TSM"
+      ],
+      "sectors": [
+        "Communications Equipment",
+        "Foundry",
+        "Information Technology",
+        "Optical Networking",
+        "Photonics",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI infrastructure",
+        "Advanced Interconnects",
+        "CPO",
+        "Data Center Infrastructure",
+        "Data center networking",
+        "Hyperscaler datacenter",
+        "Optical Interconnect",
+        "Optical Networking",
+        "Optical interconnects",
+        "Silicon Photonics"
+      ],
+      "tech_keywords": [
+        "CPO",
+        "Co-Packaged Optics",
+        "Co-Packaged Optics (CPO)",
+        "CoWoS-L",
+        "DSP",
+        "HBM",
+        "High-Bandwidth Data Transmission",
+        "High-Bandwidth Networking",
+        "InP Lasers",
+        "Optical Engines",
+        "Optical Interposer",
+        "Pluggable Optics",
+        "SOI wafer",
+        "Silicon Photonics",
+        "TIA"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Optical Networking"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Optical Engines"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cpo_adoption"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:LITE"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:COHR"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AAOI"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:customer_concentration"
+      },
+      {
+        "subject": "narrative:cpo_adoption",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:MRVL"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:cowos_l_bottleneck"
+      },
+      {
+        "subject": "narrative:cpo_adoption",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:POET"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Data center networking"
+      },
+      {
+        "subject": "ticker:TSEM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:POET"
+      },
+      {
+        "subject": "ticker:GFS",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:POET"
+      },
+      {
+        "subject": "ticker:MTSI",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:cpo"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:atm-dilution"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:MTSI"
+      },
+      {
+        "subject": "ticker:MTSI",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:lasers_for_silicon_photonics"
+      }
+    ],
+    "bull_summary": [
+      "光引擎技術是AI擴張的關鍵。",
+      "POET技術獲市場高度認可。",
+      "單筆訂單驗證產品市場吸引力。",
+      "5000萬訂單對POET營收為10x跳躍，驗證CPO商用化拐點",
+      "Optical Interposer差異化路線可繞開CoWoS-L產能瓶頸",
+      "若客戶為hyperscaler，後續rolling order潛力大"
+    ],
+    "bear_summary": [
+      "過度依賴單一客戶或項目。",
+      "光互連領域競爭激烈。",
+      "技術實際部署與擴產挑戰。",
+      "客戶集中度恐>80%，單一客戶流失即崩盤",
+      "量產yield與毛利率未驗證，小公司執行風險高",
+      "30%單日漲幅已透支樂觀情境，估值脫離基本面"
+    ],
+    "final_take": "MACOM 雷射技術成 POET 訂單關鍵，但風險猶存。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:43:31Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, CO_DEVELOPS_WITH, HEADWIND_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:39:05Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

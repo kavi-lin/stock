@@ -1,0 +1,562 @@
+{
+  "news_id": "bn_20260518_02f4f63e",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:42:31Z",
+  "last_activity_ts": "2026-05-18T10:50:19Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/energy/articles/bloom-energy-crushes-q1-estimates-101847581.html",
+    "feed_fingerprint": "bloom energy crushes q1 estimates raises 2026 guidance",
+    "published": "2026-05-18T10:18:47+00:00",
+    "url_hash": "sha1:04be047b2ebde8afc8b7b625345c993d2a2d2314"
+  },
+  "headline": "Bloom Energy (BE) Crushes Q1 Estimates, Raises 2026 Guidance",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 1.5,
+    "bull_case": "收益超預期提振前景",
+    "bear_case": "高基期+競爭加劇",
+    "sector_view": "受惠產業擴張",
+    "macro_view": "利率敏感性降低",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:48:36Z",
+      "latency_ms": 21957,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Bloom Energy Q1 超預期 + 上調 2026 guidance，核心驅動已從傳統工商備電轉向 **AI 資料中心場內供電**。GPU 機櫃功率密度暴增、電網併網排隊動輒數年，固態氧化物燃料電池 (SOFC) 能在 12-18 個月內就地供電，正好卡進空檔。需留意：guidance 上調多少靠一次性大單 (如 Oracle / 超大規模商) lumpy 訂單推動，毛利率與現金流是否同步轉正才是關鍵——BE 過去長期燒錢。競爭面 GE Vernova 燃氣輪機、Caterpillar 柴油機組仍是資料中心 backup 首選，SOFC 滲透率仍低。**屬 AI capex 的二階受惠**,題材熱但體質尚待驗證。",
+        "bull_points": [
+          "AI 資料中心併網排隊,SOFC 場內供電補空檔",
+          "Q1 超預期且上調全年 guidance,訂單能見度升",
+          "超大規模商簽約背書,從工商備電轉向高成長賽道"
+        ],
+        "bear_points": [
+          "Guidance 上調恐靠 lumpy 大單,訂單可持續性存疑",
+          "BE 長期燒錢,毛利與自由現金流轉正未證實",
+          "燃氣輪機/柴油機組仍是資料中心備電主流"
+        ],
+        "final_take": "看多 AI 供電題材,但需確認毛利與現金流兌現",
+        "entities": {
+          "tickers": [
+            "BE",
+            "GEV",
+            "CAT",
+            "ORCL"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Energy"
+          ],
+          "themes": [
+            "AI capex",
+            "datacenter power",
+            "distributed generation"
+          ],
+          "tech_keywords": [
+            "SOFC",
+            "fuel cell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:datacenter-power"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:GEV"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:ORCL"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "AI 供電題材實在,但體質與訂單持續性待驗"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:48:50Z",
+      "latency_ms": 13785,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補充 CLAUDE 的觀點，BE 的核心價值不僅是部署速度，更在於實現**「資料中心能源主權」**。隨著電網負荷臨界點到來，電力價格波動與供應穩定性成為資料中心營運痛點。SOFC 若能作為持續運行的**「基載」**，將數據中心與不穩定的區域電網解耦，對 Hyper-scaler 而言具備長期的成本規避價值，定位已從「應急備電」升級為「主動能源管理」。但需審慎評估天然氣燃料成本波動對其長期運營毛利率的侵蝕風險。",
+        "bull_points": [
+          "SOFC 賦予資料中心能源主權，對抗電力價格波動。",
+          "從備電轉向基載模式，大幅提升客戶粘著度。"
+        ],
+        "bear_points": [
+          "燃料成本易受天然氣價格波動影響，削弱毛利。",
+          "長期基載運行對 SOFC 壽命與維護成本挑戰巨大。"
+        ],
+        "final_take": "具備能源主權優勢，但需持續監控燃料成本與合約獲利性。",
+        "entities": {
+          "tickers": [
+            "BE"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "Energy security"
+          ],
+          "tech_keywords": [
+            "SOFC",
+            "Baseload"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BE",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:energy_security"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充從備電轉基載的能源主權優勢與成本規避價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:49:20Z",
+      "latency_ms": 30365,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文沒談的角度：BE 的單位經濟性高度依賴**聯邦投資稅額抵免 (Section 48 ITC)**，燃料電池目前享 30% 抵免。新國會若削減清潔能源補貼，BE 系統的安裝回收期會立刻拉長，Hyperscaler 採購誘因下降——這是純政策 beta，不在 BE 控制內。另一個被忽略的具名節點是 **SK ecoplant**:它既是 BE 大股東也是韓國總代理,等於替 BE 鎖定韓國/亞洲 AI 資料中心通路,Samsung、SK 海力士 HBM3e 廠房用電是潛在訂單池。最後體質面:BE 過去靠可轉債與增發融資擴產,股本稀釋仍是長線股東隱憂,本次 guidance 上調須對照在手現金與 capex 計畫一起看。",
+        "bull_points": [
+          "SK ecoplant 鎖定韓國通路,接亞洲 AI 資料中心訂單池",
+          "guidance 上調若伴隨現金流轉正,體質疑慮可緩解"
+        ],
+        "bear_points": [
+          "Section 48 燃料電池 ITC 若被削,回收期拉長、採購誘因降",
+          "靠可轉債與增發融資擴產,股本稀釋壓抑長線報酬"
+        ],
+        "final_take": "題材看多,但 ITC 政策與稀釋是兩大非營運風險",
+        "entities": {
+          "tickers": [
+            "BE",
+            "ORCL",
+            "GEV",
+            "CAT"
+          ],
+          "sectors": [
+            "Energy",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "data center power",
+            "energy sovereignty",
+            "clean energy tax credit"
+          ],
+          "tech_keywords": [
+            "SOFC",
+            "HBM3e",
+            "Section 48 ITC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:section_48_itc_cut"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "entity:sk_ecoplant"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:data_center_power"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 ITC 政策風險、SK ecoplant 通路、稀釋風險三點,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:49:33Z",
+      "latency_ms": 12321,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論多聚焦硬體部署與政策補貼，我認為關鍵轉捩點在於 BE 從「硬體製造商」加速轉型為「能源即服務 (Energy-as-a-Service)」提供商。通過長期運維合約 (O&M)，BE 能將一次性硬體銷售轉化為高黏著度的經常性收入 (ARR)，這能有效緩解「訂單 lumpy」的營收波動風險，並改善現金流預測性。此商業模式的價值重估 (re-rating) 潛力，或許遠大於單純販售設備。重點應觀察財報中「服務收入」佔比是否顯著提升，這才是驗證其體質由「燒錢」轉為「穩定獲利」的關鍵指標。",
+        "bull_points": [
+          "轉型 EaaS 模式，提升經常性收入占比",
+          "長期服務合約提高客戶黏著度",
+          "商業模式重估有助提振估值倍數"
+        ],
+        "bear_points": [
+          "EaaS 模式初期資本支出與現金壓力較大",
+          "專業運維人力擴張速度恐難匹配需求"
+        ],
+        "final_take": "關注 EaaS 商業模式轉型，服務收入占比是體質檢驗關鍵。",
+        "entities": {
+          "tickers": [
+            "BE"
+          ],
+          "sectors": [
+            "Energy",
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Energy-as-a-Service"
+          ],
+          "tech_keywords": [
+            "SOFC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BE",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:energy-as-a-service"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出從硬體銷售轉向服務模式的價值重估觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:50:06Z",
+      "latency_ms": 33282,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文都沒碰的反方核心：BE 的 SOFC 雖比柴油乾淨，但燒天然氣**仍排碳**。Microsoft、Google 都立下 2030 年 24/7 無碳電力 (CFE) 目標，長期把 SOFC 當基載會直接拖累 hyperscaler 的 Scope 2 帳本——這跟 GEMINI 講的「能源主權」是有張力的。真正乾淨的基載替代是**小型模組化核能 (SMR)**:Amazon 押 X-energy、Google 押 Kairos、OKLO 與 NuScale (SMR) 也在搶同一塊資料中心基載訂單。BE 的時間窗在於 SMR 2030 前難商轉,屬**過渡期解法**而非終局。另一個被忽略的瓶頸:SOFC 要管線天然氣,而 Virginia 等資料中心重鎮的天然氣管線容量同樣排隊吃緊,「12-18 個月就地供電」未必每個案場都成立。",
+        "bull_points": [
+          "SMR 2030 前難商轉，BE 卡過渡期需求真空",
+          "比柴油備電乾淨，仍是當下最快可部署選項"
+        ],
+        "bear_points": [
+          "燒天然氣排碳，違背 hyperscaler 24/7 CFE 目標",
+          "SMR (OKLO/NuScale) 是更乾淨的基載終局解",
+          "資料中心重鎮天然氣管線容量同樣排隊吃緊"
+        ],
+        "final_take": "看短多看長空，BE 是過渡解非終局",
+        "entities": {
+          "tickers": [
+            "BE",
+            "OKLO",
+            "SMR",
+            "GEV"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "datacenter power",
+            "carbon-free energy"
+          ],
+          "tech_keywords": [
+            "SOFC",
+            "SMR",
+            "24/7 CFE"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:carbon-free-energy"
+          },
+          {
+            "subject": "ticker:OKLO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:BE"
+          },
+          {
+            "subject": "ticker:SMR",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:BE"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:gas-pipeline-constraint"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增排碳衝突 + SMR 基載競爭 + 天然氣管線瓶頸三角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:50:19Z",
+      "latency_ms": 12728,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "BE 的「behind-the-meter (BTM)」部署策略，實際上是一種繞過公用事業電力併網 (UIA) 漫長監管審核的「監管避險工具」。不同於 SMR 需要深度整合電網架構，BTM 模式使資料中心能以「私有電網」模式獨立運作，這不僅是技術選型，更是**結構性的監管套利**。這賦予了 BE 在電網基礎設施極度過載區域 (如北維州) 的超強議價權。但潛在風險在於：隨著 BTM 項目規模擴大，公用事業業者恐將遊說監管機構修改法規，強制要求 BTM 用戶負擔電網備用成本 (standby charges)，這將直接侵蝕其 BTM 商業模式的經濟效益。",
+        "bull_points": [
+          "BTM 模式繞過併網審核，實現極速部署",
+          "私有電網架構提升在地化電力議價權",
+          "監管避險效應優於傳統核能技術"
+        ],
+        "bear_points": [
+          "公用事業遊說導致監管法規趨嚴風險",
+          "潛在電網備用費用將侵蝕獲利毛利",
+          "BTM 商業模式對監管環境的極端依賴"
+        ],
+        "final_take": "BTM 模式具備監管套利價值，但需警惕公用事業的反撲風險。",
+        "entities": {
+          "tickers": [
+            "BE"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "Energy sovereignty"
+          ],
+          "tech_keywords": [
+            "SOFC",
+            "BTM",
+            "UIA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:regulatory_arbitrage"
+          },
+          {
+            "subject": "ticker:BE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:utility_lobbying"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "提出 BTM 繞過併網監管的套利模式及其潛在監管反撲風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BE",
+        "CAT",
+        "GEV",
+        "OKLO",
+        "ORCL",
+        "SMR"
+      ],
+      "sectors": [
+        "Energy",
+        "Industrials",
+        "Information Technology",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Energy security",
+        "Energy sovereignty",
+        "Energy-as-a-Service",
+        "carbon-free energy",
+        "clean energy tax credit",
+        "data center power",
+        "datacenter power",
+        "distributed generation",
+        "energy sovereignty"
+      ],
+      "tech_keywords": [
+        "24/7 CFE",
+        "BTM",
+        "Baseload",
+        "HBM3e",
+        "SMR",
+        "SOFC",
+        "Section 48 ITC",
+        "UIA",
+        "fuel cell"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:datacenter-power"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:GEV"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:ORCL"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:energy_security"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:section_48_itc_cut"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "entity:sk_ecoplant"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:data_center_power"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:energy-as-a-service"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:carbon-free-energy"
+      },
+      {
+        "subject": "ticker:OKLO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:BE"
+      },
+      {
+        "subject": "ticker:SMR",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:BE"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:gas-pipeline-constraint"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:regulatory_arbitrage"
+      },
+      {
+        "subject": "ticker:BE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:utility_lobbying"
+      }
+    ],
+    "bull_summary": [
+      "AI 資料中心併網排隊,SOFC 場內供電補空檔",
+      "Q1 超預期且上調全年 guidance,訂單能見度升",
+      "超大規模商簽約背書,從工商備電轉向高成長賽道",
+      "SOFC 賦予資料中心能源主權，對抗電力價格波動。",
+      "從備電轉向基載模式，大幅提升客戶粘著度。",
+      "SK ecoplant 鎖定韓國通路,接亞洲 AI 資料中心訂單池"
+    ],
+    "bear_summary": [
+      "Guidance 上調恐靠 lumpy 大單,訂單可持續性存疑",
+      "BE 長期燒錢,毛利與自由現金流轉正未證實",
+      "燃氣輪機/柴油機組仍是資料中心備電主流",
+      "燃料成本易受天然氣價格波動影響，削弱毛利。",
+      "長期基載運行對 SOFC 壽命與維護成本挑戰巨大。",
+      "Section 48 燃料電池 ITC 若被削,回收期拉長、採購誘因降"
+    ],
+    "final_take": "BTM 模式具備監管套利價值，但需警惕公用事業的反撲風險。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:50:19Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, CO_DEVELOPS_WITH, SUPPLIES_TO; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

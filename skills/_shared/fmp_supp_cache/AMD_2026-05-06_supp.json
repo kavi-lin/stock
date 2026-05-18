@@ -1,0 +1,214 @@
+{
+  "ticker": "AMD",
+  "as_of_date": "2026-05-06",
+  "cache_key": "AMD_2026-05-06",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 26.353414137303837,
+    "piotroskiScore": 7,
+    "altman_zone": "safe",
+    "piotroski_strength": "strong",
+    "workingCapital": 17492000000,
+    "totalAssets": 76926000000,
+    "retainedEarnings": 6699000000,
+    "ebit": 4281000000,
+    "totalLiabilities": 13927000000,
+    "revenue": 34639000000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2025-Q4",
+    "as_of_date": "2025-12-27",
+    "ownersEarnings": 2594149895,
+    "ownersEarningsPerShare": 1.57,
+    "maintenanceCapex": -5850105,
+    "growthCapex": -216149895,
+    "averagePPE": 0.08275264,
+    "qoq_growth": 0.2342,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0.25,
+        "total_acquired_shares": 6000,
+        "total_disposed_shares": 42402,
+        "acquired_transactions": 1,
+        "disposed_transactions": 4,
+        "total_purchases": 0,
+        "total_sales": 3
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0.2909,
+        "total_acquired_shares": 947178,
+        "total_disposed_shares": 1173363,
+        "acquired_transactions": 16,
+        "disposed_transactions": 55,
+        "total_purchases": 0,
+        "total_sales": 34
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.102,
+        "total_acquired_shares": 141484,
+        "total_disposed_shares": 388376,
+        "acquired_transactions": 5,
+        "disposed_transactions": 49,
+        "total_purchases": 0,
+        "total_sales": 40
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "acquired_disposed_ratio": 0.6719,
+        "total_acquired_shares": 1212676,
+        "total_disposed_shares": 1060620,
+        "acquired_transactions": 43,
+        "disposed_transactions": 64,
+        "total_purchases": 0,
+        "total_sales": 21
+      }
+    ],
+    "latest_trend": "distributing",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {
+    "as_of_date": "2025-12-31",
+    "year": 2025,
+    "quarter": 4,
+    "ownership_percent": 67.1328,
+    "last_ownership_percent": 63.3359,
+    "ownership_pct_change_qoq": 3.7969,
+    "investors_holding": 3288,
+    "investors_holding_change": 429,
+    "num_13f_shares": 1090236107,
+    "num_13f_shares_change": 60393845,
+    "total_invested_usd": 245205539373,
+    "total_invested_change_usd": 75195455340,
+    "new_positions": 626,
+    "increased_positions": 1753,
+    "reduced_positions": 1098,
+    "closed_positions": 202,
+    "put_call_ratio": 1.3034,
+    "put_call_ratio_change_qoq": 2.5223,
+    "accumulation_signal": "accumulating",
+    "source": "FMP /stable/institutional-ownership/symbol-positions-summary"
+  },
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 0,
+    "house_count": 7,
+    "buy_count": 4,
+    "sell_count": 3,
+    "net_signal": "neutral",
+    "most_recent_date": "2026-03-13",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {
+    "latest_disclosure": {
+      "date": "2025-12-27",
+      "form_type": "8-K",
+      "environmental_score": 95.71,
+      "social_score": 54.79,
+      "governance_score": 59.39,
+      "total_esg_score": 69.96
+    },
+    "latest_rating": {
+      "fiscal_year": 2025,
+      "esg_risk_rating": "B+",
+      "industry": "SEMICONDUCTORS",
+      "industry_rank": null
+    },
+    "source": "FMP /stable/esg-disclosures + esg-ratings"
+  },
+  "executive_compensation": {
+    "latest_year": 2025,
+    "top_5_executives": [
+      {
+        "name": "Lisa T. Su Chair, President and Chief Executive Officer",
+        "year": 2025,
+        "salary": 1291258,
+        "bonus": 0,
+        "stock_award": 41669390,
+        "option_award": 8951513,
+        "total": 55161779
+      },
+      {
+        "name": "Darren Grasby Executive Vice President, Chief Sales Officer and President EMEA",
+        "year": 2025,
+        "salary": 828148,
+        "bonus": 0,
+        "stock_award": 14481805,
+        "option_award": 1518987,
+        "total": 18181694
+      },
+      {
+        "name": "Mark Papermaster Executive Vice President and Chief Technology Officer, Technology and Engineering",
+        "year": 2025,
+        "salary": 854885,
+        "bonus": 0,
+        "stock_award": 12271369,
+        "option_award": 2170032,
+        "total": 16606856
+      },
+      {
+        "name": "Jean Hu Executive Vice President, Chief Financial Officer and Treasurer",
+        "year": 2025,
+        "salary": 779846,
+        "bonus": 0,
+        "stock_award": 10430798,
+        "option_award": 1844510,
+        "total": 14251950
+      },
+      {
+        "name": "Forrest Norrod Executive Vice President and General Manager, Data Center Solutions Business",
+        "year": 2025,
+        "salary": 764885,
+        "bonus": 0,
+        "stock_award": 9817004,
+        "option_award": 1735973,
+        "total": 13492054
+      }
+    ],
+    "ceo_total_latest": 55161779,
+    "ceo_yoy_pct": 78.0,
+    "ceo_red_flag": true,
+    "source": "FMP /stable/governance-executive-compensation"
+  },
+  "comp_benchmark": {
+    "industry_title": "ABRASIVE, ASBESTOS & MISC NONMETALLIC MINERAL PRODS",
+    "year": 2024,
+    "average_compensation": 784407.5555555555,
+    "median_compensation": null,
+    "ceo_overpaid_vs_median_pct": null,
+    "source": "FMP /stable/executive-compensation-benchmark"
+  },
+  "employee_history": {
+    "latest_period": "2025-12-27",
+    "latest_count": 31000,
+    "one_year_pct": 10.7,
+    "cagr_5y_pct": 18.9,
+    "expansion_signal": true,
+    "layoff_signal": false,
+    "data_points": 33,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 0,
+    "cached": false
+  }
+}

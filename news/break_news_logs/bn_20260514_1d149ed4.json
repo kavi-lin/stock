@@ -1,0 +1,599 @@
+{
+  "news_id": "bn_20260514_1d149ed4",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:29:46Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/netflix-just-raised-guidance-market-153610147.html",
+    "feed_fingerprint": "netflix just raised guidance market sold off we",
+    "published": "2026-05-14T15:36:10+00:00",
+    "url_hash": "sha1:f91daab2f841c7435928d011b373ec088859c843"
+  },
+  "headline": "Netflix Just Raised Guidance. The Market Sold It Off. We See 283% Upside",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "earnings",
+    "shallow_score": 1.5,
+    "bull_case": "收益超預期提振前景",
+    "bear_case": "高基期+競爭加劇",
+    "sector_view": "受惠產業擴張",
+    "macro_view": "利率敏感性降低",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:23:25Z",
+      "latency_ms": 25372,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**Netflix 上調全年指引市場卻拋售**，典型「good news priced in」反應。Q1 廣告層 ARPU 加速 + password-sharing crackdown 紅利進入後段，但 2026 內容支出 cap 維持 170 億美元未上修，**自由現金流敘事優於營收敘事**。市場賣壓主因：股價過去 12 個月已 +40%，guidance raise 幅度 (~3-5%) 低於 buy-side whisper (~7%)。**283% upside** 屬 sell-side outlier 觀點，需扣除：(1) 廣告層 take-rate 競爭來自 AMZN Prime Video / DIS+ tier，(2) live sports bidding war 推升內容通膨。中長線**訂閱+廣告雙引擎**結構仍 intact，但近期估值 (~35x fwd P/E) 已 price in 樂觀情境，回調是健康洗盤。",
+        "bull_points": [
+          "廣告層 ARPU 加速，FCF margin 持續擴張",
+          "Password crackdown 後 ARM 結構性墊高",
+          "Guidance 上修代表內部能見度改善"
+        ],
+        "bear_points": [
+          "估值 35x fwd P/E 已 price in 多數利多",
+          "Live sports 內容成本通膨壓縮 operating leverage",
+          "AMZN/DIS 廣告層分食 take-rate"
+        ],
+        "final_take": "結構看多但短期偏整理，回調至 30x 才加碼",
+        "entities": {
+          "tickers": [
+            "NFLX",
+            "AMZN",
+            "DIS",
+            "WBD",
+            "PARA"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "streaming ad-tier",
+            "password sharing crackdown",
+            "live sports rights",
+            "content cost inflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:streaming-ad-tier"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:content-cost-inflation"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AMZN"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:DIS"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:guidance-raise-priced-in"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "指引上修但估值已反映，sell-off 屬技術性洗盤"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:25:57Z",
+      "latency_ms": 151680,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Netflix 上調全年業績指引，然市場反應卻顯得冷淡，這凸顯了未來成長動能的可持續性仍面臨質疑。儘管廣告業務持續成長且帳號共享措施奏效，但我認為 170 億美元的內容支出上限正承受日益加劇的壓力。為在飽和的串流市場中保持競爭力並尋求差異化，Netflix 亟需加大對自家 AI 技術的投資，涵蓋內容生成、個人化推薦以及直播串流基礎設施等領域。這些策略性部署雖有望帶來長期效率，但其龐大的研發與資本支出勢必對自由現金流構成挑戰，若執行不當，恐限制股價的上漲潛力，難以實現極端的上漲預期。",
+        "bull_points": [
+          "AI 驅動的內容推薦與個人化引擎仍具領先優勢。",
+          "訂閱與廣告雙引擎模式的長期潛力穩固。"
+        ],
+        "bear_points": [
+          "內容支出壓力恐迫使 Netflix 超越 170 億美元上限。",
+          "AI 研發與導入的巨額投資恐侵蝕自由現金流。"
+        ],
+        "final_take": "AI 協同成長潛力，但短期投入風險不容忽視。",
+        "entities": {
+          "tickers": [
+            "NFLX"
+          ],
+          "sectors": [
+            "Interactive Media & Services",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI in media",
+            "Streaming growth",
+            "Content monetization",
+            "R&D investment"
+          ],
+          "tech_keywords": [
+            "AI-driven personalization",
+            "Generative AI",
+            "Live streaming infrastructure"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI-driven personalization"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Generative AI"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Content cost inflation"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "CUSTOMER_OF",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "聚焦 AI 投入與內容支出壓力對自由現金流的潛在影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:26:22Z",
+      "latency_ms": 24819,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪未碰**債務再融資 timing 風險**。NFLX 帳上約 **140 億美元 long-term debt**，2025-2027 有約 60 億到期 wall，當前 IG 信評 BBB+。若 Fed cut 路徑延後 + HY spread 走擴，refinancing 成本可能從 4% coupon 跳到 5.5%+，**每年多吃 8000-9000 萬美元利息**，直接壓 FCF guidance (~80 億)。第二是**FX headwind 二階效應**：60% 營收來自海外，DXY 若因 Trump 關稅政策反彈，2026 報表營收會被砍 2-3%，但 sell-side 283% target 模型多用 spot rate 外推。第三個被忽略的是 **live sports rights inflation 的 read-through**：NFLX NFL Christmas Day deal 已推升 **DIS ESPN / FUBO / WBD** 對 NBA / UFC 續約報價，二階受惠者反而是內容版權方如 **EDR (Endeavor) / MSGS**，不是 streamer 本身。",
+        "bull_points": [
+          "FCF 結構性改善，2026E 約 80 億美元",
+          "廣告層 ARPU 加速兌現雙引擎敘事",
+          "live sports 內容資產化提升估值天花板"
+        ],
+        "bear_points": [
+          "2025-27 約 60 億債務再融資面臨利率重訂",
+          "DXY 反彈拖累 60% 海外營收 2-3%",
+          "35x fwd P/E 已 price in 樂觀情境"
+        ],
+        "final_take": "中性偏空，等 refinance 完成 + 回落至 28x fwd P/E 再進",
+        "entities": {
+          "tickers": [
+            "NFLX",
+            "DIS",
+            "AMZN",
+            "FUBO",
+            "WBD",
+            "EDR",
+            "MSGS"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "streaming wars",
+            "ad-tier monetization",
+            "live sports rights inflation",
+            "FX headwind"
+          ],
+          "tech_keywords": [
+            "ad-tier ARPU",
+            "password-sharing crackdown",
+            "FCF guidance"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:debt-refinancing-2025-27"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dxy-fx-headwind"
+          },
+          {
+            "subject": "ticker:EDR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:live-sports-rights-inflation"
+          },
+          {
+            "subject": "ticker:MSGS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:live-sports-rights-inflation"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AMZN"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:DIS"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增債務 refinance + FX + 版權方二階受惠角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:29:22Z",
+      "latency_ms": 180012,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_1d149ed4.c3.txt",
+      "parsed": {
+        "commentary": "",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": -1
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:29:27Z",
+      "latency_ms": 4945,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 686,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "cf2d36e2-ac7b-42e8-9431-0c942e55cd51",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "0117c671-c415-447d-9625-700fbf824d14"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:29:46Z",
+      "latency_ms": 19150,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "儘管 Netflix 欲藉 AI 強化內容與推薦，但全球 AI 熱潮推升了關鍵人才、高品質數據及算力成本，競爭異常激烈。這將直接考驗 Netflix AI 策略的投資報酬率與執行時程，使得 sell-side 的極端上漲預期面臨嚴峻挑戰。",
+        "bull_points": [
+          "訂閱與廣告雙引擎增長潛力仍在。",
+          "AI 效率提升可望優化內容製作成本。"
+        ],
+        "bear_points": [
+          "AI 關鍵人才與數據獲取成本急遽上升。",
+          "科技巨頭 AI 投資潮推升相關硬體與雲端服務價格。"
+        ],
+        "final_take": "AI 願景雖遠大，但成本與競爭是近期關鍵。",
+        "entities": {
+          "tickers": [
+            "NFLX"
+          ],
+          "sectors": [
+            "Interactive Media & Services",
+            "Software - Infrastructure"
+          ],
+          "themes": [
+            "AI capex",
+            "Talent war",
+            "Data acquisition costs",
+            "Cloud computing costs"
+          ],
+          "tech_keywords": [
+            "AI",
+            "Machine Learning",
+            "Cloud Computing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "theme:AI talent war"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "theme:Data acquisition costs"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "COMPETES_WITH",
+            "object": "theme:Cloud computing costs"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI investment"
+          },
+          {
+            "subject": "ticker:NFLX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI efficiency"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "AI 投資潮推升成本與競爭，衝擊 Netflix 股價上漲空間。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMZN",
+        "DIS",
+        "EDR",
+        "FUBO",
+        "MSGS",
+        "NFLX",
+        "PARA",
+        "WBD"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Consumer Discretionary",
+        "Interactive Media & Services",
+        "Software - Infrastructure"
+      ],
+      "themes": [
+        "AI capex",
+        "AI in media",
+        "Cloud computing costs",
+        "Content monetization",
+        "Data acquisition costs",
+        "FX headwind",
+        "R&D investment",
+        "Streaming growth",
+        "Talent war",
+        "ad-tier monetization",
+        "content cost inflation",
+        "live sports rights",
+        "live sports rights inflation",
+        "password sharing crackdown",
+        "streaming ad-tier",
+        "streaming wars"
+      ],
+      "tech_keywords": [
+        "AI",
+        "AI-driven personalization",
+        "Cloud Computing",
+        "FCF guidance",
+        "Generative AI",
+        "Live streaming infrastructure",
+        "Machine Learning",
+        "ad-tier ARPU",
+        "password-sharing crackdown"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:streaming-ad-tier"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:content-cost-inflation"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AMZN"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:DIS"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:guidance-raise-priced-in"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI-driven personalization"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Generative AI"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Content cost inflation"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "CUSTOMER_OF",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:debt-refinancing-2025-27"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dxy-fx-headwind"
+      },
+      {
+        "subject": "ticker:EDR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:live-sports-rights-inflation"
+      },
+      {
+        "subject": "ticker:MSGS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:live-sports-rights-inflation"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "COMPETES_WITH",
+        "object": "theme:AI talent war"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "COMPETES_WITH",
+        "object": "theme:Data acquisition costs"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "COMPETES_WITH",
+        "object": "theme:Cloud computing costs"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI investment"
+      },
+      {
+        "subject": "ticker:NFLX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI efficiency"
+      }
+    ],
+    "bull_summary": [
+      "廣告層 ARPU 加速，FCF margin 持續擴張",
+      "Password crackdown 後 ARM 結構性墊高",
+      "Guidance 上修代表內部能見度改善",
+      "AI 驅動的內容推薦與個人化引擎仍具領先優勢。",
+      "訂閱與廣告雙引擎模式的長期潛力穩固。",
+      "FCF 結構性改善，2026E 約 80 億美元"
+    ],
+    "bear_summary": [
+      "估值 35x fwd P/E 已 price in 多數利多",
+      "Live sports 內容成本通膨壓縮 operating leverage",
+      "AMZN/DIS 廣告層分食 take-rate",
+      "內容支出壓力恐迫使 Netflix 超越 170 億美元上限。",
+      "AI 研發與導入的巨額投資恐侵蝕自由現金流。",
+      "2025-27 約 60 億債務再融資面臨利率重訂"
+    ],
+    "final_take": "AI 願景雖遠大，但成本與競爭是近期關鍵。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:29:46Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:29:22Z",
+      "where": "round1.gemini",
+      "msg": "rc=-1 err=timeout after 180s"
+    },
+    {
+      "ts": "2026-05-14T16:29:27Z",
+      "where": "round2.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

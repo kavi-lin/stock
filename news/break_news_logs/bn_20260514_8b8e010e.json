@@ -1,0 +1,732 @@
+{
+  "news_id": "bn_20260514_8b8e010e",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T06:02:03Z",
+  "last_activity_ts": "2026-05-14T06:10:13Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/f828225049c2",
+    "feed_fingerprint": "futu:NVDA:36938dbd88",
+    "published": "2026-05-14T13:57:47+08:00",
+    "url_hash": "sha1:6bd2e6cd783fe008906eca85cd4f2e82b30c0c66"
+  },
+  "headline": "英偉達美股夜盤短線拉升，現漲近2%",
+  "headline_zh": null,
+  "raw_summary": "英偉達美股夜盤短線拉升，現漲近2%。據路透報道，美國批准向10家中國公司出售英偉達H200芯片。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T06:04:41Z",
+      "latency_ms": 23983,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**美國批准 NVDA H200 出口 10 家中國公司**，盤後漲近 2%。此為**監管層面實質鬆綁**，非單純情緒事件 — H200 (Hopper, 141GB HBM3e) 原受 export control 卡關，現開閘代表 China revenue 缺口可部分回補。Q4 中國占 NVDA data center 營收曾 >20%，後跌至 single digit，**重新計入估值 upside**。受惠鏈：HBM3e 供應商 **MU / SK Hynix**、CoWoS 封裝 **TSM**、server ODM **SMCI / DELL**。但須留意：(1) 10 家名單未公開，可能只是 cloud 大廠如 Alibaba / Tencent 子公司，量體有限；(2) Blackwell B200 仍受限，H200 為**上一代去庫存**而非新產能解放；(3) 中方是否買單未知 — Huawei Ascend 910C 已部分替代。**情緒利多 > 基本面利多**，需等下季 guidance 驗證。",
+        "bull_points": [
+          "H200 對中出口開閘，中國營收缺口回補",
+          "HBM3e / CoWoS 供應鏈連帶受惠",
+          "監管鬆綁訊號，後續 Blackwell 解禁想像"
+        ],
+        "bear_points": [
+          "10 家名單未公開，量體可能有限",
+          "H200 為上代品，Blackwell 仍受限",
+          "Huawei Ascend 已部分替代，中方買單未定"
+        ],
+        "final_take": "短線情緒利多，中線等 Q2 China 訂單兌現",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "TSM",
+            "SMCI",
+            "DELL",
+            "AVGO"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "China export control",
+            "Data center"
+          ],
+          "tech_keywords": [
+            "H200",
+            "HBM3e",
+            "Blackwell",
+            "CoWoS-L",
+            "Hopper",
+            "Ascend 910C"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china_export_relaxation"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:huawei_ascend"
+          },
+          {
+            "subject": "tech_keyword:H200",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:china_export_relaxation"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ai_capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.65,
+        "rationale_short": "監管鬆綁明確，但量體與兌現待驗證"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T06:05:01Z",
+      "latency_ms": 19573,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "儘管美國批准向中國出售H200晶片，為英偉達（NVDA）開啟了部分中國市場 revenue 回補的潛力，但此舉主要為清理上一代庫存。H200已非最先進的Blackwell架構，加上中國本土AI晶片（如華為昇騰）的快速追趕，預計NVDA在中國市場的H200定價將面臨顯著壓力，可能限制對整體ASP和毛利率的正面影響，甚至使中國成為低價區。投資者應關注其下一代產品佈局，而非僅依賴H200銷售量。",
+        "bull_points": [
+          "中國市場 revenue 補量，有助緩解短期壓力。",
+          "證明監管環境有彈性，為未來打開可能。"
+        ],
+        "bear_points": [
+          "H200 價格壓力大，可能影響整體 ASP。",
+          "中國自主 AI 晶片追趕，長期替代風險未減。"
+        ],
+        "final_take": "預期價格戰，看多需待 Blackwell 佈局。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "TSM",
+            "SMCI"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware",
+            "Storage & Peripherals"
+          ],
+          "themes": [
+            "China AI Market",
+            "Regulatory Easing",
+            "Inventory Clearance",
+            "Pricing Pressure"
+          ],
+          "tech_keywords": [
+            "H200",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200_export_approval"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "FACING_HEADWIND_FROM",
+            "object": "narrative:price_pressure_on_h200_sales"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Inventory Clearance"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200_export_approval"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200_export_approval"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "關注H200在華定價壓力與ASP影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T06:05:25Z",
+      "latency_ms": 23952,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**出口管制 precedent 對 AMD MI300X / MI325X 的連動效應被忽略**。BIS 既然開閘 H200，AMD MI300X (192GB HBM3e, 同屬 Hopper-era 性能帶) 大概率比照辦理 — 這對 **AMD 中國 data center narrative** 是更大的 unlock，因 AMD 中國基期更低、邊際彈性更大。第二層：**Lam Research (LRCX) / Applied Materials (AMAT) 對中國 WFE 出貨限制**未鬆綁，意味中方無法自建等效產能，**只能繼續買 H200** — 這比 NVDA 本身更值得追蹤，因 WFE 限制是 H200 中國需求的**結構性護城河**。Contra：若 BIS 名單含 ByteDance，Recommendation Engine 訓練需求可短期爆量，但 ByteDance 已透過新加坡子公司繞道採購，名單合法化只是**追認既成事實**，邊際增量有限。",
+        "bull_points": [
+          "AMD MI300X 大概率比照鬆綁，中國基期低彈性大",
+          "WFE 出口仍卡，中方無法自建是結構性護城河",
+          "BIS precedent 為 Hopper 世代全面開閘鋪路"
+        ],
+        "bear_points": [
+          "ByteDance 早經新加坡繞道，名單追認非新增量",
+          "AMD 受惠若成真將稀釋 NVDA 中國市占敘事",
+          "BIS 隨政治風向反覆，10 家名單可隨時縮減"
+        ],
+        "final_take": "看多 AMD 連動 > NVDA 本身，盯 WFE 限制不鬆動",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "LRCX",
+            "AMAT",
+            "MU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "China export control",
+            "WFE restriction"
+          ],
+          "tech_keywords": [
+            "H200",
+            "MI300X",
+            "MI325X",
+            "HBM3e",
+            "Hopper"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-export-relaxation"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:china-wfe-restriction"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:china-wfe-restriction"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AMD"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "AMD 連動 + WFE 護城河為前輪未提之新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T06:07:38Z",
+      "latency_ms": 133252,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "儘管英偉達（NVDA）H200晶片出口管制有所放寬，但中國市場對其持續需求，**關鍵在於CUDA軟體生態系統的深厚壁壘**。相較於本土AI晶片（如華為昇騰），CUDA提供了更成熟、更廣泛的開發工具鏈與函式庫支援，這使得開發者能夠更高效地進行AI模型的訓練與部署。即使H200已屬上一代技術，**CUDA的生態系統優勢**仍是吸引中國客戶採購的重要因素，這為NVDA在中國市場維持一定的競爭力提供了**隱性護城河**。",
+        "bull_points": [
+          "CUDA 生態系為 NVDA 提供軟體護城河。",
+          "H200 獲准出口，滿足中國現有開發需求。"
+        ],
+        "bear_points": [
+          "本土晶片性能追趕，軟體生態逐步建立。",
+          "Blackwell 架構仍受限，未來成長有隱憂。"
+        ],
+        "final_take": "CUDA 護城河尚存，但 Blackwell 才是未來。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "HUAWEI"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI development in China",
+            "Export controls"
+          ],
+          "tech_keywords": [
+            "CUDA",
+            "AI accelerators"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CUDA"
+          },
+          {
+            "subject": "theme:AI development in China",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CUDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "CUDA 生態系是關鍵。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T06:08:05Z",
+      "latency_ms": 26952,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**Networking layer 受惠被市場忽略**。H200 部署中國 hyperscaler 不只是 GPU 出貨，**InfiniBand / NVLink switch 同步解禁**才是關鍵 — NVDA Mellanox 業務 (Spectrum-X / Quantum-2) 在中國 AI cluster 部署中 attach rate >80%，**ARM (Arista) 與 ANET 在中國 400G/800G ethernet switch 競爭壓力同步上升**。第二層 contra：H200 出口開閘可能觸發**中國「National Team」反向加碼自主化補貼** — 寒武紀 / 海光 / 華為昇騰若獲國資委追加訂單，**長期反成 NVDA 中國市佔的反向催化**。被忽略的 ticker：**VRT (Vertiv) — H200 TDP 700W vs H100 的 350W**，中國 data center liquid cooling retrofit 需求隨 H200 進場放大，VRT 中國營收占比 ~10%，邊際彈性高。",
+        "bull_points": [
+          "NVLink/Mellanox switch 同步解禁，networking ASP 拉升",
+          "VRT 液冷 retrofit 受惠 H200 700W TDP",
+          "WFE 限制未鬆，中國只能續買 NVDA"
+        ],
+        "bear_points": [
+          "H200 開閘恐觸發中方加倍補貼自主芯片",
+          "ANET 中國 ethernet 競爭壓力上升",
+          "H200 為 Hopper 末代，Blackwell 仍卡關"
+        ],
+        "final_take": "看多 NVDA + VRT，但中國市佔長期看貶",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "VRT",
+            "ANET",
+            "AMD",
+            "MU",
+            "TSM",
+            "SMCI",
+            "DELL",
+            "LRCX",
+            "AMAT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Networking Equipment",
+            "Data Center Infrastructure"
+          ],
+          "themes": [
+            "AI capex",
+            "China export control",
+            "Data center liquid cooling",
+            "AI networking"
+          ],
+          "tech_keywords": [
+            "H200",
+            "HBM3e",
+            "NVLink",
+            "InfiniBand",
+            "Spectrum-X",
+            "Quantum-2",
+            "Blackwell",
+            "Mellanox",
+            "CUDA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-h200-export-unlock"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200-liquid-cooling-retrofit"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:nvda-mellanox-china-attach"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:china-self-sufficiency-counter-subsidy"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech:NVLink"
+          },
+          {
+            "subject": "tech:H200",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "tech:HBM3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Networking + 液冷 + 中國反向補貼三個新角度未被涵蓋"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T06:10:13Z",
+      "latency_ms": 128131,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "美國批准向中國出售H200晶片，看似是英偉達（NVDA）的營收機會，實則可能為美國地緣政治策略的一環。此舉旨在透過提供上一代AI晶片，滿足中國對算力的迫切需求，進而減緩其本土先進AI晶片研發與自主化的步伐。華府此舉或許是為了在AI軍備競賽中爭取更多時間，確保美國在下一代架構（如Blackwell）上的領先地位，同時讓NVDA在舊款庫存中獲利。投資者應警惕此舉的長遠戰略意涵，而非僅關注短期營收。",
+        "bull_points": [
+          "美國政策藉由H200牽制中國AI發展",
+          "NVDA CUDA生態系提供結構性優勢"
+        ],
+        "bear_points": [
+          "H200畢竟是上一代，難以支撐長遠AI領先",
+          "中國「國家隊」恐因刺激而加速國產化"
+        ],
+        "final_take": "地緣博弈下的權衡，短期營收非關鍵。",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology"
+          ],
+          "themes": [
+            "Geopolitical strategy",
+            "US-China tech relations",
+            "AI arms race"
+          ],
+          "tech_keywords": [
+            "H200",
+            "AI chips",
+            "CUDA",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:US_AI_chip_export_policy",
+            "predicate": "FACILITATES",
+            "object": "narrative:H200_access_for_China"
+          },
+          {
+            "subject": "narrative:US_AI_chip_export_policy",
+            "predicate": "AIMS_TO",
+            "object": "narrative:slow_China_domestic_AI_development"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:H200_China_access"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:CUDA_ecosystem"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "美國藉由舊款晶片拖延中國自主研發，以爭取技術領先。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "AMD",
+        "ANET",
+        "AVGO",
+        "DELL",
+        "HUAWEI",
+        "LRCX",
+        "MU",
+        "NVDA",
+        "SMCI",
+        "TSM",
+        "VRT"
+      ],
+      "sectors": [
+        "Data Center Infrastructure",
+        "Information Technology",
+        "Networking Equipment",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Storage & Peripherals",
+        "Technology",
+        "Technology Hardware"
+      ],
+      "themes": [
+        "AI arms race",
+        "AI capex",
+        "AI development in China",
+        "AI networking",
+        "China AI Market",
+        "China export control",
+        "Data center",
+        "Data center liquid cooling",
+        "Export controls",
+        "Geopolitical strategy",
+        "Inventory Clearance",
+        "Pricing Pressure",
+        "Regulatory Easing",
+        "US-China tech relations",
+        "WFE restriction"
+      ],
+      "tech_keywords": [
+        "AI accelerators",
+        "AI chips",
+        "Ascend 910C",
+        "Blackwell",
+        "CUDA",
+        "CoWoS-L",
+        "H200",
+        "HBM3e",
+        "Hopper",
+        "InfiniBand",
+        "MI300X",
+        "MI325X",
+        "Mellanox",
+        "NVLink",
+        "Quantum-2",
+        "Spectrum-X"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china_export_relaxation"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:huawei_ascend"
+      },
+      {
+        "subject": "tech_keyword:H200",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:china_export_relaxation"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ai_capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200_export_approval"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "FACING_HEADWIND_FROM",
+        "object": "narrative:price_pressure_on_h200_sales"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Inventory Clearance"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200_export_approval"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200_export_approval"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-export-relaxation"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:china-wfe-restriction"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:china-wfe-restriction"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AMD"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CUDA"
+      },
+      {
+        "subject": "theme:AI development in China",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CUDA"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-h200-export-unlock"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200-liquid-cooling-retrofit"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:nvda-mellanox-china-attach"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:china-self-sufficiency-counter-subsidy"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech:NVLink"
+      },
+      {
+        "subject": "tech:H200",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "tech:HBM3e"
+      },
+      {
+        "subject": "narrative:US_AI_chip_export_policy",
+        "predicate": "FACILITATES",
+        "object": "narrative:H200_access_for_China"
+      },
+      {
+        "subject": "narrative:US_AI_chip_export_policy",
+        "predicate": "AIMS_TO",
+        "object": "narrative:slow_China_domestic_AI_development"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:H200_China_access"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:CUDA_ecosystem"
+      }
+    ],
+    "bull_summary": [
+      "H200 對中出口開閘，中國營收缺口回補",
+      "HBM3e / CoWoS 供應鏈連帶受惠",
+      "監管鬆綁訊號，後續 Blackwell 解禁想像",
+      "中國市場 revenue 補量，有助緩解短期壓力。",
+      "證明監管環境有彈性，為未來打開可能。",
+      "AMD MI300X 大概率比照鬆綁，中國基期低彈性大"
+    ],
+    "bear_summary": [
+      "10 家名單未公開，量體可能有限",
+      "H200 為上代品，Blackwell 仍受限",
+      "Huawei Ascend 已部分替代，中方買單未定",
+      "H200 價格壓力大，可能影響整體 ASP。",
+      "中國自主 AI 晶片追趕，長期替代風險未減。",
+      "ByteDance 早經新加坡繞道，名單追認非新增量"
+    ],
+    "final_take": "地緣博弈下的權衡，短期營收非關鍵。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T06:10:13Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN, SUPPLIES_TO; gemini-only: AIMS_TO, FACILITATES, FACING_HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,707 @@
+{
+  "news_id": "bn_20260514_900bdd84",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T00:48:00Z",
+  "last_activity_ts": "2026-05-14T00:57:04Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/caffb7fcd5fc",
+    "feed_fingerprint": "futu:BABA:3c16c2bbfb",
+    "published": "2026-05-14T07:08:35+08:00",
+    "url_hash": "sha1:9ac4f5c75693cfda53d51c3f49befb229fce7845"
+  },
+  "headline": "科技巨頭力撐標普、納指新高，芯片股強勢反彈",
+  "headline_zh": null,
+  "raw_summary": "科技巨頭力撐標普、納指新高，芯片股強勢反彈；中國金龍指數漲近4%，阿里績後勁升8%，世紀互聯大漲25%；PPI創3年來最高水平>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:55:22Z",
+      "latency_ms": 19223,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Mixed signal masquerading as risk-on. Tape strength concentrated in mega-cap tech + semis (NVDA/AVGO/AMD beta complex) while hot PPI print should be a yield headwind — bond market either shrugging or rate-cut hopes already priced. Watch dispersion: if SPX/NDX new highs run on <5 names, breadth divergence amplifies top-risk. China ADR squeeze (BABA +8% post-print, VNET +25%) is short-cover + AI-capex readthrough (VNET = data center landlord, leverage to domestic compute buildout post-H20 export curbs). KWEB/FXI flow could reignite Macau/EV adjacent (JD, PDD, BIDU). Semi rebound likely tied to HBM3e tightness + CoWoS-L allocation chatter — SK Hynix/Micron supply read-through. PPI hot + tape up = stagflation-lite tail; if 10Y breaks 4.7%, multiple compression risk returns fast.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "AMD",
+            "MU",
+            "BABA",
+            "VNET",
+            "KWEB",
+            "FXI",
+            "JD",
+            "PDD",
+            "BIDU",
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "AI capex",
+            "China ADR short squeeze",
+            "China data center buildout",
+            "PPI reflation",
+            "Mega-cap concentration"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell",
+            "H20 export restriction"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VNET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-ai-capex"
+          },
+          {
+            "subject": "ticker:BABA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:china-adr-rerate"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "sector:Semiconductors",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ppi-reflation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Risk-on tape + hot PPI = conflicting signal. Semi strength driven by HBM3e/CoWoS tightness; China ADR move is short-squeeze + AI-capex readthrough. Breadth check needed."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:55:37Z",
+      "latency_ms": 14763,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The surge in PPI, reaching a 3-year high, signals robust underlying demand. This backdrop strongly supports continued capital expenditures by major cloud hyperscalers like Amazon, Google, and Microsoft. Their ongoing massive investments in AI infrastructure directly translate to sustained demand for the very semiconductor stocks that are now rebounding. This hyperscaler capex is a critical, fundamental driver underpinning the current rally in chip equities, providing a robust demand-side perspective beyond immediate supply constraints or China-specific short-covering.",
+        "entities": {
+          "tickers": [
+            "AMZN",
+            "GOOGL",
+            "MSFT"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI Infrastructure Spending",
+            "Consumer Demand Strength"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMZN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure Spending"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure Spending"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure Spending"
+          },
+          {
+            "subject": "ticker:AMZN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Consumer Demand Strength"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Consumer Demand Strength"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Consumer Demand Strength"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Hyperscaler demand for AI infra as a key driver of chip rally, linked to PPI."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:56:00Z",
+      "latency_ms": 23291,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: power & cooling bottleneck as 2nd-order tax on the AI capex thesis. If hyperscaler capex stays hot (per Gemini) AND VNET-style data center landlords squeeze higher, the binding constraint shifts from GPU supply to grid interconnect + liquid cooling. Read-through: **VRT** (Vertiv liquid cooling, CDU monopoly-ish), **ETN** (switchgear backlog 18mo+), **GEV** (gas turbine orders for behind-the-meter), **CEG/VST** (nuclear PPA tailwind). Contra to consensus chip-only trade: semis re-rate caps when power CapEx lead times (24-36mo for transformers) bottleneck rack deployment. Also overlooked — **AMAT/LRCX** WFE under-owned vs NVDA; HBM3e capacity adds need DRAM cap-ex, not just logic. If PPI hot persists, electrical equipment pricing power = margin expansion, not compression.",
+        "entities": {
+          "tickers": [
+            "VRT",
+            "ETN",
+            "GEV",
+            "CEG",
+            "VST",
+            "AMAT",
+            "LRCX",
+            "NVDA",
+            "VNET",
+            "BABA"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI power bottleneck",
+            "data center cooling",
+            "WFE capex",
+            "behind-the-meter power"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "liquid cooling CDU",
+            "switchgear",
+            "gas turbine",
+            "nuclear PPA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_power_bottleneck"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_power_bottleneck"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:behind_the_meter_power"
+          },
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hyperscaler_ppa"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e_capacity"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:dram_capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:power_interconnect_lead_times"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Prior thread covered semis/China/PPI/HBM. Missing: power+cooling 2nd-order constraint (VRT/ETN/GEV/CEG) capping AI capex velocity, plus WFE under-ownership angle."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:56:23Z",
+      "latency_ms": 22981,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The PPI's ascent to a 3-year high signals significant inflationary pressures on manufacturing inputs, extending beyond energy to crucial specialty chemicals and gases essential for leading-edge fabrication. This directly impacts the cost base for chip production. While demand for advanced chips remains robust, the ability of foundries and fabless players to pass on these escalating input costs for processes like etching and deposition is key. Companies specializing in these materials, such as Entegris (ENTG), face a dynamic where they may gain pricing power, but the aggregate increase in manufacturing costs could pressure overall semiconductor industry margins if end-product pricing cannot keep pace.",
+        "entities": {
+          "tickers": [
+            "ENTG",
+            "NVDA",
+            "AMAT",
+            "LRCX"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "Semiconductor input costs",
+            "Specialty chemical inflation"
+          ],
+          "tech_keywords": [
+            "Specialty chemicals",
+            "Etching gases",
+            "Photoresists",
+            "Wafer cleaning",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:high PPI print",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:Semiconductor input costs"
+          },
+          {
+            "subject": "ticker:ENTG",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:Semiconductor input costs"
+          },
+          {
+            "subject": "ticker:ENTG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:specialty chemical inflation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "High PPI suggests rising input costs for chip materials, benefiting ENTG by potentially increasing pricing power for its specialty chemicals."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:56:46Z",
+      "latency_ms": 22307,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Missed angle: **memory pricing inflection as macro tell**. PPI hot + DRAM/NAND contract prices already up 15-20% QoQ (per TrendForce Nov reads) = memory makers (MU, WDC, STX) become inflation **beneficiaries**, not victims — pass-through is mechanical via quarterly contracts. Second-order: **enterprise SSD shortage** spilling into hyperscaler procurement timelines. Watch **SMCI/DELL/HPE** server BOM cost — if NAND/DRAM eats 35%+ of server BOM (was ~25% pre-AI), gross margin guides next quarter become the real tape risk, not the chips themselves. Contra to Gemini's ENTG margin-squeeze frame: memory oligopoly (3 players) has cleaner pricing power than fragmented materials suppliers. Also unmentioned: **KLAC** — process control gets pulled forward when yield matters more than throughput (HBM3e stacking yields still <70%).",
+        "entities": {
+          "tickers": [
+            "MU",
+            "WDC",
+            "STX",
+            "SMCI",
+            "DELL",
+            "HPE",
+            "KLAC",
+            "ENTG"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Technology Hardware"
+          ],
+          "themes": [
+            "memory pricing cycle",
+            "AI server BOM inflation",
+            "HBM3e yield ramp",
+            "enterprise SSD shortage"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "DRAM contract pricing",
+            "NAND",
+            "enterprise SSD",
+            "process control",
+            "3D NAND stacking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:memory-pricing-inflection"
+          },
+          {
+            "subject": "ticker:WDC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nand-contract-pricing"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:server-bom-inflation"
+          },
+          {
+            "subject": "ticker:DELL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:server-bom-inflation"
+          },
+          {
+            "subject": "ticker:KLAC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e-yield-ramp"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Memory pricing inflection + server BOM margin squeeze unaddressed; KLAC process-control angle distinct from AMAT/LRCX WFE call."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:57:04Z",
+      "latency_ms": 18201,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The PPI's ascent to a 3-year high suggests that inflationary pressures are increasingly impacting complex, specialized components beyond raw silicon. For AI data centers, high-speed optical interconnects are as critical as GPUs for performance. Companies like Lumentum (LITE) and Coherent (COHR) are exposed to rising costs for advanced materials, manufacturing, and logistics. This inflationary squeeze on optical modules could indirectly inflate the total cost of AI infrastructure build-outs, presenting a new cost-pass-through dynamic for hyperscalers that complements the existing narrative on chip supply constraints and power/cooling bottlenecks.",
+        "entities": {
+          "tickers": [
+            "LITE",
+            "COHR",
+            "NVDA",
+            "AVGO",
+            "AMD"
+          ],
+          "sectors": [
+            "Technology",
+            "Communications Services"
+          ],
+          "themes": [
+            "AI capex",
+            "high PPI",
+            "optical interconnects",
+            "supply chain costs"
+          ],
+          "tech_keywords": [
+            "optical modules",
+            "transceivers",
+            "data center networking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LITE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_capex"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:high_ppi"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai_data_centers"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focus on PPI impact on optical interconnects for AI data centers."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "AMD",
+        "AMZN",
+        "AVGO",
+        "BABA",
+        "BIDU",
+        "CEG",
+        "COHR",
+        "DELL",
+        "ENTG",
+        "ETN",
+        "FXI",
+        "GEV",
+        "GOOGL",
+        "HPE",
+        "JD",
+        "KLAC",
+        "KWEB",
+        "LITE",
+        "LRCX",
+        "MSFT",
+        "MU",
+        "NVDA",
+        "PDD",
+        "SMCI",
+        "STX",
+        "TSM",
+        "VNET",
+        "VRT",
+        "VST",
+        "WDC"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Communications Services",
+        "Consumer Discretionary",
+        "Industrials",
+        "Information Technology",
+        "Semiconductors",
+        "Technology",
+        "Technology Hardware",
+        "Utilities"
+      ],
+      "themes": [
+        "AI Infrastructure Spending",
+        "AI capex",
+        "AI power bottleneck",
+        "AI server BOM inflation",
+        "China ADR short squeeze",
+        "China data center buildout",
+        "Consumer Demand Strength",
+        "HBM3e yield ramp",
+        "Mega-cap concentration",
+        "PPI reflation",
+        "Semiconductor input costs",
+        "Specialty chemical inflation",
+        "WFE capex",
+        "behind-the-meter power",
+        "data center cooling",
+        "enterprise SSD shortage",
+        "high PPI",
+        "memory pricing cycle",
+        "optical interconnects",
+        "supply chain costs"
+      ],
+      "tech_keywords": [
+        "3D NAND stacking",
+        "Blackwell",
+        "CoWoS-L",
+        "DRAM contract pricing",
+        "Etching gases",
+        "H20 export restriction",
+        "HBM3e",
+        "NAND",
+        "Photoresists",
+        "Specialty chemicals",
+        "Wafer cleaning",
+        "data center networking",
+        "enterprise SSD",
+        "gas turbine",
+        "liquid cooling CDU",
+        "nuclear PPA",
+        "optical modules",
+        "process control",
+        "switchgear",
+        "transceivers"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:VNET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-ai-capex"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:china-adr-rerate"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "sector:Semiconductors",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ppi-reflation"
+      },
+      {
+        "subject": "ticker:AMZN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure Spending"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure Spending"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure Spending"
+      },
+      {
+        "subject": "ticker:AMZN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Consumer Demand Strength"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Consumer Demand Strength"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Consumer Demand Strength"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_power_bottleneck"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_power_bottleneck"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:behind_the_meter_power"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hyperscaler_ppa"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e_capacity"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:dram_capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:power_interconnect_lead_times"
+      },
+      {
+        "subject": "narrative:high PPI print",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:Semiconductor input costs"
+      },
+      {
+        "subject": "ticker:ENTG",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:Semiconductor input costs"
+      },
+      {
+        "subject": "ticker:ENTG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:specialty chemical inflation"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:memory-pricing-inflection"
+      },
+      {
+        "subject": "ticker:WDC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nand-contract-pricing"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:server-bom-inflation"
+      },
+      {
+        "subject": "ticker:DELL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:server-bom-inflation"
+      },
+      {
+        "subject": "ticker:KLAC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e-yield-ramp"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_capex"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:high_ppi"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai_data_centers"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:57:04Z",
+    "close_reason": "max_rounds",
+    "divergence_note": ""
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,170 @@
+{
+  "ticker": "MSFT",
+  "as_of_date": "2026-05-11",
+  "cache_key": "MSFT_2026-05-11",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 8.493476240256777,
+    "piotroskiScore": 5,
+    "altman_zone": "safe",
+    "piotroski_strength": "moderate",
+    "workingCapital": 38668000000,
+    "totalAssets": 694228000000,
+    "retainedEarnings": 302526000000,
+    "ebit": 157330000000,
+    "totalLiabilities": 279861000000,
+    "revenue": 318273000000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q3",
+    "as_of_date": "2026-03-31",
+    "ownersEarnings": 22795669000,
+    "ownersEarningsPerShare": 3.06,
+    "maintenanceCapex": -23883331000,
+    "growthCapex": -6992669000,
+    "averagePPE": 0.54545,
+    "qoq_growth": 0.8637,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 0,
+        "total_disposed_shares": 1363.733,
+        "acquired_transactions": 0,
+        "disposed_transactions": 1,
+        "total_purchases": 0,
+        "total_sales": 0
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 1.8182,
+        "total_acquired_shares": 7261.704000000001,
+        "total_disposed_shares": 27641.755999999998,
+        "acquired_transactions": 20,
+        "disposed_transactions": 11,
+        "total_purchases": 1,
+        "total_sales": 1
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 1.3571,
+        "total_acquired_shares": 2091.0750000000003,
+        "total_disposed_shares": 73638.45100000002,
+        "acquired_transactions": 19,
+        "disposed_transactions": 14,
+        "total_purchases": 0,
+        "total_sales": 4
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "acquired_disposed_ratio": 1.5714,
+        "total_acquired_shares": 604364.8790000001,
+        "total_disposed_shares": 397717.97000000003,
+        "acquired_transactions": 33,
+        "disposed_transactions": 21,
+        "total_purchases": 0,
+        "total_sales": 8
+      }
+    ],
+    "latest_trend": "distributing",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {},
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 12,
+    "house_count": 29,
+    "buy_count": 28,
+    "sell_count": 13,
+    "net_signal": "bullish",
+    "most_recent_date": "2026-04-17",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {},
+  "executive_compensation": {
+    "latest_year": 2025,
+    "top_5_executives": [
+      {
+        "name": "Satya Nadella Chairman and Chief Executive Officer",
+        "year": 2025,
+        "salary": 2500000,
+        "bonus": 0,
+        "stock_award": 84245496,
+        "option_award": 0,
+        "total": 96496790
+      },
+      {
+        "name": "Amy E. Hood Executive Vice President and Chief Financial Officer",
+        "year": 2025,
+        "salary": 1000000,
+        "bonus": 0,
+        "stock_award": 25037360,
+        "option_award": 0,
+        "total": 29481551
+      },
+      {
+        "name": "Bradford L. Smith Vice Chair and President",
+        "year": 2025,
+        "salary": 1000000,
+        "bonus": 0,
+        "stock_award": 23734545,
+        "option_award": 0,
+        "total": 28267295
+      },
+      {
+        "name": "Judson B. Althoff Executive Vice President and CEO Microsoft Commercial",
+        "year": 2025,
+        "salary": 993333,
+        "bonus": 0,
+        "stock_award": 23708619,
+        "option_award": 0,
+        "total": 28198734
+      },
+      {
+        "name": "Takeshi Numoto Executive Vice President and Chief Marketing Officer",
+        "year": 2025,
+        "salary": 800000,
+        "bonus": 0,
+        "stock_award": 9005380,
+        "option_award": 0,
+        "total": 11876630
+      }
+    ],
+    "ceo_total_latest": 96496790,
+    "ceo_yoy_pct": 242.2,
+    "ceo_red_flag": true,
+    "source": "FMP /stable/governance-executive-compensation"
+  },
+  "comp_benchmark": {},
+  "employee_history": {
+    "latest_period": "2025-06-30",
+    "latest_count": 228000,
+    "one_year_pct": 0.0,
+    "cagr_5y_pct": 5.9,
+    "expansion_signal": false,
+    "layoff_signal": false,
+    "data_points": 32,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 2,
+    "cached": false
+  }
+}

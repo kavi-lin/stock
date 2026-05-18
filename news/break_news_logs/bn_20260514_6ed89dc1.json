@@ -1,0 +1,753 @@
+{
+  "news_id": "bn_20260514_6ed89dc1",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T16:03:39Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/trumps-best-china-trade-deal-is-the-one-he-doesnt-make-b54fe07f?mod=mw_rss_topstories",
+    "feed_fingerprint": "trump s best china trade deal one he",
+    "published": "2026-05-14T15:25:00+00:00",
+    "url_hash": "sha1:922e89ca83198d7e72ccf43af4a57f1c1736a651"
+  },
+  "headline": "Trump’s best China trade deal is the one he doesn’t make",
+  "headline_zh": null,
+  "raw_summary": "Three decades of failed engagement with Beijing show why U.S. should walk away from the bargaining table.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:56:00Z",
+      "latency_ms": 32629,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "MarketWatch 立場文章主張**川普最佳對中策略是不談判**，意味關稅長期化、脫鉤路徑延續而非緩解。市場 prior 一直假設 2026 下半年會有 trade deal rally，這篇 op-ed 若反映白宮思路，**對中曝險高的 mega-cap 是逆風** — AAPL（中國組裝+消費）、TSLA（上海廠+中國需求）、NVDA（H20/B20 對中出口受限）首當其衝。反向受惠者是**供應鏈回流概念**：MXL、ON、墨西哥/越南製造 ETF (EWW, VNM)，以及國防 (LMT, RTX) 與稀土替代 (MP)。半導體設備 (AMAT, LRCX, KLAC) 對中營收 30%+ 仍是結構性 headwind。**真正非 consensus 角度**：若市場原本 price in deal 樂觀情境，這篇可能觸發短線 de-risking，但長期反而強化 **on-shore capex 主題**（CHIPS Act 受惠 INTC, TSM Arizona, GFS）。",
+        "bull_points": [
+          "供應鏈回流加速利多墨西哥/越南製造 (MXL, ON, EWW)",
+          "On-shore 半導體 capex 結構受惠 INTC, TSM-AZ, GFS",
+          "國防+稀土替代主題受惠 LMT, RTX, MP"
+        ],
+        "bear_points": [
+          "AAPL/TSLA/NVDA 中國曝險高，關稅長期化逆風",
+          "半導體設備商 (AMAT, LRCX, KLAC) 對中營收 30%+ 受壓",
+          "市場若 price in deal rally，短線 de-risking 風險"
+        ],
+        "final_take": "短線看空中國曝險股，中線看多回流供應鏈與國防股",
+        "entities": {
+          "tickers": [
+            "AAPL",
+            "TSLA",
+            "NVDA",
+            "AMAT",
+            "LRCX",
+            "KLAC",
+            "MXL",
+            "ON",
+            "LMT",
+            "RTX",
+            "MP",
+            "INTC",
+            "TSM",
+            "GFS",
+            "EWW",
+            "VNM"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors",
+            "Consumer Discretionary",
+            "Aerospace & Defense",
+            "Materials"
+          ],
+          "themes": [
+            "US-China decoupling",
+            "Supply chain reshoring",
+            "Tariff escalation",
+            "On-shore semiconductor capex",
+            "Rare earth independence"
+          ],
+          "tech_keywords": [
+            "H20",
+            "B20",
+            "CHIPS Act"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-decoupling"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tariff-escalation"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-export-controls"
+          },
+          {
+            "subject": "ticker:MXL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:supply-chain-reshoring"
+          },
+          {
+            "subject": "ticker:INTC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:on-shore-semi-capex"
+          },
+          {
+            "subject": "ticker:LMT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-decoupling"
+          },
+          {
+            "subject": "ticker:MP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rare-earth-independence"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-export-controls"
+          }
+        ],
+        "done": false,
+        "confidence": 0.65,
+        "rationale_short": "Op-ed 反映白宮鷹派思路，但僅單一信源，需多源確認"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:58:22Z",
+      "latency_ms": 142120,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_6ed89dc1.c1.txt",
+      "parsed": {
+        "commentary": "I am currently in Plan Mode, which restricts me from executing tasks such as direct analysis and commentary generation. To fulfill your request for an analyst's commentary, I would need to exit Plan M",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:58:50Z",
+      "latency_ms": 27723,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪已涵蓋 mega-cap 逆風與 on-shore capex 受惠。補一個**被忽略的 2nd-order 角度**：**農產品 + 黃豆出口鏈**。中國過去三輪報復都優先打 US soybean (ADM, BG, 以及 CF/MOS 化肥)，若白宮真的「不談判」，**Q3 2026 美中農產品出口幾乎歸零**已是 base case — 但市場目前 ag complex 估值並未 price in。**反向受惠者：巴西 ag (ADRs: BRFS, JBS) + 阿根廷穀物**會搶走中國訂單，這是過去兩輪貿易戰已驗證的 pattern。另一個 specific node：**Yangtze Memory (YMTC) 替代鏈** — 若 export control 再升級，**WDC / 美光 (MU)** 的 NAND 定價權會被進一步強化（不只是 HBM3e），這比市場聚焦的 NVDA H20 更具持續性。Contra: 若 Beijing 報復以**稀土全面禁運**回應，MP / Lynas 短線受惠但**汽車 / 風電供應鏈 (TSLA, GM, GE Vernova)** 會出現實質供給斷鏈，不只是估值問題。",
+        "bull_points": [
+          "MU / WDC NAND 受惠 YMTC 出口管制升級",
+          "巴西 ag (BRFS, JBS) 搶走中國黃豆訂單",
+          "MP / Lynas 稀土替代鏈短線 catalyst"
+        ],
+        "bear_points": [
+          "ADM / BG / CF 農產品出口 Q3 恐歸零",
+          "稀土禁運致 TSLA / GE Vernova 供給斷鏈",
+          "ag complex 估值未 price in 報復風險"
+        ],
+        "final_take": "看空 ag complex 與汽車供應鏈，看多 MU 與巴西 ag ADR",
+        "entities": {
+          "tickers": [
+            "ADM",
+            "BG",
+            "CF",
+            "MOS",
+            "BRFS",
+            "JBS",
+            "MU",
+            "WDC",
+            "MP",
+            "TSLA",
+            "GM",
+            "GEV"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Agriculture",
+            "Semiconductors",
+            "Materials",
+            "Automobiles"
+          ],
+          "themes": [
+            "US-China decoupling",
+            "Agricultural retaliation",
+            "Rare earth supply chain",
+            "NAND pricing power"
+          ],
+          "tech_keywords": [
+            "YMTC",
+            "NAND",
+            "soybean export",
+            "rare earth export control"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ADM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china_ag_retaliation"
+          },
+          {
+            "subject": "ticker:BG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china_ag_retaliation"
+          },
+          {
+            "subject": "ticker:BRFS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china_ag_retaliation"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ymtc_export_control"
+          },
+          {
+            "subject": "ticker:WDC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ymtc_export_control"
+          },
+          {
+            "subject": "ticker:MP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rare_earth_decoupling"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rare_earth_decoupling"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rare_earth_decoupling"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補農產品報復 + NAND 替代 + 稀土斷鏈三角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:01:01Z",
+      "latency_ms": 131533,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "「不談判」的劇本意謂著美國對中國貿易政策將長期趨於分離，這不僅影響製造業回流，更深遠的第二階效應是衝擊全球物流與運輸網絡。像 UPS 和 FedEx 這類全球商業的基石，將面臨顯著的航線重塑：從美中貿易量縮減，到經由東南亞或墨西哥等替代樞紐的運量增加，都將迫使營運策略調整。這可能導致部分企業面臨利潤壓力，同時也可能為開拓新興貿易流動的公司帶來成長契機。其根本意涵是一個更碎片化且成本更高的全球供應鏈，不僅影響生產成本，更動搖國際商業的動脈。",
+        "bull_points": [
+          "物流新路線：墨西哥、東南亞等新興貿易樞紐運量增。",
+          "差異化服務：FedEx/UPS 可藉此擴展新興市場服務。",
+          "供應鏈韌性：促使物流業投資於多元化解決方案。"
+        ],
+        "bear_points": [
+          "美中航線萎縮：嚴重依賴此線的物流商面臨營收壓力。",
+          "成本結構惡化：航線重塑及替代方案增營運成本。",
+          "全球貿易量減：整體經濟放緩可能抑制物流需求。"
+        ],
+        "final_take": "物流業將因 trade war 重新佈局，挑戰與機遇並存。",
+        "entities": {
+          "tickers": [
+            "UPS",
+            "FEDEX",
+            "CHRW"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "Global Trade Diversification",
+            "Supply Chain Fragmentation",
+            "Geopolitical Risk",
+            "Logistics & Shipping"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:UPS",
+            "predicate": "AFFECTED_BY",
+            "object": "theme:Global Trade Diversification"
+          },
+          {
+            "subject": "ticker:FEDEX",
+            "predicate": "AFFECTED_BY",
+            "object": "theme:Supply Chain Fragmentation"
+          },
+          {
+            "subject": "ticker:CHRW",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Logistics & Shipping"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦物流業者在美中貿易戰中的結構性轉變。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:01:31Z",
+      "latency_ms": 30010,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪已涵蓋 mega-cap 逆風、農產品反制、物流重塑。補一個**真正被忽略的金融管道角度**：**美債需求結構性缺口 + 香港金融中心地位**。中國持有約 $7,800 億美債，過去三年已減持 $2,500 億；若「不談判」劇本延續，**PBOC 加速去美元化**會迫使 Fed / Treasury 找新邊際買家 — **日本壽險 (受 BOJ 政策正常化拖累) 已是淨賣方**，結果是**長端利率 term premium 結構性墊高 30-50 bps**，這對 long-duration tech (TSLA, ARKK 成分) 是隱性 headwind。具體 ticker：**TLT / IEF short 部位**是教科書 hedge。第二層 angle：**香港 ADR 退市潮加速** — BABA, JD, PDD 若被迫從 NYSE 下市轉港股，**做市商 IBKR、清算 ICE / CME 失去 fee revenue**，但**HKEX (0388.HK)** 與 **MSCI (退出中國指數 rebalance fee)** 反而受惠。Contra: 若 Beijing 反制以**拋售 MBS** 而非美債，**房貸利率單週跳升 50bps**，**KBH / DHI / LEN 建商股**會出現 2022 重演。",
+        "bull_points": [
+          "MSCI 中國指數 rebalance fee 受惠脫鉤",
+          "HKEX 接收 ADR 退市轉港股流動性",
+          "TLT short / IEF short 對沖 term premium"
+        ],
+        "bear_points": [
+          "Fed 找不到邊際買家 長端利率墊高",
+          "Long-duration tech (TSLA, ARKK) 隱性 headwind",
+          "Beijing 拋售 MBS 觸發建商股崩跌"
+        ],
+        "final_take": "看空 long-duration tech 與建商 看多 HKEX / MSCI",
+        "entities": {
+          "tickers": [
+            "TLT",
+            "IEF",
+            "TSLA",
+            "BABA",
+            "JD",
+            "PDD",
+            "IBKR",
+            "ICE",
+            "CME",
+            "MSCI",
+            "KBH",
+            "DHI",
+            "LEN"
+          ],
+          "sectors": [
+            "Financials",
+            "Real Estate",
+            "Consumer Discretionary",
+            "Information Technology"
+          ],
+          "themes": [
+            "US-China decoupling",
+            "de-dollarization",
+            "ADR delisting",
+            "term premium",
+            "MBS reset"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:de-dollarization"
+          },
+          {
+            "subject": "ticker:MSCI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ADR delisting"
+          },
+          {
+            "subject": "ticker:HKEX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ADR delisting"
+          },
+          {
+            "subject": "ticker:KBH",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:MBS reset"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:term premium"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "金融管道 + ADR 退市鏈 為前輪未觸及之新 angle"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:03:39Z",
+      "latency_ms": 127779,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "長期化的美中貿易緊張，不僅限於實體商品與金融管道，更可能引發人民幣匯率的劇烈波動。若川普政府堅守『不談判』立場，北京為緩解關稅壓力，可能透過人民幣貶值來提振出口，此舉將是其對抗保護主義的潛在手段。然而，此為雙面刃：大幅貶值將預示中國經濟面臨更深層的結構性問題，加劇資本外流風險；同時，這也可能引發其他國家的匯率報復，加劇全球金融市場的不穩定性。",
+        "bull_points": [
+          "人民幣貶值可部分抵銷關稅影響，支撐中國出口。",
+          "預期匯率戰可能引發資金流動，利好避險資產。"
+        ],
+        "bear_points": [
+          "人民幣貶值凸顯中國經濟基本面疲弱。",
+          "匯率干預可能引發全球金融市場系統性風險。"
+        ],
+        "final_take": "關注人民幣動態，其為經濟韌性與戰略抉擇的關鍵指標。",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [
+            "Currency devaluation",
+            "Trade war escalation",
+            "Capital flight",
+            "Chinese economic weakness"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "currency:CNY",
+            "predicate": "POTENTIALLY_WEAKENS_DUE_TO",
+            "object": "theme:US_China_trade_war"
+          },
+          {
+            "subject": "currency:CNY",
+            "predicate": "USED_TO_COUNTERACT",
+            "object": "policy:tariffs"
+          },
+          {
+            "subject": "currency:CNY",
+            "predicate": "INDICATES",
+            "object": "theme:Chinese_economic_weakness"
+          },
+          {
+            "subject": "currency:CNY",
+            "predicate": "EXACERBATES",
+            "object": "theme:Capital flight"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討人民幣匯率作為對抗關稅的潛在策略及其經濟影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "ADM",
+        "AMAT",
+        "BABA",
+        "BG",
+        "BRFS",
+        "CF",
+        "CHRW",
+        "CME",
+        "DHI",
+        "EWW",
+        "FEDEX",
+        "GEV",
+        "GFS",
+        "GM",
+        "IBKR",
+        "ICE",
+        "IEF",
+        "INTC",
+        "JBS",
+        "JD",
+        "KBH",
+        "KLAC",
+        "LEN",
+        "LMT",
+        "LRCX",
+        "MOS",
+        "MP",
+        "MSCI",
+        "MU",
+        "MXL",
+        "NVDA",
+        "ON",
+        "PDD",
+        "RTX",
+        "TLT",
+        "TSLA",
+        "TSM",
+        "UPS",
+        "VNM",
+        "WDC"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Agriculture",
+        "Automobiles",
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "Materials",
+        "Real Estate",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "ADR delisting",
+        "Agricultural retaliation",
+        "Capital flight",
+        "Chinese economic weakness",
+        "Currency devaluation",
+        "Geopolitical Risk",
+        "Global Trade Diversification",
+        "Logistics & Shipping",
+        "MBS reset",
+        "NAND pricing power",
+        "On-shore semiconductor capex",
+        "Rare earth independence",
+        "Rare earth supply chain",
+        "Supply Chain Fragmentation",
+        "Supply chain reshoring",
+        "Tariff escalation",
+        "Trade war escalation",
+        "US-China decoupling",
+        "de-dollarization",
+        "term premium"
+      ],
+      "tech_keywords": [
+        "B20",
+        "CHIPS Act",
+        "H20",
+        "NAND",
+        "YMTC",
+        "rare earth export control",
+        "soybean export"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-decoupling"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tariff-escalation"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-export-controls"
+      },
+      {
+        "subject": "ticker:MXL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:supply-chain-reshoring"
+      },
+      {
+        "subject": "ticker:INTC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:on-shore-semi-capex"
+      },
+      {
+        "subject": "ticker:LMT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-decoupling"
+      },
+      {
+        "subject": "ticker:MP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rare-earth-independence"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-export-controls"
+      },
+      {
+        "subject": "ticker:ADM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china_ag_retaliation"
+      },
+      {
+        "subject": "ticker:BG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china_ag_retaliation"
+      },
+      {
+        "subject": "ticker:BRFS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china_ag_retaliation"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ymtc_export_control"
+      },
+      {
+        "subject": "ticker:WDC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ymtc_export_control"
+      },
+      {
+        "subject": "ticker:MP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rare_earth_decoupling"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rare_earth_decoupling"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rare_earth_decoupling"
+      },
+      {
+        "subject": "ticker:UPS",
+        "predicate": "AFFECTED_BY",
+        "object": "theme:Global Trade Diversification"
+      },
+      {
+        "subject": "ticker:FEDEX",
+        "predicate": "AFFECTED_BY",
+        "object": "theme:Supply Chain Fragmentation"
+      },
+      {
+        "subject": "ticker:CHRW",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Logistics & Shipping"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:de-dollarization"
+      },
+      {
+        "subject": "ticker:MSCI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ADR delisting"
+      },
+      {
+        "subject": "ticker:HKEX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ADR delisting"
+      },
+      {
+        "subject": "ticker:KBH",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:MBS reset"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:term premium"
+      },
+      {
+        "subject": "currency:CNY",
+        "predicate": "POTENTIALLY_WEAKENS_DUE_TO",
+        "object": "theme:US_China_trade_war"
+      },
+      {
+        "subject": "currency:CNY",
+        "predicate": "USED_TO_COUNTERACT",
+        "object": "policy:tariffs"
+      },
+      {
+        "subject": "currency:CNY",
+        "predicate": "INDICATES",
+        "object": "theme:Chinese_economic_weakness"
+      },
+      {
+        "subject": "currency:CNY",
+        "predicate": "EXACERBATES",
+        "object": "theme:Capital flight"
+      }
+    ],
+    "bull_summary": [
+      "供應鏈回流加速利多墨西哥/越南製造 (MXL, ON, EWW)",
+      "On-shore 半導體 capex 結構受惠 INTC, TSM-AZ, GFS",
+      "國防+稀土替代主題受惠 LMT, RTX, MP",
+      "MU / WDC NAND 受惠 YMTC 出口管制升級",
+      "巴西 ag (BRFS, JBS) 搶走中國黃豆訂單",
+      "MP / Lynas 稀土替代鏈短線 catalyst"
+    ],
+    "bear_summary": [
+      "AAPL/TSLA/NVDA 中國曝險高，關稅長期化逆風",
+      "半導體設備商 (AMAT, LRCX, KLAC) 對中營收 30%+ 受壓",
+      "市場若 price in deal rally，短線 de-risking 風險",
+      "ADM / BG / CF 農產品出口 Q3 恐歸零",
+      "稀土禁運致 TSLA / GE Vernova 供給斷鏈",
+      "ag complex 估值未 price in 報復風險"
+    ],
+    "final_take": "關注人民幣動態，其為經濟韌性與戰略抉擇的關鍵指標。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:03:39Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: HEADWIND_FROM; gemini-only: AFFECTED_BY, EXACERBATES, INDICATES, POTENTIALLY_WEAKENS_DUE_TO, USED_TO_COUNTERACT"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

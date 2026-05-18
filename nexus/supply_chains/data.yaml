@@ -1,0 +1,504 @@
+id: data
+title: 資料中心價值鏈 (Data Center Value Chain)
+theme: data
+generated_at: '2026-05-18T00:01:18Z'
+generated_by: claude
+status: draft
+layers:
+- materials
+- silicon
+- systems_integration
+- datacenter_ops
+- end_customer
+modules:
+  materials:
+  - id: memory
+    label: HBM / DRAM Memory
+  - id: optical_networking
+    label: Optical Components
+  - id: power_components
+    label: Power Semiconductors
+  silicon:
+  - id: gpu_accelerator
+    label: GPU / Accelerator
+  - id: cpu
+    label: CPU / IP
+  - id: custom_asic
+    label: Custom ASIC / Networking Silicon
+  - id: foundry
+    label: Foundry
+  systems_integration:
+  - id: server_oem
+    label: Server OEM / ODM
+  - id: networking_systems
+    label: Networking Systems
+  - id: power_cooling
+    label: Power & Cooling Infrastructure
+  datacenter_ops:
+  - id: colocation_reit
+    label: Colocation / Data Center REIT
+  - id: neocloud
+    label: GPU Neocloud
+  - id: power_supply
+    label: Power Generation / Utility
+  end_customer:
+  - id: hyperscaler
+    label: Hyperscaler
+  - id: ai_lab
+    label: AI Lab
+spine:
+- skhynix
+- nvda
+- smci
+- crwv
+- openai
+nodes:
+- id: mu
+  label: Micron Technology
+  layer: materials
+  module: memory
+  role: HBM3e and DDR5 memory supplier for AI accelerators
+  ticker: MU
+  listing: us_listed
+  stage: revenue
+  note: HBM3e 量產出貨 NVIDIA
+- id: skhynix
+  label: SK Hynix
+  layer: materials
+  module: memory
+  role: Leading HBM memory supplier
+  ticker: null
+  listing: foreign_listed
+  stage: revenue
+  note: 韓國上市；HBM 市佔龍頭
+- id: cohr
+  label: Coherent
+  layer: materials
+  module: optical_networking
+  role: Optical transceivers and laser components for datacenter interconnect
+  ticker: COHR
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: lite
+  label: Lumentum
+  layer: materials
+  module: optical_networking
+  role: Lasers and optical components for 800G/1.6T transceivers
+  ticker: LITE
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: mpwr
+  label: Monolithic Power Systems
+  layer: materials
+  module: power_components
+  role: Power management ICs for GPU server boards
+  ticker: MPWR
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: nvts
+  label: Navitas Semiconductor
+  layer: materials
+  module: power_components
+  role: GaN/SiC power devices for high-density datacenter power
+  ticker: NVTS
+  listing: us_listed
+  stage: design_partner
+  note: 與 NVIDIA 800V HVDC 架構合作
+- id: nvda
+  label: NVIDIA
+  layer: silicon
+  module: gpu_accelerator
+  role: Dominant AI training/inference GPU and rack-scale systems
+  ticker: NVDA
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: amd
+  label: AMD
+  layer: silicon
+  module: gpu_accelerator
+  role: MI300/MI350 datacenter accelerators and EPYC CPUs
+  ticker: AMD
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: intc
+  label: Intel
+  layer: silicon
+  module: cpu
+  role: Xeon datacenter CPU supplier
+  ticker: INTC
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: arm
+  label: Arm Holdings
+  layer: silicon
+  module: cpu
+  role: CPU IP for datacenter and custom hyperscaler chips
+  ticker: ARM
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: avgo
+  label: Broadcom
+  layer: silicon
+  module: custom_asic
+  role: Custom AI ASIC design partner and datacenter networking silicon
+  ticker: AVGO
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: mrvl
+  label: Marvell Technology
+  layer: silicon
+  module: custom_asic
+  role: Custom silicon and optical/electrical interconnect chips
+  ticker: MRVL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: tsm
+  label: TSMC
+  layer: silicon
+  module: foundry
+  role: Advanced-node foundry and CoWoS packaging for AI silicon
+  ticker: TSM
+  listing: us_listed
+  stage: revenue
+  note: NYSE ADR
+- id: gfs
+  label: GlobalFoundries
+  layer: silicon
+  module: foundry
+  role: Mature-node foundry for power and connectivity chips
+  ticker: GFS
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: dell
+  label: Dell Technologies
+  layer: systems_integration
+  module: server_oem
+  role: AI server integrator and rack-scale system builder
+  ticker: DELL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: smci
+  label: Super Micro Computer
+  layer: systems_integration
+  module: server_oem
+  role: High-density GPU server and liquid-cooled rack OEM
+  ticker: SMCI
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: anet
+  label: Arista Networks
+  layer: systems_integration
+  module: networking_systems
+  role: High-speed datacenter switching for AI back-end fabrics
+  ticker: ANET
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: csco
+  label: Cisco Systems
+  layer: systems_integration
+  module: networking_systems
+  role: Datacenter switching and AI networking systems
+  ticker: CSCO
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: vrt
+  label: Vertiv Holdings
+  layer: systems_integration
+  module: power_cooling
+  role: Datacenter power distribution and liquid-cooling systems
+  ticker: VRT
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: etn
+  label: Eaton
+  layer: systems_integration
+  module: power_cooling
+  role: Electrical power distribution gear for datacenters
+  ticker: ETN
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: eqix
+  label: Equinix
+  layer: datacenter_ops
+  module: colocation_reit
+  role: Global colocation and interconnection REIT
+  ticker: EQIX
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: dlr
+  label: Digital Realty Trust
+  layer: datacenter_ops
+  module: colocation_reit
+  role: Hyperscale and colocation data center REIT
+  ticker: DLR
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: crwv
+  label: CoreWeave
+  layer: datacenter_ops
+  module: neocloud
+  role: GPU-specialized cloud provider for AI workloads
+  ticker: CRWV
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: nbis
+  label: Nebius Group
+  layer: datacenter_ops
+  module: neocloud
+  role: AI-centric cloud infrastructure provider
+  ticker: NBIS
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: ceg
+  label: Constellation Energy
+  layer: datacenter_ops
+  module: power_supply
+  role: Nuclear power generation and datacenter PPAs
+  ticker: CEG
+  listing: us_listed
+  stage: revenue
+  note: Three Mile Island PPA 供電 Microsoft
+- id: vst
+  label: Vistra
+  layer: datacenter_ops
+  module: power_supply
+  role: Power generation supplier to datacenter demand growth
+  ticker: VST
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: msft
+  label: Microsoft
+  layer: end_customer
+  module: hyperscaler
+  role: Azure hyperscale cloud and AI infrastructure operator
+  ticker: MSFT
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: amzn
+  label: Amazon
+  layer: end_customer
+  module: hyperscaler
+  role: AWS hyperscale cloud, Trainium/Inferentia custom silicon
+  ticker: AMZN
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: googl
+  label: Alphabet
+  layer: end_customer
+  module: hyperscaler
+  role: Google Cloud and TPU custom accelerator program
+  ticker: GOOGL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: orcl
+  label: Oracle
+  layer: end_customer
+  module: hyperscaler
+  role: OCI cloud and large-scale AI datacenter buildout
+  ticker: ORCL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: openai
+  label: OpenAI
+  layer: end_customer
+  module: ai_lab
+  role: Frontier AI lab consuming large-scale GPU compute
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: anthropic
+  label: Anthropic
+  layer: end_customer
+  module: ai_lab
+  role: Frontier AI lab consuming large-scale cloud compute
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+edges:
+- from: skhynix
+  to: nvda
+  rel: SUPPLIES_TO
+  note: HBM
+- from: mu
+  to: nvda
+  rel: SUPPLIES_TO
+  note: HBM3e
+- from: skhynix
+  to: amd
+  rel: SUPPLIES_TO
+  note: ''
+- from: tsm
+  to: nvda
+  rel: SUPPLIES_TO
+  note: 先進製程 + CoWoS
+- from: tsm
+  to: amd
+  rel: SUPPLIES_TO
+  note: ''
+- from: tsm
+  to: avgo
+  rel: SUPPLIES_TO
+  note: ''
+- from: gfs
+  to: mpwr
+  rel: SUPPLIES_TO
+  note: ''
+- from: cohr
+  to: anet
+  rel: SUPPLIES_TO
+  note: 光收發模組
+- from: lite
+  to: anet
+  rel: SUPPLIES_TO
+  note: ''
+- from: mrvl
+  to: csco
+  rel: SUPPLIES_TO
+  note: ''
+- from: mpwr
+  to: smci
+  rel: SUPPLIES_TO
+  note: 電源管理 IC
+- from: nvts
+  to: vrt
+  rel: SUPPLIES_TO
+  note: GaN/SiC 功率元件
+- from: nvda
+  to: dell
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: smci
+  rel: SUPPLIES_TO
+  note: ''
+- from: amd
+  to: dell
+  rel: SUPPLIES_TO
+  note: ''
+- from: intc
+  to: dell
+  rel: SUPPLIES_TO
+  note: ''
+- from: arm
+  to: avgo
+  rel: SUPPLIES_TO
+  note: CPU IP 授權
+- from: avgo
+  to: googl
+  rel: CO_DEVELOPS_WITH
+  note: TPU custom ASIC
+- from: mrvl
+  to: amzn
+  rel: CO_DEVELOPS_WITH
+  note: Trainium custom silicon
+- from: smci
+  to: crwv
+  rel: SUPPLIES_TO
+  note: ''
+- from: dell
+  to: crwv
+  rel: SUPPLIES_TO
+  note: ''
+- from: dell
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: smci
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: anet
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: csco
+  to: orcl
+  rel: SUPPLIES_TO
+  note: ''
+- from: vrt
+  to: crwv
+  rel: SUPPLIES_TO
+  note: 電源 + 液冷
+- from: vrt
+  to: eqix
+  rel: SUPPLIES_TO
+  note: ''
+- from: etn
+  to: dlr
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: crwv
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: crwv
+  rel: INVESTOR_IN
+  note: ''
+- from: ceg
+  to: msft
+  rel: SUPPLIES_TO
+  note: 電力 PPA
+- from: vst
+  to: amzn
+  rel: SUPPLIES_TO
+  note: 電力 PPA
+- from: crwv
+  to: openai
+  rel: SUPPLIES_TO
+  note: GPU 算力合約
+- from: crwv
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: nbis
+  to: anthropic
+  rel: SUPPLIES_TO
+  note: ''
+- from: eqix
+  to: orcl
+  rel: SUPPLIES_TO
+  note: colocation
+- from: dlr
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: msft
+  to: openai
+  rel: INVESTOR_IN
+  note: ''
+- from: amzn
+  to: anthropic
+  rel: INVESTOR_IN
+  note: ''
+- from: googl
+  to: anthropic
+  rel: INVESTOR_IN
+  note: ''

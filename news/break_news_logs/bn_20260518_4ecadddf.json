@@ -1,0 +1,514 @@
+{
+  "news_id": "bn_20260518_4ecadddf",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:42:31Z",
+  "last_activity_ts": "2026-05-18T10:52:36Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4594252-bitcoin-depot-says-it-filed-for-chapter-11-bankruptcy-in-texas?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "bitcoin depot stock plummets after filing chapter 11",
+    "published": "2026-05-18T10:36:15+00:00",
+    "url_hash": "sha1:a81351ec0d8e90ecdfeb708f82a9f87b9c32c0c0"
+  },
+  "headline": "Bitcoin Depot stock plummets after filing for Chapter 11 bankruptcy protection",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:50:47Z",
+      "latency_ms": 28373,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**Bitcoin Depot (BTM)** 申請第 11 章破產保護是**個股孤立事件**，不是加密貨幣大盤訊號。重點在商業模式本身：實體比特幣 ATM 收取 15-25% 高額價差，本質是**監管套利 + 金融弱勢族群**生意。近兩年多州 (康乃狄克、明尼蘇達等) 針對加密 kiosk 詐騙立法設**每日交易上限與 KYC/AML 要求**，直接打掉這類機台的單位經濟。零售買幣需求又持續往 Coinbase、交易所 App 遷移，實體機台流量結構性萎縮。BTM 是 SPAC 上市、本就高槓桿薄毛利，破產屬市場出清弱營運者。不必把它讀成 BTC 或礦股的連動風險 — COIN、MSTR 估值邏輯與此無關。",
+        "bull_points": [
+          "個股孤立事件，BTC 與礦股不受連帶拖累",
+          "弱營運者出清，存活同業搶市佔",
+          "破產為重整非清算，資產或被併購"
+        ],
+        "bear_points": [
+          "多州加密 kiosk 反詐法規打掉單位經濟",
+          "零售買幣轉向交易所 App，實體機台流量萎縮",
+          "SPAC 上市結構高槓桿薄毛利難承壓"
+        ],
+        "final_take": "個股孤立事件，不構成加密大盤利空",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "COIN",
+            "MSTR"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "crypto ATM",
+            "retail crypto access",
+            "crypto regulation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:crypto-atm-regulation"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:COIN"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:retail-crypto-app-migration"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "破產屬個股商業模式失敗，非加密板塊系統性訊號"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:50:58Z",
+      "latency_ms": 11029,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "雖然 BTM 破產是其營運模式崩潰的體現，但需注意其**資產清算**帶來的連鎖效應。此舉為擁有更強合規體系、更低營運成本的競爭對手創造了**低價併購核心實體網點**的機會。此外，此事件可能進一步促使零售支付服務業者 (如 **NCR Voyix** 等 ATM 解決方案商) 重新審視加密 kiosk 的風險模型，從而推動產業標準從「高毛利詐騙風險」轉向「低毛利合規收單」的長期轉型。這不會影響主流加密金融 (CeFi/DeFi) 走向，反而利於產業進行結構性出清，將零售入口由非正規管道引導至更成熟的體系。",
+        "bull_points": [
+          "市場淘汰落後產能，利於合規營運商取得優質網點。",
+          "加速 ATM 服務供應鏈轉向低風險、高合規模式。"
+        ],
+        "bear_points": [
+          "短線將導致實體加密 kiosk 產業信用緊縮。",
+          "可能引發監管機構對其他小型零售加密服務商加強審查。"
+        ],
+        "final_take": "產業結構出清，合規轉型後有機會存活。",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "COIN",
+            "NCR"
+          ],
+          "sectors": [
+            "Financial Services",
+            "Software"
+          ],
+          "themes": [
+            "Fintech",
+            "Cryptocurrency"
+          ],
+          "tech_keywords": [
+            "KYC/AML",
+            "Kiosk Infrastructure"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:regulatory_pressure"
+          },
+          {
+            "subject": "ticker:NCR",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:kiosk_industry"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充 BTM 資產清算對競爭對手與產業標準轉型的潛在影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:51:35Z",
+      "latency_ms": 37200,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文沒談的**二階效應**：BTM 是少數公開上市的加密 kiosk 營運者，這次破產等於給聯邦監管者一個乾淨的案例樣本。過去兩年是各州零散立法，慢火;一旦 **FTC / CFPB** 或國會以「上市公司破產 + 老年詐騙受害者」為由推動**全國性 crypto-kiosk 規則**，受傷的是整個品類——包含私有的 CoinFlip。這直接反駁 Gemini 的「低價併購網點」論：當聯邦層級監管把單位經濟壓平、加上破產污名使 host 零售商（便利店、加油站）重談分潤合約，kiosk 網路的資產價值是**減損**而非便宜貨。另一個被忽略的具體風險：機台內 BTC 庫存與在途客戶資金在 Chapter 11 下會併入破產財產，**託管鏈斷點**才是清算最髒的部分。",
+        "bull_points": [
+          "弱營運者出清，利長期產業合規化轉型",
+          "聯邦規則一旦落地反提高正規入口護城河"
+        ],
+        "bear_points": [
+          "上市破產給 FTC/CFPB 推全國 kiosk 規則彈藥",
+          "聯邦監管壓平單位經濟，併購網點論失效",
+          "機台 BTC 庫存與在途客戶資金捲入破產財產"
+        ],
+        "final_take": "看空 kiosk 品類，聯邦監管升級為真風險",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "COIN"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "crypto kiosk",
+            "regulatory crackdown",
+            "AML compliance"
+          ],
+          "tech_keywords": [
+            "KYC",
+            "AML"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:crypto-kiosk-regulation"
+          },
+          {
+            "subject": "narrative:btm-bankruptcy",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:federal-crypto-kiosk-rule"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "提出聯邦監管升級二階效應與破產財產託管斷點，前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:51:51Z",
+      "latency_ms": 16200,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Claude 提到的監管風險是關鍵，但我補充**實體租賃與場域風險**：BTM 破產會讓便利商店、加油站重新評估這類「高風險 kiosk」的**商業價值**。若零售商因 BTM 事件撤除機台，將導致市場出現「服務真空」。這迫使其他提供非加密（如預付卡）功能的 kiosk 營運商在與場域主簽約時面臨更嚴格的合規審計，這將**推升營運成本**，即使對非加密類的實體零售服務也是負面訊號。產業正在進入「場域清理」的陣痛期，不僅止於加密幣領域。",
+        "bull_points": [
+          "加密 ATM 市場出清，有助於合規業者提升信任度。",
+          "零售通路可能引進更穩定、經過審核的金融服務機台。"
+        ],
+        "bear_points": [
+          "場域主因對 BTM 失去信心，連帶撤除其他類型 kiosk。",
+          "Kiosk 營運商因合規審查變嚴，導致租金與保全成本上漲。"
+        ],
+        "final_take": "產業對 kiosk 信任度受損，中長期利空實體自助服務網路。",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "NCR"
+          ],
+          "sectors": [
+            "Financial Services",
+            "Consumer Services"
+          ],
+          "themes": [
+            "Crypto infrastructure",
+            "Regulatory headwinds"
+          ],
+          "tech_keywords": [
+            "ATM",
+            "Kiosk"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:regulatory_scrutiny"
+          },
+          {
+            "subject": "ticker:NCR",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:BTM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "轉向實體通路端與 general kiosk 的連帶風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:52:22Z",
+      "latency_ms": 30651,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個全線忽略的**供應鏈節點**：Bitcoin Depot 2021 年併購了 **Genesis Coin** — 全球加密 ATM 軟體與機台製造的龍頭平台，其 firmware 與後台據估支撐相當比例的第三方營運機台。前文都把 BTM 當純需求端營運者，但 Chapter 11 真正的隱性傳染點在這裡：破產財產一旦凍結或拆售 Genesis Coin，依賴該平台跑 KYC/AML 與韌體更新的**競爭對手機台會被孤兒化**，合規更新斷供反而加速它們也撞上監管牆。所以 Gemini 的「低價併購網點」與 Claude 的「個股孤立」都不完整 — 傳染不走 BTC 幣價，走的是**軟體平台依賴**這條供應鏈。買家若只想要網點不想接平台維護義務，Genesis Coin 資產恐折價更深。",
+        "bull_points": [
+          "Genesis Coin 平台若被整體承接，買家取得產業級軟體護城河",
+          "弱營運者出清，合規 kiosk 業者議價力上升"
+        ],
+        "bear_points": [
+          "Genesis Coin 軟體/韌體斷供，第三方機台合規更新被孤兒化",
+          "破產財產拆售使全球加密 ATM 軟體生態斷鏈",
+          "買家規避平台維護義務，Genesis Coin 資產折價更深"
+        ],
+        "final_take": "個股孤立，但 Genesis Coin 平台是隱性供應鏈傳染點",
+        "entities": {
+          "tickers": [
+            "BTM"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "crypto kiosk regulation",
+            "crypto ATM"
+          ],
+          "tech_keywords": [
+            "KYC/AML"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:crypto-atm-software-platform"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:chapter-11-asset-freeze"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增 Genesis Coin 軟體平台供應鏈傳染角度，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:52:36Z",
+      "latency_ms": 13479,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了供應鏈節點，我必須點出**資本結構與融資成本**的根本性轉折。BTM 作為少數 SPAC 上市的 kiosk 營運商，其破產直接終結了此類商業模式在資本市場的「成長敘事」。對於仍存續的私人公司，未來**融資溢價 (Cost of Capital)** 將大幅飆升。金融機構現在會將 Crypto-Kiosk 視為「結構性違約高風險資產」，信貸收緊將導致產業擴張停滯。這不僅僅是軟體斷供，而是整個**行業槓桿退出機制**的崩潰，迫使所有營運商必須從追求「網點市占」回歸到「現金流自償」，這意味著產業成長動能將全面減速。",
+        "bull_points": [
+          "加速產業去槓桿，營運回歸現金流本質",
+          "市場洗牌，優質營運商市佔率提升"
+        ],
+        "bear_points": [
+          "融資成本飆升，大幅增加擴張難度",
+          "行業信貸預期惡化，壓抑長期成長動能"
+        ],
+        "final_take": "資本市場對 kiosk 產業信貸已死，後續將進入漫長的去槓桿陣痛期。",
+        "entities": {
+          "tickers": [
+            "BTM"
+          ],
+          "sectors": [
+            "Financial Services"
+          ],
+          "themes": [
+            "Fintech",
+            "Cryptocurrency"
+          ],
+          "tech_keywords": [
+            "KYC/AML",
+            "SPAC",
+            "Leverage"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:capital_cost"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補足資本結構視角，指出破產事件對全行業融資成本與成長邏輯的深遠負面影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "BTM",
+        "COIN",
+        "MSTR",
+        "NCR"
+      ],
+      "sectors": [
+        "Consumer Services",
+        "Financial Services",
+        "Financials",
+        "Information Technology",
+        "Software"
+      ],
+      "themes": [
+        "AML compliance",
+        "Crypto infrastructure",
+        "Cryptocurrency",
+        "Fintech",
+        "Regulatory headwinds",
+        "crypto ATM",
+        "crypto kiosk",
+        "crypto kiosk regulation",
+        "crypto regulation",
+        "regulatory crackdown",
+        "retail crypto access"
+      ],
+      "tech_keywords": [
+        "AML",
+        "ATM",
+        "KYC",
+        "KYC/AML",
+        "Kiosk",
+        "Kiosk Infrastructure",
+        "Leverage",
+        "SPAC"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:crypto-atm-regulation"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:COIN"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:retail-crypto-app-migration"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:regulatory_pressure"
+      },
+      {
+        "subject": "ticker:NCR",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:kiosk_industry"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:crypto-kiosk-regulation"
+      },
+      {
+        "subject": "narrative:btm-bankruptcy",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:federal-crypto-kiosk-rule"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:regulatory_scrutiny"
+      },
+      {
+        "subject": "ticker:NCR",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:BTM"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:crypto-atm-software-platform"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:chapter-11-asset-freeze"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:capital_cost"
+      }
+    ],
+    "bull_summary": [
+      "個股孤立事件，BTC 與礦股不受連帶拖累",
+      "弱營運者出清，存活同業搶市佔",
+      "破產為重整非清算，資產或被併購",
+      "市場淘汰落後產能，利於合規營運商取得優質網點。",
+      "加速 ATM 服務供應鏈轉向低風險、高合規模式。",
+      "弱營運者出清，利長期產業合規化轉型"
+    ],
+    "bear_summary": [
+      "多州加密 kiosk 反詐法規打掉單位經濟",
+      "零售買幣轉向交易所 App，實體機台流量萎縮",
+      "SPAC 上市結構高槓桿薄毛利難承壓",
+      "短線將導致實體加密 kiosk 產業信用緊縮。",
+      "可能引發監管機構對其他小型零售加密服務商加強審查。",
+      "上市破產給 FTC/CFPB 推全國 kiosk 規則彈藥"
+    ],
+    "final_take": "資本市場對 kiosk 產業信貸已死，後續將進入漫長的去槓桿陣痛期。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:52:36Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

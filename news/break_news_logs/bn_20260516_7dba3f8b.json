@@ -1,0 +1,585 @@
+{
+  "news_id": "bn_20260516_7dba3f8b",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-16T14:21:59Z",
+  "last_activity_ts": "2026-05-16T14:37:25Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/healthcare/articles/eli-lilly-lly-reports-stage-104513450.html",
+    "feed_fingerprint": "eli lilly lly reports late stage weight loss",
+    "published": "2026-05-16T10:45:13+00:00",
+    "url_hash": "sha1:a2b8f8dc766d2363bff50259adabf5555ee130c7"
+  },
+  "headline": "Eli Lilly (LLY) Reports New Late-Stage Weight Loss Trial Results",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T14:35:25Z",
+      "latency_ms": 22803,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**LLY 又一筆減重後期試驗數據**——但標題未給效力數字 (%體重下降) 與安全性細節，市場反應全看實際 readout。GLP-1 賽道現已從「有沒有藥」轉向「療效梯度與給藥便利性」之爭：若此為**口服**資產 (orforglipron 線) 達標，估值利多最大，因口服解放產能瓶頸並擴大可及人群；若僅為注射劑增量數據，邊際意義有限。需警惕**買消息賣事實**：LLY 減重故事已高度price-in，本益比偏貴，數據縱好也可能利多出盡。對手 NVO 為直接鏡像交易。CVS/UNH 等支付方則承擔成本端壓力。",
+        "bull_points": [
+          "口服 GLP-1 若達標可解放注射產能瓶頸",
+          "減重市場 TAM 仍在向上修正",
+          "後期數據降低管線執行風險"
+        ],
+        "bear_points": [
+          "標題無效力數字,readout 未知前難定價",
+          "LLY 估值偏貴,易現利多出盡",
+          "支付方控費與保險覆蓋成長期逆風"
+        ],
+        "final_take": "中性偏多,但須見實際療效數字才加碼",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "NVO",
+            "CVS",
+            "UNH"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "GLP-1",
+            "obesity drugs",
+            "oral GLP-1"
+          ],
+          "tech_keywords": [
+            "GLP-1",
+            "orforglipron",
+            "retatrutide"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:LLY",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:obesity-drugs"
+          },
+          {
+            "subject": "ticker:NVO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:LLY"
+          },
+          {
+            "subject": "ticker:CVS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:UNH",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "標題缺數字,定價待 readout;估值貴有利多出盡風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T14:35:42Z",
+      "latency_ms": 17467,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除療效數據外，試驗推進將進一步加劇對 **CDMO 供應鏈**的緊缺壓力。LLY 為擴產，近期對包括 Catalent (CTLT) 等 fill-finish 合作夥伴的依賴度顯著上升。若此數據預示後續大規模臨床或市場需求激增，供應鏈的瓶頸 (bottleneck) 風險將成為壓制 LLY 短期放量能力的關鍵變數，不僅是藥物本身，更是**交付能力**的競賽。",
+        "bull_points": [
+          "擴大產品應用場景，加強市場主導地位。",
+          "臨床成功有助於談判更好的商業合作條款。"
+        ],
+        "bear_points": [
+          "供應鏈交付能力恐難匹配需求爆發，引發缺貨風險。",
+          "CDMO 產能擴張速度與臨床進展若不同步，將拖累營收。"
+        ],
+        "final_take": "療效固然重要，但後續的工業生產與交付能力將是 LLY 實質業績的決勝點。",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "CTLT"
+          ],
+          "sectors": [
+            "Healthcare",
+            "Pharmaceuticals"
+          ],
+          "themes": [
+            "GLP-1"
+          ],
+          "tech_keywords": [
+            "fill-finish"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:CTLT"
+          },
+          {
+            "subject": "ticker:CTLT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:GLP-1"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "強調試驗數據以外的「供應鏈瓶頸」與 CDMO 合作關係對業績兌現的關鍵影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T14:36:17Z",
+      "latency_ms": 34951,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的政策面與 2nd-order 角度。其一,減重藥試驗連環推進、適應症持續擴張,正把 **GLP-1** 推入 **IRA Medicare 議價**的政治射程——semaglutide 已入選談判清單,class 一旦大規模放量,Medicare 給付成本與政治壓力同步升溫,長線定價權將被結構性壓縮,這是支付方成本端之外、藥廠**本身**承受的監管逆風。其二,品牌端試驗推進意味供給正常化在望,將終結 GLP-1 短缺豁免,**compounded GLP-1** 灰色市場(HIMS 等遠距處方平台)失去法律掩護:對 HIMS 是 headwind,對 LLY 反而收復被仿製分流走的需求。讀數本身仍須看 %體重下降幅度才能定調利多強度。",
+        "bull_points": [
+          "短缺豁免終結,LLY 收復 compounded 分流需求",
+          "適應症擴張可觸發支付方強制給付"
+        ],
+        "bear_points": [
+          "GLP-1 進 IRA Medicare 議價射程,長線定價權受壓",
+          "class 放量推升 Medicare 給付政治壓力",
+          "HIMS 等遠距平台失去 compounding 法律掩護"
+        ],
+        "final_take": "結構利多,但 IRA 議價是長線定價權暗雷。",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "NVO",
+            "HIMS",
+            "CVS",
+            "UNH"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "GLP-1",
+            "drug pricing reform"
+          ],
+          "tech_keywords": [
+            "orforglipron",
+            "tirzepatide",
+            "semaglutide"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ira-medicare-negotiation"
+          },
+          {
+            "subject": "ticker:HIMS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1-supply-normalization"
+          },
+          {
+            "subject": "ticker:LLY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:compounding-shortage-cliff"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增 IRA 議價監管逆風與 compounding 豁免終結兩條前文未提角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T14:36:29Z",
+      "latency_ms": 12167,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場過於關注短期療效與供應鏈，忽略了此類數據對**宏觀衛生經濟學**的深遠影響。若試驗數據能佐證**心血管事件減少**（如 MACE 風險降低），LLY 便掌握了應對 IRA 議價的核心籌碼。透過證明藥物能「節省」後續昂貴的慢性病治療支出，藥廠可建立極強的「防禦性定價」基礎，抵銷政治監管對定價權的壓縮。這將導致評價體系由單純的「肥胖藥」轉為「全方位代謝防禦資產」。",
+        "bull_points": [
+          "若證實降低心血管風險，將強化藥價談判的議價優勢。",
+          "防禦性地位提升，從減重藥升級為代謝防禦資產。"
+        ],
+        "bear_points": [
+          "若心血管臨床數據不達標，市場將極度質疑其長期價值。",
+          "臨床數據轉換為實際醫保節省測算的過程仍有極大變數。"
+        ],
+        "final_take": "療效若能證明節省醫療支出，將成為對抗 IRA 議價的最大利器。",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "NVO"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "GLP-1",
+            "Health Economics"
+          ],
+          "tech_keywords": [
+            "GLP-1",
+            "MACE-reduction",
+            "Chronic-Disease-Management"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cardio-metabolic-prevention"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "市場忽略了慢性病預防數據對「IRA 議價能力」的反向緩衝作用。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T14:37:15Z",
+      "latency_ms": 45793,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補競爭格局反方視角。市場視 LLY 為 GLP-1 雙寡頭，但下一代資產正逼近——AMGN 的 **MariTide** 主打月針給藥（對比週針）並結合 amylin 機制，直攻停藥後體重維持這個 class 最大痛點；VKTX 口服 VK2735 亦在推進。LLY 領先是時間差、非結構護城河，這筆讀數若無顯著 differentiation，反而凸顯 2027 後競爭密度上升。另補一個 2nd-order：GLP-1 大規模放量會反向壓縮睡眠呼吸中止 (RMD)、CGM (DXCM) 等共病裝置需求，屬 GLP-1 主題下被忽略的 demand-destruction 受害者。fill-finish 瓶頸除 CTLT 外，WST (West Pharmaceutical) 供應針劑膠塞與彈性體元件，同為關鍵供應節點。",
+        "bull_points": [
+          "LLY 仍享 2-3 年先發時間差紅利",
+          "共病裝置需求轉移反證 GLP-1 滲透深化"
+        ],
+        "bear_points": [
+          "AMGN MariTide 月針威脅便利性差異化",
+          "VKTX 口服資產侵蝕 LLY 未來定價權",
+          "讀數若無差異化反凸顯 2027 競爭密度"
+        ],
+        "final_take": "中性偏空——競爭護城河恐被高估，須看 differentiation",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "AMGN",
+            "VKTX",
+            "NVO",
+            "RMD",
+            "DXCM",
+            "CTLT",
+            "WST"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "GLP-1"
+          ],
+          "tech_keywords": [
+            "MariTide",
+            "VK2735",
+            "orforglipron",
+            "amylin",
+            "fill-finish"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMGN",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:LLY"
+          },
+          {
+            "subject": "ticker:VKTX",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:LLY"
+          },
+          {
+            "subject": "ticker:RMD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp-1"
+          },
+          {
+            "subject": "ticker:DXCM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp-1"
+          },
+          {
+            "subject": "ticker:WST",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:LLY"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增競爭管線反方與共病裝置 demand-destruction 角度，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T14:37:25Z",
+      "latency_ms": 10410,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "LLY 數據利好固然強化其 GLP-1 領導地位，但我們需將視角拉高，關注藥物放量帶來的**結構性消費者行為改變**。市場專注於藥廠競爭，卻忽略了 GLP-1 對**食品飲料 (Consumer Staples)** 產業造成的巨大「需求破壞」(Demand Destruction)。隨著試驗數據證實療效，長期服用人口增加，對於高糖、高精緻澱粉甚至酒精產品的需求將出現結構性萎縮。這不僅是醫藥領域議題，對於 PEP, KO 或 DPZ 等消費巨頭而言，這意味著其核心目標客群的需求基礎正在遭受根本性的腐蝕，這是在評估藥廠成長性時，常被遺漏的長期宏觀風險。",
+        "bull_points": [
+          "數據強化藥物作為治療基石的市場地位",
+          "長期臨床試驗路徑更加清晰明確"
+        ],
+        "bear_points": [
+          "GLP-1放量直接侵蝕傳統高糖高油食品需求",
+          "面臨IRA議價與長期保險支付結構的極大壓力"
+        ],
+        "final_take": "GLP-1 藥效越強，對傳統消費巨頭的長期威脅越大。",
+        "entities": {
+          "tickers": [
+            "LLY",
+            "PEP",
+            "KO",
+            "DPZ"
+          ],
+          "sectors": [
+            "Healthcare",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "GLP-1",
+            "Demand Destruction"
+          ],
+          "tech_keywords": [
+            "GLP-1"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:Demand Destruction"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入 GLP-1 對消費必需品 (Consumer Staples) 造成長期結構性需求破壞的宏觀視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMGN",
+        "CTLT",
+        "CVS",
+        "DPZ",
+        "DXCM",
+        "HIMS",
+        "KO",
+        "LLY",
+        "NVO",
+        "PEP",
+        "RMD",
+        "UNH",
+        "VKTX",
+        "WST"
+      ],
+      "sectors": [
+        "Consumer Staples",
+        "Health Care",
+        "Healthcare",
+        "Pharmaceuticals"
+      ],
+      "themes": [
+        "Demand Destruction",
+        "GLP-1",
+        "Health Economics",
+        "drug pricing reform",
+        "obesity drugs",
+        "oral GLP-1"
+      ],
+      "tech_keywords": [
+        "Chronic-Disease-Management",
+        "GLP-1",
+        "MACE-reduction",
+        "MariTide",
+        "VK2735",
+        "amylin",
+        "fill-finish",
+        "orforglipron",
+        "retatrutide",
+        "semaglutide",
+        "tirzepatide"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:LLY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:obesity-drugs"
+      },
+      {
+        "subject": "ticker:NVO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:LLY"
+      },
+      {
+        "subject": "ticker:CVS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:UNH",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:CTLT"
+      },
+      {
+        "subject": "ticker:CTLT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:GLP-1"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ira-medicare-negotiation"
+      },
+      {
+        "subject": "ticker:HIMS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1-supply-normalization"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:compounding-shortage-cliff"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cardio-metabolic-prevention"
+      },
+      {
+        "subject": "ticker:AMGN",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:LLY"
+      },
+      {
+        "subject": "ticker:VKTX",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:LLY"
+      },
+      {
+        "subject": "ticker:RMD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp-1"
+      },
+      {
+        "subject": "ticker:DXCM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp-1"
+      },
+      {
+        "subject": "ticker:WST",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:LLY"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:Demand Destruction"
+      }
+    ],
+    "bull_summary": [
+      "口服 GLP-1 若達標可解放注射產能瓶頸",
+      "減重市場 TAM 仍在向上修正",
+      "後期數據降低管線執行風險",
+      "擴大產品應用場景，加強市場主導地位。",
+      "臨床成功有助於談判更好的商業合作條款。",
+      "短缺豁免終結,LLY 收復 compounded 分流需求"
+    ],
+    "bear_summary": [
+      "標題無效力數字,readout 未知前難定價",
+      "LLY 估值偏貴,易現利多出盡",
+      "支付方控費與保險覆蓋成長期逆風",
+      "供應鏈交付能力恐難匹配需求爆發，引發缺貨風險。",
+      "CDMO 產能擴張速度與臨床進展若不同步，將拖累營收。",
+      "GLP-1 進 IRA Medicare 議價射程,長線定價權受壓"
+    ],
+    "final_take": "GLP-1 藥效越強，對傳統消費巨頭的長期威脅越大。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-16T14:37:25Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, HEADWIND_FROM, SUPPLIES_TO; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

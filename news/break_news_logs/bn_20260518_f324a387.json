@@ -1,0 +1,564 @@
+{
+  "news_id": "bn_20260518_f324a387",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:12:22Z",
+  "last_activity_ts": "2026-05-18T10:28:14Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/18/treasury-yields-inflation-bond-rout-oil.html",
+    "feed_fingerprint": "treasury yields rise inflation fears drive global bond",
+    "published": "2026-05-18T10:10:23+00:00",
+    "url_hash": "sha1:5cbd766b4f89e21fccd85c8595c034899d947204"
+  },
+  "headline": "Treasury yields rise as inflation fears drive global bond rout",
+  "headline_zh": null,
+  "raw_summary": "Global bond yields rose on Monday as fears of resurgent inflation grip financial markets.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:26:15Z",
+      "latency_ms": 21670,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**全球債市拋售、殖利率走高**本質是折現率衝擊。10年期殖利率上行壓縮長存續期資產估值，**高本益比成長股與科技股首當其衝**——NVDA、MSFT 這類估值靠遠期現金流支撐的標的對利率最敏感。同時**油價走高推升通膨預期**，形成自我強化迴圈。但要區分:這是「成長型通膨」還是「停滯型通膨」?若伴隨經濟動能,**金融股 (JPM、銀行淨利差擴大) 與能源股 (XOM、CVX) 反而受惠**。公用事業 (XLU)、REITs 等債券代理資產則承壓。關鍵觀察 Fed 是否被迫推遲降息——這才是決定股市是溫和回檔或系統性 de-rating 的分水嶺。",
+        "bull_points": [
+          "通膨若源於需求,金融股淨利差與能源股獲利同步上修",
+          "殖利率上行常先於景氣加速,週期股相對占優",
+          "估值重置後優質成長股反而浮現中長期買點"
+        ],
+        "bear_points": [
+          "折現率走高直接壓縮高本益比科技股估值",
+          "Fed 可能被迫推遲降息,引發系統性 de-rating",
+          "公用事業與 REITs 等債券代理資產資金外流"
+        ],
+        "final_take": "偏防禦,科技股短線承壓,觀察 Fed 降息路徑是否生變",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "JPM",
+            "XOM",
+            "CVX"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials",
+            "Energy",
+            "Utilities",
+            "Real Estate"
+          ],
+          "themes": [
+            "rising rates",
+            "inflation",
+            "AI capex",
+            "duration risk"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "sector:Information Technology",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          },
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rising-rates"
+          },
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:inflation"
+          },
+          {
+            "subject": "sector:Utilities",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "債市拋售為折現率衝擊,科技股承壓但金融能源受惠"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:26:45Z",
+      "latency_ms": 29794,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了Claude提到的成長股與金融/能源股之外，我們必須特別關注**房地產建築板塊 (Homebuilders)**。10年期公債殖利率是抵押貸款利率的基石，殖利率攀升將直接削弱消費者購屋能力。像 **DHI** 和 **LEN** 這類營建巨頭，正面臨新屋銷售放緩與融資成本激增的雙重壓力。此外，若購屋需求萎縮，將連鎖抑制家具、家電等**非必需消費品 (Consumer Discretionary)** 的市場需求，這比單純的估值模型調整更具備實質性的**獲利基本面衝擊**。這不再只是科技股的估值修正，而是對消費引擎的直接冷卻。",
+        "bull_points": [
+          "強健營建商具備定價權與成本優勢",
+          "高利率篩選財務穩健的龍頭標的"
+        ],
+        "bear_points": [
+          "抵押貸款利率飆升直接抑制購屋需求",
+          "DHI與LEN面臨營收與毛利壓縮風險",
+          "非必需消費品需求受房市連帶拖累"
+        ],
+        "final_take": "殖利率攀升將使房市成為下一個壓力點，非科技業基本面風險擴大。",
+        "entities": {
+          "tickers": [
+            "DHI",
+            "LEN"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Real Estate"
+          ],
+          "themes": [
+            "Inflation",
+            "Housing"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond_yields"
+          },
+          {
+            "subject": "ticker:LEN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond_yields"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充Claude未提及的房地產營建與消費信心連鎖衝擊。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:27:14Z",
+      "latency_ms": 28922,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已涵蓋成長股估值、大型銀行淨利差、營建與非必需消費。補一個**反向且具體**的角度:Claude 說金融股受惠 NIM 擴張,但這只對 **JPM 這類大型行**成立。**區域銀行 (KRE) 與 SCHW 持有大量長存續期固定收益證券**,殖利率上行直接擴大其 AOCI / HTM 部位的未實現虧損——這正是 2023 年 SVB 危機的引信。殖利率若快速衝高,帳面資本受侵蝕、存款再度面臨流向貨幣基金的壓力。所以「利率上升=金融股全面利多」是錯的,**存續期錯配的銀行反而是受害者**。同時強勢美元會壓抑 AAPL 等海外營收佔比高的跨國企業換匯獲利,屬第二層外溢效應。",
+        "bull_points": [
+          "大型行 JPM 淨利差續擴,資本充足吸收衝擊",
+          "貨幣基金規模上升利好資產管理費收入"
+        ],
+        "bear_points": [
+          "區域銀行 KRE 長債部位未實現虧損擴大",
+          "SCHW 存續期錯配重演 2023 SVB 引信風險",
+          "強勢美元壓抑 AAPL 海外換匯獲利"
+        ],
+        "final_take": "看空存續期錯配銀行,KRE 風險被市場低估",
+        "entities": {
+          "tickers": [
+            "KRE",
+            "SCHW",
+            "JPM",
+            "AAPL"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "bond rout",
+            "duration risk",
+            "rising rates",
+            "USD strength"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:KRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond-rout"
+          },
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:duration-risk"
+          },
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:usd-strength"
+          },
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nim-expansion"
+          }
+        ],
+        "done": false,
+        "confidence": 0.73,
+        "rationale_short": "提出區域銀行存續期錯配反向論點與美元外溢,前文未及"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:27:27Z",
+      "latency_ms": 12566,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論已觸及成長股估值、銀行體系風險及消費衝擊，但我需指出**資本密集型的基礎建設與綠能產業**的隱憂。以 **NEE** 或 **ENPH** 為代表的企業，嚴重依賴長期債務槓桿來推動大規模基建，公債殖利率攀升將直接推高其融資成本，壓低專案的內部報酬率 (IRR)。此外，這類具備「類債券」屬性的個股，在利率走高時會面臨資金配置上的顯著排擠效應，遭到投資人轉向無風險國債而拋售，形成基本面與估值的雙重利空。",
+        "bull_points": [
+          "長期能源轉型需求具結構性支撐",
+          "部分基建商具備抗通膨定價權"
+        ],
+        "bear_points": [
+          "資本密集型產業融資成本顯著攀升",
+          "類債券個股面臨資金轉向國債的排擠"
+        ],
+        "final_take": "基建與綠能股正面臨融資成本與資金配置的雙重壓力。",
+        "entities": {
+          "tickers": [
+            "NEE",
+            "ENPH"
+          ],
+          "sectors": [
+            "Utilities",
+            "Energy"
+          ],
+          "themes": [
+            "AI capex",
+            "Infrastructure"
+          ],
+          "tech_keywords": [
+            "Renewable Energy"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NEE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_yields"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充資本密集產業與「類債券股」受高利率的雙重融資與配置打擊。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:28:01Z",
+      "latency_ms": 34229,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面聚焦估值折現與利率敏感板塊,漏掉**信用利差與再融資牆**這條獨立傳導鏈。對高評等公司殖利率上行是估值問題;但對**高收益債發行人 (HYG、JNK)**,2026-2027 到期牆撞上更高再融資成本,是**償債能力問題**而非折現率問題——殖利率每多衝高一段,槓桿企業違約機率非線性上升。私募股權如 **BX** 投組公司多為浮動利率債務,利息覆蓋率被直接侵蝕。但補反向觀察:債市拋售本身收緊金融條件、壓抑需求,某種程度是**自我修正機制**——若殖利率衝高引爆信用事件,反而會逼 Fed 轉向。這波利空有內生上限,不必線性外推。",
+        "bull_points": [
+          "債市拋售收緊金融條件,具自我修正特性",
+          "信用事件風險升高反而可能逼 Fed 提前轉向"
+        ],
+        "bear_points": [
+          "高收益債 2026-27 到期牆撞高再融資成本",
+          "槓桿企業違約機率隨殖利率非線性上升",
+          "BX 投組浮動利率債務侵蝕利息覆蓋率"
+        ],
+        "final_take": "偏空,但聚焦信用層而非估值層",
+        "entities": {
+          "tickers": [
+            "HYG",
+            "JNK",
+            "BX"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "credit spreads",
+            "refinancing wall",
+            "financial conditions"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:HYG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:refinancing-wall"
+          },
+          {
+            "subject": "ticker:JNK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:credit-spreads"
+          },
+          {
+            "subject": "ticker:BX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:floating-rate-debt"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增信用利差/再融資牆傳導鏈與自我修正反論,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:28:14Z",
+      "latency_ms": 13045,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "討論已觸及折現模型與債券代理資產的估值影響。我需補充 **Commercial Real Estate (CRE)** 的結構性信用風險。辦公室與零售地產 REITs 正面臨關鍵再融資挑戰，這不僅是單純的利率折現問題，而是貸款到期後，因物業估值下滑引發的**再融資斷裂與違約風險**。隨著殖利率衝高，CRE 產業大量浮動利率債務的利息壓力將侵蝕 **SPG** 或 **SLG** 的現金流。這不僅是估值修正，而是針對實質資產價值與銀行壞帳結構的劇烈再定價。",
+        "bull_points": [
+          "殖利率若企穩，REITs高殖利率具配置價值"
+        ],
+        "bear_points": [
+          "CRE貸款到期面臨再融資斷裂風險",
+          "浮動利率負債侵蝕CRE營運現金流"
+        ],
+        "final_take": "CRE再融資危機將是下一波信用風險引爆點。",
+        "entities": {
+          "tickers": [
+            "SPG",
+            "SLG",
+            "KRE"
+          ],
+          "sectors": [
+            "Real Estate",
+            "Financials"
+          ],
+          "themes": [
+            "Commercial Real Estate",
+            "Interest Rates"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SPG",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Commercial Real Estate"
+          },
+          {
+            "subject": "ticker:KRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:SPG"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補足CRE產業鏈面臨的結構性再融資壓力。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "BX",
+        "CVX",
+        "DHI",
+        "ENPH",
+        "HYG",
+        "JNK",
+        "JPM",
+        "KRE",
+        "LEN",
+        "MSFT",
+        "NEE",
+        "NVDA",
+        "SCHW",
+        "SLG",
+        "SPG",
+        "XOM"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Energy",
+        "Financials",
+        "Information Technology",
+        "Real Estate",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Commercial Real Estate",
+        "Housing",
+        "Inflation",
+        "Infrastructure",
+        "Interest Rates",
+        "USD strength",
+        "bond rout",
+        "credit spreads",
+        "duration risk",
+        "financial conditions",
+        "inflation",
+        "refinancing wall",
+        "rising rates"
+      ],
+      "tech_keywords": [
+        "Renewable Energy"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "sector:Information Technology",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:inflation"
+      },
+      {
+        "subject": "sector:Utilities",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:DHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond_yields"
+      },
+      {
+        "subject": "ticker:LEN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond_yields"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond-rout"
+      },
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:duration-risk"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:usd-strength"
+      },
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nim-expansion"
+      },
+      {
+        "subject": "ticker:NEE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_yields"
+      },
+      {
+        "subject": "ticker:HYG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:refinancing-wall"
+      },
+      {
+        "subject": "ticker:JNK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:credit-spreads"
+      },
+      {
+        "subject": "ticker:BX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:floating-rate-debt"
+      },
+      {
+        "subject": "ticker:SPG",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Commercial Real Estate"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:SPG"
+      }
+    ],
+    "bull_summary": [
+      "通膨若源於需求,金融股淨利差與能源股獲利同步上修",
+      "殖利率上行常先於景氣加速,週期股相對占優",
+      "估值重置後優質成長股反而浮現中長期買點",
+      "強健營建商具備定價權與成本優勢",
+      "高利率篩選財務穩健的龍頭標的",
+      "大型行 JPM 淨利差續擴,資本充足吸收衝擊"
+    ],
+    "bear_summary": [
+      "折現率走高直接壓縮高本益比科技股估值",
+      "Fed 可能被迫推遲降息,引發系統性 de-rating",
+      "公用事業與 REITs 等債券代理資產資金外流",
+      "抵押貸款利率飆升直接抑制購屋需求",
+      "DHI與LEN面臨營收與毛利壓縮風險",
+      "非必需消費品需求受房市連帶拖累"
+    ],
+    "final_take": "CRE再融資危機將是下一波信用風險引爆點。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:28:14Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

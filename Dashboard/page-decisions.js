@@ -552,6 +552,14 @@ const DECISION_TIPS = {
               desc: 'Phase 3 PM operation call: thesis is valid, but **current entry is suboptimal** (chasing / awaiting catalyst / waiting for setup completion).\n\n**Implication**: not abandonment, just timing. **Watch List** specifies entry triggers (e.g. "close above $200 + vol ≥ 1.5× 20MA"). Enter when condition fires.\n\n**Warning**: thesis can deteriorate during WAIT (macro / fundamentals) — don\'t wait indefinitely without re-evaluation.',
               scale: '🔥 ATTACK     immediate entry — high conviction + clear breakout\n⏳ WAIT       wait for pullback / catalyst — signals not aligned ← active\n🛡 DEFENSIVE  signals conflicting / bearish — avoid or trim' },
     },
+    action_partial_entry: {
+        zh: { title: '🎯 部分建倉（PARTIAL ENTRY）',
+              desc: 'Phase 3 PM 操作層判定：**STAGED_ENTRY 分批進場** — score 過 BUY 但 confidence < 70% 或有 lane 不一致 / contrarian / fragility 警示 → 系統選擇先進**半倉**，留另一半等回測 / catalyst。\n\n**意義**：不是「等待不執行」，是「現在進 AGG 半倉 + 掛單 CONS 半倉等回測」。Dual-Track Entry 區會列具體區間。\n\n**為什麼不直接 BUY**：confidence 67% < 70% ATTACK 門檻、或 polarization MIXED/OUTLIER、或 Val / RT 不一致、或 CONTRARIAN macro misalignment → 系統承認 timing 不確定，分批進控 noise。\n\n**怎麼做**：1) 點「執行建倉」進 AGG 半倉  2) 掛限價單 CONS 半倉等回測  3) SL 緊跟  4) 若 thesis 變質 (macro 轉向 / 新 catalyst)，重評不要硬等。',
+              scale: '🔥 ATTACK         立即進場 — 高確信 + ATTACK 條件全到位\n🎯 PARTIAL ENTRY  分批進場 — score 過 BUY 但有警示 ← 目前\n⏳ WAIT           等 pullback / catalyst — 還沒到進場條件\n🛡 DEFENSIVE      訊號矛盾 / 偏空 — 避開或縮倉' },
+        en: { title: '🎯 Action: PARTIAL ENTRY',
+              desc: 'Phase 3 PM op-layer call: **STAGED_ENTRY split** — score crosses BUY but confidence < 70% OR lane disagreement / contrarian / fragility flag → system enters **half size now**, holds second half for pullback / catalyst.\n\n**Meaning**: NOT "wait, skip" — it\'s "buy AGG half now + queue CONS half at retest level". Dual-Track Entry block has specific zones.\n\n**Why not pure BUY**: confidence 67% < 70% ATTACK threshold, OR polarization MIXED/OUTLIER, OR Val/RT disagreement, OR CONTRARIAN macro misalignment → system admits timing uncertainty, splits to control noise.\n\n**Execute**: 1) press "Execute Entry" → AGG half  2) place limit order at CONS zone  3) tight SL  4) if thesis breaks (macro shift / new catalyst), re-evaluate, don\'t wait indefinitely.',
+              scale: '🔥 ATTACK         immediate entry — full ATTACK gates passed\n🎯 PARTIAL ENTRY  staged split — score passes BUY but warnings present ← active\n⏳ WAIT           wait for pullback / catalyst — entry gates not met\n🛡 DEFENSIVE      signals conflicting / bearish — avoid or trim' },
+    },
     action_defensive: {
         zh: { title: '🛡 防守（DEFENSIVE）',
               desc: 'Phase 3 PM 操作層判定：lane 之間訊號矛盾、或多數 lane 偏空 — 進場勝率不佳。**即使 final_decision = BUY，PM 仍判定先觀察**比進場好。\n\n**為什麼會 BUY 但又 DEFENSIVE**：final_decision 主要看 score 是否過閾值，DEFENSIVE 看的是 lane 共識度 + 進場時機。score 達到但進場條件不到位 → BUY + DEFENSIVE。\n\n**建議**：實際操作以 DEFENSIVE 為準 — 不進、或上**極小試單** + 緊停損；用後續 Watch trigger 決定升級到 ATTACK / WAIT 才正式建倉。',
@@ -767,13 +775,18 @@ const DECISION_TIPS = {
     document.addEventListener('mouseover', e => {
         const el = e.target.closest('[data-tip-key]');
         if (!el) return;
-        if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+        // V2.20.0 — share _hideTimer via tip element with utils.js data-signal-tip
+        // handler. Both handlers write the same #signal-tip-tooltip DOM, so
+        // they must coordinate hide cancellation.
+        if (tip._hideTimer) { clearTimeout(tip._hideTimer); tip._hideTimer = null; }
+        if (_hideTimer)     { clearTimeout(_hideTimer);     _hideTimer = null; }
         showTip(el);
     });
     document.addEventListener('mouseout', e => {
         const el = e.target.closest('[data-tip-key]');
         if (!el) return;
-        _hideTimer = setTimeout(hideTip, 80);
+        tip._hideTimer = setTimeout(() => { hideTip(); tip._hideTimer = null; }, 120);
+        _hideTimer = tip._hideTimer;
     });
 })();
 
@@ -967,21 +980,20 @@ function buildV48StatusPills(item, wl) {
     // V2.17.8 — native title= upgraded to data-tip-key (rich DECISION_TIPS)
     // V2.20.0 — polarization 升 4-tier (BIPOLAR/OUTLIER/MIXED/ALIGNED) + red_team_basis 4-tier
     const ds = item.det_shadow || {};
+    // V2.20.0 — Polarization 4-tier + RT basis 4-tier badges (data-signal-tip pattern, consistent with earnings card)
     if (ds.signal_polarization === 'BIPOLAR') {
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="signal_polarization_bipolar" style="background:color-mix(in srgb,#a855f7,transparent 88%);color:#a855f7;border:1px solid color-mix(in srgb,#a855f7,transparent 70%)" title="${isZh ? '5 lane 勢均力敵衝突 (range≥4 + 雙邊各≥2 lane)' : 'Lane scores prove deadlock (range≥4 + ≥2 each side)'}">${isZh ? '訊號兩極' : 'BIPOLAR'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="polarization_bipolar" style="background:color-mix(in srgb,#a855f7,transparent 88%);color:#a855f7;border:1px solid color-mix(in srgb,#a855f7,transparent 70%)">${isZh ? '訊號兩極' : 'BIPOLAR'}</span>`);
     } else if (ds.signal_polarization === 'OUTLIER') {
-        // V2.20.0 — 新 4-vs-1 outlier 級
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#a78bfa,transparent 88%);color:#a78bfa;border:1px solid color-mix(in srgb,#a78bfa,transparent 70%)" title="${isZh ? '單一 lane 站對立面 (4-vs-1 離群)' : '1 lane on minority side (4-vs-1 outlier)'}">${isZh ? '訊號離群' : 'OUTLIER'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="polarization_outlier" style="background:color-mix(in srgb,#a78bfa,transparent 88%);color:#a78bfa;border:1px solid color-mix(in srgb,#a78bfa,transparent 70%)">${isZh ? '訊號離群' : 'OUTLIER'}</span>`);
     } else if (ds.signal_polarization === 'MIXED') {
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="signal_polarization_mixed" style="background:color-mix(in srgb,#0ea5e9,transparent 88%);color:#0ea5e9;border:1px solid color-mix(in srgb,#0ea5e9,transparent 70%)">${isZh ? '訊號分歧' : 'MIXED'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="polarization_mixed" style="background:color-mix(in srgb,#0ea5e9,transparent 88%);color:#0ea5e9;border:1px solid color-mix(in srgb,#0ea5e9,transparent 70%)">${isZh ? '訊號分歧' : 'MIXED'}</span>`);
     }
-    // V2.20.0 — red_team_basis 4-tier badge (Anti-spoofing classifier output)
     if (ds.red_team_basis === 'pure_mean_reversion') {
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#dc2626,transparent 88%);color:#dc2626;border:1px solid color-mix(in srgb,#dc2626,transparent 70%)" title="${isZh ? 'Red Team 純歷史均值回歸攻擊 (V2.19 anti-spoofing)' : 'Red Team used pure mean-reversion attack (V2.19 anti-spoofing)'}">${isZh ? 'RT 歷史攻擊' : 'RT MR-ONLY'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="red_team_basis_mr_only" style="background:color-mix(in srgb,#dc2626,transparent 88%);color:#dc2626;border:1px solid color-mix(in srgb,#dc2626,transparent 70%)">${isZh ? 'RT 歷史攻擊' : 'RT MR-ONLY'}</span>`);
     } else if (ds.red_team_basis === 'contaminated') {
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#ea580c,transparent 88%);color:#ea580c;border:1px solid color-mix(in srgb,#ea580c,transparent 70%)" title="${isZh ? 'Red Team 偷渡均值回歸 (forward + mr 並存)' : 'Red Team smuggled mean-reversion (forward + mr both present)'}">${isZh ? 'RT 污染' : 'RT CONTAM'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="red_team_basis_contaminated" style="background:color-mix(in srgb,#ea580c,transparent 88%);color:#ea580c;border:1px solid color-mix(in srgb,#ea580c,transparent 70%)">${isZh ? 'RT 污染' : 'RT CONTAM'}</span>`);
     } else if (ds.red_team_basis === 'pure_forward') {
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,#16a34a,transparent 88%);color:#16a34a;border:1px solid color-mix(in srgb,#16a34a,transparent 70%)" title="${isZh ? 'Red Team 純 forward mechanism 攻擊（健康）' : 'Red Team pure forward mechanism attack (clean)'}">${isZh ? 'RT 前瞻' : 'RT FWD'}</span>`);
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="red_team_basis_pure_forward" style="background:color-mix(in srgb,#16a34a,transparent 88%);color:#16a34a;border:1px solid color-mix(in srgb,#16a34a,transparent 70%)">${isZh ? 'RT 前瞻' : 'RT FWD'}</span>`);
     }
     if (ds.red_team_agreement === 'DISAGREE') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="red_team_disagree" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? 'Red Team 不一致' : 'RT DISAGREE'}</span>`);
@@ -989,14 +1001,28 @@ function buildV48StatusPills(item, wl) {
     if (ds.val_agreement === 'DISAGREE') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="val_disagree" style="background:color-mix(in srgb,#f59e0b,transparent 88%);color:#f59e0b;border:1px solid color-mix(in srgb,#f59e0b,transparent 70%)">${isZh ? 'Val 不一致' : 'VAL DISAGREE'}</span>`);
     }
-    // V2.13.0 — action_label (ATTACK / WAIT / DEFENSIVE)
+    // V2.13.0 + V2.20.0 — action_label (ATTACK / PARTIAL ENTRY / WAIT / DEFENSIVE)
     if (item.action_label) {
-        const actionMap = {
-            ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip: 'action_attack' },
-            WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip: 'action_wait' },
-            DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip: 'action_defensive' },
-        };
-        const a = actionMap[item.action_label];
+        // V2.20.0 — show "部分建倉" instead of "等待" when WAIT label is paired with
+        // ANY staged-entry context (explicit STAGED decision, OR final_decision STAGED_ENTRY,
+        // OR dual-track entry zones present — BUY + conf<70% triggers WAIT but dual-track
+        // still exists). "等待" was misleading users as "skip / don't enter".
+        const hasDualTrack = !!(item.targets?.entry_aggressive && item.targets?.entry_conservative);
+        const hasStagedSplit = !!(item.staged_split && (item.staged_split.aggressive_pct || item.staged_split.conservative_pct));
+        const isStaged = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY'
+                      || item.final_decision === 'STAGED_ENTRY'
+                      || hasDualTrack || hasStagedSplit;
+        let a;
+        if (item.action_label === 'WAIT' && isStaged) {
+            a = { color: '#3b82f6', label_zh: '🎯 部分建倉', label_en: '🎯 PARTIAL', tip: 'action_partial_entry' };
+        } else {
+            const actionMap = {
+                ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip: 'action_attack' },
+                WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip: 'action_wait' },
+                DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip: 'action_defensive' },
+            };
+            a = actionMap[item.action_label];
+        }
         if (a) {
             pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${a.tip}" style="background:color-mix(in srgb,${a.color},transparent 86%);color:${a.color};border:1px solid color-mix(in srgb,${a.color},transparent 65%)">${isZh ? a.label_zh : a.label_en}</span>`);
         }
@@ -1221,7 +1247,7 @@ function buildCard(item) {
         <div class="flex justify-between items-start mb-4">
             <div class="min-w-0 flex-1">
                 <div class="flex items-baseline gap-3 flex-wrap">
-                    <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}${(window.UI?.watchlistSet?.has?.(item.ticker)) ? ` <span class="watchlist-bolt" title="V2.19 結構性轉變候選 (news keyword leading signal)" style="color:#f59e0b;font-size:0.55em;vertical-align:0.4em">⚡</span>` : ''}</h4>
+                    <h4 class="text-3xl font-black tracking-tighter" style="color:var(--text-card-title)">${item.ticker}${(window.UI?.watchlistSet?.has?.(item.ticker)) ? ` <span class="watchlist-bolt" data-signal-tip="watchlist_bolt" style="color:#f59e0b;font-size:0.55em;vertical-align:0.4em">⚡</span>` : ''}</h4>
                     ${item.current_price != null ? (() => {
                         const cp = item.current_price;
                         const ap = item.analysis_price;

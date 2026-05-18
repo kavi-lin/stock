@@ -1,0 +1,180 @@
+# Project Nexus V3.0 — knowledge graph build configuration
+# Edit + bump VERSION minor when changing decay strategies or tier weights.
+version: "3.0.0"
+
+# Multi-dimensional decay (Gemini #1): different node/edge types have different inertia.
+# Half-life in days for `weight * 0.5 ** (age_days / half_life)`.
+decay_strategies:
+  catalyst: 7              # earnings, FOMC, GTC — expire fast
+  narrative: 21            # default theme/narrative lifespan
+  theme: 21
+  structural_shift: 90     # V2.18 long supercycles
+  peer_of: 45              # industrial peer links shift quarterly
+  supply_chain_hop: 45
+  outcome_for: 30          # decision verdict edges
+  belongs_to_theme: 21
+  belongs_to_sector: 60
+  mentioned_in: 14
+  bull_case_for: 30
+  bear_case_for: 30
+  default: 21
+
+# Tier confidence multipliers (Gemini #5)
+# final_weight = (tier_confidence * raw_frequency) * decay_factor
+tier_confidence:
+  tier1: 1.0   # structured JSON
+  tier2: 0.7   # regex
+  tier3: 0.85  # LLM NER
+
+# Pruning + size caps
+min_edge_weight: 0.05
+max_nodes: 800
+max_json_bytes: 5000000      # 5MB hard cap
+provisional_promotion_doc_count: 3   # LLM entity needs ≥3 distinct docs to promote
+
+# Tier toggles
+tiers_enabled:
+  tier1: true
+  tier2: true
+  tier3: true
+
+# Tier 3 LLM budget
+tier3:
+  model: "claude-haiku-4-5"
+  backfill_limit: 10        # MDs per run (cap first-day cost spike)
+  max_tokens: 1500
+  window_tokens: 6000       # per MD slice
+  since_days: 30            # only consider MDs within window
+  api_key_env: "ANTHROPIC_API_KEY"
+
+# Alias map — hard canonicalization (Gemini #2 Stage 1)
+# Lowercase keys; resolved to canonical node id.
+alias_map:
+  "taiwan semi": "ticker:TSM"
+  "taiwan semiconductor": "ticker:TSM"
+  "tsmc": "ticker:TSM"
+  "台積電": "ticker:TSM"
+  "台積": "ticker:TSM"
+  "nvidia": "ticker:NVDA"
+  "輝達": "ticker:NVDA"
+  "broadcom": "ticker:AVGO"
+  "微軟": "ticker:MSFT"
+  "microsoft": "ticker:MSFT"
+  "alphabet": "ticker:GOOGL"
+  "google": "ticker:GOOGL"
+  "amazon": "ticker:AMZN"
+  "meta platforms": "ticker:META"
+  "facebook": "ticker:META"
+  "tesla": "ticker:TSLA"
+  "apple": "ticker:AAPL"
+  "samsung": "ticker:SSNLF"
+  "sk hynix": "narrative:sk_hynix"
+  "micron": "ticker:MU"
+  "advanced micro devices": "ticker:AMD"
+  "asml": "ticker:ASML"
+  "lam research": "ticker:LRCX"
+  "applied materials": "ticker:AMAT"
+  "vertiv": "ticker:VRT"
+  "coherent": "ticker:COHR"
+  "corning": "ticker:GLW"
+  "ge vernova": "ticker:GEV"
+  "constellation energy": "ticker:CEG"
+  "vistra": "ticker:VST"
+
+# ─── Narrative sector scope (Tier 2 contamination guard, 2026-05-13) ─────
+# Each narrative key maps to allowed sector strings. Tier 2 emits edges only
+# when the source ticker's sector ∈ scope. Use EXACT sector strings from
+# Dashboard/heatmap_universe.json:
+#   Basic Materials, Communication Services, Consumer Cyclical,
+#   Consumer Defensive, Energy, Financial Services, Healthcare,
+#   Industrials, Real Estate, Technology, Utilities
+narrative_sector_scope:
+  # Tech / semiconductor narratives
+  hbm:              [Technology]
+  hbm3e:            [Technology]
+  hbm4:             [Technology]
+  gddr:             [Technology]
+  lpddr:            [Technology]
+  cowos:            [Technology]
+  cowos_l:          [Technology]
+  cowos_s:          [Technology]
+  info:             [Technology]
+  soic:             [Technology]
+  chiplet:          [Technology]
+  foplp:            [Technology]
+  n3:               [Technology]
+  n3p:              [Technology]
+  n2:               [Technology]
+  a14:              [Technology]
+  a16:              [Technology]
+  18a:              [Technology]
+  3nm:              [Technology]
+  2nm:              [Technology]
+  gaa:              [Technology]
+  nanosheet:        [Technology]
+  blackwell:        [Technology]
+  rubin:            [Technology]
+  mi300:            [Technology]
+  mi325:            [Technology]
+  mi350:            [Technology]
+  trainium:         [Technology]
+  inferentia:       [Technology]
+  tpu:              [Technology]
+  maia:             [Technology]
+  silicon_photonics: [Technology]
+  cpo:              [Technology]
+  800g:             [Technology]
+  "1_6t":           [Technology]
+  lpo:              [Technology]
+  # Power / wide-bandgap touch multiple sectors
+  gan:              [Technology, Industrials, Utilities]
+  sic:              [Technology, Industrials, Utilities]
+  silicon_carbide:  [Technology, Industrials, Utilities]
+  wide_bandgap:     [Technology, Industrials, Utilities]
+
+  # Healthcare narratives
+  glp1:             [Healthcare]
+  weight_loss:      [Healthcare]
+  peptide_mfg:      [Healthcare]
+  oncology:         [Healthcare]
+  gene_therapy:     [Healthcare]
+  alzheimer:        [Healthcare]
+  biosimilars:      [Healthcare]
+
+  # Energy narratives
+  shale:            [Energy]
+  lng:              [Energy, Utilities]
+  refining:         [Energy]
+  nuclear:          [Energy, Utilities]
+  grid:             [Utilities, Industrials]
+
+  # Financial narratives
+  nim:              [Financial Services]
+  credit_cycle:     [Financial Services]
+  capital_markets:  [Financial Services]
+
+  # Consumer narratives
+  ecommerce:        [Consumer Cyclical, Communication Services]
+  ad_spend:         [Communication Services, Consumer Cyclical]
+  travel:           [Consumer Cyclical]
+
+  # Generic supply-chain phrases — allow broadly (any sector)
+  supply_chain_signal: [Technology, Healthcare, Industrials, Consumer Cyclical, Consumer Defensive, Energy, Financial Services, Basic Materials, Real Estate, Utilities, Communication Services]
+
+# Tier-2 weights
+tier2_weights:
+  primary_ticker: 1.0     # MD filename ticker
+  peer_in_body:   0.35    # other tickers found in body text
+
+# Data source paths (relative to project root)
+sources:
+  heatmap_universe: "Dashboard/heatmap_universe.json"
+  theme_detector_glob: "skills/theme-detector/cache/theme_detector_*.json"
+  event_index: "reports/decision_review/event_index_latest.json"
+  thesis_dir: "investment/invest_logs/theses"
+  news_logs_glob: "news/news_logs/*_digest.json"
+  break_news_dir: "news/break_news_logs"
+  dashboard_data: "Dashboard/data.json"
+  reports_dir: "reports"
+  output: "Dashboard/nexus_graph.json"
+  build_log_dir: "scripts/nexus/cache"

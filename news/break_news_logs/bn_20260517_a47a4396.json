@@ -1,0 +1,547 @@
+{
+  "news_id": "bn_20260517_a47a4396",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T17:12:01Z",
+  "last_activity_ts": "2026-05-17T17:18:09Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/truist-raises-pt-woodward-wwd-163932141.html",
+    "feed_fingerprint": "truist raises pt woodward wwd stock",
+    "published": "2026-05-17T16:39:32+00:00",
+    "url_hash": "sha1:d3193e448c70a5204d4ab7759340eca2194c774f"
+  },
+  "headline": "Truist Raises PT on Woodward (WWD) Stock",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T17:16:37Z",
+      "latency_ms": 24349,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Truist 單一賣方上調 WWD 目標價屬**低訊號量**事件 — 無新財測、無訂單數據，pre-triage shallow_score 1.0 合理。真正值得追的是 Woodward 的兩條結構主線：(1) **航太售後**隨窄體機機隊利用率回升,加上 LEAP 引擎燃油系統 OEM 爬產;(2) **工業燃氣渦輪**零件直接吃到資料中心電力需求,這條 AI capex 旁支題材市場尚未充分定價。PT 調升只是把這些已知 narrative 折現,不構成獨立進場理由。需看 5 月底季報的 aftermarket mix 與工業段 book-to-bill 是否兌現。",
+        "bull_points": [
+          "窄體機機隊利用率回升帶動航太售後高毛利收入",
+          "工業燃氣渦輪零件吃資料中心電力需求增量",
+          "LEAP 引擎燃油系統 OEM 爬產提供多年營收能見度"
+        ],
+        "bear_points": [
+          "單一賣方 PT 調升訊號量低,不具獨立催化力",
+          "OEM 窄體機產線爬產延宕會壓縮零件出貨",
+          "估值已反映航太復甦,季報不如預期易回吐"
+        ],
+        "final_take": "中性偏多,但靠季報兌現非靠 PT 調升",
+        "entities": {
+          "tickers": [
+            "WWD",
+            "GE",
+            "BA",
+            "RTX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "AI capex",
+            "aerospace aftermarket",
+            "data center power",
+            "sell-side rating change"
+          ],
+          "tech_keywords": [
+            "LEAP engine",
+            "industrial gas turbine"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:aerospace-aftermarket"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:data-center-power"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:GE"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "narrative:sell-side-rating-change",
+            "predicate": "MENTIONED_IN",
+            "object": "ticker:WWD"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "PT 調升低訊號,結構題材才是重點,等季報兌現"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T17:16:50Z",
+      "latency_ms": 12450,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "同意前述分析，但**國防業務**（Defense）往往被忽略。WWD 作為彈藥與導引系統關鍵組件供應商，在當前地緣政治緊張下，具備抗循環屬性，能抵銷商用航太的潛在波動。此外，該公司積極推動供應鏈的區域化佈局（near-shoring），不僅降低了對長鏈依賴，也有效降低了關鍵零組件的運輸成本與政治曝險。這才是支撐其長期利潤率改善的核心，而不僅僅是資料中心電力需求帶來的利多。",
+        "bull_points": [
+          "國防業務具備強大抗循環特性",
+          "近岸化佈局提升供應鏈韌性"
+        ],
+        "bear_points": [
+          "全球國防預算成長放緩風險",
+          "原物料短缺導致交期延長"
+        ],
+        "final_take": "國防業務提供穩健下檔保護，但工業與航太段需加速放量。",
+        "entities": {
+          "tickers": [
+            "WWD"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Defense spending",
+            "Near-shoring"
+          ],
+          "tech_keywords": [
+            "Guided munitions"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:defense_spending"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補強國防業務抗循環價值與供應鏈佈局，這點分析師 A 未提及。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T17:17:17Z",
+      "latency_ms": 27247,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面沒談的具體供應鏈節點:**WWD 窄體機 OEM 上行受 Boeing 產能天花板綁住**。雙方都把 LEAP 引擎爬產當利多,但 LEAP 裝在 737 MAX 上,而 FAA 仍把 Boeing 月產限在 38 架、升到 42 架尚待核准。WWD 的燃油與作動系統 OEM 出貨節奏實際是被 Boeing 機體交付節流,不是被引擎需求拉動 — 訂單在 backlog 裡排隊不等於今年認列。真正乾淨的爬產來自 GE Aerospace 的 LEAP 售後與備件。另外提醒估值面:單一賣方 PT 調升時 WWD 已近歷史高位,賣方多是反身性追價,本益比擴張先於盈餘兌現,追高的風險回報並不對稱。",
+        "bull_points": [
+          "LEAP 售後與備件爬產不受機體產能限制",
+          "GE Aerospace 引擎放量帶動 WWD 零件需求"
+        ],
+        "bear_points": [
+          "737 MAX 月產卡 38 架,WWD OEM 上行受限",
+          "backlog 排隊不等於今年營收認列",
+          "近歷史高位,賣方反身性追價、估值先行"
+        ],
+        "final_take": "結構面看多,但追 PT 調升不值得,等季報兌現",
+        "entities": {
+          "tickers": [
+            "WWD",
+            "BA",
+            "GE"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "AI capex",
+            "aerospace aftermarket",
+            "narrowbody ramp"
+          ],
+          "tech_keywords": [
+            "LEAP",
+            "737 MAX"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WWD",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:737-max-production-cap"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:leap-aftermarket"
+          },
+          {
+            "subject": "ticker:GE",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "tech:LEAP"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 Boeing 產能天花板節點與估值反身性,前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T17:17:29Z",
+      "latency_ms": 11967,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論多聚焦於產能瓶頸與終端需求，忽略了 **More Electric Aircraft (MEA)** 的技術迭代結構性趨勢。WWD 在機電作動系統與功率管理上的技術布局，正受惠於商用飛機從傳統引擎引氣系統（Bleed air）大規模轉向電子化控制。這類系統更新不僅能直接改善燃油效率（滿足當前 OEM 的核心痛點），更讓 WWD 在新一代飛機平台的「平均內容價值」持續攀升。這項結構性成長紅利與短期產能瓶頸脫鉤，是 WWD 相比 Honeywell 或其他傳統供應商，長期被低估的技術 Alpha。",
+        "bull_points": [
+          "MEA 技術迭代提升單機內容價值",
+          "電子化控制系統優化燃油效率"
+        ],
+        "bear_points": [
+          "MEA 技術導入期研發資本投入高",
+          "航空產業控制系統替換週期極長"
+        ],
+        "final_take": "除短期產能限制外，WWD 在 MEA 技術迭代的結構性潛力才是長期 Alpha 來源。",
+        "entities": {
+          "tickers": [
+            "WWD",
+            "HON"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Aerospace"
+          ],
+          "tech_keywords": [
+            "MEA",
+            "actuation systems"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:mea"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "切入 MEA 技術趨勢，補充與短期產能瓶頸脫鉤的長期成長邏輯。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T17:17:54Z",
+      "latency_ms": 25726,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一條前面全被忽略的**反向風險**:WWD 工業段(占營收約四成)的核心是天然氣引擎控制與船用系統,而這塊對**中國終端需求高度曝險**。中國重卡 LNG 換裝潮已在 2025 下半年降溫、船用新造訂單也走弱,工業段的 book-to-bill 很可能不是被資料中心電力需求拉動,而是被中國週期拖累 — 兩股力量互相抵銷。市場把工業段一律當成 **AI capex** 旁支題材定價,忽略了它其實是個地理錯配的雙頭曝險。Truist PT 調升完全沒拆解這一層,單看航太敘事追價,風險回報不對稱。等 5 月底季報看工業段地區別拆分再說。",
+        "bull_points": [
+          "工業段燃氣渦輪零件確有資料中心電力需求支撐",
+          "航太售後與國防抗循環,可緩衝工業段波動"
+        ],
+        "bear_points": [
+          "工業段約四成營收,高度曝險中國天然氣引擎需求",
+          "中國 LNG 重卡換裝潮降溫、船用訂單走弱",
+          "市場誤把工業段當 AI 電力純題材,忽略地理錯配"
+        ],
+        "final_take": "偏空,工業段中國曝險被低估,等季報拆分",
+        "entities": {
+          "tickers": [
+            "WWD",
+            "GE",
+            "BA",
+            "HON",
+            "RTX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "AI capex",
+            "aftermarket",
+            "China demand",
+            "near-shoring",
+            "More Electric Aircraft"
+          ],
+          "tech_keywords": [
+            "LEAP",
+            "gas turbine",
+            "LNG engine controls"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WWD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-demand"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:WWD",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:GE"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增工業段中國需求反向風險,前討論全聚焦航太未談地理曝險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T17:18:09Z",
+      "latency_ms": 14870,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "討論結構上，WWD 在工業領域的 **LTSA (Long-Term Service Agreements)** 模式往往被低估。不同於對中國營建或船用設備的一次性交付，工業燃氣渦輪的維護合約提供高利潤率的固定收入，這能緩衝工業段在中國終端需求波動時的獲利壓力。這是市場將其錯誤歸類為單純工業週期股的關鍵修正點。",
+        "bull_points": [
+          "工業段 LTSA 提供高毛利經常性營收",
+          "維護合約緩衝中國市場需求波動"
+        ],
+        "bear_points": [
+          "轉型服務導向需長期研發資源配置",
+          "維護合約定價受通膨環境限制"
+        ],
+        "final_take": "需關注財報中工業段服務營收佔比是否提升。",
+        "entities": {
+          "tickers": [
+            "WWD"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "China"
+          ],
+          "tech_keywords": [
+            "LTSA",
+            "Gas Turbine Control"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:WWD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:LTSA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充工業段的 LTSA 經常性收入模式，提供不同於週期性銷售的獲利穩定性。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BA",
+        "GE",
+        "HON",
+        "RTX",
+        "WWD"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Industrials"
+      ],
+      "themes": [
+        "AI capex",
+        "Aerospace",
+        "China",
+        "China demand",
+        "Defense spending",
+        "More Electric Aircraft",
+        "Near-shoring",
+        "aerospace aftermarket",
+        "aftermarket",
+        "data center power",
+        "narrowbody ramp",
+        "near-shoring",
+        "sell-side rating change"
+      ],
+      "tech_keywords": [
+        "737 MAX",
+        "Gas Turbine Control",
+        "Guided munitions",
+        "LEAP",
+        "LEAP engine",
+        "LNG engine controls",
+        "LTSA",
+        "MEA",
+        "actuation systems",
+        "gas turbine",
+        "industrial gas turbine"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:aerospace-aftermarket"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:data-center-power"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:GE"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "narrative:sell-side-rating-change",
+        "predicate": "MENTIONED_IN",
+        "object": "ticker:WWD"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:defense_spending"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:737-max-production-cap"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:leap-aftermarket"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "tech:LEAP"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:mea"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-demand"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:WWD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:LTSA"
+      }
+    ],
+    "bull_summary": [
+      "窄體機機隊利用率回升帶動航太售後高毛利收入",
+      "工業燃氣渦輪零件吃資料中心電力需求增量",
+      "LEAP 引擎燃油系統 OEM 爬產提供多年營收能見度",
+      "國防業務具備強大抗循環特性",
+      "近岸化佈局提升供應鏈韌性",
+      "LEAP 售後與備件爬產不受機體產能限制"
+    ],
+    "bear_summary": [
+      "單一賣方 PT 調升訊號量低,不具獨立催化力",
+      "OEM 窄體機產線爬產延宕會壓縮零件出貨",
+      "估值已反映航太復甦,季報不如預期易回吐",
+      "全球國防預算成長放緩風險",
+      "原物料短缺導致交期延長",
+      "737 MAX 月產卡 38 架,WWD OEM 上行受限"
+    ],
+    "final_take": "需關注財報中工業段服務營收佔比是否提升。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T17:18:09Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,641 @@
+{
+  "news_id": "bn_20260513_fc3502ba",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T17:01:15Z",
+  "last_activity_ts": "2026-05-13T23:55:56Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/this-white-house-darling-just-became-the-12th-most-valuable-private-company-an-ipo-will-be-coming-ee61529a?mod=mw_rss_topstories",
+    "feed_fingerprint": "white house darling just became 12th most valuable",
+    "published": "2026-05-13T16:49:00+00:00",
+    "url_hash": "sha1:01e5352cd35a59145fb9d9836c45a8be57462d14"
+  },
+  "headline": "This White House darling just became the 12th-most valuable private company. An IPO will be coming.",
+  "headline_zh": null,
+  "raw_summary": "Defense contractor Anduril, which is helping build President Trump’s “Golden Dome” antimissile shield, completed a funding round at a $61 billion valuation.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": -1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T23:53:50Z",
+      "latency_ms": 21328,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Anduril at $61B private mark — now larger than Lockheed's market-cap gap to peers in pure defense-tech multiple. Three reads: **(1) Public defense primes face margin compression risk** — Anduril's autonomous systems (Lattice OS, Roadrunner, Bolt) undercut LMT/RTX/NOC on cost-per-kill for Golden Dome tier. (2) **IPO overhang = capital rotation catalyst** — late-2026/2027 listing pulls institutional defense allocation; Palantir (PLTR) likely co-bid beneficiary via Maven/Lattice integration. (3) **Silicon supply chain pull** — Golden Dome interceptor swarms need rad-hard FPGAs (Lattice Semi, Microchip) + edge AI inference (NVDA Jetson/Orin, AMD Versal). Watch **AVAV, KTOS, RKLB** as listed proxies pre-IPO. Anti-IPO risk: DoD contract concentration + Trump-admin political beta.",
+        "entities": {
+          "tickers": [
+            "LMT",
+            "RTX",
+            "NOC",
+            "GD",
+            "PLTR",
+            "AVAV",
+            "KTOS",
+            "RKLB",
+            "NVDA",
+            "AMD",
+            "MCHP",
+            "LSCC"
+          ],
+          "sectors": [
+            "Industrials",
+            "Information Technology",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Defense Tech",
+            "Golden Dome",
+            "Autonomous Weapons",
+            "Pre-IPO Rotation",
+            "Counter-UAS"
+          ],
+          "tech_keywords": [
+            "Lattice OS",
+            "Roadrunner",
+            "Bolt loitering munition",
+            "rad-hard FPGA",
+            "Jetson Orin",
+            "Versal AI Edge",
+            "edge AI inference"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LMT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:anduril-ipo"
+          },
+          {
+            "subject": "ticker:RTX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:anduril-ipo"
+          },
+          {
+            "subject": "ticker:NOC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:golden-dome-disruption"
+          },
+          {
+            "subject": "ticker:PLTR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:anduril-ipo"
+          },
+          {
+            "subject": "ticker:AVAV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:defense-tech-rerating"
+          },
+          {
+            "subject": "ticker:KTOS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:defense-tech-rerating"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:autonomous-weapons"
+          },
+          {
+            "subject": "ticker:LSCC",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:MCHP",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:PLTR",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:anduril-lattice"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Anduril $61B private mark signals margin/share threat to legacy primes; Golden Dome pulls silicon + listed pre-IPO proxies. IPO timing uncertain."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T23:54:37Z",
+      "latency_ms": 46732,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Anduril's $61B valuation highlights its advanced autonomous systems, but the 'Golden Dome' antimissile shield relies on more than just FPGAs and AI accelerators. The critical need for real-time processing of vast sensor data points to the demand for cutting-edge High Bandwidth Memory (HBM). US-based Micron (MU) is a significant player in this specialized memory market, and crucially, it is the only domestic manufacturer of advanced memory, making it a strategic supplier for national security. As Anduril scales its operations and fulfills complex defense contracts, demand for HBM solutions that meet rigorous defense-grade specifications for speed, power efficiency, and resilience will likely increase, presenting an indirect investment avenue beyond prime contractors and into critical component suppliers.",
+        "entities": {
+          "tickers": [
+            "MU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Defense AI hardware",
+            "High Bandwidth Memory",
+            "Trusted Supply Chain",
+            "Next-gen missile defense"
+          ],
+          "tech_keywords": [
+            "HBM",
+            "edge AI inference",
+            "autonomous systems",
+            "Golden Dome"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:high_bandwidth_memory_for_advanced_defense_systems"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "Introduced advanced memory (HBM) as a critical component for defense AI, highlighting Micron (MU) as a strategic US supplier benefiting from demand for next-gen defense systems."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-13T23:54:56Z",
+      "latency_ms": 18466,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **GPS-denied navigation supply chain**. Golden Dome interceptor swarms + Anduril's Bolt/Roadrunner operate in jammed/spoofed RF environments — drives demand for **MEMS IMU + chip-scale atomic clocks (CSAC)**. Listed pure-plays: **Honeywell (HON)** dominates tactical-grade IMU (HG1930/HG4930 series, ITAR-locked); **Microchip (MCHP)** owns CSAC after Symmetricom acquisition — sole-source for many DoD programs. Second-order: **Aerojet/L3Harris (LHX)** solid rocket motor capacity is the *actual* Golden Dome bottleneck — interceptor production caps at SRM throughput, not silicon. Contra to prior thread: Anduril IPO may *expand* defense multiples sector-wide rather than compress primes — PLTR/PANW comp showed software-defense rerated peers, not cannibalized them. Watch LHX SRM capex announcements.",
+        "entities": {
+          "tickers": [
+            "HON",
+            "MCHP",
+            "LHX",
+            "AVAV",
+            "KTOS",
+            "RKLB",
+            "PLTR",
+            "PANW",
+            "LMT",
+            "RTX",
+            "NOC"
+          ],
+          "sectors": [
+            "Industrials",
+            "Information Technology",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Golden Dome",
+            "Defense Tech IPO",
+            "GPS-denied navigation",
+            "Solid Rocket Motor bottleneck",
+            "Software-defense rerating"
+          ],
+          "tech_keywords": [
+            "MEMS IMU",
+            "Chip-Scale Atomic Clock",
+            "CSAC",
+            "HG1930",
+            "HG4930",
+            "Solid Rocket Motor",
+            "ITAR"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:HON",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:golden_dome_navigation"
+          },
+          {
+            "subject": "ticker:MCHP",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:gps_denied_timing"
+          },
+          {
+            "subject": "ticker:LHX",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:srm_capacity_bottleneck"
+          },
+          {
+            "subject": "ticker:PLTR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:defense_software_rerating"
+          },
+          {
+            "subject": "ticker:LMT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:anduril_ipo_multiple_expansion"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread missed GPS-denied PNT layer (HON IMU, MCHP CSAC) and SRM throughput bottleneck (LHX). Also offered contra to prime-compression thesis."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-13T23:55:12Z",
+      "latency_ms": 16497,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Anduril's $61B valuation highlights the critical need for advanced silicon in autonomous defense systems. The geopolitical imperative to secure domestic supply chains for AI chips and advanced memory (HBM) presents a significant opportunity. Companies like Intel, through its Intel Foundry Services (IFS), are making substantial investments in US-based advanced packaging and fabrication. This focus on localized, secure manufacturing is vital for national security and offers a distinct investment angle, addressing vulnerabilities in overseas supply chains for sensitive defense applications.",
+        "entities": {
+          "tickers": [
+            "INTC"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "supply chain resilience",
+            "domestic semiconductor manufacturing",
+            "geopolitical risk",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "advanced packaging",
+            "chiplets",
+            "Intel Foundry Services"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:INTC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:US_domestic_advanced_packaging_and_foundry_investment"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "Focus on US domestic advanced manufacturing/packaging benefiting Intel amid geopolitical supply chain risks for defense AI."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-13T23:55:35Z",
+      "latency_ms": 23219,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**New angle: insurance + reinsurance dislocation from Golden Dome deployment economics.** Missed in thread — Anduril's $61B mark validates a multi-decade homeland-defense capex cycle that reshapes **catastrophe reinsurance pricing models**. If Golden Dome materially reduces tail risk on US mainland missile/drone events, expect **RNR, EG, AXS** to face premium compression on terror/war-exclusion riders by 2027-28 renewal cycles. Contra-trade: **defense-tech ETF flows (ITA, PPA, SHLD) front-run IPO** — passive bid mechanically lifts AVAV/KTOS/RKLB regardless of fundamentals, creating reflexive overshoot. Specific node missed: **Kratos (KTOS) Valkyrie + Erinyes hypersonic targets** are the *training data factory* for Anduril's Lattice — KTOS likely gets acquired or deepens JV pre-IPO. Watch KTOS short interest + LMT/RTX 13F defense-tech allocation drift Q2.",
+        "entities": {
+          "tickers": [
+            "RNR",
+            "EG",
+            "AXS",
+            "ITA",
+            "PPA",
+            "SHLD",
+            "KTOS",
+            "AVAV",
+            "RKLB",
+            "LMT",
+            "RTX"
+          ],
+          "sectors": [
+            "Financials",
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Golden Dome",
+            "defense-tech IPO",
+            "catastrophe reinsurance",
+            "passive ETF reflexivity",
+            "hypersonic target drones"
+          ],
+          "tech_keywords": [
+            "Valkyrie",
+            "Erinyes",
+            "Lattice OS",
+            "hypersonic targets"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RNR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:golden-dome-tail-risk-compression"
+          },
+          {
+            "subject": "ticker:KTOS",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:ANDURIL"
+          },
+          {
+            "subject": "ticker:ITA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:anduril-ipo-passive-bid"
+          },
+          {
+            "subject": "ticker:KTOS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:anduril-ipo-passive-bid"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Reinsurance dislocation + KTOS-as-training-data-factory + ETF reflexivity all absent from prior 4 rounds. Lower confidence on insurance timing — 2027+ renewal cycle."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-13T23:55:56Z",
+      "latency_ms": 20490,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The $61 billion valuation of Anduril underscores the strategic importance of advanced autonomous defense systems. While discussions have rightly focused on AI chips, memory, and processors, the foundational enabler for manufacturing these cutting-edge semiconductors is specialized lithography equipment. ASML, a critical global player, provides the extreme ultraviolet (EUV) lithography machines essential for producing the most advanced chips required by the defense industry. The geopolitical imperative to bolster domestic defense capabilities and secure supply chains elevates the importance of companies like ASML, acting as gatekeepers for advanced chip fabrication. Ensuring robust domestic access to such equipment is paramount for the long-term sustainability and security of next-generation defense technologies.",
+        "entities": {
+          "tickers": [
+            "ASML"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "Semiconductor Manufacturing Equipment",
+            "Domestic Chip Production",
+            "Geopolitical Supply Chain",
+            "National Security",
+            "Defense Technology"
+          ],
+          "tech_keywords": [
+            "EUV Lithography",
+            "Semiconductor Fabrication"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ASML",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:geopolitical imperative for domestic defense supply chains"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "New angle on upstream semiconductor manufacturing equipment crucial for defense tech supply chains."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMD",
+        "ASML",
+        "AVAV",
+        "AXS",
+        "EG",
+        "GD",
+        "HON",
+        "INTC",
+        "ITA",
+        "KTOS",
+        "LHX",
+        "LMT",
+        "LSCC",
+        "MCHP",
+        "MU",
+        "NOC",
+        "NVDA",
+        "PANW",
+        "PLTR",
+        "PPA",
+        "RKLB",
+        "RNR",
+        "RTX",
+        "SHLD"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "Autonomous Weapons",
+        "Counter-UAS",
+        "Defense AI hardware",
+        "Defense Tech",
+        "Defense Tech IPO",
+        "Defense Technology",
+        "Domestic Chip Production",
+        "GPS-denied navigation",
+        "Geopolitical Supply Chain",
+        "Golden Dome",
+        "High Bandwidth Memory",
+        "National Security",
+        "Next-gen missile defense",
+        "Pre-IPO Rotation",
+        "Semiconductor Manufacturing Equipment",
+        "Software-defense rerating",
+        "Solid Rocket Motor bottleneck",
+        "Trusted Supply Chain",
+        "catastrophe reinsurance",
+        "defense-tech IPO",
+        "domestic semiconductor manufacturing",
+        "geopolitical risk",
+        "hypersonic target drones",
+        "passive ETF reflexivity",
+        "supply chain resilience"
+      ],
+      "tech_keywords": [
+        "Bolt loitering munition",
+        "CSAC",
+        "Chip-Scale Atomic Clock",
+        "EUV Lithography",
+        "Erinyes",
+        "Golden Dome",
+        "HBM",
+        "HG1930",
+        "HG4930",
+        "ITAR",
+        "Intel Foundry Services",
+        "Jetson Orin",
+        "Lattice OS",
+        "MEMS IMU",
+        "Roadrunner",
+        "Semiconductor Fabrication",
+        "Solid Rocket Motor",
+        "Valkyrie",
+        "Versal AI Edge",
+        "advanced packaging",
+        "autonomous systems",
+        "chiplets",
+        "edge AI inference",
+        "hypersonic targets",
+        "rad-hard FPGA"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:LMT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:anduril-ipo"
+      },
+      {
+        "subject": "ticker:RTX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:anduril-ipo"
+      },
+      {
+        "subject": "ticker:NOC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:golden-dome-disruption"
+      },
+      {
+        "subject": "ticker:PLTR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:anduril-ipo"
+      },
+      {
+        "subject": "ticker:AVAV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:defense-tech-rerating"
+      },
+      {
+        "subject": "ticker:KTOS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:defense-tech-rerating"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:autonomous-weapons"
+      },
+      {
+        "subject": "ticker:LSCC",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:MCHP",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:PLTR",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:anduril-lattice"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:high_bandwidth_memory_for_advanced_defense_systems"
+      },
+      {
+        "subject": "ticker:HON",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:golden_dome_navigation"
+      },
+      {
+        "subject": "ticker:MCHP",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:gps_denied_timing"
+      },
+      {
+        "subject": "ticker:LHX",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:srm_capacity_bottleneck"
+      },
+      {
+        "subject": "ticker:PLTR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:defense_software_rerating"
+      },
+      {
+        "subject": "ticker:LMT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:anduril_ipo_multiple_expansion"
+      },
+      {
+        "subject": "ticker:INTC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:US_domestic_advanced_packaging_and_foundry_investment"
+      },
+      {
+        "subject": "ticker:RNR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:golden-dome-tail-risk-compression"
+      },
+      {
+        "subject": "ticker:KTOS",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:ANDURIL"
+      },
+      {
+        "subject": "ticker:ITA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:anduril-ipo-passive-bid"
+      },
+      {
+        "subject": "ticker:KTOS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:anduril-ipo-passive-bid"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:geopolitical imperative for domestic defense supply chains"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-13T23:55:56Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH, HEADWIND_FROM, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,26 @@
+{
+  "primary": "claude",
+  "secondary": "gemini",
+  "tertiary": "codex",
+  "enabled": {
+    "claude": true,
+    "gemini": true,
+    "codex": true
+  },
+  "budgets": {
+    "claude": {
+      "daily_max_calls": 200
+    },
+    "gemini": {
+      "daily_max_calls": 500
+    },
+    "codex": {
+      "daily_max_calls": 200
+    }
+  },
+  "cooldown_hours": 4,
+  "break_news": {
+    "primary": "codex",
+    "secondary": "gemini"
+  }
+}

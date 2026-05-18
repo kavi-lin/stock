@@ -1,0 +1,664 @@
+{
+  "news_id": "bn_20260514_8e7e57fe",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T00:48:00Z",
+  "last_activity_ts": "2026-05-14T00:56:43Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/668e59b1c4a8",
+    "feed_fingerprint": "futu:GOOGL,MU,NVDA:9d8d5cf298",
+    "published": "2026-05-14T06:58:36+08:00",
+    "url_hash": "sha1:889dba99449772534e5380447af7252b0e042b31"
+  },
+  "headline": "英偉達漲超2%再破頂，黃仁勳壓哨訪華",
+  "headline_zh": null,
+  "raw_summary": "英偉達漲超2%再破頂，黃仁勳壓哨訪華；美光漲近5%，市值破9000億美元；谷歌漲4%，Gemini將嵌入安卓生態；NEBIUS績後大漲16%>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:55:11Z",
+      "latency_ms": 22919,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Multi-headline tape — NVDA new ATH on Huang's last-minute China visit signals possible H20/B20-class export thaw or at least reopened dialogue; watch China hyperscaler order flow (BABA, BIDU, Tencent capex). MU +5% to $900B mkt cap is the standout — HBM3e/HBM4 supply remains the binding constraint for Blackwell/Rubin shipments, validating the memory-as-AI-bottleneck thesis (SK Hynix, Samsung read-through). GOOGL +4% on Gemini-on-Android embed is a distribution moat play — pressures AAPL Intelligence narrative and OpenAI's mobile route. NEBIUS +16% post-print confirms neocloud GPU-rental demand still inelastic. Risk: tape is narrow-leadership again; if MU/NVDA roll, breadth thins fast.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "GOOGL",
+            "NBIS",
+            "AAPL",
+            "AVGO",
+            "TSM",
+            "BABA",
+            "BIDU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM supply tightness",
+            "China export controls",
+            "Mobile AI distribution",
+            "Neocloud GPU rental"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM4",
+            "Blackwell",
+            "Rubin",
+            "H20",
+            "Gemini Nano",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china_export_thaw"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e_tightness"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AAPL"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:mobile_ai_distribution"
+          },
+          {
+            "subject": "ticker:NBIS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:neocloud_demand"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:TSM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Four distinct AI-stack signals in one tape — opener should map them cleanly so Analyst-B can pick a sharper angle (e.g. China policy mechanics or HBM4 timing)."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:55:27Z",
+      "latency_ms": 16732,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While the market focuses on NVDA's record-breaking performance and Micron's memory crunch, the underlying constraint of advanced packaging capacity cannot be overstated. Huang Renxun's visit to China, amid ongoing export restrictions, underscores the strategic importance of securing these sophisticated manufacturing capabilities. Advanced nodes and complex integration, such as TSMC's CoWoS technology, are becoming the true bottleneck for scaling AI hardware like Blackwell. The inelastic demand for AI compute means that packaging capacity, rather than chip design or even memory, may become the next critical choke point for industry growth. This highlights a vital supply chain dependency that warrants close observation.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "GOOGL",
+            "TSMC"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced packaging",
+            "Export controls"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "narrative:advanced_packaging",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_demand"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "Focus on advanced packaging as a critical bottleneck for AI hardware scaling, distinct from memory or compute."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:55:46Z",
+      "latency_ms": 18340,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: **power & grid as the next binding constraint** behind packaging. NEBIUS +16% and neocloud inelasticity point at a less-discussed bottleneck — gas turbines and HV switchgear for GPU datacenters. **GEV (GE Vernova)** backlog already stretched to 2028 on aeroderivative turbines; **ETN, VRT, PWR** ride the same wire. Second-order: if Huang's Beijing trip reopens even a downgraded H20-successor SKU, China hyperscaler **rebuild** of stalled clusters pulls forward HBM *and* power gear orders simultaneously — bullish **AMAT/LRCX** on China WFE re-acceleration too. Contra to MU euphoria: 9000億 mkt cap prices in HBM4 ramp at ~70% yield; any Samsung HBM3e qualification at NVDA (rumored Q3) compresses MU pricing power. Watch SK Hynix ADR proxy and Samsung KRW tape for that crack.",
+        "entities": {
+          "tickers": [
+            "GEV",
+            "ETN",
+            "VRT",
+            "PWR",
+            "AMAT",
+            "LRCX",
+            "MU",
+            "NVDA"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Semiconductors",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI power infrastructure",
+            "Datacenter buildout",
+            "China WFE re-acceleration",
+            "HBM competition"
+          ],
+          "tech_keywords": [
+            "H20",
+            "HBM3e",
+            "HBM4",
+            "Blackwell",
+            "aeroderivative turbine",
+            "HV switchgear",
+            "WFE"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-datacenter-power"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:datacenter-buildout"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-wfe-reaccel"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:samsung-hbm3e-qual"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:h20-successor-china"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior covered packaging/memory/distribution. New: power/grid bottleneck (GEV/VRT), China WFE re-accel kicker, Samsung HBM3e qual contra to MU."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:56:08Z",
+      "latency_ms": 21912,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While the focus remains on GPUs, memory, and packaging, the sheer scale of AI model training and inference across distributed systems is rapidly elevating high-speed interconnects to a critical bottleneck. As AI clusters grow, the ability to move massive datasets and model parameters between compute nodes with minimal latency becomes paramount. Companies like Arista Networks (ANET) and Cisco (CSCO) are pivotal, providing the advanced networking fabric required to support the next generation of AI infrastructure. This demand for ultra-low latency, high-bandwidth networking could become as significant a constraint as compute or memory in the coming years.",
+        "entities": {
+          "tickers": [
+            "ANET",
+            "CSCO",
+            "NVDA"
+          ],
+          "sectors": [
+            "Communications Equipment",
+            "Technology"
+          ],
+          "themes": [
+            "AI Networking",
+            "Data Center Interconnects",
+            "AI Infrastructure Scaling"
+          ],
+          "tech_keywords": [
+            "InfiniBand",
+            "Ethernet",
+            "High-Speed Interconnects"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure Scaling"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure Scaling"
+          },
+          {
+            "subject": "theme:AI Infrastructure Scaling",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:AI Networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces high-speed networking/interconnects as a new bottleneck, naming ANET/CSCO."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:56:27Z",
+      "latency_ms": 18951,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Missed angle: **optical transceiver supply chain** — the silent enabler of every AI cluster ANET/CSCO sells into. **Coherent (COHR)** and **Lumentum (LITE)** ride 800G→1.6T transceiver upgrade cycle; **Fabrinet (FN)** does the assembly. Second-order on Huang's Beijing trip: if any China SKU resumes, **InnoLight** (300308.SZ) and **Eoptolink** see order rebuild — read-through pressures Western optical pricing. Contra to GEV/power thesis: **liquid cooling** displaces some grid burden — **VRT** already pivoting, but **nVent (NVT)** and **Modine (MOD)** are cleaner pure-plays. Also overlooked: NVDA Beijing optics risk — if visit yields *nothing*, tape sells the news; H20 inventory writedown at SMCI/DELL becomes tail risk. Watch **SMCI** custom-rack China exposure.",
+        "entities": {
+          "tickers": [
+            "COHR",
+            "LITE",
+            "FN",
+            "NVT",
+            "MOD",
+            "VRT",
+            "SMCI",
+            "DELL",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI optical interconnect",
+            "liquid cooling",
+            "China export thaw risk",
+            "1.6T transceiver cycle"
+          ],
+          "tech_keywords": [
+            "800G",
+            "1.6T",
+            "EML laser",
+            "silicon photonics",
+            "H20",
+            "direct-to-chip cooling"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:1.6T-transceiver-cycle"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:FN",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:COHR"
+          },
+          {
+            "subject": "ticker:MOD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:liquid-cooling"
+          },
+          {
+            "subject": "ticker:NVT",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:VRT"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-h20-stall"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Optical transceivers + liquid cooling + China-trip-fails contra not yet covered. Specific names (COHR/LITE/FN/MOD/NVT) extend supply chain map."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:56:43Z",
+      "latency_ms": 16507,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The Gemini integration into Android signifies a critical step towards ubiquitous on-device AI. Beyond enhancing user experience, this move necessitates powerful yet energy-efficient AI processing capabilities directly within mobile devices. This could accelerate the development and adoption of specialized mobile AI accelerators and NPUs, creating new market opportunities for silicon vendors like Qualcomm (QCOM) and driving innovation in battery-constrained AI hardware. It also poses a direct challenge to Apple's (AAPL) ecosystem, forcing a re-evaluation of their on-device AI strategy and silicon roadmap.",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "QCOM",
+            "AAPL"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "Edge AI",
+            "On-device AI",
+            "Mobile AI"
+          ],
+          "tech_keywords": [
+            "Gemini",
+            "Android",
+            "On-device inference",
+            "Mobile AI accelerators"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:edge AI adoption"
+          },
+          {
+            "subject": "ticker:QCOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:edge AI adoption"
+          },
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:edge AI adoption"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Gemini on Android drives on-device AI, impacting mobile silicon and competitive landscape."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "AMAT",
+        "ANET",
+        "AVGO",
+        "BABA",
+        "BIDU",
+        "COHR",
+        "CSCO",
+        "DELL",
+        "ETN",
+        "FN",
+        "GEV",
+        "GOOGL",
+        "LITE",
+        "LRCX",
+        "MOD",
+        "MU",
+        "NBIS",
+        "NVDA",
+        "NVT",
+        "PWR",
+        "QCOM",
+        "SMCI",
+        "TSM",
+        "TSMC",
+        "VRT"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Communications Equipment",
+        "Industrials",
+        "Information Technology",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "1.6T transceiver cycle",
+        "AI Infrastructure Scaling",
+        "AI Networking",
+        "AI capex",
+        "AI optical interconnect",
+        "AI power infrastructure",
+        "Advanced packaging",
+        "China WFE re-acceleration",
+        "China export controls",
+        "China export thaw risk",
+        "Data Center Interconnects",
+        "Datacenter buildout",
+        "Edge AI",
+        "Export controls",
+        "HBM competition",
+        "HBM supply tightness",
+        "Mobile AI",
+        "Mobile AI distribution",
+        "Neocloud GPU rental",
+        "On-device AI",
+        "liquid cooling"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "800G",
+        "Android",
+        "Blackwell",
+        "CoWoS-L",
+        "EML laser",
+        "Ethernet",
+        "Gemini",
+        "Gemini Nano",
+        "H20",
+        "HBM3e",
+        "HBM4",
+        "HV switchgear",
+        "High-Speed Interconnects",
+        "InfiniBand",
+        "Mobile AI accelerators",
+        "On-device inference",
+        "Rubin",
+        "WFE",
+        "aeroderivative turbine",
+        "direct-to-chip cooling",
+        "silicon photonics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china_export_thaw"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e_tightness"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AAPL"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:mobile_ai_distribution"
+      },
+      {
+        "subject": "ticker:NBIS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:neocloud_demand"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "narrative:advanced_packaging",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_demand"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-datacenter-power"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:datacenter-buildout"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-wfe-reaccel"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:samsung-hbm3e-qual"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:h20-successor-china"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure Scaling"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure Scaling"
+      },
+      {
+        "subject": "theme:AI Infrastructure Scaling",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:AI Networking"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:1.6T-transceiver-cycle"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:FN",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:COHR"
+      },
+      {
+        "subject": "ticker:MOD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:liquid-cooling"
+      },
+      {
+        "subject": "ticker:NVT",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:VRT"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-h20-stall"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:edge AI adoption"
+      },
+      {
+        "subject": "ticker:QCOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:edge AI adoption"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:edge AI adoption"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:56:43Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

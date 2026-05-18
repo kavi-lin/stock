@@ -1,0 +1,637 @@
+{
+  "news_id": "bn_20260515_c89ba6b2",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T14:04:35Z",
+  "last_activity_ts": "2026-05-15T14:33:14Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/b0e82e0c5307",
+    "feed_fingerprint": "futu:AAOI,MU,SNDK:bac29954b9",
+    "published": "2026-05-15T21:39:48+08:00",
+    "url_hash": "sha1:d989aa29869d876200dd886c5345b9f97d5746d1"
+  },
+  "headline": "美股光通信、存儲概念股集體走低，Coherent跌超7%，Astera Labs跌近7%，AAOI跌超6%，Lumentum跌超5%，美光科技跌近5%，希捷科技、閃迪跌超2%",
+  "headline_zh": null,
+  "raw_summary": "美股光通信、存儲概念股集體走低，Coherent跌超7%，Astera Labs跌近7%，AAOI跌超6%，Lumentum跌超5%，美光科技跌近5%，希捷科技、閃迪跌超2%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -3.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:30:49Z",
+      "latency_ms": 33295,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是一次**無單一催化劑的籃子式去風險**——光通信(COHR、LITE、AAOI)、連接介面(ALAB)、存儲(MU、STX、SNDK)同步走低，本質是擁擠的 **AI capex** 衍生交易在做部位調整，而非基本面轉壞。值得注意的是 Astera Labs 屬 PCIe retimer/connectivity，被一起拋售說明市場把整條 AI 基礎設施供應鏈當同一個 beta 在 trade。真正風險訊號不是這次跌幅，而是**若 hyperscaler 釋出 capex 消化(digestion)言論**才會傷及估值錨。存儲端跌幅較淺(STX/SNDK 僅 2%+)反映 HBM 與 NAND 循環邏輯不同調,籃子化反而錯殺。",
+        "bull_points": [
+          "無個股利空,屬擁擠交易去風險,非基本面惡化",
+          "AI capex 結構需求未變,光模組 800G 滲透仍在早期",
+          "存儲跌幅淺,HBM3e 緊缺循環邏輯獨立於賣壓"
+        ],
+        "bear_points": [
+          "AI 基礎設施被當單一 beta,籃子拋售放大波動",
+          "高估值族群,hyperscaler capex 消化言論將觸發殺估值",
+          "ALAB 被錯位歸類,情緒主導下個股 alpha 失效"
+        ],
+        "final_take": "視為情緒錯殺、偏多,但需等 hyperscaler capex 表態確認",
+        "entities": {
+          "tickers": [
+            "COHR",
+            "ALAB",
+            "AAOI",
+            "LITE",
+            "MU",
+            "STX",
+            "SNDK"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "optical interconnect",
+            "storage cycle",
+            "AI infrastructure"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "800G optical",
+            "CPO",
+            "PCIe retimer",
+            "Blackwell",
+            "NAND"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:ALAB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-infrastructure"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:optical-interconnect"
+          },
+          {
+            "subject": "ticker:STX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:basket-derisking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "籃子去風險非基本面,偏多但待 capex 表態驗證"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:31:02Z",
+      "latency_ms": 12626,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "觀察市場在 AI 供應鏈交易上已出現**分層定價**。除籃子去風險外，光通訊拋售亦反映市場對於**800G 至 1.6T 換代週期**間可能產生的庫存調整擔憂。記憶體端，MU 等龍頭面臨的是「HBM 強勁需求」與「傳統 NAND/DRAM 市況疲軟」的夾擊，本次回調是對 AI 基建動能與傳統消費電子週期反差的重新定價，而非單純的技術性修正。",
+        "bull_points": [
+          "AI 資料中心升級需求依舊強勁。",
+          "HBM 供需結構性失衡支撐溢價。"
+        ],
+        "bear_points": [
+          "傳統存儲市況疲軟，庫存消化緩慢。",
+          "光通訊模組短期面臨高基期壓力。"
+        ],
+        "final_take": "看好 AI 驅動升級，但須警惕傳統週期拖累。",
+        "entities": {
+          "tickers": [
+            "COHR",
+            "ALAB",
+            "AAOI",
+            "LITE",
+            "MU",
+            "STX",
+            "SNDK"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "800G",
+            "1.6T",
+            "NAND",
+            "DRAM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:hbm3e"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:commodity_memory_cycle"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "區分 AI 結構需求與消費電子週期帶來的供給矛盾。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:31:42Z",
+      "latency_ms": 40640,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文沒談的**結構性逆風**：可插拔光模組 (pluggable transceiver) 名字 COHR、LITE、AAOI 真正的長線威脅是**共封裝光學 (CPO / co-packaged optics)**。NVDA 已展示 Spectrum-X / Quantum-X 矽光子交換機，把光引擎直接整合進交換晶片旁。一旦 CPO 在 1.6T 世代放量，傳統可插拔模組的 TAM 與毛利會被侵蝕——這才是 COHR 今天跌 7% 深於籃子的潛在解釋之一。另一面：ALAB 跌近 7% 較像**估值 beta**問題，高 P/S 次新股在去風險日天然是提款機，與 PCIe retimer 基本面無關。存儲端 NAND 名字 (STX/SNDK) 跌淺，反證 HBM 與消費級循環脫鉤。",
+        "bull_points": [
+          "CPO 真正放量在 1.6T 世代，量產時程仍遠",
+          "ALAB 下殺屬估值 beta，retimer 需求未變",
+          "存儲跌幅淺，AI 基建結構需求未鬆動"
+        ],
+        "bear_points": [
+          "CPO/矽光子長線侵蝕可插拔模組 TAM 與毛利",
+          "NVDA 自研光學交換機是供應鏈去中介威脅",
+          "高估值次新股去風險日天然成提款標的"
+        ],
+        "final_take": "短線錯殺偏多，但 CPO 結構逆風須長線盯",
+        "entities": {
+          "tickers": [
+            "COHR",
+            "LITE",
+            "AAOI",
+            "ALAB",
+            "MU",
+            "STX",
+            "SNDK",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "co-packaged optics",
+            "silicon photonics",
+            "HBM"
+          ],
+          "tech_keywords": [
+            "CPO",
+            "1.6T",
+            "Spectrum-X Photonics",
+            "PCIe retimer",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:COHR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:co-packaged-optics"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:silicon-photonics"
+          },
+          {
+            "subject": "ticker:ALAB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:valuation-de-risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "新增 CPO/矽光子結構逆風與 ALAB 估值 beta 兩個前文未提角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:31:56Z",
+      "latency_ms": 13666,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了前述結構因素，還需關注 **CoWoS-L** 封裝產能帶來的節奏干擾。若 **Blackwell** 交付節奏因 CoWoS 瓶頸而出現波動，依賴其「裝機速度」的 PCIe retimer 與光模組廠商，短期營收認列將面臨「真空期」。市場對這些供應鏈的交易模型過於線性，一旦出貨節奏不如預期快，高估值組件股便成首要提款對象。",
+        "bull_points": [
+          "AI 基礎建設需求長期剛性",
+          "關鍵供應鏈技術護城河穩固"
+        ],
+        "bear_points": [
+          "CoWoS 產能制約交付節奏",
+          "高估值對出貨波動極度敏感"
+        ],
+        "final_take": "看多 AI 長線，惟短期需警惕供應鏈瓶頸導致的換手震盪。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "ALAB",
+            "COHR",
+            "LITE",
+            "AAOI",
+            "MU",
+            "STX",
+            "SNDK"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "Blackwell",
+            "PCIe retimer"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ALAB",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:ALAB",
+            "predicate": "HEADWIND_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充 CoWoS 產能限制對出貨節奏的短期影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:32:52Z",
+      "latency_ms": 55784,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個全篇沒提到的受益方與供應鏈節點。第一，若 **CPO** 真放量，最大贏家是 **AVGO**——其 Bailly CPO 交換機已出樣，市場把光模組廠當輸家殺，卻沒同步把 AVGO 當贏家買，定價明顯不對稱。第二，修正 Round 1 的 CPO 空方論述：CPO 並未消滅雷射，而是把雷射移到交換機外的**外置光源 (ELS)**，COHR 自有 InP 雷射晶圓廠仍吃得到這塊；真正受傷的是只做模組組裝、雷射全靠外購的 **AAOI**。籃子把垂直整合的 COHR 與純組裝的 AAOI 一起殺，是結構性錯價。另一個沒人提的節點是光 DSP——MRVL（Inphi）是 800G/1.6T 模組裡的 DSP 供應商，它的相對表現才是這條供應鏈真正的需求溫度計。",
+        "bull_points": [
+          "AVGO 為 CPO 放量最大受益方，今日未被買進屬定價落差",
+          "CPO 改用外置光源，COHR 自有 InP 雷射廠仍受惠",
+          "垂直整合的 COHR 被籃子錯殺，回調屬超跌"
+        ],
+        "bear_points": [
+          "純組裝廠 AAOI 雷射外購，CPO 世代結構最脆弱",
+          "MRVL 光 DSP 若相對走弱，預示模組需求真實降溫"
+        ],
+        "final_take": "COHR 錯殺可低接，AAOI 結構最弱應避開",
+        "entities": {
+          "tickers": [
+            "AVGO",
+            "COHR",
+            "AAOI",
+            "MRVL",
+            "LITE"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "CPO",
+            "optical networking"
+          ],
+          "tech_keywords": [
+            "CPO",
+            "InP",
+            "1.6T",
+            "optical DSP",
+            "external laser source"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cpo"
+          },
+          {
+            "subject": "ticker:AAOI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cpo"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:external_laser_source"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:optical_networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.71,
+        "rationale_short": "新增 AVGO 受益方與 InP 雷射節點，籃子內部分化未被討論"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:33:14Z",
+      "latency_ms": 22571,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了上述觀點，本次拋售可能暗示市場對於**從訓練(Training)轉向推理(Inference)的資本支出效率**產生質疑。雖然訓練依賴 HBM，但推理運算規模化需要巨大的 **Enterprise SSD (eSSD)** 支撐，若推理需求遞延，MU、WDC 等存儲巨頭的成長動能即刻面臨斷層。此外，光通訊/retimer 廠商在下一代 rack 設計中受制於嚴苛的 **TDP (熱設計功耗)** 限制，市場正重新評估那些無法提供低功耗架構供應商的長線市佔。",
+        "bull_points": [
+          "推理AI普及將帶動eSSD需求爆發。",
+          "垂直整合型光通訊廠具成本優勢。"
+        ],
+        "bear_points": [
+          "推理轉型期過渡緩慢，存儲業績動能銜接困難。",
+          "電源功耗(TDP)限制壓抑光組件毛利。"
+        ],
+        "final_take": "市場正將 AI 基建動能從「成長性」轉向「效率成本」審視。",
+        "entities": {
+          "tickers": [
+            "MU",
+            "WDC",
+            "STX"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI inference",
+            "Data Center Power"
+          ],
+          "tech_keywords": [
+            "eSSD",
+            "TDP",
+            "Inference"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-inference"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "點出 AI 推理週期對 eSSD 的需求槓桿，以及 TDP 功耗對光通訊架構的長線影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "AAOI",
+        "ALAB",
+        "AVGO",
+        "COHR",
+        "LITE",
+        "MRVL",
+        "MU",
+        "NVDA",
+        "SNDK",
+        "STX",
+        "WDC"
+      ],
+      "sectors": [
+        "Information Technology",
+        "Semiconductors",
+        "Semiconductors & Semiconductor Equipment",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI inference",
+        "AI infrastructure",
+        "CPO",
+        "Data Center Power",
+        "HBM",
+        "HBM3e",
+        "co-packaged optics",
+        "optical interconnect",
+        "optical networking",
+        "silicon photonics",
+        "storage cycle"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "800G",
+        "800G optical",
+        "Blackwell",
+        "CPO",
+        "CoWoS-L",
+        "DRAM",
+        "HBM3e",
+        "InP",
+        "Inference",
+        "NAND",
+        "PCIe retimer",
+        "Spectrum-X Photonics",
+        "TDP",
+        "eSSD",
+        "external laser source",
+        "optical DSP"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:ALAB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-infrastructure"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:optical-interconnect"
+      },
+      {
+        "subject": "ticker:STX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:basket-derisking"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:hbm3e"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:commodity_memory_cycle"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:co-packaged-optics"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:silicon-photonics"
+      },
+      {
+        "subject": "ticker:ALAB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:valuation-de-risk"
+      },
+      {
+        "subject": "ticker:ALAB",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:ALAB",
+        "predicate": "HEADWIND_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cpo"
+      },
+      {
+        "subject": "ticker:AAOI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cpo"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:external_laser_source"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:optical_networking"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-inference"
+      }
+    ],
+    "bull_summary": [
+      "無個股利空,屬擁擠交易去風險,非基本面惡化",
+      "AI capex 結構需求未變,光模組 800G 滲透仍在早期",
+      "存儲跌幅淺,HBM3e 緊缺循環邏輯獨立於賣壓",
+      "AI 資料中心升級需求依舊強勁。",
+      "HBM 供需結構性失衡支撐溢價。",
+      "CPO 真正放量在 1.6T 世代，量產時程仍遠"
+    ],
+    "bear_summary": [
+      "AI 基礎設施被當單一 beta,籃子拋售放大波動",
+      "高估值族群,hyperscaler capex 消化言論將觸發殺估值",
+      "ALAB 被錯位歸類,情緒主導下個股 alpha 失效",
+      "傳統存儲市況疲軟，庫存消化緩慢。",
+      "光通訊模組短期面臨高基期壓力。",
+      "CPO/矽光子長線侵蝕可插拔模組 TAM 與毛利"
+    ],
+    "final_take": "市場正將 AI 基建動能從「成長性」轉向「效率成本」審視。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T14:33:14Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

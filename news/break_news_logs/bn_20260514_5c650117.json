@@ -1,0 +1,875 @@
+{
+  "news_id": "bn_20260514_5c650117",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T06:52:22Z",
+  "last_activity_ts": "2026-05-14T06:57:04Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/8d166eb73cde",
+    "feed_fingerprint": "futu:GOOGL:36dec907a0",
+    "published": "2026-05-14T14:50:50+08:00",
+    "url_hash": "sha1:212ce771a1b01294f708424c23d4092aaea22733"
+  },
+  "headline": "谷歌I/O大會前瞻：Gemini 4.0可能要來了，但這還不是最重要的",
+  "headline_zh": null,
+  "raw_summary": "谷歌I/O大會前瞻：Gemini 4.0可能要來了，但這還不是最重要的>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T06:54:55Z",
+      "latency_ms": 24092,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "谷歌 I/O 前瞻聚焦 **Gemini 4.0**，但真正重點可能不在模型本身，而在 **TPU v6 / Trillium 自研晶片產能 ramp**、**Agent / Astra 端到端落地**、以及 **Search AI Mode 商業化**。對 GOOGL 是 narrative refresh 機會 — 市場過去半年擔心 AI search 蠶食 query monetization，若 I/O 端出 Agent 能撐 ASP 與 Cloud 加速（GCP 受惠 Gemini API + TPU 出租），可重估 multiple。**第二序衝擊**：TPU ramp 對 NVDA / AMD 是 marginal 利空（hyperscaler 自研替代），但對 **BRCM**（TPU ASIC co-design）是直接利多；CoWoS-L 產能仍由 TSM 主導，AVGO 訂單反而擴 TSM 高階封裝 backlog。Memory 端 SK Hynix / MU **HBM3e** 不受 ASIC vs GPU 路線影響，雙吃。風險：若 Gemini 4.0 benchmark 不如 GPT-5，AI capex narrative 反噬。",
+        "bull_points": [
+          "GOOGL Agent + Search AI Mode 重估 multiple",
+          "BRCM TPU v6 ASIC co-design 訂單擴張",
+          "TSM CoWoS-L 高階封裝 backlog 受惠雙路線"
+        ],
+        "bear_points": [
+          "TPU ramp 邊際侵蝕 NVDA hyperscaler 訂單",
+          "Gemini 4.0 benchmark 不如預期反噬 AI capex",
+          "Search AI Mode 廣告 ASP 稀釋風險"
+        ],
+        "final_take": "看多 GOOGL/BRCM/TSM，需驗證 I/O Agent demo 落地度",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "NVDA",
+            "AMD",
+            "AVGO",
+            "TSM",
+            "MU"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "AI agents",
+            "Custom silicon",
+            "Search monetization"
+          ],
+          "tech_keywords": [
+            "Gemini 4.0",
+            "TPU v6",
+            "Trillium",
+            "HBM3e",
+            "CoWoS-L",
+            "Astra"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:gemini-4"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:GOOGL"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tpu-ramp"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:AVGO"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:hyperscaler-custom-silicon"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Gemini 4.0 narrative + TPU ramp 第二序受惠鏈清晰"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T06:55:21Z",
+      "latency_ms": 26156,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "谷歌I/O大會的焦點已超越 Gemini 4.0 本身，更聚焦於其背後的 AI 基礎設施升級，尤其是自研 TPU v6 的產能擴張和 Agent 模型的落地應用。這不僅預示著 AI 商業化的加速，也可能重塑雲端服務 (GCP) 的競爭格局。在此基礎設施擴張的背景下，對底層支援技術的需求也日益增長，其中高效能資料中心網絡扮演著關鍵角色。Arista Networks (ANET) 作為領先的網路設備供應商，有望從這波基礎設施升級中受益，其提供的低延遲、高頻寬交換器是支持 Google 大規模 AI 計算不可或缺的一環。",
+        "bull_points": [
+          "谷歌 I/O 凸顯 AI 基礎設施與商業化是焦點。",
+          "Agent 落地與 TPU 擴產帶動網路需求。",
+          "Arista (ANET) 受惠於 AI 數據中心網路升級。"
+        ],
+        "bear_points": [
+          "TPU 自研對 NVDA/AMD 仍是潛在壓力。",
+          "競爭對手 (AWS, Azure) 亦在強化 AI 基礎設施。"
+        ],
+        "final_take": "AI 基礎設施大戰，網路環節關鍵。",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "NVDA",
+            "AMD",
+            "BRCM",
+            "AVGO",
+            "TSM",
+            "SK Hynix",
+            "MU",
+            "ANET"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors",
+            "Cloud Computing",
+            "Networking"
+          ],
+          "themes": [
+            "AI capex",
+            "AI infrastructure",
+            "Custom silicon",
+            "AI agents",
+            "AI networking"
+          ],
+          "tech_keywords": [
+            "TPU",
+            "GPU",
+            "HBM3e",
+            "CoWoS-L",
+            "Gemini 4.0",
+            "AI networking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI infrastructure"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Gemini 4.0"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:TPU v6"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI agents"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI infrastructure"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI networking"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:GOOGL"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Custom silicon"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Custom silicon"
+          },
+          {
+            "subject": "ticker:BRCM",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Custom silicon"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          },
+          {
+            "subject": "ticker:SK Hynix",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:HBM3e"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:HBM3e"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "加入網路基礎設施 (ANET) 的視角，並強調 AI 發展的供應鏈深度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T06:55:46Z",
+      "latency_ms": 24580,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**Agent / Astra 端到端落地最被低估的二序受益者是 GOOG 自家 Waymo + YouTube Shorts**，非外部 ticker。但若硬挑供應鏈未覆蓋節點 — **VRT (Vertiv)** 直接受惠 TPU v6 / Trillium liquid cooling ramp，Google 是 Vertiv hyperscaler 客戶前三大且揭露 TPU pod 已轉 direct-to-chip liquid cooling。另一個被忽略的**反向風險**：Gemini API 走 TPU 推論若大幅降價（過去 12 個月 Gemini Flash 已降 80%），對 **MSFT Azure OpenAI 毛利結構是 headwind** — Azure 仍租 NVDA H100/B200，單 token cost 拼不過 GOOG 自研垂直整合。CoreWeave (**CRWV**) 同理承壓，純 GPU neocloud 商業模式被 ASIC vertical stack 擠壓。Memory 端補充：**HBM4** sampling 已啟動，SK Hynix 領先 MU 一個 quarter，TPU v7 (2026 H2) 規格綁 HBM4，先卡位者吃定。",
+        "bull_points": [
+          "VRT 受惠 TPU v6 液冷 ramp，Google 為前三大客戶",
+          "SK Hynix HBM4 領先 MU，卡位 TPU v7 規格",
+          "GOOG 垂直整合壓低 token 推論成本，重估 Cloud multiple"
+        ],
+        "bear_points": [
+          "Gemini API 降價對 MSFT Azure OpenAI 毛利是 headwind",
+          "CRWV 純 GPU neocloud 商模被 ASIC vertical stack 擠壓",
+          "若 Gemini 4.0 benchmark 輸 GPT-5，AI capex 敘事反噬"
+        ],
+        "final_take": "看多 GOOG/VRT/BRCM，但留意 MSFT/CRWV 二序壓力",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "VRT",
+            "MSFT",
+            "CRWV",
+            "BRCM",
+            "SK Hynix",
+            "MU",
+            "NVDA",
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "TPU vertical integration",
+            "Liquid cooling",
+            "Inference cost deflation"
+          ],
+          "tech_keywords": [
+            "TPU v6",
+            "Trillium",
+            "HBM4",
+            "Direct-to-chip liquid cooling",
+            "Gemini Flash",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:GOOGL"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:liquid-cooling-tpu"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:inference-cost-deflation"
+          },
+          {
+            "subject": "ticker:CRWV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asic-vertical-stack"
+          },
+          {
+            "subject": "ticker:SK Hynix",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:hbm4-tpu-v7"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:BRCM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補 VRT 液冷 + MSFT/CRWV 二序反向風險，前序未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T06:56:16Z",
+      "latency_ms": 30054,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "谷歌 I/O 大會預示著 Gemini 4.0 和 TPU v6 產能的擴張，這不僅關乎核心 AI 運算，更對支援此規模擴張的基礎設施產生深遠影響。儘管焦點在晶片本身，但資料中心內極高的頻寬需求，將顯著推升光學元件供應商 Lumentum (LITE) 的業務。Google 持續投資於自研 ASIC 和垂直整合，使得 LITE 這類關鍵零組件供應商成為 AI 擴張不可或缺的一環，確保運算節點間的高速數據傳輸效率。",
+        "bull_points": [
+          "Lumentum (LITE) 受惠於 Google AI 基礎設施擴張，高頻寬光纖模組需求增。",
+          "Google TPU 叢集擴張帶動資料中心內部及節點間的極高傳輸速率需求。",
+          "垂直整合策略下，關鍵零組件供應商成為重要環節。"
+        ],
+        "bear_points": [
+          "Google 自研 ASIC 策略長期將壓縮對 GPU 廠商的依賴。",
+          "TPU 路線的成本效益若不及預期，可能影響擴張速度。",
+          "光模組市場競爭激烈，LITE 需維持技術領先。"
+        ],
+        "final_take": "Lumentum 的光學元件是 AI 基礎設施擴張的關鍵瓶頸之一。",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "LITE",
+            "NVDA",
+            "AMD"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Data Center Infrastructure",
+            "Optical Interconnects"
+          ],
+          "tech_keywords": [
+            "TPU v6",
+            "AI inference",
+            "AI training",
+            "optical modules"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:optical modules"
+          },
+          {
+            "subject": "theme:AI capex",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:LITE"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "谷歌擴大 TPU 產能，對光學元件供應商 Lumentum 的需求有益。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T06:56:42Z",
+      "latency_ms": 26344,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**廣告代理生態與第一方資料護城河**被忽略。Gemini I/O 若推 **Agent 自動完成購物 / 訂位**，等於 Google 把 **Performance Max + Demand Gen** 推到端到端 closed-loop，**TTD (The Trade Desk)** 開放網路 DSP 模式面臨壓力 — agent-mediated commerce 繞過傳統 programmatic bidding。反向 **APP (AppLovin)** 受惠較小但仍承壓，因其 AXON 已建第一方 ID graph。第二序：**Search AI Mode 全量推 = zero-click 比率↑**，**publisher 流量分潤協議重談**，受惠 **NYT / RDDT**（已簽 Google content licensing，年金 ~$60M），受害 **長尾 SEO-dependent 業者**（如 CHGG 殘餘、部分 affiliate 站）。再一個冷門節點：**MRVL** 在 TPU v6 retimer / PCIe Gen6 SerDes 是 BRCM 之外第二供應商，市場 narrative 全給 AVGO，MRVL custom silicon 線被低估。風險錨點：若 I/O 不揭露具體 Agent monetization timeline，narrative 又會回到 capex-only。",
+        "bull_points": [
+          "MRVL TPU v6 retimer/SerDes 第二供應，市場低估",
+          "NYT/RDDT Google content licensing 護城河顯現",
+          "VRT/BRCM liquid cooling + ASIC 雙重 ramp 持續"
+        ],
+        "bear_points": [
+          "TTD agent-mediated commerce 繞過 DSP bidding",
+          "Long-tail SEO 業者 zero-click 流量崩塌",
+          "Agent monetization timeline 未明則 narrative 回吐"
+        ],
+        "final_take": "GOOGL 偏多但需 I/O 揭 Agent 變現節奏；MRVL 是被忽略的 ASIC beta",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "MRVL",
+            "TTD",
+            "APP",
+            "NYT",
+            "RDDT",
+            "CHGG",
+            "AVGO",
+            "VRT"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Information Technology",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "AI agent commerce",
+            "Search AI Mode",
+            "TPU v6 ramp",
+            "zero-click search",
+            "content licensing"
+          ],
+          "tech_keywords": [
+            "TPU v6",
+            "PCIe Gen6",
+            "SerDes",
+            "retimer",
+            "HBM4",
+            "Trillium",
+            "AXON"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:tpu-v6-ramp"
+          },
+          {
+            "subject": "ticker:TTD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-agent-commerce"
+          },
+          {
+            "subject": "ticker:NYT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:google-content-licensing"
+          },
+          {
+            "subject": "ticker:RDDT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:google-content-licensing"
+          },
+          {
+            "subject": "ticker:CHGG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:zero-click-search"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:agent-monetization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "新增廣告生態與內容授權二序、MRVL ASIC 第二供應角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T06:57:04Z",
+      "latency_ms": 21682,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "谷歌I/O大會揭示了自研TPU的大規模部署，這不僅是算力的飛躍，更對資料中心基礎設施的電力供應提出更高要求。在密集的AI晶片叢集下，穩定且高效的電源管理系統（如Eaton的智慧PDU和UPS）將成為關鍵的隱形推動者。這預示著AI基礎設施的垂直整合鏈條正朝向更全面、更穩固的節點延伸，從晶片到網路，再到電源，環環相扣。",
+        "bull_points": [
+          "AI 算力擴張帶動電源基礎設施需求",
+          "Eaton 受惠於資料中心高密度化"
+        ],
+        "bear_points": [
+          "電源設備利潤率或低於晶片/軟體",
+          "Google 垂直整合稀釋第三方依賴"
+        ],
+        "final_take": "AI 基礎設施的全面演進，電源是穩固基石。",
+        "entities": {
+          "tickers": [
+            "GOOGL",
+            "ETN"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI Infrastructure",
+            "Data Center Power"
+          ],
+          "tech_keywords": [
+            "TPU",
+            "PDU",
+            "UPS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:AI Infrastructure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "AI 晶片擴張帶動的電源基礎設施需求"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMD",
+        "ANET",
+        "APP",
+        "AVGO",
+        "BRCM",
+        "CHGG",
+        "CRWV",
+        "ETN",
+        "GOOGL",
+        "LITE",
+        "MRVL",
+        "MSFT",
+        "MU",
+        "NVDA",
+        "NYT",
+        "RDDT",
+        "SK HYNIX",
+        "TSM",
+        "TTD",
+        "VRT"
+      ],
+      "sectors": [
+        "Cloud Computing",
+        "Communication Services",
+        "Communications Equipment",
+        "Consumer Discretionary",
+        "Industrials",
+        "Information Technology",
+        "Networking",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI Infrastructure",
+        "AI agent commerce",
+        "AI agents",
+        "AI capex",
+        "AI infrastructure",
+        "AI networking",
+        "Custom silicon",
+        "Data Center Infrastructure",
+        "Data Center Power",
+        "Inference cost deflation",
+        "Liquid cooling",
+        "Optical Interconnects",
+        "Search AI Mode",
+        "Search monetization",
+        "TPU v6 ramp",
+        "TPU vertical integration",
+        "content licensing",
+        "zero-click search"
+      ],
+      "tech_keywords": [
+        "AI inference",
+        "AI networking",
+        "AI training",
+        "AXON",
+        "Astra",
+        "CoWoS-L",
+        "Direct-to-chip liquid cooling",
+        "GPU",
+        "Gemini 4.0",
+        "Gemini Flash",
+        "HBM3e",
+        "HBM4",
+        "PCIe Gen6",
+        "PDU",
+        "SerDes",
+        "TPU",
+        "TPU v6",
+        "Trillium",
+        "UPS",
+        "optical modules",
+        "retimer"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:gemini-4"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:GOOGL"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tpu-ramp"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:hyperscaler-custom-silicon"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI infrastructure"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Gemini 4.0"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:TPU v6"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI agents"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI infrastructure"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI networking"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:GOOGL"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Custom silicon"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Custom silicon"
+      },
+      {
+        "subject": "ticker:BRCM",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Custom silicon"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "ticker:SK Hynix",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:HBM3e"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:HBM3e"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:GOOGL"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:liquid-cooling-tpu"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:inference-cost-deflation"
+      },
+      {
+        "subject": "ticker:CRWV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asic-vertical-stack"
+      },
+      {
+        "subject": "ticker:SK Hynix",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:hbm4-tpu-v7"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:BRCM"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:optical modules"
+      },
+      {
+        "subject": "theme:AI capex",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:LITE"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:tpu-v6-ramp"
+      },
+      {
+        "subject": "ticker:TTD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-agent-commerce"
+      },
+      {
+        "subject": "ticker:NYT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:google-content-licensing"
+      },
+      {
+        "subject": "ticker:RDDT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:google-content-licensing"
+      },
+      {
+        "subject": "ticker:CHGG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:zero-click-search"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:agent-monetization"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:AI Infrastructure"
+      }
+    ],
+    "bull_summary": [
+      "GOOGL Agent + Search AI Mode 重估 multiple",
+      "BRCM TPU v6 ASIC co-design 訂單擴張",
+      "TSM CoWoS-L 高階封裝 backlog 受惠雙路線",
+      "谷歌 I/O 凸顯 AI 基礎設施與商業化是焦點。",
+      "Agent 落地與 TPU 擴產帶動網路需求。",
+      "Arista (ANET) 受惠於 AI 數據中心網路升級。"
+    ],
+    "bear_summary": [
+      "TPU ramp 邊際侵蝕 NVDA hyperscaler 訂單",
+      "Gemini 4.0 benchmark 不如預期反噬 AI capex",
+      "Search AI Mode 廣告 ASP 稀釋風險",
+      "TPU 自研對 NVDA/AMD 仍是潛在壓力。",
+      "競爭對手 (AWS, Azure) 亦在強化 AI 基礎設施。",
+      "Gemini API 降價對 MSFT Azure OpenAI 毛利是 headwind"
+    ],
+    "final_take": "AI 基礎設施的全面演進，電源是穩固基石。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T06:57:04Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

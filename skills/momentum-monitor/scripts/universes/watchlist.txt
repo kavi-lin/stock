@@ -1,0 +1,5 @@
+# Manual whitelist for earnings calendar (bridge.py _load_calendar_universe).
+# Add tickers here that are NOT in sp500/nasdaq100/sox but you still want
+# to see in earnings calendar + earnings-analyst input filter.
+# One ticker per line. Lines starting with # are comments.
+CRWV

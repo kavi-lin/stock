@@ -1,0 +1,660 @@
+{
+  "news_id": "bn_20260514_6695bbb9",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T07:32:34Z",
+  "last_activity_ts": "2026-05-14T07:48:26Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/14/trump-xi-meeting-china-stocks-ai-rally.html",
+    "feed_fingerprint": "trump xi summit revives china tech rally hopes",
+    "published": "2026-05-14T07:29:41+00:00",
+    "url_hash": "sha1:14e4e88420042ce3669bbac9c87777f9e8523168"
+  },
+  "headline": "Trump-Xi summit revives China tech rally hopes as U.S. reportedly clears Nvidia H200 sales",
+  "headline_zh": null,
+  "raw_summary": "Market watchers are betting that the Trump-Xi summit could extend trade truce and lift Chinese equities.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T07:42:13Z",
+      "latency_ms": 23868,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Trump-Xi 峰會 + H200 解禁雙重利多。**NVDA** 是直接受益者 — H200 (Hopper 末代 HBM3e 96GB) 解禁打開中國 AI 雲端 capex 缺口，補 H20 閹割版之外的高階空白，**估 Q3 中國貢獻可重回 mid-teens %**。連帶利多 **HBM3e 供應鏈** (SK Hynix / 美光 MU)、**CoWoS-L** 後段封裝 (TSM)。中概互聯 ADR (**BABA / BIDU / PDD / KWEB**) 短線反彈合理，但結構性 export-control framework 未撤、Blackwell B200/GB200 仍卡關，僅是 truce-extension trade、非 regime shift。風險：H200 為 last-gen，**Blackwell 出口限制若強化**反成 NVDA 中長期天花板；峰會若 leak 為 photo-op 無實質協議，反彈一日遊。",
+        "bull_points": [
+          "H200 解禁直接補 NVDA 中國 mid-teens % 營收缺口",
+          "HBM3e/CoWoS-L 供應鏈 MU/SK海力士/TSM 連動受益",
+          "KWEB 中概股 truce-extension 短線估值修復"
+        ],
+        "bear_points": [
+          "Blackwell B200/GB200 仍受限,長線天花板未解",
+          "峰會若為 photo-op 反彈一日遊",
+          "H200 是 last-gen,中國去美化 ASIC 替代加速"
+        ],
+        "final_take": "短多 NVDA/KWEB,但 Blackwell 未解禁前不追高",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "TSM",
+            "BABA",
+            "BIDU",
+            "PDD",
+            "KWEB",
+            "AMD",
+            "AVGO"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China trade truce",
+            "Export controls",
+            "China tech rally"
+          ],
+          "tech_keywords": [
+            "H200",
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell",
+            "B200",
+            "GB200",
+            "H20"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200-china-export-clearance"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:KWEB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-trade-truce"
+          },
+          {
+            "subject": "ticker:BABA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-tech-rally"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:blackwell-export-restriction"
+          },
+          {
+            "subject": "narrative:trump-xi-summit",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:china-tech-rally"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "H200 解禁 + 峰會雙催化,但 Blackwell 仍卡,僅 truce trade"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T07:45:13Z",
+      "latency_ms": 180015,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_6695bbb9.c1.txt",
+      "parsed": {
+        "commentary": "",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": -1
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T07:45:38Z",
+      "latency_ms": 25309,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前輪沒提到的**2nd-order angle**：H200 解禁真正的隱形受益者是**中國 hyperscaler 自家 ASIC 進度被迫延後**。BABA 平頭哥含光 800 / BIDU 崑崙芯 P800 過去兩年是 H20 閹割版逼出來的內製替代品，**H200 重新可買 = 採購部門短期回頭擁抱 NVDA CUDA stack**，內製 ASIC tape-out 時程往後挪 6-12 個月。對 **NVDA** 是 CUDA moat 再固化 (positive)，對 **AVGO / MRVL** 的中國 custom silicon 訂單反而是**利空**——市場目前沒 price in 這個 reversal。另一個被忽略的節點：**Astera Labs (ALAB)** 的 retimer / CXL 控制器隨 H200 出貨進中國，AEC 線材出貨量同步放大。風險側：若北京同步祭出**反制要求中國雲廠採購自主率 ≥30%**，反而把 NVDA 推回原點。",
+        "bull_points": [
+          "H200 解禁讓中國 hyperscaler 重回 CUDA，**NVDA moat 再強化**",
+          "**ALAB** retimer / AEC 線材隨 H200 出貨間接受惠",
+          "中國自製 ASIC tape-out 延後 = NVDA 多賺 6-12 個月空窗"
+        ],
+        "bear_points": [
+          "**AVGO / MRVL** 中國 custom silicon 訂單被遞延，市場未 price in",
+          "北京可能反制祭出採購自主率紅線，逆轉劇本",
+          "CUDA 鎖定僅短期紅利，Blackwell 卡關仍是中長期天花板"
+        ],
+        "final_take": "看多 NVDA / ALAB，**AVGO 須留意中國訂單遞延**",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "MRVL",
+            "ALAB",
+            "BABA",
+            "BIDU"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China trade truce",
+            "CUDA moat",
+            "China self-sufficient silicon"
+          ],
+          "tech_keywords": [
+            "H200",
+            "HBM3e",
+            "Blackwell",
+            "CXL retimer",
+            "AEC",
+            "Kunlun P800",
+            "Hanguang 800"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cuda-lockin-china"
+          },
+          {
+            "subject": "ticker:ALAB",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:h200-export-clearance"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-asic-delay"
+          },
+          {
+            "subject": "ticker:BABA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:internal-asic-delay"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:internal-asic-delay"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新角度：H200 回歸延後中國 ASIC tape-out，AVGO/MRVL 是隱形受害者"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T07:46:06Z",
+      "latency_ms": 27194,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "美國政府放行 Nvidia H200 晶片銷售中國，此舉不僅為中國 AI 雲端運算資本支出開闢了新空間，更是一項深思熟慮的地緣政治策略。此舉旨在延緩中國本土 AI 晶片自主研發進程，透過讓中國持續依賴 Nvidia 的 CUDA 生態系統，美國得以在關鍵的 AI 研發標準與人才培養上維持影響力。儘管 H200 非最新一代，其進入中國市場能確保 Nvidia 的軟體護城河不被快速瓦解，為 Blackwell 等下一代技術的推出贏取時間，並牽制中國建立獨立 AI 生態系統的步伐。",
+        "bull_points": [
+          "H200 供貨為中國 AI 算力市場注入新動能。",
+          "美國藉此維持 CUDA 生態於中國的主導地位。",
+          "延緩中國本土 AI 晶片自主研發時程。"
+        ],
+        "bear_points": [
+          "H200 已非 Nvidia 最先進架構。",
+          "中國深度分析 H200 後，加速迭代自家 ASIC。",
+          "Blackwell 升級及地緣政治風險仍存。"
+        ],
+        "final_take": "短期和緩，長期博弈關鍵仍在 Blackwell。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "ALAB"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Software & Services"
+          ],
+          "themes": [
+            "AI Ecosystem Control",
+            "Indigenous AI Development",
+            "Geopolitical Tech Strategy",
+            "CUDA Dominance"
+          ],
+          "tech_keywords": [
+            "H200",
+            "CUDA",
+            "AI Standards"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:Geopolitical Tech Strategy",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "策略性放行H200，延緩中國AI自主化。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T07:46:31Z",
+      "latency_ms": 25808,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的**3rd-order risk**：H200 解禁的真正籌碼戰場不在中國，而在**南韓 HBM3e 雙寡頭定價權**。SK Hynix 已 100% 鎖 NVDA HBM3e 12-Hi，美光 MU 是補位第二來源；H200 重新出貨中國 = HBM3e bit demand 上修 15-20%，**2026 H2 HBM3e 現貨價有望從目前 spot discount 翻成 premium**。但 contra-argument：**三星 (005930.KS) HBM3e 12-Hi 終於通過 NVDA qual 是時間問題**，一旦 Q3 過 qual，HBM3e 供給瓶頸瞬間解開，SK Hynix / MU 的稀缺性 premium 反而被稀釋。另一個沒人提的 node：**Amphenol (APH) 高速 connector + Aspeed BMC**，H200 機櫃出貨放量直接帶 AEC + 800G optics 拉貨，**新易盛 / Coherent (COHR)** 是台面下贏家。風險：北京若卡 H200 進口許可作為反制籌碼，全鏈崩盤。",
+        "bull_points": [
+          "HBM3e bit demand 上修15-20%，MU受惠",
+          "APH高速connector + COHR 800G optics拉貨",
+          "NVDA CUDA moat再固化，中國ASIC延後"
+        ],
+        "bear_points": [
+          "三星HBM3e過qual後SK/MU溢價稀釋",
+          "北京可能反制卡H200進口許可",
+          "Blackwell仍卡關，僅truce trade非regime shift"
+        ],
+        "final_take": "看多NVDA+HBM鏈，但須警戒三星qual與北京反制",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MU",
+            "APH",
+            "COHR",
+            "AVGO",
+            "MRVL",
+            "TSM",
+            "ALAB",
+            "BABA",
+            "BIDU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China trade truce",
+            "HBM supply",
+            "Export controls"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "H200",
+            "Blackwell",
+            "CoWoS-L",
+            "800G optics",
+            "AEC",
+            "CUDA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e-demand-uplift"
+          },
+          {
+            "subject": "ticker:APH",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:h200-rack-buildout"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:800g-optics-pull"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:samsung-hbm3e-qual"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-asic-delay"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增HBM3e定價權+三星qual contra-argument+connector/optics 2nd-tier node"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T07:48:26Z",
+      "latency_ms": 114592,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這次川習會重燃中國科技股信心，美國放行 H200 銷售，不僅是地緣政治的緩和訊號，更可能引導中國 AI 訓練成本下降。儘管 H200 非最新，其供應的穩定性預計能壓低高階算力租賃價格，讓更多非巨頭的中國企業有能力投入 AI 研發與落地應用，加速其數位轉型與創新佈局。",
+        "bull_points": [
+          "降低中國 AI 訓練成本",
+          "促進 AI 應用普及化",
+          "擴大企業 AI 研發動能"
+        ],
+        "bear_points": [
+          "H200 效能仍遠不及 Blackwell",
+          "中長期供應鏈仍受政策牽動"
+        ],
+        "final_take": "AI 成本下降，但技術世代與政策仍是關鍵。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Internet & Software & Services",
+            "Technology Hardware"
+          ],
+          "themes": [
+            "AI cost reduction",
+            "AI accessibility",
+            "China tech rally"
+          ],
+          "tech_keywords": [
+            "AI training",
+            "H200",
+            "CUDA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:Nvidia_H200_sales_to_China",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI_cost_reduction"
+          },
+          {
+            "subject": "theme:AI_accessibility",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:increased_AI_compute_availability_in_China"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦 AI 算力成本下降與普及。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ALAB",
+        "AMD",
+        "APH",
+        "AVGO",
+        "BABA",
+        "BIDU",
+        "COHR",
+        "KWEB",
+        "MRVL",
+        "MU",
+        "NVDA",
+        "PDD",
+        "TSM"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Communications Equipment",
+        "Consumer Discretionary",
+        "Information Technology",
+        "Internet & Software & Services",
+        "Semiconductors",
+        "Software & Services",
+        "Technology Hardware"
+      ],
+      "themes": [
+        "AI Ecosystem Control",
+        "AI accessibility",
+        "AI capex",
+        "AI cost reduction",
+        "CUDA Dominance",
+        "CUDA moat",
+        "China self-sufficient silicon",
+        "China tech rally",
+        "Export controls",
+        "Geopolitical Tech Strategy",
+        "HBM supply",
+        "Indigenous AI Development",
+        "US-China trade truce"
+      ],
+      "tech_keywords": [
+        "800G optics",
+        "AEC",
+        "AI Standards",
+        "AI training",
+        "B200",
+        "Blackwell",
+        "CUDA",
+        "CXL retimer",
+        "CoWoS-L",
+        "GB200",
+        "H20",
+        "H200",
+        "HBM3e",
+        "Hanguang 800",
+        "Kunlun P800"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200-china-export-clearance"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:KWEB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-trade-truce"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-tech-rally"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:blackwell-export-restriction"
+      },
+      {
+        "subject": "narrative:trump-xi-summit",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:china-tech-rally"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cuda-lockin-china"
+      },
+      {
+        "subject": "ticker:ALAB",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:h200-export-clearance"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-asic-delay"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:internal-asic-delay"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:internal-asic-delay"
+      },
+      {
+        "subject": "theme:Geopolitical Tech Strategy",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e-demand-uplift"
+      },
+      {
+        "subject": "ticker:APH",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:h200-rack-buildout"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:800g-optics-pull"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:samsung-hbm3e-qual"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-asic-delay"
+      },
+      {
+        "subject": "narrative:Nvidia_H200_sales_to_China",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI_cost_reduction"
+      },
+      {
+        "subject": "theme:AI_accessibility",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:increased_AI_compute_availability_in_China"
+      }
+    ],
+    "bull_summary": [
+      "H200 解禁直接補 NVDA 中國 mid-teens % 營收缺口",
+      "HBM3e/CoWoS-L 供應鏈 MU/SK海力士/TSM 連動受益",
+      "KWEB 中概股 truce-extension 短線估值修復",
+      "H200 解禁讓中國 hyperscaler 重回 CUDA，**NVDA moat 再強化**",
+      "**ALAB** retimer / AEC 線材隨 H200 出貨間接受惠",
+      "中國自製 ASIC tape-out 延後 = NVDA 多賺 6-12 個月空窗"
+    ],
+    "bear_summary": [
+      "Blackwell B200/GB200 仍受限,長線天花板未解",
+      "峰會若為 photo-op 反彈一日遊",
+      "H200 是 last-gen,中國去美化 ASIC 替代加速",
+      "**AVGO / MRVL** 中國 custom silicon 訂單被遞延，市場未 price in",
+      "北京可能反制祭出採購自主率紅線，逆轉劇本",
+      "CUDA 鎖定僅短期紅利，Blackwell 卡關仍是中長期天花板"
+    ],
+    "final_take": "AI 成本下降，但技術世代與政策仍是關鍵。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T07:48:26Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, HEADWIND_FROM, SUPPLIES_TO"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T07:45:13Z",
+      "where": "round0.gemini",
+      "msg": "rc=-1 err=timeout after 180s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

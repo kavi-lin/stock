@@ -1,0 +1,39 @@
+{
+  "news_id": "bn_20260517_aed90273",
+  "schema_version": 1,
+  "state": "debating",
+  "fetched_at": "2026-05-17T17:12:01Z",
+  "last_activity_ts": "2026-05-18T15:29:42Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/truist-raises-pt-visa-v-163906502.html",
+    "feed_fingerprint": "truist raises pt visa v stock",
+    "published": "2026-05-17T16:39:06+00:00",
+    "url_hash": "sha1:d3fbfe9bd26db8a2326b0a3c842ebe878851f3a6"
+  },
+  "headline": "Truist Raises PT on Visa (V) Stock",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [],
+  "summary": null,
+  "errors": [
+    {
+      "ts": "2026-05-18T15:22:23Z",
+      "where": "startup_sweep",
+      "msg": "reset from debating after 79454s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "pending"
+}

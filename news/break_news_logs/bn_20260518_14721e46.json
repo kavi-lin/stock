@@ -1,0 +1,515 @@
+{
+  "news_id": "bn_20260518_14721e46",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T07:11:19Z",
+  "last_activity_ts": "2026-05-18T07:18:58Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4594252-bitcoin-depot-says-it-filed-for-chapter-11-bankruptcy-in-texas?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "bitcoin depot says filed chapter 11 bankruptcy texas",
+    "published": "2026-05-18T07:06:05+00:00",
+    "url_hash": "sha1:a81351ec0d8e90ecdfeb708f82a9f87b9c32c0c0"
+  },
+  "headline": "Bitcoin Depot says it filed for Chapter 11 bankruptcy in Texas",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T07:17:04Z",
+      "latency_ms": 21599,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Bitcoin Depot (BTM) 申請德州 Chapter 11，屬**單一公司事件**而非加密產業系統性風險。此公司為比特幣 ATM 營運商，商業模式高槓桿、手續費抽成厚但合規成本與機台折舊吃重，現金流脆弱。pre-triage 標成「市場情緒轉好」明顯誤判 — 破產對該股是利空。對 **COIN**、**MSTR** 等主流加密代理股幾乎無傳導，反而凸顯實體 crypto ATM 賽道在費率監管與通路萎縮下的結構性弱勢。BTC 現價未受擾動，宏觀無關。投資意涵：避開小型加密基礎設施股，主流交易所/礦商不受波及。",
+        "bull_points": [
+          "事件侷限單一小型股，主流加密股無傳導",
+          "競爭者破產後 ATM 通路份額或集中至倖存者"
+        ],
+        "bear_points": [
+          "crypto ATM 商業模式高合規成本、現金流脆弱",
+          "費率監管趨嚴壓縮實體加密通路獲利",
+          "小型加密基礎設施股流動性與下市風險高"
+        ],
+        "final_take": "單一公司利空，主流加密股不受影響，避開小型基礎設施股",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "COIN",
+            "MSTR"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "crypto infrastructure",
+            "bankruptcy",
+            "Bitcoin ATM"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bankruptcy"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:crypto-infrastructure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "單一小型股破產，無系統性傳導，主流加密股免疫"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T07:17:17Z",
+      "latency_ms": 13098,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此事件不只是 BTM 的個別失敗，更反映了「實體加密貨幣轉換點」在面臨 AML/KYC 監管成本高漲下的脆弱性。相比主流交易所，此類 ATM 業務極難維持規模經濟。其破產顯示了**物理端加密接入點**的整併與縮編趨勢，市場對於難以合規轉型的中小型加密服務商耐心已盡，預示賽道進一步集中化。",
+        "bull_points": [
+          "淘汰無效的加密基建營運商",
+          "利於大型合規交易所擴大市占"
+        ],
+        "bear_points": [
+          "實體加密接入點信譽受損",
+          "ATM 賽道面臨嚴峻監管與折舊壓力"
+        ],
+        "final_take": "實體加密 ATM 賽道進入加速整併寒冬。",
+        "entities": {
+          "tickers": [
+            "BTM"
+          ],
+          "sectors": [
+            "Financial Services"
+          ],
+          "themes": [
+            "Cryptocurrency"
+          ],
+          "tech_keywords": [
+            "KYC",
+            "AML"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "tech_keywords:KYC"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "tech_keywords:AML"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討實體加密接入點的監管壓力與整併趨勢。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T07:17:47Z",
+      "latency_ms": 29808,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文都漏掉的**真正驅動因素**：壓垮比特幣 ATM 賽道的不是泛泛的 AML/KYC 成本，而是針對**詐騙的消費者保護立法** — 全美多州(加州、康州、明尼蘇達等)2024 起對 BTC ATM 單筆/首日交易設硬上限(常見 $1,000),直接砍掉營運商最賺的大額抽成現金流。這是費率天花板,不是合規費用而已。其次,Bitcoin Depot 是經 **GSR II Meteora SPAC** 借殼上市,Chapter 11 下普通股權通常歸零 — 持有 BTM 普通股的散戶要有實質清零準備,這比『利空』更精確。延伸看,同類未上市對手 CoinFlip、Coinme 面臨相同立法壓力,賽道萎縮是政策性而非週期性。",
+        "bull_points": [
+          "詐騙立法淘汰弱者,合規大型營運商市佔提升",
+          "事件與 BTC 價格、主流交易所完全脫鉤"
+        ],
+        "bear_points": [
+          "多州交易上限砍掉 ATM 最賺的大額抽成現金流",
+          "BTM 普通股 Chapter 11 下普通股權恐歸零",
+          "政策性萎縮不可逆,非景氣循環可回補"
+        ],
+        "final_take": "看空實體 crypto ATM,根因是州級反詐立法非合規成本",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "COIN",
+            "MSTR"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "crypto infrastructure",
+            "consumer protection regulation",
+            "SPAC delisting risk"
+          ],
+          "tech_keywords": [
+            "Bitcoin ATM",
+            "AML/KYC"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:state-transaction-caps"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:spac-delisting-risk"
+          },
+          {
+            "subject": "narrative:consumer-protection-regulation",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:crypto-atm-consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補州級反詐交易上限與 SPAC 股權歸零兩個前文未提的具體點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T07:18:11Z",
+      "latency_ms": 24024,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了監管與資本結構問題，BTM 的破產將對實體通路造成連鎖反應。這些 ATM 多佈點於便利商店與加油站，作為這些小型零售業者的**被動租金收入來源**。隨著 BTM 撤機，零售通路商將面臨客流量與租金收入的同步損失。此外，專注於製造這類 kiosk 的硬體供應鏈恐因訂單急凍而面臨營收重創，這是該賽道萎縮的第二層級影響，投資人應注意這對小型硬體供應商的負面傳導。",
+        "bull_points": [
+          "資產重整可能吸引金融科技巨頭低價收購。",
+          "賽道集中化有助於存續者提升營運效率。"
+        ],
+        "bear_points": [
+          "便利商店與加油站等夥伴面臨租金收益流失。",
+          "專用 ATM 硬體製造商面臨訂單急凍風險。"
+        ],
+        "final_take": "關注零售通路收入下滑，及硬體供應鏈連帶效應。",
+        "entities": {
+          "tickers": [
+            "BTM"
+          ],
+          "sectors": [
+            "Financials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Crypto",
+            "Retail"
+          ],
+          "tech_keywords": [
+            "Crypto ATM"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:convenience_retail_hosts",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:BTM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "新增零售通路商影響及硬體供應鏈收縮角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T07:18:44Z",
+      "latency_ms": 33402,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補兩個前文遺漏的點。其一是**Chapter 11 是重整不是清算** — 前文講「普通股清零」沒錯，但跳過了營運面：BTM 多半會在 DIP 融資下繼續運轉，ATM 機台網路不會隔夜消失，所謂「賽道蒸發」說法過度。重整後若甩掉債務、縮減低效機台，反而可能以更精簡結構續存。其二是**通路替代的正向傳導** — 實體 crypto ATM 萎縮的另一面，是散戶上車管道往數位端集中。**COIN** 與 **Block (XYZ)** 旗下 Cash App 比特幣業務是現成的低成本替代入口，物理通路退場長線等於把邊際用戶推向交易所/錢包 App。前文說 COIN「無傳導」，我認為應修正為**輕微受惠於 on-ramp 數位化**，而非中性。",
+        "bull_points": [
+          "Ch11 為重整非清算，ATM 網路經 DIP 續營",
+          "實體通路退場利於 COIN、Block 數位入口搶份額",
+          "重整後甩債縮機，BTM 營運體可精簡續存"
+        ],
+        "bear_points": [
+          "BTM 普通股重整後高機率清零",
+          "BTC ATM 賽道受詐騙保護立法政策性萎縮",
+          "DIP 融資取得失敗則轉清算風險仍在"
+        ],
+        "final_take": "單一公司利空，但 on-ramp 數位化長線利 COIN/XYZ",
+        "entities": {
+          "tickers": [
+            "BTM",
+            "COIN",
+            "XYZ"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "crypto on-ramp digitization",
+            "crypto ATM consolidation",
+            "Chapter 11 reorganization"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:COIN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:crypto-onramp-digitization"
+          },
+          {
+            "subject": "ticker:XYZ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:crypto-onramp-digitization"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:crypto-atm-consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增重整非清算、通路替代利好 COIN/XYZ 兩角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T07:18:58Z",
+      "latency_ms": 13172,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "CLAUDE 提到營運續行與數位替代，但我看重的是**剩餘資產的價值重估**。這些 ATM 網路不僅是機器，更是一套成熟的「高流量、非銀行客群」合約組合。BTM 破產後，機台與租約可能被清算出售，成為潛在競爭對手（如其他小型 ATM 營運商或甚至 FinTech 業者）的**低成本擴張窗口**。這不再是業務模式的崩潰，而是**存量資產的低價重組**，這對賽道長期整合具關鍵意義，資產價值在於其地理佈點的壟斷性，而非營運效率。",
+        "bull_points": [
+          "核心點位合約具備「金融荒漠」的獨特稀缺價值。",
+          "破產清算可能使潛在買家低價取得通路擴張。"
+        ],
+        "bear_points": [
+          "老舊 ATM 硬體在技術更新下折舊過快。",
+          "現場現金押運與維護的人力成本仍壓垮淨利。"
+        ],
+        "final_take": "BTM 資產若被分拆出售，反而是同業低價整合的契機。",
+        "entities": {
+          "tickers": [
+            "BTM"
+          ],
+          "sectors": [
+            "Financial Services"
+          ],
+          "themes": [
+            "Digital Assets"
+          ],
+          "tech_keywords": [
+            "Kiosk Network"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BTM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:industry_consolidation"
+          },
+          {
+            "subject": "ticker:BTM",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:digital_on_ramp"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "提出資產清算與同業低價整合的新觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "BTM",
+        "COIN",
+        "MSTR",
+        "XYZ"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Financial Services",
+        "Financials",
+        "Information Technology"
+      ],
+      "themes": [
+        "Bitcoin ATM",
+        "Chapter 11 reorganization",
+        "Crypto",
+        "Cryptocurrency",
+        "Digital Assets",
+        "Retail",
+        "SPAC delisting risk",
+        "bankruptcy",
+        "consumer protection regulation",
+        "crypto ATM consolidation",
+        "crypto infrastructure",
+        "crypto on-ramp digitization"
+      ],
+      "tech_keywords": [
+        "AML",
+        "AML/KYC",
+        "Bitcoin ATM",
+        "Crypto ATM",
+        "KYC",
+        "Kiosk Network"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bankruptcy"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:crypto-infrastructure"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "tech_keywords:KYC"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "tech_keywords:AML"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:state-transaction-caps"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:spac-delisting-risk"
+      },
+      {
+        "subject": "narrative:consumer-protection-regulation",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:crypto-atm-consolidation"
+      },
+      {
+        "subject": "narrative:convenience_retail_hosts",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:BTM"
+      },
+      {
+        "subject": "ticker:COIN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:crypto-onramp-digitization"
+      },
+      {
+        "subject": "ticker:XYZ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:crypto-onramp-digitization"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:crypto-atm-consolidation"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:industry_consolidation"
+      },
+      {
+        "subject": "ticker:BTM",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:digital_on_ramp"
+      }
+    ],
+    "bull_summary": [
+      "事件侷限單一小型股，主流加密股無傳導",
+      "競爭者破產後 ATM 通路份額或集中至倖存者",
+      "淘汰無效的加密基建營運商",
+      "利於大型合規交易所擴大市占",
+      "詐騙立法淘汰弱者,合規大型營運商市佔提升",
+      "事件與 BTC 價格、主流交易所完全脫鉤"
+    ],
+    "bear_summary": [
+      "crypto ATM 商業模式高合規成本、現金流脆弱",
+      "費率監管趨嚴壓縮實體加密通路獲利",
+      "小型加密基礎設施股流動性與下市風險高",
+      "實體加密接入點信譽受損",
+      "ATM 賽道面臨嚴峻監管與折舊壓力",
+      "多州交易上限砍掉 ATM 最賺的大額抽成現金流"
+    ],
+    "final_take": "BTM 資產若被分拆出售，反而是同業低價整合的契機。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T07:18:58Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, MENTIONED_IN; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

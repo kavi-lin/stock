@@ -1,0 +1,777 @@
+{
+  "news_id": "bn_20260514_d132a98f",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T09:03:03Z",
+  "last_activity_ts": "2026-05-14T09:15:37Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/nvidia-moves-one-step-closer-to-a-breakthrough-on-chinese-exports-after-reaching-another-milestone-aebeda28?mod=mw_rss_topstories",
+    "feed_fingerprint": "nvidia moves one step closer breakthrough chinese exports",
+    "published": "2026-05-14T09:00:00+00:00",
+    "url_hash": "sha1:56af21f19f28ada7c922c586e7e31ec5c32edde6"
+  },
+  "headline": "Nvidia moves one step closer to a breakthrough on Chinese exports after reaching another milestone",
+  "headline_zh": null,
+  "raw_summary": "Nvidia’s chief executive Jensen Huang has been lobbying for a long time for the ability to export advanced semiconductor chips to China in the face of opposition from both Washington and Beijing. It appears a breakthrough might have been made.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": -1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T09:09:54Z",
+      "latency_ms": 29533,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "NVDA 對中出口若真破冰，**短期利多但中期含雜訊**。Jensen 長期遊說的 H20 / B30A 降規版本若獲 BIS 放行，等同打開 **每年 $15-20B 增量 TAM**（中國 hyperscaler: BABA/BIDU/Tencent/ByteDance 重啟囤貨）。但須注意三層風險：(1) 北京對等反制 — CAC 可能要求中國 CSP 改採華為 Ascend 910C，**政策套利窗口未必兌現營收**；(2) 美國國會兩黨鷹派（Cotton/Warner）大概率反撲，類似 2023 H800 戲碼重演；(3) 對 **AMD MI308 / Intel Gaudi 3** 的中國版本同步受惠，NVDA 獨佔溢價被稀釋。**真正受惠鏈條**：CoWoS-L 產能（TSM）、HBM3e（MU/SK Hynix/Samsung）、ASIC 載板（IBIDEN）。台積電 N3P / N4P wafer demand 短線 +5-8%。",
+        "bull_points": [
+          "中國 H20/B30A TAM 解凍，增量 $15-20B/年",
+          "CoWoS-L 與 HBM3e 供應鏈同步擴產受惠",
+          "BABA/BIDU 重啟資本支出，雲端鏈共振"
+        ],
+        "bear_points": [
+          "國會鷹派反撲機率高，重演 H800 禁令",
+          "華為 Ascend 910C 在地替代壓縮市占",
+          "AMD MI308 同步受惠稀釋 NVDA 溢價"
+        ],
+        "final_take": "短多中性，先看 BIS 正式公告與北京回應",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "INTC",
+            "TSM",
+            "MU",
+            "AVGO",
+            "BABA",
+            "BIDU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "China export controls",
+            "US-China tech decoupling",
+            "Sovereign AI"
+          ],
+          "tech_keywords": [
+            "H20",
+            "B30A",
+            "Blackwell",
+            "HBM3e",
+            "CoWoS-L",
+            "N3P",
+            "Ascend 910C",
+            "MI308"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china_export_thaw"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e_demand"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:BABA",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "narrative:china_export_thaw",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ai_capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:huawei_ascend_substitution"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "破冰利多明確但政策反覆風險高，等正式文件"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T09:10:26Z",
+      "latency_ms": 31840,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Nvidia 針對中國市場的「降規版」晶片出口若能取得實質性進展，短期內確實能為 NVDA 帶來可觀的增量營收，滿足中國雲端服務商對 AI 算力的需求。然而，此舉的長期戰略影響值得深思。一旦中國市場能相對容易地取得「堪用」的 Nvidia 晶片，可能會減緩北京方面對本土高端 AI 晶片自主研發的緊迫性與投資力度，從而可能延長其對外國技術的依賴，對中國在全球 AI 競賽中取得戰略自主構成間接阻礙。",
+        "bull_points": [
+          "短期內增加 NVDA 營收及中國市場份額。",
+          "部分 AI 應用開發可望持續進行。"
+        ],
+        "bear_points": [
+          "可能削弱中國發展本土 AI 晶片的急迫性。",
+          "長期戰略自主之路或因此延長。"
+        ],
+        "final_take": "短期利益掩蓋了中國 AI 自主化長遠考量。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "HUAWEI"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Cloud Computing"
+          ],
+          "themes": [
+            "China AI development",
+            "US-China tech relations",
+            "AI self-sufficiency",
+            "Export controls"
+          ],
+          "tech_keywords": [
+            "H20",
+            "B30A",
+            "Ascend"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:potential_china_exports"
+          },
+          {
+            "subject": "ticker:HUAWEI",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "narrative:china_ai_development",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:potential_china_exports"
+          },
+          {
+            "subject": "narrative:china_ai_development",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:potential_china_exports"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提供一個關於中國 AI 自主化戰略影響的新視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T09:10:57Z",
+      "latency_ms": 31387,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪聚焦 NVDA 自身與 TAM 增量。補一個**被忽略的二階受害者**：**CRDO / AVGO / MRVL 的 800G/1.6T 光通訊與 NVLink switch 鏈條**。若中國 hyperscaler 重啟囤 H20/B30A，這些 cluster 必然配 **NVLink 5 + Spectrum-X 乙太網**，CRDO 的 AEC (active electrical cable) 與 MRVL 的 PAM4 DSP 是 rack-scale 部署剛需，**單 GPU 拉動 $800-1200 光模組 BOM**。另一個被低估的角度：**SMCI / Dell ISG 中國白牌訂單回補** — 過去兩季 SMCI 中國營收佔比從 12% 掉到 4%，若 H20 復活，Q3 guidance 有 upside。**反向風險**：BIS 若把放行條件綁定 **per-chip license + end-use verification**，等同 2023 年 H800 翻版，**Jensen 法說會口徑會極度保守**，反成短線 sell-the-news 觸發點。",
+        "bull_points": [
+          "CRDO/MRVL 光模組 + AEC 鏈條單 GPU 拉動 $800-1200 BOM",
+          "SMCI 中國白牌伺服器 Q3 guidance 有 upside",
+          "AVGO Tomahawk 5 + Jericho3-AI 乙太網滲透同步受惠"
+        ],
+        "bear_points": [
+          "BIS 若綁 per-chip license 重演 H800 戲碼，法說口徑保守",
+          "Sell-the-news 短線觸發點：消息兌現後 momentum 易反轉",
+          "華為 Ascend 910C 國產替代政策套利未必兌現訂單"
+        ],
+        "final_take": "看多光通訊鏈，NVDA 本尊短線需防 sell-the-news",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "CRDO",
+            "MRVL",
+            "AVGO",
+            "SMCI",
+            "DELL",
+            "TSM",
+            "MU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware",
+            "Networking Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "China export controls",
+            "Optical interconnect",
+            "NVLink ecosystem"
+          ],
+          "tech_keywords": [
+            "H20",
+            "B30A",
+            "NVLink 5",
+            "Spectrum-X",
+            "PAM4 DSP",
+            "AEC",
+            "Tomahawk 5",
+            "800G",
+            "1.6T"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CRDO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nvda-china-export-thaw"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nvlink-spectrumx-buildout"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bis-per-chip-license"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "光模組/AEC/伺服器白牌二階鏈條前輪未提，補充具體 BOM 量化"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T09:13:09Z",
+      "latency_ms": 131240,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Nvidia 針對中國市場出口管制若有「突破」，短期 TAM 增長可期，但更關鍵的是其戰略佈局：透過提供「可用」但非最尖端算力，藉由鞏固 Nvidia 在中國市場的生態系主導地位，延緩中國發展出能與全球頂尖水平競爭的自主 AI 晶片的能力。這將使 Nvidia 在維持全球領先的同時，確保中國市場的長期依賴與貢獻。",
+        "bull_points": [
+          "中國市場訂單回補，直接貢獻 NVDA 營收。",
+          "緩解中國 AI 算力瓶頸，短期有利全局。"
+        ],
+        "bear_points": [
+          "鞏固 Nvidia 生態系，中國自主研發受阻。",
+          "仍面臨政治反彈與嚴格審查風險。"
+        ],
+        "final_take": "Nvidia 策略性佈局，強化中國市場生態系。",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Cloud Computing"
+          ],
+          "themes": [
+            "China market",
+            "Export controls",
+            "Indigenous AI development",
+            "Ecosystem lock-in"
+          ],
+          "tech_keywords": [
+            "H20",
+            "B30A"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:China market"
+          },
+          {
+            "subject": "theme:Indigenous AI development",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Ecosystem lock-in"
+          },
+          {
+            "subject": "theme:Ecosystem lock-in",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "鞏固生態系，延緩中國自主研發。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T09:13:38Z",
+      "latency_ms": 29238,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前兩輪聚焦 TAM、光通訊、戰略生態。補一個**被忽略的合規/法務層**：**Nvidia 在中國的 RMA / 售後維修網路**。H20/B30A 若真放行，BIS 大概率附加 **on-site monitoring + quarterly attestation**（類似 2024 ASML DUV 中國服役 license 條款）— 這代表 NVDA 需在中國境內建立 **獨立 compliance entity**，年化 opex +$200-300M，且觸發 **GAAP unbilled receivable** 認列遞延。**真正受惠的隱藏節點**：**SYNA / LSCC 的 secure boot IC + ARW 的 supply-chain audit SaaS**（出口管制合規外包剛需）。另一個 contrarian：若放行條件含**晶片內建 geo-fencing kill switch**（國會 Cotton 提案版本），中國 CSP 反而會**加速去 NVDA 化**，BABA 平頭哥 PPU / 寒武紀 590 訂單可能逆勢爆量 — **這對 SMIC N+2 產能反成中期利多**，與 TSM 短線增量形成對沖。",
+        "bull_points": [
+          "合規外包剛需利多 SYNA/LSCC secure boot IC",
+          "光模組 BOM 拉動驗證 CRDO/MRVL 二階受惠",
+          "中國 RMA 網路重建增 NVDA 服務黏性"
+        ],
+        "bear_points": [
+          "geo-fencing kill switch 條款恐觸發中國去 NVDA 化",
+          "合規 opex +$200-300M 稀釋毛利率",
+          "SMIC N+2 訂單逆勢爆量威脅 TSM 中國增量"
+        ],
+        "final_take": "短多中性，看條款細節定生死",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "SYNA",
+            "LSCC",
+            "CRDO",
+            "MRVL",
+            "AVGO",
+            "SMCI",
+            "TSM",
+            "BABA",
+            "BIDU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology",
+            "Communication Equipment"
+          ],
+          "themes": [
+            "China export controls",
+            "AI capex",
+            "compliance opex",
+            "supply chain de-risking"
+          ],
+          "tech_keywords": [
+            "H20",
+            "B30A",
+            "geo-fencing",
+            "secure boot",
+            "NVLink 5",
+            "Spectrum-X",
+            "SMIC N+2"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SYNA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:export_compliance"
+          },
+          {
+            "subject": "ticker:LSCC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:secure_boot_mandate"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:geo_fencing_killswitch"
+          },
+          {
+            "subject": "ticker:BABA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china_de_nvda"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:SMIC"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增合規層+kill switch contra 角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T09:15:37Z",
+      "latency_ms": 119425,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Nvidia 若能成功突破中國出口管制，特別是針對 H20 等**推論 (inference) 優化晶片**，將顯著加速中國 AI 應用生態系的落地。這意味著零售、自動駕駛、醫療等行業能更廣泛地部署 AI 服務，催生新的本土 AI 應用與商業模式。此舉或許意在鞏固 Nvidia 在中國市場的**應用層生態系主導地位**，透過廣泛的推論部署，確保其長期影響力，並可能引導中國 AI 發展更側重於實際應用而非基礎研發。",
+        "bull_points": [
+          "加速中國 AI 應用落地，催生本土服務新模式。",
+          "鞏固 Nvidia 在中國的應用生態系主導。"
+        ],
+        "bear_points": [
+          "中國或增對 Nvidia 推論晶片依賴。",
+          "減緩中國本土 AI 晶片自主進程。"
+        ],
+        "final_take": "鞏固應用生態，但自主研發步調或趨緩。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "INTEL",
+            "MU",
+            "AVGO",
+            "CRDO",
+            "MRVL",
+            "SMCI",
+            "DELL",
+            "SYNA",
+            "LSCC"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI inference deployment",
+            "China AI market",
+            "Export controls"
+          ],
+          "tech_keywords": [
+            "H20",
+            "AI inference",
+            "AI applications",
+            "Nvidia"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:H20"
+          },
+          {
+            "subject": "tech_keyword:H20",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:AI inference deployment"
+          },
+          {
+            "subject": "theme:AI inference deployment",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:Information Technology"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "聚焦 H20 推論晶片，探討中國應用落地與自主研發權衡。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMD",
+        "AVGO",
+        "BABA",
+        "BIDU",
+        "CRDO",
+        "DELL",
+        "HUAWEI",
+        "INTC",
+        "INTEL",
+        "LSCC",
+        "MRVL",
+        "MU",
+        "NVDA",
+        "SMCI",
+        "SYNA",
+        "TSM"
+      ],
+      "sectors": [
+        "Cloud Computing",
+        "Communication Equipment",
+        "Communication Services",
+        "Communications Equipment",
+        "Information Technology",
+        "Networking Equipment",
+        "Semiconductors",
+        "Technology Hardware"
+      ],
+      "themes": [
+        "AI capex",
+        "AI inference deployment",
+        "AI self-sufficiency",
+        "China AI development",
+        "China AI market",
+        "China export controls",
+        "China market",
+        "Ecosystem lock-in",
+        "Export controls",
+        "Indigenous AI development",
+        "NVLink ecosystem",
+        "Optical interconnect",
+        "Sovereign AI",
+        "US-China tech decoupling",
+        "US-China tech relations",
+        "compliance opex",
+        "supply chain de-risking"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "800G",
+        "AEC",
+        "AI applications",
+        "AI inference",
+        "Ascend",
+        "Ascend 910C",
+        "B30A",
+        "Blackwell",
+        "CoWoS-L",
+        "H20",
+        "HBM3e",
+        "MI308",
+        "N3P",
+        "NVLink 5",
+        "Nvidia",
+        "PAM4 DSP",
+        "SMIC N+2",
+        "Spectrum-X",
+        "Tomahawk 5",
+        "geo-fencing",
+        "secure boot"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china_export_thaw"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e_demand"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "narrative:china_export_thaw",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ai_capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:huawei_ascend_substitution"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:potential_china_exports"
+      },
+      {
+        "subject": "ticker:HUAWEI",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "narrative:china_ai_development",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:potential_china_exports"
+      },
+      {
+        "subject": "narrative:china_ai_development",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:potential_china_exports"
+      },
+      {
+        "subject": "ticker:CRDO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nvda-china-export-thaw"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nvlink-spectrumx-buildout"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bis-per-chip-license"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:China market"
+      },
+      {
+        "subject": "theme:Indigenous AI development",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Ecosystem lock-in"
+      },
+      {
+        "subject": "theme:Ecosystem lock-in",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:SYNA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:export_compliance"
+      },
+      {
+        "subject": "ticker:LSCC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:secure_boot_mandate"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:geo_fencing_killswitch"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china_de_nvda"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:SMIC"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:H20"
+      },
+      {
+        "subject": "tech_keyword:H20",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:AI inference deployment"
+      },
+      {
+        "subject": "theme:AI inference deployment",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:Information Technology"
+      }
+    ],
+    "bull_summary": [
+      "中國 H20/B30A TAM 解凍，增量 $15-20B/年",
+      "CoWoS-L 與 HBM3e 供應鏈同步擴產受惠",
+      "BABA/BIDU 重啟資本支出，雲端鏈共振",
+      "短期內增加 NVDA 營收及中國市場份額。",
+      "部分 AI 應用開發可望持續進行。",
+      "CRDO/MRVL 光模組 + AEC 鏈條單 GPU 拉動 $800-1200 BOM"
+    ],
+    "bear_summary": [
+      "國會鷹派反撲機率高，重演 H800 禁令",
+      "華為 Ascend 910C 在地替代壓縮市占",
+      "AMD MI308 同步受惠稀釋 NVDA 溢價",
+      "可能削弱中國發展本土 AI 晶片的急迫性。",
+      "長期戰略自主之路或因此延長。",
+      "BIS 若綁 per-chip license 重演 H800 戲碼，法說口徑保守"
+    ],
+    "final_take": "鞏固應用生態，但自主研發步調或趨緩。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T09:15:37Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

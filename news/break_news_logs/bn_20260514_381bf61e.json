@@ -1,0 +1,189 @@
+{
+  "news_id": "bn_20260514_381bf61e",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T16:04:05Z",
+  "last_activity_ts": "2026-05-14T16:32:16Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/7924fcd94d33",
+    "feed_fingerprint": "futu:INTC,NVDA,QCOM,XPEV:8806b6e515",
+    "published": "2026-05-14T21:31:05+08:00",
+    "url_hash": "sha1:2ad50365bf4953c1698f43a73845d720a4d7ce7c"
+  },
+  "headline": "道指開市升0.3%，納指升0.09%，標普500升0.14%",
+  "headline_zh": null,
+  "raw_summary": "道指開市升0.3%，納指升0.09%，標普500升0.14%。明星科技股英偉達升1.78%，英特爾跌4.68%，高通跌2.19%。納斯達克中國金龍指數跌1.48%，嗶哩嗶哩跌5.37%，小鵬集團跌4.56%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:29:56Z",
+      "latency_ms": 8416,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 605,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "3039fe11-fcab-4a4e-96a8-e240bf136d58",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "1261ece0-92d8-43ac-a2ff-5f01082344b6"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:32:11Z",
+      "latency_ms": 135290,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_381bf61e.c1.txt",
+      "parsed": {
+        "commentary": "The other analyst (CLAUDE) has not yet provided any input. My current analysis has covered the core news items: the market indices opening higher, Nvidia's strong performance, the contrasting performa",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:32:16Z",
+      "latency_ms": 4566,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 527,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "207e6164-bd30-4f24-bef6-99621d78a54e",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "ce3a8948-c1d1-4db0-9ef7-0663c8692d48"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "NEUTRAL",
+    "merged_entities": {
+      "tickers": [],
+      "sectors": [],
+      "themes": [],
+      "tech_keywords": []
+    },
+    "merged_relations": [],
+    "bull_summary": [],
+    "bear_summary": [],
+    "final_take": null,
+    "final_take_by": null,
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:32:16Z",
+    "close_reason": "cli_failures",
+    "divergence_note": ""
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:29:56Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:32:16Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

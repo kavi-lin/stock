@@ -1,0 +1,262 @@
+{
+  "news_id": "bn_20260514_da79b683",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T16:04:05Z",
+  "last_activity_ts": "2026-05-14T16:38:00Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/research/reports/ARGUS_47031_TechnicalAnalysis_1778757779000?yptr=yahoo&ncid=yahooproperties_plusresear_nm5q6ze1cei",
+    "feed_fingerprint": "technical assessment bullish intermediate term",
+    "published": "2026-05-14T11:22:59+00:00",
+    "url_hash": "sha1:5d8447e129c5f210db207d5627c0e775496690c6"
+  },
+  "headline": "Technical Assessment: Bullish in the Intermediate-Term",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 2.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:37:38Z",
+      "latency_ms": 5402,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 1028,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "e4ee378f-5d35-4aa3-aa7f-1c3aa80299e9",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "4aaac4f6-ff73-4824-a526-4b06e4df4212"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:37:55Z",
+      "latency_ms": 16701,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Yahoo Finance 報導指出，整體技術分析呈現中長期看多。此類評估常聚焦關鍵 AI 晶片龍頭，如 NVDA，其技術指標若持續強勁，將為 AI 相關資本支出（AI capex）注入信心。特別是 HBM3e 等先進記憶體需求，可能帶動供應鏈技術升級與營收。",
+        "bull_points": [
+          "關鍵 AI 股 NVDA 技術線圖強勁",
+          "AI 設備支出預期持續",
+          "HBM3e 需求為成長動能"
+        ],
+        "bear_points": [
+          "短線獲利了結壓力",
+          "供應鏈瓶頸風險",
+          "評價面仍存疑慮"
+        ],
+        "final_take": "AI 趨勢穩健，技術面尚可期",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:HBM3e"
+          },
+          {
+            "subject": "theme:AI capex",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:Technical Assessment"
+          }
+        ],
+        "done": false,
+        "confidence": 0.75,
+        "rationale_short": "聚焦 NVDA 技術面與 AI 趨勢"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:38:00Z",
+      "latency_ms": 5657,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 737,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "5d48a813-14da-491b-bc2e-39a3856ceea6",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "6dcf542b-1cb7-4280-977e-5d91499c1568"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sectors": [
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "HBM3e"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "HBM3e"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:HBM3e"
+      },
+      {
+        "subject": "theme:AI capex",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:Technical Assessment"
+      }
+    ],
+    "bull_summary": [
+      "關鍵 AI 股 NVDA 技術線圖強勁",
+      "AI 設備支出預期持續",
+      "HBM3e 需求為成長動能"
+    ],
+    "bear_summary": [
+      "短線獲利了結壓力",
+      "供應鏈瓶頸風險",
+      "評價面仍存疑慮"
+    ],
+    "final_take": "AI 趨勢穩健，技術面尚可期",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:38:00Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, MENTIONED_IN"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:37:38Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:38:00Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

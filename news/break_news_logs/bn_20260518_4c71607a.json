@@ -1,0 +1,532 @@
+{
+  "news_id": "bn_20260518_4c71607a",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:02:19Z",
+  "last_activity_ts": "2026-05-18T10:12:18Z",
+  "source": {
+    "name": "PR Newswire",
+    "credibility": "MEDIUM",
+    "url": "https://www.prnewswire.com/news-releases/radial-celebrates-blue-cross-blue-shield-of-south-carolinas-decision-to-cover-tms-for-ocd-and-accelerated-tms-for-depression-302773941.html",
+    "feed_fingerprint": "radial celebrates blue cross blue shield south carolina",
+    "published": "2026-05-18T10:00:00+00:00",
+    "url_hash": "sha1:f8ae4de7c5f2059b57299f29a9612a9c0172e2a3"
+  },
+  "headline": "Radial Celebrates Blue Cross Blue Shield of South Carolina's Decision to Cover TMS for OCD and Accelerated TMS for Depression",
+  "headline_zh": null,
+  "raw_summary": "MYRTLE BEACH, S.C., May 18, 2026 /PRNewswire/ -- Radial, a national clinic network delivering the most advanced brain medicine treatments for mental health conditions, today celebrates the news that Blue Cross Blue Shield of South Carolina has approved coverage for two significant...",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:10:25Z",
+      "latency_ms": 24884,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是私人診所網路 **Radial** 的公關稿，慶祝南卡州 BCBS 把 **OCD 適應症的 TMS** 與**加速式 TMS（抗憂鬱）**納入給付。Radial 與 BCBS-SC 皆非上市，新聞**本身無直接投資標的**，pre-triage 的「市場情緒」標籤誤判——這不是 macro sentiment 事件。真正可交易的二階聯想是 TMS 設備商：上市的 **Neuronetics (STIM，NeuroStar 系統)**。單一州別保險商擴大給付，對 TMS 滲透率是邊際利多，但量級極小、不足以撼動估值。整體屬低訊號 PR，建議當作 neuromodulation 給付趨勢的觀察點，而非催化劑。",
+        "bull_points": [
+          "保險給付擴張擴大 TMS 可及市場 (TAM)",
+          "加速式 TMS 納保利好 NeuroStar 滲透率",
+          "OCD 適應症給付鬆綁為長線趨勢訊號"
+        ],
+        "bear_points": [
+          "Radial 與 BCBS-SC 皆非上市，無直接標的",
+          "單一州別保險商，財務影響微乎其微",
+          "純公關稿，pre-triage 情緒標籤誤判"
+        ],
+        "final_take": "低訊號 PR，僅作 TMS 給付趨勢觀察，非催化劑",
+        "entities": {
+          "tickers": [
+            "STIM"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "TMS therapy",
+            "neuromodulation",
+            "mental health coverage"
+          ],
+          "tech_keywords": [
+            "TMS",
+            "Accelerated TMS",
+            "SAINT protocol"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tms-insurance-coverage-expansion"
+          },
+          {
+            "subject": "ticker:STIM",
+            "predicate": "MENTIONED_IN",
+            "object": "theme:neuromodulation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.42,
+        "rationale_short": "私人公司公關稿，無直接標的，僅 STIM 邊際利多"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:10:38Z",
+      "latency_ms": 12675,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "雖然整體影響屬於區域性，但該新聞顯示 **加速式 TMS (iTMS)** 的治療效率已獲醫保認可。對於 **STIM (Neuronetics)** 與 **BWAY (Brainsway)** 等設備商而言，這不僅是單一給付提升，更暗示了產業正向「縮短治療週期、提高診所週轉率」的商業模式轉型。若後續更多區域型保險商跟進，將顯著降低患者的財務與時間門檻，有望成為長期滲透率提升的**催化劑**，而非僅止於邊際利多。",
+        "bull_points": [
+          "醫保納入加速療法，可提升診所設備治療週轉率。",
+          "推動 neuromodulation 成為主流心理治療選擇。"
+        ],
+        "bear_points": [
+          "區域性保險涵蓋範圍有限，對營收貢獻具滯後性。",
+          "若臨床數據長期未見顯著改善，可能面臨給付審查收緊。"
+        ],
+        "final_take": "觀察 iTMS 給付標準是否於全美各州呈現連鎖擴散效應。",
+        "entities": {
+          "tickers": [
+            "STIM",
+            "BWAY"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Medical Devices",
+            "Healthcare Efficiency"
+          ],
+          "tech_keywords": [
+            "TMS",
+            "iTMS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:iTMS_adoption"
+          },
+          {
+            "subject": "ticker:BWAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:iTMS_adoption"
+          }
+        ],
+        "done": true,
+        "confidence": 0.85,
+        "rationale_short": "補述加速療法(iTMS)對診所週轉效率與設備商(STIM, BWAY)的潛在長線利多。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:11:04Z",
+      "latency_ms": 26307,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個兩造都漏掉的點。**Neuronetics (STIM)** 早已於 2024 年合併 Greenbrook TMS，本身就是全美最大 TMS 診所營運商——所以保險給付擴大不只是賣設備的二階利多，而是**直接灌進 STIM 自家診所的看診收入**，垂直整合讓它雙重受惠。這也意味 Radial 與 STIM 在診所端其實是**競爭關係**，PR 稿吹捧的趨勢對 STIM 是利多、對 Radial 反而是同業壓力。另一個反向角度：TMS（尤其加速式）給付放寬，長線是**抗憂鬱藥物的邊際逆風**——特別是 **J&J (JNJ)** 的 Spravato (esketamine) 難治型憂鬱症franchise，器械療法搶的正是同一群 treatment-resistant 病患。量級仍小，但方向確立。",
+        "bull_points": [
+          "STIM 併 Greenbrook 後給付直接挹注自營診所看診收入",
+          "垂直整合讓 STIM 設備+診所雙重受惠",
+          "加速式 TMS 給付降低 treatment-resistant 病患門檻"
+        ],
+        "bear_points": [
+          "TMS 給付擴大是 JNJ Spravato 憂鬱症franchise邊際逆風",
+          "Radial 與 STIM 診所端為競爭關係,趨勢非單純利多",
+          "單州別事件量級過小,難撼動估值"
+        ],
+        "final_take": "看 STIM 結構性受惠,但單州事件不足以當催化劑",
+        "entities": {
+          "tickers": [
+            "STIM",
+            "BWAY",
+            "JNJ"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "neuromodulation",
+            "TMS reimbursement",
+            "treatment-resistant depression"
+          ],
+          "tech_keywords": [
+            "accelerated TMS",
+            "iTMS",
+            "NeuroStar",
+            "esketamine"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tms-reimbursement"
+          },
+          {
+            "subject": "ticker:STIM",
+            "predicate": "COMPETES_WITH",
+            "object": "entity:radial"
+          },
+          {
+            "subject": "ticker:JNJ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tms-reimbursement"
+          },
+          {
+            "subject": "ticker:BWAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tms-reimbursement"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增 STIM-Greenbrook 垂直整合與 JNJ Spravato 逆風,兩造皆未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:11:19Z",
+      "latency_ms": 15437,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "加速 TMS (iTMS) 療程顯著縮短，直接優化了診所的「椅子周轉率 (chair turnover)」。對於 **STIM** 這類垂直整合的營運商而言，這不僅是單純的給付擴大，更是一種資本報酬率 (ROIC) 的結構性提升。然而，這對**傳統行為諮商與長期門診服務**構成了潛在逆風，因為縮短療程意味著病患的長期維持治療次數顯著減少，對依賴常規諮商收費的模式造成實質排擠。",
+        "bull_points": [
+          "療程縮短提升診所椅子周轉率與ROI。",
+          "垂直整合模式享有顯著獲利槓桿。"
+        ],
+        "bear_points": [
+          "常規行為諮商門診收入遭長期排擠。"
+        ],
+        "final_take": "擴大給付優化診所流量，但也壓縮傳統長期諮商服務價值。",
+        "entities": {
+          "tickers": [
+            "STIM",
+            "BWAY",
+            "JNJ"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Mental Health",
+            "Medical Devices"
+          ],
+          "tech_keywords": [
+            "TMS",
+            "iTMS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keywords:iTMS"
+          },
+          {
+            "subject": "ticker:JNJ",
+            "predicate": "HEADWIND_FROM",
+            "object": "tech_keywords:iTMS"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充分析加速 TMS 對營運端「診所翻桌率」的結構性優化，並點出對傳統諮商收費模式的潛在排擠。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:11:47Z",
+      "latency_ms": 27301,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個結構性反駁。Gemini 的「區域保險商骨牌跟進」催化劑論有個盲點：**全美 BCBS 不是單一公司**，是 33+ 家各自獨立營運、各自訂 medical policy 的 licensee——BCBS-SC 點頭對其他 BCBS 計畫**零約束力**，不存在自動骨牌。且 TMS 用於 MDD 早已普遍給付，OCD 給付是跟著 NeuroStar 的 FDA OCD clearance 補課，屬 catch-up 而非前沿突破。另一個被忽略的反方角度：**STIM (Neuronetics)** 併 Greenbrook 後背上診所營運虧損與債務，仍未獲利、現金消耗中；單一州別給付這種邊際利多，量級遠不足以對沖其 going-concern 體質。給付『有納入』不等於『給付費率』夠看——payer mix 與 reimbursement rate 才是診所 ROIC 真變數。",
+        "bull_points": [
+          "OCD 給付跟上 NeuroStar FDA clearance，適應症擴張具體化",
+          "iTMS 縮療程提升診所椅子周轉，長線 ROIC 正向"
+        ],
+        "bear_points": [
+          "BCBS 33+ 家各自獨立訂 policy，無自動骨牌效應",
+          "STIM 併 Greenbrook 後未獲利、現金消耗，體質脆弱",
+          "給付『納入』不等於費率夠，reimbursement rate 才關鍵"
+        ],
+        "final_take": "低訊號 PR，STIM 體質風險遠大於此給付利多",
+        "entities": {
+          "tickers": [
+            "STIM",
+            "BWAY",
+            "JNJ"
+          ],
+          "sectors": [
+            "Health Care"
+          ],
+          "themes": [
+            "neuromodulation",
+            "TMS reimbursement",
+            "treatment-resistant depression"
+          ],
+          "tech_keywords": [
+            "TMS",
+            "iTMS",
+            "NeuroStar"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STIM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cash-burn-going-concern"
+          },
+          {
+            "subject": "ticker:STIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tms-reimbursement"
+          },
+          {
+            "subject": "ticker:BWAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tms-reimbursement"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 BCBS 非單一公司反駁骨牌論 + STIM 資產負債表脆弱性反方"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:12:18Z",
+      "latency_ms": 30830,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "兩位分析師已涵蓋臨床與營運面，我想補充**價值導向醫療 (Value-Based Care, VBC)** 的結構性轉型視角。目前 TMS 仍以論量計酬 (FFS) 為主，長期風險在於單次給付費率可能受壓。若 clinic 營運商 (如 **STIM**) 能利用此類給付認可，持續累積針對「加速 TMS」的臨床數據，進而與保險商簽訂「束裝式支付 (Bundled Payment)」合約，這才是將此類服務從「邊際收益」轉為「穩定毛利」的關鍵。對保險商而言，若 iTMS 能透過更有效的治療縮短病患長期成本，VBC 模式將更具誘因，這才是長線能穩定營收的核心邏輯，而非僅依賴區域給付增加。",
+        "bull_points": [
+          "臨床數據累積有助於談判 VBC 束裝合約。",
+          "束裝支付模式能穩定 clinic 營運現金流。"
+        ],
+        "bear_points": [
+          "證明療效與成本節省的數據取得成本高昂。",
+          "轉型 VBC 合約需具極高的營運效率與數據治理。"
+        ],
+        "final_take": "給付擴大是 VBC 轉型的先決條件，後續應關注其醫療成效轉化率。",
+        "entities": {
+          "tickers": [
+            "STIM",
+            "BWAY"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "Value-Based Care",
+            "Mental Health"
+          ],
+          "tech_keywords": [
+            "TMS",
+            "iTMS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:value_based_care"
+          },
+          {
+            "subject": "ticker:STIM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:clinical_services"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出 VBC 與束裝合約，從論量計酬轉型為長期合約，深化營運商業模式視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BWAY",
+        "JNJ",
+        "STIM"
+      ],
+      "sectors": [
+        "Health Care",
+        "Healthcare"
+      ],
+      "themes": [
+        "Healthcare Efficiency",
+        "Medical Devices",
+        "Mental Health",
+        "TMS reimbursement",
+        "TMS therapy",
+        "Value-Based Care",
+        "mental health coverage",
+        "neuromodulation",
+        "treatment-resistant depression"
+      ],
+      "tech_keywords": [
+        "Accelerated TMS",
+        "NeuroStar",
+        "SAINT protocol",
+        "TMS",
+        "accelerated TMS",
+        "esketamine",
+        "iTMS"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:STIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tms-insurance-coverage-expansion"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "MENTIONED_IN",
+        "object": "theme:neuromodulation"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:iTMS_adoption"
+      },
+      {
+        "subject": "ticker:BWAY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:iTMS_adoption"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tms-reimbursement"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "COMPETES_WITH",
+        "object": "entity:radial"
+      },
+      {
+        "subject": "ticker:JNJ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tms-reimbursement"
+      },
+      {
+        "subject": "ticker:BWAY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tms-reimbursement"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keywords:iTMS"
+      },
+      {
+        "subject": "ticker:JNJ",
+        "predicate": "HEADWIND_FROM",
+        "object": "tech_keywords:iTMS"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cash-burn-going-concern"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:value_based_care"
+      },
+      {
+        "subject": "ticker:STIM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:clinical_services"
+      }
+    ],
+    "bull_summary": [
+      "保險給付擴張擴大 TMS 可及市場 (TAM)",
+      "加速式 TMS 納保利好 NeuroStar 滲透率",
+      "OCD 適應症給付鬆綁為長線趨勢訊號",
+      "醫保納入加速療法，可提升診所設備治療週轉率。",
+      "推動 neuromodulation 成為主流心理治療選擇。",
+      "STIM 併 Greenbrook 後給付直接挹注自營診所看診收入"
+    ],
+    "bear_summary": [
+      "Radial 與 BCBS-SC 皆非上市，無直接標的",
+      "單一州別保險商，財務影響微乎其微",
+      "純公關稿，pre-triage 情緒標籤誤判",
+      "區域性保險涵蓋範圍有限，對營收貢獻具滯後性。",
+      "若臨床數據長期未見顯著改善，可能面臨給付審查收緊。",
+      "TMS 給付擴大是 JNJ Spravato 憂鬱症franchise邊際逆風"
+    ],
+    "final_take": "給付擴大是 VBC 轉型的先決條件，後續應關注其醫療成效轉化率。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:12:18Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH, MENTIONED_IN; gemini-only: SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -481,6 +481,47 @@ aside#sidebar { display: flex; flex-direction: column; }
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 8%, transparent);
 }
 
+/* ── Sidebar LLM settings panel ─────────────────────────────────── */
+.sidebar-settings {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 8px; border-radius: 8px;
+  background: color-mix(in srgb, var(--text-muted) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 12%, transparent);
+}
+.sidebar-settings.hidden { display: none; }
+.sidebar-set-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 9.5px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+.sidebar-set-select {
+  flex-shrink: 0; width: 96px;
+  font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 6px;
+  background: var(--bg-card); color: var(--text-main);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, transparent);
+  cursor: pointer;
+}
+.sidebar-set-hint {
+  font-size: 8.5px; color: var(--text-muted); opacity: 0.7; line-height: 1.4;
+}
+.sidebar-set-sub {
+  font-size: 8px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); margin-top: 6px; padding-top: 5px;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 14%, transparent);
+}
+/* per-model daily usage / cooldown readout */
+.sidebar-llm-usage {
+  display: flex; flex-direction: column; gap: 2px; margin-top: 4px;
+  padding-top: 5px; border-top: 1px solid color-mix(in srgb, var(--text-muted) 14%, transparent);
+}
+.sidebar-llm-row {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-size: 8.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em;
+}
+.sidebar-llm-row.sidebar-llm-cool { color: #eab308; }
+.sidebar-llm-row.sidebar-llm-off  { color: var(--text-muted); opacity: 0.5; }
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -748,6 +789,23 @@ aside#sidebar { display: flex; flex-direction: column; }
 #signal-tip-tooltip .stt-desc {
   color: var(--text-main); margin-bottom: 8px;
   font-size: 11.5px;
+}
+/* V2.17.7 — markdown-rendered tooltip body. _renderTipMarkdown injects
+   <p> + <strong> + <br>; reset browser defaults so paragraphs sit tight
+   and bold uses the same accent style as title. */
+#signal-tip-tooltip .stt-desc p,
+#signal-tip-tooltip .stt-hint p {
+  margin: 0 0 6px 0;
+}
+#signal-tip-tooltip .stt-desc p:last-child,
+#signal-tip-tooltip .stt-hint p:last-child {
+  margin-bottom: 0;
+}
+#signal-tip-tooltip .stt-desc strong,
+#signal-tip-tooltip .stt-hint strong {
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.01em;
 }
 #signal-tip-tooltip .stt-live {
   display: flex; gap: 6px; align-items: center;
@@ -1351,6 +1409,18 @@ aside#sidebar { display: flex; flex-direction: column; }
   opacity: 0.6;
 }
 .cal-earnings-btn-refresh:hover { opacity: 1; }
+/* V2.15.0 — pre-earnings preview button (amber). Surfaces on calendar earnings
+   events when event date ≤ 7d away. Pairs with .ea-act-btn-preview on the
+   earnings page. */
+.cal-earnings-btn-preview {
+  background: rgba(251, 191, 36, 0.10);
+  border-color: rgba(251, 191, 36, 0.30);
+  color: #fbbf24;
+}
+.cal-earnings-btn-preview:hover {
+  background: rgba(251, 191, 36, 0.22);
+  border-color: rgba(251, 191, 36, 0.50);
+}
 .cal-earnings-cached-badge {
   font-size: 9.5px;
   font-weight: 800;
@@ -2378,6 +2448,97 @@ body.cal-detail-locked {
     font-size: 9.5px;
     color: var(--text-muted);
     font-style: italic;
+}
+
+/* ════════════════════════════════════════════════════════════
+   V2.17.5 — Pre-market chain status pill (atomic 3-row unit)
+   ════════════════════════════════════════════════════════════ */
+.chain-status-pill {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    min-width: 250px;
+    max-width: 320px;
+    background: var(--bg-card);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15), 0 12px 32px -8px rgba(0,0,0,0.55);
+    z-index: 9991;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    transition: opacity 0.18s ease, transform 0.18s ease, bottom 0.2s ease;
+}
+[data-theme='dark'] .chain-status-pill {
+    background: rgba(24,24,27,0.95);
+}
+[data-theme='light'] .chain-status-pill {
+    background: rgba(255,255,255,0.98);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15), 0 12px 32px -8px rgba(0,0,0,0.18);
+}
+.chain-status-pill.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+.chain-status-pill.has-proto-pill { bottom: 92px; }  /* lift above proto-status-pill */
+.chain-pill-head {
+    padding: 9px 12px 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: rgb(245, 158, 11);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.chain-pill-head-icon {
+    font-size: 14px;
+    animation: proto-spin 2.4s linear infinite;
+    display: inline-block;
+}
+.chain-pill-head-title { flex: 1; }
+.chain-pill-head-elapsed {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.chain-pill-rows {
+    padding: 4px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-top: 1px dashed var(--border);
+    margin-top: 2px;
+    padding-top: 8px;
+    background: rgba(245, 158, 11, 0.04);
+}
+.chain-pill-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-main);
+}
+.chain-pill-row-icon { font-size: 12px; width: 14px; flex-shrink: 0; text-align: center; }
+.chain-pill-row-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    width: 50px;
+    flex-shrink: 0;
+    color: var(--text-main);
+}
+.chain-pill-row-meta {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    font-size: 10.5px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -3511,30 +3672,10 @@ body.cal-detail-locked {
 }
 #cal-llm-review:disabled { cursor: progress; }
 
-/* ── Rich pill tooltip (shared: sector page #pill-tooltip + decisions #decision-tip) ── */
-#decision-tip {
-    position: fixed; z-index: 9999; width: 300px;
-    background: var(--bg-card);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px; padding: 13px 15px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    pointer-events: none;
-    opacity: 0; transition: opacity 0.12s;
-}
-#decision-tip.tip-visible { opacity: 1; }
-[data-theme="light"] #decision-tip {
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
-}
-/* tip-title / tip-desc / tip-scale already used by #pill-tooltip on sector page;
-   make them globally available so decisions cards can reuse the same look. */
-.tip-title { font-size: 11px; font-weight: 800; text-transform: uppercase;
-             letter-spacing: 0.08em; color: var(--text-card-title); margin-bottom: 5px; }
-.tip-desc  { font-size: 11px; line-height: 1.5; color: var(--text-main); margin-bottom: 8px; }
-.tip-scale { font-size: 10px; line-height: 1.7; color: var(--text-muted);
-             border-top: 1px solid rgba(255,255,255,0.07); padding-top: 7px;
-             white-space: pre-line; }
-[data-theme="light"] .tip-scale { border-top-color: rgba(0,0,0,0.08); }
+/* V2.17.9 — #decision-tip + .tip-* legacy rules removed; decisions page now
+   renders into the shared #signal-tip-tooltip element with .stt-* classes
+   (visual parity with sector page status pills). See page-decisions.js
+   initDecisionTip handler. */
 
 /* ── V2.12.0 · Radar K-line modern loading state ────────────────────────
    Top thin progress bar (indeterminate shuttle) + center accent pill with
@@ -3562,4 +3703,271 @@ body.cal-detail-locked {
 @keyframes klineDotBounce {
     0%, 70%, 100% { opacity: 0.35; transform: translateY(0); }
     35%           { opacity: 1;    transform: translateY(-2px); }
+}
+
+/* V2.13.7 — shared protocol-run banner styles. Originally inline in news.html;
+   pulled here so earnings.html (and future pages) can reuse. */
+.scan-card-frame {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-left: 6px solid var(--scan-accent, #3b82f6);
+    box-shadow: inset 4px 0 12px -4px color-mix(in srgb, var(--scan-accent, #3b82f6) 40%, transparent);
+    transition: border-left-color 0.2s, box-shadow 0.2s;
+}
+.scan-card-frame * { min-width: 0; }
+.scan-card-log {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; line-height: 1.55;
+    max-height: 240px; overflow-y: auto;
+    padding: 0; margin: 0;
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.scan-card-log:empty::before {
+    content: 'Waiting for log output…'; color: #52525b; font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   V2.17.19 — Drill-down modal (per-category decision list)
+   Triggered by clicking a `.cal-stat-tile`. Reuses `renderDecisionCard`
+   so every row already carries the verdict color stripe + emoji badge
+   + per-source body. Modal layer is global (sibling of <body>).
+   ────────────────────────────────────────────────────────────────── */
+.cal-stat-tile {
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.cal-stat-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+.cal-drill-modal {
+    position: fixed; inset: 0;
+    z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+}
+.cal-drill-modal.hidden { display: none; }
+.cal-drill-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(15, 23, 42, 0.55);             /* dim layer regardless of theme — keeps focus on shell */
+    backdrop-filter: blur(6px);
+    animation: cal-drill-fade 140ms ease-out;
+}
+@keyframes cal-drill-fade { from { opacity: 0 } to { opacity: 1 } }
+.cal-drill-shell {
+    position: relative;
+    width: min(1100px, 100%);
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    /* V2.17.23 — follow page theme via CSS vars (was hardcoded dark) */
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-hover);
+    border-radius: 14px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.25);
+    overflow: hidden;
+    animation: cal-drill-pop 160ms cubic-bezier(.2,.8,.3,1.2);
+}
+@keyframes cal-drill-pop { from { transform: translateY(8px) scale(0.97); opacity: 0 } to { transform: none; opacity: 1 } }
+.cal-drill-header {
+    flex: 0 0 auto;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-header);
+}
+.cal-drill-titlewrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cal-drill-icon { font-size: 22px; }
+.cal-drill-title { font-size: 16px; font-weight: 700; color: var(--text-card-title); margin: 0; }
+.cal-drill-count {
+    font-size: 11px; color: var(--text-muted);
+    padding: 2px 8px;
+    background: var(--sidebar-active-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-variant-numeric: tabular-nums;
+}
+.cal-drill-controls { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; justify-content: flex-end; flex-wrap: wrap; }
+.cal-drill-filter { display: flex; gap: 4px; }
+.cal-drill-filter-pill {
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border-hover);
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 100ms, border-color 100ms;
+    font-variant-numeric: tabular-nums;
+}
+.cal-drill-filter-pill:hover { background: var(--sidebar-active-bg); }
+.cal-drill-filter-pill.active {
+    background: rgba(16,185,129,0.14);
+    border-color: rgba(16,185,129,0.55);
+    color: var(--primary);
+}
+.cal-drill-sort {
+    font-size: 11px;
+    padding: 4px 8px;
+    background: var(--bg-main);
+    color: var(--text-main);
+    border: 1px solid var(--border-hover);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.cal-drill-close {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sidebar-active-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-hover);
+    border-radius: 8px;
+    font-size: 13px; line-height: 1;
+    cursor: pointer;
+    transition: background 100ms, color 100ms;
+}
+.cal-drill-close:hover { background: rgba(239,68,68,0.16); color: var(--danger); border-color: rgba(239,68,68,0.55); }
+.cal-drill-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    background: var(--bg-main);
+}
+.cal-drill-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-style: italic;
+    padding: 32px 0;
+}
+
+/* Industry-heat chip (V2.17.16 sub_industry_heat → drill-down enrichment) */
+.cal-drill-heat-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    background: var(--sidebar-active-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.cal-drill-heat-chip.is-hot {
+    background: rgba(245,158,11,0.14);
+    color: #d97706;
+    border: 1px solid rgba(245,158,11,0.45);
+}
+[data-theme="light"] .cal-drill-heat-chip.is-hot { color: #b45309; }
+.cal-drill-heat-chip.is-cold { /* falls back to default */ }
+
+/* V2.17.23 — Theme-aware drill row.
+   Uses CSS vars so it auto-adapts to light/dark page theme. */
+.cal-drill-modal .cal-drill-row {
+    position: relative;
+    display: flex;
+    min-height: 86px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 100ms, transform 100ms;
+}
+.cal-drill-modal .cal-drill-row:hover {
+    border-color: var(--border-hover);
+    transform: translateX(2px);
+}
+.cal-drill-modal .cal-drill-row-stripe {
+    flex: 0 0 4px;
+}
+.cal-drill-modal .cal-drill-row-content {
+    flex: 1 1 auto;
+    padding: 10px 14px 11px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+    min-width: 0;
+    color: var(--text-main);
+}
+.cal-drill-modal .cal-drill-row-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+    color: var(--text-card-title);
+    font-weight: 600;
+}
+.cal-drill-modal .cal-drill-row-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+/* badges: subtle tint that works on both themes (color shifts via [data-theme="light"] below) */
+.cal-drill-modal .cal-badge-hit     { background: rgba(34,197,94,0.16);  color: #15803d; border: 1px solid rgba(34,197,94,0.5); }
+.cal-drill-modal .cal-badge-miss    { background: rgba(239,68,68,0.16);  color: #b91c1c; border: 1px solid rgba(239,68,68,0.5); }
+.cal-drill-modal .cal-badge-neutral { background: rgba(234,179,8,0.18);  color: #b45309; border: 1px solid rgba(234,179,8,0.5); }
+.cal-drill-modal .cal-badge-pending { background: var(--sidebar-active-bg); color: var(--text-muted); border: 1px solid var(--border-hover); }
+.cal-drill-modal .cal-badge-na      { background: var(--sidebar-active-bg); color: var(--text-muted); border: 1px solid var(--border); }
+[data-theme="dark"] .cal-drill-modal .cal-badge-hit     { color: #86efac; }
+[data-theme="dark"] .cal-drill-modal .cal-badge-miss    { color: #fca5a5; }
+[data-theme="dark"] .cal-drill-modal .cal-badge-neutral { color: #fde047; }
+
+.cal-drill-modal .cal-drill-row-source { font-size: 16px; }
+.cal-drill-modal .cal-drill-row-logo { display: inline-flex; align-items: center; }
+.cal-drill-modal .cal-drill-row-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.cal-drill-modal .cal-drill-row-window {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.85;
+}
+.cal-drill-modal .cal-drill-row-line {
+    font-size: 12px;
+    color: var(--text-main);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+.cal-drill-modal .cal-drill-row-line .font-mono { color: var(--text-card-title); }
+.cal-drill-modal .cal-drill-row-lbl {
+    display: inline-block;
+    min-width: 56px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: 6px;
+    opacity: 0.85;
+}
+.cal-drill-modal .cal-drill-row-reason {
+    font-size: 12px;
+    color: #92400e;
+    line-height: 1.55;
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+    background: rgba(251, 191, 36, 0.10);
+    border-left: 2px solid rgba(251, 191, 36, 0.6);
+    padding: 5px 9px;
+    border-radius: 4px;
+}
+[data-theme="dark"] .cal-drill-modal .cal-drill-row-reason { color: #fde68a; background: rgba(251, 191, 36, 0.08); }
+.cal-drill-modal .cal-drill-row-chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-top: 3px;
 }

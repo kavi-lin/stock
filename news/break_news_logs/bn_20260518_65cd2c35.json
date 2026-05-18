@@ -1,0 +1,573 @@
+{
+  "news_id": "bn_20260518_65cd2c35",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T06:31:05Z",
+  "last_activity_ts": "2026-05-18T06:34:33Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/18/ryanair-earnings-fy-jet-fuel-crunch-airlines.html",
+    "feed_fingerprint": "ryanair has plans armageddon scenario cfo warns weaker",
+    "published": "2026-05-18T06:10:05+00:00",
+    "url_hash": "sha1:bb641511733fbc5d37c700dc188a69e3bfb39087"
+  },
+  "headline": "Ryanair has plans for 'armageddon' scenario as CFO warns weaker European carriers may not survive jet fuel crunch",
+  "headline_zh": null,
+  "raw_summary": "Ryanair said it has plans for an \"armageddon situation,\" amid the jet fuel crisis.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T06:32:43Z",
+      "latency_ms": 25996,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Ryanair 喊「armageddon」是低成本龍頭的**經典心理戰**——CFO 公開示警弱體質歐洲航司撐不過燃油危機，本質是替**產業整併**鋪路。Ryanair 燃油避險覆蓋率高、淨負債低、單位成本歐洲最低，燃油緊縮反而是**汰弱留強**的催化劑：弱者削減運力或退場後，留下的航線與時刻帶由 Ryanair 接收。短期市場會把標題讀成利空（全行業成本壓力），但對 **RYAAY** 個股而言，危機定價錯置正是進場觀察點。真正風險不在燃油本身，而在燃油暴漲同時疊加歐洲需求轉弱——成本與營收雙殺才是 armageddon。需追蹤 jet fuel crack spread 與夏季載客率。",
+        "bull_points": [
+          "燃油避險＋最低單位成本，Ryanair 抗壓最強",
+          "弱體質航司退場，航線時刻帶整併歸龍頭",
+          "市場誤把行業利空套在龍頭，定價錯置"
+        ],
+        "bear_points": [
+          "燃油成本上行壓縮全行業利潤率",
+          "成本漲＋歐洲需求弱形成雙殺風險",
+          "CFO 示警若兌現代表景氣下行訊號"
+        ],
+        "final_take": "看多 RYAAY，但須確認歐洲夏季需求未同步轉弱",
+        "entities": {
+          "tickers": [
+            "RYAAY"
+          ],
+          "sectors": [
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "jet fuel crunch",
+            "airline consolidation",
+            "European aviation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:RYAAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:airline-consolidation"
+          },
+          {
+            "subject": "ticker:RYAAY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:jet-fuel-crunch"
+          },
+          {
+            "subject": "ticker:RYAAY",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:european-aviation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "龍頭逆境得利，但雙殺風險未除，定價偏錯置"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T06:33:01Z",
+      "latency_ms": 17819,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Ryanair 提及「armageddon」不只是航司競爭，更可能對 **OEMs** 如 Boeing 或 Airbus 產生遞延效應。當小型航司退場，雖然短期影響交付需求，但長期看，汰換高油耗舊機型、轉向購買高燃油效率的 **Narrow-body aircraft** 需求會被加速。這其實會推升對 LEAP-engine 等燃油經濟性極高的技術需求。市場過度聚焦在燃油成本壓力，忽略了此危機可能加速歐洲航線的「現代化整併」，對具備高燃油效益機隊的航司反而是中長期的 **Capex** 護城河。",
+        "bull_points": [
+          "加速高燃油效益機隊替換需求。",
+          "航司整併提升存續者市場定價權。"
+        ],
+        "bear_points": [
+          "供應鏈產能對應變更的調整壓力。",
+          "全產業燃油漲價削弱消費需求。"
+        ],
+        "final_take": "航司整併加速，需關注具燃油效率領先優勢的 OEM 供應鏈。",
+        "entities": {
+          "tickers": [
+            "RYAAY",
+            "BA",
+            "EADSY",
+            "GE",
+            "RTX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Airline Consolidation",
+            "Fuel Efficiency"
+          ],
+          "tech_keywords": [
+            "LEAP-engine",
+            "Narrow-body"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RYAAY",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Airline_Consolidation"
+          },
+          {
+            "subject": "ticker:GE",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:LEAP-engine"
+          },
+          {
+            "subject": "tech_keyword:LEAP-engine",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Fuel_Efficiency"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "聚焦整併對高燃油效率機隊與供應鏈的長期推動力。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T06:33:33Z",
+      "latency_ms": 32360,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "兩位分析師聚焦航司整併與 OEM 機隊現代化，但漏了**最直接的受惠方:煉油廠**。Jet fuel crunch 的另一面就是 **jet fuel crack spread 走闊**——這正是精煉端毛利擴張。歐洲煉能退役加地緣套利使航空煤油供給偏緊，crack spread 擴大直接灌進 refining margin，**VLO、MPC、PSX** 是這場危機的鏡像贏家，與航司利空互為對立交易。另對 RYAAY 補一個反方:燃油避險**有到期日**,當前低成本鎖單滾掉後須以更高 strike 重新避險,所謂「成本護城河」會隨避險展期而衰減,並非結構性永久優勢。市場若只買整併故事、忽略煉油端,定價就漏了一條腿。",
+        "bull_points": [
+          "煉油廠 VLO/MPC/PSX 受惠 jet fuel crack spread 走闊",
+          "歐洲煉能退役使航空煤油供給結構性偏緊",
+          "燃油危機可作航司利空的對沖性多頭交易"
+        ],
+        "bear_points": [
+          "Ryanair 燃油避險有到期日,成本護城河會隨展期衰減",
+          "重新避險須以更高 strike 鎖單,單位成本優勢縮窄",
+          "煉油毛利受需求轉弱與煉能重啟雙向擠壓"
+        ],
+        "final_take": "看煉油端 VLO 受惠,RYAAY 護城河被高估",
+        "entities": {
+          "tickers": [
+            "VLO",
+            "MPC",
+            "PSX",
+            "RYAAY"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials"
+          ],
+          "themes": [
+            "jet fuel crack spread",
+            "refining margin",
+            "airline consolidation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jet-fuel-crack-spread"
+          },
+          {
+            "subject": "ticker:MPC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jet-fuel-crack-spread"
+          },
+          {
+            "subject": "ticker:PSX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jet-fuel-crack-spread"
+          },
+          {
+            "subject": "ticker:RYAAY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fuel-hedge-roll-off"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增煉油廠鏡像受惠方與避險衰減反方,前序皆未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T06:33:48Z",
+      "latency_ms": 14266,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論皆聚焦航司結構與煉油端，卻忽略了這場危機對**機場營運商 (Airport Operators)** 的二階效應。Ryanair 的「低成本、secondary hubs」策略若因小型航司退場導致航線驟減，機場的非航空收入（免稅店、商業設施）將同步萎縮。這類營運商對機場交通量極度敏感，航司倒閉潮不僅影響降落費，更直接破壞整體旅客基數，這也是航司燃油危機中被市場忽略的潛在「附帶損傷」。",
+        "bull_points": [
+          "航司整併後，存活者對機場議價力降低，有利機場長期營收穩定。",
+          "強勢航司接收航線後，有望恢復並提升機場的載客量能。"
+        ],
+        "bear_points": [
+          "航司倒閉潮導致短期載客量驟減，機場商業與租賃收入面臨壓力。",
+          "小型航司退場可能導致部分 secondary hubs 的服務頻率顯著下降。"
+        ],
+        "final_take": "需關注機場營運商營收壓力，航司倒閉潮非航司獨自承擔風險。",
+        "entities": {
+          "tickers": [
+            "RYAAY"
+          ],
+          "sectors": [
+            "Industrials",
+            "Real Estate"
+          ],
+          "themes": [
+            "AI capex",
+            "Travel demand"
+          ],
+          "tech_keywords": [
+            "fuel efficiency"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "sector:Industrials",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:airline_consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充航司倒閉對機場營運商的二階風險，屬產業中被忽視的視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T06:34:19Z",
+      "latency_ms": 31567,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面四輪把航司、OEM、煉油、機場都掃過，漏了**飛機租賃商 (Aircraft Lessors)**——尤其美股掛牌的 **AER (AerCap)**。「Armageddon」若兌現成弱體質歐洲航司倒閉潮，對 lessor 是**雙面刃**:一面是承租方違約風險升高,機隊被迫收回、重新招租產生空租期與 remarketing 成本;另一面卻是反方利多——全球窄體機因 Boeing/Airbus 交付瓶頸本就供給偏緊,一旦高油耗舊機加速退役,**省油新世代機隊 (LEAP-engine narrow-body)** 的租金費率會隨稀缺性走高,AER 手上現代化機隊估值與續租租金同步受惠。市場只盯航司損益表,沒看租賃端這條 counterparty 鏈。追蹤點:歐洲航司破產實際家數與 AER 對其曝險佔比。",
+        "bull_points": [
+          "窄體機交付瓶頸,省油新機租金費率因稀缺走高",
+          "舊機加速退役,AER 現代化機隊估值與續租受惠",
+          "整併後存活航司信用改善,長約租金穩定度提升"
+        ],
+        "bear_points": [
+          "弱體質航司倒閉,承租方違約直接衝擊 lessor",
+          "機隊被迫收回產生空租期與 remarketing 成本",
+          "AER 對歐洲弱航司曝險比重未知,尾端風險難量化"
+        ],
+        "final_take": "AER 偏多,但須先確認歐洲航司違約曝險佔比",
+        "entities": {
+          "tickers": [
+            "AER",
+            "RYAAY",
+            "BA"
+          ],
+          "sectors": [
+            "Industrials",
+            "Financials"
+          ],
+          "themes": [
+            "aircraft leasing",
+            "airline consolidation",
+            "jet fuel crunch",
+            "fleet modernization"
+          ],
+          "tech_keywords": [
+            "LEAP-engine",
+            "narrow-body aircraft"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AER",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:european-carrier-bankruptcy"
+          },
+          {
+            "subject": "ticker:AER",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:fuel-efficient-fleet-scarcity"
+          },
+          {
+            "subject": "ticker:AER",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:RYAAY"
+          },
+          {
+            "subject": "ticker:AER",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:BA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增飛機租賃端 AER,counterparty 違約與機隊稀缺雙面效應,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T06:34:33Z",
+      "latency_ms": 14066,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論皆忽略了**支付處理商 (Payment Processors)** 如 **V (Visa)**、**MA (Mastercard)** 或 **GPN (Global Payments)** 的潛在風險。當航空公司倒閉，乘客預售票款的**退款義務 (Chargebacks)** 往往會倒灌回支付處理商。若 Ryanair 預警的「armageddon」導致多家弱勢航司在短期內破產，處理商將面臨龐大的預售款償付壓力。這不單是航空業利空，更是金融支付鏈中極易被忽視的結構性「隱性負債」。市場目前僅將航司危機視為行業重組，卻漏算了此類風險在支付鏈中的現金流炸彈。",
+        "bull_points": [
+          "對具嚴格風險風控的支付龍頭而言，市場整合是提升市佔的機會。",
+          "危機後航空業票務預售模式若趨於保守，有利降低支付處理風險。"
+        ],
+        "bear_points": [
+          "大規模航空違約潮引發大量 Chargeback，直接侵蝕支付處理商利潤。",
+          "處理商被迫增加風險準備金，可能導致短期財報獲利下修。"
+        ],
+        "final_take": "需監控航空業違約率對支付處理商 Chargeback 損失的影響。",
+        "entities": {
+          "tickers": [
+            "V",
+            "MA",
+            "GPN"
+          ],
+          "sectors": [
+            "Financial Services"
+          ],
+          "themes": [
+            "Payment Processing Risk",
+            "Chargeback Liability"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:V",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:airline_bankruptcies"
+          },
+          {
+            "subject": "ticker:MA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:airline_bankruptcies"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "提出了航司破產對支付鏈 Chargeback 風險的二階影響，尚未被前述討論涵蓋。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AER",
+        "BA",
+        "EADSY",
+        "GE",
+        "GPN",
+        "MA",
+        "MPC",
+        "PSX",
+        "RTX",
+        "RYAAY",
+        "V",
+        "VLO"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Energy",
+        "Financial Services",
+        "Financials",
+        "Industrials",
+        "Real Estate"
+      ],
+      "themes": [
+        "AI capex",
+        "Airline Consolidation",
+        "Chargeback Liability",
+        "European aviation",
+        "Fuel Efficiency",
+        "Payment Processing Risk",
+        "Travel demand",
+        "aircraft leasing",
+        "airline consolidation",
+        "fleet modernization",
+        "jet fuel crack spread",
+        "jet fuel crunch",
+        "refining margin"
+      ],
+      "tech_keywords": [
+        "LEAP-engine",
+        "Narrow-body",
+        "fuel efficiency",
+        "narrow-body aircraft"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:RYAAY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:airline-consolidation"
+      },
+      {
+        "subject": "ticker:RYAAY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:jet-fuel-crunch"
+      },
+      {
+        "subject": "ticker:RYAAY",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:european-aviation"
+      },
+      {
+        "subject": "ticker:RYAAY",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Airline_Consolidation"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:LEAP-engine"
+      },
+      {
+        "subject": "tech_keyword:LEAP-engine",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Fuel_Efficiency"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jet-fuel-crack-spread"
+      },
+      {
+        "subject": "ticker:MPC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jet-fuel-crack-spread"
+      },
+      {
+        "subject": "ticker:PSX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jet-fuel-crack-spread"
+      },
+      {
+        "subject": "ticker:RYAAY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fuel-hedge-roll-off"
+      },
+      {
+        "subject": "sector:Industrials",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:airline_consolidation"
+      },
+      {
+        "subject": "ticker:AER",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:european-carrier-bankruptcy"
+      },
+      {
+        "subject": "ticker:AER",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:fuel-efficient-fleet-scarcity"
+      },
+      {
+        "subject": "ticker:AER",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:RYAAY"
+      },
+      {
+        "subject": "ticker:AER",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:V",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:airline_bankruptcies"
+      },
+      {
+        "subject": "ticker:MA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:airline_bankruptcies"
+      }
+    ],
+    "bull_summary": [
+      "燃油避險＋最低單位成本，Ryanair 抗壓最強",
+      "弱體質航司退場，航線時刻帶整併歸龍頭",
+      "市場誤把行業利空套在龍頭，定價錯置",
+      "加速高燃油效益機隊替換需求。",
+      "航司整併提升存續者市場定價權。",
+      "煉油廠 VLO/MPC/PSX 受惠 jet fuel crack spread 走闊"
+    ],
+    "bear_summary": [
+      "燃油成本上行壓縮全行業利潤率",
+      "成本漲＋歐洲需求弱形成雙殺風險",
+      "CFO 示警若兌現代表景氣下行訊號",
+      "供應鏈產能對應變更的調整壓力。",
+      "全產業燃油漲價削弱消費需求。",
+      "Ryanair 燃油避險有到期日,成本護城河會隨展期衰減"
+    ],
+    "final_take": "需監控航空業違約率對支付處理商 Chargeback 損失的影響。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T06:34:33Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

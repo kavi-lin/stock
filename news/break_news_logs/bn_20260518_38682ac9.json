@@ -1,0 +1,537 @@
+{
+  "news_id": "bn_20260518_38682ac9",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T09:12:01Z",
+  "last_activity_ts": "2026-05-18T09:17:44Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/4de140b7b607",
+    "feed_fingerprint": "futu:BIDU:494af49c49",
+    "published": "2026-05-18T17:05:25+08:00",
+    "url_hash": "sha1:eda52526a58e547492a2d5965abb41bc6b259d76"
+  },
+  "headline": "百度Q1營收320.75億元，去年同期爲324.52億元",
+  "headline_zh": null,
+  "raw_summary": "百度Q1營收320.75億元，去年同期爲324.52億元；歸屬公司的淨利潤爲34.45億元，去年同期爲77.17億元。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:16:02Z",
+      "latency_ms": 27593,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "百度Q1營收320.75億人民幣，年減約1.2%基本持平，但**歸母淨利潤從77.17億暴跌至34.45億、近乎腰斬**，才是真正信號。營收穩、利潤崩，指向兩條主線：一是核心廣告業務在中國消費疲弱下增長停滯；二是**AI capex與ERNIE大模型、智能雲的投入持續吃掉利潤率**，加上去年同期可能有一次性投資收益墊高基期。對美股ADR **BIDU** 而言，這是典型「轉型陣痛期」財報——市場會盯雲業務與Apollo Go robotaxi能否把燒錢轉成第二成長曲線。屬中國科技股個股事件，外溢有限。",
+        "bull_points": [
+          "營收年減僅1.2%，基本盤未崩",
+          "AI雲與ERNIE投入為長線轉型鋪路",
+          "Apollo Go robotaxi提供第二成長曲線想像"
+        ],
+        "bear_points": [
+          "歸母淨利潤年減近55%，利潤率嚴重壓縮",
+          "核心廣告業務受中國消費疲弱拖累停滯",
+          "AI capex短期內難見回收，持續燒錢"
+        ],
+        "final_take": "看空當季，利潤腰斬需觀察雲業務變現",
+        "entities": {
+          "tickers": [
+            "BIDU"
+          ],
+          "sectors": [
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "China internet",
+            "online advertising",
+            "robotaxi"
+          ],
+          "tech_keywords": [
+            "ERNIE",
+            "Apollo Go"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:online-advertising-weakness"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:robotaxi"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "營收持平但淨利腰斬，利潤率壓縮為核心風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:16:14Z",
+      "latency_ms": 12135,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "百度目前的陣痛不單是AI資本支出過高，關鍵在於**核心搜尋流量的獲利模式受到GenAI侵蝕**。當使用者習慣使用文心一言進行問答，傳統關鍵字廣告的點擊率（CTR）將面臨結構性下行壓力，這種「自我蠶食」效應比單純的成本支出更具長遠威脅。需關注其如何在提升AI市佔與維繫高利潤搜尋業務間取得平衡，否則轉型陣痛期恐將延長。",
+        "bull_points": [
+          "雲業務展現韌性，AI轉化率提升",
+          "Apollo Go在特定區域獲利模型確立"
+        ],
+        "bear_points": [
+          "搜尋廣告業務面臨GenAI流量分流風險",
+          "短期營運利潤率結構性惡化"
+        ],
+        "final_take": "AI轉型導致「搜尋獲利」被結構性侵蝕，短期獲利難好轉。",
+        "entities": {
+          "tickers": [
+            "BIDU",
+            "BABA",
+            "TCEHY"
+          ],
+          "sectors": [
+            "Internet",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Search monetization"
+          ],
+          "tech_keywords": [
+            "ERNIE",
+            "GenAI",
+            "Search"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "HEADWIND_FROM",
+            "object": "tech_keywords:GenAI"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出GenAI對搜尋廣告的「自我蠶食」風險，而非僅討論成本。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:16:45Z",
+      "latency_ms": 31133,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面兩位把利潤崩跌與搜尋自我蠶食講透了，補一個**被忽略的外溢點**：Apollo Go robotaxi。百度第二曲線最值錢的就是這塊，但它的擴張會直接壓到美股兩檔純 robotaxi 標的——**PONY (小馬智行)** 與 **WRD (文遠知行)**。百度靠搜尋現金流補貼 robotaxi、用低價甚至免費單衝量，純玩家沒有母體輸血，單位經濟學會被拖著走。再者今天淨利近腰斬，市場合理懷疑百度會縮減非核心燒錢，反而可能**放緩 Apollo Go 投入**，對 PONY/WRD 是短多、對自動駕駛感測供應鏈（光達、域控制器）是需求節奏的不確定性。這是中國個股事件，但 robotaxi 賽道的競爭與資本紀律才是該追的二階訊號。",
+        "bull_points": [
+          "百度若縮減燒錢，PONY/WRD 競價壓力短期緩解",
+          "BIDU 搜尋現金流仍可支撐 robotaxi 長期投入"
+        ],
+        "bear_points": [
+          "Apollo Go 低價衝量擠壓純 robotaxi 玩家單位經濟",
+          "百度資本紀律收緊使自駕感測供應鏈需求節奏不明",
+          "第二曲線變現遙遠，短期無法對沖利潤崩跌"
+        ],
+        "final_take": "看 robotaxi 賽道二階競爭，BIDU 本身偏中性",
+        "entities": {
+          "tickers": [
+            "BIDU",
+            "PONY",
+            "WRD",
+            "TSLA"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "robotaxi",
+            "AI capex",
+            "autonomous driving"
+          ],
+          "tech_keywords": [
+            "Apollo Go",
+            "ERNIE",
+            "LiDAR"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:PONY"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:WRD"
+          },
+          {
+            "subject": "ticker:PONY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:apollo-go-price-war"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:robotaxi"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增 robotaxi 外溢角度與 PONY/WRD 競爭，前討論未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:16:58Z",
+      "latency_ms": 12700,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面的分析已涵蓋搜索蠶食與自動駕駛。我補充一個被忽視的關鍵壓力源：**中國國內的AI API價格戰**。百度為了爭奪企業級AI市佔，對文心一言API進行了大幅度降價，此舉正直接與 **BABA** (阿里雲) 及新興黑馬 **DeepSeek** 在「低價獲客」上惡性競爭。這不僅壓縮了短期毛利，更讓市場質疑百度在 GenAI 時代的「護城河」是否僅剩價格，而非技術黏性。這種資本比拼式的搶市佔，恐導致轉型陣痛遠超預期。",
+        "bull_points": [
+          "雲端業務市佔率提升",
+          "企業級AI導入需求穩健"
+        ],
+        "bear_points": [
+          "AI價格戰嚴重侵蝕利潤率",
+          "面臨阿里雲與新秀競爭激烈"
+        ],
+        "final_take": "價格戰傷及獲利，需觀察AI商業化落地速度。",
+        "entities": {
+          "tickers": [
+            "BIDU",
+            "BABA"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "GenAI",
+            "API"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:BABA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充AI API價格戰對毛利的結構性衝擊。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:17:31Z",
+      "latency_ms": 33208,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個**反方校正**加一條漏掉的供應鏈節點。前面把淨利「腰斬」當作經營崩壞訊號，但百度持有龐大長期股權投資組合，34.45億 vs 77.17億的落差**大半來自投資公允價值的非經營性波動**(去年同期股權重估收益墊高基期),不等同核心 OPM 崩盤——盯 non-GAAP operating income 才看得清真實惡化幅度。第二,沒人提**AI 算力供應鏈**:美國出口管制下,ERNIE 訓練與智能雲已大幅轉向國產加速卡(華為 Ascend、寒武紀),百度 AI capex **基本不流向 NVDA**。利潤壓力反而逼百度優化每 token 算力成本,利好國產矽、對 NVDA 中國營收是結構性 headwind。這才是該追的二階供應鏈訊號。",
+        "bull_points": [
+          "淨利落差大半為非經營性投資重估,核心惡化被高估",
+          "利潤壓力逼算力成本優化,利好國產加速卡需求"
+        ],
+        "bear_points": [
+          "百度AI capex轉向Ascend/寒武紀,NVDA中國營收結構性流失",
+          "出口管制下國產算力性能落差或拖慢ERNIE迭代"
+        ],
+        "final_take": "看空但勿被腰斬標題誤導,真信號在算力國產化",
+        "entities": {
+          "tickers": [
+            "BIDU",
+            "NVDA"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "China AI compute localization",
+            "export controls"
+          ],
+          "tech_keywords": [
+            "ERNIE",
+            "Huawei Ascend",
+            "Cambricon",
+            "non-GAAP operating income"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:export-controls"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-ai-compute-localization"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "tech:huawei-ascend"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增淨利成分反方校正＋國產算力供應鏈節點,皆前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:17:44Z",
+      "latency_ms": 13264,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論皆集中在營收與晶片供應，我補充一個關鍵長線邏輯：**中國國企 (SOE) 的「主權雲」遷移需求**。在數據安全監管下，百度在公共雲/私有雲部署的客製化能力，使其在爭取國企轉型訂單上具備結構性優勢，這種 B2B 合約具有極高的黏性。這意味著即使短期營收成長平平，百度正在透過燒錢建立一套難以被競爭對手 (如 BABA) 輕易滲透的**國資雲技術底座**。市場過度關注短期的 API 價格戰，卻忽略了百度正透過雲基礎設施與國企綁定的長線護城河。",
+        "bull_points": [
+          "國企數位轉型帶來高黏性訂單。",
+          "百度主權雲符合數據安全政策。",
+          "長期基礎建設綁定企業客戶。"
+        ],
+        "bear_points": [
+          "私有化部署導致營收確認滯後。",
+          "高額客製化研發維持利潤壓力。"
+        ],
+        "final_take": "短期利潤雖受壓，但主權雲佈局是 BIDU 護城河核心。",
+        "entities": {
+          "tickers": [
+            "BIDU",
+            "BABA"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Sovereign AI",
+            "Private Cloud"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:sovereign_cloud"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "百度在 SOE 國資雲市場具有長期黏性優勢。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "BABA",
+        "BIDU",
+        "NVDA",
+        "PONY",
+        "TCEHY",
+        "TSLA",
+        "WRD"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Consumer Discretionary",
+        "Information Technology",
+        "Internet",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "China AI compute localization",
+        "China internet",
+        "Search monetization",
+        "autonomous driving",
+        "export controls",
+        "online advertising",
+        "robotaxi"
+      ],
+      "tech_keywords": [
+        "API",
+        "Apollo Go",
+        "Cambricon",
+        "ERNIE",
+        "GenAI",
+        "Huawei Ascend",
+        "LiDAR",
+        "Private Cloud",
+        "Search",
+        "Sovereign AI",
+        "non-GAAP operating income"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:online-advertising-weakness"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:robotaxi"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "HEADWIND_FROM",
+        "object": "tech_keywords:GenAI"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:PONY"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:WRD"
+      },
+      {
+        "subject": "ticker:PONY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:apollo-go-price-war"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:robotaxi"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:BABA"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:export-controls"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-ai-compute-localization"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "tech:huawei-ascend"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:sovereign_cloud"
+      }
+    ],
+    "bull_summary": [
+      "營收年減僅1.2%，基本盤未崩",
+      "AI雲與ERNIE投入為長線轉型鋪路",
+      "Apollo Go robotaxi提供第二成長曲線想像",
+      "雲業務展現韌性，AI轉化率提升",
+      "Apollo Go在特定區域獲利模型確立",
+      "百度若縮減燒錢，PONY/WRD 競價壓力短期緩解"
+    ],
+    "bear_summary": [
+      "歸母淨利潤年減近55%，利潤率嚴重壓縮",
+      "核心廣告業務受中國消費疲弱拖累停滯",
+      "AI capex短期內難見回收，持續燒錢",
+      "搜尋廣告業務面臨GenAI流量分流風險",
+      "短期營運利潤率結構性惡化",
+      "Apollo Go 低價衝量擠壓純 robotaxi 玩家單位經濟"
+    ],
+    "final_take": "短期利潤雖受壓，但主權雲佈局是 BIDU 護城河核心。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T09:17:44Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

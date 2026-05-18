@@ -1,0 +1,553 @@
+{
+  "news_id": "bn_20260517_7c898afd",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T17:12:01Z",
+  "last_activity_ts": "2026-05-17T17:16:13Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/boeing-still-hot-water-over-164358929.html",
+    "feed_fingerprint": "boeing still hot water over max crash",
+    "published": "2026-05-17T16:43:58+00:00",
+    "url_hash": "sha1:15002cf22549f45d3d4582fe3c83b9ba55a7d37a"
+  },
+  "headline": "Boeing is still in hot water over Max crash",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T17:14:38Z",
+      "latency_ms": 21580,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "波音 Max 墜機案餘波未了 — 法律與監管尾部風險再被點燃。重點不在單次和解金額，而在**現金流與交付節奏的不確定性**：DOJ 認罪協商、家屬訴訟、FAA 對 737 產線的監管壓力，都可能延後產能爬坡。但市場對波音的舊聞已部分鈍化，除非出現新的停飛或交付凍結，否則屬**情緒面利空而非基本面斷裂**。真正觀察點是 737 MAX 月產能能否守住、以及國防部門 (BA Defense) 與 RTX、GE 等供應鏈是否被波及。雙寡頭格局下航司無從轉單,空巴 (EADSY) 為相對受惠方。",
+        "bull_points": [
+          "舊聞鈍化,墜機議題市場已部分定價",
+          "民航雙寡頭,航司無法轉單流失訂單",
+          "積壓訂單龐大,長期交付能見度仍在"
+        ],
+        "bear_points": [
+          "DOJ 認罪協商與訴訟推高法律負債",
+          "FAA 監管壓力恐壓制 737 產能爬坡",
+          "現金流與交付節奏不確定性持續"
+        ],
+        "final_take": "情緒利空為主,看交付產能能否守住",
+        "entities": {
+          "tickers": [
+            "BA",
+            "EADSY",
+            "RTX",
+            "GE",
+            "SPR"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "aviation safety",
+            "regulatory risk",
+            "litigation overhang",
+            "supply chain"
+          ],
+          "tech_keywords": [
+            "737 MAX"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:max-litigation"
+          },
+          {
+            "subject": "ticker:EADSY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:max-litigation"
+          },
+          {
+            "subject": "ticker:SPR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:RTX",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "法律尾部風險再起,但屬情緒面非基本面斷裂"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T17:14:52Z",
+      "latency_ms": 14084,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "波音的長期法規糾紛不只影響其產能，對**飛機租賃產業 (如 ALC, AER)** 構成了深層的營運負擔。租賃公司依賴預測精準的交付時程來調整機隊組成。波音交付的不確定性，迫使租賃公司不得不延長老舊機型的服務壽命，這不僅推高了保養與維運成本，也打亂了其資本配置與機隊更新策略。這種「供應鏈瓶頸的外溢效應」不僅限於零部件供應商，更直接衝擊租賃商的資產獲利與長期成長預期，這是市場目前較少討論的次級風險。",
+        "bull_points": [
+          "原廠交付延遲拉長了現有機隊市場價值",
+          "舊機型需求增加帶動部分租賃合約收益"
+        ],
+        "bear_points": [
+          "交付計畫被打亂導致租賃商資本配置承壓",
+          "機隊更新週期被迫延後影響長期營運擴張",
+          "維運成本上升侵蝕租賃業務利潤率"
+        ],
+        "final_take": "供應端瓶頸外溢，長期租賃營運成本壓力增加。",
+        "entities": {
+          "tickers": [
+            "BA",
+            "ALC",
+            "AER"
+          ],
+          "sectors": [
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Aviation Supply Chain"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:ALC"
+          },
+          {
+            "subject": "ticker:ALC",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:BA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討波音產能延宕對租賃商的二階營運影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T17:15:16Z",
+      "latency_ms": 24309,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面兩位聚焦現金流與租賃外溢，漏掉**信用評等的尾部風險**。波音目前 S&P 評等 BBB-，是投資級最後一階,法律和解金、家屬賠償加上 737 產線爬坡的資本支出,持續侵蝕自由現金流。一旦被降至垃圾級,**指數型 IG 債券基金將被迫拋售**,融資成本跳升,反過來壓縮波音投資產能的能力——形成負向循環。另一個沒被點到的具體節點是 **Spirit AeroSystems (SPR)**:波音正回購這家機身供應商,墜機監管壓力會連帶放大 SPR 的品質整改成本與整合風險。雙寡頭護城河仍在,但資產負債表是這次真正的脆弱點。",
+        "bull_points": [
+          "雙寡頭格局穩固,航司無處轉單",
+          "目前仍守住投資級評等 BBB-",
+          "舊聞鈍化,基本面未斷裂"
+        ],
+        "bear_points": [
+          "降評至垃圾級恐觸發 IG 債基被迫拋售",
+          "和解金+資本支出雙夾擊自由現金流",
+          "回購 SPR 放大機身整合與整改成本"
+        ],
+        "final_take": "看空偏中性,緊盯評等展望與自由現金流",
+        "entities": {
+          "tickers": [
+            "BA",
+            "SPR",
+            "EADSY",
+            "RTX",
+            "GE"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "credit downgrade risk",
+            "aircraft delivery bottleneck",
+            "fallen angel"
+          ],
+          "tech_keywords": [
+            "737 MAX",
+            "BBB-"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:credit-downgrade-risk"
+          },
+          {
+            "subject": "ticker:SPR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:max-crash-litigation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "新增信用評等 fallen-angel 風險與 SPR 回購節點,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T17:15:28Z",
+      "latency_ms": 12189,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前幾輪討論集中在 BA 本身與下游租賃，卻忽略了 **MRO (維修、維護與大修)** 市場的結構性轉變。隨著波音新機交付不斷延後，全球航空公司被迫延長現役機隊壽命，這為 **GE Aerospace (GE)** 與 **RTX (RTX)** 等引擎與零組件供應商的 MRO 業務帶來了意料之外的「長壽紅利」。這不僅平衡了新機銷售不順的壓力，更讓相關企業從單次硬體銷售模式，轉向獲利更穩定的長期售後服務訂閱。這是航太供應鏈中被市場忽視的防禦性亮點。",
+        "bull_points": [
+          "現役機隊延壽帶動 MRO 市場需求大幅提升。",
+          "GE/RTX 服務營收佔比提高，增強利潤穩定性。"
+        ],
+        "bear_points": [
+          "關鍵零部件短缺恐限制 MRO 產能爬坡。",
+          "老舊機型維修複雜度上升，加重航司運營成本。"
+        ],
+        "final_take": "看空波音債信與產能，但看好 MRO 供應鏈的長期獲利韌性。",
+        "entities": {
+          "tickers": [
+            "BA",
+            "GE",
+            "RTX"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "MRO",
+            "Supply Chain"
+          ],
+          "tech_keywords": [
+            "Engine Maintenance",
+            "Fleet Longevity"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:MRO_demand"
+          },
+          {
+            "subject": "ticker:RTX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:MRO_demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充了被忽略的 MRO 市場，指出機隊延壽帶來的供應鏈服務利多。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T17:15:58Z",
+      "latency_ms": 29377,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個直接反駁 Round 0 的點:**「航司轉單空巴」這個相對受惠論其實站不住腳**。空巴自己也卡在產能瓶頸——A320neo 訂單已排到 2030 年代,且受制於 **CFM LEAP 引擎 (GE 與 Safran 合資的 CFM International) 的交付短缺**,根本吃不下波音讓出的份額。所以 Max 風波的真實結果不是份額轉移,而是**全球窄體機運力結構性短缺**,反而讓現役機隊估值與航司票價獲得支撐。另一個被忽略的長線節點是 **COMAC C919**:中國航司藉此加速國產替代,雖然短期量小,但雙寡頭護城河的'不可轉單'前提正被緩慢侵蝕。BA 的問題是自身財務,不是競爭對手變強。",
+        "bull_points": [
+          "空巴產能受限,波音份額不會真的流失",
+          "窄體機運力短缺撐起現役機隊估值與票價",
+          "雙寡頭結構未破,航司議價力仍弱"
+        ],
+        "bear_points": [
+          "CFM LEAP 引擎短缺,全球交付瓶頸難解",
+          "COMAC C919 長線侵蝕'不可轉單'護城河",
+          "運力短缺推升航司成本,需求端承壓"
+        ],
+        "final_take": "轉單論證偽,波音風險純財務面",
+        "entities": {
+          "tickers": [
+            "BA",
+            "GE",
+            "EADSY",
+            "RTX",
+            "SPR"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "aerospace supply chain",
+            "narrowbody capacity shortage"
+          ],
+          "tech_keywords": [
+            "LEAP engine",
+            "A320neo",
+            "C919",
+            "737 MAX"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:EADSY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:leap-engine-shortage"
+          },
+          {
+            "subject": "ticker:GE",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:EADSY"
+          },
+          {
+            "subject": "narrative:c919",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:BA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "反駁轉單論+點出CFM引擎瓶頸與C919長線威脅,屬全新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T17:16:13Z",
+      "latency_ms": 14848,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "討論多聚焦於民機與 MRO，卻忽略了波音 **Defense (BDS)** 部門面臨的「固定價格合約」陷阱。波音承接多項國防計畫均為固定價格，在通膨與產能受限下，嚴重成本超支。過往民機的高現金流足以掩蓋，但隨 737 MAX 產能爬坡瓶頸，波音已無足夠資金填補 BDS 的虧損黑洞。這不只是合規問題，而是營運模式在「成本管控」與「獲利預測」上的結構性潰敗。",
+        "bull_points": [
+          "國防部門技術資產關鍵",
+          "具長期合約保護"
+        ],
+        "bear_points": [
+          "固定價格合約導致成本失控",
+          "商用機現金流無法填補國防虧損"
+        ],
+        "final_take": "國防部門固定價格虧損將是債務結構的壓力源。",
+        "entities": {
+          "tickers": [
+            "BA"
+          ],
+          "sectors": [
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Defense spending"
+          ],
+          "tech_keywords": [
+            "Fixed-price contracts",
+            "KC-46"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fixed-price-contracts"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "揭示 BDS 固定價格合約帶來的結構性財務風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AER",
+        "ALC",
+        "BA",
+        "EADSY",
+        "GE",
+        "RTX",
+        "SPR"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Industrials"
+      ],
+      "themes": [
+        "Aviation Supply Chain",
+        "Defense spending",
+        "MRO",
+        "Supply Chain",
+        "aerospace supply chain",
+        "aircraft delivery bottleneck",
+        "aviation safety",
+        "credit downgrade risk",
+        "fallen angel",
+        "litigation overhang",
+        "narrowbody capacity shortage",
+        "regulatory risk",
+        "supply chain"
+      ],
+      "tech_keywords": [
+        "737 MAX",
+        "A320neo",
+        "BBB-",
+        "C919",
+        "Engine Maintenance",
+        "Fixed-price contracts",
+        "Fleet Longevity",
+        "KC-46",
+        "LEAP engine"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:max-litigation"
+      },
+      {
+        "subject": "ticker:EADSY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:max-litigation"
+      },
+      {
+        "subject": "ticker:SPR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:RTX",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:ALC"
+      },
+      {
+        "subject": "ticker:ALC",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:credit-downgrade-risk"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:max-crash-litigation"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:MRO_demand"
+      },
+      {
+        "subject": "ticker:RTX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:MRO_demand"
+      },
+      {
+        "subject": "ticker:EADSY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:leap-engine-shortage"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:EADSY"
+      },
+      {
+        "subject": "narrative:c919",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fixed-price-contracts"
+      }
+    ],
+    "bull_summary": [
+      "舊聞鈍化,墜機議題市場已部分定價",
+      "民航雙寡頭,航司無法轉單流失訂單",
+      "積壓訂單龐大,長期交付能見度仍在",
+      "原廠交付延遲拉長了現有機隊市場價值",
+      "舊機型需求增加帶動部分租賃合約收益",
+      "雙寡頭格局穩固,航司無處轉單"
+    ],
+    "bear_summary": [
+      "DOJ 認罪協商與訴訟推高法律負債",
+      "FAA 監管壓力恐壓制 737 產能爬坡",
+      "現金流與交付節奏不確定性持續",
+      "交付計畫被打亂導致租賃商資本配置承壓",
+      "機隊更新週期被迫延後影響長期營運擴張",
+      "維運成本上升侵蝕租賃業務利潤率"
+    ],
+    "final_take": "國防部門固定價格虧損將是債務結構的壓力源。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T17:16:13Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

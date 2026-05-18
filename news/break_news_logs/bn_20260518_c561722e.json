@@ -1,0 +1,386 @@
+{
+  "news_id": "bn_20260518_c561722e",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T00:02:03Z",
+  "last_activity_ts": "2026-05-18T00:10:20Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/id-buy-growth-stock-35-220500031.html",
+    "feed_fingerprint": "i d buy growth stock after 35 plunge",
+    "published": "2026-05-17T22:05:00+00:00",
+    "url_hash": "sha1:7d20a66ae621cb0b1075758d4f0fa3b212c86143"
+  },
+  "headline": "I'd Buy This Growth Stock After Its 35% Plunge",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T00:08:34Z",
+      "latency_ms": 23565,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此則為 Yahoo Finance **個股觀點文**，標題未點名標的，摘要全空，pre-triage 給 -1.0 純屬關鍵字噪音。實質訊號近乎零。**35% 回檔後抄底**的成長股近期常見候選包括 SaaS、半導體設備、生技等高 beta 名單——但無內文無法歸因。值得提醒的是：單一作者「我會買」屬意見而非催化劑，**回檔幅度本身不構成買點**，需檢視回檔是基本面惡化（estimate cut）還是純估值壓縮（rate / risk-off）。在缺乏 ticker、財報、guidance 的情況下，此新聞對市場與產業層**不可操作**，建議降權處理，等內文揭露標的再評估。",
+        "bull_points": [
+          "深度回檔的優質成長股估值壓縮後具均值回歸空間",
+          "若回檔源於 risk-off 而非基本面，反彈彈性大"
+        ],
+        "bear_points": [
+          "新聞無內文無 ticker，實質資訊量近乎零不可操作",
+          "35% 跌幅可能反映 estimate cut，接刀風險高",
+          "單一作者意見非催化劑，易引散戶情緒追高"
+        ],
+        "final_take": "資訊不足，列為噪音；待內文揭露標的再評估",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Information Technology",
+            "Health Care"
+          ],
+          "themes": [
+            "growth stock drawdown",
+            "valuation compression",
+            "buy the dip"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:buy-the-dip",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:growth-stock-drawdown"
+          }
+        ],
+        "done": false,
+        "confidence": 0.32,
+        "rationale_short": "標題無 ticker、摘要全空，僅作者抄底意見，實質訊號極低"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T00:08:46Z",
+      "latency_ms": 11216,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "分析師 A 點出缺乏個股資訊使其不可操作，但這類標題在當前市場結構中，反映了高 beta 成長股的「情緒極端化」。當市場頻繁出現「35% 跌幅抄底」的呼籲時，通常是零售市場信心動搖的象徵。這種敘事若未伴隨營收下修的證實，反而可能暗示**市場估值壓縮已至末端**，提供高風險偏好資金潛在的技術性反彈契機。重點不在該特定個股，而在於此類論述如何預示高成長板塊的潛在輪動信號。",
+        "bull_points": [
+          "板塊估值壓縮可能已至極端末期",
+          "高 beta 股技術性反彈潛力增加"
+        ],
+        "bear_points": [
+          "缺乏具體基本面轉折訊號",
+          "零售情緒焦慮易引發連鎖拋售"
+        ],
+        "final_take": "這是情緒指標而非操作建議，顯示成長板塊波動已入極端區間。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "Growth Investing"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "補充探討此類標題作為市場情緒極端化與板塊輪動的先行指標。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T00:09:24Z",
+      "latency_ms": 38104,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個兩位分析師都漏掉的角度：**35% 回檔的技術結構**。以 Minervini 階段分析，跌 35% 的成長股幾乎必然跌破 200 日均線、落入 Stage 4 下降趨勢，此時抄底等於逆勢接刀。歷史上等右側打底、Stage 2 重新確認再進場，勝率遠高於猜底。另外『跌 35% 我會買』是 Yahoo 轉載 Motley Fool 的固定 SEO 模板，敘事驅動零售買盤湧入超跌名單，反而製造『擁擠的接刀交易』——停損一旦觸發會放大下行。結論仍不可操作；但若日後揭露標的，第一步該查的是股價相對 200 日均線位置與 estimate 是否止穩，而非回檔幅度本身。",
+        "bull_points": [
+          "超跌成長股回到 Stage 2 右側打底才是有效買點",
+          "敘事性零售買盤可能引爆高放空名單軋空"
+        ],
+        "bear_points": [
+          "35% 跌幅多已跌破 200 日均線屬 Stage 4 逆勢",
+          "擁擠接刀交易停損觸發會放大下行",
+          "Motley Fool 模板標題為 SEO 敘事非真催化劑"
+        ],
+        "final_take": "不可操作；揭露標的後先看均線位置非回檔幅度",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "growth stock drawdown",
+            "retail flow"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.4,
+        "rationale_short": "新增技術階段分析與接刀交易風險，前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T00:09:36Z",
+      "latency_ms": 12596,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補充機構結構視角：這類「成長股抄底」論述常忽略**解禁期 (Lock-up Expiry)** 或**融資合約違約風險**，這往往才是導致 35% 重挫的關鍵。機構因合規被迫撤出，與散戶看到的「超跌」形成錯位。投資者需檢查該類股的**現金燒耗率 (Burn Rate)** 與融資結構，這遠比技術面回檔重要。",
+        "bull_points": [
+          "估值過度壓縮後提供回歸均值的機會",
+          "部分公司解禁後籌碼已充分沈澱"
+        ],
+        "bear_points": [
+          "恐隱含現金枯竭或融資違約風險",
+          "機構持續退出帶來的流動性折價"
+        ],
+        "final_take": "抄底前應優先審視公司的現金流與融資安全性。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "Growth",
+            "Valuation",
+            "Liquidity"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "引入機構解禁與融資結構風險視角，補充前述觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T00:10:07Z",
+      "latency_ms": 30391,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "再補一個全帖都沒談到的算術：跌 **35%** 的股票要回本需漲 **+54%**，回檔愈深、回本所需報酬愈呈非線性放大。所以「跌 35% 我會買」真正該問的不是『跌夠了沒』，而是『未來 12 個月這檔能不能跑贏無風險利率』——當前短天期美債殖利率約 4-5%，抄超跌成長股的**機會成本門檻**遠高於零利率時代。此外這類 Motley Fool 模板文幾乎從不揭露**部位大小**，散戶容易被『我會買』錨定成 all-in，而非把它當 2% 試單。結論不變：無 ticker 不可操作；但即使標的揭露，先算回本倍數與相對無風險利率的勝算，再談回檔幅度。",
+        "bull_points": [
+          "深跌名單若基本面未壞，估值壓縮反彈空間大",
+          "高風險資金可小部位試單參與技術性反彈"
+        ],
+        "bear_points": [
+          "跌35%需漲54%回本，回本報酬非線性放大",
+          "無風險利率4-5%墊高抄底機會成本門檻",
+          "模板文不揭露部位大小，散戶易誤判成all-in"
+        ],
+        "final_take": "不可操作；回本倍數與利率勝算先於回檔幅度",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "growth stock dip-buying",
+            "drawdown recovery math",
+            "risk-free rate hurdle"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:dip-buying",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:risk-free-rate"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "補回本算術與機會成本角度，前帖未提；仍無標的故不可操作"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T00:10:20Z",
+      "latency_ms": 13549,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這些 SEO 模板文不僅是噪音，更是一種**市場反向指標**。當這類文章大肆宣揚「35% 折扣」時，往往反映了市場正處於零售買盤試圖在**流動性陷阱 (Liquidity Trap)** 中尋找低成本籌碼的階段。真正的問題在於，這些標的通常缺乏 **AI Capex** 的實質現金流支撐，僅依靠過去的成長光環維持估值。在當前 4-5% 無風險利率環境下，這類散戶偏好的「抄底」交易，實際上是在壓縮市場整體流動性，掩蓋了成長板塊正在發生的 **Breadth Narrowing (廣度萎縮)** 現象，這比單純的股價下跌更值得擔憂。",
+        "bull_points": [
+          "顯示零售買盤仍在市場中尋找情緒發洩點，維持一定流動性。"
+        ],
+        "bear_points": [
+          "散戶資金被錨定在非核心資產，加劇高 Beta 板塊的廣度萎縮風險。",
+          "此類敘事掩蓋了成長板塊內部基本面分化的結構性惡化。"
+        ],
+        "final_take": "此類文章反映散戶在估值陷阱中掙扎，絕非實質買入訊號。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Market Breadth"
+          ],
+          "tech_keywords": [
+            "Liquidity"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:retail_investors",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:liquidity_trap"
+          },
+          {
+            "subject": "narrative:market_breadth",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:retail_investors"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "提出從零售情緒與市場廣度萎縮角度分析該類文章的負面結構意義。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [],
+      "sectors": [
+        "Communication Services",
+        "Financials",
+        "Health Care",
+        "Information Technology",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "Growth",
+        "Growth Investing",
+        "Liquidity",
+        "Market Breadth",
+        "Valuation",
+        "buy the dip",
+        "drawdown recovery math",
+        "growth stock dip-buying",
+        "growth stock drawdown",
+        "retail flow",
+        "risk-free rate hurdle",
+        "valuation compression"
+      ],
+      "tech_keywords": [
+        "Liquidity"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "narrative:buy-the-dip",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:growth-stock-drawdown"
+      },
+      {
+        "subject": "narrative:dip-buying",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:risk-free-rate"
+      },
+      {
+        "subject": "narrative:retail_investors",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:liquidity_trap"
+      },
+      {
+        "subject": "narrative:market_breadth",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:retail_investors"
+      }
+    ],
+    "bull_summary": [
+      "深度回檔的優質成長股估值壓縮後具均值回歸空間",
+      "若回檔源於 risk-off 而非基本面，反彈彈性大",
+      "板塊估值壓縮可能已至極端末期",
+      "高 beta 股技術性反彈潛力增加",
+      "超跌成長股回到 Stage 2 右側打底才是有效買點",
+      "敘事性零售買盤可能引爆高放空名單軋空"
+    ],
+    "bear_summary": [
+      "新聞無內文無 ticker，實質資訊量近乎零不可操作",
+      "35% 跌幅可能反映 estimate cut，接刀風險高",
+      "單一作者意見非催化劑，易引散戶情緒追高",
+      "缺乏具體基本面轉折訊號",
+      "零售情緒焦慮易引發連鎖拋售",
+      "35% 跌幅多已跌破 200 日均線屬 Stage 4 逆勢"
+    ],
+    "final_take": "此類文章反映散戶在估值陷阱中掙扎，絕非實質買入訊號。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T00:10:20Z",
+    "close_reason": "max_rounds",
+    "divergence_note": ""
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

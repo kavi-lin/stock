@@ -1,0 +1,547 @@
+{
+  "news_id": "bn_20260517_a0900e10",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T16:09:48Z",
+  "last_activity_ts": "2026-05-17T16:18:07Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/economy/policy/articles/gold-medal-winning-vodka-distillery-154800762.html",
+    "feed_fingerprint": "gold medal winning vodka distillery files chapter 11",
+    "published": "2026-05-17T15:48:00+00:00",
+    "url_hash": "sha1:ee51b9b081061a424e02960884075f43723eda2d"
+  },
+  "headline": "Gold medal-winning vodka distillery files for Chapter 11 bankruptcy",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T16:16:29Z",
+      "latency_ms": 25846,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這則新聞本身是**單一私營酒廠的 Chapter 11**,無公開股票曝險,對指數與板塊的直接衝擊近乎為零 — pre-triage 把它標為 sentiment 屬誤判,不存在「市場情緒轉好/反轉」的訊號。真正值得讀的是**結構訊號**:得獎工藝酒廠都撐不住,反映美國烈酒在 2024-25 後段需求疲軟、工藝酒精產能過剩、通膨壓縮中低價位消費。更廣的逆風是 **GLP-1** 減重藥抑制食慾連帶壓低酒精攝取量,這對 STZ、DEO、BF.B、SAM 等上市酒商是慢性 multiple 壓力,而非一次性事件。建議當作 consumer staples 中酒精次產業的弱勢佐證,不要當交易催化劑。",
+        "bull_points": [
+          "個案破產移除產能,利好存活的規模酒商",
+          "事件層級太小,完全不影響大盤與 ETF"
+        ],
+        "bear_points": [
+          "工藝酒廠倒閉印證烈酒需求結構性走弱",
+          "GLP-1 壓低酒精攝取,長線壓上市酒商估值",
+          "中低價位消費被通膨擠壓,品類量縮"
+        ],
+        "final_take": "市場層級非事件,僅作酒精次產業結構走弱的旁證",
+        "entities": {
+          "tickers": [
+            "STZ",
+            "DEO",
+            "BF.B",
+            "SAM",
+            "TAP"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "GLP-1",
+            "craft spirits oversupply",
+            "alcohol secular decline",
+            "Chapter 11 distress"
+          ],
+          "tech_keywords": [
+            "GLP-1"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:DEO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:alcohol-secular-decline"
+          },
+          {
+            "subject": "ticker:BF.B",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:craft-spirits-oversupply"
+          },
+          {
+            "subject": "ticker:SAM",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:alcohol-secular-decline"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "非事件,但可作酒精需求結構走弱旁證"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T16:16:40Z",
+      "latency_ms": 11553,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了上述消費趨勢外，需關注**利率維持高檔**對工藝酒精業的「信用緊縮」效應。小型工藝酒廠高度依賴外部槓桿，當 ROIC 無法覆蓋融資成本時，生存危機迫在眉睫。這對 **STZ** 或 **DEO** 等大廠而言，反而是「優質資產與品牌」的**低成本併購機會**，加速產業整合至具備規模效益的巨頭。這種結構性出清，意味著酒精產業集中度在 2026 年將進一步提升。",
+        "bull_points": [
+          "大廠併購優質酒類資產機率增",
+          "產業集中度提升有助龍頭訂價"
+        ],
+        "bear_points": [
+          "小型酒廠倒閉潮引發供應鏈連鎖風險",
+          "高融資成本持續壓抑中小型業者投資"
+        ],
+        "final_take": "產業整合加速，長期利好具備現金流優勢的酒精龍頭。",
+        "entities": {
+          "tickers": [
+            "STZ",
+            "DEO",
+            "BF.B"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "M&A",
+            "Capital Intensity"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:STZ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:industry_consolidation"
+          },
+          {
+            "subject": "ticker:DEO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:industry_consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "點出小型酒廠倒閉帶來的產業併購整合機會。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T16:17:11Z",
+      "latency_ms": 30858,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前串已談需求、GLP-1、信用緊縮與整併,補一個被忽略的**供應鏈下游節點**:玻璃瓶包裝。工藝烈酒 2021-23 榮景曾撐起高端玻璃瓶需求,如今酒廠倒閉直接削弱訂單,對本已產能過剩、客戶去庫存的 **O-I Glass (OI)** 是邊際逆風。另對 GEMINI 的併購論點提出反方:Vodka 是高度同質化、無定價權的品類,得獎只是工藝敘事、品牌資產薄弱,STZ、DEO 缺乏動機高價收購小眾伏特加品牌 — 此類資產多走清算而非被併購,整併紅利集中在威士忌、龍舌蘭等有陳釀稀缺性的品類,不宜一概而論。",
+        "bull_points": [
+          "工藝酒廠出清騰出貨架,利大型品牌補位",
+          "威士忌/龍舌蘭具陳釀稀缺性,整併紅利真實"
+        ],
+        "bear_points": [
+          "工藝倒閉削玻璃瓶訂單,OI 邊際承壓",
+          "Vodka 無定價權,品牌資產薄弱難被高價併購",
+          "包裝業客戶去庫存疊加酒精需求疲軟"
+        ],
+        "final_take": "中性偏空,留意 OI 包裝需求弱勢,別高估 vodka 整併價值",
+        "entities": {
+          "tickers": [
+            "OI",
+            "STZ",
+            "DEO",
+            "BF.B"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Materials"
+          ],
+          "themes": [
+            "GLP-1",
+            "craft spirits oversupply",
+            "glass packaging destocking",
+            "alcohol M&A"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:OI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:craft_spirits_oversupply"
+          },
+          {
+            "subject": "ticker:STZ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1"
+          },
+          {
+            "subject": "ticker:OI",
+            "predicate": "SUPPLIES_TO",
+            "object": "sector:consumer_staples"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "補玻璃瓶供應鏈節點 OI,並反駁 vodka 整併論點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T16:17:24Z",
+      "latency_ms": 12939,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面探討了總經與包裝瓶，但我認為還有一個 **RTD (Ready-to-Drink)** 結構性替代的關鍵缺口。消費者對於傳統瓶裝烈酒的消費習慣，正快速向便利的預調雞尾酒飲品（RTD）轉移。大型酒廠如 **STZ** 或 **BF.B** 早已積極佈局 RTD 產線，利用供應鏈優勢壓低成本並迅速擴大品項。相比之下，小型手工酒廠若無法成功切入 RTD 市場，單靠脆弱的品牌故事與高昂定價，在烈酒紅海中將難以生存。這不只是單純的資產清算問題，而是消費場景徹底且不可逆的革命性變遷。",
+        "bull_points": [
+          "巨頭快速佈局 RTD 捕捉市場轉型利潤",
+          "產品組合優化加速提升整體毛利率"
+        ],
+        "bear_points": [
+          "傳統手工品牌難以跨越 RTD 生產門檻",
+          "消費者對便利性與新口味的需求壓迫傳統品牌"
+        ],
+        "final_take": "烈酒產業正經歷消費場景革命，RTD 轉型是巨頭的核心護城河。",
+        "entities": {
+          "tickers": [
+            "STZ",
+            "BF.B",
+            "DEO",
+            "SAM"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "Product Innovation",
+            "Consumer Spending"
+          ],
+          "tech_keywords": [
+            "RTD",
+            "Supply Chain",
+            "Automation"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:STZ",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Product Innovation"
+          },
+          {
+            "subject": "ticker:BF.B",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Product Innovation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "強調消費行為從瓶裝轉向 RTD 的結構性變遷，這是小型酒廠無法抵擋的逆風。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T16:17:48Z",
+      "latency_ms": 23881,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前串已掃過需求、GLP-1、信用緊縮、玻璃瓶 (OI) 與 RTD,補一個**最直接的上市供應鏈節點**:**MGP Ingredients (MGPI)**。MGPI 的 Distillery Solutions 部門正是把桶裝中性酒精與威士忌原酒**賣給工藝酒廠**做貼牌與熟成 — 工藝酒廠倒閉潮等於砍掉 MGPI 的 B2B 客戶基數,加上 MGPI 自己 2024 已因烈酒去庫存下修白威士忌指引,這則新聞是其結構逆風的微觀佐證,而非雜訊。對 GEMINI 的 RTD 論點補一刀:RTD 雖搶傳統瓶裝份額,但 RTD 多走麥芽/葡萄酒基底課稅套利,對烈酒**蒸餾產能**反而是需求流失,MGPI 兩頭受壓。視為烈酒原料供應端的 early warning。",
+        "bull_points": [
+          "工藝出清利大型品牌通路與貨架集中度提升",
+          "MGPI 客戶洗牌後存活者議價力與訂單黏性反增"
+        ],
+        "bear_points": [
+          "MGPI Distillery Solutions B2B 客戶基數隨工藝倒閉萎縮",
+          "RTD 走麥芽基底課稅套利,烈酒蒸餾產能需求流失",
+          "白威士忌原酒去庫存未完,MGPI 指引仍有下修風險"
+        ],
+        "final_take": "看空烈酒原料鏈,MGPI 是被忽略的上市曝險點",
+        "entities": {
+          "tickers": [
+            "MGPI",
+            "OI",
+            "STZ",
+            "DEO",
+            "BF.B",
+            "SAM"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Materials"
+          ],
+          "themes": [
+            "GLP-1",
+            "craft spirits oversupply",
+            "RTD shift",
+            "spirits destocking"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MGPI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:craft-distillery-bankruptcies"
+          },
+          {
+            "subject": "ticker:MGPI",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:craft-spirits-industry"
+          },
+          {
+            "subject": "ticker:MGPI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:spirits-destocking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 MGPI 為烈酒原料端上市曝險,前串未提及。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T16:18:07Z",
+      "latency_ms": 18711,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這波破產案揭示了小型工藝酒廠的**體驗式零售（Experiential Retail）模式**已面臨結構性風險。許多小廠高度依賴高毛利的品酒室（Tasting Rooms）獲利，這不僅是製造業，更是**實體服務業**。在消費者縮減非必要體驗支出（discretionary leisure spending）下，這種「酒精+體驗」的溢價模式受到嚴重打擊。即便標榜「得獎」也無法抵銷高定價帶來的銷售動能流失。此趨勢反映的是整體**消費疲軟**，而非單一產業問題，對於高度依賴品牌體驗與工藝敘事的 **SAM** 等品牌，若無法有效降低成本並轉型提升通路市佔，同樣需面臨消費降級帶來的毛利壓抑。",
+        "bull_points": [
+          "產業集中化有利於 STZ 等具備規模效益的龍頭",
+          "消費者回流具高性價比的大眾品牌"
+        ],
+        "bear_points": [
+          "高端體驗式零售模型面臨嚴重消費降級壓力",
+          "消費者縮減體驗型酒精支出"
+        ],
+        "final_take": "體驗式零售模式崩潰，酒精產業進入「去泡沫化」整合階段。",
+        "entities": {
+          "tickers": [
+            "SAM",
+            "STZ",
+            "DEO",
+            "BF.B"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "Alcohol Demand",
+            "GLP-1"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SAM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:experiential_retail_decline"
+          },
+          {
+            "subject": "ticker:STZ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:industry_consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "揭示體驗式零售模型的脆弱性，補全酒商非製造端的風險視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "BF.B",
+        "DEO",
+        "MGPI",
+        "OI",
+        "SAM",
+        "STZ",
+        "TAP"
+      ],
+      "sectors": [
+        "Consumer Staples",
+        "Materials"
+      ],
+      "themes": [
+        "Alcohol Demand",
+        "Capital Intensity",
+        "Chapter 11 distress",
+        "Consumer Spending",
+        "GLP-1",
+        "M&A",
+        "Product Innovation",
+        "RTD shift",
+        "alcohol M&A",
+        "alcohol secular decline",
+        "craft spirits oversupply",
+        "glass packaging destocking",
+        "spirits destocking"
+      ],
+      "tech_keywords": [
+        "Automation",
+        "GLP-1",
+        "RTD",
+        "Supply Chain"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:STZ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1"
+      },
+      {
+        "subject": "ticker:DEO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:alcohol-secular-decline"
+      },
+      {
+        "subject": "ticker:BF.B",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:craft-spirits-oversupply"
+      },
+      {
+        "subject": "ticker:SAM",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:alcohol-secular-decline"
+      },
+      {
+        "subject": "ticker:STZ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:industry_consolidation"
+      },
+      {
+        "subject": "ticker:DEO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:industry_consolidation"
+      },
+      {
+        "subject": "ticker:OI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:craft_spirits_oversupply"
+      },
+      {
+        "subject": "ticker:OI",
+        "predicate": "SUPPLIES_TO",
+        "object": "sector:consumer_staples"
+      },
+      {
+        "subject": "ticker:STZ",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Product Innovation"
+      },
+      {
+        "subject": "ticker:BF.B",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Product Innovation"
+      },
+      {
+        "subject": "ticker:MGPI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:craft-distillery-bankruptcies"
+      },
+      {
+        "subject": "ticker:MGPI",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:craft-spirits-industry"
+      },
+      {
+        "subject": "ticker:MGPI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:spirits-destocking"
+      },
+      {
+        "subject": "ticker:SAM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:experiential_retail_decline"
+      }
+    ],
+    "bull_summary": [
+      "個案破產移除產能,利好存活的規模酒商",
+      "事件層級太小,完全不影響大盤與 ETF",
+      "大廠併購優質酒類資產機率增",
+      "產業集中度提升有助龍頭訂價",
+      "工藝酒廠出清騰出貨架,利大型品牌補位",
+      "威士忌/龍舌蘭具陳釀稀缺性,整併紅利真實"
+    ],
+    "bear_summary": [
+      "工藝酒廠倒閉印證烈酒需求結構性走弱",
+      "GLP-1 壓低酒精攝取,長線壓上市酒商估值",
+      "中低價位消費被通膨擠壓,品類量縮",
+      "小型酒廠倒閉潮引發供應鏈連鎖風險",
+      "高融資成本持續壓抑中小型業者投資",
+      "工藝倒閉削玻璃瓶訂單,OI 邊際承壓"
+    ],
+    "final_take": "體驗式零售模式崩潰，酒精產業進入「去泡沫化」整合階段。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T16:18:07Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN, SUPPLIES_TO; gemini-only: BENEFITS_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

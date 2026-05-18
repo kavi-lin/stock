@@ -1,0 +1,346 @@
+id: be
+title: Bloom Energy (BE) — 固態氧化物燃料電池價值鏈
+theme: BE
+generated_at: '2026-05-18T13:29:00Z'
+generated_by: claude
+status: draft
+layers:
+- materials
+- components
+- fuel_cell_systems
+- end_customer
+modules:
+  materials:
+  - id: ceramics
+    label: 電解質陶瓷粉體
+  - id: metals
+    label: 電極金屬 (Ni / 稀土)
+  - id: fuel_feedstock
+    label: 燃料 / 工業氣體
+  components:
+  - id: cell_stack
+    label: 電池 / 電堆技術
+  - id: power_electronics
+    label: 功率半導體 / 逆變
+  fuel_cell_systems:
+  - id: sofc_oem
+    label: SOFC 系統 OEM
+  - id: alt_fuelcell
+    label: 替代燃料電池技術
+  - id: mfg_partner
+    label: 代工 / 製造夥伴
+  end_customer:
+  - id: hyperscaler
+    label: 雲端 / AI 超大規模業者
+  - id: colocation
+    label: Colocation 資料中心
+  - id: utility
+    label: 電力公司 / 開發商
+  - id: capital_partner
+    label: 基建資本夥伴
+spine:
+- tosoh
+- bloom_energy
+- aep
+nodes:
+- id: tosoh
+  label: Tosoh
+  layer: materials
+  module: ceramics
+  role: YSZ 氧化鋯電解質陶瓷粉體供應
+  ticker: null
+  listing: foreign_listed
+  stage: production
+  note: 東京證交所上市；SOFC 電解質粉體主要供應商
+- id: mp_materials
+  label: MP Materials
+  layer: materials
+  module: metals
+  role: 稀土氧化物 (含釔) 上游原料
+  ticker: MP
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: vale
+  label: Vale
+  layer: materials
+  module: metals
+  role: 鎳金屬 — SOFC 陽極 / MCFC 電極材料
+  ticker: VALE
+  listing: us_listed
+  stage: unknown
+  note: NYSE 掛牌 ADR
+- id: air_products
+  label: Air Products
+  layer: materials
+  module: fuel_feedstock
+  role: 氫氣 feedstock 與電解氣體供應
+  ticker: APD
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: ceres_power
+  label: Ceres Power
+  layer: components
+  module: cell_stack
+  role: SteelCell SOFC 電堆技術授權商
+  ticker: null
+  listing: foreign_listed
+  stage: revenue
+  note: 倫敦 AIM 上市；授權模式無自有量產
+- id: elcogen
+  label: Elcogen
+  layer: components
+  module: cell_stack
+  role: 商用 SOFC 單電池 / 電堆製造
+  ticker: null
+  listing: private
+  stage: production
+  note: 愛沙尼亞私人公司
+- id: onsemi
+  label: onsemi
+  layer: components
+  module: power_electronics
+  role: SiC 功率元件 — DC-AC 逆變 (產業層級)
+  ticker: 'ON'
+  listing: us_listed
+  stage: unknown
+  note: 無公開揭露之 Bloom design win
+- id: infineon
+  label: Infineon
+  layer: components
+  module: power_electronics
+  role: 功率半導體 — 電力轉換 (產業層級)
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  note: ''
+- id: bloom_energy
+  label: Bloom Energy
+  layer: fuel_cell_systems
+  module: sofc_oem
+  role: Energy Server SOFC 系統 OEM — 天然氣 / 氫氣現地發電
+  ticker: BE
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: doosan_fuelcell
+  label: Doosan Fuel Cell
+  layer: fuel_cell_systems
+  module: sofc_oem
+  role: SOFC / PAFC 發電系統
+  ticker: null
+  listing: foreign_listed
+  stage: revenue
+  note: 韓國上市；採用 Ceres 授權技術
+- id: mitsubishi_hi
+  label: Mitsubishi Heavy Industries
+  layer: fuel_cell_systems
+  module: sofc_oem
+  role: 大型 SOFC-燃氣輪機混合發電
+  ticker: null
+  listing: foreign_listed
+  stage: production
+  note: 東京證交所上市
+- id: convion
+  label: Convion
+  layer: fuel_cell_systems
+  module: sofc_oem
+  role: SOFC 發電系統整合 (採用 Elcogen 電堆)
+  ticker: null
+  listing: private
+  stage: production
+  note: 芬蘭私人公司
+- id: fuelcell_energy
+  label: FuelCell Energy
+  layer: fuel_cell_systems
+  module: alt_fuelcell
+  role: 熔融碳酸鹽燃料電池 (MCFC) 平台
+  ticker: FCEL
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: plug_power
+  label: Plug Power
+  layer: fuel_cell_systems
+  module: alt_fuelcell
+  role: PEM 燃料電池與電解槽
+  ticker: PLUG
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: ballard_power
+  label: Ballard Power
+  layer: fuel_cell_systems
+  module: alt_fuelcell
+  role: PEM 燃料電池電堆
+  ticker: BLDP
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: sk_ecoplant
+  label: SK ecoplant
+  layer: fuel_cell_systems
+  module: mfg_partner
+  role: Bloom 韓國製造合資與分銷夥伴
+  ticker: null
+  listing: private
+  stage: production
+  note: SK 集團子公司；龜尾廠量產 Energy Server
+- id: oracle
+  label: Oracle
+  layer: end_customer
+  module: hyperscaler
+  role: AI / 雲端資料中心現地電力需求方
+  ticker: ORCL
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: microsoft
+  label: Microsoft
+  layer: end_customer
+  module: hyperscaler
+  role: 資料中心電力需求方
+  ticker: MSFT
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: amazon
+  label: Amazon
+  layer: end_customer
+  module: hyperscaler
+  role: AWS 資料中心電力需求方
+  ticker: AMZN
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: alphabet
+  label: Alphabet
+  layer: end_customer
+  module: hyperscaler
+  role: Google 資料中心電力需求方
+  ticker: GOOGL
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: equinix
+  label: Equinix
+  layer: end_customer
+  module: colocation
+  role: IBX 資料中心長期 Bloom SOFC 部署客戶
+  ticker: EQIX
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: digital_realty
+  label: Digital Realty
+  layer: end_customer
+  module: colocation
+  role: Colocation 資料中心電力需求方
+  ticker: DLR
+  listing: us_listed
+  stage: unknown
+  note: ''
+- id: aep
+  label: American Electric Power
+  layer: end_customer
+  module: utility
+  role: 1 GW Bloom 供應協議 (資料中心電力)
+  ticker: AEP
+  listing: us_listed
+  stage: qualification
+  note: 2024 年 11 月 1 GW 主供應協議
+- id: brookfield
+  label: Brookfield Asset Management
+  layer: end_customer
+  module: capital_partner
+  role: AI 資料中心電力專案資本夥伴
+  ticker: BAM
+  listing: us_listed
+  stage: unknown
+  note: 與 Bloom 大型資料中心電力合作
+edges:
+- from: mp_materials
+  to: tosoh
+  rel: SUPPLIES_TO
+  note: 稀土 / 釔氧化物原料
+- from: tosoh
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: YSZ 電解質陶瓷
+- from: tosoh
+  to: ceres_power
+  rel: SUPPLIES_TO
+  note: 氧化鋯電解質材料
+- from: tosoh
+  to: mitsubishi_hi
+  rel: SUPPLIES_TO
+  note: ''
+- from: vale
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: 陽極用鎳
+- from: vale
+  to: ceres_power
+  rel: SUPPLIES_TO
+  note: 鎳金屬
+- from: vale
+  to: fuelcell_energy
+  rel: SUPPLIES_TO
+  note: MCFC 鎳電極
+- from: air_products
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: 氫燃料 SOFC 變體用氫氣
+- from: air_products
+  to: plug_power
+  rel: SUPPLIES_TO
+  note: 氫氣供應
+- from: air_products
+  to: ballard_power
+  rel: SUPPLIES_TO
+  note: 氫氣供應
+- from: ceres_power
+  to: doosan_fuelcell
+  rel: SUPPLIES_TO
+  note: SOFC 電堆技術授權
+- from: elcogen
+  to: convion
+  rel: SUPPLIES_TO
+  note: SOFC 單電池與電堆
+- from: onsemi
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: SiC 功率元件 (產業層級，無揭露)
+- from: infineon
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: 功率半導體 (產業層級，無揭露)
+- from: sk_ecoplant
+  to: bloom_energy
+  rel: CONTRACT_MFG_FOR
+  note: 韓國龜尾廠代工 Energy Server
+- from: sk_ecoplant
+  to: bloom_energy
+  rel: INVESTOR_IN
+  note: 策略投資人兼分銷商
+- from: bloom_energy
+  to: equinix
+  rel: SUPPLIES_TO
+  note: IBX 資料中心現地 SOFC 發電
+- from: bloom_energy
+  to: aep
+  rel: SUPPLIES_TO
+  note: 1 GW 供應協議 (2024-11)
+- from: brookfield
+  to: bloom_energy
+  rel: INVESTOR_IN
+  note: AI 資料中心電力專案合作
+- from: plug_power
+  to: amazon
+  rel: SUPPLIES_TO
+  note: 氫燃料電池 (物料搬運)
+- from: plug_power
+  to: microsoft
+  rel: SUPPLIES_TO
+  note: 資料中心備援燃料電池試點

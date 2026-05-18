@@ -1,0 +1,82 @@
+{
+  "session_id": "e0f95ac2-16d4-4adb-b969-2ba0fe16db60",
+  "response": "Cannot generate JSON commentary in Plan Mode due to agent execution restrictions.",
+  "stats": {
+    "models": {
+      "gemini-2.5-flash-lite": {
+        "api": {
+          "totalRequests": 3,
+          "totalErrors": 0,
+          "totalLatencyMs": 144661
+        },
+        "tokens": {
+          "input": 18062,
+          "prompt": 36035,
+          "candidates": 2278,
+          "total": 48815,
+          "cached": 17973,
+          "thoughts": 10502,
+          "tool": 0
+        },
+        "roles": {
+          "main": {
+            "totalRequests": 3,
+            "totalErrors": 0,
+            "totalLatencyMs": 144661,
+            "tokens": {
+              "input": 18062,
+              "prompt": 36035,
+              "candidates": 2278,
+              "total": 48815,
+              "cached": 17973,
+              "thoughts": 10502,
+              "tool": 0
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "totalCalls": 3,
+      "totalSuccess": 1,
+      "totalFail": 2,
+      "totalDurationMs": 12,
+      "totalDecisions": {
+        "accept": 1,
+        "reject": 0,
+        "modify": 0,
+        "auto_accept": 0
+      },
+      "byName": {
+        "update_topic": {
+          "count": 1,
+          "success": 1,
+          "fail": 0,
+          "durationMs": 6,
+          "decisions": {
+            "accept": 1,
+            "reject": 0,
+            "modify": 0,
+            "auto_accept": 0
+          }
+        },
+        "invoke_agent": {
+          "count": 2,
+          "success": 0,
+          "fail": 2,
+          "durationMs": 6,
+          "decisions": {
+            "accept": 0,
+            "reject": 0,
+            "modify": 0,
+            "auto_accept": 0
+          }
+        }
+      }
+    },
+    "files": {
+      "totalLinesAdded": 0,
+      "totalLinesRemoved": 0
+    }
+  }
+}

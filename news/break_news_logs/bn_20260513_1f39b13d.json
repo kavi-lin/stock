@@ -1,0 +1,694 @@
+{
+  "news_id": "bn_20260513_1f39b13d",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:12:20Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/13/cerebras-prices-ipo-above-expected-range-wall-street-expects-ai-flood.html",
+    "feed_fingerprint": "cerebras prices ipo above expected range wall street",
+    "published": "2026-05-13T23:18:10+00:00",
+    "url_hash": "sha1:46fa0bf9c929a2e1dace51d18c998efef3452cd1"
+  },
+  "headline": "Cerebras prices IPO above expected range, as Wall Street braces for AI tsunami",
+  "headline_zh": null,
+  "raw_summary": "Cerebras raised $5.55 billion in its IPO, and with the chipmaker's offering, investors are gearing up for some even bigger AI deals later this year.",
+  "triage": {
+    "news_type": "corporate",
+    "shallow_score": 1.5,
+    "bull_case": "營運效率改善",
+    "bear_case": "股權稀釋隱憂",
+    "sector_view": "同業估值參考",
+    "macro_view": "現金使用決策",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:10:27Z",
+      "latency_ms": 20715,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cerebras pricing **above range** at $5.55B signals AI primary-market window wide open — wafer-scale challenger to NVDA validated by buy-side. Read-throughs: (1) AI IPO pipeline unclogs — Groq, SambaNova, CoreWeave follow-ons, possibly xAI, all get repriced higher; SPAC-era overhang officially dead. (2) Supply-chain tailwind for TSM (5nm wafer-scale die), GFS (interposer), and advanced packaging names (CoWoS-L capacity bid). (3) Mild NVDA headwind narrative — inference TAM fragmentation thesis revives, but training moat (CUDA + Blackwell + NVL72) intact; reaction likely <2%. (4) Hyperscaler capex read: above-range pricing = LPs front-running 2027 AI capex cycle. Watch ARM, AVGO custom-silicon ecosystem — Cerebras success legitimizes non-GPU architectures. Risk: float small, post-IPO pop ≠ durable. Capital rotation OUT of speculative AI software INTO silicon plumbing.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "TSM",
+            "AVGO",
+            "ARM",
+            "AMD",
+            "MU",
+            "GFS",
+            "ASML"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "AI IPO window",
+            "Inference silicon",
+            "Custom ASIC",
+            "Advanced packaging"
+          ],
+          "tech_keywords": [
+            "wafer-scale engine",
+            "CoWoS-L",
+            "Blackwell",
+            "CUDA",
+            "NVL72",
+            "HBM3e",
+            "N3P"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:cerebras-wafer-scale"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:inference-silicon-fragmentation"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:custom-asic-legitimization"
+          },
+          {
+            "subject": "ticker:ARM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:non-gpu-architectures"
+          },
+          {
+            "subject": "narrative:ai-ipo-window",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:semiconductors"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e-demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Above-range pricing = primary-market AI demand intact; supply-chain + custom-silicon ecosystem clearer beneficiaries than NVDA loss."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:10:59Z",
+      "latency_ms": 32477,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cerebras's strong IPO pricing underscores a growing demand for specialized AI hardware beyond general-purpose GPUs. While Analyst-A rightly noted NVDA's training moat remains robust, Cerebras's success validates wafer-scale architectures for specific, massive AI workloads like LLM training. This suggests a market maturation where distinct hardware solutions for specialized computational needs will gain prominence, potentially segmenting the AI infrastructure landscape and opening new avenues for hardware innovation beyond the current GPU dominance. This could also drive demand for advanced packaging and chiplet technologies catering to these specialized architectures.",
+        "entities": {
+          "tickers": [
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI hardware specialization",
+            "Market segmentation",
+            "LLM training infrastructure",
+            "Specialized AI workloads"
+          ],
+          "tech_keywords": [
+            "Wafer-scale computing",
+            "Custom AI silicon",
+            "Advanced packaging",
+            "LLM training hardware"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:AI hardware specialization"
+          },
+          {
+            "subject": "narrative:Wafer-scale computing",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI hardware specialization"
+          },
+          {
+            "subject": "narrative:LLM training hardware",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Market segmentation"
+          },
+          {
+            "subject": "narrative:Advanced packaging",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI hardware specialization"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "The IPO highlights market segmentation and specialization in AI hardware, with wafer-scale tech catering to specific workloads like LLM training, creating new opportunities beyond GPU dominance."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:11:22Z",
+      "latency_ms": 22637,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **power & cooling 2nd-order beneficiary**. Cerebras WSE-3 draws ~23kW per system vs ~10kW for an NVDA HGX — wafer-scale wins amplify the datacenter power-density problem, not solve it. Direct read-through to **VRT (Vertiv)** liquid-cooling + busway, **ETN/PWR** for medium-voltage gear, and **MOD/GEV** for on-site gas turbines. Also a contra to the prior thread's bullishness: Cerebras' S-1 likely shows **extreme customer concentration** (G42/UAE historically ~83% of revenue) — IPO pricing rewards the *narrative*, but lock-up expiry in 180d + concentration disclosure could mark a local top for AI-IPO sentiment. Watch **SMCI** and **DELL** as neutral — wafer-scale bypasses traditional server OEM stacking. Lastly: **CDNS/SNPS** quietly benefit — non-GPU silicon proliferation = more EDA seats per design win.",
+        "entities": {
+          "tickers": [
+            "VRT",
+            "ETN",
+            "PWR",
+            "MOD",
+            "GEV",
+            "SMCI",
+            "DELL",
+            "CDNS",
+            "SNPS"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI power density",
+            "datacenter liquid cooling",
+            "EDA proliferation",
+            "customer concentration risk",
+            "IPO lock-up overhang"
+          ],
+          "tech_keywords": [
+            "WSE-3",
+            "wafer-scale",
+            "liquid cooling",
+            "medium-voltage switchgear",
+            "on-site gas turbines"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_power_density"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:datacenter_electrification"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:on_site_power"
+          },
+          {
+            "subject": "ticker:CDNS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:non_gpu_silicon_proliferation"
+          },
+          {
+            "subject": "ticker:SNPS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:non_gpu_silicon_proliferation"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:wafer_scale_bypass_oem"
+          },
+          {
+            "subject": "ticker:DELL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:wafer_scale_bypass_oem"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread missed power/cooling 2nd-order (VRT/ETN/GEV), EDA tailwind (CDNS/SNPS), OEM bypass headwind (SMCI/DELL), and customer-concentration contra (G42 ~83% rev, 180d lock-up)."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:11:45Z",
+      "latency_ms": 23460,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cerebras's successful IPO highlights the burgeoning demand for specialized AI hardware, but the sheer scale of wafer-scale compute necessitates a parallel advancement in data interconnectivity. These massive processing units will require extremely high-bandwidth, low-latency datacenter networks to efficiently move data for training and inference. Consequently, players like Arista Networks (ANET), specializing in high-performance AI-centric networking fabrics, stand to gain significantly as the entire AI infrastructure stack is upgraded to support the next generation of AI workloads. This demand for robust networking is a critical second-order effect of the AI hardware boom validated by Cerebras.",
+        "entities": {
+          "tickers": [
+            "ANET",
+            "NVDA",
+            "ARM",
+            "AVGO"
+          ],
+          "sectors": [
+            "Technology",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI hardware",
+            "Datacenter networking",
+            "AI infrastructure",
+            "Wafer-scale computing",
+            "High-bandwidth data movement"
+          ],
+          "tech_keywords": [
+            "AI accelerators",
+            "Datacenter fabric",
+            "High-speed interconnects"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Datacenter networking"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI infrastructure"
+          },
+          {
+            "subject": "narrative:Wafer-scale computing",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:High-bandwidth data movement"
+          },
+          {
+            "subject": "narrative:High-bandwidth data movement",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:ANET"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Adds Arista Networks (ANET) as a beneficiary of increased datacenter networking demands driven by wafer-scale AI compute."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:12:06Z",
+      "latency_ms": 20176,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **memory bandwidth bottleneck = HBM4 pull-forward**. Cerebras WSE-3 ships 44GB on-die SRAM but pairs with MemoryX external DDR for trillion-param models — the wafer-scale validation accelerates the industry's pivot to HBM4 (2026 ramp) and **custom HBM base-die**. Direct beneficiary: **MU** (HBM3e shipping, HBM4 sampling) and especially **HBM4 base-die foundry** at TSM N5. Contra to prior thread's clean bull case: Cerebras' S-1 reportedly discloses **$1.4B G42 backlog tied to UAE export-license contingencies** — BIS reclassification risk (Commerce Dept advanced-compute rule, Jan 2026 update) could strand revenue. Underappreciated node: **CAMM2/LPCAMM modules** for inference appliances — SanDisk-spinoff plus **WDC** memory module business sees pull. Also: **CRDO** (active electrical cables) wins as wafer-scale clusters scale-out via 1.6T optics+AEC hybrid topology, not pure optics — counter to ANET-only read.",
+        "entities": {
+          "tickers": [
+            "MU",
+            "WDC",
+            "CRDO",
+            "TSM",
+            "CLS"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware",
+            "Memory"
+          ],
+          "themes": [
+            "HBM4 ramp",
+            "AI memory wall",
+            "export controls",
+            "wafer-scale compute",
+            "AEC vs optics"
+          ],
+          "tech_keywords": [
+            "HBM4",
+            "HBM3e",
+            "MemoryX",
+            "WSE-3",
+            "CAMM2",
+            "LPCAMM",
+            "N5",
+            "1.6T optics",
+            "active electrical cable"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm4-pull-forward"
+          },
+          {
+            "subject": "ticker:CRDO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:aec-scale-out"
+          },
+          {
+            "subject": "ticker:WDC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:inference-memory-modules"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:hbm4-base-die"
+          },
+          {
+            "subject": "narrative:g42-export-risk",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:CRBS"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "HBM4 pull-forward + G42 export-license contra + CRDO AEC scale-out angle absent from prior thread."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:12:20Z",
+      "latency_ms": 13888,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cerebras's IPO success validates wafer-scale AI compute, directly increasing demand for advanced semiconductor manufacturing capacity. This capital expenditure surge by foundries like TSMC benefits critical equipment suppliers. Companies such as Applied Materials (AMAT), providing essential deposition, etch, and inspection tools, are indirectly poised for significant growth as the industry scales to meet the global AI silicon requirements. This highlights a key, unaddressed second-order beneficiary of the AI hardware revolution.",
+        "entities": {
+          "tickers": [
+            "AMAT",
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI hardware manufacturing",
+            "Semiconductor manufacturing equipment"
+          ],
+          "tech_keywords": [
+            "wafer-scale",
+            "deposition",
+            "etch",
+            "metrology",
+            "advanced nodes"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI hardware manufacturing demand"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:AMAT"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "AMAT and other equipment makers benefit from increased foundry demand for AI chips."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "AMD",
+        "ANET",
+        "ARM",
+        "ASML",
+        "AVGO",
+        "CDNS",
+        "CLS",
+        "CRDO",
+        "DELL",
+        "ETN",
+        "GEV",
+        "GFS",
+        "MOD",
+        "MU",
+        "NVDA",
+        "PWR",
+        "SMCI",
+        "SNPS",
+        "TSM",
+        "VRT",
+        "WDC"
+      ],
+      "sectors": [
+        "Communications Equipment",
+        "Industrials",
+        "Information Technology",
+        "Memory",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Technology",
+        "Technology Hardware",
+        "Utilities"
+      ],
+      "themes": [
+        "AEC vs optics",
+        "AI IPO window",
+        "AI capex",
+        "AI hardware",
+        "AI hardware manufacturing",
+        "AI hardware specialization",
+        "AI infrastructure",
+        "AI memory wall",
+        "AI power density",
+        "Advanced packaging",
+        "Custom ASIC",
+        "Datacenter networking",
+        "EDA proliferation",
+        "HBM4 ramp",
+        "High-bandwidth data movement",
+        "IPO lock-up overhang",
+        "Inference silicon",
+        "LLM training infrastructure",
+        "Market segmentation",
+        "Semiconductor manufacturing equipment",
+        "Specialized AI workloads",
+        "Wafer-scale computing",
+        "customer concentration risk",
+        "datacenter liquid cooling",
+        "export controls",
+        "wafer-scale compute"
+      ],
+      "tech_keywords": [
+        "1.6T optics",
+        "AI accelerators",
+        "Advanced packaging",
+        "Blackwell",
+        "CAMM2",
+        "CUDA",
+        "CoWoS-L",
+        "Custom AI silicon",
+        "Datacenter fabric",
+        "HBM3e",
+        "HBM4",
+        "High-speed interconnects",
+        "LLM training hardware",
+        "LPCAMM",
+        "MemoryX",
+        "N3P",
+        "N5",
+        "NVL72",
+        "WSE-3",
+        "Wafer-scale computing",
+        "active electrical cable",
+        "advanced nodes",
+        "deposition",
+        "etch",
+        "liquid cooling",
+        "medium-voltage switchgear",
+        "metrology",
+        "on-site gas turbines",
+        "wafer-scale",
+        "wafer-scale engine"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:cerebras-wafer-scale"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:inference-silicon-fragmentation"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:custom-asic-legitimization"
+      },
+      {
+        "subject": "ticker:ARM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:non-gpu-architectures"
+      },
+      {
+        "subject": "narrative:ai-ipo-window",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:semiconductors"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e-demand"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:AI hardware specialization"
+      },
+      {
+        "subject": "narrative:Wafer-scale computing",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI hardware specialization"
+      },
+      {
+        "subject": "narrative:LLM training hardware",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Market segmentation"
+      },
+      {
+        "subject": "narrative:Advanced packaging",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI hardware specialization"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_power_density"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:datacenter_electrification"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:on_site_power"
+      },
+      {
+        "subject": "ticker:CDNS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:non_gpu_silicon_proliferation"
+      },
+      {
+        "subject": "ticker:SNPS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:non_gpu_silicon_proliferation"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:wafer_scale_bypass_oem"
+      },
+      {
+        "subject": "ticker:DELL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:wafer_scale_bypass_oem"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Datacenter networking"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI infrastructure"
+      },
+      {
+        "subject": "narrative:Wafer-scale computing",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:High-bandwidth data movement"
+      },
+      {
+        "subject": "narrative:High-bandwidth data movement",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:ANET"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm4-pull-forward"
+      },
+      {
+        "subject": "ticker:CRDO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:aec-scale-out"
+      },
+      {
+        "subject": "ticker:WDC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:inference-memory-modules"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:hbm4-base-die"
+      },
+      {
+        "subject": "narrative:g42-export-risk",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:CRBS"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI hardware manufacturing demand"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:AMAT"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:12:20Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: HEADWIND_FROM, SUPPLIES_TO; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

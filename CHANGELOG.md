@@ -10,6 +10,849 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.8.1] — 2026-05-19 — Break News 辯論氣泡左右/配色修正
+
+### Fixed — codex ↔ gemini 辯論兩邊都靠右藍色
+
+`renderThreadBubble` 用 `agent === 'claude'` 硬判左右與配色：只有 claude 走左側橘色，
+其餘 model 全部右側藍色。當辯論配對非 claude（例如 codex ↔ gemini）時，兩邊都判為
+非 claude → 都靠右、都藍色，看不出對話分側。
+
+- **`scripts/break_news/debater.py`** comment record 新增 `side`（`"A"`/`"B"`）欄位，
+  由 turn 位置決定（後端真相），與既有 `agent_role_label` 一致。
+- **`Dashboard/news_components.js`** `renderThreadBubble` 改讀 `comment.side` 決定
+  左右 + 配色（A=左/橘、B=右/藍）；舊資料無 `side` 時 fallback 解析 role label，
+  再退回舊 claude heuristic。avatar 改用 model 查表（claude🤖 / gemini💎 / codex🧠）。
+
+### Why
+
+多模型治理層（V3.7.0）後辯論配對可為任意兩 model，前端仍假設 claude 必為一方，
+側別判斷失效。side 應為後端位置真相，前端不該用 model 名重算。
+
+---
+
+## [3.8.0] — 2026-05-19 — Break News 免費社群/趨勢源
+
+### Added — Reddit / Bluesky / Hacker News / Google Trends 探勘層
+
+Break News 原本只有正式新聞 RSS + Futu 推播，缺少市場題材早期發酵訊號。本版新增
+免費低摩擦 source adapter，保持探索層定位，不影響 investment protocol 決策。
+
+- **`scripts/break_news/social_sources.py`** 新增 normalized adapters：
+  Reddit subreddit RSS、HN Algolia、Google Trends RSS；Bluesky public search adapter 保留，
+  但因目前 public endpoint 回 403，預設關閉，可用 `BREAK_NEWS_BLUESKY_ENABLED=1` 測試。
+- **`poller.py`** 接入 `BREAK_NEWS_SOCIAL_ENABLED`，社群/趨勢來源會進未閘 Raw 流；
+  自動辯論需通過較高的 `BREAK_NEWS_SOCIAL_GATE_MIN_SCORE`，避免社群雜訊吃掉每日預算。
+- **source metadata** 寫入 raw entry：`is_social` / `source_meta`，Dashboard 現有 raw 卡可直接顯示來源標籤。
+- **可觀測性**：poller state 新增 `items_added_social`、`social_enabled`、`feed_stats`。
+
+### Deferred
+
+X、Stocktwits、Product Hunt 暫不接入：X 為 pay-per-use；Stocktwits 新 app 註冊暫停；
+Product Hunt 需 token 且有商用限制。保留為 optional adapters。
+
+---
+
+## [3.7.1] — 2026-05-18 — Break News 辯論獨立配對（codex review fix）
+
+### Fixed — Break News 辯論改用自己的兩模型配對
+
+V3.7.0 的治理層讓 Break News debater 與通用路由共用同一組 primary/secondary —
+改 dashboard 設定會同時動到兩邊。codex code review 指出此漏洞,本版修正:
+
+- **`config/llm_config.json`** 新增 `break_news: {primary, secondary}` 區段 —
+  Break News 辯論的 A/B 兩位辯手,獨立於通用 primary/secondary/tertiary 鏈。
+- **`llm_drivers.py`** — `load_llm_config()` 解析 `break_news`;新 helper
+  `break_news_pair()`。`debater.py` `_turn_order()` 改讀此區段。
+- **`POST /api/llm-config`** 接受 `break_news` 區段(merge,不影響通用設定)。
+- **sidebar 設定面板** 加「突發辯論配對」子區:辯手 A / 辯手 B 兩個下拉,與
+  通用 主要/次要/備援 分開。
+- **辯論身分標籤修正** — debater turn 若 fallback 換了模型,改用實際模型
+  (`res.model_used`)重貼 role label,避免「Analyst-A (Claude)」卻存成 gemini。
+  side A/B 仍為位置固定。
+
+### Why
+
+Break News 的 Claude×Gemini 刻意分歧是核心設計,需要跟供應鏈 / 協定路由解耦 —
+獨立配對讓使用者單獨調辯論雙方,不波及通用 fallback 鏈。
+
+---
+
+## [3.7.0] — 2026-05-18 — 多模型治理層（claude / gemini / codex）
+
+### Added — model_router governor:角色路由 + 預算 + quota 自動降級
+
+3 個模型 CLI(claude / gemini / codex)過去各自為政:無 fallback(debater 連 2
+次 CLI 失敗直接 abort)、無預算/quota 感知、協定寫死 claude。claude 額度一用完,
+趨勢圖 / 辯論 / 協定全停。
+
+- **`scripts/_shared/model_router.py`(新)** — 治理層。`run_role()` /
+  `run_with_fallback()` 走 fallback 鏈(primary → secondary → tertiary),跳過
+  停用 / 超預算 / quota cooldown 的模型,失敗或撞 quota 自動降級。
+  `config/llm_usage.json` 記每模型每日呼叫數 + cooldown(UTC 日界自動重置)。
+  quota 偵測 = best-effort 比對 CLI 錯誤/stdout 的 rate-limit/429/quota 字樣 →
+  該模型進 `cooldown_hours` 冷卻。`model_status()` 給 dashboard。
+- **`config/llm_config.json` 擴充** — 加 `tertiary` / `enabled` / `budgets`
+  (每模型 `daily_max_calls`)/ `cooldown_hours`。舊 `{primary,secondary}` 仍相容。
+  `llm_drivers.load_llm_config()` 改回傳完整治理 config + `model_chain()`。
+- **消費者接governor** — break-news `debater.py`(每回合 `run_with_fallback`,
+  模型掛了自動換,不再整場 abort)、`supply_chain.py generate()`(`run_role`)。
+- **協定路由** — `dashboard_server.run_protocol()` 改用 `model_router.pick_model()`
+  選模型(claude 優先,gemini/codex 只在 claude 超額/冷卻時頂上),per-model
+  指令建構器(`_protocol_command`),跑完 `note_run()` 記帳 + quota cooldown。
+- **dashboard** — `GET /api/llm-config` 回傳 config + 即時 `model_status`;
+  `POST` 接受擴充 schema(merge 不覆蓋 budgets);sidebar 設定面板加備援 LLM
+  下拉 + 每模型 `calls/daily_max` + 冷卻/額度滿標示。Codex 選項解鎖。
+
+### Why
+
+claude quota 一掛全系統停擺。治理層讓三模型有統一的角色路由、每日預算、quota
+自動降級 — 一個模型用完,工作自動流到下一個,不中斷。
+
+---
+
+## [3.6.3] — 2026-05-18 — 情緒趨勢圖：線寬 / 字級不隨寬度爆掉
+
+### Fixed — 寬螢幕上線太粗、x 軸字太大且重疊
+
+`trend-chart.js` 的 SVG viewBox 固定 760 寬,圖以 `width:100%` 撐滿 → 在寬容器
+(~2000px)上整體放大 ~2.6×:`stroke-width:1.6` 變 ~4px、SVG `<text>` font 9
+變 ~23px,且相鄰日期標籤互相重疊。
+
+- **線**:所有 stroke 加 `vector-effect="non-scaling-stroke"` → 線寬恆為固定
+  px(設 1.3),不隨縮放變粗。
+- **x 軸 / 「現在」標籤**:從 SVG `<text>` 改為 HTML overlay span(`.trend-xaxis`
+  / `.trend-xlabel` / `.trend-nowlabel`)→ 字級固定 9px / 8px,不隨 viewBox 縮放。
+- **重疊**:日期標籤碰撞檢查 — 與前一個標籤距離 < 8% 就略過(分隔線仍畫)。
+- now 圓點 r 2.8→2.2。
+
+### Why
+
+SVG viewBox 縮放會等比放大 stroke 與 `<text>`;在寬版面上線與字都失控。線用
+non-scaling-stroke、文字改 HTML overlay 後,兩者皆為固定 px,任何寬度都一致。
+
+---
+
+## [3.6.2] — 2026-05-18 — 情緒趨勢圖 x 軸可讀性優化
+
+### Changed — `Dashboard/trend-chart.js` x 軸改為按日分界
+
+舊 x 軸把 4 個 tick 放在任意 1/3 位置 → 標籤落在隨機小時(`5/15 18h`、`5/16 18h`、
+`5/17 17h`),小時是雜訊、最右標籤被裁掉、看不出日界。
+
+- **按日分界**:走訪 `series_labels` 偵測本地午夜,每個日界畫一條極淡垂直分隔線
+  + 標「日期 + 星期」(`5/16 六` / `5/16 Sat`)。新 helper `_dayTicks()` / `fmtDay()`。
+- **參考格線**:±0.5 格線由 `rgba(255,255,255,0.05)`(淺色主題下白底白線看不見)改為
+  theme-safe `rgba(128,128,128,0.12)`。
+- 修正最右標籤裁切(估寬後 clamp 進繪圖區)。
+- 最新點旁加極淡「現在 / now」標記。`padB` 16→20 給日期標籤留白。
+- hover tooltip 時間格式 `13h` → `13:00`。
+
+### Why
+
+使用者反映 `5/15 18h` 很難看懂。按日分界 + 星期讓 3 日結構一眼可讀,且能看出
+週末(低新聞量)。維持低調風格 — 線條 / 顏色 / 資料不變,只動軸與格線。
+
+---
+
+## [3.6.1] — 2026-05-18 — sector 協定 turn-bloat 重構
+
+### Fixed — `產業掃描` 33 分 / 52 turn → 預期 ~20-25 turn
+
+2026-05-18 一次 sector run 跑 33 分(52 turns)被 30 分 timeout 砍 — 但其實**已成功**
+(rc=0、artifact 有效)。診斷:不是 429、不是子代理 — 是 parent agent turn 太碎:
+手寫整個 15+ key 巢狀 `sector_intel.json`(實際還寫 `/tmp/build_intel.py` Edit ×2)、
+逐檔 `python3 -c` peek cache、validator retry loop。
+
+把機械組裝從 LLM 移進 committed 腳本:
+
+- **`sector/scripts/build_sector_intel.py`(新)** — 從 phase cache + 一個精簡
+  LLM-authored decision JSON 確定性組出完整 `sector_intel.json`。模型只寫判斷欄位
+  (`sector/cache/sector_decision_<DATE>.json`),腳本自動填 `_phase0` / `_phase1`
+  / `_phase3` / metadata / `_phase4c`。輸出設計上即過 `validate_sector_intel.py`
+  → 消滅 validator retry loop。decision JSON schema 見腳本檔頭 docstring。
+- **`sector/scripts/sector_digest.py`(新)** — 一次印出 macro header + 11-sector
+  決策表(uptrend / PE / z-score / RS / theme heat / news / smart-money / beat
+  rate),取代逐檔 ad-hoc peek。
+- **協定 MD 改寫** — `phase_1-2-3.md`(不再手抄 valuation / earnings_pulse /
+  smart_money 進 JSON)、`phase_4-5.md`(Phase 5 改「寫 decision JSON → 跑 build
+  script」;Phase 4a 並行 launch 升級為硬規則 + 違規警告)、`sector_protocol_main.md`
+  GLOBAL RULE 7、`phase_0.md` / `schema.md` 指向新腳本。
+- **`SECTOR_TIMEOUT_SEC`** 1800 → 2700(45 分)— 慢但成功的 run 不再被砍。
+
+### Why
+
+慢的根因是 parent agent 步驟太碎;把 JSON 組裝與 cache 讀取交給確定性腳本後,模型
+只做真正的分析判斷,turn 數大幅下降,也不再因手寫 JSON 不合 schema 而重試。
+
+---
+
+## [3.6.0] — 2026-05-18 — 可設定主要/次要 LLM(server config + sidebar 設定面板)
+
+### Added — server-side LLM config
+
+LLM CLI 選擇過去全 hard-code(`run_claude`/`run_gemini`、debater `TURN_ORDER`、
+`supply_chain.generate`)。新增可設定的主要 / 次要 LLM。
+
+- **`config/llm_config.json`(新)** — `{"primary":"claude","secondary":"gemini"}`。
+  Server-side 檔(Python script 讀得到;localStorage 只在瀏覽器,scripts 讀不到)。
+- **`scripts/break_news/llm_drivers.py`** — 新 `run_codex` graceful stub(codex CLI
+  尚未接線,回傳 rc=1 LLMResult,不會 crash 呼叫端);`_RUNNERS` registry +
+  `run_llm(model, …)` dispatcher;`load_llm_config()` / `primary_model()` /
+  `secondary_model()`。
+
+### Added — sidebar LLM 設定面板
+
+- `dashboard_server.py` — `GET/POST /api/llm-config`(POST 驗證 ∈ {claude,gemini,codex},
+  寫回 config 檔)。
+- `Dashboard/utils.js` `renderSidebar()` footer — 可展開「⚙ 設定」面板:主要 / 次要
+  LLM 下拉(Codex 為 disabled「即將支援」),change 即 POST + toast。`style.css` 加
+  `.sidebar-settings` 等樣式。
+
+### Changed — generation / debate 走 config
+
+- `scripts/nexus/supply_chain.py` — `generate(theme, agent=None)`:未指定 agent 時
+  用設定的 primary;新 `--agent claude|gemini|codex` CLI 旗標(納入 Gemini 的建議,
+  泛化為讀共用 config)。`generated_by` 反映實際模型。
+- `scripts/break_news/debater.py` — `TURN_ORDER` 改由 `load_llm_config()` 在每場
+  辯論開始時解析為 `[primary, secondary]`,config 缺失時 fallback claude↔gemini。
+
+### Why
+
+使用者要能切換 LLM CLI,且次要 LLM 供辯論 / 未來 review 用。預設 config 與舊行為
+完全一致(零回歸)。Codex 預留:stub + disabled 選項,日後填 CLI flags 即可啟用。
+另註:Gemini 建議中的「bridge.py 即時新聞」項已過時略過 — `extract_shallow_news`
+於 v3.4.0 移除,即時 raw 新聞已是 break-news「未閘 Raw 流」(v3.3.2)。
+
+---
+
+## [3.5.3] — 2026-05-18 — heatmap 429 熔斷器
+
+### Fixed — heatmap 背景刷新狂噴 HTTP 429
+
+`heatmap_refresh_loop`(常駐背景 daemon,與是否開啟 heatmap 頁無關 — 負責把
+`heatmap.json` 保溫)在美股盤中每 `HEATMAP_REFRESH_SEC`(10 分)就 fan-out
+~517 個 FMP `stable/quote` 單檔呼叫(20 workers)。FMP 方案撐不住 → 全部回
+429,每輪在 log 噴 ~500 行 `[heatmap] HTTP error: 429`。
+
+加 **429 熔斷器**(`dashboard_server.py`):
+
+- `_fmp_get_json` 收到 429 → 設 `_heatmap_ratelimit_until = now + 1800`(30 分
+  冷卻),且**只在首次跳閘時 log 一行**(原本每通呼叫各噴一行)。
+- `_heatmap_refresh_quotes` / `_heatmap_refresh_pe_universe` 開頭檢查熔斷器,
+  冷卻中直接跳過整批 fan-out(各只留一行 `skip … cooldown`)。
+- fan-out 內 `_fetch_one` / `_fetch_pe_ttm` 逐一檢查熔斷器 — 跳閘後排隊中的
+  symbol 直接略過,不再實際打 API。
+
+效果:429 風暴從「每 10 分 ~500 行」降為「每 30 分冷卻窗 ~1-2 行」。冷卻期間
+heatmap 用既有 `heatmap.json` 快取,過後自動重試。
+
+### Why
+
+背景保溫迴圈無 rate-limit 處理 → 一被限流就無腦重打 + 洗版 log,既吵又浪費
+配額。熔斷器讓它限流時安靜退避。
+
+---
+
+## [3.5.2] — 2026-05-18 — 供應鏈節點卡 UI 修正
+
+### Fixed — 卡片重疊 / 溢出類別框 / badge 語言不一致
+
+供應鏈圖節點卡有三個問題:
+
+- **卡片重疊 + 溢出 module 框** — 卡片用 `min-height: NODE_H`(68px),但 2 行
+  role 文字 + badge 列實際把卡撐到 ~90px+;佈局卻以固定 68px 間距排版 →
+  卡片互相重疊、並超出所屬 module 子面板。改:卡片改**固定** `height`,
+  `NODE_H` 拉到 100;`.sc-role` 設 `flex:1`(吸收空隙)、`.sc-badges`
+  `flex-shrink:0`(錨在底部)。卡片等高 → 間距一致、面板尺寸精準。
+- **badge 中英不一致** — `grounding` / `heat` badge 顯示原始 enum
+  (`LLM_ONLY` / `VERIFIED` / `WARM`),中文頁面也顯示英文,與圖例
+  (追蹤中 / 有資料 / 僅 LLM)對不上。新增 `groundingLabel` / `heatLabel` /
+  `listingLabel` 隨頁面語言切換;節點卡 + detail panel 全部本地化。
+- **節點卡加寬** — `NODE_W` 174 → 198,減少公司名稱過度截斷
+  (「NTT Innovativ…」等)。
+
+### Why
+
+固定卡高是讓兩層佈局(stage → module → node)間距精準、不重疊的前提;
+badge 跟著頁面語言走才不會中英混雜。
+
+---
+
+## [3.5.1] — 2026-05-18 — 供應鏈圖例 hover 說明
+
+### Added — 圖例 pill hover tooltip
+
+供應鏈頁底部 9 個圖例 pill(US 上市 / 外股 / 擬上市 / 私有 / 追蹤中 / 有資料 /
+僅 LLM / 熱度 / 商用階段)過去無說明。沿用 `sector.html` 的 pill tooltip 模式
+(`#pill-tooltip` + `data-tip-key` + `tip-title/desc/scale`),hover 跳出標題 +
+解釋 +(熱度 / 商用階段)等級說明。
+
+- `supply-chain.html` — `#pill-tooltip` CSS + 元素;每個 `.sc-legend-item` 加
+  `data-tip-key` + `cursor:help` + hover 邊框。
+- `page-supply-chain.js` — `SC_PILL_TIPS`(zh/en × 9 項)+ `initPillTooltip()`
+  (mouseover/out 委派、量高後翻轉定位,與 sector 一致)。
+
+### Why
+
+圖例符號無說明時使用者得猜;一致的 hover 說明讓 grounding / 熱度 / 商用階段的
+語意一看就懂。
+
+---
+
+## [3.5.0] — 2026-05-18 — 供應鏈：商用化階段 stage 標記層 + 生成完整度
+
+### Added — node 級 commercialization-stage 標記
+
+供應鏈鏈圖過去無法表達「誰會先變 revenue customer」。新增 node 級 `stage` 欄,
+值域 `design_partner → sampling → qualification → production → revenue`(+ `unknown`)。
+
+- **`scripts/nexus/supply_chain.py`** — 新 `_STAGES` enum;`_normalise()` 保留並
+  驗證 node `stage`,非法值 → `unknown`。
+- **`prompts/supply_chain_system.md`** — node schema 加 `stage`;指示 LLM 僅在有
+  公開證據時標,否則 `unknown`(高精度時效資訊,使用者再編 YAML 校正)。
+- **`Dashboard/page-supply-chain.js`** — `STAGE` 色階(design 灰→sampling 藍→
+  qual 黃→production 橘→revenue 綠);node 卡 badge + 詳情面板「商用階段」列。
+- **`Dashboard/supply-chain.html`** — `.sc-stage` badge CSS + 圖例階段色階。
+
+### Changed — 提高 LLM 生成完整度
+
+供應鏈公司清單 100% 來自 LLM 草稿(專案 DB 不參與選公司)。原 prompt 硬上限
+8–20 node + 「omit rather than guess」壓制廣度 → 量產 OEM / 客戶層常漏。
+
+- `prompts/supply_chain_system.md` — node 上限 8–20 → 12–32;模塊 2–3 → 2–4;
+  「omit rather than guess」限縮到上游 materials/IP 層;OEM 層 + 客戶/系統層
+  改為要求合理完整(列出主要量產 OEM/ODM 與主要 hyperscaler 客戶)。
+
+### Changed — POET 供應鏈鏈圖擴充
+
+`nexus/supply_chains/poet.yaml` 由 20 node 擴為 27:補 NTT Innovative Devices、
+Credo、Luxshare、Foxconn Interconnect、ASE、Google、AWS,並對每個 node 標 `stage`
+(保守:5 design_partner / 2 production / 其餘 unknown,待手動校正)。新增
+`advanced_packaging` 模塊。
+
+### Why
+
+外部檢討指出 POET 鏈缺量產 OEM/客戶且無「商用化階段」標記層 — 後者比塞更多
+公司更有投資價值。診斷確認缺公司是**生成/分析缺口**(LLM 草稿被 prompt 上限與
+保守規則壓制),非資料量不足:DB 從不參與選公司,只做事後 grounding。stage 層
+讓鏈圖能標出 POET 股價催化路徑。
+
+---
+
+## [3.4.1] — 2026-05-17 — 供應鏈：stage 內模塊分組 + 邊線修正
+
+### Added — 每個 stage 分 2-3 個產業模塊
+
+供應鏈的 stage 過去是扁平一欄,使用者要求把同一 stage 分成 2-3 個產業模塊
+(如 `silicon` → CPU / GPU加速器 / 記憶體 / 網通)。
+
+- **資料模型** — YAML 新增 `modules: {layerId: [{id,label}]}`,每個 node 加
+  `module` 欄。`supply_chain.py` `_normalise()` 解析 modules、驗證 node.module
+  ∈ 該層模塊;舊 YAML 無 modules → 隱式單一 `_default`(向後相容)。
+  生成 prompt 要求 LLM 每層產出 2-3 模塊並指派每個 node。
+- **佈局** — `page-supply-chain.js` `layout()` 改兩層:stage 欄內以 module
+  子面板垂直堆疊,欄頂對齊。`renderDiagram()` 畫帶框 `.sc-module` 子面板 +
+  標籤;stage band 弱化為虛線外框,模塊面板成為視覺主體。
+- 已重生 `cpo/hbm/openai/spacex` 四條鏈帶入模塊結構。
+
+### Fixed — 供應鏈邊線兩個 bug
+
+- **隱形 spine 線** — spine 邊共用一個 `objectBoundingBox` 漸層;邊完全水平時
+  (兩端同 y)bounding box 高度 0 → 漸層退化 → stroke 不顯示,只剩會動的粒子
+  (openai 鏈 `nvidia→microsoft`)。改 per-edge `userSpaceOnUse` 漸層,絕對
+  座標不退化。
+- **同 stage 邊鼓圈** — 同層兩 node 的邊原本從右緣拉出又繞回同欄,在區塊內鼓
+  醜圈。新增 `sidePath()`:同欄邊改走欄位右側的 C 形連接器(細、虛線、低調),
+  不穿過區塊。
+
+### Why
+
+把產業分好讓供應鏈一眼看出結構;邊線修正讓主流向乾淨可讀。
+
+---
+
+## [3.4.0] — 2026-05-17 — 新聞層整併 + 情緒趨勢上首頁 + 供應鏈佐證
+
+### Changed — 移除 news.html Triage tab(消除冗餘的「未辯論新聞」第三面)
+
+`news.html` 過去有 3 個未辯論新聞清單之一的 Triage tab(讀 `bridge.py
+extract_shallow_news()`),與 break-news 的「未閘 Raw 流」重複,使用者少用。
+
+- 移除 `news.html` 🗂 Triage tab + `#news-triage-feed`。
+- `page-news.js` 刪 `renderTriageFeed()` / `wireTriageButtons()` / triage filter 分支(~270 行)。
+- `bridge.py` 刪 `extract_shallow_news()` + `data["shallow_news"]`(`_raw_pub_map` 保留,`extract_news` 仍用)。
+- `news.html` = 純委員會深度 digest;break-news「未閘 Raw 流」= 唯一未辯論新聞面。
+- `triage` 協定本身保留(`新聞分析 TRIAGE` 文字指令仍可用),只移除 dashboard 按鈕。
+
+### Added — 情緒趨勢圖抽成可重用 module + index.html 首頁精簡 widget
+
+- **`Dashboard/trend-chart.js`(新)** — `window.TrendChart` module:`mount({root, compact,
+  withSelector})`。自帶 CSS(注入 `<style id="trend-chart-css">`)+ i18n + 30s 共用 fetch
+  cache。`compact` 模式只畫市場整體線、92px 矮圖、無 entity 選擇器。
+- `page-break-news.js` / `break-news.html` 改用 module(完整模式:選擇器 + legend + hover)。
+- `index.html` `#risk-overview` 下方新增精簡趨勢卡(連往 break-news.html),`script.js` boot 掛載。
+
+### Added — 委員會 digest verdict 餵入情緒趨勢指數
+
+`trend_rollup.py` `compute_trends()` 過去只讀 `bn_*.json`。現在也讀
+`news_logs/*_digest.json`:deep verdict 權重 ×1.8、shallow ×1.0;以 headline
+fingerprint 對 break-news 去重(digest 品質高者勝)。趨勢指數現反映委員會層。
+
+### Added — 供應鏈邊「知識圖譜佐證」
+
+`supply_chain.py` `enrich()` 新增讀 `nexus_graph.json` 的 ticker↔ticker **edges**
+(已含 break-news 辯論抽出的 SUPPLIES_TO / BENEFITS_FROM 等關係)。每條 LLM 草擬
+的供應鏈邊標 `corroboration`(佐證來源數 + nexus 關係型別 + sources)。
+`page-supply-chain.js` 邊列加 `✓N` 綠色 badge。
+
+### Why
+
+新聞層有兩條平行 pipeline(委員會 digest / break-news 探索),Triage tab 是第三個
+冗餘未辯論清單。整併後職責清楚:digest = 深度委員會、break-news raw 流 = 即時全量。
+趨勢圖上首頁讓使用者快速一覽市場情緒;餵入 digest 讓指數涵蓋最深一層分析。
+Nexus 早已吃 break-news 實體/關係 — 供應鏈佐證讓 LLM 草擬的價值鏈能被真實辯論交叉驗證。
+
+---
+
+## [3.3.2] — 2026-05-17 — Break News 未閘 Raw 流 + 手動辯論觸發
+
+### Added — un-gated raw breaking-news stream on `break-news.html`
+
+突發辯論室過去只顯示過了 score gate(`|shallow_score| ≥ 2`)的自動辯論項。
+冷門時段(週末/盤後)沒新聞過閘 → 頁面空窗看似停擺。此版加一條**未閘 raw 流**:
+poller 抓到的**全部** RSS 項(過閘 + 未閘)都進 `_raw_stream.json`,UI 即時呈現,
+每則可手動「🔥 辯論」繞過 gate 升級成辯論項。
+
+- **`scripts/break_news/store.py`** — 新 `RAW_STREAM_FILE` + `load_raw_stream()` /
+  `save_raw_stream(cap=150, max_age_h=24)`(atomic、key dedupe、汰 24h、保留既有
+  `news_id` promotion)/ `mark_raw_promoted(key, news_id)`。
+- **`scripts/break_news/poller.py`** — `run_once` loop 對每則非重複 item 收集 raw
+  entry(headline / source / score / gate 結果 / 完整 triage / `key` / `news_id`),
+  poll 末 merge 寫 `_raw_stream.json`。bn-creation 上限由 `break` 改 `continue` —
+  raw 捕捉不受 `MAX_ITEMS_PER_CYCLE` 截斷。state 加 `raw_stream_size`。
+- **`dashboard_server.py`** — `GET /api/break-news/raw-stream?limit=N`;
+  `POST /api/break-news/raw/debate`(body `{key}` → 查 entry → `init_item` 繞閘 →
+  `pending_debate` + 背景 `_bn_kick_debate_scan` 立即起辯論)。
+- **`Dashboard/break-news.html` + `page-break-news.js`** — trend strip 與雙欄之間
+  插可收合「未閘 Raw 流」面板:每卡片 score badge / 過閘狀態 / age / 來源 +
+  「🔥 辯論」鈕。`loadRawStream()` 納入 poll cycle。
+
+### Why
+
+冷門時段 break news 頁空窗,使用者以為壞了。Raw 流提供「全量可視 + 手動升級」
+旁路 — score gate **保留**(自動辯論門檻不變),raw 流純探索層展示,不進
+investment_protocol 決策。
+
+---
+
+## [3.3.1] — 2026-05-17 — Supply-Chain page visual polish
+
+### Changed — frontend-design pass on `/supply-chain.html`
+
+V3.3.0 shipped the page functional but visually weak. This pass aligns it to the
+dashboard design system and turns the layered diagram into a polished centerpiece.
+
+- **Dual-theme fix** — node cards hardcoded `rgba(24,24,27,…)` (dark only); now
+  use `var(--bg-card)` / `color-mix()` tokens → light theme works.
+- **Controls** — plain box → `.ea-cmdbar`-style command bar with `>` prompt
+  glyph, mono theme input, `focus-within` emerald glow, mono Generate button.
+- **Canvas** — dotted-grid backdrop; each layer = a tinted band column with a
+  numbered header chip so upstream→downstream structure reads instantly.
+- **Edges** — flat grey → spine edges get an emerald→amber gradient stroke +
+  animated flow particles (`<animateMotion>`) travelling upstream→downstream.
+- **Node cards** — gradient listing-color accent stripe, heat → outer glow
+  (hot red / warm amber / cold blue), hover lift, staggered reveal animation,
+  badges restyled to the 9–9.5px uppercase-pill convention.
+- **Detail panel** — polished floating card with listing-color header stripe +
+  styled upstream/downstream edge rows. Legend → clean pill row.
+
+### Why
+
+User found the page's colours off and the diagram flat. Visual quality matters
+for a tool meant to be explored; the bold treatment (flow animation, layer
+depth, heat glow) makes the supply chain legible at a glance.
+
+---
+
+## [3.3.0] — 2026-05-17 — Supply-Chain Explorer
+
+### Added — theme-keyed US supply-chain maps on a new `/supply-chain.html` page
+
+User found the Nexus knowledge graph (`/graph.html`) too messy (800 nodes /
+3895 edges, `MENTIONED_IN` = 50% = hairball) and wanted instead to *explore
+US-stock supply chains by theme* — e.g. the CPO (co-packaged optics)
+upstream→downstream value chain. Nexus can't serve this: directional
+supply-chain edges are absent (count 0) and private/foreign players never
+enter the graph at all.
+
+New separate **Supply-Chain Explorer** — LLM drafts the chain, existing data
+grounds it, a clean layered diagram renders it. Nexus auto-graph untouched.
+
+- **`scripts/nexus/supply_chain.py`(新)** — `generate(theme)` calls Claude (via
+  reused `scripts/break_news/llm_drivers.py` `run_claude`) with
+  `prompts/supply_chain_system.md` → drafts ordered layers, companies (honest
+  `listing`, real tickers only), directional edges, a `spine` → saved as
+  editable YAML in `nexus/supply_chains/<slug>.yaml`. `enrich()` adds live
+  per-node `grounding` (verified = in `heatmap_universe.json` / seen = in
+  `nexus_graph.json` / llm_only) + `heat` (from Nexus mention counts).
+  `nexus_themes()` exposes Nexus theme/narrative labels as quick-picks.
+- **`dashboard_server.py`** — `GET /api/supply-chain/{list,themes,<slug>}` (60s
+  TTL cache) + `POST /api/supply-chain/generate {theme}` (synchronous LLM draft).
+- **`Dashboard/supply-chain.html` + `page-supply-chain.js`(新)** — layered
+  upstream→downstream diagram: each layer = a column, nodes = HTML cards over an
+  SVG edge layer, directional bezier arrows, spine highlighted. Per-node badges:
+  可投資性 (listing 色條) · 資料支持度 (grounding ✓◦⚠) · 供應鏈層級 (column) ·
+  近期熱度 (heat dot). Chain selector + theme free-text/quick-pick + 生成 button.
+  Node click → detail panel (role / upstream / downstream).
+- **`utils.js` + `i18n.js`** — `供應鏈` sidebar nav entry (portfolio group).
+- Seeded `nexus/supply_chains/cpo.yaml` (18 companies, 5 layers, 21 edges).
+
+### Why
+
+User wants to *know* supply chains, not untangle a log-derived hairball. LLM
+drafts breadth fast; grounding against existing universe/Nexus data flags which
+nodes are tradeable vs unverified LLM claims. Editable YAML accumulates a
+reviewed library. Nexus stays the exploration layer — this is the curated view.
+
+---
+
+## [3.2.0] — 2026-05-15 — Break News 3-day sentiment-trend chart
+
+### Added — rolling sentiment-index trajectory on break-news.html
+
+突發新聞辯論室的辯論 log 過去是孤立快照,看不出敘事「方向」隨時間怎麼演化。
+此版把每則 debate 當成帶正負號的事件,經時間衰減 EMA 串成一條情緒指數軌跡,
+呈現在 `break-news.html` 頂部全寬面板:單一大圖 + 實體選擇器。一次畫一條線
+(市場整體 / 某產業 / 某主題),避免多線疊圖糾纏。
+
+- **`scripts/break_news/trend_rollup.py`(新)** — `compute_trends()` 唯讀掃
+  `news/break_news_logs/bn_*.json`,只取 closed/partial_closed。
+  - 每則 log = 事件:`sign` = BULLISH +1 / BEARISH −1 / NEUTRAL·SPLIT 0;
+    `weight` = impact(`triage.shallow_score`/4,clamp 0.25–2.0)× 來源可信度
+    (HIGH 1.0 / MED 0.7 / LOW 0.4);`貢獻 = sign × weight`。
+  - 72 個每小時 bucket(3 日窗,直接走 UTC),時間衰減 EMA
+    `S = S_prev × decay + Σ貢獻`,`decay` 由 12h half-life 推導。
+  - 顯示值 = `tanh(S / scale)`,scale 為**每實體自適應**(該實體 peak 對應
+    ~0.9,floor `_MIN_SCALE`)→ 每條線都用滿 [−1,+1],無新聞時自然衰回 0。
+  - 實體層級:市場整體(全 log)/ 各 sector / 各 theme(theme 走輕量
+    `ALIAS_MAP` 正規化)。sector/theme 需 ≥3 事件才可選,各 cap top 12。
+- **`dashboard_server.py`** — 新 GET `/api/break-news/trends`,60s TTL cache
+  (`_bn_trend_cache`),共用 `BREAK_NEWS_AVAILABLE` guard。
+- **`Dashboard/break-news.html` + `page-break-news.js`** — 頂部 `.bn-trend-strip`
+  面板:`<select>` 實體選擇器(optgroup 分 市場/產業/主題)+ 手刻 SVG area
+  chart(零基線、綠上紅下填色 clipPath、4 個時間軸刻度)+ 即時數值讀數 +
+  hover 游標(任一時點的時間與分數)。切換實體不重 fetch(所有 series 同
+  payload)。隨既有 30s poll loop 更新。
+
+### Why
+
+使用者要的是「根據每次收到的新聞修正當下趨勢往上或往下」— 一條會穿越 0、隨
+利多利空演化的軌跡,而非靜態的提及量排行。EMA 時間衰減讓指數有記憶但會遺忘,
+符合「漂亮時高、利空連發跌破 0、無新聞慢慢衰回 0」的直覺。維持探索層紀律:
+trend 面板不進 investment_protocol 決策。
+
+---
+
+## [3.1.2] — 2026-05-14 — Break News side-panel synthesis + categorized entities
+
+### Added — bull/bear bullet synthesis + grouped entity sections + graph linkage
+
+User feedback on V3.1.1 side panel (screenshot): `合議摘要` only showed
+verdict enum + flat entity chip dump, no written bull/bear/conclusion and no
+visible link to the knowledge graph. This release fixes all 3 with zero extra
+LLM calls (schema extended on the existing per-turn JSON response).
+
+- **`scripts/break_news/prompts.py` — schema additions**
+  - `SYSTEM_PROMPT` now requires `bull_points: [str ≤3]`, `bear_points: [str ≤3]`,
+    `final_take: str` (≤30字繁中) per agent response. Each side must give at
+    least 1 point (forces balanced view even when agent leans strongly).
+  - `build_summary_block` extended: returns `bull_summary[]`, `bear_summary[]`,
+    `final_take`, `final_take_by`. Bull/Bear bullets merged across both agents
+    with `_rough_dedup` using Jaccard ≥ 0.6 over zh-aware char-level tokens.
+    `final_take` taken from latest comment with a non-empty value.
+- **`Dashboard/news_components.js`**
+  - New `renderEntityChipsGrouped(entities)` — 4 labeled sections with header
+    + count badge (🏢 個股 / 🏭 產業 / 🔥 主題 / 🔬 技術節點) instead of
+    flat chip dump. Lang-aware labels via `currentLang()`.
+  - New `entityTotal(entities)` — `{tickers, sectors, themes, tech_keywords, total}`
+    counts used by graph footer.
+  - Existing `renderEntityChips` (flat) kept for per-comment thread bubbles.
+- **`Dashboard/page-break-news.js:renderDetail`** — rewrite of summary panel:
+  - Verdict header w/ rounds + close reason
+  - 🎯 最終結論 line (with agent attribution)
+  - 分歧 (divergence) line if predicates diverge
+  - ✅ 正方意見 bullet list (green left-border accent)
+  - ❌ 反方意見 bullet list (red left-border accent)
+  - 🧩 萃取實體 categorized chip sections
+  - 🌐 知識圖譜入口 footer: catalyst node id, edge counts, graph_status,
+    link to `/graph.html`
+  - Placeholder block for items still in `debating` / `pending_debate` state
+
+### Backward compatibility
+
+Old `bn_*.json` files without `bull_points` / `bear_points` / `final_take`
+render gracefully: bull/bear sections suppressed, only verdict + entities
+appear (same as V3.1.1). Replay (`⟳ 重跑`) regenerates with new fields.
+
+### Verification
+
+```bash
+ITEM=$(ls news/break_news_logs/bn_*.json | head -1 | xargs basename | sed 's/.json//')
+python3 -c "from scripts.break_news import store; store.set_state('$ITEM', 'pending_debate')"
+python3 scripts/break_news/debater.py --news-id "$ITEM" --max-rounds 1 --verbose
+jq '.summary | {consensus_verdict, bull_summary, bear_summary, final_take, final_take_by}' \
+   news/break_news_logs/$ITEM.json
+open http://localhost:8080/break-news.html   # side panel: bull/bear bullets + grouped chips + graph footer
+```
+
+---
+
+## [3.1.1] — 2026-05-14 — Break News + Futu push channel
+
+### Added
+
+- **Futu 牛牛 push** as a second break-news source alongside the 9 RSS feeds.
+  Pre-filter is strict: US ticker required, no HK/A-share, no ads/clickbait.
+  Pushes feed `scripts/break_news/poller.py` via new
+  `scripts.parse_futu_notifications.load_for_break_news(window_hours, max_items)`.
+- `scripts/parse_futu_notifications.py`:
+  - `_AD_HARD_KEYWORDS` — 富途早晚報 system notices, 開戶 / 贈金 promos,
+    直播 / 課程 / 牛友圈 educational ads, 立即下載 / 掃碼 CTAs
+  - `_HOWTO_PATTERNS` — `如何...？` / `教你...` / `一文讀懂...` clickbait regex
+  - `_is_ad(text)` — predicate used by poller via `filter_ads=True`
+  - `load_notifications(filter_ads=, require_us_ticker=, ...)` — backward
+    compat; both flags default False so existing `/api/futu-notifications`
+    endpoint behavior unchanged
+  - `load_for_break_news()` — emits items in `fetch_news_rss.fetch_feed`
+    shape (`headline, url, raw_summary, source="Futu Push", credibility="MEDIUM",
+    published, _fp, _dt, tickers`)
+  - `_futu_fingerprint(headline, tickers)` — sha1-based fp that survives zh-CN
+    text (the RSS `headline_fingerprint` only keeps `[a-z0-9]` tokens, which
+    collapsed every Futu zh push to "" or "20" → false dedupe)
+- `scripts/break_news/poller.py`:
+  - Lazy `import scripts.parse_futu_notifications as _futu`
+  - `fetch_fresh_items()` merges Futu items with RSS items, time-window cutoff
+    applied uniformly, dedupe ranks by credibility tier (HIGH > MEDIUM > LOW)
+    and prefers non-Futu on tie (real URL beats synthetic `futu://`)
+  - `run_once()` — Futu items skip the English-keyword score gate (would
+    mis-score zh text) with `advance_reason="futu_news"`. Daily cap + per-cycle
+    cap unchanged.
+  - New counters: `items_added_futu`, `futu_enabled` in `_state.poller`
+- Env vars: `BREAK_NEWS_FUTU_ENABLED` (default `1`),
+  `BREAK_NEWS_FUTU_MAX_PER_CYCLE` (default `30`)
+
+### Why
+
+User explicitly asked: 「futu 牛牛的推播也要放入辯論, 美股限定, 中股港股不用,
+廣告也不用, 新聞限定」. Futu push 是 zh-CN 速報，常比 RSS 早 5-30 分鐘出
+（券商直連 Reuters/Bloomberg wire），加進辯論池可增加新聞覆蓋的及時性。
+
+### Verification
+
+```bash
+python3 -c "from scripts.parse_futu_notifications import load_for_break_news; \
+  items, stats = load_for_break_news(window_hours=6); print(stats); \
+  [print(f'  [{\",\".join(i[\"tickers\"])}] {i[\"headline\"][:80]}') for i in items[:5]]"
+python3 scripts/break_news/poller.py --once
+jq '.poller | {items_added, items_added_futu, futu_enabled}' news/break_news_logs/_state.json
+```
+
+---
+
+## [3.1.0] — 2026-05-14 — Break News (RSS + Dual-CLI Debate Layer)
+
+### Added — Continuous short-cycle news with Claude × Gemini debate
+
+- **`scripts/break_news/`** — new module: RSS poller + Claude/Gemini CLI debate orchestrator
+  - `store.py` — atomic JSON store at `news/break_news_logs/<news_id>.json`, per-id
+    in-process locks, `_seen_index.json` dedupe (sha1 of url+headline fingerprint),
+    `_state.json` poller/debater health, startup sweep that resets `debating` items
+    older than 15 min back to `pending_debate`
+  - `poller.py` — pulls all 9 RSS feeds via `news/fetch_news_rss.py` parsers,
+    in-process triage via `stage1_triage.classify_news_type` + `calc_shallow_score`,
+    gate `|shallow_score| ≥ BREAK_NEWS_GATE_MIN_SCORE` OR HIGH credibility + |s|≥1
+    OR binary event; daily cap `BREAK_NEWS_DAILY_MAX_DEBATES`; flags `--once --dry-run`
+  - `llm_drivers.py` — subprocess wrappers for `claude` (envelope `.result`) and
+    `gemini` (envelope `.response`); 3-stage JSON extraction (fenced → whole →
+    brace-balanced); raw stdout dump on parse failure; default Gemini model is
+    `gemini-2.5-flash-lite` (pro/2.5-pro/flash hit RESOURCE_EXHAUSTED on free tier)
+  - `prompts.py` — strict SYSTEM_PROMPT requiring single fenced JSON output with
+    schema `{commentary, entities, relations, done, confidence}`; opener + follow-up
+    user prompts; `build_summary_block` merges entities/relations across the thread
+  - `debater.py` — state machine `pending_debate → debating → closed/partial_closed/failed`;
+    alternates Claude (Analyst-A) and Gemini (Analyst-B); both must signal
+    `done:true` or `<DONE>` in commentary to close; max 3 rounds (env-overridable);
+    480s wall-clock budget; partial close on timeout. Flags `--news-id`, `--scan`,
+    `--workers`
+  - `validate.py` — schema lint for break_news_logs/*.json (rc=0/1)
+- **`Dashboard/break-news.html` + `page-break-news.js`** — new `/break-news.html`
+  page; vertical card stream + side panel with Claude/Gemini bubble thread, entity
+  chips (tickers, sectors, themes, tech-keywords), consensus summary block, replay
+  button per item. 30s polling for feed + state, 5s polling for selected item
+  while still debating
+- **`Dashboard/news_components.js`** — shared primitives: `renderNewsCard`,
+  `renderScoreBadge`, `renderSourcePill`, `renderAgePill`, `renderStatePill`,
+  `renderEntityChips`, `renderThreadBubble`, `escapeHtml`, `relTime`
+- **`dashboard_server.py`** — 2 daemon threads (`break_news_poll_loop`,
+  `break_news_debate_loop`) modeled on `refresh_loop`; 5 routes
+  (`GET /api/break-news/feed`, `/item/<id>`, `/state`; `POST /refresh`,
+  `/item/<id>/replay`); new `GEMINI_BIN` constant; startup sweep call;
+  separate `_break_news_dispatch_lock` so debates don't block `_protocol_lock`
+  (normal `分析/產業掃描/新聞分析` keep running)
+- **`Dashboard/utils.js`** — new `break-news` NAV_ITEM in MARKET group;
+  VERSION bumped to V3.1.0
+- **`Dashboard/i18n.js`** — `nav.break_news` zh + en keys
+
+### Changed
+
+- `dashboard_server.py` — `PORT` now reads `DASHBOARD_PORT` env var (still defaults
+  to 8080); enables running an isolated test instance on a different port
+
+### Why
+
+The daily DIGEST pipeline (`news/news_protocol_v2.md`) runs on user trigger
+once per day and produces a single batched verdict file. Market-moving news
+during the trading day was being missed. The new Break News layer pulls RSS
+every 10 minutes and runs an automated Claude × Gemini debate per item;
+divergence between the two models surfaces uncertainty that single-model
+arbitration hides. Entities + relations extracted from each comment feed into
+the Knowledge Graph (V3.0) as a new data source so 2nd / 3rd-order
+relationships build up faster.
+
+### Env vars
+
+```
+BREAK_NEWS_INTERVAL_SEC=600         # poll cadence (10 min)
+BREAK_NEWS_LLM_TIMEOUT_SEC=180      # per CLI turn
+BREAK_NEWS_THREAD_TIMEOUT_SEC=480   # whole debate wall-clock
+BREAK_NEWS_PARALLEL=2               # concurrent debates
+BREAK_NEWS_DAILY_MAX_DEBATES=30     # cost cap
+BREAK_NEWS_MAX_ROUNDS=3
+BREAK_NEWS_GATE_MIN_SCORE=2
+BREAK_NEWS_GEMINI_MODEL=gemini-2.5-flash-lite
+CLAUDE_BIN, GEMINI_BIN              # binary path overrides
+DASHBOARD_PORT=8080
+```
+
+### Verification
+
+```bash
+python3 scripts/break_news/poller.py --once --dry-run
+python3 scripts/break_news/poller.py --once
+python3 scripts/break_news/llm_drivers.py --probe --agent claude
+python3 scripts/break_news/llm_drivers.py --probe --agent gemini
+python3 scripts/break_news/debater.py --news-id <id> --max-rounds 1 --verbose
+python3 scripts/break_news/validate.py
+curl http://localhost:8080/api/break-news/state | jq .
+curl http://localhost:8080/api/break-news/feed?limit=5 | jq .
+open http://localhost:8080/break-news.html
+```
+
+---
+
+## [3.0.0] — 2026-05-13 — Project Nexus (Knowledge Graph)
+
+### Added — Major architectural layer: 1st/2nd/3rd-order relationship graph
+
+- **`scripts/nexus/`** — new module tree implementing news + financial-analysis-driven
+  knowledge graph extraction. Built atop existing V2.X analytical pipeline, does NOT
+  alter decision layer (Arbiter wiring deferred to V3.1).
+  - `schema.py` — Node/Edge dataclasses, NodeType + EdgeType enums, canonical id helpers
+  - `config.yaml` — multi-dimensional decay strategies (catalyst 7d / narrative 21d /
+    structural_shift 90d / supply_chain_hop 45d / outcome_for 30d), tier confidence
+    multipliers (Tier 1: 1.0 / Tier 2: 0.7 / Tier 3: 0.85), alias map (TSM/NVDA/MSFT…),
+    pruning thresholds, Tier 3 backfill limit
+  - `tier1_loaders.py` — pre-structured JSON loaders (theme-detector cache,
+    event_index, news_logs digests, thesis registry, Dashboard/data.json earnings)
+  - `tier2_regex.py` — extends existing extractors with tech-node regex
+    (HBM3e / N3P / CoWoS-L / Blackwell / Rubin / silicon photonics / GaN / SiC …)
+    — these are leading-leading indicators surfacing in commentary weeks before
+    financial confirmation. Emits SUPPLY_CHAIN_HOP edges via canonical narrative nodes
+  - `tier3_llm_ner.py` — Haiku 4.5 batched LLM NER with prompt caching, SHA256
+    per-document cache, two-stage alias canonicalization (hard alias map +
+    ≥3-doc promotion guard for provisional narratives)
+  - `pagerank_lite.py` — Power Iteration PageRank fallback when `networkx`
+    unavailable; degree-centrality cheap fallback below that
+  - `build_graph.py` — orchestrator: tier merge → multi-dim decay + confidence-weighted
+    → networkx/lite centrality → leaf+cap prune → emit `Dashboard/nexus_graph.json`
+    (<5MB hard cap, asserted)
+  - `prompts/ner_system.md` — Haiku ontology + few-shot for triple extraction
+- **`Dashboard/graph.html` + `Dashboard/page-graph.js`** — new `/graph.html` page
+  rendering Obsidian-style force-directed graph via `force-graph@1.43` CDN.
+  Monochrome by default, size = √(degree centrality), hover glows `--secondary`.
+  **Narrative Flow path tracing**: click any node → BFS up to 3 hops → 1st/2nd/3rd
+  order beneficiaries highlighted in blue gradient, animated link particles along
+  active frontier. Side-panel lists ranked neighbors per hop with PageRank, plus
+  source-document audit trail
+- **`Dashboard/utils.js` NAV_ITEMS** — new `knowledge graph` nav item in PORTFOLIO group
+- **`Dashboard/i18n.js`** — `nav.graph` zh/en keys
+- **`daily_update.sh` Step 8** — Nexus build appended after Step 7 (Structural
+  Watchlist); soft-installs `networkx` if missing; non-fatal failure mode
+- **`dashboard_server.py`** — new `/api/graph/data` (serves cached JSON) and
+  `/api/graph/centrality/<TICKER>` (per-ticker connected themes/catalysts/narratives/peers)
+  read-only inspection endpoints. **No** Arbiter integration
+
+### Why
+
+Existing V2.X analyzes individual stocks well but lacks 全域空間感知. Daily news +
+theme detector + sector intel + deep dives already produce structured artifacts —
+what was missing is the edge layer surfacing 2nd-order beneficiaries (e.g. NVDA
+capex story → VRT/COHR/GLW supply chain) and narrative共振 before financial outcomes
+confirm them. Nexus introduces a graph-shaped entity store as a structural new
+layer (hence major version jump) atop the analytical pipeline. Tier 3 LLM is the
+heart, not a supplement — it reads the prose where 2nd/3rd-order relationships
+actually live. MVP is visualization + centrality inspection only; Arbiter wiring
+into investment_protocol Phase 3 (二階衍生推薦 + 紅隊打折) deferred to V3.1.
+
+### Costs / Operations
+
+- Daily Tier 1+2 build wall time: ~10–20s
+- Tier 3 steady-state daily cost: ~$0.05 (40 MDs × ~3k tokens × Haiku 4.5,
+  cache-hit ≥90%). First-day backfill capped at 10 MDs/run (~$0.03)
+- Output: `Dashboard/nexus_graph.json` (~1.5MB Tier 1+2, ~3MB w/ Tier 3 full)
+- Audit log: `scripts/nexus/cache/build_log_<DATE>.json` per build
+
+---
+
+## [2.20.2] — 2026-05-12
+### Added — Sector protocol 加速 (A1 + B2) + 時間 timeout 拉到 30 min (V2.20.1)
+
+### Added
+- `sector/scripts/phase0_read_caches.py` (A1, 新檔):
+  - Phase 0 unified cache reader — 一次跑取 5 層 cache (breadth / FTD / market_top / FRED) + 新鮮度判斷
+  - stdout 輸出單一 JSON，取代過去 5+ 個 inline `python -c` bash call（每個 = 1 turn × LLM overhead）
+  - slim_* 函式只保留 Phase 0 需要的欄位（FRED 11 fields, breadth/FTD/market_top 4 key blocks）
+  - 預估省 **2-3 min** sector wall time（5-8 個 turn → 1 個 turn）
+- `sector/phase_0.md` — 上面標示推薦使用 unified reader，舊流程改備援
+- `sector/phase_1-2-3.md` — Step 3b/3c/3d/3e parallel mode（bash `&` + `wait`）：
+  - 4 個 fetch_*.py (earnings_pulse / smart_money / sector_news / general_news) 平行跑
+  - 過去 sequential ~6 min → parallel ~30s wall
+  - 預估省 **3-4 min** sector wall time
+- `dashboard_server.py` (V2.20.1):
+  - Preflight chain sector wait timeout 1200s (20 min) → **1800s (30 min)**
+  - `PROTOCOL_TIMEOUT_OVERRIDES` 加 sector override 1800s + `SECTOR_TIMEOUT_SEC` env var
+
+### Why
+- 用戶觀察 sector V1.4 PARALLEL_SUBAGENT 跑 ~17-21 min（p95 21 min），偶爾 hit 1200s preflight cap timeout
+- 解兩個方向：
+  1. **拉 timeout cap**：preflight 1200 → 1800，避免 false timeout
+  2. **減 sector 實際耗時**：A1 + B2 應省 5-7 min (17.8 min → 11-13 min)
+- 沒做 A3 (Devil's Advocate inline)、A2 (Phase 5 builder)：兩者需動 protocol 邏輯，風險 vs 收益不對等
+
+### Smoke
+- `python3 sector/scripts/phase0_read_caches.py` rc=0，輸出 4 layer (breadth/ftd/market_top stale, fred fresh)
+- `python3 -m py_compile sector/scripts/phase0_read_caches.py` OK
+- `python3 -m py_compile dashboard_server.py` OK
+
+### Out of Scope (V2.20.3+)
+- A2 — Phase 5 build_sector_intel.py 拆出獨立 script（需 Phase 4 lane outputs 先序列化到 disk）
+- A3 — Devil's Advocate 從 Phase 4 獨立 subagent → Phase 2.5 inline（需動 protocol divergence 邏輯）
+- B1 — 4 lane subagent 合併（Theme + News Catalyst）
+- B3 — theme_detector `--skip-if-fresh` 邏輯確認（目前 cache hit < 3h 應該秒退，需 verify）
+
+---
+
 ## [2.20.0] — 2026-05-10
 ### Added — V2.20.0：UI Decision Layer 完整化 + Backtest 深化 + Decision Logic 動態化
 

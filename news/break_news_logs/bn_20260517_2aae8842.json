@@ -1,0 +1,566 @@
+{
+  "news_id": "bn_20260517_2aae8842",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T15:39:37Z",
+  "last_activity_ts": "2026-05-17T15:42:00Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/energy/articles/green-plains-touts-operational-gains-150447590.html",
+    "feed_fingerprint": "green plains touts operational gains carbon capture upside",
+    "published": "2026-05-17T15:04:47+00:00",
+    "url_hash": "sha1:57aefd56a8609062edf193ea5b51f86efbd4ffcd"
+  },
+  "headline": "Green Plains Touts Operational Gains, Carbon Capture Upside at Conference",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T15:40:18Z",
+      "latency_ms": 25383,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Green Plains (**GPRE**) 在會議端釋出的是**敘事**而非硬催化劑——「營運改善 + 碳捕捉上行」屬管理層 conference talk，無財報、無訂單數字佐證，pre-triage 給 shallow_score 1.0 合理。真正的價值樞紐在 **45Z 潔淨燃料稅務抵免**落地節奏，以及 Summit Carbon Solutions CO2 管線的州級許可進度——這兩項都卡在政策與監理時程，不是公司自己能控。GPRE 已從純乙醇商品轉向高毛利蛋白與低碳乙醇/SAF 路線,故事方向對,但乙醇 crush spread 仍偏弱。把這則當情緒面試水溫,不宜當作基本面拐點;要追,等下季 carbon capture 收入實際入帳再說。",
+        "bull_points": [
+          "45Z 潔淨燃料抵免可大幅墊高低碳乙醇單位毛利",
+          "碳捕捉 + SAF 轉型方向打開估值重評想像",
+          "已從商品乙醇轉高毛利蛋白/低碳產品線"
+        ],
+        "bear_points": [
+          "純會議談話,無財報無訂單,情緒成分高",
+          "乙醇 crush spread 仍弱,本業現金流承壓",
+          "Summit CO2 管線卡州級許可,時程不可控"
+        ],
+        "final_take": "方向對但屬情緒題材,等碳捕捉收入入帳再追",
+        "entities": {
+          "tickers": [
+            "GPRE"
+          ],
+          "sectors": [
+            "Energy",
+            "Materials"
+          ],
+          "themes": [
+            "carbon capture",
+            "renewable fuels",
+            "45Z tax credit",
+            "SAF"
+          ],
+          "tech_keywords": [
+            "CCS",
+            "low-carbon ethanol",
+            "45Z",
+            "SAF"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:carbon-capture"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:45z-tax-credit"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:weak-ethanol-crush-spread"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:summit-carbon-pipeline"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "會議敘事非硬催化,真正槓桿在政策時程"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T15:40:32Z",
+      "latency_ms": 13378,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前一位分析師已提及政策風險，我補充二階效應：大型煉油廠（如 **CVR Energy**, **Phillips 66**）加速投入 **Renewable Diesel** 與 **SAF**，使農業基底的乙醇廠面臨「原料成本」與「碳強度 (CI)」競爭。GPRE 若無法在物流上展現規模優勢，其技術紅利恐被中游煉化巨頭的資本抵銷。市場應聚焦於 GPRE 相較於煉油巨頭，在未來燃料供應鏈的 CI 值評比中，是否具備真正的成本護城河。",
+        "bull_points": [
+          "積極布局高毛利低碳產品",
+          "營運效率優化助提升競爭力"
+        ],
+        "bear_points": [
+          "大型煉油廠資本排擠效應",
+          "碳強度CI標準提高導致成本壓力"
+        ],
+        "final_take": "需觀察其物流與低碳產品的成本護城河。",
+        "entities": {
+          "tickers": [
+            "GPRE",
+            "CVI",
+            "PSX"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "SAF",
+            "Renewable Diesel"
+          ],
+          "tech_keywords": [
+            "Carbon Capture",
+            "CI (Carbon Intensity)"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CVI"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:PSX"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "從煉油巨頭競爭與碳強度成本競爭角度分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T15:41:02Z",
+      "latency_ms": 30870,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面沒談的**公司治理催化劑**:GPRE 的真正變數不是稅務抵免時程,而是 **Ancora** 主動投資人去年已拿下董事席位、施壓策略檢討甚至分拆。這場 conference 的「碳捕捉上行」說詞,本質是管理層在向市場做 **sum-of-the-parts** 估值防禦——把低碳乙醇/蛋白/碳捕捉拆開算,帳面比合併乙醇商品股更值錢。另一個被忽略的**供應鏈節點風險**:南達科他州已立法禁止 CO2 管線動用 eminent domain,Summit Carbon 路權因此卡死,GPRE 綁定該管線的廠區碳捕捉時程恐再延。換句話說,carbon capture 同時是分拆解鎖的籌碼、也是被州級監理綁住的人質。看這檔要盯 13D 動向與 Summit 許可,不是盯 conference slides。",
+        "bull_points": [
+          "Ancora 施壓策略檢討,分拆解鎖 SOTP 價值",
+          "低碳乙醇/蛋白/碳捕捉分開估值高於合併乙醇股",
+          "活躍投資人入主董事會,治理改善動能"
+        ],
+        "bear_points": [
+          "南達科他禁 CO2 管線徵地,Summit 路權卡死",
+          "碳捕捉時程被州級監理綁住,延後入帳",
+          "管理層敘事疑為防禦活躍投資人,非真拐點"
+        ],
+        "final_take": "治理催化劑大於基本面,盯 13D 與 Summit 許可",
+        "entities": {
+          "tickers": [
+            "GPRE"
+          ],
+          "sectors": [
+            "Energy",
+            "Materials"
+          ],
+          "themes": [
+            "carbon capture",
+            "45Z tax credit",
+            "activist investor",
+            "sum-of-the-parts"
+          ],
+          "tech_keywords": [
+            "SAF",
+            "low-carbon ethanol",
+            "CO2 pipeline"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:south-dakota-co2-pipeline-eminent-domain-ban"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:activist-sum-of-the-parts-breakup"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "CUSTOMER_OF",
+            "object": "narrative:summit-carbon-co2-pipeline"
+          }
+        ],
+        "done": false,
+        "confidence": 0.6,
+        "rationale_short": "新增 Ancora 活躍投資人分拆催化劑與南達科他管線徵地禁令節點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T15:41:15Z",
+      "latency_ms": 12431,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面提到碳捕捉與分拆是籌碼，我補充**「高蛋白飼料 (Ultra-High Protein, UHP)」**的結構性價值。GPRE 不僅是能源股，其在生產乙醇過程中的蛋白質副產品業務，實際上為公司建立了與傳統乙醇煉廠差異化的護城河。**UHP 產能的規模化**是降低對「燃料價格敏感度」的關鍵；若管理層能持續提高蛋白質萃取率，這將成為公司對抗 Ethanol crush spread 疲軟的緩衝，使 GPRE 的估值邏輯從能源循環股轉向**農業科技 (Ag-Tech)** 供應鏈。",
+        "bull_points": [
+          "UHP副產品提升非能源收入佔比",
+          "高蛋白飼料提供抗燃料波動緩衝"
+        ],
+        "bear_points": [
+          "蛋白質獲利易受大豆粉市場波動影響",
+          "UHP擴產製程的穩定度尚待驗證"
+        ],
+        "final_take": "關注 UHP 營收規模，這是 GPRE 脫離傳統乙醇循環的關鍵。",
+        "entities": {
+          "tickers": [
+            "GPRE",
+            "ADM"
+          ],
+          "sectors": [
+            "Energy",
+            "Agriculture"
+          ],
+          "themes": [
+            "Ag-tech",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "UHP",
+            "Carbon Capture"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ag-tech"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補強 GPRE 農業飼料業務作為非能源避險的角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T15:41:46Z",
+      "latency_ms": 30845,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面把敘事、政策、分拆、UHP 護城河都談完了,補一個沒人碰的**資產負債表**角度:GPRE 帳上現金燃燒、crush spread 疲弱,而碳捕捉是**重資本**生意——綁定 Summit 管線的廠區改造、CO2 壓縮設施都要錢。問題是這筆 capex 撞上可轉債再融資窗口,管理層在 conference 高喊「上行」很可能也是替**潛在增資或賣資產**鋪敘事。另一個沒被點名的供應鏈節點:**Valero (VLO)** 同樣是 Summit 管線托運方且本身是乙醇龍頭,GPRE 在同一條管線裡並非獨佔低碳乙醇紅利。要追這檔,先看下季自由現金流與淨負債,別被 SAF 故事帶著走。",
+        "bull_points": [
+          "45Z 抵免可轉讓,GPRE 能賣稅務抵免換近期現金",
+          "分拆/被併購情境下重資產仍有帳面價值"
+        ],
+        "bear_points": [
+          "碳捕捉重資本撞可轉債再融資,增資稀釋風險",
+          "現金燃燒疊加 crush spread 疲弱,自由現金流承壓",
+          "Valero 同為 Summit 管線托運方,低碳乙醇紅利非獨佔"
+        ],
+        "final_take": "偏空,先看下季自由現金流與淨負債再說",
+        "entities": {
+          "tickers": [
+            "GPRE",
+            "VLO",
+            "ADM"
+          ],
+          "sectors": [
+            "Energy",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "carbon capture",
+            "SAF",
+            "45Z",
+            "ethanol"
+          ],
+          "tech_keywords": [
+            "CCS",
+            "SAF",
+            "45Z",
+            "UHP"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:carbon_capture_capex"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:GPRE"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:summit_co2_pipeline"
+          },
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:45z_credit_transferability"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增資產負債表/再融資稀釋風險與 Valero 管線競爭節點,屬前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T15:42:00Z",
+      "latency_ms": 14271,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前幾輪已談及能源面與分拆，我補充**飼料原料結構競爭**：GPRE 的 UHP 產品實則是在挑戰 ADM 與 Bunge 等農業巨頭在豆粕市場的份額。儘管有技術護城河，但在畜牧飼料供應鏈中，產品標準化與長期合約網絡才是關鍵。若其玉米蛋白無法徹底取代傳統豆粕，其「Ag-Tech」敘事在終端市場將面臨巨大的轉換成本，這在目前波動加劇的農業大宗物資環境下，風險更甚於燃料端競爭。",
+        "bull_points": [
+          "轉型高附加價值農業科技，擴展營收來源。",
+          "UHP技術具潛在差異化競爭力。"
+        ],
+        "bear_points": [
+          "農業巨頭(如ADM)通路強勢，市場壁壘高。",
+          "產品轉換成本高，標準化難度大。"
+        ],
+        "final_take": "蛋白業務雖具潛力，但終端通路是最大挑戰。",
+        "entities": {
+          "tickers": [
+            "GPRE",
+            "ADM",
+            "BG"
+          ],
+          "sectors": [
+            "Energy",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "Renewable Fuels",
+            "Agribusiness"
+          ],
+          "tech_keywords": [
+            "Ultra-High Protein"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GPRE",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ADM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "聚焦農業巨頭競爭風險，補充終端通路難度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ADM",
+        "BG",
+        "CVI",
+        "GPRE",
+        "PSX",
+        "VLO"
+      ],
+      "sectors": [
+        "Agriculture",
+        "Consumer Staples",
+        "Energy",
+        "Materials"
+      ],
+      "themes": [
+        "45Z",
+        "45Z tax credit",
+        "AI capex",
+        "Ag-tech",
+        "Agribusiness",
+        "Renewable Diesel",
+        "Renewable Fuels",
+        "SAF",
+        "activist investor",
+        "carbon capture",
+        "ethanol",
+        "renewable fuels",
+        "sum-of-the-parts"
+      ],
+      "tech_keywords": [
+        "45Z",
+        "CCS",
+        "CI (Carbon Intensity)",
+        "CO2 pipeline",
+        "Carbon Capture",
+        "SAF",
+        "UHP",
+        "Ultra-High Protein",
+        "low-carbon ethanol"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:carbon-capture"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:45z-tax-credit"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:weak-ethanol-crush-spread"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:summit-carbon-pipeline"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CVI"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:PSX"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:south-dakota-co2-pipeline-eminent-domain-ban"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:activist-sum-of-the-parts-breakup"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "CUSTOMER_OF",
+        "object": "narrative:summit-carbon-co2-pipeline"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ag-tech"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ADM"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:carbon_capture_capex"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:GPRE"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:summit_co2_pipeline"
+      },
+      {
+        "subject": "ticker:GPRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:45z_credit_transferability"
+      }
+    ],
+    "bull_summary": [
+      "45Z 潔淨燃料抵免可大幅墊高低碳乙醇單位毛利",
+      "碳捕捉 + SAF 轉型方向打開估值重評想像",
+      "已從商品乙醇轉高毛利蛋白/低碳產品線",
+      "積極布局高毛利低碳產品",
+      "營運效率優化助提升競爭力",
+      "Ancora 施壓策略檢討,分拆解鎖 SOTP 價值"
+    ],
+    "bear_summary": [
+      "純會議談話,無財報無訂單,情緒成分高",
+      "乙醇 crush spread 仍弱,本業現金流承壓",
+      "Summit CO2 管線卡州級許可,時程不可控",
+      "大型煉油廠資本排擠效應",
+      "碳強度CI標準提高導致成本壓力",
+      "南達科他禁 CO2 管線徵地,Summit 路權卡死"
+    ],
+    "final_take": "蛋白業務雖具潛力，但終端通路是最大挑戰。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T15:42:00Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH, CUSTOMER_OF, HEADWIND_FROM, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

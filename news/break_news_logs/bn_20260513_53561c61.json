@@ -1,0 +1,702 @@
+{
+  "news_id": "bn_20260513_53561c61",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:12:38Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/the-world-lost-nearly-1-billion-barrels-in-oil-supply-over-the-past-75-days-why-investors-arent-worrying-enough-5a777ae0?mod=mw_rss_topstories",
+    "feed_fingerprint": "world lost nearly 1 billion barrels oil supply",
+    "published": "2026-05-13T20:59:00+00:00",
+    "url_hash": "sha1:facc9c735a4b9bc19c9cf8739a0d1176d62368f0"
+  },
+  "headline": "The world lost nearly 1 billion barrels in oil supply over the past 75 days. Why investors aren’t worrying enough.",
+  "headline_zh": null,
+  "raw_summary": "Global oil prices have climbed by nearly 50% since the the end of February, but the rise pales in comparison to an estimated loss of nearly 1 billion barrels since the start of the Iran war 75 days ago.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:11:03Z",
+      "latency_ms": 23762,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Supply shock under-priced. 1B barrel loss in 75 days = ~13.3 mb/d run-rate gap, yet Brent only +50% off Feb lows suggests market discounting fast Iranian return or SPR release. Three asymmetric trades: (1) **E&P leverage** — XOM, CVX, FANG, EOG benefit from sustained $90+ Brent without capex discipline breaking. (2) **Refiner crack spreads** widen on sour-crude scarcity — VLO, MPC, PSX. (3) **Oil services** lag but FTI, SLB, HAL re-rate if shut-in capacity needs restart capex. Headwind: airlines (DAL, UAL, LUV) jet-fuel pass-through lag, and consumer discretionary margin compression. Watch Strait of Hormuz tail risk — 20% of seaborne crude. Tankers (FRO, STNG) benefit from ton-mile expansion if Iranian barrels reroute. Gold (GLD) + defense (LMT, RTX) co-move on geopolitical premium.",
+        "entities": {
+          "tickers": [
+            "XOM",
+            "CVX",
+            "FANG",
+            "EOG",
+            "VLO",
+            "MPC",
+            "PSX",
+            "SLB",
+            "HAL",
+            "FTI",
+            "DAL",
+            "UAL",
+            "LUV",
+            "FRO",
+            "STNG",
+            "LMT",
+            "RTX",
+            "GLD",
+            "USO",
+            "XLE"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials",
+            "Consumer Discretionary",
+            "Materials"
+          ],
+          "themes": [
+            "oil supply shock",
+            "Iran war",
+            "geopolitical premium",
+            "Strait of Hormuz risk",
+            "refiner crack spread",
+            "tanker ton-mile"
+          ],
+          "tech_keywords": [
+            "sour crude",
+            "Brent-WTI spread",
+            "SPR release",
+            "shut-in capacity"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil-supply-shock"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:refiner-crack-spread"
+          },
+          {
+            "subject": "ticker:DAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:jet-fuel-cost"
+          },
+          {
+            "subject": "ticker:FRO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tanker-ton-mile"
+          },
+          {
+            "subject": "ticker:LMT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:geopolitical-premium"
+          },
+          {
+            "subject": "ticker:XLE",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:iran-war-supply-loss"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Supply gap math implies under-pricing; mapped E&P/refiner/services/tanker beneficiaries vs airline headwind; flagged Hormuz tail risk."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:11:18Z",
+      "latency_ms": 14612,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Beyond the immediate focus on crude and refined products, the significant oil supply deficit poses a substantial, yet often overlooked, headwind for the petrochemical industry. A persistent ~13.3 mb/d shortfall directly impacts the cost and availability of critical feedstocks like naphtha and natural gas liquids (NGLs). This squeeze translates to elevated input costs for chemical manufacturers such as DOW and LYB, potentially compressing margins unless these costs can be fully passed downstream. Investors may be underestimating the cascading effect on plastics, polymers, and countless manufactured goods, creating a risk for industrial supply chains and consumer prices that extends far beyond fuel.",
+        "entities": {
+          "tickers": [
+            "DOW",
+            "LYB"
+          ],
+          "sectors": [
+            "Chemicals",
+            "Basic Materials"
+          ],
+          "themes": [
+            "Petrochemical feedstock costs",
+            "Industrial supply chain disruption",
+            "Inflationary pressures"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DOW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tight naphtha and NGL supply"
+          },
+          {
+            "subject": "ticker:LYB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tight naphtha and NGL supply"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "Adds commentary on downstream petrochemical feedstock impacts, distinct from prior upstream/refining focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:11:38Z",
+      "latency_ms": 19788,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Missed angle: **fertilizer + ag chain spillover**. Natural gas + naphtha squeeze hits ammonia/urea economics — CF Industries (CF), Nutrien (NTR), Mosaic (MOS) get cost-push tailwind as European NH3 producers (Yara, BASF) curtail again. 2nd-order: 2026 planting season input costs compress farmer margins → Deere (DE) order book risk + ADM/BG grain-handling volume hit. Contra to consensus 'oil up = energy long only': watch **rail coal substitution** — sustained $90+ Brent + diesel crack widening pulls utility dispatch back to coal (BTU, ARCH, AMR) and revives Powder River Basin volume for UNP/CSX. Tail: Henry Hub decouples upward as LNG arb to Europe re-opens (LNG, CTRA, EQT). Discipline check: if Iran restart materializes in 30 days, fertilizer trade unwinds first — sizing matters.",
+        "entities": {
+          "tickers": [
+            "CF",
+            "NTR",
+            "MOS",
+            "DE",
+            "ADM",
+            "BG",
+            "BTU",
+            "ARCH",
+            "AMR",
+            "UNP",
+            "CSX",
+            "LNG",
+            "CTRA",
+            "EQT"
+          ],
+          "sectors": [
+            "Materials",
+            "Industrials",
+            "Energy",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "fertilizer cost-push",
+            "coal substitution",
+            "LNG arbitrage",
+            "ag input inflation",
+            "feedstock squeeze"
+          ],
+          "tech_keywords": [
+            "ammonia",
+            "urea",
+            "naphtha",
+            "NGL",
+            "Henry Hub",
+            "Powder River Basin"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CF",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nat_gas_feedstock_squeeze"
+          },
+          {
+            "subject": "ticker:NTR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:fertilizer_cost_push"
+          },
+          {
+            "subject": "ticker:DE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:farmer_margin_compression"
+          },
+          {
+            "subject": "ticker:BTU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:coal_substitution"
+          },
+          {
+            "subject": "ticker:UNP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:prb_coal_volume_revival"
+          },
+          {
+            "subject": "ticker:LNG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lng_arbitrage_europe"
+          },
+          {
+            "subject": "ticker:EQT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:henry_hub_decoupling"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread covered E&P/refiners/petrochem. Fertilizer + coal-substitution + LNG arb are distinct 2nd-order nodes not raised."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:12:00Z",
+      "latency_ms": 22844,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Investors appear complacent regarding the ~13.3 mb/d oil supply deficit's broader impact. Beyond fuel prices, the sustained rise in energy costs presents a significant headwind for industrial gas producers like Linde (LIN) and Air Products (APD). Their energy-intensive cryogenic air separation processes mean elevated input expenses for critical gases used in semiconductor fabs and advanced materials. This overlooked cost pressure on essential manufacturing inputs could translate to secondary inflation, potentially impacting profit margins in high-growth tech sectors that depend on these foundational materials.",
+        "entities": {
+          "tickers": [
+            "LIN",
+            "APD"
+          ],
+          "sectors": [
+            "Industrials",
+            "Chemicals"
+          ],
+          "themes": [
+            "Energy costs",
+            "Industrial gases",
+            "Supply chain inputs",
+            "Investor complacency",
+            "Secondary inflation"
+          ],
+          "tech_keywords": [
+            "Cryogenic air separation",
+            "Semiconductor manufacturing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LIN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:high_energy_costs"
+          },
+          {
+            "subject": "ticker:APD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:high_energy_costs"
+          },
+          {
+            "subject": "narrative:semiconductor_manufacturing",
+            "predicate": "DEPENDS_ON",
+            "object": "narrative:industrial_gases"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces industrial gas production costs as an overlooked impact of high energy prices on critical manufacturing inputs, distinct from prior petrochemical focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:12:20Z",
+      "latency_ms": 19141,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **shipping fuel + IMO 2020 compliance squeeze**. A 13.3 mb/d sour-crude deficit tightens VLSFO (very-low-sulfur fuel oil) supply disproportionately — Iran/Russia barrels are heavy-sour, their loss forces refiners into sweet-light blends that yield less residual fuel. VLSFO-MGO spread blows out, hammering dry-bulk (SBLK, GNK) and container lines (ZIM, MATX) on bunker cost pass-through lag. Contra to tanker bull case: product tankers (TNK, ASC) win over crude tankers if refining migrates closer to demand centers. 2nd-order: scrubber-fitted fleet (STNG, INSW retrofits) earns widening HSFO discount arbitrage. Specific node: **Singapore bunker hub** — 50M tons/yr throughput, VLSFO premium already +$80/ton over Rotterdam. Asphalt/bitumen scarcity also hits road-construction (VMC, MLM project deferrals).",
+        "entities": {
+          "tickers": [
+            "SBLK",
+            "GNK",
+            "ZIM",
+            "MATX",
+            "TNK",
+            "ASC",
+            "STNG",
+            "INSW",
+            "VMC",
+            "MLM"
+          ],
+          "sectors": [
+            "Energy",
+            "Industrials",
+            "Materials"
+          ],
+          "themes": [
+            "sour crude deficit",
+            "IMO 2020 compliance",
+            "bunker fuel squeeze",
+            "shipping cost inflation"
+          ],
+          "tech_keywords": [
+            "VLSFO",
+            "HSFO",
+            "MGO",
+            "scrubber arbitrage",
+            "Singapore bunker hub"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SBLK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:vlsfo-squeeze"
+          },
+          {
+            "subject": "ticker:ZIM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bunker-cost-passthrough-lag"
+          },
+          {
+            "subject": "ticker:STNG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:scrubber-hsfo-arbitrage"
+          },
+          {
+            "subject": "ticker:TNK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:product-tanker-rerouting"
+          },
+          {
+            "subject": "ticker:VMC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:asphalt-scarcity"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Sour-crude deficit reshapes bunker fuel grade spreads — distinct from prior crude/refiner/petchem/fertilizer angles. Shipping cost pass-through is 2nd-order to consumer goods."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:12:38Z",
+      "latency_ms": 18128,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The sustained ~13.3 mb/d oil supply deficit and resulting price surge introduce a significant, underappreciated headwind for global mining and heavy industrial sectors. Operations heavily reliant on diesel for machinery face direct cost increases. Furthermore, potential diversion of refined products and increased energy costs could inflate prices for essential inputs like steel and alloys, impacting manufacturers of heavy equipment. This creates a dual inflationary pressure on raw material costs for infrastructure and manufacturing projects worldwide, a point not yet fully explored.",
+        "entities": {
+          "tickers": [
+            "BHP",
+            "RIO",
+            "VALE"
+          ],
+          "sectors": [
+            "Materials",
+            "Industrials"
+          ],
+          "themes": [
+            "Energy cost inflation",
+            "Mining operating costs",
+            "Industrial supply chain costs"
+          ],
+          "tech_keywords": [
+            "Diesel",
+            "Steel",
+            "Alloys"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "sector:Materials",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_diesel_costs"
+          },
+          {
+            "subject": "sector:Industrials",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_steel_and_alloy_costs"
+          },
+          {
+            "subject": "narrative:mining_operations",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:high_energy_costs"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "Adds perspective on operational cost impacts for mining and heavy industry."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "ADM",
+        "AMR",
+        "APD",
+        "ARCH",
+        "ASC",
+        "BG",
+        "BHP",
+        "BTU",
+        "CF",
+        "CSX",
+        "CTRA",
+        "CVX",
+        "DAL",
+        "DE",
+        "DOW",
+        "EOG",
+        "EQT",
+        "FANG",
+        "FRO",
+        "FTI",
+        "GLD",
+        "GNK",
+        "HAL",
+        "INSW",
+        "LIN",
+        "LMT",
+        "LNG",
+        "LUV",
+        "LYB",
+        "MATX",
+        "MLM",
+        "MOS",
+        "MPC",
+        "NTR",
+        "PSX",
+        "RIO",
+        "RTX",
+        "SBLK",
+        "SLB",
+        "STNG",
+        "TNK",
+        "UAL",
+        "UNP",
+        "USO",
+        "VALE",
+        "VLO",
+        "VMC",
+        "XLE",
+        "XOM",
+        "ZIM"
+      ],
+      "sectors": [
+        "Basic Materials",
+        "Chemicals",
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Energy",
+        "Industrials",
+        "Materials"
+      ],
+      "themes": [
+        "Energy cost inflation",
+        "Energy costs",
+        "IMO 2020 compliance",
+        "Industrial gases",
+        "Industrial supply chain costs",
+        "Industrial supply chain disruption",
+        "Inflationary pressures",
+        "Investor complacency",
+        "Iran war",
+        "LNG arbitrage",
+        "Mining operating costs",
+        "Petrochemical feedstock costs",
+        "Secondary inflation",
+        "Strait of Hormuz risk",
+        "Supply chain inputs",
+        "ag input inflation",
+        "bunker fuel squeeze",
+        "coal substitution",
+        "feedstock squeeze",
+        "fertilizer cost-push",
+        "geopolitical premium",
+        "oil supply shock",
+        "refiner crack spread",
+        "shipping cost inflation",
+        "sour crude deficit",
+        "tanker ton-mile"
+      ],
+      "tech_keywords": [
+        "Alloys",
+        "Brent-WTI spread",
+        "Cryogenic air separation",
+        "Diesel",
+        "HSFO",
+        "Henry Hub",
+        "MGO",
+        "NGL",
+        "Powder River Basin",
+        "SPR release",
+        "Semiconductor manufacturing",
+        "Singapore bunker hub",
+        "Steel",
+        "VLSFO",
+        "ammonia",
+        "naphtha",
+        "scrubber arbitrage",
+        "shut-in capacity",
+        "sour crude",
+        "urea"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil-supply-shock"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:refiner-crack-spread"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:jet-fuel-cost"
+      },
+      {
+        "subject": "ticker:FRO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tanker-ton-mile"
+      },
+      {
+        "subject": "ticker:LMT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:geopolitical-premium"
+      },
+      {
+        "subject": "ticker:XLE",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:iran-war-supply-loss"
+      },
+      {
+        "subject": "ticker:DOW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tight naphtha and NGL supply"
+      },
+      {
+        "subject": "ticker:LYB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tight naphtha and NGL supply"
+      },
+      {
+        "subject": "ticker:CF",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nat_gas_feedstock_squeeze"
+      },
+      {
+        "subject": "ticker:NTR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:fertilizer_cost_push"
+      },
+      {
+        "subject": "ticker:DE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:farmer_margin_compression"
+      },
+      {
+        "subject": "ticker:BTU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:coal_substitution"
+      },
+      {
+        "subject": "ticker:UNP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:prb_coal_volume_revival"
+      },
+      {
+        "subject": "ticker:LNG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lng_arbitrage_europe"
+      },
+      {
+        "subject": "ticker:EQT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:henry_hub_decoupling"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:high_energy_costs"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:high_energy_costs"
+      },
+      {
+        "subject": "narrative:semiconductor_manufacturing",
+        "predicate": "DEPENDS_ON",
+        "object": "narrative:industrial_gases"
+      },
+      {
+        "subject": "ticker:SBLK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:vlsfo-squeeze"
+      },
+      {
+        "subject": "ticker:ZIM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bunker-cost-passthrough-lag"
+      },
+      {
+        "subject": "ticker:STNG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:scrubber-hsfo-arbitrage"
+      },
+      {
+        "subject": "ticker:TNK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:product-tanker-rerouting"
+      },
+      {
+        "subject": "ticker:VMC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:asphalt-scarcity"
+      },
+      {
+        "subject": "sector:Materials",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_diesel_costs"
+      },
+      {
+        "subject": "sector:Industrials",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_steel_and_alloy_costs"
+      },
+      {
+        "subject": "narrative:mining_operations",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:high_energy_costs"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:12:38Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, CATALYST_FOR; gemini-only: DEPENDS_ON"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,654 @@
+{
+  "news_id": "bn_20260513_ec9da817",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:18:36Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/13/kevin-warsh-wins-senate-confirmation-as-the-next-federal-reserve-chair.html",
+    "feed_fingerprint": "kevin warsh wins senate confirmation next federal reserve",
+    "published": "2026-05-13T23:21:35+00:00",
+    "url_hash": "sha1:114f88f80a17fe9de83515b09d4ebc2dcc40851d"
+  },
+  "headline": "Kevin Warsh wins Senate confirmation as the next Federal Reserve chair",
+  "headline_zh": null,
+  "raw_summary": "In the most divisive vote ever for a Fed chair, Warsh, 56, won confirmation to take over for Jerome Powell.",
+  "triage": {
+    "news_type": "monetary_policy",
+    "shallow_score": 2.0,
+    "bull_case": "成本壓力升高",
+    "bear_case": "通膨抑制買氣",
+    "sector_view": "週期股承壓",
+    "macro_view": "實質利率抬升",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:17:01Z",
+      "latency_ms": 21988,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Warsh confirmation = **hawkish regime shift** at Fed. Warsh long critic of QE, balance-sheet expansion, dovish forward guidance. Market read: terminal rate stays higher-longer, QT runway extends, dot-plot risk skews up. **Curve bear-flattens** — front-end repricing dominates. USD bid, gold initial wobble then bid on regime-uncertainty premium.\n\nSector map:\n- **Banks** (JPM, BAC, GS) — net beneficiaries via NIM + steeper IOER spread; regional banks (KRE) mixed if CRE refi window narrows.\n- **Long-duration tech** (megacaps, unprofitable growth ARKK names) — multiple compression headwind.\n- **Homebuilders** (DHI, LEN), **REITs** (VNQ) — mortgage-rate path now ugly.\n- **Gold/Bitcoin** — hawk-credibility hedge bid eventually.\n- **USD-sensitive multinationals** (KO, PG) — translation drag.\n\nWatch: Warsh's first FOMC presser tone + any QT acceleration signal. Divisive vote = weak political cover, may force hawkish overcompensation to establish credibility.",
+        "entities": {
+          "tickers": [
+            "JPM",
+            "BAC",
+            "GS",
+            "KRE",
+            "XLF",
+            "DHI",
+            "LEN",
+            "XHB",
+            "VNQ",
+            "TLT",
+            "GLD",
+            "DXY",
+            "ARKK",
+            "QQQ",
+            "SPY",
+            "KO",
+            "PG"
+          ],
+          "sectors": [
+            "Financials",
+            "Real Estate",
+            "Consumer Discretionary",
+            "Information Technology",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "Fed hawkish regime shift",
+            "higher-for-longer rates",
+            "QT acceleration risk",
+            "yield curve bear-flattening",
+            "USD strength",
+            "duration risk"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hawkish-fed-NIM-expansion"
+          },
+          {
+            "subject": "ticker:KRE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:CRE-refi-stress"
+          },
+          {
+            "subject": "ticker:DHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage-rate-spike"
+          },
+          {
+            "subject": "ticker:VNQ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher-for-longer-rates"
+          },
+          {
+            "subject": "ticker:ARKK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:duration-multiple-compression"
+          },
+          {
+            "subject": "ticker:GLD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:fed-credibility-hedge"
+          },
+          {
+            "subject": "ticker:DXY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rate-differential-widening"
+          },
+          {
+            "subject": "person:kevin-warsh",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:fed-hawkish-regime-shift"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Warsh = documented hawk; confirmation reprices terminal rate + QT path. Bank-friendly, duration-hostile, USD-bid. Divisive vote forces credibility-signaling overcompensation risk."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:17:28Z",
+      "latency_ms": 27736,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "CLAUDE's take on Warsh's hawkish confirmation and its impact on long-duration tech is pertinent. A nuanced second-order effect could be a strategic shift in corporate R&D, moving from speculative, bleeding-edge innovation to optimizing existing AI infrastructure and models for near-term profitability. This elevated cost of capital may slow the aggressive scaling of novel AI architectures or hardware. For instance, demand for next-gen components for entirely new AI paradigms might face greater scrutiny than enhancements to current HBM3e or Blackwell-class systems. Companies demonstrating efficient monetization of current AI investments will likely gain favor.",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AMD",
+            "GOOGL",
+            "MSFT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI R&D optimization",
+            "corporate capital allocation",
+            "innovation ROI",
+            "cost of capital",
+            "speculative AI innovation"
+          ],
+          "tech_keywords": [
+            "Generative AI",
+            "AI infrastructure",
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:speculative AI innovation"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focuses on R&D strategy shift from speculative to optimization due to cost of capital."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:17:47Z",
+      "latency_ms": 18817,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: **EM & USD funding stress**. Warsh hawk-cred shock = DXY squeeze higher → dollar-funded EM (EEM, EWZ, EWW) and frontier sovereign debt (EMB, EMLC) face acute redemption pressure. Specific node prior thread missed: **Japanese life insurers + GPIF**. Warsh-era higher-for-longer keeps UST 10Y elevated → hedged-UST yields stay negative for JPY investors, accelerating BOJ/MOF FX intervention risk and forcing repatriation flows. Watch **JGB 10Y >1.5% breach** as trigger. Second-order: this caps the *global* duration trade, not just US tech. Also under-discussed: **private credit / BDCs** (ARCC, MAIN, BXSL) — floating-rate book initially benefits, but Warsh's stated skepticism of shadow-bank leverage could mean tighter supervisory posture, P/NAV compression. Contra to consensus bank-bull: if Warsh weaponizes SLR/G-SIB capital rules, big-bank NIM tailwind partially offset by buyback throttle.",
+        "entities": {
+          "tickers": [
+            "EEM",
+            "EWZ",
+            "EWW",
+            "EMB",
+            "EMLC",
+            "ARCC",
+            "MAIN",
+            "BXSL",
+            "JPM"
+          ],
+          "sectors": [
+            "Emerging Markets",
+            "Financials",
+            "Private Credit",
+            "Insurance"
+          ],
+          "themes": [
+            "USD funding stress",
+            "EM repricing",
+            "Japan repatriation",
+            "Shadow bank supervision",
+            "SLR/G-SIB capital rules"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:EEM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:warsh-hawkish-usd-squeeze"
+          },
+          {
+            "subject": "ticker:EMB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:dollar-funding-stress"
+          },
+          {
+            "subject": "ticker:ARCC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:warsh-shadow-bank-supervision"
+          },
+          {
+            "subject": "ticker:JPM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:slr-gsib-capital-tightening"
+          },
+          {
+            "subject": "narrative:japan-repatriation",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:global-duration-cap"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "EM/USD funding, Japan repatriation via JGB breach, private credit supervisory risk, and SLR-bank-bull contra — all absent from prior thread."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:17:59Z",
+      "latency_ms": 11589,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "CLAUDE's analysis on EM and Japanese insurers is critical. A further implication of Warsh's hawkish stance and higher-for-longer rates directly impacts the viability of large-scale green energy projects. The elevated cost of capital significantly increases the upfront investment burden for renewable infrastructure, such as solar farms, wind turbines, and battery storage facilities. This could decelerate the energy transition, potentially making fossil fuels more competitive in the short-to-medium term due to their lower initial capital outlay. Consequently, climate-focused investment funds and companies heavily reliant on green financing may face headwinds, shifting investment preferences towards more established, less capital-intensive ventures or those with immediate profitability.",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Utilities",
+            "Renewable Energy"
+          ],
+          "themes": [
+            "Green finance",
+            "Energy transition",
+            "Cost of capital"
+          ],
+          "tech_keywords": [
+            "Solar",
+            "Wind",
+            "Battery Storage"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:Green finance",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher interest rates"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Higher capital costs impact renewable energy project viability and pace of energy transition."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:18:19Z",
+      "latency_ms": 20433,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle prior thread missed: **municipal bond market + state/local capex transmission**. Warsh hawk-cred → muni curve repricing hits states with heavy variable-rate demand obligations (VRDOs) and tax-exempt commercial paper rollover. Specific stress node: **muni insurers** (AGO, MBI) — premium tailwind near-term but loss-reserve risk if local issuers (IL, NJ pension-heavy) face refi gridlock. Second-order rarely-named: **water/wastewater utility capex** (AWK, XYL, ROP backlog) — these are *muni-funded* not corporate-funded; higher TIC kills bond referenda → infrastructure delay → equipment-vendor order push-outs. Contra to homebuilder bear: **manufactured housing** (SUN, ELS) actually benefits as affordability gap widens vs site-built. Also: **public pension discount-rate relief** finally arrives — UAAL math improves at 5%+ risk-free, easing state budget squeeze that was a 2024-25 overhang.",
+        "entities": {
+          "tickers": [
+            "AGO",
+            "MBI",
+            "AWK",
+            "XYL",
+            "ROP",
+            "SUN",
+            "ELS"
+          ],
+          "sectors": [
+            "Financials",
+            "Utilities",
+            "Industrials",
+            "Real Estate"
+          ],
+          "themes": [
+            "muni curve repricing",
+            "infrastructure capex delay",
+            "pension UAAL relief",
+            "affordability gap"
+          ],
+          "tech_keywords": [
+            "VRDO",
+            "tax-exempt CP",
+            "TIC",
+            "UAAL"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:muni-insurance-premium"
+          },
+          {
+            "subject": "ticker:AWK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:muni-capex-delay"
+          },
+          {
+            "subject": "ticker:XYL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:muni-capex-delay"
+          },
+          {
+            "subject": "ticker:SUN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:affordability-gap"
+          },
+          {
+            "subject": "ticker:ELS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:affordability-gap"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Muni transmission + pension UAAL relief + manufactured-housing contra all absent from prior rounds; named supply-chain nodes (water utility capex via muni bonds) novel."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:18:36Z",
+      "latency_ms": 16478,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The elevated cost of capital under Warsh's hawkish Fed regime introduces significant headwinds for semiconductor manufacturing equipment (SME) providers. Companies like ASML, AMAT, LRCX, and KLAC, crucial for advanced node transitions and fab expansion, face a more challenging CapEx environment. Chipmakers will likely scrutinize multi-billion dollar investments in EUV lithography and wafer fabrication machinery due to higher borrowing costs. This could decelerate the pace of next-generation chip production and may favor companies demonstrating optimized utilization of existing capacity rather than massive new builds. The focus shifts from pure innovation scaling to capital efficiency.",
+        "entities": {
+          "tickers": [
+            "ASML",
+            "AMAT",
+            "LRCX",
+            "KLAC"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "Semiconductor CapEx",
+            "Higher Cost of Capital",
+            "Manufacturing Equipment",
+            "Next-Gen Nodes"
+          ],
+          "tech_keywords": [
+            "EUV Lithography",
+            "Wafer Fabrication"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ASML",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:higher-for-longer rates"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Higher capital costs impact semiconductor manufacturing equipment demand and CapEx."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AGO",
+        "AMAT",
+        "AMD",
+        "ARCC",
+        "ARKK",
+        "ASML",
+        "AWK",
+        "BAC",
+        "BXSL",
+        "DHI",
+        "DXY",
+        "EEM",
+        "ELS",
+        "EMB",
+        "EMLC",
+        "EWW",
+        "EWZ",
+        "GLD",
+        "GOOGL",
+        "GS",
+        "JPM",
+        "KLAC",
+        "KO",
+        "KRE",
+        "LEN",
+        "LRCX",
+        "MAIN",
+        "MBI",
+        "MSFT",
+        "NVDA",
+        "PG",
+        "QQQ",
+        "ROP",
+        "SPY",
+        "SUN",
+        "TLT",
+        "VNQ",
+        "XHB",
+        "XLF",
+        "XYL"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Emerging Markets",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "Insurance",
+        "Private Credit",
+        "Real Estate",
+        "Renewable Energy",
+        "Semiconductors",
+        "Utilities"
+      ],
+      "themes": [
+        "AI R&D optimization",
+        "Cost of capital",
+        "EM repricing",
+        "Energy transition",
+        "Fed hawkish regime shift",
+        "Green finance",
+        "Higher Cost of Capital",
+        "Japan repatriation",
+        "Manufacturing Equipment",
+        "Next-Gen Nodes",
+        "QT acceleration risk",
+        "SLR/G-SIB capital rules",
+        "Semiconductor CapEx",
+        "Shadow bank supervision",
+        "USD funding stress",
+        "USD strength",
+        "affordability gap",
+        "corporate capital allocation",
+        "cost of capital",
+        "duration risk",
+        "higher-for-longer rates",
+        "infrastructure capex delay",
+        "innovation ROI",
+        "muni curve repricing",
+        "pension UAAL relief",
+        "speculative AI innovation",
+        "yield curve bear-flattening"
+      ],
+      "tech_keywords": [
+        "AI infrastructure",
+        "Battery Storage",
+        "Blackwell",
+        "EUV Lithography",
+        "Generative AI",
+        "HBM3e",
+        "Solar",
+        "TIC",
+        "UAAL",
+        "VRDO",
+        "Wafer Fabrication",
+        "Wind",
+        "tax-exempt CP"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hawkish-fed-NIM-expansion"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:CRE-refi-stress"
+      },
+      {
+        "subject": "ticker:DHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage-rate-spike"
+      },
+      {
+        "subject": "ticker:VNQ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher-for-longer-rates"
+      },
+      {
+        "subject": "ticker:ARKK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:duration-multiple-compression"
+      },
+      {
+        "subject": "ticker:GLD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:fed-credibility-hedge"
+      },
+      {
+        "subject": "ticker:DXY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rate-differential-widening"
+      },
+      {
+        "subject": "person:kevin-warsh",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:fed-hawkish-regime-shift"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:speculative AI innovation"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:EEM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:warsh-hawkish-usd-squeeze"
+      },
+      {
+        "subject": "ticker:EMB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:dollar-funding-stress"
+      },
+      {
+        "subject": "ticker:ARCC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:warsh-shadow-bank-supervision"
+      },
+      {
+        "subject": "ticker:JPM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:slr-gsib-capital-tightening"
+      },
+      {
+        "subject": "narrative:japan-repatriation",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:global-duration-cap"
+      },
+      {
+        "subject": "theme:Green finance",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher interest rates"
+      },
+      {
+        "subject": "ticker:AGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:muni-insurance-premium"
+      },
+      {
+        "subject": "ticker:AWK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:muni-capex-delay"
+      },
+      {
+        "subject": "ticker:XYL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:muni-capex-delay"
+      },
+      {
+        "subject": "ticker:SUN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:affordability-gap"
+      },
+      {
+        "subject": "ticker:ELS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:affordability-gap"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:higher-for-longer rates"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:18:36Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, CATALYST_FOR; gemini-only: COMPETES_WITH, CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

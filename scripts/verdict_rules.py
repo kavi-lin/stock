@@ -64,9 +64,20 @@ def verdict_deep_dive(decision_content: dict, reality: dict | None) -> dict:
 
     ret = reality["return_pct"]
     final_action = (decision_content.get("final_action") or decision_content.get("decision") or "").upper()
-    direction = "buy" if "BUY" in final_action else ("sell" if "SELL" in final_action else "hold")
-    if "CANCEL" in final_action:
-        direction = "hold"
+
+    # V2.17.26 — V5.0 動詞型 action 顯式對映：
+    #   STAGED_ENTRY / EXECUTE / STAGED  → 看多進場（bullish）
+    #   STAGED_EXIT                       → 看空出場（bearish）
+    # 舊版關鍵字 BUY/SELL/HOLD/CANCEL 仍用 substring 兜底
+    BUY_ACTIONS  = {"BUY", "LONG", "EXECUTE", "STAGED_ENTRY", "STAGED"}
+    SELL_ACTIONS = {"SELL", "SHORT", "STAGED_EXIT"}
+
+    if final_action in BUY_ACTIONS or "BUY" in final_action or "LONG" in final_action:
+        direction = "buy"
+    elif final_action in SELL_ACTIONS or "SELL" in final_action or "SHORT" in final_action:
+        direction = "sell"
+    else:
+        direction = "hold"   # HOLD / CANCEL / unknown 都歸觀望
 
     label, rationale = _verdict_directional(direction, ret, threshold=HIT_THRESHOLD_PCT)
 

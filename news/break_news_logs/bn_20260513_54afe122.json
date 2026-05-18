@@ -1,0 +1,1235 @@
+{
+  "news_id": "bn_20260513_54afe122",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:53:02Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/13/microsoft-feared-openai-reliance-musk-altman-trial-testimony-reveals.html",
+    "feed_fingerprint": "microsoft feared being too dependent openai musk altman",
+    "published": "2026-05-13T22:48:19+00:00",
+    "url_hash": "sha1:6255eae6a46cd01313c08358d205288c8af21e48"
+  },
+  "headline": "Microsoft feared being too dependent on OpenAI, Musk-Altman trial testimony reveals",
+  "headline_zh": null,
+  "raw_summary": "Top Microsoft executives testified in Musk v. Altman this week, spelling out concerns they had in the early days of the partnership with OpenAI.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:12:43Z",
+      "latency_ms": 23298,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Testimony exposes MSFT's early anxiety over single-vendor OpenAI dependency — net read is mildly bearish for the **MSFT–OpenAI optionality narrative**, mildly bullish for **AI compute diversification** plays. Three angles market underprices: (1) MSFT likely accelerating in-house silicon (Maia 2, Cobalt) + multi-model hosting (Mistral, Anthropic on Azure) — reinforces AMD MI300X/MI400 traction. (2) Discovery surfaces could re-open IP-ownership ambiguity on GPT weights — overhang for Azure AI revenue attribution. (3) Validates GOOGL/META vertical-integration thesis (own model + own TPU/MTIA). Watch ORCL/CRWV as neutral compute hosts gaining share. Headline reputational hit minor; structural signal is **hyperscaler de-risking from frontier-lab concentration** — accelerates custom ASIC capex (AVGO, MRVL beneficiaries on HBM3e + CoWoS-L allocation).",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "GOOGL",
+            "META",
+            "AMD",
+            "NVDA",
+            "AVGO",
+            "MRVL",
+            "ORCL",
+            "CRWV",
+            "TSLA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Hyperscaler vendor diversification",
+            "Custom ASIC",
+            "AI vertical integration",
+            "Frontier-lab governance risk"
+          ],
+          "tech_keywords": [
+            "Maia 2",
+            "Cobalt",
+            "MI300X",
+            "MI400",
+            "TPU v5",
+            "MTIA",
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-dependency-disclosure"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hyperscaler-diversification"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:custom-asic"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:custom-asic"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-vertical-integration"
+          },
+          {
+            "subject": "ticker:META",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-vertical-integration"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:neutral-compute-host"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Testimony is backward-looking but validates structural hyperscaler diversification + custom-silicon thesis; reputational drag on MSFT minor, signal on compute supply chain meaningful."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:13:02Z",
+      "latency_ms": 19069,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The testimony reveals Microsoft's early strategic concerns about over-reliance on OpenAI. This proactive de-risking by a major hyperscaler validates a growing enterprise imperative: avoiding AI vendor lock-in. As enterprises witness these large players diversifying their AI partnerships and investing in proprietary silicon, demand for flexible, abstraction-layer solutions will surge. Companies like Palantir (PLTR), with their focus on sophisticated data integration and AI deployment platforms, are poised to benefit significantly. This trend accelerates the adoption of advanced AI orchestration tools, enabling businesses to navigate a complex, multi-vendor AI ecosystem with confidence.",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "PLTR"
+          ],
+          "sectors": [
+            "Software & Services"
+          ],
+          "themes": [
+            "Enterprise AI Flexibility",
+            "AI Orchestration Platforms",
+            "Hyperscaler De-risking"
+          ],
+          "tech_keywords": [
+            "Foundation Models",
+            "Azure AI",
+            "MLOps"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:PLTR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Enterprise AI Flexibility"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduces Palantir as a beneficiary of enterprise demand for AI flexibility, driven by hyperscaler diversification."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:13:28Z",
+      "latency_ms": 25791,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle prior thread missed: **OpenAI counterparty risk now flows downstream to CRWV/ORCL bull case**. If MSFT testimony surfaces contractual friction (exclusivity carve-outs, compute commitment caps), OpenAI's $11.9B Oracle deal + CoreWeave's ~$11B OAI backlog get **re-rated as strategic hedges, not opportunistic spillover** — multiple expansion catalyst, not just volume story. Second-order: NVDA wins both ways (MSFT custom ASIC takes years; OAI diversifies *to* more GB200/GB300 via neoclouds). Contra to bearish MSFT framing — discovery may show MSFT's $13B convert was structured to *cap* downside, meaning revenue-share ceiling is lower than consensus assumes (mild positive for MSFT FCF margin). Watch **VRT/MOD** as picks-and-shovels: every new neocloud OAI contract = liquid cooling + busway BOM regardless of who wins the model war.",
+        "entities": {
+          "tickers": [
+            "CRWV",
+            "ORCL",
+            "NVDA",
+            "MSFT",
+            "VRT",
+            "MOD"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI compute diversification",
+            "neocloud re-rating",
+            "hyperscaler de-risking",
+            "liquid cooling"
+          ],
+          "tech_keywords": [
+            "GB200",
+            "GB300",
+            "liquid cooling",
+            "busway"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CRWV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-multi-vendor-hedge"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-multi-vendor-hedge"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hyperscaler-de-risking"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CRWV"
+          },
+          {
+            "subject": "ticker:MOD",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:neocloud-buildout"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:openai-revenue-share-cap"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Neocloud re-rating + MSFT convert structure cap + VRT/MOD pick-and-shovel angle all absent from prior round."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:13:45Z",
+      "latency_ms": 17254,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The testimony highlights Microsoft's strategic prudence in avoiding single-vendor AI dependency. This proactively de-risks their AI strategy and validates the broader enterprise trend towards multi-model ecosystems. While previous analyses focused on hardware and platform diversification, a key second-order effect is the accelerated need for robust MLOps and AI observability solutions. As Microsoft (and other hyperscalers) integrate diverse AI models—from proprietary to open-source—managing, deploying, and monitoring these complex, distributed workloads becomes paramount. Companies like Datadog (DDOG) are well-positioned to capitalize on this trend, providing the critical visibility and control required for heterogeneous AI environments. This shift underscores a maturing AI infrastructure market, emphasizing management and integration over singular model reliance.",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "DDOG",
+            "AMD",
+            "ORCL",
+            "CRWV",
+            "NVDA",
+            "GOOGL",
+            "META"
+          ],
+          "sectors": [
+            "Software & Services",
+            "Technology Hardware",
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI compute diversification",
+            "AI vendor lock-in avoidance",
+            "Multi-model AI",
+            "MLOps",
+            "AI observability"
+          ],
+          "tech_keywords": [
+            "MLOps",
+            "AI orchestration",
+            "AI observability platforms"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:AI observability platforms"
+          },
+          {
+            "subject": "ticker:DDOG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI observability platforms"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "Introduces MLOps/observability angle via Datadog, linking MSFT's diversification to infrastructure needs."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:14:04Z",
+      "latency_ms": 19292,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle prior thread missed: **sovereign + regulated-vertical AI build-out as the real beneficiary**. Discovery-driven evidence that MSFT internally feared OpenAI dependency hands EU regulators (DMA gatekeeper review) and DOJ a live exhibit — accelerates forced unbundling of Azure-OpenAI bundled SKUs. Net winner is **IBM** (watsonx + on-prem Granite for banks/govs that now have legal cover to refuse hyperscaler-locked stacks) and **SMCI/DELL** for sovereign-cloud rack shipments (UAE G42, French Mistral compute, UK AISI). Contra to consensus 'CRWV/ORCL win the neocloud share': sovereign tenders skew to on-prem OEM, not neocloud rental. Second-order: **ANET** picks up the Ethernet-for-AI wave as non-MSFT buyers reject NVLink lock-in mirroring OpenAI-lock-in lesson. Specific node: **Coherent (COHR)** 800G/1.6T transceivers — every non-Azure fabric build pulls optics BOM independent of GPU vendor.",
+        "entities": {
+          "tickers": [
+            "IBM",
+            "SMCI",
+            "DELL",
+            "ANET",
+            "COHR",
+            "MSFT",
+            "ORCL",
+            "CRWV"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "sovereign AI",
+            "AI vendor lock-in",
+            "regulatory unbundling",
+            "Ethernet-for-AI",
+            "on-prem enterprise AI"
+          ],
+          "tech_keywords": [
+            "800G optics",
+            "1.6T transceivers",
+            "Ethernet fabric",
+            "NVLink",
+            "watsonx Granite",
+            "DMA gatekeeper"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:IBM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:regulatory-unbundling"
+          },
+          {
+            "subject": "ticker:SMCI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:sovereign-AI"
+          },
+          {
+            "subject": "ticker:DELL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:sovereign-AI"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ethernet-for-AI"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ethernet-for-AI"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:regulatory-unbundling"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "Sovereign/regulated on-prem AI + Ethernet optics (COHR/ANET) + IBM watsonx contra-angle not raised; ties testimony to DMA/DOJ unbundling pressure."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:14:24Z",
+      "latency_ms": 19671,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The testimony's revelation of Microsoft's anxiety over OpenAI dependency underscores a critical, often overlooked, theme: AI model governance and compliance. For highly regulated sectors like finance and healthcare, this event validates the need for AI solutions with verifiable data provenance, robust audit trails, and transparent IP. As enterprises seek to de-risk from any single AI vendor, particularly those with opaque operational models, the demand for specialized AI providers prioritizing regulatory adherence will surge. Companies demonstrating a strong commitment to compliance, such as those offering AI-driven risk analytics or patient data management, are poised to capture significant value by assuring clients of security and legal integrity in their AI deployments.",
+        "entities": {
+          "tickers": [
+            "SPGI"
+          ],
+          "sectors": [
+            "Financials",
+            "Healthcare"
+          ],
+          "themes": [
+            "AI governance",
+            "regulatory compliance",
+            "domain-specific AI"
+          ],
+          "tech_keywords": [
+            "data provenance",
+            "audit trails"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SPGI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI governance and compliance"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Validates demand for regulated-sector AI with strong governance and compliance."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c6",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:51:04Z",
+      "latency_ms": 19690,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: **stablecoin/treasury-yield leakage to OpenAI's funding stack**. Prior thread missed that MSFT's de-risking pressures OpenAI to monetize faster — accelerating the **ChatGPT ads + commerce take-rate pivot**. Direct read-through: **APP (AppLovin)** and **TTD** get re-rated as the only scaled non-Google/Meta ad-tech rails OpenAI can plug into without rebuilding attribution from scratch; OAI's reported ad partnership talks become a 2026 catalyst, not 2027. Contra to the 'MSFT diversifies away' framing: if OAI ad-revenue ramps, **revenue-share clause in MSFT's 20% rev-share tilts in MSFT's favor** (rev share applies to *all* OAI revenue, not just API). Specific node: **Integral Ad Science (IAS)** + **DV** — every LLM-generated ad surface needs brand-safety verification, a measurement layer hyperscalers won't build in-house. Second-order: **NET (Cloudflare)** Workers AI as the neutral edge-inference rail enterprises pick to avoid Azure-OpenAI bundling.",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "APP",
+            "TTD",
+            "IAS",
+            "DV",
+            "NET"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI monetization",
+            "OpenAI ad pivot",
+            "hyperscaler de-risking",
+            "edge inference"
+          ],
+          "tech_keywords": [
+            "ChatGPT ads",
+            "Workers AI",
+            "brand-safety verification",
+            "rev-share clause"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:APP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-ad-pivot"
+          },
+          {
+            "subject": "ticker:TTD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-ad-pivot"
+          },
+          {
+            "subject": "ticker:IAS",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:llm-ad-surfaces"
+          },
+          {
+            "subject": "ticker:DV",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:llm-ad-surfaces"
+          },
+          {
+            "subject": "ticker:NET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:azure-openai-unbundling"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oai-revenue-share-clause"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Monetization-side read-through (ad-tech rails, brand-safety, edge-inference) untouched by prior thread; rev-share clause framing is genuinely contra."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c7",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:51:22Z",
+      "latency_ms": 18873,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Microsoft's strategic anxiety over OpenAI dependency, as revealed in testimony, underscores their commitment to a multi-model AI ecosystem. This imperative extends beyond cloud compute to optimizing AI inference across diverse hardware. As Microsoft seeks to reduce reliance on centralized models and enhance endpoint AI capabilities, demand for specialized edge AI hardware will surge. Companies like Qualcomm, with their advanced AI-accelerated chipsets for PCs and edge devices, are strategically positioned to benefit. This trend enables broader AI deployment, reduces latency, and supports the enterprise goal of avoiding single-vendor AI lock-in by distributing AI processing capabilities.",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "QCOM"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "Edge AI",
+            "AI inference optimization",
+            "Multi-model AI ecosystem",
+            "Vendor lock-in avoidance"
+          ],
+          "tech_keywords": [
+            "AI accelerators"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:edge ai inference"
+          },
+          {
+            "subject": "ticker:QCOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:multi-model ai ecosystem"
+          },
+          {
+            "subject": "ticker:QCOM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "ticker:QCOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai vendor lock-in avoidance"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "Introduces QCOM as a key edge AI hardware beneficiary from MSFT's diversification strategy."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c8",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:51:41Z",
+      "latency_ms": 18390,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle prior thread missed: **insurance + liability underwriting becomes the gating function**. MSFT's documented internal anxiety over OpenAI dependency is now **discoverable evidence** in future AI-harm tort cases — D&O carriers (AIG, CB, TRV) re-price AI-deployment riders, and a new SKU emerges: **affirmative AI-liability cover**. Direct beneficiary: **AON** and **MMC** as brokers structuring bespoke AI E&O towers for Fortune 500 buyers who now have a paper trail showing even hyperscalers feared single-model risk. Second-order contra to 'sovereign/on-prem wins': **VRSN + OKTA** benefit because multi-model orchestration multiplies identity/DNS attack surface — every added model vendor = added SAML federation + cert rotation. Specific node: **Lemonade-style parametric AI-outage cover** underwritten by reinsurers (RNR, EG) — first measurable premium pool tied directly to LLM downtime SLAs.",
+        "entities": {
+          "tickers": [
+            "AON",
+            "MMC",
+            "AIG",
+            "CB",
+            "TRV",
+            "OKTA",
+            "VRSN",
+            "RNR",
+            "EG",
+            "MSFT"
+          ],
+          "sectors": [
+            "Financials",
+            "Insurance",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI liability underwriting",
+            "AI E&O insurance",
+            "Identity sprawl from multi-model",
+            "Parametric AI-outage cover"
+          ],
+          "tech_keywords": [
+            "SAML federation",
+            "DNS attack surface",
+            "LLM SLA",
+            "AI E&O rider"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AON",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_liability_underwriting"
+          },
+          {
+            "subject": "ticker:MMC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_liability_underwriting"
+          },
+          {
+            "subject": "ticker:OKTA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:identity_sprawl_multimodel"
+          },
+          {
+            "subject": "ticker:VRSN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:identity_sprawl_multimodel"
+          },
+          {
+            "subject": "ticker:RNR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:parametric_ai_outage_cover"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:openai_dependency_testimony"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Insurance/identity-sprawl angle untouched by prior 6 rounds; discoverable testimony = actuarial pricing event, distinct from hardware/sovereign/ads threads."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c9",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:52:15Z",
+      "latency_ms": 34514,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The revelation of Microsoft's early apprehension about OpenAI dependency highlights a critical, yet often understated, strategic imperative: securing a dominant in-house AI talent pool. This testimony suggests Microsoft is likely accelerating efforts to attract and retain top AI researchers and engineers, aiming to build proprietary capabilities that reduce long-term reliance on external labs. This intensifying competition for specialized AI talent could create tailwinds for companies facilitating AI talent acquisition, development, and retention. Furthermore, it signals a potential diversification of AI research frontiers, as Microsoft prioritizes areas where it can establish unique intellectual property and competitive advantages, rather than solely following OpenAI's trajectory.",
+        "entities": {
+          "tickers": [
+            "SNOW",
+            "PLTR"
+          ],
+          "sectors": [
+            "Software & Services"
+          ],
+          "themes": [
+            "AI talent acquisition",
+            "In-house AI R&D",
+            "AI talent competition"
+          ],
+          "tech_keywords": [
+            "AI research talent",
+            "LLM engineers",
+            "ML researchers"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:AI research talent",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:SNOW"
+          },
+          {
+            "subject": "narrative:AI research talent",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:PLTR"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "New angle: Intensified AI talent acquisition and R&D focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c10",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:52:48Z",
+      "latency_ms": 33178,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle prior thread missed: **power & grid interconnect become the binding constraint, not silicon**. Multi-model hyperscaler diversification = parallel redundant training runs across regions = data-center load growth re-accelerates vs prior single-stack consolidation assumption. Direct beneficiary: **CEG / VST / TLN** nuclear PPAs get re-priced 20-30% higher on next signing (CEG-MSFT TMI deal becomes template, not outlier). Specific bottleneck node: **ETN (Eaton)** medium-voltage switchgear lead times already 80+ weeks — multi-vendor AI buildout extends backlog into 2028. Second-order: **PWR (Quanta)** transmission EPC + **GEV** gas peaker orders (60GW backlog) as bridge generation. Contra-call: testimony is 2019-vintage; MSFT's *current* 49% cap + Azure-exclusive carve-outs through 2030 actually demonstrate governance worked — mild positive re-rating once analysts read full transcript, not headline.",
+        "entities": {
+          "tickers": [
+            "CEG",
+            "VST",
+            "TLN",
+            "ETN",
+            "PWR",
+            "GEV",
+            "MSFT"
+          ],
+          "sectors": [
+            "Utilities",
+            "Industrials",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI power constraint",
+            "nuclear PPA repricing",
+            "grid interconnect bottleneck",
+            "hyperscaler load growth"
+          ],
+          "tech_keywords": [
+            "medium-voltage switchgear",
+            "gas peaker",
+            "nuclear PPA",
+            "data-center interconnect"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CEG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nuclear-ppa-repricing"
+          },
+          {
+            "subject": "ticker:VST",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nuclear-ppa-repricing"
+          },
+          {
+            "subject": "ticker:TLN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:nuclear-ppa-repricing"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai-datacenter-buildout"
+          },
+          {
+            "subject": "ticker:PWR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:grid-transmission-buildout"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:bridge-gas-generation"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:openai-dependency-testimony"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Power/grid layer entirely absent from prior 8 rounds. ETN switchgear lead-time + CEG nuclear PPA template are specific, named, dated supply-chain nodes."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c11",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:53:02Z",
+      "latency_ms": 13479,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The testimony revealing Microsoft's early anxieties over OpenAI dependency now provides crucial discoverable evidence for AI governance. This public acknowledgment of risk by a major hyperscaler will significantly amplify demand for independent AI model auditing and verification services. Enterprises will increasingly seek third-party assurance for AI safety, bias, and IP compliance, moving beyond regulatory checkboxes to genuine risk mitigation. This trend presents a catalyst for specialized AI assurance platforms and ethical AI consultancies, creating a new category of critical infrastructure providers focused on AI robustness and transparency, vital for navigating a de-risked AI landscape.",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Software",
+            "IT Services"
+          ],
+          "themes": [
+            "AI governance",
+            "AI auditing",
+            "AI risk management",
+            "vendor lock-in mitigation"
+          ],
+          "tech_keywords": [
+            "AI model verification",
+            "AI assurance",
+            "ethical AI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:AI model auditing",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI vendor lock-in mitigation"
+          },
+          {
+            "subject": "narrative:AI assurance platforms",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:AI risk management"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Revelation of MSFT's dependency fears validates demand for independent AI model auditing and assurance services."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AIG",
+        "AMD",
+        "ANET",
+        "AON",
+        "APP",
+        "AVGO",
+        "CB",
+        "CEG",
+        "COHR",
+        "CRWV",
+        "DDOG",
+        "DELL",
+        "DV",
+        "EG",
+        "ETN",
+        "GEV",
+        "GOOGL",
+        "IAS",
+        "IBM",
+        "META",
+        "MMC",
+        "MOD",
+        "MRVL",
+        "MSFT",
+        "NET",
+        "NVDA",
+        "OKTA",
+        "ORCL",
+        "PLTR",
+        "PWR",
+        "QCOM",
+        "RNR",
+        "SMCI",
+        "SNOW",
+        "SPGI",
+        "TLN",
+        "TRV",
+        "TSLA",
+        "TTD",
+        "VRSN",
+        "VRT",
+        "VST"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Financials",
+        "Healthcare",
+        "IT Services",
+        "Industrials",
+        "Information Technology",
+        "Insurance",
+        "Semiconductors & Semiconductor Equipment",
+        "Software",
+        "Software & Services",
+        "Technology",
+        "Technology Hardware",
+        "Utilities"
+      ],
+      "themes": [
+        "AI E&O insurance",
+        "AI Orchestration Platforms",
+        "AI auditing",
+        "AI capex",
+        "AI compute diversification",
+        "AI governance",
+        "AI inference optimization",
+        "AI liability underwriting",
+        "AI monetization",
+        "AI observability",
+        "AI power constraint",
+        "AI risk management",
+        "AI talent acquisition",
+        "AI talent competition",
+        "AI vendor lock-in",
+        "AI vendor lock-in avoidance",
+        "AI vertical integration",
+        "Custom ASIC",
+        "Edge AI",
+        "Enterprise AI Flexibility",
+        "Ethernet-for-AI",
+        "Frontier-lab governance risk",
+        "Hyperscaler De-risking",
+        "Hyperscaler vendor diversification",
+        "Identity sprawl from multi-model",
+        "In-house AI R&D",
+        "MLOps",
+        "Multi-model AI",
+        "Multi-model AI ecosystem",
+        "OpenAI ad pivot",
+        "Parametric AI-outage cover",
+        "Vendor lock-in avoidance",
+        "domain-specific AI",
+        "edge inference",
+        "grid interconnect bottleneck",
+        "hyperscaler de-risking",
+        "hyperscaler load growth",
+        "liquid cooling",
+        "neocloud re-rating",
+        "nuclear PPA repricing",
+        "on-prem enterprise AI",
+        "regulatory compliance",
+        "regulatory unbundling",
+        "sovereign AI",
+        "vendor lock-in mitigation"
+      ],
+      "tech_keywords": [
+        "1.6T transceivers",
+        "800G optics",
+        "AI E&O rider",
+        "AI accelerators",
+        "AI assurance",
+        "AI model verification",
+        "AI observability platforms",
+        "AI orchestration",
+        "AI research talent",
+        "Azure AI",
+        "Blackwell",
+        "ChatGPT ads",
+        "CoWoS-L",
+        "Cobalt",
+        "DMA gatekeeper",
+        "DNS attack surface",
+        "Ethernet fabric",
+        "Foundation Models",
+        "GB200",
+        "GB300",
+        "HBM3e",
+        "LLM SLA",
+        "LLM engineers",
+        "MI300X",
+        "MI400",
+        "ML researchers",
+        "MLOps",
+        "MTIA",
+        "Maia 2",
+        "NVLink",
+        "SAML federation",
+        "TPU v5",
+        "Workers AI",
+        "audit trails",
+        "brand-safety verification",
+        "busway",
+        "data provenance",
+        "data-center interconnect",
+        "ethical AI",
+        "gas peaker",
+        "liquid cooling",
+        "medium-voltage switchgear",
+        "nuclear PPA",
+        "rev-share clause",
+        "watsonx Granite"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-dependency-disclosure"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hyperscaler-diversification"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:custom-asic"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:custom-asic"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-vertical-integration"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-vertical-integration"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:neutral-compute-host"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:PLTR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Enterprise AI Flexibility"
+      },
+      {
+        "subject": "ticker:CRWV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-multi-vendor-hedge"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-multi-vendor-hedge"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hyperscaler-de-risking"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CRWV"
+      },
+      {
+        "subject": "ticker:MOD",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:neocloud-buildout"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:openai-revenue-share-cap"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:AI observability platforms"
+      },
+      {
+        "subject": "ticker:DDOG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI observability platforms"
+      },
+      {
+        "subject": "ticker:IBM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:regulatory-unbundling"
+      },
+      {
+        "subject": "ticker:SMCI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:sovereign-AI"
+      },
+      {
+        "subject": "ticker:DELL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:sovereign-AI"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ethernet-for-AI"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ethernet-for-AI"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:regulatory-unbundling"
+      },
+      {
+        "subject": "ticker:SPGI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI governance and compliance"
+      },
+      {
+        "subject": "ticker:APP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-ad-pivot"
+      },
+      {
+        "subject": "ticker:TTD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-ad-pivot"
+      },
+      {
+        "subject": "ticker:IAS",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:llm-ad-surfaces"
+      },
+      {
+        "subject": "ticker:DV",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:llm-ad-surfaces"
+      },
+      {
+        "subject": "ticker:NET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:azure-openai-unbundling"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oai-revenue-share-clause"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:edge ai inference"
+      },
+      {
+        "subject": "ticker:QCOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:multi-model ai ecosystem"
+      },
+      {
+        "subject": "ticker:QCOM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "ticker:QCOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai vendor lock-in avoidance"
+      },
+      {
+        "subject": "ticker:AON",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_liability_underwriting"
+      },
+      {
+        "subject": "ticker:MMC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_liability_underwriting"
+      },
+      {
+        "subject": "ticker:OKTA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:identity_sprawl_multimodel"
+      },
+      {
+        "subject": "ticker:VRSN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:identity_sprawl_multimodel"
+      },
+      {
+        "subject": "ticker:RNR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:parametric_ai_outage_cover"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:openai_dependency_testimony"
+      },
+      {
+        "subject": "narrative:AI research talent",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:SNOW"
+      },
+      {
+        "subject": "narrative:AI research talent",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:PLTR"
+      },
+      {
+        "subject": "ticker:CEG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-ppa-repricing"
+      },
+      {
+        "subject": "ticker:VST",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-ppa-repricing"
+      },
+      {
+        "subject": "ticker:TLN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-ppa-repricing"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai-datacenter-buildout"
+      },
+      {
+        "subject": "ticker:PWR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:grid-transmission-buildout"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:bridge-gas-generation"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:openai-dependency-testimony"
+      },
+      {
+        "subject": "narrative:AI model auditing",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI vendor lock-in mitigation"
+      },
+      {
+        "subject": "narrative:AI assurance platforms",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:AI risk management"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:53:02Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -202,12 +202,14 @@
     function renderFilterBar() {
         const isZh = UI.currentLang === 'zh';
 
-        // Verdict chips
+        // Verdict chips (V2.20.0 — i18n + signal-tip on chips)
+        const VERDICT_CHIP_ZH = { STRONG: '強勁', SOLID: '穩健', MIXED: '混合', WEAK: '疲軟', DETERIORATING: '惡化' };
         const vWrap = document.getElementById('ea-verdict-chips');
         vWrap.innerHTML = VERDICTS.map(v => {
             const active = filterState.verdicts.has(v) ? 'active' : '';
             const klass = `ea-chip-${v.toLowerCase()}`;
-            return `<button class="ea-chip ${klass} ${active}" data-verdict="${v}" type="button"><span>${v}</span></button>`;
+            const lbl = isZh ? (VERDICT_CHIP_ZH[v] || v) : v;
+            return `<button class="ea-chip ${klass} ${active}" data-verdict="${v}" data-signal-tip="verdict_${v.toLowerCase()}" type="button"><span>${lbl}</span></button>`;
         }).join('');
 
         // Flags chips (mutually exclusive: any / clean / has)
@@ -984,6 +986,9 @@
         const isZh = lang === 'zh';
         const verdict = r.verdict || 'n/a';
         const vKey = verdict.toLowerCase();
+        // V2.20.0 — verdict i18n (zh / en) — display only; filter chips uses raw key
+        const VERDICT_LABEL_ZH = { STRONG: '強勁', SOLID: '穩健', MIXED: '混合', WEAK: '疲軟', DETERIORATING: '惡化' };
+        const verdictLabel = isZh ? (VERDICT_LABEL_ZH[verdict] || verdict) : verdict;
         const sc = r.score_components || {};
         const company = (r.company_name || '').replace(/"/g, '&quot;');
 
@@ -1092,17 +1097,17 @@
                     </div>
                     <div class="ea-score-suffix">/ 100</div>
                 </div>
-                <div class="ea-verdict-pill ea-verdict-pill-${vKey}">${verdict}</div>
+                <div class="ea-verdict-pill ea-verdict-pill-${vKey}" data-signal-tip="verdict_${vKey}">${verdictLabel}</div>
             </div>
 
             <div class="ea-data-col">
                 <div class="ea-ticker-row">
-                    <span class="ea-ticker">${r.ticker}${(window.UI?.watchlistSet?.has?.(r.ticker)) ? ` <span class="watchlist-bolt" title="V2.19 結構性轉變候選 (news keyword leading signal)" style="color:#f59e0b;font-size:0.55em;vertical-align:0.4em">⚡</span>` : ''}</span>
+                    <span class="ea-ticker">${r.ticker}${(window.UI?.watchlistSet?.has?.(r.ticker)) ? ` <span class="watchlist-bolt" data-signal-tip="watchlist_bolt" style="color:#f59e0b;font-size:0.55em;vertical-align:0.4em">⚡</span>` : ''}</span>
                     <span class="ea-company" title="${company}">${company}</span>
                     ${(() => {
                         const tier = (r.structural_shift || {}).tier;
-                        if (tier === 'CONFIRMED') return `<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:#dc2626;color:white;letter-spacing:0.5px" title="V2.18 Structural Shift CONFIRMED — 連 2 季 EPS QoQ ≥30% + GM σ-breakout + revenue accel">SHIFT⚡⚡</span>`;
-                        if (tier === 'CANDIDATE') return `<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:#f59e0b;color:white;letter-spacing:0.5px" title="V2.18 Structural Shift CANDIDATE — 1 季 EPS QoQ ≥30% + GM σ-breakout / revenue accel (≥2 of 3 signals)">SHIFT⚡</span>`;
+                        if (tier === 'CONFIRMED') return `<span data-signal-tip="structural_shift_confirmed" style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:#dc2626;color:white;letter-spacing:0.5px">SHIFT⚡⚡</span>`;
+                        if (tier === 'CANDIDATE') return `<span data-signal-tip="structural_shift_candidate" style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:#f59e0b;color:white;letter-spacing:0.5px">SHIFT⚡</span>`;
                         return '';
                     })()}
                 </div>

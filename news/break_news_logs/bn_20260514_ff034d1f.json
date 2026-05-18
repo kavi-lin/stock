@@ -1,0 +1,704 @@
+{
+  "news_id": "bn_20260514_ff034d1f",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T08:02:43Z",
+  "last_activity_ts": "2026-05-14T08:13:26Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4592721-brookfield-nears-12b-acquisition-of-world-freight-company---report?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "brookfield nears 1 2b acquisition world freight company",
+    "published": "2026-05-14T07:57:11+00:00",
+    "url_hash": "sha1:2099125454caae0ef41a27047825a9781b4b22d9"
+  },
+  "headline": "Brookfield nears $1.2B acquisition of World Freight Company - report",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "corporate",
+    "shallow_score": 0.0,
+    "bull_case": "整合效益釋放",
+    "bear_case": "交易風險存在",
+    "sector_view": "產業整併加速",
+    "macro_view": "槓桿率抬升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T08:11:22Z",
+      "latency_ms": 21621,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Brookfield 擬以 **12 億美元** 收購 World Freight Company（WFC，全球航空貨運 GSA 龍頭）。此為 **Brookfield Asset Management (BAM) / Brookfield Infrastructure (BIP)** 透過私募基礎設施基金延伸至 **air cargo GSA / freight forwarding** 領域的 bolt-on，估值倍數推估約 **10-12x EBITDA**，屬合理區間。對上市標的直接影響有限，但釋放兩個訊號：(1) **私募基金對 logistics middle-mile 資產仍有 risk appetite**，間接利多 **EXPD / KNIN / DSV** 等 freight forwarder 估值錨；(2) **air cargo capacity tightening 主題**重啟，若 e-commerce cross-border volume 回溫，受惠者含 **ATSG / CRGO / FDX 空運 segment**。風險：deal 仍在 report 階段未官宣，antitrust 與 financing 條件待驗證。",
+        "bull_points": [
+          "私募基金背書 air cargo GSA 估值錨",
+          "freight forwarder 板塊 comp 倍數受惠",
+          "Brookfield infra 平台擴張顯示資金充裕"
+        ],
+        "bear_points": [
+          "deal 未官宣存在破局風險",
+          "12 億規模對 BAM 影響微小",
+          "air cargo 週期下行壓估值"
+        ],
+        "final_take": "中性偏多，觀察 freight forwarder 估值傳導",
+        "entities": {
+          "tickers": [
+            "BAM",
+            "BIP",
+            "EXPD",
+            "FDX",
+            "ATSG",
+            "CRGO",
+            "UPS",
+            "DSV"
+          ],
+          "sectors": [
+            "Industrials",
+            "Transportation",
+            "Air Freight & Logistics"
+          ],
+          "themes": [
+            "air cargo consolidation",
+            "private infrastructure M&A",
+            "freight forwarding"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BAM",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:air-cargo-consolidation"
+          },
+          {
+            "subject": "ticker:BIP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:private-infrastructure-m&a"
+          },
+          {
+            "subject": "ticker:EXPD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:freight-forwarding-revaluation"
+          },
+          {
+            "subject": "ticker:ATSG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:air-cargo-capacity-tightening"
+          },
+          {
+            "subject": "ticker:CRGO",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:air-cargo-consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "報導未官宣，二級市場間接受惠為主"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T08:11:44Z",
+      "latency_ms": 22682,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此收購案不僅凸顯 Brookfield 在物流基礎設施的戰略擴張，也預示著航空貨運 GSA 市場的整合趨勢。隨著 WFC 被納入 Brookfield 的版圖，市場上將出現一個更具規模的 GSA 營運商。這可能改變航空業者與 GSA 之間的議價動態，使航空公司在貨運空間銷售上，面臨更集中的銷售通路，影響其靈活性與營收優化。此外，這也可能壓縮小型 GSA 的生存空間，加速市場集中度。",
+        "bull_points": [
+          "GSA市場整合，大型GSA議價能力提升。",
+          "Brookfield強化物流價值鏈佈局。"
+        ],
+        "bear_points": [
+          "航空公司貨運通路集中，選項減少。",
+          "小型GSA生存壓力增大。"
+        ],
+        "final_take": "GSA市場整合加速，關注航空公司夥伴影響。",
+        "entities": {
+          "tickers": [
+            "BAM",
+            "BIP",
+            "EXPD",
+            "KNIN",
+            "DSV",
+            "ATSG",
+            "CRGO",
+            "FDX"
+          ],
+          "sectors": [
+            "Financials",
+            "Industrials"
+          ],
+          "themes": [
+            "GSA Market Consolidation",
+            "Air Cargo Logistics",
+            "Private Equity Infrastructure",
+            "Airline Cargo Sales"
+          ],
+          "tech_keywords": [
+            "GSA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BAM",
+            "predicate": "ACQUIRES",
+            "object": "narrative:World_Freight_Company"
+          },
+          {
+            "subject": "narrative:World_Freight_Company",
+            "predicate": "IS_A",
+            "object": "narrative:air_cargo_gsa"
+          },
+          {
+            "subject": "ticker:BAM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:gsa_market_consolidation"
+          },
+          {
+            "subject": "narrative:airlines",
+            "predicate": "IS_CUSTOMER_OF",
+            "object": "narrative:World_Freight_Company"
+          },
+          {
+            "subject": "narrative:World_Freight_Company",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:airlines"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Brookfield 擴張物流版圖，GSA 市場整合新角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T08:12:09Z",
+      "latency_ms": 24470,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新增角度：**Brookfield 槓桿循環 (capital recycling) 訊號**。BAM/BIP 在 2024-25 已陸續出脫 Genesee & Wyoming 部分股權、IDEAL 倉儲，現在反手吃 GSA — 暗示其 infra 基金內部正從 **rail/warehousing rotation 到 air cargo middle-mile**。第二序效應：(1) **GXO / WMS** 等 contract logistics 估值錨會被 private market 倍數 (10-12x EBITDA) 重新校準，目前 GXO 僅 ~7x，存在 **私募套利 gap**；(2) GSA 整合若成局，**Atlas Air (AAWW 已下市) / Cargojet (CJT.TO)** 這類 ACMI wet-lease 業者議價力可能反被削弱 — GSA 大型化後會把運價壓力向上轉嫁給 ACMI lessor。Contra：若 deal financing 走 PIK / 高槓桿，反映 infra 基金 dry powder 其實在尋找出口，並非積極看多 cycle。",
+        "bull_points": [
+          "GXO 估值 ~7x vs 私募 10-12x 出現套利缺口",
+          "Infra 基金 rotation 至 air cargo 印證主題重啟",
+          "GSA 整合提升 freight forwarder 議價錨"
+        ],
+        "bear_points": [
+          "ACMI lessor (CJT) 議價力被 GSA 大型化削弱",
+          "高槓桿 PIK financing 暗示 dry powder 急尋出口",
+          "deal 仍 report 階段，antitrust 風險未解"
+        ],
+        "final_take": "結構性看多 logistics 私募套利，但慎防 ACMI 反向受壓",
+        "entities": {
+          "tickers": [
+            "BAM",
+            "BIP",
+            "GXO",
+            "CJT",
+            "EXPD",
+            "FDX",
+            "ATSG"
+          ],
+          "sectors": [
+            "Industrials",
+            "Transportation",
+            "Logistics"
+          ],
+          "themes": [
+            "air cargo GSA consolidation",
+            "private infra capital recycling",
+            "logistics middle-mile"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:GXO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:private-infra-valuation-arbitrage"
+          },
+          {
+            "subject": "ticker:BAM",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:air-cargo-gsa-consolidation"
+          },
+          {
+            "subject": "ticker:CJT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:air-cargo-gsa-consolidation"
+          },
+          {
+            "subject": "ticker:BIP",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:BAM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增 GXO 私募套利缺口 + ACMI 反向受壓 contra 點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T08:12:38Z",
+      "latency_ms": 29547,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這次 Brookfield 收購 World Freight Company (WFC)，不僅是物流整合，更可能促使 **FedEx (FDX)** 或 **UPS** 等航空貨運業者，加速建置**數位貨運預訂平台**。GSA 市場集中化將影響航空公司議價力與成本，驅動其尋求**端對端直接銷售**，優化營收並提升貨主透明度，加速貨運銷售數位轉型。",
+        "bull_points": [
+          "航空貨運銷售通路數位化加速。",
+          "強化航空公司對價格與艙位的掌控。"
+        ],
+        "bear_points": [
+          "小型 GSA 業者營運空間受擠壓。",
+          "傳統 GSA 模式面臨挑戰。"
+        ],
+        "final_take": "數位化與整合是航空貨運的未來。",
+        "entities": {
+          "tickers": [
+            "BAM",
+            "BIP",
+            "WFC",
+            "FDX",
+            "UPS"
+          ],
+          "sectors": [
+            "Air Freight",
+            "Logistics",
+            "Financial Services"
+          ],
+          "themes": [
+            "GSA consolidation",
+            "digitalization in logistics",
+            "airline cargo strategy"
+          ],
+          "tech_keywords": [
+            "digital booking platforms",
+            "cargo management systems"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:GSA_consolidation",
+            "predicate": "CATALYST_FOR",
+            "object": "tech_keyword:digital_booking_platforms"
+          },
+          {
+            "subject": "ticker:FDX",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:digital_booking_platforms"
+          },
+          {
+            "subject": "ticker:UPS",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:digital_booking_platforms"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "收購案刺激航空公司加速數位轉型，以應對 GSA 整合與市場變化。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T08:13:04Z",
+      "latency_ms": 25161,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新增第三序角度：**保險與再保險端的 cargo liability repricing**。GSA 整合後，WFC 在 Brookfield 旗下會集中承擔更大金額的 **air cargo waybill liability pool**，這對 **AJG / MMC / WTW** 等 marine + cargo specialty broker 是 fee pool 擴張訊號；而再保端 **RNR / EG** 的 specialty cargo treaty 在 2026 renewal 會被迫重新定價（單一 cedent 集中度上升 = capacity demand 上升）。第二個被忽略節點：**機場地勤 / cargo handling concession**。WFC 在 50+ 機場有 GSA 合約，但實際 ramp handling 多外包給 **Swissport / Menzies (J2 Aviation 母公司, 上市代號未列)** 與 **WFS (DSV 旗下)** — 整合後 Brookfield 可能 in-house 化 handling layer，**DSV** 短線會收到 contract loss 風險。Contra：GSA 業務本質是 capital-light commission model，10-12x EBITDA 其實偏高，反映 Brookfield 是用 infra 基金估值套 logistics service 資產 — 若未來 IPO exit 走 logistics comp（5-7x），會有 **multiple compression** 風險。",
+        "bull_points": [
+          "Cargo specialty broker (AJG/MMC) fee pool 擴張",
+          "再保 RNR/EG 2026 cargo treaty 重新定價向上",
+          "WFC handling in-house 化利多 Brookfield ROIC"
+        ],
+        "bear_points": [
+          "DSV (WFS handling) 面臨 contract loss 風險",
+          "10-12x EBITDA 用 infra 倍數套 logistics 資產偏貴",
+          "Exit 若走 logistics comp 將 multiple compression"
+        ],
+        "final_take": "中性偏多但 exit multiple 是關鍵變數",
+        "entities": {
+          "tickers": [
+            "BAM",
+            "BIP",
+            "DSV",
+            "AJG",
+            "MMC",
+            "WTW",
+            "RNR",
+            "EG",
+            "FDX",
+            "UPS",
+            "GXO",
+            "EXPD"
+          ],
+          "sectors": [
+            "Industrials",
+            "Financials",
+            "Insurance"
+          ],
+          "themes": [
+            "air cargo GSA consolidation",
+            "specialty insurance repricing",
+            "infra capital recycling",
+            "ground handling in-housing"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:AJG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cargo_liability_pool_expansion"
+          },
+          {
+            "subject": "ticker:RNR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:specialty_cargo_treaty_repricing"
+          },
+          {
+            "subject": "ticker:DSV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:wfs_handling_contract_loss"
+          },
+          {
+            "subject": "ticker:BAM",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:gsa_consolidation"
+          },
+          {
+            "subject": "ticker:BIP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:infra_capital_recycling"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "保險端 + handling node + exit multiple contra 為前文未提",
+        "_caveman_note": "skipped — JSON schema response, caveman mode does not apply to structured output"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T08:13:26Z",
+      "latency_ms": 22704,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Brookfield 收購 WFC，透過整合航空貨運 GSA 的營運數據，不僅能深化其物流網絡的資產利用效率，更有潛力將匯總的貨運數據發展為數據即服務 (DaaS)。此舉為物流數據分析領域開創了新維度，藉由**精準的貨運需求預測與路線優化**，可能建立新的營收模式，並在產業數據標準化上扮演推手。",
+        "bull_points": [
+          "數據驅動效率提升與營收多元化",
+          "匯總數據帶動物流產業數據化轉型"
+        ],
+        "bear_points": [
+          "數據匯總的隱私與合規挑戰",
+          "數據價值化需克服技術門檻"
+        ],
+        "final_take": "整合數據，再造物流價值鏈。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Air Freight",
+            "Logistics & Distribution",
+            "Data Analytics"
+          ],
+          "themes": [
+            "Data Monetization",
+            "Supply Chain Visibility",
+            "Logistics Data Services"
+          ],
+          "tech_keywords": [
+            "Data Aggregation",
+            "Predictive Analytics",
+            "Freight Data"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:Brookfield Asset Management",
+            "predicate": "ENABLES",
+            "object": "narrative:logistics data services"
+          },
+          {
+            "subject": "narrative:World Freight Company",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:data aggregation"
+          },
+          {
+            "subject": "narrative:air cargo data",
+            "predicate": "ENABLES",
+            "object": "narrative:predictive analytics"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "先前討論側重營運與財務，此處新增數據策略新視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AJG",
+        "ATSG",
+        "BAM",
+        "BIP",
+        "CJT",
+        "CRGO",
+        "DSV",
+        "EG",
+        "EXPD",
+        "FDX",
+        "GXO",
+        "KNIN",
+        "MMC",
+        "RNR",
+        "UPS",
+        "WFC",
+        "WTW"
+      ],
+      "sectors": [
+        "Air Freight",
+        "Air Freight & Logistics",
+        "Data Analytics",
+        "Financial Services",
+        "Financials",
+        "Industrials",
+        "Insurance",
+        "Logistics",
+        "Logistics & Distribution",
+        "Transportation"
+      ],
+      "themes": [
+        "Air Cargo Logistics",
+        "Airline Cargo Sales",
+        "Data Monetization",
+        "GSA Market Consolidation",
+        "GSA consolidation",
+        "Logistics Data Services",
+        "Private Equity Infrastructure",
+        "Supply Chain Visibility",
+        "air cargo GSA consolidation",
+        "air cargo consolidation",
+        "airline cargo strategy",
+        "digitalization in logistics",
+        "freight forwarding",
+        "ground handling in-housing",
+        "infra capital recycling",
+        "logistics middle-mile",
+        "private infra capital recycling",
+        "private infrastructure M&A",
+        "specialty insurance repricing"
+      ],
+      "tech_keywords": [
+        "Data Aggregation",
+        "Freight Data",
+        "GSA",
+        "Predictive Analytics",
+        "cargo management systems",
+        "digital booking platforms"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BAM",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:air-cargo-consolidation"
+      },
+      {
+        "subject": "ticker:BIP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:private-infrastructure-m&a"
+      },
+      {
+        "subject": "ticker:EXPD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:freight-forwarding-revaluation"
+      },
+      {
+        "subject": "ticker:ATSG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:air-cargo-capacity-tightening"
+      },
+      {
+        "subject": "ticker:CRGO",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:air-cargo-consolidation"
+      },
+      {
+        "subject": "ticker:BAM",
+        "predicate": "ACQUIRES",
+        "object": "narrative:World_Freight_Company"
+      },
+      {
+        "subject": "narrative:World_Freight_Company",
+        "predicate": "IS_A",
+        "object": "narrative:air_cargo_gsa"
+      },
+      {
+        "subject": "ticker:BAM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:gsa_market_consolidation"
+      },
+      {
+        "subject": "narrative:airlines",
+        "predicate": "IS_CUSTOMER_OF",
+        "object": "narrative:World_Freight_Company"
+      },
+      {
+        "subject": "narrative:World_Freight_Company",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:airlines"
+      },
+      {
+        "subject": "ticker:GXO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:private-infra-valuation-arbitrage"
+      },
+      {
+        "subject": "ticker:BAM",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:air-cargo-gsa-consolidation"
+      },
+      {
+        "subject": "ticker:CJT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:air-cargo-gsa-consolidation"
+      },
+      {
+        "subject": "ticker:BIP",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:BAM"
+      },
+      {
+        "subject": "theme:GSA_consolidation",
+        "predicate": "CATALYST_FOR",
+        "object": "tech_keyword:digital_booking_platforms"
+      },
+      {
+        "subject": "ticker:FDX",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:digital_booking_platforms"
+      },
+      {
+        "subject": "ticker:UPS",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:digital_booking_platforms"
+      },
+      {
+        "subject": "ticker:AJG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cargo_liability_pool_expansion"
+      },
+      {
+        "subject": "ticker:RNR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:specialty_cargo_treaty_repricing"
+      },
+      {
+        "subject": "ticker:DSV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:wfs_handling_contract_loss"
+      },
+      {
+        "subject": "ticker:BAM",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:gsa_consolidation"
+      },
+      {
+        "subject": "ticker:BIP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:infra_capital_recycling"
+      },
+      {
+        "subject": "narrative:Brookfield Asset Management",
+        "predicate": "ENABLES",
+        "object": "narrative:logistics data services"
+      },
+      {
+        "subject": "narrative:World Freight Company",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:data aggregation"
+      },
+      {
+        "subject": "narrative:air cargo data",
+        "predicate": "ENABLES",
+        "object": "narrative:predictive analytics"
+      }
+    ],
+    "bull_summary": [
+      "私募基金背書 air cargo GSA 估值錨",
+      "freight forwarder 板塊 comp 倍數受惠",
+      "Brookfield infra 平台擴張顯示資金充裕",
+      "GSA市場整合，大型GSA議價能力提升。",
+      "Brookfield強化物流價值鏈佈局。",
+      "GXO 估值 ~7x vs 私募 10-12x 出現套利缺口"
+    ],
+    "bear_summary": [
+      "deal 未官宣存在破局風險",
+      "12 億規模對 BAM 影響微小",
+      "air cargo 週期下行壓估值",
+      "航空公司貨運通路集中，選項減少。",
+      "小型GSA生存壓力增大。",
+      "ACMI lessor (CJT) 議價力被 GSA 大型化削弱"
+    ],
+    "final_take": "整合數據，再造物流價值鏈。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T08:13:26Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN; gemini-only: ACQUIRES, ENABLES, IS_A, IS_CUSTOMER_OF, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,128 @@
+{
+  "as_of_date": "2026-05-16",
+  "schema_version": "V1.4",
+  "spy_3m_return": 0.0842,
+  "sectors": {
+    "Technology": {
+      "etf": "XLK",
+      "pe_ttm_nasdaq": 52.27,
+      "pe_ttm_nyse": 44.51,
+      "pe_ttm": 48.39,
+      "pe_zscore_1y": 0.84,
+      "rs_vs_spy_3m": 0.1788,
+      "rs_vs_spy_20d": 0.1011,
+      "rs_vs_spy_5d": 0.0021,
+      "etf_volume_ratio_20d": 1.348
+    },
+    "Healthcare": {
+      "etf": "XLV",
+      "pe_ttm_nasdaq": 24.7,
+      "pe_ttm_nyse": 31.93,
+      "pe_ttm": 28.32,
+      "pe_zscore_1y": -0.891,
+      "rs_vs_spy_3m": -0.1639,
+      "rs_vs_spy_20d": -0.0658,
+      "rs_vs_spy_5d": 0.0091,
+      "etf_volume_ratio_20d": 0.966
+    },
+    "Energy": {
+      "etf": "XLE",
+      "pe_ttm_nasdaq": 52.17,
+      "pe_ttm_nyse": 22.55,
+      "pe_ttm": 37.36,
+      "pe_zscore_1y": 2.266,
+      "rs_vs_spy_3m": 0.0095,
+      "rs_vs_spy_20d": 0.0394,
+      "rs_vs_spy_5d": 0.065,
+      "etf_volume_ratio_20d": 0.856
+    },
+    "Financials": {
+      "etf": "XLF",
+      "pe_ttm_nasdaq": 27.65,
+      "pe_ttm_nyse": 16.39,
+      "pe_ttm": 22.02,
+      "pe_zscore_1y": -0.401,
+      "rs_vs_spy_3m": -0.0948,
+      "rs_vs_spy_20d": -0.0663,
+      "rs_vs_spy_5d": -0.0048,
+      "etf_volume_ratio_20d": 0.877
+    },
+    "Consumer_Discretionary": {
+      "etf": "XLY",
+      "pe_ttm_nasdaq": 89.7,
+      "pe_ttm_nyse": 24.25,
+      "pe_ttm": 56.98,
+      "pe_zscore_1y": -0.249,
+      "rs_vs_spy_3m": -0.0812,
+      "rs_vs_spy_20d": -0.0731,
+      "rs_vs_spy_5d": -0.0326,
+      "etf_volume_ratio_20d": 1.382
+    },
+    "Consumer_Staples": {
+      "etf": "XLP",
+      "pe_ttm_nasdaq": 42.66,
+      "pe_ttm_nyse": 22.38,
+      "pe_ttm": 32.52,
+      "pe_zscore_1y": -0.116,
+      "rs_vs_spy_3m": -0.1386,
+      "rs_vs_spy_20d": -0.0145,
+      "rs_vs_spy_5d": 0.0034,
+      "etf_volume_ratio_20d": 1.087
+    },
+    "Industrials": {
+      "etf": "XLI",
+      "pe_ttm_nasdaq": 39.68,
+      "pe_ttm_nyse": 39.39,
+      "pe_ttm": 39.54,
+      "pe_zscore_1y": 0.236,
+      "rs_vs_spy_3m": -0.1001,
+      "rs_vs_spy_20d": -0.0531,
+      "rs_vs_spy_5d": -0.0125,
+      "etf_volume_ratio_20d": 0.93
+    },
+    "Materials": {
+      "etf": "XLB",
+      "pe_ttm_nasdaq": 31.15,
+      "pe_ttm_nyse": 24.77,
+      "pe_ttm": 27.96,
+      "pe_zscore_1y": -0.078,
+      "rs_vs_spy_3m": -0.1407,
+      "rs_vs_spy_20d": -0.0714,
+      "rs_vs_spy_5d": -0.0271,
+      "etf_volume_ratio_20d": 1.118
+    },
+    "Utilities": {
+      "etf": "XLU",
+      "pe_ttm_nasdaq": 27.31,
+      "pe_ttm_nyse": 26.28,
+      "pe_ttm": 26.79,
+      "pe_zscore_1y": -0.388,
+      "rs_vs_spy_3m": -0.1408,
+      "rs_vs_spy_20d": -0.0905,
+      "rs_vs_spy_5d": -0.0211,
+      "etf_volume_ratio_20d": 1.094
+    },
+    "Real_Estate": {
+      "etf": "XLRE",
+      "pe_ttm_nasdaq": 55.3,
+      "pe_ttm_nyse": 44.74,
+      "pe_ttm": 50.02,
+      "pe_zscore_1y": -1.679,
+      "rs_vs_spy_3m": -0.0904,
+      "rs_vs_spy_20d": -0.069,
+      "rs_vs_spy_5d": -0.0287,
+      "etf_volume_ratio_20d": 0.938
+    },
+    "Communication": {
+      "etf": "XLC",
+      "pe_ttm_nasdaq": 29.07,
+      "pe_ttm_nyse": 16.33,
+      "pe_ttm": 22.7,
+      "pe_zscore_1y": -2.142,
+      "rs_vs_spy_3m": -0.0711,
+      "rs_vs_spy_20d": -0.0663,
+      "rs_vs_spy_5d": -0.0095,
+      "etf_volume_ratio_20d": 0.946
+    }
+  }
+}

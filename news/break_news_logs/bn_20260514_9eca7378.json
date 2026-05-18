@@ -1,0 +1,818 @@
+{
+  "news_id": "bn_20260514_9eca7378",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T04:31:33Z",
+  "last_activity_ts": "2026-05-14T04:40:59Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/14/oil-prices-today-wti-brent-hormuz-trump-xi-meeting.html",
+    "feed_fingerprint": "oil rises iea flags greater volatility ahead opec",
+    "published": "2026-05-14T04:25:46+00:00",
+    "url_hash": "sha1:2459d340614c61d1f08c3294fa8dc180463d2a1e"
+  },
+  "headline": "Oil rises as IEA flags greater volatility ahead, OPEC cuts demand forecast",
+  "headline_zh": null,
+  "raw_summary": "OPEC cut its demand growth estimates for 2026 to about 1.2 million barrels per day.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T04:38:19Z",
+      "latency_ms": 22369,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC 下修 2026 需求成長至 **1.2 mb/d**（前估約 1.3-1.4），同時 IEA 警告**供需波動性加劇**——兩者方向看似矛盾實則互補：需求端走弱 + 地緣（Hormuz / Trump-Xi meeting）供給溢價並存，意味油價區間放寬而非單邊。對 **XOM / CVX / OXY** 等 upstream，2026 capex guidance 有下修壓力；refiners (**VLO / MPC**) crack spread 反而受惠於波動。OEC + IEA 同步調整通常領先 **XLE** 相對 SPY 走弱 4-6 週。Secondary：油服 **SLB / HAL** 訂單能見度下降；EV / 替代能源敘事（**TSLA / FSLR**）獲邊際 tailwind。值得注意：OPEC 連續第三季下修，已接近 demand destruction 訊號區。",
+        "bull_points": [
+          "Refiners 受惠於波動擴大、crack spread 走闊",
+          "油價中樞下移利好航空 (DAL/UAL) 與消費",
+          "替代能源敘事獲邊際資金回流"
+        ],
+        "bear_points": [
+          "Upstream E&P 2026 capex 與 EPS 下修壓力",
+          "OPEC 連三季下修接近需求破壞訊號",
+          "油服訂單能見度惡化，SLB/HAL 承壓"
+        ],
+        "final_take": "結構看空 upstream，戰術做多 refiners 與航空",
+        "entities": {
+          "tickers": [
+            "XOM",
+            "CVX",
+            "OXY",
+            "VLO",
+            "MPC",
+            "SLB",
+            "HAL",
+            "XLE",
+            "DAL",
+            "UAL",
+            "TSLA",
+            "FSLR"
+          ],
+          "sectors": [
+            "Energy",
+            "Transportation",
+            "Renewable Energy"
+          ],
+          "themes": [
+            "oil demand destruction",
+            "OPEC supply discipline",
+            "Hormuz geopolitical risk",
+            "refiner crack spread"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:XOM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil-demand-destruction"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:refiner-crack-spread"
+          },
+          {
+            "subject": "ticker:SLB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:opec-demand-cut"
+          },
+          {
+            "subject": "ticker:DAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower-oil-mid-range"
+          },
+          {
+            "subject": "sector:Energy",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:opec-supply-discipline"
+          },
+          {
+            "subject": "ticker:FSLR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:alt-energy-tailwind"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "OPEC連三降+IEA波動警告，upstream承壓refiner受惠"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T04:38:46Z",
+      "latency_ms": 27743,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC 下修 2026 需求預期至 1.2 mb/d，IEA 警告供需波動性加劇。此雙重訊號不僅暗示油價區間擴大，更突顯**荷姆茲海峽**等地緣風險對**油輪運輸**的潛在影響。鑑於該區域的戰略重要性，緊張局勢升溫可能顯著推升**油輪運費**，為 **Frontline (FRO)**、**DHT Holdings (DHT)** 等專業油輪公司帶來額外利差機會，而非僅是上游或煉油環節的波動。",
+        "bull_points": [
+          "特定油輪公司有望受地緣緊張推升運價。",
+          "供應鏈中，運輸環節具備獨立獲利空間。"
+        ],
+        "bear_points": [
+          "OPEC 持續下修需求預測，總體市場仍承壓。",
+          "海峽運輸若受阻，可能引發全球供應鏈更大衝擊。"
+        ],
+        "final_take": "波動性為特定環節帶來機會，但總體需求陰影仍存。",
+        "entities": {
+          "tickers": [
+            "FRO",
+            "DHT",
+            "XOM",
+            "CVX",
+            "OXY",
+            "VLO",
+            "MPC"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "Oil tanker shipping",
+            "Energy demand",
+            "Geopolitical risk premium",
+            "Strait of Hormuz security"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:FRO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Oil tanker shipping"
+          },
+          {
+            "subject": "ticker:DHT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Oil tanker shipping"
+          },
+          {
+            "subject": "theme:Oil tanker shipping",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Geopolitical risk premium"
+          },
+          {
+            "subject": "theme:Geopolitical risk premium",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Strait of Hormuz security"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "分析點在特定油輪公司因地緣風險獲益，非僅上游/煉油。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T04:39:10Z",
+      "latency_ms": 23878,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "GEMINI 補了油輪運費角度後，再加一條前面沒提的：**美國 SPR（戰略石油儲備）回補節奏**。Biden 時代釋出 1.8 億桶後，目前 SPR 仍在 ~4 億桶低位，財政部 2026 回補預算約 60-80 mb/d 採購節奏。若 OPEC 下修需求壓低 WTI 至 **$65-70 區間**，DOE 將加速回補，形成**結構性 bid**——這對 **Permian pure-play (FANG / PR / MTDR)** 比大型整合商更有利，因其 breakeven $40-45 且對價格彈性高。另一個 missed node：**midstream pipelines (ET / EPD / KMI)** 在波動加劇時 take-or-pay 合約反而是避風港，volume 不變、fee-based cash flow 不受 spread 影響。Contra GEMINI 的油輪論點：**VLCC TCE 已在 $50k+ 高位**，Hormuz 溢價多已 priced-in，FRO 上行空間有限，下行風險更大。",
+        "bull_points": [
+          "SPR 回補預算為 WTI $65-70 提供結構性 bid",
+          "Permian pure-play breakeven 低、價格彈性高",
+          "Midstream fee-based 合約抗波動，ET/EPD 避風港"
+        ],
+        "bear_points": [
+          "VLCC 運費已高位，Hormuz 溢價多已 priced-in",
+          "OPEC 連三季下修接近 demand destruction",
+          "XLE 相對 SPY 4-6 週下行壓力未解"
+        ],
+        "final_take": "看多 midstream + Permian，看空 XLE beta 與 FRO 追高",
+        "entities": {
+          "tickers": [
+            "FANG",
+            "PR",
+            "MTDR",
+            "ET",
+            "EPD",
+            "KMI",
+            "FRO",
+            "DHT",
+            "XLE"
+          ],
+          "sectors": [
+            "Energy",
+            "Midstream",
+            "Oil & Gas E&P"
+          ],
+          "themes": [
+            "SPR refill",
+            "OPEC demand cut",
+            "Hormuz risk premium",
+            "oil price volatility"
+          ],
+          "tech_keywords": [
+            "VLCC TCE",
+            "take-or-pay",
+            "Permian breakeven"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FANG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:spr_refill"
+          },
+          {
+            "subject": "ticker:EPD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil_volatility"
+          },
+          {
+            "subject": "ticker:ET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil_volatility"
+          },
+          {
+            "subject": "ticker:FRO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:hormuz_priced_in"
+          },
+          {
+            "subject": "ticker:XLE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:opec_demand_cut"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 SPR 回補 + midstream 避險 + Permian 彈性三條未提角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T04:39:46Z",
+      "latency_ms": 35231,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC下調2026年需求預測至1.2 mb/d，IEA預警供需波動性加劇，此訊號顯示全球經濟動能趨緩，並加劇原油價格波動。相較煉油廠受惠於價差，**石化產業 (DOW, LYB, ECL)** 面臨成本與需求雙重壓力：原油波動推升成本，經濟放緩衝擊銷售。成本優勢或利基市場業者或能穩健，但產業整體逆風仍存。",
+        "bull_points": [
+          "部分特用化學品（如電子材料）需求維持強勁。",
+          "成本結構優異或擁有獨特產品線的業者仍有表現空間。"
+        ],
+        "bear_points": [
+          "原油價格波動加劇，壓縮石化業者利潤空間。",
+          "全球經濟動能減弱，影響石化產品終端需求。"
+        ],
+        "final_take": "石化業前景受原油成本與終端需求雙重牽動。",
+        "entities": {
+          "tickers": [
+            "DOW",
+            "LYB",
+            "ECL"
+          ],
+          "sectors": [
+            "Chemicals"
+          ],
+          "themes": [
+            "Crude Oil Volatility",
+            "Global Demand Slowdown",
+            "Petrochemicals",
+            "Specialty Chemicals Demand"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "sector:Chemicals",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Crude Oil Volatility"
+          },
+          {
+            "subject": "sector:Chemicals",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Global Demand Slowdown"
+          },
+          {
+            "subject": "sector:Chemicals",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Specialty Chemicals Demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "原油成本波動與終端需求放緩衝擊石化業。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T04:40:10Z",
+      "latency_ms": 24650,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面 4 輪覆蓋上游/煉油/油輪/SPR/midstream/石化，**missed node 是 LNG 出口套利**。OPEC 下修原油需求 + IEA 波動性警告，市場焦點集中在 Brent/WTI，但**亞洲 JKM LNG spot 與 Henry Hub 價差**正擴大——Hormuz 溢價若實現，**Qatar LNG (經 Hormuz 出口 ~20% 全球 LNG)** 供給中斷風險直接外溢到美國 LNG 替代需求。**Cheniere (LNG)** 與 **Venture Global (VG)** 為直接受益者：長約 fee-based + spot arbitrage upside 雙引擎。Contra 角度：若 OPEC 下修反映**中國需求結構性走弱**（非週期性），則 LNG 亞洲長約量也會被連帶下修——VG 訂單延遲風險高於 LNG（後者長約覆蓋率更高）。另一 2nd-order：**Williams (WMB) / Kinder Morgan (KMI)** Gulf Coast LNG feeder pipeline 在 LNG 出口擴張下 throughput 上行，比純 midstream 多一層 export-linked 槓桿。",
+        "bull_points": [
+          "Hormuz 溢價推升 US LNG 替代需求，LNG / VG fee+spot 雙引擎",
+          "WMB / KMI Gulf Coast LNG feeder pipeline throughput 上行",
+          "亞洲 JKM-HH 價差擴大利好 Cheniere spot arb 部位"
+        ],
+        "bear_points": [
+          "OPEC 下修若反映中國結構性需求走弱，LNG 長約量同步下修",
+          "VG 在建產能訂單延遲風險高於 LNG（長約覆蓋率較低）",
+          "全球 LNG 2026-27 新產能上線（Qatar / Mozambique）壓抑價差"
+        ],
+        "final_take": "看多 LNG / WMB，VG 風險偏高需等長約落地",
+        "entities": {
+          "tickers": [
+            "LNG",
+            "VG",
+            "WMB",
+            "KMI"
+          ],
+          "sectors": [
+            "Energy",
+            "Midstream",
+            "LNG Export"
+          ],
+          "themes": [
+            "LNG arbitrage",
+            "Hormuz geopolitical risk",
+            "Asia JKM spread"
+          ],
+          "tech_keywords": [
+            "JKM spot",
+            "Henry Hub",
+            "VLCC TCE",
+            "fee-based contracts"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LNG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hormuz_lng_substitution"
+          },
+          {
+            "subject": "ticker:VG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jkm_hh_spread"
+          },
+          {
+            "subject": "ticker:WMB",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:us_lng_export_growth"
+          },
+          {
+            "subject": "ticker:KMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:us_lng_export_growth"
+          },
+          {
+            "subject": "ticker:LNG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china_structural_demand_weakness"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 LNG 出口套利 + Gulf Coast feeder pipeline 角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T04:40:59Z",
+      "latency_ms": 48899,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC 下修 2026 需求至 1.2 mb/d，IEA 警告波動性加劇，預示油價區間擴大。對於**工業氣體龍頭（如 Air Products - APD, Linde - LIN）**，這意味著雙重挑戰：生產過程高度耗能，**能源成本**將隨油價上升；而其石化與煉油客戶正面臨成本推升與需求放緩，可能削弱工業氣體需求。",
+        "bull_points": [
+          "半導體業氣體需求增",
+          "氫能發展帶動氣體需求"
+        ],
+        "bear_points": [
+          "能源投入成本隨油價走高",
+          "石化客戶需求受壓明顯"
+        ],
+        "final_take": "工業氣體業面臨價量雙重逆風",
+        "entities": {
+          "tickers": [
+            "APD",
+            "LIN"
+          ],
+          "sectors": [
+            "Industrial Gases"
+          ],
+          "themes": [
+            "Energy Costs",
+            "Industrial Demand",
+            "Semiconductor Demand",
+            "Hydrogen Economy"
+          ],
+          "tech_keywords": [
+            "Hydrogen",
+            "Air Separation",
+            "Cryogenics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:APD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_energy_costs"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_energy_costs"
+          },
+          {
+            "subject": "ticker:APD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:softening_industrial_demand"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:softening_industrial_demand"
+          },
+          {
+            "subject": "ticker:APD",
+            "predicate": "CUSTOMER_OF",
+            "object": "sector:Petrochemicals"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "CUSTOMER_OF",
+            "object": "sector:Petrochemicals"
+          },
+          {
+            "subject": "ticker:APD",
+            "predicate": "CUSTOMER_OF",
+            "object": "sector:Oil and Gas Refining"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "CUSTOMER_OF",
+            "object": "sector:Oil and Gas Refining"
+          },
+          {
+            "subject": "ticker:APD",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Semiconductor Demand"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Semiconductor Demand"
+          },
+          {
+            "subject": "ticker:APD",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Hydrogen Economy"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Hydrogen Economy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "工業氣體因成本與需求雙向承壓"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "APD",
+        "CVX",
+        "DAL",
+        "DHT",
+        "DOW",
+        "ECL",
+        "EPD",
+        "ET",
+        "FANG",
+        "FRO",
+        "FSLR",
+        "HAL",
+        "KMI",
+        "LIN",
+        "LNG",
+        "LYB",
+        "MPC",
+        "MTDR",
+        "OXY",
+        "PR",
+        "SLB",
+        "TSLA",
+        "UAL",
+        "VG",
+        "VLO",
+        "WMB",
+        "XLE",
+        "XOM"
+      ],
+      "sectors": [
+        "Chemicals",
+        "Energy",
+        "Industrial Gases",
+        "LNG Export",
+        "Midstream",
+        "Oil & Gas E&P",
+        "Renewable Energy",
+        "Transportation"
+      ],
+      "themes": [
+        "Asia JKM spread",
+        "Crude Oil Volatility",
+        "Energy Costs",
+        "Energy demand",
+        "Geopolitical risk premium",
+        "Global Demand Slowdown",
+        "Hormuz geopolitical risk",
+        "Hormuz risk premium",
+        "Hydrogen Economy",
+        "Industrial Demand",
+        "LNG arbitrage",
+        "OPEC demand cut",
+        "OPEC supply discipline",
+        "Oil tanker shipping",
+        "Petrochemicals",
+        "SPR refill",
+        "Semiconductor Demand",
+        "Specialty Chemicals Demand",
+        "Strait of Hormuz security",
+        "oil demand destruction",
+        "oil price volatility",
+        "refiner crack spread"
+      ],
+      "tech_keywords": [
+        "Air Separation",
+        "Cryogenics",
+        "Henry Hub",
+        "Hydrogen",
+        "JKM spot",
+        "Permian breakeven",
+        "VLCC TCE",
+        "fee-based contracts",
+        "take-or-pay"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:XOM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil-demand-destruction"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:refiner-crack-spread"
+      },
+      {
+        "subject": "ticker:SLB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:opec-demand-cut"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower-oil-mid-range"
+      },
+      {
+        "subject": "sector:Energy",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:opec-supply-discipline"
+      },
+      {
+        "subject": "ticker:FSLR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:alt-energy-tailwind"
+      },
+      {
+        "subject": "ticker:FRO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Oil tanker shipping"
+      },
+      {
+        "subject": "ticker:DHT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Oil tanker shipping"
+      },
+      {
+        "subject": "theme:Oil tanker shipping",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Geopolitical risk premium"
+      },
+      {
+        "subject": "theme:Geopolitical risk premium",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Strait of Hormuz security"
+      },
+      {
+        "subject": "ticker:FANG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:spr_refill"
+      },
+      {
+        "subject": "ticker:EPD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil_volatility"
+      },
+      {
+        "subject": "ticker:ET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil_volatility"
+      },
+      {
+        "subject": "ticker:FRO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:hormuz_priced_in"
+      },
+      {
+        "subject": "ticker:XLE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:opec_demand_cut"
+      },
+      {
+        "subject": "sector:Chemicals",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Crude Oil Volatility"
+      },
+      {
+        "subject": "sector:Chemicals",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Global Demand Slowdown"
+      },
+      {
+        "subject": "sector:Chemicals",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Specialty Chemicals Demand"
+      },
+      {
+        "subject": "ticker:LNG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hormuz_lng_substitution"
+      },
+      {
+        "subject": "ticker:VG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jkm_hh_spread"
+      },
+      {
+        "subject": "ticker:WMB",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:us_lng_export_growth"
+      },
+      {
+        "subject": "ticker:KMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:us_lng_export_growth"
+      },
+      {
+        "subject": "ticker:LNG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china_structural_demand_weakness"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_energy_costs"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_energy_costs"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:softening_industrial_demand"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:softening_industrial_demand"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "CUSTOMER_OF",
+        "object": "sector:Petrochemicals"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "CUSTOMER_OF",
+        "object": "sector:Petrochemicals"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "CUSTOMER_OF",
+        "object": "sector:Oil and Gas Refining"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "CUSTOMER_OF",
+        "object": "sector:Oil and Gas Refining"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Semiconductor Demand"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Semiconductor Demand"
+      },
+      {
+        "subject": "ticker:APD",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Hydrogen Economy"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Hydrogen Economy"
+      }
+    ],
+    "bull_summary": [
+      "Refiners 受惠於波動擴大、crack spread 走闊",
+      "油價中樞下移利好航空 (DAL/UAL) 與消費",
+      "替代能源敘事獲邊際資金回流",
+      "特定油輪公司有望受地緣緊張推升運價。",
+      "供應鏈中，運輸環節具備獨立獲利空間。",
+      "SPR 回補預算為 WTI $65-70 提供結構性 bid"
+    ],
+    "bear_summary": [
+      "Upstream E&P 2026 capex 與 EPS 下修壓力",
+      "OPEC 連三季下修接近需求破壞訊號",
+      "油服訂單能見度惡化，SLB/HAL 承壓",
+      "OPEC 持續下修需求預測，總體市場仍承壓。",
+      "海峽運輸若受阻，可能引發全球供應鏈更大衝擊。",
+      "VLCC 運費已高位，Hormuz 溢價多已 priced-in"
+    ],
+    "final_take": "工業氣體業面臨價量雙重逆風",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T04:40:59Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: SUPPLIES_TO; gemini-only: CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

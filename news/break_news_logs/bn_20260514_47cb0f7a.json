@@ -1,0 +1,826 @@
+{
+  "news_id": "bn_20260514_47cb0f7a",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T15:55:27Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://www.investors.com/news/technology/nova-stock-nvmi-q1-2026-earnings/?src=A00220&yptr=yahoo",
+    "feed_fingerprint": "chip gear firm nova lights up first quarter",
+    "published": "2026-05-14T14:44:46+00:00",
+    "url_hash": "sha1:d2360f66668e7062afa38d119c0963433a8b7b6d"
+  },
+  "headline": "Chip-Gear Firm Nova Lights Up On First-Quarter Beat",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:51:12Z",
+      "latency_ms": 22131,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Nova (NVMI) Q1 beat 釋出**WFE 上游**訊號。Nova 主力為**metrology / process control**（薄膜厚度量測 + X-ray），客戶涵蓋 TSMC / Samsung / Intel / SK Hynix。Q1 beat 通常代表三件事：(1) **HBM3e 產能擴張**帶動 DRAM stacking 量測需求 — 直接利多 SK Hynix / 美光資本支出兌現；(2) **N3P / N2 ramp** 推升 leading-edge metrology 採購 — TSMC capex 沒砍訊號；(3) WFE 同業 **AMAT / LRCX / KLAC / ASML** 讀數正面，KLAC 同為 process control 最直接受惠。需留意 Nova 規模小（~$8B mcap），單季 beat 不等於 ASML 等大廠 guide 上修，但作為**領先指標**值得列入 AI capex 兌現追蹤。",
+        "bull_points": [
+          "WFE 上游讀數正面，HBM3e/N2 ramp 兌現",
+          "KLAC 同類 process control 直接受惠",
+          "TSMC/SK Hynix capex 未見砍單訊號"
+        ],
+        "bear_points": [
+          "Nova 規模小，單季 beat sample 不足",
+          "WFE 訂單 lumpy，Q2 guide 才是關鍵",
+          "中國 mature node 需求若降溫拖累整體"
+        ],
+        "final_take": "WFE 領先指標偏多，等 ASML/AMAT 確認",
+        "entities": {
+          "tickers": [
+            "NVMI",
+            "KLAC",
+            "AMAT",
+            "LRCX",
+            "ASML",
+            "TSM",
+            "INTC",
+            "MU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "Leading-edge foundry",
+            "WFE cycle"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "N3P",
+            "N2",
+            "metrology",
+            "process control"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MU"
+          },
+          {
+            "subject": "ticker:KLAC",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVMI"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:wfe-cycle"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:leading-edge-foundry"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "WFE 上游正面訊號，但需大廠確認"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:53:00Z",
+      "latency_ms": 107787,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Analyst-B 認為，Nova (NVMI) 第一季業績強勁，不僅印證 HBM3e 擴產，更關鍵的是其 metrology 設備在先進封裝領域扮演要角。這意味著 NVIDIA Blackwell 等 AI 加速器所需的 CoWoS 等先進製程良率正穩步提升，預示著 AI 運算潛能的釋放。",
+        "bull_points": [
+          "先進封裝良率穩步提升",
+          "GPU 效能創新基礎"
+        ],
+        "bear_points": [
+          "先進製程瓶頸仍存",
+          "WFE 週期性風險"
+        ],
+        "final_take": "看多 AI 封裝，但需謹慎",
+        "entities": {
+          "tickers": [
+            "NVMI",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductor Equipment",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced Packaging"
+          ],
+          "tech_keywords": [
+            "metrology",
+            "process control",
+            "CoWoS",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Advanced Packaging"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Blackwell"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦先進封裝新角度，補足先前討論的技術細節。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:53:27Z",
+      "latency_ms": 27358,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪已覆蓋 HBM3e / CoWoS / KLAC 主軸。補一個被忽略的**2nd-order**：Nova 強項其實在**獨立 metrology**（非 in-line），與 **Onto Innovation (ONTO)** 是**最直接同業**——ONTO 的 Dragonfly 平台同樣吃 HBM stacking 量測 + advanced packaging bump inspection。Nova beat 對 ONTO 是**讀數正面**，但 ONTO 估值已較 Nova 貴（forward PE ~35x vs NVMI ~28x），beat 若沒帶動 ONTO 同步上修，反而暴露**估值套利**機會。**Contra 點**：Nova Q1 含**中國成熟製程**訂單拉貨（SMIC / CXMT 庫存量測），這塊在美國 BIS 10/2024 新規下**結構性下行**——若 Q1 beat 來源偏中國而非 leading-edge，則對 TSMC N2 / HBM3e narrative 的 read-through **被稀釋**。需看 earnings call geographic mix 才能定性。",
+        "bull_points": [
+          "ONTO 為 Nova 最直接同業，beat 讀數正面",
+          "advanced packaging metrology 是 CoWoS 良率提升槓桿點",
+          "WFE 上游領先指標，先於 ASML guide"
+        ],
+        "bear_points": [
+          "Q1 beat 若來自中國成熟製程訂單，BIS 新規下不可持續",
+          "ONTO forward PE 35x 已 price-in，估值套利風險",
+          "Nova mcap 小，單季數據 noise 高不等於產業 guide"
+        ],
+        "final_take": "看多但需拆 geographic mix 驗證 leading-edge 占比",
+        "entities": {
+          "tickers": [
+            "NVMI",
+            "ONTO",
+            "KLAC",
+            "ASML",
+            "AMAT",
+            "LRCX",
+            "TSM",
+            "NVDA",
+            "SMIC"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "advanced packaging",
+            "China export controls"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS",
+            "N2",
+            "N3P",
+            "Blackwell",
+            "metrology",
+            "Dragonfly"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ONTO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:NVMI"
+          },
+          {
+            "subject": "ticker:ONTO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-export-controls"
+          },
+          {
+            "subject": "ticker:ONTO",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "narrative:advanced-packaging",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "補 ONTO 同業 + 中國訂單 contra，前輪未及"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T15:53:57Z",
+      "latency_ms": 29350,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Nova (NVMI) 第一季業績亮眼，不僅驗證了 HBM3e 產能擴張及先進邏輯節點（N3P/N2）的 ramp-up，更關鍵的是，其獨立 metrology 設備在**先進 2.5D/3D 封裝技術**中扮演的角色。隨著 AI 加速器如 NVIDIA Blackwell 後續世代，對**超精密多層互連和鍵合介面**的量測要求日益嚴苛，NVMI 的專業工具能精確檢測這些關鍵結構的均勻性與缺陷，這將是確保下一代 AI 晶片可靠性與性能的基石，此點是**比 HBM3e/CoWoS 更下一層的潛在驅動力**。",
+        "bull_points": [
+          "先進封裝介面精密量測，支援未來 AI 晶片。",
+          "獨特 metrology 平台，洞察下一代 AI 潛力。"
+        ],
+        "bear_points": [
+          "Q1 中國訂單影響，疊加 BIS 法規風險。",
+          "ONTO 估值優勢，構成潛在估值套利點。"
+        ],
+        "final_take": "重視其精準量測能力，但須關注地緣政治風險。",
+        "entities": {
+          "tickers": [
+            "NVMI",
+            "ONTO",
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced Packaging"
+          ],
+          "tech_keywords": [
+            "metrology",
+            "2.5D/3D packaging",
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Advanced Packaging"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ONTO"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:2.5D/3D packaging"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:metrology"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦先進封裝介面，補足 NVMI 技術利基與風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:54:18Z",
+      "latency_ms": 21801,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前輪都沒提到的角度：**Nova Q1 beat 對 advanced packaging 設備供應鏈的 read-through 應該往 BESI (BESI.AS) / ASMPT 延伸**。Nova metrology 在 **hybrid bonding** 站點是 inline inspection 的關鍵 — 而 hybrid bonding 正是 BESI 的核心戰場（TSMC SoIC / Intel Foveros Direct）。若 Nova Q1 強勁來自 advanced packaging metrology 而非 DRAM stacking，則 BESI 訂單能見度 read-through 比 KLAC 更直接。**另一個被忽略的 contra**：Nova 客戶集中度極高（前 3 大 ~60% 營收），單季 beat 可能只是**單一客戶 pull-in**（疑似 SK Hynix HBM 趕產）而非 broad-based recovery — 這在 small-cap WFE 上常見，**不應外推到 ASML/AMAT Q2 guide**。需看 Q2 guidance 與 book-to-bill 才能確認趨勢延續性。",
+        "bull_points": [
+          "Hybrid bonding metrology read-through 利多 BESI / ASMPT",
+          "SoIC / Foveros Direct ramp 加速 advanced packaging 量測需求",
+          "TSMC N2 良率 ramp 期 metrology intensity 結構性上升"
+        ],
+        "bear_points": [
+          "客戶集中度 60%+，單季 beat 恐為單客戶 pull-in",
+          "Small-cap WFE 訊號不應外推至 ASML / AMAT 大廠 guide",
+          "Book-to-bill 未公布前，趨勢延續性無法確認"
+        ],
+        "final_take": "看多 advanced packaging 鏈 BESI，但 NVMI 訊號需 Q2 guide 確認",
+        "entities": {
+          "tickers": [
+            "NVMI",
+            "BESI",
+            "ASML",
+            "AMAT",
+            "KLAC",
+            "ONTO",
+            "TSM",
+            "INTC"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "advanced packaging",
+            "hybrid bonding",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "hybrid bonding",
+            "SoIC",
+            "Foveros Direct",
+            "CoWoS",
+            "N2",
+            "metrology"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BESI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hybrid-bonding-ramp"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ONTO"
+          },
+          {
+            "subject": "ticker:BESI",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:soic-foveros"
+          },
+          {
+            "subject": "narrative:advanced-packaging",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:BESI"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 BESI hybrid bonding 角度 + 客戶集中度 contra"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T15:55:27Z",
+      "latency_ms": 69016,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Nova (NVMI) 第一季業績強勁，顯示其在推動下一世代 AI 硬體架構發展中的關鍵作用。其尖端 metrology 技術不僅確保先進封裝的互連精度與輔助材料（如 underfill）的可靠性，更能加速 AI 創新週期的迭代，縮短上市時間。憑藉對 metrology 的深度專注，NVMI 在 WFE 市場中建立利基領導地位，成為 AI 算力邊界擴張的重要推手，儘管面臨客戶集中度與地緣政治等風險。",
+        "bull_points": [
+          "確保次世代 AI 晶片堆疊與互連良率。",
+          "加速 AI 創新週期與上市進程。",
+          "聚焦 metrology 建立利基市場領導地位。"
+        ],
+        "bear_points": [
+          "Q1 營收受單一客戶拉貨影響之虞。",
+          "中國成熟製程訂單地緣政治風險。",
+          "規模限制與技術追趕壓力。"
+        ],
+        "final_take": "NVMI 是未來 AI 算力邊界擴張的關鍵。",
+        "entities": {
+          "tickers": [
+            "NVMI"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI hardware innovation",
+            "Advanced interconnects",
+            "3D IC integration",
+            "Thermal management",
+            "AI reliability",
+            "AI R&D acceleration",
+            "Time-to-market",
+            "Semiconductor innovation pipeline",
+            "WFE market dynamics",
+            "Niche market leadership",
+            "Specialization strategy"
+          ],
+          "tech_keywords": [
+            "metrology",
+            "hybrid bonding",
+            "next-gen AI",
+            "underfill",
+            "3D packaging",
+            "AI hardware development",
+            "WFE",
+            "yield management"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI hardware innovation"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Advanced interconnects"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:next-gen AI"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:hybrid bonding"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI reliability"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:underfill"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:Thermal management"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI R&D acceleration"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Semiconductor innovation pipeline"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "CATALYST_FOR",
+            "object": "tech_keyword:AI hardware development"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Specialization strategy"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "COMPETES_WITH",
+            "object": "tech_keyword:WFE"
+          },
+          {
+            "subject": "ticker:NVMI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Niche market leadership"
+          }
+        ],
+        "done": true,
+        "confidence": 1.0,
+        "rationale_short": "已全方位闡述 NVMI 的價值與地位。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "ASML",
+        "BESI",
+        "INTC",
+        "KLAC",
+        "LRCX",
+        "MU",
+        "NVDA",
+        "NVMI",
+        "ONTO",
+        "SMIC",
+        "TSM"
+      ],
+      "sectors": [
+        "Information Technology",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "3D IC integration",
+        "AI R&D acceleration",
+        "AI capex",
+        "AI hardware innovation",
+        "AI reliability",
+        "Advanced Packaging",
+        "Advanced interconnects",
+        "China export controls",
+        "HBM3e",
+        "Leading-edge foundry",
+        "Niche market leadership",
+        "Semiconductor innovation pipeline",
+        "Specialization strategy",
+        "Thermal management",
+        "Time-to-market",
+        "WFE cycle",
+        "WFE market dynamics",
+        "advanced packaging",
+        "hybrid bonding"
+      ],
+      "tech_keywords": [
+        "2.5D/3D packaging",
+        "3D packaging",
+        "AI hardware development",
+        "Blackwell",
+        "CoWoS",
+        "Dragonfly",
+        "Foveros Direct",
+        "HBM3e",
+        "N2",
+        "N3P",
+        "SoIC",
+        "WFE",
+        "hybrid bonding",
+        "metrology",
+        "next-gen AI",
+        "process control",
+        "underfill",
+        "yield management"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MU"
+      },
+      {
+        "subject": "ticker:KLAC",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVMI"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:wfe-cycle"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:leading-edge-foundry"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Advanced Packaging"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Blackwell"
+      },
+      {
+        "subject": "ticker:ONTO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:NVMI"
+      },
+      {
+        "subject": "ticker:ONTO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-export-controls"
+      },
+      {
+        "subject": "ticker:ONTO",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "narrative:advanced-packaging",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ONTO"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:2.5D/3D packaging"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:metrology"
+      },
+      {
+        "subject": "ticker:BESI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hybrid-bonding-ramp"
+      },
+      {
+        "subject": "ticker:BESI",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:soic-foveros"
+      },
+      {
+        "subject": "narrative:advanced-packaging",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:BESI"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI hardware innovation"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Advanced interconnects"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:next-gen AI"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:hybrid bonding"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI reliability"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:underfill"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:Thermal management"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI R&D acceleration"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Semiconductor innovation pipeline"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "CATALYST_FOR",
+        "object": "tech_keyword:AI hardware development"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Specialization strategy"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "COMPETES_WITH",
+        "object": "tech_keyword:WFE"
+      },
+      {
+        "subject": "ticker:NVMI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Niche market leadership"
+      }
+    ],
+    "bull_summary": [
+      "WFE 上游讀數正面，HBM3e/N2 ramp 兌現",
+      "KLAC 同類 process control 直接受惠",
+      "TSMC/SK Hynix capex 未見砍單訊號",
+      "先進封裝良率穩步提升",
+      "GPU 效能創新基礎",
+      "ONTO 為 Nova 最直接同業，beat 讀數正面"
+    ],
+    "bear_summary": [
+      "Nova 規模小，單季 beat sample 不足",
+      "WFE 訂單 lumpy，Q2 guide 才是關鍵",
+      "中國 mature node 需求若降溫拖累整體",
+      "先進製程瓶頸仍存",
+      "WFE 週期性風險",
+      "Q1 beat 若來自中國成熟製程訂單，BIS 新規下不可持續"
+    ],
+    "final_take": "NVMI 是未來 AI 算力邊界擴張的關鍵。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T15:55:27Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,292 @@
+{
+  "generated_at": "2026-05-18T13:45:23.207953Z",
+  "tiers_applied": [
+    "1",
+    "2",
+    "3"
+  ],
+  "meta": {
+    "node_count": 800,
+    "edge_count": 5092,
+    "nodes_by_type": {
+      "theme": 139,
+      "ticker": 225,
+      "catalyst": 300,
+      "sector": 46,
+      "narrative": 90
+    },
+    "edges_by_type": {
+      "BELONGS_TO_THEME": 167,
+      "OUTCOME_FOR": 69,
+      "BULL_CASE_FOR": 1321,
+      "MENTIONED_IN": 2625,
+      "BEAR_CASE_FOR": 492,
+      "SUPPLY_CHAIN_HOP": 283,
+      "PEER_OF": 135
+    },
+    "prune_stats": {
+      "dropped_edges_low_weight": 295,
+      "dropped_isolated_nodes": 117,
+      "dropped_provisional_low_mentions": 0,
+      "dropped_for_cap": 3801
+    },
+    "decay_strategies": {
+      "catalyst": 7,
+      "narrative": 21,
+      "theme": 21,
+      "structural_shift": 90,
+      "peer_of": 45,
+      "supply_chain_hop": 45,
+      "outcome_for": 30,
+      "belongs_to_theme": 21,
+      "belongs_to_sector": 60,
+      "mentioned_in": 14,
+      "bull_case_for": 30,
+      "bear_case_for": 30,
+      "default": 21
+    },
+    "tier_confidence": {
+      "tier1": 1.0,
+      "tier2": 0.7,
+      "tier3": 0.85
+    }
+  },
+  "size_bytes": 1798358,
+  "tier2_narrative_attribution_audit": {
+    "glp1": {
+      "emitted": 37,
+      "rejected_oos": 58
+    },
+    "nim": {
+      "emitted": 35,
+      "rejected_oos": 65
+    },
+    "weight_loss": {
+      "emitted": 16,
+      "rejected_oos": 17
+    },
+    "hbm": {
+      "emitted": 218,
+      "rejected_oos": 144
+    },
+    "cowos": {
+      "emitted": 67,
+      "rejected_oos": 46
+    },
+    "lng": {
+      "emitted": 82,
+      "rejected_oos": 105
+    },
+    "refining": {
+      "emitted": 40,
+      "rejected_oos": 35
+    },
+    "blackwell": {
+      "emitted": 40,
+      "rejected_oos": 16
+    },
+    "rubin": {
+      "emitted": 25,
+      "rejected_oos": 14
+    },
+    "trainium": {
+      "emitted": 11,
+      "rejected_oos": 13
+    },
+    "18a": {
+      "emitted": 9,
+      "rejected_oos": 2
+    },
+    "hbm3e": {
+      "emitted": 62,
+      "rejected_oos": 17
+    },
+    "hbm4": {
+      "emitted": 40,
+      "rejected_oos": 9
+    },
+    "supply_chain_signal": {
+      "emitted": 3,
+      "rejected_oos": 0
+    },
+    "shale": {
+      "emitted": 18,
+      "rejected_oos": 22
+    },
+    "peptide_mfg": {
+      "emitted": 6,
+      "rejected_oos": 3
+    },
+    "mi350": {
+      "emitted": 8,
+      "rejected_oos": 0
+    },
+    "n3": {
+      "emitted": 17,
+      "rejected_oos": 2
+    },
+    "n2": {
+      "emitted": 20,
+      "rejected_oos": 1
+    },
+    "ecommerce": {
+      "emitted": 1,
+      "rejected_oos": 3
+    },
+    "nuclear": {
+      "emitted": 15,
+      "rejected_oos": 58
+    },
+    "travel": {
+      "emitted": 2,
+      "rejected_oos": 1
+    },
+    "sic": {
+      "emitted": 10,
+      "rejected_oos": 0
+    },
+    "mi300": {
+      "emitted": 17,
+      "rejected_oos": 13
+    },
+    "mi325": {
+      "emitted": 4,
+      "rejected_oos": 0
+    },
+    "1_6t": {
+      "emitted": 33,
+      "rejected_oos": 27
+    },
+    "credit_cycle": {
+      "emitted": 0,
+      "rejected_oos": 2
+    },
+    "cowos_l": {
+      "emitted": 10,
+      "rejected_oos": 0
+    },
+    "cpo": {
+      "emitted": 7,
+      "rejected_oos": 2
+    },
+    "800g": {
+      "emitted": 23,
+      "rejected_oos": 21
+    },
+    "capital_markets": {
+      "emitted": 2,
+      "rejected_oos": 0
+    },
+    "oncology": {
+      "emitted": 0,
+      "rejected_oos": 2
+    },
+    "gan": {
+      "emitted": 8,
+      "rejected_oos": 0
+    },
+    "ad_spend": {
+      "emitted": 3,
+      "rejected_oos": 11
+    }
+  },
+  "narrative_attribution_in_graph": {
+    "narrative:glp1": {
+      "linked_tickers": 9,
+      "linked_pct_of_universe": 0.04
+    },
+    "narrative:nim": {
+      "linked_tickers": 10,
+      "linked_pct_of_universe": 0.044
+    },
+    "narrative:weight_loss": {
+      "linked_tickers": 2,
+      "linked_pct_of_universe": 0.009
+    },
+    "narrative:lng": {
+      "linked_tickers": 14,
+      "linked_pct_of_universe": 0.062
+    },
+    "narrative:refining": {
+      "linked_tickers": 13,
+      "linked_pct_of_universe": 0.058
+    },
+    "narrative:hbm": {
+      "linked_tickers": 36,
+      "linked_pct_of_universe": 0.16
+    },
+    "narrative:blackwell": {
+      "linked_tickers": 16,
+      "linked_pct_of_universe": 0.071
+    },
+    "narrative:rubin": {
+      "linked_tickers": 12,
+      "linked_pct_of_universe": 0.053
+    },
+    "narrative:trainium": {
+      "linked_tickers": 7,
+      "linked_pct_of_universe": 0.031
+    },
+    "narrative:18a": {
+      "linked_tickers": 5,
+      "linked_pct_of_universe": 0.022
+    },
+    "narrative:hbm3e": {
+      "linked_tickers": 20,
+      "linked_pct_of_universe": 0.089
+    },
+    "narrative:hbm4": {
+      "linked_tickers": 17,
+      "linked_pct_of_universe": 0.076
+    },
+    "narrative:shale": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.036
+    },
+    "narrative:cowos": {
+      "linked_tickers": 18,
+      "linked_pct_of_universe": 0.08
+    },
+    "narrative:n3": {
+      "linked_tickers": 12,
+      "linked_pct_of_universe": 0.053
+    },
+    "narrative:n2": {
+      "linked_tickers": 12,
+      "linked_pct_of_universe": 0.053
+    },
+    "narrative:nuclear": {
+      "linked_tickers": 6,
+      "linked_pct_of_universe": 0.027
+    },
+    "narrative:sic": {
+      "linked_tickers": 9,
+      "linked_pct_of_universe": 0.04
+    },
+    "narrative:mi300": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.036
+    },
+    "narrative:1_6t": {
+      "linked_tickers": 15,
+      "linked_pct_of_universe": 0.067
+    },
+    "narrative:cowos_l": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.036
+    },
+    "narrative:cpo": {
+      "linked_tickers": 6,
+      "linked_pct_of_universe": 0.027
+    },
+    "narrative:800g": {
+      "linked_tickers": 12,
+      "linked_pct_of_universe": 0.053
+    },
+    "narrative:gan": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.036
+    }
+  },
+  "quarantined_narratives": []
+}

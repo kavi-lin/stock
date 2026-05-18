@@ -1,0 +1,559 @@
+{
+  "news_id": "bn_20260513_049eed70",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T23:55:25Z",
+  "last_activity_ts": "2026-05-14T00:10:39Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/13/bulls-bet-big-on-these-three-china-related-stock-trades-during-trump-visit.html",
+    "feed_fingerprint": "bulls bet big these three china related stock",
+    "published": "2026-05-13T20:17:00+00:00",
+    "url_hash": "sha1:3e74ab69611b93eb50575298189ecaab5e0603f8"
+  },
+  "headline": "Bulls bet big on these three China-related stock trades during Trump visit",
+  "headline_zh": null,
+  "raw_summary": "Chinese stocks, ETFs and related themes posted some of the biggest rallies in months.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:06:16Z",
+      "latency_ms": 20060,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Trump-Xi summit framing flips China exposure from tail-risk to tactical long. Three obvious vehicles: **KWEB / FXI** (broad China internet + large-cap), **BABA** (ADR re-rating beneficiary, AI capex + cloud margin story intact), and **LVS / WYNN** (Macau gaming, direct beneficiary if visa / cross-border flow rhetoric softens). Second-order: **TSLA** Shanghai gigafactory + China FSD approval optionality; **NVDA** if export-control language eases on H20-successor SKUs. Watch tariff-exposed industrials (**CAT, DE**) and rare-earth proxies (**MP**) for whipsaw. Setup is event-driven — fade strength into headline confirmation, since summit deliverables historically underwhelm vs pre-meeting positioning. Concentration risk: KWEB up sharp already, chase = poor R/R.",
+        "entities": {
+          "tickers": [
+            "KWEB",
+            "FXI",
+            "BABA",
+            "LVS",
+            "WYNN",
+            "TSLA",
+            "NVDA",
+            "CAT",
+            "DE",
+            "MP",
+            "PDD",
+            "JD"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Communication Services",
+            "Information Technology",
+            "Industrials",
+            "Materials"
+          ],
+          "themes": [
+            "China reopening trade",
+            "US-China detente",
+            "Macau gaming recovery",
+            "AI chip export controls",
+            "Rare earth supply chain"
+          ],
+          "tech_keywords": [
+            "H20",
+            "FSD",
+            "ADR re-rating"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BABA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:KWEB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-reopening-trade"
+          },
+          {
+            "subject": "ticker:LVS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:macau-gaming-recovery"
+          },
+          {
+            "subject": "ticker:WYNN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:macau-gaming-recovery"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ai-chip-export-controls"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-reopening-trade"
+          },
+          {
+            "subject": "ticker:MP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:CAT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-detente"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Summit-driven re-rating thesis well-telegraphed; tactical long but fade into event. Rare-earth proxies inverse-exposed."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:06:34Z",
+      "latency_ms": 18457,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "While broad China ETFs and specific ADRs like BABA were noted for AI and cloud plays, an overlooked tactical long could be PDD. As a dominant player in China's value e-commerce segment, PDD stands to benefit significantly from any rebound in Chinese consumer sentiment and discretionary spending fueled by improved US-China relations. Unlike BABA's focus on cloud infrastructure, PDD's strength lies in its massive user base and aggressive growth in lower-tier cities. Any positive rhetoric from the Trump-Xi summit could translate directly into increased purchasing power and platform engagement for PDD, offering a distinct lens on China's domestic demand story.",
+        "entities": {
+          "tickers": [
+            "PDD"
+          ],
+          "sectors": [
+            "Internet & Direct Marketing Retail"
+          ],
+          "themes": [
+            "Chinese consumer spending",
+            "e-commerce growth",
+            "value retail"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:PDD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Chinese consumer spending"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "PDD benefits from potential rebound in Chinese consumer sentiment and discretionary spending, a distinct angle from BABA's AI/cloud focus."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:06:51Z",
+      "latency_ms": 17174,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **Hong Kong financial plumbing** as a 2nd-order beneficiary. **HKEX** (0388.HK) and Stock Connect southbound flow proxies see direct volume lift if summit re-opens dual-listing pipeline — ADR-to-HK conversion arb already active on BABA/JD. US-listed proxy: **MS** and **GS** prime brokerage desks have disproportionate HK derivatives revenue. Also overlooked: **YINN** (3x leveraged FXI) — options skew flipped call-heavy this week, signaling fast-money positioning rather than real-money re-allocation; that's a contra-tell. If institutional flows were genuine, you'd see **MCHI / EWY** quietly bid, not retail-favored leveraged ETFs. Watch **CNY offshore** (CNH) — currency strengthening past 7.10 would confirm the trade; failure to hold = sentiment trade only, no policy substance.",
+        "entities": {
+          "tickers": [
+            "HKEX",
+            "MS",
+            "GS",
+            "YINN",
+            "MCHI",
+            "EWY",
+            "BABA",
+            "JD",
+            "FXI"
+          ],
+          "sectors": [
+            "Financials",
+            "Communication Services"
+          ],
+          "themes": [
+            "US-China summit",
+            "HK dual-listing",
+            "leveraged ETF positioning",
+            "CNH FX signal"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:HKEX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hk-dual-listing-pipeline"
+          },
+          {
+            "subject": "ticker:YINN",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:retail-positioning-contra-tell"
+          },
+          {
+            "subject": "ticker:MCHI",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:institutional-china-allocation"
+          },
+          {
+            "subject": "ticker:MS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hk-derivatives-flow"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread missed HK plumbing layer + leveraged-ETF positioning as contra-tell + CNH FX confirmation signal."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:09:51Z",
+      "latency_ms": 180019,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260513_049eed70.c3.txt",
+      "parsed": {
+        "commentary": "",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": -1
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:10:15Z",
+      "latency_ms": 23656,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Underdiscussed: **shipping & dry-bulk** as a measurable summit tell. **ZIM** and **MATX** trans-Pacific container rates lead summit deliverables by ~2 weeks — SCFI Shanghai-LA leg is the cleanest real-economy gauge of tariff thaw vs rhetoric. Also missed: **agri-complex contra-trade**. Any China soybean/LNG purchase commitment (classic summit deliverable) re-rates **BG, ADM, CHK, LNG** — but watch **CF / MOS** as negative-delta plays since US fertilizer exports compete with Chinese urea re-entry. Finally, **TSM** is the cleanest semis hedge here: if H20 export language softens for NVDA, TSM CoWoS-L allocation tightens further (China demand re-enters queue), squeezing **AVGO / AMD** wafer access. Summit-as-supply-chain-reshuffle, not just sentiment trade.",
+        "entities": {
+          "tickers": [
+            "ZIM",
+            "MATX",
+            "BG",
+            "ADM",
+            "CHK",
+            "LNG",
+            "CF",
+            "MOS",
+            "TSM",
+            "NVDA",
+            "AVGO",
+            "AMD"
+          ],
+          "sectors": [
+            "Industrials",
+            "Energy",
+            "Materials",
+            "Information Technology",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "US-China summit",
+            "trans-Pacific shipping",
+            "agri export deliverables",
+            "semis export controls",
+            "LNG long-term contracts"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "H20",
+            "SCFI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ZIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:trans-pacific-rate-lift"
+          },
+          {
+            "subject": "ticker:LNG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-lng-purchase-deliverable"
+          },
+          {
+            "subject": "ticker:CF",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-urea-re-entry"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h20-export-softening"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cowos-l-allocation-squeeze"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread covered ADRs, HK plumbing, FX. Missing: shipping rates as leading indicator + agri/fertilizer two-sided trade + CoWoS-L allocation second-order squeeze."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:10:39Z",
+      "latency_ms": 24321,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The potential easing of US-China trade tensions, signaled by the Trump visit, could unlock greater manufacturing capacity in China for electronics. This, in turn, would create a significant demand surge for advanced semiconductor packaging and testing services, a critical bottleneck in the global tech supply chain. ASE Technology Holding (ASX), a leading OSAT provider, is uniquely positioned to benefit from this elevated demand, representing a key supply-chain beneficiary beyond direct consumer plays or broad market ETFs.",
+        "entities": {
+          "tickers": [
+            "ASX"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "China manufacturing ramp-up",
+            "semiconductor supply chain",
+            "advanced packaging",
+            "US-China trade thaw"
+          ],
+          "tech_keywords": [
+            "OSAT",
+            "semiconductor packaging"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ASX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:semiconductor packaging demand surge"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focuses on OSAT supply chain beneficiary (ASX) from increased Chinese manufacturing output."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ADM",
+        "AMD",
+        "ASX",
+        "AVGO",
+        "BABA",
+        "BG",
+        "CAT",
+        "CF",
+        "CHK",
+        "DE",
+        "EWY",
+        "FXI",
+        "GS",
+        "HKEX",
+        "JD",
+        "KWEB",
+        "LNG",
+        "LVS",
+        "MATX",
+        "MCHI",
+        "MOS",
+        "MP",
+        "MS",
+        "NVDA",
+        "PDD",
+        "TSLA",
+        "TSM",
+        "WYNN",
+        "YINN",
+        "ZIM"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Energy",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "Internet & Direct Marketing Retail",
+        "Materials"
+      ],
+      "themes": [
+        "AI chip export controls",
+        "CNH FX signal",
+        "China manufacturing ramp-up",
+        "China reopening trade",
+        "Chinese consumer spending",
+        "HK dual-listing",
+        "LNG long-term contracts",
+        "Macau gaming recovery",
+        "Rare earth supply chain",
+        "US-China detente",
+        "US-China summit",
+        "US-China trade thaw",
+        "advanced packaging",
+        "agri export deliverables",
+        "e-commerce growth",
+        "leveraged ETF positioning",
+        "semiconductor supply chain",
+        "semis export controls",
+        "trans-Pacific shipping",
+        "value retail"
+      ],
+      "tech_keywords": [
+        "ADR re-rating",
+        "CoWoS-L",
+        "FSD",
+        "H20",
+        "OSAT",
+        "SCFI",
+        "semiconductor packaging"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BABA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:KWEB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-reopening-trade"
+      },
+      {
+        "subject": "ticker:LVS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:macau-gaming-recovery"
+      },
+      {
+        "subject": "ticker:WYNN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:macau-gaming-recovery"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ai-chip-export-controls"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-reopening-trade"
+      },
+      {
+        "subject": "ticker:MP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:CAT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:PDD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Chinese consumer spending"
+      },
+      {
+        "subject": "ticker:HKEX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hk-dual-listing-pipeline"
+      },
+      {
+        "subject": "ticker:YINN",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:retail-positioning-contra-tell"
+      },
+      {
+        "subject": "ticker:MCHI",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:institutional-china-allocation"
+      },
+      {
+        "subject": "ticker:MS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hk-derivatives-flow"
+      },
+      {
+        "subject": "ticker:ZIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:trans-pacific-rate-lift"
+      },
+      {
+        "subject": "ticker:LNG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-lng-purchase-deliverable"
+      },
+      {
+        "subject": "ticker:CF",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-urea-re-entry"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h20-export-softening"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cowos-l-allocation-squeeze"
+      },
+      {
+        "subject": "ticker:ASX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:semiconductor packaging demand surge"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:10:39Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, HEADWIND_FROM, MENTIONED_IN"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T00:09:51Z",
+      "where": "round1.gemini",
+      "msg": "rc=-1 err=timeout after 180s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

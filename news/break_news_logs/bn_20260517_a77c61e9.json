@@ -1,0 +1,558 @@
+{
+  "news_id": "bn_20260517_a77c61e9",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T15:39:37Z",
+  "last_activity_ts": "2026-05-17T15:43:59Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/economy/policy/articles/moodys-mark-zandi-says-job-140000989.html",
+    "feed_fingerprint": "moody s mark zandi says job growth has",
+    "published": "2026-05-17T14:00:00+00:00",
+    "url_hash": "sha1:34449a40ab5db1ee69fe3e12719376e529c9faec"
+  },
+  "headline": "Moody's Mark Zandi says job growth has declined since Trump's tariffs — and warns a recession may be next",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": -1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T15:42:23Z",
+      "latency_ms": 23791,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是**宏觀勞動市場**訊號，pre-triage 把它歸為 geopolitical 是錯的——核心是關稅外溢到就業放緩、Zandi 點名衰退風險。市場含義雙向：壞消息對週期股（小型股 **IWM**、消費可選 **XLY**、工業）是逆風，財報下修壓力升高；但就業走弱會強化 Fed 降息預期，**利率敏感資產**（長債 **TLT**、公用 **XLU**、必需消費 **XLP**）反而受惠。關鍵在區分「軟著陸式放緩」還是「衰退前兆」——Zandi 一家之言不等於共識，需等非農、初領失業金、ISM 交叉驗證。當前並非 risk-off 確認，而是防禦輪動的早期提示。",
+        "bull_points": [
+          "就業走弱強化 Fed 降息路徑，長債與公用股受惠",
+          "防禦輪動早期訊號，XLP/XLU 相對抗跌",
+          "Zandi 屬單一預測，尚未獲非農數據確認"
+        ],
+        "bear_points": [
+          "關稅外溢就業，週期股與小型股盈利下修風險",
+          "消費可選需求轉弱，XLY 營收動能承壓",
+          "衰退預期一旦自我實現將觸發 risk-off"
+        ],
+        "final_take": "防禦偏多，但須等非農與ISM確認衰退路徑",
+        "entities": {
+          "tickers": [
+            "TLT",
+            "XLU",
+            "XLP",
+            "XLY",
+            "IWM"
+          ],
+          "sectors": [
+            "Utilities",
+            "Consumer Staples",
+            "Consumer Discretionary",
+            "Industrials",
+            "Financials"
+          ],
+          "themes": [
+            "tariffs",
+            "recession risk",
+            "labor market slowdown",
+            "Fed rate cuts",
+            "defensive rotation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:TLT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:fed-rate-cuts"
+          },
+          {
+            "subject": "ticker:XLU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:defensive-rotation"
+          },
+          {
+            "subject": "ticker:IWM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:recession-risk"
+          },
+          {
+            "subject": "ticker:XLY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:labor-market-slowdown"
+          },
+          {
+            "subject": "narrative:recession-risk",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:tariffs"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "宏觀訊號雙向，防禦輪動提示但未獲數據確認"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T15:42:33Z",
+      "latency_ms": 10536,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了 Claude 提到的降息博弈，我們必須關注**停滯性通膨 (Stagflation)** 風險。關稅帶來的供給面成本上升 (cost-push) 將持續擠壓企業利潤率，特別是供應鏈高度依賴全球化的公司（如 **AAPL**, **TSLA**）。即便 Fed 降息，若終端消費者因就業放緩與通膨排擠效應而縮手，企業的價格轉嫁能力將成為後續財報的主戰場。這不僅是防禦輪動，更是對企業護城河與定價能力的嚴格壓力測試。",
+        "bull_points": [
+          "降息預期緩解企業融資債務壓力",
+          "部分擁定價權企業可轉嫁關稅成本"
+        ],
+        "bear_points": [
+          "關稅誘發 cost-push 通膨壓縮毛利率",
+          "就業疲軟削弱終端需求與定價能力"
+        ],
+        "final_take": "關注 stagflation 風險，企業毛利率轉嫁能力是關鍵。",
+        "entities": {
+          "tickers": [
+            "AAPL",
+            "TSLA",
+            "IWM"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tariffs"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tariffs"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "強調 stagflation 風險下，成本轉嫁能力的關鍵重要性。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T15:43:07Z",
+      "latency_ms": 33862,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補兩個前面沒談的點。**二階效應在消費信貸**:就業放緩→低收入家庭現金流轉弱→信用卡與次級車貸拖欠率上行,直接衝擊 **COF**、**SYF**、**ALLY** 與區域銀行的 net charge-off,信用卡 ABS 利差通常會比股價更早反應。**反方論點**:Zandi 看的是絕對就業增量,但川普移民收緊已壓低勞動供給,維持失業率持平所需的 breakeven payroll 可能從約 10 萬降到 5 萬以下——job growth 放緩未必等於需求衰退,可能只是供給端縮表。單看非農會高估衰退機率,失業率與初領失業金才是更乾淨的訊號。",
+        "bull_points": [
+          "移民收緊壓低 breakeven payroll,就業放緩未必示警",
+          "失業率若仍低,絕對增量下滑非需求崩壞"
+        ],
+        "bear_points": [
+          "信用卡與次級車貸拖欠上行,衝擊 COF/SYF/ALLY",
+          "區域銀行 net charge-off 升,信貸利差先行反應"
+        ],
+        "final_take": "偏中性,看失業率與初領金、勿盯非農絕對值",
+        "entities": {
+          "tickers": [
+            "COF",
+            "SYF",
+            "ALLY"
+          ],
+          "sectors": [
+            "Financials",
+            "Consumer Finance"
+          ],
+          "themes": [
+            "tariff spillover",
+            "consumer credit",
+            "labor market slowdown"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:COF",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:consumer-credit-deterioration"
+          },
+          {
+            "subject": "ticker:SYF",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:labor-market-slowdown"
+          },
+          {
+            "subject": "ticker:ALLY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:subprime-auto-delinquency"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "補消費信貸二階效應與 breakeven payroll 反方,前文未及。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T15:43:18Z",
+      "latency_ms": 10736,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論多集中於消費與勞動力，需補充**企業資本支出（Capex）的觀望效應**。關稅帶來的不確定性往往甚於關稅本身，導致企業凍結長期擴產計畫。對於工業自動化供應鏈（如 **ROK**, **ETN**）而言，這種因政策擔憂導致的投資癱瘓，比單純的毛利壓縮更具長期殺傷力。這種動態通常在財報電話會議的 Management 指引中更為顯著，投資人應關注管理層對未來季度的擴產與自動化支出預算，而非僅僅盯著當期的勞動成本數據。",
+        "bull_points": [
+          "企業為對沖關稅影響，迫切需求工業自動化升級。"
+        ],
+        "bear_points": [
+          "政策不確定性導致企業無限期凍結資本支出，需求放緩。"
+        ],
+        "final_take": "觀察企業資本支出由「規劃」轉為「癱瘓」的轉折風險。",
+        "entities": {
+          "tickers": [
+            "ROK",
+            "ETN"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "Automation"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ROK",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:tariff_uncertainty"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充政策不確定性如何導致企業資本支出癱瘓，區別於勞動力供給。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T15:43:47Z",
+      "latency_ms": 29015,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面談了消費信貸、Capex 觀望、停滯性通膨,但漏了**就業數據的內部結構**。近年非農增量幾乎全靠醫療、政府、休閒餐飲撐盤,而**景氣循環型就業**(製造、零售、臨時派遣)其實早已停滯甚至萎縮。Zandi 講的「job growth declined」是總量掩蓋了結構——私營週期性就業可能已處於類衰退狀態。最乾淨的領先指標是**臨時派遣就業 (temp help services)**:企業砍人先砍派遣,這塊已連月負成長。對應標的是人力派遣股 **MAN**、**RHI**、**ASGN**——它們的營收與管理層 guidance 會比非農更早見頂回落,是觀察衰退是否從「結構性」擴散到「全面性」的前哨。反方:臨時派遣下滑也可能來自 AI 取代低階白領,未必純需求面。",
+        "bull_points": [
+          "結構性放緩≠全面衰退,醫療政府就業仍穩",
+          "派遣下滑部分來自 AI 替代,非純需求疲弱"
+        ],
+        "bear_points": [
+          "私營週期性就業已處類衰退,總量數字掩蓋惡化",
+          "臨時派遣連月負成長,衰退領先訊號已亮",
+          "MAN/RHI/ASGN 營收與 guidance 將早於非農見頂"
+        ],
+        "final_take": "看空,盯臨時派遣股 guidance 確認擴散風險",
+        "entities": {
+          "tickers": [
+            "MAN",
+            "RHI",
+            "ASGN",
+            "IWM"
+          ],
+          "sectors": [
+            "Industrials",
+            "Financials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "tariffs",
+            "recession risk",
+            "labor market slowdown"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MAN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cyclical-employment-contraction"
+          },
+          {
+            "subject": "ticker:RHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cyclical-employment-contraction"
+          },
+          {
+            "subject": "ticker:ASGN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cyclical-employment-contraction"
+          },
+          {
+            "subject": "narrative:temp-help-services",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:recession-risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增就業結構分歧與臨時派遣領先指標,前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T15:43:59Z",
+      "latency_ms": 12113,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論觸及製造業就業衰退，應審視這對**物流與貨運量 (Logistics & Freight)** 的連鎖反應。貨運需求（尤其是陸運與空運）是宏觀需求的直接指標。若製造與零售端就業成長持續下修，貨運公司（如 **FDX**, **UPS**, **JBHT**）的貨量指引將面臨嚴重下行風險。不同於製造業的 Capex 滯後效應，物流業的訂單量具備高度即時性，其運價與貨量數據往往領先總體就業數據揭露疲軟訊號。",
+        "bull_points": [
+          "降息預期有望減輕貨運商融資壓力。"
+        ],
+        "bear_points": [
+          "製造業疲軟導致貨運量與定價能力雙降。",
+          "燃料成本波動若難以轉嫁將侵蝕毛利。"
+        ],
+        "final_take": "緊盯貨運貨量數據，這是驗證衰退擴散的先行指標。",
+        "entities": {
+          "tickers": [
+            "FDX",
+            "UPS",
+            "JBHT"
+          ],
+          "sectors": [
+            "Industrials",
+            "Transportation"
+          ],
+          "themes": [
+            "Macro",
+            "Logistics"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:FDX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:manufacturing_deceleration"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入物流與貨運量作為驗證宏觀需求疲軟的先行指標。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "ALLY",
+        "ASGN",
+        "COF",
+        "ETN",
+        "FDX",
+        "IWM",
+        "JBHT",
+        "MAN",
+        "RHI",
+        "ROK",
+        "SYF",
+        "TLT",
+        "TSLA",
+        "UPS",
+        "XLP",
+        "XLU",
+        "XLY"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Consumer Finance",
+        "Consumer Staples",
+        "Financials",
+        "Industrials",
+        "Transportation",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Fed rate cuts",
+        "Logistics",
+        "Macro",
+        "consumer credit",
+        "defensive rotation",
+        "labor market slowdown",
+        "recession risk",
+        "tariff spillover",
+        "tariffs"
+      ],
+      "tech_keywords": [
+        "Automation"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TLT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:fed-rate-cuts"
+      },
+      {
+        "subject": "ticker:XLU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:defensive-rotation"
+      },
+      {
+        "subject": "ticker:IWM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:recession-risk"
+      },
+      {
+        "subject": "ticker:XLY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:labor-market-slowdown"
+      },
+      {
+        "subject": "narrative:recession-risk",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:tariffs"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tariffs"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tariffs"
+      },
+      {
+        "subject": "ticker:COF",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:consumer-credit-deterioration"
+      },
+      {
+        "subject": "ticker:SYF",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:labor-market-slowdown"
+      },
+      {
+        "subject": "ticker:ALLY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:subprime-auto-delinquency"
+      },
+      {
+        "subject": "ticker:ROK",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:tariff_uncertainty"
+      },
+      {
+        "subject": "ticker:MAN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cyclical-employment-contraction"
+      },
+      {
+        "subject": "ticker:RHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cyclical-employment-contraction"
+      },
+      {
+        "subject": "ticker:ASGN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cyclical-employment-contraction"
+      },
+      {
+        "subject": "narrative:temp-help-services",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:recession-risk"
+      },
+      {
+        "subject": "ticker:FDX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:manufacturing_deceleration"
+      }
+    ],
+    "bull_summary": [
+      "就業走弱強化 Fed 降息路徑，長債與公用股受惠",
+      "防禦輪動早期訊號，XLP/XLU 相對抗跌",
+      "Zandi 屬單一預測，尚未獲非農數據確認",
+      "降息預期緩解企業融資債務壓力",
+      "部分擁定價權企業可轉嫁關稅成本",
+      "移民收緊壓低 breakeven payroll,就業放緩未必示警"
+    ],
+    "bear_summary": [
+      "關稅外溢就業，週期股與小型股盈利下修風險",
+      "消費可選需求轉弱，XLY 營收動能承壓",
+      "衰退預期一旦自我實現將觸發 risk-off",
+      "關稅誘發 cost-push 通膨壓縮毛利率",
+      "就業疲軟削弱終端需求與定價能力",
+      "信用卡與次級車貸拖欠上行,衝擊 COF/SYF/ALLY"
+    ],
+    "final_take": "緊盯貨運貨量數據，這是驗證衰退擴散的先行指標。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T15:43:59Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,722 @@
+{
+  "news_id": "bn_20260514_c7f9f642",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T16:04:36Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/14/wealthy-donors-gain-trump-accounts-stock-donations.html",
+    "feed_fingerprint": "wealthy donors stand win double tax benefit if",
+    "published": "2026-05-14T15:15:40+00:00",
+    "url_hash": "sha1:21447d022046720f791f4030e52cab803ee6b7c2"
+  },
+  "headline": "Wealthy donors stand to win double tax benefit if Trump Accounts allow stock donations",
+  "headline_zh": null,
+  "raw_summary": "Permitting stock contributions to Trump Accounts would allow donors to offload appreciated shares without paying capital gains tax.",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 2.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:02:03Z",
+      "latency_ms": 23112,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此新聞屬**稅務政策套利**議題，非地緣事件 — 預先 triage 分類錯誤。Trump Accounts 若開放接受**升值股票捐贈**，富有捐贈者可同時規避 capital gains tax + 取得抵稅，形成**雙重稅務優惠**。市場層面影響有限但**結構性偏多**：(1) 高 unrealized gain 的 mega-cap 持有者 (NVDA, MSFT, AAPL, GOOGL) 將獲得新的低成本退出管道，緩解大股東 forced selling 壓力；(2) 對 brokerage / wealth management 平台 (SCHW, MS, GS) 為小幅利多，donor-advised fund 業務量可望增加；(3) 立法尚未通過，僅為 proposal 階段，短期 price action 不顯著。**真正受益**為 estate planning 服務商與 custodian。風險為政策若擴大適用範圍恐引發稅基侵蝕爭議，民主黨反對聲浪可能阻擋立法。",
+        "bull_points": [
+          "Mega-cap 大股東獲低成本退出管道，減 forced selling 壓力",
+          "Brokerage / wealth management 業務量小幅利多",
+          "Estate planning / custodian 服務商直接受益"
+        ],
+        "bear_points": [
+          "立法未過，僅 proposal 階段短期無實質 price action",
+          "稅基侵蝕爭議恐引發民主黨阻擋",
+          "適用範圍若窄，受益面僅限超高淨值族群"
+        ],
+        "final_take": "結構性微多但短期無催化，等立法進度",
+        "entities": {
+          "tickers": [
+            "SCHW",
+            "MS",
+            "GS",
+            "BLK",
+            "NVDA",
+            "MSFT",
+            "AAPL",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets",
+            "Asset Management"
+          ],
+          "themes": [
+            "tax policy arbitrage",
+            "wealth transfer",
+            "estate planning",
+            "donor-advised funds"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tax-policy-arbitrage"
+          },
+          {
+            "subject": "ticker:MS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:wealth-transfer"
+          },
+          {
+            "subject": "ticker:GS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:donor-advised-funds"
+          },
+          {
+            "subject": "ticker:BLK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:estate-planning"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:mega-cap-exit-channel"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:mega-cap-exit-channel"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "稅務政策套利非地緣，結構性微多但短期催化弱"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:02:33Z",
+      "latency_ms": 30693,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此新聞揭示富豪捐贈者的新稅務套利機會。若提案通過，捐贈者可將增值股票捐入 Trump Accounts，規避資本利得稅並獲抵稅。先前分析聚焦大股東及金融機構，但關鍵的次級效應是：受贈單位（如基金會、捐贈者建議基金）未來出售這些股票時，可能對特定股價造成集中賣壓。",
+        "bull_points": [
+          "鼓勵大股東減碼持股，緩解強制賣壓。",
+          "增加對捐贈股務的財管平台需求。"
+        ],
+        "bear_points": [
+          "受贈單位集中出售股票，對特定股價形成壓力。",
+          "僅為提案階段，通過機率未知。"
+        ],
+        "final_take": "需觀察受贈單位後續賣壓動態。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "AAPL",
+            "GOOGL",
+            "SCHW",
+            "MS",
+            "GS"
+          ],
+          "sectors": [
+            "Financials",
+            "Software & Services"
+          ],
+          "themes": [
+            "Tax Policy",
+            "Philanthropy",
+            "Wealth Management"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "entity:Foundations",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:Sales Pressure from Charitable Entities"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Sales Pressure from Charitable Entities"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Sales Pressure from Charitable Entities"
+          },
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Sales Pressure from Charitable Entities"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Sales Pressure from Charitable Entities"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "受贈單位後續賣壓動態需追蹤。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:02:58Z",
+      "latency_ms": 24430,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Gemini 提到受贈機構未來賣壓，但漏掉**時點與規模的不對稱性**。真正被忽略的次級效應在**捐贈者結構**：根據 IRS 規範，DAF / 私人基金會接收 appreciated stock 後，通常會在 **30-90 天內 rebalance** 變現以符合 5% annual payout rule（私人基金會）或捐贈人指示。若 Trump Accounts 立法通過並對接此機制，**Q4 報稅季前 (Oct-Dec)** 將形成季節性集中賣壓窗口，尤其衝擊 **insider 持股比例高且過去 5 年漲幅 >300% 的標的** — META、AVGO、PLTR 為高風險名單。另一個漏網角度：**Fidelity Charitable / Vanguard Charitable / Schwab Charitable** 三大 DAF custodian 將是直接受益者，AUM 流入可望加速，但 SCHW 的 wealth management revenue mix 中 DAF 僅佔個位數，**股價彈性有限**。真正純 play 為 **AMG (Affiliated Managers)** 旗下的 boutique wealth managers，但流動性偏低。",
+        "bull_points": [
+          "Fidelity/Vanguard/Schwab Charitable AUM 流入加速",
+          "Mega-cap 大股東退出壓力舒緩，減少 forced selling",
+          "Estate planning 與 custodian 業務量提升"
+        ],
+        "bear_points": [
+          "Q4 報稅季前 DAF rebalance 形成季節性賣壓",
+          "高 unrealized gain 標的 (META, AVGO, PLTR) 集中風險",
+          "民主黨反對加上稅基侵蝕爭議恐阻擋立法"
+        ],
+        "final_take": "結構偏多但 Q4 需防 DAF rebalance 賣壓",
+        "entities": {
+          "tickers": [
+            "META",
+            "AVGO",
+            "PLTR",
+            "SCHW",
+            "AMG",
+            "NVDA",
+            "MSFT"
+          ],
+          "sectors": [
+            "Financials",
+            "Asset Management",
+            "Information Technology"
+          ],
+          "themes": [
+            "tax arbitrage",
+            "Trump Accounts",
+            "donor-advised funds",
+            "appreciated stock donation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:META",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:daf-q4-rebalance"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:daf-q4-rebalance"
+          },
+          {
+            "subject": "ticker:PLTR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:daf-q4-rebalance"
+          },
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:daf-aum-inflow"
+          },
+          {
+            "subject": "ticker:AMG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:daf-aum-inflow"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增 DAF 5%支付規則導致Q4賣壓季節性與高風險標的清單"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:03:28Z",
+      "latency_ms": 30599,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此稅務提案雖為富豪提供退出科技股（如 NVDA、AVGO）的稅務優惠，但可能削弱創始人與早期投資者的再投資意願，間接影響 AI 相關產業（如 HBM3e）的創新與擴張動能，實屬**資本配置的長遠考量**。",
+        "bull_points": [
+          "提供創始人稅務優惠退出。",
+          "加速 DAF 規模成長。",
+          "有助於部分金融機構。"
+        ],
+        "bear_points": [
+          "削弱創始人再投資意願。",
+          "可能延緩 AI 產業擴張。"
+        ],
+        "final_take": "法案通過與否仍是未知數，需觀察實質影響。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "AVGO",
+            "META"
+          ],
+          "sectors": [
+            "Technology",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "Founder Liquidity",
+            "Tax Policy Arbitrage"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "policy:Trump Accounts",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:founder liquidity"
+          },
+          {
+            "subject": "narrative:founder liquidity",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "narrative:founder liquidity",
+            "predicate": "BENEFITS_FROM",
+            "object": "ticker:AVGO"
+          },
+          {
+            "subject": "policy:Trump Accounts",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "創始人再投資意願變化"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:03:54Z",
+      "latency_ms": 25886,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪聚焦捐贈者、受贈機構、custodian 與創新動能，但漏掉**買方接盤結構**這個關鍵環節。DAF 變現賣壓需要對手盤，而現行 **systematic passive flow** 是天然吸納者 — S&P 500 / QQQ ETF 每月被動買盤約 **300-400 億美元**，足以消化 META / AVGO 等 mega-cap 的季節性捐贈賣壓，**故價格衝擊遠低於 Gemini 暗示**。真正的 2nd-order miss 在**估值方法論**：appreciated stock 捐贈需 **qualified appraisal** (IRS Form 8283)，對**非上市持股 / RSU 未 vest 部位**將推升 **valuation 顧問需求** — **Houlihan Lokey (HLI)** 為全美 fairness opinion 龍頭、市佔 >25%，這是被完全忽略的 pure play。另外**反方論點**：若立法擴大至 Trump Accounts，民主黨大概率以 **carried interest 漏洞** 為由綁定攻擊，2026 期中選舉前推進難度極高，整體 narrative 應視為**低機率長尾事件**而非 actionable 主題。",
+        "bull_points": [
+          "HLI 為 fairness opinion 龍頭，捐贈估值需求純 play",
+          "Passive ETF 月度買盤足以吸收 DAF 季節性賣壓",
+          "高 unrealized gain mega-cap 大股東獲新退出管道"
+        ],
+        "bear_points": [
+          "民主黨將以 carried interest 議題綁定阻擋立法",
+          "2026 期中選舉前推進機率低，屬長尾事件",
+          "RSU vesting + 8283 appraisal 流程複雜，採用率有限"
+        ],
+        "final_take": "結構性偏多但屬低機率長尾，HLI 為被忽略的純 play",
+        "entities": {
+          "tickers": [
+            "HLI",
+            "META",
+            "AVGO",
+            "PLTR",
+            "NVDA",
+            "MSFT",
+            "AAPL",
+            "GOOGL",
+            "SCHW",
+            "MS",
+            "GS",
+            "AMG"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets",
+            "Information Technology"
+          ],
+          "themes": [
+            "tax arbitrage",
+            "DAF flow",
+            "appreciated stock donation",
+            "fairness opinion",
+            "estate planning"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:HLI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:appreciated-stock-donation"
+          },
+          {
+            "subject": "ticker:HLI",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:fairness-opinion-demand"
+          },
+          {
+            "subject": "narrative:passive-etf-flow",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:daf-rebalance-selling"
+          },
+          {
+            "subject": "ticker:META",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:daf-rebalance-selling"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:daf-rebalance-selling"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "HLI 估值顧問 pure play + 立法機率偏低為新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:04:36Z",
+      "latency_ms": 42129,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "此提案若通過，富豪將透過 Trump Accounts 捐贈增值股票，規避稅務。此舉不僅可能影響現有 mega-cap 股票，更重要的是，它凸顯了對複雜資產管理及合規技術的需求。DAF 與金融機構在處理增值股捐贈、估值、變現與申報時，將面臨更高難度，這將帶動財富管理與基金合規軟體解決方案的採用。SS&C Technologies (SSNC) 等公司，憑藉其專業平台，有望在此趨勢下迎來額外機會。",
+        "bull_points": [
+          "增值股捐贈流程複雜化，推升財富管理軟體需求。",
+          "SS&C Technologies 等金融科技龍頭有望受惠。"
+        ],
+        "bear_points": [
+          "提案本身通過機率仍低，短期影響有限。",
+          "DAFs 營運成本或因技術升級而增加。"
+        ],
+        "final_take": "看好金融科技平台，但立法風險仍高。",
+        "entities": {
+          "tickers": [
+            "SSNC",
+            "NVDA",
+            "AVGO",
+            "META",
+            "PLTR"
+          ],
+          "sectors": [
+            "Financials",
+            "Technology"
+          ],
+          "themes": [
+            "Tax arbitrage",
+            "Philanthropy tech"
+          ],
+          "tech_keywords": [
+            "Fund administration software",
+            "Wealth management platform"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SSNC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:complex financial operations"
+          },
+          {
+            "subject": "narrative:appreciated stock donation",
+            "predicate": "CATALYST_FOR",
+            "object": "tech_keyword:Fund administration software"
+          },
+          {
+            "subject": "tech_keyword:Fund administration software",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:DAF compliance"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "增值股捐贈推升合規科技需求。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "AMG",
+        "AVGO",
+        "BLK",
+        "GOOGL",
+        "GS",
+        "HLI",
+        "META",
+        "MS",
+        "MSFT",
+        "NVDA",
+        "PLTR",
+        "SCHW",
+        "SSNC"
+      ],
+      "sectors": [
+        "Asset Management",
+        "Capital Markets",
+        "Financials",
+        "Information Technology",
+        "Software & Services",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "DAF flow",
+        "Founder Liquidity",
+        "Philanthropy",
+        "Philanthropy tech",
+        "Tax Policy",
+        "Tax Policy Arbitrage",
+        "Tax arbitrage",
+        "Trump Accounts",
+        "Wealth Management",
+        "appreciated stock donation",
+        "donor-advised funds",
+        "estate planning",
+        "fairness opinion",
+        "tax arbitrage",
+        "tax policy arbitrage",
+        "wealth transfer"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "Fund administration software",
+        "HBM3e",
+        "Wealth management platform"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tax-policy-arbitrage"
+      },
+      {
+        "subject": "ticker:MS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:wealth-transfer"
+      },
+      {
+        "subject": "ticker:GS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:donor-advised-funds"
+      },
+      {
+        "subject": "ticker:BLK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:estate-planning"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:mega-cap-exit-channel"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:mega-cap-exit-channel"
+      },
+      {
+        "subject": "entity:Foundations",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:Sales Pressure from Charitable Entities"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Sales Pressure from Charitable Entities"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Sales Pressure from Charitable Entities"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Sales Pressure from Charitable Entities"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Sales Pressure from Charitable Entities"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:daf-q4-rebalance"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:daf-q4-rebalance"
+      },
+      {
+        "subject": "ticker:PLTR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:daf-q4-rebalance"
+      },
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:daf-aum-inflow"
+      },
+      {
+        "subject": "ticker:AMG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:daf-aum-inflow"
+      },
+      {
+        "subject": "policy:Trump Accounts",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:founder liquidity"
+      },
+      {
+        "subject": "narrative:founder liquidity",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "narrative:founder liquidity",
+        "predicate": "BENEFITS_FROM",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "policy:Trump Accounts",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI capex"
+      },
+      {
+        "subject": "ticker:HLI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:appreciated-stock-donation"
+      },
+      {
+        "subject": "ticker:HLI",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:fairness-opinion-demand"
+      },
+      {
+        "subject": "narrative:passive-etf-flow",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:daf-rebalance-selling"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:daf-rebalance-selling"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:daf-rebalance-selling"
+      },
+      {
+        "subject": "ticker:SSNC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:complex financial operations"
+      },
+      {
+        "subject": "narrative:appreciated stock donation",
+        "predicate": "CATALYST_FOR",
+        "object": "tech_keyword:Fund administration software"
+      },
+      {
+        "subject": "tech_keyword:Fund administration software",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:DAF compliance"
+      }
+    ],
+    "bull_summary": [
+      "Mega-cap 大股東獲低成本退出管道，減 forced selling 壓力",
+      "Brokerage / wealth management 業務量小幅利多",
+      "Estate planning / custodian 服務商直接受益",
+      "鼓勵大股東減碼持股，緩解強制賣壓。",
+      "增加對捐贈股務的財管平台需求。",
+      "Fidelity/Vanguard/Schwab Charitable AUM 流入加速"
+    ],
+    "bear_summary": [
+      "立法未過，僅 proposal 階段短期無實質 price action",
+      "稅基侵蝕爭議恐引發民主黨阻擋",
+      "適用範圍若窄，受益面僅限超高淨值族群",
+      "受贈單位集中出售股票，對特定股價形成壓力。",
+      "僅為提案階段，通過機率未知。",
+      "Q4 報稅季前 DAF rebalance 形成季節性賣壓"
+    ],
+    "final_take": "看好金融科技平台，但立法風險仍高。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:04:36Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN; gemini-only: SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

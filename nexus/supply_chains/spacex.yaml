@@ -1,0 +1,269 @@
+id: spacex
+title: SpaceX 太空發射價值鏈
+theme: spaceX
+generated_at: '2026-05-17T14:53:19Z'
+generated_by: claude
+status: draft
+layers:
+- materials
+- components_subsystems
+- launch_integration
+- end_applications
+modules:
+  materials:
+  - id: structural_materials
+    label: 結構金屬 (鈦/鋁)
+  - id: specialty_alloys
+    label: 特殊合金
+  - id: composites
+    label: 碳纖維複合材料
+  components_subsystems:
+  - id: avionics_sensors
+    label: 航電 / 感測器
+  - id: propulsion_components
+    label: 推進系統零組件
+  - id: rf_electronics
+    label: RF / 電子載荷
+  launch_integration:
+  - id: reusable_launch
+    label: 可回收火箭
+  - id: expendable_launch
+    label: 傳統火箭 / Prime 整合商
+  end_applications:
+  - id: connectivity
+    label: 衛星通訊 / 直連手機
+  - id: exploration
+    label: 月球 / 深空探索
+  - id: government_space
+    label: 對地觀測 / 政府任務
+spine:
+- hexcel
+- l3harris
+- spacex
+- t_mobile
+nodes:
+- id: howmet
+  label: Howmet Aerospace
+  layer: materials
+  module: structural_materials
+  role: 鈦/鋁航太鍛件與結構件供應
+  ticker: HWM
+  listing: us_listed
+  note: ''
+- id: ati
+  label: ATI Inc.
+  layer: materials
+  module: specialty_alloys
+  role: 鈦與鎳基特殊合金，火箭引擎/結構用料
+  ticker: ATI
+  listing: us_listed
+  note: ''
+- id: hexcel
+  label: Hexcel Corporation
+  layer: materials
+  module: composites
+  role: 碳纖維與蜂巢複合材料，火箭整流罩/結構
+  ticker: HXL
+  listing: us_listed
+  note: ''
+- id: honeywell
+  label: Honeywell International
+  layer: components_subsystems
+  module: avionics_sensors
+  role: 航電、慣性導航與感測器子系統
+  ticker: HON
+  listing: us_listed
+  note: ''
+- id: transdigm
+  label: TransDigm Group
+  layer: components_subsystems
+  module: propulsion_components
+  role: 閥件、致動器等推進相關高度工程零組件
+  ticker: TDG
+  listing: us_listed
+  note: ''
+- id: mercury_systems
+  label: Mercury Systems
+  layer: components_subsystems
+  module: rf_electronics
+  role: 防衛級 RF 與訊號處理電子模組
+  ticker: MRCY
+  listing: us_listed
+  note: ''
+- id: l3harris
+  label: L3Harris Technologies
+  layer: components_subsystems
+  module: rf_electronics
+  role: 通訊載荷、地面站與感測載荷整合
+  ticker: LHX
+  listing: us_listed
+  note: ''
+- id: spacex
+  label: SpaceX
+  layer: launch_integration
+  module: reusable_launch
+  role: Falcon 9 / Starship 可回收發射 + Starlink 星系
+  ticker: null
+  listing: private
+  note: 鏈條核心。引擎 (Raptor) 與大部分子系統垂直整合自製
+- id: rocket_lab
+  label: Rocket Lab
+  layer: launch_integration
+  module: reusable_launch
+  role: Electron 小型發射 + Neutron 中型可回收火箭
+  ticker: RKLB
+  listing: us_listed
+  note: SpaceX 直接競爭者，純標的 (pure play)
+- id: boeing
+  label: Boeing
+  layer: launch_integration
+  module: expendable_launch
+  role: ULA 合資母公司，傳統發射 Prime
+  ticker: BA
+  listing: us_listed
+  note: ''
+- id: lockheed_martin
+  label: Lockheed Martin
+  layer: launch_integration
+  module: expendable_launch
+  role: ULA 合資母公司，國防航太 Prime 整合商
+  ticker: LMT
+  listing: us_listed
+  note: ''
+- id: northrop_grumman
+  label: Northrop Grumman
+  layer: launch_integration
+  module: expendable_launch
+  role: Antares 火箭、固體推進與太空結構
+  ticker: NOC
+  listing: us_listed
+  note: ''
+- id: t_mobile
+  label: T-Mobile US
+  layer: end_applications
+  module: connectivity
+  role: Starlink Direct-to-Cell 商業夥伴
+  ticker: TMUS
+  listing: us_listed
+  note: ''
+- id: ast_spacemobile
+  label: AST SpaceMobile
+  layer: end_applications
+  module: connectivity
+  role: 衛星直連手機，Starlink D2C 競爭者
+  ticker: ASTS
+  listing: us_listed
+  note: ''
+- id: iridium
+  label: Iridium Communications
+  layer: end_applications
+  module: connectivity
+  role: 全球低軌衛星語音/數據服務
+  ticker: IRDM
+  listing: us_listed
+  note: ''
+- id: amazon
+  label: Amazon (Project Kuiper)
+  layer: end_applications
+  module: connectivity
+  role: Kuiper 寬頻星系，向 SpaceX 採購部分發射
+  ticker: AMZN
+  listing: us_listed
+  note: 既是 Starlink 競爭者，也是 SpaceX 發射客戶
+- id: intuitive_machines
+  label: Intuitive Machines
+  layer: end_applications
+  module: exploration
+  role: 月球登陸器，搭乘 Falcon 9 發射
+  ticker: LUNR
+  listing: us_listed
+  note: ''
+- id: planet_labs
+  label: Planet Labs
+  layer: end_applications
+  module: government_space
+  role: 對地觀測衛星營運，SpaceX rideshare 客戶
+  ticker: PL
+  listing: us_listed
+  note: ''
+edges:
+- from: howmet
+  to: spacex
+  rel: SUPPLIES_TO
+  note: 鈦/鋁結構鍛件
+- from: howmet
+  to: lockheed_martin
+  rel: SUPPLIES_TO
+  note: ''
+- from: ati
+  to: spacex
+  rel: SUPPLIES_TO
+  note: 鈦特殊合金
+- from: ati
+  to: honeywell
+  rel: SUPPLIES_TO
+  note: ''
+- from: hexcel
+  to: spacex
+  rel: SUPPLIES_TO
+  note: 整流罩/結構複材
+- from: hexcel
+  to: rocket_lab
+  rel: SUPPLIES_TO
+  note: ''
+- from: honeywell
+  to: spacex
+  rel: SUPPLIES_TO
+  note: 航電/感測器
+- from: honeywell
+  to: boeing
+  rel: SUPPLIES_TO
+  note: ''
+- from: transdigm
+  to: boeing
+  rel: SUPPLIES_TO
+  note: ''
+- from: transdigm
+  to: lockheed_martin
+  rel: SUPPLIES_TO
+  note: ''
+- from: mercury_systems
+  to: lockheed_martin
+  rel: SUPPLIES_TO
+  note: ''
+- from: mercury_systems
+  to: northrop_grumman
+  rel: SUPPLIES_TO
+  note: ''
+- from: l3harris
+  to: spacex
+  rel: SUPPLIES_TO
+  note: 通訊載荷/地面站
+- from: l3harris
+  to: northrop_grumman
+  rel: SUPPLIES_TO
+  note: ''
+- from: spacex
+  to: t_mobile
+  rel: CO_DEVELOPS_WITH
+  note: Direct-to-Cell 共同開發
+- from: spacex
+  to: amazon
+  rel: SUPPLIES_TO
+  note: Kuiper 發射服務
+- from: spacex
+  to: intuitive_machines
+  rel: SUPPLIES_TO
+  note: 月球任務發射
+- from: spacex
+  to: planet_labs
+  rel: SUPPLIES_TO
+  note: rideshare 發射
+- from: rocket_lab
+  to: planet_labs
+  rel: SUPPLIES_TO
+  note: ''
+- from: boeing
+  to: lockheed_martin
+  rel: CO_DEVELOPS_WITH
+  note: ULA 合資公司

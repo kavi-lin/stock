@@ -1,0 +1,530 @@
+{
+  "news_id": "bn_20260517_c86707d9",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T15:39:37Z",
+  "last_activity_ts": "2026-05-17T15:43:56Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/gates-foundation-sold-microsoft-shares-141500609.html",
+    "feed_fingerprint": "gates foundation sold all microsoft shares bill ackman",
+    "published": "2026-05-17T14:15:00+00:00",
+    "url_hash": "sha1:ec6bc38c03ad801e23d3c004a0d8d4437316e5ed"
+  },
+  "headline": "Gates' foundation sold all of its Microsoft shares. Bill Ackman is loading up on the stock. What is Wall Street missing?",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T15:42:22Z",
+      "latency_ms": 21483,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**蓋茲基金會清倉 MSFT 是機械性動作,非看空訊號**。基金會數十年來持續減持微軟以分散風險並支應慈善撥款,這是治理與流動性需求,與微軟基本面無關 — 把它讀成內部人看壞是典型的歸因錯誤。Ackman 加碼才是真正的主動信號,但單一基金倉位不足以構成論點。**真正該看的是微軟自身驅動力**:Azure 雲端增速、Copilot 變現滲透率、OpenAI 關係的資本支出承諾。市場若被「蓋茲賣出」的標題情緒帶風向,反而製造錯價機會。建議忽略持股人身分,回到 Q3 Azure 年增率與 AI capex 投報率本身。",
+        "bull_points": [
+          "基金會賣出屬分散撥款,非基本面看空",
+          "Ackman 加碼為主動高信念信號",
+          "Azure + Copilot 變現仍是核心成長引擎"
+        ],
+        "bear_points": [
+          "AI capex 龐大,投報週期拉長壓縮自由現金流",
+          "標題情緒若引發散戶跟賣造成短期波動"
+        ],
+        "final_take": "看多但忽略持股人雜訊,聚焦 Azure 增速與 capex 投報",
+        "entities": {
+          "tickers": [
+            "MSFT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "cloud computing",
+            "insider transactions"
+          ],
+          "tech_keywords": [
+            "Azure",
+            "Copilot",
+            "OpenAI"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:insider-transactions"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "持股人身分為雜訊,基本面驅動力才是重點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T15:42:32Z",
+      "latency_ms": 10125,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了探討持股人動機外，我們應關注**微軟在 AI 軟體邊緣運算(Edge AI)的潛力**。過去市場過度聚焦於 Azure 雲端基礎設施的支出(Capex)，卻忽略了 Copilot 在離線或混合雲環境下的潛在部署能力。若微軟能將其 AI 模型深度整合至 Windows 原生 API，這將大幅降低對數據中心頻寬的依賴，並顯著提升企業端用戶的訂閱留存率。這才是 Ackman 此類價值型投資人可能看到的長期利潤擴張空間，而非僅僅是雲端增長率。",
+        "bull_points": [
+          "Edge AI 整合將降低企業雲端營運成本",
+          "Windows 生態系強化 AI 訂閱防禦力",
+          "軟體利潤率隨離線推理功能提升"
+        ],
+        "bear_points": [
+          "邊緣 AI 推理對硬體規格要求極高",
+          "與 Apple 裝置生態系統形成激烈競爭",
+          "混合雲架構增加了技術整合複雜度"
+        ],
+        "final_take": "關注 AI 在邊緣運算的貨幣化潛力，將是 MSFT 下一階段的價值重估因子。",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "AAPL"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Edge AI"
+          ],
+          "tech_keywords": [
+            "Copilot",
+            "Azure",
+            "Edge Computing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "themes:Edge AI"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AAPL"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充前一分析師未提及的 Edge AI 軟體貨幣化與生態壁壘視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T15:42:59Z",
+      "latency_ms": 27281,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面兩位都聚焦營收端,漏了**損益表下半段的拖累**。微軟以權益法認列 OpenAI 持股,每季須按比例吸收 OpenAI 鉅額虧損 — 這會直接侵蝕 reported EPS,跟 Azure 增速無關,卻常被「AI 變現」的樂觀情緒蓋過去。第二個被忽略的是**折舊懸崖**:微軟為 AI capex 大舉建置資料中心,但 Blackwell 世代 GPU 折舊年限正被多家同業下修,未來幾季折舊費用會跳升,壓縮營業利益率。Ackman 若真做價值投資,反而要解釋 MSFT 約 33 倍本益比並非便宜。所以重點不是誰買誰賣,而是 **capex 是否能在折舊與 OpenAI 虧損吃掉利潤前先轉成現金流**。",
+        "bull_points": [
+          "Azure AI 算力需求仍供不應求,訂單能見度高",
+          "Copilot 滲透率提升帶動每用戶 ARPU 上行"
+        ],
+        "bear_points": [
+          "權益法認列 OpenAI 虧損直接侵蝕 reported EPS",
+          "AI 資料中心折舊年限下修,未來幾季費用跳升",
+          "33 倍本益比難稱價值股,評價無安全邊際"
+        ],
+        "final_take": "看多基本面但須緊盯折舊與 OpenAI 虧損吃 EPS",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "AI monetization",
+            "cloud computing"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "Copilot",
+            "Azure"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-equity-method-losses"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:datacenter-depreciation"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "提出損益表下半段:OpenAI 權益法虧損與折舊懸崖侵蝕 EPS,前文未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T15:43:13Z",
+      "latency_ms": 13784,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "談過雲端與成本，我們必須加入**資安與合規壁壘**。微軟不只是 AI 算力基礎，更是全球企業的資安防禦中樞 (Security & Compliance)。隨著各國對 AI 數據治理要求趨嚴，能同時提供 Azure 算力、Copilot 應用與 Sentinel 資安保障的一站式架構，形成極強的鎖定效應。Ackman 看中的或許不僅是單一 AI 產品的爆發，而是微軟將「AI 產品力」與「必要性基礎架構」深度綁定的防護網，這使其在面臨反壟斷調查或景氣波動時，具備遠高於純 AI 公司的定價權與營收韌性。",
+        "bull_points": [
+          "資安與合規工具形成強大技術壁壘與轉換成本。",
+          "軟硬整合提供一站式數據治理方案，客戶黏著度極高。"
+        ],
+        "bear_points": [
+          "資安產品整合可能引發全球反壟斷主管機關關注。",
+          "對企業 IT 預算的過度依賴，導致邊際獲客成本增加。"
+        ],
+        "final_take": "微軟的護城河在於資安與合規，而非單一的 AI 成長。",
+        "entities": {
+          "tickers": [
+            "MSFT"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Cloud Computing",
+            "Cybersecurity"
+          ],
+          "tech_keywords": [
+            "Copilot",
+            "Azure",
+            "Sentinel"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cybersecurity"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入資安與合規鎖定效應，補充護城河分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T15:43:43Z",
+      "latency_ms": 30684,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面都把 OpenAI 當微軟的資產或成本,漏了**它正在變成 Azure 的流失客戶**。OpenAI 透過 Stargate 計畫與 Oracle、軟銀及 CoreWeave 大規模自建算力,微軟去年已放棄 OpenAI 雲端「獨家供應商」地位 — 這代表 Azure 最大的 AI 訓練負載正在主動分散外流。市場把 Azure 增速當成 OpenAI 綁定的紅利,但客戶集中度反向鬆動才是被忽略的二階風險:未來 Azure 的 AI 收入要靠企業 Copilot 真實滲透補上,而非 OpenAI 的內部消耗。Ackman 加碼前應先問:**Azure 的 AI 需求有多少是真外部訂單,多少只是 OpenAI 自家算力左手換右手**。這條供應鏈裂縫,比蓋茲賣股重要得多。",
+        "bull_points": [
+          "Copilot 企業滲透率若起量,可補 OpenAI 外流缺口",
+          "微軟仍持有 OpenAI 權益,算力外溢仍間接受惠"
+        ],
+        "bear_points": [
+          "OpenAI 自建 Stargate 算力,Azure 失去獨家供應地位",
+          "Azure AI 收入含 OpenAI 自家消耗,真實外部需求被高估",
+          "客戶集中度鬆動,33 倍本益比缺安全邊際"
+        ],
+        "final_take": "偏空待觀察 Azure 外部 AI 訂單佔比能否驗證",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "ORCL",
+            "CRWV"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "cloud concentration risk"
+          ],
+          "tech_keywords": [
+            "Stargate",
+            "Blackwell",
+            "Azure"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-compute-diversification"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:stargate"
+          },
+          {
+            "subject": "ticker:CRWV",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:openai-compute-diversification"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ORCL"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 OpenAI 算力外流 Azure 的客戶集中度二階風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T15:43:56Z",
+      "latency_ms": 12363,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了前述的算力與折舊議題，我們忽略了**微軟在能源自主權的佈局**。AI 資料中心正面臨極大的電力供應瓶頸，微軟積極投資 SMR (小型模組化反應爐) 與相關能源基礎設施，意在確保 Azure 擴張不受電網容量限制。這不僅是資本支出(Capex)的延伸，更是為了在「電網限制」成為 AI 成長天花板時，建立極高的能源護城河。相較於純雲端服務商，微軟對電力的掌控度是長期毛利率穩定的關鍵。Ackman 若著眼長線，這項深度的能源戰略布局，可能比 Azure 短期季度增長更具決定性。",
+        "bull_points": [
+          "提前部署 SMR 確保供電，解決擴張瓶頸。",
+          "能源自主建立護城河，提升長期定價權。"
+        ],
+        "bear_points": [
+          "核能設施建設成本高昂，恐拖累資本回報。",
+          "能源監管審核具不確定性，導致投資回收期過長。"
+        ],
+        "final_take": "微軟將能源控制權納入護城河，是 AI 基建的重要一環。",
+        "entities": {
+          "tickers": [
+            "MSFT"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "Energy",
+            "Sustainability"
+          ],
+          "tech_keywords": [
+            "SMR",
+            "Datacenters"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Energy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "探討微軟在 AI 電力需求端的能源佈局(SMR)，作為長期護城河。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "CRWV",
+        "MSFT",
+        "NVDA",
+        "ORCL"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Information Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "AI monetization",
+        "Cloud Computing",
+        "Cybersecurity",
+        "Edge AI",
+        "Energy",
+        "Sustainability",
+        "cloud computing",
+        "cloud concentration risk",
+        "insider transactions"
+      ],
+      "tech_keywords": [
+        "Azure",
+        "Blackwell",
+        "Copilot",
+        "Datacenters",
+        "Edge Computing",
+        "OpenAI",
+        "SMR",
+        "Sentinel",
+        "Stargate"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:insider-transactions"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "themes:Edge AI"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AAPL"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-equity-method-losses"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:datacenter-depreciation"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cybersecurity"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-compute-diversification"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:stargate"
+      },
+      {
+        "subject": "ticker:CRWV",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:openai-compute-diversification"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ORCL"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Energy"
+      }
+    ],
+    "bull_summary": [
+      "基金會賣出屬分散撥款,非基本面看空",
+      "Ackman 加碼為主動高信念信號",
+      "Azure + Copilot 變現仍是核心成長引擎",
+      "Edge AI 整合將降低企業雲端營運成本",
+      "Windows 生態系強化 AI 訂閱防禦力",
+      "軟體利潤率隨離線推理功能提升"
+    ],
+    "bear_summary": [
+      "AI capex 龐大,投報週期拉長壓縮自由現金流",
+      "標題情緒若引發散戶跟賣造成短期波動",
+      "邊緣 AI 推理對硬體規格要求極高",
+      "與 Apple 裝置生態系統形成激烈競爭",
+      "混合雲架構增加了技術整合複雜度",
+      "權益法認列 OpenAI 虧損直接侵蝕 reported EPS"
+    ],
+    "final_take": "微軟將能源控制權納入護城河，是 AI 基建的重要一環。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T15:43:56Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, HEADWIND_FROM, MENTIONED_IN, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

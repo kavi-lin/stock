@@ -1,0 +1,791 @@
+{
+  "news_id": "bn_20260514_b10167ed",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T06:22:10Z",
+  "last_activity_ts": "2026-05-14T06:34:31Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/5ca1ef08e203",
+    "feed_fingerprint": "futu:COUPE,TSM:c3e23913e5",
+    "published": "2026-05-14T14:17:37+08:00",
+    "url_hash": "sha1:594cff18d30fca7b687ac3f5e0198d2ecac2f996"
+  },
+  "headline": "台積電首提AI芯片「三層蛋糕」理論：光互連「未來最重要」，COUPE技術或站「C位」",
+  "headline_zh": null,
+  "raw_summary": "台積電首提AI芯片「三層蛋糕」理論：光互連「未來最重要」，COUPE技術或站「C位」>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T06:30:43Z",
+      "latency_ms": 30182,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "台積電拋出**「三層蛋糕」AI 晶片架構論**：底層先進製程 (N2/A16)、中層 CoWoS 先進封裝、頂層**矽光子 / 光互連 (COUPE)**。明示光互連為「未來最重要」，COUPE 站 C 位 — 這是 TSM 首次把 silicon photonics 從 side project 拉到與製程、封裝同級的戰略主軸。受惠鏈：TSM (COUPE 主導者)、ASML (EUV 製程基底)、NVDA / AVGO (scale-up / scale-out 光互連需求方)、COHR / LITE / IIVI 系 (光元件 supply)、AMAT / LRCX (CPO 製程設備)。**warning**: 光互連量產時點落在 2027+，短期 EPS 無撐力，且 COUPE 與 Broadcom CPO、Marvell 路線競爭未明，純情緒催化。HBM3e / CoWoS-L 仍是 2026 現金流主軸。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T06:31:09Z",
+      "latency_ms": 25118,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "台積電首提 AI 晶片「三層蛋糕」架構，將先進製程、封裝與光互連 (COUPE) 同等重視，顯示其對未來運算瓶頸的預判。雖然 COUPE 量產尚遠，短期營收仍靠 HBM3e/CoWoS-L，但此佈局將引領產業朝更高整合度邁進。其中，**整合後的良率與製程監控**，尤其依賴 **KLA Corp. (KLAC)** 等專業設備商支援，成為新的關鍵考量點。",
+        "bull_points": [
+          "TSM 引領 COUPE 架構，確立未來 AI 領導者地位。",
+          "整合 COUPE 潛力無限，將加速 AI 運算發展。",
+          "新視角：KLAC 專業技術支援 COUPE 整合良率。"
+        ],
+        "bear_points": [
+          "COUPE 量產時程長，短期 EPS 支撐力道不足。",
+          "COUPE 整合難度高，良率與成本是待解難題。",
+          "新視角：複雜製程要求嚴苛，對設備商技術是嚴峻考驗。"
+        ],
+        "final_take": "看好 COUPE 長遠發展，短期聚焦 HBM3e 產能。",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "ASML",
+            "NVDA",
+            "AVGO",
+            "COHR",
+            "LITE",
+            "IIVI",
+            "AMAT",
+            "LRCX",
+            "KLAC"
+          ],
+          "sectors": [
+            "Semiconductor Manufacturing",
+            "Electronic Equipment, Instruments & Components"
+          ],
+          "themes": [
+            "AI capex",
+            "Optical Interconnect",
+            "Advanced Packaging",
+            "Silicon Photonics",
+            "Semiconductor Yield Management"
+          ],
+          "tech_keywords": [
+            "N2",
+            "A16",
+            "CoWoS",
+            "COUPE",
+            "HBM3e",
+            "EUV",
+            "CPO",
+            "Silicon Photonics",
+            "Metrology"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:COUPE"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:AVGO"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "REQUIRES",
+            "object": "theme:HBM3e"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "REQUIRES",
+            "object": "theme:CPO"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Silicon Photonics"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Silicon Photonics"
+          },
+          {
+            "subject": "ticker:IIVI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Silicon Photonics"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:CPO"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:CPO"
+          },
+          {
+            "subject": "ticker:KLAC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:TSM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "整合難度與良率監控成新焦點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T06:31:36Z",
+      "latency_ms": 27081,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**CPO (Co-Packaged Optics) 替 pluggable optics 的 power budget 戰爭**才是 COUPE 真正的賣點 — 800G/1.6T 光模組功耗已逼近 25-30W，scale-up domain 拉到 GB300 NVL576 級別後，pluggable 方案熱密度撐不住。COUPE 把光引擎搬到 package 內，每 bit 功耗砍 50%+，這是 hyperscaler (META, MSFT, GOOGL) **2027 資本支出避免被電力天花板卡死**的剛需。被忽略的第二層受惠者：**CIEN (DCI 短距互連)** 與 **ANET (scale-across 800G switch ASIC)** — 光互連世代切換會逼網路設備商重新洗牌，ANET 的 Tomahawk 5 + Jericho 3-AI 路徑與 COUPE timeline 高度耦合。反方：CPO 的 **field-repairability 問題**未解 — 光引擎壞了等於整顆 package 報廢，hyperscaler ops team 強烈抗拒，這是 Broadcom Tomahawk-CPO 試產三年仍未大規模商轉的真因。",
+        "bull_points": [
+          "CPO 功耗砍半，hyperscaler 電力天花板剛需",
+          "ANET / CIEN 為 scale-across 光互連第二層受惠",
+          "META / MSFT 2027 capex 鎖定 COUPE 路徑"
+        ],
+        "bear_points": [
+          "CPO field-repairability 未解，ops team 抗拒",
+          "Broadcom CPO 試產三年未量產，前車之鑑",
+          "光引擎與 ASIC 共封裝良率仍是黑盒"
+        ],
+        "final_take": "結構看多 TSM/ANET，但 CPO 商轉風險被市場低估",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "ANET",
+            "CIEN",
+            "AVGO",
+            "MRVL",
+            "META",
+            "MSFT",
+            "GOOGL",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Co-Packaged Optics",
+            "Silicon Photonics",
+            "Power Efficiency",
+            "Hyperscaler Capex"
+          ],
+          "tech_keywords": [
+            "COUPE",
+            "CPO",
+            "Tomahawk 5",
+            "Jericho 3-AI",
+            "800G",
+            "1.6T",
+            "GB300 NVL576",
+            "Scale-Across"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cpo-scale-across"
+          },
+          {
+            "subject": "ticker:CIEN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon-photonics-dci"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:META",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "narrative:cpo-power-budget",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:ANET"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 CPO 功耗剛需邏輯 + ANET/CIEN 第二層受惠 + field-repair 反方"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T06:33:48Z",
+      "latency_ms": 131908,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "台積電提出的「三層蛋糕」架構，將光互連 (COUPE) 置於戰略核心，彰顯其對未來運算瓶頸的預判。然而，此技術的實現仰賴複雜的**異質整合 (heterogeneous integration)**，將不同材料系統（如矽與 III-V 族化合物半導體）精密結合。**GlobalFoundries (GF)** 作為另一主要晶圓代工廠，亦積極佈局矽光子平台，其在異質整合方面的經驗與技術，與台積電形成並行或競爭態勢，共同推動著光互連技術的量產發展。關鍵在於克服材料融合的良率與成本挑戰，以實現光訊號在晶片內的低功耗、高頻寬傳輸。",
+        "bull_points": [
+          "GF 的矽光子平台強調III-V材料整合。",
+          "先進材料整合是COUPE光源的關鍵。"
+        ],
+        "bear_points": [
+          "異質整合的良率挑戰阻礙擴展。",
+          "整合光子的現場維修難題仍存。"
+        ],
+        "final_take": "晶圓廠的矽光子競賽，定義下一代AI算力。",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "GF",
+            "AVGO",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Technology Hardware, Storage & Peripherals"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced Packaging",
+            "Silicon Photonics",
+            "Heterogeneous Integration"
+          ],
+          "tech_keywords": [
+            "COUPE",
+            "silicon photonics",
+            "heterogeneous integration",
+            "III-V materials",
+            "light source integration"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:GF",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "tech_keyword:heterogeneous integration"
+          },
+          {
+            "subject": "narrative:silicon_photonics_integration",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:III-V_materials"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "tech_keyword:COUPE"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:heterogeneous integration"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon_photonics_integration"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon_photonics_integration"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦 GF 異質整合，探討代工廠矽光子競賽。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T06:34:15Z",
+      "latency_ms": 27231,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新角度：**雷射光源 (DFB / EML laser) 是 COUPE 真正的單點故障**。CPO 把光引擎搬進 package 後，每個 socket 需 8-16 顆外部 laser source (ELS, External Laser Source) — 這塊 TSMC 不做、Broadcom 不做、NVDA 不做，**100% 外包**。受惠者：**LSCC (Lumentum 系) 的 InP DFB laser**、**MACOM (MTSI) 的 PAM4 DSP + laser driver**、以及**日本 Furukawa / 住友電工**。被嚴重低估的是 **MTSI** — 它的 L-PIC (Laser-PIC) 整合方案是 COUPE ELS 的潛在 sole-source，市場還沒 price in。另一個被忽略的反向風險：**Marvell (MRVL) 的 Inphi 5nm electro-optics DSP** 走的是 pluggable 路線，若 COUPE 量產延後到 2028+，MRVL 的 1.6T pluggable 反而吃下 2026-2027 過渡期紅利。**TSM 自己反而是受害者** — silicon photonics 毛利率歷史上比 logic 低 10-15pp，COUPE 拉高 capex 卻稀釋 blended margin，2027 法說會見真章。",
+        "bull_points": [
+          "MTSI 為 COUPE 外部 laser source 潛在 sole-source，未被 price in",
+          "MRVL 1.6T pluggable DSP 吃 2026-2027 過渡期紅利",
+          "LSCC InP DFB laser 受惠 ELS 剛需"
+        ],
+        "bear_points": [
+          "Silicon photonics 毛利率低於 logic 10-15pp，稀釋 TSM blended margin",
+          "外部 laser 為 CPO 單點故障，供應鏈集中度風險高",
+          "COUPE 延後到 2028+ 則 pluggable 陣營反勝"
+        ],
+        "final_take": "看多 MTSI / MRVL 過渡期紅利，TSM margin 反成隱憂",
+        "entities": {
+          "tickers": [
+            "MTSI",
+            "MRVL",
+            "LSCC",
+            "TSM",
+            "AVGO",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "silicon photonics",
+            "CPO",
+            "external laser source"
+          ],
+          "tech_keywords": [
+            "COUPE",
+            "DFB laser",
+            "EML laser",
+            "InP",
+            "L-PIC",
+            "PAM4 DSP",
+            "1.6T pluggable",
+            "ELS"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MTSI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:coupe-external-laser"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:pluggable-transition-window"
+          },
+          {
+            "subject": "ticker:LSCC",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:cpo-laser-source"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:silicon-photonics-margin-dilution"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AVGO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "外部雷射源供應鏈與 TSM margin 稀釋皆未被討論"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T06:34:31Z",
+      "latency_ms": 16166,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "台積電將光互連 (COUPE) 置於「三層蛋糕」戰略核心，強調其未來重要性。這不僅推升了先進封裝的價值，更直接意味著承載這些 AI 晶片的**先進邏輯製程**需求將持續攀升。例如，NVIDIA 的 Blackwell 架構將深度整合 COUPE，這需要台積電的 N3P 等最尖端製程節點來製造核心 AI 處理器。此舉鞏固了台積電在**前段邏輯晶圓代工**領域的領導地位，確保其在 AI 算力供應鏈中的關鍵角色，並對其先進製程產能提出更高要求。",
+        "bull_points": [
+          "台積電 N3P 等先進邏輯製程需求穩固",
+          "AI 晶片代工產能前景看好"
+        ],
+        "bear_points": [
+          "COUPE 仍是長期佈局，短期 EPS 支撐力有限",
+          "先進邏輯製程與 COUPE 整合難度或影響良率"
+        ],
+        "final_take": "AI 算力底層架構升級，台積電全方位佈局。",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced process technology"
+          ],
+          "tech_keywords": [
+            "N3P",
+            "Blackwell",
+            "COUPE",
+            "Silicon Photonics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:N3P"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "narrative:COUPE",
+            "predicate": "REQUIRES",
+            "object": "narrative:advanced_logic_nodes"
+          },
+          {
+            "subject": "narrative:Blackwell_architecture",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:COUPE"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "台積電將光互連視為核心，提升先進邏輯製程需求。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "ANET",
+        "ASML",
+        "AVGO",
+        "CIEN",
+        "COHR",
+        "GF",
+        "GOOGL",
+        "IIVI",
+        "KLAC",
+        "LITE",
+        "LRCX",
+        "LSCC",
+        "META",
+        "MRVL",
+        "MSFT",
+        "MTSI",
+        "NVDA",
+        "TSM"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Communications Equipment",
+        "Electronic Equipment, Instruments & Components",
+        "Information Technology",
+        "Semiconductor Manufacturing",
+        "Semiconductors",
+        "Technology Hardware, Storage & Peripherals"
+      ],
+      "themes": [
+        "AI capex",
+        "Advanced Packaging",
+        "Advanced process technology",
+        "CPO",
+        "Co-Packaged Optics",
+        "Heterogeneous Integration",
+        "Hyperscaler Capex",
+        "Optical Interconnect",
+        "Power Efficiency",
+        "Semiconductor Yield Management",
+        "Silicon Photonics",
+        "external laser source",
+        "silicon photonics"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "1.6T pluggable",
+        "800G",
+        "A16",
+        "Blackwell",
+        "COUPE",
+        "CPO",
+        "CoWoS",
+        "DFB laser",
+        "ELS",
+        "EML laser",
+        "EUV",
+        "GB300 NVL576",
+        "HBM3e",
+        "III-V materials",
+        "InP",
+        "Jericho 3-AI",
+        "L-PIC",
+        "Metrology",
+        "N2",
+        "N3P",
+        "PAM4 DSP",
+        "Scale-Across",
+        "Silicon Photonics",
+        "Tomahawk 5",
+        "heterogeneous integration",
+        "light source integration",
+        "silicon photonics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:COUPE"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "REQUIRES",
+        "object": "theme:HBM3e"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "REQUIRES",
+        "object": "theme:CPO"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Silicon Photonics"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Silicon Photonics"
+      },
+      {
+        "subject": "ticker:IIVI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Silicon Photonics"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:CPO"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:CPO"
+      },
+      {
+        "subject": "ticker:KLAC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cpo-scale-across"
+      },
+      {
+        "subject": "ticker:CIEN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon-photonics-dci"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "narrative:cpo-power-budget",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:ANET"
+      },
+      {
+        "subject": "ticker:GF",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "tech_keyword:heterogeneous integration"
+      },
+      {
+        "subject": "narrative:silicon_photonics_integration",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:III-V_materials"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "tech_keyword:COUPE"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:heterogeneous integration"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon_photonics_integration"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon_photonics_integration"
+      },
+      {
+        "subject": "ticker:MTSI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:coupe-external-laser"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:pluggable-transition-window"
+      },
+      {
+        "subject": "ticker:LSCC",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:cpo-laser-source"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:silicon-photonics-margin-dilution"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:N3P"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "narrative:COUPE",
+        "predicate": "REQUIRES",
+        "object": "narrative:advanced_logic_nodes"
+      },
+      {
+        "subject": "narrative:Blackwell_architecture",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:COUPE"
+      }
+    ],
+    "bull_summary": [
+      "TSM 引領 COUPE 架構，確立未來 AI 領導者地位。",
+      "整合 COUPE 潛力無限，將加速 AI 運算發展。",
+      "新視角：KLAC 專業技術支援 COUPE 整合良率。",
+      "CPO 功耗砍半，hyperscaler 電力天花板剛需",
+      "ANET / CIEN 為 scale-across 光互連第二層受惠",
+      "META / MSFT 2027 capex 鎖定 COUPE 路徑"
+    ],
+    "bear_summary": [
+      "COUPE 量產時程長，短期 EPS 支撐力道不足。",
+      "COUPE 整合難度高，良率與成本是待解難題。",
+      "新視角：複雜製程要求嚴苛，對設備商技術是嚴峻考驗。",
+      "CPO field-repairability 未解，ops team 抗拒",
+      "Broadcom CPO 試產三年未量產，前車之鑑",
+      "光引擎與 ASIC 共封裝良率仍是黑盒"
+    ],
+    "final_take": "AI 算力底層架構升級，台積電全方位佈局。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T06:34:31Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, CUSTOMER_OF, HEADWIND_FROM; gemini-only: REQUIRES"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

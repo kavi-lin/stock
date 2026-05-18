@@ -147,9 +147,12 @@
       const isBuy     = item.decision === 'BUY' || item.decision === 'EXECUTE';
       const isStaged  = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY' || item.decision === 'STAGED_EXIT';
       const isCancel  = item.decision === 'CANCEL' || item.decision === 'PASS' || item.decision === 'SELL';
+      const isPreview = item.decision === 'PREVIEW' || item.report_type === 'pre_earnings';
       const statusColor = isBuy ? 'var(--status-bullish)'
                         : isStaged ? 'var(--status-binary)'
-                        : isCancel ? 'var(--status-bearish)' : 'var(--text-muted)';
+                        : isCancel ? 'var(--status-bearish)'
+                        : isPreview ? '#f59e0b'  // amber-500: matches 📋 前瞻 button
+                        : 'var(--text-muted)';
       const t = window.i18n?.[UI.currentLang] || {};
       const translatedDecision = t.status?.[item.decision] || item.decision;
 

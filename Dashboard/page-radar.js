@@ -1059,15 +1059,23 @@ document.addEventListener('DOMContentLoaded', () => {
  * ════════════════════════════════════════════════════════════════════ */
 
 const THEME_HEATMAP_POLL_MS = 180000;   // 3 min
-const RADAR_KLINE_POLL_MS   = 15000;    // 15s open / 5min closed (server enforces TTL)
+// V2.13.5 — split base bars (5-min granularity, slow poll) from live tick
+// (single quote, fast poll). Base catches new 5-min bars + clears tail; tick
+// extends a dashed live tail between bar boundaries.
+const RADAR_KLINE_POLL_MS   = 60000;    // 60s — only meaningful at 5-min boundaries
+const RADAR_TICK_POLL_MS    = 15000;    // 15s — live last-price tail
 
 let _lastThemeHeatmap   = null;          // {themes: [...], market_open, ...}
 let _themeHeatmapTimer  = null;
 
 let _radarKlineTicker   = null;
 let _radarKlineTimer    = null;
+let _radarTickTimer     = null;
 let _radarKlineChart    = null;
 let _radarVolumeChart   = null;
+let _radarLastBaseData  = null;          // most recent /api/heatmap/intraday payload
+let _radarLastBarTime   = null;          // detect new 5-min bar → clear tail
+let _radarTickTail      = [];            // [{t: 'HH:MM:SS', price: number}, ...]
 
 function _radarHeatmapColorFor(changePct) {
     if (changePct === null || changePct === undefined || isNaN(changePct)) return '#d4d4d8';
@@ -1238,6 +1246,27 @@ function _radarShowTooltip(ticker, event) {
     const priceStr = ticker.price == null ? '--' : '$' + ticker.price.toFixed(2);
     const rangeStr = (ticker.day_low != null && ticker.day_high != null)
         ? `$${ticker.day_low.toFixed(2)} – $${ticker.day_high.toFixed(2)}` : '--';
+    // V2.13.10/12 — valuation triplet
+    function _peColor(v) {
+        if (v == null) return '#a1a1aa';
+        if (v < 0)        return '#f87171';
+        if (v < 15)       return '#4ade80';
+        if (v > 30)       return '#fbbf24';
+        return '#e4e4e7';
+    }
+    function _evColor(v) {
+        if (v == null) return '#a1a1aa';
+        if (v < 0)        return '#f87171';
+        if (v < 10)       return '#4ade80';
+        if (v > 20)       return '#fbbf24';
+        return '#e4e4e7';
+    }
+    const pe       = ticker.pe;
+    const fwdPe    = ticker.forward_pe;
+    const evEbitda = ticker.ev_ebitda;
+    const peStr    = pe       != null ? pe.toFixed(1)       : '--';
+    const fwdPeStr = fwdPe    != null ? fwdPe.toFixed(1)    : '--';
+    const evStr    = evEbitda != null ? evEbitda.toFixed(1) : '--';
     tip.innerHTML = `
         <div class="text-[10px] text-zinc-500 mb-1">${_radarEsc(ticker.sector)} · ${_radarEsc(ticker.industry)}</div>
         <div class="flex items-baseline gap-2 mb-2">
@@ -1247,6 +1276,9 @@ function _radarShowTooltip(ticker, event) {
         <div class="space-y-1 text-[11px] text-zinc-300">
             <div class="flex justify-between"><span class="text-zinc-500">現價</span><span class="font-mono font-bold text-white">${priceStr}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">漲跌</span><span class="font-mono font-bold" style="color: ${pctColor}">${pctStr}</span></div>
+            <div class="flex justify-between" title="TTM 含一次性項目可能扭曲；負值常為一次性虧損"><span class="text-zinc-500">P/E TTM</span><span class="font-mono font-bold" style="color: ${_peColor(pe)}">${peStr}</span></div>
+            <div class="flex justify-between" title="Forward P/E (next FY consensus EPS)"><span class="text-zinc-500">Fwd P/E</span><span class="font-mono font-bold" style="color: ${_peColor(fwdPe)}">${fwdPeStr}</span></div>
+            <div class="flex justify-between" title="EV/EBITDA TTM — 跨資本結構可比"><span class="text-zinc-500">EV/EBITDA</span><span class="font-mono font-bold" style="color: ${_evColor(evEbitda)}">${evStr}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">市值</span><span class="font-mono">${_radarFormatMcap(ticker.market_cap)}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">日內區間</span><span class="font-mono">${rangeStr}</span></div>
             <div class="flex justify-between"><span class="text-zinc-500">成交量</span><span class="font-mono">${_radarFormatVol(ticker.volume)}</span></div>
@@ -1318,10 +1350,18 @@ function selectRadarKline(tickerData) {
     }
 
     if (_radarKlineTimer) clearInterval(_radarKlineTimer);
+    if (_radarTickTimer)  clearInterval(_radarTickTimer);
+    if (isNewTicker) { _radarTickTail = []; _radarLastBarTime = null; }
     loadRadarKline();
+    // Base bars (5-min OHLCV): poll every 60s — only catches a new bar when
+    // the boundary crosses. Visibility-agnostic; load is trivial (1 ticker).
     _radarKlineTimer = setInterval(() => {
-        if (document.visibilityState === 'visible' && _radarKlineTicker) loadRadarKline();
+        if (_radarKlineTicker) loadRadarKline();
     }, RADAR_KLINE_POLL_MS);
+    // Live tick: poll every 15s for last price, append to tail and re-render.
+    _radarTickTimer = setInterval(() => {
+        if (_radarKlineTicker) loadRadarTick();
+    }, RADAR_TICK_POLL_MS);
 }
 
 async function loadRadarKline() {
@@ -1330,9 +1370,54 @@ async function loadRadarKline() {
         const r = await fetch(`/api/heatmap/intraday/${_radarKlineTicker}`);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         const data = await r.json();
+        const bars = data.bars || [];
+        // New 5-min bar appeared → tail no longer needed (its purpose was to
+        // bridge the gap; the bar that just closed supersedes it).
+        const lastBarTime = bars.length ? bars[bars.length - 1].time : null;
+        if (_radarLastBarTime && lastBarTime && lastBarTime !== _radarLastBarTime) {
+            _radarTickTail = [];
+        }
+        _radarLastBarTime  = lastBarTime;
+        _radarLastBaseData = data;
         renderRadarKline(data);
     } catch (e) {
         console.error('Radar K-line load error:', e.message);
+    }
+}
+
+async function loadRadarTick() {
+    if (!_radarKlineTicker || !_radarLastBaseData) return;
+    try {
+        const r = await fetch(`/api/heatmap/quote/${_radarKlineTicker}`);
+        if (!r.ok) return;
+        const q = await r.json();
+        if (q.price == null) return;
+        const now = new Date();
+        // 24h HH:MM:SS to match bar labels' HH:MM style; locale-pin 'en-GB'
+        // avoids zh-TW prepending "下午" / "上午".
+        const hms = now.toLocaleTimeString('en-GB', { hour12: false });
+        // Replace tail's last entry if same HH:MM:SS (avoids dup at boundary).
+        const last = _radarTickTail[_radarTickTail.length - 1];
+        if (last && last.t === hms) {
+            last.price = q.price;
+        } else {
+            _radarTickTail.push({ t: hms, price: q.price });
+        }
+        // Cap to ~5min worth (20 ticks @ 15s) so memory stays bounded even when
+        // 5-min bar refresh stalls.
+        if (_radarTickTail.length > 25) _radarTickTail.splice(0, _radarTickTail.length - 25);
+        // Update header price + change_pct from this live quote (more accurate
+        // than the cached intraday last-bar close).
+        const priceEl = document.getElementById('radar-kline-price');
+        const chgEl   = document.getElementById('radar-kline-change');
+        if (priceEl) priceEl.textContent = '$' + q.price.toFixed(2);
+        if (chgEl && q.change_pct != null) {
+            chgEl.textContent = (q.change_pct >= 0 ? '+' : '') + q.change_pct.toFixed(2) + '%';
+            chgEl.style.color = q.change_pct >= 0 ? '#22c55e' : '#ef4444';
+        }
+        renderRadarKline(_radarLastBaseData);
+    } catch (e) {
+        console.error('Radar tick load error:', e.message);
     }
 }
 
@@ -1345,20 +1430,38 @@ function renderRadarKline(data) {
         document.getElementById('radar-kline-status').textContent = '無資料';
         return;
     }
-    const labels = bars.map(b => (b.time || '').slice(11, 16));   // HH:MM
-    const closes = bars.map(b => b.c);
-    const vols   = bars.map(b => b.v);
-    const colors = bars.map((b, i) => {
+    const barLabels = bars.map(b => (b.time || '').slice(11, 16));   // HH:MM
+    const barCloses = bars.map(b => b.c);
+    const vols      = bars.map(b => b.v);
+    const colors    = bars.map((b, i) => {
         const prev = i === 0 ? b.o : bars[i-1].c;
         return b.c >= prev ? 'rgba(34,197,94,0.7)' : 'rgba(239,68,68,0.7)';
     });
 
+    // Tail: live ticks since last 5-min bar close. Render as dashed amber line
+    // hooked onto the last bar's close so there's no visual discontinuity.
+    const tailLabels = _radarTickTail.map(t => t.t);
+    const tailValues = _radarTickTail.map(t => t.price);
+    const allLabels  = barLabels.concat(tailLabels);
+    // Bar dataset: bar values + nulls for tail positions (so x-axis stays aligned)
+    const barData    = barCloses.concat(tailLabels.map(() => null));
+    // Tail dataset: nulls for bar positions, then last bar's close + tail values
+    // (start with last close to make the dashed line connect to the bars line)
+    const tailData   = barLabels.slice(0, -1).map(() => null)
+                         .concat([barCloses[barCloses.length - 1]])
+                         .concat(tailValues);
+
     document.getElementById('radar-kline-status').textContent =
-        data.market_open ? '盤中 · 15s 更新' : '收盤 · 5min 更新';
-    if (data.as_of) {
+        data.market_open ? '盤中 · 15s tick' : '收盤 · 60s 更新';
+    const tickAt = (_radarTickTail.length && data.market_open)
+                   ? _radarTickTail[_radarTickTail.length - 1].t
+                   : null;
+    if (tickAt) {
+        document.getElementById('radar-kline-updated').textContent = tickAt;
+    } else if (data.as_of) {
         const dt = new Date(data.as_of);
         document.getElementById('radar-kline-updated').textContent =
-            'updated ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            'updated ' + dt.toLocaleTimeString('en-GB', { hour12: false });
     }
 
     // Price line chart
@@ -1367,17 +1470,33 @@ function renderRadarKline(data) {
     _radarKlineChart = new Chart(priceCanvas, {
         type: 'line',
         data: {
-            labels,
-            datasets: [{
-                label: data.symbol,
-                data: closes,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.08)',
-                fill: true,
-                pointRadius: 0,
-                borderWidth: 1.5,
-                tension: 0.15,
-            }],
+            labels: allLabels,
+            datasets: [
+                {
+                    label: data.symbol,
+                    data: barData,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99,102,241,0.08)',
+                    fill: true,
+                    pointRadius: 0,
+                    borderWidth: 1.5,
+                    tension: 0.15,
+                    spanGaps: false,
+                },
+                {
+                    label: 'Live',
+                    data: tailData,
+                    borderColor: '#fbbf24',
+                    backgroundColor: 'rgba(251,191,36,0.10)',
+                    fill: false,
+                    pointRadius: tailData.map(v => v == null ? 0 : 1.8),
+                    pointBackgroundColor: '#fbbf24',
+                    borderWidth: 1.2,
+                    borderDash: [3, 3],
+                    tension: 0,
+                    spanGaps: false,
+                },
+            ],
         },
         options: {
             responsive: true, maintainAspectRatio: false, animation: false,
@@ -1389,12 +1508,12 @@ function renderRadarKline(data) {
         },
     });
 
-    // Volume bar chart
+    // Volume bar chart (no tail; volume only comes with completed bars)
     const volCanvas = document.getElementById('radar-volume-canvas');
     if (_radarVolumeChart) _radarVolumeChart.destroy();
     _radarVolumeChart = new Chart(volCanvas, {
         type: 'bar',
-        data: { labels, datasets: [{ label: 'Volume', data: vols, backgroundColor: colors, borderWidth: 0 }] },
+        data: { labels: barLabels, datasets: [{ label: 'Volume', data: vols, backgroundColor: colors, borderWidth: 0 }] },
         options: {
             responsive: true, maintainAspectRatio: false, animation: false,
             plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false,
@@ -1411,8 +1530,12 @@ function renderRadarKline(data) {
 function closeRadarKline() {
     _radarKlineTicker = null;
     if (_radarKlineTimer) { clearInterval(_radarKlineTimer); _radarKlineTimer = null; }
+    if (_radarTickTimer)  { clearInterval(_radarTickTimer);  _radarTickTimer  = null; }
     if (_radarKlineChart) { _radarKlineChart.destroy(); _radarKlineChart = null; }
     if (_radarVolumeChart) { _radarVolumeChart.destroy(); _radarVolumeChart = null; }
+    _radarLastBaseData = null;
+    _radarLastBarTime  = null;
+    _radarTickTail     = [];
     const panel = document.getElementById('radar-kline-panel');
     if (panel) panel.classList.add('hidden');
 }
@@ -1428,7 +1551,7 @@ function startThemeHeatmapPolling() {
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
         loadThemeHeatmap();
-        if (_radarKlineTicker) loadRadarKline();
+        if (_radarKlineTicker) { loadRadarKline(); loadRadarTick(); }
     }
 });
 

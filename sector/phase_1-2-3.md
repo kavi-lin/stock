@@ -22,7 +22,11 @@ python3 sector/scripts/fetch_sector_valuation.py --date {SCAN_DATE}
 - 輸出：`sector/cache/sector_valuation_<DATE>.json`
 - 失敗 = **HARD FAIL**：腳本 `sys.exit(1)` 並印 `[ERROR] FMP ...`。**Phase 1 中止，不繼續 Phase 2/3/4/5**。
   - Fix：檢查 `$FMP_API_KEY`、FMP 服務狀態、rate limit。修好後重跑整個 protocol。
-- 成功後將每個 sector 的 valuation block（`pe_ttm` / `pe_zscore_1y` / `rs_vs_spy_3m` / `rs_vs_spy_20d` / `rs_vs_spy_5d` / `etf_volume_ratio_20d` / `etf` 等）寫入 `_phase1.sectors[i].sector_valuation`（schema.md 已定義）。
+- ⚡ **不要手抄 valuation 欄位進 JSON**。`pe_ttm` / `pe_zscore_1y` / `rs_vs_spy_3m`
+  / `etf_volume_ratio_20d` 等由 Phase 5 的 `build_sector_intel.py` 直接從這個 cache
+  讀進 `_phase1.sectors[].sector_valuation`。你只需確認腳本 rc=0、cache 檔產生。
+- 做判斷時要看估值數字：跑 `python3 sector/scripts/sector_digest.py`（一次印出
+  全 sector 的 PE / z-score / RS + 巨觀），不要逐檔 `python3 -c` peek。
 - **V2.9.0 多週期 RS 用法**：3M 強但 5d/20d 同向轉弱 → 動能耗盡訊號（給 Phase 4b divergence 提示，不改 score）。零新增 API call（重用既有 3M chart）。
 
 > ⚠️ V1.4 的 FMP 估值層**不**像 FRED Layer E 是 graceful optional —— 缺它就無 valuation_penalty，最終 verdict 會缺 overbought/oversold 對照。protocol 必須 abort，由人介入。
@@ -103,7 +107,46 @@ python3 ~/.claude/skills/earnings-calendar/scripts/fetch_earnings_fmp.py {SCAN_D
 - 輸出 stdout JSON：本週 mid+ 大型股財報日（含 EPS estimate / market cap）。
 - 失敗 = soft（缺 earnings catalyst，Phase 3 可繼續；不 abort protocol）。
 
-### Step 3b — Sector Earnings Pulse（V1.4 必跑）
+### ⚡ V2.20.2 — Steps 3b/3c/3d/3e PARALLEL（推薦，省 3-4 min）
+
+**過去**：4 個 fetch_*.py 串著跑 → 每個 ~10-30s + 每個 1 turn LLM overhead = **~6 min wall**。
+
+**現在**：bash `&` 平行 + `wait` 收尾 → 單 turn，~30s wall（取最慢一個）。
+
+```bash
+SCAN_DATE=$(date +%Y-%m-%d)
+PIDS=()
+python3 sector/scripts/fetch_earnings_pulse.py --date $SCAN_DATE > /tmp/fetch_eps.log 2>&1 &
+PIDS+=($!)
+python3 sector/scripts/fetch_smart_money.py    --date $SCAN_DATE > /tmp/fetch_smt.log 2>&1 &
+PIDS+=($!)
+python3 sector/scripts/fetch_sector_news.py    --date $SCAN_DATE --lookback-days 2 > /tmp/fetch_snews.log 2>&1 &
+PIDS+=($!)
+python3 sector/scripts/fetch_general_news.py   --date $SCAN_DATE > /tmp/fetch_gnews.log 2>&1 &
+PIDS+=($!)
+FAIL=0
+for pid in "${PIDS[@]}"; do wait $pid || FAIL=$((FAIL+1)); done
+echo "parallel fetches: 4 launched, $FAIL failed"
+# Inspect /tmp/fetch_*.log for stderr if any failed
+ls -la sector/cache/sector_earnings_pulse_*.json sector/cache/sector_smart_money_*.json \
+       sector/cache/sector_news_*.json sector/cache/general_news_*.json | head -4
+```
+
+**規則**：
+- 4 個 fetch script 完全獨立（讀 FMP 不同 endpoint，寫不同 cache 檔）→ 平行安全
+- `fetch_general_news` 是 SOFT（fail 不 abort），其他 3 個是 HARD FAIL
+- `FAIL` 計數需 ≤ 1（只允許 general_news SOFT fail）
+- 若任一 HARD script fail → 看 `/tmp/fetch_*.log` 找原因；通常是 FMP rate limit 或 API key
+
+**何時跳過 parallel mode**：
+- 偵錯需要看單一 script 的詳細 stderr → 改回 sequential（下方原 Step 3b/3c/3d/3e）
+- 想加 `--skip-analyst` / `--skip-institutional` 等 flag → sequential 較清楚
+
+舊 sequential 步驟保留在下方備援。
+
+---
+
+### Step 3b — Sector Earnings Pulse（V1.4 必跑，sequential 備援）
 
 ```bash
 python3 sector/scripts/fetch_earnings_pulse.py --date {SCAN_DATE}
@@ -111,7 +154,8 @@ python3 sector/scripts/fetch_earnings_pulse.py --date {SCAN_DATE}
 
 - 輸出：`sector/cache/sector_earnings_pulse_<DATE>.json`
 - 失敗 = HARD FAIL（earnings calendar 段；analyst 段為 SOFT，失敗欄位 null）。中止 protocol 僅在 earnings calendar 失敗。
-- 成功後將 `sectors` block 寫入 `_phase3.sector_earnings_pulse`。
+- ⚡ **不要手抄進 JSON** — `build_sector_intel.py` 自動把這個 cache 讀進
+  `_phase3.sector_earnings_pulse`。確認 rc=0、cache 產生即可。
 - **Rubric 用法**：`news_catalyst` 元件 ±5
   - `beat_rate_30d > 0.7 AND surprise_score_avg > 0`（且 report_count ≥ 5）→ +5
   - `beat_rate_30d < 0.4`（且 report_count ≥ 5）→ −5
@@ -128,7 +172,8 @@ python3 sector/scripts/fetch_smart_money.py --date {SCAN_DATE}
 
 - 輸出：`sector/cache/sector_smart_money_<DATE>.json`
 - 失敗 = HARD FAIL（insider/senate 段；institutional 段為 SOFT）。
-- 成功後將 `sectors` block 寫入 `_phase3.smart_money_signals`。
+- ⚡ **不要手抄進 JSON** — `build_sector_intel.py` 自動把這個 cache 讀進
+  `_phase3.smart_money_signals`。
 - **Phase 4b 用法**：HOT consensus + insider ratio < 0.5 + senate net buy < 0 → 強制 divergence challenge（見 `phase_4-5.md` Step 2 規則 5）。
 - **V2.9.0 institutional Q-on-Q 用法**（不改 rubric，給 Phase 4b 提示）：
   - HOT consensus + `institutional_holders_qoq_delta < 0` AND `institutional_ownership_pct_delta < 0` AND `institutional_sample_size >= 3` → 「機構淨流出」divergence challenge
@@ -262,9 +307,11 @@ Trigger 條件：
 
 ---
 
-### Step 6 — 輸出 `_phase3.upcoming_events[]`
+### Step 6 — 輸出 `upcoming_events[]`
 
-從 Step 1-5 結果生成統一 schema 事件清單。**完整欄位定義** → `schema.md` Phase 3 + `reports/decision_review/UPCOMING_EVENTS_SCHEMA.md`。
+從 Step 1-5 結果生成統一 schema 事件清單。這是判斷產出 → 記進 Phase 5 的 decision
+JSON（`upcoming_events` 欄位），`build_sector_intel.py` 會帶入 `_phase3`。**完整欄位
+定義** → `schema.md` Phase 3 + `reports/decision_review/UPCOMING_EVENTS_SCHEMA.md`。
 
 **必填**：`id` / `date` / `category` / `title` / `tickers` / `sectors` / `impact` / `is_binary` / `within_48h`
 

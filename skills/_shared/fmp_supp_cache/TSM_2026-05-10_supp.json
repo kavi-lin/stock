@@ -1,0 +1,95 @@
+{
+  "ticker": "TSM",
+  "as_of_date": "2026-05-10",
+  "cache_key": "TSM_2026-05-10",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 17.244978140847728,
+    "piotroskiScore": 9,
+    "altman_zone": "safe",
+    "piotroski_strength": "strong",
+    "workingCapital": 2550699389000,
+    "totalAssets": 8659053639000,
+    "retainedEarnings": 5192004934000,
+    "ebit": 2278951357000,
+    "totalLiabilities": 2727963567000,
+    "revenue": 4125510324000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q1",
+    "as_of_date": "2026-03-31",
+    "ownersEarnings": 735797084610,
+    "ownersEarningsPerShare": 28.38,
+    "maintenanceCapex": 4298520610,
+    "growthCapex": -358686587610,
+    "averagePPE": 1.17,
+    "qoq_growth": 0.2111,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 32,
+        "total_acquired_shares": 1928,
+        "total_disposed_shares": 20000,
+        "acquired_transactions": 32,
+        "disposed_transactions": 1,
+        "total_purchases": 32,
+        "total_sales": 0
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 8000,
+        "total_disposed_shares": 0,
+        "acquired_transactions": 5,
+        "disposed_transactions": 0,
+        "total_purchases": 5,
+        "total_sales": 0
+      }
+    ],
+    "latest_trend": "accumulating",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {},
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 0,
+    "house_count": 9,
+    "buy_count": 8,
+    "sell_count": 1,
+    "net_signal": "bullish",
+    "most_recent_date": "2026-04-09",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {},
+  "executive_compensation": {},
+  "comp_benchmark": {},
+  "employee_history": {
+    "latest_period": "2025-12-31",
+    "latest_count": 0,
+    "one_year_pct": -100.0,
+    "cagr_5y_pct": -100.0,
+    "expansion_signal": false,
+    "layoff_signal": true,
+    "data_points": 26,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 3,
+    "cached": false
+  }
+}

@@ -16,12 +16,23 @@ def _parse_filename(path: Path) -> str | None:
 
 
 def _find_macro_delta(text: str) -> float | None:
-    # 多版本 digest header
-    for p in (r"Macro Backdrop Delta\**[:\s]+([+\-−][\d.]+)",
-              r"Session Macro Delta\**[:\s]+([+\-−][\d.]+)",
-              r"Session macro\s*Δ\**[:\s]+([+\-−][\d.]+)",
-              r"\*\*Macro Backdrop Delta\*\*[:\s]+([+\-−][\d.]+)",
-              r"\*\*Session macro\s*Δ\*\*[:\s]+([+\-−][\d.]+)"):
+    # 多版本 digest header. V2026-05+ digests embed delta inside the
+    # macro_backdrop_score line: "(session_macro_delta +0.20)" — older
+    # patterns required signed prefix on the bolded label which misses.
+    for p in (
+            # New format — delta inside parenthetical, optional sign
+            r"session_macro_delta\s*\(?([+\-−]?\d+\.?\d*)",
+            # New format — colon / equals form (JSON-ish)
+            r"session_macro_delta[\s:=]+([+\-−]?\d+\.?\d*)",
+            # Greek-Δ headers (May 2026+ inline form, e.g. "**Macro Backdrop Δ**: -0.10")
+            r"\*\*Macro Backdrop\s*Δ\*\*[:\s]+([+\-−]?[\d.]+)",
+            r"\*\*Session macro\s*Δ\*\*[:\s]+([+\-−]?[\d.]+)",
+            r"Macro Backdrop\s*Δ\**[:\s]+([+\-−]?[\d.]+)",
+            r"Session macro\s*Δ\**[:\s]+([+\-−]?[\d.]+)",
+            # Older bolded-header forms with the word "Delta" (kept for back-compat)
+            r"Macro Backdrop Delta\**[:\s]+([+\-−][\d.]+)",
+            r"Session Macro Delta\**[:\s]+([+\-−][\d.]+)",
+            r"\*\*Macro Backdrop Delta\*\*[:\s]+([+\-−][\d.]+)"):
         m = re.search(p, text)
         if m:
             v = m.group(1).replace("−", "-")

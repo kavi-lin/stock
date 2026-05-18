@@ -1,0 +1,232 @@
+{
+  "news_id": "bn_20260515_7db9ac74",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-15T15:10:17Z",
+  "last_activity_ts": "2026-05-15T15:20:09Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4593761-mastercraft-adds-the-chaparral-robalo-brands-after-closing-on-its-sector-disrupting-acquisition?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "mastercraft adds chaparral robalo brands after closing sector",
+    "published": "2026-05-15T15:03:59+00:00",
+    "url_hash": "sha1:168e2962bf095958b3daab21b9ff18325958436a"
+  },
+  "headline": "MasterCraft adds the Chaparral, Robalo brands after closing on its sector-disrupting acquisition",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "corporate",
+    "shallow_score": 0.0,
+    "bull_case": "整合效益釋放",
+    "bear_case": "交易風險存在",
+    "sector_view": "產業整併加速",
+    "macro_view": "槓桿率抬升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:19:52Z",
+      "latency_ms": 4850,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 523,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "546d1129-4302-4e3f-81fb-50f111a53087",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "368f7325-8c1c-4ad4-9b64-2e1851efcb1b"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T15:20:04Z",
+      "latency_ms": 12397,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "MasterCraft (MCFT) 此舉標誌著其從單一高端滑水快艇領域轉向更多元化的休閒船舶市場。透過收購 Chaparral 和 Robalo，MCFT 成功進入了中心控制台（center console）與家用遊艇領域，這能有效降低對單一利基市場的依賴。然而，在目前高利率環境下，消費者對這類高單價非必需消費品的購買力持續受壓，本次併購後的整合效應，特別是在經銷商通路庫存管理的優化能力，將是衡量其策略成敗的關鍵因子。後續需密切關注其併購後的營運現金流表現，以及是否能成功在不同產品線間達成規模經濟效益。",
+        "bull_points": [
+          "成功擴展至高成長性的家庭休閒與釣魚船市場",
+          "透過品牌整合擴大市場份額與議價能力",
+          "降低對單一利基利基型產品線的依賴"
+        ],
+        "bear_points": [
+          "需高度警惕高利率環境下大宗非必需消費需求",
+          "併購後期的整合風險與文化磨合挑戰",
+          "大型經銷商庫存週轉率下降的潛在風險"
+        ],
+        "final_take": "策略轉型正確，但需嚴控整合後的庫存週轉與獲利能力。",
+        "entities": {
+          "tickers": [
+            "MCFT"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Marine Industry"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MCFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:diversification"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析 MCFT 併購後的產業多元化策略風險與機會。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T15:20:09Z",
+      "latency_ms": 4736,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 580,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 11:40pm (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "d10a52bf-9abf-4699-8461-de93e4d25fa9",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "1ea2b0ce-c28b-4cf7-8a7f-c5df6d1ee2bc"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "MCFT"
+      ],
+      "sectors": [
+        "Consumer Discretionary"
+      ],
+      "themes": [
+        "Marine Industry"
+      ],
+      "tech_keywords": []
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MCFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:diversification"
+      }
+    ],
+    "bull_summary": [
+      "成功擴展至高成長性的家庭休閒與釣魚船市場",
+      "透過品牌整合擴大市場份額與議價能力",
+      "降低對單一利基利基型產品線的依賴"
+    ],
+    "bear_summary": [
+      "需高度警惕高利率環境下大宗非必需消費需求",
+      "併購後期的整合風險與文化磨合挑戰",
+      "大型經銷商庫存週轉率下降的潛在風險"
+    ],
+    "final_take": "策略轉型正確，但需嚴控整合後的庫存週轉與獲利能力。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T15:20:09Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-15T15:19:52Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-15T15:20:09Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

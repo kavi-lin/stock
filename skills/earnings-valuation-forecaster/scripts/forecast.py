@@ -104,7 +104,8 @@ class FMP:
         return data[0] if isinstance(data, list) and data else None
 
     def income_quarter(self, ticker):
-        return self.get("/income-statement", {"symbol": ticker, "period": "quarter", "limit": 5})
+        # limit=8 so pre-earnings watch_metrics can compute YoY (Q-1 vs Q-5).
+        return self.get("/income-statement", {"symbol": ticker, "period": "quarter", "limit": 8})
 
     def income_annual(self, ticker):
         return self.get("/income-statement", {"symbol": ticker, "period": "annual", "limit": 5})
@@ -117,6 +118,10 @@ class FMP:
 
     def stock_peers(self, ticker):
         return self.get("/stock-peers", {"symbol": ticker})
+
+    def earnings_upcoming(self, ticker):
+        """Fetch /stable/earnings — returns past + scheduled rows. We pick future-dated."""
+        return self.get("/earnings", {"symbol": ticker, "limit": 8})
 
 
 # ── Cache ─────────────────────────────────────────────────────────────────
@@ -458,9 +463,349 @@ def build_scenarios(forward_eps, pe_range, current_price):
     return scenarios, grid
 
 
+def build_ps_scenarios(income_q, current_price, market_cap):
+    """V2.16 — fallback 12M target for negative-EPS growth names. Uses P/S anchored
+    on TTM revenue + recent YoY growth rate. Returns scenarios dict in same shape
+    as PE scenarios (without `pe`/`eps` keys), or None when data insufficient."""
+    if not income_q or len(income_q) < 4 or not current_price or not market_cap:
+        return None
+    ttm_rev = sum((q.get("revenue") or 0) for q in income_q[:4])
+    if ttm_rev <= 0:
+        return None
+    shares = market_cap / current_price
+    if shares <= 0:
+        return None
+    cur_ps = market_cap / ttm_rev
+
+    yoy = None
+    if len(income_q) >= 5 and (income_q[4].get("revenue") or 0) > 0:
+        yoy = income_q[0]["revenue"] / income_q[4]["revenue"] - 1
+    if yoy is None and len(income_q) >= 2 and (income_q[1].get("revenue") or 0) > 0:
+        qoq = income_q[0]["revenue"] / income_q[1]["revenue"] - 1
+        yoy = (1 + qoq) ** 4 - 1
+    if yoy is None:
+        return None
+    yoy = max(min(yoy, 2.0), -0.5)
+
+    growth = {"bull": yoy, "base": yoy * 0.7, "bear": yoy * 0.4}
+    fwd_rev = {k: ttm_rev * (1 + g) for k, g in growth.items()}
+    ps_mult = {"bull": cur_ps, "base": cur_ps * 0.85, "bear": cur_ps * 0.6}
+
+    def _price(rev, p):
+        return round(p * rev / shares, 2)
+
+    out = {}
+    for k in ("bull", "base", "bear"):
+        t = _price(fwd_rev[k], ps_mult[k])
+        out[k] = {
+            "target":     t,
+            "upside_pct": round((t / current_price - 1) * 100, 1),
+            "ps":         round(ps_mult[k], 2),
+            "fwd_rev":    round(fwd_rev[k] / 1e9, 2),
+            "achieves_if": (
+                f"YoY 維持 {growth[k]*100:+.0f}% 帶 fwd rev ${fwd_rev[k]/1e9:.1f}B；P/S 站 {ps_mult[k]:.1f}x"
+            ),
+        }
+    out["method"]      = "ps"
+    out["ttm_revenue_b"] = round(ttm_rev / 1e9, 2)
+    out["current_ps"]    = round(cur_ps, 2)
+    out["recent_yoy_pct"] = round(yoy * 100, 1)
+    return out
+
+
 # ── Output ───────────────────────────────────────────────────────────────
 def to_json(payload):
     return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
+# ── Pre-earnings extension (V2.15.0) ─────────────────────────────────────
+def _next_earnings_info(client, ticker):
+    """Return {date, days_until, eps_est, rev_est, source} or None.
+    `source`: 'fmp_confirmed' if FMP returned a future-dated row, else None.
+    """
+    rows = client.earnings_upcoming(ticker) or []
+    today_iso = dt.date.today().isoformat()
+    # Include today: ticker reporting today still wants the consensus shown.
+    # FMP marks today's row with epsActual=null until release, so it's the right pick.
+    future = sorted(
+        [r for r in rows if r.get("date") and r["date"] >= today_iso and r.get("epsActual") is None],
+        key=lambda r: r["date"],
+    )
+    if not future:
+        return None
+    nxt = future[0]
+    try:
+        d = dt.date.fromisoformat(nxt["date"][:10])
+        days_until = (d - dt.date.today()).days
+    except Exception:
+        days_until = None
+    return {
+        "date":          nxt.get("date"),
+        "days_until":    days_until,
+        "eps_estimated": nxt.get("epsEstimated"),
+        "rev_estimated": nxt.get("revenueEstimated"),
+        "source":        "fmp_confirmed",
+    }
+
+
+def _seasonality_4q(income_q):
+    """Last 4 quarters: revenue / EPS diluted / GM%. Most-recent first → reverse for chronological."""
+    out = []
+    for q in (income_q or [])[:4]:
+        rev = q.get("revenue")
+        gp  = q.get("grossProfit")
+        gm  = round((gp / rev) * 100, 1) if (rev and gp is not None and rev > 0) else None
+        out.append({
+            "period":      f"{q.get('period') or ''} {q.get('fiscalYear') or ''}".strip(),
+            "date":        q.get("date"),
+            "revenue":     rev,
+            "eps_diluted": q.get("epsDiluted"),
+            "gross_margin_pct": gm,
+        })
+    return list(reversed(out))  # chronological for reading L→R
+
+
+def _watch_metrics_default(ticker, income_q):
+    """Generic watch list — fallback when no earnings-analyst cache available.
+    Returns list of (label_zh, label_en, hint) tuples for MD render."""
+    items = [
+        ("營收 YoY",       "Revenue YoY",       "vs 同期上年；< 0 = decel"),
+        ("毛利率 (GM%)",   "Gross margin %",    "QoQ ±100bps 看 mix / pricing"),
+        ("營業利益率",     "Operating margin",  "QoQ ±50bps 看 opex 紀律"),
+        ("Forward guide",  "Next-Q FY guide",   "公司給的下季 / 全年 EPS / Rev range"),
+        ("Segment mix",    "Segment mix",       "主力業務佔比變動 — 切換點 = 估值 re-rate"),
+    ]
+    return items
+
+
+def _watch_metrics_computed(income_q):
+    """Compute watch metrics with REAL VALUES from income_q (most-recent first, up to 8Q).
+    Returns list of (label_zh, label_en, value_str). Falls back to {} when data missing."""
+    items = []
+    if not income_q:
+        return items
+
+    def _pct(a, b):
+        if a is None or not b:
+            return None
+        try:
+            return round((a / b - 1) * 100, 1)
+        except Exception:
+            return None
+
+    def _gm(q):
+        rev, gp = q.get("revenue"), q.get("grossProfit")
+        return (gp / rev * 100) if (rev and gp is not None and rev > 0) else None
+
+    def _opm(q):
+        rev, oi = q.get("revenue"), q.get("operatingIncome")
+        return (oi / rev * 100) if (rev and oi is not None and rev > 0) else None
+
+    q0 = income_q[0]
+    q1 = income_q[1] if len(income_q) >= 2 else None
+    q4 = income_q[4] if len(income_q) >= 5 else None
+    q5 = income_q[5] if len(income_q) >= 6 else None
+
+    # Revenue YoY (preferred) or QoQ fallback
+    if q4:
+        yoy = _pct(q0.get("revenue"), q4.get("revenue"))
+        prev_yoy = _pct(q1.get("revenue"), q5.get("revenue")) if (q1 and q5) else None
+        if yoy is not None:
+            tail = ""
+            if prev_yoy is not None:
+                d = yoy - prev_yoy
+                tag = "accel" if d > 0.5 else "decel" if d < -0.5 else "flat"
+                tail = f" · {tag} (prev {prev_yoy:+.1f}%)"
+            items.append(("營收 YoY", "Revenue YoY", f"{yoy:+.1f}% YoY{tail}"))
+    elif q1:
+        qoq = _pct(q0.get("revenue"), q1.get("revenue"))
+        if qoq is not None:
+            items.append(("營收 QoQ", "Revenue QoQ", f"{qoq:+.1f}% QoQ (YoY 需 ≥5Q)"))
+
+    # GM% trend (last 4Q chronological + QoQ delta in bps)
+    gms = [_gm(q) for q in income_q[:4]]
+    if gms[0] is not None and gms[1] is not None:
+        d_bps = round((gms[0] - gms[1]) * 100)
+        trend = " → ".join(f"{g:.0f}" for g in reversed([g for g in gms if g is not None]))
+        items.append(("毛利率 GM%", "Gross margin %", f"{trend}% · QoQ {d_bps:+d}bps"))
+
+    # Operating margin trend
+    opms = [_opm(q) for q in income_q[:4]]
+    if opms[0] is not None and opms[1] is not None:
+        d_bps = round((opms[0] - opms[1]) * 100)
+        trend = " → ".join(f"{o:.1f}" for o in reversed([o for o in opms if o is not None]))
+        items.append(("營業利益率", "Operating margin", f"{trend}% · QoQ {d_bps:+d}bps"))
+
+    # EPS Diluted trend (4Q)
+    eps_list = [q.get("epsDiluted") for q in income_q[:4]]
+    if eps_list[0] is not None and eps_list[1] is not None:
+        trend = " → ".join(f"${e:.2f}" for e in reversed([e for e in eps_list if e is not None]))
+        items.append(("EPS Diluted", "EPS Diluted", trend))
+
+    items.append(("Forward guide", "Forward guide", "盤後 IR press release / call 開頭"))
+    return items
+
+
+def _merged_watch_metrics(ticker, income_q):
+    """Compose final watch list: cache-derived (segments / quality flags) prepended,
+    computed real values from income_q in middle, generic fallback only if all empty.
+    Cap at 6 chips so card stays compact."""
+    cached = _watch_metrics_from_cache(ticker) or []
+    computed = _watch_metrics_computed(income_q) or []
+    # Dedupe by zh-label; cache wins, computed fills, default fills only if both empty.
+    seen, merged = set(), []
+    for it in cached + computed:
+        if it[0] in seen:
+            continue
+        seen.add(it[0])
+        merged.append(it)
+    if not merged:
+        merged = _watch_metrics_default(ticker, income_q)
+    return merged[:6]
+
+
+def _watch_metrics_from_cache(ticker):
+    """Try to enrich watch list from earnings-analyst cache (segments / quality flags).
+    Returns enriched list or None if no cache available."""
+    cache_dir = SCRIPT_DIR.parent.parent / "earnings-analyst" / "cache"
+    if not cache_dir.exists():
+        return None
+    # Find most recent cache file matching ticker (excludes infographic.json)
+    candidates = sorted(
+        [p for p in cache_dir.glob(f"{ticker.upper()}_*.json")
+         if not p.name.endswith(".infographic.json")],
+        reverse=True,
+    )
+    if not candidates:
+        return None
+    try:
+        data = json.loads(candidates[0].read_text())
+    except Exception:
+        return None
+
+    items = []
+    # Pull segment names if available (most-recent fiscal year). FMP wraps each
+    # row as {date, fiscal_year, period, products: {Name: revenue, ...}} — drill
+    # into .products before reading keys (top-level keys are just metadata).
+    segs = (data.get("segments") or {}).get("product_fy") or []
+    if segs and isinstance(segs[0], dict):
+        seg_dict = segs[0].get("products") or {}
+        seg_names = list(seg_dict.keys())[:4]
+        if seg_names:
+            items.append(("Segment 變動", "Segment mix", f"主力 segments: {', '.join(seg_names)}"))
+
+    # Quality flags signal what to watch
+    flags = data.get("quality_flags") or []
+    if flags:
+        items.append(("Quality flags",
+                      "Quality flags",
+                      f"上季有 {len(flags)} 個品質警訊：{'/'.join(flags[:3])} — 看本季是否惡化"))
+
+    # Always-include generic
+    items.append(("營收 YoY",      "Revenue YoY",      "consensus vs 公司 guide"))
+    items.append(("毛利率 (GM%)",  "Gross margin %",   "QoQ ±100bps 看 pricing / mix"))
+    items.append(("Forward guide", "Next-Q FY guide",  "下季 / 全年 EPS / Rev range（Street 對 guide reaction）"))
+    return items[:6]
+
+
+def _format_seasonality_table(rows):
+    md = ["| Period | Date | Revenue ($B) | EPS dil. | GM% |",
+          "|---|---|---|---|---|"]
+    for r in rows:
+        rev_b = f"{r['revenue']/1e9:.2f}" if r.get("revenue") else "—"
+        eps   = f"${r['eps_diluted']:.2f}" if r.get("eps_diluted") is not None else "—"
+        gm    = f"{r['gross_margin_pct']:.1f}%" if r.get("gross_margin_pct") is not None else "—"
+        md.append(f"| {r.get('period') or '—'} | {r.get('date') or '—'} | {rev_b} | {eps} | {gm} |")
+    return "\n".join(md)
+
+
+def to_markdown_pre_earnings(p):
+    """Pre-earnings cheat sheet MD layout — focuses on what to watch THIS earnings.
+    The standard 12M scenarios become a supplementary section below.
+
+    V2.15.2: handle negative-EPS partial payload (status='ok_partial') — skip
+    forward EPS reconciliation + 12M scenarios, still render cheat sheet.
+    """
+    pe   = p.get("pre_earnings") or {}
+    nxt  = pe.get("next_earnings") or {}
+    seas = pe.get("seasonality_4q") or []
+    watch = pe.get("watch_metrics") or []
+    fe   = p.get("forward_eps") or {}
+    is_negative_eps = bool(p.get("negative_eps"))
+
+    md = []
+    md.append(f"# {p['ticker']} · Pre-Earnings Cheat Sheet")
+    md.append("")
+    if nxt.get("date"):
+        days_str = f"in {nxt['days_until']}d" if nxt.get("days_until") is not None else "?"
+        md.append(f"**Next earnings**: 📅 **{nxt['date']}** ({days_str})  ·  source: {nxt.get('source','—')}")
+    else:
+        md.append("**Next earnings**: ❓ no FMP-confirmed date in next 90 days")
+    md.append(f"**Current price**: ${p['current_price']}  ·  **TTM EPS**: ${p['ttm_eps']}"
+              + ("  ·  ⚠ **Negative TTM EPS** — 12M target price section skipped" if is_negative_eps else ""))
+    md.append("")
+
+    # Consensus block
+    md.append("## Street Consensus (本季)")
+    md.append("")
+    eps_e = nxt.get("eps_estimated")
+    rev_e = nxt.get("rev_estimated")
+    md.append(f"- **EPS estimate**: ${eps_e if eps_e is not None else 'n/a'}")
+    if rev_e is not None:
+        md.append(f"- **Revenue estimate**: ${rev_e/1e9:.2f}B")
+    else:
+        md.append("- **Revenue estimate**: n/a")
+    if not is_negative_eps and fe.get("value") is not None:
+        md.append(f"- **Forward (next-FY) EPS adopted**: ${fe['value']} ({fe.get('confidence','?')} conf)")
+    md.append("")
+
+    # Seasonality
+    md.append("## 過去 4Q Seasonality（chronological）")
+    md.append("")
+    md.append(_format_seasonality_table(seas))
+    md.append("")
+    md.append("_看本季 vs 同期 1Y 前同 quarter 的趨勢；revenue YoY 加速 / 衰退 + GM% 拉伸 / 壓縮是估值 re-rate driver。_")
+    md.append("")
+
+    # Watch metrics
+    md.append("## 本季 Watch List")
+    md.append("")
+    if watch:
+        for item in watch:
+            label_zh, label_en, hint = item if len(item) == 3 else (item[0], item[0], item[-1])
+            md.append(f"- **{label_zh}** / _{label_en}_ — {hint}")
+    else:
+        md.append("- (no specific watch list — fallback to generic revenue / margin / guide)")
+    md.append("")
+
+    # Supplementary 12M scenarios — only when scenarios present (positive EPS path)
+    s = p.get("scenarios")
+    if s:
+        md.append("## 12M Target Price (supplementary — 不直接跟本季 earnings 綁)")
+        md.append("")
+        md.append("| Scenario | 12M Target | Upside | Trigger |")
+        md.append("|---|---|---|---|")
+        for name, icon in [("bull", "🐂"), ("base", "📊"), ("bear", "🐻")]:
+            sc = s[name]
+            md.append(f"| {icon} {name.capitalize()} | ${sc['target']} | {sc['upside_pct']:+.1f}% | _{sc['achieves_if']}_ |")
+        md.append("")
+    else:
+        md.append("## 12M Target Price")
+        md.append("")
+        md.append(f"⚠ **Skipped** — TTM EPS = {p.get('ttm_eps')} (≤ 0). PE-multiple math invalid for unprofitable names.")
+        md.append("Use P/S, EV/Sales, or growth-adjusted metrics for valuation context (not in this skill's scope).")
+        md.append("")
+
+    md.append("## Caveats")
+    md.append("- Consensus EPS / Rev = FMP `/earnings` 的 `epsEstimated` / `revenueEstimated`；whisper number 不在 free plan 範圍")
+    md.append("- Watch list 來源：earnings-analyst cache（若存在）+ generic fallback；非 ticker-customized 深度研究")
+    if s:
+        md.append("- 12M target 為**長期**估值 reference，不直接預測本季 beat/miss 反應")
+    else:
+        md.append("- 12M target 因 negative EPS 跳過 — 本 skill 對 unprofitable 名單僅提供 cheat sheet 部分")
+    md.append(f"- Forecast pulled at {p['generated_at']}")
+    md.append("")
+    return "\n".join(md)
 
 
 def to_markdown(p):
@@ -543,12 +888,17 @@ def to_markdown(p):
 
 
 # ── Main ─────────────────────────────────────────────────────────────────
-def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC):
+def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
     ticker = ticker.upper().strip()
+    # Cache distinguishes pre_earnings extension via separate cache key suffix
+    # (mixing them would cause the plain-mode cache to be picked up by --pre-earnings
+    # and skip the new fields). Only check cache when pre_earnings flag matches.
     if not no_cache:
         cached = load_cache(ticker, max_age)
         if cached:
-            return cached
+            cache_has_pre = bool(cached.get("pre_earnings"))
+            if pre_earnings == cache_has_pre:
+                return cached
 
     api_key = os.environ.get("FMP_API_KEY")
     if not api_key:
@@ -568,6 +918,34 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC):
 
     ttm = _ttm_eps(income_q)
     if ttm is None or ttm <= 0:
+        # V2.15.2 — pre-earnings cheat sheet does NOT need positive EPS.
+        # Consensus + seasonality + watch list still produce useful output for
+        # unprofitable growth names (CRWV / RIVN / SOFI / RDDT). Only the 12M
+        # target price section requires PE math; skip it gracefully.
+        if pre_earnings:
+            seas = _seasonality_4q(income_q)
+            next_info = _next_earnings_info(client, ticker)
+            watch = _merged_watch_metrics(ticker, income_q)
+            ps_scen = build_ps_scenarios(income_q, current_price, quote.get("marketCap"))
+            partial = {
+                "status":        "ok_partial",
+                "ticker":        ticker,
+                "generated_at":  dt.datetime.now().isoformat(timespec="seconds"),
+                "current_price": round(current_price, 2),
+                "ttm_eps":       ttm,
+                "negative_eps":  True,
+                "pre_earnings": {
+                    "next_earnings":  next_info,
+                    "seasonality_4q": seas,
+                    "watch_metrics":  watch,
+                    "mode_version":   "V2.16",
+                },
+                "scenarios":          ps_scen,  # P/S-based fallback when EPS ≤ 0
+                "cache_hit":          False,
+                "cache_age_sec":      0,
+            }
+            write_cache(ticker, partial)
+            return partial
         return {"status":  "unsupported",
                 "reason":  "negative_or_missing_ttm_eps",
                 "ticker":  ticker,
@@ -648,6 +1026,19 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC):
         "cache_hit":     False,
         "cache_age_sec": 0,
     }
+
+    # V2.15.0 — pre-earnings extension: appended only when --pre-earnings mode requested
+    if pre_earnings:
+        seas = _seasonality_4q(income_q)
+        next_info = _next_earnings_info(client, ticker)
+        watch = _watch_metrics_from_cache(ticker) or _watch_metrics_default(ticker, income_q)
+        payload["pre_earnings"] = {
+            "next_earnings":  next_info,
+            "seasonality_4q": seas,
+            "watch_metrics":  watch,
+            "mode_version":   "V2.15.0",
+        }
+
     write_cache(ticker, payload)
     return payload
 
@@ -659,20 +1050,29 @@ def main():
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--max-age", type=int, default=DEFAULT_TTL_SEC)
     ap.add_argument("--output-dir", type=str, default=None)
+    ap.add_argument("--pre-earnings", action="store_true",
+                    help="V2.15.0 pre-earnings cheat sheet mode: next earnings date "
+                         "+ consensus EPS/Rev + 4Q seasonality + watch list. Output "
+                         "filename suffix changes to _pre_earnings.md.")
     args = ap.parse_args()
 
-    out = run(args.ticker, no_cache=args.no_cache, max_age=args.max_age)
-    if args.json_only or out.get("status") != "ok":
+    out = run(args.ticker, no_cache=args.no_cache, max_age=args.max_age,
+              pre_earnings=args.pre_earnings)
+    # V2.15.2 — accept "ok_partial" (negative-EPS pre-earnings) as success.
+    # Plain mode still requires "ok" (12M scenarios are mandatory there).
+    ok_statuses = ("ok",) if not args.pre_earnings else ("ok", "ok_partial")
+    if args.json_only or out.get("status") not in ok_statuses:
         print(to_json(out))
-        sys.exit(0 if out.get("status") == "ok" else 1)
+        sys.exit(0 if out.get("status") in ok_statuses else 1)
 
-    md = to_markdown(out)
+    md = to_markdown_pre_earnings(out) if args.pre_earnings else to_markdown(out)
     print(md)
     if args.output_dir:
         d = Path(args.output_dir)
         d.mkdir(parents=True, exist_ok=True)
         stamp = dt.datetime.now().strftime("%Y%m%d")
-        outpath = d / f"{stamp}_{out['ticker']}_valuation.md"
+        suffix = "pre_earnings" if args.pre_earnings else "valuation"
+        outpath = d / f"{stamp}_{out['ticker']}_{suffix}.md"
         outpath.write_text(md)
         print(f"\n[wrote] {outpath}", file=sys.stderr)
 

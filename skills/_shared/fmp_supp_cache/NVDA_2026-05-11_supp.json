@@ -1,0 +1,170 @@
+{
+  "ticker": "NVDA",
+  "as_of_date": "2026-05-11",
+  "cache_key": "NVDA_2026-05-11",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 68.23405595040997,
+    "piotroskiScore": 6,
+    "altman_zone": "safe",
+    "piotroski_strength": "moderate",
+    "workingCapital": 93442000000,
+    "totalAssets": 206803000000,
+    "retainedEarnings": 146973000000,
+    "ebit": 141709000000,
+    "totalLiabilities": 49510000000,
+    "revenue": 215938000000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q4",
+    "as_of_date": "2026-01-25",
+    "ownersEarnings": 37271238243,
+    "ownersEarningsPerShare": 1.53,
+    "maintenanceCapex": 1083238243,
+    "growthCapex": -2367238243,
+    "averagePPE": 0.08220719,
+    "qoq_growth": 0.5583,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0.163,
+        "total_acquired_shares": 60494159,
+        "total_disposed_shares": 31467354,
+        "acquired_transactions": 15,
+        "disposed_transactions": 92,
+        "total_purchases": 0,
+        "total_sales": 84
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "acquired_disposed_ratio": 0.0099,
+        "total_acquired_shares": 9639142,
+        "total_disposed_shares": 53465000,
+        "acquired_transactions": 2,
+        "disposed_transactions": 203,
+        "total_purchases": 0,
+        "total_sales": 190
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 0,
+        "total_disposed_shares": 9513891,
+        "acquired_transactions": 0,
+        "disposed_transactions": 326,
+        "total_purchases": 0,
+        "total_sales": 315
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "acquired_disposed_ratio": 0.1463,
+        "total_acquired_shares": 21588,
+        "total_disposed_shares": 4986303,
+        "acquired_transactions": 12,
+        "disposed_transactions": 82,
+        "total_purchases": 0,
+        "total_sales": 75
+      }
+    ],
+    "latest_trend": "distributing",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {},
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 7,
+    "house_count": 15,
+    "buy_count": 9,
+    "sell_count": 13,
+    "net_signal": "neutral",
+    "most_recent_date": "2026-04-08",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {},
+  "executive_compensation": {
+    "latest_year": 2025,
+    "top_5_executives": [
+      {
+        "name": "Jen-Hsun Huang President and CEO",
+        "year": 2025,
+        "salary": 1486199,
+        "bonus": 0,
+        "stock_award": 38811306,
+        "option_award": 0,
+        "total": 49866251
+      },
+      {
+        "name": "Ajay K. Puri EVP, Worldwide Field Operations",
+        "year": 2025,
+        "salary": 943391,
+        "bonus": 0,
+        "stock_award": 19277046,
+        "option_award": 0,
+        "total": 21590897
+      },
+      {
+        "name": "Colette M. Kress EVP and CFO",
+        "year": 2025,
+        "salary": 893739,
+        "bonus": 0,
+        "stock_award": 19849891,
+        "option_award": 0,
+        "total": 21362532
+      },
+      {
+        "name": "Debora Shoquist EVP, Operations",
+        "year": 2025,
+        "salary": 844087,
+        "bonus": 0,
+        "stock_award": 17838832,
+        "option_award": 0,
+        "total": 19217903
+      },
+      {
+        "name": "Timothy S. Teter EVP, General Counsel and Secretary",
+        "year": 2025,
+        "salary": 844087,
+        "bonus": 0,
+        "stock_award": 17838832,
+        "option_award": 0,
+        "total": 19201821
+      }
+    ],
+    "ceo_total_latest": 49866251,
+    "ceo_yoy_pct": 45.9,
+    "ceo_red_flag": true,
+    "source": "FMP /stable/governance-executive-compensation"
+  },
+  "comp_benchmark": {},
+  "employee_history": {
+    "latest_period": "2026-01-25",
+    "latest_count": 42000,
+    "one_year_pct": 16.7,
+    "cagr_5y_pct": 16.9,
+    "expansion_signal": true,
+    "layoff_signal": false,
+    "data_points": 28,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 2,
+    "cached": false
+  }
+}

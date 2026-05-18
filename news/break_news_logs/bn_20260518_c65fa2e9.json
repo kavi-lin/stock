@@ -1,0 +1,557 @@
+{
+  "news_id": "bn_20260518_c65fa2e9",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T09:22:06Z",
+  "last_activity_ts": "2026-05-18T09:38:05Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/currencies/articles/global-banks-raise-yuan-forecasts-075406057.html",
+    "feed_fingerprint": "global banks raise yuan forecasts fuelled china s",
+    "published": "2026-05-18T07:54:06+00:00",
+    "url_hash": "sha1:d791e381b8b4aa99759965ccd7f5fa223f0d16c9"
+  },
+  "headline": "Global banks raise yuan forecasts, fuelled by China's export strength and stable US ties",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 1.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:36:21Z",
+      "latency_ms": 28684,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "全球投行上調人民幣預測，核心訊號是**出口韌性 + 中美關係趨穩**雙因子。對美股的傳導：人民幣升值壓低中國進口成本、提振內需，**在華營收占比高的美企**（AAPL、TSLA、NKE、SBUX）匯兌與終端需求同時受惠。中美關係穩定更關鍵 — 直接降低關稅與科技管制升級的尾端風險，對中國敞口大的半導體鏈（NVDA、AMD、QCOM）形成估值修復空間。同時弱美元利多新興市場與以美元計價的工業金屬。中概 ADR（BABA、PDD、JD）為最直接 beta。風險在於投行預測本身落後於價格，且匯率與地緣兩條敘事均可能逆轉。",
+        "bull_points": [
+          "中美關係穩定降低關稅與晶片管制尾端風險",
+          "人民幣升值提振中國內需，利多在華營收美企",
+          "弱美元利多新興市場與工業金屬"
+        ],
+        "bear_points": [
+          "投行匯率預測常落後於實際價格走勢",
+          "地緣與匯率敘事任一逆轉即回吐漲幅",
+          "人民幣升值侵蝕中國出口商價格競爭力"
+        ],
+        "final_take": "結構偏多中概與半導體，但靠敘事不靠基本面、需設停損",
+        "entities": {
+          "tickers": [
+            "BABA",
+            "PDD",
+            "JD",
+            "NVDA",
+            "AAPL",
+            "TSLA"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Information Technology",
+            "Materials",
+            "Financials"
+          ],
+          "themes": [
+            "yuan strength",
+            "US-China trade",
+            "EM FX",
+            "China consumption"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BABA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:yuan-strength"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-consumption"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-consumption"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "傳導路徑清晰，但屬地緣敘事層、無基本面確認"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T09:36:38Z",
+      "latency_ms": 16974,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除前述營收效應外，人民幣升值對於美國**製造業成本端**具有非對稱的衝擊。對於高度依賴中國供應鏈的工業龍頭（如 **CAT**、**DE**），人民幣走強意味著輸入性成本（零件採購）變貴，這將直接壓抑其毛利率，形成典型的「匯兌逆風」。此外，強勢人民幣為中國人民銀行 (PBOC) 提供了更寬裕的幣策空間，可能推升中國內部的工業需求，進而帶動全球原物料價格，形成通膨壓力再分配的循環。",
+        "bull_points": [
+          "提振跨國企業人民幣計價的中國消費營收",
+          "PBOC獲得更大的貨幣寬鬆與刺激空間"
+        ],
+        "bear_points": [
+          "加劇美國進口商的輸入性成本通膨壓力",
+          "壓縮高度依賴中國零件製造商的毛利率"
+        ],
+        "final_take": "升值利好跨國營收，但美國本土製造業需面臨成本上升風險。",
+        "entities": {
+          "tickers": [
+            "CAT",
+            "DE",
+            "AAPL"
+          ],
+          "sectors": [
+            "Industrials",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Macro",
+            "Trade"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:CAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:strong_yuan"
+          },
+          {
+            "subject": "narrative:strong_yuan",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:pboc_stimulus"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新增人民幣升值對美國製造業輸入性成本及PBOC政策空間的影響分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:37:07Z",
+      "latency_ms": 29084,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面漏掉的直接受惠節點：**澳門博彩股 (LVS、WYNN)**。澳門營收以港幣計價、但客源購買力綁人民幣 — 人民幣升值=中國旅客可支配購買力放大,VIP 與中場賭收同步受惠,這比 AAPL 那種匯兌轉換更直接。再補一個二階效應：人民幣走強會**反轉中國對美輸出的『輸入性通縮』**。過去十年中國廉價出口壓低美國商品 CPI,人民幣升值後這條通縮管道收窄,美國商品物價下行動能減弱,對 Fed 降息路徑形成隱性阻力 — 這是利多敘事裡被忽略的鷹派副作用。投行上調預測本身落後於現貨,且博彩敞口同時暴露於中國監管風險。",
+        "bull_points": [
+          "人民幣升值放大中國旅客購買力,直接利多 LVS、WYNN 澳門賭收",
+          "中美關係穩定降低博彩牌照與跨境資金尾端風險",
+          "強人民幣支撐中國內需消費升級循環"
+        ],
+        "bear_points": [
+          "人民幣升值收窄中國輸美通縮管道,阻礙 Fed 降息",
+          "博彩股額外暴露中國博彩監管與反腐風險",
+          "投行匯率預測落後現貨,追高風險高"
+        ],
+        "final_take": "看多博彩旅遊敞口,但留意輸入性通膨反轉的鷹派副作用",
+        "entities": {
+          "tickers": [
+            "LVS",
+            "WYNN",
+            "AAPL"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Hotels Restaurants & Leisure"
+          ],
+          "themes": [
+            "yuan appreciation",
+            "China consumer",
+            "imported disinflation reversal"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:LVS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:yuan-appreciation"
+          },
+          {
+            "subject": "ticker:WYNN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-consumer"
+          },
+          {
+            "subject": "narrative:imported-disinflation-reversal",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:yuan-appreciation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "澳門博彩 + 輸入性通縮反轉均為前文未提之新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T09:37:22Z",
+      "latency_ms": 15470,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "先前討論聚焦於單一企業的匯兌效應與終端通縮，但忽略了**宏觀資金流動性**。人民幣作為新興市場貨幣的『錨』，其走強通常伴隨著全球資金對亞太資產的重估。隨著市場預期修正，新興市場 ETF（如 **EEM**、**VWO**）可能成為資金避風港，促使資金從美元資產外溢。此趨勢若持續，將降低新興市場整體的風險溢價，對擁有強大亞太營收與供應鏈的企業構成估值重塑，而非僅止於損益表的匯兌轉換。",
+        "bull_points": [
+          "帶動EM資產資金流入",
+          "降低新興市場風險溢價"
+        ],
+        "bear_points": [
+          "資金外溢可能稀釋美股買盤",
+          "強化RMB抑制全球資本回流"
+        ],
+        "final_take": "RMB走強加速資金轉向新興市場，注意美股資金配置。",
+        "entities": {
+          "tickers": [
+            "EEM",
+            "VWO"
+          ],
+          "sectors": [
+            "Financials",
+            "Emerging Markets"
+          ],
+          "themes": [
+            "Capital Flows",
+            "Emerging Markets"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:yuan_strengthening",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:EEM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出資金從美股外溢至新興市場的宏觀視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:37:54Z",
+      "latency_ms": 31408,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面聚焦中企輸入美國的成本與資金流，漏了**鏡像那一面 — 美國對中出口商**。人民幣升值直接放大中國買家對美元計價商品的購買力,加上中美關係趨穩可望解凍採購承諾,兩個最具體的受惠節點是**農產出口**(ADM、Bunge BG)與**波音 BA**。中國買家以人民幣計算的大豆、玉米、飛機變便宜,訂單能見度回升。這正好反駁 GEMINI 的『匯兌逆風』單向論 — 對 CAT/DE 是進口零件變貴,但對純出口端的 ADM/BA 是不折不扣的順風。風險:採購承諾屬政治籌碼,談判破裂可瞬間撤回,且農產還受天候與庫存週期干擾。",
+        "bull_points": [
+          "人民幣升值放大中國買家對美元計價商品購買力",
+          "中美關係趨穩可解凍農產與飛機採購承諾",
+          "BA 中國機隊訂單具重啟空間,訂單能見度回升"
+        ],
+        "bear_points": [
+          "對中採購承諾屬政治籌碼,談判破裂即撤回",
+          "農產出口另受天候與全球庫存週期干擾",
+          "投行匯率預測落後現貨,順風敘事恐已部分定價"
+        ],
+        "final_take": "看多美國對中出口端,但採購承諾兌現需觀察談判進度",
+        "entities": {
+          "tickers": [
+            "ADM",
+            "BG",
+            "BA",
+            "CAT",
+            "DE"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Industrials",
+            "Materials"
+          ],
+          "themes": [
+            "yuan appreciation",
+            "US-China trade",
+            "agricultural exports"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:ADM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:yuan-appreciation"
+          },
+          {
+            "subject": "ticker:BG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-trade-thaw"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-trade-thaw"
+          },
+          {
+            "subject": "ticker:ADM",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:china-ag-imports"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增美國對中出口端(農產/波音)順風,反駁單向匯兌逆風論"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T09:38:05Z",
+      "latency_ms": 11748,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "人民幣升值除了先前討論的消費與工業外，對**全球高端奢侈品 (Luxury Goods)** 的推動力尤為關鍵。Estee Lauder (EL) 與 Tapestry (TPR) 等公司，其在中國市場的獲利占比極高，且產品具備強大的**品牌定價權 (Pricing Power)**。人民幣走強能直接提升中國消費者的購買力，降低高端產品在當地的心理門檻。相比一般零售品，奢侈品更能將匯率利多轉化為營業利益率擴張。然而，需警惕本土品牌崛起帶來的市占率縮減與消費結構變化風險。",
+        "bull_points": [
+          "提升中國消費者的奢侈品可支配購買力。",
+          "高端品牌具定價權，匯兌利多轉化為利潤。"
+        ],
+        "bear_points": [
+          "本土奢侈品牌競爭可能侵蝕市占率。",
+          "中國反腐或消費降級趨勢仍為風險。"
+        ],
+        "final_take": "人民幣看升有利奢侈品毛利擴張，但需留意品牌市佔壓力。",
+        "entities": {
+          "tickers": [
+            "EL",
+            "TPR",
+            "PVH"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "Chinese consumer spending",
+            "Pricing power"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:EL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:cny_appreciation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "討論奢侈品在匯率與定價權的獨特優勢，與前述零售股不同。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "ADM",
+        "BA",
+        "BABA",
+        "BG",
+        "CAT",
+        "DE",
+        "EEM",
+        "EL",
+        "JD",
+        "LVS",
+        "NVDA",
+        "PDD",
+        "PVH",
+        "TPR",
+        "TSLA",
+        "VWO",
+        "WYNN"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Emerging Markets",
+        "Financials",
+        "Hotels Restaurants & Leisure",
+        "Industrials",
+        "Information Technology",
+        "Materials"
+      ],
+      "themes": [
+        "Capital Flows",
+        "China consumer",
+        "China consumption",
+        "Chinese consumer spending",
+        "EM FX",
+        "Emerging Markets",
+        "Macro",
+        "Pricing power",
+        "Trade",
+        "US-China trade",
+        "agricultural exports",
+        "imported disinflation reversal",
+        "yuan appreciation",
+        "yuan strength"
+      ],
+      "tech_keywords": []
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BABA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:yuan-strength"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-consumption"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-consumption"
+      },
+      {
+        "subject": "ticker:CAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:strong_yuan"
+      },
+      {
+        "subject": "narrative:strong_yuan",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:pboc_stimulus"
+      },
+      {
+        "subject": "ticker:LVS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:yuan-appreciation"
+      },
+      {
+        "subject": "ticker:WYNN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-consumer"
+      },
+      {
+        "subject": "narrative:imported-disinflation-reversal",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:yuan-appreciation"
+      },
+      {
+        "subject": "narrative:yuan_strengthening",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:EEM"
+      },
+      {
+        "subject": "ticker:ADM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:yuan-appreciation"
+      },
+      {
+        "subject": "ticker:BG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-trade-thaw"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-trade-thaw"
+      },
+      {
+        "subject": "ticker:ADM",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:china-ag-imports"
+      },
+      {
+        "subject": "ticker:EL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:cny_appreciation"
+      }
+    ],
+    "bull_summary": [
+      "中美關係穩定降低關稅與晶片管制尾端風險",
+      "人民幣升值提振中國內需，利多在華營收美企",
+      "弱美元利多新興市場與工業金屬",
+      "提振跨國企業人民幣計價的中國消費營收",
+      "PBOC獲得更大的貨幣寬鬆與刺激空間",
+      "人民幣升值放大中國旅客購買力,直接利多 LVS、WYNN 澳門賭收"
+    ],
+    "bear_summary": [
+      "投行匯率預測常落後於實際價格走勢",
+      "地緣與匯率敘事任一逆轉即回吐漲幅",
+      "人民幣升值侵蝕中國出口商價格競爭力",
+      "加劇美國進口商的輸入性成本通膨壓力",
+      "壓縮高度依賴中國零件製造商的毛利率",
+      "人民幣升值收窄中國輸美通縮管道,阻礙 Fed 降息"
+    ],
+    "final_take": "人民幣看升有利奢侈品毛利擴張，但需留意品牌市佔壓力。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T09:38:05Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: SUPPLIES_TO; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

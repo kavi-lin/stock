@@ -1,0 +1,648 @@
+{
+  "news_id": "bn_20260514_ec21ab0c",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T00:48:00Z",
+  "last_activity_ts": "2026-05-14T00:59:12Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/0cb0b7f4d479",
+    "feed_fingerprint": "futu:CSCO:81d76773a8",
+    "published": "2026-05-14T08:36:25+08:00",
+    "url_hash": "sha1:e36ca8b81796fc09327065321e544435f9fc6602"
+  },
+  "headline": "思科夜盤飆升近20%，本季和全年指引全面超預期、AI訂單大幅上調，擬聚焦AI重組",
+  "headline_zh": null,
+  "raw_summary": "思科夜盤飆升近20%，本季和全年指引全面超預期、AI訂單大幅上調，擬聚焦AI重組>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-14T00:57:25Z",
+      "latency_ms": 21493,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco +20% afterhours on guide-up + AI order book step-up is a **second-derivative AI infra signal** — networking layer finally monetizing hyperscaler buildout. Key read: AI order backlog upgrade implies Ethernet-for-AI (Silicon One, 800G) winning share vs InfiniBand in non-NVIDIA fabrics. Bullish read-through: **ANET** (direct comp, may sell off on share-loss fear OR rally on TAM expansion — watch tape), **AVGO** (Tomahawk 5/Jericho3-AI switching silicon, Cisco's merchant alt), **MRVL** (DSP/optical for 800G/1.6T), **CRDO/ALAB** (AECs, retimers). Headwind: **JNPR** (Cisco closing acquisition — execution risk now spotlit), **HPE** (Juniper deal exposure). 'AI restructuring' = cost-out + AI focus, classic Robbins playbook. Sector: Tech / Networking. Watch CSCO open print — fade risk if +20% gaps into resistance.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "ANET",
+            "AVGO",
+            "MRVL",
+            "CRDO",
+            "ALAB",
+            "JNPR",
+            "HPE",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "AI networking",
+            "Ethernet-for-AI",
+            "hyperscaler buildout",
+            "corporate restructuring"
+          ],
+          "tech_keywords": [
+            "Silicon One",
+            "800G Ethernet",
+            "1.6T Ethernet",
+            "Tomahawk 5",
+            "Jericho3-AI",
+            "InfiniBand",
+            "AEC",
+            "DSP"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-networking-capex"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:ANET"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:AVGO"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ethernet-for-ai"
+          },
+          {
+            "subject": "ticker:MRVL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:800g-optical"
+          },
+          {
+            "subject": "ticker:JNPR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cisco-ai-pivot"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "Guide-up + AI order upgrade is genuine read-through to networking silicon stack; restructuring framing adds margin angle. Tape risk on +20% gap."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-14T00:57:41Z",
+      "latency_ms": 15928,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco's impressive performance underscores the growing importance of high-speed optical components, vital for enabling the next wave of AI data center networking. While silicon ASICs and switching fabrics are critical, the underlying photonic technologies powering 800G and future terabit transceivers are equally indispensable. This trend presents a significant tailwind for specialized optical component manufacturers, such as Coherent Corp. (COHR), whose products are fundamental to building out this advanced AI infrastructure. The increased demand for these optical building blocks is directly linked to the scale of hyperscaler AI investments.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "COHR"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Technology Hardware, Storage, and Peripherals"
+          ],
+          "themes": [
+            "AI infrastructure buildout",
+            "high-speed networking",
+            "optical components for AI"
+          ],
+          "tech_keywords": [
+            "800G optical transceivers",
+            "photonic integrated circuits",
+            "AI data center networking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:demand for advanced optical components"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:demand for high-speed optical transceivers"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CSCO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focus on optical component suppliers like COHR enabling Cisco's AI networking hardware growth."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-14T00:57:59Z",
+      "latency_ms": 17511,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle: **CSCO Splunk synergy monetization** is the under-discussed lever. AI restructuring + guide-up likely reflects Splunk cross-sell ramping (observability + security telemetry feeding AI ops) — first clean print since the $28B deal closed. Read-through to **observability cohort**: **DDOG** (competitive pressure as CSCO bundles Splunk into enterprise networking deals — HEADWIND), **DT**, **S** (SentinelAI overlap with Splunk SIEM). 2nd-order: **PANW**'s XSIAM moat narrows if Splunk-AI bundle undercuts on price. Also contra to prior optical bull case — if CSCO's AI orders are weighted toward **campus/enterprise** AI (not hyperscaler), COHR/ANET read-through weaker than tape implies. Watch transcript for hyperscaler vs enterprise mix disclosure. Cisco's 'restructuring' historically = headcount cuts funding M&A; net positive FCF.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "DDOG",
+            "DT",
+            "S",
+            "PANW",
+            "SPLK",
+            "ANET",
+            "COHR"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Equipment",
+            "Software"
+          ],
+          "themes": [
+            "AI infrastructure monetization",
+            "observability consolidation",
+            "enterprise AI",
+            "SIEM bundling"
+          ],
+          "tech_keywords": [
+            "Splunk SIEM",
+            "XSIAM",
+            "Silicon One",
+            "800G Ethernet"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:DDOG"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:PANW"
+          },
+          {
+            "subject": "ticker:DDOG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:splunk-ai-bundle"
+          },
+          {
+            "subject": "ticker:PANW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:splunk-ai-bundle"
+          },
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:enterprise-ai-networking"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "Prior thread covered networking silicon + optical. Splunk cross-sell + observability/SIEM competitive headwind is untouched 2nd-order angle with named tickers."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-14T00:58:17Z",
+      "latency_ms": 18524,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco's surge highlights the massive buildout of AI data center infrastructure, extending beyond core components. The extreme speeds and complexity of 800G+ AI networking demand rigorous validation. This creates a significant tailwind for specialized test and measurement providers like Keysight Technologies (KEYS). Their advanced equipment is crucial for ensuring the performance, reliability, and compliance of next-generation optical transceivers, ASICs, and network interfaces that underpin these hyperscale AI deployments. As Cisco ups its AI order book, the underlying test infrastructure must scale in lockstep, presenting a compelling secondary demand signal.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "KEYS"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI Infrastructure",
+            "High-Speed Networking",
+            "Network Testing & Validation"
+          ],
+          "tech_keywords": [
+            "800G",
+            "AI Networking",
+            "Network Test Equipment"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CSCO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI_Infrastructure_Buildout"
+          },
+          {
+            "subject": "ticker:KEYS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI_Networking_Testing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Introduced Keysight Technologies (KEYS) as a beneficiary of the AI networking test and validation demand."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-14T00:58:39Z",
+      "latency_ms": 21639,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Fresh angle missed by thread: **CSCO guide-up + AI restructuring is a stealth read-through to enterprise power/thermal supply chain**, not just silicon/optical/test. Cisco's AI orders skew toward **sovereign AI + tier-2 cloud + enterprise edge** racks (per recent commentary) — these need 50-100kW rack densities, driving **VRT** (Vertiv liquid cooling + busways), **ETN** (Eaton switchgear/PDU), and **nVent (NVT)** rack thermal. Contra to Gemini's optical bull case: if Cisco AI mix is enterprise-weighted (not hyperscaler), **COHR/LITE** read-through is muted — enterprise uses pluggable 400G, not 1.6T LPO/CPO. Also overlooked: **ALE.PA / Nokia** competitive squeeze in service-provider routing as CSCO redirects R&D to AI. Watch CSCO's enterprise vs SP segment split on call — that's the tell on which supply chain wins.",
+        "entities": {
+          "tickers": [
+            "CSCO",
+            "VRT",
+            "ETN",
+            "NVT",
+            "COHR",
+            "LITE",
+            "NOK"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "enterprise AI",
+            "sovereign AI",
+            "data center power",
+            "liquid cooling"
+          ],
+          "tech_keywords": [
+            "800G",
+            "1.6T",
+            "LPO",
+            "CPO",
+            "liquid cooling",
+            "busway",
+            "PDU",
+            "Silicon One"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-ai-rack-density"
+          },
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-ai-rack-density"
+          },
+          {
+            "subject": "ticker:NVT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:enterprise-ai-rack-density"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:enterprise-vs-hyperscaler-mix"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:enterprise-vs-hyperscaler-mix"
+          },
+          {
+            "subject": "ticker:NOK",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CSCO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Power/thermal supply chain (VRT/ETN/NVT) untouched; enterprise-vs-hyperscaler mix is genuine contra to optical bull thesis."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-14T00:59:12Z",
+      "latency_ms": 33035,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cisco's surge, driven by AI infrastructure demand and guide-up, directly benefits platforms like Snowflake (SNOW). As network speeds increase, the efficiency of data ingestion and processing for AI/ML workloads on Snowflake's data cloud significantly improves. This accelerated data movement is critical for training complex models and enabling real-time AI applications, making Snowflake's data lakehouse architecture more powerful and scalable. The enhanced networking infrastructure essentially acts as a force multiplier for data-centric AI initiatives.",
+        "entities": {
+          "tickers": [
+            "SNOW"
+          ],
+          "sectors": [
+            "Technology",
+            "Software - Infrastructure Software"
+          ],
+          "themes": [
+            "AI Data Platforms",
+            "AI Infrastructure",
+            "Data Cloud"
+          ],
+          "tech_keywords": [
+            "AI model training",
+            "data lakehouse",
+            "high-speed networking",
+            "data processing",
+            "MLOps"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Hyperscaler AI infrastructure buildout"
+          },
+          {
+            "subject": "ticker:SNOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:High-speed networking for data processing"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Data platform enablement via enhanced AI networking infrastructure."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ALAB",
+        "ANET",
+        "AVGO",
+        "COHR",
+        "CRDO",
+        "CSCO",
+        "DDOG",
+        "DT",
+        "ETN",
+        "HPE",
+        "JNPR",
+        "KEYS",
+        "LITE",
+        "MRVL",
+        "NOK",
+        "NVDA",
+        "NVT",
+        "PANW",
+        "S",
+        "SNOW",
+        "SPLK",
+        "VRT"
+      ],
+      "sectors": [
+        "Communication Equipment",
+        "Communications Equipment",
+        "Industrials",
+        "Information Technology",
+        "Software",
+        "Software - Infrastructure Software",
+        "Technology",
+        "Technology Hardware, Storage, and Peripherals"
+      ],
+      "themes": [
+        "AI Data Platforms",
+        "AI Infrastructure",
+        "AI capex",
+        "AI infrastructure buildout",
+        "AI infrastructure monetization",
+        "AI networking",
+        "Data Cloud",
+        "Ethernet-for-AI",
+        "High-Speed Networking",
+        "Network Testing & Validation",
+        "SIEM bundling",
+        "corporate restructuring",
+        "data center power",
+        "enterprise AI",
+        "high-speed networking",
+        "hyperscaler buildout",
+        "liquid cooling",
+        "observability consolidation",
+        "optical components for AI",
+        "sovereign AI"
+      ],
+      "tech_keywords": [
+        "1.6T",
+        "1.6T Ethernet",
+        "800G",
+        "800G Ethernet",
+        "800G optical transceivers",
+        "AEC",
+        "AI Networking",
+        "AI data center networking",
+        "AI model training",
+        "CPO",
+        "DSP",
+        "InfiniBand",
+        "Jericho3-AI",
+        "LPO",
+        "MLOps",
+        "Network Test Equipment",
+        "PDU",
+        "Silicon One",
+        "Splunk SIEM",
+        "Tomahawk 5",
+        "XSIAM",
+        "busway",
+        "data lakehouse",
+        "data processing",
+        "high-speed networking",
+        "liquid cooling",
+        "photonic integrated circuits"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-networking-capex"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:ANET"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:AVGO"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ethernet-for-ai"
+      },
+      {
+        "subject": "ticker:MRVL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:800g-optical"
+      },
+      {
+        "subject": "ticker:JNPR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cisco-ai-pivot"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:networking"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:demand for advanced optical components"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:demand for high-speed optical transceivers"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:DDOG"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:PANW"
+      },
+      {
+        "subject": "ticker:DDOG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:splunk-ai-bundle"
+      },
+      {
+        "subject": "ticker:PANW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:splunk-ai-bundle"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:enterprise-ai-networking"
+      },
+      {
+        "subject": "ticker:CSCO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI_Infrastructure_Buildout"
+      },
+      {
+        "subject": "ticker:KEYS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI_Networking_Testing"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-ai-rack-density"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-ai-rack-density"
+      },
+      {
+        "subject": "ticker:NVT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:enterprise-ai-rack-density"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:enterprise-vs-hyperscaler-mix"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:enterprise-vs-hyperscaler-mix"
+      },
+      {
+        "subject": "ticker:NOK",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CSCO"
+      },
+      {
+        "subject": "ticker:SNOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Hyperscaler AI infrastructure buildout"
+      },
+      {
+        "subject": "ticker:SNOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:High-speed networking for data processing"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T00:59:12Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

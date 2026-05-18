@@ -1,0 +1,440 @@
+{
+  "news_id": "bn_20260517_bfb71085",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-17T16:09:48Z",
+  "last_activity_ts": "2026-05-17T16:18:07Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/markets/stocks/articles/mark-cuban-ve-gotten-beat-130000617.html",
+    "feed_fingerprint": "mark cuban i ve gotten beat after investing",
+    "published": "2026-05-17T13:00:00+00:00",
+    "url_hash": "sha1:bfbbf4c87a336ea08da4eca6b61e88f93db3de3a"
+  },
+  "headline": "Mark Cuban: 'I’ve gotten beat.' After investing 20M into his first 85 Shark Tank investments they lost money",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T16:16:24Z",
+      "latency_ms": 21191,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這則新聞**毫無公開市場影響**。Mark Cuban 談的是《Shark Tank》早期創投——85 筆私人天使投資、累積投入 2000 萬美元卻虧損，這屬個人創投組合的倖存者偏差自白，不涉及任何上市標的、財報或政策。Pre-triage 把它歸為 sentiment、shallow_score 1.0 是正確的：**沒有可交易訊號**。唯一可借鏡的是創投基本算術——天使投資多數歸零、報酬靠少數本壘打撐起,這對散戶配置私募/pre-IPO 部位是風險提醒,但與二級市場 NVDA、AI capex 那類主題完全脫鉤。建議下游直接降權,不必進入 debate 深挖。",
+        "bull_points": [
+          "提醒投資人創投靠少數本壘打,有助理性配置"
+        ],
+        "bear_points": [
+          "純人物情緒新聞,無上市標的可交易訊號",
+          "天使投資多數歸零,私募部位風險偏高"
+        ],
+        "final_take": "雜訊新聞,無市場影響,建議降權略過",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [
+            "venture capital",
+            "angel investing"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.88,
+        "rationale_short": "個人創投自白,無上市標的,零交易訊號"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-17T16:16:40Z",
+      "latency_ms": 16267,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "新聞內容雖為歷史回顧，但揭示了散戶常忽略的「名人投資倖存者偏差」。Cuban 作為 AI 與醫療科技的高聲量倡議者，其投機色彩較濃的投資風格，可能帶動零售資本盲目投入高風險的非上市 AI 創業項目。這類指標人物的言論容易引導散戶資金過度集中於特定敘事，進而加劇相關產業鏈（如數位醫療）在公開市場上的散戶投機性波動，是二級市場分析中不可忽視的「情緒錨點」風險。",
+        "bull_points": [
+          "名人投資敘事有助於提升新興技術關注度",
+          "投資者警示有助於散戶反思風險配置"
+        ],
+        "bear_points": [
+          "盲目追隨名人投資策略導致散戶風險集中",
+          "過度聚焦個人敘事掩蓋了技術基本面風險"
+        ],
+        "final_take": "指標人物情緒錨點效應明顯，需提防散戶跟風波動。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Healthcare",
+            "Technology"
+          ],
+          "themes": [
+            "Retail Sentiment",
+            "AI"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:mark_cuban",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:retail_volatility"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "分析名人敘事對二級市場散戶情緒的潛在引導效應。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T16:17:11Z",
+      "latency_ms": 31106,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面兩位都沒碰的**二階角度**:這類名人公開認賠的時點，本身是私募估值週期的逆向情緒標記。2025-26 一級市場 AI 新創估值偏熱，當高聲量天使主動揭露虧損、強調「打本壘打靠少數」，傳遞的其實是**私募估值紀律回歸**訊號——與 Gemini 說的「煽動散戶 FOMO」方向相反。對二級市場真正的傳導點不是數位醫療，而是 **AI 新創 IPO 窗口**:若私募 markdown 情緒擴散，像 CoreWeave 這類靠一級市場高估值撐起的 AI 算力新股,後續 IPO pipeline 定價會被壓縮。對散戶的可操作結論仍是:這是配置提醒,不是交易訊號。",
+        "bull_points": [
+          "名人認賠揭露利於私募估值紀律回歸,降低泡沫風險",
+          "強化公開市場指數投資相對私募的吸引力"
+        ],
+        "bear_points": [
+          "私募 markdown 情緒擴散恐壓縮 AI 新股 IPO 定價",
+          "一級市場 AI 估值偏熱,後續 pre-IPO 部位風險升高"
+        ],
+        "final_take": "無交易訊號;僅作私募估值降溫的逆向情緒參考",
+        "entities": {
+          "tickers": [
+            "CRWV"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "venture valuation",
+            "IPO window"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:CRWV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:private-valuation-markdown"
+          }
+        ],
+        "done": false,
+        "confidence": 0.42,
+        "rationale_short": "新增二階角度:私募估值降溫傳導至 AI 新股 IPO 窗口"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-17T16:17:23Z",
+      "latency_ms": 11772,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cuban 承認早期創投虧損，實質上反映其投資範式的徹底轉變：從廣泛撒網的消費品 VC，轉向專注 AI 驅動的**垂直整合醫療模式** (如 Cost Plus Drug Company)。此行為揭示了高聲量指標人物對「AI 精準醫療」的高信心，這對傳統 PBM（醫藥福利管理）產業構成潛在的結構性挑戰。相較於純粹的情緒面操作，Cuban 將資本與個人品牌綁定在 AI 醫療基建，這對 CVS、UNH 等依賴傳統藥價中間商模式的企業而言，是更深層的競爭與估值重塑壓力。",
+        "bull_points": [
+          "AI 醫療垂直整合提升產業效率",
+          "醫療成本透明化長期利好科技板塊"
+        ],
+        "bear_points": [
+          "傳統 PBM 藥價差利潤模式面臨重塑",
+          "大型醫療服務商估值溢價受結構性衝擊"
+        ],
+        "final_take": "Cuban 轉向 AI 醫療，對傳統 PBM 構成長期利空。",
+        "entities": {
+          "tickers": [
+            "CVS",
+            "UNH",
+            "CI"
+          ],
+          "sectors": [
+            "Healthcare"
+          ],
+          "themes": [
+            "AI healthcare"
+          ],
+          "tech_keywords": [
+            "AI",
+            "cost_plus_model"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CVS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cost_plus_pharmacy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析Cuban轉型對PBM模式的結構性衝擊。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T16:17:55Z",
+      "latency_ms": 31959,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面三輪都沒點到的**具體上市標的**:零售化私募交易平台。Cuban 公開「85 筆天使投資累虧 2000 萬」這組數據，最直接衝擊的不是數位醫療或 IPO 定價，而是近年主打「散戶也能買 pre-IPO」的平台——**Forge Global (FRGE)** 的私募二級市場撮合、**SOFI** 的另類資產零售通路。這類商業模式的成長故事建立在「散戶相信自己能複製創投報酬」之上;當高聲量天使親口示範連專業人士都多數歸零，等於替監管與媒體提供現成的風險教育素材，是 FRGE 撮合量、SOFI alts AUM 的**敘事逆風**。方向上反駁 Gemini 的「煽動 FOMO」——名人認賠對零售私募分銷是降溫劑而非助燃劑。仍屬情緒層,非交易訊號。",
+        "bull_points": [
+          "創投紀律教育有助長期降低散戶踩雷率",
+          "私募降溫利於資金回流流動性高的二級市場ETF"
+        ],
+        "bear_points": [
+          "FRGE 散戶私募撮合量面臨敘事逆風",
+          "SOFI 另類資產零售 AUM 成長故事受質疑",
+          "名人認賠成監管收緊零售私募的素材"
+        ],
+        "final_take": "看空零售私募平台敘事,但純情緒層不構成交易訊號",
+        "entities": {
+          "tickers": [
+            "FRGE",
+            "SOFI"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "retail private markets",
+            "pre-IPO access",
+            "venture survivorship bias"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:FRGE",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:retail-private-market-skepticism"
+          },
+          {
+            "subject": "ticker:SOFI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:retail-private-market-skepticism"
+          }
+        ],
+        "done": false,
+        "confidence": 0.52,
+        "rationale_short": "新增 FRGE/SOFI 零售私募平台逆風角度,前三輪未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-17T16:18:07Z",
+      "latency_ms": 11496,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Cuban 的這段自白反映了一個更深層的趨勢：純粹依賴天使投資人個人判斷的**傳統創投模式 (Angel Investing)** 在 AI 時代正面臨邊緣化。當前 AI 新創的核心動力不僅是資金，更是**算力 (Compute credits)** 與**雲端生態系統 (Cloud ecosystem)**。這使得像 MSFT、GOOGL、AMZN 這樣的雲巨頭取代了傳統天使，成為 AI 新創的「超級創投」。這類資本配置的轉移，結構性地削弱了單打獨鬥的個人投資者在 AI 領先領域的市場份額與影響力，也進一步鞏固了巨頭對技術發展路徑的支配權。",
+        "bull_points": [
+          "雲端巨頭介入加速AI新創資本化",
+          "算力即資本模式降低新創失敗率"
+        ],
+        "bear_points": [
+          "傳統天使投資人對前沿技術影響力衰退",
+          "創投市場集中於巨頭導致生態去中心化受限"
+        ],
+        "final_take": "算力即資本，AI時代傳統天使投資人影響力將持續邊緣化。",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "GOOGL",
+            "AMZN"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "GPU credits",
+            "Cloud ecosystem"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai_startup"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ai_startup"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "提出AI時代雲巨頭取代天使投資人的結構性轉變。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AMZN",
+        "CI",
+        "CRWV",
+        "CVS",
+        "FRGE",
+        "GOOGL",
+        "MSFT",
+        "SOFI",
+        "UNH"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Financials",
+        "Healthcare",
+        "Information Technology",
+        "Technology"
+      ],
+      "themes": [
+        "AI",
+        "AI capex",
+        "AI healthcare",
+        "IPO window",
+        "Retail Sentiment",
+        "angel investing",
+        "pre-IPO access",
+        "retail private markets",
+        "venture capital",
+        "venture survivorship bias",
+        "venture valuation"
+      ],
+      "tech_keywords": [
+        "AI",
+        "Cloud ecosystem",
+        "GPU credits",
+        "cost_plus_model"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "narrative:mark_cuban",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:retail_volatility"
+      },
+      {
+        "subject": "ticker:CRWV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:private-valuation-markdown"
+      },
+      {
+        "subject": "ticker:CVS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cost_plus_pharmacy"
+      },
+      {
+        "subject": "ticker:FRGE",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:retail-private-market-skepticism"
+      },
+      {
+        "subject": "ticker:SOFI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:retail-private-market-skepticism"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai_startup"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ai_startup"
+      }
+    ],
+    "bull_summary": [
+      "提醒投資人創投靠少數本壘打,有助理性配置",
+      "名人投資敘事有助於提升新興技術關注度",
+      "投資者警示有助於散戶反思風險配置",
+      "名人認賠揭露利於私募估值紀律回歸,降低泡沫風險",
+      "強化公開市場指數投資相對私募的吸引力",
+      "AI 醫療垂直整合提升產業效率"
+    ],
+    "bear_summary": [
+      "純人物情緒新聞,無上市標的可交易訊號",
+      "天使投資多數歸零,私募部位風險偏高",
+      "盲目追隨名人投資策略導致散戶風險集中",
+      "過度聚焦個人敘事掩蓋了技術基本面風險",
+      "私募 markdown 情緒擴散恐壓縮 AI 新股 IPO 定價",
+      "一級市場 AI 估值偏熱,後續 pre-IPO 部位風險升高"
+    ],
+    "final_take": "算力即資本，AI時代傳統天使投資人影響力將持續邊緣化。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-17T16:18:07Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "gemini-only: CATALYST_FOR, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

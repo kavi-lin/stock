@@ -22,8 +22,11 @@ const i18n = {
       momentum:  "動能選股",
       radar:     "短期雷達",
       news:      "即時新聞",
+      break_news:"突發辯論",
       earnings:  "財報分析",
       calendar:  "決策日曆",
+      graph:     "知識圖譜",
+      supply_chain: "供應鏈",
       logs:      "系統日誌",
     },
 
@@ -1014,8 +1017,11 @@ const i18n = {
       momentum:  "Momentum",
       radar:     "Radar",
       news:      "News Feed",
+      break_news:"Break News",
       earnings:  "Earnings",
       calendar:  "Decision Calendar",
+      graph:     "Knowledge Graph",
+      supply_chain: "Supply Chain",
       logs:      "System Logs",
     },
 

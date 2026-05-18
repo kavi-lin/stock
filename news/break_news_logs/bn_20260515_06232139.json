@@ -1,0 +1,175 @@
+{
+  "news_id": "bn_20260515_06232139",
+  "schema_version": 1,
+  "state": "partial_closed",
+  "fetched_at": "2026-05-15T06:48:26Z",
+  "last_activity_ts": "2026-05-15T10:59:37Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/ab30d389df4a",
+    "feed_fingerprint": "futu:MU,SNDK:c3e64a519b",
+    "published": "2026-05-15T10:18:38+08:00",
+    "url_hash": "sha1:96c62635cb8a811c82ae4dd13adb43b1d07c6f49"
+  },
+  "headline": "美股三大期指短線下行，納指期貨跌0.6%，存儲、光通信股夜盤集體走弱，閃迪跌超4%，美光、Lumentum跌超3%",
+  "headline_zh": null,
+  "raw_summary": "美股三大期指短線下行，納指期貨跌0.6%，存儲、光通信股夜盤集體走弱，閃迪跌超4%，美光、Lumentum跌超3%。現貨金銀短線走低，現貨白銀日內跌超3%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -3.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T10:59:37Z",
+      "latency_ms": 785699,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "夜盤期指下行屬**情緒面回吐**，非基本面催化 — 新聞未點名任何具體利空。重點在**族群選擇**：閃迪 (SNDK)、美光 (MU) 屬 NAND/HBM 存儲鏈，Lumentum (LITE) 屬 AI 光通信收發模組，三者皆為 **AI capex 高 beta 標的**，前期漲幅大、夜盤先被獲利了結很正常。值得注意的是現貨白銀同步跌逾 3%，顯示這是**跨資產 risk-off**而非單一科技利空。納指期貨僅跌 0.6%，幅度溫和，比較像超買後的技術性消化，而非趨勢反轉。關鍵觀察點：HBM3e 與光模組的**訂單能見度**未變，回檔反而提供 AI 鏈低接窗口。",
+        "bull_points": [
+          "純情緒回吐，無基本面利空催化",
+          "HBM3e/光模組訂單能見度未變,回檔即低接窗口",
+          "納指期僅跌0.6%,屬超買技術性消化"
+        ],
+        "bear_points": [
+          "白銀同跌逾3%,跨資產risk-off訊號",
+          "AI capex高beta股漲多,獲利了結壓力大",
+          "存儲+光通信同步走弱,族群resonance風險"
+        ],
+        "final_take": "看多AI鏈,夜盤回檔屬技術性消化非反轉",
+        "entities": {
+          "tickers": [
+            "SNDK",
+            "MU",
+            "LITE",
+            "COHR"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Communications Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e",
+            "optical interconnect",
+            "risk-off"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "NAND",
+            "optical transceiver"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e"
+          },
+          {
+            "subject": "ticker:SNDK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_capex"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:optical_interconnect"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:risk_off"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "情緒面回吐,無具體利空,跨資產risk-off為主因"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "COHR",
+        "LITE",
+        "MU",
+        "SNDK"
+      ],
+      "sectors": [
+        "Communications Equipment",
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "HBM3e",
+        "optical interconnect",
+        "risk-off"
+      ],
+      "tech_keywords": [
+        "HBM3e",
+        "NAND",
+        "optical transceiver"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e"
+      },
+      {
+        "subject": "ticker:SNDK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_capex"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:optical_interconnect"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:risk_off"
+      }
+    ],
+    "bull_summary": [
+      "純情緒回吐，無基本面利空催化",
+      "HBM3e/光模組訂單能見度未變,回檔即低接窗口",
+      "納指期僅跌0.6%,屬超買技術性消化"
+    ],
+    "bear_summary": [
+      "白銀同跌逾3%,跨資產risk-off訊號",
+      "AI capex高beta股漲多,獲利了結壓力大",
+      "存儲+光通信同步走弱,族群resonance風險"
+    ],
+    "final_take": "看多AI鏈,夜盤回檔屬技術性消化非反轉",
+    "final_take_by": "claude",
+    "rounds_completed": 1,
+    "closed_at": "2026-05-15T10:59:37Z",
+    "close_reason": "timeout",
+    "divergence_note": ""
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,558 @@
+{
+  "news_id": "bn_20260516_d6857ad3",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-16T04:25:40Z",
+  "last_activity_ts": "2026-05-16T04:30:42Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/a6278184e47f",
+    "feed_fingerprint": "futu:BA:3757cef191",
+    "published": "2026-05-16T12:15:51+08:00",
+    "url_hash": "sha1:4f41841492a52b81cf9be11ea5c77985bc9b4c47"
+  },
+  "headline": "波音：已獲200架中國意向訂單初步承諾",
+  "headline_zh": null,
+  "raw_summary": "波音：已獲200架中國意向訂單初步承諾>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T04:29:00Z",
+      "latency_ms": 27019,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**意向訂單≠確定訂單**。200架是 letter of intent 初步承諾，非具約束力合約，歷史上中國對波音訂單高度政治化、轉化率與時程都有變數。真正訊號在**中美貿易解凍**——中國重啟波音採購通常是談判桌上的政治籌碼，象徵意義大於即期 EPS 貢獻。對 **BA** 短線情緒利多、backlog 能見度改善，但須留意為重返中國市場可能犧牲售價、壓縮交付利潤率。外溢效應：發動機與航電供應鏈 **GE Aerospace、RTX、HON** 同步受惠。整體屬風險偏好回升的 risk-on 訊號，但別把 LOI 當成已入袋現金。",
+        "bull_points": [
+          "中美貿易解凍訊號，risk-on 情緒回升",
+          "BA 訂單能見度改善，backlog 補強",
+          "GE/RTX/HON 航空供應鏈外溢受惠"
+        ],
+        "bear_points": [
+          "意向訂單非約束合約，轉化率存疑",
+          "中國訂單政治化，易被當談判籌碼撤回",
+          "為重返中國恐折價賣機壓縮利潤率"
+        ],
+        "final_take": "看多但僅情緒面，需 LOI 轉確定訂單才算數",
+        "entities": {
+          "tickers": [
+            "BA",
+            "GE",
+            "RTX",
+            "HON"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "US-China trade thaw",
+            "aerospace recovery"
+          ],
+          "tech_keywords": [
+            "737 MAX",
+            "787 Dreamliner"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:china-orders"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-trade-thaw"
+          },
+          {
+            "subject": "ticker:GE",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:RTX",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "narrative:us-china-trade-thaw",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:BA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "LOI 利多有限，真訊號是貿易解凍，供應鏈外溢受惠"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-16T04:29:12Z",
+      "latency_ms": 11777,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了政治籌碼面，更關鍵在於**與 Airbus 的市佔率角力**。過去幾年 Boeing 受限於 737 MAX 的安全事故與監管因素，在中國窄體客機市場幾乎被 Airbus 邊緣化。若這 200 架意向訂單能轉化為正式協議，將是 BA 扭轉市場份額失血的重大里程碑，直接威脅 **EADSY** 在該區域的主導地位。然而，考量到 Boeing 目前的產能瓶頸與 FAA 的高壓監管，即便訂單落實，交付進度能否兌現依然是市場對其經營能力的最大考驗。",
+        "bull_points": [
+          "撼動 Airbus 在中國的窄體客機市佔優勢",
+          "有利於 Boeing 營運槓桿與長期現金流修復"
+        ],
+        "bear_points": [
+          "Boeing 產能受 FAA 監管限制，交付變數極高",
+          "中國對 737 MAX 品質仍保持嚴謹審查態度"
+        ],
+        "final_take": "中國市場重啟是 BA 的重要拐點，但交付能力仍是考驗。",
+        "entities": {
+          "tickers": [
+            "BA",
+            "EADSY"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Geopolitics",
+            "Aviation"
+          ],
+          "tech_keywords": [
+            "737 MAX"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:EADSY"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充與 Airbus 的市佔競爭壓力及產能交付瓶頸。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T04:29:37Z",
+      "latency_ms": 25390,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前文已談政治籌碼與 Airbus 市佔，補一個**會計與產能槽位**角度。波音營收絕大部分在**交付時**認列現金,LOI 對近期 free cash flow 貢獻趨近於零;且 FAA 仍把 737 MAX 月產能封在 38 架上限,200 架根本無新增 slot。真正後果是**訂單槽位重分配**——中國訂單會排擠現有客戶交付順位,對 BA 是 backlog 結構調整而非淨增量。更關鍵瓶頸在機身供應商 **Spirit AeroSystems (SPR)**,其品質缺陷正是 MAX 提速卡關主因,波音回購 SPR 後整合風險仍未解。發動機端 737 MAX 獨家搭載 CFM LEAP,Safran (**SAFRY**) 與 GE 平分受惠,但同樣受制於交付節奏。",
+        "bull_points": [
+          "重啟中國市場扭轉對 Airbus 市佔失血",
+          "backlog 能見度與市場情緒改善",
+          "LEAP 發動機 Safran/GE 同步受惠"
+        ],
+        "bear_points": [
+          "LOI 不認列現金,近期 FCF 貢獻近零",
+          "FAA 封 38 架月產能,無新增交付 slot",
+          "SPR 機身品質缺陷仍是提速瓶頸"
+        ],
+        "final_take": "情緒利多但產能與認列卡關,中性偏多",
+        "entities": {
+          "tickers": [
+            "BA",
+            "SPR",
+            "SAFRY",
+            "EADSY",
+            "GE",
+            "RTX",
+            "HON"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "US-China trade thaw",
+            "aircraft backlog",
+            "production capacity constraint"
+          ],
+          "tech_keywords": [
+            "737 MAX",
+            "CFM LEAP"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SPR",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:faa-production-cap"
+          },
+          {
+            "subject": "ticker:SAFRY",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:cfm-leap-engine"
+          }
+        ],
+        "done": false,
+        "confidence": 0.74,
+        "rationale_short": "補會計認列、產能槽位、SPR 瓶頸三個新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-16T04:29:49Z",
+      "latency_ms": 12060,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了產能瓶頸與政治角力，此意向書的另一隱性關鍵在於其是否包含 **Boeing Global Services (BGS)** 的長期維修服務捆綁。BGS 是波音利潤率最高的業務板塊，且對生產槽位與 FAA 監管的敏感度遠低於新機交付。若此合作同步鎖定中國航空市場的數位化維修、預測性維護與訓練服務，即便飛機交付因產能瓶頸而延宕，BA 仍能透過服務收入緩解財務壓力，提升整體經營韌性。此舉象徵中美航空合作的「軟性解凍」，有助於穩定市場對其全球供應鏈長期韌性的預期。",
+        "bull_points": [
+          "BGS 服務合約挹注高毛利且穩定的營收。",
+          "標誌中美航空業務合作的軟性解凍。"
+        ],
+        "bear_points": [
+          "服務營收可能隨地緣政治緊張再次波動。",
+          "若訂單集中低毛利機型仍將侵蝕利潤。"
+        ],
+        "final_take": "關注 BGS 合約貢獻，現金流穩定性優於飛機交付。",
+        "entities": {
+          "tickers": [
+            "BA"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "Aerospace"
+          ],
+          "tech_keywords": [
+            "MRO"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:MRO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入 BGS 服務視角，補充營收組合與抗風險分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T04:30:29Z",
+      "latency_ms": 40101,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前文談政治、Airbus、產能槽位與 BGS 服務，補**交付槽位排擠的受害方具名**。FAA 把 **737 MAX** 封在月產 38 架,中國 200 架政治訂單一旦插隊,真正被犧牲的是等待換機的美國本土航司——**LUV (西南)** 全 737 機隊、**UAL/AAL** 的窄體更新計畫都得後延,對這些航司是隱性利空(機隊老化、油耗成本、運能規劃打亂)。另一個全程沒提的供應節點是緊固件與結構件龍頭 **Howmet (HWM)**——無論訂單給誰、機型 737 還是 787,鈦合金扣件需求都增,且 HWM 不受單一交付節奏綁死,是比 BA 本身更乾淨的受惠標的。整體仍 risk-on,但 BA 的利多有一部分是從美國航司的交付順位「挪」過來的。",
+        "bull_points": [
+          "HWM 緊固件需求隨任何機型訂單增,受惠最乾淨",
+          "中美航空軟解凍,產業鏈情緒全面回溫",
+          "200架意向若落地,BA backlog 能見度顯著拉長"
+        ],
+        "bear_points": [
+          "政治訂單插隊,LUV/UAL/AAL 換機計畫被迫後延",
+          "美國航司機隊老化、油耗成本上升,屬隱性利空",
+          "MAX 月產 38 架封頂,訂單是零和挪移非淨增"
+        ],
+        "final_take": "看多產業鏈但 BA 利多含對美國航司的零和挪移",
+        "entities": {
+          "tickers": [
+            "BA",
+            "LUV",
+            "UAL",
+            "AAL",
+            "HWM"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "US-China trade thaw",
+            "aerospace recovery",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "737 MAX",
+            "787 Dreamliner"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:HWM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BA"
+          },
+          {
+            "subject": "ticker:LUV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:delivery-slot-reallocation"
+          },
+          {
+            "subject": "ticker:UAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:delivery-slot-reallocation"
+          },
+          {
+            "subject": "ticker:BA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-trade-thaw"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增具名受害航司與 HWM 供應節點,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-16T04:30:42Z",
+      "latency_ms": 12385,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "之前的討論多聚焦於供給側與產能衝突，忽略了 **COMAC C919** 對波音的國產替代壓力。這 200 架意向書不僅是政治斡旋，更是 BA 為了緩解中國航司對 **C919** 的快速轉換率。若中國航司全面轉向國產窄體機，BA 將永久失去全球成長最快的航空市場。此舉暗示 BA 正透過維持合作關係，試圖在中國國產化進程中「卡位」，延緩國產化步調並避免被完全排除在未來窄體機市場規格之外，這對其長期的成長溢價至關重要。",
+        "bull_points": [
+          "緩解中國航司轉向 C919 的緊迫性",
+          "維持中國窄體機市場准入權"
+        ],
+        "bear_points": [
+          "面臨 COMAC 持續崛起的長期風險",
+          "政治讓利與合規成本可能壓低毛利"
+        ],
+        "final_take": "此意向書是 BA 抗衡 C919 蠶食市場份額的防禦策略。",
+        "entities": {
+          "tickers": [
+            "BA"
+          ],
+          "sectors": [
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Aerospace",
+            "Competition"
+          ],
+          "tech_keywords": [
+            "Narrowbody aircraft",
+            "C919"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BA",
+            "predicate": "COMPETES_WITH",
+            "object": "COMAC"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "分析 BA 如何利用此訂單作為抗衡中國國產機 COMAC C919 的市場防禦策略。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AAL",
+        "BA",
+        "EADSY",
+        "GE",
+        "HON",
+        "HWM",
+        "LUV",
+        "RTX",
+        "SAFRY",
+        "SPR",
+        "UAL"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Industrials"
+      ],
+      "themes": [
+        "AI capex",
+        "Aerospace",
+        "Aviation",
+        "Competition",
+        "Geopolitics",
+        "US-China trade thaw",
+        "aerospace recovery",
+        "aircraft backlog",
+        "production capacity constraint"
+      ],
+      "tech_keywords": [
+        "737 MAX",
+        "787 Dreamliner",
+        "C919",
+        "CFM LEAP",
+        "MRO",
+        "Narrowbody aircraft"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:china-orders"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-trade-thaw"
+      },
+      {
+        "subject": "ticker:GE",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:RTX",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "narrative:us-china-trade-thaw",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:EADSY"
+      },
+      {
+        "subject": "ticker:SPR",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:faa-production-cap"
+      },
+      {
+        "subject": "ticker:SAFRY",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:cfm-leap-engine"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:MRO"
+      },
+      {
+        "subject": "ticker:HWM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BA"
+      },
+      {
+        "subject": "ticker:LUV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:delivery-slot-reallocation"
+      },
+      {
+        "subject": "ticker:UAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:delivery-slot-reallocation"
+      },
+      {
+        "subject": "ticker:BA",
+        "predicate": "COMPETES_WITH",
+        "object": "COMAC"
+      }
+    ],
+    "bull_summary": [
+      "中美貿易解凍訊號，risk-on 情緒回升",
+      "BA 訂單能見度改善，backlog 補強",
+      "GE/RTX/HON 航空供應鏈外溢受惠",
+      "撼動 Airbus 在中國的窄體客機市佔優勢",
+      "有利於 Boeing 營運槓桿與長期現金流修復",
+      "重啟中國市場扭轉對 Airbus 市佔失血"
+    ],
+    "bear_summary": [
+      "意向訂單非約束合約，轉化率存疑",
+      "中國訂單政治化，易被當談判籌碼撤回",
+      "為重返中國恐折價賣機壓縮利潤率",
+      "Boeing 產能受 FAA 監管限制，交付變數極高",
+      "中國對 737 MAX 品質仍保持嚴謹審查態度",
+      "LOI 不認列現金,近期 FCF 貢獻近零"
+    ],
+    "final_take": "此意向書是 BA 抗衡 C919 蠶食市場份額的防禦策略。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-16T04:30:42Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH, HEADWIND_FROM, SUPPLIES_TO; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

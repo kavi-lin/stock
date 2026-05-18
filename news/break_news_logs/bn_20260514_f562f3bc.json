@@ -1,0 +1,731 @@
+{
+  "news_id": "bn_20260514_f562f3bc",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T16:04:05Z",
+  "last_activity_ts": "2026-05-14T16:50:28Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/e3c10949433b",
+    "feed_fingerprint": "futu:NVDA,POET:d86562980b",
+    "published": "2026-05-14T20:26:38+08:00",
+    "url_hash": "sha1:2df14412a131a0d7cc53a4b3b9409e0f8b89cc57"
+  },
+  "headline": "特朗普訪華釋放樂觀信號，三大期指齊升",
+  "headline_zh": null,
+  "raw_summary": "特朗普訪華釋放樂觀信號，三大期指齊升；POET盤前飆升逾24%，與Lumilens達成AI光互聯合作；外媒稱美批准H200對華銷售，英偉達漲超2%勢創新高>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:44:01Z",
+      "latency_ms": 30223,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "三條獨立訊號疊加：(1) **特朗普訪華**釋放美中緩和信號，三大期指齊升 — 屬風險情緒利多但缺實質協議，需後續關稅/出口管制細節驗證；(2) **NVDA H200 獲批對華銷售**為硬催化 — 中國 datacenter 需求回補，年化收入潛在數十億美元級別，**HBM3e** / **CoWoS-L** 供應鏈 (SK Hynix, TSM) 同步受惠，但留意 Blackwell B200 升級節奏是否被 H200 庫存擠壓；(3) **POET 與 Lumilens** AI 光互聯合作盤前 +24%，反映矽光子 (silicon photonics) 主題持續發酵，co-packaged optics 是 Rubin 世代以後 datacenter 的瓶頸解方。風險：訪華消息常為**情緒性 rally**，若無實質清單 (entity list 移除 / 關稅下調) 兌現，5-10 日內易回吐；H200 解禁細節 (數量上限/客戶白名單) 尚未公告。",
+        "bull_points": [
+          "NVDA H200 對華解禁為硬催化，挹注 datacenter 營收",
+          "HBM3e / CoWoS-L 供應鏈 (HXSCL, TSM) 連動受惠",
+          "矽光子主題經 POET 案例獲產業驗證"
+        ],
+        "bear_points": [
+          "訪華利多缺實質清單，易演成情緒性回吐",
+          "H200 解禁細節未明，數量上限恐有限",
+          "H200 庫存恐排擠 Blackwell B200 升級節奏"
+        ],
+        "final_take": "短線看多 NVDA 與光互聯鏈，但訪華情緒需 7 日內見實質協議才續航",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "POET",
+            "TSM"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology"
+          ],
+          "themes": [
+            "US-China trade",
+            "AI capex",
+            "Silicon photonics",
+            "China datacenter reopening"
+          ],
+          "tech_keywords": [
+            "H200",
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell",
+            "co-packaged optics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200-china-export-approval"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-trade-thaw"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "entity:lumilens"
+          },
+          {
+            "subject": "ticker:POET",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:silicon-photonics"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "tech:HBM3e",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:h200-china-export-approval"
+          },
+          {
+            "subject": "tech:CoWoS-L",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:h200-china-export-approval"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "硬催化 (H200) 疊軟情緒 (訪華)，但細節未明，confidence 中等"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:46:13Z",
+      "latency_ms": 131878,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "雖然市場焦點集中在 AI 硬體和地緣政治的短期訊號，但特朗普訪華釋放的**樂觀氣氛**，亦可能為其他與中國市場高度相關的產業帶來長遠益處。特別是**生技製藥領域**，如 GLP-1 藥物（例如 LLY 的 Mounjaro 和 NVO 的 Ozempic/Wegovy）的潛在中國市場規模龐大。若中美關係緩和，將有助於降低這些藥物進入中國市場的**監管風險**與**貿易壁壘**，為相關企業的全球營收成長注入新的動力。",
+        "bull_points": [
+          "中美關係緩和，降低全球醫藥龍頭的中國市場風險。",
+          "GLP-1 藥物在中國市場潛力巨大，利多相關企業。"
+        ],
+        "bear_points": [
+          "GLP-1 市場競爭激烈，中國藥證審批仍是關鍵。",
+          "地緣政治訊號易變，藥物臨床風險不容忽視。"
+        ],
+        "final_take": "短期訊號推升大盤，但生技長線成長題材可期。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "POET",
+            "LLY",
+            "NVO"
+          ],
+          "sectors": [
+            "Technology",
+            "Health Care"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China Relations",
+            "GLP-1"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "Blackwell",
+            "silicon photonics"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LLY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Market Access in China"
+          },
+          {
+            "subject": "ticker:NVO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Market Access in China"
+          },
+          {
+            "subject": "narrative:Market Access in China",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:US-China Relations"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "擴展分析至生技製藥，點出 GLP-1 藥物成長潛力。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:46:37Z",
+      "latency_ms": 24362,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的**第二序效應**：H200 解禁若屬實，最大邊際受惠者不是 NVDA 本身，而是**中國 hyperscaler 的美國 ADR / 供應鏈**——**BABA / BIDU / TCEHY** 的 AI capex 重啟劇本可望回血，過去 12 個月被迫採購 H20 降規卡的損失可部分回補。另一條暗線是**光模組**：**COHR / FN / LITE** 作為 800G/1.6T transceiver 供應商，若 H200 出貨拉動中國 datacenter build-out，光模組訂單會以 1.5-2x leverage 跟漲，比 POET 的故事更靠近現金流。**反向風險**：H200 解禁可能觸發 BIS 對 **HBM3e 直接出口管制** (SK Hynix 已被點名)，等於把瓶頸從 GPU 移到記憶體，**MU** 的 HBM 對華曝險反而成 headwind。",
+        "bull_points": [
+          "BABA/BIDU/TCEHY AI capex 重啟,中國 hyperscaler ADR 受惠",
+          "COHR/FN/LITE 光模組 1.5-2x leverage 跟漲 H200 出貨",
+          "datacenter build-out 拉動 800G/1.6T transceiver 訂單"
+        ],
+        "bear_points": [
+          "BIS 可能反手對 HBM3e 直接出口管制,MU 對華曝險成 headwind",
+          "H200 解禁細節未明,客戶白名單/數量上限恐令市場失望",
+          "中國 ADR 仍受 VIE/退市風險壓制,反彈持續性存疑"
+        ],
+        "final_take": "看多光模組與中國 ADR,但慎防 HBM 反制風險",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "BABA",
+            "BIDU",
+            "TCEHY",
+            "COHR",
+            "FN",
+            "LITE",
+            "MU",
+            "POET"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China relations",
+            "silicon photonics",
+            "China ADR"
+          ],
+          "tech_keywords": [
+            "H200",
+            "HBM3e",
+            "800G optics",
+            "1.6T transceiver",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BABA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200-china-export"
+          },
+          {
+            "subject": "ticker:BIDU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:h200-china-export"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:china-datacenter-buildout"
+          },
+          {
+            "subject": "ticker:FN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:800g-optics-demand"
+          },
+          {
+            "subject": "ticker:LITE",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:china-datacenter-buildout"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:hbm3e-export-control"
+          }
+        ],
+        "done": false,
+        "confidence": 0.68,
+        "rationale_short": "補光模組與中國ADR第二序鏈,新增HBM反制contra-risk"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:49:37Z",
+      "latency_ms": 180012,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_f562f3bc.c3.txt",
+      "parsed": {
+        "commentary": "",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": -1
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:50:05Z",
+      "latency_ms": 27959,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一條被市場忽略的**第三序效應**：若 H200 解禁伴隨中美科技緩和，**EDA / IP 對華出口** (SNPS / CDNS / ARM) 的灰色地帶可望解凍 — 過去 18 個月中國 fabless (HiSilicon / 寒武紀) 被切斷先進製程 EDA 授權，若 BIS 鬆綁，SNPS 中國區營收 (~16% mix) 可望 reaccelerate。另一條**反向交易**：訪華 rally 通常利空**國防 / 邊境安全板塊** (LMT / RTX / AXON)，因台海風險溢價收斂；同時**稀土 / 關鍵礦產** (MP / USAR) 短線承壓，因中國放寬出口管制預期升溫。最隱密的 contra：**ASML** 雖名義上受惠 China DUV 需求回補，但若美方以「H200 換 ASML High-NA EUV 對華禁令延續」作交換條件，ASML 反而成 net headwind — 此情境市場尚未 price in。",
+        "bull_points": [
+          "SNPS/CDNS 中國 EDA 授權若鬆綁，營收 mix 16% 可回補",
+          "COHR/FN/LITE 光模組訂單具 1.5-2x leverage",
+          "BABA/BIDU AI capex 重啟,ADR 估值修復"
+        ],
+        "bear_points": [
+          "LMT/RTX/AXON 國防股台海溢價收斂,短線承壓",
+          "MP/USAR 稀土因中國放寬出口管制承壓",
+          "ASML 可能成 High-NA EUV 禁令延續的交換籌碼"
+        ],
+        "final_take": "結構性看多 AI 供應鏈,但需提防 ASML 與國防股的反向交易",
+        "entities": {
+          "tickers": [
+            "SNPS",
+            "CDNS",
+            "ARM",
+            "LMT",
+            "RTX",
+            "AXON",
+            "MP",
+            "USAR",
+            "ASML",
+            "COHR",
+            "FN",
+            "LITE",
+            "BABA",
+            "BIDU"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Defense",
+            "Materials",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "US-China detente",
+            "AI capex",
+            "EDA software",
+            "Rare earths"
+          ],
+          "tech_keywords": [
+            "High-NA EUV",
+            "DUV",
+            "HBM3e"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SNPS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:CDNS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:LMT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:RTX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:MP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-detente"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:high-na-euv-export-ban"
+          },
+          {
+            "subject": "ticker:COHR",
+            "predicate": "SUPPLIES_TO",
+            "object": "theme:ai-capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "EDA鬆綁與國防/稀土反向交易為市場未充分定價的第三序效應"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:50:28Z",
+      "latency_ms": 22418,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這次新聞焦點雖多，但**Broadcom (AVGO)** 作為數據中心網路與光互聯的關鍵供應商，其地位不容忽視。H200 獲准銷售中國，意味著中國本土數據中心對高效能運算資源的需求將進一步釋放。AVGO 的光學元件和客製化晶片業務，將直接受惠於此波 AI 基礎設施建置潮。特別是其作為 NVDA 的重要夥伴，AI 硬體供應鏈的擴張，勢必為 AVGO 帶來顯著的營收成長動能，展現了更廣泛的產業連動效應。",
+        "bull_points": [
+          "AVGO 受惠於 H200 銷售解禁，其光網產品需求將隨之增長。",
+          "作為 NVDA 關鍵供應商，AI 需求擴張是其營收成長的有力推手。"
+        ],
+        "bear_points": [
+          "美中關稅與貿易壁壘的持續不確定性，對 AVGO 在華業務構成潛在風險。",
+          "光互聯技術日新月異，AVGO 面臨來自競品的激烈競爭與技術迭代壓力。"
+        ],
+        "final_take": "AVGO 受益於 AI 趨勢，但地緣政治風險仍需警惕。",
+        "entities": {
+          "tickers": [
+            "AVGO",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Datacenter build-out"
+          ],
+          "tech_keywords": [
+            "Optical networking",
+            "Custom silicon"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:H200 sales to China"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Datacenter build-out"
+          },
+          {
+            "subject": "narrative:H200 sales to China",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:AVGO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充 AVGO 作為關鍵網路供應商，受 AI 基礎設施擴張的影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ARM",
+        "ASML",
+        "AVGO",
+        "AXON",
+        "BABA",
+        "BIDU",
+        "CDNS",
+        "COHR",
+        "FN",
+        "LITE",
+        "LLY",
+        "LMT",
+        "MP",
+        "MU",
+        "NVDA",
+        "NVO",
+        "POET",
+        "RTX",
+        "SNPS",
+        "TCEHY",
+        "TSM",
+        "USAR"
+      ],
+      "sectors": [
+        "Communication Services",
+        "Defense",
+        "Health Care",
+        "Information Technology",
+        "Materials",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Semiconductors & Semiconductor Equipment",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "China ADR",
+        "China datacenter reopening",
+        "Datacenter build-out",
+        "EDA software",
+        "GLP-1",
+        "Rare earths",
+        "Silicon photonics",
+        "US-China Relations",
+        "US-China detente",
+        "US-China relations",
+        "US-China trade",
+        "silicon photonics"
+      ],
+      "tech_keywords": [
+        "1.6T transceiver",
+        "800G optics",
+        "Blackwell",
+        "CoWoS-L",
+        "Custom silicon",
+        "DUV",
+        "H200",
+        "HBM3e",
+        "High-NA EUV",
+        "Optical networking",
+        "co-packaged optics",
+        "silicon photonics"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200-china-export-approval"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-trade-thaw"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "entity:lumilens"
+      },
+      {
+        "subject": "ticker:POET",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:silicon-photonics"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "tech:HBM3e",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:h200-china-export-approval"
+      },
+      {
+        "subject": "tech:CoWoS-L",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:h200-china-export-approval"
+      },
+      {
+        "subject": "ticker:LLY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Market Access in China"
+      },
+      {
+        "subject": "ticker:NVO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Market Access in China"
+      },
+      {
+        "subject": "narrative:Market Access in China",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:US-China Relations"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200-china-export"
+      },
+      {
+        "subject": "ticker:BIDU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:h200-china-export"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:china-datacenter-buildout"
+      },
+      {
+        "subject": "ticker:FN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:800g-optics-demand"
+      },
+      {
+        "subject": "ticker:LITE",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:china-datacenter-buildout"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:hbm3e-export-control"
+      },
+      {
+        "subject": "ticker:SNPS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:CDNS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:LMT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:RTX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:MP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-detente"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:high-na-euv-export-ban"
+      },
+      {
+        "subject": "ticker:COHR",
+        "predicate": "SUPPLIES_TO",
+        "object": "theme:ai-capex"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:H200 sales to China"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Datacenter build-out"
+      },
+      {
+        "subject": "narrative:H200 sales to China",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:AVGO"
+      }
+    ],
+    "bull_summary": [
+      "NVDA H200 對華解禁為硬催化，挹注 datacenter 營收",
+      "HBM3e / CoWoS-L 供應鏈 (HXSCL, TSM) 連動受惠",
+      "矽光子主題經 POET 案例獲產業驗證",
+      "中美關係緩和，降低全球醫藥龍頭的中國市場風險。",
+      "GLP-1 藥物在中國市場潛力巨大，利多相關企業。",
+      "BABA/BIDU/TCEHY AI capex 重啟,中國 hyperscaler ADR 受惠"
+    ],
+    "bear_summary": [
+      "訪華利多缺實質清單，易演成情緒性回吐",
+      "H200 解禁細節未明，數量上限恐有限",
+      "H200 庫存恐排擠 Blackwell B200 升級節奏",
+      "GLP-1 市場競爭激烈，中國藥證審批仍是關鍵。",
+      "地緣政治訊號易變，藥物臨床風險不容忽視。",
+      "BIS 可能反手對 HBM3e 直接出口管制,MU 對華曝險成 headwind"
+    ],
+    "final_take": "AVGO 受益於 AI 趨勢，但地緣政治風險仍需警惕。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:50:28Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, HEADWIND_FROM, MENTIONED_IN; gemini-only: CATALYST_FOR"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:49:37Z",
+      "where": "round1.gemini",
+      "msg": "rc=-1 err=timeout after 180s"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

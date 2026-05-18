@@ -1,0 +1,679 @@
+{
+  "verdict_date": "2026-05-18",
+  "market_regime": "RISK_ON",
+  "exposure_ceiling": "40-60%",
+  "synthesized_exposure": "40-60%",
+  "cycle_phase": "Late",
+  "phase4_fanout_mode": "PARALLEL_SUBAGENT",
+  "degraded_agents": [],
+  "regime_stance": "DEFENSIVE",
+  "signal_conflict": true,
+  "scan_window": "past 2 days news + next 7 days events",
+  "rotation_theme": "資金高度集中能源（唯一全週期 INFLOW），其餘 10 產業全數 OUTFLOW、uptrend-ratio 一致下降趨勢",
+  "sectors": [
+    {
+      "name": "Technology",
+      "verdict": "WARM",
+      "composite_score": 52,
+      "score_components": {
+        "breadth_momentum": 12,
+        "theme_heat": 16,
+        "news_catalyst": 12,
+        "rotation_signal": 17,
+        "valuation_penalty": 0
+      },
+      "risk_flags": ["late_cycle", "momentum_divergence_5d"],
+      "proxy_etf": "XLK",
+      "key_reasons": [
+        "AI & 半導體 heat 58.6、量子 57.4 雙 Trending 主題",
+        "3M RS vs SPY +18.1% 為全場最強資金流入",
+        "FRED 過熱 regime 結構性逆風、5d RS 已轉負 −0.9%"
+      ],
+      "devils_advocate_note": "DA（HIGH）：Tech 內部分歧（2 lane HOT、2 lane COLD），空方催化更硬 — NVDA 5/20 盤後 binary 在「年初以來最弱科技訊號」中先行交易；3M RS +18.1% 但 5d RS −0.9% 為動能率先轉折的早期裂痕；內部人比率 0.507 僅略高於 0.5 處分閾值；FRED 過熱 + 10Y 上行壓縮長存續期 DCF。",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.324,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.893
+    },
+    {
+      "name": "Energy",
+      "verdict": "WARM",
+      "composite_score": 66,
+      "score_components": {
+        "breadth_momentum": 18,
+        "theme_heat": 15,
+        "news_catalyst": 14,
+        "rotation_signal": 19,
+        "valuation_penalty": 0
+      },
+      "risk_flags": ["overbought", "late_cycle"],
+      "proxy_etf": "XLE",
+      "key_reasons": [
+        "唯一全週期 INFLOW：RS 5d +3.2%／20d +2.8%／3M +1.5% 皆正",
+        "uptrend-ratio 0.602 rank-1、FRED favor 名單",
+        "估值過熱 pe z-score +2.31，3M RS 僅 +1.5% 價格未跟上敘事"
+      ],
+      "devils_advocate_note": "DA（MEDIUM）：3-of-4 lane 看多 Energy 為擁擠交易 — Overbought（uptr 0.602）卻 3M RS 僅 +1.5%，高參與零相對領漲；Oil & Gas 主題為 Mature 晚期；內部人 0.915 < 1.0 屬輕微淨賣、議員淨買 0；commodity 群 uptrend 39.9% 是典型晚周期讀數，廣度一旦續跌易劇烈均值回歸。",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "INFLOW",
+      "uptrend_ratio": 0.602,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.998
+    },
+    {
+      "name": "Industrials",
+      "verdict": "COLD",
+      "composite_score": 42,
+      "score_components": {
+        "breadth_momentum": 10,
+        "theme_heat": 14,
+        "news_catalyst": 12,
+        "rotation_signal": 7,
+        "valuation_penalty": 0
+      },
+      "risk_flags": ["late_cycle"],
+      "proxy_etf": "XLI",
+      "key_reasons": [
+        "Industrials Concentration 57.1、Defense 56.4 主題熱度居前",
+        "資金 OUTFLOW、3M RS vs SPY −10.9%",
+        "RTX/Raytheon 合約利多但題材與價格背離"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.255,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.963
+    },
+    {
+      "name": "Communication",
+      "verdict": "COLD",
+      "composite_score": 41,
+      "score_components": {
+        "breadth_momentum": 8,
+        "theme_heat": 9,
+        "news_catalyst": 12,
+        "rotation_signal": 9,
+        "valuation_penalty": 5
+      },
+      "risk_flags": ["late_cycle"],
+      "proxy_etf": "XLC",
+      "key_reasons": [
+        "估值便宜 pe z-score −2.10（觸發 +5 oversold overlay）",
+        "Meta「賣壓被誤讀」、Netflix 目標價偏多",
+        "資金仍 OUTFLOW、3M RS −6.2%"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.211,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.963
+    },
+    {
+      "name": "Materials",
+      "verdict": "COLD",
+      "composite_score": 35,
+      "score_components": {
+        "breadth_momentum": 8,
+        "theme_heat": 14,
+        "news_catalyst": 6,
+        "rotation_signal": 6,
+        "valuation_penalty": 0
+      },
+      "risk_flags": ["late_cycle"],
+      "proxy_etf": "XLB",
+      "key_reasons": [
+        "Basic Materials Concentration 主題 + FRED favor",
+        "RS 全週期為負（5d −3.9%／20d −8.2%／3M −13.0%）",
+        "近 48h 零產業新聞、催化薄弱"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.195,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.998
+    },
+    {
+      "name": "Real_Estate",
+      "verdict": "COLD",
+      "composite_score": 33,
+      "score_components": {
+        "breadth_momentum": 5,
+        "theme_heat": 7,
+        "news_catalyst": 10,
+        "rotation_signal": 8,
+        "valuation_penalty": 5
+      },
+      "risk_flags": [],
+      "proxy_etf": "XLRE",
+      "key_reasons": [
+        "估值便宜 pe z-score −1.76（觸發 +5 oversold overlay）",
+        "資料中心 REIT 高信度題材、REIT 重定價週期接近轉折",
+        "FRED 過熱列為避開、10Y 上行壓制、資金 OUTFLOW"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.113,
+      "cyclical_or_defensive": "defensive",
+      "step6_fred_multiplier": 0.926
+    },
+    {
+      "name": "Utilities",
+      "verdict": "COLD",
+      "composite_score": 31,
+      "score_components": {
+        "breadth_momentum": 3,
+        "theme_heat": 6,
+        "news_catalyst": 15,
+        "rotation_signal": 7,
+        "valuation_penalty": 0
+      },
+      "risk_flags": [],
+      "proxy_etf": "XLU",
+      "key_reasons": [
+        "NextEra 擬約 670 億美元收購 Dominion 大型 M&A 催化",
+        "rank-11 uptrend 0.062 oversold、RS 3M −13.3% 全週期最弱",
+        "Utilities Defensive 為空頭主題、資金 OUTFLOW"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.062,
+      "cyclical_or_defensive": "defensive",
+      "step6_fred_multiplier": 1.0
+    },
+    {
+      "name": "Financials",
+      "verdict": "COLD",
+      "composite_score": 31,
+      "score_components": {
+        "breadth_momentum": 6,
+        "theme_heat": 7,
+        "news_catalyst": 11,
+        "rotation_signal": 7,
+        "valuation_penalty": 0
+      },
+      "risk_flags": ["late_cycle"],
+      "proxy_etf": "XLF",
+      "key_reasons": [
+        "FRED favor（過熱 regime 利好銀行 NIM）但價格未驗證",
+        "Financial Services & Banks 為空頭主題 heat 40.3",
+        "uptrend-ratio 偏低、3M RS −10.0%"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.104,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.998
+    },
+    {
+      "name": "Consumer_Staples",
+      "verdict": "COLD",
+      "composite_score": 29,
+      "score_components": {
+        "breadth_momentum": 6,
+        "theme_heat": 6,
+        "news_catalyst": 10,
+        "rotation_signal": 7,
+        "valuation_penalty": 0
+      },
+      "risk_flags": [],
+      "proxy_etf": "XLP",
+      "key_reasons": [
+        "防禦未獲青睞 — Consumer Defensive Concentration 為空頭主題",
+        "uptrend 0.149 偏弱、3M RS −11.7%",
+        "資金 OUTFLOW、議員淨買 +1 為唯一正向 smart money"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.149,
+      "cyclical_or_defensive": "defensive",
+      "step6_fred_multiplier": 1.0
+    },
+    {
+      "name": "Healthcare",
+      "verdict": "COLD",
+      "composite_score": 28,
+      "score_components": {
+        "breadth_momentum": 8,
+        "theme_heat": 6,
+        "news_catalyst": 9,
+        "rotation_signal": 5,
+        "valuation_penalty": 0
+      },
+      "risk_flags": [],
+      "proxy_etf": "XLV",
+      "key_reasons": [
+        "多頭主題近乎熄火（Healthcare & Pharma heat 僅 11.7）",
+        "巴菲特 Berkshire 出清 UNH 持股、UNH 走弱",
+        "RS 全週期最差，3M RS vs SPY −16.3%"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.198,
+      "cyclical_or_defensive": "defensive",
+      "step6_fred_multiplier": 1.0
+    },
+    {
+      "name": "Consumer_Discretionary",
+      "verdict": "AVOID",
+      "composite_score": 19,
+      "score_components": {
+        "breadth_momentum": 5,
+        "theme_heat": 6,
+        "news_catalyst": 11,
+        "rotation_signal": 8,
+        "valuation_penalty": 0
+      },
+      "risk_flags": ["binary_risk_within_48h", "late_cycle"],
+      "proxy_etf": "XLY",
+      "key_reasons": [
+        "零售龍頭財報週（HD 5/19、TGT/LOW 5/20）binary 風險 ×0.70",
+        "FRED 過熱 regime 列為避開、uptrend 0.105 倒數第三",
+        "pe 55.9 為全場最貴、資金 OUTFLOW"
+      ],
+      "devils_advocate_note": "",
+      "tail_risk_label": "N/A",
+      "rotation_signal": "OUTFLOW",
+      "uptrend_ratio": 0.105,
+      "cyclical_or_defensive": "cyclical",
+      "step6_fred_multiplier": 0.893
+    }
+  ],
+  "summary": {
+    "hot_sectors": [],
+    "warm_sectors": ["Energy", "Technology"],
+    "cold_sectors": [
+      "Industrials",
+      "Communication",
+      "Materials",
+      "Real_Estate",
+      "Utilities",
+      "Financials",
+      "Consumer_Staples",
+      "Healthcare"
+    ],
+    "avoid_sectors": ["Consumer_Discretionary"]
+  },
+  "today_verdict": {
+    "headline": "防禦為先：廣度惡化、配銷沉重，無產業達 HOT",
+    "stance": "DEFENSIVE",
+    "confidence": 0.8,
+    "one_liner": "11 產業全數下降趨勢、0 上升，廣度複合分 32.4、配銷日 90/100；僅 Energy、Technology 勉強 WARM，曝險守 40-60% 下緣、停止新增動能進場。",
+    "key_takeaways": [
+      "守住整體曝險於 40-60% 下緣 — 廣度複合分僅 32.4、危險空頭背離（S&P +9.6% vs 廣度 8MA −0.119/60d）",
+      "停止新增任何動能進場 — 11 產業全數下降趨勢、0 上升，FTD 75-100% 訊號因廣度背離打 5 折",
+      "觀望輝達 NVDA 5/20 盤後財報 — 本週 AI 半導體方向關鍵 binary",
+      "規避非必需消費 — 零售龍頭財報週疊加需求警訊，Consumer_Discretionary 降為 AVOID",
+      "提防 FRED 過熱 regime 對科技逆風 — CPI 與 10Y 殖利率同步加速、實質利率 1.99%"
+    ],
+    "sector_actions": [
+      {
+        "sector": "Energy",
+        "action": "wait",
+        "confidence": "medium",
+        "reason": "唯一全週期 INFLOW 但估值 z+2.31 過熱"
+      },
+      {
+        "sector": "Technology",
+        "action": "wait",
+        "confidence": "low",
+        "reason": "FRED 過熱列避開、5d RS 轉負"
+      },
+      {
+        "sector": "Consumer_Discretionary",
+        "action": "avoid",
+        "confidence": "high",
+        "reason": "零售財報 binary＋需求警訊"
+      },
+      {
+        "sector": "Healthcare",
+        "action": "avoid",
+        "confidence": "medium",
+        "reason": "多頭主題熄火＋巴菲特清倉 UNH"
+      },
+      {
+        "sector": "Industrials",
+        "action": "underweight",
+        "confidence": "medium",
+        "reason": "主題熱但資金 OUTFLOW、RS −10.9%"
+      },
+      {
+        "sector": "Utilities",
+        "action": "neutral",
+        "confidence": "low",
+        "reason": "M&A 催化但全週期 RS 最弱"
+      }
+    ],
+    "watch_next": [
+      "零售龍頭財報 HD 5/19、TGT/LOW 5/20：消費需求即時讀數（within_48h binary）",
+      "輝達 NVDA 5/20 盤後財報：AI 資本支出與半導體景氣 binary",
+      "FOMC 4月會議紀要 5/20：利率路徑與通膨語氣",
+      "S&P／NASDAQ 配銷日計數：再添 2 日即確認機構賣壓叢集",
+      "廣度 8MA 能否站回 0.60，或續跌向 0.40 極弱區"
+    ]
+  },
+  "actionable_themes": [
+    "Space Economy",
+    "AI & Semiconductors",
+    "Oil & Gas (Energy)",
+    "Defense & Aerospace"
+  ],
+  "political_risk_summary": {
+    "active_trump_trades": [],
+    "named_targets_today": [],
+    "fear_greed_status": "Greed"
+  },
+  "session_notes": "防禦環境：廣度 32.4（Weakening）、配銷日 90/100、11 產業全數下降趨勢、0 上升。stance DEFENSIVE、曝險守 40-60% 下緣。三訊號衝突（FTD 75-100% vs Breadth 40-60%，37.5pp）→ FTD 積極訊號因廣度背離打 5 折，stance 上限封頂 NEUTRAL，實際落於 DEFENSIVE。investment_protocol 對新進場應從嚴。唯一全週期 INFLOW 為 Energy 但估值過熱（pe z+2.31）；Technology 受 FRED 過熱 regime 逆風、5d RS 已轉負。NVDA 5/20 盤後財報為本週 AI 方向關鍵 binary。經濟與財報日曆 FMP legacy endpoint 403，upcoming_events 以 WebSearch 驗證之 NVDA 日期與當週既知事件補位。",
+  "top_catalysts": [
+    {
+      "rank": 1,
+      "event": "輝達 NVDA 5/20 盤後 Q1 FY27 財報，AI 半導體景氣 binary",
+      "type": "earnings",
+      "impact_score": 5,
+      "affected_sectors": ["Technology"],
+      "direction": "binary",
+      "timing": "this_week"
+    },
+    {
+      "rank": 2,
+      "event": "美國零售龍頭財報週（HD 5/19、TGT/LOW 5/20、WMT），消費需求讀數",
+      "type": "earnings",
+      "impact_score": 4,
+      "affected_sectors": ["Consumer_Discretionary", "Consumer_Staples"],
+      "direction": "binary",
+      "timing": "within_48h"
+    },
+    {
+      "rank": 3,
+      "event": "「Higher for longer」回潮、10Y 殖利率上行與通膨疑慮衝擊股市",
+      "type": "macro",
+      "impact_score": 4,
+      "affected_sectors": ["Technology", "Real_Estate"],
+      "direction": "bearish",
+      "timing": "this_week"
+    },
+    {
+      "rank": 4,
+      "event": "FOMC 4月會議紀要 5/20，利率路徑與通膨語氣",
+      "type": "FOMC",
+      "impact_score": 4,
+      "affected_sectors": [],
+      "direction": "binary",
+      "timing": "this_week"
+    },
+    {
+      "rank": 5,
+      "event": "NextEra 擬約 670 億美元收購 Dominion Energy",
+      "type": "sector_specific",
+      "impact_score": 3,
+      "affected_sectors": ["Utilities"],
+      "direction": "bullish",
+      "timing": "this_week"
+    },
+    {
+      "rank": 6,
+      "event": "Alaska LNG 與 ConocoPhillips 簽北坡天然氣供應協議",
+      "type": "sector_specific",
+      "impact_score": 3,
+      "affected_sectors": ["Energy"],
+      "direction": "bullish",
+      "timing": "past"
+    }
+  ],
+  "political_overlay": {
+    "trump_trade_signals": [],
+    "named_targets_today": [],
+    "fear_greed_index": 68.0,
+    "fear_greed_label": "Greed",
+    "vix_current": 18.52,
+    "put_call_ratio": null,
+    "spy_rsi": 72.8,
+    "sentiment_source": "SKILL_EXECUTED",
+    "extreme_sentiment_triggered": false
+  },
+  "sentiment_snapshot": {
+    "composite_score": 68.0,
+    "fear_greed_label": "Greed",
+    "vix": 18.52,
+    "put_call_ratio": null,
+    "extreme_sentiment_triggered": false
+  },
+  "upcoming_events": [
+    {
+      "id": "nvda-q1-earnings_2026-05-20",
+      "date": "2026-05-20",
+      "time": "AMC",
+      "category": "earnings",
+      "title": "輝達 NVDA Q1 FY27 財報",
+      "description": "AI 半導體景氣關鍵讀數；高基期下市場聚焦營收驚喜遞減與資料中心資本支出指引。盤前「年初以來最弱科技訊號」。",
+      "tickers": ["NVDA"],
+      "sectors": ["Technology"],
+      "impact": "high",
+      "is_binary": true,
+      "within_48h": false
+    },
+    {
+      "id": "us-retail-earnings-week_2026-05-19",
+      "date": "2026-05-19",
+      "time": "BMO",
+      "category": "earnings",
+      "title": "美國零售龍頭財報週",
+      "description": "HD 5/19、TGT/LOW 5/20、WMT 5/21；消費需求即時讀數，盤面已現「類比 2008」需求警訊。",
+      "tickers": ["HD", "TGT", "LOW", "WMT"],
+      "sectors": ["Consumer_Discretionary"],
+      "impact": "high",
+      "is_binary": true,
+      "within_48h": true
+    },
+    {
+      "id": "fomc-april-minutes_2026-05-20",
+      "date": "2026-05-20",
+      "time": "14:00 ET",
+      "category": "macro",
+      "title": "FOMC 4月會議紀要",
+      "description": "利率路徑與通膨語氣；過熱 regime 下市場聚焦點陣圖暗示與「higher for longer」措辭。",
+      "tickers": [],
+      "sectors": [],
+      "impact": "med",
+      "is_binary": false,
+      "within_48h": false
+    },
+    {
+      "id": "us-pmi-philly-claims_2026-05-21",
+      "date": "2026-05-21",
+      "time": "08:30 ET",
+      "category": "econ",
+      "title": "5月製造業 PMI 初值與費城聯儲",
+      "description": "含初領失業金；過熱 regime 下景氣降溫訊號監控。",
+      "tickers": [],
+      "sectors": [],
+      "impact": "med",
+      "is_binary": false,
+      "within_48h": false
+    }
+  ],
+  "upcoming_binary_risks": [
+    {
+      "event": "輝達 NVDA Q1 FY27 財報",
+      "date": "2026-05-20",
+      "affected_sectors": ["Technology"],
+      "within_48h": false
+    },
+    {
+      "event": "美國零售龍頭財報週",
+      "date": "2026-05-19",
+      "affected_sectors": ["Consumer_Discretionary"],
+      "within_48h": true
+    }
+  ],
+  "sector_news_sentiment": {
+    "Technology": "neutral",
+    "Energy": "bullish",
+    "Healthcare": "bearish",
+    "Financials": "neutral",
+    "Industrials": "bullish",
+    "Materials": "neutral",
+    "Communication": "bullish",
+    "Consumer_Discretionary": "bearish",
+    "Consumer_Staples": "neutral",
+    "Utilities": "bullish",
+    "Real_Estate": "neutral"
+  },
+  "sector_divergence_watch": [
+    {
+      "sector": "Energy",
+      "signal": "news_positive_price_negative",
+      "description": "新聞偏多（Alaska LNG 供應協議）且 uptrend rank-1，但 3M RS vs SPY 僅 +1.5%，價格未充分驗證題材熱度。",
+      "action": "monitor"
+    },
+    {
+      "sector": "Technology",
+      "signal": "momentum_short_term_crack",
+      "description": "3M RS vs SPY +18.1% 強勢，但 5d RS −0.9%、20d +9.7% 已減速，短週期動能率先轉折，疊加 NVDA binary。",
+      "action": "monitor"
+    },
+    {
+      "sector": "Industrials",
+      "signal": "news_positive_price_negative",
+      "description": "主題熱度居前（Concentration 57.1、Defense 56.4）但資金 OUTFLOW、3M RS −10.9%，題材與價格背離。",
+      "action": "monitor"
+    }
+  ],
+  "step6_overlay": {
+    "applied": true,
+    "replaces_step1": true,
+    "regime_label": "Overheating",
+    "regime_confidence": 0.74,
+    "rationale": "Overheating regime, conf 0.74 → favor: Energy×0.998, Materials×0.998, Financials×0.998; avoid: Technology×0.893, Consumer_Discretionary×0.893, Real_Estate×0.926"
+  },
+  "_phase2": {
+    "phase": 2,
+    "agent": "Theme_Intelligence_Analyst",
+    "dominant_bullish_theme": "Space Economy",
+    "dominant_bearish_theme": "Obesity & GLP-1",
+    "themes": [
+      {
+        "name": "Space Economy",
+        "direction": "bullish",
+        "heat_score": 64.8,
+        "lifecycle_stage": "Mature",
+        "lifecycle_maturity": 61.5,
+        "confidence": "Low",
+        "proxy_etfs": ["UFO", "ROKT"],
+        "representative_stocks": ["LHX", "RKLB", "PL"],
+        "cross_sector_reach": ["Industrials", "Technology"]
+      },
+      {
+        "name": "Oil & Gas (Energy)",
+        "direction": "bullish",
+        "heat_score": 60.9,
+        "lifecycle_stage": "Mature",
+        "lifecycle_maturity": 0,
+        "confidence": "Medium",
+        "proxy_etfs": ["XLE", "XOP"],
+        "representative_stocks": ["XOM", "CVX"],
+        "cross_sector_reach": ["Energy"]
+      },
+      {
+        "name": "AI & Semiconductors",
+        "direction": "bullish",
+        "heat_score": 58.6,
+        "lifecycle_stage": "Trending",
+        "lifecycle_maturity": 0,
+        "confidence": "Low",
+        "proxy_etfs": ["SMH", "SOXX"],
+        "representative_stocks": ["NVDA", "AVGO"],
+        "cross_sector_reach": ["Technology"]
+      },
+      {
+        "name": "Quantum Computing",
+        "direction": "bullish",
+        "heat_score": 57.4,
+        "lifecycle_stage": "Trending",
+        "lifecycle_maturity": 0,
+        "confidence": "Low",
+        "proxy_etfs": ["QTUM"],
+        "representative_stocks": ["IONQ", "RGTI"],
+        "cross_sector_reach": ["Technology"]
+      },
+      {
+        "name": "Obesity & GLP-1",
+        "direction": "bearish",
+        "heat_score": 56.7,
+        "lifecycle_stage": "Trending",
+        "lifecycle_maturity": 0,
+        "confidence": "Low",
+        "proxy_etfs": ["THNR"],
+        "representative_stocks": ["LLY", "NVO"],
+        "cross_sector_reach": ["Healthcare"]
+      }
+    ]
+  },
+  "_phase4a": [
+    {
+      "phase": "4a",
+      "agent": "Sector_Rotation_Analyst",
+      "top_conviction_hot": ["Energy", "Technology"],
+      "top_conviction_cold": ["Utilities", "Consumer_Discretionary"],
+      "key_rationale": "Commodity 群 uptrend-ratio 39.9% 同時領先 Cyclical（20.0%）與 Defensive（13.0%），Energy uptr 0.602 — 教科書級晚周期資金輪動旗標，惟 Overbought 標籤與 3M RS 僅 +1.5% 限制上行。Technology 以 3M RS +18.1% 為明確資金流入領頭，但 uptr 0.324 下降中；冷端 Utilities（uptr 0.062、RS −13.3%、Oversold）與 Consumer_Discretionary 持續外流。",
+      "subagent_isolated": true
+    },
+    {
+      "phase": "4a",
+      "agent": "Theme_Intelligence_Analyst",
+      "top_conviction_hot": ["Technology", "Industrials"],
+      "top_conviction_cold": ["Real_Estate", "Healthcare"],
+      "key_rationale": "Technology 擁兩個 Trending 主題（AI & Semiconductors heat 58.6、Quantum 57.4），Industrials 參與最廣（Concentration 57.1 Trending、Robotics 40.6 Trending），惟 Mature 級的 Space 64.8 與 Defense 56.4 透出晚周期耗盡風險。Real Estate 最冷（REITs heat 24.5 且偏空），Healthcare 多頭僅剩 heat 11.7、動能全靠空頭 GLP-1（56.7）。",
+      "subagent_isolated": true
+    },
+    {
+      "phase": "4a",
+      "agent": "News_Catalyst_Analyst",
+      "top_conviction_hot": ["Utilities", "Energy"],
+      "top_conviction_cold": ["Healthcare", "Technology"],
+      "key_rationale": "Utilities 有乾淨的約 670 億美元 NextEra/Dominion AI 驅動 M&A 催化，Energy 有 Alaska LNG/ConocoPhillips 供應協議，皆為 48h 內利多且無對沖 binary 風險。Technology 面臨 NVDA 5/20 盤後財報「年初以來最弱科技訊號」，Healthcare 因巴菲特出清 UNH 持股而走弱。",
+      "subagent_isolated": true
+    },
+    {
+      "phase": "4a",
+      "agent": "FRED_Macro_Analyst",
+      "top_conviction_hot": ["Energy", "Financials"],
+      "top_conviction_cold": ["Technology", "Real_Estate"],
+      "key_rationale": "過熱 regime（信度 0.74、複合 69）下 DGS10 與 CPIAUCSL 同步加速，指向利好實物資產與利率敏感週期股的 reflation 傾斜；real_rate_preferred 1.99 略低於 2.0 觸發點，無 overlay 啟動，base 名單成立（favor Energy/Materials/Financials，avoid Technology/Real Estate/Consumer Discretionary）。10Y 上行與非倒掛但平緩的 0.82 曲線壓制長存續期 Tech/REIT DCF，同時支撐銀行 NIM 與能源現金流。",
+      "subagent_isolated": true
+    }
+  ],
+  "_phase4b": {
+    "phase": "4b",
+    "agent": "Devils_Advocate",
+    "tail_risk_checks": [],
+    "challenge_targets": [
+      {
+        "challenged_sector": "Energy",
+        "challenged_call": "HOT",
+        "counter_evidence": "Energy 標 Overbought（uptr 0.602）卻 3M RS 僅 +1.5% — 高參與、相對表現近零，是擁擠但停滯交易的特徵，而非領頭羊。Oil&Gas 主題為 Mature（晚期），內部人比率 0.915 低於 1.0（輕微淨賣）、議員淨買 0，commodity 群 uptrend 39.9% 正是廣度（複合 32.4、Weakening、0/11 上升）一旦轉弱即劇烈回歸的晚周期讀數。3-of-4 lane 提 HOT 是把 reflation 敘事追進 Overbought、Mature、內部人賣超的盤面。",
+        "tail_risk_evidence": "n/a（composite 上限 ~56，無產業達 >75 tail-risk-analyzer 閘門）",
+        "risk_scenario": "IF Energy 3M RS 未能擴張至 +5% 以上且 DGS10 停止加速 WITHIN 15 個交易日 THEN Energy HOT 論點被推翻 — 確認為缺乏相對領漲、靠已停滯 reflation 宏觀押注的 Overbought 商品交易。",
+        "confidence_level": "MEDIUM"
+      },
+      {
+        "challenged_sector": "Technology",
+        "challenged_call": "HOT",
+        "counter_evidence": "Technology 內部分歧（2 lane HOT、2 lane COLD），空方催化更硬：NVDA 5/20 盤後 binary 在「年初以來最弱科技訊號」中先行交易 — 任何 HOT 在最大市場推動數據解析前就建倉。RS5d 已 −0.9% 卻 RS3m +18.1%：5d 對 3M 背離是動能率先轉折的早期裂痕。內部人比率 0.507 僅略高於 0.5 賣超閾值、議員淨買 0，FRED 過熱 + 10Y 上行直接壓縮長存續期 Tech DCF，SPY RSI 72.8 / Greed 68 對失誤無緩衝。",
+        "tail_risk_evidence": "n/a（composite 上限 ~56，無產業達 >75 tail-risk-analyzer 閘門）",
+        "risk_scenario": "IF NVDA 5/20 盤後財報引發隔日負面反應 OR Technology RS5d 至 5/25 仍為負 WITHIN 7 個日曆日 THEN Technology HOT 論點被推翻 — RS3m +18.1% 為已在短端裂解的滯後窗口動能。",
+        "confidence_level": "HIGH"
+      }
+    ],
+    "consensus_warning": "false",
+    "subagent_isolated": true
+  }
+}

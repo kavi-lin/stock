@@ -1,0 +1,861 @@
+{
+  "news_id": "bn_20260514_a9327ebe",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T01:50:35Z",
+  "last_activity_ts": "2026-05-14T01:59:29Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/14/oil-prices-today-wti-brent-hormuz-trump-xi-meeting.html",
+    "feed_fingerprint": "oil struggles direction iea flags greater volatility ahead",
+    "published": "2026-05-14T01:48:05+00:00",
+    "url_hash": "sha1:2459d340614c61d1f08c3294fa8dc180463d2a1e"
+  },
+  "headline": "Oil struggles for direction as IEA flags greater volatility ahead, OPEC cuts demand forecast",
+  "headline_zh": null,
+  "raw_summary": "OPEC cut its demand growth estimates for 2026 to about 1.2 million barrels per day.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T01:54:12Z",
+      "latency_ms": 27481,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC 下修 2026 需求成長至 **1.2 mb/d**，疊加 IEA 警告波動加劇，油市方向感盡失。基本面訊號偏空：需求側中國電動車滲透 + 美國頁岩產能 resilient，供給側 OPEC+ 自願減產執行率鬆動。但 Trump-Xi 會晤 + Hormuz 地緣風險premium 仍在，下檔有支撐。對 **XOM/CVX/COP** 等 integrated major 屬中性偏空 — Q2 capex guidance 恐再下修；**OXY/FANG** 等純 E&P 槓桿放大、下行 beta 更高。Refiner 端 **VLO/MPC** crack spread 反而受惠原油走弱。**HAL/SLB** OFS 在 rig count 走平下訂單壓力升溫。整體 Energy sector 短期建議 underweight，等 OPEC+ 6 月會議 production decision 再評估。",
+        "bull_points": [
+          "Hormuz 地緣 premium 與 Trump-Xi 會晤提供下檔支撐",
+          "Refiner crack spread 隨原油走弱擴張，VLO/MPC 受惠",
+          "油價低檔利好航空 (DAL/UAL) 與化工原料成本"
+        ],
+        "bear_points": [
+          "OPEC 下修需求 1.2 mb/d 印證 demand destruction",
+          "純 E&P (OXY/FANG) 槓桿放大下行 beta",
+          "OFS (HAL/SLB) rig count 走平壓抑訂單動能"
+        ],
+        "final_take": "Energy 短期 underweight，等 6 月 OPEC+ 會議再評估",
+        "entities": {
+          "tickers": [
+            "XOM",
+            "CVX",
+            "COP",
+            "OXY",
+            "FANG",
+            "VLO",
+            "MPC",
+            "HAL",
+            "SLB",
+            "DAL",
+            "UAL",
+            "USO",
+            "XLE"
+          ],
+          "sectors": [
+            "Energy",
+            "Oil & Gas E&P",
+            "Oil & Gas Refining & Marketing",
+            "Oil & Gas Equipment & Services",
+            "Airlines"
+          ],
+          "themes": [
+            "oil demand destruction",
+            "OPEC+ supply discipline",
+            "geopolitical risk premium",
+            "EV adoption"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:XOM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_demand_destruction"
+          },
+          {
+            "subject": "ticker:OXY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_demand_destruction"
+          },
+          {
+            "subject": "ticker:FANG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_demand_destruction"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower_crude_input_cost"
+          },
+          {
+            "subject": "ticker:MPC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower_crude_input_cost"
+          },
+          {
+            "subject": "ticker:DAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower_jet_fuel_cost"
+          },
+          {
+            "subject": "ticker:UAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower_jet_fuel_cost"
+          },
+          {
+            "subject": "ticker:HAL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:flat_rig_count"
+          },
+          {
+            "subject": "ticker:SLB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:flat_rig_count"
+          },
+          {
+            "subject": "sector:Energy",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:opec_demand_cut_2026"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "OPEC 需求下修偏空 E&P，refiner 與航空受惠"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T01:56:14Z",
+      "latency_ms": 122432,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC下修2026年需求成長預測至1.2 mb/d，配合IEA對市場波動性加劇的警告，油價缺乏明確方向。在此需求趨緩背景下，**高成本的長期開發專案（如深海、油砂）吸引力下降，可能面臨延遲或取消**。雖然地緣政治風險支撐油價下檔，但基本面壓力不容忽視。",
+        "bull_points": [
+          "地緣政治風險提供價格支撐。",
+          "煉油廠價差可望受惠。"
+        ],
+        "bear_points": [
+          "高成本長多專案受擠壓。",
+          "波動加劇增添下行風險。"
+        ],
+        "final_take": "謹慎看待，觀察Q3供需變化。",
+        "entities": {
+          "tickers": [
+            "XOM",
+            "CVX",
+            "COP",
+            "OXY",
+            "FANG",
+            "VLO",
+            "MPC",
+            "HAL",
+            "SLB"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "Energy Transition",
+            "Commodity Volatility"
+          ],
+          "tech_keywords": [
+            "Deepwater Drilling",
+            "Oil Sands Extraction",
+            "Capex Reduction"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:XOM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Slowing global demand growth"
+          },
+          {
+            "subject": "ticker:CVX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Slowing global demand growth"
+          },
+          {
+            "subject": "ticker:COP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Slowing global demand growth"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦長遠項目之可行性分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T01:56:44Z",
+      "latency_ms": 30179,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪未觸及**化工/塑膠 feedstock 端**的 2nd-order 受惠。原油走弱 + 需求預期下修 → naphtha / ethane crack spread 擴大，利好 **DOW / LYB / WLK** 等 commodity chemicals — 尤其 LYB 北美乙烷成本優勢被放大。再者，**航空 jet fuel** 端 **DAL / UAL / LUV** Q2 燃油 hedge 損益翻正，unit cost 有 30-50 bps 下修空間。Contra 角度：OPEC 下修需求若觸發 **6 月 OPEC+ 加碼自願減產**（Saudi 已釋出訊號），油價反彈快過共識，此時 short energy 反成擁擠交易。另一隱藏節點：**頁岩 frac sand 商 SLCA / 壓裂砂供應鏈** rig count 走平下訂單能見度降，比 HAL/SLB 更脆弱。",
+        "bull_points": [
+          "LYB/DOW 乙烷裂解價差擴大、毛利受惠",
+          "DAL/UAL 燃油成本下修，Q2 unit cost 改善",
+          "Saudi 6 月加碼減產或觸發 short squeeze"
+        ],
+        "bear_points": [
+          "SLCA 等 frac sand 訂單比 OFS 大廠更脆弱",
+          "深海/油砂高成本專案延遲衝擊 FTI/TS 訂單",
+          "Energy short 已成擁擠交易、反彈風險升溫"
+        ],
+        "final_take": "下游化工/航空受惠勝過直接 short energy",
+        "entities": {
+          "tickers": [
+            "LYB",
+            "DOW",
+            "WLK",
+            "DAL",
+            "UAL",
+            "LUV",
+            "SLCA",
+            "FTI",
+            "XOM",
+            "OXY"
+          ],
+          "sectors": [
+            "Materials",
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "oil demand slowdown",
+            "ethane crack spread",
+            "jet fuel tailwind",
+            "OPEC+ production cut",
+            "shale supply chain"
+          ],
+          "tech_keywords": [
+            "naphtha cracking",
+            "ethane feedstock",
+            "frac sand"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:LYB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ethane_crack_spread"
+          },
+          {
+            "subject": "ticker:DOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:oil_demand_slowdown"
+          },
+          {
+            "subject": "ticker:DAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jet_fuel_tailwind"
+          },
+          {
+            "subject": "ticker:UAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:jet_fuel_tailwind"
+          },
+          {
+            "subject": "ticker:SLCA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:shale_supply_chain"
+          },
+          {
+            "subject": "ticker:FTI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:deepwater_capex_delay"
+          },
+          {
+            "subject": "ticker:XOM",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:OPEC+ production cut"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "下游受惠 + frac sand 弱點為前輪未談"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T01:58:49Z",
+      "latency_ms": 124181,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "考量 OPEC+ 下調 2026 年需求預測，油價缺乏明確方向，恐加劇市場波動。這不僅影響上游探勘生產（如 ETRN 的營收動能），對於依賴穩定輸送量的中游基礎設施業者，終端市場量能下滑或劇烈波動，將直接壓縮其營收成長空間，其低貝塔的防禦性或被高估。",
+        "bull_points": [
+          "中游油氣輸送量潛藏風險。",
+          "航空燃油成本壓力釋放。",
+          "石化原料價差擴大受惠。"
+        ],
+        "bear_points": [
+          "高成本油田開發項目延遲。",
+          "OPEC+ 減產執行率不明。",
+          "油價波動性預期升高。"
+        ],
+        "final_take": "關注中游量能變化，謹慎看待全年油價。",
+        "entities": {
+          "tickers": [
+            "ETRN",
+            "DOW",
+            "LYB",
+            "WLK",
+            "DAL",
+            "UAL",
+            "LUV"
+          ],
+          "sectors": [
+            "Energy",
+            "Oil & Gas Storage & Transportation",
+            "Chemicals",
+            "Airlines"
+          ],
+          "themes": [
+            "Energy Infrastructure",
+            "Commodity Price Volatility",
+            "Demand Slowdown",
+            "Supply Cuts",
+            "Geopolitics"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:ETRN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:volatile_oil_volumes"
+          },
+          {
+            "subject": "ticker:ETRN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:slowing_demand_growth"
+          },
+          {
+            "subject": "ticker:DOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:wider_naphtha_crack_spreads"
+          },
+          {
+            "subject": "ticker:DAL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lower_jet_fuel_costs"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新提中游管線營收風險，其餘依先前角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T01:59:11Z",
+      "latency_ms": 22212,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪未觸及**E&P 高股利/buyback yield 端的資本回報壓力**。油價區間下行 + OPEC 下修需求 → **PXD / DVN / EOG** variable dividend formula 中 cash return 直接縮水，**DVN** 的 fixed+variable 模型在 WTI 跌破 $70 時 variable 部分可能歸零，殖利率 narrative 崩塌。更隱藏的 2nd-order：**SU (Suncor) / CNQ** 等油砂業者 break-even $40-45，雖仍盈利但 **2026 sustaining capex** 需上調抵銷貯量自然衰減 — free cash flow yield 被雙重壓縮。Contra 角度：若 OPEC+ 6 月真加碼減產，**variable dividend payers 的 reflexivity** 反彈最猛（cash return 重啟敘事）。另一節點：**Permian midstream gathering** 如 **WES / KMI** 雖中游防禦，但若 E&P 砍 D&C 預算 → 新井 tie-in volume 下修，2026 EBITDA guidance 風險上升。",
+        "bull_points": [
+          "OPEC+ 6 月加碼減產則 variable dividend 反彈最猛",
+          "油砂 SU/CNQ break-even $40-45 仍有利潤緩衝",
+          "Permian midstream 合約有 MVC 保底"
+        ],
+        "bear_points": [
+          "DVN/PXD variable dividend 在 WTI<$70 恐歸零",
+          "油砂 sustaining capex 上調壓縮 FCF yield",
+          "WES/KMI 新井 tie-in volume 下修 2026 EBITDA"
+        ],
+        "final_take": "Energy 高殖利率 narrative 脆弱，避開 variable dividend payers",
+        "entities": {
+          "tickers": [
+            "PXD",
+            "DVN",
+            "EOG",
+            "SU",
+            "CNQ",
+            "WES",
+            "KMI"
+          ],
+          "sectors": [
+            "Energy",
+            "Midstream"
+          ],
+          "themes": [
+            "OPEC demand cut",
+            "variable dividend reflexivity",
+            "oil sands sustaining capex"
+          ],
+          "tech_keywords": [
+            "WTI break-even",
+            "D&C capex",
+            "tie-in volume"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:DVN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:opec_demand_cut"
+          },
+          {
+            "subject": "ticker:PXD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:variable_dividend_compression"
+          },
+          {
+            "subject": "ticker:SU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_sands_sustaining_capex"
+          },
+          {
+            "subject": "ticker:WES",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:permian_dc_capex_cut"
+          },
+          {
+            "subject": "ticker:KMI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:permian_dc_capex_cut"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 variable dividend + 油砂 capex + 中游 tie-in 三層次"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T01:59:29Z",
+      "latency_ms": 18251,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "OPEC下修2026年需求成長預測至1.2 mb/d，疊加IEA對市場波動性加劇的警告，整體油市方向不明。在此宏觀趨勢下，高資本支出且佈局長遠的**深海探勘開發專案（如FPSO部署）吸引力顯著下降**。即使地緣政治風險仍為油價提供支撐，但若長期需求前景不明，**專營海上油氣設備供應商如TechnipFMC (FTI) 與 Subsea 7 (SUB) 的訂單能見度與未來專案的final investment decision (FID) 將面臨嚴峻挑戰**。",
+        "bull_points": [
+          "地緣政治風險（如荷莫茲海峽緊張、川普-習近平會晤）仍為油價提供下檔支撐。",
+          "原油價格走弱有利於下游煉油廠及石化產品獲利。"
+        ],
+        "bear_points": [
+          "OPEC需求下修與IEA波動警告，壓抑長期海上油氣專案。",
+          "專業海上設備商 (FTI, SUB) 面臨訂單與FID風險。"
+        ],
+        "final_take": "短期關注 OPEC+ 6 月動態，長期需求趨勢仍需審慎。",
+        "entities": {
+          "tickers": [
+            "FTI",
+            "SUB",
+            "XOM",
+            "CVX",
+            "COP",
+            "VLO",
+            "MPC",
+            "DOW"
+          ],
+          "sectors": [
+            "Oil & Gas Equipment & Services",
+            "Oil & Gas Integrated",
+            "Oil & Gas Refiners",
+            "Chemicals"
+          ],
+          "themes": [
+            "Energy transition",
+            "Geopolitical risk",
+            "OPEC+ policy"
+          ],
+          "tech_keywords": [
+            "FPSO",
+            "Subsea equipment"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FTI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:slowing_demand_growth"
+          },
+          {
+            "subject": "ticker:SUB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:slowing_demand_growth"
+          },
+          {
+            "subject": "ticker:FTI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_price_volatility"
+          },
+          {
+            "subject": "ticker:SUB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:oil_price_volatility"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:low_crude_prices"
+          },
+          {
+            "subject": "ticker:MPC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:low_crude_prices"
+          },
+          {
+            "subject": "ticker:DOW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:low_crude_prices"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "強調長期需求趨勢對高資本支出海上專案與供應鏈的影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "CNQ",
+        "COP",
+        "CVX",
+        "DAL",
+        "DOW",
+        "DVN",
+        "EOG",
+        "ETRN",
+        "FANG",
+        "FTI",
+        "HAL",
+        "KMI",
+        "LUV",
+        "LYB",
+        "MPC",
+        "OXY",
+        "PXD",
+        "SLB",
+        "SLCA",
+        "SU",
+        "SUB",
+        "UAL",
+        "USO",
+        "VLO",
+        "WES",
+        "WLK",
+        "XLE",
+        "XOM"
+      ],
+      "sectors": [
+        "Airlines",
+        "Chemicals",
+        "Energy",
+        "Industrials",
+        "Materials",
+        "Midstream",
+        "Oil & Gas E&P",
+        "Oil & Gas Equipment & Services",
+        "Oil & Gas Integrated",
+        "Oil & Gas Refiners",
+        "Oil & Gas Refining & Marketing",
+        "Oil & Gas Storage & Transportation"
+      ],
+      "themes": [
+        "Commodity Price Volatility",
+        "Commodity Volatility",
+        "Demand Slowdown",
+        "EV adoption",
+        "Energy Infrastructure",
+        "Energy Transition",
+        "Energy transition",
+        "Geopolitical risk",
+        "Geopolitics",
+        "OPEC demand cut",
+        "OPEC+ policy",
+        "OPEC+ production cut",
+        "OPEC+ supply discipline",
+        "Supply Cuts",
+        "ethane crack spread",
+        "geopolitical risk premium",
+        "jet fuel tailwind",
+        "oil demand destruction",
+        "oil demand slowdown",
+        "oil sands sustaining capex",
+        "shale supply chain",
+        "variable dividend reflexivity"
+      ],
+      "tech_keywords": [
+        "Capex Reduction",
+        "D&C capex",
+        "Deepwater Drilling",
+        "FPSO",
+        "Oil Sands Extraction",
+        "Subsea equipment",
+        "WTI break-even",
+        "ethane feedstock",
+        "frac sand",
+        "naphtha cracking",
+        "tie-in volume"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:XOM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_demand_destruction"
+      },
+      {
+        "subject": "ticker:OXY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_demand_destruction"
+      },
+      {
+        "subject": "ticker:FANG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_demand_destruction"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower_crude_input_cost"
+      },
+      {
+        "subject": "ticker:MPC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower_crude_input_cost"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower_jet_fuel_cost"
+      },
+      {
+        "subject": "ticker:UAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower_jet_fuel_cost"
+      },
+      {
+        "subject": "ticker:HAL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:flat_rig_count"
+      },
+      {
+        "subject": "ticker:SLB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:flat_rig_count"
+      },
+      {
+        "subject": "sector:Energy",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:opec_demand_cut_2026"
+      },
+      {
+        "subject": "ticker:XOM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Slowing global demand growth"
+      },
+      {
+        "subject": "ticker:CVX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Slowing global demand growth"
+      },
+      {
+        "subject": "ticker:COP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Slowing global demand growth"
+      },
+      {
+        "subject": "ticker:LYB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ethane_crack_spread"
+      },
+      {
+        "subject": "ticker:DOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:oil_demand_slowdown"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jet_fuel_tailwind"
+      },
+      {
+        "subject": "ticker:UAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:jet_fuel_tailwind"
+      },
+      {
+        "subject": "ticker:SLCA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:shale_supply_chain"
+      },
+      {
+        "subject": "ticker:FTI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:deepwater_capex_delay"
+      },
+      {
+        "subject": "ticker:XOM",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:OPEC+ production cut"
+      },
+      {
+        "subject": "ticker:ETRN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:volatile_oil_volumes"
+      },
+      {
+        "subject": "ticker:ETRN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:slowing_demand_growth"
+      },
+      {
+        "subject": "ticker:DOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:wider_naphtha_crack_spreads"
+      },
+      {
+        "subject": "ticker:DAL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lower_jet_fuel_costs"
+      },
+      {
+        "subject": "ticker:DVN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:opec_demand_cut"
+      },
+      {
+        "subject": "ticker:PXD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:variable_dividend_compression"
+      },
+      {
+        "subject": "ticker:SU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_sands_sustaining_capex"
+      },
+      {
+        "subject": "ticker:WES",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:permian_dc_capex_cut"
+      },
+      {
+        "subject": "ticker:KMI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:permian_dc_capex_cut"
+      },
+      {
+        "subject": "ticker:FTI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:slowing_demand_growth"
+      },
+      {
+        "subject": "ticker:SUB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:slowing_demand_growth"
+      },
+      {
+        "subject": "ticker:FTI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_price_volatility"
+      },
+      {
+        "subject": "ticker:SUB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:oil_price_volatility"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:low_crude_prices"
+      },
+      {
+        "subject": "ticker:MPC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:low_crude_prices"
+      },
+      {
+        "subject": "ticker:DOW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:low_crude_prices"
+      }
+    ],
+    "bull_summary": [
+      "Hormuz 地緣 premium 與 Trump-Xi 會晤提供下檔支撐",
+      "Refiner crack spread 隨原油走弱擴張，VLO/MPC 受惠",
+      "油價低檔利好航空 (DAL/UAL) 與化工原料成本",
+      "地緣政治風險提供價格支撐。",
+      "煉油廠價差可望受惠。",
+      "LYB/DOW 乙烷裂解價差擴大、毛利受惠"
+    ],
+    "bear_summary": [
+      "OPEC 下修需求 1.2 mb/d 印證 demand destruction",
+      "純 E&P (OXY/FANG) 槓桿放大下行 beta",
+      "OFS (HAL/SLB) rig count 走平壓抑訂單動能",
+      "高成本長多專案受擠壓。",
+      "波動加劇增添下行風險。",
+      "SLCA 等 frac sand 訂單比 OFS 大廠更脆弱"
+    ],
+    "final_take": "短期關注 OPEC+ 6 月動態，長期需求趨勢仍需審慎。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T01:59:29Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

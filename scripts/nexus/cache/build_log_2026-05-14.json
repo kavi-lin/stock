@@ -1,0 +1,313 @@
+{
+  "generated_at": "2026-05-14T13:35:26.389129Z",
+  "tiers_applied": [
+    "1",
+    "2",
+    "3"
+  ],
+  "meta": {
+    "node_count": 800,
+    "edge_count": 2991,
+    "nodes_by_type": {
+      "theme": 101,
+      "ticker": 312,
+      "catalyst": 207,
+      "sector": 77,
+      "narrative": 103
+    },
+    "edges_by_type": {
+      "BELONGS_TO_THEME": 221,
+      "OUTCOME_FOR": 82,
+      "BULL_CASE_FOR": 708,
+      "MENTIONED_IN": 1225,
+      "BEAR_CASE_FOR": 253,
+      "SUPPLY_CHAIN_HOP": 304,
+      "PEER_OF": 178,
+      "CATALYST_FOR": 20
+    },
+    "prune_stats": {
+      "dropped_edges_low_weight": 244,
+      "dropped_isolated_nodes": 122,
+      "dropped_provisional_low_mentions": 0,
+      "dropped_for_cap": 1663
+    },
+    "decay_strategies": {
+      "catalyst": 7,
+      "narrative": 21,
+      "theme": 21,
+      "structural_shift": 90,
+      "peer_of": 45,
+      "supply_chain_hop": 45,
+      "outcome_for": 30,
+      "belongs_to_theme": 21,
+      "belongs_to_sector": 60,
+      "mentioned_in": 14,
+      "bull_case_for": 30,
+      "bear_case_for": 30,
+      "default": 21
+    },
+    "tier_confidence": {
+      "tier1": 1.0,
+      "tier2": 0.7,
+      "tier3": 0.85
+    }
+  },
+  "size_bytes": 1120552,
+  "tier2_narrative_attribution_audit": {
+    "glp1": {
+      "emitted": 37,
+      "rejected_oos": 58
+    },
+    "nim": {
+      "emitted": 37,
+      "rejected_oos": 65
+    },
+    "weight_loss": {
+      "emitted": 16,
+      "rejected_oos": 17
+    },
+    "800g": {
+      "emitted": 26,
+      "rejected_oos": 21
+    },
+    "1_6t": {
+      "emitted": 36,
+      "rejected_oos": 27
+    },
+    "lng": {
+      "emitted": 60,
+      "rejected_oos": 96
+    },
+    "hbm": {
+      "emitted": 214,
+      "rejected_oos": 138
+    },
+    "blackwell": {
+      "emitted": 41,
+      "rejected_oos": 16
+    },
+    "rubin": {
+      "emitted": 26,
+      "rejected_oos": 14
+    },
+    "refining": {
+      "emitted": 33,
+      "rejected_oos": 34
+    },
+    "trainium": {
+      "emitted": 11,
+      "rejected_oos": 13
+    },
+    "18a": {
+      "emitted": 10,
+      "rejected_oos": 2
+    },
+    "hbm3e": {
+      "emitted": 55,
+      "rejected_oos": 15
+    },
+    "hbm4": {
+      "emitted": 37,
+      "rejected_oos": 8
+    },
+    "supply_chain_signal": {
+      "emitted": 3,
+      "rejected_oos": 0
+    },
+    "shale": {
+      "emitted": 18,
+      "rejected_oos": 22
+    },
+    "cowos": {
+      "emitted": 62,
+      "rejected_oos": 40
+    },
+    "peptide_mfg": {
+      "emitted": 6,
+      "rejected_oos": 3
+    },
+    "nuclear": {
+      "emitted": 16,
+      "rejected_oos": 60
+    },
+    "mi350": {
+      "emitted": 9,
+      "rejected_oos": 0
+    },
+    "n3": {
+      "emitted": 22,
+      "rejected_oos": 2
+    },
+    "n2": {
+      "emitted": 29,
+      "rejected_oos": 1
+    },
+    "ecommerce": {
+      "emitted": 1,
+      "rejected_oos": 3
+    },
+    "travel": {
+      "emitted": 2,
+      "rejected_oos": 1
+    },
+    "sic": {
+      "emitted": 10,
+      "rejected_oos": 0
+    },
+    "mi300": {
+      "emitted": 17,
+      "rejected_oos": 13
+    },
+    "mi325": {
+      "emitted": 4,
+      "rejected_oos": 0
+    },
+    "credit_cycle": {
+      "emitted": 0,
+      "rejected_oos": 2
+    },
+    "cowos_l": {
+      "emitted": 10,
+      "rejected_oos": 0
+    },
+    "cpo": {
+      "emitted": 7,
+      "rejected_oos": 2
+    },
+    "capital_markets": {
+      "emitted": 2,
+      "rejected_oos": 0
+    },
+    "oncology": {
+      "emitted": 0,
+      "rejected_oos": 2
+    },
+    "gan": {
+      "emitted": 8,
+      "rejected_oos": 0
+    },
+    "ad_spend": {
+      "emitted": 3,
+      "rejected_oos": 11
+    }
+  },
+  "narrative_attribution_in_graph": {
+    "narrative:glp1": {
+      "linked_tickers": 13,
+      "linked_pct_of_universe": 0.042
+    },
+    "narrative:nim": {
+      "linked_tickers": 11,
+      "linked_pct_of_universe": 0.035
+    },
+    "narrative:weight_loss": {
+      "linked_tickers": 5,
+      "linked_pct_of_universe": 0.016
+    },
+    "narrative:800g": {
+      "linked_tickers": 12,
+      "linked_pct_of_universe": 0.038
+    },
+    "narrative:1_6t": {
+      "linked_tickers": 15,
+      "linked_pct_of_universe": 0.048
+    },
+    "narrative:lng": {
+      "linked_tickers": 14,
+      "linked_pct_of_universe": 0.045
+    },
+    "narrative:hbm": {
+      "linked_tickers": 37,
+      "linked_pct_of_universe": 0.119
+    },
+    "narrative:blackwell": {
+      "linked_tickers": 14,
+      "linked_pct_of_universe": 0.045
+    },
+    "narrative:rubin": {
+      "linked_tickers": 12,
+      "linked_pct_of_universe": 0.038
+    },
+    "narrative:refining": {
+      "linked_tickers": 13,
+      "linked_pct_of_universe": 0.042
+    },
+    "narrative:trainium": {
+      "linked_tickers": 7,
+      "linked_pct_of_universe": 0.022
+    },
+    "narrative:18a": {
+      "linked_tickers": 5,
+      "linked_pct_of_universe": 0.016
+    },
+    "narrative:hbm3e": {
+      "linked_tickers": 19,
+      "linked_pct_of_universe": 0.061
+    },
+    "narrative:hbm4": {
+      "linked_tickers": 16,
+      "linked_pct_of_universe": 0.051
+    },
+    "narrative:supply_chain_signal": {
+      "linked_tickers": 1,
+      "linked_pct_of_universe": 0.003
+    },
+    "narrative:shale": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.026
+    },
+    "narrative:cowos": {
+      "linked_tickers": 18,
+      "linked_pct_of_universe": 0.058
+    },
+    "narrative:peptide_mfg": {
+      "linked_tickers": 5,
+      "linked_pct_of_universe": 0.016
+    },
+    "narrative:nuclear": {
+      "linked_tickers": 6,
+      "linked_pct_of_universe": 0.019
+    },
+    "narrative:mi350": {
+      "linked_tickers": 1,
+      "linked_pct_of_universe": 0.003
+    },
+    "narrative:n3": {
+      "linked_tickers": 13,
+      "linked_pct_of_universe": 0.042
+    },
+    "narrative:n2": {
+      "linked_tickers": 13,
+      "linked_pct_of_universe": 0.042
+    },
+    "narrative:sic": {
+      "linked_tickers": 9,
+      "linked_pct_of_universe": 0.029
+    },
+    "narrative:mi300": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.026
+    },
+    "narrative:mi325": {
+      "linked_tickers": 4,
+      "linked_pct_of_universe": 0.013
+    },
+    "narrative:cowos_l": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.026
+    },
+    "narrative:cpo": {
+      "linked_tickers": 6,
+      "linked_pct_of_universe": 0.019
+    },
+    "narrative:gan": {
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.026
+    },
+    "narrative:ad_spend": {
+      "linked_tickers": 3,
+      "linked_pct_of_universe": 0.01
+    }
+  },
+  "quarantined_narratives": []
+}

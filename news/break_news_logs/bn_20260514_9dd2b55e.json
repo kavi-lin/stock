@@ -1,0 +1,765 @@
+{
+  "news_id": "bn_20260514_9dd2b55e",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T05:41:57Z",
+  "last_activity_ts": "2026-05-14T05:54:17Z",
+  "source": {
+    "name": "Seeking Alpha",
+    "credibility": "MEDIUM",
+    "url": "https://seekingalpha.com/news/4592657-asian-tech-rally-drives-mild-gains-as-us-china-summit-pressures-beijing-shares?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "feed_fingerprint": "asian tech rally drives mild gains u s",
+    "published": "2026-05-14T05:37:36+00:00",
+    "url_hash": "sha1:00550ed58e7ada4e660d2cdad648b234ec383e32"
+  },
+  "headline": "Asian tech rally drives mild gains as U.S.-China summit pressures Beijing shares",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "geopolitical",
+    "shallow_score": 2.0,
+    "bull_case": "地緣套利機會",
+    "bear_case": "供應鏈中斷風險",
+    "sector_view": "能源相關板塊波動",
+    "macro_view": "避險資產需求增加",
+    "binary_flag": false,
+    "advance_reason": "score"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T05:51:22Z",
+      "latency_ms": 22775,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "亞洲科技股反彈帶動小幅上揚，但美中峰會壓力使北京股市承壓 — 典型**地緣分歧交易**。日韓台科技鏈 (TSM, 三星, SK Hynix) 受惠於 AI 供應鏈需求外溢，HBM3e 與 CoWoS-L 產能仍緊俏，N3P 投片不受地緣影響。反觀中概股 (BABA, JD, PDD) 與北京 A 股承壓，反映市場 price-in **出口管制升級風險** — Blackwell GPU 對華禁售可能擴大，半導體設備 (ASML, AMAT, LRCX) 出口許可恐再收緊。短線看：美系 AI 上游 (NVDA, AVGO) 與台日韓代工受惠資金分流；中概 ADR 估值壓抑持續。關鍵觀察點為峰會後具體聲明 — 若僅 rhetoric 而無實質制裁，中概可能 oversold bounce。",
+        "bull_points": [
+          "亞洲科技鏈受惠 AI 供應外溢，HBM3e 需求未減",
+          "資金從中概分流至美日韓 AI 上游 (NVDA/TSM)",
+          "峰會若只 rhetoric，中概有 oversold bounce 空間"
+        ],
+        "bear_points": [
+          "Blackwell 對華禁售恐擴大，NVDA 中國營收承壓",
+          "半導體設備出口許可恐再收緊 (ASML/AMAT)",
+          "中概 ADR 估值折價持續，BABA/JD/PDD 反彈受限"
+        ],
+        "final_take": "短線看多美日韓 AI 鏈，避開中概直到峰會聲明明朗",
+        "entities": {
+          "tickers": [
+            "TSM",
+            "NVDA",
+            "AVGO",
+            "ASML",
+            "AMAT",
+            "LRCX",
+            "BABA",
+            "JD",
+            "PDD"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China decoupling",
+            "Export controls",
+            "Asian tech supply chain"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "N3P",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:asian-tech-rally"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-export-controls"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-export-controls"
+          },
+          {
+            "subject": "ticker:BABA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:us-china-summit-pressure"
+          },
+          {
+            "subject": "ticker:AVGO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-capex"
+          },
+          {
+            "subject": "tech:Blackwell",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:export-controls"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "地緣分歧交易明確，美日韓 AI 鏈受惠，中概承壓"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T05:52:34Z",
+      "latency_ms": 71531,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "本次亞洲科技股反彈，除了晶圓代工廠如台積電 (TSM) 受惠於 AI 晶片代工外，後段先進封裝（OSAT）龍頭如日月光 (ASX) 亦將同步受惠。隨著 AI 晶片複雜度與需求激增，CoWoS-L 等先進封裝產能持續緊俏，這直接推升了日月光這類專業封裝測試廠的訂單能見度與價格彈性。此類公司雖處於供應鏈的下游，但其先進封裝技術是實現先進晶片性能的關鍵瓶頸之一，因此在全球 AI 基礎設施建置潮中，其重要性不亞於上游晶圓廠，預期將迎來顯著的營運動能。",
+        "bull_points": [
+          "日月光先進封裝產能吃緊",
+          "AI 伺服器需求帶動 OSAT 營收"
+        ],
+        "bear_points": [
+          "美中地緣政治風險持續",
+          "依賴上游晶片設計公司"
+        ],
+        "final_take": "日月光前景看俏，靜待財報驗證",
+        "entities": {
+          "tickers": [
+            "ASX",
+            "TSM",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced Packaging"
+          ],
+          "tech_keywords": [
+            "OSAT",
+            "CoWoS-L",
+            "Chiplets"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ASX",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          },
+          {
+            "subject": "theme:AI capex",
+            "predicate": "CATALYST_FOR",
+            "object": "tech_keyword:Chiplets"
+          },
+          {
+            "subject": "ticker:ASX",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Advanced Packaging"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "聚焦後段封裝廠（OSAT）之新視角"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T05:52:57Z",
+      "latency_ms": 22791,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪聚焦上游晶圓 (TSM) 與後段封裝 (ASX)，**遺漏 HBM 上游記憶體三雄的相對價差**。SK Hynix 與 Micron (MU) 在 HBM3e 12-Hi 進度領先三星，但 NVDA Blackwell B200 量產拉貨後，**三星 HBM3e qualification 進度若延誤，MU 將是最大邊際受惠者** — Micron 已通過 NVDA H200/B200 認證，且 Boise/Hiroshima fab 不受對華管制影響。**第二層風險**：若峰會後美方擴大 ECCN 3B001 管制至 HBM2e/HBM3，Samsung 對華 HBM 出貨 (~15% 營收) 將被迫轉單給 MU/SK Hynix — 對 MU 反而是 supply tightness tailwind。**Contra**：若北京以稀土/鎵鍺出口限制反制，**AMAT/LRCX/KLAC 半導體設備中國營收 (25-30%) 受衝擊**比 NVDA 直接，這是市場低估的非對稱風險。",
+        "bull_points": [
+          "MU 為 HBM3e 量產 second source，Samsung 延誤的最大受惠者",
+          "對華 HBM 管制擴大反推升非中市場 supply tightness",
+          "ASX/TSM CoWoS-L 訂單能見度延伸至 2026 H2"
+        ],
+        "bear_points": [
+          "稀土/鎵鍺反制衝擊 AMAT/LRCX/KLAC 中國營收 25-30%",
+          "Samsung HBM 對華禁售可能拖累其 memory 整體 ASP",
+          "中概 ADR 若反制升級恐再殺一波估值"
+        ],
+        "final_take": "看多 MU/SK Hynix，留意半導體設備非對稱反制風險",
+        "entities": {
+          "tickers": [
+            "MU",
+            "NVDA",
+            "TSM",
+            "ASX",
+            "AMAT",
+            "LRCX",
+            "KLAC",
+            "AVGO"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment",
+            "Memory"
+          ],
+          "themes": [
+            "AI capex",
+            "US-China decoupling",
+            "HBM supply chain",
+            "Export controls"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "HBM3e 12-Hi",
+            "Blackwell B200",
+            "CoWoS-L",
+            "ECCN 3B001",
+            "N3P"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:samsung-hbm-delay"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-rare-earth-retaliation"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-rare-earth-retaliation"
+          },
+          {
+            "subject": "ticker:KLAC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:china-rare-earth-retaliation"
+          },
+          {
+            "subject": "narrative:export-controls",
+            "predicate": "CATALYST_FOR",
+            "object": "ticker:MU"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補 HBM 記憶體三雄價差 + 設備股非對稱反制風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T05:53:33Z",
+      "latency_ms": 35942,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "上游供應鏈如 TSM、三星、SK Hynix 的產能佈局已成焦點，但需求端 **微軟 (MSFT)** 等大型雲端服務商的 AI 基礎設施投資節奏，同樣是關鍵。若美中峰會後地緣政治緊張加劇，可能影響全球經濟預期，進而促使 MSFT 謹慎評估其 AI 擴張步伐，這將間接影響對 NVDA GPU 及相關零組件的需求。此為供應鏈末端的關鍵下游動能觀察點。",
+        "bull_points": [
+          "MSFT 企業 AI 整合持續推動強勁需求。",
+          "全球 AI 應用浪潮為長期趨勢。"
+        ],
+        "bear_points": [
+          "地緣政治不確定性恐延緩企業 AI 部署。",
+          "全球經濟放緩或影響雲端服務支出。"
+        ],
+        "final_take": "需求端能見度不明，AI 擴張節奏待觀察。",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology"
+          ],
+          "themes": [
+            "AI infrastructure spending",
+            "Global economic outlook",
+            "Geopolitical risk"
+          ],
+          "tech_keywords": [
+            "AI",
+            "Cloud"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI infrastructure spending"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Geopolitical risk"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Global economic outlook"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦供應鏈終端需求，補充先前討論缺口。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T05:53:57Z",
+      "latency_ms": 24376,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前三輪聚焦 HBM/封裝/雲端 capex 節奏，**遺漏電力基礎設施瓶頸的地緣分歧映射**。AI data center 真正卡點已從 GPU 移至**配電/變壓器/HVDC** — Eaton (ETN)、Vertiv (VRT)、Quanta (PWR) 訂單能見度延伸至 2027。美中峰會若加碼對華 AI 算力管制，**北美 hyperscaler capex 將更集中於本土 (TX/AZ/VA)**，間接推升 ETN switchgear 與 VRT liquid cooling 訂單。**第二層**：中國若反制限制稀土磁材出口，**GE Vernova (GEV) 風機與電網變壓器矽鋼片成本恐上升 8-12%**，但 GEV grid orders backlog ($23B) 已 pricing power lock-in。**Contra**：若 hyperscaler 因地緣不確定性 push out 2026 H2 capex，VRT/ETN 估值 (~35x fwd) 將首當其衝 de-rate — 這是 consensus underweight 的尾部風險。",
+        "bull_points": [
+          "ETN/VRT 訂單 backlog 延伸 2027，地緣分歧加速本土 capex",
+          "GEV 電網 backlog $23B 已 lock pricing，稀土反制可轉嫁",
+          "AI 算力卡點移至配電端，power infra 估值重估"
+        ],
+        "bear_points": [
+          "VRT/ETN fwd P/E ~35x，hyperscaler capex push-out 風險高",
+          "稀土磁材出口管制推升風機矽鋼片成本 8-12%",
+          "電力設備 lead time 18-24 月，需求若放緩去化慢"
+        ],
+        "final_take": "看多美系電力 infra，但留意 35x 估值對 capex 節奏敏感",
+        "entities": {
+          "tickers": [
+            "ETN",
+            "VRT",
+            "PWR",
+            "GEV",
+            "NVDA",
+            "MSFT"
+          ],
+          "sectors": [
+            "Industrials",
+            "Electrical Equipment",
+            "Utilities",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "power infrastructure",
+            "grid modernization",
+            "US-China decoupling",
+            "rare earth export control"
+          ],
+          "tech_keywords": [
+            "HVDC",
+            "liquid cooling",
+            "switchgear",
+            "rare earth magnets",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ETN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai_data_center_power"
+          },
+          {
+            "subject": "ticker:VRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:liquid_cooling_demand"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rare_earth_export_control"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:grid_modernization"
+          },
+          {
+            "subject": "ticker:PWR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:us_onshoring_capex"
+          },
+          {
+            "subject": "narrative:us_china_summit",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:us_onshoring_capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "切入電力基礎設施二階效應，前輪未提及"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T05:54:17Z",
+      "latency_ms": 20323,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "美中峰會的地緣政治緊張加劇，雖對部分地區股市構成壓力，但並未阻礙全球對 AI 基礎設施的強勁需求。大型雲端服務商如微軟 (MSFT) 等，正積極擴張其 AI 資料中心，這直接推升了對高效能網路設備的龐大需求。Arista Networks (ANET) 作為資料中心網路解決方案的領導者，憑藉其領先技術和擴展能力，將在此波建置潮中扮演關鍵角色，儘管其供應鏈亦需關注中國相關的潛在風險，但整體市場動能仍偏多。",
+        "bull_points": [
+          "ANET 受惠全球 AI 資料中心大規模建置。",
+          "高效能網路是 AI 運算擴張的關鍵瓶頸。",
+          "MSFT 等雲端巨頭持續加大 AI 基礎設施投資。"
+        ],
+        "bear_points": [
+          "供應鏈的中國關聯風險待觀察。",
+          "網路設備市場競爭激烈。",
+          "宏觀經濟放緩可能影響企業 IT 支出。"
+        ],
+        "final_take": "AI 網路需求強勁，ANET 具備擴張優勢。",
+        "entities": {
+          "tickers": [
+            "ANET",
+            "MSFT",
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology",
+            "Communications Services"
+          ],
+          "themes": [
+            "AI capex",
+            "Data Center Expansion",
+            "Global AI Infrastructure",
+            "High-Performance Networking"
+          ],
+          "tech_keywords": [
+            "Data Center Networking",
+            "Network Switches",
+            "Hyperscale Networking"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Data Center Expansion"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "ticker:ANET",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:CSCO"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新視角聚焦網路基建，回應 AI 擴張需求。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "ANET",
+        "ASML",
+        "ASX",
+        "AVGO",
+        "BABA",
+        "ETN",
+        "GEV",
+        "JD",
+        "KLAC",
+        "LRCX",
+        "MSFT",
+        "MU",
+        "NVDA",
+        "PDD",
+        "PWR",
+        "TSM",
+        "VRT"
+      ],
+      "sectors": [
+        "Communications Services",
+        "Consumer Discretionary",
+        "Electrical Equipment",
+        "Industrials",
+        "Information Technology",
+        "Memory",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "AI infrastructure spending",
+        "Advanced Packaging",
+        "Asian tech supply chain",
+        "Data Center Expansion",
+        "Export controls",
+        "Geopolitical risk",
+        "Global AI Infrastructure",
+        "Global economic outlook",
+        "HBM supply chain",
+        "High-Performance Networking",
+        "US-China decoupling",
+        "grid modernization",
+        "power infrastructure",
+        "rare earth export control"
+      ],
+      "tech_keywords": [
+        "AI",
+        "Blackwell",
+        "Blackwell B200",
+        "Chiplets",
+        "Cloud",
+        "CoWoS-L",
+        "Data Center Networking",
+        "ECCN 3B001",
+        "HBM3e",
+        "HBM3e 12-Hi",
+        "HVDC",
+        "Hyperscale Networking",
+        "N3P",
+        "Network Switches",
+        "OSAT",
+        "liquid cooling",
+        "rare earth magnets",
+        "switchgear"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:asian-tech-rally"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-export-controls"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-export-controls"
+      },
+      {
+        "subject": "ticker:BABA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:us-china-summit-pressure"
+      },
+      {
+        "subject": "ticker:AVGO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "tech:Blackwell",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:export-controls"
+      },
+      {
+        "subject": "ticker:ASX",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "theme:AI capex",
+        "predicate": "CATALYST_FOR",
+        "object": "tech_keyword:Chiplets"
+      },
+      {
+        "subject": "ticker:ASX",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Advanced Packaging"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:samsung-hbm-delay"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-rare-earth-retaliation"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-rare-earth-retaliation"
+      },
+      {
+        "subject": "ticker:KLAC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:china-rare-earth-retaliation"
+      },
+      {
+        "subject": "narrative:export-controls",
+        "predicate": "CATALYST_FOR",
+        "object": "ticker:MU"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI infrastructure spending"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Geopolitical risk"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Global economic outlook"
+      },
+      {
+        "subject": "ticker:ETN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai_data_center_power"
+      },
+      {
+        "subject": "ticker:VRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:liquid_cooling_demand"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rare_earth_export_control"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:grid_modernization"
+      },
+      {
+        "subject": "ticker:PWR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:us_onshoring_capex"
+      },
+      {
+        "subject": "narrative:us_china_summit",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:us_onshoring_capex"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Data Center Expansion"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "ticker:ANET",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:CSCO"
+      }
+    ],
+    "bull_summary": [
+      "亞洲科技鏈受惠 AI 供應外溢，HBM3e 需求未減",
+      "資金從中概分流至美日韓 AI 上游 (NVDA/TSM)",
+      "峰會若只 rhetoric，中概有 oversold bounce 空間",
+      "日月光先進封裝產能吃緊",
+      "AI 伺服器需求帶動 OSAT 營收",
+      "MU 為 HBM3e 量產 second source，Samsung 延誤的最大受惠者"
+    ],
+    "bear_summary": [
+      "Blackwell 對華禁售恐擴大，NVDA 中國營收承壓",
+      "半導體設備出口許可恐再收緊 (ASML/AMAT)",
+      "中概 ADR 估值折價持續，BABA/JD/PDD 反彈受限",
+      "美中地緣政治風險持續",
+      "依賴上游晶片設計公司",
+      "稀土/鎵鍺反制衝擊 AMAT/LRCX/KLAC 中國營收 25-30%"
+    ],
+    "final_take": "AI 網路需求強勁，ANET 具備擴張優勢。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T05:54:17Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN; gemini-only: COMPETES_WITH, CUSTOMER_OF"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

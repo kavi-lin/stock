@@ -1,0 +1,559 @@
+{
+  "news_id": "bn_20260513_79d9164c",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-13T17:01:15Z",
+  "last_activity_ts": "2026-05-13T17:15:11Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/news/memes-rally-small-caps-break-164537427.html",
+    "feed_fingerprint": "memes rally small caps break out",
+    "published": "2026-05-13T16:45:37+00:00",
+    "url_hash": "sha1:f6b52929ca37de37a5288c6b328d6d97a60957be"
+  },
+  "headline": "Memes Rally as Small Caps Break Out",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sector_news",
+    "shallow_score": 1.0,
+    "bull_case": "板塊動能向上",
+    "bear_case": "個股分化加劇",
+    "sector_view": "輪動信號出現",
+    "macro_view": "相對強度追蹤",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 0,
+      "ts": "2026-05-13T17:11:43Z",
+      "latency_ms": 19402,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Small-cap breakout + meme revival = **risk-on rotation signal**, not isolated retail froth. IWM/RUT breaking range after 18mo consolidation implies breadth thrust — historically bullish for 3-6mo forward. Watch confirmation via Russell 2000 advance/decline + high-beta ETF (SPHB) follow-through. Meme leg (GME, AMC, BBBY-successors, KOSS) is **liquidity tell**: short interest squeeze + 0DTE gamma feedback. Beneficiaries beyond memes: regional banks (KRE), biotech (XBI), unprofitable tech (ARKK) — rate-sensitive cohorts. Risk: if 10Y yield spikes >4.5%, small-cap leverage exposure kills the move fast. Watch IWM relative strength vs SPY — sustained RS > 1.0 needed. Bear angle: dispersion widens, low-quality names front-run real earnings recovery. Position via IWM/IJR not individual memes unless squeeze setup confirmed.",
+        "entities": {
+          "tickers": [
+            "IWM",
+            "IJR",
+            "SPY",
+            "GME",
+            "AMC",
+            "KRE",
+            "XBI",
+            "ARKK",
+            "SPHB",
+            "RUT"
+          ],
+          "sectors": [
+            "Financials",
+            "Biotechnology",
+            "Consumer Discretionary",
+            "Small-Cap Equity"
+          ],
+          "themes": [
+            "small-cap rotation",
+            "risk-on breadth thrust",
+            "meme squeeze",
+            "rate-sensitive rally",
+            "breadth expansion"
+          ],
+          "tech_keywords": [
+            "0DTE gamma",
+            "short squeeze",
+            "Russell 2000 breakout"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:IWM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:small-cap-breakout"
+          },
+          {
+            "subject": "ticker:KRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:risk-on-rotation"
+          },
+          {
+            "subject": "ticker:XBI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:small-cap-breakout"
+          },
+          {
+            "subject": "ticker:GME",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:meme-squeeze"
+          },
+          {
+            "subject": "ticker:ARKK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:risk-on-rotation"
+          },
+          {
+            "subject": "narrative:small-cap-breakout",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-10y-yield"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Small-cap breakout + meme = risk-on breadth thrust signal. Multi-sector beneficiaries (KRE/XBI/ARKK), yield-spike risk, dispersion warning."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 0,
+      "ts": "2026-05-13T17:13:55Z",
+      "latency_ms": 131948,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260513_79d9164c.c1.txt",
+      "parsed": {
+        "commentary": "I am currently in Plan Mode, which restricts me to read-only operations for exploring the project and creating implementation plans. I cannot generate analytical commentary or JSON output while in thi",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 1,
+      "ts": "2026-05-13T17:14:16Z",
+      "latency_ms": 21181,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "New angle: **prime brokerage + market-maker positioning**. Small-cap squeezes force dealer hedging through Citadel Securities / Virtu (VIRT) — gamma unclench in IWM weeklies amplifies the move mechanically, not just retail-driven. Second-order: **SoFi (SOFI) and Robinhood (HOOD)** are direct flow beneficiaries — DARTs spike on meme revival, payment-for-order-flow revenue re-rates. Contra to prior thread: small-cap breakout coincides with **CLO equity tranche stress** — Russell 2000 has ~40% non-earners; floating-rate debt service on this cohort worsens if SOFR stays sticky. Watch BIZD/BDC spreads as canary. Specific node missed: **ICE/CBOE volume** — 0DTE on small-cap ETFs (IWM, TNA) hit records during prior meme cycles, direct revenue tailwind for exchanges. Squeeze-mechanics ≠ fundamental breadth; distinguish.",
+        "entities": {
+          "tickers": [
+            "VIRT",
+            "SOFI",
+            "HOOD",
+            "IWM",
+            "TNA",
+            "ICE",
+            "CBOE",
+            "BIZD"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets"
+          ],
+          "themes": [
+            "meme squeeze mechanics",
+            "0DTE gamma",
+            "small-cap leverage stress",
+            "PFOF revenue"
+          ],
+          "tech_keywords": [
+            "0DTE options",
+            "CLO equity tranche",
+            "gamma hedging",
+            "PFOF"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VIRT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:meme-squeeze-volume"
+          },
+          {
+            "subject": "ticker:HOOD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:retail-dart-spike"
+          },
+          {
+            "subject": "ticker:SOFI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:retail-dart-spike"
+          },
+          {
+            "subject": "ticker:ICE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:0dte-volume"
+          },
+          {
+            "subject": "ticker:CBOE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:0dte-volume"
+          },
+          {
+            "subject": "ticker:BIZD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:smallcap-floating-rate-stress"
+          },
+          {
+            "subject": "ticker:IWM",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:smallcap-breakout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread covered breadth/rate-sensitivity. Added market-maker mechanics, retail broker flow re-rate, CLO/BDC contra-risk, exchange 0DTE tailwind."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 1,
+      "ts": "2026-05-13T17:14:35Z",
+      "latency_ms": 18612,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The surge in small-cap stocks, particularly speculative non-earning names, could create significant volatility in specialized Closed-End Funds (CEFs). Many small-cap growth and value CEFs may experience temporary NAV inflation. However, the market price of these CEFs might diverge, leading to widening premiums if investors deem the rally unsustainable or if the fund's structure amplifies price movements relative to NAV. This distinct dynamic within CEFs, driven by their unique leverage and premium/discount mechanisms, offers a different perspective on the broader speculative fervor beyond direct stock and ETF plays.",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [
+            "CEF Premium Volatility",
+            "Small-Cap NAV Inflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:meme rally",
+            "predicate": "CAUSES",
+            "object": "theme:Small-Cap NAV Inflation"
+          },
+          {
+            "subject": "theme:Small-Cap NAV Inflation",
+            "predicate": "LEADS_TO",
+            "object": "theme:CEF Premium Volatility"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Focuses on CEF premium volatility driven by speculative small-cap NAV inflation, a distinct market dynamic."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": "Analyst-A (Claude)",
+      "round": 2,
+      "ts": "2026-05-13T17:14:52Z",
+      "latency_ms": 17630,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**New angle: index reconstitution + passive flow mechanics.** Russell 2000 annual reconstitution (late June) creates forced buying as index funds rebalance — pre-positioning by quant arbs (RUT futures basis widens) front-runs the breakout. Specific node missed: **MSCI/Russell licensing revenue** (MSCI ticker) re-rates on small-cap AUM inflows into IWM/IJR. Second-order on **securities lending**: small-cap short interest spike = stock loan revenue boost for prime brokers (GS/MS) AND ETF issuers (BLK iShares pockets 30-40bps on hard-to-borrow names). Contra to meme-as-liquidity-tell: **factor crowding risk** — if momentum + small-size factors load same names, quant deleveraging cascade (Aug 2007 redux) becomes tail risk. Watch HFRX equity-hedge index drawdowns. Also: **transfer agents** (Computershare, EQ) see filing-fee bumps from retail account openings — boring infrastructure play.",
+        "entities": {
+          "tickers": [
+            "MSCI",
+            "BLK",
+            "GS",
+            "MS",
+            "IWM",
+            "IJR",
+            "TNA"
+          ],
+          "sectors": [
+            "Financials",
+            "Asset Management",
+            "Exchanges"
+          ],
+          "themes": [
+            "Russell reconstitution",
+            "factor crowding",
+            "securities lending",
+            "passive flow mechanics"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSCI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:small_cap_aum_inflow"
+          },
+          {
+            "subject": "ticker:BLK",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:securities_lending_revenue"
+          },
+          {
+            "subject": "ticker:IWM",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:russell_reconstitution_2026"
+          },
+          {
+            "subject": "ticker:GS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:prime_broker_stock_loan"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "Prior thread covered squeeze mechanics, dealer hedging, CEF dynamics. Missed: index reconstitution forced flows, sec-lending revenue, factor crowding tail risk, transfer-agent infra."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": "Analyst-B (Gemini)",
+      "round": 2,
+      "ts": "2026-05-13T17:15:11Z",
+      "latency_ms": 19215,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "The current speculative surge in small-cap stocks, amplified by meme rallies, is creating secondary effects that extend beyond retail trading dynamics. A crucial, often overlooked, beneficiary segment lies within the semiconductor supply chain, specifically firms enabling advanced packaging technologies like CoWoS-L. These companies, focused on metrology and inspection solutions, are vital for ensuring the high yields and performance required for next-generation AI hardware. As capital expenditure in AI accelerates, the demand for precise quality control in complex chip manufacturing grows. While not directly tied to meme narratives, the broader risk-on sentiment and increased market attention on technology enablers provide a supportive environment for these niche providers, essential for the future of high-performance computing.",
+        "entities": {
+          "tickers": [
+            "ONTO"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Electronic Equipment & Components"
+          ],
+          "themes": [
+            "Advanced Packaging",
+            "AI Hardware",
+            "Semiconductor Metrology",
+            "Yield Optimization"
+          ],
+          "tech_keywords": [
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ONTO",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:advanced_packaging_solutions"
+          },
+          {
+            "subject": "narrative:advanced_packaging_solutions",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI_hardware_capex"
+          },
+          {
+            "subject": "ticker:ONTO",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:semiconductor_metrology"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "New angle on semiconductor supply chain beneficiaries of AI capex, amplified by risk-on sentiment."
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMC",
+        "ARKK",
+        "BIZD",
+        "BLK",
+        "CBOE",
+        "GME",
+        "GS",
+        "HOOD",
+        "ICE",
+        "IJR",
+        "IWM",
+        "KRE",
+        "MS",
+        "MSCI",
+        "ONTO",
+        "RUT",
+        "SOFI",
+        "SPHB",
+        "SPY",
+        "TNA",
+        "VIRT",
+        "XBI"
+      ],
+      "sectors": [
+        "Asset Management",
+        "Biotechnology",
+        "Capital Markets",
+        "Consumer Discretionary",
+        "Electronic Equipment & Components",
+        "Exchanges",
+        "Financials",
+        "Semiconductors",
+        "Small-Cap Equity"
+      ],
+      "themes": [
+        "0DTE gamma",
+        "AI Hardware",
+        "Advanced Packaging",
+        "CEF Premium Volatility",
+        "PFOF revenue",
+        "Russell reconstitution",
+        "Semiconductor Metrology",
+        "Small-Cap NAV Inflation",
+        "Yield Optimization",
+        "breadth expansion",
+        "factor crowding",
+        "meme squeeze",
+        "meme squeeze mechanics",
+        "passive flow mechanics",
+        "rate-sensitive rally",
+        "risk-on breadth thrust",
+        "securities lending",
+        "small-cap leverage stress",
+        "small-cap rotation"
+      ],
+      "tech_keywords": [
+        "0DTE gamma",
+        "0DTE options",
+        "CLO equity tranche",
+        "CoWoS-L",
+        "PFOF",
+        "Russell 2000 breakout",
+        "gamma hedging",
+        "short squeeze"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:IWM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:small-cap-breakout"
+      },
+      {
+        "subject": "ticker:KRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:risk-on-rotation"
+      },
+      {
+        "subject": "ticker:XBI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:small-cap-breakout"
+      },
+      {
+        "subject": "ticker:GME",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:meme-squeeze"
+      },
+      {
+        "subject": "ticker:ARKK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:risk-on-rotation"
+      },
+      {
+        "subject": "narrative:small-cap-breakout",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-10y-yield"
+      },
+      {
+        "subject": "ticker:VIRT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:meme-squeeze-volume"
+      },
+      {
+        "subject": "ticker:HOOD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:retail-dart-spike"
+      },
+      {
+        "subject": "ticker:SOFI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:retail-dart-spike"
+      },
+      {
+        "subject": "ticker:ICE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:0dte-volume"
+      },
+      {
+        "subject": "ticker:CBOE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:0dte-volume"
+      },
+      {
+        "subject": "ticker:BIZD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:smallcap-floating-rate-stress"
+      },
+      {
+        "subject": "ticker:IWM",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:smallcap-breakout"
+      },
+      {
+        "subject": "narrative:meme rally",
+        "predicate": "CAUSES",
+        "object": "theme:Small-Cap NAV Inflation"
+      },
+      {
+        "subject": "theme:Small-Cap NAV Inflation",
+        "predicate": "LEADS_TO",
+        "object": "theme:CEF Premium Volatility"
+      },
+      {
+        "subject": "ticker:MSCI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:small_cap_aum_inflow"
+      },
+      {
+        "subject": "ticker:BLK",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:securities_lending_revenue"
+      },
+      {
+        "subject": "ticker:IWM",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:russell_reconstitution_2026"
+      },
+      {
+        "subject": "ticker:GS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:prime_broker_stock_loan"
+      },
+      {
+        "subject": "ticker:ONTO",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:advanced_packaging_solutions"
+      },
+      {
+        "subject": "narrative:advanced_packaging_solutions",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI_hardware_capex"
+      },
+      {
+        "subject": "ticker:ONTO",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:semiconductor_metrology"
+      }
+    ],
+    "rounds_completed": 3,
+    "closed_at": "2026-05-13T17:15:11Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, HEADWIND_FROM, MENTIONED_IN; gemini-only: CAUSES, LEADS_TO, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,47 @@
+{
+  "ticker": "MU",
+  "as_of_date": "2026-05-16",
+  "cache_key": "MU_2026-05-16",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {},
+  "owner_earnings": {},
+  "insider_summary": {
+    "quarters": [],
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {},
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 0,
+    "house_count": 0,
+    "buy_count": 0,
+    "sell_count": 0,
+    "net_signal": "neutral",
+    "most_recent_date": null,
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {},
+  "executive_compensation": {},
+  "comp_benchmark": {},
+  "employee_history": {
+    "latest_period": "2025-08-28",
+    "latest_count": 53000,
+    "one_year_pct": 10.4,
+    "cagr_5y_pct": 5.4,
+    "expansion_signal": false,
+    "layoff_signal": false,
+    "data_points": 32,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 6,
+    "cached": false
+  }
+}

@@ -1,0 +1,591 @@
+{
+  "news_id": "bn_20260518_a40a11f5",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T08:21:43Z",
+  "last_activity_ts": "2026-05-18T08:33:20Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/5fa8aac64be7",
+    "feed_fingerprint": "futu:DXYZ,KULR,LI:4ceb65a6b5",
+    "published": "2026-05-18T16:14:42+08:00",
+    "url_hash": "sha1:336c14390b4ca0f5eca450cf31e78fbd4b482121"
+  },
+  "headline": "美股太空概念股盤前普漲，DXYZ漲近10%，Redwire、回聲星通信漲超5%，KULR Technology、Rocket Lab漲近3%",
+  "headline_zh": null,
+  "raw_summary": "美股太空概念股盤前普漲，DXYZ漲近10%，Redwire、回聲星通信漲超5%，KULR Technology、Rocket Lab漲近3%；加密貨幣多數下跌，Strategy、Circle跌超3%；理想汽車大跌逾10%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": -2.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T08:31:37Z",
+      "latency_ms": 22781,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這是**情緒驅動**的盤前普漲，新聞未點出任何具體催化劑（無發射合約、無財報、無政策），須先壓低權重看待。值得分清標的性質：**DXYZ** 是封閉式基金（Destiny Tech100），主要代理 SpaceX 未上市曝險，漲近10% 多半是 **NAV 溢價波動**而非基本面，溢價本就大起大落。**Rocket Lab (RKLB)** 與 **Redwire (RDW)** 才是有實際營收的純太空標的，但僅漲約3-5%，反而說明真正有業務的公司漲幅最小、純概念股漲最兇——典型主題輪動末段特徵。太空板塊缺乏現金流、估值靠敘事支撐，盤前異動常在開盤後收斂。建議只盯 RKLB 的 Neutron 進度與發射節奏，其餘當噪音。",
+        "bull_points": [
+          "太空主題資金回流，板塊beta齊揚",
+          "RKLB有實際營收與Neutron題材撐估值"
+        ],
+        "bear_points": [
+          "無具體催化劑，純情緒盤前波動易收斂",
+          "DXYZ漲幅來自NAV溢價非基本面",
+          "概念股漲最兇、營收股漲最小=輪動末段"
+        ],
+        "final_take": "看淡此波情緒漲，只留RKLB觀察Neutron兌現",
+        "entities": {
+          "tickers": [
+            "DXYZ",
+            "RKLB",
+            "RDW",
+            "SATS",
+            "KULR"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "space economy",
+            "thematic rotation",
+            "satellite communications"
+          ],
+          "tech_keywords": [
+            "Neutron",
+            "Electron",
+            "LEO satellites"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:space-economy"
+          },
+          {
+            "subject": "ticker:DXYZ",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:space-economy"
+          },
+          {
+            "subject": "ticker:RDW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:space-economy"
+          },
+          {
+            "subject": "ticker:SATS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:satellite-communications"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "無催化劑情緒盤，概念股漲最兇為輪動末段警訊"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T08:31:50Z",
+      "latency_ms": 12824,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "分析師 A 已精準點出 **DXYZ** 的資金面風險，但我認為必須關注 **SATS** (EchoStar) 的個股邏輯。盤前普漲可能不僅是純概念炒作，**SATS** 與衛星頻譜資源整合、資產重組等基本面息息相關，與一般的「太空概念」存在本質差異。相較於理想汽車 (LI) 暴跌顯示資金從特定成長股撤出，資金可能正轉向具有潛在併購或防禦屬性的太空資產。",
+        "bull_points": [
+          "SATS 擁有的衛星頻譜資源具備高度併購價值。",
+          "太空板塊出現內部風險分化，資金轉向具備資產防禦屬性標的。"
+        ],
+        "bear_points": [
+          "概念股漲幅過大，純敘事驅動標的開盤後波動恐加劇。",
+          "宏觀避險需求若升溫，高 beta 值的太空股恐面臨獲利回吐壓力。"
+        ],
+        "final_take": "太空板塊內部正分化，應聚焦實際資產價值而非空洞敘事。",
+        "entities": {
+          "tickers": [
+            "DXYZ",
+            "RDW",
+            "SATS",
+            "KULR",
+            "RKLB",
+            "LI"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Communication Services",
+            "Automobiles"
+          ],
+          "themes": [
+            "Satellite communications",
+            "Risk rotation"
+          ],
+          "tech_keywords": [
+            "Satellite spectrum",
+            "Launch cadence"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SATS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:spectrum_value"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充 SATS 基本面價值及板塊內部分化邏輯，非單純的情緒炒作。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T08:32:20Z",
+      "latency_ms": 30457,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面兩位都漏掉的點：分析師 A 說「無政策催化劑」其實未必。**太空防務**是現在進行式的結構題——美國 **Golden Dome** 飛彈防禦計畫與 **SDA**（太空發展局）的衛星星系採購，正把資金往「軍工×太空」交集推。這也解釋為何 **RKLB**、**RDW** 雖漲幅小卻是真正有 backlog 的標的。另外要點名 **KULR Technology**：它本質是電池熱管理／航天電芯安全公司（NASA 供應鏈節點），被歸進「太空籃子」是寬鬆貼標，basket 成分混雜會放大盤前噪音。結論仍是壓低權重，但別把防務訂單流一併當噪音砍掉——那條線有現金流支撐。",
+        "bull_points": [
+          "Golden Dome 飛彈防禦+SDA 採購是結構性訂單流",
+          "RKLB/RDW 有 backlog，受惠軍工太空交集",
+          "防務題材提供純概念股缺乏的現金流錨"
+        ],
+        "bear_points": [
+          "KULR 屬電池熱管理，被寬鬆貼標進太空籃",
+          "basket 成分混雜放大盤前低流動性噪音",
+          "政策受惠須看實際合約落地非盤前異動"
+        ],
+        "final_take": "壓低權重，但防務訂單流那條線別當噪音砍",
+        "entities": {
+          "tickers": [
+            "RKLB",
+            "RDW",
+            "KULR",
+            "DXYZ",
+            "SATS"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "space defense",
+            "missile defense",
+            "Golden Dome"
+          ],
+          "tech_keywords": [
+            "Golden Dome",
+            "SDA satellite constellation",
+            "battery thermal management"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:RDW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:KULR",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:space-basket"
+          },
+          {
+            "subject": "narrative:golden-dome",
+            "predicate": "CATALYST_FOR",
+            "object": "sector:aerospace-defense"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增防務政策催化劑與 KULR 貼標誤判，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T08:32:33Z",
+      "latency_ms": 13106,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面提到的國防訂單與資產重組皆合理，但我認為還需補上「**發射能力瓶頸** (Launch Capacity Bottleneck)」的視角。目前的太空熱潮過於依賴遠期 Backlog 的敘事，卻忽略了無論是衛星組網或防務採購，真正的物理瓶頸在於「低成本、高頻率發射」。除了 SpaceX，**RKLB** 是目前唯一具備可靠節奏的玩家，這使得該板塊的估值存在巨大的**非線性風險**：一旦 RKLB 或其他公司的發射節奏不及預期，純概念股（如 DXYZ）的敘事會瞬間崩塌，因為它們缺乏實際的硬體交付支撐。",
+        "bull_points": [
+          "衛星組網需求具備長期剛性",
+          "RKLB 具備板塊內稀缺的發射能力"
+        ],
+        "bear_points": [
+          "純敘事概念股缺乏現金流支撐",
+          "發射延遲將造成整個產業鏈連鎖打擊"
+        ],
+        "final_take": "太空板塊風險集中，應精選具備物理硬體交付能力的標的，避開純概念炒作。",
+        "entities": {
+          "tickers": [
+            "RKLB",
+            "DXYZ",
+            "RDW",
+            "SATS",
+            "KULR"
+          ],
+          "sectors": [
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Space Economy"
+          ],
+          "tech_keywords": [
+            "Launch Capacity",
+            "Backlog"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:space_economy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入物理發射瓶頸視角，區分硬體交付與敘事估值的風險結構。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T08:33:12Z",
+      "latency_ms": 39129,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個全籃子的二階效應,前面都漏了:太空股普遍**燒錢、靠增發續命**。RDW、KULR、甚至 RKLB 帳上多掛著 ATM(at-the-market)增發額度,盤前急漲對公司而言是「印股票窗口」——管理層常趁拉高發新股補現金。所以這種無催化劑的情緒普漲反而**自我削弱**:股價越衝,後續股本稀釋壓力越大。另一個 contra:分析師 B 把 SATS(EchoStar)當防禦性併購標的,但它帳上背著龐大債務與近年到期牆,所謂「資產重組」更像被債務逼出來的求生,而非進攻佈局。結論不變,壓低權重,並把「拉高=潛在增發」當風險而非利多看待。",
+        "bull_points": [
+          "防務訂單(Golden Dome/SDA)給 RDW、RKLB 真實 backlog",
+          "RKLB 發射節奏為板塊唯一硬體護城河"
+        ],
+        "bear_points": [
+          "RDW/KULR/RKLB 掛 ATM 增發,急漲招致股本稀釋",
+          "SATS 背負龐大債務到期牆,重組屬被動求生",
+          "情緒普漲無催化劑,開盤後易收斂"
+        ],
+        "final_take": "看空,盤前急漲反成增發誘因需防稀釋",
+        "entities": {
+          "tickers": [
+            "DXYZ",
+            "RDW",
+            "KULR",
+            "RKLB",
+            "SATS",
+            "LI"
+          ],
+          "sectors": [
+            "Industrials",
+            "Aerospace & Defense",
+            "Communication Services"
+          ],
+          "themes": [
+            "space economy",
+            "missile defense",
+            "equity dilution"
+          ],
+          "tech_keywords": [
+            "ATM offering",
+            "Neutron",
+            "Golden Dome",
+            "SDA"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RDW",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:atm-dilution"
+          },
+          {
+            "subject": "ticker:KULR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:atm-dilution"
+          },
+          {
+            "subject": "ticker:SATS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:debt-maturity-wall"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:missile-defense"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增 ATM 增發稀釋二階效應+SATS 債務牆 contra,前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T08:33:20Z",
+      "latency_ms": 8197,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了增發風險，需留意**頻譜與軌道資源**的監管地緣政治效應。隨著太空活動增加，**FCC 與 ITU 對頻譜拍賣與使用權的規範**正趨嚴。對於 **SATS** 或 **Rocket Lab** 這類涉及通訊基礎設施的公司，這不僅是營運瓶頸，更是具體的法律合規風險。市場忽略了太空資產不僅需「發射」，更需「合規」。對於此類盤前異動，我建議關注其**頻譜許可授權**的可持續性，這比單純的發射節奏更具長期的護城河意義。",
+        "bull_points": [
+          "FCC頻譜資源若獲政策傾斜，將強化公司壁壘。",
+          "太空防務訂單提供穩定現金流預期。"
+        ],
+        "bear_points": [
+          "頻譜與軌道合規壓力上升，限制商業化進度。",
+          "盤前普漲誘發管理層趁勢增發稀釋股權。"
+        ],
+        "final_take": "敘事炒作大於基本面，嚴防合規監管利空。",
+        "entities": {
+          "tickers": [
+            "SATS",
+            "RKLB",
+            "RDW",
+            "DXYZ",
+            "KULR"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Communication Services"
+          ],
+          "themes": [
+            "Space Economy",
+            "AI capex",
+            "Satellite Networks"
+          ],
+          "tech_keywords": [
+            "Launch Capacity",
+            "Spectrum Licensing"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SATS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:spectrum_regulation"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:space_defense_contracts"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "引入頻譜與軌道監管對太空資產合規性的影響，補充了盤前炒作的法律合規視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "DXYZ",
+        "KULR",
+        "LI",
+        "RDW",
+        "RKLB",
+        "SATS"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Automobiles",
+        "Communication Services",
+        "Industrials"
+      ],
+      "themes": [
+        "AI capex",
+        "Golden Dome",
+        "Risk rotation",
+        "Satellite Networks",
+        "Satellite communications",
+        "Space Economy",
+        "equity dilution",
+        "missile defense",
+        "satellite communications",
+        "space defense",
+        "space economy",
+        "thematic rotation"
+      ],
+      "tech_keywords": [
+        "ATM offering",
+        "Backlog",
+        "Electron",
+        "Golden Dome",
+        "LEO satellites",
+        "Launch Capacity",
+        "Launch cadence",
+        "Neutron",
+        "SDA",
+        "SDA satellite constellation",
+        "Satellite spectrum",
+        "Spectrum Licensing",
+        "battery thermal management"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:space-economy"
+      },
+      {
+        "subject": "ticker:DXYZ",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:space-economy"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:space-economy"
+      },
+      {
+        "subject": "ticker:SATS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:satellite-communications"
+      },
+      {
+        "subject": "ticker:SATS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:spectrum_value"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:KULR",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:space-basket"
+      },
+      {
+        "subject": "narrative:golden-dome",
+        "predicate": "CATALYST_FOR",
+        "object": "sector:aerospace-defense"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:space_economy"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:atm-dilution"
+      },
+      {
+        "subject": "ticker:KULR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:atm-dilution"
+      },
+      {
+        "subject": "ticker:SATS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:debt-maturity-wall"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:missile-defense"
+      },
+      {
+        "subject": "ticker:SATS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:spectrum_regulation"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:space_defense_contracts"
+      }
+    ],
+    "bull_summary": [
+      "太空主題資金回流，板塊beta齊揚",
+      "RKLB有實際營收與Neutron題材撐估值",
+      "SATS 擁有的衛星頻譜資源具備高度併購價值。",
+      "太空板塊出現內部風險分化，資金轉向具備資產防禦屬性標的。",
+      "Golden Dome 飛彈防禦+SDA 採購是結構性訂單流",
+      "RKLB/RDW 有 backlog，受惠軍工太空交集"
+    ],
+    "bear_summary": [
+      "無具體催化劑，純情緒盤前波動易收斂",
+      "DXYZ漲幅來自NAV溢價非基本面",
+      "概念股漲最兇、營收股漲最小=輪動末段",
+      "概念股漲幅過大，純敘事驅動標的開盤後波動恐加劇。",
+      "宏觀避險需求若升溫，高 beta 值的太空股恐面臨獲利回吐壓力。",
+      "KULR 屬電池熱管理，被寬鬆貼標進太空籃"
+    ],
+    "final_take": "敘事炒作大於基本面，嚴防合規監管利空。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T08:33:20Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

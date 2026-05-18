@@ -1,0 +1,488 @@
+{
+  "news_id": "bn_20260518_729b68f5",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T10:42:31Z",
+  "last_activity_ts": "2026-05-18T10:52:24Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/energy/articles/valero-energy-vlo-crushes-estimates-101914979.html",
+    "feed_fingerprint": "valero energy vlo crushes estimates q1 expects refining",
+    "published": "2026-05-18T10:19:14+00:00",
+    "url_hash": "sha1:6d719f0e61f43e4fd4c6c46c3e00efe48202383b"
+  },
+  "headline": "Valero Energy (VLO) Crushes Estimates in Q1, Expects Refining Margins to Remain Strong",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:50:45Z",
+      "latency_ms": 21115,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260518_729b68f5.c0.txt",
+      "parsed": {
+        "commentary": "```json\n{\n  \"commentary\": \"VLO Q1 大幅超預期、管理層喊話**煉油毛利持續強勁**，是煉油族群的正面訊號。重點不在 EPS 本身，而在 crack spread 結構性支撐：過去三年北美煉廠淨產能因關廠（如 LyondellBasell、Phillips 66 退役產能）而收縮，疊加 IMO 低硫需求與出口管道暢通，毛利地板被墊高。VLO 自由現金流強、買回庫藏股積",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T10:50:55Z",
+      "latency_ms": 10507,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了傳統煉油毛利，VLO 的 **Diamond Green Diesel (DGD)** 業務是其核心結構性優勢。相較於 MPC 或 PSX 等競爭對手，DGD 透過法規激勵機制（如 RINs、LCFS）與傳統石油產品形成互補，在原油價格波動期間提供了極佳的邊際緩衝。市場往往低估此多角化佈局對其整體 ROIC 的貢獻，這使得 VLO 在面對煉油景氣循環週期時，比純煉油商具備更強的自由現金流抗壓性與獲利結構韌性。",
+        "bull_points": [
+          "DGD 業務提供非油價掛鉤之獲利渠道",
+          "法規激勵機制結構性提升邊際毛利",
+          "多角化佈局增強長期現金流穩定性"
+        ],
+        "bear_points": [
+          "再生柴油產能擴張導致利差縮窄風險",
+          "環保政策變動對稅收抵免影響巨大"
+        ],
+        "final_take": "VLO透過DGD實現煉油多角化，增強了週期中的邊際抗壓能力。",
+        "entities": {
+          "tickers": [
+            "VLO",
+            "MPC",
+            "PSX"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "Energy",
+            "Renewable Diesel"
+          ],
+          "tech_keywords": [
+            "Refining Margins"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Renewable Diesel"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:MPC"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充再生柴油作為結構性毛利穩定因子。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:51:26Z",
+      "latency_ms": 30283,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個反方視角：Gemini 把 **DGD** 當結構優勢，但 2024-2025 北美 renewable diesel 產能嚴重超建，加州 **LCFS** 抵免價格崩跌、RIN 走弱，DGD 毛利其實已被壓縮——這是利多敘事的盲點。更關鍵的是稅務斷層：blender's tax credit 2025 起被 **45Z** clean fuel production credit 取代，計算基礎改看碳強度，進口 feedstock（如 UCO）受罰，DGD 經濟性面臨重估。另外管理層喊「margins remain strong」本身是煉油深週期的典型訊號——煉油是 cyclical business，產能地板墊高不等於 crack spread 不會回落。VLO 基本面確實強，但別把週期高點的 guidance 當結構性保證。DGD 合資夥伴 **DAR**（Darling）同樣承壓，可一併觀察。",
+        "bull_points": [
+          "VLO 煉油本業 FCF 強、庫藏股回購支撐每股價值",
+          "北美煉廠淨產能收縮墊高 crack spread 地板"
+        ],
+        "bear_points": [
+          "renewable diesel 超建、LCFS/RIN 抵免崩跌壓縮 DGD 毛利",
+          "45Z 稅改取代 blender credit，DGD 經濟性面臨重估",
+          "「margins remain strong」guidance 常是煉油週期高點訊號"
+        ],
+        "final_take": "本業偏多，但 DGD 與週期高點風險被低估，宜謹慎",
+        "entities": {
+          "tickers": [
+            "VLO",
+            "DAR",
+            "PSX",
+            "MPC"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "refining margins",
+            "renewable diesel",
+            "45Z tax credit",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "LCFS",
+            "RIN",
+            "45Z",
+            "crack spread"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:renewable-diesel-oversupply"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:45z-tax-credit-transition"
+          },
+          {
+            "subject": "ticker:DAR",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:VLO"
+          },
+          {
+            "subject": "ticker:DAR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:renewable-diesel-oversupply"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補 DGD 超建與 45Z 稅改反方論點，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T10:51:42Z",
+      "latency_ms": 16588,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了 DGD 與煉油週期議題，VLO 的結構性獲利引擎在於其 **USGC (美國墨西哥灣)** 的極致出口彈性。當全球能源供給受地緣政治（如紅海與中東局勢）擾動時，美國作為成品油淨出口國，VLO 的煉廠透過基礎設施直接對接國際套利空間。這不僅是單純的 crack spread 獲利，而是將北美原油成本優勢（WTI vs Brent）直接輸出至歐洲與拉美市場。此「出口霸權」是投資人常低估的護城河，使 VLO 在面對國內需求疲軟時，仍能維持強勁的邊際貢獻。",
+        "bull_points": [
+          "VLO 坐擁 USGC 煉油樞紐，極大化國際能源套利效率。",
+          "全球成品油供給受地緣政治干擾時，出口彈性提供避險保護。"
+        ],
+        "bear_points": [
+          "全球宏觀經濟若顯著走軟，成品油需求降速恐壓抑煉油毛利。",
+          "油價漲幅若過快引發通膨與政策干預風險，恐壓縮 VLO 定價空間。"
+        ],
+        "final_take": "煉油出口霸權與地緣政治避險是 VLO 當前的抗週期底氣。",
+        "entities": {
+          "tickers": [
+            "VLO",
+            "MPC",
+            "PBF"
+          ],
+          "sectors": [
+            "ENERGY"
+          ],
+          "themes": [
+            "USGC_exports",
+            "crack_spreads",
+            "geopolitical_hedge"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:USGC_exports"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:MPC"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補強 USGC 出口套利的地緣政治結構性優勢。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:52:13Z",
+      "latency_ms": 30640,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個 Gemini 沒講的反方節點：USGC 出口護城河最大的買家是**墨西哥**，而 Pemex 的 **Olmeca (Dos Bocas)** 新煉廠 2024-2025 逐步爬產、加上 Deer Park 整建，戰略目標就是把成品油自給率拉高、削減自美進口。墨西哥是 VLO 汽油出口第一大目的地，這條需求是會結構性流失的——出口彈性是真,但下游買家正在自建產能,別把它當永久護城河。第二點:Q1 beat 要拆解是**benchmark crack 走強**還是**capture rate**(輕重/含硫價差、副產品溢價)貢獻;若靠 capture,差價本身受 OPEC+ 供給左右,同樣 cyclical、不可外推。VLO 體質強,但兩條被讚的「護城河」都有對手在挖。",
+        "bull_points": [
+          "USGC 基建對接國際套利,短期出口彈性仍領先同業",
+          "副產品與差價優化推升 capture rate,Q1 獲利品質佳"
+        ],
+        "bear_points": [
+          "Pemex Olmeca 煉廠爬產,墨西哥汽油進口需求結構性流失",
+          "Q1 beat 若靠 capture rate,差價受 OPEC+ 左右不可外推",
+          "下游買家自建產能,USGC 出口護城河被侵蝕"
+        ],
+        "final_take": "體質強但護城河被挖,看多偏謹慎",
+        "entities": {
+          "tickers": [
+            "VLO",
+            "MPC",
+            "PSX",
+            "DAR"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "refining margins",
+            "petroleum product exports",
+            "renewable diesel"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:pemex-olmeca-refinery"
+          },
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:usgc-export-arbitrage"
+          },
+          {
+            "subject": "narrative:pemex-olmeca-refinery",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:usgc-export-arbitrage"
+          }
+        ],
+        "done": false,
+        "confidence": 0.66,
+        "rationale_short": "新增墨西哥 Olmeca 自建產能侵蝕出口需求,及 capture rate 拆解視角"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T10:52:24Z",
+      "latency_ms": 11210,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦煉油與 DGD，忽略了 VLO 作為全球第二大**乙醇 (Ethanol)** 生產商的策略地位。在 SAF (永續航空燃料) 需求長線爆發背景下，VLO 透過 Ethanol-to-Jet 技術具備比單純依賴油脂類 DGD 更有利的 feedstock 轉換路徑。Ethanol 業務目前雖受 corn spread 壓抑，但這構成市場未充分定價的**選擇權 (optionality)**，一旦技術商業化成熟，其低碳燃料轉型彈性將顯著優於競爭對手。",
+        "bull_points": [
+          "乙醇業務具備轉型 SAF 的潛在長期選擇權。",
+          "傳統煉油產能緊縮維持強勁定價能力。"
+        ],
+        "bear_points": [
+          "乙醇獲利高度受玉米價格與 EPA 政策干擾。",
+          "高煉廠利用率帶來潛在設備維護風險。"
+        ],
+        "final_take": "看好 VLO 在傳統煉油與低碳燃料轉型的雙引擎配置。",
+        "entities": {
+          "tickers": [
+            "VLO"
+          ],
+          "sectors": [
+            "Energy"
+          ],
+          "themes": [
+            "SAF",
+            "Ethanol",
+            "Refining"
+          ],
+          "tech_keywords": [
+            "Ethanol-to-Jet",
+            "feedstock",
+            "crack spread"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:VLO",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keywords:Ethanol-to-Jet"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補全乙醇作為 SAF feedstock 的結構性轉型價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "DAR",
+        "MPC",
+        "PBF",
+        "PSX",
+        "VLO"
+      ],
+      "sectors": [
+        "ENERGY",
+        "Energy"
+      ],
+      "themes": [
+        "45Z tax credit",
+        "AI capex",
+        "Energy",
+        "Ethanol",
+        "Refining",
+        "Renewable Diesel",
+        "SAF",
+        "USGC_exports",
+        "crack_spreads",
+        "geopolitical_hedge",
+        "petroleum product exports",
+        "refining margins",
+        "renewable diesel"
+      ],
+      "tech_keywords": [
+        "45Z",
+        "Ethanol-to-Jet",
+        "LCFS",
+        "RIN",
+        "Refining Margins",
+        "crack spread",
+        "feedstock"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Renewable Diesel"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:MPC"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:renewable-diesel-oversupply"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:45z-tax-credit-transition"
+      },
+      {
+        "subject": "ticker:DAR",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:VLO"
+      },
+      {
+        "subject": "ticker:DAR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:renewable-diesel-oversupply"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:USGC_exports"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:pemex-olmeca-refinery"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:usgc-export-arbitrage"
+      },
+      {
+        "subject": "narrative:pemex-olmeca-refinery",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:usgc-export-arbitrage"
+      },
+      {
+        "subject": "ticker:VLO",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keywords:Ethanol-to-Jet"
+      }
+    ],
+    "bull_summary": [
+      "DGD 業務提供非油價掛鉤之獲利渠道",
+      "法規激勵機制結構性提升邊際毛利",
+      "多角化佈局增強長期現金流穩定性",
+      "VLO 煉油本業 FCF 強、庫藏股回購支撐每股價值",
+      "北美煉廠淨產能收縮墊高 crack spread 地板",
+      "VLO 坐擁 USGC 煉油樞紐，極大化國際能源套利效率。"
+    ],
+    "bear_summary": [
+      "再生柴油產能擴張導致利差縮窄風險",
+      "環保政策變動對稅收抵免影響巨大",
+      "renewable diesel 超建、LCFS/RIN 抵免崩跌壓縮 DGD 毛利",
+      "45Z 稅改取代 blender credit，DGD 經濟性面臨重估",
+      "「margins remain strong」guidance 常是煉油週期高點訊號",
+      "全球宏觀經濟若顯著走軟，成品油需求降速恐壓抑煉油毛利。"
+    ],
+    "final_take": "看好 VLO 在傳統煉油與低碳燃料轉型的雙引擎配置。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T10:52:24Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CO_DEVELOPS_WITH, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

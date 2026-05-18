@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-05-13T17:15:35.954472Z",
+  "tiers_applied": [
+    "1"
+  ],
+  "meta": {
+    "node_count": 800,
+    "edge_count": 1392,
+    "nodes_by_type": {
+      "theme": 114,
+      "ticker": 275,
+      "catalyst": 184,
+      "sector": 168,
+      "narrative": 59
+    },
+    "edges_by_type": {
+      "BELONGS_TO_THEME": 225,
+      "OUTCOME_FOR": 91,
+      "BULL_CASE_FOR": 315,
+      "MENTIONED_IN": 640,
+      "BEAR_CASE_FOR": 121
+    },
+    "prune_stats": {
+      "dropped_edges_low_weight": 229,
+      "dropped_isolated_nodes": 94,
+      "dropped_provisional_low_mentions": 0,
+      "dropped_for_cap": 151
+    },
+    "decay_strategies": {
+      "catalyst": 7,
+      "narrative": 21,
+      "theme": 21,
+      "structural_shift": 90,
+      "peer_of": 45,
+      "supply_chain_hop": 45,
+      "outcome_for": 30,
+      "belongs_to_theme": 21,
+      "belongs_to_sector": 60,
+      "mentioned_in": 14,
+      "bull_case_for": 30,
+      "bear_case_for": 30,
+      "default": 21
+    },
+    "tier_confidence": {
+      "tier1": 1.0,
+      "tier2": 0.7,
+      "tier3": 0.85
+    }
+  },
+  "size_bytes": 634451,
+  "tier2_narrative_attribution_audit": {},
+  "narrative_attribution_in_graph": {},
+  "quarantined_narratives": []
+}

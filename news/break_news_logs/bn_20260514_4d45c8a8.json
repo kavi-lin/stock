@@ -1,0 +1,258 @@
+{
+  "news_id": "bn_20260514_4d45c8a8",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T16:04:05Z",
+  "last_activity_ts": "2026-05-14T16:33:48Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/537bab01e97e",
+    "feed_fingerprint": "futu:FSD,TSLA:84dad48a94",
+    "published": "2026-05-14T19:25:31+08:00",
+    "url_hash": "sha1:bf33a93911a84ea395bc81ba36f14740a631c77b"
+  },
+  "headline": "馬斯克隨同訪華，特斯拉FSD能否趁機落地？",
+  "headline_zh": null,
+  "raw_summary": "馬斯克隨同訪華，特斯拉FSD能否趁機落地？",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:31:10Z",
+      "latency_ms": 4775,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 561,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "1b9700de-4c9e-4758-845c-e307f0bd8b37",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "40714e5d-0678-4b21-97b5-01846bef62e2"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:33:43Z",
+      "latency_ms": 153076,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "馬斯克此次隨同訪華，為特斯拉（TSLA）的完全自動駕駛（FSD）系統在中國落地帶來了新的契機。然而，FSD在中國市場的推廣，除了技術層面，更面臨嚴峻的數據主權與監管挑戰。中國對數據安全與隱私的嚴格規定，要求車輛運行產生的大量數據需在境內儲存與處理，這可能影響FSD的即時效能與持續更新。特斯拉若能成功應對此數據治理難題，將開啟龐大的潛在市場；反之，則可能面臨延遲或審批上的重大阻礙。",
+        "bull_points": [
+          "FSD落地中國，潛在市場巨大。",
+          "成功推廣將推升TSLA營收。"
+        ],
+        "bear_points": [
+          "中國數據監管是主要阻礙。",
+          "需與本土AI方案競爭。"
+        ],
+        "final_take": "看多中國FSD落地，但數據監管是關鍵。",
+        "entities": {
+          "tickers": [
+            "TSLA"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Information Technology"
+          ],
+          "themes": [
+            "Autonomous Driving",
+            "China Market Access",
+            "Data Governance"
+          ],
+          "tech_keywords": [
+            "FSD"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:China Market Access"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:Data Governance"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:Local Chinese Autonomous Driving Tech"
+          }
+        ],
+        "done": false,
+        "confidence": 1.0,
+        "rationale_short": "聚焦中國數據監管對FSD落地影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:33:48Z",
+      "latency_ms": 4539,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 599,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "98d6a70a-529b-4c29-9375-6e6fddb4d46a",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "409c75c4-a3f5-41d5-873c-4cde03adea78"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Information Technology"
+      ],
+      "themes": [
+        "Autonomous Driving",
+        "China Market Access",
+        "Data Governance"
+      ],
+      "tech_keywords": [
+        "FSD"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:China Market Access"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:Data Governance"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:Local Chinese Autonomous Driving Tech"
+      }
+    ],
+    "bull_summary": [
+      "FSD落地中國，潛在市場巨大。",
+      "成功推廣將推升TSLA營收。"
+    ],
+    "bear_summary": [
+      "中國數據監管是主要阻礙。",
+      "需與本土AI方案競爭。"
+    ],
+    "final_take": "看多中國FSD落地，但數據監管是關鍵。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:33:48Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, COMPETES_WITH, HEADWIND_FROM"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:31:10Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:33:48Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

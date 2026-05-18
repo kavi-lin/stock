@@ -14,7 +14,13 @@
 
 PS 以**單一訊息**同時發出 N 個 Agent tool call（N=4 當 `fred_available=true`，N=3 否則），等全部 JSON 回來再進入 Phase 4b。每個 subagent 僅收自己 lane 的資料切片 + Phase 0 macro，**看不到**其他 agent 的提案。
 
+> ❌ **硬規則 — 違規會慢數倍**：N 個 `Agent` tool_use **必須放在同一個 assistant
+> message 內**（一則訊息含 N 個 tool_use block）。分多則訊息一次發一個 = subagent
+> 被**強制序列化**，整個 Phase 4a 從 ~5 分變 ~20 分。發完這一則訊息後**停**，等 N
+> 個 JSON 全回來再繼續 — 不要在等待期間插入其他 tool call。
+
 ```
+# ✅ 正確：同一則訊息，N 個 Agent block 一起送
 Agent(description="Sector Rotation proposal",    subagent_type="general-purpose", prompt=<rotation-lane prompt>)
 Agent(description="Theme Intelligence proposal", subagent_type="general-purpose", prompt=<theme-lane prompt>)
 Agent(description="News Catalyst proposal",      subagent_type="general-purpose", prompt=<news-lane prompt>)
@@ -321,23 +327,43 @@ STEP H — Today Verdict（必填，繁中）
 
 **Agent**: Portfolio Strategist (PS) · **無模型 — 機械步驟**
 
-### Step 1 — 寫入 JSON
+> ⚡ **V1.4.1 — 不再手寫完整 `sector_intel.json`**。PS 只寫一個**精簡 decision
+> JSON**（純判斷欄位），由 `build_sector_intel.py` 從 phase cache 自動組裝出完整
+> 的 intel 檔。禁止用 Write 手刻 15+ key 的巢狀 intel — 那是 turn-bloat 主因。
 
-寫 `./sector_logs/YYYY-MM-DD_sector_intel.json`，shape 嚴格符合 `schema.md` Phase 5。
-`_phase4c.today_verdict` 全欄位必填（renderer 的文字來源）。
+### Step 1 — 寫入 decision JSON
 
-### Step 2 — Validator Gate（MANDATORY）
+PS 把 Phase 4a/4b/4c 的**判斷結果**寫成 `sector/cache/sector_decision_<DATE>.json`
+（Write 一次，~11 sector × 少數欄位 + 少數 top-level）。**只放判斷欄位** — cache
+裡已有的機械資料（valuation / earnings_pulse / smart_money / breadth / ftd /
+market_top / fred）**不要手抄**，build script 會自己讀。
+
+Decision JSON 完整 schema 見 **`sector/scripts/build_sector_intel.py` 檔頭 docstring**
+（authoritative）。重點欄位：
+
+- top-level：`verdict_date` / `market_regime` / `exposure_ceiling` /
+  `synthesized_exposure` / `cycle_phase` / `phase4_fanout_mode` /
+  `degraded_agents` / `regime_stance` / `summary` / `today_verdict` /
+  `actionable_themes` / `political_risk_summary` / `session_notes` /
+  `top_catalysts`(≥5) / `political_overlay`
+- `sectors[]` 每筆：`name` / `verdict` / `composite_score` / `score_components`
+  (含 `valuation_penalty`) / `risk_flags` / `proxy_etf`(HOT 必填) /
+  `rotation_signal` / `uptrend_ratio` / `sector_actions`
+
+### Step 2 — Build + Validator Gate（MANDATORY）
 
 ```bash
+python3 sector/scripts/build_sector_intel.py --date YYYY-MM-DD
 python3 sector/scripts/validate_sector_intel.py
 ```
 
-rc ≠ 0 必須修正 JSON 後重跑，直到 rc=0 才可進 Step 3。常見失敗：
-- `protocol_version` 非 `V1.3`
-- `_phase0` / `_phase1` / `_phase3` 缺必填 key
-- `_phase3.top_catalysts` < 5 筆
-- HOT sector 缺 `proxy_etf`
-- 缺 `phase4_fanout_mode` / `degraded_agents`
+`build_sector_intel.py` 讀 decision JSON + phase cache → 組出
+`sector_logs/<DATE>_sector_intel.json`（`protocol_version="V1.4"`、
+`_phase4c.today_verdict` 等全自動填好）。輸出**設計上即過 validator**。
+
+rc ≠ 0 時：build script rc≠0 → 修 decision JSON（缺欄位 / cache 沒抓到）後重跑；
+validator rc≠0 → 多半是 decision JSON 的 sector 欄位缺漏，照錯誤訊息補。**不要**
+手改組出來的 intel 檔。
 
 ### Step 3 — Render Markdown（MANDATORY，無模型）
 
@@ -359,4 +385,5 @@ python3 sector/scripts/render_sector_report.py
 
 不重複 `today_verdict` 內容 — 使用者會直接看 markdown。
 
-> Schema 紅線：`bridge.py` 依賴 `_phase0` / `_phase1` / `_phase3` 鍵名不可改；`protocol_version` 固定 `"V1.3"`。
+> Schema 紅線：`bridge.py` 依賴 `_phase0` / `_phase1` / `_phase3` 鍵名不可改；
+> `protocol_version` 由 `build_sector_intel.py` 固定填 `"V1.4"`（勿手改）。

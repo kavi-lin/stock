@@ -1,0 +1,247 @@
+{
+  "news_id": "bn_20260515_4b1bcd67",
+  "schema_version": 1,
+  "state": "partial_closed",
+  "fetched_at": "2026-05-15T06:48:26Z",
+  "last_activity_ts": "2026-05-15T11:15:28Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/3e32099f3ef0",
+    "feed_fingerprint": "futu:AAPL,INTC:de6ff6ff82",
+    "published": "2026-05-15T11:47:13+08:00",
+    "url_hash": "sha1:7c599e0643ec89169f6c46eaa94fb9a320d9598e"
+  },
+  "headline": "「果鏈預言帝」郭明錤：蘋果正有系統地培養英特爾，讓其長期具備成爲關鍵供應商的能力",
+  "headline_zh": null,
+  "raw_summary": "「果鏈預言帝」郭明錤：蘋果正有系統地培養英特爾，讓其長期具備成爲關鍵供應商的能力>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T11:00:02Z",
+      "latency_ms": 24904,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "郭明錤這則屬**長線供應鏈訊號**，非即時催化。重點在「有系統地培養」與「長期」二字——蘋果不是要立刻下單，而是替 Intel Foundry **18A/14A** 製程養出第二供應源，降低對台積電 **N3P/N2** 的單一依賴。對 **INTC** 是代工業務的指標性背書，但變現要看 2027 後良率；對 **TSM** 是情緒面雜訊而非實質流失，蘋果 A 系列主力訂單短期不會搬。**AAPL** 自身受惠於議價槓桿提升。市場易把「培養」誤讀成「已下單」，留意過度反應後的回吐。",
+        "bull_points": [
+          "Intel Foundry 取得蘋果級客戶背書",
+          "蘋果供應鏈多元化、議價力上升",
+          "18A 製程獲潛在錨定客戶"
+        ],
+        "bear_points": [
+          "純長線訊號、短期零營收貢獻",
+          "Intel 18A 良率與時程仍未驗證",
+          "台積電 A 系列主力訂單不受影響"
+        ],
+        "final_take": "長線利多 INTC，但兌現要等 2027 良率",
+        "entities": {
+          "tickers": [
+            "AAPL",
+            "INTC",
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "foundry diversification",
+            "supply chain resilience"
+          ],
+          "tech_keywords": [
+            "18A",
+            "14A",
+            "N3P",
+            "N2"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:INTC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:foundry-diversification"
+          },
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "ticker:INTC"
+          },
+          {
+            "subject": "ticker:TSM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:foundry-diversification"
+          },
+          {
+            "subject": "ticker:INTC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:AAPL"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "長線供應鏈訊號，利多 INTC 但變現遠、易遭情緒誤讀"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T11:15:28Z",
+      "latency_ms": 925650,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "分析師 A 點出了議價槓桿，但我需強調**技術遷移護城河**。Apple 的 SoC 設計高度綁定台積電特定的製程庫與設計流程，若要遷移至 Intel 18A，將面臨極其龐大的 **IP 後端重設計 (Backend Redesign)** 成本與驗證風險。這不單是製程良率問題，更是矽智財生態系的轉換障礙。即便 Intel 培養有成，這更可能僅是 Apple 用於平衡台積電報價的戰術性選擇，而非長期將高階核心產品線進行多代工廠並行的基礎策略。",
+        "bull_points": [
+          "增加供應鏈冗餘度，應對地緣風險",
+          "符合美國晶片補貼的政策路徑"
+        ],
+        "bear_points": [
+          "Apple Silicon 遷移的 backend 設計成本極高",
+          "跨廠牌 IP 相容性挑戰恐延遲產品上市"
+        ],
+        "final_take": "技術遷移成本是關鍵硬傷，這僅是 Apple 的談判戰術。",
+        "entities": {
+          "tickers": [
+            "AAPL",
+            "INTC",
+            "TSM"
+          ],
+          "sectors": [
+            "Semiconductors"
+          ],
+          "themes": [
+            "Foundry rivalry",
+            "AI capex"
+          ],
+          "tech_keywords": [
+            "18A",
+            "Apple Silicon",
+            "Backend Design"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "USES_AS_LEVERAGE",
+            "object": "ticker:TSM"
+          },
+          {
+            "subject": "ticker:INTC",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TSM"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "強調 Apple Silicon 遷移過程中的 IP 後端設計成本門檻。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "INTC",
+        "TSM"
+      ],
+      "sectors": [
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI capex",
+        "Foundry rivalry",
+        "foundry diversification",
+        "supply chain resilience"
+      ],
+      "tech_keywords": [
+        "14A",
+        "18A",
+        "Apple Silicon",
+        "Backend Design",
+        "N2",
+        "N3P"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:INTC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:foundry-diversification"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "ticker:INTC"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:foundry-diversification"
+      },
+      {
+        "subject": "ticker:INTC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:AAPL"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "USES_AS_LEVERAGE",
+        "object": "ticker:TSM"
+      },
+      {
+        "subject": "ticker:INTC",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TSM"
+      }
+    ],
+    "bull_summary": [
+      "Intel Foundry 取得蘋果級客戶背書",
+      "蘋果供應鏈多元化、議價力上升",
+      "18A 製程獲潛在錨定客戶",
+      "增加供應鏈冗餘度，應對地緣風險",
+      "符合美國晶片補貼的政策路徑"
+    ],
+    "bear_summary": [
+      "純長線訊號、短期零營收貢獻",
+      "Intel 18A 良率與時程仍未驗證",
+      "台積電 A 系列主力訂單不受影響",
+      "Apple Silicon 遷移的 backend 設計成本極高",
+      "跨廠牌 IP 相容性挑戰恐延遲產品上市"
+    ],
+    "final_take": "技術遷移成本是關鍵硬傷，這僅是 Apple 的談判戰術。",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-15T11:15:28Z",
+    "close_reason": "timeout",
+    "divergence_note": "claude-only: BENEFITS_FROM, CO_DEVELOPS_WITH, HEADWIND_FROM, SUPPLIES_TO; gemini-only: COMPETES_WITH, USES_AS_LEVERAGE"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

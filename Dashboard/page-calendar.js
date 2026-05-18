@@ -166,6 +166,7 @@
         document.getElementById('cal-llm-review').addEventListener('click', requestLlmReview);
         const reviewRefresh = document.getElementById('cal-llm-review-refresh');
         if (reviewRefresh) reviewRefresh.addEventListener('click', requestLlmReview);
+        wireDrillDown();   // V2.17.19 — one-time modal close/sort/ESC wiring
         const densityBtn = document.getElementById('cal-density-toggle');
         if (densityBtn) {
             densityBtn.addEventListener('click', () => {
@@ -1088,9 +1089,32 @@
         const cls = e.is_binary ? 'cal-upcoming-card cal-upcoming-card-binary' : 'cal-upcoming-card';
 
         // V1.71 — earnings event: append "📊 跑財報" / "📄 看報告" action button
+        // V2.15.0 — Option Z 4-quadrant logic:
+        //   ≤7d + nocache  → 📋 Preview only (forecaster --pre-earnings)
+        //   ≤7d + cached   → 看報告 + 📋 Preview + 🔄 (上季 / 下季 / 重跑上季)
+        //   >7d + nocache  → 📊 跑財報分析 (existing post-earnings flow)
+        //   >7d + cached   → 看報告 + 🔄
+        // 7-day window only triggers when event.date is fmp_confirmed (i.e., the
+        // calendar event is the actual earnings date — calendar feed already
+        // surfaces fmp_confirmed events).
         const primaryTicker = (cat === 'earnings' && e.tickers && e.tickers.length) ? e.tickers[0].toUpperCase() : null;
         let earningsActionRow = '';
         if (primaryTicker) {
+            // Days until event
+            let daysUntil = null;
+            if (e.date) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const evd = new Date(e.date);
+                if (!isNaN(evd.getTime())) {
+                    daysUntil = Math.round((evd - today) / 86400000);
+                }
+            }
+            const within7d = daysUntil !== null && daysUntil >= 0 && daysUntil <= 7;
+            const previewBtn = within7d
+                ? `<button class="cal-earnings-btn cal-earnings-btn-preview" onclick="event.stopPropagation();window.runEarningsPreview('${primaryTicker}')" title="${lang==='zh'?`下次財報 ${e.date}（${daysUntil}d）— 跑前瞻 cheat sheet`:`Next earnings ${e.date} (${daysUntil}d) — run pre-earnings preview`}">📋 ${lang==='zh'?'前瞻':'Preview'}</button>`
+                : '';
+
             const cached = earningsCacheMap[primaryTicker];
             if (cached && cached.composite_score != null) {
                 const verdict = cached.verdict || 'n/a';
@@ -1107,9 +1131,16 @@
                 earningsActionRow = `<div class="cal-earnings-action-row">
                     <span class="cal-earnings-cached-badge ${verdictClass}" title="${lang==='zh'?'已有財報分析':'Cached analysis'}">${verdict} ${score}/100</span>
                     ${reportLink}
+                    ${previewBtn}
                     ${refreshBtn}
                 </div>`;
+            } else if (within7d) {
+                // ≤7d + no cache → preview only (post-earnings analysis would just hit stale last-quarter cache key)
+                earningsActionRow = `<div class="cal-earnings-action-row">
+                    ${previewBtn}
+                </div>`;
             } else {
+                // >7d + no cache → existing run-earnings path
                 earningsActionRow = `<div class="cal-earnings-action-row">
                     <button class="cal-earnings-btn cal-earnings-btn-run" onclick="event.stopPropagation();window.runEarningsAnalysis('${primaryTicker}')" title="${lang==='zh'?'排隊跑深度財報分析(5-10 分鐘)':'Queue earnings analysis (5-10 min)'}">📊 ${lang==='zh'?'跑財報分析':'Run earnings'}</button>
                 </div>`;
@@ -1133,6 +1164,35 @@
             </div>
         </div>`;
     }
+
+    // V2.15.0 — pre-earnings preview button: routes to forecaster --pre-earnings
+    // via SCRIPT_PROTOCOLS path on server. Fires when event date is fmp_confirmed
+    // AND ≤ 7 days away (gating done in card render below).
+    window.runEarningsPreview = async function(ticker) {
+        ticker = (ticker || '').toUpperCase();
+        if (!ticker) return;
+        const lang = UI.currentLang;
+        try {
+            const r = await fetch('/api/protocol-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'earnings_preview', ticker })
+            });
+            const body = await r.json();
+            if (r.status === 202 && body.queued) {
+                const pos = body.position || '?';
+                UI.showToast(lang === 'zh' ? `已排入財報前瞻:${ticker}(第 ${pos} 位)` : `Queued preview: ${ticker} (#${pos})`, 'info');
+            } else if (r.status === 409 && body.reason === 'duplicate_active') {
+                UI.showToast(lang === 'zh' ? `${ticker} 前瞻已在執行中` : `${ticker} preview already running`, 'warn');
+            } else if (r.status === 409 && body.reason === 'duplicate_pending') {
+                UI.showToast(lang === 'zh' ? `${ticker} 前瞻已在佇列` : `${ticker} preview already queued`, 'warn');
+            } else {
+                UI.showToast(lang === 'zh' ? `加入失敗:${body.error || r.status}` : `Failed: ${body.error || r.status}`, 'error');
+            }
+        } catch (e) {
+            UI.showToast(lang === 'zh' ? `網路錯誤:${e.message}` : `Network error: ${e.message}`, 'error');
+        }
+    };
 
     // V1.71 — global handler for inline earnings buttons
     window.runEarningsAnalysis = async function(ticker) {
@@ -1208,7 +1268,7 @@
                 return `<span class="cal-stat-mini-tag ${vm.badgeClass}">${vm.emoji} ${c[k]}</span>`;
             }).join('');
 
-            html += `<div class="cal-stat-tile">
+            html += `<div class="cal-stat-tile" data-drill-source="${s}" tabindex="0" role="button" aria-label="open ${srcLabel} drill-down">
                 <div class="cal-stat-source">
                     <span class="cal-stat-source-icon">${meta.icon}</span>
                     <span>${srcLabel}</span>
@@ -1222,8 +1282,276 @@
                 <div class="cal-stat-tags">${tags}</div>
             </div>`;
         }
-        document.getElementById('cal-aggregate-table').innerHTML =
-            `<div class="cal-aggregate-grid">${html}</div>`;
+        const tableEl = document.getElementById('cal-aggregate-table');
+        tableEl.innerHTML = `<div class="cal-aggregate-grid">${html}</div>`;
+        // V2.17.19 — wire tile click → drill-down modal
+        tableEl.querySelectorAll('.cal-stat-tile[data-drill-source]').forEach(tile => {
+            const src = tile.getAttribute('data-drill-source');
+            tile.addEventListener('click', () => openDrillDown(src));
+            tile.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrillDown(src); }
+            });
+        });
+    }
+
+    // ── V2.17.19 Drill-down modal — list all decisions for a source ──────
+    let drillState = { source: null, verdict: 'all', sort: 'date_desc' };
+
+    function openDrillDown(source) {
+        if (!source) return;
+        drillState = { source, verdict: 'all', sort: 'date_desc' };
+        const modal = document.getElementById('cal-drill-modal');
+        const meta = SOURCE_META[source] || { icon: '?', label: source };
+        const ct = (window.i18n?.[UI.currentLang]?.calendar) || {};
+        const srcLabels = ct.sources || {};
+        document.getElementById('cal-drill-icon').textContent = meta.icon;
+        document.getElementById('cal-drill-title').textContent = srcLabels[source] || meta.label;
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const sortEl = document.getElementById('cal-drill-sort');
+        sortEl.value = drillState.sort;
+        renderDrillDown();
+    }
+
+    function closeDrillDown() {
+        const modal = document.getElementById('cal-drill-modal');
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        drillState.source = null;
+    }
+
+    function renderDrillDown() {
+        const { source, verdict, sort } = drillState;
+        if (!source) return;
+        const isZh = UI.currentLang === 'zh';
+        const all = allDecisions.filter(d => d.source === source);
+        const filtered = verdict === 'all' ? all : all.filter(d => (d.verdict?.label || 'n/a') === verdict);
+
+        // Sort
+        const cmpDate = (a, b) => String(a.decision_date || '').localeCompare(String(b.decision_date || ''));
+        const cmpReturn = d => {
+            const r = d.reality_at_eval?.ticker_reality?.return_pct;
+            return r != null ? Number(r) : (d.reality_at_eval?.spy_return_pct ?? null);
+        };
+        const cmpScore = d => Number(d.decision_content?.final_score ?? -Infinity);
+        const sortFns = {
+            date_desc:   (a, b) => cmpDate(b, a),
+            date_asc:    (a, b) => cmpDate(a, b),
+            return_desc: (a, b) => (cmpReturn(b) ?? -Infinity) - (cmpReturn(a) ?? -Infinity),
+            return_asc:  (a, b) => (cmpReturn(a) ?? Infinity) - (cmpReturn(b) ?? Infinity),
+            score_desc:  (a, b) => cmpScore(b) - cmpScore(a),
+        };
+        filtered.sort(sortFns[sort] || sortFns.date_desc);
+
+        // Filter pill bar — counts per verdict
+        const counts = { all: all.length, hit: 0, miss: 0, neutral: 0, pending: 0, 'n/a': 0 };
+        for (const d of all) counts[d.verdict?.label || 'n/a']++;
+        const pillSpec = [
+            { key: 'all',     label: isZh ? '全部' : 'all', emoji: '' },
+            { key: 'hit',     label: 'hit',     emoji: VERDICT_META.hit.emoji },
+            { key: 'miss',    label: 'miss',    emoji: VERDICT_META.miss.emoji },
+            { key: 'neutral', label: 'neutral', emoji: VERDICT_META.neutral.emoji },
+            { key: 'pending', label: 'pending', emoji: VERDICT_META.pending.emoji },
+            { key: 'n/a',     label: 'n/a',     emoji: VERDICT_META['n/a'].emoji },
+        ];
+        const filterEl = document.getElementById('cal-drill-filter');
+        filterEl.innerHTML = pillSpec.map(p => {
+            const c = counts[p.key] ?? 0;
+            if (p.key !== 'all' && c === 0) return '';
+            return `<button class="cal-drill-filter-pill ${p.key === verdict ? 'active' : ''}" data-verdict="${p.key}">${p.emoji} ${p.label} ${c}</button>`;
+        }).join('');
+        filterEl.querySelectorAll('.cal-drill-filter-pill').forEach(b => {
+            b.addEventListener('click', () => {
+                drillState.verdict = b.getAttribute('data-verdict');
+                renderDrillDown();
+            });
+        });
+
+        document.getElementById('cal-drill-count').textContent = `${filtered.length} / ${all.length}`;
+
+        // Body — reuse renderDecisionCard for full per-source body, prepend industry heat chip
+        const body = document.getElementById('cal-drill-body');
+        if (!filtered.length) {
+            body.innerHTML = `<div class="cal-drill-empty">${isZh ? '此篩選下無決策' : 'No decisions match this filter'}</div>`;
+            return;
+        }
+        body.innerHTML = filtered.map(d => renderDrillRow(d)).join('');
+
+        // Re-init lucide icons inside modal
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            try { window.lucide.createIcons(); } catch (e) { /* noop */ }
+        }
+    }
+
+    // V2.17.19 — Compact drill row builders (one row per decision, no raw button)
+    function _drillDecisionLine(d) {
+        const dc = d.decision_content || {};
+        const isZh = UI.currentLang === 'zh';
+        switch (d.source) {
+            case 'deep-dive': {
+                const action = dc.final_action || '?';
+                const score  = dc.final_score != null ? Number(dc.final_score).toFixed(2) : '—';
+                const pos    = dc.position_size != null ? `· pos ${(dc.position_size * 100).toFixed(0)}%` : '';
+                return `${action} · score ${score} ${pos}`.trim();
+            }
+            case 'sector-scan': {
+                const ratings = dc.sector_ratings || [];
+                const cnt = ratings.length;
+                return `${dc.market_regime || '—'} · breadth ${dc.breadth_score ?? '—'} · ${cnt} sectors rated`;
+            }
+            case 'news-digest': {
+                const cards = (dc.impact_cards || []).length;
+                return `Δ=${dc.macro_delta ?? '—'} · ${cards} impact cards`;
+            }
+            case 'theme-detector': {
+                const themes = (dc.themes || []).length;
+                return `${themes} themes detected`;
+            }
+            case 'momentum-screen':
+                return `${dc.n_total_screened ?? '?'} → top ${dc.n_evaluated ?? '?'}`;
+            case 'thematic-screener': {
+                const themes = (dc.themes || []).length;
+                return `${themes} themes · radar`;
+            }
+            case 'earnings-analyzer': {
+                const s = dc.summary || {};
+                return `A:${s.grade_a || 0} B:${s.grade_b || 0} C:${s.grade_c || 0} D:${s.grade_d || 0}`;
+            }
+            case 'short-term-weekly':
+                return `pending ${dc.pending ?? '?'} · hit_rate ${dc.hit_rate ?? '—'}`;
+            case 'postmortem':
+                return d.summary || '—';
+            default:
+                return d.summary || '—';
+        }
+    }
+
+    function _drillRealityLine(d) {
+        const re = d.reality_at_eval || {};
+        const r = re.ticker_reality;
+        if (r) {
+            const ret = r.return_pct;
+            const cls = ret == null ? 'text-zinc-500' : ret > 0 ? 'text-green-400' : ret < 0 ? 'text-red-400' : 'text-zinc-400';
+            const max = r.max_runup_since != null ? `max ${r.max_runup_since.toFixed ? r.max_runup_since.toFixed(1) : r.max_runup_since}%` : '';
+            const mdd = r.max_drawdown_since != null ? `dd ${r.max_drawdown_since.toFixed ? r.max_drawdown_since.toFixed(1) : r.max_drawdown_since}%` : '';
+            return `<span class="font-mono">${r.price_at_decision} → ${r.price_at_eval}</span> <span class="font-bold ${cls}">${pctStr(ret)}</span><span class="text-zinc-600 text-[10px] ml-2">${max} ${mdd}</span>`;
+        }
+        // Thematic-screener: top movers direction-match
+        if (re.mover_returns && Object.keys(re.mover_returns).length) {
+            const dc = d.decision_content || {};
+            const movers = dc.top_movers || [];
+            let hit = 0, total = 0;
+            const ticks = [];
+            for (const m of movers) {
+                const tk = m.ticker, tgt = m.target_5d_pct;
+                if (!tk || !(tk in re.mover_returns) || tgt == null) continue;
+                const act = re.mover_returns[tk];
+                total++;
+                const ok = (tgt > 0 && act > 0) || (tgt < 0 && act < 0);
+                if (ok) hit++;
+                const cls = ok ? 'text-green-400' : 'text-red-400';
+                ticks.push(`<span class="${cls}">${tk}${pctStr(act)}</span>`);
+            }
+            const rateCls = total === 0 ? 'text-zinc-500' : hit/total >= 0.6 ? 'text-green-400' : hit/total <= 0.4 ? 'text-red-400' : 'text-yellow-400';
+            return `<span class="${rateCls}">${hit}/${total} 方向對</span> <span class="text-zinc-500 text-[10px] ml-2">${ticks.slice(0, 5).join(' · ')}</span>`;
+        }
+        // Theme-detector / sector-scan: ETF-level returns
+        if (re.etf_returns && Object.keys(re.etf_returns).length) {
+            const spy = re.etf_returns.SPY;
+            const others = Object.entries(re.etf_returns).filter(([k]) => k !== 'SPY').slice(0, 4);
+            const top = others.map(([k, v]) => {
+                const rel = (v != null && spy != null) ? v - spy : null;
+                const cls = rel == null ? 'text-zinc-500' : rel > 0 ? 'text-green-400' : 'text-red-400';
+                return `<span class="${cls}">${k} ${pctStr(rel)}</span>`;
+            }).join(' · ');
+            return `<span class="text-zinc-500">SPY ${pctStr(spy)}</span> <span class="text-zinc-500 text-[10px] ml-2">${top}</span>`;
+        }
+        // Earnings-analyzer / momentum-screen: ticker_returns or per_ticker dict
+        if (re.ticker_returns && Object.keys(re.ticker_returns).length) {
+            const items = Object.entries(re.ticker_returns).slice(0, 4)
+                .map(([k, v]) => `<span class="${v > 0 ? 'text-green-400' : v < 0 ? 'text-red-400' : 'text-zinc-400'}">${k}${pctStr(v)}</span>`).join(' · ');
+            return items;
+        }
+        if (re.per_ticker && re.per_ticker.length) {
+            const hitN = re.per_ticker.filter(t => t.verdict === 'hit').length;
+            const total = re.per_ticker.length;
+            return `<span class="${hitN/total >= 0.6 ? 'text-green-400' : hitN/total <= 0.4 ? 'text-red-400' : 'text-yellow-400'}">${hitN}/${total} 命中</span>`;
+        }
+        // Market-wide news → SPY proxy
+        if (re.spy_return_pct != null) {
+            const ret = re.spy_return_pct;
+            const cls = ret > 0 ? 'text-green-400' : ret < 0 ? 'text-red-400' : 'text-zinc-400';
+            return `<span class="text-zinc-500">SPY ${re.window_days}d:</span> <span class="font-bold ${cls}">${pctStr(ret)}</span>`;
+        }
+        return `<span class="text-zinc-600">${re.pending ? '⏳ pending window' : '—'}</span>`;
+    }
+
+    function renderDrillRow(d) {
+        const isZh = UI.currentLang === 'zh';
+        const v = d.verdict || {};
+        const vMeta = VERDICT_META[v.label] || VERDICT_META['n/a'];
+        const re = d.reality_at_eval || {};
+        const meta = SOURCE_META[d.source] || { icon: '?', label: d.source };
+        const ticker = (d.tickers || [])[0] || '';
+        const tickerEl = ticker
+            ? `<span class="cal-drill-row-logo">${renderTickerLogo(ticker, { size: 18 })}</span><span class="font-mono font-bold text-[13px]">${ticker}</span>`
+            : '';
+        const dateStr = d.decision_date || '';
+        const windowStr = (re.window_complete_pct != null)
+            ? `<span class="cal-drill-row-window">w ${re.window_complete_pct}% (${re.days_elapsed || 0}/${re.window_days || 0}d)</span>`
+            : '';
+        const decisionLine = _drillDecisionLine(d);
+        const realityLine  = _drillRealityLine(d);
+        const reason       = v.rationale || (isZh ? '（無說明）' : '(no rationale)');
+        const heatChip     = renderHeatChip(d);
+        const decisionLbl  = isZh ? '當初' : 'decision';
+        const realityLbl   = isZh ? '現實' : 'reality';
+        const reasonLbl    = isZh ? '原因' : 'reason';
+
+        return `<div class="cal-drill-row">
+            <div class="cal-drill-row-stripe ${vMeta.stripeClass}"></div>
+            <div class="cal-drill-row-content">
+                <div class="cal-drill-row-head">
+                    <span class="cal-drill-row-badge ${vMeta.badgeClass}">${vMeta.emoji} ${(v.label || 'n/a').toUpperCase()}</span>
+                    <span class="cal-drill-row-source">${meta.icon}</span>
+                    ${tickerEl}
+                    <span class="cal-drill-row-date">${dateStr}</span>
+                    ${windowStr}
+                </div>
+                <div class="cal-drill-row-line"><span class="cal-drill-row-lbl">${decisionLbl}</span> ${decisionLine}</div>
+                <div class="cal-drill-row-line"><span class="cal-drill-row-lbl">${realityLbl}</span> ${realityLine}</div>
+                <div class="cal-drill-row-reason"><span class="cal-drill-row-lbl">${reasonLbl}</span> ${reason}</div>
+                ${heatChip ? `<div class="cal-drill-row-chips">${heatChip}</div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    function renderHeatChip(d) {
+        const heat = (d.tuning_hooks || {}).sub_industry_heat;
+        if (!heat || (heat.error)) return '';
+        const ind = heat.ticker_industry || heat.ticker_sector;
+        if (!ind) return '';
+        const top = heat.industry_top_30pct === true;
+        const sectorRank = heat.sector_rank;
+        const cls = top ? 'cal-drill-heat-chip is-hot' : 'cal-drill-heat-chip is-cold';
+        const flag = top ? '🔥 top 30%' : '· cool';
+        const rank = sectorRank ? ` · sector #${sectorRank}` : '';
+        return `<span class="${cls}">${ind}${rank} ${flag}</span>`;
+    }
+
+    // ESC + outside click + sort change wiring (one-time)
+    function wireDrillDown() {
+        document.getElementById('cal-drill-close')?.addEventListener('click', closeDrillDown);
+        document.querySelector('.cal-drill-backdrop')?.addEventListener('click', closeDrillDown);
+        document.getElementById('cal-drill-sort')?.addEventListener('change', e => {
+            drillState.sort = e.target.value;
+            renderDrillDown();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && drillState.source) closeDrillDown();
+        });
     }
 
     // ── Monthly Summary (Past 30d analyses pill cloud) ────────────────────

@@ -21,10 +21,17 @@ import os
 import sys
 import json
 import glob
+import socket
+import time
 import argparse
 import datetime
 import subprocess
 from pathlib import Path
+
+# v0.3.1 — global socket timeout. Without this yfinance / FMP requests can
+# hang indefinitely when a route black-holes the SYN (observed: 65min stuck
+# in SYN_SENT state). 15s per network op is plenty for this script's needs.
+socket.setdefaulttimeout(15)
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 SKILL_DIR = Path(__file__).resolve().parent.parent
@@ -32,6 +39,11 @@ RECS_DIR = SKILL_DIR / "data" / "recommendations"
 THEME_CACHE = ROOT / "skills" / "theme-detector" / "cache"
 FRED_CACHE = ROOT / "skills" / "fred-macro" / "cache"
 PREDICT_SCRIPT = ROOT / "skills" / "short-term-target" / "scripts" / "predict.py"
+
+def _log(msg):
+    """Stderr line-buffered log so the daily_update.sh tail sees progress live."""
+    print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}",
+          file=sys.stderr, flush=True)
 
 # v0.3 — per-mover enrichment (market_cap_tier + earnings/quality/smart-money/analyst)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -211,11 +223,18 @@ def compute_regime_factor(regime):
 # ---------- per-theme short-term metrics ----------
 
 def select_top_movers_ranked(theme, all_predictions, top_n, enrichments=None):
-    """Rank theme's mover predictions by (5d target_pct × confidence × enrichment_multiplier) desc.
+    """Rank theme's mover predictions by (5d target_pct × confidence × enrichment_multiplier).
+
+    v0.3.1 — direction-aware ranking. Bullish themes pick top-N MOST positive
+    (long candidates). Bearish themes pick top-N MOST negative (short candidates
+    or "stocks most likely to drop further"). Previous behavior always picked
+    most-positive regardless of theme direction → bearish themes showed all-bullish
+    movers, contradicting the theme call.
 
     enrichments: dict {ticker: enrichment_dict} from enrich_movers(); if None,
     multiplier defaults to 1.0 and behavior matches v0.2.
     """
+    direction = (theme.get("direction") or "bullish").lower()
     candidates = []
     for ticker in (theme.get("representative_stocks") or []):
         pred = all_predictions.get(ticker)
@@ -229,7 +248,8 @@ def select_top_movers_ranked(theme, all_predictions, top_n, enrichments=None):
         mult = enrich.get("enrichment_multiplier", 1.0) if isinstance(enrich, dict) else 1.0
         final_score = raw_score * mult
         candidates.append((final_score, raw_score, ticker, pred))
-    candidates.sort(key=lambda x: x[0], reverse=True)
+    # bullish → DESC (top positive); bearish → ASC (top negative); other (neutral / unknown) → DESC
+    candidates.sort(key=lambda x: x[0], reverse=(direction != "bearish"))
     return candidates[:top_n]
 
 
@@ -387,14 +407,22 @@ def main():
         for theme in all_themes
         for ticker in (theme.get("representative_stocks") or [])
     })
-    print(f"Predicting {len(all_tickers)} unique tickers across {len(all_themes)} themes "
-          f"(cache 4h)...", file=sys.stderr)
+    _log(f"Predicting {len(all_tickers)} unique tickers across {len(all_themes)} themes (cache 4h)...")
 
     all_predictions = {}
+    pred_start = time.time()
+    slow_tickers = []
     for i, t in enumerate(all_tickers, 1):
-        if i % 10 == 0:
-            print(f"  ... {i}/{len(all_tickers)}", file=sys.stderr)
+        t0 = time.time()
         all_predictions[t] = run_short_term_target(t)
+        dt = time.time() - t0
+        if dt > 5:
+            slow_tickers.append((t, dt))
+            _log(f"  [{i}/{len(all_tickers)}] {t} took {dt:.1f}s {'(TIMEOUT)' if all_predictions[t].get('error') == 'predict_timeout' else ''}")
+        if i % 10 == 0:
+            _log(f"  ... {i}/{len(all_tickers)} (elapsed {time.time() - pred_start:.0f}s)")
+    _log(f"Predict phase done: {len(all_tickers)} tickers in {time.time() - pred_start:.0f}s "
+         f"({len(slow_tickers)} slow >5s)")
 
     # v0.3 — enrich every ticker (cap tier + earnings landmines + quality + smart-money + analyst)
     enrichments = {}
@@ -402,10 +430,12 @@ def main():
         # Restrict to tickers that have a usable prediction (skip noise)
         ok_tickers = [t for t in all_tickers
                       if all_predictions.get(t) and not all_predictions[t].get("error")]
-        print(f"Enriching {len(ok_tickers)} tickers (caches first, light FMP fetches as needed)...",
-              file=sys.stderr)
+        _log(f"Enriching {len(ok_tickers)} tickers (caches first, light FMP fetches as needed)...")
+        enrich_start = time.time()
         try:
             enrichments = enrich_movers(ok_tickers)
+            _log(f"Enrich phase done in {time.time() - enrich_start:.0f}s "
+                 f"({len(enrichments)} enriched)")
         except Exception as e:
             print(f"WARN: enrich failed (continuing without): {e}", file=sys.stderr)
 

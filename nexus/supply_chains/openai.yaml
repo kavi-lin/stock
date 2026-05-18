@@ -1,0 +1,274 @@
+id: openai
+title: OpenAI 算力供應鏈
+theme: OpenAI
+generated_at: '2026-05-17T13:55:56Z'
+generated_by: claude
+status: draft
+layers:
+- manufacturing
+- compute
+- infrastructure
+- model_platform
+- deployment
+modules:
+  manufacturing:
+  - id: foundry_packaging
+    label: 晶圓代工 / 先進封裝
+  - id: memory
+    label: HBM 記憶體
+  - id: networking_silicon
+    label: 網路 / 光通訊矽智財
+  compute:
+  - id: gpu_accelerator
+    label: GPU / 加速器
+  - id: custom_silicon
+    label: 客製 AI ASIC
+  infrastructure:
+  - id: cloud_compute
+    label: 雲端算力 / 資料中心
+  - id: datacenter_power
+    label: 電力 / 散熱基礎設施
+  model_platform:
+  - id: foundation_lab
+    label: 基礎模型實驗室
+  - id: compute_jv
+    label: 算力合資 / 出資方
+  deployment:
+  - id: consumer_devices
+    label: 消費裝置整合
+  - id: enterprise_adoption
+    label: 企業導入
+  - id: financial_services
+    label: 金融服務應用
+spine:
+- tsmc
+- nvda
+- msft
+- openai
+- aapl
+nodes:
+- id: tsmc
+  label: TSMC 台積電
+  layer: manufacturing
+  module: foundry_packaging
+  role: 代工 NVIDIA / AMD / Broadcom AI 晶片，CoWoS 先進封裝瓶頸供應方
+  ticker: null
+  listing: foreign_listed
+  note: 台灣上市；NYSE 有 ADR (TSM)，主掛牌仍在台灣
+- id: mu
+  label: Micron
+  layer: manufacturing
+  module: memory
+  role: HBM3E 供應商，AI 加速器記憶體頻寬來源之一
+  ticker: MU
+  listing: us_listed
+  note: ''
+- id: sk_hynix
+  label: SK Hynix
+  layer: manufacturing
+  module: memory
+  role: HBM 市占龍頭，NVIDIA GPU 主力記憶體供應商
+  ticker: null
+  listing: foreign_listed
+  note: 韓國交易所上市
+- id: mrvl
+  label: Marvell
+  layer: manufacturing
+  module: networking_silicon
+  role: 資料中心光通訊 DSP / 客製互連矽智財
+  ticker: MRVL
+  listing: us_listed
+  note: ''
+- id: nvda
+  label: NVIDIA
+  layer: compute
+  module: gpu_accelerator
+  role: OpenAI 訓練 / 推論主力 GPU，且為 OpenAI 策略股權投資方
+  ticker: NVDA
+  listing: us_listed
+  note: ''
+- id: amd
+  label: AMD
+  layer: compute
+  module: gpu_accelerator
+  role: Instinct GPU 第二供應源，與 OpenAI 簽多年算力協議
+  ticker: AMD
+  listing: us_listed
+  note: ''
+- id: avgo
+  label: Broadcom
+  layer: compute
+  module: custom_silicon
+  role: 與 OpenAI 共同開發自研 AI 加速器 ASIC 及網路晶片
+  ticker: AVGO
+  listing: us_listed
+  note: ''
+- id: msft
+  label: Microsoft
+  layer: infrastructure
+  module: cloud_compute
+  role: Azure 提供訓練 / 推論算力，且為 OpenAI 最大股東與商業化夥伴
+  ticker: MSFT
+  listing: us_listed
+  note: ''
+- id: orcl
+  label: Oracle
+  layer: infrastructure
+  module: cloud_compute
+  role: OCI 大型算力合約供應方，Stargate 資料中心建置核心夥伴
+  ticker: ORCL
+  listing: us_listed
+  note: ''
+- id: crwv
+  label: CoreWeave
+  layer: infrastructure
+  module: cloud_compute
+  role: GPU 專用雲，與 OpenAI 簽多年算力供應合約
+  ticker: CRWV
+  listing: us_listed
+  note: ''
+- id: vrt
+  label: Vertiv
+  layer: infrastructure
+  module: datacenter_power
+  role: 資料中心電力 / 液冷散熱設備供應商
+  ticker: VRT
+  listing: us_listed
+  note: ''
+- id: openai
+  label: OpenAI
+  layer: model_platform
+  module: foundation_lab
+  role: GPT 系列基礎模型與 ChatGPT / API 平台開發者
+  ticker: null
+  listing: private
+  note: ''
+- id: stargate
+  label: Stargate 合資專案
+  layer: model_platform
+  module: compute_jv
+  role: OpenAI / Oracle / SoftBank 合資的超大型 AI 資料中心建置計畫
+  ticker: null
+  listing: private
+  note: ''
+- id: softbank
+  label: SoftBank Group
+  layer: model_platform
+  module: compute_jv
+  role: OpenAI 主要出資方與 Stargate 資金合夥人
+  ticker: null
+  listing: foreign_listed
+  note: 東京證交所上市
+- id: aapl
+  label: Apple
+  layer: deployment
+  module: consumer_devices
+  role: Apple Intelligence / Siri 整合 ChatGPT，消費裝置分發通路
+  ticker: AAPL
+  listing: us_listed
+  note: ''
+- id: ko
+  label: Coca-Cola
+  layer: deployment
+  module: enterprise_adoption
+  role: 早期企業客戶，行銷 / 內容生成導入 OpenAI 模型
+  ticker: KO
+  listing: us_listed
+  note: ''
+- id: ms
+  label: Morgan Stanley
+  layer: deployment
+  module: financial_services
+  role: 財富管理 GPT-4 知識助理，金融垂直導入標竿案例
+  ticker: MS
+  listing: us_listed
+  note: ''
+edges:
+- from: tsmc
+  to: nvda
+  rel: CONTRACT_MFG_FOR
+  note: 代工 + CoWoS 封裝
+- from: tsmc
+  to: amd
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: tsmc
+  to: avgo
+  rel: CONTRACT_MFG_FOR
+  note: ''
+- from: mu
+  to: nvda
+  rel: SUPPLIES_TO
+  note: HBM3E
+- from: sk_hynix
+  to: nvda
+  rel: SUPPLIES_TO
+  note: HBM 主力
+- from: mrvl
+  to: nvda
+  rel: SUPPLIES_TO
+  note: 光通訊 DSP / 互連
+- from: mrvl
+  to: crwv
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: msft
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: orcl
+  rel: SUPPLIES_TO
+  note: ''
+- from: nvda
+  to: crwv
+  rel: SUPPLIES_TO
+  note: ''
+- from: amd
+  to: openai
+  rel: SUPPLIES_TO
+  note: 6GW Instinct GPU 多年協議 + 認股權證
+- from: avgo
+  to: openai
+  rel: CO_DEVELOPS_WITH
+  note: 自研 AI 加速器 ASIC
+- from: nvda
+  to: openai
+  rel: INVESTOR_IN
+  note: 策略股權投資
+- from: msft
+  to: openai
+  rel: SUPPLIES_TO
+  note: Azure 算力 + 最大股東
+- from: orcl
+  to: stargate
+  rel: SUPPLIES_TO
+  note: OCI 大型算力合約
+- from: crwv
+  to: openai
+  rel: SUPPLIES_TO
+  note: ''
+- from: vrt
+  to: stargate
+  rel: SUPPLIES_TO
+  note: 電力 / 散熱基建
+- from: softbank
+  to: stargate
+  rel: INVESTOR_IN
+  note: ''
+- from: stargate
+  to: openai
+  rel: SUPPLIES_TO
+  note: 專屬算力
+- from: openai
+  to: aapl
+  rel: SUPPLIES_TO
+  note: ChatGPT 整合進 Apple Intelligence
+- from: openai
+  to: ko
+  rel: SUPPLIES_TO
+  note: ''
+- from: openai
+  to: ms
+  rel: SUPPLIES_TO
+  note: ''

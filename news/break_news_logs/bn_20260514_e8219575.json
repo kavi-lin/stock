@@ -1,0 +1,751 @@
+{
+  "news_id": "bn_20260514_e8219575",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:46:52Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/ce4551b7c4d5",
+    "feed_fingerprint": "futu:TSLA:233a7d9217",
+    "published": "2026-05-14T22:04:13+08:00",
+    "url_hash": "sha1:177986a9f2281521d73c23d7735e093aac97c65b"
+  },
+  "headline": "「寧王」技術加持",
+  "headline_zh": null,
+  "raw_summary": "「寧王」技術加持！福特汽車再漲近8%，昨日大幅收漲超13%，秘訣只因走上了特斯拉的儲能路？",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 3.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:42:55Z",
+      "latency_ms": 28173,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "福特連兩日暴漲（昨+13%、今+8%）核心在於**授權寧德時代 LFP 電池技術 + 自建密西根工廠**路徑跑通，疊加切入**儲能（ESS）第二曲線**敘事。這不是純情緒題材：(1) LFP 成本曲線比 NCM 低 30%+，福特電動車毛利率有實質改善空間；(2) 儲能市場 TAM 對標 Tesla Megapack 業務（已成 TSLA 高毛利引擎），福特若複製可重估 multiple；(3) 風險端，CATL 技術授權在美國政治敏感度高（IRA 補貼資格、CFIUS 審查），且福特 ESS 規模化路徑未驗證。短線 momentum 已 stretched，需觀察 Q2 訂單與工廠進度兌現。連帶利多 LFP 供應鏈與儲能 inverter 廠（ENPH/SEDG）。",
+        "bull_points": [
+          "LFP 授權壓低電動車成本，毛利結構改善",
+          "切入儲能第二曲線，對標 TSLA Megapack 重估",
+          "兩日連漲 21%+ 顯示資金認可敘事轉向"
+        ],
+        "bear_points": [
+          "CATL 授權面臨 IRA / CFIUS 政治阻力",
+          "儲能業務尚無實際營收貢獻，純預期",
+          "短線漲幅過大，獲利了結壓力高"
+        ],
+        "final_take": "敘事偏多但 stretched，等回測 20MA 再評估",
+        "entities": {
+          "tickers": [
+            "F",
+            "TSLA",
+            "ENPH",
+            "SEDG"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Industrials",
+            "Energy"
+          ],
+          "themes": [
+            "EV transition",
+            "Energy storage",
+            "LFP battery",
+            "China tech licensing"
+          ],
+          "tech_keywords": [
+            "LFP",
+            "Megapack",
+            "ESS",
+            "BEV"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:F",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lfp_licensing"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "CO_DEVELOPS_WITH",
+            "object": "narrative:catl_partnership"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TSLA"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:energy_storage"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:megapack"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ira_cfius_risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "LFP+儲能敘事有實質但政治+估值風險並存"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:45:03Z",
+      "latency_ms": 127906,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "福特汽車近期股價飆升，核心動力來自其不僅採用寧德時代（CATL）的 LFP 電池技術，更關鍵是導入了先進的 **N3P 電池技術**。此項技術預期能顯著提升電動車的續航里程與儲能系統（ESS）的能量密度與壽命。若此先進技術能成功規模化應用於福特的密西根工廠，將對其電動車毛利率與 ESS 市場的滲透率產生實質影響，並可能催生對先進電池材料及製造設備的更多需求。",
+        "bull_points": [
+          "福特導入 CATL N3P 電池技術，提升 EV 續航與 ESS 性能。",
+          "N3P 有望帶動先進電池材料與製造商的投資。"
+        ],
+        "bear_points": [
+          "CATL 技術在美國的政治風險仍是潛在阻礙。",
+          "ESS 業務規模化和盈利能力尚待市場驗證。"
+        ],
+        "final_take": "N3P 技術帶來結構性機會，但地緣政治是關鍵。",
+        "entities": {
+          "tickers": [
+            "FORD",
+            "ENPH",
+            "SEDG"
+          ],
+          "sectors": [
+            "Automotive",
+            "Energy Storage",
+            "Battery Manufacturing"
+          ],
+          "themes": [
+            "EV Battery Tech",
+            "Energy Storage",
+            "Advanced Battery Manufacturing"
+          ],
+          "tech_keywords": [
+            "N3P",
+            "LFP"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:FORD",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:N3P"
+          },
+          {
+            "subject": "tech_keyword:N3P",
+            "predicate": "BENEFITS_FROM",
+            "object": "sector:Battery Manufacturing"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "BENEFITS_FROM",
+            "object": "sector:Energy Storage"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:TSLA"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "導入 N3P 新技術細節，解析其對供應鏈的影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:45:30Z",
+      "latency_ms": 26487,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的 **2nd-order 反向風險**：福特 LFP 路線若跑通，最大受害者不是 TSLA，而是**美系 NCM 正極材料廠 Albemarle (ALB) 與 Livent/Arcadium (ALTM)**。LFP 用磷酸鐵鋰、**完全跳過鋰以外的鎳鈷**，ALB 的鋰價支撐還在，但鎳鈷 exposure 的 MP Materials、以及 NCM 路線綁定的 **Panasonic (TSLA NCM 供應商)** 邊際承壓。另一個沒人提的 catalyst：福特這次是**繞過 IRA FEOC 條款**的測試案例（CATL 技術授權 + 美國本土製造），若 Treasury 默許，將為 **GM、Stellantis 複製同模式**鋪路 — 看多 LFP 美國本土化的整條鏈（**Piedmont Lithium (PLL)、Livent 鋰鹽、ICL Group 磷酸**）。Contra：福特 ESS 業務目前營收貢獻 <1%，市場已 price-in Megapack 等級預期，**估值 disconnect 風險高**。",
+        "bull_points": [
+          "LFP 美國本土化模板若獲 Treasury 默許，GM/Stellantis 跟進",
+          "Piedmont Lithium (PLL) / ICL 磷酸鏈受惠 LFP 結構性轉換",
+          "福特毛利率改善具實質性，非純情緒"
+        ],
+        "bear_points": [
+          "ALB / Panasonic 等 NCM 路線供應商邊際承壓",
+          "ESS 營收貢獻 <1%，市場已 price-in Megapack 預期",
+          "CFIUS / FEOC 審查若收緊，授權模式急凍"
+        ],
+        "final_take": "看多 LFP 供應鏈轉換，但福特本身估值已 stretched",
+        "entities": {
+          "tickers": [
+            "F",
+            "ALB",
+            "ALTM",
+            "PLL",
+            "ICL",
+            "GM",
+            "STLA",
+            "TSLA"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Materials",
+            "Industrials"
+          ],
+          "themes": [
+            "LFP localization",
+            "IRA FEOC",
+            "ESS",
+            "battery supply chain"
+          ],
+          "tech_keywords": [
+            "LFP",
+            "NCM",
+            "N3P",
+            "Megapack"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:PLL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lfp-localization"
+          },
+          {
+            "subject": "ticker:ICL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lfp-localization"
+          },
+          {
+            "subject": "ticker:ALB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:lfp-localization"
+          },
+          {
+            "subject": "ticker:GM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ira-feoc-workaround"
+          },
+          {
+            "subject": "ticker:STLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ira-feoc-workaround"
+          },
+          {
+            "subject": "ticker:F",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:lfp-localization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "補 2nd-order: LFP 鏈贏家輸家分化 + IRA FEOC 模板效應"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:46:04Z",
+      "latency_ms": 34311,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "福特汽車導入寧德時代 N3P LFP 電池技術並於密西根設廠，顯示其在電動車及儲能系統（ESS）領域的雄心。然而，隨之而來的龐大產能及 ESS 規模化部署，將推升對先進自動化電池檢測設備的需求。像 Teradyne 這樣的業者，其高精密測試解決方案將成為確保 EV 電池及儲能系統性能、安全與壽命的關鍵，成為一項被低估的供應鏈利多。",
+        "bull_points": [
+          "N3P LFP 生產複雜，高階檢測需求增。",
+          "ESS 規模化擴張，須嚴格品管保穩定。"
+        ],
+        "bear_points": [
+          "先進測試設備成本高昂，或成入門門檻。",
+          "電池檢測領域競爭激烈，市場佔比難定。"
+        ],
+        "final_take": "設備商如 Teradyne 受惠於 LFP 產線自動化測試需求。",
+        "entities": {
+          "tickers": [
+            "ALB",
+            "ALTM",
+            "PLL",
+            "ICL",
+            "ENPH",
+            "SEDG",
+            "F",
+            "TSLA",
+            "GM",
+            "STLA",
+            "TER"
+          ],
+          "sectors": [
+            "Materials",
+            "Consumer Discretionary",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "GLP-1",
+            "HBM3e",
+            "Energy Storage Systems (ESS)",
+            "Battery Manufacturing Automation"
+          ],
+          "tech_keywords": [
+            "LFP",
+            "N3P",
+            "Blackwell",
+            "HBM3e",
+            "Battery Testing Equipment"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TER",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Battery Manufacturing Automation"
+          },
+          {
+            "subject": "ticker:TER",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:Battery Testing Equipment"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新增精密電池測試設備供應商角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:46:29Z",
+      "latency_ms": 24917,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被前面完全沒提的 **3rd-order 政治尾部風險**：福特 + CATL 模式正在被**參議員 Marco Rubio 與 House Select Committee on CCP** 點名審查，11 月若共和黨主導國會，**IRA Section 30D FEOC 條款可能被立法收緊**，明確排除「技術授權繞道」。這比 Treasury 行政默許脆弱得多 — 一旦立法落地，**福特密西根工廠資格回溯失效**，已投入的 35 億美元 capex 形成擱淺資產。連帶受害：**QuantumScape (QS)、Solid Power (SLDP)** 等固態電池 startup 反而成相對受益者（純美系 IP、無 CATL 依賴），值得作為 LFP 政策風險的 hedge pair。另一個被忽略的 **specific node**：**Eos Energy (EOSE) 鋅基液流電池**，是 ESS 領域唯一**完全 non-Chinese supply chain** 的 alternative，若 FEOC 收緊將直接受惠 DOE 貸款加速。",
+        "bull_points": [
+          "QS/SLDP 固態電池為純美系 IP，FEOC 收緊反受惠",
+          "EOSE 鋅基液流電池為唯一非中供應鏈 ESS 標的",
+          "若 Treasury 默許，GM/Stellantis 複製模式擴大 TAM"
+        ],
+        "bear_points": [
+          "Rubio + House CCP 委員會點名審查，立法風險升溫",
+          "11 月選後 FEOC 條款可能立法收緊，35 億 capex 恐擱淺",
+          "技術授權繞道法律基礎脆弱，回溯失效風險高"
+        ],
+        "final_take": "結構看多 LFP 本土化但須對沖政治尾部風險",
+        "entities": {
+          "tickers": [
+            "F",
+            "QS",
+            "SLDP",
+            "EOSE",
+            "GM",
+            "STLA"
+          ],
+          "sectors": [
+            "Consumer Discretionary",
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "LFP localization",
+            "FEOC compliance",
+            "ESS",
+            "energy storage",
+            "solid-state battery"
+          ],
+          "tech_keywords": [
+            "LFP",
+            "N3P",
+            "solid-state battery",
+            "zinc flow battery"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:F",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:feoc-tightening"
+          },
+          {
+            "subject": "ticker:QS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:feoc-tightening"
+          },
+          {
+            "subject": "ticker:SLDP",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:feoc-tightening"
+          },
+          {
+            "subject": "ticker:EOSE",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:non-china-ess-supply-chain"
+          },
+          {
+            "subject": "ticker:GM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lfp-localization"
+          },
+          {
+            "subject": "ticker:STLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:lfp-localization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 FEOC 立法尾部風險 + 固態電池/EOSE hedge 對沖角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:46:52Z",
+      "latency_ms": 23499,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "福特汽車不僅導入寧德時代 N3P LFP 電池技術，更積極佈局儲能系統（ESS）市場，意圖複製特斯拉的成功模式。此策略將顯著推升對先進電力電子與電網整合解決方案的需求。ABB 作為全球領先的電網與自動化技術供應商，其高壓變流器（PCS）及智慧電網解決方案，將是福特 ESS 規模化部署的關鍵推手，確保能源的高效轉換與穩定併網。此舉也可能帶動其他能源基礎設施升級的需求，使 ABB 成為間接受惠者。",
+        "bull_points": [
+          "ABB 鎖定大型 ESS 專案，市場份額有望提升。",
+          "能源轉型趨勢帶動電網升級商機。"
+        ],
+        "bear_points": [
+          "競爭激烈，PCS 產品面臨價格壓力。",
+          "ESS 業務成長依賴福特執行力。"
+        ],
+        "final_take": "ABB 受惠於 ESS 產業擴張，但需關注獲利能力。",
+        "entities": {
+          "tickers": [
+            "FORD",
+            "ABB",
+            "TSLA"
+          ],
+          "sectors": [
+            "Automotive",
+            "Electrical Equipment",
+            "Energy Storage"
+          ],
+          "themes": [
+            "EV Transition",
+            "Energy Storage Systems (ESS)"
+          ],
+          "tech_keywords": [
+            "LFP Battery",
+            "Power Electronics",
+            "Grid Integration",
+            "N3P"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ABB",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Energy Storage Systems (ESS)"
+          },
+          {
+            "subject": "ticker:ABB",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:Power Electronics"
+          },
+          {
+            "subject": "ticker:FORD",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:ABB"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "宏觀趨勢帶動，ABB 受惠於 ESS 擴張與電網升級。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "ABB",
+        "ALB",
+        "ALTM",
+        "ENPH",
+        "EOSE",
+        "F",
+        "FORD",
+        "GM",
+        "ICL",
+        "PLL",
+        "QS",
+        "SEDG",
+        "SLDP",
+        "STLA",
+        "TER",
+        "TSLA"
+      ],
+      "sectors": [
+        "Automotive",
+        "Battery Manufacturing",
+        "Consumer Discretionary",
+        "Electrical Equipment",
+        "Energy",
+        "Energy Storage",
+        "Industrials",
+        "Information Technology",
+        "Materials",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Advanced Battery Manufacturing",
+        "Battery Manufacturing Automation",
+        "China tech licensing",
+        "ESS",
+        "EV Battery Tech",
+        "EV Transition",
+        "EV transition",
+        "Energy Storage",
+        "Energy Storage Systems (ESS)",
+        "Energy storage",
+        "FEOC compliance",
+        "GLP-1",
+        "HBM3e",
+        "IRA FEOC",
+        "LFP battery",
+        "LFP localization",
+        "battery supply chain",
+        "energy storage",
+        "solid-state battery"
+      ],
+      "tech_keywords": [
+        "BEV",
+        "Battery Testing Equipment",
+        "Blackwell",
+        "ESS",
+        "Grid Integration",
+        "HBM3e",
+        "LFP",
+        "LFP Battery",
+        "Megapack",
+        "N3P",
+        "NCM",
+        "Power Electronics",
+        "solid-state battery",
+        "zinc flow battery"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:F",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lfp_licensing"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:catl_partnership"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TSLA"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:energy_storage"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:megapack"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ira_cfius_risk"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:N3P"
+      },
+      {
+        "subject": "tech_keyword:N3P",
+        "predicate": "BENEFITS_FROM",
+        "object": "sector:Battery Manufacturing"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "BENEFITS_FROM",
+        "object": "sector:Energy Storage"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:TSLA"
+      },
+      {
+        "subject": "ticker:PLL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lfp-localization"
+      },
+      {
+        "subject": "ticker:ICL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lfp-localization"
+      },
+      {
+        "subject": "ticker:ALB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:lfp-localization"
+      },
+      {
+        "subject": "ticker:GM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ira-feoc-workaround"
+      },
+      {
+        "subject": "ticker:STLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ira-feoc-workaround"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:lfp-localization"
+      },
+      {
+        "subject": "ticker:TER",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Battery Manufacturing Automation"
+      },
+      {
+        "subject": "ticker:TER",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Battery Testing Equipment"
+      },
+      {
+        "subject": "ticker:F",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:feoc-tightening"
+      },
+      {
+        "subject": "ticker:QS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:feoc-tightening"
+      },
+      {
+        "subject": "ticker:SLDP",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:feoc-tightening"
+      },
+      {
+        "subject": "ticker:EOSE",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:non-china-ess-supply-chain"
+      },
+      {
+        "subject": "ticker:GM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lfp-localization"
+      },
+      {
+        "subject": "ticker:STLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:lfp-localization"
+      },
+      {
+        "subject": "ticker:ABB",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Energy Storage Systems (ESS)"
+      },
+      {
+        "subject": "ticker:ABB",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:Power Electronics"
+      },
+      {
+        "subject": "ticker:FORD",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:ABB"
+      }
+    ],
+    "bull_summary": [
+      "LFP 授權壓低電動車成本，毛利結構改善",
+      "切入儲能第二曲線，對標 TSLA Megapack 重估",
+      "兩日連漲 21%+ 顯示資金認可敘事轉向",
+      "福特導入 CATL N3P 電池技術，提升 EV 續航與 ESS 性能。",
+      "N3P 有望帶動先進電池材料與製造商的投資。",
+      "LFP 美國本土化模板若獲 Treasury 默許，GM/Stellantis 跟進"
+    ],
+    "bear_summary": [
+      "CATL 授權面臨 IRA / CFIUS 政治阻力",
+      "儲能業務尚無實際營收貢獻，純預期",
+      "短線漲幅過大，獲利了結壓力高",
+      "CATL 技術在美國的政治風險仍是潛在阻礙。",
+      "ESS 業務規模化和盈利能力尚待市場驗證。",
+      "ALB / Panasonic 等 NCM 路線供應商邊際承壓"
+    ],
+    "final_take": "ABB 受惠於 ESS 產業擴張，但需關注獲利能力。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:46:52Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, CO_DEVELOPS_WITH, HEADWIND_FROM; gemini-only: CUSTOMER_OF, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

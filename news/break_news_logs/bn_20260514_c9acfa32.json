@@ -1,0 +1,737 @@
+{
+  "news_id": "bn_20260514_c9acfa32",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T16:08:26Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/technology/articles/elon-musks-court-battle-against-145312047.html",
+    "feed_fingerprint": "elon musk s court battle against openai enters",
+    "published": "2026-05-14T14:53:12+00:00",
+    "url_hash": "sha1:99ed2147bcbc584698ee0cb2540f098a77f911c2"
+  },
+  "headline": "Elon Musk's court battle against OpenAI enters homestretch",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:04:07Z",
+      "latency_ms": 27351,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Musk vs OpenAI 訴訟進入**最終辯論階段**，核心爭點在 OpenAI 從非營利轉為 capped-profit 結構是否違反創辦初衷。短期看，**判決不確定性壓抑 OpenAI 估值**(私募市場 ~$500B tag)，間接利好已上市替代品：MSFT (OpenAI 最大金主，若 OpenAI 結構被迫重組，MSFT 49% 利潤分成條款恐被法院重審) 風險偏空；GOOGL/Gemini、META/Llama、xAI/Grok 受惠注意力轉移。Musk 同時管 TSLA + xAI + X，**精力分散風險再被放大**，TSLA 已連續因 Musk 個人訴訟波動。長期看，本案判決將為整個 AI 產業 governance 訂下先例：若法院支持 Musk，未來 AI lab 從非營利轉商業化的路徑都會受限，**Anthropic / Mistral 等同類結構**也會被審視。Blackwell / HBM3e 算力需求方 (NVDA) 不直接受影響，但 OpenAI 若被迫重組，capex 節奏可能放緩。",
+        "bull_points": [
+          "OpenAI 估值不確定→競品 GOOGL/META 注意力紅利",
+          "xAI 若勝訴，Grok 商業化空間放大利好 TSLA 關聯",
+          "AI governance 釐清長期降低監管尾部風險"
+        ],
+        "bear_points": [
+          "MSFT 49% 利潤分成條款若被法院質疑直接利空",
+          "Musk 個人精力分散→TSLA 執行力折價放大",
+          "OpenAI 重組若拖累 capex 節奏，NVDA 短期訂單能見度降低"
+        ],
+        "final_take": "整體中性偏空 MSFT、偏多 GOOGL，TSLA 看 Musk 出庭頻率",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "GOOGL",
+            "META",
+            "TSLA",
+            "NVDA"
+          ],
+          "sectors": [
+            "Technology",
+            "Communication Services",
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "AI capex",
+            "AI governance",
+            "OpenAI restructuring",
+            "Musk key-person risk"
+          ],
+          "tech_keywords": [
+            "Blackwell",
+            "HBM3e",
+            "Gemini",
+            "Llama",
+            "Grok"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-restructuring"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-restructuring"
+          },
+          {
+            "subject": "ticker:META",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-restructuring"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:musk-key-person-risk"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-capex"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "訴訟結果未定，二階影響推論為主，信心中等"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:06:33Z",
+      "latency_ms": 146201,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Musk 與 OpenAI 的訴訟進入白熱化，核心爭議在於其營利模式轉變是否違背創始宗旨。先前討論已涵蓋對 MSFT 的潛在風險、GOOGL 與 META 的機會，以及 Musk 個人分身乏術對 TSLA 和 xAI 的影響。然而，此案可能對 AI 產業關鍵供應鏈造成更深遠的影響，特別是台積電 (TSMC) 這類先進製程的服務供應商。OpenAI 的資本支出計畫若因訴訟而延遲或重組，將直接衝擊 CoWoS 等先進封裝技術的需求，為 NVDA 等公司的算力佈局帶來額外的變數。這場法律戰不僅關乎 AI 公司的治理，也潛藏著對全球半導體產業鏈的衝擊。",
+        "bull_points": [
+          "xAI 的 Grok 有機會在訴訟期間吸引使用者關注。",
+          "判決結果可能為 AI 公司治理樹立新典範。"
+        ],
+        "bear_points": [
+          "台積電 (TSMC) CoWoS 業務面臨需求不確定性。",
+          "Musk 多頭經營風險持續壓抑 TSLA 股價。"
+        ],
+        "final_take": "AI 供應鏈穩定性因企業治理爭議面臨新風險。",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "GOOGL",
+            "META",
+            "TSLA",
+            "xAI",
+            "TSMC"
+          ],
+          "sectors": [
+            "Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI governance",
+            "AI supply chain",
+            "Musk's ventures",
+            "Corporate structure",
+            "OpenAI governance",
+            "AI competition",
+            "AI capex",
+            "Musk's distraction",
+            "OpenAI legal uncertainty"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "Blackwell",
+            "CoWoS",
+            "Grok"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:OpenAI governance"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:OpenAI legal uncertainty"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Musk's distraction"
+          },
+          {
+            "subject": "ticker:xAI",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI competition"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦 AI 晶片製造商，擴展了訴訟對供應鏈的影響分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:07:02Z",
+      "latency_ms": 29112,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已涵蓋 MSFT / GOOGL / META / TSLA / TSMC CoWoS。補一個被忽略的 2nd-order 角度：**訴訟發現程序 (discovery) 的 email / 內部文件曝光風險**。Musk 團隊已成功取得 OpenAI 早期 Altman / Brockman email，最終辯論前更多內部通訊恐被公開。這對 **CRM (Salesforce)** 是隱性利空 — Benioff 公開站隊 OpenAI、整合深度高；若揭露 OpenAI 商業實踐瑕疵，Agentforce 故事打折。反向，**ORCL** 受惠：剛簽 OpenAI $300B 算力合約，但 Oracle 以基建身分供貨，governance 風險絕緣度高於 MSFT 的股權綁定。另一冷門角度：**律所/訴訟融資概念股**幾無上市標的，但 **Burford Capital (BUR.L)** 這類訴訟融資若涉入會放大波動。判決時點壓在 **xAI 下輪募資 (傳 2026 H2)** 前，Musk 動機是切斷 OpenAI 估值錨點以利 xAI 自身 valuation。",
+        "bull_points": [
+          "ORCL $300B OpenAI 合約以基建供貨，governance 絕緣度高",
+          "GOOGL TPU 自研降低 OpenAI 重組外溢風險",
+          "判決若延後反而消除不確定性折價"
+        ],
+        "bear_points": [
+          "CRM Benioff 深度站隊 OpenAI，discovery 文件曝光打折 Agentforce",
+          "MSFT 49% 利潤分成條款若被法院重審，Azure AI 故事重估",
+          "xAI 募資前 Musk 有動機拖延，TSLA 注意力持續被分散"
+        ],
+        "final_take": "看空 MSFT/CRM、看多 ORCL，TSMC 衝擊被高估",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "CRM",
+            "ORCL",
+            "GOOGL",
+            "TSLA",
+            "NVDA",
+            "META",
+            "TSM"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Communication Services"
+          ],
+          "themes": [
+            "AI capex",
+            "AI governance",
+            "litigation discovery risk"
+          ],
+          "tech_keywords": [
+            "Agentforce",
+            "Azure OpenAI",
+            "TPU",
+            "CoWoS-L"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:CRM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-discovery-risk"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:openai-governance-insulation"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-profit-share-review"
+          },
+          {
+            "subject": "ticker:TSLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:musk-attention-dilution"
+          },
+          {
+            "subject": "ticker:GOOGL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-lab-governance-precedent"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "Discovery 曝光 + ORCL/CRM 分歧 + xAI 募資時點為新角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:07:24Z",
+      "latency_ms": 22581,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Musk 與 OpenAI 的訴訟不僅影響單一公司或供應鏈，更可能重塑 AI 產業發展模式。若 Musk 勝訴，可能加速開源 AI 模型生態系的發展，對 META 的 Llama 等項目提供更強採納誘因；反之，OpenAI 封閉模式鞏固將加劇產業寡占。此案將為未來 AI 研發路徑訂下關鍵的治理先例。",
+        "bull_points": [
+          "Musk 勝訴可望加速開源 AI 生態發展。",
+          "強化 META Llama 等模型採納誘因。"
+        ],
+        "bear_points": [
+          "OpenAI 封閉模式鞏固，加劇產業寡占。",
+          "專有模型主導恐限制創新普及。"
+        ],
+        "final_take": "訴訟結果將決定 AI 開源與封閉的競賽走向。",
+        "entities": {
+          "tickers": [
+            "META"
+          ],
+          "sectors": [
+            "Technology"
+          ],
+          "themes": [
+            "Open-source AI",
+            "AI governance",
+            "LLM development models"
+          ],
+          "tech_keywords": [
+            "Open-source LLMs",
+            "Proprietary LLMs"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:OpenAI's commercialization path",
+            "predicate": "COMPETES_WITH",
+            "object": "theme:Open-source AI development"
+          },
+          {
+            "subject": "ticker:META",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Open-source AI"
+          },
+          {
+            "subject": "theme:Open-source AI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:potential Musk v OpenAI lawsuit outcome"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "訴訟可能重塑 AI 開源與封閉的發展模式。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:07:52Z",
+      "latency_ms": 27520,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前討論已掃過 MSFT/GOOGL/META/TSLA/TSMC/CRM/ORCL/BUR.L。補一個**被嚴重忽略的 3rd-order 角度：AI 責任險 (D&O + Tech E&O) 市場**。本案 discovery 若揭露 OpenAI 董事會 governance 瑕疵 (非營利董事核准營利化決策的 fiduciary duty 爭議)，將直接**抬高所有 AI lab 的 D&O 保費** — 受惠標的 **CB (Chubb)、AIG、TRV (Travelers)** 為 tech D&O 主要承保商。反向利空 **HIG (Hartford)** 暴險較深。另一被忽略的具體節點：**Reddit (RDDT)**。OpenAI 與 RDDT 簽 $60M/年訓練資料授權合約，若 OpenAI 被迫拆分非營利/營利實體，現有商業合約**重新議約風險**直接打到 RDDT 的 data licensing 收入 (佔營收 ~7%)。最後反方論點：市場早已 price in 訴訟風險 (Musk 2024 起訴至今 OpenAI 估值反從 $80B 漲到 $500B)，**法院實際判 Musk 勝訴機率 <20%** (Delaware 法院近年對創辦人 derivative suit 普遍 deferential)，最終辯論更可能是 settlement 前奏而非顛覆性裁決。",
+        "bull_points": [
+          "CB/AIG D&O 保費抬升，tech 承保利差擴張",
+          "判決利空 OpenAI 反向利好 GOOGL/META 開源生態",
+          "Delaware 法院傾向 deferential，settlement 機率高、不確定性將解除"
+        ],
+        "bear_points": [
+          "RDDT data licensing 合約面臨重新議約風險",
+          "HIG tech D&O 暴險過深，保險利潤受擠壓",
+          "Discovery email 連環曝光，AI lab governance 折價擴散"
+        ],
+        "final_take": "中性偏多 settlement scenario，留意 RDDT 合約風險",
+        "entities": {
+          "tickers": [
+            "CB",
+            "AIG",
+            "TRV",
+            "HIG",
+            "RDDT",
+            "MSFT",
+            "ORCL"
+          ],
+          "sectors": [
+            "Financials",
+            "Insurance",
+            "Communication Services",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI governance",
+            "AI litigation",
+            "D&O insurance",
+            "data licensing"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:CB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-do-insurance-repricing"
+          },
+          {
+            "subject": "ticker:AIG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ai-do-insurance-repricing"
+          },
+          {
+            "subject": "ticker:HIG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:ai-do-insurance-repricing"
+          },
+          {
+            "subject": "ticker:RDDT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:openai-restructure-risk"
+          },
+          {
+            "subject": "ticker:RDDT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "ticker:MSFT",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:musk-openai-lawsuit"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增保險業 3rd-order + RDDT 合約節點 + 法院機率反方"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:08:26Z",
+      "latency_ms": 34288,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "馬斯克對 OpenAI 的訴訟，雖聚焦於治理，但間接影響了主要的雲端基礎設施供應商。若 OpenAI 因法律壓力被迫重組或分散其雲端策略，**亞馬遜網路服務 (AWS)** 可能成為顯著的受益者。AWS 積極擴展其 AI 服務與基礎設施，而 OpenAI 與微軟 Azure 的現有關係若受干擾，將為 AWS 提供機會，爭取 OpenAI 龐大的運算需求，尤其當 OpenAI 尋求分散對單一供應商的依賴時。這也契合了雲端供應商在 AI 競賽中的廣泛佈局。",
+        "bull_points": [
+          "AWS 可從 OpenAI 雲端供應商多元化中受益。",
+          "訴訟或促使 AI 公司重新評估單一雲端供應商依賴。"
+        ],
+        "bear_points": [
+          "AWS 面臨 AI 監管與治理的自身挑戰。",
+          "訴訟結果的不確定性延緩整體 AI 基礎設施支出。"
+        ],
+        "final_take": "訴訟為 AWS 爭取 AI 龍頭客戶提供潛在機會。",
+        "entities": {
+          "tickers": [
+            "AMZN",
+            "MSFT",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Cloud Computing"
+          ],
+          "themes": [
+            "AI infrastructure",
+            "Cloud competition",
+            "Generative AI"
+          ],
+          "tech_keywords": [
+            "Generative AI",
+            "Cloud Services"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMZN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:AI infrastructure diversification"
+          },
+          {
+            "subject": "ticker:AMZN",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:MSFT"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "訴訟為 AWS 爭取 OpenAI 雲端業務提供新契機。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "SPLIT",
+    "merged_entities": {
+      "tickers": [
+        "AIG",
+        "AMZN",
+        "CB",
+        "CRM",
+        "GOOGL",
+        "HIG",
+        "META",
+        "MSFT",
+        "NVDA",
+        "ORCL",
+        "RDDT",
+        "TRV",
+        "TSLA",
+        "TSM",
+        "TSMC",
+        "XAI"
+      ],
+      "sectors": [
+        "Cloud Computing",
+        "Communication Services",
+        "Consumer Discretionary",
+        "Financials",
+        "Information Technology",
+        "Insurance",
+        "Semiconductors",
+        "Technology"
+      ],
+      "themes": [
+        "AI capex",
+        "AI competition",
+        "AI governance",
+        "AI infrastructure",
+        "AI litigation",
+        "AI supply chain",
+        "Cloud competition",
+        "Corporate structure",
+        "D&O insurance",
+        "Generative AI",
+        "LLM development models",
+        "Musk key-person risk",
+        "Musk's distraction",
+        "Musk's ventures",
+        "Open-source AI",
+        "OpenAI governance",
+        "OpenAI legal uncertainty",
+        "OpenAI restructuring",
+        "data licensing",
+        "litigation discovery risk"
+      ],
+      "tech_keywords": [
+        "Agentforce",
+        "Azure OpenAI",
+        "Blackwell",
+        "Cloud Services",
+        "CoWoS",
+        "CoWoS-L",
+        "Gemini",
+        "Generative AI",
+        "Grok",
+        "HBM3e",
+        "Llama",
+        "Open-source LLMs",
+        "Proprietary LLMs",
+        "TPU"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-restructuring"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-restructuring"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-restructuring"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:musk-key-person-risk"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-capex"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:OpenAI governance"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:OpenAI legal uncertainty"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Musk's distraction"
+      },
+      {
+        "subject": "ticker:xAI",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI competition"
+      },
+      {
+        "subject": "ticker:CRM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-discovery-risk"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:openai-governance-insulation"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-profit-share-review"
+      },
+      {
+        "subject": "ticker:TSLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:musk-attention-dilution"
+      },
+      {
+        "subject": "ticker:GOOGL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-lab-governance-precedent"
+      },
+      {
+        "subject": "narrative:OpenAI's commercialization path",
+        "predicate": "COMPETES_WITH",
+        "object": "theme:Open-source AI development"
+      },
+      {
+        "subject": "ticker:META",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Open-source AI"
+      },
+      {
+        "subject": "theme:Open-source AI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:potential Musk v OpenAI lawsuit outcome"
+      },
+      {
+        "subject": "ticker:CB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-do-insurance-repricing"
+      },
+      {
+        "subject": "ticker:AIG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-do-insurance-repricing"
+      },
+      {
+        "subject": "ticker:HIG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:ai-do-insurance-repricing"
+      },
+      {
+        "subject": "ticker:RDDT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:openai-restructure-risk"
+      },
+      {
+        "subject": "ticker:RDDT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "ticker:MSFT",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:musk-openai-lawsuit"
+      },
+      {
+        "subject": "ticker:AMZN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:AI infrastructure diversification"
+      },
+      {
+        "subject": "ticker:AMZN",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:MSFT"
+      }
+    ],
+    "bull_summary": [
+      "OpenAI 估值不確定→競品 GOOGL/META 注意力紅利",
+      "xAI 若勝訴，Grok 商業化空間放大利好 TSLA 關聯",
+      "AI governance 釐清長期降低監管尾部風險",
+      "xAI 的 Grok 有機會在訴訟期間吸引使用者關注。",
+      "判決結果可能為 AI 公司治理樹立新典範。",
+      "ORCL $300B OpenAI 合約以基建供貨，governance 絕緣度高"
+    ],
+    "bear_summary": [
+      "MSFT 49% 利潤分成條款若被法院質疑直接利空",
+      "Musk 個人精力分散→TSLA 執行力折價放大",
+      "OpenAI 重組若拖累 capex 節奏，NVDA 短期訂單能見度降低",
+      "台積電 (TSMC) CoWoS 業務面臨需求不確定性。",
+      "Musk 多頭經營風險持續壓抑 TSLA 股價。",
+      "CRM Benioff 深度站隊 OpenAI，discovery 文件曝光打折 Agentforce"
+    ],
+    "final_take": "訴訟為 AWS 爭取 AI 龍頭客戶提供潛在機會。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:08:26Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN; gemini-only: COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,563 @@
+{
+  "news_id": "bn_20260518_0aa58b93",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T07:01:16Z",
+  "last_activity_ts": "2026-05-18T07:06:42Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/18/treasury-yields-inflation-bond-rout-oil.html",
+    "feed_fingerprint": "treasury yields rise amid global bond rout inflation",
+    "published": "2026-05-18T06:55:00+00:00",
+    "url_hash": "sha1:5cbd766b4f89e21fccd85c8595c034899d947204"
+  },
+  "headline": "Treasury yields rise amid global bond rout as inflation fears grip investors",
+  "headline_zh": null,
+  "raw_summary": "Global bond yields rose on Monday as fears of resurgent inflation grip financial markets.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T07:04:57Z",
+      "latency_ms": 23818,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "全球債券拋售、殖利率走高是**估值層面的純逆風**，與基本面無關。10年期殖利率上行直接推高折現率，**長存續期資產首當其衝**——高本益比 AI 權值股 (NVDA 等) 與無獲利成長股的現金流被往後折得更狠。摘要提到油價，暗示通膨預期由能源端點火，屬**成本推動型**而非需求過熱，對 Fed 降息路徑是壞消息。受惠方明確：銀行淨利差擴張、能源作通膨避險。受傷方：REITs、公用事業、住宅建商等利率敏感族群。此為情緒/宏觀事件，不改變個股 thesis，但會壓縮整體風險偏好。",
+        "bull_points": [
+          "銀行淨利差隨殖利率曲線陡化而擴張",
+          "能源股為通膨避險直接受惠",
+          "殖利率上行不損 AI 基本面，僅壓估值"
+        ],
+        "bear_points": [
+          "折現率上升重壓高本益比成長/科技股",
+          "成本推動型通膨阻斷 Fed 降息路徑",
+          "REITs、公用事業、建商利率敏感受創"
+        ],
+        "final_take": "短線估值逆風，偏空看待風險資產但不改個股 thesis",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "JPM",
+            "XOM",
+            "TLT",
+            "XLF",
+            "XLE",
+            "XLU",
+            "VNQ"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials",
+            "Energy",
+            "Real Estate",
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "rising rates",
+            "inflation",
+            "bond rout"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:rising-rates"
+          },
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:inflation"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          },
+          {
+            "subject": "ticker:VNQ",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          },
+          {
+            "subject": "ticker:XLU",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising-rates"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "宏觀估值事件，方向明確但屬情緒層，不改基本面"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T07:05:09Z",
+      "latency_ms": 11813,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了估值折現風險，更需關注**企業再融資(refinancing)風險**。隨著殖利率曲線走高，2026-2027年面臨大量債務到期的非投資級企業，其利息負擔將顯著惡化，恐引發信貸利差擴張。此外，美債殖利率領先全球，將進一步支撐**強勢美元(USD)**，對依賴海外營收的跨國龍頭（如 MSFT, AAPL）構成顯著的**匯損逆風(FX headwind)**，此為市場尚未充分定價的二次效應。",
+        "bull_points": [
+          "殖利率走高強化美元地位，吸引全球避險資金。",
+          "高利環境有助現金流充裕之企業淘汰低效競爭對手。"
+        ],
+        "bear_points": [
+          "債務槓桿高之企業面臨再融資成本飆升風險。",
+          "美元走強將壓抑跨國企業之海外營收換算表現。"
+        ],
+        "final_take": "關注再融資風險與匯損對跨國企業營收的二次衝擊。",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "AAPL",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "AI capex",
+            "Refinancing risk"
+          ],
+          "tech_keywords": [
+            "FX headwind"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:USD",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "narrative:USD",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:AAPL"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充再融資壓力與美元強勢帶來的匯率匯損逆風觀點。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T07:05:39Z",
+      "latency_ms": 30089,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前面沒提到的**機制性賣壓**：這波債券拋售真正危險處在於**股債正相關回歸**。一旦長債與股票同跌，**風險平價 (risk parity) 與波動率目標基金**的避險假設失效——它們的模型會機械式砍總曝險，不分基本面好壞同步減碼，放大股市跌幅。這是**流動性/資金流**層面的二階效應，與折現率、再融資、匯損都不同。傳統 **60/40 組合**同時兩端失血，會觸發退休基金與全委帳戶的再平衡賣股。換言之，殖利率上行不只壓估值，還會**抽走系統性買盤**。觀察重點是 MOVE 指數與 30 日股債相關係數，若轉正則賣壓自我強化。",
+        "bull_points": [
+          "短債與TIPS提供現成避風港，資金未必離場",
+          "若屬term premium正常化而非Fed恐慌，曲線可控"
+        ],
+        "bear_points": [
+          "股債正相關使風險平價基金機械式去槓桿",
+          "60/40組合兩端失血觸發退休基金再平衡賣股",
+          "賣壓與相關性轉正形成自我強化循環"
+        ],
+        "final_take": "偏空，緊盯MOVE指數與股債30日相關係數",
+        "entities": {
+          "tickers": [
+            "TLT",
+            "SPY",
+            "NTSX"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "risk parity",
+            "60/40 portfolio",
+            "term premium",
+            "bond rout"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:SPY",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:risk-parity-deleveraging"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond-rout"
+          },
+          {
+            "subject": "narrative:stock-bond-correlation-flip",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:risk-parity-deleveraging"
+          }
+        ],
+        "done": false,
+        "confidence": 0.7,
+        "rationale_short": "新增風險平價去槓桿與股債正相關之機制性賣壓，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T07:05:57Z",
+      "latency_ms": 17710,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了前述估值、流動性與再融資風險，我更關注**企業庫藏股（Buybacks）與現金調度策略的動搖**。許多科技巨頭（如 AAPL）長期依賴舉債進行資本配置與回購，以支撐 EPS 成長。當發債成本（Cost of debt）因殖利率攀升而顯著提高，企業將面臨兩難：維持激進回購計劃將惡化資產負債表，否則將失去 EPS 支撐。這不只是情緒或流動性問題，而是**基本面獲利質量的結構性修正**，此效應將在下季財報預測中浮現。",
+        "bull_points": [
+          "現金充沛企業具備防禦空間",
+          "優質短債替代需求浮現"
+        ],
+        "bear_points": [
+          "舉債回購模式難以為繼",
+          "EPS 成長預期遭下調風險",
+          "淨利潤被利息支出蠶食"
+        ],
+        "final_take": "利率上行將削弱企業回購能力，EPS 增長面臨新一輪考驗。",
+        "entities": {
+          "tickers": [
+            "AAPL",
+            "MSFT",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Financials"
+          ],
+          "themes": [
+            "Corporate buybacks",
+            "Cost of capital"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:AAPL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:cost_of_capital"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "探討債務融資型股票回購對 EPS 增長的潛在負面影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T07:06:30Z",
+      "latency_ms": 32910,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面已談折現率、再融資、風險平價與回購，補一個**供給/海外買盤**的結構面：這次是「全球」債券拋售，源頭在日本。**BOJ 持續正常化**推升 JGB 殖利率後，日本壽險與退休基金的本國債券殖利率已具吸引力，會啟動**資金回流 (repatriation)**，抽走長年扮演美債邊際買家的海外資金。少了這塊海外 sponsorship，美債**期限溢價 (term premium) 結構性墊高**，殖利率上行不再只是通膨預期問題，而是供需失衡。這也解釋為何是同步全球 rout 而非單一美國事件。對台灣壽險同理 — 海外固定收益部位帳面承壓。觀察重點：美債標售的 indirect bid 比重與日圓走勢。",
+        "bull_points": [
+          "殖利率走高常反映經濟韌性而非衰退",
+          "貨幣市場與浮動利率基金利差受惠吸金"
+        ],
+        "bear_points": [
+          "BOJ正常化觸發日資回流，抽走美債海外買盤",
+          "海外sponsorship流失推升美債期限溢價",
+          "全球同步rout印證供需失衡非單一通膨題"
+        ],
+        "final_take": "偏空，海外買盤退場使殖利率上行更黏",
+        "entities": {
+          "tickers": [
+            "NVDA",
+            "MSFT",
+            "AAPL"
+          ],
+          "sectors": [
+            "Financials",
+            "Real Estate",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "bond rout",
+            "term premium",
+            "JPY repatriation"
+          ],
+          "tech_keywords": [
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:boj-normalization",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ust-foreign-bid-withdrawal"
+          },
+          {
+            "subject": "narrative:ust-foreign-bid-withdrawal",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:term-premium"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond-rout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增日資回流、海外買盤退場的供給面角度，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T07:06:42Z",
+      "latency_ms": 12377,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述觀點多聚焦於估值與資金面，需注意**實質利率（Real Yields）與經濟成長預期的背離**。若名目殖利率上行速度快於通膨預期，實質利率飆升將直接壓抑實體投資活動的門檻（Hurdle rates），這不僅是估值問題，而是**實體資產與非必要性資本支出（Non-essential CapEx）的凍結**。這將加劇市場的分化——AI 基礎設施與 GLP-1 藥廠等需求剛性產業或能承受，但高度依賴貸款進行擴張的中小型企業與週期性產業將率先感受到景氣緊縮的寒意。",
+        "bull_points": [
+          "AI 基礎設施資本支出具備剛性",
+          "金融板塊淨利差有望擴大"
+        ],
+        "bear_points": [
+          "實質利率飆升壓抑實體資本支出",
+          "依賴借貸的週期性產業風險升溫"
+        ],
+        "final_take": "關注實質利率走勢，防範週期性產業成長預期下調。",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "NVDA",
+            "JPM"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology",
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "Cost of capital"
+          ],
+          "tech_keywords": [
+            "Real yield",
+            "Hurdle rate"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:Cost of capital",
+            "predicate": "HEADWIND_FROM",
+            "object": "sector:Industrials"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "探討實質利率對實體 CapEx 門檻的結構性壓制，區別於僅談估值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "GOOGL",
+        "JPM",
+        "MSFT",
+        "NTSX",
+        "NVDA",
+        "SPY",
+        "TLT",
+        "VNQ",
+        "XLE",
+        "XLF",
+        "XLU",
+        "XOM"
+      ],
+      "sectors": [
+        "Energy",
+        "Financials",
+        "Industrials",
+        "Information Technology",
+        "Real Estate",
+        "Utilities"
+      ],
+      "themes": [
+        "60/40 portfolio",
+        "AI capex",
+        "Corporate buybacks",
+        "Cost of capital",
+        "JPY repatriation",
+        "Refinancing risk",
+        "bond rout",
+        "inflation",
+        "rising rates",
+        "risk parity",
+        "term premium"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "FX headwind",
+        "Hurdle rate",
+        "Real yield"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:inflation"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:VNQ",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "ticker:XLU",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising-rates"
+      },
+      {
+        "subject": "narrative:USD",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "narrative:USD",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:AAPL"
+      },
+      {
+        "subject": "ticker:SPY",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:risk-parity-deleveraging"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond-rout"
+      },
+      {
+        "subject": "narrative:stock-bond-correlation-flip",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:risk-parity-deleveraging"
+      },
+      {
+        "subject": "ticker:AAPL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:cost_of_capital"
+      },
+      {
+        "subject": "narrative:boj-normalization",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ust-foreign-bid-withdrawal"
+      },
+      {
+        "subject": "narrative:ust-foreign-bid-withdrawal",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:term-premium"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond-rout"
+      },
+      {
+        "subject": "theme:Cost of capital",
+        "predicate": "HEADWIND_FROM",
+        "object": "sector:Industrials"
+      }
+    ],
+    "bull_summary": [
+      "銀行淨利差隨殖利率曲線陡化而擴張",
+      "能源股為通膨避險直接受惠",
+      "殖利率上行不損 AI 基本面，僅壓估值",
+      "殖利率走高強化美元地位，吸引全球避險資金。",
+      "高利環境有助現金流充裕之企業淘汰低效競爭對手。",
+      "短債與TIPS提供現成避風港，資金未必離場"
+    ],
+    "bear_summary": [
+      "折現率上升重壓高本益比成長/科技股",
+      "成本推動型通膨阻斷 Fed 降息路徑",
+      "REITs、公用事業、建商利率敏感受創",
+      "債務槓桿高之企業面臨再融資成本飆升風險。",
+      "美元走強將壓抑跨國企業之海外營收換算表現。",
+      "股債正相關使風險平價基金機械式去槓桿"
+    ],
+    "final_take": "關注實質利率走勢，防範週期性產業成長預期下調。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T07:06:42Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: BENEFITS_FROM, CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

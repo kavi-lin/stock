@@ -1,0 +1,139 @@
+{
+  "ticker": "TSM",
+  "as_of_date": "2026-05-05",
+  "cache_key": "TSM_2026-05-05",
+  "schema_version": "V1.1",
+  "data_source": "FMP HTTP REST (FMP-only; no Finnhub)",
+  "quality_scores": {
+    "altmanZScore": 17.042861813953866,
+    "piotroskiScore": 9,
+    "altman_zone": "safe",
+    "piotroski_strength": "strong",
+    "workingCapital": 2550699389000,
+    "totalAssets": 8659053639000,
+    "retainedEarnings": 5192004934000,
+    "ebit": 2278951357000,
+    "totalLiabilities": 2727963567000,
+    "revenue": 4125510324000,
+    "_note": "altman: <1.81=danger, 1.81-2.99=grey, >2.99=safe; piotroski: >=7=strong, <=2=weak",
+    "source": "FMP /stable/financial-scores"
+  },
+  "owner_earnings": {
+    "period": "2026-Q1",
+    "as_of_date": "2026-03-31",
+    "ownersEarnings": 735797084610,
+    "ownersEarningsPerShare": 28.38,
+    "maintenanceCapex": 4298520610,
+    "growthCapex": -358686587610,
+    "averagePPE": 1.17,
+    "qoq_growth": 0.2111,
+    "history_quarters": 5,
+    "source": "FMP /stable/owner-earnings"
+  },
+  "insider_summary": {
+    "quarters": [
+      {
+        "year": 2026,
+        "quarter": 2,
+        "acquired_disposed_ratio": 32,
+        "total_acquired_shares": 1928,
+        "total_disposed_shares": 20000,
+        "acquired_transactions": 32,
+        "disposed_transactions": 1,
+        "total_purchases": 32,
+        "total_sales": 0
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "acquired_disposed_ratio": 0,
+        "total_acquired_shares": 8000,
+        "total_disposed_shares": 0,
+        "acquired_transactions": 5,
+        "disposed_transactions": 0,
+        "total_purchases": 5,
+        "total_sales": 0
+      }
+    ],
+    "latest_trend": "accumulating",
+    "source": "FMP /stable/insider-trading/statistics"
+  },
+  "institutional": {
+    "as_of_date": "2025-12-31",
+    "year": 2025,
+    "quarter": 4,
+    "ownership_percent": 15.2155,
+    "last_ownership_percent": 15.6822,
+    "ownership_pct_change_qoq": -0.4667,
+    "investors_holding": 3219,
+    "investors_holding_change": 298,
+    "num_13f_shares": 789218884,
+    "num_13f_shares_change": -24026362,
+    "total_invested_usd": 253698148303,
+    "total_invested_change_usd": 26784033021,
+    "new_positions": 472,
+    "increased_positions": 1664,
+    "reduced_positions": 1075,
+    "closed_positions": 174,
+    "put_call_ratio": 1.8105,
+    "put_call_ratio_change_qoq": 59.2261,
+    "accumulation_signal": "neutral",
+    "source": "FMP /stable/institutional-ownership/symbol-positions-summary"
+  },
+  "congressional_trades": {
+    "lookback_days": 180,
+    "senate_count": 0,
+    "house_count": 9,
+    "buy_count": 8,
+    "sell_count": 1,
+    "net_signal": "bullish",
+    "most_recent_date": "2026-04-09",
+    "source": "FMP /stable/senate-trades + house-trades"
+  },
+  "ma_events": {
+    "lookback_days": 180,
+    "events": [],
+    "source": "FMP /stable/mergers-acquisitions-latest"
+  },
+  "esg": {
+    "latest_disclosure": {
+      "date": "2026-03-31",
+      "form_type": "6-K",
+      "environmental_score": 50,
+      "social_score": 99.7,
+      "governance_score": 99.7,
+      "total_esg_score": 83.13
+    },
+    "latest_rating": {
+      "fiscal_year": 2025,
+      "esg_risk_rating": "B",
+      "industry": "SEMICONDUCTORS",
+      "industry_rank": null
+    },
+    "source": "FMP /stable/esg-disclosures + esg-ratings"
+  },
+  "executive_compensation": {},
+  "comp_benchmark": {
+    "industry_title": "ABRASIVE, ASBESTOS & MISC NONMETALLIC MINERAL PRODS",
+    "year": 2024,
+    "average_compensation": 784407.5555555555,
+    "median_compensation": null,
+    "ceo_overpaid_vs_median_pct": null,
+    "source": "FMP /stable/executive-compensation-benchmark"
+  },
+  "employee_history": {
+    "latest_period": "2025-12-31",
+    "latest_count": 0,
+    "one_year_pct": -100.0,
+    "cagr_5y_pct": -100.0,
+    "expansion_signal": false,
+    "layoff_signal": true,
+    "data_points": 26,
+    "source": "FMP /stable/historical-employee-count"
+  },
+  "_fetch_stats": {
+    "fmp_calls": 12,
+    "fmp_failures": 1,
+    "cached": false
+  }
+}

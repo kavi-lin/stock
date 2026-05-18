@@ -8,13 +8,14 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V2.20.0';
+  const VERSION = 'V3.8.1';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
     { id: 'index',     href: 'index.html',     icon: 'layout-dashboard', i18n: 'nav_dash',      zh: '總體儀表板', group: 'market' },
     { id: 'sector',    href: 'sector.html',    icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描',   group: 'market' },
     { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞',   group: 'market' },
+    { id: 'break-news',href: 'break-news.html',icon: 'radio',            i18n: 'nav_break_news',zh: '突發辯論',   group: 'market' },
 
     { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股',   group: 'stock' },
     { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達',   group: 'stock' },
@@ -22,6 +23,8 @@
 
     { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心',   group: 'portfolio' },
     { id: 'calendar',  href: 'calendar.html',  icon: 'calendar-days',    i18n: 'nav_calendar',  zh: '決策日曆',   group: 'portfolio' },
+    { id: 'graph',     href: 'graph.html',     icon: 'network',          i18n: 'nav_graph',     zh: '知識圖譜',   group: 'portfolio' },
+    { id: 'supply-chain', href: 'supply-chain.html', icon: 'git-fork',    i18n: 'nav_supply_chain', zh: '供應鏈', group: 'portfolio' },
   ];
 
   const NAV_GROUPS = [
@@ -453,9 +456,38 @@
               <i data-lucide="languages" class="w-3.5 h-3.5"></i>
               <span id="lang-text" class="text-[10px] font-bold">English</span>
             </button>
+            <button id="settings-toggle" class="sidebar-icon-btn" title="${isZh ? 'LLM 設定' : 'LLM settings'}">
+              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+            </button>
             <button id="show-logs" class="sidebar-icon-btn" title="${isZh ? '系統日誌' : 'System logs'}">
               <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
             </button>
+          </div>
+          <div id="settings-panel" class="sidebar-settings hidden">
+            <label class="sidebar-set-row">
+              <span>${isZh ? '主要 LLM' : 'Primary LLM'}</span>
+              <select id="set-llm-primary" class="sidebar-set-select"></select>
+            </label>
+            <label class="sidebar-set-row">
+              <span>${isZh ? '次要 LLM' : 'Secondary LLM'}</span>
+              <select id="set-llm-secondary" class="sidebar-set-select"></select>
+            </label>
+            <label class="sidebar-set-row">
+              <span>${isZh ? '備援 LLM' : 'Tertiary LLM'}</span>
+              <select id="set-llm-tertiary" class="sidebar-set-select"></select>
+            </label>
+            <div class="sidebar-set-hint">${isZh ? '主要用完額度自動降到次要 / 備援' : 'Falls back primary → secondary → tertiary on quota'}</div>
+            <div class="sidebar-set-sub">${isZh ? '突發辯論配對' : 'Break News debate pair'}</div>
+            <label class="sidebar-set-row">
+              <span>${isZh ? '辯手 A' : 'Debater A'}</span>
+              <select id="set-bn-primary" class="sidebar-set-select"></select>
+            </label>
+            <label class="sidebar-set-row">
+              <span>${isZh ? '辯手 B' : 'Debater B'}</span>
+              <select id="set-bn-secondary" class="sidebar-set-select"></select>
+            </label>
+            <div class="sidebar-set-hint">${isZh ? '突發新聞辯論用獨立配對，與上方通用路由分開' : 'Break News debate uses its own pair, separate from general routing'}</div>
+            <div id="llm-usage" class="sidebar-llm-usage"></div>
           </div>
           <div class="sidebar-version">${VERSION}</div>
         </div>`;
@@ -466,7 +498,77 @@
       document.getElementById('show-logs')?.addEventListener('click',    () =>
         document.getElementById('debug-console')?.classList.toggle('hidden'));
       document.getElementById('risk-toggle')?.addEventListener('click',  () => UI.cycleRiskTolerance());
+      document.getElementById('settings-toggle')?.addEventListener('click', () =>
+        document.getElementById('settings-panel')?.classList.toggle('hidden'));
       UI._paintRiskChip();
+      UI._initLlmSettings();
+    },
+
+    // ── LLM settings (primary / secondary / tertiary CLI + usage) ────────
+    // Persisted server-side at config/llm_config.json — Python scripts read it,
+    // so this cannot be localStorage. The model_router governor falls back
+    // primary → secondary → tertiary on quota / failure.
+    async _initLlmSettings() {
+      const pri = document.getElementById('set-llm-primary');
+      const sec = document.getElementById('set-llm-secondary');
+      const ter = document.getElementById('set-llm-tertiary');
+      const bnA = document.getElementById('set-bn-primary');
+      const bnB = document.getElementById('set-bn-secondary');
+      if (!pri || !sec || !ter || !bnA || !bnB) return;
+      const opts = [
+        { v: 'claude', label: 'Claude' },
+        { v: 'gemini', label: 'Gemini' },
+        { v: 'codex',  label: 'Codex' },
+      ].map(o => `<option value="${o.v}">${o.label}</option>`).join('');
+      [pri, sec, ter, bnA, bnB].forEach(el => { el.innerHTML = opts; });
+
+      const renderUsage = (status) => {
+        const el = document.getElementById('llm-usage');
+        if (!el || !status || !status.models) return;
+        const zh = UI.currentLang === 'zh';
+        el.innerHTML = ['claude', 'gemini', 'codex'].map(m => {
+          const s = status.models[m] || {};
+          let tag = '', cls = 'ok';
+          if (!s.enabled)               { tag = zh ? '停用' : 'off';   cls = 'off'; }
+          else if (s.unavailable_reason === 'cooldown') { tag = zh ? '冷卻中' : 'cooldown'; cls = 'cool'; }
+          else if (s.unavailable_reason === 'budget')   { tag = zh ? '額度滿' : 'maxed'; cls = 'cool'; }
+          return `<div class="sidebar-llm-row sidebar-llm-${cls}">`
+            + `<span>${m}</span>`
+            + `<span>${s.calls || 0}/${s.daily_max || 0}${tag ? ' · ' + tag : ''}</span></div>`;
+        }).join('');
+      };
+
+      try {
+        const cfg = await (await fetch('/api/llm-config')).json();
+        if (cfg.primary)   pri.value = cfg.primary;
+        if (cfg.secondary) sec.value = cfg.secondary;
+        if (cfg.tertiary)  ter.value = cfg.tertiary;
+        const bn = cfg.break_news || {};
+        if (bn.primary)   bnA.value = bn.primary;
+        if (bn.secondary) bnB.value = bn.secondary;
+        renderUsage(cfg.status);
+      } catch (e) { /* keep defaults */ }
+
+      const save = async () => {
+        try {
+          const r = await fetch('/api/llm-config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              primary: pri.value, secondary: sec.value, tertiary: ter.value,
+              break_news: { primary: bnA.value, secondary: bnB.value },
+            }),
+          });
+          const cfg = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error((cfg || {}).error || r.status);
+          renderUsage(cfg.status);
+          UI.showToast((UI.currentLang === 'zh' ? 'LLM 設定已儲存' : 'LLM settings saved'), 'info', 2200);
+        } catch (e) {
+          UI.showToast((UI.currentLang === 'zh' ? 'LLM 設定儲存失敗: ' : 'LLM settings save failed: ')
+            + e.message, 'error', 3200);
+        }
+      };
+      [pri, sec, ter, bnA, bnB].forEach(el => el.addEventListener('change', save));
     },
 
     // ── Risk Tolerance (sent with every invest protocol invocation) ──────
@@ -1253,6 +1355,273 @@
           hint: 'Missing YoY = transcript didn\'t state explicit numbers that quarter (Apple CFO sometimes omits). Most critical for China-sensitive names (consumer electronics, autos, luxury).',
         },
       },
+      // ── V2.18 / V2.19 / V2.20 — Structural Shift + Lane Cross-Talk badges ──
+      structural_shift_confirmed: {
+        zh: {
+          title: 'SHIFT⚡⚡ · 結構性轉變確認 (V2.18 CONFIRMED)',
+          desc:  '**連 2 季皆 ≥2/3 signals 達標**，公司進入 paradigm shift 階段：\n\n**1. EPS QoQ ≥ 30%**：連兩季每股盈餘環比跳升\n**2. 毛利率 ≥ 歷史 8Q 平均 + 2σ**：margin breakout 不是噪音\n**3. 營收 YoY ≥ 25% AND 加速**：成長軌跡向上而非退坡\n\n**→ Phase 3 自動 modulation**：\n• Analyst PT 完全 unanchor (×0)\n• Red Team mean-reversion 攻擊 BLOCKED\n• sector_avoid 對個股失效 (macro_floor=1.0)\n• Position cap 100% (不縮)\n• Dynamic threshold: BUY ≥ 1.0 (從 1.2 降，更敢進)',
+          stages: [],
+          hint: 'CONFIRMED 是 MU/QCOM 類超級週期的訊號。V2.18 解的就是過去這類股票被 backward-looking lane 三重壓制錯失主升段的問題。',
+        },
+        en: {
+          title: 'SHIFT⚡⚡ · Structural Shift CONFIRMED (V2.18)',
+          desc:  '**2 consecutive quarters with ≥2/3 signals firing** — company entered paradigm shift:\n\n**1. EPS QoQ ≥ 30%** for both quarters\n**2. Gross margin ≥ historical 8Q mean + 2σ** (not noise)\n**3. Revenue YoY ≥ 25% AND accelerating**\n\n**→ Phase 3 auto-modulation**:\n• Analyst PT fully unanchored (×0)\n• Red Team mean-reversion attack BLOCKED\n• sector_avoid bypassed (macro_floor=1.0)\n• Position cap 100% (no cut)\n• Dynamic threshold: BUY ≥ 1.0 (lowered from 1.2)',
+          stages: [],
+          hint: 'CONFIRMED catches MU/QCOM-style super-cycles. V2.18 fixed the systemic miss where these stocks got crushed by backward-looking lanes.',
+        },
+      },
+      structural_shift_candidate: {
+        zh: {
+          title: 'SHIFT⚡ · 結構性轉變候選 (V2.18 CANDIDATE)',
+          desc:  '**最新 1 季 ≥2/3 signals 達標**，但上一季沒同步 → 待 confirm。\n\n**3 個 signals**：\n• EPS QoQ ≥ 30%\n• 毛利率 ≥ 歷史 +2σ\n• 營收 YoY ≥ 25% AND 加速\n\n**→ Phase 3 modulation (放寬不解除)**：\n• Analyst PT weight ×0.3 (stale 半折)\n• Red Team STRONG_COUNTER penalty ×0.925 (而非 0.85)\n• Macro multiplier floor = 0.95\n• Position cap 50% (半倉防 noise)\n• Dynamic threshold: BUY ≥ 1.1',
+          stages: [],
+          hint: '等下次 earnings 報出來：第二季再達標 → 升 CONFIRMED 解除全部 lock；第二季退潮 → 降回 NONE。',
+        },
+        en: {
+          title: 'SHIFT⚡ · Structural Shift CANDIDATE (V2.18)',
+          desc:  '**Latest quarter ≥2/3 signals fired**, but prior quarter did not — pending confirmation.\n\n**3 signals**:\n• EPS QoQ ≥ 30%\n• Gross margin ≥ historical +2σ\n• Revenue YoY ≥ 25% AND accelerating\n\n**→ Phase 3 modulation (relaxed, not removed)**:\n• Analyst PT weight ×0.3 (stale)\n• Red Team STRONG_COUNTER penalty ×0.925 (not 0.85)\n• Macro multiplier floor = 0.95\n• Position cap 50% (controls noise)\n• Dynamic threshold: BUY ≥ 1.1',
+          stages: [],
+          hint: 'Wait for next earnings: second quarter confirms → upgrade to CONFIRMED unlocks all caps; second quarter fizzles → revert to NONE.',
+        },
+      },
+      polarization_bipolar: {
+        zh: {
+          title: 'BIPOLAR · 訊號兩極衝突 (V2.19)',
+          desc:  '**5 lane 勢均力敵衝突**：\n• range ≥ 4 (max − min)\n• ≥2 lanes ≥ +1 AND ≥2 lanes ≤ −1\n• 至少 1 個 ≥+2 AND 1 個 ≤−2\n\n**→ Phase 3 Step 1.7 modulation**：\n• avg_confidence × 0.5 (CONFIRMED+bull macro 例外 ×0.7)\n• Position cap = 25% (砍倉至 1/4)\n• BUY → STAGED_ENTRY 強制降階\n• Dynamic threshold: BUY ≥ 1.5 (從 1.2 拉)',
+          stages: [],
+          hint: 'BIPOLAR + STAGED_ENTRY = 系統承認看不懂，用小部位試水溫。買對了少賺，買錯了少套。',
+        },
+        en: {
+          title: 'BIPOLAR · Lane Polarization (V2.19)',
+          desc:  '**5 lanes in genuine deadlock**:\n• range ≥ 4 (max − min)\n• ≥2 lanes ≥ +1 AND ≥2 lanes ≤ −1\n• ≥1 lane ≥+2 AND ≥1 lane ≤−2\n\n**→ Phase 3 Step 1.7 modulation**:\n• avg_confidence × 0.5 (CONFIRMED+bull macro: ×0.7)\n• Position cap = 25% (cut to 1/4)\n• Force BUY → STAGED_ENTRY\n• Dynamic threshold: BUY ≥ 1.5',
+          stages: [],
+          hint: 'BIPOLAR + STAGED_ENTRY = system admits low confidence, takes small toehold. Bounded loss either way.',
+        },
+      },
+      polarization_outlier: {
+        zh: {
+          title: 'OUTLIER · 單一 lane 離群 (V2.20.0)',
+          desc:  '**4-vs-1 離群值，不是真衝突**：\n• range ≥ 4 但少數方只有 1 lane\n• 例：[+4, +3, +3, +2, −2] — 4 lane 同向，1 個 outlier 站對立面\n\n**→ Phase 3 Step 1.7 modulation (輕微降，不像 BIPOLAR 砍倉)**：\n• avg_confidence × 0.85\n• Position cap 不動\n• Dynamic threshold: BUY ≥ 1.3\n• 標記 outlier_lane_id 給 user 檢視哪 lane 反對',
+          stages: [],
+          hint: 'V2.20.0 新增。修 V2.10 老 polarization rule 的 bug — 把 [+4,+3,+3,+2,-2] 誤判 BIPOLAR 砍倉，現在正確標 OUTLIER 輕微降權。',
+        },
+        en: {
+          title: 'OUTLIER · Single-lane dissent (V2.20.0)',
+          desc:  '**4-vs-1 outlier — not real deadlock**:\n• range ≥ 4 but minority side only 1 lane\n• Example: [+4, +3, +3, +2, −2] — 4 lanes aligned, 1 outlier dissents\n\n**→ Phase 3 Step 1.7 modulation (mild, not BIPOLAR-style cut)**:\n• avg_confidence × 0.85\n• Position cap unchanged\n• Dynamic threshold: BUY ≥ 1.3\n• Flags outlier_lane_id for user review',
+          stages: [],
+          hint: 'V2.20.0 fix for V2.10 polarization bug — [+4,+3,+3,+2,-2] used to be mislabeled BIPOLAR (cut position 75%); now correctly OUTLIER (mild penalty).',
+        },
+      },
+      polarization_mixed: {
+        zh: {
+          title: 'MIXED · 訊號分歧 (V2.10)',
+          desc:  '**雙邊都有但無極端值**：\n• range ≥ 3 AND 至少 1 正 1 負\n• 沒有 lane 達 ±2 極端\n\n**→ Phase 3 Step 1.7 modulation**：\n• avg_confidence × 0.75\n• Position cap 不動\n• Dynamic threshold 不改 (default 1.2)',
+          stages: [],
+          hint: 'MIXED 是中等不確定 — 比 OUTLIER 嚴 (×0.75 vs ×0.85)，比 BIPOLAR 鬆 (不砍倉)。',
+        },
+        en: {
+          title: 'MIXED · Lane Disagreement (V2.10)',
+          desc:  '**Both directions present, no extremes**:\n• range ≥ 3 AND ≥1 positive AND ≥1 negative\n• No lane reaches ±2\n\n**→ Phase 3 Step 1.7 modulation**:\n• avg_confidence × 0.75\n• Position cap unchanged\n• Dynamic threshold: default 1.2',
+          stages: [],
+          hint: 'MIXED is middle ground — stricter than OUTLIER (×0.75 vs ×0.85), looser than BIPOLAR (no position cut).',
+        },
+      },
+      red_team_basis_mr_only: {
+        zh: {
+          title: 'RT MR-ONLY · Red Team 純歷史攻擊 (V2.19)',
+          desc:  '**counter_thesis 只用 mean-reversion 關鍵字**：\n• "歷史均值" / "mean reversion"\n• "週期見頂" / "Peak Cycle"\n• "P/E ceiling" / "歷史毛利"\n• "回到歷史中位"\n\n**→ CONFIRMED tier 下自動降級**：\n• STRONG_COUNTER → MODERATE_COUNTER\n• Penalty 折半 (0.85 → 0.925)\n• 反方論點不放棄但威力減半',
+          stages: [],
+          hint: '這是 V2.18 設計時觀察到的 MU 案例核心問題：Red Team 用「歷史毛利只有 35%」殺掉 paradigm shift thesis。V2.19 anti-spoofing 直接 disable。',
+        },
+        en: {
+          title: 'RT MR-ONLY · Red Team Pure Mean-Reversion Attack (V2.19)',
+          desc:  '**counter_thesis uses only mean-reversion keywords**:\n• "historical mean" / "mean reversion"\n• "cycle peak" / "Peak Cycle"\n• "P/E ceiling" / "historical margin"\n\n**→ Auto-downgrade if CONFIRMED tier**:\n• STRONG_COUNTER → MODERATE_COUNTER\n• Penalty halved (0.85 → 0.925)\n• Counter not discarded but neutralized',
+          stages: [],
+          hint: 'Core MU pattern V2.18 was built to fix: Red Team killing paradigm shift theses with "historical margin only 35%". V2.19 anti-spoofing disables this attack.',
+        },
+      },
+      red_team_basis_contaminated: {
+        zh: {
+          title: 'RT CONTAM · Red Team 偷渡 mr (V2.19)',
+          desc:  '**counter_thesis 同時含 forward + mean-reversion 關鍵字**：\n• 表面 forward attack (新進入者 / 客戶庫存)\n• 偷渡 mr (歷史均值 / 週期高點)\n\n**→ V2.19 鐵律 — mr 一票否決**：\n• 不視為 mixed，視為 contaminated（污染）\n• CONFIRMED tier 下視同 pure_mean_reversion 自動降級\n• 1 個 fw 關鍵字無法救回 mr 否決權\n\n**設計理由**：防 LLM 故意塞 1 個 forward keyword 偽裝成 pure_forward 保留 STRONG_COUNTER 殺傷力。',
+          stages: [],
+          hint: 'Anti-spoofing 鐵律：mr keyword 一旦出現都觸發 dampening，無論搭配多少 fw keyword。命名強調污染而非平衡。',
+        },
+        en: {
+          title: 'RT CONTAM · Red Team Smuggled mr (V2.19)',
+          desc:  '**counter_thesis has BOTH forward + mean-reversion keywords**:\n• Surface looks forward (competitor / inventory)\n• Smuggles mr (historical mean / cycle peak)\n\n**→ V2.19 rule — mr veto**:\n• Treated as contaminated (not mixed)\n• Same handling as pure_mean_reversion under CONFIRMED tier\n• One fw keyword cannot rescue the veto\n\n**Why**: prevents LLM from gaming via 1 forward keyword wrapper to retain STRONG_COUNTER strength.',
+          stages: [],
+          hint: 'Anti-spoofing rule: any mr keyword present triggers dampening regardless of fw count. "Contamination" not "mix" — emphasis on pollution.',
+        },
+      },
+      red_team_basis_pure_forward: {
+        zh: {
+          title: 'RT FWD · Red Team 純前瞻攻擊 (V2.19)',
+          desc:  '**counter_thesis 只用 forward mechanism breakage 關鍵字**：\n• "competitor" / 量產時程 / 新進入者\n• 客戶庫存 / inventory days\n• 需求飽和 / 技術替代 / share loss\n\n**→ 健康反方論證 — V2.19 唯一保留 STRONG_COUNTER 殺傷力**：\n• standard penalty 0.85\n• 任何 tier 都 effective\n• Red Team 通過 anti-spoofing 檢驗',
+          stages: [],
+          hint: '看到 RT FWD 就放心 — Red Team 在做正確的事 (壓力測試未來 catalysts)，不是用過時歷史 pattern 攻擊。',
+        },
+        en: {
+          title: 'RT FWD · Red Team Pure Forward Attack (V2.19)',
+          desc:  '**counter_thesis uses only forward mechanism keywords**:\n• "competitor" / production timeline / new entrants\n• customer inventory / inventory days\n• demand saturation / tech substitution / share loss\n\n**→ Healthy counter — V2.19 only basis preserving STRONG_COUNTER**:\n• standard penalty 0.85\n• Effective at any tier\n• Passed anti-spoofing classifier',
+          stages: [],
+          hint: 'Seeing RT FWD = Red Team doing correct work (stress-testing future catalysts), not relying on stale historical patterns.',
+        },
+      },
+      watchlist_bolt: {
+        zh: {
+          title: '⚡ · News Watchlist 候選 (V2.19)',
+          desc:  '**News leading signal** — 過去 14 天 ≥2 個獨立 source 提及結構性 keyword：\n• "sold out" / "capacity constrained" / "supercycle"\n• "供不應求" / "structural deficit"\n• "capacity expansion"\n\n**→ V2.19 設計約束**：\n• 不入 Phase 3 modulation（純警覺 metadata）\n• 等 earnings-analyst 確認 CANDIDATE/CONFIRMED tier 才入決策\n• 21 天無新 hit 自動 evict\n\n**→ 跟 SHIFT badge 並現** = news + earnings 雙確認 = 最強 paradigm shift signal。',
+          stages: [],
+          hint: '⚡ 是 leading (news 早 1-2 週)，SHIFT 是 confirming (earnings 已實現)。Watchlist 提早警覺，等 earnings 確認才行動。',
+        },
+        en: {
+          title: '⚡ · News Watchlist Candidate (V2.19)',
+          desc:  '**News leading signal** — past 14 days ≥2 independent sources cite structural keywords:\n• "sold out" / "capacity constrained" / "supercycle"\n• "structural deficit" / "capacity expansion"\n\n**→ V2.19 design constraints**:\n• Does NOT drive Phase 3 modulation (advisory metadata only)\n• Earnings-analyst CANDIDATE/CONFIRMED required for decision impact\n• 21 days without new hit → auto-evict\n\n**→ Co-occurrence with SHIFT badge** = news + earnings double-confirm = strongest paradigm shift signal.',
+          stages: [],
+          hint: '⚡ is leading (news 1-2w early), SHIFT is confirming (earnings realized). Watchlist alerts early, earnings tier authorizes action.',
+        },
+      },
+      watchlist_traj_confirmed: {
+        zh: {
+          title: '✓ CONFIRMED · Watchlist 已確認軌跡 (V2.20)',
+          desc:  '**News leading signal 升至最高 confidence**：\n• earnings-analyst structural_shift.tier = CONFIRMED\n• 連 2 季 ≥2/3 signals (EPS QoQ / GM σ / rev accel) 達標\n\n**→ V2.18 Phase 3 全套 modulation 生效**\n**→ Watchlist 任務完成**：signal 已被 earnings 兌現',
+          stages: [],
+          hint: '這個 ticker 從 news leading signal 走完整 lifecycle 到 earnings 確認。最強形式的 paradigm shift 訊號。',
+        },
+        en: {
+          title: '✓ CONFIRMED · Watchlist Trajectory (V2.20)',
+          desc:  '**News leading signal upgraded to highest confidence**:\n• earnings-analyst structural_shift.tier = CONFIRMED\n• 2 consecutive quarters with ≥2/3 signals firing\n\n**→ V2.18 Phase 3 full modulation active**\n**→ Watchlist mission complete** — signal realized in earnings',
+          stages: [],
+          hint: 'Ticker walked full lifecycle from news leading signal to earnings confirmation. Strongest paradigm shift signal possible.',
+        },
+      },
+      watchlist_traj_candidate: {
+        zh: {
+          title: '✓ CANDIDATE · Watchlist 候選軌跡 (V2.20)',
+          desc:  '**News leading signal 已被 earnings 確認 CANDIDATE**：\n• earnings-analyst structural_shift.tier = CANDIDATE\n• 最新 1 季 ≥2/3 signals 達標\n\n**→ V2.18 Phase 3 modulation 已生效**\n**→ 等下次 earnings 升 CONFIRMED 或退回 NONE**',
+          stages: [],
+          hint: '中段確認。News 跟 earnings 已對齊，但需要連 2 季才升頂級。',
+        },
+        en: {
+          title: '✓ CANDIDATE · Watchlist Trajectory (V2.20)',
+          desc:  '**News leading signal confirmed at CANDIDATE tier**:\n• earnings-analyst structural_shift.tier = CANDIDATE\n• Latest 1 quarter with ≥2/3 signals\n\n**→ V2.18 Phase 3 modulation active**\n**→ Awaiting next earnings: upgrade to CONFIRMED or revert to NONE**',
+          stages: [],
+          hint: 'Mid-tier confirmation. News and earnings aligned, but 2 consecutive quarters required for top tier.',
+        },
+      },
+      watchlist_traj_aging: {
+        zh: {
+          title: 'AGING · Watchlist 老化 (V2.20)',
+          desc:  '**持續 watchlist 中 5+ 天但未升 tier**：\n• News 持續提到 (keyword hit count > 5)\n• earnings-analyst 還沒看到結構性跳躍\n\n**→ 兩種可能**：\n• 真 paradigm shift 醞釀中（等下次 earnings）\n• False positive 老化（IR boilerplate accumulation）\n\n**→ 21 天無新 hit 自動 evict**',
+          stages: [],
+          hint: 'AGING 是觀察指標 — 不是 buy 訊號。等 earnings 報出來才能判斷是真 shift 還是 noise。',
+        },
+        en: {
+          title: 'AGING · Watchlist Aging (V2.20)',
+          desc:  '**5+ days continued in watchlist without tier upgrade**:\n• News keeps citing (keyword hit count > 5)\n• earnings-analyst sees no structural break yet\n\n**→ Two possibilities**:\n• Real paradigm shift brewing (wait for next earnings)\n• False positive aging (IR boilerplate accumulation)\n\n**→ Auto-evict at 21 days without new hit**',
+          stages: [],
+          hint: 'AGING is observational — not a buy signal. Wait for earnings to distinguish real shift from noise.',
+        },
+      },
+      watchlist_traj_new: {
+        zh: {
+          title: 'NEW · Watchlist 新進 (V2.20)',
+          desc:  '**新進 watchlist (≤2 lifecycle events)**：\n• 還在累積 keyword hits\n• 14 天 hit 窗口\n\n**→ 觀察期**：\n• 21 天內若沒新 hit 會被 evict\n• 累積到 5+ continued 變 AGING\n• earnings 升 tier 變 CANDIDATE/CONFIRMED',
+          stages: [],
+          hint: '剛進場，還沒驗證。建議放 watchlist 觀察 1-2 週看走向。',
+        },
+        en: {
+          title: 'NEW · Watchlist New Entry (V2.20)',
+          desc:  '**Just entered watchlist (≤2 lifecycle events)**:\n• Still accumulating keyword hits\n• 14-day hit window active\n\n**→ Observation period**:\n• Evicts in 21 days without new hit\n• Becomes AGING after 5+ continued events\n• Becomes CANDIDATE/CONFIRMED if earnings upgrades tier',
+          stages: [],
+          hint: 'Fresh entry, unverified. Recommend 1-2 weeks of observation before any action.',
+        },
+      },
+      verdict_strong: {
+        zh: {
+          title: 'STRONG · 體質強勁 (composite 80+)',
+          desc:  '**4 大評分子項加總 ≥ 80/100**：\n• Quality (0-30) + Growth (0-30) + Value (0-25) + Analyst (0-15)\n\n**意義**：財報品質乾淨、成長動能足、估值合理、分析師看多 — 4 維度同時站住的罕見組合。',
+          stages: [],
+          hint: '罕見組合。Earnings 滿分區。投資論點要找的就是這種股。',
+        },
+        en: {
+          title: 'STRONG · Robust (composite 80+)',
+          desc:  '**4 score components total ≥ 80/100**:\n• Quality (0-30) + Growth (0-30) + Value (0-25) + Analyst (0-15)\n\n**Meaning**: clean financials + growth momentum + fair valuation + bullish analysts — rare 4-axis convergence.',
+          stages: [],
+          hint: 'Rare convergence. Top earnings tier. Target zone for thesis hunting.',
+        },
+      },
+      verdict_solid: {
+        zh: {
+          title: 'SOLID · 穩健 (composite 65-79)',
+          desc:  '**4 大評分子項加總 65-79**：多數面向健康但至少 1 軸有瑕疵（quality flag / 成長放緩 / 估值偏貴 / 分析師中性）。\n\n**意義**：值得分析但需聚焦弱項是否會擴大。',
+          stages: [],
+          hint: '主流區間，多數值得追蹤的股票落在這裡。看 score_components 哪一塊扣分。',
+        },
+        en: {
+          title: 'SOLID · Stable (composite 65-79)',
+          desc:  '**4 components total 65-79**: most axes healthy but ≥1 has weakness (quality flag / decelerating growth / rich valuation / neutral analysts).\n\n**Meaning**: worth analyzing but focus on whether weakness expands.',
+          stages: [],
+          hint: 'Mainstream range. Most watchlist-worthy names land here. Check score_components for the dragging axis.',
+        },
+      },
+      verdict_mixed: {
+        zh: {
+          title: 'MIXED · 混合訊號 (composite 50-64)',
+          desc:  '**4 大評分子項加總 50-64**：多軸出現警訊，至少 2 軸偏弱。\n\n**意義**：thesis 必須直面 trade-off — 為什麼還要進場？要看具體哪幾項在拉、哪些在拖。',
+          stages: [],
+          hint: 'MIXED 區間進場需要清楚的 catalyst 或 contrarian 論述，不能只憑「便宜」或「成長」。',
+        },
+        en: {
+          title: 'MIXED · Mixed Signals (composite 50-64)',
+          desc:  '**4 components total 50-64**: multi-axis warning signs, ≥2 axes weak.\n\n**Meaning**: thesis must address trade-offs — why enter despite weakness? Check which axes pull vs drag.',
+          stages: [],
+          hint: 'MIXED entry needs clear catalyst or contrarian thesis — cannot rely on "cheap" or "growth" alone.',
+        },
+      },
+      verdict_weak: {
+        zh: {
+          title: 'WEAK · 體質疲軟 (composite 35-49)',
+          desc:  '**4 大評分子項加總 35-49**：多軸偏弱、至少 1 軸亮紅燈（quality flag / 衰退成長 / 估值偏貴 / 分析師看空）。\n\n**意義**：除非有極強 contrarian 論述，否則不應為投資對象。可考慮列入 short / pair-trade short side 候選。',
+          stages: [],
+          hint: 'WEAK 是 quality screen 該排除的區間。少數例外：deep contrarian + 強 catalyst（e.g. activism / spinoff / 巨額回購）。',
+        },
+        en: {
+          title: 'WEAK · Deteriorating (composite 35-49)',
+          desc:  '**4 components total 35-49**: multi-axis weakness, ≥1 red flag (quality flag / shrinking growth / rich valuation / bearish analysts).\n\n**Meaning**: should not be investment target unless deep contrarian thesis with strong catalyst. Possible short / pair-trade short side candidate.',
+          stages: [],
+          hint: 'WEAK is the screen-out zone. Exceptions: deep contrarian + strong catalyst (activism / spinoff / large buyback).',
+        },
+      },
+      theme_override_bolt: {
+        zh: {
+          title: '⚡ · 結構性轉變主題 (V2.20.0)',
+          desc:  '**此 theme 內 ≥1 個代表性個股的 earnings 有 structural_shift tier**：\n• CANDIDATE: 1 季 ≥2/3 signals\n• CONFIRMED: 連 2 季 ≥2/3 signals\n\n**→ Theme heat 加分 (V2.19.2)**：\n• ≥1 CONFIRMED → +10\n• ≥2 CONFIRMED → +15 (cap)\n• ≥1 CANDIDATE 無 CONFIRMED → +5\n\n**→ Lifecycle stage 不誤判 Exhausting (V2.18)**：\n• maturity > 80 但有 paradigm shift → 降回 Mature\n• 防 sector_avoid 連坐殺好股\n\nHover badge 旁邊文字看哪些 ticker 觸發。',
+          stages: [],
+          hint: 'Theme 出現 ⚡ 代表 sector 內有 paradigm shift 進行中。對配置 sector 倉位、避免錯殺都有意義。',
+        },
+        en: {
+          title: '⚡ · Paradigm Shift Theme (V2.20.0)',
+          desc:  '**≥1 representative stock in this theme has earnings structural_shift tier**:\n• CANDIDATE: 1 quarter ≥2/3 signals\n• CONFIRMED: 2 consecutive quarters ≥2/3 signals\n\n**→ Theme heat bonus (V2.19.2)**:\n• ≥1 CONFIRMED → +10\n• ≥2 CONFIRMED → +15 (cap)\n• ≥1 CANDIDATE no CONFIRMED → +5\n\n**→ Lifecycle stage protected from Exhausting (V2.18)**:\n• maturity > 80 with paradigm shift → revert to Mature\n• Prevents sector_avoid from miscategorizing healthy stocks\n\nHover near badge to see triggering tickers.',
+          stages: [],
+          hint: 'Theme ⚡ = paradigm shift active in sector. Useful for sector allocation and avoiding false-positive sector avoid.',
+        },
+      },
+      verdict_deteriorating: {
+        zh: {
+          title: 'DETERIORATING · 體質惡化 (composite < 35)',
+          desc:  '**4 大評分子項加總 < 35**：多軸全面惡化，至少 2 軸亮紅燈。\n\n**意義**：避開區。除非是極端 deep value + activist catalyst，否則應視為地雷股。\n\n**典型場景**：\n• Quality flag 連發（accruals + capex burning + DSO + 負 FCF）\n• 衰退成長 + 估值仍貴（multiples 還沒 priced in）\n• 分析師大規模下調',
+          stages: [],
+          hint: 'DETERIORATING 是要避開的明確訊號。歷史上這區間股票 6-12 月期 alpha 多為負值。',
+        },
+        en: {
+          title: 'DETERIORATING · Distressed (composite < 35)',
+          desc:  '**4 components total < 35**: broad-based deterioration, ≥2 red flags.\n\n**Meaning**: avoid zone. Treat as toxic unless deep value + activist catalyst.\n\n**Typical scenario**:\n• Multiple quality flags (accruals + capex burn + DSO + negative FCF)\n• Shrinking growth with rich multiples (not yet priced in)\n• Mass analyst downgrades',
+          stages: [],
+          hint: 'DETERIORATING is a clear avoid signal. Historically this zone shows negative 6-12mo alpha.',
+        },
+      },
     };
 
     function classifyStage(stages, daysSince) {
@@ -1529,13 +1898,17 @@
     document.addEventListener('mouseover', e => {
       const el = e.target.closest('[data-signal-tip]');
       if (!el) return;
-      if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+      // V2.20.0 — share _hideTimer via tip element so page-decisions.js
+      // data-tip-key handler doesn't kill our just-shown tooltip (and vice versa)
+      if (tip._hideTimer) { clearTimeout(tip._hideTimer); tip._hideTimer = null; }
+      if (_hideTimer)     { clearTimeout(_hideTimer);     _hideTimer = null; }
       showSignalTip(el);
     });
     document.addEventListener('mouseout', e => {
       const el = e.target.closest('[data-signal-tip]');
       if (!el) return;
-      _hideTimer = setTimeout(hideSignalTip, 80);
+      tip._hideTimer = setTimeout(() => { hideSignalTip(); tip._hideTimer = null; }, 120);
+      _hideTimer = tip._hideTimer;
     });
   }
 

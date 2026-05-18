@@ -1,0 +1,314 @@
+{
+  "news_id": "bn_20260514_ab58374b",
+  "schema_version": 1,
+  "state": "failed",
+  "fetched_at": "2026-05-14T15:54:02Z",
+  "last_activity_ts": "2026-05-14T16:35:23Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/6311b221d737",
+    "feed_fingerprint": "futu:IREN,ORCL:f9b8ee8d0f",
+    "published": "2026-05-14T22:39:50+08:00",
+    "url_hash": "sha1:033ca9a2f8bf28f0152f0a7f8757981c23bf9570"
+  },
+  "headline": "雲計算服務商股盤中走高，NEBIUS漲幅擴大至逾8%，IREN漲超7%，CoreWeave漲近5%，甲骨文漲近3%",
+  "headline_zh": null,
+  "raw_summary": "雲計算服務商股盤中走高，NEBIUS漲幅擴大至逾8%，IREN漲超7%，CoreWeave漲近5%，甲骨文漲近3%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 4.5,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:33:52Z",
+      "latency_ms": 4064,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 545,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "0a04743e-eb97-47df-b1e1-bc92b6137668",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "a1eaedc1-c981-4522-ad02-01b436f145b1"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T16:35:18Z",
+      "latency_ms": 86008,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "雲計算服務商股價今日普遍走高，市場聚焦於AI基礎設施的龐大需求。Nebius (NBIS) 與 Iris Energy (IREN) 等專注AI雲服務的業者表現亮眼，顯示其在GPU算力供應鏈中的關鍵地位，同時Oracle (ORCL) 與 CoreWeave (CRWV) 也因企業級AI應用擴張而受惠。這波漲勢凸顯了AI硬體（如NVIDIA GPU）及先進製程（如TSMC）的戰略重要性，雲端服務正成為AI時代的核心驅動力。",
+        "bull_points": [
+          "AI 算力需求強勁推動雲端",
+          "專注 AI 雲服務商成長可期"
+        ],
+        "bear_points": [
+          "激烈競爭與估值風險",
+          "供應鏈集中度或致穩性"
+        ],
+        "final_take": "AI 雲端浪潮洶湧，謹慎樂觀",
+        "entities": {
+          "tickers": [
+            "NBIS",
+            "IREN",
+            "CRWV",
+            "ORCL",
+            "NVDA"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors",
+            "Cloud Computing"
+          ],
+          "themes": [
+            "AI Infrastructure",
+            "GPU Demand",
+            "Specialized Cloud Services"
+          ],
+          "tech_keywords": [
+            "GPU",
+            "AI",
+            "Data Centers",
+            "Advanced Packaging"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NBIS",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure"
+          },
+          {
+            "subject": "ticker:CRWV",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI Infrastructure"
+          },
+          {
+            "subject": "ticker:IREN",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:GPU Demand"
+          },
+          {
+            "subject": "ticker:ORCL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Cloud Computing"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NBIS"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:CRWV"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:IREN"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "AI 雲端算力需求強勁，多家業者受惠"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:35:23Z",
+      "latency_ms": 5101,
+      "raw_stdout_path": "",
+      "parsed": {
+        "type": "result",
+        "subtype": "success",
+        "is_error": true,
+        "api_error_status": 429,
+        "duration_ms": 599,
+        "duration_api_ms": 0,
+        "num_turns": 1,
+        "result": "You've hit your limit · resets 12:40am (Asia/Taipei)",
+        "stop_reason": "stop_sequence",
+        "session_id": "5bd5b027-261e-4bc4-8796-5bd65fb717c7",
+        "total_cost_usd": 0,
+        "usage": {
+          "input_tokens": 0,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 0,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {},
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "fast_mode_state": "off",
+        "uuid": "4d1c42d0-5f2e-43ee-a1e0-cc23b4ce0d04"
+      },
+      "parse_status": "ok",
+      "exit_code": 1
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "CRWV",
+        "IREN",
+        "NBIS",
+        "NVDA",
+        "ORCL"
+      ],
+      "sectors": [
+        "Cloud Computing",
+        "Information Technology",
+        "Semiconductors"
+      ],
+      "themes": [
+        "AI Infrastructure",
+        "GPU Demand",
+        "Specialized Cloud Services"
+      ],
+      "tech_keywords": [
+        "AI",
+        "Advanced Packaging",
+        "Data Centers",
+        "GPU"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:NBIS",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure"
+      },
+      {
+        "subject": "ticker:CRWV",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI Infrastructure"
+      },
+      {
+        "subject": "ticker:IREN",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:GPU Demand"
+      },
+      {
+        "subject": "ticker:ORCL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Cloud Computing"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NBIS"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:CRWV"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:IREN"
+      }
+    ],
+    "bull_summary": [
+      "AI 算力需求強勁推動雲端",
+      "專注 AI 雲服務商成長可期"
+    ],
+    "bear_summary": [
+      "激烈競爭與估值風險",
+      "供應鏈集中度或致穩性"
+    ],
+    "final_take": "AI 雲端浪潮洶湧，謹慎樂觀",
+    "final_take_by": "gemini",
+    "rounds_completed": 2,
+    "closed_at": "2026-05-14T16:35:23Z",
+    "close_reason": "cli_failures",
+    "divergence_note": "gemini-only: BENEFITS_FROM, SUPPLIES_TO"
+  },
+  "errors": [
+    {
+      "ts": "2026-05-14T16:33:52Z",
+      "where": "round0.claude",
+      "msg": "rc=1 err=None"
+    },
+    {
+      "ts": "2026-05-14T16:35:23Z",
+      "where": "round1.claude",
+      "msg": "rc=1 err=None"
+    }
+  ],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

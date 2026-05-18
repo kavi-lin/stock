@@ -1,0 +1,546 @@
+{
+  "news_id": "bn_20260518_35d670f1",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-18T15:45:25Z",
+  "last_activity_ts": "2026-05-18T15:47:10Z",
+  "source": {
+    "name": "CNBC Top",
+    "credibility": "HIGH",
+    "url": "https://www.cnbc.com/2026/05/18/treasury-yields-inflation-bond-rout-oil.html",
+    "feed_fingerprint": "10 year treasury yield touches highest year japan",
+    "published": "2026-05-18T13:40:47+00:00",
+    "url_hash": "sha1:5cbd766b4f89e21fccd85c8595c034899d947204"
+  },
+  "headline": "10-year Treasury yield touches highest in a year, Japan's 30-year yield rises to a record",
+  "headline_zh": null,
+  "raw_summary": "Global bond yields rose on Monday as fears of resurgent inflation grip financial markets.",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "manual_raw"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "codex",
+      "agent_role_label": {
+        "en": "Analyst-A (Codex)",
+        "zh": "分析師 A (Codex)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T15:45:47Z",
+      "latency_ms": 21636,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "這不是單純風險偏好轉弱，而是**折現率重新定價**：美日長債同步破位會壓縮高本益比成長股與 REITs 估值，同時提高企業再融資成本。相對受惠的是淨利差較敏感的大型銀行，但若殖利率上行來自通膨失控，信用風險會反噬金融股。",
+        "bull_points": [
+          "銀行淨利差短線改善",
+          "現金流強企業更抗壓"
+        ],
+        "bear_points": [
+          "高估值科技股承壓",
+          "REITs與公用事業受傷",
+          "再融資成本上升"
+        ],
+        "final_take": "偏空，金融股僅相對抗跌。",
+        "entities": {
+          "tickers": [
+            "JPM",
+            "BAC",
+            "NVDA",
+            "MSFT",
+            "TLT"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology",
+            "Real Estate",
+            "Utilities"
+          ],
+          "themes": [
+            "higher rates",
+            "inflation",
+            "bond rout",
+            "duration risk"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:JPM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:higher_rates"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:duration_risk"
+          },
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:bond_rout"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "利率衝擊主要影響估值與資金成本"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-18T15:46:00Z",
+      "latency_ms": 13506,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了上述折現率對企業估值的影響外，必須關注**聯邦政府的財政空間風險**。隨著長債殖利率攀升，美國國債利息支出負擔急遽上升，這將直接排擠政府端的長期預算。若財政部需優先應對飆升的債務成本，恐被迫削減對 AI 基礎設施、能源轉型或相關 R&D 補貼的預算，這對依賴政府補貼或公部門採購的科技巨頭而言，是個隱而未現的宏觀風險。",
+        "bull_points": [
+          "殖利率走高反映市場對通膨回升的預期，間接肯定總體經濟韌性。",
+          "防禦性資產配置需求增加，資金可能轉向現金流充沛的科技龍頭。"
+        ],
+        "bear_points": [
+          "聯邦國債利息支出激增，排擠政府端的科技與基建財政空間。",
+          "消費者借貸成本顯著提高，將進一步抑制民間消費支出韌性。"
+        ],
+        "final_take": "殖利率飆升不僅壓縮估值，更將加劇聯邦財政壓力，恐抑制政府端的長期基建投資。",
+        "entities": {
+          "tickers": [
+            "TLT",
+            "MSFT",
+            "GOOGL"
+          ],
+          "sectors": [
+            "Government",
+            "Financial Services",
+            "Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Fiscal policy"
+          ],
+          "tech_keywords": [
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TLT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_yields"
+          },
+          {
+            "subject": "narrative:fiscal_deficit",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:rising_yields"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "補充提及國債利息支出增加對聯邦政府財政空間的排擠效應。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "codex",
+      "agent_role_label": {
+        "en": "Analyst-A (Codex)",
+        "zh": "分析師 A (Codex)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T15:46:28Z",
+      "latency_ms": 27937,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "我會補住房鏈角度：長債上行會很快傳導到房貸利率，DHI、LEN 這類建商過去靠買點降息支撐成交，若利率再跳，促銷成本會吃掉毛利。不過既有屋主鎖低利率、成屋供給偏緊，反而讓新屋仍有相對議價力，壓力未必線性惡化。",
+        "bull_points": [
+          "成屋供給仍偏緊",
+          "新屋相對可被選擇",
+          "大型建商庫存控管較佳"
+        ],
+        "bear_points": [
+          "房貸利率壓抑需求",
+          "買點降息侵蝕毛利",
+          "退訂率可能再升"
+        ],
+        "final_take": "偏空住房鏈但非崩盤訊號",
+        "entities": {
+          "tickers": [
+            "DHI",
+            "LEN",
+            "HD"
+          ],
+          "sectors": [
+            "Consumer Discretionary"
+          ],
+          "themes": [
+            "mortgage rates",
+            "housing affordability",
+            "bond rout"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:DHI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage_rates"
+          },
+          {
+            "subject": "ticker:LEN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mortgage_rates"
+          },
+          {
+            "subject": "ticker:HD",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:housing_turnover"
+          }
+        ],
+        "done": false,
+        "confidence": 0.82,
+        "rationale_short": "住房傳導尚未被討論"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-18T15:46:41Z",
+      "latency_ms": 12958,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補充談談**跨國企業的匯率風險與資金流動性**。美日殖利率同步走高，若利差擴大趨勢不變，將加劇日圓套利交易 (Carry Trade) 平倉壓力，潛在可能引發全球資本回流日本，造成市場流動性短期震盪。對於像 **MSFT**, **AAPL** 這類跨國科技巨頭，美元強勢不僅構成帳面估值壓力，更直接帶來海外營收匯兌損失，使得大型企業在 Q3 財報面前，面臨實質匯率與高利率環境的雙重 FX 逆風，這點尚未被納入折現率評價模型中。",
+        "bull_points": [
+          "壽險與大型銀行固定收益配置獲利提升",
+          "強勢美元有利於美國本土純度高的零售股"
+        ],
+        "bear_points": [
+          "跨國大型科技股面臨海外匯兌虧損風險",
+          "日圓套利交易平倉可能引發全球流動性緊縮"
+        ],
+        "final_take": "匯率波動加劇，需嚴控跨國營收佔比高的個股風險。",
+        "entities": {
+          "tickers": [
+            "MSFT",
+            "AAPL",
+            "GOOGL",
+            "XLF"
+          ],
+          "sectors": [
+            "Financials",
+            "Information Technology"
+          ],
+          "themes": [
+            "Currency FX",
+            "Carry Trade",
+            "Global Liquidity"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "narrative:strong_usd",
+            "predicate": "HEADWIND_FROM",
+            "object": "ticker:MSFT"
+          },
+          {
+            "subject": "narrative:carry_trade_unwind",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:volatility"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補上匯率風險與日圓套利平倉的流動性角度。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "codex",
+      "agent_role_label": {
+        "en": "Analyst-A (Codex)",
+        "zh": "分析師 A (Codex)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T15:46:58Z",
+      "latency_ms": 16897,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "另一個二階效果在**保險與退休金資產配置**：長端殖利率上行會提高壽險新錢投資收益率，利多 MET、PRU 的未來利差，但短期債券部位未實現損失擴大，可能壓抑資本彈性。若日本壽險與年金開始把資金拉回本土超長債，美國投資級信用債與 MBS 利差也可能被動擴大。",
+        "bull_points": [
+          "壽險新錢收益率改善",
+          "年金產品吸引力提升"
+        ],
+        "bear_points": [
+          "債券帳面損失擴大",
+          "信用利差恐被推寬"
+        ],
+        "final_take": "利多壽險收入但壓資本",
+        "entities": {
+          "tickers": [
+            "MET",
+            "PRU"
+          ],
+          "sectors": [
+            "Financials"
+          ],
+          "themes": [
+            "higher rates",
+            "insurance investment income",
+            "credit spreads"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:MET",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:higher rates"
+          },
+          {
+            "subject": "ticker:PRU",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:credit spreads"
+          }
+        ],
+        "done": false,
+        "confidence": 0.82,
+        "rationale_short": "補充保險資產配置外溢"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-18T15:47:10Z",
+      "latency_ms": 12296,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "討論延伸至**公用事業與基礎設施類股 (NEE, SO, DUK)**。隨著長債殖利率走高，此類高度資本密集且依賴舉債進行 AI 數據中心能源轉型投資的產業面臨雙重逆風：首先，利率攀升直接推升融資成本，顯著侵蝕現金流與獲利空間；其次，作為傳統「類債券」股，當無風險利率水準上升，其股息率的相對吸引力大幅下滑，導致資金抽離，加劇估值下修壓力。在當前基建擴張需求下，高利率環境對其資產負債表的負面效應遠超市場預期。",
+        "bull_points": [
+          "長債殖利率上升提供固定收益配置機會。",
+          "通膨預期下，部分公用事業具備費率調整能力。"
+        ],
+        "bear_points": [
+          "資本密集型產業舉債成本激增，壓抑 EPS 成長。",
+          "高殖利率削弱公用事業股作為類債券的估值優勢。"
+        ],
+        "final_take": "高利率對公用事業的債務結構與估值形成結構性壓制。",
+        "entities": {
+          "tickers": [
+            "NEE",
+            "SO",
+            "DUK"
+          ],
+          "sectors": [
+            "Utilities"
+          ],
+          "themes": [
+            "AI capex",
+            "interest expense"
+          ],
+          "tech_keywords": [
+            "Data centers"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:NEE",
+            "predicate": "HEADWIND_FROM",
+            "object": "interest expense"
+          },
+          {
+            "subject": "ticker:SO",
+            "predicate": "HEADWIND_FROM",
+            "object": "interest expense"
+          }
+        ],
+        "done": false,
+        "confidence": 0.95,
+        "rationale_short": "分析公用事業作為高債務基建股在高利率環境下的雙重風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "AAPL",
+        "BAC",
+        "DHI",
+        "DUK",
+        "GOOGL",
+        "HD",
+        "JPM",
+        "LEN",
+        "MET",
+        "MSFT",
+        "NEE",
+        "NVDA",
+        "PRU",
+        "SO",
+        "TLT",
+        "XLF"
+      ],
+      "sectors": [
+        "Consumer Discretionary",
+        "Financial Services",
+        "Financials",
+        "Government",
+        "Information Technology",
+        "Real Estate",
+        "Technology",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "Carry Trade",
+        "Currency FX",
+        "Fiscal policy",
+        "Global Liquidity",
+        "bond rout",
+        "credit spreads",
+        "duration risk",
+        "higher rates",
+        "housing affordability",
+        "inflation",
+        "insurance investment income",
+        "interest expense",
+        "mortgage rates"
+      ],
+      "tech_keywords": [
+        "Blackwell",
+        "Data centers"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:JPM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:higher_rates"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:duration_risk"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:bond_rout"
+      },
+      {
+        "subject": "ticker:TLT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_yields"
+      },
+      {
+        "subject": "narrative:fiscal_deficit",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:rising_yields"
+      },
+      {
+        "subject": "ticker:DHI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage_rates"
+      },
+      {
+        "subject": "ticker:LEN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mortgage_rates"
+      },
+      {
+        "subject": "ticker:HD",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:housing_turnover"
+      },
+      {
+        "subject": "narrative:strong_usd",
+        "predicate": "HEADWIND_FROM",
+        "object": "ticker:MSFT"
+      },
+      {
+        "subject": "narrative:carry_trade_unwind",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:volatility"
+      },
+      {
+        "subject": "ticker:MET",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:higher rates"
+      },
+      {
+        "subject": "ticker:PRU",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:credit spreads"
+      },
+      {
+        "subject": "ticker:NEE",
+        "predicate": "HEADWIND_FROM",
+        "object": "interest expense"
+      },
+      {
+        "subject": "ticker:SO",
+        "predicate": "HEADWIND_FROM",
+        "object": "interest expense"
+      }
+    ],
+    "bull_summary": [
+      "銀行淨利差短線改善",
+      "現金流強企業更抗壓",
+      "殖利率走高反映市場對通膨回升的預期，間接肯定總體經濟韌性。",
+      "防禦性資產配置需求增加，資金可能轉向現金流充沛的科技龍頭。",
+      "成屋供給仍偏緊",
+      "新屋相對可被選擇"
+    ],
+    "bear_summary": [
+      "高估值科技股承壓",
+      "REITs與公用事業受傷",
+      "再融資成本上升",
+      "聯邦國債利息支出激增，排擠政府端的科技與基建財政空間。",
+      "消費者借貸成本顯著提高，將進一步抑制民間消費支出韌性。",
+      "房貸利率壓抑需求"
+    ],
+    "final_take": "高利率對公用事業的債務結構與估值形成結構性壓制。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T15:47:10Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "codex-only: BENEFITS_FROM; gemini-only: CATALYST_FOR"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

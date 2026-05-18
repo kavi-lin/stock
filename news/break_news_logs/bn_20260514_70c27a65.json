@@ -1,0 +1,721 @@
+{
+  "news_id": "bn_20260514_70c27a65",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T15:43:58Z",
+  "last_activity_ts": "2026-05-14T16:01:39Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/1597b34dbc74",
+    "feed_fingerprint": "futu:AST,PBC:98ca581b8c",
+    "published": "2026-05-14T22:51:24+08:00",
+    "url_hash": "sha1:881f9d82ec8cfeb5e7b6b3281c8ebb112872f666"
+  },
+  "headline": "美股部分太空概念股再度走強，Rocket Lab盤中漲超4%股價續創新高，Redwire大漲超18%，AST SpaceMobile漲超5%，Planet Labs PBC漲近3%",
+  "headline_zh": null,
+  "raw_summary": "美股部分太空概念股再度走強，Rocket Lab盤中漲超4%股價續創新高，Redwire大漲超18%，AST SpaceMobile漲超5%，Planet Labs PBC漲近3%。",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 5.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:59:27Z",
+      "latency_ms": 27366,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "太空概念股第二波拉抬，**Redwire +18%** 領漲、**Rocket Lab** 創新高，這是典型 **thematic momentum** 而非單一 catalyst 驅動。背後催化：(1) Golden Dome 飛彈防禦預算撥款進入 FY26 執行期，**SDA Tranche 3** 衛星訂單能見度提升；(2) Rocket Lab Neutron 火箭首飛在即 + Electron 訂單 backlog 已破紀錄；(3) Redwire 併購 Edge Autonomy 後切入無人機 + 太空 dual-use 國防供應鏈。但要警覺：這群股票 **float 小、beta 高**，AST SpaceMobile 仍燒錢未獲利，**Planet Labs** 政府合約占比偏高。輪動到太空板塊通常意味資金從 mega-cap AI 暫時撤退尋找下一波 narrative，**breadth 是好事但 concentration risk 同步升高**。",
+        "bull_points": [
+          "Golden Dome + SDA Tranche 3 訂單能見度延伸至 FY27",
+          "Rocket Lab Neutron 首飛接近，重型運載打開新 TAM",
+          "Redwire 併購後切入 dual-use 國防供應鏈"
+        ],
+        "bear_points": [
+          "AST SpaceMobile 仍燒錢，獲利路徑未明",
+          "小型股 beta 高，回檔速度同樣快",
+          "資金輪動可能只是短期 narrative trade"
+        ],
+        "final_take": "結構性看多但需現價追高紀律，等回檔分批",
+        "entities": {
+          "tickers": [
+            "RKLB",
+            "RDW",
+            "ASTS",
+            "PL"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Industrials",
+            "Communication Services"
+          ],
+          "themes": [
+            "Space economy",
+            "Golden Dome",
+            "Satellite broadband",
+            "Defense modernization"
+          ],
+          "tech_keywords": [
+            "SDA Tranche 3",
+            "Neutron rocket",
+            "LEO constellation",
+            "Direct-to-cell satellite"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:neutron-rocket"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:sda-tranche-3"
+          },
+          {
+            "subject": "ticker:RDW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:ASTS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:direct-to-cell-satellite"
+          },
+          {
+            "subject": "ticker:PL",
+            "predicate": "CUSTOMER_OF",
+            "object": "entity:us-government"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:space-economy"
+          },
+          {
+            "subject": "ticker:RDW",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:space-economy"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "太空板塊 thematic 輪動，結構利多但小型股波動大"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T15:59:52Z",
+      "latency_ms": 24830,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "太空概念股的近期強勢， Rocket Lab 續創新高，Redwire 亦有顯著漲幅。但 AST SpaceMobile 的直接通訊技術，面臨來自 SpaceX Starlink 及 Amazon Kuiper 的嚴峻競爭。這些巨頭不僅技術更成熟，資金實力雄厚，更可能透過規模經濟壓縮 AST 的市場空間，使 AST 的高燒錢速度與技術變現之路更顯艱難。",
+        "bull_points": [
+          "國防與太空基礎設施支出持續成長。",
+          "衛星通訊技術的長期需求潛力巨大。"
+        ],
+        "bear_points": [
+          "AST SpaceMobile 技術面臨 Starlink/Kuiper 巨頭競爭。",
+          "高燒錢速度與未經驗證的技術是主要風險。"
+        ],
+        "final_take": "創新技術股，風險仍高於潛在報酬。",
+        "entities": {
+          "tickers": [
+            "AST SPACEMOBILE",
+            "ROCKET LAB",
+            "REDWIRE"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Telecommunication Services"
+          ],
+          "themes": [
+            "Thematic Momentum",
+            "Direct-to-Cellular",
+            "Space Infrastructure",
+            "Satellite Communication"
+          ],
+          "tech_keywords": [
+            "Direct-to-Cellular"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AST SPACEMOBILE",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:Starlink"
+          },
+          {
+            "subject": "ticker:AST SPACEMOBILE",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:Project Kuiper"
+          },
+          {
+            "subject": "ticker:AST SPACEMOBILE",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Thematic Momentum"
+          },
+          {
+            "subject": "ticker:REDWIRE",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Dual-use defense supply chain"
+          },
+          {
+            "subject": "ticker:ROCKET LAB",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Launch services backlog"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "新增 AST SpaceMobile 的競爭者與技術風險分析。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:00:21Z",
+      "latency_ms": 28454,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的 **2nd-order 角度**：太空板塊真正的**結構性贏家**可能不是發射商，而是**地面段 (ground segment) + 衛星零組件供應鏈**。Redwire +18% 已反映市場認知到「**picks-and-shovels**」邏輯——它供應太陽能板、相機、roll-out arrays 給整個產業。更值得追蹤的是 **Mynaric (MYNA)** 的雷射通訊終端 (SDA Tranche 2/3 必裝)、**Kratos (KTOS)** 的衛星地面站與 OpenSpace 軟體、以及 **L3Harris (LHX)** 在 Tracking Layer 的整合角色。這三個都是「**訂單已落地、估值未 re-rate**」的標的，比 RKLB/ASTS 那種「故事股」風險報酬更佳。另外 contra-argument：**Golden Dome 預算 FY26 仍待國會 reconciliation**，若 CR (continuing resolution) 拖到 2026 Q1，這波 thematic 容易回吐 30%+。",
+        "bull_points": [
+          "Picks-and-shovels: KTOS/MYNA/LHX 訂單已落袋",
+          "SDA Tranche 3 雷射通訊終端是必裝零組件",
+          "Redwire 領漲反映供應鏈邏輯被定價"
+        ],
+        "bear_points": [
+          "Golden Dome FY26 預算待 CR 通過,有遞延風險",
+          "故事股 RKLB/ASTS 估值已 price-in 多重利多",
+          "小型太空股 float 小,回吐速度極快"
+        ],
+        "final_take": "看好供應鏈中段,避開純故事股",
+        "entities": {
+          "tickers": [
+            "RKLB",
+            "RDW",
+            "ASTS",
+            "PL",
+            "KTOS",
+            "LHX",
+            "MYNA"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Communication Services"
+          ],
+          "themes": [
+            "Space economy",
+            "Golden Dome",
+            "SDA Tranche 3",
+            "Picks and shovels"
+          ],
+          "tech_keywords": [
+            "Laser communication terminal",
+            "Ground segment",
+            "Neutron rocket",
+            "Tracking Layer"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:KTOS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ground-segment-buildout"
+          },
+          {
+            "subject": "ticker:MYNA",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:sda-tranche-3"
+          },
+          {
+            "subject": "ticker:LHX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:RDW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:space-supply-chain"
+          },
+          {
+            "subject": "narrative:golden-dome",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fy26-cr-delay"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "供應鏈中段+預算風險角度,前輪未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T16:00:51Z",
+      "latency_ms": 30064,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "衛星搭載AI運算（AI on the edge）趨勢日益顯著，這不僅需要創新的衛星零組件，更關鍵的是能承受太空環境的先進處理器。這類高算力晶片的製造，尤其仰賴 CoWoS-L 等先進封裝技術，目前面臨生產瓶頸與長交期問題。除了傳統發射與硬體供應鏈，能突破或掌握太空級AI晶片生產門檻的公司，將在這一波太空科技浪潮中扮演關鍵角色，預示著太空與尖端半導體製造的深度融合。",
+        "bull_points": [
+          "太空AI運算推升先進晶片製程需求。",
+          "CoWoS-L等封裝技術進入太空硬體供應鏈。",
+          "具備太空級AI晶片製造能力者具潛力。"
+        ],
+        "bear_points": [
+          "太空級AI晶片製造成本高昂且複雜。",
+          "關鍵製程瓶頸恐影響部署時程。",
+          "嚴格的太空驗證標準增加難度。"
+        ],
+        "final_take": "太空AI運算新局，聚焦先進晶片製程挑戰。",
+        "entities": {
+          "tickers": [
+            "RDW"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI in Orbit",
+            "Space Computing",
+            "Semiconductor Manufacturing Capacity"
+          ],
+          "tech_keywords": [
+            "CoWoS-L",
+            "radiation-hardened processors",
+            "AI accelerators"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:RDW",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI in Orbit"
+          },
+          {
+            "subject": "theme:AI in Orbit",
+            "predicate": "CATALYST_FOR",
+            "object": "tech_keyword:radiation-hardened processors"
+          },
+          {
+            "subject": "tech_keyword:radiation-hardened processors",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "太空AI晶片製造挑戰與新機遇。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:01:18Z",
+      "latency_ms": 26912,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "再補一個被前輪忽略的**現金流 + 稀釋風險**視角：太空小型股這波拉抬最大的隱憂不是 narrative 退潮，而是**ATM (At-the-Market) 發行潮**。**ASTS** 截至 Q4 仍有約 $5.5B ATM 額度未動用，**RKLB** 過去 12 個月已透過 ATM 募 >$500M，股價創高後**幾乎必然**觸發新一輪稀釋。對照 2021 SPAC 太空泡沫，Astra / Virgin Orbit / Spire 全部死於「股價高點不發股、低點被迫發股」。**Operational hedge**：可關注 **Iridium (IRDM)** — 已 FCF positive、有實際 LEO 通訊營收、估值僅 8x EBITDA，是這波熱潮中**唯一沒有稀釋風險**的成熟標的。另外 **3rd-order**：太空板塊強勢同時 **defense primes (LMT/NOC)** 卻表現平淡，暗示市場認為 Golden Dome 預算流向 **new space 而非 legacy primes**，這對 NOC 的 Sentinel ICBM / B-21 估值反而是**負面 read-across**。",
+        "bull_points": [
+          "IRDM 已 FCF+、估值 8x EBITDA，無稀釋風險",
+          "Golden Dome 預算偏向 new space 而非 legacy primes",
+          "Picks-and-shovels 標的訂單能見度優於發射商"
+        ],
+        "bear_points": [
+          "ASTS 仍有 $5.5B ATM 額度，股價創高=稀釋風險",
+          "RKLB 12 個月已 ATM 募 $500M+，新一輪將至",
+          "2021 SPAC 太空股全死於高點不發股、低點被迫稀釋"
+        ],
+        "final_take": "選擇性看多 IRDM/picks-and-shovels，迴避純故事股",
+        "entities": {
+          "tickers": [
+            "RKLB",
+            "ASTS",
+            "RDW",
+            "PL",
+            "IRDM",
+            "LMT",
+            "NOC",
+            "KTOS",
+            "LHX"
+          ],
+          "sectors": [
+            "Communication Services",
+            "Industrials",
+            "Aerospace & Defense"
+          ],
+          "themes": [
+            "Space economy",
+            "Golden Dome",
+            "ATM dilution risk",
+            "LEO communications"
+          ],
+          "tech_keywords": [
+            "SDA Tranche 3",
+            "Neutron",
+            "LEO satellite"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ASTS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:atm-dilution"
+          },
+          {
+            "subject": "ticker:RKLB",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:atm-dilution"
+          },
+          {
+            "subject": "ticker:IRDM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:space-economy"
+          },
+          {
+            "subject": "ticker:NOC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:golden-dome"
+          },
+          {
+            "subject": "ticker:LMT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:golden-dome"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增稀釋風險 + IRDM 對照 + legacy primes 負面 read-across"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T16:01:39Z",
+      "latency_ms": 21841,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "太空任務對處理器的**抗輻射能力**有極嚴苛要求，這與地面 AI 晶片截然不同。衛星需在強輻射環境穩定運行，因此「**太空級**」處理器成為趨勢核心，而非僅僅是算力。具備此技術的公司，將在中長期太空科技發展中扮演關鍵角色，雖然門檻高，但能確保 **SDA Tranche 3** 等先進衛星任務的可靠性。",
+        "bull_points": [
+          "抗輻射處理器成太空 AI 關鍵",
+          "技術壁壘高，利基市場潛力大"
+        ],
+        "bear_points": [
+          "認證週期長，開發成本驚人",
+          "供應商集中，替代性低"
+        ],
+        "final_take": "聚焦具備太空級硬體認證的廠商",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Aerospace & Defense",
+            "Semiconductors"
+          ],
+          "themes": [
+            "Space-based AI",
+            "Radiation Hardening",
+            "Satellite Components"
+          ],
+          "tech_keywords": [
+            "Radiation-hardened processors",
+            "Space-grade semiconductors"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:Space-based AI",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Radiation-hardened processors"
+          },
+          {
+            "subject": "tech_keyword:Radiation-hardened processors",
+            "predicate": "CATALYST_FOR",
+            "object": "theme:Satellite Constellations"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "輻射硬化處理器是太空 AI 的關鍵"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AST SPACEMOBILE",
+        "ASTS",
+        "IRDM",
+        "KTOS",
+        "LHX",
+        "LMT",
+        "MYNA",
+        "NOC",
+        "PL",
+        "RDW",
+        "REDWIRE",
+        "RKLB",
+        "ROCKET LAB"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Communication Services",
+        "Industrials",
+        "Semiconductors",
+        "Telecommunication Services"
+      ],
+      "themes": [
+        "AI in Orbit",
+        "ATM dilution risk",
+        "Defense modernization",
+        "Direct-to-Cellular",
+        "Golden Dome",
+        "LEO communications",
+        "Picks and shovels",
+        "Radiation Hardening",
+        "SDA Tranche 3",
+        "Satellite Communication",
+        "Satellite Components",
+        "Satellite broadband",
+        "Semiconductor Manufacturing Capacity",
+        "Space Computing",
+        "Space Infrastructure",
+        "Space economy",
+        "Space-based AI",
+        "Thematic Momentum"
+      ],
+      "tech_keywords": [
+        "AI accelerators",
+        "CoWoS-L",
+        "Direct-to-Cellular",
+        "Direct-to-cell satellite",
+        "Ground segment",
+        "LEO constellation",
+        "LEO satellite",
+        "Laser communication terminal",
+        "Neutron",
+        "Neutron rocket",
+        "Radiation-hardened processors",
+        "SDA Tranche 3",
+        "Space-grade semiconductors",
+        "Tracking Layer",
+        "radiation-hardened processors"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:neutron-rocket"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:sda-tranche-3"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:ASTS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:direct-to-cell-satellite"
+      },
+      {
+        "subject": "ticker:PL",
+        "predicate": "CUSTOMER_OF",
+        "object": "entity:us-government"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:space-economy"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:space-economy"
+      },
+      {
+        "subject": "ticker:AST SPACEMOBILE",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:Starlink"
+      },
+      {
+        "subject": "ticker:AST SPACEMOBILE",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:Project Kuiper"
+      },
+      {
+        "subject": "ticker:AST SPACEMOBILE",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Thematic Momentum"
+      },
+      {
+        "subject": "ticker:REDWIRE",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Dual-use defense supply chain"
+      },
+      {
+        "subject": "ticker:ROCKET LAB",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Launch services backlog"
+      },
+      {
+        "subject": "ticker:KTOS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ground-segment-buildout"
+      },
+      {
+        "subject": "ticker:MYNA",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:sda-tranche-3"
+      },
+      {
+        "subject": "ticker:LHX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:space-supply-chain"
+      },
+      {
+        "subject": "narrative:golden-dome",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fy26-cr-delay"
+      },
+      {
+        "subject": "ticker:RDW",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI in Orbit"
+      },
+      {
+        "subject": "theme:AI in Orbit",
+        "predicate": "CATALYST_FOR",
+        "object": "tech_keyword:radiation-hardened processors"
+      },
+      {
+        "subject": "tech_keyword:radiation-hardened processors",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "ticker:ASTS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:atm-dilution"
+      },
+      {
+        "subject": "ticker:RKLB",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:atm-dilution"
+      },
+      {
+        "subject": "ticker:IRDM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:space-economy"
+      },
+      {
+        "subject": "ticker:NOC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "ticker:LMT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:golden-dome"
+      },
+      {
+        "subject": "theme:Space-based AI",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Radiation-hardened processors"
+      },
+      {
+        "subject": "tech_keyword:Radiation-hardened processors",
+        "predicate": "CATALYST_FOR",
+        "object": "theme:Satellite Constellations"
+      }
+    ],
+    "bull_summary": [
+      "Golden Dome + SDA Tranche 3 訂單能見度延伸至 FY27",
+      "Rocket Lab Neutron 首飛接近，重型運載打開新 TAM",
+      "Redwire 併購後切入 dual-use 國防供應鏈",
+      "國防與太空基礎設施支出持續成長。",
+      "衛星通訊技術的長期需求潛力巨大。",
+      "Picks-and-shovels: KTOS/MYNA/LHX 訂單已落袋"
+    ],
+    "bear_summary": [
+      "AST SpaceMobile 仍燒錢，獲利路徑未明",
+      "小型股 beta 高，回檔速度同樣快",
+      "資金輪動可能只是短期 narrative trade",
+      "AST SpaceMobile 技術面臨 Starlink/Kuiper 巨頭競爭。",
+      "高燒錢速度與未經驗證的技術是主要風險。",
+      "Golden Dome FY26 預算待 CR 通過,有遞延風險"
+    ],
+    "final_take": "聚焦具備太空級硬體認證的廠商",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T16:01:39Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CUSTOMER_OF, HEADWIND_FROM, MENTIONED_IN, SUPPLIES_TO; gemini-only: CATALYST_FOR, COMPETES_WITH"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

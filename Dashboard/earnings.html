@@ -101,6 +101,30 @@
             background: rgba(16,185,129,0.22);
             border-color: rgba(16,185,129,0.65);
         }
+        /* V2.15.1 — preview mode button (amber). Triggers when typed ticker has
+           upcoming earnings ≤ 7 days. */
+        .ea-cmdbar-btn.ea-cmdbar-btn-preview {
+            background: rgba(251,191,36,0.14);
+            border-color: rgba(251,191,36,0.52);
+            color: #fbbf24;
+        }
+        .ea-cmdbar-btn.ea-cmdbar-btn-preview:hover {
+            background: rgba(251,191,36,0.24);
+            border-color: rgba(251,191,36,0.72);
+        }
+        /* V2.15.1 — hint line below cmdbar describing what mode the typed
+           ticker will trigger. Color shifts by mode for quick visual parsing. */
+        .ea-cmd-hint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; line-height: 1.4;
+            margin-top: 6px; padding: 0 4px;
+            min-height: 14px;
+            color: #71717a;
+            transition: color 0.18s;
+        }
+        .ea-cmd-hint[data-mode="preview"] { color: #fbbf24; }
+        .ea-cmd-hint[data-mode="soon"]    { color: #94a3b8; }
+        .ea-cmd-hint[data-mode="post"]    { color: #71717a; }
         .ea-cmdbar-recent {
             font-size: 10px; color: #71717a; margin-top: 8px;
             display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -454,6 +478,247 @@
             border-color: rgba(16,185,129,0.56);
             color: #10b981;
         }
+        /* V2.16.0 — Pre-earnings Preview Modal styles ============================== */
+        .ea-preview-shell {
+            width: 100%; max-width: 880px;
+            max-height: 90vh;
+            border-radius: 16px;
+            border: 1px solid rgba(251,191,36,0.30);
+            box-shadow: 0 25px 60px -15px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .ea-preview-accent {
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
+            z-index: 1;
+        }
+        .ea-preview-header {
+            height: 52px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid rgba(161,161,170,0.20);
+        }
+        .ea-preview-body {
+            flex: 1; overflow-y: auto;
+            padding: 20px;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        /* Section card frame */
+        .ea-pv-section {
+            border: 1px solid rgba(161,161,170,0.18);
+            border-radius: 10px;
+            padding: 14px 16px;
+            background: rgba(161,161,170,0.04);
+        }
+        .ea-pv-section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; font-weight: 800;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            color: #71717a;
+            margin-bottom: 10px;
+        }
+        /* Header card: ticker + countdown + price */
+        .ea-pv-header-card { display: flex; align-items: center; gap: 16px; }
+        .ea-pv-header-logo {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            background: rgba(251,191,36,0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px; font-weight: 900;
+            color: #fbbf24;
+            flex-shrink: 0;
+            border: 1px solid rgba(251,191,36,0.25);
+        }
+        .ea-pv-header-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+        .ea-pv-header-meta { flex: 1; min-width: 0; }
+        .ea-pv-header-ticker {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px; font-weight: 900;
+            letter-spacing: 0.04em;
+            color: var(--text-main);
+        }
+        .ea-pv-header-name {
+            font-size: 11px; color: #a1a1aa;
+            margin-top: 2px;
+        }
+        .ea-pv-countdown {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 6px;
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.40);
+            color: #fbbf24;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-top: 6px;
+        }
+        .ea-pv-countdown.ea-pv-cd-today {
+            background: rgba(239,68,68,0.14); border-color: rgba(239,68,68,0.50); color: #f87171;
+        }
+        .ea-pv-price {
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px; font-weight: 900;
+            color: var(--text-main);
+        }
+        .ea-pv-price-sub {
+            font-size: 10px; color: #a1a1aa;
+            margin-top: 2px;
+        }
+        /* Consensus row (2 stat cells) */
+        .ea-pv-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .ea-pv-stat {
+            border: 1px solid rgba(161,161,170,0.20);
+            border-radius: 8px;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.10);
+        }
+        .ea-pv-stat-label {
+            font-size: 10px; color: #a1a1aa;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .ea-pv-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px; font-weight: 900;
+            color: var(--text-main);
+            margin-top: 4px;
+        }
+        .ea-pv-stat-value.ea-pv-neg { color: #f87171; }
+        /* Seasonality SVG chart frame */
+        .ea-pv-chart {
+            width: 100%; height: 130px;
+            display: block;
+            margin-top: 4px;
+        }
+        .ea-pv-chart-legend {
+            display: flex; gap: 14px;
+            font-size: 10px; color: #a1a1aa;
+            margin-top: 6px;
+        }
+        .ea-pv-chart-legend-dot {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 2px;
+            margin-right: 4px; vertical-align: middle;
+        }
+        /* Watch chips */
+        .ea-pv-watch-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .ea-pv-chip {
+            border: 1px solid rgba(161,161,170,0.22);
+            border-radius: 8px;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.08);
+            display: flex; flex-direction: column; gap: 2px;
+            min-width: 130px;
+            cursor: help;
+            transition: all 0.15s;
+        }
+        .ea-pv-chip:hover {
+            background: rgba(251,191,36,0.06);
+            border-color: rgba(251,191,36,0.30);
+        }
+        .ea-pv-chip-title {
+            font-size: 11px; font-weight: 700;
+            color: var(--text-main);
+        }
+        .ea-pv-chip-hint {
+            font-size: 10px; color: #a1a1aa;
+            line-height: 1.3;
+        }
+        /* 12M scenario columns */
+        .ea-pv-scenarios { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .ea-pv-scen {
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        .ea-pv-scen-bull { background: rgba(16,185,129,0.10); border: 1px solid rgba(16,185,129,0.34); }
+        .ea-pv-scen-base { background: rgba(161,161,170,0.10); border: 1px solid rgba(161,161,170,0.30); }
+        .ea-pv-scen-bear { background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.34); }
+        .ea-pv-scen-icon { font-size: 22px; }
+        .ea-pv-scen-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.10em;
+            margin-top: 4px;
+        }
+        .ea-pv-scen-bull .ea-pv-scen-name { color: #10b981; }
+        .ea-pv-scen-base .ea-pv-scen-name { color: #a1a1aa; }
+        .ea-pv-scen-bear .ea-pv-scen-name { color: #f87171; }
+        .ea-pv-scen-target {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px; font-weight: 900;
+            margin-top: 6px;
+            color: var(--text-main);
+        }
+        .ea-pv-scen-upside {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 700;
+            margin-top: 2px;
+        }
+        .ea-pv-scen-bull .ea-pv-scen-upside { color: #10b981; }
+        .ea-pv-scen-bear .ea-pv-scen-upside { color: #f87171; }
+        .ea-pv-scen-trigger {
+            font-size: 10px; color: #a1a1aa;
+            line-height: 1.4;
+            margin-top: 8px;
+            text-align: left;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(161,161,170,0.20);
+        }
+        /* Negative-EPS placeholder */
+        .ea-pv-scen-na {
+            grid-column: span 3;
+            text-align: center;
+            padding: 24px;
+            color: #a1a1aa;
+            font-size: 11px;
+            border: 1px dashed rgba(161,161,170,0.30);
+            border-radius: 10px;
+        }
+        /* Caveats collapsible */
+        .ea-pv-caveats {
+            font-size: 10px; color: #71717a;
+            line-height: 1.5;
+            padding: 10px 14px;
+            border-top: 1px dashed rgba(161,161,170,0.18);
+            margin-top: 4px;
+        }
+        .ea-pv-caveats summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: #a1a1aa;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.10em;
+        }
+        .ea-pv-caveats[open] summary { color: #fbbf24; margin-bottom: 6px; }
+        .ea-pv-error {
+            text-align: center; padding: 40px;
+            color: #f87171;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        @media (max-width: 640px) {
+            .ea-pv-stats { grid-template-columns: 1fr; }
+            .ea-pv-scenarios { grid-template-columns: 1fr; }
+            .ea-pv-header-card { flex-wrap: wrap; }
+            .ea-pv-price { width: 100%; text-align: left; margin-top: 8px; }
+        }
+        /* V2.15.0 — pre-earnings preview button (amber). Surfaces only when
+           next_earnings_source = fmp_confirmed AND days_until ≤ 7. */
+        .ea-act-btn-preview {
+            background: rgba(251,191,36,0.10);
+            border-color: rgba(251,191,36,0.36);
+            color: #fbbf24;
+        }
+        .ea-act-btn-preview:hover {
+            background: rgba(251,191,36,0.20);
+            border-color: rgba(251,191,36,0.56);
+            color: #fbbf24;
+        }
 
         /* Empty state */
         .ea-empty {
@@ -525,6 +790,35 @@
             <!-- Hero stat strip -->
             <div id="ea-hero-strip" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
 
+            <!-- Protocol Run Banner (V2.13.7 — earnings-scoped, gated by active.name === 'earnings') -->
+            <div id="ea-run-banner" class="hidden mb-2 glass-card p-5 scan-card-frame" style="--scan-accent:#a855f7">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 min-w-0 overflow-hidden flex-1">
+                        <span id="ea-run-icon" class="shrink-0"><span class="inline-block w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span></span>
+                        <div class="min-w-0 overflow-hidden flex-1">
+                            <p class="text-sm font-bold truncate max-w-full" style="color:var(--text-card-title)" id="ea-run-title">財報分析中...</p>
+                            <p class="text-[11px] text-zinc-500 font-mono mt-0.5 truncate max-w-full" id="ea-run-detail"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="text-[11px] font-mono text-zinc-500" id="ea-run-elapsed">00:00</span>
+                        <button id="ea-run-expand" class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border border-zinc-300 dark:border-zinc-700 hover:border-purple-500 hover:text-purple-500">展開</button>
+                        <button id="ea-run-reload" class="hidden text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-all flex items-center gap-1" title="重新整理頁面">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>重新整理
+                        </button>
+                        <a id="ea-run-view-report" class="hidden text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border border-amber-400/50 text-amber-400 hover:bg-amber-500/10 transition-all flex items-center gap-1" title="開啟前瞻 MD 報告" target="_blank" rel="noopener">
+                            📄 <span id="ea-run-view-report-label">看前瞻報告</span>
+                        </a>
+                        <button id="ea-run-cancel" class="text-[10px] font-bold text-red-400 border border-red-500/40 px-2 py-1 rounded hover:bg-red-500/10 transition-all">CANCEL</button>
+                        <button id="ea-run-dismiss" class="text-zinc-500 hover:text-zinc-300 text-xs px-1">✕</button>
+                    </div>
+                </div>
+                <div id="ea-run-panel" class="hidden mt-4">
+                    <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2">即時日誌</div>
+                    <pre id="ea-run-log" class="scan-card-log"></pre>
+                </div>
+            </div>
+
             <!-- Command bar -->
             <div>
                 <div class="ea-cmdbar">
@@ -532,10 +826,11 @@
                     <input id="ea-ticker-input" type="text" maxlength="6"
                            class="ea-cmdbar-input"
                            placeholder="" autocomplete="off" spellcheck="false" />
-                    <button id="ea-run-btn" class="ea-cmdbar-btn">
+                    <button id="ea-run-btn" class="ea-cmdbar-btn" data-mode="post">
                         <span id="ea-run-label">Run</span>
                     </button>
                 </div>
+                <div id="ea-cmd-hint" class="ea-cmd-hint" data-mode="empty"></div>
                 <div class="ea-cmdbar-recent">
                     <span id="ea-recent-label" class="font-mono">Recent:</span>
                     <span id="ea-recent-chips" class="flex items-center gap-1.5 flex-wrap"></span>
@@ -600,6 +895,24 @@
             </div>
         </div>
     </main>
+
+    <!-- V2.16.0 — Pre-earnings Preview Modal (card view, not raw MD) -->
+    <div id="ea-preview-modal" class="fixed inset-0 bg-black/85 backdrop-blur-xl z-[110] items-center justify-center p-4 hidden" style="display:none;">
+        <div class="ea-preview-shell" style="background-color: var(--bg-card)">
+            <div class="ea-preview-accent"></div>
+            <div class="ea-preview-header">
+                <h3 class="font-bold flex items-center gap-2" style="color: var(--text-main)">
+                    <span class="text-amber-400">📋</span>
+                    <span id="ea-preview-modal-title">Pre-Earnings Preview</span>
+                </h3>
+                <div class="flex items-center gap-2">
+                    <a id="ea-preview-md-link" class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border border-zinc-300 dark:border-zinc-700 hover:border-amber-500 hover:text-amber-400 transition-all flex items-center gap-1 hidden" target="_blank" rel="noopener">📄 Raw MD</a>
+                    <button id="ea-preview-close" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all text-xs font-bold px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800">CLOSE [ESC]</button>
+                </div>
+            </div>
+            <div id="ea-preview-body" class="ea-preview-body"></div>
+        </div>
+    </div>
 
     <!-- Report Modal (reused pattern from decisions.html) -->
     <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-8 hidden">

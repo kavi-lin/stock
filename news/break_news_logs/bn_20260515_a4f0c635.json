@@ -1,0 +1,544 @@
+{
+  "news_id": "bn_20260515_a4f0c635",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-15T14:09:55Z",
+  "last_activity_ts": "2026-05-15T14:27:51Z",
+  "source": {
+    "name": "Yahoo Finance",
+    "credibility": "HIGH",
+    "url": "https://finance.yahoo.com/sectors/healthcare/articles/beer-regains-fizz-chang-owner-135514568.html",
+    "feed_fingerprint": "beer regains fizz chang owner thaibev",
+    "published": "2026-05-15T13:55:14+00:00",
+    "url_hash": "sha1:642598da0ba17548acb00fd501808670f40ead95"
+  },
+  "headline": "Beer regains fizz at Chang owner ThaiBev",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:26:03Z",
+      "latency_ms": 31123,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "**ThaiBev 並非美股標的**（星交所 Y92、泰交所掛牌），對美股 KG 直接權重低。真正可交易的訊號是**東南亞啤酒需求回溫**這個 read-through：泰國觀光復甦＋通膨降溫帶動 mass-market 啤酒走量，這對在亞洲有曝險的全球啤酒商有間接利多。**BUD**（百威 InBev）亞太區、**HEINY** 都吃到同一風向；不過 ThaiBev 自身啤酒事業近年靠 Chang 重整與成本控管，毛利修復多來自**內部營運**而非整體品類擴張，外推到美股啤酒股要打折。美國本土啤酒量能仍被 **GLP-1** 減重藥壓抑，兩個市場故事不可混為一談。情緒類新聞、shallow_score 1.0，建議當低訊號背景處理。",
+        "bull_points": [
+          "泰國觀光復甦帶動 mass-market 啤酒走量",
+          "Chang 重整＋成本控管推升毛利",
+          "東南亞曝險啤酒商 BUD/HEINY 間接受惠"
+        ],
+        "bear_points": [
+          "ThaiBev 非美股，對美股組合不可交易",
+          "毛利修復靠內部營運非品類擴張",
+          "美國啤酒量能仍受 GLP-1 壓抑"
+        ],
+        "final_take": "低訊號情緒新聞，啤酒需求 read-through 僅供背景參考",
+        "entities": {
+          "tickers": [
+            "BUD",
+            "TAP",
+            "STZ"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "Southeast Asia consumer recovery",
+            "GLP-1",
+            "EM tourism rebound"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BUD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:southeast-asia-beer-demand"
+          },
+          {
+            "subject": "ticker:TAP",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1-alcohol-demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "非美股標的，啤酒需求僅間接 read-through"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-15T14:26:15Z",
+      "latency_ms": 12151,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補充觀點：除了內部成本控制，啤酒大廠正透過「**高端化 (premiumization)**」策略彌補消費量能受挫的影響。儘管 **GLP-1** 減重藥對酒精消費形成長期結構性風險，但 **STZ** (Constellation Brands) 旗下的 Modelo 等高端品牌在美國市場展現了極高的定價韌性。這意味著消費者雖然總飲用量下降，但對於「優質啤酒」的購買預算具有排他性。此策略是全球啤酒產業對抗銷量壓力的核心佈局，而非僅僅依賴亞洲新興市場的觀光復甦。",
+        "bull_points": [
+          "高端化產品組合有效提升平均售價",
+          "STZ 等高端品牌在市場中展現高韌性",
+          "消費者趨向精釀與高品質酒精選擇"
+        ],
+        "bear_points": [
+          "高端產品在總體經濟放緩時易受衝擊",
+          "GLP-1 效應持續壓抑整體飲酒意願"
+        ],
+        "final_take": "高端化策略是否能抵銷 GLP-1 長期帶來的銷量流失為關鍵。",
+        "entities": {
+          "tickers": [
+            "STZ",
+            "TAP",
+            "BUD"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "GLP-1"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:STZ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:premiumization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "引入高端化策略作為對抗 GLP-1 與銷量壓力的核心解法。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:26:45Z",
+      "latency_ms": 30246,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前文沒碰的**供應鏈節點**：啤酒走量的真正純化標的不是品牌商，而是**鋁罐包裝廠**。**BALL**（Ball Corp）與 **CCK**（Crown Holdings）對啤酒「量」的曝險高於對「價」——高端化能救品牌商毛利，卻救不了罐廠，罐廠吃的是出貨單位數。東南亞 mass-market 啤酒回溫若成真，對 BALL 亞太產能利用率是實打實利多，且不受 GLP-1 結構性壓制影響到罐子單價。反向風險：北美啤酒量持續被 GLP-1 侵蝕，BALL 已在做罐廠產能合理化（關廠），亞洲增量未必補得回北美減量。另一個被忽略的對沖——**鋁價（LME）**走勢才是罐廠毛利的主要 swing factor，啤酒需求只是 volume 端變數。低訊號新聞，當背景處理。",
+        "bull_points": [
+          "啤酒走量直接拉高 BALL/CCK 鋁罐出貨單位數",
+          "罐廠吃量不吃價，免疫於 GLP-1 壓制單價",
+          "東南亞需求回溫提升 BALL 亞太產能利用率"
+        ],
+        "bear_points": [
+          "北美啤酒量被 GLP-1 侵蝕，罐廠仍在關廠瘦身",
+          "鋁價(LME)才是罐廠毛利主swing，非啤酒需求",
+          "亞洲增量未必補得回北美量能流失"
+        ],
+        "final_take": "看罐廠純量曝險，但鋁價與北美量縮是真變數",
+        "entities": {
+          "tickers": [
+            "BALL",
+            "CCK",
+            "BUD",
+            "STZ",
+            "TAP"
+          ],
+          "sectors": [
+            "Materials",
+            "Consumer Staples"
+          ],
+          "themes": [
+            "GLP-1",
+            "beer premiumization",
+            "Southeast Asia consumer recovery",
+            "aluminum packaging"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BALL",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:BUD"
+          },
+          {
+            "subject": "ticker:CCK",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:STZ"
+          },
+          {
+            "subject": "ticker:BALL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:beer-volume-recovery"
+          },
+          {
+            "subject": "ticker:BALL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1-volume-erosion"
+          },
+          {
+            "subject": "ticker:BALL",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:aluminum-price"
+          }
+        ],
+        "done": false,
+        "confidence": 0.6,
+        "rationale_short": "新增鋁罐包裝供應鏈節點 BALL/CCK，前文未提"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-15T14:26:59Z",
+      "latency_ms": 13206,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述討論聚焦於品牌與鋁罐供應鏈，忽略了通路結構變化。泰國觀光復甦帶動的是 **On-Premise** (酒吧、餐飲) 需求，這類銷售的定價能力與毛利率遠高於 **Off-Premise** (超市/便利商店) 通路。對於 **BUD** 或 **HEINY** 而言，觀光客在旅遊時的消費行為更偏向 premium 且具季節性彈性，這為亞洲市場帶來了優於平均的「隱性漲價」空間。若此趨勢擴大，將能進一步抵銷 **GLP-1** 在成熟市場造成的量能壓力，從結構上優化其亞太區獲利組合。",
+        "bull_points": [
+          "觀光復甦優化通路組合，提升 on-premise 毛利。",
+          "旅遊場景增加 premium 產品溢價空間。"
+        ],
+        "bear_points": [
+          "觀光需求受宏觀波動影響，穩定性低。",
+          "若消費轉趨保守，高毛利產品銷量易受衝擊。"
+        ],
+        "final_take": "觀光帶動的通路升級是具獲利價值的潛在訊號。",
+        "entities": {
+          "tickers": [
+            "BUD",
+            "HEINY"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "GLP-1",
+            "Tourism",
+            "Premiumization"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BUD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tourism_recovery"
+          },
+          {
+            "subject": "ticker:HEINY",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:tourism_recovery"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充觀光驅動的通路組合變化對獲利與定價的影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:27:36Z",
+      "latency_ms": 37537,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前文把包裝節點押在鋁罐廠（**BALL**/**CCK**），但漏了一個關鍵：東南亞 on-premise 啤酒以**回收式玻璃瓶**為主流，不是鋁罐。Gemini 講觀光帶動酒吧消費——那恰恰是玻璃瓶通路。真正吃到泰國 on-premise 回溫的包裝商是 **OI**（O-I Glass），其全球啤酒瓶曝險與亞太產能才是純化標的，鋁罐 read-through 反而被高估。另一個被忽略的 2nd-order：ThaiBev 毛利修復除了內部營運，**大麥/麥芽成本**自 2022 高峰回落是全行業順風——BUD、HEINY、STZ 釀造成本同步受惠，不限亞洲。低訊號情緒新聞，當背景處理。",
+        "bull_points": [
+          "大麥/麥芽成本自2022高點回落，全球釀酒商毛利同步受惠",
+          "泰國on-premise回溫直接利多玻璃瓶廠OI亞太產能",
+          "投入成本順風不受GLP-1結構性壓制影響"
+        ],
+        "bear_points": [
+          "回收瓶模式下單瓶玻璃需求增量低於一次性鋁罐",
+          "OI北美啤酒瓶量同樣受GLP-1侵蝕",
+          "玻璃廠能源成本（天然氣）才是毛利主swing factor"
+        ],
+        "final_take": "看淡直接訊號，OI玻璃瓶與大麥成本是更純讀法",
+        "entities": {
+          "tickers": [
+            "OI",
+            "BUD",
+            "HEINY",
+            "STZ",
+            "BALL",
+            "CCK"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Materials"
+          ],
+          "themes": [
+            "beer demand recovery",
+            "GLP-1",
+            "premiumization",
+            "input cost deflation"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:OI",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:southeast-asia-beer-volume"
+          },
+          {
+            "subject": "ticker:OI",
+            "predicate": "SUPPLIES_TO",
+            "object": "sector:beer-brewers"
+          },
+          {
+            "subject": "ticker:BUD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:barley-cost-deflation"
+          },
+          {
+            "subject": "ticker:STZ",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:barley-cost-deflation"
+          },
+          {
+            "subject": "ticker:OI",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:glp1-alcohol-demand"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "新增玻璃瓶廠OI與大麥成本兩個前文未碰節點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-15T14:27:51Z",
+      "latency_ms": 14554,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "除了啤酒業務，ThaiBev 在泰國及周邊市場的**非酒精飲料（水、茶、即飲飲料）**版圖被明顯低估。在觀光客回流與極端氣候背景下，這些高頻消費的補水需求遠比啤酒更具防禦性。此多元化佈局為該公司創造了穩定的基底現金流，有效對沖了啤酒銷售受消費稅政策或健康意識覺醒的波動影響。對於持有 BUD、HEINY 或 STZ 等純酒類曝險的投資者，這種「酒水共生」的營運結構是亞洲消費復甦中更穩健的選品策略。",
+        "bull_points": [
+          "非酒精飲料提供高頻防禦性，抗震性強。",
+          "觀光回流同步刺激水與茶類飲料銷量。"
+        ],
+        "bear_points": [
+          "非酒精類產品毛利相對低，規模效應依賴強。",
+          "原物料成本若轉嫁不易，恐侵蝕整體毛利率。"
+        ],
+        "final_take": "旅遊熱度帶動的高頻消費是 ThaiBev 穩定的底層邏輯。",
+        "entities": {
+          "tickers": [
+            "BUD",
+            "HEINY",
+            "STZ"
+          ],
+          "sectors": [
+            "Consumer Staples"
+          ],
+          "themes": [
+            "tourism",
+            "non-alcoholic beverages"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:BUD",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:tourism"
+          }
+        ],
+        "done": false,
+        "confidence": 0.8,
+        "rationale_short": "補足 ThaiBev 的非酒精飲料防禦性邏輯，與純啤酒商進行對比。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BALL",
+        "BUD",
+        "CCK",
+        "HEINY",
+        "OI",
+        "STZ",
+        "TAP"
+      ],
+      "sectors": [
+        "Consumer Staples",
+        "Materials"
+      ],
+      "themes": [
+        "EM tourism rebound",
+        "GLP-1",
+        "Premiumization",
+        "Southeast Asia consumer recovery",
+        "Tourism",
+        "aluminum packaging",
+        "beer demand recovery",
+        "beer premiumization",
+        "input cost deflation",
+        "non-alcoholic beverages",
+        "premiumization",
+        "tourism"
+      ],
+      "tech_keywords": []
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BUD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:southeast-asia-beer-demand"
+      },
+      {
+        "subject": "ticker:TAP",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1-alcohol-demand"
+      },
+      {
+        "subject": "ticker:STZ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:premiumization"
+      },
+      {
+        "subject": "ticker:BALL",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:BUD"
+      },
+      {
+        "subject": "ticker:CCK",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:STZ"
+      },
+      {
+        "subject": "ticker:BALL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:beer-volume-recovery"
+      },
+      {
+        "subject": "ticker:BALL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1-volume-erosion"
+      },
+      {
+        "subject": "ticker:BALL",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:aluminum-price"
+      },
+      {
+        "subject": "ticker:BUD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tourism_recovery"
+      },
+      {
+        "subject": "ticker:HEINY",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:tourism_recovery"
+      },
+      {
+        "subject": "ticker:OI",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:southeast-asia-beer-volume"
+      },
+      {
+        "subject": "ticker:OI",
+        "predicate": "SUPPLIES_TO",
+        "object": "sector:beer-brewers"
+      },
+      {
+        "subject": "ticker:BUD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:barley-cost-deflation"
+      },
+      {
+        "subject": "ticker:STZ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:barley-cost-deflation"
+      },
+      {
+        "subject": "ticker:OI",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:glp1-alcohol-demand"
+      },
+      {
+        "subject": "ticker:BUD",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:tourism"
+      }
+    ],
+    "bull_summary": [
+      "泰國觀光復甦帶動 mass-market 啤酒走量",
+      "Chang 重整＋成本控管推升毛利",
+      "東南亞曝險啤酒商 BUD/HEINY 間接受惠",
+      "高端化產品組合有效提升平均售價",
+      "STZ 等高端品牌在市場中展現高韌性",
+      "消費者趨向精釀與高品質酒精選擇"
+    ],
+    "bear_summary": [
+      "ThaiBev 非美股，對美股組合不可交易",
+      "毛利修復靠內部營運非品類擴張",
+      "美國啤酒量能仍受 GLP-1 壓抑",
+      "高端產品在總體經濟放緩時易受衝擊",
+      "GLP-1 效應持續壓抑整體飲酒意願",
+      "北美啤酒量被 GLP-1 侵蝕，罐廠仍在關廠瘦身"
+    ],
+    "final_take": "旅遊熱度帶動的高頻消費是 ThaiBev 穩定的底層邏輯。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-15T14:27:51Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: HEADWIND_FROM, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

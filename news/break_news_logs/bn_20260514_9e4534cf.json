@@ -1,0 +1,756 @@
+{
+  "news_id": "bn_20260514_9e4534cf",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T09:33:13Z",
+  "last_activity_ts": "2026-05-14T09:44:22Z",
+  "source": {
+    "name": "MarketWatch",
+    "credibility": "HIGH",
+    "url": "https://www.marketwatch.com/story/a-look-at-which-assets-are-following-the-script-and-which-arent-on-day-75-of-the-war-bdd52fba?mod=mw_rss_topstories",
+    "feed_fingerprint": "look which assets following script which aren t",
+    "published": "2026-05-14T09:29:00+00:00",
+    "url_hash": "sha1:4c9d21004775d28b3774980d79c1bed4d5c7401c"
+  },
+  "headline": "A look at which assets are following the script, and which aren’t, on day 75 of the war",
+  "headline_zh": null,
+  "raw_summary": "",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 1.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "hi_cred"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T09:39:21Z",
+      "latency_ms": 26472,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "戰爭第75天的資產分歧本質上是**風險溢價重估**訊號。腳本內走勢（黃金、油價、避險貨幣強勢）反映 geopolitical risk premium 維持；脫離腳本的資產（可能是股市韌性、新興市場資金回流）暗示市場已開始 price-in 戰爭常態化或結束預期。對美股影響分歧：**國防股 (LMT, RTX, NOC, GD)** 若市場認為戰爭尾聲、訂單高峰已過，可能面臨獲利了結；**能源股 (XOM, CVX)** 受油價腳本維持支撐；**航運/物流** 若紅海或黑海航線風險溢價回落則受惠。關鍵觀察：VIX 是否同步回落確認 risk-on，以及大宗商品 (WTI, 小麥) 是否破腳本支撐位。情緒類新聞 shallow_score 偏低，**不構成單獨交易訊號**，需配合 breadth / sector rotation 數據佐證。",
+        "bull_points": [
+          "戰爭常態化降低 risk premium 利好風險資產",
+          "能源股若油價腳本維持仍有支撐",
+          "航運物流受惠紅海/黑海風險回落"
+        ],
+        "bear_points": [
+          "國防股訂單高峰回落面臨估值壓力",
+          "情緒反轉若地緣事件升級恐快速 unwind",
+          "黃金避險倉位擁擠回吐風險高"
+        ],
+        "final_take": "中性偏觀望，等 VIX + 油價腳本確認方向",
+        "entities": {
+          "tickers": [
+            "LMT",
+            "RTX",
+            "NOC",
+            "GD",
+            "XOM",
+            "CVX",
+            "GLD",
+            "USO"
+          ],
+          "sectors": [
+            "Aerospace & Defense",
+            "Energy",
+            "Industrials"
+          ],
+          "themes": [
+            "geopolitical risk premium",
+            "war normalization",
+            "safe haven rotation",
+            "commodity supercycle"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:LMT",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:war-normalization"
+          },
+          {
+            "subject": "ticker:RTX",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:war-normalization"
+          },
+          {
+            "subject": "ticker:XOM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:geopolitical-risk-premium"
+          },
+          {
+            "subject": "ticker:GLD",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:safe-haven-rotation"
+          },
+          {
+            "subject": "sector:Aerospace & Defense",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:day-75-war-script"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "情緒類新聞訊號弱，分歧本身才是觀察重點"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T09:40:52Z",
+      "latency_ms": 91334,
+      "raw_stdout_path": "news/break_news_logs/_raw/bn_20260514_9e4534cf.c1.txt",
+      "parsed": {
+        "commentary": "The request to invoke the `generalist` agent was denied because the agent is currently in \"Plan Mode\", which restricts execution of commands and skills. I have, however, synthesized the information ga",
+        "entities": {
+          "tickers": [],
+          "sectors": [],
+          "themes": [],
+          "tech_keywords": []
+        },
+        "relations": [],
+        "done": false,
+        "confidence": 0.0,
+        "rationale_short": "parse_failed"
+      },
+      "parse_status": "failed",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T09:41:19Z",
+      "latency_ms": 26677,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前輪未提的**二階效應**：戰爭常態化若被 price-in，**再保險業 (RNR, RE, EG)** 的 war-risk premium pricing power 會壓縮，2026 續約季 (1/1 renewals) 費率漲幅可能不如預期；同時 **Lloyd's 船體險 (London market)** 黑海/紅海加費率 (Joint War Committee listed area) 若除名，貨櫃航運 (**ZIM, MATX**) 單位成本下降但運價也同步軟化，net 反而中性偏空。另一條被忽略的 supply-chain node：**烏克蘭氖氣 (Ne gas, semiconductor lithography 用)** 戰前佔全球 ~50%，若戰況收尾、Ingas/Cryoin 復產，**linde (LIN) / Air Products (APD)** 戰時定價優勢消退，反而對 **半導體成本端 (TSM, INTC fab COGS)** 是利多。Contra：若停火破局，**小麥 (WEAT ETF) / 葵花油** spike 風險仍在，agri-input 通膨二次點火不能完全 dismiss。",
+        "bull_points": [
+          "氖氣供應回穩利好半導體 fab COGS (TSM, INTC)",
+          "紅海航線正常化降貨櫃航運單位成本",
+          "黑海穀物走廊重啟壓 agri-input 通膨"
+        ],
+        "bear_points": [
+          "再保險 war premium pricing power 壓縮 (RNR, RE)",
+          "國防股訂單高峰已過獲利了結風險 (LMT, RTX)",
+          "停火破局則小麥/葵花油 spike 二次通膨"
+        ],
+        "final_take": "中性偏多但需盯停火進展與 1/1 再保續約費率",
+        "entities": {
+          "tickers": [
+            "RNR",
+            "RE",
+            "EG",
+            "ZIM",
+            "MATX",
+            "LIN",
+            "APD",
+            "TSM",
+            "INTC",
+            "LMT",
+            "RTX",
+            "WEAT"
+          ],
+          "sectors": [
+            "Insurance",
+            "Marine Shipping",
+            "Industrial Gases",
+            "Semiconductors",
+            "Aerospace & Defense",
+            "Agriculture"
+          ],
+          "themes": [
+            "war normalization",
+            "reinsurance pricing",
+            "semiconductor supply chain",
+            "agri-inflation"
+          ],
+          "tech_keywords": [
+            "Neon gas",
+            "EUV lithography",
+            "Joint War Committee"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:neon_supply_normalization"
+          },
+          {
+            "subject": "ticker:LIN",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:neon_supply_normalization"
+          },
+          {
+            "subject": "ticker:RNR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:war_normalization"
+          },
+          {
+            "subject": "ticker:ZIM",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:red_sea_normalization"
+          },
+          {
+            "subject": "ticker:WEAT",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:ceasefire_breakdown_risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "氖氣+再保險+航線三條二階供應鏈節點前輪未覆蓋"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T09:41:43Z",
+      "latency_ms": 23837,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "儘管戰爭常態化預期升溫，但**鈀金**供給端風險仍是汽車業關注焦點。俄羅斯作為全球最大鈀金供應國，任何地緣政治緊張或制裁措施都可能影響其出口，進而推升汽車觸媒轉化器關鍵原料成本。此一供應鏈隱憂，可能衝擊汽車製造商的獲利能力，尤其是在市場預期風險下降之際。",
+        "bull_points": [
+          "汽車業尋找鈀金替代品。",
+          "科技突破降低鈀金依賴。"
+        ],
+        "bear_points": [
+          "俄羅斯鈀金供應受衝擊。",
+          "汽車業原料成本上升。"
+        ],
+        "final_take": "鈀金供給陰影，汽車業須謹慎。",
+        "entities": {
+          "tickers": [
+            "GM",
+            "F"
+          ],
+          "sectors": [
+            "Automotive & Components"
+          ],
+          "themes": [
+            "Palladium Supply Risk"
+          ],
+          "tech_keywords": [
+            "Palladium"
+          ],
+          "narratives": [
+            "Russia"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:Russia",
+            "predicate": "SUPPLIES_TO",
+            "object": "tech_keyword:Palladium"
+          },
+          {
+            "subject": "tech_keyword:Palladium",
+            "predicate": "CUSTOMER_OF",
+            "object": "sector:Automotive & Components"
+          },
+          {
+            "subject": "theme:Palladium Supply Risk",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:Russia"
+          },
+          {
+            "subject": "sector:Automotive & Components",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:Palladium Supply Risk"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "補充鈀金供給風險，對汽車業的二階影響。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T09:42:11Z",
+      "latency_ms": 28150,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前輪都漏掉的 **三階通膨傳導鏈**：戰爭常態化若導致 **黑海穀物走廊 (BSGI)** 協議重啟，全球 wheat / corn / sunflower oil 供給回升，**Archer-Daniels-Midland (ADM)、Bunge (BG)** 這類 agri-trader 的 **crush margin** 與 trading desk volatility profit 會壓縮 — 2022-2024 戰時 ADM trading segment EBIT 暴衝就是靠 dislocation arb，常態化等於 **mean reversion 利空**。同時 **化肥端** 看 **CF Industries (CF)、Nutrien (NTR)、Mosaic (MOS)**：俄羅斯佔全球氮肥 ~15%、鉀肥 ~20%（含白俄羅斯），制裁鬆綁路線圖一出，**氮肥 / 鉀肥 spot price** 即使不破 2020 低點也會回到 mid-cycle，CF 的 **gas-to-urea spread arb** 優勢（北美天然氣便宜）也會被稀釋。Contra：埃及 / 印度 strategic stockpile 補庫存需求可能 cushion 跌幅，且 **印度 KCl 長約價** 仍是底部 anchor，不會崩盤式破位。",
+        "bull_points": [
+          "黑海走廊重啟有利全球糧價回穩，降低食品通膨壓力",
+          "氮肥成本下降利好下游食品加工 (TSN, GIS, K) margin",
+          "印度補庫存需求 cushion 化肥跌幅，不致崩盤"
+        ],
+        "bear_points": [
+          "ADM/BG agri-trader dislocation arb 利潤 mean reversion",
+          "CF/NTR/MOS 化肥 spot price 回到 mid-cycle 區間",
+          "CF 北美 gas-to-urea spread 套利優勢被稀釋"
+        ],
+        "final_take": "農化板塊戰時溢價將消退，看空 ADM/CF",
+        "entities": {
+          "tickers": [
+            "ADM",
+            "BG",
+            "CF",
+            "NTR",
+            "MOS",
+            "TSN",
+            "GIS",
+            "K"
+          ],
+          "sectors": [
+            "Consumer Staples",
+            "Materials",
+            "Agriculture"
+          ],
+          "themes": [
+            "war normalization",
+            "commodity mean reversion",
+            "fertilizer cycle",
+            "Black Sea Grain Initiative"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:ADM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:war_normalization"
+          },
+          {
+            "subject": "ticker:BG",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:war_normalization"
+          },
+          {
+            "subject": "ticker:CF",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fertilizer_cycle_mean_reversion"
+          },
+          {
+            "subject": "ticker:NTR",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fertilizer_cycle_mean_reversion"
+          },
+          {
+            "subject": "ticker:MOS",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:fertilizer_cycle_mean_reversion"
+          },
+          {
+            "subject": "ticker:TSN",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:input_cost_deflation"
+          },
+          {
+            "subject": "ticker:GIS",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:input_cost_deflation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "農化三階傳導鏈是前輪缺角，補 ADM/CF dislocation arb 消退"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T09:44:22Z",
+      "latency_ms": 131003,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "儘管戰爭常態化預期升溫，但俄羅斯作為全球主要鉑金供應國，其供給端的潛在風險不容忽視，這與先前討論的鈀金類似。若地緣政治持續影響鉑金出口，將推升汽車產業（觸媒轉化器）及綠能轉型（氫燃料電池）的關鍵原料成本。此供給疑慮可能延緩部分產業的成本下降或獲利復甦，與市場價格反映的常態化預期形成對比。",
+        "bull_points": [
+          "戰爭常態化預期，引導資金流向科技股與高成長股。",
+          "大宗商品價格回落，有助緩解全球通膨壓力，提振消費。"
+        ],
+        "bear_points": [
+          "鉑金供給瓶頸持續，汽車與綠能產業成本承壓。",
+          "俄羅斯再保險業定價權受侵蝕，預期利潤壓縮。"
+        ],
+        "final_take": "戰爭常態化與供給風險並存，需謹慎評估。",
+        "entities": {
+          "tickers": [
+            "RNR",
+            "RE",
+            "EG",
+            "LIN",
+            "APD",
+            "TSM",
+            "INTC",
+            "ZIM",
+            "MATX",
+            "ADM",
+            "BG",
+            "CF",
+            "NTR",
+            "MOS",
+            "TM",
+            "HYMTF",
+            "SBSW"
+          ],
+          "sectors": [
+            "Insurance",
+            "Chemicals",
+            "Semiconductor Manufacturing",
+            "Shipping",
+            "Automotive",
+            "Industrials",
+            "Mining",
+            "Technology",
+            "Consumer Goods"
+          ],
+          "themes": [
+            "Geopolitical Risk",
+            "War Normalization",
+            "Supply Chain Disruption",
+            "Green Energy Transition",
+            "Critical Minerals",
+            "Inflation",
+            "Risk Premium Revaluation",
+            "Capital Flows"
+          ],
+          "tech_keywords": [
+            "Palladium",
+            "Platinum",
+            "Neon Gas",
+            "Semiconductor Lithography",
+            "Catalytic Converters",
+            "Hydrogen Fuel Cells"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SBSW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:platinum supply risk"
+          },
+          {
+            "subject": "ticker:TM",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:platinum price increase"
+          },
+          {
+            "subject": "ticker:HYMTF",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:platinum price increase"
+          },
+          {
+            "subject": "tech_keyword:Platinum",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:geopolitical tensions"
+          },
+          {
+            "subject": "theme:Capital Flows",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:war normalization"
+          },
+          {
+            "subject": "theme:Inflation",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:war normalization"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入鉑金及其雙重應用場景，提供不同於過去金屬或穀物的視角。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BEARISH",
+    "merged_entities": {
+      "tickers": [
+        "ADM",
+        "APD",
+        "BG",
+        "CF",
+        "CVX",
+        "EG",
+        "F",
+        "GD",
+        "GIS",
+        "GLD",
+        "GM",
+        "HYMTF",
+        "INTC",
+        "K",
+        "LIN",
+        "LMT",
+        "MATX",
+        "MOS",
+        "NOC",
+        "NTR",
+        "RE",
+        "RNR",
+        "RTX",
+        "SBSW",
+        "TM",
+        "TSM",
+        "TSN",
+        "USO",
+        "WEAT",
+        "XOM",
+        "ZIM"
+      ],
+      "sectors": [
+        "Aerospace & Defense",
+        "Agriculture",
+        "Automotive",
+        "Automotive & Components",
+        "Chemicals",
+        "Consumer Goods",
+        "Consumer Staples",
+        "Energy",
+        "Industrial Gases",
+        "Industrials",
+        "Insurance",
+        "Marine Shipping",
+        "Materials",
+        "Mining",
+        "Semiconductor Manufacturing",
+        "Semiconductors",
+        "Shipping",
+        "Technology"
+      ],
+      "themes": [
+        "Black Sea Grain Initiative",
+        "Capital Flows",
+        "Critical Minerals",
+        "Geopolitical Risk",
+        "Green Energy Transition",
+        "Inflation",
+        "Palladium Supply Risk",
+        "Risk Premium Revaluation",
+        "Supply Chain Disruption",
+        "War Normalization",
+        "agri-inflation",
+        "commodity mean reversion",
+        "commodity supercycle",
+        "fertilizer cycle",
+        "geopolitical risk premium",
+        "reinsurance pricing",
+        "safe haven rotation",
+        "semiconductor supply chain",
+        "war normalization"
+      ],
+      "tech_keywords": [
+        "Catalytic Converters",
+        "EUV lithography",
+        "Hydrogen Fuel Cells",
+        "Joint War Committee",
+        "Neon Gas",
+        "Neon gas",
+        "Palladium",
+        "Platinum",
+        "Semiconductor Lithography"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:LMT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:war-normalization"
+      },
+      {
+        "subject": "ticker:RTX",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:war-normalization"
+      },
+      {
+        "subject": "ticker:XOM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:geopolitical-risk-premium"
+      },
+      {
+        "subject": "ticker:GLD",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:safe-haven-rotation"
+      },
+      {
+        "subject": "sector:Aerospace & Defense",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:day-75-war-script"
+      },
+      {
+        "subject": "ticker:TSM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:neon_supply_normalization"
+      },
+      {
+        "subject": "ticker:LIN",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:neon_supply_normalization"
+      },
+      {
+        "subject": "ticker:RNR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:war_normalization"
+      },
+      {
+        "subject": "ticker:ZIM",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:red_sea_normalization"
+      },
+      {
+        "subject": "ticker:WEAT",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:ceasefire_breakdown_risk"
+      },
+      {
+        "subject": "narrative:Russia",
+        "predicate": "SUPPLIES_TO",
+        "object": "tech_keyword:Palladium"
+      },
+      {
+        "subject": "tech_keyword:Palladium",
+        "predicate": "CUSTOMER_OF",
+        "object": "sector:Automotive & Components"
+      },
+      {
+        "subject": "theme:Palladium Supply Risk",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:Russia"
+      },
+      {
+        "subject": "sector:Automotive & Components",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:Palladium Supply Risk"
+      },
+      {
+        "subject": "ticker:ADM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:war_normalization"
+      },
+      {
+        "subject": "ticker:BG",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:war_normalization"
+      },
+      {
+        "subject": "ticker:CF",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fertilizer_cycle_mean_reversion"
+      },
+      {
+        "subject": "ticker:NTR",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fertilizer_cycle_mean_reversion"
+      },
+      {
+        "subject": "ticker:MOS",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fertilizer_cycle_mean_reversion"
+      },
+      {
+        "subject": "ticker:TSN",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:input_cost_deflation"
+      },
+      {
+        "subject": "ticker:GIS",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:input_cost_deflation"
+      },
+      {
+        "subject": "ticker:SBSW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:platinum supply risk"
+      },
+      {
+        "subject": "ticker:TM",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:platinum price increase"
+      },
+      {
+        "subject": "ticker:HYMTF",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:platinum price increase"
+      },
+      {
+        "subject": "tech_keyword:Platinum",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:geopolitical tensions"
+      },
+      {
+        "subject": "theme:Capital Flows",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:war normalization"
+      },
+      {
+        "subject": "theme:Inflation",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:war normalization"
+      }
+    ],
+    "bull_summary": [
+      "戰爭常態化降低 risk premium 利好風險資產",
+      "能源股若油價腳本維持仍有支撐",
+      "航運物流受惠紅海/黑海風險回落",
+      "氖氣供應回穩利好半導體 fab COGS (TSM, INTC)",
+      "紅海航線正常化降貨櫃航運單位成本",
+      "黑海穀物走廊重啟壓 agri-input 通膨"
+    ],
+    "bear_summary": [
+      "國防股訂單高峰回落面臨估值壓力",
+      "情緒反轉若地緣事件升級恐快速 unwind",
+      "黃金避險倉位擁擠回吐風險高",
+      "再保險 war premium pricing power 壓縮 (RNR, RE)",
+      "國防股訂單高峰已過獲利了結風險 (LMT, RTX)",
+      "停火破局則小麥/葵花油 spike 二次通膨"
+    ],
+    "final_take": "戰爭常態化與供給風險並存，需謹慎評估。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T09:44:22Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: MENTIONED_IN; gemini-only: CUSTOMER_OF, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

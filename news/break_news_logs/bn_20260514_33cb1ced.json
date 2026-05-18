@@ -1,0 +1,651 @@
+{
+  "news_id": "bn_20260514_33cb1ced",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T10:03:22Z",
+  "last_activity_ts": "2026-05-14T10:12:17Z",
+  "source": {
+    "name": "PR Newswire",
+    "credibility": "MEDIUM",
+    "url": "https://www.prnewswire.com/news-releases/stratos-completes-acquisition-of-11-partner-practices-totaling-approximately-4-8-billion-in-client-assets-302770641.html",
+    "feed_fingerprint": "stratos completes acquisition 11 partner practices totaling approximately",
+    "published": "2026-05-14T10:00:00+00:00",
+    "url_hash": "sha1:59c1edf5e2e0d53b92136a0eaa66b62a7a38fda9"
+  },
+  "headline": "Stratos Completes Acquisition of 11 Partner Practices Totaling Approximately $4.8 Billion in Client Assets",
+  "headline_zh": null,
+  "raw_summary": "BEACHWOOD, Ohio, May 14, 2026 /PRNewswire/ -- Stratos Wealth Holdings (\"Stratos\") today announced it has completed the acquisition of 11 partner practices ranging from sole practitioners to multi-advisor teams, representing approximately $4.8 billion in total client assets, as of Dec. 31,...",
+  "triage": {
+    "news_type": "corporate",
+    "shallow_score": 0.0,
+    "bull_case": "整合效益釋放",
+    "bear_case": "交易風險存在",
+    "sector_view": "產業整併加速",
+    "macro_view": "槓桿率抬升",
+    "binary_flag": true,
+    "advance_reason": "binary"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T10:10:11Z",
+      "latency_ms": 22412,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Stratos 為私人控股的 RIA aggregator，非上市公司，本則新聞對美股 ticker 層面**無直接 catalyst**。但訊號層面仍值得留意：**$4.8B AUM 一次併 11 家** 顯示 RIA roll-up 賽道仍在加速整合，PE-backed 平台 (Stratos 由 Emigrant Partners 入股) 持續吃下獨立 advisor。對標的上市可比包含 **LPLA**（Stratos 多數 practice 仍掛 LPL clearing）、**RJF**、**AMP**、**HTLF/CIVB** 等 broker-dealer / wealth platform。**間接 read-through**：RIA M&A multiple 維持高檔 (10-14x EBITDA) 對 LPLA recruiting economics 是順風；但 Stratos 這類 super-OSJ 同時也分食 LPL 的 advisor wallet share，長線 **競合並存**。Theme 上歸入 wealth management consolidation / alternative asset distribution。",
+        "bull_points": [
+          "RIA roll-up 賽道熱度延續，LPLA clearing AUM 受惠",
+          "Wealth M&A multiple 撐住，利好 platform valuation",
+          "Advisor 整合潮加速，規模經濟強者恆強"
+        ],
+        "bear_points": [
+          "Super-OSJ 吃掉 LPL 直接 advisor wallet share",
+          "Stratos 未上市，市場無法直接 price-in",
+          "高 multiple 併購恐稀釋 acquirer 長線 ROIC"
+        ],
+        "final_take": "對上市 wealth platform 偏中性順風，不構成單獨進場理由",
+        "entities": {
+          "tickers": [
+            "LPLA",
+            "RJF",
+            "AMP",
+            "SF",
+            "HLNE"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets"
+          ],
+          "themes": [
+            "RIA roll-up",
+            "wealth management consolidation",
+            "private equity in wealth"
+          ],
+          "tech_keywords": []
+        },
+        "relations": [
+          {
+            "subject": "ticker:LPLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ria-rollup"
+          },
+          {
+            "subject": "ticker:RJF",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:wealth-consolidation"
+          },
+          {
+            "subject": "ticker:LPLA",
+            "predicate": "COMPETES_WITH",
+            "object": "narrative:super-osj-aggregator"
+          },
+          {
+            "subject": "ticker:AMP",
+            "predicate": "MENTIONED_IN",
+            "object": "narrative:ria-rollup"
+          }
+        ],
+        "done": false,
+        "confidence": 0.55,
+        "rationale_short": "Stratos 未上市，僅 read-through 順風訊號"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T10:10:36Z",
+      "latency_ms": 24981,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Stratos 透過併購 11 家業者、總計 $4.8B 的客戶資產，再次彰顯了 RIA 整併的強勁勢頭。儘管 Stratos 本身是私人控股公司，但其由 Emigrant Partners 等 PE 支持的成長模式，持續對 LPLA 等公開交易的可比公司產生間接影響。先前討論已觸及 Stratos 作為 Super-OSJ 與 LPL 在 advisor wallet share 的競爭，然而，本次併購的規模暗示了 Stratos 可能朝著提供獨立的清算與技術平台方向發展，直接挑戰 LPLA 的核心業務模式，這將是 LPLA 業務的結構性風險。",
+        "bull_points": [
+          "產業整併趨勢明確，資金持續湧入。",
+          "PE 支持推動規模擴張。"
+        ],
+        "bear_points": [
+          "Stratos 潛力轉為 LPLA 的直接平台競爭者。",
+          "併購整合風險及執行難度。"
+        ],
+        "final_take": "LPLA 需警惕 Stratos 的平台化競爭升級。",
+        "entities": {
+          "tickers": [
+            "LPLA"
+          ],
+          "sectors": [
+            "Financial Services",
+            "Investment Management"
+          ],
+          "themes": [
+            "RIA consolidation",
+            "Private Equity",
+            "Wealth Management Technology"
+          ],
+          "tech_keywords": [
+            "RIA aggregation",
+            "Clearing services",
+            "OSJ"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "narrative:Stratos",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Private Equity"
+          },
+          {
+            "subject": "narrative:Stratos",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:LPLA"
+          },
+          {
+            "subject": "ticker:LPLA",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:RIA consolidation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "Stratos 規模擴大，可能發展自有清算平台。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T10:11:01Z",
+      "latency_ms": 24390,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個前輪未提的二階角度：**Stratos 這類 super-OSJ 規模化**對 **custodian / clearing 端**的 read-through 比對 LPLA 更直接。Stratos practices 多數 clearing 仍掛 LPL，但 $4.8B 一次併入的規模已逼近 **SCHW (Schwab Advisor Services)** 與 **IBKR RIA custody** 的甜蜜點 — Stratos 未來若 RFP 重新分配 custody，SCHW/IBKR 是真正的 silent winner，LPLA 反而面臨 clearing 收入流失風險。另一個被忽略的 node：**Envestnet (ENV)** 與 **Orion (private)** 的 TAMP / advisor tech 訂閱 — RIA roll-up 每併一家就多一個 seat license，**ENV 的 ARPU 與 seat count 是 pure beneficiary**。Contra：若 PE-backed aggregator 開始追求 EBITDA margin，反而會 **renegotiate ENV/Orion fee schedule**，tech vendor 議價力長期受壓。",
+        "bull_points": [
+          "SCHW/IBKR custody 平台是 silent winner，吃下 RIA 資產流入",
+          "ENV seat count + ARPU 隨 aggregator roll-up 線性受惠",
+          "RIA M&A multiple 高檔支撐 LPLA recruiting economics"
+        ],
+        "bear_points": [
+          "LPLA 長期面臨 super-OSJ 自建 clearing 的 disintermediation 風險",
+          "PE-backed aggregator 規模化後壓 ENV/Orion fee，tech vendor 議價力受損",
+          "Stratos 私有，無直接 ticker catalyst，read-through 訊號偏弱"
+        ],
+        "final_take": "結構順風偏 SCHW/ENV，LPLA 中性偏空需觀察 clearing 流失",
+        "entities": {
+          "tickers": [
+            "LPLA",
+            "SCHW",
+            "IBKR",
+            "ENV",
+            "RJF",
+            "AMP"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets"
+          ],
+          "themes": [
+            "RIA consolidation",
+            "wealth management roll-up",
+            "advisor tech"
+          ],
+          "tech_keywords": [
+            "RIA custody",
+            "TAMP",
+            "super-OSJ",
+            "clearing platform"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SCHW",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ria-consolidation"
+          },
+          {
+            "subject": "ticker:IBKR",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ria-consolidation"
+          },
+          {
+            "subject": "ticker:ENV",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:advisor-tech-seat-growth"
+          },
+          {
+            "subject": "ticker:LPLA",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:super-osj-disintermediation"
+          },
+          {
+            "subject": "ticker:ENV",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:pe-aggregator-fee-pressure"
+          }
+        ],
+        "done": false,
+        "confidence": 0.62,
+        "rationale_short": "補 custodian (SCHW/IBKR) 與 advisor tech (ENV) 二階受益鏈，前輪只談 LPLA。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T10:11:35Z",
+      "latency_ms": 34170,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Stratos 透過併購 11 家業者、總計 $4.8B 的客戶資產，再次彰顯了 RIA 整併的強勁勢頭。先前討論已聚焦於平台上層的競爭、託管端轉移效應，以及 ENV 等 TAMP 供應商的影響。然而，本次併購凸顯了另一關鍵趨勢：**資產類別的多元化**。隨著 Stratos 等大型 RIA 平台致力於提供更廣泛的另類投資選擇（如私募股權、私人信貸），其營運與合規複雜度急遽升高。這將**間接推動對專門管理另類資產的技術供應商**（負責盡職調查、風險控管、客製化報告）的**需求**，這些業者將成為此趨勢下的隱形受益者。",
+        "bull_points": [
+          "Stratos 擴張，利多另類投資平台。",
+          "另類資產管理帶動 tech 供應商成長。"
+        ],
+        "bear_points": [
+          "另類投資合規門檻顯著提高。",
+          "整合複雜另類資產平台具挑戰。"
+        ],
+        "final_take": "另類投資整合是趨勢，技術業者迎新機遇。",
+        "entities": {
+          "tickers": [
+            "LPLA",
+            "RJF",
+            "AMP",
+            "HTLF",
+            "SCHW",
+            "IBKR"
+          ],
+          "sectors": [
+            "Wealth Management"
+          ],
+          "themes": [
+            "Alternative Investments",
+            "RIA Consolidation"
+          ],
+          "tech_keywords": [
+            "Alt-Investment Tech",
+            "Due Diligence",
+            "Compliance Software"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "tech_keyword:Alt-Investment Tech",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Alternative Investments"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "擴張的 RIA 平台聚焦另類投資，帶動相關技術需求。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T10:11:59Z",
+      "latency_ms": 24217,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "補一個被忽略的三階角度：**私募信貸 distribution channel** 才是 Stratos 這類 super-OSJ 規模化的真正 alpha node。Gemini 提到 alts diversification 帶動 tech vendor 需求，但更直接的受益者是**私募信貸 GP 的 retail feeder fund 通路**。Stratos $4.8B 一次入袋意味著 **ARES Wealth Management Solutions / BX Private Wealth / KKR Democratized Access** 多一個 distribution endpoint — 這些 BDC + interval fund 賣方近 18 個月把 retail channel 視為 AUM 成長主引擎。具體 ticker 受益：**ARES**（Aspida + AWMS 雙引擎）、**BX**（BCRED / BXPE retail share class）、**OWL**（Blue Owl 的 GP stakes + private credit），這三家對 RIA aggregator AUM 成長的 fee leverage 最高。**Contra**：SEC Reg BI 強化 + 2026 年 alt fund liquidity stress test 若觸發，super-OSJ 通路反而會被監管放大檢視，private credit retail distribution 是 regulatory crosshair。",
+        "bull_points": [
+          "RIA aggregator 規模化直接擴大私募信貸 retail feeder 通路 AUM",
+          "ARES/BX/OWL 對 RIA 通路 AUM 成長 fee leverage 最高",
+          "Interval fund / BDC retail share class 為 GP 18 個月成長主引擎"
+        ],
+        "bear_points": [
+          "SEC Reg BI + 2026 alt fund 流動性 stress test 為監管風險",
+          "Private credit retail distribution 已是 regulator crosshair",
+          "PE-backed aggregator 追求 margin 反壓 alt manager fee"
+        ],
+        "final_take": "看多 ARES/BX/OWL，但留意 2026 alt 流動性監管尾端風險",
+        "entities": {
+          "tickers": [
+            "ARES",
+            "BX",
+            "OWL",
+            "LPLA",
+            "SCHW",
+            "IBKR",
+            "ENV"
+          ],
+          "sectors": [
+            "Financials",
+            "Capital Markets",
+            "Asset Management"
+          ],
+          "themes": [
+            "RIA roll-up",
+            "Private credit retail distribution",
+            "Wealth management consolidation",
+            "Alternative asset democratization"
+          ],
+          "tech_keywords": [
+            "Interval fund",
+            "BDC retail share class",
+            "TAMP"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ARES",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:private-credit-retail-distribution"
+          },
+          {
+            "subject": "ticker:BX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:ria-rollup"
+          },
+          {
+            "subject": "ticker:OWL",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:alternative-asset-democratization"
+          },
+          {
+            "subject": "ticker:ARES",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:sec-reg-bi-alt-liquidity-stress"
+          },
+          {
+            "subject": "ticker:BX",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:ria-aggregator-distribution"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增私募信貸 GP retail distribution 三階受益鏈，前輪未觸及"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T10:12:17Z",
+      "latency_ms": 17811,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "Stratos 併購 11 家業者、總計 $4.8B 資產，大幅增加了營運複雜度。橫跨不同實體的數據系統異質性，為統一客戶管理、風險評估與合規帶來挑戰。此次整合將推動對強健數據彙整與資料倉儲解決方案的需求，這些方案專門整合多元金融數據源，讓 Stratos 掌握營運效率與策略洞見。",
+        "bull_points": [
+          "RIA 整併推動統一數據平台需求。",
+          "數據彙整解決方案提升營運協同。"
+        ],
+        "bear_points": [
+          "數據整合實施成本高昂。",
+          "資料安全與隱私風險增。"
+        ],
+        "final_take": "Stratos 擴張突顯數據整合關鍵性。",
+        "entities": {
+          "tickers": [
+            "SSNC"
+          ],
+          "sectors": [
+            "Software",
+            "Financial Technology"
+          ],
+          "themes": [
+            "WealthTech integration",
+            "Financial data aggregation"
+          ],
+          "tech_keywords": [
+            "Data Lake",
+            "Financial Data Integration"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:SSNC",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:WealthTech integration"
+          },
+          {
+            "subject": "ticker:SSNC",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:Financial data aggregation"
+          },
+          {
+            "subject": "ticker:SSNC",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:Financial Data Integration"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "併購規模造就數據整合剛需。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMP",
+        "ARES",
+        "BX",
+        "ENV",
+        "HLNE",
+        "HTLF",
+        "IBKR",
+        "LPLA",
+        "OWL",
+        "RJF",
+        "SCHW",
+        "SF",
+        "SSNC"
+      ],
+      "sectors": [
+        "Asset Management",
+        "Capital Markets",
+        "Financial Services",
+        "Financial Technology",
+        "Financials",
+        "Investment Management",
+        "Software",
+        "Wealth Management"
+      ],
+      "themes": [
+        "Alternative Investments",
+        "Alternative asset democratization",
+        "Financial data aggregation",
+        "Private Equity",
+        "Private credit retail distribution",
+        "RIA Consolidation",
+        "RIA consolidation",
+        "RIA roll-up",
+        "Wealth Management Technology",
+        "Wealth management consolidation",
+        "WealthTech integration",
+        "advisor tech",
+        "private equity in wealth",
+        "wealth management consolidation",
+        "wealth management roll-up"
+      ],
+      "tech_keywords": [
+        "Alt-Investment Tech",
+        "BDC retail share class",
+        "Clearing services",
+        "Compliance Software",
+        "Data Lake",
+        "Due Diligence",
+        "Financial Data Integration",
+        "Interval fund",
+        "OSJ",
+        "RIA aggregation",
+        "RIA custody",
+        "TAMP",
+        "clearing platform",
+        "super-OSJ"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:LPLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ria-rollup"
+      },
+      {
+        "subject": "ticker:RJF",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:wealth-consolidation"
+      },
+      {
+        "subject": "ticker:LPLA",
+        "predicate": "COMPETES_WITH",
+        "object": "narrative:super-osj-aggregator"
+      },
+      {
+        "subject": "ticker:AMP",
+        "predicate": "MENTIONED_IN",
+        "object": "narrative:ria-rollup"
+      },
+      {
+        "subject": "narrative:Stratos",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Private Equity"
+      },
+      {
+        "subject": "narrative:Stratos",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:LPLA"
+      },
+      {
+        "subject": "ticker:LPLA",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:RIA consolidation"
+      },
+      {
+        "subject": "ticker:SCHW",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ria-consolidation"
+      },
+      {
+        "subject": "ticker:IBKR",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ria-consolidation"
+      },
+      {
+        "subject": "ticker:ENV",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:advisor-tech-seat-growth"
+      },
+      {
+        "subject": "ticker:LPLA",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:super-osj-disintermediation"
+      },
+      {
+        "subject": "ticker:ENV",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:pe-aggregator-fee-pressure"
+      },
+      {
+        "subject": "tech_keyword:Alt-Investment Tech",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Alternative Investments"
+      },
+      {
+        "subject": "ticker:ARES",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:private-credit-retail-distribution"
+      },
+      {
+        "subject": "ticker:BX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ria-rollup"
+      },
+      {
+        "subject": "ticker:OWL",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:alternative-asset-democratization"
+      },
+      {
+        "subject": "ticker:ARES",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:sec-reg-bi-alt-liquidity-stress"
+      },
+      {
+        "subject": "ticker:BX",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:ria-aggregator-distribution"
+      },
+      {
+        "subject": "ticker:SSNC",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:WealthTech integration"
+      },
+      {
+        "subject": "ticker:SSNC",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Financial data aggregation"
+      },
+      {
+        "subject": "ticker:SSNC",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:Financial Data Integration"
+      }
+    ],
+    "bull_summary": [
+      "RIA roll-up 賽道熱度延續，LPLA clearing AUM 受惠",
+      "Wealth M&A multiple 撐住，利好 platform valuation",
+      "Advisor 整合潮加速，規模經濟強者恆強",
+      "產業整併趨勢明確，資金持續湧入。",
+      "PE 支持推動規模擴張。",
+      "SCHW/IBKR custody 平台是 silent winner，吃下 RIA 資產流入"
+    ],
+    "bear_summary": [
+      "Super-OSJ 吃掉 LPL 直接 advisor wallet share",
+      "Stratos 未上市，市場無法直接 price-in",
+      "高 multiple 併購恐稀釋 acquirer 長線 ROIC",
+      "Stratos 潛力轉為 LPLA 的直接平台競爭者。",
+      "併購整合風險及執行難度。",
+      "LPLA 長期面臨 super-OSJ 自建 clearing 的 disintermediation 風險"
+    ],
+    "final_take": "Stratos 擴張突顯數據整合關鍵性。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T10:12:17Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: HEADWIND_FROM, MENTIONED_IN, SUPPLIES_TO"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}

@@ -1,0 +1,692 @@
+{
+  "news_id": "bn_20260514_65db7c26",
+  "schema_version": 1,
+  "state": "closed",
+  "fetched_at": "2026-05-14T02:20:47Z",
+  "last_activity_ts": "2026-05-14T02:33:41Z",
+  "source": {
+    "name": "Futu Push",
+    "credibility": "MEDIUM",
+    "url": "futu://push/c75d8079fba8",
+    "feed_fingerprint": "futu:JPM:9451ceda60",
+    "published": "2026-05-14T10:14:38+08:00",
+    "url_hash": "sha1:75e3ebb7787c0c95d812dd48c927a26a68eeb51c"
+  },
+  "headline": "罷工對三星影響多大？摩根大通：內存價格強勁上漲足以抵消大部分衝擊，任何回調都是買入機會",
+  "headline_zh": null,
+  "raw_summary": "罷工對三星影響多大？摩根大通：內存價格強勁上漲足以抵消大部分衝擊，任何回調都是買入機會>>",
+  "triage": {
+    "news_type": "sentiment",
+    "shallow_score": 0.0,
+    "bull_case": "市場情緒轉好",
+    "bear_case": "情緒反轉風險",
+    "sector_view": "板塊追漲機會",
+    "macro_view": "風險偏好提升",
+    "binary_flag": false,
+    "advance_reason": "futu_news"
+  },
+  "thread": [
+    {
+      "comment_id": "c0",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T02:29:52Z",
+      "latency_ms": 23127,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "JPM 立論核心：**DRAM/NAND 現貨價漲幅已足以蓋過三星罷工的產出損失**，這暗示記憶體週期供需吃緊比想像更剛性。罷工反而壓抑供給端、加速漲價斜率，對 **SK Hynix (非美上市) / Micron (MU)** 是純利多，因為三星 HBM3e 良率落後 Hynix 已是公開秘密，罷工只會放大這個 gap。AI capex 拉動 **HBM3e** 需求，Blackwell / MI300X 出貨吃緊 HBM 配額，**NVDA / AMD** 間接受惠於記憶體供應穩定。回調買入點：MU 若因恐慌性 sell-off 跌破 20MA，是加碼點。風險：若罷工兩週內收斂、Q3 供給恢復，價格修正會比現貨指數預期快。",
+        "bull_points": [
+          "DRAM/NAND 現貨價已 price-in 罷工衝擊，週期上行剛性",
+          "三星 HBM3e 良率落後，罷工放大 Hynix/MU 競爭優勢",
+          "AI capex 拉動 HBM 配額吃緊，MU 回調是加碼點"
+        ],
+        "bear_points": [
+          "罷工兩週內收斂，Q3 供給恢復觸發價格快修正",
+          "三星若降價搶單反殺 Hynix/MU 報價",
+          "記憶體股估值已反映漲價，利多出盡風險"
+        ],
+        "final_take": "看多 MU/Hynix，等回調進場而非追高",
+        "entities": {
+          "tickers": [
+            "MU",
+            "NVDA",
+            "AMD",
+            "AVGO"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "Memory cycle",
+            "Korea labor disruption"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "DRAM",
+            "NAND",
+            "Blackwell",
+            "MI300X"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:memory_price_uptrend"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:samsung_strike"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "tech:HBM3e"
+          },
+          {
+            "subject": "ticker:AMD",
+            "predicate": "CUSTOMER_OF",
+            "object": "tech:HBM3e"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "COMPETES_WITH",
+            "object": "ticker:Samsung"
+          },
+          {
+            "subject": "narrative:samsung_strike",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:memory_price_uptrend"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "JPM 邏輯成立，但需觀察罷工持續時間與三星 HBM3e 良率追趕"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c1",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 0,
+      "ts": "2026-05-14T02:30:10Z",
+      "latency_ms": 17421,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "摩根大通著重於記憶體現貨價格上漲可抵銷三星罷工衝擊，但此事件更凸顯 **AI 供應鏈**中，先進製程與封裝的瓶頸。**TSMC** 的 **CoWoS-L** 等先進封裝技術，對於生產高頻寬記憶體（**HBM3e**）至關重要，而這些封裝產能本已滿載。三星罷工若導致 HBM 供應緊張，勢必加劇對 **TSMC** 產能的壓力，可能進一步限制 **AI 加速器**（如 **NVDA** 的 Blackwell 架構）的整體出貨量，而不僅是記憶體本身的供應問題。這突顯了 **TSMC** 在 AI 價值鏈中的關鍵戰略地位與潛在定價權。",
+        "bull_points": [
+          "AI 需求持續推升先進封裝產能。",
+          "HBM 供應吃緊，凸顯 CoWoS-L 重要性。",
+          "TSMC 具備 AI 價值鏈關鍵定價權。"
+        ],
+        "bear_points": [
+          "先進封裝瓶頸可能限制 AI 晶片整體產出。",
+          "HBM 供應鏈協調複雜，罷工影響深遠。"
+        ],
+        "final_take": "AI 晶片供應鏈壓力，已從記憶體延燒至先進封裝。",
+        "entities": {
+          "tickers": [
+            "TSMC",
+            "NVDA",
+            "MU",
+            "AMD"
+          ],
+          "sectors": [
+            "Information Technology",
+            "Semiconductors"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "CoWoS-L",
+            "N3P",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:AI capex"
+          },
+          {
+            "subject": "ticker:TSMC",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:NVDA"
+          },
+          {
+            "subject": "tech_keyword:HBM3e",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keyword:CoWoS-L"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "聚焦 AI 供應鏈的先進封裝瓶頸，此為前文未涵蓋的延伸。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c2",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T02:30:34Z",
+      "latency_ms": 24274,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪聚焦 MU/Hynix/TSMC CoWoS-L，遺漏**設備與材料端的二階效應**。三星若延長停工或事後**補產能擴張**，會直接拉動 **AMAT / LRCX / KLAC** 的 DRAM/HBM 設備訂單 — 三星 P3/P4 平澤廠 HBM3e 產線本就排隊擴產，罷工後追單會更急。另一個**反向角度**：JPM 「價格漲幅蓋過產出損失」隱含三星**毛利率反而擴張**（量縮價升），韓股 005930.KS ADR 投資人不該無腦砍。**禁忌點**：HBM 用 **EUV photoresist** 來自 **JSR / 信越**，三星罷工若波及光阻吃貨節奏，反而拖累 **ASML** EUV 工具 utilization 的近端 narrative。**Contra**：若 Fed 9 月不降息、AI capex guide 下修，HBM spot 漲價可能是**最後一波 squeeze**，MU 追高風險不對稱。",
+        "bull_points": [
+          "三星補產能利多 AMAT/LRCX/KLAC 設備訂單",
+          "量縮價升下三星記憶體部門毛利率反擴張",
+          "HBM 缺貨延長 MU 漲價週期至 2026 H1"
+        ],
+        "bear_points": [
+          "HBM spot 漲價恐為 cycle 末段 squeeze",
+          "罷工拖累 EUV 光阻吃貨節奏壓 ASML utilization",
+          "Fed 不降息+AI capex 下修則 MU 追高不對稱"
+        ],
+        "final_take": "看多設備鏈 AMAT/LRCX，MU 等回調再進",
+        "entities": {
+          "tickers": [
+            "AMAT",
+            "LRCX",
+            "KLAC",
+            "MU",
+            "ASML",
+            "NVDA"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM3e supply",
+            "Memory cycle"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "EUV photoresist",
+            "CoWoS-L",
+            "DRAM",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:AMAT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:samsung-hbm-capex-rebuild"
+          },
+          {
+            "subject": "ticker:LRCX",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:samsung-hbm-capex-rebuild"
+          },
+          {
+            "subject": "ticker:KLAC",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:samsung-hbm-capex-rebuild"
+          },
+          {
+            "subject": "ticker:ASML",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:euv-photoresist-disruption"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e-squeeze-extended"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增設備鏈二階效應與 EUV 光阻 contra 角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c3",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 1,
+      "ts": "2026-05-14T02:32:47Z",
+      "latency_ms": 132851,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "摩根大通雖預期記憶體現貨價漲勢能抵銷三星罷工衝擊，但事件更突顯先進記憶體（如 HBM）生產中的品質控制與良率挑戰。三星罷工期間，為了在重啟後維持 HBM 製程的純淨度與良率，**Entegris (ENTG)** 這類高階材料供應商的角色益發關鍵。其先進過濾與特用化學品對於避免製程汙染至關重要。這顯示 AI 記憶體供應鏈的瓶頸，不僅在於產能，更在於能確保最高良率的先進材料與製程技術的穩定性。",
+        "bull_points": [
+          "**Entegris (ENTG)** 受惠於先進記憶體製程對材料純淨度的嚴格要求。",
+          "罷工凸顯 AI 記憶體良率控管對高階材料的依賴。"
+        ],
+        "bear_points": [
+          "罷工衝擊 **NAND** 價格與市場穩定性。",
+          "JPM 低估罷工對 **DRAM** 供應鏈的長期風險。"
+        ],
+        "final_take": "應觀察罷工對 DRAM/NAND 的長期影響。",
+        "entities": {
+          "tickers": [
+            "SAMSUNG",
+            "ENTG",
+            "NVDA",
+            "MU",
+            "TSMC",
+            "WDC"
+          ],
+          "sectors": [
+            "Semiconductors & Semiconductor Equipment"
+          ],
+          "themes": [
+            "AI capex",
+            "Advanced Packaging",
+            "Memory Supply Chain",
+            "Yield Management",
+            "NAND Flash",
+            "DRAM"
+          ],
+          "tech_keywords": [
+            "HBM",
+            "Contamination Control",
+            "Specialty Chemicals"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:ENTG",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:SAMSUNG"
+          },
+          {
+            "subject": "ticker:ENTG",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:advanced_memory_yield_requirements"
+          },
+          {
+            "subject": "ticker:SAMSUNG",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:NAND_flash_market"
+          },
+          {
+            "subject": "ticker:SAMSUNG",
+            "predicate": "SUPPLIES_TO",
+            "object": "narrative:DRAM_market"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入 ENTG 材料商，並關注 NAND/DRAM 潛在風險。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c4",
+      "agent": "claude",
+      "agent_role_label": {
+        "en": "Analyst-A (Claude)",
+        "zh": "分析師 A (Claude)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T02:33:15Z",
+      "latency_ms": 27762,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前輪覆蓋 MU/Hynix/TSMC CoWoS-L/AMAT-LRCX-KLAC/ENTG 材料端，**遺漏的關鍵節點是 HBM 測試與後段設備**。HBM3e 12-Hi 堆疊良率痛點在 **TC-NCF bonding** 與 **KGSD (Known-Good Stacked Die) 測試**，這塊由 **Teradyne (TER) / Advantest (非美上市)** 寡占。三星罷工若導致 HBM 出貨延後，下游 NVDA/AMD 會被迫**加倍下單 Hynix/MU 的 HBM3e**，而每顆 HBM3e 12-Hi 的測試時間是傳統 DRAM 的 5-8 倍，**TER 的 HBM tester 訂單能見度可望從 2026 H2 拉長到 2027**。另一個**反向警訊**：JPM 邏輯隱含「現貨價持續強」，但 **DRAMeXchange 11 月合約價**已出現 mobile DRAM 漲幅放緩（智慧型手機需求疲軟），若 server HBM 與 commodity DRAM 解耦加速，MU 的 mix shift 故事還在，但 **Western Digital (WDC) / Kioxia** NAND 部位反而曝險於消費端疲弱。",
+        "bull_points": [
+          "HBM3e 12-Hi 測試時間暴增,Teradyne 訂單能見度延長至 2027",
+          "三星復工後補產能,DRAM/HBM 設備追單加速 TER/AMAT 利多",
+          "Hynix/MU 接走轉單,HBM 配額談判力上升"
+        ],
+        "bear_points": [
+          "Mobile DRAM 合約價漲幅放緩,消費端需求分歧",
+          "WDC/Kioxia NAND 曝險消費端,非 AI 純受惠者",
+          "罷工若快速收斂,HBM tester 訂單 pull-in 預期落空"
+        ],
+        "final_take": "看多 TER 與 MU,但須監控 server/mobile DRAM 解耦速度",
+        "entities": {
+          "tickers": [
+            "TER",
+            "MU",
+            "NVDA",
+            "AMD",
+            "WDC"
+          ],
+          "sectors": [
+            "Semiconductors",
+            "Semiconductor Equipment",
+            "Information Technology"
+          ],
+          "themes": [
+            "AI capex",
+            "HBM supply chain",
+            "Memory cycle"
+          ],
+          "tech_keywords": [
+            "HBM3e",
+            "12-Hi stacking",
+            "TC-NCF bonding",
+            "KGSD testing",
+            "Blackwell"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:TER",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:hbm3e_testing_bottleneck"
+          },
+          {
+            "subject": "ticker:MU",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:samsung_strike_share_shift"
+          },
+          {
+            "subject": "ticker:WDC",
+            "predicate": "HEADWIND_FROM",
+            "object": "narrative:mobile_dram_weakness"
+          },
+          {
+            "subject": "ticker:TER",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:MU"
+          },
+          {
+            "subject": "ticker:NVDA",
+            "predicate": "CUSTOMER_OF",
+            "object": "ticker:MU"
+          }
+        ],
+        "done": false,
+        "confidence": 0.72,
+        "rationale_short": "新增 HBM 測試端 TER 二階效應 + mobile DRAM 解耦反向警訊"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c5",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "round": 2,
+      "ts": "2026-05-14T02:33:41Z",
+      "latency_ms": 25890,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "三星罷工事件凸顯了高頻寬記憶體 (HBM) 供應的結構性瓶頸與價格波動風險。此情況可能加速 **CXL (Compute Express Link)** 技術的採納，該技術透過記憶體擴展與匯流，使系統能在不完全依賴高價 HBM 的情況下，達到所需的記憶體容量與頻寬。這將有助於降低 AI 系統（特別是推論和部分訓練任務）的總體擁有成本與設計複雜度，並為 CXL 生態系的參與者帶來新機遇。",
+        "bull_points": [
+          "HBM 供應緊張促使 CXL 技術加速落地。",
+          "記憶體匯流與擴展降低對高價 HBM 的依賴。",
+          "AI 系統建置成本及複雜度有望下降。"
+        ],
+        "bear_points": [
+          "CXL 技術於頂級 AI 訓練的成熟度待驗證。",
+          "生態系整合與互通性仍有挑戰。"
+        ],
+        "final_take": "CXL 技術是應對未來 AI 記憶體挑戰的關鍵。",
+        "entities": {
+          "tickers": [],
+          "sectors": [
+            "Semiconductors",
+            "Computer Systems"
+          ],
+          "themes": [
+            "CXL",
+            "AI Memory",
+            "Memory Pooling",
+            "HBM scarcity"
+          ],
+          "tech_keywords": [
+            "CXL"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "theme:CXL",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:HBM scarcity"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "CXL 作為 HBM 供應瓶頸下的解決方案，將加速採用。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "AMAT",
+        "AMD",
+        "ASML",
+        "AVGO",
+        "ENTG",
+        "KLAC",
+        "LRCX",
+        "MU",
+        "NVDA",
+        "SAMSUNG",
+        "TER",
+        "TSMC",
+        "WDC"
+      ],
+      "sectors": [
+        "Computer Systems",
+        "Information Technology",
+        "Semiconductor Equipment",
+        "Semiconductors",
+        "Semiconductors & Semiconductor Equipment"
+      ],
+      "themes": [
+        "AI Memory",
+        "AI capex",
+        "Advanced Packaging",
+        "CXL",
+        "DRAM",
+        "HBM scarcity",
+        "HBM supply chain",
+        "HBM3e",
+        "HBM3e supply",
+        "Korea labor disruption",
+        "Memory Pooling",
+        "Memory Supply Chain",
+        "Memory cycle",
+        "NAND Flash",
+        "Yield Management"
+      ],
+      "tech_keywords": [
+        "12-Hi stacking",
+        "Blackwell",
+        "CXL",
+        "CoWoS-L",
+        "Contamination Control",
+        "DRAM",
+        "EUV photoresist",
+        "HBM",
+        "HBM3e",
+        "KGSD testing",
+        "MI300X",
+        "N3P",
+        "NAND",
+        "Specialty Chemicals",
+        "TC-NCF bonding"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:memory_price_uptrend"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:samsung_strike"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "tech:HBM3e"
+      },
+      {
+        "subject": "ticker:AMD",
+        "predicate": "CUSTOMER_OF",
+        "object": "tech:HBM3e"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:Samsung"
+      },
+      {
+        "subject": "narrative:samsung_strike",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:memory_price_uptrend"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:AI capex"
+      },
+      {
+        "subject": "ticker:TSMC",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:NVDA"
+      },
+      {
+        "subject": "tech_keyword:HBM3e",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keyword:CoWoS-L"
+      },
+      {
+        "subject": "ticker:AMAT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:samsung-hbm-capex-rebuild"
+      },
+      {
+        "subject": "ticker:LRCX",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:samsung-hbm-capex-rebuild"
+      },
+      {
+        "subject": "ticker:KLAC",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:samsung-hbm-capex-rebuild"
+      },
+      {
+        "subject": "ticker:ASML",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:euv-photoresist-disruption"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e-squeeze-extended"
+      },
+      {
+        "subject": "ticker:ENTG",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:SAMSUNG"
+      },
+      {
+        "subject": "ticker:ENTG",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:advanced_memory_yield_requirements"
+      },
+      {
+        "subject": "ticker:SAMSUNG",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:NAND_flash_market"
+      },
+      {
+        "subject": "ticker:SAMSUNG",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:DRAM_market"
+      },
+      {
+        "subject": "ticker:TER",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:hbm3e_testing_bottleneck"
+      },
+      {
+        "subject": "ticker:MU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:samsung_strike_share_shift"
+      },
+      {
+        "subject": "ticker:WDC",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:mobile_dram_weakness"
+      },
+      {
+        "subject": "ticker:TER",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:MU"
+      },
+      {
+        "subject": "ticker:NVDA",
+        "predicate": "CUSTOMER_OF",
+        "object": "ticker:MU"
+      },
+      {
+        "subject": "theme:CXL",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:HBM scarcity"
+      }
+    ],
+    "bull_summary": [
+      "DRAM/NAND 現貨價已 price-in 罷工衝擊，週期上行剛性",
+      "三星 HBM3e 良率落後，罷工放大 Hynix/MU 競爭優勢",
+      "AI capex 拉動 HBM 配額吃緊，MU 回調是加碼點",
+      "AI 需求持續推升先進封裝產能。",
+      "HBM 供應吃緊，凸顯 CoWoS-L 重要性。",
+      "TSMC 具備 AI 價值鏈關鍵定價權。"
+    ],
+    "bear_summary": [
+      "罷工兩週內收斂，Q3 供給恢復觸發價格快修正",
+      "三星若降價搶單反殺 Hynix/MU 報價",
+      "記憶體股估值已反映漲價，利多出盡風險",
+      "先進封裝瓶頸可能限制 AI 晶片整體產出。",
+      "HBM 供應鏈協調複雜，罷工影響深遠。",
+      "HBM spot 漲價恐為 cycle 末段 squeeze"
+    ],
+    "final_take": "CXL 技術是應對未來 AI 記憶體挑戰的關鍵。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-14T02:33:41Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, CUSTOMER_OF, HEADWIND_FROM"
+  },
+  "errors": [],
+  "graph_promoted_at": null,
+  "graph_status": "provisional"
+}
