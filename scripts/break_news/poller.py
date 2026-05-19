@@ -17,6 +17,7 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -50,6 +51,8 @@ FUTU_ENABLED = os.environ.get("BREAK_NEWS_FUTU_ENABLED", "1") not in ("0", "fals
 FUTU_MAX_PER_CYCLE = int(os.environ.get("BREAK_NEWS_FUTU_MAX_PER_CYCLE", "30"))
 SOCIAL_ENABLED = os.environ.get("BREAK_NEWS_SOCIAL_ENABLED", "1") not in ("0", "false", "no")
 SOCIAL_GATE_MIN_SCORE = float(os.environ.get("BREAK_NEWS_SOCIAL_GATE_MIN_SCORE", "3"))
+SESSION_RESERVE = int(os.environ.get("BREAK_NEWS_SESSION_RESERVE", "25"))
+SESSION_TZ = ZoneInfo("America/New_York")
 
 _last_feed_stats: list[dict] = []
 
@@ -65,6 +68,26 @@ def _count_today() -> int:
     for p in store.STORE_DIR.glob(f"bn_{today}_*.json"):
         n += 1
     return n
+
+
+def _in_us_news_window(now_utc: datetime | None = None) -> bool:
+    """True during the high-value US market news window.
+
+    Uses America/New_York so DST is handled by the stdlib. The window starts
+    before regular session for pre-market news and extends past close for
+    late-day headlines.
+    """
+    now = (now_utc or datetime.now(timezone.utc)).astimezone(SESSION_TZ)
+    start = now.replace(hour=7, minute=0, second=0, microsecond=0)
+    end = now.replace(hour=18, minute=0, second=0, microsecond=0)
+    return start <= now <= end
+
+
+def _auto_budget_limit(now_utc: datetime | None = None) -> tuple[int, bool]:
+    in_window = _in_us_news_window(now_utc)
+    if in_window:
+        return DAILY_MAX, True
+    return max(0, DAILY_MAX - max(0, SESSION_RESERVE)), False
 
 
 def gate(score: float, credibility: str, binary: bool) -> tuple[bool, str | None]:
@@ -85,6 +108,23 @@ def social_gate(score: float, binary: bool) -> tuple[bool, str | None]:
     if binary and abs(score) >= GATE_MIN_SCORE:
         return True, "social_binary_score"
     return False, None
+
+
+def _candidate_priority(c: dict) -> tuple:
+    """Higher tuple wins. Spend LLM budget on high-impact fresh items first."""
+    score = abs(float(c.get("score") or 0.0))
+    cred_rank = {"HIGH": 2, "MEDIUM": 1, "LOW": 0}.get(
+        str(c.get("credibility") or "").upper(), 0)
+    dt = c.get("published_dt")
+    ts = dt.astimezone(timezone.utc).timestamp() if dt else 0.0
+    return (
+        score,
+        1 if c.get("binary") else 0,
+        cred_rank,
+        0 if c.get("is_social") else 1,
+        1 if c.get("is_futu") else 0,
+        ts,
+    )
 
 
 def fetch_fresh_items(window_hours: int) -> list[dict]:
@@ -178,7 +218,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
 
     seen = store.load_seen()
     today_count = _count_today()
-    cost_guard_remaining = max(DAILY_MAX - today_count, 0)
+    auto_budget_limit, us_news_window_open = _auto_budget_limit(started)
+    cost_guard_remaining = max(auto_budget_limit - today_count, 0)
 
     new_items = 0
     new_items_futu = 0
@@ -188,6 +229,7 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
     duplicates = 0
     advanced_ids: list[str] = []
     raw_entries: list[dict] = []   # every fetched non-dup item, for the un-gated UI feed
+    debate_candidates: list[dict] = []
 
     for raw in items:
         key = store.hash_key(raw.get("url"), raw.get("_fp"))
@@ -272,35 +314,49 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             gated_out += 1
             continue
 
+        debate_candidates.append({
+            "key": key,
+            "headline": headline[:200],
+            "raw_summary": summary[:400],
+            "source": source,
+            "triage": triage,
+            "raw_entry": raw_entry,
+            "score": score,
+            "binary": binary,
+            "credibility": raw.get("source_credibility", "MEDIUM"),
+            "published_dt": raw.get("_dt"),
+            "is_futu": is_futu,
+            "is_social": is_social,
+        })
+
+    debate_candidates.sort(key=_candidate_priority, reverse=True)
+
+    for c in debate_candidates:
         if cost_guard_remaining <= 0:
             gated_cost += 1
             continue
-
-        # bn-creation is capped per cycle; raw-stream capture above is not, so
-        # we `continue` (not `break`) once the cap is hit — trailing items still
-        # land in the un-gated feed.
         if new_items >= MAX_ITEMS_PER_CYCLE:
+            gated_cost += 1
             continue
-
         if dry_run:
             new_items += 1
-            if is_futu:
+            if c["is_futu"]:
                 new_items_futu += 1
-            if is_social:
+            if c["is_social"]:
                 new_items_social += 1
             cost_guard_remaining -= 1
             continue
 
         nid = store.init_item(
-            source=source, triage=triage,
-            headline=headline[:200], raw_summary=summary[:400],
+            source=c["source"], triage=c["triage"],
+            headline=c["headline"], raw_summary=c["raw_summary"],
         )
-        raw_entry["news_id"] = nid
+        c["raw_entry"]["news_id"] = nid
         advanced_ids.append(nid)
         new_items += 1
-        if is_futu:
+        if c["is_futu"]:
             new_items_futu += 1
-        if is_social:
+        if c["is_social"]:
             new_items_social += 1
         cost_guard_remaining -= 1
 
@@ -323,8 +379,12 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         "items_gated_out": gated_out,
         "items_gated_cost": gated_cost,
         "duplicates_skipped": duplicates,
+        "debate_candidates": len(debate_candidates),
         "raw_stream_size": raw_stream_size,
         "cost_guard_remaining": cost_guard_remaining,
+        "auto_budget_limit": auto_budget_limit,
+        "session_reserve": SESSION_RESERVE,
+        "us_news_window_open": us_news_window_open,
         "advanced_ids": advanced_ids,
         "futu_enabled": FUTU_ENABLED and FUTU_AVAILABLE,
         "social_enabled": SOCIAL_ENABLED and SOCIAL_AVAILABLE,

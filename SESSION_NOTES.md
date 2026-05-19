@@ -1,7 +1,23 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-19 (v3.8.1)
+> **Last Updated**: 2026-05-19 (v3.9.3)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.9.2 → v3.9.3) — Market-wide 公司名誤中修正
+
+使用者指出 `_MARKET_WIDE_PATTERNS` 仍有低頻裸 token 誤中: `dollar` 會吃 Dollar General / Dollar Tree, `dow` 會吃 Dow Inc, `s&p` 會吃 S&P Global。修成明確宏觀/指數語境: `US dollar/dollar index/DXY`; `Dow Jones/Dow futures/DJIA`; `S&P 500/S&P futures/SPX/SPY`。避免個股公司名回流 Market Consensus。bump 3.9.2→3.9.3。
+
+## 🟢 Session Note (v3.9.1 → v3.9.2) — Market-wide 判定收斂
+
+Claude review 指出 V3.9.1 合理但有兩個 polish: (1) `_MARKET_WIDE_PATTERNS` 裸 `rates/oil/gold/war/yield` 太寬,會把 price war、油金個股財報、公司貸款利率等個股新聞拉回 Market Consensus,造成「過於敏感」；(2) digest pass 沒把 `affected_sectors/tickers_mentioned` 傳給 `_is_market_wide()`,導致 high-quality digest 的 multi-sector `sector_news` 比 break-news debate 更難進 market。修:收窄 regex 為 `interest rates/fed rate/rate outlook/rate cut|hike`、`Treasury yields/market/auction/selloff/retreat`、`oil prices/crude oil`、`gold prices`、`trade war/Iran war/Ukraine war`;digest sectors/tickers 包成 entities 傳入。驗證:最近 12h market events 10,合計 -3.7,未見裸 keyword 噪音回流。bump 3.9.1→3.9.2。
+
+## 🟢 Session Note (v3.9.0 → v3.9.1) — Break News Market Consensus 校準
+
+使用者貼圖指出 Break News 市場情緒 +0.87 明顯不合理,因當時市場已連跌三天。只讀診斷:最近 12h 有 67 個事件合計 +5.99,但多數是個股/小題材 bullish debate；同時 bearish digest 如 `Wall St futures fall...` / `oil and yield shocks` 因 `verdict=None` 被算 0；`_event_weight()` 用 signed score,負分被 clamp 到最低 0.25,低估 BEARISH。修:(1) `_event_weight()` 改 `abs(score)`,方向只由 verdict / sign 決定。(2) digest sign fallback `sign(net_impact_score)`。(3) `__ALL__` 改 Market Consensus,只吃 systemic/macro/monetary/geopolitical/broad-market headline；個股新聞仍進 sector/theme,不再等權推高 market。(4) closed debate time 優先 `source.published`,缺失才 `fetched_at`。(5) `trend-chart.js` label 改 Market Consensus / Raw Pulse,meta 顯示 `market_event_count/log_count`。驗證:最近 12h market events 67→11,貢獻 -4.2,`__ALL__` 尾端約 -0.81；Raw Pulse 獨立仍在。bump 3.9.0→3.9.1。
+
+## 🟢 Session Note (v3.8.1 → v3.9.0) — Break News quota pacing + Raw Pulse
+
+使用者指出 source 變多後,今日 LLM debate quota 很快燒完,後半天新聞停在 raw stream,情緒圖仍看 5-6h 前的 closed debate。Claude review 同意診斷並修正方案:raw 不應 blend 進 Market consensus,應獨立成 Raw Pulse；UTC 線性 pacing 不適合美股,改 score-ranked admission + 美股時段 reserve。實作:(1) `poller.py` 兩段式 admission:先收 raw + candidates,再依 priority(`abs(shallow_score)`, binary, credibility, 非 social, Futu tie-break, freshness)排序後消耗 budget。(2) 新 `BREAK_NEWS_SESSION_RESERVE=25`:非 07:00-18:00 America/New_York 時段最多用 `DAILY_MAX-reserve`,美股新聞時段釋放全額；state 加 `debate_candidates/auto_budget_limit/session_reserve/us_news_window_open`。(3) `store.save_raw_stream()` 預設 72h/500 筆,env 可調,支援 3 日 Raw Pulse。(4) `trend_rollup.py` 新增 `__RAW_PULSE__` kind=pulse,用 raw signed `shallow_score`,低權重、只 market-level、fingerprint 跳過 digest/closed debate,不污染 `__ALL__` consensus。(5) `trend-chart.js` 認 pulse,full selector 永遠保留「即時脈搏 / Raw Pulse」,首頁 compact 仍看乾淨 Market。驗證:py_compile ok; network dry-run ok(`auto_budget_limit=60`, `us_news_window_open=True`, `debate_candidates=22`); trend_rollup 產生 `raw_pulse_count=36`。bump 3.8.1→3.9.0。
 
 ## 🟢 Session Note (v3.8.0 → v3.8.1) — Break News 辯論氣泡左右/配色修正
 

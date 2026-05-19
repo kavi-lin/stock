@@ -10,6 +10,109 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.9.3] — 2026-05-19 — Market-wide 公司名誤中修正
+
+### Fixed — Dollar / Dow / S&P 裸 token 誤判
+
+V3.9.2 收窄多數 broad-market regex 後，仍保留少數裸 token 可能誤中公司名：
+`Dollar General` / `Dollar Tree`、`Dow Inc`、`S&P Global`。本版改為只匹配明確
+指數或宏觀語境：
+
+- `dollar` → `US dollar` / `dollar index` / `DXY`
+- `dow` → `Dow Jones` / `Dow futures` / `DJIA`
+- `s&p` → `S&P 500` / `S&P futures` / `SPX` / `SPY`
+
+---
+
+## [3.9.2] — 2026-05-19 — Market-wide 判定收斂
+
+### Changed — 收窄 Market Consensus 的 broad-market regex
+
+V3.9.1 的方向修正有效，但 market-wide regex 仍有裸 `rates/oil/gold/war/yield`
+等寬匹配，可能把 `price war`、油金個股財報、公司貸款利率等個股新聞拉回
+Market Consensus。本版收窄為明確宏觀語境：
+
+- `interest rates` / `fed rate` / `rate outlook` / `rate cut|hike`
+- `Treasury yields/market/auction/selloff/retreat`
+- `oil prices` / `crude oil`、`gold prices`
+- `trade war`、`Iran war`、`Ukraine war`
+
+### Fixed — digest market-wide 判定帶入 affected sectors
+
+committee digest 本身有 `affected_sectors` / `tickers_mentioned`，但 V3.9.1 沒把
+它傳給 `_is_market_wide()`，導致 digest 的 multi-sector `sector_news` 比
+break-news debate 更難進 Market Consensus。本版把 digest sectors/tickers 包成
+entities 傳入，讓 high-quality digest 與 debate 使用同一套判定。
+
+驗證：最近 12h market events 維持精簡（10 筆），合計貢獻約 `-3.7`；未見裸
+keyword 導致的個股噪音回流。
+
+---
+
+## [3.9.1] — 2026-05-19 — Break News Market Consensus 校準
+
+### Fixed — 市場共識線被個股 bullish 新聞推得過高
+
+V3.9.0 後圖上 `Market` 仍顯示高情緒，但當日大盤已連跌。診斷發現 trend rollup
+有三個偏多來源：
+
+- `_event_weight()` 用 signed score 算權重，`BEARISH -2` 被 clamp 成最低權重
+  `-0.25`，低估負面事件。
+- digest 有 signed `net_impact_score` 但 `verdict` 缺失時，原本 sign=0，導致
+  「futures fall / oil-yield shocks」這類負面 headline 不入帳。
+- `__ALL__` 把所有個股/小題材 closed debate 等權加到 market line，POET / INOD /
+  target increase 類個股 bullish 新聞把大盤線推高。
+
+修正：
+
+- `_event_weight()` 改用 `abs(score)`；方向只由 verdict 或 signed impact 決定。
+- digest verdict 缺失時 fallback `sign(net_impact_score)`。
+- `__ALL__` 改為 Market Consensus，只吃 macro / monetary / geopolitical / broad
+  market headline；個股新聞仍進 sector/theme，不再等權推高大盤線。
+- closed debate 時間優先用 source `published`，缺失才 fallback `fetched_at`。
+- `trend-chart.js` label 改成 Market Consensus / Raw Pulse，meta 顯示
+  `market_event_count/log_count`。
+
+驗證：最近 12h market events 由泛新聞 67 筆縮到 11 筆，合計貢獻 `-4.2`；
+`__ALL__` 尾端從約 `+0.87` 轉為約 `-0.81`，方向與盤面壓力一致。
+
+---
+
+## [3.9.0] — 2026-05-19 — Break News quota pacing + Raw Pulse
+
+### Added — Raw Pulse 即時脈搏線
+
+Break News source 擴充後，raw stream 已能更快抓到市場訊號，但趨勢圖原本只吃
+committee digest + closed debate，LLM quota 用完後半天情緒線就不動。本版新增
+獨立 `__RAW_PULSE__` 線：
+
+- `trend_rollup.py` 讀 `_raw_stream.json`，用 raw item 既有 signed `shallow_score`
+  產生低權重即時脈搏。
+- Raw Pulse 是獨立 `kind: pulse`，不混入 `__ALL__` market consensus，也不產
+  sector/theme，避免雜訊污染權威辯論線與 EMA scale。
+- raw headline fingerprint 若已被 committee digest 或 closed debate 覆蓋則跳過，
+  避免 raw→debate 雙算。
+- `trend-chart.js` 認 `kind: pulse`，full mode selector 永遠保留「即時脈搏 /
+  Raw Pulse」選項；compact 首頁仍鎖定乾淨的 whole-market consensus。
+
+### Changed — LLM debate admission 改成分數排序 + 美股時段保留
+
+- `poller.py` 改兩段式 admission：第一段只收 raw entries + debate candidates；
+  第二段依 priority 排序後才消耗 LLM 預算。priority = `abs(shallow_score)`、
+  binary、source credibility、非社群優先、Futu tie-break、freshness。
+- 新增 `BREAK_NEWS_SESSION_RESERVE=25`。非美股新聞時段最多使用
+  `DAILY_MAX - reserve`，07:00-18:00 America/New_York 才釋放全日額度。
+- poller state 新增 `debate_candidates`、`auto_budget_limit`、
+  `session_reserve`、`us_news_window_open`，方便 debug 為何候選被擋。
+
+### Changed — raw stream retention
+
+- `_raw_stream.json` 保留期由 24h/150 筆改為可設定，預設
+  `BREAK_NEWS_RAW_STREAM_MAX_AGE_H=72`、`BREAK_NEWS_RAW_STREAM_CAP=500`，
+  讓 Raw Pulse 能覆蓋完整 3 日趨勢圖。
+
+---
+
 ## [3.8.1] — 2026-05-19 — Break News 辯論氣泡左右/配色修正
 
 ### Fixed — codex ↔ gemini 辯論兩邊都靠右藍色

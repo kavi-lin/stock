@@ -58,8 +58,29 @@ _MIN_EVENTS = 3             # sector/theme needs this many events to be plotted
 _TOP_ENTITIES = 12          # cap selectable sectors / themes (by activity)
 
 _ALL_KEY = "__ALL__"
+_RAW_PULSE_KEY = "__RAW_PULSE__"
 _VERDICT_SIGN = {"BULLISH": 1.0, "BEARISH": -1.0}  # others -> 0
 _CRED_MULT = {"HIGH": 1.0, "MEDIUM": 0.7, "LOW": 0.4}
+_RAW_PULSE_MULT = 0.25
+_RAW_SOCIAL_PULSE_MULT = 0.15
+_SYSTEMIC_TYPES = {"monetary_policy", "macro_data", "geopolitical"}
+_MARKET_WIDE_PATTERNS = [
+    re.compile(p, re.I) for p in [
+        r"\bstock market\b", r"\bstocks (?:open|close|fall|falls|fell|rise|rises|rose|rally|rallies|slide|slides|lower|higher|mixed)\b",
+        r"\bwall st(?:reet)? futures\b", r"\bfutures\b", r"\brisk assets?\b",
+        r"\bnasdaq\b",
+        r"\bdow jones\b", r"\bdow futures\b", r"\bdjia\b",
+        r"\bs&p 500\b", r"\bs&p futures\b", r"\bspx\b", r"\bqqq\b", r"\bspy\b",
+        r"\btreasur(?:y|ies|ys) (?:yield|yields|market|auction|selloff|retreat)\b",
+        r"\b(?:10-year|2-year|30-year) yields?\b", r"\binterest rates?\b",
+        r"\bfed rate\b", r"\brate outlook\b", r"\brate cuts?\b", r"\brate hikes?\b",
+        r"\bfed\b", r"\bfomc\b", r"\binflation\b", r"\bcpi\b", r"\bpce\b",
+        r"\bgdp\b", r"\bjobs report\b", r"\bpayroll\b", r"\bunemployment\b",
+        r"\boil prices?\b", r"\bcrude oil\b", r"\bgold prices?\b",
+        r"\bus dollar\b", r"\bdollar index\b", r"\bdxy\b", r"\bvix\b",
+        r"\btariff", r"\btrade war\b", r"\biran war\b", r"\bukraine war\b",
+    ]
+]
 
 # Hand-curated theme aliases — fold obvious free-text duplicates onto a
 # canonical key. Keys + values are pre-normalized (lowercase, single-spaced).
@@ -105,11 +126,51 @@ def _event_weight(shallow_score, credibility) -> float:
     """Impact weight for one news event: bigger triage score + more credible
     source -> stronger nudge on the sentiment index."""
     try:
-        s = float(shallow_score)
+        s = abs(float(shallow_score))
     except (TypeError, ValueError):
         s = 2.0
     impact = min(2.0, max(0.25, s / 4.0))
     return impact * _CRED_MULT.get(str(credibility or "").upper(), 0.7)
+
+
+def _signed_value(v) -> float:
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return 0.0
+    if x > 0:
+        return 1.0
+    if x < 0:
+        return -1.0
+    return 0.0
+
+
+def _digest_sign(v: dict) -> float:
+    sign = _VERDICT_SIGN.get(str(v.get("verdict") or "").upper())
+    if sign is not None:
+        return sign
+    return _signed_value(v.get("net_impact_score"))
+
+
+def _is_market_wide(headline: str, news_type: str | None,
+                    entities: dict | None = None) -> bool:
+    """Whether this item should move the whole-market consensus line.
+
+    Company-specific bullish/bearish news still affects sector/theme lines, but
+    it should not dominate the market line.
+    """
+    ntype = str(news_type or "").lower()
+    if ntype in _SYSTEMIC_TYPES:
+        return True
+    text = str(headline or "")
+    if any(p.search(text) for p in _MARKET_WIDE_PATTERNS):
+        return True
+    ent = entities or {}
+    sectors = ent.get("sectors") or []
+    tickers = ent.get("tickers") or []
+    # Broad sector/news items with no obvious single-stock anchor can move the
+    # market line; stock-specific sector news remains sector-only.
+    return ntype == "sector_news" and len(sectors) >= 2 and len(tickers) <= 2
 
 
 def _ema_series(buckets):
@@ -158,15 +219,21 @@ def compute_trends(now_utc: datetime | None = None,
         return i if 0 <= i < n else None
 
     log_count = 0
+    market_event_count = 0
+    raw_pulse_count = 0
 
-    def _add_event(idx, contrib_val, sectors, themes):
+    _slot(_RAW_PULSE_KEY, "Raw Pulse", "pulse")
+
+    def _add_event(idx, contrib_val, sectors, themes, add_market: bool = True):
         """Accumulate one signed event into the market line + its sector/theme
         lines. `contrib_val` already carries sign × weight."""
-        nonlocal log_count
+        nonlocal log_count, market_event_count
         log_count += 1
-        _slot(_ALL_KEY, "Market", "all")
-        contrib[_ALL_KEY][idx] += contrib_val
-        meta[_ALL_KEY]["events"] += 1
+        if add_market:
+            market_event_count += 1
+            _slot(_ALL_KEY, "Market", "all")
+            contrib[_ALL_KEY][idx] += contrib_val
+            meta[_ALL_KEY]["events"] += 1
         seen = set()
         for raw in sectors or []:
             name = _norm_sector(str(raw))
@@ -188,6 +255,17 @@ def compute_trends(now_utc: datetime | None = None,
             contrib[key][idx] += contrib_val
             meta[key]["events"] += 1
 
+    def _add_raw_pulse(idx, contrib_val):
+        """Fast, non-LLM pulse from raw stream shallow_score.
+
+        Kept on its own line so noisy source volume cannot distort the
+        consensus market / sector / theme series.
+        """
+        nonlocal raw_pulse_count
+        raw_pulse_count += 1
+        contrib[_RAW_PULSE_KEY][idx] += contrib_val
+        meta[_RAW_PULSE_KEY]["events"] += 1
+
     # ── Pass 1: committee news digests ───────────────────────────────
     # Deep (4-agent) verdicts weigh 1.8×; their headlines also win the dedup
     # race against any break-news log covering the same story.
@@ -206,16 +284,24 @@ def compute_trends(now_utc: datetime | None = None,
             idx = _idx_for(_utc_dt(v.get("published")))
             if idx is None:
                 continue
-            sign = _VERDICT_SIGN.get(str(v.get("verdict") or "").upper(), 0.0)
+            sign = _digest_sign(v)
             depth_mult = _DIGEST_DEPTH_MULT.get(str(v.get("depth") or "").lower(), 1.0)
-            # net_impact_score passed as-is (may be negative) — matches how the
-            # break-news pass feeds raw shallow_score into _event_weight.
+            if sign == 0.0:
+                continue
             weight = _event_weight(v.get("net_impact_score"), "HIGH") * depth_mult
             sectors = [s.get("sector") if isinstance(s, dict) else s
                        for s in (v.get("affected_sectors") or [])]
-            _add_event(idx, sign * weight, sectors, [])
+            ent = {
+                "sectors": sectors,
+                "tickers": v.get("tickers_mentioned") or [],
+            }
+            _add_event(
+                idx, sign * weight, sectors, [],
+                add_market=_is_market_wide(headline, v.get("news_type"), ent),
+            )
 
     # ── Pass 2: break-news debate logs ───────────────────────────────
+    debate_fps: set = set()
     for path in sorted(store.STORE_DIR.glob("bn_*.json")):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -223,27 +309,57 @@ def compute_trends(now_utc: datetime | None = None,
             continue
         if data.get("state") not in _USABLE_STATES:
             continue
-        idx = _idx_for(_utc_dt(data.get("fetched_at")))
+        src = data.get("source") or {}
+        idx = _idx_for(_utc_dt(src.get("published")) or _utc_dt(data.get("fetched_at")))
         if idx is None:
             continue
         headline = str(data.get("headline") or "")
-        if headline and headline_fingerprint(headline) in digest_fps:
+        fp = headline_fingerprint(headline) if headline else ""
+        if fp:
+            debate_fps.add(fp)
+        if fp and fp in digest_fps:
             continue  # already counted via the higher-quality digest verdict
 
         summary = data.get("summary") or {}
         sign = _VERDICT_SIGN.get(
             str(summary.get("consensus_verdict") or "").upper(), 0.0)
         triage = data.get("triage") or {}
-        src = data.get("source") or {}
         weight = _event_weight(triage.get("shallow_score"), src.get("credibility"))
         ent = summary.get("merged_entities") or {}
-        _add_event(idx, sign * weight, ent.get("sectors"), ent.get("themes"))
+        if sign == 0.0:
+            continue
+        _add_event(
+            idx, sign * weight, ent.get("sectors"), ent.get("themes"),
+            add_market=_is_market_wide(headline, triage.get("news_type"), ent),
+        )
+
+    # ── Pass 3: raw-stream fast pulse ────────────────────────────────
+    # Raw entries carry a signed shallow_score, so they provide a no-LLM,
+    # low-authority pulse. Do not blend into the consensus market line.
+    for e in store.load_raw_stream():
+        idx = _idx_for(_utc_dt(e.get("fetched_at")))
+        if idx is None:
+            continue
+        headline = str(e.get("headline") or "")
+        fp = e.get("feed_fingerprint") or (headline_fingerprint(headline) if headline else "")
+        if fp and (fp in digest_fps or fp in debate_fps):
+            continue
+        try:
+            score = float(e.get("shallow_score"))
+        except (TypeError, ValueError):
+            continue
+        if abs(score) < 0.1:
+            continue
+        sign = 1.0 if score > 0 else -1.0
+        mult = _RAW_SOCIAL_PULSE_MULT if e.get("is_social") else _RAW_PULSE_MULT
+        weight = _event_weight(abs(score), e.get("credibility")) * mult
+        _add_raw_pulse(idx, sign * weight)
 
     # Keep the market line always; sector/theme lines need enough events so
     # the curve isn't a 2-point zigzag.
     rows = [m for m in meta.values()
-            if m["kind"] == "all" or m["events"] >= _MIN_EVENTS]
-    kind_rank = {"all": 0, "sector": 1, "theme": 2}
+            if m["kind"] in ("all", "pulse") or m["events"] >= _MIN_EVENTS]
+    kind_rank = {"all": 0, "pulse": 1, "sector": 2, "theme": 3}
     rows.sort(key=lambda m: (kind_rank[m["kind"]], -m["events"], m["label"].lower()))
 
     entities, kept_keys, per_kind = [], [], {"sector": 0, "theme": 0}
@@ -265,6 +381,8 @@ def compute_trends(now_utc: datetime | None = None,
         "window_hours": window_hours,
         "half_life_hours": _HALF_LIFE_H,
         "log_count": log_count,
+        "market_event_count": market_event_count,
+        "raw_pulse_count": raw_pulse_count,
         "series_labels": labels,
         "series": series,
         "entities": entities,

@@ -186,7 +186,9 @@ window.TrendChart = (function () {
 
   function entityLabel(e) {
     if (!e) return '';
-    return e.kind === 'all' ? t('市場整體', 'Whole Market') : e.label;
+    if (e.kind === 'all') return t('市場共識', 'Market Consensus');
+    if (e.kind === 'pulse') return t('即時脈搏', 'Raw Pulse');
+    return e.label;
   }
 
   function Instance(opts) {
@@ -238,9 +240,9 @@ window.TrendChart = (function () {
     const ents = this.data.entities || [];
     if (!ents.some(e => e.key === this.entity))
       this.entity = ents.length ? ents[0].key : '__ALL__';
-    const groups = { all: [], sector: [], theme: [] };
+    const groups = { all: [], pulse: [], sector: [], theme: [] };
     ents.forEach(e => (groups[e.kind] || groups.all).push(e));
-    const allOpts = groups.all.map(e =>
+    const headOpts = groups.all.concat(groups.pulse).map(e =>
       `<option value="${esc(e.key)}">${esc(entityLabel(e))}</option>`).join('');
     const grp = (key, zh, en) => {
       if (!groups[key].length) return '';
@@ -248,7 +250,7 @@ window.TrendChart = (function () {
         `<option value="${esc(e.key)}">${esc(e.label)} (${e.events})</option>`).join('');
       return `<optgroup label="${t(zh, en)}">${opts}</optgroup>`;
     };
-    sel.innerHTML = allOpts + grp('sector', '產業', 'Sectors') + grp('theme', '主題', 'Themes');
+    sel.innerHTML = headOpts + grp('sector', '產業', 'Sectors') + grp('theme', '主題', 'Themes');
     sel.value = this.entity;
   };
 
@@ -276,8 +278,8 @@ window.TrendChart = (function () {
     const idn = this.id;
     const titleEl = this._q('title');
     if (titleEl) titleEl.textContent = this.compact
-      ? t('市場情緒趨勢', 'Market Sentiment')
-      : t('3 日情緒趨勢', '3-Day Sentiment Trend');
+      ? t('市場共識趨勢', 'Market Consensus')
+      : t('3 日新聞情緒', '3-Day News Sentiment');
     const chart = this._q('chart');
     if (!chart || !this.data) return;
     const legend = this._q('legend');
@@ -288,7 +290,8 @@ window.TrendChart = (function () {
     const series = (this.data.series || {})[key];
     const labels = this.data.series_labels || [];
     if (meta)
-      meta.textContent = `${this.data.log_count || 0} ${t('則辯論', 'debates')}`
+      meta.textContent = `${this.data.market_event_count || 0}/${this.data.log_count || 0} ${t('則共識', 'consensus')}`
+        + ` · ${this.data.raw_pulse_count || 0} ${t('則脈搏', 'pulse')}`
         + ` · ½-life ${this.data.half_life_hours || 12}h`;
     if (!series || !series.length) {
       chart.innerHTML = `<div class="trend-empty">${t('資料不足', 'Not enough data')}</div>`;

@@ -24,6 +24,8 @@ SEEN_FILE = STORE_DIR / "_seen_index.json"
 STATE_FILE = STORE_DIR / "_state.json"
 RAW_STREAM_FILE = STORE_DIR / "_raw_stream.json"
 SCHEMA_VERSION = 1
+RAW_STREAM_CAP = int(os.environ.get("BREAK_NEWS_RAW_STREAM_CAP", "500"))
+RAW_STREAM_MAX_AGE_H = int(os.environ.get("BREAK_NEWS_RAW_STREAM_MAX_AGE_H", "72"))
 
 _locks: dict[str, threading.Lock] = {}
 _locks_master = threading.Lock()
@@ -307,10 +309,13 @@ def _raw_entry_ts(e: dict) -> float:
         return 0.0
 
 
-def save_raw_stream(entries: list[dict], cap: int = 150, max_age_h: int = 24) -> int:
+def save_raw_stream(entries: list[dict], cap: int | None = None,
+                    max_age_h: int | None = None) -> int:
     """Merge `entries` into the rolling raw-stream file. Dedupe by `key`
     (newer entry wins, but a kept `news_id` is never lost), keep newest `cap`,
     drop anything older than `max_age_h`. Returns kept count."""
+    cap = cap if cap is not None else RAW_STREAM_CAP
+    max_age_h = max_age_h if max_age_h is not None else RAW_STREAM_MAX_AGE_H
     cutoff = datetime.now(timezone.utc).timestamp() - max_age_h * 3600
     with _raw_stream_lock:
         existing: list[dict] = []
