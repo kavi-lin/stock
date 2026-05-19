@@ -1,7 +1,11 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-19 (v3.9.3)
+> **Last Updated**: 2026-05-20 (v3.9.4)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.9.3 → v3.9.4) — Break News model-aware admission
+
+使用者回報 Break News 頁顯示「今日剩餘預算 0」、最後辯論已 3h 前，但 settings 的 Claude/Gemini/Codex quota 都還有。診斷:poller 仍用 `BREAK_NEWS_DAILY_MAX_DEBATES` 全域 item hard cap，與 multi-model governor 脫鉤，導致 debater 被 admission gate 餓死而非模型 quota 真用完。修:poller admission 改讀 Break News A/B voice 的有效 headroom；capacity = `min(A,B headroom) - session_call_reserve - pending_debate_backlog * BREAK_NEWS_EST_CALLS_PER_DEBATE` 再除 calls/debate。Codex 只算 fallback buffer，不拉低正常 capacity；任一 voice disabled/cooldown/over-budget 則 automatic admission=0。`BREAK_NEWS_EST_CALLS_PER_DEBATE` 預設 6；`BREAK_NEWS_SESSION_RESERVE` 改 call 單位，預設 25 calls 約 4 則 debate，若要保留約 25 則 debate 應設約 150；`BREAK_NEWS_DAILY_MAX_DEBATES` 預設 0，只作 >0 emergency item ceiling。UI 顯示 `admission/model_capacity`。bump 3.9.3→3.9.4。
 
 ## 🟢 Session Note (v3.9.2 → v3.9.3) — Market-wide 公司名誤中修正
 

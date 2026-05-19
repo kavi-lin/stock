@@ -10,6 +10,30 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.9.4] — 2026-05-20 — Break News model-aware admission
+
+### Fixed — 硬 cap 餓死 debater
+
+Break News poller 原本用 `BREAK_NEWS_DAILY_MAX_DEBATES` 當全域每日 item cap，
+會出現 dashboard 顯示「今日剩餘預算 0」，但 settings 裡 Claude/Gemini/Codex
+仍有 quota 的矛盾。本版把 automatic debate admission 改成讀 multi-model
+governor 的真實可用 call：
+
+- capacity 綁 Break News A/B voice，而不是三模型總 quota；Codex 保留 fallback
+  buffer，不拉低正常 Claude × Gemini 容量。
+- 一則 debate 依 `BREAK_NEWS_EST_CALLS_PER_DEBATE`（預設 6 calls）估算，不再把
+  1 則新聞錯算成 1 call。
+- admission 會扣掉現有 `pending_debate` backlog，避免 poller 連續 cycle 超發。
+- disabled / cooldown / over-budget 的 voice 會讓 automatic admission 歸 0；手動
+  raw debate 仍可由使用者觸發。
+- `BREAK_NEWS_SESSION_RESERVE` 改為 call reserve；預設 25 calls 約保留 4 則
+  debate，若要保留約 25 則 debate 應設約 150 calls。
+- `BREAK_NEWS_DAILY_MAX_DEBATES` 預設 0，僅在設成 >0 時作 emergency item
+  ceiling。
+- Break News UI 顯示 `admission/model_capacity`，tooltip 顯示 pair 與 calls/debate。
+
+---
+
 ## [3.9.3] — 2026-05-19 — Market-wide 公司名誤中修正
 
 ### Fixed — Dollar / Dow / S&P 裸 token 誤判

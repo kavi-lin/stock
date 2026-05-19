@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('bn-next-label').textContent     = t('下次輪詢', 'Next poll');
     $('bn-queue-label').textContent    = t('排隊', 'Queue');
     $('bn-flight-label').textContent   = t('進行中', 'In flight');
-    $('bn-budget-label').textContent   = t('今日剩餘預算', 'Daily budget left');
+    $('bn-budget-label').textContent   = t('自動辯論額度', 'Auto debate left');
     $('bn-last-poll-label').textContent = t('上次輪詢', 'last poll');
     $('bn-health-label').textContent   = 'LIVE';
     $('bn-raw-title').textContent = t('未閘 Raw 流', 'Un-gated Raw Stream');
@@ -113,7 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
         ? fmtTime(poller.last_run) : '--';
       $('bn-queue-depth').textContent = (debater.queue_depth ?? '0');
       $('bn-in-flight').textContent = (debater.in_flight && debater.in_flight.length) || 0;
-      $('bn-budget-left').textContent = (poller.cost_guard_remaining ?? '--');
+      const admission = poller.admission_remaining ?? poller.cost_guard_remaining;
+      const capacity = poller.model_debate_capacity;
+      const budgetText = (admission == null)
+        ? '--'
+        : (capacity == null ? `${admission}` : `${admission}/${capacity}`);
+      $('bn-budget-left').textContent = budgetText;
+      const pair = Array.isArray(poller.break_news_pair) ? poller.break_news_pair.join('×') : '';
+      const calls = poller.estimated_calls_per_debate;
+      $('bn-budget-left').title = pair
+        ? `${pair} · ${calls || '?'} calls/debate · ${t('已扣待辯論 backlog', 'pending backlog deducted')}`
+        : '';
       const ok = poller.last_status === 'ok';
       $('bn-health-dot').style.background = ok ? '#22c55e' : '#eab308';
       $('bn-health-dot').style.boxShadow = ok ? '0 0 8px rgba(34,197,94,0.6)' : '0 0 8px rgba(234,179,8,0.6)';

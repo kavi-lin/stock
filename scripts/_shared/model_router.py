@@ -139,6 +139,24 @@ def model_status() -> dict:
     return {"date": usage["date"], "chain": model_chain(cfg), "models": models}
 
 
+def model_headroom(model: str, cfg: dict | None = None, usage: dict | None = None) -> tuple[int | None, bool, str]:
+    """Remaining governed calls for `model`.
+
+    Returns (headroom, available, reason). `headroom is None` means the model is
+    enabled and available with no configured daily call cap.
+    """
+    cfg = cfg or load_llm_config()
+    usage = usage or _load_usage()
+    avail, reason = model_available(model, cfg, usage)
+    if not avail:
+        return 0, False, reason
+    budget = cfg.get("budgets", {}).get(model, {}).get("daily_max_calls", 0)
+    if not budget:
+        return None, True, ""
+    calls = int((usage.get("models", {}).get(model) or {}).get("calls", 0) or 0)
+    return max(0, int(budget) - calls), True, ""
+
+
 def _record(model: str, result: LLMResult, cfg: dict) -> None:
     """Increment the call counter; trip a cooldown on a quota wall."""
     usage = _load_usage()

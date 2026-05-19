@@ -12,6 +12,7 @@ break-news has its own dedupe and its own dedicated store.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import time
@@ -27,6 +28,8 @@ from news.scripts.stage1_triage import (  # noqa: E402
     classify_news_type, calc_shallow_score, gen_4view_snaps, BINARY_KEYS,
 )
 from scripts.break_news import store  # noqa: E402
+from scripts.break_news.llm_drivers import break_news_pair  # noqa: E402
+from scripts._shared import model_router  # noqa: E402
 
 try:
     from scripts.break_news import social_sources as _social_sources  # noqa: E402
@@ -45,13 +48,14 @@ except Exception as _e:
 DEFAULT_INTERVAL = int(os.environ.get("BREAK_NEWS_INTERVAL_SEC", "600"))
 GATE_MIN_SCORE = float(os.environ.get("BREAK_NEWS_GATE_MIN_SCORE", "2"))
 MAX_ITEMS_PER_CYCLE = int(os.environ.get("BREAK_NEWS_MAX_PER_CYCLE", "10"))
-DAILY_MAX = int(os.environ.get("BREAK_NEWS_DAILY_MAX_DEBATES", "60"))
+DAILY_MAX = int(os.environ.get("BREAK_NEWS_DAILY_MAX_DEBATES", "0"))
 WINDOW_HOURS = int(os.environ.get("BREAK_NEWS_WINDOW_HOURS", "6"))
 FUTU_ENABLED = os.environ.get("BREAK_NEWS_FUTU_ENABLED", "1") not in ("0", "false", "no")
 FUTU_MAX_PER_CYCLE = int(os.environ.get("BREAK_NEWS_FUTU_MAX_PER_CYCLE", "30"))
 SOCIAL_ENABLED = os.environ.get("BREAK_NEWS_SOCIAL_ENABLED", "1") not in ("0", "false", "no")
 SOCIAL_GATE_MIN_SCORE = float(os.environ.get("BREAK_NEWS_SOCIAL_GATE_MIN_SCORE", "3"))
 SESSION_RESERVE = int(os.environ.get("BREAK_NEWS_SESSION_RESERVE", "25"))
+EST_CALLS_PER_DEBATE = max(1, int(os.environ.get("BREAK_NEWS_EST_CALLS_PER_DEBATE", "6")))
 SESSION_TZ = ZoneInfo("America/New_York")
 
 _last_feed_stats: list[dict] = []
@@ -83,11 +87,92 @@ def _in_us_news_window(now_utc: datetime | None = None) -> bool:
     return start <= now <= end
 
 
-def _auto_budget_limit(now_utc: datetime | None = None) -> tuple[int, bool]:
+def _pending_backlog_count() -> int:
+    n = 0
+    for p in store.STORE_DIR.glob("bn_*.json"):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                if json.load(f).get("state") == "pending_debate":
+                    n += 1
+        except (OSError, json.JSONDecodeError):
+            continue
+    return n
+
+
+def _model_call_headroom(pair: list[str]) -> dict:
+    cfg = model_router.load_llm_config()
+    status = model_router.model_status()
+    usage_date = status.get("date")
+    details = {}
+    finite: list[int] = []
+    for model in pair:
+        headroom, available, reason = model_router.model_headroom(model, cfg=cfg)
+        model_state = (status.get("models") or {}).get(model, {})
+        details[model] = {
+            "headroom": headroom,
+            "available": available,
+            "reason": reason,
+            "calls": model_state.get("calls"),
+            "daily_max": model_state.get("daily_max"),
+        }
+        if not available:
+            return {
+                "ok": False,
+                "binding_call_headroom": 0,
+                "usage_date": usage_date,
+                "models": details,
+                "blocked_reason": f"{model}:{reason}",
+            }
+        if headroom is not None:
+            finite.append(headroom)
+
+    # No configured cap on either voice: admission is governed by per-cycle gate
+    # and optional BREAK_NEWS_DAILY_MAX_DEBATES emergency ceiling.
+    binding = min(finite) if finite else MAX_ITEMS_PER_CYCLE * EST_CALLS_PER_DEBATE
+    return {
+        "ok": True,
+        "binding_call_headroom": max(0, int(binding)),
+        "usage_date": usage_date,
+        "models": details,
+        "blocked_reason": None,
+    }
+
+
+def _auto_budget_limit(now_utc: datetime | None = None, today_count: int = 0) -> dict:
+    """Model-aware admission capacity for new debate items.
+
+    `BREAK_NEWS_DAILY_MAX_DEBATES > 0` is only an emergency item ceiling. Normal
+    capacity comes from the configured Break News A/B voices, in LLM-call units.
+    """
     in_window = _in_us_news_window(now_utc)
-    if in_window:
-        return DAILY_MAX, True
-    return max(0, DAILY_MAX - max(0, SESSION_RESERVE)), False
+    pair = break_news_pair()
+    model_cap = _model_call_headroom(pair)
+    pending_backlog = _pending_backlog_count()
+    call_headroom = int(model_cap.get("binding_call_headroom") or 0)
+    reserve_calls = 0 if in_window else max(0, SESSION_RESERVE)
+    usable_calls = max(0, call_headroom - reserve_calls)
+    queued_calls = pending_backlog * EST_CALLS_PER_DEBATE
+    model_debate_capacity = max(0, (usable_calls - queued_calls) // EST_CALLS_PER_DEBATE)
+
+    emergency_remaining = None
+    admission_remaining = model_debate_capacity
+    if DAILY_MAX > 0:
+        emergency_remaining = max(0, DAILY_MAX - today_count)
+        admission_remaining = min(admission_remaining, emergency_remaining)
+
+    return {
+        "admission_remaining": int(max(0, admission_remaining)),
+        "model_debate_capacity": int(model_debate_capacity),
+        "binding_call_headroom": call_headroom,
+        "pending_backlog": pending_backlog,
+        "estimated_calls_per_debate": EST_CALLS_PER_DEBATE,
+        "reserved_session_calls": reserve_calls,
+        "emergency_item_limit": DAILY_MAX,
+        "emergency_items_remaining": emergency_remaining,
+        "break_news_pair": pair,
+        "model_capacity": model_cap,
+        "us_news_window_open": in_window,
+    }
 
 
 def gate(score: float, credibility: str, binary: bool) -> tuple[bool, str | None]:
@@ -218,8 +303,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
 
     seen = store.load_seen()
     today_count = _count_today()
-    auto_budget_limit, us_news_window_open = _auto_budget_limit(started)
-    cost_guard_remaining = max(auto_budget_limit - today_count, 0)
+    budget = _auto_budget_limit(started, today_count=today_count)
+    cost_guard_remaining = budget["admission_remaining"]
 
     new_items = 0
     new_items_futu = 0
@@ -382,9 +467,19 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         "debate_candidates": len(debate_candidates),
         "raw_stream_size": raw_stream_size,
         "cost_guard_remaining": cost_guard_remaining,
-        "auto_budget_limit": auto_budget_limit,
+        "admission_remaining": cost_guard_remaining,
+        "auto_budget_limit": budget["model_debate_capacity"],
+        "model_debate_capacity": budget["model_debate_capacity"],
+        "binding_call_headroom": budget["binding_call_headroom"],
+        "pending_debate_backlog": budget["pending_backlog"],
+        "estimated_calls_per_debate": budget["estimated_calls_per_debate"],
+        "reserved_session_calls": budget["reserved_session_calls"],
+        "emergency_item_limit": budget["emergency_item_limit"],
+        "emergency_items_remaining": budget["emergency_items_remaining"],
+        "break_news_pair": budget["break_news_pair"],
+        "model_capacity": budget["model_capacity"],
         "session_reserve": SESSION_RESERVE,
-        "us_news_window_open": us_news_window_open,
+        "us_news_window_open": budget["us_news_window_open"],
         "advanced_ids": advanced_ids,
         "futu_enabled": FUTU_ENABLED and FUTU_AVAILABLE,
         "social_enabled": SOCIAL_ENABLED and SOCIAL_AVAILABLE,
