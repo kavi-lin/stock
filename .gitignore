@@ -40,6 +40,37 @@ skills/*/journal/
 # Claude Code local settings (machine-specific allowlists)
 .claude/settings.local.json
 
+# agy / Antigravity CLI workdir (machine-local)
+.antigravitycli/
+
+# Daily FMP / FRED cache snapshots (regenerable from upstream APIs)
+.cache_bridge/
+
+# Root-level daemon stderr captures (breadth.err / burry.err / dual.err / …)
+/*.err
+
+# Break News per-item logs + daemon state (auto-written by poller; regenerable)
+news/break_news_logs/bn_*.json
+news/break_news_logs/_*.json
+
+# Nexus supply-chain LLM output cache (regenerable from supply_chain.py)
+nexus/supply_chains/*.yaml
+nexus/supply_chain_logs/
+
+# Per-day sector caches (grow daily; historical snapshots may be tracked)
+sector/breadth_cache/market_breadth_*.json
+sector/breadth_cache/market_breadth_*.md
+!sector/breadth_cache/market_breadth_history.json   # rolling aggregate — keep tracked
+sector/cache/
+sector/ftd_cache/
+sector/market_top_cache/
+
+# Shared FMP supplementary cache (24h TTL, regenerable)
+skills/_shared/fmp_supp_cache/
+
+# Nexus build provenance logs (per-day; baseline tracked, daily new ones ignored)
+scripts/nexus/cache/build_log_*.json
+
 # Keep directory structure
 !news/news_logs/.gitkeep
 !sector/sector_logs/.gitkeep
