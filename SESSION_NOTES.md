@@ -1,7 +1,20 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-20 (v3.14.0)
+> **Last Updated**: 2026-05-20 (v3.14.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.14.0 → v3.14.1) — daily_update.sh 可靠性修正
+
+Codex review 指出 daily_update.sh 4 個 priority 問題,全證實成立:
+
+1. **Step 1 `~/.claude/skills/...` 路徑漂移** — repo 內已有 `skills/market-breadth-analyzer/`,跨機器/agent 跑不同版本。改 repo-local。
+2. **Step 4 FRED 「非致命」是錯的** — `python3 ... > /dev/null` 不在 if/&&/|| 條件內,`set -e` 上一旦非零 shell 立刻 exit,line 64 的 `if [ $? -eq 0 ]` **永遠不會跑**。包 `set +e` ... `set -e` 才真的非致命。
+3. **Step 5.5 `| tail -3` 吃 rc** — `REFRESH_RC=$?` 拿 tail 的 rc(永遠 0),python 失敗訊號被吞。加 `set -o pipefail` 修正。
+4. **Step 8 cron 內 `pip install networkx`** — 卡網路/污染環境/失敗無聲。`build_graph.py` 本有 `pagerank_lite` fallback(驗證:`networkx not installed; using pagerank_lite + degree fallback`),直接移除 install。
+
+Bonus:結尾 banner 原固定講「FRED 已更新」即使 skip / fail 也照講,加 `FRED_STATUS=ok|failed|skipped` 三態,訊息對應實際狀態。
+
+Helper 化(`run_hard_step`/`run_soft_step`)、Step 8 默認降級 tier 1+2、daily_update_<DATE>.log run summary 等 second-phase 優化留下次。bump 3.14.0→3.14.1。
 
 ## 🟢 Session Note (v3.13.0 → v3.14.0) — Nexus graph ticker-centric
 

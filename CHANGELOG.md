@@ -10,6 +10,36 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.14.1] — 2026-05-20 — daily_update.sh 可靠性修正
+
+### Fixed — 4 priority issues
+
+- **Step 1 改 repo-local skill**: `~/.claude/skills/market-breadth-analyzer/...`
+  改成 `skills/market-breadth-analyzer/...`,避免跨機器/跨 agent 跑不同版本。
+  `plan_support_codex.md` cleanup item。
+- **Step 4 FRED 包 `set +e`**: 原 `if [ $? -eq 0 ]` 在 `set -e` 下是死碼 —
+  python 一旦非零 shell 立刻 exit,「非致命」comment 是錯的。包成
+  `set +e ... FRED_RC=$? ... set -e` 後才真的非致命。
+- **Step 5.5 加 `set -o pipefail`**: 原 `python ... | tail -3` 讓 `$?` 拿
+  tail 的 rc(永遠 0),ETF refresh 失敗訊號被吞。加 pipefail 後
+  `REFRESH_RC` 正確反映 python rc。
+- **Step 8 移除 `pip install networkx`**: cron 內 install 會卡網路 / 污染環境 /
+  失敗訊號被吞;`build_graph.py` 本就有 `pagerank_lite` fallback,移除即可。
+
+### Added — FRED 結尾提示對應實際狀態
+
+- Step 4 用 `FRED_STATUS=ok/failed/skipped` 三態追蹤;
+  結尾 banner 依狀態顯示對應提示,不再固定講「FRED 已更新」誤導。
+
+### Why
+
+Codex review 指出 daily_update.sh 在 cron 環境的 4 個可靠性問題:跨機器路徑漂移、
+死碼 if 檢查、pipe 吃 rc、cron 內 pip install。本 patch 全修。
+Helper 化(`run_hard_step`/`run_soft_step`)、Step 8 默認降級 tier 1+2、
+run summary log 等 second-phase 優化留下次。
+
+---
+
 ## [3.14.0] — 2026-05-20 — Nexus graph: ticker-centric
 
 ### Changed — Knowledge Graph 改 ticker-only
