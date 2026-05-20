@@ -227,6 +227,42 @@ def main():
     if entry.get("final_action") != trade.get("final_action"):
         errors.append(f"top-level final_action ({entry.get('final_action')!r}) differs from trades_this_session[0].final_action ({trade.get('final_action')!r})")
 
+    # ── 9. V5.0.x — cross-field consistency (A1) ─────────────────────────
+    # CANCEL execution cannot coexist with a BUY-side thesis. Either the
+    # thesis is wrong or the execution choice is. Caller must reconcile.
+    fa = trade.get("final_action")
+    if fa == "CANCEL" and fd in ("BUY", "STAGED_ENTRY"):
+        errors.append(
+            f"final_action='CANCEL' incompatible with final_decision={fd!r} — "
+            "WAIT/CANCEL execution cannot coexist with BUY-side thesis. "
+            "Use HOLD/STAGED_EXIT/SELL, or change final_action to EXECUTE/STAGED."
+        )
+
+    # ── 10. V5.0.x — Phase 4.6 decision-cap rules (A2) ───────────────────
+    # Optional fields (back-compat with pre-V5.0.x entries). When the cap is
+    # active, enforce: no BUY, confidence ≤ 0.65, position ≤ 30bps, and a
+    # reason from the controlled enum.
+    cap_active = trade.get("decision_cap_active")
+    if cap_active is True:
+        valid_reasons = ("insufficient_anchors", "low_valuation_confidence", "low_data_quality")
+        cr = trade.get("decision_cap_reason")
+        if cr not in valid_reasons:
+            errors.append(
+                f"decision_cap_active=true requires decision_cap_reason in {valid_reasons}, got {cr!r}"
+            )
+        if fd == "BUY":
+            errors.append("decision_cap_active=true forbids final_decision='BUY'; use STAGED_ENTRY/HOLD")
+        ac = trade.get("avg_confidence")
+        if isinstance(ac, (int, float)) and ac > 0.65:
+            errors.append(
+                f"decision_cap_active=true requires avg_confidence ≤ 0.65, got {ac}"
+            )
+        ps = trade.get("position_size_pct")
+        if isinstance(ps, (int, float)) and ps > 0.003:
+            errors.append(
+                f"decision_cap_active=true requires position_size_pct ≤ 0.003 (30bps), got {ps}"
+            )
+
     if errors:
         fail(errors)
 

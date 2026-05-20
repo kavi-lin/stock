@@ -214,6 +214,184 @@ def compute_centrality(
         return {nid: {"degree": deg.get(nid, 0.0), "pagerank": pr.get(nid, 0.0)} for nid in nodes}
 
 
+def _to_ticker_centric(
+    nodes: dict[str, Node],
+    edges: list[Edge],
+    cfg: dict[str, Any],
+) -> tuple[dict[str, Node], list[Edge], dict[str, int]]:
+    """Collapse a mixed-type graph into a ticker-only graph.
+
+    Aggregates non-ticker neighbours of each ticker into that ticker's
+    metadata so the UI tooltip can surface news / themes / sector / narrative
+    context without the graph itself rendering those as standalone nodes.
+
+    Returns (survivors, ticker_only_edges, stats). Original `nodes`/`edges`
+    are not mutated; this rebuilds fresh dataclass instances for survivors.
+    """
+    per_ticker_news_cap = int(cfg.get("ticker_centric_recent_news_per_ticker", 8))
+
+    # Index by id for O(1) neighbour lookup
+    by_id = nodes  # already dict[id -> Node]
+
+    # adjacency: ticker_id -> list of (other_node_id, edge)
+    adj: dict[str, list[tuple[str, Edge]]] = defaultdict(list)
+    for e in edges:
+        s = by_id.get(e.source); t = by_id.get(e.target)
+        if not s or not t:
+            continue
+        if s.type == "ticker" and t.type != "ticker":
+            adj[e.source].append((e.target, e))
+        elif t.type == "ticker" and s.type != "ticker":
+            adj[e.target].append((e.source, e))
+
+    # Build per-ticker rolled-up metadata
+    stats = {"news_attached": 0, "themes_attached": 0, "narratives_attached": 0,
+             "theses_attached": 0, "sectors_attached": 0}
+
+    for tid, node in list(by_id.items()):
+        if node.type != "ticker":
+            continue
+        recent_news: list[dict[str, Any]] = []
+        themes: list[str] = []
+        narratives: list[str] = []
+        theses: list[str] = []
+        sector: str | None = None
+
+        for nbr_id, e in adj.get(tid, []):
+            nbr = by_id.get(nbr_id)
+            if not nbr:
+                continue
+            md = nbr.metadata or {}
+            if nbr.type == "catalyst":
+                recent_news.append({
+                    "id": nbr.id,
+                    "headline": nbr.label,
+                    "verdict": md.get("verdict") or md.get("news_type") or "",
+                    "net_impact": md.get("net_impact"),
+                    "published": nbr.last_seen,
+                    "edge_type": e.type,
+                    "weight": round(float(e.weight or 0.0), 4),
+                })
+            elif nbr.type == "theme":
+                themes.append(nbr.label)
+            elif nbr.type == "narrative":
+                narratives.append(nbr.label)
+            elif nbr.type == "thesis":
+                theses.append(nbr.label)
+            elif nbr.type == "sector":
+                # there can be only one sector per ticker; keep the heaviest edge
+                if sector is None:
+                    sector = nbr.label
+
+        # Sort news by recency desc, then by |net_impact|, cap to N. The cap is
+        # what keeps the JSON below the 5 MB ceiling — without it a high-mention
+        # ticker like NVDA accrues 100+ items.
+        def _news_key(x: dict[str, Any]) -> tuple:
+            pub = x.get("published") or ""
+            try:
+                impact = abs(float(x.get("net_impact") or 0.0))
+            except (TypeError, ValueError):
+                impact = 0.0
+            return (pub, impact)
+        recent_news.sort(key=_news_key, reverse=True)
+        recent_news = recent_news[:per_ticker_news_cap]
+
+        # Dedupe themes / narratives / theses by label preserving order
+        def _uniq(xs: list[str]) -> list[str]:
+            seen, out = set(), []
+            for x in xs:
+                if x and x not in seen:
+                    seen.add(x); out.append(x)
+            return out
+
+        themes = _uniq(themes)[:12]
+        narratives = _uniq(narratives)[:12]
+        theses = _uniq(theses)[:6]
+
+        # Mutate metadata in place — node.to_json() will serialize this.
+        node.metadata = {
+            **(node.metadata or {}),
+            "recent_news": recent_news,
+            "themes": themes,
+            "narratives": narratives,
+            "theses": theses,
+            "sector": sector or (node.metadata or {}).get("sector"),
+        }
+        stats["news_attached"]      += len(recent_news)
+        stats["themes_attached"]    += len(themes)
+        stats["narratives_attached"]+= len(narratives)
+        stats["theses_attached"]    += len(theses)
+        if sector:
+            stats["sectors_attached"] += 1
+
+    # Filter survivors to ticker nodes only
+    survivors = {nid: n for nid, n in by_id.items() if n.type == "ticker"}
+
+    # Keep only ticker↔ticker edges
+    ticker_ids = set(survivors)
+    ticker_only_edges = [
+        e for e in edges
+        if e.source in ticker_ids and e.target in ticker_ids
+    ]
+
+    # Synthesize CO_THEME edges between tickers sharing a theme/narrative. The
+    # raw pipeline only emits PEER_OF / SUPPLIES_TO directly, leaving most
+    # tickers isolated once non-ticker nodes are dropped. Theme co-membership
+    # is a legitimate ticker↔ticker relation; capping per-theme prevents the
+    # well-known "everyone in AI" 200-clique explosion.
+    co_theme_cap_tickers_per_theme = 12
+    co_theme_cap_themes_per_ticker = 3
+    # Build theme/narrative -> [(ticker_id, edge_weight)] map
+    grp: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    for e in edges:
+        s = by_id.get(e.source); t = by_id.get(e.target)
+        if not s or not t:
+            continue
+        if s.type == "ticker" and t.type in ("theme", "narrative"):
+            grp[t.id].append((s.id, float(e.weight or 0.0)))
+        elif t.type == "ticker" and s.type in ("theme", "narrative"):
+            grp[s.id].append((t.id, float(e.weight or 0.0)))
+
+    # Cap memberships per ticker (only top-K themes per ticker get CO_THEME edges)
+    ticker_top_themes: dict[str, set[str]] = defaultdict(set)
+    by_ticker_themes: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    for theme_id, members in grp.items():
+        for tid, w in members:
+            by_ticker_themes[tid].append((theme_id, w))
+    for tid, themes_w in by_ticker_themes.items():
+        themes_w.sort(key=lambda x: x[1], reverse=True)
+        ticker_top_themes[tid] = {th for th, _ in themes_w[:co_theme_cap_themes_per_ticker]}
+
+    seen_pairs: set[tuple[str, str]] = set()
+    synth_edges: list[Edge] = []
+    for theme_id, members in grp.items():
+        # Limit per-theme participants to the heaviest-edge tickers
+        members = sorted(members, key=lambda x: x[1], reverse=True)[:co_theme_cap_tickers_per_theme]
+        for i, (a, wa) in enumerate(members):
+            if theme_id not in ticker_top_themes.get(a, set()):
+                continue
+            for b, wb in members[i + 1:]:
+                if theme_id not in ticker_top_themes.get(b, set()):
+                    continue
+                key = (a, b) if a < b else (b, a)
+                if key in seen_pairs:
+                    continue
+                seen_pairs.add(key)
+                synth_edges.append(Edge(
+                    source=key[0], target=key[1], type="CO_THEME",
+                    weight=round(min(wa, wb), 4),
+                    raw_frequency=1.0, tier="synth",
+                    confidence=0.6, last_seen=None,
+                    sources={f"co_theme:{theme_id}"},
+                ))
+    ticker_only_edges.extend(synth_edges)
+    stats["co_theme_synthesized"] = len(synth_edges)
+
+    stats["ticker_nodes"]      = len(survivors)
+    stats["ticker_edges"]      = len(ticker_only_edges)
+    return survivors, ticker_only_edges, stats
+
+
 def collect_tier1(cfg: dict[str, Any]) -> tuple[list[Node], list[Edge]]:
     sources = cfg["sources"]
     universe = tier1_loaders.load_ticker_universe(
@@ -390,6 +568,28 @@ def main() -> int:
         c = centrality.get(nid, {})
         n.weight = c.get("degree", 0.0)
         n.pagerank = c.get("pagerank", 0.0)
+
+    # ─── V3.1.0 — ticker-centric collapse ──────────────────────────────────
+    # Knowledge-graph page only wants ticker↔ticker relations. Move all other-
+    # type context (news, themes, sector, narrative, thesis) into each ticker's
+    # metadata block, then drop non-ticker nodes + edges. Internal pipeline
+    # (Tier 1/2/3) is unchanged — only the OUTPUT shape collapses.
+    ticker_centric = bool(cfg.get("ticker_centric", True))
+    if ticker_centric:
+        survivors, edges_out, tc_stats = _to_ticker_centric(
+            survivors, edges_out, cfg,
+        )
+        _log(
+            "ticker_centric: " + ", ".join(f"{k}={v}" for k, v in tc_stats.items())
+        )
+        # Re-compute centrality on the collapsed graph so degree / pagerank
+        # reflect the ticker-only topology (was previously inflated by hub-y
+        # theme / catalyst nodes acting as bridges).
+        centrality = compute_centrality(survivors, edges_out)
+        for nid, n in survivors.items():
+            c = centrality.get(nid, {})
+            n.weight = c.get("degree", 0.0)
+            n.pagerank = c.get("pagerank", 0.0)
 
     graph = {
         "version": "3.0.0",

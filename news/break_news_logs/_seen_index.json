@@ -1006,5 +1006,333 @@
   "35d670f190aaa903cc2e96d9010cce12bda0b6a2": {
     "news_id": "bn_20260518_35d670f1",
     "first_seen": "2026-05-18T15:45:25Z"
+  },
+  "cd82d6075fbc59ca32d291e8945732e1654e2e8f": {
+    "news_id": "bn_20260519_cd82d607",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "73d2b073f763927dbacc4304431d7fd4ca17fe02": {
+    "news_id": "bn_20260519_73d2b073",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "0f53e8293f15dde8ef9bf4dc4e2d3f6e27ab1d98": {
+    "news_id": "bn_20260519_0f53e829",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "2ca9d51fde825a0cf2a9de027a7079dc35fcd16c": {
+    "news_id": "bn_20260519_2ca9d51f",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "5f10681cca5afb3443e7481af65e440ef6407059": {
+    "news_id": "bn_20260519_5f10681c",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "22aec634ddbb599a58ad0b856e82cb1a1d687274": {
+    "news_id": "bn_20260519_22aec634",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "96d89e7a433919f9e1b977c8af6c07205f16d94b": {
+    "news_id": "bn_20260519_96d89e7a",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "d1101c398a0cfac246077bbb3e3b24eecdf83a73": {
+    "news_id": "bn_20260519_d1101c39",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "8a28f9b94a5bda083f90e48e89db2e24d3149bc0": {
+    "news_id": "bn_20260519_8a28f9b9",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "2621e50cb02b593f6c10b06198acd0a27fed96d8": {
+    "news_id": "bn_20260519_2621e50c",
+    "first_seen": "2026-05-19T00:39:11Z"
+  },
+  "851f1ea4f4960199d564dcb9f167cfd1b7035ed3": {
+    "news_id": "bn_20260519_851f1ea4",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "e6aa58fa53100fca8a3c698e48f22346831fa7e0": {
+    "news_id": "bn_20260519_e6aa58fa",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "f8ad56a27526e708e97aee3ac6fb27059bd47f02": {
+    "news_id": "bn_20260519_f8ad56a2",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "57871917398c0b0a0418afbc851ffcff7617b52f": {
+    "news_id": "bn_20260519_57871917",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "715e20b8c463ea0e9c58ca11b04213eb1a40cf18": {
+    "news_id": "bn_20260519_715e20b8",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "9f784beecbc392566fc1b01dd2f436ae8979e9fb": {
+    "news_id": "bn_20260519_9f784bee",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "94b4cc12b91bd314442827f7d7a27df95f17c920": {
+    "news_id": "bn_20260519_94b4cc12",
+    "first_seen": "2026-05-19T03:46:49Z"
+  },
+  "79f37acf3aa4562e161684ad00e1fb9b3a5310f7": {
+    "news_id": "bn_20260519_79f37acf",
+    "first_seen": "2026-05-19T08:05:18Z"
+  },
+  "aadca8f7cb17b45bd66e6dbbb2bf21e027d8d565": {
+    "news_id": "bn_20260519_aadca8f7",
+    "first_seen": "2026-05-19T08:05:18Z"
+  },
+  "b397a13aacc2a51c7a0ac8a4b3e9d7a45bc4cec1": {
+    "news_id": "bn_20260519_b397a13a",
+    "first_seen": "2026-05-19T08:05:18Z"
+  },
+  "c9a9ced3cdfeb982c208ae417ea70f71da0a7f36": {
+    "news_id": "bn_20260519_c9a9ced3",
+    "first_seen": "2026-05-19T08:05:18Z"
+  },
+  "7a04873cd6cb9026c145842c6c43ae6aa8d12be7": {
+    "news_id": "bn_20260519_7a04873c",
+    "first_seen": "2026-05-19T08:05:18Z"
+  },
+  "37383b27109923abd41b761ff5069edbc041e6c2": {
+    "news_id": "bn_20260519_37383b27",
+    "first_seen": "2026-05-19T08:05:18Z"
+  },
+  "1bdfb1d4363809952b2df9afbc67c7a2fb2098a3": {
+    "news_id": "bn_20260519_1bdfb1d4",
+    "first_seen": "2026-05-19T09:01:47Z"
+  },
+  "6dacaebbbff7de304579faac9cb2abf54b954629": {
+    "news_id": "bn_20260519_6dacaebb",
+    "first_seen": "2026-05-19T09:12:05Z"
+  },
+  "39efb048e51a7861c7f1448ac78d4177b9d17b68": {
+    "news_id": "bn_20260519_39efb048",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "ecdcb37696a590b31cb5433a97ea4455bfa45074": {
+    "news_id": "bn_20260519_ecdcb376",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "ad73e56a6d80f0536b10a41d970f1abcaad4e607": {
+    "news_id": "bn_20260519_ad73e56a",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "73442ac796cbe3be1fe2df86c9d2ade613aa2b70": {
+    "news_id": "bn_20260519_73442ac7",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "953e0489cb677c4cc2e12234d684327601407061": {
+    "news_id": "bn_20260519_953e0489",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "d28972c836689373d55efb4de2bb0427f884e8c0": {
+    "news_id": "bn_20260519_d28972c8",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "1f27c284cfb9ce8c81508123cdc44bc5e0d49757": {
+    "news_id": "bn_20260519_1f27c284",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "5cec82089be23af551c2cc60e5f48939bd9aff40": {
+    "news_id": "bn_20260519_5cec8208",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "9d813f3f2fe4c1ae666b1456360931838985aa53": {
+    "news_id": "bn_20260519_9d813f3f",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "df8aff4c0f8b090c9e7fffc9bb66907bdd57f91d": {
+    "news_id": "bn_20260519_df8aff4c",
+    "first_seen": "2026-05-19T10:23:50Z"
+  },
+  "557b04ff71d58b92c91cc3e5e838e7536551c652": {
+    "news_id": "bn_20260519_557b04ff",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "142db224067fd9ee62020e6378066ad98665ac07": {
+    "news_id": "bn_20260519_142db224",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "4d04bcaa6b7b7720cd426a68044d57780f5e4205": {
+    "news_id": "bn_20260519_4d04bcaa",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "e2859aad7865692eedec5c1d4d2d7de493154b31": {
+    "news_id": "bn_20260519_e2859aad",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "2ef0a468237df567786d40f9479f39fe6901ef61": {
+    "news_id": "bn_20260519_2ef0a468",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "8195226359a005ea8111d28fee90ac8628cc91e8": {
+    "news_id": "bn_20260519_81952263",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "d1674175c6f82b34699d379d3fb6f6b28bf0e27d": {
+    "news_id": "bn_20260519_d1674175",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "cffa38a4b7d72cb91aed3672451d08aa2f65a96b": {
+    "news_id": "bn_20260519_cffa38a4",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "bc3c143962baca670bbfbec5a274887dc261854b": {
+    "news_id": "bn_20260519_bc3c1439",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "6089b2703652f4cd8fceabee903c0aeb0522f724": {
+    "news_id": "bn_20260519_6089b270",
+    "first_seen": "2026-05-19T11:28:37Z"
+  },
+  "5909fa677215ec292b1b6d240543c39039c55e66": {
+    "news_id": "bn_20260519_5909fa67",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "b18d4a1a04309fc5f12087eff7289a888a1aca5e": {
+    "news_id": "bn_20260519_b18d4a1a",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "573492c58bb61da4215064268c9ac37676430628": {
+    "news_id": "bn_20260519_573492c5",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "cd24055294d3cdba8b7351f77f77b8bdc94013c5": {
+    "news_id": "bn_20260519_cd240552",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "e635e0de57bf1d0399f4d3620a9f3890e27eeae9": {
+    "news_id": "bn_20260519_e635e0de",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "6e349dbc9f5f56ed47aec8442b91763afa46b29a": {
+    "news_id": "bn_20260519_6e349dbc",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "03a25430cefde6d85b044c5143316848717ea6da": {
+    "news_id": "bn_20260519_03a25430",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "cd2b3f49f469156f2c9b6c015a574b461edf598a": {
+    "news_id": "bn_20260519_cd2b3f49",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "fa7ef36d96f601adcc4cfce912768ef06373de12": {
+    "news_id": "bn_20260519_fa7ef36d",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "479421e360e1216b70e0b664a77c079c8fabe2c7": {
+    "news_id": "bn_20260519_479421e3",
+    "first_seen": "2026-05-19T11:38:51Z"
+  },
+  "490e2d33273db8b6ca1f432e842978739a4bfc78": {
+    "news_id": "bn_20260519_490e2d33",
+    "first_seen": "2026-05-19T11:49:05Z"
+  },
+  "d63922923145a534cf62d82ccbd290ef0e3b1c5e": {
+    "news_id": "bn_20260519_d6392292",
+    "first_seen": "2026-05-19T11:59:18Z"
+  },
+  "f16c8c0e85c07e2c247a60dadb01dd9f9495119c": {
+    "news_id": "bn_20260519_f16c8c0e",
+    "first_seen": "2026-05-19T11:59:18Z"
+  },
+  "2851afa73ba88aba05e04d770047225b1d795a04": {
+    "news_id": "bn_20260519_2851afa7",
+    "first_seen": "2026-05-19T12:09:31Z"
+  },
+  "f78b5a99dc6ceb3876c92c0ab60d615c1d0f5767": {
+    "news_id": "bn_20260519_f78b5a99",
+    "first_seen": "2026-05-19T12:09:31Z"
+  },
+  "232e8d69dcbd46ebb18c6d532a42eb5c37f888bc": {
+    "news_id": "bn_20260519_232e8d69",
+    "first_seen": "2026-05-19T16:49:01Z"
+  },
+  "d02abfca684c8e2aca565975073d8b5b430143f1": {
+    "news_id": "bn_20260519_d02abfca",
+    "first_seen": "2026-05-19T16:49:01Z"
+  },
+  "18cc6dad7793c9f6d84ba32de54555e99be87372": {
+    "news_id": "bn_20260519_18cc6dad",
+    "first_seen": "2026-05-19T16:49:01Z"
+  },
+  "5d700572eaf7430599c7395ba962f2083ab15563": {
+    "news_id": "bn_20260519_5d700572",
+    "first_seen": "2026-05-19T16:49:01Z"
+  },
+  "2273d13ffec860cf7057473d23598a99248aa3ac": {
+    "news_id": "bn_20260519_2273d13f",
+    "first_seen": "2026-05-19T16:49:01Z"
+  },
+  "3aaaca6ef2f2f570b1e227dddd3f6d575174e715": {
+    "news_id": "bn_20260519_3aaaca6e",
+    "first_seen": "2026-05-19T16:49:19Z"
+  },
+  "a7a501722a9d9fde856c29426fd72c5350b77cc1": {
+    "news_id": "bn_20260519_a7a50172",
+    "first_seen": "2026-05-19T16:59:17Z"
+  },
+  "09401d72a9a192954f52d2d6be71bceb84f1b259": {
+    "news_id": "bn_20260519_09401d72",
+    "first_seen": "2026-05-19T16:59:17Z"
+  },
+  "2e335e53172fbad0afe1ee449d1c1fce9cf6cd9f": {
+    "news_id": "bn_20260519_2e335e53",
+    "first_seen": "2026-05-19T17:09:29Z"
+  },
+  "ab9bd9a75cace4c3d0c2fe5e53b23e1f08702edd": {
+    "news_id": "bn_20260519_ab9bd9a7",
+    "first_seen": "2026-05-19T17:11:36Z"
+  },
+  "0486178e0059b9a9fcd729cfd5373a6e9aed6cec": {
+    "news_id": "bn_20260520_0486178e",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "d16de48c33b7fa0b0bc18d4355cc3683a0c96293": {
+    "news_id": "bn_20260520_d16de48c",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "494892a6ad33c3aac3ac5a9fba6cb0225ae2a403": {
+    "news_id": "bn_20260520_494892a6",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "a89b3e7112186cacc9f07369d5d0c4a8b7c4bbe3": {
+    "news_id": "bn_20260520_a89b3e71",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "8a2a09fd922a9a8cba978ae2cfdf344dc7559c60": {
+    "news_id": "bn_20260520_8a2a09fd",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "3d1285a419c1a129ac71fdbcdcd09652ddd9d42d": {
+    "news_id": "bn_20260520_3d1285a4",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "aef6ff4413db6f9a10e835e43d8485d7662bda3c": {
+    "news_id": "bn_20260520_aef6ff44",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "0e6f6f18764b72a0a6bc72c1b6c545186d43a677": {
+    "news_id": "bn_20260520_0e6f6f18",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "3d1e8a18118f6798b974f37ff8ed833b8443801c": {
+    "news_id": "bn_20260520_3d1e8a18",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "2139e1add951b527a587ee490965eff84edf87b2": {
+    "news_id": "bn_20260520_2139e1ad",
+    "first_seen": "2026-05-20T00:00:01Z"
+  },
+  "f3b477d8b6b8aef83a113b97efc9ba0eff6126a2": {
+    "news_id": "bn_20260520_f3b477d8",
+    "first_seen": "2026-05-20T01:01:26Z"
+  },
+  "da52a64eeab0fa7c9a588b080c365b2489c7c234": {
+    "news_id": "bn_20260520_da52a64e",
+    "first_seen": "2026-05-20T01:21:56Z"
   }
 }

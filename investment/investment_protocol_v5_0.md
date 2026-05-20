@@ -1006,6 +1006,58 @@ else:                       confidence = "low"
 
 ---
 
+## PHASE 4.6 — DECISION CAP (V5.0.x NEW)
+
+PM (inline, deterministic — 沒有 LLM 呼叫)。在 Phase 5 export 之前強制執行。
+
+### 目的
+Phase 4.5 anchors 不足 / fair value confidence=low 時，仍可能因其他 lane 推力推出
+高信心 BUY → 過去常見「弱 valuation 證據卻給高信心 BUY」誤判。Cap 把這類決策硬壓回
+低 size、低 confidence、不得 BUY，但保留 STAGED_ENTRY / HOLD 路徑。
+
+### 觸發條件 (任一即觸發 cap)
+
+| 條件 | `decision_cap_reason` |
+|---|---|
+| `fair_value_summary.anchors_available < 2` | `insufficient_anchors` |
+| `fair_value_summary.confidence == "low"` | `low_valuation_confidence` |
+| 任一 lane data_quality 標記為 low（degraded_analysts 或 bundle 缺失） | `low_data_quality` |
+
+### Cap 規則（強制套用）
+
+觸發後 PM **必須**：
+
+1. **`decision_cap_active = true`** — schema field
+2. **`decision_cap_reason`** = 上表的 reason 值
+3. **`final_decision`** 不得是 `BUY` — 只能 `STAGED_ENTRY` / `HOLD`
+4. **`avg_confidence`** = `min(原值, 0.65)`
+5. **`position_size_pct`** = `min(原值, 0.003)` — 即 30 bps 上限
+6. **`final_action`** 對應改：原 `EXECUTE` → `STAGED`；若降為 HOLD 則 `CANCEL`
+
+### Override 例外
+
+若 PM 認為有重大 catalyst 推力（earnings beat / 結構性 thesis / 監管利多），
+可保留 `STAGED_ENTRY` + 30 bps，但 **必須**填：
+
+- **`cap_override_reason: string`** — 一句說明為何 override（非空字串）
+
+Override **不解除** size 與 confidence 的 cap，只是允許不退到 HOLD。
+
+### Schema export 欄位（trades_this_session[0]）
+
+```json
+{
+  "decision_cap_active":  true,
+  "decision_cap_reason":  "insufficient_anchors | low_valuation_confidence | low_data_quality",
+  "cap_override_reason":  "string | null"
+}
+```
+
+未觸發 cap 時 `decision_cap_active=false`、其餘兩欄 null。
+Validator (`validate_session_export.py` § 10) 會檢查 cap 規則一致性，違反 rc=1。
+
+---
+
 ## PHASE 5 — SESSION EXPORT + MD REPORT + VALIDATE
 
 PM (inline)。
@@ -1013,10 +1065,34 @@ PM (inline)。
 ### Step 1 — Append session export JSON 至 `./invest_logs/history.json`
 Shape **必須**符合 `phase5_export_schema.md` (FULL EXAMPLE)。
 
+**V5.0.x — 用 script 寫入，不再在 prompt 內手寫巨大 JSON 段**：
+
+```bash
+# 把本次 session 完整 entry JSON 存到暫存檔（PM 在 Phase 5 末段用 Write 工具寫入）
+# 然後呼叫：
+python3 investment/scripts/append_session_export.py --from-file /tmp/<ticker>_session.json
+```
+
+或直接 pipe：
+
+```bash
+cat <<'JSON' | python3 investment/scripts/append_session_export.py
+{ "session_export_version": "V5.0", ... }
+JSON
+```
+
+腳本會：原子寫入（tmp + rename）、`fcntl.flock` 序列化、自動鏡射 top-level
+`ticker` / `final_action` / `date`、檢查最小 shape。失敗 → 修 entry 再重跑。
+
 > **V2.10.0 補必填欄位**（trades_this_session[] 內）：
 > - `lane_scores: {fundamentals, sentiment, news, technical}` — Phase 2 四個非 valuation lane 的 raw score（−3..+3）
 > - `det_inputs: {altman_z, debt_to_equity, fcf_yield, insider_ratio_q, short_interest_pct, fred_in_sector_avoid}` — 6 個 quant 原始值，**直接從 Phase 2 bundle 抄寫**，禁重新解讀
 > - `det_shadow` — Step 1.5 跑 post-processor 後自動產生，**不要手寫**
+
+> **V5.0.x 補必填欄位**（trades_this_session[] 內，Phase 4.6 產出）：
+> - `decision_cap_active: bool`
+> - `decision_cap_reason: "insufficient_anchors" | "low_valuation_confidence" | "low_data_quality" | null`
+> - `cap_override_reason: string | null`
 
 ### Step 1.5 — Apply deterministic shadow + polarization label (V2.10.0+ MUST-run)
 ```bash

@@ -121,8 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
       $('bn-budget-left').textContent = budgetText;
       const pair = Array.isArray(poller.break_news_pair) ? poller.break_news_pair.join('×') : '';
       const calls = poller.estimated_calls_per_debate;
+      const fb = poller.fallback_backed_capacity ? ` · ${t('含 fallback 容量', 'fallback-backed')}` : '';
       $('bn-budget-left').title = pair
-        ? `${pair} · ${calls || '?'} calls/debate · ${t('已扣待辯論 backlog', 'pending backlog deducted')}`
+        ? `${pair} · ${calls || '?'} calls/debate · ${t('已扣待辯論 backlog', 'pending backlog deducted')}${fb}`
         : '';
       const ok = poller.last_status === 'ok';
       $('bn-health-dot').style.background = ok ? '#22c55e' : '#eab308';
@@ -193,6 +194,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (s < 3600)  return Math.floor(s / 60) + 'm';
     if (s < 86400) return Math.floor(s / 3600) + 'h';
     return Math.floor(s / 86400) + 'd';
+  }
+
+  function rawTimeMs(it) {
+    const d = new Date(it?.published || it?.fetched_at || 0);
+    const ms = d.getTime();
+    return Number.isFinite(ms) ? ms : 0;
   }
 
   function renderRawCard(it) {
@@ -271,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadRawStream() {
     try {
       const r = await fetchJson('/api/break-news/raw-stream?limit=120');
-      rawStreamItems = r.items || [];
+      rawStreamItems = (r.items || []).slice().sort((a, b) => rawTimeMs(b) - rawTimeMs(a));
       renderRawStream();
     } catch (e) {
       const empty = $('bn-raw-empty');

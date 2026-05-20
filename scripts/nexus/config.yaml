@@ -166,6 +166,19 @@ tier2_weights:
   primary_ticker: 1.0     # MD filename ticker
   peer_in_body:   0.35    # other tickers found in body text
 
+# V3.1.0 — ticker-centric output mode
+# When ticker_centric: true, the final write step collapses the rich internal
+# graph (ticker / theme / catalyst / sector / narrative / thesis nodes) down to
+# ticker nodes only, with all other-type metadata aggregated into each ticker's
+# `metadata` block (recent_news[], themes[], sector, narratives[], theses[]).
+# This is what the user wants on the Knowledge Graph page: ticker↔ticker
+# relations only, news shown via ticker tooltip — NOT as standalone graph nodes.
+#
+# Set to false for the legacy multi-type graph (still useful for debugging Tier
+# 3 LLM NER output / supply-chain edges via build_graph.py --dry-run).
+ticker_centric: true
+ticker_centric_recent_news_per_ticker: 8     # tooltip cap; keep most recent + |impact|
+
 # Data source paths (relative to project root)
 sources:
   heatmap_universe: "Dashboard/heatmap_universe.json"

@@ -30,6 +30,7 @@ from news.scripts.stage1_triage import (  # noqa: E402
 from scripts.break_news import store  # noqa: E402
 from scripts.break_news.llm_drivers import break_news_pair  # noqa: E402
 from scripts._shared import model_router  # noqa: E402
+from scripts.break_news.llm_drivers import VALID_MODELS  # noqa: E402
 
 try:
     from scripts.break_news import social_sources as _social_sources  # noqa: E402
@@ -99,42 +100,68 @@ def _pending_backlog_count() -> int:
     return n
 
 
+def _voice_order(preferred: str, chain: list[str]) -> list[str]:
+    if preferred in VALID_MODELS:
+        return [preferred] + [m for m in chain if m != preferred]
+    return list(chain)
+
+
 def _model_call_headroom(pair: list[str]) -> dict:
     cfg = model_router.load_llm_config()
     status = model_router.model_status()
+    chain = model_router.model_chain(cfg)
     usage_date = status.get("date")
     details = {}
-    finite: list[int] = []
-    for model in pair:
-        headroom, available, reason = model_router.model_headroom(model, cfg=cfg)
-        model_state = (status.get("models") or {}).get(model, {})
-        details[model] = {
-            "headroom": headroom,
-            "available": available,
-            "reason": reason,
-            "calls": model_state.get("calls"),
-            "daily_max": model_state.get("daily_max"),
-        }
-        if not available:
+    voice_headrooms: list[int] = []
+    fallback_backed = False
+    for voice in pair:
+        order = _voice_order(voice, chain)
+        route = []
+        selected = None
+        for model in order:
+            headroom, available, reason = model_router.model_headroom(model, cfg=cfg)
+            model_state = (status.get("models") or {}).get(model, {})
+            rec = {
+                "model": model,
+                "headroom": headroom,
+                "available": available,
+                "reason": reason,
+                "calls": model_state.get("calls"),
+                "daily_max": model_state.get("daily_max"),
+            }
+            route.append(rec)
+            if available and (headroom is None or headroom >= EST_CALLS_PER_DEBATE):
+                selected = rec
+                break
+        details[voice] = {"order": order, "selected": selected, "route": route}
+        if not selected:
             return {
                 "ok": False,
                 "binding_call_headroom": 0,
                 "usage_date": usage_date,
+                "voices": details,
                 "models": details,
-                "blocked_reason": f"{model}:{reason}",
+                "blocked_reason": f"{voice}:no_available_route",
+                "fallback_backed": fallback_backed,
             }
-        if headroom is not None:
-            finite.append(headroom)
+        if selected["model"] != voice:
+            fallback_backed = True
+        voice_headrooms.append(
+            selected["headroom"] if selected["headroom"] is not None
+            else MAX_ITEMS_PER_CYCLE * EST_CALLS_PER_DEBATE
+        )
 
     # No configured cap on either voice: admission is governed by per-cycle gate
     # and optional BREAK_NEWS_DAILY_MAX_DEBATES emergency ceiling.
-    binding = min(finite) if finite else MAX_ITEMS_PER_CYCLE * EST_CALLS_PER_DEBATE
+    binding = min(voice_headrooms) if voice_headrooms else 0
     return {
         "ok": True,
         "binding_call_headroom": max(0, int(binding)),
         "usage_date": usage_date,
+        "voices": details,
         "models": details,
         "blocked_reason": None,
+        "fallback_backed": fallback_backed,
     }
 
 
@@ -171,6 +198,7 @@ def _auto_budget_limit(now_utc: datetime | None = None, today_count: int = 0) ->
         "emergency_items_remaining": emergency_remaining,
         "break_news_pair": pair,
         "model_capacity": model_cap,
+        "fallback_backed_capacity": bool(model_cap.get("fallback_backed")),
         "us_news_window_open": in_window,
     }
 
@@ -478,6 +506,7 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         "emergency_items_remaining": budget["emergency_items_remaining"],
         "break_news_pair": budget["break_news_pair"],
         "model_capacity": budget["model_capacity"],
+        "fallback_backed_capacity": budget["fallback_backed_capacity"],
         "session_reserve": SESSION_RESERVE,
         "us_news_window_open": budget["us_news_window_open"],
         "advanced_ids": advanced_ids,

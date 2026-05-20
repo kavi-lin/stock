@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V3.12.0';
+  const VERSION = 'V3.14.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -800,10 +800,12 @@
       // Detail panel: list active log_tail (truncated) + pending queue items
       const lines = [];
       if (active) {
-        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">▶</span><span><strong>${active.name}</strong>${active.ticker ? ' · ' + active.ticker : ''} · ${fmtElapsed(active.elapsed_sec)}</span></div>`);
+        const activeLabel = active.label || active.ticker || active.name || '?';
+        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">▶</span><span><strong>${activeLabel}</strong> · ${fmtElapsed(active.elapsed_sec)}</span></div>`);
       }
       for (const q of queue.slice(0, 5)) {
-        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">⏳</span><span><strong>${q.name || '?'}</strong>${q.params?.ticker ? ' · ' + q.params.ticker : ''}</span></div>`);
+        const qLabel = q.label || q.params?.ticker || q.name || '?';
+        lines.push(`<div class="proto-pill-row"><span class="proto-pill-row-icon">⏳</span><span><strong>${qLabel}</strong></span></div>`);
       }
       if (queue.length > 5) lines.push(`<div class="proto-pill-row proto-pill-row-more">+${queue.length - 5} more</div>`);
       det.innerHTML = lines.join('');

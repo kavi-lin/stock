@@ -10,6 +10,62 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.14.0] — 2026-05-20 — Nexus graph: ticker-centric
+
+### Changed — Knowledge Graph 改 ticker-only
+
+- **`scripts/nexus/build_graph.py`** 加 `_to_ticker_centric()` collapse 步驟:
+  prune 後把所有 catalyst / theme / sector / narrative / thesis 鄰居的 metadata
+  aggregated 進每個 ticker 的 `metadata.recent_news[]` / `themes[]` / `narratives[]`
+  / `sector`,然後 filter 只留 ticker 節點 + ticker↔ticker 邊。內部 Tier 1/2/3
+  pipeline 不動 — 只動最終 output shape。
+- 合成 `CO_THEME` 邊:同主題 / 同 narrative 的 top-12 tickers 之間建立稀薄的
+  ticker↔ticker 邊(每個 ticker 限 top-3 themes),把原本只能透過 theme hub 連
+  的關係轉成直接 ticker 對。
+- 新 config flag `ticker_centric: true`(default) + `ticker_centric_recent_news_per_ticker: 8`。
+  Legacy 多型別 graph 仍可用 `ticker_centric: false` 跑(主要給 Tier 3 LLM NER 除錯)。
+- 重算 centrality:collapse 後 degree / pagerank 用 ticker-only 拓樸,
+  不再被 theme / catalyst hub 中介膨脹。
+
+### Added — Ticker tooltip + 細節面板顯示新聞
+
+- **`Dashboard/page-graph.js`** `buildNodeTooltip()`:hover ticker 卡片顯示
+  最近 6 則新聞(headline / verdict 顏色 / net_impact / 日期)+ themes chips
+  + narratives chips + sector。
+- 點 ticker 後右側 detail panel 加 News / Themes / Narratives block,同步資料。
+- 邊顏色依 edge type 區分:PEER_OF(藍)/ SUPPLIES_TO(綠深)/ COMPETES_WITH(紅)
+  / CO_DEVELOPS_WITH(琥珀)/ CO_THEME(琥珀淡 — 合成邊)。idle 也有薄底
+  讓拓撲可見,hover 強化。
+- 過濾列在 ticker-only 模式下改成 edge type legend(同業 / 供應 / 競爭 / 同主題),
+  不再顯示無意義的 ticker checkbox。
+
+### Why
+
+User 反映知識圖譜需要的是 ticker↔ticker 關係,news 是 ticker 的內部資訊
+(tooltip 上看),不該當成圖譜節點。原 V3.0 multi-type graph 800 節點裡 328 是
+catalyst (news) 節點,把 ticker 之間的訊號淹沒。改 ticker-centric 後節點數 ~204
+(只有 ticker),邊 ~704(PEER_OF 111 + CO_THEME 593),JSON ~649 KB
+(原 2.5 MB),載入更快、拓撲清楚、news 仍在 ticker tooltip 可查。
+
+---
+
+## [3.13.0] — 2026-05-20 — Migrate gemini CLI to agy CLI
+
+### Changed — LLM Execution Track
+
+- **CLI Engine**: 將專案中所有原本呼叫 `gemini` CLI 的地方全部遷移至 `agy` (Antigravity) CLI。
+- **`llm_drivers.py`**:
+  - `GEMINI_BIN` 重新定義為 `AGY_BIN` (預設 `agy`)。
+  - `run_gemini` 內部指令改為 `agy --print` 並加上 `--dangerously-skip-permissions`。
+  - 移除 `--output-format json`，解析邏輯調整為直接處理 stdout 內容（相容原有的 3-stage JSON extractor）。
+- **`dashboard_server.py`**:
+  - `_protocol_command` 針對 `gemini` 模型改用 `agy` 執行軌道。
+  - 更新 `GEMINI_BIN` 全域變數為 `AGY_BIN`。
+
+### Why
+
+配合系統環境升級，將舊有的 `gemini` 執行層統一替換為功能更強大且與當前 Agent 深度整合的 `agy` CLI，確保指令執行的一致性與權限管理自動化。
+
 ## [3.12.0] — 2026-05-20 — Cerebras supply-chain grounding
 
 ### Added
@@ -32,6 +88,92 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 Cerebras 生成圖原本偏向硬體製造與舊研究客戶，漏掉 OpenAI/AWS 這類 2026 年核心商業節點。
 本版修正現有圖，也讓後續供應鏈生成更不容易忽略最近新聞與上市狀態。
+
+## [3.11.0] — 2026-05-20 — Invest V5.0.x decision quality patch
+
+### Fixed — UI / decision cross-field consistency (A1)
+
+- `validate_session_export.py` §9：拒絕 `final_action="CANCEL"` 與 `final_decision in {BUY, STAGED_ENTRY}`
+  並存。新 session 在 schema 層擋住,不允許 BUY-side thesis 配 WAIT execution。
+- `Dashboard/page-decisions.js` `buildCard()`:對遺留歷史中的不一致組合,卡片改顯示
+  muted gray + dual label `CANCEL / BUY thesis`,不再透出 BUY 的綠色。
+
+### Added — Phase 4.6 Valuation Decision Cap (A2)
+
+- 新 Phase 4.6 段落寫入 `investment_protocol_v5_0.md`。觸發條件:
+  - `fair_value_summary.anchors_available < 2` → `decision_cap_reason="insufficient_anchors"`
+  - `fair_value_summary.confidence == "low"` → `decision_cap_reason="low_valuation_confidence"`
+  - lane data_quality low → `decision_cap_reason="low_data_quality"`
+- Cap 規則:`final_decision` 不得 `BUY`、`avg_confidence ≤ 0.65`、`position_size_pct ≤ 0.003`(30 bps)。
+- 例外保留 `cap_override_reason` 欄位讓 PM 在重大 catalyst 時保留 STAGED_ENTRY,
+  但 size / confidence cap 不解除。
+- Schema 加 `decision_cap_active` / `decision_cap_reason` / `cap_override_reason` 欄位
+  (V5.0.x optional,既有 entry 不受影響)。`validate_session_export.py` §10 強制 cap rules。
+
+### Changed — History append 改 script 化 (A3)
+
+- 新 script `investment/scripts/append_session_export.py`:
+  - 從 stdin / `--from-file` / `--from-arg` 讀 entry JSON
+  - `fcntl.flock(LOCK_EX)` 序列化、tmp + atomic rename 寫入
+  - 自動鏡射 top-level `ticker` / `final_action` / `date`
+  - 最小 shape gate;完整 schema 仍由 `validate_session_export.py` 把關
+- Phase 5 Step 1 改成「PM 用 Write 工具把 entry 存到暫存,呼叫 script 寫入」,
+  prompt 不再內嵌巨大 JSON,大幅降低 output token 與 malformed-JSON 重試成本。
+- `register_thesis.py` 保持不變;順序在 protocol 內 sequential
+  (Step 1 append → Step 6 register),不會與 append 競爭。
+
+### Why
+
+`分析 [TICKER]` 過去常出現「Phase 4.5 anchors<2 仍給高信心 BUY」+「`final_action=WAIT`
+與 `final_decision=BUY` 並存」等決策品質問題。本 patch 在 schema、protocol、UI 三層
+分別擋住誤判,並把 Phase 5 PM 手寫巨大 JSON 的低品質環節 script 化。為 V5.1 mode
+切換與 shadow 校準鋪路 — V5.1 plan 見 `~/.claude/plans/llm-llm-queue-pythone-script-whimsical-beacon.md`。
+
+---
+
+## [3.10.0] — 2026-05-20 — Supply-chain generation queue
+
+### Added — Truth Social Raw source
+
+- Break News social sources 新增 Truth Social adapter，預設追蹤
+  `@realDonaldTrump`，寫入 Raw 流作為政策/市場 headline source。
+- 新 env：`BREAK_NEWS_TRUTH_SOCIAL_ENABLED`、`BREAK_NEWS_TRUTH_SOCIAL_HANDLES`、
+  `BREAK_NEWS_TRUTH_SOCIAL_MAX_PER_CYCLE`、`BREAK_NEWS_TRUTH_SOCIAL_BASE`。
+- Truth Social item 標記為 social source，Raw 全收；auto-debate 仍走 social gate，
+  避免純政治/轉貼噪音直接消耗 LLM quota。
+
+### Changed — Break News admission counts fallback routes
+
+- poller 的 model-aware admission 不再只看指定 A/B voice 的剩餘 call；現在會模擬
+  `run_with_fallback(preferred)` 的 route，使用每個 voice 第一個可用且至少夠
+  `BREAK_NEWS_EST_CALLS_PER_DEBATE` 的模型 headroom。
+- 例如 Break News pair 是 `codex×gemini` 且 Codex 已滿，只要 Claude 可用，
+  Codex 那一席會用 Claude 的 headroom 支撐 automatic admission。
+- state 新增 `fallback_backed_capacity`，前端 tooltip 顯示 fallback-backed。
+
+### Added — 供應鏈生成進入全域 queue
+
+- `POST /api/supply-chain/generate` 改為 enqueue `supply_chain_generate` job，
+  背景 worker 執行 `_sc.generate(theme)` + `_sc.enrich()`，避免切頁造成同步
+  request abort。
+- 供應鏈生成沿用 `/api/protocol-queue` 與右下角 global pill，可跨頁顯示
+  active / queued 狀態。
+- supply-chain 頁送出後顯示 queued 狀態；若仍停在本頁，完成後自動刷新 chain
+  list 並載入新生成主題。
+- `_json()` 對 `BrokenPipeError` 靜默處理，避免正常切頁/abort 噴 traceback。
+- pill detail 改優先顯示 queue label，例如 `🔗 Supply TPU`。
+
+---
+
+## [3.9.5] — 2026-05-20 — Raw stream published-time ordering
+
+### Fixed — 未閘 Raw 流排序
+
+Raw stream 原本用 `fetched_at` 排序，同一輪 poll 抓到的 item 會有相同時間戳，
+導致畫面看起來不是照新聞時間排列。本版改為讀取時與寫入時都用 `published`
+近到遠排序，缺 `published` 才 fallback `fetched_at`。
+
+---
 
 ## [3.9.4] — 2026-05-20 — Break News model-aware admission
 

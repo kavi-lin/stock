@@ -39,7 +39,7 @@ dashboard_server 開機後常駐 2 條 daemon thread：
 | 元件 | 內容 |
 |---|---|
 | `break_news_poll_loop` (每 600s) | 跑 `scripts/break_news/poller.py`：抓 **9 個 RSS feed + Futu 牛牛推播 (US 限定，自動濾掉港股/中股/廣告) + 免費社群/趨勢源 (Reddit / Hacker News / Google Trends；Bluesky adapter 預設關閉，可用 `BREAK_NEWS_BLUESKY_ENABLED=1` 測試)** → stage1_triage 分數閘 (Futu 走 advance_reason=futu_news 旁路；社群源用更高 `BREAK_NEWS_SOCIAL_GATE_MIN_SCORE`，多數只進 Raw 流) → 候選依 `abs(shallow_score)` / binary / credibility / freshness 排序後才消耗 LLM 預算；admission 讀 Break News A/B voice 的實際 LLM quota headroom，扣 `pending_debate` backlog × `BREAK_NEWS_EST_CALLS_PER_DEBATE`(預設 6)，`BREAK_NEWS_SESSION_RESERVE` 以 call 為單位保留美股新聞時段額度；`BREAK_NEWS_DAILY_MAX_DEBATES>0` 僅作 emergency item ceiling → 寫 `news/break_news_logs/bn_<date>_<hash>.json` (state=`pending_debate`) |
-| `break_news_debate_loop` | 掃描 `pending_debate` 條目 → `scripts/break_news/debater.py` 起 `claude` + `gemini` CLI 交替留言（max 3 rounds，`<DONE>` 或 `done:true` 收斂）→ entities / relations 寫入 `summary.merged_*` |
+| `break_news_debate_loop` | 掃描 `pending_debate` 條目 → `scripts/break_news/debater.py` 起 `claude` + `agy` CLI 交替留言（max 3 rounds，`<DONE>` 或 `done:true` 收斂）→ entities / relations 寫入 `summary.merged_*` |
 | `/break-news.html` | 即時 stream 卡片 + Claude × Gemini 對話 side panel + entity chips + replay button + 情緒趨勢圖（Market Consensus 只吃系統性/大盤新聞；Raw Pulse 分線，不污染 consensus） |
 | `/api/break-news/{feed,item/<id>,state}` GET / `/refresh, /item/<id>/replay` POST | 只讀檢視 + manual 觸發；debate 用獨立 `_break_news_dispatch_lock`，**不**搶 `_protocol_lock`（normal `分析/產業掃描/新聞分析` 不會被擋） |
 

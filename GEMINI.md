@@ -1,6 +1,6 @@
-# AI 投資委員會 — Gemini CLI Execution Context
+# AI 投資委員會 — Antigravity (agy) CLI Execution Context
 
-This file defines the specific instructions, workflows, and standards for the Gemini CLI agent within the "AI Investment Committee" project.
+This file defines the specific instructions, workflows, and standards for the Antigravity (agy) CLI agent within the "AI Investment Committee" project.
 
 ## 專案核心定位 (Core Identity)
 - **Role**: Senior Software Engineer / Quantitative Research Engineer.
@@ -30,7 +30,7 @@ This file defines the specific instructions, workflows, and standards for the Ge
 
 **🚫 例外規定 (EXCLUSION)**: 執行投資協議 (`分析`, `產業掃描` 等) **不屬於** Session。執行完協議後 **不可** 更新版本號或修改 TODO list。
 
-## Gemini 專屬規範 (Gemini Specific Guidelines)
+## Antigravity 專屬規範 (Antigravity Specific Guidelines)
 
 ### 1. Topic Model 使用規範
 - **啟動任務**: 在第一回合呼叫 `update_topic` 描述任務目標與預計步驟。

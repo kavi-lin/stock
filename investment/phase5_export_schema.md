@@ -102,6 +102,9 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `action_label` | `ATTACK \| WAIT \| DEFENSIVE` | **V2.13.0+ 必填** | Phase 3 PM 動作建議（與 final_action 並存，不取代） |
 | `thesis_id` | string or `null` | optional | **V2.14.0+** Phase 5.5 trader-memory-core register 後回填的 thesis lifecycle ID（e.g. `nvda-2026-05-06-001`）；register 失敗 / skip 時 null。Dashboard 用此 ID 拉 review queue |
 | `thesis_registered_at` | `"YYYY-MM-DDTHH:MM:SSZ"` or `null` | optional | **V2.14.0+** Phase 5.5 register 完成的 ISO timestamp；null = 未 register |
+| `decision_cap_active` | bool | optional **(V5.0.x+)** | Phase 4.6 — true 表示 valuation 證據不足，cap 已套用（不得 BUY、conf ≤ 0.65、size ≤ 30bps）。預設 false 視為未觸發 |
+| `decision_cap_reason` | `"insufficient_anchors" \| "low_valuation_confidence" \| "low_data_quality"` or `null` | required if `decision_cap_active=true` | 觸發 cap 的具體原因。Validator (`validate_session_export.py` § 10) 強制此 enum |
+| `cap_override_reason` | string or `null` | optional | PM 在 cap active 時若有重大 catalyst,可填 1 句說明保留 STAGED_ENTRY 路徑;不解除 size/conf cap |
 
 ### `valuation_lane` (V5.0)
 ```json

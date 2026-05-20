@@ -60,6 +60,19 @@ window.TrendChart = (function () {
     return out;
   }
 
+  // Shared chart geometry — keeps buildSVG() and the hover cursor in sync so
+  // the hover dot lands exactly on the rendered line.
+  const GEOM = { W: 760, padL: 6, padR: 6, padT: 8, padB: 18 };
+  function _xAt(i, n) {
+    const plotW = GEOM.W - GEOM.padL - GEOM.padR;
+    return GEOM.padL + (n <= 1 ? 0 : (i / (n - 1)) * plotW);
+  }
+  function _yAt(v, H) {
+    const plotH = H - GEOM.padT - GEOM.padB;
+    const base = GEOM.padT + plotH / 2;
+    return base - Math.max(-1, Math.min(1, v)) * (plotH / 2);
+  }
+
   function injectCSS() {
     if (document.getElementById('trend-chart-css')) return;
     const arrow = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' "
@@ -81,8 +94,9 @@ window.TrendChart = (function () {
       .trend-chart{position:relative;}
       .trend-svg{display:block;width:100%;height:auto;}
       .trend-cursor{position:absolute;top:0;pointer-events:none;
-        background:rgba(9,9,11,0.94);border:1px solid rgba(161,161,170,0.4);
+        background:var(--bg-card);border:1px solid var(--border);
         border-radius:6px;padding:4px 8px;font-size:10px;
+        box-shadow:0 4px 14px rgba(0,0,0,0.14);
         font-family:'JetBrains Mono',monospace;color:var(--text-main);
         white-space:nowrap;transform:translateX(-50%);display:none;z-index:5;}
       .trend-legend{display:flex;gap:14px;margin-top:4px;font-size:9.5px;
@@ -126,12 +140,12 @@ window.TrendChart = (function () {
   // pixel width however wide the SVG is scaled; x-axis + "now" labels are HTML
   // overlays (not SVG <text>) so their font size never balloons with scale.
   function buildSVG(values, labels, H, idn) {
-    const W = 760, padL = 6, padR = 6, padT = 8, padB = 18;
+    const W = GEOM.W, padL = GEOM.padL, padR = GEOM.padR, padT = GEOM.padT, padB = GEOM.padB;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const base = padT + plotH / 2;
     const n = values.length;
-    const xAt = i => padL + (n <= 1 ? 0 : (i / (n - 1)) * plotW);
-    const yAt = v => base - Math.max(-1, Math.min(1, v)) * (plotH / 2);
+    const xAt = i => _xAt(i, n);
+    const yAt = v => _yAt(v, H);
     const pctX = x => (x / W * 100).toFixed(2);
     const linePts = values.map((v, i) => `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`).join(' ');
     const area = `${xAt(0).toFixed(1)},${base.toFixed(1)} ${linePts} `
@@ -177,6 +191,11 @@ window.TrendChart = (function () {
       <line x1="${padL}" x2="${W - padR}" y1="${base}" y2="${base}"
         stroke="rgba(161,161,170,0.55)" stroke-width="1" stroke-dasharray="3 3" ${NS}/>
       <circle cx="${nowX.toFixed(1)}" cy="${nowY.toFixed(1)}" r="2.2" fill="${nowColor}"/>
+      <line id="trend-hvline-${idn}" y1="${padT}" y2="${(H - padB).toFixed(1)}"
+        stroke="rgba(128,128,128,0.5)" stroke-width="1" stroke-dasharray="2 3" ${NS}
+        style="display:none"/>
+      <circle id="trend-hdot-${idn}" r="3" stroke="var(--bg-card)" stroke-width="1.6"
+        ${NS} style="display:none"/>
     </svg>
     <span class="trend-nowlabel" style="left:${pctX(nowX)}%;top:${(nowY / H * 100).toFixed(2)}%;`
       + `color:${nowColor};">${esc(t('現在', 'now'))}</span>
@@ -254,24 +273,45 @@ window.TrendChart = (function () {
     sel.value = this.entity;
   };
 
-  Instance.prototype._wireCursor = function (series, labels) {
+  Instance.prototype._wireCursor = function (series, labels, H) {
+    const idn = this.id;
     const chart = this._q('chart');
     const svg = chart && chart.querySelector('svg');
     const cursor = chart && chart.querySelector('.trend-cursor');
     if (!svg || !cursor) return;
+    const dot = chart.querySelector(`#trend-hdot-${idn}`);
+    const vline = chart.querySelector(`#trend-hvline-${idn}`);
     const n = series.length;
+    const hide = () => {
+      cursor.style.display = 'none';
+      if (dot) dot.style.display = 'none';
+      if (vline) vline.style.display = 'none';
+    };
     svg.addEventListener('mousemove', (ev) => {
       const r = svg.getBoundingClientRect();
       const fx = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
       const i = Math.max(0, Math.min(n - 1, Math.round(fx * (n - 1))));
       const v = series[i];
       const vc = v > 0.05 ? '#22c55e' : v < -0.05 ? '#ef4444' : '#a1a1aa';
+      // snap x to the actual data point so dot + tooltip + guide all align
+      const px = _xAt(i, n), py = _yAt(v, H);
       cursor.style.display = 'block';
-      cursor.style.left = (fx * 100) + '%';
+      cursor.style.left = (px / GEOM.W * 100) + '%';
       cursor.innerHTML = `${esc(fmtTick(labels[i] || ''))} · `
         + `<strong style="color:${vc};">${v > 0 ? '+' : ''}${v.toFixed(2)}</strong>`;
+      if (dot) {
+        dot.setAttribute('cx', px.toFixed(1));
+        dot.setAttribute('cy', py.toFixed(1));
+        dot.setAttribute('fill', vc);
+        dot.style.display = 'block';
+      }
+      if (vline) {
+        vline.setAttribute('x1', px.toFixed(1));
+        vline.setAttribute('x2', px.toFixed(1));
+        vline.style.display = 'block';
+      }
     });
-    svg.addEventListener('mouseleave', () => { cursor.style.display = 'none'; });
+    svg.addEventListener('mouseleave', hide);
   };
 
   Instance.prototype.renderChart = function () {
@@ -314,7 +354,7 @@ window.TrendChart = (function () {
       if (lr) lr.textContent = t('看空', 'bearish');
       if (lh) lh.textContent = t('滑過看任一時點', 'hover for any point');
     }
-    this._wireCursor(series, labels);
+    this._wireCursor(series, labels, H);
   };
 
   Instance.prototype.refresh = function () {

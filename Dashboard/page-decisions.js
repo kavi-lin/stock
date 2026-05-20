@@ -1090,12 +1090,22 @@ function escapeHtmlDc(s) {
 }
 
 function buildCard(item) {
-    const isExecute = isActiveDecision(item.decision);
-    const isStaged = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY' || item.final_decision === 'STAGED_ENTRY';
-    const statusColor = DECISION_COLOR[item.decision] || 'var(--text-muted)';
+    // V5.0.x — defensive consistency guard. New entries are blocked at schema layer
+    // (validate_session_export.py § 9) but legacy history may still have CANCEL execution
+    // paired with BUY/STAGED_ENTRY thesis. Surface as muted "inconsistent" rather than
+    // letting the BUY-side colour leak through.
+    const _isCancelExec = item.decision === 'CANCEL';
+    const _isBuyThesis  = item.final_decision === 'BUY' || item.final_decision === 'STAGED_ENTRY';
+    const _inconsistent = _isCancelExec && _isBuyThesis;
+
+    const isExecute = isActiveDecision(item.decision) && !_inconsistent;
+    const isStaged = !_inconsistent && (item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY' || item.final_decision === 'STAGED_ENTRY');
+    const statusColor = _inconsistent ? 'var(--text-muted)' : (DECISION_COLOR[item.decision] || 'var(--text-muted)');
     const t  = window.i18n?.[UI.currentLang] || {};
     const wl = t.watchlist || {};
-    const status  = t.status?.[item.decision] || item.decision;
+    const baseStatus = t.status?.[item.decision] || item.decision;
+    // Dual label for inconsistent rows: "WAIT / BUY-thesis" so the conflict is visible.
+    const status = _inconsistent ? `${baseStatus} / ${item.final_decision} thesis` : baseStatus;
     const horizon = item.time_horizon ? (t.horizon?.[item.time_horizon] || item.time_horizon) : null;
     const version = detectProtocolVersion(item);
     const sectorBadge = _tickerSectorMap[item.ticker]

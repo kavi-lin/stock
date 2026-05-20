@@ -31,6 +31,8 @@ TIMEOUT = int(os.environ.get("BREAK_NEWS_SOCIAL_TIMEOUT_SEC", "12"))
 MAX_TOTAL = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_TOTAL", "80"))
 MAX_PER_SOURCE = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_PER_SOURCE", "20"))
 MAX_PER_QUERY = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_PER_QUERY", "5"))
+TRUTH_SOCIAL_ENABLED = os.environ.get("BREAK_NEWS_TRUTH_SOCIAL_ENABLED", "1").lower() not in ("0", "false", "no")
+TRUTH_SOCIAL_MAX_PER_CYCLE = int(os.environ.get("BREAK_NEWS_TRUTH_SOCIAL_MAX_PER_CYCLE", "10"))
 
 DEFAULT_REDDIT_SUBS = [
     "stocks", "investing", "wallstreetbets", "options",
@@ -48,6 +50,7 @@ DEFAULT_HN_QUERIES = [
     "nvidia", "semiconductor", "\"data center\"", "openai",
     "\"AI agent\"", "robotics", "cloud gpu", "nuclear power",
 ]
+DEFAULT_TRUTH_SOCIAL_HANDLES = ["realDonaldTrump"]
 MARKET_TERMS = [
     "stock", "stocks", "market", "markets", "nasdaq", "s&p", "sp500",
     "dow", "rates", "fed", "inflation", "earnings", "guidance", "ipo",
@@ -75,6 +78,13 @@ def _http_get(url: str, **params):
 def _parse_rfc3339_or_rfc822(s: str):
     if not s:
         return None
+    try:
+        dt = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        pass
     dt = parse_date(s)
     if dt is not None:
         return dt
@@ -290,10 +300,85 @@ def fetch_google_trends(window_hours: int) -> tuple[list[dict], dict]:
     return out, {"feed": "Google Trends", "fetched": len(out), "errors": errors}
 
 
+def _strip_tags(text: str) -> str:
+    text = re.sub(r"<br\s*/?>", " ", text or "", flags=re.I)
+    text = re.sub(r"<[^>]+>", " ", text)
+    return clean_text(html.unescape(text))
+
+
+def fetch_truth_social(window_hours: int) -> tuple[list[dict], dict]:
+    """Fetch recent public posts from Truth Social handles.
+
+    Truth Social does not advertise a stable public API, but its web app has
+    retained Mastodon-like account lookup/statuses endpoints. Treat failures as
+    soft source errors so the rest of Break News keeps running.
+    """
+    if not TRUTH_SOCIAL_ENABLED:
+        return [], {"feed": "Truth Social", "fetched": 0, "disabled": True}
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+    handles = _split_env("BREAK_NEWS_TRUTH_SOCIAL_HANDLES", DEFAULT_TRUTH_SOCIAL_HANDLES)
+    base = os.environ.get("BREAK_NEWS_TRUTH_SOCIAL_BASE", "https://truthsocial.com").rstrip("/")
+    out: list[dict] = []
+    errors: list[str] = []
+    for handle in handles:
+        if len(out) >= TRUTH_SOCIAL_MAX_PER_CYCLE:
+            break
+        acct = handle.lstrip("@").strip()
+        if not acct:
+            continue
+        try:
+            account = _http_get(f"{base}/api/v1/accounts/lookup", acct=acct).json()
+            account_id = account.get("id")
+            if not account_id:
+                raise RuntimeError("account id not found")
+            statuses = _http_get(
+                f"{base}/api/v1/accounts/{account_id}/statuses",
+                limit=min(TRUTH_SOCIAL_MAX_PER_CYCLE, MAX_PER_SOURCE),
+                exclude_replies="true",
+            ).json()
+        except Exception as e:
+            errors.append(f"{acct}:{str(e)[:100]}")
+            continue
+        for s in statuses or []:
+            if len(out) >= TRUTH_SOCIAL_MAX_PER_CYCLE:
+                break
+            dt = _parse_rfc3339_or_rfc822(s.get("created_at") or "")
+            if not _within(dt, cutoff):
+                continue
+            text = _strip_tags(s.get("content") or "")
+            reblog = s.get("reblog") or {}
+            if not text and reblog:
+                text = "RT: " + _strip_tags(reblog.get("content") or "")
+            if not text:
+                continue
+            status_id = s.get("id") or ""
+            url = s.get("url") or f"{base}/@{acct}/{status_id}"
+            item = _social_item(
+                f"Truth Social:@{acct}",
+                text[:180],
+                url,
+                text,
+                dt,
+                "MEDIUM",
+                {
+                    "platform": "truth_social",
+                    "handle": acct,
+                    "status_id": status_id,
+                    "replies": s.get("replies_count"),
+                    "reblogs": s.get("reblogs_count"),
+                    "favourites": s.get("favourites_count"),
+                },
+            )
+            if item:
+                out.append(item)
+    return out, {"feed": "Truth Social", "fetched": len(out), "handles": handles, "errors": errors[:5]}
+
+
 def fetch_social_items(window_hours: int) -> tuple[list[dict], list[dict]]:
     items: list[dict] = []
     stats: list[dict] = []
     adapters = [
+        fetch_truth_social,
         fetch_reddit,
         fetch_bluesky,
         fetch_hacker_news,

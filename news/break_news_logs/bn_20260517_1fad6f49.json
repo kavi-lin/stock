@@ -1,9 +1,9 @@
 {
   "news_id": "bn_20260517_1fad6f49",
   "schema_version": 1,
-  "state": "debating",
+  "state": "closed",
   "fetched_at": "2026-05-17T17:23:18Z",
-  "last_activity_ts": "2026-05-18T15:29:34Z",
+  "last_activity_ts": "2026-05-18T16:32:42Z",
   "source": {
     "name": "Yahoo Finance",
     "credibility": "HIGH",
@@ -697,16 +697,665 @@
       },
       "parse_status": "ok",
       "exit_code": 0
+    },
+    {
+      "comment_id": "c10",
+      "agent": "codex",
+      "agent_role_label": {
+        "en": "Analyst-A (Codex)",
+        "zh": "分析師 A (Codex)"
+      },
+      "side": "A",
+      "round": 0,
+      "ts": "2026-05-18T16:30:54Z",
+      "latency_ms": 30801,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "再補一個財務節奏角度：Kinectrics 的檢測與壽命延長服務，雖然比 SMR 題材更落地，但收入常綁在公用事業計畫性停機、換燃料與大修窗口。若電力公司為了供電緊張而延後停機，或監管費率案拖慢資本支出，BWXT 的「經常性服務」可能變成季度波動來源，而非線性成長。",
+        "bull_points": [
+          "服務收入黏著度較高",
+          "核電延役需求擴大",
+          "客戶轉換成本偏高"
+        ],
+        "bear_points": [
+          "停機排程影響認收",
+          "費率審查拖慢支出",
+          "現金流未必平滑"
+        ],
+        "final_take": "看多底盤，警惕季度波動",
+        "entities": {
+          "tickers": [
+            "BWXT"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "nuclear services",
+            "CANDU refurbishment",
+            "utility outage cycle"
+          ],
+          "tech_keywords": [
+            "CANDU",
+            "SMR"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:nuclear services"
+          },
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:utility outage cycle"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "新增停機排程與認收風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c11",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "side": "B",
+      "round": 0,
+      "ts": "2026-05-18T16:31:27Z",
+      "latency_ms": 32954,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前述分析已完整覆蓋了國防、同位素與燃料，但市場遺漏了一個關鍵的**數位轉型維度**：**核能反應爐的「數位孿生」(Digital Twins)**。隨核電廠營運期延長，BWXT 透過整合 Kinectrics 等資源，已具備將反應爐運行數據進行複雜建模與疲勞分析的能力。這種軟硬整合方案能精確預測組件風險，極大化縮短非計畫性停機時間。這不僅是工業服務，而是將核能營運「軟體化」的高毛利生意。目前市場仍以傳統工業設備邏輯為其估值，嚴重低估了這類**預測維護軟體服務**對長期毛利率提升的隱藏槓桿效應。",
+        "bull_points": [
+          "數位孿生技術顯著提升核電廠預測維護與運營效率。",
+          "從傳統硬體製造商轉型為高毛利的軟硬整合服務商。",
+          "軟體服務具有更高的經常性收入比例與經營槓桿。"
+        ],
+        "bear_points": [
+          "核能軟體導入需經嚴格監管，軟體導入節奏可能延遲。",
+          "數位化後的網路安全風險增加，可能成為新潛在攻擊面。"
+        ],
+        "final_take": "核能營運數位化是 BWXT 提升長期毛利率的關鍵轉型催化劑。",
+        "entities": {
+          "tickers": [
+            "BWXT"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "Nuclear revival",
+            "Digital transformation"
+          ],
+          "tech_keywords": [
+            "Digital Twins",
+            "Predictive Maintenance"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "BENEFITS_FROM",
+            "object": "tech_keywords:Digital Twins"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "提出核能數位孿生作為硬體轉型高毛利軟體服務的隱藏價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c12",
+      "agent": "codex",
+      "agent_role_label": {
+        "en": "Analyst-A (Codex)",
+        "zh": "分析師 A (Codex)"
+      },
+      "side": "A",
+      "round": 1,
+      "ts": "2026-05-18T16:31:44Z",
+      "latency_ms": 16959,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "再補一個尚未談到的會計與匯率角度：Kinectrics 把 BWXT 的營收組合拉向加拿大公用事業與省級核能預算，這有助於分散美國國防週期，但也引入 CAD/USD 匯率、加拿大工會成本與省政府費率審批節奏。若美元走強，海外服務收入折算可能壓抑表面成長，市場容易只看訂單而忽略換算毛利。",
+        "bull_points": [
+          "收入來源更全球化",
+          "降低美國預算單一依賴"
+        ],
+        "bear_points": [
+          "匯率恐侵蝕成長率",
+          "省級費率審批拖延"
+        ],
+        "final_take": "看多底盤，但留意匯率折算。",
+        "entities": {
+          "tickers": [
+            "BWXT"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities"
+          ],
+          "themes": [
+            "nuclear services",
+            "CANDU refurbishment",
+            "FX translation"
+          ],
+          "tech_keywords": [
+            "CANDU",
+            "reactor life extension"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "BENEFITS_FROM",
+            "object": "theme:CANDU_refurbishment"
+          },
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "HEADWIND_FROM",
+            "object": "theme:FX_translation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.82,
+        "rationale_short": "補充匯率與加拿大費率風險"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c13",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "side": "B",
+      "round": 1,
+      "ts": "2026-05-18T16:32:05Z",
+      "latency_ms": 20904,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "市場聚焦 AI 電力需求與 SMR 產能，卻忽略了核能產業長久以來的「隱形成本」——**乏核燃料管理 (Spent Fuel Management)**。隨著反應爐壽命延長與機組更新，高放射性廢棄物處理成了電力公司沉重的財務負債與監管隱憂。BWXT 憑藉其在核燃料處置的專業，未來極可能切入**乾式貯存 (Dry Cask Storage)** 與**放射性廢棄物減量工程**服務。這類業務屬於強制性需求，不論電價或 AI 題材如何波動，核電廠都必須支付這筆費用，提供了比單純硬體製造更長期的「護城河型」現金流。",
+        "bull_points": [
+          "核廢料管理屬強制性需求，不受景氣影響，保障長期收益。",
+          "乾式貯存技術門檻高，市場處於寡佔格局。"
+        ],
+        "bear_points": [
+          "核廢料處理涉及極高法律責任，一旦發生洩漏風險極大。",
+          "聯邦政府對廢棄物處置政策反覆，可能延誤商業化進程。"
+        ],
+        "final_take": "關注其在廢棄物處理市場的佈局，此為估值被低估的隱藏現金流。",
+        "entities": {
+          "tickers": [
+            "BWXT"
+          ],
+          "sectors": [
+            "Industrial",
+            "Energy"
+          ],
+          "themes": [
+            "Nuclear energy",
+            "Waste management"
+          ],
+          "tech_keywords": [
+            "Spent Fuel",
+            "Dry Cask Storage"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:spent_fuel_management"
+          }
+        ],
+        "done": false,
+        "confidence": 0.85,
+        "rationale_short": "分析核廢料處理這一常被忽略的長期強制性需求業務。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c14",
+      "agent": "codex",
+      "agent_role_label": {
+        "en": "Analyst-A (Codex)",
+        "zh": "分析師 A (Codex)"
+      },
+      "side": "A",
+      "round": 2,
+      "ts": "2026-05-18T16:32:26Z",
+      "latency_ms": 21625,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "可補一個供應鏈節點：Kinectrics 讓 BWXT 更貼近 OPG Darlington 的 **BWRX-300** 示範案，但設計主導權在 GE Hitachi／GE Vernova。若首座機組順利，BWXT 可吃到檢測、燃料與零組件外溢訂單；若成本超支，市場會把 SMR 風險重新折現到整個核能鏈。",
+        "bull_points": [
+          "切入 BWRX-300 實案",
+          "OPG 關係強化訂單可見度",
+          "服務收入可跟隨機組壽命"
+        ],
+        "bear_points": [
+          "GEV 掌握設計主導權",
+          "首案超支恐拖累估值",
+          "供應商毛利上限較明確"
+        ],
+        "final_take": "看多但催化取決於BWRX-300。",
+        "entities": {
+          "tickers": [
+            "BWXT",
+            "GEV"
+          ],
+          "sectors": [
+            "Industrials",
+            "Utilities",
+            "Health Care"
+          ],
+          "themes": [
+            "AI power demand",
+            "nuclear renaissance",
+            "SMR",
+            "radiopharmaceuticals"
+          ],
+          "tech_keywords": [
+            "BWRX-300",
+            "SMR",
+            "CANDU"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:bwrx300_deployment"
+          },
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "SUPPLIES_TO",
+            "object": "ticker:GEV"
+          },
+          {
+            "subject": "ticker:GEV",
+            "predicate": "CATALYST_FOR",
+            "object": "narrative:smr_validation"
+          }
+        ],
+        "done": false,
+        "confidence": 0.78,
+        "rationale_short": "新增BWRX-300供應鏈角度"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
+    },
+    {
+      "comment_id": "c15",
+      "agent": "gemini",
+      "agent_role_label": {
+        "en": "Analyst-B (Gemini)",
+        "zh": "分析師 B (Gemini)"
+      },
+      "side": "B",
+      "round": 2,
+      "ts": "2026-05-18T16:32:42Z",
+      "latency_ms": 15393,
+      "raw_stdout_path": "",
+      "parsed": {
+        "commentary": "前面討論已詳盡涵蓋核能硬體、同位素與服務，但忽略了**電力產能之外的數據安全與地緣政治邊界**。隨著核能被視為國家關鍵戰略，BWXT 不僅供應硬體，其核心業務涉及的機密數據與核材料，使其受到美國**出口管制條例 (EAR)** 的極度嚴格監管。這種高強度合規壁壘，無形中將任何潛在競爭對手擋在門外，形成一種「監管賦能的壟斷」。此外，隨著北美資料中心區域能源網格化，BWXT 的**模組化供應與現場快速組裝能力**，在未來若發生能源網遭攻擊需緊急修復時，其戰略意義遠大於單純的供電能力，具備深度的「韌性資產」溢價。",
+        "bull_points": [
+          "出口管制建立高強度防禦壁壘。",
+          "戰略資產韌性帶來估值溢價。"
+        ],
+        "bear_points": [
+          "高強度監管拉長合約交付週期。",
+          "地緣政治變動增加跨境業務隱憂。"
+        ],
+        "final_take": "核能產業的核心在於監管壁壘所造就的排他性競爭優勢。",
+        "entities": {
+          "tickers": [
+            "BWXT"
+          ],
+          "sectors": [
+            "Industrials"
+          ],
+          "themes": [
+            "AI capex",
+            "Nuclear energy"
+          ],
+          "tech_keywords": [
+            "SMR",
+            "HALEU"
+          ]
+        },
+        "relations": [
+          {
+            "subject": "ticker:BWXT",
+            "predicate": "BENEFITS_FROM",
+            "object": "narrative:regulatory_moat"
+          }
+        ],
+        "done": false,
+        "confidence": 0.9,
+        "rationale_short": "引入「監管賦能壟斷」與「韌性資產」新視角，分析硬體供應之外的戰略防禦價值。"
+      },
+      "parse_status": "ok",
+      "exit_code": 0
     }
   ],
-  "summary": null,
+  "summary": {
+    "consensus_verdict": "BULLISH",
+    "merged_entities": {
+      "tickers": [
+        "BWXT",
+        "CCJ",
+        "CEG",
+        "CONST",
+        "GD",
+        "GEV",
+        "HII",
+        "LEU",
+        "LNTH",
+        "OKLO",
+        "SMR",
+        "VST"
+      ],
+      "sectors": [
+        "Energy",
+        "Health Care",
+        "Industrial",
+        "Industrials",
+        "Utilities"
+      ],
+      "themes": [
+        "AI capex",
+        "AI power demand",
+        "CANDU refurbishment",
+        "Digital transformation",
+        "Energy Security",
+        "FX translation",
+        "Geopolitics",
+        "Human Capital",
+        "Nuclear",
+        "Nuclear Exports",
+        "Nuclear energy",
+        "Nuclear renaissance",
+        "Nuclear revival",
+        "SMR",
+        "Waste management",
+        "data center power",
+        "defense spending",
+        "medical isotopes",
+        "naval defense",
+        "nuclear",
+        "nuclear SMR",
+        "nuclear power",
+        "nuclear renaissance",
+        "nuclear services",
+        "radiopharmaceuticals",
+        "utility outage cycle"
+      ],
+      "tech_keywords": [
+        "Actinium-225",
+        "BWRX-300",
+        "CANDU",
+        "Digital Twins",
+        "Dry Cask Storage",
+        "HALEU",
+        "Heavy Forging",
+        "Lutetium-177",
+        "Mo-99",
+        "N-stamp welding",
+        "Naval Reactors",
+        "Nuclear engineering",
+        "Predictive Maintenance",
+        "SMR",
+        "Spent Fuel",
+        "TRISO",
+        "Tc-99m",
+        "Virginia-class",
+        "naval reactor",
+        "reactor life extension",
+        "small modular reactor"
+      ]
+    },
+    "merged_relations": [
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:nuclear-power"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:ai-data-center-power"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:smr-commercialization"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:SMR"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "sector:Industrials"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:Nuclear"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "CUSTOMER_OF",
+        "object": "narrative:haleu_supply"
+      },
+      {
+        "subject": "ticker:LEU",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:smr_fuel_cycle"
+      },
+      {
+        "subject": "ticker:LEU",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:haleu_domestic_enrichment"
+      },
+      {
+        "subject": "narrative:haleu_supply",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:smr_commercialization"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:regulatory_bottleneck"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:candu-refurbishment"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "CO_DEVELOPS_WITH",
+        "object": "narrative:nuclear-services-kinectrics"
+      },
+      {
+        "subject": "ticker:CCJ",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:candu-refurbishment"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:fixed-price-naval-contract-margin"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:defense-budget-appropriations-risk"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "HEADWIND_FROM",
+        "object": "narrative:skilled-labor-forging-bottleneck"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:energy_security"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:nuclear_exports"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "sector:defense"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:radiopharmaceuticals"
+      },
+      {
+        "subject": "ticker:LNTH",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:radiopharmaceuticals"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "narrative:medical-isotopes"
+      },
+      {
+        "subject": "ticker:LNTH",
+        "predicate": "COMPETES_WITH",
+        "object": "ticker:BWXT"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:Human Capital"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:HII"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:GD"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:aukus"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:nuclear services"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:utility outage cycle"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "tech_keywords:Digital Twins"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "theme:CANDU_refurbishment"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "HEADWIND_FROM",
+        "object": "theme:FX_translation"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:spent_fuel_management"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:bwrx300_deployment"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "SUPPLIES_TO",
+        "object": "ticker:GEV"
+      },
+      {
+        "subject": "ticker:GEV",
+        "predicate": "CATALYST_FOR",
+        "object": "narrative:smr_validation"
+      },
+      {
+        "subject": "ticker:BWXT",
+        "predicate": "BENEFITS_FROM",
+        "object": "narrative:regulatory_moat"
+      }
+    ],
+    "bull_summary": [
+      "AI 資料中心電力缺口提供結構性需求",
+      "海軍+醫用同位素現金流穩,非純概念股",
+      "併購擴大 SMR 供應鏈與規模效益",
+      "國防工業產能具護城河",
+      "軍民雙用技術具整合綜效",
+      "長期國防合約提供下檔防禦"
+    ],
+    "bear_summary": [
+      "一年漲近 100%,估值已反映多數樂觀",
+      "併購恐換股舉債,稀釋 EPS 並添整合風險",
+      "SMR 牌照與訂單兌現時程不確定",
+      "併購後期的營運整合風險",
+      "國防預算波動影響獲利穩定性",
+      "HALEU 濃縮產能近乎零,鎖死 SMR 訂單兌現時程"
+    ],
+    "final_take": "核能產業的核心在於監管壁壘所造就的排他性競爭優勢。",
+    "final_take_by": "gemini",
+    "rounds_completed": 3,
+    "closed_at": "2026-05-18T16:32:42Z",
+    "close_reason": "max_rounds",
+    "divergence_note": "claude-only: CATALYST_FOR, COMPETES_WITH, CO_DEVELOPS_WITH, CUSTOMER_OF"
+  },
   "errors": [
     {
       "ts": "2026-05-18T15:22:23Z",
       "where": "startup_sweep",
       "msg": "reset from debating after 79015s"
+    },
+    {
+      "ts": "2026-05-18T16:29:53Z",
+      "where": "startup_sweep",
+      "msg": "reset from debating after 3619s"
     }
   ],
   "graph_promoted_at": null,
-  "graph_status": "pending"
+  "graph_status": "provisional"
 }

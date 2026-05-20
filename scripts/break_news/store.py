@@ -13,6 +13,7 @@ import json
 import os
 import threading
 import time
+from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -295,7 +296,10 @@ def load_raw_stream() -> list[dict]:
         try:
             with open(RAW_STREAM_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            return data if isinstance(data, list) else []
+            if not isinstance(data, list):
+                return []
+            data.sort(key=_raw_entry_sort_ts, reverse=True)
+            return data
         except (OSError, json.JSONDecodeError):
             return []
 
@@ -307,6 +311,25 @@ def _raw_entry_ts(e: dict) -> float:
         ).replace(tzinfo=timezone.utc).timestamp()
     except ValueError:
         return 0.0
+
+
+def _raw_entry_sort_ts(e: dict) -> float:
+    """Published time for display ordering; fetched_at is only the fallback."""
+    for key in ("published", "fetched_at"):
+        raw = e.get(key)
+        if not raw:
+            continue
+        try:
+            dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        except ValueError:
+            try:
+                dt = parsedate_to_datetime(str(raw))
+            except (TypeError, ValueError):
+                continue
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).timestamp()
+    return 0.0
 
 
 def save_raw_stream(entries: list[dict], cap: int | None = None,
@@ -338,7 +361,7 @@ def save_raw_stream(entries: list[dict], cap: int | None = None,
                      "promoted_at": prev.get("promoted_at")}
             merged[k] = e
         kept = [e for e in merged.values() if _raw_entry_ts(e) >= cutoff]
-        kept.sort(key=_raw_entry_ts, reverse=True)
+        kept.sort(key=_raw_entry_sort_ts, reverse=True)
         kept = kept[:cap]
         _atomic_write_json(RAW_STREAM_FILE, kept)
         return len(kept)

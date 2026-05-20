@@ -115,7 +115,7 @@ _state_lock = threading.Lock()
 # Lets the Dashboard trigger a model CLI to execute a protocol (sector/news/invest).
 # Single-job lock: one protocol at a time to avoid runaway token burn.
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
-GEMINI_BIN = os.environ.get("GEMINI_BIN") or "/usr/local/bin/gemini"
+AGY_BIN    = os.environ.get("AGY_BIN")    or "agy"
 CODEX_BIN  = os.environ.get("CODEX_BIN")  or "/usr/local/bin/codex"
 
 # Multi-model governance — protocols route through the governor (claude first;
@@ -133,8 +133,8 @@ def _protocol_command(model, prompt):
     """Build the CLI argv for running an agentic protocol on `model`.
     The stdout reader just pipes to the log, so only the command differs."""
     if model == "gemini":
-        return [GEMINI_BIN, "-p", prompt,
-                "--output-format", "stream-json", "--approval-mode", "yolo"]
+        return [AGY_BIN, "--print", prompt,
+                "--dangerously-skip-permissions"]
     if model == "codex":
         return [CODEX_BIN, "exec", prompt, "--json", "-C", ROOT,
                 "--dangerously-bypass-approvals-and-sandbox", "--color", "never"]
@@ -193,6 +193,7 @@ PROTOCOL_LOG_DIRS = {
     "earnings":   "skills/earnings-analyst/cache",
     "llm_review": "reports/decision_review",
     "earnings_preview": "skills/earnings-valuation-forecaster/cache",
+    "supply_chain_generate": "nexus/supply_chain_logs",
 }
 
 # V2.15.0 — Script protocols: bypass Claude conversation, run a Python script
@@ -208,6 +209,13 @@ SCRIPT_PROTOCOLS = {
         "label_template": "📋 Preview {ticker}",
         "timeout": int(os.getenv("PREVIEW_TIMEOUT_SEC", "180")),  # 3 min
         "requires": ["ticker"],
+    },
+}
+
+CUSTOM_PROTOCOLS = {
+    "supply_chain_generate": {
+        "requires": ["theme"],
+        "timeout": int(os.getenv("SUPPLY_CHAIN_GENERATE_TIMEOUT_SEC", "360")),
     },
 }
 
@@ -511,6 +519,75 @@ def _run_script_protocol(name, params=None):
     return job_id, None
 
 
+def _run_custom_protocol(name, params=None):
+    """Dispatch in-process queued jobs that are not agentic protocols."""
+    params = params or {}
+    spec = CUSTOM_PROTOCOLS[name]
+    for req in spec.get("requires", []):
+        if not params.get(req):
+            return None, f"protocol '{name}' requires '{req}'"
+    with _protocol_lock:
+        if _protocol_state["status"] == "running":
+            return None, f"another protocol is running: {_protocol_state['name']}"
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        job_id = f"{name}_{ts}"
+        log_dir = os.path.join(ROOT, PROTOCOL_LOG_DIRS[name])
+        os.makedirs(log_dir, exist_ok=True)
+        log_path = os.path.join(log_dir, f"{job_id}.log")
+        _protocol_state.update({
+            "job_id":      job_id,
+            "name":        name,
+            "status":      "running",
+            "started_at":  _now_iso(),
+            "ended_at":    None,
+            "log_path":    log_path,
+            "error":       None,
+            "elapsed_sec": 0,
+            "ticker":      None,
+            "params":      params,
+        })
+
+    def _run():
+        start = datetime.now()
+        try:
+            with open(log_path, "w", buffering=1, encoding="utf-8") as lf:
+                lf.write(f"=== custom_protocol={name} params={params!r} started={_now_iso()} ===\n")
+                if name == "supply_chain_generate":
+                    if not SUPPLY_CHAIN_AVAILABLE:
+                        raise RuntimeError("supply_chain module not loaded")
+                    theme = str(params.get("theme") or "").strip()
+                    if not theme:
+                        raise RuntimeError("missing theme")
+                    lf.write(f"theme={theme}\n")
+                    chain = _sc.enrich(_sc.generate(theme))
+                    _sc_cache[chain["id"]] = {"data": chain, "ts": time.time()}
+                    lf.write(f"generated id={chain.get('id')} nodes={len(chain.get('nodes') or [])} "
+                             f"edges={len(chain.get('edges') or [])}\n")
+                else:
+                    raise RuntimeError(f"unknown custom protocol: {name}")
+                lf.write(f"=== ended={_now_iso()} ok ===\n")
+            with _protocol_lock:
+                _protocol_state["ended_at"] = _now_iso()
+                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+                if _protocol_state["status"] != "cancelled":
+                    _protocol_state["status"] = "done"
+        except Exception as e:
+            try:
+                with open(log_path, "a", encoding="utf-8") as lf:
+                    lf.write(f"\n=== error={_now_iso()} ===\n{e}\n")
+            except Exception:
+                pass
+            with _protocol_lock:
+                _protocol_state["status"] = "error"
+                _protocol_state["error"] = str(e)
+                _protocol_state["ended_at"] = _now_iso()
+                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+
+    threading.Thread(target=_run, daemon=True).start()
+    return job_id, None
+
+
 def run_protocol(name, params=None):
     """Spawn `claude -p "<prompt>"` in a daemon thread. Single-job lock.
     params: optional dict for template substitution (e.g. {ticker: "NVDA"}).
@@ -518,6 +595,8 @@ def run_protocol(name, params=None):
     V2.15.0: when name is in SCRIPT_PROTOCOLS, dispatch via _run_script_protocol
     instead of spawning Claude — bypasses LLM for pure subprocess work.
     """
+    if name in CUSTOM_PROTOCOLS:
+        return _run_custom_protocol(name, params)
     if name in SCRIPT_PROTOCOLS:
         return _run_script_protocol(name, params)
     if name not in PROTOCOL_PROMPTS:
@@ -741,6 +820,9 @@ def _label_for(name, params):
         return "🏭 Sector Scan"
     if name == "earnings":
         return f"📊 Earnings {p.get('ticker', '?')}"
+    if name == "supply_chain_generate":
+        theme = str(p.get("theme") or "?")[:24]
+        return f"🔗 Supply {theme}"
     if name in SCRIPT_PROTOCOLS:
         tpl = SCRIPT_PROTOCOLS[name].get("label_template", name)
         return tpl.replace("{ticker}", str(p.get("ticker", "?")))
@@ -752,7 +834,7 @@ def enqueue_protocol(name, params=None, source="direct"):
     Returns (state, err). err='duplicate' for invest with same ticker pending.
     state: {queued, position, total_ahead, label, id, enqueued_at}.
     """
-    if name not in PROTOCOL_PROMPTS and name not in SCRIPT_PROTOCOLS:
+    if name not in PROTOCOL_PROMPTS and name not in SCRIPT_PROTOCOLS and name not in CUSTOM_PROTOCOLS:
         return None, f"unknown protocol: {name}"
     params = dict(params or {})
     label  = _label_for(name, params)
@@ -775,6 +857,24 @@ def enqueue_protocol(name, params=None, source="direct"):
                 if any(q.get("name") == name and (q.get("params") or {}).get("ticker") == ticker
                        for q in _protocol_queue):
                     return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
+
+    if name == "supply_chain_generate":
+        theme = str(params.get("theme") or "").strip()
+        if not theme:
+            return None, "missing theme"
+        params["theme"] = theme
+        slug = _sc.slugify(theme) if SUPPLY_CHAIN_AVAILABLE else theme.lower().replace(" ", "_")[:48]
+        params["slug"] = slug
+        with _protocol_lock:
+            cur = _protocol_state
+            if (cur.get("status") == "running" and cur.get("name") == name
+                    and ((cur.get("params") or {}).get("slug") == slug
+                         or cur.get("queue_label") == _label_for(name, params))):
+                return {"queued": False, "reason": "duplicate_active", "theme": theme}, "duplicate"
+        with _protocol_queue_lock:
+            if any(q.get("name") == name and (q.get("params") or {}).get("slug") == slug
+                   for q in _protocol_queue):
+                return {"queued": False, "reason": "duplicate_pending", "theme": theme}, "duplicate"
 
     # invest dedup: same ticker queued or running → reject
     if name == "invest":
@@ -2543,7 +2643,7 @@ def save_watchlist(tickers):
 # news/break_news_logs/<news_id>.json. Has its own dedicated lock pool so it
 # never blocks the existing Claude protocol queue.
 BREAK_NEWS_INTERVAL_SEC = int(os.getenv("BREAK_NEWS_INTERVAL_SEC", "600"))
-GEMINI_BIN = os.environ.get("GEMINI_BIN") or "/usr/local/bin/gemini"
+AGY_BIN = os.environ.get("AGY_BIN") or "agy"
 _break_news_state = {
     "last_poll": None,
     "last_debate_scan": None,
@@ -2658,12 +2758,15 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _json(self, code, body):
         payload = json.dumps(body, ensure_ascii=False).encode("utf-8")
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(payload)))
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        self.wfile.write(payload)
+        try:
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(payload)))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(payload)
+        except BrokenPipeError:
+            return
 
     # ── Asset cache-busting: inject ?v=<mtime> into .html responses ──
     # Matches src="foo.js" / href="bar.css" for relative paths only.
@@ -3389,12 +3492,12 @@ class Handler(SimpleHTTPRequestHandler):
             theme = (body.get("theme") or "").strip()
             if not theme:
                 return self._json(400, {"error": "missing theme"})
-            try:
-                chain = _sc.enrich(_sc.generate(theme))
-            except Exception as e:
-                return self._json(500, {"error": str(e)[:300]})
-            _sc_cache[chain["id"]] = {"data": chain, "ts": time.time()}
-            return self._json(200, {**chain, "cached": False})
+            state, err = enqueue_protocol("supply_chain_generate", {"theme": theme}, source="supply_chain")
+            if err == "duplicate":
+                return self._json(409, state)
+            if err:
+                return self._json(400, {"error": err})
+            return self._json(202, state)
         if path == "/api/break-news/raw/debate":
             if not BREAK_NEWS_AVAILABLE:
                 return self._json(503, {"error": "break_news module not loaded"})

@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
-GEMINI_BIN = os.environ.get("GEMINI_BIN") or "/usr/local/bin/gemini"
+AGY_BIN = os.environ.get("AGY_BIN") or "agy"
 CODEX_BIN = os.environ.get("CODEX_BIN") or "/usr/local/bin/codex"
 GEMINI_MODEL = os.environ.get("BREAK_NEWS_GEMINI_MODEL", "gemini-2.5-flash-lite")
 LLM_TIMEOUT_SEC = int(os.environ.get("BREAK_NEWS_LLM_TIMEOUT_SEC", "180"))
@@ -151,34 +151,17 @@ def run_claude(system_prompt: str, user_prompt: str,
 
 def run_gemini(system_prompt: str, user_prompt: str,
                timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
-    # Gemini CLI does not have --append-system-prompt — we concatenate.
+    # agy CLI uses --print/-p and --dangerously-skip-permissions.
     full_prompt = f"{system_prompt}\n\n---\n\n{user_prompt}"
     cmd = [
-        GEMINI_BIN, "-p", full_prompt,
-        "--output-format", "json",
-        "--approval-mode", "plan",
-        "-m", GEMINI_MODEL,
+        AGY_BIN, "--print", full_prompt,
+        "--dangerously-skip-permissions",
     ]
     rc, out, err, latency, error = _run_cli(cmd, timeout)
-    text = ""
-    if rc == 0 and out:
-        # Gemini sometimes prints non-JSON banner lines ("Ripgrep is not
-        # available..."). Find the first '{' that begins a valid object.
-        start = out.find("{")
-        if start >= 0:
-            try:
-                envelope = json.loads(out[start:])
-                text = envelope.get("response") or ""
-            except json.JSONDecodeError:
-                # Try last JSON-looking blob (sometimes 2 are emitted).
-                m = re.findall(r"\{.*?\"response\".*?\}", out, re.DOTALL)
-                if m:
-                    try:
-                        envelope = json.loads(m[-1])
-                        text = envelope.get("response") or ""
-                    except json.JSONDecodeError:
-                        pass
-    parsed, status = _extract_json(text or out)
+    # agy --print returns the raw agent output directly (no JSON envelope
+    # unless specifically requested, but we handle that in _extract_json).
+    text = out.strip()
+    parsed, status = _extract_json(text)
     return LLMResult(
         agent="gemini",
         parsed=parsed,

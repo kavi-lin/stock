@@ -9,15 +9,29 @@
 (function () {
   'use strict';
 
+  // V3.1.0 — graph is ticker-only by default (build_graph.py `ticker_centric: true`).
+  // Other node types remain enumerated here so a legacy non-ticker-centric build
+  // (e.g. dry-run dump for Tier 3 debugging) still renders if loaded manually.
   const NODE_TYPES = ['ticker', 'theme', 'catalyst', 'sector', 'narrative', 'thesis'];
-  // Per-type palette mirrors the .ng-chip[data-type=…] colors in graph.html
   const TYPE_COLOR = {
     ticker:    'rgba(147,197,253,0.85)',   // sky blue   — 個股
-    theme:     'rgba(251,191,36,0.85)',    // amber      — 主題
-    catalyst:  'rgba(248,113,113,0.85)',   // rose       — 新聞/事件
-    sector:    'rgba(167,139,250,0.85)',   // violet     — 產業
-    narrative: 'rgba(52,211,153,0.85)',    // emerald    — 敘事
-    thesis:    'rgba(244,114,182,0.85)',   // pink       — 投資論點
+    theme:     'rgba(251,191,36,0.85)',    // amber
+    catalyst:  'rgba(248,113,113,0.85)',   // rose
+    sector:    'rgba(167,139,250,0.85)',   // violet
+    narrative: 'rgba(52,211,153,0.85)',    // emerald
+    thesis:    'rgba(244,114,182,0.85)',   // pink
+  };
+  // Edge palette for ticker-centric mode — distinguishes direct supply-chain
+  // / peer relations from synthesized co-theme relations.
+  const EDGE_COLOR = {
+    PEER_OF:          'rgba(147,197,253,0.55)',
+    SUPPLIES_TO:      'rgba(34,197,94,0.65)',
+    CUSTOMER_OF:      'rgba(34,197,94,0.45)',
+    CONTRACT_MFG_FOR: 'rgba(168,85,247,0.55)',
+    COMPETES_WITH:    'rgba(239,68,68,0.55)',
+    CO_DEVELOPS_WITH: 'rgba(245,158,11,0.55)',
+    SUPPLY_CHAIN_HOP: 'rgba(34,197,94,0.45)',
+    CO_THEME:         'rgba(251,191,36,0.22)',   // dim — synthetic via shared theme
   };
   const TYPE_COLOR_PROVISIONAL = 'rgba(245,158,11,0.6)';   // amber-orange — pending promotion
   const COLOR_DIM = 'rgba(115,115,115,0.06)';
@@ -66,6 +80,10 @@
     try {
       await loadGraph();
       buildIndices();
+      // Re-render filter row now that GRAPH_DATA is loaded — switches to edge
+      // legend if the build is ticker-centric.
+      renderFilters();
+      bindControls();
       mountGraph();
       updateMetaLine();
       hideStatus();
@@ -73,6 +91,83 @@
       showStatusError(err);
     }
   });
+
+  // V3.1.0 — ticker tooltip. News rolled up at build time into ticker.metadata
+  // (recent_news[], themes[], narratives[], sector). Reads only that; no extra
+  // network calls. Wider than the legacy 1-line title so the news block fits.
+  function buildNodeTooltip(n) {
+    if (!n) return '';
+    const md = n.metadata || {};
+    const isZh = !!(window.UI && window.UI.currentLang === 'zh');
+    const t = (zh, en) => isZh ? zh : en;
+    const verdictColor = (v) => {
+      const k = String(v || '').toUpperCase();
+      if (k.includes('BULL')) return '#22c55e';
+      if (k.includes('BEAR')) return '#ef4444';
+      return '#a1a1aa';
+    };
+    const escapeAttr = s => escapeHtml(String(s == null ? '' : s));
+    const wrap = (inner) =>
+      `<div style="font-family:system-ui,sans-serif;padding:8px 10px;max-width:360px;background:rgba(15,15,17,0.96);border:1px solid rgba(161,161,170,0.35);border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,0.45);color:#e4e4e7;">${inner}</div>`;
+
+    // Non-ticker fallback (only present if a legacy non-ticker-centric build
+    // is loaded). Compact single-line.
+    if (n.type !== 'ticker') {
+      return wrap(`
+        <div style="font-weight:700;font-size:12px;">${escapeAttr(n.label)}</div>
+        <div style="font-size:10px;color:#a1a1aa;margin-top:2px;">
+          type=${n.type} · deg=${(n.weight||0).toFixed(2)} · pr=${(n.pagerank||0).toFixed(2)}
+        </div>
+      `);
+    }
+
+    const themes = (md.themes || []).slice(0, 5);
+    const narratives = (md.narratives || []).slice(0, 5);
+    const news = (md.recent_news || []).slice(0, 6);
+    const sector = md.sector;
+
+    const themesChips = themes.length
+      ? `<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">
+          ${themes.map(x => `<span style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.35);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">${escapeAttr(x)}</span>`).join('')}
+        </div>` : '';
+    const narrativesChips = narratives.length
+      ? `<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
+          ${narratives.map(x => `<span style="background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.30);border-radius:4px;padding:1px 6px;font-size:10px;">${escapeAttr(x)}</span>`).join('')}
+        </div>` : '';
+
+    const newsRows = news.length
+      ? news.map(e => {
+          const col = verdictColor(e.verdict);
+          const v   = e.verdict ? `<span style="color:${col};font-weight:700;font-size:9px;letter-spacing:0.04em;">${escapeAttr(String(e.verdict).toUpperCase().slice(0,8))}</span>` : '';
+          const imp = (e.net_impact != null)
+            ? `<span style="color:${col};font-family:monospace;font-size:10px;">${e.net_impact >= 0 ? '+' : ''}${Number(e.net_impact).toFixed(1)}</span>` : '';
+          const pub = e.published ? `<span style="color:#71717a;font-size:9px;">${escapeAttr(String(e.published).slice(0,10))}</span>` : '';
+          return `<div style="padding:5px 0;border-top:1px solid rgba(255,255,255,0.06);font-size:11px;line-height:1.35;">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;">
+              <div style="flex:1;color:#e4e4e7;">${escapeAttr(e.headline || '')}</div>
+              <div style="flex-shrink:0;display:flex;gap:6px;align-items:baseline;">${v}${imp}</div>
+            </div>
+            ${pub ? `<div style="margin-top:2px;">${pub}</div>` : ''}
+          </div>`;
+        }).join('')
+      : `<div style="margin-top:4px;font-size:11px;color:#71717a;">${t('近期無相關新聞', 'No recent news')}</div>`;
+
+    return wrap(`
+      <div style="display:flex;align-items:baseline;gap:8px;justify-content:space-between;">
+        <div style="font-weight:800;font-size:14px;letter-spacing:0.02em;">${escapeAttr(n.label)}</div>
+        <div style="font-size:9px;color:#a1a1aa;font-family:monospace;">
+          deg=${(n.weight||0).toFixed(2)} · pr=${(n.pagerank||0).toFixed(2)}
+        </div>
+      </div>
+      ${sector ? `<div style="margin-top:3px;font-size:10px;color:#a78bfa;">${escapeAttr(sector)}</div>` : ''}
+      ${themesChips}
+      ${narrativesChips}
+      <div style="margin-top:8px;font-size:9px;font-weight:700;letter-spacing:0.08em;color:#a1a1aa;text-transform:uppercase;">
+        ${t('近期新聞', 'Recent News')} ${news.length ? `(${news.length})` : ''}
+      </div>
+      ${newsRows}
+    `);
+  }
 
   async function loadGraph() {
     const url = 'nexus_graph.json?t=' + Date.now();
@@ -96,13 +191,39 @@
   // ─── controls ────────────────────────────────────────────────────────────
   function renderFilters() {
     const host = document.getElementById('ng-filter-types');
-    host.innerHTML = NODE_TYPES.map(t =>
+    // V3.1.0 — ticker-centric. Only render type filters for kinds that actually
+    // exist in the current graph; legacy multi-type filters are hidden when the
+    // graph is collapsed to ticker-only. Edge-type legend replaces the chip row
+    // so users can tell PEER_OF from CO_THEME at a glance.
+    const presentTypes = GRAPH_DATA && GRAPH_DATA.nodes
+      ? Array.from(new Set(GRAPH_DATA.nodes.map(n => n.type)))
+      : NODE_TYPES.slice();
+    if (presentTypes.length <= 1 && presentTypes[0] === 'ticker') {
+      // Pure ticker graph — show edge-type legend instead of pointless type checkboxes.
+      const edgeLegend = [
+        ['PEER_OF',          isLangZh() ? '同業' : 'Peer'],
+        ['SUPPLIES_TO',      isLangZh() ? '供應' : 'Supplies'],
+        ['CUSTOMER_OF',      isLangZh() ? '客戶' : 'Customer'],
+        ['COMPETES_WITH',    isLangZh() ? '競爭' : 'Competes'],
+        ['CO_DEVELOPS_WITH', isLangZh() ? '合作' : 'Co-dev'],
+        ['CO_THEME',         isLangZh() ? '同主題' : 'Co-theme'],
+      ];
+      host.innerHTML = edgeLegend.map(([k, label]) => {
+        const col = EDGE_COLOR[k] || 'rgba(160,160,160,0.6)';
+        return `<span class="ng-chip" style="border-color:${col};color:${col}" title="${k}">${label}</span>`;
+      }).join(' ');
+      // No checkbox to bind; visibleTypes already contains 'ticker' from init.
+      return;
+    }
+    host.innerHTML = presentTypes.map(t =>
       `<label><span class="ng-chip" data-type="${t}">${t}</span>
         <input type="checkbox" data-filter-type="${t}" /></label>`
     ).join('');
-    // Force `checked = true` programmatically — `checked` attribute via innerHTML
-    // is unreliable across rerenders.
     host.querySelectorAll('input[type=checkbox]').forEach(el => { el.checked = true; });
+  }
+
+  function isLangZh() {
+    return !!(window.UI && window.UI.currentLang === 'zh');
   }
 
   function bindControls() {
@@ -210,11 +331,16 @@
     }
     if (hoveredNode) {
       if (sId === hoveredNode.id || tId === hoveredNode.id) {
-        return 'rgba(254,243,199,0.55)';
+        // Hover edges colored by edge type so the relation kind is visible at
+        // first glance (peer / supply / co-theme).
+        return EDGE_COLOR[l.type] || 'rgba(254,243,199,0.55)';
       }
       return 'rgba(0,0,0,0)';
     }
-    return 'rgba(0,0,0,0)';
+    // Idle state: keep edges subtly visible at low alpha so the topology shows
+    // even without hover. CO_THEME is dimmest (synthetic).
+    const base = EDGE_COLOR[l.type] || 'rgba(120,120,120,0.18)';
+    return base.replace(/[\d.]+\)$/, m => (parseFloat(m) * 0.35).toFixed(2) + ')');
   }
 
   function linkWidth(l) {
@@ -499,12 +625,7 @@
       .nodeRelSize(3)
       .nodeVal(n => nodeSize(n))
       .nodeColor(n => nodeColor(n))
-      .nodeLabel(n => `<div style="font-family:monospace;padding:4px 8px;">
-        <b>${escapeHtml(n.label)}</b><br/>
-        type=${n.type} · deg=${(n.weight || 0).toFixed(3)} · pr=${(n.pagerank || 0).toFixed(3)}<br/>
-        <span style='color:#71717a'>mentions=${n.mentions || 0}</span>
-        ${n.status === 'provisional' ? '<span style="color:#f59e0b">· provisional</span>' : ''}
-      </div>`)
+      .nodeLabel(n => buildNodeTooltip(n))
       .linkColor(linkColor)
       .linkWidth(linkWidth)
       .linkDirectionalParticles(l => {
@@ -737,6 +858,58 @@
         <div class="text-[10px] px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
           provisional — needs ≥3 distinct docs to promote
         </div>` : ''}
+
+      ${(() => {
+        // V3.1.0 — for ticker nodes show rolled-up news + themes from metadata.
+        // Surfacing news here (in addition to hover tooltip) is the click-state
+        // equivalent and matches the goal: news inside the ticker, not in the graph.
+        const md = n.metadata || {};
+        if (n.type !== 'ticker') return '';
+        const themes = (md.themes || []).slice(0, 8);
+        const narratives = (md.narratives || []).slice(0, 8);
+        const news = (md.recent_news || []).slice(0, 6);
+        const sector = md.sector;
+        const verdictColor = v => {
+          const k = String(v || '').toUpperCase();
+          if (k.includes('BULL')) return '#22c55e';
+          if (k.includes('BEAR')) return '#ef4444';
+          return '#a1a1aa';
+        };
+        const themesBlock = themes.length ? `
+          <div class="mt-2">
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">主題 / Themes</h4>
+            <div class="flex flex-wrap gap-1">
+              ${themes.map(x => `<span style="background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.30);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;">${escapeHtml(x)}</span>`).join('')}
+            </div>
+          </div>` : '';
+        const narrativesBlock = narratives.length ? `
+          <div class="mt-2">
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">敘事 / Narratives</h4>
+            <div class="flex flex-wrap gap-1">
+              ${narratives.map(x => `<span style="background:rgba(52,211,153,0.10);color:#34d399;border:1px solid rgba(52,211,153,0.28);border-radius:4px;padding:1px 6px;font-size:10px;">${escapeHtml(x)}</span>`).join('')}
+            </div>
+          </div>` : '';
+        const sectorBlock = sector ? `
+          <div class="text-[10px] text-violet-400">${escapeHtml(sector)}</div>` : '';
+        const newsBlock = news.length ? `
+          <div class="mt-2">
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">近期新聞 / Recent News</h4>
+            <div class="space-y-1">
+              ${news.map(e => {
+                const col = verdictColor(e.verdict);
+                const v = e.verdict ? `<span style="color:${col};font-weight:700;font-size:9px;">${escapeHtml(String(e.verdict).toUpperCase().slice(0, 8))}</span>` : '';
+                const imp = (e.net_impact != null)
+                  ? `<span style="color:${col};font-family:monospace;font-size:10px;">${e.net_impact >= 0 ? '+' : ''}${Number(e.net_impact).toFixed(1)}</span>` : '';
+                const pub = e.published ? `<span class="text-zinc-500 text-[9px]">${escapeHtml(String(e.published).slice(0,10))}</span>` : '';
+                return `<div class="text-[11px] leading-snug border-l-2 pl-2" style="border-color:${col};">
+                  <div>${escapeHtml(e.headline || '')}</div>
+                  <div class="flex gap-2 mt-0.5 items-baseline">${v}${imp}${pub}</div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>` : '';
+        return sectorBlock + themesBlock + narrativesBlock + newsBlock;
+      })()}
 
       <div>
         <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">直接鄰居 (1st)</h4>

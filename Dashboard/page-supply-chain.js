@@ -170,24 +170,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!theme) return;
     const btn = $('sc-gen-btn');
     btn.disabled = true;
-    btn.innerHTML = `<span class="sc-spinner"></span>${t('生成中', 'Generating')}`;
-    showStatus(t('LLM 生成供應鏈中，約 30-60 秒…', 'LLM drafting the chain — 30-60s…'));
+    btn.innerHTML = `<span class="sc-spinner"></span>${t('排入中', 'Queueing')}`;
+    showStatus(t('供應鏈生成排入佇列中…', 'Queueing supply-chain generation…'));
     try {
-      currentChain = await fetchJson('/api/supply-chain/generate', {
+      const queued = await fetchJson('/api/supply-chain/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme }),
       });
-      selectedNodeId = null;
-      hideDetail();
-      await loadChainList(currentChain.id);
-      renderDiagram(currentChain);
+      const pos = queued.position || 1;
+      showStatus(t(`已排入佇列（第 ${pos} 位）。可切換頁面，右下角會顯示進度。`,
+                   `Queued (#${pos}). You can switch pages; progress stays in the bottom-right pill.`));
+      watchGeneratedTheme(theme);
     } catch (e) {
       showStatus(t('生成失敗: ', 'Generate failed: ') + e.message);
     } finally {
       btn.disabled = false;
       btn.textContent = t('生成', 'Generate');
     }
+  }
+
+  function slugifyTheme(theme) {
+    return String(theme || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 48) || 'chain';
+  }
+
+  function watchGeneratedTheme(theme) {
+    const target = slugifyTheme(theme);
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries += 1;
+      try {
+        const slug = await loadChainList(target);
+        const sel = $('sc-chain-select');
+        const hasTarget = Array.from(sel.options).some(o => o.value === target);
+        if (hasTarget) {
+          clearInterval(timer);
+          await loadChain(target);
+        } else if (slug) {
+          showStatus(t('生成仍在佇列或進行中…', 'Generation is still queued or running…'));
+        }
+      } catch { /* keep polling */ }
+      if (tries >= 180) clearInterval(timer); // ~15 min at 5s
+    }, 5000);
   }
 
   function showStatus(msg) {
