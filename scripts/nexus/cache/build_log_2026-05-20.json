@@ -1,24 +1,25 @@
 {
-  "generated_at": "2026-05-20T01:31:44.068297Z",
+  "generated_at": "2026-05-20T13:05:44.836328Z",
   "tiers_applied": [
     "1",
-    "2"
+    "2",
+    "3"
   ],
   "meta": {
-    "node_count": 204,
-    "edge_count": 704,
+    "node_count": 184,
+    "edge_count": 634,
     "nodes_by_type": {
-      "ticker": 204
+      "ticker": 184
     },
     "edges_by_type": {
-      "PEER_OF": 111,
-      "CO_THEME": 593
+      "PEER_OF": 108,
+      "CO_THEME": 526
     },
     "prune_stats": {
       "dropped_edges_low_weight": 298,
-      "dropped_isolated_nodes": 129,
+      "dropped_isolated_nodes": 128,
       "dropped_provisional_low_mentions": 0,
-      "dropped_for_cap": 4746
+      "dropped_for_cap": 5253
     },
     "decay_strategies": {
       "catalyst": 7,
@@ -41,11 +42,11 @@
       "tier3": 0.85
     }
   },
-  "size_bytes": 649159,
+  "size_bytes": 630501,
   "tier2_narrative_attribution_audit": {
     "glp1": {
-      "emitted": 37,
-      "rejected_oos": 58
+      "emitted": 41,
+      "rejected_oos": 59
     },
     "nim": {
       "emitted": 23,
@@ -178,100 +179,88 @@
   },
   "narrative_attribution_in_graph": {
     "narrative:glp1": {
-      "linked_tickers": 8,
-      "linked_pct_of_universe": 0.039
+      "linked_tickers": 5,
+      "linked_pct_of_universe": 0.027
     },
     "narrative:weight_loss": {
       "linked_tickers": 2,
-      "linked_pct_of_universe": 0.01
+      "linked_pct_of_universe": 0.011
     },
     "narrative:nim": {
-      "linked_tickers": 9,
-      "linked_pct_of_universe": 0.044
+      "linked_tickers": 8,
+      "linked_pct_of_universe": 0.043
     },
     "narrative:lng": {
       "linked_tickers": 14,
-      "linked_pct_of_universe": 0.069
+      "linked_pct_of_universe": 0.076
     },
     "narrative:refining": {
       "linked_tickers": 13,
-      "linked_pct_of_universe": 0.064
+      "linked_pct_of_universe": 0.071
     },
     "narrative:hbm": {
-      "linked_tickers": 36,
-      "linked_pct_of_universe": 0.176
+      "linked_tickers": 34,
+      "linked_pct_of_universe": 0.185
     },
     "narrative:blackwell": {
       "linked_tickers": 16,
-      "linked_pct_of_universe": 0.078
+      "linked_pct_of_universe": 0.087
     },
     "narrative:rubin": {
       "linked_tickers": 12,
-      "linked_pct_of_universe": 0.059
+      "linked_pct_of_universe": 0.065
     },
     "narrative:trainium": {
       "linked_tickers": 7,
-      "linked_pct_of_universe": 0.034
+      "linked_pct_of_universe": 0.038
     },
     "narrative:hbm3e": {
-      "linked_tickers": 20,
-      "linked_pct_of_universe": 0.098
+      "linked_tickers": 19,
+      "linked_pct_of_universe": 0.103
     },
     "narrative:hbm4": {
-      "linked_tickers": 17,
-      "linked_pct_of_universe": 0.083
+      "linked_tickers": 16,
+      "linked_pct_of_universe": 0.087
     },
     "narrative:shale": {
       "linked_tickers": 8,
-      "linked_pct_of_universe": 0.039
+      "linked_pct_of_universe": 0.043
     },
     "narrative:cowos": {
       "linked_tickers": 18,
-      "linked_pct_of_universe": 0.088
+      "linked_pct_of_universe": 0.098
     },
     "narrative:n3": {
-      "linked_tickers": 12,
-      "linked_pct_of_universe": 0.059
+      "linked_tickers": 11,
+      "linked_pct_of_universe": 0.06
     },
     "narrative:n2": {
-      "linked_tickers": 12,
-      "linked_pct_of_universe": 0.059
-    },
-    "narrative:18a": {
-      "linked_tickers": 5,
-      "linked_pct_of_universe": 0.025
-    },
-    "narrative:nuclear": {
-      "linked_tickers": 6,
-      "linked_pct_of_universe": 0.029
+      "linked_tickers": 11,
+      "linked_pct_of_universe": 0.06
     },
     "narrative:sic": {
       "linked_tickers": 9,
-      "linked_pct_of_universe": 0.044
+      "linked_pct_of_universe": 0.049
     },
     "narrative:mi300": {
       "linked_tickers": 8,
-      "linked_pct_of_universe": 0.039
+      "linked_pct_of_universe": 0.043
     },
     "narrative:1_6t": {
       "linked_tickers": 15,
-      "linked_pct_of_universe": 0.074
-    },
-    "narrative:cowos_l": {
-      "linked_tickers": 8,
-      "linked_pct_of_universe": 0.039
+      "linked_pct_of_universe": 0.082
     },
     "narrative:cpo": {
       "linked_tickers": 6,
-      "linked_pct_of_universe": 0.029
+      "linked_pct_of_universe": 0.033
     },
     "narrative:800g": {
       "linked_tickers": 12,
-      "linked_pct_of_universe": 0.059
+      "linked_pct_of_universe": 0.065
     },
     "narrative:gan": {
       "linked_tickers": 8,
-      "linked_pct_of_universe": 0.039
+      "linked_pct_of_universe": 0.043
     }
   },
   "quarantined_narratives": []

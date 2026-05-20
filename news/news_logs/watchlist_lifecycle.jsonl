@@ -147,3 +147,18 @@
 {"date": "2026-05-19", "ticker": "DELL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
 {"date": "2026-05-19", "ticker": "WDC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
 {"date": "2026-05-19", "ticker": "STX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "NVDA", "event": "graduated_candidate", "earnings_tier": "CANDIDATE"}
+{"date": "2026-05-20", "ticker": "VRT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-20", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-20", "ticker": "TSM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "AVGO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-20", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-20", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-20", "ticker": "ETN", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-20", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-20", "ticker": "DELL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "WDC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-20", "ticker": "STX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
