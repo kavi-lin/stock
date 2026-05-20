@@ -1,6 +1,6 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-05-20 (v3.9.4)
+> **Last Updated**: 2026-05-20 (v3.12.0)
 
 ---
 

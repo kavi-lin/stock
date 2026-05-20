@@ -1,7 +1,21 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-20 (v3.9.4)
+> **Last Updated**: 2026-05-20 (v3.12.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.11.0 → v3.12.0) — Cerebras supply-chain grounding
+
+使用者要求檢查昨天產出的 Cerebras/CBRS 供應鏈是否漏項，web 查核後發現最大問題是
+`cerebras.yaml` 已修正 ticker/listing 但內容仍偏舊：缺 OpenAI 750MW inference capacity、
+AWS Bedrock / Trainium × CS-3 disaggregated inference、AlphaSense/Cognition/Meta Llama API/
+OpenRouter/Hugging Face 等 2026 年核心商業與分發節點。已補進 YAML，spine 改為
+`tsmc -> cerebras -> aws -> openai`，G42/Aleph Alpha 保留為 sovereign AI 分支。
+
+同輪修 supply-chain generator：`_local_context_for_theme()` 從本地 Nexus / news / break-news /
+reports 抽 theme 相關片段注入 prompt；`_audit_chain()` 生成後提示重要實體漏項、上市狀態錯、
+下游客戶稀疏、未公開關係卻非 unknown stage。Prompt 加 company/ticker 主題規則與 evidence
+hygiene；`SCHEMA.md` 補 `stage` 與 note 標示規範。驗證：`cerebras.yaml` 28 nodes / 29 edges
+schema sanity errors=0；`supply_chain.py` py_compile 通過。
 
 ## 🟢 Session Note (v3.9.3 → v3.9.4) — Break News model-aware admission
 

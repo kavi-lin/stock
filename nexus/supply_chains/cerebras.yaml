@@ -1,0 +1,415 @@
+id: cerebras
+title: Cerebras 晶圓級 AI 運算供應鏈
+theme: Cerebras
+generated_at: '2026-05-19T17:42:56Z'
+generated_by: claude
+status: draft
+layers:
+- semiconductor_supply
+- system_integration
+- cloud_deployment
+- end_customer
+modules:
+  semiconductor_supply:
+  - id: eda_tools
+    label: EDA / 設計工具
+  - id: fab_equipment
+    label: 晶圓廠設備
+  - id: foundry
+    label: 先進製程代工
+  system_integration:
+  - id: ai_processor
+    label: 晶圓級 AI 處理器
+  - id: memory
+    label: 系統 DRAM
+  cloud_deployment:
+  - id: sovereign_compute
+    label: 主權 AI 超算營運商
+  - id: hyperscaler
+    label: Hyperscaler / Cloud
+  - id: inference_ecosystem
+    label: 推論架構 / 分發
+  end_customer:
+  - id: pharma_life_sciences
+    label: 製藥 / 生命科學
+  - id: research_national_labs
+    label: 研究機構 / 國家實驗室
+  - id: frontier_ai_labs
+    label: 前沿 AI 模型實驗室
+  - id: enterprise_ai_apps
+    label: 企業 AI 應用
+spine:
+- tsmc
+- cerebras
+- aws
+- openai
+nodes:
+- id: cadence
+  label: Cadence Design Systems
+  layer: semiconductor_supply
+  module: eda_tools
+  role: 晶片設計 / 驗證 EDA 工具供應商
+  ticker: CDNS
+  listing: us_listed
+  stage: unknown
+  note: 大型自研晶片標準工具鏈；Cerebras 具體採用未公開
+- id: synopsys
+  label: Synopsys
+  layer: semiconductor_supply
+  module: eda_tools
+  role: EDA 工具與 IP 供應商
+  ticker: SNPS
+  listing: us_listed
+  stage: unknown
+  note: Cerebras 具體採用未公開
+- id: asml
+  label: ASML
+  layer: semiconductor_supply
+  module: fab_equipment
+  role: EUV 微影設備供應商
+  ticker: ASML
+  listing: us_listed
+  stage: unknown
+  note: 供 TSMC，非直供 Cerebras
+- id: applied_materials
+  label: Applied Materials
+  layer: semiconductor_supply
+  module: fab_equipment
+  role: 薄膜沉積 / 製程設備供應商
+  ticker: AMAT
+  listing: us_listed
+  stage: unknown
+  note: 供 TSMC
+- id: lam_research
+  label: Lam Research
+  layer: semiconductor_supply
+  module: fab_equipment
+  role: 蝕刻 / 沉積設備供應商
+  ticker: LRCX
+  listing: us_listed
+  stage: unknown
+  note: 供 TSMC
+- id: kla
+  label: KLA Corporation
+  layer: semiconductor_supply
+  module: fab_equipment
+  role: 製程量測 / 良率檢測設備供應商
+  ticker: KLAC
+  listing: us_listed
+  stage: unknown
+  note: 供 TSMC；晶圓級單晶片良率管理尤其關鍵
+- id: tsmc
+  label: TSMC
+  layer: semiconductor_supply
+  module: foundry
+  role: WSE-3 晶圓級晶片代工製造（5nm 級製程）
+  ticker: TSM
+  listing: us_listed
+  stage: production
+  note: 整片晶圓單一巨型晶片；公開確認的代工夥伴
+- id: cerebras
+  label: Cerebras Systems
+  layer: system_integration
+  module: ai_processor
+  role: 設計 WSE-3 晶圓級引擎與 CS-3 系統、營運推論雲
+  ticker: CBRS
+  listing: us_listed
+  stage: revenue
+  note: 2026-05-14 於 Nasdaq 以 CBRS 掛牌；2026-05-15 IPO closing
+- id: micron
+  label: Micron Technology
+  layer: system_integration
+  module: memory
+  role: MemoryX 外掛權重記憶體用 DRAM 供應商
+  ticker: MU
+  listing: us_listed
+  stage: unknown
+  note: DRAM 為系統結構性元件；對 Cerebras 之具體採購合約未公開
+- id: sk_hynix
+  label: SK Hynix
+  layer: system_integration
+  module: memory
+  role: DRAM 供應商
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  note: 韓國上市；具體合約未公開
+- id: samsung
+  label: Samsung Electronics
+  layer: system_integration
+  module: memory
+  role: DRAM 供應商
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  note: 韓國上市；具體合約未公開
+- id: g42
+  label: G42
+  layer: cloud_deployment
+  module: sovereign_compute
+  role: 建置 Condor Galaxy 超算群、Cerebras 最大客戶兼投資人
+  ticker: null
+  listing: private
+  stage: production
+  note: 阿布達比控股集團；Condor Galaxy 已部署
+- id: aws
+  label: Amazon Web Services
+  layer: cloud_deployment
+  module: hyperscaler
+  role: 在 AWS data centers 部署 CS-3，透過 Amazon Bedrock 提供高速推論
+  ticker: AMZN
+  listing: us_listed
+  stage: design_partner
+  note: 2026-03 公布 AWS Trainium + Cerebras WSE disaggregated inference 合作
+- id: qualcomm
+  label: Qualcomm
+  layer: cloud_deployment
+  module: inference_ecosystem
+  role: 推論部署夥伴（Cerebras 訓練 → Qualcomm Cloud AI 推論）
+  ticker: QCOM
+  listing: us_listed
+  stage: design_partner
+  note: 2024 公布的訓練-推論協作
+- id: openrouter
+  label: OpenRouter
+  layer: cloud_deployment
+  module: inference_ecosystem
+  role: 以 pay-per-token 形式分發 Cerebras Inference
+  ticker: null
+  listing: private
+  stage: production
+  note: Cerebras customer spotlight 列為推論分發渠道
+- id: hugging_face
+  label: Hugging Face
+  layer: cloud_deployment
+  module: inference_ecosystem
+  role: 將 Cerebras-powered inference 帶入 Hugging Face 生態
+  ticker: null
+  listing: private
+  stage: production
+  note: Cerebras customer spotlight 列為生態分發節點
+- id: openai
+  label: OpenAI
+  layer: end_customer
+  module: frontier_ai_labs
+  role: 採用 Cerebras 750MW ultra-low-latency inference capacity，分批上線至 2028
+  ticker: null
+  listing: private
+  stage: design_partner
+  note: OpenAI 與 Cerebras 2026-01 公布 multi-year agreement
+- id: gsk
+  label: GSK
+  layer: end_customer
+  module: pharma_life_sciences
+  role: 用 Cerebras 訓練表觀基因組 / 蛋白質模型
+  ticker: GSK
+  listing: us_listed
+  stage: production
+  note: NYSE ADR；已發表使用成果
+- id: astrazeneca
+  label: AstraZeneca
+  layer: end_customer
+  module: pharma_life_sciences
+  role: 用 CS 系統加速生醫 NLP 模型訓練
+  ticker: AZN
+  listing: us_listed
+  stage: production
+  note: Nasdaq ADR
+- id: mayo_clinic
+  label: Mayo Clinic
+  layer: end_customer
+  module: pharma_life_sciences
+  role: 與 Cerebras 共建基因組醫療基礎模型
+  ticker: null
+  listing: private
+  stage: production
+  note: 非營利醫療機構；2024 公布合作
+- id: alphasense
+  label: AlphaSense
+  layer: end_customer
+  module: enterprise_ai_apps
+  role: 企業市場情報搜尋，利用 Cerebras Inference 提升即時答案與文件處理速度
+  ticker: null
+  listing: private
+  stage: production
+  note: Cerebras IPO/customer page customer story
+- id: cognition
+  label: Cognition
+  layer: end_customer
+  module: enterprise_ai_apps
+  role: agentic coding 工作負載採用 Cerebras fast inference
+  ticker: null
+  listing: private
+  stage: production
+  note: Cerebras 2026 Kimi K2.6 公告點名其 coding workload speedup
+- id: meta_llama_api
+  label: Meta Llama API
+  layer: end_customer
+  module: enterprise_ai_apps
+  role: 透過 Cerebras 提供高速 Llama inference 給開發者
+  ticker: META
+  listing: us_listed
+  stage: production
+  note: Cerebras customer spotlight 列為 Fast Llama inference for developers
+- id: argonne
+  label: Argonne National Laboratory
+  layer: end_customer
+  module: research_national_labs
+  role: 部署 CS 系統做科學 AI / 大模型研究
+  ticker: null
+  listing: private
+  stage: production
+  note: 美國能源部國家實驗室
+- id: llnl
+  label: Lawrence Livermore National Laboratory
+  layer: end_customer
+  module: research_national_labs
+  role: 將 CS-2 整合進超算做模擬 + AI 工作負載
+  ticker: null
+  listing: private
+  stage: production
+  note: 美國能源部國家實驗室
+- id: sandia
+  label: Sandia National Laboratories
+  layer: end_customer
+  module: research_national_labs
+  role: 部署 CS 系統做 AI 科學運算
+  ticker: null
+  listing: private
+  stage: production
+  note: 美國能源部國家實驗室
+- id: mistral
+  label: Mistral AI
+  layer: end_customer
+  module: frontier_ai_labs
+  role: Le Chat 等產品採用 Cerebras Inference 高速推論
+  ticker: null
+  listing: private
+  stage: production
+  note: 法國前沿模型實驗室
+- id: aleph_alpha
+  label: Aleph Alpha
+  layer: end_customer
+  module: frontier_ai_labs
+  role: 於 Condor Galaxy 上訓練主權大模型
+  ticker: null
+  listing: private
+  stage: production
+  note: 德國前沿模型實驗室
+edges:
+- from: cadence
+  to: cerebras
+  rel: SUPPLIES_TO
+  note: EDA 工具（推測）
+- from: synopsys
+  to: cerebras
+  rel: SUPPLIES_TO
+  note: EDA 工具（推測）
+- from: asml
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: applied_materials
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: lam_research
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: kla
+  to: tsmc
+  rel: SUPPLIES_TO
+  note: ''
+- from: tsmc
+  to: cerebras
+  rel: CONTRACT_MFG_FOR
+  note: 代工 WSE-3 晶圓級晶片
+- from: micron
+  to: cerebras
+  rel: SUPPLIES_TO
+  note: MemoryX DRAM（合約未公開）
+- from: sk_hynix
+  to: cerebras
+  rel: SUPPLIES_TO
+  note: DRAM（合約未公開）
+- from: samsung
+  to: cerebras
+  rel: SUPPLIES_TO
+  note: DRAM（合約未公開）
+- from: cerebras
+  to: g42
+  rel: SUPPLIES_TO
+  note: 供 Condor Galaxy CS-3 系統
+- from: g42
+  to: cerebras
+  rel: INVESTOR_IN
+  note: G42 為主要股東
+- from: cerebras
+  to: aws
+  rel: CO_DEVELOPS_WITH
+  note: CS-3 部署於 AWS data centers；Trainium prefill + WSE decode
+- from: cerebras
+  to: qualcomm
+  rel: CO_DEVELOPS_WITH
+  note: 訓練-推論協作
+- from: cerebras
+  to: openrouter
+  rel: SUPPLIES_TO
+  note: Cerebras Inference 分發渠道
+- from: cerebras
+  to: hugging_face
+  rel: SUPPLIES_TO
+  note: Cerebras-powered inference 生態整合
+- from: cerebras
+  to: openai
+  rel: SUPPLIES_TO
+  note: 750MW ultra-low-latency inference capacity
+- from: aws
+  to: openai
+  rel: SUPPLIES_TO
+  note: Bedrock / cloud access path; OpenAI 亦為 AWS strategic compute customer
+- from: cerebras
+  to: gsk
+  rel: SUPPLIES_TO
+  note: ''
+- from: cerebras
+  to: astrazeneca
+  rel: SUPPLIES_TO
+  note: ''
+- from: cerebras
+  to: mayo_clinic
+  rel: CO_DEVELOPS_WITH
+  note: 共建基因組基礎模型
+- from: cerebras
+  to: alphasense
+  rel: SUPPLIES_TO
+  note: 企業搜尋 / market intelligence inference
+- from: cerebras
+  to: cognition
+  rel: SUPPLIES_TO
+  note: agentic coding fast inference
+- from: cerebras
+  to: meta_llama_api
+  rel: SUPPLIES_TO
+  note: 高速 Llama inference 開發者 API
+- from: cerebras
+  to: argonne
+  rel: SUPPLIES_TO
+  note: ''
+- from: cerebras
+  to: llnl
+  rel: SUPPLIES_TO
+  note: ''
+- from: cerebras
+  to: sandia
+  rel: SUPPLIES_TO
+  note: ''
+- from: cerebras
+  to: mistral
+  rel: SUPPLIES_TO
+  note: Cerebras Inference 雲端服務
+- from: g42
+  to: aleph_alpha
+  rel: SUPPLIES_TO
+  note: Condor Galaxy 算力

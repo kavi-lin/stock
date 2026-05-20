@@ -36,6 +36,7 @@ nodes:
     role: "光學 I/O chiplet"          # one-line function in the chain
     ticker: null                      # US ticker symbol, or null if not US-listed
     listing: private                  # us_listed | foreign_listed | private | pre_ipo
+    stage: revenue                    # design_partner | sampling | qualification | production | revenue | unknown
     note: ""                          # optional extra context
 
 edges:
@@ -59,3 +60,12 @@ edges:
 - Do not invent ticker symbols. `ticker: null` is correct for any non-US-listed
   or private company.
 - Edges flow upstream → downstream (`SUPPLIES_TO` source is the supplier).
+- `note` should carry evidence hygiene when needed:
+  - use `publicly confirmed` / `公開確認` for announced relationships;
+  - use `inferred` / `推測` / `unconfirmed` for plausible but unannounced links;
+  - keep upstream vendor nodes at `stage: unknown` when the company is important
+    structurally but the direct customer relationship is not public.
+- For company/ticker themes, include recent listing status, anchor customers,
+  hyperscaler or channel partners, and API/marketplace distribution routes when
+  publicly known. A map that only contains generic upstream vendors can be
+  structurally valid but commercially incomplete.

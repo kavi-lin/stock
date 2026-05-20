@@ -34,6 +34,9 @@ CHAINS_DIR = _ROOT / "nexus" / "supply_chains"
 PROMPT_FILE = _ROOT / "scripts" / "nexus" / "prompts" / "supply_chain_system.md"
 UNIVERSE_FILE = _ROOT / "Dashboard" / "heatmap_universe.json"
 NEXUS_FILE = _ROOT / "Dashboard" / "nexus_graph.json"
+REPORTS_DIR = _ROOT / "reports"
+NEWS_LOG_DIR = _ROOT / "news" / "news_logs"
+BREAK_NEWS_DIR = _ROOT / "news" / "break_news_logs"
 
 _LISTINGS = {"us_listed", "foreign_listed", "private", "pre_ipo"}
 _RELS = {"SUPPLIES_TO", "CUSTOMER_OF", "CONTRACT_MFG_FOR", "CO_DEVELOPS_WITH", "INVESTOR_IN"}
@@ -85,6 +88,135 @@ def list_chains() -> list[dict]:
         })
     out.sort(key=lambda c: c.get("generated_at", ""), reverse=True)
     return out
+
+
+# ─────────────────────────── local context helpers ──────────────────────────
+def _theme_terms(theme: str) -> list[str]:
+    """Search terms for local context. Keep narrow to avoid noisy prompts."""
+    raw = (theme or "").strip()
+    terms = {raw.lower(), slugify(raw).replace("_", " ").lower()}
+    for part in re.split(r"[\s/_:;,\-]+", raw):
+        part = part.strip().lower()
+        if len(part) >= 4:
+            terms.add(part)
+    if slugify(raw) == "cerebras":
+        terms.add("cbrs")
+    return sorted(t for t in terms if t)
+
+
+def _recent_context_paths(limit: int = 220) -> list[Path]:
+    paths = [NEXUS_FILE]
+    for root, patterns in (
+        (REPORTS_DIR, ("*.md", "*.json")),
+        (NEWS_LOG_DIR, ("*.json", "*.jsonl")),
+        (BREAK_NEWS_DIR, ("*.json", "_raw/*.txt")),
+    ):
+        if not root.is_dir():
+            continue
+        for pat in patterns:
+            paths.extend(root.glob(pat))
+    uniq = []
+    seen = set()
+    for p in paths:
+        if p in seen or not p.is_file():
+            continue
+        seen.add(p)
+        uniq.append(p)
+    uniq.sort(key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
+    return uniq[:limit]
+
+
+def _context_date(path: Path) -> str:
+    m = re.search(r"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})", str(path))
+    if not m:
+        return ""
+    return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+
+
+def _clean_snippet(text: str) -> str:
+    text = re.sub(r"\s+", " ", text or "").strip()
+    return text[:360]
+
+
+def _local_context_for_theme(theme: str, max_items: int = 18) -> str:
+    """Extract small, repeatable local context for the LLM draft.
+
+    This is deliberately local-only: no web calls from dashboard generation, but
+    recent news/Nexus artifacts still keep ticker/company maps from going stale.
+    """
+    terms = _theme_terms(theme)
+    if not terms:
+        return ""
+    items = []
+    for path in _recent_context_paths():
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        lower = text.lower()
+        hits = []
+        for term in terms:
+            start = lower.find(term)
+            if start >= 0:
+                hits.append(start)
+        if not hits:
+            continue
+        for start in sorted(set(hits))[:2]:
+            lo, hi = max(0, start - 180), min(len(text), start + 360)
+            rel = path.relative_to(_ROOT)
+            date = _context_date(path)
+            prefix = f"{date} " if date else ""
+            items.append(f"- {prefix}{rel}: {_clean_snippet(text[lo:hi])}")
+            if len(items) >= max_items:
+                return "\n".join(items)
+    return "\n".join(items)
+
+
+def _audit_chain(chain: dict, context: str) -> list[str]:
+    warnings: list[str] = []
+    ctx = (context or "").lower()
+    labels = {
+        str(n.get("id", "")).lower()
+        for n in chain.get("nodes", [])
+    } | {
+        str(n.get("label", "")).lower()
+        for n in chain.get("nodes", [])
+    } | {
+        str(n.get("ticker", "")).lower()
+        for n in chain.get("nodes", []) if n.get("ticker")
+    }
+
+    important = {
+        "openai": "OpenAI",
+        "amazon web services": "Amazon Web Services / AWS",
+        "aws": "Amazon Web Services / AWS",
+        "g42": "G42",
+        "tsmc": "TSMC",
+        "alphasense": "AlphaSense",
+        "cognition": "Cognition",
+        "mistral": "Mistral AI",
+        "openrouter": "OpenRouter",
+        "hugging face": "Hugging Face",
+        "meta llama": "Meta Llama API",
+    }
+    for needle, display in important.items():
+        if needle in ctx and not any(needle in lbl for lbl in labels):
+            warnings.append(f"recent context mentions {display}, but generated nodes omit it")
+
+    for n in chain.get("nodes", []):
+        label = str(n.get("label", "")).lower()
+        if "cerebras" in label and ("nasdaq" in ctx or "ticker symbol" in ctx or "cbrs" in ctx):
+            if n.get("listing") != "us_listed" or not n.get("ticker"):
+                warnings.append("theme company appears public in context but node is not us_listed with ticker")
+        note = str(n.get("note") or "").lower()
+        if any(x in note for x in ("推測", "unconfirmed", "未公開")) and n.get("stage") != "unknown":
+            warnings.append(f"node {n.get('id')} has unconfirmed note but stage={n.get('stage')}")
+
+    customer_layers = {"end_customer", "customer", "customers", "cloud_deployment", "systems"}
+    customer_count = sum(1 for n in chain.get("nodes", []) if n.get("layer") in customer_layers)
+    if customer_count < 4:
+        warnings.append("downstream/customer side is sparse; check anchor customers and distribution channels")
+    return warnings[:12]
 
 
 # ─────────────────────────── normalisation ──────────────────────────────────
@@ -184,8 +316,10 @@ def generate(theme: str, agent: str | None = None) -> dict:
         raise RuntimeError("empty theme")
     slug = slugify(theme)
     system_prompt = PROMPT_FILE.read_text(encoding="utf-8")
+    local_context = _local_context_for_theme(theme)
     user_prompt = (
-        f"Theme: {theme}\n\n"
+        f"Theme: {theme}\n\n" +
+        (f"Recent local context:\n{local_context}\n\n" if local_context else "") +
         "Build the US-equity supply chain for this theme. Return the JSON block "
         "per the schema."
     )
@@ -206,6 +340,9 @@ def generate(theme: str, agent: str | None = None) -> dict:
     chain["generated_by"] = model
     if not chain["nodes"]:
         raise RuntimeError("LLM returned no usable nodes")
+    warnings = _audit_chain(chain, local_context)
+    for w in warnings:
+        print(f"WARNING: {w}", file=sys.stderr)
 
     CHAINS_DIR.mkdir(parents=True, exist_ok=True)
     path = CHAINS_DIR / f"{slug}.yaml"

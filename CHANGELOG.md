@@ -10,6 +10,29 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.12.0] — 2026-05-20 — Cerebras supply-chain grounding
+
+### Added
+
+- `cerebras.yaml` 補上 OpenAI 750MW inference capacity、AWS Bedrock / Trainium × CS-3
+  disaggregated inference、AlphaSense、Cognition、Meta Llama API、OpenRouter、Hugging Face 等
+  2026 年公開商業節點。
+- Supply-chain generator 會把本地 Nexus / news / break-news / reports 相關片段注入 prompt，
+  讓新生成主題能看到最近 30-45 天左右的上市、客戶與合作訊號。
+- 生成後新增 warnings：近期 context 提到的重要實體被漏掉、上市公司 ticker/listing 不一致、
+  下游 customer/channel 太稀疏、未公開關係卻標成非 unknown stage。
+
+### Changed
+
+- Supply-chain prompt 強化 company/ticker 主題規則：優先納入 anchor customers、hyperscaler、
+  API/channel distribution、上市狀態與近期商業合作；推測性 upstream 關係需在 note 標明。
+- `SCHEMA.md` 補 `stage` 欄位與 note evidence hygiene 規範，維持現有 YAML/API 相容。
+
+### Why
+
+Cerebras 生成圖原本偏向硬體製造與舊研究客戶，漏掉 OpenAI/AWS 這類 2026 年核心商業節點。
+本版修正現有圖，也讓後續供應鏈生成更不容易忽略最近新聞與上市狀態。
+
 ## [3.9.4] — 2026-05-20 — Break News model-aware admission
 
 ### Fixed — 硬 cap 餓死 debater

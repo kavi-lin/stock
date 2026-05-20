@@ -1,0 +1,479 @@
+id: cbrs
+title: Citizens Broadband Radio Service (CBRS) 共享頻譜價值鏈 (3.5 GHz)
+theme: Citizens Broadband Radio Service / CBRS shared spectrum
+generated_at: '2026-05-19T17:23:22Z'
+generated_by: claude
+status: draft
+layers:
+- spectrum_sas
+- silicon
+- radio_oem
+- integration
+- end_customer
+modules:
+  spectrum_sas:
+  - id: sas_admin
+    label: SAS 管理系統
+  - id: esc_sensing
+    label: ESC 雷達感測
+  silicon:
+  - id: baseband_modem
+    label: 基頻 / 數據機晶片
+  - id: rf_front_end
+    label: RF 前端
+  radio_oem:
+  - id: ran_macro
+    label: 宏蜂巢 RAN
+  - id: small_cell_fwa
+    label: 小基站 / FWA
+  - id: antenna_systems
+    label: 天線 / 連接
+  integration:
+  - id: private_network_platform
+    label: 私有網路平台
+  - id: neutral_host
+    label: 中立主機
+  - id: systems_integrator
+    label: 系統整合商
+  end_customer:
+  - id: mno
+    label: 電信營運商
+  - id: cable_mso
+    label: 有線電視 MSO
+  - id: enterprise
+    label: 企業 / 雲端
+spine:
+- federated_wireless
+- qualcomm
+- samsung
+- verizon
+nodes:
+- id: google_sas
+  label: Alphabet (Google SAS)
+  layer: spectrum_sas
+  module: sas_admin
+  role: FCC 核可 SAS 管理系統，協調 CBRS 頻道分配
+  ticker: GOOGL
+  listing: us_listed
+  stage: revenue
+  note: Google SAS 自 2020 商轉
+- id: federated_wireless
+  label: Federated Wireless
+  layer: spectrum_sas
+  module: esc_sensing
+  role: SAS 管理 + ESC 感測網路，CBRS 純玩家
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: amdocs
+  label: Amdocs
+  layer: spectrum_sas
+  module: sas_admin
+  role: FCC 核可 SAS 管理系統供應商
+  ticker: DOX
+  listing: us_listed
+  stage: production
+  note: ''
+- id: key_bridge
+  label: Key Bridge Wireless
+  layer: spectrum_sas
+  module: sas_admin
+  role: FCC 核可 SAS 管理系統
+  ticker: null
+  listing: private
+  stage: production
+  note: ''
+- id: red_technologies
+  label: RED Technologies
+  layer: spectrum_sas
+  module: sas_admin
+  role: FCC 核可 SAS 管理系統；支援 spectrum manager leasing
+  ticker: null
+  listing: private
+  stage: production
+  note: 2023 獲 FCC full-scale commercial deployment approval
+- id: sony_sas
+  label: Sony Group
+  layer: spectrum_sas
+  module: esc_sensing
+  role: SAS + ESC 雷達感測營運商
+  ticker: SONY
+  listing: us_listed
+  stage: production
+  note: NYSE ADR
+- id: qualcomm
+  label: Qualcomm
+  layer: silicon
+  module: baseband_modem
+  role: CBRS 裝置數據機 / SoC 主力供應商
+  ticker: QCOM
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: mediatek
+  label: MediaTek
+  layer: silicon
+  module: baseband_modem
+  role: 小基站 / CPE 基頻晶片
+  ticker: null
+  listing: foreign_listed
+  stage: production
+  note: 台灣上市
+- id: skyworks
+  label: Skyworks Solutions
+  layer: silicon
+  module: rf_front_end
+  role: 3.5 GHz RF 前端模組 / PA
+  ticker: SWKS
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: qorvo
+  label: Qorvo
+  layer: silicon
+  module: rf_front_end
+  role: RF 前端 / 濾波器，CBRS band 48
+  ticker: QRVO
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: ericsson
+  label: Ericsson
+  layer: radio_oem
+  module: ran_macro
+  role: CBRS 宏蜂巢 RAN 設備
+  ticker: ERIC
+  listing: us_listed
+  stage: revenue
+  note: NASDAQ ADR
+- id: nokia
+  label: Nokia
+  layer: radio_oem
+  module: ran_macro
+  role: CBRS RAN + 私有無線設備
+  ticker: NOK
+  listing: us_listed
+  stage: revenue
+  note: NYSE ADR
+- id: samsung
+  label: Samsung Networks
+  layer: radio_oem
+  module: ran_macro
+  role: CBRS 宏蜂巢 RAN，Verizon 主力供應商
+  ticker: null
+  listing: foreign_listed
+  stage: revenue
+  note: 韓國上市
+- id: mavenir
+  label: Mavenir
+  layer: radio_oem
+  module: ran_macro
+  role: 雲原生 / Open RAN 軟體 RAN
+  ticker: null
+  listing: private
+  stage: production
+  note: ''
+- id: cambium
+  label: Cambium Networks
+  layer: radio_oem
+  module: small_cell_fwa
+  role: CBRS 固定無線接取 (FWA) 無線電
+  ticker: CMBM
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: baicells
+  label: Baicells Technologies
+  layer: radio_oem
+  module: small_cell_fwa
+  role: CBRS 小基站 / eNodeB
+  ticker: null
+  listing: private
+  stage: production
+  note: ''
+- id: airspan
+  label: Airspan Networks
+  layer: radio_oem
+  module: small_cell_fwa
+  role: CBRS 小基站 / 私有網路無線電
+  ticker: null
+  listing: private
+  stage: production
+  note: 2024 重整後恢復私有
+- id: jma_wireless
+  label: JMA Wireless
+  layer: radio_oem
+  module: small_cell_fwa
+  role: CBRS 小基站 + 室內 DAS
+  ticker: null
+  listing: private
+  stage: production
+  note: ''
+- id: commscope
+  label: CommScope
+  layer: radio_oem
+  module: antenna_systems
+  role: 天線 / 連接 / DAS；原 SAS business 已併入 ANDREW/Amphenol
+  ticker: COMM
+  listing: us_listed
+  stage: revenue
+  note: FCC 記錄顯示 CommScope 2023-04 起 suspended SAS operations；2025 續期主體為 ANDREW/Amphenol
+- id: celona
+  label: Celona
+  layer: integration
+  module: private_network_platform
+  role: 企業私有 5G turnkey 平台，整合 CBRS 頻譜
+  ticker: null
+  listing: private
+  stage: revenue
+  note: ''
+- id: betacom
+  label: Betacom
+  layer: integration
+  module: private_network_platform
+  role: 受管私有 5G as-a-service
+  ticker: null
+  listing: private
+  stage: production
+  note: ''
+- id: boingo
+  label: Boingo Wireless
+  layer: integration
+  module: neutral_host
+  role: 機場 / 場館中立主機 CBRS 部署
+  ticker: null
+  listing: private
+  stage: production
+  note: 2021 被 Digital Bridge 私有化
+- id: kyndryl
+  label: Kyndryl
+  layer: integration
+  module: systems_integrator
+  role: 企業私有無線網路系統整合
+  ticker: KD
+  listing: us_listed
+  stage: production
+  note: ''
+- id: verizon
+  label: Verizon
+  layer: end_customer
+  module: mno
+  role: CBRS PAL 最大持有者，宏網容量層 + 私有網路
+  ticker: VZ
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: t_mobile
+  label: T-Mobile US
+  layer: end_customer
+  module: mno
+  role: CBRS 容量補強 + 私有網路
+  ticker: TMUS
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: att
+  label: AT&T
+  layer: end_customer
+  module: mno
+  role: CBRS 室內 / 場館容量分流
+  ticker: T
+  listing: us_listed
+  stage: production
+  note: ''
+- id: echostar
+  label: EchoStar (Dish)
+  layer: end_customer
+  module: mno
+  role: CBRS PAL 持有者，建構 5G 網路
+  ticker: SATS
+  listing: us_listed
+  stage: production
+  note: ''
+- id: charter
+  label: Charter Communications
+  layer: end_customer
+  module: cable_mso
+  role: CBRS 流量分流以降低 MVNO 成本
+  ticker: CHTR
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: comcast
+  label: Comcast
+  layer: end_customer
+  module: cable_mso
+  role: CBRS PAL 持有者，行動分流
+  ticker: CMCSA
+  listing: us_listed
+  stage: revenue
+  note: ''
+- id: cox
+  label: Cox Communications
+  layer: end_customer
+  module: cable_mso
+  role: CBRS PAL 持有者，固定無線 / 分流
+  ticker: null
+  listing: private
+  stage: production
+  note: ''
+- id: amazon
+  label: Amazon (AWS Private 5G)
+  layer: integration
+  module: private_network_platform
+  role: AWS Private 5G 管理式私有行動網路平台，使用美國 CBRS GAA 頻譜
+  ticker: AMZN
+  listing: us_listed
+  stage: revenue
+  note: AWS 官方文件：SAS 整合由 AWS 代管
+- id: john_deere
+  label: Deere & Co.
+  layer: end_customer
+  module: enterprise
+  role: 工廠私有 CBRS 網路，智慧製造用例
+  ticker: DE
+  listing: us_listed
+  stage: production
+  note: ''
+edges:
+- from: qualcomm
+  to: ericsson
+  rel: SUPPLIES_TO
+  note: ''
+- from: qualcomm
+  to: nokia
+  rel: SUPPLIES_TO
+  note: ''
+- from: qualcomm
+  to: samsung
+  rel: SUPPLIES_TO
+  note: ''
+- from: qualcomm
+  to: cambium
+  rel: SUPPLIES_TO
+  note: ''
+- from: qualcomm
+  to: mavenir
+  rel: SUPPLIES_TO
+  note: ''
+- from: mediatek
+  to: baicells
+  rel: SUPPLIES_TO
+  note: ''
+- from: skyworks
+  to: ericsson
+  rel: SUPPLIES_TO
+  note: ''
+- from: skyworks
+  to: cambium
+  rel: SUPPLIES_TO
+  note: ''
+- from: qorvo
+  to: samsung
+  rel: SUPPLIES_TO
+  note: ''
+- from: qorvo
+  to: cambium
+  rel: SUPPLIES_TO
+  note: ''
+- from: ericsson
+  to: verizon
+  rel: SUPPLIES_TO
+  note: ''
+- from: samsung
+  to: verizon
+  rel: SUPPLIES_TO
+  note: ''
+- from: samsung
+  to: t_mobile
+  rel: SUPPLIES_TO
+  note: ''
+- from: samsung
+  to: echostar
+  rel: SUPPLIES_TO
+  note: ''
+- from: nokia
+  to: att
+  rel: SUPPLIES_TO
+  note: ''
+- from: mavenir
+  to: echostar
+  rel: SUPPLIES_TO
+  note: ''
+- from: cambium
+  to: cox
+  rel: SUPPLIES_TO
+  note: ''
+- from: commscope
+  to: comcast
+  rel: SUPPLIES_TO
+  note: ''
+- from: commscope
+  to: charter
+  rel: SUPPLIES_TO
+  note: ''
+- from: jma_wireless
+  to: att
+  rel: SUPPLIES_TO
+  note: 室內 DAS
+- from: nokia
+  to: kyndryl
+  rel: SUPPLIES_TO
+  note: ''
+- from: airspan
+  to: betacom
+  rel: SUPPLIES_TO
+  note: ''
+- from: baicells
+  to: betacom
+  rel: SUPPLIES_TO
+  note: ''
+- from: cambium
+  to: boingo
+  rel: SUPPLIES_TO
+  note: ''
+- from: federated_wireless
+  to: verizon
+  rel: SUPPLIES_TO
+  note: SAS 頻譜協調服務
+- from: google_sas
+  to: comcast
+  rel: SUPPLIES_TO
+  note: SAS 服務
+- from: google_sas
+  to: john_deere
+  rel: SUPPLIES_TO
+  note: ''
+- from: amdocs
+  to: att
+  rel: SUPPLIES_TO
+  note: ''
+- from: key_bridge
+  to: cox
+  rel: SUPPLIES_TO
+  note: ''
+- from: red_technologies
+  to: celona
+  rel: SUPPLIES_TO
+  note: SAS 服務 / spectrum manager leasing 能力
+- from: federated_wireless
+  to: celona
+  rel: CO_DEVELOPS_WITH
+  note: 私有網路 SAS 整合
+- from: celona
+  to: john_deere
+  rel: SUPPLIES_TO
+  note: ''
+- from: kyndryl
+  to: john_deere
+  rel: SUPPLIES_TO
+  note: ''
+- from: betacom
+  to: amazon
+  rel: CO_DEVELOPS_WITH
+  note: 私有 5G 生態夥伴 / 部署整合線索
+- from: boingo
+  to: att
+  rel: SUPPLIES_TO
+  note: 中立主機承載營運商流量
