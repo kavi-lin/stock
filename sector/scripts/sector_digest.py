@@ -48,7 +48,7 @@ UPTREND_NAME_MAP = {
     "Technology": "Technology",
     "Healthcare": "Healthcare",
     "Energy": "Energy",
-    "Financials": "Financial Services",
+    "Financials": "Financial",
     "Industrials": "Industrials",
     "Materials": "Basic Materials",
     "Communication": "Communication Services",
