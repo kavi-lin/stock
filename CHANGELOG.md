@@ -10,6 +10,107 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.14.3] — 2026-05-21 — News pipeline Stage 1 quality + validator cross-check
+
+### Added — Stage 1 hard-block negative content (P0a)
+
+- `news/scripts/stage1_triage.py`:新 `_BLOCK_PATTERNS` 三類 regex,命中即 drop
+  (不進 verdicts,不進 stage2_items,不進 export):
+  - `law_firm_solicitation`:Johnson Fistel / Schall Law / Rosen / Hagens Berman …
+    + 通用 `securities class action investigation` / `encouraged to reach out`
+  - `real_estate_pr`:Condominium / Penthouse + Debuts / Launches / Grand Opening
+  - `personal_finance_advice`:`I inherited|Should I|My (husband|wife|parents)|
+    Dear (Penny|Reader)|Ask the Expert`
+- 每次 stage1 run 在 triage.json 加 `blocked_counts` 計數 + `items_blocked` 總數,
+  validator 後續可以用此偵測規律性失常。
+
+### Added — Headline-template dedup (P0b)
+
+- 同一律所/PR 模板橫跨 N 個 ticker(`Johnson Fistel Investigates Losses at
+  NVDA/TSLA/AMD`)以前獨立打分、可能 N 條全進 stage 2。新 `_headline_template_key`
+  把 ticker / 金額 / 日期 / 星期 normalize 後比對,只留第一條,後面 dedup。
+- triage.json 加 `items_dedup_dropped` + `template_dedup_dropped`。
+
+### Added — Content-aware credibility downgrade (P0c)
+
+- `effective_credibility(item, headline, summary)`:provider HIGH × press-release
+  marker → MEDIUM;MEDIUM × press-release → LOW;opinion / personal-finance
+  marker → LOW outright。
+- Advancement gate 改用 `effective_credibility`,不再被 raw provider HIGH 短路:
+  律所新聞掛在 GlobeNewsWire 上拿 HIGH 也會被 content marker 降回 MEDIUM。
+- 每個 verdict 加 `effective_credibility` 欄,validator 可後續加 enum check。
+
+### Changed — Env-tunable stage1 cap (P0d)
+
+- `STAGE1_MAX_ITEMS` env(default 800)取代硬寫 `items[:313]`。raw 397 → 全 394
+  scored(3 個 blocked),不再丟掉尾端 84 條。
+
+### Changed — Rule-based news_type classifier (P1b)
+
+- 新 `_CLASS_RULES` priority-ordered regex(earnings → corporate → monetary_policy
+  → macro_data → geopolitical → sector_news),fallback 才走舊 keyword tally。
+  原 bug `FLGT shareholder loss → monetary_policy` 因 priority 修掉。
+- 既有 `classify_news_type(headline, summary)` 簽名不變,break_news poller
+  imports 沿用。
+
+### Changed — `headline_zh` null in Stage 1 (P0f)
+
+- Stage 1 不再做 `headline[:150]` 英文 placeholder 假譯;`headline_zh = None`。
+- Downstream digest LLM step 才對 top-N 跑翻譯(Wave 2 任務,本 patch 未實作)。
+- `digest_output_schema.md` 接受 null。
+
+### Added — Validator cross-check raw / triage / digest (P0e)
+
+- `news/scripts/validate_digest_output.py` `_cross_check_files()`:讀同日
+  `<DATE>_triage.json`,assert `digest.stage1_count == len(triage.shallow_verdicts)`
+  + `deep verdict news_ids ⊆ triage.stage2_items`。
+- Loose mode(legacy digest 無對應 triage):print note 跳過,不 hard fail。
+- Strict mode(`NEWS_RUN_START_MS` 設定 = 今日 run):missing triage 即 hard fail。
+- 新增 v3.14.3 telemetry 缺失(`blocked_counts` / `template_dedup_dropped`)時
+  print note,不擋。
+
+### Deprecated — `assemble_digest.py` 歸檔 (P1a)
+
+- `news/scripts/assemble_digest.py` → `news/scripts/archive/assemble_digest.py`
+  (git mv 留 blame)。
+- 新 `news/scripts/archive/README.md` 列出封存理由。
+- `news/news_protocol_v2.md` Phase 4 DO-NOT 表加 footnote 指向 archive 目錄。
+
+### Tests (真測,不假側)
+
+- **`tests/news/test_stage1_filters.py`**:31 個 unit tests,涵蓋 _is_blocked
+  (3 類 × ≥3 positive + 1 negative)、_headline_template_key、
+  effective_credibility、classify_news_type priority、_build_verdict integration。
+- **`tests/news/test_validator_crosscheck.py`**:6 個 tests 用 tmp_path fixture
+  寫假 raw/triage/digest,驗 consistent / mismatch / missing_triage 三組 path
+  (loose + strict mode)、unreadable 案例。
+- **`tests/news/test_pipeline_regression.py`**:1 個 real-data test 拿
+  `news/news_logs/2026-05-20_raw.json` 跑完整 stage1,assert blocked_counts ≥ 1
+  per category、無 Johnson Fistel/condo 漏網、items_scored > 313 證實 cap 已開。
+- `pytest tests/news/ -v` → 38/38 passed in 0.08s。
+
+### Why
+
+Codex 對 news 頁面 review 指出 7 個 issue,真正最大弱點是 Stage 1 選題品質:
+律所徵案 / Astoria condo PR / 個人理財 fluff 經常 advance 到 Stage 2 deep
+debate,4-agent debate 浪費最貴 token,還把垃圾新聞寫得像高價值分析。
+
+具體案例(2026-05-20 production digest):
+- `n0197` Johnson Fistel solicitation about FLGT → BEARISH -2.6 deep verdict
+- `n0038` 「PARISIAN Condominium Debuts in Astoria」→ stage2 advanced
+- `n0107`「I inherited a house, capital gains?」→ shallow_verdicts top 10
+
+本 patch 在 Stage 1 入口 hard-block,真實重跑 2026-05-20 raw:
+- 3 個 noise item 在 stage 1 即 dropped(law_firm/real_estate_pr/personal_finance 各 1)
+- 2 / 5 stage2 deep slot 被換成 genuine signal(Dow -320pt / Schwab Q2 sentiment)
+- items_scored 從 313 → 394,尾端 84 條尾巴項終於進 advancement gate
+
+Wave 2(lane completeness validator + LLM 翻譯 top-10 digest)留下次。
+
+Plan 全文:`~/.claude/plans/llm-llm-queue-pythone-script-whimsical-beacon.md`
+
+---
+
 ## [3.14.2] — 2026-05-20 — Skills × Codex compatibility wave 1
 
 ### Changed — market-top-detector doc clean-up (Wave 1.1)

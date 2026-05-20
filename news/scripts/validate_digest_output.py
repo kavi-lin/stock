@@ -61,6 +61,86 @@ def find_latest_digest():
     return files[-1] if files else None
 
 
+def _cross_check_files(digest, digest_path):
+    """Cross-check today's digest against its sibling triage.json.
+
+    Catches the laziness pattern where digest.stage1_count claims one number
+    but the on-disk triage shows another, or deep verdict news_ids do not
+    appear in triage.stage2_items at all (i.e. Stage 1 was never re-run for
+    this date and the digest was hand-edited).
+
+    Soft behaviour: when triage.json is missing for that date, we record an
+    INFO note and skip — protocol pre-v3.14.3 didn't always persist a
+    matching triage file, so making this hard-fail would break historical
+    digests. Today's run (NEWS_RUN_START_MS set) bumps it to hard-fail.
+    """
+    base = os.path.basename(digest_path)
+    # Strip trailing _digest.json
+    date = base[: -len("_digest.json")] if base.endswith("_digest.json") else base
+    triage_path = os.path.join(os.path.dirname(digest_path), f"{date}_triage.json")
+
+    if not os.path.exists(triage_path):
+        if os.environ.get("NEWS_RUN_START_MS"):
+            return [
+                f"triage.json missing alongside digest: {triage_path} — "
+                "Stage 1 triage was not persisted for this run "
+                "(STRICT mode — env NEWS_RUN_START_MS set)."
+            ]
+        # Loose mode: legacy digests without triage are tolerated.
+        print(
+            f"[validate_digest_output] note: no {date}_triage.json found "
+            "— skipping cross-check (loose mode).",
+            file=sys.stderr,
+        )
+        return []
+
+    try:
+        with open(triage_path, "r", encoding="utf-8") as fp:
+            triage = json.load(fp)
+    except (OSError, json.JSONDecodeError) as e:
+        return [f"triage.json unreadable {triage_path}: {e}"]
+
+    errors = []
+
+    shallow_n = len(triage.get("shallow_verdicts") or [])
+    digest_s1 = digest.get("stage1_count")
+    if isinstance(digest_s1, int) and digest_s1 != shallow_n:
+        errors.append(
+            f"stage1_count mismatch: digest claims {digest_s1} but "
+            f"{date}_triage.json shallow_verdicts has {shallow_n} entries"
+        )
+
+    triage_stage2_ids = {
+        x.get("news_id")
+        for x in (triage.get("stage2_items") or [])
+        if isinstance(x, dict)
+    }
+    deep_ids = {
+        v.get("news_id")
+        for v in (digest.get("verdicts") or [])
+        if isinstance(v, dict) and v.get("depth") == "deep"
+    }
+    missing = sorted(d for d in deep_ids if d and d not in triage_stage2_ids)
+    if missing:
+        errors.append(
+            f"deep verdicts not in triage.stage2_items: {missing} — "
+            "digest cites news_ids that Stage 1 did not advance"
+        )
+
+    # Telemetry sanity (P0a/P0b): triage should carry blocked_counts /
+    # template_dedup_dropped fields once v3.14.3 stage1 runs in production.
+    # We don't fail when they're missing (pre-v3.14.3 runs) but surface them.
+    if "blocked_counts" not in triage or "template_dedup_dropped" not in triage:
+        print(
+            "[validate_digest_output] note: triage.json missing v3.14.3 "
+            "telemetry (blocked_counts / template_dedup_dropped) — "
+            "stage1_triage may be pre-v3.14.3.",
+            file=sys.stderr,
+        )
+
+    return errors
+
+
 def main():
     path = find_latest_digest()
     if not path:
@@ -210,6 +290,9 @@ def main():
         bad = [v.get("news_id") for v in verdicts if v.get("depth") == "deep" and v.get("subagent_isolated") is not True]
         if bad:
             errors.append(f"fanout_mode=PER_AGENT_BATCH but these deep verdicts have subagent_isolated!=true: {bad}")
+
+    # ── 6. v3.14.3 — cross-check digest against sibling triage.json ──────
+    errors.extend(_cross_check_files(data, path))
 
     if errors:
         fail(errors)

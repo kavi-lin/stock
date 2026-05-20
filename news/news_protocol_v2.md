@@ -355,7 +355,7 @@ Schema 完整定義：**`./digest_output_schema.md`**（本 protocol 不再內�
 |---|---|
 | **⚠️ 先 `Read news_logs/YYYY-MM-DD_digest.json`**（若已存在）| 不准用 `Bash` + heredoc（`cat > file <<EOF`）|
 | 用 `Write` 工具一次寫完（Read 滿足守門）| 不准建 `news_logs/YYYY-MM-DD_chunks/` 子資料夾 |
-| DIGEST 的 shallow 硬上限 **top 10**（依 `\|shallow_score\|` 排序取前 10，其餘丟棄）| 不准寫 `assemble_digest.py` / `digest_append_deep.py` 等輔助腳本 |
+| DIGEST 的 shallow 硬上限 **top 10**（依 `\|shallow_score\|` 排序取前 10，其餘丟棄）| 不准寫 `assemble_digest.py` / `digest_append_deep.py` 等輔助腳本（已封存至 `news/scripts/archive/`，見該目錄 README）|
 | 若整包仍 > 25KB → 砍 shallow 到 top 5 | 不准分多次 Write / 不准多檔合併 |
 | 在 thinking 裡組好 JSON object → 一次 `Write` 丟出 | |
 

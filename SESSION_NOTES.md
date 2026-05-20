@@ -1,7 +1,26 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-20 (v3.14.2)
+> **Last Updated**: 2026-05-21 (v3.14.3)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.14.2 → v3.14.3) — News pipeline Stage 1 quality + validator cross-check
+
+Codex review 對 news 頁面提 7 點,review 後確認真正最大弱點是 **Stage 1 選題品質**(不是 protocol 流程防呆)。律所徵案 / Astoria condo PR / 個人理財 fluff 經常 advance 到 Stage 2,4-agent debate 把垃圾新聞寫得像高價值分析。具體案例(2026-05-20 production digest):n0197 Johnson Fistel about FLGT → BEARISH deep verdict、n0038 PARISIAN Condominium Debuts → stage2、n0107「I inherited a house」→ shallow top 10。
+
+**User 明確要求一次上 P0+P1,但測試必須真跑,不准只 py_compile**。實作 P0a-f + P1a-b(8 件) + 38 個 pytest tests + 真實 2026-05-20 raw regression:
+
+- **P0a hard-block negative-content**:`_BLOCK_PATTERNS` 三類 regex(law_firm_solicitation / real_estate_pr / personal_finance_advice),命中即 continue。
+- **P0b headline-template dedup**:`_headline_template_key` normalize ticker/$/date/DOW 後 dedup,跨 N ticker 模板只留首條。
+- **P0c content-aware credibility**:`effective_credibility(item, head, summary)` 把 provider HIGH × press-release marker 降為 MEDIUM、opinion/personal-finance → LOW。advancement gate 走 effective_credibility,堵 raw HIGH 短路。
+- **P0d 397→313 cap → env `STAGE1_MAX_ITEMS=800`**:預設 800,2026-05-20 raw 397 全 scored(過去丟掉 84 條尾端)。
+- **P0e validator cross-check**:`_cross_check_files()` 讀同日 triage.json,assert stage1_count match + deep verdict subset of stage2_items。loose / strict mode 兩路。
+- **P0f headline_zh = None**:stage 1 不假譯,留 downstream digest LLM 補 top-N。
+- **P1a `assemble_digest.py` git mv to `news/scripts/archive/`** + README + protocol footnote。
+- **P1b rule-based classifier**:priority-ordered regex,修掉 FLGT shareholder loss 誤判 monetary_policy。簽名不變,break_news poller 沿用。
+
+**真實 regression 結果**(2026-05-20 raw 397 條): items_scored=394、items_blocked=3、blocked_counts={law_firm:1, real_estate:1, personal_finance:1}。Stage 2 deep 5 slot 中 2 個 noise(FLGT、condo)換成 genuine signal(Dow -320pt、Schwab Q2 sentiment)。`pytest tests/news/ -v` 38/38 passed。
+
+Wave 2(lane completeness validator + LLM 翻譯 top-10 digest)留下次,牽涉 protocol 改寫 + token budget。bump 3.14.2→3.14.3(patch)。
 
 ## 🟢 Session Note (v3.14.1 → v3.14.2) — Skills × Codex compat Wave 1
 
