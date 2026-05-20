@@ -52,6 +52,7 @@
       .bn-raw-strip {
         background: var(--bg-card); border: 1px solid rgba(161,161,170,0.18);
         border-radius: 12px; padding: 14px; margin-bottom: 16px;
+        min-width: 0; max-width: 100%;
       }
       .bn-raw-head {
         display: flex; align-items: center; gap: 10px; cursor: pointer;
@@ -81,9 +82,12 @@
         font-size: 11px; padding: 22px 20px;
       }
       .bn-raw-card {
-        display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) max-content max-content max-content max-content;
+        align-items: center; gap: 9px; padding: 7px 10px;
         border: 1px solid rgba(161,161,170,0.14); border-radius: 8px;
         background: rgba(255,255,255,0.02);
+        min-width: 0; max-width: 100%;
       }
       .bn-raw-card.gated { opacity: 0.62; }
       .bn-raw-card.promoted { border-color: rgba(59,130,246,0.45); }
@@ -114,6 +118,48 @@
       }
       .bn-raw-debate-btn:hover { background: #6366f1; color: #fff; }
       .bn-raw-debate-btn:disabled { opacity: 0.5; cursor: default; }
+      @media (max-width: 760px) {
+        .bn-raw-head {
+          flex-wrap: wrap;
+        }
+        .bn-raw-hint {
+          flex-basis: 100%;
+          min-width: 0;
+        }
+        .bn-raw-card {
+          grid-template-columns: 42px minmax(0, 1fr) max-content;
+          grid-template-areas:
+            "score headline headline"
+            "source age gate"
+            "button button button";
+          align-items: center;
+        }
+        .bn-raw-score { grid-area: score; }
+        .bn-raw-headline { grid-area: headline; }
+        .bn-raw-card .bn-raw-meta:nth-last-of-type(3) {
+          grid-area: source;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .bn-raw-card .bn-raw-meta:nth-last-of-type(2) { grid-area: age; }
+        .bn-raw-gate { grid-area: gate; justify-self: end; }
+        .bn-raw-debate-btn { grid-area: button; justify-self: end; }
+      }
+      @media (max-width: 520px) {
+        .bn-raw-card {
+          grid-template-columns: 42px minmax(0, 1fr);
+          grid-template-areas:
+            "score headline"
+            "source source"
+            "age gate"
+            "button button";
+        }
+        .bn-raw-debate-btn {
+          justify-self: stretch;
+          text-align: center;
+        }
+      }
       .bn-thread-panel {
         position: sticky; top: 96px;
         max-height: calc(100vh - 120px);
