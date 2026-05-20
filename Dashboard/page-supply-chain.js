@@ -23,6 +23,45 @@ document.addEventListener('DOMContentLoaded', () => {
     llm_only: { icon: '⚠', color: '#f59e0b', bg: 'rgba(245,158,11,0.13)', bd: 'rgba(245,158,11,0.32)',
                 zh: '僅 LLM', en: 'LLM-only' },
   };
+  const VERIFICATION = {
+    corroborated: {
+      icon: '●', color: '#22c55e', bg: 'rgba(34,197,94,0.13)', bd: 'rgba(34,197,94,0.32)',
+      zh: '本地佐證', en: 'Corroborated',
+      tip: 'Backed by local Nexus/news evidence; FMP does not verify the supply-chain relation.',
+    },
+    fmp_profile: {
+      icon: '◐', color: '#60a5fa', bg: 'rgba(59,130,246,0.13)', bd: 'rgba(59,130,246,0.32)',
+      zh: '公司 OK', en: 'Company OK',
+      tip: 'FMP verified the company/ticker exists; supply-chain relation is NOT verified.',
+    },
+    name_match: {
+      icon: '○', color: '#a78bfa', bg: 'rgba(167,139,250,0.13)', bd: 'rgba(167,139,250,0.32)',
+      zh: '名稱匹配', en: 'Name match',
+      tip: 'Weak company-name match for private, foreign, or cross-listed entity.',
+    },
+    llm_only: {
+      icon: '⚠', color: '#f59e0b', bg: 'rgba(245,158,11,0.13)', bd: 'rgba(245,158,11,0.32)',
+      zh: '僅 LLM', en: 'LLM only',
+      tip: 'Drafted by LLM with no local or FMP corroboration.',
+    },
+    fmp_unavailable: {
+      icon: '—', color: '#a1a1aa', bg: 'rgba(161,161,170,0.13)', bd: 'rgba(161,161,170,0.24)',
+      zh: '略過', en: 'Skipped',
+      tip: 'FMP verification skipped because API key, quota, or network was unavailable.',
+    },
+  };
+  const RELATION_EVIDENCE = {
+    corroborated_relation: {
+      icon: '●', color: '#4ade80', bg: 'rgba(34,197,94,0.14)',
+      zh: '關係佐證', en: 'Corroborated relation',
+      tip: 'This drafted relation has repeated recent co-mentions in news/digest artifacts; still not a contractual proof.',
+    },
+    llm_relation: {
+      icon: '○', color: '#a1a1aa', bg: 'rgba(161,161,170,0.13)',
+      zh: 'LLM 關係', en: 'LLM relation',
+      tip: "Drafted relation with insufficient recent co-mention evidence. Recent co-mention threshold (>=3 in 30d) not met; niche or low-volume edges can read 'LLM' here without being fictional.",
+    },
+  };
   const HEAT_COLOR = { hot: '#ef4444', warm: '#f97316', cold: '#3b82f6', none: null };
   const HEAT_LABEL = {
     hot:  { zh: '熱', en: 'Hot' }, warm: { zh: '溫', en: 'Warm' },
@@ -35,6 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     private:        { zh: '私有',     en: 'Private' },
   };
   const groundingLabel = (k) => { const m = GROUNDING[k]; return m ? (isZh() ? m.zh : m.en) : k; };
+  const verificationLabel = (k) => { const m = VERIFICATION[k]; return m ? (isZh() ? m.zh : m.en) : k; };
+  const relationLabel = (k) => { const m = RELATION_EVIDENCE[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   const heatLabel = (k) => { const m = HEAT_LABEL[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   const listingLabel = (k) => { const m = LISTING_LABEL[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   // Commercialization stage ramp — design partner → revenue recognized.
@@ -78,6 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
       zh: { title: '僅 LLM Unverified', desc: '本地資料完全查無此公司 — 純 LLM 生成內容，未經佐證，需自行查證。' },
       en: { title: 'LLM-only', desc: 'No trace in any local data — purely LLM-asserted and unverified. Check it yourself.' },
     },
+    verification: {
+      zh: { title: '公司驗證', desc: '節點主徽章顯示公司層級驗證。FMP 只確認公司 / ticker 存在，不驗證供應鏈關係。' },
+      en: { title: 'Company Verification', desc: 'The primary node badge shows company-level verification. FMP confirms company/ticker existence, not supply-chain relationships.' },
+    },
+    relation: {
+      zh: { title: '關係佐證', desc: '邊的佐證只使用近 30 天 digest verdict 的 tickers_mentioned[] 共同出現。>=3 次才標為關係佐證。' },
+      en: { title: 'Relation Evidence', desc: 'Edge evidence uses only strict co-mentions in digest verdict tickers_mentioned[] over the last 30 days. >=3 counts as corroborated.' },
+    },
     heat: {
       zh: { title: '近期熱度', desc: '節點卡的外光暈強度 = 該公司近期在知識圖譜的被提及熱度。',
             scale: '🔴 hot　提及 ≥ 40\n🟠 warm　15 – 39\n🔵 cold　1 – 14\n⚪ none　無近期提及' },
@@ -111,6 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     $('sc-lg-verified').textContent = t('追蹤中', 'verified');
     $('sc-lg-seen').textContent = t('有資料', 'seen');
     $('sc-lg-llm').textContent = t('僅 LLM', 'llm-only');
+    $('sc-lg-vf').textContent = t('公司驗證', 'company check');
+    $('sc-lg-rel').textContent = t('關係佐證', 'relation evidence');
     $('sc-lg-heat').textContent = t('熱度', 'heat');
     $('sc-lg-stage').textContent = t('商用階段', 'stage');
     if (currentChain) renderDiagram(currentChain);
@@ -129,6 +180,36 @@ document.addEventListener('DOMContentLoaded', () => {
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g,
       c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+  function fmtMoney(v) {
+    const n = Number(v);
+    if (!Number.isFinite(n) || n <= 0) return '';
+    if (n >= 1e12) return `$${(n / 1e12).toFixed(1)}T`;
+    if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
+    if (n >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
+    return `$${n.toFixed(0)}`;
+  }
+  function verificationKey(n) {
+    if (n.verification_level || n.verificationLevel) return n.verification_level || n.verificationLevel;
+    if (n.grounding === 'verified' || n.grounding === 'seen') return 'corroborated';
+    return 'llm_only';
+  }
+  function verificationBadge(n) {
+    const key = verificationKey(n);
+    const m = VERIFICATION[key] || VERIFICATION.llm_only;
+    return `<span class="sc-badge sc-vf-badge" title="${esc(m.tip)}"
+      style="color:${m.color};background:${m.bg};border:1px solid ${m.bd};">
+      ${m.icon} ${esc(verificationLabel(key))}</span>`;
+  }
+  function relationBadge(e) {
+    const ev = e.relation_evidence || {};
+    const key = ev.level || (e.corroboration && e.corroboration.count ? 'corroborated_relation' : 'llm_relation');
+    const m = RELATION_EVIDENCE[key] || RELATION_EVIDENCE.llm_relation;
+    const cnt = Number(ev.co_mention_count_30d || (e.corroboration && e.corroboration.count) || 0);
+    const threshold = Number(ev.threshold || 3);
+    const suffix = key === 'corroborated_relation' ? ` ${cnt}` : ` ${cnt}/${threshold}`;
+    return `<span class="sc-edge-corr" title="${esc(m.tip)}"
+      style="color:${m.color};background:${m.bg};">${m.icon} ${esc(relationLabel(key))}${esc(suffix)}</span>`;
   }
 
   // ── data loading ───────────────────────────────────────────────
@@ -370,7 +451,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = L.pos[n.id];
       if (!p) return;
       const stripe = LISTING_COLOR[n.listing] || '#71717a';
-      const g = GROUNDING[n.grounding] || GROUNDING.llm_only;
       const heat = HEAT_COLOR[n.heat];
       const isSpine = spine.has(n.id);
       const tkr = n.ticker
@@ -401,8 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="sc-role">${esc(n.role)}</div>
         <div class="sc-badges">
-          <span class="sc-badge" style="color:${g.color};background:${g.bg};
-            border:1px solid ${g.bd};">${g.icon} ${esc(groundingLabel(n.grounding))}</span>
+          ${verificationBadge(n)}
           ${heatTag}
           ${stageTag}
         </div>
@@ -437,15 +516,26 @@ document.addEventListener('DOMContentLoaded', () => {
       return m ? m.label : nid;
     };
     const g = GROUNDING[n.grounding] || GROUNDING.llm_only;
+    const vKey = verificationKey(n);
+    const vf = VERIFICATION[vKey] || VERIFICATION.llm_only;
+    const prof = n.fmp_profile || {};
+    const profileBits = [
+      prof.symbol ? esc(prof.symbol) : '',
+      prof.exchange ? esc(prof.exchange) : '',
+      prof.sector ? esc(prof.sector) : '',
+      prof.industry ? esc(prof.industry) : '',
+      fmtMoney(prof.marketCap),
+    ].filter(Boolean);
+    const reasons = (n.verification_reasons || [])
+      .map(r => `<li>${esc(r)}</li>`).join('');
+    const peers = (n.fmp_peers || []).slice(0, 8).map(esc).join(', ');
     const stripe = LISTING_COLOR[n.listing] || '#71717a';
     const edgeRow = (txt, e) => {
-      const c = e.corroboration;
-      const badge = (c && c.count)
-        ? ` <span class="sc-edge-corr" title="${esc(t('知識圖譜佐證 (break-news + digest 關係)：', 'Nexus-corroborated (break-news + digest relations): ')
-            + (c.sources || []).join(', '))}">✓${c.count}</span>`
-        : '';
+      const ev = e.relation_evidence || {};
+      const sources = (ev.sources || []).slice(0, 3).map(esc).join(', ');
+      const src = sources ? `<div class="sc-edge-src">${sources}</div>` : '';
       return `<div class="sc-edge-row">${txt}
-      <span class="sc-edge-rel">${esc(e.rel)}</span>${badge}</div>`;
+      <span class="sc-edge-rel">${esc(e.rel)}</span>${relationBadge(e)}${src}</div>`;
     };
     const downstream = edges.filter(e => e.from === id)
       .map(e => edgeRow('→ ' + esc(labelOf(e.to)), e));
@@ -469,6 +559,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="sc-detail-row">${t('上市別', 'Listing')}: <strong>${esc(listingLabel(n.listing))}</strong></div>
         <div class="sc-detail-row">${t('資料支持', 'Grounding')}:
           <strong style="color:${g.color};">${g.icon} ${esc(groundingLabel(n.grounding))}</strong></div>
+        <div class="sc-detail-row">${t('公司驗證', 'Company check')}:
+          <strong style="color:${vf.color};" title="${esc(vf.tip)}">${vf.icon} ${esc(verificationLabel(vKey))}</strong></div>
         <div class="sc-detail-row">${t('近期熱度', 'Heat')}:
           <strong>${n.heat && n.heat !== 'none' ? esc(heatLabel(n.heat)) : t('無', 'none')}</strong></div>
         <div class="sc-detail-row">${t('商用階段', 'Stage')}:
@@ -476,6 +568,13 @@ document.addEventListener('DOMContentLoaded', () => {
           >${STAGE[n.stage] ? esc(stageLabel(n.stage)) : esc(n.stage || 'unknown')}</strong></div>
         <div class="sc-detail-sec">${t('角色', 'Role')}</div>
         <div style="font-size:11px;color:var(--text-main);line-height:1.5;">${esc(n.role)}</div>
+        <div class="sc-fmp-box">
+          <div class="sc-fmp-title">${esc(vf.tip)}</div>
+          ${profileBits.length ? `<div>${profileBits.join(' · ')}</div>` : ''}
+          ${n.alias_used ? `<div>${t('別名對應', 'Alias used')}: <strong>${esc(n.alias_used)}</strong></div>` : ''}
+          ${peers ? `<div>${t('FMP 同業', 'FMP peers')}: ${peers}</div>` : ''}
+          ${reasons ? `<ul class="sc-reason-list">${reasons}</ul>` : ''}
+        </div>
         ${n.note ? `<div class="sc-detail-sec">${t('備註', 'Note')}</div>
           <div style="font-size:10.5px;color:var(--text-muted);line-height:1.5;">${esc(n.note)}</div>` : ''}
         ${downstream.length ? `<div class="sc-detail-sec">${t('供應給', 'Supplies to')}</div>${downstream.join('')}` : ''}

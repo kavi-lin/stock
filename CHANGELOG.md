@@ -10,6 +10,58 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.14.4] — 2026-05-21 — Supply-chain FMP company verification + relation evidence
+
+### Added — FMP company/ticker verification
+
+- `scripts/nexus/supply_chain.py` now enriches supply-chain nodes at serve time with
+  `verification_level`, `verification_reasons`, `fmp_profile`, `fmp_peers`, and
+  `data_quality.verification_breakdown`.
+- FMP verification is explicitly company-level only. It does not claim that a
+  supplier/customer relation is verified.
+- Added shared file-backed cache under
+  `skills/_shared/fmp_supp_cache/supply_chain/`:
+  `profile/<TICKER>.json` TTL 7d, `peers/<TICKER>.json` TTL 24h,
+  `search_name/<sha12>.json` TTL 24h.
+
+### Changed — Quota-safe lookup rules
+
+- Profile lookup is batched, cache-first, and shared by ticker instead of chain.
+- Daily budget gate defaults to `FMP_SUPP_DAILY_BUDGET=150`; the counter is
+  persisted in `_budget_<YYYY-MM-DD>.json` and resets on UTC day boundary.
+- API key absence, exhausted budget, 403/429, or network failure degrades to
+  `fmp_unavailable` without breaking the page.
+- Ticker disambiguation now uses US exchange allowlist plus hand aliases for ADR /
+  class-share cases such as TSMC→TSM, GOOG/GOOGL, and BRK class shares.
+
+### Added — Relation evidence track
+
+- Supply-chain edges now get `relation_evidence` from strict 30-day digest
+  co-mentions: both endpoint tickers must appear in the same verdict
+  `tickers_mentioned[]`. Prose scanning is intentionally not used.
+- Threshold is `>=3` co-mentions for `corroborated_relation`; below that remains
+  `llm_relation` with UI wording that low-volume edges are not necessarily false.
+
+### Changed — Dashboard verification UI
+
+- Node cards show one primary company-verification badge. Existing grounding
+  remains visible only in the detail panel to avoid duplicate/conflicting badges.
+- Detail panel shows FMP profile summary, alias used, peers, verification reasons,
+  and relation-evidence badges on upstream/downstream edges.
+- Legend tooltips document the distinction between company verification and
+  relation evidence.
+
+### Tests
+
+- Added `tests/test_supply_chain_enrichment.py` for no-key fallback, alias profile
+  matching, budget exhaustion, name-match fallback, and strict digest co-mentions.
+
+### Why
+
+供應鏈 YAML 仍是 LLM 草稿;本版把「公司存在」與「關係佐證」拆成兩條清楚的 evidence track,
+避免 FMP profile 被誤讀成 supply-chain relation verified，同時用 batch/cache/budget gate 防止
+FMP quota 被一頁供應鏈燒光。
+
 ## [3.14.3] — 2026-05-21 — News pipeline Stage 1 quality + validator cross-check
 
 ### Added — Stage 1 hard-block negative content (P0a)

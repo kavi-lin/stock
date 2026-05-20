@@ -1,7 +1,21 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-21 (v3.14.3)
+> **Last Updated**: 2026-05-21 (v3.14.4)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.14.3 → v3.14.4) — Supply-chain FMP verification + relation evidence
+
+使用者要求依 Claude review 釘死供應鏈頁與資料來源優化，尤其避免 FMP 被誤用成「供應鏈關係已驗證」。本輪實作採納 P0/P1/P2 重點:
+
+- **刪除新 `verified` verification level**:保留既有 `grounding=verified` 代表 tracked universe；新 `verification_level` 只含 `corroborated / fmp_profile / name_match / llm_only / fmp_unavailable`。
+- **FMP 只驗公司，不驗關係**:`fmp_profile` 文字明寫 relation NOT verified。profile batch + shared cache + file-backed daily budget，缺 key / quota / 403/429 / network 都降級 `fmp_unavailable` 不爆頁面。
+- **Cache / budget 釘死**:`skills/_shared/fmp_supp_cache/supply_chain/{profile,peers,search_name}`，profile TTL 7d、peers/search 24h、`_budget_<YYYY-MM-DD>.json` UTC reset，預設 budget 150。
+- **Ticker disambiguation**:US exchange allowlist + aliases(TSMC→TSM、GOOG/GOOGL、BRK class shares、Facebook/Meta)。lookup 順序:exact profile → hand alias profile → search-name US exchange top-1 → fallback。
+- **Relation evidence**:不用 FMP，不掃 prose；只算近 30 天 digest verdict `tickers_mentioned[]` 兩端同時出現。`>=3` → `corroborated_relation`，否則 `llm_relation` 並提示 low-volume edge 不等於虛構。
+- **Frontend composite rule**:節點卡只顯示一個 primary company-verification badge；grounding 只放 detail panel。detail panel 增 FMP profile / peers / alias / reasons，edge row 顯示 relation evidence badge。
+- **測試**:`tests/test_supply_chain_enrichment.py` 覆蓋 no-key fallback、alias profile、budget exhausted、name-match、strict co-mention。驗證 `py_compile`、pytest 5/5、`node --check`。
+
+版本 bump 3.14.3→3.14.4。
 
 ## 🟢 Session Note (v3.14.2 → v3.14.3) — News pipeline Stage 1 quality + validator cross-check
 

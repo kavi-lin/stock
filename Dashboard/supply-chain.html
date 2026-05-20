@@ -217,7 +217,7 @@
       }
       .sc-edge-row {
         font-size: 10.5px; color: var(--text-main); padding: 3px 0;
-        display: flex; align-items: center; gap: 6px;
+        display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
       }
       .sc-edge-rel {
         font-family: 'JetBrains Mono', monospace; font-size: 8px;
@@ -228,6 +228,20 @@
         font-weight: 700; color: #4ade80; padding: 1px 4px; border-radius: 4px;
         background: rgba(34,197,94,0.14); cursor: help;
       }
+      .sc-edge-src {
+        flex-basis: 100%; margin-left: 13px;
+        font-family: 'JetBrains Mono', monospace; font-size: 8px;
+        color: var(--text-muted); line-height: 1.35;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .sc-fmp-box {
+        margin-top: 8px; padding: 8px 9px; border-radius: 8px;
+        background: color-mix(in srgb, var(--text-main) 5%, transparent);
+        border: 1px solid color-mix(in srgb, var(--text-main) 10%, transparent);
+        font-size: 9.5px; line-height: 1.55; color: var(--text-muted);
+      }
+      .sc-fmp-title { color: var(--text-main); font-weight: 700; margin-bottom: 4px; }
+      .sc-reason-list { margin: 5px 0 0 14px; padding: 0; }
 
       /* ── States + legend ──────────────────────────────────────── */
       .sc-status {
@@ -323,6 +337,8 @@
                 <span class="sc-legend-item" data-tip-key="verified" style="color:#22c55e;">✓ <span id="sc-lg-verified">追蹤中</span></span>
                 <span class="sc-legend-item" data-tip-key="seen" style="color:#60a5fa;">◦ <span id="sc-lg-seen">有資料</span></span>
                 <span class="sc-legend-item" data-tip-key="llm" style="color:#f59e0b;">⚠ <span id="sc-lg-llm">僅 LLM</span></span>
+                <span class="sc-legend-item" data-tip-key="verification" style="color:#60a5fa;">◐ <span id="sc-lg-vf">公司驗證</span></span>
+                <span class="sc-legend-item" data-tip-key="relation" style="color:#4ade80;">● <span id="sc-lg-rel">關係佐證</span></span>
                 <span class="sc-legend-item" data-tip-key="heat"><i class="sc-heat-dot" style="background:#ef4444;"></i><span id="sc-lg-heat">熱度</span></span>
                 <span class="sc-legend-item" data-tip-key="stage"><i class="sc-heat-dot" style="background:#94a3b8;"></i><i class="sc-heat-dot" style="background:#3b82f6;"></i><i class="sc-heat-dot" style="background:#eab308;"></i><i class="sc-heat-dot" style="background:#f97316;"></i><i class="sc-heat-dot" style="background:#22c55e;"></i><span id="sc-lg-stage">商用階段</span></span>
             </div>

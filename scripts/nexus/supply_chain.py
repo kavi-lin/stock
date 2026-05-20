@@ -15,12 +15,16 @@ Standalone: `python3 scripts/nexus/supply_chain.py --theme CPO`
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import sys
-from datetime import datetime, timezone
+import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import requests
 import yaml
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +41,7 @@ NEXUS_FILE = _ROOT / "Dashboard" / "nexus_graph.json"
 REPORTS_DIR = _ROOT / "reports"
 NEWS_LOG_DIR = _ROOT / "news" / "news_logs"
 BREAK_NEWS_DIR = _ROOT / "news" / "break_news_logs"
+FMP_SC_CACHE_DIR = _ROOT / "skills" / "_shared" / "fmp_supp_cache" / "supply_chain"
 
 _LISTINGS = {"us_listed", "foreign_listed", "private", "pre_ipo"}
 _RELS = {"SUPPLIES_TO", "CUSTOMER_OF", "CONTRACT_MFG_FOR", "CO_DEVELOPS_WITH", "INVESTOR_IN"}
@@ -45,6 +50,31 @@ _RELS = {"SUPPLIES_TO", "CUSTOMER_OF", "CONTRACT_MFG_FOR", "CO_DEVELOPS_WITH", "
 _STAGES = {"design_partner", "sampling", "qualification", "production",
            "revenue", "unknown"}
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
+_FMP_BASE = "https://financialmodelingprep.com"
+_FMP_PROFILE_TTL_SEC = 7 * 86400
+_FMP_PEERS_TTL_SEC = 86400
+_FMP_SEARCH_TTL_SEC = 86400
+_FMP_DAILY_BUDGET = int(os.getenv("FMP_SUPP_DAILY_BUDGET", "150"))
+_FMP_NAME_SEARCH_LIMIT = int(os.getenv("SUPPLY_CHAIN_FMP_NAME_SEARCH_LIMIT", "20"))
+_US_EXCHANGES = {"NASDAQ", "NYSE", "AMEX"}
+_RELATION_CORMENTION_THRESHOLD = 3
+
+_ALIAS_TO_TICKER = {
+    "TSMC": "TSM",
+    "TAIWAN SEMICONDUCTOR": "TSM",
+    "TAIWAN SEMICONDUCTOR MANUFACTURING": "TSM",
+    "GOOG": "GOOGL",
+    "GOOGL": "GOOGL",
+    "ALPHABET": "GOOGL",
+    "BRK.A": "BRK-B",
+    "BRK-A": "BRK-B",
+    "BRK.B": "BRK-B",
+    "BRK-B": "BRK-B",
+    "BERKSHIRE HATHAWAY": "BRK-B",
+    "META PLATFORMS": "META",
+    "FACEBOOK": "META",
+}
+_CLASS_SHARE_ALIASES = {"GOOG": "GOOGL", "BRK.A": "BRK-B", "BRK-A": "BRK-B", "BRK.B": "BRK-B"}
 
 
 # ─────────────────────────── slug / IO helpers ──────────────────────────────
@@ -405,6 +435,290 @@ def _heat(mentions: int) -> str:
     return "none"
 
 
+def _cache_dir(kind: str) -> Path:
+    p = FMP_SC_CACHE_DIR / kind
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _cache_read(path: Path, ttl_sec: int):
+    try:
+        if not path.is_file() or (time.time() - path.stat().st_mtime) > ttl_sec:
+            return None
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _cache_write(path: Path, payload) -> None:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(path)
+    except OSError:
+        pass
+
+
+def _budget_path(day: str | None = None) -> Path:
+    day = day or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    FMP_SC_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    return FMP_SC_CACHE_DIR / f"_budget_{day}.json"
+
+
+def _budget_state() -> dict:
+    p = _budget_path()
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+        if data.get("date") == day:
+            data.setdefault("calls_used", 0)
+            data.setdefault("budget", _FMP_DAILY_BUDGET)
+            data.setdefault("budget_exhausted", False)
+            return data
+    except (OSError, json.JSONDecodeError):
+        pass
+    tomorrow = (datetime.now(timezone.utc).date() + timedelta(days=1)).isoformat()
+    return {
+        "date": day,
+        "calls_used": 0,
+        "budget": _FMP_DAILY_BUDGET,
+        "budget_exhausted": False,
+        "reset_at": f"{tomorrow}T00:00:00Z",
+    }
+
+
+def _budget_save(state: dict) -> None:
+    _cache_write(_budget_path(state.get("date")), state)
+
+
+def _budget_can_call() -> bool:
+    state = _budget_state()
+    return not state.get("budget_exhausted") and int(state.get("calls_used", 0)) < int(state.get("budget", _FMP_DAILY_BUDGET))
+
+
+def _budget_note_call(status_code: int | None = None) -> None:
+    state = _budget_state()
+    state["calls_used"] = int(state.get("calls_used", 0)) + 1
+    if state["calls_used"] >= int(state.get("budget", _FMP_DAILY_BUDGET)):
+        state["budget_exhausted"] = True
+    if status_code in (401, 402, 403, 429):
+        state["budget_exhausted"] = True
+        state["last_status"] = status_code
+    _budget_save(state)
+
+
+def _fmp_get(path: str, params: dict, *, timeout: int = 12):
+    api_key = os.getenv("FMP_API_KEY")
+    if not api_key or not _budget_can_call():
+        return None, "unavailable"
+    status = None
+    try:
+        r = requests.get(
+            f"{_FMP_BASE}{path}",
+            params={**params, "apikey": api_key},
+            timeout=timeout,
+        )
+        status = r.status_code
+        _budget_note_call(status)
+        if status in (401, 402, 403, 429):
+            return None, "budget_exhausted"
+        if status != 200:
+            return None, f"http_{status}"
+        return r.json(), "ok"
+    except Exception:
+        _budget_note_call(status)
+        return None, "network_error"
+
+
+def _profile_cache_path(ticker: str) -> Path:
+    return _cache_dir("profile") / f"{ticker.upper()}.json"
+
+
+def _peers_cache_path(ticker: str) -> Path:
+    return _cache_dir("peers") / f"{ticker.upper()}.json"
+
+
+def _search_cache_path(name: str) -> Path:
+    h = hashlib.sha1(name.strip().lower().encode("utf-8")).hexdigest()[:12]
+    return _cache_dir("search_name") / f"{h}.json"
+
+
+def _exchange_ok(profile: dict) -> bool:
+    ex = str(profile.get("exchangeShortName") or "").upper().strip()
+    ex_full = str(profile.get("exchange") or "").upper()
+    return ex in _US_EXCHANGES or any(token in ex_full for token in _US_EXCHANGES)
+
+
+def _slim_profile(profile: dict) -> dict:
+    return {
+        "symbol": profile.get("symbol"),
+        "companyName": profile.get("companyName"),
+        "exchange": profile.get("exchangeShortName") or profile.get("exchange"),
+        "sector": profile.get("sector"),
+        "industry": profile.get("industry"),
+        "marketCap": profile.get("marketCap"),
+    }
+
+
+def _normalise_symbol(symbol: str | None) -> str | None:
+    if not symbol:
+        return None
+    sym = str(symbol).strip().upper().replace(".", "-")
+    return _CLASS_SHARE_ALIASES.get(sym, sym)
+
+
+def _node_alias_symbol(node: dict) -> str | None:
+    parts = [
+        str(node.get("ticker") or ""),
+        str(node.get("label") or ""),
+        str(node.get("id") or "").replace("_", " "),
+    ]
+    for raw in parts:
+        key = raw.upper().strip()
+        if key in _ALIAS_TO_TICKER:
+            return _ALIAS_TO_TICKER[key]
+        for alias, ticker in _ALIAS_TO_TICKER.items():
+            if alias in key:
+                return ticker
+    return None
+
+
+def _fetch_profiles_batch(symbols: list[str], errors: list[str]) -> dict[str, dict]:
+    out: dict[str, dict] = {}
+    misses = []
+    clean_symbols = {
+        sym for sym in (_normalise_symbol(s) for s in symbols if s) if sym
+    }
+    for sym in sorted(clean_symbols):
+        if not sym:
+            continue
+        cached = _cache_read(_profile_cache_path(sym), _FMP_PROFILE_TTL_SEC)
+        if isinstance(cached, dict):
+            out[sym] = cached
+        else:
+            misses.append(sym)
+    if not misses:
+        return out
+    if not os.getenv("FMP_API_KEY") or not _budget_can_call():
+        errors.append("profile_fetch_skipped")
+        return out
+    raw, status = _fmp_get("/stable/profile", {"symbol": ",".join(misses)})
+    if status != "ok":
+        errors.append(f"profile_fetch_{status}")
+        return out
+    rows = raw if isinstance(raw, list) else [raw] if isinstance(raw, dict) else []
+    for row in rows:
+        if not isinstance(row, dict) or not row.get("symbol"):
+            continue
+        sym = _normalise_symbol(row.get("symbol"))
+        if not sym or not _exchange_ok(row):
+            continue
+        slim = _slim_profile(row)
+        out[sym] = slim
+        _cache_write(_profile_cache_path(sym), slim)
+    return out
+
+
+def _fetch_peers(symbol: str, errors: list[str]) -> list[str]:
+    sym = _normalise_symbol(symbol)
+    if not sym:
+        return []
+    cached = _cache_read(_peers_cache_path(sym), _FMP_PEERS_TTL_SEC)
+    if isinstance(cached, list):
+        return cached[:8]
+    if not os.getenv("FMP_API_KEY") or not _budget_can_call():
+        return []
+    raw, status = _fmp_get("/stable/stock-peers", {"symbol": sym})
+    if status != "ok":
+        errors.append(f"peers_{sym}_{status}")
+        return []
+    peers: list[str] = []
+    for row in raw if isinstance(raw, list) else []:
+        peer = row.get("symbol") if isinstance(row, dict) else row if isinstance(row, str) else None
+        peer = _normalise_symbol(peer)
+        if peer and peer != sym and peer not in peers:
+            peers.append(peer)
+    peers = peers[:8]
+    _cache_write(_peers_cache_path(sym), peers)
+    return peers
+
+
+def _search_name(name: str, errors: list[str]) -> dict | None:
+    name = (name or "").strip()
+    if not name:
+        return None
+    path = _search_cache_path(name)
+    cached = _cache_read(path, _FMP_SEARCH_TTL_SEC)
+    if isinstance(cached, dict):
+        return cached or None
+    if not os.getenv("FMP_API_KEY") or not _budget_can_call():
+        return None
+    raw, status = _fmp_get("/stable/search-name", {"query": name, "limit": 5})
+    if status != "ok":
+        errors.append(f"search_name_{status}")
+        return None
+    rows = raw if isinstance(raw, list) else []
+    best = None
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        # search-name is a weak fallback; accept only US exchange matches so
+        # foreign/common-name ambiguity does not get promoted as Company OK.
+        if _exchange_ok(row):
+            best = row
+            break
+    payload = _slim_profile(best) if isinstance(best, dict) else {}
+    _cache_write(path, payload)
+    return payload or None
+
+
+def _digest_paths_30d() -> list[Path]:
+    cutoff = datetime.now(timezone.utc).date() - timedelta(days=30)
+    out = []
+    if not NEWS_LOG_DIR.is_dir():
+        return out
+    for path in NEWS_LOG_DIR.glob("*_digest.json"):
+        date = _context_date(path)
+        if not date:
+            continue
+        try:
+            if datetime.fromisoformat(date).date() >= cutoff:
+                out.append(path)
+        except ValueError:
+            continue
+    return sorted(out)
+
+
+def _digest_comention_index() -> dict[tuple[str, str], dict]:
+    idx: dict[tuple[str, str], dict] = {}
+    for path in _digest_paths_30d():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for v in data.get("verdicts") or []:
+            tickers = sorted({
+                _normalise_symbol(t)
+                for t in (v.get("tickers_mentioned") or [])
+                if _normalise_symbol(t)
+            })
+            if len(tickers) < 2:
+                continue
+            nid = str(v.get("news_id") or "")
+            src = f"{path.name}:{nid}" if nid else path.name
+            for i, a in enumerate(tickers):
+                for b in tickers[i + 1:]:
+                    if not a or not b or a == b:
+                        continue
+                    key = tuple(sorted((a, b)))
+                    slot = idx.setdefault(key, {"count": 0, "sources": []})
+                    slot["count"] += 1
+                    if len(slot["sources"]) < 8:
+                        slot["sources"].append(src)
+    return idx
+
+
 def _nexus_edge_index() -> dict:
     """Return {(ticker_a, ticker_b): {count, types, sources}} for ticker↔ticker
     edges in the Nexus graph. The key pair is sorted so lookups are
@@ -434,12 +748,32 @@ def _nexus_edge_index() -> dict:
 
 
 def enrich(chain: dict) -> dict:
-    """Add live `grounding` + `heat` to each node and `corroboration` to each
-    edge. Returns the same dict."""
+    """Add live verification fields to nodes and relation evidence to edges.
+
+    The YAML remains an LLM-drafted skeleton. FMP only verifies company/ticker
+    existence and peer context; it never verifies supply-chain relations.
+    Relation evidence is a local 30d digest co-mention count.
+    """
     universe = _universe_symbols()
     nexus_labels, nexus_tickers = _nexus_index()
+    fmp_errors: list[str] = []
+    fmp_key_present = bool(os.getenv("FMP_API_KEY"))
+
+    profile_candidates: list[str] = []
+    alias_by_node: dict[str, str] = {}
     for n in chain.get("nodes", []):
-        ticker = (n.get("ticker") or "").upper()
+        exact = _normalise_symbol(n.get("ticker"))
+        if exact:
+            profile_candidates.append(exact)
+        alias = _node_alias_symbol(n)
+        if alias:
+            alias_by_node[str(n.get("id"))] = alias
+            profile_candidates.append(alias)
+    profiles = _fetch_profiles_batch(profile_candidates, fmp_errors)
+
+    name_searches_used = 0
+    for n in chain.get("nodes", []):
+        ticker = _normalise_symbol(n.get("ticker")) or ""
         label = (n.get("label") or "").strip().lower()
         if ticker and ticker in universe:
             n["grounding"] = "verified"
@@ -451,23 +785,94 @@ def enrich(chain: dict) -> dict:
         nx = nexus_tickers.get(ticker) if ticker else None
         n["heat"] = _heat(int(nx.get("mentions", 0))) if nx else "none"
 
-    # Edge corroboration — is this LLM-drafted chain edge backed by a Nexus
-    # ticker↔ticker edge (which carries break-news + digest relations)?
-    node_ticker = {n.get("id"): (n.get("ticker") or "").upper()
-                   for n in chain.get("nodes", [])}
-    edge_idx = _nexus_edge_index()
+        reasons: list[str] = []
+        exact_profile = profiles.get(ticker) if ticker else None
+        alias = alias_by_node.get(str(n.get("id")))
+        alias_profile = profiles.get(alias) if alias else None
+        profile = exact_profile or alias_profile
+        if profile:
+            if exact_profile:
+                reasons.append("FMP profile matched ticker")
+            else:
+                reasons.append(f"FMP profile matched alias {alias}")
+                n["alias_used"] = alias
+            n["verification_level"] = "fmp_profile"
+            n["fmp_profile"] = profile
+            n["fmp_peers"] = _fetch_peers(str(profile.get("symbol") or ticker or alias), fmp_errors)
+        else:
+            n["fmp_profile"] = None
+            n["fmp_peers"] = []
+            can_search = (
+                fmp_key_present and _budget_can_call()
+                and name_searches_used < _FMP_NAME_SEARCH_LIMIT
+                and n.get("grounding") != "verified"
+            )
+            match = None
+            if can_search:
+                name_searches_used += 1
+                match = _search_name(str(n.get("label") or ""), fmp_errors)
+            if match:
+                n["verification_level"] = "name_match"
+                n["fmp_profile"] = match
+                reasons.append("FMP weak company-name match")
+            elif not fmp_key_present or _budget_state().get("budget_exhausted"):
+                n["verification_level"] = "fmp_unavailable"
+                reasons.append("FMP verification skipped")
+            elif n.get("grounding") in ("verified", "seen"):
+                n["verification_level"] = "corroborated"
+                reasons.append("Local universe/Nexus data supports company existence")
+            else:
+                n["verification_level"] = "llm_only"
+                reasons.append("No local or FMP company corroboration")
+        n["verification_reasons"] = reasons
+
+    # Relation evidence: strict ticker co-mentions in recent digest verdicts.
+    node_ticker = {}
+    for n in chain.get("nodes", []):
+        prof = n.get("fmp_profile") if isinstance(n.get("fmp_profile"), dict) else {}
+        node_ticker[n.get("id")] = _normalise_symbol(
+            n.get("ticker") or n.get("alias_used") or prof.get("symbol")
+        )
+    edge_idx = _digest_comention_index()
     for e in chain.get("edges", []):
         ta, tb = node_ticker.get(e.get("from")), node_ticker.get(e.get("to"))
         hit = edge_idx.get(tuple(sorted((ta, tb)))) if (ta and tb and ta != tb) else None
-        if hit:
-            sources = sorted(hit["sources"])
+        count = int((hit or {}).get("count") or 0)
+        sources = list((hit or {}).get("sources") or [])[:8]
+        ok = count >= _RELATION_CORMENTION_THRESHOLD
+        e["relation_evidence"] = {
+            "level": "corroborated_relation" if ok else "llm_relation",
+            "co_mention_count_30d": count,
+            "threshold": _RELATION_CORMENTION_THRESHOLD,
+            "sources": sources,
+            "method": "digest_tickers_mentioned_30d",
+        }
+        if ok:
             e["corroboration"] = {
-                "count":       len(sources) or hit["count"],
-                "nexus_types": sorted(hit["types"]),
-                "sources":     sources[:8],
+                "count": count,
+                "nexus_types": ["digest_co_mention"],
+                "sources": sources,
             }
         else:
             e["corroboration"] = None
+
+    breakdown: dict[str, int] = {}
+    for n in chain.get("nodes", []):
+        lvl = str(n.get("verification_level") or "unknown")
+        breakdown[lvl] = breakdown.get(lvl, 0) + 1
+    bstate = _budget_state()
+    chain["data_quality"] = {
+        "fmp_enabled": fmp_key_present,
+        "fmp_budget_exhausted": bool(bstate.get("budget_exhausted")),
+        "fmp_calls_used_today": int(bstate.get("calls_used", 0)),
+        "fmp_daily_budget": int(bstate.get("budget", _FMP_DAILY_BUDGET)),
+        "fmp_nodes_checked": len(chain.get("nodes") or []),
+        "fmp_errors": sorted(set(fmp_errors))[:12],
+        "verification_breakdown": breakdown,
+        "llm_only_count": breakdown.get("llm_only", 0),
+        "corroborated_count": breakdown.get("corroborated", 0),
+        "enriched_at": _now_iso(),
+    }
     return chain
 
 
