@@ -139,26 +139,46 @@ ls -lt reports/theme_detector_*.json | head -1
 cat reports/theme_detector_YYYY-MM-DD_HHMMSS.json
 ```
 
-### Step 4: Perform Narrative Confirmation via WebSearch
+### Step 4: Narrative Confirmation (optional sidecar)
 
-For the top 5 themes (by Theme Heat score), execute WebSearch queries to confirm narrative strength:
+Step 4 is **optional**. Quant output from Step 2 already caps `confidence` at
+Medium — that is the production default consumed by `bridge.py`, Dashboard
+sector card, and investment protocol. The sidecar described here can elevate
+top themes to High when material narrative support exists.
 
-**Search Pattern:**
+**Codex-compatible path (v3.14.2+) — router-driven script:**
+
+```bash
+python3 skills/theme-detector/scripts/narrative_confirm.py            # latest cache, top-5
+python3 skills/theme-detector/scripts/narrative_confirm.py --top-n 8
 ```
-"[theme name] stocks market [current month] [current year]"
-"[theme name] sector momentum [current month] [current year]"
-```
 
-**Evaluate narrative signals:**
-- **Strong narrative**: Multiple major outlets covering the theme, analyst upgrades, policy catalysts
-- **Moderate narrative**: Some coverage, mixed sentiment, no clear catalyst
-- **Weak narrative**: Little coverage, or predominantly contrarian/skeptical tone
+The script:
+- Walks the multi-model fallback chain via `scripts/_shared/model_router.run_role("narrative_confirm", ...)`
+  — any of claude / gemini / codex can drive it.
+- Writes `cache/theme_detector_<ts>.narrative.json` (sidecar) with
+  `confirmations[]`, `narrate_mode = llm | skipped`, `model_used`, and a
+  `bumped_count` summary.
+- On router exhaustion (every model over budget / cooldown / disabled),
+  falls back to `narrate_mode = skipped` with empty bumps — never raises.
 
-Update Confidence levels based on findings:
-- Quantitative High + Narrative Strong = **High** confidence
-- Quantitative High + Narrative Weak = **Medium** confidence (possible momentum divergence)
-- Quantitative Low + Narrative Strong = **Medium** confidence (narrative may lead price)
-- Quantitative Low + Narrative Weak = **Low** confidence
+**Claude WebSearch path (legacy)** — for sessions running under Claude
+Code with WebSearch / WebFetch available, the analyst may still do manual
+searches and elevate Confidence in-conversation. The sidecar is preferred
+because it leaves a deterministic audit trail, but both paths produce the
+same downstream effect.
+
+**Downstream consumption:**
+- Default: read `confidence` from `theme_detector_<ts>.json` (capped at Medium).
+- If `theme_detector_<ts>.narrative.json` exists AND a confirmation row has
+  `confidence_bump == "medium->high"`, bump that theme to High.
+- Sidecar absence is the normal case — do NOT error.
+
+**Confidence ladder:**
+- Quantitative High + Narrative `medium->high` = **High** confidence
+- Quantitative High + Narrative `none` = **Medium** (possible momentum divergence)
+- Quantitative Low + Narrative `medium->high` = **Medium** (narrative may lead price)
+- Quantitative Low + Narrative `none` = **Low**
 
 ### Step 5: Analyze Results and Provide Recommendations
 

@@ -8,6 +8,26 @@ data_sources: [WebSearch, yfinance, FMP, dependency_logic.json]
 
 # Supply-Chain Event Analyst
 
+> ## ⚠️ DEPRECATED (v3.14.2)
+>
+> This skill has been **superseded** by `scripts/nexus/supply_chain.py`, the
+> Nexus knowledge-graph supply-chain generator. The legacy `chain_mapper.py`
+> stub here only resolves FMP profile data; it never did the WebSearch-heavy
+> ecosystem mapping the SKILL.md prescribed. Production paths (Nexus Tier-1
+> loader, supply-chain page, `/api/supply-chain/generate`) all use the Nexus
+> generator now.
+>
+> **Replacements:**
+> - **Generate a supply chain for a theme/ticker** →
+>   `python3 scripts/nexus/supply_chain.py <theme_or_ticker>`
+>   (router-driven; codex / claude / gemini all work).
+> - **Quick supplier/customer probe** → call FMP `/company/profile/<TICKER>`
+>   directly, or keep using `chain_mapper.py` (2.7 KB stub) for the same data.
+>
+> This SKILL.md + `chain_mapper.py` are retained as read-only reference for
+> the dependency_logic.json schema and historical context. **No new feature
+> work will land here.** New callers should target the Nexus path.
+
 ## Purpose
 Deconstruct a company's ecosystem to identify vulnerability to external shocks (raw material prices, customer demand shifts, geopolitical disruptions). This skill bridges the gap between macro sector trends and individual ticker performance by tracing **value transmission**.
 

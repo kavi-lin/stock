@@ -39,14 +39,17 @@ Unlike the Bubble Detector (macro/multi-month evaluation), this skill focuses on
 ## Prerequisites
 
 **Required:**
-- **FMP API Key:** Set `$FMP_API_KEY` environment variable or pass `--api-key`. Free tier sufficient (~33 API calls per execution).
-- **WebSearch Access:** Required to collect S&P 500 breadth (50DMA %) and CBOE Put/Call ratio data.
+- **yfinance** (no key). Canonical production path uses `sector/market_top_yfinance.py`, which reuses every analysis function from this skill but swaps the FMP client for yfinance — no API key, no WebSearch required. Works under Claude / Codex / Gemini / cron equally.
 
-**Optional:**
-- **Margin Debt Data:** Enhances sentiment scoring but typically 1-2 months lagged.
-- **VIX Term Structure:** Auto-detected from FMP API if VIX3M quote available; manual override via `--vix-term`.
+**Optional (improves sentiment + breadth scoring; missing → recorded in `data_quality.missing_optional`):**
+- **50DMA breadth** (S&P 500 % above 50DMA): `--breadth-50dma <pct>` `--breadth-50dma-date <YYYY-MM-DD>`
+- **CBOE Put/Call ratio**: `--put-call <ratio>` `--put-call-date <YYYY-MM-DD>`
+- **Margin debt YoY**: `--margin-debt-yoy <pct>` `--margin-debt-date <YYYY-MM-DD>`
+- **VIX term structure**: `--vix-term {steep_contango|contango|flat|backwardation}` (auto-detected from yfinance ^VIX/^VIX3M if not supplied)
 
-**Data Freshness:** All manually collected data should be from the most recent 3 business days for accurate analysis.
+> **Codex compatibility note (v3.14.2)**: The original SKILL spec mandated WebSearch to fetch the optional metrics above. That requirement is now downgraded — the script falls back to yfinance + TraderMonty breadth (auto-fetched) when those flags are absent, and reports the missing inputs in `data_quality.missing_optional`. Claude users can still WebSearch + supply the flags for higher accuracy; Codex / cron users get a graceful degraded score.
+
+**Data Freshness:** All optional inputs should be from the most recent 3 business days for accurate analysis.
 
 ## Difference from Bubble Detector
 
@@ -62,70 +65,45 @@ Unlike the Bubble Detector (macro/multi-month evaluation), this skill focuses on
 
 ## Execution Workflow
 
-### Phase 1: Data Collection via WebSearch
-
-Before running the Python script, collect the following data using WebSearch.
-**Data Freshness Requirement:** All data must be from the most recent 3 business days. Stale data degrades analysis quality.
-
-```
-1. S&P 500 Breadth (200DMA above %)
-   AUTO-FETCHED from TraderMonty CSV (no WebSearch needed)
-   The script fetches this automatically from GitHub Pages CSV data.
-   Override: --breadth-200dma [VALUE] to use a manual value instead.
-   Disable: --no-auto-breadth to skip auto-fetch entirely.
-
-2. [REQUIRED] S&P 500 Breadth (50DMA above %)
-   Valid range: 20-100
-   Primary search: "S&P 500 percent stocks above 50 day moving average"
-   Fallback: "market breadth 50dma site:barchart.com"
-   Record the data date
-
-3. [REQUIRED] CBOE Equity Put/Call Ratio
-   Valid range: 0.30-1.50
-   Primary search: "CBOE equity put call ratio today"
-   Fallback: "CBOE total put call ratio current"
-   Fallback: "put call ratio site:cboe.com"
-   Record the data date
-
-4. [OPTIONAL] VIX Term Structure
-   Values: steep_contango / contango / flat / backwardation
-   Primary search: "VIX VIX3M ratio term structure today"
-   Fallback: "VIX futures term structure contango backwardation"
-   Note: Auto-detected from FMP API if VIX3M quote available.
-   CLI --vix-term overrides auto-detection.
-
-5. [OPTIONAL] Margin Debt YoY %
-   Primary search: "FINRA margin debt latest year over year percent"
-   Fallback: "NYSE margin debt monthly"
-   Note: Typically 1-2 months lagged. Record the reporting month.
-```
-
-### Phase 2: Execute Python Script
-
-Run the script with collected data as CLI arguments:
+### Canonical entry — `sector/market_top_yfinance.py` (production / cron / Codex)
 
 ```bash
-python3 skills/market-top-detector/scripts/market_top_detector.py \
-  --api-key $FMP_API_KEY \
-  --breadth-50dma [VALUE] --breadth-50dma-date [YYYY-MM-DD] \
-  --put-call [VALUE] --put-call-date [YYYY-MM-DD] \
-  --vix-term [steep_contango|contango|flat|backwardation] \
-  --margin-debt-yoy [VALUE] --margin-debt-date [YYYY-MM-DD] \
-  --output-dir reports/ \
-  --context "Consumer Confidence=[VALUE]" "Gold Price=[VALUE]"
-# 200DMA breadth is auto-fetched from TraderMonty CSV.
-# Override with --breadth-200dma [VALUE] if needed.
-# Disable with --no-auto-breadth to skip auto-fetch.
+python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
+
+# With optional sentiment / breadth inputs (Claude WebSearch may supply these):
+python3 sector/market_top_yfinance.py \
+  --output-dir sector/market_top_cache/ \
+  --breadth-50dma 45.0 --breadth-50dma-date 2026-05-19 \
+  --put-call 0.72  --put-call-date  2026-05-19 \
+  --margin-debt-yoy 5.2 --margin-debt-date 2026-04-30 \
+  --vix-term contango
 ```
 
-The script will:
-1. Fetch S&P 500, QQQ, VIX quotes and history from FMP API
-2. Fetch Leading ETF (ARKK, WCLD, IGV, XBI, SOXX, SMH, KWEB, TAN) data
-3. Fetch Sector ETF (XLU, XLP, XLV, VNQ, XLK, XLC, XLY) data
-4. Calculate all 6 components
-5. Generate composite score and reports
+This is the entry used by `daily_update.sh` Step 3 and by `bridge.py`. It:
 
-### Phase 3: Present Results
+1. Pulls ^GSPC / QQQ / ^VIX / ^VIX3M / Leading ETFs / Sector ETFs via **yfinance** (no key).
+2. Auto-fetches 200DMA breadth from TraderMonty CSV (override `--breadth-200dma`, disable `--no-auto-breadth`).
+3. Reuses every calculator in `skills/market-top-detector/scripts/` (composite scoring, distribution days, leading-stock health, defensive rotation, breadth divergence, index technical, sentiment, follow-through-day, historical comparator, scenario engine).
+4. Records any missing optional flag in `data_quality.missing_optional` instead of failing.
+
+### Optional Claude-only enhancement — WebSearch supplements
+
+When running under Claude (with WebSearch / WebFetch tools available), the model may collect the four optional inputs and pass them as flags above for a higher-confidence score:
+
+```
+1. S&P 500 50DMA breadth      — "S&P 500 percent stocks above 50 day moving average"
+2. CBOE equity Put/Call ratio — "CBOE equity put call ratio today"
+3. Margin debt YoY            — "FINRA margin debt latest year over year"
+4. VIX term structure         — usually auto-detected from ^VIX3M; WebSearch only when yfinance fails
+```
+
+Codex / cron callers skip this step entirely — the script falls back to yfinance + TraderMonty breadth and reports `data_quality.missing_optional`.
+
+### Legacy entry (deprecated) — `scripts/market_top_detector.py`
+
+The original FMP-based entry `python3 skills/market-top-detector/scripts/market_top_detector.py --api-key $FMP_API_KEY ...` still works but requires FMP. Production switched to the yfinance adapter above in v3.x because FMP-only blocked Codex / cron runs. Keep using `sector/market_top_yfinance.py` unless you specifically need FMP data lineage.
+
+### Present Results
 
 Present the generated Markdown report to the user, highlighting:
 - Composite score and risk zone
@@ -146,9 +124,9 @@ Present the generated Markdown report to the user, highlighting:
 | 1 | Distribution Day Count | **25%** | FMP API | Institutional selling in last 25 trading days |
 | 2 | Leading Stock Health | **20%** | FMP API | Growth ETF basket deterioration |
 | 3 | Defensive Sector Rotation | **15%** | FMP API | Defensive vs Growth relative performance |
-| 4 | Market Breadth Divergence | **15%** | Auto (CSV) + WebSearch | 200DMA (auto) / 50DMA (WebSearch) breadth vs index level |
+| 4 | Market Breadth Divergence | **15%** | Auto (CSV) + optional CLI | 200DMA (auto from TraderMonty) / 50DMA (optional `--breadth-50dma`) breadth vs index level |
 | 5 | Index Technical Condition | **15%** | FMP API | MA structure, failed rallies, lower highs |
-| 6 | Sentiment & Speculation | **10%** | FMP + WebSearch | VIX, Put/Call, term structure |
+| 6 | Sentiment & Speculation | **10%** | yfinance + optional CLI | VIX (yfinance), Put/Call + term structure (optional `--put-call` / `--vix-term`) |
 
 ## Risk Zone Mapping
 
@@ -164,8 +142,8 @@ Present the generated Markdown report to the user, highlighting:
 
 ## API Requirements
 
-**Required:** FMP API key (free tier sufficient: ~33 calls per execution)
-**Optional:** WebSearch data for breadth and sentiment (improves accuracy)
+**Required:** none — yfinance is keyless. Canonical entry `sector/market_top_yfinance.py`.
+**Optional:** Claude WebSearch (to supply 50DMA breadth / Put-Call / margin debt as CLI flags); legacy FMP path for `scripts/market_top_detector.py`. Both improve accuracy when available; absence is logged in `data_quality.missing_optional`, never fails.
 
 ## Output Files
 

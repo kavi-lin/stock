@@ -2248,18 +2248,96 @@ def ingest_momentum_screen():
     return out
 
 
+def _latest_theme_cache_path():
+    """Return latest theme_detector_<ts>.json (NOT the sidecar) or None."""
+    cache_dir = os.path.join(BASE_DIR, "skills", "theme-detector", "cache")
+    if not os.path.isdir(cache_dir):
+        return None
+    files = sorted(
+        glob.glob(os.path.join(cache_dir, "theme_detector_*.json")),
+        reverse=True,
+    )
+    files = [f for f in files if ".narrative." not in os.path.basename(f)]
+    return files[0] if files else None
+
+
+def load_theme_narrative_bumps():
+    """V3.14.3 — read sidecar `theme_detector_<ts>.narrative.json` (if it
+    exists next to the latest quant cache) and return a flat dict the UI can
+    use to bump theme confidence from Medium to High.
+
+    Shape:
+        {
+            "status":         "success" | "no_sidecar" | "stale" | "error",
+            "as_of":          "ISO ts" | null,
+            "narrate_mode":   "llm" | "skipped" | null,
+            "model_used":     str | null,
+            "evidence_window_days": int | null,
+            "bumps_by_theme": {
+                "<theme name>": {
+                    "confidence_bump": "medium->high",
+                    "rationale": str,
+                    "primary_evidence_id": str,
+                }
+            }
+        }
+
+    Sidecar absence is the normal case (the narrative_confirm script is opt-in,
+    weekly cadence). We never raise."""
+    latest = _latest_theme_cache_path()
+    if not latest:
+        return {"status": "no_sidecar", "reason": "no_quant_cache",
+                "as_of": None, "narrate_mode": None, "model_used": None,
+                "evidence_window_days": None, "bumps_by_theme": {}}
+    sidecar = latest.replace(".json", ".narrative.json")
+    if not os.path.exists(sidecar):
+        return {"status": "no_sidecar", "as_of": None, "narrate_mode": None,
+                "model_used": None, "evidence_window_days": None,
+                "bumps_by_theme": {}}
+    try:
+        with open(sidecar, "r", encoding="utf-8") as fp:
+            payload = json.load(fp)
+    except (OSError, json.JSONDecodeError) as e:
+        return {"status": "error", "reason": f"read_error: {e}",
+                "as_of": None, "narrate_mode": None, "model_used": None,
+                "evidence_window_days": None, "bumps_by_theme": {}}
+    bumps_by_theme = {}
+    for c in (payload.get("confirmations") or []):
+        if not isinstance(c, dict):
+            continue
+        if c.get("confidence_bump") != "medium->high":
+            continue
+        name = c.get("theme")
+        if not name:
+            continue
+        bumps_by_theme[name] = {
+            "confidence_bump":     "medium->high",
+            "rationale":           c.get("rationale") or "",
+            "primary_evidence_id": c.get("primary_evidence_id"),
+        }
+    return {
+        "status":               "success",
+        "as_of":                payload.get("as_of"),
+        "narrate_mode":         payload.get("narrate_mode"),
+        "model_used":           payload.get("model_used"),
+        "evidence_window_days": payload.get("evidence_window_days"),
+        "bumps_by_theme":       bumps_by_theme,
+    }
+
+
 def load_theme_overrides():
     """V2.20.0 — load latest theme-detector cache, filter themes with V2.18+
     structural_shift_override=True. Used by sector.html "Paradigm Shift Themes"
-    panel. Falls back to empty list if cache missing/stale."""
-    cache_dir = os.path.join(BASE_DIR, "skills", "theme-detector", "cache")
-    if not os.path.isdir(cache_dir):
-        return []
-    files = sorted(glob.glob(os.path.join(cache_dir, "theme_detector_*.json")), reverse=True)
-    if not files:
+    panel. Falls back to empty list if cache missing/stale.
+
+    V3.14.3 — when `theme_detector_<ts>.narrative.json` sidecar exists, apply
+    `confidence_bump=medium->high` per-theme so the UI surfaces High instead of
+    the quant-capped Medium."""
+    latest = _latest_theme_cache_path()
+    if not latest:
         return []
     try:
-        with open(files[0], "r", encoding="utf-8") as f:
+        with open(latest, "r", encoding="utf-8") as f:
             d = json.load(f)
     except Exception:
         return []
@@ -2268,17 +2346,27 @@ def load_theme_overrides():
         themes = themes.get("all") or themes.get("bullish") or []
     if not isinstance(themes, list):
         return []
+    # Pre-load sidecar bumps (cheap; happens once per bridge run).
+    bumps = load_theme_narrative_bumps().get("bumps_by_theme", {})
     out = []
     for t in themes:
         if t.get("structural_shift_override"):
-            out.append({
-                "name":     t.get("name"),
+            name = t.get("name")
+            bumped = bumps.get(name)
+            entry = {
+                "name":     name,
                 "heat":     t.get("heat"),
                 "stage":    t.get("stage"),
                 "hits":     t.get("structural_shift_hits") or [],
                 "bonus":    (t.get("heat_breakdown") or {}).get("structural_shift_bonus", 0),
                 "tier_counts": (t.get("heat_breakdown") or {}).get("structural_tier_counts") or {},
-            })
+                "confidence": "High" if bumped else (t.get("confidence") or "Medium"),
+                "narrative_bumped": bool(bumped),
+            }
+            if bumped:
+                entry["narrative_evidence_id"] = bumped.get("primary_evidence_id")
+                entry["narrative_rationale"]   = bumped.get("rationale")
+            out.append(entry)
     out.sort(key=lambda x: -(x.get("heat") or 0))
     return out
 
@@ -2542,6 +2630,20 @@ def run_bridge():
     except Exception as e:
         print(f"[WARN] Theme overrides ingest: {e}")
         data["theme_overrides"] = []
+
+    # 7b. Theme narrative bumps (V3.14.3 — optional sidecar from
+    #     narrative_confirm.py; surfaces medium->high bumps to the UI without
+    #     mutating the quant cache)
+    try:
+        data["theme_narrative_bumps"] = load_theme_narrative_bumps()
+        tnb = data["theme_narrative_bumps"]
+        if tnb.get("status") == "success":
+            n_b = len(tnb.get("bumps_by_theme") or {})
+            print(f"[OK] Theme narrative bumps: {n_b} themes "
+                  f"(mode={tnb.get('narrate_mode')}, model={tnb.get('model_used') or '—'})")
+    except Exception as e:
+        print(f"[WARN] Theme narrative bumps ingest: {e}")
+        data["theme_narrative_bumps"] = {"status": "error", "bumps_by_theme": {}}
 
     # 6. Structural Watchlist (V2.19.1 — paradigm-shift candidates from news keyword aggregation)
     try:

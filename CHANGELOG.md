@@ -10,6 +10,75 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ---
 
+## [3.14.2] — 2026-05-20 — Skills × Codex compatibility wave 1
+
+### Changed — market-top-detector doc clean-up (Wave 1.1)
+
+- `sector/market_top_yfinance.py`:sys.path 從 `~/.claude/skills/...` 改為 repo-local
+  `skills/market-top-detector/scripts/`(同 v3.14.1 daily_update fix 的對應修正);
+  新增 `SKILL_SCRIPTS_PATH` env override。
+- `skills/market-top-detector/SKILL.md`:重寫「Execution Workflow」段,把
+  canonical entry 改為 `sector/market_top_yfinance.py`(daily_update Step 3 早就
+  在用)。WebSearch 從必需降為 optional CLI flags:`--breadth-50dma` / `--put-call`
+  / `--margin-debt-yoy` / `--vix-term`,缺失欄位寫進 `data_quality.missing_optional`。
+- Production / Codex / cron 不再需要 WebSearch 即可跑;Claude 仍可 WebSearch 補
+  optional 提高精度。
+
+### Added — theme-detector narrative confirmation sidecar (Wave 1.2,evidence-grounded)
+
+- 新 script `skills/theme-detector/scripts/narrative_confirm.py`:
+  - 走 `model_router.run_role("narrative_confirm", ...)`,codex/claude/gemini
+    任一都能驅動。
+  - **Evidence-grounded prompt**(codex review #1+#2 修正): 從
+    `news/news_logs/*_digest.json` 最近 14 天 verdicts 撈出每個 theme 的候選
+    evidence(按 representative_stocks ∩ tickers_mentioned 或 industries ∩
+    affected_sectors),作為 LLM 的**封閉**候選集。Prompt 強制模型只能引用提供
+    的 news_id,不可發明 URL。
+  - **`primary_evidence_id` 必須存在於該 theme 的 allowed_ids set** 才能
+    `confidence_bump=medium->high`;否則 validator 自動降為 `none` 並計入
+    `dropped_bumps_no_evidence`。修掉了「模型靠記憶/幻覺 URL bump」的 P0 風險。
+  - 讀最新 `theme_detector_*.json`,top-5 themes 跑 narrative 確認,寫 sidecar
+    `theme_detector_<ts>.narrative.json`(`confirmations[]` + `narrate_mode` +
+    `model_used` + `bumped_count` + `dropped_bumps_no_evidence`)。
+  - Router 全失敗 → `narrate_mode=skipped`,輸出空 bump,不報錯。
+- **`bridge.py` 接 sidecar consumer**(codex review #3 修正):
+  - 新 `load_theme_narrative_bumps()` 讀 sidecar,輸出 `data["theme_narrative_bumps"]`
+    給前端(`bumps_by_theme[theme_name] = {confidence_bump, rationale, primary_evidence_id}`)。
+  - `load_theme_overrides()` 自動套用 bump:對 paradigm-shift 主題,有 bump 時
+    輸出 `confidence: "High"` + `narrative_bumped: true`,沒 bump 維持 quant Medium。
+  - Sidecar 不存在 = `status: "no_sidecar"`,絕不報錯。
+- `skills/theme-detector/SKILL.md` Step 4 改成 optional sidecar 流程。
+- **不進 daily_update.sh** — 每日跑會吃 LLM quota;週末 cron / manual 才跑。
+
+### Deprecated — supply-chain-event-analyst (Wave 1.3)
+
+- `skills/supply-chain-event-analyst/SKILL.md` 頂部加 DEPRECATED banner,指向
+  `scripts/nexus/supply_chain.py`(已是 production path)。SKILL.md +
+  `chain_mapper.py`(2.7 KB FMP stub)保留作 read-only reference,不再開發。
+
+### Chore — untrack 29 stale `*.pyc` (codex review #4)
+
+`__pycache__/*.pyc` 早已 commit 進 repo(在加 gitignore 前)。本輪一次
+`git rm --cached` 29 個 .pyc,gitignore 已有 `__pycache__/` 規則,未來不會
+再進 git。Daemon-state(Dashboard/data.json / nexus_graph.json /
+config/llm_usage.json)維持 tracked,但不進此 commit 範圍 — 純源碼/文檔 commit。
+
+### Why
+
+Codex(替代 Claude 作 LLM driver)無法用 WebSearch / 不能 in-conversation Write,
+原 SKILL.md 寫死 Claude-only primitives 導致 5 個關鍵 skill 在 Codex 下半殘。
+Wave 1 是低風險前菜(2 doc 清理 + 1 sidecar 新增),全部走 `model_router`
+fallback chain(V3.7.0)讓三模型統一驅動。Wave 2 將處理 market-news-analyst
+fetch.py 主線化,Wave 3 處理 earnings-analyst narrate via router。
+
+Codex 對 Wave 1 review 提出 4 點(2× P0 + 1× P1 + 1× P2)在本版 ship 前全部修完:
+prompt 加 evidence-grounding、bump 強制需 `primary_evidence_id ∈ allowed_ids`、
+bridge.py 接 sidecar consumer、commit scope 清乾淨。
+
+Plan 全文:`~/.claude/plans/llm-llm-queue-pythone-script-whimsical-beacon.md`
+
+---
+
 ## [3.14.1] — 2026-05-20 — daily_update.sh 可靠性修正
 
 ### Fixed — 4 priority issues

@@ -33,9 +33,16 @@ except ImportError:
     sys.exit(1)
 
 # ── inject skill path so we can reuse all analysis functions ─────────────────
-SKILL_SCRIPTS = os.path.expanduser(
-    "~/.claude/skills/market-top-detector/scripts"
+# Repo-local skill is the canonical source. The env var lets ops point at an
+# alternative path (e.g. a vendor mirror) without code change; previous
+# behaviour hardcoded ~/.claude/skills/ which silently drifted between
+# machines / agents.
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKILL_SCRIPTS = os.environ.get(
+    "SKILL_SCRIPTS_PATH",
+    os.path.join(_PROJECT_ROOT, "skills/market-top-detector/scripts"),
 )
+SKILL_SCRIPTS = os.path.expanduser(SKILL_SCRIPTS)
 if SKILL_SCRIPTS not in sys.path:
     sys.path.insert(0, SKILL_SCRIPTS)
 

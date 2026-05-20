@@ -1,7 +1,23 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-20 (v3.14.1)
+> **Last Updated**: 2026-05-20 (v3.14.2)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.14.1 → v3.14.2) — Skills × Codex compat Wave 1
+
+Codex 提出 5-skill 相容性 proposal(earnings-analyst / market-news-analyst / theme-detector / market-top-detector / supply-chain-event-analyst)。Review 後採 3-wave 風險順序:Wave 1 低風險文檔 + sidecar、Wave 2 fetch 主線化、Wave 3 earnings narrate via router。**核心架構決定**:narrate / narrative 步驟走 `scripts/_shared/model_router.run_role()`,不走 deterministic-only — 讓 codex/claude/gemini 任一都能驅動,deterministic 只作 router 全失敗的 fallback。Plan 全文:`~/.claude/plans/llm-llm-queue-pythone-script-whimsical-beacon.md`
+
+本輪實作 **Wave 1 三件**:
+
+1. **market-top-detector doc + path**:`sector/market_top_yfinance.py` sys.path 從 `~/.claude/skills/...` 改 repo-local(同 v3.14.1 daily_update fix 的對應修)+ `SKILL_SCRIPTS_PATH` env override。SKILL.md 重寫 Execution Workflow,canonical entry 改為 yfinance adapter,WebSearch 從必需降為 optional CLI flags(`--breadth-50dma` / `--put-call` / `--margin-debt-yoy` / `--vix-term`),缺失欄位寫 `data_quality.missing_optional`。
+2. **theme-detector narrative_confirm.py sidecar(evidence-grounded)**:新 script 走 `run_role("narrative_confirm", ...)`,top-5 themes 跑 LLM 確認後寫 sidecar `theme_detector_<ts>.narrative.json`。Codex review 抓到原版兩個 P0:(a) prompt 沒餵 evidence → 模型靠記憶 / 幻覺 URL bump;(b) `medium->high` 沒強制 `primary_source` non-null。**已修**:從 `news/news_logs/*_digest.json` 14 天 verdicts 撈出每個 theme 的封閉候選 evidence(按 representative_stocks ∩ tickers_mentioned 或 industries ∩ affected_sectors),top-6 / theme 餵 prompt;模型必須引用 `news_id ∈ allowed_ids`,否則 validator 自動降為 `none` 並計入 `dropped_bumps_no_evidence`。Router 失敗 → `narrate_mode=skipped` 空 bump 不報錯。
+3. **bridge.py 接 sidecar consumer**(codex review #3):新 `load_theme_narrative_bumps()` 讀 sidecar,輸出 `data["theme_narrative_bumps"]` + `load_theme_overrides()` 自動對 paradigm-shift 主題套用 confidence bump(`narrative_bumped=true`、`confidence="High"`)。Sidecar 不存在 = `status: "no_sidecar"`,絕不報錯。
+4. **supply-chain-event-analyst DEPRECATED**:SKILL.md 頂部加 banner,指向 `scripts/nexus/supply_chain.py`。`chain_mapper.py` 留作 FMP quick probe。
+5. **Untrack 29 個 stale .pyc**(codex review #4):`__pycache__/*.pyc` 早就 commit 進 repo(gitignore 加上去前的事)。本輪 `git rm --cached` 一次清掉。Daemon-state(data.json / nexus_graph.json / llm_usage.json)維持 tracked 但不進本 commit。
+
+Wave 1 全部走 model_router governance 一致(V3.7.0 既有層)。Codex review 4 點全在 ship 前修完。Dry-run 驗證:evidence_window=14d / pool_size=232 / 6 候選/theme。bump 3.14.1→3.14.2(patch)。
+
+Wave 2(market-news-analyst fetch.py 主線化 + source_mode schema)等本 patch ship + 觀察 3-5 day,確認 daily_update 仍綠 + Dashboard 無 regression 再進。
 
 ## 🟢 Session Note (v3.14.0 → v3.14.1) — daily_update.sh 可靠性修正
 
