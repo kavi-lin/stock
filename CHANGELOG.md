@@ -8,6 +8,31 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.14.8] — 2026-05-21 — Supply-chain scrollbar polish
+
+### Fixed — horizontal scrollbar height + always-visible scroll on supply-chain
+
+- `Dashboard/style.css` `::-webkit-scrollbar` had `width: 6px` only, which applies
+  to vertical bars. Horizontal bars fell back to the browser default (~16px on
+  macOS / Chrome), looking chunky next to the slim vertical bar. Added
+  `height: 6px` so both axes are 6px. Also added Firefox `scrollbar-width: thin`
+  + `scrollbar-color` for parity.
+- `Dashboard/supply-chain.html` `.sc-scroll` changed `overflow: auto` →
+  `overflow: scroll` so both scrollbars are always visible. At narrow viewports
+  the auto-hidden bars left users unable to tell the canvas could be scrolled
+  — typical CPU-supply-chain layout extends well past viewport.
+- Added `max-width: min(1400px, calc(100vw - 320px))` on `.sc-scroll` as a hard
+  safety cap so the right-edge scrollbar never lands past the viewport even if
+  the flex/max-w-1400 chain has a quirk at certain resolutions.
+
+### Why
+
+Visible-bar-mismatch (6 vs ~16) was jarring on supply-chain page. Auto-hide on
+narrow viewports made users miss the "can scroll right" affordance entirely.
+Both changes touch CSS only — no logic change.
+
+---
+
 ## [3.14.7] — 2026-05-21 — Sector v3.14.6 follow-up: FTD source_file test coverage + log honesty
 
 Codex follow-up on the v3.14.6 ship surfaced 3 more nits. All addressed.

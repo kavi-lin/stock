@@ -60,13 +60,22 @@
         text-transform: uppercase;
       }
 
-      /* ── Diagram canvas ───────────────────────────────────────── */
+      /* ── Diagram canvas ─────────────────────────────────────────
+         `overflow: scroll` (not auto) so both scrollbars are ALWAYS
+         visible — at narrow viewports the auto-hidden bars left users
+         unable to tell the canvas was scrollable. style.css sets 6px
+         width/height so the always-visible bars stay minimal. */
       .sc-scroll {
-        position: relative; overflow: auto; border-radius: 16px;
+        position: relative; overflow: scroll; border-radius: 16px;
         background: var(--bg-card);
         border: 1px solid rgba(161,161,170,0.18);
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
         min-height: 440px; max-height: calc(100vh - 248px);
+        /* Keep the container fully inside the viewport even on narrow
+           screens. The parent wrapper has max-w-[1400px]; this min()
+           caps to the actual viewport minus sidebar + padding so the
+           right-edge scrollbar never lands past the visible area. */
+        max-width: min(1400px, calc(100vw - 320px));
       }
       .sc-canvas {
         position: relative;
