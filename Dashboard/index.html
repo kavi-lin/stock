@@ -104,6 +104,15 @@
                 </div>
                 <p id="tv-one-liner" class="text-[13px] leading-relaxed mb-4" style="color:var(--text-main)"></p>
 
+                <!-- Premarket briefing: compact cross-signal summary from existing Dashboard/data.json -->
+                <div id="tv-briefing" class="hidden mb-4 space-y-3">
+                    <div id="tv-signal-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        <div id="tv-conflict-card" class="hidden rounded-lg border border-zinc-200/50 dark:border-zinc-800/70 bg-zinc-50/50 dark:bg-zinc-900/40 p-3"></div>
+                        <div id="tv-catalysts-card" class="hidden rounded-lg border border-zinc-200/50 dark:border-zinc-800/70 bg-zinc-50/50 dark:bg-zinc-900/40 p-3"></div>
+                    </div>
+                </div>
+
                 <!-- 3-column: takeaways / sector actions / watch -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>

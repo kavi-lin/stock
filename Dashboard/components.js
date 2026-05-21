@@ -12,9 +12,10 @@
     // Mutates #today-verdict-card and its tv-* children. Used by both
     // index.html (總體儀表板) and sector.html (產業掃描).
     // i18n pulled from sector_page namespace (both pages share it).
-    renderTodayVerdict(market) {
+    renderTodayVerdict(market, dashboardData = null) {
       const card = document.getElementById('today-verdict-card');
       if (!card || !market) return;
+      const data = dashboardData || { market };
       const tr   = window.i18n?.[UI.currentLang]?.sector_page || {};
       const isZh = UI.currentLang === 'zh';
 
@@ -33,7 +34,40 @@
 
       const tv = market.today_verdict;
       const $ = (id) => document.getElementById(id);
-
+      const fmt = (v, suffix = '') => {
+        if (v === null || v === undefined || v === '') return '—';
+        return `${typeof v === 'number' ? Number(v).toFixed(v % 1 ? 1 : 0) : v}${suffix}`;
+      };
+      const colorByScore = (score, inverse = false) => {
+        if (score === null || score === undefined || Number.isNaN(Number(score))) return '#a1a1aa';
+        const n = Number(score);
+        const good = inverse ? n <= 35 : n >= 60;
+        const bad = inverse ? n >= 65 : n < 40;
+        if (good) return '#22c55e';
+        if (bad) return '#ef4444';
+        return '#eab308';
+      };
+      const asList = (items, mapper) => (items || []).map(mapper).join('');
+      const attrStr = (attrs) => Object.entries(attrs || {})
+        .filter(([, v]) => v !== null && v !== undefined && v !== '')
+        .map(([k, v]) => `${k}="${UI.escapeHTML(String(v))}"`)
+        .join(' ');
+      const miniGauge = ({ value, color, display, suffix }) => {
+        const n = Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Number(value))) : 0;
+        const C = 100;
+        const dash = (n / 100) * C;
+        return `<div class="relative w-14 h-14 shrink-0" style="color:${color}">
+          <svg viewBox="0 0 36 36" class="w-14 h-14 -rotate-90">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-opacity="0.14" stroke-width="3"></circle>
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-width="3"
+              stroke-linecap="round" stroke-dasharray="${dash.toFixed(1)} ${C}"></circle>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center leading-none">
+            <span class="text-[11px] font-black">${UI.escapeHTML(display)}</span>
+            ${suffix ? `<span class="text-[8px] font-bold mt-0.5 opacity-80">${UI.escapeHTML(suffix)}</span>` : ''}
+          </div>
+        </div>`;
+      };
       // Build staleness badge — same logic on both pages so user always sees freshness.
       const vdateStr = market.verdict_date || (market.generated_at || '').slice(0, 10);
       let stalenessHTML = '';
@@ -61,6 +95,8 @@
         $('tv-stance') && ($('tv-stance').textContent = '—');
         $('tv-headline') && ($('tv-headline').textContent = tr.tv_no_structured || '今日裁決（舊版快取，待下次掃描升級）');
         $('tv-one-liner') && ($('tv-one-liner').textContent = '');
+        ['tv-briefing','tv-conflict-card','tv-catalysts-card'].forEach(id => $(id)?.classList.add('hidden'));
+        ['tv-signal-grid'].forEach(id => { const el = $(id); if (el) el.innerHTML = ''; });
         ['tv-takeaways','tv-actions','tv-watch'].forEach(id => { const el = $(id); if (el) el.innerHTML = ''; });
         if (confEl) confEl.innerHTML = stalenessHTML;
         const fb = $('tv-fallback');
@@ -91,6 +127,159 @@
           ? `<span>conf ${(tv.confidence * 100).toFixed(0)}%</span>` : '';
         confEl.innerHTML = `${stalenessHTML ? stalenessHTML + '&nbsp;&nbsp;' : ''}${confHTML}`;
       }
+
+      const br = data.breadth || {};
+      const ftd = data.ftd || {};
+      const mt = data.market_top || {};
+      const fred = data.fred_macro || {};
+      const fredSignals = fred.regime_signals || {};
+      const fredScores = fred.macro_scores || {};
+      const signalGrid = $('tv-signal-grid');
+      const briefing = $('tv-briefing');
+      const ftdDay = ftd.days_since_ftd;
+      const ftdConfirmed = ftd.state === 'FTD_CONFIRMED' && ftdDay != null;
+      const ftdStage = !ftdConfirmed ? null
+        : ftdDay <= 5 ? { zh: '黃金', en: 'PRIME', pct: 100, color: '#22c55e' }
+        : ftdDay <= 12 ? { zh: '主升', en: 'STD', pct: 78, color: '#eab308' }
+        : ftdDay <= 20 ? { zh: '補漲', en: 'LATE', pct: 52, color: '#f97316' }
+        : { zh: '過熱', en: 'HOT', pct: 22, color: '#ef4444' };
+      const signalCards = [
+        {
+          label: isZh ? '建議曝險' : 'Exposure',
+          value: market.exposure_ceiling || br.exposure_ceiling || '—',
+          sub: isZh ? '裁決上限' : 'verdict cap',
+          color: sty.fg,
+          gaugeValue: (() => {
+            const nums = String(market.exposure_ceiling || br.exposure_ceiling || '').match(/\d+/g);
+            return nums?.length > 1 ? (Number(nums[0]) + Number(nums[1])) / 2 : Number(nums?.[0] || 0);
+          })(),
+          gaugeDisplay: (() => {
+            const nums = String(market.exposure_ceiling || br.exposure_ceiling || '').match(/\d+/g);
+            return nums?.length ? `${nums[nums.length - 1]}%` : '—';
+          })(),
+          tip: 'exposure',
+          attrs: { 'data-exposure': market.exposure_ceiling || br.exposure_ceiling || '' },
+        },
+        {
+          label: isZh ? '廣度' : 'Breadth',
+          value: fmt(br.score ?? market.breadth_score),
+          sub: br.zone || market.cycle_phase || '—',
+          color: colorByScore(br.score ?? market.breadth_score),
+          gaugeValue: br.score ?? market.breadth_score,
+          gaugeDisplay: fmt(br.score ?? market.breadth_score),
+          tip: 'breadth',
+          attrs: {
+            'data-br-score': br.score ?? market.breadth_score ?? '',
+            'data-br-zone': br.zone || '',
+            'data-br-ceiling': br.exposure_ceiling || market.exposure_ceiling || '',
+          },
+        },
+        {
+          label: 'FTD',
+          value: ftdConfirmed ? `Day ${ftdDay}` : (ftd.state || '—').replace(/_/g, ' '),
+          sub: ftdStage ? (isZh ? `${ftdStage.zh}期` : ftdStage.en) : (ftd.signal || '—'),
+          color: ftdStage?.color || colorByScore(ftd.quality_score),
+          gaugeValue: ftdStage?.pct ?? 0,
+          gaugeDisplay: ftdConfirmed ? `D${ftdDay}` : '—',
+          gaugeSuffix: ftdStage ? (isZh ? ftdStage.zh : ftdStage.en) : '',
+          tip: 'ftd',
+          attrs: {
+            'data-ftd-state': ftd.state || '',
+            'data-ftd-date': ftd.ftd_date || '',
+            'data-ftd-day': ftd.days_since_ftd ?? '',
+          },
+        },
+        {
+          label: isZh ? '頂部風控' : 'Top Risk',
+          value: fmt(mt.composite_score),
+          sub: mt.zone || mt.risk_budget || '—',
+          color: colorByScore(mt.composite_score, true),
+          gaugeValue: mt.composite_score,
+          gaugeDisplay: fmt(mt.composite_score),
+          tip: 'market_top',
+          attrs: {
+            'data-mt-score': mt.composite_score ?? '',
+            'data-mt-zone': mt.zone || '',
+            'data-mt-budget': mt.risk_budget || '',
+          },
+        },
+        {
+          label: 'Macro',
+          value: fred.regime_label || '—',
+          sub: fredSignals.real_rate_preferred != null ? `real ${Number(fredSignals.real_rate_preferred).toFixed(2)}%` : `score ${fmt(fredScores.composite)}`,
+          color: fred.regime_label === 'Overheating' ? '#f97316' : colorByScore(fredScores.composite),
+          gaugeValue: fredScores.composite ?? 50,
+          gaugeDisplay: fred.regime_label === 'Overheating' ? (isZh ? '熱' : 'HOT') : fmt(fredScores.composite),
+          gaugeSuffix: fredSignals.real_rate_preferred != null ? `${Number(fredSignals.real_rate_preferred).toFixed(1)}%` : '',
+          attrs: {
+            'data-tip-key': 'macro_briefing_tip',
+            'data-tip-text': isZh
+              ? `FRED macro regime = ${fred.regime_label || '—'}。綜合利率、通膨、就業、信用與金融條件；Overheating 代表通膨/利率壓力偏高，通常壓抑高估值成長股與長天期資產。Real rate ${fmt(fredSignals.real_rate_preferred, '%')}。`
+              : `FRED macro regime = ${fred.regime_label || '—'}. Composite of rates, inflation, employment, credit, and financial conditions; Overheating means rate/inflation pressure is elevated and usually weighs on high-multiple growth and duration assets. Real rate ${fmt(fredSignals.real_rate_preferred, '%')}.`,
+            title: isZh
+              ? `FRED macro regime: ${fred.regime_label || '—'} · composite ${fmt(fredScores.composite)} · real rate ${fmt(fredSignals.real_rate_preferred, '%')}`
+              : `FRED macro regime: ${fred.regime_label || '—'} · composite ${fmt(fredScores.composite)} · real rate ${fmt(fredSignals.real_rate_preferred, '%')}`,
+          },
+        },
+        {
+          label: isZh ? '二元事件' : 'Binary',
+          value: fmt((data.binary_risks || []).filter(r => r.within_48h).length),
+          sub: isZh ? '48h 內' : 'within 48h',
+          color: (data.binary_risks || []).some(r => r.within_48h) ? '#f59e0b' : '#22c55e',
+          gaugeValue: (data.binary_risks || []).some(r => r.within_48h) ? 80 : 15,
+          gaugeDisplay: fmt((data.binary_risks || []).filter(r => r.within_48h).length),
+          attrs: {
+            'data-tip-key': 'binary_derated_tip',
+            title: isZh ? '48 小時內二元風險事件數' : 'Binary risk events within 48 hours',
+          },
+        },
+      ];
+      if (signalGrid) {
+        signalGrid.innerHTML = signalCards.map(s => `
+          <div class="rounded-lg border px-3 py-2 min-h-[76px] flex items-center gap-3" ${s.tip ? `data-signal-tip="${s.tip}"` : ''} ${attrStr(s.attrs)}
+               style="border-color:${s.color}38;background:${s.color}10">
+            ${miniGauge({ value: s.gaugeValue, color: s.color, display: s.gaugeDisplay || s.value, suffix: s.gaugeSuffix })}
+            <div class="min-w-0">
+              <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${UI.escapeHTML(s.label)}</div>
+              <div class="text-[14px] font-black leading-tight mt-1 truncate" style="color:${s.color}" title="${UI.escapeHTML(String(s.value))}">${UI.escapeHTML(String(s.value))}</div>
+              <div class="text-[10px] text-zinc-500 truncate mt-0.5" title="${UI.escapeHTML(String(s.sub))}">${UI.escapeHTML(String(s.sub))}</div>
+            </div>
+          </div>`).join('');
+      }
+
+      const conflictCard = $('tv-conflict-card');
+      if (conflictCard) {
+        const conflictBits = [];
+        if (ftd.exposure_range && (br.exposure_ceiling || market.exposure_ceiling)) {
+          conflictBits.push(`${isZh ? 'FTD 建議' : 'FTD'} ${ftd.exposure_range} vs ${isZh ? '廣度/裁決' : 'breadth/verdict'} ${br.exposure_ceiling || market.exposure_ceiling}`);
+        }
+        if ((market.warning_flags_v2 || market.warning_flags || []).length) {
+          const flags = (market.warning_flags_v2 || []).map(f => f.key).concat(market.warning_flags || []).slice(0, 3);
+          conflictBits.push(flags.join(' · '));
+        }
+        if (br.components_full?.divergence?.signal) conflictBits.push(br.components_full.divergence.signal);
+        conflictCard.classList.toggle('hidden', !conflictBits.length);
+        if (conflictBits.length) conflictCard.setAttribute('title', conflictBits.join('\n'));
+        conflictCard.innerHTML = conflictBits.length ? `
+          <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2">${isZh ? '為什麼不是 Risk-On' : 'Why not risk-on'}</div>
+          <ul class="space-y-1 text-[11px] leading-snug">
+            ${asList(conflictBits.slice(0, 3), b => `<li class="flex gap-1.5"><span class="text-amber-500 shrink-0">!</span><span>${UI.escapeHTML(b)}</span></li>`)}
+          </ul>` : '';
+      }
+
+      const catalystsCard = $('tv-catalysts-card');
+      const catalysts = (market.top_catalysts || []).slice(0, 3);
+      if (catalystsCard) {
+        catalystsCard.classList.toggle('hidden', !catalysts.length);
+        if (catalysts.length) catalystsCard.setAttribute('title', catalysts.map(c => c.event || '').join('\n'));
+        catalystsCard.innerHTML = catalysts.length ? `
+          <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2">${isZh ? '今日市場在交易什麼' : 'What market trades today'}</div>
+          <ul class="space-y-1 text-[11px] leading-snug">
+            ${asList(catalysts, c => `<li class="flex gap-1.5"><span class="text-blue-400 shrink-0">#${UI.escapeHTML(c.rank || '')}</span><span>${UI.escapeHTML(c.event || '')}</span></li>`)}
+          </ul>` : '';
+      }
+
+      briefing?.classList.toggle('hidden', !(signalGrid || conflictCard || catalystsCard));
 
       $('tv-takeaways') && ($('tv-takeaways').innerHTML =
         (tv.key_takeaways || []).map(k => `<li class="flex items-start gap-1.5"><span class="text-emerald-500 shrink-0">•</span><span>${UI.escapeHTML(k)}</span></li>`).join('') ||

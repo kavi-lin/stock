@@ -1007,7 +1007,7 @@ async function updateDashboard() {
     data = await DataStore.get(true);
 
     // Layer 1: Today's AI Verdict hero (4-bar mini gauge replaced by sector-status-row below)
-    Components.renderTodayVerdict(data.market);
+    Components.renderTodayVerdict(data.market, data);
 
     // V1.73.4: 8-gauge status row + binary alert (adaptive) + warning flags
     renderSectorStatusStrip(data);
@@ -1805,7 +1805,7 @@ if (window.TrendChart) {
     }
 
     // Search for content: top-level key OR sector_page logic
-    const body = dict[key] || dict.sector_page?.risk_flags?.[key] || key;
+    const body = target.getAttribute('data-tip-text') || dict[key] || dict.sector_page?.risk_flags?.[key] || key;
     const title = isZh ? '解釋說明' : 'EXPLANATION';
 
     tip.innerHTML = `<h4 class="text-[10px] font-black uppercase tracking-widest mb-1" style="color:#ef4444">${UI.escapeHTML(title)}</h4><p class="text-[11px] leading-relaxed text-zinc-300">${UI.escapeHTML(body)}</p>`;
