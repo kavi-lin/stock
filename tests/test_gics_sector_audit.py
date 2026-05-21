@@ -125,3 +125,115 @@ def test_validator_module_imports_sector_utils():
     assert "strict=True" in src, (
         "validate_sector_intel.py must call canonicalize with strict=True"
     )
+
+
+# ── v3.14.7 — FTD source_file path verification ──────────────────────────
+# The most critical correctness fix in v3.14.6 was switching the FTD verbatim
+# assert from "latest cache on disk" to "the specific cache file recorded at
+# build time" (`_phase0.ftd.source_file`). These tests pin that behaviour so
+# a future agent cannot silently revert to latest-cache compare.
+
+from sector.scripts.validate_sector_intel import verify_ftd_verbatim  # noqa: E402
+
+
+class TestVerifyFtdVerbatim:
+    """`verify_ftd_verbatim(phase0_ftd, root)` is the testable extract of the
+    validator's FTD assert. Returns list of errors (empty = pass)."""
+
+    def _write_ftd_cache(self, ftd_dir, name, status_text):
+        ftd_dir.mkdir(parents=True, exist_ok=True)
+        path = ftd_dir / name
+        path.write_text(json.dumps({
+            "ftd_timeline": {"ftd_status_text": status_text},
+        }), encoding="utf-8")
+        return path
+
+    def test_source_file_matches_returns_no_errors(self, tmp_path):
+        ftd_dir = tmp_path / "sector" / "ftd_cache"
+        self._write_ftd_cache(
+            ftd_dir, "ftd_detector_2026-05-21_010000.json",
+            "FTD CONFIRMED, day 30 post-confirmation",
+        )
+        phase0_ftd = {
+            "source_file": "sector/ftd_cache/ftd_detector_2026-05-21_010000.json",
+            "ftd_status_text": "FTD CONFIRMED, day 30 post-confirmation",
+        }
+        assert verify_ftd_verbatim(phase0_ftd, str(tmp_path)) == []
+
+    def test_source_file_mismatch_returns_error(self, tmp_path):
+        ftd_dir = tmp_path / "sector" / "ftd_cache"
+        self._write_ftd_cache(
+            ftd_dir, "ftd_detector_2026-05-21_010000.json",
+            "FTD CONFIRMED, day 30 post-confirmation",
+        )
+        phase0_ftd = {
+            "source_file": "sector/ftd_cache/ftd_detector_2026-05-21_010000.json",
+            "ftd_status_text": "FTD CONFIRMED, Day 6 rally",  # hallucinated rewrite
+        }
+        errors = verify_ftd_verbatim(phase0_ftd, str(tmp_path))
+        assert any("hallucination detected" in e for e in errors), errors
+
+    def test_source_file_used_not_latest_cache(self, tmp_path):
+        """**The critical anti-regression test**: validator must read the file
+        named in `source_file`, NOT whichever cache is latest on disk. If a
+        future agent reverts to `sorted(glob)[-1]`, this test catches it."""
+        ftd_dir = tmp_path / "sector" / "ftd_cache"
+        # OLD cache: matches what the sector intel claims it built against
+        self._write_ftd_cache(
+            ftd_dir, "ftd_detector_2026-05-21_010000.json",
+            "FTD CONFIRMED, day 30 post-confirmation",
+        )
+        # NEWER cache: FTD daemon rolled a new snapshot AFTER build. Latest
+        # by sort order. If validator falls back to latest it would flag the
+        # legitimate report as hallucinated.
+        self._write_ftd_cache(
+            ftd_dir, "ftd_detector_2026-05-21_235959.json",
+            "FTD CONFIRMED, day 31 post-confirmation",  # different text!
+        )
+        phase0_ftd = {
+            # Pointing at the OLDER file — sector intel was built when it
+            # was the current snapshot.
+            "source_file": "sector/ftd_cache/ftd_detector_2026-05-21_010000.json",
+            "ftd_status_text": "FTD CONFIRMED, day 30 post-confirmation",
+        }
+        # Validator must use source_file → status_text matches → pass.
+        # If validator regresses to latest → comparing against day-31 cache
+        # → "mismatch (hallucination)" error → test fails.
+        errors = verify_ftd_verbatim(phase0_ftd, str(tmp_path))
+        assert errors == [], (
+            f"validator must read source_file, not latest cache. errors={errors}"
+        )
+
+    def test_missing_source_file_legacy_soft_skips(self, tmp_path, capsys):
+        ftd_dir = tmp_path / "sector" / "ftd_cache"
+        self._write_ftd_cache(
+            ftd_dir, "ftd_detector_2026-05-21_010000.json",
+            "FTD CONFIRMED, day 30 post-confirmation",
+        )
+        # No source_file in phase0_ftd (pre-v3.14.6 report)
+        phase0_ftd = {
+            "ftd_status_text": "FTD CONFIRMED, day 30 post-confirmation",
+        }
+        errors = verify_ftd_verbatim(phase0_ftd, str(tmp_path))
+        # Soft skip — no error, just stderr warning
+        assert errors == []
+        captured = capsys.readouterr()
+        assert "legacy report" in captured.err
+
+    def test_source_file_points_to_missing_disk_path(self, tmp_path, capsys):
+        # source_file given but file rotated off disk → soft skip, no error
+        # (refuses unsafe fallback to latest)
+        phase0_ftd = {
+            "source_file": "sector/ftd_cache/ftd_detector_2099-01-01_000000.json",
+            "ftd_status_text": "anything",
+        }
+        errors = verify_ftd_verbatim(phase0_ftd, str(tmp_path))
+        assert errors == []
+        captured = capsys.readouterr()
+        assert "missing on disk" in captured.err
+
+    def test_no_ftd_cache_at_all_errors(self, tmp_path):
+        # No source_file AND no ftd_cache directory → hard error
+        phase0_ftd = {"ftd_status_text": "x"}
+        errors = verify_ftd_verbatim(phase0_ftd, str(tmp_path))
+        assert any("No FTD cache file found" in e for e in errors), errors

@@ -8,6 +8,51 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.14.7] — 2026-05-21 — Sector v3.14.6 follow-up: FTD source_file test coverage + log honesty
+
+Codex follow-up on the v3.14.6 ship surfaced 3 more nits. All addressed.
+
+### Added — Test coverage for FTD `source_file` path (P2)
+
+The most critical correctness fix in v3.14.6 was switching the FTD verbatim
+assert from "latest cache on disk" to "the specific cache file recorded at
+build time". That logic was inline in `main()` with no unit-test coverage,
+so a future agent could quietly revert to `sorted(glob)[-1]`.
+
+- Extracted the verifier into `verify_ftd_verbatim(phase0_ftd, root)` —
+  pure function, takes explicit phase0_ftd dict + repo root, returns
+  `list[str]` of error strings.
+- `tests/test_gics_sector_audit.py` `TestVerifyFtdVerbatim` adds 6 cases:
+  match returns no errors / mismatch hallucination detection / **anti-regression
+  for "must use source_file not latest cache"** / legacy soft-skip /
+  missing-on-disk soft-skip / no-FTD-cache-at-all hard error.
+
+### Fixed — Log honesty on builder strict mode (P2)
+
+v3.14.6 changelog + SESSION_NOTES said "builder / validator / pytest pass
+`strict=True`". Actual code: `build_sector_intel.py:289` calls
+`canonicalize_sector_name(raw_name)` without `strict=True`. This is by
+design — builder absorbs LLM-emitted aliases (`"Financial Services"` →
+`"Financials"`) so downstream cache lookups hit; if the LLM emits an
+uncanonicalizable name, the cache lookup hard-fails one line later. **The
+validator is the schema gate that catches drift**, not the builder. Log
+amended.
+
+### Fixed — SESSION_NOTES test count (P3)
+
+v3.14.6 SESSION_NOTES said `pytest tests/test_gics_sector_audit.py 4/4
+pass`. Actual was 12/12 (was 2 before v3.14.6 + 10 new). v3.14.7 now reports
+18/18 with the FTD source_file additions.
+
+### Why
+
+These are docs / tests, not functional code changes — but they materially
+affect the next agent's ability to trust the prior changelog and to maintain
+the v3.14.6 correctness fix without regression. Session notes are the
+hand-off cache; precision matters.
+
+---
+
 ## [3.14.6] — 2026-05-21 — Sector validator hardening + honesty fixes
 
 Follow-up to v3.14.5 — codex review caught 4 issues. All addressed.
@@ -36,10 +81,13 @@ Follow-up to v3.14.5 — codex review caught 4 issues. All addressed.
 ### Added — `sector_utils` strict mode (P2-2)
 
 - `canonicalize_sector_name(name, *, silent=False, strict=False)` — new
-  `strict` kwarg raises `UnknownSectorError` instead of falling back. Builder /
-  validator / pytest pass `strict=True`; digest / fetch keep the default
-  warning-fallback mode (upstream caches occasionally surface novel keys we
-  prefer to log + skip rather than crash on).
+  `strict` kwarg raises `UnknownSectorError` instead of falling back.
+  **Validator + pytest** pass `strict=True`. **Builder / digest / fetch keep
+  lenient canonicalization by design** — builder absorbs LLM-emitted aliases
+  (`"Financial Services"` → `"Financials"`) so that valuation cache lookups
+  hit; if the LLM emits a name that doesn't even canonicalize cleanly, the
+  cache lookup hard-fails one line later. Validator is the schema gate that
+  catches drift LLM didn't pre-canonicalize.
 
 ### Fixed — Honesty on calculator dual-run promotion criteria (P1-2)
 

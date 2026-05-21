@@ -84,6 +84,72 @@ def find_latest_sector_intel():
     return files[-1] if files else None
 
 
+def verify_ftd_verbatim(phase0_ftd: dict, root: str) -> list[str]:
+    """v3.14.6+ — assert _phase0.ftd.ftd_status_text matches the exact FTD
+    cache snapshot that was consumed at build time.
+
+    Behaviour:
+    - `source_file` present + readable → strict verbatim compare; mismatch
+      returns an error.
+    - `source_file` present but missing on disk → stderr warning, no error
+      (someone rotated/cleaned the cache after build; don't false-positive).
+    - `source_file` absent (legacy report pre-v3.14.6) → stderr warning,
+      no error (we refuse to fall back to "latest" because that's the very
+      race condition v3.14.6 closes).
+    - Neither source_file nor any FTD cache file present → error.
+
+    Returns a list of error strings (empty list = pass). Used by `main()`;
+    exposed as a standalone helper so tests can exercise the source_file
+    logic without spinning up an entire sector_intel fixture.
+    """
+    errors: list[str] = []
+    ftd_source_file = phase0_ftd.get("source_file")
+    ftd_cache_path = None
+
+    if ftd_source_file:
+        candidate = os.path.join(root, ftd_source_file)
+        if os.path.exists(candidate):
+            ftd_cache_path = candidate
+        else:
+            print(
+                f"[validate_sector_intel] WARNING: FTD source_file "
+                f"{ftd_source_file!r} missing on disk — skipping "
+                "verbatim FTD assert (no unsafe fallback to latest).",
+                file=sys.stderr,
+            )
+    else:
+        ftd_files = sorted(glob.glob(os.path.join(
+            root, "sector", "ftd_cache", "ftd_detector_*.json"
+        )))
+        if ftd_files:
+            print(
+                "[validate_sector_intel] WARNING: legacy report has no "
+                "_phase0.ftd.source_file — verbatim FTD assert skipped "
+                "(re-run build to record source_file).",
+                file=sys.stderr,
+            )
+        else:
+            errors.append("No FTD cache file found under sector/ftd_cache")
+
+    if ftd_cache_path:
+        try:
+            with open(ftd_cache_path, "r", encoding="utf-8") as f:
+                ftd_cache_data = json.load(f)
+            expected_status_text = (ftd_cache_data.get("ftd_timeline") or {}).get("ftd_status_text")
+            actual_status_text = phase0_ftd.get("ftd_status_text")
+            if expected_status_text != actual_status_text:
+                errors.append(
+                    f"FTD status text mismatch (hallucination detected) "
+                    f"against {ftd_source_file}: "
+                    f"expected verbatim: {expected_status_text!r}, "
+                    f"got: {actual_status_text!r}"
+                )
+        except Exception as e:
+            errors.append(f"Failed to read/verify FTD cache {ftd_source_file!r}: {e}")
+
+    return errors
+
+
 def main():
     path = find_latest_sector_intel()
     if not path:
@@ -114,57 +180,7 @@ def main():
         if not ftd or "state" not in ftd or "quality_score" not in ftd:
             errors.append("_phase0.ftd missing state/quality_score (Global Rule 2 requires cache refresh)")
         else:
-            # Verbatim assert against the FTD snapshot that build_sector_intel
-            # actually consumed. `source_file` (v3.14.6+) is the repo-relative
-            # path; if the FTD daemon rolled a new snapshot between build and
-            # validate, this avoids the false-positive "hallucination" call.
-            #
-            # Pre-v3.14.6 reports lack `source_file` — we soft-skip with a
-            # warning rather than hard-fail against a possibly-mismatched
-            # latest snapshot.
-            ftd_source_file = ftd.get("source_file")
-            ftd_cache_path = None
-            if ftd_source_file:
-                candidate = os.path.join(ROOT, ftd_source_file)
-                if os.path.exists(candidate):
-                    ftd_cache_path = candidate
-                else:
-                    print(
-                        f"[validate_sector_intel] WARNING: FTD source_file "
-                        f"{ftd_source_file!r} missing on disk — skipping "
-                        "verbatim FTD assert (no unsafe fallback to latest).",
-                        file=sys.stderr,
-                    )
-            else:
-                # Legacy: confirm at least one FTD cache exists, then skip
-                ftd_files = sorted(glob.glob(os.path.join(
-                    ROOT, "sector", "ftd_cache", "ftd_detector_*.json"
-                )))
-                if ftd_files:
-                    print(
-                        "[validate_sector_intel] WARNING: legacy report has no "
-                        "_phase0.ftd.source_file — verbatim FTD assert skipped "
-                        "(re-run build to record source_file).",
-                        file=sys.stderr,
-                    )
-                else:
-                    errors.append("No FTD cache file found under sector/ftd_cache")
-
-            if ftd_cache_path:
-                try:
-                    with open(ftd_cache_path, "r", encoding="utf-8") as f:
-                        ftd_cache_data = json.load(f)
-                    expected_status_text = (ftd_cache_data.get("ftd_timeline") or {}).get("ftd_status_text")
-                    actual_status_text = ftd.get("ftd_status_text")
-                    if expected_status_text != actual_status_text:
-                        errors.append(
-                            f"FTD status text mismatch (hallucination detected) "
-                            f"against {ftd_source_file}: "
-                            f"expected verbatim: {expected_status_text!r}, "
-                            f"got: {actual_status_text!r}"
-                        )
-                except Exception as e:
-                    errors.append(f"Failed to read/verify FTD cache {ftd_source_file!r}: {e}")
+            errors.extend(verify_ftd_verbatim(ftd, ROOT))
         mt = p0.get("market_top") or {}
         if not mt or "composite_score" not in mt or "zone" not in mt:
             errors.append("_phase0.market_top missing composite_score/zone")

@@ -1,7 +1,19 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-21 (v3.14.6)
+> **Last Updated**: 2026-05-21 (v3.14.7)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.14.6 → v3.14.7) — Codex 3 nits closure
+
+Codex review of v3.14.6 抓到 3 個小瑕(2 P2 + 1 P3),全收:
+
+- **P2-1 builder strict 過度宣稱**:v3.14.6 log 寫「builder/validator/pytest pass strict=True」,實際 `build_sector_intel.py:289` `canonicalize_sector_name(raw_name)` 沒 strict。但這是 by design — builder 故意吸收 LLM 別名(`"Financial Services"` → `"Financials"`)讓 valuation cache lookup 能命中;若 LLM 寫完全亂 cache miss 會在下一行 hard-fail。**Validator 才是真正擋 schema 漂移的閘**。CHANGELOG / SESSION_NOTES 改寫成「validator + pytest 用 strict;builder/digest/fetch 維持寬鬆 canonicalize」。
+- **P2-2 FTD source_file path 沒測試覆蓋**:v3.14.6 最關鍵的 correctness fix(從 latest cache 改 source_file)inline 在 `main()` 沒 unit test,未來 agent 可能默默 revert。本輪抽出 `verify_ftd_verbatim(phase0_ftd, root)` 純函數,加 6 個 test case 包括**反 regression「必須讀 source_file 不是 latest cache」**(寫 old + newer 兩個 cache,phase0_ftd 指 old,assert validator 用 old 過、不會被 newer 干擾)。
+- **P3 SESSION_NOTES 數字錯**:v3.14.6 寫 4/4 pass,實際 12/12。本輪報告 18/18(加 FTD source_file 6 個 case)。
+
+實測:`pytest tests/test_gics_sector_audit.py` 18/18 pass。`python3 sector/scripts/validate_sector_intel.py` 跑既有 intel rc=0(legacy FTD 軟跳過)。
+
+版本 bump 3.14.6→3.14.7。Functional code 不變,只:(a) refactor 出 testable helper,(b) docs honesty。
 
 ## 🟢 Session Note (v3.14.5 → v3.14.6) — Sector validator hardening + 4 codex follow-ups
 
@@ -10,9 +22,9 @@ Codex review of v3.14.5 ship 抓到 4 點(2 correctness + 2 overclaim),全收:
 - **P1-1 FTD verifier race condition**:v3.14.5 validator 拿「磁碟最新 FTD cache」跟 sector intel 比對,FTD daemon 若在 build 之後寫新 snapshot 就會把合法舊報告誤判 hallucination。修法:`build_sector_intel.py` 把實際讀的 FTD cache repo-relative path 寫入 `_phase0.ftd.source_file`(從 `layers.ftd.file`);validator 改成讀 **那個檔**比對,缺 source_file 的 legacy 報告 → 警告 + 跳過(不 fallback latest 以免誤殺)。
 - **P1-2 N=5 dual-run criteria overclaim**:v3.14.5 CHANGELOG/SESSION_NOTES 寫「N=5 sessions, 0 hard diff > 1.0…」當成已 enforced 規格,但 calculator 只看當次 run,沒 history 持久化。本輪改寫為「per-run shadow check;N=5 promotion thresholds 已 document 但 history 持久化留下次 patch」。`SECTOR_CALC_STRICT=1` 仍只在當次 run 內 fail-fast,不跨 run 累計。
 - **P2-1 validator 沒接 canonicalize**:v3.14.5 CHANGELOG 列了 `validate_sector_intel.py` 在統一 canonicalization 清單裡,但 diff 沒 import `sector_utils`。本輪真的接上:validator import `canonicalize_sector_name(strict=True)` 對 `sectors[].name` assert,LLM emit `"Financial Services"` 或 `" Technology "` 即 schema fail。
-- **P2-2 `sector_utils` 缺 strict mode**:`canonicalize_sector_name` 對未知名永遠 warning + fallback。本輪加 `strict=False` kwarg(default 不破壞既有 caller),`strict=True` 時 raise `UnknownSectorError`。builder / validator / pytest 用 strict;digest / fetch 維持寬鬆。
+- **P2-2 `sector_utils` 缺 strict mode**:`canonicalize_sector_name` 對未知名永遠 warning + fallback。本輪加 `strict=False` kwarg(default 不破壞既有 caller),`strict=True` 時 raise `UnknownSectorError`。**validator + pytest** 用 `strict=True`;**builder / digest / fetch 維持寬鬆 canonicalize**(builder 故意吸收 LLM 別名 → canonical 形式;若 LLM emit 亂寫名而後續 valuation cache 找不到 key 仍會 hard-fail。validator 才是真正擋 schema 漂移的閘)。
 
-實測:`pytest tests/test_gics_sector_audit.py` 4/4 pass(含新 strict mode + validator canonicalize 案例)。validator 跑既有 2026-05-20_sector_intel.json → legacy report warning + 跳過 FTD verbatim,其他 schema check rc=0。
+實測:`pytest tests/test_gics_sector_audit.py` 12/12 pass(含新 strict mode + validator canonicalize 案例)。validator 跑既有 2026-05-20_sector_intel.json → legacy report warning + 跳過 FTD verbatim,其他 schema check rc=0。
 
 未做(留下次):
 - N=5 history file persistence(`sector/sector_logs/_calc_dual_run_history.json`)— 補上後 `SECTOR_CALC_STRICT=1` 可跨 5 run 算 promotion gate
