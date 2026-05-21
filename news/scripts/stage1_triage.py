@@ -99,6 +99,16 @@ _BLOCK_PATTERNS = {
         r"|Ask (?:the Expert|an Advisor)\b)",
         re.I,
     ),
+    # HK-listed China-tech reports (NetEase / Bilibili 港股表述) — Futu Push
+    # surfaces RMB-denominated Q-results and HK-index breakdowns that don't
+    # move the US session this committee tracks. Block by Chinese company
+    # name + Latin variants. ADR coverage (NTES / BILI tickers) is preserved
+    # — the regex only fires on the Chinese company name, so English wires
+    # citing NTES/BILI still flow through normally.
+    "hk_china_listing_chatter": re.compile(
+        r"網易|嗶哩嗶哩|bilibili|netease|163\.com",
+        re.I,
+    ),
 }
 
 

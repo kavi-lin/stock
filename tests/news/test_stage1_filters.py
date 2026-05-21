@@ -111,6 +111,60 @@ class TestIsBlocked:
         assert b is False
 
 
+class TestHkChinaListingChatter:
+    """v3.14.9 — block NetEase / Bilibili HK-listed chatter that Futu Push
+    surfaces. US committee scope: keep ADR English mentions (NTES / BILI
+    tickers); drop Chinese company-name reports and English wires citing the
+    company by name (user wants these companies out of the LLM debate queue
+    entirely)."""
+
+    def test_chinese_netease_q_results_block(self):
+        b, r = _is_blocked("網易Q1淨收入306億元，去年同期爲288億元", "")
+        assert b is True
+        assert r == "hk_china_listing_chatter"
+
+    def test_chinese_bilibili_index_breakdown_block(self):
+        b, r = _is_blocked(
+            "三大指數齊跌，科指跌2.15%，科網股走弱，嗶哩嗶哩跌超7%", "",
+        )
+        assert b is True
+        assert r == "hk_china_listing_chatter"
+
+    def test_english_bilibili_name_block(self):
+        b, r = _is_blocked("Bilibili reports Q1 revenue beat", "")
+        assert b is True
+        assert r == "hk_china_listing_chatter"
+
+    def test_english_netease_name_block(self):
+        b, r = _is_blocked("NetEase Q1 results from Hong Kong listing", "")
+        assert b is True
+        assert r == "hk_china_listing_chatter"
+
+    def test_163_com_url_marker_block(self):
+        b, r = _is_blocked(
+            "Tech news roundup", "source: money.163.com/finance",
+        )
+        assert b is True
+        assert r == "hk_china_listing_chatter"
+
+    # Negative — must NOT block US-only / ADR-only news
+    def test_pure_ntes_adr_english_passes(self):
+        b, _ = _is_blocked(
+            "NTES ADR rises 4% on China iGaming approvals", "",
+        )
+        assert b is False
+
+    def test_pure_bili_adr_english_passes(self):
+        b, _ = _is_blocked(
+            "BILI gains on US ADR upgrade by Morgan Stanley", "",
+        )
+        assert b is False
+
+    def test_unrelated_us_stock_passes(self):
+        b, _ = _is_blocked("NVDA reports Q3 earnings beat", "")
+        assert b is False
+
+
 # ── _headline_template_key ────────────────────────────────────────────────────
 
 class TestHeadlineTemplateKey:
