@@ -327,7 +327,7 @@
     "headline":    "string ≤ 60 chars — stance + 1 行核心診斷",
     "stance":      "AGGRESSIVE | NEUTRAL | DEFENSIVE — 對齊 final_regime_stance",
     "confidence":  "float 0.0–1.0 — 對齊 regime_confidence",
-    "one_liner":   "string ≤ 160 chars — 一句話擴展",
+    "one_liner":   "string ≤ 160 chars — 結論→原因→行動的人讀版盤前摘要；禁止內部 enum / 規則語（signal_conflict、不得 AGGRESSIVE、強制 stance、STEP、Phase、validator、pp 等）",
     "key_takeaways": [
       "string — 今日必看，動詞開頭可操作化（3-5 條）"
     ],
@@ -540,4 +540,3 @@
 11. 頂層 `sectors[]` V1.4：`score_components.valuation_penalty` 必填（int，-10 至 +5）
 
 > V2.9.0 新增的軟性欄位（`rs_vs_spy_5d` / `rs_vs_spy_20d` / `analyst_pt_upside_median_pct` / `pt_sample_size` / `institutional_holders_qoq_delta` / `institutional_ownership_pct_delta` / `institutional_sample_size`）**不**做硬性檢查（皆為 soft-fail 訊號，可為 null），僅供 Phase 4b divergence challenge 與 Phase 5 narrative 使用。
-

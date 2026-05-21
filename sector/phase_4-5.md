@@ -300,7 +300,7 @@ STEP H — Today Verdict（必填，繁中）
     "headline":    string ≤ 60 chars,         // stance + 核心診斷
     "stance":      AGGRESSIVE|NEUTRAL|DEFENSIVE,
     "confidence":  0.0-1.0,
-    "one_liner":   string ≤ 160 chars,
+    "one_liner":   string ≤ 160 chars,        // 結論 → 原因 → 行動，給人讀的盤前摘要
     "key_takeaways": [3-5 條, 動詞開頭, 可操作化],
     "sector_actions": [
       { "sector": <name from sectors[]>,
@@ -317,6 +317,12 @@ STEP H — Today Verdict（必填，繁中）
   - action=wait        → verdict=WARM (高不確定性)
   - key_takeaways[0]   → 必須點出今日 stance 主因
   - watch_next         → 必須涵蓋全部 upcoming_events 中 is_binary=true AND within_48h=true 的事件
+  - one_liner          → 必須像投資人盤前摘要，不得像內部規則/validator 訊息
+    - 格式：先講「今天怎麼做」，再講「為什麼」，最後講「等什麼才改變」
+    - 禁止輸出內部 enum / 規則語：signal_conflict、不得 AGGRESSIVE、強制 stance、STEP、Phase、validator、score 69、pp
+    - 可保留必要市場術語：FTD、breadth、RSI、MA、FOMC、real rate
+    - 避免把 5 個以上指標硬塞同一句；細節放 key_takeaways / watch_next
+    - 中文標點需自然；避免半形分號串接多個子句
 ```
 
 **JSON Schema** → 見 `schema.md` Phase 4c
