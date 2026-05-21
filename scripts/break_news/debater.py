@@ -16,7 +16,9 @@ Run modes:
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import re
 import sys
 import threading
 import time
@@ -98,6 +100,83 @@ def _comment_from_result(res: LLMResult, role: str, side: str, round_idx: int,
     }
 
 
+def _load_universe_tickers() -> set[str]:
+    path = ROOT / "Dashboard" / "heatmap_universe.json"
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        raw = data["tickers"] if isinstance(data, dict) and "tickers" in data else data
+        if isinstance(raw, list):
+            out = set()
+            for item in raw:
+                if isinstance(item, str):
+                    out.add(item.upper())
+                elif isinstance(item, dict):
+                    sym = item.get("ticker") or item.get("symbol")
+                    if sym:
+                        out.add(str(sym).upper())
+            return out
+        if isinstance(raw, dict):
+            return {str(k).upper() for k in raw}
+    except Exception:
+        pass
+    return set()
+
+
+def is_high_priority_item(item: dict) -> bool:
+    src = item.get("source") or {}
+    src_name = src.get("name") or ""
+    src_cred = src.get("credibility") or ""
+    
+    # 1. 來源高可信度（如 Futu Push / Bloomberg）或 credibility == "HIGH"
+    if src_name in ("Bloomberg", "Futu Push") or src_cred == "HIGH":
+        return True
+
+    triage = item.get("triage") or {}
+    # 2. binary_flag == True
+    if triage.get("binary_flag") is True:
+        return True
+
+    # 3. abs(shallow_score) >= 3.0  (stage1_triage scale: |s|>=1.5 important,
+    #    |s|>=3 strong; the V4 plan's "高 abs(shallow_score)" maps to the strong gate.)
+    try:
+        score = abs(float(triage.get("shallow_score") or 0.0))
+        if score >= 3.0:
+            return True
+    except (ValueError, TypeError):
+        pass
+
+    # 4. Ticker belongs to SECTOR_TOP_5
+    from skills._shared.company_context import SECTOR_TOP_5
+    all_top_5_tickers = {t.upper() for list_t in SECTOR_TOP_5.values() for t in list_t}
+    headline = item.get("headline") or ""
+    summary = item.get("raw_summary") or ""
+    text_to_check = f"{headline} {summary}"
+
+    if all_top_5_tickers:
+        # Case-insensitive: feeds occasionally render tickers as "Nvda" / "nvda".
+        ticker_pattern = re.compile(
+            r"\b(" + "|".join(sorted(all_top_5_tickers, key=len, reverse=True)) + r")\b",
+            re.IGNORECASE,
+        )
+        if ticker_pattern.search(text_to_check):
+            return True
+
+    # 5. Tech Node hits >= 2 (ALL_DOMAIN_PATTERNS)
+    try:
+        from scripts.nexus.tier2_regex import ALL_DOMAIN_PATTERNS
+        hits = 0
+        for key, pattern in ALL_DOMAIN_PATTERNS.items():
+            if pattern.search(text_to_check):
+                hits += 1
+                if hits >= 2:
+                    return True
+    except Exception:
+        pass
+
+    return False
+
+
 def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
                 wall_timeout: int = THREAD_TIMEOUT_SEC,
                 verbose: bool = False) -> dict:
@@ -107,8 +186,13 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
     if item.get("state") not in ("pending_debate", "partial_closed", "failed"):
         return {"ok": False, "error": f"state={item.get('state')}, refusing"}
 
-    if item.get("source") == "Futu Push" and max_rounds == MAX_ROUNDS:
-        max_rounds = MAX_ROUNDS_FUTU
+    # Dynamic depth policy
+    is_high = is_high_priority_item(item)
+    rounds_limit = 3 if is_high else 2
+    max_rounds = min(max_rounds, rounds_limit)
+
+    if (item.get("source") or {}).get("name") == "Futu Push" and max_rounds == MAX_ROUNDS:
+        max_rounds = min(max_rounds, MAX_ROUNDS_FUTU)
 
     store.set_state(news_id, "debating")
 
@@ -134,11 +218,7 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
             comment_id_hint = f"c{len(thread)}"
             if verbose:
                 print(f"[{news_id}] round={r} agent={agent} prompt_len={len(usr_p)}")
-            # Governed call: prefer this turn's intended model, but fall back
-            # down the chain (quota / failure) instead of aborting the debate.
             res = run_with_fallback(agent, "debate", sys_p, usr_p)
-            # If fallback swapped the model, relabel the role so the stored
-            # role name matches res.agent (side A/B stays positional).
             actual = getattr(res, "model_used", res.agent) or agent
             if actual != agent:
                 role = _role_for(idx, actual)
@@ -165,10 +245,55 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
         rounds_completed = r + 1
         if state_final in ("failed", "partial_closed"):
             break
+
         # Stop when both debaters signalled DONE in this round.
         if all(last_done[m] for m in turn_order):
             close_reason = "both_done"
             break
+
+        # At the end of Round 1 (r == 0), check for early stop on low relation density / neutrality
+        if r == 0 and not is_high:
+            # 1. Both debaters set done: true
+            cond_done = all(last_done[m] for m in turn_order)
+            
+            # 2. No ticker-to-ticker relation generated (both subject and object start with "ticker:")
+            thread = (store.load_item(news_id) or item).get("thread") or []
+            has_ticker_relation = False
+            for c in thread:
+                relations = (c.get("parsed") or {}).get("relations") or []
+                for rel in relations:
+                    if isinstance(rel, dict):
+                        subj = rel.get("subject") or ""
+                        obj = rel.get("object") or ""
+                        if subj.startswith("ticker:") and obj.startswith("ticker:"):
+                            has_ticker_relation = True
+                            break
+                if has_ticker_relation:
+                    break
+            cond_no_ticker_rel = not has_ticker_relation
+            
+            # 3. Consensus verdict is "NEUTRAL" AND no ticker in thread/text is in universe_tickers
+            temp_summary = prompts.build_summary_block(thread)
+            verdict = temp_summary.get("consensus_verdict", "NEUTRAL")
+            cond_neutral_no_universe = False
+            if verdict == "NEUTRAL":
+                universe_tickers = _load_universe_tickers()
+                headline = item.get("headline") or ""
+                summary = item.get("raw_summary") or ""
+                text_to_check = f"{headline} {summary}"
+                words = set(re.findall(r"\b[A-Z]{2,5}\b", text_to_check))
+                for c in thread:
+                    parsed = c.get("parsed") or {}
+                    ent = parsed.get("entities") or {}
+                    for t in ent.get("tickers") or []:
+                        if isinstance(t, str):
+                            words.add(t.upper())
+                has_universe_ticker = any(w in universe_tickers for w in words)
+                cond_neutral_no_universe = not has_universe_ticker
+
+            if cond_done or cond_no_ticker_rel or cond_neutral_no_universe:
+                close_reason = "early_stop_low_relation_density"
+                break
 
     summary = prompts.build_summary_block((store.load_item(news_id) or {}).get("thread") or [])
     summary["rounds_completed"] = rounds_completed

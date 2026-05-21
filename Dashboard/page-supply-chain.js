@@ -61,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
       zh: 'LLM 關係', en: 'LLM relation',
       tip: "Drafted relation with insufficient recent co-mention evidence. Recent co-mention threshold (>=3 in 30d) not met; niche or low-volume edges can read 'LLM' here without being fictional.",
     },
+    break_news_provisional: {
+      icon: '◐', color: '#fbbf24', bg: 'rgba(251,191,36,0.14)',
+      zh: '突發暫定', en: 'Break-news provisional',
+      tip: 'A compatible direction-aware Break News debate edge exists in the Knowledge Graph (provisional, single-source). Treated as a weak supplementary signal (weight 0.2) — not corroborated by 30-day digest co-mentions.',
+    },
   };
   const HEAT_COLOR = { hot: '#ef4444', warm: '#f97316', cold: '#3b82f6', none: null };
   const HEAT_LABEL = {
@@ -207,7 +212,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const m = RELATION_EVIDENCE[key] || RELATION_EVIDENCE.llm_relation;
     const cnt = Number(ev.co_mention_count_30d || (e.corroboration && e.corroboration.count) || 0);
     const threshold = Number(ev.threshold || 3);
-    const suffix = key === 'corroborated_relation' ? ` ${cnt}` : ` ${cnt}/${threshold}`;
+    // BN-provisional has no digest count to display; show the BN source-count instead.
+    const bnCnt = key === 'break_news_provisional'
+      ? Number((ev.sources || []).filter(s => String(s).startsWith('break_news:')).length)
+      : 0;
+    const suffix = key === 'corroborated_relation'
+      ? ` ${cnt}`
+      : key === 'break_news_provisional'
+        ? ` ${bnCnt}·BN`
+        : ` ${cnt}/${threshold}`;
     return `<span class="sc-edge-corr" title="${esc(m.tip)}"
       style="color:${m.color};background:${m.bg};">${m.icon} ${esc(relationLabel(key))}${esc(suffix)}</span>`;
   }

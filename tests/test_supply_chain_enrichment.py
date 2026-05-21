@@ -4,14 +4,17 @@ from pathlib import Path
 from scripts.nexus import supply_chain as sc
 
 
-def _write_local_indexes(tmp_path: Path, monkeypatch, *, universe=None, nexus_nodes=None):
+def _write_local_indexes(tmp_path: Path, monkeypatch, *, universe=None, nexus_nodes=None, nexus_edges=None):
     universe_path = tmp_path / "heatmap_universe.json"
     nexus_path = tmp_path / "nexus_graph.json"
     universe_path.write_text(
         json.dumps({"tickers": [{"ticker": t} for t in (universe or [])]}),
         encoding="utf-8",
     )
-    nexus_path.write_text(json.dumps({"nodes": nexus_nodes or [], "edges": []}), encoding="utf-8")
+    nexus_path.write_text(
+        json.dumps({"nodes": nexus_nodes or [], "edges": nexus_edges or []}),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(sc, "UNIVERSE_FILE", universe_path)
     monkeypatch.setattr(sc, "NEXUS_FILE", nexus_path)
     monkeypatch.setattr(sc, "FMP_SC_CACHE_DIR", tmp_path / "fmp_cache")
@@ -152,3 +155,68 @@ def test_relation_evidence_counts_only_strict_digest_ticker_mentions(tmp_path, m
     assert ev["level"] == "corroborated_relation"
     assert ev["co_mention_count_30d"] == 3
     assert ev["method"] == "digest_tickers_mentioned_30d"
+
+
+def test_break_news_provisional_requires_compatible_relation_direction(tmp_path, monkeypatch):
+    monkeypatch.setenv("FMP_API_KEY", "test-key")
+    monkeypatch.setattr(sc, "_fmp_get", lambda *args, **kwargs: ([], "ok"))
+    base_edges = [
+        {
+            "source": "ticker:NVDA",
+            "target": "ticker:TSM",
+            "type": "SUPPLIES_TO",
+            "sources": ["break_news:wrong_direction"],
+            "metadata": {"provisional": True},
+        },
+        {
+            "source": "ticker:TSM",
+            "target": "ticker:NVDA",
+            "type": "COMPETES_WITH",
+            "sources": ["break_news:wrong_type"],
+            "metadata": {"provisional": True},
+        },
+    ]
+    _write_local_indexes(
+        tmp_path, monkeypatch, universe=["NVDA", "TSM"], nexus_edges=base_edges
+    )
+
+    out = sc.enrich(_chain(
+        [
+            {"id": "tsmc", "label": "TSMC", "ticker": "TSM", "listing": "us_listed"},
+            {"id": "nvda", "label": "NVIDIA", "ticker": "NVDA", "listing": "us_listed"},
+        ],
+        [{"from": "tsmc", "to": "nvda", "rel": "SUPPLIES_TO"}],
+    ))
+
+    assert out["edges"][0]["relation_evidence"]["level"] == "llm_relation"
+    assert out["edges"][0]["relation_evidence"]["weight"] == 0.4
+
+
+def test_break_news_provisional_marks_compatible_supply_chain_edge(tmp_path, monkeypatch):
+    monkeypatch.setenv("FMP_API_KEY", "test-key")
+    monkeypatch.setattr(sc, "_fmp_get", lambda *args, **kwargs: ([], "ok"))
+    _write_local_indexes(
+        tmp_path,
+        monkeypatch,
+        universe=["NVDA", "TSM"],
+        nexus_edges=[{
+            "source": "ticker:TSM",
+            "target": "ticker:NVDA",
+            "type": "SUPPLIES_TO",
+            "sources": ["break_news:compatible"],
+            "metadata": {"provisional": True},
+        }],
+    )
+
+    out = sc.enrich(_chain(
+        [
+            {"id": "tsmc", "label": "TSMC", "ticker": "TSM", "listing": "us_listed"},
+            {"id": "nvda", "label": "NVIDIA", "ticker": "NVDA", "listing": "us_listed"},
+        ],
+        [{"from": "tsmc", "to": "nvda", "rel": "SUPPLIES_TO"}],
+    ))
+    ev = out["edges"][0]["relation_evidence"]
+
+    assert ev["level"] == "break_news_provisional"
+    assert ev["weight"] == 0.2
+    assert ev["sources"] == ["break_news:compatible"]

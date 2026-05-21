@@ -89,6 +89,7 @@ class Edge:
     confidence: float = 1.0
     last_seen: str | None = None
     sources: set[str] = field(default_factory=set)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def key(self) -> tuple[str, str, str]:
@@ -105,6 +106,7 @@ class Edge:
             "confidence": self.confidence,
             "last_seen": self.last_seen,
             "sources": sorted(self.sources),
+            "metadata": self.metadata,
         }
 
 

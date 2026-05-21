@@ -98,6 +98,7 @@ def merge_edges(edges: list[Edge]) -> list[Edge]:
                 confidence=e.confidence,
                 last_seen=e.last_seen,
                 sources=set(e.sources),
+                metadata=dict(e.metadata or {}),
             )
     return list(merged.values())
 
@@ -392,7 +393,7 @@ def _to_ticker_centric(
     return survivors, ticker_only_edges, stats
 
 
-def collect_tier1(cfg: dict[str, Any]) -> tuple[list[Node], list[Edge]]:
+def collect_tier1(cfg: dict[str, Any], enable_direct_edge: bool = False) -> tuple[list[Node], list[Edge]]:
     sources = cfg["sources"]
     universe = tier1_loaders.load_ticker_universe(
         str(PROJECT_ROOT / sources["heatmap_universe"])
@@ -440,6 +441,7 @@ def collect_tier1(cfg: dict[str, Any]) -> tuple[list[Node], list[Edge]]:
         n, e = tier1_loaders.load_break_news(
             str(PROJECT_ROOT / bn_dir), universe,
             digest_url_hashes=digest_hashes,
+            enable_direct_edge=enable_direct_edge,
         )
         _log(f"break_news: +{len(n)} nodes / +{len(e)} edges")
         all_nodes += n
@@ -483,6 +485,7 @@ def main() -> int:
     ap.add_argument("--tier", default="1", help="Comma-separated: 1, 2, 3 (e.g. '1,2,3')")
     ap.add_argument("--dry-run", action="store_true", help="Print stats, write nothing")
     ap.add_argument("--full", action="store_true", help="Tier 3: process full backfill")
+    ap.add_argument("--enable-direct-edge", action="store_true", help="Phase 2: Enable provisional ticker-to-ticker edge loading")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -497,7 +500,7 @@ def main() -> int:
     tier2_audit: dict[str, Any] = {}
 
     if "1" in tiers and enabled.get("tier1", True):
-        n, e = collect_tier1(cfg)
+        n, e = collect_tier1(cfg, enable_direct_edge=args.enable_direct_edge)
         nodes += n
         edges += e
     if "2" in tiers and enabled.get("tier2", True):

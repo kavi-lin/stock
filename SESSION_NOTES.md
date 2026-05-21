@@ -1,7 +1,81 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-21 (v3.14.7)
+> **Last Updated**: 2026-05-21 (v3.15.2)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.15.1 → v3.15.2) — Break News V4 final-gate polish
+
+Opus final-gate review of Gemini's V4 implementation + codex's V4 review fixes.
+Four downstream gaps caught; each would have silently degraded the V4 KG-first
+design without breaking tests.
+
+- **Depth-policy shallow_score threshold mis-scaled** (`debater.py:143`):
+  `abs(score) >= 7.0` never fires — Stage 1 triage emits values on a ~0–3 scale
+  (`abs(s) >= 1.5` important, `>= 3` strong). Dropped to `3.0` to match the
+  existing strong gate. Sample real bn item: `shallow_score=2.0`.
+- **Futu Push round-cap regression** (`debater.py:189`):
+  `item.get("source") == "Futu Push"` compared a dict to a string, so
+  `MAX_ROUNDS_FUTU=2` never applied. Fixed to read `.get("name")`.
+- **Mega-cap regex case-sensitive** (`debater.py:156`): added `re.IGNORECASE`
+  so headlines that render tickers as `Nvda` still trigger high-priority.
+- **Dashboard supply-chain UI missing provisional badge**
+  (`page-supply-chain.js:53-64`): `RELATION_EVIDENCE` only had `corroborated`
+  and `llm` entries; new `break_news_provisional` level was rendering as
+  raw key string with no styling. Added amber `◐` badge with BN source-count
+  suffix.
+
+Validation:
+- `pytest tests/` → 75 passed
+- `python3 scripts/break_news/validate.py` → rc=0, 458 files
+- `python3 scripts/nexus/build_graph.py --tier 1,2 --dry-run --enable-direct-edge` → 166 nodes / 594 edges / 638kB (under 5MB cap)
+
+Not fixed (out of scope / contested):
+- BN-provisional weight (0.2) < llm_relation (0.4) — semantically odd (some
+  evidence rates lower than no evidence) but locked in V4 plan + tests.
+- `merge_edges` keeps only first edge's metadata — no real impact today since
+  `cross_item_count` is identical across duplicates, but worth revisiting.
+- Symmetric predicates (`COMPETES_WITH`, `CO_DEVELOPS_WITH`) not order-
+  normalized; (A↔B) and (B↔A) would dedupe as 2 edges. Minor.
+- `validate.py` uses date-based strict gate instead of `summary.schema_version`
+  field — works but a replayed old debate would be marked strict.
+
+---
+
+## 🟢 Session Note (v3.15.0 → v3.15.1) — Break News V4 Codex review fixes
+
+Codex review of Gemini's Break News V4 implementation found 5 issues; this patch fixes them without expanding scope:
+
+- **Universe loader fix**: `_load_universe_tickers()` now supports `heatmap_universe.json` dict-list entries, so neutral early-stop correctly detects tracked tickers.
+- **Nexus metadata persistence**: `Edge` now carries `metadata`, and `merge_edges()` preserves it, so provisional Break News direct edges keep `is_break_news/provisional/support_count/cross_item_count/confidence_avg`.
+- **Supply-chain evidence precision**: Break News provisional evidence now checks relation type and direction. `COMPETES_WITH` or reversed `SUPPLIES_TO` no longer corroborates a supply-chain hop.
+- **Legacy schema fallback**: missing `support_count` is treated as `1` during the transition window.
+- **Regression tests added**: `tests/test_break_news_v4.py` plus supply-chain evidence compatibility tests cover the reviewed failure modes.
+
+Validation:
+- `pytest tests/test_break_news_v4.py tests/test_supply_chain_enrichment.py` → 11 passed
+- `python3 scripts/break_news/validate.py` → rc=0, 458 files
+- `python3 scripts/nexus/build_graph.py --tier 1,2 --dry-run` → 166 nodes / 554 edges / 620471 bytes
+- `python3 scripts/nexus/build_graph.py --tier 1,2 --dry-run --enable-direct-edge` → 166 nodes / 596 edges / 638483 bytes
+
+---
+
+## 🟢 Session Note (v3.14.8 → v3.15.0) — Break News Debate V4 Implementation
+
+成功實作 Break News Debate V4 改進計畫（KG-first 與供應鏈證據對齊）：
+
+- **Debate Prompt 與 Thread 壓縮**: 重構 `prompts.py` 使用 `compact_thread_formatter` 滑動窗（包含壓縮後的 `kg_state` 與各 Agent 最後一條 comment 原文），引導 A/B 對立補強 second-order / supply-chain 與 contradiction，並保留 early-stop done 出口。
+- **Summary 聚合指標優化**: 擴充 `build_summary_block()`，聚合 `support_count`、排除 confidence=null 的 `confidence_avg`、擷取 evidence snippets (最多 3 條，每條 ≤200 字，按置信度排序)，以及 round-by-round 的 `final_takes_by_round`，保留相容的 `final_take`。
+- **Dynamic Depth Policy 與 Early-Stop**: 在 `debater.py` 實作優先度感知 depth policy (正常 2 輪/4 calls，高優先度 3 輪/6 calls)。依據來源可信度、binary_flag、abs(shallow_score) >= 7.0、`SECTOR_TOP_5` 權重、與技術 Regex `ALL_DOMAIN_PATTERNS` 判定優先度。在 Round 1 結尾，依據低關係密度、共識 neutral 且無 universe tickers、或雙方 complete 自動觸發 early-stop。
+- **Transitional Strictness 校驗**: 更新 `validate.py`。歷史 log 寬鬆向下相容（忽略 round 遞減錯誤），2026-06-20 起的突發辯論 log 則強制執行嚴格 V2 欄位檢查，確保 rc=0。
+- **Phase 2 Direct Edge 載入**: 在 `tier1_loaders.py` 修改 `load_break_news` 支援 `--enable-direct-edge` / `BREAK_NEWS_NEXUS_DIRECT_EDGE_ENABLED=1`。解析 structured relations，進行雙方 `support_count >= 2` 或跨日誌共現 pre-pass 判定，歸一化方向 (`CUSTOMER_OF` 反轉成 `SUPPLIES_TO`)，限制 weight <= 0.15 且標記為 provisional。
+- **供應鏈三級證據權重優先序**: 在 `supply_chain.py` 的 `enrich` 重構關係證據判定，優先度為：`corroborated_relation` (1.0, 30天共現 >= 閾值) > `llm_relation` (0.4, yaml draft) > `break_news_provisional` (0.2, Nexus 圖譜中 provisional 邊)。
+
+驗證結果：
+- `validate.py` 校驗既有 458 份突發辯論 log 完美通過 (`rc=0`)。
+- `test_summary_aggregation.py` 單元測試順利通過，涵蓋 null 置信度排除、最優 final_take 挑選與 snippets cap。
+- `build_graph.py --enable-direct-edge --dry-run` 順利載入 +40 條 (如 `SUPPLIES_TO`, `COMPETES_WITH`) provisional direct edges。
+
+---
 
 ## 🟢 Session Note (v3.14.6 → v3.14.7) — Codex 3 nits closure
 

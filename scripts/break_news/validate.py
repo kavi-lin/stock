@@ -55,6 +55,19 @@ def validate_file(path: Path) -> list[str]:
     if miss:
         issues.append(f"{path.name}: missing triage keys: {sorted(miss)}")
 
+    # Determine strict mode based on date >= 2026-06-20
+    news_id = d.get("news_id") or ""
+    date_str = ""
+    if d.get("fetched_at"):
+        date_str = d.get("fetched_at")[:10].replace("-", "")
+    elif news_id.startswith("bn_") and len(news_id) >= 11:
+        date_str = news_id[3:11]
+
+    is_strict = False
+    if date_str and len(date_str) == 8 and date_str.isdigit():
+        if date_str >= "20260620":
+            is_strict = True
+
     thread = d.get("thread") or []
     last_round = -1
     for i, c in enumerate(thread):
@@ -64,13 +77,34 @@ def validate_file(path: Path) -> list[str]:
         if c.get("comment_id") != f"c{i}":
             issues.append(f"{path.name}: thread[{i}].comment_id != c{i}")
         rnd = c.get("round", -1)
-        if rnd < last_round:
+        if rnd < last_round and is_strict:
             issues.append(
                 f"{path.name}: thread[{i}].round={rnd} decreasing (prev={last_round})")
         last_round = max(last_round, rnd)
 
-    if d.get("state") in ("closed", "partial_closed") and not d.get("summary"):
-        issues.append(f"{path.name}: state={d['state']} but summary is empty")
+    if d.get("state") in ("closed", "partial_closed"):
+        summary = d.get("summary")
+        if not summary:
+            issues.append(f"{path.name}: state={d['state']} but summary is empty")
+        else:
+            if is_strict:
+                if "final_takes_by_round" not in summary or not isinstance(summary["final_takes_by_round"], list):
+                    issues.append(f"{path.name}: strict V2 gate failed: missing or invalid final_takes_by_round in summary")
+                
+                merged_relations = summary.get("merged_relations") or []
+                if not isinstance(merged_relations, list):
+                    issues.append(f"{path.name}: strict V2 gate failed: merged_relations is not a list")
+                else:
+                    for i, rel in enumerate(merged_relations):
+                        if not isinstance(rel, dict):
+                            issues.append(f"{path.name}: merged_relations[{i}] is not a dict")
+                            continue
+                        required_rel_keys = {"support_count", "source_agents", "source_rounds", "evidence_snippets", "provisional"}
+                        miss_rel = required_rel_keys - set(rel.keys())
+                        if miss_rel:
+                            issues.append(f"{path.name}: strict V2 gate failed: merged_relations[{i}] missing keys: {sorted(miss_rel)}")
+                        if "confidence_avg" not in rel:
+                            issues.append(f"{path.name}: strict V2 gate failed: merged_relations[{i}] missing confidence_avg key")
 
     return issues
 

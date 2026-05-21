@@ -8,6 +8,85 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.15.2] — 2026-05-21 — Break News V4 final-gate polish
+
+### Fixed
+
+- Depth-policy `is_high_priority_item` `abs(shallow_score)` threshold dropped
+  from `7.0` to `3.0`. The Stage 1 triage scorer emits values on a ~0–3 scale
+  (`abs(s) >= 1.5` important, `>= 3` strong); the old gate never fired, so the
+  shallow-score signal was silently ignored.
+- Futu Push round-cap regression: `item.get("source") == "Futu Push"` compared
+  a dict to a string, so the `MAX_ROUNDS_FUTU=2` cap never applied. Now reads
+  `(item.get("source") or {}).get("name")`.
+- Mega-cap ticker match in depth policy is now case-insensitive (`re.IGNORECASE`).
+  Headlines occasionally render tickers as `Nvda`, which the strict pattern
+  silently dropped from high-priority.
+
+### Added
+
+- `RELATION_EVIDENCE.break_news_provisional` style in `page-supply-chain.js`
+  (amber icon `◐`, "突發暫定" label, BN source-count suffix) so V4 provisional
+  edges render with their own badge instead of falling back to raw key text.
+
+### Why
+
+Final-gate review of the V4 → V4-review-fixes stack found four downstream gaps
+that would have silently degraded the new depth policy and supply-chain UI.
+None block release, but each subtracts signal from the V4 KG-first design.
+
+---
+
+## [3.15.1] — 2026-05-21 — Break News V4 review fixes
+
+### Fixed
+
+- Fixed Break News universe ticker loading for `Dashboard/heatmap_universe.json`
+  dict-list shape, so neutral early-stop no longer treats tracked tickers as
+  absent.
+- Persisted provisional direct-edge metadata through Nexus `Edge.to_json()` and
+  `merge_edges()`, including `is_break_news`, `provisional`, `support_count`,
+  `cross_item_count`, and `confidence_avg`.
+- Made supply-chain provisional evidence relation-aware and direction-aware:
+  unrelated `COMPETES_WITH` / narrative edges or reversed `SUPPLIES_TO` edges no
+  longer corroborate a YAML supply-chain hop.
+- Restored transition fallback for legacy Break News relations missing
+  `support_count` by treating them as support `1`.
+
+### Added
+
+- Added focused regression tests for Break News V4 summary aggregation, universe
+  loading, direct-edge gating/metadata, Edge metadata preservation, and
+  supply-chain provisional evidence compatibility.
+
+### Why
+
+Codex review found that the V4 data path could silently drop provisional
+metadata and over-credit pair-only Nexus evidence. This patch keeps the KG
+integration conservative while preserving the new richer debate summaries.
+
+---
+
+## [3.15.0] — 2026-05-21 — Break News Debate V4: KG-first & Supply-chain Integration
+
+### Added
+
+- **Phase 2 Direct Edge Loading**: Introduced a feature flag and CLI flag (`--enable-direct-edge` in `build_graph.py`) to support provisional direct ticker-to-ticker edge loading. This parses the structured `merged_relations` from debate logs, applies cross-item/same-item support count gates (`support_count >= 2` or `cross_item_counts >= 2`), normalizes direction (`CUSTOMER_OF` -> `SUPPLIES_TO`), caps weight at `0.15`, and tags edges as provisional break-news relations.
+- **Three-Level Evidence Weights in Supply Chain**: Implemented a prioritised evidence ranking in `supply_chain.py`'s `enrich` logic: `corroborated_relation` (1.0 weight for digest co-mentions >= threshold) > `llm_relation` (0.4 weight for LLM drafted skeletons) > `break_news_provisional` (0.2 weight for provisional break news edges in the Nexus graph).
+
+### Changed
+
+- **Debate Prompt Compression & V4 Sliding Window**: Transitioned `prompts.py` to use a `compact_thread_formatter` sliding window (`kg_state` containing tickers, themes, relations, unresolved gaps, recent claims + full verbatim of each agent's last comment).
+- **Summary Aggregation Metrics**: Upgraded `build_summary_block()` to perform advanced aggregation including `support_count`, null-safe `confidence_avg`, evidence snippet cropping (up to 3 distinct snippets sorted by confidence/round, each <= 200 chars), and round-by-round final take tracking (`final_takes_by_round`).
+- **Dynamic Depth Policy & Early-Stop in `debater.py`**: Added an priority-aware depth control that defaults to 2 rounds (4 calls) for normal news and up to 3 rounds (6 calls) for high-priority news. High priority is dynamically triggered by source (Futu Push / Bloomberg / credibility == HIGH), high triage shallow score, binary flag, sector top 5 tickers, or domain pattern hits >= 2. Added dynamic early-stop at Round 1 on low relation density, consensus neutrality without universe tickers, or both done.
+- **Strict V2 Gate Transition**: Updated `validate.py` to gracefully fallback for older records while strictly enforcing V2 schema validation (requiring V2 final takes, merged relations structures, confidence averages, etc.) on logs dated on or after `2026-06-20`.
+
+### Why
+
+Shifts the Break News debate framework from generic market commentary to a rigorous, quality-gated, and cost-controlled KG-first architecture that directly fuels the Knowledge Graph and Supply Chain pages without hallucination risk.
+
+---
+
 ## [3.14.8] — 2026-05-21 — Supply-chain scrollbar polish
 
 ### Fixed — horizontal scrollbar height + always-visible scroll on supply-chain

@@ -411,7 +411,7 @@ def load_news_digests(
 
 def load_break_news(
     break_news_dir: str, universe: set[str], since_days: int = 14,
-    digest_url_hashes: set[str] | None = None,
+    digest_url_hashes: set[str] | None = None, enable_direct_edge: bool = False,
 ) -> tuple[list[Node], list[Edge]]:
     """Load `news/break_news_logs/bn_*.json` items (closed or partial_closed
     only) and emit catalyst-type nodes with edges to tickers, sectors, themes,
@@ -440,6 +440,40 @@ def load_break_news(
             if date and (seen[nid].last_seen or "") < date:
                 seen[nid].last_seen = date
         return seen[nid]
+
+    # Feature Flag for Phase 2 provisional direct edge loading
+    direct_edge_enabled = (os.environ.get("BREAK_NEWS_NEXUS_DIRECT_EDGE_ENABLED") == "1") or enable_direct_edge
+
+    # Cross-item co-occurrence counting pre-pass
+    cross_item_counts: dict[tuple[str, str, str], int] = {}
+    if direct_edge_enabled:
+        for path in sorted(glob.glob(os.path.join(break_news_dir, "bn_*.json"))):
+            data = _safe_read_json(path)
+            if not data or not isinstance(data, dict):
+                continue
+            state = data.get("state")
+            if state not in ("closed", "partial_closed"):
+                continue
+            fetched = (data.get("fetched_at") or "")[:10]
+            try:
+                d = datetime.fromisoformat(fetched).date()
+            except ValueError:
+                continue
+            if d.toordinal() < cutoff:
+                continue
+            
+            summary = data.get("summary") or {}
+            merged_relations = summary.get("merged_relations") or []
+            for rel in merged_relations:
+                if not isinstance(rel, dict):
+                    continue
+                subj = rel.get("subject") or ""
+                pred = rel.get("predicate") or ""
+                obj = rel.get("object") or ""
+                if subj.startswith("ticker:") and obj.startswith("ticker:"):
+                    if pred == "CUSTOMER_OF":
+                        subj, obj, pred = obj, subj, "SUPPLIES_TO"
+                    cross_item_counts[(subj, pred, obj)] = cross_item_counts.get((subj, pred, obj), 0) + 1
 
     for path in sorted(glob.glob(os.path.join(break_news_dir, "bn_*.json"))):
         data = _safe_read_json(path)
@@ -535,6 +569,59 @@ def load_break_news(
                 tier="tier1", confidence=1.0, last_seen=date_part,
                 sources={source_tag},
             ))
+
+        # Phase 2 provisional direct edge loading
+        if direct_edge_enabled:
+            merged_relations = summary.get("merged_relations") or []
+            for rel in merged_relations:
+                if not isinstance(rel, dict):
+                    continue
+                subj = rel.get("subject") or ""
+                pred = rel.get("predicate") or ""
+                obj = rel.get("object") or ""
+                if subj.startswith("ticker:") and obj.startswith("ticker:"):
+                    if pred == "CUSTOMER_OF":
+                        subj, obj, pred = obj, subj, "SUPPLIES_TO"
+                    
+                    t_subj = subj.replace("ticker:", "")
+                    t_obj = obj.replace("ticker:", "")
+                    if universe and (t_subj not in universe or t_obj not in universe):
+                        continue
+
+                    try:
+                        supp_count = int(rel.get("support_count", 1))
+                    except (TypeError, ValueError):
+                        supp_count = 1
+                    cross_count = cross_item_counts.get((subj, pred, obj), 0)
+                    if supp_count >= 2 or cross_count >= 2:
+                        get_or_make(subj, NodeType.TICKER.value, t_subj, date_part)
+                        get_or_make(obj, NodeType.TICKER.value, t_obj, date_part)
+
+                        conf_avg = rel.get("confidence_avg")
+                        try:
+                            weight_val = min(0.15, float(conf_avg) if conf_avg is not None else 0.15)
+                        except (ValueError, TypeError):
+                            weight_val = 0.15
+
+                        edge = Edge(
+                            source=subj,
+                            target=obj,
+                            type=pred,
+                            raw_frequency=1.0,
+                            weight=weight_val,
+                            tier="tier1",
+                            confidence=1.0,
+                            last_seen=date_part,
+                            sources={source_tag},
+                            metadata={
+                                "is_break_news": True,
+                                "provisional": True,
+                                "support_count": supp_count,
+                                "cross_item_count": cross_count,
+                                "confidence_avg": conf_avg,
+                            },
+                        )
+                        edges.append(edge)
 
     return nodes, edges
 

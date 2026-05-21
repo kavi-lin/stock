@@ -720,11 +720,12 @@ def _digest_comention_index() -> dict[tuple[str, str], dict]:
 
 
 def _nexus_edge_index() -> dict:
-    """Return {(ticker_a, ticker_b): {count, types, sources}} for ticker↔ticker
-    edges in the Nexus graph. The key pair is sorted so lookups are
-    direction-agnostic. Nexus edges already fold in break-news debate relations
-    (SUPPLIES_TO / BENEFITS_FROM / COMPETES_WITH …), so this is how a supply-
-    chain edge gets cross-checked against real debates."""
+    """Return ticker↔ticker Nexus edges indexed by unordered pair.
+
+    Each entry keeps directed edge records so supply-chain enrichment can
+    distinguish true upstream→downstream evidence from unrelated co-mentions or
+    competitor/headwind edges.
+    """
     idx: dict = {}
     try:
         d = json.loads(NEXUS_FILE.read_text(encoding="utf-8"))
@@ -738,13 +739,58 @@ def _nexus_edge_index() -> dict:
         if not a or not b or a == b:
             continue
         slot = idx.setdefault(tuple(sorted((a, b))),
-                              {"count": 0, "types": set(), "sources": set()})
+                              {"count": 0, "types": set(), "sources": set(), "edges": []})
         slot["count"] += 1
         if e.get("type"):
             slot["types"].add(str(e["type"]))
         for src in e.get("sources") or []:
             slot["sources"].add(str(src))
+        slot["edges"].append({
+            "source": a,
+            "target": b,
+            "type": str(e.get("type") or ""),
+            "sources": set(str(src) for src in (e.get("sources") or [])),
+            "metadata": e.get("metadata") if isinstance(e.get("metadata"), dict) else {},
+        })
     return idx
+
+
+def _normalise_chain_rel(rel: str | None, src: str, dst: str) -> tuple[str, str, str]:
+    """Return comparable (upstream, relation, downstream) for a chain edge."""
+    rel = str(rel or "SUPPLIES_TO").upper()
+    if rel == "CUSTOMER_OF":
+        return dst, "SUPPLIES_TO", src
+    return src, rel, dst
+
+
+def _break_news_relation_evidence(nexus_hit: dict | None, src: str, dst: str,
+                                  chain_rel: str | None) -> tuple[bool, list[str]]:
+    """Does Nexus contain a compatible provisional Break News edge?"""
+    if not nexus_hit:
+        return False, []
+    want_src, want_rel, want_dst = _normalise_chain_rel(chain_rel, src, dst)
+    matched_sources: set[str] = set()
+    for edge in nexus_hit.get("edges") or []:
+        srcs = set(edge.get("sources") or set())
+        if not any(s.startswith("break_news:") for s in srcs):
+            continue
+        meta = edge.get("metadata") or {}
+        if meta and not meta.get("provisional"):
+            continue
+        edge_src = str(edge.get("source") or "").upper()
+        edge_dst = str(edge.get("target") or "").upper()
+        edge_rel = str(edge.get("type") or "").upper()
+        edge_src, edge_rel, edge_dst = _normalise_chain_rel(edge_rel, edge_src, edge_dst)
+
+        compatible = False
+        if want_rel == "SUPPLIES_TO":
+            compatible = edge_rel in ("SUPPLIES_TO", "CONTRACT_MFG_FOR") and edge_src == want_src and edge_dst == want_dst
+        elif want_rel in ("CO_DEVELOPS_WITH", "COMPETES_WITH"):
+            compatible = edge_rel == want_rel and {edge_src, edge_dst} == {want_src, want_dst}
+
+        if compatible:
+            matched_sources.update(s for s in srcs if s.startswith("break_news:"))
+    return bool(matched_sources), sorted(matched_sources)
 
 
 def enrich(chain: dict) -> dict:
@@ -833,6 +879,7 @@ def enrich(chain: dict) -> dict:
         node_ticker[n.get("id")] = _normalise_symbol(
             n.get("ticker") or n.get("alias_used") or prof.get("symbol")
         )
+    nexus_edges = _nexus_edge_index()
     edge_idx = _digest_comention_index()
     for e in chain.get("edges", []):
         ta, tb = node_ticker.get(e.get("from")), node_ticker.get(e.get("to"))
@@ -840,8 +887,30 @@ def enrich(chain: dict) -> dict:
         count = int((hit or {}).get("count") or 0)
         sources = list((hit or {}).get("sources") or [])[:8]
         ok = count >= _RELATION_CORMENTION_THRESHOLD
+        
+        # Check if there's a compatible break-news provisional edge in Nexus.
+        is_bn_provisional = False
+        bn_sources: list[str] = []
+        if ta and tb and ta != tb:
+            nexus_hit = nexus_edges.get(tuple(sorted((ta, tb))))
+            is_bn_provisional, bn_sources = _break_news_relation_evidence(
+                nexus_hit, ta, tb, e.get("rel")
+            )
+
+        if ok:
+            level = "corroborated_relation"
+            weight = 1.0
+        elif is_bn_provisional:
+            level = "break_news_provisional"
+            weight = 0.2
+            sources = sorted(list(set(sources + bn_sources)))[:8]
+        else:
+            level = "llm_relation"
+            weight = 0.4
+
         e["relation_evidence"] = {
-            "level": "corroborated_relation" if ok else "llm_relation",
+            "level": level,
+            "weight": weight,
             "co_mention_count_30d": count,
             "threshold": _RELATION_CORMENTION_THRESHOLD,
             "sources": sources,
@@ -852,6 +921,14 @@ def enrich(chain: dict) -> dict:
                 "count": count,
                 "nexus_types": ["digest_co_mention"],
                 "sources": sources,
+                "weight": weight,
+            }
+        elif is_bn_provisional:
+            e["corroboration"] = {
+                "count": 0,
+                "nexus_types": ["break_news_provisional"],
+                "sources": sources,
+                "weight": weight,
             }
         else:
             e["corroboration"] = None
