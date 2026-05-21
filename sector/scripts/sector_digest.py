@@ -36,27 +36,9 @@ CACHE_DIR = ROOT / "sector" / "cache"
 THEME_CACHE_DIR = ROOT / "skills" / "theme-detector" / "cache"
 PHASE0_SCRIPT = ROOT / "sector" / "scripts" / "phase0_read_caches.py"
 
-# Canonical 11 sector names (cache key order)
-SECTORS = [
-    "Technology", "Healthcare", "Energy", "Financials", "Industrials",
-    "Materials", "Communication", "Consumer_Discretionary",
-    "Consumer_Staples", "Utilities", "Real_Estate",
-]
+sys.path.insert(0, str(ROOT))
+from sector.lib.sector_utils import canonicalize_sector_name, CANONICAL_SECTORS as SECTORS
 
-# theme-detector sector_uptrend uses GICS-ish display names
-UPTREND_NAME_MAP = {
-    "Technology": "Technology",
-    "Healthcare": "Healthcare",
-    "Energy": "Energy",
-    "Financials": "Financial",
-    "Industrials": "Industrials",
-    "Materials": "Basic Materials",
-    "Communication": "Communication Services",
-    "Consumer_Discretionary": "Consumer Cyclical",
-    "Consumer_Staples": "Consumer Defensive",
-    "Utilities": "Utilities",
-    "Real_Estate": "Real Estate",
-}
 
 
 def load_json(path: Path):
@@ -108,17 +90,15 @@ def theme_heat_by_sector(theme_data):
     if not theme_data:
         return out
     themes = (theme_data.get("themes") or {}).get("all") or []
-    # display-name -> canonical
-    disp_to_canon = {v: k for k, v in UPTREND_NAME_MAP.items()}
     for t in themes:
         heat = t.get("heat")
         if heat is None:
             continue
         touched = set()
         for sw in (t.get("sector_weights") or {}):
-            touched.add(disp_to_canon.get(sw, sw))
+            touched.add(canonicalize_sector_name(sw))
         for cs in (t.get("cross_sector_reach") or []):
-            touched.add(disp_to_canon.get(cs, cs))
+            touched.add(canonicalize_sector_name(cs))
         for s in touched:
             if s in out and (out[s] is None or heat > out[s]):
                 out[s] = heat
@@ -130,11 +110,12 @@ def uptrend_by_sector(theme_data):
     if not theme_data:
         return out
     su = theme_data.get("sector_uptrend") or {}
-    for canon, disp in UPTREND_NAME_MAP.items():
-        blk = su.get(disp) or su.get(canon)
-        if isinstance(blk, dict):
+    for raw_key, blk in su.items():
+        canon = canonicalize_sector_name(raw_key)
+        if canon in out and isinstance(blk, dict):
             out[canon] = blk.get("ratio")
     return out
+
 
 
 def print_macro_header(layers):

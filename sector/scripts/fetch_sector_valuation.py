@@ -14,20 +14,7 @@ from statistics import mean, pstdev
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from sector.lib.fmp_client import cache_path, fmp_get  # noqa: E402
-
-FMP_TO_PROJECT = {
-    "Basic Materials":        "Materials",
-    "Communication Services": "Communication",
-    "Consumer Cyclical":      "Consumer_Discretionary",
-    "Consumer Defensive":     "Consumer_Staples",
-    "Energy":                 "Energy",
-    "Financial Services":     "Financials",
-    "Healthcare":             "Healthcare",
-    "Industrials":            "Industrials",
-    "Real Estate":            "Real_Estate",
-    "Technology":             "Technology",
-    "Utilities":              "Utilities",
-}
+from sector.lib.sector_utils import canonicalize_sector_name, CANONICAL_SECTORS, PROJECT_TO_FMP  # noqa: E402
 
 SECTOR_ETF = {
     "Technology":             "XLK",
@@ -47,21 +34,21 @@ EXCHANGES = ["NASDAQ", "NYSE"]
 
 
 def fetch_pe_snapshot(d: str) -> dict:
-    out: dict = {v: {} for v in FMP_TO_PROJECT.values()}
+    out: dict = {v: {} for v in CANONICAL_SECTORS}
     for exch in EXCHANGES:
         rows = fmp_get("/stable/sector-pe-snapshot", {"date": d, "exchange": exch}, timeout=15)
         if not isinstance(rows, list) or not rows:
             sys.exit(f"[ERROR] FMP sector-pe-snapshot returned empty for {d}/{exch}")
         for row in rows:
-            proj = FMP_TO_PROJECT.get(row.get("sector"))
-            if proj:
+            proj = canonicalize_sector_name(row.get("sector"))
+            if proj in CANONICAL_SECTORS:
                 out[proj][exch] = float(row["pe"])
     return out
 
 
 def fetch_pe_history(from_d: str, to_d: str) -> dict:
-    out: dict = {v: {"NASDAQ": [], "NYSE": []} for v in FMP_TO_PROJECT.values()}
-    for fmp_name, proj in FMP_TO_PROJECT.items():
+    out: dict = {v: {"NASDAQ": [], "NYSE": []} for v in CANONICAL_SECTORS}
+    for proj, fmp_name in PROJECT_TO_FMP.items():
         for exch in EXCHANGES:
             rows = fmp_get(
                 "/stable/historical-sector-pe",

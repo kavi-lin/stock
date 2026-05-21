@@ -25,6 +25,11 @@ REGIME_MATRIX = {
     "Transitional":           {"cyclical": 1.00, "defensive": 1.00},
 }
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from sector.lib.sector_utils import canonicalize_sector_name
+
 # GICS-ish classification used by sector protocol
 DEFENSIVE_SECTORS = {"Healthcare", "Utilities", "Consumer_Staples", "Real_Estate"}
 # Everything else (Tech, Materials, Energy, Financials, Industrials, Cons_Disc, Comm) → cyclical
@@ -36,18 +41,18 @@ OVERRIDE_CAP_LOW      = 0.70
 
 
 def classify(name: str) -> str:
-    """Return 'cyclical' or 'defensive'. Tolerates 'Real Estate' / 'Real_Estate' etc."""
-    n = name.replace(" ", "_")
-    return "defensive" if n in DEFENSIVE_SECTORS else "cyclical"
+    """Return 'cyclical' or 'defensive' using canonicalize_sector_name."""
+    canon = canonicalize_sector_name(name)
+    return "defensive" if canon in DEFENSIVE_SECTORS else "cyclical"
 
 
 def _matches(sector: str, lst) -> bool:
-    """Sector name match tolerant of space/underscore differences."""
+    """Sector name match using canonicalize_sector_name."""
     if not lst:
         return False
-    target = sector.replace(" ", "_").lower()
+    target = canonicalize_sector_name(sector)
     for s in lst:
-        if s.replace(" ", "_").lower() == target:
+        if canonicalize_sector_name(s) == target:
             return True
     return False
 
@@ -191,9 +196,17 @@ def main():
     import os
     import sys
 
-    here     = os.path.dirname(os.path.abspath(__file__))
+    # Robust repo root finder by locating CLAUDE.md
+    current = os.path.dirname(os.path.abspath(__file__))
+    root_dir = current
+    while current != os.path.dirname(current):
+        if os.path.exists(os.path.join(current, "CLAUDE.md")):
+            root_dir = current
+            break
+        current = os.path.dirname(current)
+    
     fred_default = os.path.abspath(
-        os.path.join(here, "..", "..", "skills/fred-macro/cache/fred_latest.json")
+        os.path.join(root_dir, "skills/fred-macro/cache/fred_latest.json")
     )
 
     ap = argparse.ArgumentParser(

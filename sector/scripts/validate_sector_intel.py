@@ -14,6 +14,15 @@ ROOT     = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(ROOT, "sector/sector_logs")
 EXPECTED_VERSION = "V1.4"
 
+# v3.14.6 — strict canonicalization for LLM-emitted sector names. Validator
+# trips schema fail if `sectors[].name` is not in the canonical 11-key set,
+# preventing decision.json leaks of `"Financial Services"` (display name) or
+# whitespace-padded variants from polluting downstream cache lookups.
+sys.path.insert(0, ROOT)
+from sector.lib.sector_utils import (  # noqa: E402
+    canonicalize_sector_name, CANONICAL_SECTORS, UnknownSectorError,
+)
+
 # V1.4 — sector valuation block required on each _phase1.sectors[]
 SECTOR_VALUATION_REQUIRED = [
     "pe_ttm", "pe_zscore_1y", "rs_vs_spy_3m", "etf_volume_ratio_20d",
@@ -104,6 +113,58 @@ def main():
         ftd = p0.get("ftd") or {}
         if not ftd or "state" not in ftd or "quality_score" not in ftd:
             errors.append("_phase0.ftd missing state/quality_score (Global Rule 2 requires cache refresh)")
+        else:
+            # Verbatim assert against the FTD snapshot that build_sector_intel
+            # actually consumed. `source_file` (v3.14.6+) is the repo-relative
+            # path; if the FTD daemon rolled a new snapshot between build and
+            # validate, this avoids the false-positive "hallucination" call.
+            #
+            # Pre-v3.14.6 reports lack `source_file` — we soft-skip with a
+            # warning rather than hard-fail against a possibly-mismatched
+            # latest snapshot.
+            ftd_source_file = ftd.get("source_file")
+            ftd_cache_path = None
+            if ftd_source_file:
+                candidate = os.path.join(ROOT, ftd_source_file)
+                if os.path.exists(candidate):
+                    ftd_cache_path = candidate
+                else:
+                    print(
+                        f"[validate_sector_intel] WARNING: FTD source_file "
+                        f"{ftd_source_file!r} missing on disk — skipping "
+                        "verbatim FTD assert (no unsafe fallback to latest).",
+                        file=sys.stderr,
+                    )
+            else:
+                # Legacy: confirm at least one FTD cache exists, then skip
+                ftd_files = sorted(glob.glob(os.path.join(
+                    ROOT, "sector", "ftd_cache", "ftd_detector_*.json"
+                )))
+                if ftd_files:
+                    print(
+                        "[validate_sector_intel] WARNING: legacy report has no "
+                        "_phase0.ftd.source_file — verbatim FTD assert skipped "
+                        "(re-run build to record source_file).",
+                        file=sys.stderr,
+                    )
+                else:
+                    errors.append("No FTD cache file found under sector/ftd_cache")
+
+            if ftd_cache_path:
+                try:
+                    with open(ftd_cache_path, "r", encoding="utf-8") as f:
+                        ftd_cache_data = json.load(f)
+                    expected_status_text = (ftd_cache_data.get("ftd_timeline") or {}).get("ftd_status_text")
+                    actual_status_text = ftd.get("ftd_status_text")
+                    if expected_status_text != actual_status_text:
+                        errors.append(
+                            f"FTD status text mismatch (hallucination detected) "
+                            f"against {ftd_source_file}: "
+                            f"expected verbatim: {expected_status_text!r}, "
+                            f"got: {actual_status_text!r}"
+                        )
+                except Exception as e:
+                    errors.append(f"Failed to read/verify FTD cache {ftd_source_file!r}: {e}")
         mt = p0.get("market_top") or {}
         if not mt or "composite_score" not in mt or "zone" not in mt:
             errors.append("_phase0.market_top missing composite_score/zone")
@@ -214,6 +275,26 @@ def main():
         errors.append("top-level sectors[] must be non-empty")
     else:
         for i, s in enumerate(sectors):
+            name = s.get("name")
+            # v3.14.6 — canonicalize gate. LLM emitting "Financial Services"
+            # or " Technology " (padded) used to silently drift downstream;
+            # now it fails the schema at the gate.
+            if not isinstance(name, str) or not name.strip():
+                errors.append(f"sectors[{i}]: missing name")
+            else:
+                try:
+                    canon = canonicalize_sector_name(name, strict=True)
+                except UnknownSectorError as e:
+                    errors.append(
+                        f"sectors[{i}] ({name!r}): unknown sector name. "
+                        f"{e}. Expected one of {CANONICAL_SECTORS}."
+                    )
+                else:
+                    if canon != name:
+                        errors.append(
+                            f"sectors[{i}] ({name!r}): name not in canonical "
+                            f"form. Use {canon!r} (see sector/lib/sector_utils.py)."
+                        )
             verd = s.get("verdict")
             if verd not in VALID_VERDICTS:
                 errors.append(f"sectors[{i}] ({s.get('name','?')}): verdict={verd!r} must be one of {VALID_VERDICTS}")

@@ -1,7 +1,45 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-21 (v3.14.4)
+> **Last Updated**: 2026-05-21 (v3.14.6)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.14.5 → v3.14.6) — Sector validator hardening + 4 codex follow-ups
+
+Codex review of v3.14.5 ship 抓到 4 點(2 correctness + 2 overclaim),全收:
+
+- **P1-1 FTD verifier race condition**:v3.14.5 validator 拿「磁碟最新 FTD cache」跟 sector intel 比對,FTD daemon 若在 build 之後寫新 snapshot 就會把合法舊報告誤判 hallucination。修法:`build_sector_intel.py` 把實際讀的 FTD cache repo-relative path 寫入 `_phase0.ftd.source_file`(從 `layers.ftd.file`);validator 改成讀 **那個檔**比對,缺 source_file 的 legacy 報告 → 警告 + 跳過(不 fallback latest 以免誤殺)。
+- **P1-2 N=5 dual-run criteria overclaim**:v3.14.5 CHANGELOG/SESSION_NOTES 寫「N=5 sessions, 0 hard diff > 1.0…」當成已 enforced 規格,但 calculator 只看當次 run,沒 history 持久化。本輪改寫為「per-run shadow check;N=5 promotion thresholds 已 document 但 history 持久化留下次 patch」。`SECTOR_CALC_STRICT=1` 仍只在當次 run 內 fail-fast,不跨 run 累計。
+- **P2-1 validator 沒接 canonicalize**:v3.14.5 CHANGELOG 列了 `validate_sector_intel.py` 在統一 canonicalization 清單裡,但 diff 沒 import `sector_utils`。本輪真的接上:validator import `canonicalize_sector_name(strict=True)` 對 `sectors[].name` assert,LLM emit `"Financial Services"` 或 `" Technology "` 即 schema fail。
+- **P2-2 `sector_utils` 缺 strict mode**:`canonicalize_sector_name` 對未知名永遠 warning + fallback。本輪加 `strict=False` kwarg(default 不破壞既有 caller),`strict=True` 時 raise `UnknownSectorError`。builder / validator / pytest 用 strict;digest / fetch 維持寬鬆。
+
+實測:`pytest tests/test_gics_sector_audit.py` 4/4 pass(含新 strict mode + validator canonicalize 案例)。validator 跑既有 2026-05-20_sector_intel.json → legacy report warning + 跳過 FTD verbatim,其他 schema check rc=0。
+
+未做(留下次):
+- N=5 history file persistence(`sector/sector_logs/_calc_dual_run_history.json`)— 補上後 `SECTOR_CALC_STRICT=1` 可跨 5 run 算 promotion gate
+- calculator Phase 2 — replicate Step 1-4 動態乘數心算
+
+版本 bump 3.14.5→3.14.6。
+
+## 🟢 Session Note (v3.14.4 → v3.14.5) — Sector protocol precision alias & score calculator shadow-run
+
+使用者與 Codex review 要求優化與修復產業掃描協定 (Sector Protocol V1.4)，確保系統算術正確性、防止靜默失效及漸進遷移原則。本輪實作採納 P0/P1/P2 重點：
+
+- **共享別名模組統一 (A, D)**：
+  - 新增 `sector/lib/sector_utils.py`，定義 11 大 Canonical Sector 名稱，維護顯式 `SECTOR_ALIASES` 與 `PROJECT_TO_FMP` 對齊字典。
+  - 將名稱對齊完全引入口入端 `fetch_sector_valuation.py`（對齊 FMP API）、`sector_digest.py`、`step6_overlay.py` 及 `build_sector_intel.py`，完全消除因空格/大小寫引起的 valuation 快取載入失敗與 key 漂移，修復 Financials `n/a` 問題。
+  - 為 `tests/test_gics_sector_audit.py` 加上 `@pytest.mark.skipif(not theme_caches)` 裝飾器，防止 CI 在無快取環境中報錯，且測試已完全通過。
+- **心算分數計算器雙軌運行 (B, C)**：
+  - 建立 `sector/scripts/sector_score_calculator.py`，當前為 Phase 1 (Summation and Post-scaling sanity check) 弱驗證版本，驗證 4 大 lane 分數加總、估值 penalty 漂移與 FRED 乘積後 cap 上限（**注意：此版本暫未 replicate Step 1-4 動態乘數心算，Phase 2 留下次擴展 Step 1-4 multiplier replication**）。
+  - 驗證 `score_components` 欄位確為 4 大 lane (每維度 `[0, 25]`，相加上限為 `100`，加總公式正確)。
+  - **Per-run** shadow 檢查;promotion thresholds (N=5 sessions, 0 hard diff > 1.0, ≤2 soft diff 0.5-1.0, 0 valuation penalty drift) **僅文件記載,未實作 history 持久化**(v3.14.6 honesty fix)。`build_sector_intel.py` shadow 運行中當次抓到 Industrials 板塊 composite score LLM 與心算的 2 分差距 (50 vs 48)。
+- **FTD Verbatim 反幻覺比對**：
+  - 在 `build_sector_intel.py` 內將 `ftd_timeline` 資訊組裝橋接寫入 `_phase0.ftd`。
+  - 在 `validate_sector_intel.py` 內直接載入磁碟最新 FTD 快取之 `ftd_status_text` 字串原值，進行精確字串比對，拒絕 LLM 的二次加工重寫。
+- **FRED 快取與新鮮度路徑防護**：
+  - `step6_overlay.py` 引入口專案根目錄定位器 (尋找 `CLAUDE.md`) 計算絕對路徑，確保 Cron 執行時相對路徑漂移不影響 `fred_latest.json` 載入。
+  - 修改 `sector/phase_0.md`，統一以產出的 `generated_at` < 3 小時為新鮮度基準，不看 `mtime`。
+
+版本 bump 3.14.4→3.14.5。
 
 ## 🟢 Session Note (v3.14.3 → v3.14.4) — Supply-chain FMP verification + relation evidence
 

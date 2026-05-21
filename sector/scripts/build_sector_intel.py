@@ -78,6 +78,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -88,6 +89,10 @@ CACHE_DIR = ROOT / "sector" / "cache"
 LOGS_DIR = ROOT / "sector" / "sector_logs"
 PHASE0_SCRIPT = ROOT / "sector" / "scripts" / "phase0_read_caches.py"
 VALIDATOR = ROOT / "sector" / "scripts" / "validate_sector_intel.py"
+
+sys.path.insert(0, str(ROOT))
+from sector.lib.sector_utils import canonicalize_sector_name
+from sector.scripts.sector_score_calculator import run_shadow_score_check, verify_session_dual_run
 
 
 def die(msg: str) -> None:
@@ -128,6 +133,12 @@ def build_phase0(date: str) -> dict:
     layers = p0raw.get("layers", {})
     breadth = (layers.get("breadth") or {}).get("data") or {}
     ftd = (layers.get("ftd") or {}).get("data") or {}
+    # phase0_read_caches.py writes the relative path of the actual FTD cache
+    # it consumed into `layers.ftd.file`. We persist this so validator can
+    # later verify against the SAME file (not whichever happens to be latest
+    # at validation time) — avoids race-condition false positives when the
+    # FTD daemon writes a new snapshot between build and validate.
+    ftd_source_file = (layers.get("ftd") or {}).get("file")
     mtop = (layers.get("market_top") or {}).get("data") or {}
     fred = (layers.get("fred") or {}).get("data") or {}
     fred_available = bool((layers.get("fred") or {}).get("available"))
@@ -153,6 +164,7 @@ def build_phase0(date: str) -> dict:
     ftd_state = (ftd.get("market_state") or {})
     ftd_qual = (ftd.get("quality_score") or {})
 
+    ftd_timeline = ftd.get("ftd_timeline") or {}
     phase0 = {
         "phase": 0,
         "agent": "Macro_Regime_Analyst",
@@ -179,7 +191,15 @@ def build_phase0(date: str) -> dict:
                               else ftd_qual.get("score")),
             "exposure_range": ftd_state.get("exposure_range")
                               or ftd_state.get("recommended_exposure"),
+            "ftd_status_text": ftd_timeline.get("ftd_status_text"),
+            "ftd_day_number": ftd_timeline.get("ftd_day_number"),
+            "days_since_ftd": ftd_timeline.get("days_since_ftd"),
+            "rally_day_count": ftd_timeline.get("rally_day_count"),
             "source": "ftd_cache",
+            # Repo-relative path of the FTD cache file actually consumed at
+            # build time. Validator uses this to read the same snapshot for
+            # verbatim assertion; absence (legacy reports) is tolerated.
+            "source_file": ftd_source_file,
         },
         "market_top": {
             "composite_score": mt_comp.get("composite_score"),
@@ -263,9 +283,11 @@ def build(date: str, decision_path: Path) -> dict:
     p1_sectors = []
     uptrend_vals = []
     for s in dec_sectors:
-        name = s.get("name")
-        if not name:
+        raw_name = s.get("name")
+        if not raw_name:
             die("a decision.sectors[] entry is missing 'name'")
+        name = canonicalize_sector_name(raw_name)
+        s["name"] = name
         sv = val_sectors.get(name)
         if not isinstance(sv, dict):
             die(f"sector_valuation cache has no entry for sector '{name}' "
@@ -318,6 +340,7 @@ def build(date: str, decision_path: Path) -> dict:
 
     # ── top-level sectors[] (final verdicts) ──────────────────────────────
     sectors_out = []
+    shadow_reports = []
     for s in dec_sectors:
         name = s["name"]
         sc = s.get("score_components") or {}
@@ -330,11 +353,15 @@ def build(date: str, decision_path: Path) -> dict:
         key_reasons = s.get("key_reasons")
         if not key_reasons:
             key_reasons = s.get("sector_actions") or []
+        p1_sec = next((p for p in p1_sectors if p["name"] == name), {})
         entry = {
             "name": name,
             "verdict": verdict,
             "composite_score": s.get("composite_score"),
             "score_components": sc,
+            "uptrend_ratio": p1_sec.get("uptrend_ratio"),
+            "rotation_signal": p1_sec.get("rotation_signal"),
+            "cyclical_or_defensive": p1_sec.get("cyclical_or_defensive"),
             "key_reasons": key_reasons,
             "devils_advocate_note": s.get("devils_advocate_note", ""),
             "tail_risk_label": s.get("tail_risk_label", "N/A"),
@@ -344,6 +371,26 @@ def build(date: str, decision_path: Path) -> dict:
         if s.get("step6_fred_multiplier") is not None:
             entry["step6_fred_multiplier"] = s["step6_fred_multiplier"]
         sectors_out.append(entry)
+
+        # Build a unified view including phase1-enriched fields for shadow check
+        s_unified = {
+            **s,
+            "uptrend_ratio": p1_sec.get("uptrend_ratio"),
+            "rotation_signal": p1_sec.get("rotation_signal"),
+            "cyclical_or_defensive": p1_sec.get("cyclical_or_defensive"),
+        }
+
+        # Run shadow scoring check
+        report = run_shadow_score_check(s_unified, val_sectors)
+        shadow_reports.append(report)
+
+    is_ok, summary_msg = verify_session_dual_run(shadow_reports)
+    print(summary_msg, file=sys.stderr)
+
+    if not is_ok and os.environ.get("SECTOR_CALC_STRICT") == "1":
+        print("[build_sector_intel] ERROR: Calculator dual-run failed under strict enforcement mode (SECTOR_CALC_STRICT=1).", file=sys.stderr)
+        sys.exit(1)
+
 
     # ── _phase4c (today_verdict + stance) ─────────────────────────────────
     today_verdict = require(decision, "today_verdict")

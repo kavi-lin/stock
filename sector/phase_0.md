@@ -2,7 +2,7 @@
 
 **Agent**: Macro Regime Analyst
 
-讀取 `./sector_logs/*_sector_intel.json` 最新檔（FRESH = mtime < 3 小時前 / 10800s）：
+讀取 `./sector_logs/*_sector_intel.json` 最新檔（FRESH = 內部 `generated_at` < 3 小時前 / 10800s，不看 `mtime`，詳見主文件全局規則 2）：
 - FRESH → 載入，跳至 Phase 2（Phase 3 仍需重新執行；FTD/market_top 新鮮度補丁見 Global Rule 2）
 - STALE 或缺失 → 執行以下分析並寫入 `./sector_logs/YYYY-MM-DD_sector_intel.json`
 

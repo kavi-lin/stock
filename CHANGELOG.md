@@ -8,9 +8,83 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.14.6] — 2026-05-21 — Sector validator hardening + honesty fixes
+
+Follow-up to v3.14.5 — codex review caught 4 issues. All addressed.
+
+### Fixed — FTD validator now uses build-time source_file, not latest cache
+
+- `build_sector_intel.py` records the actual FTD cache file consumed at build
+  time into `_phase0.ftd.source_file` (repo-relative path from
+  `phase0_read_caches.py` `layers.ftd.file`).
+- `validate_sector_intel.py` reads **that** file for the verbatim assert, not
+  the latest snapshot in `sector/ftd_cache/`. The FTD daemon writing a new
+  snapshot between build and validate no longer flags a legitimate report as
+  a "hallucination".
+- Legacy reports without `source_file` get a stderr warning + skip (never
+  hard-fail against a possibly-mismatched latest snapshot).
+
+### Added — Validator canonicalizes sectors[].name (P2-1)
+
+- `validate_sector_intel.py` now imports `sector_utils.canonicalize_sector_name`
+  and runs it with `strict=True` on each `sectors[].name`. LLM emitting display
+  / prose / whitespace-padded variants (`"Financial Services"`, `" Technology "`)
+  trips a schema fail at the gate.
+- Closes the loop on v3.14.5's alias module — the previous changelog claimed
+  validator was canonicalized, but the diff didn't add the import. Fixed here.
+
+### Added — `sector_utils` strict mode (P2-2)
+
+- `canonicalize_sector_name(name, *, silent=False, strict=False)` — new
+  `strict` kwarg raises `UnknownSectorError` instead of falling back. Builder /
+  validator / pytest pass `strict=True`; digest / fetch keep the default
+  warning-fallback mode (upstream caches occasionally surface novel keys we
+  prefer to log + skip rather than crash on).
+
+### Fixed — Honesty on calculator dual-run promotion criteria (P1-2)
+
+The v3.14.5 changelog cited "N=5 sessions, 0 hard diffs > 1.0, ≤2 soft diffs,
+0 penalty drifts" as enforced criteria. The calculator only checks the
+**current** run — there is no history persistence. Rewording (here and in
+SESSION_NOTES.md) to say: "per-run shadow check; N=5 promotion thresholds are
+documented but not persisted yet — implementing the history file is a future
+patch." `SECTOR_CALC_STRICT=1` still fails-fast on the current run; it does
+not aggregate across runs.
+
+### Why
+
+Codex review of the v3.14.5 ship surfaced two correctness issues (FTD
+race-condition + validator canonicalize claim) and two overclaim issues
+(N=5 criteria not persisted + sector_utils not actually fail-fast). v3.14.6
+closes the loop on all four.
+
+---
+
+## [3.14.5] — 2026-05-21 — Sector protocol precision alias & score calculator shadow-run
+
+### Added — Unified sector alias module (SECTOR_ALIASES)
+- Created a shared explicit lookup module `sector/lib/sector_utils.py` mapping GICS prose names, display names, and FMP names to 11 Canonical Keys.
+- Unified name canonicalization inside `sector_digest.py`, `build_sector_intel.py`, `step6_overlay.py`, and `fetch_sector_valuation.py` to eliminate name drift bugs (like Financials n/a).
+  (Validator canonicalization shipped in v3.14.6 — the original v3.14.5 changelog incorrectly claimed it landed here.)
+
+### Added — Score calculator with shadow run
+- Implemented `sector_score_calculator.py` with multi-stage scoring verification: `base_score`, `pre_step6_score`, and `post_step6_score`. (**Note: This is Phase 1 = summation & post-scaling sanity check; Phase 2 is left for future Step 1-4 multiplier replication**).
+- Added dynamic FRED cyclic skip rules and valuation penalty checks.
+- Enabled Shadow Mode comparison inside `build_sector_intel.py`. **Per-run** check; the documented promotion thresholds (N=5 sessions, 0 hard diffs > 1.0, ≤2 soft diffs, 0 penalty drifts) are NOT persisted across runs in this version — history accumulation is a future patch (see v3.14.6 honesty note).
+
+### Added — FTD verbatim assert and path safety
+- Enriched `build_sector_intel.py` to bridge `ftd_timeline` into `_phase0.ftd`.
+- Implemented precision string assertions in `validate_sector_intel.py` against disk FTD cache to prevent LLM hallucination and rewriting. (v3.14.6 changed this from "latest snapshot" to "build-time source_file" to avoid race conditions — see that section.)
+- Fixed FRED cache path lookup in `step6_overlay.py` using repo-root locator.
+- Added pytest skip-if-no-cache decorator in `tests/test_gics_sector_audit.py` to prevent CI failure on empty caches.
+
+### Why
+- Deterministic calculation prevents random LLM math drifts, while unified aliasing stops name mismatches. Skip-on-no-cache decorators maintain CI stability without requiring cached files.
+
 ---
 
 ## [3.14.4] — 2026-05-21 — Supply-chain FMP company verification + relation evidence
+
 
 ### Added — FMP company/ticker verification
 
