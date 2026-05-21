@@ -175,6 +175,12 @@
             </div>`;
     }
 
+    function displayRegionName(name) {
+        const raw = String(name || '').trim();
+        if (/^taiwan,\s*province\s+of\s+china$/i.test(raw)) return 'Taiwan';
+        return raw || '?';
+    }
+
     function renderSegments(segments_q) {
         const grid = document.getElementById('ed-segment-grid');
         const tag  = document.getElementById('ed-segments-fallback');
@@ -201,7 +207,7 @@
         section.hidden = false;
         tag.hidden = !geographic_q.is_fy_fallback;
         grid.innerHTML = items.map(it => segmentCell(
-            it.region || it.name || '?', it.amount_usd, it.yoy_pct, 'globe', false
+            displayRegionName(it.region || it.name), it.amount_usd, it.yoy_pct, 'globe', false
         )).join('');
     }
 
@@ -713,7 +719,7 @@
             makeChart('ed-chart-geogrowth', {
                 type: 'bar',
                 data: {
-                    labels: geoItems.map(it => it.region || '?'),
+                    labels: geoItems.map(it => displayRegionName(it.region)),
                     datasets: [{
                         label: L.yoy,
                         data: geoItems.map(it => +(it.yoy_pct * 100).toFixed(1)),
@@ -741,7 +747,7 @@
                 const v = (it.yoy_pct * 100).toFixed(1);
                 const sign = parseFloat(v) >= 0 ? '+' : '';
                 const color = parseFloat(v) >= 0 ? 'rgb(34,197,94)' : 'rgb(239,68,68)';
-                return _summaryItem(it.region || '?', sign + v + '%', color);
+                return _summaryItem(displayRegionName(it.region), sign + v + '%', color);
             }).join(' · '));
         } else if (geoCard) {
             geoCard.style.display = 'none';

@@ -69,19 +69,42 @@
         }
     });
 
-    // V2.15.1 — build ticker → nearest-future-earnings-date map from data.json
-    // upcoming_events. Source events come from FMP earnings calendar (all
-    // fmp_confirmed by definition). Multiple future events → keep nearest.
+    function parseIsoDateLocal(iso) {
+        if (typeof iso !== 'string') return null;
+        const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!m) {
+            const d = new Date(iso);
+            return isNaN(d.getTime()) ? null : d;
+        }
+        return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    }
+
+    function daysFromToday(isoDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const d = parseIsoDateLocal(isoDate);
+        if (!d) return null;
+        d.setHours(0, 0, 0, 0);
+        return Math.round((d - today) / 86400000);
+    }
+
+    function isFmpConfirmedEarningsEvent(e) {
+        if (!e || e.category !== 'earnings') return false;
+        if (e.source === 'fmp-earnings') return true;
+        const sources = e.source_payload?._merged_from_sources;
+        return Array.isArray(sources) && sources.includes('fmp-earnings');
+    }
+
+    // V2.15.1 — build ticker → nearest future FMP-confirmed earnings date map.
+    // Sector-protocol/LLM events may be useful calendar context, but they are not
+    // precise enough to trigger pre-earnings mode.
     function rebuildUpcomingEarningsMap(upcomingEvents) {
         upcomingEarningsMap = {};
         if (!Array.isArray(upcomingEvents)) return;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
         for (const e of upcomingEvents) {
-            if (e.category !== 'earnings' || !e.date) continue;
-            const evd = new Date(e.date);
-            if (isNaN(evd.getTime())) continue;
-            const days = Math.round((evd - today) / 86400000);
+            if (!isFmpConfirmedEarningsEvent(e) || !e.date) continue;
+            const days = daysFromToday(e.date);
+            if (days === null) continue;
             if (days < 0) continue;  // past — skip
             for (const t of (Array.isArray(e.tickers) ? e.tickers : [])) {
                 const key = String(t).toUpperCase();
@@ -1005,11 +1028,8 @@
         // V2.15.0 — morph 重跑 → 📋 財報前瞻 when next earnings is fmp_confirmed AND ≤ 7 days
         let actionBtn;
         if (r.next_earnings_source === 'fmp_confirmed' && r.next_earnings_est) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const ne = new Date(r.next_earnings_est);
-            const daysUntil = Math.round((ne - today) / 86400000);
-            if (daysUntil >= 0 && daysUntil <= 7) {
+            const daysUntil = daysFromToday(r.next_earnings_est);
+            if (daysUntil !== null && daysUntil >= 0 && daysUntil <= 7) {
                 const tipZh = `下次財報 ${r.next_earnings_est}（${daysUntil}d）— 跑前瞻 cheat sheet（forecaster --pre-earnings）`;
                 const tipEn = `Next earnings ${r.next_earnings_est} (${daysUntil}d) — run pre-earnings cheat sheet`;
                 actionBtn = `<button class="ea-act-btn ea-act-btn-preview" data-action="preview" data-ticker="${r.ticker}" title="${isZh?tipZh:tipEn}">📋 ${isZh?'財報前瞻':'Preview'}</button>`;
