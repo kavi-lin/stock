@@ -1,18 +1,18 @@
 {
-  "date": "2026-05-20",
+  "date": "2026-05-21",
   "models": {
     "claude": {
-      "calls": 9,
-      "cooldown_until": "2026-05-20T21:14:32.317715+00:00",
-      "last_error": "\\n        ]\\n      },\\n      \\\"institutional_lens\\\": \\\"機構 13F 資料未取得 (FMP institutional bundle empty)；congressional 過 180d 淨買訊號 bullish (3 House 買 / 0 賣，net_signal=bullish, 最近 2026-04-13)；但 insider 連 4"
+      "calls": 75,
+      "cooldown_until": null,
+      "last_error": null
     },
     "gemini": {
-      "calls": 199,
+      "calls": 126,
       "cooldown_until": null,
-      "last_error": "timeout after 180s"
+      "last_error": "parse=failed"
     },
     "codex": {
-      "calls": 200,
+      "calls": 196,
       "cooldown_until": null,
       "last_error": "timeout after 180s"
     }
