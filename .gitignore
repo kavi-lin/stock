@@ -75,3 +75,9 @@ scripts/nexus/cache/build_log_*.json
 !news/news_logs/.gitkeep
 !sector/sector_logs/.gitkeep
 !investment/invest_logs/.gitkeep
+
+# Narrative Pulse Detector V1.0 — per-ticker cache (regenerable, TTL 4h)
+skills/narrative-pulse-detector/cache/
+
+# Per-session NOK image-card review thesis (private analysis, not part of repo history)
+reports/2026-05-23_NOK_image_review.md

@@ -191,7 +191,7 @@ echo ""
 # Tier 1 (structured JSON) + Tier 2 (regex tech-nodes) + Tier 3 (Haiku 4.5 NER, if key)
 # Output: Dashboard/nexus_graph.json
 # 失敗 non-fatal — 不打斷 pipeline
-echo "[ 8/8 ]  Nexus 知識圖譜（Tier 1+2+3）..."
+echo "[ 8/9 ]  Nexus 知識圖譜（Tier 1+2+3）..."
 # build_graph.py has a pagerank_lite fallback when networkx is missing, so we
 # no longer pip-install inside the cron path (it caused network/permission
 # flakes and silently mutated the python env).
@@ -204,6 +204,28 @@ if [ $NEXUS_RC -eq 0 ]; then
   echo "         ✅ Nexus graph 更新完成 → Dashboard/nexus_graph.json (${NEXUS_SIZE})"
 else
   echo "         ⚠️  Nexus build 失敗 (rc=${NEXUS_RC})，非致命，繼續..."
+fi
+
+echo ""
+
+# ── Step 9｜Narrative Pulse Detector (V1.0) ───────────────────────────
+# 跑 thematic-screener top movers + structural watchlist 共 ~30 ticker,寫
+# Dashboard/narrative_pulse.json (radar.html + index.html 共用)。
+# 失敗 non-fatal — 不打斷 pipeline。
+echo "[ 9/9 ]  Narrative Pulse 階段掃描..."
+set +e
+python3 skills/narrative-pulse-detector/scripts/batch_scan.py \
+  --source thematic_screener \
+  --top-n 30 \
+  --output Dashboard/narrative_pulse.json \
+  2> >(sed 's/^/         │ /' >&2)
+NPD_RC=$?
+set -e
+if [ $NPD_RC -eq 0 ]; then
+  NPD_COUNT=$(python3 -c "import json; d=json.load(open('Dashboard/narrative_pulse.json')); print(len(d.get('tickers',{})))" 2>/dev/null || echo "?")
+  echo "         ✅ Narrative Pulse 完成 → Dashboard/narrative_pulse.json (${NPD_COUNT} tickers)"
+else
+  echo "         ⚠️  Narrative Pulse 失敗 (rc=${NPD_RC})，非致命,繼續..."
 fi
 
 echo ""

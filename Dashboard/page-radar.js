@@ -1562,3 +1562,180 @@ window.addEventListener('resize', () => {
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('radar-kline-close')?.addEventListener('click', closeRadarKline);
 });
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Narrative Pulse Detector (NPD) — V1.0
+ * Self-contained block. Reads /api/narrative-pulse/data + on-demand single.
+ * ════════════════════════════════════════════════════════════════════════ */
+(function () {
+    const NPD_PULSE_TIMEOUT_MS = 90 * 1000;   // 90s for one-off ad-hoc fetch
+
+    function stageColor(stage) {
+        return { 1: '#10b981', 2: '#34d399', 3: '#facc15', 4: '#fb923c', 5: '#ef4444' }[stage] || '#71717a';
+    }
+    function stageEmoji(stage) {
+        return { 1: '🟢', 2: '🟡', 3: '🟡', 4: '🟠', 5: '🔴' }[stage] || '⚪';
+    }
+
+    async function fetchNPDData() {
+        try {
+            const r = await fetch('/api/narrative-pulse/data');
+            if (!r.ok) return null;
+            return await r.json();
+        } catch (e) { return null; }
+    }
+
+    async function fetchNPDTicker(ticker) {
+        const r = await fetch(`/api/narrative-pulse/ticker/${encodeURIComponent(ticker)}`, {
+            signal: AbortSignal.timeout ? AbortSignal.timeout(NPD_PULSE_TIMEOUT_MS) : undefined,
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
+        return await r.json();
+    }
+
+    function rowHTML(ticker, entry) {
+        const stage = entry.stage;
+        const c = stageColor(stage);
+        const er = entry.expected_return_pct;
+        const erColor = er >= 0 ? '#10b981' : '#ef4444';
+        const erTxt = `${er >= 0 ? '+' : ''}${er?.toFixed?.(1) ?? '?'}%`;
+        return `<a href="#" data-ticker="${ticker}" class="npd-row flex items-center justify-between gap-2 px-2 py-1 rounded hover:bg-zinc-800/50 text-[11px] no-underline transition-all">
+            <span class="font-mono font-bold tracking-wider" style="color:${c}">${ticker}</span>
+            <span class="text-zinc-400 text-[10px] truncate flex-1">S${stage} ${entry.stage_label_zh || '?'}</span>
+            <span class="font-mono font-bold" style="color:${erColor}">${erTxt}</span>
+        </a>`;
+    }
+
+    function renderRankings(data) {
+        if (!data || !data.ranking || !data.tickers) {
+            ['npd-list-risk', 'npd-list-opportunity', 'npd-list-distribution'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '<div class="text-[10px] text-zinc-500 px-2 py-1">無資料 · run daily_update Step 9</div>';
+            });
+            return;
+        }
+        const r = data.ranking;
+        const fill = (id, list) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (!list || list.length === 0) {
+                el.innerHTML = '<div class="text-[10px] text-zinc-500 px-2 py-1">—</div>';
+                return;
+            }
+            el.innerHTML = list.map(t => rowHTML(t, data.tickers[t] || {})).join('');
+        };
+        fill('npd-list-risk', r.top_risk);
+        fill('npd-list-opportunity', r.top_opportunity);
+        fill('npd-list-distribution', r.watch_distribution_imminent);
+
+        // Bind click handlers
+        document.querySelectorAll('.npd-row').forEach(a => {
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                const t = a.getAttribute('data-ticker');
+                renderDetailFromCache(t, data.tickers[t]);
+            });
+        });
+
+        // Update timestamp
+        const ts = document.getElementById('npd-last-updated');
+        if (ts && data.last_updated) {
+            const dt = new Date(data.last_updated);
+            ts.textContent = `last: ${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+        }
+    }
+
+    function renderDetailFromCache(ticker, entry) {
+        const panel = document.getElementById('npd-detail-panel');
+        if (!panel) return;
+        if (!entry || entry.error) {
+            panel.classList.remove('hidden');
+            panel.innerHTML = `<div class="text-xs text-rose-400">${ticker}: ${entry?.error || '無資料'} — 試試「探測」按鈕重抓</div>`;
+            return;
+        }
+        const stage = entry.stage;
+        const c = stageColor(stage);
+        const er = entry.expected_return_pct;
+        const erColor = er >= 0 ? '#10b981' : '#ef4444';
+        const sc = entry.scenarios || [];
+        const comp = entry.components || {};
+        const quote = entry.quote || {};
+        const scRows = sc.map(s => {
+            const pColor = s.target_pct >= 0 ? '#10b981' : '#ef4444';
+            return `<tr>
+                <td class="px-2 py-1">${s.label}</td>
+                <td class="px-2 py-1 text-right text-zinc-400">${(s.prob*100).toFixed(0)}%</td>
+                <td class="px-2 py-1 text-right font-mono" style="color:${pColor}">${s.target_pct >= 0 ? '+' : ''}${s.target_pct.toFixed(1)}%</td>
+                <td class="px-2 py-1 text-right font-mono">$${s.target_price ?? '—'}</td>
+            </tr>`;
+        }).join('');
+        panel.innerHTML = `
+            <div class="flex items-baseline justify-between flex-wrap gap-2">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-lg font-black tracking-tight font-mono" style="color:${c}">${ticker}</span>
+                    <span class="text-sm font-bold" style="color:${c}">${stageEmoji(stage)} Stage ${stage} ${entry.stage_label_zh}</span>
+                    <span class="text-[10px] text-zinc-500 font-mono">conf=${entry.stage_confidence?.toFixed?.(2) ?? '?'}</span>
+                </div>
+                <div class="flex items-baseline gap-3 text-[11px] font-mono">
+                    <span>$${quote.price ?? '?'}</span>
+                    <span style="color:${erColor}">E[R] ${er >= 0 ? '+' : ''}${er?.toFixed?.(2) ?? '?'}%</span>
+                    <span class="text-zinc-500">→ ${entry.recommended_action}</span>
+                </div>
+            </div>
+            <div class="text-[10px] text-zinc-500">Next warning: ${entry.next_warning_condition || '—'}</div>
+            <table class="w-full text-[11px] border-collapse">
+                <thead><tr class="text-zinc-500 text-[10px] uppercase tracking-wider">
+                    <th class="px-2 py-1 text-left">情境</th>
+                    <th class="px-2 py-1 text-right">機率</th>
+                    <th class="px-2 py-1 text-right">% 變動</th>
+                    <th class="px-2 py-1 text-right">目標價</th>
+                </tr></thead>
+                <tbody>${scRows}</tbody>
+            </table>
+            <div class="text-[10px] text-zinc-500 font-mono pt-1 border-t border-zinc-800">
+                RSI ${comp.rsi_14_latest?.toFixed?.(0) ?? '?'} (peak ${comp.rsi_peak_recent?.toFixed?.(0) ?? '?'},
+                streak ${comp.rsi_overbought_days ?? '?'}d) ·
+                P/SMA200 ${comp.price_to_sma200_ratio?.toFixed?.(2) ?? '?'}x ·
+                vol ${comp.volume_multiplier?.toFixed?.(1) ?? '?'}x baseline ·
+                impulse ${comp.gap_up_density_4w ?? '?'} bars/20d ·
+                DD ${comp.distribution_days_25d ?? '?'}/25d ·
+                PT raise ${comp.pt_raise_30d ?? '?'}/30d
+            </div>`;
+        panel.classList.remove('hidden');
+    }
+
+    async function probeTicker() {
+        const inp = document.getElementById('npd-ticker-input');
+        const status = document.getElementById('npd-probe-status');
+        const ticker = (inp?.value || '').trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, '').slice(0, 8);
+        if (!ticker) { if (status) status.textContent = '請輸入 ticker'; return; }
+        if (status) status.textContent = `探測 ${ticker}…`;
+        try {
+            const data = await fetchNPDTicker(ticker);
+            if (status) status.textContent = `✓ ${ticker}`;
+            renderDetailFromCache(ticker, data);
+            // Optionally refresh rankings to surface this ticker if it now qualifies
+            const fullData = await fetchNPDData();
+            if (fullData) renderRankings(fullData);
+        } catch (e) {
+            if (status) status.textContent = `✗ ${e.message.slice(0, 30)}`;
+        }
+    }
+
+    async function initNPD() {
+        const data = await fetchNPDData();
+        renderRankings(data);
+        document.getElementById('npd-probe-btn')?.addEventListener('click', probeTicker);
+        document.getElementById('npd-ticker-input')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') probeTicker();
+        });
+        if (window.lucide?.createIcons) window.lucide.createIcons();
+    }
+
+    // Init on DOM ready (additive — does not interfere with main page-radar render)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNPD);
+    } else {
+        initNPD();
+    }
+})();

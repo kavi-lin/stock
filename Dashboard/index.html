@@ -176,6 +176,51 @@
                 <div id="index-trend-mount"></div>
             </a>
 
+            <!-- ── Narrative Pulse mini-strip (V1.0) — top risk + opportunity per narrative trade stage ── -->
+            <a href="radar.html#npd-section" class="glass-card block p-3 no-underline" id="npd-mini-strip"
+               style="border-left:3px solid #fb923c">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Narrative 焦點</span>
+                        <span class="text-[10px] font-mono text-zinc-500" id="npd-mini-updated">—</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-[11px] font-mono flex-wrap" id="npd-mini-rows">
+                        <span class="text-zinc-500">載入中…</span>
+                    </div>
+                </div>
+            </a>
+            <script>
+            (async () => {
+                try {
+                    const r = await fetch('/api/narrative-pulse/data');
+                    if (!r.ok) return;
+                    const d = await r.json();
+                    if (!d || !d.tickers || !d.ranking) return;
+                    const stageColor = s => ({1:'#10b981',2:'#34d399',3:'#facc15',4:'#fb923c',5:'#ef4444'}[s] || '#71717a');
+                    const make = (t) => {
+                        const e = d.tickers[t]; if (!e) return '';
+                        const c = stageColor(e.stage);
+                        const er = e.expected_return_pct;
+                        const erC = er >= 0 ? '#10b981' : '#ef4444';
+                        return `<span><span style="color:${c}" class="font-bold">${t}</span> <span class="text-zinc-500">S${e.stage}</span> <span style="color:${erC}">${er>=0?'+':''}${er?.toFixed?.(0) ?? '?'}%</span></span>`;
+                    };
+                    const risks = (d.ranking.top_risk || []).slice(0, 3).map(make).filter(Boolean);
+                    const opps  = (d.ranking.top_opportunity || []).slice(0, 2).map(make).filter(Boolean);
+                    const rows = [...risks, ...opps];
+                    const mount = document.getElementById('npd-mini-rows');
+                    if (mount) {
+                        mount.innerHTML = rows.length ? rows.join('<span class="text-zinc-700">·</span>') : '<span class="text-zinc-500">尚無資料</span>';
+                    }
+                    const ts = document.getElementById('npd-mini-updated');
+                    if (ts && d.last_updated) {
+                        const dt = new Date(d.last_updated);
+                        ts.textContent = `${dt.getMonth()+1}/${dt.getDate()}`;
+                    }
+                } catch (e) { /* silent */ }
+            })();
+            </script>
+
             <!-- M3: Today's Focus Ticker (cross-module intersection, full-width attention strip) -->
             <div id="focus-ticker-card" class="hidden focus-ticker-promoted"></div>
 

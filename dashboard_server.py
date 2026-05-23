@@ -210,6 +210,13 @@ SCRIPT_PROTOCOLS = {
         "timeout": int(os.getenv("PREVIEW_TIMEOUT_SEC", "180")),  # 3 min
         "requires": ["ticker"],
     },
+    # V3.16 — Narrative Pulse on-demand single ticker
+    "narrative_pulse": {
+        "cmd": ["python3", "skills/narrative-pulse-detector/scripts/pulse.py", "{ticker}"],
+        "label_template": "🌡️ Pulse {ticker}",
+        "timeout": int(os.getenv("NARRATIVE_PULSE_TIMEOUT_SEC", "120")),
+        "requires": ["ticker"],
+    },
 }
 
 CUSTOM_PROTOCOLS = {
@@ -2836,6 +2843,78 @@ class Handler(SimpleHTTPRequestHandler):
                     "error":             _heatmap_state["error"],
                 }
             return self._json(200, payload)
+
+        # ── Narrative Pulse Detector V1.0 ────────────────────────────
+        if path == "/api/narrative-pulse/data":
+            npd_path = os.path.join(DASHBOARD_DIR, "narrative_pulse.json")
+            if not os.path.exists(npd_path):
+                return self._json(404, {
+                    "error": "narrative_pulse.json not built",
+                    "hint": "run skills/narrative-pulse-detector/scripts/batch_scan.py "
+                            "or wait for daily_update.sh Step 9",
+                })
+            try:
+                with open(npd_path, "r", encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except (OSError, json.JSONDecodeError) as e:
+                return self._json(500, {"error": str(e)})
+
+        if path.startswith("/api/narrative-pulse/ticker/"):
+            ticker = path.rsplit("/", 1)[-1].strip().upper()
+            if not re.match(r"^[A-Z][A-Z0-9.\-]{0,8}$", ticker):
+                return self._json(400, {"error": "invalid ticker"})
+            # Check fresh cache first (TTL handled by pulse.py)
+            today = datetime.utcnow().strftime("%Y-%m-%d")
+            cache_path = os.path.join(
+                ROOT, "skills/narrative-pulse-detector/cache",
+                f"{ticker}_{today}.json",
+            )
+            # Codex review #3 fix: invalidate cache when stage_weights.yaml
+            # changes (compare cached.weights_version to current config).
+            current_wv = None
+            try:
+                import yaml as _yaml
+                wcfg_path = os.path.join(
+                    ROOT, "skills/narrative-pulse-detector/config/stage_weights.yaml",
+                )
+                with open(wcfg_path, "r", encoding="utf-8") as f:
+                    current_wv = (_yaml.safe_load(f) or {}).get("weights_version")
+            except Exception:
+                pass
+            if os.path.exists(cache_path):
+                age_h = (datetime.utcnow().timestamp()
+                         - os.path.getmtime(cache_path)) / 3600
+                if age_h < 4:
+                    try:
+                        with open(cache_path, "r", encoding="utf-8") as f:
+                            cached = json.load(f)
+                        # Only serve from cache if weights_version matches
+                        if current_wv is None or cached.get("weights_version") == current_wv:
+                            return self._json(200, cached)
+                    except (OSError, json.JSONDecodeError):
+                        pass
+            # Cache miss / stale → dispatch subprocess synchronously (≤ 90s typical)
+            try:
+                proc = subprocess.run(
+                    ["python3", "skills/narrative-pulse-detector/scripts/pulse.py", ticker],
+                    cwd=ROOT, capture_output=True, text=True,
+                    timeout=int(os.getenv("NARRATIVE_PULSE_TIMEOUT_SEC", "120")),
+                )
+                if proc.returncode != 0:
+                    return self._json(500, {
+                        "error": "pulse.py failed",
+                        "stderr": proc.stderr[-2000:],
+                        "returncode": proc.returncode,
+                    })
+                # Read newly created cache
+                if os.path.exists(cache_path):
+                    with open(cache_path, "r", encoding="utf-8") as f:
+                        return self._json(200, json.load(f))
+                return self._json(500, {"error": "pulse.py ran but cache not written"})
+            except subprocess.TimeoutExpired:
+                return self._json(504, {"error": "pulse.py timeout"})
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:300]})
 
         # ── Project Nexus V3.0 — Knowledge Graph ────────────────────────
         if path == "/api/graph/data":

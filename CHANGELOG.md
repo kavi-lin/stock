@@ -8,6 +8,207 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.16.2] — 2026-05-24 — Narrative Pulse: Codex review fixes
+
+### Fixed
+
+- **Codex #1 — `classify({})` no longer mis-labels as Stage 5.** When all stage
+  confidences scored 0 (empty / failed inputs), the fallback used
+  `max(all_scores)` which picked `distribution` (first dict key) as the winner
+  — producing `stage=5, recommended_action=exit_or_short_candidate`. Now
+  returns `stage=None, recommended_action=insufficient_data` with a
+  `next_warning_condition` explaining what input gates failed.
+- **Codex #2 — `None → 0` coercion in rule evaluator removed.** Previously
+  `_eval_rule` did `{k: 0 if v is None else v}` for safety, but this silently
+  turned `breadth_200dma_pct=None` into `0` and triggered the Stage 1 washout
+  boost (rule was `breadth_200dma_pct is not None and breadth_200dma_pct <= 30`
+  — `0 is not None` is True). Now None is preserved verbatim and any
+  arithmetic/comparison touching None raises `TypeError`, caught and returned
+  as `False`. Rules can still opt-in to "missing == 0" via
+  `(field or 0) <= threshold`.
+- **Codex #3 — cache invalidation now honors `weights_version`.** `pulse.py`'s
+  `_cache_fresh()` and `dashboard_server.py`'s on-demand endpoint now compare
+  the cached JSON's `weights_version` against the current `stage_weights.yaml`.
+  Editing the YAML mid-day will refresh on next read instead of returning
+  stale classifications. CHANGELOG promise (V3.16.0) now matches behavior.
+- **Codex #4 — `render.py` partial-quote crash on `None` fields.** Replaced
+  inline f-string formatting (`q.get('volume', '?'):,`) with None-safe helpers
+  `_fmt_int / _fmt_money / _fmt_pct / _fmt_market_cap` — missing values render
+  as `—` instead of raising `TypeError: unsupported format string passed to
+  NoneType`.
+
+### Improved
+
+- **`pulse.py` critical-input gate:** OHLCV is the only truly required input.
+  If `input_health.ohlcv_ok=False`, `pulse.py` now skips `classify()` entirely
+  and writes a clear `insufficient_data` verdict + the original fetch failure
+  reason. Previously partial bundles flowed into classify and emitted
+  low-confidence guesses.
+- **Codex #5 — `batch_scan.py` reads `weights_version` from `load_weights()`**
+  instead of hardcoding `"v1.0"`. Dashboard's `last_updated` strip now reflects
+  the actual config version after a `stage_weights.yaml` edit.
+- **Codex #6 — `pt_raise_30d` semantic clarity.** `fetch_pt_cadence` uses
+  Finnhub `/stock/upgrade-downgrade` which captures any positive analyst
+  action (upgrade / raise / initiate-buy), not strictly a PT raise event.
+  Bundle now emits both names — legacy `pt_raise_30d/60d` (kept for YAML
+  rules + existing tests) and the more accurate
+  `analyst_positive_actions_30d/60d` — with a code comment flagging future
+  FMP `historical-grades` integration for true PT-raise event stream.
+
+### Added
+
+- **5 new unit tests** (16 → 21) covering all four Codex findings:
+  `test_empty_components_returns_insufficient`,
+  `test_all_zero_components_returns_insufficient`,
+  `test_breadth_none_does_not_trigger_washout`,
+  `test_vix_none_does_not_trigger_dampen`,
+  `test_render_handles_none_quote_fields`.
+
+### Deferred (Codex suggestions #7 + #8 — V1.2 scope)
+
+- **stage_weights profile split (`default` + `high_beta_ai_infra`)**: the
+  current single-profile thresholds were calibrated against NOK 5/22 and may
+  be too sensitive for mature large caps or too lax for true meme stocks.
+  Requires user input on which ticker classes to profile and which thresholds
+  to relax/tighten — left for V1.2 after collecting more live samples.
+- **`fundamental_overlay` (CF quality + valuation pressure + analyst PT vs
+  price + recent-earnings narrative support)**: would let the skill say "tape
+  says Stage 4 狂熱, but fundamentals justify multiples" — useful nuance, but
+  conflates the pure tape/voice signal that V1.0 deliberately isolates. If
+  added, must be a separate overlay layer, not folded into stage classifier.
+
+### Verified
+
+- 21/21 unit tests pass: `python3 skills/narrative-pulse-detector/tests/test_stage_classifier.py`
+- Live NOK (with all fixes): Stage 4 狂熱, conf 0.70, E[R] -13.4% — **unchanged
+  from pre-fix runs** confirming no regression
+- Render markdown sample: `$15.47 / 9.10% / 126,178,313 / $15.78 / $4.00 / $83.6B`
+  — None-safe formatters working
+
+---
+
+## [3.16.1] — 2026-05-23 — Narrative Pulse: Gemini review fixes
+
+### Fixed
+
+- **`consecutive_overbought_days` docstring vs implementation mismatch** (Gemini #2):
+  the function declared a `reset_below=50.0` parameter and docstring claimed
+  "Resets when RSI drops below `reset_below`", but the implementation simply
+  `break`s on any `RSI < threshold`. Two metrics are now emitted explicitly:
+  - `rsi_overbought_days` (strict consecutive — unchanged behavior, fixed docstring)
+  - `rsi_overbought_episode_days` (new, loose count — tolerates 1-3 day buffer
+    dips into the 50-70 zone, breaks only when RSI drops below `reset_below`)
+
+  Both are written to `components` of every pulse cache. NOK 5/22 live values:
+  strict=1 vs episode=21 — explains why NOK report §10.2's "連 17 日" intuition
+  matched the loose count even though strict was much smaller.
+
+### Added
+
+- **Macro overrides** in `config/stage_weights.yaml` (Gemini #3): post-classification
+  `expected_return_pct` adjustments based on bigger-picture macro state:
+  - `vix_elevated_stage_4_5`: VIX ≥ 25 → dampen Stage 4/5 E[R] by -5%
+  - `breadth_washout_stage_1`: breadth_200dma_pct ≤ 30 → boost Stage 1 E[R] by +3%
+
+  `classify_stage.classify()` now applies any matching overrides and emits
+  `expected_return_pct_pre_macro` + `macro_adjustments_applied` alongside the
+  final `expected_return_pct` so audit trail is preserved. `pulse.py` propagates
+  both fields to the cache JSON.
+
+- **Stage 4 `rsi_overheated` condition** extended to use the new loose count
+  as primary signal: `rsi_overbought_episode_days >= 10 or rsi_overbought_days
+  >= 5 or rsi_peak_recent >= 80`. Three-way OR keeps detection robust whether
+  the rally has been clean (high strict streak), choppy (high episode count),
+  or just had a recent extreme spike.
+
+- **6 new unit tests** (10 → 16): `test_vix_elevated_dampens_stage_4`,
+  `test_low_vix_no_adjustment`, `test_washout_boosts_stage_1`,
+  `test_strict_vs_loose_basic`, `test_loose_breaks_on_floor_drop`,
+  `test_empty_series_returns_zero`.
+
+### Not Changed (Gemini #1 was a false alarm)
+
+Gemini suggested `dashboard_server.py`'s synchronous `subprocess.run` in
+`/api/narrative-pulse/ticker/<T>` could block the whole Dashboard. Verified
+that `dashboard_server.py:25` already imports `ThreadingHTTPServer` and
+`:3804` instantiates the server with it — per-request threading is in place,
+so the 120s timeout window cannot block parallel API calls. No change needed.
+
+### Verified
+
+- 16/16 unit tests pass
+- Live NOK: Stage 4 狂熱, conf 0.70, E[R] -13.4% (unchanged — VIX 16.7 below
+  25 threshold so no macro override applied, consistent with prior runs)
+- Live NOK cache now carries `rsi_overbought_episode_days=21` (resolves the
+  apparent inconsistency between the NOK report §10.2 claim and the strict
+  streak of 1)
+
+---
+
+## [3.16.0] — 2026-05-23 — Narrative Pulse Detector V1.0
+
+### Added
+
+- **New skill `skills/narrative-pulse-detector/`** — 熱潮股 / 話題股短期上漲潛力探測器
+  - `SKILL.md` + `schema.md` + `config/stage_weights.yaml` (5-stage thresholds, user-tunable)
+  - `scripts/fetch_inputs.py` — 8-input integrator (5 reused + 3 new)
+    - Reuses: `momentum-monitor.technical_core` (OHLCV/RSI/SMA), `market-top-detector.fmp_client` (quote),
+      `market-top-detector.distribution_day_calculator` (forked per-stock), `finnhub-client.upgrade_downgrade`
+      (PT cadence, graceful 403 fallback), `scripts/break_news/social_sources.fetch_reddit/fetch_hacker_news`
+      ($TICKER cashtag filter)
+    - New: consecutive RSI overbought days, close-to-close impulse density (4w), news mention aggregator
+      (source diversity index), per-stock distribution day (O'Neil fork)
+  - `scripts/classify_stage.py` — 5-stage classifier (蘊釀 → 啟動 → 加速 → 狂熱 → 分配) with R/R
+    quantification; pure function + YAML-driven thresholds; mini-DSL rule evaluator
+  - `scripts/pulse.py` — single-ticker CLI entry, 4h cache TTL
+  - `scripts/batch_scan.py` — daily batch entry, pulls thematic-screener top movers
+  - `scripts/render.py` — JSON → markdown report
+  - `tests/test_stage_classifier.py` — 10 unit tests (NOK Stage 4, NOK_STAGE5, MSFT mature, brewing
+    fixture, expected_return math)
+- **Dashboard surface** (dual-track per user request):
+  - `radar.html` — new `#npd-section` with 3-column rankings (top_risk / top_opportunity /
+    watch_distribution_imminent), ad-hoc ticker input + 探測 button, side panel with full scenarios
+  - `index.html` — Hero 下 mini-strip showing top 3 risk + top 2 opportunity, click → jump to
+    `radar.html#npd-section`
+- **Server endpoints** in `dashboard_server.py`:
+  - `GET /api/narrative-pulse/data` — serves `Dashboard/narrative_pulse.json`
+  - `GET /api/narrative-pulse/ticker/<T>` — on-demand single-ticker (cache hit if < 4h, else
+    subprocess dispatch with 120s timeout)
+  - `SCRIPT_PROTOCOLS["narrative_pulse"]` entry for protocol-style dispatch
+- **`daily_update.sh` Step 9** — runs `batch_scan.py --top-n 30` → writes
+  `Dashboard/narrative_pulse.json` (~5-10 min, non-fatal). `[8/8]` renamed to `[8/9]`.
+
+### Why
+
+NOK image_review report (`reports/2026-05-23_NOK_image_review.md` §10-11) surfaced 7 dimensions
+that no existing tool tracked: 連續 RSI 超買日數、價/SMA200 拉伸倍數、impulse-day 密集度、
+per-stock distribution day、sell-side PT raise 速度、retail $cashtag mention 量、media source
+diversity + narrative stage 1-5 分類 + 4-scenario R/R 量化. Critical signals for judging whether
+a hype stock's rally still has runway — but `momentum-monitor` covers tape flow,
+`short-term-target` covers 1d/5d/15d tactical prediction, `thematic-screener` covers theme
+rotation. None frame a single ticker against narrative trade lifecycle.
+
+V1.0 ships as **exploratory tier** (same level as Nexus / Break News) — does **not** feed
+`investment_protocol_v5_0` Arbiter, does **not** auto-adjust positions. Stage thresholds in
+`config/stage_weights.yaml` are user-tunable per `feedback_exploration_phase.md` design principle.
+
+### Verified
+
+- 10/10 unit tests pass: `python3 skills/narrative-pulse-detector/tests/test_stage_classifier.py`
+- Live NOK pulse: **Stage 4 狂熱後段, confidence 0.70, E[R] -13.4%** — matches NOK report §10 exactly
+- Live batch_scan (3 tickers): NOK Stage 4, MSFT Stage 1, PLTR Stage 1; rankings populate correctly
+- All 5 modified Python files + bash script + YAML config parse clean
+
+### Errata
+
+`reports/2026-05-23_NOK_image_review.md` §10.2's claim "連續 17 個交易日 RSI ≥ 70" was a manual
+calculation error. Actual max RSI(14) streak ≥ 70 was the 5/1-5/6 window (~5 days, peak 83.0).
+The Stage 4 conclusion remains correct — driven now by the `rsi_overheated` condition
+(`rsi_overbought_days >= 5 OR rsi_peak_recent >= 80`), which the live pulse confirms via the peak
+path.
+
+---
+
 ## [3.15.2] — 2026-05-21 — Break News V4 final-gate polish
 
 ### Fixed
