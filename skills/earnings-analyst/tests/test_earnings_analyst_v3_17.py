@@ -9,7 +9,7 @@ Covers:
   - score_quality directional flag scoring (clean=0 / wc_driven=-2 / negative=-4)
 
 Run:
-  python3 skills/earnings-analyst/tests/test_v3_17.py
+  python3 skills/earnings-analyst/tests/test_earnings_analyst_v3_17.py
 """
 import sys
 import unittest
@@ -79,8 +79,8 @@ class TestBusinessMixShiftOverlay(unittest.TestCase):
         self.assertIsNone(out["new_segment"])
 
     def test_stable_when_segments_present_but_thresholds_unmet(self):
-        # Single year with 2 stable segments — can't compute YoY → NO_DATA
-        # so we need 2+ years
+        # 2 years are enough for YoY, but not 5Y CAGR, so this should identify
+        # a segment and remain STABLE.
         segments = {
             "product_fy": [
                 {"date": "2024-12-31", "core_software": 8000, "minor_segment": 2000},
@@ -92,10 +92,11 @@ class TestBusinessMixShiftOverlay(unittest.TestCase):
         out = compute_business_mix_shift_overlay(segments, annual_growth, [])
         # minor_segment YoY = (2000-2100)/2100 = negative → skipped
         # core_software: yoy = (8000-7900)/7900 ≈ 1.3%, share 80% → STABLE (not EMERGING)
-        self.assertIn(out["tier"], ("STABLE", "NO_DATA"))
+        self.assertEqual(out["tier"], "STABLE")
+        self.assertEqual(out["new_segment"]["name"], "core_software")
 
-    def test_emerging_thresholds(self):
-        # New segment grows fast + share in 10-25% band
+    def test_emerging_threshold_includes_25_pct(self):
+        # New segment grows fast + share exactly 25%; schema defines [10%, 25%].
         segments = {
             "product_fy": [
                 {"date": "2024-12-31", "core": 7500, "new_ai": 2500},
@@ -108,11 +109,33 @@ class TestBusinessMixShiftOverlay(unittest.TestCase):
         }
         annual_growth = [{"fiveYRevenueGrowthPerShare": 0.02}]
         out = compute_business_mix_shift_overlay(segments, annual_growth, [])
-        # new_ai: share 25% (boundary — depends on > or >=); YoY 25%; CAGR (2500/600)^0.25-1 ≈ 43%
+        # new_ai: share 25%; YoY 25%; CAGR (2500/600)^0.25-1 ≈ 43%
         # relative_cagr 43% - 2% = 41% > 10pp ✓
-        self.assertIn(out["tier"], ("EMERGING", "STABLE"))
-        if out["tier"] == "EMERGING":
-            self.assertEqual(out["new_segment"]["name"], "new_ai")
+        self.assertEqual(out["tier"], "EMERGING")
+        self.assertEqual(out["new_segment"]["name"], "new_ai")
+
+    def test_nested_product_rows_from_fetch_are_flattened(self):
+        segments = {
+            "product_fy": [
+                {"date": "2024-12-31", "fiscal_year": 2024, "period": "FY",
+                 "products": {"core": 7500, "new_ai": 2500}},
+                {"date": "2023-12-31", "fiscal_year": 2023, "period": "FY",
+                 "products": {"core": 8000, "new_ai": 2000}},
+                {"date": "2022-12-31", "fiscal_year": 2022, "period": "FY",
+                 "products": {"core": 8200, "new_ai": 1500}},
+                {"date": "2021-12-31", "fiscal_year": 2021, "period": "FY",
+                 "products": {"core": 8400, "new_ai": 1000}},
+                {"date": "2020-12-31", "fiscal_year": 2020, "period": "FY",
+                 "products": {"core": 8800, "new_ai": 600}},
+            ],
+            "geographic_fy": [],
+        }
+        out = compute_business_mix_shift_overlay(
+            segments, [{"fiveYRevenueGrowthPerShare": 0.02}], [],
+        )
+        self.assertEqual(out["tier"], "EMERGING")
+        self.assertEqual(out["new_segment"]["name"], "new_ai")
+        self.assertNotEqual(out["new_segment"]["name"], "fiscal_year")
 
 
 class TestWCDiagnostics(unittest.TestCase):

@@ -1,7 +1,32 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-21 (v3.15.2)
+> **Last Updated**: 2026-05-24 (v3.17.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.17.0 → v3.17.1) — Transition overlay review fixes
+
+User asked Codex to first commit the previous feature work, then fix Codex review
+findings so Claude can review the fix separately.
+
+- Created feature baseline commit `684b5e7 feat(protocol): add transition overlays`.
+- Fixed `earnings-analyst` segment parsing: `business_mix_shift_overlay` now
+  flattens `products` / `regions` nested rows from `fetch.py`, excludes metadata
+  such as `fiscal_year`, and includes the 25% EMERGING boundary.
+- Fixed `earnings-valuation-forecaster`: markdown now renders the
+  Revenue-Margin Matrix, `transition_case` emits `transition_case_mtime`, and
+  loaded EA bundles backfill `transition_signature_mtime` from cache mtime when
+  older caches lack it.
+- Renamed V3.17 test files to unique module names, eliminating pytest import
+  mismatch when both skill test directories are collected together.
+- Aligned protocol/schema/changelog wording for annual PE + FY segment YoY
+  numeric anomaly.
+
+Validation:
+- `python3 -m pytest skills/earnings-analyst/tests/test_earnings_analyst_v3_17.py skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py` → 31 passed
+- `python3 -m pytest skills/earnings-analyst/tests/test_earnings_analyst_v3_17.py skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py skills/narrative-pulse-detector/tests/test_stage_classifier.py` → 52 passed
+- NVDA cache smoke: business mix candidate is `Data Center`, not `fiscal_year`.
+
+---
 
 ## 🟢 Session Note (v3.15.1 → v3.15.2) — Break News V4 final-gate polish
 

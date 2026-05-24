@@ -20,6 +20,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import glob
 import json
 import os
@@ -345,6 +346,20 @@ def compute_wc_diagnostics(income: list, balance: list) -> dict:
     }
 
 
+def _segment_values(row: dict, src_kind: str) -> dict:
+    """Return segment-name -> revenue from either legacy flat rows or fetch.py
+    nested rows (`products` / `regions`)."""
+    if not isinstance(row, dict):
+        return {}
+    nested_key = "products" if src_kind == "product" else "regions"
+    nested = row.get(nested_key)
+    if isinstance(nested, dict):
+        return {k: v for k, v in nested.items() if isinstance(v, (int, float))}
+    metadata = {"date", "period", "fiscalYear", "fiscal_year"}
+    return {k: v for k, v in row.items()
+            if k not in metadata and isinstance(v, (int, float))}
+
+
 def _identify_new_segment(segments: dict, annual_growth: list) -> dict | None:
     """V3.17 (M1) — pick the single 'new segment' for business_mix_shift_overlay.
 
@@ -371,7 +386,8 @@ def _identify_new_segment(segments: dict, annual_growth: list) -> dict | None:
     if not src or len(src) < 2:
         return None
 
-    # Each row is a year with multiple segment keys + 'date'
+    # Each row is a year with either legacy flat segment keys or fetch.py's
+    # nested `products` / `regions` dict.
     # Compute per-segment latest share, YoY, 5y CAGR
     latest_row = src[0]
     prior_row = src[1] if len(src) >= 2 else None
@@ -380,13 +396,14 @@ def _identify_new_segment(segments: dict, annual_growth: list) -> dict | None:
     if not isinstance(latest_row, dict) or not isinstance(prior_row, dict):
         return None
 
-    seg_keys = [k for k in latest_row.keys()
-                if k not in ("date", "period", "fiscalYear")
-                and isinstance(latest_row.get(k), (int, float))]
+    latest_values = _segment_values(latest_row, src_kind)
+    prior_values = _segment_values(prior_row, src_kind)
+    five_y_values = _segment_values(five_y_row, src_kind)
+    seg_keys = list(latest_values.keys())
     if not seg_keys:
         return None
 
-    total_latest = sum(latest_row.get(k) or 0 for k in seg_keys)
+    total_latest = sum(latest_values.get(k) or 0 for k in seg_keys)
     if total_latest <= 0:
         return None
 
@@ -398,9 +415,9 @@ def _identify_new_segment(segments: dict, annual_growth: list) -> dict | None:
 
     candidates = []
     for k in seg_keys:
-        latest = latest_row.get(k) or 0
-        prior = prior_row.get(k) or 0
-        five_y = (five_y_row.get(k) if isinstance(five_y_row, dict) else None) or 0
+        latest = latest_values.get(k) or 0
+        prior = prior_values.get(k) or 0
+        five_y = five_y_values.get(k) or 0
         share = latest / total_latest if total_latest > 0 else 0
         yoy = (latest - prior) / prior if prior > 0 else None
         # 5y CAGR (assume 4 year span between idx 0 and idx 4)
@@ -471,7 +488,7 @@ def compute_business_mix_shift_overlay(segments: dict, annual_growth: list,
 
     # Tier decision
     tier = "STABLE"
-    emerging_share_ok = 0.10 <= share < 0.25
+    emerging_share_ok = 0.10 <= share <= 0.25
     emerging_growth_ok = yoy >= 0.15
     emerging_cagr_ok = rel_cagr >= 0.10
     if emerging_share_ok and emerging_growth_ok and emerging_cagr_ok:
@@ -778,6 +795,7 @@ def analyze(bundle: dict) -> dict:
     # EARNINGS_ANALYST_BUNDLE + forecaster transition cascade.
     bundle["business_mix_shift_overlay"] = mix_overlay
     bundle["transition_signature"]       = transition_signature
+    bundle["transition_signature_mtime"] = dt.datetime.now().isoformat(timespec="seconds")
     bundle["cash_conversion_quality"]    = cash_conversion_quality
     bundle["composite_score"]  = composite
     bundle["verdict"]          = verdict_for(composite)

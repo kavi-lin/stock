@@ -8,6 +8,33 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.17.1] — 2026-05-24 — Transition overlay review fixes
+
+### Fixed
+
+- `earnings-analyst` now flattens `segments.product_fy[].products` and
+  `segments.geographic_fy[].regions` before scoring business mix shift, so
+  metadata fields like `fiscal_year` cannot be selected as the new segment.
+- `business_mix_shift_overlay` now treats exactly 25% revenue share as
+  `EMERGING`, matching the documented `[10%, 25%]` threshold.
+- `earnings-valuation-forecaster` markdown output now renders the
+  Revenue-Margin Matrix when `transition_case` is true.
+- Transition staleness fields are now emitted: `transition_signature_mtime`
+  from earnings analyst and top-level `transition_case_mtime` from the
+  forecaster.
+- Forecaster numeric anomaly wording now matches implementation:
+  latest annual PE plus FY segment YoY growth, not true forward PE or quarterly
+  segment growth.
+- V3.17 test files were renamed to unique module names so combined `pytest`
+  collection no longer fails with an import mismatch.
+
+### Verified
+
+- `python3 -m pytest skills/earnings-analyst/tests/test_earnings_analyst_v3_17.py skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py`
+- `python3 -m pytest skills/earnings-analyst/tests/test_earnings_analyst_v3_17.py skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py skills/narrative-pulse-detector/tests/test_stage_classifier.py`
+
+---
+
 ## [3.17.0] — 2026-05-24 — Skills/Protocol 泛化優化 Wave 1 (Codex 5-round + Gemini review)
 
 ### Added
@@ -32,7 +59,7 @@ Single source of truth for version history. Current version authority is `VERSIO
   `paradigm_only | mix_only | both | neither` — consumed by forecaster + protocol Phase 3
 - **`earnings-valuation-forecaster` transition_case priority cascade** (`forecast.py`):
   1. `transition_signature ∈ {paradigm_only, mix_only, both}` → `reason=signature_*`
-  2. Numeric anomaly: `forward_PE > 50 AND DCF/price < 0.5 AND 5y_CAGR < 5% AND seg_growth > 30%`
+  2. Numeric anomaly: `latest annual PE > 50 AND DCF/price < 0.5 AND 5y_CAGR < 5% AND FY seg YoY growth > 30%`
   3. Otherwise `false`
 - **Revenue-Margin trade-off matrix** — 2 versions:
   - EMERGING: `volume_driven / margin_driven / balanced / bear_reset`

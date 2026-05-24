@@ -238,6 +238,7 @@
 {
   "cash_conversion_quality": "negative_accruals | clean_positive_gap | wc_driven | n_a",
   "transition_signature":    "paradigm_only | mix_only | both | neither",
+  "transition_signature_mtime": "ISO-8601 local timestamp",
   "business_mix_shift_overlay": {
     "tier":              "NO_DATA | STABLE | EMERGING | ESTABLISHED",
     "new_segment":       { "name": "...", "share_of_revenue": 0.18,
@@ -266,6 +267,10 @@
 - `STABLE`: 識別出 new_segment 但未達 EMERGING 門檻
 - `EMERGING`: new_segment share ∈ [10%, 25%] AND YoY ≥ 15% AND 5y CAGR > consolidated 5y CAGR + 10pp
 - `ESTABLISHED`: new_segment share ≥ 25% AND operating income share ≥ 40% AND 連續 4 季成立(目前 FY-fallback mode 下 tier 上限 EMERGING)
+
+Segment source rows may be either legacy flat maps (`{segment_name: amount}`) or
+the current `fetch.py` nested shape (`products` / `regions`). Metadata keys such
+as `fiscal_year` are never eligible as segment candidates.
 
 **`transition_signature`** = integrate(`structural_shift`, `business_mix_shift_overlay`):
 - `paradigm_only`: structural ∈ {CANDIDATE, CONFIRMED}, mix ∈ {NO_DATA, STABLE}

@@ -1,6 +1,15 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-05-21 (v3.15.2)
+> **Last Updated**: 2026-05-24 (v3.17.1)
+
+---
+
+## ✅ Recently Completed
+
+- [x] **[V317-FIX] Transition overlay review fixes** — committed prior feature
+  baseline (`684b5e7`), then fixed nested segment parsing, 25% EMERGING boundary,
+  revenue-margin markdown rendering, transition mtime fields, pytest module-name
+  collision, and protocol/schema wording drift.
 
 ---
 

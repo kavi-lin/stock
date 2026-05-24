@@ -716,7 +716,7 @@ Step 2 (Red-Team-Gated Bonus/Penalty — V3.17 5-level priority cascade):
     # Note: dissent_basis is REQUIRED when valuation_specialist.lane_score < 0;
     # null → treated as "thesis_fundamental" (conservative default).
 
-  Cross-check stale signal (V3.17 — Codex v5 Staleness Alert + Gemini G2):
+  Cross-check stale signal (V3.17.1 — Codex review fix; Staleness Alert + Gemini G2):
     IF abs(bundle.transition_signature_mtime - forecaster.transition_case_mtime) > 6h
        OR bundle.transition_signature inconsistent with forecaster.transition_case:
       emit_terminal_alert(level=HIGH, includes=[bundle_mtime, forecaster_mtime, delta])
@@ -724,6 +724,10 @@ Step 2 (Red-Team-Gated Bonus/Penalty — V3.17 5-level priority cascade):
       transition_softening_disabled = true       # disables rule #2 only,
                                                   # cascade #1/#3/#4/#5 still apply
       # 不寫 SESSION_NOTES.md (per CLAUDE.md §2 EXCLUSION — protocol run 不是 session)
+    # Field source:
+    # - `bundle.transition_signature_mtime` emitted by earnings-analyst analyze.py
+    #   and backfilled from cache file mtime by forecaster if missing.
+    # - `forecaster.transition_case_mtime` emitted by forecast.py.
 
   IF all 5 signals same direction AND Burry.veto_flag = false AND red_team_verdict = NO_VIABLE_COUNTER:
     raw_after_bonus = raw_total × 1.15

@@ -2,7 +2,7 @@
 """V3.17 (Wave 1) — smoke tests for forecaster transition_case + matrix.
 
 Run:
-  python3 skills/earnings-valuation-forecaster/tests/test_v3_17.py
+  python3 skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py
 """
 import sys
 import unittest
@@ -15,6 +15,7 @@ from forecast import (
     _determine_transition_case,
     build_revenue_margin_matrix,
     build_scenarios,
+    to_markdown,
 )
 
 
@@ -31,7 +32,7 @@ class TestTransitionCascade(unittest.TestCase):
         self.assertEqual(out["reason"], "signature_mix_only")
 
     def test_numeric_anomaly_when_no_signature(self):
-        """Rule #2: forward_PE > 50 + DCF/price < 0.5 + 5y CAGR < 5% + seg growth > 30%."""
+        """Rule #2: annual PE > 50 + DCF/price < 0.5 + 5y CAGR < 5% + seg growth > 30%."""
         bundle = {
             "transition_signature": "neither",
             "business_mix_shift_overlay": {
@@ -46,6 +47,8 @@ class TestTransitionCascade(unittest.TestCase):
                                           income_q=[], ratios_a=ratios_a)
         self.assertTrue(out["transition_case"])
         self.assertEqual(out["reason"], "numeric_anomaly")
+        self.assertEqual(out["metrics"]["latest_annual_pe"], 75)
+        self.assertEqual(out["metrics"]["segment_yoy_growth"], 0.45)
 
     def test_false_when_neither_triggers(self):
         bundle = {
@@ -136,6 +139,52 @@ class TestBuildScenariosDualField(unittest.TestCase):
             self.assertIn("eps_delta_pct", s["achieves_if_struct"])
             self.assertIn("pe_percentile", s["achieves_if_struct"])
             self.assertIn("required_eps", s["achieves_if_struct"])
+
+
+class TestMarkdownRendering(unittest.TestCase):
+    def test_transition_matrix_renders_in_markdown(self):
+        scenarios, grid = build_scenarios(
+            forward_eps=5.0,
+            pe_range={"pe_p25": 15, "pe_p50": 20, "pe_p75": 25},
+            current_price=100,
+        )
+        matrix = build_revenue_margin_matrix(
+            {"transition_case": True, "reason": "signature_mix_only",
+             "mix_tier": "EMERGING"},
+            [{"revenue": 1000, "operatingIncome": 80}] * 5,
+            current_price=100,
+        )
+        payload = {
+            "ticker": "TEST",
+            "current_price": 100,
+            "signal": "HOLD",
+            "ttm_eps": 4.5,
+            "forward_eps": {
+                "value": 5.0,
+                "confidence": "high",
+                "spread_pct": 4.0,
+                "methods": {"consensus": 5.0},
+            },
+            "expected_value": None,
+            "expected_value_upside_pct": None,
+            "generated_at": "2026-05-24T00:00:00",
+            "scenarios": scenarios,
+            "revenue_margin_matrix": matrix,
+            "sensitivity_grid": grid,
+            "sensitivity_axes": {
+                "rows": ["PE p25", "PE p50", "PE p75"],
+                "cols": ["EPS -15%", "EPS base", "EPS +15%"],
+            },
+            "multiple_range": {"pe_p25": 15, "pe_p50": 20, "pe_p75": 25,
+                               "window_years": 5},
+            "multiple_range_effective": {"pe_p25": 15, "pe_p50": 20, "pe_p75": 25},
+            "peer_pe_info": {},
+            "rate_context": {},
+            "caveats": [],
+        }
+        md = to_markdown(payload)
+        self.assertIn("## Revenue-Margin Matrix", md)
+        self.assertIn("volume_driven", md)
 
 
 if __name__ == "__main__":

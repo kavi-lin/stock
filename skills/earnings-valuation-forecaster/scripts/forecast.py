@@ -453,11 +453,19 @@ def _load_earnings_analyst_bundle(ticker: str) -> dict | None:
     if not candidates:
         return None
     candidates.sort(key=os.path.getmtime, reverse=True)
+    source_path = candidates[0]
+    source_mtime = dt.datetime.fromtimestamp(
+        os.path.getmtime(source_path)
+    ).isoformat(timespec="seconds")
     try:
-        with open(candidates[0], "r", encoding="utf-8") as f:
-            return json.load(f)
+        with open(source_path, "r", encoding="utf-8") as f:
+            bundle = json.load(f)
     except (OSError, json.JSONDecodeError):
         return None
+    bundle.setdefault("transition_signature_mtime", source_mtime)
+    bundle["_source_path"] = source_path
+    bundle["_source_mtime"] = source_mtime
+    return bundle
 
 
 def _determine_transition_case(bundle: dict | None, current_price: float,
@@ -466,8 +474,8 @@ def _determine_transition_case(bundle: dict | None, current_price: float,
 
       1. earnings-analyst transition_signature ∈ {paradigm_only, mix_only, both}
          → transition_case=True, reason=signature_<sig>
-      2. Numeric anomaly: forward_PE > 50 AND DCF/current_price < 0.5
-         AND 5y_rev_CAGR_per_share < 5% AND latest_Q_segment_growth > 30%
+      2. Numeric anomaly: latest annual PE > 50 AND DCF/current_price < 0.5
+         AND 5y_rev_CAGR_per_share < 5% AND segment YoY growth > 30%
          → transition_case=True, reason=numeric_anomaly
       3. Otherwise → transition_case=False
     """
@@ -488,9 +496,9 @@ def _determine_transition_case(bundle: dict | None, current_price: float,
             }
 
     # Numeric anomaly fallback (M2 specific thresholds)
-    forward_pe = None
+    latest_annual_pe = None
     if ratios_a and isinstance(ratios_a[0], dict):
-        forward_pe = ratios_a[0].get("priceToEarningsRatio")
+        latest_annual_pe = ratios_a[0].get("priceToEarningsRatio")
     rev_5y_cagr_per_share = None
     if bundle:
         ag = bundle.get("annual_growth") or []
@@ -505,7 +513,7 @@ def _determine_transition_case(bundle: dict | None, current_price: float,
                    or {})
         seg_growth_latest = new_seg.get("yoy_growth")
 
-    cond = (forward_pe is not None and forward_pe > 50
+    cond = (latest_annual_pe is not None and latest_annual_pe > 50
             and dcf_intrinsic is not None and current_price > 0
             and dcf_intrinsic / current_price < 0.5
             and rev_5y_cagr_per_share is not None and rev_5y_cagr_per_share < 0.05
@@ -517,11 +525,11 @@ def _determine_transition_case(bundle: dict | None, current_price: float,
             "signature": signature,
             "mix_tier": mix_tier,
             "metrics": {
-                "forward_pe":               forward_pe,
+                "latest_annual_pe":         latest_annual_pe,
                 "dcf_intrinsic":            dcf_intrinsic,
                 "dcf_to_price":             round(dcf_intrinsic / current_price, 3),
                 "rev_5y_cagr_per_share":    rev_5y_cagr_per_share,
-                "latest_segment_growth":    seg_growth_latest,
+                "segment_yoy_growth":       seg_growth_latest,
             },
         }
     return {
@@ -652,6 +660,12 @@ def build_revenue_margin_matrix(transition_info: dict, income_q: list,
         },
         "cells": cells,
     }
+
+
+def _fmt_matrix_value(value, suffix=""):
+    if value is None:
+        return "n/a"
+    return f"{value}{suffix}"
 
 
 # ── Scenario builder ─────────────────────────────────────────────────────
@@ -1119,6 +1133,29 @@ def to_markdown(p):
         md.append(f"- {icon} **{name.capitalize()}** — achieves if: _{sc['achieves_if']}_")
         md.append(f"  - invalidated if: _{sc['invalidated_if']}_")
     md.append("")
+    matrix = p.get("revenue_margin_matrix")
+    if matrix:
+        baseline = matrix.get("current_baseline") or {}
+        md.append("## Revenue-Margin Matrix")
+        md.append("")
+        md.append(
+            f"_Transition: {matrix.get('transition_reason', 'n/a')} · "
+            f"tier={matrix.get('tier_basis', 'n/a')} · "
+            f"baseline rev YoY={_fmt_matrix_value(baseline.get('latest_rev_yoy_pct'), '%')} · "
+            f"op margin={_fmt_matrix_value(baseline.get('latest_op_margin_pct'), '%')}_"
+        )
+        md.append("")
+        md.append("| Case | Revenue Growth | Operating Margin | Achieves If |")
+        md.append("|---|---:|---:|---|")
+        for cell in matrix.get("cells", []):
+            st = cell.get("achieves_if_struct") or {}
+            md.append(
+                f"| **{cell.get('label_en', cell.get('label', 'case'))}** "
+                f"| {_fmt_matrix_value(st.get('revenue_growth_pct'), '%')} "
+                f"| {_fmt_matrix_value(st.get('operating_margin_pct'), '%')} "
+                f"| {st.get('narrative') or cell.get('achieves_if_text', '')} |"
+            )
+        md.append("")
     md.append("## Sensitivity Matrix (target price)")
     md.append("")
     md.append(f"| | {axes['cols'][0]} | {axes['cols'][1]} | {axes['cols'][2]} |")
@@ -1244,6 +1281,11 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
     transition_info = _determine_transition_case(
         ea_bundle, current_price, income_q, ratios_a,
     )
+    now_iso = dt.datetime.now().isoformat(timespec="seconds")
+    transition_info["transition_case_mtime"] = now_iso
+    if ea_bundle:
+        transition_info["transition_signature_mtime"] = ea_bundle.get("transition_signature_mtime")
+        transition_info["source_bundle_mtime"] = ea_bundle.get("_source_mtime")
     revenue_margin_matrix = build_revenue_margin_matrix(
         transition_info, income_q, current_price,
     )
@@ -1256,7 +1298,7 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
     payload = {
         "status":        "ok",
         "ticker":        ticker,
-        "generated_at":  dt.datetime.now().isoformat(timespec="seconds"),
+        "generated_at":  now_iso,
         "current_price": round(current_price, 2),
         "ttm_eps":       ttm,
         "forward_eps": {
@@ -1281,6 +1323,7 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
         "scenarios":          scenarios,
         # V3.17 (Wave 1) — transition case + revenue-margin matrix
         "transition_case":    transition_info,
+        "transition_case_mtime": transition_info["transition_case_mtime"],
         "revenue_margin_matrix": revenue_margin_matrix,
         "sensitivity_grid":   grid,
         "sensitivity_axes": {
