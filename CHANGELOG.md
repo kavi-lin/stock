@@ -8,6 +8,84 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.17.3] — 2026-05-24 — Governance sub-wave: cohort + alignment + stale gate
+
+### Added
+
+- **`skills/_shared/composite_calibration_cohort/`** — V3.17 rubric calibration
+  measurement layer (NOT enforcement). Three files:
+    - `cohort.yaml` — 18-ticker manifest grouped into 6 buckets (hyper_growth_transition
+      / mature_mega_cap_stable / value_trap / hype_bust / margin_recovery /
+      cyclical_trough). Each entry: `{ticker, target_quarter_end,
+      expected_outcome, notes}`. Acceptance gates pinned to ≥ 14/18 directional
+      correctness + new-flag trigger rate ≤ 30%.
+    - `runner.py` — reads cohort.yaml, finds the closest earnings-analyst
+      cache within ±90 days of `target_quarter_end`, re-runs `analyze()`, scores
+      each sample's composite vs hand-coded `expected_outcome`, aggregates,
+      writes `reports/calibration_<DATE>.md`. **Always rc=0** (soft-pass) —
+      missing caches counted but excluded from acceptance denominator. When
+      AVAILABLE < 6 samples, acceptance = `INSUFFICIENT_DATA`.
+    - `__init__.py` — package marker.
+  Initial run: 0/18 AVAILABLE (no historical caches present yet). User can
+  populate over time via `python3 skills/earnings-analyst/scripts/fetch.py
+  <T>` with historical periods, or accept the skeleton as a future-baseline.
+- **`scripts/_shared/audit_data_alignment.py`** — cross-validates two FMP
+  read paths (`fmp_client.FMPClient.quote` vs direct `requests.get /stable/quote`)
+  for 5 default mega-cap tickers, surfacing price / PE / market_cap divergences
+  > 1%. Soft-fail rc=0 on FMP quota / unavailability. Substitutes for the
+  original "MCP vs script alignment" spec because MCP tools only run inside
+  Claude's harness — the two-path FMP check catches the same class of bugs
+  (cache staleness, endpoint version drift). Live verification:
+  NVDA/AAPL/MSFT all 0.00% diff.
+- **`skills/earnings-analyst/tests/test_stale_gate_simulated.py`** — 8 unit
+  tests freezing the V3.17.1 stale-gate contract from synthetic mtime fixtures:
+    - 4 `TestStaleThresholdMath` — pin the 6h boundary (strict `>`)
+    - 2 `TestEarningsAnalystEmitsSignatureMtime` — analyze() must emit
+      `transition_signature_mtime` for the protocol's Phase 3 Step 2
+      cross-check to be operational
+    - 2 `TestForecasterBackfillsMtimeFromOldCache` — `_load_earnings_analyst_bundle`
+      backfills `transition_signature_mtime` from cache file mtime for
+      pre-V3.17.1 caches, but never overwrites an explicit value (setdefault)
+
+### Why governance is a measurement layer, not a release gate
+
+Per Codex round-7 risk discussion:
+  - Historical earnings-analyst caches aren't guaranteed to exist for the
+    18 cohort periods. Live-fetching them would couple the wave to FMP
+    quota availability and historical data depth (the free tier exposes
+    5 years of annuals + recent quarters only). Runner uses cached
+    fixtures and reports `MISSING_CACHE` honestly.
+  - Acceptance denominator = **AVAILABLE samples**, not total 18. A
+    cohort with 8 available samples scoring 6 correct is `directional_pct = 75%`,
+    not 6/18 = 33%. Otherwise sparse caches would automatically fail acceptance.
+  - Stale-gate trigger rate is measured via fixture simulation
+    (`test_stale_gate_simulated.py`), NOT on historical cache mtime. Local
+    filesystem mtime ≠ financial event time, so historical cache mtimes
+    would systematically misreport the gate.
+  - Alignment audit soft-fails rc=0 on FMP unavailability. External-service
+    flakiness must not block the governance wave.
+
+### Verified
+
+- `python3 -m pytest skills/earnings-analyst/tests skills/earnings-valuation-forecaster/tests skills/narrative-pulse-detector/tests`
+  → **87 passed** (was 79 in V3.17.2; +8 stale gate)
+- `python3 skills/_shared/composite_calibration_cohort/runner.py`
+  → cohort v1.0 → reports/calibration_2026-05-24.md; available=0/18 missing=18
+  errors=0; acceptance=INSUFFICIENT_DATA (rc=0 soft-pass — expected on first run)
+- `python3 scripts/_shared/audit_data_alignment.py --tickers NVDA,AAPL,MSFT`
+  → ok=3 alert=0 unavailable=0 threshold=1.0% (rc=0)
+
+### Out of scope (deferred to V3.18+)
+
+- Populating cohort with real historical fixtures (cohort runner is
+  intentionally skeleton — user adds caches over time)
+- Re-baselining acceptance thresholds (`min_directionally_correct=14`,
+  `max_new_flag_trigger_rate=0.30`) after observing real cohort outcomes
+- Wiring `audit_data_alignment.py` into daily_update.sh as a cron job
+  (currently ad-hoc CLI only)
+
+---
+
 ## [3.17.2] — 2026-05-24 — business_mix tier ceiling fix + slim_* round-trip contract
 
 ### Fixed

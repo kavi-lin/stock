@@ -1,0 +1,109 @@
+# V3.17.3 — Composite calibration cohort manifest.
+#
+# 18 historical ticker × period samples grouped by 6 archetypes to validate
+# that the V3.17 rubric (transition_signature, cash_conversion_quality,
+# large_cap_parabolic) produces directionally correct calls across distinct
+# market regimes — not just NOK-calibrated.
+#
+# Acceptance gates (per Wave 1 plan, Codex round-7 risk discussion):
+#   - ≥ 14/18 directionally correct on AVAILABLE samples (NOT total —
+#     MISSING_CACHE samples are excluded from the denominator)
+#   - New flag trigger rate < 30% across AVAILABLE samples
+#   - Stale gate trigger rate < 5% (measured via fixture simulation,
+#     not historical cache mtime — historical mtime is local filesystem
+#     time, not financial event time)
+#
+# Cache resolution: runner.py looks up
+#   skills/earnings-analyst/cache/<TICKER>_<DATE>.json
+# where <DATE> is the closest available cache to `target_quarter_end`.
+# If none within ±90 days, status = MISSING_CACHE and the sample is
+# reported but does NOT contribute to acceptance metrics.
+#
+# Directional outcome is the 12-month forward total return categorized as:
+#   directional_up   : +20% or better
+#   directional_flat : -20% to +20%
+#   directional_down : -20% or worse
+# Outcomes are HAND-CODED based on retrospective public price history;
+# runner.py treats them as ground truth for acceptance scoring.
+
+version: v1.0
+target_quarter_window_days: 90
+
+buckets:
+
+  # Bucket 1 — Hyper-growth transition (paradigm shift confirmed by tape)
+  # Expected: transition_signature ∈ {paradigm_only, both}, composite SOLID+
+  hyper_growth_transition:
+    - {ticker: NVDA, target_quarter_end: 2023-10-29, expected_outcome: directional_up,
+       notes: "Q3 FY24 — AI ramp, Data Center +279% YoY"}
+    - {ticker: META, target_quarter_end: 2022-12-31, expected_outcome: directional_up,
+       notes: "Year of Efficiency pivot, margin re-rate ahead"}
+    - {ticker: SHOP, target_quarter_end: 2020-09-30, expected_outcome: directional_up,
+       notes: "COVID e-commerce ramp"}
+
+  # Bucket 2 — Mature mega-cap stable (no transition signal expected)
+  # Expected: transition_signature = neither, mix = STABLE, composite MIXED/SOLID
+  mature_mega_cap_stable:
+    - {ticker: MSFT, target_quarter_end: 2024-09-30, expected_outcome: directional_up,
+       notes: "Stable mega-cap, Azure/AI tailwind but no abrupt shift"}
+    - {ticker: JNJ,  target_quarter_end: 2023-06-30, expected_outcome: directional_flat,
+       notes: "Defensive, post-consumer-spinoff"}
+    - {ticker: KO,   target_quarter_end: 2024-03-31, expected_outcome: directional_flat,
+       notes: "Defensive, stable margin"}
+
+  # Bucket 3 — Value trap (low PE but margin/cash deteriorating)
+  # Expected: accruals_warning_negative OR negative_fcf; composite WEAK
+  value_trap:
+    - {ticker: INTC, target_quarter_end: 2023-09-30, expected_outcome: directional_down,
+       notes: "Margin compression + foundry losses"}
+    - {ticker: VFC,  target_quarter_end: 2022-12-31, expected_outcome: directional_down,
+       notes: "Vans deceleration + balance sheet stress"}
+    - {ticker: WBA,  target_quarter_end: 2023-08-31, expected_outcome: directional_down,
+       notes: "Retail pharmacy structural decline"}
+
+  # Bucket 4 — Hype bust (narrative crash, no fundamental backstop)
+  # Expected: large_cap_parabolic LIKELY NO (already crashed by target),
+  #           but composite DETERIORATING or WEAK
+  hype_bust:
+    - {ticker: PTON, target_quarter_end: 2022-06-30, expected_outcome: directional_down,
+       notes: "Post-COVID demand collapse"}
+    - {ticker: RIVN, target_quarter_end: 2023-03-31, expected_outcome: directional_down,
+       notes: "EV oversupply + cash burn"}
+    - {ticker: SPCE, target_quarter_end: 2022-09-30, expected_outcome: directional_down,
+       notes: "Space tourism narrative collapse"}
+
+  # Bucket 5 — Margin recovery (revenue flat but margin re-rate)
+  # Expected: transition_signature COULD be mix_only (if segment shift) or
+  #           paradigm_only (if margin breakout); composite MIXED → SOLID
+  margin_recovery:
+    - {ticker: SBUX, target_quarter_end: 2022-09-30, expected_outcome: directional_up,
+       notes: "Reinvention plan + China reopening"}
+    - {ticker: DIS,  target_quarter_end: 2023-09-30, expected_outcome: directional_up,
+       notes: "DTC profitability inflection"}
+    - {ticker: CRM,  target_quarter_end: 2022-10-31, expected_outcome: directional_up,
+       notes: "Margin discipline post-activist"}
+
+  # Bucket 6 — Cyclical trough (downcycle bottom turning up)
+  # Expected: paradigm shift CANDIDATE/CONFIRMED on Q-over-Q rev accel;
+  #           composite MIXED → SOLID
+  cyclical_trough:
+    - {ticker: AMD,  target_quarter_end: 2019-09-30, expected_outcome: directional_up,
+       notes: "Zen 2 ramp + server share gain"}
+    - {ticker: MU,   target_quarter_end: 2022-12-31, expected_outcome: directional_up,
+       notes: "Memory downcycle bottom"}
+    - {ticker: FCX,  target_quarter_end: 2020-06-30, expected_outcome: directional_up,
+       notes: "Copper cycle bottom + EV demand"}
+
+acceptance:
+  min_directionally_correct: 14      # of AVAILABLE samples (not total 18)
+  max_new_flag_trigger_rate: 0.30    # AVAILABLE samples emitting V3.17 new flags
+  max_stale_gate_trigger_rate: 0.05  # measured via fixture sim, not cohort
+  # When AVAILABLE < 6, acceptance metrics are reported as INSUFFICIENT_DATA
+  # and acceptance returns soft-pass (rc=0) with warning.
+  min_available_for_scoring: 6
+
+  # New V3.17 flags counted toward the trigger rate metric:
+  v317_new_flags:
+    - accruals_warning_negative
+    - cash_conversion_positive_gap_clean
+    - cash_conversion_wc_driven
