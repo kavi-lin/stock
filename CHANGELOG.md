@@ -8,6 +8,112 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.17.0] — 2026-05-24 — Skills/Protocol 泛化優化 Wave 1 (Codex 5-round + Gemini review)
+
+### Added
+
+- **`earnings-analyst` cash conversion 3-tier directional flag system** (`analyze.py`):
+  - `accruals_warning_negative` — NI > OpCF, gap > 30% (red flag, −4)
+  - `cash_conversion_positive_gap_clean` — OpCF > NI + WC 不惡化 (正向訊號, 0 penalty,
+    replaces V3.16 monolithic accruals_warning miscategorization)
+  - `cash_conversion_wc_driven` — OpCF > NI + WC 任一惡化 (ambiguous, −2 half penalty)
+- **Working capital diagnostics 二階校對** (`compute_wc_diagnostics`):
+  - DSO / DIO / DPO 4Q trend + deteriorating flag (rising trend + 最新 Q > 4Q_avg × 1.15)
+  - DPO 3-tier fallback (G3 — Gemini): `direct` (有 accountsPayable) / `estimated_from_other_cl`
+    (0.6 × OCL fallback for foreign ADRs) / `unavailable`
+  - **Estimated DPO 不可單獨觸發 wc_driven** (避免 FMP schema 缺陷誤觸紅旗)
+- **`business_mix_shift_overlay`** (`analyze.py` — Codex v5 + Gemini G1):
+  - Quantified tier thresholds:
+    - `EMERGING`: new_segment share ∈ [10%, 25%] AND YoY ≥ 15% AND relative CAGR > +10pp
+    - `ESTABLISHED`: share ≥ 25% AND OI share ≥ 40% AND 連續 4 季 (FY-fallback caps at EMERGING)
+  - `new_segment` 識別 (M1): argmax over segments of `(seg_5y_CAGR_per_share −
+    consolidated_5y_CAGR_per_share)` AND `latest_YoY > 0` (top-1 only)
+- **`transition_signature`** integrates `structural_shift` + `business_mix_shift_overlay`:
+  `paradigm_only | mix_only | both | neither` — consumed by forecaster + protocol Phase 3
+- **`earnings-valuation-forecaster` transition_case priority cascade** (`forecast.py`):
+  1. `transition_signature ∈ {paradigm_only, mix_only, both}` → `reason=signature_*`
+  2. Numeric anomaly: `forward_PE > 50 AND DCF/price < 0.5 AND 5y_CAGR < 5% AND seg_growth > 30%`
+  3. Otherwise `false`
+- **Revenue-Margin trade-off matrix** — 2 versions:
+  - EMERGING: `volume_driven / margin_driven / balanced / bear_reset`
+  - ESTABLISHED: `market_share_consolidation / moat_validation / pricing_power / disruption_threat`
+    (M4 — renamed from `regime_break` for ESTABLISHED case semantic clarity)
+- **`achieves_if` dual-field** (Codex v5 + reviewer): `achieves_if_text` (str, backward
+  compat) + `achieves_if_struct` (dict for protocol consumers); legacy `achieves_if` mirrors
+  text field
+- **`momentum-monitor` market-cap aware extension warnings** (`momentum.py`):
+  - `large_cap_parabolic`: marketCap > $10B AND above_ma200_pct > 100
+  - `mid_cap_extreme`: marketCap > $2B AND above_ma200_pct > 100
+  - `microcap_extension`: small cap same condition
+  - Preserves existing `parabolic_blowoff_risk` (am200 > 50); new tags are additive severity
+- **`investment_protocol_v5_0.md` updates**:
+  - Phase 0 `systemic_backdrop` stub schema (V0.1, values null — ready for V3.18 fill)
+  - Phase 1 EARNINGS_ANALYST_BUNDLE adds 4 new fields documented in table
+  - Valuation Specialist 必填 `cited_transition_overlay` + `transition_dissent_basis`
+    (`macro_systemic | thesis_fundamental | valuation_anchor | null`) — Gemini G4 乾淨方案
+  - Technical lane large_cap_parabolic ceiling: raw score ≤ +1 + 強寫 extension_penalty_note
+  - Red Team prompt 加 V3.17 cash conversion 攻擊限制 + transition_signature 攻擊指引
+  - **Phase 3 Step 2 — 5-level penalty cascade (first match wins)**:
+    1. structural_shift CONFIRMED + mr/contaminated → 0.925 + downgrade
+    2. transition_signature {mix_only, both} + valuation_confirmed_transition + mr → **0.95** (NEW)
+    3. structural_shift CANDIDATE → 0.925
+    4. STRONG_COUNTER + pure_forward → 0.85
+    5. otherwise (catch-all STRONG_COUNTER) → 0.85
+  - `valuation_confirmed_transition` deterministic gate (V3.17 — `lane_score` NOT a gate,
+    uses `transition_dissent_basis != "thesis_fundamental"`)
+  - Staleness alert: `abs(bundle.mtime − forecaster.mtime) > 6h` 或 inconsistent →
+    terminal HIGH alert + `session_export.transition_data_stale_or_inconsistent=true` +
+    禁用 cascade rule #2(其他規則照走 — 不全面退化 to NONE per Gemini G2 review)
+- **`apply_det_shadow.py` 主邏輯不動** (Codex 反駁: sidecar metadata, line 11
+  contract preserved); 不另立 valuation-anchor classifier class — 沿用既有
+  `pure_mean_reversion / contaminated / pure_forward`
+- **29 new unit tests**:
+  - `skills/earnings-analyst/tests/test_v3_17.py` (20): transition_signature 5 態 + cash
+    conversion enum 4 case + business_mix overlay 3 tier + WC diagnostics DPO 3 fallback +
+    score_quality directional flags
+  - `skills/earnings-valuation-forecaster/tests/test_v3_17.py` (9): transition cascade
+    first match wins + EMERGING/ESTABLISHED matrix labels + dual-field achieves_if
+
+### Why
+
+NOK image_review session (`reports/2026-05-23_NOK_image_review.md`) 暴露的 3 類**通用**
+系統盲點:
+1. 現金流品質校對缺方向性 → narrative 股(OpCF >> NI)被錯誤扣分
+2. 轉型估值用 EPS × PE 對 hyper-growth / business mix 改變的公司產出失真 PT
+3. 動能 warning 對 +100% above SMA200 不分市值 → 大型股 crowded trade 風險被掩蓋
+
+**This is NOT NOK-specific calibration.** 設計經 5 輪 Codex round-trip (v1→v5) +
+Gemini 第三方 review + 我中介 review + 16 條議題收斂全部 settle。Cohort 18-ticker
+calibration + MCP/script alignment audit defer to V3.17.1 (governance sub-wave).
+
+### Verified
+
+- 29 new tests pass + 21 existing narrative-pulse tests pass = **50/50 PASS**
+- NOK live re-run on existing cache: composite **43 → 47** (quality 26→30, 因為 clean
+  positive gap 不再被誤扣 −4),verdict 維持 WEAK (47 < 50),transition_signature=neither
+  (NOK 在 FMP free-tier 拿不到 quarterly product segment,所以 mix=STABLE 合理)
+- NOK forecaster: `transition_case=false` (mix=STABLE, signature=neither);scenarios dual-field 並存
+- NOK momentum-monitor: `warnings = [..., 'parabolic_blowoff_risk', 'large_cap_parabolic']`
+  ($83.5B market cap × am200=113.92% → triggered, 對齊設計)
+- protocol .md prompt 改 — 全 syntax-valid (markdown 結構未破壞)
+
+### Deferred (V3.17.1 governance sub-wave)
+
+- 18-ticker calibration cohort (NVDA-2023 / META-2022 / SHOP-2020 / MSFT-2024 / JNJ-2023 /
+  KO-2024 / INTC-2023 / VFC-2022 / WBA-2023 / PTON-2022 / RIVN-2023 / SPCE-2022 /
+  SBUX-2022 / DIS-2023 / CRM-2022 / AMD-2019 / MU-2022 / FCX-2020)
+- MCP/script alignment audit (5 ticker × {MCP, FMPClient} core metric diff > 1% alert)
+- Acceptance criteria: ≥ 14/18 directionally correct + 新 flag 觸發率 < 30% +
+  `transition_data_stale_or_inconsistent` 觸發率 < 5%
+
+### Deferred (V3.18+)
+
+- `systemic_backdrop` 完整 score (AI bubble proximity + VIX regime + Fed funds regime)
+- Large-cap parabolic 閾值 backtest (50 sample 校準)
+- `narrative-pulse-detector` news mention schema drift fix
+
+---
+
 ## [3.16.2] — 2026-05-24 — Narrative Pulse: Codex review fixes
 
 ### Fixed

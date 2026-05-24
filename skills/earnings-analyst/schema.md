@@ -217,16 +217,61 @@
 
 ## quality_flags(deterministic — `analyze.py` 內運算)
 
-| Flag | 觸發條件 |
-|---|---|
-| `accruals_warning` | TTM \|NI − OpCF\| / \|NI\| > 0.30 |
-| `capex_outpaces_ocf` | latest Q OpCF / abs(capex) < 1.0 |
-| `gross_margin_compression` | 最新 4 季 gross margin 連續下滑 |
-| `dso_slowdown` | 最新 4 季 DSO(receivables/revenue×91) 連續上升 |
-| `negative_fcf` | latest Q FCF < 0 |
-| `debt_buildup` | totalDebt 環比增 > 15% 連 2 季 |
+| Flag | 觸發條件 | score_quality penalty |
+|---|---|---|
+| `accruals_warning_negative` (V3.17) | TTM \|NI − OpCF\| / \|NI\| > 0.30 **AND** OpCF < NI(NI 跑贏現金) | −4 |
+| `cash_conversion_positive_gap_clean` (V3.17) | OpCF > NI 且 gap > 30% **AND** WC 三項 DSO/DIO/DPO 不惡化 | 0(正向訊號不扣分) |
+| `cash_conversion_wc_driven` (V3.17) | OpCF > NI 且 gap > 30% **AND** WC 任一項惡化(rising 4Q + 最新 Q > 4Q_avg × 1.15) | −2(半扣) |
+| `capex_outpaces_ocf` | latest Q OpCF / abs(capex) < 1.0 | −4 |
+| `gross_margin_compression` | 最新 4 季 gross margin 連續下滑 | −4 |
+| `dso_slowdown` | 最新 4 季 DSO(receivables/revenue×91) 連續上升 | −4 |
+| `negative_fcf` | latest Q FCF < 0 | −4 |
+| `debt_buildup` | totalDebt 環比增 > 15% 連 2 季 | −4 |
 
 無 flag → 空 list `[]`(品質乾淨)。
+
+> **V3.17 NOTE — accruals_warning 拆方向**: V3.16 之前的 monolithic `accruals_warning` 在 NOK 案例(OpCF $1964M >> NI $796M, gap=9.1x)會被當扣分項,但實際是正向訊號(現金流先於盈餘)。V3.17 拆 3 個方向 flag,搭配 WC 二階校對(DSO/DIO/DPO)區分 clean 與 WC-driven。
+
+## V3.17 — 新增 derived 欄位(供 investment_protocol Phase 1 bundle 消費)
+
+```json
+{
+  "cash_conversion_quality": "negative_accruals | clean_positive_gap | wc_driven | n_a",
+  "transition_signature":    "paradigm_only | mix_only | both | neither",
+  "business_mix_shift_overlay": {
+    "tier":              "NO_DATA | STABLE | EMERGING | ESTABLISHED",
+    "new_segment":       { "name": "...", "share_of_revenue": 0.18,
+                           "yoy_growth": 0.22, "five_y_cagr": 0.35,
+                           "relative_cagr": 0.30, "data_mode": "fy_fallback",
+                           "data_kind": "product | geographic" },
+    "segment_data_mode": "quarterly | fy_fallback | unavailable",
+    "data_quality_note": "string | null"
+  },
+  "derived": {
+    "working_capital_diagnostics": {
+      "dso_q4": [...], "dio_q4": [...], "dpo_q4": [...],
+      "dso_q4_trend": "rising | stable | declining | insufficient",
+      "dio_q4_trend": "...", "dpo_q4_trend": "...",
+      "dso_deteriorating": "bool", "dio_deteriorating": "bool", "dpo_deteriorating": "bool",
+      "dpo_method": "direct | estimated_from_other_cl | unavailable",
+      "flag_estimate": "bool — true when DPO is estimated (foreign-ADR fallback)",
+      "wc_deteriorating": "bool — composite (DSO/DIO 任一惡化, 或 DPO direct 惡化)"
+    }
+  }
+}
+```
+
+**`business_mix_shift_overlay` 量化閾值**(Gemini G1):
+- `NO_DATA`: 連 new_segment 都識別不出
+- `STABLE`: 識別出 new_segment 但未達 EMERGING 門檻
+- `EMERGING`: new_segment share ∈ [10%, 25%] AND YoY ≥ 15% AND 5y CAGR > consolidated 5y CAGR + 10pp
+- `ESTABLISHED`: new_segment share ≥ 25% AND operating income share ≥ 40% AND 連續 4 季成立(目前 FY-fallback mode 下 tier 上限 EMERGING)
+
+**`transition_signature`** = integrate(`structural_shift`, `business_mix_shift_overlay`):
+- `paradigm_only`: structural ∈ {CANDIDATE, CONFIRMED}, mix ∈ {NO_DATA, STABLE}
+- `mix_only`: structural ∈ {NONE, INSUFFICIENT_DATA}, mix ∈ {EMERGING, ESTABLISHED}
+- `both`: 兩者都命中
+- `neither`: 都未命中
 
 ## structural_shift (V2.18.0 — paradigm-shift detection)
 

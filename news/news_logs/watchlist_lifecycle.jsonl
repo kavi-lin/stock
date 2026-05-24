@@ -177,3 +177,37 @@
 {"date": "2026-05-21", "ticker": "DELL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
 {"date": "2026-05-21", "ticker": "WDC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
 {"date": "2026-05-21", "ticker": "STX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-22", "ticker": "VRT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-22", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-22", "ticker": "TSM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "AVGO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-22", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-22", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-22", "ticker": "ETN", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-22", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-22", "ticker": "DELL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "WDC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-22", "ticker": "STX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-23", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-23", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-23", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-23", "ticker": "TSM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "LRCX", "event": "first_seen", "sector": "Memory Semiconductors", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "AMAT", "event": "first_seen", "sector": "Memory Semiconductors", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-23", "ticker": "PWR", "event": "first_seen", "sector": "AI Power Infrastructure", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-05-13"}
+{"date": "2026-05-23", "ticker": "CRDO", "event": "first_seen", "sector": "AI Power Infrastructure", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-05-13"}
+{"date": "2026-05-23", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-04-23"}
+{"date": "2026-05-23", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-23", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-23", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-23", "ticker": "DELL", "event": "evicted", "last_seen_yesterday": "2026-05-01"}
+{"date": "2026-05-23", "ticker": "WDC", "event": "evicted", "last_seen_yesterday": "2026-05-01"}
+{"date": "2026-05-23", "ticker": "STX", "event": "evicted", "last_seen_yesterday": "2026-05-01"}

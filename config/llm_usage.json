@@ -1,20 +1,20 @@
 {
-  "date": "2026-05-21",
+  "date": "2026-05-24",
   "models": {
     "claude": {
-      "calls": 75,
+      "calls": 0,
       "cooldown_until": null,
       "last_error": null
     },
     "gemini": {
-      "calls": 126,
+      "calls": 3,
       "cooldown_until": null,
-      "last_error": "parse=failed"
+      "last_error": null
     },
     "codex": {
-      "calls": 196,
+      "calls": 3,
       "cooldown_until": null,
-      "last_error": "timeout after 180s"
+      "last_error": null
     }
   }
 }

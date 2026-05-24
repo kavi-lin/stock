@@ -422,6 +422,238 @@ def valuation_signal(price, expected_value, base_target):
     return "SELL"
 
 
+# ── V3.17 (Wave 1) — Transition case detection + Revenue-Margin matrix ────
+#
+# Reads earnings-analyst cache to consume `transition_signature` and the new
+# `business_mix_shift_overlay`. When transition_case is True the forecaster
+# emits an additional 2x2 revenue-margin matrix alongside the standard 3x3
+# EPS×PE grid. Bundle path resolution mirrors earnings-analyst convention:
+#   skills/earnings-analyst/cache/<TICKER>_<DATE>.json (latest mtime wins)
+import glob as _glob_fc
+import re as _re_fc
+
+REPO_ROOT_FC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+EA_CACHE_DIR_FC = os.path.join(REPO_ROOT_FC, "skills", "earnings-analyst", "cache")
+
+
+def _load_earnings_analyst_bundle(ticker: str) -> dict | None:
+    """Return latest earnings-analyst cache dict for ticker, or None.
+    Skips *.infographic.json — that is the LLM-derived narrative layer, not
+    the structured fundamentals bundle that holds transition_signature.
+    """
+    if not os.path.isdir(EA_CACHE_DIR_FC):
+        return None
+    candidates = []
+    for fp in _glob_fc.glob(os.path.join(EA_CACHE_DIR_FC, f"{ticker}_*.json")):
+        if fp.endswith(".infographic.json"):
+            continue
+        if not _re_fc.search(rf"/{ticker}_\d{{4}}-\d{{2}}-\d{{2}}\.json$", fp):
+            continue
+        candidates.append(fp)
+    if not candidates:
+        return None
+    candidates.sort(key=os.path.getmtime, reverse=True)
+    try:
+        with open(candidates[0], "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _determine_transition_case(bundle: dict | None, current_price: float,
+                               income_q: list, ratios_a: list) -> dict:
+    """V3.17 round-3 priority cascade (first match wins):
+
+      1. earnings-analyst transition_signature ∈ {paradigm_only, mix_only, both}
+         → transition_case=True, reason=signature_<sig>
+      2. Numeric anomaly: forward_PE > 50 AND DCF/current_price < 0.5
+         AND 5y_rev_CAGR_per_share < 5% AND latest_Q_segment_growth > 30%
+         → transition_case=True, reason=numeric_anomaly
+      3. Otherwise → transition_case=False
+    """
+    reason = None
+    signature = None
+    mix_tier = "NO_DATA"
+
+    if bundle:
+        signature = bundle.get("transition_signature")
+        mix_tier = ((bundle.get("business_mix_shift_overlay") or {}).get("tier")
+                    or "NO_DATA")
+        if signature in {"paradigm_only", "mix_only", "both"}:
+            return {
+                "transition_case": True,
+                "reason": f"signature_{signature}",
+                "signature": signature,
+                "mix_tier": mix_tier,
+            }
+
+    # Numeric anomaly fallback (M2 specific thresholds)
+    forward_pe = None
+    if ratios_a and isinstance(ratios_a[0], dict):
+        forward_pe = ratios_a[0].get("priceToEarningsRatio")
+    rev_5y_cagr_per_share = None
+    if bundle:
+        ag = bundle.get("annual_growth") or []
+        if ag and isinstance(ag[0], dict):
+            rev_5y_cagr_per_share = ag[0].get("fiveYRevenueGrowthPerShare")
+    dcf_intrinsic = None
+    if bundle:
+        dcf_intrinsic = (bundle.get("valuation") or {}).get("dcf_intrinsic")
+    seg_growth_latest = None
+    if bundle:
+        new_seg = ((bundle.get("business_mix_shift_overlay") or {}).get("new_segment")
+                   or {})
+        seg_growth_latest = new_seg.get("yoy_growth")
+
+    cond = (forward_pe is not None and forward_pe > 50
+            and dcf_intrinsic is not None and current_price > 0
+            and dcf_intrinsic / current_price < 0.5
+            and rev_5y_cagr_per_share is not None and rev_5y_cagr_per_share < 0.05
+            and seg_growth_latest is not None and seg_growth_latest > 0.30)
+    if cond:
+        return {
+            "transition_case": True,
+            "reason": "numeric_anomaly",
+            "signature": signature,
+            "mix_tier": mix_tier,
+            "metrics": {
+                "forward_pe":               forward_pe,
+                "dcf_intrinsic":            dcf_intrinsic,
+                "dcf_to_price":             round(dcf_intrinsic / current_price, 3),
+                "rev_5y_cagr_per_share":    rev_5y_cagr_per_share,
+                "latest_segment_growth":    seg_growth_latest,
+            },
+        }
+    return {
+        "transition_case": False,
+        "reason": None,
+        "signature": signature,
+        "mix_tier": mix_tier,
+    }
+
+
+def _scenario_struct(label: str, label_en: str, rev_growth_pct: float | None,
+                     op_margin_pct: float | None, narrative: str) -> dict:
+    """Helper — build structured achieves_if entry for one matrix cell."""
+    parts = []
+    if rev_growth_pct is not None:
+        parts.append(f"Revenue growth ≈ {rev_growth_pct:+.1f}%")
+    if op_margin_pct is not None:
+        parts.append(f"operating margin → {op_margin_pct:.1f}%")
+    parts.append(narrative)
+    return {
+        "label":      label,
+        "label_en":   label_en,
+        "achieves_if_text":   "; ".join(parts),
+        "achieves_if_struct": {
+            "revenue_growth_pct":  rev_growth_pct,
+            "operating_margin_pct": op_margin_pct,
+            "narrative":           narrative,
+        },
+    }
+
+
+def build_revenue_margin_matrix(transition_info: dict, income_q: list,
+                                current_price: float) -> dict | None:
+    """V3.17 (Wave 1) — Codex v5 Revenue-Margin matrix.
+
+    Returns 4-cell dict keyed by case label. Two versions based on
+    business_mix_shift tier:
+      - EMERGING:    volume_driven / margin_driven / balanced / bear_reset
+      - ESTABLISHED: market_share_consolidation / moat_validation /
+                     pricing_power / disruption_threat (M4 rename from regime_break)
+      - other tiers: defaults to EMERGING matrix
+    """
+    if not transition_info.get("transition_case"):
+        return None
+
+    # Derive latest revenue + margin baseline from income_q for narrative
+    latest_rev_yoy = None
+    latest_op_margin = None
+    if income_q and len(income_q) >= 5:
+        cur, prev_y = income_q[0], income_q[4]
+        cr, pr = cur.get("revenue"), prev_y.get("revenue")
+        if cr and pr and pr > 0:
+            latest_rev_yoy = round((cr - pr) / pr * 100, 1)
+        if cur.get("operatingIncome") and cr:
+            latest_op_margin = round(cur["operatingIncome"] / cr * 100, 1)
+
+    tier = transition_info.get("mix_tier", "EMERGING")
+    use_established = tier == "ESTABLISHED"
+
+    if use_established:
+        # ESTABLISHED matrix — Margin 多半已兌現, achieves_if 轉看 regime sustainability
+        cells = [
+            _scenario_struct(
+                label="市佔鞏固", label_en="market_share_consolidation",
+                rev_growth_pct=(latest_rev_yoy or 15.0),
+                op_margin_pct=latest_op_margin,
+                narrative="新板塊維持當前市佔率,沒丟單給新進入者",
+            ),
+            _scenario_struct(
+                label="護城河驗證", label_en="moat_validation",
+                rev_growth_pct=(latest_rev_yoy or 10.0) * 1.2 if latest_rev_yoy else 18.0,
+                op_margin_pct=(latest_op_margin or 0) + 2 if latest_op_margin else None,
+                narrative="客戶 lock-in / switching cost 驗證,毛利穩或微升",
+            ),
+            _scenario_struct(
+                label="定價權", label_en="pricing_power",
+                rev_growth_pct=(latest_rev_yoy or 12.0),
+                op_margin_pct=(latest_op_margin or 0) + 5 if latest_op_margin else None,
+                narrative="提價傳導到 margin 而非被吞,顯示定價權",
+            ),
+            _scenario_struct(
+                label="顛覆性威脅", label_en="disruption_threat",
+                rev_growth_pct=-5.0,
+                op_margin_pct=(latest_op_margin or 0) - 3 if latest_op_margin else None,
+                narrative="新對手 / 新技術衝擊已轉型 moat,share loss + margin compression",
+            ),
+        ]
+        version = "established_v1"
+    else:
+        # EMERGING matrix — 仍在 ramp,看 volume vs margin 路徑取捨
+        cells = [
+            _scenario_struct(
+                label="量驅動", label_en="volume_driven",
+                rev_growth_pct=15.0,
+                op_margin_pct=latest_op_margin,
+                narrative="margin 維持現狀,靠 revenue ramp 支撐估值",
+            ),
+            _scenario_struct(
+                label="利潤率驅動", label_en="margin_driven",
+                rev_growth_pct=(latest_rev_yoy or 5.0),
+                op_margin_pct=((latest_op_margin or 0) + 5)
+                              if latest_op_margin is not None else 8.0,
+                narrative="revenue 維持 base/consensus,margin 修復到目標水準",
+            ),
+            _scenario_struct(
+                label="平衡", label_en="balanced",
+                rev_growth_pct=8.0,
+                op_margin_pct=((latest_op_margin or 0) + 3)
+                              if latest_op_margin is not None else 5.0,
+                narrative="revenue + margin 同步小幅改善,中性走勢",
+            ),
+            _scenario_struct(
+                label="Bear reset", label_en="bear_reset",
+                rev_growth_pct=0.0,
+                op_margin_pct=latest_op_margin,
+                narrative="growth / margin 都未兌現 → multiple 壓縮回到 transition 前",
+            ),
+        ]
+        version = "emerging_v1"
+
+    return {
+        "matrix_version":  version,
+        "tier_basis":      tier,
+        "transition_reason": transition_info.get("reason"),
+        "current_baseline": {
+            "latest_rev_yoy_pct":  latest_rev_yoy,
+            "latest_op_margin_pct": latest_op_margin,
+        },
+        "cells": cells,
+    }
+
+
 # ── Scenario builder ─────────────────────────────────────────────────────
 def build_scenarios(forward_eps, pe_range, current_price):
     p25, p50, p75 = pe_range["pe_p25"], pe_range["pe_p50"], pe_range["pe_p75"]
@@ -440,23 +672,55 @@ def build_scenarios(forward_eps, pe_range, current_price):
 
     bear_t, base_t, bull_t = grid[0][0], grid[1][1], grid[2][2]
 
+    # V3.17 (Wave 1, Codex v5) — dual-field achieves_if for forward-compat:
+    #   - achieves_if      : legacy string field (kept for backward compatibility)
+    #   - achieves_if_text : new explicit text field
+    #   - achieves_if_struct : structured dict for protocol / validators
+    bear_text = "forward EPS misses by > 10% OR gross margin compression OR sector multiple de-rating"
+    base_text = "earnings trajectory in-line with trend AND multiple stays in p25-p75 range"
+    bull_text = "forward EPS beats consensus by > 10% AND multiple re-rates to p75 (requires narrative catalyst)"
+
     scenarios = {
         "bear": {
             "target": bear_t, "upside_pct": up(bear_t),
             "eps": eps_bear, "eps_delta_pct": -15, "pe": p25,
-            "achieves_if":    "forward EPS misses by > 10% OR gross margin compression OR sector multiple de-rating",
+            "achieves_if":        bear_text,
+            "achieves_if_text":   bear_text,
+            "achieves_if_struct": {
+                "eps_delta_pct":   -15,
+                "pe_percentile":   "p25",
+                "required_eps":    eps_bear,
+                "required_pe":     p25,
+                "narrative":       bear_text,
+            },
             "invalidated_if": "company beats guidance 2 quarters in a row WITH multiple holding > p50",
         },
         "base": {
             "target": base_t, "upside_pct": up(base_t),
             "eps": eps_base, "eps_delta_pct": 0, "pe": p50,
-            "achieves_if":    "earnings trajectory in-line with trend AND multiple stays in p25-p75 range",
+            "achieves_if":        base_text,
+            "achieves_if_text":   base_text,
+            "achieves_if_struct": {
+                "eps_delta_pct":   0,
+                "pe_percentile":   "p50",
+                "required_eps":    eps_base,
+                "required_pe":     p50,
+                "narrative":       base_text,
+            },
             "invalidated_if": "material earnings surprise (> 10% either side) OR multiple breaks range",
         },
         "bull": {
             "target": bull_t, "upside_pct": up(bull_t),
             "eps": eps_bull, "eps_delta_pct": +15, "pe": p75,
-            "achieves_if":    "forward EPS beats consensus by > 10% AND multiple re-rates to p75 (requires narrative catalyst)",
+            "achieves_if":        bull_text,
+            "achieves_if_text":   bull_text,
+            "achieves_if_struct": {
+                "eps_delta_pct":   +15,
+                "pe_percentile":   "p75",
+                "required_eps":    eps_bull,
+                "required_pe":     p75,
+                "narrative":       bull_text,
+            },
             "invalidated_if": "any guidance cut OR macro multiple compression (rates up / recession)",
         },
     }
@@ -972,6 +1236,18 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
 
     scenarios, grid = build_scenarios(fwd_eps, effective_pe, current_price)
 
+    # V3.17 (Wave 1) — load earnings-analyst bundle + transition_case cascade.
+    # Adds revenue-margin matrix when transition_case is detected. Bundle is
+    # optional — when missing, forecaster falls back to EPS×PE-only behavior
+    # (no transition_case, no matrix) for backward compatibility.
+    ea_bundle = _load_earnings_analyst_bundle(ticker)
+    transition_info = _determine_transition_case(
+        ea_bundle, current_price, income_q, ratios_a,
+    )
+    revenue_margin_matrix = build_revenue_margin_matrix(
+        transition_info, income_q, current_price,
+    )
+
     # v1.1: expected value + advisory signal
     ev, ev_probs = calc_expected_value(scenarios, confidence)
     sig = valuation_signal(current_price, ev, scenarios["base"]["target"])
@@ -1003,6 +1279,9 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
             "source":          rate_source,
         },
         "scenarios":          scenarios,
+        # V3.17 (Wave 1) — transition case + revenue-margin matrix
+        "transition_case":    transition_info,
+        "revenue_margin_matrix": revenue_margin_matrix,
         "sensitivity_grid":   grid,
         "sensitivity_axes": {
             "rows": [f"PE p25 ({effective_pe['pe_p25']})",

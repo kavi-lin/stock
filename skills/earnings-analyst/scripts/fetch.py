@@ -79,19 +79,25 @@ def find_existing_cache(ticker: str, latest_earnings_date: str) -> str | None:
 
 
 def slim_income(rows: list) -> list:
-    keep = ["date", "fiscalYear", "period", "revenue", "grossProfit", "operatingIncome",
-            "netIncome", "eps", "epsDiluted", "researchAndDevelopmentExpenses",
+    # V3.17 — costOfRevenue added for DPO computation (DPO = AP / COGS × 91).
+    keep = ["date", "fiscalYear", "period", "revenue", "costOfRevenue", "grossProfit",
+            "operatingIncome", "netIncome", "eps", "epsDiluted",
+            "researchAndDevelopmentExpenses",
             "sellingGeneralAndAdministrativeExpenses", "ebitda", "ebit",
             "weightedAverageShsOutDil"]
     return [{k: r.get(k) for k in keep} for r in rows]
 
 
 def slim_balance(rows: list) -> list:
+    # V3.17 — accountsPayable + otherCurrentLiabilities added for DPO computation.
+    # FMP often omits accountsPayable for European ADRs (合併揭露 in otherCurrentLiabilities).
+    # Downstream analyze.py uses a 3-tier DPO fallback (direct / estimated / unavailable).
     keep = ["date", "period", "totalAssets", "totalLiabilities", "totalEquity",
             "totalCurrentAssets", "totalCurrentLiabilities",
             "cashAndCashEquivalents", "shortTermInvestments",
             "totalDebt", "longTermDebt", "shortTermDebt",
-            "netReceivables", "inventory", "retainedEarnings"]
+            "netReceivables", "inventory", "retainedEarnings",
+            "accountsPayable", "otherCurrentLiabilities"]
     return [{k: r.get(k) for k in keep} for r in rows]
 
 

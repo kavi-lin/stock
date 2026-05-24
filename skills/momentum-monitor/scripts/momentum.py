@@ -153,6 +153,22 @@ def _short_interest_block(t):
     }
 
 
+def _market_cap(t):
+    """V3.17 (Wave 1) — fetch marketCap from yfinance .info. Returns None on
+    any failure (rate-limit, missing field). Consumed by _signals_and_warnings
+    to assign extension severity tag (large_cap_parabolic / mid_cap_extreme /
+    microcap_extension)."""
+    try:
+        info = t.info or {}
+    except Exception:
+        return None
+    mc = info.get("marketCap")
+    try:
+        return float(mc) if mc else None
+    except (TypeError, ValueError):
+        return None
+
+
 # ── V2.1 new derives — leader-finder indicators ──────────────────────────
 def _get_spy_hist():
     """Return SPY hist (1y), shared across all tickers in same process. Cached 1h."""
@@ -438,7 +454,8 @@ def _composite(volume, ma, short_int):
     }
 
 
-def _signals_and_warnings(volume, ma, short_int, comp, rsi=None, macd=None):
+def _signals_and_warnings(volume, ma, short_int, comp, rsi=None, macd=None,
+                          market_cap=None):
     signals, warnings = [], []
     if rsi and rsi.get("rsi_14") is not None:
         v = rsi["rsi_14"]
@@ -469,6 +486,17 @@ def _signals_and_warnings(volume, ma, short_int, comp, rsi=None, macd=None):
     am200 = ma["above_ma200_pct"] or 0
     if am200 > 50:
         warnings.append("parabolic_blowoff_risk")
+    # V3.17 (Wave 1, Codex v5) — market-cap aware severity tag.
+    # `market_cap` is injected into the local namespace by analyze() prior to
+    # this call (see momentum.py:analyze). Tag is additive — parabolic_blowoff_risk
+    # remains the base flag, severity is the secondary classifier.
+    if am200 > 100 and market_cap is not None:
+        if market_cap > 10_000_000_000:
+            warnings.append("large_cap_parabolic")
+        elif market_cap > 2_000_000_000:
+            warnings.append("mid_cap_extreme")
+        else:
+            warnings.append("microcap_extension")
     for c in ma["recent_crosses"]:
         if c["days_ago"] <= 10:
             if c["type"] == "golden_cross_20_50":  signals.append("fresh_golden_cross_20_50")
@@ -493,10 +521,12 @@ def analyze(ticker):
     volume    = volume_profile(hist)
     ma        = ma_structure(hist)
     short_int = _short_interest_block(t)
+    market_cap = _market_cap(t)
     rsi       = rsi_state(hist)
     macd      = compute_macd(hist["Close"])
     comp      = _composite(volume, ma, short_int)
-    signals, warnings = _signals_and_warnings(volume, ma, short_int, comp, rsi, macd)
+    signals, warnings = _signals_and_warnings(volume, ma, short_int, comp, rsi, macd,
+                                              market_cap=market_cap)
 
     # V2.1 leader-finder indicators
     nhp           = _compute_nhp(hist)

@@ -112,9 +112,22 @@ python3 skills/fred-macro/scripts/fetch.py --json-only
   "fred_available": "bool",
   "fred_snapshot": { /* 12 series, see fred-macro skill */ },
   "phase3_macro_multiplier": "float",
-  "macro_multiplier_rationale": "string — LLM baseline + FRED caps applied"
+  "macro_multiplier_rationale": "string — LLM baseline + FRED caps applied",
+  "systemic_backdrop": {
+    "ai_bubble_proximity": null,
+    "vix_regime": null,
+    "fed_funds_regime": null,
+    "version": "v0.1_stub"
+  }
 }
 ```
+
+> **V3.17 NOTE — `systemic_backdrop`** (Codex v5 + Gemini review): added as schema
+> stub only. Values stay `null` in this wave; future V3.18+ will populate
+> `ai_bubble_proximity` (via `market-top-detector` + sector concentration metrics),
+> `vix_regime` (from FRED VIXCLS percentile), and `fed_funds_regime` (FRED DFF /
+> rate-cycle classifier). Stub exists now so downstream consumers can branch on
+> presence of the field without breaking when values fill in.
 
 ### macro_multiplier (LLM baseline)
 
@@ -154,7 +167,7 @@ PM (inline)。Phase 1 結束前 PM **MUST** 取得 4 個 bundles 供 Phase 2 共
 | Bundle | Source | Cost | Lane 注入 |
 |---|---|---|---|
 | `TICKER_DATA_BUNDLE` | `bash skills/finnhub-client/scripts/run_dual_fetch.sh --tickers <T>` → 讀 `scoring.*` (15 scalar) | 1 dual_fetch / session | All 5 lanes |
-| `EARNINGS_ANALYST_BUNDLE` | 讀 `skills/earnings-analyst/cache/<T>_*.json` (≤ 90d) | 0 FMP call | Fundamentals + **Valuation Specialist** |
+| `EARNINGS_ANALYST_BUNDLE` | 讀 `skills/earnings-analyst/cache/<T>_*.json` (≤ 90d) — V3.17 加 `transition_signature` / `business_mix_shift_overlay` / `cash_conversion_quality` / `working_capital_diagnostics` | 0 FMP call | Fundamentals + **Valuation Specialist** + Phase 3 penalty cascade |
 | `PEER_BUNDLE` | `from skills._shared.company_context import get_peers, get_profile` | 2-7 FMP, 24h cache | Fundamentals + Burry + **Valuation Specialist** |
 | `FMP_SUPP_BUNDLE` | `from skills._shared.fmp_supplementary import get_supplementary_bundle` | 2-9 FMP, 24h cache | 視 lane 而定（見 appendix） |
 
@@ -362,6 +375,14 @@ OUTPUT (strict JSON):
 - **Skill**: `python3 skills/technical-analyst/scripts/analyze.py <TICKER> --json-only`
 - OHLCV-only lane，但 V2.13 起額外讀 FMP_SUPP_BUNDLE.insider_summary 做主力分析（見下）
 
+##### V3.17 (Wave 1) — Large-cap parabolic ceiling
+
+當 `momentum-monitor` 輸出 `warnings` 含 `large_cap_parabolic` (marketCap > $10B AND
+above_ma200_pct > 100) 時 Technical lane:
+- `raw score ceiling = +1`(就算 trend / pattern / smart money 都偏多,score 也不得 > +1)
+- 必填 narrative `extension_penalty_note`: 1 句說明為何 large-cap parabolic 蓋頂(crowded trade、回測 SMA50 平均 -30%、historical R/R 不對稱)
+- 設計理由(Codex v5):大型股 +100% above SMA200 的 R/R 跟小型股 不同 — 全市場可見 → 散戶 FOMO 已到、回檔深度通常更大。Technical 不能因 Stage 2 / golden cross 給滿分
+
 ##### V2.13.0 Technical lane 額外輸出（必填，不影響 score 公式）
 
 對應外部模板「主力吸籌/出貨」+「型態分類」+「強弱/關鍵價/劇本」三件套：
@@ -411,6 +432,28 @@ OUTPUT (strict JSON):
 - **論述格式**: 必須引用具體 anchor 數字，e.g.「DCF $155 / FCFE $148 / PT consensus $325 / Peer-implied $200 → 加權合理價 $215，現價 $285 = 32.5% premium → score -3」
 - **絕對禁止**: 直接 mirror Fundamentals 的 P/E judgment；本 lane 是獨立估值維度
 - 額外輸出: `valuation_anchors{}` (6 anchor 數字), `weighted_fair_value`, `vs_current_pct`
+
+##### V3.17 (Wave 1) 新增必填欄位 — Transition case dissent_basis
+
+當 `EARNINGS_ANALYST_BUNDLE.transition_signature ∈ {paradigm_only, mix_only, both}`
+**或** `forecaster.transition_case is True` 時,Valuation Specialist 必須額外輸出:
+
+```json
+{
+  "cited_transition_overlay": true | false,
+  "transition_dissent_basis": "macro_systemic" | "thesis_fundamental" | "valuation_anchor" | null
+}
+```
+
+- `cited_transition_overlay`: 是否在 narrative 內引用 `transition_signature` 或
+  `forecaster.revenue_margin_matrix`(EMERGING / ESTABLISHED 任一)
+- `transition_dissent_basis`: 當 `lane_score < 0` 時 **必填** (null 視同 `thesis_fundamental` 保守處理):
+  - `macro_systemic`: 負分主因 = 大盤 multiples 壓縮 (高利率 / regime stagflation),非 transition 本身
+  - `thesis_fundamental`: 負分主因 = transition thesis 本身存疑 (segment growth 不可持續、margin 路徑不通)
+  - `valuation_anchor`: 負分主因 = 歷史 PE / DCF 等 anchor 給出明顯失真結論
+- `lane_score >= 0` 時 dissent_basis 可填 null
+
+此欄位被 Phase 3 Step 2 `valuation_confirmed_transition` gate 消費 (V3.17 — Gemini G4 乾淨方案,`lane_score` 不再是 gate)。
 
 ### Fan-Out 執行（PM 層）
 
@@ -573,6 +616,25 @@ V2.19 — STRUCTURAL_SHIFT_TIER 條件指令 (anti-spoofing):
     - mr 論證仍可用但效力減半（penalty 0.85 → 0.925）
   IF STRUCTURAL_SHIFT_TIER = NONE / INSUFFICIENT_DATA:
     - 標準攻擊模式，無限制
+
+V3.17 (Wave 1) — Cash conversion 攻擊限制:
+  - 若 EARNINGS_ANALYST_BUNDLE.cash_conversion_quality == "clean_positive_gap":
+    禁止用「OpCF >> NI 推論造假」作為攻擊路徑。clean positive gap 已通過
+    DSO/DIO/DPO 4Q 二階校對 — 用 cash quality 攻擊 = 直接違反 deterministic
+    flag,後驗 classifier 將自動把該 counter_thesis 視為 invalid。
+  - 要攻擊 cash quality,必須引用 working_capital_diagnostics 內 ≥1 個 indicator
+    (DSO/DIO/DPO)惡化 (rising trend + 最新 Q > 4Q_avg × 1.15)
+  - 若 cash_conversion_quality == "wc_driven",可攻擊 cash quality,但需明確
+    引用是哪一個 WC indicator 異常 (e.g. "DSO Q4 trend rising 117→138 + 最新
+    Q 比 4Q avg 高 22% → revenue 認列鬆綁")
+
+V3.17 (Wave 1) — transition_signature 攻擊指引:
+  - 若 transition_signature ∈ {mix_only, both}:
+    pure mean-reversion 攻擊仍可送,但 Phase 3 Step 2 cascade #2 會自動軟化到
+    × 0.95 (前提 Valuation Specialist 也確認 transition,即 cited_transition_overlay
+    == True AND transition_dissent_basis != "thesis_fundamental")
+  - 鼓勵 pure_forward 攻擊主線(新對手 / 新技術 / 訂單下修 / margin thesis 證偽)
+    — 這類攻擊維持 × 0.85 penalty,殺傷力最大
 ```
 
 ### Phase 3 影響對照
@@ -635,29 +697,86 @@ Step 1.7 (Lane Polarization Modulation — V2.19.0):
   ELSE (ALIGNED):
     - no modulation
 
-Step 2 (Red-Team-Gated Bonus/Penalty — V2.19 anti-spoofing):
+Step 2 (Red-Team-Gated Bonus/Penalty — V3.17 5-level priority cascade):
   Read red_team_basis from det_shadow (V2.19 classifier output).
   basis ∈ {pure_forward, pure_mean_reversion, contaminated, unclassified}
+
+  Read transition_signature from EARNINGS_ANALYST_BUNDLE (V3.17 — added field).
+  Read forecaster.transition_case + valuation_specialist.cited_transition_overlay
+  + valuation_specialist.transition_dissent_basis (V3.17 — Codex v5 + Gemini G4).
+
+  Compute valuation_confirmed_transition (V3.17 — Gemini G4 dissent_basis gate):
+    valuation_confirmed_transition = (
+        forecaster.transition_case is True
+        AND valuation_specialist.cited_transition_overlay is True
+        AND valuation_specialist.transition_dissent_basis != "thesis_fundamental"
+    )
+    # Note: lane_score is NOT the gate (V3.17 — was Round 3 design,
+    # rejected to avoid macro-systemic false negatives).
+    # Note: dissent_basis is REQUIRED when valuation_specialist.lane_score < 0;
+    # null → treated as "thesis_fundamental" (conservative default).
+
+  Cross-check stale signal (V3.17 — Codex v5 Staleness Alert + Gemini G2):
+    IF abs(bundle.transition_signature_mtime - forecaster.transition_case_mtime) > 6h
+       OR bundle.transition_signature inconsistent with forecaster.transition_case:
+      emit_terminal_alert(level=HIGH, includes=[bundle_mtime, forecaster_mtime, delta])
+      session_export["transition_data_stale_or_inconsistent"] = true
+      transition_softening_disabled = true       # disables rule #2 only,
+                                                  # cascade #1/#3/#4/#5 still apply
+      # 不寫 SESSION_NOTES.md (per CLAUDE.md §2 EXCLUSION — protocol run 不是 session)
 
   IF all 5 signals same direction AND Burry.veto_flag = false AND red_team_verdict = NO_VIABLE_COUNTER:
     raw_after_bonus = raw_total × 1.15
 
   ELIF red_team_verdict = STRONG_COUNTER:
-    # V2.19: anti-spoofing — mr 偷渡偵測
+    # V3.17 — 5-level priority cascade, first match wins.
+    # Cascade rules:
+    #   1. structural paradigm shift CONFIRMED + mr/contaminated → 0.925 + downgrade
+    #   2. transition_signature (mix-based) + Valuation confirmed + mr → 0.95 (NEW)
+    #   3. structural paradigm shift CANDIDATE → 0.925
+    #   4. pure_forward attack → 0.85
+    #   5. otherwise → no penalty (default catch-all)
     IF shift_tier = CONFIRMED AND red_team_basis IN {pure_mean_reversion, contaminated}:
-      # mr 一票否決：即使 LLM 塞 fw keyword 試圖救回，仍降級
+      # Rule #1 — mr 一票否決：CONFIRMED paradigm shift 期間不接受 mr 攻擊
       effective_verdict = MODERATE_COUNTER
       penalty = 0.925
       raw_after_bonus = raw_total × penalty
       auto_downgrade_logged = true
+      cascade_rule_applied = "rule_1_paradigm_confirmed_mr_downgrade"
+
+    ELIF (not transition_softening_disabled
+          AND transition_signature IN {"mix_only", "both"}
+          AND valuation_confirmed_transition is True
+          AND red_team_basis == "pure_mean_reversion"):
+      # Rule #2 (V3.17 NEW) — business mix transition + Valuation lane confirms
+      # + Red Team is purely mean-reversion → soft-penalize (0.95).
+      # NOTE: reuses pure_mean_reversion / contaminated keyword set in
+      # apply_det_shadow.py — does NOT introduce a "valuation_anchor" attack
+      # class (per Round 3 Q3 — anchor 已含在 MR_KEYWORDS 內).
+      penalty = 0.95
+      raw_after_bonus = raw_total × penalty
+      cascade_rule_applied = "rule_2_transition_signature_mr_soften"
+
     ELIF shift_tier = CANDIDATE:
       penalty = 0.925
       raw_after_bonus = raw_total × penalty
-    ELSE:
+      cascade_rule_applied = "rule_3_paradigm_candidate"
+
+    ELIF red_team_basis == "pure_forward":
       penalty = 0.85
       raw_after_bonus = raw_total × penalty
+      cascade_rule_applied = "rule_4_pure_forward"
+
+    ELSE:
+      # Rule #5 — STRONG_COUNTER but no specific rule triggers
+      # (e.g. unclassified basis without paradigm/mix evidence)
+      penalty = 0.85
+      raw_after_bonus = raw_total × penalty
+      cascade_rule_applied = "rule_5_default_strong_counter"
+
   ELSE:
     raw_after_bonus = raw_total
+    cascade_rule_applied = "no_penalty"
 
 Step 3 (Directional Macro Multiplier):
   effective_macro_mult = max(macro_multiplier, shift_macro_floor)
