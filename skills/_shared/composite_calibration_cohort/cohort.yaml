@@ -95,7 +95,13 @@ buckets:
        notes: "Copper cycle bottom + EV demand"}
 
 acceptance:
-  min_directionally_correct: 14      # of AVAILABLE samples (not total 18)
+  # V3.17.4 (Codex Finding 2): switched from absolute count
+  # `min_directionally_correct: 14` to a rate threshold because the
+  # denominator is AVAILABLE samples, not total 18. A cohort with 6/6
+  # correct (100%) was incorrectly FAILing because 6 < 14 (absolute).
+  # Rate-based: 0.78 ≈ 14/18, preserving the originally intended floor
+  # while correctly normalizing against AVAILABLE.
+  min_directional_correct_rate: 0.78
   max_new_flag_trigger_rate: 0.30    # AVAILABLE samples emitting V3.17 new flags
   max_stale_gate_trigger_rate: 0.05  # measured via fixture sim, not cohort
   # When AVAILABLE < 6, acceptance metrics are reported as INSUFFICIENT_DATA

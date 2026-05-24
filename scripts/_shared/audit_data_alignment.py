@@ -33,6 +33,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -50,16 +51,41 @@ DEFAULT_THRESHOLD = 0.01   # 1% relative diff
 FMP_STABLE_QUOTE = "https://financialmodelingprep.com/stable/quote"
 
 
+# V3.17.4 (Codex Finding 1) — secret-leak hardening.
+# Even with header-based auth, exceptions can still surface URLs / params
+# containing the API key (e.g. requests.exceptions.MissingSchema with the
+# raw URL, retries logging the prepared request, urllib3 NameResolutionError
+# echoing the full URL with apikey query). Two-layer defense:
+#   1. Use header auth on direct REST (no apikey in query in the first place)
+#   2. _scrub_secret strips both `apikey=...` query patterns AND the literal
+#      key value from any returned error string
+_APIKEY_QUERY_RE = re.compile(r"(?i)(apikey)=[^&\s'\"]+")
+
+
+def _scrub_secret(text, secret: str | None = None) -> str:
+    """Strip apikey=... query patterns + literal key value from any string.
+    Applied to every error message returned upstream so DNS / network / parse
+    failures never echo the secret into --json output or markdown reports."""
+    s = str(text)
+    s = _APIKEY_QUERY_RE.sub(r"\1=<REDACTED>", s)
+    if secret:
+        s = s.replace(secret, "<REDACTED>")
+    return s
+
+
 def _path_a_fmpclient(ticker: str) -> dict | None:
-    """PATH_A — skills/market-top-detector/scripts/fmp_client.FMPClient.quote"""
+    """PATH_A — skills/market-top-detector/scripts/fmp_client.FMPClient.quote.
+    FMPClient already uses header auth so secret leak risk is low; defensive
+    _scrub_secret applied to error strings for consistency with PATH_B."""
+    api_key = os.environ.get("FMP_API_KEY")
     try:
         from fmp_client import FMPClient
     except ImportError as e:
-        return {"_error": f"fmp_client import: {e}"}
+        return {"_error": _scrub_secret(f"fmp_client import: {e}", api_key)}
     try:
         c = FMPClient()
     except ValueError as e:
-        return {"_error": f"FMPClient init: {e}"}
+        return {"_error": _scrub_secret(f"FMPClient init: {e}", api_key)}
     data = c._request_with_fallback("quote", ticker)
     if not data or not isinstance(data, list):
         return None
@@ -73,20 +99,28 @@ def _path_a_fmpclient(ticker: str) -> dict | None:
 
 
 def _path_b_rest_direct(ticker: str) -> dict | None:
-    """PATH_B — direct requests.get to /stable/quote (parallel impl)."""
+    """PATH_B — direct requests.get to /stable/quote (parallel impl).
+    V3.17.4: API key moved to header (matches fmp_client pattern) so the
+    secret is never in the query string. Defensive _scrub_secret applied
+    to all returned error strings as belt-and-braces."""
     api_key = os.environ.get("FMP_API_KEY")
     if not api_key:
         return {"_error": "FMP_API_KEY missing"}
+    headers = {"apikey": api_key}
     try:
         r = requests.get(FMP_STABLE_QUOTE,
-                         params={"symbol": ticker, "apikey": api_key},
+                         params={"symbol": ticker},
+                         headers=headers,
                          timeout=30)
     except requests.RequestException as e:
-        return {"_error": f"REST exception: {e}"}
+        return {"_error": _scrub_secret(f"REST exception: {e}", api_key)}
     if r.status_code == 429:
         return {"_error": "REST 429 (quota exhausted)"}
     if r.status_code != 200:
-        return {"_error": f"REST status {r.status_code}"}
+        # Strip secret from response body too in case the server echoed it
+        body_preview = _scrub_secret(r.text[:200], api_key)
+        return {"_error": _scrub_secret(
+            f"REST status {r.status_code}: {body_preview}", api_key)}
     try:
         data = r.json()
     except ValueError:

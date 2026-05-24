@@ -204,9 +204,15 @@ def aggregate(results: list, acceptance: dict) -> dict:
     else:
         directional_pct = correct / n_avail
         flag_rate = v317_hit / n_avail
-        min_correct = acceptance.get("min_directionally_correct", 14)
+        # V3.17.4 (Codex Finding 2) — rate-based, not absolute count.
+        # Fallback to legacy `min_directionally_correct / 18` rate if the
+        # rate key is absent (backward-compat for older cohort.yaml).
+        min_rate = acceptance.get("min_directional_correct_rate")
+        if min_rate is None:
+            legacy_abs = acceptance.get("min_directionally_correct", 14)
+            min_rate = legacy_abs / 18.0
         max_flag_rate = acceptance.get("max_new_flag_trigger_rate", 0.30)
-        directional_ok = correct >= min_correct
+        directional_ok = directional_pct >= min_rate
         flag_rate_ok = flag_rate <= max_flag_rate
         acceptance_status = "PASS" if (directional_ok and flag_rate_ok) else "FAIL"
 
@@ -240,8 +246,12 @@ def render_markdown(cohort: dict, results: list, agg: dict) -> str:
           f"≥ {cohort['acceptance']['min_available_for_scoring']} | "
           f"{'✅' if agg['n_available'] >= cohort['acceptance']['min_available_for_scoring'] else '⚠'} |"]
     if agg["directional_pct"] is not None:
+        # V3.17.4: display rate threshold (legacy abs fallback if older yaml)
+        min_rate = cohort["acceptance"].get("min_directional_correct_rate")
+        if min_rate is None:
+            min_rate = cohort["acceptance"].get("min_directionally_correct", 14) / 18.0
         md.append(f"| Directional correctness | {agg['correct']}/{agg['n_available']} "
-                  f"({agg['directional_pct']:.0%}) | ≥ {cohort['acceptance']['min_directionally_correct']}/18 | "
+                  f"({agg['directional_pct']:.0%}) | ≥ {min_rate:.0%} | "
                   f"{'✅' if agg['directional_ok'] else '🔴'} |")
         md.append(f"| New V3.17 flag trigger rate | {agg['new_flag_trigger_rate']:.0%} | "
                   f"≤ {cohort['acceptance']['max_new_flag_trigger_rate']:.0%} | "

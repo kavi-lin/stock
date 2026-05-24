@@ -8,6 +8,61 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.17.4] — 2026-05-24 — Codex round-8 review fixes: secret-leak + cohort rate gate
+
+### Fixed
+
+- **🔴 `audit_data_alignment.py` API key leak via exception URL** (Codex Finding 1):
+  PATH_B (direct REST) put the API key in query params. On DNS / network
+  failure, `requests.exceptions.ConnectionError` echoed the prepared URL —
+  including `apikey=<value>` — into the exception message, which then
+  flowed into the returned dict, the `--json` stdout, and the persisted
+  markdown report. Reproduced with `FMP_STABLE_QUOTE` pointed at an
+  unresolvable host: sentinel key appeared in `_error` field.
+  Two-layer fix:
+    1. PATH_B switched to **header auth** (`headers={"apikey": api_key}`,
+       removed apikey from `params`). Matches the FMPClient pattern.
+       Confirmed post-fix: failing URL now reads `/stable/quote?symbol=NVDA`
+       — no apikey query, no secret in exception trace.
+    2. New `_scrub_secret()` helper applied to **every** returned error
+       string (both PATH_A + PATH_B), strips `apikey=...` query patterns
+       (case-insensitive) AND the literal key value when supplied.
+       Belt-and-braces: even if a future library logs the prepared
+       request differently, the scrub catches it.
+  6 new regression tests in `scripts/_shared/tests/test_audit_secret_scrub.py`
+  including the original DNS-failure repro asserting sentinel never appears
+  in the returned dict.
+- **🟡 cohort runner acceptance gate used absolute count vs documented rate**
+  (Codex Finding 2): `min_directionally_correct: 14` was compared as
+  `correct >= 14` against a denominator that was documented as AVAILABLE
+  samples (not total 18). Practical effect: 6/6 or 13/13 correct would
+  have FAILed acceptance despite 100% directional correctness.
+  Fix:
+    - Replaced `min_directionally_correct: 14` with
+      `min_directional_correct_rate: 0.78` (14/18 ≈ 0.78)
+    - `aggregate()` evaluates `directional_pct >= min_rate`
+    - Backward-compat: legacy `min_directionally_correct: <int>` still
+      accepted; runner converts to `<int> / 18.0` rate.
+  7 new regression tests in
+  `skills/_shared/composite_calibration_cohort/tests/test_acceptance_rate.py`:
+  6/6 PASS, 13/13 PASS, 14/18 strict FAIL (documents the boundary
+  intentionally), insufficient data still INSUFFICIENT_DATA, flag rate
+  independently gated, legacy abs-count config converts correctly.
+
+### Verified
+
+- `python3 -m pytest scripts/_shared/tests skills/_shared/composite_calibration_cohort/tests
+  skills/earnings-analyst/tests skills/earnings-valuation-forecaster/tests
+  skills/narrative-pulse-detector/tests`
+  → **100 passed** (was 87 in V3.17.3; +6 secret scrub + 7 acceptance rate)
+- DNS leak repro post-fix: sentinel `SENTINEL_SECRET_NEVER_VALID_V317` does
+  NOT appear in `_path_b_rest_direct` error result; URL in trace is
+  `/stable/quote?symbol=NVDA` (no apikey query)
+- Live alignment still works: NVDA 0.00% diff path_a vs path_b
+- Cohort runner: same 18/18 missing soft-pass behavior post-rate-conversion
+
+---
+
 ## [3.17.3] — 2026-05-24 — Governance sub-wave: cohort + alignment + stale gate
 
 ### Added
