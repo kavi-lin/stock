@@ -486,20 +486,35 @@ def compute_business_mix_shift_overlay(segments: dict, annual_growth: list,
     rel_cagr = new_seg.get("relative_cagr") or 0.0
     data_mode = new_seg.get("data_mode", "fy_fallback")
 
-    # Tier decision
+    # Tier decision (V3.17.2 — Codex review fix)
+    # Bug pre-fix: emerging_share_ok was `0.10 <= share <= 0.25`, which silently
+    # left high-growth segments with share > 25% in STABLE because the ESTABLISHED
+    # branch only fires when data_mode == "quarterly". For FY-fallback caches
+    # (the default on FMP free tier) any share > 25% high-growth segment got
+    # mis-labelled as STABLE despite the contract saying EMERGING is the
+    # ceiling when ESTABLISHED gates can't clear.
+    #
+    # Fixed semantics:
+    #   - share >= 10% (no upper bound) AND growth + relative CAGR pass
+    #     → at least EMERGING (the universal floor when transition signal is real)
+    #   - ESTABLISHED additionally requires quarterly data + new_segment_OI_share
+    #     ≥ 40% + 4Q persistence — none of which is fetchable on the free tier,
+    #     so the upgrade path is wired but stays inert until V3.18+ adds the
+    #     paid endpoints.
     tier = "STABLE"
-    emerging_share_ok = 0.10 <= share <= 0.25
-    emerging_growth_ok = yoy >= 0.15
-    emerging_cagr_ok = rel_cagr >= 0.10
-    if emerging_share_ok and emerging_growth_ok and emerging_cagr_ok:
+    share_ok = share >= 0.10
+    growth_ok = yoy >= 0.15
+    cagr_ok = rel_cagr >= 0.10
+    if share_ok and growth_ok and cagr_ok:
         tier = "EMERGING"
-
-    # ESTABLISHED requires quarterly segment OI — NOT achievable on FY fallback
-    if data_mode == "quarterly" and share >= 0.25:
-        # Would need new_segment_operating_income_share ≥ 40% + 4Q persistence;
-        # paid-tier check deferred to a future fetch.py change.
-        # For now, only FY data → capped at EMERGING.
-        pass
+        # ESTABLISHED upgrade path (V3.18+ — currently inert):
+        #   requires data_mode == "quarterly" AND share >= 0.25
+        #   AND new_segment_operating_income_share >= 0.40 AND 4Q persistence.
+        # Until fetch.py exposes quarterly segment OI, ESTABLISHED is never
+        # reached and EMERGING is the documented ceiling.
+        if data_mode == "quarterly" and share >= 0.25:
+            # placeholder for future ESTABLISHED upgrade — tier stays EMERGING
+            pass
 
     note = None
     if data_mode == "fy_fallback":

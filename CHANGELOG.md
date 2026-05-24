@@ -8,6 +8,66 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.17.2] — 2026-05-24 — business_mix tier ceiling fix + slim_* round-trip contract
+
+### Fixed
+
+- **`compute_business_mix_shift_overlay` tier ceiling bug** (Codex Finding 1):
+  segments with `share > 25%` + qualifying growth/CAGR silently stayed `STABLE`
+  on FY-fallback caches because `emerging_share_ok` was `0.10 <= share <= 0.25`
+  AND the ESTABLISHED branch only fired on `data_mode == "quarterly"`. The 25%
+  upper bound was an implicit assumption that ESTABLISHED would catch any
+  higher share — but ESTABLISHED is unreachable on FMP free tier (no quarterly
+  segment OI). Result: AMD-like Data Center (60% share, 66% YoY, 51pp relative
+  CAGR) FY-fallback fixture mis-labelled STABLE instead of EMERGING.
+  Fixed semantics: `share_ok = share >= 0.10` (lower bound only) + growth +
+  CAGR → at least EMERGING; ESTABLISHED upgrade path remains wired for V3.18+
+  when quarterly segment OI lands.
+
+### Improved
+
+- **Tightened contract test assertion** (Codex Finding 2):
+  `test_amd_like_fixture_classifies_emerging_or_better` was renamed to
+  `test_amd_like_fixture_classifies_emerging_strict` with `assertEqual("EMERGING")`
+  in place of the original `assertIn(..., {EMERGING, ESTABLISHED, STABLE})`
+  which silently masked the Finding 1 bug. Also added
+  `test_low_share_high_growth_stays_stable` to pin the EMERGING floor at 10%.
+
+- **`TestFetchSlimRoundTripContract` added** (Codex Finding 3): 4 new cases
+  that feed raw FMP-shaped rows through the real `fetch.py.slim_segment_product`
+  / `slim_segment_geographic` / `slim_balance` / `slim_income` helpers before
+  invoking the analyzer. This catches schema drift where the slim_* output
+  shape changes (e.g. `products` → `lines`) but pre-shaped fixtures would
+  still pass:
+    - `test_slim_segment_product_shape_contract` — pins the `{date, fiscal_year,
+      period, products: {...}}` output shape and snake_case fiscal_year
+    - `test_slim_segment_geographic_shape_contract` — same for regions
+    - `test_round_trip_analyzer_picks_correct_segment` — raw → slim → analyzer
+      must reach EMERGING with `new_segment = Data Center`
+    - `test_round_trip_balance_with_ap_yields_direct_dpo` — pins `slim_balance`
+      keeps `accountsPayable` + `otherCurrentLiabilities` and `slim_income`
+      keeps `costOfRevenue` (V3.17 additions); regression would drop DPO to
+      `unavailable` silently
+
+### Verified
+
+- `python3 -m pytest skills/earnings-analyst/tests skills/earnings-valuation-forecaster/tests skills/narrative-pulse-detector/tests`
+  → **79 passed** (31 V3.17 + 21 narrative-pulse + 27 contract — was 74 pre-fix)
+- NOK live re-run: composite **47 unchanged**, mix=STABLE unchanged
+  (NOK's geographic FY shape lacks any high-share high-growth new segment,
+  so the bug fix has no impact on this ticker — confirming the fix is
+  targeted at the AMD/NVDA Data Center class, not NOK)
+
+### Why this slipped V3.17.1 review
+
+The original `test_amd_like_fixture_classifies_emerging_or_better` accepted
+`STABLE` as a valid outcome. Codex round-6 caught the segment parsing bug
+(metadata key selection) but not the tier classification bug because the
+test never asserted what the AMD-like fixture _should_ resolve to. The
+revised assertion makes the contract explicit.
+
+---
+
 ## [3.17.1] — 2026-05-24 — Transition overlay review fixes
 
 ### Fixed
