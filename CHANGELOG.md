@@ -8,6 +8,718 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.20.2] — 2026-05-25 — Retail Sector Pulse: Dual-Gate + Retail Override + Broad ETF Routing
+
+### Fixed (Codex post-V3.20.1 review)
+
+- **Lexicon polluted by English-word tickers.** V3.20.1 live run showed
+  `LONG`/`CALLS`/`EARLY`/`GPU`/`NYSE`/`TRUMP`/`NIFTY`/`RINOS`/`FOSS`
+  matching as tickers and crowding the `low_confidence[]` list while real
+  tickers (NVDA, DJT, RDDT) were demoted by a uniform threshold. Added
+  these to `ticker_blocklist` (now 50 entries).
+- **Single uniform threshold demoted real tickers.** Per Codex feedback,
+  splitting `ticker_inclusion` into `known_sector` (1 mention, 1.0
+  engagement) vs `unknown_sector` (3 mentions, 8.0 engagement). NVDA
+  single Reddit mention now qualifies via known-sector gate; unknown
+  ticker SXC stays in `low_confidence` until it crosses the strict gate.
+  Backward-compat shim handles legacy single-gate yaml.
+- **Retail meme tickers not in `SECTOR_UNIVERSE` dropped silently.** New
+  `retail_only_sector_overrides` block in `retail_lexicon.yaml` maps
+  DJT / GME / AMC / HOOD / COIN / SOFI / SMCI / RDDT / ARM / MU / MARA /
+  RIOT / OXY / MRNA to their natural GICS sector — **without** modifying
+  `skills/_shared/company_context.py::SECTOR_UNIVERSE` (which other
+  skills like narrative-pulse-detector read; we don't want pollution
+  spreading across the codebase).
+- **Broad-market ETFs polluted sector rollups.** `SPY` / `QQQ` / `IWM` /
+  `DIA` / `VOO` / `VTI` / `TLT` / `VXX` / `UVXY` / `SQQQ` / `TQQQ` /
+  `SPXS` / `SPXL` are broad indices, not single-sector. They now route
+  to `market_wide_buzz` under `broad_etf` + `market_direction` topics
+  instead of any individual sector.
+- **Dashboard polarity row** now shows `· n=X` mention-count warning
+  with dimmed text when total retail mentions for a sector card is
+  below 5 — flags thin samples without burying them.
+
+### Lexicon v1.2
+
+- 50 blocklist entries (was 41 in v1.1)
+- 137 cashtag-only tickers (unchanged)
+- 12 high-liquidity naked whitelist (unchanged)
+- 15 retail-only sector override tickers (new)
+- 13 broad-market ETFs (new)
+- bull/bear/macro term counts unchanged
+- `lexicon_version: v1.1 → v1.2`
+
+### Live verification (V3.20.1 → V3.20.2)
+
+| Metric | V3.20.1 | V3.20.2 |
+|---|---:|---:|
+| Posts ingested | 44 | 49 |
+| Qualified tickers | 0 | **3** (DJT, RDDT, NVDA) |
+| Low-confidence | 14 (含 LONG/CALLS/NYSE/TRUMP 假) | 2 (純 unknown sector real ticker) |
+| Sectors with retail data | 0 | **2** (Technology + Cons Disc) |
+
+### Test Results
+
+- `tests/test_aggregate.py` → 22 OK (unchanged)
+- `tests/test_trending_tickers.py` → 34 OK (27 V3.20.1 + 7 new V3.20.2):
+  blocklist verification, known-sector relaxed gate, unknown-sector
+  strict gate, retail override (DJT → Cons Disc), broad ETF routing to
+  market_wide, end-to-end SPY → market_direction topic, legacy
+  single-gate backward compat
+
+## [3.20.1] — 2026-05-25 — Retail Sector Pulse: Polarity-First 3-Lane
+
+### Added
+
+- **`skills/retail-sector-pulse/scripts/trending_tickers.py`** — new entry point
+  consuming Reddit / HN / Bluesky / Google Trends via existing
+  `scripts/break_news/social_sources.py`. Outputs
+  `Dashboard/trending_tickers.json` with per-ticker engagement-weighted
+  polarity, per-sector rollup, low-confidence list, and market-wide buzz
+  bucket. 27 unit tests cover ticker disambiguation, span-masked polarity,
+  engagement scoring, thresholds, sector rollup, market-wide bucketing,
+  and lexicon-version propagation.
+- **`config/retail_lexicon.yaml`** new file (~400 polarity terms + ~190 ticker
+  rules). Bull (120) + bear (138) terms cover English / Chinese / WSB /
+  PTT slang. Curated by Gemini suggestions filtered by Codex (skipped
+  high-noise emoji 🔥💪🤡💩, ambiguous META/COIN naked whitelist, and
+  substring-risk qt/qe). Cashtag-only list (137 tickers) and blocklist
+  (41 acronyms) prevent AI/ON/X/IT/FOMO/YOLO false positives.
+- **V3.20.1 polarity bar** on each radar sector card — visual −1 to +1
+  indicator anchored at center. Green right, red left, stone-grey when
+  within ±0.20. Tooltip on card hover shows `signal_lanes` breakdown
+  (price/polarity/attention normalized values) plus top 3 sample posts
+  for audit.
+- **Market-wide buzz strip** at top of Sector Pulse section. Renders
+  topic pills (`Fed +0.45`, `recession -0.55`, etc.) for posts that
+  don't map to a single sector (no ticker, or 6+ tickers = broad sweep).
+- **`daily_update.sh` Step 9.4** runs `trending_tickers.py` before
+  Step 9.5 (`aggregate.py`). Step 9.5 reads
+  `Dashboard/trending_tickers.json` automatically.
+
+### Changed
+
+- **`config/weights.yaml` v1.0 → v1.1** — composite formula refactored
+  from 2-lane (news 0.4 / predicted 0.4 / retail_volume 0.2) to **3-lane
+  polarity-first**: `price_5d_norm` (0.30) + `retail_polarity_signed`
+  (0.50) + `retail_attention_signed` (0.20). News sentiment is now a
+  secondary display attribute on the card but **does not enter the
+  composite formula**. Reasoning: user wants to know what a retail
+  investor would conclude from public info; news is context, retail
+  polarity is the primary signal.
+- **`scripts/aggregate.py`** — new `load_trending_tickers()` +
+  `aggregate_retail_from_trending()` replace the old NPD-cache-based
+  retail layer. New `make_framing_v2()` 3-lane framing. Output JSON
+  schema bumped (`version: 1.1`) with new fields: `retail_polarity_score`,
+  `retail_engagement_score`, `retail_top_tickers`, `sample_posts`,
+  `matched_terms_summary`, `signal_lanes`. Top-level adds `market_wide_buzz`
+  and `trending_meta`.
+- **`Dashboard/page-radar.js`** — `buildRspCard()` renders new schema.
+  Updated `RADAR_TERMS.retail_sector_pulse` tooltip to document 3-lane
+  composite formula and polarity-first philosophy.
+- **`Dashboard/radar.html`** — new `#rsp-market-wide-strip` element above
+  the sector grid.
+
+### Codex review fixes baked in
+
+1. **Ticker disambiguation must be hard**:
+   - `$NVDA` cashtag always wins
+   - Naked NVDA / TSLA / etc. only when in `high_liquidity_naked_whitelist`
+     (NVDA / TSLA / AAPL / AMD / SMCI / PLTR / MSFT / AMZN / GOOG / GOOGL /
+     NFLX / BABA)
+   - Short / English-word tickers (ON / IT / AI / X / BE / OK / NO / IF /
+     PM / TV / etc.) forced to cashtag-only
+   - Blocklist (USA / IPO / FED / CPI / ATH / FOMO / YOLO / FUD / DCA /
+     GAAP / FCF / ROIC / ROE / NAV / ESG / CAGR / DCF / EPS / PE / PEG /
+     YOY / QOQ / EBITDA / ECB / BOJ / OPEC / EIA / PMI / ISM / NFP / PBOC)
+     rejected even with `$`
+2. **Span-masked polarity matching** — long phrases sorted DESC by length;
+   matched span consumed so `short squeeze` does not also fire `short`,
+   `pump and dump` does not fire `pump` + `dump`. Word-boundary check for
+   ASCII alphanumeric terms.
+3. **Inclusion thresholds** prevent long-tail garbage — ticker must have
+   `>= 2 mentions` AND `engagement_score >= 5.0` to qualify; sub-threshold
+   tickers go to `low_confidence[]` for audit, not into sector rollup.
+4. **Market-wide bucket** captures sectorless macro posts (no ticker or
+   `> 5` ticker count) classified by 9-topic lexicon
+   (fed / inflation / recession / jobs / trade / ai_capex / geopolitics /
+   volatility / market_direction).
+5. **軋多 corrected to bear** — was wrongly listed under bull in v1.0
+   draft; is actually a long squeeze (bears killing longs).
+
+### Why
+
+- V3.20.0 retail layer was just `retail_mention_multiplier` (cashtag count)
+  from NPD cache — volume only, no direction. User cannot tell from "Reddit
+  NVDA 4.1x" whether retail is buying or selling. This patch infers
+  direction from post-level keyword polarity (bull vs bear terms in title
+  + summary), engagement-weighted across all posts mentioning each ticker.
+
+### Schema Breaking Change
+
+- `Dashboard/retail_sector_pulse.json` `version: 1.0 → 1.1`
+- Per-sector fields removed: `retail_volume_score`, `retail_top_ticker`,
+  `retail_top_multiplier`
+- Per-sector fields added: `retail_polarity_score`, `retail_engagement_score`,
+  `retail_top_tickers[]` (list with polarity + engagement per ticker),
+  `sample_posts[]`, `matched_terms_summary{}`, `signal_lanes{}` (3 normalized
+  lane values for audit)
+
+### Test Results
+
+- `python3 skills/retail-sector-pulse/tests/test_aggregate.py` → 22 OK
+- `python3 skills/retail-sector-pulse/tests/test_trending_tickers.py` → 27 OK
+
+## [3.20.0] — 2026-05-25 — Retail Sector Pulse: 散戶視角分產業 sentiment + 5d direction
+
+### Added
+
+- **New skill `skills/retail-sector-pulse/`** — daily aggregator that produces
+  per-sector (11 GICS) retail-perspective sentiment cards for the Tactical
+  Opportunity Radar. Inputs are all retail-accessible: deep-digest news
+  verdicts (`net_impact_score` + `affected_sectors[]`), narrative-pulse cache
+  `retail_mention_multiplier` (Reddit + HN cashtag volume), and
+  `short-term-target/predict.py` 5d direction forecast. No new LLM calls.
+- **`scripts/aggregate.py`** — main entry. CLI: `--output`, `--skip-predict`,
+  `--sector-override Sector=insufficient_data` (for UI testing without
+  touching real cache). Per-sector record carries `news_sentiment_score`
+  (weighted 72h half-life decay), `retail_volume_score` (median NPD
+  multiplier across `SECTOR_TOP_5`), `predicted_5d_median_pct` +
+  `predicted_5d_bullish_breadth_pct`, plus rule-based `framing_zh` /
+  `framing_en` one-liner.
+- **`config/weights.yaml`** — declarative formulas: composite =
+  0.4×news_norm + 0.4×predicted_norm + 0.2×retail_signed. 5-tier bucket
+  labels for each signal + composite. `sector_aliases` map normalizes
+  messy digest sector strings (`"Real Estate"` / `"Tech"` /
+  `"Semiconductors"` / `"Defense"` → canonical
+  `SECTOR_UNIVERSE` key). All user-tunable in yaml; bump `weights_version`
+  after edits.
+- **21 unit tests** in `tests/test_aggregate.py` — bucket boundaries,
+  alias normalization, weighted mean decay, composite formula
+  traceability, partial-signal re-normalization, framing template
+  (align / diverge / partial).
+- **`Dashboard/retail_sector_pulse.json`** — output artifact (auto-gen
+  by Step 9.5).
+- **`Dashboard/radar.html`** — new `<section id="radar-retail-sector-pulse">`
+  above Narrative Pulse, hidden until data loads.
+- **`Dashboard/page-radar.js`** — `renderRetailSectorPulse()` renders an
+  11-card 4-column responsive grid. Each card shows sector + proxy ETF +
+  composite pill, 3-line metrics (📰 news / 💬 retail / 📈 5d), framing
+  line, and top key tickers footer. New `RADAR_TERMS.retail_sector_pulse`
+  tooltip entry.
+- **`bridge.py`** — new `load_retail_sector_pulse()` reads the JSON and
+  nests under `data['tactical']['retail_sector_pulse']`. Non-fatal on
+  missing file.
+- **`daily_update.sh` Step 9.5** — runs `aggregate.py` after
+  Narrative Pulse, before bridge. Non-fatal failure.
+
+### Design
+
+- **Daily only** for V1. Intraday 4h refresh deferred to V3.21+
+  (avoids dashboard_server daemon + cache invalidation surface this round).
+- **Rule-based framing** (no LLM). Templates in `config/weights.yaml` per
+  language. Reasoning: Narrative Pulse V1.1 already validated that
+  declarative-rule transparency beats black-box scoring for weekly
+  calibration.
+- **Retail Sector Pulse is exploratory display layer only** — does NOT
+  influence `investment_protocol`, `momentum-monitor` ranking, or any
+  auto-trade logic. composite_score is suggestion direction, not signal.
+
+### Coverage Limitation (V3.20.1 backlog)
+
+- `SECTOR_TOP_5` tickers (AAPL, LLY, XOM, BRK-B, AMZN, …) are mostly NOT
+  in the narrative-pulse `batch_scan` universe today (which is
+  thematic-screener top movers + structural watchlist). Result:
+  `retail_mention_multiplier` defaults to None for most sectors on first
+  ship. Aggregator handles gracefully (re-normalize composite weights to
+  available signals). V3.20.1 plan: expand narrative-pulse universe to
+  include SECTOR_TOP_5 ticker set so retail volume signal is always
+  populated.
+
+### Why
+
+- Tactical Opportunity Radar V0.2 showed regime + per-ticker narrative
+  pulse + theme heat, but lacked **per-sector retail-perspective signal**.
+  User asked for "從散戶可以拿到的新聞 + 散戶可知資訊 + 市場情緒,分產業
+  分析個股幾天內走向". V3.20.0 fills that gap with a single new aggregator
+  and one new radar section.
+
+## [3.19.1] — 2026-05-25 — Narrative Pulse V1.1.1: Codex review fixes
+
+### Fixed
+
+- **`weights_version: v1.1 → v1.1.1`** so existing per-ticker cache files
+  (generated under the buggy V1.1 weights / normalize) are auto-invalidated by
+  `pulse._cache_fresh()` on next run. Without this bump, cached classifications
+  from the morning V1.1 run would silently survive into V1.1.1 evaluations.
+- **Regenerated `Dashboard/narrative_pulse.json`** via a fresh
+  `batch_scan.py --no-cache` so the live dashboard reflects V1.1.1 weights,
+  bounded normalize, three-layer E[R], and the bumped batch schema `"version": "1.1"`.
+- **Stage 1 SMA200 gate now effectively mandatory.**
+  `skills/narrative-pulse-detector/config/stage_weights.yaml` — re-balanced
+  Stage 1 brewing condition weights from `0.4 / 0.3 / 0.3` (breakout / media /
+  no_sell_side) to `0.5 / 0.25 / 0.25`. Previously `media_quiet +
+  no_sell_side_raise` summed to exactly `min_confidence_for_stage = 0.6`,
+  so a below-SMA200 ticker that happened to be media-quiet with no
+  sell-side raise would still classify as Stage 1 brewing — the
+  SMA200 condition was a soft signal, not a gate. New weights make
+  `media + no_sell_side = 0.50 < 0.60`, forcing the breakout signal to
+  fire for a Stage 1 verdict.
+- **Bounded normalize respects scenario clamp.**
+  `skills/narrative-pulse-detector/scripts/classify_stage.py` — replaced
+  the simple proportional `prob *= scale` with `_bounded_normalize()`
+  (water-filling iteration). The previous step clamped each scenario to
+  `[0.05, 0.80]` but the subsequent normalize-to-Σ-1 could re-inflate a
+  clamped value above the cap (a `[0.80, 0.05, 0.05] / 0.90` case
+  produced `[0.889, …]`). The new projection distributes the
+  deficit/excess proportional to each scenario's headroom toward the
+  bound, so post-normalize values respect `[clamp_lo, clamp_hi]` AND
+  Σ = 1. The breakdown's `_normalize` entry now annotates
+  `bounded water-fill to Σ=1 within [lo, hi]`.
+- **Batch output schema version bumped + schema.md documented V1.1.**
+  `batch_scan.py` now emits `"version": "1.1"` (was `"1.0"` despite
+  breaking payload changes). `schema.md` documents the new
+  `prob_base` / `prob_breakdown` / `target_pct_base` / `target_breakdown`
+  fields, the `expected_return_pct_base` field, the shifted
+  `expected_return_pct_pre_macro` semantics, and the snapshot archive
+  path. Added a "V1.1 Breaking Schema Changes" section so downstream
+  consumers can detect the contract change.
+
+### Added
+
+- 2 regression tests in `test_stage_classifier.py::TestV111CodexFixes`:
+  - `test_below_sma200_quiet_does_not_classify_stage_1` reproduces Codex's
+    finding #1 fixture and asserts Stage ≠ 1.
+  - `test_bounded_normalize_respects_clamp` reproduces Codex's finding #2
+    fixture (`[0.90, 0.05, 0.05]`) and asserts post-normalize max ≤ 0.80,
+    min ≥ 0.05, Σ = 1.
+
+### Why
+
+- All three issues were real bugs introduced (or left unfixed) by V3.19.0.
+  V1.1's transparency goal (formulas visible, deltas traceable) is
+  undermined if the declared `[0.05, 0.80]` clamp can silently be
+  violated by the normalize step, or if the SMA200 "hard gate" is
+  documented as mandatory but is actually optional in practice. Schema
+  staleness compounds the risk because downstream consumers cannot
+  detect the V1.0→V1.1 contract change. Fixed in a single patch because
+  all three sit on the V1.1 scenario-math pipeline and share the same
+  test surface.
+
+### Test Results
+
+- `python3 skills/narrative-pulse-detector/tests/test_stage_classifier.py`
+  → 30/30 OK (28 original + 2 new)
+- `python3 skills/narrative-pulse-detector/tests/test_fetch_inputs.py`
+  → 3/3 OK
+
+## [3.19.0] — 2026-05-25 — Narrative Pulse V1.1: per-ticker scenario math
+
+### Changed
+
+- **`skills/narrative-pulse-detector/scripts/fetch_inputs.py`** — `sma200_breakout_days_ago`
+  semantics fix: when latest close is below SMA200, return `None` instead of `0`.
+  Old behavior had the function `break` on the first below-bar walking backwards,
+  silently returning `0`, which satisfied the Stage 1 brewing rule
+  `0 <= sma200_breakout_days_ago <= 30` and misclassified below-SMA200 tickers
+  as "fresh breakout."
+- **`skills/narrative-pulse-detector/config/stage_weights.yaml`** — bump
+  `weights_version: v1.0 → v1.1` (auto-invalidates per-ticker cache).
+  Stage 1 `sma200_breakout_recent` rule tightened with `is not None` guard +
+  `price_to_sma200_ratio >= 1.0` hard gate. New `scenario_adjustments:` block
+  declares per-ticker prob / target deltas for Stage 1 (brewing), Stage 2
+  (ignition), Stage 4 (euphoria), Stage 5 (distribution). Stage 3 (acceleration)
+  is intentionally NOT included — holding-period per-ticker tuning has low
+  marginal value at this iteration. `global.prob_clamp: [0.05, 0.80]` +
+  `normalize: true` enforce probability bounds and Σ = 1.
+- **`skills/narrative-pulse-detector/scripts/classify_stage.py`** — new
+  `_apply_scenario_adjustments()` reads the YAML adjustment block and applies
+  bounded per-ticker prob/target deltas. Every applied rule is recorded in
+  `prob_breakdown` / `target_breakdown` for full traceability — user reads the
+  JSON to see exactly which condition fired with what delta. `_clamp` and
+  `_normalize` synthetic entries are appended where they take effect.
+- **`skills/narrative-pulse-detector/scripts/pulse.py`** + `batch_scan.py` —
+  surface the three new E[R] layers in cache JSON and Dashboard output.
+- **`skills/narrative-pulse-detector/scripts/batch_scan.py`** — every run now
+  writes a snapshot copy to `snapshots/<YYYY-MM-DD>.json` for the 5/31
+  observation-period review (join momentum-journal forward returns later).
+
+### Added
+
+- **Three-layer E[R] in output JSON** (per ticker):
+  - `expected_return_pct_base` — V1.0 prior, no ticker delta, no macro. Control
+    for 5/31 review.
+  - `expected_return_pct_pre_macro` — V1.1 ticker-adjusted scenario sum, no macro.
+    Isolates the per-ticker rule contribution.
+  - `expected_return_pct` — final value (pre_macro + Σ macro_delta). Dashboard
+    renders only this; the others are for downstream analytics.
+- **`scenario_model_version: "v1.1_declarative"`** field on every classify
+  result for downstream consumers to detect schema.
+- **`skills/narrative-pulse-detector/snapshots/`** new directory with `.gitkeep`.
+- **`skills/narrative-pulse-detector/tests/test_fetch_inputs.py`** — new test
+  file. 3 synthetic-OHLCV tests verify the SMA200 breakout semantics fix at the
+  fetch layer (below→None, above streak count, <200 bars→None).
+- **`skills/narrative-pulse-detector/tests/test_stage_classifier.py`** — new
+  `TestV11ScenarioAdjustments` class with 7 regression tests covering:
+  same-stage divergence, Σ prob = 1, breakdown traceability, clamp bounds,
+  Stage 3 untouched, three-layer E[R] consistency, model-version tag.
+
+### Why
+
+- V1.0 hardcoded scenario `prob` and `target_pct` as stage-level constants,
+  so every Stage 1 brewing ticker showed identical `+11.15%` E[R]. Information
+  density on the Dashboard was zero — same stage → same number → 8 rows that
+  add nothing beyond what the stage label already tells you.
+- User wants formula transparency: every probability movement should be
+  traceable to a named, condition-guarded YAML rule that the user can edit
+  during weekly calibration. V1.1 is intentionally heuristic-declarative,
+  NOT logistic regression — sample size during the observation period
+  (target ≥ 210 by 5/31) is too small to fit weights, and a black-box
+  model wouldn't satisfy the "show me the math" requirement.
+- The SMA200 breakout `0` vs `None` bug was a separate pre-existing issue
+  that fed false fresh-breakout signals into Stage 1 brewing. Fixed in the
+  same patch since it sits on the same gating logic.
+
+### Breaking Schema Change
+
+- **`expected_return_pct_pre_macro` semantics shifted.** In V1.0 it was the
+  raw stage prior (no ticker delta, no macro). In V1.1 it is the
+  ticker-adjusted scenario sum (no macro). The original V1.0 meaning has moved
+  to the new `expected_return_pct_base` field. Downstream consumers that
+  treated `pre_macro` as the V1.0 baseline must read `_base` instead.
+
+### Rollback Plan (5/31 review)
+
+- If the 5/31 review shows `pre_macro` IC / hit rate does NOT beat `base`,
+  set every `scenario_adjustments.*.prob_deltas[].delta = 0` in the YAML.
+  That is equivalent to falling back to V1.0 priors without touching code.
+  No code rollback required.
+
+## [3.18.4] — 2026-05-25 — Momentum rank-score UI wiring
+
+### Changed
+
+- `Dashboard/momentum.html` now has a dedicated calibrated rank-score column
+  next to the raw momentum score.
+- `Dashboard/page-momentum.js` defaults table sorting to `rank_score` while
+  preserving the raw `score` slider as the quality threshold.
+- `bridge.py` now carries `rank_score` from momentum CSV output into
+  `data.json.momentum_screen.rows`.
+
+### Why
+
+- V3.18.2 introduced calibrated momentum ranking, but the dashboard still only
+  surfaced raw `score`. This makes the improvement observable in the UI and
+  separates "passes base quality" from "preferred by calibrated leader rank".
+
+## [3.18.3] — 2026-05-24 — REVIEW carry-over queue (TODO 跨週傳遞)
+
+### Added
+
+- **`reports/decision_review/REVIEW_TODO.md`** — 新檔,專職 queue 裝跨週 carry-over
+  todo。Schema 含 created_in / source_type (`accumulating_data` / `out_of_scope` /
+  `instrumentation_gap`) / trigger_condition (量化) / target_action (附 file path) /
+  review_count / status / last_check / evidence。Active Items + Closed Items 兩區段。
+- **REVIEW_PROMPT.md Step -1 (preamble)** — 每週 LLM REVIEW 開頭先讀 REVIEW_TODO.md
+  Active Items,逐筆 +1 review_count + 對照本週 event_index 判斷
+  `ready` / `still_waiting` / `stale`,寫進輸出報告新增的 **「## 0. Carry-over
+  from Previous REVIEWs」** 段。`ready` 項目在報告 Section 5 末尾再次拋出,讓
+  user 跑完 REVIEW 後優先處理。
+- **REVIEW_PROMPT.md Step 5 (postamble)** — REVIEW 結束時掃 Section 3「累積資料後再
+  評估」+ Section 4 系統盲點 + 任何 instrumentation gap,append 新 item 到
+  REVIEW_TODO.md Active Items (ID 連號)。已在 Active 的不重複 emit。
+- **8 個 seed items** (TODO-001 ~ TODO-008) — 從 REVIEW_2026-05-24 + 3.18.x leftover
+  人工 seed:
+  - TODO-001: Pattern B (CANCEL miss) N≥20 重評 (3.18.1 抓到 11 個漏標 CANCEL,
+    真實 N 應 ≥ 20)
+  - TODO-002: Pattern A HOLD 集中 Semiconductors 等 V5 decisive_agent 累積驗證 H1/H3
+  - TODO-003: momentum-screen verdict 規則重審 (跟 3.18.2 momentum calibration 互補)
+  - TODO-004: 拆 `final_decision` / `final_action` 兩欄 full version
+  - TODO-005: verdict 物件 surface max_drawdown / max_runup
+  - TODO-006: pre-V5 era macro_regime null 29% 老報告無 phase0 cache
+  - TODO-007: Rec 7 (sub_industry_heat) 連續 3 週 < 15pp 則 paused
+  - TODO-008: news-digest 殘留 9 筆 macro_delta null 逐一檢視
+
+### Why
+
+3.18.0 + 3.18.1 修完 extractor 後識別出一堆「下次再做 / 累積後再評估 / 等修」項目,
+**但這些 item 之前沒地方裝** — REVIEW_2026-05-24 寫了「out-of-scope」清單但下週 LLM
+不會主動讀它,等於每週重新發明輪子或乾脆漏掉。`ADJUSTMENT_LEDGER.md` 只裝**已套用**
+的 Rec (active/paused/rolled-back/superseded),不適合裝**待動**項目 (語意不對)。
+
+新增 REVIEW_TODO.md 解這 gap:
+- 跨週**持續可見** (每次 LLM REVIEW 必讀)
+- review_count 自動 +1,4 週沒動會自動 `[stale]` 提醒 drop 或 promote
+- `ready` 標記讓 user 跑完 REVIEW 後**有明確 next action**,不是 "讀完報告就忘"
+- evidence 累積每週 N 值,trigger_condition 達成時 LLM 主動標 ready
+
+跟 ADJUSTMENT_LEDGER 分工:
+- ledger = **已套用** Rec,每週評估 metric 是否 still improving
+- todo = **待決定 / 等資料 / 等修** 候選,評估前不算 Rec,trigger 達成才 promote
+
+### Touched
+
+- `reports/decision_review/REVIEW_TODO.md` (新檔,+200 行 schema + 8 seed items)
+- `reports/decision_review/REVIEW_PROMPT.md` (+50 行,改任務從四步 → 六步,
+  輸出格式加 Section 0 + Section 5)
+- 不動 extractor / event_index / build pipeline
+
+## [3.18.2] — 2026-05-24 — momentum-screen calibration + review metrics
+
+### Changed
+
+- `skills/momentum-monitor/scripts/screen.py`
+  - Added `rank_score` alongside raw composite `score`; ranking now uses calibrated
+    `rank_score` while preserving raw score in CSV/Markdown.
+  - Added empirical signal adjustments: reward Stage 2 / RS leader / fresh 20-50
+    cross / near-high strength; penalize squeeze, high short interest, VCP-only,
+    death cross, MACD bearish, and extension warnings.
+  - Added soft cooldown from recent journal Top-20 appearances via
+    `--cooldown-snapshots` (default 3, disable with 0).
+  - Fixed CLI mutually-exclusive default bug: `--tickers AAPL,MSFT` no longer gets
+    overridden by implicit `--universe all`.
+- `dashboard_server.py`
+  - Dashboard momentum runs now default to a conservative leader preset:
+    `min_score=65`, `min_rs=60`, `min_nhp=-10`, and exclusion of squeeze/death-cross
+    names unless the caller passes explicit custom tickers.
+- `scripts/verdict_rules.py` / `scripts/build_event_index.py`
+  - Added momentum per-ticker aggregate metrics (`hit_rate_with_neutral`,
+    `hit_rate_ex_neutral`, `neutral_rate`, mean/median return) so review reports can
+    distinguish neutral-heavy screens from outright misses.
+- `skills/momentum-monitor/scripts/journal.py` and
+  `scripts/extractors/momentum_extractor.py`
+  - Persist and propagate `rank_score` through CSV → journal → event_index.
+
+### Validation
+
+- `python3 -m py_compile scripts/verdict_rules.py scripts/build_event_index.py scripts/extractors/momentum_extractor.py skills/momentum-monitor/scripts/screen.py skills/momentum-monitor/scripts/journal.py dashboard_server.py`
+- `python3 skills/momentum-monitor/scripts/screen.py --tickers AAPL,MSFT,NVDA --max-age 9999999 --output-dir /private/tmp --md-only --cooldown-snapshots 0 --top 3`
+- Conservative filter smoke with custom tickers and cached data.
+
+## [3.18.1] — 2026-05-24 — Codex round-2 review fixes (Pattern B 真正解鎖)
+
+### Fixed
+
+- **🔴 `_find_decision` 早 return 漏抓 Final Action / Action Label rows**
+  (Codex round-2 review #1):
+  V5.0 後期報告把 Final Decision / Final Action / Action Label 拆成三 row
+  (`reports/20260510_MU.md:9-14`)。原 implementation 在第一條 hit (Final Decision=HOLD)
+  就 return,丟掉 Final Action=CANCEL + Action Label=DEFENSIVE → `final_action_modifier=None`,
+  defeats stated purpose of distinguishing 裸 HOLD vs HOLD+CANCEL。
+  修復: `_find_decision()` 改 multi-pass aggregation:
+    1. 掃 `_DECISION_ROW_FINAL` regex (verb + 可選 paren modifier)
+    2. 掃 `_DECISION_ROW_ACTION` regex (Final Action row)
+    3. 掃 `_DECISION_ROW_ACTION_LABEL` regex (Action Label row)
+  Modifier priority chain: paren content > Final Action > Action Label。
+  Side effect:**pre-V5 era 之前被當「裸 HOLD」的 12 個 case 現在正確標 `CANCEL`**,
+  REVIEW Pattern B (CANCEL miss 78%) 的 N=9 樣本基數可能擴大,Pattern A
+  (HOLD miss 24/43) 統計需重新分桶。
+
+- **🔴 `AGENT_TABLE_V50_RE` score cell 太嚴 (Codex round-2 review #2)**:
+  Score cell regex `([+\-]?\d+(?:\.\d+)?)\s*\|` 不容忍 trailing 註記如
+  `4 (capped +3)` (`reports/20260510_MU.md:31`)。整 row drop → MU 20260510
+  decisive_agent 變 News (錯誤,Fundamentals 才該 dominate)。修復: score cell
+  改 `([+\-]?\d+(?:\.\d+)?)[^|]*?\|`,score 後吞 trailing 內容到下個 `|`。
+
+- **🟡 `_normalize_modifier` 沒 enforce ALL-CAPS (Codex round-2 review #3)**:
+  原 implementation 取第一 whitespace token 不過濾 case,GLW 20260427
+  `HOLD (Auto REJECT)` → modifier="Auto" (title case)。修復: 改用
+  `_MODIFIER_TOKEN_RE = r"[A-Z][A-Z_]{1,}"` 抓第一個 ALL-CAPS token ≥2 chars,
+  跳過 "Auto" / "Forward" 等 title-case noise → modifier="REJECT"。
+
+### Added
+
+- **新增 V5.0 table variants for column-order resilience**:
+  - `AGENT_TABLE_V50_INV_RE` — Score|Signal column order (TSM 20260510:
+    `| Lane | Score | Signal | Confidence |`)
+  - `AGENT_HEADING_V50_SCORE_FIRST_RE` — `### Lane — Score N | SIGNAL | conf X`
+    heading variant
+  - 修前 TSM 20260510 `agent_count=0`,所有 lane drop。修後 5 lanes 全抓,
+    decisive_agent 正常。**V5 era null_decisive 9% → 0%**。
+
+- **regression tests 從 19 → 26** (+7 covering Codex round-2 bugs):
+  - `test_final_action_three_row_aggregation_mu_format`
+  - `test_final_action_action_label_only_fallback`
+  - `test_final_action_paren_modifier_beats_other_rows`
+  - `test_normalize_modifier_rejects_titlecase`
+  - `test_v50_table_score_with_capped_annotation`
+  - `test_v50_table_score_signal_inverted_column_order`
+  - `test_v50_heading_score_first_inline`
+
+### Why
+
+3.18.0 把 Pattern G/H 解鎖,但 Codex round-2 review 抓出 instrumentation 本身
+有 4 個 bug (3 行為 + 1 hygiene),會污染下輪 REVIEW 的 root cause 分析。
+最關鍵的 Bug A (Final Action row 沒抓) 直接影響 Pattern B 樣本基數 —
+原 REVIEW 報 9 個 CANCEL,但實際有 12 個被縮成裸 HOLD,代表 Pattern B
+真實 N 可能 ≥ 20。修完後下輪 REVIEW 可以信任 modifier 欄分桶。
+
+### Backfill verification
+
+| metric | 3.17.x (before) | 3.18.0 (round-1) | 3.18.1 (round-2) |
+|---|---|---|---|
+| V5 era null `decisive_agent` | 100% (33/33) | 9% (1/11) | **0% (0/11)** |
+| V5 era null `macro_regime` | 100% (33/33) | 0% (0/11) | 0% (0/11) |
+| V5 era `final_action_modifier` 有值 | n/a | 2/11 | **6/11** (DEFENSIVE 4, CANCEL 1, WAIT 1) |
+| Pre-V5 `CANCEL` modifier 抓到數 | 0 | 0 | **11** |
+| All-data action_modifiers 分佈 | n/a | 2 buckets | **6 buckets** (None/CANCEL/EXECUTE/REJECT/ATTACK/DEFENSIVE/WAIT) |
+
+### Touched
+
+- `scripts/extractors/deep_dive_extractor.py` (+95 行):
+  - 新 regex `_DECISION_ROW_FINAL` / `_DECISION_ROW_ACTION` / `_DECISION_ROW_ACTION_LABEL`
+    / `_MODIFIER_TOKEN_RE` / `AGENT_TABLE_V50_INV_RE` / `AGENT_HEADING_V50_SCORE_FIRST_RE`
+  - `_find_decision()` 改 multi-pass aggregation,signature 改 `tuple[verb, modifier]`
+  - `_normalize_modifier()` 改用 ALL-CAPS token regex
+  - `AGENT_TABLE_V50_RE` score cell 放寬 (1 char `*?` 加入)
+  - `_find_agent_breakdown()` priority chain 加 2 個 V5 variant patterns
+- `scripts/extractors/tests/test_extractors_review_fixes.py` (+170 行,7 新 test)
+- `scripts/extractors/tests/__pycache__/` 移除 (hygiene; .gitignore 已含)
+- `reports/decision_review/event_index_latest.json` 三度 backfill
+- 不動 V5.0 protocol / verdict 規則 / Dashboard UI
+
+## [3.18.0] — 2026-05-24 — REVIEW_2026-05-24 extractor fixes (Patterns G/H/B 解鎖)
+
+### Fixed
+
+- **`tuning_hooks.decisive_agent` 100% null in V5 era → 9%** (REVIEW Pattern G):
+  V5.0 5-lane subagent 用新 markdown 標題格式 (`### Fundamentals — HOLD / -1.5`)
+  + Final Visualization Table (`| Lane | Signal | Score | Confidence | … |`),
+  既有 `AGENT_RE_V46` / `AGENT_RE_V44` 不認 + `AGENT_NAMES` 沒列 `Valuation`
+  (V5.0 新增 lane)。修復:
+  - 新增 `AGENT_TABLE_V50_RE` (table-first parser,容忍 `L\d+` prefix + `Specialist`
+    後綴 + `Conf`/`Confidence` column alias)
+  - 新增 `AGENT_HEADING_V50_RE` (heading fallback,無 confidence 欄)
+  - `AGENT_NAMES` 加 `Valuation`
+  - `_find_agent_breakdown()` 重寫:5-stage priority chain (V5 table → V5 heading →
+    V4.6 inline → V4.4 inline → V4.4 JSON-block),seen-set 防重複
+  - 新增 `tuning_hooks.decisive_agent_method` (`score_x_confidence` / `max_abs_score`),
+    讓下輪 REVIEW 能分辨「真 confidence 主導」vs「fallback 用 |score|」
+- **`tuning_hooks.macro_regime` 100% null → 0%** (V5 era,REVIEW Pattern H):
+  V5.0 deep-dive MD 報告**不**內嵌 regime 標籤,只存在 `investment/invest_logs/<date>_phase0[_<ticker>].json`
+  裡。`_find_macro_regime()` 只讀 MD 看不到。修復:
+  - 模組頂端 `ROOT = Path(__file__).resolve().parents[2]` (Codex review #4 —
+    repo-root absolute,不依賴 cwd,pytest monkeypatch.chdir 不會誤判)
+  - `_find_macro_regime()` 重寫:優先讀 phase0 JSON,多 key fallback
+    (`macro_summary.market_regime` / `phase1.market_regime` / `phase0.market_regime`
+    / 根 `market_regime` / `macro_regime` / `regime`),fail-soft 回退 MD regex
+  - `extract()` 傳 `decision_date` + `ticker` 給 `_find_macro_regime()`
+  - 新增 `tuning_hooks.macro_regime_source` (`phase0_cache` / `md_regex` / None)
+- **`session_macro_delta` backtick+bold+equals form parser miss** (REVIEW Rec 4 殘留):
+  2026-05-18 報告用 `` `session_macro_delta` = **-0.5** `` 形式,8 個既有 regex 全漏。
+  修復:`_find_macro_delta()` patterns 首位加 `` `session_macro_delta`\s*=\s*\*\*([+-]?…)\*\* ``。
+
+### Added
+
+- **`final_action_modifier` 欄** (Codex review #6 輕量版): V5.0 報告
+  `| Final Decision | HOLD (DEFENSIVE) |` 的 paren modifier (DEFENSIVE / OFFENSIVE /
+  CANCEL / WAIT / 等) 之前被 `split("(")[0]` 吞掉。修復:
+  - `_find_decision()` signature 改 return `tuple[verb, modifier]`
+  - 加 `_normalize_modifier()` 處理 keyed paren (NVDA: `(action_label: **WAIT** — …)`
+    → `WAIT`),strip bold + take first token after `:`
+  - regex 容忍 row label 無 bold wrapper (`| Final Decision |` vs `| **Final Decision** |`)
+  - `decision_content.final_action_modifier` 新欄,**不**動既有 `final_action` (back-compat)
+  - 下輪 REVIEW 可用此欄重算 Pattern A/B 分桶,區分「裸 HOLD」/「HOLD+DEFENSIVE」/
+    「HOLD+CANCEL」三種狀態,解決 HOLD-miss 24/43 樣本污染問題
+- **`tuning_hooks.agent_confidence_count`** — 有真 confidence 的 lane 數 (V5 heading
+  fallback 時為 0),讓下輪 REVIEW 能判斷哪些 decisive_agent 是 score×conf 算的、
+  哪些只能用 |score| fallback
+- **`scripts/extractors/tests/test_extractors_review_fixes.py`** — 19 個 pytest
+  regression tests 覆蓋全部 4 個 fix + V4.x back-compat (table parser / heading
+  fallback / phase0 cache / phase0 cache fail-soft / paren modifier 變體 / 中文
+  modifier / keyed paren / unbolded row label / V4.4 JSON-block)
+- **`scripts/extractors/tests/__init__.py`** — pytest discovery anchor
+
+### Why
+
+REVIEW_2026-05-24 Section 5 列出 instrumentation gap 阻擋了 H1 (HOLD 過嚴?) / H3
+(Semiconductors agent 主導?) 兩條根因 hypothesis。Pattern G (decisive_agent 100% null)
++ Pattern H (macro_regime 100% null) 是 root blocker — 無 decisive_agent hook
+就無法回答「是哪個 agent 主導 HOLD 決定」,無 macro_regime hook 就無法做
+「VOLATILE regime 下 Technical 權重要不要降」這類 regime-conditioned 分析。
+
+修完後:
+- V5 era null_decisive **100% (33/33) → 9% (1/11)**
+- V5 era null_regime **100% (33/33) → 0% (0/11)**
+- Pre-V5 bonus: 71% (79/112) 老報告也接到 phase0 cache → 整體 regime null rate
+  從 ~50%+ 降到 27% (33/123)
+- final_action_modifier 第一次有資料 (V5 era 2/11 已抓到 DEFENSIVE / WAIT)
+
+下輪 REVIEW (2026-05-31) 可直接用這些 hook 回答 H1/H3。
+
+### 不破壞
+
+- `event_index` schema **純 additive** — 新增 4 欄 (`decisive_agent_method` /
+  `macro_regime_source` / `agent_confidence_count` / `final_action_modifier`)。
+  `render_event_index.py` 既有 `decisive_agent` / `min_agent_confidence` /
+  `max_agent_confidence` 讀法不變 (只是現在 V5 era 有值了)。
+- `final_action` 欄保持 verb-only,paren modifier 走新欄 — 既有 verdict_rules
+  / Pattern A/B 統計邏輯**不**受影響,下輪 REVIEW 才主動引用新欄重算分桶。
+- V4.x 報告 (V4.4 JSON-block / V4.6 inline) parsing **不 regress** — 5-stage
+  priority chain 把舊 regex 全部保留在 chain 後段。
+
+### Touched
+
+- `scripts/extractors/news_digest_extractor.py` (+5 行,1 regex)
+- `scripts/extractors/deep_dive_extractor.py` (+120 行,2 新 regex + 5-stage parser
+  重寫 + `_find_macro_regime` 重寫 + `_find_decision` tuple return + `_normalize_modifier`
+  helper + `extract()` 4 新 hook 欄)
+- `scripts/extractors/tests/__init__.py` (新空檔)
+- `scripts/extractors/tests/test_extractors_review_fixes.py` (新檔,+260 行,19 tests)
+- `reports/decision_review/event_index_latest.json` 全量 backfill (252 records,
+  老檔備份 `event_index_latest.bak.json`)
+- 不動 V5.0 protocol / verdict 規則 / Dashboard UI
+
+## [3.17.6] — 2026-05-24 — thematic-screener enrich phase 加 progress log
+
+### Changed
+
+- `skills/thematic-screener/scripts/enrich.py` `enrich_movers()` — 加入時間節流
+  progress log,預設每 30s 印一次 `[HH:MM:SS]   ... N/M enriched (elapsed Xs)` 到
+  stderr,格式對齊 predict phase 的進度行。最後一個 ticker 強制 log。
+- 新增 kwarg `progress_every_sec=30.0`,caller 可調整節奏。
+
+### Why
+
+daily_update.sh Step 6 thematic-screener 在 enrich 240 個 ticker 時冷跑 5-10 分鐘,
+原本完全沒 progress 輸出,user 端看起來像 stuck (`Enriching N tickers...` 一行後
+靜默)。實測 165/238 enriched 用時 5 分鐘,中間完全沒提示。30s 節流確保至少每分鐘
+有 2 行進度,夠判斷是不是 hang 而不會洗版。
+
+### Touched
+
+- `skills/thematic-screener/scripts/enrich.py` (+22 lines,純加 log,**不**動 enrich_one
+  邏輯 / FMP 呼叫 / cache schema)。
+- screen.py 不用改,signature 向後相容(新 kwarg 有 default)。
+
+## [3.17.5] — 2026-05-24 — Narrative Pulse UI: 中文化 + insufficient_data 進度條
+
+### Changed
+
+- `Dashboard/page-radar.js` — Narrative Pulse detail panel polish:
+  - `recommended_action` enum 中文化 mapping (`early_entry_window` → 早期進場窗口 等 6 個值)。
+  - `next_warning_condition` 中文化 (`supply enough inputs to clear min_confidence=0.6 …`
+    → `任一 stage conf 需 ≥ 0.6 才會掛標 — 目前全部不過閘`;`distribution day count >= 4 / 25d`
+    → `分配日 ≥ 4 / 25d`;OHLCV 失敗 reason 也轉中文)。
+  - `stage===null` (insufficient_data) 時把空白 scenarios 表換成 5 列 stage conf 進度條
+    (S1 蘊釀 … S5 分配),conf ≥ 閘值用 stage 顏色,否則灰色,讓使用者一眼看出
+    距離哪個 stage 最接近。
+
+### Why
+
+NVDA / 中段訊號股探測時,UI 只顯示 `Stage null 資料不足/訊號模糊` + 空 scenarios 表,
+看不出來「為什麼模糊」也看不出來離哪個 stage 最近。新 stage 進度條把 classifier 內部
+`all_stage_scores` 視覺化,user 可立刻判斷:
+- 接近 brewing (Stage 1) → 等媒體冷卻就會掛標
+- 全部都 < 0.3 → 真的訊號雜訊比過低,放生
+另外 `early_entry_window` 這種 enum 直接秀英文 string 在中文 UI 內有違和,順手 i18n。
+
+### Touched
+
+- `Dashboard/page-radar.js` (+60 lines,新增 `ACTION_ZH` map / `warnZh()` / `stageScoresHTML()`
+  + `renderDetailFromCache()` 改走 isInsufficient 分支)
+- 純前端,**不**動 `classify_stage.py` 邏輯 / `narrative_pulse.json` schema。
+
 ## [3.17.4] — 2026-05-24 — Codex round-8 review fixes: secret-leak + cohort rate gate
 
 ### Fixed

@@ -135,7 +135,11 @@ def main():
                 "stage": r.get("stage"),
                 "stage_label_zh": r.get("stage_label_zh"),
                 "stage_confidence": r.get("stage_confidence"),
+                # V1.1: three-layer E[R] surfaced for downstream review/analytics
                 "expected_return_pct": r.get("expected_return_pct"),
+                "expected_return_pct_pre_macro": r.get("expected_return_pct_pre_macro"),
+                "expected_return_pct_base": r.get("expected_return_pct_base"),
+                "scenario_model_version": r.get("scenario_model_version"),
                 "recommended_action": r.get("recommended_action"),
                 "scenarios": r.get("scenarios"),
                 "next_warning_condition": r.get("next_warning_condition"),
@@ -154,7 +158,8 @@ def main():
     # shows a stale hardcoded label after stage_weights.yaml is updated.
     weights_cfg = load_weights()
     out = {
-        "version": "1.0",
+        # V1.1: schema bumped to reflect breaking pre_macro semantics + three-layer E[R]
+        "version": "1.1",
         "last_updated": datetime.now(timezone.utc).isoformat(),
         "weights_version": weights_cfg.get("weights_version", "v1.0"),
         "universe": {
@@ -171,6 +176,17 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False, default=str)
     print(f"[batch_scan] wrote {output_path} ({len(per_ticker)} tickers)", file=sys.stderr)
+
+    # V1.1: snapshot archive — full output copy per UTC date,for 5/31 review
+    # (join momentum-journal forward returns to compute IC / hit rate for
+    # base vs pre_macro vs final E[R] columns).
+    snapshot_dir = HERE.parent / "snapshots"
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    snapshot_path = snapshot_dir / f"{snapshot_date}.json"
+    with open(snapshot_path, "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=2, ensure_ascii=False, default=str)
+    print(f"[batch_scan] snapshot → {snapshot_path}", file=sys.stderr)
 
 
 if __name__ == "__main__":

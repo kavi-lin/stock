@@ -60,17 +60,23 @@ def fetch_price_volume(ticker: str, period: str = "1y") -> dict:
     rsi_latest = float(rsi.iloc[-1]) if not rsi.empty else None
     rsi_peak_30d = float(rsi.tail(30).max()) if len(rsi) >= 30 else (rsi_latest or 0.0)
 
-    # SMA200 breakout 距今多少日 (close > sma200 first day in last 365d)
+    # SMA200 breakout 距今多少日 (close > sma200 連續站上多少天)
+    # V1.1 fix: 若當前收盤未站上 SMA200,回傳 None (而非 0)。
+    # 舊版會在 close<sma200 時 break 在第一根 below 並回 0,被 Stage 1 brewing
+    # rule `0 <= sma200_breakout_days_ago <= 30` 誤判為「剛突破」。
     if len(close) >= 200:
         rolling_sma200 = close.rolling(200).mean()
         above = close > rolling_sma200
-        # Find most recent transition from below → above
-        last_above_streak = 0
-        for i in range(len(above) - 1, -1, -1):
-            if pd.isna(above.iloc[i]) or not above.iloc[i]:
-                break
-            last_above_streak += 1
-        sma200_breakout_days_ago = last_above_streak
+        if not above.iloc[-1] or pd.isna(above.iloc[-1]):
+            # 當前低於 SMA200 (或最新值缺) — 沒有 fresh breakout window
+            sma200_breakout_days_ago = None
+        else:
+            last_above_streak = 0
+            for i in range(len(above) - 1, -1, -1):
+                if pd.isna(above.iloc[i]) or not above.iloc[i]:
+                    break
+                last_above_streak += 1
+            sma200_breakout_days_ago = last_above_streak
     else:
         sma200_breakout_days_ago = None
 

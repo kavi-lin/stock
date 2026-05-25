@@ -737,13 +737,13 @@
         }
         /* Hidden columns (controlled by data-cols-extra="off") */
         /* th: explicit .col-extra class | td: nth-child positions
-           Cols (1-indexed): rank=1, ticker=2, price=3, score=4, label=5, stage=6, volume=7,
-           above_ma200=8, rsi=9, macd=10, signals=11, short=12 */
+           Cols (1-indexed): rank=1, ticker=2, price=3, pe=4, score=5, rank_score=6,
+           label=7, stage=8, volume=9, above_ma200=10, rsi=11, macd=12, signals=13, short=14 */
         .mom-table[data-cols-extra="off"] thead .col-extra,
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(8),
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(9),
         .mom-table[data-cols-extra="off"] tbody td:nth-child(10),
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(12) { display: none; }
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(11),
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(12),
+        .mom-table[data-cols-extra="off"] tbody td:nth-child(14) { display: none; }
 
         /* Active sort header — emerald accent */
         .mom-th.active-sort { color: #10b981 !important; }
@@ -1101,6 +1101,7 @@
                             <th class="mom-th text-right sortable" data-sort="price"           id="th-price">價格<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="pe"              id="th-pe">P/E<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="score"           id="th-score">分數<span class="sort-arrow"></span></th>
+                            <th class="mom-th text-right sortable" data-sort="rank_score"      id="th-rank-score">Rank<span class="sort-arrow"></span></th>
                             <th class="mom-th" id="th-label">標籤</th>
                             <th class="mom-th sortable"            data-sort="stage"           id="th-stage">階段<span class="sort-arrow"></span></th>
                             <th class="mom-th text-right sortable" data-sort="ratio_20d"       id="th-volume">量比<span class="sort-arrow"></span></th>

@@ -1,0 +1,963 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-24T17:12:03.570897+00:00",
+  "weights_version": "v1.1",
+  "universe": {
+    "source": "thematic_screener",
+    "ticker_count": 8,
+    "tickers": [
+      "AAPL",
+      "CSCO",
+      "TXN",
+      "ASML",
+      "WFC",
+      "MA",
+      "AXP",
+      "STM"
+    ]
+  },
+  "tickers": {
+    "AAPL": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 6.2,
+      "expected_return_pct_pre_macro": 6.2,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.3978,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_overheated_75_plus",
+              "delta": -0.1,
+              "note": "overheated — failure risk up, dilute early ignition"
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0278,
+              "note": "scaled by 1.0753 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 25.0,
+          "target_breakdown": [],
+          "target_price": 386.02
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.3871,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_overheated_75_plus",
+              "delta": 0.06,
+              "note": ""
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0271,
+              "note": "scaled by 1.0753 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 284.11
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2151,
+          "prob_breakdown": [
+            {
+              "rule": "_normalize",
+              "delta": 0.0151,
+              "note": "scaled by 1.0753 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 299.56
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 78.37998685417438,
+        "rsi_peak_recent": 78.37998685417438,
+        "rsi_overbought_days": 11,
+        "rsi_overbought_episode_days": 11,
+        "price_to_sma50_ratio": 1.141,
+        "price_to_sma200_ratio": 1.181,
+        "sma200_breakout_days_ago": 38,
+        "volume_baseline_30d_avg": 53033802,
+        "volume_recent_20d_avg": 48399495,
+        "volume_multiplier": 0.91,
+        "gap_up_density_4w": 0,
+        "distribution_days_25d": 3,
+        "stalling_days_25d": 0,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 3,
+        "media_source_diversity": 2,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 308.82,
+        "change_pct": 1.25578,
+        "volume": 43605063,
+        "year_high": 311.4,
+        "year_low": 195.07,
+        "market_cap": 4535749279920
+      }
+    },
+    "CSCO": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 5.71,
+      "expected_return_pct_pre_macro": 5.71,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.4227,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_overheated_75_plus",
+              "delta": -0.1,
+              "note": "overheated — failure risk up, dilute early ignition"
+            },
+            {
+              "rule": "impulse_constructive_1_2",
+              "delta": 0.04,
+              "note": ""
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0127,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 22.0,
+          "target_breakdown": [
+            {
+              "rule": "strain_p_sma200_1.35_to_1.6",
+              "delta": -3.0,
+              "note": "runway 被壓縮,target 折讓"
+            }
+          ],
+          "target_price": 146.9
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.3711,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_overheated_75_plus",
+              "delta": 0.06,
+              "note": ""
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0111,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 110.78
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2062,
+          "prob_breakdown": [
+            {
+              "rule": "_normalize",
+              "delta": 0.0062,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 116.8
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 80.84572429403264,
+        "rsi_peak_recent": 88.70563662608835,
+        "rsi_overbought_days": 11,
+        "rsi_overbought_episode_days": 18,
+        "price_to_sma50_ratio": 1.339,
+        "price_to_sma200_ratio": 1.546,
+        "sma200_breakout_days_ago": 55,
+        "volume_baseline_30d_avg": 25560607,
+        "volume_recent_20d_avg": 26126554,
+        "volume_multiplier": 1.02,
+        "gap_up_density_4w": 1,
+        "distribution_days_25d": 4,
+        "stalling_days_25d": 0,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 2,
+        "media_source_diversity": 2,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 120.41,
+        "change_pct": 1.86971,
+        "volume": 18132424,
+        "year_high": 120.79,
+        "year_low": 62.3,
+        "market_cap": 474588151745
+      }
+    },
+    "TXN": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 9.5,
+      "expected_return_pct_pre_macro": 9.5,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.55,
+          "prob_breakdown": [],
+          "target_pct_base": 25.0,
+          "target_pct": 22.0,
+          "target_breakdown": [
+            {
+              "rule": "strain_p_sma200_1.35_to_1.6",
+              "delta": -3.0,
+              "note": "runway 被壓縮,target 折讓"
+            }
+          ],
+          "target_price": 377.24
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.25,
+          "prob_breakdown": [],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 284.47
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2,
+          "prob_breakdown": [],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 299.93
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 71.82702905840374,
+        "rsi_peak_recent": 88.61418081532587,
+        "rsi_overbought_days": 1,
+        "rsi_overbought_episode_days": 26,
+        "price_to_sma50_ratio": 1.278,
+        "price_to_sma200_ratio": 1.54,
+        "sma200_breakout_days_ago": 38,
+        "volume_baseline_30d_avg": 8889874,
+        "volume_recent_20d_avg": 7531854,
+        "volume_multiplier": 0.85,
+        "gap_up_density_4w": 0,
+        "distribution_days_25d": 2,
+        "stalling_days_25d": 1,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 0,
+        "media_source_diversity": 0,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 309.21,
+        "change_pct": 3.62613,
+        "volume": 6955684,
+        "year_high": 315.57,
+        "year_low": 152.73,
+        "market_cap": 281409856530
+      }
+    },
+    "ASML": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 9.02,
+      "expected_return_pct_pre_macro": 9.02,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.5385,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_constructive_55_69",
+              "delta": 0.05,
+              "note": "constructive band — early ignition more probable"
+            },
+            {
+              "rule": "impulse_constructive_1_2",
+              "delta": 0.04,
+              "note": ""
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": -0.0215,
+              "note": "scaled by 0.9615 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 22.0,
+          "target_breakdown": [
+            {
+              "rule": "strain_p_sma200_1.35_to_1.6",
+              "delta": -3.0,
+              "note": "runway 被壓縮,target 折讓"
+            }
+          ],
+          "target_price": 1992.14
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.2885,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": -0.0115,
+              "note": "scaled by 0.9615 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 1502.27
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.1731,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_constructive_55_69",
+              "delta": -0.02,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": -0.0069,
+              "note": "scaled by 0.9615 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 1583.91
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 62.14120555318543,
+        "rsi_peak_recent": 64.46989596692474,
+        "rsi_overbought_days": 0,
+        "rsi_overbought_episode_days": 0,
+        "price_to_sma50_ratio": 1.137,
+        "price_to_sma200_ratio": 1.387,
+        "sma200_breakout_days_ago": 55,
+        "volume_baseline_30d_avg": 1957813,
+        "volume_recent_20d_avg": 1655873,
+        "volume_multiplier": 0.85,
+        "gap_up_density_4w": 2,
+        "distribution_days_25d": 5,
+        "stalling_days_25d": 0,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 3,
+        "media_source_diversity": 2,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 1632.9,
+        "change_pct": 2.5691,
+        "volume": 1644089,
+        "year_high": 1653.53,
+        "year_low": 683.48,
+        "market_cap": 629349037504
+      }
+    },
+    "WFC": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 9.02,
+      "expected_return_pct_pre_macro": 9.02,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.4845,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0145,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 25.0,
+          "target_breakdown": [],
+          "target_price": 95.5
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.3093,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0093,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 70.29
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2062,
+          "prob_breakdown": [
+            {
+              "rule": "_normalize",
+              "delta": 0.0062,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 74.11
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 45.54357978537116,
+        "rsi_peak_recent": 65.69897490414073,
+        "rsi_overbought_days": 0,
+        "rsi_overbought_episode_days": 0,
+        "price_to_sma50_ratio": 0.967,
+        "price_to_sma200_ratio": 0.909,
+        "sma200_breakout_days_ago": null,
+        "volume_baseline_30d_avg": 17148164,
+        "volume_recent_20d_avg": 16948031,
+        "volume_multiplier": 0.99,
+        "gap_up_density_4w": 0,
+        "distribution_days_25d": 5,
+        "stalling_days_25d": 1,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 0,
+        "media_source_diversity": 0,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 76.4,
+        "change_pct": 0.63224,
+        "volume": 0,
+        "year_high": 97.76,
+        "year_low": 71.9,
+        "market_cap": 233798516000
+      }
+    },
+    "MA": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 9.02,
+      "expected_return_pct_pre_macro": 9.02,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.4845,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0145,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 25.0,
+          "target_breakdown": [],
+          "target_price": 623.18
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.3093,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0093,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 458.66
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2062,
+          "prob_breakdown": [
+            {
+              "rule": "_normalize",
+              "delta": 0.0062,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 483.58
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 48.21265397386216,
+        "rsi_peak_recent": 61.06188453062337,
+        "rsi_overbought_days": 0,
+        "rsi_overbought_episode_days": 0,
+        "price_to_sma50_ratio": 0.993,
+        "price_to_sma200_ratio": 0.917,
+        "sma200_breakout_days_ago": null,
+        "volume_baseline_30d_avg": 4280957,
+        "volume_recent_20d_avg": 3850036,
+        "volume_multiplier": 0.9,
+        "gap_up_density_4w": 0,
+        "distribution_days_25d": 6,
+        "stalling_days_25d": 0,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 5,
+        "media_source_diversity": 2,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 498.54,
+        "change_pct": -0.21616,
+        "volume": 1958814,
+        "year_high": 601.77,
+        "year_low": 480.5,
+        "market_cap": 440501895072
+      }
+    },
+    "AXP": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 9.02,
+      "expected_return_pct_pre_macro": 9.02,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.4845,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0145,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 25.0,
+          "target_breakdown": [],
+          "target_price": 389.72
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.3093,
+          "prob_breakdown": [
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0093,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 286.84
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2062,
+          "prob_breakdown": [
+            {
+              "rule": "_normalize",
+              "delta": 0.0062,
+              "note": "scaled by 1.0309 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 302.43
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 46.21956266709279,
+        "rsi_peak_recent": 65.45650589226915,
+        "rsi_overbought_days": 0,
+        "rsi_overbought_episode_days": 0,
+        "price_to_sma50_ratio": 0.999,
+        "price_to_sma200_ratio": 0.926,
+        "sma200_breakout_days_ago": null,
+        "volume_baseline_30d_avg": 3439583,
+        "volume_recent_20d_avg": 3269511,
+        "volume_multiplier": 0.95,
+        "gap_up_density_4w": 0,
+        "distribution_days_25d": 6,
+        "stalling_days_25d": 0,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 0,
+        "media_source_diversity": 0,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 311.78,
+        "change_pct": 0.67162,
+        "volume": 1826328,
+        "year_high": 387.49,
+        "year_low": 286.15,
+        "market_cap": 212735738399
+      }
+    },
+    "STM": {
+      "stage": 1,
+      "stage_label_zh": "蘊釀",
+      "stage_confidence": 0.6,
+      "expected_return_pct": 2.39,
+      "expected_return_pct_pre_macro": 2.39,
+      "expected_return_pct_base": 11.15,
+      "scenario_model_version": "v1.1_declarative",
+      "recommended_action": "early_entry_window",
+      "scenarios": [
+        {
+          "label": "早期 momentum 啟動",
+          "label_en": "early_ignition",
+          "prob_base": 0.55,
+          "prob": 0.3708,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_overheated_75_plus",
+              "delta": -0.1,
+              "note": "overheated — failure risk up, dilute early ignition"
+            },
+            {
+              "rule": "volume_healthy_1.2_1.8x",
+              "delta": 0.03,
+              "note": ""
+            },
+            {
+              "rule": "impulse_overextended_3_plus",
+              "delta": -0.07,
+              "note": ""
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": -0.08,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0408,
+              "note": "scaled by 1.1236 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": 25.0,
+          "target_pct": 17.0,
+          "target_breakdown": [
+            {
+              "rule": "strain_p_sma200_1.6_plus",
+              "delta": -8.0,
+              "note": ""
+            }
+          ],
+          "target_price": 78.23
+        },
+        {
+          "label": "失敗回測",
+          "label_en": "failed_breakout",
+          "prob_base": 0.25,
+          "prob": 0.4045,
+          "prob_breakdown": [
+            {
+              "rule": "rsi_overheated_75_plus",
+              "delta": 0.06,
+              "note": ""
+            },
+            {
+              "rule": "distribution_days_3_plus",
+              "delta": 0.05,
+              "note": ""
+            },
+            {
+              "rule": "_normalize",
+              "delta": 0.0445,
+              "note": "scaled by 1.1236 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -8.0,
+          "target_pct": -8.0,
+          "target_breakdown": [],
+          "target_price": 61.51
+        },
+        {
+          "label": "橫盤消化",
+          "label_en": "consolidation",
+          "prob_base": 0.2,
+          "prob": 0.2247,
+          "prob_breakdown": [
+            {
+              "rule": "_normalize",
+              "delta": 0.0247,
+              "note": "scaled by 1.1236 to enforce Σ prob = 1.0"
+            }
+          ],
+          "target_pct_base": -3.0,
+          "target_pct": -3.0,
+          "target_breakdown": [],
+          "target_price": 64.85
+        }
+      ],
+      "next_warning_condition": null,
+      "components": {
+        "rsi_14_latest": 76.17211695148072,
+        "rsi_peak_recent": 88.28337764514951,
+        "rsi_overbought_days": 3,
+        "rsi_overbought_episode_days": 30,
+        "price_to_sma50_ratio": 1.454,
+        "price_to_sma200_ratio": 2.075,
+        "sma200_breakout_days_ago": 55,
+        "volume_baseline_30d_avg": 8403831,
+        "volume_recent_20d_avg": 11514152,
+        "volume_multiplier": 1.37,
+        "gap_up_density_4w": 4,
+        "distribution_days_25d": 3,
+        "stalling_days_25d": 0,
+        "failed_rally_signal": false,
+        "pt_raise_30d": 0,
+        "pt_raise_60d": 0,
+        "analyst_positive_actions_30d": 0,
+        "analyst_positive_actions_60d": 0,
+        "retail_mention_24h": 0,
+        "retail_mention_baseline_7d_avg": 0.0,
+        "retail_mention_multiplier": null,
+        "media_mention_30d": 0,
+        "media_source_diversity": 0,
+        "vix_now": 16.7,
+        "breadth_200dma_pct": null
+      },
+      "quote": {
+        "price": 66.86,
+        "change_pct": 1.8276,
+        "volume": 7541061,
+        "year_high": 68.14,
+        "year_low": 21.11,
+        "market_cap": 59424776134
+      }
+    }
+  },
+  "ranking": {
+    "top_risk": [],
+    "top_opportunity": [
+      "TXN",
+      "ASML",
+      "WFC",
+      "MA",
+      "AXP",
+      "AAPL",
+      "CSCO",
+      "STM"
+    ],
+    "watch_distribution_imminent": []
+  }
+}

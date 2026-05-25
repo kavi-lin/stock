@@ -39,7 +39,12 @@ from scripts.extractors import (  # noqa: E402
     weekly_review_extractor,
     postmortem_extractor,
 )
-from scripts.verdict_rules import EVAL_WINDOW_DAYS, VERDICT_DISPATCH, verdict_momentum_aggregate  # noqa: E402
+from scripts.verdict_rules import (  # noqa: E402
+    EVAL_WINDOW_DAYS,
+    VERDICT_DISPATCH,
+    momentum_aggregate_metrics,
+    verdict_momentum_aggregate,
+)
 
 DEEP_DIVE_RE = re.compile(r"^\d{8}_[A-Z][A-Z0-9]+\.md$")
 
@@ -230,13 +235,16 @@ def build_eval_block(record: dict, today: date) -> tuple[dict, dict]:
             per_ticker_results.append({
                 "ticker": tk,
                 "score": t_data.get("score"),
+                "rank_score": t_data.get("rank_score"),
                 "label": t_data.get("label"),
+                "signals": t_data.get("signals") or [],
                 "warnings": t_data.get("warnings") or [],
                 "return_pct": (tk_reality or {}).get("return_pct"),
                 "verdict": tk_verdict["label"],
                 "rationale": tk_verdict["rationale"],
             })
         base["per_ticker"] = per_ticker_results
+        base["aggregate_metrics"] = momentum_aggregate_metrics(per_ticker_results)
         verdict = verdict_momentum_aggregate(per_ticker_results)
 
     elif src == "thematic-screener":

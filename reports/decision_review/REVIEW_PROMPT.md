@@ -14,9 +14,33 @@
 
 ---
 
-## 任務（四步驟）
+## 任務（六步驟）
 
-### Step 0 — Adjustment Ledger 評估（先做）
+### Step -1 — Carry-over Status 評估（最先做,放輸出報告頂部）
+
+讀 `reports/decision_review/REVIEW_TODO.md` 的 **Active Items** 區段。對每個 active item：
+
+- `review_count += 1`,`last_check = 本週日期`
+- 對照 `trigger_condition` 跟本週 `event_index` 資料,判斷:
+  - **ready** — 條件達成,本週應該動 (e.g. accumulating_data 樣本到了 / instrumentation_gap
+    null rate 降到目標)
+  - **still_waiting** — 條件未達,繼續累積;補一筆 `evidence: YYYY-MM-DD: <現況>`
+  - **stale** — `review_count ≥ 4` (一個月沒動) → 建議 drop 或 promote 為 Rec
+- 寫進輸出 markdown 的 **「## 0. Carry-over from Previous REVIEWs」** 段:
+
+```markdown
+## 0. Carry-over from Previous REVIEWs
+
+| TODO-ID | title | source_type | review_count | judgement | evidence this week |
+|---|---|---|---|---|---|
+| TODO-001 | Pattern B N≥20 重評 | accumulating_data | 2 | still_waiting | N=14 (還差 6) |
+| TODO-005 | verdict surface drawdown | instrumentation_gap | 1 | ready (本週可動) | TODO-001 已需此資料 |
+| ... |
+```
+
+**ready 標出來 → user 在跑完此 REVIEW 後優先去做 ready items**。
+
+### Step 0 — Adjustment Ledger 評估（次先做）
 
 JSON 內 `adjustment_ledger_active` 列出目前 active 的系統調整（Rec entries）。
 **對每一筆 active Rec**：
@@ -59,6 +83,31 @@ JSON 內 `adjustment_ledger_active` 列出目前 active 的系統調整（Rec en
 
 對應「現在做」vs「累積資料後再決定」分兩欄。
 
+### Step 4 — 系統盲點
+
+寫進輸出「## 4. 系統盲點」段:沒涵蓋到的 verdict 場景、樣本太少不能評估的 source、
+hooks 100% null 的 instrumentation gap。
+
+### Step 5 — Carry-over Queue 更新（最後做,寫回 REVIEW_TODO.md）
+
+掃本次 REVIEW 的 Section 3「累積資料後再評估」+ Section 4 系統盲點 + 任何
+instrumentation gap (e.g. Pattern G/H 類「某 hook 100% null」),把 **新識別且
+不在 Active Items 的 item** append 到 `reports/decision_review/REVIEW_TODO.md`
+**Active Items 區段**,ID 連號 (next free = max(existing IDs) + 1)。
+
+每筆新 item 必填 schema 見 `REVIEW_TODO.md` 開頭 Schema 區段:
+- created_in / source_type / trigger_condition (量化) / target_action (附 file path)
+- review_count = 0 (本週首發)
+- status = pending
+- last_check = 本週日期
+- evidence: 至少 1 筆 `- YYYY-MM-DD: <初始觀察>`
+
+**不要重複 emit 已在 Active Items 的 item** — Step -1 已 +1 review_count + 補 evidence,
+不再 append。
+
+對 Step -1 標 `ready` 的 item,在輸出報告 Section 5 末尾加一句:
+`> Carry-over READY: 跑完此 REVIEW 後優先處理 TODO-XXX (跟 TODO-YYY)`,讓 user 一眼看見。
+
 ---
 
 ## 輸出格式
@@ -66,7 +115,15 @@ JSON 內 `adjustment_ledger_active` 列出目前 active 的系統調整（Rec en
 ```markdown
 # Weekly Review — <today>
 
-## 0. Adjustment Evaluation
+## 0. Carry-over from Previous REVIEWs
+| TODO-ID | title | source_type | review_count | judgement | evidence this week |
+|---|---|---|---|---|---|
+| TODO-001 | Pattern B N≥20 重評 | accumulating_data | 2 | still_waiting | N=14 (還差 6) |
+| TODO-005 | verdict surface drawdown | instrumentation_gap | 1 | ready | TODO-001 已需此資料 |
+
+> Carry-over READY 項目見 Section 5 末尾。
+
+## 0.5. Adjustment Evaluation
 | Rec | applied_date | target_metric | last_value | this_week_value | judgement |
 |---|---|---|---|---|---|
 | Rec 7 | 2026-05-09 | sub_industry_heat 非 null 比例 ≥ 80% | — | 92% | improved |
@@ -101,6 +158,12 @@ JSON 內 `adjustment_ledger_active` 列出目前 active 的系統調整（Rec en
 ## 4. 系統盲點
 - 沒涵蓋到的 verdict 場景
 - 哪些 source 樣本太少不能評估
+
+## 5. Carry-over Queue Updates
+- 本週 append 到 REVIEW_TODO.md Active Items 的新 TODO-IDs: [TODO-009, TODO-010, ...]
+- (簡述每筆 new TODO 的 title + source_type)
+
+> **Carry-over READY (跑完此 REVIEW 後優先處理)**: TODO-005, TODO-008
 ```
 
 ---

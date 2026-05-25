@@ -20,6 +20,10 @@ def _find_macro_delta(text: str) -> float | None:
     # macro_backdrop_score line: "(session_macro_delta +0.20)" — older
     # patterns required signed prefix on the bolded label which misses.
     for p in (
+            # Markdown identifier=value 形式 (2026-05-18+ digest)
+            # e.g. `session_macro_delta` = **-0.5**
+            # (REVIEW_2026-05-24 Rec 4 殘留 — backtick + bold + equals gap)
+            r"`session_macro_delta`\s*=\s*\*\*([+\-−]?\d+\.?\d*)\*\*",
             # New format — delta inside parenthetical, optional sign
             r"session_macro_delta\s*\(?([+\-−]?\d+\.?\d*)",
             # New format — colon / equals form (JSON-ish)

@@ -1,0 +1,808 @@
+# retail-sector-pulse — V3.20.1 retail polarity lexicon
+# Hand-curated bull / bear / macro-topic vocabulary for inferring
+# retail-investor directional bias from Reddit / HN / Bluesky posts.
+#
+# 校 lexicon 流程:
+#   1. 修詞後 bump `lexicon_version` (e.g. v1.0 → v1.1)
+#   2. trending_tickers.py output 帶這個版本字串
+#   3. 5/31 review 用 `lexicon_version` 區分 sample 來自哪版
+#
+# 不做 sarcasm / negation (V3.20.1 scope deferred to V3.20.2)。
+# `sample_posts` 保留 matched_terms,讓用戶 audit lexicon 命中是否合理。
+#
+# Phrase matching rule (trending_tickers.py 實作):
+#   - Match case-insensitive on post title + summary (NOT comments — token explosion)
+#   - LONG PHRASE FIRST **+ SPAN MASKING** (★ critical, Codex finding):
+#       1. Sort all candidate terms by len(term) DESC
+#       2. Walk terms in order; when a term matches, MARK that text span as
+#          consumed and skip overlapping matches afterwards
+#       3. Example: "short squeeze" 命中 bull → mask "short squeeze" 區段 →
+#          後面 bear list 的單字 "short" 在這個區段不再計分 → 不會互相抵消
+#       4. 防 "pump and dump" → 不會 "pump"(bull) + "dump"(bear) 同篇 0 polarity
+#   - Emoji 視為單 token,跟英文一樣計分
+#   - Hit count: 一個 term 在同篇 post 多次出現,只算 1 hit (避免 spam 灌票)
+#   - post polarity = (bull_hits - bear_hits) / (bull_hits + bear_hits + 1)
+#     範圍 [-1, +1];中性 (兩邊 0 hits) → 0
+
+lexicon_version: v1.2
+revision_date: "2026-05-25"
+notes: "v1.2 — V3.20.2 修 V1.1 ship-time issues:擴 blocklist (LONG/CALLS/EARLY/GPU/NYSE/TRUMP/NIFTY/RINOS) + dual-gate ticker_inclusion (known vs unknown sector) + retail_only_sector_overrides (SMCI/RDDT/DJT 等 retail meme,不動 SECTOR_UNIVERSE) + broad_market_etfs (QQQ/SPY 不進 sector,改 market_wide_buzz)。"
+
+# ── Bullish terms (en + zh + WSB slang) ───────────────────────────────
+# 排序原則:LONG PHRASE 寫前面(實作 sort by length DESC)。
+bull_terms:
+  # Multi-token / phrase (HIGH-confidence directional)
+  - "to the moon"
+  - "to da moon"
+  - "all-time high"
+  - "buy the dip"
+  - "buy the fucking dip"
+  - "btfd"
+  - "diamond hands"
+  - "short squeeze"
+  - "gamma squeeze"
+  - "melt up"
+  - "going parabolic"
+  - "ripping higher"
+  - "breakout above"
+  - "loaded up"
+  - "all in"
+  - "gain porn"
+  - "tendies"
+  - "yolo calls"
+  - "calls printing"
+  - "money printer"
+  - "easy money"
+  - "free money"
+  - "stonks only go up"
+  - "to the moon 🚀"
+  # Earnings / corporate-action bullish (Codex nice-to-have)
+  - "beat and raise"
+  - "raised guidance"
+  - "guidance raised"
+  - "record revenue"
+  - "record earnings"
+  - "margin expansion"
+  - "earnings beat"
+  - "analyst upgrade"
+  - "price target raise"
+  - "pt raise"
+  # v1.1 Gemini → Codex curated additions: WSB / retail hype phrases
+  - "bull run"
+  - "bullish run"
+  - "load the boat"
+  - "shorts are trapped"
+  - "squeezing shorts"
+  - "highly undervalued"
+  - "massively undervalued"
+  - "undervalued gem"
+  - "generational wealth"
+  - "easy double"
+  - "easy 2x"
+  - "blown out earnings"
+  - "blew out earnings"
+  - "accelerating growth"
+  - "share buyback"
+  - "stock buyback"
+
+  # Single-token bullish
+  - "moon"
+  - "🚀"
+  - "💎🙌"
+  - "💎"
+  - "🙌"
+  - "🤑"
+  - "📈"
+  - "calls"
+  - "long"
+  - "longs"
+  - "bullish"
+  - "bull"
+  - "rocket"
+  - "rocketing"
+  - "ripping"
+  - "ripped"
+  - "ramping"
+  - "ramped"
+  - "pumping"
+  - "pump"
+  - "rally"
+  - "rallying"
+  - "rallied"
+  - "breakout"
+  - "broke out"
+  - "squeeze"
+  - "squeezed"
+  - "ath"
+  - "fomo"
+  - "yolo"
+  - "alpha"
+  - "tendie"
+  - "hodl"
+  - "accumulating"
+  - "accumulate"
+  - "gap up"
+  - "gapped up"
+  - "runner"
+  # v1.1 single-token bullish (low ambiguity only — skipped 🔥 💪 per Codex)
+  - "bulls"
+  - "multibagger"
+  - "multi-bagger"
+  - "mooning"
+  - "🐂"
+  - "🐃"
+
+  # 中文 bullish
+  - "看漲"
+  - "看多"
+  - "做多"
+  - "嘎空"
+  - "軋空"
+  - "突破"
+  - "起漲"
+  - "噴出"
+  - "抄底"
+  - "翻多"
+  - "新高"
+  # v1.1 PTT / Dcard slang (Gemini + Codex curated)
+  - "要噴了"
+  - "狂噴"
+  - "噴了"
+  - "多頭"
+  - "多方"
+  - "利多"
+  - "利多消息"
+  - "送錢"
+  - "送分題"
+  - "黃金交叉"
+  - "主升段"
+  - "滿倉"
+  - "歐印"
+  - "加碼"
+  - "補倉"
+  # Note: "軋多" 移除 — Codex 指出實際是 long squeeze (bears killing longs),語意是 bearish。
+  # 已加入 bear_terms multi-token section。
+
+# ── Bearish terms ─────────────────────────────────────────────────────
+bear_terms:
+  # Multi-token / phrase
+  - "to zero"
+  - "to the ground"
+  - "dead cat bounce"
+  - "loss porn"
+  - "bag holder"
+  - "bag holding"
+  - "rug pull"
+  - "rug pulled"
+  - "head and shoulders"
+  - "double top"
+  - "bear flag"
+  - "blood bath"
+  - "blood in the streets"
+  - "going to zero"
+  - "rolled over"
+  - "broke down"
+  - "breakdown below"
+  - "gap down"
+  - "gapped down"
+  - "selling pressure"
+  - "puts printing"
+  - "puts loaded"
+  - "buying puts"
+  - "bear market"
+  - "stop loss hit"
+  # Pump-and-dump phrase family (Codex finding: 防 "pump"(bull) + "dump"(bear) 互抵)
+  # 必須配合 span masking 才有意義 — 命中後 mask 區段擋 "pump" / "dump" 個別計分
+  - "pump and dump"
+  - "pumped and dumped"
+  - "exit liquidity"
+  # Earnings / corporate-action bearish (Codex nice-to-have)
+  - "missed earnings"
+  - "earnings miss"
+  - "guidance cut"
+  - "cut guidance"
+  - "lowered guidance"
+  - "analyst downgrade"
+  - "price target cut"
+  - "pt cut"
+  - "valuation stretched"
+  - "secondary offering"
+  - "share dilution"
+  # v1.1 Gemini → Codex curated:WSB / retail bearish phrases
+  - "falling knife"
+  - "value trap"
+  - "sell the rip"
+  - "selling the rip"
+  - "bull trap"
+  - "dumpster fire"
+  - "cash burn"
+  - "burning cash"
+  - "chapter 11"
+  - "going bankrupt"
+  - "going bust"
+  - "miss and lower"
+  - "missed and lowered"
+  - "slowing growth"
+  - "growth deceleration"
+  - "margin contraction"
+  - "dividend cut"
+  - "suspended dividend"
+  - "margin call"
+  - "getting margin called"
+  - "insider dumping"
+  - "insiders selling"
+
+  # Single-token bearish
+  - "puts"
+  - "short"
+  - "shorting"
+  - "shorted"
+  - "bear"
+  - "bearish"
+  - "crash"
+  - "crashing"
+  - "crashed"
+  - "dump"
+  - "dumping"
+  - "dumped"
+  - "tank"
+  - "tanking"
+  - "tanked"
+  - "rug"
+  - "fud"
+  - "capitulate"
+  - "capitulation"
+  - "💀"
+  - "📉"
+  - "🩸"
+  - "⚰️"
+  - "bagholder"
+  - "bagholding"
+  - "selloff"
+  - "sell-off"
+  - "rekt"
+  - "rugpull"
+  # Valuation / single-token bearish (Codex nice-to-have)
+  - "overvalued"
+  - "bubble"
+  - "dilution"
+  - "downgrade"
+  - "downgraded"
+  # v1.1 single-token bearish (skip 🤡 💩 💸 + 'joke' per Codex sarcasm risk)
+  - "bears"
+  - "bankrupt"
+  - "insolvent"
+  - "scam"
+  - "garbage"
+  - "trash"
+  - "overpriced"
+  - "overhyped"
+  - "doomed"
+  - "🐻"
+
+  # 中文 bearish
+  - "看空"
+  - "看跌"
+  - "做空"
+  - "崩盤"
+  - "崩跌"
+  - "崩了"
+  - "破底"
+  - "套牢"
+  - "慘澹"
+  - "暴跌"
+  - "腰斬"
+  - "下殺"
+  - "殺尾"
+  - "翻空"
+  - "新低"
+  - "軋多"   # 移自 bull_terms — Codex 指正:long squeeze = bears killing longs = bearish
+  # v1.1 PTT / Dcard slang (Gemini + Codex curated)
+  - "接刀"
+  - "接飛刀"
+  - "割韭菜"
+  - "被割"
+  - "當韭菜"
+  - "利空"
+  - "利空襲來"
+  - "空頭"
+  - "空方"
+  - "出貨"
+  - "倒貨"
+  - "死亡交叉"
+  - "垃圾股"
+  - "斷頭"
+  - "融資斷頭"
+  - "快逃"
+  - "快閃"
+
+# ── Ticker disambiguation (Codex finding #1) ──────────────────────────
+# Naked-ticker match disabled for these. Only `$TICKER` cashtag accepted.
+# 理由:這些 ticker 同時是常用英文詞,裸字會把整 sector polarity 污染。
+ticker_extraction:
+  naked_min_length: 3              # naked ticker 至少 3 字母 (除非在 high_liquidity_naked_whitelist)
+  cashtag_required_pattern: "\\$([A-Z]{1,5})\\b"   # $TICKER always wins
+
+  # ── High-liquidity naked whitelist (Codex fix #5) ───────────────────
+  # 這些 ticker 即使是 cashtag-only / 短 / 跟 English word 衝突 (例如 X),也
+  # 允許 naked match — 因為 retail 討論頻率太高,強制 $ prefix 會丟太多 signal。
+  # V1 保守起手:只放 mega-cap meme / 高 retail 討論量的名稱。
+  # 不放 GE / GM / KO 這種雖然真實但 retail 討論度沒那麼炸的。
+  # 若某條跟 cashtag_only_tickers 同時出現,whitelist 優先 (允許 naked)。
+  high_liquidity_naked_whitelist:
+    - "NVDA"
+    - "TSLA"
+    - "AAPL"
+    - "AMD"
+    - "SMCI"
+    - "PLTR"
+    # v1.1 Gemini → Codex curated (skip META / COIN — 字義衝突風險)
+    - "MSFT"
+    - "AMZN"
+    - "GOOG"
+    - "GOOGL"
+    - "NFLX"
+    - "BABA"
+
+  # 一律強制 cashtag(任何裸字都拒)。同時是 English word 或縮寫的 ticker。
+  # Order: 1-letter, 2-letter, common-English-word 3+letter.
+  cashtag_only_tickers:
+    # 1-letter tickers (all require cashtag)
+    - "A"     # Agilent
+    - "B"     # Barnes Group
+    - "C"     # Citigroup
+    - "D"     # Dominion Energy
+    - "E"     # Eni SpA
+    - "F"     # Ford
+    - "G"     # Genpact
+    - "H"     # Hyatt
+    - "K"     # Kellogg
+    - "L"     # Loews
+    - "M"     # Macy's
+    - "O"     # Realty Income
+    - "R"     # Ryder
+    - "T"     # AT&T
+    - "U"     # Unity Software
+    - "V"     # Visa
+    - "W"     # Wayfair
+    - "X"     # US Steel (+ Twitter rebrand 衝突)
+    - "Y"     # Alleghany
+    - "Z"     # Zillow
+
+    # 2-letter tickers (all require cashtag)
+    - "AA"    # Alcoa
+    - "AB"
+    - "AG"
+    - "AH"    # v1.1: clashes with "ah" / "after hours" (Gemini)
+    - "AI"    # C3.ai (vs 主題詞 AI)
+    - "AM"    # v1.1: Antero Midstream — clashes with "am" (Gemini)
+    - "AN"
+    - "AR"
+    - "AT"
+    - "BE"    # Bloom Energy
+    - "BJ"
+    - "BP"
+    - "BY"    # v1.1: Byline Bancorp — clashes with "by" (Gemini)
+    - "CB"
+    - "CC"
+    - "CE"
+    - "CF"
+    - "CG"
+    - "CI"
+    - "CM"
+    - "CN"
+    - "CO"
+    - "CR"
+    - "CX"
+    - "DD"
+    - "DE"
+    - "DG"
+    - "DO"    # v1.1: Diamond Offshore — clashes with "do" (Gemini)
+    - "DT"
+    - "EL"
+    - "EW"
+    - "EQ"
+    - "EX"
+    - "FE"
+    - "FI"
+    - "FL"
+    - "FS"
+    - "GE"    # 雖然 GE 常被討論,但 GE 也是縮寫
+    - "GM"
+    - "GO"
+    - "HE"
+    - "HP"
+    - "IF"    # v1.1: clashes with English word "if" (Gemini)
+    - "IT"    # IT 太常見 English word
+    - "JD"
+    - "KO"
+    - "LH"
+    - "ME"    # v1.1: 23andMe — clashes with "me" (Gemini)
+    - "MO"
+    - "NO"    # v1.1: clashes with "no" (Gemini)
+    - "OH"    # v1.1: clashes with "oh" (Gemini)
+    - "OK"    # v1.1: clashes with "ok" (Gemini)
+    - "ON"    # Semtech vs preposition "on"
+    - "OR"    # v1.1: clashes with English "or" (Gemini)
+    - "PG"
+    - "PM"    # v1.1: Philip Morris vs PM time (Gemini)
+    - "PR"
+    - "RH"
+    - "SE"
+    - "SO"
+    - "TS"
+    - "TV"    # v1.1: Grupo Televisa vs TV / television (Gemini)
+    - "UP"
+    - "US"    # v1.1: US Foods vs "us"/"United States" (Gemini)
+    - "WE"    # v1.1: WeWork vs "we" (Gemini)
+    - "WM"
+
+    # 3+ letter tickers same as common English words
+    - "ALL"   # Allstate
+    - "AND"   # 沒這 ticker 但常被誤 match
+    - "ANY"
+    - "ARE"   # Alexandria Real Estate
+    - "AVG"
+    - "BAD"
+    - "BIG"   # Big Lots
+    - "BUY"
+    - "CAN"
+    - "CAR"
+    - "CASH"
+    - "CHAT"
+    - "DOWN"
+    - "EOG"   # 是 Energy 真 ticker,但 3 字小尾,V1 保守:強制 $-prefix。若 retail 提及量真高,V3.20.2 移入 whitelist
+    - "FOR"
+    - "GOOD"  # The Good Co
+    - "GROW"
+    - "HAS"
+    - "HIT"
+    - "HOT"
+    - "ITS"
+    - "JOB"
+    - "KEY"   # KeyCorp
+    - "LIKE"
+    - "MAN"
+    - "MED"
+    - "MET"
+    - "MOST"
+    - "MUST"
+    - "NEW"
+    - "NEXT"
+    - "NOW"   # ServiceNow but "now" too common
+    - "ONE"
+    - "OUT"
+    - "PAY"
+    - "PLAY"
+    - "REAL"
+    - "RUN"
+    - "SAID"
+    - "SAY"
+    - "SAYS"
+    - "SO"
+    - "SUN"   # Sunoco
+    - "TWO"
+    - "USE"
+    - "VERY"
+    - "WELL"  # Welltower
+    - "WHY"
+    - "WIN"
+    - "YOU"
+    - "YOUR"
+
+  # Even more aggressive: explicit blocklist — never match these as ticker,
+  # not even with $-prefix (avoids deliberate $ON / $IT trolling).
+  ticker_blocklist:
+    # Org / company-role acronyms
+    - "USA"
+    - "USD"
+    - "CEO"
+    - "CFO"
+    - "CTO"
+    - "IPO"
+    - "ETF"
+    - "FDA"
+    - "SEC"
+    # Central banks / macro institutions (Codex nice-to-have)
+    - "FED"
+    - "FOMC"
+    - "ECB"
+    - "BOJ"
+    - "PBOC"
+    - "OPEC"
+    - "EIA"
+    # Economic indicators (Codex nice-to-have)
+    - "CPI"
+    - "PPI"
+    - "GDP"
+    - "PMI"
+    - "ISM"
+    - "NFP"
+    # Valuation / accounting acronyms (Codex nice-to-have)
+    - "EPS"
+    - "PE"
+    - "PEG"
+    - "YOY"
+    - "QOQ"
+    - "EBITDA"
+    # v1.1 Gemini → Codex curated: meme/finance acronyms commonly written as $XXX
+    - "ATH"     # All-Time High
+    - "FOMO"
+    - "YOLO"
+    - "FUD"
+    - "DCA"     # Dollar Cost Averaging
+    - "GAAP"
+    - "FCF"
+    - "ROIC"
+    - "ROE"
+    - "NAV"
+    - "ESG"
+    - "CAGR"
+    - "DCF"
+    # v1.2 V3.20.2 — caught polluting live trending output:
+    - "LONG"    # WSB verb "going long",not a ticker
+    - "CALLS"   # WSB "buying calls",not a ticker
+    - "EARLY"   # English adverb,not a ticker
+    - "GPU"     # tech acronym
+    - "NYSE"    # exchange name
+    - "TRUMP"   # person name (real ticker is DJT)
+    - "NIFTY"   # Indian index — not US equity
+    - "RINOS"   # political meme "Republicans In Name Only"
+    - "FOSS"    # open-source acronym
+
+# ── Inclusion thresholds (V3.20.2 dual-gate per Codex review) ─────────
+# Known-sector tickers (in TICKER_TO_SECTOR OR retail_only_sector_overrides):
+#   relaxed gate — 1 mention OK,low engagement OK。
+#   Reddit RSS fallback engagement=1.0,所以 known ticker 單篇 NVDA 可入。
+# Unknown-sector tickers (sector mapping failed):
+#   strict gate — 防止 long-tail 假 ticker (LONG/CALLS 即使 blocklist 漏掉也擋住) 進 sector。
+ticker_inclusion:
+  known_sector:
+    min_mention_count: 1
+    min_total_engagement: 1.0
+  unknown_sector:
+    min_mention_count: 3
+    min_total_engagement: 8.0
+  max_tickers_per_sector: 8     # sector rollup 只留 top 8 by engagement
+  max_low_confidence_kept: 30   # low_confidence[] 保留前 30 給 audit
+
+# ── Retail-only sector overrides (V3.20.2) ────────────────────────────
+# 散戶熱門但不在 SECTOR_UNIVERSE 的 ticker。不動 company_context.SECTOR_UNIVERSE
+# (那會擴散污染到 narrative-pulse-detector / sector_protocol 等多處)。
+# 只給 retail-sector-pulse 自己用,擴 retail-perspective 視野。
+retail_only_sector_overrides:
+  Technology:
+    - "SMCI"     # 半導體 retail meme
+    - "RDDT"     # Reddit 自家股
+    - "ARM"      # ARM Holdings — retail 高討論量
+    - "MU"       # Micron — retail meme
+    - "MARA"     # crypto miner — tech bucket
+    - "RIOT"     # crypto miner — tech bucket
+  Consumer_Discretionary:
+    - "DJT"      # Trump Media
+    - "GME"      # GameStop — retail icon
+    - "AMC"      # AMC — retail icon
+    - "HOOD"     # Robinhood — meme stock
+    - "BBBY"     # Bed Bath Beyond (delisted but still discussed)
+  Financials:
+    - "COIN"     # Coinbase (crypto-financial)
+    - "SOFI"     # SoFi — retail platform
+  Energy:
+    - "OXY"      # Occidental — Buffett favorite, retail tracks
+  Healthcare:
+    - "MRNA"     # Moderna — retail meme during COVID era still tracked
+
+# ── Broad-market ETFs (V3.20.2) ───────────────────────────────────────
+# 抽到這些 ticker 不進 sector rollup (broad index — 不屬單一 sector)。
+# 改 contribute 進 market_wide_buzz.market_direction topic。
+broad_market_etfs:
+  - "SPY"
+  - "QQQ"
+  - "IWM"
+  - "DIA"
+  - "VOO"
+  - "VTI"
+  - "TLT"       # 20-year Treasury — macro
+  - "VXX"
+  - "UVXY"
+  - "SQQQ"      # inverse Nasdaq
+  - "TQQQ"      # 3x Nasdaq
+  - "SPXS"      # inverse SP500
+  - "SPXL"
+
+# ── Market-wide buzz bucket (Codex finding #3) ────────────────────────
+# 無 ticker 或 ticker 數 > 5 的 broad-market post 進這裡。
+# 用 topic lexicon 粗分桶,顯在 radar 頂部 strip。
+market_wide:
+  collect: true
+  trigger:
+    no_ticker_extracted: true
+    ticker_count_above: 5       # post 提 6+ tickers → 視為 broad-market 而非個股
+  topic_lexicon:
+    # Macro: Fed / 利率
+    fed:
+      - "fed"
+      - "fomc"
+      - "powell"
+      - "rate cut"
+      - "rate hike"
+      - "rate decision"
+      - "interest rate"
+      - "monetary policy"
+      - "聯準會"
+      - "升息"
+      - "降息"
+      # v1.1 (skip qt/qe per Codex — substring risk)
+      - "dot plot"
+      - "jerome powell"
+      - "hawkish"
+      - "dovish"
+      - "quantitative tightening"
+      - "quantitative easing"
+      - "點陣圖"
+      - "鷹派"
+      - "鴿派"
+      - "縮表"
+      - "量化寬鬆"
+    # Inflation / 通膨
+    inflation:
+      - "cpi"
+      - "ppi"
+      - "inflation"
+      - "deflation"
+      - "通膨"
+      - "通縮"
+      # v1.1
+      - "hyperinflation"
+      - "stagflation"
+      - "core cpi"
+      - "sticky inflation"
+      - "pce"
+      - "core pce"
+      - "滯脹"
+      - "惡性通膨"
+      - "核心CPI"
+      - "個人消費支出"
+    # Recession / 景氣
+    recession:
+      - "recession"
+      - "hard landing"
+      - "soft landing"
+      - "depression"
+      - "衰退"
+      - "硬著陸"
+      - "軟著陸"
+      # v1.1
+      - "economic slowdown"
+      - "economic downturn"
+      - "growth slowdown"
+      - "景氣衰退"
+      - "經濟放緩"
+    # Jobs / 就業
+    jobs:
+      - "nonfarm payroll"
+      - "nfp"
+      - "jobs report"
+      - "unemployment"
+      - "jobless claims"
+      - "失業率"
+      - "非農"
+      # v1.1
+      - "hiring freeze"
+      - "layoffs"
+      - "job market"
+      - "payroll"
+      - "裁員"
+      - "就業報告"
+      - "初請失業金"
+    # Trade / 關稅
+    trade:
+      - "tariff"
+      - "trade war"
+      - "trade deal"
+      - "china tariff"
+      - "關稅"
+      - "貿易戰"
+      # v1.1
+      - "protectionism"
+      - "deglobalization"
+      - "trade deficit"
+      - "sanctions"
+      - "貿易逆差"
+      - "制裁"
+    # AI capex / 主題
+    ai_capex:
+      - "ai capex"
+      - "data center"
+      - "hyperscaler"
+      - "ai bubble"
+      - "compute"
+      - "gpu shortage"
+      - "ai 泡沫"
+      - "資料中心"
+      # v1.1
+      - "gpu capex"
+      - "ai infrastructure"
+      - "hbm"
+      - "liquid cooling"
+      - "llm training"
+      - "ai 基礎建設"
+      - "液冷"
+      - "高頻寬記憶體"
+    # Geopolitics
+    geopolitics:
+      - "ukraine"
+      - "russia"
+      - "israel"
+      - "middle east"
+      - "taiwan"
+      - "north korea"
+      - "戰爭"
+      - "地緣"
+      # v1.1
+      - "geopolitical risk"
+      - "china invasion"
+      - "gaza"
+      - "iran"
+      - "red sea"
+      - "supply chain disruption"
+      - "地緣政治"
+      - "台海"
+      - "紅海"
+    # VIX / volatility
+    volatility:
+      - "vix"
+      - "volatility"
+      - "panic"
+      - "fear gauge"
+      - "波動"
+      - "恐慌"
+      # v1.1
+      - "sell-off"
+      - "black swan"
+      - "market turmoil"
+      - "capitulation"
+      - "黑天鵝"
+      - "市場動盪"
+    # Market-wide direction (broad)
+    market_direction:
+      - "bull market"
+      - "bear market"
+      - "market crash"
+      - "market rally"
+      - "spy"
+      - "qqq"
+      - "spx"
+      - "ndx"
+      - "大盤"
+      - "牛市"
+      - "熊市"
+      # v1.1
+      - "market correction"
+      - "correction"
+      - "all-time high"
+      - "sideways"
+      - "iwm"
+      - "dia"
+      - "回檔"
+      - "修正"
+      - "盤整"
+
+  # Same flat-weight polarity rule applies inside market_wide bucket.
+  # market_wide_polarity = engagement-weighted post polarity (same formula).
+  min_topic_engagement: 5.0     # topic 累計 engagement < 5 不顯
+  max_topics_displayed: 6       # radar strip 顯前 6 個 topic
+
+# ── Per-source credibility weight (deferred V3.20.2) ──────────────────
+# V1 flat: every source weight 1.0. Engagement-based ranking 已隱式處理
+# r/wallstreetbets 噪音(因為 WSB 一篇 5k upvotes vs r/investing 100,
+# engagement_score 已加權)。V3.20.2 觀察 IC 後決定要不要 multiplier。
+source_credibility:
+  reddit_wallstreetbets: 1.0
+  reddit_stocks:         1.0
+  reddit_investing:      1.0
+  reddit_options:        1.0
+  reddit_securityanalysis: 1.0
+  hackernews:            1.0
+  bluesky:               1.0
+  google_trends:         1.0

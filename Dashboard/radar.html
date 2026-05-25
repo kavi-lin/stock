@@ -117,6 +117,28 @@
             <!-- Regime badges (RSI + VIX independent) -->
             <div id="radar-regime-badges" class="space-y-2"></div>
 
+            <!-- ── Retail Sector Pulse (V3.20.0) — 散戶視角分產業 sentiment + 5d direction ── -->
+            <section id="radar-retail-sector-pulse" class="glass-card p-4 space-y-3 hidden">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i>
+                        <span class="text-xs font-black uppercase tracking-widest text-zinc-300">Sector Pulse · 散戶視角</span>
+                        <span class="experimental-badge">
+                            <i data-lucide="flask-conical" class="w-3 h-3"></i>
+                            <span>EXPLORATORY</span>
+                        </span>
+                        <span id="rsp-last-updated" class="text-[10px] font-mono text-zinc-500">—</span>
+                    </div>
+                    <div class="text-[10px] text-zinc-500">
+                        <span data-radar-tip="retail_sector_pulse">i</span>
+                        · 5d horizon · 72h news window
+                    </div>
+                </div>
+                <!-- V3.20.1 market-wide buzz strip (above sector grid) -->
+                <div id="rsp-market-wide-strip" class="hidden flex flex-wrap items-center gap-2 mb-3 pb-3 border-b" style="border-color: var(--border);"></div>
+                <div id="rsp-sector-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+            </section>
+
             <!-- ── Narrative Pulse Detector (V1.0) — 熱潮股 narrative trade 階段 ── -->
             <section id="npd-section" class="glass-card p-4 space-y-3">
                 <div class="flex items-center justify-between flex-wrap gap-3">

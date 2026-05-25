@@ -1,7 +1,15 @@
 # narrative-pulse-detector — stage classification thresholds
-# 版本: v1.0 (2026-05-23,以 NOK 5/22 案例為錨)
-# 修改後 bump weights_version,batch_scan 會自動 invalidate cache
-weights_version: v1.0
+# 版本: v1.1.1 (2026-05-25 — Codex review fixes: hard Stage 1 gate + bounded normalize)
+# 修改後 bump weights_version,batch_scan 會自動 invalidate cache。
+# History:
+#   v1.0   (2026-05-23) 初版,NOK 5/22 為錨
+#   v1.1   (2026-05-25 AM) per-ticker scenario adjustments + SMA200 gate fix
+#   v1.1.1 (2026-05-25 PM) Codex review #1/#2 fix:
+#                          - Stage 1 weights 0.4/0.3/0.3 → 0.5/0.25/0.25
+#                            (SMA200 條件實質 mandatory)
+#                          - classify_stage._bounded_normalize 取代 simple scaling
+#                            (post-normalize 不再違反 prob_clamp)
+weights_version: v1.1.1
 
 # Stage 1-5 條件(所有 condition 都要滿足才算該 stage)
 # classify_stage.py 從 Stage 5 → Stage 1 順序判斷,first match wins
@@ -15,15 +23,21 @@ stages:
     label_en: Brewing
     recommended_action: early_entry_window
     conditions:
+      # V1.1: 加 `is not None` 守門 (fetch_inputs 改為 close<sma200 時回 None)
+      # 並加 `price_to_sma200_ratio >= 1.0` 硬閘擋邊緣 case
+      # V1.1.1 (Codex #1 fix): bump breakout weight 0.4→0.5,
+      #   media/no_sell_side 0.3→0.25 each。否則 media+no_sell_side = 0.6 = min_conf,
+      #   below-SMA200 ticker 仍能被分到 Stage 1 brewing。新權重:
+      #   media+no_sell_side = 0.50 < 0.60 → 必須 breakout 才能達 conf 門檻。
       sma200_breakout_recent:
-        rule: "0 <= sma200_breakout_days_ago <= 30"
-        weight: 0.4
+        rule: "sma200_breakout_days_ago is not None and 0 <= sma200_breakout_days_ago <= 30 and price_to_sma200_ratio is not None and price_to_sma200_ratio >= 1.0"
+        weight: 0.5
       media_quiet:
         rule: "media_mention_30d <= 10"
-        weight: 0.3
+        weight: 0.25
       no_sell_side_raise:
         rule: "pt_raise_60d == 0"
-        weight: 0.3
+        weight: 0.25
     scenarios:
       - label: 早期 momentum 啟動
         label_en: early_ignition
@@ -208,3 +222,220 @@ macro_overrides:
     affected_stages: [1]
     expected_return_adjustment_pct: 3.0    # add to E[R]
     note: "broad-market washout — early-stage entries get a cleaner runway"
+
+# ── Scenario Adjustments (V1.1) ───────────────────────────────────────
+# Per-ticker prob / target deltas applied AFTER stage classification.
+# 每條 rule = name + condition + delta + note。Python 只是 evaluator;
+# 用戶編輯本 block 校準,不碰 code。
+#
+# Scope (本版):
+#   Stage 1 (brewing) / Stage 2 (ignition) / Stage 4 (euphoria) / Stage 5 (distribution)
+# 跳過 Stage 3 (acceleration) — 持有期 per-ticker 細調價值不高;Stage 3 保 V1.0 hardcoded。
+#
+# Pipeline (classify_stage._apply_scenario_adjustments):
+#   1. For each scenario:
+#        prob_raw = prob_base + Σ (delta where condition fires)
+#        target_raw = target_base + Σ (target_delta where condition fires)
+#   2. clamp prob_raw to global.prob_clamp
+#   3. normalize so Σ prob == 1.0 (proportional scaling)
+#   4. record breakdown (every applied rule + _clamp + _normalize entries)
+#
+# Output:
+#   expected_return_pct_base       = V1.0 prior (control,for 5/31 review)
+#   expected_return_pct_pre_macro  = V1.1 adjusted scenario sum (NO macro)
+#   expected_return_pct            = pre_macro + Σ macro_delta (final)
+scenario_adjustments:
+  global:
+    prob_clamp: [0.05, 0.80]   # 單一 scenario prob 上下界
+    normalize: true            # adjusted prob 強制 sum=1.0
+
+  # ── Stage 1 brewing ─────────────────────────────────────────────────
+  brewing:
+    early_ignition:
+      prob_deltas:
+        - name: rsi_constructive_55_69
+          condition: "rsi_14_latest is not None and 55 <= rsi_14_latest < 70"
+          delta: 0.05
+          note: "constructive band — early ignition more probable"
+        - name: rsi_overheated_75_plus
+          condition: "rsi_14_latest is not None and rsi_14_latest >= 75"
+          delta: -0.10
+          note: "overheated — failure risk up, dilute early ignition"
+        - name: volume_healthy_1.2_1.8x
+          condition: "volume_multiplier is not None and 1.2 <= volume_multiplier < 1.8"
+          delta: 0.03
+        - name: volume_anemic_below_0.8x
+          condition: "volume_multiplier is not None and volume_multiplier < 0.8"
+          delta: -0.05
+        - name: impulse_constructive_1_2
+          condition: "gap_up_density_4w is not None and 1 <= gap_up_density_4w <= 2"
+          delta: 0.04
+        - name: impulse_overextended_3_plus
+          condition: "gap_up_density_4w is not None and gap_up_density_4w >= 3"
+          delta: -0.07
+        - name: no_distribution_days
+          condition: "distribution_days_25d == 0"
+          delta: 0.04
+        - name: distribution_days_3_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 3"
+          delta: -0.08
+      target_deltas:
+        - name: strain_p_sma200_1.35_to_1.6
+          condition: "price_to_sma200_ratio is not None and 1.35 <= price_to_sma200_ratio < 1.6"
+          delta: -3.0
+          note: "runway 被壓縮,target 折讓"
+        - name: strain_p_sma200_1.6_plus
+          condition: "price_to_sma200_ratio is not None and price_to_sma200_ratio >= 1.6"
+          delta: -8.0
+
+    failed_breakout:
+      prob_deltas:
+        - name: rsi_overheated_75_plus
+          condition: "rsi_14_latest is not None and rsi_14_latest >= 75"
+          delta: 0.06
+        - name: distribution_days_3_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 3"
+          delta: 0.05
+        - name: volume_anemic_below_0.8x
+          condition: "volume_multiplier is not None and volume_multiplier < 0.8"
+          delta: 0.03
+      target_deltas: []
+
+    consolidation:
+      prob_deltas:
+        - name: rsi_constructive_55_69
+          condition: "rsi_14_latest is not None and 55 <= rsi_14_latest < 70"
+          delta: -0.02
+      target_deltas: []
+
+  # ── Stage 2 ignition ────────────────────────────────────────────────
+  ignition:
+    accelerate:
+      prob_deltas:
+        - name: volume_strong_2.0_3.0x
+          condition: "volume_multiplier is not None and 2.0 <= volume_multiplier < 3.0"
+          delta: 0.06
+        - name: rsi_constructive_60_69
+          condition: "rsi_14_latest is not None and 60 <= rsi_14_latest < 70"
+          delta: 0.04
+        - name: rsi_overheated_75_plus
+          condition: "rsi_14_latest is not None and rsi_14_latest >= 75"
+          delta: -0.08
+        - name: distribution_days_2_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 2"
+          delta: -0.06
+        - name: impulse_overextended_3_plus
+          condition: "gap_up_density_4w is not None and gap_up_density_4w >= 3"
+          delta: -0.05
+      target_deltas:
+        - name: strain_p_sma200_1.5_plus
+          condition: "price_to_sma200_ratio is not None and price_to_sma200_ratio >= 1.5"
+          delta: -4.0
+
+    re_ignite:
+      prob_deltas:
+        - name: volume_modest_1.0_1.5x
+          condition: "volume_multiplier is not None and 1.0 <= volume_multiplier < 1.5"
+          delta: 0.04
+      target_deltas: []
+
+    test_sma50:
+      prob_deltas:
+        - name: distribution_days_2_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 2"
+          delta: 0.06
+        - name: rsi_overheated_75_plus
+          condition: "rsi_14_latest is not None and rsi_14_latest >= 75"
+          delta: 0.04
+      target_deltas: []
+
+  # ── Stage 4 euphoria ────────────────────────────────────────────────
+  euphoria:
+    climactic_top:
+      prob_deltas:
+        - name: rsi_extreme_85_plus
+          condition: "rsi_peak_recent is not None and rsi_peak_recent >= 85"
+          delta: -0.06
+          note: "RSI peak ≥85 已過頂,末段衝高機率反而下降"
+        - name: distribution_days_3_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 3"
+          delta: -0.08
+        - name: failed_rally_signal_true
+          condition: "failed_rally_signal == True"
+          delta: -0.10
+        - name: strain_p_sma200_2.0_plus
+          condition: "price_to_sma200_ratio is not None and price_to_sma200_ratio >= 2.0"
+          delta: -0.04
+      target_deltas:
+        - name: strain_p_sma200_2.0_plus
+          condition: "price_to_sma200_ratio is not None and price_to_sma200_ratio >= 2.0"
+          delta: -3.0
+
+    consolidation:
+      prob_deltas:
+        - name: rsi_cooling_below_70
+          condition: "rsi_14_latest is not None and rsi_14_latest < 70"
+          delta: 0.04
+      target_deltas: []
+
+    test_sma50:
+      prob_deltas:
+        - name: distribution_days_3_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 3"
+          delta: 0.05
+        - name: failed_rally_signal_true
+          condition: "failed_rally_signal == True"
+          delta: 0.05
+      target_deltas: []
+
+    test_sma200:
+      prob_deltas:
+        - name: distribution_days_4_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 4"
+          delta: 0.05
+        - name: failed_rally_signal_true
+          condition: "failed_rally_signal == True"
+          delta: 0.05
+      target_deltas: []
+
+  # ── Stage 5 distribution ────────────────────────────────────────────
+  distribution:
+    slow_decline:
+      prob_deltas:
+        - name: rsi_still_overbought
+          condition: "rsi_14_latest is not None and rsi_14_latest >= 65"
+          delta: 0.05
+          note: "高 RSI 緩跌機率高 (還沒急殺)"
+        - name: failed_rally_signal_true
+          condition: "failed_rally_signal == True"
+          delta: -0.05
+      target_deltas: []
+
+    sharp_test_sma50:
+      prob_deltas:
+        - name: distribution_days_5_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 5"
+          delta: 0.06
+        - name: failed_rally_signal_true
+          condition: "failed_rally_signal == True"
+          delta: 0.04
+      target_deltas: []
+
+    deep_test_sma200:
+      prob_deltas:
+        - name: distribution_days_6_plus
+          condition: "distribution_days_25d is not None and distribution_days_25d >= 6"
+          delta: 0.05
+        - name: strain_p_sma200_2.0_plus
+          condition: "price_to_sma200_ratio is not None and price_to_sma200_ratio >= 2.0"
+          delta: 0.04
+      target_deltas: []
+
+    dead_cat_bounce:
+      prob_deltas:
+        - name: rsi_oversold_below_30
+          condition: "rsi_14_latest is not None and rsi_14_latest < 30"
+          delta: 0.05
+      target_deltas: []
+
+  # Stage 3 acceleration: 不設 adjustment block (保 V1.0 prior)

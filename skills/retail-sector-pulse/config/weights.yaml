@@ -1,0 +1,167 @@
+# retail-sector-pulse — declarative scoring formulas
+# 版本 v1.1 (2026-05-25 — V3.20.1: 3-lane composite + trending tickers input)
+# 修改後 bump weights_version,aggregate.py 寫入 output 讓 downstream 可偵測
+#
+# History:
+#   v1.0 (V3.20.0) — 2-lane (news / predicted) + retail_volume from NPD cache
+#   v1.1 (V3.20.1) — 3-lane (price / polarity / attention) + trending_tickers.json
+#                    為主源;news_sentiment 改 secondary attribute (顯在卡片但不入
+#                    composite 主公式)。理由:核心問題是「散戶看完會偏多偏空」,所以
+#                    polarity 是主軸,price 是 anchor,attention 是放大器。
+weights_version: v1.1
+
+# ── News window + ticker roster ──────────────────────────────────────
+lookback_hours: 72            # how far back to scan digest verdicts (news layer)
+news_decay_half_life_hours: 12  # exponential weight: w = 0.5 ** (age_h / 12)
+predict_horizon: "5d"         # which short-term-target horizon to use
+min_predict_ok_per_sector: 3  # require ≥3 of SECTOR_TOP_5 to compute aggregate
+
+# ── Three-lane composite direction score [-1, +1] (V3.20.1) ───────────
+# composite_score = Σ (weight × normalized signal); 用 yaml 公式 explicit
+# 缺 signal 的 lane 從加權平均 drop (re-normalize 剩餘 weights)
+composite:
+  price_5d_norm:
+    # Lane 1: 客觀 anchor — predict.py 5d 中位 (SECTOR_TOP_5)
+    # ±5% caps at ±1; beyond clamped
+    source_field: predicted_5d_median_pct
+    normalize: "max(-1.0, min(1.0, value / 5.0))"
+    weight: 0.30
+  retail_polarity_signed:
+    # Lane 2: ★ 主訊號 — 散戶 directional polarity (engagement-weighted)
+    # value 本身已在 [-1, +1] (post polarity 公式產出範圍)
+    source_field: retail_polarity_score
+    normalize: "value"
+    weight: 0.50
+  retail_attention_signed:
+    # Lane 3: 散戶 engagement 量,sign 跟 polarity 對齊。
+    # 高 buzz = 放大已有方向;不獨立決定方向。
+    # |attention| caps at 50.0 engagement_score → normalize [-1, +1]
+    source_expr: "(min(retail_engagement_score, 50.0) / 50.0) * sign_of(retail_polarity_score)"
+    weight: 0.20
+
+# ── Bucket labels (lo, hi] ranges,從上往下 first-match ─────────────
+direction_labels:
+  - { name: strong_bull,   range: [ 0.50,  1.01] }
+  - { name: mod_bull,      range: [ 0.20,  0.50] }
+  - { name: neutral_mixed, range: [-0.20,  0.20] }
+  - { name: mod_bear,      range: [-0.50, -0.20] }
+  - { name: strong_bear,   range: [-1.01, -0.50] }
+
+news_sentiment_labels:
+  - { name: strong_bull,   range: [ 2.5,  5.01] }
+  - { name: mod_bull,      range: [ 0.8,  2.5 ] }
+  - { name: neutral,       range: [-0.8,  0.8 ] }
+  - { name: mod_bear,      range: [-2.5, -0.8 ] }
+  - { name: strong_bear,   range: [-5.01, -2.5] }
+
+retail_volume_labels:
+  - { name: spike,    range: [ 3.5,    99.0] }
+  - { name: elevated, range: [ 2.0,     3.5] }
+  - { name: normal,   range: [ 1.2,     2.0] }
+  - { name: calm,     range: [ 0.0,     1.2] }
+
+predicted_5d_labels:
+  - { name: strong_bull,   range: [ 3.0,   99.0] }
+  - { name: mod_bull,      range: [ 1.0,    3.0] }
+  - { name: neutral,       range: [-1.0,    1.0] }
+  - { name: mod_bear,      range: [-3.0,   -1.0] }
+  - { name: strong_bear,   range: [-99.0,  -3.0] }
+
+# ── Framing (rule-based template,純字串拼接) ───────────────────────
+framing:
+  zh_template: "新聞 {news_count} 篇{news_label_zh}, Reddit {top_ticker} {top_mult_label}({top_mult:.1f}x), 5天 {bullish_count}/{total_preds} 看漲 (中位 {pred_sign}{pred_median:.1f}%)。{conflict_note}"
+  en_template: "News {news_count} {news_label_en}, Reddit {top_ticker} {top_mult_label} ({top_mult:.1f}x), 5d {bullish_count}/{total_preds} bullish (med {pred_sign}{pred_median:.1f}%). {conflict_note}"
+  label_translations:
+    strong_bull:   { zh: "強烈看漲", en: "strong bull" }
+    mod_bull:      { zh: "偏多",     en: "mostly bullish" }
+    neutral:       { zh: "中性",     en: "neutral" }
+    neutral_mixed: { zh: "分歧",     en: "mixed" }
+    mod_bear:      { zh: "偏空",     en: "mostly bearish" }
+    strong_bear:   { zh: "強烈看空", en: "strong bear" }
+    spike:         { zh: "爆量",     en: "spiked" }
+    elevated:      { zh: "升溫",     en: "elevated" }
+    normal:        { zh: "正常",     en: "normal" }
+    calm:          { zh: "冷清",     en: "calm" }
+  conflict_rules:
+    # signs of news_sentiment vs predicted_5d agree → "訊號一致" / "signals align"
+    # signs disagree → "訊號分歧" / "signals diverge"
+    # one missing → "資料部分缺" / "partial data"
+    align_zh:    "訊號一致"
+    align_en:    "Signals align."
+    diverge_zh:  "訊號分歧。"
+    diverge_en:  "Signals diverge."
+    partial_zh:  "資料部分缺。"
+    partial_en:  "Partial data."
+
+# ── Sector name normalization (messy digest values → canonical key) ──
+# Codex finding: digest verdicts have inconsistent sector strings.
+# Below maps known variants to the 11 canonical SECTOR_UNIVERSE keys.
+# Unknown variants are dropped silently (logged to stderr).
+sector_aliases:
+  # Canonical: Technology
+  "Technology":             "Technology"
+  "Tech":                   "Technology"
+  "Semiconductors":         "Technology"
+  "Semi":                   "Technology"
+  "Software":               "Technology"
+  # Canonical: Healthcare
+  "Healthcare":             "Healthcare"
+  "Health Care":            "Healthcare"
+  "Health-Care":            "Healthcare"
+  "Biotech":                "Healthcare"
+  # Canonical: Energy
+  "Energy":                 "Energy"
+  "Oil":                    "Energy"
+  "Oil & Gas":              "Energy"
+  # Canonical: Financials
+  "Financials":             "Financials"
+  "Financial":              "Financials"
+  "Banks":                  "Financials"
+  # Canonical: Consumer_Discretionary
+  "Consumer_Discretionary": "Consumer_Discretionary"
+  "Consumer Discretionary": "Consumer_Discretionary"
+  "Consumer-disc":          "Consumer_Discretionary"
+  "Discretionary":          "Consumer_Discretionary"
+  # Canonical: Consumer_Staples
+  "Consumer_Staples":       "Consumer_Staples"
+  "Consumer Staples":       "Consumer_Staples"
+  "Staples":                "Consumer_Staples"
+  # Canonical: Industrials
+  "Industrials":            "Industrials"
+  "Industrial":             "Industrials"
+  "Defense":                "Industrials"
+  "Airlines":               "Industrials"
+  "Transport":              "Industrials"
+  # Canonical: Materials
+  "Materials":              "Materials"
+  "Material":               "Materials"
+  "Chemicals":              "Materials"
+  "Metals":                 "Materials"
+  # Canonical: Utilities
+  "Utilities":              "Utilities"
+  "Utility":                "Utilities"
+  # Canonical: Real_Estate
+  "Real_Estate":            "Real_Estate"
+  "Real Estate":            "Real_Estate"
+  "Real-estate":            "Real_Estate"
+  "REIT":                   "Real_Estate"
+  "REITs":                  "Real_Estate"
+  # Canonical: Communication
+  "Communication":          "Communication"
+  "Communications":         "Communication"
+  "Comm Services":          "Communication"
+  "Media":                  "Communication"
+
+# ── Proxy ETF per sector (display only) ──────────────────────────────
+proxy_etfs:
+  Technology:             "XLK"
+  Healthcare:             "XLV"
+  Energy:                 "XLE"
+  Financials:             "XLF"
+  Consumer_Discretionary: "XLY"
+  Consumer_Staples:       "XLP"
+  Industrials:            "XLI"
+  Materials:              "XLB"
+  Utilities:              "XLU"
+  Real_Estate:            "XLRE"
+  Communication:          "XLC"

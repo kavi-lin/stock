@@ -308,6 +308,32 @@ const RADAR_TERMS = {
             hint: 'Credit spreads often lead equity turns by 1-2 months; spikes historically in 2008 / COVID / 2022 risk-off periods',
         },
     },
+    retail_sector_pulse: {
+        zh: {
+            title: '散戶視角 Sector Pulse · V3.20.1',
+            desc: '11 sector 整合卡片。**Polarity-first 三 lane** composite:price 5d (anchor) + retail polarity (★ 主訊號,engagement-weighted span-masked lexicon match) + retail attention (放大器,sign 跟著 polarity)。News digest 變 context (顯卡片但**不入** composite)。從 Reddit / HN / Bluesky / Trends 抓 trending ticker → engagement-weighted bull/bear 詞庫匹配 → 推測散戶看完會偏多偏空。Daily 更新,lexicon v1.1 含 ~120 bull + ~140 bear term (含 WSB slang + PTT/Dcard 詞)。',
+            stages: [
+                { key: 'cp_strong_bull', range: [0.5, 1.0],   range_label: '> 0.5', tag: '強多', action: '順勢 / 看 sector ETF', detail: 'polarity + 5d 都同步看漲,sector 風險最低時段' },
+                { key: 'cp_mod_bull',    range: [0.2, 0.5],   range_label: '0.2-0.5', tag: '偏多', action: '選股', detail: '主訊號偏多但未三共振,挑 sector 內高 RS' },
+                { key: 'cp_neutral',     range: [-0.2, 0.2],  range_label: '-0.2~0.2', tag: '分歧', action: '觀望', detail: '訊號不一致 (polarity vs 5d 異號) 或 data thin' },
+                { key: 'cp_mod_bear',    range: [-0.5, -0.2], range_label: '-0.5~-0.2', tag: '偏空', action: '減碼 / 不新進', detail: '主訊號偏空,sector 內看空 mover 多' },
+                { key: 'cp_strong_bear', range: [-1.0, -0.5], range_label: '< -0.5', tag: '強空', action: '出場 / 反向 ETF', detail: 'polarity + 5d 同步看空,系統性壓力大' },
+            ],
+            hint: 'composite = 0.30×price_5d_norm + 0.50×retail_polarity + 0.20×retail_attention (sign 跟 polarity)。yaml: weights_version v1.1。hover 卡片看 signal_lanes + sample posts。',
+        },
+        en: {
+            title: 'Retail Sector Pulse · V3.20.1',
+            desc: '11-sector composite. **Polarity-first 3-lane**: price 5d (anchor) + retail polarity (★ primary signal — engagement-weighted span-masked lexicon match) + retail attention (amplifier; sign follows polarity). News digest is context only (displayed but NOT in composite). Pulls trending tickers from Reddit / HN / Bluesky / Trends; engagement-weighted bull/bear lexicon matching infers retail directional bias. Daily refresh; lexicon v1.1 has ~120 bull + ~140 bear terms incl. WSB / PTT slang.',
+            stages: [
+                { key: 'cp_strong_bull', range: [0.5, 1.0],   range_label: '> 0.5', tag: 'Strong Bull', action: 'Trend follow', detail: 'polarity + 5d both bullish — lowest-risk window' },
+                { key: 'cp_mod_bull',    range: [0.2, 0.5],   range_label: '0.2-0.5', tag: 'Mod Bull', action: 'Selective', detail: 'Lean bullish but not full alignment' },
+                { key: 'cp_neutral',     range: [-0.2, 0.2],  range_label: '-0.2~0.2', tag: 'Mixed', action: 'Wait', detail: 'Signals diverge (polarity vs 5d sign mismatch) or data thin' },
+                { key: 'cp_mod_bear',    range: [-0.5, -0.2], range_label: '-0.5~-0.2', tag: 'Mod Bear', action: 'Reduce', detail: 'Lean bearish; more bearish movers in sector' },
+                { key: 'cp_strong_bear', range: [-1.0, -0.5], range_label: '< -0.5', tag: 'Strong Bear', action: 'Exit / inverse', detail: 'polarity + 5d both bearish — systemic stress' },
+            ],
+            hint: 'composite = 0.30×price_5d_norm + 0.50×retail_polarity + 0.20×retail_attention (sign follows polarity). yaml: weights_version v1.1. Hover card for signal_lanes + sample posts.',
+        },
+    },
 };
 
 function getTermTip(key) {
@@ -437,6 +463,7 @@ function render(data) {
     renderHeader(tac);
     renderRegimeBanner(tac);
     renderRegimeBadges(tac);
+    renderRetailSectorPulse(tac);
     renderThemeGrid(tac);
     if (_expandedTheme) renderExpanded(_expandedTheme, tac);
 
@@ -527,6 +554,244 @@ function renderRegimeBadges(tac) {
         `;
         wrap.appendChild(div);
     });
+}
+
+// ── Retail Sector Pulse (V3.20.0) ────────────────────────────────
+// 11-sector grid. Style: `glass-card` base + 4px left border accent,
+// matches theme grid pattern; theme-neutral via CSS vars (works both
+// light + dark theme). No full-bg tint.
+const RSP_ACCENT_COLOR = {
+    strong_bull:   '#15803d',  // green-700 (matches --status-bullish light)
+    mod_bull:      '#22c55e',  // green-500
+    neutral_mixed: '#a8a29e',  // stone-400 (theme-neutral grey)
+    mod_bear:      '#f97316',  // orange-500
+    strong_bear:   '#b91c1c',  // red-700 (matches --status-bearish light)
+    insufficient:  'rgba(120,120,120,0.25)',
+};
+const RSP_LABEL_TEXT = {
+    strong_bull:   { zh: '強多', en: 'Strong Bull' },
+    mod_bull:      { zh: '偏多', en: 'Mod Bull' },
+    neutral_mixed: { zh: '分歧', en: 'Mixed' },
+    mod_bear:      { zh: '偏空', en: 'Mod Bear' },
+    strong_bear:   { zh: '強空', en: 'Strong Bear' },
+    neutral:       { zh: '中性', en: 'Neutral' },
+    insufficient_data: { zh: '資料不足', en: 'No Data' },
+    spike:    { zh: '爆量', en: 'spike' },
+    elevated: { zh: '升溫', en: 'elevated' },
+    normal:   { zh: '正常', en: 'normal' },
+    calm:     { zh: '冷清', en: 'calm' },
+};
+const RSP_TEXT_BY_DIR = {
+    strong_bull:   '#15803d',
+    mod_bull:      '#15803d',
+    neutral_mixed: '#78716c',  // stone-500
+    mod_bear:      '#c2410c',
+    strong_bear:   '#b91c1c',
+};
+
+function _rspLabelText(label) {
+    const lang = UI.currentLang === 'en' ? 'en' : 'zh';
+    return RSP_LABEL_TEXT[label]?.[lang] || label || '—';
+}
+
+function renderRetailSectorPulse(tac) {
+    const section = $('radar-retail-sector-pulse');
+    const grid = $('rsp-sector-grid');
+    if (!section || !grid) return;
+
+    const rsp = tac?.retail_sector_pulse;
+    if (!rsp || rsp.status !== 'success' || !Array.isArray(rsp.sectors)) {
+        section.classList.add('hidden');
+        return;
+    }
+    section.classList.remove('hidden');
+
+    const updated = $('rsp-last-updated');
+    if (updated) {
+        const lexv = rsp.trending_meta?.lexicon_version || '';
+        updated.textContent = rsp._freshness
+            ? `${rsp._freshness} · ${rsp._cache_age_hr}h${lexv ? ' · lex ' + lexv : ''}`
+            : '—';
+    }
+
+    // V3.20.1: market-wide buzz strip above sector grid
+    renderMarketWideBuzz(rsp.market_wide_buzz || []);
+
+    grid.innerHTML = '';
+    rsp.sectors.forEach(s => {
+        grid.appendChild(buildRspCard(s));
+    });
+}
+
+// V3.20.1: market-wide buzz strip (topics without sector mapping)
+function renderMarketWideBuzz(topics) {
+    let strip = $('rsp-market-wide-strip');
+    if (!strip) return;   // strip element not yet in radar.html → skip silently
+    if (!topics || topics.length === 0) {
+        strip.classList.add('hidden');
+        strip.innerHTML = '';
+        return;
+    }
+    strip.classList.remove('hidden');
+    const pills = topics.map(t => {
+        const pol = (t.polarity_score ?? 0);
+        const polSign = pol > 0 ? '+' : '';
+        const polColor = pol > 0.20 ? '#15803d' :
+                         pol < -0.20 ? '#b91c1c' :
+                         '#78716c';
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono"
+                      style="background: var(--bg-card); border: 1px solid var(--border);"
+                      title="posts=${t.post_count} · engagement=${t.engagement_score}">
+                  <span style="color: var(--text-main);">${t.topic}</span>
+                  <span style="color: ${polColor};">${polSign}${pol.toFixed(2)}</span>
+                </span>`;
+    }).join('');
+    strip.innerHTML = `
+        <span class="text-[10px] uppercase tracking-wider mr-2" style="color: var(--text-muted);">市場熱議</span>
+        ${pills}`;
+}
+
+function buildRspCard(s) {
+    const card = document.createElement('div');
+    const dir = s.composite_direction || 'neutral_mixed';
+    const allOk = s?.data_health?.all_ok !== false;
+    const insufficient = !allOk && (s.composite_score == null);
+
+    const accent = insufficient
+        ? RSP_ACCENT_COLOR.insufficient
+        : (RSP_ACCENT_COLOR[dir] || RSP_ACCENT_COLOR.neutral_mixed);
+
+    card.className = `glass-card p-3 space-y-2 text-xs ${insufficient ? 'opacity-60' : ''}`;
+    card.style.borderLeft = `4px solid ${accent}`;
+    card.style.borderTopLeftRadius = '0.25rem';
+    card.style.borderBottomLeftRadius = '0.25rem';
+
+    const dirText = insufficient ? _rspLabelText('insufficient_data') : _rspLabelText(dir);
+    const compositeStr = (s.composite_score != null)
+        ? (s.composite_score > 0 ? '+' : '') + s.composite_score.toFixed(2)
+        : '—';
+    const compositeTextColor = insufficient ? 'var(--text-muted)' : (RSP_TEXT_BY_DIR[dir] || 'var(--text-main)');
+
+    // ── Header ──
+    const head = document.createElement('div');
+    head.className = 'flex items-center justify-between gap-2';
+    head.innerHTML = `
+        <div class="flex items-baseline gap-1.5 min-w-0">
+            <span class="font-bold truncate" style="color: var(--text-main);">${s.sector || '—'}</span>
+            <span class="text-[10px] font-mono" style="color: var(--text-muted);">${s.proxy_etf || ''}</span>
+        </div>
+        <span class="text-[10px] font-bold whitespace-nowrap" style="color: ${compositeTextColor};">${dirText} ${compositeStr}</span>`;
+    card.appendChild(head);
+
+    // ── V3.20.1 metrics: 3 lanes (Price / Retail Polarity / News context) ──
+    const total_keys = s.key_tickers?.length || 0;
+    const predRow = _rspMetricRow(
+        '📈',
+        s.predicted_5d_median_pct != null
+            ? `5d ${(s.predicted_5d_median_pct > 0 ? '+' : '')}${s.predicted_5d_median_pct.toFixed(1)}% (${Math.round((s.predicted_5d_bullish_breadth_pct || 0) * total_keys / 100)}/${total_keys})`
+            : '—',
+        _rspLabelText(s.predicted_5d_label || 'neutral')
+    );
+    // Retail polarity row — ★ V3.20.1 primary signal
+    // V3.20.2: append n=X mention warning when sample is thin
+    const tops = s.retail_top_tickers || [];
+    const topStr = tops.length
+        ? tops.slice(0, 2).map(t => t.ticker).join(', ')
+        : '—';
+    const polStr = (s.retail_polarity_score != null)
+        ? `${s.retail_polarity_score > 0 ? '+' : ''}${s.retail_polarity_score.toFixed(2)}`
+        : '—';
+    // Total mention count across top retail tickers
+    const totalMentions = tops.reduce((sum, t) => sum + (t.mention_count || 0), 0);
+    const lowSampleWarn = totalMentions > 0 && totalMentions < 5;
+    const retailValue = s.retail_polarity_score != null
+        ? `${polStr} (${topStr})${lowSampleWarn ? ` · n=${totalMentions}` : ''}`
+        : '—';
+    const retailRow = _rspMetricRow(
+        '💬',
+        retailValue,
+        _rspLabelText(s.retail_volume_label || 'calm')
+    );
+    // dim row text slightly when sample is thin (visual cue)
+    if (lowSampleWarn) {
+        const valSpan = retailRow.querySelector('.font-mono');
+        if (valSpan) valSpan.style.opacity = '0.75';
+    }
+    const newsRow = _rspMetricRow(
+        '📰',
+        s.news_count_72h ? `${s.news_count_72h} 篇 ${(s.news_sentiment_score ?? 0).toFixed(1)}` : '—',
+        _rspLabelText(s.news_label || 'neutral')
+    );
+    [predRow, retailRow, newsRow].forEach(r => card.appendChild(r));
+
+    // ── V3.20.1 polarity bar (visual −1 to +1) ──
+    if (s.retail_polarity_score != null) {
+        card.appendChild(_rspPolarityBar(s.retail_polarity_score));
+    }
+
+    // ── Framing line ──
+    if (s.framing_zh) {
+        const fr = document.createElement('div');
+        fr.className = 'text-[10px] leading-relaxed pt-2';
+        fr.style.color = 'var(--text-muted)';
+        fr.style.borderTop = '1px solid var(--border)';
+        fr.textContent = s.framing_zh;
+        card.appendChild(fr);
+    }
+
+    // ── Top tickers footer (predict.py top movers) ──
+    if (Array.isArray(s.key_tickers) && s.key_tickers.length) {
+        const foot = document.createElement('div');
+        foot.className = 'text-[10px] font-mono truncate';
+        foot.style.color = 'var(--text-muted)';
+        foot.textContent = s.key_tickers.map(k =>
+            `${k.ticker} ${k.target_central_pct > 0 ? '+' : ''}${k.target_central_pct.toFixed(1)}%`
+        ).join(' · ');
+        card.appendChild(foot);
+    }
+
+    // ── V3.20.1 hover tooltip: signal_lanes breakdown + sample posts ──
+    const lanes = s.signal_lanes || {};
+    const lanePartsTxt = [
+        lanes.price_5d_norm != null ? `price=${lanes.price_5d_norm}` : 'price=—',
+        lanes.retail_polarity != null ? `polarity=${lanes.retail_polarity}` : 'polarity=—',
+        lanes.retail_attention != null ? `attention=${lanes.retail_attention}` : 'attention=—',
+    ].join(' · ');
+    const samples = (s.sample_posts || []).slice(0, 3).map(p =>
+        `[${p.ticker || ''}] ${(p.headline || '').slice(0, 80)}`
+    ).join('\n');
+    card.title = `Lanes: ${lanePartsTxt}\n\nSample posts:\n${samples || '(none)'}`;
+
+    return card;
+}
+
+function _rspMetricRow(icon, value, badge) {
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between text-[11px]';
+    row.innerHTML = `
+        <span class="flex items-center gap-1.5 min-w-0">
+            <span class="shrink-0">${icon}</span>
+            <span class="font-mono truncate" style="color: var(--text-main);">${value}</span>
+        </span>
+        <span class="text-[10px] whitespace-nowrap" style="color: var(--text-muted);">${badge}</span>`;
+    return row;
+}
+
+// V3.20.1: polarity bar — visual -1 to +1 indicator
+function _rspPolarityBar(polarity) {
+    const wrap = document.createElement('div');
+    wrap.className = 'relative h-1.5 rounded overflow-hidden mt-1';
+    wrap.style.background = 'var(--border)';
+    // Position fill from center (0) outward toward ±1
+    const pct = Math.min(Math.abs(polarity), 1.0) * 50;   // each side = 50% of bar
+    const color = polarity > 0.20 ? '#15803d' :
+                  polarity < -0.20 ? '#b91c1c' :
+                  '#a8a29e';
+    const left = polarity >= 0 ? 50 : (50 - pct);
+    wrap.innerHTML = `
+        <div class="absolute inset-y-0" style="left: 50%; width: 1px; background: var(--text-muted); opacity: 0.5;"></div>
+        <div class="absolute inset-y-0" style="left: ${left}%; width: ${pct}%; background: ${color};"></div>`;
+    return wrap;
 }
 
 // ── Theme grid (all themes) ───────────────────────────────────
@@ -1577,6 +1842,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return { 1: '🟢', 2: '🟡', 3: '🟡', 4: '🟠', 5: '🔴' }[stage] || '⚪';
     }
 
+    // recommended_action enum → 中文 (source: stage_weights.yaml)
+    const ACTION_ZH = {
+        early_entry_window: '早期進場窗口',
+        active_accumulation: '積極布局',
+        hold_or_follow: '持有 / 跟進',
+        reduce_or_no_new_entry: '減倉 / 不新進',
+        exit_or_short_candidate: '出場 / 做空候選',
+        insufficient_data: '訊號模糊',
+    };
+    function actionZh(a) { return ACTION_ZH[a] || a || '—'; }
+
+    // next_warning_condition 中文化 (regex + 已知字串)
+    function warnZh(s) {
+        if (!s || s === '—') return '—';
+        if (/supply enough inputs to clear min_confidence/i.test(s)) {
+            const m = s.match(/min_confidence=([\d.]+)/);
+            const th = m ? m[1] : '0.6';
+            return `任一 stage conf 需 ≥ ${th} 才會掛標 — 目前全部不過閘`;
+        }
+        if (/^reason:/i.test(s)) return `OHLCV 抓取失敗 (${s.replace(/^reason:\s*/i, '')})`;
+        // 例: "distribution day count >= 4 / 25d"
+        return s.replace(/distribution day count\s*>=\s*(\d+)\s*\/\s*(\d+)d/i,
+                         '分配日 ≥ $1 / $2d');
+    }
+
+    // 5-bar stage confidence breakdown (used for insufficient_data)
+    function stageScoresHTML(allScores, threshold) {
+        const order = [
+            ['brewing', 1, '蘊釀'],
+            ['ignition', 2, '啟動'],
+            ['acceleration', 3, '加速'],
+            ['euphoria', 4, '狂熱'],
+            ['distribution', 5, '分配'],
+        ];
+        const th = threshold ?? 0.6;
+        const rows = order.map(([k, n, label]) => {
+            const s = (allScores || {})[k] || {};
+            const conf = Number(s.confidence || 0);
+            const pct = Math.min(100, Math.round(conf * 100));
+            const barColor = conf >= th ? stageColor(n) : '#52525b';
+            const labelColor = conf >= th ? stageColor(n) : '#71717a';
+            return `<div class="flex items-center gap-2 text-[10px] font-mono">
+                <span class="w-16 truncate" style="color:${labelColor}">S${n} ${label}</span>
+                <div class="flex-1 h-1.5 bg-zinc-800 rounded overflow-hidden">
+                    <div style="width:${pct}%;background:${barColor};height:100%"></div>
+                </div>
+                <span class="w-10 text-right" style="color:${labelColor}">${conf.toFixed(2)}</span>
+            </div>`;
+        }).join('');
+        return `<div class="space-y-1 pt-1">
+            <div class="text-[10px] text-zinc-500">各 stage 累積 conf (閘值 ${th.toFixed(2)})</div>
+            ${rows}
+        </div>`;
+    }
+
     async function fetchNPDData() {
         try {
             const r = await fetch('/api/narrative-pulse/data');
@@ -1660,6 +1980,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sc = entry.scenarios || [];
         const comp = entry.components || {};
         const quote = entry.quote || {};
+        const isInsufficient = stage === null || stage === undefined;
         const scRows = sc.map(s => {
             const pColor = s.target_pct >= 0 ? '#10b981' : '#ef4444';
             return `<tr>
@@ -1669,21 +1990,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="px-2 py-1 text-right font-mono">$${s.target_price ?? '—'}</td>
             </tr>`;
         }).join('');
-        panel.innerHTML = `
-            <div class="flex items-baseline justify-between flex-wrap gap-2">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-lg font-black tracking-tight font-mono" style="color:${c}">${ticker}</span>
-                    <span class="text-sm font-bold" style="color:${c}">${stageEmoji(stage)} Stage ${stage} ${entry.stage_label_zh}</span>
-                    <span class="text-[10px] text-zinc-500 font-mono">conf=${entry.stage_confidence?.toFixed?.(2) ?? '?'}</span>
-                </div>
-                <div class="flex items-baseline gap-3 text-[11px] font-mono">
-                    <span>$${quote.price ?? '?'}</span>
-                    <span style="color:${erColor}">E[R] ${er >= 0 ? '+' : ''}${er?.toFixed?.(2) ?? '?'}%</span>
-                    <span class="text-zinc-500">→ ${entry.recommended_action}</span>
-                </div>
-            </div>
-            <div class="text-[10px] text-zinc-500">Next warning: ${entry.next_warning_condition || '—'}</div>
-            <table class="w-full text-[11px] border-collapse">
+        // Insufficient_data: 換成 stage conf 進度條;有 scenarios 才秀情境表
+        const scenariosBlock = isInsufficient
+            ? stageScoresHTML(entry.all_stage_scores, 0.6)
+            : `<table class="w-full text-[11px] border-collapse">
                 <thead><tr class="text-zinc-500 text-[10px] uppercase tracking-wider">
                     <th class="px-2 py-1 text-left">情境</th>
                     <th class="px-2 py-1 text-right">機率</th>
@@ -1691,7 +2001,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     <th class="px-2 py-1 text-right">目標價</th>
                 </tr></thead>
                 <tbody>${scRows}</tbody>
-            </table>
+            </table>`;
+        panel.innerHTML = `
+            <div class="flex items-baseline justify-between flex-wrap gap-2">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-lg font-black tracking-tight font-mono" style="color:${c}">${ticker}</span>
+                    <span class="text-sm font-bold" style="color:${c}">${stageEmoji(stage)} ${isInsufficient ? '' : 'Stage ' + stage + ' '}${entry.stage_label_zh}</span>
+                    <span class="text-[10px] text-zinc-500 font-mono">conf=${entry.stage_confidence?.toFixed?.(2) ?? '?'}</span>
+                </div>
+                <div class="flex items-baseline gap-3 text-[11px] font-mono">
+                    <span>$${quote.price ?? '?'}</span>
+                    <span style="color:${erColor}">E[R] ${er >= 0 ? '+' : ''}${er?.toFixed?.(2) ?? '?'}%</span>
+                    <span class="text-zinc-500">→ ${actionZh(entry.recommended_action)}</span>
+                </div>
+            </div>
+            <div class="text-[10px] text-zinc-500">下個警示: ${warnZh(entry.next_warning_condition)}</div>
+            ${scenariosBlock}
             <div class="text-[10px] text-zinc-500 font-mono pt-1 border-t border-zinc-800">
                 RSI ${comp.rsi_14_latest?.toFixed?.(0) ?? '?'} (peak ${comp.rsi_peak_recent?.toFixed?.(0) ?? '?'},
                 streak ${comp.rsi_overbought_days ?? '?'}d) ·

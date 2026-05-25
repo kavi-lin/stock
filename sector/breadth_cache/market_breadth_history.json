@@ -1,18 +1,5 @@
 [
   {
-    "data_date": "2026-04-23",
-    "composite_score": 43.3,
-    "component_scores": {
-      "breadth_level_trend": 57,
-      "ma_crossover": 45,
-      "cycle_position": 45,
-      "bearish_signal": 25,
-      "historical_percentile": 30,
-      "divergence": 43.0
-    },
-    "recorded_at": "2026-04-27 18:58:05"
-  },
-  {
     "data_date": "2026-04-24",
     "composite_score": 42.4,
     "component_scores": {
@@ -257,6 +244,19 @@
       "historical_percentile": 30,
       "divergence": 26.0
     },
-    "recorded_at": "2026-05-23 22:14:16"
+    "recorded_at": "2026-05-25 21:28:28"
+  },
+  {
+    "data_date": "2026-05-22",
+    "composite_score": 41.6,
+    "component_scores": {
+      "breadth_level_trend": 57,
+      "ma_crossover": 45,
+      "cycle_position": 45,
+      "bearish_signal": 25,
+      "historical_percentile": 30,
+      "divergence": 26.0
+    },
+    "recorded_at": "2026-05-25 22:48:02"
   }
 ]

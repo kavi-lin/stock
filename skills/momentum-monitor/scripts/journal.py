@@ -133,6 +133,7 @@ def cmd_snapshot(csv_path):
                 "ticker": ticker,
                 "entry_price": _float_or_none(row.get("price")),
                 "score": _float_or_none(row.get("score")),
+                "rank_score": _float_or_none(row.get("rank_score")),
                 "label": row.get("label"),
                 "stage": row.get("stage"),
                 "ratio_20d": _float_or_none(row.get("ratio_20d")),

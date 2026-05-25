@@ -1,0 +1,721 @@
+{
+  "version": "1.1",
+  "schema_note": "V3.20.1 — 3-lane composite (price/polarity/attention); retail sourced from trending_tickers.json",
+  "as_of": "2026-05-25T14:23:49.995899+00:00",
+  "weights_version": "v1.1",
+  "lookback_hours": 72,
+  "horizon": "5d",
+  "universe_size": 55,
+  "sectors": [
+    {
+      "sector": "Technology",
+      "proxy_etf": "XLK",
+      "news_sentiment_score": 0.3,
+      "news_label": "neutral",
+      "news_count_72h": 2,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 1.7,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.61,
+      "predicted_5d_label": "mod_bull",
+      "composite_score": 0.34,
+      "composite_direction": "mod_bull",
+      "signal_lanes": {
+        "price_5d_norm": 0.34,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +1.7% (5/5 看漲); 新聞 2 篇中性。資料部分缺。",
+      "framing_en": "5d med +1.7% (5/5 bull); news 2 neutral. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "AAPL",
+          "target_central_pct": 1.99,
+          "confidence": 0.76
+        },
+        {
+          "ticker": "NVDA",
+          "target_central_pct": 1.96,
+          "confidence": 0.56
+        },
+        {
+          "ticker": "MSFT",
+          "target_central_pct": 1.43,
+          "confidence": 0.69
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-22T17:00:10+00:00",
+          "source": "Yahoo Finance",
+          "headline": "Kevin Warsh is officially the chairman of the Federal Reserve.",
+          "verdict": "BEARISH",
+          "net_impact_score": -2.3
+        },
+        {
+          "published": "2026-05-22T22:30:09+00:00",
+          "source": "Fox Business",
+          "headline": "Micron expands US memory chip production amid AI demand surge",
+          "verdict": "BULLISH",
+          "net_impact_score": 2.2
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Healthcare",
+      "proxy_etf": "XLV",
+      "news_sentiment_score": null,
+      "news_label": "neutral",
+      "news_count_72h": 0,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 1.79,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.726,
+      "predicted_5d_label": "mod_bull",
+      "composite_score": 0.358,
+      "composite_direction": "mod_bull",
+      "signal_lanes": {
+        "price_5d_norm": 0.358,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +1.8% (5/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +1.8% (5/5 bull). Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "LLY",
+          "target_central_pct": 2.44,
+          "confidence": 0.68
+        },
+        {
+          "ticker": "MRK",
+          "target_central_pct": 1.79,
+          "confidence": 0.74
+        },
+        {
+          "ticker": "UNH",
+          "target_central_pct": 1.86,
+          "confidence": 0.71
+        }
+      ],
+      "key_headlines": [],
+      "data_health": {
+        "news_72h_ok": false,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Energy",
+      "proxy_etf": "XLE",
+      "news_sentiment_score": -1.97,
+      "news_label": "mod_bear",
+      "news_count_72h": 2,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 0.33,
+      "predicted_5d_bullish_breadth_pct": 80.0,
+      "predicted_5d_avg_confidence": 0.688,
+      "predicted_5d_label": "neutral",
+      "composite_score": 0.066,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": 0.066,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +0.3% (4/5 看漲); 新聞 2 篇偏空。資料部分缺。",
+      "framing_en": "5d med +0.3% (4/5 bull); news 2 mostly bearish. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "SLB",
+          "target_central_pct": 1.6,
+          "confidence": 0.7
+        },
+        {
+          "ticker": "COP",
+          "target_central_pct": -0.83,
+          "confidence": 0.68
+        },
+        {
+          "ticker": "XOM",
+          "target_central_pct": 0.44,
+          "confidence": 0.67
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-22T17:00:10+00:00",
+          "source": "Yahoo Finance",
+          "headline": "Kevin Warsh is officially the chairman of the Federal Reserve.",
+          "verdict": "BEARISH",
+          "net_impact_score": -2.3
+        },
+        {
+          "published": "2026-05-22T15:26:23+00:00",
+          "source": "CNBC Top",
+          "headline": "Iran war leaves U.S. gas prices at highest levels in nearly four years ahead of Memorial Day",
+          "verdict": "BINARY",
+          "net_impact_score": -1.6
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Financials",
+      "proxy_etf": "XLF",
+      "news_sentiment_score": -2.3,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 1.06,
+      "predicted_5d_bullish_breadth_pct": 80.0,
+      "predicted_5d_avg_confidence": 0.742,
+      "predicted_5d_label": "mod_bull",
+      "composite_score": 0.212,
+      "composite_direction": "mod_bull",
+      "signal_lanes": {
+        "price_5d_norm": 0.212,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +1.1% (4/5 看漲); 新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "5d med +1.1% (4/5 bull); news 1 mostly bearish. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "BRK-B",
+          "target_central_pct": 2.23,
+          "confidence": 0.81
+        },
+        {
+          "ticker": "GS",
+          "target_central_pct": 2.52,
+          "confidence": 0.7
+        },
+        {
+          "ticker": "JPM",
+          "target_central_pct": 1.06,
+          "confidence": 0.75
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-22T17:00:10+00:00",
+          "source": "Yahoo Finance",
+          "headline": "Kevin Warsh is officially the chairman of the Federal Reserve.",
+          "verdict": "BEARISH",
+          "net_impact_score": -2.3
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Consumer_Discretionary",
+      "proxy_etf": "XLY",
+      "news_sentiment_score": 1.8,
+      "news_label": "mod_bull",
+      "news_count_72h": 1,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": -0.03,
+      "predicted_5d_bullish_breadth_pct": 40.0,
+      "predicted_5d_avg_confidence": 0.676,
+      "predicted_5d_label": "neutral",
+      "composite_score": -0.006,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": -0.006,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 -0.0% (2/5 看漲); 新聞 1 篇偏多。資料部分缺。",
+      "framing_en": "5d med -0.0% (2/5 bull); news 1 mostly bullish. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "TSLA",
+          "target_central_pct": 1.73,
+          "confidence": 0.52
+        },
+        {
+          "ticker": "NKE",
+          "target_central_pct": 1.05,
+          "confidence": 0.7
+        },
+        {
+          "ticker": "MCD",
+          "target_central_pct": -0.54,
+          "confidence": 0.75
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-25T08:15:48+00:00",
+          "source": "MarketBeat",
+          "headline": "Ross Stores Earnings Beat Sends Stock To New Highs",
+          "verdict": "BULLISH",
+          "net_impact_score": 1.8
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Consumer_Staples",
+      "proxy_etf": "XLP",
+      "news_sentiment_score": null,
+      "news_label": "neutral",
+      "news_count_72h": 0,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": -0.18,
+      "predicted_5d_bullish_breadth_pct": 40.0,
+      "predicted_5d_avg_confidence": 0.742,
+      "predicted_5d_label": "neutral",
+      "composite_score": -0.036,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": -0.036,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 -0.2% (2/5 看漲)。資料部分缺。",
+      "framing_en": "5d med -0.2% (2/5 bull). Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "KO",
+          "target_central_pct": 2.63,
+          "confidence": 0.81
+        },
+        {
+          "ticker": "COST",
+          "target_central_pct": 1.4,
+          "confidence": 0.73
+        },
+        {
+          "ticker": "PEP",
+          "target_central_pct": -0.97,
+          "confidence": 0.74
+        }
+      ],
+      "key_headlines": [],
+      "data_health": {
+        "news_72h_ok": false,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Industrials",
+      "proxy_etf": "XLI",
+      "news_sentiment_score": 2.11,
+      "news_label": "mod_bull",
+      "news_count_72h": 3,
+      "news_breadth": "wide",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 0.89,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.696,
+      "predicted_5d_label": "neutral",
+      "composite_score": 0.178,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": 0.178,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +0.9% (5/5 看漲); 新聞 3 篇偏多。資料部分缺。",
+      "framing_en": "5d med +0.9% (5/5 bull); news 3 mostly bullish. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "HON",
+          "target_central_pct": 1.79,
+          "confidence": 0.73
+        },
+        {
+          "ticker": "GE",
+          "target_central_pct": 1.21,
+          "confidence": 0.64
+        },
+        {
+          "ticker": "RTX",
+          "target_central_pct": 0.89,
+          "confidence": 0.73
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-25T07:52:37+00:00",
+          "source": "Seeking Alpha",
+          "headline": "RTX Corporation: A Dual Cycle Profile In Play",
+          "verdict": "BULLISH",
+          "net_impact_score": 2.2
+        },
+        {
+          "published": "2026-05-22T22:30:09+00:00",
+          "source": "Fox Business",
+          "headline": "Micron expands US memory chip production amid AI demand surge",
+          "verdict": "BULLISH",
+          "net_impact_score": 2.2
+        },
+        {
+          "published": "2026-05-22T15:26:23+00:00",
+          "source": "CNBC Top",
+          "headline": "Iran war leaves U.S. gas prices at highest levels in nearly four years ahead of Memorial Day",
+          "verdict": "BINARY",
+          "net_impact_score": -1.6
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Materials",
+      "proxy_etf": "XLB",
+      "news_sentiment_score": -1.6,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": -0.14,
+      "predicted_5d_bullish_breadth_pct": 40.0,
+      "predicted_5d_avg_confidence": 0.672,
+      "predicted_5d_label": "neutral",
+      "composite_score": -0.028,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": -0.028,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 -0.1% (2/5 看漲); 新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "5d med -0.1% (2/5 bull); news 1 mostly bearish. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "LIN",
+          "target_central_pct": 2.18,
+          "confidence": 0.76
+        },
+        {
+          "ticker": "FCX",
+          "target_central_pct": 1.16,
+          "confidence": 0.49
+        },
+        {
+          "ticker": "ECL",
+          "target_central_pct": -0.53,
+          "confidence": 0.72
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-22T15:26:23+00:00",
+          "source": "CNBC Top",
+          "headline": "Iran war leaves U.S. gas prices at highest levels in nearly four years ahead of Memorial Day",
+          "verdict": "BINARY",
+          "net_impact_score": -1.6
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Utilities",
+      "proxy_etf": "XLU",
+      "news_sentiment_score": -0.03,
+      "news_label": "neutral",
+      "news_count_72h": 3,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": -0.07,
+      "predicted_5d_bullish_breadth_pct": 20.0,
+      "predicted_5d_avg_confidence": 0.746,
+      "predicted_5d_label": "neutral",
+      "composite_score": -0.014,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": -0.014,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 -0.1% (1/5 看漲); 新聞 3 篇中性。資料部分缺。",
+      "framing_en": "5d med -0.1% (1/5 bull); news 3 neutral. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "AEP",
+          "target_central_pct": -0.71,
+          "confidence": 0.74
+        },
+        {
+          "ticker": "NEE",
+          "target_central_pct": -0.72,
+          "confidence": 0.67
+        },
+        {
+          "ticker": "DUK",
+          "target_central_pct": 0.13,
+          "confidence": 0.8
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-22T17:00:10+00:00",
+          "source": "Yahoo Finance",
+          "headline": "Kevin Warsh is officially the chairman of the Federal Reserve.",
+          "verdict": "BEARISH",
+          "net_impact_score": -2.3
+        },
+        {
+          "published": "2026-05-22T22:30:09+00:00",
+          "source": "Fox Business",
+          "headline": "Micron expands US memory chip production amid AI demand surge",
+          "verdict": "BULLISH",
+          "net_impact_score": 2.2
+        },
+        {
+          "published": "2026-05-25T12:45:56+00:00",
+          "source": "Yahoo Finance",
+          "headline": "T1 Energy (TE) Surges 42% as Analyst ‘Bullish’ Despite Short-Seller Claims",
+          "verdict": "BINARY",
+          "net_impact_score": -0.05
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Real_Estate",
+      "proxy_etf": "XLRE",
+      "news_sentiment_score": -2.3,
+      "news_label": "mod_bear",
+      "news_count_72h": 1,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 1.33,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.732,
+      "predicted_5d_label": "mod_bull",
+      "composite_score": 0.266,
+      "composite_direction": "mod_bull",
+      "signal_lanes": {
+        "price_5d_norm": 0.266,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +1.3% (5/5 看漲); 新聞 1 篇偏空。資料部分缺。",
+      "framing_en": "5d med +1.3% (5/5 bull); news 1 mostly bearish. Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "PLD",
+          "target_central_pct": 2.36,
+          "confidence": 0.79
+        },
+        {
+          "ticker": "AMT",
+          "target_central_pct": 1.44,
+          "confidence": 0.7
+        },
+        {
+          "ticker": "CCI",
+          "target_central_pct": 1.33,
+          "confidence": 0.69
+        }
+      ],
+      "key_headlines": [
+        {
+          "published": "2026-05-22T17:00:10+00:00",
+          "source": "Yahoo Finance",
+          "headline": "Kevin Warsh is officially the chairman of the Federal Reserve.",
+          "verdict": "BEARISH",
+          "net_impact_score": -2.3
+        }
+      ],
+      "data_health": {
+        "news_72h_ok": true,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    },
+    {
+      "sector": "Communication",
+      "proxy_etf": "XLC",
+      "news_sentiment_score": null,
+      "news_label": "neutral",
+      "news_count_72h": 0,
+      "news_breadth": "narrow",
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
+      "retail_volume_label": "calm",
+      "retail_top_tickers": [],
+      "sample_posts": [],
+      "matched_terms_summary": {},
+      "predicted_5d_median_pct": 0.38,
+      "predicted_5d_bullish_breadth_pct": 60.0,
+      "predicted_5d_avg_confidence": 0.7,
+      "predicted_5d_label": "neutral",
+      "composite_score": 0.076,
+      "composite_direction": "neutral_mixed",
+      "signal_lanes": {
+        "price_5d_norm": 0.076,
+        "retail_polarity": null,
+        "retail_attention": null
+      },
+      "framing_zh": "5天中位 +0.4% (3/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +0.4% (3/5 bull). Partial data.",
+      "key_tickers": [
+        {
+          "ticker": "NFLX",
+          "target_central_pct": -0.81,
+          "confidence": 0.68
+        },
+        {
+          "ticker": "TMUS",
+          "target_central_pct": -0.59,
+          "confidence": 0.72
+        },
+        {
+          "ticker": "DIS",
+          "target_central_pct": 0.62,
+          "confidence": 0.68
+        }
+      ],
+      "key_headlines": [],
+      "data_health": {
+        "news_72h_ok": false,
+        "retail_signals_ok": false,
+        "predict_5d_ok": true,
+        "all_ok": false
+      }
+    }
+  ],
+  "market_wide_buzz": [
+    {
+      "topic": "ai_capex",
+      "post_count": 5,
+      "engagement_score": 7.514,
+      "sample_posts": [
+        {
+          "headline": "Microsoft pulls plug on plans for 244-acre data center in Caledonia",
+          "url": "https://www.tmj4.com/news/racine-county/microsoft-pulls-plug-on-plans-for-244-acre-data-center-in-caledonia-after-community-pushback",
+          "source": "Hacker News",
+          "engagement": 2.197,
+          "polarity": 0.0
+        },
+        {
+          "headline": "Data center ordinance development continues in Washington Township",
+          "url": "https://planetdetroit.org/2026/04/washington-township-weighs-data-center-impacts/",
+          "source": "Hacker News",
+          "engagement": 1.609,
+          "polarity": 0.0
+        },
+        {
+          "headline": "South Carolina county passes first reading on data center moratorium",
+          "url": "https://www.blufftontoday.com/story/news/environment/2026/05/10/south-carolina-county-passes-first-reading-on-data-center-moratorium/89961598007/",
+          "source": "Hacker News",
+          "engagement": 1.609,
+          "polarity": 0.0
+        }
+      ],
+      "polarity_score": 0.0
+    }
+  ],
+  "trending_meta": {
+    "available": true,
+    "lexicon_version": "v1.1",
+    "post_count": 44,
+    "as_of": "2026-05-25T14:23:27.485231+00:00",
+    "source_stats": {
+      "truth_social": 5,
+      "reddit": 20,
+      "hacker_news": 17,
+      "google_trends": 2
+    }
+  }
+}

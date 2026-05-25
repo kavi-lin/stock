@@ -211,9 +211,118 @@ def _load_top_sector_set(top_n):
         return None
 
 
+def _load_recent_top_counts(snapshots=3, top_n=20):
+    """Count tickers repeatedly appearing in recent full-universe Top-N snaps.
+
+    This is a soft cooldown for names that keep entering Top-20 while the
+    forward-return evidence is still unresolved. Missing journal = no-op.
+    """
+    if not snapshots or snapshots <= 0:
+        return {}
+    journal_path = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "journal", "journal.jsonl"))
+    if not os.path.exists(journal_path):
+        return {}
+
+    snaps = {}
+    meta = {}
+    try:
+        with open(journal_path, "r", encoding="utf-8") as fp:
+            for ln in fp:
+                try:
+                    rec = json.loads(ln)
+                except json.JSONDecodeError:
+                    continue
+                sid = rec.get("snap_id")
+                if not sid:
+                    continue
+                snaps.setdefault(sid, []).append(rec)
+                meta.setdefault(sid, {
+                    "snap_timestamp": rec.get("snap_timestamp") or sid,
+                    "snap_date": rec.get("snap_date"),
+                })
+    except OSError:
+        return {}
+
+    full_snaps = [
+        sid for sid, recs in snaps.items()
+        if len(recs) >= 100
+    ]
+    full_snaps.sort(key=lambda sid: meta[sid]["snap_timestamp"], reverse=True)
+    counts = {}
+    for sid in full_snaps[:snapshots]:
+        ranked = sorted(
+            snaps[sid],
+            key=lambda r: (r.get("rank_score") or r.get("score") or 0),
+            reverse=True,
+        )[:top_n]
+        for rec in ranked:
+            tk = rec.get("ticker")
+            if tk:
+                counts[tk] = counts.get(tk, 0) + 1
+    return counts
+
+
+def _rank_score(payload, recent_top_count=0):
+    """Calibrated ranking score.
+
+    Raw composite score remains intact; rank_score adjusts for observed weak
+    signal families and repeated unresolved Top-20 appearances.
+    """
+    comp = payload.get("momentum_composite") or {}
+    score = float(comp.get("score") or 0)
+    signals = set(payload.get("signals") or [])
+    warnings = set(payload.get("warnings") or [])
+    rank = score
+
+    bonuses = {
+        "stage2_uptrend_intact": 4.0,
+        "fresh_golden_cross_20_50": 4.0,
+        "rs_leader_3m": 4.0,
+        "near_52w_high": 2.0,
+        "at_52w_new_high": 2.0,
+        "volume_expansion": 2.0,
+        "low_short_interest": 1.0,
+    }
+    penalties = {
+        "squeeze_candidate": 8.0,
+        "dtc_squeeze_candidate": 6.0,
+        "high_short_interest": 3.0,
+        "vcp_compressed": 2.0,
+        "heavy_volume_spike_today": 2.0,
+    }
+    warning_penalties = {
+        "fresh_death_cross_20_50": 8.0,
+        "fresh_death_cross_50_200": 8.0,
+        "macd_bearish_cross": 4.0,
+        "parabolic_blowoff_risk": 3.0,
+        "large_cap_parabolic": 3.0,
+        "mid_cap_extreme": 4.0,
+        "microcap_extension": 5.0,
+        "overbought_rsi": 1.0,
+    }
+
+    for sig, bonus in bonuses.items():
+        if sig in signals:
+            rank += bonus
+    for sig, penalty in penalties.items():
+        if sig in signals:
+            rank -= penalty
+    for warn, penalty in warning_penalties.items():
+        if warn in warnings:
+            rank -= penalty
+
+    if recent_top_count:
+        cooldown_penalty = 4.0 * recent_top_count
+        if score >= 80:
+            cooldown_penalty *= 0.5
+        rank -= cooldown_penalty
+
+    return round(rank, 1)
+
+
 # ── Output ───────────────────────────────────────────────────────────────
 CSV_COLUMNS = [
-    "rank", "ticker", "in_sp500", "in_nasdaq100", "in_sox", "sector", "price", "score", "label", "stage",
+    "rank", "ticker", "in_sp500", "in_nasdaq100", "in_sox", "sector", "price", "score", "rank_score", "label", "stage",
     "volume_today", "avg_20d", "ratio_20d", "spike_label", "volume_trend",
     "intraday_state", "elapsed_min",
     "ma_20", "ma_50", "ma_200",
@@ -262,6 +371,7 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
         "sector": _SECTOR_MAP.get(ticker) or "Unknown",
         "price": p.get("price"),
         "score": c.get("score"),
+        "rank_score": p.get("rank_score"),
         "label": c.get("label"),
         "stage": m.get("stage"),
         "volume_today":   v.get("today"),
@@ -326,8 +436,8 @@ def _render_md(rows, top, meta):
         f"- Filters: {meta['filters'] or '_none_'}",
         f"- Elapsed: {meta['elapsed_sec']}s │ cache hits: {meta['cache_hits']}/{meta['scanned']}",
         "",
-        "| # | Ticker | Price | Score | Label | NHP% | RS3M | VCP | EPS YoY | DTC | Signals |",
-        "|---|--------|-------|-------|-------|------|------|-----|---------|-----|---------|",
+        "| # | Ticker | Price | Score | Rank | Label | NHP% | RS3M | VCP | EPS YoY | DTC | Signals |",
+        "|---|--------|-------|-------|------|-------|------|------|-----|---------|-----|---------|",
     ]
     for r in rows[:top]:
         sig = r["signals"].replace("|", ", ") or "—"
@@ -340,7 +450,7 @@ def _render_md(rows, top, meta):
         dtc_txt = f"{r['days_to_cover']:.1f}d" if r.get("days_to_cover") is not None else "—"
         lines.append(
             f"| {r['rank']} | **{r['ticker']}** | ${r['price']} | "
-            f"{r['score']} | {r['label']} | {nhp_txt} | {rs3m_txt} | "
+            f"{r['score']} | {r.get('rank_score') or '—'} | {r['label']} | {nhp_txt} | {rs3m_txt} | "
             f"{vcp_txt} | {eps_txt} | {dtc_txt} | {sig} |"
         )
     if len(rows) > top:
@@ -353,7 +463,7 @@ def _render_md(rows, top, meta):
 def main():
     ap = argparse.ArgumentParser(description="Batch momentum screener")
     src = ap.add_mutually_exclusive_group(required=False)
-    src.add_argument("--universe", default="all", help="Universe name under scripts/universes/ (e.g. sp500, nasdaq100, sox, all)")
+    src.add_argument("--universe", default=None, help="Universe name under scripts/universes/ (e.g. sp500, nasdaq100, sox, all)")
     src.add_argument("--tickers", help="Comma-separated ticker list")
     src.add_argument("--tickers-file", help="Path to file with one ticker per line")
 
@@ -395,6 +505,8 @@ def main():
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--max-age", type=int, default=DEFAULT_TTL_SEC)
     ap.add_argument("--top", type=int, default=30, help="Rows to display in MD table (CSV has all)")
+    ap.add_argument("--cooldown-snapshots", type=int, default=3,
+                    help="Soft-rank penalty for tickers in recent Top-N snapshots; 0 disables")
 
     # Output
     ap.add_argument("--output-dir", default=CACHE_DIR, help="Where to write CSV")
@@ -404,6 +516,8 @@ def main():
                     help="Auto-append results to momentum-monitor journal for forward-return tracking")
 
     args = ap.parse_args()
+    if not args.universe and not args.tickers and not args.tickers_file:
+        args.universe = "all"
 
     # Primary universe selection
     if args.universe:
@@ -467,12 +581,16 @@ def main():
     if args.top_sectors and sector_rs_set:
         print(f"[screen] sector RS pre-filter: top {args.top_sectors} = {sorted(sector_rs_set)}",
               file=sys.stderr)
+    recent_top_counts = _load_recent_top_counts(args.cooldown_snapshots, top_n=20)
 
     # Filter + rank
     matched = [p for p in results if _passes(p, args, sector_rs_set=sector_rs_set)]
+    for p in matched:
+        ticker = p.get("ticker")
+        p["rank_score"] = _rank_score(p, recent_top_counts.get(ticker, 0))
     matched.sort(
         key=lambda p: (
-            -(p.get("momentum_composite", {}).get("score") or 0),
+            -(p.get("rank_score") or 0),
             -(p.get("volume", {}).get("ratio_20d") or 0),  # None → 0 (too_early state)
         )
     )
@@ -515,6 +633,7 @@ def main():
     if args.require_eps_accelerating:  filter_bits.append("eps_accel")
     if args.min_dtc is not None:       filter_bits.append(f"dtc≥{args.min_dtc}")
     if args.top_sectors:               filter_bits.append(f"top_sectors={args.top_sectors}")
+    if args.cooldown_snapshots:         filter_bits.append(f"cooldown={args.cooldown_snapshots} snaps")
 
     meta = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),

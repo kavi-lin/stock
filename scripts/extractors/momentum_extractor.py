@@ -14,6 +14,7 @@ def extract_one(record: dict) -> dict:
     ticker = record.get("ticker")
     snap_date = record.get("snap_date")
     score = record.get("score")
+    rank_score = record.get("rank_score")
     label = record.get("label")
     signals = record.get("signals") or []
     warnings = record.get("warnings") or []
@@ -30,6 +31,7 @@ def extract_one(record: dict) -> dict:
         "decision_content": {
             "ticker": ticker,
             "score": score,
+            "rank_score": rank_score,
             "label": label,
             "stage": record.get("stage"),
             "ratio_20d": record.get("ratio_20d"),
@@ -121,9 +123,10 @@ def extract_aggregated_runs(
     for d in sorted(by_date.keys()):
         sid = by_date[d]
         recs = snaps[sid]
-        # rank by score descending
+        # rank by calibrated rank_score when available; legacy journal entries
+        # fall back to raw score.
         recs_sorted = sorted(recs,
-                             key=lambda r: (r.get("score") or 0),
+                             key=lambda r: (r.get("rank_score") or r.get("score") or 0),
                              reverse=True)
         top = recs_sorted[:top_n_per_snap]
 
@@ -134,6 +137,7 @@ def extract_aggregated_runs(
             per_ticker.append({
                 "ticker": r.get("ticker"),
                 "score": r.get("score"),
+                "rank_score": r.get("rank_score"),
                 "label": r.get("label"),
                 "stage": r.get("stage"),
                 "rsi_14": r.get("rsi_14"),
@@ -173,6 +177,8 @@ def extract_aggregated_runs(
                 "warning_counts": warnings_total,
                 "score_top": top[0].get("score") if top else None,
                 "score_min_top_n": top[-1].get("score") if top else None,
+                "rank_score_top": top[0].get("rank_score") if top else None,
+                "rank_score_min_top_n": top[-1].get("rank_score") if top else None,
             },
         }
         output.append(record)

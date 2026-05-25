@@ -1559,15 +1559,43 @@ def _build_screen_cmd(params):
         cmd += ["--tickers", str(params["tickers"])]
     else:
         cmd += ["--universe", "all"]
-    if params.get("min_score") is not None:
-        cmd += ["--min-score", str(params["min_score"])]
+    min_score = params.get("min_score")
+    if min_score is None and not params.get("tickers"):
+        min_score = 65
+    if min_score is not None:
+        cmd += ["--min-score", str(min_score)]
     if params.get("top") is not None:
         cmd += ["--top", str(params["top"])]
     if params.get("stage"):
         cmd += ["--stage", str(params["stage"])]
+    min_rs = params.get("min_rs")
+    if min_rs is None and not params.get("tickers"):
+        min_rs = 60
+    if min_rs is not None:
+        cmd += ["--min-rs", str(min_rs)]
+    min_nhp = params.get("min_nhp")
+    if min_nhp is None and not params.get("tickers"):
+        min_nhp = -10
+    if min_nhp is not None:
+        cmd += ["--min-nhp", str(min_nhp)]
+    if params.get("top_sectors") is not None:
+        cmd += ["--top-sectors", str(params["top_sectors"])]
+    if params.get("cooldown_snapshots") is not None:
+        cmd += ["--cooldown-snapshots", str(params["cooldown_snapshots"])]
     for sig in params.get("signals", []) or []:
         cmd += ["--signal", str(sig)]
-    for w in params.get("exclude_warnings", []) or []:
+    exclude_signals = list(params.get("exclude_signals", []) or [])
+    exclude_warnings = list(params.get("exclude_warnings", []) or [])
+    if not params.get("tickers"):
+        for sig in ("squeeze_candidate", "dtc_squeeze_candidate"):
+            if sig not in exclude_signals:
+                exclude_signals.append(sig)
+        for w in ("fresh_death_cross_20_50", "fresh_death_cross_50_200"):
+            if w not in exclude_warnings:
+                exclude_warnings.append(w)
+    for sig in exclude_signals:
+        cmd += ["--exclude-signal", str(sig)]
+    for w in exclude_warnings:
         cmd += ["--exclude-warning", str(w)]
     if params.get("journal"):
         cmd += ["--journal"]

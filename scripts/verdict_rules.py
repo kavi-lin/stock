@@ -189,26 +189,70 @@ def verdict_theme_detector(decision_content: dict, etf_returns: dict | None) -> 
     return {"label": "neutral", "rationale": f"LEAD 主題 {len(hits)}/{total} 跑贏 SPY"}
 
 
+def momentum_aggregate_metrics(per_ticker_verdicts: list[dict]) -> dict:
+    """Return richer per-ticker stats for momentum screen-run review.
+
+    The aggregate verdict remains intentionally coarse for the calendar UI, but
+    review needs the per-ticker hit/miss/neutral split so neutral-heavy runs are
+    not mistaken for outright directional failure.
+    """
+    counts = {"hit": 0, "miss": 0, "neutral": 0, "pending": 0, "n/a": 0}
+    returns = []
+    for v in per_ticker_verdicts:
+        label = v.get("verdict") or v.get("label") or "n/a"
+        counts[label] = counts.get(label, 0) + 1
+        ret = v.get("return_pct")
+        if isinstance(ret, (int, float)):
+            returns.append(float(ret))
+
+    n_evaluable = counts["hit"] + counts["miss"] + counts["neutral"]
+    directional = counts["hit"] + counts["miss"]
+    sorted_returns = sorted(returns)
+    median_return = None
+    if sorted_returns:
+        mid = len(sorted_returns) // 2
+        if len(sorted_returns) % 2:
+            median_return = sorted_returns[mid]
+        else:
+            median_return = (sorted_returns[mid - 1] + sorted_returns[mid]) / 2
+
+    return {
+        "counts": counts,
+        "n_evaluable": n_evaluable,
+        "hit_rate_with_neutral": (counts["hit"] / n_evaluable) if n_evaluable else None,
+        "miss_rate_with_neutral": (counts["miss"] / n_evaluable) if n_evaluable else None,
+        "hit_rate_ex_neutral": (counts["hit"] / directional) if directional else None,
+        "neutral_rate": (counts["neutral"] / n_evaluable) if n_evaluable else None,
+        "mean_return_pct": round(sum(returns) / len(returns), 3) if returns else None,
+        "median_return_pct": round(median_return, 3) if median_return is not None else None,
+    }
+
+
 def verdict_momentum_aggregate(per_ticker_verdicts: list[dict]) -> dict:
     """聚合 per-ticker verdicts 成 hit rate 為基準的 aggregate verdict.
 
     per_ticker_verdicts 每筆有 'verdict' 欄位 (str), 例如 'hit'/'miss'/...
     """
-    counts = {"hit": 0, "miss": 0, "neutral": 0, "pending": 0, "n/a": 0}
-    for v in per_ticker_verdicts:
-        label = v.get("verdict") or v.get("label") or "n/a"
-        counts[label] = counts.get(label, 0) + 1
-    n_evaluable = counts["hit"] + counts["miss"] + counts["neutral"]
+    metrics = momentum_aggregate_metrics(per_ticker_verdicts)
+    counts = metrics["counts"]
+    n_evaluable = metrics["n_evaluable"]
     if n_evaluable == 0:
         return {"label": "pending",
-                "rationale": f"無 evaluable ticker (pending: {counts['pending']})"}
-    hit_rate = counts["hit"] / n_evaluable
-    rationale = f"{counts['hit']}/{n_evaluable} hit (miss {counts['miss']}, neutral {counts['neutral']})"
+                "rationale": f"無 evaluable ticker (pending: {counts['pending']})",
+                "metrics": metrics}
+    hit_rate = metrics["hit_rate_with_neutral"]
+    directional_txt = "n/a"
+    if metrics["hit_rate_ex_neutral"] is not None:
+        directional_txt = f"{metrics['hit_rate_ex_neutral']:.0%} ex-neutral"
+    rationale = (
+        f"{counts['hit']}/{n_evaluable} hit "
+        f"(miss {counts['miss']}, neutral {counts['neutral']}; {directional_txt})"
+    )
     if hit_rate >= 0.55:
-        return {"label": "hit", "rationale": rationale}
+        return {"label": "hit", "rationale": rationale, "metrics": metrics}
     if hit_rate <= 0.35:
-        return {"label": "miss", "rationale": rationale}
-    return {"label": "neutral", "rationale": rationale}
+        return {"label": "miss", "rationale": rationale, "metrics": metrics}
+    return {"label": "neutral", "rationale": rationale, "metrics": metrics}
 
 
 def verdict_momentum(decision_content: dict, reality: dict | None) -> dict:

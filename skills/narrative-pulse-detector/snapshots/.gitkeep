@@ -1,0 +1,3 @@
+# V1.1 snapshot archive — batch_scan.py writes <YYYY-MM-DD>.json here daily.
+# 5/31 review reads these to join momentum-journal forward returns and compute
+# IC / hit rate for base vs pre_macro vs final E[R] columns.

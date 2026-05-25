@@ -1,0 +1,298 @@
+{
+  "version": "1.0",
+  "as_of": "2026-05-25T14:43:02.378703+00:00",
+  "lookback_hours": 24,
+  "lexicon_version": "v1.2",
+  "post_count": 49,
+  "source_stats": {
+    "truth_social": 10,
+    "reddit": 20,
+    "hacker_news": 17,
+    "google_trends": 2
+  },
+  "tickers": [
+    {
+      "ticker": "DJT",
+      "sector": "Consumer_Discretionary",
+      "mention_count": 4,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Mike: Thank you for your nice words on Fox. We are on the same path. Keep up the great work. Good luck on the Show! President DJT",
+          "url": "https://truthsocial.com/@realDonaldTrump/116635119382599342",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "RT @ realDonaldTrump The Dumocrats have BAD POLICY, AND BAD CANDIDATES. Other than that, they are doing quite well! President DJT",
+          "url": "https://truthsocial.com/@realDonaldTrump/116635026701312955",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "The Dumocrats have BAD POLICY, AND BAD CANDIDATES. Other than that, they are doing quite well! President DJT",
+          "url": "https://truthsocial.com/@realDonaldTrump/116634733606433479",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 4.0,
+      "_gate": "known"
+    },
+    {
+      "ticker": "RDDT",
+      "sector": "Technology",
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Is the recent dip in Reddit (RDDT) a great buying opportunity, or is there more downside ahead?",
+          "url": "https://www.reddit.com/r/investing/comments/1tn1zz6/is_the_recent_dip_in_reddit_rddt_a_great_buying/",
+          "source": "Reddit:r/investing",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "known"
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "Technology",
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "$67 invested in CS2 vs $NVDA in 2020",
+          "url": "https://www.reddit.com/r/wallstreetbets/comments/1tna6df/67_invested_in_cs2_vs_nvda_in_2020/",
+          "source": "Reddit:r/wallstreetbets",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "known"
+    }
+  ],
+  "low_confidence": [
+    {
+      "ticker": "SXC",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "SunCoke Energy, Inc. (NYSE: SXC) - Metallurgical coke.",
+          "url": "https://www.reddit.com/r/stocks/comments/1tn6j91/suncoke_energy_inc_nyse_sxc_metallurgical_coke/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "SunCoke Energy, Inc. (NYSE: SXC) - Metallurgical coke.",
+          "url": "https://www.reddit.com/r/investing/comments/1tn742f/suncoke_energy_inc_nyse_sxc_metallurgical_coke/",
+          "source": "Reddit:r/investing",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "UFC",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "The voice and genius of the great Dana White (UFC!). Thank you Dana! President DJT",
+          "url": "https://truthsocial.com/@realDonaldTrump/116632780751574963",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    }
+  ],
+  "sectors": [
+    {
+      "sector": "Consumer_Discretionary",
+      "ticker_count": 1,
+      "engagement_score": 4.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": [
+        {
+          "ticker": "DJT",
+          "engagement_score": 4.0,
+          "polarity_score": 0.0,
+          "mention_count": 4
+        }
+      ],
+      "polarity_score": 0.0
+    },
+    {
+      "sector": "Technology",
+      "ticker_count": 2,
+      "engagement_score": 2.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": [
+        {
+          "ticker": "RDDT",
+          "engagement_score": 1.0,
+          "polarity_score": 0.0,
+          "mention_count": 1
+        },
+        {
+          "ticker": "NVDA",
+          "engagement_score": 1.0,
+          "polarity_score": 0.0,
+          "mention_count": 1
+        }
+      ],
+      "polarity_score": 0.0
+    },
+    {
+      "sector": "Healthcare",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Energy",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Financials",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Consumer_Staples",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Industrials",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Materials",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Utilities",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Real_Estate",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Communication",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    }
+  ],
+  "market_wide_buzz": [
+    {
+      "topic": "ai_capex",
+      "post_count": 5,
+      "engagement_score": 9.648,
+      "sample_posts": [
+        {
+          "headline": "Microsoft pulls plug on plans for 244-acre data center in Caledonia",
+          "url": "https://www.tmj4.com/news/racine-county/microsoft-pulls-plug-on-plans-for-244-acre-data-center-in-caledonia-after-community-pushback",
+          "source": "Hacker News",
+          "engagement": 4.331,
+          "polarity": 0.0
+        },
+        {
+          "headline": "Data center ordinance development continues in Washington Township",
+          "url": "https://planetdetroit.org/2026/04/washington-township-weighs-data-center-impacts/",
+          "source": "Hacker News",
+          "engagement": 1.609,
+          "polarity": 0.0
+        },
+        {
+          "headline": "South Carolina county passes first reading on data center moratorium",
+          "url": "https://www.blufftontoday.com/story/news/environment/2026/05/10/south-carolina-county-passes-first-reading-on-data-center-moratorium/89961598007/",
+          "source": "Hacker News",
+          "engagement": 1.609,
+          "polarity": 0.0
+        }
+      ],
+      "polarity_score": 0.0
+    }
+  ]
+}

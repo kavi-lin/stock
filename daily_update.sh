@@ -228,6 +228,46 @@ else
   echo "         ⚠️  Narrative Pulse 失敗 (rc=${NPD_RC})，非致命,繼續..."
 fi
 
+# ── Step 9.4｜Trending Ticker Discovery (V3.20.1) ─────────────────────
+# 抓 Reddit / HN / Bluesky / Google Trends posts → ticker disambiguator +
+# span-masked lexicon polarity → per-ticker + per-sector engagement-weighted
+# polarity → Dashboard/trending_tickers.json (consumed by Step 9.5).
+# 失敗 non-fatal — Step 9.5 會在缺 trending input 時 fallback。
+echo "[ 9.4 ]  Trending Ticker Discovery (社群極性)..."
+set +e
+python3 skills/retail-sector-pulse/scripts/trending_tickers.py \
+  --window-hours 24 \
+  --output Dashboard/trending_tickers.json \
+  2> >(sed 's/^/         │ /' >&2)
+TTK_RC=$?
+set -e
+if [ $TTK_RC -eq 0 ]; then
+  TTK_COUNT=$(python3 -c "import json; d=json.load(open('Dashboard/trending_tickers.json')); print(f\"{len(d.get('tickers',[]))} tickers, {len(d.get('market_wide_buzz',[]))} topics\")" 2>/dev/null || echo "?")
+  echo "         ✅ Trending discovery 完成 → Dashboard/trending_tickers.json (${TTK_COUNT})"
+else
+  echo "         ⚠️  Trending discovery 失敗 (rc=${TTK_RC})，非致命,繼續..."
+fi
+
+# ── Step 9.5｜Retail Sector Pulse (V3.20.1: 3-lane composite) ─────────
+# Aggregate per-sector (11 GICS) news + retail polarity (from trending) +
+# 5d direction from short-term-target/predict.py. Output Dashboard/
+# retail_sector_pulse.json → bridge.py reads → data['tactical']
+# ['retail_sector_pulse'] → radar.html new section.
+# 失敗 non-fatal,bridge 會 fallback 顯 hidden。
+echo "[ 9.5 ]  Retail Sector Pulse 聚合..."
+set +e
+python3 skills/retail-sector-pulse/scripts/aggregate.py \
+  --output Dashboard/retail_sector_pulse.json \
+  2> >(sed 's/^/         │ /' >&2)
+RSP_RC=$?
+set -e
+if [ $RSP_RC -eq 0 ]; then
+  RSP_COUNT=$(python3 -c "import json; d=json.load(open('Dashboard/retail_sector_pulse.json')); print(len(d.get('sectors',[])))" 2>/dev/null || echo "?")
+  echo "         ✅ Retail Sector Pulse 完成 → Dashboard/retail_sector_pulse.json (${RSP_COUNT} sectors)"
+else
+  echo "         ⚠️  Retail Sector Pulse 失敗 (rc=${RSP_RC})，非致命,繼續..."
+fi
+
 echo ""
 case "$FRED_STATUS" in
   ok)      FRED_LINE="║  提醒：FRED 宏觀數據已更新（個股分析將使用此 cache） ║" ;;

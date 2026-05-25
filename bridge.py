@@ -2101,6 +2101,7 @@ def ingest_momentum_screen():
             "forward_pe": pe_lookup_fwd.get(ticker_up),
             "ev_ebitda":  pe_lookup_ev.get(ticker_up),
             "score":    _safe_float(row.get("score")),
+            "rank_score": _safe_float(row.get("rank_score")),
             "label":    row.get("label"),
             "stage":    row.get("stage"),
             "volume_today":   _safe_float(row.get("volume_today")),
@@ -2436,6 +2437,29 @@ def load_structural_watchlist():
     }
 
 
+def load_retail_sector_pulse():
+    """V3.20.0: Load Dashboard/retail_sector_pulse.json (produced by
+    skills/retail-sector-pulse/scripts/aggregate.py in daily_update.sh Step 9.5).
+    Returns dict for nesting under data['tactical']['retail_sector_pulse'].
+    """
+    fp = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      "Dashboard", "retail_sector_pulse.json")
+    if not os.path.exists(fp):
+        return {"status": "no_file"}
+    age_sec = int(time.time() - os.path.getmtime(fp))
+    age_hr = age_sec / 3600
+    try:
+        with open(fp, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception as e:
+        return {"status": "parse_error", "error": str(e)}
+    payload["status"] = "success"
+    payload["_cache_age_sec"] = age_sec
+    payload["_cache_age_hr"] = round(age_hr, 1)
+    payload["_freshness"] = "FRESH" if age_hr < 24 else ("STALE" if age_hr < 48 else "OLD")
+    return payload
+
+
 def load_tactical_recommendations():
     """Load latest thematic-screener recommendations file. Returns dict for data['tactical']."""
     rec_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -2620,6 +2644,21 @@ def run_bridge():
             print(f"[INFO] No tactical recommendations: {t.get('status')}")
     except Exception as e:
         print(f"[WARN] Tactical ingest: {e}")
+
+    # 5b. Retail Sector Pulse (V3.20.0 — nested under data['tactical'])
+    try:
+        rsp = load_retail_sector_pulse()
+        if not isinstance(data.get("tactical"), dict):
+            data["tactical"] = {}
+        data["tactical"]["retail_sector_pulse"] = rsp
+        if rsp.get("status") == "success":
+            n_sectors = len(rsp.get("sectors", []))
+            print(f"[OK] Retail Sector Pulse: {n_sectors} sectors "
+                  f"({rsp['_freshness']}, {rsp['_cache_age_hr']}h)")
+        else:
+            print(f"[INFO] No retail_sector_pulse: {rsp.get('status')}")
+    except Exception as e:
+        print(f"[WARN] Retail Sector Pulse ingest: {e}")
 
     # 7. Theme overrides (V2.20.0 — paradigm-shift themes from theme-detector)
     try:

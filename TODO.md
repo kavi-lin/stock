@@ -1,11 +1,52 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-05-24 (v3.17.1)
+> **Last Updated**: 2026-05-25 (v3.20.2)
 
 ---
 
 ## ✅ Recently Completed
 
+- [x] **[V320.2-RSP] Retail Sector Pulse V3.20.2 — Dual-Gate + Retail Override
+  + Broad ETF Routing** — fix V3.20.1 ship-time issues: blocklist expanded 41→50
+  (LONG/CALLS/EARLY/GPU/NYSE/TRUMP/NIFTY/RINOS/FOSS), `ticker_inclusion` split
+  into dual-gate (known-sector 1/1.0 vs unknown 3/8.0), 15 retail-only sector
+  override tickers (DJT/GME/AMC/RDDT/SMCI/...) mapped without polluting
+  SECTOR_UNIVERSE, 13 broad ETFs (SPY/QQQ/IWM/...) routed to market_wide_buzz
+  instead of single sector. Live verification: 0 → 3 qualified tickers.
+  +7 unit tests (34 total).
+- [x] **[V320.1-RSP] Retail Sector Pulse V3.20.1 — Polarity-First 3-Lane** —
+  refactor composite from 2-lane (news+predict) to 3-lane (price 0.30 / retail
+  polarity 0.50 / attention 0.20). News digest demoted to secondary context.
+  New `trending_tickers.py` pulls Reddit/HN/Bluesky/Trends → span-masked
+  lexicon match infers retail bull/bear bias. Hand-curated `retail_lexicon.yaml`
+  v1.1 (~400 polarity terms, ~190 ticker rules) filtered by Gemini → Codex →
+  final review. 49 unit tests pass. UI: polarity bar + market-wide buzz strip
+  + signal_lanes tooltip.
+- [x] **[V320-RSP] Retail Sector Pulse 散戶視角分產業** — new skill
+  `retail-sector-pulse`. Per-sector (11 GICS) aggregator combining
+  news digest verdict sentiment + Reddit cashtag volume + 5d
+  predict.py direction into single radar card. Declarative composite
+  formula in weights.yaml. Daily-only V1 (intraday 4h deferred V3.21+).
+  21 unit tests pass.
+- [x] **[V319.1-NP] Narrative Pulse V1.1.1 Codex review fixes** — (1) Stage 1
+  weights re-balanced 0.5/0.25/0.25 so SMA200 condition is effectively
+  mandatory; (2) replaced simple normalize with `_bounded_normalize()`
+  water-fill so post-normalize probs respect clamp `[0.05, 0.80]`; (3)
+  batch_scan version 1.0→1.1, schema.md rewritten with V1.1 fields +
+  breaking-change table. +2 regression tests reproducing Codex's exact
+  fixtures.
+- [x] **[V319-NP] Narrative Pulse V1.1 per-ticker scenario math** — declarative
+  YAML `scenario_adjustments:` block lets every prob/target delta be a named
+  rule the user edits during weekly calibration. Three-layer E[R]
+  (`_base` / `_pre_macro` / `final`) keeps V1.0 baseline alongside V1.1 for
+  the 5/31 observation review. Fixes upstream SMA200 breakout `0` vs `None`
+  bug. Stage 3 intentionally untouched. 31 tests pass.
+- [x] **[V318-MOM] Momentum-screen calibration** — added calibrated `rank_score`,
+  soft Top-20 cooldown, conservative Dashboard defaults, rank-score journal/event
+  propagation, and per-ticker aggregate metrics for future reviews.
+- [x] **[V318-MOM-UI] Momentum rank-score UI wiring** — dashboard now ingests,
+  displays, and default-sorts by calibrated `rank_score` while keeping raw
+  `score` as the quality filter.
 - [x] **[V317-FIX] Transition overlay review fixes** — committed prior feature
   baseline (`684b5e7`), then fixed nested segment parsing, 25% EMERGING boundary,
   revenue-margin markdown rendering, transition mtime fields, pytest module-name
@@ -14,6 +55,39 @@
 ---
 
 ## 🎯 活動 Backlog (Pending)
+
+### 路線 RSP — Retail Sector Pulse 後續
+
+- [ ] **[RSP-1] V3.20.1 — 擴 NPD universe 含 SECTOR_TOP_5** — narrative-pulse
+  `batch_scan.py` 加 SECTOR_TOP_5 全 55 ticker 進 universe,讓
+  retail_mention_multiplier signal 普遍 populated。修
+  `Dashboard/data.json` structural_watchlist 或 batch_scan 增 `--extra-tickers`
+  flag。
+- [ ] **[RSP-2] V3.21 — Intraday 4h refresh daemon** — dashboard_server.py 加
+  daemon thread 每 4h 重跑 `aggregate.py`。沿用 break_news daemon pattern。
+  V3.20 跑 1-2 週後評估必要性再做。
+- [ ] **[RSP-3] V3.22 — LLM-enriched framing** — Haiku 4.5 對 rule-based
+  framing 做一句潤色(11 call/day,~$0.01)。權衡:LLM dependency vs 自然語感。
+- [ ] **[RSP-4] V3.23 — Per-sector FTD pattern** — sector ETF (XLK/XLF/...)
+  FTD state machine,類似 SPY ftd_yfinance.py。 sector 級 "follow-through
+  day" 信號。
+- [ ] **[RSP-5] Weekly review hit rate** — `scripts/retail_sector_pulse_review.py`
+  比 composite_score 預測方向 vs 後續 5d sector ETF 實際 return,計算 IC。
+
+### 路線 NP — Narrative Pulse V1.1 後續
+
+- [ ] **[NP-1]** Dashboard hover tooltip 顯 `prob_breakdown` + `target_breakdown`
+  — `Dashboard/page-radar.js` 為每條 scenario row 加 hover tooltip 展開
+  per-rule delta + clamp + normalize 鏈路。拆為 V3.19.1 獨立 patch（estimate
+  ~50 lines；page-radar.js 目前 monolithic）。
+- [ ] **[NP-2]** 5/31 review script — `scripts/narrative_pulse_v11_review.py`：
+  讀 `skills/narrative-pulse-detector/snapshots/*.json`，join momentum-journal
+  forward returns 5d/20d 到 ticker，計算 `_base` vs `_pre_macro` vs `final`
+  三層 E[R] 各自的 IC / hit rate。若 `_pre_macro` 沒贏 `_base`，把
+  `scenario_adjustments.*.prob_deltas[].delta = 0` 回 V1.0 prior。
+- [ ] **[NP-3]** Stage 2 / 4 / 5 adjustment 校準 — V1.1 觀察期跑滿後若數據
+  支持，把當前 conservative delta 幅度加大；若 Stage 3 在 review 顯示
+  per-ticker dispersion 也有意義，再補 acceleration block。
 
 ### 路線 BN — Break News source expansion
 

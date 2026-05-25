@@ -332,15 +332,32 @@ def enrich_one(ticker: str, *, force: bool = False) -> dict:
     return out
 
 
-def enrich_movers(tickers: list[str], *, force: bool = False) -> dict:
-    """Batch entry. Returns {ticker: enrichment_dict}."""
+def enrich_movers(tickers: list[str], *, force: bool = False,
+                  progress_every_sec: float = 30.0) -> dict:
+    """Batch entry. Returns {ticker: enrichment_dict}.
+
+    Emits progress to stderr at least every `progress_every_sec` seconds (and
+    always on the last ticker), matching the `[HH:MM:SS]` prefix used by
+    screen.py's predict phase so daily_update output looks consistent.
+    """
+    import datetime as _dt
     out = {}
-    for t in tickers:
+    total = len(tickers)
+    t_start = time.time()
+    t_last_log = t_start
+    for idx, t in enumerate(tickers, 1):
         try:
             out[t] = enrich_one(t, force=force)
         except Exception as e:
             print(f"[enrich] WARN {t}: {e}", file=sys.stderr)
             out[t] = {"ticker": t, "error": str(e)[:200]}
+        now = time.time()
+        if now - t_last_log >= progress_every_sec or idx == total:
+            elapsed = int(now - t_start)
+            stamp = _dt.datetime.now().strftime("%H:%M:%S")
+            print(f"[{stamp}]   ... {idx}/{total} enriched (elapsed {elapsed}s)",
+                  file=sys.stderr, flush=True)
+            t_last_log = now
     return out
 
 

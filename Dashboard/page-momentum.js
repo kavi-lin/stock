@@ -726,7 +726,7 @@ function applyPreset(key) {
 let _state = {
     rows: [],
     filter: defaultFilter(),
-    sort: { field: 'score', dir: 'desc' },  // default: highest score first
+    sort: { field: 'rank_score', dir: 'desc' },  // default: calibrated leader rank first
     history: {},
     journalStats: null,
     historyChart: null,
@@ -744,6 +744,7 @@ const STAGE_ORDER = {
 
 function _sortKey(r, field) {
     if (field === 'stage') return STAGE_ORDER[r.stage] ?? -1;
+    if (field === 'rank_score') return r.rank_score ?? r.score;
     const v = r[field];
     // Nulls sort last regardless of direction
     if (v == null) return null;
@@ -1320,6 +1321,19 @@ function scoreBatteryHTML(score) {
     </div>`;
 }
 
+function rankScoreHTML(r) {
+    const v = r.rank_score ?? r.score;
+    if (v == null) return '<span class="text-zinc-600">—</span>';
+    const delta = r.rank_score != null && r.score != null ? r.rank_score - r.score : null;
+    const color = v >= 75 ? '#60a5fa'
+                : v >= 65 ? '#22c55e'
+                : v >= 50 ? '#eab308'
+                : '#ef4444';
+    const deltaTxt = delta == null ? ''
+        : ` (${delta >= 0 ? '+' : ''}${delta.toFixed(1)} vs score)`;
+    return `<span style="color:${color}" title="Calibrated momentum rank${deltaTxt}">${v.toFixed(1)}</span>`;
+}
+
 // RSI cell: number with tier-based color.
 // >70 red (overbought), 50-70 green (bullish), 30-50 yellow (neutral), <30 blue (oversold)
 function rsiCell(v) {
@@ -1439,6 +1453,7 @@ function rowHTML(r) {
             return 'color:var(--text-main)';
         })()}" title="P/E (TTM)">${r.pe != null ? r.pe.toFixed(1) : '—'}</td>
         <td class="text-right score-cell">${scoreBatteryHTML(r.score)}</td>
+        <td class="text-right font-mono text-xs font-bold">${rankScoreHTML(r)}</td>
         <td><span class="mlabel label-${r.label || 'NEUTRAL'} pill-clickable" data-pill-type="label" data-pill-value="${r.label || ''}" title="${r.label || ''}">${labelText(r.label)}</span></td>
         <td class="text-xs text-zinc-400 stage-cell" data-ticker-stage="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4)" title="${r.stage || ''}">${stageLabel(r.stage)}</td>
         <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_volCellColor(r)};font-weight:700" title="${_volCellTitle(r)}">${_volCellText(r)}</td>
@@ -1451,7 +1466,7 @@ function rowHTML(r) {
 }
 
 function emptyRow() {
-    return `<tr><td colspan="13" class="text-center text-zinc-500 py-8 text-xs">
+    return `<tr><td colspan="14" class="text-center text-zinc-500 py-8 text-xs">
         ${t().no_data || 'No matches'}</td></tr>`;
 }
 
@@ -2539,7 +2554,21 @@ async function checkExistingScan() {
 /* ── Translations ─────────────────────────────────────────────── */
 function translate() {
     const tr = t();
-    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el || !val) return;
+        if (el.classList.contains('sortable')) {
+            let arrow = el.querySelector('.sort-arrow');
+            el.textContent = val;
+            if (!arrow) {
+                arrow = document.createElement('span');
+                arrow.className = 'sort-arrow';
+            }
+            el.appendChild(arrow);
+        } else {
+            el.textContent = val;
+        }
+    };
     set('momentum-title',     tr.title);
     set('momentum-subtitle',  tr.subtitle);
     set('refresh-btn-label',  tr.refresh_btn);
@@ -2548,6 +2577,7 @@ function translate() {
     set('th-price',     tr.col_price);
     set('th-pe',        tr.col_pe);
     set('th-score',     tr.col_score);
+    set('th-rank-score', tr.col_rank_score);
     set('th-label',     tr.col_label);
     set('th-stage',     tr.col_stage);
     set('th-volume',    tr.col_volume);
