@@ -1,60 +1,33 @@
 {
   "version": "1.0",
-  "as_of": "2026-05-25T14:43:02.378703+00:00",
+  "as_of": "2026-05-25T15:05:01.188711+00:00",
   "lookback_hours": 24,
-  "lexicon_version": "v1.2",
-  "post_count": 49,
+  "lexicon_version": "v1.3",
+  "post_count": 41,
+  "truth_social_dropped": 7,
   "source_stats": {
-    "truth_social": 10,
+    "truth_social": 3,
     "reddit": 20,
     "hacker_news": 17,
-    "google_trends": 2
+    "google_trends": 1
   },
   "tickers": [
-    {
-      "ticker": "DJT",
-      "sector": "Consumer_Discretionary",
-      "mention_count": 4,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Mike: Thank you for your nice words on Fox. We are on the same path. Keep up the great work. Good luck on the Show! President DJT",
-          "url": "https://truthsocial.com/@realDonaldTrump/116635119382599342",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "RT @ realDonaldTrump The Dumocrats have BAD POLICY, AND BAD CANDIDATES. Other than that, they are doing quite well! President DJT",
-          "url": "https://truthsocial.com/@realDonaldTrump/116635026701312955",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "The Dumocrats have BAD POLICY, AND BAD CANDIDATES. Other than that, they are doing quite well! President DJT",
-          "url": "https://truthsocial.com/@realDonaldTrump/116634733606433479",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 4.0,
-      "_gate": "known"
-    },
     {
       "ticker": "RDDT",
       "sector": "Technology",
       "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 1,
+      "matched_terms": [
+        {
+          "term": "great buying opportunity",
+          "side": "bull"
+        },
+        {
+          "term": "downside",
+          "side": "bear"
+        }
+      ],
       "sample_posts": [
         {
           "headline": "Is the recent dip in Reddit (RDDT) a great buying opportunity, or is there more downside ahead?",
@@ -62,7 +35,10 @@
           "source": "Reddit:r/investing",
           "engagement": 1.0,
           "polarity": 0.0,
-          "matched_terms": []
+          "matched_terms": [
+            "great buying opportunity",
+            "downside"
+          ]
         }
       ],
       "polarity_score": 0.0,
@@ -91,81 +67,14 @@
       "_gate": "known"
     }
   ],
-  "low_confidence": [
-    {
-      "ticker": "SXC",
-      "sector": null,
-      "mention_count": 2,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "SunCoke Energy, Inc. (NYSE: SXC) - Metallurgical coke.",
-          "url": "https://www.reddit.com/r/stocks/comments/1tn6j91/suncoke_energy_inc_nyse_sxc_metallurgical_coke/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "SunCoke Energy, Inc. (NYSE: SXC) - Metallurgical coke.",
-          "url": "https://www.reddit.com/r/investing/comments/1tn742f/suncoke_energy_inc_nyse_sxc_metallurgical_coke/",
-          "source": "Reddit:r/investing",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "UFC",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "The voice and genius of the great Dana White (UFC!). Thank you Dana! President DJT",
-          "url": "https://truthsocial.com/@realDonaldTrump/116632780751574963",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    }
-  ],
+  "low_confidence": [],
   "sectors": [
-    {
-      "sector": "Consumer_Discretionary",
-      "ticker_count": 1,
-      "engagement_score": 4.0,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "top_tickers": [
-        {
-          "ticker": "DJT",
-          "engagement_score": 4.0,
-          "polarity_score": 0.0,
-          "mention_count": 4
-        }
-      ],
-      "polarity_score": 0.0
-    },
     {
       "sector": "Technology",
       "ticker_count": 2,
       "engagement_score": 2.0,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 1,
       "top_tickers": [
         {
           "ticker": "RDDT",
@@ -202,6 +111,15 @@
     },
     {
       "sector": "Financials",
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
+    },
+    {
+      "sector": "Consumer_Discretionary",
       "ticker_count": 0,
       "engagement_score": 0.0,
       "polarity_score": 0.0,
@@ -268,13 +186,13 @@
     {
       "topic": "ai_capex",
       "post_count": 5,
-      "engagement_score": 9.648,
+      "engagement_score": 11.298,
       "sample_posts": [
         {
           "headline": "Microsoft pulls plug on plans for 244-acre data center in Caledonia",
           "url": "https://www.tmj4.com/news/racine-county/microsoft-pulls-plug-on-plans-for-244-acre-data-center-in-caledonia-after-community-pushback",
           "source": "Hacker News",
-          "engagement": 4.331,
+          "engagement": 5.981,
           "polarity": 0.0
         },
         {

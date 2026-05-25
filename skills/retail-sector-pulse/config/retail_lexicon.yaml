@@ -24,9 +24,9 @@
 #   - post polarity = (bull_hits - bear_hits) / (bull_hits + bear_hits + 1)
 #     範圍 [-1, +1];中性 (兩邊 0 hits) → 0
 
-lexicon_version: v1.2
+lexicon_version: v1.3
 revision_date: "2026-05-25"
-notes: "v1.2 — V3.20.2 修 V1.1 ship-time issues:擴 blocklist (LONG/CALLS/EARLY/GPU/NYSE/TRUMP/NIFTY/RINOS) + dual-gate ticker_inclusion (known vs unknown sector) + retail_only_sector_overrides (SMCI/RDDT/DJT 等 retail meme,不動 SECTOR_UNIVERSE) + broad_market_etfs (QQQ/SPY 不進 sector,改 market_wide_buzz)。"
+notes: "v1.3 — V3.20.3 fix:lexicon 偏 WSB slang 對 wire-news 命中率 0。加 ~40 wire-news polarity terms (surge/plunge/downside/buying opportunity 等)。Truth Social Trump 簽名 \"President DJT\" 污染 ticker extraction → 加 truth_social_filter:strip signatures + relevance filter (post 須含 macro topic keyword 才保留,純政治 endorsement 整篇 drop)。"
 
 # ── Bullish terms (en + zh + WSB slang) ───────────────────────────────
 # 排序原則:LONG PHRASE 寫前面(實作 sort by length DESC)。
@@ -67,6 +67,45 @@ bull_terms:
   - "analyst upgrade"
   - "price target raise"
   - "pt raise"
+  # v1.3 wire-news bullish (RSS feed Bloomberg/CNBC/Reuters/WSJ language)
+  - "buying opportunity"
+  - "great buying opportunity"
+  - "upside potential"
+  - "to the upside"
+  - "extend gains"
+  - "extending gains"
+  - "extends gains"
+  - "outperforms"
+  - "outperformed"
+  - "outperforming"
+  - "leads gains"
+  - "broad-based rally"
+  - "surges"
+  - "surge"
+  - "surged"
+  - "surging"
+  - "soars"
+  - "soar"
+  - "soared"
+  - "soaring"
+  - "jumps"
+  - "jumped"
+  - "jumping"
+  - "climbs"
+  - "climbed"
+  - "climbing"
+  - "advances"
+  - "advanced"
+  - "rebounds"
+  - "rebounded"
+  - "recovers"
+  - "recovered"
+  - "gain"
+  - "gains"
+  - "gained"
+  - "rises"
+  - "rose"
+  - "rising"
   # v1.1 Gemini → Codex curated additions: WSB / retail hype phrases
   - "bull run"
   - "bullish run"
@@ -208,6 +247,51 @@ bear_terms:
   - "valuation stretched"
   - "secondary offering"
   - "share dilution"
+  # v1.3 wire-news bearish (RSS feed language)
+  - "downside risk"
+  - "downside"
+  - "to the downside"
+  - "extends losses"
+  - "extending losses"
+  - "extend losses"
+  - "underperforms"
+  - "underperformed"
+  - "underperforming"
+  - "leads losses"
+  - "broad-based selloff"
+  - "broad-based sell-off"
+  - "headwinds"
+  - "headwind"
+  - "plunges"
+  - "plunge"
+  - "plunged"
+  - "plunging"
+  - "tumbles"
+  - "tumble"
+  - "tumbled"
+  - "tumbling"
+  - "slumps"
+  - "slump"
+  - "slumped"
+  - "slumping"
+  - "slides"
+  - "slid"
+  - "slipping"
+  - "slipped"
+  - "drops"
+  - "dropped"
+  - "declines"
+  - "declined"
+  - "declining"
+  - "falls"
+  - "fell"
+  - "falling"
+  - "sinks"
+  - "sank"
+  - "retreats"
+  - "retreated"
+  - "weakens"
+  - "weakened"
   # v1.1 Gemini → Codex curated:WSB / retail bearish phrases
   - "falling knife"
   - "value trap"
@@ -609,6 +693,72 @@ broad_market_etfs:
   - "TQQQ"      # 3x Nasdaq
   - "SPXS"      # inverse SP500
   - "SPXL"
+
+# ── Truth Social filter (V3.20.3) ─────────────────────────────────────
+# Trump 的 Truth Social posts 有公信力(他經濟決策直接影響市場),但大量是
+# 純政治貼文 (Dumocrats endorsements, 對手攻擊) 應該過濾掉。
+# Strategy:
+#   1. Strip signature 防 DJT ticker 被誤抽 (大多是 "- President DJT" 簽名)
+#   2. Relevance filter — post 必須含 macro topic keyword (fed/tariff/jobs/
+#      inflation/recession/trade/ai/geopolitics/volatility/market_direction
+#      或股票/經濟相關詞) 才保留,否則整篇 drop。
+#
+# Only applies to Truth Social source. Other sources unchanged.
+truth_social_filter:
+  enabled: true
+
+  # Signature 撕除 patterns (regex,case-insensitive,在 ticker extraction 前套用)
+  # 移除 "- President DJT" / "—DJT" / "President DJT" 結尾簽名
+  signature_patterns:
+    - "(?i)\\s*[—\\-–]?\\s*President\\s+DJT\\s*$"
+    - "(?i)\\s*[—\\-–]\\s*DJT\\s*$"
+    - "(?i)RT\\s+@\\s*realDonaldTrump"
+
+  # Relevance filter — must hit one of these (case-insensitive substring) or
+  # one of macro_wide.topic_lexicon entries. Otherwise drop entire post.
+  # 額外經濟/股市詞彙 (不在 macro topic_lexicon 但 retail 視角相關):
+  extra_relevance_keywords:
+    - "economy"
+    - "economic"
+    - "market"
+    - "markets"
+    - "stock"
+    - "stocks"
+    - "earnings"
+    - "tariff"
+    - "tariffs"
+    - "china"
+    - "tax"
+    - "taxes"
+    - "tax cut"
+    - "tax cuts"
+    - "deal"
+    - "dollar"
+    - "oil"
+    - "gold"
+    - "bitcoin"
+    - "crypto"
+    - "doge"
+    - "trade"
+    - "jobs"
+    - "wages"
+    - "manufacturing"
+    - "boeing"
+    - "auto"
+    - "energy"
+    - "industry"
+    - "wall street"
+    - "federal reserve"
+    - "powell"
+    - "rates"
+    - "interest"
+    - "經濟"
+    - "股市"
+    - "關稅"
+    - "貿易"
+
+  # Drop post entirely if no relevance keyword AND no macro topic hit
+  drop_if_irrelevant: true
 
 # ── Market-wide buzz bucket (Codex finding #3) ────────────────────────
 # 無 ticker 或 ticker 數 > 5 的 broad-market post 進這裡。

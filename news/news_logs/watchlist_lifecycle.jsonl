@@ -259,3 +259,19 @@
 {"date": "2026-05-25", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
 {"date": "2026-05-25", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
 {"date": "2026-05-25", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-25", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-25", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-25", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-25", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-25", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-25", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-25", "ticker": "TSM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-25", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-25", "ticker": "PWR", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-25", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-25", "ticker": "AMAT", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-05-25", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-05-25", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-25", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-25", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-25", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}

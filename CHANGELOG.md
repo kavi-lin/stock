@@ -8,6 +8,97 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [3.20.3] — 2026-05-25 — Retail Sector Pulse: Truth Social Filter + Wire-News Polarity
+
+### Fixed (post-V3.20.2 ship validation)
+
+V3.20.2 live run showed polarity = 0 for all sectors even with 3 qualified
+tickers (NVDA, RDDT, DJT). Diagnosis showed two root causes:
+
+1. **Lexicon偏 WSB slang (moon/puts/diamond hands),但 RSS feed 抓到的多是
+   wire-news 風格 (surge/plunge/dip/downside)**. The lexicon had 0 hits
+   on 49 live posts. Sample post `"Is the recent dip in Reddit (RDDT) a
+   great buying opportunity, or is there more downside ahead?"` should
+   register both `buying opportunity` (bull) and `downside` (bear) but
+   neither was in v1.2 lexicon.
+2. **DJT qualified entirely from Trump Truth Social signatures**. Posts
+   like `"Mike: Thank you for your nice words on Fox. — President DJT"`
+   are pure political endorsements that don't reflect any market view,
+   but the `DJT` ticker was extracted from the signature, falsely
+   counting Trump's political activity as DJT (Trump Media) stock signal.
+
+### Fix #1: Lexicon v1.2 → v1.3 wire-news vocabulary
+
+- Bull adds (~37): `buying opportunity` / `upside potential` /
+  `extends gains` / `outperforms` / `leads gains` / `broad-based rally` /
+  `surge(s|d|ing)` / `soar(s|ed|ing)` / `jumps` / `climbs` / `advances` /
+  `rebounds` / `recovers` / `gain(s|ed)` / `rises` / `rose`
+- Bear adds (~43): `downside (risk)` / `to the downside` / `extends losses` /
+  `underperforms` / `leads losses` / `broad-based selloff` /
+  `headwind(s)` / `plunge(s|d|ing)` / `tumble(s|d|ing)` /
+  `slump(s|ed|ing)` / `slides` / `slid` / `slip(ping|ped)` /
+  `drops` / `dropped` / `declines` / `declined` / `declining` /
+  `falls` / `fell` / `falling` / `sinks` / `sank` / `retreats` /
+  `weakens` / `weakened`
+
+Total polarity terms: 320 → 340.
+
+### Fix #2: Truth Social relevance filter + DJT signature strip
+
+New `truth_social_filter` block in lexicon yaml:
+
+```yaml
+truth_social_filter:
+  enabled: true
+  signature_patterns:                   # regex stripped before extraction
+    - "(?i)\\s*[—\\-–]?\\s*President\\s+DJT\\s*$"
+    - "(?i)\\s*[—\\-–]\\s*DJT\\s*$"
+    - "(?i)RT\\s+@\\s*realDonaldTrump"
+  extra_relevance_keywords:             # 38 economic/market keywords
+    - "economy", "tariff", "fed", "powell", "stock", "earnings",
+      "tax", "trade", "jobs", "wages", "boeing", "oil", "gold", ...
+  drop_if_irrelevant: true              # drop post if no relevance hit
+```
+
+`trending_tickers.py` new `apply_truth_social_filter(post, lex)` called
+between fetch and process_post. Two stages:
+1. Strip "President DJT" / "RT @ realDonaldTrump" signatures from text
+2. Relevance check — post text must hit ≥1 economic/macro/market keyword
+   (from `extra_relevance_keywords` OR `market_wide.topic_lexicon`).
+   Drop entire post if no hit.
+
+Other source platforms (Reddit / HN / Bluesky / Trends) unchanged.
+
+### Why "filter, not block"
+
+Trump's economic / tariff / Fed / market posts carry real market-moving
+weight and SHOULD inform retail sentiment. Pure political endorsements
+("Mike thanks for your support") should not. The relevance filter
+keeps the economic signal while dropping noise.
+
+### Live verification (V3.20.2 → V3.20.3)
+
+| Metric | V3.20.2 | V3.20.3 |
+|---|---:|---:|
+| Posts ingested | 49 | 41 |
+| `truth_social_dropped` (new) | — | **7** |
+| Qualified tickers | 3 | 2 |
+| DJT false-positive | 4 mentions (all from signature) | **0** ✓ |
+| RDDT post matched terms | `[]` | **`["great buying opportunity", "downside"]`** ✓ |
+
+RDDT polarity still 0.0 because the single post hit both bull AND bear
+terms (mathematically: `(1-1)/(1+1+1) = 0`). This is honest — author is
+asking whether it's a buying opportunity OR more downside. Lexicon now
+correctly reflects that ambiguity instead of falsely returning 0-hit.
+
+### Test results
+
+- `tests/test_aggregate.py` → 22 OK
+- `tests/test_trending_tickers.py` → 39 OK (+5 V3.20.3 tests):
+  political post dropped, economic post kept w/ signature stripped,
+  signature strip prevents DJT false-positive, $DJT in body still
+  extracts, wire-news polarity (surge/plunge/buying opportunity) fires
+
 ## [3.20.2] — 2026-05-25 — Retail Sector Pulse: Dual-Gate + Retail Override + Broad ETF Routing
 
 ### Fixed (Codex post-V3.20.1 review)

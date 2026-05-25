@@ -1,11 +1,18 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-05-25 (v3.20.2)
+> **Last Updated**: 2026-05-25 (v3.20.3)
 
 ---
 
 ## ✅ Recently Completed
 
+- [x] **[V320.3-RSP] Retail Sector Pulse V3.20.3 — Truth Social Filter +
+  Wire-News Polarity** — fix V3.20.2 live polarity-all-zero issue. Lexicon
+  v1.2→v1.3 加 ~80 wire-news 詞 (surge/plunge/downside/buying opportunity
+  等),解決 RSS feed wire-style mismatch。新 `truth_social_filter` block:
+  signature strip ("- President DJT") + relevance filter (drop 政治貼,
+  保留經濟貼)。Live verify:7 政治貼 dropped、DJT 簽名假 ticker 消失、
+  RDDT 首次 lexicon hit。+5 unit tests (39 total)。
 - [x] **[V320.2-RSP] Retail Sector Pulse V3.20.2 — Dual-Gate + Retail Override
   + Broad ETF Routing** — fix V3.20.1 ship-time issues: blocklist expanded 41→50
   (LONG/CALLS/EARLY/GPU/NYSE/TRUMP/NIFTY/RINOS/FOSS), `ticker_inclusion` split

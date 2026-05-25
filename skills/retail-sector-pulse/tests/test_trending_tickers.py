@@ -291,8 +291,8 @@ class TestMarketWideBuzz(unittest.TestCase):
 class TestLexiconVersionPropagation(unittest.TestCase):
     def test_lexicon_version_in_payload(self):
         payload = run(window_hours=24, social_items=[])
-        # v1.2: V3.20.2 dual-gate + retail overrides + broad ETF routing
-        self.assertEqual(payload["lexicon_version"], "v1.2")
+        # v1.3: V3.20.3 Truth Social filter + wire-news polarity
+        self.assertEqual(payload["lexicon_version"], "v1.3")
         self.assertEqual(payload["version"], "1.0")  # output schema version,not lexicon
         # Should always return 11 sectors even with no data
         self.assertEqual(len(payload["sectors"]), 11)
@@ -385,6 +385,82 @@ class TestV202DualGate(unittest.TestCase):
         topics = {m["topic"] for m in payload["market_wide_buzz"]}
         self.assertTrue("broad_etf" in topics or "market_direction" in topics,
                         f"SPY post must show up in market_wide_buzz; got topics: {topics}")
+
+    def test_truth_social_political_post_dropped(self):
+        """V3.20.3: Truth Social post with no economic/macro keyword (pure
+        political endorsement) must be dropped entirely."""
+        from trending_tickers import apply_truth_social_filter
+        post = _post(
+            "Mike: Thank you for your nice words on Fox. We are on the same path. Keep up the great work. — President DJT",
+            source="Truth Social:@realDonaldTrump",
+            platform="truth_social",
+        )
+        result = apply_truth_social_filter(post, self.lex)
+        self.assertIsNone(result, "Pure political endorsement must be dropped")
+
+    def test_truth_social_economic_post_kept_signature_stripped(self):
+        """V3.20.3: Truth Social post mentioning tariff/fed/economy must be
+        KEPT, but signature "President DJT" must be stripped from text."""
+        from trending_tickers import apply_truth_social_filter
+        post = _post(
+            "Just signed massive tariff on China steel imports. American jobs will boom! — President DJT",
+            source="Truth Social:@realDonaldTrump",
+            platform="truth_social",
+        )
+        result = apply_truth_social_filter(post, self.lex)
+        self.assertIsNotNone(result, "Economic post must NOT be dropped")
+        self.assertNotIn("President DJT", result["headline"],
+                         "Signature must be stripped from headline")
+        self.assertIn("tariff", result["headline"].lower())
+
+    def test_truth_social_djt_signature_strip_prevents_false_ticker(self):
+        """V3.20.3: end-to-end — Trump economic post with DJT signature should
+        NOT extract DJT as ticker (signature gets stripped first)."""
+        from trending_tickers import apply_truth_social_filter, process_post
+        post = _post(
+            "Fed rates need to come down NOW for the economy! — President DJT",
+            source="Truth Social:@realDonaldTrump",
+            platform="truth_social",
+        )
+        filtered = apply_truth_social_filter(post, self.lex)
+        self.assertIsNotNone(filtered)
+        processed = process_post(filtered, self.lex)
+        # DJT should NOT appear in tickers (signature was stripped)
+        self.assertNotIn("DJT", processed["tickers"],
+                         "After signature strip,DJT must not extract")
+
+    def test_truth_social_djt_real_mention_preserved(self):
+        """V3.20.3: when Trump actually discusses DJT stock in body
+        (not just signature),DJT ticker IS extracted."""
+        from trending_tickers import apply_truth_social_filter, process_post
+        post = _post(
+            "$DJT stock is undervalued, market should buy it now! — President DJT",
+            source="Truth Social:@realDonaldTrump",
+            platform="truth_social",
+        )
+        filtered = apply_truth_social_filter(post, self.lex)
+        self.assertIsNotNone(filtered, "Has 'stock' + 'market' relevance keywords")
+        processed = process_post(filtered, self.lex)
+        # $DJT in body should still extract
+        self.assertIn("DJT", processed["tickers"])
+
+    def test_wire_news_polarity_words(self):
+        """V3.20.3: lexicon now includes wire-news language."""
+        # bull wire-news
+        p_bull = compute_polarity("NVDA surges on strong earnings, climbs to 52-week high",
+                                  self.lex)
+        self.assertGreater(p_bull["bull_hits"], 0,
+                           "surges + climbs should fire bull")
+        # bear wire-news
+        p_bear = compute_polarity("TSLA plunges as deliveries miss, downside risk ahead",
+                                  self.lex)
+        self.assertGreater(p_bear["bear_hits"], 0,
+                           "plunges + downside should fire bear")
+        # buying opportunity
+        p_opp = compute_polarity("Is the recent dip in RDDT a great buying opportunity?",
+                                 self.lex)
+        self.assertGreater(p_opp["bull_hits"], 0,
+                           "buying opportunity should fire bull")
 
     def test_legacy_single_gate_backward_compat(self):
         """If a user-edited lexicon uses old single-gate config (V3.20.0 style),

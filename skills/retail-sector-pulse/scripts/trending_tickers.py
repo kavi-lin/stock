@@ -64,6 +64,56 @@ def get_broad_etf_set(lex: dict) -> set[str]:
     return set(lex.get("broad_market_etfs", []) or [])
 
 
+# ── V3.20.3 Truth Social filter ──────────────────────────────────────
+def apply_truth_social_filter(post: dict, lex: dict) -> Optional[dict]:
+    """Truth Social posts dominate by Trump signatures + political endorsements.
+    Strategy:
+      1. Strip signatures from text (prevent DJT ticker false-positive from sig)
+      2. Relevance check: post text MUST mention economy/markets/macro keyword
+         OR one of macro_wide.topic_lexicon entries. Otherwise drop entire post.
+    Returns: modified post dict (signature stripped) OR None if dropped.
+    Non-Truth-Social posts pass through unchanged.
+    """
+    platform = (post.get("_source_meta") or {}).get("platform")
+    if platform != "truth_social":
+        return post
+
+    tsf = lex.get("truth_social_filter", {}) or {}
+    if not tsf.get("enabled", True):
+        return post
+
+    import re as _re
+    headline = post.get("headline") or ""
+    summary = post.get("raw_summary") or ""
+
+    # Step 1: strip signatures
+    for pat in tsf.get("signature_patterns", []) or []:
+        headline = _re.sub(pat, "", headline).strip()
+        summary = _re.sub(pat, "", summary).strip()
+
+    # Step 2: relevance check — must hit at least one macro/economic keyword
+    text_l = (headline + "\n" + summary).lower()
+    extra_kw = [k.lower() for k in (tsf.get("extra_relevance_keywords") or [])]
+
+    # Also include macro_wide.topic_lexicon entries
+    mw_lex = (lex.get("market_wide", {}) or {}).get("topic_lexicon", {}) or {}
+    macro_terms = [term.lower() for terms in mw_lex.values() for term in (terms or [])]
+
+    all_relevance = extra_kw + macro_terms
+    has_relevance = any(kw in text_l for kw in all_relevance)
+
+    if not has_relevance and tsf.get("drop_if_irrelevant", True):
+        return None   # caller skips this post
+
+    # Return modified post (signatures stripped)
+    return {
+        **post,
+        "headline": headline,
+        "raw_summary": summary,
+        "_truth_social_filtered": True,    # debugging marker
+    }
+
+
 # ── Ticker extraction (Codex finding #1: disambiguation) ─────────────
 CASHTAG_RE = re.compile(r"\$([A-Z]{1,5})\b")
 NAKED_RE = re.compile(r"\b([A-Z]{2,5})\b")
@@ -532,8 +582,19 @@ def run(window_hours: int = 24, social_items: Optional[list[dict]] = None) -> di
         from social_sources import fetch_social_items  # break_news/social_sources.py
         social_items, _stats = fetch_social_items(window_hours=window_hours)
 
+    # 1b. V3.20.3: Truth Social relevance filter + signature strip
+    #     drops political-only posts; strips "President DJT" signatures
+    filtered_items = []
+    truth_social_dropped = 0
+    for p in social_items:
+        filtered = apply_truth_social_filter(p, lex)
+        if filtered is None:
+            truth_social_dropped += 1
+            continue
+        filtered_items.append(filtered)
+
     # 2. Per-post processing
-    processed = [process_post(p, lex) for p in social_items]
+    processed = [process_post(p, lex) for p in filtered_items]
 
     # 3. Ticker aggregation + thresholds
     qualified, low_conf, broad_etf_posts = aggregate_tickers(processed, lex)
@@ -553,6 +614,7 @@ def run(window_hours: int = 24, social_items: Optional[list[dict]] = None) -> di
         "lookback_hours": window_hours,
         "lexicon_version": lex.get("lexicon_version", "unknown"),
         "post_count": len(processed),
+        "truth_social_dropped": truth_social_dropped,
         "source_stats": source_stats,
         "tickers": qualified,
         "low_confidence": low_conf,

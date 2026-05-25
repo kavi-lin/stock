@@ -1,7 +1,67 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-25 (v3.20.2)
+> **Last Updated**: 2026-05-25 (v3.20.3)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v3.20.2 → v3.20.3) — Truth Social Filter + Wire-News Polarity
+
+User ran daily_update + refreshed UI after V3.20.2 ship; reported "目測還是
+沒什麼變". Diagnosis showed retail polarity all 0 across sectors despite 3
+qualified tickers because:
+
+1. Lexicon偏 WSB slang (moon/puts/diamond hands/tendies),但 RSS feed 抓到
+   的多是 wire-news 風格 (surge/plunge/dip/downside/buying opportunity)。
+   49 live posts → 0 lexicon hits。
+2. DJT 4 mentions 全來自 Trump Truth Social 簽名 "— President DJT",政治
+   貼文不該被當 DJT 股票訊號。
+
+User 提示 「川普的貼文有公信力,只是要濾掉政治貼文,只看股票或經濟」,
+所以方向是 **relevance filter,不是 blanket reject**。
+
+V3.20.3 修法:
+
+**A. Wire-news polarity vocabulary** — lexicon v1.2 → v1.3:
+- Bull ~37 新詞:buying opportunity / upside potential / extends gains /
+  outperforms / surge(s|d|ing) / soar(s|ed) / jumps / climbs / advances /
+  rebounds / recovers / gain(s|ed) / rises / rose
+- Bear ~43 新詞:downside (risk) / extends losses / underperforms /
+  headwind(s) / plunge(s|d|ing) / tumble(s|d) / slump(s|ed) / slides /
+  slid / slip(ped|ping) / drops / drop / declines / declined / falls /
+  fell / sinks / sank / retreats / weakens
+- 標題詞 RDDT "great buying opportunity, ... downside" 現在能匹配兩端
+
+**B. Truth Social filter** — 新 `truth_social_filter` block in yaml:
+- Signature regex strip: `"— President DJT"` / `"-DJT"` / `"RT @ realDonaldTrump"`
+- Relevance check:post 必須含一個 economic/market keyword (economy /
+  tariff / fed / stock / earnings / jobs / oil / dollar / 經濟 / 關稅 等
+  38 keyword + macro topic lexicon 全部 macro term)
+- 不含 → drop 整篇 (政治 endorsement 砍掉)
+- 含 → 保留 + signature stripped 後跑正常 pipeline
+- 套用範圍:只 Truth Social,其他 platform 不影響
+- `trending_tickers.py` 新 `apply_truth_social_filter()` 在 `run()` 內
+  fetch 後 process 前呼叫
+
+Live verification:
+- 49 posts → 41 (7 政治貼被 drop)
+- DJT 從 V3.20.2 qualified 列表完全消失 (簽名 strip 後沒 hit)
+- RDDT 從 matched_terms=[] → matched_terms=[great buying opportunity, downside]
+  (wire-news 詞庫第一次 hit live data)
+- RDDT polarity 還是 0.0 — 但原因從「lexicon 0 hit」變「真實 mixed
+  (bull + bear 各 1)」,這是 honest signal
+
+Validation:
+- `tests/test_trending_tickers.py` → 39 OK (+5 V3.20.3 tests:政治 drop /
+  經濟 keep / 簽名 strip / $DJT body 保留 / wire-news polarity hit)
+- `tests/test_aggregate.py` → 22 OK
+- Live trending output 寫入 Dashboard/trending_tickers.json + 跑 aggregate +
+  bridge → data.json[tactical][retail_sector_pulse] FRESH
+
+下一輪改進可能方向 (defer):
+- Reddit JSON API (取代 RSS) — 拿真實 upvote 數
+- Question-form polarity heuristic ("Is X a buy?" 偏多)
+- Topic matcher 改 word-boundary (現在還是 substring,Codex V3.20.1 留的)
+
+---
 
 ## 🟢 Session Note (v3.20.1 → v3.20.2) — Dual-Gate + Retail Override + Broad ETF Routing
 

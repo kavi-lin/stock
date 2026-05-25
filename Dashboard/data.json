@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-05-25 22:48:39",
+  "last_updated": "2026-05-25 23:06:30",
   "market": {
     "regime": "RISK_ON",
     "cycle_phase": "Mid",
@@ -11188,8 +11188,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-econ",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-econ"
         ]
       },
       "links": {}
@@ -33520,7 +33520,7 @@
     "snap_date": "2026-05-25",
     "generated_at": "2026-05-25 22:29",
     "freshness": "FRESH",
-    "age_label": "19m",
+    "age_label": "37m",
     "total_rows": 528,
     "rows": [
       {
@@ -136813,7 +136813,7 @@
     "snapshot_count": 78
   },
   "tactical": {
-    "as_of": "2026-05-25T14:22:52.396544Z",
+    "as_of": "2026-05-25T14:53:10.051618Z",
     "experimental": true,
     "framework": "Tactical Opportunity Radar v0.3 (thematic-screener)",
     "regime_snapshot": {
@@ -136822,7 +136822,7 @@
       "spy_ma50_status": "above",
       "spy_rsi_14": 71.8,
       "spy_5d_pct": 0.88,
-      "vix": 16.65,
+      "vix": 16.68,
       "yield_curve_t10y2y": 0.9,
       "yield_curve_inverted": false,
       "fed_funds_current": 3.62,
@@ -136843,7 +136843,7 @@
       "triggers": []
     },
     "theme_detector_meta": {
-      "age_hr": 0.1,
+      "age_hr": 0.6,
       "file": "theme_detector_2026-05-25_221518.json"
     },
     "screener_params": {
@@ -157535,15 +157535,15 @@
     ],
     "global_warnings": [],
     "status": "success",
-    "_cache_age_sec": 1575,
-    "_cache_age_hr": 0.4,
+    "_cache_age_sec": 829,
+    "_cache_age_hr": 0.2,
     "_source_file": "2026-05-25.json",
     "_freshness": "FRESH",
     "_total_log_days": 30,
     "retail_sector_pulse": {
       "version": "1.1",
       "schema_note": "V3.20.1 — 3-lane composite (price/polarity/attention); retail sourced from trending_tickers.json",
-      "as_of": "2026-05-25T14:23:49.995899+00:00",
+      "as_of": "2026-05-25T15:05:54.836120+00:00",
       "weights_version": "v1.1",
       "lookback_hours": 72,
       "horizon": "5d",
@@ -157556,25 +157556,63 @@
           "news_label": "neutral",
           "news_count_72h": 2,
           "news_breadth": "narrow",
-          "retail_polarity_score": null,
-          "retail_engagement_score": null,
+          "retail_polarity_score": 0.0,
+          "retail_engagement_score": 2.0,
           "retail_volume_label": "calm",
-          "retail_top_tickers": [],
-          "sample_posts": [],
-          "matched_terms_summary": {},
+          "retail_top_tickers": [
+            {
+              "ticker": "RDDT",
+              "engagement_score": 1.0,
+              "polarity_score": 0.0,
+              "mention_count": 1
+            },
+            {
+              "ticker": "NVDA",
+              "engagement_score": 1.0,
+              "polarity_score": 0.0,
+              "mention_count": 1
+            }
+          ],
+          "sample_posts": [
+            {
+              "ticker": "RDDT",
+              "headline": "Is the recent dip in Reddit (RDDT) a great buying opportunity, or is there more downside ahead?",
+              "url": "https://www.reddit.com/r/investing/comments/1tn1zz6/is_the_recent_dip_in_reddit_rddt_a_great_buying/",
+              "source": "Reddit:r/investing",
+              "engagement": 1.0,
+              "polarity": 0.0,
+              "matched_terms": [
+                "great buying opportunity",
+                "downside"
+              ]
+            },
+            {
+              "ticker": "NVDA",
+              "headline": "$67 invested in CS2 vs $NVDA in 2020",
+              "url": "https://www.reddit.com/r/wallstreetbets/comments/1tna6df/67_invested_in_cs2_vs_nvda_in_2020/",
+              "source": "Reddit:r/wallstreetbets",
+              "engagement": 1.0,
+              "polarity": 0.0,
+              "matched_terms": []
+            }
+          ],
+          "matched_terms_summary": {
+            "great buying opportunity": "bull",
+            "downside": "bear"
+          },
           "predicted_5d_median_pct": 1.7,
           "predicted_5d_bullish_breadth_pct": 100.0,
           "predicted_5d_avg_confidence": 0.61,
           "predicted_5d_label": "mod_bull",
-          "composite_score": 0.34,
-          "composite_direction": "mod_bull",
+          "composite_score": 0.102,
+          "composite_direction": "neutral_mixed",
           "signal_lanes": {
             "price_5d_norm": 0.34,
-            "retail_polarity": null,
-            "retail_attention": null
+            "retail_polarity": 0.0,
+            "retail_attention": 0.0
           },
-          "framing_zh": "5天中位 +1.7% (5/5 看漲); 新聞 2 篇中性。資料部分缺。",
-          "framing_en": "5d med +1.7% (5/5 bull); news 2 neutral. Partial data.",
+          "framing_zh": "5天中位 +1.7% (5/5 看漲); 散戶 polarity +0.00 (RDDT, NVDA); 新聞 2 篇中性。資料部分缺。",
+          "framing_en": "5d med +1.7% (5/5 bull); retail polarity +0.00 (RDDT, NVDA); news 2 neutral. Partial data.",
           "key_tickers": [
             {
               "ticker": "AAPL",
@@ -157610,9 +157648,9 @@
           ],
           "data_health": {
             "news_72h_ok": true,
-            "retail_signals_ok": false,
+            "retail_signals_ok": true,
             "predict_5d_ok": true,
-            "all_ok": false
+            "all_ok": true
           }
         },
         {
@@ -158221,13 +158259,13 @@
         {
           "topic": "ai_capex",
           "post_count": 5,
-          "engagement_score": 7.514,
+          "engagement_score": 11.298,
           "sample_posts": [
             {
               "headline": "Microsoft pulls plug on plans for 244-acre data center in Caledonia",
               "url": "https://www.tmj4.com/news/racine-county/microsoft-pulls-plug-on-plans-for-244-acre-data-center-in-caledonia-after-community-pushback",
               "source": "Hacker News",
-              "engagement": 2.197,
+              "engagement": 5.981,
               "polarity": 0.0
             },
             {
@@ -158250,19 +158288,19 @@
       ],
       "trending_meta": {
         "available": true,
-        "lexicon_version": "v1.1",
-        "post_count": 44,
-        "as_of": "2026-05-25T14:23:27.485231+00:00",
+        "lexicon_version": "v1.3",
+        "post_count": 41,
+        "as_of": "2026-05-25T15:05:01.188711+00:00",
         "source_stats": {
-          "truth_social": 5,
+          "truth_social": 3,
           "reddit": 20,
           "hacker_news": 17,
-          "google_trends": 2
+          "google_trends": 1
         }
       },
       "status": "success",
-      "_cache_age_sec": 1517,
-      "_cache_age_hr": 0.4,
+      "_cache_age_sec": 64,
+      "_cache_age_hr": 0.0,
       "_freshness": "FRESH"
     }
   },
@@ -159736,23 +159774,11 @@
     }
   ],
   "fred_macro": {
-    "generated_at": "2026-05-25T14:48:39+00:00",
+    "generated_at": "2026-05-25T14:56:30+00:00",
     "asof": null,
     "cache_hit": false,
     "cache_age_sec": 0,
     "series": {
-      "DFF": {
-        "value": 3.62,
-        "value_smooth_3d": 3.62,
-        "date": "2026-05-21",
-        "data_freshness_days": 4,
-        "delta_bps_1m": -2.0,
-        "delta_bps_3m": -2.0,
-        "delta_bps_1y": -71.0,
-        "percentile_1y": 0,
-        "trend_30d": "stable",
-        "trend_90d": "stable"
-      },
       "DGS10": {
         "value": 4.57,
         "value_smooth_3d": 4.6033,
@@ -159765,18 +159791,6 @@
         "trend_30d": "rising",
         "trend_90d": "rising"
       },
-      "DFII10": {
-        "value": 2.18,
-        "value_smooth_3d": 2.1633,
-        "date": "2026-05-21",
-        "data_freshness_days": 4,
-        "delta_bps_1m": 26.0,
-        "delta_bps_3m": 38.0,
-        "delta_bps_1y": -5.0,
-        "percentile_1y": 97,
-        "trend_30d": "rising",
-        "trend_90d": "rising"
-      },
       "DGS2": {
         "value": 4.08,
         "value_smooth_3d": 4.0833,
@@ -159786,6 +159800,30 @@
         "delta_bps_3m": 60.0,
         "delta_bps_1y": 8.0,
         "percentile_1y": 99,
+        "trend_30d": "rising",
+        "trend_90d": "rising"
+      },
+      "DFF": {
+        "value": 3.62,
+        "value_smooth_3d": 3.62,
+        "date": "2026-05-21",
+        "data_freshness_days": 4,
+        "delta_bps_1m": -2.0,
+        "delta_bps_3m": -2.0,
+        "delta_bps_1y": -71.0,
+        "percentile_1y": 0,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "DFII10": {
+        "value": 2.18,
+        "value_smooth_3d": 2.1633,
+        "date": "2026-05-21",
+        "data_freshness_days": 4,
+        "delta_bps_1m": 26.0,
+        "delta_bps_3m": 38.0,
+        "delta_bps_1y": -5.0,
+        "percentile_1y": 97,
         "trend_30d": "rising",
         "trend_90d": "rising"
       },
@@ -159824,12 +159862,12 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
-      "CPILFESL": {
-        "value": 335.423,
-        "date": "2026-04-01",
-        "data_freshness_days": 54,
-        "yoy_change_pct": 2.74,
-        "mom_change_pct": 0.38,
+      "PCEPILFE": {
+        "value": 129.279,
+        "date": "2026-03-01",
+        "data_freshness_days": 85,
+        "yoy_change_pct": 3.2,
+        "mom_change_pct": 0.29,
         "wow_change": 0.0,
         "percentile_1y": 92,
         "trend_30d": "stable",
@@ -159857,6 +159895,17 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
+      "CPILFESL": {
+        "value": 335.423,
+        "date": "2026-04-01",
+        "data_freshness_days": 54,
+        "yoy_change_pct": 2.74,
+        "mom_change_pct": 0.38,
+        "wow_change": 0.0,
+        "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
       "ICSA": {
         "value": 209000.0,
         "date": "2026-05-16",
@@ -159868,16 +159917,16 @@
         "trend_30d": "falling",
         "trend_90d": "stable"
       },
-      "PCEPILFE": {
-        "value": 129.279,
-        "date": "2026-03-01",
-        "data_freshness_days": 85,
-        "yoy_change_pct": 3.2,
-        "mom_change_pct": 0.29,
+      "RSXFS": {
+        "value": 656115.0,
+        "date": "2026-04-01",
+        "data_freshness_days": 54,
+        "yoy_change_pct": 5.21,
+        "mom_change_pct": 0.47,
         "wow_change": 0.0,
         "percentile_1y": 92,
         "trend_30d": "stable",
-        "trend_90d": "stable"
+        "trend_90d": "rising"
       },
       "SAHMREALTIME": {
         "value": 0.13,
@@ -159889,17 +159938,6 @@
         "percentile_1y": 8,
         "trend_30d": "stable",
         "trend_90d": "falling"
-      },
-      "RSXFS": {
-        "value": 656115.0,
-        "date": "2026-04-01",
-        "data_freshness_days": 54,
-        "yoy_change_pct": 5.21,
-        "mom_change_pct": 0.47,
-        "wow_change": 0.0,
-        "percentile_1y": 92,
-        "trend_30d": "stable",
-        "trend_90d": "rising"
       },
       "BAMLH0A0HYM2": {
         "value": 2.78,
@@ -160096,7 +160134,7 @@
       "missing": [],
       "errors": []
     },
-    "_cache_age_sec": 28
+    "_cache_age_sec": 628
   },
   "theme_overrides": [
     {
@@ -160174,11 +160212,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 36,
+          "n_events": 38,
           "first_seen_event": "2026-05-10",
           "graduated_candidate": true,
           "graduated_confirmed": true,
-          "continued_count": 16
+          "continued_count": 17
         }
       },
       {
@@ -160196,11 +160234,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 14,
+          "n_events": 15,
           "first_seen_event": "2026-05-13",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 13
+          "continued_count": 14
         }
       },
       {
@@ -160218,11 +160256,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 16,
+          "n_events": 17,
           "first_seen_event": "2026-05-11",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 15
+          "continued_count": 16
         }
       },
       {
@@ -160239,11 +160277,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 14,
+          "n_events": 15,
           "first_seen_event": "2026-05-13",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 13
+          "continued_count": 14
         }
       },
       {
@@ -160261,11 +160299,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 10,
+          "n_events": 11,
           "first_seen_event": "2026-05-18",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 8
+          "continued_count": 9
         }
       },
       {
@@ -160282,11 +160320,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 18,
+          "n_events": 19,
           "first_seen_event": "2026-05-10",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 16
+          "continued_count": 17
         }
       },
       {
@@ -160303,11 +160341,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 14,
+          "n_events": 15,
           "first_seen_event": "2026-05-13",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 13
+          "continued_count": 14
         }
       },
       {
@@ -160324,11 +160362,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 4,
+          "n_events": 5,
           "first_seen_event": "2026-05-23",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 3
+          "continued_count": 4
         }
       },
       {
@@ -160345,11 +160383,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 4,
+          "n_events": 5,
           "first_seen_event": "2026-05-23",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 3
+          "continued_count": 4
         }
       },
       {
@@ -160366,11 +160404,11 @@
         "days_since_last_hit": 3,
         "note": "watchlist only; not a Phase 3 modulation trigger in V2.19",
         "trajectory": {
-          "n_events": 4,
+          "n_events": 5,
           "first_seen_event": "2026-05-23",
           "graduated_candidate": false,
           "graduated_confirmed": false,
-          "continued_count": 3
+          "continued_count": 4
         }
       }
     ],
@@ -160409,6 +160447,6 @@
       "first_hit_filtered": 37,
       "digests_scanned": 30
     },
-    "_freshness_hr": 0.4
+    "_freshness_hr": 0.2
   }
 }

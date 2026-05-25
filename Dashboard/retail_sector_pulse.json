@@ -1,7 +1,7 @@
 {
   "version": "1.1",
   "schema_note": "V3.20.1 — 3-lane composite (price/polarity/attention); retail sourced from trending_tickers.json",
-  "as_of": "2026-05-25T14:23:49.995899+00:00",
+  "as_of": "2026-05-25T15:05:54.836120+00:00",
   "weights_version": "v1.1",
   "lookback_hours": 72,
   "horizon": "5d",
@@ -14,25 +14,63 @@
       "news_label": "neutral",
       "news_count_72h": 2,
       "news_breadth": "narrow",
-      "retail_polarity_score": null,
-      "retail_engagement_score": null,
+      "retail_polarity_score": 0.0,
+      "retail_engagement_score": 2.0,
       "retail_volume_label": "calm",
-      "retail_top_tickers": [],
-      "sample_posts": [],
-      "matched_terms_summary": {},
+      "retail_top_tickers": [
+        {
+          "ticker": "RDDT",
+          "engagement_score": 1.0,
+          "polarity_score": 0.0,
+          "mention_count": 1
+        },
+        {
+          "ticker": "NVDA",
+          "engagement_score": 1.0,
+          "polarity_score": 0.0,
+          "mention_count": 1
+        }
+      ],
+      "sample_posts": [
+        {
+          "ticker": "RDDT",
+          "headline": "Is the recent dip in Reddit (RDDT) a great buying opportunity, or is there more downside ahead?",
+          "url": "https://www.reddit.com/r/investing/comments/1tn1zz6/is_the_recent_dip_in_reddit_rddt_a_great_buying/",
+          "source": "Reddit:r/investing",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": [
+            "great buying opportunity",
+            "downside"
+          ]
+        },
+        {
+          "ticker": "NVDA",
+          "headline": "$67 invested in CS2 vs $NVDA in 2020",
+          "url": "https://www.reddit.com/r/wallstreetbets/comments/1tna6df/67_invested_in_cs2_vs_nvda_in_2020/",
+          "source": "Reddit:r/wallstreetbets",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "matched_terms_summary": {
+        "great buying opportunity": "bull",
+        "downside": "bear"
+      },
       "predicted_5d_median_pct": 1.7,
       "predicted_5d_bullish_breadth_pct": 100.0,
       "predicted_5d_avg_confidence": 0.61,
       "predicted_5d_label": "mod_bull",
-      "composite_score": 0.34,
-      "composite_direction": "mod_bull",
+      "composite_score": 0.102,
+      "composite_direction": "neutral_mixed",
       "signal_lanes": {
         "price_5d_norm": 0.34,
-        "retail_polarity": null,
-        "retail_attention": null
+        "retail_polarity": 0.0,
+        "retail_attention": 0.0
       },
-      "framing_zh": "5天中位 +1.7% (5/5 看漲); 新聞 2 篇中性。資料部分缺。",
-      "framing_en": "5d med +1.7% (5/5 bull); news 2 neutral. Partial data.",
+      "framing_zh": "5天中位 +1.7% (5/5 看漲); 散戶 polarity +0.00 (RDDT, NVDA); 新聞 2 篇中性。資料部分缺。",
+      "framing_en": "5d med +1.7% (5/5 bull); retail polarity +0.00 (RDDT, NVDA); news 2 neutral. Partial data.",
       "key_tickers": [
         {
           "ticker": "AAPL",
@@ -68,9 +106,9 @@
       ],
       "data_health": {
         "news_72h_ok": true,
-        "retail_signals_ok": false,
+        "retail_signals_ok": true,
         "predict_5d_ok": true,
-        "all_ok": false
+        "all_ok": true
       }
     },
     {
@@ -679,13 +717,13 @@
     {
       "topic": "ai_capex",
       "post_count": 5,
-      "engagement_score": 7.514,
+      "engagement_score": 11.298,
       "sample_posts": [
         {
           "headline": "Microsoft pulls plug on plans for 244-acre data center in Caledonia",
           "url": "https://www.tmj4.com/news/racine-county/microsoft-pulls-plug-on-plans-for-244-acre-data-center-in-caledonia-after-community-pushback",
           "source": "Hacker News",
-          "engagement": 2.197,
+          "engagement": 5.981,
           "polarity": 0.0
         },
         {
@@ -708,14 +746,14 @@
   ],
   "trending_meta": {
     "available": true,
-    "lexicon_version": "v1.1",
-    "post_count": 44,
-    "as_of": "2026-05-25T14:23:27.485231+00:00",
+    "lexicon_version": "v1.3",
+    "post_count": 41,
+    "as_of": "2026-05-25T15:05:01.188711+00:00",
     "source_stats": {
-      "truth_social": 5,
+      "truth_social": 3,
       "reddit": 20,
       "hacker_news": 17,
-      "google_trends": 2
+      "google_trends": 1
     }
   }
 }
