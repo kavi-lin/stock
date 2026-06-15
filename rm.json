@@ -1,0 +1,20 @@
+{
+  "ticker": "PANW",
+  "generated_at": "2026-05-30T03:52:14.683230+00:00",
+  "inputs": {
+    "vol_budget_pct": 0.6,
+    "positions_loaded": 1,
+    "candidate_sector": "Technology",
+    "portfolio_size_usd": 100000
+  },
+  "ticker_stats": {
+    "daily_vol_pct": 2.746,
+    "ann_vol_pct": 43.58,
+    "avg_correlation_with_portfolio": 0.15
+  },
+  "raw_vol_adjusted_cap_pct": 20.0,
+  "correlation_multiplier": 1.0,
+  "sector_cap_triggered": false,
+  "final_position_cap_pct": 20.0,
+  "reasoning": "daily_vol=2.75% → raw_cap=20.00% │ avg_corr=+0.15 → mult=1.0"
+}

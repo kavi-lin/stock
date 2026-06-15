@@ -243,6 +243,18 @@ def main():
     generate_json_report(analysis, json_file)
     generate_markdown_report(analysis, md_file)
 
+    # Keep last 30 of each kind — timestamped reports accumulated forever
+    # (222 files) while bridge.py only ever reads the newest.
+    import glob as _glob
+    for pat in ("market_breadth_*.json", "market_breadth_*.md"):
+        candidates = [f for f in sorted(_glob.glob(os.path.join(args.output_dir, pat)))
+                      if "history" not in os.path.basename(f)]
+        for f in candidates[:-30]:
+            try:
+                os.remove(f)
+            except OSError:
+                pass
+
     print()
     print("=" * 70)
     print("Market Breadth Analysis Complete")

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | 市場氛圍</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      /* brief columns — same visual language as break-news.html */
+      .mood-brief-text { font-size: 13px; color: var(--text-main); line-height: 1.7; }
+      .mood-brief-cols {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px; margin-top: 10px;
+      }
+      .mood-brief-col {
+        border-left: 3px solid var(--border); padding: 2px 0 2px 10px; font-size: 11px;
+      }
+      .mood-brief-col-title {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: .06em; margin-bottom: 4px;
+      }
+      .mood-brief-col ul { margin: 0; padding-left: 16px; }
+      .mood-brief-col li { margin: 3px 0; color: var(--text-main); line-height: 1.5; }
+      .mood-chip {
+        display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+        border-radius: 999px; font-size: 10px; font-family: 'JetBrains Mono', monospace;
+        background: var(--bg-card); border: 1px solid var(--border); white-space: nowrap;
+      }
+      .mood-verdict-big { font-size: 34px; font-weight: 800; letter-spacing: .04em; line-height: 1.1; }
+      .mood-row { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        padding: 7px 4px; border-bottom: 1px solid var(--border); font-size: 12px; }
+      .mood-row:last-child { border-bottom: none; }
+      .mood-section-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .mood-muted { color: var(--text-muted); }
+      .mood-srcbadge {
+        display: inline-block; min-width: 54px; text-align: center; padding: 1px 6px;
+        border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      }
+      .mood-empty { text-align: center; color: var(--text-muted); font-size: 11px; padding: 18px 10px; }
+      .mood-verdict-badge { font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 4px; letter-spacing: .05em; }
+    </style>
+</head>
+<body class="flex min-h-screen transition-all" data-page="mood">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="ml-64 flex-1 flex flex-col">
+
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-20">
+            <div class="flex items-center gap-3">
+                <i data-lucide="gauge" class="w-5 h-5 text-indigo-500"></i>
+                <h2 id="mood-title" class="text-lg font-bold">市場氛圍</h2>
+                <span id="mood-subtitle" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden sm:block">Market Mood · 散戶視角 + 3 日趨勢</span>
+                <span class="experimental-badge" id="mood-experimental-badge">
+                    <i data-lucide="flask-conical" class="w-3 h-3"></i>
+                    <span id="mood-experimental-text">EXPERIMENTAL</span>
+                </span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="mood-disclaimer" class="text-[10px] text-zinc-500 hidden md:block"></span>
+                <span id="mood-as-of" class="text-[10px] font-mono text-zinc-500"></span>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-5">
+
+            <!-- No-data fallback -->
+            <div id="mood-no-data" class="glass-card p-8 text-center hidden">
+                <i data-lucide="cloud-off" class="w-8 h-8 mx-auto mb-3 text-zinc-500"></i>
+                <p id="mood-no-data-text" class="text-sm text-zinc-500">市場氛圍資料尚未產生，請先跑 <code>daily_update.sh</code>（Step 9.3）。</p>
+            </div>
+
+            <!-- 1. VERDICT BAND「今天該不該進場？」 -->
+            <section id="mood-verdict" class="glass-card p-5 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col justify-center gap-2">
+                        <div id="mood-verdict-q" class="text-[11px] uppercase tracking-widest" style="color:var(--text-muted);"></div>
+                        <div id="mood-verdict-label" class="mood-verdict-big">—</div>
+                        <div id="mood-verdict-score" class="text-xs font-mono" style="color:var(--text-muted);"></div>
+                        <div id="mood-verdict-chips" class="flex flex-wrap gap-1.5 mt-1"></div>
+                        <div id="mood-divergence" class="text-[11px] font-bold hidden" style="color:#f59e0b;"></div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span id="mood-brief-regime" class="mood-chip" style="display:none;font-weight:700;"></span>
+                            <span id="mood-brief-meta" class="text-[10px] font-mono" style="color:var(--text-muted);"></span>
+                        </div>
+                        <div id="mood-brief-body"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. 3-DAY TREND + ANCHORS -->
+            <section id="mood-trend-wrap" class="glass-card p-4 space-y-3 hidden">
+                <h3 class="mood-section-title" id="mood-trend-title">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-indigo-500"></i><span></span>
+                </h3>
+                <div id="mood-trend-chart"></div>
+                <div id="mood-regime-timeline" class="flex flex-wrap items-center gap-1.5 pt-2" style="border-top:1px solid var(--border);"></div>
+                <div id="mood-anchors" class="flex flex-wrap items-center gap-1.5"></div>
+            </section>
+
+            <!-- 3. INTRADAY LIVE TAPE (conditional on market_open) -->
+            <section id="mood-intraday" class="glass-card p-4 space-y-3 hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="mood-section-title" id="mood-intraday-title">
+                        <i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i><span></span>
+                        <span id="mood-market-badge" class="mood-verdict-badge"></span>
+                    </h3>
+                    <span id="mood-intraday-asof" class="text-[10px] font-mono" style="color:var(--text-muted);"></span>
+                </div>
+                <div id="mood-intraday-body"></div>
+            </section>
+
+            <!-- 4. SOCIAL RADAR (Reddit / HN / Bluesky) -->
+            <section id="mood-social" class="glass-card p-4 space-y-3 hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="mood-section-title" id="mood-social-title">
+                        <i data-lucide="users" class="w-4 h-4 text-indigo-500"></i><span></span>
+                    </h3>
+                    <span id="mood-retail-tilt" class="text-xs font-bold"></span>
+                </div>
+                <div id="mood-hot-tickers" class="flex flex-wrap gap-2"></div>
+                <div id="mood-buzz-strip" class="flex flex-wrap items-center gap-1.5 pt-2" style="border-top:1px solid var(--border);"></div>
+                <div id="mood-posts-feed" class="pt-2" style="border-top:1px solid var(--border);"></div>
+            </section>
+
+            <!-- 4b. TRUMP POLICY RADAR (Truth Social) -->
+            <section id="mood-trump" class="glass-card p-4 space-y-2 hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="mood-section-title" id="mood-trump-title">
+                        <i data-lucide="megaphone" class="w-4 h-4 text-amber-500"></i><span></span>
+                    </h3>
+                    <span id="mood-trump-hint" class="text-[10px]" style="color:var(--text-muted);"></span>
+                </div>
+                <div id="mood-trump-body"></div>
+            </section>
+
+            <!-- 5. BREAKING DEBATE SIGNALS -->
+            <section id="mood-debates" class="glass-card p-4 space-y-3 hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="mood-section-title" id="mood-debates-title">
+                        <i data-lucide="swords" class="w-4 h-4 text-rose-500"></i><span></span>
+                    </h3>
+                    <a href="break-news.html" id="mood-debates-link" class="text-[10px] hover:text-indigo-500 transition-all" style="color:var(--text-muted);"></a>
+                </div>
+                <div id="mood-clusters-strip" class="flex flex-wrap items-center gap-1.5"></div>
+                <div id="mood-debates-list"></div>
+            </section>
+
+            <!-- 6. SECTOR SENTIMENT RANKING -->
+            <section id="mood-sector-wrap" class="glass-card p-4 hidden">
+                <h3 class="mood-section-title mb-2" id="mood-sector-title">
+                    <i data-lucide="layout-list" class="w-4 h-4 text-indigo-500"></i><span></span>
+                </h3>
+                <div id="mood-sector-list"></div>
+            </section>
+
+            <!-- 7. OPTIONS & SENTIMENT GAUGES (demoted compact strip) -->
+            <section id="mood-tiles" class="glass-card p-4 hidden">
+                <h3 class="mood-section-title mb-3" id="mood-tiles-title">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4 text-zinc-500"></i><span></span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div id="mood-tile-options" class="glass-card p-3" style="border-left:4px solid var(--border);">
+                        <div class="text-[10px] uppercase tracking-wider" style="color:var(--text-muted);" id="mood-options-label">期權 Put/Call</div>
+                        <div id="mood-options-value" class="text-xl font-bold font-mono mt-1">—</div>
+                        <div id="mood-options-interp" class="text-[10px] mt-1 leading-snug" style="color:var(--text-muted);"></div>
+                    </div>
+                    <div id="mood-tile-vix" class="glass-card p-3" style="border-left:4px solid var(--border);">
+                        <div class="text-[10px] uppercase tracking-wider" style="color:var(--text-muted);" id="mood-vix-label">VIX · SKEW</div>
+                        <div id="mood-vix-value" class="text-xl font-bold font-mono mt-1">—</div>
+                        <div id="mood-vix-interp" class="text-[10px] mt-1 leading-snug" style="color:var(--text-muted);"></div>
+                    </div>
+                    <div id="mood-tile-fg" class="glass-card p-3" style="border-left:4px solid var(--border);">
+                        <div class="text-[10px] uppercase tracking-wider" style="color:var(--text-muted);" id="mood-fg-label">Fear &amp; Greed</div>
+                        <div id="mood-fg-value" class="text-xl font-bold font-mono mt-1">—</div>
+                        <div id="mood-fg-subs" class="mt-2 space-y-0.5"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="mood-tooltip" aria-hidden="true"></div>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="data-store.js"></script>
+    <script src="trend-chart.js"></script>
+    <script src="page-mood.js"></script>
+</body>
+</html>

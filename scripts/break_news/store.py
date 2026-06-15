@@ -93,8 +93,11 @@ def write_item(news_id: str, payload: dict) -> None:
         _atomic_write_json(item_path(news_id), payload)
 
 
-def init_item(source: dict, triage: dict, headline: str, raw_summary: str) -> str:
-    """Create a fresh `pending_debate` item. Returns news_id. Idempotent on hash."""
+def init_item(source: dict, triage: dict, headline: str, raw_summary: str,
+              cluster: dict | None = None) -> str:
+    """Create a fresh `pending_debate` item. Returns news_id. Idempotent on hash.
+    `cluster` carries event-cluster context (echo_count / escalated /
+    prior_summary) consumed by the debater's escalation prompt."""
     url = source.get("url")
     fp = source.get("feed_fingerprint")
     seen = load_seen()
@@ -115,6 +118,7 @@ def init_item(source: dict, triage: dict, headline: str, raw_summary: str) -> st
         "headline_zh": None,
         "raw_summary": raw_summary,
         "triage": triage,
+        "cluster": cluster,
         "thread": [],
         "summary": None,
         "errors": [],
@@ -277,8 +281,17 @@ def list_items_by_state(states: list[str] | None = None) -> list[dict]:
             "binary_flag": (d.get("triage") or {}).get("binary_flag"),
             "comment_count": len(d.get("thread") or []),
             "consensus_verdict": ((d.get("summary") or {}) or {}).get("consensus_verdict"),
+            "final_take": (((d.get("summary") or {}) or {}).get("final_take") or "")[:400] or None,
+            "cluster_id": (d.get("cluster") or {}).get("cluster_id"),
+            "echo_count": (d.get("cluster") or {}).get("echo_count"),
+            "escalated": (d.get("cluster") or {}).get("escalated"),
         })
-    out.sort(key=lambda x: x.get("last_activity_ts") or "", reverse=True)
+    # Sort newest → oldest by news arrival (fetched_at). Falls back to
+    # last_activity_ts only if fetched_at is missing. We deliberately avoid
+    # sorting by last_activity_ts as primary because debate activity bumps it
+    # and old news would float to the top during debate.
+    out.sort(key=lambda x: x.get("fetched_at") or x.get("last_activity_ts") or "",
+             reverse=True)
     return out
 
 

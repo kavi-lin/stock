@@ -494,6 +494,27 @@ function _presetTip(key) {
             `,
         };
     }
+    // V3.25.6 — column-header tooltip. Resolves the `data-col-tip` key on a
+    // <th> to its label + tip i18n strings and renders inside the existing
+    // #mom-pill-tooltip card (mpt-col styling). Replaces the prior native
+    // `title="..."` binding so the column tooltips share the same visual
+    // language as signal / warning / preset tips.
+    function _renderColTip(el) {
+        const key = el.dataset.colTip;
+        if (!key) return null;
+        const tr = t();
+        const labelKey = `col_${key}`;
+        const tipKey   = `col_${key}_tip`;
+        const label = tr[labelKey] || el.id || key;
+        const body  = tr[tipKey];
+        if (!body) return null;
+        return {
+            cls: 'mpt-col',
+            html: `<div class="mpt-title">${label}</div>
+                   <div class="mpt-body">${body
+                       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`,
+        };
+    }
     function showTip(el) {
         const tip = document.getElementById('mom-pill-tooltip');
         if (!tip) return;
@@ -501,6 +522,7 @@ function _presetTip(key) {
         if (el.dataset.presetTip)      content = _renderPresetTip(el);
         else if (el.dataset.warnTip)   content = _renderSignalTip(el, true);
         else if (el.dataset.sigTip)    content = _renderSignalTip(el, false);
+        else if (el.dataset.colTip)    content = _renderColTip(el);
         if (!content) return;
         tip.className = content.cls;
         tip.innerHTML = content.html;
@@ -525,7 +547,9 @@ function _presetTip(key) {
         const tip = document.getElementById('mom-pill-tooltip');
         if (tip) tip.classList.remove('visible');
     }
-    const SELECTOR = '[data-sig-tip], [data-warn-tip], [data-preset-tip]';
+    // V3.25.6 — `data-col-tip` joins the same hover dispatcher so column
+    // headers render in the styled tooltip card alongside signals/presets.
+    const SELECTOR = '[data-sig-tip], [data-warn-tip], [data-preset-tip], [data-col-tip]';
     document.addEventListener('mouseover', e => {
         const el = e.target.closest(SELECTOR);
         if (!el) return;
@@ -598,6 +622,12 @@ function defaultFilter() {
         requireEpsAccel: false,
         minDtc: null,
         topSectors: null,   // 1-N int; only keep tickers in top-N sectors
+        // V3.22 — fundamentals filters (null = inactive). Sourced from the
+        // quarterly-income TTM block in momentum.py / screen.py output.
+        maxPs:        null,   // upper bound on P/S TTM
+        minGm:        null,   // lower bound on TTM Gross Margin %
+        minRevYoy:    null,   // lower bound on TTM Revenue YoY %
+        minReturn5d:  null,   // lower bound on 5-day price return %
     };
 }
 
@@ -627,6 +657,8 @@ function _mkFilter(overrides) {
         requireVcp: false, requireVolDryupSpike: false,
         minEpsYoy: null, requireEpsAccel: false,
         minDtc: null, topSectors: null,
+        // V3.22 — fundamentals defaults (null = unused; presets can override)
+        maxPs: null, minGm: null, minRevYoy: null, minReturn5d: null,
         ...overrides,
     };
 }
@@ -664,6 +696,28 @@ const PRESETS = {
         filter: _mkFilter({
             minDtc: 5,
             requiredSignals: ['dtc_squeeze_candidate'],
+        }),
+    },
+    // V3.22 — fundamentals-aware presets. Sales Breakout = growth thrust
+    // (no P/S cap so true leaders like NVDA/LLY aren't filtered out at the
+    // breakout moment). Value Momentum = cheap-but-confirmed with a GM
+    // floor + non-shrinking revenue to dodge value-trap retail / commodities.
+    sales_breakout: {
+        filter: _mkFilter({
+            stage: 'Stage 2 uptrend',
+            requiredSignals: ['volume_expansion'],
+            minRs: 80,
+            minRevYoy: 15,
+        }),
+    },
+    value_momentum: {
+        filter: _mkFilter({
+            stage: 'Stage 2 uptrend',
+            minScore: 65,
+            maxPs: 5,
+            minRevYoy: 0,
+            minGm: 15,
+            excludedWarnings: ['parabolic_blowoff_risk'],
         }),
     },
 
@@ -954,8 +1008,11 @@ function renderUniverseToggle() {
 
 // V1.71.x — Featured presets (5 most strategic) vs Secondary (5 in More dropdown)
 // V2.2: 5 featured + 6 secondary (was 5 + 5; now leader-finder oriented)
-const FEATURED_PRESETS  = ['nh_leaders', 'vcp_setup', 'dual_engine', 'breakout', 'dtc_squeeze'];
-const SECONDARY_PRESETS = ['rs_pullback', 'near_high_pool', 'safe_quality', 'macd_breakout', 'macd_accel', 'all'];
+// V3.22 — sales_breakout + value_momentum promoted to Featured (the user
+// asked for fundamental-aware top-row entry points). dtc_squeeze pushed
+// into Secondary to keep Featured at 5 (UI grid is sized for 5 tabs).
+const FEATURED_PRESETS  = ['nh_leaders', 'sales_breakout', 'value_momentum', 'vcp_setup', 'breakout'];
+const SECONDARY_PRESETS = ['dual_engine', 'dtc_squeeze', 'rs_pullback', 'near_high_pool', 'safe_quality', 'macd_breakout', 'macd_accel', 'all'];
 
 // Compute match count for a given preset (without mutating active filter state)
 function _countMatchesForPreset(key) {
@@ -1013,6 +1070,13 @@ function _activePresetKey() {
         if (Boolean(f.requireVcp)            !== Boolean(target.requireVcp))            continue;
         if (Boolean(f.requireVolDryupSpike)  !== Boolean(target.requireVolDryupSpike))  continue;
         if (Boolean(f.requireEpsAccel)       !== Boolean(target.requireEpsAccel))       continue;
+        // V3.22 fundamentals — required to disambiguate sales_breakout vs
+        // value_momentum (both share Stage 2 + Rev YoY thresholds but differ
+        // on maxPs / minGm).
+        if (!_numEq(f.maxPs,         target.maxPs))         continue;
+        if (!_numEq(f.minGm,         target.minGm))         continue;
+        if (!_numEq(f.minRevYoy,     target.minRevYoy))     continue;
+        if (!_numEq(f.minReturn5d,   target.minReturn5d))   continue;
         return key;
     }
     return null;
@@ -1167,6 +1231,14 @@ function matchesFilter(r) {
     if (f.requireEpsAccel && r.eps_acceleration !== 'accelerating') return false;
     if (f.minDtc != null && (r.days_to_cover == null || r.days_to_cover < f.minDtc)) return false;
     if (f.topSectors != null && (r.sector_rs_rank == null || r.sector_rs_rank > f.topSectors)) return false;
+
+    // ── V3.22 fundamentals filter chain ────────────────────────────────────
+    // Missing data (null) fails the filter — `--max-ps 5` shouldn't quietly
+    // accept tickers whose fundamentals weren't fetched.
+    if (f.maxPs       != null && (r.ps_ttm          == null || r.ps_ttm          > f.maxPs))       return false;
+    if (f.minGm       != null && (r.gm_ttm_pct      == null || r.gm_ttm_pct      < f.minGm))       return false;
+    if (f.minRevYoy   != null && (r.rev_yoy_ttm_pct == null || r.rev_yoy_ttm_pct < f.minRevYoy))   return false;
+    if (f.minReturn5d != null && (r.return_5d_pct   == null || r.return_5d_pct   < f.minReturn5d)) return false;
 
     return true;
 }
@@ -1380,6 +1452,25 @@ function _volCellText(r) {
     const mark = r.intraday_state === 'partial' ? '*' : '';
     return `${r.ratio_20d.toFixed(2)}×${mark}`;
 }
+// V3.25.8 — 3D rolling-volume subscript shown beneath the today × ratio.
+// Returns inner HTML for the subscript block (3D ratio line + state label).
+// Empty string when no 3D data — keeps the cell tight on legacy rows.
+function _vol3dSubHTML(r) {
+    const tr = t();
+    const ratio = r.vol_3d_vs_20d;
+    const state = r.vol_3d_state;          // "expanding" | "neutral" | "drying_up"
+    if (ratio == null && !state) return '';
+    const ratioTxt = ratio == null ? '—' : `${ratio.toFixed(2)}×`;
+    const stateLbl =
+        state === 'expanding' ? (tr.vol_3d_state_expanding || '放量') :
+        state === 'drying_up' ? (tr.vol_3d_state_drying_up || '量縮') :
+        state === 'neutral'   ? (tr.vol_3d_state_neutral   || '中性') : '';
+    const stateClass = state ? `vol-3d-state state-${state}` : 'vol-3d-state';
+    return (
+        `<div class="vol-3d">3D ${ratioTxt}</div>` +
+        (stateLbl ? `<div class="${stateClass}">${stateLbl}</div>` : '')
+    );
+}
 function _volCellColor(r) {
     if (r.intraday_state === 'too_early') return '#71717a';
     return _ratioColor(r.ratio_20d);
@@ -1395,6 +1486,34 @@ function _volCellTitle(r) {
              + ` (elapsed ${r.elapsed_min || 0}m)`;
     }
     return '';
+}
+
+// V3.22 — fundamentals cluster (P/S / GM% / Rev YoY / 5D return).
+// V3.25.1 — `col-fund` doubles as the hide-control AND the visual tint class;
+// the inline <style> in momentum.html targets `.col-fund` for both purposes.
+// Numeric formatting:
+//   P/S      → two-decimal (or "—" when null / FMP unavailable)
+//   GM%      → integer percent (TTM gross margin)
+//   Rev YoY  → signed integer percent, green / red colored
+//   5D ret   → signed integer percent, green / red colored
+function _fundamentalsCellsHTML(r) {
+    const fmtPs   = v => (v == null ? '—' : v.toFixed(2));
+    const fmtPct  = v => (v == null ? '—' : `${Math.round(v)}%`);
+    const fmtPctS = v => {
+        if (v == null) return '—';
+        const sign = v >= 0 ? '+' : '';
+        return `${sign}${Math.round(v)}%`;
+    };
+    const colorSigned = v => v == null ? '#71717a' : v >= 0 ? '#86efac' : '#fca5a5';
+    const titleLag = r.fundamentals_lag_days != null
+        ? `data lag ${Math.round(r.fundamentals_lag_days)}d`
+        : 'no fundamentals cached yet';
+    return (
+        `<td class="col-fund text-right font-mono text-xs" title="${titleLag}">${fmtPs(r.ps_ttm)}</td>` +
+        `<td class="col-fund text-right font-mono text-xs">${fmtPct(r.gm_ttm_pct)}</td>` +
+        `<td class="col-fund text-right font-mono text-xs" style="color:${colorSigned(r.rev_yoy_ttm_pct)}">${fmtPctS(r.rev_yoy_ttm_pct)}</td>` +
+        `<td class="col-fund text-right font-mono text-xs" style="color:${colorSigned(r.return_5d_pct)}">${fmtPctS(r.return_5d_pct)}</td>`
+    );
 }
 
 function rowHTML(r) {
@@ -1431,9 +1550,15 @@ function rowHTML(r) {
     const watchBadge = isWatchlist
         ? `<span class="text-[11px]" title="${t().watchlist_badge_tooltip || '自選清單'}">⭐</span>`
         : '';
+    // V3.25.1 — every <td> carries one of three view classes:
+    //   col-anchor : rendered on both Tech and Fund tabs
+    //   col-tech   : Tech tab only
+    //   col-fund   : Fund tab only (visually tinted via inline CSS)
+    // The <th> at the same index carries the matching class; CSS in
+    // momentum.html hides .col-{other} when [data-view] is the wrong lens.
     return `<tr class="${rowClass}" data-ticker="${r.ticker}">
-        <td class="text-zinc-500 font-mono text-xs">${r.rank ?? '—'}</td>
-        <td>
+        <td class="col-anchor text-zinc-500 font-mono text-xs">${r.rank ?? '—'}</td>
+        <td class="col-anchor">
             <div class="flex items-center gap-1.5">
                 <span class="font-bold">${r.ticker}</span>
                 ${watchBadge}
@@ -1443,8 +1568,8 @@ function rowHTML(r) {
             </div>
             ${sectorTxt}
         </td>
-        <td class="text-right font-mono">$${r.price != null ? r.price.toFixed(2) : '—'}</td>
-        <td class="text-right font-mono text-xs" style="${(() => {
+        <td class="col-anchor text-right font-mono">$${r.price != null ? r.price.toFixed(2) : '—'}</td>
+        <td class="col-fund text-right font-mono text-xs" style="${(() => {
             const pe = r.pe;
             if (pe == null) return 'color:#52525b';
             if (pe < 0)        return 'color:#f87171;font-weight:700';
@@ -1452,21 +1577,22 @@ function rowHTML(r) {
             if (pe > 30)       return 'color:#fbbf24;font-weight:700';
             return 'color:var(--text-main)';
         })()}" title="P/E (TTM)">${r.pe != null ? r.pe.toFixed(1) : '—'}</td>
-        <td class="text-right score-cell">${scoreBatteryHTML(r.score)}</td>
-        <td class="text-right font-mono text-xs font-bold">${rankScoreHTML(r)}</td>
-        <td><span class="mlabel label-${r.label || 'NEUTRAL'} pill-clickable" data-pill-type="label" data-pill-value="${r.label || ''}" title="${r.label || ''}">${labelText(r.label)}</span></td>
-        <td class="text-xs text-zinc-400 stage-cell" data-ticker-stage="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4)" title="${r.stage || ''}">${stageLabel(r.stage)}</td>
-        <td class="text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);color:${_volCellColor(r)};font-weight:700" title="${_volCellTitle(r)}">${_volCellText(r)}</td>
-        <td class="text-right font-mono text-xs" style="${above200Color}">${above200Txt}</td>
-        <td class="text-right rsi-cell" data-ticker-rsi="${r.ticker}" style="cursor:pointer">${rsiCell(r.rsi_14)}</td>
-        <td class="text-right macd-cell" data-ticker-macd="${r.ticker}" style="cursor:pointer">${macdCell(r)}</td>
-        <td>${sigHTML || '<span class="text-zinc-600 text-xs">—</span>'}</td>
-        <td class="text-xs" style="color:${shortColor}">${shortTxt}</td>
+        <td class="col-tech text-right score-cell">${scoreBatteryHTML(r.score)}</td>
+        <td class="col-tech text-right font-mono text-xs font-bold">${rankScoreHTML(r)}</td>
+        <td class="col-tech"><span class="mlabel label-${r.label || 'NEUTRAL'} pill-clickable" data-pill-type="label" data-pill-value="${r.label || ''}" title="${r.label || ''}">${labelText(r.label)}</span></td>
+        <td class="col-tech text-xs text-zinc-400 stage-cell" data-ticker-stage="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4)" title="${(!r.stage || r.stage === 'unknown') ? (t().stage_unknown_note || '') : (r.stage || '')}">${stageLabel(r.stage)}</td>
+        <td class="col-tech text-right font-mono text-xs vol-cell" data-ticker-vol="${r.ticker}" style="cursor:pointer;text-decoration:underline dotted rgba(161,161,170,0.4);font-weight:700" title="${_volCellTitle(r)}"><div style="color:${_volCellColor(r)}">${_volCellText(r)}</div>${_vol3dSubHTML(r)}</td>
+        <td class="col-tech text-right font-mono text-xs" style="${above200Color}">${above200Txt}</td>
+        <td class="col-tech text-right rsi-cell" data-ticker-rsi="${r.ticker}" style="cursor:pointer">${rsiCell(r.rsi_14)}</td>
+        <td class="col-tech text-right macd-cell" data-ticker-macd="${r.ticker}" style="cursor:pointer">${macdCell(r)}</td>
+        <td class="col-tech">${sigHTML || '<span class="text-zinc-600 text-xs">—</span>'}</td>
+        <td class="col-fund text-right font-mono text-xs" style="color:${shortColor}">${shortTxt}</td>
+        ${_fundamentalsCellsHTML(r)}
     </tr>`;
 }
 
 function emptyRow() {
-    return `<tr><td colspan="14" class="text-center text-zinc-500 py-8 text-xs">
+    return `<tr><td colspan="18" class="text-center text-zinc-500 py-8 text-xs">
         ${t().no_data || 'No matches'}</td></tr>`;
 }
 
@@ -2060,6 +2186,29 @@ function openVolumePopup(r) {
 
     const ratioColor = _ratioColor(ratio);
 
+    // V3.25.8 — 3D rolling-volume row. Shown when the screener emitted a
+    // 3D state (older CSVs predating V3.25.8 leave both fields null).
+    const vol3dRow = (r.vol_3d_vs_20d != null || r.vol_3d_state) ? (() => {
+        const v = r.vol_3d_vs_20d;
+        const s = r.vol_3d_state;
+        const stateLbl =
+            s === 'expanding' ? (tr.vol_3d_state_expanding || '放量') :
+            s === 'drying_up' ? (tr.vol_3d_state_drying_up || '量縮') :
+            s === 'neutral'   ? (tr.vol_3d_state_neutral   || '中性') : '';
+        const stateColor =
+            s === 'expanding' ? '#22c55e' :
+            s === 'drying_up' ? '#fbbf24' : '#71717a';
+        const ratioTxt = v == null ? '—' : `${v.toFixed(2)}×`;
+        return `
+          <div class="flex items-baseline justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
+            <span class="text-zinc-500">${tr.vol_modal_3d_ratio || '3D 均量 / 20D'}</span>
+            <span class="font-mono font-bold" style="color:${stateColor}">
+              ${ratioTxt}
+              <span class="text-[10px] font-normal ml-2">${stateLbl}</span>
+            </span>
+          </div>`;
+    })() : '';
+
     body.innerHTML = `
       ${stateBanner}
       <div class="grid grid-cols-2 gap-y-1.5">
@@ -2075,6 +2224,7 @@ function openVolumePopup(r) {
           <span class="text-[10px] font-normal ml-2 text-zinc-500">${spike || ''}</span>
         </span>
       </div>
+      ${vol3dRow}
       ${projBlock}
     `;
 
@@ -2156,7 +2306,19 @@ function renderJournalStats(journal) {
     document.getElementById('journal-title').textContent = tr.journal_title || 'Journal stats';
     document.getElementById('journal-note').textContent  = tr.journal_note || '';
     document.getElementById('stats-bin-title').textContent    = tr.stats_bin || 'By score bin';
-    document.getElementById('stats-col-signal').textContent   = 'Signal';
+    document.getElementById('stats-col-signal').textContent   = tr.stats_th_signal || 'Signal';
+    const _hintEl = document.getElementById('journal-click-hint');
+    if (_hintEl) _hintEl.textContent = tr.journal_click_hint || '';
+    // Volume Regime Alpha table title + headers (no id'd defaults — set here)
+    const _setTxt = (id, v) => { const el = document.getElementById(id); if (el && v) el.textContent = v; };
+    _setTxt('stats-volume-title', tr.stats_volume_title);
+    _setTxt('vol-th-trend', tr.vol_th_trend);
+    _setTxt('vol-th-stage', tr.vol_th_stage);
+    _setTxt('vol-th-ratio', tr.vol_th_ratio);
+    _setTxt('vol-th-n', tr.stats_n);
+    _setTxt('vol-th-win', tr.stats_winrate);
+    _setTxt('vol-th-mean', tr.stats_mean);
+    _setTxt('vol-th-median', tr.stats_median);
     document.getElementById('stats-col-n').textContent        = tr.stats_n || 'n';
     document.getElementById('stats-col-winrate').textContent  = tr.stats_winrate || 'Win%';
     document.getElementById('stats-col-mean').textContent     = tr.stats_mean || 'Mean';
@@ -2174,7 +2336,7 @@ function renderJournalStats(journal) {
         document.getElementById('journal-content').classList.add('hidden');
         const msg = fills['5d'] === 0
             ? (tr.journal_empty || 'No data yet — run journal update to fill forward returns')
-            : 'Waiting for 20d fills…';
+            : (tr.journal_waiting_20d || 'Waiting for 20d fills…');
         document.getElementById('journal-empty-text').textContent = msg;
         return;
     }
@@ -2184,9 +2346,9 @@ function renderJournalStats(journal) {
     // Update section titles to reflect current horizon
     const horizonLabel = bestHorizon === '5d' ? '5d' : bestHorizon === '20d' ? '20d' : bestHorizon;
     document.getElementById('stats-signal-title').textContent =
-        (tr.stats_signal || 'By signal') + ` (${horizonLabel} win rate)`;
+        (tr.stats_signal || 'By signal') + ` · ${horizonLabel} ${tr.stats_winrate || 'win rate'}`;
     document.getElementById('journal-fills-label').textContent =
-        `Filled: 5d=${fills['5d'] || 0}  20d=${fills['20d'] || 0}  60d=${fills['60d'] || 0}`;
+        `${tr.fills_label || 'Filled'}: 5d=${fills['5d'] || 0}  20d=${fills['20d'] || 0}  60d=${fills['60d'] || 0}`;
 
     // By signal — use best horizon
     const sigRows = [];
@@ -2195,13 +2357,15 @@ function renderJournalStats(journal) {
         if (d && d.n >= 3) sigRows.push([sig, d]);
     });
     sigRows.sort((a, b) => b[1].win_rate - a[1].win_rate);
-    document.getElementById('stats-signal-tbody').innerHTML = sigRows.slice(0, 12).map(([sig, d]) => {
+    const sigBody = document.getElementById('stats-signal-tbody');
+    sigBody.innerHTML = sigRows.slice(0, 12).map(([sig, d]) => {
         const wrPct = (d.win_rate * 100).toFixed(0);
         const wrColor = d.win_rate >= 0.6 ? '#22c55e'
                       : d.win_rate >= 0.5 ? '#86efac'
                       : d.win_rate >= 0.4 ? '#fbbf24' : '#ef4444';
-        return `<tr class="stats-row">
-            <td class="text-xs" title="${sig}">${sigLabel(sig)}</td>
+        const active = _state.filter.requiredSignals.has(sig);
+        return `<tr class="stats-row clickable${active ? ' active' : ''}" data-sig="${sig}" title="${tr.journal_click_hint || ''}">
+            <td class="text-xs">${active ? '✓ ' : ''}${sigLabel(sig)}</td>
             <td class="text-right text-xs text-zinc-400">${d.n}</td>
             <td>
                 <div class="flex items-center gap-2">
@@ -2215,6 +2379,21 @@ function renderJournalStats(journal) {
             <td class="text-right font-mono text-xs" style="color:${d.median >= 0 ? '#86efac' : '#fca5a5'}">${d.median >= 0 ? '+' : ''}${d.median}</td>
         </tr>`;
     }).join('');
+    // Click a signal row → toggle it into the main table's signal filter, then
+    // jump to the results table. Reuses the same _state.filter.requiredSignals
+    // path as the filter chips (renderSignalChips).
+    sigBody.querySelectorAll('tr.clickable[data-sig]').forEach(tr_ => {
+        tr_.addEventListener('click', () => {
+            const k = tr_.dataset.sig;
+            const s = _state.filter.requiredSignals;
+            if (s.has(k)) s.delete(k); else s.add(k);
+            if (typeof renderSignalChips === 'function') renderSignalChips();
+            renderTable();
+            renderJournalStats(journal);   // refresh ✓ active marks
+            const tableEl = document.getElementById('table-section');
+            if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
 
     // By score bin
     const binOrder = ['90-100', '80-90', '70-80', '60-70', '50-60', '<50'];
@@ -2237,6 +2416,56 @@ function renderJournalStats(journal) {
             <td class="text-right font-mono text-xs">${fmt(d60.mean)}</td>
         </tr>`;
     }).join('');
+
+    // By volume regime — evidence only; does not affect score or ranking.
+    const volumeRows = [];
+    Object.entries(stats.by_volume_regime || {}).forEach(([regime, byH]) => {
+        const d = byH['20d'];
+        if (!d || d.n < 5 || d.win_rate < 0.55 || d.median < 2) return;
+        const [trend, stage, bucket] = regime.split(' | ');
+        volumeRows.push({
+            trend: trend || 'unknown',
+            stage: stage || 'unknown',
+            bucket: bucket || 'unknown',
+            ...d,
+        });
+    });
+    volumeRows.sort((a, b) => (b.median - a.median) || (b.win_rate - a.win_rate));
+
+    const volumeBody = document.getElementById('stats-volume-tbody');
+    if (volumeBody) {
+        const pctColor = v => v >= 0.7 ? '#22c55e'
+                         : v >= 0.6 ? '#86efac'
+                         : '#fbbf24';
+        const numColor = v => v >= 0 ? '#86efac' : '#fca5a5';
+        const fmtPct = v => `${(v * 100).toFixed(0)}%`;
+        const fmtNum = v => v == null ? '—' : `${v >= 0 ? '+' : ''}${Number(v).toFixed(1)}`;
+        const trendMap = tr.vol_trend_map || {};
+        const unk = tr.regime_unknown || 'unknown';
+        const trendLabel = v => v === 'unknown' ? unk : (trendMap[v] || v);
+        const bucketLabel = v => v === 'unknown' ? unk : v;          // e.g. ">2x" kept as-is
+        volumeBody.innerHTML = volumeRows.slice(0, 10).map(r => {
+            const wrColor = pctColor(r.win_rate);
+            return `<tr class="stats-row">
+                <td class="text-xs">${trendLabel(r.trend)}</td>
+                <td class="text-xs" title="${r.stage}">${stageLabel(r.stage)}</td>
+                <td class="text-xs font-mono">${bucketLabel(r.bucket)}</td>
+                <td class="text-right text-xs text-zinc-400">${r.n}</td>
+                <td>
+                    <div class="flex items-center gap-2">
+                        <div class="winrate-bar flex-1" style="min-width:64px">
+                            <div class="winrate-fill" style="width:${fmtPct(r.win_rate)}; background:${wrColor}"></div>
+                        </div>
+                        <span class="text-[10px] font-mono" style="color:${wrColor}">${fmtPct(r.win_rate)}</span>
+                    </div>
+                </td>
+                <td class="text-right font-mono text-xs" style="color:${numColor(r.mean)}">${fmtNum(r.mean)}</td>
+                <td class="text-right font-mono text-xs font-bold" style="color:${numColor(r.median)}">${fmtNum(r.median)}</td>
+            </tr>`;
+        }).join('') || `<tr class="stats-row">
+            <td colspan="7" class="text-center text-xs text-zinc-500 py-4">${tr.vol_regime_empty || 'No volume regime has passed the alpha gate yet.'}</td>
+        </tr>`;
+    }
 }
 
 /* ── Journal stale banner + run-now action ───────────────────── */
@@ -2586,8 +2815,15 @@ function translate() {
     set('th-signals',   tr.col_signals);
     set('th-short',     tr.col_short);
     set('th-macd',      tr.col_macd);
-    const macdTh = document.getElementById('th-macd');
-    if (macdTh && tr.col_macd_tip) macdTh.title = tr.col_macd_tip;
+    // V3.25.5 — Fund tab labels (previously hardcoded English in HTML).
+    set('th-ps',        tr.col_ps);
+    set('th-gm',        tr.col_gm);
+    set('th-revyoy',    tr.col_revyoy);
+    set('th-r5d',       tr.col_r5d);
+    // V3.25.6 — column header tooltips now use the styled #mom-pill-tooltip
+    // card (data-col-tip="<key>" on each <th>). i18n strings are looked up
+    // at hover time inside _renderColTip(). No more native title= binding —
+    // it conflicted visually with the styled card on slow hovers.
     set('no-data-text', tr.no_data);
     set('filter-title',          tr.filter_title);
     set('filter-reset-label',    tr.filter_reset);
@@ -2597,6 +2833,12 @@ function translate() {
     set('filter-sector-label',   tr.filter_sector);
     set('filter-search-label',   tr.filter_search);
     set('filter-preset-label',    tr.filter_preset_title);
+    // V3.22 — translate fundamentals lag note (HTML default is Chinese)
+    const fndNote = document.querySelector('#mom-fnd-note [data-i18n-key="momentum_fnd_lag_note"]');
+    if (fndNote && tr.momentum_fnd_lag_note) fndNote.textContent = tr.momentum_fnd_lag_note;
+    // V3.25.1 — translate the two table-view tab labels (Tech / Fund lenses).
+    set('mom-view-tab-tech-label', tr.momentum_view_tech);
+    set('mom-view-tab-fund-label', tr.momentum_view_fund);
     set('filter-match-label',     tr.filter_match_label);
     set('filter-advanced-label',  tr.filter_advanced);
     set('filter-req-sig-label',   tr.filter_req_sig);
@@ -2711,28 +2953,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // V1.71.x — Table column toggle (More columns)
-    const colToggle = document.getElementById('mom-col-toggle');
+    // V3.25.1 — Table view switcher (Technical / Fundamentals). Replaces the
+    // previous boolean "More columns" toggle. Two tab buttons swap the table's
+    // `data-view` attribute, which the CSS uses to hide .col-tech or .col-fund
+    // cells. The lag-disclaimer block (#mom-fnd-note inside #table-wrap) is
+    // also gated off the same attribute on the wrap, so it only shows for the
+    // Fund lens. Old localStorage key (`momentum_cols_extra`) is intentionally
+    // ignored — its boolean semantics don't map cleanly onto two named views.
     const momTable = document.getElementById('mom-table');
-    if (colToggle && momTable) {
-        // Restore from localStorage
-        const saved = localStorage.getItem('momentum_cols_extra');
-        if (saved === 'on') {
-            momTable.dataset.colsExtra = 'on';
-            colToggle.classList.add('expanded');
-            colToggle.dataset.state = 'on';
-        }
-        colToggle.addEventListener('click', () => {
-            const next = momTable.dataset.colsExtra === 'on' ? 'off' : 'on';
-            momTable.dataset.colsExtra = next;
-            colToggle.dataset.state = next;
-            colToggle.classList.toggle('expanded', next === 'on');
-            localStorage.setItem('momentum_cols_extra', next);
-            const lbl = document.getElementById('mom-col-toggle-label');
-            const isZh = UI.currentLang === 'zh';
-            if (lbl) lbl.textContent = next === 'on'
-                ? (isZh ? '隱藏額外欄位' : 'Hide extra columns')
-                : (isZh ? '更多欄位' : 'More columns');
+    const tableWrap = document.getElementById('table-wrap');
+    const viewTabs = document.querySelectorAll('.mom-view-tab');
+    if (momTable && viewTabs.length) {
+        const setView = (view, persist = true) => {
+            const v = view === 'fund' ? 'fund' : 'tech';
+            momTable.dataset.view = v;
+            if (tableWrap) tableWrap.dataset.view = v;
+            viewTabs.forEach(btn => {
+                const isActive = btn.dataset.view === v;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+            if (persist) localStorage.setItem('momentum_table_view', v);
+        };
+        const saved = localStorage.getItem('momentum_table_view');
+        setView(saved === 'fund' ? 'fund' : 'tech', false);
+        viewTabs.forEach(btn => {
+            btn.addEventListener('click', () => setView(btn.dataset.view));
         });
     }
     const rsiBind = (id, key) => {

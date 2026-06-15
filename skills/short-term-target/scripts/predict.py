@@ -20,6 +20,7 @@ Usage:
 import os
 import sys
 import json
+import time
 import argparse
 import datetime
 from pathlib import Path
@@ -33,6 +34,11 @@ except ImportError:
     sys.exit(1)
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from skills._shared.technical_core import rsi_14 as _shared_rsi_14  # noqa: E402
+import pandas as pd  # noqa: E402 (pulled in by yfinance anyway)
+
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CACHE_DIR = SKILL_DIR / "cache"
 CONFIG_PATH = SKILL_DIR / "config" / "weights.yaml"
@@ -80,6 +86,8 @@ def fetch_ohlcv(ticker, days=60):
     """yfinance OHLCV. Returns dict or None."""
     try:
         h = yf.Ticker(ticker).history(period=f"{days}d", auto_adjust=False)
+        # yfinance occasionally returns trailing NaN Close rows (observed 2026-06-10)
+        h = h[h["Close"].notna()]
         if h.empty:
             return None
         return {
@@ -94,13 +102,47 @@ def fetch_ohlcv(ticker, days=60):
         return None
 
 
+# Benchmark history: in-process memo + 1h file cache. Used to be one yfinance
+# call per (ticker × horizon) — 3 identical SPY fetches per ticker and, since
+# batch runners (thematic / retail-pulse) spawn predict.py as a subprocess per
+# ticker, hundreds of SPY fetches per daily run.
+_BENCH_HIST_CACHE = {}
+_BENCH_FILE_TTL_SEC = 3600
+
+
+def _bench_closes(etf):
+    closes = _BENCH_HIST_CACHE.get(etf)
+    if closes is not None:
+        return closes
+    fpath = CACHE_DIR / f"_bench_{etf.upper()}.json"
+    try:
+        if fpath.exists() and time.time() - fpath.stat().st_mtime < _BENCH_FILE_TTL_SEC:
+            closes = json.loads(fpath.read_text())
+            _BENCH_HIST_CACHE[etf] = closes
+            return closes
+    except Exception:
+        pass
+    h = yf.Ticker(etf).history(period="30d", auto_adjust=False)
+    closes = None if h.empty else [float(x) for x in h["Close"]]
+    _BENCH_HIST_CACHE[etf] = closes
+    if closes:
+        try:
+            CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            tmp = fpath.with_suffix(f".tmp{os.getpid()}")
+            tmp.write_text(json.dumps(closes))
+            os.replace(tmp, fpath)
+        except Exception:
+            pass
+    return closes
+
+
 def fetch_benchmark_realized(etf, n_days):
     """N-day realized return of benchmark ETF, or None."""
     try:
-        h = yf.Ticker(etf).history(period=f"{n_days + 7}d", auto_adjust=False)
-        if h.empty or len(h) < n_days + 1:
+        closes = _bench_closes(etf)
+        if not closes or len(closes) < n_days + 1:
             return None
-        return (h["Close"].iloc[-1] / h["Close"].iloc[-(n_days + 1)] - 1) * 100
+        return (closes[-1] / closes[-(n_days + 1)] - 1) * 100
     except Exception:
         return None
 
@@ -173,11 +215,9 @@ def compute_momentum_score(ohlcv):
         return 0.0, "insufficient_history"
     closes = np.asarray(ohlcv["closes"], dtype=float)
 
-    deltas = np.diff(closes[-15:])
-    gains = np.where(deltas > 0, deltas, 0).mean() if len(deltas) else 0
-    losses = np.where(deltas < 0, -deltas, 0).mean() if len(deltas) else 0
-    rs = gains / losses if losses > 0 else 100.0
-    rsi = 100 - (100 / (1 + rs))
+    # shared Wilder RSI (skills/_shared/technical_core) — same numbers as momentum/sector pages
+    rsi_series = _shared_rsi_14(pd.Series(closes))
+    rsi = float(rsi_series.iloc[-1]) if rsi_series.iloc[-1] == rsi_series.iloc[-1] else 50.0
 
     ma20 = closes[-20:].mean()
     ma50 = closes[-50:].mean()
@@ -202,6 +242,26 @@ def compute_momentum_score(ohlcv):
     score = max(-1.0, min(1.0, rsi_score + ma_score))
     label = f"RSI={rsi:.0f}, current{'>' if current > ma20 else '<'}MA20{'>' if ma20 > ma50 else '<'}MA50"
     return score, label
+
+
+def compute_trailing_returns(ohlcv):
+    """Pure-price trailing returns (real, symmetric — can be negative).
+
+    Distinct from the forward target_central_pct: this is what the price
+    ACTUALLY did over the trailing window. Used by thematic-screener to derive
+    a direction-honest theme breadth that can read bearish.
+    """
+    out = {"trailing_return_5d_pct": None, "trailing_return_20d_pct": None}
+    if not ohlcv:
+        return out
+    closes = np.asarray(ohlcv["closes"], dtype=float)
+    n = len(closes)
+    last = closes[-1]
+    if n >= 6 and closes[-6] > 0:
+        out["trailing_return_5d_pct"] = round((last / closes[-6] - 1) * 100, 2)
+    if n >= 21 and closes[-21] > 0:
+        out["trailing_return_20d_pct"] = round((last / closes[-21] - 1) * 100, 2)
+    return out
 
 
 import re
@@ -420,21 +480,26 @@ def get_news_driver_v2(ticker):
 
 
 def get_news_driver(ohlcv, ticker=None):
-    """v0.2 wrapper: try Finnhub /company-news first, fallback to v0.1 proxy."""
+    """v0.2 wrapper: try Finnhub /company-news first, fallback to v0.1 proxy.
+
+    Returns (score, label, source, age_hr). age_hr carries v2's real
+    newest-article age so check_sufficiency freshness gates can fire;
+    volume-proxy fallbacks report 0.5h (market data is "live").
+    """
     # Try Finnhub method 2 first (if ticker provided)
     if ticker:
         v2 = get_news_driver_v2(ticker)
         if v2 is not None and v2.get("n_articles", 0) > 0:
-            return v2["score"], v2["label"], v2["source"]
+            return v2["score"], v2["label"], v2["source"], v2.get("age_hr")
     # Fallback to v0.1 proxy (volume × gap)
     if not ohlcv or len(ohlcv["closes"]) < 21:
-        return 0.0, "insufficient", "proxy_volume_gap"
+        return 0.0, "insufficient", "proxy_volume_gap", 0.5
     vols = np.asarray(ohlcv["vols"], dtype=float)
     closes = np.asarray(ohlcv["closes"], dtype=float)
     recent_vol = vols[-1]
     avg_vol = vols[-21:-1].mean()
     if avg_vol == 0:
-        return 0.0, "no_volume_data", "proxy_volume_gap"
+        return 0.0, "no_volume_data", "proxy_volume_gap", 0.5
     vol_ratio = recent_vol / avg_vol
     gap_pct = (closes[-1] / closes[-2] - 1) * 100 if len(closes) >= 2 else 0
     if vol_ratio > 1.5:
@@ -444,7 +509,7 @@ def get_news_driver(ohlcv, ticker=None):
     else:
         score = 0.0
         label = f"normal vol ({vol_ratio:.1f}×)"
-    return score, label, "proxy_volume_gap_fallback"
+    return score, label, "proxy_volume_gap_fallback", 0.5
 
 
 # --------- prediction ---------
@@ -609,39 +674,33 @@ def save_to_cache(ticker, payload):
     cache_path_for(ticker).write_text(json.dumps(payload, indent=2, default=str))
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("ticker")
-    ap.add_argument("--json-only", action="store_true",
-                    help="Compact JSON (no indent)")
-    ap.add_argument("--no-cache", action="store_true",
-                    help="Skip cache; force fresh prediction")
-    args = ap.parse_args()
-
-    ticker = args.ticker.upper()
+def predict_ticker(ticker, use_cache=True):
+    """In-process API (screener import path). Returns the same payload dict
+    the CLI prints; {"ticker", "error"} when OHLCV fetch fails."""
+    ticker = ticker.upper()
 
     # Cache check (per §plan_short Q3 — predict cache layer to reduce screener wall time)
-    if not args.no_cache:
+    if use_cache:
         cached = load_from_cache(ticker)
         if cached is not None:
             cached.setdefault("metadata", {})["from_cache"] = True
-            print(json.dumps(cached, indent=2 if not args.json_only else None, default=str))
-            return
+            return cached
 
     cfg = load_config()
 
     ohlcv = fetch_ohlcv(ticker, days=60)
     if not ohlcv:
-        print(json.dumps({"ticker": ticker, "error": "ohlcv_fetch_failed"}))
-        sys.exit(1)
+        return {"ticker": ticker, "error": "ohlcv_fetch_failed"}
     current = float(ohlcv["closes"][-1])
 
     atr_pct = compute_atr_pct(ohlcv, n=14)
     momentum, momentum_label = compute_momentum_score(ohlcv)
-    news, news_label, news_meta = get_news_driver(ohlcv, ticker=ticker)
+    trailing = compute_trailing_returns(ohlcv)
+    news, news_label, news_meta, news_age_hr = get_news_driver(ohlcv, ticker=ticker)
     heat, sector_age_hr, sector_status = get_sector_heat(ticker)
     dual_scoring, dual_status = get_dual_fetch_scoring(ticker)
-    news_age_hr = 0.5  # v1 proxy; treat volume signal as "live"
+    if news_age_hr is None:
+        news_age_hr = 0.5  # proxy paths / missing timestamp → treat as live
 
     horizons_def = {"1d": 1, "5d": 5, "15d": 15}
     predictions = {}
@@ -694,6 +753,8 @@ def main():
         "as_of": datetime.datetime.utcnow().isoformat() + "Z",
         "current_price": round(current, 2),
         "weights_version": cfg.get("weights_version", "unknown"),
+        "trailing_return_5d_pct": trailing["trailing_return_5d_pct"],
+        "trailing_return_20d_pct": trailing["trailing_return_20d_pct"],
         "horizons": predictions,
         "trading_meta": tm,
         "invalidation": invalidation,
@@ -724,8 +785,22 @@ def main():
     # Cache write (4h TTL — for screener batch reuse)
     out.setdefault("metadata", {})["from_cache"] = False
     save_to_cache(ticker, out)
+    return out
 
-    print(json.dumps(out, indent=2 if not args.json_only else None, default=str))
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("ticker")
+    ap.add_argument("--json-only", action="store_true",
+                    help="Compact JSON (no indent)")
+    ap.add_argument("--no-cache", action="store_true",
+                    help="Skip cache; force fresh prediction")
+    args = ap.parse_args()
+
+    out = predict_ticker(args.ticker, use_cache=not args.no_cache)
+    print(json.dumps(out, indent=None if args.json_only else 2, default=str))
+    if out.get("error") == "ohlcv_fetch_failed":
+        sys.exit(1)
 
 
 if __name__ == "__main__":

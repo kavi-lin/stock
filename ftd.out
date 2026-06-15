@@ -1,0 +1,45 @@
+======================================================================
+FTD Detector (yfinance adapter)
+Follow-Through Day Bottom Confirmation — Dual Index (SPY + QQQ)
+======================================================================
+
+Step 1: Fetching Market Data (yfinance)
+----------------------------------------------------------------------
+  Fetching S&P 500 history (^GSPC)... OK (100 days, latest: 2026-05-29)
+  Fetching QQQ history... OK (100 days)
+  Fetching S&P 500 quote... OK ($7580.06)
+  Fetching QQQ quote... OK ($738.31)
+
+Step 2: Analyzing Market State
+----------------------------------------------------------------------
+  S&P 500 State: FTD_CONFIRMED
+  NASDAQ State:  FTD_CONFIRMED
+  Combined:      FTD_CONFIRMED
+  S&P 500 Swing Low: 2026-03-30 ($6343.72, -7.1% decline)
+  S&P 500 Rally Day 1: 2026-03-31 (Day 42)
+  NASDAQ Swing Low: 2026-03-30 ($558.28, -8.2% decline)
+  NASDAQ Rally Day 1: 2026-03-31 (Day 42)
+
+Step 3: Post-FTD Health Assessment
+----------------------------------------------------------------------
+  Quality Score: 100/100
+  Signal:        Strong FTD
+  Guidance:      Aggressively increase exposure to 75-100%.
+  Exposure:      75-100%
+  Power Trend: YES (3/3 conditions)
+  Distribution Days: 0 (monitored 5 days)
+
+Step 4: Generating Reports
+----------------------------------------------------------------------
+  FTD Timeline: FTD CONFIRMED, day 36 post-confirmation (rally-day 42; FTD originally confirmed on rally-day 6)
+  JSON report saved to: sector/ftd_cache/ftd_detector_2026-05-30_114304.json
+  Markdown report saved to: sector/ftd_cache/ftd_detector_2026-05-30_114304.md
+
+======================================================================
+FTD Analysis Complete
+======================================================================
+  State:         FTD_CONFIRMED
+  Quality Score: 100/100
+  Signal:        Strong FTD
+  JSON:          sector/ftd_cache/ftd_detector_2026-05-30_114304.json
+  Markdown:      sector/ftd_cache/ftd_detector_2026-05-30_114304.md

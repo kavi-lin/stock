@@ -70,7 +70,6 @@ flowchart LR
         SK_TAIL[tail-risk-analyzer]
         SK_THEME[theme-detector]
         SK_VAL[earnings-valuation-forecaster]
-        SK_SC[supply-chain-event-analyst]
     end
 
     %% ═══════ L4 Protocol (Claude 多 Agent 辯論) ═══════

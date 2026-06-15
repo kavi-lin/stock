@@ -10,6 +10,16 @@ data_sources: [chart image or yfinance]
 
 Weekly-chart-driven technical analysis → probabilistic scenarios + structured report. Pure chart analysis, no news/fundamental input. See `README.md` for example usage scenarios and pedagogy.
 
+## ⚠️ Investment-Protocol Lane Mode（`分析 [TICKER]` Technical lane — 優先閱讀）
+
+當本 skill 作為 investment_protocol Phase 2 Technical lane 執行時，**不走下方 chart-image 工作流**：
+
+- **必跑** `python3 skills/technical-analyst/scripts/analyze.py <TICKER> --json-only` — 指標以 script 輸出為準，不看圖片
+- Lane 必輸出欄位（契約見 `investment/investment_protocol_v5_0.md` Phase 2）：`signal` / `score`、`smart_money_analysis`、`pattern_taxonomy`、`key_levels`、`high_prob_scenario`、`volatility{atr_14, hist_vol_20d_daily, momentum_20d_pct}`（V5.1）、`extension_penalty_note`（V3.17）
+- **不落地 MD 檔** — lane 輸出回 JSON 給 PM fan-in；下方 Step 5/6 存檔規則僅限 standalone chart 分析
+
+（以下為 standalone chart-image 模式）
+
 ## Core Principles
 
 1. **Pure chart analysis** — conclusions from observable chart data only

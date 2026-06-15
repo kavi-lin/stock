@@ -1,7 +1,1181 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-05-25 (v3.20.3)
+> **Last Updated**: 2026-06-15 (v4.12.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.12.1) — Premarket chain 完成偵測 bug 修復
+- **症狀**：news 20:11 已寫 digest，但 chain 仍卡 `news: queued, elapsed=1500`；sector 等到 news timeout（1500s）才於 20:26 啟動。
+- **Root cause**：`_wait_protocol_completion()` 用 count-based baseline（`len(_protocol_history)`），但 `_protocol_history` 受 `_PROTOCOL_HISTORY_MAX=10` 封頂、長度滿後恆定 → `history[: len-baseline]` 永遠空集合 → 完成永遠偵測不到 → 跑滿 timeout。**非 enqueue duplicate**。
+- **第二 bug**：`_run_news` 跑獨立 thread，timeout 的 `RuntimeError` 無聲逃逸 → `phase1_errors` 空 → chain 假性過關推進 sector。
+- **修復**：(1) baseline 改 timestamp，比 `ended_at >= baseline_ts`；(2) news/sector wait 包 try/except，timeout 記 item error + 中止 chain。`dashboard_server.py` 單檔。parse OK。
+- **驗證待辦**：server 重啟後跑一次 premarket chain 確認 news 完成即推進 sector（不再卡 1500s）。
+- **追加 bug（同 session）**：產業掃描 2026-06-15 跑完 + validator rc=0，但 `data.json.sectors` 空 → 沒進網頁。Root cause = `bridge.py _extract_committee` 對 `_phase4a` 無條件 `.get`，但該 run LLM 把 `_phase4a` 寫成 bare list（非 dict）→ `'list' object has no attribute 'get'` → sector ingest try-block 整段中止。改成兩種 shape 都吃。重跑 bridge → 11 sectors + 4 committee proposals 已進 data.json。
+
+## 🟢 Session Note (v4.12.0) — Weekly REVIEW 改善計劃落地（shadow 量測 + 合成 replay）
+- **動機**：user「針對這禮拜的 llm 回顧提改善計劃」。讀 REVIEW_2026-06-13 — 11 個 TODO 7 個卡資料門檻 still_waiting，週評估空轉。提三層計劃，user 選 Tier 1 全做 + Rec 11 shadow-replay，gate 保留 RISK_ON/BULL。
+- **改動**（3 檔，~150 行，皆 shadow/唯讀，零決策層風險）：
+  1. `verdict_rules.py`：`verdict_news_digest_directional()` 方向法（H-D）— shadow only，不進 DISPATCH。
+  2. `build_event_index.py`：news verdict 掛 `shadow_directional`；新增 `decisive_agent_split` rollup（Pattern C 自動化）。index version 1.1→1.2。
+  3. `investment/scripts/replay_rec11.py`（new 唯讀）：Rec 11 strict + ex-regime 雙 pass 合成驗收。
+- **跑出來的發現**（量測揭露，未改決策）：
+  - **H-C 收斂**：miss 是 action_class（保守性）驅動非 agent 驅動 — 各 agent conservative 都 ~57-69% miss，active 都 ~18-27%。News 不特殊 = Pattern A 同根。
+  - **H-D 反轉**：強訊號 shadow directional = hit 1 / miss 8 → magnitude gate 過去藏的是**真 miss** 非 hit；macro_delta 方向校準本身弱，汰換前要先修 delta 來源。
+  - **Rec 11 驗收**：strict 歷史 fire 12/19 Semis（+0.62% NAV，dd −3.1%）→ 規則健全，live dormant 純 regime timing。ex-regime 放寬只多 +0.35% 邊際 → 維持 strict gate 正確。
+- **驗證**：py_compile 三檔過；build_event_index rc=0（314 records，version 1.2，shadow/split 欄就位）；replay 產 `reports/decision_review/REC11_SHADOW_REPLAY_2026-06-13.md`。
+- **未動**：REVIEW_TODO.md（人/LLM-review 維護，TODO-012 監控點不自動改）；decision band / Rec 11 gate 規則本體不碰。
+- **下一步建議**：下週 REVIEW 讀 `decisive_agent_split` + `shadow_directional` 自動帶入；H-D 汰換 magnitude 前先查 macro_delta extractor 方向校準。
+- **檔案**：scripts/{verdict_rules.py, build_event_index.py} / investment/scripts/replay_rec11.py / VERSION×3。
+
+## 🟢 Session Note (v4.11.0) — Dashboard 協定 per-protocol model tiering
+- **動機**：user 問 dashboard 個股分析走 bridge → `claude -p` 預設用哪個 model；發現 `_protocol_command` 無 `--model` flag，全部協定吃 CLI 全域預設（手動 `/model` 切、易忘、貴）。要求按性質分層：需推理用 opus、簡單用 sonnet 省 token。
+- **改動**（`dashboard_server.py` 單檔）：新增 `PROTOCOL_MODEL` map + `_protocol_model_for()`；`_protocol_command()` 加 `claude_model` 參數注入 `claude --model`（接受 alias `opus`/`sonnet`）。dispatch site 接上 + log 行印出 tier。
+- **分層**：opus = `invest`/`llm_review`/`sector`（深推理/綜合）；sonnet = `news`/`flash`/`flash_text`/`review`/`link_digest`/`triage`/`earnings`（script-first/結構化抽取）。default=sonnet。env `PROTOCOL_MODEL_<NAME>` 可單協定覆寫（空字串回退 CLI 預設）。
+- **範圍外**：break_news debater / supply_chain / office 走 model_router（primary=gemini），獨立不受影響；nexus Tier 3 = Haiku 不動。
+- **驗證**：`ast.parse` 過；`claude --help` 確認 `--model` 接 alias。
+- **檔案**：dashboard_server.py / VERSION×3（VERSION, utils.js, CHANGELOG）。
+
+## 🟢 Session Note (v4.10.0) — 決策中心 RWD + 三層卡片 + V3.45+ 估值欄位接通
+- **動機**：user 反映決策中心 ①無 RWD（4K 要往右捲、卡片固定寬不跟視窗）②卡片 10+ pills 平鋪看不出結論 ③invest protocol V3.45-V3.49 新欄位沒上頁面。
+- **RWD**：主 grid 加 `2xl:grid-cols-3 min-[2200px]:grid-cols-4`；**歷史 drill overlay 從固定 420px 橫向 rail 改 wrap grid**（4K 橫捲主因）；main 加 `min-w-0`；style.css 全站 `@media(max-width:860px)` sidebar 隱藏（15 頁共用一條規則）。
+- **三層卡片（同 4.2.0 產業頁哲學）**：L1 結論 = 新 `buildDecisionStrip()`（action_label 主視覺 + conf% + CAP/PROBE/binary pills + institutional_lens 一句話 2 行 clamp）+ score/TP/SL/雙軌/持倉；L2 理由 = 單一 collapse（其餘 pills + Red Team + 觸發條件 + risks，summary 帶 RT verdict chip + 計數）；L3 證據 = 單一 collapse（估值 6-anchor + FvExtras，summary 帶 band chip）。`buildV48StatusPills` 改回傳 array；`buildV5ValuationBlock`/`buildRedTeamBlock` 改回傳 `{html, chip}`。
+- **斷鏈補齊**：bridge.py 接 8 欄位（MHP/fair_value_range/implied_expectations/archetype_shadow/decision_cap_active/reason/cap_override_reason/hot_zone_probe）。前端 `buildFvExtras()` V3.49 早寫好但 data.json 從沒資料；本版接上後 **MHP 等 4 個 advisory block 要等下次跑 `分析` 才有資料**（history.json 現為 0 筆），cap 欄位立即可見（MRVL/PANW/CRWD 3 檔 4 筆）。
+- **驗證**：node/py syntax 全過；`python3 bridge.py` 後 data.json MRVL `decision_cap_active=true/insufficient_anchors` ✓；headless Chrome 3840/1440/1280/760 截圖 — 4K 滿版 4 欄無橫捲、760 sidebar 收合 + CAP pill/防守/29%/lens 一句話全到位；index.html 760 無副作用；卡片 click delegation（details/summary 排除）原樣保留。
+- **檔案**：bridge.py / Dashboard/{decisions.html, page-decisions.js, style.css, i18n.js} / VERSION×3。
+
+## 🟢 Session Note (v4.9.0) — 市場氛圍頁重設計：決策漏斗 + 川普政策雷達
+- **動機**：user 反映 mood 頁無法回答「目前市場走向、當下要不要投資」，產業情緒 grid 難讀；要求散戶視角 + 近 3 天趨勢為主、開盤含即時盤勢、多社群參考、即時新聞/突發辯論推播納入、**不增 token 成本**。
+- **重設計（決策漏斗）**：①判定帶 偏多/偏空/觀望（確定性公式：開盤 盤面.35/新聞.25/辯論.20/情緒.20，收盤 .35/.30/.35，±0.15 中性帶，分項 chip 透明 + 分歧警示）+ Market Brief 導讀四欄；②trend-chart.js 72h 情緒線 + brief history regime 時間軸 + 每日錨點；③盤中即時（heatmap client 聚合，開盤 3min 輪詢、收盤收合一行）；④社群雷達 Reddit/HN/Bluesky 貼文 feed（直讀 trending_tickers.json 全量）；④b **川普政策雷達**：raw-stream 過濾 Truth Social，政策詞高亮 + TACO 轉彎 lexicon flag + 已辯論帖掛 verdict/final_take；⑤突發辯論 10 列 + 熱事件 clusters；⑥產業情緒 11 卡 → 單列排行；⑦舊三 tile 降頁尾。半圓儀表 + Chart.js 移除。
+- **0 新 LLM call**：全頁只 GET 已存在 artifact（brief/debates/trends/heatmap/trending）。探索層，不回饋 investment_protocol。
+- **Server**：brief API 加 `?history=1`（預設回應不變）；store feed projection 加截斷 final_take（≤400）。
+- **驗證**：server 重啟後 curl 三項全過（default brief 迴歸無 history key / history=1 回 list / feed 帶 final_take）；node 煙霧測試（真 heatmap+data.json）：tape 聚合正確、收盤模式正確排除盤面、verdict=觀望 +0.141、renderAll 無 throw；JS/HTML id 交叉檢查 55/55；validate.py 僅 pre-existing 壞檔 bn_20260530_d1e30a96 fail（與本次無關）。
+- **user 決策記錄**：移除儀表 / 接受預設權重 / 收盤收合摘要 / Truth Social 獨立政策雷達（只評川普政策轉彎，不混一般 feed）。
+- **檔案**：mood.html / page-mood.js（重寫）/ i18n.js / dashboard_server.py / scripts/break_news/store.py / VERSION×3。dashboard_server 已重啟。
+
+## 🟢 Session Note (v4.8.0) — Break News V6：event clustering + 嚴格 gate + Market Brief
+- **動機**：user 要 refactor 即時新聞辯論省 token + triage 先用 Python 統計同類新聞防重複辯論 + 系統產可用的市場現況導讀。診斷（6/1-11 實測）：650 件 2,873 call（4.4/件、~261/天），**69% 跑滿 3 輪**（V5 conf-gap 0.4 觸發太鬆，實際 round-1 收斂率僅 17%）；56% 是 sentiment 情緒標題且多同事件跨源重複。
+- **V6 三刀 + 一個新輸出**：
+  1. `cluster.py`（新，0 LLM）— zh-aware token（en stemming + 中文 bigram）Jaccard/containment ≥0.55 同 news_type 聚類；echo 不重辯；milestone 4/8/16/32 + 距上辯 ≥3h → 增量追辯（opener 附前次結論）。`_clusters.json` 滾動 48h。
+  2. debater V6 — max_rounds 3→2 全員；gate 只認真衝突（verdict 對立/極性衝突）；conf-gap 限 high-priority ≥0.65；`single_voice`：單邊 CLI 掛直接收 partial_closed（實測抓到 codex 掛時省 2 call/件）。
+  3. poller — sentiment 非 binary/非 HIGH/|score|<3 只聚類不辯；EST_CALLS 3→2；state 新增 echo/sentiment/escalation 計數；dry-run 零寫檔合約保持。
+  4. `market_brief.py`（新）— 每 2h 聚合 24h clusters+verdicts → 1 call 產繁中導讀（regime/drivers/bull/bear/watch）→ `_market_brief.json`；UI 頂部面板 + `/api/break-news/brief` + `/brief/refresh` + `/clusters`；卡片 ×N echo badge。
+- **估算**：~261 → ~60-75 call/天（▼70%+），含 brief +12/天。
+- **驗證**：cluster 單元測試全過（echo/escalation/milestone 防重發/type 隔離/zh tokenize）；poller dry-run OK；live debate ×2（V6 gate + single_voice 路徑）；live brief 1 call 產出品質好；validator 含新 lint 通過（僅 bn_20260530_d1e30a96 一個 pre-existing 壞檔 fail，與本次無關）。
+- **⚠️ user 動作**：**dashboard_server 需重啟**（新 module import + brief loop + 新 API）。**codex CLI 目前壞掉**（`Reading additional input from stdin...` rc=1，probe 也掛）— break_news pair 是 gemini×codex，codex 修好前辯論都走 single_voice 單聲道（gemini 仍有結論，但無對抗）。可考慮暫時把 `config/llm_config.json` break_news.secondary 改 claude。
+- **檔案**：cluster.py + market_brief.py（新）/ poller.py / debater.py / prompts.py / store.py / validate.py / dashboard_server.py / break-news.html / page-break-news.js / news_components.js / CLAUDE.md / VERSION×3。
+
+## 🟢 Session Note (v4.7.0) — News Protocol V2.2：script-first triage 省 token
+- **動機**：user 要求 refactor news protocol 減 token、品質持平。診斷：DIGEST 單跑 ~110K+，最大洞是 LLM 讀整包 raw.json（287KB ≈ 70K tokens）手工 triage — 但 `stage1_triage.py` v3.14.3（block/dedup/credibility/score/snap/gate）+ validator triage cross-check 早已存在，protocol 文件沒接上。
+- **V2.2 改動**：Stage 1 全 script 化（LLM 禁讀 raw.json，只讀 stage2_items + shallow top-25，補 top-15 headline_zh）；Stage 2 bundle 每篇截 5000 chars；MD shallow 20→10 照抄 script snaps；Phase 4.5 watchlist 節移 README；protocol 563→361 行（每 run 省 ~4K context）。**Stage 2 四方辯論 / Arbiter / 加權表 / cache patch / FLASH / REVIEW 全不動**。
+- **server prompts**：`news` + `triage` 改 script-first；順帶修 `triage` prompt 舊 `verdicts` shape 與 validator `shallow_verdicts` 期望的衝突（UI 無人消費 triage.json，i18n triage_* keys 是 orphan，安全）。
+- **預期**：DIGEST ~110K → ~35-40K；TRIAGE ~75K → ~5K。品質 trade-off：shallow snaps 從 LLM 個別寫改 script template（本就「品質不穩、不 patch cache」的展示層；明顯錯誤時 protocol 允許 LLM 改寫 top-10）。
+- **驗證**：dashboard_server.py ast.parse OK；validator 規則（stage1_count 對照、deep ⊆ stage2_items、shallow 10-15 cap）逐條核對相容，validator 0 改動。
+- **⚠️ user 動作**：dashboard_server 需重啟（PROTOCOL_PROMPTS 改動）。下次 DIGEST 跑完建議覆核 token 實耗 + shallow snaps 可讀性。
+- **檔案**：news/news_protocol_v2.md（重寫 V2.2）/ news/README.md / news/digest_output_schema.md（註記）/ dashboard_server.py（2 prompts + 1 註解）/ VERSION×3。
+
+## 🟢 Session Note (v4.6.2) — 取消 LLM Fallback 機制
+- user 要求取消 LLM Fallback。修改後，若主要模型不可用或呼叫失敗，系統將直接顯式報錯，不再默默 fallback 到其他備援模型。
+- **`model_router.py`**：重構 `_run_chain` 以取消 fallback 機制，`order` 列表中僅包含單一模型（優先使用指定的 `preferred`，若無指定則僅用 `chain[0]`）。
+- **`poller.py`**：修改 `_voice_order` 只回傳單一優先模型，以避免准入控制（Admission Gate）誤判 fallback 備援容量。
+- **`llm_drivers.py`**：更新 `_DEFAULT_CONFIG` 預設模型順序，將 `run_llm` 與 `model_chain` 的預設 fallback 模型由 `claude` 改為 `gemini`。
+- **`llm_config.json`**：更新 `primary` 為 `gemini`，`secondary` 為 `codex`，`tertiary` 為 `claude`。
+
+## 🟢 Session Note (v4.6.1) — ops glob 大小寫 + postmortem 資料修復
+- user 跑完回測仍標 never_run：Python glob macOS 大小寫敏感（`*postmortem*` ≠ `POSTMORTEM_`）→ registry glob 修 + `_glob_ci()` fallback（需重啟 server 生效；registry 修即時生效）。
+- postmortem 報告半盲三因：yfinance 尾端 NaN Close 毒 mean/pearson、V4.x 加粗格式 regex 漂移（5 月起 score/RT/burry 全空）、RSI 只認表格式。全修 + 重跑，N 大增（score 49→94）。
+- **修後關鍵發現**（詳 POSTMORTEM_2026-06-11.md + 本次對話分析）：final_score r=-0.003 純噪音、News lane 唯一接近訊號 (+0.186)、RSI>90 derate 只在 5d 視窗成立（10d 後 90-95 桶反而最強 +23%）、aggressive 進場 3/99 成交、SELL 1/1 錯。樣本偏差：半導體大多頭 tape + MU/TSM 重複計入。
+- **候選 protocol 調整（未動，待 user 決定）**：RSI derate 改 horizon-aware、aggressive 進場帶提高、score 權重等 weekly REVIEW 樣本累積後再判。
+
+## 🟢 Session Note (v4.6.0) — 工作流導向 Dashboard（Today 工作台 / 產出閉環 / 節奏自動化）
+- **起因**：user 要求從前端觀點重新檢視工作流。盤點（2 Explore agents）：16 頁 ~16.8K 行 JS、42 API 運作正常，但 weekly/shadow/postmortem/REVIEW/ledger/premarket 6 類產出無前端入口、手動 cadence 靠人記、index 缺梳理後全貌。user 確認三痛點 + 選工作流導向、分階段。**頁面瘦身合併明確不做**。
+- **架構**：聚合放 `/api/today`（server 即時算，真相源 ops_scripts_status/preflight_check/_list_reports_cached 全現成），不擴 bridge/data.json。報告關鍵行萃取 deterministic regex 0-LLM。
+- **Phase 1**：`/api/today` + `today-panel.js` 三卡（該做的事：triggered kill > protocol stale > due scripts > watch 股財報 ≤7d > kill 倒數 ≤2d > break-news stale；最新產出 feed 用 reports 頁 chip + deep-link；晨報 digest + 過期黃條觸發盤前檢查）。index 加盤前/盤中/盤後分段標籤，零 DOM id 變動。
+- **Phase 2**：分類器 +5 type、掃 decision_review/ 子目錄、view API 白名單分支（traversal 測試 400）、reports 頁摘要行、`/api/adjustment-ledger` + decisions 頁唯讀 active-recs panel。
+- **Phase 3**：SCRIPT_PROTOCOLS +3 script、registry 加 protocol_id/endpoint/auto、`ops_auto_loop`（30min tick、6h 防抖、`OPS_AUTO_LLM` 雙重開關）、ops/Today ▶ 一鍵。**發現 llm_review 已有 launchd 週日 06:00 自動**（com.kavi.aicommittee.llm-review）— registry 只收監控不重複排。
+- **驗證**：curl smoke 全過；headless 截圖 4 頁逐區；auto loop 實測（touch 舊→enqueue→fresh、weights.yaml 未動）；dedup 擋連點。注意 touch 模擬時年份格式 `202606020000`（CCYY）。
+- **⚠️ user 動作**：**dashboard_server 需重啟**（新端點 /api/today、/api/adjustment-ledger、ops_auto_loop daemon）。
+- **檔案**：dashboard_server.py（+~280 行）/ today-panel.js（新）/ index.html / page-reports.js / page-ops.js / page-decisions.js / decisions.html / style.css / config/ops_scripts.json / VERSION×3。
+
+## 🟢 Session Note (v4.5.1) — 刪 earnings-trade-analyzer
+- user 拍板刪除（0 接線、4/27 後無活動）。`git rm -f`（含未提交 fmp_client.py 修改一併捨棄）+ README / earnings-analyst SKILL.md / MARKET_INDEX 引用清除。
+- event index extractor + 歷史 artifact（`reports/earnings_trade_analyzer_2026-04-26_*`）保留。check_skills 22 skills 0 warn。要復原：`git log -- skills/earnings-trade-analyzer`。
+
+## 🟢 Session Note (v4.5.0) — Kill-Trigger Monitor + 稽核餘留批
+- **Kill-trigger monitor（★★★）**：`scripts/kill_trigger_monitor.py` 0-LLM 每日重檢 Red Team 推翻條件（history.json 近 90d kill_conditions + sector _phase4b risk_scenario）。regex 謂詞：價格/MA（`200MA`+`MA200`）/量比/VIX/SPY RSI/breadth/DFII10（讀 fred cache）；WITHIN 窗口支援絕對日期/交易日(×1.45)/日曆日；**`未能…WITHIN` 否定期限語義到期才判**（MSFT 200MA 案例驅動，防假紅 banner）；AND/且 拆子句、OR/或 → manual；不可解析 → `manual`+倒數照樣上畫面。daily Step 9.9 + index.html banner（headless 截圖驗收：PANW d3 amber + DFII10 met-chip）。實測 189 條件 3 armed/60 manual/126 expired。
+- **稽核餘留批**：predict 抽 `predict_ticker()` → thematic in-process（cache hit 0.00s）；earnings fetch 20 call 並行×8 + income dedupe（main 抓 limit 8 傳入）；weekly_review weights_version 讀 `top_movers[].short_term`（修死層級）+ per-ticker 史料 memoize（476→138 fetch）+ per-version 比較段；**technical_core 整檔升 `skills/_shared/`**（舊路徑 shim，momentum/analyze 零改）；RSI 5 實作→1（etf_scanner/sentiment/screen/predict 全 import shared Wilder；predict momentum_score 數值分布會移，weights 校準時注意）；MARKET_INDEX.md 23 skills 全列重寫。
+- **順手修**：yfinance 尾端 NaN Close row（6/10 SPY 實測）→ screen/predict dropna；retail-pulse SKILL.md 退役引用清掉（check_skills 0 WARN）。
+- **發現（待處置）**：FMP `/stable/rating-historical` + `/stable/grades-summary` 404（pre-existing；earnings bundle 該兩欄長期全零）— legacy 退役系列同 econ-calendar。
+- **驗證**：6 消費端 RSI 同值 53.48、momentum NVDA / predict NVDA fresh / screen snapshot live ✓、check_skills 0 warn、bash -n、node --check、headless banner 截圖、weekly_review 真跑 476 預測。
+- **檔案**：新 kill_trigger_monitor.py；technical_core 搬家+shim；predict/screen/weekly_review/fetch.py/etf_scanner/sentiment.py；index.html/script.js/style.css/daily_update.sh；MARKET_INDEX/SKILL.md×1/VERSION×3。
+
+## 🟢 Session Note (v4.4.0) — Skills 稽核修復批（依 SKILLS_AUDIT_2026-06-11）
+- **🔴 bug 批**：ic-memo quality_flags list crash（MSFT 全鏈驗證修復）+ trades[0] 錯 ticker 進 decision_lock + 9 欄位 shape 防護；v5_0 Burry 契約鍵名/T4 刻度修正（CANCEL 分支原不可達）；predict news_age 傳through（新鮮度閘復活）；retail-pulse 比對 headline+內文（原誤用 feed 名）；earnings render 新 flag 描述；us-stock-analysis（教 lane 違規 web search）/ technical-analyst 兩份 SKILL.md 補 lane 契約段。
+- **靜默失敗**：fred degraded→rc2 + 不重寫 cache mtime；mood _partial→rc2；daily Step1 breadth 改 non-fatal；Step5.5 theme-detector 重跑補 rc 檢查；forecaster real_rate fallback 加 WARN + 修 0.0-falsy。
+- **殭屍/效能**：刪 supply-chain-event-analyst（被 nexus 取代）；momentum .info 24h sidecar（省 529 Yahoo call/日）；predict SPY 1h file cache；retail-pulse predict ThreadPool×8 + 首例失敗 log；finnhub calendar memoize + status 不被 poison；enrich >7d prune（8386→1012）+ breadth keep-30（history 排除）。
+- **驗證**：golden 26 asserts ✓、check_skills 23 skills ✓、MSFT ic-memo rc=2 degraded-usable ✓、momentum/predict smoke ✓、bash -n ✓。
+- **餘留 backlog（audit 報告 §四之二）**：thematic in-process predict、earnings fetch 並行/重複抓、weekly_review weights_version 讀錯層、RSI 三實作統一、_shared price-history helper、MARKET_INDEX 重寫、kill-trigger monitor（新功能）。
+- **檔案**：12 個 script + protocol v5_0 + daily_update.sh + 2 SKILL.md + VERSION×3。
+
+## 🟢 Session Note (v4.3.0) — 知識圖譜重構：theme hub-and-spoke + 聚焦模式
+- **user 三抱怨**：看不懂 / zoom 不順 / 資訊量太大。診斷：280 邊中 262 是 CO_THEME 合成 clique（hairball 數學根源）；3 個錯開 auto-zoomToFit timer 跟 user 搶縮放 + 每幀 radial-gradient glow / `lighter` 合成拖累 zoom；點擊 thermographic 全圖特效資訊過載。
+- **重構**（page-graph.js 全重寫 1046→~620 行，純呈現層，nexus_graph.json / build_graph.py 不動）：CO_THEME 不渲染，client-side 由 ticker.metadata.themes 合成 ~30 theme hub + MEMBER_OF spoke（邊 280→85）；點擊改 ego 聚焦模式（1/2 hop 切換、麵包屑、ESC 返回）；user 動手後永不 auto-fit；painter 只剩 circle+fillText；theme label 恆定螢幕大小（地標）。
+- **控制台**：datalist 搜尋自動完成、關係類型 chip 開關、邊權重門檻 slider（取代時間衰減倍率）、聚焦深度按鈕；砍 provisional toggle。
+- **驗證**：node --check 過；headless 截圖 ×2（hub 星系成形、主題 label 可讀、孤立節點自動隱藏）。聚焦模式點擊互動待 user 實測。
+- **檔案**：page-graph.js / graph.html / VERSION×3。
+
+## 🟢 Session Note (v4.2.0) — 產業掃描頁重設計：結論→辯論→證據
+- **動機**：user 抱怨「掃描跑很多 token、頁面呈現很簡單」。盤點發現 sector_intel.json ~1300 行只有約 1/3 被 bridge 搬上 Dashboard — `_phase4a` 委員會 4 lane 投票、`_phase4b` Red Team IF/THEN 推翻條件、phase-1 估值（PE z1y/RS 多週期）、phase-3 盈餘脈搏/內部人/情緒全被丟掉；Today's Verdict hero 在 sector.html 還是 hidden stub（只活在 index.html）。
+- **新區塊**：委員會決議矩陣（11×4 ▲▼ 投票 + 分歧高亮 + lane rationale）/ Red Team panel（反證 + IF/THEN amber 觸發塊 + DA conf 徽章）/ 量化證據矩陣（14 欄可排序熱力表）/ 宏觀 Overlay chips（FRED snapshot + step6 乘數理由 + 地緣風險）。verdict hero 上掃描頁（briefing signal grid 一併）。heatmap 移頁尾。
+- **bridge.py**：market 增 `committee/da_challenges/fred_overlay/political_risk`；sectors[] 增 `valuation/earnings_pulse/smart_money/news_sentiment/fred_multiplier`。
+- **驗證**：bridge 跑過、data.json 新欄位齊；node --check + ast.parse 過；headless Chrome 截圖逐區塊目視（矩陣/Red Team/quant 表/macro chips 全部 real data render）。
+- **註**：新區塊文案用 isZh inline 雙語 fallback，i18n.js 未動。卡片 DA note 改 ⚔ marker（hover 全文），完整內容歸 Red Team panel。
+- **檔案**：bridge.py / sector.html / page-sector.js / style.css / VERSION×3。
+
+## 🟢 Session Note (v4.1.0) — Break News 辯論 V5：盲開局 + 分歧閘門
+- **目標**：突發辯論省 token 但保有效產出。舊制 normal 固定 4 call（~10k tok）/ high 6 call，Round 2/3 大量重複 Round 1 資訊。
+- **Round 1 雙盲並行**：A/B 各吃 opener、互不見 → divergence 變真訊號（舊制 B 看完 A 再寫，分歧被稀釋）。
+- **Divergence gate（0 LLM）**：verdict 對立 / 同 pair predicate 極性衝突 / conf gap ≥0.4（`BREAK_NEWS_DIVERGENCE_CONF_GAP`）；`concede` 即收斂。無分歧 → 2 call 收場 `converged_round1`。舊 low-density early-stop 併入。
+- **Round 2+ slim rebuttal**：新 `REBUTTAL_SYSTEM_PROMPT`+`rebuttal_user_prompt` — headline 1 行 + known state 1 行 + 確切分歧點 + 雙方 stance；output 只剩 commentary ≤60字/stance/新 relations/done，不重抽 entities。Round 3 只給 high-priority 仍分歧。
+- **預算端**：`EST_CALLS_PER_DEBATE` 6→3，同 quota 可辯 ~2 倍條數。估收斂 case −70% tok、分歧 case −45%。
+- **驗證**：mock 全流程 5 scenario（converge 2 call / concede relabel `divergence_resolved` / high persist 6 call / normal cap 4 call / 雙開局失敗→failed）+ gate 單測 6 case 全過。UI / build_summary_block / Nexus merge schema 相容免改。
+- **注意**：validate.py 掃到 1 個 2026-05-30 舊檔缺 key — pre-existing，與本次無關。
+- **檔案**：debater.py / prompts.py / poller.py / VERSION×3。
+
+## 🟢 Session Note (v4.0.0) — Protocol 瘦身 + Model 分層（major）
+- **B1 外移**：Phase 4.5 演算法 366 行 → `protocol_appendix_price_framework.md`（audit 用；engine+golden 為事實來源）。Protocol 4.5 縮成封裝呈現層 ~25 行。
+- **B2**：Phase 2 reverse DCF pseudocode → 指路；2.4 時點 bullet → 1 行。**合計 1853 → 1471 行（−21%）**。
+- **Model 分層第一批**：Sent/News/Tech lane → `model="sonnet"`；Fund/Val inherit（第二批候選）；**Red Team 永不降**；MD formatter Sonnet 既有。估單次 `分析` 成本 −35-50%。
+- **哨兵**：shadow_report 加 lane 段（近 10 mean drift vs baseline n=31 + DISAGREE/polar 計數）。**降級後前 10 session 必看**；異常 lane 回 inherit。
+- **第二批條件**：10 session 哨兵乾淨 → Fund/Val → Sonnet + MD formatter 試 Haiku。**第三批（另議，動決策）**：Valuation Specialist 裁撤（val_det 已有 deterministic 分數）。
+- **驗證**：17 個 PHASE header 完整、golden 26/26、validator rc=0。
+- **檔案**：protocol / 新 appendix / shadow_report / VERSION×3。
+
+## 🟢 Session Note (v3.49.0) — 估值新 block 呈現層 + moat 容錯
+- **呈現層補齊**：ic-memo §8（range/reverse DCF/MHP 三框/archetype shadow 四段，graceful skip 舊 entry，decision_lock 不動）+ decisions 頁 Valuation 卡 `buildFvExtras()` 4 行（Range/5D Band+60D+signal badge/Implied CAGR/Archetype flip ⚠）。
+- **⚠️ 又抓到 pre-existing bug**：近期 entries（MRVL/PLTR/PANW）`moat_assessment` 被 LLM 寫成 string → **ic-memo 對最新 entries 一直 crash**。容錯修復，MRVL memo 重新可產（rc=2 degraded-usable）。註：根因是 LLM 沒照 schema 寫 dict — 之後 protocol 跑時 PM 應注意 fundamentals_lane shape；可考慮 validator 加 warning（未做）。
+- **驗證**：render_sec_8 單測（synthetic blocks 全 render）、MRVL 全鏈 build→compose→validate rc=2、page-decisions.js syntax OK、golden 26 asserts 過。
+- **Backlog 剩**：protocol token 瘦身、#10 cron 化、moat string drift 的 validator warning、shadow checkpoints（等 session）。
+- **檔案**：build_fact_pack / compose / page-decisions.js / VERSION×3。
+
+## 🟢 Session Note (v3.48.0) — Engine self-assemble + golden 測試 + peer_pe bug 修
+- **P2 完成**：`--self-assemble` — quant 欄全由 engine 讀 deterministic 源（earnings cache / peer bundle / supp / forecaster cache / phase0），file 欄位優先，`self_assembled_fields[]` audit。AAPL 實測 24 欄自組、5/6 anchor。**估值鏈 0 LLM 算術 + 0 LLM 抄寫達成**（qualitative 欄 pattern/key_levels/catalyst 仍 LLM lane）。
+- **⚠️ 順藤摸瓜抓到既有 bug**：FMP stable migration 後 `/stable/profile` 無 `peRatio`、`/stable/quote` 無 `eps` → **peer_pe_implied anchor 默默失效已久**。修：peer pe 用 ratios-ttm `pe_ttm` median；self eps = price/pe_ttm 反推（虧損股 → None，hypergrowth 規則退化只看 rev_yoy）。
+- **#8a 修**：60d earnings_revision 折算 60/250（原直接用長期錨 = horizon mismatch）。
+- **golden 測試**：`test_compute_price_framework.py` 4 fixtures × 26 asserts 全過；入 ops registry。改 engine 必跑。
+- **限制註記**：self-assemble 的 fred 只補 real rate（nominal 10Y 無乾淨快取源 → engine fallback_fixed）；earnings cache 缺的 ticker（如 MRVL）→ DCF/PT/archetype 缺料降級（decision cap 接住）。
+- **剩餘 backlog**：呈現層（ic-memo/Dashboard render range/implied/archetype）、protocol token 瘦身、#10 cron 化、shadow checkpoints（等 session）。
+- **檔案**：engine / phase1_factpack / company_context / 新 test / protocol / CLAUDE.md / ops registry / VERSION×3。
+
+## 🟢 Session Note (v3.47.0) — Dashboard Script 工具箱
+- **起因**：user 要面板看「有哪些 script / 上次多久前用 / 需不需要跑」。
+- **實作**：`config/ops_scripts.json` registry（11 支，可編輯）→ `/api/ops/scripts`（artifact-mtime 推斷 last run，零侵入；cadence 寬限 daily 26h/weekly 8d/monthly 32d）→ `/ops.html` + `page-ops.js`（badge: due/never_run/fresh/on_demand，due 排前；📋 複製指令；唯讀不執行）。
+- **實測**：weekly_review 46 天未跑 → due 紅標（立刻有用的訊號）。
+- **注意**：dashboard_server 需重啟才吃到新 endpoint（user 自管 daemon）。
+- **檔案**：ops_scripts.json / dashboard_server.py / ops.html / page-ops.js / utils.js / i18n.js / VERSION×3。
+
+## 🟢 Session Note (v3.46.1) — shadow_report.py 讀出端 + dispersion backfill
+- **起因**：3 個 shadow 實驗（#3/#6/#4）只有寫入端沒有讀出端，checkpoint 到了要手挖 history。
+- **`shadow_report.py`**：唯讀，一次算 4 section + checkpoint 進度，數學 import engine（單一事實來源），輸出 `reports/SHADOW_REPORT_<date>.md` + `--json`。#10 cron 前半身。
+- **⚠️ backfill 重大發現**：歷史 37 筆 anchor CV 分布 median=0.46、P33=0.367、max=1.27 — agreement_grade 拍腦袋門檻 0.15/0.35 會把幾乎全部 session 判 low。**校準建議：high<0.367 / low>0.484**（33/66 pct），已寫進 protocol 4.5.0b 註記，#2 cap 接線前需 user 核可改 engine 常數。
+- **跑法**：任何時候 `python3 investment/scripts/shadow_report.py`；#6/#3 到 20 session、#4 到 10 session 時跑它出報告。
+- **檔案**：新 script + protocol 註記 + CLAUDE.md + VERSION×3。
+
+## 🟢 Session Note (v3.46.0) — Valuation Archetype Shadow（#3，shadow-only）
+- **起因**：固定 anchor 權重對未獲利成長股（DCF 0.45 雜訊、peer_pe EPS≤0 失效）與金融股（無 P/B）半殘。user 拍板：shadow 先行 + 權重表/門檻照設計初值。
+- **archetype 分類**（按序首中）：financial → hypergrowth → cyclical → mature_cashflow → balanced。門檻初值：rev 25% / FCF 8% / rev 15% / margin σ 5pp。
+- **3 新 anchor**：peer_ev_ebitda/ev_sales implied（精確 EV 數學，非比例近似）+ pb_roe_justified。資料：`get_ratios_ttm()`（company_context 新函數，雙 endpoint merge，24h cache）→ PEER_BUNDLE 新 5 欄。
+- **紀律**：live `fair_value_summary` 完全不動；shadow 輸出 `flip_vs_live` 累積。**退出條件 ≥20 session 翻轉率報告 → #3b 切 live（cap/T5 接線同步）**。balanced fallback = shadow==live 自驗。
+- **實測**：hypergrowth case live $225.7 overvalued vs shadow $270.5 fairly_valued（flip=true，EV/Sales 主錨）；financial pb_roe $76.95 手算一致；back-compat 舊 input → balanced flip=false；AAPL live peer median EV/EBITDA 20.4。validator rc=0。
+- **Deferred**：forward EPS peer_pe、normalized-earnings anchor（cyclical）、cap/T5 接線 → #3b。
+- **shadow 等待中清單**：#3 archetype（20 session）、#6 oe_mult（20 session）、#4 news_score 分布監測（10 session 凍結窗）。
+- **檔案**：company_context / phase1_factpack / compute_price_framework / protocol / schema / validator / VERSION×3。
+
+## 🟢 Session Note (v3.45.4) — News lane PT 去重（external review #4）
+- **起因**：PT consensus 計分三次（valuation anchor 0.20 + 60d pt_60d 0.35 + News「PT vs price ±1」）。user 拍板：移除（非減半，LLM 聚合下減半不可控）+ 注入層剝離（非 rubric 層）+ revision momentum 回填 + 後驗防線。
+- **fetch.py 剝離**：payload 砍 `price_target` block 全部絕對 level → `pt_revision_momentum`（30d/90d 方向+delta%+家數）。實測 AAPL：leak check 0、1m 下修 8% 有料。
+- **持久化先行**：`news_lane.reasoning_one_line`+`key_factors[]` 必填第 5 欄（之前 0/134 落地，classifier 無 haystack — 這是 #4 計畫 review 抓到的致命缺陷）。
+- **classifier**：`apply_det_shadow.py` `news_pt_leakage`（PT 折溢價措辭 → flag；「PT 上修/下修」合法）。warning 級。det_shadow → V3.45.4。
+- **Phase 6 凍結窗**：前 10 個 News session delta.News=0（`news_weight_frozen_v3454`），防分布下移被誤判 lane 失準。
+- **驗證法**：前向監測 news_score 分布 vs baseline `{-1:1,0:2,1:6,2:18,3:4}` (n=31) + leakage 累積率。history 反事實不可行（PT 子分數/reasoning/threshold 皆未落地）。
+- **測試**：classifier 3 case PASS、舊 history entry back-compat（flag=None）、validator §5g warning-only rc=0。
+- **待辦移交**：P2 餘項（#2 cap 接線 / #3 archetype anchor / #9 vol-normalize）、#8b DECAY backtest、#10 anchor 校準 cron、#6 oe shadow 20-session 檢查、PT 三點化 anchor（#1 後續）。
+- **檔案**：fetch.py / protocol / schema / apply_det_shadow.py / validator / VERSION×3。
+
+## 🟢 Session Note (v3.45.3) — Price Framework Engine script 化 + Phase 2.4
+- **起因**：protocol review 抓到 B1（P0）：3.45.x spec 累積 weighted percentile / CV / reverse DCF 迭代解，LLM inline 算不可靠，卻寫「PM inline deterministic 計算」。user 拍板：order 對調（先 script 後 #4）、script 整包。
+- **`compute_price_framework.py`**：一個 call 算 4 block（fvs blend byte-identical / range / MHP / reverse DCF bisection）。ticker 給了且缺 vol → 自抓 FMP OHLCV（消 LLM 抄寫）。降級=data 非 failure → rc=0。
+- **新 Phase 2.4**：phase order `0→1→2→2.4→2.5→2.8→3→4→4.5→5`。一次解 B2 時序 fudge：T5(2.5) 直接用 mhp_signal、Red Team(2.8) 直接收 kill_seed、Phase 3/4/4.5 引用既存輸出。**注意**：本來打算放 Phase 3 Step 0，發現 implied_expectations 餵 2.8 Red Team → 必須 2.4。
+- **Phase 4.5 降格為封裝呈現層**；implied_expectations 歸屬 Specialist→engine；B3 常數註記（ERP 0.04 real vs 0.045 nominal，用途不同非筆誤）；convergence low-conf guard。
+- **驗證**：full / degraded（1 anchor、無 vol、FCF<0、FRED 缺）/ live FMP fetch（AAPL σ=0.0143）三路徑 rc=0。
+- **版號**：3.45.2 跳過（原配 #4 PT 去重，對調後移後）。**下一步**：#4（注入層剝 PT + pt_revision_momentum 改 engine/deterministic 算 + news_lane 文字持久化 + leakage classifier）。
+- **檔案**：新 script + protocol（Phase 2.4 新章 + 4.5/T5/RedTeam/Phase3/4 措辭）+ schema + CLAUDE.md + VERSION×3。
+
+## 🟢 Session Note (v3.45.1) — 估值層 external review P0+P1 批次
+- **起因**：外部 AI model review V5.1 protocol 給 10 點建議。本批做 P0（bug）+ P1（advisory/sibling，零決策衝擊）。user 釐清 4 點全收。
+- **#7 bug 修**：`high_conviction_long_zone` 是 dead code（band_lower 必 < current）→ 改 `band_point<LT AND mid_target>current AND current<LT×0.9`。
+- **#1 `fair_value_range`**：anchor 分布 P25/P50/P75 + `range_verdict` 位置判定。解決「加權平均沒人信、分歧被銷毀」。退化 n<4→minmax、n<2→null。
+- **#2 拆半**：CV + `agreement_grade` **純展示**進 P1（**不**接 Phase 4.6 cap，接線+winsorize 留 P2，待歷史分布校準門檻）。
+- **#5 `implied_expectations`**：reverse DCF 現價隱含 5Y FCF CAGR。WACC=FRED10Y+0.045、FCF base=owner earnings、FCF≤0→null。餵 Red Team `red_team_kill_seed`。不進加權。
+- **#6 shadow (option a)**：live anchor 仍 static ×15（weighted_fair_value 不變），shadow-log rate-linked 倍數。確認翻轉率後才切換。
+- **契約鐵律**：`fair_value_summary` byte-for-byte 不動 → decision_lock / val_det / validator / 舊 entry 全相容。新 block 全 sibling、warning-only rc=0。實測 MRVL entry rc=0。
+- **未做（待議）**：P2 改決策數學各項（#2 cap 接線 / #3 archetype+EV/Sales/EBITDA/PB anchor / #4 PT 去重 / #9 verdict vol-normalize）逐項 review；#8b DECAY backtest；#10 anchor 校準 cron（獨立 infra）。
+- **檔案**：protocol / schema / validator / VERSION×3 + SESSION_NOTES。
+
+## 🟢 Session Note (v3.45.0) — investment Phase 4.5 → Multi-Horizon Price Framework
+- **起因**：user 提案把單點 `fair_value_summary` 擴成三時間框架（5d 機率帶 / 60d target / 長期 6-anchor），各用該尺度合適方法 + 三框收斂成交易語意，並補 protocol 原本沒定義的 trade_plan TP/SL 來源。
+- **做法**：Phase 4.5 升級成 Multi-Horizon Price Framework（仍 inline deterministic、0 LLM 重評）。
+  - 5d band = 波動率錨定（σ_daily·√5 ± 1.28 + drift 查表 + catalyst override + key_level 反射）。
+  - 60d = 0.40 momentum + 0.35 pt_60d + 0.25 earnings_revision。
+  - convergence → `mhp_signal` 4 態，餵 Phase 3 T5 reasoning + Phase 4 entry/TP/SL provenance。
+- **契約零破壞關鍵**：`fair_value_summary` key/shape **不動**（被 ic-memo 11-field decision_lock + apply_det_shadow val_det + validator 鎖死）→ 新框架另存 sibling `multi_horizon_price_framework`，長期層引用不重算。MHP **不**進 decision_lock（derived/advisory）。
+- **新缺料輸入**：technical_lane 加 `volatility` sub-block（atr_14 / hist_vol_20d_daily / momentum_20d_pct，deterministic FMP read，缺 → 降級不擋）。
+- **validator**：MHP warning-only（rc 維持 0），驗 long_term_ref 一致性 + mhp_signal enum + sub-block 完整度。實測既有 V5.0 MRVL entry rc=0 + 印 degraded warning。
+- **檔案**：protocol / schema / validator / VERSION×3。
+
+## 🟢 Session Note (v3.43.0 + v3.44.0) — token 計量上線 + sector 三招砍 cache_read
+- **起因**：user 要盤前檢查的 per-stage token 報表。診斷發現系統只記 per-model **call 數**、
+  從不記 token；真 token 全在 agentic protocol(sector/news/invest)+ break-news debate 的
+  stream-json log 裡沒被聚合。
+- **盤前實測 (2026-06-09→10)**：daily_update.sh 全 deterministic = 0 token；TOKEN 消費 =
+  news DIGEST $2.75 + sector $4.25 = **claude 今日 $7.00**（in 27.8K / out 77.6K /
+  cache_read 3.09M → cache_read 佔 89%）。
+- **v3.43.0 token 計量**：`llm_drivers`(LLMResult +5 token 欄 + `parse_stream_log_usage`) +
+  `model_router`(per-model `tokens` dict、`_record`/`note_run(tokens=)` 累加、migrate 舊檔) +
+  `dashboard_server`(run_protocol 結束解析 log→note_run) + sidebar 顯示 in/out/cache/$。
+  **已重啟 dashboard server (PID 變)**，今日 $7 已 backfill。break-news daemon 重啟回常駐。
+- **v3.44.0 sector**：解剖 sector log = 24 Bash turn、cache_read 16K→131K 雪球。三招(同 3.42.0
+  invest 模式)：① `phase_prefetch.py`(NEW 0-LLM 並行聚合 9 取數→1 JSON，Phase 3 FAST PATH) ②
+  4 lane + Devil's Advocate 加 `model="sonnet"`(Arbiter 留 Opus) ③ GLOBAL RULES 禁 fmp MCP
+  ToolSearch。**決策邏輯零變動**。
+- ⚠️ **未跑真實驗證**：phase_prefetch 結構測過(valuation/sector_news/sentiment/digest rc0)，
+  但 econ/earnings calendar 撞 FMP **legacy endpoint 退役**(403→SOFT null，非本次 bug)；
+  smart_money ~131 ticker 慢(timeout 調 360s)。**下次真實「產業掃描」需確認 FAST PATH 真省 turn +
+  Sonnet lane 品質不掉**。
+
+## 🟢 Session Note (v3.41.0) — Rec 11 熱區保守性鬆綁（首個決策層 weekly-review 調整）
+- 依 REVIEW_2026-06-07 + 上週(05-31) READY 項，promote **TODO-001 + TODO-002 → Rec 11**：
+  Pattern A（Semis HOLD-miss 86% N=22）+ Pattern B（CANCEL-miss 71% N=21）同根，miss avg runup
+  +30.5% vs drawdown −3.2%（Rec 9 證實真錯過）→ 鬆綁 V5.0 decision band。
+- 改 `investment_protocol_v5_0.md`：正分模糊區 `[0,+staged)` × `industry_top_30pct` ×
+  `RISK_ON/BULL` → default HOLD 降為 `STAGED_ENTRY (hot_zone_probe)`，15bps 上限；cap 規則不 force CANCEL。
+  **3 道硬保險**：regime guard / `decision_cap_active!=true` / `mandatory_risk_flags 空`；硬閘（Auto REJECT /
+  burry≤1 / proceed_to_phase3=false）全部優先。
+- schema 加 `hot_zone_probe`；validator §11 enforcement（4-case smoke 綠：valid rc0 / HOLD・20bps・cap 衝突 rc1）。
+- ledger Rec 11 target_metric：Semis HOLD-miss<60% / CANCEL-miss<60% / deep-dive hit 不退；
+  **Semis HOLD-miss 回升>70% → paused**（user 指定）。
+- 順手修 `build_event_index.py` ledger loader（`startswith("active")`，補抓 Rec 10）→ active 7→8。
+- ⚠️ **user 提示 2026-06 中旬將大幅回檔**：回檔期 regime 應轉 VOLATILE/SIDEWAYS → 規則自動 dormant；
+  首兩週需確認 `hot_zone_probe` 觸發數 ≈0、Semis HOLD-miss 走勢。
+- **待**：下次真實 `分析 [TICKER]` deep-dive run 帶 hot_zone_probe 欄做真實 smoke；下輪 REVIEW 評 Rec 11。
+- 留待累積：TODO-003（momentum-screen 8-12週）/ TODO-009（News-decisive N≥40）/ TODO-011（強訊號 N≥15 精校）；
+  TODO-010 flip 12% observe band，續觀察 1 輪。
+
+## 🟢 Session Note (v3.40.8) — Market Mood scoring 修正
+- 使用者指出 mood page 每天都是「偏樂觀」。查證：`Dashboard/market_mood.json` 有更新，但 CBOE raw put/call 抓不到時退回 CNN `put_call_options=96.6`，被當成 `pc_signed=+93.2` 強訊號，壓過 SKEW high、breadth/strength 弱、junk bond demand 低。
+- 修：CNN put/call fallback 改弱 proxy（cap ±50、權重 0.10）；新增 `fg_quality_signed` 聚合 stock_price_strength / stock_price_breadth / junk_bond_demand，權重 0.15。
+- 重跑 mood producer（需網路權限）與 bridge：`data.json.market_mood.mood.score` 從 `+36 Greed` 變 `+2 Neutral`。
+
+## 🟢 Session Note (v3.40.7) — Break News 源整理：移除 StockTwits + 補 3 RSS
+
+User 觀察 StockTwits 很少被選到、沒用 → 要求移除並找新 RSS。先驗證：StockTwits 每
+cycle 抓 ~35 則但只 63/1304（~5%）bn files 以它為 primary source，幾乎純雜訊進 Raw 流，
+claim 成立。`social_sources.py` 移除 `fetch_stocktwits` 函式 + `STOCKTWITS_*` 3 個 env
+var + adapter-list entry（社群源剩 truth_social / reddit / bluesky / hacker_news /
+google_trends）。新 RSS 先 live curl + 過專案 `fetch_feed` 驗證才接：Fed Press(HIGH)、
+Nasdaq Markets(MEDIUM)、Benzinga(MEDIUM) 全部 200 + 有效 item + 日期新鮮 → 加進共用
+`FEEDS`（9→12，news protocol 與 break news 同步受惠）。淘汰 WSJ（item 全凍結 2025-01-27
+dead endpoint）、GlobeNewswire（外語 micro-cap 噪訊）、Fool/FT(301)、SEC(403)。
+TODO BN-2 closed。
+
+## 🟢 Session Note (v3.40.5) — 新聞戰情室卡片可點開原文
+- 修：新聞頁卡片無法點開原文。`url` 在 `*_raw.json` 抓取階段有，但 triage/digest 只保留 `news_id`、丟掉 `url`。
+- `bridge.py` `_raw_pub_map` 改回傳 `{published, url}`，`extract_news()` 用 `news_id` 重新 join url；`page-news.js` source_label → clickable `↗`（新分頁），舊 digest 無 url 時 fallback 純文字。
+- 驗：當前 11 筆全帶 url，`data.json` 已重生。
+
+## 🟢 Session Note (v3.40.4) — 短期雷達：產業趨勢榜可點 → 列出**完整**成分股（finvizfinance）
+
+user 要 radar 產業趨勢榜「點產業列出該類**所有**股票」。`industry_trend` 只有產業漲幅、無成分股。
+先做輕量版（heatmap 大型股，Solar 1/半導體設備 0），user 追問「免費 api 也拿不到嗎」→ 查到 **`finvizfinance`**
+（theme-detector 既有依賴、免 key、公開爬）Screener 可 by-industry 撈**完整**清單 → user 同意升級完整版。
+
+最終實作（完整版）：
+- **server**：`GET /api/industry/<name>` → `finvizfinance` Screener(`filters_dict={'Industry':name}`) → `{ticker,company,sector,market_cap}` list
+  + **12h TTL 快取**（`_industry_cache`，`INDUSTRY_CACHE_TTL_SEC`）+ lazy import 防呆 + `_INDUSTRY_NAME_RE` 驗證 + `unquote`（名稱含空白/&）。
+- **`page-radar.js`** `showIndustryStocks()`：主打 `/api/industry/`（完整），失敗才 fallback `_ensureHeatmapIndustries()`（本地大型股）；
+  chip 沿用 `analyze-ticker-btn`→深度分析；`_industryRow` 加 `data-industry`+clickable；click 委派 + 關閉。`radar.html` 加 `#ind-stock-panel`。
+- 保留 `_finvizIndustryUrl()`「在 finviz 看全部」連結（雙保險）。
+
+驗證（fresh server live test）：Communication Equipment 44 / Semiconductor Equipment & Materials 29（& 名稱 OK）/ Solar 22；
+2nd call cached 即時；bad name 400。node/py syntax 全過。
+
+⚠️ user 的**跑著的 server 需重啟**才有 `/api/industry` route（route 是 boot 時註冊）。需瀏覽器實點驗收。
+finviz 偶爾擋爬 → 自動 fallback 本地大型股 + finviz 連結。
+
+## 🟢 Session Note (v3.40.3) — TODO-011 止血：news-digest verdict 門檻（接 3.40.1 回測檢討）
+
+接 3.40.1 回測檢討。user 問 TODO-011 現在改不改 → 建議「現在改」並執行。
+
+**root cause（確定 bug 非假設）**：`verdict_news_digest` 用單股設計的 `HIT_THRESHOLD_PCT=2.0`
+評 SPY 市場級 call。SPY 窗口內幾乎不動 ±2% → 強訊號全壓 neutral → news-digest hit 結構性 0%
+（連兩週 0524/0531 列盲點卻沒人開 TODO）。
+
+**為何敢直接改**：純回測 verdict 標籤規則,**不碰任何 live 決策 / protocol** → 零下單風險、可逆。
+跟 TODO-001/002 protocol threshold（必須等 drawdown 驗收）本質不同。
+
+**改動**：`scripts/verdict_rules.py` 加 `NEWS_HIT_THRESHOLD_PCT = 1.0`,`verdict_news_digest` 改用之
+（deep-dive 2.0% 不動）。±1.0% 經現有 7 筆強訊號驗算最優（救回 05-14 看空 SPY−1.93%,不像 ±0.5%
+製造 sub-1% 雜訊假 miss）。rebuild 後 hit **0→1**。→ Rec 10。
+
+**剩餘（TODO-011 in_progress）**：N≥15 強訊號 digest 累積後 grid 精校 ±1.0% 值。
+**同時補建 TODO-010**（verdict <100% 窗口翻轉追蹤,資料已存在 9 snapshot,缺 diff 工具,下輪可跑）。
+
+⚠️ **並行 session 注意**：本分支有另一條 session 同時在動（momentum journal v3.40.2）。VERSION
+被推進數次,我的 review 改動最終落 **3.40.3**（3.40.1 = drawdown+parser / 3.40.3 = news 門檻止血;
+3.40.2 是 momentum journal 那條 session 的）。
+
+## 🟢 Session Note (v3.40.2) — 動能選股 Journal 統計區：中文化 + 點訊號→篩選 + unknown 說明
+
+接 user 反映「動能選股下面那張圖（Journal 統計區）是英文、有 unknown 看不懂、想點訊號直接篩選」。
+調查後確認：by-signal 表**本來就**按勝率降序 + 訊號名已翻；真正缺的是殘留英文 + unknown 說明 + 點擊互動。
+
+範圍（皆取輕量、純前端）：
+- **翻譯**（`i18n.js` zh+en 補 8 key / `page-momentum.js` renderStats）：by-signal 標題後綴（原 zh 還重複疊英文 `(20d win rate)`）、
+  `Filled:`、等待 20d、`Signal` 表頭、量能 regime 的 expanding/stable/contracting（新 `vol_trend_map`）+ stage（走 stages_map）+ 空狀態。
+- **unknown**：`stages_map.unknown`「未知」→「資料不足」；主表 stage cell hover 出原因（歷史<200日）。sector 已「未分類」。
+  根因記錄：stage unknown = MA20/50/200 任一 NaN（`technical_core.py:259`）；sector Unknown = 不在三大名單（`screen.py:409`）。
+- **點訊號→篩選**：by-signal 列可點 → toggle `_state.filter.requiredSignals`（複用 filter-chip 路徑）→ 重繪主表 + 捲動；
+  已選 ✓、再點取消。table-section 與 journal-section 同頁並列（非互斥 view），故只捲動不切 view。
+
+決策（問過 user，全取建議/輕量）：勝率用既有全史 stats.json（不加近窗）、點列 toggle（不做 Top-K preset）、
+unknown 純前端 relabel+tooltip（不動後端 sector 補值）。
+
+驗證：node --check 全過；/momentum.html 200；data.json by_signal=17 / by_volume_regime=99 / 20d fills=16565；
+4 筆 unknown stage + 1 筆 Unknown sector 可驗。版本 3.40.2 三處同步。
+
+⚠️ 待 user 在瀏覽器實點驗收（headless 無法點）。三張圖未附，以「下面那張=Journal 統計區」為準（user 已確認）；
+若主表/filter 面板另有英文殘留，補圖再一併翻。
+
+## 🟢 Session Note (v3.40.1) — Weekly REVIEW 回測檢討：drawdown surface + news parser 修復
+
+針對 0531 LLM REVIEW（`REVIEW_2026-05-31.md`）的 READY items 執行回測檢討。共 4 個 READY：
+TODO-005（drawdown surface）/ TODO-001 / TODO-002（protocol threshold）/ TODO-008（news parser）。
+
+**做了什麼（問過 user，選 005 + 008）**：
+- **TODO-005 → Rec 9**（`scripts/build_event_index.py`）：reality 加 `max_runup_pct` /
+  `max_drawdown_pct`（從 decision price 換算 pct；原 `max_*_since` 是絕對價格不可讀）；
+  deep-dive verdict 注入兩欄；rollup miss 區加 `avg_miss_drawdown_pct` / `worst_miss_drawdown_pct`。
+- **TODO-008 → Rec 4 resolved**（`scripts/extractors/news_digest_extractor.py`）：10-pattern
+  ladder 換單一 tolerant regex。news-digest macro_delta null **35% → 2.5%** (14→1)，零 regression。
+
+**關鍵發現（drawdown 解開謎團）**：負 avg_miss_return 之謎 = rollup 對 HOLD-miss（正值）+
+BUY-miss（負值）不分方向混算的 artifact。surface drawdown 後：**Semiconductors HOLD/CANCEL
+miss avg_ret +33.86% vs avg_dd 僅 -3.26%** → 真錯過上漲、caution 不成立、**H1 確認**。
+
+**刻意不做（紀律）**：TODO-001/002 protocol decision threshold（`investment_protocol_v5_0.md:851-857`
+HOLD = score ∈ [±0.8]）**本週不改**。改 threshold 前須走完 drawdown 資料 → 下週 REVIEW 重評 →
+promote-to-ledger 迴圈，避免盲改誤殺避損 HOLD。blocker 已清，候選方向（score [0,0.8) +
+top30 + RISK_ON/BULL → STAGED_ENTRY probe）已寫進 TODO-001/002 evidence。
+
+event_index 已 rebuild（271 records）反映兩項修復。
+
+## 🟢 Session Note (v3.40.0) — AI 辦公室翻案：自主多角色協作（砍掉 3.38 PTY terminal）
+
+**user 回饋翻案**：3.38 的 PTY terminal「效果奇差、畫面破碎」，而且**本來就不是要 terminal** —
+要的是**多角色自動協同工作**，需要 persist 的互動式 UI 來驅動/觀察。terminal 是我把手段當目標。
+
+決策（問過 user）：多 CLI 真分歧 / 通用辦公任務 / 全自動到產出。
+
+**關鍵發現**：專案**早就有** programmatic 多 agent 引擎 — `scripts/break_news/llm_drivers.py`
+（`run_claude`=`claude -p --output-format json`、`run_gemini`=`agy --print`、`run_codex`=`codex exec --json`）
++ `scripts/_shared/model_router.py`（角色鏈 + 每模型日預算 + cooldown + fallback），Break News 每天在跑。
+→ 直接長大這個，**不用 PTY、不用 WS、破碎問題從根消失**，且因 reuse 既有 `-p` driver **零新增計費面**
+（3.38 RFC §1 的計費焦慮對本專案根本不成立 — 早就在用 `-p`）。
+
+砍掉：`scripts/office/pty_session.py` / `ws.py` / `preflight_smoke.py` / `config/office_claude/`。
+新增：
+- `scripts/office/roles.py`（Lead=claude 主筆 / Critic=gemini 挑戰 / Verifier=codex 佐證，通用領域中立，JSON envelope 契約）
+- `scripts/office/store.py`（run 生命週期 `reports/office/<run_id>/`：meta.json + events.jsonl append-only + deliverable.md）
+- `scripts/office/orchestrator.py`（round-robin 迴圈 → run_with_fallback → 收斂(全員 done/輪數/wall/預算) → Lead compose 交付物；合作式 stop）
+- `dashboard_server.py` office routes（token/runs/run/<id>/SSE stream/run start 202/stop；single-active 409 guard；token+Origin gate）
+- `Dashboard/office.html` + `page-office.js`（任務輸入 + 啟動/停止 + SSE live 角色卡 + 交付物面板 + 歷史 run replay）
+
+驗證：roles/store/orchestrator 邏輯（stub 引擎：收斂/事件/交付物/spend/stop 全綠）+ 全 HTTP/SSE live test
+（token gate 403 / run 202 / dup 409 / SSE 全程 replay+end / 交付物 / runs list 全綠）。版本 3.40.0 三處同步。
+
+⚠️ **待辦**：(a) **尚未對真 claude/agy/codex 跑端到端**（只用 stub 測編排）— 要實跑一次驗 agy/codex 真會吐
+可解析 envelope（不然該角色會 fallback 到別引擎）;(b) 全自動跑一輪量出真實 per-run 呼叫數/耗時/預算衝擊;
+(c) phase-2：mid-run interject（user 選全自動，暫不做）、可設定角色 YAML、多 run 並行。
+
+## 🟢 Session Note (v3.38.0) — AI 辦公室 · Claude member v1（Route A persistent PTY terminal，已於 3.39 移除）
+
+實作 `docs/office_claude_route_a.md`。定位：drawer 內是真 **xterm.js terminal viewport**，後端純 PTY raw
+byte relay（`claude` 無 inline，永遠 alt-screen TUI，scraper 是死路）。v1 **只做 Claude member**。
+
+決策（問過 user）：(1) transport = **手寫 WebSocket** 直接 bolt 在既有純 stdlib `ThreadingHTTPServer`
+上（無新依賴、無 async refactor；SSE+POST 對終端機太 laggy）;(2) scope = **minimal Claude-only page**
+（新 `office.html`，不先做 multi-member shell）。
+
+交付：
+- `scripts/office/pty_session.py`（PtySession：pty.openpty+Popen 起互動式 claude **無 -p**，sanitize nested env，
+  注入 `CLAUDE_CONFIG_DIR=config/office_claude` 無 MCP，bounded scrollback + reconnect replay，resize TIOCSWINSZ，
+  clear/restart/stop，Asia/Taipei 日界 rollover）
+- `scripts/office/ws.py`（純 stdlib RFC6455 server：handshake+frame codec+續傳+thread-safe send）
+- `config/office_claude/settings.json`（無 MCP、default permission mode）
+- `scripts/office/preflight_smoke.py`（Gate1 啟動健檢 auto / Gate2 billing **手動 checklist 不 auto-pass**）
+- `dashboard_server.py` office routes（token mint / status / WS relay / message·resize·lifecycle）+ token+Origin gate
+- `Dashboard/office.html` + `page-office.js`（xterm CDN + WS client + 控制鈕）+ 側欄 `工具/OPS` group nav
+
+安全：127.0.0.1 + per-process session token（hmac.compare_digest）+ Origin allowlist；**不** bypassPermissions。
+
+驗證：ws frame round-trip + PtySession（cat 替身）lifecycle + 全 HTTP/WS live test 全綠
+（token mint / token gate 403 / origin gate 403 / WS 101 / 雙向 PTY echo / resize / lifecycle）。
+
+⚠️ **未做/待辦**：(a) **billing gate 未實測** — RFC §1 計費前提仍未驗，正式上線前須跑 preflight Gate2 對真帳號確認
+訂閱有扣、Agent-SDK credit 沒動;(b) 多行貼上 bracketed paste = phase 2;(c) 乾淨 transcript parser = phase 2;
+(d) Codex/Gemini member 各自 smoke 後再加;(e) 尚未對真 `claude` 跑過 preflight（只用 cat 替身測 relay）。
+
+## 🟢 Session Note (v3.37.0) — 新聞 digest 全面 zh-TW（補 bridge 缺口 + 自動翻譯 hook）
+
+接 3.36。user 要「都上中文翻譯」。**查證翻案**：每日 news digest（05-27/28/29）的 bull_case/arbiter
+**本來就是中文**（news protocol 中文輸出，native-zh=5/5），只有今日 1 筆偶發英文 + link_digest/flash 英文。
+所以重點不是「全翻」，是「補英文 straggler + 確保 zh 欄位流到前端」。
+
+**抓到 3.36 的隱性 bug**：`bridge.extract_news()` 只挑特定欄位建 news item，**沒帶 `*_zh`** →
+3.36 的 link_digest 翻譯欄位**根本到不了前端**（page-news 讀的是 data.json，永遠 fallback 英文）。已補。
+
+做的：
+- `bridge.py`：news item 補 6 個 `*_zh` 欄位 → data.json 帶 zh。
+- `news/scripts/translate_digest.py`：翻一份 digest 的 deep verdicts → `*_zh`（重用 translate_to_zh，
+  單批次 agy，idempotent + **CJK-skip**：已中文欄位跳過，避免每日對中文 digest 燒 agy）。
+- `dashboard_server.py`：news/flash_text/flash/review rc=0 後、bridge 前自動跑 translate_digest。
+- backfill 今日 digest（6/6 欄）+ re-run bridge → NVIDIA 卡 data.json 已帶 `bull_case_zh`。
+
+驗證：data.json news item 帶 `bull_case_zh`（`Vera Rubin 平台強迫資料中心電力進行結構性重寫…`）;
+05-29 native-zh → CJK-skip 翻 0（不燒 agy）;05-30 idempotent skip;`--date` parse bug 修掉;全 py/js syntax 過。
+版本 3.37.0 三處同步。
+
+follow-up：(a) link_digest 報告 **MD 仍英文**（只翻卡片欄位）;(b) 翻譯無 cache，同一 digest 重跑會
+重翻英文欄（但 idempotent skip 已翻者）;(c) en 語系下 native-zh verdict 仍顯中文（base 是中文，pre-existing）;
+(d) sector_view/macro_view 已備 `_zh` 但 news 卡未渲染這兩欄。
+
+## 🟢 Session Note (v3.36.0) — Link Digest zh-TW 在地化（gemini/agy 翻譯）
+
+接 3.35.0。user 反映 link_digest 產物全英文；查證後發現即時新聞（break-news 辯論）本來就中文
+（debater prompt 要求中文），但每日 news digest 的 bull_case/arbiter **也是英文**（只 headline_zh 翻）。
+user 選「保留英文分析 + agy 翻譯」(非 claude 直接寫中文)。
+
+做的：
+- `scripts/link_digest/translate.py`：重用 break-news `run_gemini`，單次批次 JSON in/out EN→zh-TW；
+  env `LINK_DIGEST_TRANSLATE`（預設開）；agy 缺/失敗回 `{}` 非致命。
+- `build_artifacts.py`：`build_translations()` 翻 7 欄 → verdict + bn 接 `*_zh`（headline_zh 優先序：
+  LLM 提供 > gemini > 原文）。agy 缺 → warn + rc=2 degraded，不擋。
+- `page-news.js`：news 卡 bull/bear/arbiter/debate 改 `_zh || base`（`UI.currentLang`）。既有 digest 無 `_zh` → 不變。
+- `link_digest_protocol.md`：Localisation 段。
+
+驗證：**translate.py 實打 agy** → 回乾淨 zh-TW JSON（`NVIDIA 資料中心營收優於預期` …）；
+build_artifacts mock translator + 真 validator e2e（verdict/bn `*_zh` 都在）；env gate 關/空輸入回 `{}`；
+4 支 JS / py syntax 過。版本 3.36.0 三處同步。
+
+follow-up：(a) 每日 **news digest 本身仍英文**（本次只動 link_digest；要全站中文化需改 `news` protocol 或加共用翻譯 pass）；
+(b) link_digest 報告 **MD 仍英文**（只翻結構化卡片欄位；要 MD 中文需 claude 直接寫 zh 或 agy 翻整篇）;
+(c) sector_view/macro_view 有翻 `_zh` 但 news 卡目前不渲染這兩欄（已備好，未來要顯示即可用）。
+
+## 🟢 Session Note (v3.35.0) — Link Digest（URL → 讀全文 + 上網找相關 → 判斷 digest → 報告/新聞/KG）
+
+新功能。使用者丟一條文章 URL，LLM 讀全文 + 上網找相關新聞交叉佐證 → 判斷 digest，
+結果同時進投資報告(raw md)、新聞 digest，且 entities/relations 讓 KG/供應鏈撿到。
+
+**架構決策**：重用既有 `flash_text` claude-turn pattern（bypassPermissions → WebFetch+WebSearch 可用）
++ Nexus Tier-1 ingestion 契約。**LLM 負責 prose MD + judgment.json；deterministic script 負責 KG schema**。
+- `news/link_digest_protocol.md`：5 步 spec + judgment.json schema + relation rubric。
+- `scripts/link_digest/build_artifacts.py`：judgment.json → append digest.json verdict（安全 append：
+  既有 DIGEST bump stage2_count；無檔開 REVIEW/INLINE）+ 寫 bn_*.json（`support_count=len(corroborating_sources)`，
+  ≥2 源 → Nexus Phase-2 directed 供應鏈 edge）+ validate + tier-1 graph refresh。rc 0/1/2。
+- `dashboard_server.py`：註冊 link_digest（PROMPTS `{url}` + guard + LOG_DIRS + 900s + label + classify）。
+- `news.html`+`page-news.js`+`i18n.js`：URL 輸入框 + 分析連結 button + 驗證 + banner resume。
+
+**巧妙耦合**：web-search 廣度 = 供應鏈 edge 強度。一條 ticker↔ticker 關係被 ≥2 篇來源佐證 →
+`support_count≥2` 過 Nexus Phase-2 門檻 → 晉升 directed edge（否則只 provisional/co-mention）。
+
+**驗證**：build_artifacts 兩條 digest path（fresh REVIEW + 既有 DIGEST safe-append）都過**真 validator** rc=0；
+full main() e2e（temp ROOT）rc=0 + bn relation support_count=2 edge-eligible；
+4 支 JS node --check 過；news.html tag balance OK；dashboard_server syntax OK；`--enable-direct-edge` flag 確認存在。
+版本 3.35.0 三處同步。
+
+**未做/follow-up**：(a) 沒實跑一條真 URL（需 claude turn + tokens；e2e 寫手已驗）；(b) link_digest verdict
+不 patch sector_intel/phase0（cache_updated=false，探索層定位，標 reviewed）；(c) bn 若早於當天 morning news
+DIGEST 寫，之後 news run 會覆寫 digest.json（bn_*.json KG 仍在）— 罕見邊界。
+
+## 🟢 Session Note (v3.34.0) — Narrative Pulse 完整退役
+
+接 3.33.0(UI 移除)。觀察期原 2026-05-31,但 5/30(週六)、5/31(週日)無新市場資料 →
+不會再有 sample(最後 2026-05-29 週五)→ 提前整套退役:
+- `daily_update.sh` 刪 `step9_narrative()` + Phase 3 呼叫;`dashboard_server.py` 刪
+  SCRIPT_PROTOCOLS `narrative_pulse` + `/api/narrative-pulse/{data,ticker}` 2 route。
+- 刪 `Dashboard/narrative_pulse.json` + 整個 `skills/narrative-pulse-detector/` skill dir。
+- **唯一依賴**:`retail-sector-pulse/aggregate.py` 的 `load_npd_cache_for`/`aggregate_retail_volume`
+  是 legacy graceful fallback(註解標 "kept as fallback")→ 缺 cache 自動回 `calm`/None。
+  mood.html 每產業「散戶量能」恆 calm;**主 composite(trending polarity)不受影響**。fallback
+  程式碼留著無害,日後可清。
+
+驗證:bash -n daily_update.sh 過、dashboard_server.py + retail aggregate.py ast 過、repo 代碼層
+narrative 殘留只剩 retail legacy fallback、narrative_pulse.json + skill dir 已刪。版本 3.34.0 三處同步。
+memory `project-narrative-pulse-v12-review` 已改記退役結論。
+
+## 🟢 Session Note (v3.33.0) — 退役 Narrative Pulse UI + 移除散戶視角 + index 產業趨勢 mini
+
+使用者:narrative 完全沒參考用處。清掉死/冗餘 UI:
+- **index Zone B「Narrative 焦點」→ 真實「產業趨勢」mini**(`#industry-mini-strip` +
+  script.js `renderIndustryMini`):讀 `data.industry_trend`(領漲前3+領跌前2 perf_1w),連
+  radar。移除原 index 內 fetch `/api/narrative-pulse/data` 的 inline IIFE(舊連結連到已隱藏
+  radar#npd-section,是死的)。
+- **radar 清死碼**:刪 `#npd-section` + page-radar.js NPD IIFE(NPD_RADAR_ENABLED 死碼)。
+- **散戶視角移除**:radar 刪 `#radar-retail-sector-pulse` + page-radar.js retail 全套
+  (`renderRetailSectorPulse`/`renderMarketWideBuzz`/`buildRspCard`/`_rsp*`)+ render 呼叫 +
+  tooltip。mood.html 自帶副本不受影響。
+- **保留**:batch_scan generator + `/api/narrative-pulse/*` + narrative_pulse.json(觀察期
+  2026-05-31);bridge 仍餵 retail_sector_pulse(mood 用)。
+
+陷阱:page-radar.js 多塊刪除必須**行號高→低**(2228→1142-939→508→347-372),否則上面先刪
+會位移下面行號(第一次刪 508 在刪 tooltip 之後 → 誤刪 collateral,已 restore backup 重做)。
+驗證:node --check 兩檔過、residue grep 0(只剩自家註解)、industry_trend success/15、
+narrative_pulse.json 仍在。版本 3.33.0 三處同步。
+
+remote-control 任務:重新規劃 index.html、優化 AI 裁決頁面、判斷今日焦點是否有意義。**純前端、零 backend、零 schema 變更**。
+
+做的:
+- **index.html 4-zone**:9 條垂直 stack 收斂成 Zone A 指令(verdict+binary+8-gauge)/ Zone B 訊號帶(sentiment+narrative+today-focus 三薄 strip 合成 `#signals-band` 3-up grid)/ Zone C teasers / Zone D action。Structural Watchlist body → `<details class="experimental-collapse">` 摺疊。**所有依賴 ID 逐一 verify 保留**(35 個 grep 全中)。
+- **decisions.html AI 裁決卡片**(`page-decisions.js` buildCard + 3 helper):V5 估值/Red Team/進場條件 → `<details class="dc-collapse">` 摺疊(summary 露 verdict chip);Model Score text-4xl→2xl;key_risks 4 顆 inline + "+N more";估值 grid 加 sm: breakpoint。click handler L1478 已排除 summary,details → drill 不誤觸。
+- **hero 密度**:`components.js` tv-signal-grid min-h 76→60。
+- **今日焦點**(`script.js renderFocusTicker`):**判斷=真訊號但 framing 誤導**(三軍同向 deterministic 可重現,但單 pick + 紫色買進 CTA 把 NTAP RSI92 末段噴出當進場)。改造保留→ Top 3 + 過熱守衛(rsi≥80/overbought/Stage3 → 「過熱」amber pill)+ 中性 `查看分析` CTA + 0 候選 graceful fallback。
+
+驗證:3 支 JS node --check 過;index.html tag balance OK;35 ID grep 全中;真實 data.json 跑 selection → Top3 = NTAP(過熱)/IT(乾淨)/CRWD(過熱),守衛正確;server :8080 serve 200 + signals-band 命中。版本 3.32.0 三處同步。
+
+## 🟢 Session Note (v3.31.0) — 個股動向 row 可點 → inline 動能明細 + K線
+
+接 V3.30.0(個股動向 panel)。讓 row 可點就地展開明細。**純前端、零 backend、零新 fetch** —
+資料(`momentum_screen` row + `history_by_ticker` 30 日)與 K線 API、analyze queue 都現成。
+
+做的(`page-radar.js` + `radar.html`):
+- `_smRow` + 弱中強 chip 加 `data-sm-ticker` + cursor;新 `#sm-detail` 共用明細容器。
+- `renderStockDetail(ticker)`:30日 score sparkline(`_miniSparkline` inline SVG,免 Chart.js)
+  + 均線排列(above_ma20/50/200_pct) + RSI/MACD/RS3m6m/距52週高 + signals/warnings chips
+  + [看即時 K線](`selectRadarKline`+scrollIntoView) + [完整分析](重用 `.analyze-ticker-btn`)。
+- document click delegation:`[data-sm-ticker]`(非 button)→ renderStockDetail;`[data-sm-kline]`
+  → selectRadarKline;`#sm-detail-close` → 收;再點同檔收合。
+
+驗證:node --check 過;data.json momentum_screen success + history 529;wiring grep 11 命中。
+版本 3.31.0 三處同步。
+
+## 🟢 Session Note (v3.30.0) — 短期雷達加「個股動向」panel
+
+接 V3.29.0(產業級趨勢榜)。痛點:產業榜看不出**產業內個股強弱分化**(光通 case —
+強勢產業裡某股連跌多天)。
+
+**關鍵**:個股 Weinstein stage / RS / Stage4 warning 系統每日算好且**已在
+`data.json.momentum_screen.rows[]`**(daily Step 9.7 momentum-monitor ~529 檔),radar
+沒用。→ **純前端、零 backend**。
+
+做的:radar 新 `#radar-stock-movers` 區塊 + `renderStockMovers()`:
+- 對稱 📈領漲個股(Stage2+RS≥70/新高) ↔ 📉走弱個股(Stage4/Stage3/WEAK·BEARISH),
+  各 top 12,走弱按 composite score 由低到高。
+- **🔥強勢產業中走弱 strip**:走弱 ∩ `sector_rs_rank≤3`(用 row 內建欄位,免 sector
+  名對映)。實測抓到 BSX(RS-46/-14.9% 5d, Health Care #2)、ISRG、MDT 等。
+- stage chip(S1-S4) + warning dots(🔻✗💀🪫) + freshness badge + 2 tooltip。
+
+陷阱修正:走弱判定**不**用 `rs_3m_pct<0`(強 SPY 盤 412/529 會被誤標),改「Stage3/4
+OR WEAK/BEARISH」→ 193 檔,UI top12 worst-first。校準:今日光通(COHR/CIEN/MRVL/LITE)
+其實是 Stage2 強勢 parabolic,非走弱 — 引擎對,只是今天讀數異於印象。
+
+驗證:node --check 過;data.json momentum_screen success/529/snap 2026-05-29;
+consistency 印 leaders95/laggards193/weak-in-strong67 對得上。版本 3.30.0 三處同步。
+
+## 🟢 Session Note (v3.29.0) — 短期雷達改用真實近期趨勢
+
+痛點:radar 只反映 forward 預測 → ① narrative pulse 數據死板無參考價值
+② 短期看多率結構性永遠 >50、看不到看空 ③ 看不出真實近期趨勢
+(SaaS/CPU/AI server 巔峰、光通走弱)。
+
+**關鍵**:使用者要的真實 trailing 資料系統**早已算好、卻被 radar 棄置** —
+`theme-detector` cache 的 `industry_rankings.top/bottom` (140 finviz 產業真實
+`perf_1w/1m/3m`) + `sector_uptrend`。修法 = surface 既有真實資料 + 顯示指標換真實。
+
+四件事:
+1. **`predict.py`** 輸出加 top-level `trailing_return_5d_pct` / `_20d_pct`
+   (純價格 trailing,可負)。
+2. **`screen.py`** `compute_theme_short_term` 加 `trailing` 區塊
+   (`trailing_breadth_5d_pct` = 成分股近 5d **實際**上漲比例 + median 5d/20d +
+   median momentum)。保留 bullish_breadth 不當主顯示。預設排序改 trailing。
+3. **`bridge.py`** `load_industry_trend()` → `data['industry_trend']`
+   (leaders/laggards/sector_uptrend/summary + freshness)。
+4. **radar UI**:headline 新 `#radar-industry-board` (領漲↔領跌 + 1週/1月/3月
+   toggle + 11-sector strip);theme card 改「真實上漲率」+「中位漲幅」+ 看多/看空
+   badge;**Narrative Pulse 隱藏** (`NPD_RADAR_ENABLED=false`,generator 保留到
+   5/31 觀察期)。
+
+驗證:predict NVDA real 5d -1.77% / IONQ +16%;screen 重跑後 Oil&Gas REAL_up
+10% med -5.37% (forward 是 40%)、多主題 <50、負中位 — 對稱看空生效;
+smoking gun = 舊版 direction=bearish 主題仍顯示 bullish_breadth 83/66%。
+JS node --check 過;bridge 餵 industry_trend OK (leaders top1=Computer Hardware
++17.98% 1w = AI server 巔峰);data.json 確認帶 industry_trend + theme trailing。
+**注意** theme-detector cache 非每日強制重跑 (≤7天舊),趨勢榜帶 freshness badge。
+
+## 🟢 Session Note (v3.28.0) — Market Mood 市場氛圍 page + retail social expansion
+
+新增 Dashboard 專頁「市場氛圍」(`mood.html`/`page-mood.js`, nav group market)。
+動機:radar Sector Pulse 看似情緒、實為純技術 — 散戶社群太稀 (整天 ~41 post)，
+composite 塌縮成 5d 價格預測。
+
+三件事:
+1. **`mood.py`** → `Dashboard/market_mood.json`:VIX + ^VIX3M term structure +
+   ^SKEW + CBOE/CNN put-call + Fear&Greed 7 子指標 → signed -100..+100 氛圍分。
+   CBOE put/call CDN 目前 **403 封鎖**,fallback 到 CNN `put_call_options` 子指標
+   proxy (有效)。缺源時權重 re-normalize。import sentiment.py 不改它。
+2. **社群擴充** `social_sources.py`:新增 StockTwits source (trending → 各檔
+   streams,native Bull/Bear tag 進 meta;env-gate + 429 graceful) + 加寬
+   subreddit + 提高上限。實測 post 41→110、tickers[] 0→6+。契約不變,
+   trending_tickers.py/aggregate.py 零改。
+3. **新頁 UI**:hero gauge (Chart.js 半圓 + deterministic needle) + 3 訊號 tile
+   (期權/VIX-SKEW/F&G+7子指標 bar) + 散戶熱股 strip + sector grid (情緒在前、
+   技術 lane 灰底降權標「技術面參考」)。bridge 烤進 data.json (market_mood top-level
+   + tactical.trending slim 投影,+7.7KB),無新 server route。
+
+期權誠實講:無 live IV chain (FMP 付費也沒),用市場級 put/call + VIX + SKEW proxy。
+驗證:mood.py CBOE 403 仍 score=41 不報錯;server serve mood.html/page-mood.js 200;
+data.json 含 market_mood + trending;JS node --check 全過。
+
+## 🟢 Session Note (v3.27.0) — Pre-Market Pipeline Redesign + Morning Brief
+
+Redesigned the pre-market flow (`daily_update.sh`) to exploit the FMP **paid**
+250/min plan, which the old free-tier-shaped pipeline (serialized FMP lane,
+300ms per-client throttles, 150-call budgets, 6 workers) left unused.
+
+Core: new `scripts/_shared/fmp_pool.py` — a single **cross-process** rate
+limiter. It models FMP's "calls per rolling minute" via a JSON timestamp window
+in `~/.cache_bridge/fmp_pool_window.json` guarded by an `fcntl.flock` lockfile,
+targeting 220/min. The lock is held only for the read-trim-write (microseconds),
+released before any backoff sleep, so the parallel subprocesses + threaded
+workers `daily_update.sh` spawns share one budget without serializing. Verified
+hermetically: 8 procs × 3 threads × 6 calls under cap 30/min held to exactly 30
+per 60s window over ~240s.
+
+All 6+ previously-uncoordinated FMP clients now delegate pacing to the pool
+(signatures + caches unchanged). FMP lane de-serialized into two parallel chains
+(thematic ∥ momentum); workers 6→20/16; supply_chain call-count cap 150→2000.
+`dashboard_server.py` heatmap fan-out calls `acquire_slot()` so the always-on
+server + a daily run never collectively exceed 250/min (optional
+`FMP_DASHBOARD_RPM` soft sub-cap).
+
+New `scripts/premarket/morning_brief.py` (step 9.8, non-fatal) → deterministic
+`reports/PREMARKET_<DATE>.md`, 10 sections, cache-reuse + ~5-25 pooled fresh
+calls, graceful when `FMP_API_KEY` unset, 36h staleness guard. Verified render
+with and without the key.
+
+## 🟢 Session Note (v3.26.1) — Break News Debate Scroll Reset
+
+User reported that clicking a different Break News debate left the right-side
+chat room at the previous item's scroll position instead of starting from the
+top.
+
+Fix: `Dashboard/page-break-news.js` now passes `resetScroll` only when
+`selectedId` actually changes, and `renderDetail()` sets
+`#bn-thread-panel.scrollTop = 0` after replacing the panel HTML. The 5s
+same-item polling path does not pass `resetScroll`, so an active debate can
+refresh without yanking the reader back to the top.
+
+## 🟢 Session Note (v3.26.0) — Reports Center
+
+Built a Dashboard reading layer over the existing 251 MD files in `reports/`.
+Triggered by user wanting to visually browse the new IC memo outputs
+(V3.25.0) plus 10 other report families in one place instead of using finder.
+
+Implementation:
+- `dashboard_server.py` adds two read-only routes — `/api/reports` (classified
+  list, 60s cache, mtime-invalidated) and `/api/reports/view/<filename>` (raw
+  markdown, ASCII whitelist + traversal guard). Cloned the existing
+  `/decision_review/` static-serve pattern for consistency.
+- New page `Dashboard/reports.html` + `Dashboard/page-reports.js` — master
+  list (search + 12 type tabs with counts) on left, marked.js-rendered
+  viewer with TOC on right.
+- IC-memo-specific post-processing: verdict badge (BUY/HOLD/SELL/CANCEL
+  colour), 🔒 `decision_lock` chip with 11-field SHA256 tooltip, degraded
+  banner from footer flag, summary card extracting Date/Live Spot/Analysis
+  Price/Market Cap/Sector from the YAML-ish header.
+- Filename classifier handles 12 type families. `deep_dive` rule
+  (`^YYYYMMDD_TICKER.md$` or `^YYYY-MM-DD_TICKER.md$`) catches 126 of the
+  legacy V5.0 single-stock reports; only 9 misc files fall to `other`.
+
+Strict discipline: pure viewer — no edit/delete/regeneration. Decision-lock
+hash *verification* stays with `validate_ic_memo.py`; the page only displays
+the lock. No protocol or skill behaviour touched.
+
+**Server restart required** to load the new `/api/reports` routes (the
+running `dashboard_server.py` process pre-dates this commit).
+
+## 🟢 Session Note (v3.25.10) — Daily Update Hybrid Parallelism
+
+User asked to implement the earlier dependency analysis for `daily_update.sh`
+while respecting FMP's 250 calls/minute limit.
+
+Implemented hybrid scheduling:
+- Phase 1 runs breadth / FTD / market-top / FRED in parallel, then joins
+  before `bridge.py`.
+- Post-bridge FMP lane remains serialized: ETF holdings check → thematic
+  screener → momentum fundamentals prefetch → full momentum screen.
+- Non-FMP lane runs structural watchlist / Nexus / trending discovery in
+  parallel, then retail sector pulse.
+- Narrative Pulse runs after both lanes complete so thematic recommendations
+  and structural watchlist are available.
+- A final lightweight `bridge.py` refresh runs after Narrative Pulse so
+  `Dashboard/data.json` includes same-run narrative / retail / momentum screen
+  outputs instead of waiting for the next daily run.
+
+Live timing correction: the first run showed Step 6 thematic can take ~948s
+on a cold path, while `9.7` momentum screen took ~106s. User clarified both
+are intended daily signals, so they remain enabled by default.
+
+Optimization added:
+- `skills/thematic-screener/scripts/screen.py` now supports
+  `--predict-workers` for bounded parallel `predict.py` subprocess fanout.
+  `daily_update.sh` uses `THEMATIC_PREDICT_WORKERS=6` by default.
+- FMP-heavy enrichment remains serialized to avoid bursting the 250/min FMP
+  limit.
+- Temporary escape hatches exist for incident response:
+  `DAILY_RUN_THEMATIC=0`, `DAILY_RUN_MOMENTUM_SCREEN=0`,
+  `DAILY_FORCE_THEMATIC=1`.
+
+Added temp-log background helpers so parallel jobs do not interleave stdout,
+with elapsed seconds printed for every background job after join.
+When enabled, `9.7` uses full universe with `MOMENTUM_SCREEN_WORKERS=6` by
+default; caller can override the env var after observing 429/rate-limit logs.
+
+Validation: `bash -n daily_update.sh` passes. Full live run intentionally not
+executed during implementation because it would hit external APIs.
+
+## 🟢 Session Note (v3.25.9) — Momentum 3D Volume Window
+
+User asked for a quick-scan read of "**最近 3 天是量縮或放量**" without
+clicking into the per-ticker volume modal. The existing 量比 column
+only shows today vs 20D, which flips around on intraday noise. The 5D
+average inside `_compute_dry_up_spike` was already there but too
+smoothed for "recent" reading. 3D sits in the middle.
+
+Compute (`momentum.py:_compute_dry_up_spike`): added `avg_3d_vs_20d`
+(last-3-day avg / 20D avg, both excluding today, `iloc[-4:-1]`) +
+`vol_3d_state` ∈ `{expanding, neutral, drying_up}` with thresholds
+≥1.3 / [0.75,1.3] / ≤0.75 mirroring the existing dry-up cutoff.
+Schema bumped `v2.2 → v2.3`; `_load_cache` gate updated to invalidate
+old caches.
+
+UI placement (per user pick): subscript under the existing 量比 cell.
+Three stacked lines — today × ratio (existing, colored by today's
+tier), then `3D X.XX×` dim subscript, then small colored state pill
+(放量 / 中性 / 量縮). The cell stays clickable; the modal also gained a
+new "3D 均量 / 20D" row. Single `_vol3dSubHTML(r)` helper renders the
+two new lines so the rowHTML stays compact.
+
+Smoke (NVDA, AMD, WMT, ULTA on real OHLCV):
+- NVDA  today=1.12 3d=1.14 state=neutral
+- WMT   today=1.50 3d=1.94 state=expanding (放量)
+- AMD   today=0.88 3d=0.77 state=neutral   (just above 0.75 cutoff)
+- ULTA  today=0.96 3d=0.85 state=neutral
+
+Tooltip wording (`col_volume_tip`) updated zh + en so users discover
+the subscript on header hover. No new tooltip component; reused the
+existing styled card.
+
+Out of scope: filter / preset wiring on `vol_3d_state`. If user wants
+it later as a screening axis, the field is already in the CSV and
+JSON path — only need `--min-vol-3d` flag + a defaultFilter() entry.
+
+## 🟢 Session Note (v3.25.8) — IC Memo F-8 §1 Dedup
+
+Cosmetic followup to V3.25.7 review. F-8 §1 entry-range check sat inside
+the per-key for-loop, so when both `entry_aggressive` and
+`entry_conservative` were non-null and §1 row was broken, validator emitted
+two identical findings. Moved the §1 check out of the loop with an
+`any_entry_set` guard preserving the original "skip when both keys null"
+semantics. Added `test_md_entry_range_sec1_finding_not_duplicated` to lock
+the behavior; 60 tests pass. No LOCK_FIELDS / decision_lock contract
+touched — committee `decision_lock_hash` invariance preserved across
+V3.25.4 → V3.25.7 → V3.25.8.
+
+## 🟢 Session Note (v3.25.7) — IC Memo Validator Narrowing
+
+Claude review of the V3.25.4 IC Memo patch found two real low-risk issues:
+D-6 scanned the whole memo for `{"tier": ...}` and D-7 scanned the whole memo
+for `Consensus View` / `Differentiated View`. Both were useful regression
+checks but too broad — an appendix example or quoted phrase could trip them.
+
+Fix: `validate_ic_memo.py` now extracts section blocks and limits D-6 to §7
+and D-7 to §10 markdown headers. D-6 also catches Python-dict style
+`{'tier': ...}` inside §7. Added a small stderr log when `build_fact_pack.py`
+falls back to shared FMP peers because no IC Memo local roster exists.
+
+Verification: `python3 -m pytest skills/ic-memo-writer/tests -q` → 59 passed.
+MU memo validator remains rc=2 with only `sec_4_peer_descriptor_stub`.
+
+## 🟢 Session Note (v3.25.6) — Column tooltips switched to styled card UI
+
+User screenshot showed the V3.25.5 column tooltips rendering as the OS
+native black box (Image #2), wanted them as the white-card style that
+the sector heatmap uses for GOOGL row hover (Image #3).
+
+Fix: instead of native `title="..."` attribute, wire `data-col-tip="<key>"`
+on each annotated `<th>` and dispatch through the existing
+`#mom-pill-tooltip` element + `showTip()` handler that already powers
+the signal / warning / preset cards on this page. New CSS class
+`.mpt-col` (emerald-accent title, 440px max-width) + `.mpt-body`
+(`white-space: pre-line` so the `\n` in i18n strings renders cleanly).
+Removed the now-redundant `setTitle` block — native title + styled card
+were both firing on slow hovers and competed visually.
+
+No new tooltip system, no popup framework, no hydration. The momentum
+page now has exactly one tooltip component handling four content types
+(signal / warning / preset / column). Consistent UX across hover
+surfaces.
+
+## 🟢 Session Note (v3.25.5) — Tooltips + Fund-tab i18n + 100% PE coverage
+
+User flagged three follow-ups on the V3.25.x momentum work:
+
+1. `MU` still showed empty 本益比 even after V3.25.2's backfill.
+2. Fund-tab column headers (P/S / GM% / Rev YoY / 5D%) had no zh
+   translation; left as raw English in the HTML.
+3. Score vs Rank columns needed an in-UI tooltip explaining the
+   difference, same UX pattern as the sector page's tooltips.
+
+### MU root cause + 100% backfill
+
+The `scripts/backfill_heatmap_pe.py` parallel run (15 workers) was
+consistently dropping ~250/517 tickers in the SAME alphabetic cluster
+(EQR, EQT, ERIE, ES, ESS, ETN, ETR…) — looked like an FMP rate-limit /
+worker-batch failure that the script swallowed silently because every
+network exception in `fetch_valuation` just falls through to the
+all-None default.
+
+Workaround: keep the parallel run for speed, then sequential second-pass
+through the still-missing list with `time.sleep(0.08)` between calls
+and `timeout=20`. Sequential pass filled all 236 remaining; MU now
+reports `pe=41.79` end-to-end (heatmap.json → bridge → data.json).
+
+Final coverage: heatmap.json `517/517`, data.json momentum rows
+`515/528` (the residual ~13 are tickers genuinely missing TTM PE on
+FMP, mostly negative-earnings names — not a bug).
+
+There was also a `__pycache__` ghost that made an isolated `python3 -c`
+import of `fetch_valuation` return all-None until the cache was wiped.
+Likely the cached `.pyc` came from a half-saved earlier version of the
+script. Cleared with `find scripts -name __pycache__ -exec rm -rf {} +`
+before re-running. Not a long-term concern because the CLI script
+recompiles cleanly each invocation; just a footgun when debugging via
+`-c` snippets.
+
+### Tooltips + Fund-tab labels
+
+Pattern intentionally minimal: inline `title="..."` attribute set in
+`applyLanguage()` via a small `setTitle` helper, mirroring the sector
+page's heatmap-cell tooltips (`page-sector.js:1295-1297`). No new popup
+component, no hover JS — browsers render multi-line tooltips natively.
+Same UX as the macd column's existing tooltip already had.
+
+Added 9 tooltip keys + 4 label keys (zh+en) to `i18n.js`. Score vs Rank
+tooltip explicitly enumerates the bonus/penalty table from
+`screen.py:_rank_score()` so users no longer have to ask "why is rank
+80 when score is 65?".
+
+### Operational note
+
+If PE goes empty again later, run:
+
+```bash
+find scripts -name __pycache__ -exec rm -rf {} + 2>/dev/null
+python3 scripts/backfill_heatmap_pe.py
+# then sequential pass on still-missing if parallel left holes:
+python3 -c "
+import os, sys, json, time
+sys.path.insert(0, 'scripts')
+from backfill_heatmap_pe import fetch_valuation, HEATMAP, _safe_round
+api = os.environ['FMP_API_KEY']
+with open(HEATMAP) as f: d = json.load(f)
+for row in d['tickers']:
+    if row.get('pe') is not None: continue
+    v = fetch_valuation(row['ticker'], api, timeout=20)
+    if v.get('pe_ttm') is not None: row['pe'] = v['pe_ttm']
+    if v.get('ev_ebitda') is not None: row['ev_ebitda'] = v['ev_ebitda']
+    if v.get('fwd_eps') and row.get('price'):
+        try: row['forward_pe'] = _safe_round(float(row['price'])/v['fwd_eps'], 2)
+        except: pass
+    time.sleep(0.08)
+with open(HEATMAP+'.tmp','w') as f: json.dump(d, f, ensure_ascii=False)
+os.replace(HEATMAP+'.tmp', HEATMAP)"
+python3 bridge.py
+```
+
+V325.X-PE-WARMUP-RETRY (already in TODO) should fold this two-pass
+shape into the dashboard_server daemon so the manual rescue isn't
+needed; out of scope for this hot-fix.
+
+## 🟢 Session Note (v3.25.4) — IC Memo MU Data-Gap Patch
+
+MU smoke on the new IC Memo Writer exposed readable-output bugs that the
+V1.0 hash validator did not catch: live spot and protocol analysis price were
+mixed in the header, entry ranges stored as lists rendered as `—`, populated
+earnings-cache fields were missed due to key-name mismatches, and §7 printed
+a truncated raw structural-shift JSON fragment.
+
+Patch shape:
+
+- Dual price basis in fact_pack + memo: `Live Spot` and `Analysis Price` are
+  both shown, and FV downside is split vs analysis and vs live.
+- `fmt_price_range()` renders list/dict/scalar entry zones in §1 and §11.
+- §5-§7 flatten TTM aliases, derive surprise %, alias balance-sheet fields,
+  and support snake_case analyst estimates.
+- §3 splits MU's FY2025 DRAM/NAND presentation from legacy CNBU/MBU/EBU/SBU.
+- §4 uses a skill-local `peer_rosters.py` override for MU/NVDA/AMD/INTC/TSM
+  instead of changing `_shared.company_context.get_peers()`.
+- Validator gained MD-level checks for price-basis labels, lost entry ranges,
+  raw structural JSON, and dead §10 consensus/differentiated headers.
+
+Verification: `python3 -m pytest skills/ic-memo-writer/tests -q` → 59 passed.
+Rebuilt MU/NVDA/CRWD fact packs and memos. MU and NVDA validate rc=2 only
+because `sec_4_peer_descriptor_stub` remains Phase A.5 work; CRWD keeps the
+expected missing-earnings-cache + low-anchor degraded findings. MU report was
+regenerated at `reports/20260527_MU_ic_memo.md`.
+
+## 🟢 Session Note (v3.25.3) — Fund tab color parity with Tech tab
+
+User screenshot showed the Fund tab with an emerald tint on every
+`.col-fund` cell (P/E header + body). After V3.25.2 pushed score/signals
+into `col-tech`, the Fund tab's visible columns alternated between
+untinted (`col-anchor`: #/ticker/price) and tinted (`col-fund`: P/E,
+short, P/S, GM%, Rev YoY, 5D%) which read as broken stripes rather
+than a unified group.
+
+Fix: removed the `.col-fund` tint rules entirely. Both tabs now share
+the same neutral cell background; emerald identity lives only in the
+active tab pill in the rail above. Single-line CSS deletion. No JS,
+no markup, no data changes.
+
+## 🟢 Session Note (v3.25.2) — 2-Tab Refinements + P/E Backfill
+
+User opened the new 2-tab view and reported two things: (a) `本益比` (P/E)
+column was empty for every row, (b) score battery and signal pills should
+only render on the Tech tab — Fund tab should read as raw fundamentals.
+
+Root cause of P/E empty: `dashboard_server._heatmap_refresh_pe_universe()`
+runs exactly once on server startup with a 24h TTL. The current
+`Dashboard/heatmap.json` had 0/517 P/E entries — the warm-up either errored
+mid-run or the server hadn't restarted in the meantime. Since
+`bridge.py:ingest_momentum_screen` joins P/E from heatmap.json, every
+momentum row got `pe=null`.
+
+Fix: new `scripts/backfill_heatmap_pe.py` mirrors the daemon's three-call
+fetch (ratios-ttm + key-metrics-ttm + analyst-estimates) out of process,
+parallel via ThreadPoolExecutor, writes back atomically. Backfilled
+269/517 entries (the remaining ~half are negative-earnings tickers where
+FMP correctly returns no TTM PE). Re-ran `bridge.py` → data.json now
+shows real P/E values on the Fund tab.
+
+UI refinement: moved `score` + `signals` from `col-anchor` to `col-tech`.
+New anchor set: `# · ticker · price` only. The 2-tab counts shifted to
+Tech 12 / Fund 9. Fund badge updated. Class-based hide model meant zero
+CSS work — just swap class on 2 `<th>` and 2 `<td>` cells.
+
+Operational note: if P/E goes empty again later, run
+`python3 scripts/backfill_heatmap_pe.py && python3 bridge.py`. Long-term
+the dashboard_server PE warm-up should retry on failure instead of
+silently leaving the cache empty — that's a deeper fix worth scheduling
+separately, not for this patch.
+
+## 🟢 Session Note (v3.25.1) — Momentum Table 2-Tab Column View
+
+User pointed out the "More columns" toggle no longer fits after V3.22 added
+the Fundamentals group. Default view hid the new P/S · GM% · Rev YoY · 5D%
+work; expanded view ballooned to 18 cols. The boolean lens was the wrong
+mental model — Tech and Fundamentals are two different ways of reading the
+same row, not "less / more" of the same thing.
+
+Replacement design (planned in `/Users/kavi/.claude/plans/more-column-colume-zany-cascade.md`):
+
+- Two named tabs styled like the existing preset rail: 📊 技術面 (12 cols)
+  and 💰 基本面 (11 cols). Each tab carries an inline count badge.
+- 5 anchor columns (`# · ticker · price · score · signals`) render in both;
+  the other 13 split by domain (7 tech, 6 fund). Hide control is purely
+  class-based — `[data-view="tech"] .col-fund { display: none }` and inverse.
+  No `nth-child` indexing, no fragility on column-reorder.
+- Lag disclaimer (`#mom-fnd-note`) only shows when `#table-wrap[data-view=
+  "fund"]` — it's a fundamentals-only message, so the Tech tab stays clean.
+- localStorage key changed `momentum_cols_extra` → `momentum_table_view ∈
+  {tech, fund}`. Legacy key intentionally ignored; default is `tech` to
+  preserve the existing mental model for users who haven't touched anything.
+- `.col-fund` doubles as visibility class and visual tint. The previous
+  `.col-fnd` tint only covered the 4 V3.22 cells; reusing `.col-fund` now
+  also tints P/E + short, which unifies the Fund lens visually.
+
+No CSV / `bridge.py` / data shape changes — every field still ships in the
+row payload; this is purely client-side rendering. Filters and presets work
+identically across tabs (they operate on the underlying row data, not the
+visible columns).
+
+## 🟢 Session Note (v3.25.0) — IC Memo Writer (deterministic readable memo)
+
+User shared a long Chinese Planet Labs (PL) analyst memo and asked whether
+the project could surface that kind of "readable research report" view —
+not Dashboard panels, but a narrative MD covering business model, revenue
+segments, peers, scenarios, and DCF triangulation. Codex round-tripped on
+the design and pushed back on five things that became the final spec:
+
+1. `fact_pack.json` middle layer between cache and Memo MD (so template
+   changes can re-render without re-fetching).
+2. Per-section provenance tags (`<!-- src: ... -->` + Provenance Roster
+   table) so every fact is traceable to its source.
+3. **Decision-lock SHA256 over 11 fields** (not just `lane_scores`) —
+   `final_decision`, `final_action`, `position_size_pct`, `analysis_price`,
+   `fair_value_summary`, `scenario_odds`, `watch_conditions`, `key_risks`,
+   `red_team_counter_thesis`, `red_team_kill_conditions`, `lane_scores`.
+   Floats `round(x, 4)` before canonicalization to avoid IEEE drift.
+4. LLM peer descriptor is isolated to the skill's own cache, not
+   `_shared/cache` — that keeps the deterministic FMP-derived shared cache
+   pristine. V1.0 ships the descriptor as a `status: stub_no_llm` empty
+   shell; Phase A.5 will swap in a single Haiku 4.5 batch call.
+5. `compose.py` is **deterministic-only** in V1.0 (zero LLM calls);
+   `--llm-polish` flag is reserved but raises `NotImplementedError` so
+   nobody accidentally re-introduces narrative drift.
+
+Validator rc ladder: `0` pass / `1` fatal / `2` degraded-usable. Fatal
+codes (F-1.1/1.2/1.3/2/3/4/5/6) cover hash self-inconsistency, history
+mismatch, §11 verbatim mismatch, FV mismatch, missing §11 block, and
+forbidden re-scoring phrases. Degraded codes (D-1..D-5) cover missing
+earnings cache, low FV anchor count, missing provenance comments, and
+missing Provenance Roster.
+
+Smoke-tested on CRWD (no earnings cache → 6 degraded sections, rc=2 as
+expected) and NVDA (full data path → only peer_descriptor stub degraded,
+rc=2). 44 pytest cases pass, including all 11 single-field decision_lock
+breach parametrized cases.
+
+### Files touched
+
+| File | Lines | Purpose |
+|---|---|---|
+| `skills/ic-memo-writer/SKILL.md` | new ~180 | skill spec + decision_lock + rc ladder |
+| `skills/ic-memo-writer/template.md` | new ~150 | 12-section reference skeleton |
+| `skills/ic-memo-writer/scripts/build_fact_pack.py` | new ~360 | aggregator + hash |
+| `skills/ic-memo-writer/scripts/compose.py` | new ~430 | deterministic renderer |
+| `skills/ic-memo-writer/scripts/validate_ic_memo.py` | new ~270 | rc=0/1/2 validator |
+| `skills/ic-memo-writer/scripts/fetch_peer_descriptor.py` | new ~70 | V1.0 stub |
+| `skills/ic-memo-writer/tests/test_validator.py` | new ~240 | 24 tests incl 11 breach sub-cases |
+| `skills/ic-memo-writer/tests/test_fact_pack.py` | new ~115 | 11 tests |
+| `skills/ic-memo-writer/tests/test_compose.py` | new ~135 | 9 tests |
+| `skills/ic-memo-writer/tests/fixtures/*.json` | new ~660 | minimal NVDA history + earnings |
+| `investment/investment_protocol_v5_0.md` | +20 | Phase 5 Step 7 IC Memo hook |
+| `CLAUDE.md` | +5 | Protocol Triggers row + Ops Shortcuts |
+| `CHANGELOG.md` | +60 | V3.25.0 entry |
+| `VERSION`, `Dashboard/utils.js` | sync | 3.22.0 → 3.25.0 |
+
+### Last Session Note
+
+Phase A (IC Memo Writer V1.0.0) shipped. Composer is deterministic, no
+network calls beyond profile/peers (24h-cached). Decision-lock SHA256 over
+11 history fields means the memo cannot silently change committee output —
+mutation of any single field flips validator to rc=1 fatal. Phase A.5
+follow-up will swap `fetch_peer_descriptor.py` from stub to Haiku 4.5
+one-shot batch call; Phase B will be a Dashboard `stock-detail.html` that
+renders the memo + live FMP quote / 6-anchor bar chart. Neither is on the
+critical path — Phase A alone delivers the requested "readable memo".
+
+---
+
+## 📦 Previous Session Note (v3.22.0) — Momentum Fundamentals Layer (P/S · GM% · Rev YoY TTM)
+
+User asked to add P/S + "營收股價比值" to the momentum page. Round-tripped
+through Gemini Codex review which flagged the two obvious failure modes of
+naive valuation overlays on a momentum table:
+
+1. A hard P/S cap on the breakout preset strips the strongest leaders
+   (NVDA / LLY) precisely at their thrust moment.
+2. A naked low-P/S filter is a value trap without a gross-margin floor +
+   non-shrinking revenue guard (retail / commodity names look "cheap"
+   because they earn nothing).
+
+Final shape:
+
+- New fundamentals derive block on `momentum.py` (schema `v2.2`) computes
+  `ps_ttm`, `gm_ttm_pct`, `rev_yoy_ttm_pct`, `ttm_revenue_usd`, plus 1D/5D
+  price return. All TTM (8 quarters of FMP `income-statement?period=quarter`)
+  to dampen single-quarter noise.
+- Shared cache at `skills/_shared/cache/quarterly_income/{TICKER}.json`
+  with 7-day TTL — fundamentals only refresh once per earnings cycle.
+- `daily_update.sh` Step 9.6 prefetches the screener universe (~532 tickers
+  across SP500 + Nasdaq100 + SOX) so ad-hoc `screen.py` runs cost zero
+  FMP calls on the fundamentals side.
+- 7 new CSV columns appended (not inserted) so legacy `bridge.py` column
+  parsers stay compatible; bridge already used `DictReader` so by-name
+  lookup was free.
+- Dashboard adds a tinted Fundamentals column group (P/S · GM% · Rev YoY ·
+  5D%) hidden behind the "More columns" toggle. Two new Featured presets:
+  `🚀 Sales Breakout` (no P/S cap; Stage 2 + RS≥80 + RevYoY≥15%) and
+  `💎 Value Momentum` (P/S≤5 stacked with GM%≥15 + RevYoY>0 + exclude
+  parabolic).
+
+Smoke test on NVDA: P/S=20.36, GM=74.15%, Rev YoY=+70.7%, TTM rev=$253B,
+lag=30d. Sales Breakout includes NVDA; Value Momentum correctly excludes.
+
+Discipline kept: fundamentals are **information-only**, never feed into
+`momentum_composite.score` or `rank_score`. Cross-industry P/S comparisons
+aren't trustworthy enough to weight a momentum signal — they're guardrails
+the user reads, not gradients the system optimizes.
+
+Deferred to a follow-up PR (per user agreement to ship in two slices):
+ATR-normalized Gap Up detector, `Catalyst Gap-Up` preset, sector-relative
+P/S, Pocket Pivot. Ship V3.22 first, watch a couple of weeks of screen
+output to calibrate Value Momentum's GM/P-S thresholds before piling on.
+
+## 🟢 Session Note (v3.21.0) — Break News Hourly Cap + Stale-Backlog Guard
+
+Diagnosis: previous 5-6hr session burned the Anthropic 5hr quota window.
+Forensic counts: 106 break-news debates in ~6hr × MAX_ROUNDS=3 Claude voice =
+~300+ `claude` CLI subprocess spawns, plus 3 large protocols (`分析 CRWD` +
+`產業掃描` + `新聞分析`) running concurrently. `config/llm_usage.json` showed
+claude in cooldown (34 calls, tripped early), gemini fell back to 404 calls
+(over its 200 budget — only daily counters, no 5hr window awareness).
+
+Fix shape: throttle the explore layer at the admission stage, not after-the-fact.
+
+- `BREAK_NEWS_HOURLY_CAP=25` rolling 1hr admission cap, slot = 2.4 min/item;
+  quiet periods accumulate slot tokens, bursts still bounded by hourly_left.
+- `BREAK_NEWS_BACKFILL_MINUTES=30` freshness gate — auto-admission only for
+  news published within the last 30 min. Older stuff still visible in raw
+  stream, just not in the auto-debate queue.
+- `BREAK_NEWS_PENDING_MAX_AGE_HOURS=2` stops `scan_and_debate` from
+  re-processing stale `pending_debate` after a long idle. Stale queue surfaces
+  in a new UI panel with per-item manual 🔥 Debate button.
+- Feed sort key changed `last_activity_ts` → `fetched_at` so news ordering
+  reflects arrival time (debating items no longer float to top).
+
+Endpoints: `GET /api/break-news/stale-pending`, `POST /api/break-news/item/<id>/debate-now`.
+
+Dry-run verified: hourly_used=8, hourly_left=17, slot_tokens=0 (slot未滿),
+allowed_this_cycle=0 — correctly throttled. Model headroom side still has
+room (model_debate_capacity=11), but hourly cap is now the binding constraint.
+
+Followup-ish: still need a real 5hr-rolling-window counter in `model_router.py`
+for protocol runs (this PR only governs break_news). Defer until next quota
+incident.
+
+## 🟢 Session Note (v3.20.7) — Momentum Volume Regime Alpha UI
+
+- `journal.py` extended momentum journal evidence with `volume_trend`,
+  `ratio_20d_bucket`, and `by_volume_regime` (`trend × stage × ratio bucket`).
+  Existing historical journal rows are not rewritten; stats backfills old
+  fields from matching cached `screen_*.csv` snapshots when available.
+- Existing sample check: 23,986 entries, 12,342 filled 20d returns, 100% volume
+  regime field coverage via cache. `expanding + Stage 2 + ratio_20d>=1.3`
+  showed n=113, 20d win=73.5%, median=+9.56%. `volume_expansion` alone was
+  weak, confirming regime-dependent volume interpretation.
+- Momentum Dashboard Journal section now shows `Volume Regime Alpha` cells that
+  pass exploratory gate `n>=5`, `20d win_rate>=55%`, `20d median>=+2%`.
+  Composite score and row ranking intentionally unchanged.
 
 ## 🟢 Session Note (v3.20.2 → v3.20.3) — Truth Social Filter + Wire-News Polarity
 

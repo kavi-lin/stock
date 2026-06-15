@@ -62,6 +62,17 @@
         #mom-pill-tooltip.mpt-warning .mpt-title { color: #ef4444; }
         #mom-pill-tooltip.mpt-preset  .mpt-title { color: #a78bfa; font-size: 13px; }
         #mom-pill-tooltip.mpt-preset  { max-width: 400px; }
+        /* V3.25.6 — Column-header tooltip. Reuses the same card chrome as
+           the signal/warning/preset tooltips; the only specialization is a
+           neutral emerald title accent and a slightly wider max-width since
+           tooltip bodies enumerate full bonus/penalty tables. */
+        #mom-pill-tooltip.mpt-col     .mpt-title { color: #10b981; font-size: 13px; }
+        #mom-pill-tooltip.mpt-col     { max-width: 440px; }
+        #mom-pill-tooltip .mpt-body {
+            font-size: 11.5px; line-height: 1.55;
+            color: var(--text-main, #d4d4d8);
+            white-space: pre-line;     /* preserve \n in i18n strings */
+        }
         #mom-pill-tooltip .mpt-section-label {
             font-size: 9px; font-weight: 900;
             letter-spacing: 0.1em; text-transform: uppercase;
@@ -123,6 +134,24 @@
                    color: #71717a; text-align: left;
                    border-bottom: 1px solid rgba(161,161,170,0.15); }
         .score-cell { font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+        /* V3.25.8 — 3D rolling-volume subscript shown under the today × ratio
+           in the 量比 cell. Reads as a secondary line: smaller, dimmer than
+           the headline today value. Colored state pill on the third line. */
+        .vol-cell .vol-3d {
+            font-size: 9.5px;
+            color: var(--text-muted, #a1a1aa);
+            line-height: 1.2;
+            margin-top: 1px;
+        }
+        .vol-cell .vol-3d-state {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            line-height: 1.1;
+        }
+        .vol-cell .vol-3d-state.state-expanding { color: #22c55e; }
+        .vol-cell .vol-3d-state.state-drying_up { color: #fbbf24; }
+        .vol-cell .vol-3d-state.state-neutral   { color: #71717a; }
 
         /* Scan card (inline, expandable log panel). Matches news.html style + sector.html expand behavior. */
         /* Thicker accent bar with soft inset glow — "--scan-accent" drives the colour from JS */
@@ -410,6 +439,9 @@
 
         .stats-row td   { padding: 6px 10px; font-size: 12px;
                           border-bottom: 1px solid rgba(161,161,170,0.08); }
+        .stats-row.clickable        { cursor: pointer; transition: background 0.12s; }
+        .stats-row.clickable:hover  { background: rgba(59,130,246,0.10); }
+        .stats-row.clickable.active  { background: rgba(34,197,94,0.10); }
         .stats-th       { padding: 8px 10px; font-size: 10px; font-weight: 800;
                           text-transform: uppercase; letter-spacing: 0.08em;
                           color: #71717a; text-align: left;
@@ -720,30 +752,62 @@
         .mom-adv-prefix-warn { background: rgba(245,158,11,0.16); color: #f59e0b; }
         .mom-adv-prefix-not  { background: rgba(239,68,68,0.14);  color: #ef4444; }
 
-        /* Column toggle button (table) */
-        .mom-col-toggle {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 4px 10px; border-radius: 7px;
+        /* V3.25.1 — Column-view tab switcher. Replaces the previous boolean
+           "More columns" toggle. Two named lenses (tech / fund) over the same
+           18 columns; anchors render in both, the rest split by domain. The
+           visual style mirrors .mom-preset-tab so the two tab rails on the
+           page (preset rail above the table, view rail inside the table-wrap
+           header) read as siblings. */
+        .mom-view-rail { display: inline-flex; gap: 8px; }
+        .mom-view-tab {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 8px;
             background: transparent;
             border: 1px solid rgba(161,161,170,0.25);
             color: var(--text-muted);
-            font-size: 10px; font-weight: 700;
-            letter-spacing: 0.06em; text-transform: uppercase;
+            font-size: 12px; font-weight: 700;
+            letter-spacing: 0.02em;
             cursor: pointer; transition: all 0.15s;
         }
-        .mom-col-toggle:hover { border-color: rgba(16,185,129,0.45); color: var(--text-main); }
-        .mom-col-toggle.expanded {
-            background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.40); color: #10b981;
+        .mom-view-tab:hover { border-color: rgba(16,185,129,0.45); color: var(--text-main); }
+        .mom-view-tab.active {
+            background: rgba(16,185,129,0.12);
+            border-color: rgba(16,185,129,0.55);
+            color: #10b981;
+            box-shadow: 0 0 0 1px rgba(16,185,129,0.18), 0 0 12px -4px rgba(16,185,129,0.45) inset;
         }
-        /* Hidden columns (controlled by data-cols-extra="off") */
-        /* th: explicit .col-extra class | td: nth-child positions
-           Cols (1-indexed): rank=1, ticker=2, price=3, pe=4, score=5, rank_score=6,
-           label=7, stage=8, volume=9, above_ma200=10, rsi=11, macd=12, signals=13, short=14 */
-        .mom-table[data-cols-extra="off"] thead .col-extra,
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(10),
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(11),
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(12),
-        .mom-table[data-cols-extra="off"] tbody td:nth-child(14) { display: none; }
+        .mom-view-tab .mom-view-count {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 700;
+            padding: 1px 6px; border-radius: 999px;
+            background: rgba(161,161,170,0.18); color: var(--text-muted);
+            min-width: 18px; text-align: center;
+        }
+        .mom-view-tab.active .mom-view-count {
+            background: rgba(16,185,129,0.25); color: #10b981;
+        }
+
+        /* Column visibility — pure class-based, indexed by .col-tech / .col-fund.
+           Anchors carry no view class and stay visible regardless. Applies to
+           both <th> and <td> via the same selector pair. */
+        .mom-table[data-view="tech"] .col-fund { display: none; }
+        .mom-table[data-view="fund"] .col-tech { display: none; }
+
+        /* V3.25.3 — Fund tab uses the same neutral background as Tech tab.
+           The earlier emerald tint on .col-fund created alternating
+           tint-by-column stripes once score/signals moved out of the
+           anchor set (col-anchor cells stayed white, col-fund cells were
+           tinted, end result looked broken). The active-tab pill in the
+           rail above the table is now the only emerald accent — that's
+           where the lens identity lives, not inside the column cells. */
+
+        /* Lag disclaimer only when the Fund tab is active. Default hidden;
+           [data-view="fund"] reveals it. Lives inside #table-wrap so the
+           attribute selector cascades cleanly without sibling-combinator
+           contortions. */
+        #table-wrap #mom-fnd-note { display: none; }
+        #table-wrap[data-view="fund"] #mom-fnd-note { display: block; }
 
         /* Active sort header — emerald accent */
         .mom-th.active-sort { color: #10b981 !important; }
@@ -1085,36 +1149,66 @@
                     </span>
                     <i data-lucide="chevron-down" id="table-chevron" class="w-4 h-4 transition-transform duration-200"></i>
                 </button>
-                <div id="table-wrap" class="glass-card overflow-x-auto" style="border-top-left-radius:0;border-top-right-radius:0">
-                <!-- Table toolbar: column toggle -->
-                <div class="flex items-center justify-end gap-2 px-4 py-2 border-b border-zinc-200 dark:border-zinc-800">
-                    <button id="mom-col-toggle" class="mom-col-toggle" type="button" data-state="off">
-                        <i data-lucide="columns-3" class="w-3 h-3"></i>
-                        <span id="mom-col-toggle-label">More columns</span>
-                    </button>
+                <div id="table-wrap" class="glass-card overflow-x-auto" data-view="tech" style="border-top-left-radius:0;border-top-right-radius:0">
+                <!-- V3.25.1 — Table view tabs (Technical / Fundamentals). Each tab
+                     is a lens over the same 18-column row; .col-anchor cells render
+                     in both, .col-tech and .col-fund are gated by [data-view] above. -->
+                <div class="flex items-center justify-between gap-2 px-4 py-2 border-b border-zinc-200 dark:border-zinc-800">
+                    <div class="mom-view-rail" role="tablist" aria-label="Momentum table view">
+                        <button id="mom-view-tab-tech" class="mom-view-tab active" type="button"
+                                data-view="tech" role="tab" aria-selected="true">
+                            <span id="mom-view-tab-tech-label">📊 技術面</span>
+                            <span class="mom-view-count">12</span>
+                        </button>
+                        <button id="mom-view-tab-fund" class="mom-view-tab" type="button"
+                                data-view="fund" role="tab" aria-selected="false">
+                            <span id="mom-view-tab-fund-label">💰 基本面</span>
+                            <span class="mom-view-count">9</span>
+                        </button>
+                    </div>
                 </div>
-                <table class="w-full mom-table" id="mom-table" data-cols-extra="off">
+                <table class="w-full mom-table" id="mom-table" data-view="tech">
                     <thead>
                         <tr>
-                            <th class="mom-th" id="th-rank">#</th>
-                            <th class="mom-th" id="th-ticker">代號</th>
-                            <th class="mom-th text-right sortable" data-sort="price"           id="th-price">價格<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="pe"              id="th-pe">P/E<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="score"           id="th-score">分數<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="rank_score"      id="th-rank-score">Rank<span class="sort-arrow"></span></th>
-                            <th class="mom-th" id="th-label">標籤</th>
-                            <th class="mom-th sortable"            data-sort="stage"           id="th-stage">階段<span class="sort-arrow"></span></th>
-                            <th class="mom-th text-right sortable" data-sort="ratio_20d"       id="th-volume">量比<span class="sort-arrow"></span></th>
-                            <th class="mom-th col-extra text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
-                            <th class="mom-th col-extra text-right sortable" data-sort="rsi_14"          id="th-rsi">RSI<span class="sort-arrow"></span></th>
-                            <th class="mom-th col-extra text-right sortable" data-sort="macd_hist" id="th-macd">MACD<span class="sort-arrow"></span></th>
-                            <th class="mom-th" id="th-signals">訊號</th>
-                            <th class="mom-th col-extra text-right sortable" data-sort="short_pct_float" id="th-short">空方<span class="sort-arrow"></span></th>
+                            <!-- Anchors — always rendered (no col-tech / col-fund class). -->
+                            <th class="mom-th col-anchor" id="th-rank">#</th>
+                            <th class="mom-th col-anchor" id="th-ticker">代號</th>
+                            <th class="mom-th col-anchor text-right sortable" data-sort="price" id="th-price">價格<span class="sort-arrow"></span></th>
+                            <!-- Fund-only: P/E (existing valuation field, lives with the fundamentals lens).
+                                 V3.25.6 — `data-col-tip` swaps native title= for the styled
+                                 #mom-pill-tooltip card (same chrome as signal/preset tips). -->
+                            <th class="mom-th col-fund text-right sortable" data-sort="pe"          id="th-pe" data-col-tip="pe">P/E<span class="sort-arrow"></span></th>
+                            <!-- Tech-only: composite score battery (user wants
+                                 it visible only in the Technical lens — V3.25.2). -->
+                            <th class="mom-th col-tech text-right sortable" data-sort="score"       id="th-score" data-col-tip="score">分數<span class="sort-arrow"></span></th>
+                            <!-- Tech-only: calibrated rank_score, label, stage, volume, MA distance, RSI, MACD. -->
+                            <th class="mom-th col-tech text-right sortable" data-sort="rank_score"  id="th-rank-score" data-col-tip="rank_score">Rank<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-tech" id="th-label">標籤</th>
+                            <th class="mom-th col-tech sortable" data-sort="stage" id="th-stage">階段<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-tech text-right sortable" data-sort="ratio_20d"   id="th-volume" data-col-tip="volume">量比<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-tech text-right sortable" data-sort="above_ma200_pct" id="th-above-200">距 200MA<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-tech text-right sortable" data-sort="rsi_14"      id="th-rsi">RSI<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-tech text-right sortable" data-sort="macd_hist"   id="th-macd" data-col-tip="macd">MACD<span class="sort-arrow"></span></th>
+                            <!-- Tech-only: signal pills (V3.25.2 — user
+                                 prefers Fund lens to focus on raw numbers). -->
+                            <th class="mom-th col-tech" id="th-signals">訊號</th>
+                            <!-- Fund-only group (existing short-interest + V3.22 TTM fundamentals + 5D return). -->
+                            <th class="mom-th col-fund text-right sortable" data-sort="short_pct_float" id="th-short" data-col-tip="short">空方<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-fund text-right sortable" data-sort="ps_ttm"      id="th-ps" data-col-tip="ps">P/S<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-fund text-right sortable" data-sort="gm_ttm_pct"  id="th-gm" data-col-tip="gm">GM%<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-fund text-right sortable" data-sort="rev_yoy_ttm_pct" id="th-revyoy" data-col-tip="revyoy">Rev YoY<span class="sort-arrow"></span></th>
+                            <th class="mom-th col-fund text-right sortable" data-sort="return_5d_pct"   id="th-r5d" data-col-tip="r5d">5D%<span class="sort-arrow"></span></th>
                         </tr>
                     </thead>
                     <tbody id="mom-tbody"></tbody>
                 </table>
                 <div id="table-count" class="px-4 py-2 text-[10px] text-zinc-500 border-t border-zinc-200 dark:border-zinc-800"></div>
+                <!-- V3.22 — fundamentals data lag note. CSS gates this to
+                     [data-view="fund"] only (rule in the inline style block) so
+                     it's invisible on the Tech lens where no TTM fields show. -->
+                <div id="mom-fnd-note" class="px-4 pb-2 text-[10px] text-zinc-500 italic">
+                    <span data-i18n-key="momentum_fnd_lag_note">P/S · GM% · Rev YoY 為 TTM 數值，最多可能延遲 7 天才反映最新財報。</span>
+                </div>
                 </div><!-- /table-wrap -->
             </div><!-- /table-section -->
 
@@ -1153,10 +1247,11 @@
                 <div id="journal-content" class="grid grid-cols-1 lg:grid-cols-2 gap-4 hidden">
                     <!-- By signal -->
                     <div class="glass-card p-4">
-                        <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center justify-between mb-1">
                             <h4 class="text-xs font-bold" id="stats-signal-title">按 Signal 分組（20 日勝率）</h4>
                             <span id="journal-fills-label" class="text-[9px] text-zinc-500 font-mono"></span>
                         </div>
+                        <div id="journal-click-hint" class="text-[9px] text-emerald-400/70 mb-2"></div>
                         <table class="w-full">
                             <thead>
                                 <tr>
@@ -1188,6 +1283,28 @@
                                 </tr>
                             </thead>
                             <tbody id="stats-bin-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- By volume regime -->
+                    <div class="glass-card p-4 lg:col-span-2">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="text-xs font-bold" id="stats-volume-title">Volume Regime Alpha</h4>
+                            <span id="stats-volume-note" class="text-[9px] text-zinc-500 font-mono">n>=5 · win>=55% · median>=2%</span>
+                        </div>
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="stats-th" id="vol-th-trend">Trend</th>
+                                    <th class="stats-th" id="vol-th-stage">Stage</th>
+                                    <th class="stats-th" id="vol-th-ratio">Ratio</th>
+                                    <th class="stats-th text-right" id="vol-th-n">n</th>
+                                    <th class="stats-th" id="vol-th-win">Win%</th>
+                                    <th class="stats-th text-right" id="vol-th-mean">Mean</th>
+                                    <th class="stats-th text-right" id="vol-th-median">Median</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats-volume-tbody"></tbody>
                         </table>
                     </div>
                 </div>

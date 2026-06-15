@@ -124,6 +124,11 @@ def fetch_finnhub(ticker, client):
     return out
 
 
+# Whole-market earnings calendar memo — one fetch per run, not one per ticker
+# (the unfiltered 120-day calendar is thousands of rows).
+_CAL_CACHE = {}
+
+
 def fetch_fmp(ticker, api_key, session):
     """Audit-only source. Returns (data_dict, status_str)."""
     out = {"_source": "fmp"}
@@ -182,14 +187,25 @@ def fetch_fmp(ticker, api_key, session):
         if m.get("freeCashFlowPerShareTTM") is not None:
             out["fcfPerShareTTM"] = m["freeCashFlowPerShareTTM"]
 
-    # nextEarningsDate via /stable/earnings-calendar — filter to ticker-specific
-    cal = _get("earnings-calendar", {"from": datetime.date.today().isoformat(),
-                                     "to":   (datetime.date.today() + datetime.timedelta(days=120)).isoformat()})
+    # nextEarningsDate via /stable/earnings-calendar — memoized per run, and
+    # its failure must not poison `status` (it's enrichment; a calendar 403
+    # used to discard the whole quote/ratios diff downstream).
+    cal_key = datetime.date.today().isoformat()
+    status_before_cal = status
+    if cal_key in _CAL_CACHE:
+        cal = _CAL_CACHE[cal_key]
+    else:
+        cal = _get("earnings-calendar", {"from": cal_key,
+                                         "to":   (datetime.date.today() + datetime.timedelta(days=120)).isoformat()})
+        if isinstance(cal, list):
+            _CAL_CACHE[cal_key] = cal
     if isinstance(cal, list) and cal:
         upcoming = [c for c in cal if c.get("symbol") == ticker.upper() and c.get("date")]
         if upcoming:
             upcoming.sort(key=lambda x: x["date"])
             out["nextEarningsDate"] = upcoming[0]["date"]
+    else:
+        status = status_before_cal
 
     return out, status
 

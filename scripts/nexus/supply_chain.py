@@ -33,6 +33,7 @@ if str(_ROOT) not in sys.path:
 
 from scripts.break_news.llm_drivers import run_llm, primary_model, VALID_MODELS  # noqa: E402, F401
 from scripts._shared.model_router import run_role, run_with_fallback  # noqa: E402
+from scripts._shared import fmp_pool  # noqa: E402
 
 CHAINS_DIR = _ROOT / "nexus" / "supply_chains"
 PROMPT_FILE = _ROOT / "scripts" / "nexus" / "prompts" / "supply_chain_system.md"
@@ -54,7 +55,9 @@ _FMP_BASE = "https://financialmodelingprep.com"
 _FMP_PROFILE_TTL_SEC = 7 * 86400
 _FMP_PEERS_TTL_SEC = 86400
 _FMP_SEARCH_TTL_SEC = 86400
-_FMP_DAILY_BUDGET = int(os.getenv("FMP_SUPP_DAILY_BUDGET", "150"))
+# Paid-plan budget: RPM pacing is now the central fmp_pool's job, so this is
+# just a per-day call-COUNT safety cap (raised from the old free-tier 150).
+_FMP_DAILY_BUDGET = int(os.getenv("FMP_SUPP_DAILY_BUDGET", "2000"))
 _FMP_NAME_SEARCH_LIMIT = int(os.getenv("SUPPLY_CHAIN_FMP_NAME_SEARCH_LIMIT", "20"))
 _US_EXCHANGES = {"NASDAQ", "NYSE", "AMEX"}
 _RELATION_CORMENTION_THRESHOLD = 3
@@ -514,6 +517,10 @@ def _fmp_get(path: str, params: dict, *, timeout: int = 12):
         return None, "unavailable"
     status = None
     try:
+        # Count this call against the shared 250/min window before issuing
+        # (keeps the (raw, status) tuple + budget_exhausted contract intact —
+        # we keep our own transport so status_code stays observable downstream).
+        fmp_pool.acquire_slot(block=True)
         r = requests.get(
             f"{_FMP_BASE}{path}",
             params={**params, "apikey": api_key},

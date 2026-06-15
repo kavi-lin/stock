@@ -33,6 +33,7 @@ SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
 JOURNAL_DIR  = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "journal"))
 JOURNAL_FILE = os.path.join(JOURNAL_DIR, "journal.jsonl")
 STATS_FILE   = os.path.join(JOURNAL_DIR, "stats.json")
+CACHE_DIR    = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
 
 HORIZONS = [5, 20, 60]  # trading days
 MAE_MFE_HORIZON = 20    # compute max adverse/favorable excursion over 20d
@@ -103,6 +104,17 @@ def _float_or_none(x):
         return None
 
 
+def _ratio_20d_bucket(ratio):
+    if ratio is None:
+        return "unknown"
+    if ratio < 0.7: return "<0.7"
+    if ratio < 1.0: return "0.7-1.0"
+    if ratio < 1.3: return "1.0-1.3"
+    if ratio < 2.0: return "1.3-2.0"
+    if ratio < 3.0: return "2.0-3.0"
+    return ">=3.0"
+
+
 def cmd_snapshot(csv_path):
     if not os.path.exists(csv_path):
         raise SystemExit(f"CSV not found: {csv_path}")
@@ -137,6 +149,8 @@ def cmd_snapshot(csv_path):
                 "label": row.get("label"),
                 "stage": row.get("stage"),
                 "ratio_20d": _float_or_none(row.get("ratio_20d")),
+                "ratio_20d_bucket": _ratio_20d_bucket(_float_or_none(row.get("ratio_20d"))),
+                "volume_trend": row.get("volume_trend") or None,
                 "above_ma200_pct": _float_or_none(row.get("above_ma200_pct")),
                 "rsi_14":   _float_or_none(row.get("rsi_14")),
                 "rsi_zone": row.get("rsi_zone") or None,
@@ -323,6 +337,42 @@ def _score_bin(score):
     return "<50"
 
 
+def _load_screen_cache_fields(snap_id):
+    path = os.path.join(CACHE_DIR, f"{snap_id}.csv")
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    with open(path, "r", encoding="utf-8") as fp:
+        for row in csv.DictReader(fp):
+            ticker = (row.get("ticker") or "").strip().upper()
+            if not ticker:
+                continue
+            ratio = _float_or_none(row.get("ratio_20d"))
+            out[ticker] = {
+                "volume_trend": row.get("volume_trend") or None,
+                "ratio_20d_bucket": _ratio_20d_bucket(ratio),
+                "stage": row.get("stage") or None,
+                "above_ma200_pct": _float_or_none(row.get("above_ma200_pct")),
+            }
+    return out
+
+
+def _fill_volume_fields_from_cache(entries):
+    by_snap = {}
+    for e in entries:
+        if e.get("volume_trend") and e.get("ratio_20d_bucket"):
+            continue
+        snap_id = e.get("snap_id")
+        if snap_id not in by_snap:
+            by_snap[snap_id] = _load_screen_cache_fields(snap_id)
+        cached = by_snap[snap_id].get(e.get("ticker"), {})
+        if cached:
+            e.update({k: v for k, v in cached.items() if v is not None})
+        if not e.get("ratio_20d_bucket"):
+            e["ratio_20d_bucket"] = _ratio_20d_bucket(e.get("ratio_20d"))
+    return sum(1 for e in entries if e.get("volume_trend"))
+
+
 def cmd_stats():
     entries = _load_journal()
     if not entries:
@@ -330,23 +380,29 @@ def cmd_stats():
         return
 
     now_ts = datetime.now().isoformat(timespec="seconds")
+    volume_field_count = _fill_volume_fields_from_cache(entries)
 
     # Buckets keyed by group → {horizon → [returns]}
     by_signal = defaultdict(lambda: defaultdict(list))
     by_score_bin = defaultdict(lambda: defaultdict(list))
     by_stage = defaultdict(lambda: defaultdict(list))
+    by_volume_regime = defaultdict(lambda: defaultdict(list))
     mae_by_signal = defaultdict(list)
     mfe_by_signal = defaultdict(list)
 
     for e in entries:
         bin_key = _score_bin(e.get("score"))
         stage = e.get("stage") or "unknown"
+        vol_trend = e.get("volume_trend") or "unknown"
+        ratio_bucket = e.get("ratio_20d_bucket") or _ratio_20d_bucket(e.get("ratio_20d"))
+        volume_regime = f"{vol_trend} | {stage} | {ratio_bucket}"
         for h in HORIZONS:
             v = e["returns"].get(f"{h}d", {}).get("value")
             if v is None:
                 continue
             by_score_bin[bin_key][f"{h}d"].append(v)
             by_stage[stage][f"{h}d"].append(v)
+            by_volume_regime[volume_regime][f"{h}d"].append(v)
             for sig in e.get("signals", []):
                 by_signal[sig][f"{h}d"].append(v)
         if e.get("mae_20d") is not None:
@@ -374,6 +430,7 @@ def cmd_stats():
         "by_signal":    _summarize(by_signal),
         "by_score_bin": _summarize(by_score_bin),
         "by_stage":     _summarize(by_stage),
+        "by_volume_regime": _summarize(by_volume_regime),
         "mae_mfe_by_signal": {
             sig: {
                 "n": len(mae_by_signal[sig]),
@@ -397,6 +454,7 @@ def cmd_stats():
     print(f"- Filled: 5d={stats['fill_counts']['5d']}  "
           f"20d={stats['fill_counts']['20d']}  "
           f"60d={stats['fill_counts']['60d']}")
+    print(f"- Volume regime fields: {volume_field_count}/{len(entries)} entries")
     print()
     if stats["by_signal"]:
         print("### Top signals by 20d win rate (n≥5)")
@@ -412,6 +470,21 @@ def cmd_stats():
             print(f"| {sig} | {d['n']} | {d['win_rate']*100:.1f}% | "
                   f"{d['mean']:+.2f} | {d['median']:+.2f} | "
                   f"{d['p25']:+.2f} | {d['p75']:+.2f} |")
+    if stats["by_volume_regime"]:
+        print("\n### Volume regime candidates by 20d median (n≥5)")
+        rows = []
+        for regime, by_h in stats["by_volume_regime"].items():
+            d20 = by_h.get("20d", {})
+            if d20.get("n", 0) >= 5:
+                rows.append((regime, d20))
+        rows.sort(key=lambda r: (-(r[1]["median"]), -r[1]["win_rate"]))
+        print("| Volume Trend | Stage | Ratio Bucket | n | Win% | Mean | Median | P25 | P75 |")
+        print("|---|---|---|---|---|---|---|---|---|")
+        for regime, d in rows[:15]:
+            trend, stage, ratio_bucket = regime.split(" | ", 2)
+            print(f"| {trend} | {stage} | {ratio_bucket} | {d['n']} | "
+                  f"{d['win_rate']*100:.1f}% | {d['mean']:+.2f} | "
+                  f"{d['median']:+.2f} | {d['p25']:+.2f} | {d['p75']:+.2f} |")
     print(f"\n→ written {STATS_FILE}")
 
 

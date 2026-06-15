@@ -23,6 +23,13 @@ except ImportError:
     print("ERROR: requests library not found. Install with: pip install requests", file=sys.stderr)
     sys.exit(1)
 
+# Central cross-process rate pool (shared 250/min budget). Pacing/429-backoff
+# now live there; this client keeps its stable→v3 fallback + caching.
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from scripts._shared import fmp_pool  # noqa: E402
+
 
 # --- FMP endpoint fallback: stable (new users) -> v3 (legacy users) ---
 
@@ -92,40 +99,20 @@ class FMPClient:
         if params is None:
             params = {}
 
-        elapsed = time.time() - self.last_call_time
-        if elapsed < self.RATE_LIMIT_DELAY:
-            time.sleep(self.RATE_LIMIT_DELAY - elapsed)
-
-        try:
-            response = self.session.get(url, params=params, timeout=30)
-            self.last_call_time = time.time()
-            self.api_calls_made += 1
-
-            if response.status_code == 200:
-                self.retry_count = 0
-                return response.json()
-            elif response.status_code == 429:
-                # Short-circuit: quota exhausted means every subsequent call
-                # also returns 429. Sleeping 60s to retry is pointless when
-                # the daily cap is hit (resets at UTC midnight, not in 60s).
-                # Set flag immediately so the rest of this run skips FMP.
-                if not self.rate_limit_reached:
-                    print(
-                        "WARNING: FMP returned 429 (daily quota reached); skipping all further FMP calls this run",
-                        file=sys.stderr,
-                    )
-                self.rate_limit_reached = True
-                return None
-            else:
-                if not quiet:
-                    print(
-                        f"ERROR: API request failed: {response.status_code} - {response.text[:200]}",
-                        file=sys.stderr,
-                    )
-                return None
-        except requests.exceptions.RequestException as e:
-            print(f"ERROR: Request exception: {e}", file=sys.stderr)
-            return None
+        # Rate pacing + 429 backoff handled by the central pool. apikey is
+        # injected by get_url (this client otherwise sets it as a session
+        # header, which the pool's per-request transport does not carry).
+        # With the pool keeping us under 250/min, a persistent None is a genuine
+        # network/auth failure (no longer a quota wall), so we no longer
+        # short-circuit the whole run — each call independently retries.
+        self.api_calls_made += 1
+        data = fmp_pool.get_url(url, params, timeout=30, api_key=self.api_key)
+        if data is not None:
+            self.retry_count = 0
+            return data
+        if not quiet:
+            print("ERROR: FMP request failed (network/auth)", file=sys.stderr)
+        return None
 
     def _request_with_fallback(self, endpoint_key, symbols_str, extra_params=None):
         """Try stable endpoint first, fall back to v3 for legacy users.

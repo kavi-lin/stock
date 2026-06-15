@@ -4,7 +4,8 @@ retail-sector-pulse — per-sector retail-perspective sentiment aggregator.
 
 V3.20.0 daily-only entry. Reads:
   - news/news_logs/*_digest.json (last 72h) → news sentiment per sector
-  - skills/narrative-pulse-detector/cache/<T>_<DATE>.json → retail mention multiplier
+  - narrative-pulse-detector cache (retired V3.34; dir gone → retail volume
+    component degrades to score=None every run, kept for future social-source rewire)
   - skills/short-term-target/scripts/predict.py (subprocess per ticker) → 5d direction
 
 Writes Dashboard/retail_sector_pulse.json with 11 sector records.
@@ -282,18 +283,32 @@ def aggregate_retail_volume(tickers: list[str], cfg: dict) -> dict:
 
 
 # ── 5d predictions (subprocess per ticker) ──────────────────────────────
+_predict_fail_logged = False
+
+
 def run_predict(ticker: str, horizon: str = "5d", timeout: int = 60) -> Optional[dict]:
     """Subprocess call to short-term-target/predict.py. Returns
     horizons.<horizon> dict if status=ok, else None."""
+    global _predict_fail_logged
     try:
         r = subprocess.run(
             [sys.executable, str(PREDICT_SCRIPT), ticker, "--json-only"],
             capture_output=True, text=True, timeout=timeout,
         )
         if r.returncode != 0:
+            if not _predict_fail_logged:
+                _predict_fail_logged = True
+                print(f"[aggregate] WARN predict.py rc={r.returncode} for {ticker} "
+                      f"(first failure this run): {(r.stderr or '')[-200:]}", file=sys.stderr)
             return None
         data = json.loads(r.stdout)
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
+    except Exception as e:
+        # A globally-broken predict.py used to degrade every sector to silent
+        # "neutral" — log the first failure so daily_update output shows it.
+        if not _predict_fail_logged:
+            _predict_fail_logged = True
+            print(f"[aggregate] WARN predict failed for {ticker} (first failure this run): {e}",
+                  file=sys.stderr)
         return None
 
     horizons = data.get("horizons") or {}
@@ -318,11 +333,12 @@ def aggregate_predictions(
         }
 
     horizon = cfg.get("predict_horizon", "5d")
-    results = []
-    for t in tickers:
-        r = run_predict(t, horizon=horizon)
-        if r is not None:
-            results.append(r)
+    # Parallel: ~55 sequential subprocesses was the slowest serial tail of
+    # Step 9.5. predict's per-ticker file cache is safe for distinct tickers.
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        results = [r for r in ex.map(lambda t: run_predict(t, horizon=horizon), tickers)
+                   if r is not None]
 
     min_ok = int(cfg.get("min_predict_ok_per_sector", 3))
     if len(results) < min_ok:

@@ -27,7 +27,7 @@ from news.fetch_news_rss import FEEDS, fetch_feed, headline_fingerprint  # noqa:
 from news.scripts.stage1_triage import (  # noqa: E402
     classify_news_type, calc_shallow_score, gen_4view_snaps, BINARY_KEYS,
 )
-from scripts.break_news import store  # noqa: E402
+from scripts.break_news import store, cluster  # noqa: E402
 from scripts.break_news.llm_drivers import break_news_pair  # noqa: E402
 from scripts._shared import model_router  # noqa: E402
 from scripts.break_news.llm_drivers import VALID_MODELS  # noqa: E402
@@ -56,7 +56,15 @@ FUTU_MAX_PER_CYCLE = int(os.environ.get("BREAK_NEWS_FUTU_MAX_PER_CYCLE", "30"))
 SOCIAL_ENABLED = os.environ.get("BREAK_NEWS_SOCIAL_ENABLED", "1") not in ("0", "false", "no")
 SOCIAL_GATE_MIN_SCORE = float(os.environ.get("BREAK_NEWS_SOCIAL_GATE_MIN_SCORE", "3"))
 SESSION_RESERVE = int(os.environ.get("BREAK_NEWS_SESSION_RESERVE", "25"))
-EST_CALLS_PER_DEBATE = max(1, int(os.environ.get("BREAK_NEWS_EST_CALLS_PER_DEBATE", "6")))
+# V6 blind-open + strict divergence gate: converged items cost 2 calls and the
+# gate only re-opens on a true verdict conflict, so 2 ≈ expected average.
+EST_CALLS_PER_DEBATE = max(1, int(os.environ.get("BREAK_NEWS_EST_CALLS_PER_DEBATE", "2")))
+# V6 sentiment damping: generic market-mood headlines (56% of historic volume)
+# are clustered + counted, NOT debated, unless binary / HIGH-cred / strong score.
+SENTIMENT_DEBATE_MIN_SCORE = float(os.environ.get("BREAK_NEWS_SENTIMENT_MIN_SCORE", "3"))
+HOURLY_CAP = max(1, int(os.environ.get("BREAK_NEWS_HOURLY_CAP", "25")))
+SLOT_MINUTES = 60.0 / HOURLY_CAP
+BACKFILL_MINUTES = max(1, int(os.environ.get("BREAK_NEWS_BACKFILL_MINUTES", "30")))
 SESSION_TZ = ZoneInfo("America/New_York")
 
 _last_feed_stats: list[dict] = []
@@ -100,10 +108,64 @@ def _pending_backlog_count() -> int:
     return n
 
 
+def _parse_iso_utc(s: str | None) -> datetime | None:
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _admissions_in_window(window_minutes: int = 60) -> list[datetime]:
+    """fetched_at UTC of bn_*.json items admitted within rolling window."""
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=window_minutes)
+    out: list[datetime] = []
+    for p in store.STORE_DIR.glob("bn_*.json"):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        dt = _parse_iso_utc(d.get("fetched_at"))
+        if dt is None:
+            continue
+        if dt >= cutoff:
+            out.append(dt)
+    return out
+
+
+def _hourly_slot_capacity(now_utc: datetime | None = None) -> dict:
+    """Rolling 1-hour admission cap with time-slot pacing.
+
+    HOURLY_CAP=25 → slot=2.4 min → at most 1 admission per slot. Quiet periods
+    accumulate slot tokens (catch-up). Burst cycles still bounded by hourly_left.
+    """
+    now = now_utc or datetime.now(timezone.utc)
+    window_start = now - timedelta(hours=1)
+    admissions = _admissions_in_window(60)
+    hourly_used = len(admissions)
+    hourly_left = max(0, HOURLY_CAP - hourly_used)
+    last_ts = max(admissions) if admissions else window_start
+    elapsed_min = max(0.0, (now - last_ts).total_seconds() / 60.0)
+    slot_tokens = int(elapsed_min // SLOT_MINUTES) if SLOT_MINUTES > 0 else hourly_left
+    allowed = min(hourly_left, slot_tokens)
+    return {
+        "hourly_cap": HOURLY_CAP,
+        "hourly_used": hourly_used,
+        "hourly_left": hourly_left,
+        "slot_minutes": round(SLOT_MINUTES, 3),
+        "slot_tokens": slot_tokens,
+        "allowed_this_cycle": int(allowed),
+        "last_admission_ts": last_ts.isoformat() if admissions else None,
+    }
+
+
 def _voice_order(preferred: str, chain: list[str]) -> list[str]:
+    # Cancel fallback: only evaluate the preferred/voice model
     if preferred in VALID_MODELS:
-        return [preferred] + [m for m in chain if m != preferred]
-    return list(chain)
+        return [preferred]
+    return [chain[0]] if chain else ["gemini"]
 
 
 def _model_call_headroom(pair: list[str]) -> dict:
@@ -181,8 +243,11 @@ def _auto_budget_limit(now_utc: datetime | None = None, today_count: int = 0) ->
     queued_calls = pending_backlog * EST_CALLS_PER_DEBATE
     model_debate_capacity = max(0, (usable_calls - queued_calls) // EST_CALLS_PER_DEBATE)
 
+    hourly_slot = _hourly_slot_capacity(now_utc)
+    hourly_allowed = int(hourly_slot.get("allowed_this_cycle") or 0)
+
     emergency_remaining = None
-    admission_remaining = model_debate_capacity
+    admission_remaining = min(model_debate_capacity, hourly_allowed)
     if DAILY_MAX > 0:
         emergency_remaining = max(0, DAILY_MAX - today_count)
         admission_remaining = min(admission_remaining, emergency_remaining)
@@ -200,6 +265,8 @@ def _auto_budget_limit(now_utc: datetime | None = None, today_count: int = 0) ->
         "model_capacity": model_cap,
         "fallback_backed_capacity": bool(model_cap.get("fallback_backed")),
         "us_news_window_open": in_window,
+        "hourly_slot": hourly_slot,
+        "backfill_minutes": BACKFILL_MINUTES,
     }
 
 
@@ -339,6 +406,9 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
     new_items_social = 0
     gated_out = 0
     gated_cost = 0
+    gated_echo = 0
+    gated_sentiment = 0
+    escalations = 0
     duplicates = 0
     advanced_ids: list[str] = []
     raw_entries: list[dict] = []   # every fetched non-dup item, for the un-gated UI feed
@@ -376,6 +446,38 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             passed, reason = social_gate(score, binary)
         else:
             passed, reason = gate(score, raw.get("source_credibility", "MEDIUM"), binary)
+
+        # ── V6 event clustering (0 LLM) ──────────────────────────────────
+        # Every non-dup item joins a rolling event cluster. Echoes of an
+        # already-debated story are counted, not re-debated; a cluster that
+        # keeps growing escalates one follow-up debate at echo milestones.
+        cl = {"cluster_id": None, "is_echo": False, "echo_count": 1,
+              "should_escalate": False, "prior_news_ids": []}
+        if not dry_run:  # cluster store is a write — keep dry-run write-free
+            try:
+                cl = cluster.assign_item(
+                    headline, summary, news_type, score,
+                    raw.get("source"), key=key)
+            except Exception as _cl_e:  # clustering must never break the poll
+                sys.stderr.write(f"[poller] cluster assign failed: {_cl_e}\n")
+
+        cred_eff = raw.get("source_credibility", "MEDIUM")
+        if (passed and news_type == "sentiment" and not binary
+                and cred_eff != "HIGH"
+                and abs(score) < SENTIMENT_DEBATE_MIN_SCORE):
+            # Generic market-mood headline: cluster count feeds the trend
+            # index (Raw Pulse line); no LLM debate.
+            passed, reason = False, "sentiment_cluster_only"
+            gated_sentiment += 1
+
+        if passed and cl["is_echo"] and not cl["should_escalate"] \
+                and cl.get("prior_news_ids"):
+            # Same story already debated — record the echo, spend nothing.
+            passed, reason = False, "cluster_echo"
+            gated_echo += 1
+        elif cl["should_escalate"]:
+            passed, reason = True, "cluster_escalation"
+            escalations += 1
 
         triage = {
             "news_type": news_type,
@@ -420,6 +522,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             "is_social": is_social,
             "source_meta": raw.get("_source_meta") or {},
             "news_id": None,
+            "cluster_id": cl.get("cluster_id"),
+            "echo_count": cl.get("echo_count"),
         }
         raw_entries.append(raw_entry)
 
@@ -427,12 +531,31 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             gated_out += 1
             continue
 
+        # Cluster context stored on the item — debater reads `escalated` +
+        # `prior_summary` to run an increment-only follow-up round.
+        cluster_block = {
+            "cluster_id": cl.get("cluster_id"),
+            "echo_count": cl.get("echo_count"),
+            "sources": None,
+            "escalated": bool(cl.get("should_escalate")),
+            "prior_summary": None,
+        }
+        if cl.get("should_escalate") and cl.get("prior_news_ids"):
+            prior = store.load_item(cl["prior_news_ids"][-1]) or {}
+            ps = prior.get("summary") or {}
+            if ps:
+                cluster_block["prior_summary"] = {
+                    "consensus_verdict": ps.get("consensus_verdict"),
+                    "final_take": ps.get("final_take"),
+                }
+
         debate_candidates.append({
             "key": key,
             "headline": headline[:200],
             "raw_summary": summary[:400],
             "source": source,
             "triage": triage,
+            "cluster": cluster_block,
             "raw_entry": raw_entry,
             "score": score,
             "binary": binary,
@@ -441,6 +564,22 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             "is_futu": is_futu,
             "is_social": is_social,
         })
+
+    # Backfill freshness gate: only items published within the last
+    # BACKFILL_MINUTES are eligible for auto-debate admission. Older items
+    # remain in the raw stream for manual triggering. Items lacking a
+    # published timestamp pass through (Futu/social without _dt — already
+    # filtered by upstream cutoff).
+    backfill_cutoff = started - timedelta(minutes=BACKFILL_MINUTES)
+    backfill_dropped = 0
+    fresh_candidates: list[dict] = []
+    for c in debate_candidates:
+        dt = c.get("published_dt")
+        if dt is not None and dt.astimezone(timezone.utc) < backfill_cutoff:
+            backfill_dropped += 1
+            continue
+        fresh_candidates.append(c)
+    debate_candidates = fresh_candidates
 
     debate_candidates.sort(key=_candidate_priority, reverse=True)
 
@@ -463,7 +602,13 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         nid = store.init_item(
             source=c["source"], triage=c["triage"],
             headline=c["headline"], raw_summary=c["raw_summary"],
+            cluster=c.get("cluster"),
         )
+        if (c.get("cluster") or {}).get("cluster_id"):
+            try:
+                cluster.mark_debated(c["cluster"]["cluster_id"], nid)
+            except Exception as _md_e:
+                sys.stderr.write(f"[poller] cluster mark_debated failed: {_md_e}\n")
         c["raw_entry"]["news_id"] = nid
         advanced_ids.append(nid)
         new_items += 1
@@ -491,6 +636,10 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         "items_added_social": new_items_social,
         "items_gated_out": gated_out,
         "items_gated_cost": gated_cost,
+        "items_gated_backfill": backfill_dropped,
+        "items_echo_merged": gated_echo,
+        "items_sentiment_clustered": gated_sentiment,
+        "items_escalated": escalations,
         "duplicates_skipped": duplicates,
         "debate_candidates": len(debate_candidates),
         "raw_stream_size": raw_stream_size,
@@ -509,6 +658,8 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         "fallback_backed_capacity": budget["fallback_backed_capacity"],
         "session_reserve": SESSION_RESERVE,
         "us_news_window_open": budget["us_news_window_open"],
+        "hourly_slot": budget["hourly_slot"],
+        "backfill_minutes": budget["backfill_minutes"],
         "advanced_ids": advanced_ids,
         "futu_enabled": FUTU_ENABLED and FUTU_AVAILABLE,
         "social_enabled": SOCIAL_ENABLED and SOCIAL_AVAILABLE,

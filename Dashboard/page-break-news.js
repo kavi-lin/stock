@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyTranslations() {
     $('bn-title').textContent = t('突發新聞辯論室', 'Break News War Room');
+    $('bn-brief-title').textContent = t('市場現況導讀', 'Market Brief');
+    $('bn-brief-refresh-label').textContent = t('重產', 'Regenerate');
     $('bn-subtitle').textContent = t('Break News War Room', '突發新聞辯論室');
     $('bn-refresh-label').textContent = t('立即輪詢', 'Poll Now');
     $('bn-loading-label').textContent = t('載入即時新聞中…', 'Loading break news feed…');
@@ -36,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     $('bn-health-label').textContent   = 'LIVE';
     $('bn-raw-title').textContent = t('未閘 Raw 流', 'Un-gated Raw Stream');
     $('bn-raw-hint').textContent  = t('所有抓到的新聞，繞過 score gate', 'All fetched news, bypassing the score gate');
+    const staleTitle = $('bn-stale-title');
+    if (staleTitle) staleTitle.textContent = t('陳舊待辯論', 'Stale Backlog');
+    const staleHint = $('bn-stale-hint');
+    if (staleHint) staleHint.textContent = t(
+      '>2h 未自動辯論，user 手動選擇',
+      'Past auto-debate cutoff — user picks per item');
     // Labels rendered fresh on every feed update so counts stay current.
     updateFilterTabs();
     if (bnTrend) bnTrend.refresh();
@@ -165,10 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function feedTimeMs(it) {
+    // Newest → oldest by news arrival. fetched_at is ISO UTC and lexicographic
+    // sort matches chronological, but parse for safety + to handle missing.
+    const raw = it?.fetched_at || it?.published || it?.last_activity_ts;
+    if (!raw) return 0;
+    const d = new Date(raw);
+    const ms = d.getTime();
+    return Number.isFinite(ms) ? ms : 0;
+  }
+
   async function loadFeed() {
     try {
       const r = await fetchJson('/api/break-news/feed?limit=100');
-      currentItems = r.items || [];
+      const items = (r.items || []).slice();
+      items.sort((a, b) => feedTimeMs(b) - feedTimeMs(a));
+      currentItems = items;
       applyFilter();
       updateFilterTabs();
     } catch (e) {
@@ -177,8 +197,155 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ── Stale backlog (pending_debate items past PENDING_MAX_AGE_HOURS) ───
+  // Listed so user opts-in to spending LLM budget after long idle. Auto-loop
+  // skips them.
+  let staleItems = [];
+
+  function renderStaleCard(it) {
+    const sc = Number(it.shallow_score) || 0;
+    const score = it.shallow_score == null ? '—'
+      : (sc > 0 ? '+' : '') + sc.toFixed(1);
+    const scoreColor = sc >= 2 ? 'background:rgba(34,197,94,0.16);color:#4ade80;'
+      : sc <= -2 ? 'background:rgba(239,68,68,0.16);color:#f87171;'
+      : 'background:rgba(161,161,170,0.14);color:var(--text-muted);';
+    const age = it.age_hours != null ? it.age_hours.toFixed(1) + 'h' : '?';
+    const hl = it.url
+      ? `<a class="bn-raw-headline" href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(it.headline)}" style="text-decoration:none;">${esc(it.headline)}</a>`
+      : `<span class="bn-raw-headline" title="${esc(it.headline)}">${esc(it.headline)}</span>`;
+    const btn = `<button class="bn-raw-debate-btn" data-nid="${esc(it.news_id)}">${t('🔥 辯論', '🔥 Debate')}</button>`;
+    return `<div class="bn-raw-card">
+      <span class="bn-raw-score" style="${scoreColor}">${score}</span>
+      ${hl}
+      <span class="bn-raw-meta">${esc(it.source || '')}</span>
+      <span class="bn-raw-meta" style="color:#fbbf24;">${age}</span>
+      <span class="bn-raw-gate block">${t('陳舊', 'stale')}</span>
+      ${btn}
+    </div>`;
+  }
+
+  function renderStaleList() {
+    const list = $('bn-stale-list');
+    const empty = $('bn-stale-empty');
+    if (!list || !empty) return;
+    $('bn-stale-count').textContent = staleItems.length;
+    if (!staleItems.length) {
+      list.innerHTML = '';
+      empty.style.display = '';
+      empty.textContent = t('無陳舊待辯論項目', 'No stale pending items');
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = staleItems.map(renderStaleCard).join('');
+    list.querySelectorAll('.bn-raw-debate-btn').forEach(btn => {
+      btn.addEventListener('click', () => triggerStaleDebate(btn));
+    });
+  }
+
+  async function triggerStaleDebate(btn) {
+    const nid = btn.dataset.nid;
+    if (!nid) return;
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = t('啟動中…', 'starting…');
+    try {
+      await fetchJson(`/api/break-news/item/${encodeURIComponent(nid)}/debate-now`, {
+        method: 'POST',
+      });
+      btn.textContent = t('辯論中', 'debating');
+      setTimeout(() => { loadFeed(); loadState(); loadStalePending(); }, 1500);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = orig;
+      alert(t('觸發辯論失敗: ', 'Debate trigger failed: ') + e.message);
+    }
+  }
+
+  async function loadStalePending() {
+    try {
+      const r = await fetchJson('/api/break-news/stale-pending');
+      staleItems = r.items || [];
+      renderStaleList();
+    } catch (e) {
+      const empty = $('bn-stale-empty');
+      if (empty) { empty.style.display = ''; empty.textContent = 'Stale list error: ' + e.message; }
+    }
+  }
+
   // ── Shared HTML-escape helper ────────────────────────────────────
   const esc = (s) => NewsComponents.escapeHtml(s == null ? '' : String(s));
+
+  // ── Market brief (periodic 1-call situational digest) ────────────
+  let briefGeneratedAt = null;
+
+  function briefCol(title, items, color) {
+    if (!items || !items.length) return '';
+    const lis = items.map(x => `<li>${esc(x)}</li>`).join('');
+    return `<div class="bn-brief-col" style="border-left-color:${color};">
+      <div class="bn-brief-col-title" style="color:${color};">${title}</div>
+      <ul>${lis}</ul>
+    </div>`;
+  }
+
+  function renderBrief(cur) {
+    const body = $('bn-brief-body');
+    const regime = $('bn-brief-regime');
+    const meta = $('bn-brief-meta');
+    if (!cur) {
+      body.innerHTML = `<div class="bn-brief-empty">${t('尚無導讀 — 等待下一次自動產生', 'No brief yet — waiting for the next auto run')}</div>`;
+      regime.style.display = 'none';
+      meta.textContent = '';
+      return;
+    }
+    briefGeneratedAt = cur.generated_at || null;
+    if (cur.regime) {
+      regime.style.display = '';
+      regime.textContent = cur.regime;
+    } else {
+      regime.style.display = 'none';
+    }
+    const stats = cur.stats || {};
+    meta.textContent = `${cur.model || ''} · ${stats.closed_debate_count ?? '?'} ${t('場辯論', 'debates')} · ${fmtTime(cur.generated_at)}`;
+    body.innerHTML = `
+      <div class="bn-brief-text">${esc(cur.brief_text || '')}</div>
+      <div class="bn-brief-cols">
+        ${briefCol(t('🔥 主導事件', '🔥 Drivers'), cur.drivers, '#60a5fa')}
+        ${briefCol(t('✅ 多方力量', '✅ Bull Pressure'), cur.bull_pressure, '#22c55e')}
+        ${briefCol(t('❌ 空方力量', '❌ Bear Pressure'), cur.bear_pressure, '#ef4444')}
+        ${briefCol(t('👁 觀察點', '👁 Watch'), cur.watch, '#eab308')}
+      </div>`;
+  }
+
+  async function loadBrief() {
+    try {
+      const r = await fetchJson('/api/break-news/brief');
+      renderBrief(r.current);
+    } catch (e) {
+      $('bn-brief-body').innerHTML = `<div class="bn-brief-empty">Brief error: ${esc(e.message)}</div>`;
+    }
+  }
+
+  $('bn-brief-refresh').addEventListener('click', async () => {
+    const btn = $('bn-brief-refresh');
+    btn.disabled = true;
+    try {
+      await fetchJson('/api/break-news/brief/refresh', { method: 'POST' });
+      const before = briefGeneratedAt;
+      // generation takes ~30-60s — poll until generated_at changes (max 2 min)
+      let tries = 0;
+      const timer = setInterval(async () => {
+        tries += 1;
+        await loadBrief();
+        if (briefGeneratedAt !== before || tries >= 12) {
+          clearInterval(timer);
+          btn.disabled = false;
+        }
+      }, 10000);
+    } catch (e) {
+      btn.disabled = false;
+      alert(t('重產導讀失敗: ', 'Brief refresh failed: ') + e.message);
+    }
+  });
 
   // ── Un-gated raw breaking-news stream ────────────────────────────
   // Shows every item the poller fetched, gated or not. Each card offers a
@@ -286,23 +453,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function loadDetail(id) {
+  async function loadDetail(id, opts = {}) {
     const panel = $('bn-thread-panel');
     if (!id) {
       panel.innerHTML = `<div class="bn-thread-empty"><i data-lucide="message-circle" class="w-8 h-8 mx-auto mb-3 text-zinc-600"></i>
         <div>${t('點選左側新聞卡查看 Claude × Gemini 辯論', 'Click a card to view the Claude × Gemini debate')}</div></div>`;
+      panel.scrollTop = 0;
       if (window.lucide && lucide.createIcons) lucide.createIcons();
       return;
     }
     try {
       const item = await fetchJson(`/api/break-news/item/${id}`);
-      renderDetail(item);
+      renderDetail(item, opts);
     } catch (e) {
       panel.innerHTML = `<div style="color:#ef4444;padding:14px;">Error: ${e.message}</div>`;
+      if (opts.resetScroll) panel.scrollTop = 0;
     }
   }
 
-  function renderDetail(item) {
+  function renderDetail(item, opts = {}) {
     const panel = $('bn-thread-panel');
     const C = window.NewsComponents;
     const src = item.source || {};
@@ -419,6 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     panel.innerHTML = header + thread + summaryBlock;
+    if (opts.resetScroll) panel.scrollTop = 0;
     const replay = panel.querySelector('[data-replay]');
     if (replay) replay.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -435,11 +605,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function selectItem(id) {
+    const changed = selectedId !== id;
     selectedId = id;
     document.querySelectorAll('.bn-card').forEach(el => {
       el.classList.toggle('bn-selected', el.dataset.newsId === id);
     });
-    loadDetail(id);
+    loadDetail(id, { resetScroll: changed });
     if (detailTimer) clearInterval(detailTimer);
     detailTimer = setInterval(() => {
       const it = currentItems.find(i => i.news_id === id);
@@ -484,6 +655,13 @@ document.addEventListener('DOMContentLoaded', () => {
   $('bn-raw-toggle').addEventListener('click', () => {
     $('bn-raw-strip').classList.toggle('collapsed');
   });
+  // Stale backlog collapse toggle
+  const staleToggle = $('bn-stale-toggle');
+  if (staleToggle) {
+    staleToggle.addEventListener('click', () => {
+      $('bn-stale-strip').classList.toggle('collapsed');
+    });
+  }
 
   // Full-mode sentiment-trend chart (entity selector + legend + hover cursor)
   bnTrend = TrendChart.mount({
@@ -494,9 +672,13 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFeed();
   loadState();
   loadRawStream();
+  loadStalePending();
+  loadBrief();
   setInterval(loadFeed, BN_POLL_MS);
   setInterval(loadState, BN_POLL_MS);
   setInterval(() => { if (bnTrend) bnTrend.reload(); }, BN_POLL_MS);
   setInterval(loadRawStream, BN_POLL_MS);
+  setInterval(loadStalePending, BN_POLL_MS);
+  setInterval(loadBrief, BN_POLL_MS * 4);   // brief changes at most every 2h
   if (window.lucide && lucide.createIcons) lucide.createIcons();
 });

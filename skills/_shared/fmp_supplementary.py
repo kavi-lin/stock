@@ -34,6 +34,10 @@ CACHE_DIR = BASE_DIR / "skills" / "_shared" / "fmp_supp_cache"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_TTL = 86400  # 24h
 
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+from scripts._shared import fmp_pool as _fmp_pool  # noqa: E402
+
 SCHEMA_VERSION = "V1.1"  # V5.0 — added executive_compensation, comp_benchmark, employee_history
 
 
@@ -41,26 +45,13 @@ def _fmp_get(path: str, params: dict, *, timeout: int = 12):
     """GET /stable/<path>?<params>&apikey=...
     Returns parsed body on 200, None otherwise (paid block / network / parse).
     No raise — caller handles None gracefully.
+
+    Pacing/429-backoff governed centrally by scripts/_shared/fmp_pool (shared
+    250/min budget). Behavior change vs the old inline client: a 429 is now
+    retried with exponential backoff instead of returning None immediately —
+    safe because every _fetch_* consumer already None-tolerates.
     """
-    api_key = os.environ.get("FMP_API_KEY")
-    if not api_key:
-        return None
-    try:
-        r = requests.get(
-            f"https://financialmodelingprep.com/stable/{path}",
-            params={**params, "apikey": api_key},
-            timeout=timeout,
-        )
-        if r.status_code in (401, 402, 403):
-            return None
-        if r.status_code == 429:
-            time.sleep(2)
-            return None
-        if r.status_code != 200:
-            return None
-        return r.json()
-    except Exception:
-        return None
+    return _fmp_pool.get(path, params, stable=True, retries=2, timeout=timeout)
 
 
 def _fetch_quality_scores(ticker: str) -> dict:

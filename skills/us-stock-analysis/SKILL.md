@@ -10,7 +10,15 @@ data_sources: [yfinance, FMP API]
 
 Comprehensive single-ticker US equity analysis — fundamentals, technicals, valuation, comparison, investment reports. See `README.md` for tone / formatting pedagogy and example queries.
 
-## Data Sources
+## ⚠️ Investment-Protocol Lane Mode（`分析 [TICKER]` Fundamentals lane — 優先閱讀）
+
+當本 skill 作為 investment_protocol Phase 2 Fundamentals lane 執行時：
+
+- **必跑** `python3 skills/us-stock-analysis/scripts/analyze.py <TICKER> --json-only` — 所有數字以 script 輸出 + protocol 發的 FMP bundles 為準
+- **Web search 對任何 scalar（價格/EPS/PE/PT…）❌ FORBIDDEN** — 見 protocol DATA SOURCE DISCIPLINE。本檔下方 web-search 工作流**僅限 standalone 對話**
+- Lane 必輸出欄位（契約見 `investment/investment_protocol_v5_0.md` Phase 2）：`moat_assessment`（**dict**，勿寫成 string — 有 drift 前科）、`near_term_catalysts[]`、`bull_thesis_one_line` / `bear_thesis_one_line`、`market_position{tam_usd,...}`
+
+## Data Sources（standalone 模式限定）
 
 Fetch via web search tools (always verify recency — prefer last quarter):
 

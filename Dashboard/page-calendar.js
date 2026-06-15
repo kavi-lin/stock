@@ -1747,7 +1747,7 @@
             } else if (s.status === 'done') {
                 stopLlmReviewPoll();
                 UI.showToast(isZh ? 'LLM 檢討完成，正在載入結果…' : 'LLM Review done, loading…', 'info', 3000);
-                await loadLatestReview();
+                await loadLatestReview(true);
             } else if (s.status === 'error') {
                 stopLlmReviewPoll();
                 const tail = (s.log_tail || '').slice(-300);
@@ -1796,13 +1796,30 @@
         }
     }
 
-    async function loadLatestReview() {
+    async function loadLatestReview(justRan = false) {
         const host = document.getElementById('cal-llm-review-body');
         const meta = document.getElementById('cal-llm-review-meta');
         if (!host) return;
         const isZh = UI.currentLang === 'zh';
         // Try today first, walk back up to 14 days for fallback
         const today = new Date(todayIso || browserTodayIso());
+        // When invoked right after a "done" status, confirm TODAY's file exists.
+        // A done run with no today-file means the model finished without writing
+        // output (the server artifact gate normally turns this into "error", so
+        // this is a belt-and-suspenders warning rather than a silent old-file load).
+        if (justRan) {
+            const td = today;
+            const tIso = `${td.getFullYear()}-${String(td.getMonth() + 1).padStart(2, '0')}-${String(td.getDate()).padStart(2, '0')}`;
+            try {
+                const tr = await fetch(`/decision_review/REVIEW_${tIso}.md`, { cache: 'no-store' });
+                if (!tr.ok) {
+                    UI.showToast(isZh
+                        ? '已標記完成但無今日輸出（模型可能異常未產檔），請查 reports/decision_review log'
+                        : 'Marked done but no output for today (model likely produced nothing) — check reports/decision_review log',
+                        'warn', 7000);
+                }
+            } catch {}
+        }
         for (let offset = 0; offset < 14; offset++) {
             const d = new Date(today); d.setDate(today.getDate() - offset);
             const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

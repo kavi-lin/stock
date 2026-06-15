@@ -128,6 +128,34 @@ function computeConviction(data) {
 // Today's Verdict hero is a shared component — see components.js Components.renderTodayVerdict
 
 // ── 3-signal mini gauge (bottom of hero) ──────────────────────────────────
+// V3.33.0 — index Zone B「產業趨勢」mini (replaces dead Narrative 焦點).
+// Reads data.industry_trend (real finviz trailing perf, V3.29.0). Links to radar.html.
+function renderIndustryMini(data) {
+  const mount = document.getElementById('industry-mini-rows');
+  if (!mount) return;
+  const it = data && data.industry_trend;
+  if (!it || it.status !== 'success' || (!it.leaders?.length && !it.laggards?.length)) {
+    mount.innerHTML = '<span class="text-zinc-500">尚無資料</span>';
+    return;
+  }
+  const isZh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
+  const fmt = (v) => v == null ? '—' : `${v > 0 ? '+' : ''}${v.toFixed(0)}%`;
+  const byWk = (arr, asc) => [...(arr || [])]
+    .filter(r => r.perf_1w != null)
+    .sort((a, b) => asc ? a.perf_1w - b.perf_1w : b.perf_1w - a.perf_1w);
+  const lead = byWk(it.leaders, false).slice(0, 3);
+  const lag = byWk(it.laggards, true).slice(0, 2);
+  const chip = (r, col) => `<span><span style="color:${col}" class="font-bold">${(r.name || '').slice(0, 18)}</span> <span style="color:${col}">${fmt(r.perf_1w)}</span></span>`;
+  const sep = '<span class="text-zinc-700"> · </span>';
+  const leadHtml = lead.map(r => chip(r, '#34d399')).join(sep);
+  const lagHtml = lag.map(r => chip(r, '#f87171')).join(sep);
+  mount.innerHTML =
+    `<div class="flex items-center gap-1 flex-wrap"><span class="text-emerald-500 text-[9px] font-bold mr-1">${isZh ? '領漲' : 'LEAD'}</span>${leadHtml || '<span class="text-zinc-500">—</span>'}</div>` +
+    `<div class="flex items-center gap-1 flex-wrap"><span class="text-red-400 text-[9px] font-bold mr-1">${isZh ? '領跌' : 'LAG'}</span>${lagHtml || '<span class="text-zinc-500">—</span>'}</div>`;
+  const ts = document.getElementById('industry-mini-updated');
+  if (ts) ts.textContent = it._freshness === 'FRESH' ? '🟢 1週' : `${it._cache_age_hr != null ? it._cache_age_hr + 'h' : ''} 1週`;
+}
+
 function renderThreeSignalMini(data) {
   const el = document.getElementById('three-signal-mini');
   if (!el) return;
@@ -938,8 +966,25 @@ function renderMomentumTeaser(momentum, crossSet) {
 function renderFocusTicker(data) {
   const el = document.getElementById('focus-ticker-card');
   if (!el) { return; }
+  const isZh = UI.currentLang === 'zh';
   const tv = data.market?.today_verdict;
   const moms = (data.momentum_screen?.rows) || [];
+
+  // Header + empty-state are rendered as a normal card so Zone B keeps 3 columns
+  // even when no candidate qualifies (was: el.classList.add('hidden') → grid collapse).
+  const header = `
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[9px] font-black uppercase tracking-widest" style="color:#a78bfa">✨ ${isZh ? '今日焦點' : 'TODAY FOCUS'}</span>
+        <span class="text-[9px] text-zinc-500">${isZh ? '三軍同向（AI verdict + 產業 + 動能）' : 'Tri-signal alignment'}</span>
+      </div>`;
+  const emptyState = (msg) => {
+    el.classList.remove('hidden');
+    el.innerHTML = `<div class="focus-ticker-card">${header}
+      <div class="text-[10px] text-zinc-500 leading-snug py-2">${msg}</div></div>`;
+  };
+  const noAlign = isZh ? '今日無三軍同向標的（AI overweight ∩ 動能領先）' : 'No tri-signal alignment today';
+
+  // tv missing → no data at all, hide entirely (Zone B handles 2-col gracefully on true no-data).
   if (!tv || !moms.length) { el.classList.add('hidden'); return; }
 
   const overweightSectors = new Set(
@@ -948,39 +993,51 @@ function renderFocusTicker(data) {
       .map(a => SECTOR_TO_GICS_IDX[a.sector] || '')
       .filter(Boolean)
   );
-  if (!overweightSectors.size) { el.classList.add('hidden'); return; }
+  if (!overweightSectors.size) { emptyState(noAlign); return; }
 
   const candidates = moms
     .filter(r => overweightSectors.has(r.sector))
     .filter(r => r.label === 'STRONGLY_BULLISH' || r.label === 'BULLISH')
-    .slice(0, 20);
-  if (!candidates.length) { el.classList.add('hidden'); return; }
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 3);
+  if (!candidates.length) { emptyState(noAlign); return; }
 
-  const pick = candidates.reduce((best, r) => (r.score || 0) > (best.score || 0) ? r : best, candidates[0]);
+  // Overheat guard — surface (not hide) late-stage / parabolic names so the user
+  // reads "focus" as "the market is telling a story here", not "enter now".
+  const isOverheated = (r) =>
+    (r.rsi_14 != null && r.rsi_14 >= 80) ||
+    r.rsi_zone === 'overbought' ||
+    r.stage === 'Stage 3 top';
 
-  const isZh = UI.currentLang === 'zh';
-  const sectorName = pick.sector || '';
-  // Defence-in-depth: tickers are A-Z0-9.- in our universe; strip anything else
-  // before splicing into the inline onclick string. The data fields are still
-  // escaped via UI.escapeHTML for HTML attribute / text contexts.
-  const safeTicker = String(pick.ticker || '').replace(/[^A-Za-z0-9.\-]/g, '');
+  const rows = candidates.map(r => {
+    // Defence-in-depth: tickers are A-Z0-9.- in our universe; strip anything else
+    // before splicing into the inline onclick string. Data fields still escaped
+    // via UI.escapeHTML for HTML attribute / text contexts.
+    const safeTicker = String(r.ticker || '').replace(/[^A-Za-z0-9.\-]/g, '');
+    const hot = isOverheated(r);
+    const hotPill = hot
+      ? `<span class="focus-overheated-pill" title="${isZh ? 'RSI 高 / 後段，避免追高' : 'High RSI / late-stage — avoid chasing'}">${isZh ? '過熱' : 'OVERHEATED'}</span>`
+      : '';
+    return `
+      <div class="flex items-baseline gap-2.5 flex-wrap py-1 ${hot ? 'opacity-70' : ''}">
+        <span class="text-base font-black tracking-tight" style="color:var(--text-card-title)">${UI.escapeHTML(safeTicker)}</span>
+        <span class="text-[10px] text-zinc-500 font-mono">$${r.price ? Number(r.price).toFixed(2) : '—'}</span>
+        <span class="text-[10px] font-mono" style="color:#a78bfa">score ${UI.escapeHTML(r.score ?? '—')}</span>
+        ${r.rsi_14 != null ? `<span class="text-[9px] font-mono ${hot ? 'text-amber-500' : 'text-zinc-600'}">RSI ${Number(r.rsi_14).toFixed(0)}</span>` : ''}
+        ${hotPill}
+        <button onclick="window.AnalyzeQueue && window.AnalyzeQueue.enqueue('${safeTicker}')"
+                class="ml-auto text-[9px] font-black px-2 py-1 rounded border transition-all hover:border-violet-400"
+                style="border-color:var(--border);color:var(--text-muted)">
+          ${isZh ? '查看分析' : 'VIEW'}
+        </button>
+      </div>`;
+  }).join('');
+
   el.classList.remove('hidden');
   el.innerHTML = `
-    <div class="focus-ticker-card">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="text-[9px] font-black uppercase tracking-widest" style="color:#a78bfa">✨ ${isZh ? '今日焦點' : 'TODAY FOCUS'}</span>
-        <span class="text-[9px] text-zinc-500">${isZh ? '三軍同向（AI verdict + 產業 + 動能）' : 'Tri-signal alignment'}</span>
-      </div>
-      <div class="flex items-baseline gap-3 flex-wrap">
-        <span class="text-lg font-black tracking-tight" style="color:var(--text-card-title)">${UI.escapeHTML(safeTicker)}</span>
-        <span class="text-[10px] text-zinc-500 font-mono">$${pick.price ? Number(pick.price).toFixed(2) : '—'}</span>
-        <span class="text-[10px] font-mono" style="color:#a78bfa">score ${UI.escapeHTML(pick.score ?? '—')}</span>
-        <button onclick="window.AnalyzeQueue && window.AnalyzeQueue.enqueue('${safeTicker}')"
-                class="ml-auto text-[9px] font-black px-2 py-1 rounded" style="background:#a78bfa;color:#fff">
-          ${isZh ? '加入佇列' : 'ENQUEUE'}
-        </button>
-      </div>
-      <div class="text-[10px] text-zinc-500 mt-1 leading-snug">${UI.escapeHTML(sectorName)} · ${isZh ? '來自 AI overweight 產業的動能領先股' : 'Momentum leader in an AI-overweight sector'}</div>
+    <div class="focus-ticker-card">${header}
+      <div class="divide-y divide-zinc-200/10 dark:divide-zinc-800/40">${rows}</div>
+      <div class="text-[9px] text-zinc-500 mt-2 leading-snug">${isZh ? 'AI overweight 產業的動能領先股 · 焦點非買進訊號' : 'Momentum leaders in AI-overweight sectors · focus ≠ buy signal'}</div>
     </div>`;
 }
 
@@ -998,6 +1055,54 @@ function computeCrossSignalSet(data) {
 }
 
 // ── Dashboard Update ───────────────────────────────────────────────────────
+// ── V4.5 — Kill-Trigger Monitor banner ─────────────────────────────────
+// Reads kill_triggers.json (written daily by scripts/kill_trigger_monitor.py).
+// Red banner when any Red Team kill condition TRIGGERED; amber strip when
+// armed/manual conditions expire within 3 days. Hidden otherwise.
+async function renderKillTriggers() {
+  const host = document.getElementById('kill-trigger-banner');
+  if (!host) return;
+  let kt = null;
+  try {
+    const r = await fetch('kill_triggers.json?t=' + Date.now());
+    if (!r.ok) return;
+    kt = await r.json();
+  } catch (e) { return; }
+  const isZh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
+  const items = kt.items || [];
+  const triggered = items.filter(i => i.status === 'triggered');
+  const expiring = items.filter(i =>
+    (i.status === 'armed' || i.status === 'manual') && i.days_left >= 0 && i.days_left <= 3);
+  if (!triggered.length && !expiring.length) { host.classList.add('hidden'); return; }
+
+  const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const row = it => {
+    const metChecks = (it.checks || []).filter(c => c.met)
+      .map(c => `${esc(c.predicate)} (${c.value})`).join(' · ');
+    const daysLabel = it.status === 'triggered'
+      ? (isZh ? '已觸發' : 'TRIGGERED')
+      : (isZh ? `剩 ${it.days_left} 天` : `${it.days_left}d left`);
+    return `<div class="kt-item kt-${it.status}">
+      <span class="kt-tag">${esc(it.ticker || it.sector || '—')}</span>
+      <span class="kt-cond" title="${esc(it.condition)}">${esc(it.condition)}</span>
+      <span class="kt-days">${daysLabel}</span>
+      ${metChecks ? `<span class="kt-checks">${metChecks}</span>` : ''}
+    </div>`;
+  };
+
+  host.classList.remove('hidden');
+  host.innerHTML = `
+    <div class="kt-banner ${triggered.length ? 'kt-banner-red' : 'kt-banner-amber'}">
+      <div class="kt-header">
+        <span class="kt-title">${triggered.length
+          ? (isZh ? `🔴 推翻條件已觸發 (${triggered.length})` : `🔴 Kill Trigger Fired (${triggered.length})`)
+          : (isZh ? `⏳ 推翻條件即將到期，請人工複核 (${expiring.length})` : `⏳ Kill Conditions Expiring — manual review (${expiring.length})`)}</span>
+        <span class="kt-meta">armed ${kt.summary?.armed ?? 0} · ${isZh ? '人工' : 'manual'} ${kt.summary?.manual ?? 0} · ${esc((kt.as_of || '').slice(0, 16))}</span>
+      </div>
+      <div class="kt-list">${triggered.map(row).join('')}${expiring.slice(0, 6).map(row).join('')}</div>
+    </div>`;
+}
+
 async function updateDashboard() {
   UI.logToUI('Refreshing system synchronization...');
   UI.updateMarketStatus();
@@ -1013,6 +1118,7 @@ async function updateDashboard() {
     renderSectorStatusStrip(data);
     renderBinaryAlertIndex(data.binary_risks);
     renderWarningFlagsIndex(data.market);
+    renderKillTriggers(); // V4.5 — async, reads kill_triggers.json independently
 
     // Layer 3: Deep-dive teasers + M3 focus ticker
     const crossSet = computeCrossSignalSet(data);
@@ -1020,6 +1126,7 @@ async function updateDashboard() {
     renderNewsVerdictsTeaser(data.news);
     renderMomentumTeaser(data.momentum_screen, crossSet);
     renderFocusTicker(data);
+    renderIndustryMini(data);
 
     // Layer 4: Recent Analysis (compact list) — M3 ⭐ badge + V2.19.1 ⚡ watchlist badge
     const condensedGrid = document.getElementById('audit-grid-condensed');

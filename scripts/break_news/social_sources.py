@@ -28,15 +28,22 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 )
 TIMEOUT = int(os.environ.get("BREAK_NEWS_SOCIAL_TIMEOUT_SEC", "12"))
-MAX_TOTAL = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_TOTAL", "80"))
-MAX_PER_SOURCE = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_PER_SOURCE", "20"))
-MAX_PER_QUERY = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_PER_QUERY", "5"))
+# Ceilings raised (was 80/20/5) to lift retail-ticker coverage — the per-sector
+# retail polarity in retail_sector_pulse was mostly null because too few posts
+# reached trending_tickers.py. env still overrides.
+MAX_TOTAL = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_TOTAL", "120"))
+MAX_PER_SOURCE = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_PER_SOURCE", "35"))
+MAX_PER_QUERY = int(os.environ.get("BREAK_NEWS_SOCIAL_MAX_PER_QUERY", "8"))
 TRUTH_SOCIAL_ENABLED = os.environ.get("BREAK_NEWS_TRUTH_SOCIAL_ENABLED", "1").lower() not in ("0", "false", "no")
 TRUTH_SOCIAL_MAX_PER_CYCLE = int(os.environ.get("BREAK_NEWS_TRUTH_SOCIAL_MAX_PER_CYCLE", "10"))
+# StockTwits removed (V3.40.7): unofficial streams API fetched ~35/cycle but
+# only ~5% of items ever cleared the gate to become a primary source — almost
+# pure noise into the Raw stream. Dropped.
 
 DEFAULT_REDDIT_SUBS = [
-    "stocks", "investing", "wallstreetbets", "options",
-    "SecurityAnalysis", "technology", "artificial", "LocalLLaMA",
+    "stocks", "investing", "wallstreetbets", "options", "StockMarket",
+    "Daytrading", "thetagang", "SecurityAnalysis", "technology",
+    "artificial", "LocalLLaMA",
 ]
 DEFAULT_BLUESKY_QUERIES = [
     "$NVDA OR Nvidia",

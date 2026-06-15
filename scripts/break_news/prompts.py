@@ -4,67 +4,128 @@ from __future__ import annotations
 import json
 from typing import Iterable
 
-SYSTEM_PROMPT = """You are an equity-market analyst commenting on a single
-breaking news item alongside another analyst (different model). Your job is
-to keep the discussion sharp and additive — do NOT restate points the other
-analyst already made.
+PREDICATES = ("BENEFITS_FROM, HEADWIND_FROM, COMPETES_WITH, SUPPLIES_TO, "
+              "CUSTOMER_OF, CO_DEVELOPS_WITH, MENTIONED_IN, CATALYST_FOR")
 
-Output rules — STRICT:
-1. Reply with a SINGLE fenced ```json``` block. No prose outside the block.
-2. The block MUST match this schema:
-   {
-     "commentary": str — Traditional Chinese (繁體中文), 80-200 字, 可含 markdown 粗體。
-                         **必須**用繁體中文書寫，不可用簡體中文或英文段落。
-                         可在句中保留專有名詞 (NVDA, HBM3e, Blackwell, N3P, GLP-1) 不翻譯。
-     "bull_points": [str, ...]   # 你方看法中的**正方論點**(看多 / 利多), 1-3 條,
-                                 # 每條 ≤30 字繁體中文, 條列短句, 不要重複 commentary 原文。
-     "bear_points": [str, ...]   # **反方論點**(看空 / 風險 / 利空), 1-3 條, 同上格式。
-     "final_take":  str           # 你個人的最終一句話結論 (繁體中文, ≤30字),
-                                 # 例如「看多但需觀察Q2訂單兌現」。
-     "entities": {
-       "tickers":      [str, ...],   # US-listed root tickers, UPPERCASE English
-       "sectors":      [str, ...],   # GICS-style sector names in English
-       "themes":       [str, ...],   # English keys: "AI capex", "GLP-1", "HBM3e"
-       "tech_keywords":[str, ...]    # English tech-nodes: HBM3e, N3P, CoWoS-L, Blackwell
-     },
-     "relations": [
-       {"subject": "ticker:NVDA", "predicate": "BENEFITS_FROM", "object": "narrative:hbm3e"}
-     ],
-     "done": bool,             # true ONLY if no new substantive point to add
-     "confidence": float (0-1),
-     "rationale_short": str — Traditional Chinese (繁體中文), <= 40 字
-   }
-3. CRITICAL: `commentary` / `bull_points` / `bear_points` / `final_take` /
-   `rationale_short` 必須是**繁體中文 (台灣)**。
-   `entities` 的內容 (ticker / sector / theme / tech_keyword) 維持英文 — 它們是
-   knowledge graph 的 canonical ID，混入中文會破壞 dedup。`relations` 的
-   `subject` / `predicate` / `object` 也維持英文。
-4. `bull_points` / `bear_points` 是給下游 UI 摘要展示用的**短條列**, 必須
-   獨立可讀 — 不可以是「同上」/「見 commentary」這種引用。即使你整體偏空
-   也要至少給出 1 條 bull_points (代表方論點), 反之亦然 — 平衡兩面觀點。
-5. In Round 2 and Round 3, prioritize adding second-order effects, customer-supplier/competitor/co-development relations, or checking contradictions. Set `done: true` ONLY if the other analyst has covered all relevant angles AND you have no fresh angle to add. Otherwise add a NEW point not already raised in the prior thread.
-6. Predicates must be one of: BENEFITS_FROM, HEADWIND_FROM, COMPETES_WITH,
-   SUPPLIES_TO, CUSTOMER_OF, CO_DEVELOPS_WITH, MENTIONED_IN, CATALYST_FOR.
+SYSTEM_PROMPT = f"""You are an equity analyst giving an INDEPENDENT take on one
+breaking news item. Another analyst (different model) evaluates the same item in
+parallel — you cannot see each other. Disagreement is welcome.
+
+Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
+{{
+  "commentary": str,       // 繁體中文(台灣) 80-150 字，市場/產業/個股影響。專有名詞 (NVDA, HBM3e) 保留英文
+  "bull_points": [str],    // 利多論點 1-3 條，每條 ≤30 字繁中，獨立可讀（不可寫「見 commentary」）
+  "bear_points": [str],    // 利空/風險 1-3 條，同格式。整體偏空仍要給 ≥1 條 bull_points，反之亦然
+  "final_take": str,       // 一句話結論，繁中 ≤30 字，例「看多但需觀察Q2訂單兌現」
+  "entities": {{
+    "tickers": [str],      // US-listed root tickers, UPPERCASE English
+    "sectors": [str],      // GICS-style sector names, English
+    "themes": [str],       // English keys: "AI capex", "GLP-1", "HBM3e"
+    "tech_keywords": [str] // English tech-nodes: HBM3e, N3P, CoWoS-L, Blackwell
+  }},
+  "relations": [{{"subject": "ticker:NVDA", "predicate": "BENEFITS_FROM", "object": "narrative:hbm3e"}}],
+  "done": false,
+  "confidence": float 0-1,
+  "rationale_short": str   // 繁中 ≤40 字
+}}
+Rules: 中文欄位必須繁體中文(台灣)；`entities` 與 `relations` 內容維持英文 —
+它們是 knowledge graph canonical ID，混入中文會破壞 dedup。
+Predicates must be one of: {PREDICATES}.
+"""
+
+REBUTTAL_SYSTEM_PROMPT = f"""You are in a focused rebuttal round of an equity-news
+debate. You will see the exact divergence point and the opponent's stance. Either
+CHALLENGE it with ONE new specific point (second-order effect, named supply-chain
+node, contra-evidence) or CONCEDE if the opponent's view is stronger. Do NOT
+restate prior points; do NOT re-extract entities (round 1 already did).
+
+Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
+{{
+  "commentary": str,       // 繁體中文 ≤60 字，只寫新論點或讓步理由
+  "stance": "challenge" | "concede",
+  "relations": [],         // ONLY relations NOT already in the known list; same format
+                           // {{"subject":"ticker:X","predicate":"...","object":"narrative:y"}}
+  "done": bool,            // true = 無新實質論點，可收斂
+  "confidence": float 0-1, // 對自己整體立場的信心
+  "rationale_short": str   // 繁中 ≤20 字
+}}
+Predicates must be one of: {PREDICATES}.
+"""
+
+BRIEF_SYSTEM_PROMPT = """You are a market strategist writing a short situational
+brief (市場現況導讀) for a human investor, from aggregated break-news debate
+output. You see verdict tallies, hot event clusters (echo_count = how many
+independent pushes reported the same story), and top closed-debate conclusions.
+Weigh clusters by echo_count x |score|; multi-source stories matter more than
+single-push noise. Do NOT invent events not present in the input.
+
+Reply with a SINGLE fenced ```json``` block, no prose outside. Schema:
+{
+  "regime": str,              // ≤12 字繁中標籤，例「風險偏好回升」「避險主導」
+  "regime_confidence": float, // 0-1
+  "brief_text": str,          // 繁體中文(台灣) 200-300 字導讀：當前市場敘事、主導力量、轉折觀察。專有名詞 (NVDA, FOMC) 保留英文
+  "drivers": [str],           // 主導事件 2-5 條，每條 ≤30 字繁中
+  "bull_pressure": [str],     // 多方力量 1-4 條，≤25 字
+  "bear_pressure": [str],     // 空方力量 1-4 條，≤25 字
+  "watch": [str]              // 後續觀察點 2-5 條，≤30 字
+}
+中文欄位必須繁體中文(台灣)。
 """
 
 
-def compact_thread_formatter(thread: list[dict]) -> str:
-    """V4 Slide-Window Thread Compression.
-    Returns a string containing the current kg_state and the raw last comment from each agent."""
-    if not thread:
-        return "(no prior comments)"
+def brief_user_prompt(ctx: dict) -> str:
+    """Compact context block for the market brief — pre-aggregated, the LLM
+    only synthesizes prose. Keep it lean: top clusters + top debates only."""
+    lines = [f"WINDOW: last {ctx.get('window_hours')}h",
+             f"VERDICT TALLY: {json.dumps(ctx.get('verdict_tally') or {}, ensure_ascii=False)}",
+             f"NEWS TYPE MIX: {json.dumps(ctx.get('news_type_mix') or {}, ensure_ascii=False)}",
+             "", "HOT EVENT CLUSTERS (multi-source stories, by heat):"]
+    for c in ctx.get("hot_clusters") or []:
+        lines.append(
+            f"- [{c.get('news_type')}] x{c.get('echo_count')} srcs={len(c.get('sources') or [])} "
+            f"score={c.get('best_score')} tickers={','.join((c.get('tickers') or [])[:5]) or '-'} :: "
+            f"{c.get('rep_headline')}")
+    lines.append("")
+    lines.append("TOP CLOSED DEBATES (by impact):")
+    for d in ctx.get("top_debates") or []:
+        take = (d.get("final_take") or "").strip()
+        lines.append(
+            f"- [{d.get('verdict')}] {d.get('headline')}"
+            + (f" → {take}" if take else ""))
+    lines.append("")
+    lines.append("Write the situational brief JSON as specified in your system prompt.")
+    return "\n".join(lines)
 
-    # 1. 提取每個 Agent 最後一條 comment 原文 (確保 A/B stance 都在 context)
-    latest_comments: dict[str, dict] = {}
+
+def _comment_label(c: dict, default: str = "?") -> str:
+    """Return a string label for a thread comment. `agent_role_label` may be a
+    `{en,zh}` dict (debater._role_for); fall back to `agent` (model name) when
+    the label is missing or not a string."""
+    label = c.get("agent_role_label")
+    if isinstance(label, dict):
+        label = label.get("en") or label.get("zh")
+    if not isinstance(label, str) or not label:
+        label = c.get("agent") or default
+    return str(label)
+
+
+def _latest_by_side(thread: list[dict]) -> dict[str, dict]:
+    """Latest comment per side ('A' / 'B')."""
+    out: dict[str, dict] = {}
     for c in thread:
-        agent = c.get("agent_role_label", c.get("agent", "?")).upper()
-        latest_comments[agent] = c
+        s = c.get("side")
+        if s:
+            out[s] = c
+    return out
 
-    # 2. 建立 kg_state
+
+def _known_state_lines(thread: list[dict]) -> str:
+    """One-line compact known entities + relations — dedup hint for rebuttal,
+    so agents never re-list what round 1 already extracted."""
     tickers: set[str] = set()
     themes: set[str] = set()
-    relations: list[dict] = []
-
+    rel_keys: list[str] = []
+    seen = set()
     for c in thread:
         parsed = c.get("parsed") or {}
         ent = parsed.get("entities") or {}
@@ -72,49 +133,13 @@ def compact_thread_formatter(thread: list[dict]) -> str:
         themes.update(t for t in (ent.get("themes") or []) if t)
         for r in (parsed.get("relations") or []):
             if isinstance(r, dict) and r.get("subject") and r.get("predicate") and r.get("object"):
-                relations.append(r)
-
-    deduped_rels = []
-    seen_rels = set()
-    for r in relations:
-        k = f"{r.get('subject')}|{r.get('predicate')}|{r.get('object')}"
-        if k not in seen_rels:
-            seen_rels.add(k)
-            deduped_rels.append({
-                "subject": r.get("subject"),
-                "predicate": r.get("predicate"),
-                "object": r.get("object")
-            })
-
-    recent_claims = []
-    for agent, c in sorted(latest_comments.items()):
-        parsed = c.get("parsed") or {}
-        recent_claims.append(
-            f"{agent} (Round {c.get('round')}) take: {parsed.get('final_take') or ''} "
-            f"[confidence: {parsed.get('confidence', 'N/A')}]"
-        )
-
-    kg_state = {
-        "known_tickers": sorted(tickers),
-        "known_themes": sorted(themes),
-        "discovered_relations": deduped_rels,
-        "recent_claims": recent_claims,
-        "unresolved_gaps_hint": "Please identify any contradiction between A and B, or missing second-order / supply-chain links."
-    }
-
-    # 3. 組合 slide-window stance text
-    parts = []
-    parts.append("CURRENT KNOWLEDGE GRAPH STATE (kg_state):")
-    parts.append(json.dumps(kg_state, ensure_ascii=False, indent=2))
-    parts.append("\nLAST COMMENT RAW TEXT FROM EACH ANALYST (SLIDING WINDOW):")
-
-    for agent, c in sorted(latest_comments.items()):
-        parsed = c.get("parsed") or {}
-        raw_text = parsed.get("commentary") or ""
-        rnd = c.get("round")
-        parts.append(f"--- [{agent} · Round {rnd}] ---\n{raw_text}")
-
-    return "\n\n".join(parts)
+                k = f"{r['subject']} {r['predicate']} {r['object']}"
+                if k not in seen:
+                    seen.add(k)
+                    rel_keys.append(k)
+    return (f"KNOWN entities (do NOT re-extract): tickers={sorted(tickers)}; "
+            f"themes={sorted(themes)}\n"
+            f"KNOWN relations (do NOT repeat): {'; '.join(rel_keys) or '(none)'}")
 
 
 def _role_text(role) -> str:
@@ -124,11 +149,31 @@ def _role_text(role) -> str:
     return str(role)
 
 
+def _escalation_block(item: dict) -> str:
+    """Cluster-escalation context: prior conclusion of the same event cluster,
+    so the follow-up debate argues only the increment (more sources / new
+    details), not the whole story again."""
+    cl = item.get("cluster") or {}
+    prior = cl.get("prior_summary") or {}
+    if not cl.get("escalated") or not prior:
+        return ""
+    return f"""
+PRIOR DEBATE — SAME EVENT CLUSTER (echo x{cl.get('echo_count')}, {len(cl.get('sources') or [])} sources)
+  prior_verdict    = {prior.get('consensus_verdict')}
+  prior_final_take = {prior.get('final_take')}
+This story keeps accumulating coverage. Do NOT re-litigate the prior round.
+Focus ONLY on what is NEW or CHANGED: fresh details in this headline, the
+significance of the growing coverage itself, second-order effects not yet
+covered. If nothing material is new, say so and keep confidence near prior.
+"""
+
+
 def opener_user_prompt(item: dict, role) -> str:
     triage = item.get("triage") or {}
     src = item.get("source") or {}
     role = _role_text(role)
     return f"""You are {role}.
+{_escalation_block(item)}
 
 NEWS ITEM
 ---------
@@ -145,35 +190,55 @@ Pre-triage signal (keyword classifier, not authoritative):
   bull_case_snap = {triage.get('bull_case')}
   bear_case_snap = {triage.get('bear_case')}
 
-You are commenting FIRST. Give your independent take on market / sector /
-individual-stock implications. Identify the tickers, sectors, themes, and
-specific tech-keywords (e.g. HBM3e, N3P, CoWoS-L, GLP-1, Blackwell) that
-this news touches. Set `done: false` (you opened the thread).
+Give your independent take on market / sector / individual-stock implications.
+Identify the tickers, sectors, themes, and specific tech-keywords (e.g. HBM3e,
+N3P, CoWoS-L, GLP-1, Blackwell) that this news touches. Set `done: false`
+(this is the opening round; the other analyst evaluates blind in parallel).
 
 Respond with the single JSON block as specified in your system prompt.
 """
 
 
-def followup_user_prompt(item: dict, thread: list[dict], role) -> str:
-    src = item.get("source") or {}
+def _stance_block(parsed: dict, full: bool = False) -> str:
+    """Compact one-line JSON of a side's stance. `full` adds bull/bear +
+    commentary head (used for the opponent; own side only needs the take)."""
+    out = {
+        "final_take": parsed.get("final_take"),
+        "confidence": parsed.get("confidence"),
+        "stance": parsed.get("stance"),
+    }
+    if full:
+        out["bull_points"] = parsed.get("bull_points")
+        out["bear_points"] = parsed.get("bear_points")
+        commentary = (parsed.get("commentary") or "").strip()
+        if commentary:
+            out["commentary"] = commentary[:120]
+    out = {k: v for k, v in out.items() if v not in (None, [], "")}
+    return json.dumps(out, ensure_ascii=False)
+
+
+def rebuttal_user_prompt(item: dict, thread: list[dict], role, side: str,
+                         divergence_note: str) -> str:
+    """Slim round-2+ prompt: headline + known state + exact divergence point +
+    both stances. No news body re-paste, no triage block, no full transcript."""
     role = _role_text(role)
+    latest = _latest_by_side(thread)
+    own = (latest.get(side) or {}).get("parsed") or {}
+    opp_side = "B" if side == "A" else "A"
+    opp = (latest.get(opp_side) or {}).get("parsed") or {}
     return f"""You are {role}.
 
-NEWS ITEM
----------
-Headline : {item.get('headline')}
-Source   : {src.get('name')} ({src.get('credibility')})
-URL      : {src.get('url')}
-Summary  : {item.get('raw_summary')}
+NEWS: {item.get('headline')}
 
-PRIOR DISCUSSION (COMPRESSED SLIDING WINDOW)
---------------------------------------------
-{compact_thread_formatter(thread)}
+{_known_state_lines(thread)}
 
-Add ONE genuinely new angle the prior thread missed (different ticker, a
-2nd-order effect, a contra-argument, a specific named supply-chain node).
-If you cannot find a new substantive point, set `done: true` and explain why
-in `rationale_short`. Do NOT restate prior points.
+DIVERGENCE POINT: {divergence_note}
+
+YOUR prior stance: {_stance_block(own)}
+OPPONENT (Analyst-{opp_side}) stance: {_stance_block(opp, full=True)}
+
+Challenge the opponent on the divergence point with ONE new specific argument,
+or concede. If nothing substantive remains, set `done: true`.
 
 Respond with the single JSON block as specified in your system prompt.
 """
@@ -243,7 +308,7 @@ def build_summary_block(thread: list[dict]) -> dict:
 
     for c in thread:
         rnd = c.get("round", 0)
-        agent = c.get("agent_role_label", c.get("agent", "Unknown"))
+        agent = _comment_label(c, default="Unknown")
         p = c.get("parsed") or {}
 
         # 收集 entities

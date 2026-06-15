@@ -28,6 +28,8 @@ from datetime import date, datetime, timedelta
 
 import requests
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 CACHE_DIR = os.path.join(BASE_DIR, "skills", "earnings-analyst", "cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -280,50 +282,70 @@ def _resolve_transcript_q(ticker: str, last_earnings_date: str,
     return None
 
 
-def fetch_bundle(ticker: str) -> dict:
-    """Run all FMP calls for one ticker. Returns the raw bundle ready to write."""
-    print(f"[fetch] {ticker}: profile / income / balance / cashflow ...", file=sys.stderr)
-
+def fetch_bundle(ticker: str, income: list | None = None) -> dict:
+    """Run all FMP calls for one ticker (parallel batch). Returns the raw bundle ready to write.
+    `income` lets main() pass its pre-fetched quarterly income-statement to avoid a duplicate call."""
     # profile via skills/_shared/company_context (24h cache, shared with sector + protocol PEER_BUNDLE)
     profile = _shared_get_profile(ticker) or {}
-    income = _fmp_get("/stable/income-statement",
-                      {"symbol": ticker, "period": "quarter", "limit": 8}) or []
+
+    calls = {
+        "income":           ("/stable/income-statement",        {"symbol": ticker, "period": "quarter", "limit": 8}),
+        "balance":          ("/stable/balance-sheet-statement", {"symbol": ticker, "period": "quarter", "limit": 8}),
+        "cashflow":         ("/stable/cash-flow-statement",     {"symbol": ticker, "period": "quarter", "limit": 8}),
+        "km_ttm":           ("/stable/key-metrics-ttm",         {"symbol": ticker}),
+        "rat_ttm":          ("/stable/ratios-ttm",              {"symbol": ticker}),
+        "growth":           ("/stable/financial-growth",        {"symbol": ticker, "period": "annual", "limit": 5}),
+        "ev":               ("/stable/enterprise-values",       {"symbol": ticker, "period": "quarter", "limit": 1}),
+        "dcf":              ("/stable/discounted-cash-flow",    {"symbol": ticker}),
+        "dcf_levered":      ("/stable/levered-discounted-cash-flow", {"symbol": ticker}),
+        "pt":               ("/stable/price-target-consensus",  {"symbol": ticker}),
+        "ratings":          ("/stable/ratings-snapshot",        {"symbol": ticker}),
+        "grades":           ("/stable/grades-historical",       {"symbol": ticker, "limit": 6}),
+        "pt_news":          ("/stable/price-target-news",       {"symbol": ticker, "limit": 8}),
+        "rating_history":   ("/stable/rating-historical",       {"symbol": ticker, "limit": 12}),
+        "grades_summary":   ("/stable/grades-summary",          {"symbol": ticker}),
+        "grades_news":      ("/stable/grades-news",             {"symbol": ticker, "limit": 10}),
+        "earn_surprises":   ("/stable/earnings",                {"symbol": ticker, "limit": 8}),
+        "seg_product":      ("/stable/revenue-product-segmentation",    {"symbol": ticker}),
+        "seg_geographic":   ("/stable/revenue-geographic-segmentation", {"symbol": ticker}),
+        "dividends":        ("/stable/dividends",               {"symbol": ticker, "limit": 8}),
+        # V1.87 — annual analyst estimates (forward EPS / revenue / EBITDA consensus)
+        "annual_estimates": ("/stable/analyst-estimates",       {"symbol": ticker, "period": "annual", "limit": 3}),
+    }
+    if income:
+        del calls["income"]
+    print(f"[fetch] {ticker}: {len(calls)} FMP calls (parallel ×8) ...", file=sys.stderr)
+    results = {}
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futs = {ex.submit(_fmp_get, path, params): key for key, (path, params) in calls.items()}
+        for fut in as_completed(futs):
+            results[futs[fut]] = fut.result()
+    if income:
+        results["income"] = income
+
+    income = results.get("income") or []
     if not income:
         sys.exit(f"[ERROR] No quarterly income-statement returned for {ticker}")
-    balance = _fmp_get("/stable/balance-sheet-statement",
-                       {"symbol": ticker, "period": "quarter", "limit": 8}) or []
-    cashflow = _fmp_get("/stable/cash-flow-statement",
-                        {"symbol": ticker, "period": "quarter", "limit": 8}) or []
-
-    print(f"[fetch] {ticker}: ttm metrics / ratios / growth / EV ...", file=sys.stderr)
-    km_ttm_raw = _fmp_get("/stable/key-metrics-ttm", {"symbol": ticker}) or [{}]
-    rat_ttm_raw = _fmp_get("/stable/ratios-ttm", {"symbol": ticker}) or [{}]
-    growth = _fmp_get("/stable/financial-growth",
-                      {"symbol": ticker, "period": "annual", "limit": 5}) or []
-    ev_raw = _fmp_get("/stable/enterprise-values",
-                      {"symbol": ticker, "period": "quarter", "limit": 1}) or [{}]
-
-    print(f"[fetch] {ticker}: DCF / price-target / ratings / grades ...", file=sys.stderr)
-    dcf          = _fmp_get("/stable/discounted-cash-flow", {"symbol": ticker}) or [{}]
-    dcf_levered  = _fmp_get("/stable/levered-discounted-cash-flow", {"symbol": ticker}) or [{}]
-    pt           = _fmp_get("/stable/price-target-consensus", {"symbol": ticker}) or [{}]
-    ratings      = _fmp_get("/stable/ratings-snapshot", {"symbol": ticker}) or [{}]
-    grades       = _fmp_get("/stable/grades-historical", {"symbol": ticker, "limit": 6}) or []
-
-    print(f"[fetch] {ticker}: pt-news / rating-history / grades-ext ...", file=sys.stderr)
-    pt_news_raw      = _fmp_get("/stable/price-target-news",  {"symbol": ticker, "limit": 8}) or []
-    rating_history   = _fmp_get("/stable/rating-historical",  {"symbol": ticker, "limit": 12}) or []
-    grades_summary_r = _fmp_get("/stable/grades-summary",     {"symbol": ticker}) or [{}]
-    grades_news_raw  = _fmp_get("/stable/grades-news",        {"symbol": ticker, "limit": 10}) or []
-
-    print(f"[fetch] {ticker}: surprise / segments / dividends / transcript ...", file=sys.stderr)
-    earn_surprises = _fmp_get("/stable/earnings", {"symbol": ticker, "limit": 8}) or []
-    seg_product    = _fmp_get("/stable/revenue-product-segmentation", {"symbol": ticker}) or []
-    seg_geographic = _fmp_get("/stable/revenue-geographic-segmentation", {"symbol": ticker}) or []
-    dividends      = _fmp_get("/stable/dividends", {"symbol": ticker, "limit": 8}) or []
-    # V1.87 — annual analyst estimates (forward EPS / revenue / EBITDA consensus)
-    annual_estimates = _fmp_get("/stable/analyst-estimates",
-                                {"symbol": ticker, "period": "annual", "limit": 3}) or []
+    balance          = results.get("balance") or []
+    cashflow         = results.get("cashflow") or []
+    km_ttm_raw       = results.get("km_ttm") or [{}]
+    rat_ttm_raw      = results.get("rat_ttm") or [{}]
+    growth           = results.get("growth") or []
+    ev_raw           = results.get("ev") or [{}]
+    dcf              = results.get("dcf") or [{}]
+    dcf_levered      = results.get("dcf_levered") or [{}]
+    pt               = results.get("pt") or [{}]
+    ratings          = results.get("ratings") or [{}]
+    grades           = results.get("grades") or []
+    pt_news_raw      = results.get("pt_news") or []
+    rating_history   = results.get("rating_history") or []
+    grades_summary_r = results.get("grades_summary") or [{}]
+    grades_news_raw  = results.get("grades_news") or []
+    earn_surprises   = results.get("earn_surprises") or []
+    seg_product      = results.get("seg_product") or []
+    seg_geographic   = results.get("seg_geographic") or []
+    dividends        = results.get("dividends") or []
+    annual_estimates = results.get("annual_estimates") or []
 
     last_earnings_date = income[0].get("date")
 
@@ -457,9 +479,10 @@ def main() -> int:
 
     ticker = args.ticker
 
-    # Step 0: lightweight call to discover last_earnings_date
+    # Step 0: discover last_earnings_date. Fetch the full 8Q up front so a cache
+    # miss can reuse it inside fetch_bundle (no duplicate income-statement call).
     pre = _fmp_get("/stable/income-statement",
-                   {"symbol": ticker, "period": "quarter", "limit": 1})
+                   {"symbol": ticker, "period": "quarter", "limit": 8})
     if not pre:
         sys.exit(f"[ERROR] {ticker}: no income-statement available — invalid ticker?")
     latest_date = pre[0].get("date")
@@ -474,8 +497,8 @@ def main() -> int:
                   f"(last_earnings_date={latest_date})", file=sys.stderr)
             return 0
 
-    # Step 2: full fetch
-    bundle = fetch_bundle(ticker)
+    # Step 2: full fetch (reuses pre-fetched income)
+    bundle = fetch_bundle(ticker, income=pre)
 
     out_path = os.path.join(CACHE_DIR, f"{ticker}_{latest_date}.json")
 

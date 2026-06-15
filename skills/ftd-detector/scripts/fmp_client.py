@@ -17,6 +17,11 @@ import sys
 import time
 from typing import Optional
 
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from scripts._shared import fmp_pool  # noqa: E402
+
 try:
     import requests
 except ImportError:
@@ -92,38 +97,17 @@ class FMPClient:
         if params is None:
             params = {}
 
-        elapsed = time.time() - self.last_call_time
-        if elapsed < self.RATE_LIMIT_DELAY:
-            time.sleep(self.RATE_LIMIT_DELAY - elapsed)
-
-        try:
-            response = self.session.get(url, params=params, timeout=30)
-            self.last_call_time = time.time()
-            self.api_calls_made += 1
-
-            if response.status_code == 200:
-                self.retry_count = 0
-                return response.json()
-            elif response.status_code == 429:
-                self.retry_count += 1
-                if self.retry_count <= self.max_retries:
-                    print("WARNING: Rate limit exceeded. Waiting 60 seconds...", file=sys.stderr)
-                    time.sleep(60)
-                    return self._rate_limited_get(url, params, quiet=quiet)
-                else:
-                    print("ERROR: Daily API rate limit reached.", file=sys.stderr)
-                    self.rate_limit_reached = True
-                    return None
-            else:
-                if not quiet:
-                    print(
-                        f"ERROR: API request failed: {response.status_code} - {response.text[:200]}",
-                        file=sys.stderr,
-                    )
-                return None
-        except requests.exceptions.RequestException as e:
-            print(f"ERROR: Request exception: {e}", file=sys.stderr)
-            return None
+        # Rate pacing + 429 backoff handled by the central pool (shared 250/min
+        # budget). apikey is injected by get_url (this client otherwise sets it
+        # as a session header, which the pool's transport does not carry).
+        self.api_calls_made += 1
+        data = fmp_pool.get_url(url, params, timeout=30, api_key=self.api_key)
+        if data is not None:
+            self.retry_count = 0
+            return data
+        if not quiet:
+            print("ERROR: FMP request failed (network/auth)", file=sys.stderr)
+        return None
 
     def _request_with_fallback(self, endpoint_key, symbols_str, extra_params=None):
         """Try stable endpoint first, fall back to v3 for legacy users."""

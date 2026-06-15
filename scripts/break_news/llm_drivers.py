@@ -21,6 +21,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -51,6 +52,53 @@ class LLMResult:
     latency_ms: int
     parse_status: str       # ok | fallback | failed
     error: str | None       # error message if exit_code != 0 / timeout / etc.
+    # Token accounting (best-effort; 0 when the CLI envelope omits usage).
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_read_tokens: int = 0
+    cache_write_tokens: int = 0
+    cost_usd: float = 0.0
+
+
+def _usage_from_envelope(envelope: dict) -> dict:
+    """Pull token counts + cost out of a claude `--output-format json` envelope
+    (or any dict carrying a `usage` block). Missing keys → 0."""
+    if not isinstance(envelope, dict):
+        return {}
+    u = envelope.get("usage") or {}
+    if not isinstance(u, dict):
+        u = {}
+    return {
+        "input_tokens": int(u.get("input_tokens", 0) or 0),
+        "output_tokens": int(u.get("output_tokens", 0) or 0),
+        "cache_read_tokens": int(u.get("cache_read_input_tokens", 0) or 0),
+        "cache_write_tokens": int(u.get("cache_creation_input_tokens", 0) or 0),
+        "cost_usd": float(envelope.get("total_cost_usd", 0.0) or 0.0),
+    }
+
+
+def parse_stream_log_usage(log_path: str) -> dict:
+    """Scan a claude `--output-format stream-json` protocol log and return the
+    token usage from its terminal `result` event. {} when none found.
+
+    Used by the dashboard protocol runner (sector / news / invest) to attribute
+    per-run tokens to the model that produced them."""
+    last_result = None
+    try:
+        with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                line = line.strip()
+                if not line.startswith("{"):
+                    continue
+                try:
+                    ev = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(ev, dict) and ev.get("type") == "result":
+                    last_result = ev
+    except OSError:
+        return {}
+    return _usage_from_envelope(last_result) if last_result else {}
 
 
 def _extract_json(text: str) -> tuple[dict | None, str]:
@@ -120,10 +168,12 @@ def run_claude(system_prompt: str, user_prompt: str,
     ]
     rc, out, err, latency, error = _run_cli(cmd, timeout)
     text = ""
+    usage: dict = {}
     if rc == 0 and out:
         try:
             envelope = json.loads(out)
             text = envelope.get("result") or ""
+            usage = _usage_from_envelope(envelope)
         except json.JSONDecodeError:
             # Some claude CLI runs prefix lines (e.g. login banner); try the last
             # JSON-looking line.
@@ -133,6 +183,7 @@ def run_claude(system_prompt: str, user_prompt: str,
                     try:
                         envelope = json.loads(line)
                         text = envelope.get("result") or ""
+                        usage = _usage_from_envelope(envelope)
                         break
                     except json.JSONDecodeError:
                         continue
@@ -146,6 +197,7 @@ def run_claude(system_prompt: str, user_prompt: str,
         latency_ms=latency,
         parse_status=status,
         error=error or (err[:300] if rc != 0 and err else None),
+        **usage,
     )
 
 
@@ -178,10 +230,18 @@ def run_codex(system_prompt: str, user_prompt: str,
               timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
     """Run Codex non-interactively and parse its JSONL event stream.
 
-    `codex exec --json` emits JSONL events; the final assistant text is in the
-    last `item.completed` event whose item has `type=agent_message`.
+    `codex exec --json` emits JSONL events. Recent builds put the final
+    assistant text in `item.completed.item.text`, while older / alternate
+    builds may use content parts. `--output-last-message` is a second source
+    of truth when the event stream shape changes.
     """
     full_prompt = f"{system_prompt}\n\n---\n\n{user_prompt}"
+    tmp_path = ""
+    try:
+        fd, tmp_path = tempfile.mkstemp(prefix="break_news_codex_", suffix=".txt")
+        os.close(fd)
+    except OSError:
+        tmp_path = ""
     cmd = [
         CODEX_BIN, "exec",
         "--json",
@@ -190,10 +250,13 @@ def run_codex(system_prompt: str, user_prompt: str,
         "--skip-git-repo-check",
         "--ephemeral",
         "--color", "never",
-        full_prompt,
     ]
+    if tmp_path:
+        cmd.extend(["--output-last-message", tmp_path])
+    cmd.append(full_prompt)
     rc, out, err, latency, error = _run_cli(cmd, timeout)
     text = ""
+    codex_error = ""
     if out:
         for line in out.splitlines():
             line = line.strip()
@@ -204,12 +267,29 @@ def run_codex(system_prompt: str, user_prompt: str,
             except json.JSONDecodeError:
                 continue
             item = event.get("item") if isinstance(event, dict) else None
+            if event.get("type") == "error":
+                codex_error = str(event.get("message") or codex_error)
+            elif event.get("type") == "turn.failed":
+                ev_err = event.get("error")
+                if isinstance(ev_err, dict):
+                    codex_error = str(ev_err.get("message") or codex_error)
             if (
                 event.get("type") == "item.completed"
                 and isinstance(item, dict)
                 and item.get("type") == "agent_message"
             ):
-                text = item.get("text") or text
+                text = _codex_item_text(item) or text
+    if not text and tmp_path:
+        try:
+            with open(tmp_path, "r", encoding="utf-8", errors="ignore") as f:
+                text = f.read().strip()
+        except OSError:
+            pass
+    if tmp_path:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
     parsed, status = _extract_json(text or out)
     return LLMResult(
         agent="codex",
@@ -219,8 +299,29 @@ def run_codex(system_prompt: str, user_prompt: str,
         exit_code=rc,
         latency_ms=latency,
         parse_status=status,
-        error=error or (err[:300] if rc != 0 and err else None),
+        error=error or codex_error or (err[:300] if rc != 0 and err else None),
     )
+
+
+def _codex_item_text(item: dict) -> str:
+    """Extract assistant text from known Codex JSONL item shapes."""
+    text = item.get("text")
+    if isinstance(text, str) and text.strip():
+        return text
+    content = item.get("content")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                val = part.get("text") or part.get("content")
+                if isinstance(val, str):
+                    parts.append(val)
+        return "\n".join(p for p in parts if p)
+    return ""
 
 
 # ── model registry + config ───────────────────────────────────────────────
@@ -231,9 +332,9 @@ VALID_MODELS = tuple(_RUNNERS)
 # keys are filled from these defaults. `tertiary` extends the fallback chain;
 # `enabled` / `budgets` / `cooldown_hours` drive the model_router governor.
 _DEFAULT_CONFIG = {
-    "primary":   "claude",
-    "secondary": "gemini",
-    "tertiary":  "codex",
+    "primary":   "gemini",
+    "secondary": "codex",
+    "tertiary":  "claude",
     "enabled":   {"claude": True, "gemini": True, "codex": True},
     "budgets":   {"claude": {"daily_max_calls": 200},
                   "gemini": {"daily_max_calls": 500},
@@ -242,14 +343,14 @@ _DEFAULT_CONFIG = {
     # Break News debate uses its OWN two-model pair, independent of the general
     # primary/secondary above — so the Claude×Gemini divergence can be tuned
     # without affecting supply-chain / protocol routing.
-    "break_news": {"primary": "claude", "secondary": "gemini"},
+    "break_news": {"primary": "gemini", "secondary": "codex"},
 }
 
 
 def run_llm(model: str, system_prompt: str, user_prompt: str,
             timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
-    """Dispatch to a model runner by name. Unknown name → claude."""
-    runner = _RUNNERS.get((model or "").lower().strip(), run_claude)
+    """Dispatch to a model runner by name. Unknown name → gemini."""
+    runner = _RUNNERS.get((model or "").lower().strip(), run_gemini)
     return runner(system_prompt, user_prompt, timeout=timeout)
 
 
@@ -309,7 +410,7 @@ def break_news_pair() -> list[str]:
     cfg = load_llm_config()
     bn = cfg.get("break_news") or {}
     pair = [bn.get("primary"), bn.get("secondary")]
-    return pair if all(m in _RUNNERS for m in pair) else ["claude", "gemini"]
+    return pair if all(m in _RUNNERS for m in pair) else ["gemini", "codex"]
 
 
 def model_chain(cfg: dict | None = None) -> list[str]:
@@ -321,7 +422,7 @@ def model_chain(cfg: dict | None = None) -> list[str]:
         if m in _RUNNERS and m not in seen:
             seen.add(m)
             chain.append(m)
-    return chain or ["claude"]
+    return chain or ["gemini"]
 
 
 def primary_model() -> str:

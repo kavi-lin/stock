@@ -1,0 +1,43 @@
+======================================================================
+Market Breadth Analyzer
+6-Component Health Scoring (No API Key Required)
+======================================================================
+
+Step 1: Fetching CSV Data
+----------------------------------------------------------------------
+  Fetching detail CSV from https://tradermonty.github.io/market-breadth-analysis/market_breadth_data.csv... OK (2513 rows, 2016-05-31 to 2026-05-28)
+  Fetching summary CSV from https://tradermonty.github.io/market-breadth-analysis/market_breadth_summary.csv... OK (12 metrics)
+  Data freshness: OK (latest: 2026-05-28, 2 days old)
+
+Step 2: Calculating Components
+----------------------------------------------------------------------
+  [1/6] Current Breadth Level & Trend... Score: 57 (NEUTRAL: 8MA=0.582 in downtrend - mixed signals)
+  [2/6] 8MA vs 200MA Crossover... Score: 45 (NEUTRAL: Near crossover (gap=-0.013, 8MA rising) (recovery signal))
+  [3/6] Peak/Trough Cycle Position... Score: 45 (PEAK (59d ago): recovery attempt, 8MA rising)
+  [4/6] Bearish Signal Status... Score: 25 (WARNING (muted): Bearish signal active in downtrend, but 8MA=0.582 still relatively strong [PINK ZONE])
+  [5/6] Historical Percentile... Score: 30 (LOW: 27th percentile - below average breadth)
+  [6/6] S&P 500 vs Breadth Divergence... Score: 34.0 (Dangerous bearish divergence: S&P +10.4%, Breadth 8MA -0.076 over 60d)
+
+Step 3: Calculating Composite Score
+----------------------------------------------------------------------
+  Composite Score: 42.4/100
+  Health Zone: Neutral
+  Equity Exposure: 60-75%
+  Strongest: Current Breadth Level & Trend (57)
+  Weakest: Bearish Signal Status (25)
+
+
+Step 4: Generating Reports
+----------------------------------------------------------------------
+  JSON report saved to: sector/breadth_cache/market_breadth_2026-05-30_114302.json
+  Markdown report saved to: sector/breadth_cache/market_breadth_2026-05-30_114302.md
+
+======================================================================
+Market Breadth Analysis Complete
+======================================================================
+  Composite Score: 42.4/100
+  Health Zone: Neutral
+  Equity Exposure: 60-75%
+  JSON Report: sector/breadth_cache/market_breadth_2026-05-30_114302.json
+  Markdown Report: sector/breadth_cache/market_breadth_2026-05-30_114302.md
+

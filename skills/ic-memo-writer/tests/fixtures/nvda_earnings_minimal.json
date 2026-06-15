@@ -1,0 +1,377 @@
+{
+  "ticker": "NVDA",
+  "as_of_date": "2026-05-21",
+  "last_earnings_date": "2026-04-26",
+  "segments": {
+    "product_fy": [
+      {
+        "date": "2026-01-25",
+        "fiscal_year": 2026,
+        "period": "FY",
+        "products": {
+          "Automotive": 2349000000,
+          "Data Center": 193737000000,
+          "Gaming": 16042000000,
+          "OEM And Other": 619000000,
+          "Professional Visualization": 3191000000
+        }
+      },
+      {
+        "date": "2025-01-26",
+        "fiscal_year": 2025,
+        "period": "FY",
+        "products": {
+          "Automotive": 1694000000,
+          "Data Center": 115186000000,
+          "Gaming": 11350000000,
+          "OEM And Other": 389000000,
+          "Professional Visualization": 1878000000
+        }
+      }
+    ],
+    "geographic_fy": [
+      {
+        "date": "2026-01-25",
+        "fiscal_year": 2026,
+        "period": "FY",
+        "regions": {
+          "CHINA": 19677000000,
+          "Other Americas": 4299000000,
+          "TAIWAN, PROVINCE OF CHINA": 42345000000,
+          "UNITED STATES": 149617000000
+        }
+      },
+      {
+        "date": "2025-01-26",
+        "fiscal_year": 2025,
+        "period": "FY",
+        "regions": {
+          "CHINA": 17108000000,
+          "Other Americas": 7875000000,
+          "SINGAPORE": 23684000000,
+          "TAIWAN, PROVINCE OF CHINA": 20573000000,
+          "UNITED STATES": 61257000000
+        }
+      }
+    ]
+  },
+  "quarterly_pnl": [
+    {
+      "date": "2026-04-26",
+      "fiscalYear": "2027",
+      "period": "Q1",
+      "revenue": 81615000000,
+      "grossProfit": 61157000000,
+      "operatingIncome": 53536000000,
+      "netIncome": 58321000000,
+      "eps": 2.4,
+      "epsDiluted": 2.39,
+      "researchAndDevelopmentExpenses": 6321000000,
+      "sellingGeneralAndAdministrativeExpenses": 1300000000,
+      "ebitda": 70796000000,
+      "ebit": 69799000000,
+      "weightedAverageShsOutDil": 24391000000
+    },
+    {
+      "date": "2026-01-25",
+      "fiscalYear": "2026",
+      "period": "Q4",
+      "revenue": 68127000000,
+      "grossProfit": 51093000000,
+      "operatingIncome": 44299000000,
+      "netIncome": 42960000000,
+      "eps": 1.77,
+      "epsDiluted": 1.76,
+      "researchAndDevelopmentExpenses": 5512000000,
+      "sellingGeneralAndAdministrativeExpenses": 1282000000,
+      "ebitda": 51283000000,
+      "ebit": 50471000000,
+      "weightedAverageShsOutDil": 24432000000
+    }
+  ],
+  "ttm_metrics": {
+    "from_key_metrics_ttm": {
+      "marketCap": 5412560772031,
+      "freeCashFlowYieldTTM": 0.021999937740249727,
+      "evToEBITDATTM": 28.07649650365732,
+      "evToFreeCashFlowTTM": 45.45112173763815,
+      "evToSalesTTM": 21.350413908308383,
+      "currentRatioTTM": 3.440775681341719,
+      "netDebtToEBITDATTM": -0.00219439314394804,
+      "incomeQualityTTM": 0.7872040497954427,
+      "capexToOperatingCashFlowTTM": 0.05230485164905132,
+      "daysOfSalesOutstandingTTM": 58.61805744582648,
+      "freeCashFlowToFirmTTM": 169028513531.77472,
+      "returnOnInvestedCapitalTTM": 0.6299357881627576,
+      "returnOnCapitalEmployedTTM": 0.7527482721833109,
+      "returnOnTangibleAssetsTTM": 0.6778773464707382
+    },
+    "from_ratios_ttm": {
+      "grossProfitMarginTTM": 0.741454331711974,
+      "operatingProfitMarginTTM": 0.6402002437956377,
+      "netProfitMarginTTM": 0.629659435640713,
+      "ebitMarginTTM": 0.7476991293576498,
+      "priceToEarningsRatioTTM": 34.00219543520891,
+      "priceToBookRatioTTM": 27.764267472912,
+      "debtToEquityRatioTTM": 0.06555347514247419,
+      "interestCoverageRatioTTM": 544.5805369127517,
+      "priceToFreeCashFlowRatioTTM": 45.454674090757166
+    }
+  },
+  "annual_growth": [
+    {
+      "fiscalYear": "2026",
+      "date": "2026-01-25",
+      "period": "FY",
+      "revenueGrowth": 0.654735357900948,
+      "grossProfitGrowth": 0.5682213002513846,
+      "operatingIncomeGrowth": 0.6007636305599549,
+      "netIncomeGrowth": 0.6474615806805708,
+      "freeCashFlowGrowth": 0.5886809195931179,
+      "fiveYRevenueGrowthPerShare": 12.150147704291372,
+      "fiveYNetIncomeGrowthPerShare": 27.145087965487324,
+      "threeYRevenueGrowthPerShare": 7.191845451302118,
+      "threeYNetIncomeGrowthPerShare": 27.128013285471933
+    },
+    {
+      "fiscalYear": "2025",
+      "date": "2025-01-26",
+      "period": "FY",
+      "revenueGrowth": 1.1420340763599357,
+      "grossProfitGrowth": 1.208934335568046,
+      "operatingIncomeGrowth": 1.470368797767803,
+      "netIncomeGrowth": 1.4489247311827957,
+      "freeCashFlowGrowth": 1.2520632100958513,
+      "fiveYRevenueGrowthPerShare": 10.857545049266577,
+      "fiveYNetIncomeGrowthPerShare": 24.85881043081879,
+      "threeYRevenueGrowthPerShare": 3.928638012549667,
+      "threeYNetIncomeGrowthPerShare": 6.596600957252382
+    },
+    {
+      "fiscalYear": "2024",
+      "date": "2024-01-28",
+      "period": "FY",
+      "revenueGrowth": 1.2585452658115222,
+      "grossProfitGrowth": 1.8849309716071894,
+      "operatingIncomeGrowth": 6.805871212121212,
+      "netIncomeGrowth": 5.813186813186813,
+      "freeCashFlowGrowth": 6.0958508403361344,
+      "fiveYRevenueGrowthPerShare": 4.121972824927358,
+      "fiveYNetIncomeGrowthPerShare": 6.078971714852189,
+      "threeYRevenueGrowthPerShare": 2.652013507219659,
+      "threeYNetIncomeGrowthPerShare": 5.867023669681334
+    },
+    {
+      "fiscalYear": "2023",
+      "date": "2023-01-29",
+      "period": "FY",
+      "revenueGrowth": 0.0022293230289068887,
+      "grossProfitGrowth": -0.12125894134477826,
+      "operatingIncomeGrowth": -0.5793247684493577,
+      "netIncomeGrowth": -0.5520918785890074,
+      "freeCashFlowGrowth": -0.5317265125430398,
+      "fiveYRevenueGrowthPerShare": 1.6752124843710663,
+      "fiveYNetIncomeGrowthPerShare": 0.3810875297856699,
+      "threeYRevenueGrowthPerShare": 1.4199353398986325,
+      "threeYNetIncomeGrowthPerShare": 0.5301956439580238
+    },
+    {
+      "fiscalYear": "2022",
+      "date": "2022-01-30",
+      "period": "FY",
+      "revenueGrowth": 0.6140329835082459,
+      "grossProfitGrowth": 0.6809349749903809,
+      "operatingIncomeGrowth": 1.2155781112091792,
+      "netIncomeGrowth": 1.2511542012927055,
+      "freeCashFlowGrowth": 0.7324243715381338,
+      "fiveYRevenueGrowthPerShare": 2.376858603287692,
+      "fiveYNetIncomeGrowthPerShare": 4.074945362760489,
+      "threeYRevenueGrowthPerShare": 1.238297835088549,
+      "threeYNetIncomeGrowthPerShare": 1.2946024433587826
+    }
+  ],
+  "enterprise_value": {
+    "symbol": "NVDA",
+    "date": "2026-04-26",
+    "stockPrice": 216.61,
+    "numberOfShares": 24286000000,
+    "marketCapitalization": 5260590460000,
+    "minusCashAndCashEquivalents": 13237000000,
+    "addTotalDebt": 12814000000,
+    "enterpriseValue": 5260167460000
+  },
+  "valuation": {
+    "dcf_intrinsic": 238.83054489733146,
+    "dcf_levered_intrinsic": 249.17234191813571,
+    "price_target_consensus": 279.89,
+    "price_target_high": 360,
+    "price_target_low": 140,
+    "price_target_median": 275,
+    "pt_dispersion_pct": 78.6,
+    "pt_news": [
+      {
+        "date": null,
+        "analystCompany": "HSBC",
+        "priceTarget": 325,
+        "adjPriceTarget": 325,
+        "publishedDate": "2026-05-19T09:58:32.000Z"
+      },
+      {
+        "date": null,
+        "analystCompany": "Morgan Stanley",
+        "priceTarget": 285,
+        "adjPriceTarget": 285,
+        "publishedDate": "2026-05-18T11:52:08.000Z"
+      },
+      {
+        "date": null,
+        "analystCompany": "KeyBanc",
+        "priceTarget": 300,
+        "adjPriceTarget": 300,
+        "publishedDate": "2026-05-18T10:34:14.000Z"
+      }
+    ],
+    "ratings_snapshot": {
+      "symbol": "NVDA",
+      "rating": "C",
+      "overallScore": 2,
+      "discountedCashFlowScore": 4,
+      "returnOnEquityScore": 1,
+      "returnOnAssetsScore": 1,
+      "debtToEquityScore": 3,
+      "priceToEarningsScore": 1,
+      "priceToBookScore": 1
+    },
+    "dcf_vs_price_pct": 0.0826,
+    "pt_upside_pct": 0.2687
+  },
+  "earnings_surprises": [
+    {
+      "date": "2026-08-26",
+      "epsActual": null,
+      "epsEstimated": 1.94,
+      "revenueActual": null,
+      "revenueEstimated": 87088730000,
+      "lastUpdated": "2026-05-21"
+    },
+    {
+      "date": "2026-05-20",
+      "epsActual": 2.4,
+      "epsEstimated": 1.76,
+      "revenueActual": 81615000000,
+      "revenueEstimated": 78423370000,
+      "lastUpdated": "2026-05-21"
+    }
+  ],
+  "balance_sheet": [
+    {
+      "date": "2026-04-26",
+      "period": "Q1",
+      "totalAssets": 259474000000,
+      "totalLiabilities": 64000000000,
+      "totalEquity": 195474000000,
+      "totalCurrentAssets": 150995000000,
+      "totalCurrentLiabilities": 43884000000,
+      "cashAndCashEquivalents": 13237000000,
+      "shortTermInvestments": 67335000000,
+      "totalDebt": 12814000000,
+      "longTermDebt": 7470000000,
+      "shortTermDebt": 1000000000,
+      "netReceivables": 40710000000,
+      "inventory": 25797000000,
+      "retainedEarnings": 185038000000
+    },
+    {
+      "date": "2026-01-25",
+      "period": "Q4",
+      "totalAssets": 206803000000,
+      "totalLiabilities": 49510000000,
+      "totalEquity": 157293000000,
+      "totalCurrentAssets": 125605000000,
+      "totalCurrentLiabilities": 32163000000,
+      "cashAndCashEquivalents": 10605000000,
+      "shortTermInvestments": 51951000000,
+      "totalDebt": 11412000000,
+      "longTermDebt": 7469000000,
+      "shortTermDebt": 999000000,
+      "netReceivables": 38466000000,
+      "inventory": 21403000000,
+      "retainedEarnings": 146973000000
+    }
+  ],
+  "cash_flow": [
+    {
+      "date": "2026-04-26",
+      "period": "Q1",
+      "operatingCashFlow": 50344000000,
+      "freeCashFlow": 48587000000,
+      "capitalExpenditure": -1757000000,
+      "stockBasedCompensation": 1928000000,
+      "commonStockRepurchased": -21441000000,
+      "commonDividendsPaid": -243000000,
+      "netIncome": 58321000000
+    },
+    {
+      "date": "2026-01-25",
+      "period": "Q4",
+      "operatingCashFlow": 36188000000,
+      "freeCashFlow": 34904000000,
+      "capitalExpenditure": -1284000000,
+      "stockBasedCompensation": 1633000000,
+      "commonStockRepurchased": -3815000000,
+      "commonDividendsPaid": -242000000,
+      "netIncome": 42960000000
+    }
+  ],
+  "annual_estimates": [
+    {
+      "date": "2031-01-25",
+      "revenue_avg": 584899000000,
+      "revenue_low": 460774027965,
+      "revenue_high": 694853920865,
+      "ebitda_avg": 299143793627,
+      "net_income_avg": 331297920013,
+      "eps_avg": 13.56,
+      "eps_low": 9.81905,
+      "eps_high": 16.87388,
+      "num_analysts_revenue": 9,
+      "num_analysts_eps": 5
+    },
+    {
+      "date": "2030-01-25",
+      "revenue_avg": 529197000000,
+      "revenue_low": 416892887963,
+      "revenue_high": 628680524945,
+      "ebitda_avg": 270655272373,
+      "net_income_avg": 300269280012,
+      "eps_avg": 12.29,
+      "eps_low": 8.89942,
+      "eps_high": 15.29351,
+      "num_analysts_revenue": 10,
+      "num_analysts_eps": 4
+    }
+  ],
+  "quality_flags": [],
+  "structural_shift": {
+    "tier": "CONFIRMED",
+    "candidate": true,
+    "signals": {
+      "eps_qoq_jump": true,
+      "gm_breakout": false,
+      "rev_accel": true
+    },
+    "metrics": {
+      "eps_qoq": 0.358,
+      "gm_latest": 0.7493,
+      "gm_hist_mean": 0.7201,
+      "gm_hist_std": 0.0479,
+      "gm_z_score": 0.61,
+      "rev_yoy": 0.8523,
+      "prior_q_yoy": 0.7321
+    },
+    "prior_quarter_candidate": true
+  },
+  "composite_score": 80,
+  "verdict": "STRONG",
+  "schema_version": "V1.0"
+}

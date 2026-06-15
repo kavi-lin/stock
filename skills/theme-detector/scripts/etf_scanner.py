@@ -9,6 +9,7 @@ PE ratio, volume ratios.
 FMP API key is optional; without it, yfinance is used exclusively.
 """
 
+import os
 import sys
 import time
 from typing import Any, Optional
@@ -19,6 +20,11 @@ try:
 except ImportError:
     print("ERROR: pandas/numpy not found. Install with: pip install pandas numpy", file=sys.stderr)
     sys.exit(1)
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from skills._shared.technical_core import rsi_14 as _shared_rsi_14  # noqa: E402
 
 try:
     import yfinance as yf
@@ -638,31 +644,13 @@ class ETFScanner:
     # -------------------------------------------------------------------
     @staticmethod
     def _calculate_rsi(prices: pd.Series, period: int = 14) -> Optional[float]:
-        """Calculate RSI using Wilder's smoothing method."""
+        """RSI via skills/_shared/technical_core (single Wilder implementation across skills)."""
         if prices is None or len(prices) < period + 1:
             return None
-
-        deltas = prices.diff()
-
-        gains = deltas.where(deltas > 0, 0.0)
-        losses = (-deltas).where(deltas < 0, 0.0)
-
-        first_avg_gain = gains.iloc[1 : period + 1].mean()
-        first_avg_loss = losses.iloc[1 : period + 1].mean()
-
-        avg_gain = first_avg_gain
-        avg_loss = first_avg_loss
-
-        for i in range(period + 1, len(prices)):
-            avg_gain = (avg_gain * (period - 1) + gains.iloc[i]) / period
-            avg_loss = (avg_loss * (period - 1) + losses.iloc[i]) / period
-
-        if avg_loss == 0:
-            return 100.0
-
-        rs = avg_gain / avg_loss
-        rsi = 100.0 - (100.0 / (1.0 + rs))
-        return round(rsi, 2)
+        val = _shared_rsi_14(prices, period=period).iloc[-1]
+        if pd.isna(val):
+            return None
+        return round(float(val), 2)
 
     @staticmethod
     def _calculate_52w_distances(close: pd.Series, high: pd.Series, low: pd.Series) -> dict:

@@ -35,6 +35,11 @@ CACHE_DIR       = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
 CACHE_FILE      = os.path.join(CACHE_DIR, "sentiment_latest.json")
 DEFAULT_TTL_SEC = 900
 
+_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", ".."))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from skills._shared.technical_core import rsi_14 as _shared_rsi_14  # noqa: E402
+
 
 def _load_cache(max_age_sec):
     """Return cached payload (dict) if fresh, else None."""
@@ -68,13 +73,8 @@ def _write_cache(payload):
 
 
 def rsi(series: pd.Series, period: int = 14) -> float:
-    delta = series.diff()
-    gain = delta.clip(lower=0)
-    loss = -delta.clip(upper=0)
-    avg_gain = gain.rolling(period).mean()
-    avg_loss = loss.rolling(period).mean()
-    rs = avg_gain / avg_loss.replace(0, np.nan)
-    rsi_val = 100 - (100 / (1 + rs))
+    """RSI via skills/_shared/technical_core (single Wilder implementation across skills)."""
+    rsi_val = _shared_rsi_14(series, period=period)
     return float(rsi_val.iloc[-1]) if not rsi_val.empty else float("nan")
 
 

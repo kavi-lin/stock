@@ -109,6 +109,53 @@ def validate_file(path: Path) -> list[str]:
     return issues
 
 
+def validate_clusters(path: Path) -> list[str]:
+    """Light lint over _clusters.json (V6 event clustering store)."""
+    if not path.exists():
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        return [f"{path.name}: cannot read: {e}"]
+    issues: list[str] = []
+    clusters = d.get("clusters")
+    if not isinstance(clusters, list):
+        return [f"{path.name}: 'clusters' is not a list"]
+    required = {"cluster_id", "created_at", "last_seen", "news_type",
+                "rep_headline", "echo_count"}
+    for i, c in enumerate(clusters):
+        if not isinstance(c, dict):
+            issues.append(f"{path.name}: clusters[{i}] not a dict")
+            continue
+        miss = required - set(c.keys())
+        if miss:
+            issues.append(f"{path.name}: clusters[{i}] missing: {sorted(miss)}")
+        if not isinstance(c.get("echo_count"), int) or c.get("echo_count", 0) < 1:
+            issues.append(f"{path.name}: clusters[{i}].echo_count invalid")
+    return issues
+
+
+def validate_brief(path: Path) -> list[str]:
+    """Light lint over _market_brief.json."""
+    if not path.exists():
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        return [f"{path.name}: cannot read: {e}"]
+    issues: list[str] = []
+    cur = d.get("current")
+    if cur is not None:
+        for k in ("generated_at", "brief_text", "regime"):
+            if k not in cur:
+                issues.append(f"{path.name}: current missing '{k}'")
+    if not isinstance(d.get("history", []), list):
+        issues.append(f"{path.name}: history is not a list")
+    return issues
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", default=str(STORE_DIR))
@@ -124,6 +171,8 @@ def main() -> int:
     all_issues: list[str] = []
     for f in files:
         all_issues.extend(validate_file(f))
+    all_issues.extend(validate_clusters(p / "_clusters.json"))
+    all_issues.extend(validate_brief(p / "_market_brief.json"))
 
     if not all_issues:
         if not args.quiet:

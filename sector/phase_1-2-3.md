@@ -62,6 +62,25 @@ python3 skills/theme-detector/scripts/theme_detector.py --skip-if-fresh 10800
 **Agent**: News Catalyst Analyst
 **資料來源**: `market-sentiment-analyzer` + `economic-calendar-fetcher` + `earnings-calendar` + WebSearch（≤ 5 個，narrative 類）
 
+### ⚡ FAST PATH（V3.44 — 預設，砍 cache_read 雪球）
+
+**先用一個 turn 把 Phase 1 valuation + Phase 3 所有取數併成單一 JSON**，取代原本 ~9 個逐項 Bash/MCP turn（每 turn 重收漲大 context = cache_read 主要成本，見 CHANGELOG 3.44.0）：
+
+```bash
+SCAN_DATE=$(date +%Y-%m-%d)
+python3 sector/scripts/phase_prefetch.py --date $SCAN_DATE \
+        --out /tmp/sector_prefetch_$SCAN_DATE.json
+echo "rc=$?"   # rc=1 → 有 HARD task 失敗（valuation / earnings_pulse / smart_money / sector_news）
+```
+
+- **0-LLM / read-only**：並行跑 `fetch_sector_valuation` + `fetch_earnings_pulse` + `fetch_smart_money` + `fetch_sector_news` + `fetch_general_news` + `sentiment` + econ/earnings calendar + `sector_digest`，寫 cache 的照寫，stdout-only 的（sentiment / 兩個 calendar / digest）inline 進輸出 JSON 的 `results.<name>.data`。
+- **讀回**：`Read /tmp/sector_prefetch_$SCAN_DATE.json` 一次拿到全部。`results.valuation.cache` / `results.sector_news.cache` 等給 `build_sector_intel.py` 用的 cache 路徑都已寫好。
+- **HARD FAIL 契約不變**：`rc=1` 或 `hard_fail=true` 時，檢查哪個 HARD task（看 `results.<name>.error`）。`valuation` 失敗 = 照舊 abort（V1.4 規則）。
+- **SOFT 失敗正常**：`econ_calendar` / `earnings_calendar` 為 SOFT（fail 不 abort，靠下方 Step 5 WebSearch 補 narrative）。兩個 skill 已於 V3.44.1 migrate 到 FMP `/stable/` endpoint（舊 v3 已退役 403）— 正常應回資料，若 `data=null` 表示 FMP 端又變動。
+- **Fallback**：prefetch 本身炸了（script error）→ 回到下方逐 Step 手動流程。
+
+讀完 prefetch JSON 後，直接進 Phase 3 判斷邏輯（extreme_sentiment trigger 等），**跳過**下方 Step 1–3e 的逐項執行（資料已在 JSON / cache 內）。下方逐 Step 規格保留為 fallback + 欄位語意參考。
+
 ### ⚠️ 執行順序（強制）
 
 ```

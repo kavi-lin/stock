@@ -13,6 +13,7 @@ API:
     DELETE /api/positions/{id}    → remove by id
 """
 
+import fnmatch
 import glob
 import json
 import os
@@ -23,7 +24,7 @@ import subprocess
 import threading
 from datetime import date, datetime, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 ROOT          = os.path.dirname(os.path.abspath(__file__))
 DASHBOARD_DIR = os.path.join(ROOT, "Dashboard")
@@ -64,6 +65,11 @@ _HEATMAP_TICKER_RE       = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 # instead of re-firing ~500 calls every cycle (and flooding the log).
 HEATMAP_RATELIMIT_COOLDOWN = int(os.getenv("HEATMAP_RATELIMIT_COOLDOWN", "1800"))  # 30 min
 _heatmap_ratelimit_until = 0.0   # epoch; quote refresh skipped until this time
+# Optional soft sub-cap so the always-on dashboard server doesn't starve a
+# concurrent daily_update.sh run of the shared 250/min FMP budget. 0 = use the
+# pool's full DEFAULT_TARGET_RPM. The pool's cross-process window is the actual
+# ceiling; this just biases how much of it the dashboard claims.
+FMP_DASHBOARD_RPM = int(os.getenv("FMP_DASHBOARD_RPM", "0"))
 
 _heatmap_state = {
     "last_update":         None,   # ISO timestamp (last quote refresh)
@@ -129,9 +135,41 @@ except Exception as _mr_e:
     sys.stderr.write(f"[model_router] load failed: {_mr_e}\n")
 
 
-def _protocol_command(model, prompt):
+# Per-protocol Claude model tier. Deep-reasoning protocols (multi-lane debate,
+# valuation judgment, statistical root-cause) → opus; script-first / structured-
+# extraction protocols (triage already deterministic, LLM only fills gaps) →
+# sonnet (cheaper + faster, no quality loss). Values are passed verbatim to
+# `claude --model`, so CLI aliases ("opus"/"sonnet") OR full ids
+# ("claude-opus-4-8[1m]") both work. Override one protocol at runtime with env
+# PROTOCOL_MODEL_<NAME> (e.g. PROTOCOL_MODEL_SECTOR=sonnet). Empty string / None
+# → omit --model (inherit CLI global default).
+PROTOCOL_MODEL = {
+    "invest":      "opus",    # 5-lane debate + valuation + Red Team + price framework
+    "llm_review":  "opus",    # statistical pattern + root-cause over 300KB index
+    "sector":      "opus",    # Phase 5 cross-sector synthesis
+    "news":        "sonnet",  # script-first triage, LLM debates ≤5
+    "flash":       "sonnet",  # single-event 4-view debate
+    "flash_text":  "sonnet",
+    "review":      "sonnet",
+    "link_digest": "sonnet",  # single-article extract + debate
+    "triage":      "sonnet",  # headline_zh translation only
+    "earnings":    "sonnet",  # structured infographic extraction
+}
+PROTOCOL_MODEL_DEFAULT = "sonnet"  # unlisted claude protocols → sonnet floor
+
+
+def _protocol_model_for(name):
+    """Resolve the Claude model for a protocol. Env PROTOCOL_MODEL_<NAME> wins."""
+    env = os.getenv("PROTOCOL_MODEL_" + name.upper())
+    if env is not None:
+        return env.strip()  # "" → caller omits --model
+    return PROTOCOL_MODEL.get(name, PROTOCOL_MODEL_DEFAULT)
+
+
+def _protocol_command(model, prompt, claude_model=None):
     """Build the CLI argv for running an agentic protocol on `model`.
-    The stdout reader just pipes to the log, so only the command differs."""
+    The stdout reader just pipes to the log, so only the command differs.
+    `claude_model` (when truthy) pins `claude --model` for tier control."""
     if model == "gemini":
         return [AGY_BIN, "--print", prompt,
                 "--dangerously-skip-permissions"]
@@ -139,9 +177,12 @@ def _protocol_command(model, prompt):
         return [CODEX_BIN, "exec", prompt, "--json", "-C", ROOT,
                 "--dangerously-bypass-approvals-and-sandbox", "--color", "never"]
     claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
-    return [claude_bin, "-p", prompt,
-            "--output-format", "stream-json", "--verbose",
-            "--permission-mode", "bypassPermissions"]
+    cmd = [claude_bin, "-p", prompt,
+           "--output-format", "stream-json", "--verbose",
+           "--permission-mode", "bypassPermissions"]
+    if claude_model:
+        cmd += ["--model", claude_model]
+    return cmd
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been
 # pathological (e.g. Claude looping on a Bash-heredoc write that hits Stream
@@ -158,7 +199,10 @@ PROTOCOL_TIMEOUT_OVERRIDES = {
     "flash":      int(os.getenv("FLASH_TIMEOUT_SEC",       "600")),   # 10 min
     "flash_text": int(os.getenv("FLASH_TEXT_TIMEOUT_SEC",  "600")),   # 10 min
     "review":     int(os.getenv("REVIEW_TIMEOUT_SEC",      "600")),   # 10 min
-    "triage":     int(os.getenv("TRIAGE_TIMEOUT_SEC",      "600")),   # 10 min (RSS fetch 30s + 60 條 shallow snap)
+    # link_digest: WebFetch article + WebSearch + fetch 3-5 related + 4-view debate
+    # + build_artifacts (digest append + bn + graph refresh). 15 min headroom.
+    "link_digest": int(os.getenv("LINK_DIGEST_TIMEOUT_SEC", "900")),  # 15 min
+    "triage":     int(os.getenv("TRIAGE_TIMEOUT_SEC",      "600")),   # 10 min (fetch 30s + script triage + top-15 headline_zh)
     # V4.8 invest protocol: Phase 0-5 with subagents typically takes 30-45 min.
     # Default 25 min (1500s) is too short; 60 min gives comfortable headroom.
     "invest":     int(os.getenv("INVEST_TIMEOUT_SEC",     "3600")),  # 60 min
@@ -173,12 +217,13 @@ PROTOCOL_PROMPTS = {
               "Cache 衝突自動處理：若 sector_intel.json 的 mtime 看起來新但內部 `generated_at` 距今 ≥ 3 小時 "
               "（通常是 news protocol Phase 4 patch top_catalysts 造成的 mtime touch），"
               "視為 STALE 必須重跑 Phase 0–1，不要當成 FRESH 跳過。\n\n產業掃描",
-    "news":   "非互動模式 + 硬規定：\n0. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json\n1. **必須執行** Stage 1 shallow triage（讀 raw.json 產 ≥ 20 筆 shallow_verdicts 的 triage 表）\n2. **必須 dispatch 4 個 Agent tool_use**（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst），不得在 thinking block 裡自己幻想 4 視角\n3. **必須 Write news_logs/YYYY-MM-DD_digest.json**（timestamp 必須是今天日期），validator 有 freshness gate 會擋舊檔\n4. Stage 1 triage 表直接依 |shallow_score| 排序取前 5 則進 Stage 2 **不要停下等使用者確認**\n5. 跑完 Phase 3 Arbiter + Phase 4 cache patch + validator + 產出 reports/YYYY-MM-DD_news_digest.md\n6. **禁止**：讀昨天 MD 當範本、跳過 Stage 1/2 直接寫 MD、單 model 編 4-view 辯論\n7. 一個 turn 跑完整條 pipeline，不要中途停下。\n8. **每筆 verdict（不論 shallow/deep）必須帶 `published` 欄位**（從 raw.json 對應 news_id 抄過來的 ISO timestamp）— UI 用此算「Xm/Xh ago」freshness。\n\n新聞分析 DIGEST",
+    "news":   "非互動模式 + 硬規定（V2.2 script-first triage）：\n0. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json\n1. **必須執行** `python3 news/scripts/stage1_triage.py`（deterministic triage：block/dedup/credibility/score/snap/晉級 gate，寫 YYYY-MM-DD_triage.json + stdout 印 triage 表）。**禁止讀 raw.json 全文、禁止 LLM 手工 triage** — 只讀 script stdout + triage.json 的 `stage2_items`（≤5 則）與 `shallow_verdicts` top-25\n2. **必須 dispatch 4 個 Agent tool_use**（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst），不得在 thinking block 裡自己幻想 4 視角\n3. **必須 Write news_logs/YYYY-MM-DD_digest.json**（timestamp 必須是今天日期）。`stage1_count` = triage.json `shallow_verdicts` 長度；shallow 取 top 10、snaps 照抄 triage.json 不重寫；validator 有 freshness gate + triage cross-check 會擋\n4. 晉級名單 = triage.json `stage2_items`（script 已依 gate + |shallow_score| 取前 5）**不要停下等使用者確認**\n5. 跑完 Phase 3 Arbiter + Phase 4 cache patch + validator + 產出 reports/YYYY-MM-DD_news_digest.md（Shallow Digest top 10 照抄 snaps）\n6. **禁止**：讀昨天 MD 當範本、跳過 Stage 1/2 直接寫 MD、單 model 編 4-view 辯論\n7. 一個 turn 跑完整條 pipeline，不要中途停下。\n8. **每筆 verdict（不論 shallow/deep）必須帶 `published` 欄位**（從 triage.json 對應 news_id 抄過來的 ISO timestamp）— UI 用此算「Xm/Xh ago」freshness；deep 5 + shallow 10 補 `headline_zh`。\n\n新聞分析 DIGEST",
     "invest": "SESSION CONFIG: RISK_TOLERANCE={risk_tolerance}\n非互動模式：照 protocol 規則直接執行，不要輸出「請確認」類摘要表停下來等候。Phase 0 cache 策略：< 3h 用現有、否則 L3 重跑。\n\n分析 {ticker}",
     "flash":  "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 產出 reports MD 報告，不要中途停下等使用者回話。\n\n新聞分析 FLASH {ticker} 近期動態",
     "flash_text": "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 雙重 artifact 寫入，不要中途停下等使用者回話。輸入是富途推播原文（中英混排），請：\n1. 先抽出事件主體（公司/標的/ticker，若有）\n2. WebFetch 補上下文（最近 24h 相關報導）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter\n4. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_news_flash.md` — 完整 Impact Card（review_status: pending）\n   (b) `news/news_logs/YYYY-MM-DD_digest.json` — 讀現有 file，append 一筆 verdict 到 `verdicts[]` 陣列（不要覆寫整個檔）。verdict 必須含：news_id (next available `nNNN`), depth: \"deep\", review_status: \"pending\", headline, headline_zh, source_label, news_type, bull_case, bear_case, sector_view, macro_view, verdict (BULLISH/BEARISH/BINARY/NEUTRAL), net_impact_score (數字), arbiter_reasoning, binary_risk (bool), within_48h (bool), affected_sectors (string list), tickers_mentioned (string list), date (YYYY-MM-DD), published (ISO timestamp — 用 WebFetch 取得的原始發布時間，UI 拿來算 freshness)。**這條是 Dashboard「待審核」tab 顯示卡片的唯一來源 — 沒寫等於沒分析過。**\n\n新聞分析 FLASH \"{headline}\"",
     "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。覆寫 verdict 時請保留原 `published` 欄位（若不存在，從對應 raw.json 補上）。\n\n新聞分析 審核 \"{headline}\"",
-    "triage": "非互動模式：只跑 Stage 1 shallow triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. 讀剛產出的 `news/news_logs/YYYY-MM-DD_raw.json`（已 dedupe + 按 published desc 排序）\n3. 對每則跑 shallow triage（30 字 snap，依 news_protocol_v2.md Stage 1 rubric 給 score -5~+5）\n4. **必須寫 `news/news_logs/YYYY-MM-DD_triage.json`**（不寫等於沒跑），結構：\n```\n{\n  \"timestamp\": ISO,\n  \"mode\": \"TRIAGE\",\n  \"raw_count\": N,\n  \"verdicts\": [{\n    \"news_id\": \"nNNN\", \"depth\": \"shallow\", \"review_status\": \"reviewed\",\n    \"headline\": str, \"headline_zh\": str, \"source_label\": str,\n    \"news_type\": str, \"bull_case\": str(<=30字), \"bear_case\": str(<=30字),\n    \"sector_view\": str(<=30字), \"macro_view\": str(<=30字),\n    \"verdict\": \"BULLISH\"|\"BEARISH\"|\"NEUTRAL\"|\"BINARY\",\n    \"net_impact_score\": float, \"binary_risk\": bool, \"within_48h\": bool,\n    \"affected_sectors\": [str], \"tickers_mentioned\": [str],\n    \"date\": \"YYYY-MM-DD\",\n    \"published\": str (從 raw.json 對應 news_id 抄過來的 ISO timestamp，UI 拿來算 freshness 顏色)\n  }, ...]\n}\n```\n5. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
+    "link_digest": "非互動模式：一個 turn 跑完整條 link digest pipeline，不要中途停下等使用者回話。輸入是使用者提供的一條文章 URL：{url}\n依照 `news/link_digest_protocol.md` 規範執行：\n1. WebFetch({url}) 讀完整文章（headline / publisher / 發布時間 ISO / 主體）\n2. WebSearch 找 3-5 則相關報導並 WebFetch 前 3-5 篇讀全文（交叉佐證 + 找上下游/客戶/競品/產業/總經）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter（net_impact_score -5~+5、verdict BULLISH/BEARISH/BINARY/NEUTRAL、arbiter_reasoning ≥150 字、debate_note 一行）\n4. 抽 entities（tickers/sectors/themes/tech_keywords）+ supply-chain relations（ticker↔ticker：SUPPLIES_TO/CUSTOMER_OF/CONTRACT_MFG_FOR/CO_DEVELOPS_WITH/COMPETES_WITH，格式 subject/object 用 \"ticker:NVDA\"；ticker→theme：BENEFITS_FROM/HEADWIND_FROM，object 用 \"theme:hbm\"），每條 relation 標 corroborating_sources（**≥2 源才會晉升為 KG 供應鏈 directed edge**）\n5. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_link_digest.md` — 人讀判斷 digest（來源摘要+原文連結 / 相關新聞綜述（附引用連結）/ 4 視角辯論 / Arbiter 裁決 / KG payload 附錄列出 entities+relations）\n   (b) `news/news_logs/link_digest/<id>.judgment.json` — 機器記錄，schema 見 link_digest_protocol.md（<id> = `ld_YYYYMMDD_<url 的 sha1 前 8 碼>`）\n6. **必須執行**：`python3 scripts/link_digest/build_artifacts.py news/news_logs/link_digest/<id>.judgment.json`（它負責 append digest.json verdict + 寫 bn_*.json KG payload + 驗證 + 刷新 nexus graph；rc=0 或 rc=2 皆可收尾，rc=1 要修 judgment.json 重跑）\n7. **禁止**：自己手寫 digest.json / bn_*.json（schema 由 build_artifacts 保證）、跳過 WebSearch、跑到一半停下問問題。\n\n連結分析 {url}",
+    "triage": "非互動模式：只跑 Stage 1 deterministic triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. **必須執行** `python3 news/scripts/stage1_triage.py` — script deterministic 寫 `news/news_logs/YYYY-MM-DD_triage.json`（block/dedup/credibility downgrade/news_type/score/4-view snap/晉級 gate 全內建）\n3. **禁止讀 raw.json 全文、禁止 LLM 重新 triage**。讀 triage.json 的 `shallow_verdicts` top-15，對這 15 則補 `headline_zh`（script 留 null），用單次 Edit 寫回 triage.json — 其餘欄位不動\n4. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
     "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker}` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
     "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict、新增 `industry_rollup` + `adjustment_ledger_active` 兩個 top-level 欄位）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（**四步驟**：Step 0 Adjustment Evaluation + Step 1 Pattern + Step 2 Root Cause + Step 3 Recommendations）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合 + industry_rollup + adjustment_ledger_active，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 四步驟執行：\n   - **Step 0 — Adjustment Evaluation（先做）**：對 `adjustment_ledger_active` 中每筆 active Rec，從 industry_rollup / decisions / 外部資料拉出 `target_metric` 當週數值，對照 ledger 的 `evaluation_history` 上次值，下 improved / no_change / regressed 判斷。連 3 週 no_change 建議 paused；regressed 建議 rolled-back。完整 ledger 在 `reports/decision_review/ADJUSTMENT_LEDGER.md`，schema 在 `ADJUSTMENT_LEDGER_SCHEMA.md`\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime / sub_industry_heat 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)。**必看 `industry_rollup`** 找 sub-industry / sector 集中性\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## 0. Adjustment Evaluation\n| Rec | applied_date | target_metric | last_value | this_week_value | judgement |\n|---|---|---|---|---|---|\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Industry Rollup\n| industry | sector | n | miss_rate | avg_miss_return | tickers | top_30%? |\n|---|---|---|---|---|---|---|\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跳過 Adjustment Evaluation、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
 }
@@ -190,10 +235,14 @@ PROTOCOL_LOG_DIRS = {
     "flash_text": "news/scan_logs",
     "review":     "news/scan_logs",
     "triage":     "news/scan_logs",
+    "link_digest": "news/scan_logs",
     "earnings":   "skills/earnings-analyst/cache",
     "llm_review": "reports/decision_review",
     "earnings_preview": "skills/earnings-valuation-forecaster/cache",
     "supply_chain_generate": "nexus/supply_chain_logs",
+    "weekly_review":       "logs/ops_protocols",
+    "shadow_report":       "logs/ops_protocols",
+    "backtest_postmortem": "logs/ops_protocols",
 }
 
 # V2.15.0 — Script protocols: bypass Claude conversation, run a Python script
@@ -210,12 +259,26 @@ SCRIPT_PROTOCOLS = {
         "timeout": int(os.getenv("PREVIEW_TIMEOUT_SEC", "180")),  # 3 min
         "requires": ["ticker"],
     },
-    # V3.16 — Narrative Pulse on-demand single ticker
-    "narrative_pulse": {
-        "cmd": ["python3", "skills/narrative-pulse-detector/scripts/pulse.py", "{ticker}"],
-        "label_template": "🌡️ Pulse {ticker}",
-        "timeout": int(os.getenv("NARRATIVE_PULSE_TIMEOUT_SEC", "120")),
-        "requires": ["ticker"],
+    # V4.6 — 節奏自動化: ops registry scripts runnable from UI / ops_auto_loop.
+    # All read-only producers (weekly_review only SUGGESTS weights; never writes
+    # weights.yaml).
+    "weekly_review": {
+        "cmd": ["python3", "skills/short-term-target/scripts/weekly_review.py"],
+        "label_template": "📊 Weekly Review",
+        "timeout": int(os.getenv("WEEKLY_REVIEW_TIMEOUT_SEC", "600")),
+        "requires": [],
+    },
+    "shadow_report": {
+        "cmd": ["python3", "investment/scripts/shadow_report.py"],
+        "label_template": "🌓 Shadow Report",
+        "timeout": int(os.getenv("SHADOW_REPORT_TIMEOUT_SEC", "300")),
+        "requires": [],
+    },
+    "backtest_postmortem": {
+        "cmd": ["python3", "investment/scripts/backtest_postmortem.py"],
+        "label_template": "🔬 Postmortem",
+        "timeout": int(os.getenv("POSTMORTEM_TIMEOUT_SEC", "900")),
+        "requires": [],
     },
 }
 
@@ -232,6 +295,15 @@ CUSTOM_PROTOCOLS = {
 PROTOCOL_VALIDATORS = {
     "sector": ["sector/scripts/validate_sector_intel.py"],
     "news":   ["news/scripts/validate_digest_output.py"],
+}
+
+# Post-run required-artifact gate. Catches a model returning rc=0 while leaving
+# the expected output file unwritten (e.g. a fallback model timing out without
+# producing the MD, yet the CLI still exiting 0). At least ONE listed path must
+# exist AND be fresher than the run start, else status flips to "error" instead
+# of being silently marked "done". `{today}` = run-start date (YYYY-MM-DD).
+PROTOCOL_REQUIRED_ARTIFACTS = {
+    "llm_review": ["reports/decision_review/REVIEW_{today}.md"],
 }
 
 _protocol_state = {
@@ -614,6 +686,8 @@ def run_protocol(name, params=None):
         return None, f"protocol '{name}' requires a 'ticker' parameter"
     if "{headline}" in PROTOCOL_PROMPTS[name] and not params.get("headline"):
         return None, f"protocol '{name}' requires a 'headline' parameter"
+    if "{url}" in PROTOCOL_PROMPTS[name] and not params.get("url"):
+        return None, f"protocol '{name}' requires a 'url' parameter"
     # V4.8 invest: RISK_TOLERANCE is required by protocol SESSION CONFIG.
     # Default to MEDIUM when caller omits or sends an invalid value — the protocol
     # non-interactive rule says "don't ask user", so silent server-side default is correct.
@@ -652,13 +726,23 @@ def run_protocol(name, params=None):
         prompt = PROTOCOL_PROMPTS[name]
         for _k, _v in (params or {}).items():
             prompt = prompt.replace("{" + _k + "}", str(_v))
-        # Governor picks the model — claude first, gemini/codex only when
-        # claude is over budget / in a quota cooldown.
-        proto_model = _mrouter.pick_model("protocol") if MODEL_ROUTER_AVAILABLE else "claude"
+        # Dashboard agentic protocols (產業掃描/新聞/分析/llm_review/…) are written
+        # exclusively for a claude turn — they drive Agent subagents, project-relative
+        # paths, and claude-CLI-specific behaviour. gemini/codex fallback was observed
+        # to "succeed" (rc=0) while doing nothing useful (find wrong file copies, time
+        # out, never write the artifact), so we pin claude here and intentionally
+        # bypass model_router's pick_model: a user-clicked protocol is an explicit,
+        # expensive request that should NOT be silently rerouted by the 4h quota-
+        # cooldown heuristic (which never checks the real quota). A genuine 529 is
+        # still recorded via note_run below and caught by the rc/artifact gate.
+        # NOTE: model_router multi-model governance is unchanged for break_news
+        # debater (codex/gemini primary via run_with_fallback) — a separate path.
+        proto_model = "claude"
+        claude_model = _protocol_model_for(name)  # tier: opus (deep) / sonnet (cheap)
         rc = -1
         try:
             lf = open(log_path, "w", buffering=1)
-            lf.write(f"=== protocol={name} model={proto_model} prompt={prompt!r} started={_now_iso()} ===\n")
+            lf.write(f"=== protocol={name} model={proto_model}:{claude_model or 'cli-default'} prompt={prompt!r} started={_now_iso()} ===\n")
             lf.flush()
             # stream-json: every event is one line of JSON → naturally line-buffered.
             # Intentionally NOT passing --include-partial-messages: those emit char-by-char
@@ -666,7 +750,7 @@ def run_protocol(name, params=None):
             # without providing info we actually parse. tool_use/tool_result/result events
             # arrive at block-level completion, which is plenty for event tracking.
             proc = subprocess.Popen(
-                _protocol_command(proto_model, prompt),
+                _protocol_command(proto_model, prompt, claude_model=claude_model),
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -718,7 +802,14 @@ def run_protocol(name, params=None):
                 try:
                     with open(log_path, "r", encoding="utf-8", errors="ignore") as _lf:
                         _tail = _lf.read()[-4000:]
-                    _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail)
+                    # Attribute this run's tokens to proto_model by mining the
+                    # stream-json log's terminal `result` event usage block.
+                    try:
+                        from scripts.break_news.llm_drivers import parse_stream_log_usage
+                        _tok = parse_stream_log_usage(log_path)
+                    except Exception:
+                        _tok = None
+                    _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail, tokens=_tok)
                 except Exception:
                     pass
 
@@ -745,21 +836,65 @@ def run_protocol(name, params=None):
                 except Exception as ve:
                     validator_err = f"validator exception: {ve}"
 
+            # Required-artifact gate: rc=0 + validator pass still is not enough if
+            # the run produced no fresh output file (fallback/timeout can exit 0
+            # while writing nothing). At least one listed path must exist and be
+            # newer than the run start; otherwise downgrade to "error".
+            artifact_err = None
+            if rc == 0 and validator_err is None and name in PROTOCOL_REQUIRED_ARTIFACTS:
+                today = start.strftime("%Y-%m-%d")
+                start_ts = start.timestamp()
+                wanted = [a.replace("{today}", today) for a in PROTOCOL_REQUIRED_ARTIFACTS[name]]
+                fresh = False
+                for rel in wanted:
+                    fp = os.path.join(ROOT, rel)
+                    try:
+                        if os.path.exists(fp) and os.path.getmtime(fp) >= start_ts - 1:
+                            fresh = True
+                            break
+                    except OSError:
+                        pass
+                if not fresh:
+                    artifact_err = (
+                        "rc=0 but required artifact missing/stale: "
+                        + ", ".join(wanted)
+                        + " (model may have finished without writing output)"
+                    )
+                    try:
+                        with open(log_path, "a") as _lf:
+                            _lf.write(f"\n=== artifact gate FAILED: {artifact_err} ===\n")
+                    except Exception:
+                        pass
+
             with _protocol_lock:
                 _protocol_state["ended_at"]    = _now_iso()
                 _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
                 if _protocol_state["status"] == "cancelled":
                     pass
-                elif rc == 0 and validator_err is None:
+                elif rc == 0 and validator_err is None and artifact_err is None:
                     _protocol_state["status"] = "done"
                 else:
                     _protocol_state["status"] = "error"
                     if not _protocol_state["error"]:
-                        _protocol_state["error"] = validator_err or _extract_error_from_log(log_path, rc)
+                        _protocol_state["error"] = (
+                            validator_err or artifact_err
+                            or _extract_error_from_log(log_path, rc)
+                        )
             _protocol_proc["p"] = None
 
             # Success → refresh data.json so Dashboard picks up new state
             if _protocol_state["status"] == "done":
+                # zh-TW localise any new deep verdicts BEFORE bridge reads the digest,
+                # so data.json carries the *_zh fields the News page renders. Best-effort
+                # (gemini/agy); never blocks the pipeline on a translation hiccup.
+                if name in ("news", "flash_text", "flash", "review"):
+                    try:
+                        subprocess.run(
+                            [sys.executable, os.path.join(ROOT, "news", "scripts", "translate_digest.py")],
+                            cwd=ROOT, capture_output=True, text=True, timeout=180,
+                        )
+                    except Exception:
+                        pass
                 run_bridge(reason=f"after {name} scan")
         except Exception as e:
             with _protocol_lock:
@@ -819,6 +954,14 @@ def _label_for(name, params):
     if name == "review":
         h = (p.get("headline") or "")[:24]
         return f"🧑‍⚖ REVIEW «{h}»"
+    if name == "link_digest":
+        u = (p.get("url") or "")
+        try:
+            from urllib.parse import urlparse as _up
+            host = _up(u).netloc or u
+        except Exception:
+            host = u
+        return f"🔗 Link «{host[:24]}»"
     if name == "news":
         return "📰 DIGEST"
     if name == "triage":
@@ -864,6 +1007,14 @@ def enqueue_protocol(name, params=None, source="direct"):
                 if any(q.get("name") == name and (q.get("params") or {}).get("ticker") == ticker
                        for q in _protocol_queue):
                     return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
+        else:
+            # V4.6 — parameterless script protocols (weekly_review 等): dedup by name
+            with _protocol_lock:
+                if _protocol_state.get("status") == "running" and _protocol_state.get("name") == name:
+                    return {"queued": False, "reason": "duplicate_active"}, "duplicate"
+            with _protocol_queue_lock:
+                if any(q.get("name") == name for q in _protocol_queue):
+                    return {"queued": False, "reason": "duplicate_pending"}, "duplicate"
 
     if name == "supply_chain_generate":
         theme = str(params.get("theme") or "").strip()
@@ -1370,11 +1521,18 @@ _premarket_chain_state = {
 }
 
 
-def _wait_protocol_completion(name, history_baseline, timeout_sec, on_progress=None):
-    """Block until a fresh entry for protocol `name` appears in _protocol_history
-    (i.e. completion happened AFTER history_baseline). Calls on_progress(running,
+def _wait_protocol_completion(name, baseline_ts, timeout_sec, on_progress=None):
+    """Block until a fresh completion entry for protocol `name` appears in
+    _protocol_history with ended_at >= baseline_ts. Calls on_progress(running,
     elapsed) every 2s while waiting. Returns the history entry dict on success,
-    raises RuntimeError on timeout."""
+    raises RuntimeError on timeout.
+
+    NOTE: baseline is a TIMESTAMP, not a list length. _protocol_history is capped
+    at _PROTOCOL_HISTORY_MAX (insert(0) + del[MAX:]), so its length stays constant
+    once full — the old count-based baseline (history[:len-baseline]) sliced to
+    empty forever and never matched, forcing every wait to its full timeout even
+    when the protocol had completed. Bug 2026-06-15 (premarket chain false-advance:
+    news/sector frozen at timeout wall while the next phase launched anyway)."""
     t0 = time.time()
     while True:
         time.sleep(2)
@@ -1388,9 +1546,20 @@ def _wait_protocol_completion(name, history_baseline, timeout_sec, on_progress=N
         )
         with _protocol_queue_lock:
             history = list(_protocol_history)
-        # New completions are at index [0..N-baseline)
-        new_completions = history[: max(0, len(history) - history_baseline)]
-        match = next((h for h in new_completions if h.get("name") == name), None)
+        # Match the newest completion for `name` that ended at/after baseline_ts.
+        match = None
+        for h in history:
+            if h.get("name") != name:
+                continue
+            ended = h.get("ended_at")
+            if not ended:
+                continue
+            try:
+                if datetime.fromisoformat(ended) >= baseline_ts:
+                    match = h
+                    break
+            except ValueError:
+                continue
         if match:
             return match
         if on_progress:
@@ -1473,8 +1642,7 @@ def run_premarket_chain():
                 if news_check and news_check.get("status") == "FRESH":
                     _set_item("news", status="skipped", reason="today_digest_fresh")
                     return
-                with _protocol_queue_lock:
-                    history_baseline = len(_protocol_history)
+                baseline_ts = datetime.now().replace(microsecond=0)
                 try:
                     state, err = enqueue_protocol("news", source="premarket_chain")
                     if err and err != "duplicate":
@@ -1484,11 +1652,19 @@ def run_premarket_chain():
                     phase1_errors.append(("news", str(e)))
                     return
                 _set_item("news", status="queued")
-                done_entry = _wait_protocol_completion(
-                    "news", history_baseline, timeout_sec=1500,
-                    on_progress=lambda running, sec: _set_item(
-                        "news", status="running" if running else "queued", elapsed_sec=sec),
-                )
+                # _run_news runs on its own thread — a RuntimeError (timeout) here
+                # would escape silently, leaving phase1_errors empty so the chain
+                # would false-advance to sector. Catch it and record the failure.
+                try:
+                    done_entry = _wait_protocol_completion(
+                        "news", baseline_ts, timeout_sec=1500,
+                        on_progress=lambda running, sec: _set_item(
+                            "news", status="running" if running else "queued", elapsed_sec=sec),
+                    )
+                except Exception as e:
+                    _set_item("news", status="error", error=str(e))
+                    phase1_errors.append(("news", str(e)))
+                    return
                 _set_item("news",
                           status=done_entry.get("status") or "done",
                           error=done_entry.get("error"))
@@ -1513,8 +1689,7 @@ def run_premarket_chain():
             if sector_check and sector_check.get("status") == "FRESH":
                 _set_item("sector", status="skipped", reason="today_intel_fresh")
             else:
-                with _protocol_queue_lock:
-                    history_baseline = len(_protocol_history)
+                baseline_ts = datetime.now().replace(microsecond=0)
                 state, err = enqueue_protocol("sector", source="premarket_chain")
                 if err and err != "duplicate":
                     raise RuntimeError(f"sector enqueue failed: {err}")
@@ -1522,11 +1697,17 @@ def run_premarket_chain():
                 # V2.20.1 — sector V1.4 PARALLEL_SUBAGENT typically takes 15-21 min
                 # (p95 ~21 min). Old 1200s/20min cap was too tight, hit timeout on 5/10
                 # despite sector still running. Bumped to 1800s/30min for headroom.
-                done_entry = _wait_protocol_completion(
-                    "sector", history_baseline, timeout_sec=1800,
-                    on_progress=lambda running, sec: _set_item(
-                        "sector", status="running" if running else "queued", elapsed_sec=sec),
-                )
+                try:
+                    done_entry = _wait_protocol_completion(
+                        "sector", baseline_ts, timeout_sec=1800,
+                        on_progress=lambda running, sec: _set_item(
+                            "sector", status="running" if running else "queued", elapsed_sec=sec),
+                    )
+                except Exception as e:
+                    # Surface timeout on the sector item too (the outer try sets the
+                    # chain to error, but leaves the item frozen at "queued" otherwise).
+                    _set_item("sector", status="error", error=str(e))
+                    raise
                 _set_item("sector",
                           status=done_entry.get("status") or "done",
                           error=done_entry.get("error"))
@@ -1992,6 +2173,16 @@ def _fmp_get_json(url, timeout=20):
     global _heatmap_ratelimit_until
     from urllib.request import Request, urlopen
     from urllib.error  import URLError, HTTPError
+    # Count this call against the shared cross-process 250/min window so the
+    # dashboard's ~500-ticker fan-out and a concurrent daily_update.sh run never
+    # collectively exceed FMP's limit. Keeps the urllib transport (so the 429
+    # circuit breaker below stays intact) — only the pacing is delegated.
+    try:
+        from scripts._shared import fmp_pool
+        fmp_pool.acquire_slot(block=True,
+                              target_rpm=FMP_DASHBOARD_RPM or None)
+    except Exception:
+        pass
     try:
         req = Request(url, headers={"User-Agent": "ai-invest-dashboard/heatmap"})
         with urlopen(req, timeout=timeout) as r:
@@ -2629,6 +2820,249 @@ def heatmap_refresh_loop():
 _positions_lock = threading.Lock()
 
 
+# ---------------------------------------------------------------- Ops Script 工具箱 (V3.47.0)
+# Registry @ config/ops_scripts.json。last run 由 artifact_globs 最新 mtime 推斷（零侵入，
+# 不要求 script 自己寫 run log）。cadence 超期 → status="due"；on_demand 不催。
+_OPS_CADENCE_HOURS = {"daily": 26, "weekly": 8 * 24, "monthly": 32 * 24}
+
+
+def _glob_ci(pattern):
+    """glob with case-insensitive fallback. macOS filesystems are
+    case-insensitive but Python's glob is not — a registry pattern like
+    `*postmortem*` silently missing `POSTMORTEM_*.md` produced a false
+    never_run badge (V4.6.1). Falls back to a lowercased fnmatch scan of the
+    pattern's directory when the exact glob hits nothing."""
+    hits = glob.glob(pattern)
+    if hits:
+        return hits
+    d, _, name = pattern.rpartition(os.sep)
+    if not d or any(ch in d for ch in "*?["):
+        return []
+    try:
+        return [os.path.join(d, f) for f in os.listdir(d)
+                if fnmatch.fnmatch(f.lower(), name.lower())]
+    except OSError:
+        return []
+
+
+def ops_scripts_status():
+    cfg_path = os.path.join(ROOT, "config", "ops_scripts.json")
+    try:
+        with open(cfg_path, "r", encoding="utf-8") as f:
+            registry = json.load(f).get("scripts", [])
+    except (OSError, json.JSONDecodeError) as e:
+        return {"error": f"ops_scripts.json unreadable: {e}", "scripts": []}
+
+    now = time.time()
+    out = []
+    for s in registry:
+        newest = None
+        for pat in s.get("artifact_globs", []):
+            for p in _glob_ci(os.path.join(ROOT, pat)):
+                try:
+                    m = os.path.getmtime(p)
+                except OSError:
+                    continue
+                if newest is None or m > newest:
+                    newest = m
+        age_h = (now - newest) / 3600 if newest else None
+        cadence = s.get("cadence", "on_demand")
+        limit = _OPS_CADENCE_HOURS.get(cadence)
+        if cadence == "on_demand":
+            status = "on_demand"
+        elif age_h is None:
+            status = "never_run"
+        elif age_h > limit:
+            status = "due"
+        else:
+            status = "fresh"
+        out.append({
+            "id": s.get("id"), "name": s.get("name"), "cmd": s.get("cmd"),
+            "desc": s.get("desc"), "cadence": cadence,
+            "last_run_ts": int(newest) if newest else None,
+            "last_run_age_hours": round(age_h, 1) if age_h is not None else None,
+            "status": status,
+            # V4.6 — 節奏自動化 passthrough
+            "protocol_id": s.get("protocol_id"),
+            "endpoint": s.get("endpoint"),
+            "auto": bool(s.get("auto")),
+        })
+    order = {"due": 0, "never_run": 1, "fresh": 2, "on_demand": 3}
+    out.sort(key=lambda r: (order.get(r["status"], 9), r["name"] or ""))
+    return {"generated_at": int(now), "scripts": out}
+
+
+# ── Ops auto-runner (V4.6 節奏自動化) ─────────────────────────────────────
+# Every 30 min: any registry entry with auto:true that is due/never_run gets
+# auto-dispatched. Whitelist = SCRIPT_PROTOCOLS (0-LLM scripts) + the journal
+# endpoint. Claude protocols (e.g. llm_review) are NEVER auto-run here unless
+# the OPS_AUTO_LLM=1 env opt-in is set AND the entry says auto:true — default
+# is reminder-only (llm_review already has its own launchd weekly trigger).
+OPS_AUTO_INTERVAL_SEC = int(os.getenv("OPS_AUTO_INTERVAL_SEC", "1800"))
+OPS_AUTO_BACKOFF_SEC = int(os.getenv("OPS_AUTO_BACKOFF_SEC", "21600"))  # 6h — failed run leaves status due forever
+_ops_auto_attempts = {}   # id -> last attempt ts
+
+
+def ops_auto_loop():
+    while True:
+        time.sleep(OPS_AUTO_INTERVAL_SEC)
+        try:
+            now = time.time()
+            for s in ops_scripts_status().get("scripts", []):
+                if not s.get("auto") or s["status"] not in ("due", "never_run"):
+                    continue
+                sid = s.get("id")
+                if now - _ops_auto_attempts.get(sid, 0) < OPS_AUTO_BACKOFF_SEC:
+                    continue
+                pid = s.get("protocol_id")
+                if s.get("endpoint") == "/api/journal-update":
+                    _ops_auto_attempts[sid] = now
+                    print(f"[ops_auto] dispatch journal-update ({sid} {s['status']})", flush=True)
+                    run_journal_update()
+                elif pid in SCRIPT_PROTOCOLS:
+                    _ops_auto_attempts[sid] = now
+                    print(f"[ops_auto] enqueue {pid} ({sid} {s['status']})", flush=True)
+                    enqueue_protocol(pid, source="ops_auto")
+                elif pid and os.getenv("OPS_AUTO_LLM", "0") == "1":
+                    _ops_auto_attempts[sid] = now
+                    print(f"[ops_auto] enqueue LLM protocol {pid} (OPS_AUTO_LLM=1)", flush=True)
+                    enqueue_protocol(pid, source="ops_auto")
+        except Exception as e:
+            print(f"[ops_auto] loop error: {e}", flush=True)
+
+
+# ── Today Workbench (V4.6) ────────────────────────────────────────────────
+# /api/today — server-side aggregation for the index.html workbench. Pulls
+# from existing truth sources (ops_scripts_status / preflight_check /
+# _list_reports_cached); deliberately NOT in bridge.py/data.json — due/staleness
+# must be computed at request time, not on the 300s bridge cadence.
+
+_REPORT_SUMMARY_CACHE = {}   # (path, mtime) -> list[str]
+_BRIEF_REGIME_RE = re.compile(r"- \*\*(Breadth|FTD|Market-Top|Regime)\*\*:\s*(.+)")
+
+
+def _extract_report_summary(full_path, type_key, mtime):
+    """Deterministic key-line extraction per report type. 0 LLM; failure → []."""
+    key = (full_path, mtime)
+    if key in _REPORT_SUMMARY_CACHE:
+        return _REPORT_SUMMARY_CACHE[key]
+    out = []
+    try:
+        with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+            head = f.read(4096)
+        if type_key == "ic_memo":
+            m = re.search(r"- \*\*Final Action\*\*:\s*(.+)", head)
+            if m:
+                out.append(m.group(1).replace("**", "").strip()[:120])
+        elif type_key == "weekly_short":
+            m = re.search(r"\*\*Total predictions evaluated\*\*:\s*(\d+)", head)
+            h = re.search(r"\|\s*1d\s*\|\s*\d+\s*\|\s*([\d.]+%)", head)
+            parts = ([f"{m.group(1)} preds"] if m else []) + ([f"1d hit {h.group(1)}"] if h else [])
+            if parts:
+                out.append(" · ".join(parts))
+        elif type_key == "shadow":
+            m = re.search(r"history entries scanned:\s*(\d+)", head)
+            if m:
+                out.append(f"{m.group(1)} entries scanned")
+        elif type_key == "llm_review":
+            m = re.search(r"_decisions_analyzed:\s*(\d+)_", head)
+            if m:
+                out.append(f"{m.group(1)} decisions analyzed")
+        elif type_key == "premarket":
+            for b in _BRIEF_REGIME_RE.finditer(head):
+                out.append(f"{b.group(1)}: {b.group(2).replace('**', '').strip()[:80]}")
+        if not out:
+            for ln in head.splitlines():
+                ln = ln.strip()
+                if ln.startswith("## ") or ln.startswith("> "):
+                    out.append(ln.lstrip("#> ").strip()[:120])
+                    break
+    except Exception:
+        out = []
+    if len(_REPORT_SUMMARY_CACHE) > 400:
+        _REPORT_SUMMARY_CACHE.clear()
+    _REPORT_SUMMARY_CACHE[key] = out
+    return out
+
+
+def _parse_morning_brief():
+    """Latest reports/PREMARKET_<date>.md → regime bullets + top-5 movers."""
+    files = sorted(glob.glob(os.path.join(REPORTS_DIR, "PREMARKET_*.md")))
+    if not files:
+        return None
+    path = files[-1]
+    name = os.path.basename(path)
+    date_str = name[len("PREMARKET_"):-3]
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            text = f.read(16384)
+    except OSError:
+        return None
+
+    regime_lines = [f"{m.group(1)}: {m.group(2).replace('**', '').strip()}"
+                    for m in _BRIEF_REGIME_RE.finditer(text)]
+
+    def _movers(section):
+        m = re.search(rf"### {section}\n((?:\|.*\n)+)", text)
+        rows = []
+        if m:
+            for row in m.group(1).splitlines():
+                cells = [c.strip() for c in row.strip().strip("|").split("|")]
+                if len(cells) >= 2 and cells[0] and cells[0] not in ("Ticker", "---") \
+                        and not set(cells[0]) <= {"-", ":"}:
+                    rows.append([cells[0], cells[1]])
+                if len(rows) >= 5:
+                    break
+        return rows
+
+    return {
+        "filename": name,
+        "date": date_str,
+        "is_today": date_str == datetime.now().strftime("%Y-%m-%d"),
+        "regime_lines": regime_lines,
+        "gainers": _movers("Gainers"),
+        "losers": _movers("Losers"),
+    }
+
+
+def today_digest():
+    """Aggregate due actions + latest outputs + morning brief for index workbench."""
+    due_actions = []
+    for s in ops_scripts_status().get("scripts", []):
+        if s["status"] in ("due", "never_run") and s["cadence"] != "on_demand":
+            due_actions.append({
+                "kind": "ops_script", "id": s["id"], "name": s["name"],
+                "status": s["status"], "age_hours": s["last_run_age_hours"],
+                "cadence": s["cadence"], "cmd": s["cmd"],
+                "protocol_id": s.get("protocol_id"), "endpoint": s.get("endpoint"),
+                "auto": s.get("auto"),
+            })
+    try:
+        for c in preflight_check():
+            if c["status"] in ("STALE", "MISSING") and not c.get("free"):
+                due_actions.append({
+                    "kind": "protocol_stale", "key": c["key"], "label": c["label"],
+                    "label_en": c["label_en"], "age_str": c["age_str"], "status": c["status"],
+                })
+    except Exception:
+        pass
+
+    items, _counts = _list_reports_cached()
+    latest_outputs = []
+    for it in sorted(items, key=lambda x: x["mtime"], reverse=True)[:10]:
+        entry = dict(it)
+        entry["summary_lines"] = _extract_report_summary(
+            os.path.join(REPORTS_DIR, it["filename"]), it["type"], it["mtime"])
+        latest_outputs.append(entry)
+
+    return {
+        "generated_at": int(time.time()),
+        "due_actions": due_actions,
+        "latest_outputs": latest_outputs,
+        "morning_brief": _parse_morning_brief(),
+    }
+
+
 def load_positions():
     if not os.path.exists(POSITIONS):
         return {"positions": []}
@@ -2694,6 +3128,8 @@ try:
     from scripts.break_news import poller as _bn_poller
     from scripts.break_news import debater as _bn_debater
     from scripts.break_news import trend_rollup as _bn_trend
+    from scripts.break_news import cluster as _bn_cluster
+    from scripts.break_news import market_brief as _bn_brief
     BREAK_NEWS_AVAILABLE = True
 except Exception as _bn_e:
     BREAK_NEWS_AVAILABLE = False
@@ -2713,6 +3149,78 @@ except Exception as _sc_e:
 _sc_cache = {}            # slug -> {"data": enriched_chain, "ts": float}
 SC_TTL_SEC = 60
 _sc_slug_re = re.compile(r"^[a-z0-9_]{1,48}$")
+
+# ── AI Office (V3.39 — autonomous multi-agent collaboration) ─────────────
+# scripts/office/. A team of role-pinned CLI agents (Lead=claude / Critic=gemini
+# / Verifier=codex) collaborates on a task to completion via model_router (daily
+# budgets + cooldown + fallback), reusing the same `-p` drivers Break News runs
+# — no new billing surface. Turns stream to the UI as structured events (SSE).
+# Security: 127.0.0.1 bind (already) + per-process session token + Origin allowlist.
+import hmac
+import secrets as _secrets
+from urllib.parse import parse_qs, unquote
+
+try:
+    from scripts.office import orchestrator as _office_orch
+    from scripts.office import store as _office_store
+    OFFICE_AVAILABLE = True
+except Exception as _office_e:  # noqa: BLE001
+    OFFICE_AVAILABLE = False
+    sys.stderr.write(f"[office] module load failed: {_office_e}\n")
+
+# ── Industry constituents (radar drill-down — full list via finvizfinance) ──
+# industry_trend has no constituent lists; heatmap covers only large caps. This
+# scrapes the full finviz industry membership (incl. small/mid caps) on demand,
+# behind a long TTL cache since industry membership rarely changes intraday.
+INDUSTRY_CACHE_TTL_SEC = int(os.getenv("INDUSTRY_CACHE_TTL_SEC", str(12 * 3600)))
+_industry_cache = {}                 # industry_lower -> {"ts": float, "data": dict}
+_industry_cache_lock = threading.Lock()
+_INDUSTRY_NAME_RE = re.compile(r"^[A-Za-z0-9 &/\-.,'()]{1,80}$")
+
+
+def _fetch_industry_constituents(name):
+    """Full ticker list for a finviz industry via finvizfinance Screener.
+    Returns {industry, count, tickers:[{ticker,company,sector,market_cap}], ...}
+    or {error}. No API key required (public finviz scrape)."""
+    try:
+        from finvizfinance.screener.overview import Overview
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"finvizfinance unavailable: {e}"}
+    try:
+        ov = Overview()
+        ov.set_filter(filters_dict={"Industry": name})
+        df = ov.screener_view(limit=300, verbose=0)
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"finviz fetch failed: {str(e)[:200]}"}
+    rows = []
+    if df is not None and len(df):
+        for _, r in df.iterrows():
+            tk = str(r.get("Ticker") or "").strip()
+            if not tk:
+                continue
+            rows.append({
+                "ticker": tk,
+                "company": str(r.get("Company") or "")[:80],
+                "sector": str(r.get("Sector") or ""),
+                "market_cap": str(r.get("Market Cap") or ""),
+            })
+    return {"industry": name, "count": len(rows), "tickers": rows,
+            "source": "finviz",
+            "as_of": datetime.now().isoformat(timespec="seconds")}
+
+# Only one autonomous run at a time (it fans out to 3 CLIs per round).
+_office_run_lock = threading.Lock()
+
+# Per-process secret minted at boot. The same-origin office page fetches it via
+# GET /api/office/token (Origin-gated); every other office call must present it.
+_OFFICE_TOKEN = _secrets.token_urlsafe(32)
+_OFFICE_ALLOWED_ORIGINS = {
+    f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}",
+}
+
+
+def _office_token_ok(token):
+    return bool(token) and hmac.compare_digest(str(token), _OFFICE_TOKEN)
 
 
 def break_news_poll_loop():
@@ -2759,6 +3267,12 @@ def break_news_debate_loop():
             with _break_news_lock:
                 _break_news_state["last_error"] = str(e)[:300]
             sys.stderr.write(f"[break_news] debate scan error: {e}\n")
+        # Market brief — TTL-gated inside (1 LLM call per BRIEF_INTERVAL_SEC,
+        # default 2h); piggybacks on this loop so no extra thread.
+        try:
+            _bn_brief.maybe_generate()
+        except Exception as e:
+            sys.stderr.write(f"[break_news] market brief error: {e}\n")
         if _shutdown.wait(BREAK_NEWS_INTERVAL_SEC):
             return
 
@@ -2782,6 +3296,201 @@ def _bn_kick_debate_scan():
 
 _BREAK_NEWS_ID_RE = re.compile(r"^bn_\d{8}_[0-9a-f]{6,16}$")
 _BREAK_NEWS_KEY_RE = re.compile(r"^[0-9a-f]{40}$")   # raw-stream entry key = sha1 hex
+
+
+# ── Reports Center (V3.26.0) ─────────────────────────────────────────────
+# Read-only browser over reports/*.md (262+ files spanning ic_memo, earnings,
+# sector_report, news_digest, news_flash, pre_earnings, weekly variants, etc).
+# Used by /reports.html — does NOT touch decision/skill layer.
+REPORTS_DIR = os.path.join(ROOT, "reports")
+_REPORTS_FILENAME_RE = re.compile(r"^[A-Za-z0-9_\-.]+\.md$")
+_REPORTS_DATE_RE = re.compile(r"^(\d{4}-?\d{2}-?\d{2})(?:[_-]|$)")
+_REPORTS_TICKER_RE = re.compile(r"_([A-Z]{1,5})_")
+_REPORT_TYPE_RULES = [
+    # (regex matched against filename, type key, label_zh, label_en)
+    (re.compile(r"_ic_memo\.md$"),                  "ic_memo",      "IC Memo",      "IC Memo"),
+    (re.compile(r"pre[_-]?earnings", re.I),         "pre_earnings", "財報前瞻",     "Pre-Earnings"),
+    (re.compile(r"_earnings\.md$"),                 "earnings",     "財報分析",     "Earnings"),
+    (re.compile(r"_sector_report\.md$"),            "sector",       "產業掃描",     "Sector"),
+    (re.compile(r"_news_digest\.md$"),              "news_digest",  "新聞 Digest",  "News Digest"),
+    (re.compile(r"_news_flash\.md$"),               "news_flash",   "新聞 Flash",   "News Flash"),
+    (re.compile(r"_link_digest\.md$"),              "link_digest",  "連結分析",     "Link Digest"),
+    (re.compile(r"^SHORT_TERM_WEEKLY"),             "weekly_short", "短期週報",     "Short-term Weekly"),
+    (re.compile(r"^WEEKLY"),                        "weekly",       "週報",         "Weekly"),
+    # V4.6 — 產出閉環: previously editor-only outputs surfaced in reports browser
+    (re.compile(r"^SHADOW_REPORT"),                 "shadow",       "影子實驗",     "Shadow"),
+    (re.compile(r"^PREMARKET_"),                    "premarket",    "盤前簡報",     "Pre-Market"),
+    (re.compile(r"^POSTMORTEM_", re.I),             "postmortem",   "回測覆盤",     "Postmortem"),
+    (re.compile(r"^decision_review/REVIEW_"),       "llm_review",   "決策檢討",     "LLM Review"),
+    (re.compile(r"^decision_review/ADJUSTMENT_LEDGER\.md$"),
+                                                    "ledger",       "調整 Ledger",  "Adj. Ledger"),
+    (re.compile(r"SENTIMENT_PHASE2"),               "sentiment",    "情緒分析",     "Sentiment"),
+    (re.compile(r"_valuation", re.I),               "valuation",    "估值專題",     "Valuation"),
+    (re.compile(r"theme_(detector|report)"),        "theme",        "主題報告",     "Theme"),
+    # YYYYMMDD_TICKER.md  or  YYYY-MM-DD_TICKER.md — V5.0 deep-dive reports.
+    # Match must be exact end-of-name to avoid catching e.g. _earnings/_ic_memo.
+    (re.compile(r"^\d{4}-?\d{2}-?\d{2}_[A-Z]{1,5}\.md$"),
+                                                    "deep_dive",    "個股深度",     "Deep Dive"),
+]
+_REPORTS_CACHE = {"ts": 0.0, "dir_mtime": 0.0, "items": None, "counts": None}
+_REPORTS_CACHE_TTL_SEC = 60
+
+
+def _classify_report(filename: str) -> dict:
+    for rx, tkey, zh, en in _REPORT_TYPE_RULES:
+        if rx.search(filename):
+            type_key, label_zh, label_en = tkey, zh, en
+            break
+    else:
+        type_key, label_zh, label_en = "other", "其他", "Other"
+
+    # date/ticker parsed from basename (filename may carry a subdir, e.g. decision_review/)
+    base = filename.rsplit("/", 1)[-1]
+    m_date = _REPORTS_DATE_RE.match(base)
+    if not m_date:                              # REVIEW_/SHADOW_REPORT_<date> style (date after prefix)
+        m_date = re.search(r"(\d{4}-\d{2}-\d{2})", base)
+    date_str = ""
+    if m_date:
+        raw = m_date.group(1)
+        if len(raw) == 8:                       # YYYYMMDD
+            date_str = f"{raw[0:4]}-{raw[4:6]}-{raw[6:8]}"
+        else:
+            date_str = raw                      # YYYY-MM-DD
+
+    ticker = ""
+    m_tk = _REPORTS_TICKER_RE.search("_" + base)
+    if m_tk:
+        cand = m_tk.group(1)
+        # Drop common non-ticker tokens that look uppercase
+        if cand not in {"IC", "FY", "MD", "ET", "US"}:
+            ticker = cand
+
+    return {
+        "filename": filename,
+        "type": type_key,
+        "label_zh": label_zh,
+        "label_en": label_en,
+        "date": date_str,
+        "ticker": ticker,
+    }
+
+
+# V4.6 — decision_review/ sub-dir: only the human-facing outputs (REVIEW_<date> +
+# ADJUSTMENT_LEDGER), not PROMPT/TODO/SCHEMA scaffolding or event_index machine files.
+_DECISION_REVIEW_FILE_RE = re.compile(r"^(REVIEW_\d{4}-\d{2}-\d{2}|ADJUSTMENT_LEDGER)\.md$")
+
+
+def _list_reports_cached() -> tuple:
+    """Returns (items, counts). Caches 60s, invalidated when reports/ mtime changes."""
+    now = time.time()
+    dr_dir = os.path.join(REPORTS_DIR, "decision_review")
+    try:
+        dir_mtime = os.path.getmtime(REPORTS_DIR)
+    except OSError:
+        return ([], {})
+    try:
+        dir_mtime = max(dir_mtime, os.path.getmtime(dr_dir))
+    except OSError:
+        pass
+    if (_REPORTS_CACHE["items"] is not None
+            and now - _REPORTS_CACHE["ts"] < _REPORTS_CACHE_TTL_SEC
+            and _REPORTS_CACHE["dir_mtime"] == dir_mtime):
+        return (_REPORTS_CACHE["items"], _REPORTS_CACHE["counts"])
+
+    rel_names = []
+    try:
+        rel_names += [n for n in os.listdir(REPORTS_DIR)
+                      if n.endswith(".md") and _REPORTS_FILENAME_RE.match(n)]
+    except OSError:
+        pass
+    try:
+        rel_names += [f"decision_review/{n}" for n in os.listdir(dr_dir)
+                      if _DECISION_REVIEW_FILE_RE.match(n)]
+    except OSError:
+        pass
+
+    items = []
+    counts = {}
+    for name in rel_names:
+        full = os.path.join(REPORTS_DIR, name)
+        if not os.path.isfile(full):
+            continue
+        try:
+            st = os.stat(full)
+        except OSError:
+            continue
+        meta = _classify_report(name)
+        meta["size_kb"] = round(st.st_size / 1024.0, 1)
+        meta["mtime"] = int(st.st_mtime)
+        # V4.6 — key-line summary for the surfaced ops/review outputs
+        if meta["type"] in ("shadow", "premarket", "postmortem", "llm_review", "ledger", "weekly_short"):
+            meta["summary"] = " · ".join(
+                _extract_report_summary(full, meta["type"], meta["mtime"])[:2])
+        items.append(meta)
+        counts[meta["type"]] = counts.get(meta["type"], 0) + 1
+
+    # Sort: by date (desc) when present, else by mtime (desc). Same-key tiebreak by filename.
+    items.sort(key=lambda x: (x["date"] or "", x["mtime"], x["filename"]), reverse=True)
+
+    _REPORTS_CACHE["ts"] = now
+    _REPORTS_CACHE["dir_mtime"] = dir_mtime
+    _REPORTS_CACHE["items"] = items
+    _REPORTS_CACHE["counts"] = counts
+    return (items, counts)
+
+
+# ── V4.6 — Adjustment Ledger parser (read-only; writes stay with llm_review/human) ──
+_LEDGER_CACHE = {"mtime": 0.0, "data": None}
+
+
+def adjustment_ledger():
+    """Parse reports/decision_review/ADJUSTMENT_LEDGER.md → structured entries."""
+    path = os.path.join(REPORTS_DIR, "decision_review", "ADJUSTMENT_LEDGER.md")
+    try:
+        mtime = os.path.getmtime(path)
+    except OSError:
+        return {"entries": [], "active": 0, "error": "ADJUSTMENT_LEDGER.md not found"}
+    if _LEDGER_CACHE["data"] is not None and _LEDGER_CACHE["mtime"] == mtime:
+        return _LEDGER_CACHE["data"]
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            text = f.read()
+    except OSError as e:
+        return {"entries": [], "active": 0, "error": str(e)}
+
+    entries = []
+    for b in re.split(r"\n## ", text)[1:]:
+        title = b.splitlines()[0].strip()
+
+        def field(name, _b=b):
+            m = re.search(rf"- \*\*{name}\*\*:\s*(.+)", _b)
+            return m.group(1).strip() if m else ""
+
+        tm = field("target_metric")
+        if not tm:
+            m = re.search(r"- \*\*target_metric\*\*:\s*\n((?:\s+- .+\n?)+)", b)
+            if m:
+                tm = "; ".join(ln.strip().lstrip("- ").strip()
+                               for ln in m.group(1).splitlines() if ln.strip())
+        latest_eval = ""
+        m = re.search(r"- \*\*evaluation_history\*\*:\s*\n((?:\s+- .+\n?)+)", b)
+        if m:
+            evals = [ln.strip().lstrip("- ").strip()
+                     for ln in m.group(1).splitlines() if ln.strip()]
+            if evals:
+                latest_eval = evals[-1]
+        entries.append({
+            "title": title,
+            "applied_date": field("applied_date"),
+            "status": field("status") or "unknown",
+            "target_metric": tm[:400],
+            "latest_eval": latest_eval[:400],
+        })
+
+    data = {"generated_at": int(time.time()), "entries": entries,
+            "active": sum(1 for e in entries if e["status"] == "active")}
+    _LEDGER_CACHE.update({"mtime": mtime, "data": data})
+    return data
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -2822,10 +3531,141 @@ class Handler(SimpleHTTPRequestHandler):
             return f'{attr}="{asset_path}?v={mtime}"'
         return self._ASSET_RE.sub(sub, html_bytes.decode("utf-8")).encode("utf-8")
 
+    # ── Office helpers (security) ─────────────────────────────────────────
+    def _office_origin_ok(self):
+        """Reject cross-origin callers. Absent Origin (same-origin navigation /
+        non-browser) is allowed; a present Origin must be in the allowlist."""
+        origin = self.headers.get("Origin")
+        if origin is None:
+            return True
+        return origin in _OFFICE_ALLOWED_ORIGINS
+
+    def _office_guard(self, need_token=True):
+        """Returns None if the request may proceed, else an (code, body) the
+        caller should hand to _json. Token may arrive as an X-Office-Token
+        header or a ?token= query param (EventSource can't set headers)."""
+        if not OFFICE_AVAILABLE:
+            return 503, {"error": "office module not loaded"}
+        if not self._office_origin_ok():
+            return 403, {"error": "bad origin"}
+        if need_token:
+            tok = self.headers.get("X-Office-Token")
+            if tok is None:
+                qs = parse_qs(urlparse(self.path).query)
+                tok = (qs.get("token") or [None])[0]
+            if not _office_token_ok(tok):
+                return 403, {"error": "bad token"}
+        return None
+
+    def _office_sse_stream(self, run_id):
+        """Tail a run's event log as Server-Sent Events until it terminates.
+        Replays from seq 0 so a late/refreshed client gets the full history."""
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+        except OSError:
+            return
+        since = 0
+        idle = 0
+        while not _shutdown.is_set():
+            events = _office_store.load_events(run_id, since=since)
+            for ev in events:
+                since = ev.get("seq", since) + 1
+                try:
+                    self.wfile.write(
+                        f"data: {json.dumps(ev, ensure_ascii=False)}\n\n".encode("utf-8"))
+                    self.wfile.flush()
+                except OSError:
+                    return
+            meta = _office_store.load_meta(run_id)
+            terminal = meta and meta.get("status") in ("done", "stopped", "failed")
+            if terminal and not events:
+                # Flush a final sentinel and close.
+                try:
+                    self.wfile.write(b"event: end\ndata: {}\n\n")
+                    self.wfile.flush()
+                except OSError:
+                    pass
+                return
+            if not events:
+                idle += 1
+                if idle % 15 == 0:  # ~15s keepalive comment
+                    try:
+                        self.wfile.write(b": keepalive\n\n")
+                        self.wfile.flush()
+                    except OSError:
+                        return
+                time.sleep(1.0)
+            else:
+                idle = 0
+
     def do_GET(self):
         path = urlparse(self.path).path
+
+        # ── Industry constituents (radar drill-down full list) ──────────
+        if path.startswith("/api/industry/"):
+            name = unquote(path[len("/api/industry/"):]).strip()
+            if not _INDUSTRY_NAME_RE.match(name):
+                return self._json(400, {"error": "bad industry name"})
+            key = name.lower()
+            now = time.time()
+            with _industry_cache_lock:
+                ent = _industry_cache.get(key)
+                if ent and now - ent["ts"] < INDUSTRY_CACHE_TTL_SEC:
+                    return self._json(200, {**ent["data"], "cached": True})
+            data = _fetch_industry_constituents(name)
+            if data.get("error"):
+                return self._json(502, data)
+            with _industry_cache_lock:
+                _industry_cache[key] = {"ts": now, "data": data}
+            return self._json(200, {**data, "cached": False})
+
+        # ── AI Office (autonomous multi-agent collaboration) ────────────
+        if path == "/api/office/token":
+            # Origin-gated token mint (no token needed to fetch the token).
+            guard = self._office_guard(need_token=False)
+            if guard:
+                return self._json(*guard)
+            return self._json(200, {"token": _OFFICE_TOKEN})
+        if path == "/api/office/runs":
+            guard = self._office_guard()
+            if guard:
+                return self._json(*guard)
+            return self._json(200, {"runs": _office_store.list_runs(),
+                                    "active": _office_store.active_run()})
+        if path.startswith("/api/office/run/"):
+            guard = self._office_guard()
+            if guard:
+                return self._json(*guard)
+            tail = path[len("/api/office/run/"):]
+            stream = tail.endswith("/stream")
+            run_id = tail[:-len("/stream")] if stream else tail
+            meta = _office_store.load_meta(run_id)
+            if meta is None:
+                return self._json(404, {"error": "run not found"})
+            if stream:
+                return self._office_sse_stream(run_id)
+            return self._json(200, {
+                "meta": meta,
+                "events": _office_store.load_events(run_id),
+                "deliverable": _office_store.load_deliverable(run_id),
+            })
+
         if path == "/api/positions":
             return self._json(200, load_positions())
+        if path == "/api/ops/scripts":
+            # V3.47.0 — Script 工具箱：registry + artifact-mtime 推斷 last run + 到期判定
+            return self._json(200, ops_scripts_status())
+        if path == "/api/today":
+            # V4.6 — Today 工作台：due actions + 最新產出 feed + 晨報 digest
+            return self._json(200, today_digest())
+        if path == "/api/adjustment-ledger":
+            # V4.6 — 產出閉環：ADJUSTMENT_LEDGER.md 結構化（唯讀）
+            return self._json(200, adjustment_ledger())
         if path == "/api/llm-config":
             # Full governance config + live per-model usage/status.
             if MODEL_ROUTER_AVAILABLE:
@@ -2871,78 +3711,6 @@ class Handler(SimpleHTTPRequestHandler):
                     "error":             _heatmap_state["error"],
                 }
             return self._json(200, payload)
-
-        # ── Narrative Pulse Detector V1.0 ────────────────────────────
-        if path == "/api/narrative-pulse/data":
-            npd_path = os.path.join(DASHBOARD_DIR, "narrative_pulse.json")
-            if not os.path.exists(npd_path):
-                return self._json(404, {
-                    "error": "narrative_pulse.json not built",
-                    "hint": "run skills/narrative-pulse-detector/scripts/batch_scan.py "
-                            "or wait for daily_update.sh Step 9",
-                })
-            try:
-                with open(npd_path, "r", encoding="utf-8") as f:
-                    return self._json(200, json.load(f))
-            except (OSError, json.JSONDecodeError) as e:
-                return self._json(500, {"error": str(e)})
-
-        if path.startswith("/api/narrative-pulse/ticker/"):
-            ticker = path.rsplit("/", 1)[-1].strip().upper()
-            if not re.match(r"^[A-Z][A-Z0-9.\-]{0,8}$", ticker):
-                return self._json(400, {"error": "invalid ticker"})
-            # Check fresh cache first (TTL handled by pulse.py)
-            today = datetime.utcnow().strftime("%Y-%m-%d")
-            cache_path = os.path.join(
-                ROOT, "skills/narrative-pulse-detector/cache",
-                f"{ticker}_{today}.json",
-            )
-            # Codex review #3 fix: invalidate cache when stage_weights.yaml
-            # changes (compare cached.weights_version to current config).
-            current_wv = None
-            try:
-                import yaml as _yaml
-                wcfg_path = os.path.join(
-                    ROOT, "skills/narrative-pulse-detector/config/stage_weights.yaml",
-                )
-                with open(wcfg_path, "r", encoding="utf-8") as f:
-                    current_wv = (_yaml.safe_load(f) or {}).get("weights_version")
-            except Exception:
-                pass
-            if os.path.exists(cache_path):
-                age_h = (datetime.utcnow().timestamp()
-                         - os.path.getmtime(cache_path)) / 3600
-                if age_h < 4:
-                    try:
-                        with open(cache_path, "r", encoding="utf-8") as f:
-                            cached = json.load(f)
-                        # Only serve from cache if weights_version matches
-                        if current_wv is None or cached.get("weights_version") == current_wv:
-                            return self._json(200, cached)
-                    except (OSError, json.JSONDecodeError):
-                        pass
-            # Cache miss / stale → dispatch subprocess synchronously (≤ 90s typical)
-            try:
-                proc = subprocess.run(
-                    ["python3", "skills/narrative-pulse-detector/scripts/pulse.py", ticker],
-                    cwd=ROOT, capture_output=True, text=True,
-                    timeout=int(os.getenv("NARRATIVE_PULSE_TIMEOUT_SEC", "120")),
-                )
-                if proc.returncode != 0:
-                    return self._json(500, {
-                        "error": "pulse.py failed",
-                        "stderr": proc.stderr[-2000:],
-                        "returncode": proc.returncode,
-                    })
-                # Read newly created cache
-                if os.path.exists(cache_path):
-                    with open(cache_path, "r", encoding="utf-8") as f:
-                        return self._json(200, json.load(f))
-                return self._json(500, {"error": "pulse.py ran but cache not written"})
-            except subprocess.TimeoutExpired:
-                return self._json(504, {"error": "pulse.py timeout"})
-            except Exception as e:
-                return self._json(500, {"error": str(e)[:300]})
 
         # ── Project Nexus V3.0 — Knowledge Graph ────────────────────────
         if path == "/api/graph/data":
@@ -3107,6 +3875,16 @@ class Handler(SimpleHTTPRequestHandler):
             if d is None:
                 return self._json(404, {"error": "not found"})
             return self._json(200, d)
+        if path == "/api/break-news/stale-pending":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            try:
+                items = _bn_debater.list_stale_pending()
+            except AttributeError:
+                items = []
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+            return self._json(200, {"items": items, "count": len(items)})
         if path == "/api/break-news/raw-stream":
             if not BREAK_NEWS_AVAILABLE:
                 return self._json(503, {"error": "break_news module not loaded"})
@@ -3132,6 +3910,40 @@ class Handler(SimpleHTTPRequestHandler):
                 "live": live, "persisted": persisted,
                 "interval_sec": BREAK_NEWS_INTERVAL_SEC,
             })
+        if path == "/api/break-news/brief":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            try:
+                data = _bn_brief.load_brief()
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+            payload = {
+                "current": data.get("current"),
+                "history_count": len(data.get("history") or []),
+                "interval_sec": _bn_brief.BRIEF_INTERVAL_SEC,
+            }
+            if "history=1" in (urlparse(self.path).query or ""):
+                payload["history"] = data.get("history") or []
+            return self._json(200, payload)
+        if path == "/api/break-news/clusters":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            qs = urlparse(self.path).query
+            params = dict(kv.split("=", 1) for kv in qs.split("&") if "=" in kv)
+            try:
+                hours = max(1.0, min(float(params.get("hours", "24")), 72.0))
+            except ValueError:
+                hours = 24.0
+            try:
+                min_echo = max(1, min(int(params.get("min_echo", "2")), 50))
+            except ValueError:
+                min_echo = 2
+            try:
+                items = _bn_cluster.cluster_feed(hours=hours, min_echo=min_echo)
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+            return self._json(200, {"clusters": items, "count": len(items),
+                                    "hours": hours, "min_echo": min_echo})
         if path == "/api/break-news/trends":
             if not BREAK_NEWS_AVAILABLE:
                 return self._json(503, {"error": "break_news module not loaded"})
@@ -3387,6 +4199,42 @@ class Handler(SimpleHTTPRequestHandler):
             state["log_tail"] = _tail_log(state.get("log_path"), lines=40)
             return self._json(200, state)
 
+        # V3.26.0 — Reports Center: list reports/*.md classified by type
+        if path == "/api/reports":
+            items, counts = _list_reports_cached()
+            return self._json(200, {"reports": items, "counts": counts, "total": len(items)})
+
+        # V3.26.0 — Reports Center: serve a single reports/*.md (whitelist + no traversal)
+        if path.startswith("/api/reports/view/"):
+            rel = unquote(path[len("/api/reports/view/"):])
+            # V4.6 — explicit decision_review/ branch; base regex still rejects "/" and "..".
+            if rel.startswith("decision_review/"):
+                tail = rel[len("decision_review/"):]
+                if not _DECISION_REVIEW_FILE_RE.match(tail):
+                    self.send_error(400, "bad filename")
+                    return
+            elif not _REPORTS_FILENAME_RE.match(rel):
+                self.send_error(400, "bad filename")
+                return
+            full = os.path.join(REPORTS_DIR, rel)
+            if not os.path.isfile(full):
+                self.send_error(404, "not found")
+                return
+            try:
+                with open(full, "rb") as f:
+                    body = f.read()
+            except OSError as e:
+                self.send_error(500, f"read error: {e}")
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "text/markdown; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         # Serve /decision_review/* from reports/decision_review/ (read-only)
         if path.startswith("/decision_review/"):
             rel = path[len("/decision_review/"):]
@@ -3433,6 +4281,43 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+
+        # ── AI Office (autonomous multi-agent collaboration) ────────────
+        if path == "/api/office/run":
+            guard = self._office_guard()
+            if guard:
+                return self._json(*guard)
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            task = (body.get("task") or "").strip()
+            if not task:
+                return self._json(400, {"error": "missing 'task'"})
+            if len(task) > 8000:
+                return self._json(400, {"error": "task too long (max 8000 chars)"})
+            with _office_run_lock:
+                if _office_store.active_run():
+                    return self._json(409, {"error": "a run is already in progress",
+                                            "active": _office_store.active_run()})
+                try:
+                    max_rounds = int(body.get("max_rounds") or _office_orch.MAX_ROUNDS)
+                except (TypeError, ValueError):
+                    max_rounds = _office_orch.MAX_ROUNDS
+                max_rounds = max(1, min(max_rounds, 6))
+                meta = _office_orch.start_run(task, max_rounds=max_rounds)
+            return self._json(202, meta)
+        if path.startswith("/api/office/run/") and path.endswith("/stop"):
+            guard = self._office_guard()
+            if guard:
+                return self._json(*guard)
+            run_id = path[len("/api/office/run/"):-len("/stop")]
+            if _office_store.load_meta(run_id) is None:
+                return self._json(404, {"error": "run not found"})
+            stopped = _office_orch.request_stop(run_id)
+            return self._json(202, {"run_id": run_id, "stop_requested": stopped})
+
         if path == "/api/llm-config":
             length = int(self.headers.get("Content-Length", 0))
             try:
@@ -3588,6 +4473,16 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(500, {"error": str(e)[:300]})
             return self._json(202, res)
 
+        if path == "/api/break-news/brief/refresh":
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            # 1 LLM call (~30-60s) — run in background; UI polls GET /brief.
+            threading.Thread(
+                target=lambda: _bn_brief.generate(force=True),
+                daemon=True, name="bn-brief-refresh",
+            ).start()
+            return self._json(202, {"status": "generating"})
+
         if path == "/api/supply-chain/generate":
             if not SUPPLY_CHAIN_AVAILABLE:
                 return self._json(503, {"error": "supply_chain module not loaded"})
@@ -3663,6 +4558,37 @@ class Handler(SimpleHTTPRequestHandler):
             # Reset to pending_debate so the next debate scan picks it up.
             _bn_store.set_state(tail, "pending_debate")
             return self._json(202, {"news_id": tail, "state": "pending_debate"})
+
+        if path.startswith("/api/break-news/item/") and path.endswith("/debate-now"):
+            # Manual single-item debate. Bypasses scan_and_debate (which honors
+            # PENDING_MAX_AGE_HOURS), so user can spend LLM budget on a stale
+            # backlog item explicitly.
+            tail = path[len("/api/break-news/item/"):-len("/debate-now")]
+            if not _BREAK_NEWS_ID_RE.match(tail):
+                return self._json(400, {"error": "invalid news_id"})
+            if not BREAK_NEWS_AVAILABLE:
+                return self._json(503, {"error": "break_news module not loaded"})
+            d = _bn_store.load_item(tail)
+            if d is None:
+                return self._json(404, {"error": "not found"})
+            if d.get("state") not in ("pending_debate", "partial_closed", "failed"):
+                return self._json(409, {"error": "item not eligible",
+                                        "state": d.get("state")})
+
+            def _run_single(nid=tail):
+                try:
+                    with _break_news_dispatch_lock:
+                        _bn_debater.debate_item(nid, verbose=False)
+                    with _break_news_lock:
+                        _break_news_state["last_debate_scan"] = \
+                            datetime.now().isoformat(timespec="seconds")
+                except Exception as ex:
+                    with _break_news_lock:
+                        _break_news_state["last_error"] = str(ex)[:300]
+                    sys.stderr.write(f"[break_news] debate-now {nid} error: {ex}\n")
+
+            threading.Thread(target=_run_single, daemon=True).start()
+            return self._json(202, {"news_id": tail, "state": "debating"})
 
         if path == "/api/run-protocol":
             length = int(self.headers.get("Content-Length", 0))
@@ -3865,6 +4791,8 @@ if __name__ == "__main__":
     fred_thread.start()
     heatmap_thread = threading.Thread(target=heatmap_refresh_loop, daemon=True)
     heatmap_thread.start()
+    # V4.6 — 節奏自動化: due 的 auto:true registry scripts 自動跑（0-LLM 白名單）
+    threading.Thread(target=ops_auto_loop, daemon=True, name="ops_auto").start()
 
     # Break News (RSS poller + Claude/Gemini debate scanner)
     if BREAK_NEWS_AVAILABLE:
@@ -3884,6 +4812,12 @@ if __name__ == "__main__":
               f"(Claude + Gemini CLI debate)")
     else:
         sys.stderr.write("[break_news] disabled (module not loaded)\n")
+
+    if OFFICE_AVAILABLE:
+        print("AI Office:          autonomous team at /office.html "
+              "(Lead=claude / Critic=gemini / Verifier=codex; token + Origin gated)")
+    else:
+        sys.stderr.write("[office] disabled (module not loaded)\n")
 
     try:
         srv.serve_forever()

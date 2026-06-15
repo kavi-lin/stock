@@ -133,7 +133,15 @@ document.addEventListener('DOMContentLoaded', () => {
           ? `<span class="text-[9px] font-black px-2 py-0.5 rounded-full border ${item.within_48h ? 'text-red-400 border-red-500/40 bg-red-500/10 animate-pulse' : 'text-yellow-400 border-yellow-500/40 bg-yellow-500/10'}">${np.binary_badge || '⚡ BINARY RISK'}</span>`
           : '';
 
-        // Bull / Bear / Arbiter section
+        // Bull / Bear / Arbiter section.
+        // Prefer zh-TW variant when lang=zh (link_digest writes *_zh via gemini);
+        // existing digest items have no *_zh → falls back to the base (unchanged).
+        const _zh = UI.currentLang === 'zh';
+        const Lz = (en, zh) => (_zh && zh) ? zh : (en || '');
+        const _bull = Lz(item.bull_case, item.bull_case_zh);
+        const _bear = Lz(item.bear_case, item.bear_case_zh);
+        const _arb  = Lz(item.arbiter_reasoning, item.arbiter_reasoning_zh);
+        const _dnote = Lz(item.debate_note, item.debate_note_zh);
         const hasBullBear = item.bull_case || item.bear_case;
         const bullBearSection = hasBullBear ? `
           <div class="grid grid-cols-2 gap-3 mt-3">
@@ -143,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i data-lucide="trending-up" class="w-3 h-3" style="color:var(--status-bullish)"></i>
                 <span class="text-[9px] font-black uppercase tracking-widest" style="color:var(--status-bullish)">${np.bull_label || 'Bull'}</span>
               </div>
-              <p class="text-[11px] leading-relaxed" style="color:var(--text-card-title)">${item.bull_case}</p>
+              <p class="text-[11px] leading-relaxed" style="color:var(--text-card-title)">${_bull}</p>
             </div>` : ''}
             ${item.bear_case ? `
             <div class="rounded-lg p-2.5" style="background:color-mix(in srgb,var(--status-bearish),transparent 92%);border:1px solid color-mix(in srgb,var(--status-bearish),transparent 75%)">
@@ -151,20 +159,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i data-lucide="trending-down" class="w-3 h-3" style="color:var(--status-bearish)"></i>
                 <span class="text-[9px] font-black uppercase tracking-widest" style="color:var(--status-bearish)">${np.bear_label || 'Bear'}</span>
               </div>
-              <p class="text-[11px] leading-relaxed" style="color:var(--text-card-title)">${item.bear_case}</p>
+              <p class="text-[11px] leading-relaxed" style="color:var(--text-card-title)">${_bear}</p>
             </div>` : ''}
           </div>` : '';
 
         const arbiterSection = item.arbiter_reasoning ? `
           <div class="mt-2.5 rounded-lg px-3 py-2 flex items-start gap-2" style="background:color-mix(in srgb,${statusColor},transparent 93%);border:1px solid color-mix(in srgb,${statusColor},transparent 78%)">
             <i data-lucide="gavel" class="w-3 h-3 mt-0.5 shrink-0" style="color:${statusColor}"></i>
-            <p class="text-[11px] leading-relaxed" style="color:var(--text-card-title)"><span class="font-bold" style="color:${statusColor}">${np.arbiter_prefix || 'Arbiter → '}</span>${item.arbiter_reasoning}</p>
+            <p class="text-[11px] leading-relaxed" style="color:var(--text-card-title)"><span class="font-bold" style="color:${statusColor}">${np.arbiter_prefix || 'Arbiter → '}</span>${_arb}</p>
           </div>` : '';
 
         const debateNote = item.debate_note ? `
           <div class="mt-1.5 flex items-center gap-1.5">
             <i data-lucide="message-square" class="w-3 h-3 text-zinc-500 shrink-0"></i>
-            <p class="text-[10px] text-zinc-500 italic leading-snug">${item.debate_note}</p>
+            <p class="text-[10px] text-zinc-500 italic leading-snug">${_dnote}</p>
           </div>` : '';
 
         // review_status: DIGEST=reviewed, FLASH=pending, legacy=reviewed (no field)
@@ -225,7 +233,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   <div class="text-[10px] font-mono ${ageColor}" title="${UI.escapeHTML(item.published || '')}">${ageStr} ${UI.currentLang === 'zh' ? '前' : 'ago'}</div>
                   <div class="text-[9px] font-mono text-zinc-600">${item.date || ''}</div>`;
               })()}
-              ${item.source_label ? `<div class="text-[9px] text-zinc-600">${item.source_label}</div>` : ''}
+              ${item.url
+                ? `<a href="${UI.escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[9px] text-sky-400 hover:text-sky-300 hover:underline" title="${UI.escapeHTML(item.url)}">${item.source_label || (UI.currentLang === 'zh' ? '原文' : 'Source')}<i data-lucide="external-link" class="w-2.5 h-2.5"></i></a>`
+                : (item.source_label ? `<div class="text-[9px] text-zinc-600">${item.source_label}</div>` : '')}
             </div>
           </div>
 
@@ -509,6 +519,35 @@ document.addEventListener('DOMContentLoaded', () => {
       isZh ? `FLASH 分析中: ${preview}` : `FLASH analyzing: ${preview}`);
   };
 
+  // Link Digest (v3.35): paste an article URL → full-read + web-search → judgment digest.
+  window.goLinkDigest = async function() {
+    const isZh = UI.currentLang === 'zh';
+    const input = document.getElementById('link-digest-input');
+    const url = (input?.value || '').trim();
+    let parsed;
+    try {
+      parsed = new URL(url);
+      if (!/^https?:$/.test(parsed.protocol)) throw new Error('scheme');
+    } catch (e) {
+      UI.showToast(isZh ? '請貼上有效的 http(s) 連結' : 'Please paste a valid http(s) URL', 'error');
+      input?.focus();
+      return;
+    }
+    const host = parsed.host;
+    const prefix = await UI.dailyUpdatePrefix();
+    const confirmMsg = prefix + (isZh
+      ? `分析這條連結？\n「${host}」\n讀全文 + 上網找相關新聞 + 4 視角辯論\n約 5-10 分鐘 / ~$0.5-1 tokens`
+      : `Analyze this link?\n"${host}"\nfull-read + web search + 4-view debate\n~5-10 min / ~$0.5-1 tokens`);
+    if (!confirm(confirmMsg)) return;
+    triggerProtocol('link_digest', { url },
+      isZh ? `連結分析中: ${host}` : `Link digest: ${host}`);
+    if (input) input.value = '';
+  };
+  document.getElementById('link-digest-btn')?.addEventListener('click', () => window.goLinkDigest());
+  document.getElementById('link-digest-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); window.goLinkDigest(); }
+  });
+
   // ── Protocol run banner (shared by DIGEST / FLASH / REVIEW) ──────
   let _newsPollTimer = null;
 
@@ -719,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const r = await fetch('/api/run-protocol/status');
       const s = await r.json();
-      const isNews = s.name === 'news' || s.name === 'flash' || s.name === 'flash_text' || s.name === 'review' || s.name === 'triage';
+      const isNews = s.name === 'news' || s.name === 'flash' || s.name === 'flash_text' || s.name === 'review' || s.name === 'triage' || s.name === 'link_digest';
       if (!isNews) return;
       let dismissedRecently = false;
       try {

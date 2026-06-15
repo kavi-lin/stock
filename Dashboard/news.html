@@ -230,6 +230,26 @@
                 </div>
             </div>
 
+            <!-- Link Digest (v3.35) — paste an article URL → full-read + web-search → judgment digest -->
+            <div class="glass-card p-4 mb-6" id="link-digest-card" style="border-left:3px solid #8b5cf6">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="link" class="w-4 h-4 text-violet-400"></i>
+                    <h4 class="text-sm font-bold" data-i18n="link_digest_title">連結分析</h4>
+                    <span class="text-[10px] text-zinc-500" data-i18n="link_digest_desc">貼上文章 URL → 讀全文 + 上網找相關新聞 → 判斷 digest（進報告 + 新聞 + 知識圖譜）</span>
+                </div>
+                <div class="flex gap-2">
+                    <input type="url" id="link-digest-input" inputmode="url"
+                           placeholder="https://… (Reuters / Bloomberg / 公司 IR / SEC …)"
+                           class="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500 transition-all">
+                    <button id="link-digest-btn"
+                            class="bg-violet-600 hover:bg-violet-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5 shrink-0">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span data-i18n="link_digest_btn">分析連結</span>
+                    </button>
+                </div>
+                <p id="link-digest-hint" class="text-[9px] text-zinc-500 mt-1.5" data-i18n="link_digest_hint">約 5-10 分鐘 / ~$0.5-1 tokens · 結果在報告中心、下方新聞流與供應鏈圖譜可見</p>
+            </div>
+
             <!-- Compact hero stat strip -->
             <div class="news-hero mb-5">
                 <div class="news-tile">

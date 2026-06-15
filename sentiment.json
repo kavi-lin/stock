@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-05-30T03:42:53.736745+00:00",
+  "composite_score": 71.7,
+  "label": "Greed",
+  "vix": {
+    "current": 15.32,
+    "percentile_1y": 13.4,
+    "regime": "NORMAL"
+  },
+  "spy_momentum": {
+    "rsi_14": 68.8,
+    "pct_above_ma50": 7.51,
+    "pct_above_ma200": 11.46
+  },
+  "put_call_ratio": null,
+  "fear_greed_index": 60.2,
+  "components_used": [
+    "vix",
+    "spy_rsi",
+    "pct_above_ma",
+    "fg"
+  ],
+  "extreme_sentiment_triggered": false,
+  "cache_hit": false,
+  "cache_age_sec": 0
+}

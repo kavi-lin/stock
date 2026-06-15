@@ -1,12 +1,18 @@
-"""Break-news debate orchestrator.
+"""Break-news debate orchestrator (V6 blind-open + strict divergence gate).
 
 State machine per item:
     pending_debate ─► debating ─► closed / partial_closed / failed
 
-Alternates Claude (Analyst-A) and Gemini (Analyst-B). Each round, the
-responding agent sees the full prior thread and must either add a new point
-or signal `<DONE>` / `done:true`. Thread closes when both DONE signals are
-emitted consecutively, OR max rounds hit, OR total wall-clock budget exceeded.
+Round 1: both debaters (Claude=Analyst-A, Gemini=Analyst-B) evaluate the item
+BLIND in parallel — neither sees the other, so divergence is a genuine signal.
+A deterministic gate (0 LLM) then decides whether ONE rebuttal round is worth
+the tokens. V6 tightening (V5 hit max_rounds on 69% of items): the gate
+re-opens only on a TRUE conflict — opposite verdicts or opposite relation
+polarity on the same pair. A confidence gap alone counts only for
+high-priority items and only when ≥ DIVERGENCE_CONF_GAP (default 0.65).
+Max 2 rounds for everyone (4 calls worst case, 2 typical). Items flagged
+`cluster.escalated` get the prior cluster conclusion in the opener prompt and
+argue only the increment.
 
 Run modes:
   --news-id <id>     Debate a single item (testing)
@@ -34,10 +40,15 @@ from scripts.break_news.llm_drivers import (  # noqa: E402, F401
     run_llm, load_llm_config, break_news_pair, LLMResult)
 from scripts._shared.model_router import run_with_fallback  # noqa: E402
 
-MAX_ROUNDS = int(os.environ.get("BREAK_NEWS_MAX_ROUNDS", "3"))
+MAX_ROUNDS = int(os.environ.get("BREAK_NEWS_MAX_ROUNDS", "2"))
 MAX_ROUNDS_FUTU = int(os.environ.get("BREAK_NEWS_MAX_ROUNDS_FUTU", "2"))
 THREAD_TIMEOUT_SEC = int(os.environ.get("BREAK_NEWS_THREAD_TIMEOUT_SEC", "480"))
 PARALLEL = int(os.environ.get("BREAK_NEWS_PARALLEL", "2"))
+# Auto-debate stale-pending guard: items older than this stay in pending_debate
+# state but are skipped by scan_and_debate. Surfaced via list_stale_pending()
+# so the UI can offer per-item manual triggers. Prevents queue-flood after a
+# long idle period (e.g. user opens dashboard 10hr later → no auto burst).
+PENDING_MAX_AGE_HOURS = float(os.environ.get("BREAK_NEWS_PENDING_MAX_AGE_HOURS", "2"))
 
 _MODEL_NAMES = {"claude": "Claude", "gemini": "Gemini", "codex": "Codex"}
 
@@ -177,6 +188,117 @@ def is_high_priority_item(item: dict) -> bool:
     return False
 
 
+# Confidence gap (A vs B) that counts as divergence — high-priority items only
+# (V6: a gap alone on a routine item is not worth a rebuttal round).
+DIVERGENCE_CONF_GAP = float(os.environ.get("BREAK_NEWS_DIVERGENCE_CONF_GAP", "0.65"))
+
+_POS_PREDS = {"BENEFITS_FROM", "CATALYST_FOR"}
+_NEG_PREDS = {"HEADWIND_FROM"}
+
+
+def _side_verdict(parsed: dict) -> str:
+    pos = neg = 0
+    for r in (parsed.get("relations") or []):
+        if not isinstance(r, dict):
+            continue
+        pred = r.get("predicate")
+        if pred in _POS_PREDS:
+            pos += 1
+        elif pred in _NEG_PREDS:
+            neg += 1
+    if pos > neg:
+        return "BULLISH"
+    if neg > pos:
+        return "BEARISH"
+    return "NEUTRAL"
+
+
+def divergence_gate(thread: list[dict], is_high: bool = False) -> tuple[bool, str]:
+    """Deterministic (0 LLM) check: is a rebuttal round worth the tokens?
+
+    V6 strict mode: divergent ONLY on a true conflict — opposite verdicts, or
+    conflicting relation polarity on the same subject|object pair. A
+    confidence gap ≥ DIVERGENCE_CONF_GAP counts only for high-priority items.
+    A `stance: concede` from either side ends the debate regardless. The note
+    is fed verbatim into the rebuttal prompt so the next round argues the
+    exact conflict instead of re-surveying the news.
+    """
+    latest: dict[str, dict] = {}
+    for c in thread:
+        side = c.get("side")
+        parsed = c.get("parsed") or {}
+        if side and parsed:
+            latest[side] = parsed
+    if len(latest) < 2:
+        return False, "single_side_only"
+    a, b = latest.get("A") or {}, latest.get("B") or {}
+
+    if a.get("stance") == "concede" or b.get("stance") == "concede":
+        return False, "concession"
+
+    notes: list[str] = []
+    va, vb = _side_verdict(a), _side_verdict(b)
+    if {va, vb} == {"BULLISH", "BEARISH"}:
+        notes.append(f"verdict conflict: A={va} vs B={vb}")
+
+    def _polarity(parsed: dict) -> dict[str, set[str]]:
+        m: dict[str, set[str]] = {}
+        for r in (parsed.get("relations") or []):
+            if not isinstance(r, dict):
+                continue
+            pred = r.get("predicate")
+            sign = "+" if pred in _POS_PREDS else "-" if pred in _NEG_PREDS else None
+            if sign:
+                m.setdefault(f"{r.get('subject')}|{r.get('object')}", set()).add(sign)
+        return m
+
+    pa, pb = _polarity(a), _polarity(b)
+    for k in sorted(set(pa) & set(pb)):
+        if pa[k] != pb[k]:
+            notes.append(f"relation polarity conflict on {k.replace('|', ' → ')}")
+            break
+
+    if is_high:
+        try:
+            ca = float(a.get("confidence") or 0.0)
+            cb = float(b.get("confidence") or 0.0)
+            if abs(ca - cb) >= DIVERGENCE_CONF_GAP:
+                notes.append(f"confidence gap: A={ca:.2f} vs B={cb:.2f}")
+        except (ValueError, TypeError):
+            pass
+
+    if notes:
+        return True, "; ".join(notes)
+    return False, "converged"
+
+
+def _low_relation_density(thread: list[dict], item: dict) -> bool:
+    """Old round-1 early-stop conditions: no ticker→ticker relation, or
+    NEUTRAL consensus with no universe ticker anywhere in sight."""
+    for c in thread:
+        for rel in ((c.get("parsed") or {}).get("relations") or []):
+            if isinstance(rel, dict) and (rel.get("subject") or "").startswith("ticker:") \
+                    and (rel.get("object") or "").startswith("ticker:"):
+                break
+        else:
+            continue
+        break
+    else:
+        return True  # no ticker-to-ticker relation at all
+
+    if prompts.build_summary_block(thread).get("consensus_verdict") == "NEUTRAL":
+        universe_tickers = _load_universe_tickers()
+        text = f"{item.get('headline') or ''} {item.get('raw_summary') or ''}"
+        words = set(re.findall(r"\b[A-Z]{2,5}\b", text))
+        for c in thread:
+            for t in ((c.get("parsed") or {}).get("entities") or {}).get("tickers") or []:
+                if isinstance(t, str):
+                    words.add(t.upper())
+        if not any(w in universe_tickers for w in words):
+            return True
+    return False
+
+
 def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
                 wall_timeout: int = THREAD_TIMEOUT_SEC,
                 verbose: bool = False) -> dict:
@@ -186,10 +308,10 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
     if item.get("state") not in ("pending_debate", "partial_closed", "failed"):
         return {"ok": False, "error": f"state={item.get('state')}, refusing"}
 
-    # Dynamic depth policy
+    # Dynamic depth policy — V6: 2 rounds max for everyone. is_high now only
+    # widens the divergence gate (confidence-gap trigger), not the depth.
     is_high = is_high_priority_item(item)
-    rounds_limit = 3 if is_high else 2
-    max_rounds = min(max_rounds, rounds_limit)
+    max_rounds = min(max_rounds, 2)
 
     if (item.get("source") or {}).get("name") == "Futu Push" and max_rounds == MAX_ROUNDS:
         max_rounds = min(max_rounds, MAX_ROUNDS_FUTU)
@@ -198,32 +320,87 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
 
     turn_order = _turn_order()
     t0 = time.time()
-    rounds_completed = 0
     consecutive_failures = {m: 0 for m in turn_order}
     last_done = {m: False for m in turn_order}
     close_reason = "max_rounds"
     state_final = "closed"
+    div_note = ""
 
-    for r in range(max_rounds):
+    # ── Round 1: blind parallel openers ─────────────────────────────────
+    def _opener_call(idx_agent: tuple[int, str]):
+        idx, agent = idx_agent
+        usr_p = prompts.opener_user_prompt(item, _role_for(idx, agent))
+        if verbose:
+            print(f"[{news_id}] round=0 agent={agent} (blind) prompt_len={len(usr_p)}")
+        return idx, agent, run_with_fallback(agent, "debate", prompts.SYSTEM_PROMPT, usr_p)
+
+    with ThreadPoolExecutor(max_workers=len(turn_order)) as ex:
+        opener_results = sorted(ex.map(_opener_call, enumerate(turn_order)))
+
+    opener_failures = 0
+    for idx, agent, res in opener_results:
+        actual = getattr(res, "model_used", res.agent) or agent
+        side = "A" if idx == 0 else "B"
+        comment = _comment_from_result(res, _role_for(idx, actual), side, 0,
+                                       news_id, f"c{idx}")
+        store.append_comment(news_id, comment)
+        if res.exit_code != 0:
+            opener_failures += 1
+            consecutive_failures[agent] += 1
+            store.push_error(news_id, f"round0.{agent}",
+                             f"rc={res.exit_code} err={res.error}")
+        last_done[agent] = _is_done(res.parsed, res.raw_text)
+        if verbose:
+            print(f"  agent={agent} done={last_done[agent]} "
+                  f"parse_status={res.parse_status} rc={res.exit_code}")
+    rounds_completed = 1
+
+    if opener_failures == len(turn_order):
+        close_reason = "cli_failures"
+        state_final = "failed"
+    elif opener_failures > 0:
+        # One voice down → no real debate possible. Close on the healthy
+        # opener instead of burning rebuttal calls against a salvage record.
+        close_reason = "single_voice"
+        state_final = "partial_closed"
+
+    # ── Rounds 2+: divergence-gated slim rebuttals ──────────────────────
+    for r in range(1, max_rounds):
+        if state_final != "closed":
+            break
+        if all(last_done[m] for m in turn_order):
+            close_reason = "both_done"
+            break
+
+        thread = (store.load_item(news_id) or item).get("thread") or []
+        if not is_high and _low_relation_density(thread, item):
+            close_reason = "early_stop_low_relation_density"
+            break
+
+        divergent, div_note = divergence_gate(thread, is_high)
+        if not divergent:
+            close_reason = "converged_round1" if r == 1 else "divergence_resolved"
+            break
+
         for idx, agent in enumerate(turn_order):
             if time.time() - t0 > wall_timeout:
                 close_reason = "timeout"
                 state_final = "partial_closed"
                 break
             role = _role_for(idx, agent)
+            side = "A" if idx == 0 else "B"
             thread = (store.load_item(news_id) or item).get("thread") or []
-            sys_p = prompts.SYSTEM_PROMPT
-            usr_p = (prompts.opener_user_prompt(item, role) if not thread
-                     else prompts.followup_user_prompt(item, thread, role))
-            comment_id_hint = f"c{len(thread)}"
+            usr_p = prompts.rebuttal_user_prompt(item, thread, role, side, div_note)
             if verbose:
-                print(f"[{news_id}] round={r} agent={agent} prompt_len={len(usr_p)}")
-            res = run_with_fallback(agent, "debate", sys_p, usr_p)
+                print(f"[{news_id}] round={r} agent={agent} rebuttal "
+                      f"prompt_len={len(usr_p)}")
+            res = run_with_fallback(agent, "debate",
+                                    prompts.REBUTTAL_SYSTEM_PROMPT, usr_p)
             actual = getattr(res, "model_used", res.agent) or agent
             if actual != agent:
                 role = _role_for(idx, actual)
-            side = "A" if idx == 0 else "B"
-            comment = _comment_from_result(res, role, side, r, news_id, comment_id_hint)
+            comment = _comment_from_result(res, role, side, r, news_id,
+                                           f"c{len(thread)}")
             store.append_comment(news_id, comment)
 
             if res.exit_code != 0:
@@ -243,65 +420,22 @@ def debate_item(news_id: str, max_rounds: int = MAX_ROUNDS,
                       f"rc={res.exit_code}")
 
         rounds_completed = r + 1
-        if state_final in ("failed", "partial_closed"):
-            break
 
-        # Stop when both debaters signalled DONE in this round.
-        if all(last_done[m] for m in turn_order):
-            close_reason = "both_done"
-            break
+    final_thread = (store.load_item(news_id) or {}).get("thread") or []
 
-        # At the end of Round 1 (r == 0), check for early stop on low relation density / neutrality
-        if r == 0 and not is_high:
-            # 1. Both debaters set done: true
-            cond_done = all(last_done[m] for m in turn_order)
-            
-            # 2. No ticker-to-ticker relation generated (both subject and object start with "ticker:")
-            thread = (store.load_item(news_id) or item).get("thread") or []
-            has_ticker_relation = False
-            for c in thread:
-                relations = (c.get("parsed") or {}).get("relations") or []
-                for rel in relations:
-                    if isinstance(rel, dict):
-                        subj = rel.get("subject") or ""
-                        obj = rel.get("object") or ""
-                        if subj.startswith("ticker:") and obj.startswith("ticker:"):
-                            has_ticker_relation = True
-                            break
-                if has_ticker_relation:
-                    break
-            cond_no_ticker_rel = not has_ticker_relation
-            
-            # 3. Consensus verdict is "NEUTRAL" AND no ticker in thread/text is in universe_tickers
-            temp_summary = prompts.build_summary_block(thread)
-            verdict = temp_summary.get("consensus_verdict", "NEUTRAL")
-            cond_neutral_no_universe = False
-            if verdict == "NEUTRAL":
-                universe_tickers = _load_universe_tickers()
-                headline = item.get("headline") or ""
-                summary = item.get("raw_summary") or ""
-                text_to_check = f"{headline} {summary}"
-                words = set(re.findall(r"\b[A-Z]{2,5}\b", text_to_check))
-                for c in thread:
-                    parsed = c.get("parsed") or {}
-                    ent = parsed.get("entities") or {}
-                    for t in ent.get("tickers") or []:
-                        if isinstance(t, str):
-                            words.add(t.upper())
-                has_universe_ticker = any(w in universe_tickers for w in words)
-                cond_neutral_no_universe = not has_universe_ticker
-
-            if cond_done or cond_no_ticker_rel or cond_neutral_no_universe:
-                close_reason = "early_stop_low_relation_density"
-                break
-
-    summary = prompts.build_summary_block((store.load_item(news_id) or {}).get("thread") or [])
+    # Relabel when the loop exhausted max_rounds but the last rebuttal round
+    # actually resolved the conflict (concession / convergence).
+    if state_final == "closed" and close_reason == "max_rounds":
+        still_divergent, note = divergence_gate(final_thread, is_high)
+        if not still_divergent:
+            close_reason = "divergence_resolved"
+        div_note = note if still_divergent else div_note
+    summary = prompts.build_summary_block(final_thread)
     summary["rounds_completed"] = rounds_completed
     summary["closed_at"] = _utc_iso()
     summary["close_reason"] = close_reason
-    summary["divergence_note"] = _divergence_note(
-        (store.load_item(news_id) or {}).get("thread") or []
-    )
+    summary["divergence_note"] = _divergence_note(final_thread)
+    summary["divergence_gate_note"] = div_note
     store.set_summary(news_id, summary)
     store.set_state(news_id, state_final, graph_status="provisional")
     return {"ok": True, "news_id": news_id, "state": state_final,
@@ -334,18 +468,85 @@ def _divergence_note(thread: list[dict]) -> str:
     return "; ".join(parts)
 
 
-def scan_pending(max_items: int = 100) -> list[str]:
+def _parse_iso_utc(s: str | None) -> datetime | None:
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _pending_age_hours(d: dict, now_utc: datetime) -> float | None:
+    fetched = _parse_iso_utc(d.get("fetched_at"))
+    if fetched is None:
+        return None
+    return (now_utc - fetched).total_seconds() / 3600.0
+
+
+def scan_pending(max_items: int = 100, include_stale: bool = False) -> list[str]:
+    """List pending_debate news_ids eligible for auto-debate.
+
+    Skips items older than PENDING_MAX_AGE_HOURS unless include_stale=True.
+    Stale items remain pending_debate and surface via list_stale_pending()
+    so the user can manually choose which to debate.
+    """
     out = []
+    now_utc = datetime.now(timezone.utc)
     for p in sorted(store.STORE_DIR.glob("bn_*.json")):
         try:
             with open(p, "r", encoding="utf-8") as f:
                 d = __import__("json").load(f)
         except Exception:
             continue
-        if d.get("state") == "pending_debate":
-            out.append(d.get("news_id"))
-            if len(out) >= max_items:
-                break
+        if d.get("state") != "pending_debate":
+            continue
+        if not include_stale:
+            age = _pending_age_hours(d, now_utc)
+            if age is not None and age > PENDING_MAX_AGE_HOURS:
+                continue
+        out.append(d.get("news_id"))
+        if len(out) >= max_items:
+            break
+    return out
+
+
+def list_stale_pending() -> list[dict]:
+    """Summaries of pending_debate items past PENDING_MAX_AGE_HOURS.
+
+    UI calls /api/break-news/stale-pending → renders a manual-trigger list so
+    the user opts in to spending LLM budget on backlog.
+    """
+    out: list[dict] = []
+    now_utc = datetime.now(timezone.utc)
+    for p in sorted(store.STORE_DIR.glob("bn_*.json")):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                d = __import__("json").load(f)
+        except Exception:
+            continue
+        if d.get("state") != "pending_debate":
+            continue
+        age = _pending_age_hours(d, now_utc)
+        if age is None or age <= PENDING_MAX_AGE_HOURS:
+            continue
+        src = d.get("source") or {}
+        triage = d.get("triage") or {}
+        out.append({
+            "news_id": d.get("news_id"),
+            "headline": d.get("headline"),
+            "headline_zh": d.get("headline_zh"),
+            "source": src.get("name"),
+            "credibility": src.get("credibility"),
+            "url": src.get("url"),
+            "published": src.get("published"),
+            "fetched_at": d.get("fetched_at"),
+            "age_hours": round(age, 2),
+            "shallow_score": triage.get("shallow_score"),
+            "news_type": triage.get("news_type"),
+            "binary_flag": triage.get("binary_flag"),
+        })
+    out.sort(key=lambda x: x.get("fetched_at") or "", reverse=True)
     return out
 
 

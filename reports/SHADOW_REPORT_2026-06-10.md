@@ -1,0 +1,38 @@
+# Shadow Report — 2026-06-10
+
+> 唯讀讀出端。history entries scanned: 143。
+
+## #2 Anchor Dispersion（backfill — 立即可用）
+
+- 樣本 n=37，CV min/P33/median/P66/max = 0.0394 / 0.367 / 0.4636 / 0.4835 / 1.2726
+- 現行門檻 high<0.15 / low>0.35（拍腦袋初值）
+- **建議門檻（33/66 pct）**: high<0.367 / low>0.4835
+- 建議門檻 = 歷史 CV 33/66 percentile（三等分 high/medium/low）。#2 cap 接線前由 user 核可。
+
+## #6 Owner-Earnings 倍數 shadow
+
+- 累積 0/20 session；翻轉 0 筆（rate=None）；decision: **accumulating**
+- checkpoint: ≥20 session 且翻轉率 <15% → 切換提案
+
+## #3 Valuation Archetype shadow
+
+- 累積 0/20 session；翻轉率 None；archetype 分布 {}
+- checkpoint: ≥20 session → 翻轉率報告 → user 拍 → #3b 切 live（含 cap/T5 接線）
+
+## #4 News PT 去重監測
+
+- post-切換 0 session（凍結窗剩 10）
+- baseline mean 1.71 → post mean None（shift None）
+- 分布 baseline {'-1': 1, '0': 2, '1': 6, '2': 18, '3': 4} → post {}
+- leakage: 0/0（rate=None）
+- 預期 post mean 較 baseline 下移（PT +1 源移除）；下移 ≈ 證實 PT 曾在計分。凍結窗滿後恢復 News weight 調整。
+
+## Lane Model 分層哨兵（V4.0.0 — Sent/News/Tech → Sonnet 監測）
+
+- 近 10 session（baseline n=31）lane mean drift：
+  - fundamentals: baseline 1.13 → recent 0.9（drift -0.23）
+  - sentiment: baseline 0.67 → recent 0.68（drift 0.01）
+  - news: baseline 1.71 → recent 1.9（drift 0.19）
+  - technical: baseline 1.63 → recent 1.6（drift -0.03）
+- 近 10 val DISAGREE: 9；polarization 異常: 9
+- 哨兵規則：降級 lane 的 |drift| 明顯 > 其他 lane、或 DISAGREE/BIPOLAR 率較歷史升 → 該 lane 改回 inherit（V4.0.0 Phase 2 model 分層表）

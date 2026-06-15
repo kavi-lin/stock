@@ -15,36 +15,36 @@ def _parse_filename(path: Path) -> str | None:
     return m.group(1) if m else None
 
 
+# TODO-008 (REVIEW_2026-05-31 Rec 4 regression — null 回升 35%). One tolerant
+# matcher replaces the 10-pattern ladder that kept missing new digest dialects.
+# Handles every observed form (Apr–May 2026):
+#   session_macro_delta **+0.3**        (label + bold, no separator)
+#   **session_macro_delta**: −0.22      (bolded label + colon)
+#   **Session macro delta**: -0.55      (space words + bold + colon, mixed case)
+#   session_macro_delta: **-0.3**       (colon + bolded number)
+#   `session_macro_delta` = **-0.5**    (backtick + equals + bold)
+#   **Macro Δ**: -0.4 / **Macro Backdrop Δ**: -0.10   (Greek-Δ short & long)
+#   (session_macro_delta +0.20)         (parenthetical)
+# Label variants + optional backtick/bold wrappers + optional :/= + IGNORECASE.
+_MACRO_DELTA_LABEL = (
+    r"(?:session[ _]macro[ _]delta"
+    r"|net[ _]session[ _]delta"
+    r"|macro[ _]backdrop[ _](?:delta|Δ)"
+    r"|session[ _]macro[ _]Δ"
+    r"|macro[ _]Δ)")
+_MACRO_DELTA_RE = re.compile(
+    _MACRO_DELTA_LABEL + r"[`*]*\s*[:=]?\s*[`*]*([+\-−]?\d+\.?\d*)",
+    re.IGNORECASE)
+
+
 def _find_macro_delta(text: str) -> float | None:
-    # 多版本 digest header. V2026-05+ digests embed delta inside the
-    # macro_backdrop_score line: "(session_macro_delta +0.20)" — older
-    # patterns required signed prefix on the bolded label which misses.
-    for p in (
-            # Markdown identifier=value 形式 (2026-05-18+ digest)
-            # e.g. `session_macro_delta` = **-0.5**
-            # (REVIEW_2026-05-24 Rec 4 殘留 — backtick + bold + equals gap)
-            r"`session_macro_delta`\s*=\s*\*\*([+\-−]?\d+\.?\d*)\*\*",
-            # New format — delta inside parenthetical, optional sign
-            r"session_macro_delta\s*\(?([+\-−]?\d+\.?\d*)",
-            # New format — colon / equals form (JSON-ish)
-            r"session_macro_delta[\s:=]+([+\-−]?\d+\.?\d*)",
-            # Greek-Δ headers (May 2026+ inline form, e.g. "**Macro Backdrop Δ**: -0.10")
-            r"\*\*Macro Backdrop\s*Δ\*\*[:\s]+([+\-−]?[\d.]+)",
-            r"\*\*Session macro\s*Δ\*\*[:\s]+([+\-−]?[\d.]+)",
-            r"Macro Backdrop\s*Δ\**[:\s]+([+\-−]?[\d.]+)",
-            r"Session macro\s*Δ\**[:\s]+([+\-−]?[\d.]+)",
-            # Older bolded-header forms with the word "Delta" (kept for back-compat)
-            r"Macro Backdrop Delta\**[:\s]+([+\-−][\d.]+)",
-            r"Session Macro Delta\**[:\s]+([+\-−][\d.]+)",
-            r"\*\*Macro Backdrop Delta\*\*[:\s]+([+\-−][\d.]+)"):
-        m = re.search(p, text)
-        if m:
-            v = m.group(1).replace("−", "-")
-            try:
-                return float(v)
-            except ValueError:
-                continue
-    return None
+    m = _MACRO_DELTA_RE.search(text)
+    if not m:
+        return None
+    try:
+        return float(m.group(1).replace("−", "-"))
+    except ValueError:
+        return None
 
 
 def _find_macro_delta_from_triage(text: str) -> float | None:

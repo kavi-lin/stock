@@ -314,6 +314,11 @@ def render_quality_flags(d):
         lines.append("✅ **No flags raised** — accruals / capex coverage / margins / DSO / FCF / debt 全部乾淨。")
     else:
         flag_desc = {
+            # V3.17 keys
+            "accruals_warning_negative":           "🟡 **Accruals warning (negative gap)** — TTM NI 高於 OpCF > 30%(盈餘品質可疑,應計項目堆高)",
+            "cash_conversion_wc_driven":           "🟠 **Cash conversion WC-driven** — OpCF > NI 的正向缺口主要來自營運資金釋放(半懲罰,非經常性)",
+            "cash_conversion_positive_gap_clean":  "🟢 **Cash conversion positive gap (clean)** — OpCF > NI 且非營運資金驅動(純資訊,不扣分)",
+            # legacy key (pre-V3.17 caches)
             "accruals_warning":         "🟡 **Accruals warning** — TTM \\|NI − OpCF\\| / \\|NI\\| > 30%(盈餘品質可疑)",
             "capex_outpaces_ocf":       "🔴 **CapEx outpaces OCF** — 最新 Q OpCF 不夠覆蓋 CapEx(燒錢)",
             "gross_margin_compression": "🟠 **Gross margin compression** — 最新 4 季毛利率連續下滑",

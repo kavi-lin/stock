@@ -36,6 +36,33 @@ from technical_core import (
     compute_macd,
 )
 
+# V3.22 — fundamentals layer (P/S TTM, GM%, Rev YoY TTM). Pulled from the
+# shared FMP cache so a screen.py run shares quarterly-income hits with any
+# other consumer (earnings-analyst, etc.). Import is guarded because the
+# shared module hard-exits when FMP_API_KEY is missing; without it we still
+# want momentum.py to run with fundamentals fields = None.
+try:
+    _REPO_ROOT = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
+    )
+    if _REPO_ROOT not in sys.path:
+        sys.path.insert(0, _REPO_ROOT)
+    if os.environ.get("FMP_API_KEY"):
+        from skills._shared.company_context import (  # noqa: E402
+            get_quarterly_income,
+            get_profile,
+        )
+        _FUNDAMENTALS_AVAILABLE = True
+    else:
+        get_quarterly_income = None  # type: ignore[assignment]
+        get_profile = None  # type: ignore[assignment]
+        _FUNDAMENTALS_AVAILABLE = False
+except Exception as _exc:  # pragma: no cover - defensive import guard
+    print(f"[momentum] fundamentals layer disabled: {_exc}", file=sys.stderr)
+    get_quarterly_income = None  # type: ignore[assignment]
+    get_profile = None  # type: ignore[assignment]
+    _FUNDAMENTALS_AVAILABLE = False
+
 # Backward-compat aliases — some existing callers may import the old
 # underscore-prefixed names. Keep them working by re-exporting the public
 # names here.
@@ -80,8 +107,10 @@ def _load_cache(ticker, max_age_sec):
         # Invalidate old cache entries that pre-date MACD field (treat as stale)
         if "macd" not in payload:
             return None
-        # V2.1 — invalidate caches missing leader-finder fields (NHP / RS / VCP / etc.)
-        if payload.get("schema_version") != "v2.1":
+        # V3.25.8 — invalidate caches predating the 3D volume window block.
+        # Old v2.2 payloads are missing avg_3d_vs_20d / vol_3d_state, which
+        # would render as "—" forever on the Dashboard; force a refresh.
+        if payload.get("schema_version") != "v2.3":
             return None
         # Re-derive MACD signals from cached macd data if signals were generated
         # before MACD signal detection was added (cheap: no network call needed).
@@ -114,12 +143,42 @@ def _write_cache(ticker, payload):
 
 
 # ── Momentum-specific layers ────────────────────────────────────────────
-def _short_interest_block(t):
-    """Pull short interest from yfinance `info` dict. Fields can be None."""
+# 24h sidecar for the .info fields we use — short interest updates biweekly
+# and marketCap drifts slowly, so the daily 529-ticker screen doesn't need
+# 529 Yahoo quoteSummary calls (the slowest network op of the run).
+_INFO_SIDECAR_DIR = os.path.join(CACHE_DIR, "yf_info")
+_INFO_TTL_SEC = 24 * 3600
+_INFO_FIELDS = ("sharesShort", "shortRatio", "shortPercentOfFloat",
+                "dateShortInterest", "marketCap")
+
+
+def _get_info_cached(ticker, t):
+    import time as _time
+    path = os.path.join(_INFO_SIDECAR_DIR, f"{str(ticker).upper()}.json")
+    try:
+        if os.path.exists(path) and _time.time() - os.path.getmtime(path) < _INFO_TTL_SEC:
+            with open(path, encoding="utf-8") as fp:
+                return json.load(fp)
+    except Exception:
+        pass
     try:
         info = t.info or {}
     except Exception:
         info = {}
+    slim = {k: info.get(k) for k in _INFO_FIELDS}
+    try:
+        os.makedirs(_INFO_SIDECAR_DIR, exist_ok=True)
+        tmp = f"{path}.tmp{os.getpid()}"
+        with open(tmp, "w", encoding="utf-8") as fp:
+            json.dump(slim, fp)
+        os.replace(tmp, path)
+    except Exception:
+        pass
+    return slim
+
+
+def _short_interest_block(info):
+    """Short interest from the cached yfinance `info` slim dict."""
     shares_short       = info.get("sharesShort")
     short_ratio        = info.get("shortRatio")           # days to cover
     short_pct_float    = info.get("shortPercentOfFloat")  # 0.0-1.0 fraction
@@ -153,15 +212,10 @@ def _short_interest_block(t):
     }
 
 
-def _market_cap(t):
-    """V3.17 (Wave 1) — fetch marketCap from yfinance .info. Returns None on
-    any failure (rate-limit, missing field). Consumed by _signals_and_warnings
-    to assign extension severity tag (large_cap_parabolic / mid_cap_extreme /
-    microcap_extension)."""
-    try:
-        info = t.info or {}
-    except Exception:
-        return None
+def _market_cap(info):
+    """V3.17 (Wave 1) — marketCap from the cached yfinance info slim dict.
+    Returns None on any failure (rate-limit, missing field). Consumed by
+    _signals_and_warnings to assign extension severity tag."""
     mc = info.get("marketCap")
     try:
         return float(mc) if mc else None
@@ -304,35 +358,56 @@ def _compute_dry_up_spike(hist):
     dry_up: 5D avg / 20D avg < 0.75 (recent volume below baseline)
     spike: today_volume / 20D avg > 1.5 (today expanded)
     pattern_active = dry_up AND spike (both required)
+
+    V3.25.8 — also emits a 3D window for the Dashboard's at-a-glance
+    contraction / expansion read:
+      avg_3d_vs_20d : (last 3 bars excl. today) / (last 20 bars excl. today)
+      vol_3d_state  : "expanding" (≥1.3) | "drying_up" (≤0.75) | "neutral"
+    Thresholds mirror existing dry-up cutoff + `volume_expansion` signal.
     """
+    # Single empty-state template — keeps every early-return aligned and
+    # ensures new keys never go missing in degenerate paths.
+    empty = {
+        "avg_5d_vs_20d": None, "today_vs_20d": None,
+        "dry_up": None, "spike": None, "pattern_active": None,
+        "avg_3d_vs_20d": None, "vol_3d_state": None,
+    }
     try:
         if hist is None or len(hist) < 25:
-            return {"avg_5d_vs_20d": None, "today_vs_20d": None,
-                    "dry_up": None, "spike": None, "pattern_active": None}
-        # Exclude today from 5D-prev / 20D-prev to avoid look-ahead
+            return dict(empty)
+        # Exclude today from 3D/5D-prev / 20D-prev to avoid look-ahead
         vol = hist["Volume"]
         avg_20d_prev = float(vol.iloc[-21:-1].mean())  # 20 days excluding today
         avg_5d_prev  = float(vol.iloc[-6:-1].mean())   # 5 days excluding today
+        avg_3d_prev  = float(vol.iloc[-4:-1].mean())   # 3 days excluding today
         today_vol    = float(vol.iloc[-1])
 
         if avg_20d_prev <= 0:
-            return {"avg_5d_vs_20d": None, "today_vs_20d": None,
-                    "dry_up": None, "spike": None, "pattern_active": None}
+            return dict(empty)
 
-        ratio_5_20 = round(avg_5d_prev / avg_20d_prev, 2)
-        today_ratio = round(today_vol / avg_20d_prev, 2)
+        ratio_5_20  = round(avg_5d_prev  / avg_20d_prev, 2)
+        ratio_3_20  = round(avg_3d_prev  / avg_20d_prev, 2)
+        today_ratio = round(today_vol    / avg_20d_prev, 2)
         dry_up = bool(ratio_5_20 < 0.75)
         spike  = bool(today_ratio > 1.5)
+
+        if   ratio_3_20 >= 1.3:  state_3d = "expanding"
+        elif ratio_3_20 <= 0.75: state_3d = "drying_up"
+        else:                    state_3d = "neutral"
+
         return {
             "avg_5d_vs_20d":  ratio_5_20,
             "today_vs_20d":   today_ratio,
             "dry_up":         dry_up,
             "spike":          spike,
             "pattern_active": dry_up and spike,
+            "avg_3d_vs_20d":  ratio_3_20,
+            "vol_3d_state":   state_3d,
         }
     except Exception as e:
-        return {"avg_5d_vs_20d": None, "today_vs_20d": None, "dry_up": None,
-                "spike": None, "pattern_active": None, "error": str(e)}
+        out = dict(empty)
+        out["error"] = str(e)
+        return out
 
 
 def _compute_eps_acceleration(ticker):
@@ -366,6 +441,109 @@ def _compute_eps_acceleration(ticker):
         out["cache_age_days"] = round(age_days, 1)
     except Exception as e:
         out["error"] = str(e)
+    return out
+
+
+def _compute_short_term_returns(hist):
+    """V3.22 — pure-price short-horizon momentum (1D / 5D % return).
+
+    Complements the existing RS-vs-SPY block which is 3M/6M. Useful for the
+    Catalyst / breakout playbooks where a 5-day price thrust matters more
+    than a 6-month relative-strength reading. Returns None when history is
+    too short rather than zero (zero is a real reading — "flat").
+    """
+    out = {"return_1d_pct": None, "return_5d_pct": None}
+    try:
+        if hist is None or len(hist) < 6:
+            return out
+        close = hist["Close"]
+        last = float(close.iloc[-1])
+        prev = float(close.iloc[-2])
+        prev5 = float(close.iloc[-6])
+        if prev > 0:
+            out["return_1d_pct"] = round((last - prev) / prev * 100, 2)
+        if prev5 > 0:
+            out["return_5d_pct"] = round((last - prev5) / prev5 * 100, 2)
+    except Exception as e:
+        out["error"] = str(e)
+    return out
+
+
+def _compute_fundamentals(ticker, market_cap):
+    """V3.22 — P/S TTM, GM% TTM, Revenue YoY TTM.
+
+    All three derived from `get_quarterly_income(ticker, n=8)` (8 quarters →
+    TTM = sum of latest 4, prior TTM = sum of quarters 5-8). P/S needs
+    market cap from yfinance — falls back to FMP profile if yfinance returned
+    None. Any missing input collapses that field to None; the function never
+    raises. Behaviour when FMP_API_KEY is unset: all fields None (graceful).
+    """
+    out = {
+        "ps_ttm":            None,
+        "gm_ttm_pct":        None,
+        "rev_yoy_ttm_pct":   None,
+        "ttm_revenue_usd":   None,
+        "data_lag_days":     None,
+    }
+    if not _FUNDAMENTALS_AVAILABLE or get_quarterly_income is None:
+        return out
+    try:
+        rows = get_quarterly_income(ticker, n=8) or []
+    except Exception as e:
+        out["error"] = str(e)
+        return out
+    if len(rows) < 4:
+        # Need at least the latest 4 quarters for TTM revenue; YoY needs 8.
+        return out
+
+    def _sum(field, slc):
+        total = 0.0
+        for r in rows[slc]:
+            v = r.get(field)
+            try:
+                total += float(v) if v is not None else 0.0
+            except (TypeError, ValueError):
+                return None
+        return total
+
+    # Newest first — slice [0:4] = latest TTM, [4:8] = prior TTM.
+    ttm_rev = _sum("revenue", slice(0, 4))
+    ttm_gp  = _sum("grossProfit", slice(0, 4))
+
+    if ttm_rev and ttm_rev > 0:
+        out["ttm_revenue_usd"] = round(ttm_rev, 0)
+        # Resolve market cap: prefer yfinance value already pulled by analyze();
+        # fall back to FMP profile to avoid losing P/S when yfinance returns None.
+        mc = market_cap
+        if mc is None and get_profile is not None:
+            try:
+                prof = get_profile(ticker) or {}
+                mc_raw = prof.get("marketCap") or prof.get("mktCap")
+                mc = float(mc_raw) if mc_raw else None
+            except Exception:
+                mc = None
+        if mc and mc > 0:
+            out["ps_ttm"] = round(mc / ttm_rev, 2)
+        if ttm_gp is not None:
+            out["gm_ttm_pct"] = round(ttm_gp / ttm_rev * 100, 2)
+
+    # Revenue YoY TTM only when we have 8 full quarters.
+    if len(rows) >= 8:
+        prior_ttm_rev = _sum("revenue", slice(4, 8))
+        if prior_ttm_rev and prior_ttm_rev > 0 and ttm_rev:
+            out["rev_yoy_ttm_pct"] = round(
+                (ttm_rev - prior_ttm_rev) / prior_ttm_rev * 100, 2
+            )
+
+    # Lag indicator — days since the most-recent quarter's `date` field.
+    latest_date = rows[0].get("date") or rows[0].get("fillingDate") or rows[0].get("acceptedDate")
+    if latest_date:
+        try:
+            dt = datetime.strptime(latest_date[:10], "%Y-%m-%d")
+            out["data_lag_days"] = max(0, (datetime.utcnow() - dt).days)
+        except Exception:
+            pass
+
     return out
 
 
@@ -520,8 +698,9 @@ def analyze(ticker):
     price = round(float(hist["Close"].iloc[-1]), 2)
     volume    = volume_profile(hist)
     ma        = ma_structure(hist)
-    short_int = _short_interest_block(t)
-    market_cap = _market_cap(t)
+    info_slim = _get_info_cached(ticker, t)
+    short_int = _short_interest_block(info_slim)
+    market_cap = _market_cap(info_slim)
     rsi       = rsi_state(hist)
     macd      = compute_macd(hist["Close"])
     comp      = _composite(volume, ma, short_int)
@@ -535,6 +714,10 @@ def analyze(ticker):
     vol_pattern   = _compute_dry_up_spike(hist)
     eps_accel     = _compute_eps_acceleration(ticker)
     dtc           = _compute_days_to_cover(short_int)
+
+    # V3.22 — short-term price thrust + fundamentals layer (P/S / GM% / Rev YoY)
+    short_returns = _compute_short_term_returns(hist)
+    fundamentals  = _compute_fundamentals(ticker, market_cap)
 
     # Promote new patterns to signals (so they appear in --signal filter)
     if nhp.get("is_new_high"):
@@ -555,8 +738,9 @@ def analyze(ticker):
     return {
         "ticker":           ticker.upper(),
         "generated_at":     datetime.now(timezone.utc).isoformat(),
-        "schema_version":   "v2.1",   # bumped: includes new derive fields
+        "schema_version":   "v2.3",   # V3.25.8 — adds 3D volume window (avg_3d_vs_20d, vol_3d_state)
         "price":            price,
+        "market_cap":       market_cap,
         "cache_hit":        False,
         "cache_age_sec":    0,
         "volume":           volume,
@@ -571,6 +755,9 @@ def analyze(ticker):
         "volume_pattern":      vol_pattern,
         "eps_acceleration":    eps_accel,
         "days_to_cover":       dtc,
+        # V3.22 — short-term price thrust + fundamentals (P/S, GM, Rev YoY)
+        "short_term_returns":  short_returns,
+        "fundamentals":        fundamentals,
         "momentum_composite": comp,
         "signals":          signals,
         "warnings":         warnings,

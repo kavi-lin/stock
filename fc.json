@@ -1,0 +1,152 @@
+{
+  "status": "ok",
+  "ticker": "PANW",
+  "generated_at": "2026-05-30T11:45:56",
+  "current_price": 281.69,
+  "ttm_eps": 1.8,
+  "forward_eps": {
+    "value": 3.8,
+    "methods": {
+      "cagr": null,
+      "consensus": 3.9855,
+      "trend": 3.617
+    },
+    "confidence": "MEDIUM",
+    "spread_pct": 9.7
+  },
+  "multiple_range": {
+    "pe_p25": 70.82,
+    "pe_p50": 101.43,
+    "pe_p75": 136.9,
+    "window_years": 3,
+    "source": "annual_ratios"
+  },
+  "multiple_range_effective": {
+    "pe_p25": 63.74,
+    "pe_p50": 91.29,
+    "pe_p75": 123.21,
+    "window_years": 3,
+    "source": "annual_ratios"
+  },
+  "peer_pe_info": {
+    "median_pe": null,
+    "peers_used": [],
+    "source": "none"
+  },
+  "rate_context": {
+    "real_rate": 2.08,
+    "rate_multiplier": 0.9,
+    "rate_regime": "elevated",
+    "source": "fred_macro_cache"
+  },
+  "scenarios": {
+    "bear": {
+      "target": 205.88,
+      "upside_pct": -26.9,
+      "eps": 3.23,
+      "eps_delta_pct": -15,
+      "pe": 63.74,
+      "achieves_if": "forward EPS misses by > 10% OR gross margin compression OR sector multiple de-rating",
+      "achieves_if_text": "forward EPS misses by > 10% OR gross margin compression OR sector multiple de-rating",
+      "achieves_if_struct": {
+        "eps_delta_pct": -15,
+        "pe_percentile": "p25",
+        "required_eps": 3.23,
+        "required_pe": 63.74,
+        "narrative": "forward EPS misses by > 10% OR gross margin compression OR sector multiple de-rating"
+      },
+      "invalidated_if": "company beats guidance 2 quarters in a row WITH multiple holding > p50"
+    },
+    "base": {
+      "target": 346.9,
+      "upside_pct": 23.1,
+      "eps": 3.8,
+      "eps_delta_pct": 0,
+      "pe": 91.29,
+      "achieves_if": "earnings trajectory in-line with trend AND multiple stays in p25-p75 range",
+      "achieves_if_text": "earnings trajectory in-line with trend AND multiple stays in p25-p75 range",
+      "achieves_if_struct": {
+        "eps_delta_pct": 0,
+        "pe_percentile": "p50",
+        "required_eps": 3.8,
+        "required_pe": 91.29,
+        "narrative": "earnings trajectory in-line with trend AND multiple stays in p25-p75 range"
+      },
+      "invalidated_if": "material earnings surprise (> 10% either side) OR multiple breaks range"
+    },
+    "bull": {
+      "target": 538.43,
+      "upside_pct": 91.1,
+      "eps": 4.37,
+      "eps_delta_pct": 15,
+      "pe": 123.21,
+      "achieves_if": "forward EPS beats consensus by > 10% AND multiple re-rates to p75 (requires narrative catalyst)",
+      "achieves_if_text": "forward EPS beats consensus by > 10% AND multiple re-rates to p75 (requires narrative catalyst)",
+      "achieves_if_struct": {
+        "eps_delta_pct": 15,
+        "pe_percentile": "p75",
+        "required_eps": 4.37,
+        "required_pe": 123.21,
+        "narrative": "forward EPS beats consensus by > 10% AND multiple re-rates to p75 (requires narrative catalyst)"
+      },
+      "invalidated_if": "any guidance cut OR macro multiple compression (rates up / recession)"
+    }
+  },
+  "transition_case": {
+    "transition_case": false,
+    "reason": null,
+    "signature": null,
+    "mix_tier": "NO_DATA",
+    "transition_case_mtime": "2026-05-30T11:45:56"
+  },
+  "transition_case_mtime": "2026-05-30T11:45:56",
+  "revenue_margin_matrix": null,
+  "sensitivity_grid": [
+    [
+      205.88,
+      242.21,
+      278.54
+    ],
+    [
+      294.87,
+      346.9,
+      398.94
+    ],
+    [
+      397.97,
+      468.2,
+      538.43
+    ]
+  ],
+  "sensitivity_axes": {
+    "rows": [
+      "PE p25 (63.74)",
+      "PE p50 (91.29)",
+      "PE p75 (123.21)"
+    ],
+    "cols": [
+      "EPS −15%",
+      "EPS base",
+      "EPS +15%"
+    ]
+  },
+  "expected_value": 359.53,
+  "expected_value_upside_pct": 27.6,
+  "expected_value_probabilities": {
+    "bear": 0.25,
+    "base": 0.5,
+    "bull": 0.25
+  },
+  "signal": "STRONG BUY",
+  "caveats": [
+    "Multiple range uses company's own 5-year annual history — blind to sector regime shifts",
+    "Forward EPS assumes business model continuity (secular disruption breaks all 3 methods)",
+    "Earnings quality not adjusted (SBC, one-offs, GAAP vs non-GAAP ignored)",
+    "Peer PE blend uses median of up to 5 peers — thin or mismatched peer groups reduce accuracy",
+    "Rate adjustment uses DFII10 real rate from fred-macro cache (stale if cache not refreshed)",
+    "Signal is advisory only — not a trading instruction",
+    "Multiple window: 3 years of annual PE history"
+  ],
+  "cache_hit": false,
+  "cache_age_sec": 0
+}

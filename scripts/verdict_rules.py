@@ -25,6 +25,21 @@ EVAL_WINDOW_DAYS = {
 HIT_THRESHOLD_PCT = 2.0
 MISS_THRESHOLD_PCT = -2.0
 
+# TODO-011 (REVIEW_2026-05-24/05-31 盲點). News-digest scores a market-wide call
+# against SPY, where the ±2.0% single-stock band is structurally unreachable in
+# the digest window → every strong call got pinned to neutral (0% hit). Index-
+# level band. Stopgap value (±1.0%): on the 7 strong-delta samples it recovers
+# the one unambiguous correct call (2026-05-14 bearish, SPY −1.93%) without
+# manufacturing false misses from sub-1% noise (±0.5% did). Re-calibrate once
+# N≥15 strong-delta digests accumulate. Does NOT touch deep-dive's 2.0%.
+NEWS_HIT_THRESHOLD_PCT = 1.0
+
+# H-D (REVIEW_2026-06-13). The magnitude gate above pins 5/9 strong-delta digests
+# to neutral because SPY rarely clears ±1% inside the digest window — so the bug is
+# "magnitude vs direction", structural and independent of N. Noise floor below which
+# SPY has no readable direction. Used ONLY by verdict_news_digest_directional (shadow).
+NEWS_NOISE_FLOOR_PCT = 0.3
+
 
 def _verdict_directional(direction: str, return_pct: float, threshold: float = HIT_THRESHOLD_PCT) -> tuple[str, str]:
     """Generic directional verdict for long/short calls."""
@@ -150,15 +165,39 @@ def verdict_news_digest(decision_content: dict, spy_return_pct: float | None) ->
     if delta is None:
         return {"label": "n/a", "rationale": "digest 未提供 macro_delta"}
 
-    if delta < -0.5 and spy_return_pct < -HIT_THRESHOLD_PCT:
+    th = NEWS_HIT_THRESHOLD_PCT  # index-level band, not the single-stock 2.0%
+    if delta < -0.5 and spy_return_pct < -th:
         return {"label": "hit", "rationale": f"digest 看空 ({delta:+.1f}) → SPY {spy_return_pct:+.2f}%"}
-    if delta > 0.5 and spy_return_pct > HIT_THRESHOLD_PCT:
+    if delta > 0.5 and spy_return_pct > th:
         return {"label": "hit", "rationale": f"digest 看多 ({delta:+.1f}) → SPY {spy_return_pct:+.2f}%"}
-    if delta < -0.5 and spy_return_pct > HIT_THRESHOLD_PCT:
+    if delta < -0.5 and spy_return_pct > th:
         return {"label": "miss", "rationale": f"digest 看空 ({delta:+.1f}) 但 SPY {spy_return_pct:+.2f}%"}
-    if delta > 0.5 and spy_return_pct < -HIT_THRESHOLD_PCT:
+    if delta > 0.5 and spy_return_pct < -th:
         return {"label": "miss", "rationale": f"digest 看多 ({delta:+.1f}) 但 SPY {spy_return_pct:+.2f}%"}
     return {"label": "neutral", "rationale": f"digest delta {delta:+.1f} / SPY {spy_return_pct:+.2f}%, 不顯著"}
+
+
+def verdict_news_digest_directional(decision_content: dict, spy_return_pct: float | None) -> dict:
+    """SHADOW verdict (H-D / TODO-011, REVIEW_2026-06-13). Scores news-digest by
+    sign(macro_delta)==sign(SPY) beyond a small noise floor instead of the ±1.0%
+    magnitude band. Same |delta|>0.5 strong-signal gate as the primary so the two
+    are directly comparable. NOT in VERDICT_DISPATCH — never drives the calendar
+    label; build_event_index attaches it as `verdict.shadow_directional` so REVIEW
+    can re-baseline before promoting/retiring the magnitude method."""
+    if spy_return_pct is None:
+        return {"label": "pending", "rationale": "尚未取得 SPY 報酬"}
+    delta = decision_content.get("macro_delta")
+    if delta is None:
+        return {"label": "n/a", "rationale": "digest 未提供 macro_delta"}
+    if abs(delta) < 0.5:
+        return {"label": "neutral", "rationale": f"digest delta {delta:+.1f} 弱訊號, 不評分"}
+    nf = NEWS_NOISE_FLOOR_PCT
+    if abs(spy_return_pct) < nf:
+        return {"label": "neutral", "rationale": f"SPY {spy_return_pct:+.2f}% 在雜訊地板 ±{nf}% 內"}
+    same_dir = (delta > 0) == (spy_return_pct > 0)
+    if same_dir:
+        return {"label": "hit", "rationale": f"digest {delta:+.1f} 方向 → SPY {spy_return_pct:+.2f}% 同向"}
+    return {"label": "miss", "rationale": f"digest {delta:+.1f} 方向 → SPY {spy_return_pct:+.2f}% 反向"}
 
 
 def verdict_theme_detector(decision_content: dict, etf_returns: dict | None) -> dict:

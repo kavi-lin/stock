@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | Script 工具箱</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex min-h-screen transition-all" data-page="ops">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="ml-64 flex-1 flex flex-col">
+
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-20">
+            <div class="flex items-center gap-3">
+                <i data-lucide="terminal" class="w-5 h-5 text-indigo-500"></i>
+                <h2 id="ops-title" class="text-lg font-bold">Script 工具箱</h2>
+                <span id="ops-subtitle" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden sm:block">Ops Scripts · 上次執行 + 到期狀態</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="ops-as-of" class="text-[10px] font-mono text-zinc-500"></span>
+                <button id="ops-refresh" class="text-[11px] px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span id="ops-refresh-label">重新整理</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-4">
+            <div id="ops-summary" class="flex gap-3 flex-wrap"></div>
+            <div id="ops-error" class="glass-card p-6 text-center text-sm text-red-500 hidden"></div>
+            <div id="ops-list" class="space-y-2.5"></div>
+            <p id="ops-footnote" class="text-[10px] text-zinc-500 leading-relaxed">
+                上次執行由產出檔 mtime 推斷（registry：<code class="font-mono">config/ops_scripts.json</code>，可直接編輯增刪）。
+                面板唯讀 — 執行請在 terminal 跑指令（點 📋 複製）。
+            </p>
+        </div>
+    </main>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="page-ops.js"></script>
+</body>
+</html>

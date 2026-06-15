@@ -1,62 +1,196 @@
 {
   "version": "1.0",
-  "as_of": "2026-05-25T15:05:01.188711+00:00",
+  "as_of": "2026-06-15T12:02:34.758671+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
-  "post_count": 41,
-  "truth_social_dropped": 7,
+  "post_count": 39,
+  "truth_social_dropped": 4,
   "source_stats": {
-    "truth_social": 3,
-    "reddit": 20,
-    "hacker_news": 17,
-    "google_trends": 1
+    "truth_social": 6,
+    "reddit": 8,
+    "hacker_news": 23,
+    "google_trends": 2
   },
-  "tickers": [
+  "tickers": [],
+  "low_confidence": [
     {
-      "ticker": "RDDT",
-      "sector": "Technology",
-      "mention_count": 1,
-      "bull_hits_sum": 1,
-      "bear_hits_sum": 1,
-      "matched_terms": [
-        {
-          "term": "great buying opportunity",
-          "side": "bull"
-        },
-        {
-          "term": "downside",
-          "side": "bear"
-        }
-      ],
-      "sample_posts": [
-        {
-          "headline": "Is the recent dip in Reddit (RDDT) a great buying opportunity, or is there more downside ahead?",
-          "url": "https://www.reddit.com/r/investing/comments/1tn1zz6/is_the_recent_dip_in_reddit_rddt_a_great_buying/",
-          "source": "Reddit:r/investing",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": [
-            "great buying opportunity",
-            "downside"
-          ]
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "known"
-    },
-    {
-      "ticker": "NVDA",
-      "sector": "Technology",
+      "ticker": "FTX",
+      "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
       "bear_hits_sum": 0,
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "$67 invested in CS2 vs $NVDA in 2020",
-          "url": "https://www.reddit.com/r/wallstreetbets/comments/1tna6df/67_invested_in_cs2_vs_nvda_in_2020/",
-          "source": "Reddit:r/wallstreetbets",
+          "headline": "FTX's former Anthropic stake would be worth about $75B at today's valuation",
+          "url": "https://news.ycombinator.com/item?id=48529190",
+          "source": "Hacker News",
+          "engagement": 6.873,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 6.873,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "GUI",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Show HN: Peek – A Figma like DB GUI",
+          "url": "https://getpeek.dev",
+          "source": "Hacker News",
+          "engagement": 2.639,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Show HN: Peek – A Figma like DB GUI",
+          "url": "https://getpeek.dev",
+          "source": "Hacker News",
+          "engagement": 2.639,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 5.278,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SWE",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Ask HN: I am a junior CS and math major. I have no hope for SWE or math. Advice?",
+          "url": "https://news.ycombinator.com/item?id=48531538",
+          "source": "Hacker News",
+          "engagement": 3.296,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 3.296,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "MADE",
+      "sector": null,
+      "mention_count": 3,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Josh Brecheen is doing a fantastic job representing the wonderful people of Oklahoma’s 2nd Congressional District! Josh is a Conservative Warrior who has strong support",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754012612389383",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Frank Lucas is an incredible Representative for the wonderful people of Oklahoma’s 3rd Congressional District! A Fifth Generation Oklahoman, and lifelong Farmer and Ran",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754011972787542",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 3.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "GREAT",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Tom Cole is a Tremendous Champion for Oklahoma’s 4th Congressional District! As the Chairman of the POWERFUL House Appropriations Committee, Tom knows the America First",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754011009785366",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "THE",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Congressman Josh Brecheen is doing a fantastic job representing the wonderful people of Oklahoma’s 2nd Congressional District! Josh is a Conservative Warrior who has strong support",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754012612389383",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Congressman Frank Lucas is an incredible Representative for the wonderful people of Oklahoma’s 3rd Congressional District! A Fifth Generation Oklahoman, and lifelong Farmer and Ran",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754011972787542",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "MAGA",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
@@ -64,32 +198,177 @@
       ],
       "polarity_score": 0.0,
       "engagement_score": 1.0,
-      "_gate": "known"
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "WON",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "EVER",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "FIRST",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
+          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "MRR",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Offered 25x MRR to sell my mobile apps. Take the cash and go into AI/robotics stocks?",
+          "url": "https://www.reddit.com/r/stocks/comments/1u6ed4p/offered_25x_mrr_to_sell_my_mobile_apps_take_the/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "PART",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "What $10k invested in 8 major indices would be worth today *PART 2*",
+          "url": "https://www.reddit.com/r/stocks/comments/1u6e5dn/what_10k_invested_in_8_major_indices_would_be/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "KRUS",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Kuras chart (KRUS)",
+          "url": "https://www.reddit.com/r/stocks/comments/1u67m7e/kuras_chart_krus/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "IREN",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 1,
+      "matched_terms": [
+        {
+          "term": "bull",
+          "side": "bull"
+        },
+        {
+          "term": "bear",
+          "side": "bear"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "Looking for a serious bull vs bear discussion on IREN (AI infrastructure/data center thesis)",
+          "url": "https://www.reddit.com/r/stocks/comments/1u64fmf/looking_for_a_serious_bull_vs_bear_discussion_on/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": [
+            "bull",
+            "bear"
+          ]
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
     }
   ],
-  "low_confidence": [],
   "sectors": [
     {
       "sector": "Technology",
-      "ticker_count": 2,
-      "engagement_score": 2.0,
-      "bull_hits_sum": 1,
-      "bear_hits_sum": 1,
-      "top_tickers": [
-        {
-          "ticker": "RDDT",
-          "engagement_score": 1.0,
-          "polarity_score": 0.0,
-          "mention_count": 1
-        },
-        {
-          "ticker": "NVDA",
-          "engagement_score": 1.0,
-          "polarity_score": 0.0,
-          "mention_count": 1
-        }
-      ],
-      "polarity_score": 0.0
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "top_tickers": []
     },
     {
       "sector": "Healthcare",
@@ -184,29 +463,29 @@
   ],
   "market_wide_buzz": [
     {
-      "topic": "ai_capex",
+      "topic": "market_direction",
       "post_count": 5,
-      "engagement_score": 11.298,
+      "engagement_score": 6.356,
       "sample_posts": [
         {
-          "headline": "Microsoft pulls plug on plans for 244-acre data center in Caledonia",
-          "url": "https://www.tmj4.com/news/racine-county/microsoft-pulls-plug-on-plans-for-244-acre-data-center-in-caledonia-after-community-pushback",
+          "headline": "People quit because reality doesn't match the movie they created in their heads",
+          "url": "https://timesofindia.indiatimes.com/technology/tech-news/quote-of-the-day-by-nvidia-ceo-jensen-huang-one-of-my-great-advantages-is-that-i-have-very-low-/articleshow/131692397.cms",
           "source": "Hacker News",
-          "engagement": 5.981,
+          "engagement": 2.079,
           "polarity": 0.0
         },
         {
-          "headline": "Data center ordinance development continues in Washington Township",
-          "url": "https://planetdetroit.org/2026/04/washington-township-weighs-data-center-impacts/",
+          "headline": "How Nvidia Dominates AI:11 Engineering Moves [video]",
+          "url": "https://www.youtube.com/watch?v=vzM8mv1t_zM",
           "source": "Hacker News",
-          "engagement": 1.609,
+          "engagement": 1.386,
           "polarity": 0.0
         },
         {
-          "headline": "South Carolina county passes first reading on data center moratorium",
-          "url": "https://www.blufftontoday.com/story/news/environment/2026/05/10/south-carolina-county-passes-first-reading-on-data-center-moratorium/89961598007/",
+          "headline": "Nvidia Is the Federal Reserve of AI",
+          "url": "https://ramansharma.substack.com/p/nvidia-is-the-federal-reserve-of",
           "source": "Hacker News",
-          "engagement": 1.609,
+          "engagement": 1.099,
           "polarity": 0.0
         }
       ],

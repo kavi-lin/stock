@@ -260,6 +260,14 @@
         letter-spacing:0.04em;">${escapeHtml(verdictLabel)}</span>` : '';
     const commentBadge = (item.comment_count > 0)
       ? `<span style="font-size:11px;color:var(--text-muted);">💬 ${item.comment_count}</span>` : '';
+    // Event-cluster echo badge: same story pushed by N sources/feeds.
+    const echoBadge = (item.echo_count > 1)
+      ? `<span title="${currentLang() === 'zh' ? '同事件被多源重複報導' : 'Same event echoed by multiple sources'}"
+          style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;
+          background:rgba(99,102,241,0.14);color:#818cf8;
+          border:1px solid rgba(99,102,241,0.40);">×${item.echo_count}</span>` : '';
+    const escalatedBadge = item.escalated
+      ? `<span style="font-size:10px;color:#fb923c;font-weight:700;">⤴ ${currentLang() === 'zh' ? '升級追辯' : 'ESCALATED'}</span>` : '';
 
     return `<div class="glass-card bn-card" data-news-id="${escapeHtml(item.news_id || '')}"
       style="padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;">
@@ -269,6 +277,8 @@
           ${renderScoreBadge(score)}
           ${verdictBadge}
           ${renderSourcePill(item.source, item.credibility)}
+          ${echoBadge}
+          ${escalatedBadge}
           ${item.binary_flag ? '<span style="font-size:10px;color:#eab308;font-weight:700;">⚡ BINARY</span>' : ''}
         </div>
         <div style="display:flex;align-items:center;gap:8px;">

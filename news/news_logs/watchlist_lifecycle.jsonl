@@ -275,3 +275,406 @@
 {"date": "2026-05-25", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
 {"date": "2026-05-25", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
 {"date": "2026-05-25", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-26", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-26", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-26", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-26", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-26", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-26", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-26", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-26", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-26", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-26", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-26", "ticker": "MU", "event": "first_seen", "sector": "Memory (DRAM/NAND/HBM)", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-05-01"}
+{"date": "2026-05-26", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-26", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-26", "ticker": "KLAC", "event": "first_seen", "sector": "Semiconductors — Compute IP & Custom ASIC", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-05-22"}
+{"date": "2026-05-26", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-26", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-26", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-26", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-26", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-27", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-27", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-27", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-27", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-27", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-27", "ticker": "MU", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-27", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-27", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-05-27", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-27", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-27", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-27", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-27", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-27", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-27", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-27", "ticker": "MU", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-27", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-27", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-05-27", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-27", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-27", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-27", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-28", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-28", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-28", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-28", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-28", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-28", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-28", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-28", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-28", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-28", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-28", "ticker": "MU", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-28", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-28", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-28", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-05-28", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-28", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-28", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-28", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-28", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-29", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-29", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-29", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-29", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-29", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-29", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-29", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-29", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-29", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-29", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-29", "ticker": "MU", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-29", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-29", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-29", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-05-29", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-29", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-29", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-29", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-29", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-30", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-30", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-30", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-30", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-30", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-30", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-30", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-30", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-30", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-30", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-30", "ticker": "MU", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-30", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-30", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-30", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-05-30", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-30", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-30", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-30", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-30", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-31", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-05-31", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-31", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-05-31", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-01"}
+{"date": "2026-05-31", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-05-31", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-05-31", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-05-31", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-05-31", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-31", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-05-31", "ticker": "MU", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-01"}
+{"date": "2026-05-31", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-05-31", "ticker": "ASML", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-31", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-05-31", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-05-31", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-05-31", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-31", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-05-31", "ticker": "GEV", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-06-01", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-01", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-01", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-01", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-06-01", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-01", "ticker": "AMAT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-01", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-01", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-01", "ticker": "MU", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-01", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-01", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-01", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-01", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-01", "ticker": "GOOGL", "event": "first_seen", "sector": "Semiconductors — Compute IP & Custom ASIC", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-05-22"}
+{"date": "2026-06-01", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-01", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-06-01", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-01", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-06-01", "ticker": "CEG", "event": "evicted", "last_seen_yesterday": "2026-05-13"}
+{"date": "2026-06-01", "ticker": "GEV", "event": "evicted", "last_seen_yesterday": "2026-05-13"}
+{"date": "2026-06-02", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-02", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-02", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-02", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-06-02", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-02", "ticker": "AMAT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-02", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-02", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-02", "ticker": "MU", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-02", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-02", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-02", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-02", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-02", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-02", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-02", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-06-02", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-02", "ticker": "VST", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-08"}
+{"date": "2026-06-05", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-05", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-06-05", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-05", "ticker": "AMAT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-05", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-05", "ticker": "MU", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-05", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-05", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-05", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-05", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-05", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-05", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-05", "ticker": "VST", "event": "evicted", "last_seen_yesterday": "2026-05-13"}
+{"date": "2026-06-05", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-05", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-06-05", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-05", "ticker": "AMAT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-05", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-05", "ticker": "MU", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-05", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-05", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-05", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-05", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-05", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-05", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-06-05", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-05", "ticker": "VST", "event": "evicted", "last_seen_yesterday": "2026-05-13"}
+{"date": "2026-06-06", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-06", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-06", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-07"}
+{"date": "2026-06-06", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-08"}
+{"date": "2026-06-06", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-06", "ticker": "AMAT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-06", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-06", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-06", "ticker": "MU", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-06", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-06", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-07"}
+{"date": "2026-06-06", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-06", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-06", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-06", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-06", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-07"}
+{"date": "2026-06-06", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-07", "ticker": "AMAT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-07", "ticker": "VRT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-07", "ticker": "NVDA", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-07", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-07", "ticker": "AVGO", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-07", "ticker": "MU", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-07", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-07", "ticker": "TSM", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-07", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-08"}
+{"date": "2026-06-07", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-07", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-07", "ticker": "LRCX", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-07", "ticker": "AMD", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-11"}
+{"date": "2026-06-07", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-07", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-07", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-07", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-08", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-08", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-08", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-08", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-08", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-08", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-08", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-08", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-08", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-08", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-08", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-08", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-08", "ticker": "CEG", "event": "first_seen", "sector": "AI Power Infrastructure", "hit_count_14d": 2, "credibility": "MEDIUM", "first_observed": "2026-05-13"}
+{"date": "2026-06-08", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-08", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-08", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-08", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-08", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-09", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-09", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-09", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-09", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-09", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-09", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-09", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-09", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-09", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-09", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-09", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-09", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-09", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-09", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-09", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-10", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-10", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-10", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-11"}
+{"date": "2026-06-10", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-10", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-10", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-10", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-10", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-11"}
+{"date": "2026-06-10", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-10", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-10", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-10", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-10", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-10", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-10", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-10", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-10", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-10", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-11", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-11", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-11", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-11", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-11", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-11", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-11", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-11", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-11", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-11", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-11", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-12", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-12", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-12", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-12", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-12", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-12", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "PWR", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-12", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-12", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-12", "ticker": "ARM", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-12", "ticker": "CRDO", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-13"}
+{"date": "2026-06-15", "ticker": "MU", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "MU", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-15", "ticker": "NVDA", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "NVDA", "event": "graduated_confirmed", "earnings_tier": "CONFIRMED"}
+{"date": "2026-06-15", "ticker": "AVGO", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "TSM", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "VRT", "event": "continued", "hit_count_14d": 4, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "AMAT", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "AMD", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-22"}
+{"date": "2026-06-15", "ticker": "ASML", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "ETN", "event": "continued", "hit_count_14d": 3, "first_observed": "2026-05-22"}
+{"date": "2026-06-15", "ticker": "LRCX", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-17"}
+{"date": "2026-06-15", "ticker": "CEG", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-31"}
+{"date": "2026-06-15", "ticker": "GOOGL", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-15", "ticker": "PWR", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-15", "ticker": "KLAC", "event": "continued", "hit_count_14d": 2, "first_observed": "2026-05-22"}
+{"date": "2026-06-15", "ticker": "ARM", "event": "evicted", "last_seen_yesterday": "2026-05-22"}
+{"date": "2026-06-15", "ticker": "CRDO", "event": "evicted", "last_seen_yesterday": "2026-05-22"}

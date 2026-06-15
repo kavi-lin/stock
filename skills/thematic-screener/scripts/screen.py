@@ -26,6 +26,7 @@ import time
 import argparse
 import datetime
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 # v0.3.1 — global socket timeout. Without this yfinance / FMP requests can
@@ -52,6 +53,17 @@ try:
     HAS_ENRICH = True
 except ImportError:
     HAS_ENRICH = False
+
+# v0.4 — in-process predict (saves ~1-2s interpreter+import per ticker vs subprocess).
+# Falls back to subprocess if the module can't be imported.
+sys.path.insert(0, str(PREDICT_SCRIPT.parent))
+try:
+    from predict import predict_ticker as _predict_inproc
+except Exception:
+    _predict_inproc = None
+
+sys.path.insert(0, str(ROOT))
+from skills._shared.technical_core import rsi_14 as _shared_rsi_14  # noqa: E402
 
 
 # ---------- data loaders (unchanged from v0.1) ----------
@@ -107,19 +119,20 @@ def get_market_snapshot():
     out = {}
     try:
         spy = yf.Ticker("SPY").history(period="60d", auto_adjust=False)
-        if not spy.empty:
-            closes = spy["Close"].values
+        # yfinance occasionally returns a trailing NaN Close row (observed 2026-06-10)
+        spy_close_series = spy["Close"].dropna() if not spy.empty else None
+        if spy_close_series is not None and not spy_close_series.empty:
+            closes = spy_close_series.values
             out["spy_close"] = round(float(closes[-1]), 2)
             if len(closes) >= 50:
                 ma50 = float(np.mean(closes[-50:]))
                 out["spy_ma50"] = round(ma50, 2)
                 out["spy_ma50_status"] = "above" if closes[-1] > ma50 else "below"
             if len(closes) >= 15:
-                deltas = np.diff(closes[-15:])
-                gains = np.where(deltas > 0, deltas, 0).mean()
-                losses = np.where(deltas < 0, -deltas, 0).mean()
-                rsi = 100 - (100 / (1 + gains / losses)) if losses > 0 else 100
-                out["spy_rsi_14"] = round(float(rsi), 1)
+                # shared Wilder RSI (skills/_shared/technical_core) — same numbers as momentum/sector pages
+                rsi = _shared_rsi_14(spy_close_series).iloc[-1]
+                if rsi == rsi:  # not NaN
+                    out["spy_rsi_14"] = round(float(rsi), 1)
             if len(closes) >= 6:
                 out["spy_5d_pct"] = round((float(closes[-1]) / float(closes[-6]) - 1) * 100, 2)
         vix = yf.Ticker("^VIX").history(period="5d", auto_adjust=False)
@@ -130,9 +143,16 @@ def get_market_snapshot():
     return out
 
 
-# ---------- per-ticker prediction (subprocess; uses predict.py 4h cache) ----------
+# ---------- per-ticker prediction (in-process; uses predict.py 4h cache) ----------
 
 def run_short_term_target(ticker, timeout=60):
+    if _predict_inproc is not None:
+        # In-process: no per-ticker hard timeout, but the global
+        # socket.setdefaulttimeout(15) bounds every network op inside predict.
+        try:
+            return _predict_inproc(ticker)
+        except Exception as e:
+            return {"ticker": ticker, "error": str(e)[:200]}
     try:
         r = subprocess.run(
             ["python3", str(PREDICT_SCRIPT), ticker, "--json-only"],
@@ -148,6 +168,55 @@ def run_short_term_target(ticker, timeout=60):
         return {"ticker": ticker, "error": "predict_timeout"}
     except Exception as e:
         return {"ticker": ticker, "error": str(e)}
+
+
+def _timed_short_term_target(ticker, timeout=60):
+    t0 = time.time()
+    pred = run_short_term_target(ticker, timeout=timeout)
+    return ticker, pred, time.time() - t0
+
+
+def run_short_term_targets(tickers, workers=1, timeout=60):
+    """Run short-term predictions with bounded subprocess fanout."""
+    total = len(tickers)
+    pred_start = time.time()
+    slow_tickers = []
+    all_predictions = {}
+    workers = max(1, int(workers or 1))
+
+    if workers == 1:
+        for i, t in enumerate(tickers, 1):
+            t0 = time.time()
+            all_predictions[t] = run_short_term_target(t, timeout=timeout)
+            dt = time.time() - t0
+            if dt > 5:
+                slow_tickers.append((t, dt))
+                _log(f"  [{i}/{total}] {t} took {dt:.1f}s "
+                     f"{'(TIMEOUT)' if all_predictions[t].get('error') == 'predict_timeout' else ''}")
+            if i % 10 == 0:
+                _log(f"  ... {i}/{total} (elapsed {time.time() - pred_start:.0f}s)")
+        return all_predictions, slow_tickers, time.time() - pred_start
+
+    _log(f"Prediction fanout: {workers} workers")
+    done = 0
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = {ex.submit(_timed_short_term_target, t, timeout): t for t in tickers}
+        for fut in as_completed(futs):
+            t = futs[fut]
+            try:
+                _, pred, dt = fut.result()
+            except Exception as e:
+                pred = {"ticker": t, "error": str(e)}
+                dt = 0
+            all_predictions[t] = pred
+            done += 1
+            if dt > 5:
+                slow_tickers.append((t, dt))
+                _log(f"  [{done}/{total}] {t} took {dt:.1f}s "
+                     f"{'(TIMEOUT)' if pred.get('error') == 'predict_timeout' else ''}")
+            if done % 10 == 0 or done == total:
+                _log(f"  ... {done}/{total} (elapsed {time.time() - pred_start:.0f}s)")
+    return all_predictions, slow_tickers, time.time() - pred_start
 
 
 # ---------- regime: 2-badge + 1-factor ----------
@@ -283,6 +352,9 @@ def compute_theme_short_term(theme, all_predictions, regime_factor):
                                "n_valid_predictions": 0,
                                "n_bullish": 0}
                            for h in ("1d", "5d", "15d")},
+            "trailing": {"trailing_breadth_5d_pct": None, "median_trailing_5d_pct": None,
+                         "median_trailing_20d_pct": None, "median_momentum_score": None,
+                         "n_valid_trailing": 0, "n_up_5d": 0},
             "components": {},
         }
 
@@ -320,6 +392,47 @@ def compute_theme_short_term(theme, all_predictions, regime_factor):
             "n_bullish": bullish,
         }
 
+    # ── Trailing (REAL price) breadth — direction-honest, can read bearish ──
+    # Distinct from bullish_breadth_pct (forward target>0, structurally >50).
+    # trailing_breadth = % of constituents whose price ACTUALLY rose over 5d.
+    def _median(vals):
+        s = sorted(vals)
+        n = len(s)
+        if n == 0:
+            return None
+        m = n // 2
+        return s[m] if n % 2 else round((s[m - 1] + s[m]) / 2, 2)
+
+    tr5, tr20, mom_all = [], [], []
+    for ticker in constituents:
+        pred = all_predictions.get(ticker)
+        if not pred or pred.get("error"):
+            continue
+        r5 = pred.get("trailing_return_5d_pct")
+        r20 = pred.get("trailing_return_20d_pct")
+        if r5 is not None:
+            tr5.append(r5)
+        if r20 is not None:
+            tr20.append(r20)
+        d = pred.get("horizons", {}).get("5d", {}).get("drivers", {})
+        if d and d.get("momentum_score") is not None:
+            mom_all.append(d.get("momentum_score"))
+    n_tr5 = len(tr5)
+    if n_tr5:
+        up5 = sum(1 for r in tr5 if r > 0)
+        trailing_breadth = round(up5 / n_tr5 * 100, 1)
+    else:
+        up5 = 0
+        trailing_breadth = None
+    trailing = {
+        "trailing_breadth_5d_pct": trailing_breadth,   # % constituents with REAL 5d gain
+        "median_trailing_5d_pct": _median(tr5),
+        "median_trailing_20d_pct": _median(tr20),
+        "median_momentum_score": _median(mom_all),     # -1..1 RSI/MA structural lean
+        "n_valid_trailing": n_tr5,
+        "n_up_5d": up5,
+    }
+
     # Shared components context — uses 5d drivers across ALL constituents
     momentums, sectors, atrs = [], [], []
     for ticker in constituents:
@@ -344,6 +457,7 @@ def compute_theme_short_term(theme, all_predictions, regime_factor):
         "n_total_constituents": n_total,
         "primary_horizon": "5d",
         "by_horizon": by_horizon,
+        "trailing": trailing,
         "components": components,
     }
 
@@ -382,6 +496,8 @@ def main():
                     help="Skip writing to data/recommendations/")
     ap.add_argument("--json-only", action="store_true",
                     help="Compact JSON output")
+    ap.add_argument("--predict-workers", type=int, default=1,
+                    help="Bounded parallelism for per-ticker predict.py subprocesses")
     args = ap.parse_args()
 
     themes_data, theme_meta = load_latest_themes()
@@ -409,19 +525,11 @@ def main():
     })
     _log(f"Predicting {len(all_tickers)} unique tickers across {len(all_themes)} themes (cache 4h)...")
 
-    all_predictions = {}
-    pred_start = time.time()
-    slow_tickers = []
-    for i, t in enumerate(all_tickers, 1):
-        t0 = time.time()
-        all_predictions[t] = run_short_term_target(t)
-        dt = time.time() - t0
-        if dt > 5:
-            slow_tickers.append((t, dt))
-            _log(f"  [{i}/{len(all_tickers)}] {t} took {dt:.1f}s {'(TIMEOUT)' if all_predictions[t].get('error') == 'predict_timeout' else ''}")
-        if i % 10 == 0:
-            _log(f"  ... {i}/{len(all_tickers)} (elapsed {time.time() - pred_start:.0f}s)")
-    _log(f"Predict phase done: {len(all_tickers)} tickers in {time.time() - pred_start:.0f}s "
+    all_predictions, slow_tickers, pred_elapsed = run_short_term_targets(
+        all_tickers,
+        workers=args.predict_workers,
+    )
+    _log(f"Predict phase done: {len(all_tickers)} tickers in {pred_elapsed:.0f}s "
          f"({len(slow_tickers)} slow >5s)")
 
     # v0.3 — enrich every ticker (cap tier + earnings landmines + quality + smart-money + analyst)
@@ -469,9 +577,11 @@ def main():
         })
     themes_block = tag_concentration(themes_block)
 
-    # Sort themes by 5d bullish_breadth_pct descending (default sort)
+    # Sort themes by REAL trailing 5d breadth descending (default sort).
+    # v0.4: switched off forward bullish_breadth_pct (structurally >50, direction-blind)
+    # → trailing_breadth_5d_pct so leaders surface and genuinely-weak themes sink (still visible).
     themes_block.sort(
-        key=lambda t: (t["short_term"].get("by_horizon", {}).get("5d", {}).get("bullish_breadth_pct") or -1),
+        key=lambda t: (t["short_term"].get("trailing", {}).get("trailing_breadth_5d_pct") or -1),
         reverse=True,
     )
 
@@ -487,6 +597,7 @@ def main():
             "top_movers": args.top_movers,
             "n_themes_total": len(all_themes),
             "n_unique_tickers_predicted": len(all_tickers),
+            "predict_workers": args.predict_workers,
             "show_all_themes": True,
         },
         "themes": themes_block,

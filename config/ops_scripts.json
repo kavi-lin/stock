@@ -1,0 +1,136 @@
+{
+  "_comment": "V3.47.0 — Ops Script 工具箱 registry。Dashboard /api/ops/scripts 讀此檔。last run 由 artifact_globs 最新 mtime 推斷（零侵入）。cadence: daily/weekly/monthly → 超期標 due；on_demand → 不催。直接編輯本檔增刪。 V4.6: protocol_id → ops 頁 ▶ 一鍵執行（走 protocol queue）；endpoint → 專用 POST 端點；auto:true → server ops_auto_loop 到期自動跑（僅限 0-LLM script）。",
+  "scripts": [
+    {
+      "id": "daily_update",
+      "name": "每日資料更新",
+      "cmd": "./daily_update.sh",
+      "desc": "Breadth → FTD → Top → FRED → Bridge → Thematic → Watchlist → Nexus（8 步全自動）",
+      "cadence": "daily",
+      "artifact_globs": [
+        "Dashboard/data.json"
+      ]
+    },
+    {
+      "id": "weekly_review",
+      "name": "短期戰術週報",
+      "cmd": "python3 skills/short-term-target/scripts/weekly_review.py",
+      "desc": "hit rate / alpha / weights 調整建議（週末手動）",
+      "cadence": "weekly",
+      "artifact_globs": [
+        "reports/SHORT_TERM_WEEKLY_*.md"
+      ],
+      "protocol_id": "weekly_review",
+      "auto": true
+    },
+    {
+      "id": "shadow_report",
+      "name": "Shadow 實驗成績單",
+      "cmd": "python3 investment/scripts/shadow_report.py",
+      "desc": "#2 dispersion + #6 oe / #3 archetype 翻轉率 + #4 news 分布偏移 + checkpoint 進度（唯讀）",
+      "cadence": "weekly",
+      "artifact_globs": [
+        "reports/SHADOW_REPORT_*.md"
+      ],
+      "protocol_id": "shadow_report",
+      "auto": true
+    },
+    {
+      "id": "backtest_postmortem",
+      "name": "決策回測覆盤",
+      "cmd": "python3 investment/scripts/backtest_postmortem.py",
+      "desc": "protocol 歷史決策 vs 實際走勢 backtest",
+      "cadence": "monthly",
+      "artifact_globs": [
+        "reports/POSTMORTEM_*.md"
+      ],
+      "protocol_id": "backtest_postmortem",
+      "auto": false
+    },
+    {
+      "id": "momentum_journal",
+      "name": "動能 Journal 更新",
+      "cmd": "python3 skills/momentum-monitor/scripts/journal.py",
+      "desc": "screener 標的 5/20/60d forward return 追蹤",
+      "cadence": "weekly",
+      "artifact_globs": [
+        "skills/momentum-monitor/journal/*.json",
+        "skills/momentum-monitor/journal/*.csv"
+      ],
+      "endpoint": "/api/journal-update",
+      "auto": true
+    },
+    {
+      "id": "audit_drift_check",
+      "name": "Finnhub/FMP 漂移稽核",
+      "cmd": "python3 skills/finnhub-client/scripts/audit_drift_check.py",
+      "desc": "雙源報價 drift 比對",
+      "cadence": "on_demand",
+      "artifact_globs": [
+        "skills/finnhub-client/cache/*audit*"
+      ]
+    },
+    {
+      "id": "check_skills",
+      "name": "Skills Linter",
+      "cmd": "python3 scripts/check_skills.py",
+      "desc": "SKILL.md frontmatter + cross-ref lint（warnings only）",
+      "cadence": "on_demand",
+      "artifact_globs": []
+    },
+    {
+      "id": "sector_digest",
+      "name": "Sector 決策速覽",
+      "cmd": "python3 sector/scripts/sector_digest.py",
+      "desc": "1-call macro + 11 sector 決策表（唯讀）（stdout-only，無 artifact 可推斷 last run）",
+      "cadence": "on_demand",
+      "artifact_globs": []
+    },
+    {
+      "id": "predict",
+      "name": "短期單股預測",
+      "cmd": "python3 skills/short-term-target/scripts/predict.py <TICKER>",
+      "desc": "1d/5d/15d projection（ad-hoc 單股）",
+      "cadence": "on_demand",
+      "artifact_globs": []
+    },
+    {
+      "id": "nexus_rebuild",
+      "name": "Nexus 圖譜重建",
+      "cmd": "python3 scripts/nexus/build_graph.py --tier 1,2,3 --full",
+      "desc": "知識圖譜 full rebuild（Tier 3 需 ANTHROPIC_API_KEY；日常由 daily_update Step 8 跑 Tier 1+2）",
+      "cadence": "on_demand",
+      "artifact_globs": [
+        "Dashboard/nexus_graph.json"
+      ]
+    },
+    {
+      "id": "validate_session_export",
+      "name": "History Schema 驗證",
+      "cmd": "python3 investment/scripts/validate_session_export.py",
+      "desc": "history.json 最新 entry schema gate（rc=0 必須）",
+      "cadence": "on_demand",
+      "artifact_globs": []
+    },
+    {
+      "id": "engine_golden_test",
+      "name": "Engine 回歸測試",
+      "cmd": "python3 investment/scripts/test_compute_price_framework.py",
+      "desc": "price framework engine golden fixtures（26 asserts；改 engine 後必跑）",
+      "cadence": "on_demand",
+      "artifact_globs": []
+    },
+    {
+      "id": "llm_review",
+      "name": "決策日曆 LLM Review",
+      "cmd": "(Claude protocol — POST /api/protocol-queue {\"name\":\"llm_review\"})",
+      "desc": "event_index rebuild + 四步驟統計檢討 → REVIEW_<date>.md。launchd com.kavi.aicommittee.llm-review 每週日 06:00 自動 enqueue；此 entry 供監控/手動補跑",
+      "cadence": "weekly",
+      "artifact_globs": [
+        "reports/decision_review/REVIEW_*.md"
+      ],
+      "protocol_id": "llm_review",
+      "auto": false
+    }
+  ]
+}

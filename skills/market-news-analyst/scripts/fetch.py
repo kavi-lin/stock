@@ -257,6 +257,43 @@ def _fmp_price_target(ticker: str, api_key: str):
     return out or None
 
 
+def _pt_revision_momentum(pt: dict | None):
+    """V3.45.4 — PT 30d/90d revision direction+magnitude, WITHOUT absolute levels.
+
+    News lane 注入層剝離：PT consensus level vs price 已在 valuation anchor (0.20)
+    + 60d pt_60d (0.35) 計分兩次，News lane 再看 level 是第三次重複計分（cross-lane
+    anchoring）。但 PT 的「變動方向」是 sell-side 行為變化 — 與 rating changes 同類的
+    真新資訊，不重複。故輸出 delta % 不輸出 level；LLM 看不到的數字才真的不會計分。
+    """
+    if not isinstance(pt, dict):
+        return None
+
+    def _f(k):
+        v = pt.get(k)
+        return v if isinstance(v, (int, float)) and v > 0 else None
+
+    cons, m1, q1 = _f("target_consensus"), _f("last_month_avg_target"), _f("last_quarter_avg_target")
+    d1 = round((cons - m1) / m1 * 100, 2) if cons and m1 else None
+    d3 = round((cons - q1) / q1 * 100, 2) if cons and q1 else None
+    ref = d1 if d1 is not None else d3
+    if ref is None:
+        direction = "UNKNOWN"
+    elif ref > 1.0:
+        direction = "UP"
+    elif ref < -1.0:
+        direction = "DOWN"
+    else:
+        direction = "FLAT"
+    return {
+        "direction":            direction,
+        "consensus_delta_pct_1m": d1,
+        "consensus_delta_pct_3m": d3,
+        "analysts_last_month":  pt.get("last_month_count"),
+        "analysts_last_quarter": pt.get("last_quarter_count"),
+        "note": "PT revision direction only — absolute levels stripped (V3.45.4 anti cross-lane anchoring)",
+    }
+
+
 def _fmp_grades_news(ticker: str, api_key: str, since: datetime):
     """Analyst rating change news (with publisher / URL / image)."""
     data = _fmp_get("grades-news", api_key, {"symbol": ticker, "limit": 20})
@@ -515,7 +552,10 @@ def fetch(ticker: str, hours: int, use_fmp: bool = True):
         "analyst_actions":      analyst_actions_primary,
         "analyst_actions_source": analyst_actions_source,
         "analyst_consensus":    fmp_consensus,
-        "price_target":         fmp_price_target,
+        # V3.45.4: absolute PT levels stripped from News lane payload (cross-lane
+        # anchoring — level already scored in valuation anchor + 60d pt_60d).
+        # Revision direction/magnitude kept: sell-side behaviour change = real news.
+        "pt_revision_momentum": _pt_revision_momentum(fmp_price_target),
         "analyst_news":         fmp_grades_news,
         "sec_filings_recent":   sec_filings,
         "sec_8k_filings":       sec_8k_filings,

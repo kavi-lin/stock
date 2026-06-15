@@ -10,7 +10,7 @@ description: Aggregate retail-perspective sentiment + multi-day direction by sec
 Produce per-sector (11 GICS sectors) daily snapshot of:
 
 1. **News sentiment** — weighted avg of recent (72h) news-digest `net_impact_score`, joined by `affected_sectors[]`
-2. **Retail discussion volume** — median Reddit/HN cashtag multiplier across `SECTOR_TOP_5` tickers (from narrative-pulse cache)
+2. **Retail discussion volume** — retired with narrative-pulse-detector (V3.34); component degrades gracefully to `score=None` / `sample_size=0`. Candidate future source: break_news social adapters (Reddit / HN)
 3. **5-day direction forecast** — median `target_central_pct` + bullish-breadth % across `SECTOR_TOP_5`, via `short-term-target/predict.py`
 4. **Composite direction label** — declarative weighted blend (see `config/weights.yaml`)
 5. **Rule-based framing** — one-line 大白話 summary per sector (no LLM)
@@ -20,14 +20,13 @@ Output feeds `Dashboard/data.json['tactical']['retail_sector_pulse']` via `bridg
 ## Triggers
 
 - `python3 skills/retail-sector-pulse/scripts/aggregate.py` (CLI)
-- Auto-invoked by `daily_update.sh` Step 9.5 (after narrative_pulse, before bridge)
+- Auto-invoked by `daily_update.sh` Step 9.5 (before bridge)
 
 ## Inputs (all retail-accessible)
 
 | Source | Field used |
 |---|---|
 | `news/news_logs/<DATE>_digest.json` | `verdicts[].{verdict, net_impact_score, affected_sectors[], tickers_mentioned[], headline, source_label, published}` |
-| `skills/narrative-pulse-detector/cache/<TICKER>_<DATE>.json` | `components.retail_mention_multiplier` |
 | `skills/short-term-target/scripts/predict.py` (called per ticker) | `horizons.5d.{target_central_pct, confidence, status}` |
 | `skills/_shared/company_context.py` | `SECTOR_TOP_5` (11 × 5 ticker roster) |
 

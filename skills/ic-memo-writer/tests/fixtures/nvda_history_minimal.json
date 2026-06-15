@@ -1,0 +1,283 @@
+[
+  {
+    "session_export_version": "V5.0",
+    "export_date": "2026-05-11",
+    "date": "2026-05-11",
+    "ticker": "NVDA",
+    "final_action": "EXECUTE",
+    "trades_this_session": [
+      {
+        "ticker": "NVDA",
+        "final_action": "EXECUTE",
+        "final_score": 1.845,
+        "final_decision": "BUY",
+        "consensus_bonus_applied": false,
+        "red_team_verdict": "STRONG_COUNTER",
+        "red_team_counter_thesis": "看多論點建立在單季加速 (Rev YoY +73.2%, eps_qoq +35.4%) 並外推至 $248 合理價、現價貼近 52w 高，但 9 天後 Q1 FY27 二元財報落入 Late-cycle / Overheating FRED 體制（Technology 明確列 sector_rotation_avoid），疊加連 4 季內部人淨賣、PT 分散度 93%、Barron's 點名相對落後同業 (MU/QCOM) — 這是頂部追勢動能交易，而非便宜複利機會。",
+        "red_team_kill_conditions": [
+          "IF Q1 FY27 財報 (2026-05-20, 9 天) 營收符合或低於 whisper 或 FY27 guidance 未能再加速 above +73% YoY THEN structural_shift CANDIDATE 坍縮為單季噪音，$248 fair value 失去基底，L1/L5 BUY 失效",
+          "IF FRED Overheating 持續且 Technology 留在 sector_rotation_avoid AND real_rate 升破 1.25 WITHIN 30 天 THEN late-cycle Tech de-rating 凌駕 +27% PT upside 敘事",
+          "IF China 晶片關稅升級（named_targets_today=[CHINA] ACTIVE）45 天內具體出口管制行動 THEN NVDA 中國 revenue 暴險疊加同業相對弱勢 → 基本面 EPS 下修，PEG 0.68 看多錨點失效",
+          "IF NVDA 財報反應未收盤站上 pivot $221 且跌破支撐 $197.22 (-10%) WITHIN 14 天 THEN false_breakout 確認內部人分發為領先指標，L4 Stage-2 BUY 失效"
+        ],
+        "red_team_execution_failed": false,
+        "phase2_fanout_mode": "PARALLEL_SUBAGENT",
+        "degraded_analysts": [],
+        "macro_alignment": "CONTRARIAN",
+        "avg_confidence": 0.704,
+        "burry_score": 26.5,
+        "burry_override_active": false,
+        "burry_override_recheck_date": null,
+        "entry_aggressive": [
+          "213",
+          "219"
+        ],
+        "entry_conservative": [
+          "200",
+          "210"
+        ],
+        "take_profit": 260,
+        "stop_loss": 200,
+        "risk_reward_ratio": 2.87,
+        "position_size_pct": 0.0263,
+        "staged_split": null,
+        "position_size_method": "VOL_ADJUSTED",
+        "ftd_timeline_gate": {
+          "applied": true,
+          "days_since_ftd": 22,
+          "stage": "exhausted",
+          "sector_class": "cyclical",
+          "multiplier": 0.5,
+          "stop_loss_adjustment_pp": -2,
+          "rejection_triggered": false
+        },
+        "fragility_label": "MODERATE",
+        "binary_classification": "positive",
+        "time_horizon": "mid",
+        "analysis_price": 218.9,
+        "macro_context": "RISK_ON 體制但 macro_backdrop_score -1.0：breadth 33 Weakening、market_top 25.6 Early_Warning、FTD day 22 exhausted、FRED 規制 Overheating 把 Technology 列入 sector_rotation_avoid，整體屬 CONTRARIAN BUY — AI&Semis 個股題材逆勢於宏觀 sector 規避訊號。",
+        "watch_conditions": {
+          "earnings_2026_05_20": "Q1 FY27 財報前 1 日決定是否加碼或全砍倉位 — guide 高於 +73% YoY 才解除 CANDIDATE 卡位",
+          "ma_pivot_break": "收盤站穩 $221 上方 + 量 > 1.5×20D avg → uptrend_breakout 確認，conservative 軌 50% 加碼",
+          "ma_pivot_failure": "若 5 個交易日內未能突破 $221 並跌破 $213 → false_breakout，aggressive 軌出場",
+          "support_break": "收盤跌破 $200 (50MA 鄰近) → 觸發 SL，全砍",
+          "china_tariff_escalation": "45 天內出現具體中國晶片出口管制 → R/R 重評，考慮減碼",
+          "fred_regime_check": "real_rate DFII10 升破 1.25 或 FRED 規制轉 Late Cycle Tightening → 觀察是否需要 hedge 或縮倉",
+          "insider_resume": "Q2 2026 出現內部人淨買 (acquired/disposed > 0.5) → 結構性看多訊號回歸"
+        },
+        "key_risks": [
+          "9 天後 Q1 FY27 二元財報風險",
+          "現價 0% 距 52 週高 — 頂部追勢風險",
+          "Burry 26.5 WARNING — FCF yield 1.12% 末段、EV/EBIT 38.9 偏貴",
+          "連 4 季內部人淨分發",
+          "FRED Technology 列 sector_rotation_avoid (Overheating 規制)",
+          "中國晶片關稅政治風險 active",
+          "PT 分散度 93% — 分析師信心分歧",
+          "CEO 薪酬 YoY +45.9% 治理黃旗"
+        ],
+        "devils_advocate_filed": false,
+        "trade_metadata": {
+          "trade_type": "trend",
+          "event_tag": "earnings"
+        },
+        "valuation_lane": {
+          "signal": "BUY",
+          "score": 1.0,
+          "confidence": 0.7,
+          "weighted_fair_value": 248.04,
+          "vs_current_pct": 13.31
+        },
+        "fair_value_summary": {
+          "anchors": {
+            "dcf_unlevered": 235.5,
+            "dcf_levered": 245.7,
+            "analyst_pt_consensus": 278.83,
+            "peer_pe_implied": 322.54,
+            "owner_earnings_mult": 22.95,
+            "forecaster_blend": 386.09
+          },
+          "weights_used": {
+            "dcf_unlevered": 0.3,
+            "dcf_levered": 0.15,
+            "analyst_pt_consensus": 0.2,
+            "peer_pe_implied": 0.2,
+            "owner_earnings_mult": 0.1,
+            "forecaster_blend": 0.05
+          },
+          "weighted_fair_value": 248.04,
+          "current_price": 218.9,
+          "vs_current_pct": 13.31,
+          "verdict_band": "undervalued",
+          "confidence": "high",
+          "anchors_available": 6,
+          "methodology_note": "6/6 anchors used; owner_earnings_mult $22.95 retained at 10% weight as outlier (Buffett ×15 understates because NVDA capex profile distorts maintenance-capex calc) — flagged in reasoning"
+        },
+        "lane_scores": {
+          "fundamentals": 4,
+          "sentiment": 1,
+          "news": 3,
+          "technical": 3
+        },
+        "det_inputs": {
+          "altman_z": 68.23,
+          "debt_to_equity": 0.054,
+          "fcf_yield": 0.0112,
+          "insider_ratio_q": 0.163,
+          "short_interest_pct": 0.0122,
+          "fred_in_sector_avoid": true
+        },
+        "technical_lane": {
+          "smart_money_analysis": {
+            "label": "distributing",
+            "note": "Insider Q1 2026 ratio 0.163 (60.5M acq vs 31.5M disp 但 92 sell txns vs 15 buy)；連 4 季淨分發配上價格強勢屬於知情供給釋放"
+          },
+          "pattern_taxonomy": {
+            "pattern": "uptrend_breakout",
+            "confirmation_criteria": "日收盤 > $220.90 且量 > 1.5×20D avg 確認；否則跌破 $216.83 swing high + 收盤 → 降為 false_breakout"
+          },
+          "market_strength": "STRONG",
+          "key_levels": {
+            "support": 197.22,
+            "resistance": 220.9,
+            "pivot": 216.83
+          },
+          "high_prob_scenario": "Base case (60%): $213-$221 5-10 天盤整後若日收 > $221 + 量 ≥ 1.5×20D avg → 上攻 $232-$238；Bear case (40%): 220.90 拒絕 → 拉回 $204.62 (20MA) 或 $197.22 swing support 10-15 天內"
+        },
+        "fundamentals_lane": {
+          "moat_assessment": {
+            "level": "WIDE",
+            "type": "network_effect",
+            "evidence_one_line": "CUDA 生態 + ~80% AI 訓練 GPU 份額 + ROE 104.37% 遠超同業中位數 — 切換成本與規模經濟雙護城河"
+          },
+          "near_term_catalysts": [
+            {
+              "date": "2026-05-20",
+              "type": "earnings",
+              "description": "Q1 FY27 財報 (consensus EPS growth +95.6%)",
+              "impact": "high"
+            },
+            {
+              "date": "2026-05-21",
+              "type": "guidance",
+              "description": "FY27 data-center revenue & Blackwell ramp guidance",
+              "impact": "high"
+            },
+            {
+              "date": "2026-06-15",
+              "type": "product_launch",
+              "description": "Blackwell Ultra / Rubin 平台更新業界活動",
+              "impact": "medium"
+            },
+            {
+              "date": "2026-07-31",
+              "type": "macro_event",
+              "description": "中國晶片出口管制里程碑 (political_risk active)",
+              "impact": "medium"
+            },
+            {
+              "date": "2026-08-15",
+              "type": "earnings",
+              "description": "Q2 FY27 print — 毛利率趨勢守門 (Q4 75% → 觀察是否下行)",
+              "impact": "high"
+            }
+          ],
+          "bull_thesis_one_line": "Rev +73% YoY, FCF margin 51%, PEG 0.68",
+          "bear_thesis_one_line": "Tech late-cycle avoid + China 關稅 + P/B 28.8",
+          "market_position": {
+            "tam_usd": 400,
+            "industry_5y_cagr_pct": 35.0,
+            "company_revenue_share_pct": 55.0,
+            "position_label": "leader",
+            "competitive_moat_evidence": "NVDA ROE 104.37% vs peers (AVGO/AAPL/MSFT) 遠低；P/B 28.81× 反映 CUDA+GPU duopoly 稀缺；employee 5Y CAGR +16.9% 顯示產能持續擴張對比 peer hiring freeze"
+          }
+        },
+        "news_lane": {
+          "immediate_catalyst_5d": null,
+          "medium_term_shift_20d": {
+            "narrative": "Q1 FY27 財報 2026-05-20 (9d) + AI capex 順風 + Anthropic/SpaceX 合作 + 半導體拋物線磁鐵",
+            "label": "BULLISH"
+          },
+          "decision_point_days": 9,
+          "cross_asset_spillover": [
+            {
+              "asset": "sector_SOX_SMH",
+              "direction": "BULLISH",
+              "mechanism": "NVDA 財報設定整個半導體複合體 AI capex 基調"
+            },
+            {
+              "asset": "sector_XLK",
+              "direction": "BULLISH",
+              "mechanism": "Mega-cap 權重 ~6% — Tech beta 代理"
+            },
+            {
+              "asset": "treasury_10y",
+              "direction": "BEARISH",
+              "mechanism": "強 AI capex print 強化成長/風險偏好，壓 duration 殖利率上行"
+            }
+          ]
+        },
+        "institutional_lens": "Sentiment lane 顯示市場貪婪 (F&G 71.2 Greed) + 短期空頭 1.22% 極低，但個股層 4 季連續內部人淨分發 (Q1 2026 ratio 0.163, 92 sell txns vs 15 buy)、CEO 薪酬 YoY +45.9% 紅旗、congressional net 中性 — 機構/權力中心訊號矛盾：價格上漲卻看到知情者出貨，搭配 FTD day 22 exhausted 階段，提示散戶在追末段拋物線、機構在減碼。",
+        "decision_confidence_pct": 70,
+        "scenario_odds": {
+          "bull": 40,
+          "base": 35,
+          "bear": 25
+        },
+        "action_label": "WAIT",
+        "thesis_id": null,
+        "thesis_registered_at": null,
+        "_as_of_date_inherited": "2026-05-11",
+        "det_shadow": {
+          "version": "V2.20.0",
+          "signal_polarization": "ALIGNED",
+          "polarization_detail": {
+            "label": "ALIGNED",
+            "range": 3.0,
+            "max": 4.0,
+            "min": 1.0,
+            "pos_strong": 5,
+            "neg_strong": 0,
+            "missing_lanes": []
+          },
+          "valuation_score_det": 0.5,
+          "val_agreement": "DRIFT",
+          "red_team_verdict_det": "NO_VIABLE_COUNTER",
+          "red_team_detail": {
+            "verdict": "NO_VIABLE_COUNTER",
+            "kill_count": 2,
+            "triggered": [
+              "insider_ratio_q",
+              "fred_in_sector_avoid"
+            ],
+            "missing": []
+          },
+          "red_team_agreement": "DISAGREE",
+          "red_team_basis": "unclassified",
+          "red_team_basis_detail": {
+            "mr_hits": 0,
+            "fw_hits": 0,
+            "mr_keywords": [],
+            "fw_keywords": [],
+            "haystack_chars": 781,
+            "mr_density": 0.0,
+            "fw_density": 0.0
+          },
+          "lane_freshness": {
+            "version": "V2.20.0",
+            "as_of": "2026-05-11",
+            "lane_multipliers": {
+              "news": 0.7,
+              "sentiment": 0.7,
+              "technical": 0.7,
+              "fundamentals": 1.0,
+              "valuation": 1.0
+            },
+            "stalest_lane": "news",
+            "stalest_age_days": 15,
+            "applied": true
+          }
+        }
+      }
+    ]
+  }
+]

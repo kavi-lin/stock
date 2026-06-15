@@ -1,0 +1,28 @@
+{
+  "ticker": "PANW",
+  "generated_at": "2026-05-30T03:49:22.608547+00:00",
+  "burry_score": 26.7,
+  "verdict": "WARNING",
+  "components": {
+    "fcf_yield_pct": 1.27,
+    "ev_ebit": 147.0,
+    "debt_to_equity": 0.05,
+    "pct_below_52w_high": 0.0,
+    "insider_net": "SELL"
+  },
+  "component_scores": {
+    "fcf_yield": 16.3,
+    "ev_ebit": 10.0,
+    "debt_to_equity": 90.0,
+    "pct_below_52w_high": 20.0,
+    "insider": 20
+  },
+  "weights_active": [
+    "fcf_yield",
+    "ev_ebit",
+    "debt_to_equity",
+    "pct_below_52w_high",
+    "insider"
+  ],
+  "reasoning": "FCF yield 1.3% │ EV/EBITDA 147.0 │ D/E 0.05 │ 0% below 52wH │ insider=SELL"
+}

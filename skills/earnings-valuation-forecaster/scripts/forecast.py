@@ -346,11 +346,15 @@ def _load_real_rate():
         if _FRED_MACRO_CACHE.exists():
             data = json.loads(_FRED_MACRO_CACHE.read_text())
             rs = data.get("regime_signals", {})
-            rate = rs.get("real_rate_preferred") or rs.get("real_rate_dfii10")
+            rate = rs.get("real_rate_preferred")
+            if rate is None:
+                rate = rs.get("real_rate_dfii10")
             if rate is not None:
                 return float(rate), "fred_macro_cache"
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[forecast] WARN: fred-macro cache unreadable ({e}) — "
+              f"falling back to real_rate=4.5% (restrictive ×0.82, targets skew low)",
+              file=sys.stderr)
     return 4.5, "fallback"
 
 

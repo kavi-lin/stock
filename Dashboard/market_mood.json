@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-06-15T12:02:28.924473+00:00",
+  "mood": {
+    "score": -19,
+    "label": "Neutral",
+    "label_zh": "中性",
+    "components_used": [
+      "fg_signed",
+      "fg_quality_signed",
+      "pc_signed",
+      "vix_signed",
+      "skew_signed",
+      "term_signed"
+    ],
+    "component_scores": {
+      "fg_signed": -32.0,
+      "fg_quality_signed": -59.3,
+      "pc_signed": -32.4,
+      "vix_signed": 33.2,
+      "skew_signed": -100,
+      "term_signed": 100
+    }
+  },
+  "options": {
+    "put_call_ratio": null,
+    "source": "CNN put_call_options sub-index",
+    "asof": null,
+    "tilt": "bear",
+    "tilt_signed": -32.4,
+    "interpretation_zh": "期權傾向（CNN put/call 子指標）：偏空（避險買權升高）",
+    "fmp_megacap": []
+  },
+  "vix": {
+    "current": 16.68,
+    "percentile_1y": 41.7,
+    "regime": "NORMAL",
+    "vix3m": 20.51,
+    "term_structure": "contango",
+    "term_diff": 3.83,
+    "interpretation_zh": "VIX 16.7 NORMAL，期限結構 contango（市場平靜）"
+  },
+  "skew": {
+    "current": 142.6,
+    "percentile_1y": 29.5,
+    "label": "high",
+    "interpretation_zh": "SKEW 143 high：機構在買尾部避險"
+  },
+  "fear_greed": {
+    "index": 34.0,
+    "label": "Fear",
+    "sub_indices": {
+      "market_momentum_sp500": 64.6,
+      "stock_price_strength": 32.4,
+      "stock_price_breadth": 21.4,
+      "put_call_options": 33.8,
+      "market_volatility_vix": 50.0,
+      "safe_haven_demand": 28.6,
+      "junk_bond_demand": 7.2
+    }
+  },
+  "spy_momentum": {
+    "rsi_14": 53.0,
+    "pct_above_ma50": 2.62,
+    "pct_above_ma200": 8.43
+  },
+  "_source_health": {
+    "vix": "ok",
+    "vix3m": "ok",
+    "skew": "ok",
+    "fg": "ok",
+    "pcr": "CNN put_call_options sub-index"
+  },
+  "_partial": false
+}

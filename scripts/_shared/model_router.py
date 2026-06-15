@@ -52,12 +52,37 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _blank_tokens() -> dict:
+    return {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "cost_usd": 0.0}
+
+
 def _blank_usage() -> dict:
     return {
         "date": _today(),
-        "models": {m: {"calls": 0, "cooldown_until": None, "last_error": None}
+        "models": {m: {"calls": 0, "cooldown_until": None, "last_error": None,
+                       "tokens": _blank_tokens()}
                    for m in VALID_MODELS},
     }
+
+
+def _accumulate_tokens(entry: dict, tok: dict | None) -> None:
+    """Add a single run's token counts into a model's running daily totals.
+    Accepts either llm_drivers field names (input_tokens/…) or the compact
+    persisted names (input/…). No-op on empty/invalid input."""
+    if not isinstance(tok, dict) or not tok:
+        return
+    t = entry.setdefault("tokens", _blank_tokens())
+    for dst, srcs in (("input", ("input", "input_tokens")),
+                      ("output", ("output", "output_tokens")),
+                      ("cache_read", ("cache_read", "cache_read_tokens")),
+                      ("cache_write", ("cache_write", "cache_write_tokens"))):
+        for s in srcs:
+            if s in tok:
+                t[dst] = int(t.get(dst, 0) or 0) + int(tok.get(s, 0) or 0)
+                break
+    cost = tok.get("cost_usd")
+    if cost:
+        t["cost_usd"] = round(float(t.get("cost_usd", 0.0) or 0.0) + float(cost), 6)
 
 
 def _load_usage() -> dict:
@@ -73,7 +98,12 @@ def _load_usage() -> dict:
     if not isinstance(models, dict):
         return _blank_usage()
     for m in VALID_MODELS:
-        models.setdefault(m, {"calls": 0, "cooldown_until": None, "last_error": None})
+        e = models.setdefault(m, {"calls": 0, "cooldown_until": None, "last_error": None})
+        if not isinstance(e.get("tokens"), dict):
+            e["tokens"] = _blank_tokens()
+        else:
+            for k, v in _blank_tokens().items():
+                e["tokens"].setdefault(k, v)
     return u
 
 
@@ -135,6 +165,7 @@ def model_status() -> dict:
             "unavailable_reason": reason,
             "cooldown_until": e.get("cooldown_until"),
             "last_error": e.get("last_error"),
+            "tokens": e.get("tokens") or _blank_tokens(),
         }
     return {"date": usage["date"], "chain": model_chain(cfg), "models": models}
 
@@ -163,6 +194,13 @@ def _record(model: str, result: LLMResult, cfg: dict) -> None:
     e = usage["models"].setdefault(
         model, {"calls": 0, "cooldown_until": None, "last_error": None})
     e["calls"] = e.get("calls", 0) + 1
+    _accumulate_tokens(e, {
+        "input_tokens": getattr(result, "input_tokens", 0),
+        "output_tokens": getattr(result, "output_tokens", 0),
+        "cache_read_tokens": getattr(result, "cache_read_tokens", 0),
+        "cache_write_tokens": getattr(result, "cache_write_tokens", 0),
+        "cost_usd": getattr(result, "cost_usd", 0.0),
+    })
     if result.exit_code != 0 or not result.parsed:
         e["last_error"] = (result.error or f"parse={result.parse_status}")[:200]
     if is_quota_error(result):
@@ -176,12 +214,11 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
                user_prompt: str, timeout: int) -> LLMResult:
     cfg = load_llm_config()
     chain = model_chain(cfg)
+    # Cancel fallback: only try preferred, or default to the primary model
     if preferred in VALID_MODELS:
-        order = [preferred] + [m for m in chain if m != preferred]
+        order = [preferred]
     else:
-        order = list(chain)
-    if not order:
-        order = ["claude"]
+        order = [chain[0]] if chain else ["gemini"]
 
     tried: list[str] = []
     last: LLMResult | None = None
@@ -223,17 +260,20 @@ def pick_model(role: str = "protocol") -> str:
         avail, _ = model_available(m, cfg, usage)
         if avail:
             return m
-    return chain[0] if chain else "claude"
+    return chain[0] if chain else "gemini"
 
 
-def note_run(model: str, ok: bool, error_text: str = "") -> None:
+def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = None) -> None:
     """Record a protocol / long-run subprocess against `model`'s daily budget;
-    trip a cooldown when `error_text` looks like a quota wall."""
+    trip a cooldown when `error_text` looks like a quota wall. `tokens` (parsed
+    from the run's stream-json `result` event) is added to the model's daily
+    token totals when supplied."""
     cfg = load_llm_config()
     usage = _load_usage()
     e = usage["models"].setdefault(
         model, {"calls": 0, "cooldown_until": None, "last_error": None})
     e["calls"] = e.get("calls", 0) + 1
+    _accumulate_tokens(e, tokens)
     if not ok:
         e["last_error"] = (error_text or "run failed")[:200]
     if error_text and _QUOTA_RE.search(error_text):

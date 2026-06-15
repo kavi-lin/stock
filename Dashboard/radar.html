@@ -117,72 +117,83 @@
             <!-- Regime badges (RSI + VIX independent) -->
             <div id="radar-regime-badges" class="space-y-2"></div>
 
-            <!-- ── Retail Sector Pulse (V3.20.0) — 散戶視角分產業 sentiment + 5d direction ── -->
-            <section id="radar-retail-sector-pulse" class="glass-card p-4 space-y-3 hidden">
+            <!-- ── Industry Trend Board (V3.29.0) — REAL trailing perf 領漲↔領跌 (radar headline) ── -->
+            <section id="radar-industry-board" class="glass-card p-4 space-y-3 hidden">
                 <div class="flex items-center justify-between flex-wrap gap-3">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i>
-                        <span class="text-xs font-black uppercase tracking-widest text-zinc-300">Sector Pulse · 散戶視角</span>
-                        <span class="experimental-badge">
-                            <i data-lucide="flask-conical" class="w-3 h-3"></i>
-                            <span>EXPLORATORY</span>
-                        </span>
-                        <span id="rsp-last-updated" class="text-[10px] font-mono text-zinc-500">—</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                        <span class="text-xs font-black uppercase tracking-widest text-zinc-700 dark:text-zinc-200">產業趨勢榜</span>
+                        <span class="text-[10px] text-zinc-500">·</span>
+                        <span class="text-[11px] font-semibold text-zinc-500">真實近期漲跌 · 領漲 ↔ 領跌</span>
+                        <span id="ind-freshness" class="text-[10px] font-mono text-zinc-500">—</span>
                     </div>
-                    <div class="text-[10px] text-zinc-500">
-                        <span data-radar-tip="retail_sector_pulse">i</span>
-                        · 5d horizon · 72h news window
+                    <div class="flex items-center gap-1 text-[10px]" id="ind-horizon-toggle">
+                        <span class="text-zinc-500 mr-1">區間:</span>
+                        <button data-ind-h="perf_1w" class="sort-toggle active px-2 py-0.5 rounded">1週</button>
+                        <button data-ind-h="perf_1m" class="sort-toggle px-2 py-0.5 rounded">1月</button>
+                        <button data-ind-h="perf_3m" class="sort-toggle px-2 py-0.5 rounded">3月</button>
                     </div>
                 </div>
-                <!-- V3.20.1 market-wide buzz strip (above sector grid) -->
-                <div id="rsp-market-wide-strip" class="hidden flex flex-wrap items-center gap-2 mb-3 pb-3 border-b" style="border-color: var(--border);"></div>
-                <div id="rsp-sector-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+                <!-- 11-sector uptrend strip -->
+                <div id="ind-sector-strip" class="flex flex-wrap items-center gap-1.5 pb-3 border-b" style="border-color: var(--border);"></div>
+                <!-- two symmetric columns: leaders / laggards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">📈 領漲產業</div>
+                        <div id="ind-leaders" class="space-y-1"></div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-red-400 mb-2">📉 領跌 / 弱勢產業</div>
+                        <div id="ind-laggards" class="space-y-1"></div>
+                    </div>
+                </div>
+                <!-- Industry → constituent stocks drill-down (V3.40.x) -->
+                <div id="ind-stock-panel" class="hidden mt-2 pt-3 border-t" style="border-color: var(--border);">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span id="ind-stock-title" class="text-[12px] font-bold truncate" style="color:var(--text-card-title)"></span>
+                            <span id="ind-stock-count" class="text-[10px] text-zinc-500 shrink-0"></span>
+                        </div>
+                        <button id="ind-stock-close" class="text-[10px] px-2 py-1 rounded border shrink-0" style="border-color:var(--border)">✕</button>
+                    </div>
+                    <div id="ind-stock-note" class="text-[10px] text-zinc-500 mb-2"></div>
+                    <div id="ind-stock-chips" class="flex flex-wrap gap-1.5"></div>
+                </div>
             </section>
 
-            <!-- ── Narrative Pulse Detector (V1.0) — 熱潮股 narrative trade 階段 ── -->
-            <section id="npd-section" class="glass-card p-4 space-y-3">
+            <!-- ── Stock Movers (V3.30.0) — 個股動向 領漲↔走弱 + 弱中強 (momentum_screen) ── -->
+            <section id="radar-stock-movers" class="glass-card p-4 space-y-3 hidden">
                 <div class="flex items-center justify-between flex-wrap gap-3">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="activity" class="w-4 h-4 text-orange-400"></i>
-                        <span class="text-xs font-black uppercase tracking-widest text-zinc-300">Narrative Pulse · 熱潮股階段</span>
-                        <span class="experimental-badge">
-                            <i data-lucide="flask-conical" class="w-3 h-3"></i>
-                            <span>EXPLORATORY</span>
-                        </span>
-                        <span id="npd-last-updated" class="text-[10px] font-mono text-zinc-500">—</span>
-                    </div>
-                    <!-- Ad-hoc ticker input -->
-                    <div class="flex items-center gap-2">
-                        <input id="npd-ticker-input" type="text" placeholder="輸入 ticker (NOK)"
-                               maxlength="8" autocomplete="off" spellcheck="false"
-                               class="px-3 py-1 rounded text-[11px] font-mono uppercase bg-zinc-900/60 border border-zinc-700 focus:border-orange-500 focus:outline-none w-32" />
-                        <button id="npd-probe-btn"
-                                class="px-3 py-1 rounded text-[11px] font-bold bg-orange-600/80 hover:bg-orange-600 text-white transition-all">
-                            探測
-                        </button>
-                        <span id="npd-probe-status" class="text-[10px] font-mono text-zinc-500 min-w-[80px]">—</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i data-lucide="git-compare-arrows" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+                        <span class="text-xs font-black uppercase tracking-widest text-zinc-700 dark:text-zinc-200">個股動向</span>
+                        <span class="text-[10px] text-zinc-500">·</span>
+                        <span class="text-[11px] font-semibold text-zinc-500">領漲 ↔ 走弱 · Weinstein stage</span>
+                        <span id="sm-freshness" class="text-[10px] font-mono text-zinc-500" data-radar-tip="stock_movers">—</span>
                     </div>
                 </div>
-
-                <!-- Three-column layout: top risk / top opportunity / distribution watch -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="npd-rankings">
+                <!-- 弱中強 highlight: 個股走弱但所屬 sector 強 (光通 case 主角) -->
+                <div id="sm-weak-in-strong" class="hidden rounded p-2 border" style="border-color:rgba(248,113,113,0.35);background:rgba(248,113,113,0.06);">
+                    <div class="flex items-center gap-1.5 mb-1.5">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-red-400" data-radar-tip="weak_in_strong">🔥 強勢產業中走弱</span>
+                    </div>
+                    <div id="sm-weak-in-strong-list" class="flex flex-wrap gap-1.5"></div>
+                </div>
+                <!-- two symmetric columns -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-orange-400 mb-1">⚠ 後段風險 (Stage 4-5)</div>
-                        <div id="npd-list-risk" class="space-y-1"></div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">📈 領漲個股</div>
+                        <div id="sm-leaders" class="space-y-1"></div>
                     </div>
                     <div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">🌱 早期機會 (Stage 1-2)</div>
-                        <div id="npd-list-opportunity" class="space-y-1"></div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-rose-400 mb-1">🚨 分配臨近 (DD ≥ 2)</div>
-                        <div id="npd-list-distribution" class="space-y-1"></div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-red-400 mb-2">📉 走弱個股</div>
+                        <div id="sm-laggards" class="space-y-1"></div>
                     </div>
                 </div>
-
-                <!-- Side panel slot — populated on row click -->
-                <div id="npd-detail-panel" class="hidden border-t border-zinc-700 pt-3 mt-3 space-y-2"></div>
+                <!-- inline 動能明細 (click row → fill; reuses momentum_screen row + history, no fetch) -->
+                <div id="sm-detail" class="hidden rounded p-3 border" style="border-color:var(--border);background:var(--bg-elevated, rgba(127,127,127,0.04));"></div>
             </section>
+
 
             <!-- All themes grid -->
             <section>

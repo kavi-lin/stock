@@ -424,6 +424,28 @@ const DECISION_TIPS = {
             desc: 'Confirmed downside catalyst within 48h. Tighten size, consider waiting it out, or use protective puts.',
         },
     },
+    decision_cap: {
+        zh: {
+            title: '⛔ 估值證據不足上限 (Decision Cap)',
+            desc: 'Phase 4.6 判定估值證據不足（錨點太少 / 估值信心低 / 資料品質差），對本檔強制套用決策上限：**不得 BUY、信心 ≤ 0.65、倉位 ≤ 30bps**。這是防呆煞車，不是看空訊號。',
+            scale: '⛔ insufficient_anchors — 可用估值錨 < 門檻\n⛔ low_valuation_confidence — 估值 lane 信心低\n⛔ low_data_quality — 財報/資料品質差',
+        },
+        en: {
+            title: '⛔ Decision Cap (insufficient valuation evidence)',
+            desc: 'Phase 4.6 found valuation evidence too weak (few anchors / low valuation confidence / poor data quality) and capped the decision: **no BUY, confidence ≤ 0.65, size ≤ 30bps**. A safety brake, not a bearish signal.',
+            scale: '⛔ insufficient_anchors — usable anchors below threshold\n⛔ low_valuation_confidence — valuation lane confidence low\n⛔ low_data_quality — poor financial data quality',
+        },
+    },
+    hot_zone_probe: {
+        zh: {
+            title: '🧪 熱區試倉 (Hot Zone Probe)',
+            desc: '價格落在高風險「熱區」，protocol 不直接全倉進場，改強制 **STAGED_ENTRY 試倉，倉位 ≤ 15bps**。先用最小敞口驗證 thesis，等價格離開熱區或證據增強再加碼。',
+        },
+        en: {
+            title: '🧪 Hot Zone Probe',
+            desc: 'Price sits in a high-risk "hot zone" — protocol forces a **STAGED_ENTRY probe, size ≤ 15bps** instead of a full position. Minimal exposure to validate the thesis; add only once price exits the zone or evidence strengthens.',
+        },
+    },
     consensus: {
         zh: {
             title: '共識加權 ×1.15',
@@ -872,6 +894,8 @@ const ANCHOR_INFO = {
     },
 };
 
+// V4.10.0 — returns { html, chip } so buildCard can lift the fair-value band
+// chip into the Layer-3 <details> summary (three-layer card). '' when no data.
 function buildV5ValuationBlock(item, wl) {
     const fvs = item.fair_value_summary;
     const lane = item.valuation_lane;
@@ -899,14 +923,12 @@ function buildV5ValuationBlock(item, wl) {
     const pctStr = pct != null ? `${pct >= 0 ? '+' : ''}${Number(pct).toFixed(1)}%` : '--';
     const pctColor = pct == null ? '#a1a1aa' : (pct >= 0 ? '#22c55e' : '#ef4444');
 
-    return `
-    <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
-        <p class="text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-1" style="color:#34d399">
-            <i data-lucide="scale" class="w-3 h-3"></i>
-            ${wl.fv_block_title || 'Valuation · Fair Value'}
-            ${band ? `<span class="ml-auto text-[9px] font-black px-1.5 py-0.5 rounded" style="background:color-mix(in srgb,${band.fg},transparent 85%);color:${band.fg};border:1px solid color-mix(in srgb,${band.fg},transparent 65%)">${band.text}</span>` : ''}
-        </p>
-        <div class="grid grid-cols-3 gap-2 mb-2">
+    const chip = band
+        ? `<span class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:color-mix(in srgb,${band.fg},transparent 85%);color:${band.fg};border:1px solid color-mix(in srgb,${band.fg},transparent 65%)">${band.text}</span>`
+        : '';
+    const html = `
+        <div class="mt-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
             <div>
                 <div class="text-[10px] text-zinc-300 font-bold uppercase tracking-wide">${wl.fv_fair_value || 'Fair Value'}</div>
                 <div class="text-sm font-mono font-bold" style="color:var(--text-card-title)">${fv != null ? '$' + Number(fv).toFixed(2) : '--'}</div>
@@ -922,7 +944,65 @@ function buildV5ValuationBlock(item, wl) {
         </div>
         ${anchorChips ? `<div class="flex flex-wrap gap-1.5 items-center">${anchorChips}${anchorCount != null ? `<span class="text-[10px] text-zinc-300 ml-1 font-mono">${anchorCount}/6</span>` : ''}</div>` : ''}
         ${fvs?.methodology_note ? `<div class="text-[10px] text-zinc-400 italic mt-2 leading-relaxed">${escapeHtmlDc(fvs.methodology_note)}</div>` : ''}
-    </div>`;
+        ${buildFvExtras(item, wl)}
+        </div>`;
+    return { html, chip };
+}
+
+/* V3.49.0 — V3.45.x+ advisory blocks（range / MHP / reverse DCF / archetype shadow）。
+   舊 entry 缺 block → 整段不顯示。全 advisory，不改決策呈現。 */
+function buildFvExtras(item, wl) {
+    const rows = [];
+    const money = v => v != null ? '$' + Number(v).toFixed(2) : '--';
+
+    const fvr = item.fair_value_range;
+    if (fvr && fvr.p50 != null) {
+        const gradeColor = { high: '#22c55e', medium: '#eab308', low: '#ef4444' }[fvr.agreement_grade] || '#a1a1aa';
+        rows.push(`<div class="text-[10px] font-mono text-zinc-300">
+            <span class="font-bold text-zinc-400 uppercase">Range</span>
+            ${money(fvr.p25)} / <b>${money(fvr.p50)}</b> / ${money(fvr.p75)}
+            <span class="text-zinc-500">(${money(fvr.min_anchor)}–${money(fvr.max_anchor)})</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:${gradeColor};border:1px solid color-mix(in srgb,${gradeColor},transparent 65%)">${(fvr.agreement_grade || '--').toUpperCase()} AGREE</span>
+            <span class="text-zinc-500">${fvr.range_verdict || ''}</span>
+        </div>`);
+    }
+
+    const mh = item.multi_horizon_price_framework;
+    const st = mh?.short_term_5d, mt = mh?.mid_term_60d, cv = mh?.convergence;
+    if (st?.band_capped) {
+        const sigColor = { wait_for_pullback: '#f97316', high_conviction_long_zone: '#22c55e',
+                           momentum_not_value: '#eab308', neutral_aligned: '#a1a1aa' }[cv?.mhp_signal] || '#a1a1aa';
+        rows.push(`<div class="text-[10px] font-mono text-zinc-300">
+            <span class="font-bold text-zinc-400 uppercase">5D Band</span>
+            ${money(st.band_capped[0])} / ${money(st.band_capped[1])} / ${money(st.band_capped[2])}
+            ${mt?.mid_target != null ? `<span class="font-bold text-zinc-400 uppercase ml-2">60D</span> ${money(mt.mid_target)}` : ''}
+            ${cv?.mhp_signal ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:${sigColor};border:1px solid color-mix(in srgb,${sigColor},transparent 65%)" title="${escapeHtmlDc(cv.signal_note || '')}">${cv.mhp_signal.replace(/_/g, ' ').toUpperCase()}</span>` : ''}
+        </div>`);
+    }
+
+    const ie = item.implied_expectations || item.valuation_lane?.implied_expectations;
+    if (ie?.implied_5y_fcf_cagr != null) {
+        rows.push(`<div class="text-[10px] font-mono text-zinc-300" title="${escapeHtmlDc(ie.sanity_note || '')}">
+            <span class="font-bold text-zinc-400 uppercase">Implied 5Y FCF CAGR</span>
+            ${(ie.implied_5y_fcf_cagr * 100).toFixed(0)}%${ie.implied_out_of_range ? ' ⚠' : ''}
+            ${ie.actual_3y_fcf_cagr != null ? `<span class="text-zinc-500">vs actual ${(ie.actual_3y_fcf_cagr * 100).toFixed(0)}%</span>` : ''}
+        </div>`);
+    }
+
+    const ash = item.valuation_archetype_shadow;
+    if (ash?.archetype && ash.archetype !== 'balanced') {
+        rows.push(`<div class="text-[10px] font-mono text-zinc-300">
+            <span class="font-bold text-zinc-400 uppercase">Archetype</span>
+            ${ash.archetype}
+            <span class="text-zinc-500">shadow FV ${money(ash.weighted_fair_value_shadow)} (${ash.verdict_band_shadow || '--'})</span>
+            ${ash.flip_vs_live ? '<span class="text-[9px] font-bold" style="color:#f97316">⚠ FLIP vs LIVE</span>' : ''}
+            <span class="text-zinc-600 text-[9px]">shadow-only</span>
+        </div>`);
+    }
+
+    return rows.length
+        ? `<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800/60 space-y-1">${rows.join('')}</div>`
+        : '';
 }
 
 /* ── V4.7+ — Red Team challenge block ───────────────────────── */
@@ -938,20 +1018,25 @@ function buildRedTeamBlock(item, wl) {
     const kill = item.red_team_kill || [];
     const thesis = item.red_team_thesis;
     const failed = item.red_team_failed;
-    return `
-    <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
-        <p class="text-[9px] font-black uppercase tracking-widest mb-2 flex items-center gap-1" style="color:${fg}">
+    // V4.10.0 — returns { html, chip }: verdict pill is lifted into the Layer-2
+    // <details> summary by buildCard. Inner counter-thesis <details> nesting kept.
+    const chip = `<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" style="background:color-mix(in srgb,${fg},transparent 85%);color:${fg};border:1px solid color-mix(in srgb,${fg},transparent 65%)">${verdictText}</span>`;
+    const html = `
+    <div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
+        <div class="text-[9px] font-black uppercase tracking-widest flex items-center gap-1 mb-1.5" style="color:${fg}">
             <i data-lucide="swords" class="w-3 h-3"></i>
             ${wl.rt_block_title || 'Red Team Challenge'}
-            <span class="ml-auto text-[8px] px-1.5 py-0.5 rounded" style="background:color-mix(in srgb,${fg},transparent 85%);color:${fg};border:1px solid color-mix(in srgb,${fg},transparent 65%)">${verdictText}</span>
-        </p>
+        </div>
         ${failed ? `<div class="text-[9px] text-amber-600 dark:text-amber-400 mb-1.5">⚠ ${wl.rt_failed || 'Red Team execution degraded'}</div>` : ''}
         ${thesis ? `<details class="mb-1.5"><summary class="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100">${wl.rt_thesis || 'Counter thesis'}</summary><p class="text-[11px] mt-1 leading-relaxed" style="color:var(--text-main)">${escapeHtmlDc(thesis)}</p></details>` : ''}
         ${kill.length ? `<div><div class="text-[9px] font-black uppercase mb-1 text-zinc-700 dark:text-zinc-400">${wl.rt_kill || 'Kill conditions'}</div><ol class="text-[11px] list-decimal list-inside space-y-0.5 leading-relaxed" style="color:var(--text-main)">${kill.slice(0,3).map(k => `<li>${escapeHtmlDc(k)}</li>`).join('')}</ol></div>` : ''}
     </div>`;
+    return { html, chip };
 }
 
-/* ── V4.8 status pills (degraded analysts, fanout, burry override) ─── */
+/* ── V4.8 status pills (degraded analysts, fanout, burry override) ───
+   V4.10.0 — returns an ARRAY of pill strings (Layer 2 needs the count for its
+   summary). action_label + decision_confidence_pct moved to buildDecisionStrip. */
 function buildV48StatusPills(item, wl) {
     const pills = [];
     const isZh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
@@ -1000,32 +1085,6 @@ function buildV48StatusPills(item, wl) {
     }
     if (ds.val_agreement === 'DISAGREE') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="val_disagree" style="background:color-mix(in srgb,#f59e0b,transparent 88%);color:#f59e0b;border:1px solid color-mix(in srgb,#f59e0b,transparent 70%)">${isZh ? 'Val 不一致' : 'VAL DISAGREE'}</span>`);
-    }
-    // V2.13.0 + V2.20.0 — action_label (ATTACK / PARTIAL ENTRY / WAIT / DEFENSIVE)
-    if (item.action_label) {
-        // V2.20.0 — show "部分建倉" instead of "等待" when WAIT label is paired with
-        // ANY staged-entry context (explicit STAGED decision, OR final_decision STAGED_ENTRY,
-        // OR dual-track entry zones present — BUY + conf<70% triggers WAIT but dual-track
-        // still exists). "等待" was misleading users as "skip / don't enter".
-        const hasDualTrack = !!(item.targets?.entry_aggressive && item.targets?.entry_conservative);
-        const hasStagedSplit = !!(item.staged_split && (item.staged_split.aggressive_pct || item.staged_split.conservative_pct));
-        const isStaged = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY'
-                      || item.final_decision === 'STAGED_ENTRY'
-                      || hasDualTrack || hasStagedSplit;
-        let a;
-        if (item.action_label === 'WAIT' && isStaged) {
-            a = { color: '#3b82f6', label_zh: '🎯 部分建倉', label_en: '🎯 PARTIAL', tip: 'action_partial_entry' };
-        } else {
-            const actionMap = {
-                ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip: 'action_attack' },
-                WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip: 'action_wait' },
-                DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip: 'action_defensive' },
-            };
-            a = actionMap[item.action_label];
-        }
-        if (a) {
-            pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${a.tip}" style="background:color-mix(in srgb,${a.color},transparent 86%);color:${a.color};border:1px solid color-mix(in srgb,${a.color},transparent 65%)">${isZh ? a.label_zh : a.label_en}</span>`);
-        }
     }
     // V2.13.0 — moat_assessment (Fundamentals lane)
     const moat = item.fundamentals_lane?.moat_assessment;
@@ -1076,13 +1135,86 @@ function buildV48StatusPills(item, wl) {
             pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="${s.tip}" style="background:color-mix(in srgb,${s.color},transparent 86%);color:${s.color};border:1px solid color-mix(in srgb,${s.color},transparent 65%)">${isZh ? s.label_zh : s.label_en}</span>`);
         }
     }
-    // V2.13.0 — decision_confidence_pct
+    return pills;
+}
+
+/* ── V4.10.0 — Layer 1 decision strip (結論層) ─────────────────────
+   Action label promoted to lead visual + confidence + cap/probe/binary pills
+   + one-line institutional_lens "why". Always visible — answers「該做什麼、
+   為什麼」without expanding anything. */
+function buildDecisionStrip(item, wl) {
+    const isZh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
+    const pills = [];
+
+    // Action label (moved from buildV48StatusPills, V2.20.0 PARTIAL logic intact):
+    // WAIT paired with ANY staged-entry context (explicit STAGED decision, OR
+    // final_decision STAGED_ENTRY, OR dual-track entry zones present) renders as
+    // 部分建倉 — plain「等待」misled users as "skip / don't enter".
+    if (item.action_label) {
+        const hasDualTrack = !!(item.targets?.entry_aggressive && item.targets?.entry_conservative);
+        const hasStagedSplit = !!(item.staged_split && (item.staged_split.aggressive_pct || item.staged_split.conservative_pct));
+        const isStaged = item.decision === 'STAGED' || item.decision === 'STAGED_ENTRY'
+                      || item.final_decision === 'STAGED_ENTRY'
+                      || hasDualTrack || hasStagedSplit;
+        let a;
+        if (item.action_label === 'WAIT' && isStaged) {
+            a = { color: '#3b82f6', label_zh: '🎯 部分建倉', label_en: '🎯 PARTIAL', tip: 'action_partial_entry' };
+        } else {
+            const actionMap = {
+                ATTACK:    { color: '#f97316', label_zh: '🔥 進攻',     label_en: '🔥 ATTACK',    tip: 'action_attack' },
+                WAIT:      { color: '#eab308', label_zh: '⏳ 等待',     label_en: '⏳ WAIT',      tip: 'action_wait' },
+                DEFENSIVE: { color: '#64748b', label_zh: '🛡 防守',     label_en: '🛡 DEFENSIVE', tip: 'action_defensive' },
+            };
+            a = actionMap[item.action_label];
+        }
+        if (a) {
+            pills.push(`<span class="text-[11px] px-2.5 py-1 rounded-md font-black" data-tip-key="${a.tip}" style="background:color-mix(in srgb,${a.color},transparent 86%);color:${a.color};border:1px solid color-mix(in srgb,${a.color},transparent 60%)">${isZh ? a.label_zh : a.label_en}</span>`);
+        }
+    }
+    // decision_confidence_pct (moved from buildV48StatusPills)
     if (typeof item.decision_confidence_pct === 'number') {
         const c = item.decision_confidence_pct;
         const color = c >= 70 ? '#22c55e' : (c >= 50 ? '#eab308' : '#71717a');
-        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-mono font-bold" data-tip-key="decision_confidence" style="color:${color};border:1px solid color-mix(in srgb,${color},transparent 70%)">${c}%</span>`);
+        pills.push(`<span class="text-[10px] px-2 py-1 rounded-md font-mono font-bold" data-tip-key="decision_confidence" style="color:${color};border:1px solid color-mix(in srgb,${color},transparent 70%)">${c}%</span>`);
     }
-    return pills.join(' ');
+    // V5.0.x decision cap — decision-relevant, belongs in the conclusion layer
+    if (item.decision_cap_active) {
+        const reasonMap = {
+            insufficient_anchors:     { zh: '錨點不足', en: 'ANCHORS' },
+            low_valuation_confidence: { zh: '估值信心低', en: 'VAL CONF' },
+            low_data_quality:         { zh: '資料品質低', en: 'DATA QUALITY' },
+        };
+        const r = reasonMap[item.decision_cap_reason];
+        const rLabel = r ? (isZh ? r.zh : r.en) : (item.decision_cap_reason || '');
+        pills.push(`<span class="text-[10px] px-2 py-1 rounded-md font-bold" data-tip-key="decision_cap" style="background:color-mix(in srgb,#ef4444,transparent 88%);color:#ef4444;border:1px solid color-mix(in srgb,#ef4444,transparent 60%)">⛔ ${wl.badge_cap || 'CAP'}${rLabel ? `·${rLabel}` : ''}</span>`);
+        if (item.cap_override_reason) {
+            pills.push(`<span class="text-[10px] px-2 py-1 rounded-md font-bold" title="${escapeHtmlDc(item.cap_override_reason)}" style="background:color-mix(in srgb,#f59e0b,transparent 88%);color:#f59e0b;border:1px solid color-mix(in srgb,#f59e0b,transparent 60%)">${wl.badge_cap_override || (isZh ? 'CAP 已覆寫' : 'CAP OVERRIDE')}</span>`);
+        }
+    }
+    // V5.0.x hot zone probe
+    if (item.hot_zone_probe) {
+        pills.push(`<span class="text-[10px] px-2 py-1 rounded-md font-bold" data-tip-key="hot_zone_probe" style="background:color-mix(in srgb,#3b82f6,transparent 88%);color:#3b82f6;border:1px solid color-mix(in srgb,#3b82f6,transparent 60%)">🧪 ${wl.badge_probe || (isZh ? '熱區試倉' : 'HOT ZONE PROBE')}</span>`);
+    }
+    // Binary catalyst (moved up from the old badges row — timing-critical)
+    if (item.binary_class === 'positive') {
+        pills.push(`<span class="text-[10px] px-2 py-1 rounded-md font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20" data-tip-key="pos_binary">${wl.badge_pos_binary || 'POS BINARY'}</span>`);
+    } else if (item.binary_class === 'negative') {
+        pills.push(`<span class="text-[10px] px-2 py-1 rounded-md font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20" data-tip-key="neg_binary">${wl.badge_neg_binary || 'NEG BINARY'}</span>`);
+    }
+
+    // One-line "why" — institutional_lens (V2.13.0+ PM narrative), 2-line clamp,
+    // full text on hover.
+    const lens = (typeof item.institutional_lens === 'string') ? item.institutional_lens.trim() : '';
+    const lensHtml = lens
+        ? `<p class="dc-lens-clamp text-[11px] leading-relaxed mt-2" style="color:var(--text-main)" title="${escapeHtmlDc(lens)}">${escapeHtmlDc(lens)}</p>`
+        : '';
+
+    if (!pills.length && !lensHtml) return '';
+    return `
+    <div class="mb-3">
+        ${pills.length ? `<div class="flex flex-wrap items-center gap-1.5">${pills.join(' ')}</div>` : ''}
+        ${lensHtml}
+    </div>`;
 }
 
 function escapeHtmlDc(s) {
@@ -1146,21 +1278,22 @@ function buildCard(item) {
         </div>`;
     }
 
-    // V4.6 badges: consensus bonus, macro alignment, binary class
+    // V4.10.0 三層卡片 — Layer 1 結論 = buildDecisionStrip (action/conf/cap/probe/
+    // binary + institutional_lens one-liner). Layer 2 理由 = remaining pills +
+    // Red Team + triggers + risks. Layer 3 證據 = valuation detail.
     const isZhDc = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
-    const badgesHtml = [
+    const decisionStripHtml = buildDecisionStrip(item, wl);
+    const layer2Pills = [
         item.consensus_bonus ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold" data-tip-key="consensus">${wl.badge_consensus || '×1.15 CONSENSUS'}</span>` : '',
         item.macro_alignment === 'CONTRARIAN' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 font-bold" data-tip-key="contrarian">${wl.badge_contrarian || 'CONTRARIAN'}</span>` : '',
-        item.binary_class === 'positive' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold" data-tip-key="pos_binary">${wl.badge_pos_binary || 'POS BINARY'}</span>` : '',
-        item.binary_class === 'negative' ? `<span class="text-[8px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 font-bold" data-tip-key="neg_binary">${wl.badge_neg_binary || 'NEG BINARY'}</span>` : '',
-        // V4.8+ status pills (fragility / degraded / burry override / fanout)
-        buildV48StatusPills(item, wl),
-    ].filter(Boolean).join(' ');
+        // V4.8+ status pills (fragility / polarization / moat / pattern / strength / …)
+        ...buildV48StatusPills(item, wl),
+    ].filter(Boolean);
 
-    // Version-specific extras
-    const v5BlockHtml      = (version === 'V5.0') ? buildV5ValuationBlock(item, wl) : '';
-    const redTeamBlockHtml = (version === 'V5.0' || version === 'V4.8' || version === 'V4.7') ? buildRedTeamBlock(item, wl) : '';
-    const bookmarkHtml     = buildVersionBookmark(version);
+    // Version-specific extras — both return { html, chip } or ''
+    const v5Block      = (version === 'V5.0') ? buildV5ValuationBlock(item, wl) : '';
+    const redTeamBlock = (version === 'V5.0' || version === 'V4.8' || version === 'V4.7') ? buildRedTeamBlock(item, wl) : '';
+    const bookmarkHtml = buildVersionBookmark(version);
 
     // Entry targets block — V4.6 supports dual-track
     const tgt = item.targets || {};
@@ -1219,23 +1352,30 @@ function buildCard(item) {
             : (wl.entry_triggers || (UI.currentLang === 'zh' ? '進場觸發條件' : 'Entry Triggers'));
         const icon = isReEval ? 'eye' : 'crosshair';
         condHtml = `
-        <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
-            <p class="text-[9px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-1 mb-2">
+        <details class="dc-collapse mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
+            <summary class="text-[9px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-1">
                 <i data-lucide="${icon}" class="w-3 h-3"></i> ${header}
-            </p>
+                <span class="ml-auto text-[8px] text-zinc-500 font-mono">${entries.length}</span>
+            </summary>
+            <div class="mt-2">
             ${entries.map(([k, v]) => conditionRow(k.toUpperCase().replace(/_/g, ' '), v, 'var(--status-binary)')).join('')}
-        </div>`;
+            </div>
+        </details>`;
     }
 
-    // Key risks
+    // Key risks — stay visible (risk should lead) but cap to 4 inline; overflow
+    // tucks behind a compact "+N more" expander so a long risk list can't bloat the card.
     let risksHtml = '';
     if (item.key_risks && item.key_risks.length) {
+        const headRisks = item.key_risks.slice(0, 4);
+        const restRisks = item.key_risks.slice(4);
         risksHtml = `
         <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
             <p class="text-[9px] font-black text-red-500 uppercase tracking-widest mb-2 flex items-center gap-1">
                 <i data-lucide="shield-alert" class="w-3 h-3"></i> ${wl.key_risks || 'Key Risks'}
             </p>
-            <div class="flex flex-wrap gap-1.5">${item.key_risks.map(riskTag).join('')}</div>
+            <div class="flex flex-wrap gap-1.5">${headRisks.map(riskTag).join('')}</div>
+            ${restRisks.length ? `<details class="dc-collapse mt-1.5"><summary class="text-[9px] font-bold text-zinc-500 cursor-pointer">+${restRisks.length} ${isZhDc ? '更多' : 'more'}</summary><div class="flex flex-wrap gap-1.5 mt-1.5">${restRisks.map(riskTag).join('')}</div></details>` : ''}
         </div>`;
     }
 
@@ -1249,6 +1389,38 @@ function buildCard(item) {
 
     const statusGlow = isExecute ? 'glow-green' : '';
     const refreshLbl = wl.refresh_btn || (UI.currentLang === 'zh' ? '重新分析' : 'Re-analyze');
+
+    // Layer 2 理由 — single <details>; summary carries the Red Team verdict chip
+    // + signal count so the gist reads without expanding.
+    const layer2Parts = [
+        layer2Pills.length ? `<div class="flex flex-wrap gap-1.5">${layer2Pills.join(' ')}</div>` : '',
+        redTeamBlock ? redTeamBlock.html : '',
+        condHtml,
+        risksHtml,
+    ].filter(Boolean);
+    const layer2Count = layer2Pills.length
+        + (item.key_risks?.length || 0)
+        + (item.watch_conditions ? Object.keys(item.watch_conditions).length : 0);
+    const layer2Html = layer2Parts.length ? `
+        <details class="dc-collapse mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900/50">
+            <summary class="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--text-main)">
+                <i data-lucide="users" class="w-3 h-3"></i>
+                ${wl.layer2_title || (isZhDc ? '理由 · 委員會訊號' : 'Why · Committee Signals')}
+                <span class="ml-auto flex items-center gap-1.5">${redTeamBlock ? redTeamBlock.chip : ''}<span class="text-[8px] text-zinc-500 font-mono">${layer2Count}</span></span>
+            </summary>
+            <div class="mt-2">${layer2Parts.join('')}</div>
+        </details>` : '';
+
+    // Layer 3 證據 — valuation detail; summary carries the fair-value band chip.
+    const layer3Html = v5Block ? `
+        <details class="dc-collapse mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
+            <summary class="text-[9px] font-black uppercase tracking-widest flex items-center gap-1" style="color:#34d399">
+                <i data-lucide="scale" class="w-3 h-3"></i>
+                ${wl.layer3_title || (isZhDc ? '證據 · 估值' : 'Evidence · Valuation')}
+                <span class="ml-auto">${v5Block.chip}</span>
+            </summary>
+            ${v5Block.html}
+        </details>` : '';
 
     return `
     <div class="glass-card dc-card-hover p-6 flex flex-col gap-0 ${statusGlow} cursor-pointer" data-history-ticker="${item.ticker}" data-protocol-version="${version}" style="position:relative;">
@@ -1297,24 +1469,22 @@ function buildCard(item) {
             </div>
         </div>
 
-        ${badgesHtml ? `<div class="flex flex-wrap gap-1.5 mb-3">${badgesHtml}</div>` : ''}
+        ${decisionStripHtml}
 
-        <!-- Score + Meta -->
+        <!-- Score + Meta (score demoted text-4xl→text-2xl so decision/targets/risk lead) -->
         <div class="flex items-end justify-between mb-2">
             <div>
                 <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">${wl.model_score || 'Model Score'}</p>
-                <p class="text-4xl font-bold tracking-tighter" style="color:var(--text-card-title)">${item.score}</p>
+                <p class="text-2xl font-bold tracking-tighter" style="color:var(--text-card-title)">${item.score}</p>
             </div>
             <div class="flex gap-4">${metaItems}</div>
         </div>
 
         ${targetHtml}
         ${dualTrackHtml}
-        ${v5BlockHtml}
-        ${redTeamBlockHtml}
         ${livePosHtml}
-        ${condHtml}
-        ${risksHtml}
+        ${layer2Html}
+        ${layer3Html}
 
         <!-- Footer -->
         <div class="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-900/50 flex justify-end gap-2">
@@ -2028,7 +2198,7 @@ function openHistoryDrill(ticker) {
     } else {
         emptyEl.classList.add('hidden');
         // Reuse buildCard for identical visual parity; wrap each with a fixed-width shell so they lay out horizontally
-        rail.innerHTML = items.map(i => `<div class="shrink-0 w-[420px]">${buildCard(i)}</div>`).join('');
+        rail.innerHTML = items.map(i => `<div class="min-w-0">${buildCard(i)}</div>`).join('');
     }
 
     overlay.classList.remove('hidden');
@@ -2062,3 +2232,36 @@ document.addEventListener('keydown', e => {
 pollProtocolStatus();
 setInterval(pollProtocolStatus, 2000);
 setInterval(updateRefreshStatus, 1000);
+
+// ── V4.6 — Adjustment Ledger panel (read-only) ──────────────────────────
+// Active config-adjustment recommendations from decision_review/ADJUSTMENT_LEDGER.md.
+async function renderAdjustmentLedger() {
+    const host = document.getElementById('adjustment-ledger-panel');
+    if (!host) return;
+    let d = null;
+    try {
+        const r = await fetch('/api/adjustment-ledger');
+        if (!r.ok) return;
+        d = await r.json();
+    } catch (e) { return; }
+    const active = (d.entries || []).filter(e => e.status === 'active');
+    if (!active.length) { host.classList.add('hidden'); return; }
+    const isZh = UI.currentLang === 'zh';
+    host.classList.remove('hidden');
+    host.innerHTML = `
+        <div class="alp-header">
+            <span class="alp-title">${isZh ? '🧾 調整 Ledger — 追蹤中' : '🧾 Adjustment Ledger — Active'}
+                <span class="alp-count">${active.length}</span></span>
+            <a class="alp-more" href="reports.html#report=${encodeURIComponent('decision_review/ADJUSTMENT_LEDGER.md')}">${isZh ? '完整 Ledger →' : 'full ledger →'}</a>
+        </div>
+        <div class="alp-list">
+            ${active.map(e => `
+            <div class="alp-row" title="${UI.escapeHTML(e.target_metric || '')}">
+                <span class="alp-dot"></span>
+                <span class="alp-rec">${UI.escapeHTML(e.title)}</span>
+                <span class="alp-date">${UI.escapeHTML(e.applied_date || '')}</span>
+                ${e.latest_eval ? `<span class="alp-eval">${UI.escapeHTML(e.latest_eval)}</span>` : ''}
+            </div>`).join('')}
+        </div>`;
+}
+renderAdjustmentLedger();

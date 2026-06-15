@@ -1469,6 +1469,16 @@ def main():
 
     payload = fetch(series_ids, api_key)
     prev    = _load_prev()
+
+    # Degraded (all-series-failed stale fallback) must NOT report rc=0 —
+    # daily_update Step 4 is non-fatal but should show ⚠️ instead of ✅.
+    # Also skip _write_cache: payload IS the stale cache; rewriting would
+    # refresh its mtime and disguise it as fresh.
+    if payload.get("degraded_mode"):
+        print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+        print(f"[fred-macro] degraded: {payload.get('degraded_reason')}", file=sys.stderr)
+        sys.exit(2)
+
     _write_cache(payload)
     print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
 

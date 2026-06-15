@@ -21,11 +21,13 @@ PS 以**單一訊息**同時發出 N 個 Agent tool call（N=4 當 `fred_availab
 
 ```
 # ✅ 正確：同一則訊息，N 個 Agent block 一起送
-Agent(description="Sector Rotation proposal",    subagent_type="general-purpose", prompt=<rotation-lane prompt>)
-Agent(description="Theme Intelligence proposal", subagent_type="general-purpose", prompt=<theme-lane prompt>)
-Agent(description="News Catalyst proposal",      subagent_type="general-purpose", prompt=<news-lane prompt>)
-Agent(description="FRED Macro proposal",         subagent_type="general-purpose", prompt=<fred-lane prompt>)   # only if fred_available
+Agent(description="Sector Rotation proposal",    subagent_type="general-purpose", model="sonnet", prompt=<rotation-lane prompt>)
+Agent(description="Theme Intelligence proposal", subagent_type="general-purpose", model="sonnet", prompt=<theme-lane prompt>)
+Agent(description="News Catalyst proposal",      subagent_type="general-purpose", model="sonnet", prompt=<news-lane prompt>)
+Agent(description="FRED Macro proposal",         subagent_type="general-purpose", model="sonnet", prompt=<fred-lane prompt>)   # only if fred_available
 ```
+
+> 💰 **V3.44 — lane subagent 跑 Sonnet**：每個 lane 是**有界 JSON 任務**（收固定資料切片 → 出固定 schema 提案），不需 Opus 推理深度。`model="sonnet"` 砍 fan-out 段成本（~40%），**Arbiter（Phase 4c）留主模型 Opus** 做最終整合與決策樹。若 harness 不支援 `model=` 參數則忽略此欄、退回繼承主模型，不影響正確性。
 
 #### 共通 Subagent Prompt 骨架
 
@@ -90,6 +92,7 @@ OUTPUT（單一 JSON object）:
 Agent(
   description="Devil's Advocate sector challenge",
   subagent_type="general-purpose",
+  model="sonnet",   # V3.44 — 有界挑戰任務，跑 Sonnet 省成本；Arbiter 留 Opus
   prompt="""
   You are DEVIL'S ADVOCATE. 你的任務是破壞 Phase 4a 的共識。
 

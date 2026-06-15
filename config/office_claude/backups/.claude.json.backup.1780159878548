@@ -1,0 +1,27 @@
+{
+  "firstStartTime": "2026-05-30T16:50:12.680Z",
+  "opusProMigrationComplete": true,
+  "sonnet1m45MigrationComplete": true,
+  "seenNotifications": {},
+  "migrationVersion": 13,
+  "userID": "71c727815d2008b76db5592baff95fec8c86431662d5f2fa2106df46cc6e677e",
+  "changelogLastFetched": 1780159813121,
+  "oauthAccount": {
+    "accountUuid": "2e1f1634-ab66-4b55-accc-b046b2394f42",
+    "emailAddress": "lin12832@gmail.com",
+    "organizationUuid": "0ac0166a-4517-44fb-a29d-5335457788b9",
+    "hasExtraUsageEnabled": false,
+    "billingType": "stripe_subscription",
+    "accountCreatedAt": "2024-06-28T02:04:30.561353Z",
+    "subscriptionCreatedAt": "2026-03-29T01:23:14.097883Z",
+    "ccOnboardingFlags": {},
+    "claudeCodeTrialEndsAt": null,
+    "claudeCodeTrialDurationDays": null,
+    "seatTier": null,
+    "displayName": "kavi",
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "lin12832@gmail.com's Organization"
+  },
+  "claudeCodeFirstTokenDate": null
+}

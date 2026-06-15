@@ -37,6 +37,12 @@ FEEDS = [
     # PR Newswire financial press releases — typical latency 5-15 min from
     # company release, much fresher than wire RSS index polls.
     ("PR Newswire",    "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss", "MEDIUM"),
+    # Fed press releases — low-volume, high-impact macro mover (rate/regulatory).
+    ("Fed Press",      "https://www.federalreserve.gov/feeds/press_all.xml",       "HIGH"),
+    # Nasdaq + Benzinga US-markets feeds — fresh retail/trader coverage to widen
+    # break-news intake after dropping the StockTwits social source (V3.40.7).
+    ("Nasdaq Markets", "https://www.nasdaq.com/feed/rssoutbound?category=Markets", "MEDIUM"),
+    ("Benzinga",       "https://www.benzinga.com/feed",                            "MEDIUM"),
 ]
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"

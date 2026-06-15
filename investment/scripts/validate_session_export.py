@@ -263,12 +263,140 @@ def main():
                 f"decision_cap_active=true requires position_size_pct ≤ 0.003 (30bps), got {ps}"
             )
 
+    # ── 11. V5.0.x — Rec 11 hot-zone probe rules (TODO-001+002) ──────────
+    # When the hot-zone conservative-loosening exception fires, enforce:
+    # STAGED_ENTRY decision, ≤15bps size, and mutual exclusion with the
+    # valuation decision-cap (hard gates take precedence over the probe).
+    if trade.get("hot_zone_probe") is True:
+        if fd != "STAGED_ENTRY":
+            errors.append(
+                f"hot_zone_probe=true requires final_decision='STAGED_ENTRY', got {fd!r}"
+            )
+        hp = trade.get("position_size_pct")
+        if isinstance(hp, (int, float)) and hp > 0.0015:
+            errors.append(
+                f"hot_zone_probe=true requires position_size_pct ≤ 0.0015 (15bps), got {hp}"
+            )
+        if cap_active is True:
+            errors.append(
+                "hot_zone_probe=true incompatible with decision_cap_active=true — "
+                "valuation cap is a hard gate and takes precedence over the probe"
+            )
+
+    # ── 5d. V5.1 — Multi-Horizon Price Framework (advisory, warning-only) ─
+    # MHP is derived/advisory: it feeds reasoning + trade_plan provenance but
+    # NOT decision math and NOT the 11-field decision_lock. Absence (V5.0 back-
+    # compat) or partial fill must NEVER fail the gate — emit warnings, keep rc=0.
+    warnings = []
+    mhp = trade.get("multi_horizon_price_framework")
+    if mhp is None:
+        if ver == "V5.0":
+            warnings.append(
+                "multi_horizon_price_framework absent — V5.1 三框架未填（V5.0 舊 entry 可接受，"
+                "新分析建議補上 short_term_5d / mid_term_60d / convergence）"
+            )
+    elif isinstance(mhp, dict):
+        for k in ("short_term_5d", "mid_term_60d", "long_term_ref", "convergence"):
+            if k not in mhp:
+                warnings.append(f"multi_horizon_price_framework: missing sub-block {k} (degraded)")
+        conv = mhp.get("convergence")
+        if isinstance(conv, dict):
+            sig = conv.get("mhp_signal")
+            if sig not in (None, "wait_for_pullback", "high_conviction_long_zone",
+                           "momentum_not_value", "neutral_aligned"):
+                warnings.append(f"multi_horizon_price_framework.convergence.mhp_signal invalid: {sig!r}")
+        lt = mhp.get("long_term_ref")
+        fvs_ok = trade.get("fair_value_summary") or {}
+        if isinstance(lt, dict) and "weighted_fair_value" in lt and "weighted_fair_value" in fvs_ok:
+            if lt.get("weighted_fair_value") != fvs_ok.get("weighted_fair_value"):
+                warnings.append(
+                    "multi_horizon_price_framework.long_term_ref.weighted_fair_value != "
+                    "fair_value_summary.weighted_fair_value — 長期層應引用不重算"
+                )
+    else:
+        warnings.append("multi_horizon_price_framework must be an object when present")
+
+    # ── 5e. V3.45.1 — fair_value_range (advisory sibling, warning-only) ───
+    # Anchor 分布區間。fair_value_summary 不變、仍是決策數字唯一來源；range 純呈現。
+    # 缺/不全 NEVER fail gate — emit warnings, keep rc=0.
+    fvr = trade.get("fair_value_range")
+    if isinstance(fvr, dict):
+        rm = fvr.get("range_method")
+        if rm not in (None, "weighted_percentile", "minmax_fallback"):
+            warnings.append(f"fair_value_range.range_method invalid: {rm!r}")
+        rv = fvr.get("range_verdict")
+        if rv not in (None, "undervalued_zone", "fair_zone", "overvalued_zone",
+                      "extreme_undervalued", "extreme_overvalued"):
+            warnings.append(f"fair_value_range.range_verdict invalid: {rv!r}")
+        ag = fvr.get("agreement_grade")
+        if ag not in (None, "high", "medium", "low"):
+            warnings.append(f"fair_value_range.agreement_grade invalid: {ag!r}")
+    elif fvr is not None:
+        warnings.append("fair_value_range must be an object when present")
+
+    # ── 5f. V3.45.1 — implied_expectations (reverse DCF, warning-only) ────
+    # 掛 valuation_lane 或 trade 頂層皆可；不進加權/lane score/decision_lock。
+    ie = trade.get("implied_expectations") or (trade.get("valuation_lane") or {}).get("implied_expectations")
+    if isinstance(ie, dict):
+        if ie.get("fcf_base_source") not in (None, "owner_earnings"):
+            warnings.append(
+                f"implied_expectations.fcf_base_source should be 'owner_earnings' (Burry rule 3 一致), "
+                f"got {ie.get('fcf_base_source')!r}"
+            )
+        fb = ie.get("fcf_base")
+        if isinstance(fb, (int, float)) and fb <= 0 and ie.get("implied_5y_fcf_cagr") is not None:
+            warnings.append(
+                "implied_expectations: fcf_base ≤ 0 但 implied_5y_fcf_cagr 非 null — "
+                "FCF ≤ 0 應設 null 不硬解（V3.45.1 spec）"
+            )
+    elif ie is not None:
+        warnings.append("implied_expectations must be an object when present")
+
+    # ── 5g. V3.45.4 — news_lane PT 去重欄位（warning-only） ────────────────
+    # reasoning_one_line / key_factors = pt_leakage classifier haystack；
+    # pt_revision_momentum = PT level 剝離後的方向性替代訊號。舊 entry 缺欄不擋。
+    nl = trade.get("news_lane")
+    if isinstance(nl, dict):
+        if "reasoning_one_line" not in nl or "key_factors" not in nl:
+            warnings.append(
+                "news_lane: missing reasoning_one_line / key_factors (V3.45.4 必填 — "
+                "pt_leakage classifier 無 haystack；舊 entry 可接受)"
+            )
+        prm = nl.get("pt_revision_momentum")
+        if isinstance(prm, dict):
+            d = prm.get("direction")
+            if d not in (None, "UP", "DOWN", "FLAT", "UNKNOWN"):
+                warnings.append(f"news_lane.pt_revision_momentum.direction invalid: {d!r}")
+        elif prm is not None:
+            warnings.append("news_lane.pt_revision_momentum must be an object when present")
+    ds_leak = (trade.get("det_shadow") or {}).get("news_pt_leakage")
+    if ds_leak not in (None, True, False):
+        warnings.append(f"det_shadow.news_pt_leakage must be bool|null, got {ds_leak!r}")
+
+    # ── 5h. V3.46.0 — valuation_archetype_shadow（warning-only） ───────────
+    # shadow-only：live fair_value_summary 不動；缺 block / 缺欄不擋（舊 entry 相容）
+    vas = trade.get("valuation_archetype_shadow")
+    if isinstance(vas, dict):
+        at = vas.get("archetype")
+        if at not in (None, "financial", "hypergrowth", "cyclical", "mature_cashflow", "balanced"):
+            warnings.append(f"valuation_archetype_shadow.archetype invalid: {at!r}")
+        vbs = vas.get("verdict_band_shadow")
+        if vbs not in (None, "extreme_undervalued", "undervalued", "fairly_valued",
+                       "overvalued", "extreme_overvalued"):
+            warnings.append(f"valuation_archetype_shadow.verdict_band_shadow invalid: {vbs!r}")
+        if vas.get("flip_vs_live") not in (None, True, False):
+            warnings.append("valuation_archetype_shadow.flip_vs_live must be bool|null")
+    elif vas is not None:
+        warnings.append("valuation_archetype_shadow must be an object when present")
+
     if errors:
         fail(errors)
 
     ticker = trade.get("ticker", "?")
     decision = trade.get("final_decision", "?")
     print(f"[validate_session_export] ✓ {ver} schema compliant — {ticker} / {decision}")
+    for w in warnings:
+        print(f"[validate_session_export] ⚠ degraded: {w}", file=sys.stderr)
     sys.exit(0)
 
 

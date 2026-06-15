@@ -39,6 +39,10 @@ FOCUS_DATE     : [留空 = 今日]
    - 要看 cache 數字做判斷：跑 `sector/scripts/sector_digest.py`（一次印完）。
      **禁止**對同一份 cache 反覆 `python3 -c "import json…"` peek。
    - Phase 4a 的 N 個 lane subagent **必須在同一則 assistant message 內**發出（並行）。
+   - **不用 fmp MCP tools / 不 ToolSearch**（V3.44）：本 protocol 全程取數走 local
+     scripts（`sector/scripts/*` + `phase_prefetch.py`），earnings/econ calendar 也由
+     prefetch 涵蓋。**禁止**為了抓資料去 `ToolSearch` 載入 `mcp__fmp__*`（白費一個
+     discovery turn + cache_read）。唯一例外是 Phase 3 Step 5 的 narrative WebSearch。
 
 ---
 

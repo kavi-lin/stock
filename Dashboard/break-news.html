@@ -201,6 +201,49 @@
         color: var(--text-muted); cursor: pointer;
       }
       .bn-replay-btn:hover { color: var(--text-main); border-color: #3b82f6; }
+      /* Market brief — 1-call situational digest panel */
+      .bn-brief-strip {
+        background: var(--bg-card); border: 1px solid rgba(34,197,94,0.30);
+        border-radius: 12px; padding: 16px; margin-bottom: 16px;
+      }
+      .bn-brief-head {
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .bn-brief-title {
+        font-size: 12px; font-weight: 800; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--text-main);
+      }
+      .bn-brief-regime {
+        font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 999px;
+        background: rgba(34,197,94,0.14); color: #4ade80;
+        border: 1px solid rgba(34,197,94,0.40);
+      }
+      .bn-brief-meta { font-size: 10px; color: var(--text-muted);
+        font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+      .bn-brief-text { font-size: 13px; color: var(--text-main); line-height: 1.7; }
+      .bn-brief-cols {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px; margin-top: 12px;
+      }
+      .bn-brief-col {
+        padding: 8px 10px 8px 12px; border-radius: 6px; font-size: 11.5px;
+        background: rgba(255,255,255,0.02); border-left: 3px solid var(--text-muted);
+      }
+      .bn-brief-col-title {
+        font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em;
+        text-transform: uppercase; margin-bottom: 5px;
+      }
+      .bn-brief-col ul { margin: 0; padding-left: 16px; }
+      .bn-brief-col li { margin: 3px 0; color: var(--text-main); line-height: 1.5; }
+      .bn-brief-refresh {
+        font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+        border: 1px solid rgba(34,197,94,0.4); color: #4ade80;
+        background: transparent; cursor: pointer;
+      }
+      .bn-brief-refresh:hover { background: rgba(34,197,94,0.14); }
+      .bn-brief-refresh:disabled { opacity: 0.5; cursor: default; }
+      .bn-brief-empty { font-size: 12px; color: var(--text-muted); padding: 8px 0; }
     </style>
 </head>
 <body class="flex min-h-screen transition-all" data-page="break-news">
@@ -237,6 +280,19 @@
                 </span>
             </div>
 
+            <!-- Market brief — periodic 1-call 市場現況導讀 over 24h break-news output -->
+            <div class="bn-brief-strip" id="bn-brief-strip">
+                <div class="bn-brief-head">
+                    <span class="bn-brief-title" id="bn-brief-title">市場現況導讀</span>
+                    <span class="bn-brief-regime" id="bn-brief-regime" style="display:none;"></span>
+                    <span class="bn-brief-meta" id="bn-brief-meta"></span>
+                    <button class="bn-brief-refresh" id="bn-brief-refresh">⟳ <span id="bn-brief-refresh-label">重產</span></button>
+                </div>
+                <div id="bn-brief-body">
+                    <div class="bn-brief-empty" id="bn-brief-empty">尚無導讀 — 等待下一次自動產生</div>
+                </div>
+            </div>
+
             <!-- Filter strip -->
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
                 <div class="bn-filter-tab active" data-filter="all">All</div>
@@ -248,6 +304,23 @@
 
             <!-- 3-day sentiment-trend chart — rendered by TrendChart (trend-chart.js) -->
             <div class="bn-trend-strip" id="bn-trend-mount"></div>
+
+            <!-- Stale backlog — pending_debate items past auto-debate cutoff.
+                 Listed so user can opt-in per item; auto-loop skips them. -->
+            <div class="bn-raw-strip collapsed" id="bn-stale-strip"
+                 style="border-color:rgba(234,179,8,0.35);">
+                <div class="bn-raw-head" id="bn-stale-toggle">
+                    <span class="bn-raw-title" id="bn-stale-title">陳舊待辯論</span>
+                    <span class="bn-raw-count" id="bn-stale-count"
+                          style="background:rgba(234,179,8,0.18);color:#fbbf24;">0</span>
+                    <span class="bn-raw-hint" id="bn-stale-hint">>2h 未自動辯論，user 手動選擇</span>
+                    <i data-lucide="chevron-down" class="bn-raw-chevron" id="bn-stale-chevron"></i>
+                </div>
+                <div class="bn-raw-body" id="bn-stale-body">
+                    <div class="bn-raw-empty" id="bn-stale-empty">無陳舊待辯論項目</div>
+                    <div class="bn-raw-list" id="bn-stale-list"></div>
+                </div>
+            </div>
 
             <!-- Un-gated raw breaking-news stream -->
             <div class="bn-raw-strip collapsed" id="bn-raw-strip">

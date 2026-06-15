@@ -17,6 +17,12 @@
 - `degraded_agents` — fallback 時標記哪些 agent 降級 inline
 - `subagent_isolated` per-verdict sentinel — 驗證 deep verdicts 來自獨立 subagent
 
+**Protocol V2.2 註記**（shape 不變，產出來源變）：
+- shallow verdicts 的 `bull_case / bear_case / sector_view / macro_view` **照抄** `stage1_triage.py` 產出的 template snaps（LLM 不重寫；語意明顯錯誤時才允許改）
+- `stage1_count` = 當日 `YYYY-MM-DD_triage.json` 的 `shallow_verdicts` 長度（validator 嚴格對照，不是 raw_count）
+- deep verdicts 的 `news_id` 必須 ⊆ triage.json `stage2_items`（validator cross-check）
+- `headline_zh` 由 LLM 補 deep 5 + shallow top 10（script 階段留 null）
+
 Claude 在 Phase 4 末尾**必須**：
 1. 以本檔的 `FULL EXAMPLE` 為 shape 範本填入本次 DIGEST / FLASH / REVIEW 結果
 2. 執行 `python3 news/scripts/validate_digest_output.py` — rc ≠ 0 時修正再重跑
@@ -141,7 +147,7 @@ Claude 在 Phase 4 末尾**必須**：
 
 ### DIGEST
 - `stage1_count ≥ stage2_count`（triage 必然 ≥ 晉級）
-- verdicts 必須包含全部 stage1 項目（shallow + deep 混合），不得只留 deep
+- verdicts = deep（≤5）+ shallow **top 10**（依 `|shallow_score|`；validator 下限 `min(10, s1−s2)`、硬上限 15），不得只留 deep
 - 所有 deep verdict `review_status = reviewed` + `cache_updated = true`
 - fanout_mode 應為 `PER_AGENT_BATCH`（正常）或 `PARTIAL_FALLBACK`（某 agent 降級）/ `FULL_FALLBACK`（極端情況）
 

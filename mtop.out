@@ -1,0 +1,89 @@
+======================================================================
+Market Top Detector (yfinance adapter)
+O'Neil (Distribution) + Minervini (Leadership) + Monty (Rotation)
+======================================================================
+
+Step 1: Fetching Market Data (yfinance)
+----------------------------------------------------------------------
+  S&P 500 (^GSPC):
+    yfinance: ^GSPC (260d)... OK (260 bars, latest: 2026-05-29)
+    OK (260 bars)
+  NASDAQ (QQQ):
+    yfinance: QQQ (260d)... OK (260 bars, latest: 2026-05-29)
+  VIX (^VIX):
+    yfinance: ^VIX (260d)... OK (260 bars, latest: 2026-05-29)
+    OK (15.32)
+  VIX term structure (^VIX3M):
+    yfinance: ^VIX3M (30d)... OK (30 bars, latest: 2026-05-29)
+    OK (steep_contango, ratio=0.821)
+  Candidate pool quotes (20 ETFs):
+    yfinance: SMH (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: SOXX (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: PSI (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: SOXQ (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: IGV (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: WCLD (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: CLOU (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: BUG (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: XBI (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: ARKG (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: ARKK (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: ARKW (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: KOMP (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: TAN (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: ICLN (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: KWEB (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: FDN (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: FINX (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: IPAY (60d)... OK (60 bars, latest: 2026-05-29)
+    yfinance: BOTZ (60d)... OK (60 bars, latest: 2026-05-29)
+  Selected dynamic basket: ['IGV', 'BUG', 'FDN', 'WCLD', 'CLOU', 'ARKW', 'KOMP', 'ARKK', 'ICLN', 'ARKG']
+  Leading ETF history:
+    OK (10 quotes, 10 histories)
+  Sector ETFs:
+    yfinance: XLC (50d)... OK (50 bars, latest: 2026-05-29)
+    yfinance: XLP (50d)... OK (50 bars, latest: 2026-05-29)
+    yfinance: XLY (50d)... OK (50 bars, latest: 2026-05-29)
+    yfinance: XLU (50d)... OK (50 bars, latest: 2026-05-29)
+    yfinance: XLV (50d)... OK (50 bars, latest: 2026-05-29)
+    yfinance: VNQ (50d)... OK (50 bars, latest: 2026-05-29)
+    yfinance: XLK (50d)... OK (50 bars, latest: 2026-05-29)
+    OK (8 ETFs)
+
+Step 2: Calculating Components
+----------------------------------------------------------------------
+  [1/6] Distribution Day Count... Score: 55 (CAUTION: Moderate distribution)
+  [2/6] Leading Stock Health... Score: 8 (HEALTHY: Leadership intact)
+  [3/6] Defensive Sector Rotation... Score: 0 (HEALTHY: Growth leading)
+  Fetching 200DMA breadth from TraderMonty CSV... OK (60.16%, 2026-05-28, fresh)
+  [4/6] Market Breadth Divergence... Score: 30 (HEALTHY: Breadth supports index level)
+  [5/6] Index Technical Condition... Score: 0 (HEALTHY: Technical structure intact)
+  [6/6] Sentiment & Speculation... Score: 33 (CAUTION: Some speculative excess)
+
+Step 3: Calculating Composite Score
+----------------------------------------------------------------------
+  Composite Score: 23.2/100
+  Risk Zone:       Yellow (Early Warning)
+  Risk Budget:     80-90%
+  Strongest Warning: Distribution Day Count (55)
+  vs Previous: 23.2 → 23.2 (+0.0)
+
+Step 5: Historical Comparison & Scenarios
+----------------------------------------------------------------------
+  Closest historical pattern: 2018 (Q4 Correction)
+  Generated 4 what-if scenarios
+
+Step 6: Generating Reports
+----------------------------------------------------------------------
+JSON report saved to: sector/market_top_cache/market_top_2026-05-30_114319.json
+Markdown report saved to: sector/market_top_cache/market_top_2026-05-30_114319.md
+
+======================================================================
+Market Top Detection Complete
+======================================================================
+  Composite Score: 23.2/100
+  Risk Zone:       Yellow (Early Warning)
+  Risk Budget:     80-90%
+  JSON:            sector/market_top_cache/market_top_2026-05-30_114319.json
+  Markdown:        sector/market_top_cache/market_top_2026-05-30_114319.md
+

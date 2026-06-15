@@ -13,6 +13,10 @@ Usage:
     python3 screen.py --tickers-file my_watchlist.txt --signal fresh_golden_cross_20_50
     python3 screen.py --universe sp500 --stage "Stage 2 uptrend" --exclude-warning parabolic_blowoff_risk --top 25
     python3 screen.py --universe sp500 --no-cache --workers 20
+    # V3.22 fundamentals + presets
+    python3 screen.py --preset sales_breakout                 # growth-momentum bundle
+    python3 screen.py --preset value_momentum --top 25        # cheap-but-confirmed
+    python3 screen.py --max-ps 5 --min-gm 25 --min-rev-yoy 10 # ad-hoc fundamental filter
 """
 import argparse
 import csv
@@ -178,6 +182,29 @@ def _passes(payload, args, sector_rs_set=None):
         if v is None or v < args.min_dtc:
             return False
 
+    # V3.22 fundamentals + short-term return filters. Missing data (None) is
+    # treated as "fails the filter" so a screener run with --max-ps doesn't
+    # silently include tickers whose fundamentals weren't fetched.
+    fnd = payload.get("fundamentals") or {}
+    if args.max_ps is not None:
+        v = fnd.get("ps_ttm")
+        if v is None or v > args.max_ps:
+            return False
+    if args.min_gm is not None:
+        v = fnd.get("gm_ttm_pct")
+        if v is None or v < args.min_gm:
+            return False
+    if args.min_rev_yoy is not None:
+        v = fnd.get("rev_yoy_ttm_pct")
+        if v is None or v < args.min_rev_yoy:
+            return False
+
+    str_blk = payload.get("short_term_returns") or {}
+    if args.min_return_5d is not None:
+        v = str_blk.get("return_5d_pct")
+        if v is None or v < args.min_return_5d:
+            return False
+
     # Sector RS pre-filter (top-N sectors by composite_score from sector_intel.json)
     if args.top_sectors and sector_rs_set is not None:
         ticker = payload.get("ticker")
@@ -335,10 +362,18 @@ CSV_COLUMNS = [
     "rs_3m_pct", "rs_6m_pct", "rs_rating",
     "vcp_ratio", "vcp_compressed",
     "vol_5d_vs_20d", "vol_today_vs_20d", "vol_dryup_spike",
+    # V3.25.8 — 3D rolling-volume window + state label (expanding/neutral/drying_up).
+    "vol_3d_vs_20d", "vol_3d_state",
     "eps_yoy_pct", "eps_acceleration",
     "days_to_cover", "dtc_tier",
     "signals", "warnings",
     "cache_hit", "cache_age_sec",
+    # V3.22 fundamentals + short-term return columns (appended → downstream
+    # consumers reading by header name stay compatible; index-based readers
+    # would only see truncation, never reorder).
+    "return_1d_pct", "return_5d_pct",
+    "ps_ttm", "gm_ttm_pct", "rev_yoy_ttm_pct",
+    "ttm_revenue_usd", "fundamentals_lag_days",
 ]
 
 
@@ -361,6 +396,9 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
     vp_block  = p.get("volume_pattern") or {}
     eps_block = p.get("eps_acceleration") or {}
     dtc_block = p.get("days_to_cover") or {}
+    # V3.22 — short-term thrust + fundamentals (None when FMP key unset)
+    str_block = p.get("short_term_returns") or {}
+    fnd_block = p.get("fundamentals") or {}
 
     return {
         "rank": rank,
@@ -408,6 +446,10 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
         "vol_5d_vs_20d":    vp_block.get("avg_5d_vs_20d"),
         "vol_today_vs_20d": vp_block.get("today_vs_20d"),
         "vol_dryup_spike":  int(bool(vp_block.get("pattern_active"))),
+        # V3.25.8 — 3D rolling-volume window. avg_3d_vs_20d is numeric;
+        # vol_3d_state is a string passthrough ("expanding"/"neutral"/"drying_up").
+        "vol_3d_vs_20d":    vp_block.get("avg_3d_vs_20d"),
+        "vol_3d_state":     vp_block.get("vol_3d_state"),
         "eps_yoy_pct":      eps_block.get("latest_q_yoy_pct"),
         "eps_acceleration": eps_block.get("growth_acceleration"),
         "days_to_cover":    dtc_block.get("days_to_cover"),
@@ -416,6 +458,14 @@ def _row_from_payload(rank, p, sp500_set=None, n100_set=None, sox_set=None):
         "warnings": "|".join(p.get("warnings", [])),
         "cache_hit": p.get("cache_hit"),
         "cache_age_sec": p.get("cache_age_sec"),
+        # V3.22 — fundamentals + short-term returns (None safe; CSV writes blank)
+        "return_1d_pct":         str_block.get("return_1d_pct"),
+        "return_5d_pct":         str_block.get("return_5d_pct"),
+        "ps_ttm":                fnd_block.get("ps_ttm"),
+        "gm_ttm_pct":            fnd_block.get("gm_ttm_pct"),
+        "rev_yoy_ttm_pct":       fnd_block.get("rev_yoy_ttm_pct"),
+        "ttm_revenue_usd":       fnd_block.get("ttm_revenue_usd"),
+        "fundamentals_lag_days": fnd_block.get("data_lag_days"),
     }
 
 
@@ -459,6 +509,57 @@ def _render_md(rows, top, meta):
     return "\n".join(lines)
 
 
+# ── V3.22 preset bundles ────────────────────────────────────────────────
+# Sales Breakout = growth-momentum: Stage 2 + relative-strength leader +
+# accelerating revenue. P/S deliberately not capped — best-in-class names
+# (NVDA / LLY) trade well above 25 during their thrust phase.
+# Value Momentum = cheap-but-confirmed: low P/S backed by non-shrinking
+# revenue and a real gross-margin floor (guards against value-trap retail
+# / commodity names that look cheap but earn nothing).
+_PRESETS = {
+    "sales_breakout": {
+        "stage": "Stage 2 uptrend",
+        "signal_add": ["volume_expansion"],
+        "min_rs": 80,
+        "min_rev_yoy": 15.0,
+    },
+    "value_momentum": {
+        "stage": "Stage 2 uptrend",
+        "min_score": 65,
+        "max_ps": 5.0,
+        "min_rev_yoy": 0.0,
+        "min_gm": 15.0,
+        "exclude_warning_add": ["parabolic_blowoff_risk"],
+    },
+}
+
+
+def _apply_preset(args):
+    if not args.preset:
+        return
+    bundle = _PRESETS.get(args.preset, {})
+    # Scalar fields — only fill when user left it at the argparse default.
+    scalar_defaults = {
+        "stage":         None,
+        "min_score":     0,        # argparse default
+        "min_rs":        None,
+        "min_rev_yoy":   None,
+        "min_gm":        None,
+        "max_ps":        None,
+        "min_return_5d": None,
+    }
+    for key, dflt in scalar_defaults.items():
+        if key in bundle and getattr(args, key) == dflt:
+            setattr(args, key, bundle[key])
+    # List fields — always merge (additive; can't loosen explicit user filters).
+    for sig in bundle.get("signal_add", []):
+        if sig not in args.signal:
+            args.signal.append(sig)
+    for warn in bundle.get("exclude_warning_add", []):
+        if warn not in args.exclude_warning:
+            args.exclude_warning.append(warn)
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 def main():
     ap = argparse.ArgumentParser(description="Batch momentum screener")
@@ -500,6 +601,19 @@ def main():
     ap.add_argument("--top-sectors", type=int, default=None,
                     help="Only keep tickers in top-N sectors by sector_intel composite_score")
 
+    # V3.22 fundamentals + short-term return filters
+    ap.add_argument("--max-ps", type=float, default=None,
+                    help="Max P/S TTM (market cap / sum-of-last-4Q revenue)")
+    ap.add_argument("--min-gm", type=float, default=None,
+                    help="Min TTM Gross Margin %% (gross_profit / revenue × 100)")
+    ap.add_argument("--min-rev-yoy", type=float, default=None,
+                    help="Min TTM Revenue YoY %% (latest TTM vs prior TTM)")
+    ap.add_argument("--min-return-5d", type=float, default=None,
+                    help="Min 5-day price return %%")
+    ap.add_argument("--preset", choices=["sales_breakout", "value_momentum"],
+                    default=None,
+                    help="Apply a curated filter bundle. CLI flags override preset defaults.")
+
     # Execution
     ap.add_argument("--workers", type=int, default=15)
     ap.add_argument("--no-cache", action="store_true")
@@ -518,6 +632,12 @@ def main():
     args = ap.parse_args()
     if not args.universe and not args.tickers and not args.tickers_file:
         args.universe = "all"
+
+    # V3.22 — preset bundles. Each preset only fills fields the user left
+    # unset (CLI flag wins, so `--preset sales_breakout --min-rs 90` keeps
+    # the explicit 90). Stage / required signals / exclusions are merged
+    # additively so a preset can't loosen something the user tightened.
+    _apply_preset(args)
 
     # Primary universe selection
     if args.universe:
@@ -634,6 +754,12 @@ def main():
     if args.min_dtc is not None:       filter_bits.append(f"dtc≥{args.min_dtc}")
     if args.top_sectors:               filter_bits.append(f"top_sectors={args.top_sectors}")
     if args.cooldown_snapshots:         filter_bits.append(f"cooldown={args.cooldown_snapshots} snaps")
+    # V3.22 fundamentals + short-term filter bits
+    if args.preset:                    filter_bits.append(f"preset={args.preset}")
+    if args.max_ps is not None:        filter_bits.append(f"ps≤{args.max_ps}")
+    if args.min_gm is not None:        filter_bits.append(f"gm≥{args.min_gm}%")
+    if args.min_rev_yoy is not None:   filter_bits.append(f"rev_yoy≥{args.min_rev_yoy}%")
+    if args.min_return_5d is not None: filter_bits.append(f"r5d≥{args.min_return_5d}%")
 
     meta = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),

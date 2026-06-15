@@ -49,20 +49,31 @@ def load_recommendations(days):
     return out
 
 
-def fetch_actual_price(ticker, target_date):
-    """Get actual close at or just after target_date. Returns float or None."""
-    try:
-        end = target_date + datetime.timedelta(days=5)
-        h = yf.Ticker(ticker).history(
-            start=target_date.isoformat(),
-            end=end.isoformat(),
-            auto_adjust=False,
-        )
-        if h.empty:
-            return None
-        return float(h["Close"].iloc[0])
-    except Exception:
+_HIST_CACHE = {}
+
+
+def _ticker_history(ticker, start_date):
+    """One yfinance fetch per ticker covering the whole review window."""
+    h = _HIST_CACHE.get(ticker)
+    if h is None:
+        try:
+            h = yf.Ticker(ticker).history(start=start_date.isoformat(), auto_adjust=False)
+        except Exception:
+            h = pd.DataFrame()
+        _HIST_CACHE[ticker] = h
+    return h
+
+
+def fetch_actual_price(ticker, target_date, window_start):
+    """Get actual close at or just after target_date (within 5 days). Returns float or None."""
+    h = _ticker_history(ticker, window_start)
+    if h.empty:
         return None
+    end = target_date + datetime.timedelta(days=5)
+    sel = h[(h.index.date >= target_date) & (h.index.date < end)]
+    if sel.empty:
+        return None
+    return float(sel["Close"].iloc[0])
 
 
 def compute_outcomes(rec_files):
@@ -71,6 +82,7 @@ def compute_outcomes(rec_files):
     today = datetime.date.today()
     horizons_def = {"1d": 1, "5d": 5, "15d": 15}
     rows = []
+    window_start = min((d for d, _ in rec_files), default=today)
 
     for rec_date, data in rec_files:
         for theme_block in data.get("themes", []):
@@ -93,7 +105,7 @@ def compute_outcomes(rec_files):
                     if target_date > today:
                         # Window not elapsed yet
                         continue
-                    actual = fetch_actual_price(ticker, target_date)
+                    actual = fetch_actual_price(ticker, target_date, window_start)
                     if actual is None:
                         continue
                     actual_pct = (actual / current - 1) * 100
@@ -120,8 +132,7 @@ def compute_outcomes(rec_files):
                         "in_range": in_range,
                         "confidence": pred.get("confidence"),
                         "drivers": pred.get("drivers", {}),
-                        "weights_version": data.get("themes", [{}])[0].get("short_term", {}).get("weights_version", "unknown")
-                                          if data.get("themes") else "unknown",
+                        "weights_version": st.get("weights_version", "unknown"),
                     })
     return rows
 
@@ -151,6 +162,22 @@ def per_horizon_stats(rows):
             "mean_actual_pct": round(mean_actual, 2),
             "directional_bias_pct": round(bias, 2),
         }
+    return out
+
+
+def per_version_stats(rows):
+    """Hit rate per (weights_version, horizon) — before/after comparison across weight bumps."""
+    by_v = defaultdict(lambda: defaultdict(list))
+    for r in rows:
+        by_v[r["weights_version"]][r["horizon"]].append(r)
+    out = {}
+    for v, by_h in by_v.items():
+        out[v] = {}
+        for h, rs in by_h.items():
+            n = len(rs)
+            hit = sum(1 for r in rs if r["direction_correct"])
+            bias = sum(r["pred_pct"] - r["actual_pct"] for r in rs) / n
+            out[v][h] = {"n": n, "hit_rate_pct": round(hit / n * 100, 1), "bias_pct": round(bias, 2)}
     return out
 
 
@@ -285,6 +312,28 @@ def render_report(rows, days, run_date):
         "- `In-Range` = % of cases where actual price fell within [target_low, target_high]",
         "- `Bias` > 0 = model OVER-predicts (more bullish than reality); < 0 = UNDER-predicts",
         "",
+    ]
+
+    per_v = per_version_stats(rows)
+    if len(per_v) > 1:
+        lines += [
+            "## 1b. Per-weights-version comparison (before/after weight bumps)",
+            "",
+            "| Version | Horizon | N | Hit Rate | Bias |",
+            "|---|---|---:|---:|---:|",
+        ]
+        for v in sorted(per_v):
+            for h in ["1d", "5d", "15d"]:
+                if h in per_v[v]:
+                    s = per_v[v][h]
+                    lines.append(f"| {v} | {h} | {s['n']} | {s['hit_rate_pct']}% | {s['bias_pct']:+.2f}% |")
+        lines.append("")
+    else:
+        only_v = next(iter(per_v), "unknown")
+        lines.append(f"_All evaluated predictions used weights_version `{only_v}` — no before/after comparison this window._")
+        lines.append("")
+
+    lines += [
         "---",
         "",
         "## 2. Per-theme 5d alpha breakdown",

@@ -90,9 +90,12 @@ def _raw_pub_map(date_iso):
             raw_items = raw if isinstance(raw, list) else raw.get('items') or raw.get('news') or []
             for it in raw_items:
                 nid = it.get("news_id")
-                pub = it.get("published") or it.get("published_at")
-                if nid and pub:
-                    m[nid] = pub
+                if not nid:
+                    continue
+                m[nid] = {
+                    "published": it.get("published") or it.get("published_at"),
+                    "url": it.get("url") or it.get("link") or "",
+                }
         except Exception as e:
             print(f"[ERROR] raw.json {raw_path}: {e}")
     _raw_pub_cache[date_iso] = m
@@ -407,6 +410,82 @@ def extract_market_data(s_data):
         "verdict_date":     s_data.get("verdict_date"),
         "generated_at":     s_data.get("generated_at"),
         "notes":            s_data.get("session_notes", ""),
+        # V4.2.0 — previously-dropped scan output surfaced for the sector page
+        "committee":        _extract_committee(s_data),
+        "da_challenges":    _extract_da_challenges(s_data),
+        "fred_overlay":     _extract_fred_overlay(s_data),
+        "political_risk":   s_data.get("political_risk_summary") or {},
+    }
+
+
+def _extract_committee(s_data):
+    """V4.2.0 — Phase 4a 4-lane committee proposals → Dashboard conviction matrix.
+
+    V4.12.1 — tolerate two _phase4a shapes. Documented one is a dict
+    {fanout_mode, proposals:[...]}, but some PARALLEL_SUBAGENT runs emit the
+    proposals array *directly* as a bare list. Old code called p4a.get(...)
+    unconditionally → 'list' object has no attribute 'get' → the whole sector
+    ingest try-block aborted → data.json.sectors came out empty (sector report
+    never reached the webpage). Validator doesn't gate _phase4a inner shape, so
+    bridge must accept both."""
+    p4a = s_data.get("_phase4a") or {}
+    if isinstance(p4a, list):
+        raw_proposals = p4a
+        fanout_mode   = s_data.get("phase4_fanout_mode", "")
+    else:
+        raw_proposals = p4a.get("proposals", [])
+        fanout_mode   = p4a.get("fanout_mode", "")
+    proposals = []
+    for p in raw_proposals:
+        if not isinstance(p, dict):
+            continue
+        proposals.append({
+            "agent":     p.get("agent", ""),
+            "hot":       p.get("top_conviction_hot", []),
+            "cold":      p.get("top_conviction_cold", []),
+            "rationale": p.get("key_rationale", ""),
+        })
+    return {"fanout_mode": fanout_mode, "proposals": proposals}
+
+
+def _extract_da_challenges(s_data):
+    """V4.2.0 — Phase 4b Devil's Advocate challenges → Red Team panel."""
+    p4b = s_data.get("_phase4b") or {}
+    challenges = []
+    for c in p4b.get("challenge_targets", []):
+        challenges.append({
+            "sector":           c.get("challenged_sector", ""),
+            "call":             c.get("challenged_call", ""),
+            "counter_evidence": c.get("counter_evidence", ""),
+            "risk_scenario":    c.get("risk_scenario", ""),
+            "confidence":       c.get("confidence_level", ""),
+            "accepted":         bool(c.get("accepted")),
+        })
+    return {
+        "consensus_warning": bool(p4b.get("consensus_warning")),
+        "tail_risk_note":    p4b.get("tail_risk_note", ""),
+        "challenges":        challenges,
+    }
+
+
+def _extract_fred_overlay(s_data):
+    """V4.2.0 — Phase 0 FRED snapshot + step6 multiplier rationale for sector page."""
+    snap  = (s_data.get("_phase0") or {}).get("fred_snapshot") or {}
+    step6 = s_data.get("step6_overlay") or {}
+    if not snap and not step6:
+        return None
+    return {
+        "regime_label":               snap.get("regime_label") or step6.get("regime_label"),
+        "regime_confidence":          snap.get("regime_confidence", step6.get("regime_confidence")),
+        "yield_curve_value":          snap.get("yield_curve_value"),
+        "yield_curve_inverted":       snap.get("yield_curve_inverted"),
+        "credit_stress_elevated":     snap.get("credit_stress_elevated"),
+        "financial_stress_above_avg": snap.get("financial_stress_above_avg"),
+        "fed_rate_direction":         snap.get("fed_rate_direction"),
+        "real_rate":                  snap.get("real_rate_preferred"),
+        "velocity_highlights":        snap.get("velocity_highlights", []),
+        "overlay_applied":            bool(step6.get("applied")),
+        "overlay_rationale":          step6.get("rationale", ""),
     }
 
 
@@ -469,12 +548,55 @@ def _extract_sector_competitors():
     return out
 
 
+def _slim_valuation(v):
+    """V4.2.0 — phase-1 sector_valuation → quant table columns."""
+    if not v:
+        return None
+    return {
+        "pe_ttm":           v.get("pe_ttm"),
+        "pe_zscore_1y":     v.get("pe_zscore_1y"),
+        "rs_5d":            v.get("rs_vs_spy_5d"),
+        "rs_20d":           v.get("rs_vs_spy_20d"),
+        "rs_3m":            v.get("rs_vs_spy_3m"),
+        "volume_ratio_20d": v.get("etf_volume_ratio_20d"),
+    }
+
+
+def _slim_pulse(p):
+    """V4.2.0 — phase-3 sector_earnings_pulse → quant table columns."""
+    if not p:
+        return None
+    return {
+        "report_count":         p.get("report_count"),
+        "beat_rate_30d":        p.get("beat_rate_30d"),
+        "surprise_score_avg":   p.get("surprise_score_avg"),
+        "analyst_revision_net": p.get("analyst_revision_net"),
+    }
+
+
+def _slim_smart_money(m):
+    """V4.2.0 — phase-3 smart_money_signals → quant table columns."""
+    if not m:
+        return None
+    return {
+        "insider_ratio":      m.get("insider_acquired_disposed_ratio_q"),
+        "insider_sample":     m.get("insider_sample_size"),
+        "senate_net_buy_30d": m.get("senate_net_buy_30d"),
+    }
+
+
 def extract_sectors(s_data):
     """Merge phase-4 verdicts with phase-1 rotation signals"""
     # Build lookup from _phase1 per sector name
     p1_map = {}
     for s in s_data.get("_phase1", {}).get("sectors", []):
         p1_map[s["name"]] = s
+
+    # V4.2.0 — phase-3 per-sector evidence maps (earnings pulse / smart money / sentiment)
+    phase3    = s_data.get("_phase3", {}) or {}
+    pulse_map = phase3.get("sector_earnings_pulse") or {}
+    smart_map = phase3.get("smart_money_signals") or {}
+    sent_map  = phase3.get("sector_news_sentiment") or {}
 
     # V2.17.1 — competitive landscape per sector (top 5 by market cap)
     competitors_map = _extract_sector_competitors()
@@ -501,6 +623,12 @@ def extract_sectors(s_data):
             "ytd_perf_note":    p1.get("ytd_perf_note", ""),
             # V2.17.1 — top-5 competitive landscape (24h cached profile data)
             "competitors":      competitors_map.get(name) or [],
+            # V4.2.0 — quant evidence merged from phase-1 valuation + phase-3 pulses
+            "valuation":        _slim_valuation(p1.get("sector_valuation")),
+            "earnings_pulse":   _slim_pulse(pulse_map.get(name)),
+            "smart_money":      _slim_smart_money(smart_map.get(name)),
+            "news_sentiment":   sent_map.get(name, ""),
+            "fred_multiplier":  s.get("step6_fred_multiplier"),
         })
     return result
 
@@ -1421,6 +1549,16 @@ def extract_audit_history(positions_by_ticker=None):
                 decision_confidence_pct = meta.get("decision_confidence_pct")
                 scenario_odds        = meta.get("scenario_odds")
                 action_label         = meta.get("action_label")
+                # V3.45+ Phase 2.4 price framework advisory blocks (rendered by buildFvExtras)
+                multi_horizon_price_framework = meta.get("multi_horizon_price_framework")  # {short_term_5d, mid_term_60d, long_term_ref, convergence}
+                fair_value_range              = meta.get("fair_value_range")               # {p25, p50, p75, min_anchor, max_anchor, agreement_grade, range_verdict, ...}
+                implied_expectations          = meta.get("implied_expectations")           # reverse DCF {implied_5y_fcf_cagr, actual_3y_fcf_cagr, sanity_note, ...}
+                valuation_archetype_shadow    = meta.get("valuation_archetype_shadow")     # shadow-only {archetype, weighted_fair_value_shadow, flip_vs_live, ...}
+                # V5.0.x Phase 4.6 decision cap + hot zone probe
+                decision_cap_active  = meta.get("decision_cap_active", False)
+                decision_cap_reason  = meta.get("decision_cap_reason")    # insufficient_anchors | low_valuation_confidence | low_data_quality
+                cap_override_reason  = meta.get("cap_override_reason")
+                hot_zone_probe       = meta.get("hot_zone_probe", False)
 
                 # Join active positions (open) for this ticker
                 active_positions = positions_by_ticker.get(ticker, [])
@@ -1508,6 +1646,16 @@ def extract_audit_history(positions_by_ticker=None):
                     "decision_confidence_pct": decision_confidence_pct,
                     "scenario_odds":      scenario_odds,
                     "action_label":       action_label,
+                    # V3.45+ Phase 2.4 advisory blocks
+                    "multi_horizon_price_framework": multi_horizon_price_framework,
+                    "fair_value_range":              fair_value_range,
+                    "implied_expectations":          implied_expectations,
+                    "valuation_archetype_shadow":    valuation_archetype_shadow,
+                    # V5.0.x decision cap / hot zone probe
+                    "decision_cap_active": decision_cap_active,
+                    "decision_cap_reason": decision_cap_reason,
+                    "cap_override_reason": cap_override_reason,
+                    "hot_zone_probe":      hot_zone_probe,
                     # Price fields (current = yfinance live; analysis = snapshot at decision time)
                     "current_price":    live_prices.get(ticker),
                     "analysis_price":   meta.get("analysis_price"),
@@ -1904,8 +2052,10 @@ def extract_news():
                 # Resolve published time: prefer verdict's own field (if pipeline
                 # threaded it), else look up via news_id in raw.json. Lets the UI
                 # show "Xh ago" instead of just YYYY-MM-DD on deep verdicts.
+                raw_meta = pub_map.get(v.get("news_id", "")) or {}
                 published = v.get("published") or v.get("published_at") \
-                            or pub_map.get(v.get("news_id", ""))
+                            or raw_meta.get("published")
+                url = v.get("url") or raw_meta.get("url") or ""
                 news.append({
                     "headline":          v.get("headline"),
                     "headline_zh":       v.get("headline_zh", ""),
@@ -1916,6 +2066,7 @@ def extract_news():
                     "sectors":           sector_names,
                     "source":            "news_protocol",
                     "source_label":      v.get("source_label", ""),
+                    "url":               url,
                     "type":              type_val,
                     "bull_case":         v.get("bull_case", ""),
                     "bear_case":         v.get("bear_case", ""),
@@ -1924,6 +2075,14 @@ def extract_news():
                     "macro_view":        v.get("macro_view", ""),
                     "arbiter_reasoning": v.get("arbiter_reasoning", ""),
                     "debate_note":       v.get("debate_note", ""),
+                    # zh-TW variants (gemini translate_digest / link_digest); UI renders
+                    # these when lang=zh, else falls back to the base field.
+                    "bull_case_zh":        v.get("bull_case_zh", ""),
+                    "bear_case_zh":        v.get("bear_case_zh", ""),
+                    "sector_view_zh":      v.get("sector_view_zh", ""),
+                    "macro_view_zh":       v.get("macro_view_zh", ""),
+                    "arbiter_reasoning_zh": v.get("arbiter_reasoning_zh", ""),
+                    "debate_note_zh":      v.get("debate_note_zh", ""),
                     "binary_risk":       v.get("binary_risk", False),
                     "within_48h":        v.get("within_48h", False),
                     "tickers_mentioned": v.get("tickers_mentioned", []),
@@ -2137,11 +2296,26 @@ def ingest_momentum_screen():
             "vol_5d_vs_20d":     _safe_float(row.get("vol_5d_vs_20d")),
             "vol_today_vs_20d":  _safe_float(row.get("vol_today_vs_20d")),
             "vol_dryup_spike":   row.get("vol_dryup_spike") in ("True", "1", "true"),
+            # V3.25.8 — 3D rolling-volume window. State is a string passthrough
+            # ("expanding"/"neutral"/"drying_up"); old CSVs predating V3.25.8
+            # surface as None and the Dashboard renders "—".
+            "vol_3d_vs_20d":     _safe_float(row.get("vol_3d_vs_20d")),
+            "vol_3d_state":      (row.get("vol_3d_state") or None),
             "eps_yoy_pct":       _safe_float(row.get("eps_yoy_pct")),
             "eps_acceleration":  row.get("eps_acceleration"),
             "days_to_cover":     _safe_float(row.get("days_to_cover")),
             "dtc_tier":          row.get("dtc_tier"),
             "sector_rs_rank":    _SECTOR_RS_RANK.get(row.get("sector")) if row.get("sector") else None,
+            # V3.22 — fundamentals + short-term return fields. Older CSVs
+            # predating the columns simply return None via .get(); the
+            # Dashboard renders "—" for those rows until the next screen run.
+            "return_1d_pct":         _safe_float(row.get("return_1d_pct")),
+            "return_5d_pct":         _safe_float(row.get("return_5d_pct")),
+            "ps_ttm":                _safe_float(row.get("ps_ttm")),
+            "gm_ttm_pct":            _safe_float(row.get("gm_ttm_pct")),
+            "rev_yoy_ttm_pct":       _safe_float(row.get("rev_yoy_ttm_pct")),
+            "ttm_revenue_usd":       _safe_float(row.get("ttm_revenue_usd")),
+            "fundamentals_lag_days": _safe_float(row.get("fundamentals_lag_days")),
             "signals":  row.get("signals", "").split("|") if row.get("signals") else [],
             "warnings": row.get("warnings", "").split("|") if row.get("warnings") else [],
         }
@@ -2372,6 +2546,57 @@ def load_theme_overrides():
     return out
 
 
+def load_industry_trend():
+    """V3.29.0 — surface REAL trailing industry/sector performance for the radar
+    headline (領漲 ↔ 領跌 board). Reads the existing theme-detector cache, which
+    already computes finviz industry trailing perf — radar never used it before.
+
+    Returns dict for data['industry_trend']:
+        {
+          "status": "success" | "no_cache" | "error",
+          "as_of": ISO ts | None,
+          "_freshness": "FRESH" | "STALE" | "OLD",
+          "_cache_age_hr": float,
+          "leaders":  [ {name, sector, perf_1w, perf_1m, perf_3m, momentum_score, direction}, ... ],
+          "laggards": [ ...same shape, weakest first... ],
+          "sector_uptrend": { "<sector>": {ratio, ma_10, slope, trend}, ... },
+          "summary": { bullish_count, bearish_count, top_bullish, top_bearish },
+        }
+    Industry rows are direction-symmetric and keyword-lock-free (full ~140
+    finviz universe), so emergent leaders AND laggards both surface.
+    """
+    latest = _latest_theme_cache_path()
+    if not latest:
+        return {"status": "no_cache", "as_of": None, "leaders": [], "laggards": [],
+                "sector_uptrend": {}, "summary": {}}
+    try:
+        with open(latest, "r", encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        return {"status": "error", "reason": f"read_error: {e}", "as_of": None,
+                "leaders": [], "laggards": [], "sector_uptrend": {}, "summary": {}}
+
+    def _slim_industry(rows, n):
+        keep = ("name", "sector", "perf_1w", "perf_1m", "perf_3m", "perf_6m",
+                "perf_ytd", "momentum_score", "weighted_return", "direction")
+        return [{k: r.get(k) for k in keep} for r in (rows or [])[:n]]
+
+    ir = d.get("industry_rankings") or {}
+    age_sec = int(datetime.now().timestamp() - os.path.getmtime(latest))
+    age_hr = age_sec / 3600
+    return {
+        "status":          "success",
+        "as_of":           d.get("generated_at"),
+        "_cache_age_hr":   round(age_hr, 1),
+        "_freshness":      "FRESH" if age_hr < 24 else ("STALE" if age_hr < 168 else "OLD"),
+        "_source_file":    os.path.basename(latest),
+        "leaders":         _slim_industry(ir.get("top"), 15),
+        "laggards":        _slim_industry(ir.get("bottom"), 15),
+        "sector_uptrend":  d.get("sector_uptrend") or {},
+        "summary":         d.get("summary") or {},
+    }
+
+
 def load_structural_watchlist():
     """V2.19.1 — load news/news_logs/structural_watchlist.json for data['structural_watchlist'].
 
@@ -2458,6 +2683,80 @@ def load_retail_sector_pulse():
     payload["_cache_age_hr"] = round(age_hr, 1)
     payload["_freshness"] = "FRESH" if age_hr < 24 else ("STALE" if age_hr < 48 else "OLD")
     return payload
+
+
+def load_market_mood():
+    """V3.27: Load Dashboard/market_mood.json (produced by
+    skills/market-sentiment-analyzer/scripts/mood.py in daily_update.sh Step 9.3).
+    Returns dict for nesting at data['market_mood'] (page-primary, top-level)."""
+    fp = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      "Dashboard", "market_mood.json")
+    if not os.path.exists(fp):
+        return {"status": "no_file"}
+    age_sec = int(time.time() - os.path.getmtime(fp))
+    age_hr = age_sec / 3600
+    try:
+        with open(fp, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception as e:
+        return {"status": "parse_error", "error": str(e)}
+    payload["status"] = "success"
+    payload["_cache_age_sec"] = age_sec
+    payload["_cache_age_hr"] = round(age_hr, 1)
+    payload["_freshness"] = "FRESH" if age_hr < 24 else ("STALE" if age_hr < 48 else "OLD")
+    return payload
+
+
+def load_trending_slim():
+    """V3.27: Slim projection of Dashboard/trending_tickers.json for the mood page.
+    NOT the whole file (it carries full sample_posts) — cap to bound data.json size.
+    Returns dict for nesting at data['tactical']['trending']."""
+    fp = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      "Dashboard", "trending_tickers.json")
+    if not os.path.exists(fp):
+        return {"status": "no_file"}
+    age_sec = int(time.time() - os.path.getmtime(fp))
+    age_hr = age_sec / 3600
+    try:
+        with open(fp, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+    except Exception as e:
+        return {"status": "parse_error", "error": str(e)}
+
+    def _slim_ticker(t):
+        return {
+            "ticker": t.get("ticker"),
+            "sector": t.get("sector"),
+            "mention_count": t.get("mention_count"),
+            "polarity_score": t.get("polarity_score"),
+            "engagement_score": t.get("engagement_score"),
+            "sample_posts": [
+                {"headline": p.get("headline"), "url": p.get("url"),
+                 "polarity": p.get("polarity")}
+                for p in (t.get("sample_posts") or [])[:2]
+            ],
+        }
+
+    # Prefer the confident tickers; fall back to low_confidence when empty.
+    tickers = raw.get("tickers") or raw.get("low_confidence") or []
+    sectors = [
+        {"sector": s.get("sector"), "polarity_score": s.get("polarity_score"),
+         "engagement_score": s.get("engagement_score"),
+         "top_tickers": (s.get("top_tickers") or [])[:3]}
+        for s in (raw.get("sectors") or [])
+    ]
+    return {
+        "status": "success",
+        "as_of": raw.get("as_of"),
+        "post_count": raw.get("post_count"),
+        "lexicon_version": raw.get("lexicon_version"),
+        "source_stats": raw.get("source_stats"),
+        "tickers": [_slim_ticker(t) for t in tickers[:15]],
+        "sectors": sectors,
+        "market_wide_buzz": (raw.get("market_wide_buzz") or [])[:12],
+        "_cache_age_hr": round(age_hr, 1),
+        "_freshness": "FRESH" if age_hr < 24 else ("STALE" if age_hr < 48 else "OLD"),
+    }
 
 
 def load_tactical_recommendations():
@@ -2645,6 +2944,19 @@ def run_bridge():
     except Exception as e:
         print(f"[WARN] Tactical ingest: {e}")
 
+    # 5a2. Industry Trend Board (V3.29.0 — REAL trailing industry perf, radar headline)
+    try:
+        it = load_industry_trend()
+        data["industry_trend"] = it
+        if it.get("status") == "success":
+            print(f"[OK] Industry Trend: {len(it.get('leaders', []))} leaders / "
+                  f"{len(it.get('laggards', []))} laggards "
+                  f"({it.get('_freshness')}, {it.get('_cache_age_hr')}h)")
+        else:
+            print(f"[INFO] No industry_trend: {it.get('status')}")
+    except Exception as e:
+        print(f"[WARN] Industry Trend ingest: {e}")
+
     # 5b. Retail Sector Pulse (V3.20.0 — nested under data['tactical'])
     try:
         rsp = load_retail_sector_pulse()
@@ -2659,6 +2971,30 @@ def run_bridge():
             print(f"[INFO] No retail_sector_pulse: {rsp.get('status')}")
     except Exception as e:
         print(f"[WARN] Retail Sector Pulse ingest: {e}")
+
+    # 5c. Market Mood (V3.27 — top-level page-primary) + slim retail trending
+    try:
+        mm = load_market_mood()
+        data["market_mood"] = mm
+        if mm.get("status") == "success":
+            m = mm.get("mood", {})
+            print(f"[OK] Market Mood: score={m.get('score')} ({m.get('label')}) "
+                  f"({mm.get('_freshness')}, {mm.get('_cache_age_hr')}h)")
+        else:
+            print(f"[INFO] No market_mood: {mm.get('status')}")
+    except Exception as e:
+        print(f"[WARN] Market Mood ingest: {e}")
+
+    try:
+        tr = load_trending_slim()
+        if not isinstance(data.get("tactical"), dict):
+            data["tactical"] = {}
+        data["tactical"]["trending"] = tr
+        if tr.get("status") == "success":
+            print(f"[OK] Retail Trending (slim): {len(tr.get('tickers', []))} tickers, "
+                  f"{len(tr.get('market_wide_buzz', []))} topics ({tr.get('_freshness')})")
+    except Exception as e:
+        print(f"[WARN] Retail Trending ingest: {e}")
 
     # 7. Theme overrides (V2.20.0 — paradigm-shift themes from theme-detector)
     try:

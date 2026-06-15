@@ -109,6 +109,39 @@ FW_KEYWORDS = (
     "新產能", "新對手", "市佔流失", "share loss",
 )
 
+# V3.45.4 — News lane PT-leakage keywords. PT 注入層已剝離絕對 level（fetch.py
+# pt_revision_momentum 只給方向+幅度%），News reasoning 若仍出現「PT level vs 現價」
+# 類措辭 = 隱性偏誤殘留（從 headlines / analyst_news 標題滲入）。warning 級，
+# 累積統計用 — 不改 score、不擋 export（與 V2.19 red_team_basis 同模式）。
+# 注意：'PT 上修/下修'（revision direction）是合法訊號，不在 leak 清單。
+PT_LEAKAGE_KEYWORDS = (
+    "pt 折價", "pt 溢價", "目標價折價", "目標價溢價", "折價空間", "溢價空間",
+    "vs 目標價", "目標價 vs", "距離目標價", "距目標價", "upside to target",
+    "target implies", "below consensus target", "above consensus target",
+    "pt vs price", "price vs pt", "離 pt", "低於目標價", "高於目標價",
+    "目標價隱含", "implied upside", "implied downside",
+)
+
+
+def classify_news_pt_leakage(news_lane: dict | None) -> dict:
+    """V3.45.4 — scan news_lane.reasoning_one_line + key_factors[] for PT
+    level-vs-price wording. Haystack 由 V3.45.4 起持久化（之前 reasoning 不落地，
+    classifier 無對象）。Returns {flag, hits, scanned}。舊 entry 缺欄 → scanned=False。"""
+    if not isinstance(news_lane, dict):
+        return {"flag": None, "hits": [], "scanned": False}
+    parts = []
+    r = news_lane.get("reasoning_one_line")
+    if isinstance(r, str):
+        parts.append(r)
+    kf = news_lane.get("key_factors")
+    if isinstance(kf, list):
+        parts.extend(str(x) for x in kf)
+    if not parts:
+        return {"flag": None, "hits": [], "scanned": False}
+    haystack = " ".join(parts).lower()
+    hits = [kw for kw in PT_LEAKAGE_KEYWORDS if kw in haystack]
+    return {"flag": bool(hits), "hits": hits, "scanned": True}
+
 
 def classify_red_team_basis(counter_thesis: str, kill_conditions: list) -> str:
     """V2.19 — classify Red Team attack basis (anti-spoofing).
@@ -430,8 +463,11 @@ def apply_to_trade(trade: dict) -> dict:
     # V2.20.0 — lane freshness penalty (separate metadata block)
     freshness = compute_lane_freshness_penalty(trade)
 
+    # V3.45.4 — News lane PT leakage post-filter (warning-grade, stats only)
+    pt_leak = classify_news_pt_leakage(trade.get("news_lane"))
+
     trade["det_shadow"] = {
-        "version":              "V2.20.0",
+        "version":              "V3.45.4",
         "signal_polarization":  polar.get("label"),
         "polarization_detail":  polar,
         "valuation_score_det":  val_det,
@@ -442,6 +478,8 @@ def apply_to_trade(trade: dict) -> dict:
         "red_team_basis":       rt_basis,
         "red_team_basis_detail": rt_basis_detail,   # V2.20.0 — hit counts for future tuning
         "lane_freshness":       freshness,
+        "news_pt_leakage":      pt_leak["flag"],     # V3.45.4 — None=舊 entry 無 haystack
+        "news_pt_leakage_detail": pt_leak,
     }
     return trade
 

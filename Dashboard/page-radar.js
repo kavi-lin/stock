@@ -68,6 +68,42 @@ const RADAR_TERMS = {
             hint: 'Theme cards sort by this metric by default; regime_factor < 1 auto-dampens it',
         },
     },
+    stock_movers: {
+        zh: { title: '個股動向 · momentum_screen (Weinstein stage)', desc: '來源是每日 momentum-monitor 掃描 (~529 檔 sp500/n100/sox/watchlist)。領漲=Stage 2 上升 + 高 RS / 創新高;走弱=Stage 4 下降 / Stage 3 頭部 / 負 RS。補產業趨勢榜看不到的個股強弱分化。', hint: 'S2 上升 / S1 打底 / S3 頭部 / S4 下降 = Weinstein 4 階段;warning dots:🔻Stage4 ✗MACD空頭 💀死亡交叉 🪫量縮' },
+        en: { title: 'Stock Movers · momentum_screen (Weinstein stage)', desc: 'From the daily momentum-monitor screen (~529 names). Leaders = Stage 2 uptrend + high RS / new highs; laggards = Stage 4 downtrend / Stage 3 top / negative RS. Surfaces per-stock dispersion the industry board misses.', hint: 'S2 up / S1 base / S3 top / S4 down = Weinstein stages; dots: 🔻stage4 ✗macd-bear 💀death-cross 🪫vol-dryup' },
+    },
+    weak_in_strong: {
+        zh: { title: '強勢產業中走弱 · 個股分化警示', desc: '個股本身走弱 (Stage4/Stage3/負 RS) 但所屬 sector 是最強前 3 名 (sector_rs_rank ≤ 3)。代表「產業在漲、這幾檔反而在跌」—— 產業順風但個股掉隊,是最該避開或減碼的名單。', hint: '用 row 內建 sector_rs_rank (1=最強 sector),不靠產業名對映' },
+        en: { title: 'Weak-in-Strong · per-stock divergence alert', desc: 'Stock itself is weak (Stage4/Stage3/negative RS) yet its sector is a top-3 strongest sector (sector_rs_rank ≤ 3). "Sector rising but these names falling" — laggards inside a tailwind, the names to avoid/trim.', hint: 'Uses row sector_rs_rank (1=strongest), no sector-name mapping needed' },
+    },
+    trail_breadth: {
+        zh: {
+            title: '真實上漲率 · 過去 5 日實際正報酬比例',
+            desc: '主題成分股中，過去 5 個交易日股價「實際」上漲的 % 比例（純價格、非預測）。取代舊的「短期看多率」（forward 預測結構性永遠 >50、看空主題也顯示偏多）。這個數字可以低於 50、可以讀作看空。',
+            stages: [
+                { key: 'tb_strong', range: [70,100], range_label: '≥ 70%', tag: '普遍走強', action: '順勢',   detail: '多數成分股近 5 日實際上漲，題材真實動能在' },
+                { key: 'tb_up',     range: [50,69],  range_label: '50-70%', tag: '偏多',     action: '挑強',   detail: '過半上漲，挑近期最強的領頭股' },
+                { key: 'tb_weak',   range: [35,49],  range_label: '35-50%', tag: '轉弱',     action: '保守',   detail: '多數成分股近 5 日下跌，題材實際在退潮' },
+                { key: 'tb_down',   range: [0,34],   range_label: '< 35%',  tag: '明顯走弱', action: '避開',   detail: '幾乎全跌（如光通類弱勢產業）— 真實看空，當週避開' },
+            ],
+            hint: 'Theme card 預設按此排序；與 mid_heat 互補：mid_heat=題材熱不熱、real up-rate=成分股近期真的漲還是跌',
+        },
+        en: {
+            title: 'Real Up-Rate · % constituents actually up over 5d',
+            desc: '% of theme constituents whose price ACTUALLY rose over the trailing 5 days (pure price, not a forecast). Replaces the old forward "bullish breadth" that was structurally >50 even for bearish themes. This can read below 50 / bearish.',
+            stages: [
+                { key: 'tb_strong', range: [70,100], range_label: '≥ 70%', tag: 'Broad up',  action: 'Ride',     detail: 'Most constituents really rose — genuine theme momentum' },
+                { key: 'tb_up',     range: [50,69],  range_label: '50-70%', tag: 'Up-tilt',   action: 'Pick lead', detail: 'Majority up — pick the strongest recent leader' },
+                { key: 'tb_weak',   range: [35,49],  range_label: '35-50%', tag: 'Weakening', action: 'Cautious',  detail: 'Most constituents fell over 5d — theme actually fading' },
+                { key: 'tb_down',   range: [0,34],   range_label: '< 35%',  tag: 'Clearly weak', action: 'Avoid',  detail: 'Nearly all down (e.g. weak optical-comms names) — real bearish, sit out' },
+            ],
+            hint: 'Default card sort; complements mid_heat (theme heat) — real up-rate = did constituents actually rise/fall recently',
+        },
+    },
+    trail_median: {
+        zh: { title: '中位漲幅 · 過去 5 日實際報酬中位數', desc: '主題成分股近 5 日「實際」報酬的中位數（%）。正=多數真的漲、負=多數真的跌。比平均不受單一暴衝股扭曲。', hint: '與 real up-rate 搭配看：上漲率高 + 中位漲幅正 = 真實全面走強' },
+        en: { title: 'Median 5d · median actual trailing return', desc: 'Median of the theme constituents\' ACTUAL trailing 5-day returns (%). Positive = most really rose; negative = most really fell. Robust to a single runaway name vs the mean.', hint: 'Read with real up-rate: high up-rate + positive median = genuinely broad strength' },
+    },
     avg_conv: {
         zh: {
             title: '平均信心 · theme 內模型確定度',
@@ -308,32 +344,6 @@ const RADAR_TERMS = {
             hint: 'Credit spreads often lead equity turns by 1-2 months; spikes historically in 2008 / COVID / 2022 risk-off periods',
         },
     },
-    retail_sector_pulse: {
-        zh: {
-            title: '散戶視角 Sector Pulse · V3.20.1',
-            desc: '11 sector 整合卡片。**Polarity-first 三 lane** composite:price 5d (anchor) + retail polarity (★ 主訊號,engagement-weighted span-masked lexicon match) + retail attention (放大器,sign 跟著 polarity)。News digest 變 context (顯卡片但**不入** composite)。從 Reddit / HN / Bluesky / Trends 抓 trending ticker → engagement-weighted bull/bear 詞庫匹配 → 推測散戶看完會偏多偏空。Daily 更新,lexicon v1.1 含 ~120 bull + ~140 bear term (含 WSB slang + PTT/Dcard 詞)。',
-            stages: [
-                { key: 'cp_strong_bull', range: [0.5, 1.0],   range_label: '> 0.5', tag: '強多', action: '順勢 / 看 sector ETF', detail: 'polarity + 5d 都同步看漲,sector 風險最低時段' },
-                { key: 'cp_mod_bull',    range: [0.2, 0.5],   range_label: '0.2-0.5', tag: '偏多', action: '選股', detail: '主訊號偏多但未三共振,挑 sector 內高 RS' },
-                { key: 'cp_neutral',     range: [-0.2, 0.2],  range_label: '-0.2~0.2', tag: '分歧', action: '觀望', detail: '訊號不一致 (polarity vs 5d 異號) 或 data thin' },
-                { key: 'cp_mod_bear',    range: [-0.5, -0.2], range_label: '-0.5~-0.2', tag: '偏空', action: '減碼 / 不新進', detail: '主訊號偏空,sector 內看空 mover 多' },
-                { key: 'cp_strong_bear', range: [-1.0, -0.5], range_label: '< -0.5', tag: '強空', action: '出場 / 反向 ETF', detail: 'polarity + 5d 同步看空,系統性壓力大' },
-            ],
-            hint: 'composite = 0.30×price_5d_norm + 0.50×retail_polarity + 0.20×retail_attention (sign 跟 polarity)。yaml: weights_version v1.1。hover 卡片看 signal_lanes + sample posts。',
-        },
-        en: {
-            title: 'Retail Sector Pulse · V3.20.1',
-            desc: '11-sector composite. **Polarity-first 3-lane**: price 5d (anchor) + retail polarity (★ primary signal — engagement-weighted span-masked lexicon match) + retail attention (amplifier; sign follows polarity). News digest is context only (displayed but NOT in composite). Pulls trending tickers from Reddit / HN / Bluesky / Trends; engagement-weighted bull/bear lexicon matching infers retail directional bias. Daily refresh; lexicon v1.1 has ~120 bull + ~140 bear terms incl. WSB / PTT slang.',
-            stages: [
-                { key: 'cp_strong_bull', range: [0.5, 1.0],   range_label: '> 0.5', tag: 'Strong Bull', action: 'Trend follow', detail: 'polarity + 5d both bullish — lowest-risk window' },
-                { key: 'cp_mod_bull',    range: [0.2, 0.5],   range_label: '0.2-0.5', tag: 'Mod Bull', action: 'Selective', detail: 'Lean bullish but not full alignment' },
-                { key: 'cp_neutral',     range: [-0.2, 0.2],  range_label: '-0.2~0.2', tag: 'Mixed', action: 'Wait', detail: 'Signals diverge (polarity vs 5d sign mismatch) or data thin' },
-                { key: 'cp_mod_bear',    range: [-0.5, -0.2], range_label: '-0.5~-0.2', tag: 'Mod Bear', action: 'Reduce', detail: 'Lean bearish; more bearish movers in sector' },
-                { key: 'cp_strong_bear', range: [-1.0, -0.5], range_label: '< -0.5', tag: 'Strong Bear', action: 'Exit / inverse', detail: 'polarity + 5d both bearish — systemic stress' },
-            ],
-            hint: 'composite = 0.30×price_5d_norm + 0.50×retail_polarity + 0.20×retail_attention (sign follows polarity). yaml: weights_version v1.1. Hover card for signal_lanes + sample posts.',
-        },
-    },
 };
 
 function getTermTip(key) {
@@ -447,11 +457,17 @@ let _currentSort = 'short';     // 'short' or 'mid'
 let _currentHorizon = '5d';     // '1d' | '5d' | '15d' — which horizon's breadth/conv to display
 let _expandedTheme = null;
 let _lastData = null;
+let _lastFullData = null;        // full bridge data (carries industry_trend)
+let _indHorizon = 'perf_1w';     // industry board window: perf_1w | perf_1m | perf_3m
 
 // ── Render entry ──────────────────────────────────────────────
 function render(data) {
     const tac = data?.tactical;
     _lastData = tac;
+    _lastFullData = data;
+    // Industry board + stock movers render independently of tactical recommendations.
+    renderIndustryBoard(data);
+    renderStockMovers(data);
     if (!tac || tac.status !== 'success' || !tac.themes?.length) {
         $('radar-no-data')?.classList.remove('hidden');
         $('radar-regime-banner')?.classList.add('hidden');
@@ -463,10 +479,410 @@ function render(data) {
     renderHeader(tac);
     renderRegimeBanner(tac);
     renderRegimeBadges(tac);
-    renderRetailSectorPulse(tac);
     renderThemeGrid(tac);
     if (_expandedTheme) renderExpanded(_expandedTheme, tac);
 
+    if (window.lucide?.createIcons) window.lucide.createIcons();
+}
+
+// ── Industry Trend Board (V3.29.0) — REAL trailing perf, 領漲↔領跌 ──
+// Reads data.industry_trend (theme-detector finviz industry perf). Direction-
+// symmetric and keyword-lock-free, so emergent leaders AND laggards surface.
+const _SECTOR_ABBR = {
+    // finviz sector names (industry trend board / sector_uptrend)
+    'Basic Materials': '原料', 'Communication Services': '通訊', 'Consumer Cyclical': '景氣消費',
+    'Consumer Defensive': '防禦消費', 'Energy': '能源', 'Financial': '金融', 'Healthcare': '醫療',
+    'Industrials': '工業', 'Real Estate': '地產', 'Technology': '科技', 'Utilities': '公用',
+    // GICS sector names (momentum_screen rows)
+    'Information Technology': '科技', 'Health Care': '醫療', 'Financials': '金融',
+    'Consumer Discretionary': '景氣消費', 'Consumer Staples': '防禦消費', 'Materials': '原料',
+};
+const _IND_H_LABEL = { perf_1w: '1週', perf_1m: '1月', perf_3m: '3月' };
+
+function _perfColor(v) {
+    if (v == null) return 'text-zinc-500';
+    if (v >= 10) return 'text-emerald-400';
+    if (v > 0)   return 'text-emerald-500';
+    if (v === 0) return 'text-zinc-400';
+    if (v > -10) return 'text-orange-400';
+    return 'text-red-400';
+}
+
+function _industryRow(r, maxAbs) {
+    const v = r[_indHorizon];
+    const pct = (v == null) ? '—' : `${v > 0 ? '+' : ''}${v.toFixed(1)}%`;
+    const w = (v == null || !maxAbs) ? 0 : Math.min(100, Math.abs(v) / maxAbs * 100);
+    const barColor = (v == null) ? 'transparent' : (v >= 0 ? 'rgba(52,211,153,0.30)' : 'rgba(248,113,113,0.30)');
+    const sec = _SECTOR_ABBR[r.sector] || r.sector || '';
+    return `<div class="ind-row ind-row-clickable relative flex items-center justify-between gap-2 px-2 py-1 rounded overflow-hidden"
+                 data-industry="${escapeHtml(r.name||'')}" style="cursor:pointer;background:linear-gradient(90deg, ${barColor} ${w}%, transparent ${w}%);"
+                 title="${escapeHtml(r.name||'')} — ${UI.currentLang==='zh'?'點擊列出成分股':'click to list constituents'}">
+        <span class="text-[11px] font-semibold truncate" style="color:var(--text-card-title)">${escapeHtml(r.name||'—')}</span>
+        <span class="flex items-center gap-2 shrink-0">
+            ${sec ? `<span class="text-[9px] text-zinc-500">${escapeHtml(sec)}</span>` : ''}
+            <span class="font-mono text-[11px] font-bold ${_perfColor(v)}">${pct}</span>
+        </span>
+    </div>`;
+}
+
+function renderIndustryBoard(data) {
+    const sec = $('radar-industry-board');
+    if (!sec) return;
+    const it = data?.industry_trend;
+    if (!it || it.status !== 'success' || (!it.leaders?.length && !it.laggards?.length)) {
+        sec.classList.add('hidden');
+        return;
+    }
+    sec.classList.remove('hidden');
+
+    // freshness badge
+    const fr = $('ind-freshness');
+    if (fr) {
+        const tag = it._freshness === 'FRESH' ? '🟢' : (it._freshness === 'STALE' ? '🟡' : '🔴');
+        fr.textContent = `${tag} ${it._cache_age_hr != null ? it._cache_age_hr + 'h' : ''} · ${_IND_H_LABEL[_indHorizon]}漲跌`;
+    }
+
+    // sector uptrend strip
+    const stripEl = $('ind-sector-strip');
+    if (stripEl) {
+        const su = it.sector_uptrend || {};
+        stripEl.innerHTML = Object.keys(su).map(name => {
+            const s = su[name] || {};
+            const ratio = s.ratio != null ? Math.round(s.ratio * 100) : null;
+            const up = s.trend === 'up';
+            const col = up ? 'text-emerald-400' : 'text-red-400';
+            const arrow = up ? '▲' : '▼';
+            return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] border" style="border-color:var(--border)" title="${escapeHtml(name)} uptrend ${ratio}% · ${s.trend||''}">
+                <span class="text-zinc-400">${escapeHtml(_SECTOR_ABBR[name] || name)}</span>
+                <span class="${col} font-mono">${arrow}${ratio != null ? ratio : '—'}</span>
+            </span>`;
+        }).join('');
+    }
+
+    // leaders sorted by active horizon desc; laggards asc (weakest first)
+    const sortByH = (arr, asc) => [...(arr || [])]
+        .filter(r => r[_indHorizon] != null)
+        .sort((a, b) => asc ? (a[_indHorizon] - b[_indHorizon]) : (b[_indHorizon] - a[_indHorizon]));
+    const leaders = sortByH(it.leaders, false).slice(0, 12);
+    const laggards = sortByH(it.laggards, true).slice(0, 12);
+    const maxAbs = Math.max(1, ...[...leaders, ...laggards].map(r => Math.abs(r[_indHorizon] || 0)));
+
+    const lead = $('ind-leaders');
+    const lag = $('ind-laggards');
+    if (lead) lead.innerHTML = leaders.length ? leaders.map(r => _industryRow(r, maxAbs)).join('')
+        : '<div class="text-[10px] text-zinc-500 px-2 py-1">無資料</div>';
+    if (lag) lag.innerHTML = laggards.length ? laggards.map(r => _industryRow(r, maxAbs)).join('')
+        : '<div class="text-[10px] text-zinc-500 px-2 py-1">無資料</div>';
+}
+
+// ── Industry → constituent stocks drill-down (V3.40.x) ──────────────────
+// industry_trend has no constituent lists, so we filter the heatmap universe
+// (S&P500 ∪ NDX100) by its per-ticker finviz `industry`. Large-caps only — a
+// "在 finviz 看全部" link covers the small/mid-cap tail the heatmap lacks.
+let _heatmapByIndustry = null;          // { industry: [{ticker,name,change_pct,sector}] }
+let _heatmapLoading = null;
+
+async function _ensureHeatmapIndustries() {
+    if (_heatmapByIndustry) return _heatmapByIndustry;
+    if (_heatmapLoading) return _heatmapLoading;
+    _heatmapLoading = (async () => {
+        const map = {};
+        try {
+            const r = await fetch('/api/heatmap/data');
+            const j = await r.json();
+            (j.tickers || []).forEach(t => {
+                const ind = t.industry;
+                if (!ind) return;
+                (map[ind] = map[ind] || []).push({
+                    ticker: t.ticker, name: t.name, change_pct: t.change_pct, sector: t.sector,
+                });
+            });
+        } catch (e) { /* leave map empty → note + finviz link still shown */ }
+        Object.values(map).forEach(arr => arr.sort((a, b) => (b.change_pct ?? -1e9) - (a.change_pct ?? -1e9)));
+        _heatmapByIndustry = map;
+        return map;
+    })();
+    return _heatmapLoading;
+}
+
+// finviz Market Cap → human $X.XB / $XXXM. Handles raw numbers and "12.7B" strings.
+function _fmtMktCap(v) {
+    if (v == null || v === '') return '';
+    const s = String(v).toUpperCase().trim();
+    if (/[BMKT]\s*$/.test(s)) return '$' + s;            // already human (12.7B)
+    const n = parseFloat(s.replace(/[^0-9.]/g, ''));
+    if (!isFinite(n)) return '';
+    if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
+    if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2) + 'B';
+    if (n >= 1e6)  return '$' + (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3)  return '$' + (n / 1e3).toFixed(0) + 'K';
+    return '$' + n;
+}
+
+// Chip for a constituent (reuses analyze-ticker-btn → deep analyze handler).
+function _indStockChip(ticker, sub, tip) {
+    return `<button class="analyze-ticker-btn flex items-center gap-1.5 text-[11px] px-2 py-1 rounded border"
+                  style="border-color:var(--border)" data-ticker="${escapeHtml(ticker)}" title="${escapeHtml(tip || '')}">
+        <span class="font-mono font-bold" style="color:var(--text-card-title)">${escapeHtml(ticker)}</span>
+        ${sub ? `<span class="font-mono text-zinc-500">${escapeHtml(sub)}</span>` : ''}
+    </button>`;
+}
+
+async function showIndustryStocks(name) {
+    const panel = $('ind-stock-panel');
+    if (!panel) return;
+    const zh = UI.currentLang === 'zh';
+    panel.classList.remove('hidden');
+    $('ind-stock-title').textContent = name;
+    $('ind-stock-count').textContent = '';
+    $('ind-stock-note').textContent = zh ? '抓取完整清單中…（finviz）' : 'Fetching full list… (finviz)';
+    $('ind-stock-chips').innerHTML = `<span class="text-[10px] text-zinc-500">${zh ? '載入中…' : 'loading…'}</span>`;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Primary: full finviz industry membership (incl. small/mid caps).
+    try {
+        const r = await fetch(`/api/industry/${encodeURIComponent(name)}`);
+        const j = await r.json();
+        if (r.ok && Array.isArray(j.tickers) && j.tickers.length) {
+            $('ind-stock-count').textContent = `${j.count}`;
+            $('ind-stock-note').textContent = zh
+                ? `完整 finviz 產業清單（含小中型）· 來源 finviz${j.cached ? '（快取）' : ''}`
+                : `Full finviz industry list (incl. small/mid caps)${j.cached ? ' (cached)' : ''}`;
+            $('ind-stock-chips').innerHTML = j.tickers
+                .map(m => _indStockChip(m.ticker, _fmtMktCap(m.market_cap), `${m.company || ''} · ${_fmtMktCap(m.market_cap)} — ${zh ? '深度分析' : 'deep analyze'}`))
+                .join('');
+            return;
+        }
+    } catch (e) { /* fall through to heatmap */ }
+
+    // Fallback: local large-caps from the heatmap universe.
+    const map = await _ensureHeatmapIndustries();
+    const members = map[name] || [];
+    $('ind-stock-count').textContent = `${members.length}`;
+    $('ind-stock-note').textContent = zh
+        ? 'finviz 完整清單抓取失敗，改顯示本地大型股（S&P500 / NDX100）。'
+        : 'Full finviz fetch failed — showing local large-caps (S&P500 / NDX100).';
+    $('ind-stock-chips').innerHTML = members.length
+        ? members.map(m => {
+            const pct = m.change_pct != null ? `${m.change_pct >= 0 ? '+' : ''}${m.change_pct.toFixed(1)}%` : '';
+            return _indStockChip(m.ticker, pct, `${m.name || ''} — ${zh ? '深度分析' : 'deep analyze'}`);
+        }).join('')
+        : `<span class="text-[10px] text-zinc-500">${zh ? '無本地成分股，且 finviz 抓取失敗，請稍後再試。' : 'No local members and finviz fetch failed — try again later.'}</span>`;
+}
+
+// ── Stock Movers (V3.30.0) — 個股動向 領漲↔走弱 + 弱中強 ──
+// Reads data.momentum_screen.rows[] (daily momentum-monitor screen, ~529 names,
+// Weinstein stage + RS + warnings). Surfaces per-stock dispersion the
+// industry-level trend board can't: which specific names lead/lag, and weak
+// stocks sitting inside a strong sector (the 光通 dispersion case).
+function _smStageChip(stage) {
+    const map = {
+        'Stage 2 uptrend':   ['S2', '#34d399', '上升'],
+        'Stage 1 basing':    ['S1', '#a1a1aa', '打底'],
+        'Stage 3 top':       ['S3', '#fb923c', '頭部'],
+        'Stage 4 downtrend': ['S4', '#f87171', '下降'],
+    };
+    const m = map[stage] || ['—', '#71717a', ''];
+    return `<span class="text-[8px] font-bold px-1 rounded" style="background:${m[1]}22;color:${m[1]}" title="${escapeHtml(stage||'')}">${m[0]}</span>`;
+}
+
+// warning → short dot label
+const _SM_WARN_DOT = {
+    stage4_downtrend: '🔻', macd_bearish_cross: '✗', fresh_death_cross_20_50: '💀',
+    fresh_death_cross_50_200: '💀', volume_dry_up: '🪫',
+};
+function _smWarnDots(warnings) {
+    const ws = (warnings || []).filter(w => _SM_WARN_DOT[w]);
+    if (!ws.length) return '';
+    const uniq = [...new Set(ws.map(w => _SM_WARN_DOT[w]))].slice(0, 3).join('');
+    return `<span class="text-[9px]" title="${escapeHtml(ws.join(', '))}">${uniq}</span>`;
+}
+
+function _smRow(r, kind) {
+    // primary metric: laggards show 5d return + distance-from-high; leaders show RS + 5d
+    const r5 = r.return_5d_pct;
+    const nhp = r.nhp_pct;
+    const rs = r.rs_3m_pct;
+    const sec = _SECTOR_ABBR[r.sector] || (r.sector ? r.sector.slice(0, 4) : '');
+    let metricHtml;
+    if (kind === 'laggard') {
+        const r5s = r5 != null ? `${r5 > 0 ? '+' : ''}${r5.toFixed(1)}%` : '—';
+        const nhps = nhp != null ? `距高 ${nhp.toFixed(0)}%` : '';
+        metricHtml = `<span class="font-mono text-[11px] font-bold ${_perfColor(r5)}">${r5s}</span>
+                      ${nhps ? `<span class="text-[9px] text-zinc-500 ml-1">${nhps}</span>` : ''}`;
+    } else {
+        const rss = rs != null ? `RS ${rs > 0 ? '+' : ''}${rs.toFixed(0)}` : '';
+        const r5s = r5 != null ? `${r5 > 0 ? '+' : ''}${r5.toFixed(1)}%` : '—';
+        metricHtml = `<span class="font-mono text-[11px] font-bold ${_perfColor(r5)}">${r5s}</span>
+                      ${rss ? `<span class="text-[9px] text-zinc-500 ml-1">${rss}</span>` : ''}`;
+    }
+    return `<div class="ind-row sm-clickable flex items-center justify-between gap-2 px-2 py-1 rounded" data-sm-ticker="${escapeHtml(r.ticker || '')}" style="cursor:pointer">
+        <span class="flex items-center gap-1.5 min-w-0">
+            ${_smStageChip(r.stage)}
+            <span class="text-[11px] font-bold truncate" style="color:var(--text-card-title)">${escapeHtml(r.ticker || '—')}</span>
+            ${sec ? `<span class="text-[9px] text-zinc-500">${escapeHtml(sec)}</span>` : ''}
+            ${_smWarnDots(r.warnings)}
+        </span>
+        <span class="shrink-0">${metricHtml}</span>
+    </div>`;
+}
+
+function renderStockMovers(data) {
+    const sec = $('radar-stock-movers');
+    if (!sec) return;
+    const ms = data?.momentum_screen;
+    const rows = (ms && ms.status === 'success') ? (ms.rows || []) : [];
+    if (!rows.length) { sec.classList.add('hidden'); return; }
+    sec.classList.remove('hidden');
+
+    // freshness
+    const fr = $('sm-freshness');
+    if (fr) fr.textContent = `🟢 ${ms.snap_date || ''}${ms.age_label ? ' · ' + ms.age_label : ''} · ${rows.length} 檔`;
+
+    // "Weak" = structural downtrend/top OR composite WEAK/BEARISH. Deliberately
+    // NOT "rs_3m_pct<0" alone — in a strong-SPY tape most names underperform,
+    // which would tag ~80% of the universe and dilute the signal.
+    const isWeak = (r) =>
+        r.stage === 'Stage 4 downtrend' || r.stage === 'Stage 3 top' ||
+        r.label === 'WEAK' || r.label === 'BEARISH';
+    const isLeader = (r) =>
+        r.stage === 'Stage 2 uptrend' &&
+        ((r.rs_rating != null && r.rs_rating >= 70) || r.is_new_high || (r.return_5d_pct != null && r.return_5d_pct > 0));
+
+    // weakness ordering: lowest composite score first, then most-negative RS
+    const weakRank = (r) => [r.score ?? 999, r.rs_3m_pct ?? 999];
+    const cmpAsc = (a, b) => { const x = weakRank(a), y = weakRank(b); return (x[0] - y[0]) || (x[1] - y[1]); };
+    const cmpDesc = (a, b) => (b.score ?? -999) - (a.score ?? -999) || (b.rs_3m_pct ?? -999) - (a.rs_3m_pct ?? -999);
+
+    const leaders = rows.filter(isLeader).sort(cmpDesc).slice(0, 12);
+    const laggards = rows.filter(isWeak).sort(cmpAsc).slice(0, 12);
+
+    // 弱中強: weak stock whose sector is a top-3 strongest sector (sector_rs_rank<=3)
+    const weakInStrong = rows.filter(r => isWeak(r) && r.sector_rs_rank != null && r.sector_rs_rank <= 3)
+        .sort(cmpAsc).slice(0, 8);
+
+    const lead = $('sm-leaders');
+    const lag = $('sm-laggards');
+    if (lead) lead.innerHTML = leaders.length ? leaders.map(r => _smRow(r, 'leader')).join('')
+        : '<div class="text-[10px] text-zinc-500 px-2 py-1">無</div>';
+    if (lag) lag.innerHTML = laggards.length ? laggards.map(r => _smRow(r, 'laggard')).join('')
+        : '<div class="text-[10px] text-zinc-500 px-2 py-1">無</div>';
+
+    const wisWrap = $('sm-weak-in-strong');
+    const wisList = $('sm-weak-in-strong-list');
+    if (wisWrap && wisList) {
+        if (weakInStrong.length) {
+            wisWrap.classList.remove('hidden');
+            wisList.innerHTML = weakInStrong.map(r => {
+                const r5 = r.return_5d_pct;
+                const r5s = r5 != null ? `${r5 > 0 ? '+' : ''}${r5.toFixed(1)}%` : '';
+                const secAb = _SECTOR_ABBR[r.sector] || (r.sector ? r.sector.slice(0, 4) : '');
+                return `<span class="sm-clickable inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border" data-sm-ticker="${escapeHtml(r.ticker)}" style="border-color:rgba(248,113,113,0.3);cursor:pointer"
+                             title="${escapeHtml(r.ticker)} · ${escapeHtml(r.stage||'')} · sector ${escapeHtml(r.sector||'')} (RS rank #${r.sector_rs_rank})">
+                    ${_smStageChip(r.stage)}
+                    <span class="font-bold" style="color:var(--text-card-title)">${escapeHtml(r.ticker)}</span>
+                    <span class="text-zinc-500">${escapeHtml(secAb)}</span>
+                    <span class="font-mono ${_perfColor(r5)}">${r5s}</span>
+                </span>`;
+            }).join('');
+        } else {
+            wisWrap.classList.add('hidden');
+        }
+    }
+}
+
+// 30-day momentum-score sparkline — tiny inline SVG (no Chart.js)
+let _smDetailTicker = null;
+function _miniSparkline(points, w = 140, h = 26) {
+    const vals = (points || []).map(p => p && p.score).filter(v => typeof v === 'number');
+    if (vals.length < 2) return '<span class="text-[10px] text-zinc-500">無歷史</span>';
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const span = (max - min) || 1;
+    const n = vals.length;
+    const pts = vals.map((v, i) => {
+        const x = (i / (n - 1)) * (w - 2) + 1;
+        const y = h - 1 - ((v - min) / span) * (h - 2);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const up = vals[n - 1] >= vals[0];
+    const col = up ? '#34d399' : '#f87171';
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="display:inline-block;vertical-align:middle">
+        <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>`;
+}
+
+// Inline 動能明細 — fills #sm-detail from existing momentum_screen row + history (no fetch).
+function renderStockDetail(ticker) {
+    const box = $('sm-detail');
+    if (!box) return;
+    // toggle off if re-clicking the same ticker
+    if (_smDetailTicker === ticker && !box.classList.contains('hidden')) {
+        box.classList.add('hidden'); _smDetailTicker = null; return;
+    }
+    const ms = _lastFullData?.momentum_screen;
+    const r = (ms?.rows || []).find(x => x.ticker === ticker);
+    if (!r) { box.classList.add('hidden'); _smDetailTicker = null; return; }
+    _smDetailTicker = ticker;
+
+    const hist = ms?.history_by_ticker?.[ticker] || [];
+    const fmtPct = (v, withSign = true) => v == null ? '—' : `${withSign && v > 0 ? '+' : ''}${v.toFixed(1)}%`;
+    const r1 = r.return_1d_pct, r5 = r.return_5d_pct;
+    const sec = _SECTOR_ABBR[r.sector] || r.sector || '';
+    const label = r.label || '';
+    const labelCol = (label === 'BEARISH') ? '#f87171' : (label === 'WEAK') ? '#fb923c'
+        : (label === 'STRONGLY_BULLISH' || label === 'BULLISH') ? '#34d399' : '#a1a1aa';
+
+    // MA stack (price vs MA20/50/200)
+    const maCell = (lbl, pct) => {
+        const c = _perfColor(pct);
+        return `<span class="text-[10px]"><span class="text-zinc-500">${lbl}</span> <span class="font-mono ${c}">${fmtPct(pct)}</span></span>`;
+    };
+    const macd = r.macd_bearish_cross ? '<span class="text-red-400">空頭</span>'
+        : r.macd_bullish_cross ? '<span class="text-emerald-400">多頭</span>'
+        : (r.macd_hist != null ? `<span class="font-mono">${r.macd_hist.toFixed(2)}</span>` : '—');
+    const rsiCol = r.rsi_zone === 'overbought' ? 'text-orange-400' : r.rsi_zone === 'oversold' ? 'text-sky-400' : '';
+    const nhpTxt = r.nhp_pct != null ? `${r.nhp_pct.toFixed(0)}%${r.weeks_since_high != null ? ` (${r.weeks_since_high}wk)` : ''}` : '—';
+
+    const chips = (arr, cls) => (arr || []).slice(0, 6).map(s =>
+        `<span class="text-[9px] px-1 py-0.5 rounded ${cls}">${escapeHtml(s)}</span>`).join('');
+
+    box.innerHTML = `
+        <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div class="flex items-center gap-2 min-w-0">
+                ${_smStageChip(r.stage)}
+                <span class="font-black text-sm" style="color:var(--text-card-title)">${escapeHtml(ticker)}</span>
+                ${sec ? `<span class="text-[10px] text-zinc-500">${escapeHtml(sec)}</span>` : ''}
+                <span class="text-[11px] font-mono">${r.price != null ? '$' + r.price.toFixed(2) : ''}</span>
+                <span class="text-[10px] font-mono ${_perfColor(r1)}">1d ${fmtPct(r1)}</span>
+                <span class="text-[10px] font-mono ${_perfColor(r5)}">5d ${fmtPct(r5)}</span>
+                <span class="text-[10px]">分數 <span class="font-mono font-bold">${r.score ?? '—'}</span> <span style="color:${labelCol}">${escapeHtml(label)}</span></span>
+            </div>
+            <button id="sm-detail-close" class="text-[10px] text-zinc-500 hover:text-red-400">✕ 關閉</button>
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+            <span class="text-[10px] text-zinc-500">30日分數</span>
+            ${_miniSparkline(hist)}
+            <span class="text-[9px] text-zinc-600">${hist.length ? hist.length + ' 點' : ''}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
+            <span class="text-[10px] text-zinc-500">均線:</span>
+            ${maCell('vsMA20', r.above_ma20_pct)} ${maCell('vsMA50', r.above_ma50_pct)} ${maCell('vsMA200', r.above_ma200_pct)}
+        </div>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 text-[10px]">
+            <span><span class="text-zinc-500">RSI</span> <span class="font-mono ${rsiCol}">${r.rsi_14 != null ? r.rsi_14.toFixed(0) : '—'}${r.rsi_zone ? ' ' + r.rsi_zone : ''}</span></span>
+            <span><span class="text-zinc-500">MACD</span> ${macd}</span>
+            <span><span class="text-zinc-500">RS</span> <span class="font-mono ${_perfColor(r.rs_3m_pct)}">3m ${fmtPct(r.rs_3m_pct)}</span> / <span class="font-mono ${_perfColor(r.rs_6m_pct)}">6m ${fmtPct(r.rs_6m_pct)}</span></span>
+            <span><span class="text-zinc-500">距52週高</span> <span class="font-mono ${_perfColor(r.nhp_pct)}">${nhpTxt}</span></span>
+        </div>
+        ${(r.signals?.length || r.warnings?.length) ? `<div class="flex flex-wrap items-center gap-1 mb-2">
+            ${chips(r.signals, 'bg-emerald-500/10 text-emerald-400')}
+            ${chips(r.warnings, 'bg-red-500/10 text-red-400')}
+        </div>` : ''}
+        <div class="flex items-center gap-2">
+            <button id="sm-detail-kline" class="text-[10px] px-2 py-1 rounded border" style="border-color:var(--border)" data-sm-kline="${escapeHtml(ticker)}">📈 看即時 K 線</button>
+            <button class="analyze-ticker-btn text-[10px] px-2 py-1 rounded border" style="border-color:var(--border)" data-ticker="${escapeHtml(ticker)}">🔬 完整分析</button>
+        </div>`;
+    box.classList.remove('hidden');
     if (window.lucide?.createIcons) window.lucide.createIcons();
 }
 
@@ -589,210 +1005,6 @@ const RSP_TEXT_BY_DIR = {
     strong_bear:   '#b91c1c',
 };
 
-function _rspLabelText(label) {
-    const lang = UI.currentLang === 'en' ? 'en' : 'zh';
-    return RSP_LABEL_TEXT[label]?.[lang] || label || '—';
-}
-
-function renderRetailSectorPulse(tac) {
-    const section = $('radar-retail-sector-pulse');
-    const grid = $('rsp-sector-grid');
-    if (!section || !grid) return;
-
-    const rsp = tac?.retail_sector_pulse;
-    if (!rsp || rsp.status !== 'success' || !Array.isArray(rsp.sectors)) {
-        section.classList.add('hidden');
-        return;
-    }
-    section.classList.remove('hidden');
-
-    const updated = $('rsp-last-updated');
-    if (updated) {
-        const lexv = rsp.trending_meta?.lexicon_version || '';
-        updated.textContent = rsp._freshness
-            ? `${rsp._freshness} · ${rsp._cache_age_hr}h${lexv ? ' · lex ' + lexv : ''}`
-            : '—';
-    }
-
-    // V3.20.1: market-wide buzz strip above sector grid
-    renderMarketWideBuzz(rsp.market_wide_buzz || []);
-
-    grid.innerHTML = '';
-    rsp.sectors.forEach(s => {
-        grid.appendChild(buildRspCard(s));
-    });
-}
-
-// V3.20.1: market-wide buzz strip (topics without sector mapping)
-function renderMarketWideBuzz(topics) {
-    let strip = $('rsp-market-wide-strip');
-    if (!strip) return;   // strip element not yet in radar.html → skip silently
-    if (!topics || topics.length === 0) {
-        strip.classList.add('hidden');
-        strip.innerHTML = '';
-        return;
-    }
-    strip.classList.remove('hidden');
-    const pills = topics.map(t => {
-        const pol = (t.polarity_score ?? 0);
-        const polSign = pol > 0 ? '+' : '';
-        const polColor = pol > 0.20 ? '#15803d' :
-                         pol < -0.20 ? '#b91c1c' :
-                         '#78716c';
-        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono"
-                      style="background: var(--bg-card); border: 1px solid var(--border);"
-                      title="posts=${t.post_count} · engagement=${t.engagement_score}">
-                  <span style="color: var(--text-main);">${t.topic}</span>
-                  <span style="color: ${polColor};">${polSign}${pol.toFixed(2)}</span>
-                </span>`;
-    }).join('');
-    strip.innerHTML = `
-        <span class="text-[10px] uppercase tracking-wider mr-2" style="color: var(--text-muted);">市場熱議</span>
-        ${pills}`;
-}
-
-function buildRspCard(s) {
-    const card = document.createElement('div');
-    const dir = s.composite_direction || 'neutral_mixed';
-    const allOk = s?.data_health?.all_ok !== false;
-    const insufficient = !allOk && (s.composite_score == null);
-
-    const accent = insufficient
-        ? RSP_ACCENT_COLOR.insufficient
-        : (RSP_ACCENT_COLOR[dir] || RSP_ACCENT_COLOR.neutral_mixed);
-
-    card.className = `glass-card p-3 space-y-2 text-xs ${insufficient ? 'opacity-60' : ''}`;
-    card.style.borderLeft = `4px solid ${accent}`;
-    card.style.borderTopLeftRadius = '0.25rem';
-    card.style.borderBottomLeftRadius = '0.25rem';
-
-    const dirText = insufficient ? _rspLabelText('insufficient_data') : _rspLabelText(dir);
-    const compositeStr = (s.composite_score != null)
-        ? (s.composite_score > 0 ? '+' : '') + s.composite_score.toFixed(2)
-        : '—';
-    const compositeTextColor = insufficient ? 'var(--text-muted)' : (RSP_TEXT_BY_DIR[dir] || 'var(--text-main)');
-
-    // ── Header ──
-    const head = document.createElement('div');
-    head.className = 'flex items-center justify-between gap-2';
-    head.innerHTML = `
-        <div class="flex items-baseline gap-1.5 min-w-0">
-            <span class="font-bold truncate" style="color: var(--text-main);">${s.sector || '—'}</span>
-            <span class="text-[10px] font-mono" style="color: var(--text-muted);">${s.proxy_etf || ''}</span>
-        </div>
-        <span class="text-[10px] font-bold whitespace-nowrap" style="color: ${compositeTextColor};">${dirText} ${compositeStr}</span>`;
-    card.appendChild(head);
-
-    // ── V3.20.1 metrics: 3 lanes (Price / Retail Polarity / News context) ──
-    const total_keys = s.key_tickers?.length || 0;
-    const predRow = _rspMetricRow(
-        '📈',
-        s.predicted_5d_median_pct != null
-            ? `5d ${(s.predicted_5d_median_pct > 0 ? '+' : '')}${s.predicted_5d_median_pct.toFixed(1)}% (${Math.round((s.predicted_5d_bullish_breadth_pct || 0) * total_keys / 100)}/${total_keys})`
-            : '—',
-        _rspLabelText(s.predicted_5d_label || 'neutral')
-    );
-    // Retail polarity row — ★ V3.20.1 primary signal
-    // V3.20.2: append n=X mention warning when sample is thin
-    const tops = s.retail_top_tickers || [];
-    const topStr = tops.length
-        ? tops.slice(0, 2).map(t => t.ticker).join(', ')
-        : '—';
-    const polStr = (s.retail_polarity_score != null)
-        ? `${s.retail_polarity_score > 0 ? '+' : ''}${s.retail_polarity_score.toFixed(2)}`
-        : '—';
-    // Total mention count across top retail tickers
-    const totalMentions = tops.reduce((sum, t) => sum + (t.mention_count || 0), 0);
-    const lowSampleWarn = totalMentions > 0 && totalMentions < 5;
-    const retailValue = s.retail_polarity_score != null
-        ? `${polStr} (${topStr})${lowSampleWarn ? ` · n=${totalMentions}` : ''}`
-        : '—';
-    const retailRow = _rspMetricRow(
-        '💬',
-        retailValue,
-        _rspLabelText(s.retail_volume_label || 'calm')
-    );
-    // dim row text slightly when sample is thin (visual cue)
-    if (lowSampleWarn) {
-        const valSpan = retailRow.querySelector('.font-mono');
-        if (valSpan) valSpan.style.opacity = '0.75';
-    }
-    const newsRow = _rspMetricRow(
-        '📰',
-        s.news_count_72h ? `${s.news_count_72h} 篇 ${(s.news_sentiment_score ?? 0).toFixed(1)}` : '—',
-        _rspLabelText(s.news_label || 'neutral')
-    );
-    [predRow, retailRow, newsRow].forEach(r => card.appendChild(r));
-
-    // ── V3.20.1 polarity bar (visual −1 to +1) ──
-    if (s.retail_polarity_score != null) {
-        card.appendChild(_rspPolarityBar(s.retail_polarity_score));
-    }
-
-    // ── Framing line ──
-    if (s.framing_zh) {
-        const fr = document.createElement('div');
-        fr.className = 'text-[10px] leading-relaxed pt-2';
-        fr.style.color = 'var(--text-muted)';
-        fr.style.borderTop = '1px solid var(--border)';
-        fr.textContent = s.framing_zh;
-        card.appendChild(fr);
-    }
-
-    // ── Top tickers footer (predict.py top movers) ──
-    if (Array.isArray(s.key_tickers) && s.key_tickers.length) {
-        const foot = document.createElement('div');
-        foot.className = 'text-[10px] font-mono truncate';
-        foot.style.color = 'var(--text-muted)';
-        foot.textContent = s.key_tickers.map(k =>
-            `${k.ticker} ${k.target_central_pct > 0 ? '+' : ''}${k.target_central_pct.toFixed(1)}%`
-        ).join(' · ');
-        card.appendChild(foot);
-    }
-
-    // ── V3.20.1 hover tooltip: signal_lanes breakdown + sample posts ──
-    const lanes = s.signal_lanes || {};
-    const lanePartsTxt = [
-        lanes.price_5d_norm != null ? `price=${lanes.price_5d_norm}` : 'price=—',
-        lanes.retail_polarity != null ? `polarity=${lanes.retail_polarity}` : 'polarity=—',
-        lanes.retail_attention != null ? `attention=${lanes.retail_attention}` : 'attention=—',
-    ].join(' · ');
-    const samples = (s.sample_posts || []).slice(0, 3).map(p =>
-        `[${p.ticker || ''}] ${(p.headline || '').slice(0, 80)}`
-    ).join('\n');
-    card.title = `Lanes: ${lanePartsTxt}\n\nSample posts:\n${samples || '(none)'}`;
-
-    return card;
-}
-
-function _rspMetricRow(icon, value, badge) {
-    const row = document.createElement('div');
-    row.className = 'flex items-center justify-between text-[11px]';
-    row.innerHTML = `
-        <span class="flex items-center gap-1.5 min-w-0">
-            <span class="shrink-0">${icon}</span>
-            <span class="font-mono truncate" style="color: var(--text-main);">${value}</span>
-        </span>
-        <span class="text-[10px] whitespace-nowrap" style="color: var(--text-muted);">${badge}</span>`;
-    return row;
-}
-
-// V3.20.1: polarity bar — visual -1 to +1 indicator
-function _rspPolarityBar(polarity) {
-    const wrap = document.createElement('div');
-    wrap.className = 'relative h-1.5 rounded overflow-hidden mt-1';
-    wrap.style.background = 'var(--border)';
-    // Position fill from center (0) outward toward ±1
-    const pct = Math.min(Math.abs(polarity), 1.0) * 50;   // each side = 50% of bar
-    const color = polarity > 0.20 ? '#15803d' :
-                  polarity < -0.20 ? '#b91c1c' :
-                  '#a8a29e';
-    const left = polarity >= 0 ? 50 : (50 - pct);
-    wrap.innerHTML = `
-        <div class="absolute inset-y-0" style="left: 50%; width: 1px; background: var(--text-muted); opacity: 0.5;"></div>
-        <div class="absolute inset-y-0" style="left: ${left}%; width: ${pct}%; background: ${color};"></div>`;
-    return wrap;
-}
 
 // ── Theme grid (all themes) ───────────────────────────────────
 function renderThemeGrid(tac) {
@@ -804,12 +1016,14 @@ function renderThemeGrid(tac) {
     // Per-theme horizon-specific breadth & conviction (uses _currentHorizon)
     const getH = (theme) => (theme.short_term?.by_horizon || {})[_currentHorizon] || {};
 
-    // Sort
+    // Sort. SHORT now ranks by REAL trailing 5d breadth (direction-honest),
+    // not the forward bullish_breadth_pct that was structurally >50.
+    const trBreadth = (theme) => theme.short_term?.trailing?.trailing_breadth_5d_pct;
     themes.sort((a, b) => {
         if (_currentSort === 'mid') {
             return (b.mid_heat || 0) - (a.mid_heat || 0);
         }
-        return ((getH(b).bullish_breadth_pct ?? -1) - (getH(a).bullish_breadth_pct ?? -1));
+        return ((trBreadth(b) ?? -1) - (trBreadth(a) ?? -1));
     });
 
     const themesLabel = (UI.currentLang === 'zh') ? '個主題' : 'themes';
@@ -819,11 +1033,15 @@ function renderThemeGrid(tac) {
     themes.forEach(theme => {
         const st = theme.short_term || {};
         const horizonView = getH(theme);
-        const bp = horizonView.bullish_breadth_pct;
         const cv = horizonView.avg_conviction;
-        const nValid = horizonView.n_valid_predictions ?? 0;
-        const nBullish = horizonView.n_bullish ?? 0;
         const nTotal = st.n_total_constituents ?? 0;
+        // REAL trailing trend (replaces forward bullish_breadth as the headline metric)
+        const tr = st.trailing || {};
+        const tb = tr.trailing_breadth_5d_pct;          // % constituents actually up over 5d
+        const tMed = tr.median_trailing_5d_pct;          // median real 5d return
+        const nUp = tr.n_up_5d ?? 0;
+        const nTr = tr.n_valid_trailing ?? 0;
+        const dir = (theme.direction || '').toLowerCase();
         const mid = theme.mid_heat || 0;
         const isExpanded = (_expandedTheme === theme.name);
 
@@ -848,12 +1066,22 @@ function renderThemeGrid(tac) {
         if (theme.confidence) tipParts.push(`${t().confidence || 'conf'}: ${tConfLabel(theme.confidence)}`);
         card.title = tipParts.join(' · ');
 
-        const bpStr = bp != null ? `${bp.toFixed(0)}%` : '—';
-        const bpColor = bp == null ? 'text-zinc-500' :
-                        bp >= 80 ? 'text-emerald-400' :
-                        bp >= 50 ? 'text-yellow-400' :
-                        bp >= 30 ? 'text-orange-400' :
+        // Trailing breadth — symmetric color (genuinely-weak themes read red)
+        const tbStr = tb != null ? `${tb.toFixed(0)}%` : '—';
+        const tbColor = tb == null ? 'text-zinc-500' :
+                        tb >= 70 ? 'text-emerald-400' :
+                        tb >= 50 ? 'text-emerald-500' :
+                        tb >= 35 ? 'text-orange-400' :
                         'text-red-400';
+        const medStr = tMed != null ? `${tMed > 0 ? '+' : ''}${tMed.toFixed(1)}%` : '—';
+        const medColor = _perfColor(tMed);
+
+        // Direction badge from theme-detector (was hidden — bearish themes used to look bullish)
+        const dirBadge = dir === 'bullish'
+            ? '<span class="text-[8px] font-bold px-1 rounded" style="background:rgba(52,211,153,0.15);color:#34d399">看多</span>'
+            : dir === 'bearish'
+            ? '<span class="text-[8px] font-bold px-1 rounded" style="background:rgba(248,113,113,0.15);color:#f87171">看空</span>'
+            : '';
 
         const cvStr = cv != null ? cv.toFixed(2) : '—';
         const displayName = tThemeName(theme.name);
@@ -867,7 +1095,10 @@ function renderThemeGrid(tac) {
         const shortRowCls = 'metric-row';
 
         card.innerHTML = `
-            <div class="font-bold text-[12px] leading-tight mb-1 truncate">${escapeHtml(displayName)}</div>
+            <div class="flex items-center gap-1 mb-1">
+                <span class="font-bold text-[12px] leading-tight truncate flex-1">${escapeHtml(displayName)}</span>
+                ${dirBadge}
+            </div>
 
             <div class="flex items-center gap-1 mb-1 ${midRowCls}" data-radar-tip="mid_heat">
                 <span class="text-[8px] font-bold uppercase text-zinc-500 w-8">${escapeHtml(t().card_mid || 'MID')}${midSortInd}</span>
@@ -875,14 +1106,14 @@ function renderThemeGrid(tac) {
                 <span class="text-[10px] font-mono w-7 text-right">${mid.toFixed(0)}</span>
             </div>
 
-            <div class="flex items-center justify-between text-[10px] mt-2 ${shortRowCls}" data-radar-tip="short_bull">
-                <span class="text-zinc-500">${escapeHtml(t().card_short_bull || 'SHORT bull')} <span class="text-zinc-600">[${_currentHorizon}]</span>${shortSortInd}</span>
-                <span class="${bpColor} font-mono font-bold">${bpStr}${nValid > 0 ? `<span class="text-[9px] text-zinc-600 ml-1">${nBullish}/${nValid}</span>` : ''}</span>
+            <div class="flex items-center justify-between text-[10px] mt-2 ${shortRowCls}" data-radar-tip="trail_breadth">
+                <span class="text-zinc-500">${UI.currentLang === 'zh' ? '真實上漲率' : 'real up-rate'} <span class="text-zinc-600">[5d]</span>${shortSortInd}</span>
+                <span class="${tbColor} font-mono font-bold">${tbStr}${nTr > 0 ? `<span class="text-[9px] text-zinc-600 ml-1">${nUp}/${nTr}</span>` : ''}</span>
             </div>
 
-            <div class="flex items-center justify-between text-[10px] metric-row" data-radar-tip="avg_conv">
-                <span class="text-zinc-500">${escapeHtml(t().card_conv || 'conv')} <span class="text-zinc-600">[${_currentHorizon}]</span></span>
-                <span class="font-mono">${cvStr}</span>
+            <div class="flex items-center justify-between text-[10px] metric-row" data-radar-tip="trail_median">
+                <span class="text-zinc-500">${UI.currentLang === 'zh' ? '中位漲幅' : 'median 5d'} <span class="text-zinc-600">[5d]</span></span>
+                <span class="font-mono ${medColor}">${medStr}</span>
             </div>
 
             <div class="flex items-center justify-between text-[9px] text-zinc-600 mt-0.5">
@@ -1270,6 +1501,16 @@ document.addEventListener('DOMContentLoaded', () => {
     $('horizon-5d').addEventListener('click',  () => setHorizon('5d'));
     $('horizon-15d').addEventListener('click', () => setHorizon('15d'));
 
+    // Industry board horizon toggle (1週/1月/3月)
+    $('ind-horizon-toggle')?.addEventListener('click', e => {
+        const btn = e.target.closest('[data-ind-h]');
+        if (!btn) return;
+        _indHorizon = btn.dataset.indH;
+        $('ind-horizon-toggle').querySelectorAll('[data-ind-h]').forEach(b =>
+            b.classList.toggle('active', b === btn));
+        if (_lastFullData) renderIndustryBoard(_lastFullData);
+    });
+
     // Tooltip hover handler
     document.addEventListener('mouseover', e => {
         const el = e.target.closest('[data-radar-tip]');
@@ -1290,6 +1531,38 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         const ticker = btn.dataset.ticker;
         if (ticker) analyzeTicker(ticker);
+    });
+
+    // Industry trend row → list constituent stocks
+    document.addEventListener('click', e => {
+        if (e.target.closest('#ind-stock-close')) {
+            $('ind-stock-panel')?.classList.add('hidden'); return;
+        }
+        const row = e.target.closest('.ind-row-clickable[data-industry]');
+        if (!row) return;
+        const name = row.dataset.industry;
+        if (name) showIndustryStocks(name);
+    });
+
+    // Stock-movers: row/chip click → inline 動能明細; detail buttons (V3.31.0)
+    document.addEventListener('click', e => {
+        const closeBtn = e.target.closest('#sm-detail-close');
+        if (closeBtn) {
+            $('sm-detail')?.classList.add('hidden'); _smDetailTicker = null; return;
+        }
+        const klineBtn = e.target.closest('[data-sm-kline]');
+        if (klineBtn) {
+            const tk = klineBtn.dataset.smKline;
+            const r = (_lastFullData?.momentum_screen?.rows || []).find(x => x.ticker === tk) || {};
+            selectRadarKline({ ticker: tk, name: r.sector || '', price: r.price, change_pct: r.return_1d_pct });
+            document.getElementById('radar-kline-panel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        const row = e.target.closest('[data-sm-ticker]');
+        if (row && !e.target.closest('button')) {
+            const tk = row.dataset.smTicker;
+            if (tk) renderStockDetail(tk);
+        }
     });
     $('radar-expanded-close').addEventListener('click', () => {
         _expandedTheme = null;
@@ -1828,239 +2101,3 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('radar-kline-close')?.addEventListener('click', closeRadarKline);
 });
 
-/* ════════════════════════════════════════════════════════════════════════
- * Narrative Pulse Detector (NPD) — V1.0
- * Self-contained block. Reads /api/narrative-pulse/data + on-demand single.
- * ════════════════════════════════════════════════════════════════════════ */
-(function () {
-    const NPD_PULSE_TIMEOUT_MS = 90 * 1000;   // 90s for one-off ad-hoc fetch
-
-    function stageColor(stage) {
-        return { 1: '#10b981', 2: '#34d399', 3: '#facc15', 4: '#fb923c', 5: '#ef4444' }[stage] || '#71717a';
-    }
-    function stageEmoji(stage) {
-        return { 1: '🟢', 2: '🟡', 3: '🟡', 4: '🟠', 5: '🔴' }[stage] || '⚪';
-    }
-
-    // recommended_action enum → 中文 (source: stage_weights.yaml)
-    const ACTION_ZH = {
-        early_entry_window: '早期進場窗口',
-        active_accumulation: '積極布局',
-        hold_or_follow: '持有 / 跟進',
-        reduce_or_no_new_entry: '減倉 / 不新進',
-        exit_or_short_candidate: '出場 / 做空候選',
-        insufficient_data: '訊號模糊',
-    };
-    function actionZh(a) { return ACTION_ZH[a] || a || '—'; }
-
-    // next_warning_condition 中文化 (regex + 已知字串)
-    function warnZh(s) {
-        if (!s || s === '—') return '—';
-        if (/supply enough inputs to clear min_confidence/i.test(s)) {
-            const m = s.match(/min_confidence=([\d.]+)/);
-            const th = m ? m[1] : '0.6';
-            return `任一 stage conf 需 ≥ ${th} 才會掛標 — 目前全部不過閘`;
-        }
-        if (/^reason:/i.test(s)) return `OHLCV 抓取失敗 (${s.replace(/^reason:\s*/i, '')})`;
-        // 例: "distribution day count >= 4 / 25d"
-        return s.replace(/distribution day count\s*>=\s*(\d+)\s*\/\s*(\d+)d/i,
-                         '分配日 ≥ $1 / $2d');
-    }
-
-    // 5-bar stage confidence breakdown (used for insufficient_data)
-    function stageScoresHTML(allScores, threshold) {
-        const order = [
-            ['brewing', 1, '蘊釀'],
-            ['ignition', 2, '啟動'],
-            ['acceleration', 3, '加速'],
-            ['euphoria', 4, '狂熱'],
-            ['distribution', 5, '分配'],
-        ];
-        const th = threshold ?? 0.6;
-        const rows = order.map(([k, n, label]) => {
-            const s = (allScores || {})[k] || {};
-            const conf = Number(s.confidence || 0);
-            const pct = Math.min(100, Math.round(conf * 100));
-            const barColor = conf >= th ? stageColor(n) : '#52525b';
-            const labelColor = conf >= th ? stageColor(n) : '#71717a';
-            return `<div class="flex items-center gap-2 text-[10px] font-mono">
-                <span class="w-16 truncate" style="color:${labelColor}">S${n} ${label}</span>
-                <div class="flex-1 h-1.5 bg-zinc-800 rounded overflow-hidden">
-                    <div style="width:${pct}%;background:${barColor};height:100%"></div>
-                </div>
-                <span class="w-10 text-right" style="color:${labelColor}">${conf.toFixed(2)}</span>
-            </div>`;
-        }).join('');
-        return `<div class="space-y-1 pt-1">
-            <div class="text-[10px] text-zinc-500">各 stage 累積 conf (閘值 ${th.toFixed(2)})</div>
-            ${rows}
-        </div>`;
-    }
-
-    async function fetchNPDData() {
-        try {
-            const r = await fetch('/api/narrative-pulse/data');
-            if (!r.ok) return null;
-            return await r.json();
-        } catch (e) { return null; }
-    }
-
-    async function fetchNPDTicker(ticker) {
-        const r = await fetch(`/api/narrative-pulse/ticker/${encodeURIComponent(ticker)}`, {
-            signal: AbortSignal.timeout ? AbortSignal.timeout(NPD_PULSE_TIMEOUT_MS) : undefined,
-        });
-        if (!r.ok) throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
-        return await r.json();
-    }
-
-    function rowHTML(ticker, entry) {
-        const stage = entry.stage;
-        const c = stageColor(stage);
-        const er = entry.expected_return_pct;
-        const erColor = er >= 0 ? '#10b981' : '#ef4444';
-        const erTxt = `${er >= 0 ? '+' : ''}${er?.toFixed?.(1) ?? '?'}%`;
-        return `<a href="#" data-ticker="${ticker}" class="npd-row flex items-center justify-between gap-2 px-2 py-1 rounded hover:bg-zinc-800/50 text-[11px] no-underline transition-all">
-            <span class="font-mono font-bold tracking-wider" style="color:${c}">${ticker}</span>
-            <span class="text-zinc-400 text-[10px] truncate flex-1">S${stage} ${entry.stage_label_zh || '?'}</span>
-            <span class="font-mono font-bold" style="color:${erColor}">${erTxt}</span>
-        </a>`;
-    }
-
-    function renderRankings(data) {
-        if (!data || !data.ranking || !data.tickers) {
-            ['npd-list-risk', 'npd-list-opportunity', 'npd-list-distribution'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = '<div class="text-[10px] text-zinc-500 px-2 py-1">無資料 · run daily_update Step 9</div>';
-            });
-            return;
-        }
-        const r = data.ranking;
-        const fill = (id, list) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (!list || list.length === 0) {
-                el.innerHTML = '<div class="text-[10px] text-zinc-500 px-2 py-1">—</div>';
-                return;
-            }
-            el.innerHTML = list.map(t => rowHTML(t, data.tickers[t] || {})).join('');
-        };
-        fill('npd-list-risk', r.top_risk);
-        fill('npd-list-opportunity', r.top_opportunity);
-        fill('npd-list-distribution', r.watch_distribution_imminent);
-
-        // Bind click handlers
-        document.querySelectorAll('.npd-row').forEach(a => {
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                const t = a.getAttribute('data-ticker');
-                renderDetailFromCache(t, data.tickers[t]);
-            });
-        });
-
-        // Update timestamp
-        const ts = document.getElementById('npd-last-updated');
-        if (ts && data.last_updated) {
-            const dt = new Date(data.last_updated);
-            ts.textContent = `last: ${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-        }
-    }
-
-    function renderDetailFromCache(ticker, entry) {
-        const panel = document.getElementById('npd-detail-panel');
-        if (!panel) return;
-        if (!entry || entry.error) {
-            panel.classList.remove('hidden');
-            panel.innerHTML = `<div class="text-xs text-rose-400">${ticker}: ${entry?.error || '無資料'} — 試試「探測」按鈕重抓</div>`;
-            return;
-        }
-        const stage = entry.stage;
-        const c = stageColor(stage);
-        const er = entry.expected_return_pct;
-        const erColor = er >= 0 ? '#10b981' : '#ef4444';
-        const sc = entry.scenarios || [];
-        const comp = entry.components || {};
-        const quote = entry.quote || {};
-        const isInsufficient = stage === null || stage === undefined;
-        const scRows = sc.map(s => {
-            const pColor = s.target_pct >= 0 ? '#10b981' : '#ef4444';
-            return `<tr>
-                <td class="px-2 py-1">${s.label}</td>
-                <td class="px-2 py-1 text-right text-zinc-400">${(s.prob*100).toFixed(0)}%</td>
-                <td class="px-2 py-1 text-right font-mono" style="color:${pColor}">${s.target_pct >= 0 ? '+' : ''}${s.target_pct.toFixed(1)}%</td>
-                <td class="px-2 py-1 text-right font-mono">$${s.target_price ?? '—'}</td>
-            </tr>`;
-        }).join('');
-        // Insufficient_data: 換成 stage conf 進度條;有 scenarios 才秀情境表
-        const scenariosBlock = isInsufficient
-            ? stageScoresHTML(entry.all_stage_scores, 0.6)
-            : `<table class="w-full text-[11px] border-collapse">
-                <thead><tr class="text-zinc-500 text-[10px] uppercase tracking-wider">
-                    <th class="px-2 py-1 text-left">情境</th>
-                    <th class="px-2 py-1 text-right">機率</th>
-                    <th class="px-2 py-1 text-right">% 變動</th>
-                    <th class="px-2 py-1 text-right">目標價</th>
-                </tr></thead>
-                <tbody>${scRows}</tbody>
-            </table>`;
-        panel.innerHTML = `
-            <div class="flex items-baseline justify-between flex-wrap gap-2">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-lg font-black tracking-tight font-mono" style="color:${c}">${ticker}</span>
-                    <span class="text-sm font-bold" style="color:${c}">${stageEmoji(stage)} ${isInsufficient ? '' : 'Stage ' + stage + ' '}${entry.stage_label_zh}</span>
-                    <span class="text-[10px] text-zinc-500 font-mono">conf=${entry.stage_confidence?.toFixed?.(2) ?? '?'}</span>
-                </div>
-                <div class="flex items-baseline gap-3 text-[11px] font-mono">
-                    <span>$${quote.price ?? '?'}</span>
-                    <span style="color:${erColor}">E[R] ${er >= 0 ? '+' : ''}${er?.toFixed?.(2) ?? '?'}%</span>
-                    <span class="text-zinc-500">→ ${actionZh(entry.recommended_action)}</span>
-                </div>
-            </div>
-            <div class="text-[10px] text-zinc-500">下個警示: ${warnZh(entry.next_warning_condition)}</div>
-            ${scenariosBlock}
-            <div class="text-[10px] text-zinc-500 font-mono pt-1 border-t border-zinc-800">
-                RSI ${comp.rsi_14_latest?.toFixed?.(0) ?? '?'} (peak ${comp.rsi_peak_recent?.toFixed?.(0) ?? '?'},
-                streak ${comp.rsi_overbought_days ?? '?'}d) ·
-                P/SMA200 ${comp.price_to_sma200_ratio?.toFixed?.(2) ?? '?'}x ·
-                vol ${comp.volume_multiplier?.toFixed?.(1) ?? '?'}x baseline ·
-                impulse ${comp.gap_up_density_4w ?? '?'} bars/20d ·
-                DD ${comp.distribution_days_25d ?? '?'}/25d ·
-                PT raise ${comp.pt_raise_30d ?? '?'}/30d
-            </div>`;
-        panel.classList.remove('hidden');
-    }
-
-    async function probeTicker() {
-        const inp = document.getElementById('npd-ticker-input');
-        const status = document.getElementById('npd-probe-status');
-        const ticker = (inp?.value || '').trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, '').slice(0, 8);
-        if (!ticker) { if (status) status.textContent = '請輸入 ticker'; return; }
-        if (status) status.textContent = `探測 ${ticker}…`;
-        try {
-            const data = await fetchNPDTicker(ticker);
-            if (status) status.textContent = `✓ ${ticker}`;
-            renderDetailFromCache(ticker, data);
-            // Optionally refresh rankings to surface this ticker if it now qualifies
-            const fullData = await fetchNPDData();
-            if (fullData) renderRankings(fullData);
-        } catch (e) {
-            if (status) status.textContent = `✗ ${e.message.slice(0, 30)}`;
-        }
-    }
-
-    async function initNPD() {
-        const data = await fetchNPDData();
-        renderRankings(data);
-        document.getElementById('npd-probe-btn')?.addEventListener('click', probeTicker);
-        document.getElementById('npd-ticker-input')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') probeTicker();
-        });
-        if (window.lucide?.createIcons) window.lucide.createIcons();
-    }
-
-    // Init on DOM ready (additive — does not interfere with main page-radar render)
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initNPD);
-    } else {
-        initNPD();
-    }
-})();

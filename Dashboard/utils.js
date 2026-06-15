@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V3.20.3';
+  const VERSION = 'V4.12.1';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -16,21 +16,27 @@
     { id: 'sector',    href: 'sector.html',    icon: 'pie-chart',        i18n: 'nav_sector',    zh: '產業掃描',   group: 'market' },
     { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞',   group: 'market' },
     { id: 'break-news',href: 'break-news.html',icon: 'radio',            i18n: 'nav_break_news',zh: '突發辯論',   group: 'market' },
+    { id: 'mood',      href: 'mood.html',      icon: 'gauge',            i18n: 'nav_mood',      zh: '市場氛圍',   group: 'market' },
 
     { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股',   group: 'stock' },
     { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達',   group: 'stock' },
     { id: 'earnings',  href: 'earnings.html',  icon: 'bar-chart-3',      i18n: 'nav_earnings',  zh: '財報分析',   group: 'stock' },
 
     { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心',   group: 'portfolio' },
+    { id: 'reports',   href: 'reports.html',   icon: 'file-text',        i18n: 'nav_reports',   zh: '投資報告',   group: 'portfolio' },
     { id: 'calendar',  href: 'calendar.html',  icon: 'calendar-days',    i18n: 'nav_calendar',  zh: '決策日曆',   group: 'portfolio' },
     { id: 'graph',     href: 'graph.html',     icon: 'network',          i18n: 'nav_graph',     zh: '知識圖譜',   group: 'portfolio' },
     { id: 'supply-chain', href: 'supply-chain.html', icon: 'git-fork',    i18n: 'nav_supply_chain', zh: '供應鏈', group: 'portfolio' },
+
+    { id: 'office',    href: 'office.html',    icon: 'building-2',        i18n: 'nav_office',    zh: 'AI 辦公室',  group: 'ops' },
+    { id: 'ops',       href: 'ops.html',       icon: 'terminal',          i18n: 'nav_ops',       zh: 'Script 工具箱', group: 'ops' },
   ];
 
   const NAV_GROUPS = [
     { key: 'market',    zh: '市場',  en: 'MARKET',    icon: 'globe-2' },
     { key: 'stock',     zh: '個股',  en: 'STOCK',     icon: 'target' },
     { key: 'portfolio', zh: '組合',  en: 'PORTFOLIO', icon: 'briefcase' },
+    { key: 'ops',       zh: '工具',  en: 'OPS',       icon: 'wrench' },
   ];
 
   window.UI = {
@@ -532,9 +538,16 @@
           if (!s.enabled)               { tag = zh ? '停用' : 'off';   cls = 'off'; }
           else if (s.unavailable_reason === 'cooldown') { tag = zh ? '冷卻中' : 'cooldown'; cls = 'cool'; }
           else if (s.unavailable_reason === 'budget')   { tag = zh ? '額度滿' : 'maxed'; cls = 'cool'; }
+          const t = s.tokens || {};
+          const totTok = (t.input || 0) + (t.output || 0) + (t.cache_read || 0) + (t.cache_write || 0);
+          const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
+          const tokLine = totTok > 0
+            ? `<div class="sidebar-llm-tok">${fmtK(totTok)} tok · in ${fmtK(t.input || 0)} / out ${fmtK(t.output || 0)} / cache ${fmtK(t.cache_read || 0)}${t.cost_usd ? ' · $' + Number(t.cost_usd).toFixed(2) : ''}</div>`
+            : '';
           return `<div class="sidebar-llm-row sidebar-llm-${cls}">`
             + `<span>${m}</span>`
-            + `<span>${s.calls || 0}/${s.daily_max || 0}${tag ? ' · ' + tag : ''}</span></div>`;
+            + `<span>${s.calls || 0}/${s.daily_max || 0}${tag ? ' · ' + tag : ''}</span></div>`
+            + tokLine;
         }).join('');
       };
 

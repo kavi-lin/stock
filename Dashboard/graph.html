@@ -28,20 +28,7 @@
             content: '';
             position: absolute; inset: 0; pointer-events: none;
             background: radial-gradient(ellipse at center, transparent 35%, #050609 92%);
-            transition: opacity 480ms ease, background 480ms ease;
             opacity: 0.85;
-        }
-
-        /* ── Thermographic mode: only intensifies vignette + adds aurora ── */
-        body.ng-thermal .ng-canvas::after {
-            background:
-                radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, #050609 95%),
-                radial-gradient(ellipse 1200px 800px at 30% 50%, rgba(120,30,20,0.10), transparent 75%);
-            opacity: 1;
-        }
-        body.ng-thermal .ng-side {
-            border-color: rgba(251,191,36,0.22);
-            box-shadow: 0 0 0 1px rgba(251,191,36,0.05), 0 18px 60px -20px rgba(0,0,0,0.55);
         }
 
         /* Side panels stay readable on dark canvas */
@@ -59,30 +46,6 @@
             height: 100%;
         }
         #graph-host canvas { display: block; }
-
-        /* Subtle pulsing aurora drawn behind canvas only during thermal mode.
-           Pure CSS — separate stacking element so canvas pointer events untouched. */
-        .ng-canvas::before {
-            content: '';
-            position: absolute; inset: 0; pointer-events: none;
-            opacity: 0;
-            background: radial-gradient(60% 50% at 50% 50%,
-                rgba(255,210,140,0.12) 0%,
-                rgba(220,90,40,0.06) 35%,
-                transparent 70%);
-            transition: opacity 700ms ease;
-            z-index: 0;
-            mix-blend-mode: screen;
-        }
-        body.ng-thermal .ng-canvas::before {
-            opacity: 1;
-            animation: ngAurora 4.2s ease-in-out infinite alternate;
-        }
-        @keyframes ngAurora {
-            0%   { transform: scale(1.0)   translate(0, 0);    opacity: 0.85; }
-            50%  { transform: scale(1.06)  translate(2%, -1%); opacity: 1.0;  }
-            100% { transform: scale(0.97)  translate(-1%, 1%); opacity: 0.78; }
-        }
 
         .ng-side {
             backdrop-filter: blur(10px);
@@ -113,12 +76,32 @@
         .ng-chip[data-type='narrative']  { color: #34d399; border-color: rgba(52,211,153,0.30); }
         .ng-chip[data-type='thesis']     { color: #f472b6; border-color: rgba(244,114,182,0.30); }
 
-        .ng-filter-row label {
-            display: flex; align-items: center; justify-content: space-between;
-            font-size: 11px; padding: 4px 0;
-            color: var(--text-card-title);
+        /* V4.3.0 — clickable edge-type toggle chips */
+        .ng-edge-chip {
+            font-size: 10px; font-weight: 700;
+            padding: 2px 8px; margin: 0 4px 4px 0;
+            border-radius: 999px;
+            border: 1px solid var(--chip);
+            color: var(--chip);
+            background: transparent;
+            cursor: pointer;
+            transition: opacity 0.15s;
         }
-        .ng-filter-row input[type='checkbox'] { accent-color: #3b82f6; }
+        .ng-edge-chip.off { opacity: 0.25; border-style: dashed; }
+        .ng-depth-btn {
+            flex: 1; font-size: 10px; font-weight: 900;
+            padding: 4px 0; border-radius: 6px;
+            border: 1px solid rgba(161,161,170,0.3);
+            color: #a1a1aa; cursor: pointer;
+        }
+        .ng-depth-btn.active { border-color: #3b82f6; color: #60a5fa; background: rgba(59,130,246,0.12); }
+        .ng-theme-chip {
+            background: rgba(251,191,36,0.12); color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.30);
+            border-radius: 4px; padding: 1px 6px;
+            font-size: 10px; font-weight: 600; cursor: pointer;
+        }
+        .ng-theme-chip:hover { background: rgba(251,191,36,0.25); }
 
         .ng-neighbor-row {
             display: flex; align-items: center; justify-content: space-between;
@@ -171,27 +154,29 @@
             <div id="ng-side-panel" class="absolute top-14 left-4 w-64 max-h-[calc(100vh-8rem)] overflow-y-auto p-3 rounded-xl ng-side z-10 space-y-3 transition-transform">
                 <div>
                     <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500">搜尋節點</label>
-                    <input id="ng-search" class="ng-search-input mt-1" placeholder="ticker / theme / catalyst …" autocomplete="off" />
+                    <input id="ng-search" class="ng-search-input mt-1" placeholder="ticker / 主題…" autocomplete="off" list="ng-search-list" />
+                    <datalist id="ng-search-list"></datalist>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-1">節點類型</label>
-                    <div id="ng-filter-types" class="ng-filter-row"></div>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-1">關係類型（點擊開關）</label>
+                    <div id="ng-edge-chips"></div>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-1">時間衰減倍率</label>
-                    <input id="ng-decay" type="range" min="0.5" max="3" step="0.1" value="1" class="w-full" />
+                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-1">結構邊權重門檻</label>
+                    <input id="ng-weight" type="range" min="0" max="2.5" step="0.1" value="0" class="w-full" />
                     <div class="text-[10px] font-mono text-zinc-500 flex justify-between">
-                        <span>×0.5</span><span id="ng-decay-readout">×1.0</span><span>×3.0</span>
+                        <span>全部</span><span id="ng-weight-readout">≥ 0.0</span><span>僅強連結</span>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1 flex items-center justify-between">
-                        <span>顯示 provisional</span>
-                        <input id="ng-show-provisional" type="checkbox" />
-                    </label>
+                    <label class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-1">聚焦深度</label>
+                    <div class="flex gap-2">
+                        <button class="ng-depth-btn active" data-focus-depth="1">1 hop</button>
+                        <button class="ng-depth-btn" data-focus-depth="2">2 hop</button>
+                    </div>
                 </div>
 
                 <div class="flex gap-2">
@@ -200,10 +185,14 @@
                 </div>
 
                 <div class="text-[10px] text-zinc-500 leading-relaxed">
-                    點擊 ticker → BFS 3 跳路徑追蹤<br/>
+                    🟡 主題 hub・🔵 個股<br/>
+                    點節點 → 聚焦該星系（ESC / 點背景返回）<br/>
                     背景拖曳 = 平移 / 滾輪 = 縮放
                 </div>
             </div>
+
+            <!-- V4.3.0 — focus-mode breadcrumb -->
+            <div id="ng-breadcrumb" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-lg ng-side text-[11px] flex items-center gap-1.5"></div>
 
             <!-- right detail panel (populated on click) -->
             <div id="ng-detail" class="hidden absolute top-14 right-4 w-80 max-h-[calc(100vh-8rem)] overflow-y-auto p-3 rounded-xl ng-side z-10 space-y-3"></div>

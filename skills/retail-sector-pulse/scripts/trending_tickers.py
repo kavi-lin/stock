@@ -292,6 +292,8 @@ def process_post(post: dict, lex: dict) -> dict:
     eng = compute_engagement(post)
     return {
         "headline": headline,
+        # carried through so topic matching can see post body, not just headline
+        "summary": summary[:500],
         "url": post.get("url"),
         "source": post.get("source"),
         "platform": (post.get("_source_meta") or {}).get("platform"),
@@ -529,7 +531,9 @@ def aggregate_market_wide(processed: list[dict], lex: dict,
         broad = (no_ticker_trigger and nt == 0) or nt > too_many
         if not broad:
             continue
-        text_l = (p["headline"] + "\n" + (p.get("source") or "")).lower()
+        # match on headline + post body — `source` is the FEED NAME (was a bug:
+        # it both spuriously matched and missed body-only topic mentions)
+        text_l = (p["headline"] + "\n" + (p.get("summary") or "")).lower()
         matched_topics = set()
         for topic, term in flat:
             if term in text_l:

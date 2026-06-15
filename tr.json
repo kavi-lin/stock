@@ -1,0 +1,15 @@
+{
+  "ticker": "PANW",
+  "generated_at": "2026-05-30T03:52:15.710248+00:00",
+  "lookback": "1y",
+  "sample_days": 250,
+  "excess_kurtosis": 1.76,
+  "skewness": -0.32,
+  "var_95": 4.06,
+  "max_drawdown": 36.01,
+  "ann_vol": 37.52,
+  "downside_deviation": 27.94,
+  "tail_risk_score": 53.1,
+  "fragility_label": "MODERATE",
+  "position_multiplier": 0.75
+}

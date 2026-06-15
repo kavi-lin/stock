@@ -18,7 +18,7 @@ Ticker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claud
 ## GLOBAL RULES (PM cheatsheet)
 
 ### MUST
-1. **Phase order**: 0 → 1 → 2 → 2.5 → 2.8 → 3 → 4 → 4.5 → 5。不跳過。
+1. **Phase order**: 0 → 1 → 2 → 2.4 → 2.5 → 2.8 → 3 → 4 → 4.5 → 5。不跳過。（2.4 = price framework engine，V3.45.3）
 2. **Skill execution (NO SIMULATION)**: 凡標 **MUST run** 的 skill 指令必須實際執行 Bash 呼叫並解析 JSON 輸出，**禁止** LLM 估算 / 模擬數值。受規則約束的 skill：
    - `market-sentiment-analyzer`, `us-stock-analysis`, `market-news-analyst`, `technical-analyst`, `short-contrarian-analyst`, `portfolio-risk-manager`, `tail-risk-analyzer`, `fred-macro`
    - 失敗時必須在 final report 標 `skill_execution_failed: true` + stderr，禁止靜默用估算值補上。
@@ -162,7 +162,26 @@ rc ≠ 0 必須修正後重跑。
 
 PM (inline)。Phase 1 結束前 PM **MUST** 取得 4 個 bundles 供 Phase 2 共享。
 
-### Bundle 摘要（詳細 schema 與 injection rules → `protocol_appendix_fmp_bundles.md`）
+### FAST PATH（預設走這條 — 1 call 取代 ~13 個取數 turn）
+
+```bash
+python3 investment/scripts/phase1_factpack.py <TICKER> --out /tmp/<TICKER>_factpack.json
+```
+
+讀回 `/tmp/<TICKER>_factpack.json`（~2-3k token，deterministic 0-LLM）一次拿齊：
+- `phase0`（L1 sector_intel / L2 invest cache 抽核心欄位）+ `phase0_source` + `phase0_validator_rc`
+- `bundles.ticker_data_bundle.scoring`（15 scalar，已剝 `_audit`）
+- `bundles.earnings_analyst_bundle` / `peer_bundle` / `fmp_supp_bundle`（appendix shape，fail-soft）
+
+**判讀規則**：
+- `phase0_source == "STALE_NEEDS_L3"` → 依 Phase 0 L3 重跑 skill chain（factpack 不跑重活），完成後再進 Phase 2。其餘值（`SECTOR_CACHE`/`INVEST_CACHE`）= phase0 FRESH，直接用。
+- `phase0_validator_rc != 0` → 修正後重跑（同 Validator gate）。
+- 任一 `bundles_loaded[*]` 非 ok → 該 lane 走原 fallback 規則（見下表 + appendix），**不**中止 protocol。
+- factpack 為**唯讀聚合**，不寫 history、不評分。若它失敗，回落手動逐 bundle（下方摘要 + appendix）。
+
+> ⚠️ 仍須遵守 Physical isolation：注入 lane 時只貼該 lane 對應欄位，禁貼整包 factpack 給單一 lane（會 cross-anchor）。
+
+### Bundle 摘要（詳細 schema 與 injection rules → `protocol_appendix_fmp_bundles.md`；factpack 失敗時的手動 fallback）
 
 | Bundle | Source | Cost | Lane 注入 |
 |---|---|---|---|
@@ -203,6 +222,18 @@ PM (inline)。Phase 1 結束前 PM **MUST** 取得 4 個 bundles 供 Phase 2 共
 ## PHASE 2 — 5-LANE PARALLEL SUBAGENT FAN-OUT
 
 PM 以**單一訊息**平行呼叫 5 個 Agent subagent（Fundamentals / Sentiment / News / Technical / Valuation Specialist），等 5 個結果回傳後進入 Phase 2 末段（Burry inline）與 Phase 2.5。
+
+### Model 分層（V4.0.0 — 成本治理）
+
+| Subagent | Agent tool `model` 參數 | 理由 |
+|---|---|---|
+| **Sentiment / News / Technical** | `"sonnet"` | rubric 明確的結構化抽取+評分；品質哨兵 = det_shadow agreement + lane score 分布（`shadow_report.py` 監測） |
+| Fundamentals / Valuation Specialist | 不指定（inherit session model） | 判斷較重，第二批降級候選 — 第一批 10 session 哨兵無異常後再議 |
+| Red Team (Phase 2.8) | 不指定（inherit） | 對抗性推理 = 核心價值，**永不降級** |
+| Sonnet MD Formatter (Phase 5) | `"sonnet"`（既有） | validator gate 兜底 |
+
+> 第一批降級後**前 10 個 session** 盯 `shadow_report.py` lane 哨兵段：任一降級 lane 的 score
+> 分布 vs 歷史明顯偏移、或 agreement 異常率升 → 該 lane 改回 inherit 並記 SESSION_NOTES。
 
 ### 共通 Subagent Prompt 模板
 
@@ -334,12 +365,21 @@ OUTPUT (strict JSON):
 - 結構化欄位（**禁止** web search 重抓 analyst rating / target 數字）：
   - `analyst_actions[]` (FMP `/grades-historical` 過去 30d)
   - `analyst_consensus`: Strong Buy +1.5 / Buy +1 / Hold 0 / Sell -1 / Strong Sell -2
-  - `price_target` consensus vs current_price: > 20% 折價 → +1；> 20% 溢價 → -1
+  - `pt_revision_momentum` (V3.45.4 — 取代舊「PT vs price 折溢價 ±1」項): 30d consensus PT
+    **變動方向**。`direction=UP` 且 `delta_1m > +3%` → bullish sell-side flow（同 rating change 性質，+0.5~+1）；
+    `DOWN` 且 `delta_1m < -3%` → bearish（-0.5~-1）；`FLAT/UNKNOWN` → 0
   - `analyst_news[]` (FMP `/grades-news`)
   - `headlines[]` (finviz + yfinance + Finnhub deduped)
   - `sec_filings_recent[]` + `sec_8k_filings[]` (30d)
 - **優先檢查 Phase 0 `_market_signals.top_catalysts[]`** 避免重抓
 - `FMP_SUPP_BUNDLE.ma_events.events[]` 非空 → 強訊號（target 通常 +1）
+
+> **V3.45.4 — PT 注入層剝離（去三重計分）**：PT consensus **level** 已在 Valuation anchor
+> (0.20) + MHP 60d `pt_60d` (0.35) 計分兩次；News lane 再比 level vs price 是第三次（cross-lane
+> anchoring，共識牛市系統性放大多頭）。`fetch.py` V3.45.4 起 payload **不含任何絕對 PT level**
+> （`price_target` block 已移除，只給 `pt_revision_momentum` 方向+幅度%）。**禁止**：在 News lane
+> prompt 額外注入 PT level、或 reasoning 中以「PT 折價/溢價 X%」「目標價 vs 現價」計分 —
+> 後驗由 `apply_det_shadow.py` `news_pt_leakage` keyword classifier 抓（warning 級，累積統計）。
 
 ##### V2.13.0 News lane 額外輸出（必填，不影響 score 公式）
 
@@ -368,7 +408,13 @@ OUTPUT (strict JSON):
    - 至少 1 筆；若該股新聞純個股無溢出，明示 `[{"asset":"none","direction":"NEUTRAL","mechanism":"news 純個股財務，無跨資產傳導"}]`
    - 例：`[{"asset":"treasury_10y", "direction":"BEARISH", "mechanism":"AI capex 預期 → cyclical 通膨壓力 → 殖利率上行"}]`
 
-> 以上 4 個欄位**必填**；缺資料寫 `INSUFFICIENT_DATA`（陣列用 `[]` + 註記）。
+5. **`reasoning_one_line`** + **`key_factors[]`**（V3.45.4 必填，持久化進 export）：
+   - `reasoning_one_line`: 1 句 — News score 的核心依據
+   - `key_factors[]`: 2-4 條短語 — 計分主因（與 Final Visualization Table 的 Key Factors 同源）
+   - **用途**：history.json 持久化後供 `apply_det_shadow.py` `news_pt_leakage` classifier 掃描
+     （V2.19 red_team_basis 同模式 — 沒有落地文字，後驗防線就沒有 haystack）
+
+> 以上 5 個欄位**必填**；缺資料寫 `INSUFFICIENT_DATA`（陣列用 `[]` + 註記）。
 
 #### Technical Subagent
 - **Rubric**: 20/50/200MA 結構、RSI(14)、MACD histogram、volume vs 20D avg、support/resistance。Stage 2 上升結構 → +3+；跌破 200MA + 量放大 → -3-
@@ -409,7 +455,13 @@ above_ma200_pct > 100) 時 Technical lane:
    - `high_prob_scenario`: 1 句話描繪未來 5-15 天最有機率的走法（明確帶價位 + 觸發條件）
      例：「站穩 $122 pivot + 量 ≥ 1.5×20D avg → 突破上攻 $135；跌破 $115 → 回測 $108 200MA」
 
-> 以上 3 區塊**必填**；資料缺則寫 `INSUFFICIENT_DATA` 而非 null。LLM 不得跳過。
+4. **`volatility`**（V5.1 必填，deterministic — 餵 Phase 4.5 Multi-Horizon Price Framework 5-Day Band）：
+   - `atr_14`: FMP `technicalIndicators` ATR period 14（float；缺 → null）
+   - `hist_vol_20d_daily`: 20D 日報酬標準差（小數，e.g. 0.028；FMP `technicalIndicators` standardDeviation period 20，或 20D close 序列算）。缺 → 用 `atr_14 / current_price` 反推
+   - `momentum_20d_pct`: 20 交易日報酬 %（(price / close_20d_ago − 1) × 100；float）
+   - 三值皆**直接寫入原始數字**，LLM **不**重新判讀；缺料寫 null（Phase 4.5 自動降級，不擋）
+
+> 以上 4 區塊**必填**；1-3 區塊資料缺寫 `INSUFFICIENT_DATA`，volatility 缺寫 null。LLM 不得跳過。
 
 #### Valuation Specialist Subagent (V5.0 NEW)
 - **角色**: 純估值錨點專家。獨立於 Fundamentals lane（後者偏品質 + 成長），這層專注「現價 vs 多錨點合理價」
@@ -432,6 +484,13 @@ above_ma200_pct > 100) 時 Technical lane:
 - **論述格式**: 必須引用具體 anchor 數字，e.g.「DCF $155 / FCFE $148 / PT consensus $325 / Peer-implied $200 → 加權合理價 $215，現價 $285 = 32.5% premium → score -3」
 - **絕對禁止**: 直接 mirror Fundamentals 的 P/E judgment；本 lane 是獨立估值維度
 - 額外輸出: `valuation_anchors{}` (6 anchor 數字), `weighted_fair_value`, `vs_current_pct`
+
+##### Reverse DCF `implied_expectations`（engine 產出，Specialist 不算）
+
+現價隱含 5Y FCF CAGR vs 實際 vs lane 估 — falsifiable sanity check + Red Team 彈藥。
+由 **Phase 2.4 engine 計算**（Specialist 只負責 anchors；演算法 / clamp / WACC fallback 見
+`protocol_appendix_price_framework.md`）。**不進**加權 / lane score / decision_lock。
+Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見 schema。
 
 ##### V3.17 (Wave 1) 新增必填欄位 — Transition case dissent_basis
 
@@ -512,7 +571,7 @@ python3 skills/short-contrarian-analyst/scripts/burry_score.py <TICKER> --json-o
 1. **Altman Z-Score** (`quality_scores.altman_zone`): danger → -2，grey → -1，safe → 0
 2. **Piotroski F-Score** (`piotroski_strength`): strong → +1；weak → reasoning 註記不調 score
 3. **Owner Earnings vs GAAP FCF** (`owner_earnings.ownersEarnings` vs `cash_flow[0].freeCashFlow`): 差距 > 30% → narrative 註記，不調 score
-4. **Insider trend** (`insider_summary.latest_trend`): accumulating + insider_pts==0 → 升至 1；distributing → narrative 註記
+4. **Insider trend** (`insider_summary.latest_trend`): accumulating + `component_scores.insider == 0` → narrative 註記正向背離；distributing → narrative 註記
 5. **DCF FCFF vs FCFE 差距** (`dcf_intrinsic` vs `dcf_levered_intrinsic`): 差 > 20% → narrative 加註資本結構警告，不調 score
 6. **Comp benchmark** (V5.0, `comp_benchmark.ceo_vs_peer_pct`): CEO comp > peer median 200%+ → narrative 治理紅旗
 7. **PEER_BUNDLE mispricing** (V4.10): `EV/EBIT > peer_median × 1.5` 或 `fcf_yield < peer 中位數一半` → narrative 加註，不調 score
@@ -522,14 +581,46 @@ python3 skills/short-contrarian-analyst/scripts/burry_score.py <TICKER> --json-o
   "phase": 2, "agent": "Contrarian_Analyst_Burry",
   "ticker": "STRING",
   "burry_score": "0-100",
-  "verdict": "T4_VETO | WARNING | NEUTRAL | VALUE_BONUS",
-  "components": { "value_pts", "balance_pts", "insider_pts", "contrarian_pts" },
+  "verdict": "T4_VETO | WARNING | NEUTRAL | VALUE_BONUS | UNKNOWN",
+  "components": { "fcf_yield_pct", "ev_ebit", "debt_to_equity", "pct_below_52w_high", "insider_net" },
+  "component_scores": { "fcf_yield", "ev_ebit", "debt_to_equity", "pct_below_52w_high", "insider" },
   "burry_voice": "string — 含所有規則調整理由",
   "veto_flag": "true if score < 20"
 }
 ```
 
 `veto_flag = true` → 觸發 Phase 2.5 T4。
+
+---
+
+## PHASE 2.4 — PRICE FRAMEWORK ENGINE (V3.45.3 NEW)
+
+PM (inline，一個 Bash call)。Phase 2 Fan-In 後所有估值輸入已備齊
+（anchors / volatility / key_levels / pattern / catalyst / FRED / owner earnings）。
+PM 組 input JSON 後呼叫 deterministic engine，**禁止手算任何 framework 數字**：
+
+```bash
+# input：Phase 2 Valuation Specialist anchors + technical_lane key_levels/pattern/smart_money
+#        + news_lane immediate_catalyst_5d + Phase 0 FRED + owner earnings per share
+#        + V3.46.0 archetype shadow 用：archetype_inputs{sector,revenue_yoy,fcf_margin,eps_ttm,
+#          margin_sigma_pp} + peer_ratios（PEER_BUNDLE 新 median 欄）+ self_ratios（PEER_BUNDLE
+#          self_ratios_ttm）+ ev_block{enterprise_value,net_debt,shares}（earnings bundle）+ beta
+#
+# V3.48.0 — 標準跑法：--self-assemble。quant 欄位（anchors / ev_block / archetype_inputs /
+# peer_ratios / self_ratios / beta / fred real rate / fcf base）由 engine 直接讀
+# earnings cache + peer bundle + supp bundle + forecaster cache + phase0 自組，
+# **0 LLM 抄寫**。PM 的 input file 只需給 qualitative 欄（pattern_taxonomy / smart_money_label /
+# key_levels / immediate_catalyst_5d）+ ticker；file 給的欄位永遠優先。
+# 輸出 self_assembled_fields[] 供 audit。
+python3 investment/scripts/compute_price_framework.py --from-file /tmp/<ticker>_pf.json --self-assemble
+```
+
+一次回傳 4 個 block：`fair_value_summary`（V5.0 blend，演算法 byte-identical）+ `fair_value_range` +
+`multi_horizon_price_framework` + `implied_expectations`。PM **verbatim 抄寫**進後續 phase 輸出。
+input 含 `ticker` 且未給 volatility 時，engine 自抓 FMP OHLCV 算 sigma/atr/momentum
+（消除 LLM 抄寫風險）；`technical_lane.volatility` 仍必填（lane 呈現用），framework 計算以 engine 自算值為準。
+
+**時點 2.4 的原因**：下游全是消費者 — T5 (2.5) 用 `mhp_signal`、Red Team (2.8) 收 `red_team_kill_seed`、Phase 3/4/4.5 引用既存輸出；且 engine 是唯一計算來源（迭代解/percentile 超出 LLM inline 可靠範圍）。
 
 ---
 
@@ -545,8 +636,10 @@ PM (inline)。**Triggers**:
 - **Anti-Bias**: 5 lane 同向 → News 追加 `devils_advocate[]` (≤ 3 條)
 
 ### T4 仲裁
-- `burry_score 0-1` → 強烈建議 `CANCEL`
-- `burry_score = 2` → `DOWNGRADE_DECISION` (BUY → HOLD) 或 `OVERRIDE_BURRY`
+（burry_score 為 0-100 刻度；T4 觸發 = `veto_flag`，即 score < 20）
+- `burry_score < 10` → 強烈建議 `CANCEL`
+- `burry_score 10-19` → `DOWNGRADE_DECISION` (BUY → HOLD) 或 `OVERRIDE_BURRY`
+- `verdict = UNKNOWN`（資料不足，score=null）→ 不觸發 T4，narrative 註記資料缺口
 - 選 `OVERRIDE_BURRY` 自動三項成本：
   1. Phase 4 倉位 × 0.5 (`burry_override_multiplier`)
   2. 必填 `override_justification` (≥ 20 字，具體引用 Phase 2 某 analyst 證據)
@@ -555,6 +648,9 @@ PM (inline)。**Triggers**:
 ### T5 仲裁 (V5.0)
 - `Valuation.score = -2`: reasoning 加注「估值警告 (溢價 {pct}%)」，不強制 downgrade
 - `Valuation.score = -3` (extreme overvalued): **自動 downgrade BUY → STAGED_ENTRY**；STAGED_ENTRY → HOLD
+- **V5.1 MHP 強化（reasoning-only，不改決策數學；V3.45.3 起 `mhp_signal` 由 Phase 2.4 engine 產出，T5 當下直接可用）**：
+  - `wait_for_pullback`（短期帶下界 > 長期合理價）→ T5 reasoning 追加「短期超漲 vs 長期偏貴 (band_lower ${bl} > FV ${fv})，建議等回檔」
+  - `momentum_not_value`（mid_target > 現價 > 長期合理價）→ 對齊既有 `hot_zone_probe` 語意（動能交易非價值持有）
 
 ```json
 {
@@ -592,10 +688,12 @@ TENTATIVE CONSENSUS DIRECTION: <BULLISH | BEARISH | MIXED>
 PHASE 0 MACRO + FRED slim
 PHASE 2 ANALYST OUTPUTS (6: 5 lanes + Burry)
 STRUCTURAL_SHIFT_TIER: <NONE | CANDIDATE | CONFIRMED | INSUFFICIENT_DATA>     ← V2.19 NEW
+IMPLIED_EXPECTATIONS: <Phase 2.4 engine implied_expectations，含 red_team_kill_seed>   ← V3.45.1 NEW (V3.45.3 改 engine 產出)
 
 TASK:
 1. 找共識最脆弱 1 個主論點 → counter_thesis (1-2 句)
 2. 產 2-3 條 falsifiable kill_conditions: "IF <事件> WITHIN <天數> THEN <推翻論點>"
+   - V3.45.1: 若 `implied_5y_fcf_cagr` 顯著高於 actual/lane 估 → 至少 1 條 kill_condition 用 `red_team_kill_seed` 為起點（隱含預期破滅型）
 3. FRED 衝突挑戰：若 fred_snapshot 顯示衝突訊號（yield_curve_inverted / real_rate > 2.0 / credit_stress / regime ∈ {Late Cycle, Stagflation, Recession Risk} / sector ∈ rotation_avoid / NFCI accelerating）→ MUST 至少 1 條 kill_condition 引用具體 FRED 數值
 4. counter_evidence_strength (1-5):
    1-2 = 找不到有力反論
@@ -653,7 +751,7 @@ V3.17 (Wave 1) — transition_signature 攻擊指引:
 
 ## PHASE 3 — DECISION ENGINE
 
-PM (inline)。
+PM (inline)。Price framework 數字已由 **Phase 2.4 engine** 產出，直接引用。
 
 ```
 Step 1 (Raw):
@@ -794,33 +892,7 @@ Step 3 (Directional Macro Multiplier):
 
 Burry 不納入 Step 1 加權。VOLATILE regime 不重複扣分（已計入 macro_backdrop_score）。
 
-### V2.18.0 — Structural Shift Modulation 設計理由
-
-**痛點**：MU/QCOM 案例顯示 Valuation Lane（被過時 analyst PT 拖累）+ Red Team（用歷史週期 mean-reversion 攻擊）+ Macro（sector_avoid 一視同仁壓 multiplier）三個 backward-looking 模型同時壓制 forward signal，導致超級週期股票被迫 `DEFENSIVE HOLD`，錯失主升段。
-
-**機制**：earnings-analyst (`compute_structural_shift`) 偵測 EPS QoQ ≥30% + GM 歷史 +2σ + revenue 加速三個 signal，≥2 過 → CANDIDATE，連 2 季 → CONFIRMED。Phase 3 讀此 tier 對症給予豁免。
-
-**安全閥**：
-- CANDIDATE 只放寬不解除，position cap 50% — 避免單季 noise 導致 bubble-top BUY
-- CONFIRMED 才完全解除估值錨點，但仍要求 Red Team 必須以 forward mechanism breakage 攻擊（不接受純歷史均值論證）
-- Tier 不影響 Step 1 raw_total — 個別 lane 仍然獨立評分；modulation 只動 Step 2/3 的 backward-looking 折扣
-
-**對稱性原則**：missing top 是 bounded loss（少賺）；buying top 是 unbounded loss（套牢）。Tier 階梯 + position cap 把後者風險壓住。
-
-### V2.19.0 — Lane Polarization + Red Team Anti-Spoofing 設計理由
-
-**痛點 1 — Lane 各自為政**：5 lane 獨立評分後 PM 加權平均，但加權平均把「集體看多」(ALIGNED +2) 和「兩極衝突」(+3 +3 -3 -3 +1) 都壓平成中性數字，喪失「lane 衝突 = 系統不確定性」的訊號。Phase 3 沒做 divergence detection。
-
-**痛點 2 — Red Team 偷渡 mean-reversion**：V2.18 在 PM 端 post-filter，但 Red Team prompt 仍用標準歷史攻擊；LLM 常塞 1 個 forward 關鍵字（"客戶庫存"）但本質是 mean-reversion 論證（"歷史均值"），表面 mixed 實則污染。
-
-**機制 1 — Polarization 4-tier**：reuse 既存 `apply_det_shadow.compute_polarization`，加 OUTLIER 級避免 4-vs-1 outlier 誤判 BIPOLAR。Phase 3 Step 1.7 對應 confidence multiplier 0.5/0.85/0.75/1.0。
-
-**機制 2 — Red Team basis classifier**：deterministic keyword scan（mr_keywords + fw_keywords）→ 4 級 basis（pure_forward / pure_mean_reversion / contaminated / unclassified）。CONFIRMED 狀態下 contaminated 跟 pure_mean_reversion 同等對待 → STRONG_COUNTER 自動降 MODERATE。
-
-**Anti-Adversarial 鐵律**：
-1. **mr 一票否決**：mr keyword 出現即觸發 dampening，無論搭配多少 fw keyword
-2. **OUTLIER 不誤殺**：4-vs-1 不是真衝突，confidence × 0.85（不像 BIPOLAR 砍倉位）
-3. **雙層防偽**：prompt 限制 + post-filter classifier，不單靠 LLM 自律
+> **設計理由（V2.18.0 Structural Shift / V2.19.0 Lane Polarization + Red Team Anti-Spoofing）** 已移至 `investment_protocol_v5_0_DESIGN_NOTES.md`（純人讀，runtime 不載入）。對應操作規則仍在本節 Phase 3 step 定義（polarization tier / STRONG_COUNTER downgrade / position cap 等）。
 
 ### 決策閾值（V2.20.0 — Dynamic Threshold）
 
@@ -854,11 +926,34 @@ staged_threshold = max(0.6, buy_threshold - 0.4)   # always 0.4 below buy
 | -buy_threshold ~ -staged_threshold | STAGED_EXIT |
 | ≤ -buy_threshold | SELL |
 
+#### 熱區保守性鬆綁（V5.0.x — Rec 11，rec_source TODO-001+002）
+
+正分 HOLD band（`[0, +staged_threshold)`）在熱門 sub-industry × 多頭 regime 下系統性錯過平順上漲（Semis HOLD-miss 86% N=22 / CANCEL-miss 71% N=21；miss avg runup +30.5% vs drawdown −3.2% → 真錯過非避損）。故加單一例外，把正分模糊區的 default 觀望降為小倉試探：
+
+```
+WHEN final_score ∈ [0, +staged_threshold)        # 正分模糊區（不含負分）
+  AND industry_top_30pct = true                   # 熱門 sub-industry
+  AND macro_regime ∈ {RISK_ON, BULL}              # regime guard — 只在驗證過的多頭觸發
+  AND decision_cap_active != true                  # 硬保險：valuation 證據不足 cap 仍走原路
+  AND (mandatory_risk_flags 為空)                  # 硬保險：任何系統性 risk flag → 不鬆綁
+THEN:
+    final_decision = STAGED_ENTRY (hot_zone_probe)  # 原 default HOLD 降為小倉試探
+    hot_zone_probe = true
+    position_size_pct ≤ 0.0015                       # 15 bps 上限（正常 cap 30bps 之半）
+    # 連動 cap 規則第 6 點：熱區 probe 不 force CANCEL（見下）
+```
+
+- **負分區（`(-staged, 0)`）不適用** — 仍 default HOLD（無證據鬆綁空方）。
+- **硬閘優先**：Auto REJECT（下節）、burry≤1 CANCEL、`proceed_to_phase3=false`、systemic risk flag、decision_cap 全部**優先於**本例外；任一觸發即不 probe。
+
 **設計理由**：
 - 固定 +1.2 BUY 對 5-lane ALIGNED + CONFIRMED 太嚴（白白錯失 super-cycle 進場），對 BIPOLAR 衝突太鬆（容易誤判 BUY）
 - Tier × polarization 矩陣 4 種組合對應不同信心 → threshold 動態化
 - staged_threshold 永遠 = buy − 0.4 維持比例
 - 其他組合（CONFIRMED + MIXED、CANDIDATE + OUTLIER、NONE + ALIGNED 等）走 default — 漸進式 conviction，不所有 tier 都改
+- **熱區 probe regime guard 是刻意自限**：規則僅在 `RISK_ON/BULL` 觸發，即只在 N=22/21 樣本驗證過的多頭市況生效。空頭/避險 regime 樣本不足（見 REVIEW §4 盲點），不外推。回檔來臨時 regime 轉 `VOLATILE/SIDEWAYS` → 規則**自動 dormant**；外加 `decision_cap` + `mandatory_risk_flags` 兩道硬保險，防 regime 偵測落後仍誤標 RISK_ON 而在回檔段誤 probe。
+- **probe 15 bps**：即使 pattern 在某 regime 失效，單筆曝險上限極小（正常 cap 30bps 之半）— 鬆綁的下檔風險受嚴格 bound。
+- ⚠️ **2026-06 中旬預期大幅回檔**（user 2026-06-07 提示）：若回檔期 regime 仍被誤標 RISK_ON，依賴上述兩道硬保險 dormant；Rec 11 首兩週加嚴觀察 Semis HOLD-miss，>70% 即 paused。
 
 ### Auto REJECT
 - `risk_reward_ratio < 2.0`
@@ -961,6 +1056,13 @@ Trader Agent + Risk Manager (inline)。
 - BUY → 兩軌二選一（預設 aggressive）
 - STAGED_ENTRY → 兩軌各佔 50%
 
+> **V5.1 — entry/TP/SL 取值 provenance（補原本 protocol 未明定缺口；V3.45.3 起直接取 Phase 2.4 engine 輸出，不再前向引用）**：
+> - `entry_aggressive.range` ← short_term_5d `[band_point 附近, band_upper_capped]`（突破續勢）或現價附近（pattern=breakout 時）
+> - `entry_conservative.range` ← short_term_5d `[band_lower_capped, band_point]`（回檔承接；下界貼 support）
+> - `take_profit` ← mid_term_60d `mid_target`；若 > `key_levels.resistance` → cap 在 resistance 並於 `exit_conditions` 註記「需突破 $R 才上看 $mid_target」
+> - `stop_loss` ← `min(short_term band_lower_capped, key_levels.support)` − buffer；與 Step 4 `final_stop_loss_pct` 算出的價取**較保守（較高）**者
+> - `risk_reward_ratio` 用上述 TP/SL 重算，仍須 ≥ 2.0（不足 → 收緊 entry 或降級 HOLD）
+
 ### Step 2 — Vol-Adjusted Position Sizing
 ```bash
 python3 skills/portfolio-risk-manager/scripts/risk_manager.py <TICKER> --json-only
@@ -1055,77 +1157,24 @@ final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment   # 上限 -1
 
 ---
 
-## PHASE 4.5 — FAIR VALUE SUMMARY (V5.0 NEW)
+## PHASE 4.5 — MULTI-HORIZON PRICE FRAMEWORK（封裝呈現層）
 
-PM **inline deterministic 計算**。**禁止 LLM 重新評估數字** — 純 anchor weighted blend。
+**全部數字已由 Phase 2.4 engine 算出**（`fair_value_summary` + `fair_value_range` +
+`multi_horizon_price_framework` + `implied_expectations` + `valuation_archetype_shadow`）。
+本 Phase PM 只做兩件事：
 
-### 算法
+1. **verbatim 抄寫** engine 5 個 block 進 session export（shape 見 `phase5_export_schema.md`）。
+   **禁止手算 / 重算 / 改寫任何數字**。
+2. MD 報告 §6 呈現（三時間框架表，見 Phase 5 Step 4 模板）。
 
-```python
-# 從 Valuation Specialist (Phase 2) 拿 valuation_anchors
-anchors = phase2.valuation_specialist.valuation_anchors
-weights_default = {
-  "dcf_unlevered":      0.30,
-  "dcf_levered":        0.15,
-  "analyst_pt_consensus": 0.20,
-  "peer_pe_implied":    0.20,
-  "owner_earnings_mult": 0.10,
-  "forecaster_blend":   0.05,
-}
-
-# 缺 anchor → weight 重分配
-available = {k: v for k, v in anchors.items() if v is not None and v > 0}
-total_w = sum(weights_default[k] for k in available)
-weights_norm = {k: weights_default[k] / total_w for k in available}
-
-weighted_fair_value = sum(weights_norm[k] * available[k] for k in available)
-current_price = ticker_data_bundle["scoring"]["price"]
-vs_current_pct = (weighted_fair_value - current_price) / current_price * 100
-
-# Verdict band
-if vs_current_pct >= 30:   verdict_band = "extreme_undervalued"
-elif vs_current_pct >= 10: verdict_band = "undervalued"
-elif vs_current_pct >= -10: verdict_band = "fairly_valued"
-elif vs_current_pct >= -30: verdict_band = "overvalued"
-else:                       verdict_band = "extreme_overvalued"
-
-# Confidence by anchor count
-if len(available) >= 5:    confidence = "high"
-elif len(available) >= 3:  confidence = "medium"
-else:                       confidence = "low"
-```
-
-### 輸出
-
-```json
-{
-  "phase": "4.5",
-  "agent": "Portfolio_Manager",
-  "fair_value_summary": {
-    "anchors": {
-      "dcf_unlevered":        "float|null",
-      "dcf_levered":          "float|null",
-      "analyst_pt_consensus": "float|null",
-      "peer_pe_implied":      "float|null",
-      "owner_earnings_mult":  "float|null",
-      "forecaster_blend":     "float|null"
-    },
-    "weights_used": {"dcf_unlevered": 0.32, "dcf_levered": 0.16, ...},  // 重分配後
-    "weighted_fair_value":  "float",
-    "current_price":        "float",
-    "vs_current_pct":       "float",
-    "verdict_band":         "extreme_undervalued | undervalued | fairly_valued | overvalued | extreme_overvalued",
-    "confidence":           "high | medium | low",
-    "anchors_available":    "int 0-6",
-    "methodology_note":     "string — e.g. '5/6 anchors used; owner_earnings_mult unavailable, weight redistributed'"
-  }
-}
-```
-
-### 與 Valuation lane 的關係
-- Valuation Specialist (Phase 2) 給 lane score（-5 ~ +5）參與加權
-- `fair_value_summary` (Phase 4.5) 給 deterministic 數字呈現給 user（"合理股價 $215，現價 $285，溢價 32.5%"）
-- 兩者都用同一組 anchor，但 Specialist 是 LLM 詮釋（含 narrative），Phase 4.5 是純算數
+紀律速記：
+- `fair_value_summary` 是決策數字唯一來源（decision_lock 保護）；range / MHP / implied /
+  archetype shadow 全部 **advisory sibling**，不進 11-field decision_lock、不改決策數學。
+- `mhp_signal` 只餵 T5 reasoning 與 Phase 4 trade_plan 取值（entry ← 5d band、TP ← 60d
+  mid_target cap at resistance、SL ← min(band_lower, support) 取較保守）。
+- 缺料降級 = data 非 failure（engine 自動處理；validator warning-only）。
+- shadow 退出條件 / 演算法細節 / 權重表：見 `investment/protocol_appendix_price_framework.md`
+  （audit 用，跑 protocol 不需讀）。checkpoint 報告：`python3 investment/scripts/shadow_report.py`。
 
 ---
 
@@ -1156,6 +1205,7 @@ Phase 4.5 anchors 不足 / fair value confidence=low 時，仍可能因其他 la
 4. **`avg_confidence`** = `min(原值, 0.65)`
 5. **`position_size_pct`** = `min(原值, 0.003)` — 即 30 bps 上限
 6. **`final_action`** 對應改：原 `EXECUTE` → `STAGED`；若降為 HOLD 則 `CANCEL`
+   - **熱區例外（Rec 11）**：當 `hot_zone_probe=true`（見 decision band 熱區鬆綁）且本 cap 非 systemic / 非 decision_cap 觸發時，**保留 `STAGED` probe，不 force `CANCEL`**。15 bps 倉位上限本就 ≤ 30bps cap，無衝突。systemic risk flag / decision_cap_active 觸發的 cap **不適用**此例外（硬閘優先）。
 
 ### Override 例外
 
@@ -1267,15 +1317,21 @@ Agent(
     3. Phase 0 Macro Context (1 段)
     4. Final Visualization Table (5 lanes + Burry + Red Team)
     5. 詳細評分 (key_factors / risk_flags per lane)
-    6. **合理股價估算 (V5.0 新 section)**: anchors 6 行 + weighted_fair_value + verdict_band + confidence
+    6. **Multi-Horizon Price Framework (V5.1 — 升級自 V5.0 合理股價估算)**: 三時間框架表 —
+       - **長期合理價**: anchors 6 行 + weighted_fair_value + verdict_band + confidence（`fair_value_summary`，不變）
+       - **長期區間 (V3.45.1)**: `fair_value_range` — `[P25 / P50 / P75]` + min/max anchor + `range_verdict` + `agreement_grade`（錨一致度）。重點呈現「合理股價是 $170–$280 區間不是單點 $215」
+       - **隱含預期 (V3.45.1)**: `implied_expectations` — 現價隱含 5Y FCF CAGR vs 實際 vs lane 估（sanity_note）
+       - **5 日機率帶**: `[下界 / 點估計 / 上界]`（capped 版）+ drift + confidence + catalyst flag + key_level 反射註記
+       - **60 日 target**: momentum_target / pt_60d / earnings_revision → mid_target + reality_check 成立條件
+       - **三框收斂訊號**: `mhp_signal`（wait_for_pullback / high_conviction_long_zone / momentum_not_value / neutral_aligned）+ 1 句解讀
     7. **Red Team Counter Thesis (V2.14.0 IC-memo 結構強化)**:
        - **Consensus View (市場共識)**: 1-2 句 — 主流分析師 / 媒體普遍認同的看法（從 Phase 2 News + Sentiment lane 抽）
        - **Differentiated View (本委員會差異化判斷)**: 1-2 句 — 本次分析跟 consensus 哪裡不同、為什麼（from final_decision + final_score 的關鍵 driver）
        - **Counter Thesis**: red_team_counter_thesis 全文
        - **Numbered Kill Conditions**: 必須 numbered list（1. / 2. / 3.），每條 falsifiable + 可量化（red_team_kill_conditions 直接照搬 + 編號）。禁 free-form 段落
     8. **進場計畫 (V2.14.0 Returns Profile 三檔)**:
-       - **Base Case**: 進場區間 + TP1 / TP2 + SL + R/R（雙軌 staged_split）+ position_size_pct
-       - **Bull Case (1-2 句)**: 若 base case 觸發後 follow-through，下一個 TP3 / 加碼條件 / 持有窗口（從 fair_value_summary verdict_band + watch_conditions 推）
+       - **Base Case**: 進場區間（← 5 日 band）+ TP1 / TP2（TP ← 60 日 mid_target）+ SL（← band 下界 / support 取較保守）+ R/R（雙軌 staged_split）+ position_size_pct
+       - **Bull Case (1-2 句)**: 若 base case 觸發後 follow-through，下一個 TP3 / 加碼條件 / 持有窗口（從 long-term verdict_band + watch_conditions 推）
        - **Bear Case (1-2 句)**: 若 SL 觸發 / kill condition 命中 → exit 行為 + 不再進場條件
     9. 關鍵風險（key_risks 條列）
     10. Watch / re-eval 觸發條件（watch_conditions dict 全列，加觀察 metric）
@@ -1285,7 +1341,7 @@ Agent(
 )
 ```
 
-> **V2.14.0 IC-memo 強化動機**：對齊機構級投資決策備忘錄 (PE 業界標準 ic-memo skill pattern) — 強迫呈現「consensus vs differentiated view」避免 echo chamber，Kill Conditions numbered 加強執行紀律，Returns Profile 三檔給未來 thesis review 一致對照基準。所有欄位來源**仍是** Phase 2-4 已產出 JSON，formatter 不重新評分。
+> **V2.14.0 IC-memo 強化動機** 已移至 `investment_protocol_v5_0_DESIGN_NOTES.md`（純人讀）。執行重點：consensus vs differentiated view 並陳、Kill Conditions numbered、Returns Profile 三檔；欄位來源**仍是** Phase 2-4 已產出 JSON，formatter 不重新評分。
 
 > **成本**: Sonnet 4.6 vs Opus → 每次節省 ~$0.4-0.7。違反 hard constraints → PM reject 並 retry 1 次；再失敗 → PM inline 寫 MD (照 V5.0 template，禁 freestyle)。
 
@@ -1314,6 +1370,29 @@ python3 investment/scripts/register_thesis.py
 **Idempotent**：若 last entry 已有 thesis_id（同一 protocol run 重跑），script 直接 rc=0 退出，不重複 register。
 
 **State 位置**：`investment/invest_logs/theses/`（project-local，不汙染 global trader-memory-core state）。
+
+### Step 7 — IC Memo Hook (V3.25.0+, non-fatal, `--memo` flag only)
+
+當 `分析 [TICKER]` 加 `--memo` flag 時，於 Phase 5.5 結束後執行；不加 flag 預設**跳過**。
+
+```bash
+python3 skills/ic-memo-writer/scripts/build_fact_pack.py <TICKER>
+python3 skills/ic-memo-writer/scripts/compose.py <TICKER>
+python3 skills/ic-memo-writer/scripts/validate_ic_memo.py reports/<DATE>_<TICKER>_ic_memo.md
+```
+
+- 產出第二份 MD：`reports/<YYYYMMDD>_<TICKER>_ic_memo.md`（高可讀敘事 12 章節）
+- **不重評分、不重抓 FMP、不修改 history.json**。資料源 = profile + earnings-analyst cache + history.json `trades_this_session[-1]`。
+- §11 委員會結論 **verbatim** 來自 protocol.history，受 11 欄位 SHA256 decision_lock 保護（`final_decision / final_action / position_size_pct / analysis_price / fair_value_summary / scenario_odds / watch_conditions / key_risks / red_team_counter_thesis / red_team_kill_conditions / lane_scores`）。
+- Validator rc 分級：
+  - rc=0 pass
+  - rc=1 **fatal** — decision_lock hash mismatch / §11 verbatim 失敗 / FV mismatch / 重評分禁字。**不可稱完成**；memo file 仍寫但加 `<!-- INVALID -->` 標頭，hook 報錯。
+  - rc=2 **degraded-usable** — earnings cache 缺 / 章節 stub / peer_descriptor 為 stub。 Memo published；footer 標 `degraded_sections`。
+- **失敗 non-fatal**：IC Memo composer 任一步炸了，**不影響** Phase 5 委員會決策報告（`reports/<DATE>_<TICKER>.md`）的 done 狀態。
+
+第一版（V1.0）為 deterministic-only：0 LLM call，純資料 → MD 拼接。`--llm-polish` flag 預留但 raise `NotImplementedError`。
+
+詳見 `skills/ic-memo-writer/SKILL.md`。
 
 ---
 
@@ -1344,6 +1423,12 @@ PM (inline)。
 ```
 
 **Weight 限制**: 單 agent 0.10-0.40；每次調整 ±0.05；總和 = 1.0。
+
+> **V3.45.4 — News lane weight 凍結窗**：PT 注入層剝離後 News score 分布會系統性下移
+> （歷史 baseline `{-1:1, 0:2, +1:6, +2:18, +3:4}`，n=31 — 牛市常態 +1 來源消失）。
+> 歷史 lane weights 是在舊行為上校準的 → V3.45.4 後**前 10 個含 News lane 的 session**，
+> `weight_adjustment_delta.News` 強制 = 0 並在 `lesson_learned` 標注 `news_weight_frozen_v3454`，
+> 避免學習層把分布偏移誤判成 lane 失準。第 11 個 session 起恢復正常調整。
 
 ---
 

@@ -236,7 +236,7 @@
       ];
       if (signalGrid) {
         signalGrid.innerHTML = signalCards.map(s => `
-          <div class="rounded-lg border px-3 py-2 min-h-[76px] flex items-center gap-3" ${s.tip ? `data-signal-tip="${s.tip}"` : ''} ${attrStr(s.attrs)}
+          <div class="rounded-lg border px-2.5 py-1.5 min-h-[60px] flex items-center gap-2.5" ${s.tip ? `data-signal-tip="${s.tip}"` : ''} ${attrStr(s.attrs)}
                style="border-color:${s.color}38;background:${s.color}10">
             ${miniGauge({ value: s.gaugeValue, color: s.color, display: s.gaugeDisplay || s.value, suffix: s.gaugeSuffix })}
             <div class="min-w-0">

@@ -304,47 +304,70 @@
                 </div>
             </div>
 
-            <!-- ── LIVE HEATMAP (S&P 500 + NDX 100) — moved to top per UX ────────── -->
-            <div id="heatmap-section" class="glass-card p-5 mb-5">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="grid-3x3" class="w-3.5 h-3.5 text-cyan-400"></i>
-                        <span id="heatmap-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">S&amp;P 500 + NDX 100 LIVE HEATMAP</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span id="heatmap-market-status" class="text-[10px] font-mono text-zinc-500"></span>
-                        <span id="heatmap-last-update" class="text-[10px] font-mono text-zinc-500">--</span>
-                    </div>
-                </div>
-                <div id="heatmap-container" style="height: 640px; position: relative; overflow: hidden;">
-                    <div id="heatmap-loading" class="absolute inset-0 flex items-center justify-center text-xs text-zinc-500">
-                        <span data-i18n="sector.heatmap_loading">載入中…</span>
-                    </div>
-                </div>
-                <!-- Color legend -->
-                <div class="flex items-center justify-center gap-2 mt-2 text-[9px] font-mono text-zinc-500">
-                    <span>-3%</span>
-                    <div class="flex h-2 w-48 rounded overflow-hidden">
-                        <div class="flex-1" style="background: linear-gradient(to right, #ef4444, #fca5a5, #d4d4d8, #86efac, #10b981);"></div>
-                    </div>
-                    <span>+3%</span>
-                </div>
-            </div>
-
             <!-- ── BINARY RISK ALERT / STATUS STRIP stubs (no-op — lives on index.html) ── -->
             <div id="binary-alert-section" class="hidden"></div>
             <div id="warning-flags-row" class="hidden"></div>
 
-            <!-- Today's Verdict + handoff stubs (no-op — lives on index.html dashboard) -->
-            <div id="today-verdict-card" class="hidden"></div>
+            <!-- ── V4.2.0: Today's Verdict HERO — scan conclusion first (was hidden stub; full card lived only on index.html) ── -->
+            <div id="today-verdict-card" class="hidden glass-card p-6" style="border-left:4px solid #22c55e;border-radius:8px">
+                <div class="flex items-baseline gap-3 flex-wrap mb-3">
+                    <span id="tv-stance" class="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded" style="background:rgba(234,179,8,0.15);color:#eab308">NEUTRAL</span>
+                    <h2 id="tv-headline" class="text-lg font-bold flex-1" style="color:var(--text-card-title)">—</h2>
+                    <span id="tv-confidence" class="text-[10px] font-mono text-zinc-500">conf —</span>
+                </div>
+                <p id="tv-one-liner" class="text-[13px] leading-relaxed mb-4" style="color:var(--text-main)"></p>
+                <div id="tv-briefing" class="hidden mb-4 space-y-3">
+                    <div id="tv-signal-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        <div id="tv-conflict-card" class="hidden rounded-lg border border-zinc-200/50 dark:border-zinc-800/70 bg-zinc-50/50 dark:bg-zinc-900/40 p-3"></div>
+                        <div id="tv-catalysts-card" class="hidden rounded-lg border border-zinc-200/50 dark:border-zinc-800/70 bg-zinc-50/50 dark:bg-zinc-900/40 p-3"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-takeaways-title">✦ 關鍵觀察</div>
+                        <ul id="tv-takeaways" class="space-y-1.5 text-[11px] leading-snug"></ul>
+                    </div>
+                    <div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-actions-title">✦ 產業操作建議</div>
+                        <ul id="tv-actions" class="space-y-1.5 text-[11px] leading-snug"></ul>
+                    </div>
+                    <div>
+                        <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-2" id="tv-watch-title">✦ 接下來盯什麼</div>
+                        <ul id="tv-watch" class="space-y-1.5 text-[11px] leading-snug"></ul>
+                    </div>
+                </div>
+                <div id="three-signal-mini" class="hidden"></div>
+                <div id="tv-fallback" class="hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                    <div class="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2" id="tv-fallback-title">Session Notes</div>
+                    <p id="tv-fallback-text" class="text-[12px] leading-relaxed" style="color:var(--text-muted)"></p>
+                </div>
+            </div>
             <div id="handoff-section" class="hidden"><p id="handoff-text" class="hidden"></p><span id="handoff-title" class="hidden"></span></div>
-            <!-- Legacy tv-* stubs so Components.renderTodayVerdict sub-selectors don't error -->
-            <span id="tv-stance" class="hidden"></span><h2 id="tv-headline" class="hidden"></h2>
-            <span id="tv-confidence" class="hidden"></span><p id="tv-one-liner" class="hidden"></p>
-            <span id="tv-takeaways-title" class="hidden"></span><ul id="tv-takeaways" class="hidden"></ul>
-            <span id="tv-watch-title" class="hidden"></span><ul id="tv-watch" class="hidden"></ul>
-            <ul id="tv-actions" class="hidden"></ul><span id="tv-actions-title" class="hidden"></span>
-            <div id="tv-fallback" class="hidden"><span id="tv-fallback-title" class="hidden"></span><p id="tv-fallback-text" class="hidden"></p></div>
+
+            <!-- ── V4.2.0: COMMITTEE MATRIX + RED TEAM (debate layer — was never rendered) ── -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div id="committee-card" class="glass-card p-5 hidden">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i data-lucide="users" class="w-3.5 h-3.5 text-sky-400"></i>
+                        <span id="committee-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">委員會決議矩陣</span>
+                        <span id="committee-mode" class="text-[8px] font-mono text-zinc-600 ml-auto"></span>
+                    </div>
+                    <p id="committee-sub" class="text-[9px] text-zinc-600 mb-3"></p>
+                    <div id="committee-matrix" class="overflow-x-auto"></div>
+                    <div id="committee-rationale" class="mt-3 space-y-1.5"></div>
+                </div>
+                <div id="redteam-card" class="glass-card p-5 hidden">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i data-lucide="swords" class="w-3.5 h-3.5 text-violet-400"></i>
+                        <span id="redteam-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Red Team 推翻條件</span>
+                        <span id="redteam-consensus" class="text-[8px] font-mono text-zinc-600 ml-auto"></span>
+                    </div>
+                    <p id="redteam-sub" class="text-[9px] text-zinc-600 mb-3"></p>
+                    <div id="redteam-list" class="space-y-2.5"></div>
+                    <p id="redteam-tail-note" class="text-[9px] text-zinc-600 mt-3 hidden"></p>
+                </div>
+            </div>
 
             <!-- ── SECTOR VERDICT MATRIX ─────────────────────────────── -->
             <div>
@@ -397,8 +420,29 @@
                 </div>
             </div>
 
+            <!-- ── V4.2.0: QUANT EVIDENCE MATRIX (phase-1 valuation + phase-3 pulses) ── -->
+            <div id="quant-card" class="glass-card p-5 hidden">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="table-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span id="quant-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">量化證據矩陣</span>
+                    <span id="quant-hint" class="text-[8px] text-zinc-600 ml-auto"></span>
+                </div>
+                <div class="overflow-x-auto"><table id="quant-table" class="quant-table"></table></div>
+            </div>
+
+            <!-- ── V4.2.0: MACRO OVERLAY (FRED snapshot + step6 multiplier + political risk) ── -->
+            <div id="macro-card" class="glass-card p-5 hidden">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="landmark" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span id="macro-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">宏觀 Overlay (FRED)</span>
+                </div>
+                <div id="macro-overlay-chips" class="flex flex-wrap gap-2 mb-3"></div>
+                <p id="macro-overlay-note" class="text-[10px] text-zinc-500"></p>
+                <div id="political-risk-box" class="mt-3 hidden rounded-lg border p-3"></div>
+            </div>
+
             <!-- ── BOTTOM TWO-COLUMN ROW ─────────────────────────────── -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
                 <!-- COL 1: Catalysts & Political Signals -->
                 <div class="glass-card p-5">
@@ -429,6 +473,33 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- ── LIVE HEATMAP (S&P 500 + NDX 100) — V4.2.0: moved to bottom; live quotes, not scan output ── -->
+            <div id="heatmap-section" class="glass-card p-5 mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="grid-3x3" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        <span id="heatmap-title" class="text-[10px] font-black uppercase tracking-widest text-zinc-500">S&amp;P 500 + NDX 100 LIVE HEATMAP</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="heatmap-market-status" class="text-[10px] font-mono text-zinc-500"></span>
+                        <span id="heatmap-last-update" class="text-[10px] font-mono text-zinc-500">--</span>
+                    </div>
+                </div>
+                <div id="heatmap-container" style="height: 640px; position: relative; overflow: hidden;">
+                    <div id="heatmap-loading" class="absolute inset-0 flex items-center justify-center text-xs text-zinc-500">
+                        <span data-i18n="sector.heatmap_loading">載入中…</span>
+                    </div>
+                </div>
+                <!-- Color legend -->
+                <div class="flex items-center justify-center gap-2 mt-2 text-[9px] font-mono text-zinc-500">
+                    <span>-3%</span>
+                    <div class="flex h-2 w-48 rounded overflow-hidden">
+                        <div class="flex-1" style="background: linear-gradient(to right, #ef4444, #fca5a5, #d4d4d8, #86efac, #10b981);"></div>
+                    </div>
+                    <span>+3%</span>
+                </div>
             </div>
 
         </div>

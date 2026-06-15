@@ -44,6 +44,7 @@ from scripts.verdict_rules import (  # noqa: E402
     VERDICT_DISPATCH,
     momentum_aggregate_metrics,
     verdict_momentum_aggregate,
+    verdict_news_digest_directional,
 )
 
 DEEP_DIVE_RE = re.compile(r"^\d{8}_[A-Z][A-Z0-9]+\.md$")
@@ -71,6 +72,7 @@ def discover_sources() -> dict[str, list[Path]]:
         list(reports.glob("theme_detector_*.md")))
     found["thematic-screener"] = sorted(
         (ROOT / "skills/thematic-screener/data/recommendations").glob("*.json"))
+    # earnings-trade-analyzer skill deleted V4.5.1 — historical report artifacts still indexed
     found["earnings-analyzer"] = sorted(reports.glob("earnings_trade_analyzer_*.json"))
     found["short-term-weekly"] = sorted(reports.glob("SHORT_TERM_WEEKLY_*.md"))
     found["postmortem"] = sorted(reports.glob("POSTMORTEM_*.md"))
@@ -150,6 +152,11 @@ def compute_reality_for_ticker(ticker: str, decision_date: date, eval_date: date
         "return_pct": round((p_eval - p_dec) / p_dec * 100, 3),
         "max_runup_since": round(max(in_window.values()), 4),
         "max_drawdown_since": round(min(in_window.values()), 4),
+        # TODO-005: path-aware pct vs decision price. Lets REVIEW distinguish a
+        # HOLD/CANCEL "miss" that smoothly rose (real miss) from one that ended
+        # up but had a deep intra-window drawdown (caution was justified).
+        "max_runup_pct": round((max(in_window.values()) - p_dec) / p_dec * 100, 3),
+        "max_drawdown_pct": round((min(in_window.values()) - p_dec) / p_dec * 100, 3),
     }
 
 
@@ -207,6 +214,11 @@ def build_eval_block(record: dict, today: date) -> tuple[dict, dict]:
         ticker_reality = compute_reality_for_ticker(ticker, decision_d, eval_d)
         base["ticker_reality"] = ticker_reality
         verdict = verdict_fn(dc, ticker_reality) if verdict_fn else {"label": "n/a", "rationale": ""}
+        # TODO-005: surface path pct onto verdict so REVIEW reads it without
+        # digging into reality_at_eval. Label logic unchanged (pure instrumentation).
+        if ticker_reality:
+            verdict["max_runup_pct"] = ticker_reality.get("max_runup_pct")
+            verdict["max_drawdown_pct"] = ticker_reality.get("max_drawdown_pct")
 
     elif src == "sector-scan":
         etfs = list({r.get("etf") for r in (dc.get("sector_ratings") or []) if r.get("etf")}) + ["SPY"]
@@ -218,6 +230,10 @@ def build_eval_block(record: dict, today: date) -> tuple[dict, dict]:
         spy_returns = compute_returns_for_tickers(["SPY"], decision_d, eval_d)
         base["spy_return_pct"] = spy_returns.get("SPY")
         verdict = verdict_fn(dc, spy_returns.get("SPY")) if verdict_fn else {"label": "n/a", "rationale": ""}
+        # H-D shadow (REVIEW_2026-06-13): directional method alongside the live
+        # magnitude label. Pure instrumentation — primary `verdict.label` unchanged.
+        verdict["shadow_directional"] = verdict_news_digest_directional(
+            dc, spy_returns.get("SPY")).get("label")
 
     elif src == "theme-detector":
         etfs = list({e for t in (dc.get("themes") or []) for e in (t.get("proxy_etfs") or [])}) + ["SPY"]
@@ -311,6 +327,7 @@ def _build_industry_rollup(records: list[dict]) -> list[dict]:
             "pending":               0,
             "tickers":               set(),
             "miss_returns":          [],
+            "miss_drawdowns":        [],
             "industry_top_30pct":    heat.get("industry_top_30pct"),
             "sector_top_3":          heat.get("sector_top_3"),
             "sector_composite_score": heat.get("sector_composite_score"),
@@ -326,12 +343,18 @@ def _build_industry_rollup(records: list[dict]) -> list[dict]:
             ret = rl.get("return_pct")
             if ret is not None:
                 b["miss_returns"].append(round(float(ret), 2))
+            # TODO-005: track worst intra-window drawdown on miss decisions so
+            # REVIEW can tell whether a "miss" HOLD/CANCEL actually dodged a drop.
+            dd = rl.get("max_drawdown_pct")
+            if dd is not None:
+                b["miss_drawdowns"].append(round(float(dd), 2))
 
     rows = []
     for b in buckets.values():
         n = b["n"]
         miss = b.get("miss", 0)
         miss_returns = b["miss_returns"]
+        miss_drawdowns = b["miss_drawdowns"]
         rows.append({
             "industry":               b["industry"],
             "sector":                 b["sector"],
@@ -344,11 +367,62 @@ def _build_industry_rollup(records: list[dict]) -> list[dict]:
             "tickers":                sorted(b["tickers"]),
             "avg_miss_return_pct":    round(sum(miss_returns) / len(miss_returns), 2) if miss_returns else None,
             "max_miss_return_pct":    max(miss_returns) if miss_returns else None,
+            # TODO-005: avg/worst intra-window drawdown across miss decisions.
+            # Pairs with avg_miss_return_pct — large negative here on a "miss"
+            # bucket = the HOLD/CANCEL dodged real downside, not pure upside miss.
+            "avg_miss_drawdown_pct":  round(sum(miss_drawdowns) / len(miss_drawdowns), 2) if miss_drawdowns else None,
+            "worst_miss_drawdown_pct": min(miss_drawdowns) if miss_drawdowns else None,
             "industry_top_30pct":     b["industry_top_30pct"],
             "sector_top_3":           b["sector_top_3"],
             "sector_composite_score": b["sector_composite_score"],
         })
     rows.sort(key=lambda r: (-r["n"], -(r["miss"] or 0)))
+    return rows
+
+
+# Pattern C instrumentation (REVIEW_2026-06-13 / H-C). News-decisive deep-dive
+# miss ran high (56%); ad-hoc split showed it concentrates in HOLD/CANCEL, i.e.
+# the same conservatism root as Pattern A, NOT News-edge decay. Surface the
+# decisive_agent × action_class × verdict split every week so REVIEW reads it
+# directly instead of recomputing. action_class buckets the verb into
+# conservative (HOLD/CANCEL/...) vs active (BUY/STAGED_ENTRY/EXECUTE).
+_CONSERVATIVE_ACTIONS = {"HOLD", "CANCEL", "WAIT", "DEFENSIVE", "NEUTRAL", "REJECT"}
+
+
+def _action_class(dc: dict) -> str:
+    act = (dc.get("final_action") or dc.get("final_action_modifier") or "").upper()
+    if not act:
+        return "unknown"
+    return "conservative" if act in _CONSERVATIVE_ACTIONS else "active"
+
+
+def _build_decisive_agent_split(records: list[dict]) -> list[dict]:
+    """Deep-dive miss split by decisive_agent × action_class. Lets REVIEW see
+    whether a high-miss agent (e.g. News) is conservatism-driven or edge-driven."""
+    buckets: dict[tuple, dict] = {}
+    for r in records:
+        if r.get("source") != "deep-dive":
+            continue
+        th = r.get("tuning_hooks") or {}
+        da = th.get("decisive_agent")
+        if isinstance(da, dict):
+            da = da.get("agent")
+        da = da or "Unknown"
+        acls = _action_class(r.get("decision_content") or {})
+        v = (r.get("verdict") or {}).get("label") or "n/a"
+        b = buckets.setdefault((da, acls), {
+            "decisive_agent": da, "action_class": acls,
+            "n": 0, "hit": 0, "miss": 0, "neutral": 0, "pending": 0,
+        })
+        b["n"] += 1
+        if v in ("hit", "miss", "neutral", "pending"):
+            b[v] += 1
+    rows = []
+    for b in buckets.values():
+        evaluable = b["hit"] + b["miss"] + b["neutral"]
+        b["miss_rate"] = round(b["miss"] / evaluable, 3) if evaluable else None
+        rows.append(b)
+    rows.sort(key=lambda r: (r["decisive_agent"], r["action_class"]))
     return rows
 
 
@@ -369,7 +443,9 @@ def _load_adjustment_ledger() -> list[dict]:
             m = re.search(rf"^- \*\*{k}\*\*:\s*(.+)$", blk, re.MULTILINE)
             if m:
                 meta[k] = m.group(1).strip().rstrip("`").lstrip("`")
-        if (meta.get("status") or "").lower() == "active":
+        # status field may carry a parenthetical note (e.g. "active（止血值…）"),
+        # so match the "active" prefix rather than requiring exact equality.
+        if (meta.get("status") or "").lower().startswith("active"):
             entries.append(meta)
     return entries
 
@@ -402,13 +478,15 @@ def main(today: date):
 
     industry_rollup = _build_industry_rollup(out_records)
     adjustment_ledger = _load_adjustment_ledger()
+    decisive_agent_split = _build_decisive_agent_split(out_records)
 
     out = {
-        "version": "1.1",
+        "version": "1.2",
         "generated_at": datetime.now().isoformat(),
         "today": today.isoformat(),
         "decision_count": len(out_records),
         "industry_rollup": industry_rollup,
+        "decisive_agent_split": decisive_agent_split,
         "adjustment_ledger_active": adjustment_ledger,
         "decisions": out_records,
     }

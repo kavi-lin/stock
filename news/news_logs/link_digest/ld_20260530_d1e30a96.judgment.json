@@ -1,0 +1,157 @@
+{
+  "id": "ld_20260530_d1e30a96",
+  "url": "https://www.sinotrade.com.tw/richclub/industry/輝達-Vera-Rubin-電力硬規-800V-變革啟動-台廠電源雙雄台達電-光寶科的千金行情布局-產業熱話-69f863454d59ab006c07f1b8",
+  "headline": "NVIDIA Vera Rubin 800V power mandate triggers data-center power redesign; Taiwan power duo Delta & Lite-On positioned",
+  "headline_zh": "輝達 Vera Rubin 電力硬規：800V 變革啟動，台廠電源雙雄台達電、光寶科的千金行情布局",
+  "source_label": "永豐金證券 豐雲學堂 (SinoPac RichClub)",
+  "published": "2026-05-28T00:00:00Z",
+  "news_type": "sector_news",
+  "verdict": "BULLISH",
+  "net_impact_score": 2.6,
+  "bull_case": "The Vera Rubin platform forces a structural rewrite of data-center power: in-rack distribution moves from 54V to 800V HVDC to feed racks scaling from ~130kW (NVL144) toward 600kW–1MW (Rubin Ultra Kyber, 2027). NVIDIA's own Oct-2025 800VDC announcement enrolled 50+ partners and explicitly listed Delta and LITEON in the power/cooling-integration tier — independent confirmation that the article's '電源雙雄' framing is real, not promotional. The value-capture story is the upgrade: vendors shift from selling discrete components (connectors, BBU, SST) to delivering full rack-level power cabinets, lifting ASP and content-per-rack by an order of magnitude. 800V cuts copper losses (>150% more power through the same conductor vs 54V), trims TCO ~20-30%, and is mandatory — not optional — for Kyber-scale density, so demand is platform-gated rather than discretionary. Delta guides Q3-2026 mass production, aligning supply with NVIDIA's 2H-2026 first Vera Rubin shipments. US-listed power names (Vertiv, Eaton, Navitas, onsemi, Infineon, Power Integrations) ride the same secular 800VDC capex wave, giving the theme a deep, cross-listed beneficiary set rather than a single-name bet.",
+  "bear_case": "Most of the headline power number belongs to the wrong product. Multiple independent sources put standard Vera Rubin NVL144 at ~120-130kW per rack; the 600kW figure is Rubin Ultra / Kyber, slated for 2H-2027 — so the article's '600kW Vera Rubin' framing front-loads a 2027 catalyst into a 2026 trade and risks a timing air-pocket. The 800VDC ecosystem is crowded and Western-anchored: NVIDIA's reference partners lead with Vertiv, Eaton, ABB, Schneider, Siemens, GE Vernova and silicon from Infineon/Navitas/onsemi/TI — Delta and Lite-On are two names among 50+, and the cnesa industry-chain list (31 firms) names Delta but omits Lite-On entirely, undercutting the clean 'duopoly moat' thesis. 'Full-cabinet solution delivery' raises integration, warranty and working-capital intensity, compressing the margin uplift the bull case assumes. The names have already run hard ('千金行情' = four-digit TWD price), so much of the 800V transition may be discounted; any Rubin Ultra slip, liquid-cooling bottleneck, or hyperscaler capex digestion hits richly-valued stocks first. This is a Taiwan-equity (2308.TW/2301.TW) story with no direct US-listed read-through for the duo themselves.",
+  "sector_view": "Sector: Information Technology (power electronics / data-center infrastructure), bullish; Industrials (electrical equipment) bullish via Vertiv/Eaton/ABB/Schneider. Two-stage supply chain — UPSTREAM beneficiaries: power-semi (Navitas GaN/SiC, Infineon, onsemi, TI, Power Integrations) and SST/BBU/connector makers feed the 800V conversion stack; MIDSTREAM integrators: Delta (2308.TW) and Lite-On (2301.TW) plus Vertiv (VRT), Eaton (ETN) package rack-level HVDC power cabinets. DOWNSTREAM customer: NVIDIA (NVDA) sets the 800V spec and pulls demand; hyperscalers/neoclouds (Oracle, CoreWeave, Microsoft) are the end-buyers of the racks. WHO IS HURT: legacy 54V in-rack PSU vendors and AC-distribution incumbents face obsolescence as the 13.8kV-AC→800V-HVDC perimeter conversion eliminates AC/DC stages. Net: a content-expansion event for power-electronics names tied to NVIDIA's roadmap, with the directed edges NVDA←(supplies)←VRT/ETN/NVTS being the cross-listed expression of the Taiwan duo story.",
+  "macro_view": "Macro-neutral, secular-positive. The driver is AI-capex intensity, not the rate cycle — data-center power buildout is a multi-year structural spend largely insensitive to near-term Fed path, though a higher-for-longer regime pressures the rich multiples these '千金' names carry (long-duration growth equities). FX: a stronger TWD would dent Delta/Lite-On reported margins (USD-denominated revenue, TWD cost base); USD strength is a mild tailwind. Historical analogue: the 54V→800V shift rhymes with prior platform-power step-changes (e.g. the move to 48V in-rack a cycle ago) where the spec-setter (NVIDIA) captured the roadmap and a handful of power-integration incumbents captured the content — early movers compounded, latecomers commoditized. Risk to the analogue: power/grid and liquid-cooling buildout, not silicon, is increasingly the binding constraint on AI scaling, which raises execution risk on the 2027 Kyber timeline the bull case leans on.",
+  "arbiter_reasoning": "Verdict BULLISH, net_impact +2.6. The core claim survives cross-examination: NVIDIA's 800V HVDC mandate is real, platform-gated, and independently documented (Electronics Weekly, Oct-2025) to include both Delta and LITEON among 50+ named 800VDC partners, with Delta further confirmed by the cnesa 31-firm industry-chain list. The transition from 54V to 800V is mandatory for Rubin-class rack density (>150% more power through the same copper, ~20-30% TCO reduction), so the demand is structural rather than discretionary, and the component→full-cabinet shift is a genuine ASP/content-expansion lever. Two material caveats cap the score below +3.5. First, a timing/labeling issue: the eye-catching 600kW–1MW figures belong to Rubin Ultra / Kyber (2H-2027), while standard Vera Rubin NVL144 racks are ~120-130kW (2H-2026) — the article conflates them, so the biggest power numbers are a 2027 story being priced in 2026. Second, the 'duopoly moat' is overstated: the ecosystem is crowded and Western-led (Vertiv, Eaton, ABB, Schneider, Infineon, Navitas, onsemi), and one corroborating source names Delta but not Lite-On. The names have already re-rated ('千金行情'), so reward is increasingly execution- and timeline-dependent. Net: a real, multi-year content-expansion theme with a credible near-term (Q3-2026 Delta MP, 2H-2026 Vera Rubin) anchor, discounted for crowded competition and a partly front-loaded 2027 catalyst. This is an exploration-layer read and does not feed investment_protocol decisions.",
+  "debate_note": "Bull sees a platform-mandated 800V content-expansion duopoly; bear says the 600kW 'duopoly' headline is a 2027 Rubin-Ultra story in a crowded Western-led field, front-loaded into already-re-rated 2026 prices.",
+  "binary_risk": false,
+  "binary_event_date": null,
+  "within_48h": false,
+  "affected_sectors": [
+    {"sector": "Information Technology", "direction": "bullish"},
+    {"sector": "Industrials", "direction": "bullish"}
+  ],
+  "entities": {
+    "tickers": ["NVDA", "VRT", "ETN", "NVTS", "ON", "IFX", "TXN", "POWI", "2308.TW", "2301.TW"],
+    "sectors": ["Information Technology", "Industrials"],
+    "themes": ["800v-hvdc", "ai-data-center-power", "vera-rubin", "data-center-capex"],
+    "tech_keywords": ["800V HVDC", "54V", "Vera Rubin", "Rubin Ultra", "Kyber", "NVL144", "SST", "BBU", "solid state transformer", "600kW rack", "13.8kV AC"]
+  },
+  "relations": [
+    {
+      "subject": "ticker:VRT",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:NVDA",
+      "confidence": 0.85,
+      "evidence": "Vertiv is a lead NVIDIA 800VDC power-system partner; its 800V DC portfolio targets H2-2026 for Vera Rubin / Kyber racks.",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/",
+        "https://introl.com/blog/nvidia-vera-rubin-gpu-600kw-racks-2027"
+      ]
+    },
+    {
+      "subject": "ticker:ETN",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:NVDA",
+      "confidence": 0.8,
+      "evidence": "Eaton is a named NVIDIA 800VDC partner and released an 800V DC reference architecture in Oct-2025.",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/",
+        "https://www.insightologyresearch.com/p/800v-hvdc-powering-the-next-generation"
+      ]
+    },
+    {
+      "subject": "ticker:NVTS",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:NVDA",
+      "confidence": 0.78,
+      "evidence": "Navitas Semiconductor is a named NVIDIA 800VDC component partner supplying GaN/SiC power devices for the HVDC conversion stack.",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/",
+        "https://www.sec.gov/Archives/edgar/data/0001821769/000162828025027705/ex9912025-05x21prrenvidiac.htm"
+      ]
+    },
+    {
+      "subject": "ticker:2308.TW",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:NVDA",
+      "confidence": 0.82,
+      "evidence": "Delta Electronics is listed in NVIDIA's 800VDC power/cooling-integration tier and guides Q3-2026 mass production of rack-level HVDC power.",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/",
+        "http://en.cnesa.org/latest-news/2025/11/25/nvidias-800v-architecture-reshapes-ai-data-centers-31-core-industry-chain-companies-unveiled",
+        "https://www.sinotrade.com.tw/richclub/industry/輝達-Vera-Rubin-電力硬規-800V-變革啟動-台廠電源雙雄台達電-光寶科的千金行情布局-產業熱話-69f863454d59ab006c07f1b8"
+      ]
+    },
+    {
+      "subject": "ticker:2301.TW",
+      "predicate": "SUPPLIES_TO",
+      "object": "ticker:NVDA",
+      "confidence": 0.7,
+      "evidence": "Lite-On (LITEON) appears in NVIDIA's 800VDC power/cooling-integration partner tier; article frames it with Delta as power '雙雄'.",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/",
+        "https://www.sinotrade.com.tw/richclub/industry/輝達-Vera-Rubin-電力硬規-800V-變革啟動-台廠電源雙雄台達電-光寶科的千金行情布局-產業熱話-69f863454d59ab006c07f1b8"
+      ]
+    },
+    {
+      "subject": "ticker:2308.TW",
+      "predicate": "COMPETES_WITH",
+      "object": "ticker:VRT",
+      "confidence": 0.65,
+      "evidence": "Delta and Vertiv both supply rack-level 800V HVDC power systems into the same NVIDIA-spec ecosystem.",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/"
+      ]
+    },
+    {
+      "subject": "ticker:NVDA",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:800v-hvdc",
+      "confidence": 0.85,
+      "evidence": "NVIDIA sets the 800V HVDC spec to enable Rubin-class rack density (130kW→600kW+).",
+      "corroborating_sources": [
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/",
+        "https://introl.com/blog/nvidia-vera-rubin-gpu-600kw-racks-2027"
+      ]
+    },
+    {
+      "subject": "ticker:2308.TW",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:800v-hvdc",
+      "confidence": 0.82,
+      "evidence": "Delta shifts from component supply to full 800V power-cabinet delivery, expanding content per rack.",
+      "corroborating_sources": [
+        "https://www.sinotrade.com.tw/richclub/industry/輝達-Vera-Rubin-電力硬規-800V-變革啟動-台廠電源雙雄台達電-光寶科的千金行情布局-產業熱話-69f863454d59ab006c07f1b8",
+        "http://en.cnesa.org/latest-news/2025/11/25/nvidias-800v-architecture-reshapes-ai-data-centers-31-core-industry-chain-companies-unveiled"
+      ]
+    },
+    {
+      "subject": "ticker:2301.TW",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:800v-hvdc",
+      "confidence": 0.7,
+      "evidence": "Lite-On positioned as NVIDIA 800VDC power-integration partner riding the data-center power upgrade.",
+      "corroborating_sources": [
+        "https://www.sinotrade.com.tw/richclub/industry/輝達-Vera-Rubin-電力硬規-800V-變革啟動-台廠電源雙雄台達電-光寶科的千金行情布局-產業熱話-69f863454d59ab006c07f1b8",
+        "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/"
+      ]
+    },
+    {
+      "subject": "ticker:VRT",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:ai-data-center-power",
+      "confidence": 0.8,
+      "evidence": "Vertiv 800V DC product portfolio launches H2-2026 into the AI data-center power upgrade cycle.",
+      "corroborating_sources": [
+        "https://introl.com/blog/nvidia-vera-rubin-gpu-600kw-racks-2027"
+      ]
+    },
+    {
+      "subject": "ticker:NVTS",
+      "predicate": "BENEFITS_FROM",
+      "object": "theme:800v-hvdc",
+      "confidence": 0.75,
+      "evidence": "Navitas GaN/SiC devices enable high-efficiency 800V HVDC conversion stages.",
+      "corroborating_sources": [
+        "https://www.sec.gov/Archives/edgar/data/0001821769/000162828025027705/ex9912025-05x21prrenvidiac.htm"
+      ]
+    }
+  ],
+  "related_sources": [
+    {"url": "https://www.electronicsweekly.com/news/business/nvidia-and-partners-gear-up-for-800vdc-datacentres-and-vera-rubin-for-2025-10/", "title": "Nvidia and partners gear up for 800Vdc datacentres and Vera Rubin", "published": "2025-10-14T00:00:00Z"},
+    {"url": "http://en.cnesa.org/latest-news/2025/11/25/nvidias-800v-architecture-reshapes-ai-data-centers-31-core-industry-chain-companies-unveiled", "title": "NVIDIA's 800V Architecture Reshapes AI Data Centers: 31 Core Industry Chain Companies", "published": "2025-11-25T00:00:00Z"},
+    {"url": "https://introl.com/blog/nvidia-vera-rubin-gpu-600kw-racks-2027", "title": "NVIDIA Vera Rubin: 600kW Racks by 2027", "published": "2025-09-25T00:00:00Z"},
+    {"url": "https://www.insightologyresearch.com/p/800v-hvdc-powering-the-next-generation", "title": "800V HVDC: Powering the Next Generation of AI Data Centers", "published": "2025-11-01T00:00:00Z"}
+  ]
+}

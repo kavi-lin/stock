@@ -19,6 +19,7 @@ Public API:
   get_market_cap_history(ticker, limit=20) → list[dict]
   get_employee_history(ticker)     → list[dict]
   get_profiles_bulk(tickers)       → dict[ticker → dict]   (cache-aware)
+  get_quarterly_income(ticker, n=8) → list[dict]   (7d cache; newest-first)
 
 Fail behaviour:
   - FMP_API_KEY missing → sys.exit(1)  (matches sector script pattern)
@@ -39,8 +40,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 CACHE_DIR = os.path.join(BASE_DIR, "skills", "_shared", "cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+from scripts._shared import fmp_pool as _fmp_pool  # noqa: E402
+
 FMP_BASE = "https://financialmodelingprep.com"
 CACHE_TTL_HOURS = 24
+# Quarterly income statements live in their own subdir with a longer TTL —
+# fundamentals only change once per earnings cycle, so a 7-day refresh window
+# is far cheaper than the 24h company profile cache and still picks up new
+# filings within a week. Consumed by momentum-monitor (P/S, GM%, Rev YoY).
+QUARTERLY_INCOME_TTL_HOURS = 7 * 24
+QUARTERLY_INCOME_CACHE_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "cache", "quarterly_income"
+)
+os.makedirs(QUARTERLY_INCOME_CACHE_DIR, exist_ok=True)
 
 # ---------------------------------------------------------------------------
 # Sector universe — single source of truth shared by sector/* scripts.
@@ -99,28 +113,13 @@ SECTOR_TOP_5: dict[str, list[str]] = {
 # FMP HTTP wrapper (kept local to avoid import coupling with sector scripts).
 # ---------------------------------------------------------------------------
 def _fmp_get(path: str, params: dict, *, retries: int = 2, timeout: int = 20) -> Any:
-    api_key = os.environ.get("FMP_API_KEY")
-    if not api_key:
+    # Pacing/429-backoff governed centrally by scripts/_shared/fmp_pool (shared
+    # 250/min budget). Callers pass full ``/stable/...`` paths → stable=False.
+    # Missing key still hard-exits (matches sector script pattern); 402 paid
+    # block returns None (pool returns None on 401/402/403).
+    if not os.environ.get("FMP_API_KEY"):
         sys.exit("[ERROR] FMP_API_KEY not set — skills/_shared/company_context cannot run.")
-    url = f"{FMP_BASE}{path}"
-    full = {**params, "apikey": api_key}
-    last_exc = None
-    for attempt in range(retries + 1):
-        try:
-            r = requests.get(url, params=full, timeout=timeout)
-            if r.status_code == 429:
-                time.sleep(2 ** attempt)
-                continue
-            if r.status_code == 402:
-                return None
-            r.raise_for_status()
-            return r.json()
-        except Exception as e:
-            last_exc = e
-            time.sleep(0.5)
-    print(f"[company_context] WARN: FMP {path} failed after {retries+1} tries: {last_exc}",
-          file=sys.stderr)
-    return None
+    return _fmp_pool.get(path, params, stable=False, retries=retries, timeout=timeout)
 
 
 # ---------------------------------------------------------------------------
@@ -170,6 +169,38 @@ def get_profile(ticker: str) -> dict | None:
     if profile:
         _write_cache(ticker, "profile", profile)
     return profile
+
+
+def get_ratios_ttm(ticker: str) -> dict | None:
+    """Return slim TTM valuation ratios dict or None. 24h cache.
+
+    V3.46.0 — feeds peer EV/EBITDA / EV/Sales / P/B medians for the valuation
+    archetype shadow (investment protocol #3). Slimmed to the fields the
+    price-framework engine needs; full payload not cached to keep cache small.
+    """
+    cached = _read_cache(ticker, "ratios_ttm")
+    if cached is not None and (not cached or "pe_ttm" in cached):   # V3.48.0 加欄後舊 slim 重抓
+        return cached if cached else None
+
+    def _first(raw):
+        return raw[0] if isinstance(raw, list) and raw else (raw if isinstance(raw, dict) else {})
+
+    km = _first(_fmp_get("/stable/key-metrics-ttm", {"symbol": ticker}))   # ev_sales/ev_ebitda/roe
+    rt = _first(_fmp_get("/stable/ratios-ttm", {"symbol": ticker}))        # P/B, BVPS, net margin
+    if not km and not rt:
+        _write_cache(ticker, "ratios_ttm", {})
+        return None
+    slim = {
+        "ev_to_ebitda_ttm":  km.get("evToEBITDATTM"),
+        "ev_to_sales_ttm":   km.get("evToSalesTTM"),
+        "roe_ttm":           km.get("returnOnEquityTTM"),
+        "price_to_book_ttm": rt.get("priceToBookRatioTTM"),
+        "book_value_per_share_ttm": rt.get("bookValuePerShareTTM"),
+        "net_profit_margin_ttm":    rt.get("netProfitMarginTTM"),
+        "pe_ttm":            rt.get("priceToEarningsRatioTTM"),   # V3.48.0 — eps_ttm = price/pe 反推用
+    }
+    _write_cache(ticker, "ratios_ttm", slim)
+    return slim
 
 
 def get_peers(ticker: str) -> list[str]:
@@ -225,6 +256,49 @@ def get_profiles_bulk(tickers: list[str]) -> dict[str, dict]:
         if prof:
             out[t] = prof
     return out
+
+
+# ---------------------------------------------------------------------------
+# Quarterly income — TTM revenue / gross margin / YoY derivations.
+# Separate cache dir + 7d TTL (fundamentals change once per earnings cycle).
+# ---------------------------------------------------------------------------
+def get_quarterly_income(ticker: str, n: int = 8) -> list[dict]:
+    """Return up to `n` quarterly income-statement rows (newest first).
+
+    7d cache @ skills/_shared/cache/quarterly_income/{TICKER}.json. Used by
+    momentum-monitor for TTM revenue / gross margin / revenue YoY derivations.
+    Returns [] on failure / paid blocker — callers treat empty as missing
+    fundamentals (graceful skip rather than abort).
+    """
+    ticker = ticker.upper()
+    cache_path = os.path.join(QUARTERLY_INCOME_CACHE_DIR, f"{ticker}.json")
+    if os.path.exists(cache_path):
+        age_h = (time.time() - os.path.getmtime(cache_path)) / 3600
+        if age_h <= QUARTERLY_INCOME_TTL_HOURS:
+            try:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    cached = json.load(f)
+                # Cached payload is always a list; treat anything else as
+                # corrupt and re-fetch below.
+                if isinstance(cached, list):
+                    return cached
+            except Exception:
+                pass
+    raw = _fmp_get(
+        "/stable/income-statement",
+        {"symbol": ticker, "period": "quarter", "limit": n},
+    )
+    if not isinstance(raw, list):
+        raw = []
+    try:
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(raw, f, ensure_ascii=False)
+    except Exception as e:
+        print(
+            f"[company_context] WARN: cache write {cache_path} failed: {e}",
+            file=sys.stderr,
+        )
+    return raw
 
 
 if __name__ == "__main__":

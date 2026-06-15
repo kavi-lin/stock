@@ -332,6 +332,21 @@ def enrich_one(ticker: str, *, force: bool = False) -> dict:
     return out
 
 
+def _prune_enrich_cache(max_age_days: int = 7) -> None:
+    """Per-day cache files accumulate forever (was 8k+ files) — drop >7d old."""
+    cutoff = time.time() - max_age_days * 86400
+    n = 0
+    try:
+        for p in ENRICH_CACHE.iterdir():
+            if p.is_file() and p.stat().st_mtime < cutoff:
+                p.unlink()
+                n += 1
+    except Exception as e:
+        print(f"[enrich] WARN cache prune failed: {e}", file=sys.stderr)
+    if n:
+        print(f"[enrich] pruned {n} cache files older than {max_age_days}d", file=sys.stderr)
+
+
 def enrich_movers(tickers: list[str], *, force: bool = False,
                   progress_every_sec: float = 30.0) -> dict:
     """Batch entry. Returns {ticker: enrichment_dict}.
@@ -341,6 +356,7 @@ def enrich_movers(tickers: list[str], *, force: bool = False,
     screen.py's predict phase so daily_update output looks consistent.
     """
     import datetime as _dt
+    _prune_enrich_cache()
     out = {}
     total = len(tickers)
     t_start = time.time()

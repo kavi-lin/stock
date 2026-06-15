@@ -38,7 +38,8 @@ RESULT_DEC_RE = re.compile(
     r"\|\s*[A-Z]*\s*\|\s*\*?\*?(BUY|HOLD|SELL|STAGED_ENTRY)\*?\*?\s*\|\s*[+-]?\d+\.?\d*\s*\|",
     re.I
 )
-SCORE_RE = re.compile(r"\|\s*\*?\*?Final Score\*?\*?\s*\|\s*([+-]?\d+\.?\d*)\s*\|", re.I)
+# Value cell may be bold and carry "/ 3.0" denominator: "| **Final Score** | **1.5637 / 3.0** |"
+SCORE_RE = re.compile(r"\|\s*\*{0,2}Final Score\*{0,2}\s*\|\s*\*{0,2}([+-]?\d+\.?\d*)", re.I)
 POS_RE = re.compile(r"\|\s*\*?\*?Position Size\*?\*?\s*\|\s*([\d.]+)%", re.I)
 RR_RE = re.compile(r"\|\s*\*?\*?Risk/Reward\*?\*?\s*\|\s*([\d.]+)", re.I)
 ACTION_RE = re.compile(r"\|\s*\*?\*?Action\*?\*?\s*\|\s*\*?\*?(EXECUTE|CANCEL|SKIP|STAGED|WAIT|MONITOR)\*?\*?", re.I)
@@ -48,14 +49,17 @@ LANE_RE = re.compile(
     r"\|\s*(Fundamentals|Sentiment|News|Technical)\s*\|\s*(BUY|HOLD|SELL|STAGED_ENTRY)\s*\|\s*([+-]?\d+\.?\d*)\s*\|\s*([\d.]+)\s*\|",
     re.I
 )
-# Red Team — "| Red Team (V4.8) | STRONG_COUNTER | 4/5 | ..." or "| Red Team | ... | strength 4 | ..."
+# Red Team — "| Red Team (V4.8) | STRONG_COUNTER | 4/5 |" or V4.x bold form
+# "| **Red Team** | **MODERATE_COUNTER** | **3 / 5** |"
 RT_RE = re.compile(
-    r"\|\s*Red Team[^|]*\|\s*([A-Z_]+)\s*\|\s*(?:strength\s*)?(\d)(?:/5)?\s*\|",
+    r"\|\s*\*{0,2}Red Team\*{0,2}[^|]*\|\s*\*{0,2}([A-Z_]+)\*{0,2}\s*\|\s*\*{0,2}(?:strength\s*)?(\d)\s*(?:/\s*5)?\*{0,2}\s*\|",
     re.I
 )
-# Burry — "| Contrarian (Burry) | — | 60.8/100 VALUE_BONUS | ..."
+# Burry — "| Contrarian (Burry) | — | 60.8/100 VALUE_BONUS |" or V4.x bold form
+# "| **Burry (Contrarian)** | **VALUE_BONUS** | **73.9 / 100** |"
 BURRY_RE = re.compile(
-    r"\|\s*(?:Contrarian\s*\()?Burry\)?\s*\|\s*[—\-]?\s*\|\s*([\d.]+)\s*/?\s*100",
+    r"\|\s*\*{0,2}(?:Contrarian\s*\(\s*Burry\s*\)|Burry\s*\(\s*Contrarian\s*\)|Burry)\*{0,2}\s*\|"
+    r"(?:\s*[^|]*\|)?\s*\*{0,2}([\d.]+)\s*/?\s*100",
     re.I
 )
 # RESULT row — "| | BUY | 1.721 | ×0.85 | ×0.9 | 1.463 | ..."
@@ -73,6 +77,9 @@ ENTRY_RANGE_RE = re.compile(r"進場區間\**\s*[:：]\s*\$?([\d.]+)\s*[–\-—
 # Technical RSI — REQUIRES separator (|/:/：) to avoid grabbing "RSI 14" as the value.
 # Matches: "RSI 14 | 98.08", "RSI(14): 98.08", "RSI | 39.5"
 RSI_RE = re.compile(r"RSI\s*(?:14|\(14\))?\s*[|:：]\s*([\d.]+)", re.I)
+# V4.x prose form fallback: "RSI 59.5 健康偏強" — decimal REQUIRED so the bare
+# period token "RSI 14" can never match.
+RSI_PROSE_RE = re.compile(r"RSI\s+(\d{1,2}\.\d+)\b")
 
 # Phase 0 regime / warning text search
 EARLY_WARN_RE = re.compile(r"Early[_\s]Warning", re.I)
@@ -156,6 +163,10 @@ def parse_report(path):
 
     # Technical RSI
     rsi_m = RSI_RE.search(txt)
+    if not rsi_m:
+        # prose fallback — skip macro-paragraph "SPY RSI 68.8" (that's SPY, not the ticker)
+        rsi_m = next((m for m in RSI_PROSE_RE.finditer(txt)
+                      if not txt[max(0, m.start() - 4):m.start()].endswith("SPY ")), None)
     out["tech_rsi"] = float(rsi_m.group(1)) if rsi_m else None
 
     # Phase 0 warnings
@@ -190,6 +201,11 @@ def compute_outcome(parsed, prices, window_days=20):
         return {"outcome_available": False}
 
     # Find decision-day row (first trading day >= decision_date)
+    # yfinance occasionally returns trailing NaN Close rows (observed 2026-06-10/11)
+    # — one NaN poisons every mean / pearson downstream, so drop them here.
+    prices = prices[prices["Close"].notna()]
+    if prices.empty:
+        return {"outcome_available": False}
     dd = pd.Timestamp(parsed["date"])
     forward = prices[prices.index >= dd]
     if forward.empty:
@@ -267,7 +283,7 @@ def make_xtab(rows, group_fn, group_label, metric_keys):
         rs = buckets[g]
         cells = [f"`{g}`", str(len(rs))]
         for k in metric_keys:
-            vals = [r[k] for r in rs if r.get(k) is not None]
+            vals = [r[k] for r in rs if r.get(k) is not None and r[k] == r[k]]  # drop None AND NaN
             if vals:
                 cells.append(f"{sum(vals)/len(vals):+.2f}%")
             else:
@@ -388,9 +404,11 @@ def render_report(parsed_rows, run_date):
     ]
     out.append("| Source | Pearson r vs ret_so_far | N |")
     out.append("|---|---:|---:|")
-    rows_with_ret = [r for r in rows if r.get("ret_so_far") is not None]
+    rows_with_ret = [r for r in rows
+                     if r.get("ret_so_far") is not None and r["ret_so_far"] == r["ret_so_far"]]
     for name, fn in sources:
-        pairs = [(fn(r), r["ret_so_far"]) for r in rows_with_ret if fn(r) is not None]
+        pairs = [(fn(r), r["ret_so_far"]) for r in rows_with_ret
+                 if fn(r) is not None and fn(r) == fn(r)]
         if not pairs:
             out.append(f"| {name} | — | 0 |")
             continue

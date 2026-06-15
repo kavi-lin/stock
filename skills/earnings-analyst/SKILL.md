@@ -14,7 +14,6 @@
 |---|---|---|
 | `us-stock-analysis` | 估值/技術/情緒 snapshot(yfinance + FMP partial) | Phase 2 fundamentals lane |
 | `earnings-valuation-forecaster` | 12M 目標價 3×3 敏感度 | ad-hoc / earnings 前 14 天 |
-| `earnings-trade-analyzer` | post-earnings gap/趨勢 5 因子評分 | earnings 後 |
 | **`earnings-analyst`(本)** | **8 季三表結構化趨勢 + 品質 flag + 0-100 composite score** | `財報 [TICKER]` |
 
 ## 執行流程 (V1.73 — 6 步驟,含 LLM narrate phase)

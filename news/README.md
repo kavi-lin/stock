@@ -18,18 +18,18 @@
 
 | Agent | 執行模式 | 職責 | 核心關注 |
 |---|---|---|---|
-| **News Collector** | inline | 蒐集 RSS / WebFetch 原文，確認來源可信度 | Source credibility、時效性、去重 |
-| **Bull Analyst** | Stage 1 inline / **Stage 2 subagent batch** | 多頭角度解讀 | 受益族群、催化劑類型、短中期驅動 |
-| **Bear Analyst** | Stage 1 inline / **Stage 2 subagent batch** | 空頭角度解讀 | 受損族群、風險傳導、尾部風險 |
-| **Sector Analyst** | Stage 1 inline / **Stage 2 subagent batch** | 產業分析師視角 | 上下游傳導、供應鏈 2 階效應、受影響個股 |
-| **Macro/Policy Expert** | Stage 1 inline / **Stage 2 subagent batch** | 財經/政策專家 | Fed 路徑、殖利率、匯率、地緣、歷史類比 |
+| **Stage 1 Triage** | **deterministic script**（`scripts/stage1_triage.py`，0 LLM） | block / dedup / credibility / news_type / score / snap / 晉級 gate | 噪音過濾、template dedup、advancement gate |
+| **News Collector** | inline | WebFetch 晉級項目原文，確認來源可信度 | Source credibility、時效性 |
+| **Bull Analyst** | **Stage 2 subagent batch** | 多頭角度解讀 | 受益族群、催化劑類型、短中期驅動 |
+| **Bear Analyst** | **Stage 2 subagent batch** | 空頭角度解讀 | 受損族群、風險傳導、尾部風險 |
+| **Sector Analyst** | **Stage 2 subagent batch** | 產業分析師視角 | 上下游傳導、供應鏈 2 階效應、受影響個股 |
+| **Macro/Policy Expert** | **Stage 2 subagent batch** | 財經/政策專家 | Fed 路徑、殖利率、匯率、地緣、歷史類比 |
 | **News Arbiter** | inline | 仲裁辯論、加權評分、執行 cache patch | 綜合判斷、cache 一致性 |
 
-### V2.1 執行模式說明
+### V2.2 執行模式說明
 
-- **Stage 1**（shallow triage，30-50 則 × 4 agent snap ≤30 字）保持 inline — subagent 啟動 overhead 對 120 個短 snap 不划算
-- **Stage 2**（deep debate，≤5 則 × 4 agent 完整辯論）改用 **per-agent batch subagent**：每位 agent 一個 Agent tool call，一次看全部晉級項目、輸出 N 份自己視角的分析，彼此不看對方輸出
-- **目的**：消除同 model 序列產生 4 視角的 anchoring 風險，與 `investment_protocol_v4_8` Phase 2 fan-out 同邏輯
+- **Stage 1**（triage）**全 deterministic**：`scripts/stage1_triage.py` 做 hard-block（法律廣告/地產 PR/理財專欄）、headline-template dedup、content-aware credibility downgrade、rule-based news_type、keyword score、4-view template snaps、晉級 gate，寫 `YYYY-MM-DD_triage.json`。LLM **不讀 raw.json 全文**（287KB ≈ 70K tokens），只讀 script 輸出 + `stage2_items` + `shallow_verdicts` top-25，補 top-15 `headline_zh`
+- **Stage 2**（deep debate，≤5 則 × 4 agent 完整辯論）**per-agent batch subagent**：每位 agent 一個 Agent tool call，一次看全部晉級項目（每篇全文截 5000 chars）、輸出 N 份自己視角的分析，彼此不看對方輸出 — 消除同 model 序列產生 4 視角的 anchoring，與 investment_protocol Phase 2 fan-out 同邏輯
 - **REVIEW** 同樣套用 subagent 模式（1 則 × 4 agent 擴展）
 
 ---
@@ -37,12 +37,12 @@
 ## 執行流程（DIGEST 為例）
 
 ```
-Stage 1 Triage              Stage 2 Deep Debate        Phase 3 Arbiter       Phase 4 Patch
-─────────────────           ─────────────────────      ──────────────        ───────────────
-RSS raw.json                4 subagent parallel        加權計算              sector_intel.json
-→ 30-50 則 shallow          Bull / Bear / Sector       per news_type         phase0.json
-→ 4 agent snap              / Macro                    weights table         news_logs/digest.json
-→ |score|≥3 / binary        ≤5 則 full text            verdict output        validator → rc=0
+Stage 1 Triage (script)     Stage 2 Deep Debate        Phase 3 Arbiter       Phase 4 Patch
+─────────────────────       ─────────────────────      ──────────────        ───────────────
+fetch_all_news.py           4 subagent parallel        加權計算              sector_intel.json
+→ stage1_triage.py          Bull / Bear / Sector       per news_type         phase0.json
+  (block/dedup/score        / Macro                    weights table         news_logs/digest.json
+   /snap/gate, 0 LLM)       ≤5 則 × ≤5000 chars        verdict output        validator → rc=0
 → 晉級 ≤5 則                subagent_isolated=true     cache_action          → MD 報告
 ```
 
@@ -52,10 +52,9 @@ RSS raw.json                4 subagent parallel        加權計算             
 
 **V1 的痛**：3 人委員會對 30 則新聞每則都深度辯論 → 單次 DIGEST 燒 ~45k tokens、10+ 分鐘。
 
-**V2 兩階段漏斗**：
-- Stage 1 用 RSS 原始摘要做便宜寬掃描（shallow score 只是 4 個 snap 的加權），快速過濾低影響雜訊
-- Stage 2 只對高影響 / binary 新聞做完整 WebFetch + 四方深度辯論
-- 合計 ~23k tokens（省 50%），時間也從 10+ min 降到 5-8 min
+**V2 兩階段漏斗**：Stage 1 寬掃描過濾雜訊 → Stage 2 只對高影響 / binary 新聞做完整 WebFetch + 四方深度辯論。
+
+**V2.2 把 Stage 1 完全 script 化**：V2.0-2.1 的 Stage 1 仍由 LLM 讀整包 raw.json（~287KB ≈ 70K tokens）手寫 snaps；`stage1_triage.py` 上線後這些全 deterministic，LLM 只讀 top-25 摘要 + 補 top-15 中文標題。DIGEST 單跑 ~110K → **~35-40K tokens**。
 
 **硬上限 Stage 2 ≤ 5 則**：超過這個量深度辯論的 marginal value 大幅遞減（top 5 通常吃掉當日 80% 影響力）。
 
@@ -94,12 +93,16 @@ news/
 ├── README.md                        ← 本文件（說明、哲學、版本歷史）
 ├── news_protocol_v2.md              ← Claude instruction（純執行規則）
 ├── digest_output_schema.md          ← digest.json shape 唯一事實來源
+├── fetch_all_news.py                ← orchestrator：4 fetcher 平行（RSS / Finnhub / FMP / SEC EDGAR）
 ├── fetch_news_rss.py                ← RSS 抓取腳本
 ├── scripts/
-│   ├── validate_digest_output.py    ← schema validator（rc=0 才可進 MD 階段）
+│   ├── stage1_triage.py             ← Stage 1 deterministic triage（block/dedup/score/snap/gate，0 LLM）
+│   ├── validate_digest_output.py    ← schema validator（rc=0 才可進 MD 階段；cross-check triage.json）
+│   ├── build_structural_watchlist.py← Phase 4.5 structural watchlist（daily_update Step 7）
 │   └── (salvage_digest.py 已移至 archive/)  ← API stream idle timeout 後的搶救工具
 ├── news_logs/
-│   ├── YYYY-MM-DD_raw.json          ← RSS 原始資料
+│   ├── YYYY-MM-DD_raw.json          ← 4 源合併原始資料
+│   ├── YYYY-MM-DD_triage.json       ← Stage 1 script 輸出（shallow_verdicts top-50 + stage2_items）
 │   └── YYYY-MM-DD_digest.json       ← 分析結果 cache（shallow + deep）
 └── scan_logs/
     └── news_YYYYMMDD_HHMMSS.log     ← protocol 執行 stream-json log
@@ -143,14 +146,16 @@ phase0.json        ← investment_protocol_v4_8 讀取（macro_backdrop + binary
 
 ## Token 預算
 
-| 項目 | V1 | V2 |
-|---|---|---|
-| Web 請求 | ~30k（6 WebSearch） | ~8k（5 WebFetch） |
-| RSS 解析 | 0 | ~3k（腳本預處理） |
-| Agent 辯論 | ~15k（3 人） | ~12k（Stage 1 輕量 + Stage 2 4 人深度） |
-| **DIGEST 合計** | **~45k** | **~23k** |
-| **FLASH** | ~8k | ~5k |
-| **REVIEW** | n/a | ~4k（只擴展 1 則）|
+| 項目 | V1 | V2.0-2.1（實測） | V2.2 |
+|---|---|---|---|
+| Stage 1 triage | n/a | ~70k in（LLM 讀整包 raw.json）+ ~6k out | **~4k**（script 跑完只讀 top-25） |
+| Web 請求 | ~30k（6 WebSearch） | ~8k（5 WebFetch） | ~8k（5 WebFetch，每篇截 5000 chars） |
+| Stage 2 辯論 | ~15k（3 人） | ~32k in（4 subagent × full bundle）+ ~8k out | **~20k**（bundle cap 後） |
+| Phase 3-4 + MD | — | ~8k（shallow 20 卡） | **~6k**（shallow 10 卡照抄 snaps） |
+| **DIGEST 合計** | **~45k** | **~110k+** | **~35-40k** |
+| **FLASH** | ~8k | ~5k | ~5k |
+| **REVIEW** | n/a | ~4k | ~4k |
+| **TRIAGE（standalone）** | n/a | ~75k | **~5k**（script + top-15 headline_zh） |
 
 ---
 
@@ -167,13 +172,12 @@ phase0.json        ← investment_protocol_v4_8 讀取（macro_backdrop + binary
 
 ### API Stream Idle Timeout
 
-歷史上 Phase 4 寫 digest.json 時發生過兩次：Claude 用單一超大 tool call（Bash heredoc 或 Write）噴整包 10K+ token JSON → Anthropic API 的 stream idle watchdog 觸發 → partial response 中斷、rc=1、token 全浪費。
+歷史上 Phase 4 寫 digest.json 時發生過兩次：超大 JSON 單 tool call → stream idle watchdog 中斷、token 全浪費。
 
-**預防**（protocol Phase 4 強制規則）：
-- ❌ 禁用 `Bash` + heredoc 一次灌入整個 JSON
-- ❌ 禁用單一 `Write` 把整檔當單一字串 argument
-- ✅ 必須分塊 Write（skeleton → append 5-10 筆 verdicts → 封檔）
-- ✅ 推薦用 `news/scripts/digest_append_deep.py` merge script（每 tool call input_json 都很小）
+**現行預防**（protocol Phase 4 規則；歷史的「分塊 Write + digest_append_deep.py」方案已退役、腳本封存 `news/scripts/archive/`）：
+- shallow 硬上限 top 10 → digest.json < 10KB → 單次 `Write` < 1 min，不會觸發 idle
+- ❌ 禁用 `Bash` + heredoc；❌ 禁止分多次 Write / chunks 子資料夾
+- ⚠️ Write 前先 Read 一次 digest.json（解鎖 Write-safety 守門，避免失敗重試重 stream 一次）
 
 **萬一撞上**：不要重跑 protocol（會再燒同樣 tokens），改跑：
 ```bash
@@ -187,9 +191,54 @@ python3 archive/salvage_digest.py
 
 ---
 
+## Structural Watchlist（Phase 4.5 — daily 自動，V2.19 設計）
+
+**目的**：把連續觀察到的 `top_catalysts[]` structural keyword 命中彙整成 watchlist，給 Dashboard「結構性轉變候選」tile + user 提早警覺。**不入 Phase 3 modulation** — 純展示用 metadata，投資 protocol 不讀此檔做決策。
+
+**觸發**：`daily_update.sh` Step 7 自動跑 `python3 news/scripts/build_structural_watchlist.py`（deterministic，LLM 不參與；失敗 non-fatal）。
+
+| | 路徑 |
+|---|---|
+| **輸入** | `news/news_logs/*_digest.json`（過去 30 天）+ `news/news_logs/sector_intel.json` |
+| **輸出** | `news/news_logs/structural_watchlist.json`（atomic temp + rename） |
+
+**STRUCTURAL_KEYWORDS（14 條 whitelist，narrow signal）**：
+
+```
+"sold out", "capacity constrained", "structural deficit", "supercycle",
+"super-cycle", "supply tight", "shortage", "all-time high demand",
+"booked through", "fully allocated", "production at capacity",
+"capacity expansion", "供不應求", "結構性短缺"
+```
+
+廣義 sentiment keyword（"strong demand"、"growth"）刻意排除。
+
+**Decay & Hygiene**：
+
+| 規則 | 條件 | 行為 |
+|---|---|---|
+| Hit window | 只計 `last_observed - 14d` 內 keyword hits | `hit_count_14d` 不含過期 hit |
+| Eviction | `(today - last_observed_date) > 21d` | candidate 自動剔除 |
+| First-hit gate | 第一次出現不入 watchlist | ≥2 獨立 source 同 ticker / 14d 內才入 |
+| Source dedup | 同新聞重貼（url stem 同 OR headline 8-gram 重疊） | 計 1 hit |
+| Sector aggregation | 個股入榜後 sector 列 hot | sector 層級同樣 21d eviction |
+
+**Output schema**：見 `structural_watchlist.json` 實檔（`as_of` / `decay_rules` / `candidates[]`（ticker, sector, keyword_hits, hit_count_14d, source_credibility_max, first/last_observed, days_since_last_hit）/ `sectors[]` / `stats`）。
+
+**V2.20 規劃**：earnings-analyst structural_shift tier tie-breaker（signal 1/3 + watchlist hit → CANDIDATE 門檻降 1）；需先 backtest。
+
+---
+
 ## 版本演進
 
-### V2.1（現行）
+### V2.2（現行）
+- **Stage 1 全 deterministic**：protocol 接上 `scripts/stage1_triage.py`（v3.14.3 已具備 block / template-dedup / credibility downgrade / rule-based news_type / score / snap / gate），LLM 禁讀 raw.json 全文、禁手工 triage — DIGEST 單跑 ~110K → ~35-40K tokens
+- **Stage 2 bundle cap**：每篇全文截 5000 chars（4 subagent 各收一份，重複成本 ×4）
+- **MD 報告 Shallow Digest 20 → 10**，snaps 照抄 triage.json（與 digest.json 一致）
+- **server `triage` protocol** 改 script-first：LLM 只補 top-15 headline_zh（舊 prompt 的 `verdicts` shape 與 validator 期望的 `shallow_verdicts` 衝突，一併修正）
+- Phase 4.5 structural watchlist spec 從 protocol 移到本 README（LLM 不執行，不必佔 protocol context）
+
+### V2.1
 - **Stage 2 / REVIEW 改 per-agent batch subagent**：Bull/Bear/Sector/Macro 各自一個 Agent tool call，一次分析全部晉級項目，彼此 context 隔離 — 消除同 model 序列產生 4 視角的 anchoring
 - **Phase 4 digest.json schema 抽離**至 `digest_output_schema.md`，配 `validate_digest_output.py` 驗證（rc=0 才可進 MD 階段）
 - **新欄位**：`fanout_mode` / `degraded_agents` / `subagent_isolated` sentinel

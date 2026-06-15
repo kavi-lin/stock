@@ -166,7 +166,6 @@ python3 skills/finnhub-client/scripts/audit_drift_check.py
 |---|---|---|
 | `earnings-analyst` | `scripts/fetch.py` + `analyze.py` + `render.py` | FMP 三表 8Q + composite 0-100 + **structural_shift tier** (V2.18) |
 | `earnings-valuation-forecaster` | `scripts/forecast.py` | 12mo Bull/Base/Bear FV + `--pre-earnings` cheat sheet |
-| `earnings-trade-analyzer` | `scripts/analyze_earnings_trades.py` | 5-factor scoring (gap/trend/volume/MA200/MA50) |
 | `economic-calendar-fetcher` | `scripts/get_economic_calendar.py` | FMP econ calendar |
 
 ### 🎯 Decision Layer（決策層）
@@ -187,7 +186,6 @@ python3 skills/finnhub-client/scripts/audit_drift_check.py
 | `technical-analyst` | `scripts/analyze.py` | 技術面 lane（用於投資 protocol Phase 2） |
 | `us-stock-analysis` | `scripts/analyze.py` | 通用個股 deep-dive |
 | `short-term-target` | `scripts/predict.py` + `weekly_review.py` | 1d/5d/15d 目標價 + 戰術建議 |
-| `supply-chain-event-analyst` | `scripts/chain_mapper.py` | 供應鏈事件影響鏈分析 |
 
 ### 🔌 Data Provider Layer（資料抓取）
 

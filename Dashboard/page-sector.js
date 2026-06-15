@@ -105,6 +105,9 @@ const SECTOR_ZH = {
     TECHNOLOGY:'科技', FINANCIAL:'金融', ENERGY:'能源',
     HEALTHCARE:'醫療保健', CONSUMER_CYCLICAL:'非必需消費', COMMUNICATION_SERVICES:'通訊服務',
     CONSUMER_DEFENSIVE:'必需消費', REAL_ESTATE:'房地產',
+    // V4.2.0 — aliases for sector_intel internal names (Financials / Consumer_Staples / …)
+    FINANCIALS:'金融', CONSUMER_STAPLES:'必需消費', CONSUMER_DISCRETIONARY:'非必需消費',
+    COMMUNICATION:'通訊服務', MATERIALS:'基礎材料',
 };
 
 // Map sector page names (data.json .sectors[].name) → momentum page row.sector
@@ -191,8 +194,12 @@ async function loadSectorData() {
         window.UI = window.UI || {};
         window.UI._themeOverrides = data.theme_overrides || [];
 
-        renderHandoff(data.market);
+        renderHandoff(data.market, data);
+        renderCommittee(data.market?.committee, data.sectors || []);
+        renderRedTeam(data.market?.da_challenges);
         renderSectorMatrix(data.sectors || [], lang);
+        renderQuantTable(data.sectors || []);
+        renderMacroOverlay(data.market?.fred_overlay, data.market?.political_risk);
         renderThreeSignal(data.breadth, data.ftd, data.market_top);
         renderCatalystFeed(data.market);
         renderDivergence(data.divergence_watch || []);
@@ -213,7 +220,260 @@ function renderBinaryAlert(risks) { /* no-op: lives on dashboard */ }
 /* ── Today's Verdict (hero card) — shared component ──────────── */
 // Implementation moved to components.js (Components.renderTodayVerdict).
 // Keep the legacy `renderHandoff` alias so existing callers still work.
-function renderHandoff(market) { Components.renderTodayVerdict(market); }
+// V4.2.0 — pass full data so the briefing signal grid (breadth/FTD/top/FRED)
+// renders here too, same as index.html.
+function renderHandoff(market, data) { Components.renderTodayVerdict(market, data); }
+
+/* ── V4.2.0: helpers shared by committee matrix + quant table ── */
+function _sectorZhName(name) {
+    return SECTOR_ZH[(name || '').toUpperCase().replace(/ /g, '_')] || (name || '').replace(/_/g, ' ');
+}
+function _sectorDispName(name) {
+    return UI.currentLang === 'zh' ? _sectorZhName(name) : (name || '').replace(/_/g, ' ');
+}
+function _fmtRS(v) { return v == null ? '—' : (v > 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
+function _colorRS(v) {
+    if (v == null) return '#71717a';
+    return v >= 0.03 ? '#22c55e' : v > 0 ? '#4ade80' : v <= -0.03 ? '#ef4444' : '#f87171';
+}
+
+/* ── V4.2.0: Committee conviction matrix (phase-4a — 4 lanes' independent calls) ── */
+const LANE_META = {
+    Sector_Rotation_Analyst:    { zh: '輪動', en: 'Rotation' },
+    Theme_Intelligence_Analyst: { zh: '主題', en: 'Theme' },
+    News_Catalyst_Analyst:      { zh: '新聞', en: 'News' },
+    FRED_Macro_Analyst:         { zh: '宏觀', en: 'Macro' },
+};
+
+function renderCommittee(committee, sectors) {
+    const card = document.getElementById('committee-card');
+    if (!card) return;
+    const proposals = committee?.proposals || [];
+    if (!proposals.length || !sectors.length) { card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    const isZh = UI.currentLang === 'zh';
+    const tr = t();
+
+    document.getElementById('committee-mode').textContent = committee.fanout_mode || '';
+    document.getElementById('committee-sub').textContent = tr.committee_sub ||
+        (isZh ? '4 條分析 lane 各自的 HOT/COLD conviction — 意見相左本身就是訊號'
+              : 'Independent HOT/COLD convictions from 4 analyst lanes — disagreement is signal');
+
+    const laneLabel = p => {
+        const meta = LANE_META[p.agent];
+        return meta ? (isZh ? meta.zh : meta.en) : (p.agent || '').split('_')[0];
+    };
+
+    const ordered = [...sectors].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const header = `<tr><th>${tr.committee_col_sector || (isZh ? '板塊' : 'Sector')}</th>${
+        proposals.map(p => `<th title="${UI.escapeHTML(p.agent)}">${laneLabel(p)}</th>`).join('')
+    }<th></th></tr>`;
+
+    const rows = ordered.map(s => {
+        let hot = 0, cold = 0;
+        const cells = proposals.map(p => {
+            if ((p.hot || []).includes(s.name))  { hot++;  return '<td><span style="color:#22c55e;font-weight:900">▲</span></td>'; }
+            if ((p.cold || []).includes(s.name)) { cold++; return '<td><span style="color:#ef4444;font-weight:900">▼</span></td>'; }
+            return '<td><span style="color:#52525b">·</span></td>';
+        }).join('');
+        const divergent = hot > 0 && cold > 0;
+        const badge = divergent
+            ? `<span class="cm-badge" style="color:#f59e0b;border-color:#f59e0b40;background:#f59e0b15">${tr.committee_divergent || (isZh ? '分歧' : 'SPLIT')}</span>`
+            : hot >= 2  ? `<span class="cm-badge" style="color:#22c55e;border-color:#22c55e40;background:#22c55e15">▲×${hot}</span>`
+            : cold >= 2 ? `<span class="cm-badge" style="color:#ef4444;border-color:#ef444440;background:#ef444415">▼×${cold}</span>`
+            : '';
+        return `<tr${divergent ? ' style="background:rgba(245,158,11,0.05)"' : ''}>
+            <td><span class="font-bold" style="color:var(--text-main)">${s.proxy_etf || ''}</span> <span class="text-zinc-500">${_sectorDispName(s.name)}</span></td>
+            ${cells}<td>${badge}</td></tr>`;
+    }).join('');
+
+    document.getElementById('committee-matrix').innerHTML =
+        `<table class="committee-table"><thead>${header}</thead><tbody>${rows}</tbody></table>`;
+
+    // Per-lane rationale — the analyst voice that was previously dropped on the floor
+    document.getElementById('committee-rationale').innerHTML = proposals.map(p => `
+        <details class="cm-rationale">
+            <summary>
+                <span class="cm-lane-chip">${laneLabel(p)}</span>
+                <span style="color:#22c55e">▲ ${(p.hot || []).map(_sectorDispName).join('、') || '—'}</span>
+                <span style="color:#ef4444">▼ ${(p.cold || []).map(_sectorDispName).join('、') || '—'}</span>
+            </summary>
+            <p>${UI.escapeHTML(p.rationale || '')}</p>
+        </details>`).join('');
+}
+
+/* ── V4.2.0: Red Team falsification panel (phase-4b Devil's Advocate) ── */
+function renderRedTeam(da) {
+    const card = document.getElementById('redteam-card');
+    if (!card) return;
+    const challenges = da?.challenges || [];
+    if (!challenges.length && !da?.tail_risk_note) { card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    const isZh = UI.currentLang === 'zh';
+    const tr = t();
+
+    document.getElementById('redteam-sub').textContent = tr.redteam_sub ||
+        (isZh ? 'Devil\'s Advocate 對多頭論點的反證 — IF/THEN 是可監控的推翻觸發條件'
+              : 'Devil\'s Advocate counter-evidence — each IF/THEN is a monitorable kill trigger');
+    const consEl = document.getElementById('redteam-consensus');
+    if (consEl) consEl.textContent = da?.consensus_warning ? '⚠ CONSENSUS WARNING' : '';
+
+    const CONF = { HIGH: '#ef4444', MEDIUM: '#f59e0b', LOW: '#71717a' };
+    document.getElementById('redteam-list').innerHTML = challenges.map(c => {
+        const cc = CONF[(c.confidence || '').toUpperCase()] || '#71717a';
+        const scenario = UI.escapeHTML(c.risk_scenario || '')
+            .replace(/\b(IF|THEN|WITHIN)\b/g, '<b style="color:#f59e0b">$1</b>');
+        return `
+        <div class="rt-card">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="text-[11px] font-black" style="color:var(--text-main)">${_sectorDispName(c.sector)}</span>
+                <span class="text-[8px] font-bold text-zinc-500">${tr.rt_challenged || (isZh ? '被挑戰的 call' : 'challenged call')}: <b style="color:#a78bfa">${UI.escapeHTML(c.call || '')}</b></span>
+                <span class="text-[8px] font-black px-1.5 py-0.5 rounded ml-auto" style="background:${cc}20;color:${cc};border:1px solid ${cc}40">DA ${UI.escapeHTML(c.confidence || '')}</span>
+                ${c.accepted ? `<span class="text-[9px] font-bold" style="color:#22c55e" title="${tr.rt_accepted || (isZh ? '已記入 sector notes' : 'accepted into sector notes')}">✓</span>` : ''}
+            </div>
+            <p class="text-[10px] leading-snug mb-1.5" style="color:var(--text-muted)">${UI.escapeHTML(c.counter_evidence || '')}</p>
+            ${c.risk_scenario ? `<div class="rt-trigger">${scenario}</div>` : ''}
+        </div>`;
+    }).join('') || `<p class="text-[10px] text-zinc-600">${tr.rt_none || 'No challenges this run.'}</p>`;
+
+    const tail = document.getElementById('redteam-tail-note');
+    if (tail) {
+        if (da?.tail_risk_note) { tail.textContent = `Tail risk: ${da.tail_risk_note}`; tail.classList.remove('hidden'); }
+        else tail.classList.add('hidden');
+    }
+}
+
+/* ── V4.2.0: Quant evidence matrix (phase-1 valuation + phase-3 pulses, sortable) ── */
+let _quantSort = { key: 'score', dir: -1 };
+let _quantSectors = [];
+
+function renderQuantTable(sectors) {
+    const card  = document.getElementById('quant-card');
+    const table = document.getElementById('quant-table');
+    if (!card || !table) return;
+    const hasQuant = (sectors || []).some(s => s.valuation || s.earnings_pulse || s.smart_money);
+    if (!hasQuant) { card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    _quantSectors = sectors;
+    const isZh = UI.currentLang === 'zh';
+    const tr = t();
+    document.getElementById('quant-hint').textContent = tr.quant_hint || (isZh ? '點欄位標題排序' : 'click a column to sort');
+
+    const COLS = [
+        { key: 'sector',  label: isZh ? '板塊' : 'Sector', num: false, align: 'left',
+          get: s => s.proxy_etf || s.name,
+          fmt: (v, s) => `<span class="font-bold" style="color:var(--text-main)">${s.proxy_etf || ''}</span> <span class="text-zinc-500">${_sectorDispName(s.name)}</span>`,
+          color: () => '' },
+        { key: 'verdict', label: 'Verdict', num: false, get: s => s.verdict,
+          fmt: v => v || '—', color: v => (VC[v] || VC.COLD).hex },
+        { key: 'score',   label: 'Score', get: s => s.score,
+          fmt: v => v == null ? '—' : String(v), color: v => v >= 60 ? '#22c55e' : v >= 50 ? '#eab308' : '#ef4444' },
+        { key: 'rotation', label: isZh ? '輪動' : 'Rotation', num: false, get: s => s.rotation_signal,
+          fmt: v => v === 'INFLOW' ? '▲ IN' : v === 'OUTFLOW' ? '▼ OUT' : '–',
+          color: v => v === 'INFLOW' ? '#22c55e' : v === 'OUTFLOW' ? '#ef4444' : '#71717a' },
+        { key: 'uptrend', label: 'Uptrend', get: s => s.uptrend_ratio,
+          fmt: v => v == null ? '—' : (v * 100).toFixed(0) + '%',
+          color: v => v >= 0.4 ? '#22c55e' : v >= 0.2 ? '#eab308' : '#ef4444' },
+        { key: 'pez', label: 'PE z1y', get: s => s.valuation?.pe_zscore_1y,
+          fmt: v => v == null ? '—' : v.toFixed(2),
+          color: v => v == null ? '#71717a' : v <= -1 ? '#22c55e' : v >= 1 ? '#ef4444' : '#a1a1aa' },
+        { key: 'rs5',  label: 'RS 5d',  get: s => s.valuation?.rs_5d,  fmt: _fmtRS, color: _colorRS },
+        { key: 'rs20', label: 'RS 20d', get: s => s.valuation?.rs_20d, fmt: _fmtRS, color: _colorRS },
+        { key: 'rs3m', label: 'RS 3m',  get: s => s.valuation?.rs_3m,  fmt: _fmtRS, color: _colorRS },
+        { key: 'beat', label: 'Beat 30d', get: s => s.earnings_pulse?.beat_rate_30d,
+          fmt: (v, s) => v == null ? '—' : `${(v * 100).toFixed(0)}% <span style="color:#52525b">n=${s.earnings_pulse?.report_count ?? '?'}</span>`,
+          color: v => v == null ? '#71717a' : v >= 0.7 ? '#22c55e' : v >= 0.5 ? '#eab308' : '#ef4444' },
+        { key: 'rev', label: isZh ? '淨上修' : 'Revisions', get: s => s.earnings_pulse?.analyst_revision_net,
+          fmt: v => v == null ? '—' : (v > 0 ? '+' : '') + v,
+          color: v => v > 0 ? '#22c55e' : v < 0 ? '#ef4444' : '#71717a' },
+        { key: 'insider', label: 'Insider', get: s => s.smart_money?.insider_ratio,
+          fmt: (v, s) => v == null ? '—' : `${v.toFixed(2)}× <span style="color:#52525b">n=${s.smart_money?.insider_sample ?? '?'}</span>`,
+          color: v => v == null ? '#71717a' : v >= 1.2 ? '#22c55e' : v <= 0.7 ? '#ef4444' : '#a1a1aa' },
+        { key: 'sent', label: isZh ? '情緒' : 'Sentiment', num: false, get: s => s.news_sentiment,
+          fmt: v => v === 'bullish' ? '🟢' : v === 'bearish' ? '🔴' : v ? '⚪' : '—', color: () => '' },
+        { key: 'fredx', label: 'FRED×', get: s => s.fred_multiplier,
+          fmt: v => v == null ? '—' : Number(v).toFixed(3),
+          color: v => v > 1 ? '#22c55e' : v < 1 ? '#ef4444' : '#71717a' },
+    ];
+
+    const col = COLS.find(c => c.key === _quantSort.key) || COLS[2];
+    const rows = [..._quantSectors].sort((a, b) => {
+        const av = col.get(a), bv = col.get(b);
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        const cmp = (col.num === false) ? String(av).localeCompare(String(bv)) : (av - bv);
+        return cmp * _quantSort.dir;
+    });
+
+    const thead = `<thead><tr>${COLS.map(c => {
+        const active = c.key === _quantSort.key;
+        const arrow = active ? (_quantSort.dir === -1 ? ' ▾' : ' ▴') : '';
+        return `<th data-qsort="${c.key}" style="text-align:${c.align || 'right'}${active ? ';color:var(--text-main)' : ''}">${c.label}${arrow}</th>`;
+    }).join('')}</tr></thead>`;
+
+    const tbody = `<tbody>${rows.map(s => `<tr>${COLS.map(c => {
+        const v = c.get(s);
+        const colr = c.color(v);
+        return `<td style="text-align:${c.align || 'right'}${colr ? `;color:${colr}` : ''}">${c.fmt(v, s)}</td>`;
+    }).join('')}</tr>`).join('')}</tbody>`;
+
+    table.innerHTML = thead + tbody;
+    table.querySelectorAll('th[data-qsort]').forEach(th => th.addEventListener('click', () => {
+        const key = th.dataset.qsort;
+        if (_quantSort.key === key) _quantSort.dir *= -1;
+        else _quantSort = { key, dir: -1 };
+        renderQuantTable(_quantSectors);
+    }));
+}
+
+/* ── V4.2.0: Macro overlay strip (phase-0 FRED snapshot + step6 + political risk) ── */
+function renderMacroOverlay(fred, political) {
+    const card = document.getElementById('macro-card');
+    if (!card) return;
+    if (!fred && !political?.summary) { card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    const isZh = UI.currentLang === 'zh';
+    const tr = t();
+
+    const chips = [];
+    const chip = (label, value, color) => chips.push(
+        `<span class="macro-chip" style="border-color:${color}40;color:${color};background:${color}10"><span class="macro-chip-label">${label}</span>${value}</span>`);
+
+    if (fred) {
+        if (fred.regime_label) chip('Regime', `${fred.regime_label}${fred.regime_confidence != null ? ` (${(fred.regime_confidence * 100).toFixed(0)}%)` : ''}`, '#38bdf8');
+        if (fred.yield_curve_value != null) chip(isZh ? '殖利率曲線' : 'Curve',
+            `${fred.yield_curve_value > 0 ? '+' : ''}${fred.yield_curve_value}${fred.yield_curve_inverted ? (isZh ? ' 倒掛' : ' inverted') : ''}`,
+            fred.yield_curve_inverted ? '#ef4444' : '#22c55e');
+        if (fred.real_rate != null) chip('Real rate', `${fred.real_rate}%${fred.real_rate > 2 ? ' ⚠' : ''}`, fred.real_rate > 2 ? '#ef4444' : '#22c55e');
+        if (fred.fed_rate_direction) chip('Fed', fred.fed_rate_direction, '#a1a1aa');
+        if (fred.credit_stress_elevated) chip(isZh ? '信用壓力' : 'Credit stress', '⚠', '#ef4444');
+        if (fred.financial_stress_above_avg) chip(isZh ? '金融壓力' : 'Fin. stress', '⚠', '#f59e0b');
+        (fred.velocity_highlights || []).forEach(v => {
+            const [series, dir] = String(v).split(':');
+            const up = dir === 'accelerating';
+            chip(series, up ? '↑' : '↓', up ? '#f59e0b' : '#38bdf8');
+        });
+    }
+    document.getElementById('macro-overlay-chips').innerHTML = chips.join('');
+
+    const note = document.getElementById('macro-overlay-note');
+    note.textContent = fred?.overlay_applied && fred.overlay_rationale
+        ? `${isZh ? 'Step6 板塊乘數' : 'Step6 sector multiplier'}: ${fred.overlay_rationale}` : '';
+
+    const pol = document.getElementById('political-risk-box');
+    if (political?.summary) {
+        const LV = { low: '#22c55e', moderate: '#eab308', elevated: '#f97316', high: '#ef4444' };
+        const lc = LV[(political.level || '').toLowerCase()] || '#a1a1aa';
+        pol.style.borderColor = lc + '40';
+        pol.style.background = lc + '08';
+        pol.innerHTML = `<div class="flex items-center gap-2 mb-1">
+            <span class="text-[9px] font-black uppercase tracking-widest" style="color:${lc}">${tr.political_title || (isZh ? '地緣 / 政策風險' : 'Geopolitical / Policy Risk')}</span>
+            <span class="text-[8px] font-black px-1.5 py-0.5 rounded" style="background:${lc}20;color:${lc};border:1px solid ${lc}40">${(political.level || '').toUpperCase()}</span></div>
+            <p class="text-[10px] leading-snug" style="color:var(--text-muted)">${UI.escapeHTML(political.summary)}</p>`;
+        pol.classList.remove('hidden');
+    } else pol.classList.add('hidden');
+}
 
 /* ── Sector Cards ────────────────────────────────────────────── */
 function renderSectorMatrix(sectors, lang) {
@@ -287,11 +547,9 @@ function buildSectorCard(s, lang) {
     }).filter(Boolean).join('');
 
     const tr = t();
-    const daNote = s.devils_advocate
-        ? `<div class="mt-2 pt-2 border-t border-violet-500/20">
-            <div class="text-[9px] font-black text-violet-400 mb-1 uppercase tracking-wider">${tr.da_challenge || 'DA Challenge'}</div>
-            <p class="text-[10px] text-violet-300/80 leading-snug">${s.devils_advocate}</p>
-           </div>`
+    // V4.2.0 — full DA challenge moved to the Red Team panel; card keeps a tiny marker only
+    const daMark = s.devils_advocate
+        ? `<div class="text-[9px] font-bold text-violet-400 mt-1" title="${(s.devils_advocate || '').replace(/"/g, '&quot;')}">⚔ ${tr.da_challenge || 'DA Challenge'}</div>`
         : '';
 
     const uptrendBar = s.uptrend_ratio != null
@@ -379,8 +637,8 @@ function buildSectorCard(s, lang) {
         <!-- Risk flags -->
         ${flags ? `<div class="flex flex-wrap gap-1">${flags}</div>` : ''}
 
-        <!-- DA note -->
-        ${daNote}
+        <!-- DA marker (full challenge lives in Red Team panel) -->
+        ${daMark}
 
         <!-- V2.17.1 — Top 5 競品 collapsible -->
         ${competitorsBlock}
@@ -667,6 +925,12 @@ function applyTranslations() {
     set('divergence-title',     tr.divergence_title);
     set('themes-title',         tr.themes_title);
     set('heatmap-title',        tr.heatmap_title);
+    // V4.2.0 — new sections
+    const isZh = UI.currentLang === 'zh';
+    set('committee-title', tr.committee_title || (isZh ? '委員會決議矩陣' : 'Committee Conviction Matrix'));
+    set('redteam-title',   tr.redteam_title   || (isZh ? 'Red Team 推翻條件' : 'Red Team Falsification'));
+    set('quant-title',     tr.quant_title     || (isZh ? '量化證據矩陣' : 'Quant Evidence Matrix'));
+    set('macro-title',     tr.macro_title     || (isZh ? '宏觀 Overlay (FRED)' : 'Macro Overlay (FRED)'));
 }
 
 /* ── Reverse-call: trigger Claude to run sector scan ─────────── */
