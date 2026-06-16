@@ -15,6 +15,11 @@ import sys
 DEFAULT_TAX_RATE = 0.21
 MIN_CORE_ROWS = 1
 
+# EXP-R2 illustrative elasticities — NOT a bear/base/bull scenario. They show how
+# sensitive the bridge is to its two biggest held-constant assumptions.
+NET_MARGIN_SHOCK = 0.20   # +/-20% relative to the held-constant historical net margin
+SHARE_SHOCK = 0.10        # +/-10% diluted share count (buyback vs dilution over horizon)
+
 
 def _num(value):
     return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
@@ -239,6 +244,74 @@ def _consistency_checks(row: dict):
     return checks
 
 
+def _held_constant_assumptions(margins: dict, fcf_margin, capex_intensity, shares, tax_rate, tax_source) -> list[dict]:
+    """EXP-R2: make the bridge's frozen conversion ratios explicit. Forward net income
+    is forward_revenue * historical_net_margin — an identity, not new information."""
+    items = [
+        ("gross_margin", margins.get("gross_margin"), margins.get("source")),
+        ("operating_margin", margins.get("operating_margin"), margins.get("source")),
+        ("net_margin", margins.get("net_margin"), margins.get("source")),
+        ("fcf_margin", fcf_margin, "historical"),
+        ("capex_intensity", capex_intensity, "historical"),
+        ("diluted_share_count", shares, "historical_latest"),
+        ("tax_and_other_rate", tax_rate, tax_source),
+    ]
+    return [
+        {
+            "driver": name,
+            "held_constant_value": _round(value, 0 if name == "diluted_share_count" else 4),
+            "basis": basis,
+            "assumption": "held_constant_at_historical_value",
+        }
+        for name, value, basis in items if _num(value) is not None
+    ]
+
+
+def _terminal_sensitivity(terminal_row: dict, net_margin, shares) -> dict | None:
+    """EXP-R2: elasticity of forward net income / EPS to the two held-constant
+    assumptions (net margin, share count). Labelled illustrative — NOT a scenario."""
+    revenue = _num((terminal_row.get("revenue") or {}).get("point"))
+    net_margin = _ratio(net_margin)
+    if revenue is None or net_margin is None:
+        return None
+    shares = _pos(shares)
+
+    def _eps(net_income, share_count):
+        share_count = _pos(share_count)
+        return _round(net_income / share_count, 4) if (share_count and net_income is not None) else None
+
+    base_ni = revenue * net_margin
+    margin_cases = {}
+    for label, factor in (("minus_20pct_relative", 1 - NET_MARGIN_SHOCK),
+                          ("held_constant", 1.0),
+                          ("plus_20pct_relative", 1 + NET_MARGIN_SHOCK)):
+        ni = revenue * net_margin * factor
+        margin_cases[label] = {
+            "net_margin": _round(net_margin * factor, 4),
+            "net_income": _round(ni, 0),
+            "eps_implied": _eps(ni, shares),
+        }
+    share_cases = {}
+    for label, factor in (("minus_10pct_buyback", 1 - SHARE_SHOCK),
+                          ("held_constant", 1.0),
+                          ("plus_10pct_dilution", 1 + SHARE_SHOCK)):
+        share_cases[label] = {
+            "diluted_share_count": _round(shares * factor, 0) if shares else None,
+            "eps_implied": _eps(base_ni, shares * factor if shares else None),
+        }
+    return {
+        "horizon_date": terminal_row.get("date"),
+        "basis": "illustrative_elasticity_not_a_scenario",
+        "net_margin_sensitivity": margin_cases,
+        "share_count_sensitivity": share_cases,
+        "policy": (
+            "Shows how much forward net income / EPS move with the held-constant net margin and "
+            "share-count assumptions. This is a sensitivity probe, not a bear/base/bull scenario, "
+            "and produces no fair value, target price, or verdict."
+        ),
+    }
+
+
 def build_financial_bridge(earnings_cache: dict, guidance_promoted: list[dict] | None = None,
                            generated_at: str | None = None) -> dict:
     """Build a conservative forward financial bridge from sourced estimates."""
@@ -303,11 +376,18 @@ def build_financial_bridge(earnings_cache: dict, guidance_promoted: list[dict] |
 
     available = bool(rows) and not missing
     status = "available" if available else "insufficient_inputs"
+    assumptions = _held_constant_assumptions(
+        margins, fcf_margin, capex_intensity, shares, tax_rate, tax_source,
+    )
+    sensitivity = _terminal_sensitivity(rows[-1], margins.get("net_margin"), shares) if rows else None
     return {
         "available": available,
         "status": status,
         "generated_at": generated_at,
         "forecast_basis": "consensus_annual_estimates_plus_historical_conversion",
+        "assumption_basis": "historical_ratios_held_constant",
+        "held_constant_assumptions": assumptions,
+        "terminal_sensitivity": sensitivity,
         "historical_conversion": {
             "gross_margin": _round(margins.get("gross_margin")),
             "operating_margin": _round(margins.get("operating_margin")),

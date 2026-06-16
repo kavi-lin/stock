@@ -8,6 +8,21 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.32.0] — 2026-06-16 — Forward Bridge 凍結假設透明化 + 敏感度（EXP-R2）
+
+### Added
+- `forward_expectations_financial_bridge.py`：top-level `assumption_basis: historical_ratios_held_constant`
+  + `held_constant_assumptions`（逐項揭露 gross/operating/net margin、fcf margin、capex、share count、tax
+  皆 held-constant 於歷史值）+ `terminal_sensitivity`（最遠 row 的 net-margin ±20% 與 share count ±10%
+  對 net income / EPS 的彈性；明確標 `illustrative_elasticity_not_a_scenario`，非 bear/base/bull）。
+- `forward_expectations_report.py` Financial Bridge Risk 區塊新增 held-constant 揭露 + sensitivity 行（人讀）。
+- `test_forward_expectations_financial_bridge.py` 25→35 asserts。
+
+### Why
+- V4.30.0 code review 缺點 #2：bridge 把 margin/share 凍結於歷史值，forward net income =
+  forward_revenue × 歷史 net margin 其實是恆等式、看似新資訊。本版不改演算法，而是**誠實揭露**這是
+  held-constant 假設並量化它的敏感度，讓讀者知道數字對假設多脆弱。仍 shadow-only，不產 fair value。
+
 ## [4.31.0] — 2026-06-16 — 打破 Future Price Range 套套邏輯：歷史 multiple regime anchor（EXP-R1）
 
 ### Added

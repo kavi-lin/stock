@@ -115,7 +115,6 @@ def _bridge_risk_lines(snapshot: dict):
         return lines
     if not risks:
         lines.append("- No bridge risk flags emitted.")
-        return lines
     for risk in risks[:8]:
         if risk.get("risk"):
             lines.append(f"- {risk['risk']} ({risk.get('severity', 'medium')})")
@@ -130,6 +129,31 @@ def _bridge_risk_lines(snapshot: dict):
         else:
             detail = status
         lines.append(f"- {date}: {check} = {status} ({detail})")
+    lines.extend(_bridge_assumption_lines(bridge))
+    return lines
+
+
+def _bridge_assumption_lines(bridge: dict):
+    """EXP-R2: surface held-constant assumptions + terminal sensitivity for the human reader."""
+    lines = []
+    held = bridge.get("held_constant_assumptions") or []
+    if held:
+        names = ", ".join(a.get("driver") for a in held if a.get("driver"))
+        lines.append(f"- Held-constant assumptions ({bridge.get('assumption_basis')}): {names}.")
+        lines.append("  Forward net income = forward revenue × historical net margin — an identity, not new information.")
+    ts = bridge.get("terminal_sensitivity")
+    if isinstance(ts, dict):
+        nm = ts.get("net_margin_sensitivity") or {}
+        sc = ts.get("share_count_sensitivity") or {}
+        lo = (nm.get("minus_20pct_relative") or {}).get("eps_implied")
+        mid = (nm.get("held_constant") or {}).get("eps_implied")
+        hi = (nm.get("plus_20pct_relative") or {}).get("eps_implied")
+        dil = (sc.get("plus_10pct_dilution") or {}).get("eps_implied")
+        if mid is not None:
+            lines.append(
+                f"- Sensitivity @ {ts.get('horizon_date')} (illustrative, not a scenario): "
+                f"net-margin ±20% → EPS {lo}/{mid}/{hi}; +10% dilution → EPS {dil}."
+            )
     return lines
 
 

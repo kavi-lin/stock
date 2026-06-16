@@ -129,5 +129,24 @@ none = fb.build_financial_bridge({"quarterly_pnl": EC["quarterly_pnl"], "cash_fl
 check("none.available", none["available"], False)
 check("none.warning", "no_forward_revenue_rows" in none["warnings"], True)
 
+print("Fixture G (EXP-R2 held-constant disclosure + terminal sensitivity):")
+g = fb.build_financial_bridge(EC)
+check("g.assumption_basis", g["assumption_basis"], "historical_ratios_held_constant")
+drivers = {a["driver"] for a in g["held_constant_assumptions"]}
+check("g.discloses net_margin held", "net_margin" in drivers, True)
+check("g.discloses share count held", "diluted_share_count" in drivers, True)
+ts = g["terminal_sensitivity"]
+check("g.sensitivity labelled not-a-scenario", ts["basis"], "illustrative_elasticity_not_a_scenario")
+check("g.sensitivity horizon = farthest row", ts["horizon_date"], "2028-12-31")
+# net margin 0.155 (median of 0.14/0.15/0.16/0.17), revenue 2000, shares 100
+check("g.margin held eps = 2000*0.155/100", ts["net_margin_sensitivity"]["held_constant"]["eps_implied"], 3.10, tol=0.001)
+check("g.margin -20% eps = 2000*0.124/100", ts["net_margin_sensitivity"]["minus_20pct_relative"]["eps_implied"], 2.48, tol=0.001)
+check("g.share +10% dilution eps = 310/110", ts["share_count_sensitivity"]["plus_10pct_dilution"]["eps_implied"], 2.8182, tol=0.001)
+check("g.share -10% buyback shares = 90", ts["share_count_sensitivity"]["minus_10pct_buyback"]["diluted_share_count"], 90)
+
+print("Fixture H (sensitivity degrades when net margin missing):")
+h = fb.build_financial_bridge({"annual_estimates": EC["annual_estimates"]})
+check("h.terminal_sensitivity None", h["terminal_sensitivity"], None)
+
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
