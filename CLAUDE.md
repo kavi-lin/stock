@@ -127,7 +127,9 @@ python3 investment/scripts/forward_expectations_report.py --snapshot-file <snaps
 python3 investment/scripts/forward_expectations_scenario_policy.py --snapshot-file <snapshot.json> # V4.26.0 scenario evidence gate policy（不產生 scenario 數字）
 python3 investment/scripts/forward_expectations_scenario_builder.py --snapshot-file <snapshot.json> # V4.28.0 operating-driver scenario builder（shadow；Royalty/IP driver-level cases；不產生 fair value）
 python3 investment/scripts/forward_expectations_price_range.py --snapshot-file <snapshot.json> # V4.29.0 future price range mapper（shadow；bear/base/bull target range）
-python3 investment/scripts/test_forward_expectations.py                         # V4.30.0 forward_expectations core golden-fixture（45 asserts，改 engine 後必跑 rc=0）
+python3 investment/scripts/forward_expectations_multiple_anchor.py <T>          # V4.31.0 自身歷史 multiple regime anchor（EXP-R1；price-independent；破套套邏輯）
+python3 investment/scripts/forward_expectations_success_criteria.py             # V4.34.0 成功標準 gate（EXP-0.4；8 criteria；shadow→live 唯讀門檻；現況 insufficient_evidence）
+python3 investment/scripts/test_forward_expectations.py                         # V4.34.0 forward_expectations core golden-fixture（48 asserts，改 engine 後必跑 rc=0）
 python3 investment/scripts/test_forward_price_range.py                          # V4.30.0 ticker-facing future price range CLI golden-fixture
 python3 investment/scripts/test_forward_expectations_source_discovery.py        # V4.21.0 ticker-neutral source discovery golden-fixture
 python3 investment/scripts/test_forward_expectations_document_acquisition.py    # V4.21.0 bounded SEC document acquisition golden-fixture

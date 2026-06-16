@@ -307,8 +307,8 @@
 
 #### 🩺 系統健康度快照（V4.30.0 code review）
 
-> 治理層 A（shadow-only / evidence contract / same-metric gate / immutable ledger / 0-LLM / 16 golden test 全綠）。
-> **交付層 C**：headline 產物 `future_price_range` 在預設路徑數學上塌回現價，看似 forecast 實為波動帶。下列 P0 未清前，**禁止任何 lane 進入 EXP-4.5 shadow→live**。
+> 治理層 A（shadow-only / evidence contract / same-metric gate / immutable ledger / 0-LLM / 19 golden test 全綠）。
+> **交付層 C→B（V4.34.0）**：P0 robustness gate (R1~R4 + 0.4 + 1.2) 全清。`future_price_range` 套套邏輯已破（接歷史 multiple regime），scenario 分歧度 evidence 化，成功標準 gate 上線（現況 insufficient_evidence、shadow→live 仍誠實擋住，待樣本累積）。EXP-4.5 升 live 前須 `success_criteria` verdict=pass + user 批准。
 >
 > 已知致命/重大問題（review 實測 ARM base +0.0% / NVDA base +0.0%）：
 > 1. ~~**套套邏輯**：無 explicit forward multiple 時 base target ≡ current price~~ → **✅ V4.31.0 EXP-R1 修復**：接歷史 multiple regime anchor（price-independent），無 anchor 時誠實標 advisory band。
@@ -325,8 +325,8 @@
 - [x] **[EXP-R2] forward bridge 假設透明化 + 敏感度** — V4.32.0：bridge 加 `assumption_basis` + `held_constant_assumptions`（逐項揭露 margin/fcf/capex/share/tax 皆 held-constant）+ `terminal_sensitivity`（net-margin ±20% / share ±10% 對 net income/EPS 彈性，標 `illustrative_elasticity_not_a_scenario`）；report 同步呈現給人讀。`eps_implied_net_income` vs `net_income_from_margin` 既有 consistency check 保留（V4.23）。
 - [x] **[EXP-R3] scenario driver step 改由 evidence 決定** — V4.33.0：builder v2.0 移除固定 ±0.05/±0.10 step；bear/bull 改由 consensus 營收 low/high envelope 推 CAGR band（真 dispersion）。driver-level driver 無 per-driver dispersion evidence → `base_operating_drivers_held`（揭露不捏造）。缺 evidence dispersion（無 2-row 跨度/無 low<high）→ 降級 qualitative + 標 `no_evidence_based_dispersion_for_scenario_spread`。test 26→33 asserts。**未做**：guidance-range 直接當 driver dispersion 來源（目前只用 consensus envelope）+ price_range 倍數壓縮 scenario（ARM $870 過樂觀，留待 forecast-to-valuation EXP-3.4）。
 - [x] **[EXP-R4] 數值安全：除零 + NaN/Inf** — V4.30.1：12 script data-output `json.dumps` 全加 `allow_nan=False`（NaN/Inf 序列化即 fail-fast）；確認 `gap._compare`（`right_value not in (None,0)`）、scenario `change_vs_base`（`if value`）、`_ratio_upside`（`_pos` 現價）、bridge margin（`_pos` revenue / tax `<=0`）除法均已 guard；新增 `test_forward_expectations_numeric_safety.py` 15 asserts 覆蓋 0/負分母/零現價/零 EPS。
-- [ ] **[EXP-0.4] 定義成功標準（前置 gate）** — 不以「估值變高」為目標；以 driver 可解釋性、預測誤差（WAPE）、方向命中率、bias、來源完整度、expectations gap 可驗證性為準。**這是 R1 的驗收尺：沒有它無法判斷套套邏輯是否真被修好。**
-- [ ] **[EXP-1.2] 修正 consensus 被歷史方法壓制** — consensus 必須作獨立 lane；CAGR／trend 僅能進 Base-rate 或作風險對照，不能用 median 無條件覆蓋 consensus。
+- [x] **[EXP-0.4] 定義成功標準（前置 gate）** — V4.34.0：`forward_expectations_success_criteria.py` 8 條 falsifiable criteria（sample/WAPE≤0.30/directional≥0.60/|bias|≤0.20/explainability/source/gap/非估值膨脹）+ `shadow_to_live_gate`（僅 pass 為 true、且必要非充分）。實測 n=3<15 → insufficient_evidence、gate False。19 asserts。
+- [x] **[EXP-1.2] 修正 consensus 被歷史方法壓制** — V4.34.0 驗證：現設計 matrix 已把 consensus 與 base_rate 分欄，divergent base-rate median 不覆蓋 consensus，只並列為 comparator。補 falsifiable guard test（core 45→48 asserts）。
 
 #### 🟡 P1 — 覆蓋率與 driver 深度（P0 清完後）
 

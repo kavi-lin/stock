@@ -8,6 +8,27 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.34.0] — 2026-06-16 — Forward 成功標準 gate + consensus lane 獨立性驗證（EXP-0.4 / EXP-1.2）
+
+### Added
+- `forward_expectations_success_criteria.py`：唯讀驗收尺 + EXP-4.5 shadow→live gate。八條 falsifiable
+  criteria（sample 充足度 / WAPE ≤0.30 / directional ≥0.60 / |bias| ≤0.20 / driver explainability /
+  source completeness / same-metric gap 可驗證 / **非估值膨脹**）。verdict pass/fail/insufficient_evidence；
+  `shadow_to_live_gate` 僅 pass 時 true，且 pass 為必要非充分（仍需 user 批准）。實測現況 n=3<15 →
+  insufficient_evidence、gate False（誠實擋住）。
+- `test_forward_expectations_success_criteria.py` 19 asserts（樣本不足擋 promotion、達標 pass、WAPE 超標 fail、
+  系統性樂觀 bias fail、rejected evidence fail、無 snapshot 不 silent pass）。
+- `forward_expectations_schema.md` 新增 Success Criteria 章節。
+
+### Changed
+- `test_forward_expectations.py` 加 EXP-1.2 guard（45→48 asserts）：divergent base-rate median **不得**覆蓋
+  consensus revenue CAGR，只能並列為 comparator（驗證 consensus 為獨立 lane）。
+
+### Why
+- EXP-0.4：R1 把 ARM future price 推到 $870，但沒有成功標準就無法判斷對錯。本版把「成功」定義成可驗證的
+  預測品質 + 來源完整度 + 治理，明確排除「估值變高=成功」，並當成 shadow→live 硬門檻。
+- EXP-1.2：明確驗證歷史 base-rate median 不會無條件壓過 analyst consensus（現設計已分離，補 falsifiable test）。
+
 ## [4.33.0] — 2026-06-16 — Scenario 分歧度改由 evidence 決定（EXP-R3）
 
 ### Changed

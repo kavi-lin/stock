@@ -533,6 +533,33 @@ is a future estimate-horizon range, not today's live fair-value anchor. Applying
 persisted historical multiple to a much larger forward metric assumes regime persistence;
 the band's dispersion and `multiple_quality` are surfaced so the reader can judge it.
 
+## Success Criteria (EXP-0.4)
+
+`forward_expectations_success_criteria.py` is the read-only acceptance yardstick and the
+gate that EXP-4.5 (shadow → live) must clear. Success is **never** "valuation went up";
+it is measured on eight falsifiable criteria:
+
+| Criterion | Source | Pass condition |
+|---|---|---|
+| `sample_sufficiency` | calibration | comparable rows ≥ `min_sample_n` (15) |
+| `forecast_error_wape` | calibration | worst lane WAPE ≤ 0.30 |
+| `directional_accuracy` | calibration | worst lane directional ≥ 0.60 |
+| `forecast_bias` | calibration rows | \|mean signed relative error\| ≤ 0.20 (no systematic over/under) |
+| `driver_explainability` | snapshot evidence_contract | accepted > 0 and rejected = 0 (numbers trace to evidence) |
+| `source_completeness` | snapshot | evidence_contract `pass` and missing sources = 0 |
+| `expectations_gap_verifiability` | snapshot | ≥ 1 auditable same-metric gap |
+| `not_valuation_inflation` | snapshot | shadow_only flags intact; success not defined by higher fair value |
+
+Verdict: any `fail` → `fail`; any `insufficient_sample`/`insufficient_data` → `insufficient_evidence`;
+all `pass` → `pass`. `shadow_to_live_gate` is true only on `pass`. A `pass` is **necessary, not
+sufficient**, for live wiring — user approval is still required. Thresholds tighten only with
+evidence and never to make the valuation look better. The evaluator changes no live decision.
+
+```bash
+python3 investment/scripts/forward_expectations_success_criteria.py                       # run calibration + gate
+python3 investment/scripts/forward_expectations_success_criteria.py --snapshot-file <snap> # add explainability/source/gap checks
+```
+
 ## Calibration Scaffold
 
 `forward_expectations_calibration.py` is read-only. It scans immutable forecast

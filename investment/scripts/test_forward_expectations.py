@@ -72,6 +72,15 @@ check("matrix.cross_metric_has_no_gap", matrix["same_metric_comparisons"], [])
 check("matrix.fcf_market_implied", matrix["metrics"]["fcf_cagr"]["market_implied"], 0.6)
 check("matrix.eps_consensus", matrix["metrics"]["eps_cagr"]["consensus"], 0.4142, tol=0.001)
 
+# EXP-1.2: consensus is an INDEPENDENT lane — a divergent base-rate median must NOT
+# overwrite the consensus revenue CAGR; it may only sit beside it as a comparator.
+low_base = {"available": True, "peer_rev_cagr_median": 0.05}
+m12 = fe.assemble_expectations_matrix(cons, market, low_base)
+check("EXP-1.2 consensus preserved (not base-rate median)", m12["metrics"]["revenue_cagr"]["consensus"], cons["revenue_cagr"])
+check("EXP-1.2 base-rate sits in its own column", m12["metrics"]["revenue_cagr"]["base_rate"], 0.05)
+check("EXP-1.2 divergence emitted as descriptive comparison, not override",
+      m12["same_metric_comparisons"][0]["verdict"], "consensus_above_base_rate")
+
 # ── Fixture B: consensus only, no reverse DCF → insufficient_forward_data ──
 EC_B = {
     "as_of_date": "2026-01-01",
