@@ -245,10 +245,17 @@ def market_implied_lane(ticker: str, inp: dict, no_fetch: bool) -> dict:
 
 
 # ── Lane 3: base_rate (peer historical revenue-CAGR distribution) ─────────────
+def _subject_gross_margin(earnings_cache: dict):
+    margins = (earnings_cache.get("derived") or {}).get("margins_8q") or []
+    grosses = [_num(m.get("gross")) for m in margins if isinstance(m, dict)]
+    grosses = [g for g in grosses if g is not None]
+    return (sum(grosses) / len(grosses)) if grosses else None
+
+
 def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
     out = {"available": False, "peer_rev_cagr_median": None, "peer_rev_cagr_p25": None,
            "peer_rev_cagr_p75": None, "peers_used": [], "self_revenue_yoy": None,
-           "growth_acceleration": None, "note": ""}
+           "growth_acceleration": None, "cohort": None, "basis": None, "note": ""}
     yoy = (earnings_cache.get("derived") or {}).get("yoy_growth") or {}
     out["self_revenue_yoy"] = _num(yoy.get("revenue_yoy"))
     out["growth_acceleration"] = yoy.get("growth_acceleration")
@@ -256,13 +263,13 @@ def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
         out["note"] = "--no-fetch：跳過 peer 歷史抓取"
         return out
     try:
-        from skills._shared.company_context import get_peers
+        from skills._shared.company_context import get_peers, get_profile
         from scripts._shared import fmp_pool
     except Exception as e:
         out["note"] = f"peer/fmp 模組 import 失敗: {e}"
         return out
     peers = (get_peers(ticker) or [])[:MAX_PEERS]
-    cagrs, used = [], []
+    cagrs, used, candidates = [], [], []
     for p in peers:
         rows = fmp_pool.get("income-statement", {"symbol": p, "limit": 6},
                             stable=True, retries=1, timeout=15, hard_fail=False)
@@ -272,17 +279,51 @@ def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
         if len(rows) < 4:
             continue
         c = _cagr(rows[0]["revenue"], rows[-1]["revenue"], _years_between(rows[0]["date"], rows[-1]["date"]))
-        if c is not None:
-            cagrs.append(clamp(c, *CAGR_CLAMP))
-            used.append(p)
-    if len(cagrs) >= 3:
+        if c is None:
+            continue
+        c = clamp(c, *CAGR_CLAMP)
+        cagrs.append(c)
+        used.append(p)
+        # classify candidate for the cohort (reuses the rows already fetched + 24h-cached profile)
+        prof = get_profile(p) or {}
+        rev_yoy = (rows[-1]["revenue"] / rows[-2]["revenue"] - 1) if _pos(rows[-2].get("revenue")) else None
+        gm = (rows[-1].get("grossProfit") / rows[-1]["revenue"]) if _pos(rows[-1].get("grossProfit")) else None
+        candidates.append({
+            "ticker": p, "sector": prof.get("sector"),
+            "market_cap": prof.get("marketCap") or prof.get("mktCap"),
+            "rev_yoy": rev_yoy, "gross_margin": gm, "revenue_cagr": c,
+        })
+
+    subj_prof = get_profile(ticker) or {}
+    subject = {
+        "ticker": ticker, "sector": subj_prof.get("sector"),
+        "market_cap": subj_prof.get("marketCap") or subj_prof.get("mktCap"),
+        "rev_yoy": out["self_revenue_yoy"], "gross_margin": _subject_gross_margin(earnings_cache),
+    }
+    from forward_expectations_cohort import build_cohort
+    cohort = build_cohort(subject, candidates)
+    out["cohort"] = cohort
+
+    if cohort.get("available"):
+        dist = cohort["distribution"]
         out.update({
-            "available": True,
+            "available": True, "basis": "cohort",
+            "peer_rev_cagr_median": dist["median"],
+            "peer_rev_cagr_p25": dist["p25"],
+            "peer_rev_cagr_p75": dist["p75"],
+            "peers_used": [m["ticker"] for m in cohort["members"]],
+            "note": (f"{cohort['member_count']} 名 cohort（同 sector + growth/margin/size ±1 tier，"
+                     f"記錄選取理由防 cherry-pick）營收 CAGR 分布"),
+        })
+    elif len(cagrs) >= 3:
+        out.update({
+            "available": True, "basis": "raw_peers_fallback",
             "peer_rev_cagr_median": round(_pct(cagrs, 0.50), 4),
             "peer_rev_cagr_p25": round(_pct(cagrs, 0.25), 4),
             "peer_rev_cagr_p75": round(_pct(cagrs, 0.75), 4),
             "peers_used": used,
-            "note": f"{len(used)} 同業歷史營收 CAGR 分布（防過度樂觀 base rate）",
+            "note": (f"cohort 不足（{cohort.get('member_count', 0)} 名），fallback {len(used)} 名 raw peer "
+                     f"歷史營收 CAGR 分布（防過度樂觀 base rate）"),
         })
     else:
         out["note"] = f"可用 peer <3（{len(cagrs)}），base_rate 跳過"

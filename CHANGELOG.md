@@ -8,6 +8,26 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.35.0] — 2026-06-17 — Base-rate Cohort Library：可稽核同類群（EXP-3.2）
+
+### Added
+- `forward_expectations_cohort.py`：以**明確固定 criteria**（sector exact + growth stage / margin tier /
+  size tier ±1 tier，≥2/3 graded dims）選 cohort，記錄選取理由 + 每名 member match reasons，防事後挑樣本。
+  純 deterministic engine（0 LLM / 0 network）。
+- `test_forward_expectations_cohort.py` 23 asserts（tier 分類、sector 必配、adjacency 計數、distribution、
+  None-cagr 排除、insufficient 降級）。
+
+### Changed
+- `forward_expectations.py` `base_rate_lane`：改用 cohort 推 peer 營收 CAGR 分布（median/p25/p75），
+  附 `cohort`（rationale + members + classification）與 `basis`（cohort / raw_peers_fallback）。
+  cohort <3 名時 fallback 既有 raw-peer 邏輯。複用既有 income-statement 抓取 + 24h-cached profile，近乎零額外 fetch。
+  實測 ARM → 9 名 Technology cohort、median CAGR 0.135（grounded anti-fantasy ceiling）。
+
+### Why
+- EXP-3.2：原 base-rate 直接吃 FMP raw peer list，混不同成長階段/margin/規模且易事後挑樣本。本版把 base-rate
+  變成可稽核同類群：criteria 與 tolerance 在選取前固定、每名 member 記錄為何入選，提升「市場上同類公司實際成長」
+  這個 anti-fantasy ceiling 的可信度。仍 shadow-only，不改 live 決策。
+
 ## [4.34.0] — 2026-06-16 — Forward 成功標準 gate + consensus lane 獨立性驗證（EXP-0.4 / EXP-1.2）
 
 ### Added

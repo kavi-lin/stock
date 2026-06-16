@@ -331,7 +331,7 @@
 #### 🟡 P1 — 覆蓋率與 driver 深度（P0 清完後）
 
 - [ ] **[EXP-3.1] 建立 business-model driver template library** — V4.15.0 已有首個 `royalty_ip` adapter 與 registry；待擴 SaaS、半導體、銀行、零售與工業（否則非 ARM 全走套套邏輯 band）。
-- [ ] **[EXP-3.2] 建立 Base-rate cohort library** — 依商業模式、成長階段、margin profile 與規模選 cohort；保存 cohort 選擇理由，防事後挑樣本。
+- [x] **[EXP-3.2] 建立 Base-rate cohort library** — V4.35.0：`forward_expectations_cohort.py` 依 sector(exact)+growth/margin/size(±1 tier, ≥2/3) 選 cohort，記錄 criteria/tolerance/每名 match reasons（防 cherry-pick）。`base_rate_lane` 改用 cohort（fallback raw peers），近乎零額外 fetch。ARM→9 名 Tech cohort median 0.135。23 asserts。**未做**：cross-sector supply-chain cohort、cohort 隨時間 drift 追蹤。
 - [ ] **[EXP-2.1] 擴充 ARM driver tree** — V4.20.0 已能 discovery + opt-in 下載 allowlisted SEC filing 正規化文字 → promotion gate；待擴 filing 內 ARM driver pattern（units / rate / license conversion / data-center exposure）。
 - [ ] **[EXP-2.2] 產生 Consensus／Independent／Base-rate 三條 3–5Y lane** — 每條保留獨立假設、輸出與信心，不先 blend 成單一數字。
 - [ ] **[EXP-1.1] 補齊資料 inventory 介面** — 待接 structural shift、12M forecaster 與 implied expectations（其餘來源 V4.21.0 已串）。
