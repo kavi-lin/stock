@@ -91,6 +91,12 @@ def extract_range(snapshot: dict) -> dict:
         "horizon_date": price_range.get("horizon_date"),
         "method": price_range.get("method"),
         "multiple_quality": price_range.get("multiple_quality"),
+        "compression": {
+            "compressed": bool((price_range.get("multiple_range") or {}).get("compressed")),
+            "growth_tier": (price_range.get("multiple_range") or {}).get("growth_tier"),
+            "historical_p50": ((price_range.get("multiple_range") or {}).get("historical_band") or {}).get("p50"),
+            "applied_p50": (price_range.get("multiple_range") or {}).get("p50"),
+        },
         "range": {
             "bear": rng.get("low"),
             "base": rng.get("base"),
@@ -120,6 +126,9 @@ def format_text(summary: dict) -> str:
         f"- Current: ${summary.get('current_price')}",
         f"- Horizon: {summary.get('horizon_date')}",
         f"- Method: {summary.get('method')} ({summary.get('multiple_quality')})",
+        *( [f"- Multiple: {summary['compression']['growth_tier']}-compressed "
+            f"(historical P/E {summary['compression']['historical_p50']} → {summary['compression']['applied_p50']}; EXP-3.4)"]
+           if (summary.get('compression') or {}).get('compressed') else [] ),
         f"- Bear: ${rng.get('bear')} ({up.get('bear'):+.1f}%)",
         f"- Base: ${rng.get('base')} ({up.get('base'):+.1f}%)",
         f"- Bull: ${rng.get('bull')} ({up.get('bull'):+.1f}%)",

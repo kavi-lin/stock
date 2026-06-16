@@ -1471,7 +1471,10 @@ def load_forward_outlook(ticker):
     cases = fpr.get('cases') or {}
     br = d.get('base_rate_lane') or {}
     rng = fpr.get('range') or {}
+    mr = fpr.get('multiple_range') or {}
     return {
+        'compressed': bool(mr.get('compressed')),
+        'growth_tier': mr.get('growth_tier'),
         'as_of': d.get('generated_at'),
         'shadow_only': True,
         'status': fpr.get('status'),                 # available | advisory_band_only

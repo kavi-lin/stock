@@ -528,6 +528,18 @@ Multiple source priority (EXP-R1):
    to `status: advisory_band_only` with warnings `derived_current_market_multiple_used` and
    `current_price_volatility_band_not_forecast`. → `multiple_quality: derived`.
 
+**Growth-tier compression (EXP-3.4).** The historical regime reflects PAST growth, so
+applying a hyper-growth-era multiple onto a horizon metric consensus says has plateaued
+overshoots (NVDA ~57x, ARM ~151x). `forward_expectations_multiple_compression.py` haircuts
+the historical band toward the level the FORWARD growth justifies:
+`effective = historical × growth_factor` (dimension-agnostic across P/E·P/S·P/FCF), and for
+P/E an absolute ceiling per tier caps the median while the band is scaled proportionally so
+dispersion survives. The forward growth signal is the consensus estimate-window CAGR
+(eps→P/E, revenue→P/S). Tiers: hypergrowth ≥0.25 (×1.00, ≤55x) · growth ≥0.15 (×0.82, ≤45x) ·
+moderate ≥0.07 (×0.66, ≤35x) · slowing ≥0.03 (×0.52, ≤28x) · mature <0.03 (×0.40, ≤22x). The
+applied band carries `compressed`, `growth_tier`, `compression_factor`, and the original
+`historical_band` for audit. Method becomes `historical_regime_growth_compressed`.
+
 The builder prefers an explicit/historical forecast over the derived advisory band, and
 auto-selects the metric whose historical regime is usable (e.g. P/S over a noisy P/E).
 With `--no-fetch` the historical regime is skipped and the output degrades to the labelled

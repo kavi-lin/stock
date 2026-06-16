@@ -8,6 +8,28 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.38.0] — 2026-06-17 — 倍數壓縮：前瞻價格區間去樂觀化（EXP-3.4）
+
+### Added
+- `forward_expectations_multiple_compression.py`：成長分級倍數壓縮。歷史 multiple regime 反映**過去**成長，
+  套在 consensus 說已攤平的 horizon EPS 上會嚴重高估（NVDA 57×、ARM 151×）。本層把歷史倍數 haircut 到
+  **前瞻成長**支撐的水準：`effective = historical × growth_factor`（跨 P/E·P/S·P/FCF 同口徑）；P/E 另加每階
+  絕對上限（cap median + 等比例縮放 band 保留 dispersion）。成長訊號 = consensus estimate-window CAGR
+  （eps→P/E、revenue→P/S）。階：hypergrowth ≥25%（×1.0/≤55×）→ mature <3%（×0.4/≤22×）。
+- `test_forward_expectations_multiple_compression.py` 32 asserts。
+
+### Changed
+- `forward_expectations.py`：build_multiple_anchor 後接 compress_anchor（用 consensus eps/rev CAGR）再進 price_range。
+- `forward_expectations_price_range.py`：multiple_range 帶 `compressed/growth_tier/compression_factor/historical_band`，
+  compressed 時 method = `historical_regime_growth_compressed`。
+- `forward_expectations_report.py` + `forward_price_range.py` CLI + 決策卡 Forward row 顯示壓縮（tier↓ + 歷史→套用 P/E）。
+
+### Why
+- EXP-3.4 / code review 缺點：NVDA 實測 base $776（+271%）、bull $1219（mcap ~$30T 物理不可能）；ARM base $870。
+  原因是死守 hypergrowth 倍數。壓縮後 **NVDA bear $162(-23%)/base $298(+43%)/bull $468(+124%)**、
+  **ARM bear $256/base $317/bull $373（全負，誠實標 ARM 即使用富裕前瞻倍數仍過貴）** — 可信且保留 dispersion。
+  consensus 2029-2031 EPS CAGR 1.6% → mature tier → 57×→22×。仍 shadow-only，自動流入 L1 決策卡。
+
 ## [4.37.0] — 2026-06-17 — Forward Expectations 進決策中心（L1 advisory，option b auto-fetch）
 
 ### Added

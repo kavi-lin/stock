@@ -335,7 +335,7 @@
 - [ ] **[EXP-2.1] 擴充 ARM driver tree** — V4.20.0 已能 discovery + opt-in 下載 allowlisted SEC filing 正規化文字 → promotion gate；待擴 filing 內 ARM driver pattern（units / rate / license conversion / data-center exposure）。
 - [ ] **[EXP-2.2] 產生 Consensus／Independent／Base-rate 三條 3–5Y lane** — 每條保留獨立假設、輸出與信心，不先 blend 成單一數字。
 - [ ] **[EXP-1.1] 補齊資料 inventory 介面** — 待接 structural shift、12M forecaster 與 implied expectations（其餘來源 V4.21.0 已串）。
-- [ ] **[EXP-3.4] 建立 forecast-to-valuation mapping** — 依商業模式映射 forward revenue／EPS／FCF 至合適估值方法；避免全套同一 DCF 或固定倍數。**依賴 EXP-R1。**
+- [x] **[EXP-3.4] forecast-to-valuation mapping（倍數壓縮）** — V4.38.0：`forward_expectations_multiple_compression.py` 成長分級壓縮歷史 regime（factor × historical + P/E 絕對上限等比例縮放）。consensus CAGR 低 → 倍數收斂 mature。實測 NVDA $776→$298 base（+271%→+43%）、ARM $870→$317、bull mcap 從 $30T 物理不可能拉回可信。流入 L1 卡。**未做**：依商業模式選不同估值法（adapter-specific valuation method）、quality-franchise 不該壓太兇的 override。
 - [ ] **[EXP-3.5] 延後 full forward DCF 自由假設模型** — Independent lane 校準前不加大量成長期 / margin normalization / terminal multiple 自由參數。
 
 #### 🔵 決策中心整合（L1 done / L2 gated）

@@ -91,15 +91,25 @@ def _historical_band(anchor: dict, metric_key: str):
     p25, p50, p75 = _pos(band.get("p25")), _pos(band.get("p50")), _pos(band.get("p75"))
     if not (p25 and p50 and p75):
         return None
+    compressed = bool(band.get("compressed"))
     return {
         "p25": p25,
         "p50": p50,
         "p75": p75,
         "source": band.get("source") or "fmp_ratios_annual_history",
-        "method": "historical_multiple_regime",
+        "method": "historical_regime_growth_compressed" if compressed else "historical_multiple_regime",
         "history_points": band.get("n"),
         "dispersion_ratio": band.get("dispersion_ratio"),
-        "band_policy": "p25/p50/p75 from the ticker's own historical valuation regime; price-independent; shadow only.",
+        # EXP-3.4 compression transparency
+        "compressed": compressed,
+        "growth_tier": band.get("growth_tier"),
+        "growth_used": band.get("growth_used"),
+        "compression_factor": band.get("compression_factor"),
+        "pe_ceiling_applied": band.get("pe_ceiling_applied"),
+        "historical_band": band.get("historical_band"),
+        "band_policy": ("p25/p50/p75 = historical regime compressed toward forward-growth-justified level (EXP-3.4); shadow only."
+                        if compressed else
+                        "p25/p50/p75 from the ticker's own historical valuation regime; price-independent; shadow only."),
     }
 
 

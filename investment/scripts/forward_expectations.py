@@ -535,11 +535,17 @@ def main():
         inp["current_price"] = cp
 
     from forward_expectations_multiple_anchor import build_multiple_anchor
+    from forward_expectations_multiple_compression import compress_anchor
     consensus = consensus_lane(ec)
     with _stdout_to_stderr():
         market = market_implied_lane(ticker, inp, args.no_fetch)
         base_rate = base_rate_lane(ticker, ec, args.no_fetch)
         multiple_anchor = build_multiple_anchor(ticker, no_fetch=args.no_fetch)
+    # EXP-3.4: compress the historical multiple toward forward-growth-justified levels
+    multiple_anchor = compress_anchor(
+        multiple_anchor,
+        {"eps": consensus.get("eps_cagr"), "revenue": consensus.get("revenue_cagr")},
+    )
     from forward_expectations_adapters import evaluate_adapters
     adapter_evaluation = evaluate_adapters(ticker, ec, inp)
     selected_adapter = adapter_evaluation["selected_adapter"]

@@ -238,6 +238,16 @@ def _future_price_lines(snapshot: dict):
             )
         r = price_range.get("range") or {}
         lines.append(_bullet("Range", f"${r.get('low')} / ${r.get('base')} / ${r.get('high')}"))
+        mr = price_range.get("multiple_range") or {}
+        if mr.get("compressed"):
+            hb = mr.get("historical_band") or {}
+            lines.append(_bullet(
+                "Multiple compression (EXP-3.4)",
+                f"{mr.get('growth_tier')} tier · historical p50 {_fmt_mult(hb.get('p50'))} → "
+                f"applied {_fmt_mult(mr.get('p50'))}"
+                + (" (P/E ceiling)" if mr.get("pe_ceiling_applied") else "")
+                + f" · forward growth {(_fmt_mult(mr.get('growth_used')))}"
+            ))
     else:
         warnings = ", ".join(price_range.get("warnings") or [])
         lines.append(f"- Unavailable: {warnings or 'insufficient inputs'}")
