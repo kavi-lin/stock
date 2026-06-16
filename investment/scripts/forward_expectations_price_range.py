@@ -277,7 +277,7 @@ def main():
         snapshot.get("earnings_cache_snapshot") or {},
         snapshot.get("valuation_multiples") or {},
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

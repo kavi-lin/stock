@@ -434,7 +434,7 @@ def write_snapshot(payload: dict) -> str | None:
         os.makedirs(SNAPSHOT_DIR, exist_ok=True)
         path = os.path.join(SNAPSHOT_DIR, f"{payload['ticker']}_{payload['run_id']}.json")
         with open(path, "x", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
+            json.dump(payload, f, ensure_ascii=False, indent=2, allow_nan=False)
         return path
     except FileExistsError:
         print(f"WARN: immutable snapshot exists for run_id={payload.get('run_id')}", file=sys.stderr)
@@ -597,7 +597,7 @@ def main():
         sp = write_snapshot(out)
         if sp:
             out["snapshot_path"] = sp
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    print(json.dumps(out, ensure_ascii=False, indent=2, allow_nan=False))
     sys.exit(0)
 
 

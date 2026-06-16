@@ -211,7 +211,7 @@ def main():
         snapshot.get("base_rate_lane") or {},
         snapshot.get("forward_financial_bridge") or {},
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

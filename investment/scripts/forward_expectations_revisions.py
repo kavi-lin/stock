@@ -127,7 +127,7 @@ def main():
     except Exception as exc:
         print(json.dumps({"error": f"unparseable earnings cache file: {exc}"}))
         sys.exit(1)
-    print(json.dumps(build_revision_snapshot(args.ticker, earnings_cache), ensure_ascii=False, indent=2))
+    print(json.dumps(build_revision_snapshot(args.ticker, earnings_cache), ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

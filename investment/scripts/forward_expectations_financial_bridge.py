@@ -342,7 +342,7 @@ def main():
     except Exception as exc:
         print(json.dumps({"error": f"unparseable earnings cache: {exc}"}))
         sys.exit(1)
-    print(json.dumps(build_financial_bridge(earnings_cache), ensure_ascii=False, indent=2))
+    print(json.dumps(build_financial_bridge(earnings_cache), ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

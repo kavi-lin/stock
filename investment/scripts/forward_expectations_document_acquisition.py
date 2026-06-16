@@ -63,7 +63,7 @@ def _cache_put(url: str, payload: dict) -> None:
     try:
         os.makedirs(CACHE_DIR, exist_ok=True)
         with open(_cache_path(url), "w", encoding="utf-8") as handle:
-            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            json.dump(payload, handle, ensure_ascii=False, indent=2, allow_nan=False)
     except Exception:
         pass
 
@@ -233,7 +233,7 @@ def main():
         no_fetch=not args.fetch,
         max_documents=args.max_documents,
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

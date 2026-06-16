@@ -187,7 +187,7 @@ def main():
         print(json.dumps({"error": f"unparseable primary-source file: {exc}"}))
         sys.exit(1)
     result = extract_guidance_from_documents((bundle or {}).get("documents") or [])
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

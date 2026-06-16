@@ -73,7 +73,7 @@ def _write_filing_cache(ticker: str, rows: list[dict]) -> None:
     try:
         os.makedirs(SOURCE_CACHE_DIR, exist_ok=True)
         with open(_filing_cache_path(ticker), "w", encoding="utf-8") as handle:
-            json.dump(rows, handle, ensure_ascii=False, indent=2)
+            json.dump(rows, handle, ensure_ascii=False, indent=2, allow_nan=False)
     except Exception:
         pass
 
@@ -289,7 +289,7 @@ def main():
         payload.get("source_discovery"),
         no_fetch=args.no_fetch,
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

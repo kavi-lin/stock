@@ -198,6 +198,7 @@ def main():
         run_calibration(args.snapshot_dir, args.earnings_cache_dir, args.min_n),
         ensure_ascii=False,
         indent=2,
+        allow_nan=False,
     ))
 
 

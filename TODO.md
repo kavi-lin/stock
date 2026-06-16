@@ -320,11 +320,11 @@
 
 #### 🔴 P0 — Robustness Gate（必須全清才可談 shadow→live；engine 變更後跑對應 golden test rc=0）
 
-- [ ] **[EXP-R0] 落地 commit 現有未來估值系統** — 切 feature commit，把 17 script + 16 test + 2 schema doc 分批落地（避免單一 4363 行 working tree 流失）；commit 後再動下列 R 系列。
+- [x] **[EXP-R0] 落地 commit 現有未來估值系統** — V4.30.0：2 commit（`fad6359` engine+adapter+16 test+2 schema / `f9c55bb` version+protocol+TODO），runtime ledger 不入 git；無關 dashboard 改動未動。
 - [ ] **[EXP-R1] 打破 derived-band 套套邏輯（致命）** — 無 explicit forward multiple 時 base target ≡ current price，`future_price_range` 非真前瞻。須接真 forward multiple 來源：peer forward P/E 分布 / 該股歷史 multiple regime（如 5y median fwd P/E）/ reverse-DCF 一致倍數，擇一打破 base==current。未完成前 `future_price_range` 標 `advisory_band_only` 並在 `forward_price_range.py` 輸出明示「此為現價波動帶、非成長前瞻」。
 - [ ] **[EXP-R2] forward bridge 假設透明化 + 敏感度** — 明確標 margin/share-count 為「held-constant 歷史值」假設；至少對 margin 與 share count 各跑一檔敏感度（buyback dilution / margin normalization），避免 forward net income 只是 forward_revenue × 歷史 margin 的恆等式。`eps_implied_net_income` vs `net_income_from_margin` 的差異須當 consistency check 呈現，不可被當兩個獨立 view。
 - [ ] **[EXP-R3] scenario driver step 改由 evidence 決定** — 移除固定 ±10% / ±5pp 寫死 step；bear/base/bull 的 driver 變動幅度須來自 guidance range、analyst low/high dispersion 或歷史 driver 波動，缺證據時降級 `qualitative_only`（呼應 EXP-3.3 gate，不得用固定百分比偽裝成 driver scenario）。
-- [ ] **[EXP-R4] 數值安全：除零 + NaN/Inf** — 全線 `json.dumps(..., allow_nan=False)`；`gap._compare`、scenario `change_vs_base`、`_ratio_upside`、bridge margin 除法補 0/負值 guard；加 golden test 覆蓋 0 與負分母。
+- [x] **[EXP-R4] 數值安全：除零 + NaN/Inf** — V4.30.1：12 script data-output `json.dumps` 全加 `allow_nan=False`（NaN/Inf 序列化即 fail-fast）；確認 `gap._compare`（`right_value not in (None,0)`）、scenario `change_vs_base`（`if value`）、`_ratio_upside`（`_pos` 現價）、bridge margin（`_pos` revenue / tax `<=0`）除法均已 guard；新增 `test_forward_expectations_numeric_safety.py` 15 asserts 覆蓋 0/負分母/零現價/零 EPS。
 - [ ] **[EXP-0.4] 定義成功標準（前置 gate）** — 不以「估值變高」為目標；以 driver 可解釋性、預測誤差（WAPE）、方向命中率、bias、來源完整度、expectations gap 可驗證性為準。**這是 R1 的驗收尺：沒有它無法判斷套套邏輯是否真被修好。**
 - [ ] **[EXP-1.2] 修正 consensus 被歷史方法壓制** — consensus 必須作獨立 lane；CAGR／trend 僅能進 Base-rate 或作風險對照，不能用 median 無條件覆蓋 consensus。
 

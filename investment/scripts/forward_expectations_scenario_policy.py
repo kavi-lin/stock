@@ -179,7 +179,7 @@ def main():
         snapshot.get("forward_financial_bridge") or {},
         snapshot.get("guidance_extraction") or {},
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

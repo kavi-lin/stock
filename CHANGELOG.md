@@ -8,6 +8,21 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.30.1] — 2026-06-16 — Forward Expectations 數值安全硬化（EXP-R4）
+
+### Added
+- `test_forward_expectations_numeric_safety.py` 15 asserts：除零 / 負分母 / 零現價 /
+  零 forward EPS 的降級行為，並驗證每個 shadow 輸出都通過 `json.dumps(allow_nan=False)`。
+
+### Changed
+- Forward Expectations 全線 data-output `json.dumps` 加 `allow_nan=False`（12 個 script），
+  任何 NaN/Inf 會在序列化當下 fail-fast，不吐 `Infinity`/`NaN` 非法 JSON token 炸下游 parser。
+
+### Why
+- V4.30.0 code review 發現 `gap._compare` / scenario `change_vs_base` / bridge margin 等除法雖多數
+  已有 guard，但缺最後一道 `allow_nan=False` 防線。本版補上 durable guard + 回歸測試；
+  仍 shadow-only，不改 live `fair_value_summary` / `decision_lock` / threshold / sizing。
+
 ## [4.30.0] — 2026-06-16 — Ticker Future Price Range CLI
 
 ### Added

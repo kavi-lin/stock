@@ -170,15 +170,15 @@ def main():
     if _missing_earnings_cache(snapshot, args.ticker):
         bootstrap_error = ensure_earnings_cache(args.ticker)
         if bootstrap_error:
-            print(json.dumps(bootstrap_error, ensure_ascii=False, indent=2) if args.json else bootstrap_error["error"])
+            print(json.dumps(bootstrap_error, ensure_ascii=False, indent=2, allow_nan=False) if args.json else bootstrap_error["error"])
             sys.exit(1)
         snapshot = run_forward_engine(args.ticker, fetch=args.fetch, acquire_documents=args.acquire_documents)
     if snapshot.get("error"):
-        print(json.dumps(snapshot, ensure_ascii=False, indent=2) if args.json else snapshot["error"])
+        print(json.dumps(snapshot, ensure_ascii=False, indent=2, allow_nan=False) if args.json else snapshot["error"])
         sys.exit(1)
     summary = extract_range(snapshot)
     if args.json:
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        print(json.dumps(summary, ensure_ascii=False, indent=2, allow_nan=False))
     else:
         print(format_text(summary))
     sys.exit(0 if summary.get("available") else 2)
