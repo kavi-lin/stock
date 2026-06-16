@@ -312,9 +312,9 @@
 >
 > 已知致命/重大問題（review 實測 ARM base +0.0% / NVDA base +0.0%）：
 > 1. ~~**套套邏輯**：無 explicit forward multiple 時 base target ≡ current price~~ → **✅ V4.31.0 EXP-R1 修復**：接歷史 multiple regime anchor（price-independent），無 anchor 時誠實標 advisory band。
-> 2. **bridge 凍結 margin/share**：forward net income = forward_revenue × 歷史 margin；`eps_implied_net_income` 繞回 forward_eps × shares，兩 view 塌成一個。→ EXP-R2
-> 3. **scenario 固定 ±10% step**：driver-level 仍是寫死百分比加減，違背 EXP-2.4 精神（分歧度該由 driver 經濟學決定）。→ EXP-R3
-> 4. **inf/NaN 序列化**：`gap._compare` / scenario `change_vs_base` 除法無 0 guard + `json.dumps(allow_nan=True)` → 可能吐非法 JSON 炸下游。→ EXP-R4
+> 2. ~~**bridge 凍結 margin/share**~~ → **✅ V4.32.0 EXP-R2 修復**：揭露 held-constant 假設 + terminal sensitivity（margin±20% / share±10% 彈性）。
+> 3. ~~**scenario 固定 ±10% step**~~ → **✅ V4.33.0 EXP-R3 修復**：bear/bull 改由 consensus low/high envelope 推導，缺 dispersion 即降級，不捏造固定 step。
+> 4. ~~**inf/NaN 序列化**~~ → **✅ V4.30.1 EXP-R4 修復**：全線 `allow_nan=False` + 除法 guard + safety test。
 > 5. **覆蓋率**：只有 `royalty_ip` 1 個 adapter，僅 ARM 走得通 independent lane；其餘 ticker 全掉回 consensus + 套套邏輯 band。→ P1 EXP-3.1
 > 6. **全部 uncommit**：~4363 行 / 17 script / 16 test 零 commit，工作區已 bump 4.30.0。→ EXP-R0
 
@@ -323,7 +323,7 @@
 - [x] **[EXP-R0] 落地 commit 現有未來估值系統** — V4.30.0：2 commit（`fad6359` engine+adapter+16 test+2 schema / `f9c55bb` version+protocol+TODO），runtime ledger 不入 git；無關 dashboard 改動未動。
 - [x] **[EXP-R1] 打破 derived-band 套套邏輯（致命）** — V4.31.0：新增 `forward_expectations_multiple_anchor.py` 自身歷史 multiple regime（FMP `ratios` annual P/E/P/S/P/FCF，price-independent；dispersion ≤3.0 gate）。倍數優先序 explicit → historical → derived；只剩 derived 時 status `advisory_band_only` + warning + CLI ⚠️ disclaimer。ARM `--fetch` base 由 ≡現價 變 forward EPS×歷史 P/E（實測 base $870 vs 現價 $402）。**Tier2 peer forward P/E 暫緩**（N peer × estimates 太重），無歷史/no-fetch 時誠實降級 advisory band。
 - [x] **[EXP-R2] forward bridge 假設透明化 + 敏感度** — V4.32.0：bridge 加 `assumption_basis` + `held_constant_assumptions`（逐項揭露 margin/fcf/capex/share/tax 皆 held-constant）+ `terminal_sensitivity`（net-margin ±20% / share ±10% 對 net income/EPS 彈性，標 `illustrative_elasticity_not_a_scenario`）；report 同步呈現給人讀。`eps_implied_net_income` vs `net_income_from_margin` 既有 consistency check 保留（V4.23）。
-- [ ] **[EXP-R3] scenario driver step 改由 evidence 決定** — 移除固定 ±10% / ±5pp 寫死 step；bear/base/bull 的 driver 變動幅度須來自 guidance range、analyst low/high dispersion 或歷史 driver 波動，缺證據時降級 `qualitative_only`（呼應 EXP-3.3 gate，不得用固定百分比偽裝成 driver scenario）。
+- [x] **[EXP-R3] scenario driver step 改由 evidence 決定** — V4.33.0：builder v2.0 移除固定 ±0.05/±0.10 step；bear/bull 改由 consensus 營收 low/high envelope 推 CAGR band（真 dispersion）。driver-level driver 無 per-driver dispersion evidence → `base_operating_drivers_held`（揭露不捏造）。缺 evidence dispersion（無 2-row 跨度/無 low<high）→ 降級 qualitative + 標 `no_evidence_based_dispersion_for_scenario_spread`。test 26→33 asserts。**未做**：guidance-range 直接當 driver dispersion 來源（目前只用 consensus envelope）+ price_range 倍數壓縮 scenario（ARM $870 過樂觀，留待 forecast-to-valuation EXP-3.4）。
 - [x] **[EXP-R4] 數值安全：除零 + NaN/Inf** — V4.30.1：12 script data-output `json.dumps` 全加 `allow_nan=False`（NaN/Inf 序列化即 fail-fast）；確認 `gap._compare`（`right_value not in (None,0)`）、scenario `change_vs_base`（`if value`）、`_ratio_upside`（`_pos` 現價）、bridge margin（`_pos` revenue / tax `<=0`）除法均已 guard；新增 `test_forward_expectations_numeric_safety.py` 15 asserts 覆蓋 0/負分母/零現價/零 EPS。
 - [ ] **[EXP-0.4] 定義成功標準（前置 gate）** — 不以「估值變高」為目標；以 driver 可解釋性、預測誤差（WAPE）、方向命中率、bias、來源完整度、expectations gap 可驗證性為準。**這是 R1 的驗收尺：沒有它無法判斷套套邏輯是否真被修好。**
 - [ ] **[EXP-1.2] 修正 consensus 被歷史方法壓制** — consensus 必須作獨立 lane；CAGR／trend 僅能進 Base-rate 或作風險對照，不能用 median 無條件覆蓋 consensus。

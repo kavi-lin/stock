@@ -12,26 +12,41 @@ import json
 import math
 import sys
 
-BUILDER_VERSION = "forward_expectations_scenario_builder.py v1.1"
+BUILDER_VERSION = "forward_expectations_scenario_builder.py v2.0 (evidence-dispersion spread)"
 SCENARIO_CASES = ("bear", "base", "bull")
-SENSITIVITY_STEP = 0.05
-DRIVER_LEVEL_STEP = 0.10
 MIN_REVENUE_CAGR = -0.50
 MAX_REVENUE_CAGR = 1.50
-RATIO_DRIVERS = {
-    "royalty_rate_or_value_per_unit",
-    "license_pipeline_conversion",
-    "data_center_segment_exposure",
-    "revenue_cagr",
-}
 
 
 def _num(value):
     return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
 
 
+def _pos(value):
+    value = _num(value)
+    return value if value is not None and value > 0 else None
+
+
 def _clamp(value, lo=MIN_REVENUE_CAGR, hi=MAX_REVENUE_CAGR):
     return max(lo, min(hi, value))
+
+
+def _years_between(d_old: str, d_new: str):
+    import datetime as _dt
+    try:
+        a = _dt.date.fromisoformat((d_old or "")[:10])
+        b = _dt.date.fromisoformat((d_new or "")[:10])
+    except Exception:
+        return None
+    days = (b - a).days
+    return days / 365.25 if days > 0 else None
+
+
+def _cagr(v0, v1, years):
+    v0, v1, years = _pos(v0), _pos(v1), _num(years)
+    if v0 is None or v1 is None or years is None or years <= 0:
+        return None
+    return (v1 / v0) ** (1 / years) - 1
 
 
 def _allowed_mode_names(policy: dict) -> set[str]:
@@ -103,85 +118,88 @@ def _guidance_overlays(guidance_extraction: dict) -> list[dict]:
     return overlays
 
 
-def _numeric_cases(independent: dict, selected: dict) -> list[dict]:
-    driver_level = _driver_level_cases(selected)
-    if driver_level:
-        return driver_level
-    base_cagr = _num(independent.get("revenue_cagr"))
-    if base_cagr is None:
+def _consensus_cagr_band(financial_bridge: dict):
+    """EXP-R3: bear/base/bull revenue CAGR from the analyst consensus low/high envelope —
+    a real dispersion source, NOT a fixed +/- step. Needs >=2 forward rows spanning time
+    and a genuine low<high spread on the terminal revenue. Returns None to force degradation."""
+    rows = [r for r in (financial_bridge or {}).get("rows") or []
+            if isinstance(r, dict) and _pos((r.get("revenue") or {}).get("point"))]
+    rows = sorted(rows, key=lambda r: r.get("date") or "")
+    if len(rows) < 2:
+        return None
+    near, far = rows[0], rows[-1]
+    years = _years_between(near.get("date"), far.get("date"))
+    rev = far.get("revenue") or {}
+    pt, lo, hi = _pos(rev.get("point")), _pos(rev.get("low")), _pos(rev.get("high"))
+    near_pt = _pos((near.get("revenue") or {}).get("point"))
+    if not (years and pt and lo and hi and near_pt) or not (hi > lo):
+        return None
+    base = _cagr(near_pt, pt, years)
+    bear = _cagr(near_pt, lo, years)
+    bull = _cagr(near_pt, hi, years)
+    if base is None or bear is None or bull is None:
+        return None
+    return {
+        "bear": round(_clamp(bear), 4),
+        "base": round(_clamp(base), 4),
+        "bull": round(_clamp(bull), 4),
+        "window_years": round(years, 2),
+        "near_date": near.get("date"),
+        "far_date": far.get("date"),
+        "dispersion_source": "consensus_revenue_low_high_envelope",
+    }
+
+
+def _base_driver_values(selected: dict) -> dict:
+    """Disclose the evidenced base driver values WITHOUT fabricating per-driver spread.
+    Driver specs carry only a point value + evidence_refs, so they cannot legitimately
+    drive bear/bull moves (no per-driver dispersion evidence). They are held at base."""
+    model = selected.get("driver_model") or {}
+    if not model.get("available"):
+        return {}
+    drivers = model.get("drivers") or {}
+    keys = [key for key in model.get("case_driver_keys") or [] if key in drivers]
+    out = {}
+    for key in keys:
+        value = _num((drivers.get(key) or {}).get("value"))
+        if value is not None:
+            out[key] = round(value, 6)
+    return out
+
+
+def _numeric_cases(independent: dict, selected: dict, financial_bridge: dict) -> list[dict]:
+    band = _consensus_cagr_band(financial_bridge)
+    if band is None:
         return []
     refs = _driver_refs(independent, selected)
+    base_drivers = _base_driver_values(selected)
+    model = selected.get("driver_model") or {}
     cases = []
-    for case, delta in (("bear", -SENSITIVITY_STEP), ("base", 0.0), ("bull", SENSITIVITY_STEP)):
-        cagr = round(_clamp(base_cagr + delta), 4)
+    for case in SCENARIO_CASES:
+        cagr = band[case]
         cases.append({
             "case": case,
-            "operating_drivers": {
-                "revenue_cagr": cagr,
-            },
-            "driver_changes": [
-                {
-                    "driver": "revenue_cagr",
-                    "change_vs_base": round(delta, 4),
-                    "method": "bounded_driver_sensitivity",
-                    "evidence_refs": refs.get("revenue_cagr") or [],
-                }
-            ],
+            "business_model": model.get("business_model"),
+            "operating_drivers": {"revenue_cagr": cagr},
+            "base_operating_drivers_held": base_drivers,
+            "driver_changes": [{
+                "driver": "revenue_cagr",
+                "value": cagr,
+                "change_vs_base": round(cagr - band["base"], 4),
+                "method": "consensus_low_high_envelope",
+                "dispersion_source": band["dispersion_source"],
+                "window": {"from": band["near_date"], "to": band["far_date"], "years": band["window_years"]},
+                "evidence_refs": refs.get("revenue_cagr") or [],
+            }],
             "interpretation": (
-                "Base uses the evidenced Independent revenue CAGR."
-                if case == "base"
-                else "Sensitivity case changes the evidenced revenue CAGR driver; no valuation math is produced."
+                "Base uses the consensus point revenue CAGR over the estimate window."
+                if case == "base" else
+                "Bear/bull use the analyst low/high revenue envelope (evidence dispersion), "
+                "not a fixed step. Per-driver values are held at base — no per-driver dispersion "
+                "evidence exists to spread them. No valuation math is produced."
             ),
         })
     return cases
-
-
-def _bounded_driver_value(driver: str, value: float, direction: int):
-    if driver == "revenue_cagr":
-        return round(_clamp(value + direction * SENSITIVITY_STEP), 4)
-    if driver in RATIO_DRIVERS:
-        return round(max(0.0, min(1.0, value * (1 + direction * DRIVER_LEVEL_STEP))), 4)
-    return round(max(0.0, value * (1 + direction * DRIVER_LEVEL_STEP)), 4)
-
-
-def _driver_level_cases(selected: dict) -> list[dict]:
-    model = selected.get("driver_model") or {}
-    if not model.get("available"):
-        return []
-    drivers = model.get("drivers") or {}
-    keys = [key for key in model.get("case_driver_keys") or [] if key in drivers]
-    if not keys:
-        return []
-    cases = []
-    for case, direction in (("bear", -1), ("base", 0), ("bull", 1)):
-        operating = {}
-        changes = []
-        for key in keys:
-            spec = drivers.get(key) or {}
-            value = _num(spec.get("value"))
-            if value is None:
-                continue
-            adjusted = _bounded_driver_value(key, value, direction)
-            operating[key] = adjusted
-            changes.append({
-                "driver": key,
-                "change_vs_base": 0 if direction == 0 else round((adjusted - value) / value, 4) if value else 0,
-                "method": "driver_level_bounded_sensitivity",
-                "evidence_refs": spec.get("evidence_refs") or [],
-            })
-        if operating:
-            cases.append({
-                "case": case,
-                "business_model": model.get("business_model"),
-                "operating_drivers": operating,
-                "driver_changes": changes,
-                "interpretation": (
-                    "Base uses evidenced Royalty/IP driver values."
-                    if case == "base"
-                    else "Sensitivity case changes explicit Royalty/IP operating drivers; no valuation math is produced."
-                ),
-            })
-    return cases if len(cases) == 3 else []
 
 
 def build_operating_driver_scenarios(
@@ -213,22 +231,25 @@ def build_operating_driver_scenarios(
         ),
     }
     if status == "numeric_scenario_allowed" and "driver_numeric_bear_base_bull" in modes:
-        cases = _numeric_cases(independent or {}, selected)
+        cases = _numeric_cases(independent or {}, selected, financial_bridge or {})
         if cases:
             return {
                 **base,
                 "available": True,
                 "mode": "driver_numeric_bear_base_bull",
+                "dispersion_source": "consensus_revenue_low_high_envelope",
                 "cases": cases,
                 "qualitative_watchlist": [],
             }
+        # EXP-R3: policy allows numeric, but no evidence-based dispersion exists to spread
+        # bear/bull. Do NOT fabricate a fixed +/- step — degrade to qualitative.
         return {
             **base,
             "status": "numeric_inputs_incomplete",
             "mode": "qualitative_driver_watchlist",
-            "qualitative_watchlist": watchlist or [{
-                "item": "independent_revenue_cagr",
-                "reason": "numeric_policy_allowed_but_base_driver_missing",
+            "qualitative_watchlist": (watchlist or []) + [{
+                "item": "consensus_revenue_dispersion",
+                "reason": "no_evidence_based_dispersion_for_scenario_spread",
                 "needed_for": "driver_numeric_bear_base_bull",
             }],
         }

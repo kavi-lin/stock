@@ -8,6 +8,24 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.33.0] — 2026-06-16 — Scenario 分歧度改由 evidence 決定（EXP-R3）
+
+### Changed
+- `forward_expectations_scenario_builder.py` v2.0：移除固定 ±0.05 / ±0.10 step。bear/bull 改由
+  **consensus 營收 low/high envelope** 推導 CAGR band（near→far bridge row 的 point/low/high 各算 CAGR）
+  — 真 evidence dispersion，非寫死百分比。driver-level driver（royalty units/rate/…）因 spec 只有單點
+  value、無 per-driver dispersion evidence，改為 `base_operating_drivers_held`（揭露但不捏造分歧），
+  唯一 spread 來自 envelope CAGR。
+- 缺 evidence dispersion（無 2-row 時間跨度 / 無 low<high）時 **降級 qualitative_driver_watchlist**，
+  watchlist 標 `no_evidence_based_dispersion_for_scenario_spread`，不再用固定 step 偽裝 driver scenario。
+- `test_forward_expectations_scenario_builder.py` 重寫（26→33 asserts），涵蓋 envelope band、held drivers、
+  無 dispersion 降級、single-row 降級。
+
+### Why
+- V4.30.0 code review 缺點 #3：scenario 的 bear/base/bull 分歧度是寫死 ±10% / ±5pp，違背 EXP-2.4
+  「scenario 必須改 driver、不得固定百分比加減」精神。本版把分歧度綁回 analyst 共識 low/high 實際
+  dispersion，缺證據就降級，不捏造。仍 shadow-only，不產 fair value / target / verdict。
+
 ## [4.32.0] — 2026-06-16 — Forward Bridge 凍結假設透明化 + 敏感度（EXP-R2）
 
 ### Added
