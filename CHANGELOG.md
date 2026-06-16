@@ -8,6 +8,26 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.37.0] — 2026-06-17 — Forward Expectations 進決策中心（L1 advisory，option b auto-fetch）
+
+### Added
+- `bridge.py` `load_forward_outlook(ticker)`：決策中心每檔 ticker 掛 `forward_expectations` advisory block
+  （future price range bear/base/bull + upside% + forecast/advisory_band 狀態 + expectations gap + cohort base-rate）。
+  **option (b)**：無 fresh snapshot 時自動跑 `forward_expectations.py --ticker <T> --self-assemble`（含 fetch，
+  即新分析的股自動有前瞻），TTL 快取（預設 20h，`FORWARD_OUTLOOK_TTL_SEC`）+ 每次 bridge run cold-fetch 預算
+  上限（預設 8，`FORWARD_OUTLOOK_BUDGET`）+ 可關（`FORWARD_OUTLOOK_FETCH=0`）。失敗 non-fatal。
+- `Dashboard/page-decisions.js` `buildFvExtras`：卡片 Layer-3 advisory 加 Forward row，FORECAST（綠）/
+  ⚠ ADVISORY BAND（橘，非前瞻只是現價波動帶）badge + shadow-only 標記。
+
+### Why
+- 讓 forward 前瞻**出現在決策中心**供肉眼對照（protocol fair value vs forward price range），同時嚴守治理：
+  純 advisory row，**不**進 score / verdict / fair_value blend / sizing。升到真正影響決策（L2）仍須
+  `forward_expectations_success_criteria.py` verdict=pass + user 批准（現況 insufficient_evidence）。
+  ARM 卡實測 Forward $702/$870/$1024（FORECAST, historical regime, shadow-only）。
+
+### Ops
+- 生效需重啟 dashboard_server 並重跑 bridge（或下次 `daily_update.sh` 自動跑）。冷啟動每 run 補 8 檔，數次跑滿。
+
 ## [4.36.0] — 2026-06-17 — Semiconductor business-model adapter（EXP-3.1 首個跨模式擴充）
 
 ### Added

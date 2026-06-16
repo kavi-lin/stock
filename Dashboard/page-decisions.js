@@ -1000,6 +1000,23 @@ function buildFvExtras(item, wl) {
         </div>`);
     }
 
+    // V4.37.0 Forward Expectations L1 advisory (shadow; never feeds decision math)
+    const fe = item.forward_expectations;
+    if (fe && fe.range && fe.range.base != null) {
+        const up = fe.upside_pct || {};
+        const pct = v => v != null ? `<span class="text-zinc-500">(${v >= 0 ? '+' : ''}${Number(v).toFixed(0)}%)</span>` : '';
+        const advisory = fe.status === 'advisory_band_only' || !fe.is_forecast;
+        const badge = advisory
+            ? '<span class="text-[9px] font-bold" style="color:#f97316" title="No price-independent multiple anchor: ±15% band around today\'s price, not a growth forecast. Re-run forward engine with fetch.">⚠ ADVISORY BAND</span>'
+            : `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:#22c55e;border:1px solid color-mix(in srgb,#22c55e,transparent 65%)" title="${escapeHtmlDc((fe.method || '') + ' · ' + (fe.multiple_quality || ''))}">FORECAST</span>`;
+        rows.push(`<div class="text-[10px] font-mono text-zinc-300" title="Forward Expectations shadow · horizon ${escapeHtmlDc(fe.horizon_date || '--')} · gap ${escapeHtmlDc(fe.expectations_gap_status || '--')}">
+            <span class="font-bold text-zinc-400 uppercase">Forward</span>
+            ${money(fe.range.bear)} ${pct(up.bear)} / <b>${money(fe.range.base)}</b> ${pct(up.base)} / ${money(fe.range.bull)} ${pct(up.bull)}
+            ${badge}
+            <span class="text-zinc-600 text-[9px]">shadow-only</span>
+        </div>`);
+    }
+
     return rows.length
         ? `<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800/60 space-y-1">${rows.join('')}</div>`
         : '';
@@ -1411,16 +1428,17 @@ function buildCard(item) {
             <div class="mt-2">${layer2Parts.join('')}</div>
         </details>` : '';
 
-    // Layer 3 證據 — valuation detail; summary carries the fair-value band chip.
+    // Layer 3 證據 — valuation detail; always visible (un-folded) so fair value
+    // + fair_value_range sit inline next to the dual-track entry for direct compare.
     const layer3Html = v5Block ? `
-        <details class="dc-collapse mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
-            <summary class="text-[9px] font-black uppercase tracking-widest flex items-center gap-1" style="color:#34d399">
+        <div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-900/50">
+            <div class="text-[9px] font-black uppercase tracking-widest flex items-center gap-1" style="color:#34d399">
                 <i data-lucide="scale" class="w-3 h-3"></i>
                 ${wl.layer3_title || (isZhDc ? '證據 · 估值' : 'Evidence · Valuation')}
                 <span class="ml-auto">${v5Block.chip}</span>
-            </summary>
+            </div>
             ${v5Block.html}
-        </details>` : '';
+        </div>` : '';
 
     return `
     <div class="glass-card dc-card-hover p-6 flex flex-col gap-0 ${statusGlow} cursor-pointer" data-history-ticker="${item.ticker}" data-protocol-version="${version}" style="position:relative;">

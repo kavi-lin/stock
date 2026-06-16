@@ -5,6 +5,7 @@ import sys
 import glob
 import re
 import time
+import subprocess
 import requests
 from datetime import datetime, date, timedelta, timezone
 
@@ -1427,6 +1428,66 @@ def _batch_current_prices(tickers):
     return result
 
 
+# ── Forward Expectations L1 advisory (shadow) ─────────────────────────────────
+# Surfaces the forward engine's future price range + expectations gap on the decision
+# card as a READ-ONLY advisory block. It never feeds score, verdict, fair-value blend,
+# or sizing — that promotion is gated by forward_expectations_success_criteria.py.
+FORWARD_DIR        = os.path.join(INVEST_LOGS, 'forward_expectations')
+FORWARD_SCRIPT     = os.path.join(BASE_DIR, 'investment', 'scripts', 'forward_expectations.py')
+FORWARD_TTL_SEC    = int(os.getenv('FORWARD_OUTLOOK_TTL_SEC', str(20 * 3600)))   # reuse within ~a trading day
+FORWARD_FETCH_ON   = os.getenv('FORWARD_OUTLOOK_FETCH', '1') != '0'              # option (b): auto --fetch
+FORWARD_BUDGET     = int(os.getenv('FORWARD_OUTLOOK_BUDGET', '8'))               # max cold fetches per bridge run
+_forward_budget    = [0]
+
+
+def _newest_forward_snapshot(ticker):
+    files = glob.glob(os.path.join(FORWARD_DIR, f'{ticker.upper()}_*.json'))
+    return max(files, key=os.path.getmtime) if files else None
+
+
+def load_forward_outlook(ticker):
+    """Reuse a fresh immutable snapshot; else run ONE budgeted --self-assemble fetch
+    (option b). Always non-fatal — a failure just returns None and the card omits it."""
+    snap = _newest_forward_snapshot(ticker)
+    fresh = bool(snap) and (time.time() - os.path.getmtime(snap) < FORWARD_TTL_SEC)
+    if not fresh and FORWARD_FETCH_ON and _forward_budget[0] < FORWARD_BUDGET:
+        _forward_budget[0] += 1
+        try:
+            subprocess.run([sys.executable, FORWARD_SCRIPT, '--ticker', ticker.upper(),
+                            '--self-assemble'], cwd=BASE_DIR, capture_output=True, timeout=150)
+            snap = _newest_forward_snapshot(ticker)
+        except Exception:
+            pass
+    if not snap:
+        return None
+    try:
+        with open(snap, encoding='utf-8') as f:
+            d = json.load(f)
+    except Exception:
+        return None
+    fpr = d.get('future_price_range') or {}
+    if not fpr or not (fpr.get('range') or {}).get('base'):
+        return None
+    cases = fpr.get('cases') or {}
+    br = d.get('base_rate_lane') or {}
+    rng = fpr.get('range') or {}
+    return {
+        'as_of': d.get('generated_at'),
+        'shadow_only': True,
+        'status': fpr.get('status'),                 # available | advisory_band_only
+        'is_forecast': fpr.get('multiple_quality') in ('explicit', 'historical'),
+        'multiple_quality': fpr.get('multiple_quality'),
+        'method': fpr.get('method'),
+        'horizon_date': fpr.get('horizon_date'),
+        'range': {'bear': rng.get('low'), 'base': rng.get('base'), 'bull': rng.get('high')},
+        'upside_pct': {k: (cases.get(k) or {}).get('upside_pct') for k in ('bear', 'base', 'bull')},
+        'expectations_gap_status': ((d.get('expectations_gap') or {}).get('summary') or {}).get('status'),
+        'base_rate_median': br.get('peer_rev_cagr_median'),
+        'base_rate_basis': br.get('basis'),
+        'warnings': fpr.get('warnings') or [],
+    }
+
+
 def extract_audit_history(positions_by_ticker=None):
     """Build recent_analysis[] with full watchlist metadata + live current_price"""
     positions_by_ticker = positions_by_ticker or {}
@@ -1656,6 +1717,8 @@ def extract_audit_history(positions_by_ticker=None):
                     "decision_cap_reason": decision_cap_reason,
                     "cap_override_reason": cap_override_reason,
                     "hot_zone_probe":      hot_zone_probe,
+                    # V4.37.0 Forward Expectations L1 advisory (shadow; does NOT feed decision)
+                    "forward_expectations": load_forward_outlook(ticker),
                     # Price fields (current = yfinance live; analysis = snapshot at decision time)
                     "current_price":    live_prices.get(ticker),
                     "analysis_price":   meta.get("analysis_price"),

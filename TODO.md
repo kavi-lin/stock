@@ -338,6 +338,11 @@
 - [ ] **[EXP-3.4] 建立 forecast-to-valuation mapping** — 依商業模式映射 forward revenue／EPS／FCF 至合適估值方法；避免全套同一 DCF 或固定倍數。**依賴 EXP-R1。**
 - [ ] **[EXP-3.5] 延後 full forward DCF 自由假設模型** — Independent lane 校準前不加大量成長期 / margin normalization / terminal multiple 自由參數。
 
+#### 🔵 決策中心整合（L1 done / L2 gated）
+
+- [x] **[EXP-INT-1] L1 advisory 顯示** — V4.37.0：`bridge.py load_forward_outlook()` 掛 `forward_expectations` 到決策 item（option b auto-fetch + TTL + budget），`page-decisions.js` Layer-3 加 Forward row（FORECAST/⚠advisory badge + shadow-only）。純顯示，**不**進 score/verdict/blend/sizing。
+- [ ] **[EXP-INT-2] L2 接決策（gated，禁現在做）** — forward 進 fair_value blend / 改 verdict / 改 sizing。前提全清才可：`success_criteria` verdict=pass（需 EXP-4.4 樣本 ≥15 + EXP-2.x independent lane 真 available）+ EXP-4.5 升級報告 + **user 批准**。先以 risk-flag 形式（如 forward gap 過大→⚠），不直接動 sizing。
+
 #### 🟢 P2 — 校準與上線門檻（P0+P1 清完後）
 
 - [ ] **[EXP-4.4] 設定最小驗證樣本** — ARM pilot 通過後擴至不同 archetype；樣本不足不得宣稱某 lane 優於現行系統。
