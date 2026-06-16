@@ -1,6 +1,6 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-06-13 (v4.10.0)
+> **Last Updated**: 2026-06-16 (v4.30.0)
 
 ---
 
@@ -296,6 +296,78 @@
 ---
 
 ## 🎯 活動 Backlog (Pending)
+
+### 路線 EXP — Forward Expectations Engine（未來營運預測 → 預期估值）
+
+> **目的**：讓 AI 投資委員會能回答「未來價值由什麼驅動、目前市場已反映什麼、委員會與市場差在哪、哪些未來數據能驗證 thesis」，而非只用 trailing 財務數據外推。
+>
+> **治理原則**：shadow-first；初期不得修改 live `fair_value_summary`、`decision_lock`、買進門檻或部位 sizing。所有預測必須保存 point-in-time 來源、時間戳與假設，不得虛構 TAM、guidance 或 analyst estimate。
+>
+> **既有零件優先復用**：`earnings-analyst` 的 8Q 財報／segment／transcript／annual estimates、`earnings-valuation-forecaster` 的 12M forecast、`compute_implied_expectations()` reverse DCF、archetype 與現有估值錨。
+
+#### 🩺 系統健康度快照（V4.30.0 code review）
+
+> 治理層 A（shadow-only / evidence contract / same-metric gate / immutable ledger / 0-LLM / 16 golden test 全綠）。
+> **交付層 C**：headline 產物 `future_price_range` 在預設路徑數學上塌回現價，看似 forecast 實為波動帶。下列 P0 未清前，**禁止任何 lane 進入 EXP-4.5 shadow→live**。
+>
+> 已知致命/重大問題（review 實測 ARM base +0.0% / NVDA base +0.0%）：
+> 1. **套套邏輯**：無 explicit forward multiple 時 `base_multiple = current_price / forward_eps` → base target ≡ current price，range 退化成現價 ±15%，前瞻成長沒進價格。→ EXP-R1
+> 2. **bridge 凍結 margin/share**：forward net income = forward_revenue × 歷史 margin；`eps_implied_net_income` 繞回 forward_eps × shares，兩 view 塌成一個。→ EXP-R2
+> 3. **scenario 固定 ±10% step**：driver-level 仍是寫死百分比加減，違背 EXP-2.4 精神（分歧度該由 driver 經濟學決定）。→ EXP-R3
+> 4. **inf/NaN 序列化**：`gap._compare` / scenario `change_vs_base` 除法無 0 guard + `json.dumps(allow_nan=True)` → 可能吐非法 JSON 炸下游。→ EXP-R4
+> 5. **覆蓋率**：只有 `royalty_ip` 1 個 adapter，僅 ARM 走得通 independent lane；其餘 ticker 全掉回 consensus + 套套邏輯 band。→ P1 EXP-3.1
+> 6. **全部 uncommit**：~4363 行 / 17 script / 16 test 零 commit，工作區已 bump 4.30.0。→ EXP-R0
+
+#### 🔴 P0 — Robustness Gate（必須全清才可談 shadow→live；engine 變更後跑對應 golden test rc=0）
+
+- [ ] **[EXP-R0] 落地 commit 現有未來估值系統** — 切 feature commit，把 17 script + 16 test + 2 schema doc 分批落地（避免單一 4363 行 working tree 流失）；commit 後再動下列 R 系列。
+- [ ] **[EXP-R1] 打破 derived-band 套套邏輯（致命）** — 無 explicit forward multiple 時 base target ≡ current price，`future_price_range` 非真前瞻。須接真 forward multiple 來源：peer forward P/E 分布 / 該股歷史 multiple regime（如 5y median fwd P/E）/ reverse-DCF 一致倍數，擇一打破 base==current。未完成前 `future_price_range` 標 `advisory_band_only` 並在 `forward_price_range.py` 輸出明示「此為現價波動帶、非成長前瞻」。
+- [ ] **[EXP-R2] forward bridge 假設透明化 + 敏感度** — 明確標 margin/share-count 為「held-constant 歷史值」假設；至少對 margin 與 share count 各跑一檔敏感度（buyback dilution / margin normalization），避免 forward net income 只是 forward_revenue × 歷史 margin 的恆等式。`eps_implied_net_income` vs `net_income_from_margin` 的差異須當 consistency check 呈現，不可被當兩個獨立 view。
+- [ ] **[EXP-R3] scenario driver step 改由 evidence 決定** — 移除固定 ±10% / ±5pp 寫死 step；bear/base/bull 的 driver 變動幅度須來自 guidance range、analyst low/high dispersion 或歷史 driver 波動，缺證據時降級 `qualitative_only`（呼應 EXP-3.3 gate，不得用固定百分比偽裝成 driver scenario）。
+- [ ] **[EXP-R4] 數值安全：除零 + NaN/Inf** — 全線 `json.dumps(..., allow_nan=False)`；`gap._compare`、scenario `change_vs_base`、`_ratio_upside`、bridge margin 除法補 0/負值 guard；加 golden test 覆蓋 0 與負分母。
+- [ ] **[EXP-0.4] 定義成功標準（前置 gate）** — 不以「估值變高」為目標；以 driver 可解釋性、預測誤差（WAPE）、方向命中率、bias、來源完整度、expectations gap 可驗證性為準。**這是 R1 的驗收尺：沒有它無法判斷套套邏輯是否真被修好。**
+- [ ] **[EXP-1.2] 修正 consensus 被歷史方法壓制** — consensus 必須作獨立 lane；CAGR／trend 僅能進 Base-rate 或作風險對照，不能用 median 無條件覆蓋 consensus。
+
+#### 🟡 P1 — 覆蓋率與 driver 深度（P0 清完後）
+
+- [ ] **[EXP-3.1] 建立 business-model driver template library** — V4.15.0 已有首個 `royalty_ip` adapter 與 registry；待擴 SaaS、半導體、銀行、零售與工業（否則非 ARM 全走套套邏輯 band）。
+- [ ] **[EXP-3.2] 建立 Base-rate cohort library** — 依商業模式、成長階段、margin profile 與規模選 cohort；保存 cohort 選擇理由，防事後挑樣本。
+- [ ] **[EXP-2.1] 擴充 ARM driver tree** — V4.20.0 已能 discovery + opt-in 下載 allowlisted SEC filing 正規化文字 → promotion gate；待擴 filing 內 ARM driver pattern（units / rate / license conversion / data-center exposure）。
+- [ ] **[EXP-2.2] 產生 Consensus／Independent／Base-rate 三條 3–5Y lane** — 每條保留獨立假設、輸出與信心，不先 blend 成單一數字。
+- [ ] **[EXP-1.1] 補齊資料 inventory 介面** — 待接 structural shift、12M forecaster 與 implied expectations（其餘來源 V4.21.0 已串）。
+- [ ] **[EXP-3.4] 建立 forecast-to-valuation mapping** — 依商業模式映射 forward revenue／EPS／FCF 至合適估值方法；避免全套同一 DCF 或固定倍數。**依賴 EXP-R1。**
+- [ ] **[EXP-3.5] 延後 full forward DCF 自由假設模型** — Independent lane 校準前不加大量成長期 / margin normalization / terminal multiple 自由參數。
+
+#### 🟢 P2 — 校準與上線門檻（P0+P1 清完後）
+
+- [ ] **[EXP-4.4] 設定最小驗證樣本** — ARM pilot 通過後擴至不同 archetype；樣本不足不得宣稱某 lane 優於現行系統。
+- [ ] **[EXP-4.5] 提出 shadow → live 升級報告** — 比較現行估值、Forward Expectations shadow、翻轉率與實際預測誤差；**前提：EXP-R1~R4 + EXP-0.4 全清**；僅在 user 批准後接入 live。
+
+#### ✅ EXP 已完成（V4.14–4.30；歷史紀錄）
+
+- [x] **[EXP-0.1]** schema：同口徑 matrix + evidence contract + source lineage + freshness + unknown rejection（V4.14.0）
+- [x] **[EXP-0.2]** 三 lane 角色 + 禁混合規則（FCF／EPS／營收 CAGR 不互減）（V4.14.0）
+- [x] **[EXP-0.3]** shadow 輸出 + live 升級治理（V4.14.0）
+- [x] **[EXP-1.3]** management guidance 結構化抽取（range 保持 range）（V4.20.0）
+- [x] **[EXP-1.4]** analyst estimate revision snapshot（單 cache 標 `delta unavailable`）（V4.21.0）
+- [x] **[EXP-2.3]** 簡化 forward financial bridge（⚠️ 見 EXP-R2 凍結假設問題）（V4.23.0）
+- [x] **[EXP-2.4a]** operating-driver scenario builder shadow（⚠️ 見 EXP-R3 固定 step）（V4.27.0）
+- [x] **[EXP-2.4b]** Royalty/IP driver-level scenario cases（V4.28.0）
+- [x] **[EXP-2.5]** Expectations Gap shadow scaffold（同口徑比較）（V4.24.0）
+- [x] **[EXP-2.6]** shadow report renderer `forward_expectations_report.py`（V4.25.0）
+- [x] **[EXP-3.1a]** Sector／Supply-chain Transmission Graph gate（V4.15.0）
+- [x] **[EXP-3.3]** scenario 約束 + 缺資料降級規則（policy gates）（V4.26.0）
+- [x] **[EXP-3.4a]** shadow future price range mapper（⚠️ 見 EXP-R1 套套邏輯）（V4.29.0）
+- [x] **[EXP-3.4b]** ticker → future price range 驗收入口 `forward_price_range.py`（⚠️ 同 R1）（V4.30.0）
+- [x] **[EXP-4.1]** point-in-time Forecast Ledger（UTC run_id + exclusive-create）（V4.14.0）
+- [x] **[EXP-4.2]** 財報後 actual vs forecast scaffold（V4.22.0）
+- [x] **[EXP-4.3]** 校準指標 scaffold（WAPE proxy / directional / `insufficient_sample`）（V4.22.0）
+
+#### EXP 明確非目標
+
+- 不把 analyst price target 同時當作預測輸入與成功驗證標準。
+- 不以調高成長股 fair value 為成功；高估、低估或資訊不足都必須能被誠實輸出。
+- 不在 EXP 初期混入 anchor eligibility gate、live blend 權重修改或 CV 校準；這些維持為獨立估值治理工作。
 
 ### 路線 RSP — Retail Sector Pulse 後續
 

@@ -1176,6 +1176,41 @@ final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment   # 上限 -1
 - shadow 退出條件 / 演算法細節 / 權重表：見 `investment/protocol_appendix_price_framework.md`
   （audit 用，跑 protocol 不需讀）。checkpoint 報告：`python3 investment/scripts/shadow_report.py`。
 
+**Forward Expectations（V4.26.0 — shadow，advisory）**：成長股的 `fair_value_summary`
+後視錨（trailing DCF / owner-earnings）會把公允價壓到不可信（ARM「$8 DCF / FV $51 / −86%」）。
+PM 可選跑 `python3 investment/scripts/forward_expectations.py --ticker <T> --self-assemble`
+產出前瞻 lane（consensus 分析師估計 / market_implied reverse DCF / base_rate 同業歷史成長 /
+adapter-gated Independent）+ expectations matrix + expectations gap + forward financial bridge。
+可用 `python3 investment/scripts/forward_expectations_report.py --snapshot-file <snapshot.json>`
+將 snapshot render 成 MD §6 advisory 區塊。**只有同口徑指標可計算 gap 與 verdict**；
+FCF / EPS / 營收 CAGR 可並列描述，但禁止互減或產生跨口徑判定。
+**shadow-only — 不進 decision_lock、不改 `fair_value_summary` 或任何決策數學**；schema 見
+`investment/forward_expectations_schema.md`。跨產業 Independent lane 須遵守
+`investment/forward_expectations_adapter_contract.md`。V4.15.0 起 `royalty_ip` adapter 可由
+product segment deterministic match 並輸出 Revenue Exposure Map / driver tree / transmission graph；
+缺 units、rate、conversion 或 evidence 時必須維持 `independent_lane.available=false`，外部趨勢只能
+標為 `qualitative_only`。V4.16.0 起每次 run 另保存 point-in-time `evidence_inventory`：
+structured company facts 可 accepted；Nexus `CO_THEME`／無 corroboration 或無 conversion method
+的關係只能 provisional；缺來源與 adapter 必要 driver 必須明列 acquisition target。V4.17.0
+primary-source acquisition 僅讀既有 transcript 或 `--primary-source-file` 明確提供的 filing／IR／transcript
+bundle；缺 URL、日期、期間、單位或 supported source type 的候選不得 promoted。V4.18.0 起 source
+discovery 對所有 ticker 共用：只依實際 filing metadata 分類 10-K／20-F／40-F／10-Q／6-K 等來源，
+不按 ticker、國家、產業或 adapter 猜測；URL 與 metadata 永遠 provisional，不得 numeric eligible。
+V4.19.0 起可選 `--acquire-documents`，僅下載 discovery manifest 內 allowlisted SEC filing 文件並正規化成
+text bundle；公司 IR root、SEC submissions manifest 與任意網站不抓。下載全文本身仍不是證據，必須再通過
+primary-source promotion gate。V4.20.0 起 management guidance extraction 可從 primary-source document 抽
+revenue／EPS／margin／FCF／capex 明確 guidance；range 必須保持 range，midpoint 只當 derived helper，不得
+直接改 fair value。V4.21.0 起 estimate revision snapshot 保存 annual revenue／EPS consensus curve、
+dispersion、analyst count 與 rating momentum；單一 cache 無歷史 estimate 版本時必須標示 delta unavailable，
+不得假造上修/下修。V4.22.0 起 calibration scaffold 可唯讀對照 forecast snapshot 與後續 earnings actual；
+樣本不足固定 `insufficient_sample`，不得調權重或決策規則。V4.23.0 起 forward financial bridge 將
+annual estimates + 歷史 margin／FCF conversion／share count 映射成簡化 P&L/FCF；缺核心輸入必須降級。
+V4.24.0 起 expectations gap 只做同口徑 gap，bridge wide-gap / negative FCF 只作財務敘事風險。
+V4.25.0 起 report renderer 只產生 shadow MD section，不進 validator 必填欄位。V4.26.0 起
+scenario policy 先判定 allowed modes；缺 driver evidence / conversion method 時只能 qualitative-only
+或 range/overlay-only，禁止固定 EPS/P-E 百分比加減、LLM invented TAM 或跨口徑 gap 當 driver。
+輸出 ≠ 前瞻單點公允價。
+
 ---
 
 ## PHASE 4.6 — DECISION CAP (V5.0.x NEW)

@@ -114,6 +114,35 @@ python3 scripts/link_digest/build_artifacts.py <judgment.json>                  
 python3 investment/scripts/compute_price_framework.py --from-file <inputs.json> # V3.45.3 Phase 2.4 price framework engine: fair_value_summary blend + fair_value_range + MHP 三框架 + reverse DCF + archetype shadow（0 LLM 算術；--no-fetch 跳過 FMP vol 自抓）
 python3 investment/scripts/shadow_report.py                                     # V3.46.1 shadow 讀出端: #2 dispersion backfill + #6 oe / #3 archetype 翻轉率 + #4 news 分布偏移 + checkpoint 進度（唯讀，輸出 reports/SHADOW_REPORT_<date>.md）
 python3 investment/scripts/test_compute_price_framework.py                      # V3.48.0 engine golden-fixture 回歸測試（26 asserts，改 engine 後必跑 rc=0）
+python3 investment/scripts/forward_expectations.py --ticker <T> --self-assemble # V4.30.0 前瞻預期引擎（shadow）：同口徑 matrix + expectations gap + scenario policy + operating-driver scenario builder（Royalty/IP driver-level cases）+ future_price_range + ledger/inventory + ticker-neutral source discovery + bounded SEC document acquisition + management guidance extraction + estimate revision snapshot + financial bridge + primary-source gate + adapters（0 LLM；不碰 live blend）
+python3 investment/scripts/forward_price_range.py <TICKER> # V4.30.0 ticker → future price range 驗收入口（current / horizon / bear-base-bull / method / warnings）
+python3 investment/scripts/forward_expectations.py --ticker <T> --self-assemble --acquire-documents # V4.26.0 opt-in allowlisted SEC filing text normalization + guidance extraction
+python3 investment/scripts/forward_expectations_source_discovery.py <T> --no-fetch # V4.21.0 跨 ticker source manifest（metadata only；不 promotion）
+python3 investment/scripts/forward_expectations_guidance.py --primary-source-file primary.json # V4.21.0 明確 management guidance/range extractor
+python3 investment/scripts/forward_expectations_revisions.py --ticker <T> --earnings-cache-file <cache.json> # V4.21.0 analyst estimate/rating point-in-time snapshot
+python3 investment/scripts/forward_expectations_calibration.py                  # V4.22.0 read-only forecast-vs-actual scaffold（insufficient_sample 不調參）
+python3 investment/scripts/forward_expectations_financial_bridge.py --earnings-cache-file <cache.json> # V4.23.0 forward P&L/FCF bridge（shadow；不產生 fair value）
+python3 investment/scripts/forward_expectations_gap.py --snapshot-file <snapshot.json> # V4.24.0 expectations gap builder（shadow；同口徑比較）
+python3 investment/scripts/forward_expectations_report.py --snapshot-file <snapshot.json> # V4.25.0 render Forward Expectations shadow markdown section
+python3 investment/scripts/forward_expectations_scenario_policy.py --snapshot-file <snapshot.json> # V4.26.0 scenario evidence gate policy（不產生 scenario 數字）
+python3 investment/scripts/forward_expectations_scenario_builder.py --snapshot-file <snapshot.json> # V4.28.0 operating-driver scenario builder（shadow；Royalty/IP driver-level cases；不產生 fair value）
+python3 investment/scripts/forward_expectations_price_range.py --snapshot-file <snapshot.json> # V4.29.0 future price range mapper（shadow；bear/base/bull target range）
+python3 investment/scripts/test_forward_expectations.py                         # V4.30.0 forward_expectations core golden-fixture（45 asserts，改 engine 後必跑 rc=0）
+python3 investment/scripts/test_forward_price_range.py                          # V4.30.0 ticker-facing future price range CLI golden-fixture
+python3 investment/scripts/test_forward_expectations_source_discovery.py        # V4.21.0 ticker-neutral source discovery golden-fixture
+python3 investment/scripts/test_forward_expectations_document_acquisition.py    # V4.21.0 bounded SEC document acquisition golden-fixture
+python3 investment/scripts/test_forward_expectations_guidance.py                # V4.21.0 management guidance extraction golden-fixture
+python3 investment/scripts/test_forward_expectations_revisions.py               # V4.21.0 estimate revision snapshot golden-fixture
+python3 investment/scripts/test_forward_expectations_calibration.py             # V4.22.0 forecast calibration scaffold golden-fixture
+python3 investment/scripts/test_forward_expectations_financial_bridge.py        # V4.23.0 financial bridge golden-fixture
+python3 investment/scripts/test_forward_expectations_gap.py                     # V4.24.0 expectations gap golden-fixture
+python3 investment/scripts/test_forward_expectations_report.py                  # V4.25.0 Forward Expectations markdown renderer golden-fixture
+python3 investment/scripts/test_forward_expectations_scenario_policy.py         # V4.26.0 scenario policy golden-fixture
+python3 investment/scripts/test_forward_expectations_scenario_builder.py        # V4.28.0 operating-driver scenario builder golden-fixture
+python3 investment/scripts/test_forward_expectations_price_range.py             # V4.29.0 future price range mapper golden-fixture
+python3 investment/scripts/test_forward_expectations_primary_sources.py         # V4.21.0 cache-first primary-source acquisition golden-fixture
+python3 investment/scripts/test_forward_expectations_evidence.py                # V4.21.0 Evidence Inventory golden-fixture
+python3 investment/scripts/test_royalty_ip_adapter.py                           # V4.28.0 Royalty/IP adapter golden-fixture（32 asserts，改 adapter 後必跑 rc=0）
 ```
 
 ## Link Digest (V3.35 — News 頁 URL 輸入框觸發)

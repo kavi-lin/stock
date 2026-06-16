@@ -8,7 +8,391 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
-## [4.12.1] — 2026-06-15 — Premarket chain 完成偵測 bug 修復：news/sector 不再卡 timeout 牆 + 不再假性進入下一階段（patch）
+## [4.30.0] — 2026-06-16 — Ticker Future Price Range CLI
+
+### Added
+- `forward_price_range.py`：ticker-facing wrapper，使用者輸入一個 ticker 即可直接看到
+  current / horizon / bear-base-bull future price range / method / warnings。
+- `test_forward_price_range.py` 13 asserts，覆蓋 range extraction、human-readable output
+  與 missing future_price_range degradation。
+
+### Changed
+- TODO `EXP-3.4b` 完成：`python3 investment/scripts/forward_price_range.py ARM`
+  已可直接輸出 ARM future price range。
+
+### Why
+- V4.29.0 已在完整 Forward Expectations JSON 中產生 `future_price_range`，但使用者驗收要求是
+  「輸入一個 ticker，可以找到推估的未來價格區間」。本版補上直接入口，不需要翻完整 JSON。
+
+## [4.29.0] — 2026-06-16 — Forward Future Price Range（shadow）
+
+### Added
+- `forward_expectations_price_range.py`：將 forward financial bridge 映射成
+  `future_price_range`，支援 EPS×P/E、Revenue/share×P/S、FCF/share×P/FCF。
+- `test_forward_expectations_price_range.py` 19 asserts，覆蓋 explicit multiple range、
+  current-market derived multiple band、Revenue/P/S fallback、FCF/PFCF fallback 與
+  insufficient inputs。
+
+### Changed
+- `forward_expectations.py` 新增 top-level `future_price_range` block。
+- `forward_expectations_report.py` 新增 Future Price Range 區塊，顯示 bear/base/bull
+  target price、upside、metric 與 multiple。
+- `forward_expectations_schema.md` 正式定義 shadow `future_price_range` contract。
+- TODO `EXP-3.4a` 完成；core golden fixture 擴至 45 asserts，report renderer 擴至 22 asserts。
+
+### Why
+- 使用者最終驗收是「輸入一個 ticker，可以找到推估的未來價格區間」。本版先把 forward layer
+  接到 shadow future price range，仍不改 live `fair_value_summary`、decision lock、threshold 或 sizing。
+
+## [4.28.0] — 2026-06-16 — Royalty/IP Driver-Level Scenarios（shadow）
+
+### Added
+- `royalty_ip` adapter 新增 `driver_model`，把 promoted primary-source drivers 整理成
+  scenario builder 可消費的 driver-level contract。
+- `test_forward_expectations_scenario_builder.py` 擴至 26 asserts，覆蓋 Royalty/IP
+  driver-level bear/base/bull cases 與 aggregate revenue CAGR fallback。
+- `test_royalty_ip_adapter.py` 擴至 32 asserts，覆蓋 data-center exposure gate 與
+  driver model shape。
+
+### Changed
+- `data_center_segment_exposure` 納入 Royalty/IP numeric lane 必要 driver。
+- `forward_expectations_scenario_builder.py` 優先使用 adapter `driver_model`，讓
+  bear/base/bull 改變 royalty units、royalty rate/value per unit、license conversion、
+  data-center exposure 與 revenue CAGR；缺 driver model 時才 fallback 到 aggregate
+  revenue CAGR sensitivity。
+- `forward_expectations_report.py` 的 scenario table 可呈現多 driver case。
+- TODO `EXP-2.4b` 完成。
+
+### Why
+- V4.27.0 的 builder 已有安全 gate，但 numeric case 仍太粗，只是 revenue CAGR ±5pp。
+  本版把 ARM Royalty/IP scenario 推到 explicit driver 層，仍維持 shadow-only，不產生
+  fair value、target price、verdict、threshold 或 sizing。
+
+## [4.27.0] — 2026-06-16 — Operating-Driver Scenario Builder（shadow）
+
+### Added
+- `forward_expectations_scenario_builder.py`：讀取 scenario policy，只有
+  `numeric_scenario_allowed` 時才產生 bear/base/bull operating-driver cases。
+- `test_forward_expectations_scenario_builder.py` 20 asserts，涵蓋 numeric allowed、
+  policy allowed 但 base driver 缺失、guidance range overlay、qualitative watchlist
+  與 insufficient inputs。
+
+### Changed
+- `forward_expectations.py` 新增 top-level `operating_driver_scenarios` shadow block。
+- `forward_expectations_report.py` 新增 Operating-Driver Scenarios 區塊；numeric case 只顯示
+  revenue CAGR driver，blocked case 顯示 guidance overlay 或 qualitative watchlist。
+- TODO `EXP-2.4a` 完成；core golden fixture 擴至 42 asserts，report renderer 擴至 17 asserts。
+
+### Why
+- V4.26.0 已先定義 scenario gate；本版補上 gate 後面的最小 builder。輸出仍只描述營運 driver，
+  不產生前瞻單點 fair value、target price、verdict、threshold 或 sizing。
+
+## [4.26.0] — 2026-06-16 — Scenario Policy Gates（shadow）
+
+### Added
+- `forward_expectations_scenario_policy.py`：定義 bear/base/bull scenario 的 evidence gates，
+  判斷目前只能 qualitative-only、range/overlay-only，或可允許 driver numeric scenario。
+- `test_forward_expectations_scenario_policy.py` 16 asserts，涵蓋缺 driver、完整 numeric
+  transmission、guidance range overlay、bridge unavailable、no base metric 與 forbidden methods。
+
+### Changed
+- `forward_expectations.py` 新增 top-level `scenario_policy` shadow block。
+- TODO `EXP-3.3` scaffold 完成：缺可靠 driver / conversion method 時不得產生精確 scenario。
+
+### Why
+- 在建立 bear/base/bull 前，必須先把防幻覺規則寫死。此版不產生 scenario 數字，只授權哪些
+  scenario mode 可以被後續 builder 使用。
+
+## [4.25.0] — 2026-06-16 — Forward Expectations Shadow Report Renderer
+
+### Added
+- `forward_expectations_report.py`：將 Forward Expectations snapshot render 成人可讀 Markdown
+  advisory section，包含 expectations matrix、expectations gap、financial bridge risk 與 policy footer。
+- `test_forward_expectations_report.py` 12 asserts，涵蓋 bridge-risk-only、same-metric gap table、
+  bridge unavailable 與 shadow-only policy。
+
+### Changed
+- TODO `EXP-2.6` scaffold 完成：Forward Expectations 已可輸出 MD 區塊，供個股報告 §6 advisory
+  呈現，但不覆蓋 live fair value 或 verdict。
+- `investment_protocol_v5_0.md` Forward Expectations 描述更新到 v4.25 功能邊界。
+
+### Why
+- v4.24 已有 JSON gap，但使用者實際讀的是個股報告。此版把 forward layer 轉成人可讀敘事，
+  同時保留 shadow-only 治理。
+
+## [4.24.0] — 2026-06-16 — Expectations Gap Engine（shadow）
+
+### Added
+- `forward_expectations_gap.py`：建立 market-implied、analyst consensus、committee independent
+  與 base-rate 的 expectations gap scaffold；numeric gap 僅允許同 metric 比較。
+- `test_forward_expectations_gap.py` 23 asserts，涵蓋 revenue same-metric gaps、FCF/EPS 跨口徑不比較、
+  independent unavailable 降級、bridge risk only、negative FCF 與 no-data fallback。
+
+### Changed
+- `forward_expectations.py` 新增 top-level `expectations_gap` shadow block。
+- TODO `EXP-2.5` scaffold 完成：目前可並列 expectations pressure 與財務敘事風險，但不產生 fair value
+  或 live verdict。
+
+### Why
+- v4.23 已能產出 forward financial bridge；本版把不同 lane 的差異整理成可稽核 gap，避免回到
+  FCF CAGR、EPS CAGR、營收 CAGR 跨口徑相減。
+
+## [4.23.0] — 2026-06-16 — Forward Financial Bridge（shadow）
+
+### Added
+- `forward_expectations_financial_bridge.py`：ticker-neutral 簡化財務 bridge，將 sourced forward
+  revenue/EPS expectations 映射到 revenue → gross profit → operating income →
+  tax/other → net income → FCF / EPS implied net income。
+- `test_forward_expectations_financial_bridge.py` 25 asserts，涵蓋正常 bridge、derived margin
+  優先、缺核心輸入降級、負 FCF 保留、share count fallback、無 forward rows 降級。
+
+### Changed
+- `forward_expectations.py` 新增 top-level `forward_financial_bridge` shadow block。
+- TODO `EXP-2.3` scaffold 完成：目前只做財務敘事自洽檢查，不產生 fair value、不改 live decision。
+
+### Why
+- Forward Expectations 已有 consensus/guidance/revision/calibration，但仍缺一張可檢查的未來財務表。
+  此版把未來收入與 EPS 預期轉成 P&L/FCF bridge，讓後續 expectations gap 與 scenario 能檢查營運假設是否自洽。
+
+## [4.22.0] — 2026-06-16 — Forecast Calibration Scaffold（read-only）
+
+### Added
+- `forward_expectations_calibration.py`：唯讀掃描 Forward Expectations immutable snapshots 與
+  earnings-analyst cache actual，建立 forecast-vs-actual rows。
+- 初始比較：`consensus.revenue_cagr` vs latest actual `revenue_yoy`、
+  `consensus.eps_cagr` vs latest actual `earnings_yoy`。
+- `test_forward_expectations_calibration.py` 19 asserts，涵蓋 comparable rows、future level 不可比、
+  actual missing 降級、WAPE proxy、directional accuracy、insufficient sample。
+
+### Changed
+- TODO `EXP-4.2` / `EXP-4.3` scaffold 完成：已有 calibration output shape 與樣本不足紀律。
+
+### Why
+- Forward Expectations 已開始保存 consensus、guidance、revision snapshots；下一步必須建立驗證閉環。
+  此版只產生 calibration scaffold，不調權重、不改 live 決策，避免樣本不足時把噪音寫進規則。
+
+## [4.21.0] — 2026-06-16 — Analyst Estimate Revision Snapshot
+
+### Added
+- `forward_expectations_revisions.py`：建立 point-in-time analyst estimate / rating snapshot，
+  保存 annual revenue／EPS consensus curve、low/high dispersion、analyst count 與 rating momentum。
+- `test_forward_expectations_revisions.py` 15 asserts，涵蓋日期排序、dispersion、rating momentum
+  UP/FLAT、缺資料降級、單一 snapshot 不可假造 estimate revision delta。
+
+### Changed
+- `forward_expectations.py` 新增 top-level `estimate_revision_snapshot` shadow block。
+- `forward_expectations_evidence.py` 將 snapshot 轉成 `consensus_revision:revenue`、
+  `consensus_revision:eps`、`consensus_revision:rating_momentum` accepted evidence。
+- TODO `EXP-1.4` 完成：目前保存 point-in-time 市場預期；真正上修/下修 delta 留待未來 ledger snapshots
+  累積後比較。
+
+### Why
+- 只有最新 consensus 不足以描述市場預期。此版先保存「當時市場預期曲線與分歧」，並誠實標示目前 cache
+  沒有同一 estimate 的歷史版本，因此不得從單一 snapshot 假造 analyst up/down revision。
+
+## [4.20.0] — 2026-06-16 — Management Guidance Extraction（range-preserving）
+
+### Added
+- `forward_expectations_guidance.py`：ticker-neutral management guidance extractor，從 primary-source
+  documents 抽 revenue／EPS／gross margin／operating margin／FCF／capex 的明確 guidance / outlook。
+- Guidance range contract：range 保持 `{low, high, midpoint}`，midpoint 僅為 derived helper，
+  不代表管理層原始單點值。
+- `test_forward_expectations_guidance.py` 22 asserts，涵蓋 revenue range、EPS point guidance、
+  margin percentage range、缺日期/來源 provisional、unsupported narrative 不 promoted、歷史結果不抽。
+
+### Changed
+- `forward_expectations_primary_sources.py` 同時輸出 driver candidates 與 guidance candidates；
+  兩者分開保存，避免 guidance 被誤當 adapter driver。
+- `forward_expectations_evidence.py` 將 promoted guidance 納入 accepted inventory，metric 以
+  `guidance:<metric>` 呈現，metadata 保留 `value_type=guided` 與 `guidance_kind`。
+- `forward_expectations.py` 新增 top-level `guidance_extraction` shadow block。
+
+### Why
+- Document acquisition 已能產生可抽取文字，但 engine 仍缺「公司自己怎麼看未來」的結構化入口。
+  此版把明確 management guidance 作為 point-in-time evidence 保存，同時避免把區間硬壓成單點估值或
+  混入 live fair value。
+
+## [4.19.0] — 2026-06-16 — Bounded SEC Document Acquisition / Normalization
+
+### Added
+- `forward_expectations_document_acquisition.py`：opt-in bounded acquisition，僅從 source discovery
+  manifest 內的 allowlisted SEC filing document URL 下載 HTML/TXT，轉成 normalized text bundle。
+- URL safety policy：只允許 `sec.gov` / `www.sec.gov` / `data.sec.gov`，且 SEC filing document
+  必須在 `/Archives/edgar/data/` 並以 `.htm` / `.html` / `.txt` 結尾；`data.sec.gov`
+  submissions manifest 保持 metadata-only，不當作文件證據。
+- 30-day document cache、最大下載大小上限、EDGAR User-Agent、HTML script/style 清理。
+- `test_forward_expectations_document_acquisition.py` 19 asserts，涵蓋 allowlist、拒絕任意網站、
+  HTML 正規化、cache hit 避免網路、normalized text 不自動 promotion。
+
+### Changed
+- `forward_expectations.py` 新增 `--acquire-documents` / `--max-documents`；預設仍不抓文件。
+- Acquired normalized documents 可併入 primary-source bundle，但仍須通過既有 promotion gate 才能
+  進 accepted evidence 或 adapter driver。
+
+### Why
+- v4.18 只知道「去哪裡找」，還沒有安全地把 filing 轉成可抽取文字。此版補上最窄的 SEC 文件取得層，
+  讓後續 guidance / driver extraction 有原文輸入，同時避免把任意網站、SEC manifest 或全文存在本身誤當證據。
+
+## [4.18.0] — 2026-06-16 — Ticker-Neutral Primary Source Discovery Manifest
+
+### Added
+- `forward_expectations_source_discovery.py`：跨 ticker source manifest，從 shared company
+  profile cache、CIK、company website、24h filing metadata cache、FMP filing metadata 與
+  earnings transcript location 發現候選來源。
+- Filing family classifier：依實際 metadata 分類 `10-K/20-F/40-F` annual、`10-Q` interim、
+  `6-K` foreign-issuer report、current/proxy/registration/unknown；不按 ticker、國家、產業或
+  adapter 猜測。
+- `test_forward_expectations_source_discovery.py`：涵蓋美國發行人、外國發行人、未知表格、
+  缺 CIK、去重、transcript 與 cache 避免 provider quota。
+
+### Changed
+- Forward Expectations shadow snapshot 新增 `source_discovery`；所有 discovered metadata 進
+  Evidence Inventory 時固定 provisional、`numeric_eligible=false`。
+- Filing metadata 使用 24 小時 cache；只有 cache miss 且允許 fetch 時才查 FMP。
+- Adapter registry 只有 `matched` 可成為 selected adapter；`partial` 僅保留研究候選，避免
+  ORCL 這類含 License 字樣但不是 Royalty/IP 模型的公司收到錯誤 driver acquisition targets。
+
+### Why
+- Primary-source promotion gate 已能防止幻覺，但缺少通用的「去哪裡取證」入口。Discovery 必須適用
+  所有 ticker，且不能因 ARM 是外國發行人就硬編規則，也不能把 URL／filing metadata 誤當營運證據。
+
+## [4.17.0] — 2026-06-16 — Cache-First Primary Source Acquisition + Promotion Gate
+
+### Added
+- `forward_expectations_primary_sources.py`：只讀既有 earnings transcript 或
+  `--primary-source-file` 明確提供的 filing／IR／transcript text bundle；不主動上網、不使用 LLM。
+- Royalty/IP deterministic candidate extraction：只認 units、royalty rate/value per unit、
+  license conversion、data-center exposure 的明確數字句。
+- Primary evidence promotion gate：候選必須同時具備 value、unit、period、published date、
+  supported primary source type 與 source URL/ref；缺任一項保持 provisional。
+- `test_forward_expectations_primary_sources.py` 19 asserts；Evidence Inventory 擴至 20 asserts；
+  Royalty/IP adapter 擴至 27 asserts。
+
+### Changed
+- Promoted primary-source records進入 Evidence Inventory accepted 區，並可填入直接觀察的 adapter
+  driver 值與 evidence ref；仍不得自行建立 revenue CAGR 或 transmission conversion。
+
+### Why
+- ARM 目前缺 transcript／filing／IR 原文，不能靠新聞、報告或 Nexus 敘事補 driver。此版先建立嚴格的
+  cache-first 取證與 promotion 流程，讓未來取得 primary bundle 後可安全接入，而不是讓 AI 自由抽數字。
+
+## [4.16.0] — 2026-06-16 — Point-in-Time Evidence Inventory + ARM Acquisition Targets
+
+### Added
+- `forward_expectations_evidence.py`：建立每次 run 的 point-in-time Evidence Inventory，分類
+  `accepted / provisional / missing_sources / missing_drivers`，並保存至 immutable forecast ledger。
+- Evidence promotion gate：structured company segment／financial facts與 analyst consensus 可 accepted；
+  Nexus `CO_THEME`、非 causal relation、未受 corroboration 或缺 conversion method 的關係只能 provisional。
+- Royalty/IP adapter acquisition targets：明列缺失 driver、用途、preferred primary source 與 promotion requirement。
+- `test_forward_expectations_evidence.py` 17 asserts；Royalty/IP adapter 測試擴至 25 asserts。
+
+### Changed
+- `forward_expectations.py` v1.3 在 adapter 初次匹配後建立 inventory，再以 inventory evidence references
+  重跑 selected adapter；inventory 可補來源引用，但不可補缺失 driver 數值。
+
+### Why
+- Repo 內 ARM 已有公司 segment 與共識資料，但 Nexus 只有 `CO_THEME` 關聯，沒有可量化 AI 基建傳導證據。
+  本版將「目前有什麼、缺什麼、應向哪類 primary source 取得」結構化，防止敘事或共題材被誤當因果輸入。
+
+## [4.15.0] — 2026-06-16 — Royalty/IP Adapter + ARM Revenue Exposure / Transmission Gate
+
+### Added
+- `forward_expectations_adapters/` registry 與首個 `royalty_ip` adapter：以 product segment
+  deterministic match Royalty／License 商業模式，輸出 Revenue Exposure Map、歷史 segment growth、
+  driver tree、supported/unsupported valuation methods。
+- Supply-chain transmission gate：外部趨勢須具備 target、lag、evidence refs、conversion method 與
+  confidence 才能 `numeric_eligible`；否則固定為 `qualitative_only`。
+- Numeric Independent lane gate：營運 driver 與最終 revenue CAGR 均須有 evidence refs，缺任一項即
+  `insufficient_evidence`，禁止用 explicit input 注入無來源預測。
+- `test_royalty_ip_adapter.py` 22 asserts；core Forward Expectations 測試擴至 33 asserts。
+
+### Changed
+- `forward_expectations.py` v1.2 接入 adapter registry，輸出 `adapter_evaluation` 與
+  `independent_lane`；只有通過 gate 的 Independent Revenue CAGR 才能進同口徑 expectations matrix。
+
+### Why
+- ARM 的現有 cache 足以證明 Royalty／License 收入結構，但不足以證明 AI 基建成長如何量化轉成 ARM
+  收入。此版先建立可驗證的曝險與傳導骨架，明確把缺 conversion evidence 的 AI 路徑留在定性層。
+
+## [4.14.0] — 2026-06-15 — Forward Expectations Foundation：同口徑比較 + Evidence Contract + Adapter Contract
+
+### Changed
+- `forward_expectations.py` v1.1 將 `expectations_gap` 改為同口徑 `expectations_matrix`：
+  Revenue／EPS／FCF CAGR 僅能各自比較；跨口徑只並列描述，不再互減或產生市場高估／低估 verdict。
+- Forecast snapshot 改用 UTC microsecond `run_id` + exclusive-create，避免同一 earnings date 重跑時覆寫歷史預測。
+- `forecast.py::forward_eps_bundle` 恢復 governed live median／mean 採用規則；consensus-dominant 值只記為
+  `shadow_consensus_dominant_candidate`，不再未經批准移動 live `forecaster_blend`。
+
+### Added
+- Forward Expectations Evidence Contract：每個數值保存 value type、source lineage、published/retrieved time
+  與 confidence；`unknown` 或來源不完整的數值拒絕進入模型。
+- `investment/forward_expectations_adapter_contract.md`：跨產業 Adapter、segment composition、
+  supply-chain transmission gate、匹配與缺資料降級規則。
+- Golden fixture 擴至 30 asserts，涵蓋禁止跨口徑 verdict、evidence rejection 與 immutable ledger。
+
+### Why
+- FCF CAGR 與 EPS／營收 CAGR 互減會製造沒有經濟意義的精確 verdict；未建立來源契約與產業 Adapter
+  前，系統也無法可靠擴充至 ARM 供應鏈傳導、銀行或零售。此版先修正地基，維持全 shadow 治理。
+
+## [4.13.0] — 2026-06-15 — Forward Expectations Layer Phase 1（shadow）+ forecaster 稀釋 bug 修
+
+### Added
+- `investment/scripts/forward_expectations.py` — V1.0 deterministic 前瞻預期引擎（0 LLM）。
+  三條 grounded lane：① **consensus**（讀 earnings-analyst `annual_estimates` → estimate-window
+  營收/EPS CAGR + 分析師離散 + rating 修正方向）② **market_implied**（reuse
+  `compute_price_framework.compute_implied_expectations` reverse DCF）③ **base_rate**（同業歷史
+  營收 CAGR 分布，防過度樂觀）→ `expectations_gap` + deterministic gap_assessment。每跑寫
+  point-in-time 快照至 `investment/invest_logs/forward_expectations/`（**只存、不建校準引擎**）。
+- `investment/forward_expectations_schema.md` — schema + 建模決策（estimate-window CAGR、
+  跨口徑比較標註、base-rate anti-fantasy、margin-expansion flag）。
+- `investment/scripts/test_forward_expectations.py` — golden fixture（19 asserts，3 fixtures）。
+- `investment/investment_protocol_v5_0.md` Phase 4.5 — Forward Expectations advisory shadow 區塊說明。
+
+### Fixed
+- `skills/earnings-valuation-forecaster/scripts/forecast.py::forward_eps_bundle` — 稀釋 bug：
+  舊 `median(vals)` 讓 2 個 trailing 外推法（cagr/trend）表決掉唯一前瞻法（consensus）。成長股
+  trailing EPS 偏低時，真前瞻共識被丟棄（ARM consensus ~2.18 → 被壓到 ~0.92）。改為 consensus
+  與 trailing 顯著背離（>15%）時 **consensus 主導**（0.6 floor）；方法一致（成熟股）維持 median
+  → 對 live `forecaster_blend`（5% 錨）影響僅限病態背離情形。附 `adoption_rule` reason。
+
+### Why
+- 成長股 `fair_value_summary` 後視錨（trailing DCF / owner-earnings×15）把公允價壓到不可信
+  （ARM「$8 DCF / FV $51 / 現價 −86%」）。Phase 1 不重寫 live blend、不輸出前瞻單點公允價（那需
+  driver tree，押 Phase 2），而是用**已存在的真前瞻資料**（分析師多年估計、reverse DCF、同業歷史）
+  產出「市場要求 vs 共識 vs 歷史 base-rate」的誠實對比。ARM 實跑：市場隱含 60% FCF CAGR（out_of_range）
+  vs 共識 EPS CAGR 40% vs 同業 base-rate 13% → 「市場要求顯著高於共識與歷史達成率」，取代不可信幅度，
+  保留「ARM 很貴」的合理判斷。全 shadow，不碰決策數學。
+
+## [4.12.3] — 2026-06-15 — 決策中心卡片：Layer-3 估值改常駐不 fold（patch）
+
+### Changed
+- `Dashboard/page-decisions.js` — Layer-3「證據 · 估值」block 由 `<details class="dc-collapse">`
+  改為常駐 `<div>`（不再折疊）。fair value / vs current / confidence / anchor chips +
+  `buildFvExtras` 的 fair_value_range（Range p25/p50/p75）現在卡片上直接可見。
+
+### Why
+- 估值 + fair_value_range 原本藏在折疊 details 裡，要點開才看得到。常駐後與其上方常駐的
+  dual-track entry（AGG/CONS 建倉推薦）並排，建倉區間 vs 公允價值區間可在同一張卡直接比對，
+  不用展開折疊來回對照。
+
+## [4.12.2] — 2026-06-15 — sector Phase 4b Devil's Advocate prompt 瘦身：結構性 divergence 規則改條件觸發（patch）
+
+### Changed
+- `sector/phase_4-5.md` Phase 4b — DA（Devil's Advocate）prompt 是 sector protocol 單一最肥
+  subagent input。舊版每次無條件把 4 條結構性 divergence 規則（R4 FRED 衝突 / R5 smart money /
+  R6 PT target exhausted / R7 動能耗盡）全文塞進 prompt，但這 4 條是 threshold 觸發型，多數日子
+  根本沒命中。
+- 新增「DA Pre-Trigger 計算」段：PS 在組 DA prompt 前，用已在手 cache（`_phase0.fred_snapshot` /
+  `_phase3.smart_money_signals` / `_phase3.sector_earnings_pulse` / `_phase1.sectors[].sector_valuation`）
+  對每個 HOT 提案 sector 逐條 threshold 比對，**只把 fired 的規則塊 + 命中 sector/數值** paste 進
+  `<TRIGGERED_DIVERGENCE_RULES>` placeholder；全沒觸發則填一行 n/a。R4–R7 全文移到 spec 內的
+  Rule Library 區（僅參考，不再無條件入 prompt）。
+- DA prompt 的 smart-money 資料段也改成「僅 R5 觸發時才 paste」，未觸發填 `n/a`。
+
+### Why
+- 砍 DA subagent 每次 run 的 input token：沒觸發的規則本來就不會產 challenge，全文塞進去純浪費。
+  正確性不變（fired 規則仍逐條 MUST 引具體數值）。R1–R3（consensus_warning / tail-risk /
+  falsifiable）維持每次必跑。
 
 ### Fixed
 - `dashboard_server.py` `_wait_protocol_completion()`：baseline 由「list 長度」改為「timestamp」。
