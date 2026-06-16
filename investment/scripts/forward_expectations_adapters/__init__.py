@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 from . import royalty_ip
+from . import semiconductor
 
 
-ADAPTERS = (royalty_ip,)
+ADAPTERS = (royalty_ip, semiconductor)
 
 
 def evaluate_adapters(ticker: str, earnings_cache: dict, explicit_input: dict | None = None) -> dict:

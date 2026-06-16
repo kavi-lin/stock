@@ -8,6 +8,23 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.36.0] — 2026-06-17 — Semiconductor business-model adapter（EXP-3.1 首個跨模式擴充）
+
+### Added
+- `forward_expectations_adapters/semiconductor.py`：產品/晶片廠 adapter（end-market 分類：Data Center /
+  Gaming / Client / Automotive / Embedded / DRAM / NAND / Networking…）。exposure map + driver tree
+  （unit/wafer volume × ASP × mix、utilization、capex cycle）+ transmission gate（AI datacenter capex →
+  segment，需 conversion+evidence）+ independent lane（缺 driver/evidence 時 blocked）+ driver_model。
+  **刻意把 royalty/license 名稱讓給 royalty_ip**（晶片廠出貨實體 unit；IP 授權收 royalty）。
+- registry `ADAPTERS` 加入 semiconductor；evaluate_adapters 仍取最高信心 matched。
+- `test_semiconductor_adapter.py` 30 asserts（match 分離、pure-play memory dram+nand、exposure、driver tree、
+  transmission gate、lane blocked/available、registry 選擇）。
+
+### Why
+- EXP-3.1：原本只有 royalty_ip → 只有 ARM 走得到 independent lane，其餘半導體股全靠 consensus + 歷史
+  multiple regime。本版補上 universe 最大宗的半導體模式，讓 NVDA/AMD/MU 等也有 end-market 結構化 driver
+  tree 與 evidence 缺口清單（lane 仍誠實 blocked 直到 volume/ASP/utilization 證據到位）。仍 shadow-only。
+
 ## [4.35.0] — 2026-06-17 — Base-rate Cohort Library：可稽核同類群（EXP-3.2）
 
 ### Added

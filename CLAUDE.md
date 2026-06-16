@@ -145,6 +145,10 @@ python3 investment/scripts/test_forward_expectations_price_range.py             
 python3 investment/scripts/test_forward_expectations_primary_sources.py         # V4.21.0 cache-first primary-source acquisition golden-fixture
 python3 investment/scripts/test_forward_expectations_evidence.py                # V4.21.0 Evidence Inventory golden-fixture
 python3 investment/scripts/test_royalty_ip_adapter.py                           # V4.28.0 Royalty/IP adapter golden-fixture（32 asserts，改 adapter 後必跑 rc=0）
+python3 investment/scripts/test_semiconductor_adapter.py                        # V4.36.0 Semiconductor adapter golden-fixture（30 asserts；NVDA/AMD/MU end-market driver tree，royalty 讓給 royalty_ip）
+python3 investment/scripts/test_forward_expectations_cohort.py                  # V4.35.0 base-rate cohort engine golden（23 asserts，防 cherry-pick）
+python3 investment/scripts/test_forward_expectations_success_criteria.py        # V4.34.0 success-criteria gate golden（19 asserts，shadow→live 門檻）
+python3 investment/scripts/test_forward_expectations_multiple_anchor.py         # V4.31.0 歷史 multiple regime anchor golden（21 asserts，EXP-R1 破套套邏輯）
 ```
 
 ## Link Digest (V3.35 — News 頁 URL 輸入框觸發)

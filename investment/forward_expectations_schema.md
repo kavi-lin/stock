@@ -14,9 +14,12 @@ price. It preserves three available views:
 - `market_implied_lane`: reverse-DCF implied FCF growth.
 - `base_rate_lane`: peer historical revenue growth distribution.
 
-The `independent` lane uses business-model adapters and operating drivers. The first
-implemented adapter is `royalty_ip`; it remains unavailable until numeric drivers,
-driver evidence, and transmission evidence all pass.
+The `independent` lane uses business-model adapters and operating drivers. Implemented
+adapters: `royalty_ip` (IP/royalty licensors, e.g. ARM) and `semiconductor` (product/chip
+vendors with end-market segments — Data Center / Gaming / Client / Automotive / DRAM /
+NAND …, e.g. NVDA / AMD / MU). The registry picks the highest-confidence deterministic
+match; `semiconductor` defers IP-licensing names to `royalty_ip`. Each lane stays
+unavailable until its numeric drivers, driver evidence, and transmission evidence all pass.
 
 ## Non-Negotiable Comparison Rule
 
