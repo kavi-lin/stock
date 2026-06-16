@@ -311,7 +311,7 @@
 > **交付層 C**：headline 產物 `future_price_range` 在預設路徑數學上塌回現價，看似 forecast 實為波動帶。下列 P0 未清前，**禁止任何 lane 進入 EXP-4.5 shadow→live**。
 >
 > 已知致命/重大問題（review 實測 ARM base +0.0% / NVDA base +0.0%）：
-> 1. **套套邏輯**：無 explicit forward multiple 時 `base_multiple = current_price / forward_eps` → base target ≡ current price，range 退化成現價 ±15%，前瞻成長沒進價格。→ EXP-R1
+> 1. ~~**套套邏輯**：無 explicit forward multiple 時 base target ≡ current price~~ → **✅ V4.31.0 EXP-R1 修復**：接歷史 multiple regime anchor（price-independent），無 anchor 時誠實標 advisory band。
 > 2. **bridge 凍結 margin/share**：forward net income = forward_revenue × 歷史 margin；`eps_implied_net_income` 繞回 forward_eps × shares，兩 view 塌成一個。→ EXP-R2
 > 3. **scenario 固定 ±10% step**：driver-level 仍是寫死百分比加減，違背 EXP-2.4 精神（分歧度該由 driver 經濟學決定）。→ EXP-R3
 > 4. **inf/NaN 序列化**：`gap._compare` / scenario `change_vs_base` 除法無 0 guard + `json.dumps(allow_nan=True)` → 可能吐非法 JSON 炸下游。→ EXP-R4
@@ -321,7 +321,7 @@
 #### 🔴 P0 — Robustness Gate（必須全清才可談 shadow→live；engine 變更後跑對應 golden test rc=0）
 
 - [x] **[EXP-R0] 落地 commit 現有未來估值系統** — V4.30.0：2 commit（`fad6359` engine+adapter+16 test+2 schema / `f9c55bb` version+protocol+TODO），runtime ledger 不入 git；無關 dashboard 改動未動。
-- [ ] **[EXP-R1] 打破 derived-band 套套邏輯（致命）** — 無 explicit forward multiple 時 base target ≡ current price，`future_price_range` 非真前瞻。須接真 forward multiple 來源：peer forward P/E 分布 / 該股歷史 multiple regime（如 5y median fwd P/E）/ reverse-DCF 一致倍數，擇一打破 base==current。未完成前 `future_price_range` 標 `advisory_band_only` 並在 `forward_price_range.py` 輸出明示「此為現價波動帶、非成長前瞻」。
+- [x] **[EXP-R1] 打破 derived-band 套套邏輯（致命）** — V4.31.0：新增 `forward_expectations_multiple_anchor.py` 自身歷史 multiple regime（FMP `ratios` annual P/E/P/S/P/FCF，price-independent；dispersion ≤3.0 gate）。倍數優先序 explicit → historical → derived；只剩 derived 時 status `advisory_band_only` + warning + CLI ⚠️ disclaimer。ARM `--fetch` base 由 ≡現價 變 forward EPS×歷史 P/E（實測 base $870 vs 現價 $402）。**Tier2 peer forward P/E 暫緩**（N peer × estimates 太重），無歷史/no-fetch 時誠實降級 advisory band。
 - [ ] **[EXP-R2] forward bridge 假設透明化 + 敏感度** — 明確標 margin/share-count 為「held-constant 歷史值」假設；至少對 margin 與 share count 各跑一檔敏感度（buyback dilution / margin normalization），避免 forward net income 只是 forward_revenue × 歷史 margin 的恆等式。`eps_implied_net_income` vs `net_income_from_margin` 的差異須當 consistency check 呈現，不可被當兩個獨立 view。
 - [ ] **[EXP-R3] scenario driver step 改由 evidence 決定** — 移除固定 ±10% / ±5pp 寫死 step；bear/base/bull 的 driver 變動幅度須來自 guidance range、analyst low/high dispersion 或歷史 driver 波動，缺證據時降級 `qualitative_only`（呼應 EXP-3.3 gate，不得用固定百分比偽裝成 driver scenario）。
 - [x] **[EXP-R4] 數值安全：除零 + NaN/Inf** — V4.30.1：12 script data-output `json.dumps` 全加 `allow_nan=False`（NaN/Inf 序列化即 fail-fast）；確認 `gap._compare`（`right_value not in (None,0)`）、scenario `change_vs_base`（`if value`）、`_ratio_upside`（`_pos` 現價）、bridge margin（`_pos` revenue / tax `<=0`）除法均已 guard；新增 `test_forward_expectations_numeric_safety.py` 15 asserts 覆蓋 0/負分母/零現價/零 EPS。

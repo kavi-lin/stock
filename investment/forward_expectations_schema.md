@@ -509,15 +509,29 @@ Supported mapping order:
 2. `revenue_per_share_x_ps`: forward revenue per share × P/S range.
 3. `fcf_per_share_x_pfcf`: forward FCF per share × P/FCF range.
 
-Multiple source priority:
+Multiple source priority (EXP-R1):
 
-1. Explicit `valuation_multiples` input (`pe_range`, `ps_range`, `pfcf_range`, etc.).
-2. Derived current-market multiple band, such as `current_price / horizon_eps_consensus`
-   or `current_market_cap / horizon_revenue_consensus`. This is marked with
-   `derived_current_market_multiple_used` and remains shadow-only.
+1. Explicit `valuation_multiples` input (`pe_range`, `ps_range`, `pfcf_range`, etc.) →
+   `multiple_quality: explicit`.
+2. **Historical multiple regime** (`forward_expectations_multiple_anchor.py`): the
+   ticker's own FMP `ratios` annual P/E, P/S, P/FCF history. Each year uses that year's
+   price, so the median/p25/p75 band is INDEPENDENT of today's price. A metric's regime
+   is used only when it has ≥2 positive years and p75/p25 dispersion ≤ 3.0 (noisy regimes
+   are rejected so a stabler metric can be chosen). → `multiple_quality: historical`,
+   `multiple_range.method: historical_multiple_regime`.
+3. Derived current-market multiple band (`current_price / horizon_eps_consensus`, etc.).
+   This band's base case mathematically equals today's price — it is a ±15% volatility
+   band, **not a forecast**. When this is the only available path the output is downgraded
+   to `status: advisory_band_only` with warnings `derived_current_market_multiple_used` and
+   `current_price_volatility_band_not_forecast`. → `multiple_quality: derived`.
 
-The selected `horizon_date` is the farthest available forward bridge row. The output is
-a future estimate-horizon range, not today's live fair-value anchor.
+The builder prefers an explicit/historical forecast over the derived advisory band, and
+auto-selects the metric whose historical regime is usable (e.g. P/S over a noisy P/E).
+With `--no-fetch` the historical regime is skipped and the output degrades to the labelled
+advisory band. The selected `horizon_date` is the farthest forward bridge row. The output
+is a future estimate-horizon range, not today's live fair-value anchor. Applying a
+persisted historical multiple to a much larger forward metric assumes regime persistence;
+the band's dispersion and `multiple_quality` are surfaced so the reader can judge it.
 
 ## Calibration Scaffold
 

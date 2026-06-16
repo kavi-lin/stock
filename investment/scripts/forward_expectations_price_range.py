@@ -83,6 +83,41 @@ def _derived_band(base_multiple: float, source: str):
     }
 
 
+def _historical_band(anchor: dict, metric_key: str):
+    """Price-independent multiple from the ticker's own historical regime (EXP-R1)."""
+    band = ((anchor or {}).get("by_metric") or {}).get(metric_key)
+    if not isinstance(band, dict) or not band.get("usable"):
+        return None
+    p25, p50, p75 = _pos(band.get("p25")), _pos(band.get("p50")), _pos(band.get("p75"))
+    if not (p25 and p50 and p75):
+        return None
+    return {
+        "p25": p25,
+        "p50": p50,
+        "p75": p75,
+        "source": band.get("source") or "fmp_ratios_annual_history",
+        "method": "historical_multiple_regime",
+        "history_points": band.get("n"),
+        "dispersion_ratio": band.get("dispersion_ratio"),
+        "band_policy": "p25/p50/p75 from the ticker's own historical valuation regime; price-independent; shadow only.",
+    }
+
+
+def _resolve_multiple(explicit, names, anchor, metric_key, derived_base, derived_source):
+    """Priority: explicit input > historical regime anchor > derived current-price band.
+    Returns (multiple_range, quality) with quality in explicit|historical|derived."""
+    m = _explicit_range(explicit, names)
+    if m:
+        return m, "explicit"
+    hist = _historical_band(anchor, metric_key)
+    if hist:
+        return hist, "historical"
+    derived = _derived_band(derived_base, derived_source)
+    if derived:
+        return derived, "derived"
+    return None, None
+
+
 def _latest_bridge_row(financial_bridge: dict):
     rows = [row for row in (financial_bridge or {}).get("rows") or [] if isinstance(row, dict)]
     if not rows:
@@ -117,18 +152,20 @@ def _case(label, target, current_price, metric_value, multiple, metric_name):
     }
 
 
-def _eps_path(row: dict, current_price, explicit: dict):
+def _eps_path(row: dict, current_price, explicit: dict, anchor: dict | None = None):
     eps = _range_values(row.get("eps_consensus"))
     if _pos(eps.get("point")) is None:
         return None
-    multiples = _explicit_range(explicit, ("pe_range", "forward_pe_range", "multiple_range_effective", "multiple_range"))
-    if not multiples:
-        base = _pos(current_price) / eps["point"] if _pos(current_price) and _pos(eps.get("point")) else None
-        multiples = _derived_band(base, "current_price / horizon_eps_consensus")
+    derived_base = _pos(current_price) / eps["point"] if _pos(current_price) and _pos(eps.get("point")) else None
+    multiples, quality = _resolve_multiple(
+        explicit, ("pe_range", "forward_pe_range", "multiple_range_effective", "multiple_range"),
+        anchor, "pe", derived_base, "current_price / horizon_eps_consensus",
+    )
     if not multiples:
         return None
     return {
         "method": "eps_x_pe",
+        "multiple_quality": quality,
         "multiple_range": multiples,
         "cases": {
             "bear": _case("bear", eps["low"] * multiples["p25"], current_price, eps["low"], multiples["p25"], "eps_consensus"),
@@ -146,19 +183,21 @@ def _per_share(value, shares):
     return value / shares
 
 
-def _revenue_path(row: dict, current_price, explicit: dict, shares, market_cap):
+def _revenue_path(row: dict, current_price, explicit: dict, shares, market_cap, anchor: dict | None = None):
     revenue = _range_values(row.get("revenue"))
     rev_ps = {key: _per_share(value, shares) for key, value in revenue.items()}
     if _pos(rev_ps.get("point")) is None:
         return None
-    multiples = _explicit_range(explicit, ("ps_range", "price_to_sales_range"))
-    if not multiples:
-        base = market_cap / revenue["point"] if _pos(market_cap) and _pos(revenue.get("point")) else None
-        multiples = _derived_band(base, "current_market_cap / horizon_revenue_consensus")
+    derived_base = market_cap / revenue["point"] if _pos(market_cap) and _pos(revenue.get("point")) else None
+    multiples, quality = _resolve_multiple(
+        explicit, ("ps_range", "price_to_sales_range"),
+        anchor, "ps", derived_base, "current_market_cap / horizon_revenue_consensus",
+    )
     if not multiples:
         return None
     return {
         "method": "revenue_per_share_x_ps",
+        "multiple_quality": quality,
         "multiple_range": multiples,
         "cases": {
             "bear": _case("bear", rev_ps["low"] * multiples["p25"], current_price, rev_ps["low"], multiples["p25"], "revenue_per_share"),
@@ -168,19 +207,21 @@ def _revenue_path(row: dict, current_price, explicit: dict, shares, market_cap):
     }
 
 
-def _fcf_path(row: dict, current_price, explicit: dict, shares):
+def _fcf_path(row: dict, current_price, explicit: dict, shares, anchor: dict | None = None):
     fcf = _range_values(row.get("free_cash_flow"))
     fcf_ps = {key: _per_share(value, shares) for key, value in fcf.items()}
     if _pos(fcf_ps.get("point")) is None:
         return None
-    multiples = _explicit_range(explicit, ("pfcf_range", "price_to_fcf_range", "fcf_multiple_range"))
-    if not multiples:
-        base = _pos(current_price) / fcf_ps["point"] if _pos(current_price) and _pos(fcf_ps.get("point")) else None
-        multiples = _derived_band(base, "current_price / horizon_fcf_per_share")
+    derived_base = _pos(current_price) / fcf_ps["point"] if _pos(current_price) and _pos(fcf_ps.get("point")) else None
+    multiples, quality = _resolve_multiple(
+        explicit, ("pfcf_range", "price_to_fcf_range", "fcf_multiple_range"),
+        anchor, "pfcf", derived_base, "current_price / horizon_fcf_per_share",
+    )
     if not multiples:
         return None
     return {
         "method": "fcf_per_share_x_pfcf",
+        "multiple_quality": quality,
         "multiple_range": multiples,
         "cases": {
             "bear": _case("bear", fcf_ps["low"] * multiples["p25"], current_price, fcf_ps["low"], multiples["p25"], "fcf_per_share"),
@@ -196,6 +237,7 @@ def build_future_price_range(
     financial_bridge: dict,
     earnings_cache: dict | None = None,
     explicit_multiples: dict | None = None,
+    multiple_anchor: dict | None = None,
 ) -> dict:
     row = _latest_bridge_row(financial_bridge or {})
     base = {
@@ -208,6 +250,7 @@ def build_future_price_range(
         "changes_live_decision": False,
         "horizon_date": row.get("date") if row else None,
         "method": None,
+        "multiple_quality": None,
         "cases": {},
         "range": {"low": None, "base": None, "high": None},
         "multiple_range": None,
@@ -227,23 +270,38 @@ def build_future_price_range(
     shares = _shares(financial_bridge)
     market_cap = _market_cap(earnings_cache, current_price)
     attempts = [
-        _eps_path(row, current_price, explicit_multiples),
-        _revenue_path(row, current_price, explicit_multiples, shares, market_cap),
-        _fcf_path(row, current_price, explicit_multiples, shares),
+        _eps_path(row, current_price, explicit_multiples, multiple_anchor),
+        _revenue_path(row, current_price, explicit_multiples, shares, market_cap, multiple_anchor),
+        _fcf_path(row, current_price, explicit_multiples, shares, multiple_anchor),
     ]
-    chosen = next((item for item in attempts if item), None)
+    # Prefer a genuine forecast (explicit / price-independent historical regime).
+    # Only fall back to the current-price-derived band as a labelled advisory band —
+    # that band's base case equals today's price (EXP-R1 tautology), so it is not a forecast.
+    forecast = next((a for a in attempts if a and a["multiple_quality"] in ("explicit", "historical")), None)
+    advisory = next((a for a in attempts if a and a["multiple_quality"] == "derived"), None)
+    chosen = forecast or advisory
     if not chosen:
         return {
             **base,
             "status": "unavailable",
             "warnings": ["no_supported_metric_or_multiple_path"],
         }
+
+    is_advisory = chosen is not forecast
+    warnings = []
+    if chosen["multiple_range"].get("method") == "current_market_multiple_band":
+        warnings.append("derived_current_market_multiple_used")
+    if is_advisory:
+        warnings.append("current_price_volatility_band_not_forecast")
+        if (multiple_anchor or {}).get("warnings"):
+            warnings.extend(multiple_anchor["warnings"])
     cases = chosen["cases"]
     return {
         **base,
         "available": True,
-        "status": "available",
+        "status": "advisory_band_only" if is_advisory else "available",
         "method": chosen["method"],
+        "multiple_quality": chosen["multiple_quality"],
         "cases": cases,
         "range": {
             "low": cases["bear"]["target_price"],
@@ -251,12 +309,7 @@ def build_future_price_range(
             "high": cases["bull"]["target_price"],
         },
         "multiple_range": chosen["multiple_range"],
-        "warnings": [
-            warning for warning in (
-                "derived_current_market_multiple_used"
-                if chosen["multiple_range"].get("method") == "current_market_multiple_band" else None,
-            ) if warning
-        ],
+        "warnings": warnings,
     }
 
 

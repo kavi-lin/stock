@@ -81,6 +81,34 @@ fcf = pr.build_future_price_range("TEST", 100, bridge_fcf, {}, {"pfcf_range": {"
 check("fcf.method", fcf["method"], "fcf_per_share_x_pfcf")
 check("fcf.base", fcf["cases"]["base"]["target_price"], 72.0)
 
+print("Fixture F (historical anchor breaks the tautology — base != current):")
+# anchor with usable PE regime p50=18 (independent of the 100 current price)
+ANCHOR = {"by_metric": {"pe": {"usable": True, "p25": 15, "p50": 18, "p75": 22, "n": 5,
+                               "dispersion_ratio": 1.47, "source": "fmp_ratios_annual_history:priceToEarningsRatio"}}}
+fcast = pr.build_future_price_range("TEST", 100, BRIDGE, {}, {}, ANCHOR)
+check("anchor.status available (forecast)", fcast["status"], "available")
+check("anchor.quality historical", fcast["multiple_quality"], "historical")
+check("anchor.multiple_method", fcast["multiple_range"]["method"], "historical_multiple_regime")
+check("anchor.base = fwd_eps5 * p50 = 5*18 = 90 (NOT current 100)", fcast["cases"]["base"]["target_price"], 90.0)
+check("anchor.no derived warning", "derived_current_market_multiple_used" in fcast["warnings"], False)
+
+print("Fixture G (unusable anchor -> honest advisory band, not silent forecast):")
+BAD_ANCHOR = {"by_metric": {"pe": {"usable": False, "reason": "dispersion_too_high"}},
+              "warnings": ["no_usable_historical_multiple_regime"]}
+adv = pr.build_future_price_range("TEST", 100, BRIDGE, {}, {}, BAD_ANCHOR)
+check("advisory.status advisory_band_only", adv["status"], "advisory_band_only")
+check("advisory.quality derived", adv["multiple_quality"], "derived")
+check("advisory.base == current (tautology, labelled)", adv["cases"]["base"]["target_price"], 100.0)
+check("advisory.not_forecast warning", "current_price_volatility_band_not_forecast" in adv["warnings"], True)
+check("advisory.still available range", adv["available"], True)
+
+print("Fixture H (anchor present but explicit input still wins):")
+exp_win = pr.build_future_price_range(
+    "TEST", 100, BRIDGE, {}, {"pe_range": {"p25": 15, "p50": 20, "p75": 25}}, ANCHOR
+)
+check("explicit beats anchor (quality explicit)", exp_win["multiple_quality"], "explicit")
+check("explicit base = 5*20 = 100", exp_win["cases"]["base"]["target_price"], 100.0)
+
 print("Fixture E (insufficient inputs degrade):")
 empty = pr.build_future_price_range("TEST", 100, {"rows": []}, {}, {})
 check("empty.available", empty["available"], False)

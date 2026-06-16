@@ -493,10 +493,12 @@ def main():
     if cp is not None:
         inp["current_price"] = cp
 
+    from forward_expectations_multiple_anchor import build_multiple_anchor
     consensus = consensus_lane(ec)
     with _stdout_to_stderr():
         market = market_implied_lane(ticker, inp, args.no_fetch)
         base_rate = base_rate_lane(ticker, ec, args.no_fetch)
+        multiple_anchor = build_multiple_anchor(ticker, no_fetch=args.no_fetch)
     from forward_expectations_adapters import evaluate_adapters
     adapter_evaluation = evaluate_adapters(ticker, ec, inp)
     selected_adapter = adapter_evaluation["selected_adapter"]
@@ -562,7 +564,8 @@ def main():
         scenario_policy, independent, adapter_evaluation, financial_bridge, guidance_extraction,
     )
     future_price_range = build_future_price_range(
-        ticker, inp.get("current_price"), financial_bridge, ec, inp.get("valuation_multiples") or {},
+        ticker, inp.get("current_price"), financial_bridge, ec,
+        inp.get("valuation_multiples") or {}, multiple_anchor,
     )
     evidence = build_evidence_contract(ec, consensus, market, base_rate, generated_at)
 
@@ -586,6 +589,7 @@ def main():
         "guidance_extraction": guidance_extraction,
         "estimate_revision_snapshot": revision_snapshot,
         "forward_financial_bridge": financial_bridge,
+        "multiple_anchor": multiple_anchor,
         "expectations_gap": expectations_gap,
         "scenario_policy": scenario_policy,
         "operating_driver_scenarios": operating_driver_scenarios,

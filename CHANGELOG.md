@@ -8,6 +8,32 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.31.0] — 2026-06-16 — 打破 Future Price Range 套套邏輯：歷史 multiple regime anchor（EXP-R1）
+
+### Added
+- `forward_expectations_multiple_anchor.py`：自身歷史估值 regime anchor。讀 FMP `ratios`
+  annual P/E、P/S、P/FCF（每年用當年股價→與今日價無關），輸出 median/p25/p75 band。
+  穩健 gate：每個 metric 須 ≥2 個正值年且 p75/p25 dispersion ≤ 3.0 才 `usable`，否則 reject
+  → builder 自動改用較穩的 metric（如 ARM P/E 太噪時退 P/S）或誠實降級。
+- `test_forward_expectations_multiple_anchor.py` 21 asserts（穩定/噪聲/樣本不足/負值年/no-fetch）。
+- price_range golden fixture 擴至 31 asserts（historical anchor 破套套邏輯、advisory 降級、explicit 仍優先）。
+
+### Changed
+- `forward_expectations_price_range.py` 倍數優先序改為 **explicit → historical regime → derived band**，
+  並標 `multiple_quality`（explicit/historical/derived）。只剩 derived band 時 status 改
+  `advisory_band_only` + warning `current_price_volatility_band_not_forecast`（誠實標示 base≈現價、非前瞻）。
+- `forward_expectations.py` fetch 段算 anchor 並傳入 price_range；payload 加 top-level `multiple_anchor`。
+- `forward_price_range.py` CLI：`advisory_band_only` 時印 ⚠️ disclaimer + 提示 `--fetch`。
+- `forward_expectations_schema.md` Future Price Range 章節改寫倍數優先序與 regime-persistence 說明。
+- TODO `EXP-R1` 完成。
+
+### Why
+- V4.30.0 code review 致命缺點 #1：無 explicit forward multiple 時 `base_multiple = current_price /
+  forward_eps`，使 base target ≡ current price（ARM/NVDA 實測 base +0.0%），future price range 退化成
+  現價 ±15% 波動帶、看似 forecast 實非前瞻。本版接 price-independent 歷史 regime anchor 打破套套邏輯
+  （ARM `--fetch` base 由 ≡現價 變成 forward EPS × 歷史 P/E 的真前瞻），無 anchor 時誠實標 advisory band。
+  仍 shadow-only，不改 live `fair_value_summary` / `decision_lock` / threshold / sizing。
+
 ## [4.30.1] — 2026-06-16 — Forward Expectations 數值安全硬化（EXP-R4）
 
 ### Added

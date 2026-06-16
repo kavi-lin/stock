@@ -90,6 +90,7 @@ def extract_range(snapshot: dict) -> dict:
         "current_price": snapshot.get("current_price"),
         "horizon_date": price_range.get("horizon_date"),
         "method": price_range.get("method"),
+        "multiple_quality": price_range.get("multiple_quality"),
         "range": {
             "bear": rng.get("low"),
             "base": rng.get("base"),
@@ -112,15 +113,23 @@ def format_text(summary: dict) -> str:
         return f"{ticker} future price range unavailable ({summary.get('status')}). {warnings}".strip()
     rng = summary.get("range") or {}
     up = summary.get("upside_pct") or {}
+    advisory = summary.get("status") == "advisory_band_only"
+    header = f"{ticker} Future Price Range" + (" ⚠️ ADVISORY BAND (not a forecast)" if advisory else "")
     lines = [
-        f"{ticker} Future Price Range",
+        header,
         f"- Current: ${summary.get('current_price')}",
         f"- Horizon: {summary.get('horizon_date')}",
-        f"- Method: {summary.get('method')}",
+        f"- Method: {summary.get('method')} ({summary.get('multiple_quality')})",
         f"- Bear: ${rng.get('bear')} ({up.get('bear'):+.1f}%)",
         f"- Base: ${rng.get('base')} ({up.get('base'):+.1f}%)",
         f"- Bull: ${rng.get('bull')} ({up.get('bull'):+.1f}%)",
     ]
+    if advisory:
+        lines.append(
+            "- ⚠️ No price-independent multiple anchor available: this is a +/-15% band around "
+            "today's price (base ≈ current), NOT a growth-driven forecast. Run with --fetch for the "
+            "historical multiple regime, or supply explicit forward multiples."
+        )
     if summary.get("warnings"):
         lines.append(f"- Warnings: {', '.join(summary['warnings'])}")
     lines.append("- Policy: shadow-only; does not change live fair value or decision rules.")
