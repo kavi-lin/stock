@@ -248,6 +248,16 @@ def _future_price_lines(snapshot: dict):
                 + (" (P/E ceiling)" if mr.get("pe_ceiling_applied") else "")
                 + f" · forward growth {(_fmt_mult(mr.get('growth_used')))}"
             ))
+        mn = snapshot.get("margin_normalization") or {}
+        if mn.get("applied"):
+            sm = mn.get("scenario_net_margins") or {}
+            lines.append(_bullet(
+                "Margin normalization (EXP-3.4b)",
+                f"held {_fmt_pct(mn.get('held_net_margin'))} → bear/base/bull "
+                f"{_fmt_pct(sm.get('bear'))}/{_fmt_pct(sm.get('base'))}/{_fmt_pct(sm.get('bull'))}"
+                + (f" · floor {_fmt_pct(mn.get('floor_net_margin'))}" if mn.get("floor_net_margin") else "")
+                + " · durable-platform retention, not sector mean reversion"
+            ))
     else:
         warnings = ", ".join(price_range.get("warnings") or [])
         lines.append(f"- Unavailable: {warnings or 'insufficient inputs'}")

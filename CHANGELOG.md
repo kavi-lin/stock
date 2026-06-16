@@ -8,6 +8,31 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.39.0] — 2026-06-17 — Margin 正常化 path：去除凍結壟斷利潤率的樂觀（EXP-3.4b）
+
+### Added
+- `forward_expectations_margin_normalization.py`：forward bridge 把現行淨利率凍結到 horizon，對超常利潤率
+  公司（NVDA ~60%，AI 加速器稀缺 + CUDA/networking/rack-scale 鎖定 + hyperscaler 急單）等於把壟斷經濟學
+  灌進 headline EPS。本層**不做機械式 sector 均值回歸**（會低估真平台壟斷），改用 durable-platform **retention
+  path**：bear 0.62 / base 0.80 / bull 1.00（bull 維持今日 margin = 壟斷持續 = tail）。bridge：forward 營收
+  scenario × scenario margin → normalized NI → normalized EPS → 估值。只在 margin >40%（超常）才觸發；
+  並設 floor（own recent margin × 0.85）保護結構性高 margin franchise（V/MA 類）不被過度壓縮。
+- `test_forward_expectations_margin_normalization.py` 18 asserts。
+
+### Changed
+- `forward_expectations_price_range.py`：`build_future_price_range` 新增 `eps_override`；margin 正常化時
+  EPS path 用 normalized EPS band（bear=rev.low×bear_margin、base=rev.base×base_margin、bull=rev.high×bull_margin），
+  標 `eps_basis=margin_normalized` + warning。
+- `forward_expectations.py` 算 margin_normalization（用 margins_8q net median 當 own-history floor）並注入 price_range；payload 加 `margin_normalization`。
+- report / CLI / 決策卡 Forward row 顯示 margin path（held→bear/base/bull + `margin↓` tag）。
+
+### Why
+- user 校準（同意方向、修正力度）：NVDA $11.3T bull 是「高成長 × 60% margin 長維持 × 倍數不壓」三樂觀疊乘 → 該標 tail
+  非 base。最大樂觀來源是凍結 60% margin（半導體常態 20-35%，但 NVDA 是 GPU+networking+system+CUDA 平台，合理
+  normalized 不該回 25-35% 而是 bear 35-40/base 45-50/bull 55-60）。實作 retention path（非 sector reversion）後
+  **NVDA bear $115(-45%)/base $252(+21%)/bull $473(+126% tail)** — base 落在 user 目標 $220-260。倍數(EXP-3.4)+margin
+  (EXP-3.4b)兩軸都正常化，bull-tail 保留。仍 shadow-only，自動流入 L1 決策卡。
+
 ## [4.38.0] — 2026-06-17 — 倍數壓縮：前瞻價格區間去樂觀化（EXP-3.4）
 
 ### Added

@@ -540,6 +540,18 @@ moderate ≥0.07 (×0.66, ≤35x) · slowing ≥0.03 (×0.52, ≤28x) · mature 
 applied band carries `compressed`, `growth_tier`, `compression_factor`, and the original
 `historical_band` for audit. Method becomes `historical_regime_growth_compressed`.
 
+**Margin normalization (EXP-3.4b).** The bridge holds today's net margin to the horizon,
+which bakes monopoly economics into the EPS for a supernormal-margin company. When the
+held net margin exceeds 40%, `forward_expectations_margin_normalization.py` builds a
+bear/base/bull margin PATH using durable-platform RETENTION factors (bear 0.62 / base 0.80
+/ bull 1.00 — bull keeps today's margin, a tail) — deliberately NOT a sector mean reversion,
+which would underestimate a genuine platform franchise. A floor at the company's own recent
+margin × 0.85 protects structurally high-margin franchises. The bridge is
+revenue_scenario × margin_scenario → normalized net income → normalized EPS, and that EPS
+band overrides the held-margin consensus EPS in the price-range eps path
+(`eps_basis=margin_normalized`). NVDA: held 60% → bear/base/bull 37/48/60% → base ≈ $252
+vs the $776 held-margin figure.
+
 The builder prefers an explicit/historical forecast over the derived advisory band, and
 auto-selects the metric whose historical regime is usable (e.g. P/S over a noisy P/E).
 With `--no-fetch` the historical regime is skipped and the output degrades to the labelled

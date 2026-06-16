@@ -162,8 +162,11 @@ def _case(label, target, current_price, metric_value, multiple, metric_name):
     }
 
 
-def _eps_path(row: dict, current_price, explicit: dict, anchor: dict | None = None):
-    eps = _range_values(row.get("eps_consensus"))
+def _eps_path(row: dict, current_price, explicit: dict, anchor: dict | None = None, eps_override: dict | None = None):
+    # EXP-3.4b: a margin-normalized EPS band replaces held-margin consensus EPS when supplied.
+    override_ok = isinstance(eps_override, dict) and _pos(_range_values(eps_override).get("point")) is not None
+    eps = _range_values(eps_override if override_ok else row.get("eps_consensus"))
+    eps_basis = "margin_normalized" if override_ok else "consensus"
     if _pos(eps.get("point")) is None:
         return None
     derived_base = _pos(current_price) / eps["point"] if _pos(current_price) and _pos(eps.get("point")) else None
@@ -173,14 +176,16 @@ def _eps_path(row: dict, current_price, explicit: dict, anchor: dict | None = No
     )
     if not multiples:
         return None
+    metric_label = "eps_margin_normalized" if override_ok else "eps_consensus"
     return {
         "method": "eps_x_pe",
         "multiple_quality": quality,
+        "eps_basis": eps_basis,
         "multiple_range": multiples,
         "cases": {
-            "bear": _case("bear", eps["low"] * multiples["p25"], current_price, eps["low"], multiples["p25"], "eps_consensus"),
-            "base": _case("base", eps["point"] * multiples["p50"], current_price, eps["point"], multiples["p50"], "eps_consensus"),
-            "bull": _case("bull", eps["high"] * multiples["p75"], current_price, eps["high"], multiples["p75"], "eps_consensus"),
+            "bear": _case("bear", eps["low"] * multiples["p25"], current_price, eps["low"], multiples["p25"], metric_label),
+            "base": _case("base", eps["point"] * multiples["p50"], current_price, eps["point"], multiples["p50"], metric_label),
+            "bull": _case("bull", eps["high"] * multiples["p75"], current_price, eps["high"], multiples["p75"], metric_label),
         },
     }
 
@@ -248,6 +253,7 @@ def build_future_price_range(
     earnings_cache: dict | None = None,
     explicit_multiples: dict | None = None,
     multiple_anchor: dict | None = None,
+    eps_override: dict | None = None,
 ) -> dict:
     row = _latest_bridge_row(financial_bridge or {})
     base = {
@@ -280,7 +286,7 @@ def build_future_price_range(
     shares = _shares(financial_bridge)
     market_cap = _market_cap(earnings_cache, current_price)
     attempts = [
-        _eps_path(row, current_price, explicit_multiples, multiple_anchor),
+        _eps_path(row, current_price, explicit_multiples, multiple_anchor, eps_override),
         _revenue_path(row, current_price, explicit_multiples, shares, market_cap, multiple_anchor),
         _fcf_path(row, current_price, explicit_multiples, shares, multiple_anchor),
     ]
@@ -305,6 +311,8 @@ def build_future_price_range(
         warnings.append("current_price_volatility_band_not_forecast")
         if (multiple_anchor or {}).get("warnings"):
             warnings.extend(multiple_anchor["warnings"])
+    if chosen.get("eps_basis") == "margin_normalized":
+        warnings.append("eps_margin_normalized")
     cases = chosen["cases"]
     return {
         **base,
@@ -312,6 +320,7 @@ def build_future_price_range(
         "status": "advisory_band_only" if is_advisory else "available",
         "method": chosen["method"],
         "multiple_quality": chosen["multiple_quality"],
+        "eps_basis": chosen.get("eps_basis", "consensus"),
         "cases": cases,
         "range": {
             "low": cases["bear"]["target_price"],

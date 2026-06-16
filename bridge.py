@@ -1472,9 +1472,13 @@ def load_forward_outlook(ticker):
     br = d.get('base_rate_lane') or {}
     rng = fpr.get('range') or {}
     mr = fpr.get('multiple_range') or {}
+    mn = d.get('margin_normalization') or {}
     return {
         'compressed': bool(mr.get('compressed')),
         'growth_tier': mr.get('growth_tier'),
+        'margin_normalized': bool(mn.get('applied')),
+        'held_net_margin': mn.get('held_net_margin'),
+        'base_net_margin': (mn.get('scenario_net_margins') or {}).get('base'),
         'as_of': d.get('generated_at'),
         'shadow_only': True,
         'status': fpr.get('status'),                 # available | advisory_band_only

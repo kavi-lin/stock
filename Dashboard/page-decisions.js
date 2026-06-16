@@ -1010,10 +1010,11 @@ function buildFvExtras(item, wl) {
             ? '<span class="text-[9px] font-bold" style="color:#f97316" title="No price-independent multiple anchor: ±15% band around today\'s price, not a growth forecast. Re-run forward engine with fetch.">⚠ ADVISORY BAND</span>'
             : `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:#22c55e;border:1px solid color-mix(in srgb,#22c55e,transparent 65%)" title="${escapeHtmlDc((fe.method || '') + ' · ' + (fe.multiple_quality || ''))}">FORECAST</span>`;
         const comp = fe.compressed ? `<span class="text-zinc-500 text-[9px]" title="Historical multiple compressed toward forward-growth-justified level (EXP-3.4)">${escapeHtmlDc(fe.growth_tier || '')}↓</span>` : '';
+        const mgn = fe.margin_normalized ? `<span class="text-zinc-500 text-[9px]" title="Net margin normalized via durable-platform retention path (EXP-3.4b): held ${((fe.held_net_margin||0)*100).toFixed(0)}% → base ${((fe.base_net_margin||0)*100).toFixed(0)}%">margin↓</span>` : '';
         rows.push(`<div class="text-[10px] font-mono text-zinc-300" title="Forward Expectations shadow · horizon ${escapeHtmlDc(fe.horizon_date || '--')} · gap ${escapeHtmlDc(fe.expectations_gap_status || '--')}">
             <span class="font-bold text-zinc-400 uppercase">Forward</span>
             ${money(fe.range.bear)} ${pct(up.bear)} / <b>${money(fe.range.base)}</b> ${pct(up.base)} / ${money(fe.range.bull)} ${pct(up.bull)}
-            ${badge} ${comp}
+            ${badge} ${comp} ${mgn}
             <span class="text-zinc-600 text-[9px]">shadow-only</span>
         </div>`);
     }

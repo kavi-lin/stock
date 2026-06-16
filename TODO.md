@@ -335,7 +335,8 @@
 - [ ] **[EXP-2.1] 擴充 ARM driver tree** — V4.20.0 已能 discovery + opt-in 下載 allowlisted SEC filing 正規化文字 → promotion gate；待擴 filing 內 ARM driver pattern（units / rate / license conversion / data-center exposure）。
 - [ ] **[EXP-2.2] 產生 Consensus／Independent／Base-rate 三條 3–5Y lane** — 每條保留獨立假設、輸出與信心，不先 blend 成單一數字。
 - [ ] **[EXP-1.1] 補齊資料 inventory 介面** — 待接 structural shift、12M forecaster 與 implied expectations（其餘來源 V4.21.0 已串）。
-- [x] **[EXP-3.4] forecast-to-valuation mapping（倍數壓縮）** — V4.38.0：`forward_expectations_multiple_compression.py` 成長分級壓縮歷史 regime（factor × historical + P/E 絕對上限等比例縮放）。consensus CAGR 低 → 倍數收斂 mature。實測 NVDA $776→$298 base（+271%→+43%）、ARM $870→$317、bull mcap 從 $30T 物理不可能拉回可信。流入 L1 卡。**未做**：依商業模式選不同估值法（adapter-specific valuation method）、quality-franchise 不該壓太兇的 override。
+- [x] **[EXP-3.4] forecast-to-valuation mapping（倍數壓縮）** — V4.38.0：`forward_expectations_multiple_compression.py` 成長分級壓縮歷史 regime（factor × historical + P/E 絕對上限等比例縮放）。consensus CAGR 低 → 倍數收斂 mature。實測 NVDA $776→$298 base、ARM $870→$317。流入 L1 卡。
+- [x] **[EXP-3.4b] Margin 正常化 path** — V4.39.0：`forward_expectations_margin_normalization.py` durable-platform retention（bear 0.62/base 0.80/bull 1.00，非 sector 均值回歸），>40% margin 才觸發 + own-history floor 保護平台 franchise。EPS path 用 normalized EPS。實測 NVDA held 60%→37/48/60%，**base $252(+21%)/bear $115(-45%)/bull $473(+126% tail)**（user 校準後目標 $220-260 命中）。18 asserts。**未做**：adapter-specific 估值法選擇；margin path 與 R2 sensitivity 整合成單一 driver 樹。
 - [ ] **[EXP-3.5] 延後 full forward DCF 自由假設模型** — Independent lane 校準前不加大量成長期 / margin normalization / terminal multiple 自由參數。
 
 #### 🔵 決策中心整合（L1 done / L2 gated）

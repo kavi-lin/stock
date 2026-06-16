@@ -610,9 +610,15 @@ def main():
     operating_driver_scenarios = build_operating_driver_scenarios(
         scenario_policy, independent, adapter_evaluation, financial_bridge, guidance_extraction,
     )
+    from forward_expectations_margin_normalization import build_margin_normalization
+    _m8q = [m.get("net") for m in ((ec.get("derived") or {}).get("margins_8q") or []) if isinstance(m, dict)]
+    _m8q = sorted(v for v in _m8q if isinstance(v, (int, float)) and not isinstance(v, bool))
+    _own_net_margin = _m8q[len(_m8q) // 2] if _m8q else None
+    margin_normalization = build_margin_normalization(financial_bridge, _own_net_margin)
+    _eps_override = margin_normalization.get("normalized_eps") if margin_normalization.get("applied") else None
     future_price_range = build_future_price_range(
         ticker, inp.get("current_price"), financial_bridge, ec,
-        inp.get("valuation_multiples") or {}, multiple_anchor,
+        inp.get("valuation_multiples") or {}, multiple_anchor, _eps_override,
     )
     evidence = build_evidence_contract(ec, consensus, market, base_rate, generated_at)
 
@@ -637,6 +643,7 @@ def main():
         "estimate_revision_snapshot": revision_snapshot,
         "forward_financial_bridge": financial_bridge,
         "multiple_anchor": multiple_anchor,
+        "margin_normalization": margin_normalization,
         "expectations_gap": expectations_gap,
         "scenario_policy": scenario_policy,
         "operating_driver_scenarios": operating_driver_scenarios,

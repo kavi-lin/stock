@@ -91,6 +91,12 @@ def extract_range(snapshot: dict) -> dict:
         "horizon_date": price_range.get("horizon_date"),
         "method": price_range.get("method"),
         "multiple_quality": price_range.get("multiple_quality"),
+        "eps_basis": price_range.get("eps_basis"),
+        "margin_normalization": {
+            "applied": bool((snapshot.get("margin_normalization") or {}).get("applied")),
+            "held": (snapshot.get("margin_normalization") or {}).get("held_net_margin"),
+            "scenario_net_margins": (snapshot.get("margin_normalization") or {}).get("scenario_net_margins"),
+        },
         "compression": {
             "compressed": bool((price_range.get("multiple_range") or {}).get("compressed")),
             "growth_tier": (price_range.get("multiple_range") or {}).get("growth_tier"),
@@ -126,9 +132,18 @@ def format_text(summary: dict) -> str:
         f"- Current: ${summary.get('current_price')}",
         f"- Horizon: {summary.get('horizon_date')}",
         f"- Method: {summary.get('method')} ({summary.get('multiple_quality')})",
-        *( [f"- Multiple: {summary['compression']['growth_tier']}-compressed "
-            f"(historical P/E {summary['compression']['historical_p50']} → {summary['compression']['applied_p50']}; EXP-3.4)"]
-           if (summary.get('compression') or {}).get('compressed') else [] ),
+    ]
+    comp = summary.get("compression") or {}
+    if comp.get("compressed"):
+        lines.append(f"- Multiple: {comp.get('growth_tier')}-compressed "
+                     f"(historical P/E {comp.get('historical_p50')} → {comp.get('applied_p50')}; EXP-3.4)")
+    mn = summary.get("margin_normalization") or {}
+    if mn.get("applied"):
+        sm = mn.get("scenario_net_margins") or {}
+        path = "/".join(f"{(sm.get(k) or 0) * 100:.0f}%" for k in ("bear", "base", "bull"))
+        lines.append(f"- Margin: normalized (held {(mn.get('held') or 0) * 100:.0f}% → "
+                     f"bear/base/bull {path}; EXP-3.4b durable-platform retention)")
+    lines += [
         f"- Bear: ${rng.get('bear')} ({up.get('bear'):+.1f}%)",
         f"- Base: ${rng.get('base')} ({up.get('base'):+.1f}%)",
         f"- Bull: ${rng.get('bull')} ({up.get('bull'):+.1f}%)",
