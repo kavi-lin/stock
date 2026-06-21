@@ -1,0 +1,402 @@
+[
+  {
+    "symbol": "DNN",
+    "cik": "0001063259",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:52:35",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1063259/000110465924030026/0001104659-24-030026-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1063259/000110465924030026/dnn-20231231xex99d1.htm"
+  },
+  {
+    "symbol": "LL",
+    "cik": "0001396033",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:38:37",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1396033/000095017024023941/0000950170-24-023941-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1396033/000095017024023941/ll-ex99_1.htm"
+  },
+  {
+    "symbol": "TTEC",
+    "cik": "0001013880",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:30:35",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/0001104659-24-030001-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1013880/000110465924030001/tm247637d1_ex99-1.htm"
+  },
+  {
+    "symbol": "DTE",
+    "cik": "0000936340",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:20:34",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
+  },
+  {
+    "symbol": "DTW",
+    "cik": "0000936340",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:20:34",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
+  },
+  {
+    "symbol": "DTB",
+    "cik": "0000936340",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:20:34",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
+  },
+  {
+    "symbol": "DTP",
+    "cik": "0000936340",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:20:34",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
+  },
+  {
+    "symbol": "DTG",
+    "cik": "0000936340",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:20:34",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/0000936340-24-000090-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/936340/000093634024000090/dtegasexhibit991123123.htm"
+  },
+  {
+    "symbol": "SNEX",
+    "cik": "0000913760",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:18:45",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/913760/000091376024000055/0000913760-24-000055-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/913760/000091376024000055/stonex-indenturebondoffe.htm"
+  },
+  {
+    "symbol": "AIR",
+    "cik": "0000001750",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 16:18:03",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1750/000110465924029986/0001104659-24-029986-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1750/000110465924029986/tm246820d2_ex4-1.htm"
+  },
+  {
+    "symbol": "NTR",
+    "cik": "0001725964",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 11:17:46",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1725964/000119312524055135/0001193125-24-055135-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1725964/000119312524055135/d473973dex991.htm"
+  },
+  {
+    "symbol": "GEF-B",
+    "cik": "0000043920",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 10:54:27",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/0000043920-24-000012-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/gef2024q18-kerex991.htm"
+  },
+  {
+    "symbol": "GEF",
+    "cik": "0000043920",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 10:54:27",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/0000043920-24-000012-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/43920/000004392024000012/gef2024q18-kerex991.htm"
+  },
+  {
+    "symbol": "ACU",
+    "cik": "0000002098",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 10:17:53",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/2098/000095017024023566/0000950170-24-023566-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/2098/000095017024023566/acu-ex99_1.htm"
+  },
+  {
+    "symbol": "JAKK",
+    "cik": "0001009829",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 09:31:06",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1009829/000118518524000198/0001185185-24-000198-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1009829/000118518524000198/ex_632477.htm"
+  },
+  {
+    "symbol": "MUX",
+    "cik": "0000314203",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 09:29:09",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/314203/000110465924029694/0001104659-24-029694-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/314203/000110465924029694/tm247723d1_ex99-1.htm"
+  },
+  {
+    "symbol": "TUSK",
+    "cik": "0001679268",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 09:04:18",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1679268/000167926824000003/0001679268-24-000003-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1679268/000167926824000003/a2023-12x31exx991.htm"
+  },
+  {
+    "symbol": "DDL",
+    "cik": "0001854545",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 08:34:59",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1854545/000095017024023547/0000950170-24-023547-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1854545/000095017024023547/0000950170-24-023547.txt"
+  },
+  {
+    "symbol": "AENZ",
+    "cik": "0001572621",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 08:00:08",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1572621/000121390024018770/0001213900-24-018770-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1572621/000121390024018770/0001213900-24-018770.txt"
+  },
+  {
+    "symbol": "BVN",
+    "cik": "0001013131",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 07:40:12",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1013131/000110465924029627/0001104659-24-029627-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1013131/000110465924029627/0001104659-24-029627.txt"
+  },
+  {
+    "symbol": "FUBO",
+    "cik": "0001484769",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 07:35:17",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1484769/000149315224008410/0001493152-24-008410-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1484769/000149315224008410/ex99-1.htm"
+  },
+  {
+    "symbol": "CCLP",
+    "cik": "0001449488",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 07:06:15",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1449488/000144948824000011/0001449488-24-000011-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1449488/000144948824000011/cclpq42023pressrelease-123.htm"
+  },
+  {
+    "symbol": "PSO",
+    "cik": "0000938323",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 07:01:44",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/938323/000165495424002443/0001654954-24-002443-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/938323/000165495424002443/0001654954-24-002443.txt"
+  },
+  {
+    "symbol": "PGRU",
+    "cik": "0001873331",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 06:30:03",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023517/0000950170-24-023517-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023517/0000950170-24-023517.txt"
+  },
+  {
+    "symbol": "EVBG",
+    "cik": "0001437352",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 06:19:55",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1437352/000119312524054346/0001193125-24-054346-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1437352/000119312524054346/d746222dex21.htm"
+  },
+  {
+    "symbol": "TD",
+    "cik": "0000947263",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 06:18:23",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/947263/000094726324000006/0000947263-24-000006-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/947263/000094726324000006/ex991.htm"
+  },
+  {
+    "symbol": "AMRX",
+    "cik": "0001723128",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 06:13:05",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1723128/000172312824000007/0001723128-24-000007-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1723128/000172312824000007/amrx-q42023ex991.htm"
+  },
+  {
+    "symbol": "MSC",
+    "cik": "0001713334",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 06:07:27",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1713334/000119312524054318/0001193125-24-054318-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1713334/000119312524054318/d760892dex991.htm"
+  },
+  {
+    "symbol": "PGRU",
+    "cik": "0001873331",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-03-01 06:07:15",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023510/0000950170-24-023510-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1873331/000095017024023510/pgru-ex99_1.htm"
+  },
+  {
+    "symbol": "MTZ",
+    "cik": "0000015615",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-02-29 21:24:32",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/0001193125-24-054015-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/15615/000119312524054015/d775448dex991.htm"
+  },
+  {
+    "symbol": "DAY",
+    "cik": "0001725057",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-02-29 19:15:14",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/0000950170-24-023418-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm"
+  },
+  {
+    "symbol": "CDAY",
+    "cik": "0001725057",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-02-29 19:15:14",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/0000950170-24-023418-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1725057/000095017024023418/day-ex10_1.htm"
+  },
+  {
+    "symbol": "MEOBF",
+    "cik": "0001345099",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-02-29 18:15:50",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/0001345099-24-000024-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/exhibit991hy1fy24results.htm"
+  },
+  {
+    "symbol": "MESO",
+    "cik": "0001345099",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-02-29 18:15:50",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/0001345099-24-000024-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1345099/000134509924000024/exhibit991hy1fy24results.htm"
+  },
+  {
+    "symbol": "FET",
+    "cik": "0001401257",
+    "filingDate": "2024-03-01 00:00:00",
+    "acceptedDate": "2024-02-29 17:41:18",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/0001401257-24-000036-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1401257/000140125724000036/fetq42023earningsrelease.htm"
+  },
+  {
+    "symbol": "NVX",
+    "cik": "0001859795",
+    "filingDate": "2024-02-29 00:00:00",
+    "acceptedDate": "2024-02-29 17:11:51",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/0000950170-24-023263-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm"
+  },
+  {
+    "symbol": "NVNXF",
+    "cik": "0001859795",
+    "filingDate": "2024-02-29 00:00:00",
+    "acceptedDate": "2024-02-29 17:11:51",
+    "formType": "6-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/0000950170-24-023263-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1859795/000095017024023263/nvx-ex99_1.htm"
+  },
+  {
+    "symbol": "DNA",
+    "cik": "0001830214",
+    "filingDate": "2024-02-29 00:00:00",
+    "acceptedDate": "2024-02-29 17:03:04",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/0001628280-24-008045-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/ex-991fy2023earnings.htm"
+  },
+  {
+    "symbol": "DNA-WT",
+    "cik": "0001830214",
+    "filingDate": "2024-02-29 00:00:00",
+    "acceptedDate": "2024-02-29 17:03:04",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/0001628280-24-008045-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1830214/000162828024008045/ex-991fy2023earnings.htm"
+  },
+  {
+    "symbol": "GRBK",
+    "cik": "0001373670",
+    "filingDate": "2024-02-29 00:00:00",
+    "acceptedDate": "2024-02-29 16:41:21",
+    "formType": "8-K",
+    "hasFinancials": true,
+    "link": "https://www.sec.gov/Archives/edgar/data/1373670/000137367024000007/0001373670-24-000007-index.htm",
+    "finalLink": "https://www.sec.gov/Archives/edgar/data/1373670/000137367024000007/a2q42023ex99earningsrelease.htm"
+  }
+]

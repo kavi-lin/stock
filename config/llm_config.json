@@ -1,7 +1,7 @@
 {
-  "primary": "gemini",
-  "secondary": "codex",
-  "tertiary": "claude",
+  "primary": "codex",
+  "secondary": "claude",
+  "tertiary": "gemini",
   "enabled": {
     "claude": true,
     "gemini": true,

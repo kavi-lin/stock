@@ -1,20 +1,19 @@
 {
   "version": "1.0",
-  "as_of": "2026-06-15T12:02:34.758671+00:00",
+  "as_of": "2026-06-20T05:29:24.506544+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
   "post_count": 39,
-  "truth_social_dropped": 4,
+  "truth_social_dropped": 3,
   "source_stats": {
-    "truth_social": 6,
+    "truth_social": 5,
     "reddit": 8,
-    "hacker_news": 23,
-    "google_trends": 2
+    "hacker_news": 26
   },
   "tickers": [],
   "low_confidence": [
     {
-      "ticker": "FTX",
+      "ticker": "ASML",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -22,49 +21,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "FTX's former Anthropic stake would be worth about $75B at today's valuation",
-          "url": "https://news.ycombinator.com/item?id=48529190",
+          "headline": "ASML denies US Government report that EUV chipmaking tool was shipped to China",
+          "url": "https://www.tomshardware.com/tech-industry/semiconductors/asml-denies-us-government-report-that-its-euv-chipmaking-tool-was-shipped-to-china-says-rumors-are-inaccurate-and-damaging-to-our-reputation",
           "source": "Hacker News",
-          "engagement": 6.873,
+          "engagement": 2.398,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 6.873,
+      "engagement_score": 2.398,
       "_gate": "unknown"
     },
     {
-      "ticker": "GUI",
-      "sector": null,
-      "mention_count": 2,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Show HN: Peek – A Figma like DB GUI",
-          "url": "https://getpeek.dev",
-          "source": "Hacker News",
-          "engagement": 2.639,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Show HN: Peek – A Figma like DB GUI",
-          "url": "https://getpeek.dev",
-          "source": "Hacker News",
-          "engagement": 2.639,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 5.278,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "SWE",
+      "ticker": "EUV",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -72,115 +42,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Ask HN: I am a junior CS and math major. I have no hope for SWE or math. Advice?",
-          "url": "https://news.ycombinator.com/item?id=48531538",
+          "headline": "ASML denies US Government report that EUV chipmaking tool was shipped to China",
+          "url": "https://www.tomshardware.com/tech-industry/semiconductors/asml-denies-us-government-report-that-its-euv-chipmaking-tool-was-shipped-to-china-says-rumors-are-inaccurate-and-damaging-to-our-reputation",
           "source": "Hacker News",
-          "engagement": 3.296,
+          "engagement": 2.398,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 3.296,
+      "engagement_score": 2.398,
       "_gate": "unknown"
     },
     {
-      "ticker": "MADE",
-      "sector": null,
-      "mention_count": 3,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Congressman Josh Brecheen is doing a fantastic job representing the wonderful people of Oklahoma’s 2nd Congressional District! Josh is a Conservative Warrior who has strong support",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754012612389383",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Congressman Frank Lucas is an incredible Representative for the wonderful people of Oklahoma’s 3rd Congressional District! A Fifth Generation Oklahoman, and lifelong Farmer and Ran",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754011972787542",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 3.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "GREAT",
-      "sector": null,
-      "mention_count": 2,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Congressman Tom Cole is a Tremendous Champion for Oklahoma’s 4th Congressional District! As the Chairman of the POWERFUL House Appropriations Committee, Tom knows the America First",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754011009785366",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "THE",
-      "sector": null,
-      "mention_count": 2,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Congressman Josh Brecheen is doing a fantastic job representing the wonderful people of Oklahoma’s 2nd Congressional District! Josh is a Conservative Warrior who has strong support",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754012612389383",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Congressman Frank Lucas is an incredible Representative for the wonderful people of Oklahoma’s 3rd Congressional District! A Fifth Generation Oklahoman, and lifelong Farmer and Ran",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754011972787542",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "MAGA",
+      "ticker": "WASM",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -188,16 +63,16 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
+          "headline": "Show HN: Jumpjet – a WASM runtime for game developers",
+          "url": "https://jumpjet.dev",
+          "source": "Hacker News",
+          "engagement": 1.386,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 1.0,
+      "engagement_score": 1.386,
       "_gate": "unknown"
     },
     {
@@ -209,8 +84,8 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
+          "headline": "Senator Lindsey Graham is working incredibly hard for the Great People of South Carolina, a State I love and WON BIG in 2016, 2020, and 2024! Lindsey has been a wonderful friend, a",
+          "url": "https://truthsocial.com/@realDonaldTrump/116777408397415858",
           "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
@@ -222,7 +97,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "EVER",
+      "ticker": "API",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -230,20 +105,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
+          "headline": "Show HN: Schemic – your database schema, in the Zod API you know",
+          "url": "https://schemic.dev/",
+          "source": "Hacker News",
+          "engagement": 0.693,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 1.0,
+      "engagement_score": 0.693,
       "_gate": "unknown"
     },
     {
-      "ticker": "FIRST",
+      "ticker": "BIOS",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -251,20 +126,20 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "It is my Great Honor to endorse MAGA Warrior, Mike Mazzei, who is running for Governor of Oklahoma, a State which I love, and WON BIG — All 77 out of 77 Counties in 2016, 2020, and",
-          "url": "https://truthsocial.com/@realDonaldTrump/116754016895261150",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
+          "headline": "Show HN: Ratchet – let an AI agent reflash your BIOS over a CH341A (MCP server)",
+          "url": "https://github.com/jackulau/ratchet",
+          "source": "Hacker News",
+          "engagement": 0.693,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 1.0,
+      "engagement_score": 0.693,
       "_gate": "unknown"
     },
     {
-      "ticker": "MRR",
+      "ticker": "MCP",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -272,91 +147,16 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Offered 25x MRR to sell my mobile apps. Take the cash and go into AI/robotics stocks?",
-          "url": "https://www.reddit.com/r/stocks/comments/1u6ed4p/offered_25x_mrr_to_sell_my_mobile_apps_take_the/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
+          "headline": "Show HN: Ratchet – let an AI agent reflash your BIOS over a CH341A (MCP server)",
+          "url": "https://github.com/jackulau/ratchet",
+          "source": "Hacker News",
+          "engagement": 0.693,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "PART",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "What $10k invested in 8 major indices would be worth today *PART 2*",
-          "url": "https://www.reddit.com/r/stocks/comments/1u6e5dn/what_10k_invested_in_8_major_indices_would_be/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "KRUS",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Kuras chart (KRUS)",
-          "url": "https://www.reddit.com/r/stocks/comments/1u67m7e/kuras_chart_krus/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "IREN",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 1,
-      "bear_hits_sum": 1,
-      "matched_terms": [
-        {
-          "term": "bull",
-          "side": "bull"
-        },
-        {
-          "term": "bear",
-          "side": "bear"
-        }
-      ],
-      "sample_posts": [
-        {
-          "headline": "Looking for a serious bull vs bear discussion on IREN (AI infrastructure/data center thesis)",
-          "url": "https://www.reddit.com/r/stocks/comments/1u64fmf/looking_for_a_serious_bull_vs_bear_discussion_on/",
-          "source": "Reddit:r/stocks",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": [
-            "bull",
-            "bear"
-          ]
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
+      "engagement_score": 0.693,
       "_gate": "unknown"
     }
   ],
@@ -464,28 +264,57 @@
   "market_wide_buzz": [
     {
       "topic": "market_direction",
-      "post_count": 5,
-      "engagement_score": 6.356,
+      "post_count": 3,
+      "engagement_score": 7.496,
       "sample_posts": [
         {
-          "headline": "People quit because reality doesn't match the movie they created in their heads",
-          "url": "https://timesofindia.indiatimes.com/technology/tech-news/quote-of-the-day-by-nvidia-ceo-jensen-huang-one-of-my-great-advantages-is-that-i-have-very-low-/articleshow/131692397.cms",
+          "headline": "Google Is Using Nvidia's Playbook to Build a Rival AI Chip Business",
+          "url": "https://www.wsj.com/tech/ai/google-is-using-nvidias-playbook-to-build-a-rival-ai-chip-business-1eac86f9",
           "source": "Hacker News",
-          "engagement": 2.079,
+          "engagement": 2.708,
           "polarity": 0.0
         },
         {
-          "headline": "How Nvidia Dominates AI:11 Engineering Moves [video]",
-          "url": "https://www.youtube.com/watch?v=vzM8mv1t_zM",
+          "headline": "Google Is Using Nvidia's Playbook to Build a Rival AI Chip Business",
+          "url": "https://www.wsj.com/tech/ai/google-is-using-nvidias-playbook-to-build-a-rival-ai-chip-business-1eac86f9",
           "source": "Hacker News",
-          "engagement": 1.386,
+          "engagement": 2.485,
           "polarity": 0.0
         },
         {
-          "headline": "Nvidia Is the Federal Reserve of AI",
-          "url": "https://ramansharma.substack.com/p/nvidia-is-the-federal-reserve-of",
+          "headline": "Using AI to help physicians diagnose rare genetic diseases affecting children",
+          "url": "https://openai.com/index/diagnose-rare-childhood-diseases/",
           "source": "Hacker News",
-          "engagement": 1.099,
+          "engagement": 2.303,
+          "polarity": 0.0
+        }
+      ],
+      "polarity_score": 0.0
+    },
+    {
+      "topic": "geopolitics",
+      "post_count": 5,
+      "engagement_score": 5.946,
+      "sample_posts": [
+        {
+          "headline": "How Russia's nuclear-powered 'Skyfall' missile works",
+          "url": "https://www.npr.org/2026/06/18/nx-s1-5843252/russia-nuclear-powered-missile-burevestnik",
+          "source": "Hacker News",
+          "engagement": 1.946,
+          "polarity": 0.0
+        },
+        {
+          "headline": "We didn’t meet out of desperation, Iran did. They are FINISHED! We’ll play out the 60 days. They get no money, not ten cents!",
+          "url": "https://truthsocial.com/@realDonaldTrump/116777207736809151",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0
+        },
+        {
+          "headline": "The War has diminished Iran! It doesn’t, any longer, have an Air Force, a Navy, Antiaircraft Equipment, Radar, or practically anything else, and yet the Dumocr",
+          "url": "https://truthsocial.com/@realDonaldTrump/116777207460249864",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
           "polarity": 0.0
         }
       ],

@@ -1,0 +1,210 @@
+{
+  "as_of": "2026-06-20",
+  "decay_rules": {
+    "hit_window_days": 14,
+    "eviction_after_days": 21,
+    "eviction_basis": "last_observed_date",
+    "first_hit_gate_min_sources": 2
+  },
+  "candidates": [
+    {
+      "ticker": "AVGO",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "VRT",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "TSM",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "MU",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AMD",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "ETN",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "capacity expansion",
+        "sold out",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-05-31",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "CEG",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 13,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "GOOGL",
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "keyword_hits": [
+        "capacity expansion",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-22",
+      "last_observed": "2026-05-31",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "ASML",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-05-31",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    }
+  ],
+  "sectors": [
+    {
+      "sector": "Semiconductors — Compute IP & Custom ASIC",
+      "hot": true,
+      "ticker_count": 9
+    },
+    {
+      "sector": "Semiconductors-Memory",
+      "hot": true,
+      "ticker_count": 2
+    },
+    {
+      "sector": "Technology / Semiconductors",
+      "hot": false,
+      "ticker_count": 1
+    }
+  ],
+  "stats": {
+    "candidates_in": 12,
+    "candidates_evicted": 13,
+    "first_hit_filtered": 12,
+    "digests_scanned": 25
+  }
+}

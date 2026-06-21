@@ -80,5 +80,51 @@ check("anchor echoes eps growth", out["compression"]["growth_signals"]["eps"], 0
 check("anchor pe routed to eps growth (mature)", out["by_metric"]["pe"]["growth_tier"], "mature")
 check("anchor ps routed to revenue growth (slowing)", out["by_metric"]["ps"]["growth_tier"], "slowing")
 
+# ── V4.40.0 PEG terminal P/E (bound to terminal growth, not the calendar year) ─────
+def bridge(rev_points, coverage=None):
+    rows = []
+    for i, (d, rev) in enumerate(rev_points):
+        cov = (coverage or {}).get(d)
+        rows.append({"date": d, "revenue": {"point": rev},
+                     "eps_consensus": {"point": None},
+                     "coverage": cov or {"num_analysts_revenue": 30, "num_analysts_eps": 30}})
+    return {"rows": rows}
+
+
+# clamp helpers
+check("peg pe formula 2.2x", mc._peg_terminal_pe(0.1372), 30.184, tol=0.01)
+check("peg pe floor 20", mc._peg_terminal_pe(0.02), 20.0, tol=0.01)
+check("peg pe ceiling 60", mc._peg_terminal_pe(0.40), 60.0, tol=0.01)
+check("peg pe none", mc._peg_terminal_pe(None), None)
+
+# terminal growth = YoY entering terminal year (well-covered, monotonic decel)
+g_clean, basis_clean = mc._terminal_growth(bridge([
+    ("2027-01-25", 390e9), ("2028-01-25", 553e9), ("2029-01-25", 672e9), ("2030-01-25", 764e9)]))
+check("terminal growth clean YoY", g_clean, 764 / 672 - 1, tol=0.002)
+check("terminal basis clean", basis_clean, "terminal_year_yoy")
+
+# noise guard: thin terminal year re-accelerates -> fall back to prior YoY
+g_guard, basis_guard = mc._terminal_growth(bridge(
+    [("2029-01-25", 672e9), ("2030-01-25", 764e9), ("2031-01-25", 950e9)],
+    coverage={"2031-01-25": {"num_analysts_revenue": 7, "num_analysts_eps": 7}}))
+check("terminal growth noise-guarded to prior", g_guard, 764 / 672 - 1, tol=0.002)
+check("terminal basis noise guard", basis_guard, "prior_year_yoy_terminal_noise_guard")
+
+# end-to-end: PEG binds the P/E to terminal growth, not the tier ceiling
+peg_anchor = mc.compress_anchor(
+    {"available": True, "by_metric": {"pe": band(42.88, 57.25, 72.24)}},
+    {"eps": 0.336, "revenue": 0.336},
+    bridge([("2029-01-25", 672e9), ("2030-01-25", 764e9), ("2031-01-25", 950e9)],
+           coverage={"2031-01-25": {"num_analysts_revenue": 7, "num_analysts_eps": 7}}),
+)
+pe = peg_anchor["by_metric"]["pe"]
+check("peg routed (not tier)", pe["growth_tier"], "peg_terminal")
+check("peg method", pe["method"], "peg_terminal_growth_bound")
+check("peg p50 ~30.2 (2.2x13.7%)", pe["p50"], 30.19, tol=0.1)
+check("peg dispersion preserved", pe["p25"] < pe["p50"] < pe["p75"], True)
+check("peg historical kept", pe["historical_band"]["p50"], 57.25, tol=0.01)
+check("peg compression echoes terminal_pe", peg_anchor["compression"]["terminal_pe_peg"], 30.19, tol=0.1)
+check("peg compression basis", peg_anchor["compression"]["terminal_growth_basis"], "prior_year_yoy_terminal_noise_guard")
+
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

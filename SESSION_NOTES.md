@@ -1,7 +1,111 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-06-17 (v4.35.0)
+> **Last Updated**: 2026-06-20 (v4.46.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.46.0) — 現值估值 confidence 接錨點一致性（破假精確）
+- **起因**：user 貼 ARM 現值估值截圖（FV $52、現價 $375、$3–$164、LOW AGREE、`confidence: high`）質疑「不太合理吧」。
+- **診斷**：方向是真的（$375 高於每一個錨點，連 analyst PT $164 也是），但 **$52 單點 + high confidence 是假精確**。root cause = `compute_fair_value_summary` 的 confidence 只看「有幾個錨點回傳數字」(n≥5→high)，不看一致性；同引擎 `fair_value_range` 早就算出 cv=1.20 / `agreement_grade=low`，沒回灌。DCF/owner-earnings 佔 55% 權重把前瞻成長股估到 $3–$12。
+- **修法（通用，全標的）**：`reconcile_confidence()` 用**錨點離散 cv 兩段式**封頂 confidence（cv≥0.6→low、0.35–0.6→medium、<0.35 不動；記 `confidence_count_based` + `confidence_capped_by`）；range 加 `dispersion_ratio`；`page-decisions.js` Track A `cv≥0.6` 時 FV 點改灰 + `⚠ 錨點分散 N×` caption。
+- **校準關鍵（user 拍板）**：backfill dry-run 發現有 grade 的 12 筆 snapshot **全部 grade=low**（含 AAPL）—— `owner_earnings_mult` 是全科技股結構性低離群值，cv 普遍 >0.35，直接綁 grade 會讓科技股一律 low、無鑑別度。改 cv 兩段式後：ARM/PLTR(50×+)→low、AAPL(11×)→medium。**不**自動剔錨點（median-ratio 會誤殺 analyst PT）；重新加權交給 `hypergrowth` archetype（shadow-only，待 ≥20 session 翻轉報告）。
+- **backfill**：`Dashboard/data.json` 既有 snapshot 一次性重算 —— 13 筆補 dispersion_ratio，8 筆 confidence 變動（TSM/ARM/AMD/PLTR/GOOGL→low；AAPL/NOK/MU→medium）。
+- **驗證**：engine golden 5 fixtures/38 asserts pass；ARM CLI 實測 confidence high→low、span 51.66×；`node --check` page-decisions.js pass。
+
+## 🟢 Session Note (v4.45.0) — 供應鏈 Wave B：UI 訊號下鑽 + FMP budget tiering + node 人工校正
+- **接續 Wave A**：user「繼續 wave b」。收口前次規劃三項 #5/#7/#8，跨 `supply_chain.py` + `dashboard_server.py` + `page-supply-chain.js` + `supply-chain.html` + 測試。
+- **#7 UI 下鑽**：Wave A 算的 `direction`/`stale` 終於進 UI。edge row 加 `⚠ 方向衝突`(紅) / `✓ 方向確認`(綠) chip；node card + detail 加 stale(⏳ 半透明) + user_status(✓ 綠框 / ⚑ 黃虛線框)。
+- **#5 budget tiering**：spine / 有 ticker / ≥2 downstream = priority；headroom<0.5 時週邊 node 只服務 peers cache（`_fetch_peers(allow_network=False)`）+ 跳 name-search，核心 node 不因 budget 燒乾失驗。profile TTL 7d→30d。data_quality 加 `override_count`/`fmp_peers_deferred`/`fmp_budget_headroom`。
+- **#8 node override**：`overrides/<slug>.json` sidecar（**永不改寫 LLM YAML**），enrich 先 merge（修正欄位優先、流經 grounding+FMP）。`POST /api/supply-chain/<slug>/override`（pop cache 強制重 enrich）。detail panel ✓確認/⚑標記/清除 button。status confirmed/flagged/none + field 修正 + note；清空自動移除 entry。
+- **驗收**：`pytest tests/test_supply_chain_enrichment.py` **23 pass**（18+5）；`py_compile` server+engine OK；be chain override roundtrip 驗 user_status/override_count 後清乾淨（無 git 殘留）。
+- **供應鏈 8 gap 分析至此 Wave A+B 全收口**。剩餘未做：原 #2 已在 Wave A、所有 8 項皆已處理。後續若要：override 加 field-edit 表單 UI（目前 status+note via UI、field 修正僅 API）、relation 來源 clickable 連回新聞流。
+
+## 🟢 Session Note (v4.44.0) — 供應鏈 Wave A：方向校驗 + 回寫閉環 + stale/relative-heat/ADR
+- **起因**：user 要對現有供應鏈系統提優化。先做 8 項 gap 分析，user 選「Wave A 先」= 純後端高 ROI 六項（#1/#2/#3/#4/#6/#9），全集中 `scripts/nexus/supply_chain.py` + 測試。
+- **#1 方向校驗**：digest co-mention 是對稱訊號（只證兩 ticker 相關、非誰供誰），LLM 畫的箭頭可能反。`_direction_check()` 改用 Nexus *directed* SUPPLIES_TO/CONTRACT_MFG_FOR edge 校驗 → `confirmed/conflict/unverified`；corroborated 但方向矛盾 → weight 1.0→0.5 + `relation_evidence.direction`。
+- **#2 回寫閉環**：`export_corroborated_edges()` + CLI `--export-edges`。enrich serve 路徑維持唯讀紀律（不碰 KG）；改 opt-in batch，把 corroborated 方向乾淨 edge 寫 `bn_*.json`（schema 對齊 build_artifacts）餵 Nexus tier-1。source 標 `supply_chain`（非 `break_news:`）故不會被下次 enrich 當獨立 break-news 佐證 → 無增強迴圈。跨 chain dedup。實測 be chain 產出 `VRT SUPPLIES_TO ORCL support=3`。
+- **#3 stale**：node `stale`/`stale_reason`（llm_only grounding + 無 heat + verification llm_only 且 age>45d）；computed 非 persist（enrich stateless）。FMP-off 刻意不算 stale（區分 budget vs 真 stale）。
+- **#6 relative heat**：`_heat_relative()` 改 chain 內 33/67 百分位 + 絕對 floor 8（防低活躍 chain 造 hot）；<4 active node fallback 絕對 `_heat`。relation 門檻刻意維持絕對（相對會讓 edge 信心取決無關 node、破壞可重現 + golden test）。
+- **#4 ADR**：foreign node name-match 命中 US 交易所 symbol → 升 `adr_ticker` → investability 從 opaque FOREIGN 變可交易 proxy。
+- **#9 測試**：7 新 golden test，全檔 **18 pass**。既有 11 test 全綠（conflict penalty 只打 corroborated、新增 `direction` key 不動既有 assert）。
+- **驗收**：`pytest tests/test_supply_chain_enrichment.py` 18 pass；be chain enrich serve 路徑新欄位齊全無 regression；export CLI 實跑 OK（artifact 已清，未留 git tree）。
+- **Wave B 待辦**：#5 FMP budget tiering、#7 UI edge 下鑽 `relation_evidence.sources`、#8 node override 編輯。三項跨 server/JS，未動。
+
+## 🟢 Session Note (v4.43.6) — Decision Review 優化：agent_score_stdev + accumulating_data stall 規則
+- **起因**：依本週 LLM 檢討報告（REVIEW_2026-06-20）提優化。核心：保守決策 miss 率 ~3× 進取（59% vs 20%）、半導體佔 51% miss，根因疑在 0–1 分數帶 default HOLD 過保守；但缺 `agent_score_stdev` 無法分離「弱訊號」vs「agent 高分歧」，所有修正卡在此 instrumentation。
+- **#1（已落地）**：`deep_dive_extractor.py` tuning_hooks 加 `agent_score_stdev`（四 lane score pstdev）+ `agent_score_count`。解鎖 TODO-013。驗證：TSLA lanes [-3,1,-1,-2] → stdev 1.479 ✓；extractor 單元測試 25 passed（1 failing 為 pre-existing `_find_macro_delta`，與本次無關）。
+- **#4**：TODO-007 → `promoted-to-ledger`，Rec 7 加 `standing_monitor`（gap 已穩 ≥15pp，轉常設 tripwire，<15pp 連 3 週才 paused，移出 TODO 佇列）。
+- **#5**：REVIEW_PROMPT.md Step -1 加 `stalled` 狀態（accumulating_data 樣本連 3 輪不增長 → 以現 N 直接評或 drop）；TODO-003 → `stalled`（momentum N=24 凍結 4 週）。
+- **#3（已重建）**：`scripts/diff_verdict_flips.py` 原從未 commit（報告誤稱已備）。重建完成：跨 13 snapshot N=194 / flip_rate **13.4%** 落 observe band（與 06-07 12% 一致）→ 不加 provisional，Pattern 統計維持只計 window_complete=100。下輪 `python3 scripts/diff_verdict_flips.py` 即可重跑。
+- **下輪待辦**：① 下次 REVIEW 用 `agent_score_stdev` 拆 0–1 band 決定改 HOLD 閾值 or 高分歧降倉（#2）。② Pattern C / TODO-014 僅記錄不動手（N=4）。③ flip_rate 跌破 10% → close TODO-010；破 20% → build_event_index 加 provisional。
+- **未動 code**：deep_dive_extractor + 新增 diff_verdict_flips.py + 3 個 decision_review 文件；無 protocol 決策邏輯改動。
+
+## 🟢 Session Note (v4.43.5) — 供應鏈 Rerun：資料新鮮度、生成模型、增量更新
+- **起因**：user 要知道供應鏈是哪天抓取/生成、由哪個 LLM 生成，並希望 rerun 參考前一版加上最新 source，而不是整份從零重抓。
+- **UI**：`sc-meta` 改成 chips：Fresh/Aging/Stale（依 `generated_at` 0-2 / 3-7 / >7 天）、`LLM <generated_by>`、`完整生成/增量更新`、節點/層/模組/關係數。
+- **資料**：`supply_chain.generate()` 新增 `refresh_mode`、`source_scope`、`previous_generated_at`、`previous_generated_by`；`SCHEMA.md` 同步。
+- **Rerun 行為**：`/api/supply-chain/generate` 接 `rerun:true`；protocol worker 載入同 slug 既有 YAML，傳給 LLM 作 previous-chain baseline。prompt 要求保留仍有效結構，根據最新 local context / model 可用 public sources 增量更新，避免每次從零漂移。
+- **CLI**：`scripts/nexus/supply_chain.py --theme <T> --rerun` 支援同邏輯。
+- **限制**：`generated_at` 是鏈條草稿時間，不保證每條底層 source 同時刷新；目前 source scope 仍取決於 local context 與所選 LLM runtime 是否具 web/search 能力。
+- **驗證**：`node --check Dashboard/page-supply-chain.js` rc=0；`python3 -m py_compile dashboard_server.py scripts/nexus/supply_chain.py` rc=0；`python3 -m pytest tests/test_supply_chain_enrichment.py` 11 passed。
+
+## 🟢 Session Note (v4.43.4) — 供應鏈頁：主題 Rerun 重新抓取
+- **起因**：user 要供應鏈探索的主題可 rerun，方便針對同一主題重新抓最新資訊。
+- **做法**：`supply-chain.html` 控制列新增 `Rerun`；`page-supply-chain.js` 新增 `rerunCurrent()`，讀目前 chain 的 `theme`，沿用 `/api/supply-chain/generate` 佇列與 `watchGeneratedTheme()` 輪詢載入。
+- **後端確認**：`supply_chain_generate` 不是硬寫死 Claude；未指定 agent 時走 `run_role("generate")`，由 `config/llm_config.json` 的 model router 目前設定決定。dedup 僅擋同 slug active/pending，不擋完成後 rerun。
+- **驗證**：`node --check Dashboard/page-supply-chain.js` rc=0；`python3 -m py_compile dashboard_server.py scripts/nexus/supply_chain.py` rc=0；`python3 -m pytest tests/test_supply_chain_enrichment.py` 11 passed。
+
+## 🟢 Session Note (v4.43.3) — 供應鏈探索：材料型產業 prompt 稽核強化
+- **起因**：MLCC 供應鏈討論中，原探索容易把焦點縮到單一報告或 finished maker，漏掉整條材料/製程/規格分層鏈。
+- **做法**：`supply_chain_system.md` 新增 materials/process-heavy themes 規則，要求拆 upstream materials、additives/minerals、process equipment、product tiers、downstream demand cycles、substitutes/package-level alternatives。
+- **MLCC 特化紀律**：要求區分高容值/高壓/低 ESL/車規/AI server MLCC vs commodity 0402/0603 消費料；cost driver 不再粗糙套白銀，需區分 BaTiO3、鎳/base-metal electrode、銅/錫端電極、稀土/摻雜與燒結能源成本。
+- **證據衛生**：因 YAML schema 暫無 evidence-grade 欄位，要求在 `note` 標 `confirmed` / `industry_report` / `inferred` / `stale` / `contested`。
+- **最後審核**：新增 LLM self-review 清單，防止漏上游材料/設備/替代技術、過度泛化單一熱門規格、亂填 ticker/listing/stage、混淆客戶/部署/製造/終端市場。
+- **驗證**：`python3 -m pytest tests/test_supply_chain_enrichment.py` 11 passed。
+
+## 🟢 Session Note (v4.43.2) — Forward Expectations calibration 誠實化：修 gate 假性 fail
+- **起因**：問「前瞻下一步」→ success_criteria gate = **fail (WAPE 0.77 / bias −0.46 / n=100)**。挖根因 → 三個方法學 artifact，非引擎差。
+- **缺陷 A 基準錯配**：拿多年 forward CAGR 比單年 trailing YoY（CAGR 內含減速 < 火熱單年 → 81/100 偏低）。改 `_realized_window_cagr`：由 `annual_growth` 各 FY YoY 幾何平均出**同窗 realized CAGR**。
+- **缺陷 B 未到期計分**：窗 2027–2031 但 actual 取 2026 trailing。改 `window_to > 最新實現 FY` → `actual_not_comparable_yet`；缺窗內 FY → `actual_basis_unavailable`（不退回 YoY）。
+- **缺陷 C 重複灌水**：同股 re-run 8 份算 8 row。`_latest_snapshot_per_ticker` 只留每股最新。
+- **結果**：gate fail → **insufficient_evidence (comparable=0)**。56 檔→13 ticker→48 row 全 not_comparable_yet（最早窗 2027 > 實現 FY 2026）。仍擋 live 但理由正確。calibration golden 9→25 asserts，全 forward 套件（24 檔）綠。
+- **注意版本**：本 session 與平行 session（供應鏈 4.43.0/4.43.1）同日；我的 forward 工作 = 4.42.0（貨幣正規化）+ 4.43.2（calibration）。三處版本同步至 4.43.2。
+- **檔案**：forward_expectations_calibration.py（v2 helpers + dedup + evaluate）/ test_..._calibration.py（重寫）/ VERSION + utils.js + CHANGELOG。
+
+## 🟢 Session Note (v4.43.1) — 供應鏈外股常見公司 backfill
+- **起因**：V4.43.0 新欄位上線後，既有 YAML 因沒有 `market/local_ticker`，仍顯示 `FOREIGN`。這是正確 fallback，但對常見台/韓/日供應鏈公司可 deterministic 補齊。
+- **做法**：`supply_chain.py` 加 `_FOREIGN_LISTING_BACKFILL` 與 `_apply_foreign_listing_backfill()`，只在 `listing: foreign_listed` 且欄位為空時套用，不覆蓋人工修正。
+- **覆蓋**：TSMC、Samsung Electronics、SK hynix、Tokyo Electron、Advantest、Disco、Lasertec、Hon Hai/Foxconn、Quanta、Wistron、Wiwynn、MediaTek、ASE、ASML 等。
+- **驗證**：`python3 -m pytest tests/test_supply_chain_enrichment.py` 11 passed；`python3 -m py_compile scripts/nexus/supply_chain.py` rc=0。
+
+## 🟢 Session Note (v4.43.0) — 供應鏈頁外股標示 + 上下游投資摘要
+- **起因**：供應鏈頁把大量台股/韓股/日股與 private/pre-IPO 混成「外股/未上市」，使用者難以分辨可交易性；同時圖譜只回答「誰連誰」，缺少可掃讀的上下游投資報告。
+- **資料層**：`supply_chain.py` schema/enrich 新增 `market/exchange/local_ticker/adr_ticker/country/investability/proxy_tickers`，derive `display_symbol/market_label`；`chain_report` deterministic 輸出可投資節點、瓶頸、私有 proxy、關係信心與高信心 edge。
+- **UI**：`supply-chain.html/page-supply-chain.js` 新增「上下游投資摘要」四欄，卡片顯示 `US:NVDA` / `TW:2330` / `KR:005930` / `PRIVATE`，detail panel 顯示市場與可投資性。
+- **生成提示/文件**：prompt 改成 global supply-chain for US-focused investor，要求非美上市填本地 market/ticker；SCHEMA.md 同步。
+- **驗證**：`python3 -m pytest tests/test_supply_chain_enrichment.py` 9 passed；`node --check Dashboard/page-supply-chain.js` rc=0；`python3 -m py_compile scripts/nexus/supply_chain.py` rc=0。
+
+## 🟢 Session Note (v4.42.0) — Forward Expectations 貨幣正規化：修 ADR (TWD/EUR) 前瞻股價 ~30× 爆衝
+- **起因**：review 抓到 TSM「未來前瞻」base = **$11,491 (+2598%)** garbage。根因：FMP 對外國 ADR 三表/估計用記帳幣別（TSM→TWD，eps 131.6 TWD），但股價/市值/PE 是 USD → TWD EPS × USD P/E 膨脹整個 FX 倍率。cache **無 reportedCurrency 欄位**。
+- **治本（FX）**：`forward_expectations_price_range.py` 加 `reporting_to_trading_fx`，EPS/rev-ps/fcf-ps 乘 multiple 前先 ÷ fx。純函式 `resolve_reporting_fx()`（reportedCurrency==USD→1.0 / FMP forex {CUR}USD→1/rate / 由 statement-vs-ADR EPS ratio >5× 反推 / parity）。`forward_expectations.py` `_currency_normalization()` fetch **income-statement reportedCurrency**（權威；**非 profile.currency** — 對 ADR 是 USD 交易幣別會誤判 parity）+ forex。
+- **防護網（gate）**：base/現價 >6× 或 <1/6 → 退自洽 advisory band + `currency_unit_suspect`，永不寫爆炸值。anchor 可用無 derived 退路時動態合成 current-price band。
+- **驗證**：TSM live fx=31.6 (TWD via forex) → base **$363** / bear $184 / bull $487（對齊 blended FV，review 預期 ~$359）。NVDA fx=1.0 range 不變。price_range golden 56 passed（+TSM TWD fixture 兩路）；margin_norm 18 / bridge 38 / compression 47 / core 48 全綠。
+- **連帶查證**：live blend `peer_pe_implied`（compute_price_framework）`eps_ttm = 現價(USD)/pe_self(USD)` → **USD 自洽無污染**，$773 偏高純 peer 失配已折讓。Shadow-only，不入 live 決策。
+- **檔案**：price_range.py（fx+gate+resolve）/ forward_expectations.py（_currency_normalization）/ margin_normalization.py（currency tag）/ test_..._price_range.py（fixtures）/ schema + VERSION + utils.js + CHANGELOG。
+
+## 🟢 Session Note (v4.41.0) — 決策卡 v5.1 估值區 price-axis number-line 視覺化
+- **起因**：user 要重新設計決策中心 v5.1 卡片估值區那批數據（FV / range / 5D-60D / implied CAGR / archetype / forward / glide）的視覺呈現。
+- **選的方向**：user 選 price-axis number-line（同尺規把各價位放一條軸上），inline 在卡內。
+- **做法**：`page-decisions.js` `buildFvExtras` 全重寫成兩條 CSS-positioned track — Track A 現值估值（p25–p75 著色帶 + FV tick + 現價 marker，現價>FV 紅/<FV 綠）、Track B 未來前瞻 shadow（現價→bear/base/bull caret + %，glide chips 移此）；momentum / implied CAGR / archetype 收成下方 compact chips。新增 helper `buildValAxis()`（純 CSS %-positioning，themeable）。
+- **不變**：全 advisory / shadow-only 標籤、tooltip、版本閘、缺 block 隱藏行為照舊；不碰決策數學。`node --check` rc=0。
+- **檔案**：page-decisions.js（重寫 + helper）/ VERSION / utils.js / CHANGELOG。
+
+## 🟢 Session Note (v4.40.0) — PEG terminal P/E + 近年年化 glide + 修 limit=3 截斷（EXP-3.5）
+- **起因**：user 問 NVDA forward base $252 是幾年（→4.6yr），覺得「不該取這麼遠當 horizon」，要近年年化目標價。
+- **挖到的根因**：`fetch.py` annual estimates `limit=3` + FMP 降冪 → 只拿最遠 3 年、丟掉近年；遠期營收被截成假平 → EXP-3.4 把 NVDA 誤判 mature → 22x → **$252 是壞資料假象**。修 `limit=6` 後 NVDA 變 hypergrowth → 55x → $1024（定價完美，不可作 base）。
+- **解法（user 選 PEG）**：`terminal_pe = clamp(2.2 × terminal_growth_pct, 20, 60)`，綁定**終期減速成長**（非年份），含薄覆蓋雜訊守門。NVDA 57→30x（13.7%）、ARM 151→60x。+ 近年年化 glide trajectory（錨定 terminal、幾何內插、年化恆定，不重估）。
+- **NVDA 結果**：terminal base **$562**（ann +24%/yr）；glide FY2027 $237(+14%)→FY2028 $294(+42%)→FY2031 $562(+171%)。AMD/MU 亦合理。
+- **校準 lever**：PEG 常數 2.2 / 20 / 60 在 `forward_expectations_multiple_compression.py` 頂部。Shadow-only，不入 live 決策。
+- **檔案**：fetch.py(limit) / multiple_compression.py(PEG) / price_range.py(glide) / financial_bridge.py(coverage) / forward_expectations.py(compress 移後) / forward_price_range.py + bridge.py(顯示) / 3 golden + schema + CHANGELOG。全套 golden rc=0。
 
 ## 🟢 Session Note (v4.30.0→v4.35.0) — Forward Valuation Robustness Sweep（review → P0 gate 全清 + cohort）
 - **起因**：user 請 code review 整套未來估值系統（V4.13–4.30，~4363 行原 uncommit）。Review 抓 6 問題，最致命：`future_price_range` 預設 `base_multiple = current_price/forward_eps` → base ≡ 現價（ARM/NVDA 實測 +0.0%），看似 forecast 實為波動帶。

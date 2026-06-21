@@ -89,6 +89,10 @@ def extract_range(snapshot: dict) -> dict:
         "ticker": price_range.get("ticker") or snapshot.get("ticker") or "UNKNOWN",
         "current_price": snapshot.get("current_price"),
         "horizon_date": price_range.get("horizon_date"),
+        "horizon_basis": price_range.get("horizon_basis"),
+        "horizon_years": price_range.get("horizon_years"),
+        "horizon_coverage": price_range.get("horizon_coverage"),
+        "trajectory": price_range.get("trajectory") or [],
         "method": price_range.get("method"),
         "multiple_quality": price_range.get("multiple_quality"),
         "eps_basis": price_range.get("eps_basis"),
@@ -127,10 +131,21 @@ def format_text(summary: dict) -> str:
     up = summary.get("upside_pct") or {}
     advisory = summary.get("status") == "advisory_band_only"
     header = f"{ticker} Future Price Range" + (" ⚠️ ADVISORY BAND (not a forecast)" if advisory else "")
+    hy = summary.get("horizon_years")
+    hb = summary.get("horizon_basis")
+    hcov = summary.get("horizon_coverage")
+    horizon_line = f"- Horizon: {summary.get('horizon_date')}"
+    if hy is not None:
+        horizon_line += f" (~{hy}yr"
+        if hcov is not None:
+            horizon_line += f", {hcov} analysts"
+        horizon_line += ")"
+    if hb == "fallback_farthest":
+        horizon_line += " ⚠️ fell back to thin far year"
     lines = [
         header,
         f"- Current: ${summary.get('current_price')}",
-        f"- Horizon: {summary.get('horizon_date')}",
+        horizon_line,
         f"- Method: {summary.get('method')} ({summary.get('multiple_quality')})",
     ]
     comp = summary.get("compression") or {}
@@ -148,6 +163,21 @@ def format_text(summary: dict) -> str:
         f"- Base: ${rng.get('base')} ({up.get('base'):+.1f}%)",
         f"- Bull: ${rng.get('bull')} ({up.get('bull'):+.1f}%)",
     ]
+    traj = summary.get("trajectory") or []
+    if traj:
+        lines.append("- Per-FY trajectory (base case, annualized glide to terminal fair value):")
+        lines.append("    FY-end      ~yr  base target   cum%     ann%   coverage")
+        for r in traj:
+            t = (r.get("targets") or {}).get("base")
+            cum = (r.get("cumulative_upside_pct") or {}).get("base")
+            ann = (r.get("annualized_pct") or {}).get("base")
+            cov = r.get("coverage")
+            flag = " ⚠️thin" if r.get("thin_coverage") else ""
+            t_s = f"${t:,.2f}" if isinstance(t, (int, float)) else "—"
+            cum_s = f"{cum:+.1f}%" if isinstance(cum, (int, float)) else "—"
+            ann_s = f"{ann:+.1f}%" if isinstance(ann, (int, float)) else "—"
+            cov_s = str(cov) if cov is not None else "—"
+            lines.append(f"    {r.get('date')}  {r.get('years_out')!s:>4}  {t_s:>11}  {cum_s:>7}  {ann_s:>6}   {cov_s}{flag}")
     if advisory:
         lines.append(
             "- ⚠️ No price-independent multiple anchor available: this is a +/-15% band around "

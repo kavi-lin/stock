@@ -1,0 +1,59 @@
+{
+  "engine": "forward_expectations.py v1.0 (Phase 1 shadow)",
+  "ticker": "ARM",
+  "as_of_earnings_date": "2026-05-07",
+  "current_price": 395,
+  "shadow_only": true,
+  "consensus_lane": {
+    "available": true,
+    "revenue_cagr": 0.3842,
+    "eps_cagr": 0.3999,
+    "window_from": "2028-03-31",
+    "window_to": "2030-03-31",
+    "window_years": 2.0,
+    "eps_spread_pct": 4.7,
+    "num_analysts_eps": 7,
+    "num_analysts_revenue": 11,
+    "revision_direction": "UP",
+    "note": "estimate-window CAGR（2028-03→2030-03）；非 trailing-base（避免低基期失真）"
+  },
+  "market_implied_lane": {
+    "available": true,
+    "required_fcf_cagr": 0.6,
+    "out_of_range": true,
+    "fcf_base_per_share": 0.21101,
+    "wacc_used": 0.09,
+    "note": "現價 $395 隱含 5Y FCF CAGR 60%"
+  },
+  "base_rate_lane": {
+    "available": true,
+    "peer_rev_cagr_median": 0.132,
+    "peer_rev_cagr_p25": 0.0864,
+    "peer_rev_cagr_p75": 0.1872,
+    "peers_used": [
+      "AMAT",
+      "APH",
+      "INTC",
+      "INTU",
+      "KLAC",
+      "LRCX",
+      "NOW",
+      "QCOM",
+      "SONY",
+      "TXN"
+    ],
+    "self_revenue_yoy": 0.2635,
+    "growth_acceleration": "decelerating",
+    "note": "10 同業歷史營收 CAGR 分布（防過度樂觀 base rate）"
+  },
+  "expectations_gap": {
+    "market_implied_fcf_cagr": 0.6,
+    "consensus_eps_cagr": 0.3999,
+    "consensus_revenue_cagr": 0.3842,
+    "base_rate_peer_rev_cagr_median": 0.132,
+    "market_minus_consensus": 0.2001,
+    "verdict": "market_demands_above_consensus",
+    "gap_assessment": "市場隱含 5Y FCF CAGR 60%（out_of_range）；分析師共識 EPS CAGR 40%；營收 CAGR 38%；同業歷史營收 base-rate 中位 13%。⚠ 市場要求顯著高於分析師共識（>1.3×）；連分析師共識營收增速都高於同業歷史 base-rate >1.5×（共識本身偏樂觀）；市場要求 FCF 增速（60%）遠高於共識營收增速（38%）→ 隱含大幅 margin 擴張，執行風險高",
+    "comparator_note": "market_implied 為 FCF CAGR、consensus 主比 EPS CAGR（最近 per-share 收益力代理，非同口徑 FCF）；base_rate 為營收 CAGR。跨口徑比較僅供方向判讀。"
+  }
+}

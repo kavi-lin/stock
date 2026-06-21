@@ -470,6 +470,54 @@ def _current_price(ticker: str, inp: dict, earnings_cache: dict, no_fetch: bool)
         return snap_px
 
 
+def _statement_ttm_eps(earnings_cache: dict):
+    rows = [r for r in (earnings_cache.get("quarterly_pnl") or []) if isinstance(r, dict)][:4]
+    vals = []
+    for r in rows:
+        v = r.get("epsDiluted")
+        if not isinstance(v, (int, float)) or isinstance(v, bool):
+            v = r.get("eps")
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            vals.append(v)
+    return sum(vals[:4]) if len(vals) >= 4 else None
+
+
+def _currency_normalization(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
+    """Resolve reporting→trading (USD) FX so a reporting-currency EPS (TWD/EUR/…) is not
+    multiplied by a trading-currency P/E. Best-effort: reads FMP profile currency + forex +
+    quote EPS when fetching; degrades to parity (price-range sanity gate is the backstop).
+    Shadow-only metadata; never alters live decisions."""
+    from forward_expectations_price_range import resolve_reporting_fx
+    stmt_eps = _statement_ttm_eps(earnings_cache)
+    # The authoritative reporting currency is the income statement's reportedCurrency — NOT
+    # profile.currency, which for an ADR is the TRADING currency (USD) and falsely implies parity.
+    reporting_currency = trading_eps = forex_to_usd = None
+    if not no_fetch:
+        try:
+            from scripts._shared import fmp_pool
+            inc = fmp_pool.get("income-statement", {"symbol": ticker, "limit": 1},
+                               stable=True, retries=1, timeout=15, hard_fail=False)
+            irow = inc[0] if isinstance(inc, list) and inc else (inc if isinstance(inc, dict) else {})
+            reporting_currency = irow.get("reportedCurrency")
+            quote = fmp_pool.get("quote", {"symbol": ticker}, stable=True, retries=1, timeout=15, hard_fail=False)
+            qrow = quote[0] if isinstance(quote, list) and quote else (quote if isinstance(quote, dict) else {})
+            trading_eps = qrow.get("eps")
+            if reporting_currency and str(reporting_currency).upper() != "USD":
+                pair = f"{str(reporting_currency).upper()}USD"
+                fxq = fmp_pool.get("quote", {"symbol": pair}, stable=True, retries=1, timeout=15, hard_fail=False)
+                fxrow = fxq[0] if isinstance(fxq, list) and fxq else (fxq if isinstance(fxq, dict) else {})
+                forex_to_usd = fxrow.get("price")
+        except Exception:
+            pass
+    info = resolve_reporting_fx(reporting_currency, forex_to_usd, stmt_eps, trading_eps)
+    info["statement_ttm_eps"] = stmt_eps
+    info["trading_eps"] = trading_eps
+    info["shadow_only"] = True
+    info["policy"] = ("Converts reporting-currency EPS/revenue to the trading currency for the "
+                      "shadow future price range; does not alter live decisions.")
+    return info
+
+
 def write_snapshot(payload: dict) -> str | None:
     try:
         os.makedirs(SNAPSHOT_DIR, exist_ok=True)
@@ -541,11 +589,8 @@ def main():
         market = market_implied_lane(ticker, inp, args.no_fetch)
         base_rate = base_rate_lane(ticker, ec, args.no_fetch)
         multiple_anchor = build_multiple_anchor(ticker, no_fetch=args.no_fetch)
-    # EXP-3.4: compress the historical multiple toward forward-growth-justified levels
-    multiple_anchor = compress_anchor(
-        multiple_anchor,
-        {"eps": consensus.get("eps_cagr"), "revenue": consensus.get("revenue_cagr")},
-    )
+    # EXP-3.4 / V4.40.0: compression is applied AFTER the financial bridge is built so the
+    # terminal-growth-bound PEG P/E can read the per-FY revenue path (see below).
     from forward_expectations_adapters import evaluate_adapters
     adapter_evaluation = evaluate_adapters(ticker, ec, inp)
     selected_adapter = adapter_evaluation["selected_adapter"]
@@ -589,6 +634,12 @@ def main():
     financial_bridge = build_financial_bridge(
         ec, primary_acquisition.get("guidance_promoted") or [], generated_at,
     )
+    # EXP-3.4 / V4.40.0: terminal P/E bound to the bridge's terminal (decelerated) growth.
+    multiple_anchor = compress_anchor(
+        multiple_anchor,
+        {"eps": consensus.get("eps_cagr"), "revenue": consensus.get("revenue_cagr")},
+        financial_bridge,
+    )
     evidence_inventory = build_inventory(
         ticker, ec, selected_adapter.get("adapter_id"), generated_at,
         primary_acquisition=primary_acquisition,
@@ -616,9 +667,13 @@ def main():
     _own_net_margin = _m8q[len(_m8q) // 2] if _m8q else None
     margin_normalization = build_margin_normalization(financial_bridge, _own_net_margin)
     _eps_override = margin_normalization.get("normalized_eps") if margin_normalization.get("applied") else None
+    with _stdout_to_stderr():
+        currency_normalization = _currency_normalization(ticker, ec, args.no_fetch)
     future_price_range = build_future_price_range(
         ticker, inp.get("current_price"), financial_bridge, ec,
         inp.get("valuation_multiples") or {}, multiple_anchor, _eps_override,
+        reporting_to_trading_fx=currency_normalization.get("fx") or 1.0,
+        as_of_date=generated_at,
     )
     evidence = build_evidence_contract(ec, consensus, market, base_rate, generated_at)
 
@@ -644,6 +699,7 @@ def main():
         "forward_financial_bridge": financial_bridge,
         "multiple_anchor": multiple_anchor,
         "margin_normalization": margin_normalization,
+        "currency_normalization": currency_normalization,
         "expectations_gap": expectations_gap,
         "scenario_policy": scenario_policy,
         "operating_driver_scenarios": operating_driver_scenarios,

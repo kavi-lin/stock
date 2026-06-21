@@ -86,6 +86,34 @@ OUTPUT（單一 JSON object）:
 
 ### Step 2 (Phase 4b) — Devil's Advocate（V1.3 獨立 subagent）
 
+#### DA Pre-Trigger 計算（V4.12.2 — prompt 瘦身）
+
+> 結構性 divergence 規則 R4–R7 是**條件觸發**型：多數日子根本沒命中，但舊版每次把
+> 4 條全文塞進 DA prompt（DA 是單一最肥 subagent input）。V4.12.2 改為 **PS 先用手上
+> cache 算哪些觸發，只把 fired 的規則塊 + 命中 sector/數值 paste 進 prompt**；沒觸發
+> 的不貼。正確性不變 — 沒觸發的規則本來就不會產 challenge。
+
+**計算**：對每個 Phase 4a HOT 提案 sector，用已在手 cache 逐條檢查（純 threshold 比對）：
+
+| 規則 | 觸發條件（per HOT sector） | 來源 |
+|---|---|---|
+| **R4 FRED 衝突** | `yield_curve_inverted=true` OR `real_rate_preferred>2.0` OR `credit_stress_elevated=true` OR `financial_stress_above_avg=true` OR `regime_label ∈ {Late Cycle Tightening, Stagflation, Recession Risk, Recession Easing}` OR sector ∈ `sector_rotation_avoid` | `_phase0.fred_snapshot` |
+| **R5 Smart Money divergence** | `insider_acquired_disposed_ratio_q<0.5` OR `senate_net_buy_30d<0` OR (`institutional_holders_qoq_delta<0` AND `institutional_ownership_pct_delta<0` AND `institutional_sample_size>=3`) | `_phase3.smart_money_signals` |
+| **R6 PT target exhausted** | `analyst_pt_upside_median_pct<0.03` AND `pt_sample_size>=3` | `_phase3.sector_earnings_pulse` |
+| **R7 動能耗盡** | `rs_vs_spy_3m>0.05` AND `rs_vs_spy_5d<0` AND `rs_vs_spy_20d<0` | `_phase1.sectors[].sector_valuation` |
+
+**組 `<TRIGGERED_DIVERGENCE_RULES>` placeholder**：
+- 任一 HOT sector 命中某規則 → paste 下方 R4–R7 library 該條原文 + 命中的 sector 名單與具體數值。
+- 完全沒觸發 → 填 `"(無結構性 divergence 觸發 — 專注 R1-R3 + tail-risk)"`。
+- R4–R7 全文只留在下方 library（spec 參考），**不再無條件塞進每次 prompt**。
+
+##### R4–R7 Rule Library（觸發才 paste；each MUST 引具體數值）
+
+- **R4 FRED 衝突**：→ MUST 構造 kill_conditions 引用**具體 FRED 數值**（"real_rate 1.92% > 2.0% threshold"），不可寫 vague「macro 轉差」。優先序：credit_stress > yield_curve_inverted > real_rate_high > yield_curve_steep。
+- **R5 smart_money_divergence**：→ MUST 在 `challenge_targets` 加 **smart_money_divergence** challenge，counter_evidence 引具體數值（"insider ratio 0.41 < 0.5; senate net −3 in 30d; 13F holders QoQ −12, ownership % −0.45"）。smart money 與 consensus 一致（ratio>0.8 且 senate≥0 且 holders_qoq≥0）→ 不挑。
+- **R6 pt_target_exhausted**：→ MUST 加 **pt_target_exhausted** challenge，counter_evidence 引數值（"PT median upside 1.8% < 3% across 5 mega-caps"）。
+- **R7 momentum_exhaustion**：→ MUST 加 **momentum_exhaustion** challenge，counter_evidence 引數值（"3M RS +8.1% but 20d −2.3% / 5d −0.7% — short-term reversal"）。三窗口同向 → 不挑。
+
 #### 執行方式（MUST use Agent tool）
 
 ```
@@ -113,7 +141,7 @@ Agent(
   <paste tail_risk_checks[]>
 
   PHASE 3 SMART MONEY SIGNALS (V1.4，from `sector/cache/sector_smart_money_<DATE>.json`):
-  <paste _phase3.smart_money_signals[hot_sector] for each HOT proposal>
+  <僅當 R5 觸發時 paste _phase3.smart_money_signals[hot_sector]（命中 sector）；R5 未觸發則填 "n/a">
 
   CONSENSUS_WARNING: <true | false>（若 true 表示該板塊在 rotation/theme/news 三方向全看多，你必須強力挑戰）
 
@@ -121,41 +149,13 @@ Agent(
   1. 若 consensus_warning=true → MUST 提交 challenge_targets（不可省略）；counter_evidence ≥ 2 句含具體數據
   2. 若 consensus_warning=false → 優先挑戰 tail_risk_score 最高的 2-3 個板塊
   3. 每個 challenge_target 必須 falsifiable（IF <條件> WITHIN <天數> THEN <推翻論點>）
-  4. (V1.4) FRED 衝突挑戰規則 — 若 fred_snapshot 顯示與某 HOT 提案衝突的訊號：
-       - yield_curve_inverted = true
-       - real_rate_preferred > 2.0
-       - credit_stress_elevated = true
-       - financial_stress_above_avg = true
-       - regime_label ∈ {Late Cycle Tightening, Stagflation, Recession Risk, Recession Easing}
-       - sector ∈ fred_snapshot.sector_rotation_avoid
-     → MUST 構造 kill_conditions 引用 **具體 FRED 數值**（"real_rate 1.92% > 2.0% threshold"），
-       不可寫 vague 的「macro 轉差」或「總體環境不佳」
-  5. (V1.4) **Smart Money Divergence 強制檢查** — 讀 `_phase3.smart_money_signals`（若可用），
-     對每個 HOT 提案 sector 檢查：
-       - `insider_acquired_disposed_ratio_q < 0.5` (內部人賣多買少) AND/OR
-       - `senate_net_buy_30d < 0` (議員淨賣超) AND/OR
-       - (V2.9.0) `institutional_holders_qoq_delta < 0` AND `institutional_ownership_pct_delta < 0`
-         AND `institutional_sample_size >= 3`（13F filer 與機構持股 % 都 QoQ 下降）
-     → MUST 在 `challenge_targets` 加 **smart_money_divergence** challenge,
-       counter_evidence 必須引用具體數值(例 "insider ratio 0.41 < 0.5 threshold; senate net −3 in 30d;
-       13F holders QoQ −12, ownership % −0.45 in Q4 2025")。
-     - smart money 與 HOT consensus 一致(ratio > 0.8 且 senate ≥ 0 且 institutional_holders_qoq_delta ≥ 0)→ 不必挑戰此項
+  4. 結構性 divergence 規則（R4–R7）— 僅處理 PS 已預先判定觸發、paste 在下方的規則：
 
-  6. (V2.9.0) **Forward Valuation Divergence**（PT consensus）— 讀 `_phase3.sector_earnings_pulse`，
-     對每個 HOT 提案 sector 檢查：
-       - `analyst_pt_upside_median_pct < 0.03`（中位 PT 上行空間 < 3%）
-       - AND `pt_sample_size >= 3`（樣本足）
-     → MUST 在 `challenge_targets` 加 **pt_target_exhausted** challenge,
-       counter_evidence 引用具體數值(例 "PT median upside 1.8% < 3% threshold across 5 mega-caps")。
-     - PT upside ≥ 3% 或樣本不足 → 不必挑戰此項
+  TRIGGERED STRUCTURAL DIVERGENCE RULES (V4.12.2 — PS 預算後只填 fired 的):
+  <TRIGGERED_DIVERGENCE_RULES>
 
-  7. (V2.9.0) **動能耗盡 Divergence**（多週期 RS）— 讀 `_phase1.sectors[].sector_valuation`，
-     對每個 HOT 提案 sector 檢查：
-       - `rs_vs_spy_3m > 0.05`（3M RS 強勢，> +5%）
-       - AND `rs_vs_spy_5d < 0` AND `rs_vs_spy_20d < 0`（近 5d 與 20d 皆轉弱）
-     → MUST 在 `challenge_targets` 加 **momentum_exhaustion** challenge,
-       counter_evidence 引用具體數值(例 "3M RS +8.1% but 20d −2.3% / 5d −0.7% — short-term reversal")。
-     - 三窗口同向（皆正或皆負）→ 不必挑戰此項
+     對上方每條 fired 規則，依其指示加對應 challenge_target，counter_evidence MUST
+     引具體數值。**未列在上方 = 當日未觸發，不需處理、不需自行重算 cache。**
 
   OUTPUT JSON:
   {

@@ -1,10 +1,10 @@
 {
-  "as_of": "2026-06-15T20:10:22",
+  "as_of": "2026-06-20T13:39:53",
   "summary": {
-    "triggered": 0,
+    "triggered": 1,
     "armed": 5,
-    "manual": 67,
-    "expired": 118
+    "manual": 68,
+    "expired": 115
   },
   "items": [
     {
@@ -17,12 +17,12 @@
       "condition": "IF MSFT 未能站回並守住 200MA $458.46（現 $450.24，低 1.79%）WITHIN 15 天 THEN 今日 +5.4%/2.31× 量能確認為 overhead resistance 的 oversold bounce 失敗，而非 Stage-2 突破",
       "window": "15 days",
       "expires": "2026-06-15",
-      "days_left": 0,
-      "status": "armed",
+      "days_left": -5,
+      "status": "triggered",
       "checks": [
         {
-          "predicate": "MSFT close > MA200 (453.73)",
-          "value": 390.74,
+          "predicate": "MSFT close > MA200 (451.35)",
+          "value": 379.4,
           "met": false
         }
       ]
@@ -37,12 +37,12 @@
       "condition": "若6/17 FOMC在7天內維持鷹派（real_rate續站>2.0%，現2.19%）且headline CPI續維持≥4.0%（現4.17%），則長久期估值論述破裂——242倍營收使SPCX為全市場最受利率敏感久期資產，僅10%倍數壓縮即蒸發逾2000億市值。",
       "window": "7 days",
       "expires": "2026-06-20",
-      "days_left": 5,
+      "days_left": 0,
       "status": "manual",
       "checks": [
         {
-          "predicate": "DFII10 > 2.0 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 > 2.0 (data 2026-06-17)",
+          "value": 2.23,
           "met": true
         }
       ]
@@ -57,21 +57,7 @@
       "condition": "IF 6/17 FOMC SEP dot-plot 偏鷹致 real_rate_dfii10 升破 2.40%（現 2.19% 已 elevated）WITHIN 7 天 THEN 長存續期 tech DCF 折現惡化、FCF yield <1% 的 MRVL 失去估值支撐",
       "window": "7 days",
       "expires": "2026-06-21",
-      "days_left": 6,
-      "status": "manual",
-      "checks": []
-    },
-    {
-      "id": "thesis_ORCL_2026-05-07_1",
-      "source": "thesis",
-      "ticker": "ORCL",
-      "sector": null,
-      "origin_date": "2026-05-07",
-      "decision": "HOLD",
-      "condition": "IF FRED Overheating regime 持續 + ICSA 4-week MA 連 3 週加速上行（>5% WoW）WITHIN 45 天 THEN sector_rotation_AVOID Technology 訊號實現，ORCL 高 beta + 高估值（P/E 31.94 vs peer 23.88）將首當其衝重新定價",
-      "window": "45 days",
-      "expires": "2026-06-21",
-      "days_left": 6,
+      "days_left": 1,
       "status": "manual",
       "checks": []
     },
@@ -85,7 +71,7 @@
       "condition": "IF 內部人 insider Q ratio Q3 26 仍 < 0.10 (延續 0.0552→0.1245→0.0974 的 3 季 distributing 趨勢) 或 short_pct_float 突破 25% WITHIN 45d THEN Sentiment SELL -2 升級為 STRONG_SELL",
       "window": "45 days",
       "expires": "2026-06-22",
-      "days_left": 7,
+      "days_left": 2,
       "status": "manual",
       "checks": []
     },
@@ -99,7 +85,7 @@
       "condition": "IF 任何 proxy advisor (ISS/Glass Lewis) 建議 AGAINST 或股東訴訟成功阻擋投票 WITHIN 60 天 THEN 58% 既得票數論點失效",
       "window": "60 days",
       "expires": "2026-06-25",
-      "days_left": 10,
+      "days_left": 5,
       "status": "manual",
       "checks": []
     },
@@ -113,7 +99,7 @@
       "condition": "IF China 晶片關稅升級（named_targets_today=[CHINA] ACTIVE）45 天內具體出口管制行動 THEN NVDA 中國 revenue 暴險疊加同業相對弱勢 → 基本面 EPS 下修，PEG 0.68 看多錨點失效",
       "window": "45 days",
       "expires": "2026-06-25",
-      "days_left": 10,
+      "days_left": 5,
       "status": "manual",
       "checks": []
     },
@@ -127,12 +113,12 @@
       "condition": "若SPCX在10個交易日內以超過2倍均量跌破135美元IPO支撐區（自160.95跌幅>16%），則IPO動能多頭論述破裂——4.886%流通量根本無流動性地板，證實反身性買盤是唯一買家。",
       "window": "10 trading days",
       "expires": "2026-06-27",
-      "days_left": 12,
+      "days_left": 7,
       "status": "armed",
       "checks": [
         {
           "predicate": "SPCX close < 135",
-          "value": 160.95,
+          "value": 185.0,
           "met": false
         }
       ]
@@ -147,12 +133,12 @@
       "condition": "IF DFII10 實質利率維持 >2.0%（現 2.08%）且 10Y 任一交易日收 >4.75% WITHIN 30 天 THEN 長存續期科技 DCF 下修、+26.5% 溢價論點破裂（Valuation 已把現金流 FV 釘在 $356 < 現價 $450）",
       "window": "30 days",
       "expires": "2026-06-30",
-      "days_left": 15,
+      "days_left": 10,
       "status": "manual",
       "checks": [
         {
-          "predicate": "DFII10 > 2.0 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 > 2.0 (data 2026-06-17)",
+          "value": 2.23,
           "met": true
         }
       ]
@@ -167,12 +153,12 @@
       "condition": "IF NFCI 由 -0.52 升破 0 (轉緊) 或 HY OAS pctile 由 20 升破 50，且 market_top 由 Early_Warning 升級為 Confirmed、breadth 由 33 跌破 25 WITHIN 60 天 THEN Late cycle 確認進入 derate 階段",
       "window": "60 days",
       "expires": "2026-07-02",
-      "days_left": 17,
+      "days_left": 12,
       "status": "manual",
       "checks": [
         {
           "predicate": "LLY close < 25",
-          "value": 1133.0,
+          "value": 1098.57,
           "met": false
         }
       ]
@@ -187,29 +173,15 @@
       "condition": "IF 收盤跌破 52 週低 $122.68 並帶量擴大下跌（現於 MA20 $138.75 之下、distributing）WITHIN 21 天 THEN 技術 DOWNTREND（score -3）確認破位，多頭 PT 修正 narrative 被價格行為證偽，MHP wait_for_pullback 升級為趨勢空。",
       "window": "21 days",
       "expires": "2026-07-05",
-      "days_left": 20,
+      "days_left": 15,
       "status": "armed",
       "checks": [
         {
           "predicate": "PLTR close < 52",
-          "value": 127.99,
+          "value": 128.47,
           "met": false
         }
       ]
-    },
-    {
-      "id": "thesis_ORCL_2026-05-07_3",
-      "source": "thesis",
-      "ticker": "ORCL",
-      "sector": null,
-      "origin_date": "2026-05-07",
-      "decision": "HOLD",
-      "condition": "IF VIX 從 17.39 跳升 > 22 且 F&G 從 71.5 Greed 回落 < 50 WITHIN 60 天 THEN late-cycle euphoria + breadth 33 Weakening 的早期警訊兌現，high P/E + high D/E 名單（ORCL 完美命中）將被優先 de-risk",
-      "window": "60 days",
-      "expires": "2026-07-06",
-      "days_left": 21,
-      "status": "manual",
-      "checks": []
     },
     {
       "id": "thesis_CRWV_2026-05-08_2",
@@ -221,7 +193,7 @@
       "condition": "IF 任一 hyperscaler (MSFT/META/GOOGL/AMZN) 公告擴大自研 ASIC 部署 或 NVDA 直供折扣給 hyperscaler bypass neocloud WITHIN 60d THEN Specialized_GPU_Cloud_Challenger 的 NARROW moat 結構性失守，P/S 10.5 vs peer 6.71 的 +56% premium 直接 de-rate 至 peer median",
       "window": "60 days",
       "expires": "2026-07-07",
-      "days_left": 22,
+      "days_left": 17,
       "status": "manual",
       "checks": []
     },
@@ -235,7 +207,7 @@
       "condition": "IF 收盤跌破 support $358.08 且 insider 出現第 5 季連續 distributing 或再現機構全數出清 WITHIN 30 天 THEN Stage 1 basing 失敗轉下行，Technical/Sentiment 中性假設同步失效",
       "window": "30 days",
       "expires": "2026-07-13",
-      "days_left": 28,
+      "days_left": 23,
       "status": "manual",
       "checks": []
     },
@@ -249,7 +221,7 @@
       "condition": "IF 6/17 FOMC 因 headline CPI 4.17% 加速 + 密大 1y 通膨預期 4.9% 轉鷹，且 10Y real rate (DFII10) 自 2.19 (pctile 96) 升破 2.40 WITHIN 30 天 THEN 長久期 AI semis 折現率假設崩壞，wait_for_pullback 下界 $854 不守",
       "window": "30 days",
       "expires": "2026-07-13",
-      "days_left": 28,
+      "days_left": 23,
       "status": "manual",
       "checks": []
     },
@@ -263,7 +235,7 @@
       "condition": "IF FOMC 6/17 後 real_rate_dfii10 維持或升破 2.19%（>2.0 的 Technology DCF 折現壓力 overlay 未解除）WITHIN 30 天 THEN SIDEWAYS/Transitional regime + AI/Semi 動能末期 + Tech rotation-lower 三重宏觀逆風確立，對 EV/EBIT 264.8 長久期資產持續折現壓制",
       "window": "30 days",
       "expires": "2026-07-14",
-      "days_left": 29,
+      "days_left": 24,
       "status": "manual",
       "checks": []
     },
@@ -277,7 +249,7 @@
       "condition": "IF FOMC 6/17 因 CPI 動能加速 + 1y 通膨預期 4.9% 轉鷹、且 DFII10 實質利率自 2.19% 續升破 2.40% WITHIN 30 days THEN 高倍數 tech 折現分母擴大、PE166 的 AMD 首當其衝殺估值",
       "window": "30 days",
       "expires": "2026-07-14",
-      "days_left": 29,
+      "days_left": 24,
       "status": "manual",
       "checks": []
     },
@@ -291,12 +263,12 @@
       "condition": "IF 股價在量已較 20D avg 低 23%、MACD 直方圖下傾、smart_money distributing 下跌破 $244 支撐 WITHIN 30 天 THEN Stage 2 topping_pattern 轉 Stage 3、157% above 200MA 均值回歸觸發",
       "window": "30 days",
       "expires": "2026-07-14",
-      "days_left": 29,
+      "days_left": 24,
       "status": "armed",
       "checks": [
         {
           "predicate": "MRVL close < 244",
-          "value": 279.7,
+          "value": 310.58,
           "met": false
         }
       ]
@@ -311,7 +283,7 @@
       "condition": "IF FRED 10Y 實質利率維持或升破 2.19%（>2.0 高久期 DCF 折現逆風）且 6/17 FOMC 未轉鴿 WITHIN 30 天 THEN 高久期科技 DCF 折現率持續壓縮，現價對 DCF 錨（$10.8/$18）7–12 倍溢價無法靠降息修復，估值 de-rating 確立。",
       "window": "30 days",
       "expires": "2026-07-14",
-      "days_left": 29,
+      "days_left": 24,
       "status": "manual",
       "checks": []
     },
@@ -325,7 +297,7 @@
       "condition": "IF real_rate_10y 由 2.16(96th pctile)回落至 90th pctile 以下且 Technology 脫離 FRED sector_lower WITHIN 30 days THEN 長久期未獲利成長股宏觀逆風解除，bull re-rate 路徑打開",
       "window": "30 days",
       "expires": "2026-07-14",
-      "days_left": 29,
+      "days_left": 24,
       "status": "manual",
       "checks": []
     },
@@ -339,7 +311,7 @@
       "condition": "IF 賣方 next month 出現 ≥2 筆向上 PT 修正且突破 resistance $21.02 配合 volume 回到 ≥1.0x avg WITHIN 30 days THEN 技術/動能中性論點與 smart-money distributing 訊號被推翻",
       "window": "30 days",
       "expires": "2026-07-14",
-      "days_left": 29,
+      "days_left": 24,
       "status": "manual",
       "checks": []
     },
@@ -353,7 +325,7 @@
       "condition": "IF MACD hist continues FALLING + RSI 89.7 prints bearish divergence WITHIN 3 sessions THEN Technical flips HOLD→SELL, raw_total goes negative",
       "window": "standing (90d cap)",
       "expires": "2026-07-17",
-      "days_left": 32,
+      "days_left": 27,
       "status": "manual",
       "checks": []
     },
@@ -367,7 +339,7 @@
       "condition": "IF 2026-04-19 至 04-28 間再有 ≥2 家賣方 PT 下修 或 任一家 Buy→Hold/Sell WITHIN earnings 前 THEN 賣方共識瓦解",
       "window": "standing (90d cap)",
       "expires": "2026-07-18",
-      "days_left": 33,
+      "days_left": 28,
       "status": "manual",
       "checks": []
     },
@@ -381,12 +353,12 @@
       "condition": "IF 收盤 < MA200 $83.0 且 3 交易日無法收復 WITHIN 04-28 earnings 前 THEN broken uptrend 技術確認",
       "window": "standing (90d cap)",
       "expires": "2026-07-18",
-      "days_left": 33,
+      "days_left": 28,
       "status": "manual",
       "checks": [
         {
-          "predicate": "IR close < MA200 (81.47)",
-          "value": 74.0,
+          "predicate": "IR close < MA200 (81.43)",
+          "value": 77.91,
           "met": true
         }
       ]
@@ -401,9 +373,29 @@
       "condition": "IF FOMC 2026-04-29 點陣圖 2026 降息 ≤1 次 WITHIN 會後 2 交易日 THEN RISK_ON 前提反轉",
       "window": "standing (90d cap)",
       "expires": "2026-07-18",
-      "days_left": 33,
+      "days_left": 28,
       "status": "manual",
       "checks": []
+    },
+    {
+      "id": "thesis_TSM_2026-06-18_2",
+      "source": "thesis",
+      "ticker": "TSM",
+      "sector": null,
+      "origin_date": "2026-06-18",
+      "decision": "STAGED_ENTRY",
+      "condition": "IF 股價在量能持續 <0.9x 下未能站穩 $442.58 阻力並跌破 $410（5d band 下緣）WITHIN 30 天 THEN Stage 2 突破證偽，確認 wait_for_pullback",
+      "window": "30 days",
+      "expires": "2026-07-18",
+      "days_left": 28,
+      "status": "armed",
+      "checks": [
+        {
+          "predicate": "TSM close < 410",
+          "value": 462.12,
+          "met": false
+        }
+      ]
     },
     {
       "id": "thesis_D_2026-05-20_2",
@@ -415,7 +407,7 @@
       "condition": "IF 距結案前 D 對隱含成交價的折價在 60 天內持續擴大至 12% 以上 THEN 市場已重新定價 break risk 上升，HOLD 不再成立，應視為帶 18% 下檔尾險的部位",
       "window": "60 days",
       "expires": "2026-07-19",
-      "days_left": 34,
+      "days_left": 29,
       "status": "manual",
       "checks": []
     },
@@ -429,7 +421,7 @@
       "condition": "IF STT 2026-05-15 前再出現 CEO/C-suite Form 4 insider SELL 或 Q2 guidance 下修 fee rev <7% 或 NII <8% WITHIN 4 週 THEN 推翻 News FY guidance 上修催化論點",
       "window": "standing (90d cap)",
       "expires": "2026-07-20",
-      "days_left": 35,
+      "days_left": 30,
       "status": "manual",
       "checks": []
     },
@@ -443,7 +435,7 @@
       "condition": "IF TEL Q2 FY26 earnings 2026-04-22 misses EPS/revenue OR guides FY26 below Street WITHIN 24h THEN fundamental/sentiment pillar collapses given 0% cushion to 52w-high",
       "window": "standing (90d cap)",
       "expires": "2026-07-20",
-      "days_left": 35,
+      "days_left": 30,
       "status": "manual",
       "checks": []
     },
@@ -457,12 +449,12 @@
       "condition": "IF US-Iran Hormuz escalation 2026-04-22 triggers VIX >25 AND Industrials composite rolls over WITHIN 48h THEN RISK_ON + HOT sector tailwind dies and TEL mean-reverts to MA50 $218.92",
       "window": "standing (90d cap)",
       "expires": "2026-07-20",
-      "days_left": 35,
+      "days_left": 30,
       "status": "manual",
       "checks": [
         {
           "predicate": "VIX > 25",
-          "value": 17.7,
+          "value": 16.4,
           "met": false
         }
       ]
@@ -477,12 +469,12 @@
       "condition": "IF FOMC 2026-04-29 (72h內) hawkish hold 或暗示 real_rate 突破 2.0 (FRED real_rate_preferred 已 1.92) THEN Tech sector_rotation.avoid 訊號被驗證，CSCO PE 32 首當其衝，BULLISH 推翻",
       "window": "standing (90d cap)",
       "expires": "2026-07-25",
-      "days_left": 40,
+      "days_left": 35,
       "status": "manual",
       "checks": [
         {
-          "predicate": "DFII10 > 2.0 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 > 2.0 (data 2026-06-17)",
+          "value": 2.23,
           "met": true
         }
       ]
@@ -497,12 +489,12 @@
       "condition": "IF CSCO 5 日內未能突破 $90.45 + RSI 跌破 60 + MACD hist 持續走弱 THEN Stage 2 論點失效，配合 insider net-sell + HY spread tightening accelerating 觸發 mean reversion 至 MA50 $80",
       "window": "standing (90d cap)",
       "expires": "2026-07-25",
-      "days_left": 40,
+      "days_left": 35,
       "status": "armed",
       "checks": [
         {
           "predicate": "CSCO close < 60",
-          "value": 121.1,
+          "value": 119.54,
           "met": false
         }
       ]
@@ -517,7 +509,7 @@
       "condition": "IF WTI (FRED DCOILWTICO 已 +43% YoY pctile 90) 14 日內因 Iran 突破 $120 推升 CPI 預期 (現 3.29) THEN Overheating 加劇，Fed 轉鷹，Tech 估值殺戮，CSCO PE 32→25 即 -22%",
       "window": "standing (90d cap)",
       "expires": "2026-07-25",
-      "days_left": 40,
+      "days_left": 35,
       "status": "manual",
       "checks": []
     },
@@ -531,7 +523,7 @@
       "condition": "IF FRED CPIAUCSL MoM 連續第 2 個月 >0.5% (目前 0.87% vs 基準 0.27%) 在下次 FOMC 前公布 THEN Fed Pause 假設破裂、降息預期推遲，REIT 在 sector_rotation_avoid 名單位置被強化",
       "window": "standing (90d cap)",
       "expires": "2026-07-25",
-      "days_left": 40,
+      "days_left": 35,
       "status": "manual",
       "checks": []
     },
@@ -545,7 +537,7 @@
       "condition": "IF DLR 下一份 quarterly leasing 報告 (90 天內) 顯示 hyperscaler signed bookings QoQ <-15% 或 churn rate >3% THEN AI leasing momentum 論點崩解",
       "window": "90 days",
       "expires": "2026-07-25",
-      "days_left": 40,
+      "days_left": 35,
       "status": "manual",
       "checks": []
     },
@@ -559,21 +551,7 @@
       "condition": "IF DOJ/FTC 發出 second request 或 FCC Carr 公開轉為 skeptical WITHIN 90 天 THEN merger arb thesis 崩潰，spread blow out 至 25%+",
       "window": "90 days",
       "expires": "2026-07-25",
-      "days_left": 40,
-      "status": "manual",
-      "checks": []
-    },
-    {
-      "id": "thesis_ARM_2026-04-27_0",
-      "source": "thesis",
-      "ticker": "ARM",
-      "sector": null,
-      "origin_date": "2026-04-27",
-      "decision": "HOLD",
-      "condition": "若 2026-05-06 ARM Q4 財報 fwd guide 中位數低於 sell-side consensus 上緣 +5%，則 BUY 派『AGI CPU + Meta partnership 已 priced-in 但未過熱』論點被推翻，從 PE 271 向 fwd PE 110 的 de-rate（≥ -25%）將被啟動。",
-      "window": "standing (90d cap)",
-      "expires": "2026-07-26",
-      "days_left": 41,
+      "days_left": 35,
       "status": "manual",
       "checks": []
     },
@@ -587,17 +565,17 @@
       "condition": "IF FRED BAMLH0A0HYM2 持續 falling/accelerating 且 NFCI 進一步寬鬆 AND real rate 跌破 1.7 WITHIN 3 週 THEN『real_rate 1.92 + Overheating 壓制 SaaS PE』邏輯被金融條件 risk-on 抵銷",
       "window": "standing (90d cap)",
       "expires": "2026-07-26",
-      "days_left": 41,
+      "days_left": 36,
       "status": "manual",
       "checks": [
         {
-          "predicate": "DFII10 < 1.7 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 < 1.7 (data 2026-06-17)",
+          "value": 2.23,
           "met": false
         },
         {
           "predicate": "NOW close < 1.7",
-          "value": 102.15,
+          "value": 95.04,
           "met": false
         }
       ]
@@ -612,7 +590,7 @@
       "condition": "IF 2026-07-24 Q2 earnings 前任一 OFS 同業 (HAL/BKR) 下修 FY26 guidance 或 Rig Count 連 3 週下滑 THEN Fundamentals 已警示的 Fwd EPS -13.8% 將被市場 price in，估值溢價收斂",
       "window": "standing (90d cap)",
       "expires": "2026-07-26",
-      "days_left": 41,
+      "days_left": 36,
       "status": "manual",
       "checks": []
     },
@@ -626,7 +604,7 @@
       "condition": "IF MACD 負背離兌現跌破 support $486.8 且 insider 連 4 季分銷持續 WITHIN 45 days THEN Stage 2 趨勢失效、parabolic（高於 MA200 達 101%）均值回歸啟動",
       "window": "45 days",
       "expires": "2026-07-29",
-      "days_left": 44,
+      "days_left": 39,
       "status": "manual",
       "checks": []
     },
@@ -640,21 +618,7 @@
       "condition": "IF CHIPS Act $100M 資金協議由 non-binding 轉為 binding 撥款或聯邦股權正式入帳(8-K 確認) WITHIN 45 days THEN 估值殺多論點(Valuation SELL -4 / FV $7.24)失效，題材定價凌駕倍數",
       "window": "45 days",
       "expires": "2026-07-29",
-      "days_left": 44,
-      "status": "manual",
-      "checks": []
-    },
-    {
-      "id": "thesis_TSM_2026-06-14_1",
-      "source": "thesis",
-      "ticker": "TSM",
-      "sector": null,
-      "origin_date": "2026-06-14",
-      "decision": "STAGED_ENTRY",
-      "condition": "IF 價格 45 天內收破 $405.51 支撐並失守 50MA、distribution days 維持 MAXED 且反彈量持續低於 20D 均量 THEN +105% 延伸段轉頂確認、技術與動能多頭同步失效",
-      "window": "45 days",
-      "expires": "2026-07-29",
-      "days_left": 44,
+      "days_left": 39,
       "status": "manual",
       "checks": []
     },
@@ -668,7 +632,7 @@
       "condition": "IF 30 天內出現任一：(a) 分析師下修 PT 使 pt_vs_price_pct 由 +1.63% 翻負，(b) 內部人 net selling 連續第 4 季且季 sell ratio < 0.3，(c) Q2 財報 revenue YoY 由 18% 減速至 < 12% WITHIN 90 天 THEN 推翻 News BUY 的 Q1 beat re-rated 與 Fundamentals Rev YoY +18% strong 論點",
       "window": "90 days",
       "expires": "2026-07-30",
-      "days_left": 45,
+      "days_left": 40,
       "status": "manual",
       "checks": []
     },
@@ -682,7 +646,7 @@
       "condition": "IF Q4 FY2026 GAAP op margin 仍 ≤ -3% 或 insider 第 5 季續 distribute (Q1 ratio < 0.05) WITHIN 90 days THEN 推翻品質拐點論點，Altman 2.27 grey 風險顯性化",
       "window": "90 days",
       "expires": "2026-07-31",
-      "days_left": 46,
+      "days_left": 41,
       "status": "manual",
       "checks": []
     },
@@ -696,7 +660,7 @@
       "condition": "IF VRT 下一季 owner earnings QoQ 持續負成長（已 -25.7%）或 FCF margin 從 18.1% 下滑 >2pp THEN AI capex 高峰假設破裂，peer_pe_implied $122 anchor 下修",
       "window": "standing (90d cap)",
       "expires": "2026-07-31",
-      "days_left": 46,
+      "days_left": 41,
       "status": "manual",
       "checks": []
     },
@@ -710,7 +674,7 @@
       "condition": "IF Novo Nordisk 口服 Ozempic 取得 FDA 標籤擴張或公布頭對頭優於 Zepbound 的減重數據 WITHIN 90 天 THEN GLP-1 雙寡頭定價權崩解，LLY fwd EPS +169.8% 預估須下修 ≥20%",
       "window": "90 days",
       "expires": "2026-08-01",
-      "days_left": 47,
+      "days_left": 42,
       "status": "manual",
       "checks": []
     },
@@ -724,21 +688,21 @@
       "condition": "IF 下季 (Q3 FY26) revenue guidance YoY 仍 ≤ -3% 或 owner earnings QoQ 再跌 ≥20% WITHIN 90 天 THEN Fund 論點的 'FCF margin 21.6% + PEG 0.77' 被現金流持續惡化推翻，fwd EPS +173% 預估遭分析師下修，Valuation weighted_fair_value $181.62 將下調至 $140-150",
       "window": "90 days",
       "expires": "2026-08-01",
-      "days_left": 47,
+      "days_left": 42,
       "status": "manual",
       "checks": []
     },
     {
-      "id": "thesis_ORCL_2026-05-07_0",
+      "id": "thesis_TSM_2026-06-18_1",
       "source": "thesis",
-      "ticker": "ORCL",
+      "ticker": "TSM",
       "sector": null,
-      "origin_date": "2026-05-07",
-      "decision": "HOLD",
-      "condition": "IF ORCL 下一季財報 capex 年增 >40% 且 FCF 仍為負 WITHIN 90 天 THEN News lane 的『RPO 變現』論點崩潰，證實 backlog 是燒錢補貼的訂單而非獲利引擎",
-      "window": "90 days",
-      "expires": "2026-08-05",
-      "days_left": 51,
+      "origin_date": "2026-06-18",
+      "decision": "STAGED_ENTRY",
+      "condition": "IF analyst PT 修正動能維持負值且 1 個月再下修 >10%（延續 -25.7%/1m）WITHIN 45 天 THEN 賣方共識先於股價轉空，News lane 多頭基礎被抽空",
+      "window": "45 days",
+      "expires": "2026-08-02",
+      "days_left": 43,
       "status": "manual",
       "checks": []
     },
@@ -752,7 +716,7 @@
       "condition": "IF Q1 FY27 財報 (2026-05-20, 9 天) 營收符合或低於 whisper 或 FY27 guidance 未能再加速 above +73% YoY THEN structural_shift CANDIDATE 坍縮為單季噪音，$248 fair value 失去基底，L1/L5 BUY 失效",
       "window": "standing (90d cap)",
       "expires": "2026-08-09",
-      "days_left": 55,
+      "days_left": 50,
       "status": "manual",
       "checks": []
     },
@@ -766,27 +730,27 @@
       "condition": "IF FOMC 6/17 後 real_rate_10y 仍 ≥2.0%（現 2.19%）且 1y 通膨預期守 4.9% WITHIN 60 天 THEN Technology 分類 NOK 長存續 DCF 折現持續被壓、AI re-rating 被抵銷",
       "window": "60 days",
       "expires": "2026-08-12",
-      "days_left": 58,
+      "days_left": 53,
       "status": "manual",
       "checks": [
         {
-          "predicate": "DFII10 >= 2.0 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 >= 2.0 (data 2026-06-17)",
+          "value": 2.23,
           "met": true
         }
       ]
     },
     {
-      "id": "thesis_TSM_2026-06-14_0",
+      "id": "thesis_ARM_2026-06-15_2",
       "source": "thesis",
-      "ticker": "TSM",
+      "ticker": "ARM",
       "sector": null,
-      "origin_date": "2026-06-14",
-      "decision": "STAGED_ENTRY",
-      "condition": "IF 實質利率（FRED DFII10）60 天內由 2.16 升 ≥25bp 站上 2.40 且 TSM fwd PE 壓回 ≤18x THEN 倍數重評啟動、PE 便宜論點破滅，價格向 DCF blend $255 收斂",
+      "origin_date": "2026-06-15",
+      "decision": "HOLD",
+      "condition": "IF 分析師目標價共識 WITHIN 60天 再下修 ≥10%（延續 -38.1% 趨勢、Goldman 維持 Sell）或內部人續 mspr -100 THEN 多頭催化劑歸零",
       "window": "60 days",
-      "expires": "2026-08-13",
-      "days_left": 59,
+      "expires": "2026-08-14",
+      "days_left": 55,
       "status": "manual",
       "checks": []
     },
@@ -800,7 +764,7 @@
       "condition": "IF NEE 股價在 90 天內自 ~$90 下跌逾 15%（至 ~$76 以下，受利率上行 dfii10 2.03 偏高或自身營運衝擊）THEN 0.8138 固定換股比下 D 隱含成交價同步縮水至 ~$62 以下，現價 $68.40 的安全墊轉為負，多頭論點失效",
       "window": "90 days",
       "expires": "2026-08-18",
-      "days_left": 64,
+      "days_left": 59,
       "status": "manual",
       "checks": []
     },
@@ -814,7 +778,7 @@
       "condition": "IF 2026-06-03 earnings 出現任一: (a) NRR <115%, (b) ARR growth <22% YoY, (c) FCF margin guide-down from 33% THEN Fundamentals +1 失去 growth-justifies-multiple 支撐，PT $535 共識下修進一步擴大",
       "window": "standing (90d cap)",
       "expires": "2026-08-24",
-      "days_left": 70,
+      "days_left": 65,
       "status": "manual",
       "checks": []
     },
@@ -828,7 +792,7 @@
       "condition": "IF Q1/Q2 EBITDA margin 從 50% 滑落至 40% 以下 或 Apple service revenue guidance 下修 WITHIN 120 天 THEN standalone fallback valuation 崩潰",
       "window": "120 days",
       "expires": "2026-08-24",
-      "days_left": 70,
+      "days_left": 65,
       "status": "manual",
       "checks": []
     },
@@ -842,7 +806,7 @@
       "condition": "IF 下一季財報顯示 FCF 成長仍為負或 FCF margin <15%、capex 指引維持 ~$1900 億 WITHIN 90 天 THEN AI capex 轉現金論點失效、accruals_warning 與 <5% FCF yield gate 失敗被驗證",
       "window": "90 days",
       "expires": "2026-08-29",
-      "days_left": 75,
+      "days_left": 70,
       "status": "manual",
       "checks": []
     },
@@ -856,7 +820,7 @@
       "condition": "IF LLY 下一季財報 Mounjaro/Zepbound combined 營收 QoQ 成長 <8% 或 management 下修 FY guidance WITHIN 120 天 THEN Rev +55.5% / Owner Earnings +100% QoQ 成長動能被證偽",
       "window": "120 days",
       "expires": "2026-08-31",
-      "days_left": 77,
+      "days_left": 72,
       "status": "manual",
       "checks": []
     },
@@ -870,12 +834,12 @@
       "condition": "IF DFII10 實質利率維持 > 2.0%（現 2.19, pctile 96, rising）且 headline CPI YoY 維持 > 4.0% 並經 6/17 FOMC 確認鷹派不轉向 WITHIN 90 天 THEN real_rate_high overlay 持續降評 Technology，27.2x PE 多重壓縮，同業折價論點被宏觀 de-rating 否決",
       "window": "90 days",
       "expires": "2026-09-11",
-      "days_left": 88,
+      "days_left": 83,
       "status": "manual",
       "checks": [
         {
-          "predicate": "DFII10 > 2.0 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 > 2.0 (data 2026-06-17)",
+          "value": 2.23,
           "met": true
         }
       ]
@@ -890,7 +854,7 @@
       "condition": "IF Samsung 或 SK Hynix 宣布 HBM4 通過 NVDA 認證、或公告 HBM 產能擴張 ≥30%、或任一 top-3 hyperscaler 下修 AI capex 指引 WITHIN 90 天 THEN HBM 供給吃緊敘事逆轉，74.4% GM 定價權失去結構支撐",
       "window": "90 days",
       "expires": "2026-09-11",
-      "days_left": 88,
+      "days_left": 83,
       "status": "manual",
       "checks": []
     },
@@ -904,7 +868,7 @@
       "condition": "IF 未來 2 季（≤180 天）FCF 年化增速 < 30%（隱含 60% 的一半）THEN 現價對加權 FV $8.49 的溢價失去成長支撐、估值論點破滅",
       "window": "standing (90d cap)",
       "expires": "2026-09-11",
-      "days_left": 88,
+      "days_left": 83,
       "status": "manual",
       "checks": []
     },
@@ -918,7 +882,7 @@
       "condition": "IF 下次財報（≤120 天）AI/cloud +49% YoY 動能放緩至 <+25% 或 op-margin 無法站上 5% THEN News BUY 催化失去確認、評等流倒向 Barclays Underweight/Citi Sell 一側",
       "window": "standing (90d cap)",
       "expires": "2026-09-11",
-      "days_left": 88,
+      "days_left": 83,
       "status": "manual",
       "checks": []
     },
@@ -932,7 +896,7 @@
       "condition": "若Starship在90天內發生公開測試/任務失敗，或Starlink首份財報揭露ARPU/訂閱環比減速，則隱含預期論述破裂——2.1兆＠242倍營收要求營收複合成長至數千億且FCF由-139.5億翻正，零失誤路徑任何裂縫在0.6% FCF殖利率下都無法被資金支撐。",
       "window": "90 days",
       "expires": "2026-09-11",
-      "days_left": 88,
+      "days_left": 83,
       "status": "manual",
       "checks": []
     },
@@ -946,7 +910,7 @@
       "condition": "IF WITHIN 90 天 insider acquired_disposed_ratio 維持 < 0.05（延續 Q2-2026 的 0.0276，第 5 個連續分配季）或 MSPR 仍深度負值（現 -68.6）THEN 內部人持續分配升級為硬性看空證據，與 PT delta_1m -19.34% 調降動能共振，推翻分析師 13/16 Buy 的表面共識",
       "window": "90 days",
       "expires": "2026-09-12",
-      "days_left": 89,
+      "days_left": 84,
       "status": "manual",
       "checks": []
     },
@@ -960,21 +924,63 @@
       "condition": "IF 未來 2 季（接連兩次財報、≤180 天）資料中心 FCF 年化增速 < 30%（隱含 60% 的一半）THEN 現價 $279.72 估值論點數學破滅、向加權 FV 收斂下檔打開（implied-expectations-collapse）",
       "window": "standing (90d cap)",
       "expires": "2026-09-12",
-      "days_left": 89,
+      "days_left": 84,
       "status": "manual",
       "checks": []
     },
     {
-      "id": "thesis_TSM_2026-06-14_2",
+      "id": "thesis_ARM_2026-06-15_1",
       "source": "thesis",
-      "ticker": "TSM",
+      "ticker": "ARM",
       "sector": null,
-      "origin_date": "2026-06-14",
-      "decision": "STAGED_ENTRY",
-      "condition": "IF 未來 2 季 FCF 年化增速 < 5%（reverse-DCF 隱含 9.4% 的一半）或 TSMC 因台灣人才/水/地緣下修先進封裝產能展望 cut guidance THEN 成長溢價與 sold-out-through-2027 論點崩解",
+      "origin_date": "2026-06-15",
+      "decision": "HOLD",
+      "condition": "IF 實質利率維持/升破 2.19%（ELEVATED>2.0）且 CPI 續加速、迫使長存續期折現率上修 WITHIN 90天 THEN PE 402.8/EV-EBITDA 287.8 多重壓縮啟動",
+      "window": "90 days",
+      "expires": "2026-09-13",
+      "days_left": 85,
+      "status": "manual",
+      "checks": []
+    },
+    {
+      "id": "thesis_ORCL_2026-06-15_0",
+      "source": "thesis",
+      "ticker": "ORCL",
+      "sector": null,
+      "origin_date": "2026-06-15",
+      "decision": "HOLD",
+      "condition": "IF 未來 2 季（≤180 天）報告的年化 FCF 增速 < 30%（隱含 60% 的一半）或 FCF 仍維持負值 THEN 現價隱含的 60% FCF CAGR 估值論點破滅，公允值回落至 engine weighted_fair_value $165.80（現價 -12.5%）",
       "window": "standing (90d cap)",
-      "expires": "2026-09-12",
-      "days_left": 89,
+      "expires": "2026-09-13",
+      "days_left": 85,
+      "status": "manual",
+      "checks": []
+    },
+    {
+      "id": "thesis_ORCL_2026-06-15_1",
+      "source": "thesis",
+      "ticker": "ORCL",
+      "sector": null,
+      "origin_date": "2026-06-15",
+      "decision": "HOLD",
+      "condition": "IF $400 億募資（≤120 天）以債務為主完成、使 D/E 由 3.6 進一步攀升且利息覆蓋下降，在實質利率 2.19%>2.0 偏高環境下 THEN Altman 2.04 grey 區下探、資本成本侵蝕 DCF，HOLD 偏多論點轉空",
+      "window": "standing (90d cap)",
+      "expires": "2026-09-13",
+      "days_left": 85,
+      "status": "manual",
+      "checks": []
+    },
+    {
+      "id": "thesis_ORCL_2026-06-15_2",
+      "source": "thesis",
+      "ticker": "ORCL",
+      "sector": null,
+      "origin_date": "2026-06-15",
+      "decision": "HOLD",
+      "condition": "IF 大盤於 FTD EXHAUSTED 第 46 天 + market_top 49.5 elevated 窗口內（≤45 天）出現新一輪分配且 ORCL 跌破 support $180.87 THEN momentum_not_value 訊號失效、-45.7% off 高點延續，確認估值非價值而是動能陷阱",
+      "window": "standing (90d cap)",
+      "expires": "2026-09-13",
+      "days_left": 85,
       "status": "manual",
       "checks": []
     },
@@ -988,7 +994,7 @@
       "condition": "IF 10y 實質利率由 2.16% 回落至 < 2.0% 且 Technology 由 sector AVOID 翻為 NEUTRAL/BUY WITHIN 120 天 THEN 空方賴以成立的 ≥2 條 FRED 衝突訊號同時失效",
       "window": "120 days",
       "expires": "2026-10-12",
-      "days_left": 119,
+      "days_left": 114,
       "status": "manual",
       "checks": []
     },
@@ -1002,7 +1008,7 @@
       "condition": "IF 下兩次財報 fwd EPS 共識維持 ≥ +18% 成長且 owner-earnings QoQ 由 -46.7% 回正 WITHIN 150 天 THEN Fundamentals HOLD -1 的負向核心被推翻",
       "window": "150 days",
       "expires": "2026-11-11",
-      "days_left": 149,
+      "days_left": 144,
       "status": "manual",
       "checks": []
     },
@@ -1016,7 +1022,7 @@
       "condition": "IF GOOGL TTM FCF 年化增速 < 30%（修正 Q1 OE 失真後仍為隱含 60% CAGR 之半）或 GAAP FCF yield 持續 < 1.0% 且 capex intensity 未自 15.65% 回落 WITHIN 180 天 THEN 現價隱含預期破滅，估值錨向 FV $277.36 收斂，Fundamentals BUY 論點推翻",
       "window": "180 days",
       "expires": "2026-12-10",
-      "days_left": 178,
+      "days_left": 173,
       "status": "manual",
       "checks": []
     },
@@ -1030,7 +1036,7 @@
       "condition": "IF MU 自 6/24 財報起連續 2 季 owner-earnings FCF 年化增速 < 13%（現價隱含 26% 之一半），或 capex/營收升破 30% 壓垮 FCF margin 至 <15% WITHIN 180 天 THEN 現價估值論點破滅，+94% premium 與 PEG 0.287 同步失效",
       "window": "180 days",
       "expires": "2026-12-10",
-      "days_left": 178,
+      "days_left": 173,
       "status": "manual",
       "checks": []
     },
@@ -1044,7 +1050,7 @@
       "condition": "IF 未來 2 季 FCF 年化增速 ≥ 30%（隱含 60% 的一半）WITHIN 180 天 THEN 現價隱含預期被證實可達、估值崩盤論點失效",
       "window": "180 days",
       "expires": "2026-12-11",
-      "days_left": 179,
+      "days_left": 174,
       "status": "manual",
       "checks": []
     },
@@ -1058,7 +1064,7 @@
       "condition": "IF 未來 2 季（WITHIN 180 天）季度 FCF 年化增速 < 30%（隱含 60% 之半）或 FCF yield 仍 < 1% THEN 現價隱含的 60% 5Y FCF CAGR 預期破滅，成長溢價論點失效，估值回歸 peer-implied $85.6（較現價約 -76%）",
       "window": "180 days",
       "expires": "2026-12-11",
-      "days_left": 179,
+      "days_left": 174,
       "status": "manual",
       "checks": []
     },
@@ -1072,7 +1078,7 @@
       "condition": "IF 未來 2 季財報 FCF 年化增速 < 30%（隱含 60% 的一半）或 FY guidance 暗示 FCF 放緩 WITHIN 180 days THEN 隱含預期崩塌、向 6 錨點公允值 $142~$316 均值回歸",
       "window": "180 days",
       "expires": "2026-12-11",
-      "days_left": 179,
+      "days_left": 174,
       "status": "manual",
       "checks": []
     },
@@ -1086,7 +1092,35 @@
       "condition": "IF 未來 2 季財報實際 FCF 年化增速 < 30%（即隱含 60% CAGR 的一半）WITHIN 180 天 THEN 隱含預期崩潰，現價估值論點（PE 134 / EV/EBITDA 145 / FCF yield 0.59%）失去成長支撐，公允值向 $66 以下回歸。",
       "window": "180 days",
       "expires": "2026-12-11",
-      "days_left": 179,
+      "days_left": 174,
+      "status": "manual",
+      "checks": []
+    },
+    {
+      "id": "thesis_ARM_2026-06-15_0",
+      "source": "thesis",
+      "ticker": "ARM",
+      "sector": null,
+      "origin_date": "2026-06-15",
+      "decision": "HOLD",
+      "condition": "IF 未來 2 季(WITHIN 180天) 年化 FCF/owner-earnings 增速 < 30%（隱含 60% 的一半）THEN 隱含 5Y CAGR 證偽、現價 +625% 溢價論點破滅",
+      "window": "180 days",
+      "expires": "2026-12-12",
+      "days_left": 175,
+      "status": "manual",
+      "checks": []
+    },
+    {
+      "id": "thesis_TSM_2026-06-18_0",
+      "source": "thesis",
+      "ticker": "TSM",
+      "sector": null,
+      "origin_date": "2026-06-18",
+      "decision": "STAGED_ENTRY",
+      "condition": "IF 接下來兩季年化 FCF 成長 < 30%（內含值一半）WITHIN 180 天 THEN 內含預期崩潰，估值論述失效，公允價值向 blended FV $392 以下回歸",
+      "window": "180 days",
+      "expires": "2026-12-15",
+      "days_left": 178,
       "status": "manual",
       "checks": []
     },
@@ -1100,7 +1134,7 @@
       "condition": "IF FERC 或維吉尼亞/南北卡羅萊納州公用事業委員會在 270 天內發出實質否決、附帶嚴苛條件導致 NEE 撤案、或雙方公告終止合併協議 THEN 套利論點失效，D 跌向 standalone 公允值 ~$56（-18%）",
       "window": "270 days",
       "expires": "2027-02-14",
-      "days_left": 244,
+      "days_left": 239,
       "status": "manual",
       "checks": []
     },
@@ -1114,7 +1148,7 @@
       "condition": "若 FOMC 4/29 出現 hawkish hold 或 dot plot 上修，且 real_rate (DFII10) 由 1.92 突破 2.10 於 5 個交易日內，則高 forward PE 50x 無 FCF 的 AAOI 應 multiple compression ≥ 15%",
       "window": "5 trading days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -1128,7 +1162,7 @@
       "condition": "若 CPIAUCSL accelerating 延伸至 5 月 CPI 印超預期 (core MoM ≥ 0.4%) 於 14 天內，FRED Overheating regime 加深，AAOI 將從 $162 回測 gap fill $137.73 (-15.1%)",
       "window": "14 days",
       "expires": "2026-05-11",
-      "days_left": -35,
+      "days_left": -40,
       "status": "expired",
       "checks": []
     },
@@ -1142,7 +1176,7 @@
       "condition": "若 AAOI 5/7-8 財報出現 GM/EPS miss 或 Q2 rev guide < consensus 5% 於 11 天內，則 Fundamentals +33.9% YoY 論點與 PT $102 gap 同步壓縮股價 ≥ 20%",
       "window": "11 days",
       "expires": "2026-05-08",
-      "days_left": -38,
+      "days_left": -43,
       "status": "expired",
       "checks": []
     },
@@ -1156,7 +1190,7 @@
       "condition": "若 BAMLH0A0HYM2 由 falling 反轉、NFCI 由負轉正且 VIX 突破 22 於 7 天內，則 risk-off 切換，short-float 12% 的 squeeze 論點反向變成 long crowding unwind",
       "window": "7 days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -1170,7 +1204,7 @@
       "condition": "若 FOMC 4/29 後 real_rate (DFII10) 上破 2.0 且 fed_rate_direction 由 flat 轉 hawkish 5 個交易日內，則保險股 duration mismatch 加劇、AIZ 投資組合 mark-to-market 受壓，Burry 19% FCF yield 折現假設失效，BUY 共識推翻",
       "window": "5 trading days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1184,7 +1218,7 @@
       "condition": "若 AIZ 5/6 Q1 EPS miss 或 Global Housing combined ratio > 95% 或下修 FY guidance 10 天內發生，則 Fundamentals 的 forward EPS +15.1% 與 PEG 2.16 失去支撐，BUY 推翻為 SELL",
       "window": "10 days",
       "expires": "2026-05-06",
-      "days_left": -40,
+      "days_left": -45,
       "status": "expired",
       "checks": []
     },
@@ -1198,7 +1232,7 @@
       "condition": "若技術面跌破 MA50 221.54 且失守 support 216.27 7 個交易日內（量能放大 > 1.5x 20DMA），則 Technical stage 2 uptrend 與 golden cross 論述被否定，並印證 insider 連續 5 次賣出無買入的領先訊號",
       "window": "7 trading days",
       "expires": "2026-05-06",
-      "days_left": -40,
+      "days_left": -45,
       "status": "expired",
       "checks": []
     },
@@ -1212,7 +1246,7 @@
       "condition": "IF AMZN 2026-04-30 Q1 revenue/EPS 任一低於 consensus 或 Q2 guide 低於街口中位 WITHIN 3 days THEN 基本面+情緒+新聞 BUY 三腳同步崩解",
       "window": "3 days",
       "expires": "2026-04-24",
-      "days_left": -52,
+      "days_left": -57,
       "status": "expired",
       "checks": []
     },
@@ -1226,7 +1260,7 @@
       "condition": "IF 財報前單日跌幅 >4% 且收破 MA20 ($223) WITHIN 7 days THEN 過熱+擁擠 mean-reversion 啟動，推翻 sentiment +2.4",
       "window": "7 days",
       "expires": "2026-04-28",
-      "days_left": -48,
+      "days_left": -53,
       "status": "expired",
       "checks": []
     },
@@ -1240,7 +1274,7 @@
       "condition": "IF RSI(14) 自 93.4 回落 <70 伴隨成交量 >20D avg 1.5x distribution day WITHIN 5 days THEN 低量上漲確認為 exhaustion",
       "window": "5 days",
       "expires": "2026-04-26",
-      "days_left": -50,
+      "days_left": -55,
       "status": "expired",
       "checks": []
     },
@@ -1254,7 +1288,7 @@
       "condition": "IF APLD 14 天內宣布新一輪股權增發或可轉債融資 (≥$200M) THEN 稀釋風險實現、EV/Rev 35x 估值瓦解",
       "window": "14 days",
       "expires": "2026-05-05",
-      "days_left": -41,
+      "days_left": -46,
       "status": "expired",
       "checks": []
     },
@@ -1268,7 +1302,7 @@
       "condition": "IF CoreWeave 21 天內進一步 amend 或終止剩餘 lease halls (除已 suspended 的 2 halls 外) THEN +139% YoY 敘事崩解",
       "window": "21 days",
       "expires": "2026-05-12",
-      "days_left": -34,
+      "days_left": -39,
       "status": "expired",
       "checks": []
     },
@@ -1282,35 +1316,7 @@
       "condition": "IF APLD 10 個交易日內跌破 SMA50 ($28.68) 並且 RSI14 跌破 50 THEN Stage 2 post-pullback 論點失效，blow-off 頂部確認",
       "window": "10 trading days",
       "expires": "2026-05-05",
-      "days_left": -41,
-      "status": "expired",
-      "checks": []
-    },
-    {
-      "id": "thesis_ARM_2026-04-27_1",
-      "source": "thesis",
-      "ticker": "ARM",
-      "sector": null,
-      "origin_date": "2026-04-27",
-      "decision": "HOLD",
-      "condition": "若 FRED real_rate_preferred 1.92 於 4/29 FOMC 後 7 個交易日內升破 2.0，則 Tech 落入 Overheating regime sector_rotation_avoid 名單 + EV/EBIT 227 的長 duration 估值將被推翻；macro_scores_composite 62 + NFCI 寬鬆趨勢若反轉將同步觸發風險資產 de-rate。",
-      "window": "7 trading days",
-      "expires": "2026-05-07",
-      "days_left": -39,
-      "status": "expired",
-      "checks": []
-    },
-    {
-      "id": "thesis_ARM_2026-04-27_2",
-      "source": "thesis",
-      "ticker": "ARM",
-      "sector": null,
-      "origin_date": "2026-04-27",
-      "decision": "HOLD",
-      "condition": "若 5 個交易日內 ARM 跌破 $218.38 並失守 20MA $163.53 路徑（單週跌幅 > 12%），則 Stage 2 + 2.51x volume breakaway gap 論點被推翻；歷史上距 50MA +66% 的 parabolic 個案 80% 於 2 週內均值回歸 ≥ 30%。",
-      "window": "5 trading days",
-      "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -46,
       "status": "expired",
       "checks": []
     },
@@ -1324,7 +1330,7 @@
       "condition": "若 2026-04-29 FOMC 釋出 hawkish 訊號或維持 flat 但點陣圖上修(real_rate_preferred 1.92 已接近 2.0 壓抑門檻 + CPIAUCSL mom 0.87% 加速再通膨) WITHIN 3 天 THEN 推翻 forward P/E 23 折價論點",
       "window": "3 days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -1338,7 +1344,7 @@
       "condition": "若 AVGO 在 FOMC 後跌破 support 394.57 (距現價 -6.7%) WITHIN 7 天 THEN 推翻 Stage 2 uptrend 論點，確認 RSI 77.8 + MACD histogram falling 頂背離",
       "window": "7 days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1352,7 +1358,7 @@
       "condition": "若 2026-04-26 ~ 2026-05-10 出現第 3 家券商下調評等(繼 Seaport、Erste 後)或 Meta/Google ASIC 訂單延後 WITHIN 14 天 THEN 推翻 AI ASIC 護城河論點",
       "window": "14 days",
       "expires": "2026-05-10",
-      "days_left": -36,
+      "days_left": -41,
       "status": "expired",
       "checks": []
     },
@@ -1366,7 +1372,7 @@
       "condition": "若 FRED BAMLH0A0HYM2 從 risk-on 轉為單週 +20bps 反彈或 NFCI 由負轉正 WITHIN 10 天 THEN 推翻 risk-on 環境假設",
       "window": "10 days",
       "expires": "2026-05-06",
-      "days_left": -40,
+      "days_left": -45,
       "status": "expired",
       "checks": []
     },
@@ -1380,7 +1386,7 @@
       "condition": "IF BE 4/28 盤後財報 EPS miss 或 guidance 下修（或 Oracle deal revenue 未量化）WITHIN 1 day THEN Sentiment +2 / News +1 / Tech +1 全部崩解",
       "window": "1 days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -1394,7 +1400,7 @@
       "condition": "IF FOMC 4/29 Warsh hawkish + Dalio stagflation 推 10Y 與 FRED real_rate 由 1.92 突破 2.0 threshold WITHIN 2 days THEN 高久期 / 負 EPS / EV/EBITDA 470 估值模型直接破裂",
       "window": "2 days",
       "expires": "2026-04-30",
-      "days_left": -46,
+      "days_left": -51,
       "status": "expired",
       "checks": []
     },
@@ -1408,7 +1414,7 @@
       "condition": "IF BE 跌破 $200 support（距現價 -14.7% / 仍距 ma200 +41.6% 過度延伸）WITHIN 5 days 且 vol_vs_20d 由 61% 翻 >150% THEN Stage 2 假設失效，RSI 72 + MACD hist falling 之頂背離兌現",
       "window": "5 days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1422,7 +1428,7 @@
       "condition": "IF CFG closes <$60.50 WITHIN 10 trading days THEN MA20>MA50 breakout pillar falsified (bull trap)",
       "window": "10 trading days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1436,7 +1442,7 @@
       "condition": "IF SPY closes <20DMA with VIX>22 WITHIN 5 trading days (Iran breakdown / hot PCE) THEN RISK_ON regime collapses",
       "window": "5 trading days",
       "expires": "2026-04-26",
-      "days_left": -50,
+      "days_left": -55,
       "status": "expired",
       "checks": []
     },
@@ -1450,7 +1456,7 @@
       "condition": "IF 2Y-10Y flattens >15bps OR 2026-06 Fed cut odds <30% WITHIN 10 trading days THEN forward NIM expansion thesis falsified",
       "window": "10 trading days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1464,7 +1470,7 @@
       "condition": "IF CHRW 2026-04-30 Q1 earnings revenue YoY <0% 或 EPS miss consensus >5% WITHIN 1 day THEN freight rebound 拐點論破，+8% 預期漲幅回吐",
       "window": "1 days",
       "expires": "2026-04-20",
-      "days_left": -56,
+      "days_left": -61,
       "status": "expired",
       "checks": []
     },
@@ -1478,7 +1484,7 @@
       "condition": "IF CHRW 2026-04-30 財報後 5 個交易日內股價跌破 MA50 $176.66 且 3 日內無法收復 WITHIN 8 days THEN 技術 BUY 失效、breakout 確認為 bull trap",
       "window": "8 days",
       "expires": "2026-04-27",
-      "days_left": -49,
+      "days_left": -54,
       "status": "expired",
       "checks": []
     },
@@ -1492,7 +1498,7 @@
       "condition": "IF 2026-04-29 FOMC 後 SPY 從 RSI 96.8 拉回 >5% 或 VIX 升破 22 WITHIN 10 days THEN RISK_ON 假設崩解、非龍頭 industrials 首波被拋",
       "window": "10 days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -1506,7 +1512,7 @@
       "condition": "若 FOMC 2026-04-29 點陣圖維持 hawkish 或上調終端利率（呼應 CPIAUCSL accelerating + real_rate_preferred 1.92 接近 2.0% 壓抑區）2 天內，SaaS multiple compression 持續，Forward PE 12.2 並非折價而是 value trap，Fundamentals BUY 論點失效",
       "window": "2 days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -1520,7 +1526,7 @@
       "condition": "若 Mag-7 earnings 2026-04-30~05-01 中 MSFT/GOOGL Azure/GCP AI 收入指引顯示企業客戶將 SaaS 預算重分配到 hyperscaler AI agents，5 天內 Agentforce 變現故事 + Google Cloud 擴大合作的 News BUY +2 論點被反向解讀（CRM 變成被取代方）",
       "window": "5 days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -1534,7 +1540,7 @@
       "condition": "若 CRM 在 2026-05-28 earnings 前 cRPO 或 Agentforce ARR pre-announcement 低於 buyside whisper，30 天內 rev_yoy 12.1% 成長假設崩盤，PEG 0.97 失效，Burry VALUE_BONUS 72.7 變成 classic value trap 案例（insider SELL 已是領先訊號）",
       "window": "30 days",
       "expires": "2026-05-27",
-      "days_left": -19,
+      "days_left": -24,
       "status": "expired",
       "checks": []
     },
@@ -1548,15 +1554,9 @@
       "condition": "IF CRWD RSI(14) drops below 70 AND close < MA20 ($547) WITHIN 10 trading days THEN Stage 2 thesis 被推翻 (distribution top confirmed)",
       "window": "10 trading days",
       "expires": "2026-06-09",
-      "days_left": -6,
+      "days_left": -11,
       "status": "expired",
-      "checks": [
-        {
-          "predicate": "CRWD close < MA20 (676.26)",
-          "value": 682.8,
-          "met": false
-        }
-      ]
+      "checks": []
     },
     {
       "id": "thesis_CRWD_2026-05-26_1",
@@ -1568,15 +1568,9 @@
       "condition": "IF FRED real_rate_preferred >= 2.0% AND XLK/SPY 20D slope < 0 WITHIN 15 days THEN sector_rotation_avoid 兌現，high-duration SaaS premium 壓縮，Valuation SELL -3 被驗證",
       "window": "15 days",
       "expires": "2026-06-10",
-      "days_left": -5,
+      "days_left": -10,
       "status": "expired",
-      "checks": [
-        {
-          "predicate": "DFII10 >= 2.0 (data 2026-06-11)",
-          "value": 2.16,
-          "met": true
-        }
-      ]
+      "checks": []
     },
     {
       "id": "thesis_CRWV_2026-05-08_0",
@@ -1588,7 +1582,7 @@
       "condition": "IF NFCI 連續 2 週維持 accelerating 且 BAMLH0A0HYM2 (HY OAS) 突破 +50bps WITHIN 30d THEN 高槓桿 GPU capex 玩家融資成本重定價，CRWV $29.82B 債務 + D/E 6.48 + retainedEarnings -$3.38B 將直接擊穿 Burry WARNING 升級為 VETO",
       "window": "30 days",
       "expires": "2026-06-07",
-      "days_left": -8,
+      "days_left": -13,
       "status": "expired",
       "checks": []
     },
@@ -1602,7 +1596,7 @@
       "condition": "IF CRWV 跌破 sup $110.6 並收於 MA50 $95.47 之上 < 5% 緩衝 WITHIN 21d 且伴隨 ICSA 持續 accelerating THEN Stage 1 basing 論點崩解、轉 Stage 4 distribution，News BUY +1.5 的 analyst PT $120.65 將被連環下調",
       "window": "21 days",
       "expires": "2026-05-29",
-      "days_left": -17,
+      "days_left": -22,
       "status": "expired",
       "checks": []
     },
@@ -1616,7 +1610,7 @@
       "condition": "IF Mag-7 earnings week (2026-04-27 起 7 天內) 任一 hyperscaler (MSFT/GOOG/META/AMZN) 下修 capex 或 AI infra spend 放緩 THEN CSCO AI networking thesis 直接斷裂，Truist PT $94 失效",
       "window": "7 days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1630,7 +1624,7 @@
       "condition": "IF FOMC 2026-04-29 釋放 hawkish 訊號（real_rate_preferred 1.92 突破 2.0 或 dot plot 上修）WITHIN 3 天 THEN FRED Overheating regime 觸發 sector_rotation_avoid 擴散，Industrials 鐵路作為 cyclical late-cycle 標的首當其衝",
       "window": "3 days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -1644,7 +1638,7 @@
       "condition": "IF CSX 跌破 50DMA 或 MACD histogram 轉負 WITHIN 5 個交易日 THEN Stage 2 uptrend 論點失效，1.43x 量能變成 distribution day 而非 accumulation",
       "window": "5 trading days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1658,7 +1652,7 @@
       "condition": "IF Mag-7 財報 04-29~04-30 任一家 miss 引發 SPY 回檔 >3% WITHIN 7 天 THEN GREED→FEAR 切換，CSX 距 52 週高點僅 2% 的 profit-taking 風險全面實現",
       "window": "7 days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -1672,7 +1666,7 @@
       "condition": "IF FRED real_rate_preferred 在 30 天內突破 2.00 (從目前 1.92 +0.08) 且 10Y yield 同步 +20bps THEN 長 duration REIT 估值多重必須收斂，DLR forward P/E 69.96 不可持續",
       "window": "30 days",
       "expires": "2026-05-26",
-      "days_left": -20,
+      "days_left": -25,
       "status": "expired",
       "checks": []
     },
@@ -1686,7 +1680,7 @@
       "condition": "IF RSI 72.2 + intraday 鞭撻 (high $208.14 收 $199.35) 在 10 個交易日內跌破 MA20 $190.60 並伴隨內部人再次出現 >$5M sell THEN 技術 Stage 2 結構失效",
       "window": "10 trading days",
       "expires": "2026-05-10",
-      "days_left": -36,
+      "days_left": -41,
       "status": "expired",
       "checks": []
     },
@@ -1700,7 +1694,7 @@
       "condition": "IF CPI sticky 推高 real_rate 突破 2.0 cap (現 1.94) WITHIN 30d THEN Overheating regime 切換 risk-off, fundamentals BUY 失效",
       "window": "30 days",
       "expires": "2026-06-01",
-      "days_left": -14,
+      "days_left": -19,
       "status": "expired",
       "checks": []
     },
@@ -1714,7 +1708,7 @@
       "condition": "IF distribution days 從 5.5 升至 ≥ 6.0 或 breadth 60d divergence score 跌破 5/100 WITHIN 15d THEN FTD day 17 失效, technical BUY 推翻",
       "window": "15 days",
       "expires": "2026-05-17",
-      "days_left": -29,
+      "days_left": -34,
       "status": "expired",
       "checks": []
     },
@@ -1728,7 +1722,7 @@
       "condition": "IF EME 跌破 MA20 ($829) 配合 volume ≥ 1.5× avg WITHIN 20d THEN Stage 2 終止, 觸發 valuation 12.65% 溢價回歸 fair_value",
       "window": "20 days",
       "expires": "2026-05-22",
-      "days_left": -24,
+      "days_left": -29,
       "status": "expired",
       "checks": []
     },
@@ -1742,7 +1736,7 @@
       "condition": "IF FCX 7 個交易日內跌破 60.72 支撐並以該價位下方收盤至少 2 日，則 Technical stage 2 多頭結構失效",
       "window": "7 trading days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -1756,7 +1750,7 @@
       "condition": "IF 未來 14 天內賣方對 FCX 2026 EPS 共識下修幅度 ≥ 10%，則 Fundamentals 所依賴的 EPS fwd growth +47.7% 基礎瓦解",
       "window": "14 days",
       "expires": "2026-05-08",
-      "days_left": -38,
+      "days_left": -43,
       "status": "expired",
       "checks": []
     },
@@ -1770,7 +1764,7 @@
       "condition": "IF 未來 10 個交易日內 COMEX 銅或 LME 銅跌幅 ≥ 5%，則 Materials 熱門族群敘事同步崩解",
       "window": "10 trading days",
       "expires": "2026-05-08",
-      "days_left": -38,
+      "days_left": -43,
       "status": "expired",
       "checks": []
     },
@@ -1784,7 +1778,7 @@
       "condition": "IF FTV 於 2026-04-30 公布 Q1 EPS miss > 5% 或 FY26 營收 guide < 4% WITHIN 3 天 THEN Fundamentals HOLD 降級為 SELL,Technical Stage 2 於跌破 MA20 ($58.52) 上失效",
       "window": "3 days",
       "expires": "2026-04-30",
-      "days_left": -46,
+      "days_left": -51,
       "status": "expired",
       "checks": []
     },
@@ -1798,7 +1792,7 @@
       "condition": "IF BAMLH0A0HYM2 (HY OAS) 週增幅 > 25bps 或 NFCI 上升 > 0.10 WITHIN 7 天 THEN FRED 'credit_stress 未升溫' 假設破滅,Industrials cyclical 順風反轉",
       "window": "7 days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -1812,7 +1806,7 @@
       "condition": "IF FTV 於財報後 5 個交易日內以 > 1.5x avg 量收於 MA50 ($57.37) 之下 THEN Stage 2 結構轉 Stage 3 distribution,唯一 BUY 支柱 (Tech) 失效",
       "window": "5 trading days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -1826,7 +1820,7 @@
       "condition": "IF Wells Fargo 式 PT 砍降串聯 (≥ 2 家賣方額外下修至 ≤ $58) WITHIN 5 天 THEN News HOLD 降為 SELL,共識崩跌至看空",
       "window": "5 days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -1840,7 +1834,7 @@
       "condition": "IF GEV closes below $933 (MA20) on >1.2x avg volume WITHIN 5 trading days THEN Stage 2 uptrend breaks and post-earnings gap-fade confirmed",
       "window": "5 trading days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -1854,7 +1848,7 @@
       "condition": "IF GEV fails to reclaim 52w-high $1016 on next attempt and RSI_14 drops below 55 WITHIN 7 trading days THEN momentum exhaustion at resistance confirmed",
       "window": "7 trading days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -1868,7 +1862,7 @@
       "condition": "IF SPY breadth divergence resolves via >2% SPY drawdown OR VIX >25 WITHIN 10 trading days THEN narrow leadership breaks and extended high-beta names mean-revert",
       "window": "10 trading days",
       "expires": "2026-05-06",
-      "days_left": -40,
+      "days_left": -45,
       "status": "expired",
       "checks": []
     },
@@ -1882,7 +1876,7 @@
       "condition": "IF GLW 4/28 Q1 EPS 或 FY guidance 未顯著上修（raise <5%）WITHIN 2 個交易日 THEN 推翻 Sentiment +2 BUY 的 AI infrastructure narrative + Meta $6B 動能論點；PE 94 fully priced 必 sell-the-news 回測 sma20=159.22（-9.5%）",
       "window": "2 trading days",
       "expires": "2026-04-30",
-      "days_left": -46,
+      "days_left": -51,
       "status": "expired",
       "checks": []
     },
@@ -1896,7 +1890,7 @@
       "condition": "IF FOMC 4/29 受 FRED CPIAUCSL mom +0.87% 加速與 real_rate_preferred 1.92%（接近 2.0 緊縮門檻）影響釋出 hawkish 訊號，且 GLW 屬 Technology 落在 fred_snapshot.sector_rotation_avoid WITHIN 3 個交易日 THEN 推翻 Tech +3 BUY 的 Stage 2 突破論點，176.75 假突破回落 158.5（-10%）",
       "window": "3 trading days",
       "expires": "2026-05-01",
-      "days_left": -45,
+      "days_left": -50,
       "status": "expired",
       "checks": []
     },
@@ -1910,7 +1904,7 @@
       "condition": "IF GLW 4/28-4/30 跌破 sma20=159.22（-9.5%）或日成交量放大且 RSI 從 68.4 跌穿 50 WITHIN 5 個交易日 THEN 推翻技術面 Stage 2 多頭結構，配合 Burry 24.2 WARNING 與 analyst PT -17% 形成估值修正起點",
       "window": "5 trading days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -1924,7 +1918,7 @@
       "condition": "IF GOOG 自當前價回測跌破 MA20（約 -13.5% 修正至 ~324）且 RSI 14 由 80.9 降至 50 以下 WITHIN 15 個交易日 THEN 推翻 Technical BUY 的 Stage 2 uptrend 論點，證實當前為超買頂部",
       "window": "15 trading days",
       "expires": "2026-05-23",
-      "days_left": -23,
+      "days_left": -28,
       "status": "expired",
       "checks": []
     },
@@ -1938,7 +1932,7 @@
       "condition": "IF FRED NFCI 由當前 accelerating 持續上行使 financial_stress_above_avg 翻 true，或 real_rate_preferred 由 1.91 突破 2.0 cap WITHIN 30 天 THEN 推翻 Phase 0 RISK_ON 假設與 forwardPE 30.74 的容忍度，Overheating regime 將觸發 Tech/Comm Services 估值壓縮",
       "window": "30 days",
       "expires": "2026-05-31",
-      "days_left": -15,
+      "days_left": -20,
       "status": "expired",
       "checks": []
     },
@@ -1952,7 +1946,7 @@
       "condition": "IF HPE 收盤跌破 MA20 $27.99 並 RSI 跌破 60 WITHIN 10 交易日 THEN 技術面 Stage 2 BUY (+3) 失效 — 突破變 failed breakout",
       "window": "10 trading days",
       "expires": "2026-05-24",
-      "days_left": -22,
+      "days_left": -27,
       "status": "expired",
       "checks": []
     },
@@ -1966,7 +1960,7 @@
       "condition": "IF 6/2 earnings GAAP EPS YoY ≤ -25% 或 FY26 guidance 下修 WITHIN 25 天 THEN fwd EPS -30.3% 已 priced-in 多頭假設破滅 — Juniper synergy 無法掩蓋 Altman 0.877/ROE -0.48 結構性惡化",
       "window": "25 days",
       "expires": "2026-06-04",
-      "days_left": -11,
+      "days_left": -16,
       "status": "expired",
       "checks": []
     },
@@ -1980,7 +1974,7 @@
       "condition": "IF FRED real_rate 突破 2.0% 或 NFCI 連續 2 週 accelerating tightening WITHIN 15 天 THEN Late cycle Overheating + sector_avoid Tech macro headwind 加劇，HPE 高 D/E 0.91 + Altman DANGER 三重曝險先 derate",
       "window": "15 days",
       "expires": "2026-05-25",
-      "days_left": -21,
+      "days_left": -26,
       "status": "expired",
       "checks": []
     },
@@ -1994,7 +1988,7 @@
       "condition": "IF HUBB 4/30 財報 guidance 持平或下修（非 raise）WITHIN 2 天 THEN P/E 33.6 + FCF yield 2.16% 估值溢價無法支撐，技術 Stage 2 將在 565.5 阻力下轉為失敗突破，多頭論點失效",
       "window": "2 days",
       "expires": "2026-04-30",
-      "days_left": -46,
+      "days_left": -51,
       "status": "expired",
       "checks": []
     },
@@ -2008,7 +2002,7 @@
       "condition": "IF FRED BAMLH0A0HYM2（HY spread）在 FOMC 4/29 後 WITHIN 5 天再加速擴張且 real_rate_preferred 突破 2.0 THEN late-cycle Overheating 訊號確立，工業龍頭（HUBB 高於 50MA 9.2%）首當其衝出現均值回歸，Greed sentiment 快速 unwind",
       "window": "5 days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -2022,7 +2016,7 @@
       "condition": "IF HUBB 股價 WITHIN 5 天跌破 MA20（526.74）且 MACD histogram 翻負 THEN technical 主論點被推翻，confluence 變為 distribution top，與 Burry WARNING + insider SELL 共振",
       "window": "5 days",
       "expires": "2026-05-03",
-      "days_left": -43,
+      "days_left": -48,
       "status": "expired",
       "checks": []
     },
@@ -2036,7 +2030,7 @@
       "condition": "IF INTC Q1 earnings on 2026-04-23 misses revenue OR guides Q2 below Street WITHIN 5 days THEN News BUY +3 thesis invalidated; stock reverts toward MA50 ~$49 (-28%)",
       "window": "5 days",
       "expires": "2026-04-23",
-      "days_left": -53,
+      "days_left": -58,
       "status": "expired",
       "checks": []
     },
@@ -2050,7 +2044,7 @@
       "condition": "IF SPY pullback > 5% WITHIN 10 trading days THEN INTC's 83% MA200 extension mean-reverts disproportionately (beta-adj -15-20%), invalidating Technical HOLD +1",
       "window": "10 trading days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -2064,7 +2058,7 @@
       "condition": "IF IR 2026-04-28 Q1 發布時 FY26 organic rev guide ≤+3% 或撤回 full-year guide WITHIN 1 交易日 THEN 併購驅動成長假設破功",
       "window": "1 trading days",
       "expires": "2026-04-20",
-      "days_left": -56,
+      "days_left": -61,
       "status": "expired",
       "checks": []
     },
@@ -2078,7 +2072,7 @@
       "condition": "IF FRED regime 由 Overheating 切到 Late Cycle Tightening 或 Recession Risk（real_rate 1.92% 升 > 2.2% 或 yield_curve 0.52 重新倒掛）WITHIN 30 天 THEN Tech avoid 加劇，BULLISH 論點瓦解",
       "window": "30 days",
       "expires": "2026-05-27",
-      "days_left": -19,
+      "days_left": -24,
       "status": "expired",
       "checks": []
     },
@@ -2092,7 +2086,7 @@
       "condition": "IF NFCI / BAMLH0A0HYM2 由 falling accelerating 反轉為 rising（HY 利差走闊 ≥ 30bps 或 NFCI 由負轉正）WITHIN 21 天 THEN D/E 3.92 + FCF yield 0.32% 的高槓桿光通信 narrative 立即被 repricing",
       "window": "21 days",
       "expires": "2026-05-18",
-      "days_left": -28,
+      "days_left": -33,
       "status": "expired",
       "checks": []
     },
@@ -2106,7 +2100,7 @@
       "condition": "IF 5/7 Q3 earnings 營收或 datacenter optical guidance miss（QoQ < +10% 或下修 FY guide）WITHIN 10 天 THEN PE 250 + 距 50MA +19.97% 的 crowded long 觸發 stage 2 → stage 4 結構性反轉",
       "window": "10 days",
       "expires": "2026-05-07",
-      "days_left": -39,
+      "days_left": -44,
       "status": "expired",
       "checks": []
     },
@@ -2120,7 +2114,7 @@
       "condition": "IF 10Y-2Y yield_curve 從 0.49 進一步陡峭化至 >0.75 或 real_rate (DFII10) 突破 2.10 WITHIN 10 trading days THEN duration-sensitive utility 重估壓力觸發",
       "window": "10 trading days",
       "expires": "2026-05-22",
-      "days_left": -24,
+      "days_left": -29,
       "status": "expired",
       "checks": []
     },
@@ -2134,7 +2128,7 @@
       "condition": "IF NFCI 連續 2 週 accelerating 且 BAMLH0A0HYM2 OAS 擴張 >25 bps WITHIN 15 days THEN Late-cycle credit tightening 證實，高槓桿 utility refinancing risk 浮現",
       "window": "15 days",
       "expires": "2026-05-23",
-      "days_left": -23,
+      "days_left": -28,
       "status": "expired",
       "checks": []
     },
@@ -2148,7 +2142,7 @@
       "condition": "IF NEE 收盤跌破 MA50 92.86 並失守 support 92.02 with volume >1.3× WITHIN 5 trading days THEN Stage 1 base 被破壞 + MACD bearish cross 被確認",
       "window": "5 trading days",
       "expires": "2026-05-15",
-      "days_left": -31,
+      "days_left": -36,
       "status": "expired",
       "checks": []
     },
@@ -2162,7 +2156,7 @@
       "condition": "IF FOMC 4/29 鴿派訊號 (dot plot 下調或 Powell 明示降息路徑) AND NOW 在記者會後 2 個交易日內 reclaim MA20 (~$96.11) on volume > 1.5x avg WITHIN 4/29-5/02 THEN『Stage 4 不可逆』論點被推翻",
       "window": "2 trading days",
       "expires": "2026-04-30",
-      "days_left": -46,
+      "days_left": -51,
       "status": "expired",
       "checks": []
     },
@@ -2176,7 +2170,7 @@
       "condition": "IF Q1 earnings cRPO YoY ≥ 20% AND AI Now Assist NNACV guidance 上修 WITHIN 14 天 THEN『AI usage-pricing thesis unproven + Forward EPS 2.3%』bearish 立論破功",
       "window": "14 days",
       "expires": "2026-05-11",
-      "days_left": -35,
+      "days_left": -40,
       "status": "expired",
       "checks": []
     },
@@ -2190,7 +2184,7 @@
       "condition": "IF NTRS 收盤 < $165 (約 -4% from $171.74) WITHIN 5 trading days THEN 確認 post-earnings exhaustion gap fill 推翻 bullish 論點",
       "window": "5 trading days",
       "expires": "2026-04-29",
-      "days_left": -47,
+      "days_left": -52,
       "status": "expired",
       "checks": []
     },
@@ -2204,7 +2198,7 @@
       "condition": "IF RSI_14 從 98 回落 < 70 並伴單日量 > 1.5x 20d avg 的紅 K WITHIN 7 trading days THEN blow-off top 確認技術反轉",
       "window": "7 trading days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -2218,7 +2212,7 @@
       "condition": "IF 2026-04-24 Iran Hormuz 48h deadline 未達休戰 + VIX 單日 > 25 WITHIN 3 days THEN RISK_ON→RISK_OFF 切換 Financials COLD 放大跌幅",
       "window": "3 days",
       "expires": "2026-04-25",
-      "days_left": -51,
+      "days_left": -56,
       "status": "expired",
       "checks": []
     },
@@ -2232,7 +2226,7 @@
       "condition": "IF 下週第二位 insider Form 4 discretionary sell > $1M WITHIN 10 days THEN insider conviction 負向確認 fundamentals 含金量下修",
       "window": "10 days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -2246,7 +2240,7 @@
       "condition": "IF FRED Overheating 持續且 Technology 留在 sector_rotation_avoid AND real_rate 升破 1.25 WITHIN 30 天 THEN late-cycle Tech de-rating 凌駕 +27% PT upside 敘事",
       "window": "30 days",
       "expires": "2026-06-10",
-      "days_left": -5,
+      "days_left": -10,
       "status": "expired",
       "checks": []
     },
@@ -2260,7 +2254,7 @@
       "condition": "IF NVDA 財報反應未收盤站上 pivot $221 且跌破支撐 $197.22 (-10%) WITHIN 14 天 THEN false_breakout 確認內部人分發為領先指標，L4 Stage-2 BUY 失效",
       "window": "14 days",
       "expires": "2026-05-25",
-      "days_left": -21,
+      "days_left": -26,
       "status": "expired",
       "checks": []
     },
@@ -2274,7 +2268,7 @@
       "condition": "IF NVTS 2026-05-05 earnings Revenue YoY 仍 < -30% 或 gross margin < 35% WITHIN 14 days THEN Nvidia 800V design-in 敘事被證偽",
       "window": "14 days",
       "expires": "2026-05-05",
-      "days_left": -41,
+      "days_left": -46,
       "status": "expired",
       "checks": []
     },
@@ -2288,7 +2282,7 @@
       "condition": "IF 日 K 收盤跌破 MA20 $9.97 WITHIN 21 days THEN Stage2 breakout 論點被推翻，回到 Stage4 distribution",
       "window": "21 days",
       "expires": "2026-05-12",
-      "days_left": -34,
+      "days_left": -39,
       "status": "expired",
       "checks": []
     },
@@ -2302,7 +2296,7 @@
       "condition": "IF earnings 後 sell-side 12M PT 中位數未上調至 $12 以上 (現 $8.64) WITHIN 14 days THEN Fundamentals SELL -3 估值論點確認，P/S 78x 無法辯護",
       "window": "14 days",
       "expires": "2026-05-05",
-      "days_left": -41,
+      "days_left": -46,
       "status": "expired",
       "checks": []
     },
@@ -2316,7 +2310,7 @@
       "condition": "IF 2026-05-05 Q1 財報 EPS 或營收低於 sell-side consensus 或 Q2 guidance YoY 成長 < 5% WITHIN 10 個交易日 THEN AI Power 敘事升級論點被推翻，股價回測 MA50 ($67) 概率大增",
       "window": "10 trading days",
       "expires": "2026-05-08",
-      "days_left": -38,
+      "days_left": -43,
       "status": "expired",
       "checks": []
     },
@@ -2330,7 +2324,7 @@
       "condition": "IF 股價於未來 10 個交易日內從 $99 回檔 > -15%（跌破 $84）且 RSI 從 89 掉至 < 60 WITHIN 10 trading days THEN 技術面 Stage 2 結構論點被推翻，確認為 RSI 極端超買後的均值回歸",
       "window": "10 trading days",
       "expires": "2026-05-08",
-      "days_left": -38,
+      "days_left": -43,
       "status": "expired",
       "checks": []
     },
@@ -2344,21 +2338,7 @@
       "condition": "IF 內部人於財報前後 30 天內持續申報 Form 4 賣出且無任何買進，同時 B.Riley $115 目標價未獲任一其他賣方跟進上修至 > $90 WITHIN 30 days THEN 單一激進升級論點被揭露為 outlier，共識 $65 仍為錨定價",
       "window": "30 days",
       "expires": "2026-05-24",
-      "days_left": -22,
-      "status": "expired",
-      "checks": []
-    },
-    {
-      "id": "thesis_ORCL_2026-05-07_2",
-      "source": "thesis",
-      "ticker": "ORCL",
-      "sector": null,
-      "origin_date": "2026-05-07",
-      "decision": "HOLD",
-      "condition": "IF ORCL 跌破技術 pivot $189 並失守 $170 支撐 WITHIN 30 天 THEN Stage 1 basing 論點失效，轉為 Stage 4 下行，Valuation 的 $115.72 fair value（-40.4%）成為下一個 magnet",
-      "window": "30 days",
-      "expires": "2026-06-06",
-      "days_left": -9,
+      "days_left": -27,
       "status": "expired",
       "checks": []
     },
@@ -2372,7 +2352,7 @@
       "condition": "IF PANW 2026-06-02 FQ3 財報後缺乏 guidance raise 或 NGS ARR 不及買方 whisper（已溢價 17.6% 於 PT 239.55）WITHIN 3 days THEN 動能論點破裂、回測 support 243 甚至 gap-fill 至 257",
       "window": "3 days",
       "expires": "2026-06-02",
-      "days_left": -13,
+      "days_left": -18,
       "status": "expired",
       "checks": []
     },
@@ -2386,12 +2366,12 @@
       "condition": "IF real_rate_dfii10 維持 ≥2.08 ELEVATED 且 SPY RSI 68.8 觸發大盤回檔、Tech 在 real-rate overlay 持續被 deprioritise WITHIN 15 days THEN 高估值 PANW（EV/EBIT 147x、FCF yield 1.27%）領跌",
       "window": "15 days",
       "expires": "2026-06-14",
-      "days_left": -1,
+      "days_left": -6,
       "status": "expired",
       "checks": [
         {
-          "predicate": "DFII10 >= 2.08 (data 2026-06-11)",
-          "value": 2.16,
+          "predicate": "DFII10 >= 2.08 (data 2026-06-17)",
+          "value": 2.23,
           "met": true
         }
       ]
@@ -2406,7 +2386,7 @@
       "condition": "IF insider acquired_disposed_ratio 連續第二季 ≤0.1（2026Q2 已 0.0）且股價跌破 pivot 261 WITHIN 10 days THEN Sentiment(+1) 與動能論點同時失效",
       "window": "10 days",
       "expires": "2026-06-09",
-      "days_left": -6,
+      "days_left": -11,
       "status": "expired",
       "checks": []
     },
@@ -2420,7 +2400,7 @@
       "condition": "IF FOMC 4/29 釋出鷹派或 CPI 重新加速被確認 WITHIN 3 天 THEN P/E 24.8 + D/E 0.95 紙包裝股將遭 multiple compression，HOLD 論點瓦解",
       "window": "3 days",
       "expires": "2026-04-30",
-      "days_left": -46,
+      "days_left": -51,
       "status": "expired",
       "checks": []
     },
@@ -2434,7 +2414,7 @@
       "condition": "IF Q2 同業 (IP, WRK) 財報顯示 containerboard 價格/出貨年減 WITHIN 7 天 THEN Forward EPS -15.5% 進一步下修，Stage 1 基底破 MA50 下軌",
       "window": "7 days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -2448,7 +2428,7 @@
       "condition": "IF Mag-7 earnings 4/30 觸發 risk-off 且 SPY RSI 87.4 均值回歸 WITHIN 5 天 THEN 短利回補動能耗盡 + 內部人淨賣壓力顯現，sentiment 翻負",
       "window": "5 days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -2462,7 +2442,7 @@
       "condition": "IF POET 單日收盤跌破 20MA（約 $6.90）或從高點跌幅 ≥25% WITHIN 10 個交易日 THEN 拋物線結構崩潰、Stage 2 技術論點失效",
       "window": "10 trading days",
       "expires": "2026-05-07",
-      "days_left": -39,
+      "days_left": -44,
       "status": "expired",
       "checks": []
     },
@@ -2476,7 +2456,7 @@
       "condition": "IF Marvell/Celestial AI 訂單在 Q2 2026 財報未能兌現具體營收貢獻或被官方否認 WITHIN 30 天 THEN News/Sentiment 主催化劑失效",
       "window": "30 days",
       "expires": "2026-05-23",
-      "days_left": -23,
+      "days_left": -28,
       "status": "expired",
       "checks": []
     },
@@ -2490,7 +2470,7 @@
       "condition": "IF XLK tail_risk 觸發 SPY 回檔 ≥7% 或 VIX 突破 28 WITHIN 14 天 THEN Phase 0 MISALIGNED 風險兌現，小型投機股首當其衝被清洗",
       "window": "14 days",
       "expires": "2026-05-07",
-      "days_left": -39,
+      "days_left": -44,
       "status": "expired",
       "checks": []
     },
@@ -2504,7 +2484,7 @@
       "condition": "IF QCOM 收盤跌破 20MA 或 5 日內回吐 ≥10%（即 < $159）WITHIN 10 天 THEN RSI 83 拋物線反轉確認，News +2 BUY 動能論點失效，Tech HOLD 應降為 SELL",
       "window": "10 days",
       "expires": "2026-05-13",
-      "days_left": -33,
+      "days_left": -38,
       "status": "expired",
       "checks": []
     },
@@ -2518,7 +2498,7 @@
       "condition": "IF Phase 0 distribution days 增至 ≥6 in 25d 或 market_top_score 升破 40 進入 Red zone 且 breadth_composite < 30 WITHIN 15 天 THEN FRED Overheating + sector_avoid Technology 宏觀逆風落實，Fundamentals +2 BUY 的 cheap valuation 論點被 multiple compression 抵消（PE 19→14 = 股價 -26%）",
       "window": "15 days",
       "expires": "2026-05-18",
-      "days_left": -28,
+      "days_left": -33,
       "status": "expired",
       "checks": []
     },
@@ -2532,7 +2512,7 @@
       "condition": "IF Iran/Hormuz 在 FOMC 4/29 後 5 個交易日內出現去升級（停火或外交聲明），且 Brent 單日下跌 >5% 或回到 $80 以下 THEN『能源輪動 + Hormuz 結構性溢價』論點被推翻；SLB 將回吐地緣 premium，技術面 Stage 2 跌破 MA20 ($52.14) 確認趨勢失效",
       "window": "5 trading days",
       "expires": "2026-05-04",
-      "days_left": -42,
+      "days_left": -47,
       "status": "expired",
       "checks": []
     },
@@ -2546,7 +2526,7 @@
       "condition": "IF SLB 在未來 10 個交易日內收盤跌破 MA50 ($50.30) 或日線 RSI 由 69.6 跌破 50 並伴隨成交量 >1.5x THEN『Stage 2 突破 + 金叉動能』論點被推翻，等於確認此波 $56.15 是 blow-off top 而非趨勢延續",
       "window": "10 trading days",
       "expires": "2026-05-11",
-      "days_left": -35,
+      "days_left": -40,
       "status": "expired",
       "checks": []
     },
@@ -2560,7 +2540,7 @@
       "condition": "IF FRED 週更新顯示 BAMLH0A0HYM2 3m delta 由 +18bp 擴大至 >+40bp 或 NFCI 由 -0.018 翻正且連 2 週 accelerating 緊縮（10 個交易日內） THEN『信用環境支持 cyclicals』前提失效，Overheating regime 將向 Late Cycle Tightening 漂移，Energy 在 favor list 的優勢被消除",
       "window": "10 trading days",
       "expires": "2026-05-11",
-      "days_left": -35,
+      "days_left": -40,
       "status": "expired",
       "checks": []
     },
@@ -2574,7 +2554,7 @@
       "condition": "IF 2026-04-29 FOMC 聲明確認實質利率將突破 2.0 或點陣圖上修 WITHIN 7 天 THEN 工業類股輪動順風論述破功（FRED real_rate_preferred=1.92 已貼近門檻，CPI 加速將迫使 Fed 延後降息，壓縮 PE 19.8 的估值空間）",
       "window": "7 days",
       "expires": "2026-05-02",
-      "days_left": -44,
+      "days_left": -49,
       "status": "expired",
       "checks": []
     },
@@ -2588,7 +2568,7 @@
       "condition": "IF 2026-04-30 Core PCE 年增率 ≥ 上期 或 GDP 超預期過熱 WITHIN 3 天 THEN Overheating regime 將升級為 Stagflation 風險（FRED CPIAUCSL accelerating + BAMLH0A0HYM2 tightening_accelerating 雙重加速信號），Industrials 晚週期股首當其衝",
       "window": "3 days",
       "expires": "2026-04-28",
-      "days_left": -48,
+      "days_left": -53,
       "status": "expired",
       "checks": []
     },
@@ -2602,7 +2582,7 @@
       "condition": "IF SNA 股價跌破 MA50 支撐 374.56 並伴隨成交量 > 20日均量 1.5 倍 WITHIN 10 個交易日 THEN 技術面 Stage 1 基底破位、20/50 死亡交叉確認為趨勢反轉",
       "window": "10 trading days",
       "expires": "2026-05-09",
-      "days_left": -37,
+      "days_left": -42,
       "status": "expired",
       "checks": []
     },
@@ -2616,7 +2596,7 @@
       "condition": "IF STT 2026-04-21 至 2026-04-28 期間單日收盤跌破 MA20 $133.25 且跌幅 ≥ 5% WITHIN 5 交易日 THEN 推翻 Technical Stage 2 stack 20>50>200 論點",
       "window": "5 trading days",
       "expires": "2026-04-28",
-      "days_left": -48,
+      "days_left": -53,
       "status": "expired",
       "checks": []
     },
@@ -2630,7 +2610,7 @@
       "condition": "IF SPY 2026-04-21 至 2026-05-05 期間 RSI 從 97.7 回落至 <50 且 STT 回撤 ≥10% WITHIN 10 交易日 THEN 推翻 Sentiment Greed 支撐論點並驗證 mean-reversion",
       "window": "10 trading days",
       "expires": "2026-05-05",
-      "days_left": -41,
+      "days_left": -46,
       "status": "expired",
       "checks": []
     },
@@ -2644,7 +2624,7 @@
       "condition": "IF 5 個交易日內 TEAM 收盤跌破 gap 起點 $68.59 (gap-fill) THEN earnings gap 確認假突破，Stage 2 論點失效",
       "window": "5 trading days",
       "expires": "2026-05-09",
-      "days_left": -37,
+      "days_left": -42,
       "status": "expired",
       "checks": []
     },
@@ -2658,7 +2638,7 @@
       "condition": "IF FRED T10Y2Y 由 0.51 收斂至 ≤ 0 或 NFCI 由 -0.518 翻正 WITHIN 30 days THEN sector_rotation_avoid Technology 強化為強制 underweight，TEAM 失去 multiple 擴張支撐",
       "window": "30 days",
       "expires": "2026-06-01",
-      "days_left": -14,
+      "days_left": -19,
       "status": "expired",
       "checks": []
     },
@@ -2672,7 +2652,7 @@
       "condition": "IF breadth_composite 由 33 跌破 25 或 market_top_zone 升級至 Confirmed WITHIN 15 days THEN late_cycle Tech 高 beta 名單優先壓縮，TEAM 估值面臨重評",
       "window": "15 days",
       "expires": "2026-05-17",
-      "days_left": -29,
+      "days_left": -34,
       "status": "expired",
       "checks": []
     },
@@ -2686,7 +2666,7 @@
       "condition": "IF TEL fails to reclaim $252.56 resistance on >1.0× 20D volume WITHIN 5 trading days post-earnings THEN Stage 2 technical thesis is falsified — low-volume rally is distribution not markup",
       "window": "5 trading days",
       "expires": "2026-04-28",
-      "days_left": -48,
+      "days_left": -53,
       "status": "expired",
       "checks": []
     },
@@ -2700,7 +2680,7 @@
       "condition": "IF close >$452.43 on >1.3x vol WITHIN 15 trading days THEN Technical HOLD flips BUY, Burry 52wH anchor broken",
       "window": "15 trading days",
       "expires": "2026-05-10",
-      "days_left": -36,
+      "days_left": -41,
       "status": "expired",
       "checks": []
     },
@@ -2714,7 +2694,7 @@
       "condition": "IF 2026-04-22 earnings auto GM >=18% AND FY26 delivery growth >=20% reaffirmed WITHIN 7d THEN Fundamentals SELL overturned",
       "window": "7 days",
       "expires": "2026-04-25",
-      "days_left": -51,
+      "days_left": -56,
       "status": "expired",
       "checks": []
     },
@@ -2728,7 +2708,7 @@
       "condition": "IF VIX <15 AND breadth >50 AND TSLA holds MA200 WITHIN 10d THEN Sentiment SELL overturned",
       "window": "10 days",
       "expires": "2026-04-28",
-      "days_left": -48,
+      "days_left": -53,
       "status": "expired",
       "checks": []
     },
@@ -2742,7 +2722,7 @@
       "condition": "IF FSD-unsupervised 2nd EU approval OR CA robotaxi commercial launch WITHIN 30d THEN News HOLD flips BUY",
       "window": "30 days",
       "expires": "2026-05-18",
-      "days_left": -28,
+      "days_left": -33,
       "status": "expired",
       "checks": []
     },
@@ -2756,7 +2736,7 @@
       "condition": "IF VRT 5 個交易日內未放量（≥1.2x avg）突破 $330.3 阻力且 RSI 從 65.1 走平回落 <60 THEN Stage 2 假突破確認，回撤 50MA 機率 >60%",
       "window": "5 trading days",
       "expires": "2026-05-09",
-      "days_left": -37,
+      "days_left": -42,
       "status": "expired",
       "checks": []
     },
@@ -2770,7 +2750,7 @@
       "condition": "IF FRED real_rate_10y 30 天內升破 2.10%（目前 1.94 接近 cap）或 yield_curve 壓縮至 <0.30 THEN Overheating 轉 risk-off，high-multiple AI proxy 首當其衝",
       "window": "30 days",
       "expires": "2026-06-01",
-      "days_left": -14,
+      "days_left": -19,
       "status": "expired",
       "checks": []
     }

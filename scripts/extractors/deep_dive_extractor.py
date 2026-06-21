@@ -5,6 +5,7 @@ lenient regex over section headers; missing fields default to None.
 """
 from __future__ import annotations
 import re
+import statistics
 import sys
 from pathlib import Path
 
@@ -505,6 +506,14 @@ def extract(path: Path) -> dict:
     macro = _find_macro_regime(text, decision_date=decision_date, ticker=ticker)
 
     confs = [a["confidence"] for a in agents if "confidence" in a]
+    # TODO-013 (REVIEW 2026-06-20) — lane score dispersion. Lets next REVIEW
+    # split the 0–1 score band into weak-signal (low stdev) vs agent-high-
+    # dispersion (high stdev). Shadow field only; population stdev so a single
+    # 2-lane report still yields a value. None when <2 lanes parsed.
+    lane_scores = [a["score"] for a in agents if "score" in a]
+    agent_score_stdev = (
+        round(statistics.pstdev(lane_scores), 4) if len(lane_scores) >= 2 else None
+    )
 
     record = {
         "source": "deep-dive",
@@ -531,6 +540,8 @@ def extract(path: Path) -> dict:
             "macro_regime_source": macro["source"],           # phase0_cache / md_regex / None
             "agent_count": len(agents),
             "agent_confidence_count": len(confs),             # 有真 confidence 的 lane 數
+            "agent_score_stdev": agent_score_stdev,           # TODO-013 — 0–1 band dispersion split
+            "agent_score_count": len(lane_scores),
             "min_agent_confidence": min(confs, default=None),
             "max_agent_confidence": max(confs, default=None),
         },

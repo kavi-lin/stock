@@ -362,6 +362,12 @@ def build_financial_bridge(earnings_cache: dict, guidance_promoted: list[dict] |
             "free_cash_flow": _range_amount(revenue, fcf_margin),
             "capex": _range_amount(revenue, capex_intensity),
             "guidance_overlay": _period_guidance(overlays, estimate.get("date")),
+            # V4.40.0 — analyst coverage per FY; lets the price-range mapper flag thin
+            # far-out years and prefer a near, well-covered horizon.
+            "coverage": {
+                "num_analysts_revenue": estimate.get("num_analysts_revenue"),
+                "num_analysts_eps": estimate.get("num_analysts_eps"),
+            },
         }
         row["consistency_checks"] = _consistency_checks(row)
         rows.append(row)

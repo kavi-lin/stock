@@ -310,7 +310,10 @@ def fetch_bundle(ticker: str, income: list | None = None) -> dict:
         "seg_geographic":   ("/stable/revenue-geographic-segmentation", {"symbol": ticker}),
         "dividends":        ("/stable/dividends",               {"symbol": ticker, "limit": 8}),
         # V1.87 — annual analyst estimates (forward EPS / revenue / EBITDA consensus)
-        "annual_estimates": ("/stable/analyst-estimates",       {"symbol": ticker, "period": "annual", "limit": 3}),
+        # V4.40.0 — limit 3→6: FMP sorts annual estimates DESCENDING (farthest-first),
+        # so limit=3 silently dropped the well-covered near years (FY+1/FY+2) and kept
+        # only the thin-coverage far tail. 6 reaches the near years for the trajectory.
+        "annual_estimates": ("/stable/analyst-estimates",       {"symbol": ticker, "period": "annual", "limit": 6}),
     }
     if income:
         del calls["income"]

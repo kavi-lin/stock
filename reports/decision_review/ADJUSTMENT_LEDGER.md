@@ -103,8 +103,10 @@
   - `scripts/extractors/deep_dive_extractor.py` — 注入 `tuning_hooks.sub_industry_heat`
 - **rollback_plan**: 改 `enrich_ticker_heat = None` 即可關閉，不影響其他欄位
 - **status**: active
+- **standing_monitor** (REVIEW_2026-06-20 §3 — 自 TODO-007 升級)：heat asymmetry gap (top30 vs not30 miss_rate) 已連續穩定 ≥15pp（06-13 18pp / 06-14 18pp / 06-20 24pp），不再每週佔 TODO slot。改常設 tripwire：每輪 REVIEW 從 `industry_rollup` 自動算 gap，**只有 gap <15pp 連續 3 週才轉 `paused`**；≥15pp 維持 active 不需逐週 TODO 追蹤。
 - **evaluation_history**:
   - 2026-05-31: improved — sub_industry_heat 非 null deep-dive 100% (126/126)，達標 ≥80%。但 heat asymmetry **未證實**：top30 miss 44% vs not30 30%，gap 14pp <15pp 目標（連 2 週 <15pp，見 TODO-007；再 1 週觸發 paused）。continue 累積 not30 樣本。
+  - 2026-06-20: maintained — gap **24pp** (top30 50% 44/88 vs not30 26% 10/38) ≥15pp，asymmetry 證實穩定。TODO-007 升級為 standing_monitor（見上），移出 Active TODO 佇列。
 
 ---
 

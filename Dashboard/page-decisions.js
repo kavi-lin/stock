@@ -711,10 +711,16 @@ const DECISION_TIPS = {
               scale: '🟢 ≥ 70%   high — standard size\n🟡 50-70%  medium — cut one notch\n⚪ < 50%   low — wait or tiny pilot (high fragility → just wait)' },
     },
     // ── Protocol version bookmarks ──────────────────────────────────────
+    version_v51: {
+        zh: { title: 'Protocol V5.1 — 前瞻估值（最新）',
+              desc: 'V5.0 全部 + **前瞻估值（4.40）**：forward future price range 綁定 **PEG terminal P/E**（terminal_pe = clamp(2.2×終期成長%, 20, 60)，隨成長降速自動壓縮）+ **逐年年化 glide trajectory**（錨定 terminal 內插，非每年重估）+ per-FY analyst coverage 薄覆蓋標記。Shadow-only，不入 live 決策。有此標 = snapshot 已用新引擎重生。' },
+        en: { title: 'Protocol V5.1 — Forward Valuation (current)',
+              desc: 'All of V5.0 + **forward valuation (4.40)**: future price range bound to a **PEG terminal P/E** (clamp(2.2×terminal_growth%, 20, 60); auto-compresses as growth decelerates) + **per-FY annualized glide trajectory** (anchored to terminal, not re-valued yearly) + thin-coverage flags. Shadow-only. This badge = snapshot regenerated with the new engine.' },
+    },
     version_v50: {
-        zh: { title: 'Protocol V5.0（最新）',
+        zh: { title: 'Protocol V5.0',
               desc: '5 lane subagent (Fundamentals / Sentiment / News / Technical / **Valuation Specialist**) + Burry + Red Team + **Phase 4.5 fair_value_summary** (6 anchor weighted blend) + **Phase 5.5 thesis registry**。完整版。' },
-        en: { title: 'Protocol V5.0 (current)',
+        en: { title: 'Protocol V5.0',
               desc: '5-lane subagents (Fund / Sent / News / Tech / **Valuation Specialist**) + Burry + Red Team + **Phase 4.5 fair_value_summary** (6-anchor weighted blend) + **Phase 5.5 thesis registry**.' },
     },
     version_v48: {
@@ -814,6 +820,11 @@ const DECISION_TIPS = {
 
 /* ── Version detection + UI helpers ─────────────────────────── */
 function detectProtocolVersion(item) {
+    // V5.1 — card carries the new (4.40) forward valuation: per-FY annualized glide
+    // trajectory bound to a PEG terminal P/E. Old forward snapshots lack `trajectory`,
+    // so this cleanly distinguishes regenerated cards from stale ones.
+    const fwd = item.forward_expectations;
+    if (fwd && Array.isArray(fwd.trajectory) && fwd.trajectory.length > 0) return 'V5.1';
     // Trust bridge.py if it set protocol_version (from session_export_version)
     if (item.protocol_version && item.protocol_version !== 'legacy') {
         // Normalize: "V5.0" / "V4.8" / "V4.7" / "V4.6" / "V4.5" → keep as-is
@@ -827,6 +838,7 @@ function detectProtocolVersion(item) {
 }
 
 const VERSION_COLOR = {
+    'V5.1':   { bg: 'rgba(20,184,166,0.22)',  border: 'rgba(45,212,191,0.70)',  fg: '#5eead4', label: 'V5.1'   },
     'V5.0':   { bg: 'rgba(16,185,129,0.18)',  border: 'rgba(16,185,129,0.55)',  fg: '#34d399', label: 'V5.0'   },
     'V4.8':   { bg: 'rgba(59,130,246,0.18)',  border: 'rgba(59,130,246,0.55)',  fg: '#60a5fa', label: 'V4.8'   },
     'V4.7':   { bg: 'rgba(245,158,11,0.18)',  border: 'rgba(245,158,11,0.55)',  fg: '#fbbf24', label: 'V4.7'   },
@@ -839,6 +851,7 @@ function buildVersionBookmark(version) {
     const c = VERSION_COLOR[version] || VERSION_COLOR['LEGACY'];
     // V2.17.8 — version bookmark gets rich tooltip via data-tip-key
     const tipKeyMap = {
+        'V5.1':   'version_v51',
         'V5.0':   'version_v50',
         'V4.8':   'version_v48',
         'V4.7':   'version_v47',
@@ -949,78 +962,234 @@ function buildV5ValuationBlock(item, wl) {
     return { html, chip };
 }
 
-/* V3.49.0 — V3.45.x+ advisory blocks（range / MHP / reverse DCF / archetype shadow）。
-   舊 entry 缺 block → 整段不顯示。全 advisory，不改決策呈現。 */
-function buildFvExtras(item, wl) {
-    const rows = [];
-    const money = v => v != null ? '$' + Number(v).toFixed(2) : '--';
+/* V5.2.0 — Forward-value number-line visualization. Replaces the flat advisory
+   text rows with two CSS-positioned price-axis tracks (present-value + forward
+   shadow) so the present-vs-future tension is spatially readable. Momentum /
+   implied-CAGR / archetype kept as compact secondary chips. All advisory, shadow
+   labels intact; 舊 entry 缺 block → 該段不顯示，不改決策呈現。 */
 
-    const fvr = item.fair_value_range;
-    if (fvr && fvr.p50 != null) {
-        const gradeColor = { high: '#22c55e', medium: '#eab308', low: '#ef4444' }[fvr.agreement_grade] || '#a1a1aa';
-        rows.push(`<div class="text-[10px] font-mono text-zinc-300">
-            <span class="font-bold text-zinc-400 uppercase">Range</span>
-            ${money(fvr.p25)} / <b>${money(fvr.p50)}</b> / ${money(fvr.p75)}
-            <span class="text-zinc-500">(${money(fvr.min_anchor)}–${money(fvr.max_anchor)})</span>
-            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:${gradeColor};border:1px solid color-mix(in srgb,${gradeColor},transparent 65%)">${(fvr.agreement_grade || '--').toUpperCase()} AGREE</span>
-            <span class="text-zinc-500">${fvr.range_verdict || ''}</span>
-        </div>`);
+// One horizontal price axis. domLo/domHi = scale; band = shaded region; markers =
+// [{v,color,label,side:'up'|'down',strong}]. Pure CSS %-positioning, themeable.
+function buildValAxis(domLo, domHi, band, markers, h) {
+    const span = (domHi - domLo) || 1;
+    const pos = v => Math.max(0, Math.min(100, ((v - domLo) / span) * 100));
+    h = h || 42;
+    const mid = h / 2;
+    let inner = `<div class="absolute left-0 right-0" style="top:${mid}px;height:2px;background:color-mix(in srgb,var(--text-main),transparent 82%)"></div>`;
+    if (band && band.lo != null && band.hi != null) {
+        const l = pos(band.lo), r = pos(band.hi);
+        inner += `<div class="absolute rounded-sm" style="left:${l}%;width:${Math.max(1.2, r - l)}%;top:${mid - 5}px;height:10px;background:color-mix(in srgb,${band.color},transparent 84%);border:1px solid color-mix(in srgb,${band.color},transparent 58%)" title="${escapeHtmlDc(band.tip || '')}"></div>`;
     }
+    (markers || []).forEach(m => {
+        if (m.v == null) return;
+        const p = pos(m.v), up = m.side === 'up';
+        const lblTop = up ? 0 : h - 10;
+        const tickTop = up ? 12 : mid;
+        const tickH = Math.max(2, up ? mid - 12 : h - 12 - mid);
+        inner += `<div class="absolute" style="left:${p}%;top:${tickTop}px;height:${tickH}px;width:1px;background:color-mix(in srgb,${m.color},transparent 35%)"></div>`;
+        inner += `<div class="absolute rounded-full" style="left:${p}%;top:${mid - 3}px;width:6px;height:6px;transform:translateX(-50%);background:${m.color};box-shadow:0 0 0 2px color-mix(in srgb,${m.color},transparent 72%)"></div>`;
+        if (m.label) inner += `<div class="absolute font-mono whitespace-nowrap" style="left:${p}%;top:${lblTop}px;transform:translateX(-50%);font-size:8.5px;font-weight:${m.strong ? '700' : '600'};color:${m.color}" title="${escapeHtmlDc(m.tip || '')}">${m.label}</div>`;
+    });
+    return `<div class="relative" style="height:${h}px;margin:3px 0">${inner}</div>`;
+}
+
+// V5.2.0 — Forward glide as a time×price line chart: X = year, Y = projected price.
+// The bear/base/bull terminal scenarios share ONE horizon year, so a price-only axis
+// can't show "which year"; this maps the base glide path now→horizon and renders the
+// bear/bull spread as a terminal fan. Inline SVG, themeable, overflow-visible labels.
+function buildGlideChart(refPrice, traj, fe, zh) {
+    const r = fe.range || {}, up = fe.upside_pct || {};
+    const pts = [];
+    if (refPrice != null) pts.push({ x: 0, price: refPrice, now: true });
+    traj.forEach(t => pts.push({ x: t.years_out, price: t.base_target, date: t.date, cum: t.base_cumulative_pct, thin: t.thin_coverage }));
+    if (pts.length < 2) return '';
+    const W = 320, H = 100, padL = 10, padR = 60, padT = 14, padB = 16;
+    const xL = padL, xR = W - padR, yT = padT, yB = H - padB;
+    const maxX = Math.max(...pts.map(p => p.x), 0.0001);
+    const allP = pts.map(p => p.price).concat([r.bear, r.bull].filter(v => v != null));
+    let pMin = Math.min(...allP), pMax = Math.max(...allP);
+    const pd = (pMax - pMin) * 0.10 || 1; pMin -= pd; pMax += pd;
+    const PX = x => xL + (x / maxX) * (xR - xL);
+    const PY = v => yB - ((v - pMin) / (pMax - pMin || 1)) * (yB - yT);
+    const num = v => '$' + Number(v).toFixed(0);
+    let s = '';
+    if (refPrice != null) {
+        const by = PY(refPrice).toFixed(1);
+        s += `<line x1="${xL}" y1="${by}" x2="${xR}" y2="${by}" stroke="#a1a1aa" stroke-opacity="0.3" stroke-dasharray="2 2" stroke-width="0.8"/>`;
+    }
+    const linePts = pts.map(p => `${PX(p.x).toFixed(1)},${PY(p.price).toFixed(1)}`).join(' ');
+    s += `<polygon points="${PX(pts[0].x).toFixed(1)},${yB} ${linePts} ${PX(maxX).toFixed(1)},${yB}" fill="#5eead4" fill-opacity="0.10"/>`;
+    s += `<polyline points="${linePts}" fill="none" stroke="#5eead4" stroke-width="1.6" stroke-linejoin="round"/>`;
+    const tx = PX(maxX);
+    if (r.bear != null && r.bull != null)
+        s += `<line x1="${tx.toFixed(1)}" y1="${PY(r.bull).toFixed(1)}" x2="${tx.toFixed(1)}" y2="${PY(r.bear).toFixed(1)}" stroke="#a1a1aa" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/>`;
+    pts.forEach(p => {
+        const cx = PX(p.x).toFixed(1), cy = PY(p.price).toFixed(1);
+        const tip = `${escapeHtmlDc(p.date || (p.now ? 'now' : ''))} · ${num(p.price)}${p.cum != null ? ` (${p.cum >= 0 ? '+' : ''}${Number(p.cum).toFixed(0)}%)` : ''}`;
+        s += `<circle cx="${cx}" cy="${cy}" r="${p.now ? 2.4 : 2}" fill="${p.now ? '#a1a1aa' : '#5eead4'}"><title>${tip}</title></circle>`;
+        if (!p.now) s += `<text x="${cx}" y="${H - 4}" font-size="7" text-anchor="middle" fill="#71717a" font-family="monospace">'${String(p.date || '').slice(2, 4)}${p.thin ? ' ⚠' : ''}</text>`;
+    });
+    if (r.bull != null) {
+        s += `<circle cx="${tx.toFixed(1)}" cy="${PY(r.bull).toFixed(1)}" r="2" fill="#22c55e"/>`;
+        s += `<text x="${(tx + 5).toFixed(1)}" y="${(PY(r.bull) + 2.5).toFixed(1)}" font-size="7.5" fill="#22c55e" font-family="monospace">${num(r.bull)}${up.bull != null ? ` +${Number(up.bull).toFixed(0)}%` : ''}</text>`;
+    }
+    if (r.base != null)
+        s += `<text x="${(tx + 5).toFixed(1)}" y="${(PY(r.base) + 2.5).toFixed(1)}" font-size="8" font-weight="700" fill="#5eead4" font-family="monospace">${num(r.base)}${up.base != null ? ` +${Number(up.base).toFixed(0)}%` : ''}</text>`;
+    if (r.bear != null) {
+        s += `<circle cx="${tx.toFixed(1)}" cy="${PY(r.bear).toFixed(1)}" r="2" fill="#f97316"/>`;
+        s += `<text x="${(tx + 5).toFixed(1)}" y="${(PY(r.bear) + 2.5).toFixed(1)}" font-size="7.5" fill="#f97316" font-family="monospace">${num(r.bear)}${up.bear != null ? ` +${Number(up.bear).toFixed(0)}%` : ''}</text>`;
+    }
+    if (refPrice != null)
+        s += `<text x="${PX(0).toFixed(1)}" y="${(PY(refPrice) + 9).toFixed(1)}" font-size="7.5" fill="#a1a1aa" font-family="monospace">${zh ? '現價' : 'now'} ${num(refPrice)}</text>`;
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block;overflow:visible" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+}
+
+function buildFvExtras(item, wl) {
+    const sections = [];
+    const money = v => v != null ? '$' + Number(v).toFixed(2) : '--';
+    const m0 = v => v != null ? '$' + Number(v).toFixed(0) : '--';
+    const zh = (typeof UI !== 'undefined' && UI.currentLang === 'zh');
+    const curLbl = zh ? '現價' : 'Now';
+
+    const fvs  = item.fair_value_summary;
+    const lane = item.valuation_lane;
+    const fvr  = item.fair_value_range;
+    const fv   = fvs?.weighted_fair_value ?? lane?.weighted_fair_value ?? fvr?.p50;
+    const pct  = fvs?.vs_current_pct ?? lane?.vs_current_pct;
+    // Reference (analysis-time) price the valuation was compared against.
+    const refPrice = item.analysis_price
+        ?? ((fv != null && pct != null) ? fv / (1 + pct / 100) : item.current_price);
+
+    const bandFg = {
+        extreme_undervalued: '#10b981', undervalued: '#22c55e', fairly_valued: '#a1a1aa',
+        overvalued: '#f97316', extreme_overvalued: '#ef4444',
+    }[fvs?.verdict_band] || '#a1a1aa';
+    const curColor = pct == null ? '#a1a1aa' : (pct < 0 ? '#ef4444' : '#22c55e');
 
     const mh = item.multi_horizon_price_framework;
     const st = mh?.short_term_5d, mt = mh?.mid_term_60d, cv = mh?.convergence;
-    if (st?.band_capped) {
-        const sigColor = { wait_for_pullback: '#f97316', high_conviction_long_zone: '#22c55e',
-                           momentum_not_value: '#eab308', neutral_aligned: '#a1a1aa' }[cv?.mhp_signal] || '#a1a1aa';
-        rows.push(`<div class="text-[10px] font-mono text-zinc-300">
-            <span class="font-bold text-zinc-400 uppercase">5D Band</span>
-            ${money(st.band_capped[0])} / ${money(st.band_capped[1])} / ${money(st.band_capped[2])}
-            ${mt?.mid_target != null ? `<span class="font-bold text-zinc-400 uppercase ml-2">60D</span> ${money(mt.mid_target)}` : ''}
-            ${cv?.mhp_signal ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:${sigColor};border:1px solid color-mix(in srgb,${sigColor},transparent 65%)" title="${escapeHtmlDc(cv.signal_note || '')}">${cv.mhp_signal.replace(/_/g, ' ').toUpperCase()}</span>` : ''}
+    const stBand = st?.band_capped;
+
+    // ── Track A — present value (range band + FV + current) ──
+    if ((fvr && fvr.p50 != null) || (fv != null && refPrice != null)) {
+        const gradeColor = { high: '#22c55e', medium: '#eab308', low: '#ef4444' }[fvr?.agreement_grade] || '#a1a1aa';
+        // V4.46.0 — when anchors disperse hard (cv ≥ 0.60), the weighted point FV is
+        // false precision (e.g. ARM: $3–$164 anchors blended to $52). De-emphasize the
+        // point, lead with the range, and say so in plain language. Gated on cv (not the
+        // blunt agreement_grade 0.35 cliff, which fires across the whole tech universe).
+        const cvVal = fvr?.anchor_dispersion_cv;
+        const lowAgree = cvVal != null && cvVal >= 0.60;
+        const pts = [fvr?.p25, fvr?.p75, fv, refPrice, stBand?.[0], stBand?.[2]].filter(n => n != null);
+        let lo = Math.min(...pts), hi = Math.max(...pts);
+        const pad = (hi - lo) * 0.06 || (hi * 0.02) || 1;
+        lo -= pad; hi += pad;
+        const markers = [];
+        if (fv != null)       markers.push({ v: fv, color: lowAgree ? '#a1a1aa' : bandFg,
+            label: lowAgree ? `FV ~${m0(fv)}` : `FV ${m0(fv)}`, side: 'up', strong: !lowAgree,
+            tip: lowAgree ? 'Low anchor agreement — this blended point is unreliable; read the range, not the dot.'
+                          : 'Weighted fair value (6-anchor blend)' });
+        if (refPrice != null) markers.push({ v: refPrice, color: curColor, label: `${curLbl} ${m0(refPrice)}`, side: 'down', tip: pct != null ? `${pct >= 0 ? '+' : ''}${Number(pct).toFixed(1)}% vs fair value` : '' });
+        const band = (fvr?.p25 != null && fvr?.p75 != null)
+            ? { lo: fvr.p25, hi: fvr.p75, color: gradeColor, tip: `fair-value range p25–p75 · ${(fvr.agreement_grade || '').toUpperCase()} agreement` }
+            : null;
+        const cap = [];
+        if (fvr?.agreement_grade) cap.push(`<span style="color:${gradeColor};font-weight:700">${fvr.agreement_grade.toUpperCase()} AGREE</span>`);
+        if (fvs?.anchors_available != null) cap.push(`<span class="text-zinc-500">${fvs.anchors_available}/6 anchor</span>`);
+        if (fvr?.min_anchor != null && fvr?.max_anchor != null) cap.push(`<span class="text-zinc-600">${m0(fvr.min_anchor)}–${m0(fvr.max_anchor)}</span>`);
+        if (fvr?.range_verdict) cap.push(`<span class="text-zinc-600">${escapeHtmlDc(fvr.range_verdict)}</span>`);
+        if (lowAgree) cap.push(`<span style="color:#f97316;font-weight:700;border-bottom:1px dotted currentColor;cursor:help" title="${escapeHtmlDc(zh ? '錨點彼此分散，加權單點 FV 屬假精確 — 看區間不要看那個點。' : 'Anchors disagree widely; the weighted point FV is false precision — read the range, not the dot.')}">⚠ ${zh ? '錨點分散' : 'anchors span'}${fvr?.dispersion_ratio ? ` ${Number(fvr.dispersion_ratio).toFixed(0)}×` : ''}${zh ? '，單點 FV 不可靠' : ', point FV unreliable'}</span>`);
+        sections.push(`<div>
+            <div class="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mb-0.5">${zh ? '現值估值' : 'Present Value'}</div>
+            ${buildValAxis(lo, hi, band, markers)}
+            ${cap.length ? `<div class="text-[9px] font-mono flex flex-wrap gap-x-2 gap-y-0.5 -mt-0.5">${cap.join('')}</div>` : ''}
         </div>`);
     }
 
-    const ie = item.implied_expectations || item.valuation_lane?.implied_expectations;
-    if (ie?.implied_5y_fcf_cagr != null) {
-        rows.push(`<div class="text-[10px] font-mono text-zinc-300" title="${escapeHtmlDc(ie.sanity_note || '')}">
-            <span class="font-bold text-zinc-400 uppercase">Implied 5Y FCF CAGR</span>
-            ${(ie.implied_5y_fcf_cagr * 100).toFixed(0)}%${ie.implied_out_of_range ? ' ⚠' : ''}
-            ${ie.actual_3y_fcf_cagr != null ? `<span class="text-zinc-500">vs actual ${(ie.actual_3y_fcf_cagr * 100).toFixed(0)}%</span>` : ''}
-        </div>`);
-    }
-
-    const ash = item.valuation_archetype_shadow;
-    if (ash?.archetype && ash.archetype !== 'balanced') {
-        rows.push(`<div class="text-[10px] font-mono text-zinc-300">
-            <span class="font-bold text-zinc-400 uppercase">Archetype</span>
-            ${ash.archetype}
-            <span class="text-zinc-500">shadow FV ${money(ash.weighted_fair_value_shadow)} (${ash.verdict_band_shadow || '--'})</span>
-            ${ash.flip_vs_live ? '<span class="text-[9px] font-bold" style="color:#f97316">⚠ FLIP vs LIVE</span>' : ''}
-            <span class="text-zinc-600 text-[9px]">shadow-only</span>
-        </div>`);
-    }
-
-    // V4.37.0 Forward Expectations L1 advisory (shadow; never feeds decision math)
+    // ── Track B — forward glide as time×price chart (which FY → which price) ──
     const fe = item.forward_expectations;
     if (fe && fe.range && fe.range.base != null) {
         const up = fe.upside_pct || {};
-        const pct = v => v != null ? `<span class="text-zinc-500">(${v >= 0 ? '+' : ''}${Number(v).toFixed(0)}%)</span>` : '';
+        const r = fe.range;
         const advisory = fe.status === 'advisory_band_only' || !fe.is_forecast;
-        const badge = advisory
-            ? '<span class="text-[9px] font-bold" style="color:#f97316" title="No price-independent multiple anchor: ±15% band around today\'s price, not a growth forecast. Re-run forward engine with fetch.">⚠ ADVISORY BAND</span>'
-            : `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold" style="color:#22c55e;border:1px solid color-mix(in srgb,#22c55e,transparent 65%)" title="${escapeHtmlDc((fe.method || '') + ' · ' + (fe.multiple_quality || ''))}">FORECAST</span>`;
-        const comp = fe.compressed ? `<span class="text-zinc-500 text-[9px]" title="Historical multiple compressed toward forward-growth-justified level (EXP-3.4)">${escapeHtmlDc(fe.growth_tier || '')}↓</span>` : '';
-        const mgn = fe.margin_normalized ? `<span class="text-zinc-500 text-[9px]" title="Net margin normalized via durable-platform retention path (EXP-3.4b): held ${((fe.held_net_margin||0)*100).toFixed(0)}% → base ${((fe.base_net_margin||0)*100).toFixed(0)}%">margin↓</span>` : '';
-        rows.push(`<div class="text-[10px] font-mono text-zinc-300" title="Forward Expectations shadow · horizon ${escapeHtmlDc(fe.horizon_date || '--')} · gap ${escapeHtmlDc(fe.expectations_gap_status || '--')}">
-            <span class="font-bold text-zinc-400 uppercase">Forward</span>
-            ${money(fe.range.bear)} ${pct(up.bear)} / <b>${money(fe.range.base)}</b> ${pct(up.base)} / ${money(fe.range.bull)} ${pct(up.bull)}
-            ${badge} ${comp} ${mgn}
-            <span class="text-zinc-600 text-[9px]">shadow-only</span>
+        const hzYrs = fe.horizon_years != null ? `~${Number(fe.horizon_years).toFixed(1)}yr` : '';
+        const hzYear = (fe.horizon_date || '').slice(0, 4);
+        const traj = Array.isArray(fe.trajectory) ? fe.trajectory.filter(x => x && x.base_target != null && x.years_out != null) : [];
+        const annBase = traj.length ? traj[0].base_annualized_pct : null;
+        const cap = [];
+        // V4.45.1 — jargon chip carries a hover affordance (dotted underline + help cursor)
+        // and a plain-language bilingual tooltip, so the forward labels self-explain.
+        const jt = (label, t, style = '') =>
+            `<span style="${style};border-bottom:1px dotted currentColor;cursor:help" title="${escapeHtmlDc(t)}">${label}</span>`;
+        if (annBase != null) cap.push(jt(
+            `${zh ? '年化' : 'glide '}${annBase >= 0 ? '+' : ''}${Number(annBase).toFixed(0)}%/yr`,
+            zh ? `到 ${hzYear || '終期'} 年公允目標的年化路徑斜率。各年數字是沿這條路徑內插，非每年重新估值。`
+               : `Annualized slope of the path to the ${hzYear || 'terminal'} fair value. Each year is interpolated along this one path, not re-valued yearly.`,
+            'color:#71717a'));
+        cap.push(advisory
+            ? jt(zh ? '⚠ 僅參考帶' : '⚠ ADVISORY BAND',
+                zh ? '無價格獨立倍數錨：以今日股價 ±15% 為帶，非成長預測。'
+                   : "No price-independent multiple anchor: ±15% band around today's price, not a growth forecast.",
+                'color:#f97316;font-weight:700')
+            : jt('FORECAST',
+                zh ? `前瞻預測。方法 ${fe.method || '--'}；倍數品質 ${fe.multiple_quality || '--'}。`
+                   : `Forward forecast. method ${fe.method || '--'} · multiple ${fe.multiple_quality || '--'}.`,
+                'color:#22c55e;font-weight:700'));
+        if (fe.compressed) cap.push(jt(
+            `${zh ? '倍數壓縮' : (fe.growth_tier || '')}↓`,
+            zh ? `終期本益比按成長降速壓縮（tier=${fe.growth_tier || '--'}）。今日倍數高於終期合理倍數，故前瞻路徑向下傾斜。(EXP-3.4)`
+               : `Terminal multiple compressed toward the forward-growth-justified level (tier=${fe.growth_tier || '--'}). Today's multiple sits above it, so the path glides down. (EXP-3.4)`,
+            'color:#71717a'));
+        if (fe.margin_normalized) cap.push(jt(
+            `${zh ? '利潤正常化' : 'margin'}↓`,
+            zh ? `淨利率經耐久平台保留路徑正常化：held ${((fe.held_net_margin||0)*100).toFixed(0)}% → base ${((fe.base_net_margin||0)*100).toFixed(0)}%。(EXP-3.4b)`
+               : `Net margin normalized via durable-platform retention path: held ${((fe.held_net_margin||0)*100).toFixed(0)}% → base ${((fe.base_net_margin||0)*100).toFixed(0)}%. (EXP-3.4b)`,
+            'color:#71717a'));
+        cap.push(jt(zh ? '影子層' : 'shadow-only',
+            zh ? '影子輸出，不進入 live 投資決策（buy_threshold / position_size 完全不受影響）。'
+               : 'Shadow output — does not enter live investment decisions (buy_threshold / position_size unaffected).',
+            'color:#52525b'));
+        // time×price chart when a per-FY trajectory exists; else compact terminal text
+        const upStr = v => v != null ? ` <span class="text-zinc-500">${v >= 0 ? '+' : ''}${Number(v).toFixed(0)}%</span>` : '';
+        const body = (traj.length && refPrice != null)
+            ? buildGlideChart(refPrice, traj, fe, zh)
+            : `<div class="text-[10px] font-mono text-zinc-300 mt-0.5">${m0(r.bear)}${upStr(up.bear)} / <b>${m0(r.base)}</b>${upStr(up.base)} / ${m0(r.bull)}${upStr(up.bull)} <span class="text-zinc-600">@${escapeHtmlDc(hzYear)}</span></div>`;
+        // exact year→price table (answers "which year is which projected price")
+        const chips = traj.length ? `<div class="text-[8.5px] font-mono text-zinc-500 flex flex-wrap gap-1 items-center mt-1" title="Per-FY base target along the annualized glide to the terminal fair value; shadow-only.">${traj.map(x => {
+            const yy = `'${String(x.date || '').slice(2, 4)}`;
+            const thin = x.thin_coverage ? '<span style="color:#f97316">⚠</span>' : '';
+            const cum = x.base_cumulative_pct != null ? `${x.base_cumulative_pct >= 0 ? '+' : ''}${Number(x.base_cumulative_pct).toFixed(0)}%` : '';
+            const tip = `${escapeHtmlDc(x.date || '')} · ${x.years_out != null ? '~' + Number(x.years_out).toFixed(1) + 'yr' : ''} · base ${money(x.base_target)} (${cum})${x.thin_coverage ? ' · thin analyst coverage' : ''}`;
+            return `<span class="px-1 rounded" style="background:color-mix(in srgb,var(--text-card-title),transparent 92%)" title="${tip}">${yy} <b>${m0(x.base_target)}</b>${cum ? ` <span class="text-zinc-600">${cum}</span>` : ''}${thin}</span>`;
+        }).join(' ')}</div>` : '';
+        sections.push(`<div title="Forward Expectations shadow · horizon ${escapeHtmlDc(fe.horizon_date || '--')} ${hzYrs} · gap ${escapeHtmlDc(fe.expectations_gap_status || '--')}">
+            <div class="text-[8px] font-bold uppercase tracking-widest text-zinc-500 mb-0.5">${zh ? '未來前瞻' : 'Forward'} ▸ ${escapeHtmlDc(hzYear || '--')} ${hzYrs}</div>
+            ${body}
+            <div class="text-[9px] font-mono flex flex-wrap gap-x-2 gap-y-0.5 mt-1">${cap.join('')}</div>
+            ${chips}
         </div>`);
     }
 
-    return rows.length
-        ? `<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800/60 space-y-1">${rows.join('')}</div>`
+    // ── Secondary chips — momentum signal / implied CAGR / archetype ──
+    const chips = [];
+    if (stBand) {
+        const sigColor = { wait_for_pullback: '#f97316', high_conviction_long_zone: '#22c55e',
+                           momentum_not_value: '#eab308', neutral_aligned: '#a1a1aa' }[cv?.mhp_signal] || '#a1a1aa';
+        const sig = cv?.mhp_signal ? cv.mhp_signal.replace(/_/g, ' ').toUpperCase() : '';
+        chips.push(`<span class="px-1.5 py-0.5 rounded text-[9px] font-mono" style="border:1px solid color-mix(in srgb,${sigColor},transparent 70%)" title="${escapeHtmlDc(cv?.signal_note || '')}">5D ${m0(stBand[0])}-${m0(stBand[2])}${mt?.mid_target != null ? ` · 60D ${m0(mt.mid_target)}` : ''}${sig ? ` · <b style="color:${sigColor}">${sig}</b>` : ''}</span>`);
+    }
+    const ie = item.implied_expectations || item.valuation_lane?.implied_expectations;
+    if (ie?.implied_5y_fcf_cagr != null) {
+        const oor = ie.implied_out_of_range;
+        chips.push(`<span class="px-1.5 py-0.5 rounded text-[9px] font-mono" style="border:1px solid color-mix(in srgb,${oor ? '#f97316' : '#a1a1aa'},transparent 70%)" title="${escapeHtmlDc(ie.sanity_note || '')}">implied 5Y FCF <b style="color:${oor ? '#f97316' : 'var(--text-main)'}">${(ie.implied_5y_fcf_cagr * 100).toFixed(0)}%</b>${oor ? ' ⚠' : ''}${ie.actual_3y_fcf_cagr != null ? ` <span class="text-zinc-500">vs ${(ie.actual_3y_fcf_cagr * 100).toFixed(0)}% act</span>` : ''}</span>`);
+    }
+    const ash = item.valuation_archetype_shadow;
+    if (ash?.archetype && ash.archetype !== 'balanced') {
+        chips.push(`<span class="px-1.5 py-0.5 rounded text-[9px] font-mono text-zinc-400" style="border:1px solid color-mix(in srgb,#a1a1aa,transparent 78%)" title="archetype shadow valuation">${escapeHtmlDc(ash.archetype)} ${m0(ash.weighted_fair_value_shadow)} (${ash.verdict_band_shadow || '--'})${ash.flip_vs_live ? ' <span style="color:#f97316">⚠FLIP</span>' : ''} <span class="text-zinc-600">shadow</span></span>`);
+    }
+    if (chips.length) sections.push(`<div class="flex flex-wrap gap-1 items-center">${chips.join('')}</div>`);
+
+    return sections.length
+        ? `<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800/60 space-y-2">${sections.join('')}</div>`
         : '';
 }
 
@@ -1310,8 +1479,9 @@ function buildCard(item) {
     ].filter(Boolean);
 
     // Version-specific extras — both return { html, chip } or ''
-    const v5Block      = (version === 'V5.0') ? buildV5ValuationBlock(item, wl) : '';
-    const redTeamBlock = (version === 'V5.0' || version === 'V4.8' || version === 'V4.7') ? buildRedTeamBlock(item, wl) : '';
+    // V5.1 = V5.0 + forward valuation; must inherit the full V5.0 render path.
+    const v5Block      = (version === 'V5.0' || version === 'V5.1') ? buildV5ValuationBlock(item, wl) : '';
+    const redTeamBlock = (version === 'V5.0' || version === 'V5.1' || version === 'V4.8' || version === 'V4.7') ? buildRedTeamBlock(item, wl) : '';
     const bookmarkHtml = buildVersionBookmark(version);
 
     // Entry targets block — V4.6 supports dual-track

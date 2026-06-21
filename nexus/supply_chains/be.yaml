@@ -1,346 +1,679 @@
 id: be
-title: Bloom Energy (BE) — 固態氧化物燃料電池價值鏈
+title: Bloom Energy onsite AI power chain
 theme: BE
-generated_at: '2026-05-18T13:29:00Z'
-generated_by: claude
+generated_at: '2026-06-20T05:26:29Z'
+generated_by: codex
 status: draft
 layers:
-- materials
+- materials_fuels
+- process_equipment
 - components
-- fuel_cell_systems
-- end_customer
+- system_integration
+- deployment_channels
+- customers_workloads
 modules:
-  materials:
-  - id: ceramics
-    label: 電解質陶瓷粉體
-  - id: metals
-    label: 電極金屬 (Ni / 稀土)
-  - id: fuel_feedstock
-    label: 燃料 / 工業氣體
+  materials_fuels:
+  - id: zirconia_ceramics
+    label: Zirconia / SOFC ceramic feedstock
+  - id: specialty_dopants
+    label: Scandia / yttria dopants
+  - id: electrode_metals
+    label: Nickel / base metals
+  - id: fuel_supply
+    label: Natural gas / hydrogen fuel supply
+  process_equipment:
+  - id: ceramic_processing
+    label: Ceramic processing tools
+  - id: thermal_treatment
+    label: High-temperature sintering / furnaces
+  - id: coating_deposition
+    label: Coating / deposition ecosystem
   components:
-  - id: cell_stack
-    label: 電池 / 電堆技術
-  - id: power_electronics
-    label: 功率半導體 / 逆變
-  fuel_cell_systems:
-  - id: sofc_oem
-    label: SOFC 系統 OEM
-  - id: alt_fuelcell
-    label: 替代燃料電池技術
-  - id: mfg_partner
-    label: 代工 / 製造夥伴
-  end_customer:
-  - id: hyperscaler
-    label: 雲端 / AI 超大規模業者
-  - id: colocation
-    label: Colocation 資料中心
-  - id: utility
-    label: 電力公司 / 開發商
-  - id: capital_partner
-    label: 基建資本夥伴
+  - id: sofc_stack
+    label: SOFC / SOEC stack technology
+  - id: electrical_interconnect
+    label: Switchgear / interconnect
+  - id: thermal_power_bop
+    label: Thermal and power balance-of-plant
+  - id: substitute_fuel_cells
+    label: Substitute fuel-cell platforms
+  system_integration:
+  - id: bloom_servers
+    label: Bloom Energy Server systems
+  - id: ai_server_infra
+    label: AI server infrastructure
+  - id: backup_power_alt
+    label: Backup / onsite power alternatives
+  - id: electrolyzer_systems
+    label: Hydrogen electrolyzer systems
+  deployment_channels:
+  - id: infrastructure_finance
+    label: Infrastructure finance / asset ownership
+  - id: utility_channel
+    label: Utility and grid-edge channel
+  - id: korea_developer
+    label: Korea fuel-cell project developer
+  - id: hydrogen_partner
+    label: Hydrogen / decarbonization partner
+  customers_workloads:
+  - id: cloud_ai
+    label: Cloud AI data centers
+  - id: anchor_workload
+    label: Anchor AI workloads
+  - id: colo_data_center
+    label: Colocation / enterprise data centers
+  - id: commercial_industrial
+    label: Commercial / industrial onsite power
 spine:
-- tosoh
+- iluka
 - bloom_energy
-- aep
+- brookfield_asset_management
+- oracle
+- openai
 nodes:
-- id: tosoh
-  label: Tosoh
-  layer: materials
-  module: ceramics
-  role: YSZ 氧化鋯電解質陶瓷粉體供應
+- id: tronox
+  label: Tronox
+  layer: materials_fuels
+  module: zirconia_ceramics
+  role: Mineral-sands producer with zircon exposure relevant to zirconia ceramic cost drivers.
+  ticker: TROX
+  listing: us_listed
+  stage: unknown
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: inferred cost-driver exposure; not confirmed as Bloom supplier
+- id: iluka
+  label: Iluka Resources
+  layer: materials_fuels
+  module: specialty_dopants
+  role: Zircon and rare-earth feedstock producer relevant to SOFC zirconia and scandia/yttria dopant chains.
   ticker: null
   listing: foreign_listed
-  stage: production
-  note: 東京證交所上市；SOFC 電解質粉體主要供應商
-- id: mp_materials
-  label: MP Materials
-  layer: materials
-  module: metals
-  role: 稀土氧化物 (含釔) 上游原料
-  ticker: MP
-  listing: us_listed
   stage: unknown
-  note: ''
+  market: FOREIGN
+  exchange: ASX
+  local_ticker: ILU
+  adr_ticker: null
+  country: Australia
+  investability: ''
+  proxy_tickers:
+  - TROX
+  note: inferred; scandia/zirconia bottleneck marker, not a confirmed Bloom vendor
 - id: vale
   label: Vale
-  layer: materials
-  module: metals
-  role: 鎳金屬 — SOFC 陽極 / MCFC 電極材料
-  ticker: VALE
+  layer: materials_fuels
+  module: electrode_metals
+  role: Nickel and base-metal producer relevant to SOFC anode and metallic interconnect cost exposure.
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  market: FOREIGN
+  exchange: B3
+  local_ticker: VALE3
+  adr_ticker: VALE
+  country: Brazil
+  investability: ''
+  proxy_tickers:
+  - FCX
+  note: inferred cost-driver exposure; Bloom uses non-precious-metal SOFC chemistry
+- id: williams
+  label: Williams Companies
+  layer: materials_fuels
+  module: fuel_supply
+  role: US natural-gas pipeline infrastructure supporting onsite fuel-cell fuel availability.
+  ticker: WMB
   listing: us_listed
   stage: unknown
-  note: NYSE 掛牌 ADR
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: inferred infrastructure exposure; not confirmed as direct supplier
 - id: air_products
   label: Air Products
-  layer: materials
-  module: fuel_feedstock
-  role: 氫氣 feedstock 與電解氣體供應
+  layer: materials_fuels
+  module: fuel_supply
+  role: Industrial gas and hydrogen supplier relevant to Bloom electrolyzer and hydrogen pathways.
   ticker: APD
   listing: us_listed
   stage: unknown
-  note: ''
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: inferred sector proxy; not confirmed as Bloom customer or vendor
+- id: applied_materials
+  label: Applied Materials
+  layer: process_equipment
+  module: coating_deposition
+  role: Deposition and materials-engineering equipment ecosystem relevant to advanced ceramic/electrode
+    coatings.
+  ticker: AMAT
+  listing: us_listed
+  stage: unknown
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: inferred process-equipment adjacency; no confirmed Bloom supply relationship
+- id: ngk_insulators
+  label: NGK Insulators
+  layer: process_equipment
+  module: ceramic_processing
+  role: Advanced ceramics manufacturer representing the high-reliability ceramic processing supply base.
+  ticker: null
+  listing: foreign_listed
+  stage: unknown
+  market: JP
+  exchange: TSE
+  local_ticker: '5333'
+  adr_ticker: null
+  country: Japan
+  investability: ''
+  proxy_tickers: []
+  note: industry_report/inferred SOFC ceramics benchmark; not confirmed as Bloom supplier
+- id: linde
+  label: Linde
+  layer: process_equipment
+  module: thermal_treatment
+  role: Industrial gases and thermal-process support relevant to ceramic sintering and hydrogen infrastructure.
+  ticker: LIN
+  listing: us_listed
+  stage: unknown
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: UK
+  investability: ''
+  proxy_tickers: []
+  note: inferred process and gas-supply exposure
+- id: eaton
+  label: Eaton
+  layer: components
+  module: electrical_interconnect
+  role: Switchgear, power distribution, and microgrid interconnection equipment for onsite power systems.
+  ticker: ETN
+  listing: us_listed
+  stage: unknown
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: Ireland/US
+  investability: ''
+  proxy_tickers: []
+  note: inferred complementary supplier to data-center onsite-power deployments
+- id: vertiv
+  label: Vertiv
+  layer: components
+  module: thermal_power_bop
+  role: Data-center power and thermal infrastructure supplier adjacent to Bloom-powered AI facilities.
+  ticker: VRT
+  listing: us_listed
+  stage: unknown
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: inferred complementary infrastructure; not confirmed as Bloom supplier
 - id: ceres_power
   label: Ceres Power
   layer: components
-  module: cell_stack
-  role: SteelCell SOFC 電堆技術授權商
+  module: substitute_fuel_cells
+  role: Solid-oxide cell licensing platform and technology substitute to Bloom's proprietary SOFC/SOEC
+    stack.
   ticker: null
   listing: foreign_listed
-  stage: revenue
-  note: 倫敦 AIM 上市；授權模式無自有量產
-- id: elcogen
-  label: Elcogen
+  stage: unknown
+  market: FOREIGN
+  exchange: LSE
+  local_ticker: CWR
+  adr_ticker: null
+  country: UK
+  investability: ''
+  proxy_tickers:
+  - BE
+  - FCEL
+  note: substitute technology, not part of Bloom confirmed supply chain
+- id: fuelcell_energy
+  label: FuelCell Energy
   layer: components
-  module: cell_stack
-  role: 商用 SOFC 單電池 / 電堆製造
-  ticker: null
-  listing: private
-  stage: production
-  note: 愛沙尼亞私人公司
-- id: onsemi
-  label: onsemi
-  layer: components
-  module: power_electronics
-  role: SiC 功率元件 — DC-AC 逆變 (產業層級)
-  ticker: 'ON'
+  module: substitute_fuel_cells
+  role: Stationary fuel-cell competitor using carbonate and developing solid-oxide platforms.
+  ticker: FCEL
   listing: us_listed
   stage: unknown
-  note: 無公開揭露之 Bloom design win
-- id: infineon
-  label: Infineon
-  layer: components
-  module: power_electronics
-  role: 功率半導體 — 電力轉換 (產業層級)
-  ticker: null
-  listing: foreign_listed
-  stage: unknown
-  note: ''
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: substitute/competitive platform, not a Bloom supplier
 - id: bloom_energy
   label: Bloom Energy
-  layer: fuel_cell_systems
-  module: sofc_oem
-  role: Energy Server SOFC 系統 OEM — 天然氣 / 氫氣現地發電
+  layer: system_integration
+  module: bloom_servers
+  role: Designs, manufactures, installs, and services solid-oxide Energy Server and electrolyzer systems.
   ticker: BE
   listing: us_listed
   stage: revenue
-  note: ''
-- id: doosan_fuelcell
-  label: Doosan Fuel Cell
-  layer: fuel_cell_systems
-  module: sofc_oem
-  role: SOFC / PAFC 發電系統
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed public company; AI data-center onsite power is current demand driver
+- id: quanta_computer
+  label: Quanta Computer
+  layer: system_integration
+  module: ai_server_infra
+  role: AI server ODM and Bloom site customer; expanded SOFC installation to support AI hardware manufacturing.
   ticker: null
   listing: foreign_listed
   stage: revenue
-  note: 韓國上市；採用 Ceres 授權技術
-- id: mitsubishi_hi
-  label: Mitsubishi Heavy Industries
-  layer: fuel_cell_systems
-  module: sofc_oem
-  role: 大型 SOFC-燃氣輪機混合發電
-  ticker: null
-  listing: foreign_listed
-  stage: production
-  note: 東京證交所上市
-- id: convion
-  label: Convion
-  layer: fuel_cell_systems
-  module: sofc_oem
-  role: SOFC 發電系統整合 (採用 Elcogen 電堆)
-  ticker: null
-  listing: private
-  stage: production
-  note: 芬蘭私人公司
-- id: fuelcell_energy
-  label: FuelCell Energy
-  layer: fuel_cell_systems
-  module: alt_fuelcell
-  role: 熔融碳酸鹽燃料電池 (MCFC) 平台
-  ticker: FCEL
+  market: TW
+  exchange: TWSE
+  local_ticker: '2382'
+  adr_ticker: null
+  country: Taiwan
+  investability: ''
+  proxy_tickers:
+  - SMCI
+  - DELL
+  note: confirmed Bloom customer/expansion; also structural AI server ODM node
+- id: super_micro
+  label: Super Micro Computer
+  layer: system_integration
+  module: ai_server_infra
+  role: AI server and liquid-cooling systems supplier driving power-dense data-center demand.
+  ticker: SMCI
   listing: us_listed
   stage: revenue
-  note: ''
-- id: plug_power
-  label: Plug Power
-  layer: fuel_cell_systems
-  module: alt_fuelcell
-  role: PEM 燃料電池與電解槽
-  ticker: PLUG
-  listing: us_listed
-  stage: revenue
-  note: ''
-- id: ballard_power
-  label: Ballard Power
-  layer: fuel_cell_systems
-  module: alt_fuelcell
-  role: PEM 燃料電池電堆
-  ticker: BLDP
-  listing: us_listed
-  stage: revenue
-  note: ''
-- id: sk_ecoplant
-  label: SK ecoplant
-  layer: fuel_cell_systems
-  module: mfg_partner
-  role: Bloom 韓國製造合資與分銷夥伴
-  ticker: null
-  listing: private
-  stage: production
-  note: SK 集團子公司；龜尾廠量產 Energy Server
-- id: oracle
-  label: Oracle
-  layer: end_customer
-  module: hyperscaler
-  role: AI / 雲端資料中心現地電力需求方
-  ticker: ORCL
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: recent local context flags SMCI order visibility and liquid-cooling advantage; not confirmed as
+    direct Bloom counterparty
+- id: ge_vernova
+  label: GE Vernova
+  layer: system_integration
+  module: backup_power_alt
+  role: Gas turbine and grid power alternative for large data-center onsite generation.
+  ticker: GEV
   listing: us_listed
   stage: unknown
-  note: ''
-- id: microsoft
-  label: Microsoft
-  layer: end_customer
-  module: hyperscaler
-  role: 資料中心電力需求方
-  ticker: MSFT
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: substitute power path; relevant where fuel cells compete with gas generation
+- id: caterpillar
+  label: Caterpillar
+  layer: system_integration
+  module: backup_power_alt
+  role: Diesel and gas generator supplier for backup/prime power alternatives at data centers.
+  ticker: CAT
   listing: us_listed
   stage: unknown
-  note: ''
-- id: amazon
-  label: Amazon
-  layer: end_customer
-  module: hyperscaler
-  role: AWS 資料中心電力需求方
-  ticker: AMZN
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: substitute/backup-power benchmark rather than Bloom supplier
+- id: brookfield_asset_management
+  label: Brookfield Asset Management
+  layer: deployment_channels
+  module: infrastructure_finance
+  role: Infrastructure capital partner for up to $5B of Bloom fuel-cell deployments at AI factories.
+  ticker: BAM
   listing: us_listed
-  stage: unknown
-  note: ''
-- id: alphabet
-  label: Alphabet
-  layer: end_customer
-  module: hyperscaler
-  role: Google 資料中心電力需求方
-  ticker: GOOGL
-  listing: us_listed
-  stage: unknown
-  note: ''
-- id: equinix
-  label: Equinix
-  layer: end_customer
-  module: colocation
-  role: IBX 資料中心長期 Bloom SOFC 部署客戶
-  ticker: EQIX
-  listing: us_listed
-  stage: revenue
-  note: ''
-- id: digital_realty
-  label: Digital Realty
-  layer: end_customer
-  module: colocation
-  role: Colocation 資料中心電力需求方
-  ticker: DLR
-  listing: us_listed
-  stage: unknown
-  note: ''
-- id: aep
+  stage: qualification
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: Canada/US
+  investability: ''
+  proxy_tickers:
+  - BN
+  note: confirmed announced strategic deployment partnership
+- id: american_electric_power
   label: American Electric Power
-  layer: end_customer
-  module: utility
-  role: 1 GW Bloom 供應協議 (資料中心電力)
+  layer: deployment_channels
+  module: utility_channel
+  role: Utility channel contracted for up to 1 GW of Bloom fuel-cell capacity for industrial and data-center
+    customers.
   ticker: AEP
   listing: us_listed
   stage: qualification
-  note: 2024 年 11 月 1 GW 主供應協議
-- id: brookfield
-  label: Brookfield Asset Management
-  layer: end_customer
-  module: capital_partner
-  role: AI 資料中心電力專案資本夥伴
-  ticker: BAM
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed announced capacity agreement; commercialization ramp timing still developing
+- id: sk_eternix
+  label: SK Eternix
+  layer: deployment_channels
+  module: korea_developer
+  role: Korean fuel-cell project developer partnering with Bloom for large Eco Park SOFC installations.
+  ticker: null
+  listing: foreign_listed
+  stage: qualification
+  market: KR
+  exchange: KRX
+  local_ticker: ''
+  adr_ticker: null
+  country: South Korea
+  investability: ''
+  proxy_tickers:
+  - BE
+  note: confirmed partnership; local ticker omitted due uncertainty
+- id: duke_energy
+  label: Duke Energy
+  layer: deployment_channels
+  module: utility_channel
+  role: Utility and distributed-generation asset owner with prior Bloom fuel-cell project portfolio exposure.
+  ticker: DUK
   listing: us_listed
+  stage: revenue
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed historical Bloom project portfolio exposure; may be less central than AEP for current
+    AI ramp
+- id: shell
+  label: Shell
+  layer: deployment_channels
+  module: hydrogen_partner
+  role: Hydrogen and decarbonization partner evaluating Bloom solid-oxide electrolyzer applications.
+  ticker: null
+  listing: foreign_listed
+  stage: design_partner
+  market: EU
+  exchange: LSE
+  local_ticker: SHEL
+  adr_ticker: SHEL
+  country: UK
+  investability: ''
+  proxy_tickers:
+  - APD
+  - LIN
+  note: confirmed collaboration/study; not the core AI data-center revenue spine
+- id: oracle
+  label: Oracle
+  layer: customers_workloads
+  module: cloud_ai
+  role: Cloud AI data-center customer using Bloom onsite SOFC power for Project Jupiter/New Mexico route.
+  ticker: ORCL
+  listing: us_listed
+  stage: qualification
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed announced Bloom partner/customer; local context and recent reports emphasize AI data-center
+    power pivot
+- id: openai
+  label: OpenAI
+  layer: customers_workloads
+  module: anchor_workload
+  role: Anchor AI workload behind Oracle-led cloud capacity demand; indirect pull-through for onsite power.
+  ticker: null
+  listing: private
   stage: unknown
-  note: 與 Bloom 大型資料中心電力合作
+  market: PRIVATE
+  exchange: ''
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers:
+  - MSFT
+  - ORCL
+  - NVDA
+  note: industry_report/inferred indirect demand through Oracle; not confirmed direct Bloom customer
+- id: alphabet
+  label: Alphabet
+  layer: customers_workloads
+  module: cloud_ai
+  role: Early Bloom customer and hyperscale cloud operator with onsite power and data-center demand exposure.
+  ticker: GOOGL
+  listing: us_listed
+  stage: revenue
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed historical Bloom installation; current AI expansion relevance is structural
+- id: equinix
+  label: Equinix
+  layer: customers_workloads
+  module: colo_data_center
+  role: Colocation data-center operator and large onsite fuel-cell adoption case.
+  ticker: EQIX
+  listing: us_listed
+  stage: revenue
+  market: US
+  exchange: NASDAQ
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed customer category; data-center onsite reliability use case
+- id: walmart
+  label: Walmart
+  layer: customers_workloads
+  module: commercial_industrial
+  role: Retail and logistics onsite-power customer for distributed fuel-cell generation.
+  ticker: WMT
+  listing: us_listed
+  stage: revenue
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed historical Bloom customer
+- id: fedex
+  label: FedEx
+  layer: customers_workloads
+  module: commercial_industrial
+  role: Logistics and facilities customer for resilient onsite power.
+  ticker: FDX
+  listing: us_listed
+  stage: revenue
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed historical Bloom customer
+- id: bank_of_america
+  label: Bank of America
+  layer: customers_workloads
+  module: commercial_industrial
+  role: Financial-services facilities customer for onsite distributed generation.
+  ticker: BAC
+  listing: us_listed
+  stage: revenue
+  market: US
+  exchange: NYSE
+  local_ticker: ''
+  adr_ticker: null
+  country: US
+  investability: ''
+  proxy_tickers: []
+  note: confirmed historical Bloom customer
 edges:
-- from: mp_materials
-  to: tosoh
-  rel: SUPPLIES_TO
-  note: 稀土 / 釔氧化物原料
-- from: tosoh
+- from: tronox
   to: bloom_energy
   rel: SUPPLIES_TO
-  note: YSZ 電解質陶瓷
-- from: tosoh
-  to: ceres_power
+  note: inferred zirconia ceramic cost driver, not confirmed vendor
+- from: iluka
+  to: bloom_energy
   rel: SUPPLIES_TO
-  note: 氧化鋯電解質材料
-- from: tosoh
-  to: mitsubishi_hi
-  rel: SUPPLIES_TO
-  note: ''
+  note: inferred zircon/scandia/rare-earth dopant exposure, not confirmed vendor
 - from: vale
   to: bloom_energy
   rel: SUPPLIES_TO
-  note: 陽極用鎳
-- from: vale
-  to: ceres_power
+  note: inferred nickel/base-metal electrode cost driver
+- from: williams
+  to: bloom_energy
   rel: SUPPLIES_TO
-  note: 鎳金屬
-- from: vale
-  to: fuelcell_energy
-  rel: SUPPLIES_TO
-  note: MCFC 鎳電極
+  note: inferred natural-gas fuel infrastructure relevance
 - from: air_products
   to: bloom_energy
   rel: SUPPLIES_TO
-  note: 氫燃料 SOFC 變體用氫氣
-- from: air_products
-  to: plug_power
+  note: inferred hydrogen/industrial-gas adjacency
+- from: applied_materials
+  to: bloom_energy
   rel: SUPPLIES_TO
-  note: 氫氣供應
-- from: air_products
-  to: ballard_power
+  note: inferred coating/deposition equipment adjacency
+- from: ngk_insulators
+  to: bloom_energy
   rel: SUPPLIES_TO
-  note: 氫氣供應
+  note: inferred ceramic-processing benchmark, unconfirmed
+- from: linde
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: inferred thermal-process gas adjacency
+- from: eaton
+  to: bloom_energy
+  rel: SUPPLIES_TO
+  note: inferred switchgear/interconnect adjacency for onsite power projects
+- from: vertiv
+  to: oracle
+  rel: SUPPLIES_TO
+  note: inferred data-center power/cooling adjacency; not Bloom-specific
 - from: ceres_power
-  to: doosan_fuelcell
+  to: shell
+  rel: CO_DEVELOPS_WITH
+  note: substitute SOFC/SOEC technology path; not Bloom chain
+- from: bloom_energy
+  to: brookfield_asset_management
+  rel: CO_DEVELOPS_WITH
+  note: confirmed up to $5B AI factory deployment partnership
+- from: bloom_energy
+  to: american_electric_power
   rel: SUPPLIES_TO
-  note: SOFC 電堆技術授權
-- from: elcogen
-  to: convion
+  note: confirmed up to 1 GW capacity agreement for industrial/data-center customers
+- from: bloom_energy
+  to: sk_eternix
   rel: SUPPLIES_TO
-  note: SOFC 單電池與電堆
-- from: onsemi
-  to: bloom_energy
+  note: confirmed Korea Eco Park SOFC deployment partnership
+- from: bloom_energy
+  to: duke_energy
   rel: SUPPLIES_TO
-  note: SiC 功率元件 (產業層級，無揭露)
-- from: infineon
-  to: bloom_energy
+  note: confirmed historical distributed fuel-cell project portfolio exposure
+- from: bloom_energy
+  to: shell
+  rel: CO_DEVELOPS_WITH
+  note: confirmed electrolyzer/decarbonization study
+- from: brookfield_asset_management
+  to: oracle
   rel: SUPPLIES_TO
-  note: 功率半導體 (產業層級，無揭露)
-- from: sk_ecoplant
-  to: bloom_energy
-  rel: CONTRACT_MFG_FOR
-  note: 韓國龜尾廠代工 Energy Server
-- from: sk_ecoplant
-  to: bloom_energy
-  rel: INVESTOR_IN
-  note: 策略投資人兼分銷商
+  note: confirmed/industry_report AI factory deployment route building on Oracle agreement
+- from: american_electric_power
+  to: oracle
+  rel: SUPPLIES_TO
+  note: inferred utility channel for data-center/industrial demand, customer not specifically confirmed
+- from: bloom_energy
+  to: oracle
+  rel: SUPPLIES_TO
+  note: confirmed Bloom onsite fuel-cell power route for Oracle AI data center
+- from: bloom_energy
+  to: quanta_computer
+  rel: SUPPLIES_TO
+  note: confirmed existing installation expansion for AI hardware manufacturing
+- from: quanta_computer
+  to: oracle
+  rel: SUPPLIES_TO
+  note: inferred AI server ODM exposure; direct project link unconfirmed
+- from: super_micro
+  to: oracle
+  rel: SUPPLIES_TO
+  note: inferred AI server demand adjacency; recent local context flags SMCI orders, not direct Bloom
+    edge
+- from: oracle
+  to: openai
+  rel: SUPPLIES_TO
+  note: industry_report cloud capacity/workload route; indirect Bloom demand
+- from: bloom_energy
+  to: alphabet
+  rel: SUPPLIES_TO
+  note: confirmed historical Bloom installation/customer
 - from: bloom_energy
   to: equinix
   rel: SUPPLIES_TO
-  note: IBX 資料中心現地 SOFC 發電
+  note: confirmed data-center fuel-cell customer category
 - from: bloom_energy
-  to: aep
+  to: walmart
   rel: SUPPLIES_TO
-  note: 1 GW 供應協議 (2024-11)
-- from: brookfield
-  to: bloom_energy
-  rel: INVESTOR_IN
-  note: AI 資料中心電力專案合作
-- from: plug_power
-  to: amazon
+  note: confirmed historical commercial onsite-power customer
+- from: bloom_energy
+  to: fedex
   rel: SUPPLIES_TO
-  note: 氫燃料電池 (物料搬運)
-- from: plug_power
-  to: microsoft
+  note: confirmed historical commercial onsite-power customer
+- from: bloom_energy
+  to: bank_of_america
   rel: SUPPLIES_TO
-  note: 資料中心備援燃料電池試點
+  note: confirmed historical commercial onsite-power customer
+- from: ge_vernova
+  to: oracle
+  rel: SUPPLIES_TO
+  note: substitute onsite generation path; recent Project Jupiter pivot moved away from gas plant per
+    reports
+- from: caterpillar
+  to: oracle
+  rel: SUPPLIES_TO
+  note: backup/prime-power substitute path, inferred

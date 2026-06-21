@@ -16,6 +16,7 @@ from compute_price_framework import (  # noqa: E402
     compute_fair_value_summary,
     compute_implied_expectations,
     compute_mhp,
+    reconcile_confidence,
 )
 
 FAILS = []
@@ -118,10 +119,44 @@ eq("deg.band", mhp4["short_term_5d"]["band"], [48.0, 50.0, 52.0])       # cataly
 eq("deg.5d_conf", mhp4["short_term_5d"]["confidence"], "low")
 eq("deg.low_conf_note", "僅供參考" in mhp4["convergence"]["signal_note"], True)
 
+# ── Fixture 5: V4.46.0 confidence ← anchor dispersion (two-tier cv cap) ──────
+# Tier LOW — ARM-shaped: 6 anchors span 50x, cv=1.20 (>= 0.60) -> cap to "low".
+ARM_ANCHORS = {"dcf_unlevered": 8.0, "dcf_levered": 12.08, "analyst_pt_consensus": 163.75,
+               "peer_pe_implied": 40.62, "owner_earnings_mult": 3.17, "forecaster_blend": 122.76}
+fvs5 = compute_fair_value_summary(ARM_ANCHORS, 374.52)
+rng5 = compute_fair_value_range(ARM_ANCHORS, 374.52, {})
+eq("agree.count_conf_high", fvs5["confidence"], "high")          # before reconcile (6 anchors)
+eq("agree.cv_extreme", rng5["anchor_dispersion_cv"] >= 0.60, True)
+eq("agree.dispersion_ratio", rng5["dispersion_ratio"], round(163.75 / 3.17, 2))
+reconcile_confidence(fvs5, rng5)
+eq("agree.capped_low", fvs5["confidence"], "low")                # after reconcile
+eq("agree.kept_count_based", fvs5["confidence_count_based"], "high")
+eq("agree.capped_by_set", fvs5["confidence_capped_by"].startswith("anchor_dispersion"), True)
+
+# Tier MEDIUM — AAPL-shaped: cv≈0.45 (0.35 <= cv < 0.60) -> cap high to "medium".
+AAPL_ANCHORS = {"dcf_unlevered": 152.4, "dcf_levered": 145.7, "analyst_pt_consensus": 326.5,
+                "peer_pe_implied": 226.3, "owner_earnings_mult": 29.2, "forecaster_blend": 208.3}
+fvs7 = compute_fair_value_summary(AAPL_ANCHORS, 250.0)
+rng7 = compute_fair_value_range(AAPL_ANCHORS, 250.0, {})
+eq("agree.cv_moderate", 0.35 <= rng7["anchor_dispersion_cv"] < 0.60, True)
+reconcile_confidence(fvs7, rng7)
+eq("agree.capped_medium", fvs7["confidence"], "medium")
+eq("agree.med_kept_count_based", fvs7["confidence_count_based"], "high")
+
+# Tier NONE — converging anchors (cv < 0.35) keep their count-based confidence.
+TIGHT = {"dcf_unlevered": 100.0, "dcf_levered": 102.0, "analyst_pt_consensus": 105.0,
+         "peer_pe_implied": 98.0, "owner_earnings_mult": 101.0}
+fvs6 = compute_fair_value_summary(TIGHT, 100.0)
+rng6 = compute_fair_value_range(TIGHT, 100.0, {})
+eq("agree.tight_cv_low", rng6["anchor_dispersion_cv"] < 0.35, True)
+reconcile_confidence(fvs6, rng6)
+eq("agree.tight_conf_kept", fvs6["confidence"], "high")
+eq("agree.tight_no_cap", fvs6.get("confidence_capped_by"), None)
+
 # ──────────────────────────────────────────────────────────────────────────────
 if FAILS:
     print(f"✗ {len(FAILS)} regression(s):")
     for f in FAILS:
         print("  -", f)
     sys.exit(1)
-print("✓ all golden fixtures pass (4 fixtures, 26 asserts)")
+print("✓ all golden fixtures pass (5 fixtures, 38 asserts)")

@@ -496,15 +496,53 @@ Top-level snapshot field:
   "valuation_output": "future_price_range_shadow",
   "changes_live_decision": false,
   "horizon_date": "2030-03-31",
+  "horizon_basis": "terminal_margin_normalized",
+  "horizon_years": 4.6,
+  "horizon_coverage": 11,
+  "reporting_to_trading_fx": 1.0,
   "method": "eps_x_pe",
   "range": {"low": 60.0, "base": 100.0, "high": 150.0},
   "cases": {
     "bear": {"target_price": 60.0, "upside_pct": -40.0, "metric": "eps_consensus", "metric_value": 4.0, "multiple": 15.0},
     "base": {"target_price": 100.0, "upside_pct": 0.0, "metric": "eps_consensus", "metric_value": 5.0, "multiple": 20.0},
     "bull": {"target_price": 150.0, "upside_pct": 50.0, "metric": "eps_consensus", "metric_value": 6.0, "multiple": 25.0}
-  }
+  },
+  "trajectory": [
+    {"date": "2028-03-31", "years_out": 2.6, "coverage": 30, "thin_coverage": false, "consensus_eps": 4.0,
+     "is_terminal": false, "targets": {"bear": 80.0, "base": 88.0, "bull": 110.0},
+     "cumulative_upside_pct": {"base": 41.6}, "annualized_pct": {"base": 14.2}},
+    {"date": "2030-03-31", "years_out": 4.6, "coverage": 11, "thin_coverage": true, "consensus_eps": 5.0,
+     "is_terminal": true, "targets": {"bear": 60.0, "base": 100.0, "high": 150.0},
+     "cumulative_upside_pct": {"base": 0.0}, "annualized_pct": {"base": 0.0}}
+  ]
 }
 ```
+
+**Currency normalization (V4.42.0).** For a foreign-domiciled ADR, FMP statements/estimates
+are in the company's **reporting currency** (TSM→TWD, ASML/SAP→EUR) while the ADR price /
+market cap / multiple anchor are in the **trading currency** (USD). `reporting_to_trading_fx`
+is the divisor that converts reporting-currency EPS / revenue / FCF into the trading currency
+before any price-currency multiple is applied (1.0 = no conversion). It is resolved in the
+top-level `currency_normalization` node via `resolve_reporting_fx()` — priority: income
+statement `reportedCurrency==USD` → 1.0; FMP forex `{CUR}USD` → 1/rate; else implied from the
+statement-vs-ADR EPS ratio when the gap is currency-scale (>5×); else parity. A
+defense-in-depth **sanity gate** flags `currency_unit_suspect` and falls back to the
+self-consistent advisory band whenever a price-basis forecast's base target lands >6× or <1/6
+of the current price (a currency-unit mismatch that slipped through). Shadow-only; never
+alters live decisions.
+
+**Per-FY annualized glide trajectory (V4.40.0).** `trajectory[]` gives a target price for
+each forward fiscal year as a geometric glide path TO the headline terminal target
+(`implied = current × (terminal/current)^(t/T)`), so the annualized rate is constant along
+the path. It is NOT a per-year re-valuation: for a hypergrowth name the near-year price is
+dominated by an unknowable multiple assumption, and re-valuing each FY at today's rich
+multiple explodes the target (tautology trap). Each row carries `years_out`, analyst
+`coverage`, a `thin_coverage` flag (<20 analysts), that FY's `consensus_eps` for context,
+`is_terminal`, and bear/base/bull `targets` + `cumulative_upside_pct` + `annualized_pct`.
+Past/already-reported fiscal years (`years_out ≤ 0`) are excluded. The headline
+`horizon_date` remains the terminal (farthest) row — that is where growth has cooled enough
+for the mature multiple + margin normalization to apply (`horizon_basis:
+terminal_margin_normalized`).
 
 Supported mapping order:
 
@@ -528,17 +566,31 @@ Multiple source priority (EXP-R1):
    to `status: advisory_band_only` with warnings `derived_current_market_multiple_used` and
    `current_price_volatility_band_not_forecast`. → `multiple_quality: derived`.
 
-**Growth-tier compression (EXP-3.4).** The historical regime reflects PAST growth, so
-applying a hyper-growth-era multiple onto a horizon metric consensus says has plateaued
+**Multiple compression (EXP-3.4 / V4.40.0 PEG terminal P/E).** The historical regime
+reflects PAST growth, so applying a hyper-growth-era multiple onto a horizon metric
 overshoots (NVDA ~57x, ARM ~151x). `forward_expectations_multiple_compression.py` haircuts
-the historical band toward the level the FORWARD growth justifies:
-`effective = historical × growth_factor` (dimension-agnostic across P/E·P/S·P/FCF), and for
-P/E an absolute ceiling per tier caps the median while the band is scaled proportionally so
-dispersion survives. The forward growth signal is the consensus estimate-window CAGR
-(eps→P/E, revenue→P/S). Tiers: hypergrowth ≥0.25 (×1.00, ≤55x) · growth ≥0.15 (×0.82, ≤45x) ·
-moderate ≥0.07 (×0.66, ≤35x) · slowing ≥0.03 (×0.52, ≤28x) · mature <0.03 (×0.40, ≤22x). The
-applied band carries `compressed`, `growth_tier`, `compression_factor`, and the original
-`historical_band` for audit. Method becomes `historical_regime_growth_compressed`.
+the historical band toward the level FORWARD growth justifies.
+
+- **P/E — bound to TERMINAL growth (not the calendar year).**
+  `terminal_pe = clamp(2.2 × terminal_growth_pct, 20, 60)`, then the historical P/E band is
+  pulled to `min(historical_p50, terminal_pe)` with the dispersion scaled proportionally.
+  `terminal_growth` is the revenue YoY entering the terminal (horizon) year, with a
+  thin-coverage noise guard: if the terminal year RE-ACCELERATES vs the prior step and its
+  analyst coverage is thin (<20), the prior, better-grounded YoY is used instead
+  (`terminal_growth_basis = prior_year_yoy_terminal_noise_guard`). This avoids both a flat
+  ceiling that wrongly caps durable AI-infra compounders and freezing today's hypergrowth
+  multiple forever — as growth decelerates the deserved P/E compresses automatically.
+  The applied band carries `growth_tier: peg_terminal`, `terminal_pe_peg`,
+  `compression_factor`, `historical_band`; method `peg_terminal_growth_bound`. The anchor's
+  `compression` block echoes `terminal_growth`, `terminal_growth_basis`, `terminal_pe_peg`.
+  Because compression now needs the per-FY revenue path, `compress_anchor` runs AFTER the
+  financial bridge is built. (NVDA: hist 57x, terminal growth 13.7% → PEG 30x. ARM: hist
+  151x, growth >27% → clamped to the 60x ceiling.) The PEG constants (2.2 / 20 / 60) are the
+  calibration lever.
+- **P/S, P/FCF (and P/E fallback when no terminal-growth signal):** legacy growth-tier
+  factor `effective = historical × growth_factor` on the consensus estimate-window CAGR.
+  Tiers: hypergrowth ≥0.25 (×1.00) · growth ≥0.15 (×0.82) · moderate ≥0.07 (×0.66) ·
+  slowing ≥0.03 (×0.52) · mature <0.03 (×0.40). Method `historical_regime_growth_compressed`.
 
 **Margin normalization (EXP-3.4b).** The bridge holds today's net margin to the horizon,
 which bakes monopoly economics into the EPS for a supernormal-margin company. When the
@@ -549,8 +601,11 @@ which would underestimate a genuine platform franchise. A floor at the company's
 margin × 0.85 protects structurally high-margin franchises. The bridge is
 revenue_scenario × margin_scenario → normalized net income → normalized EPS, and that EPS
 band overrides the held-margin consensus EPS in the price-range eps path
-(`eps_basis=margin_normalized`). NVDA: held 60% → bear/base/bull 37/48/60% → base ≈ $252
-vs the $776 held-margin figure.
+(`eps_basis=margin_normalized`). NVDA: held 60% → bear/base/bull 37/48/60%; combined with the
+PEG terminal P/E (30x on 13.7% terminal growth) the terminal base ≈ $562 (ann ~+24%/yr).
+(NB: an earlier ≈$252 base was an artifact of a truncated `limit=3` estimate fetch that made
+far-out revenue look flat → mis-tiered NVDA as "mature" → 22x; the `limit=6` fix + PEG
+correct it.)
 
 The builder prefers an explicit/historical forecast over the derived advisory band, and
 auto-selects the metric whose historical regime is usable (e.g. P/S over a noisy P/E).

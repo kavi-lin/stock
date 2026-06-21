@@ -231,14 +231,25 @@ def _trend_method(income_annual):
 
 
 def forward_eps_bundle(income_annual, estimates):
-    m1 = _cagr_method(income_annual)
-    m2 = _consensus_method(estimates)
-    m3 = _trend_method(income_annual)
+    m1 = _cagr_method(income_annual)      # trailing EPS CAGR  (backward-looking)
+    m2 = _consensus_method(estimates)     # analyst consensus  (ONLY forward-looking method)
+    m3 = _trend_method(income_annual)     # trend regression   (backward-looking)
     methods = {"cagr": m1, "consensus": m2, "trend": m3}
     vals = [v for v in methods.values() if v is not None and v > 0]
     if not vals:
         return None, methods, None, None
+    # Preserve the governed live adoption rule. A consensus-dominant alternative
+    # is recorded only as a shadow candidate so it cannot silently move the live
+    # forecaster_blend anchor before comparison and user approval.
     adopted = stats.median(vals) if len(vals) >= 3 else sum(vals) / len(vals)
+    methods["adoption_rule"] = "live_median" if len(vals) >= 3 else "live_mean"
+    trailing = [v for v in (m1, m3) if v is not None and v > 0]
+    if m2 is not None and m2 > 0 and trailing:
+        trailing_mean = sum(trailing) / len(trailing)
+        divergence = abs(m2 - trailing_mean) / m2
+        if divergence > 0.15:
+            methods["shadow_consensus_dominant_candidate"] = round(0.6 * m2 + 0.4 * trailing_mean, 4)
+            methods["shadow_candidate_reason"] = f"trailing divergence {divergence * 100:.0f}%"
     spread = (max(vals) - min(vals)) / adopted if adopted > 0 else 0
     if len(vals) >= 3 and spread <= 0.10:
         confidence = "HIGH"

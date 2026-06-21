@@ -62,13 +62,65 @@ def _earnings_cache_for(ticker: str, earnings_cache_dir: str = EARNINGS_CACHE_DI
     return _read_json(files[-1])
 
 
-def _actuals(earnings_cache: dict | None) -> dict:
-    yoy = ((earnings_cache or {}).get("derived") or {}).get("yoy_growth") or {}
-    return {
-        "revenue_yoy": _num(yoy.get("revenue_yoy")),
-        "eps_yoy": _num(yoy.get("earnings_yoy")),
-        "as_of": (earnings_cache or {}).get("as_of_date") or (earnings_cache or {}).get("last_earnings_date"),
-    }
+def _year(value):
+    try:
+        return int(str(value)[:4])
+    except (ValueError, TypeError):
+        return None
+
+
+def _geomean_cagr(yoy_growths: list) -> float | None:
+    """Annualized rate from a sequence of single-year YoY growths (same basis as a
+    consensus estimate-window CAGR). Returns None if any year swings through ≤ -100%
+    (sign flip / loss year) where a geometric mean is undefined."""
+    factors = [1.0 + g for g in yoy_growths]
+    if not factors or any(f <= 0 for f in factors):
+        return None
+    product = 1.0
+    for f in factors:
+        product *= f
+    return product ** (1.0 / len(factors)) - 1.0
+
+
+def _annual_growth_index(earnings_cache: dict | None, metric: str) -> dict:
+    """{fiscal_year:int -> realized YoY growth} from the cache's realized annual_growth.
+    EPS uses netIncomeGrowth as a same-basis proxy (no realized per-share series in cache)."""
+    field = "revenueGrowth" if metric == "revenue_growth" else "netIncomeGrowth"
+    out = {}
+    for row in (earnings_cache or {}).get("annual_growth") or []:
+        if not isinstance(row, dict):
+            continue
+        year = _year(row.get("date")) or _year(row.get("fiscalYear"))
+        growth = _num(row.get(field))
+        if year is not None and growth is not None:
+            out[year] = growth
+    return out
+
+
+def _realized_window_cagr(earnings_cache: dict | None, window_from, window_to, metric):
+    """Realized annualized growth over the SAME [window_from, window_to] the forecast
+    CAGR spans — built from realized per-FY YoY growths. Returns (cagr, status):
+      actual_not_comparable_yet  — forecast horizon has not elapsed (window_to > latest realized FY)
+      actual_basis_unavailable   — elapsed but a window FY is missing / sign-flips
+      comparable                 — every window FY realized → same-basis realized CAGR
+    Deliberately NOT a trailing-1yr YoY (the previous apples-to-oranges bug)."""
+    year_from, year_to = _year(window_from), _year(window_to)
+    if year_from is None or year_to is None or year_to <= year_from:
+        return None, "window_unparseable"
+    index = _annual_growth_index(earnings_cache, metric)
+    if not index:
+        return None, "actual_basis_unavailable"
+    if year_to > max(index):
+        return None, "actual_not_comparable_yet"
+    growths = []
+    for year in range(year_from + 1, year_to + 1):
+        if year not in index:
+            return None, "actual_basis_unavailable"
+        growths.append(index[year])
+    cagr = _geomean_cagr(growths)
+    if cagr is None:
+        return None, "actual_basis_unavailable"
+    return cagr, "comparable"
 
 
 def _forecast_points(snapshot: dict) -> list[dict]:
@@ -80,6 +132,7 @@ def _forecast_points(snapshot: dict) -> list[dict]:
             "metric": "revenue_growth",
             "forecast_value": consensus.get("revenue_cagr"),
             "forecast_basis": "estimate_window_cagr",
+            "window_from": consensus.get("window_from"),
             "window_to": consensus.get("window_to"),
         })
     if consensus.get("eps_cagr") is not None:
@@ -88,6 +141,7 @@ def _forecast_points(snapshot: dict) -> list[dict]:
             "metric": "eps_growth",
             "forecast_value": consensus.get("eps_cagr"),
             "forecast_basis": "estimate_window_cagr",
+            "window_from": consensus.get("window_from"),
             "window_to": consensus.get("window_to"),
         })
     revision = snapshot.get("estimate_revision_snapshot") or {}
@@ -107,26 +161,31 @@ def _forecast_points(snapshot: dict) -> list[dict]:
 
 def evaluate_snapshot(snapshot: dict, earnings_cache: dict | None = None) -> dict:
     ticker = snapshot.get("ticker")
-    actual = _actuals(earnings_cache)
+    as_of = (earnings_cache or {}).get("as_of_date") or (earnings_cache or {}).get("last_earnings_date")
     rows = []
     for point in _forecast_points(snapshot):
-        actual_key = "revenue_yoy" if point["metric"] == "revenue_growth" else "eps_yoy"
-        actual_value = actual.get(actual_key)
+        actual_value = direction_hit = ape = None
+        actual_basis = None
         if point["forecast_basis"] != "estimate_window_cagr":
+            # future-level snapshots have no realized same-basis actual to score against.
             status = "actual_not_comparable_yet"
-            ape = direction_hit = None
-        elif actual_value is None:
-            status = "actual_not_available"
-            ape = direction_hit = None
         else:
-            status = "comparable"
-            ape = _abs_pct_error(point["forecast_value"], actual_value)
-            direction_hit = _direction_hit(point["forecast_value"], actual_value)
+            actual_value, status = _realized_window_cagr(
+                earnings_cache, point.get("window_from"), point.get("window_to"), point["metric"],
+            )
+            if status == "window_unparseable":
+                status = "actual_basis_unavailable"
+            if status == "comparable":
+                actual_basis = "realized_window_cagr"
+                ape = _abs_pct_error(point["forecast_value"], actual_value)
+                direction_hit = _direction_hit(point["forecast_value"], actual_value)
+            else:
+                actual_value = None
         rows.append({
             **point,
-            "actual_value": actual_value if point["forecast_basis"] == "estimate_window_cagr" else None,
-            "actual_basis": "latest_yoy" if point["forecast_basis"] == "estimate_window_cagr" else None,
-            "actual_as_of": actual.get("as_of"),
+            "actual_value": actual_value,
+            "actual_basis": actual_basis,
+            "actual_as_of": as_of,
             "status": status,
             "absolute_pct_error": round(ape, 4) if ape is not None else None,
             "direction_hit": direction_hit,
@@ -168,21 +227,38 @@ def summarize(rows: list[dict], min_n: int = MIN_CALIBRATION_N) -> dict:
     }
 
 
-def run_calibration(snapshot_dir: str = SNAPSHOT_DIR, earnings_cache_dir: str = EARNINGS_CACHE_DIR,
-                    min_n: int = MIN_CALIBRATION_N) -> dict:
-    evaluations = []
-    all_rows = []
+def _latest_snapshot_per_ticker(snapshot_dir: str) -> list[dict]:
+    """Re-running the engine on the same ticker writes many near-identical snapshots; counting
+    each as an independent forecast inflated the sample (8 AAPL re-runs → 8 rows). Keep only the
+    latest snapshot per ticker so the calibration sample reflects true breadth, not re-run count."""
+    latest = {}
     for path in _snapshot_files(snapshot_dir):
         snapshot = _read_json(path)
         if not isinstance(snapshot, dict):
             continue
+        ticker = (snapshot.get("ticker") or "").upper()
+        if not ticker:
+            continue
+        stamp = snapshot.get("generated_at") or snapshot.get("run_id") or os.path.basename(path)
+        if ticker not in latest or stamp > latest[ticker][0]:
+            latest[ticker] = (stamp, snapshot)
+    return [snapshot for _, snapshot in sorted(latest.values(), key=lambda item: item[0])]
+
+
+def run_calibration(snapshot_dir: str = SNAPSHOT_DIR, earnings_cache_dir: str = EARNINGS_CACHE_DIR,
+                    min_n: int = MIN_CALIBRATION_N) -> dict:
+    evaluations = []
+    all_rows = []
+    snapshots = _latest_snapshot_per_ticker(snapshot_dir)
+    for snapshot in snapshots:
         cache = _earnings_cache_for(snapshot.get("ticker") or "", earnings_cache_dir)
         evaluation = evaluate_snapshot(snapshot, cache)
         evaluations.append(evaluation)
         all_rows.extend(evaluation["rows"])
     return {
-        "engine": "forward_expectations_calibration.py v1",
+        "engine": "forward_expectations_calibration.py v2 (same-basis realized window + dedup)",
         "snapshot_count": len(evaluations),
+        "deduped_from_files": len(_snapshot_files(snapshot_dir)),
         "summary": summarize(all_rows, min_n),
         "evaluations": evaluations,
     }

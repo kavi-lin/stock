@@ -1486,6 +1486,21 @@ def load_forward_outlook(ticker):
         'multiple_quality': fpr.get('multiple_quality'),
         'method': fpr.get('method'),
         'horizon_date': fpr.get('horizon_date'),
+        # V4.40.0 — near horizon + per-FY annualized trajectory (shadow context only)
+        'horizon_basis': fpr.get('horizon_basis'),
+        'horizon_years': fpr.get('horizon_years'),
+        'horizon_coverage': fpr.get('horizon_coverage'),
+        'trajectory': [
+            {
+                'date': r.get('date'),
+                'years_out': r.get('years_out'),
+                'thin_coverage': r.get('thin_coverage'),
+                'base_target': (r.get('targets') or {}).get('base'),
+                'base_annualized_pct': (r.get('annualized_pct') or {}).get('base'),
+                'base_cumulative_pct': (r.get('cumulative_upside_pct') or {}).get('base'),
+            }
+            for r in (fpr.get('trajectory') or [])
+        ],
         'range': {'bear': rng.get('low'), 'base': rng.get('base'), 'bull': rng.get('high')},
         'upside_pct': {k: (cases.get(k) or {}).get('upside_pct') for k in ('bear', 'base', 'bull')},
         'expectations_gap_status': ((d.get('expectations_gap') or {}).get('summary') or {}).get('status'),

@@ -8,6 +8,315 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.46.0] — 2026-06-20 — 現值估值 confidence 接錨點一致性（破假精確；全標的通用）
+
+### Changed
+- `investment/scripts/compute_price_framework.py` — 新增 `reconcile_confidence(fvs, frange)`：`fair_value_summary.confidence` 不再只看「有幾個錨點回傳數字」(n≥5→high)，改以**錨點離散 cv 兩段式封頂**：`cv≥0.60→low`、`0.35≤cv<0.60→medium`、`<0.35` 不動（門檻常數 `CONF_CAP_CV_LOW` / `CONF_CAP_CV_MEDIUM`）。count-based 仍存進 `confidence_count_based`，封頂原因記 `confidence_capped_by`。`compute_fair_value_range` 新增 `dispersion_ratio`（max/min 錨點倍數）。`main()` 在 MHP/archetype 之前 reconcile。`ENGINE_VERSION` → v1.1 (V4.46.0)。
+- `Dashboard/page-decisions.js` `buildFvExtras` Track A（現值估值）— `anchor_dispersion_cv≥0.60` 時：FV 點改灰、非 strong、label `FV ~$X` + tooltip「單點不可靠，看區間」；caption 加 `⚠ 錨點分散 N×，單點 FV 不可靠`（橙、雙語 tooltip）。**刻意不綁 `agreement_grade`**（grade 在 cv≥0.35 即 low，因 owner_earnings_mult 是全科技股結構性低離群值會整片誤報）；cv<0.60 的中度分散維持正常單點 + MEDIUM 標示。
+- `investment/scripts/test_compute_price_framework.py` — 新增 Fixture 5：三層 cv（ARM 1.20→low / AAPL 0.45→medium / tight <0.35→不動）+ dispersion_ratio。**5 fixtures, 38 asserts**。
+- `Dashboard/data.json` — 一次性 backfill 既有現值 snapshot：13 筆補 `dispersion_ratio`，8 筆 confidence 重算（cv≥0.6→low：TSM/ARM/AMD/PLTR/GOOGL；0.35–0.6→medium：AAPL/NOK/MU）。
+
+### Why
+- ARM 案例：6 錨點 $3.17–$163.75（DCF/owner-earnings 把前瞻成長股當成熟現金流公司估，崩到 $3–$12），加權成單點 $52 卻標 `confidence: high`、`extreme_overvalued`。confidence 舊邏輯只數「有幾個錨點」不看「是否一致」，對輸入分散 50× 的 blend 是假精確。引擎其實已在 `fair_value_range` 算出 cv=1.20，只是沒回灌。
+- **校準關鍵**：backfill dry-run 發現 12 筆有 grade 的 snapshot **全部 grade=low**（含 AAPL）—— 因 `owner_earnings_mult` 對幾乎所有科技股都是結構性低離群值，cv 普遍 >0.35。直接綁 grade 會讓科技股 confidence 一律 low、失去鑑別度。故改 cv 兩段式：極端分散（ARM 50×、PLTR）→low，中度分散（AAPL 11×）→medium。
+- **通用、非 per-ticker**。不自動剔除「垃圾錨點」（median-ratio 會誤殺 ARM 的 analyst PT），重新加權交給 `hypergrowth` archetype（已存在，shadow-only 待 ≥20 session 翻轉率報告才 live）。
+
+## [4.45.1] — 2026-06-20 — Forward glide 標籤自解釋（hover affordance + 雙語 tooltip）
+
+### Changed
+- `Dashboard/page-decisions.js` `buildFvExtras` Track B caption row：jargon chip（`glide ±N%/yr` / `FORECAST` / `ADVISORY BAND` / `<tier>↓` 倍數壓縮 / `margin↓` / `shadow-only`）改走共用 `jt()` helper — 加 dotted-underline + `cursor:help` 視覺提示，並掛**繁中/英雙語白話 tooltip**。`shadow-only` 先前無 tooltip 現補上。
+
+### Why
+- TSM 等卡片前瞻區的縮寫標籤（peg_terminal↓ / margin↓ / glide）對使用者過於 cryptic，且「逐年下降」易被誤讀為基本面衰退。tooltip 點出真正機制：**終期倍數按成長降速壓縮 + 淨利率正常化**，逐年數字是沿單一年化 glide 內插（非每年重估），且 **shadow-only 不入 live 決策**。dotted underline 提示「可 hover 查定義」。
+
+## [4.45.0] — 2026-06-20 — 供應鏈 Wave B：UI 訊號下鑽 + FMP budget tiering + node 人工校正
+
+### Added
+- `Dashboard/page-supply-chain.js` + `supply-chain.html`（#7 UI 下鑽）— detail panel edge row 新增 `direction` chip：`⚠ 方向衝突`（紅，Nexus 有向邊反向、信心已 1.0→0.5）/ `✓ 方向確認`（綠）。node card + detail 新增 `stale`（⏳ 半透明）、`user_status`（✓ confirmed 綠框 / ⚑ flagged 黃虛線框）視覺標記。Wave A 算出的 direction/stale 訊號終於進 UI。
+- `scripts/nexus/supply_chain.py`（#8 node override）— `load_overrides()` / `save_override()` / `_apply_overrides()`：user 對 node 的修正存 `nexus/supply_chains/overrides/<slug>.json`（sidecar，**永不改寫 LLM YAML**），enrich() serve 時 merge（修正欄位優先、如同手動編輯，corrected ticker 會流經 grounding+FMP）。支援 status(confirmed/flagged/none) + field 修正(ticker/market/listing/adr_ticker/local_ticker/note/proxy_tickers) + note。清空（status=none 無 note/fields）自動移除 entry。
+- `dashboard_server.py` — `POST /api/supply-chain/<slug>/override`（驗 slug + node_id 存在 → `save_override` → pop `_sc_cache[slug]` 強制重 enrich）。detail panel「✓ 確認 / ⚑ 標記問題 / 清除」button → POST → reload → 重開同 node panel。
+- `data_quality` 新增 `override_count` / `fmp_peers_deferred` / `fmp_budget_headroom`。
+- `tests/test_supply_chain_enrichment.py` — 5 個 Wave B test（override 修正+status、clear 移除、bad status reject、budget 低時週邊 node 跳過 name-search、budget 健康時允許）。全檔 **23 pass**。
+
+### Changed
+- `scripts/nexus/supply_chain.py` `enrich()`（#5 FMP budget tiering）— spine / 有 ticker / 高 fan-out(≥2 downstream) node 列為 priority 優先驗證；budget headroom <0.5 時週邊 node 只服務 peers cache（`_fetch_peers(allow_network=False)`）並跳過 name-search，確保結構關鍵 node 不因 budget 耗盡而失驗。profile cache TTL 7d→30d（profile 幾乎不變，省 budget）。
+- `nexus/supply_chains/SCHEMA.md` — 補 override sidecar + budget tiering + `data_quality` 新欄位說明。
+
+### Why
+Wave A 把方向校驗/stale 算了出來但只在 JSON；Wave B 讓這些訊號進 UI 並補上前次規劃的三項：#5 budget tiering（避免 21 chains × 30 nodes 把 2000/day budget 燒乾後核心 node 全失驗）、#7 把 direction/stale 下鑽到 detail/card、#8 讓 user 不必開 YAML 就能確認/標記/修正 LLM 畫錯的 node（sidecar 不污染 LLM 草稿）。供應鏈 8 項 gap 分析至此 Wave A+B 全收口。
+
+## [4.44.0] — 2026-06-20 — 供應鏈 Wave A：edge 方向校驗 + corroborated 回寫閉環 + stale flag + relative heat + ADR 補全
+
+### Added
+- `scripts/nexus/supply_chain.py` `_direction_check()` — edge 方向校驗（供應鏈 gap #1）。digest co-mention 是對稱訊號（只證「相關」非「誰供誰」），改用 Nexus *directed* SUPPLIES_TO / CONTRACT_MFG_FOR edge 校驗 LLM 畫的箭頭：`confirmed` / `conflict` / `unverified`。corroborated edge 若方向與 Nexus 矛盾 → weight 1.0→0.5 + `relation_evidence.direction` 標記。
+- `scripts/nexus/supply_chain.py` `export_corroborated_edges()` + CLI `--export-edges [--chain SLUG] [--export-graph-refresh]`（#2 回寫閉環）。把 digest-corroborated、方向乾淨的 edge 升級成 `bn_*.json`（schema 對齊 `build_artifacts.py`），餵 Nexus tier-1 晉升 provisional 供應鏈 edge。**opt-in batch path，不在 `enrich()` serve 路徑**（serve 維持唯讀紀律）；source 標 `supply_chain`（非 `break_news:`）故下次 enrich 不會把自己當獨立 break-news 佐證 → 無增強迴圈。跨 chain dedup 取 max support_count + source 聯集。
+- `scripts/nexus/supply_chain.py` `_heat_relative()` / `_percentile()`（#6）— heat 改相對該 chain 自身 mention 分布的 33/67 百分位分級，取代絕對 magic number（≥40 hot 等）；`_HEAT_HOT_FLOOR=8` 防低活躍 chain 憑單一 mention 造 hot；活躍節點 <4 時 fallback 絕對 `_heat`。
+- node 新增 `stale` / `stale_reason`（#3）— llm_only grounding + 無 heat + verification llm_only 且 chain age > `SUPPLY_CHAIN_STALE_DAYS`(45) → flag（UI 灰用，**永不刪**，不與 FMP budget off 混淆）。`data_quality` 加 `stale_node_count` / `chain_age_days`。
+- `tests/test_supply_chain_enrichment.py` — 7 個 Wave A golden test（direction confirmed/conflict、stale aged vs fresh、relative-heat 高 spread downgrade、foreign ADR 升級、corroborated relation payload、conflict 排除）。全檔 18 pass。
+
+### Changed
+- `scripts/nexus/supply_chain.py` `enrich()` name_match 分支（#4）— foreign_listed node 無 ticker 但 search-name 命中 US 交易所 symbol → 視為 ADR，補 `adr_ticker` → investability 由 opaque FOREIGN 升級成可交易 proxy。
+- `nexus/supply_chains/SCHEMA.md` — 補記新 serve-time 計算欄位（`direction` / `stale` / `stale_reason` / `data_quality` 擴充）。
+
+### Why
+針對供應鏈系統 8 項 gap 分析，Wave A 收口純後端高 ROI 三組：方向校驗修核心語義錯（co-mention 對稱、LLM 箭頭可能反）、corroborated 回寫把白拿的高信心訊號送回 KG 形成閉環、stale/relative-heat/ADR 三項提升 grounding 準確度與覆蓋。Wave B（UI edge 下鑽 / budget tiering / node override）留待後續。relation co-mention 門檻刻意維持絕對值：相對門檻會讓 edge 信心取決於無關 node、破壞可重現性與 golden test。
+
+## [4.43.6] — 2026-06-20 — Decision Review 優化：agent_score_stdev 落地 + accumulating_data stall 規則 + Rec 7 常設化
+
+### Added
+- `scripts/extractors/deep_dive_extractor.py` — deep-dive `tuning_hooks` 新增 `agent_score_stdev`（四 lane score 母體標準差）+ `agent_score_count`。解鎖 TODO-013：下輪 REVIEW 可把 0–1 分數帶拆成「弱訊號(低 stdev)」vs「agent 高分歧(高 stdev)」，判別 Pattern A 是「HOLD 閾值太鬆」還是「高分歧該降倉」。Shadow 欄位，<2 lane 時為 None。
+- `scripts/diff_verdict_flips.py` (NEW) — 重建 TODO-010 的 verdict flip-rate 追蹤器（原報告誤稱已備、實際從未 commit）。讀 ≥2 個 `event_index_YYYY-MM-DD.json` snapshot，量「窗口未完成(<100%)→完成(100%)」時 verdict.label 翻轉率。本輪跑 N=194 / flip_rate **13.4%** 落 observe band（與 06-07 12% 一致）→ 不加 provisional。`--json` / `--show-flips` / `--dir`，唯讀 rc=0。
+
+### Changed
+- `reports/decision_review/REVIEW_PROMPT.md` — Step -1 carry-over 新增 `stalled` 狀態：`accumulating_data` 類樣本 N 連續 3 輪不增長 → 改「以現有 N 直接評估或 drop」，不再無限 still_waiting（修 accumulating_data 模型在上游停產時的死等缺陷）。
+- `reports/decision_review/ADJUSTMENT_LEDGER.md` — Rec 7 加 `standing_monitor`：heat asymmetry gap 已穩定 ≥15pp，轉常設 tripwire（gap <15pp 連 3 週才 paused），移出 Active TODO 佇列。
+- `reports/decision_review/REVIEW_TODO.md` — TODO-007 → `promoted-to-ledger`（轉 Rec 7 standing_monitor）；TODO-003 → `stalled`（momentum N=24 凍結 4 週，下輪以現 N 直接評或 drop）。
+
+### Why
+本週 LLM 檢討報告（REVIEW_2026-06-20）核心發現：保守決策 miss 率是進取的 ~3 倍（59% vs 20%）、半導體佔 51% miss，根因疑在 0–1 分數帶 default HOLD 過保守——但缺 `agent_score_stdev` 無法分離「弱訊號」與「agent 高分歧」兩種成因，所有後續修正都卡在此 instrumentation。先落地該欄位解鎖判別；同時清掉兩個流程缺陷（樣本凍結死等、已穩定 Rec 仍逐週佔 TODO slot）。
+
+## [4.43.5] — 2026-06-20 — 供應鏈 Rerun：資料新鮮度、生成模型、增量更新
+
+### Added
+- **供應鏈頁 freshness metadata**：控制列右側顯示供應鏈 `generated_at` 的新鮮度 badge：
+  Fresh `0-2D`、Aging `3-7D`、Stale `>7D · Rerun`，並顯示生成 LLM 與 full/incremental mode。
+- **YAML metadata**：新生成鏈條寫入 `refresh_mode`、`source_scope`、`previous_generated_at`、
+  `previous_generated_by`。既有 `generated_by` / `generated_at` 現在會在 UI 明確露出。
+- **CLI rerun**：`python3 scripts/nexus/supply_chain.py --theme <T> --rerun` 會載入同 slug 既有 YAML
+  作為 previous-chain context。
+
+### Changed
+- `Rerun` 不再等同整份重抓。後端會載入前一版 chain，傳給 LLM 當 baseline，要求保留仍有效的
+  nodes/layers/modules/edges，只根據最新 local context / model 可用 public sources 做增量更新。
+- `/api/supply-chain/generate` 接受 `rerun: true`；後端 protocol log 會記錄 rerun 與 previous 是否存在。
+- `SCHEMA.md` 補充 `generated_at` 不是每個底層 source 的抓取時間；需搭配 `source_scope` 與 note evidence markers
+  判斷資料新鮮度。
+
+### Why
+- 使用者需要知道圖譜是哪一天、哪個 LLM 生成，才能判斷是否需要重跑；同時 rerun 應該參考前版差異更新，
+  不應每次從零重建造成結構漂移。
+
+## [4.43.4] — 2026-06-20 — 供應鏈頁：主題 Rerun 重新抓取
+
+### Added
+- **供應鏈探索頁新增 `Rerun` 按鈕**：選定既有 supply-chain theme 後，可直接把同一主題重新送進
+  `/api/supply-chain/generate` 佇列，完成後覆寫同一 slug YAML 並由前端輪詢載入新版。
+- Rerun 按鈕會在未選擇 chain 時 disabled；選中後 tooltip 顯示將重新抓取的 theme。
+
+### Changed
+- `page-supply-chain.js` 將 Generate / Rerun 共用同一個 queue helper，保持既有 progress pill 與輪詢行為。
+- 後端不新增 API；沿用既有 `supply_chain_generate` protocol。dedup 仍只擋同 slug active/pending，不擋已完成主題重跑。
+
+### Why
+- 使用者需要針對同一供應鏈主題重新抓最新 local context / Nexus / news 後重建圖譜，不必手動重打主題。
+
+## [4.43.3] — 2026-06-20 — 供應鏈探索：材料型產業 prompt 稽核強化
+
+### Changed
+- **`supply_chain_system.md` 新增材料/製程型供應鏈規則**：MLCC、電池、基板、光學、化學品、
+  power components 等主題不再只列 finished-component makers，需拆 upstream functional materials、
+  constrained minerals/additives、製程/設備瓶頸、finished-component product tiers、downstream
+  demand cycles 與 substitutes/package-level alternatives。
+- **新增規格/需求分層要求**：以 MLCC 為例，要求區分 high-capacitance / high-voltage / low-ESL /
+  automotive-grade / AI-server parts 與 commodity 0402/0603 consumer parts，避免把 AI server 缺料
+  外推成全 MLCC 週期。
+- **新增 cost-driver hygiene 與 source-confidence note**：MLCC 需區分 BaTiO3/陶瓷粉、鎳或 base-metal
+  electrode、銅/錫端電極、貴金屬 exposure 僅限相關 noble-metal electrode 產品、稀土/摻雜與燒結能源成本；
+  note 可標 `confirmed` / `industry_report` / `inferred` / `stale` / `contested`。
+- **新增 Final Self-Review**：LLM 輸出前需自查是否漏上游材料/設備/替代技術、是否過度泛化單一熱門規格、
+  是否亂填 ticker/listing/stage、是否混淆 customer/deployment/manufacturing/end market。
+
+### Why
+- MLCC 討論暴露原供應鏈探索容易抓到單一應用或 finished maker，卻漏掉材料、製程、規格分層與替代技術。
+  本版先用 prompt 層強化探索紀律，不改 YAML schema、不改 Dashboard parser，降低破壞面。
+
+## [4.43.2] — 2026-06-20 — Forward Expectations calibration 誠實化：修 gate 假性 fail（同口徑 + 已到期窗 + 去重）
+
+### Fixed
+- **`forward_expectations_calibration.py` v2 — 三個方法學缺陷讓 shadow→live gate 假性 fail**
+  （WAPE 0.77 / bias −0.46 / n=100，全是 artifact，非引擎預測差）：
+  - **基準錯配**：原本拿 consensus **多年 forward CAGR** 比 `derived.yoy_growth` 的**單年 trailing
+    YoY**（蘋果比橘子；CAGR 內含減速 < 火熱單年 → 81/100 系統性偏低 → bias −0.46）。改為對
+    **同窗 realized CAGR**：由 `annual_growth` 各 FY YoY 幾何平均出 [window_from, window_to] 同口徑
+    年化率（`_realized_window_cagr` / `_geomean_cagr`，sign-flip 年回 None 不硬算）。
+  - **未到期就計分**：forecast 窗 2027–2031，但 actual 取的是 2026 trailing。改為 `window_to >
+    最新已實現 FY` → `actual_not_comparable_yet`（不計分）；已到期但缺窗內某 FY → `actual_basis_unavailable`
+    （**不**退回 trailing YoY）。
+  - **重複 snapshot 灌水 n**：同股 re-run 寫多份近似 snapshot（8× AAPL 算 8 row）。
+    `_latest_snapshot_per_ticker` 只留每股最新（依 generated_at），sample 反映真實廣度。
+
+### Changed
+- 實測 gate 由 **fail (WAPE 0.77, n=100)** → **insufficient_evidence (comparable=0)**：56 snapshot
+  檔 → 13 去重 ticker → 48 forecast row 全 `actual_not_comparable_yet`（最早窗 2027 > 最新實現 FY 2026）。
+  仍誠實擋住 shadow→live，但理由正確（無已到期窗可計分，非引擎差）。calibration golden 9→25 asserts。
+
+### Why
+- gate 是 shadow→live 的唯一閘；它用錯指標就會永遠誤判，EXP-4.5 升 live 報告也建立在錯數據上。
+  治本是「同口徑 + 只比已實現 + 去重」，讓 gate 反映事實：目前樣本不足（窗未到期），而非預測不準。
+  待 2027+ 窗陸續到期，calibration 才會累積真正可計分的 comparable row。
+
+## [4.43.1] — 2026-06-20 — 供應鏈外股常見公司 backfill
+
+### Added
+- `supply_chain.enrich()` 新增 deterministic 外股 backfill map：舊 YAML 只要有 `listing:
+  foreign_listed` 且公司名命中常見台/韓/日/歐供應鏈公司，就自動補 `market/exchange/local_ticker/
+  adr_ticker/country`。
+- 初始覆蓋：TSMC、Samsung Electronics、SK hynix、Tokyo Electron、Advantest、Disco、
+  Lasertec、Renesas、Murata、Ibiden、Shinko Electric、Hon Hai/Foxconn、Quanta、Wistron、
+  Inventec、Pegatron、Wiwynn、Delta Electronics、MediaTek、ASE、GlobalWafers、Nanya、
+  Winbond、ASML、ASM International、Infineon、STMicroelectronics。
+
+### Fixed
+- 舊供應鏈 YAML 未填 `market/local_ticker` 時，台股/韓股/日股節點會退回顯示 `FOREIGN`。
+  現在常見名稱會直接顯示 `TW:2330`、`KR:005930`、`JP:8035` 等；人工填過的欄位不會被覆蓋。
+
+### Why
+- V4.43.0 已讓新生成供應鏈能填本地市場資訊，但既有鏈條仍缺 metadata。backfill 讓舊資料立即
+  改善，不需要一次手改所有 YAML。
+
+## [4.43.0] — 2026-06-20 — 供應鏈頁：外股市場標示 + 上下游投資摘要
+
+### Added
+- **供應鏈節點市場欄位**：YAML / generator schema 新增 `market`、`exchange`、`local_ticker`、
+  `adr_ticker`、`country`、`investability`、`proxy_tickers`。台股/韓股/日股不再被壓成
+  「未上市」；前端卡片可顯示 `TW:2330`、`KR:005930`、`JP:8035`、`ADR:TSM` 等。
+- **`chain_report` deterministic 摘要**：`supply_chain.enrich()` 產出可投資節點、瓶頸/槓桿節點、
+  私有/觀察節點與 proxy、關係信心統計、高信心上下游關係。0 LLM，僅使用現有 YAML、Nexus、
+  digest relation evidence 與 FMP 公司 profile。
+- **Dashboard 上下游投資摘要面板**：供應鏈圖上方新增「可投資標的 / 瓶頸節點 / 私有公司與替代標的 /
+  高信心關係」四欄，讓頁面從純探索圖譜升級為可掃讀的上下游報告入口。
+
+### Changed
+- 供應鏈生成提示從「US-equity supply-chain analyst」改成「global supply-chain analyst for a
+  US-focused investor」，明確要求外國上市公司填本地 market/ticker，且只在有明確重疊時列
+  private/pre-IPO proxy。
+- 供應鏈 detail panel 新增市場與可投資性，legend 將「外股」改為「台/韓/日等外股」。
+
+### Why
+- 原頁面把許多台股/韓股/日股節點和真正私有公司混在一起，容易把「非美上市」誤讀成「不可交易」。
+  供應鏈投資決策需要先分清交易可及性、ADR/複委託需求與 private proxy。
+- 單純節點圖回答的是「誰連到誰」，但投資上更需要「誰是瓶頸、誰有上下游槓桿、哪些關係有佐證、
+  哪些私有公司可用上市替代標的觀察」。本版先用 deterministic report 做探索層摘要，不改
+  investment protocol 的評分、門檻或部位規則。
+
+## [4.42.0] — 2026-06-20 — Forward Expectations 貨幣正規化：修 ADR (TWD/EUR…) 前瞻股價 ~30× 爆衝
+
+### Fixed
+- **`forward_expectations_price_range.py` — reporting→trading 貨幣單位錯配（治本）**：
+  FMP 對外國註冊 ADR（TSM→TWD、ASML/SAP→EUR…）的三表/估計用**記帳幣別**（TWD），
+  但 ADR 股價 / 市值 / multiple anchor 是**交易幣別**（USD）。引擎把 TWD EPS 直接乘上
+  USD P/E → 前瞻股價膨脹整整一個 FX 倍率（TSM base 從 broken **$11,491 (+2598%)** 變正常
+  **$363**，對齊 blended FV）。新增 `reporting_to_trading_fx` 參數：EPS / revenue-per-share /
+  fcf-per-share 在乘 price-currency multiple **前先 ÷ fx** 轉成 USD（含 derived band 自洽、
+  trajectory consensus_eps 顯示）。
+- 新增純函式 **`resolve_reporting_fx()`**（可離線測）：優先序 reportedCurrency==USD → 1.0；
+  FMP forex `{CUR}USD` → 1/rate；否則由 statement TTM EPS vs ADR EPS 的 currency-scale ratio
+  （>5×）反推；皆無 → parity。
+- **Sanity gate（防護網）**：price-basis forecast 的 base target / 現價 **>6× 或 <1/6** 視為
+  漏網的幣別錯配 → 退回自洽 advisory band（base≈現價，FX 抵消）並標 `currency_unit_suspect`
+  warning，永不把爆炸值寫進卡片。anchor 可用導致無 derived 退路時，**動態合成** current-price
+  derived band。
+
+### Changed
+- **`forward_expectations.py`** 新增 `_currency_normalization()`：fetch **income-statement
+  `reportedCurrency`**（權威來源；**非** `profile.currency`，後者對 ADR 是 USD 交易幣別會誤判 parity）
+  + forex pair + quote EPS，best-effort 餵 `resolve_reporting_fx()`；no-fetch / 失敗 → parity
+  由 sanity gate 兜底。輸出新增 `currency_normalization` 節點。
+- **`forward_expectations_margin_normalization.py`** 標 `value_currency_basis="reporting_currency"`
+  註明 normalized_eps 為記帳幣別、轉換在 price_range 發生。
+
+### Why
+- TSM「未來前瞻」glide chart 對非 USD 記帳 ADR 直接畫衝天線（+2598%），雖屬 shadow-only **不污染**
+  live 決策（buy_threshold / position_size 不受影響），但卡片數字為 garbage。`--no-fetch` advisory
+  band 路徑（純現價 ±vol）因自洽而恰好遮住此 bug，須 fetch 歷史 multiple anchor 才暴露。
+- 治本（FX 轉換）+ 防護網（sanity gate）雙層：FX 正確時 forecast 存活；FX 不明 / 偵測失敗時
+  gate 仍保證不爆。新增 TSM TWD golden fixture（含 fx-applied 與 fx-unknown 兩路）防回歸。
+- 連帶查證 live blend 的 `peer_pe_implied`（compute_price_framework）：`eps_ttm = 現價(USD)/pe_self(USD)`
+  → **USD 自洽，無同款污染**；偏高純為 peer-multiple 失配，已由 LOW-agreement 折讓。
+
+## [4.41.0] — 2026-06-18 — 決策卡 v5.1 估值區改 price-axis number-line 視覺化
+
+### Changed
+- **`page-decisions.js` `buildFvExtras` 全重寫**：原本 6 條扁平 monospace 文字列
+  （Range / 5D Band / Implied CAGR / Archetype / Forward / Glide）改成兩條 CSS 定位的
+  **price-axis number-line track**：
+  - **Track A 現值估值** — p25–p75 range 著色帶（顏色=agreement grade）+ FV tick + 現價
+    marker（現價>FV 紅、<FV 綠，spatially 讀出高估/低估）；caption 收 AGREE grade / anchor
+    count / min–max anchor / range_verdict。
+  - **Track B 未來前瞻 (shadow)** — **time×price 折線圖**（X=年、Y=推估價）：base glide line
+    現價→horizon，terminal bear/bull 畫成 fan + %；下方保留每 FY「年→價」精確 chips。
+    bear/base/bull 同屬一個 horizon 年，純價格軸無法表達「哪一年」，故改時間軸折線。
+    caption 收 glide 年化%/yr / FORECAST·ADVISORY badge / compress·margin↓ / shadow-only。
+  - momentum signal / implied 5Y FCF CAGR / archetype shadow 收成 track 下方 compact chips。
+- 新增 helper **`buildValAxis(domLo, domHi, band, markers, h)`**（Track A，純 CSS price axis）
+  + **`buildGlideChart(refPrice, traj, fe, zh)`**（Track B，inline SVG time×price 折線，
+  overflow-visible labels），皆 themeable（`--text-main` / hex）。
+
+### Why
+- v5.1 卡估值資料很豐富（現值 vs 6-anchor range vs 5 年 forward vs glide），但原本全是
+  等寬扁平文字列，沒有共同尺規、沒有視覺層次，掃讀時看不出「現在高估、未來大漲」這個
+  present-vs-future 張力。改成同尺規 number-line 後一眼讀出各價位相對位置。
+- 全 advisory / shadow-only 標籤、tooltip、版本閘行為不變；缺 block 的舊 entry 仍整段隱藏。
+
+## [4.40.1] — 2026-06-17 — 修 V5.1 卡片整段空白（fair value + red team 被版本閘擋掉）
+
+### Fixed
+- **`page-decisions.js` V5.1 render 回歸**：4.40.0 新增 `detectProtocolVersion` → 有
+  `forward_expectations.trajectory` 的卡判為 `'V5.1'`，但卡片組裝處 `v5Block` / `redTeamBlock`
+  仍硬閘 `version === 'V5.0'`。結果 V5.1 卡**整段 fair value summary（6-anchor blend）+ Forward
+  shadow row + Glide trajectory + Red Team block 全部不渲染** → 卡片看起來只剩 dual-track entry，
+  資訊大幅消失。閘改為 `=== 'V5.0' || === 'V5.1'`，V5.1 完整繼承 V5.0 render path 再疊上前瞻列。
+
+### Why
+- 新版本徽章不該砍掉它本要「補強」的區塊。V5.1 = V5.0 + 前瞻估值，必須是**疊加**不是**取代**。
+
+## [4.40.0] — 2026-06-17 — PEG terminal P/E + 近年年化 glide trajectory + 修 limit=3 估計截斷（EXP-3.5）
+
+### Fixed
+- **`fetch.py` annual estimates `limit` 3→6**：FMP `/stable/analyst-estimates?period=annual`
+  以日期**降冪**回傳，`limit=3` 只拿到最遠 3 年（NVDA FY2029/30/31），把覆蓋最完整的近年
+  （FY2027 39 analysts、FY2028 41）整批丟掉。連帶後果嚴重：截斷後的遠期營收看似**人為走平**
+  （NVDA 584→529→585B ≈ 0% 成長），讓 EXP-3.4 把高成長股**誤判成 mature** → 壓到 22x →
+  NVDA base ≈ $252（先前被當成「命中」的數字其實是壞資料假象）。`limit=6` 取回近年。
+
+### Changed
+- **EXP-3.5 PEG terminal P/E（`forward_expectations_multiple_compression.py` v1.1）**：P/E 壓縮
+  由「成長 tier 絕對天花板」改為**綁定 terminal 成長**：`terminal_pe = clamp(2.2 ×
+  terminal_growth_pct, 20, 60)`，歷史 band 拉到 `min(historical_p50, terminal_pe)` 並等比保留
+  dispersion。`terminal_growth` = 進入終期年的營收 YoY，含**薄覆蓋雜訊守門**（終期年相對前一年
+  re-accelerate 且 analyst<20 → 改用前一年 YoY，`terminal_growth_basis=prior_year_yoy_terminal_noise_guard`）。
+  不再用固定 35x 砍掉 AI 基建複利股，也不凍結今天的高倍數。NVDA 57x→30x（13.7% 終期成長）、
+  ARM 151x→60x（觸頂）。`compress_anchor` 因此移到 financial bridge 之後執行。
+- **近年年化 glide trajectory（`forward_expectations_price_range.py` v1.1）**：新增 `trajectory[]`，
+  逐 FY 給目標價 = 錨定 terminal target 的幾何 glide（`current ×(terminal/current)^(t/T)`，
+  年化率沿途恆定），附 `years_out`/`coverage`/`thin_coverage`(<20)/`consensus_eps`/`is_terminal`。
+  **不**用今天高倍數重估每年（避開 tautology 爆衝）。已申報/過去 FY（years_out≤0）剔除。headline
+  `horizon_date` 維持 terminal（`horizon_basis=terminal_margin_normalized`），因 mature 倍數 +
+  margin 正常化只在成長冷卻的終期成立。
+- bridge row 加 `coverage`（per-FY analyst 數）；`forward_price_range.py` 文字輸出、`bridge.py`
+  L1 payload、**`decisions.html` 決策卡新增「Glide」行**（`page-decisions.js`：base 年化 + 逐年
+  chips + thin 標記 + hover cum%/ann%/coverage）+ Forward 行補 horizon 年數。
+- **決策卡版號 badge 新增 `V5.1`**（`page-decisions.js` `detectProtocolVersion`）：卡的
+  `forward_expectations.trajectory` 非空（= snapshot 已用 4.40 新引擎重生）→ 角落版號顯示
+  teal `V5.1`，與舊 `V5.0`/`V4.x` 卡區別。舊 snapshot 無 trajectory → 維持原版號。系統全域
+  VERSION 不動（V5.1 是 per-card protocol 標記，非系統版本）。
+
+### Net effect (NVDA)
+- terminal base $252（壞資料）/ $1024（正確資料 + 無壓縮）→ **$562**（PEG 30x，ann ~+24%/yr）。
+- 年化 glide：FY2027 ~$237(+14%) → FY2028 ~$294(+42%) → terminal FY2031 $562(+171%)。
+
+### Why
+上個 session 驗證的 $252 是 `limit=3` 截斷造成的「假成熟」假象；修對資料後 NVDA 變回 hypergrowth
+→ 55x → terminal $1024（定價完美、不可作 base）。根因是 EXP-3.4 用「到 horizon 的 CAGR」決定壓縮，
+把「現在成長快」等同「terminal 該給高倍數」。改成 PEG-綁定 terminal 成長後，倍數隨成長降速自動壓縮，
+且近年年化目標價直接呈現，解決「不該只看 4.6yr 單點」的問題。Shadow-only，不入 live 決策。
+
+### Tests
+- `test_forward_expectations_multiple_compression.py`（+PEG/noise-guard/clamp asserts）、
+  `test_forward_expectations_price_range.py`（+glide trajectory）、
+  `test_forward_expectations_financial_bridge.py`（+coverage）全綠；forward 全套 + adapter +
+  framework golden rc=0。
+
 ## [4.39.0] — 2026-06-17 — Margin 正常化 path：去除凍結壟斷利潤率的樂觀（EXP-3.4b）
 
 ### Added

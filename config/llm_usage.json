@@ -1,20 +1,20 @@
 {
-  "date": "2026-06-15",
+  "date": "2026-06-21",
   "models": {
     "claude": {
-      "calls": 2,
+      "calls": 0,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
-        "input": 14935,
-        "output": 85930,
-        "cache_read": 3418803,
-        "cache_write": 216877,
-        "cost_usd": 6.168703
+        "input": 0,
+        "output": 0,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cost_usd": 0.0
       }
     },
     "gemini": {
-      "calls": 44,
+      "calls": 13,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
@@ -26,7 +26,7 @@
       }
     },
     "codex": {
-      "calls": 38,
+      "calls": 5,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {

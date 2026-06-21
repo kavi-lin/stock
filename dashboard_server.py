@@ -638,8 +638,15 @@ def _run_custom_protocol(name, params=None):
                     theme = str(params.get("theme") or "").strip()
                     if not theme:
                         raise RuntimeError("missing theme")
-                    lf.write(f"theme={theme}\n")
-                    chain = _sc.enrich(_sc.generate(theme))
+                    rerun = bool(params.get("rerun"))
+                    slug = str(params.get("slug") or _sc.slugify(theme))
+                    previous = _sc.load(slug) if rerun else None
+                    lf.write(f"theme={theme} rerun={rerun} previous={bool(previous)}\n")
+                    chain = _sc.enrich(_sc.generate(
+                        theme,
+                        previous_chain=previous,
+                        rerun=rerun and previous is not None,
+                    ))
                     _sc_cache[chain["id"]] = {"data": chain, "ts": time.time()}
                     lf.write(f"generated id={chain.get('id')} nodes={len(chain.get('nodes') or [])} "
                              f"edges={len(chain.get('edges') or [])}\n")
@@ -1021,6 +1028,7 @@ def enqueue_protocol(name, params=None, source="direct"):
         if not theme:
             return None, "missing theme"
         params["theme"] = theme
+        params["rerun"] = bool(params.get("rerun"))
         slug = _sc.slugify(theme) if SUPPLY_CHAIN_AVAILABLE else theme.lower().replace(" ", "_")[:48]
         params["slug"] = slug
         with _protocol_lock:
@@ -4494,12 +4502,47 @@ class Handler(SimpleHTTPRequestHandler):
             theme = (body.get("theme") or "").strip()
             if not theme:
                 return self._json(400, {"error": "missing theme"})
-            state, err = enqueue_protocol("supply_chain_generate", {"theme": theme}, source="supply_chain")
+            state, err = enqueue_protocol(
+                "supply_chain_generate",
+                {"theme": theme, "rerun": bool(body.get("rerun"))},
+                source="supply_chain",
+            )
             if err == "duplicate":
                 return self._json(409, state)
             if err:
                 return self._json(400, {"error": err})
             return self._json(202, state)
+        if path.startswith("/api/supply-chain/") and path.endswith("/override"):
+            # V4.45.0 — user node correction sidecar. Writes nexus/supply_chains/
+            # overrides/<slug>.json; never rewrites the LLM-drafted YAML. enrich()
+            # merges it at serve time (corrected fields win, like a manual edit).
+            if not SUPPLY_CHAIN_AVAILABLE:
+                return self._json(503, {"error": "supply_chain module not loaded"})
+            slug = path[len("/api/supply-chain/"):-len("/override")]
+            if not _sc_slug_re.match(slug):
+                return self._json(400, {"error": "invalid slug"})
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            node_id = str(body.get("node_id") or "").strip()
+            chain = _sc.load(slug)
+            if chain is None:
+                return self._json(404, {"error": "chain not found"})
+            if node_id not in {str(n.get("id")) for n in chain.get("nodes") or []}:
+                return self._json(400, {"error": "unknown node_id"})
+            try:
+                _sc.save_override(
+                    slug, node_id,
+                    status=body.get("status"),
+                    fields=body.get("fields") if isinstance(body.get("fields"), dict) else None,
+                    note=body.get("note"),
+                )
+            except ValueError as e:
+                return self._json(400, {"error": str(e)})
+            _sc_cache.pop(slug, None)  # force re-enrich on next GET
+            return self._json(200, {"status": "ok", "slug": slug, "node_id": node_id})
         if path == "/api/break-news/raw/debate":
             if not BREAK_NEWS_AVAILABLE:
                 return self._json(503, {"error": "break_news module not loaded"})

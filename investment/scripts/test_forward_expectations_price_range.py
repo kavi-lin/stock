@@ -117,5 +117,67 @@ no_price = pr.build_future_price_range("TEST", None, BRIDGE, {}, {})
 check("no_price.available", no_price["available"], False)
 check("no_price.warning", no_price["warnings"][0], "current_price_missing")
 
+# ── V4.40.0 glide trajectory: per-FY annualized path TO the terminal target ─────
+print("Fixture H (annualized glide trajectory):")
+gt = pr.build_future_price_range(
+    "TEST", 50, BRIDGE, {}, {"pe_range": {"p25": 15, "p50": 20, "p75": 25}},
+    as_of_date="2026-12-31",
+)
+traj = gt["trajectory"]
+check("traj 2 forward rows", len(traj), 2)
+check("traj headline still terminal (farthest)", gt["horizon_date"], "2028-12-31")
+check("traj terminal flagged", traj[-1]["is_terminal"], True)
+check("traj terminal base = 5*20 = 100", traj[-1]["targets"]["base"], 100.0)
+# near FY ~1yr: 50*(100/50)^(1/2) = 70.7 (glide to terminal, not re-valued at rich multiple)
+check("traj near base glide ~70.7", traj[0]["targets"]["base"], 70.7, tol=0.4)
+check("traj annualized constant along path",
+      traj[0]["annualized_pct"]["base"], traj[-1]["annualized_pct"]["base"], tol=0.2)
+check("traj exposes consensus eps", traj[-1]["consensus_eps"], 5.0)
+check("traj past FY excluded (none before as_of)", all(r["years_out"] > 0 for r in traj), True)
+
+# ── V4.41.0 currency normalization (TSM TWD → USD ADR regression) ──────────────
+print("Fixture I (reporting-currency EPS converted via FX → sane, no explosion):")
+# Reporting-currency (TWD) EPS band ~32× a USD ADR; USD P/E anchor 15/18/22; price $100 USD.
+TWD_BRIDGE = {
+    "available": True,
+    "historical_conversion": {"diluted_share_count": 100},
+    "rows": [{
+        "date": "2028-12-31",
+        "revenue": {"point": 38400, "low": 32000, "high": 44800},   # TWD scale
+        "eps_consensus": {"point": 160.0, "low": 96.0, "high": 192.0},  # TWD; /32 → 5/3/6 USD
+        "free_cash_flow": {"point": 5760, "low": 4480, "high": 7040},
+    }],
+}
+TWD_ANCHOR = {"by_metric": {"pe": {"usable": True, "p25": 15, "p50": 18, "p75": 22, "n": 5,
+                                   "dispersion_ratio": 1.4, "source": "fmp_ratios_annual_history"}}}
+fx_fix = pr.build_future_price_range("TSM", 100, TWD_BRIDGE, {}, {}, TWD_ANCHOR,
+                                     reporting_to_trading_fx=32.0, as_of_date="2026-12-31")
+check("fx.quality historical (forecast survives)", fx_fix["multiple_quality"], "historical")
+check("fx.base = (160/32)*18 = 90 (USD)", fx_fix["cases"]["base"]["target_price"], 90.0)
+check("fx.bear = (96/32)*15 = 45", fx_fix["cases"]["bear"]["target_price"], 45.0)
+check("fx.no currency_unit_suspect", "currency_unit_suspect" in fx_fix["warnings"], False)
+check("fx.echo fx", fx_fix["reporting_to_trading_fx"], 32.0)
+check("fx.trajectory consensus_eps converted to USD ~5",
+      fx_fix["trajectory"][-1]["consensus_eps"], 5.0, tol=0.01)
+
+print("Fixture J (FX unknown → sanity gate drops to advisory + flags suspect):")
+# Same TWD bridge but fx left at parity (1.0): 160 × 18 = 2880 vs price 100 ⇒ >6× ⇒ gate.
+gate = pr.build_future_price_range("TSM", 100, TWD_BRIDGE, {}, {}, TWD_ANCHOR,
+                                   reporting_to_trading_fx=1.0)
+check("gate.status advisory_band_only", gate["status"], "advisory_band_only")
+check("gate.quality derived", gate["multiple_quality"], "derived")
+check("gate.currency_unit_suspect flagged", "currency_unit_suspect" in gate["warnings"], True)
+check("gate.base ≈ current (self-consistent band)", gate["cases"]["base"]["target_price"], 100.0)
+
+print("Fixture K (resolve_reporting_fx priority):")
+check("usd → 1.0", pr.resolve_reporting_fx("USD", None, None, None)["fx"], 1.0)
+check("forex wins", pr.resolve_reporting_fx("TWD", 0.03125, None, None)["fx"], 32.0)
+check("forex source", pr.resolve_reporting_fx("TWD", 0.03125, None, None)["source"], "fmp_forex")
+imp = pr.resolve_reporting_fx("TWD", None, 160.0, 5.0)
+check("implied from eps ratio", imp["fx"], 32.0)
+check("implied source", imp["source"], "implied_from_trading_eps")
+check("small gap (EUR-like) → parity", pr.resolve_reporting_fx("EUR", None, 4.6, 5.0)["fx"], 1.0)
+check("no inputs → parity", pr.resolve_reporting_fx(None, None, None, None)["source"], "assumed_parity")
+
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

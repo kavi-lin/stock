@@ -25,6 +25,7 @@
   - **ready** — 條件達成,本週應該動 (e.g. accumulating_data 樣本到了 / instrumentation_gap
     null rate 降到目標)
   - **still_waiting** — 條件未達,繼續累積;補一筆 `evidence: YYYY-MM-DD: <現況>`
+  - **stalled** — `source_type: accumulating_data` 且樣本 N **連續 3 輪不增長**（trigger_condition 的目標 N 永遠等不到，因上游不再產新 run）→ 不再 still_waiting，改建議「以**現有 N 直接評估**或 drop」。accumulating_data 模型假設樣本會長；樣本凍結時該假設失效，不可無限等待（REVIEW_2026-06-20 §5；e.g. TODO-003 momentum N=24 卡 4 週）
   - **stale** — `review_count ≥ 4` (一個月沒動) → 建議 drop 或 promote 為 Rec
 - 寫進輸出 markdown 的 **「## 0. Carry-over from Previous REVIEWs」** 段:
 

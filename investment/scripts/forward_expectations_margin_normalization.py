@@ -57,6 +57,11 @@ def build_margin_normalization(financial_bridge: dict, own_hist_net_margin=None)
         "shadow_only": True,
         "held_net_margin": round(held, 4) if held is not None else None,
         "elevated_threshold": MARGIN_ELEVATED,
+        # V4.41.0: normalized_eps / held_margin_eps_base below are in the company's REPORTING
+        # currency (the cache's statement currency). Conversion to the trading currency (USD)
+        # for any price-multiple application happens in forward_expectations_price_range.py via
+        # reporting_to_trading_fx — do NOT multiply these by a USD P/E without that conversion.
+        "value_currency_basis": "reporting_currency",
         "policy": "Durable-platform retention margin path; NOT sector mean reversion; shadow only.",
     }
     if held is None or shares is None or not rows:

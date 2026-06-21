@@ -30,6 +30,8 @@ EC = {
             "eps_avg": 4.0,
             "eps_low": 3.5,
             "eps_high": 4.5,
+            "num_analysts_revenue": 12,
+            "num_analysts_eps": 8,
         },
         {
             "date": "2027-12-31",
@@ -147,6 +149,13 @@ check("g.share -10% buyback shares = 90", ts["share_count_sensitivity"]["minus_1
 print("Fixture H (sensitivity degrades when net margin missing):")
 h = fb.build_financial_bridge({"annual_estimates": EC["annual_estimates"]})
 check("h.terminal_sensitivity None", h["terminal_sensitivity"], None)
+
+# ── V4.40.0 per-FY analyst coverage threaded into each row ──────────────────────
+print("Fixture I (per-FY coverage):")
+cov_rows = {r["date"]: r for r in g["rows"]}
+check("i.2028 coverage rev", cov_rows["2028-12-31"]["coverage"]["num_analysts_revenue"], 12)
+check("i.2028 coverage eps", cov_rows["2028-12-31"]["coverage"]["num_analysts_eps"], 8)
+check("i.2027 coverage absent -> None", cov_rows["2027-12-31"]["coverage"]["num_analysts_revenue"], None)
 
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

@@ -1,6 +1,71 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-06-16 (v4.30.0)
+> **Last Updated**: 2026-06-20 (v4.45.0)
+
+---
+
+## ✅ Done (v4.45.0) — 供應鏈 Wave B：UI 下鑽 + budget tiering + node 校正
+
+- **#7 UI 下鑽** — edge `direction` chip（衝突/確認）+ node `stale`/`user_status` 視覺標記進 card+detail（Wave A 訊號終於可見）。
+- **#5 FMP budget tiering** — priority(spine/ticker/≥2 downstream) 先驗；headroom<0.5 週邊只服務 cache + 跳 name-search；profile TTL 7d→30d。
+- **#8 node override** — `overrides/<slug>.json` sidecar（不改 LLM YAML）+ `POST /api/supply-chain/<slug>/override` + detail panel ✓確認/⚑標記/清除 button。enrich merge 修正欄位優先。
+- **#9 測試** — 5 新 test，全檔 23 pass。
+- **供應鏈 8 gap 全收口（Wave A+B）**。後續可選：override field-edit 表單 UI（現 field 修正僅 API）；relation source clickable 連回新聞流。
+- **待 user**：重啟 dashboard_server → 開 `/supply-chain.html`，點 node 試「✓確認/⚑標記」確認框線變化與 detail；觀察 edge `方向衝突/確認` chip 是否在有 Nexus 有向邊的 pair 出現。
+
+---
+
+## ✅ Done (v4.44.0) — 供應鏈 Wave A：方向校驗 + 回寫閉環 + stale/relative-heat/ADR
+
+- **#1 edge 方向校驗** — `_direction_check()`：co-mention 對稱只證相關非方向，改用 Nexus directed edge 校驗 LLM 箭頭；corroborated 但方向矛盾 → weight 0.5 + `relation_evidence.direction`。
+- **#2 corroborated 回寫閉環** — `export_corroborated_edges()` + CLI `--export-edges`：digest-corroborated 方向乾淨 edge → `bn_*.json` 餵 Nexus tier-1。opt-in，不在 enrich serve 路徑；source 標 `supply_chain` 防增強迴圈。
+- **#3 stale flag** — node `stale`/`stale_reason`（age>45d 且無 live 訊號）；`data_quality.stale_node_count`/`chain_age_days`。FMP-off 不算 stale。
+- **#6 relative heat** — heat 改 chain 內 33/67 百分位 + 絕對 floor 8；<4 active node fallback 絕對。
+- **#4 foreign ADR 補全** — foreign node name-match 命中 US 交易所 → 升 `adr_ticker` → 可交易 proxy。
+- **#9 測試** — 7 新 golden test，`tests/test_supply_chain_enrichment.py` 全檔 18 pass。
+- **Wave B 待辦**（下次）：#5 FMP budget tiering（spine/investable 先驗、週邊 lazy）、#7 UI edge 下鑽到 `relation_evidence.sources`、#8 node override（標錯/確認 → override file → enrich merge）。
+- **待 user**：可選跑 `python3 scripts/nexus/supply_chain.py --export-edges --export-graph-refresh` 把現有 chain 的 corroborated edge 灌回 KG；開 `/supply-chain.html` 確認 heat 分級與既有頁面無 regression。
+
+---
+
+## ✅ Done (v4.43.5) — 供應鏈 freshness + incremental rerun metadata
+
+- 供應鏈頁右側 meta 顯示 Fresh/Aging/Stale、生成 LLM、完整/增量模式與生成時間 tooltip。
+- Rerun 會把前一版 YAML 傳給 LLM 作 baseline，要求保留有效結構並以最新 local context / 可用 public sources 增量更新。
+- YAML metadata 新增 `refresh_mode/source_scope/previous_generated_at/previous_generated_by`；CLI 支援 `--rerun`。
+- **待 user**：重啟/刷新 `/supply-chain.html` 後，選既有主題確認右上 freshness badge；按 `Rerun` 後新版應顯示 `增量更新` 與當日生成時間。
+
+---
+
+## ✅ Done (v4.43.4) — 供應鏈頁主題 Rerun
+
+- 供應鏈頁選定既有主題後可按 `Rerun`，用同一 theme 重新排入 `supply_chain_generate`，完成後覆寫同 slug YAML 並自動輪詢載入新版。
+- Generate / Rerun 共用 queue helper；未選 chain 時 Rerun disabled。
+- **待 user**：重啟 dashboard_server 後開 `/supply-chain.html`，選 MLCC 或既有主題按 `Rerun`，右下角 protocol pill 應顯示進度，完成後圖譜刷新。
+
+---
+
+## ✅ Done (v4.43.3) — 供應鏈探索：材料型產業 prompt 稽核強化
+
+- 供應鏈生成 prompt 對 MLCC/電池/基板/光學/化學品等材料/製程型主題新增完整拆鏈要求：上游材料、受限添加物/礦物、製程設備、產品等級、下游需求週期、替代技術。
+- MLCC 類主題新增規格分層與成本驅動紀律，避免把 AI server 高階料缺貨外推到全 MLCC，或把現代 MLCC 成本粗糙連到白銀。
+- evidence 暫以 `note` 標 `confirmed` / `industry_report` / `inferred` / `stale` / `contested`；未改 YAML schema。
+- **待 user**：重新用 supply-chain generator 產一條 `MLCC` 鏈，檢查是否展開材料/設備/替代技術與規格分層；若效果仍不夠，再升級成獨立 reviewer/validator pass。
+
+---
+
+## ✅ Done (v4.43.1) — 供應鏈外股常見公司 backfill
+
+- 舊 YAML 只有 `foreign_listed` 時，常見外股供應鏈公司自動補 `TW/KR/JP/EU + local_ticker + ADR` 顯示；人工欄位不覆蓋。
+- **待 user**：重啟 dashboard_server 後重新開 `/supply-chain.html`，常見 TSMC/Samsung/Tokyo Electron 等應不再顯示 `FOREIGN`。
+
+---
+
+## ✅ Done (v4.43.0) — 供應鏈頁外股標示 + 上下游投資摘要
+
+- 台股/韓股/日股等非美上市節點新增 `market/local_ticker/adr_ticker/investability`，Dashboard 卡片不再把外股誤顯為未上市。
+- 供應鏈頁新增 deterministic「上下游投資摘要」：可投資標的、瓶頸/槓桿節點、私有公司 proxy、高信心關係。
+- **待 user**：重啟 dashboard_server 後打開 `/supply-chain.html` 實看既有鏈條；舊 YAML 若要完整顯示台/韓/日代號，可逐步補 `market/local_ticker/adr_ticker`。
 
 ---
 

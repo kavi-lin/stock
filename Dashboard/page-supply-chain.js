@@ -78,11 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
     pre_ipo:        { zh: '擬上市',   en: 'Pre-IPO' },
     private:        { zh: '私有',     en: 'Private' },
   };
+  const INVESTABILITY_LABEL = {
+    direct_us: { zh: '美股可買', en: 'US tradable' },
+    adr_or_us_proxy: { zh: 'ADR/美股替代', en: 'ADR/proxy' },
+    international_broker: { zh: '需複委託', en: 'Intl broker' },
+    not_tradeable: { zh: '不可買', en: 'Watch only' },
+    unknown: { zh: '未知', en: 'Unknown' },
+  };
   const groundingLabel = (k) => { const m = GROUNDING[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   const verificationLabel = (k) => { const m = VERIFICATION[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   const relationLabel = (k) => { const m = RELATION_EVIDENCE[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   const heatLabel = (k) => { const m = HEAT_LABEL[k]; return m ? (isZh() ? m.zh : m.en) : k; };
   const listingLabel = (k) => { const m = LISTING_LABEL[k]; return m ? (isZh() ? m.zh : m.en) : k; };
+  const investabilityLabel = (k) => {
+    const m = INVESTABILITY_LABEL[k] || INVESTABILITY_LABEL.unknown;
+    return isZh() ? m.zh : m.en;
+  };
   // Commercialization stage ramp — design partner → revenue recognized.
   // `unknown` is intentionally absent so it renders no badge.
   const STAGE = {
@@ -158,8 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $('sc-subtitle').textContent = t('Supply Chain Explorer', '供應鏈探索');
     $('sc-theme-input').placeholder = t('輸入主題 (CPO / HBM…)', 'Theme (CPO / HBM…)');
     $('sc-gen-btn').textContent = t('生成', 'Generate');
+    $('sc-rerun-btn').textContent = t('重新抓取', 'Rerun');
     $('sc-lg-us').textContent = t('US 上市', 'US-listed');
-    $('sc-lg-fl').textContent = t('外股', 'Foreign');
+    $('sc-lg-fl').textContent = t('台/韓/日等外股', 'TW/KR/JP etc.');
     $('sc-lg-pi').textContent = t('擬上市', 'Pre-IPO');
     $('sc-lg-pv').textContent = t('私有', 'Private');
     $('sc-lg-verified').textContent = t('追蹤中', 'verified');
@@ -169,6 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
     $('sc-lg-rel').textContent = t('關係佐證', 'relation evidence');
     $('sc-lg-heat').textContent = t('熱度', 'heat');
     $('sc-lg-stage').textContent = t('商用階段', 'stage');
+    $('sc-report-title').textContent = t('上下游投資摘要', 'Upstream/Downstream Report');
+    $('sc-report-subtitle').textContent = t('只讀探索層，不改投資決策', 'Read-only exploration layer');
     if (currentChain) renderDiagram(currentChain);
   }
 
@@ -193,6 +207,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
     if (n >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
     return `$${n.toFixed(0)}`;
+  }
+  function parseDate(v) {
+    const d = v ? new Date(v) : null;
+    return d && Number.isFinite(d.getTime()) ? d : null;
+  }
+  function fmtDateTime(v) {
+    const d = parseDate(v);
+    if (!d) return '';
+    return d.toLocaleString(isZh() ? 'zh-TW' : 'en-US', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+  }
+  function ageDays(v) {
+    const d = parseDate(v);
+    if (!d) return null;
+    return Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+  }
+  function freshnessInfo(v) {
+    const days = ageDays(v);
+    if (days == null) return { cls: 'sc-aging', label: t('日期未知', 'Unknown date') };
+    if (days <= 2) return { cls: 'sc-fresh', label: t(`新鮮 ${days}D`, `Fresh ${days}D`) };
+    if (days <= 7) return { cls: 'sc-aging', label: t(`偏舊 ${days}D`, `Aging ${days}D`) };
+    return { cls: 'sc-stale', label: t(`過舊 ${days}D · 建議 Rerun`, `Stale ${days}D · Rerun`) };
+  }
+  function refreshModeLabel(mode) {
+    return mode === 'rerun_incremental'
+      ? t('增量更新', 'Incremental')
+      : t('完整生成', 'Full');
   }
   function verificationKey(n) {
     if (n.verification_level || n.verificationLevel) return n.verification_level || n.verificationLevel;
@@ -254,33 +297,69 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedNodeId = null;
       hideDetail();
       renderDiagram(currentChain);
+      updateRerunState();
     } catch (e) {
       showStatus(t('載入失敗: ', 'Load failed: ') + e.message);
     }
   }
 
-  async function generate() {
-    const theme = $('sc-theme-input').value.trim();
+  function setQueueButton(btn, busy, busyLabel, idleLabel) {
+    if (!btn) return;
+    btn.disabled = busy || (btn.id === 'sc-rerun-btn' && !currentChain);
+    btn.innerHTML = busy ? `<span class="sc-spinner"></span>${esc(busyLabel)}` : esc(idleLabel);
+  }
+
+  async function queueTheme(theme, btn, labels = {}) {
     if (!theme) return;
-    const btn = $('sc-gen-btn');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="sc-spinner"></span>${t('排入中', 'Queueing')}`;
-    showStatus(t('供應鏈生成排入佇列中…', 'Queueing supply-chain generation…'));
+    const busy = labels.busy || t('排入中', 'Queueing');
+    const idle = labels.idle || t('生成', 'Generate');
+    setQueueButton(btn, true, busy, idle);
+    showStatus(labels.status || t('供應鏈生成排入佇列中…', 'Queueing supply-chain generation…'));
     try {
       const queued = await fetchJson('/api/supply-chain/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme }),
+        body: JSON.stringify({ theme, rerun: !!labels.rerun }),
       });
       const pos = queued.position || 1;
       showStatus(t(`已排入佇列（第 ${pos} 位）。可切換頁面，右下角會顯示進度。`,
                    `Queued (#${pos}). You can switch pages; progress stays in the bottom-right pill.`));
       watchGeneratedTheme(theme);
     } catch (e) {
-      showStatus(t('生成失敗: ', 'Generate failed: ') + e.message);
+      showStatus((labels.failPrefix || t('生成失敗: ', 'Generate failed: ')) + e.message);
     } finally {
-      btn.disabled = false;
-      btn.textContent = t('生成', 'Generate');
+      setQueueButton(btn, false, busy, idle);
+      updateRerunState();
+    }
+  }
+
+  async function generate() {
+    const theme = $('sc-theme-input').value.trim();
+    await queueTheme(theme, $('sc-gen-btn'));
+  }
+
+  async function rerunCurrent() {
+    const theme = (currentChain && (currentChain.theme || currentChain.title)) || '';
+    if (!theme) return;
+    await queueTheme(theme, $('sc-rerun-btn'), {
+      busy: t('重跑中', 'Rerun'),
+      idle: t('重新抓取', 'Rerun'),
+      rerun: true,
+      status: t(`重新抓取「${theme}」供應鏈，已準備排入佇列…`,
+                `Preparing to rerun "${theme}" supply chain…`),
+      failPrefix: t('重新抓取失敗: ', 'Rerun failed: '),
+    });
+  }
+
+  function updateRerunState() {
+    const btn = $('sc-rerun-btn');
+    if (!btn) return;
+    btn.disabled = !currentChain;
+    if (currentChain && currentChain.theme) {
+      btn.title = t(`重新抓取 ${currentChain.theme} 的最新供應鏈`,
+                    `Rerun latest supply-chain search for ${currentChain.theme}`);
+    } else {
+      btn.title = t('先選擇一條供應鏈', 'Select a chain first');
     }
   }
 
@@ -312,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('sc-status').textContent = msg;
     $('sc-status').style.display = 'block';
     $('sc-canvas').style.display = 'none';
+    $('sc-report').style.display = 'none';
   }
 
   // ── layout (2-level: stage column → module sub-panels → nodes) ──
@@ -389,6 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const svg = $('sc-edges');
     $('sc-status').style.display = 'none';
     canvas.style.display = 'block';
+    $('sc-report').style.display = 'block';
     const L = layout(chain);
     const spine = new Set(chain.spine || []);
 
@@ -466,8 +547,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const stripe = LISTING_COLOR[n.listing] || '#71717a';
       const heat = HEAT_COLOR[n.heat];
       const isSpine = spine.has(n.id);
-      const tkr = n.ticker
-        ? `<span class="sc-tkr sc-tkr-real">${esc(n.ticker)}</span>`
+      const sym = n.display_symbol || n.ticker || (n.listing === 'foreign_listed' ? n.market || 'FOREIGN' : '');
+      const isTradable = ['direct_us', 'adr_or_us_proxy', 'international_broker'].includes(n.investability);
+      const tkr = sym
+        ? `<span class="sc-tkr ${isTradable ? 'sc-tkr-real' : 'sc-tkr-none'}">${esc(sym)}</span>`
         : `<span class="sc-tkr sc-tkr-none">${t('未上市', 'PRIVATE')}</span>`;
       const heatTag = heat
         ? `<span class="sc-heat-tag"><span class="sc-heat-dot"
@@ -483,7 +566,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const cls = 'sc-node'
         + (heat ? ` sc-heat-${n.heat}` : '')
         + (isSpine ? ' sc-spine' : '')
+        + (n.stale ? ' sc-stale' : '')
+        + (n.user_status === 'flagged' ? ' sc-flagged' : '')
+        + (n.user_status === 'confirmed' ? ' sc-confirmed' : '')
         + (n.id === selectedNodeId ? ' sc-sel' : '');
+      const uflag = (n.user_status === 'confirmed'
+          ? `<span class="sc-uflag sc-uflag-ok" title="${esc(t('已人工確認', 'confirmed'))}">✓</span>`
+          : n.user_status === 'flagged'
+            ? `<span class="sc-uflag sc-uflag-flag" title="${esc(t('已標記問題', 'flagged'))}">⚑</span>`
+            : '')
+        + (n.stale ? `<span class="sc-uflag sc-uflag-stale" title="${esc(n.stale_reason || 'stale')}">⏳</span>` : '');
       html += `<div class="${cls}" data-node="${esc(n.id)}"
         style="left:${p.x}px;top:${p.y}px;width:${NODE_W}px;height:${NODE_H}px;
         animation-delay:${order * 28}ms;">
@@ -497,6 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${verificationBadge(n)}
           ${heatTag}
           ${stageTag}
+          ${uflag}
         </div>
       </div>`;
       order++;
@@ -510,11 +603,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const modCount = Object.values(chain.modules || {})
       .reduce((a, m) => a + (m ? m.length : 0), 0);
-    $('sc-meta').textContent =
-      `${(chain.nodes || []).length} ${t('家公司', 'COS')} · `
-      + `${(chain.layers || []).length} ${t('層', 'LAYERS')} · `
-      + `${modCount} ${t('模塊', 'MODULES')} · `
-      + `${(chain.edges || []).length} ${t('關係', 'LINKS')}`;
+    const f = freshnessInfo(chain.generated_at);
+    const generatedAt = fmtDateTime(chain.generated_at) || t('未知日期', 'unknown date');
+    const model = chain.generated_by || t('未知模型', 'unknown model');
+    const scope = chain.source_scope || '';
+    const prev = chain.previous_generated_at
+      ? ` · ${t('前版', 'prev')} ${fmtDateTime(chain.previous_generated_at)}`
+      : '';
+    $('sc-meta').innerHTML = `
+      <span class="sc-meta-chip ${f.cls}" title="${esc(generatedAt)}">${esc(f.label)}</span>
+      <span class="sc-meta-chip sc-model-chip" title="${esc(scope || 'generated_by')}">LLM ${esc(model)}</span>
+      <span class="sc-meta-chip sc-mode-chip" title="${esc(generatedAt + prev)}">${esc(refreshModeLabel(chain.refresh_mode))}</span>
+      <span class="sc-meta-chip sc-count-chip">${(chain.nodes || []).length} ${t('家公司', 'COS')}</span>
+      <span class="sc-meta-chip sc-count-chip">${(chain.layers || []).length} ${t('層', 'LAYERS')}</span>
+      <span class="sc-meta-chip sc-count-chip">${modCount} ${t('模塊', 'MODULES')}</span>
+      <span class="sc-meta-chip sc-count-chip">${(chain.edges || []).length} ${t('關係', 'LINKS')}</span>`;
+    renderReport(chain);
+  }
+
+  function renderReport(chain) {
+    const report = chain.chain_report || {};
+    const confidence = report.relation_confidence || {};
+    const inv = report.investable_nodes || [];
+    const bottlenecks = report.bottlenecks || [];
+    const watch = report.private_or_watch_only || [];
+    const edges = report.high_confidence_edges || [];
+    const confTxt = [
+      `${t('關係佐證', 'corroborated')}: ${confidence.corroborated_relation || 0}`,
+      `${t('突發暫定', 'BN provisional')}: ${confidence.break_news_provisional || 0}`,
+      `${t('LLM 關係', 'LLM')}: ${confidence.llm_relation || 0}`,
+    ].join(' · ');
+
+    const chip = (x) => `<span class="sc-report-chip">${esc(x)}</span>`;
+    const invHtml = inv.slice(0, 8).map(n => `
+      <div class="sc-report-row">
+        <strong>${esc(n.label)}</strong>
+        ${chip(n.symbol || n.market || '')}
+        ${chip(investabilityLabel(n.investability))}
+        ${n.stage && n.stage !== 'unknown' ? chip(stageLabel(n.stage)) : ''}
+      </div>`).join('') || `<div class="sc-report-empty">${t('沒有可直接交易標的', 'No directly tradable nodes')}</div>`;
+    const bottleneckHtml = bottlenecks.slice(0, 6).map(n => `
+      <div class="sc-report-row">
+        <strong>${esc(n.label)}</strong>
+        ${chip(n.symbol || '')}
+        ${chip(`${t('下游', 'downstream')} ${n.downstream_links || 0}`)}
+        <span class="sc-report-note">${esc(n.role || '')}</span>
+      </div>`).join('') || `<div class="sc-report-empty">${t('尚無瓶頸節點', 'No bottleneck nodes yet')}</div>`;
+    const watchHtml = watch.slice(0, 6).map(n => {
+      const proxies = (n.proxy_tickers || []).slice(0, 5).join(', ');
+      return `<div class="sc-report-row">
+        <strong>${esc(n.label)}</strong>
+        ${chip(n.symbol || '')}
+        <span class="sc-report-note">${proxies ? `${t('替代', 'proxy')}: ${esc(proxies)}` : t('研究線索', 'research lead')}</span>
+      </div>`;
+    }).join('') || `<div class="sc-report-empty">${t('沒有私有/觀察節點', 'No private/watch-only nodes')}</div>`;
+    const edgeHtml = edges.slice(0, 6).map(e => `
+      <div class="sc-report-row">
+        <strong>${esc(e.from)}</strong>
+        <span class="sc-report-arrow">→</span>
+        <strong>${esc(e.to)}</strong>
+        ${chip(relationLabel(e.level))}
+      </div>`).join('') || `<div class="sc-report-empty">${t('尚無高信心關係', 'No high-confidence edges yet')}</div>`;
+
+    $('sc-report-body').innerHTML = `
+      <div class="sc-report-kpi">
+        <span>${esc(confTxt)}</span>
+        <span>${t('可投資節點', 'investable')}: ${inv.length}</span>
+      </div>
+      <div class="sc-report-grid">
+        <section><h3>${t('可投資標的', 'Investable Names')}</h3>${invHtml}</section>
+        <section><h3>${t('瓶頸/槓桿節點', 'Bottlenecks')}</h3>${bottleneckHtml}</section>
+        <section><h3>${t('私有公司與替代標的', 'Private + Proxies')}</h3>${watchHtml}</section>
+        <section><h3>${t('高信心上下游關係', 'Higher-Confidence Links')}</h3>${edgeHtml}</section>
+      </div>`;
   }
 
   // ── node detail ────────────────────────────────────────────────
@@ -547,8 +708,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const ev = e.relation_evidence || {};
       const sources = (ev.sources || []).slice(0, 3).map(esc).join(', ');
       const src = sources ? `<div class="sc-edge-src">${sources}</div>` : '';
+      const dir = ev.direction === 'conflict'
+        ? `<span class="sc-dir sc-dir-conflict" title="${esc(t('Nexus 有向邊指向相反方向，此箭頭信心已下調 (1.0→0.5)', 'A directed Knowledge-Graph edge points the opposite way; this arrow confidence was downgraded (1.0→0.5)'))}">⚠ ${esc(t('方向衝突', 'dir conflict'))}</span>`
+        : ev.direction === 'confirmed'
+          ? `<span class="sc-dir sc-dir-ok" title="${esc(t('Nexus 有向邊確認此供應方向', 'A directed Knowledge-Graph edge confirms this supply direction'))}">✓ ${esc(t('方向確認', 'dir ok'))}</span>`
+          : '';
       return `<div class="sc-edge-row">${txt}
-      <span class="sc-edge-rel">${esc(e.rel)}</span>${relationBadge(e)}${src}</div>`;
+      <span class="sc-edge-rel">${esc(e.rel)}</span>${relationBadge(e)}${dir}${src}</div>`;
     };
     const downstream = edges.filter(e => e.from === id)
       .map(e => edgeRow('→ ' + esc(labelOf(e.to)), e));
@@ -568,8 +734,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="sc-detail-body">
         <div class="sc-detail-row">${t('代號', 'Ticker')}:
-          <strong>${esc(n.ticker || t('未上市 / 私有', 'private'))}</strong></div>
+          <strong>${esc(n.display_symbol || n.ticker || t('未上市 / 私有', 'private'))}</strong></div>
+        <div class="sc-detail-row">${t('市場', 'Market')}: <strong>${esc(n.market_label || n.market || listingLabel(n.listing))}</strong></div>
         <div class="sc-detail-row">${t('上市別', 'Listing')}: <strong>${esc(listingLabel(n.listing))}</strong></div>
+        <div class="sc-detail-row">${t('可投資性', 'Investability')}: <strong>${esc(investabilityLabel(n.investability))}</strong></div>
         <div class="sc-detail-row">${t('資料支持', 'Grounding')}:
           <strong style="color:${g.color};">${g.icon} ${esc(groundingLabel(n.grounding))}</strong></div>
         <div class="sc-detail-row">${t('公司驗證', 'Company check')}:
@@ -579,6 +747,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="sc-detail-row">${t('商用階段', 'Stage')}:
           <strong${STAGE[n.stage] ? ` style="color:${STAGE[n.stage].color};"` : ''}
           >${STAGE[n.stage] ? esc(stageLabel(n.stage)) : esc(n.stage || 'unknown')}</strong></div>
+        ${n.stale ? `<div class="sc-detail-row" style="color:var(--text-muted);">⏳ <strong>${t('資料可能過期', 'Stale')}</strong>
+          <span style="font-size:9px;">${esc(n.stale_reason || '')}</span></div>` : ''}
         <div class="sc-detail-sec">${t('角色', 'Role')}</div>
         <div style="font-size:11px;color:var(--text-main);line-height:1.5;">${esc(n.role)}</div>
         <div class="sc-fmp-box">
@@ -592,9 +762,36 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="font-size:10.5px;color:var(--text-muted);line-height:1.5;">${esc(n.note)}</div>` : ''}
         ${downstream.length ? `<div class="sc-detail-sec">${t('供應給', 'Supplies to')}</div>${downstream.join('')}` : ''}
         ${upstream.length ? `<div class="sc-detail-sec">${t('上游來源', 'Upstream')}</div>${upstream.join('')}` : ''}
+        <div class="sc-detail-sec">${t('人工校正', 'Your review')}</div>
+        <div class="sc-override-row">
+          <button class="sc-ov-btn sc-ov-ok${n.user_status === 'confirmed' ? ' active' : ''}" data-ov="confirmed">✓ ${t('確認', 'Confirm')}</button>
+          <button class="sc-ov-btn sc-ov-flag${n.user_status === 'flagged' ? ' active' : ''}" data-ov="flagged">⚑ ${t('標記問題', 'Flag')}</button>
+          ${n.user_status ? `<button class="sc-ov-btn" data-ov="none">${t('清除', 'Clear')}</button>` : ''}
+        </div>
+        ${n.user_note ? `<div class="sc-edge-src" style="margin-top:4px;">“${esc(n.user_note)}”</div>` : ''}
       </div>`;
     d.classList.add('show');
     $('sc-detail-x').addEventListener('click', hideDetail);
+    d.querySelectorAll('.sc-ov-btn').forEach(b => b.addEventListener('click', () => submitOverride(id, b.dataset.ov)));
+  }
+
+  async function submitOverride(nodeId, status) {
+    if (!currentChain || !currentChain.id) return;
+    let note = null;
+    if (status === 'flagged') {
+      note = prompt(t('問題說明（可選）：', 'Describe the issue (optional):')) || '';
+    }
+    try {
+      await fetchJson('/api/supply-chain/' + encodeURIComponent(currentChain.id) + '/override', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ node_id: nodeId, status, note }),
+      });
+      await loadChain(currentChain.id);   // server cache busted → fresh enrich
+      selectNode(nodeId);                 // reopen the panel on the same node
+    } catch (e) {
+      showStatus(t('校正失敗: ', 'Override failed: ') + e.message);
+    }
   }
   function hideDetail() {
     selectedNodeId = null;
@@ -649,6 +846,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyTranslations();
   $('sc-chain-select').addEventListener('change', (e) => loadChain(e.target.value));
   $('sc-gen-btn').addEventListener('click', generate);
+  $('sc-rerun-btn').addEventListener('click', rerunCurrent);
   $('sc-theme-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') generate();
   });

@@ -61,7 +61,7 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, BASE_DIR)
 
-ENGINE_VERSION = "compute_price_framework.py v1.0 (V3.45.3)"
+ENGINE_VERSION = "compute_price_framework.py v1.1 (V4.46.0)"
 
 # ── Constants (B3 — 兩組常數用途不同，集中定義並註明) ─────────────────────────
 # WACC for reverse DCF: nominal 10Y + full equity risk premium (discounting nominal FCF).
@@ -299,6 +299,9 @@ def compute_fair_value_range(anchors: dict, current_price: float, fred: dict) ->
     else:
         req_yield, oe_linked = None, None
 
+    # max/min spread — plain-language dispersion signal for the UI ("anchors span N×")
+    disp_ratio = round(max_a / min_a, 2) if (min_a and min_a > 0 and max_a is not None) else None
+
     return {
         "range_method": range_method,
         "p25": round(p25, 2) if p25 is not None else None,
@@ -306,6 +309,7 @@ def compute_fair_value_range(anchors: dict, current_price: float, fred: dict) ->
         "p75": round(p75, 2) if p75 is not None else None,
         "min_anchor": round(min_a, 2) if min_a is not None else None,
         "max_anchor": round(max_a, 2) if max_a is not None else None,
+        "dispersion_ratio": disp_ratio,
         "range_verdict": range_verdict,
         "anchor_dispersion_cv": round(cv, 4) if cv is not None else None,
         "agreement_grade": grade,
@@ -316,6 +320,45 @@ def compute_fair_value_range(anchors: dict, current_price: float, fred: dict) ->
             "required_yield": round(req_yield, 4) if req_yield is not None else None,
         },
     }
+
+
+# ── V4.46.0 — confidence ← anchor dispersion (general, all tickers) ──────────
+_CONF_ORDER = {"low": 0, "medium": 1, "high": 2}
+# Two-tier cv cap (decoupled from agreement_grade, which is a blunt 0.35 cliff:
+# owner_earnings_mult is a structural low outlier across the tech universe, so
+# grade=low fires almost everywhere). These give confidence some discrimination:
+# extreme dispersion -> low, moderate -> medium, tight -> untouched.
+CONF_CAP_CV_LOW = 0.60       # cv >= this -> cap confidence at "low"
+CONF_CAP_CV_MEDIUM = 0.35    # cv >= this (and < LOW) -> cap at "medium"
+
+
+def reconcile_confidence(fvs: dict, frange: dict) -> None:
+    """Cap fair_value_summary.confidence by anchor dispersion (cv), in place.
+
+    Pre-V4.46.0 `confidence` was set purely from how many anchors *returned a
+    number* (n>=5 -> high), ignoring whether they *agreed*. A blend of anchors
+    spanning 50x (e.g. ARM: $3.17-$163.75, cv=1.20) was still labelled "high".
+    The dispersion cv already lives in fair_value_range; here we feed it back so
+    the point estimate can't claim more confidence than the anchors support.
+    Tight anchors (cv < 0.35) are untouched.
+    """
+    cv = frange.get("anchor_dispersion_cv")
+    cur = fvs.get("confidence")
+    if cv is None or cur not in _CONF_ORDER:
+        return
+    if cv >= CONF_CAP_CV_LOW:
+        cap, thr = "low", CONF_CAP_CV_LOW
+    elif cv >= CONF_CAP_CV_MEDIUM:
+        cap, thr = "medium", CONF_CAP_CV_MEDIUM
+    else:
+        return
+    if _CONF_ORDER[cap] < _CONF_ORDER[cur]:
+        fvs["confidence_count_based"] = cur
+        fvs["confidence"] = cap
+        fvs["confidence_capped_by"] = (
+            f"anchor_dispersion cv={cv} (>= {thr}) -> {cap}; "
+            f"span={frange.get('dispersion_ratio')}x"
+        )
 
 
 # ── Block 3: multi_horizon_price_framework (V5.1) ────────────────────────────
@@ -836,11 +879,13 @@ def main():
     anchors = inp.get("anchors") or {}
     fred = inp.get("fred") or {}
     fvs = compute_fair_value_summary(anchors, cp)
+    frange = compute_fair_value_range(anchors, cp, fred)
+    reconcile_confidence(fvs, frange)   # confidence can't exceed anchor agreement
     out = {
         "engine": ENGINE_VERSION,
         "ticker": inp.get("ticker"),
         "fair_value_summary": fvs,
-        "fair_value_range": compute_fair_value_range(anchors, cp, fred),
+        "fair_value_range": frange,
         "multi_horizon_price_framework": compute_mhp(inp, fvs),
         "implied_expectations": compute_implied_expectations(inp),
         "valuation_archetype_shadow": compute_archetype_shadow(inp, fvs),
