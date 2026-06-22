@@ -1,7 +1,29 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-06-20 (v4.46.0)
+> **Last Updated**: 2026-06-22 (v4.47.2)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.47.2) — weekly-tech-playbook：Codex Review 整合優化（解耦 fatal gate + 去自打臉 nag）
+- **起因**：user 請 codex review 並改 code（結果已在 working tree），要我檢討優化。Codex 加了一整套「committee-blind then reconcile」獨立 review：build_pack 多寫 `blind_pack_<DATE>.json`（去委員會 verdict 防 anchoring）、selections 加 `codex_review` block、render 驗證 + 渲染、review.py 把 Codex 替代配置（含現金 sleeve）一起評分排名、page-playbook 加面板。
+- **評估**：review **內容**強（抓到原三籃 ~100% 部署 vs macro 60–75% 的矛盾 → 現金當正式 sleeve、部署 75%；降權 MU/MRVL/CRDO 抛物線股；檢討加 QQQ/SOXX+回撤）——保留。但**工程整合**兩個 gating bug。
+- **修法（不動 Codex 好設計）**：
+  - **P1 解耦（關鍵）**：`render.py` 把 `codex_review` 從 fatal 必填改為**可選**——缺它仍 rc=0 生成（原本缺 review→rc=1 不出檔，依賴反轉、破壞可重跑）。提供時才驗結構。
+  - **P2 去自打臉 nag**：原「非 blind→degraded」對每份非盲評都 rc=2（含 Codex 自己這份）。改為只在明確宣稱 `review_mode=committee_blind_then_reconcile` 時才要求 `blind_artifact`（fatal）。
+  - **P4 比較公平性**：`review.py` Codex sleeve 加 `deployed_pct`/`cash_pct`，標「部署 75%」，避免含現金的 alpha 被當同 beta 比。
+  - **SKILL.md** Step 2.5「必填」→「建議；對生成可選」與 code 對齊。
+- **驗收**：render WITH review → rc=0（原 rc=2 nag 消失）；render WITHOUT review → rc=0 仍生成（原 rc=1）；review CLI 顯示「部署 75%」；py_compile + node -c OK。
+- **未做（留 user 決定）**：P3 schema 欄位 `codex_review` 綁工具名，可泛化為 `independent_review` + `reviewer` meta；P5 render 同時生成+驗證自身 critique（職責混合）；P6 review.py 對「不在三籃內」的 codex 標的無進場價會當 flat（本週全在籃內故無影響）。
+- **待 user**：仍未 commit（整個 feature + Codex 改動 + 本次優化都在 working tree）。
+
+## 🟢 Session Note (v4.47.1) — weekly-tech-playbook：三籃子 $100k 科技投資方案 + Dashboard 頁 + 檢討機制
+- **起因**：user 要把「從本週系統分析（指標線 + 新聞辯論 + 委員會 verdict）擬下週科技投資方案」變成常駐工具——保險 100% / 激進 100% / 混合 100% **各假設投入 $100k**，附理由+數據，供下週 LLM 一起檢討。先 commit 既有 snapshot（`1b16b11`，chore/snapshot 分支）再切 `feat/weekly-tech-playbook` 開工。
+- **設計拍板（AskUserQuestion）**：(1) 籃內配重 = **信心分級**（核心 $15k×3 / 標準 $10k×4 / 輕倉 $5k×3 = $100k）；(2) 打包成 **skill + 新 Dashboard 頁**。
+- **流程三段**：`build_pack.py`（0 LLM 組資料：regime + 熱題 + 近 14d 委員會 verdict 解析 + yfinance 報價/動能）→ LLM 寫 `selections_<DATE>.json` 選股 → `render.py`（0 LLM 算股數/成本、驗證每籃=$100k、rc 0/1/2）→ `Dashboard/playbook.json` + `reports/<DATE>_TECH_PLAYBOOK.md`。
+- **本週首版**（2026-06-22，下週 06-23 起）：保險 NVDA/AVGO/MSFT/GOOGL/META/ORCL/TXN/AAPL/ANET/TSM；激進 AMD/CCJ/CEG/MU/MRVL/ALAB/CRDO/NBIS/PLTR/IONQ；混合 65% 保險 sleeve + 35% 激進 sleeve。背景 RISK_ON + 實質利率 2.17% 高檔 + Core PCE 6/25 binary → 激進籃過半近月漲 45–76%、委員會多標過熱故標「等回檔/小注/停損」。render rc=0，三籃各約 $99.4–100.2k（whole-share rounding，drift <2%）。
+- **檢討機制（v4.47.1，user「請 LLM 檢討的機制也寫上」）**：`review.py`（0 LLM）讀 `render.py` 寫的 immutable dated snapshot `data/playbook_<ENTRY>.json`,抓檢討日收盤算每檔報酬 / 每籃 vs SPY alpha / 命中率 / kill 觸發（從 kill 文字擷取門檻價,跌破標 🔴）→ `reports/<REVIEW>_TECH_PLAYBOOK_REVIEW.md`（含空白「🧠 LLM 檢討」段）+ `Dashboard/playbook_review.json`。Claude turn 讀數據填質性判讀（哪籃贏+為何 / kill 認賠或續抱 / 貢獻+拖累 / 催化兌現 / 下週調整）→ 可改下週 selections。觸發詞「投資方案檢討」。page 頂部「上週方案檢討」橫幅（僅 entry≠review 日顯示,避同日 0% 退化）。永不自動覆寫 config（比照 short-term weekly_review）。
+- **驗收**：`check_skills.py --skill weekly-tech-playbook` 0 warnings；`node -c page-playbook.js` OK；render.py rc=0、emit dated snapshot；review.py 同日 smoke rc=0（entry=asof → 0% 為預期）;playbook.json 三籃加總正確。
+- **紀律**：前瞻探索層，**不**入 investment_protocol 決策。委員會單股 verdict 仍以各自報告為準。
+- **待 user**：重啟 dashboard_server → 開 `/playbook.html` 看三籃；下週同日跑 `review.py --date 2026-06-22 --asof <下週日>` 產檢討,再讓 LLM 填質性段。可考慮 `/schedule` 每週一自動跑 build_pack + render、週末自動跑 review。
 
 ## 🟢 Session Note (v4.46.0) — 現值估值 confidence 接錨點一致性（破假精確）
 - **起因**：user 貼 ARM 現值估值截圖（FV $52、現價 $375、$3–$164、LOW AGREE、`confidence: high`）質疑「不太合理吧」。

@@ -1,6 +1,38 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-06-20 (v4.45.0)
+> **Last Updated**: 2026-06-22 (v4.47.2)
+
+---
+
+## ✅ Done (v4.47.2) — weekly-tech-playbook：Codex Review 整合優化
+
+- **P1 解耦（關鍵）**：`render.py` `codex_review` 改可選——缺它 rc=0 仍生成（原 fatal、依賴反轉破壞可重跑）。
+- **P2 去自打臉**：非 blind review 不再 by-default degraded；只在宣稱 blind 時要求 `blind_artifact`。
+- **P4 公平性**：`review.py` Codex sleeve 標 `deployed_pct`/`cash_pct`（部署 75%），alpha 非同 beta 比較已標示。
+- **SKILL.md** Step 2.5「必填」→「可選」對齊 code。
+- **保留 Codex 好設計**：committee-blind pack（反 anchoring）、現金當 sleeve、降權抛物線股、檢討加 QQQ/SOXX+回撤。
+- **待 user 決定**：P3 `codex_review` 欄位泛化為 `independent_review`+`reviewer` meta；P5 render 職責拆分；P6 codex 標的若不在三籃內無進場價。
+
+---
+
+## ✅ Done (v4.47.1) — weekly-tech-playbook：下週 LLM 檢討機制
+
+- **`scripts/review.py`**（0 LLM）— 過去某週方案 vs 檢討日收盤:每檔報酬、每籃 vs SPY alpha、命中率、kill 觸發偵測、三籃排名 → `reports/<REVIEW>_TECH_PLAYBOOK_REVIEW.md`（含空白「🧠 LLM 檢討」段）+ `Dashboard/playbook_review.json`。觸發詞「投資方案檢討」。
+- **`render.py`** 加寫 immutable dated snapshot `data/playbook_<DATE>.json`（進場錨點,可回放）。
+- **`page-playbook.js`** 頂「上週方案檢討」橫幅（讀 playbook_review.json,僅 entry≠review 日顯示）。
+- **兩段式**:review.py 算硬數據(0 LLM,永不自動覆寫) → Claude turn 讀填質性判讀 → 改下週 selections。
+- **用法**:下週同日 `python3 skills/weekly-tech-playbook/scripts/review.py --date 2026-06-22 --asof <下週日>`。
+
+---
+
+## ✅ Done (v4.47.0) — weekly-tech-playbook：三籃子 $100k 科技投資方案 + Dashboard 頁
+
+- **新 skill `skills/weekly-tech-playbook/`** — build_pack（0 LLM 組 regime+熱題+委員會 verdict+報價）→ LLM 選股 selections JSON → render（0 LLM 算股數/驗證每籃=$100k，rc 0/1/2）→ `Dashboard/playbook.json` + `reports/<DATE>_TECH_PLAYBOOK.md`。
+- **三籃子設計** — 保險/激進/混合各 $100k，信心分級（核心 $15k×3 / 標準 $10k×4 / 輕倉 $5k×3）；混合 = 65% 保險 sleeve + 35% 激進 sleeve。
+- **Dashboard** — 新增 `/playbook.html` + `page-playbook.js`，sidebar「投資方案」（portfolio group），三籃可切換 + 檢討 scaffold。
+- **本週首版** selections_2026-06-22.json 已產，render rc=0。
+- **待 user**：重啟 dashboard_server 開 `/playbook.html`；下週同日跑檢討；考慮 `/schedule` 每週一自動 build_pack+render。
+- **後續可選**：build_pack 委員會 scraper 會抓「最近 14d 內」報告，可能含較舊/不同價基的 FV（如 AMD 6/14 FV $142）→ 之後可加 freshness 標記或只取 ≤7d；render 可加 `--refresh-prices` 重抓 yfinance。
 
 ---
 

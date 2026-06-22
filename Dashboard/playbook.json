@@ -1,0 +1,772 @@
+{
+  "as_of": "2026-06-22",
+  "week_label": "2026-06-23 起",
+  "capital_per_basket": 100000,
+  "tier_weights": {
+    "core": 15000,
+    "standard": 10000,
+    "light": 5000
+  },
+  "macro": {
+    "regime": "RISK_ON (產業層) / FRED Transitional conf 0.48",
+    "exposure_ceiling": "淨曝險 60–75%",
+    "breadth": "53 中性 / uptrend 0.284 窄幅領漲",
+    "market_top": "34.2 黃燈 (早期分配日)",
+    "sentiment": "F&G 37 Fear · VIX 16.4 NORMAL · SKEW 147 high (機構買尾部避險)",
+    "real_rate_10y": "DFII10 2.17% (百分位 ~94–100) — 高 multiple 成長股最大逆風",
+    "key_events": [
+      "2026-06-24 Fed 銀行壓力測試結果",
+      "2026-06-25 Core PCE 通膨數據 (本週最大 binary 風險)"
+    ],
+    "playbook_logic": "保險籃靠 megacap 質地 + MSFT/GOOGL/META 回檔價值,可較滿配;激進籃押最夯題材但過半標的近月已漲 45–76% 且多被委員會標過熱,故分批/等回檔/嚴設停損;混合 = 65% 保險 sleeve + 35% 激進 sleeve。"
+  },
+  "discipline_note": "前瞻探索層,非 investment_protocol 正式決策。委員會單股 verdict 以各自 reports/<DATE>_<TICKER>.md 為準。",
+  "author": "AI 投資委員會 (Claude)",
+  "codex_review": {
+    "label": "Codex Review",
+    "reviewed_on": "2026-06-22",
+    "review_mode": "committee_informed_second_opinion",
+    "committee_dependency": "medium-high",
+    "dependency_note": "本次 review 在讀取原報告與委員會個股資料後完成；曝險、集中度與執行批評為 Codex 獨立判斷，但股票宇宙、價格動能及部分估值敘述承接委員會產物。MRVL、CRDO、PLTR 另以公司官方資料核對。",
+    "verdict": "不建議照表一次投入；保留原始三籃作比較，實際執行優先採 75% 部署的 Codex 替代配置。",
+    "comparison_notes": [
+      {
+        "title": "總曝險",
+        "original": "市場背景建議淨曝險 60–75%，但三個原始籃子都接近 100% 部署。",
+        "note": "把現金視為正式配置：目標部署 75%、現金 25%。PCE 前先建立約一半目標倉位，事件後確認殖利率與價格結構再補足。"
+      },
+      {
+        "title": "保險籃定義",
+        "original": "原文以 megacap 質地、回檔價值與較低個股尾部風險，將保險籃視為可較滿配。",
+        "note": "全籃仍集中科技、AI 與半導體，遇到實質利率上升或 AI capex 下修時相關性會同步升高，不應視為真正防禦配置。"
+      },
+      {
+        "title": "高動能標的",
+        "original": "MU、MRVL、ALAB、CRDO 近月上漲約 61–76%，原文仍給予 10% 級別配置，但同時要求等回檔。",
+        "note": "不要用完整權重追價。MU 降至 2%；MRVL 3%、CRDO 2% 僅分批進場。MRVL 等 8–12% 回檔或橫盤，CRDO 等 10–15% 回檔。"
+      },
+      {
+        "title": "剔除股重評",
+        "original": "激進籃納入 MRVL、ALAB、CRDO、NBIS、PLTR、IONQ；混合籃納入 NBIS。",
+        "note": "不採委員會否決作為唯一依據後，加回 MRVL 3% 與 CRDO 2%；PLTR 保留觀察，待重新站回主要均線才考慮最多 1%；ALAB、NBIS、IONQ 暫不納入。"
+      },
+      {
+        "title": "風控與檢討",
+        "original": "原文以固定股數與價格 Kill 訊號管理風險，並以一週報酬、SPY alpha、命中率檢討。",
+        "note": "Kill 以日線收盤確認；每檔最大預定損失控制在資金 0.5%，全組合約 3%。檢討增加 QQQ、SOXX 與最大回撤，避免只看命中率。"
+      }
+    ],
+    "recommended_allocation": [
+      {
+        "ticker": "現金／短債",
+        "weight_pct": 25,
+        "role": "事件風險與回檔加碼彈性"
+      },
+      {
+        "ticker": "MSFT",
+        "weight_pct": 10,
+        "role": "AI 雲核心"
+      },
+      {
+        "ticker": "GOOGL",
+        "weight_pct": 8,
+        "role": "搜尋／TPU"
+      },
+      {
+        "ticker": "META",
+        "weight_pct": 7,
+        "role": "廣告現金流／AI"
+      },
+      {
+        "ticker": "ORCL",
+        "weight_pct": 5,
+        "role": "OCI 雲端"
+      },
+      {
+        "ticker": "NVDA",
+        "weight_pct": 10,
+        "role": "AI 加速器核心"
+      },
+      {
+        "ticker": "AVGO",
+        "weight_pct": 10,
+        "role": "客製矽／網通"
+      },
+      {
+        "ticker": "TSM",
+        "weight_pct": 3,
+        "role": "晶圓代工"
+      },
+      {
+        "ticker": "CCJ",
+        "weight_pct": 7,
+        "role": "鈾／AI 電力"
+      },
+      {
+        "ticker": "CEG",
+        "weight_pct": 5,
+        "role": "核能／AI 電力"
+      },
+      {
+        "ticker": "AMD",
+        "weight_pct": 3,
+        "role": "AI GPU 衛星倉"
+      },
+      {
+        "ticker": "MU",
+        "weight_pct": 2,
+        "role": "HBM 衛星倉"
+      },
+      {
+        "ticker": "MRVL",
+        "weight_pct": 3,
+        "role": "AI 客製矽／光通訊；回檔分批"
+      },
+      {
+        "ticker": "CRDO",
+        "weight_pct": 2,
+        "role": "AEC 高成長衛星倉；回檔分批"
+      }
+    ],
+    "execution": [
+      "PCE 前只建立約一半目標部位；數據後若殖利率未急升且個股守住支撐，再補至 75% 總曝險。",
+      "MRVL、CRDO 採 1/3 試單、1/3 確認止跌、1/3 突破整理區；不按報告參考價一次買滿。",
+      "PLTR 僅列觀察；ALAB、NBIS、IONQ 本週不配置。"
+    ],
+    "sources": [
+      {
+        "label": "Federal Reserve 2026 stress test release",
+        "url": "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20260609a.htm"
+      },
+      {
+        "label": "BEA PCE release schedule",
+        "url": "https://www.bea.gov/data/personal-consumption-expenditures-price-index"
+      },
+      {
+        "label": "Marvell FY2027 Q1 results",
+        "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results"
+      },
+      {
+        "label": "Credo FY2026 updated guidance",
+        "url": "https://investors.credosemi.com/news-events/news/news-details/2026/Credo-Provides-Preliminary-Third-Quarter-Fiscal-Year-2026-Revenue-Results-Updated-Revenue-Guidance-for-Fourth-Quarter-of-Fiscal-Year-2026-and-Schedules-Third-Quarter-Fiscal-Year-2026-Financial-Results-Conference-Call/default.aspx"
+      },
+      {
+        "label": "Palantir 2026 Q1 10-Q",
+        "url": "https://investors.palantir.com/files/2026%20Q1%20PLTR%2010-Q.pdf"
+      }
+    ]
+  },
+  "baskets": {
+    "conservative": {
+      "label_zh": "保險",
+      "label_en": "Conservative",
+      "thesis": "AI/科技核心曝險,要求獲利能力 + 相對估值合理 + 較低個股尾部風險。多為 megacap 可全倉,近月回檔者 (MSFT/GOOGL/META) 視為再進場價值。",
+      "summary": {
+        "n_picks": 10,
+        "target_capital": 100000,
+        "actual_deployed": 99723.38,
+        "leftover_cash": 276.62,
+        "theme_allocation": {
+          "AI 半導體": 15000,
+          "AI 客製矽 / 網通": 15000,
+          "AI 雲": 15000,
+          "AI / 搜尋": 10000,
+          "AI capex 受益": 10000,
+          "AI 雲 / OCI": 10000,
+          "AI 半導體 / 類比": 10000,
+          "科技壓艙石": 5000,
+          "AI 資料中心網通": 5000,
+          "AI 半導體 / 晶圓": 5000
+        },
+        "tier_breakdown": {
+          "core": 3,
+          "standard": 4,
+          "light": 3
+        }
+      },
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 半導體",
+          "price": 210.69,
+          "mom_5d": 2.8,
+          "mom_1mo": -4.4,
+          "committee": "extreme_undervalued · score 1.04",
+          "reason": "唯一被委員會標便宜的 AI 龍頭,結構需求最強",
+          "data": "合理價 $279 vs 現價 $210 (+32% 折價);AI_Semi INFLOW 領頭",
+          "kill": "跌破 $195 / AI capex 縮手新聞",
+          "tier_label": "核心",
+          "shares": 71,
+          "actual_cost": 14958.99,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "AVGO",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 客製矽 / 網通",
+          "price": 411.35,
+          "mom_5d": 6.7,
+          "mom_1mo": 0.1,
+          "committee": "—",
+          "reason": "自研 ASIC + 網通雙引擎,巨額 FCF,近月未過熱",
+          "data": "1mo +0.1% (不延伸) → 風險報酬佳",
+          "kill": "跌破 $380",
+          "tier_label": "核心",
+          "shares": 36,
+          "actual_cost": 14808.6,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "MSFT",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI 雲",
+          "price": 379.4,
+          "mom_5d": -2.8,
+          "mom_1mo": -8.9,
+          "committee": "—",
+          "reason": "防禦型 megacap,近月回檔 9% 是再進場價值",
+          "data": "1mo -8.9%;Azure AI 需求穩",
+          "kill": "跌破 $360",
+          "tier_label": "核心",
+          "shares": 40,
+          "actual_cost": 15176.0,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "GOOGL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI / 搜尋",
+          "price": 368.03,
+          "mom_5d": 2.9,
+          "mom_1mo": -5.0,
+          "committee": "—",
+          "reason": "AI megacap 中估值最低,TPU 自研降本",
+          "data": "Comm PE z -1.70 最便宜;1mo -5%",
+          "kill": "跌破 $350 / 反壟斷裁決",
+          "tier_label": "標準",
+          "shares": 27,
+          "actual_cost": 9936.81,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "META",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI capex 受益",
+          "price": 577.22,
+          "mom_5d": 1.6,
+          "mom_1mo": -4.1,
+          "committee": "—",
+          "reason": "廣告現金流 + AI 資本支出受益,近月未過熱",
+          "data": "1mo -4.1%",
+          "kill": "跌破 $550",
+          "tier_label": "標準",
+          "shares": 17,
+          "actual_cost": 9812.74,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "ORCL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 雲 / OCI",
+          "price": 184.29,
+          "mom_5d": 0.1,
+          "mom_1mo": 1.6,
+          "committee": "—",
+          "reason": "OCI backlog 強,價格行為最平靜 → 適合保險籃",
+          "data": "1mo +1.6% (最乾淨進場)",
+          "kill": "跌破 $172",
+          "tier_label": "標準",
+          "shares": 54,
+          "actual_cost": 9951.66,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "TXN",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 半導體 / 類比",
+          "price": 322.86,
+          "mom_5d": 8.7,
+          "mom_1mo": 6.8,
+          "committee": "—",
+          "reason": "類比週期回升 + 股息,質地穩、非極端估值",
+          "data": "1mo +6.8%",
+          "kill": "跌破 $300",
+          "tier_label": "標準",
+          "shares": 31,
+          "actual_cost": 10008.66,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "AAPL",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "科技壓艙石",
+          "price": 298.01,
+          "mom_5d": 0.8,
+          "mom_1mo": -0.3,
+          "committee": "—",
+          "reason": "最低 beta 壓艙石,資本返還,降整體波動",
+          "data": "1mo -0.3% 橫盤",
+          "kill": "跌破 $285",
+          "tier_label": "輕倉/樂透",
+          "shares": 17,
+          "actual_cost": 5066.17,
+          "weight_pct": 5.0
+        },
+        {
+          "ticker": "ANET",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 資料中心網通",
+          "price": 169.67,
+          "mom_5d": 8.5,
+          "mom_1mo": 19.8,
+          "committee": "—",
+          "reason": "AI datacenter 網通核心、高獲利;近月偏熱故輕倉",
+          "data": "1mo +19.8% (偏熱 → 輕倉/回檔加)",
+          "kill": "跌破 $158",
+          "tier_label": "輕倉/樂透",
+          "shares": 29,
+          "actual_cost": 4920.43,
+          "weight_pct": 5.0
+        },
+        {
+          "ticker": "TSM",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 半導體 / 晶圓",
+          "price": 462.12,
+          "mom_5d": 9.7,
+          "mom_1mo": 18.0,
+          "committee": "overvalued · score 1.065",
+          "reason": "晶圓龍頭,委員會建議倉位 3.67%;但已漲到合理價上方",
+          "data": "現價 $462 較委員會 FV $392 高 ~18% → 半倉、回檔補",
+          "kill": "跌破 $430",
+          "tier_label": "輕倉/樂透",
+          "shares": 11,
+          "actual_cost": 5083.32,
+          "weight_pct": 5.0
+        }
+      ]
+    },
+    "aggressive": {
+      "label_zh": "激進",
+      "label_en": "Aggressive",
+      "thesis": "押注最夯題材 (AI 記憶體/HBM、客製矽小型股、量子、AI 電力、neocloud)。高 beta、高 upside、高回撤。過半標的近月已漲 45–76%、多被委員會標過熱 → 分批、等回檔、PCE 後再加、嚴設停損。",
+      "summary": {
+        "n_picks": 10,
+        "target_capital": 100000,
+        "actual_deployed": 100207.07,
+        "leftover_cash": -207.07,
+        "theme_allocation": {
+          "AI GPU #2 + 量子": 15000,
+          "鈾 / AI 電力燃料": 15000,
+          "核能 / AI 電力": 15000,
+          "AI 記憶體 / HBM": 10000,
+          "AI 客製矽 ASIC": 10000,
+          "AI rack 連接": 10000,
+          "AI 連接 AEC": 10000,
+          "AI Neocloud": 5000,
+          "AI 軟體": 5000,
+          "量子運算": 5000
+        },
+        "tier_breakdown": {
+          "core": 3,
+          "standard": 4,
+          "light": 3
+        }
+      },
+      "picks": [
+        {
+          "ticker": "AMD",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "AI GPU #2 + 量子",
+          "price": 537.37,
+          "mom_5d": 10.0,
+          "mom_1mo": 29.8,
+          "committee": "—",
+          "reason": "AI GPU 第二供應商,MI 系列放量,題材雙押",
+          "data": "1mo +29.8%",
+          "kill": "跌破 $475 (-12%)",
+          "tier_label": "核心",
+          "shares": 28,
+          "actual_cost": 15046.36,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "CCJ",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "鈾 / AI 電力燃料",
+          "price": 106.49,
+          "mom_5d": 7.6,
+          "mom_1mo": 2.9,
+          "committee": "—",
+          "reason": "鈾為 AI 電力燃料、系統熱題材,未過熱 → 進場相對乾淨",
+          "data": "1mo +2.9% (激進籃中最乾淨)",
+          "kill": "跌破 $96",
+          "tier_label": "核心",
+          "shares": 141,
+          "actual_cost": 15015.09,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "CEG",
+          "tier": "core",
+          "weight_usd": 15000,
+          "theme": "核能 / AI 電力",
+          "price": 274.06,
+          "mom_5d": 11.1,
+          "mom_1mo": 5.1,
+          "committee": "—",
+          "reason": "Constellation 核電,datacenter 電力短缺最大受益",
+          "data": "1mo +5.1%",
+          "kill": "跌破 $245",
+          "tier_label": "核心",
+          "shares": 55,
+          "actual_cost": 15073.3,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "MU",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 記憶體 / HBM",
+          "price": 1133.99,
+          "mom_5d": 13.9,
+          "mom_1mo": 62.3,
+          "committee": "extreme_overvalued · score 0.814",
+          "reason": "HBM 超級循環,Rev YoY +196%、ROE 41%、淨現金",
+          "data": "委員會 +92% 溢價 (FV $594);1mo +62% → 起始小注/等回檔",
+          "kill": "跌破 $980 / 記憶體報價轉弱",
+          "tier_label": "標準",
+          "shares": 9,
+          "actual_cost": 10205.91,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "MRVL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 客製矽 ASIC",
+          "price": 310.58,
+          "mom_5d": 10.6,
+          "mom_1mo": 76.2,
+          "committee": "—",
+          "reason": "客製 AI silicon 設計贏家",
+          "data": "1mo +76.2% 極度延伸 → 只在回檔買",
+          "kill": "跌破 $265 (-15%)",
+          "tier_label": "標準",
+          "shares": 32,
+          "actual_cost": 9938.56,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "ALAB",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI rack 連接",
+          "price": 417.07,
+          "mom_5d": 13.5,
+          "mom_1mo": 70.7,
+          "committee": "—",
+          "reason": "Astera Labs,AI 機櫃連接 (PCIe/retimer) 放量",
+          "data": "1mo +70.7% 小型股,波動巨大",
+          "kill": "跌破 $355 (-15%)",
+          "tier_label": "標準",
+          "shares": 24,
+          "actual_cost": 10009.68,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "CRDO",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "theme": "AI 連接 AEC",
+          "price": 271.83,
+          "mom_5d": 2.7,
+          "mom_1mo": 60.9,
+          "committee": "—",
+          "reason": "主動電纜 (AEC) AI datacenter 滲透",
+          "data": "1mo +60.9% 噴出 → 小注/停損",
+          "kill": "跌破 $231 (-15%)",
+          "tier_label": "標準",
+          "shares": 37,
+          "actual_cost": 10057.71,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "NBIS",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI Neocloud",
+          "price": 286.69,
+          "mom_5d": 29.0,
+          "mom_1mo": 45.0,
+          "committee": "HOLD/CANCEL · decision_cap",
+          "reason": "納入 Nasdaq-100 催化;委員會叫等回檔 $200–238",
+          "data": "現價 $287 已超委員會進場區 → 等回檔、不追",
+          "kill": "現價站不回 $238 進場區 = 持續超買",
+          "tier_label": "輕倉/樂透",
+          "shares": 17,
+          "actual_cost": 4873.73,
+          "weight_pct": 5.0
+        },
+        {
+          "ticker": "PLTR",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "AI 軟體",
+          "price": 128.47,
+          "mom_5d": -2.0,
+          "mom_1mo": -5.0,
+          "committee": "decision_cap 0% (估值分歧)",
+          "reason": "AI 軟體敘事領頭,近月回檔提供較佳進場",
+          "data": "委員會 cap 0% (估值極度分歧) → 樂透小注、認賠快",
+          "kill": "跌破 $118",
+          "tier_label": "輕倉/樂透",
+          "shares": 39,
+          "actual_cost": 5010.33,
+          "weight_pct": 5.0
+        },
+        {
+          "ticker": "IONQ",
+          "tier": "light",
+          "weight_usd": 5000,
+          "theme": "量子運算",
+          "price": 56.55,
+          "mom_5d": -2.5,
+          "mom_1mo": 16.7,
+          "committee": "—",
+          "reason": "Quantum 題材 Warm 70,純量子標的",
+          "data": "高 beta 樂透,可換 RGTI",
+          "kill": "跌破 $48",
+          "tier_label": "輕倉/樂透",
+          "shares": 88,
+          "actual_cost": 4976.4,
+          "weight_pct": 5.0
+        }
+      ]
+    },
+    "hybrid": {
+      "label_zh": "混合",
+      "label_en": "Hybrid",
+      "thesis": "65% 保險 sleeve + 35% 激進 sleeve。以保險籃為底,留三成押最夯題材搏 upside — 單一帳戶想兼顧抗跌與題材爆發力者的折衷。",
+      "summary": {
+        "n_picks": 10,
+        "target_capital": 100000,
+        "actual_deployed": 99394.92,
+        "leftover_cash": 605.08,
+        "theme_allocation": {
+          "AI 半導體": 15000,
+          "AI 客製矽 / 網通": 15000,
+          "AI 雲": 15000,
+          "AI / 搜尋": 10000,
+          "AI 雲 / OCI": 10000,
+          "AI GPU #2": 10000,
+          "鈾 / AI 電力": 10000,
+          "AI 記憶體 / HBM": 5000,
+          "核能 / AI 電力": 5000,
+          "AI Neocloud": 5000
+        },
+        "tier_breakdown": {
+          "core": 3,
+          "standard": 4,
+          "light": 3
+        }
+      },
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "tier": "core",
+          "weight_usd": 15000,
+          "sleeve": "保險",
+          "theme": "AI 半導體",
+          "price": 210.69,
+          "mom_5d": 2.8,
+          "mom_1mo": -4.4,
+          "committee": "extreme_undervalued · score 1.04",
+          "reason": "保險 sleeve 核心:唯一便宜 AI 龍頭",
+          "data": "FV $279 vs $210 (+32%)",
+          "kill": "跌破 $195",
+          "tier_label": "核心",
+          "shares": 71,
+          "actual_cost": 14958.99,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "AVGO",
+          "tier": "core",
+          "weight_usd": 15000,
+          "sleeve": "保險",
+          "theme": "AI 客製矽 / 網通",
+          "price": 411.35,
+          "mom_5d": 6.7,
+          "mom_1mo": 0.1,
+          "committee": "—",
+          "reason": "保險 sleeve 核心:FCF + 未過熱",
+          "data": "1mo +0.1%",
+          "kill": "跌破 $380",
+          "tier_label": "核心",
+          "shares": 36,
+          "actual_cost": 14808.6,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "MSFT",
+          "tier": "core",
+          "weight_usd": 15000,
+          "sleeve": "保險",
+          "theme": "AI 雲",
+          "price": 379.4,
+          "mom_5d": -2.8,
+          "mom_1mo": -8.9,
+          "committee": "—",
+          "reason": "保險 sleeve 核心:回檔再進場價值",
+          "data": "1mo -8.9%",
+          "kill": "跌破 $360",
+          "tier_label": "核心",
+          "shares": 40,
+          "actual_cost": 15176.0,
+          "weight_pct": 15.0
+        },
+        {
+          "ticker": "GOOGL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "sleeve": "保險",
+          "theme": "AI / 搜尋",
+          "price": 368.03,
+          "mom_5d": 2.9,
+          "mom_1mo": -5.0,
+          "committee": "—",
+          "reason": "保險 sleeve:最便宜 AI mega",
+          "data": "PE z -1.70",
+          "kill": "跌破 $350",
+          "tier_label": "標準",
+          "shares": 27,
+          "actual_cost": 9936.81,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "ORCL",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "sleeve": "保險",
+          "theme": "AI 雲 / OCI",
+          "price": 184.29,
+          "mom_5d": 0.1,
+          "mom_1mo": 1.6,
+          "committee": "—",
+          "reason": "保險 sleeve:OCI backlog、最乾淨進場",
+          "data": "1mo +1.6%",
+          "kill": "跌破 $172",
+          "tier_label": "標準",
+          "shares": 54,
+          "actual_cost": 9951.66,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "AMD",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "sleeve": "激進",
+          "theme": "AI GPU #2",
+          "price": 537.37,
+          "mom_5d": 10.0,
+          "mom_1mo": 29.8,
+          "committee": "—",
+          "reason": "激進 sleeve 主力:AI GPU #2",
+          "data": "1mo +29.8%",
+          "kill": "跌破 $475",
+          "tier_label": "標準",
+          "shares": 19,
+          "actual_cost": 10210.03,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "CCJ",
+          "tier": "standard",
+          "weight_usd": 10000,
+          "sleeve": "激進",
+          "theme": "鈾 / AI 電力",
+          "price": 106.49,
+          "mom_5d": 7.6,
+          "mom_1mo": 2.9,
+          "committee": "—",
+          "reason": "激進 sleeve:AI 電力燃料、乾淨進場",
+          "data": "1mo +2.9%",
+          "kill": "跌破 $96",
+          "tier_label": "標準",
+          "shares": 94,
+          "actual_cost": 10010.06,
+          "weight_pct": 10.0
+        },
+        {
+          "ticker": "MU",
+          "tier": "light",
+          "weight_usd": 5000,
+          "sleeve": "激進",
+          "theme": "AI 記憶體 / HBM",
+          "price": 1133.99,
+          "mom_5d": 13.9,
+          "mom_1mo": 62.3,
+          "committee": "extreme_overvalued · score 0.814",
+          "reason": "激進 sleeve 樂透:HBM 超循環",
+          "data": "委員會 +92% 溢價;1mo +62% → 小注",
+          "kill": "跌破 $980",
+          "tier_label": "輕倉/樂透",
+          "shares": 4,
+          "actual_cost": 4535.96,
+          "weight_pct": 5.0
+        },
+        {
+          "ticker": "CEG",
+          "tier": "light",
+          "weight_usd": 5000,
+          "sleeve": "激進",
+          "theme": "核能 / AI 電力",
+          "price": 274.06,
+          "mom_5d": 11.1,
+          "mom_1mo": 5.1,
+          "committee": "—",
+          "reason": "激進 sleeve 樂透:核電 AI 電力",
+          "data": "1mo +5.1%",
+          "kill": "跌破 $245",
+          "tier_label": "輕倉/樂透",
+          "shares": 18,
+          "actual_cost": 4933.08,
+          "weight_pct": 5.0
+        },
+        {
+          "ticker": "NBIS",
+          "tier": "light",
+          "weight_usd": 5000,
+          "sleeve": "激進",
+          "theme": "AI Neocloud",
+          "price": 286.69,
+          "mom_5d": 29.0,
+          "mom_1mo": 45.0,
+          "committee": "HOLD/CANCEL · decision_cap",
+          "reason": "激進 sleeve 樂透:neocloud,等回檔",
+          "data": "委員會叫等 $200–238",
+          "kill": "站不回 $238",
+          "tier_label": "輕倉/樂透",
+          "shares": 17,
+          "actual_cost": 4873.73,
+          "weight_pct": 5.0
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-06-22T00:59:24"
+}

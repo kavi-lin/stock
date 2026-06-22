@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.46.0';
+  const VERSION = 'V4.47.2';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -27,6 +27,7 @@
     { id: 'calendar',  href: 'calendar.html',  icon: 'calendar-days',    i18n: 'nav_calendar',  zh: '決策日曆',   group: 'portfolio' },
     { id: 'graph',     href: 'graph.html',     icon: 'network',          i18n: 'nav_graph',     zh: '知識圖譜',   group: 'portfolio' },
     { id: 'supply-chain', href: 'supply-chain.html', icon: 'git-fork',    i18n: 'nav_supply_chain', zh: '供應鏈', group: 'portfolio' },
+    { id: 'playbook',  href: 'playbook.html',  icon: 'wallet',           i18n: 'nav_playbook',  zh: '投資方案',   group: 'portfolio' },
 
     { id: 'office',    href: 'office.html',    icon: 'building-2',        i18n: 'nav_office',    zh: 'AI 辦公室',  group: 'ops' },
     { id: 'ops',       href: 'ops.html',       icon: 'terminal',          i18n: 'nav_ops',       zh: 'Script 工具箱', group: 'ops' },

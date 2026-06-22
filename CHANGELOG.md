@@ -8,6 +8,43 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.47.2] — 2026-06-22 — weekly-tech-playbook：Codex Review 整合的優化（解耦 + 去自打臉 nag）
+
+### Changed
+- **`render.py` `validate_codex_review`** — `codex_review` 改為**可選**:缺它不再 fatal、weekly 生成器可獨立重跑（原本缺 review 會 rc=1、不出任何檔，依賴反轉）。提供時才驗證結構。
+- **去除自打臉 degraded**:原邏輯「非 committee-blind → degraded」對每份非盲評 review 都報 rc=2（含 Codex 自己的非盲評產出）。改為只在**明確宣稱** `review_mode=committee_blind_then_reconcile` 時才要求 `blind_artifact`（fatal），不再 by-default 扣分。
+- **`review.py`** — Codex 替代配置（含 25% 現金）新增 `deployed_pct`/`cash_pct`,排名/MD/CLI 標示「部署 75%」,避免其 vs SPY alpha 被誤讀為同 beta 比較。
+- **`SKILL.md`** — Step 2.5 從「（必填）」改為「（建議；對生成可選）」,與 code 一致。
+
+### Why
+- Codex review 的**內容**是強的第二意見（抓到原三籃 ~100% 部署 vs macro 建議 60–75% 的矛盾、降權抛物線動能股、檢討加 QQQ/SOXX+回撤、committee-blind 反 anchoring）——全部保留。但**工程整合**把 review 變成生成器的 fatal 必填（破壞可重跑性）且 blind-mode 檢查自打臉。本版只修這兩個 gating bug + 一個比較公平性標示,不動 Codex 的好設計。P3（schema 欄位寫死 `codex_review` 綁工具名）留待後續決定是否泛化為 `independent_review`。
+
+## [4.47.1] — 2026-06-22 — weekly-tech-playbook：下週 LLM 檢討機制
+
+### Added
+- **`scripts/review.py`**（0 LLM）— 把過去某週方案對「檢討日收盤」評分:每檔 進場→現價 報酬、每籃加權報酬 + vs SPY alpha + 命中率、kill 觸發偵測（從 kill 文字擷取門檻價,現價跌破標 🔴）、三籃排名。輸出 `reports/<REVIEW_DATE>_TECH_PLAYBOOK_REVIEW.md`（含空白「🧠 LLM 檢討」段供 Claude turn 填質性判讀）+ `Dashboard/playbook_review.json`。觸發詞「投資方案檢討」。
+- **`render.py`** 加寫 immutable dated snapshot `data/playbook_<DATE>.json` — 進場錨點,故 `Dashboard/playbook.json` 被下週覆寫後仍可回放檢討。
+- **`page-playbook.js`** 頂部「上週方案檢討」橫幅 — 讀 `playbook_review.json`,顯示三籃報酬/alpha/命中率/觸發 kill;僅在 entry≠review 日顯示（避開同日 0% 退化）。
+
+### Why
+- user 要求「請 LLM 檢討的機制也寫上」。原本只有靜態 scaffold 表,無實際機制。改成兩段式:`review.py` 算硬數據（0 LLM,比照 short-term weekly_review 永不自動覆寫 config）→ Claude turn 讀數據填質性判讀並可據此改下週 selections。檢討為前瞻探索層,不回寫 investment_protocol。
+
+## [4.47.0] — 2026-06-22 — weekly-tech-playbook skill：三籃子 $100k 科技投資方案 + Dashboard 頁
+
+### Added
+- **`skills/weekly-tech-playbook/`** — 把「從本週系統分析擬下週投資方案」固化成可重跑 skill。每次產三個各 $100k 籃子（🛡️保險 / 🔥激進 / ⚖️混合），信心分級配重（核心 $15k×3 / 標準 $10k×4 / 輕倉 $5k×3），搭最夯題材，附理由+數據+kill trigger。
+  - `scripts/build_pack.py`（0 LLM 資料層）：regime（market_mood + thematic）+ 熱題排序（thematic-screener）+ 近 14 天委員會 verdict 解析（reports/<DATE>_<TICKER>.md 的 Final Score / fair value / band / decision cap）+ yfinance 報價+動能 → `data/pack_<DATE>.json`。
+  - `scripts/render.py`（0 LLM）：selections → 股數+成本配重、驗證每籃 = $100k（rc 0/1/2）→ `Dashboard/playbook.json` + `reports/<DATE>_TECH_PLAYBOOK.md`（含下週檢討 scaffold）。
+  - `data/selections_2026-06-22.json`：本週首版三籃實際選股。
+- **`Dashboard/playbook.html` + `page-playbook.js`** — sidebar 新增「投資方案」頁，三籃可切換，顯示分級配重 / 股數 / 理由+數據 / kill / 動能 chips / 檢討 scaffold。
+
+### Changed
+- `Dashboard/utils.js`：NAV_ITEMS 加 `playbook`（portfolio group）；VERSION → V4.47.0。
+- `Dashboard/i18n.js`：nav `playbook` zh/en。
+
+### Why
+- user 要把「保險 100% / 激進 100% / 混合 100% 各投 $100k 假設、附理由數據、供下週 LLM 檢討」變成常駐工具而非一次性報告。流程拆成 0-LLM 資料層 + LLM 選股 + 0-LLM 渲染驗證，可每週重跑且結果可追蹤。前瞻探索層，不入 investment_protocol 決策。
+
 ## [4.46.0] — 2026-06-20 — 現值估值 confidence 接錨點一致性（破假精確；全標的通用）
 
 ### Changed
