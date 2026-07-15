@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.kavi.aicommittee.premarket</string>
+
+    <!-- Pre-market raw-data refresh. Headless: runs daily_update.sh with no
+         dependency on dashboard_server.py or any Claude turn. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/kavi/Developer/Claude/Projects/AI投資委員會/scripts/premarket/premarket_cron.sh</string>
+    </array>
+
+    <!-- 04:30 local (Pacific) = ~2h before the 06:30 PT US open. Mon–Fri only.
+         launchd Weekday: 1=Mon .. 5=Fri. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+    </array>
+
+    <!-- launchd-level stdout/stderr (catches failures before the wrapper sets up
+         its own per-day log under logs/premarket_cron/). -->
+    <key>StandardOutPath</key>
+    <string>/Users/kavi/Library/Logs/aicommittee-premarket.launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/kavi/Library/Logs/aicommittee-premarket.launchd.log</string>
+
+    <!-- Do not run on load/reboot — only at the scheduled calendar times. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
