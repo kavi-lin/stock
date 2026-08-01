@@ -58,6 +58,100 @@
 - MU audit、完整 regression tests、invest validator 與同 session Claude Fable 5 code review 均完成；最終 review `ACCEPT`。
 - **後續校準**：累積足夠 outcome 後再校準 PT 180 天 freshness 與 family weights；校準前不得憑 LLM 判斷改 live 數字。
 
+## ✅ Done (v4.70.0 → v4.72.0) — 分析協議審計 + P0/P1/P2 全系列改制
+
+- 審計報告 `reports/decision_review/AUDIT_2026-07-16_protocol_v5.md`；三波全落地：P0（probe 分層 / Red Team 懲罰分級 / anchor 修剪 / confidence 三檔）、P1（shadow 落日 / 欄位瘦身 / 5d 降級 / Phase 0 caps；P1-6 依消費者證據收窄、regime 規則表化依校準否決）、P2（parabolic 斷鏈 / forecaster 聲明 / validator §12 界限檢查 / ftd 路徑整併）。
+- **⏳ 待 user 決策**：
+  - [x] dispersion 門檻改 0.375/0.52 — **已核准並落地（v4.72.1）**
+  - [ ] archetype shadow：翻轉率 22.6% ≥15% → 按規則不切（2026-07-16 檢視：7 筆翻轉 100% 集中 hypergrowth、方向雙向 4/3 = 把極端 band 往中間拉；有 outcome 的僅 1 筆無從判定）。**檢查點重置**：P0-3 trim 已改變 live 行為，pre-trim 翻轉率過時——累積 ≥20 筆修剪後 session 重測；屆時若仍 ≥15% → 對翻轉案例跑方向性 backtest（live vs shadow band 誰更能預測 30/60d 前瞻報酬），並評估 **hypergrowth-only 局部切換**（balanced/cyclical 零翻轉不需動）
+- **📊 校準債（有截止條件）**：`red_team_counter_evidence_strength` × `thesis_break_probability` 累積 ≥20 session 後跑 outcome 校準（無鑑別度 → 分級懲罰再降）；probe tier 首 4 週盯 t2 命中率；oe shadow 11/20 累積中；**agreement_grade 門檻再校準**——P0-3 trim 使 cv 左移，累積 ≥20 筆修剪後 session 由 shadow_report.py 重出分佈再議 0.375/0.52。
+- **🔍 下次 `分析 [TICKER]` 實戰驗證清單**：Red Team strength/probability 兩新欄、C_eff 三檔量化、rationale 機械格式、anchor 修剪、hot_zone_probe_tier。
+
+---
+
+## ✅ Done (v4.64.0) — Agent 治理層（CLAUDE.md 瘦身 + docs/agent-ops/）
+
+- CLAUDE.md 178→74 行純路由；父層指標化；`docs/agent-ops/` 8 檔（診斷/指令總表/模型調度/判斷 rubric/派工模板/維護協議/教訓/交接信）；v4_8 歸檔+引用清零；MARKET_INDEX 補齊 24 skills；AGENTS/GEMINI 去重。對抗審查 13 findings 全修。
+- **⏳ 待 user**：`CLAUDE拷貝.md` 確認後刪除（備份在 `docs/agent-ops/backups/`）。
+- ✅ SESSION_NOTES 歸檔完成（v4.64.1）：保留最近 10 個 Session Note，236 個搬 `archive/session_notes_archive.md`（4754→~100 行）。
+- ✅ CLAUDE拷貝.md 已由使用者刪除（2026-07-03）。
+- ✅ daily health 摘要完成（v4.65.0）：`scripts/daily_health.py` + daily_update.sh 收尾自動印表。
+- ✅ 報告決策數字 script 注入完成（v4.66.0）：`inject_report_facts.py` + protocol Step 4.5，6 區塊佔位符制，33-assert golden fixture。**⏳ 待實戰**：下次跑 `分析 [TICKER]` 驗證一輪佔位符流程。
+- ✅ 2+1 評審制接線完成（v4.67.0）：Red Team + Arbiter 降級補償寫入兩 protocol 本文，schema 零改動。**⏳ 待實測**：首次在無高階檔環境跑 protocol 時盯 referee 是否守三問制。
+- **⏳ Backlog（詳見 docs/agent-ops/LETTER.md 交接表）**：llm_review 300KB 索引預切段（script 先切段統計、模型只看摘要層）。
+
+---
+
+## ✅ Done (v4.62.0) — 量化策略回測頁（quant-backtest）
+
+- **`skills/quant-backtest/`** — 0-LLM 回測引擎（momentum 計分規則 5-10y 重放 + ma_cross）+ 29-assert golden fixture + SKILL.md；`backtest.html` 新頁（tiles/權益/進出場/回撤/分數/Sharpe 熱力圖/逐年/交易）；server `quant_backtest` SCRIPT_PROTOCOLS + `GET /api/backtest/{list,result}`。探索層，不入委員會決策。
+- **⏳ 待 user**：重啟 dashboard_server 生效後實機開 `/backtest.html` 看渲染。
+- **⏳ V2 候選**：多 ticker 組合、walk-forward 分段、自家訊號源（journal/thematic recommendations）接入回測、股息調整報酬。
+
+---
+
+## ✅ Done (v4.54.1) — 修逆勢假反轉(MU) + 訊號流收合
+
+- **`apply_trend_context(rv, tr)`** — 反轉撞嚴格反向均線排列 → `counter_trend`/`alert=False`/「逆勢反彈·回測」;`build()` 套用,前端不當頭條。修 MU 空頭排列急跌卻爆「反轉向上」。
+- **`_collapse_flow()`** — 訊號流連續同向收一筆(spike 保留 ⚡),`max_events` 4→3,不再連三次。
+- **+4 case**(逆勢降級/同向保留/無趨勢保留/flow 收合)。
+- **⏳ 已知取捨**：counter_trend 僅嚴格對向排列觸發;tr=None 時逆勢反轉仍報。
+
+---
+
+## ✅ Done (v4.54.0) — 個股急拉/急殺：加「順勢續攻/續跌」趨勢延續 STATE 偵測器
+
+- **`detect_trend()`**（intraday_spikes.py，0 LLM）— 狀態型偵測,補 spike(暴衝)/reversal(剛交叉) 抓不到的「均線多頭排列順勢創高」。多頭 = 嚴格 ma5>ma10>ma20 + 收≥ma5 + ma5 上揚 + KDJ K>D & K≥50 + 貼近 20 根窗高;空頭鏡像。payload 1.3→1.4,reading 掛 `trend` + top-level `trends[]`。前端狀態行優先序 反轉>趨勢>尚無訊號,趨勢卡左緣色條。+5 case/+19 asserts。Live：12 檔全無訊號 → 6 檔跳順勢訊號。
+- **⏳ 可調**：render 把非 alert 小反轉排在 strong 趨勢前,若要 strong 趨勢優先可調;`TREND_K_MIN`/`TREND_HIGH_WINDOW`/`TREND_HIGH_TOL` tuning。
+
+---
+
+## ✅ Done (v4.51.0) — 急拉/急殺加 MACD/KDJ/量 確認層
+
+- **`detect_spikes()`** 重用 `intraday.compute_macd`/`compute_kdj` → confirmations + confirmed(價 + ≥2)；fetch 40→90 分；chip 加 ✓badge + ★。24 asserts。
+- **⏳ 資金流向/特大單（待 user 選）**：(a) Futu OpenAPI/OpenD（確切特大單，免費 user Futu 帳號，需裝 futu-api + 跑 OpenD）/ (b) Alpaca SIP $99 tick 自分類 / (c) 免費 bar 近似（OBV/上下量比，只有方向）。
+
+---
+
+## ✅ Done (v4.50.0) — 個股急拉/急殺快線（Alpaca 1 分鐘，獨立 lane）
+
+- **`intraday_spikes.py`**（0 LLM）— Alpaca 1min REST 多檔一次抓 + `detect_spikes()`：近 5 分鐘 `|1分|≥1%` / `|3分|≥2%` → 急拉/急殺，severity + 量增 3× 次要確認。`config/spike_watchlist.txt` 可手編。
+- **接線**：`intraday_spikes_poll_loop`（60s，盤中）+ GET `/api/intraday-spikes/data` + intraday 頁頂部區塊。無 Alpaca key graceful no-op。`test_intraday_spikes.py` 18 asserts。
+- **⏳ 待 user**：alpaca.markets 免費註冊 → 設 `ALPACA_API_KEY`/`ALPACA_SECRET_KEY`。`ALPACA_FEED=sip`（$99/mo）才有準確量；免費 IEX 量低估，偵測以價格為主。
+
+---
+
+## ✅ Done (v4.49.x) — 盤中評估：MACD/KDJ 動能層 + 即時 quote + 修側欄
+
+- v4.49.1 修 `intraday-mood.html` 漏 `UI.boot('intraday')` → 左側欄不 render（已修）。
+## ✅ Done (v4.49.0) — 盤中評估：MACD/KDJ 動能確認層
+
+- **`intraday.py`** pure-python `compute_macd`/`compute_kdj`（末根交叉 + bar 數守門）→ 日線(regime)+5min(時機) 雙框。
+- **旗標（只確認層、不動分數）**：下殺=盤中 KDJ 高檔死叉 / MACD 死叉+跌破VWAP；反轉=盤中 KDJ 低檔金叉 / 日線 MACD 柱轉升；macd_daily=日線金叉死叉。confluence-gated 擋 5min whipsaw。
+- 每檔 `momentum` 數值透出；卡片加 MACD/KDJ 讀數+交叉箭頭。`MACD_*`/`KDJ_*`/`KDJ_OB`/`KDJ_OS` 檔頭可調。`test_intraday.py` 47 asserts。
+
+---
+
+## ✅ Done (v4.48.1) — 盤中評估：即時 quote 混合
+
+- **`intraday.py`** `assess(live=)` + `_fetch_live_quote`：FMP `quote` 覆蓋 spot/當日高低/量/昨收（~2s 新），破底/止跌秒級化；5-min K 仍管 VWAP+型態。每檔 `data_source`+`quote_timestamp`，頁面 pill「· 即時報價」。`test_intraday.py` 34 asserts。
+- **1min 不可用**（stable 回 None）→ 型態最細 5-min。
+
+### ⏳ 盤中評估候選增強（user 待決，Tier-1）
+- 盤中 VIX context 分量（`quote ^VIX`）、類股輪動快照（`sector-performance-snapshot`）、HYG 信用佐證（同 assess 跑 HYG）、時段化 RVOL 曲線（修早盤線性外推噪音）。皆走既有 quote/5min 端點。
+
+---
+
+## ✅ Done (v4.48.0) — 盤中評估引擎（Intraday weakness tape）
+
+- **`intraday.py`**（0 LLM）— FMP 5-min bars + ~60 日 daily → SPY/QQQ/IWM signed −100..+100 盤中評估。破底(5/20/50d)/止跌/高開低走/量增價跌(RVOL)/VWAP/MA20/連跌/出貨日。`UNIVERSE`/`WEIGHTS`/門檻 = 檔頭常數可調。
+- **接線**：dashboard_server `intraday_mood_poll_loop`（盤中 300s + 開機 + 收盤快照）+ GET `/api/intraday-mood/{data,state}` + POST `/refresh`；`intraday-mood.html` 獨立面板；utils.js nav；index.html mini-strip；daily_update Step 9.35；`test_intraday.py` 26 asserts。
+- **踩雷**：stable daily 端點 = `historical-price-eod/full`（`historical-price-full` 回 None）。
+- **可調項（user 探索期）**：universe 增減（如加 ^VIX 盤中）、poll 間隔、score 取向（目前 負=破底）、各 WEIGHTS/門檻。
+- **紀律**：探索層，**不**入 investment_protocol。
+
+---
+
 ## ✅ Done (v4.47.2) — weekly-tech-playbook：Codex Review 整合優化
 
 - **P1 解耦（關鍵）**：`render.py` `codex_review` 改可選——缺它 rc=0 仍生成（原 fatal、依賴反轉破壞可重跑）。
@@ -450,7 +544,7 @@
 
 ### 路線 EXP — Forward Expectations Engine（未來營運預測 → 預期估值）
 
-> **目的**：讓 AI 投資委員會能回答「未來價值由什麼驅動、目前市場已反映什麼、委員會與市場差在哪、哪些未來數據能驗證 thesis」，而非只用 trailing 財務數據外推。
+> **目的**：讓 AI Investment Committee 能回答「未來價值由什麼驅動、目前市場已反映什麼、委員會與市場差在哪、哪些未來數據能驗證 thesis」，而非只用 trailing 財務數據外推。
 >
 > **治理原則**：shadow-first；初期不得修改 live `fair_value_summary`、`decision_lock`、買進門檻或部位 sizing。所有預測必須保存 point-in-time 來源、時間戳與假設，不得虛構 TAM、guidance 或 analyst estimate。
 >

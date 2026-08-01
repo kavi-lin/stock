@@ -82,6 +82,524 @@ Single source of truth for version history. Current version authority is `VERSIO
 - MU 重跑：FV `$623.79`、vs current `-24.21%`、score `-1`、confidence `low`；完整 lineage/排除原因在 `reports/20260802_MU_valuation_pack_audit.md`。
 - 同一個 Claude Fable 5 session 完成兩輪 code review；F1–F5 全部 resolved，最終明確 `ACCEPT`。
 
+## [4.74.1] — 2026-07-21 — 專案全面更名為英文（AI投資委員會 → ai-investment-committee），保留中文顯示名稱
+
+### Changed
+- 專案資料夾實體搬遷：`/Users/kavi/Developer/Claude/Projects/AI投資委員會` → `/Users/kavi/Developer/Claude/Projects/ai-investment-committee`（`mv`，git 歷史完整保留）
+- 重新指向並 reload 現行 launchd job `com.kavi.aicommittee.premarket`（原本指向舊中文路徑的 plist，含 repo 內 `scripts/premarket/com.kavi.aicommittee.premarket.plist` 與 `~/Library/LaunchAgents/` 安裝副本兩處）
+- 修正 `scripts/premarket/premarket_cron.sh`、`scripts/run_weekly_review.sh`、`reports/decision_review/{p0_param_replay_2026-07-16,audit_stats_2026-07-16}.py` 的硬編路徑
+- 修正 `docs/agent-ops/{DELEGATION_TEMPLATES,MAINTENANCE}.md`、`docs/ARCHITECTURE_DIAGRAM.md` 治理文件內的專案根目錄路徑
+- 各活文件（README/CLAUDE/AGENTS/GEMINI/TODO/sector/docs/news/daily_update.sh/REVIEW_PROMPT）標題與內文的專案名稱由中文改為英文 "AI Investment Committee"；README.md、CLAUDE.md、AGENTS.md、GEMINI.md 標題保留中文為副標（使用者指定保留位置）；Dashboard UI 顯示文字維持中文不動（使用者指定保留位置）
+- 歸檔內容（`archive/**`）、已封存的個股/週報 `reports/*.md`（`SHORT_TERM_WEEKLY_2026-07-15.md` 因仍是近 6 天內最新一份、含可執行 `ls` 指令而一併修正路徑，其餘維持原樣）、`skills/weekly-tech-playbook/data/*2026-06-22*.json`、`CHANGELOG.md` 既有歷史條目維持原樣不改寫（歷史紀錄不可回寫）
+
+### Fixed
+- `scripts/extractors/{thematic_screener_extractor,earnings_analyzer_extractor}.py` 的 `str(path).split("AI投資委員會/")[-1]` 硬編舊資料夾名稱——搬遷後若不修正會讓 `raw_path` 欄位 split 失敗、整段路徑洩漏
+
+### Why
+- 使用者要求專案全面更名為英文（含實體路徑），但保留中文名稱於指定位置作為專案説明副標
+- `docs/agent-ops/MAINTENANCE.md` 自身即記載舊路徑為 `Documents/Claude/Projects/...`，與實際 `Developer/Claude/Projects/...` 不符（既有文件漂移），此次一併修正並回寫 `LESSONS.md`
+
+## [4.74.0] — 2026-07-17 — AI 辦公室辯論機制 v2：四方平行辯論 pipeline + 修復 Claude 無輸出
+
+### Fixed
+- Lead (Claude) 連續 `(no output)`：headless `claude -p` 在專案根目錄會進入 agentic 模式（載 CLAUDE.md/MCP/工具）跑超過 180s timeout 被砍。`llm_drivers.run_claude` 新增 `model` / `max_turns` / `strict_mcp` / `no_tools` 參數，辯論 turn 走 text-only（`--max-turns 1 --strict-mcp-config --tools ""` + 固定 model + **`--system-prompt` 整個取代內建 Claude Code prompt**——只關工具不換 prompt 時模型仍會幻覺文字版工具呼叫 `**Tool: read**`；壓測 3/3 clean），並加一次 transient 失敗 retry
+- `model_router._run_chain` ALL_FAILED 路徑誤標 `fell_back=True`（UI 顯示「↩ 已 fallback」但實際沒有任何模型成功）
+
+### Changed
+- `scripts/office/orchestrator.py` + `roles.py` 重寫為四階段平行辯論 pipeline，取代 round-robin 全 transcript 重讀（token O(輪²) → O(分歧數)）：
+  0. **資料蒐集（Researcher，固定 gemini）**：起草前先跑一輪 facts-only 蒐集——gemini 強項是檢索不是激進論點（使用者定調）；agentic 讀 repo 新鮮 caches（market_mood / data.json / breadth_cache…），輸出 ≤12 條帶數字、日期、出處的 fact pack + gaps，發給所有起草席與終局裁決作共同依據（同一份中性事實，不破壞獨立性）；失敗時優雅降級、起草照跑；`OFFICE_RESEARCH_TIMEOUT_SEC` 預設 240s
+  1. 獨立觀點：四席平行起草（Lead / Critic / Verifier / **Trader 盤面派**）——**Lead 固定 claude sonnet；Critic 只派 codex/grok（gemini 實測激進主張讓步率 3/5 最高，排除出攻擊席）；Verifier/Trader 在剩餘引擎隨機**（`roles.random_team()`；席位↔引擎解耦，meta.roles 記錄每 run 分配供後續統計讓步率），互不可見 → cross-read token = 0、分歧不被首發言者錨定；grok 對 JSON 紀律較鬆——`_call_role` 對所有引擎加一次 parse 失敗重試；grok 小 prompt 也常要 90-150s，另給 `OFFICE_GROK_TIMEOUT_SEC`（預設 300s，按引擎不按席位）；任一稿失敗時 pipeline 以 ≥2 稿續行
+  2. 分歧萃取：一次結構化 pass 產出共識清單 + 編號分歧表（≤ `OFFICE_MAX_DISAGREEMENTS`，預設 5）
+  3. 定點交鋒：每個分歧只發給持立場的角色，context 只含該分歧點（maintain/revise/concede + 證據）
+  4. 終局裁決：強模型（`OFFICE_STRONG_MODEL`，預設 opus）讀濃縮包、逐分歧裁決並寫交付物；失敗時 deterministic fallback 組裝
+- `Dashboard/page-office.js` / `office.html`：四段式展示（觀點卡 → 分歧表 → 交鋒嵌在分歧卡下 → 交付物）；保留舊 run 的輪次事件相容渲染；移除輪數選擇器
+- 新 env：`OFFICE_CLAUDE_MODEL`（草稿用，預設 sonnet）、`OFFICE_STRONG_MODEL`（裁決用，預設 opus）、`OFFICE_MAX_DISAGREEMENTS`、`OFFICE_VERDICT_TIMEOUT_SEC`（預設 300）
+
+### Why
+- 7/17 使用者實跑：Lead 兩輪空白、Critic 花整輪評論「Lead 沒交東西」——順序制一來一往 token 貴且價值密度低；分歧才是這系統的訊號，改成只在分歧點上花 token
+
+## [4.73.0] — 2026-07-17 — 新增 Grok CLI 進 LLM 治理鏈（第 4 個可選模型）
+
+### Added
+- `scripts/break_news/llm_drivers.py`：`run_grok()`（`grok -p --output-format json --permission-mode dontAsk --disable-web-search --no-subagents`；envelope `{"text":...,"usage":{...}}`）+ `GROK_BIN` 常數；註冊進 `_RUNNERS` / `VALID_MODELS`；`_DEFAULT_CONFIG.enabled/budgets` 加 grok（daily_max_calls=100，保守值）
+- `config/llm_config.json`：`enabled.grok: true`、`budgets.grok.daily_max_calls: 100`
+- `dashboard_server.py` `/api/llm-config`：`valid` 集合加 `"grok"`
+- `Dashboard/utils.js`：側邊欄 LLM 設定下拉選單 + usage 面板加 `grok` 選項
+
+### Why
+- 使用者本機已裝 grok CLI（已測試可用，`grok-4.5`，session auth）；納入治理鏈後可被 budget/cooldown 治理、可在 Dashboard 手動選入 primary/secondary/tertiary 或 break_news 配對
+- 刻意**不**動預設 `primary/secondary/tertiary`（維持 codex→claude→gemini）與 `dashboard_server.py` 的 `_protocol_command`（整段 protocol 執行器是更大決定）——grok 目前只是「可被選、可被治理」，是否拉進實際 routing 鏈由使用者手動決定
+
+## [4.72.1] — 2026-07-16 — agreement_grade 門檻校準（0.15/0.35 → 0.375/0.52，user 核准）
+
+### Changed
+- `compute_price_framework.py` `AGREEMENT_GRADE_HIGH_CV/LOW_CV` 常數化並改 0.375/0.52（SHADOW_REPORT_2026-07-16 n=67 歷史 cv 的 33/66 percentile）；appendix spec 同步
+- 效果：歷史分級 28/30 low（93% 亮燈無鑑別度）→ 4 high / 6 medium / 20 low；真極端（PLTR cv 1.26 / ARM 1.20）兩制皆 low 不受影響
+- 只影響展示標籤；`reconcile_confidence` 的 0.35/0.60 confidence caps（決策鏈）不動
+
+### Why
+- 拍腦袋初值讓「錨一致度」標籤失去功能。⚠ 再校準檢查點：本校準基於修剪前 anchors，P0-3 trim 使 cv 左移（NVDA 0.341→0.188），累積 ≥20 筆修剪後 session 重出分佈再議（TODO 📊）
+
+## [4.72.0] — 2026-07-16 — P2 斷鏈修補 + validator 補強（AUDIT F6 收尾）
+
+### Fixed
+- **P2-9** `large_cap_parabolic` 斷鏈：判定抽到 `skills/_shared/technical_core.parabolic_severity_tag`（單一源），momentum.py 原地改用、technical-analyst analyze.py 新增產出（marketCap 走 company_context 24h cache，`marketCap`/`mktCap` 容錯同 momentum.py:522）——protocol Technical lane 規則引用的 flag 現由該 lane 自己的 MANDATORY script 產出。函式測試 6/6、NVDA 實跑兩 skill 皆過
+- **P2-10** forecaster SKILL.md「not auto-wired」聲明與實作矛盾修正：明示 soft-wired（engine `--self-assemble` 讀 cache 填 `forecaster_blend` anchor 0.05；缺 cache → null 重分配不失敗）
+- **P2-12** `sector/ftd_yfinance.py` hardcode `~/.claude/skills/` user-level 路徑改 repo 內 canonical（env `SKILL_SCRIPTS_PATH_FTD` 可覆寫，同 market_top_yfinance.py 既有模式）；diff 確認兩份未漂移後切換；兩 adapter 實跑 rc=0；MARKET_INDEX ⚠ 整併備註解除
+- **schema 文件錯誤**：`lane_scores` 註記 −3..+3 與協議 Phase 2 量表（−5..+5）矛盾（歷史 9 筆合法 ±4 分被舊註記誤標越界）——修正為 −5..+5
+
+### Added
+- **P2-11** validator §12 數值界限/加總檢查（hard error）：`final_score` ±4.5 sane bound（理論上限 ≈4.35；防 VRT 6.72 類）、`scenario_odds` 加總=100、`lane_scores`/`valuation_lane.score` 值域 ±5、`avg_confidence` 0-1。合成壞 entry 四類違規全抓 rc=1；現任 history rc=0
+
+### Why
+- AUDIT_2026-07-16 F6 文件↔實作斷鏈四項全數收尾；validator 從純 schema 檢查升級為含決策數字 sanity gate
+
+## [4.71.0] — 2026-07-16 — P1 砍白產（shadow 落日 + 欄位瘦身 + 5d 降級 + Phase 0 caps）
+
+### Removed（落日條款，AUDIT_2026-07-16 F5 為據）
+- **P1-5** `systemic_backdrop` stub（V3.17 起全 null、宣稱的填值從未實作、零消費者）— protocol Phase 0 shape 移除
+- **P1-6** `market_position`（TAM/CAGR/市占 sub-block）與 `medium_term_shift_20d` — 消費者掃描證實零渲染/零決策用途（Dashboard 決策頁、ic-memo fact pack、score 公式皆不用）；TAM 類同時是最大無來源數字幻覺面。`moat_assessment`/`institutional_lens`/`cross_asset_spillover` 等**保留**（有 Dashboard/ic-memo 渲染）——原審計 P1-6 範圍依消費者證據收窄
+- Forward Expectations 35 行版本演進段移出協議本文 → `protocol_appendix_price_framework.md` §Forward-Expectations（協議本文留 8 行指標；工具改 on-demand，不在 分析 預設 flow）
+
+### Changed
+- **P1-7** `short-term-target/predict.py`：sector_intel 過期從硬拒改優雅降級（β 項歸零 + `degraded_sources` 標記 + confidence ×0.8）；news/ohlcv/atr 過期仍硬拒。根因：5d 預測 84% 被拒，其中 96% 只因 sector>72h（手動 產業掃描 更新頻率使然）。合成測試 6 asserts + 實跑 NVDA 三 horizon ok
+- **P1-8** Phase 0 `macro_backdrop_score` 新增確定性一致性 caps（market_top Orange/Red → ≤0、vix ELEVATED → ≤0、CRISIS → ≤−2、breadth<30+FTD 惡化 → ≤−1，同 FRED caps 模式先於查表套用）；`macro_multiplier_rationale` 改機械式 trace 格式禁自由散文（歷史 76 份模板化重複）
+- **market_regime 規則表化提案否決（校準結果）**：76 個 phase0 訊號×標籤 joint 分佈顯示存檔量化訊號無法重建 LLM regime 標籤（breadth 中位數 SIDEWAYS 50 > BULL 32；VIX 各 regime 15-19 無差），而該標籤已有 outcome 鑑別力（BULL +27.6% vs RISK_OFF −19.8%）——規則替換 = 拿未驗證分類器換有效分類器，不做；決策記錄於協議 Phase 0 caps 段
+
+### Why
+- 審計 F5 白產清單的落日執行 + F4 偽變數的低成本 bound；每項處置皆先掃消費者/跑校準，兩項原提案（P1-6 全砍敘事、regime 規則化）依證據收窄或否決
+
+## [4.70.0] — 2026-07-16 — P0 決策品質修正（AUDIT_2026-07-16 四項對症改制）
+
+### Added
+- `reports/decision_review/AUDIT_2026-07-16_protocol_v5.md` — 分析協議全面審計：168 筆歷史 + 兩個新統計檢驗（Red Team verdict × 30d outcome 零相關 p=0.689；confidence 0.6/0.7 bucket 命中率同為 67%）；重現腳本 `audit_stats_2026-07-16.py` + `p0_param_replay_2026-07-16.py` 同目錄
+- Phase 2.8 新輸出欄：`red_team_counter_evidence_strength`（進 export）+ `red_team_thesis_break_probability`（僅記錄，≥20 session 後校準用）；validator 11c 值域檢查
+- `compute_price_framework.py` v1.2：`trim_anchor_outliers()`（P0-3）— n≥4 時錨值落在錨中位數 ×1/3..×3 外剔除不進加權（相對錨共識非現價，全體偏低不誤剪）；`fair_value_summary.anchors_trimmed` 記錄、raw 值保留；golden test +10 asserts（7 fixtures 61 asserts，NVDA-like 案例修剪後 $272→$296 手工驗算）
+
+### Changed（決策路徑，AUDIT 數據為據）
+- **P0-1** Rec 11 熱區 probe 分數分層：`final_score ≥ 0.4` → t2（≤30bps）/ `< 0.4` → t1（≤15bps 原上限）。replay：上半帶觀望 mean +17.6%（up 10/15，dd −7.1%）vs 下半帶 [0,0.2) −1.2%——上半帶錯過實質上漲。新欄 `hot_zone_probe_tier`，validator §11 按 tier 強制
+- **P0-2** Red Team 懲罰分級：rule 4 pure_forward 只有 strength=5（≥2 獨立資料源）保留 ×0.85，strength=4 → ×0.925；rule 5 default（unclassified）×0.85 → ×0.95。依據檢驗 A：STRONG_COUNTER 佔 80.4% 且與 outcome 零相關（STRONG 組 30d +12.52% vs 對照 +8.64%；被否決且 CANCEL 的 60 筆 57% 照漲）——blanket 重懲無資訊基礎且加重保守偏誤
+- **P0-4** Phase 3 Step 1 lane confidence 改三檔量化 C_eff（<0.45→0.35 / <0.675→0.60 / ≥0.675→0.72）：校準檢驗證實 0.5–0.7 核心帶無鑑別度、唯一訊號在低尾；111 筆 what-if rho +0.127 vs 連續 +0.117，flips 8 筆方向中性；檔位中心=歷史分佈均值（scale-preserving，buy_threshold 免重校準）。raw conf 照舊 export
+- protocol 本文 + price_framework appendix（outlier 修剪段取代「winsorize 留 P2」）+ phase5_export_schema（3 新欄 + anchors_trimmed）+ validator（§11 tier / §11c 值域；既有 history 實測 rc=0，舊 entry 僅 warning）
+
+### Why
+- 審計證實：60% 決策 CANCEL 且 conservative miss 46.3% vs active 22.2%（錯過 +28% runup 而非避開 −5% dd）；四項全部對症「系統性向下壓分」的無資訊環節，每項參數皆由 134 筆已完成 30d 窗口的 replay 選定
+
+## [4.69.0] — 2026-07-16 — valuation-modeler：自建 DCF/comps + 8-anchor + 首次覆蓋報告
+
+### Added
+- `skills/valuation-modeler/`（第 25 個 skill）— 對照 Anthropic「Claude for Financial Services」官方套件差距分析後，把四個缺口以原生 deterministic engine 移植（官方 LLM prompt 包手算數字，違反本專案 script 定值紀律）：
+  - `dcf.py`：driver-based 5 年 FCFF DCF——假設自動推導（analyst estimates / 歷史均值，每欄帶 provenance）可 `--set`/`--overrides` 覆寫；CAPM WACC（beta=FMP profile、rf=fred-macro cache）；5×5 WACC × terminal growth sensitivity；golden test 43 asserts（baseline $248.41 人工驗算）
+  - `comps.py`：多指標同業比較（P/E / EV/EBITDA / EV/Sales / PEG，IQR winsorize + quartiles + implied per-share，EV 數學同 compute_price_framework）；24 asserts
+  - `export_xlsx.py`：`--xlsx` 出 5-sheet Excel workbook（openpyxl，graceful degrade）；13 asserts
+- 首次覆蓋 Initiating Coverage：`ic-memo-writer` 新增 `compose_initiation.py` + `template_initiation.md` + `build_fact_pack.py --initiation`（嵌 valuation_model block，缺 cache rc=4 印補跑指令）+ `validate_ic_memo.py --initiation`（F-I1/I2/I3：區塊齊全 + 數字 verbatim 一致）；觸發 `首次覆蓋 [TICKER]`；28 asserts + NVDA 端到端 rc=2（僅既有 peer_descriptor stub）
+
+### Changed（決策路徑，使用者已核准）
+- fair_value_summary 6 anchor → **8 anchor**：+`dcf_self_built`(0.15) +`comps_implied`(0.10)；家族層權重不變（DCF 族 0.45 / 倍數族 0.30 / 市場預期 0.25），族內拆分調整；comps anchor 排除 P/E 防與 `peer_pe_implied` 重複計權
+- confidence 門檻 high ≥6 / medium 4-5 / low <4（原 ≥5/≥3）；ARCHETYPE_WEIGHTS 11-anchor 池重配平（financial 的新 anchor 刻意 0）；golden test 全數按新權重人工重驗算（6 fixtures 51 asserts）
+- protocol 本文 + price_framework / fmp_bundles appendix（新增 §4 VALUATION_MODEL_BUNDLE）+ phase5_export_schema 同步；validator 加 anchors 容錯（舊 6-key entry 天然相容，實測既有 history rc=0）
+
+### Why
+- 官方套件真正缺口 = 可審計自建 DCF、完整 comps table、首次覆蓋格式、xlsx 交付物；已有且更嚴謹的（earnings/sector/news/ic-memo/screening）不取代。連接器（S&P/FactSet/Daloopa 等）需付費訂閱不引入，FMP+Finnhub 等效
+
+## [4.68.1] — 2026-07-16 — 盤前 launchd 排程補跑機制（電池闔蓋喚醒失效修復）
+
+### Fixed
+- 盤前 4:30 launchd 任務在「Mac 電池供電＋闔蓋過夜」時整天不執行：`pmset` 的 4:27 排程喚醒在該狀態下被 macOS 跳過（只剩幾秒的 DarkWake，GUI LaunchAgent 不會跑），launchd 醒來後也沒有補跑 missed calendar job（實測 2026-07-16 全程未執行）
+- `scripts/premarket/com.kavi.aicommittee.premarket.plist`：`StartCalendarInterval` 從單一 04:30 擴成 04:30 / 05:00 / 06:00 / 07:00 / 08:00 五個時段（週一~五）——早上任何時間開蓋，下一個時段就會補跑
+- `scripts/premarket/premarket_cron.sh`：加 already-succeeded-today guard（當日 log 已有 `daily_update.sh rc=0` 就記一行 skip 後退出），多時段不會重複做工
+
+### Why
+- 排程喚醒只有接電源才保證生效；補跑機制讓「沒插電過夜」從整天漏更新降級為「開蓋後最多等到下一個整點」
+
+## [4.68.0] — 2026-07-03 — SESSION_NOTES 批次輪替制 + rotate script
+
+### Added
+- `scripts/rotate_session_notes.py`（0 LLM）— 批次輪替：主檔 >20 個 Session Note 時自動把最舊 10 個切成 `archive/session_notes_v<最舊>_to_v<最新>.md`（批內新在上；≤20 no-op；目標檔已存在不覆蓋 rc=1）；`--split-legacy` 一次性拆舊式 rolling archive。版號 regex 支援 `(v4.63.0)` 與範圍式 `(v2.10.0 → v2.11.0)` 標題
+
+### Changed
+- 舊 `archive/session_notes_archive.md`（239 note）拆成 **24 個版號範圍批次檔**（v1.40.0 → v4.54.2），總數驗證無遺失；原檔備份 `docs/agent-ops/backups/session_notes_archive.md.bak-20260703`
+- MAINTENANCE §3 輪替規則改批次制（不再每 session 手搬一個）；SESSION_NOTES 指標註解、OPS_COMMANDS §1 同步
+
+### Why
+- 使用者定案：查歷史時按版號範圍直接開對應批次檔，比單一大 archive 好找；輪替動作 script 化後弱模型只需跑一條命令，不可能搬壞
+
+## [4.67.0] — 2026-07-03 — 2+1 評審制接線進 protocol 本文（最強檔不可用時的判斷節點補償）
+
+### Added
+- `investment_protocol_v5_0.md` 新小節「最強檔不可用時的 2+1 補償」：Phase 2.8 Red Team 在 Agent tool `model` 可用值無高於 sonnet 檔位時，改為盲開 2 個獨立 Red Team + 1 個 referee subagent（fresh context，只做矛盾比對/證據強度/選優補條，禁重寫）；輸出維持單份 red team JSON，schema/validator 不變；分歧摘要以 `[2+1: …]` 附加於 counter_thesis 文末
+- `sector/phase_4-5.md` V4.67.0 Arbiter 降級模式註記：Phase 4c 同判準下盲開 2 個獨立 Arbiter + referee 選優；分歧寫進既有 rationale 欄位，不動 sector schema
+- `docs/agent-ops/MODEL_DISPATCH.md` §6 標註已接線＋指向兩處小節
+
+### Why
+- 高判斷節點（對抗推理、跨 lane 仲裁）原本靠 opus 檔位，未來若最高檔只剩 Sonnet 級沒有補償機制。2 個中階獨立作答 + 1 個評審 ≈ 1 個高階的穩定度；觸發判準寫成可觀測條件（Agent tool model 清單），有高階檔的現在零成本零行為改變
+
+## [4.66.0] — 2026-07-03 — Phase 5 報告決策數字改 script 注入（Formatter 只寫佔位符）
+
+### Added
+- `investment/scripts/inject_report_facts.py`（0 LLM）— Sonnet MD Formatter 對 6 個決策關鍵區塊只寫 `<!--INJECT:*-->` 佔位符（decision_summary / lane_scores / fair_value_anchors / kill_conditions / key_risks / watch_conditions），本 script 從 history.json 末筆 verbatim 注入。`<!--FACTS:*-->` 標記包裹 → 重跑 idempotent 刷新；HOLD/CANCEL 的 None entry/TP/SL 渲染 N/A；未知 placeholder / 殘留 token rc=1
+- `investment/scripts/test_inject_report_facts.py` — 33-assert golden fixture（注入完整性、數值 verbatim、N/A-safe、idempotent 刷新、錯誤路徑、與 `validate_markdown_export.py` 相容）
+- `investment_protocol_v5_0.md` Step 4 prompt 增佔位符強制 + 新 Step 4.5（注入步，在 Step 5 score-scale validator 之前）
+
+### Changed
+- `docs/agent-ops/DIAGNOSIS.md` §三.1 定位修正：原診斷指 ic-memo §11，覆查發現該處已由 `compose.py` deterministic 渲染；真正的 LLM 手抄暴露點是 Step 4 Formatter（validator 只驗刻度格式、值抄錯照樣過）。教訓入 LESSONS.md
+
+### Why
+- 「叫 LLM 精確抄寫數字」是弱模型最典型的失敗模式，且原 gate 抓不到值漂移。與既有「禁止手算」哲學一致：verbatim 複製就是一種算術，全部走 script。5 日/60 日 advisory 數字仍由 Formatter 轉寫（漂移非致命），決策關鍵數字已 100% script 化
+
+## [4.65.0] — 2026-07-03 — 資料源健康檢查：daily_update.sh 收尾自動印 artifact 新鮮度表
+
+### Added
+- `scripts/daily_health.py`（0 LLM）— 17 個資料源的 artifact 存在＋mtime 年齡檢查：14 個 auto 源（daily 應每日刷新，超齡 3x → FAIL）+ 3 個 manual 源（產業掃描/新聞分析/economic-calendar，只 WARN/MISS 不 FAIL）。`--strict` 有 FAIL 時 rc=1、`--json` 機器可讀。分支邏輯 6 條路徑（OK/WARN/FAIL/manual 降級/missing auto/missing manual）以受控 mtime 測試通過
+- `daily_update.sh` 收尾（final banner 前）自動跑健檢，非致命
+
+### Why
+- economic-calendar FMP 403 之後 sector Phase 3 一直 silent SOFT fail——step「成功」但下游沿用舊 cache 沒人喊。rc 只能抓「本次失敗」，artifact 年齡連「連續失敗中/從未產出」都抓得到；弱模型不會「覺得怪」，所以斷供必須自己大聲。首跑即揪出 economic-calendar cache 從未產出（MISS）
+
+## [4.64.1] — 2026-07-03 — SESSION_NOTES 輪替：只保留最近 10 個 Session Note
+
+### Changed
+- `SESSION_NOTES.md` 4754→~100 行：保留最近 10 個 Session Note 區塊 + 尾部 2 個常駐狀態區塊（Momentum Context、Bridge 資料流對照）；其餘 236 個區塊以 script 機械搬移至 `archive/session_notes_archive.md`（最新在上，查舊版本用 Grep 版號）。搬移前備份 `docs/agent-ops/backups/SESSION_NOTES.md.bak-20260703`
+- `docs/agent-ops/MAINTENANCE.md` §3 輪替規則定案：每次收尾新增 Session Note 後，把第 11 個搬 archive（使用者 2026-07-03 定案「保留 10 個」）
+- Bridge 資料流對照表的 `investment_v4_8` 標籤更新為 `investment_v5_0`
+
+### Why
+- SESSION_NOTES 雖非自動載入，但被讀時弱模型容易整檔 Read（一次數萬 token）；「檔案本身只有 ~100 行」是比「請帶 limit 讀」更可靠的結構性保險。
+
+## [4.64.0] — 2026-07-03 — Agent 治理層：CLAUDE.md 瘦身 + docs/agent-ops/ 全套（弱模型時代保品質）
+
+### Added
+- `docs/agent-ops/` 新目錄：`DIAGNOSIS.md`（harness 三大漏洞診斷）、`OPS_COMMANDS.md`（指令總表，含「改哪個引擎跑哪組測試」對照）、`MODEL_DISPATCH.md`（指揮官不下場/派工三件套/升降級路徑/驗證不自驗/2+1 評審制）、`JUDGMENT.md`（升級時機/完成判準/該問人時機/方向錯誤訊號/品質底線，各附正反例）、`DELEGATION_TEMPLATES.md`（T1-T5 派工模板）、`MAINTENANCE.md`（治理檔權限分級/版本同步驗證命令/巨檔讀寫與輪替規則/LESSONS 格式）、`LESSONS.md`、`LETTER.md`（交接與制度退化預防）
+- `skills/MARKET_INDEX.md` 補列 `quant-backtest`、`weekly-tech-playbook`（索引 drift 修復，24 skills 齊）
+
+### Changed
+- `CLAUDE.md` 178→74 行：只留路由與紀律，Ops 指令抽到 OPS_COMMANDS.md，刪全部版號歷史敘述；Workflow Rules 增「已授權自主作業免確認」例外、收尾增版本同步驗證命令
+- 父層 `/Users/kavi/Documents/CLAUDE.md` 改為 ≤10 行指標檔（原為過期舊拷貝，與專案版雙載且矛盾）
+- `AGENTS.md` / `GEMINI.md` 去重：trigger 表與 Workflow Rules 只留指向 CLAUDE.md 的引用，不再複製
+- `investment/investment_protocol_v4_8.md` → `investment/archive/`；全 repo 16 條活文件 v4_8 引用改指 v5_0（skills/sector/news README、SKILL.md、plan_short.md、.py docstring）
+
+### Fixed
+- 對抗審查（fresh-context agent）找出 13 個問題全數修正：MARKET_INDEX 漏 weekly-tech-playbook、AGENTS.md provisional 規則指向撲空、OPS_COMMANDS assert 數過期（26→實測 38，改為 rc=0 為準）、DIAGNOSIS/MAINTENANCE 輪替門檻數字打架、GEMINI.md 第三入口規則複製等
+
+### Why
+- 未來若只有 Sonnet/Opus/Haiku 級模型，品質靠「拆小任務+明確驗收+獨立驗證」的結構而非單一強模型；先修掉每 session ~35KB 的雙 CLAUDE.md 載入與 changelog 式膨脹，再把調度/判斷/維護規則外化成弱模型可執行的判準。舊 CLAUDE.md 備份於 `docs/agent-ops/backups/`。
+
+## [4.63.0] — 2026-07-02 — 回測策略模板擴至 11 個（20 候選實測取前 10 + 自家引擎）＋策略卡片選擇 dialog
+
+### Added
+- **`skills/quant-backtest/scripts/backtest.py` — STRATEGIES registry（11 模板）**：原 `momentum` / `ma_cross` 之外新增 `roc_trend`（TSMOM 時序動能）、`donchian`（唐奇安/海龜通道）、`obv_trend`（OBV 量能趨勢確認）、`boll_reversion`（MA200 過濾布林回歸）、`supertrend`（ATR 通道翻轉）、`triple_ma`（三均線多頭排列）、`rsi_reversion`（RSI14 超賣反轉）、`high_52w`（52 週新高動能）、`keltner`（肯特納通道突破）。每模板含中文 label、預設參數、參數掃描格、無效組合驗證；新增 `--params-json` 通用參數通道（舊 `--entry-score/--exit-score/--fast/--slow` flags 保留相容）+ `resolve_params()` 型別轉型。
+- **模板選型方法學**：先以 20 個候選策略（含 chandelier / RSI2-Connors / KD / z-score / 布林突破 / ADX / MACD / 趨勢回檔 / 量能突破等）對 12 檔（SPY、QQQ + 跨產業 mega-cap 10 檔）跑 5y / 單邊 10 bps 同一基準，以**跨標的中位數 Sharpe** 排名，取前 10 名 + 自家 momentum 引擎入 registry；落選 9 個（中位 Sharpe 0.42→0.09）不提供。
+- **`scripts/rank_strategies.py`（新）** — 基準排名 runner → `data/strategy_rank.json`（含 methodology / universe / 每模板中位 Sharpe/CAGR/MaxDD/交易數/贏過 B&H 比例），供卡片 badge 與重跑再生。
+- **`Dashboard/backtest.html` + `page-backtest.js` — 策略卡片選擇 UI**：`<select>` 換成觸發按鈕 + popup dialog（backdrop blur、ESC/backdrop 關閉、鍵盤可選）；11 張卡片各含 lucide icon、中英名、分類 badge（趨勢跟蹤/均值回歸/量價確認/自家引擎）、**一句白話策略說明**、**迷你 SVG 訊號示意圖**、基準績效 badge（rank + Sharpe + CAGR）。參數表單改由 TEMPLATES spec 動態渲染；載入歷史結果自動同步模板與參數；bench 值烘焙於 JS 並在載入時以 `GET /api/backtest/strategies` 最新 artifact 覆蓋。
+- `dashboard_server.py` — `GET /api/backtest/strategies`（serve strategy_rank.json）；`QUANT_BACKTEST_TEMPLATES` 白名單（11 keys，result API 檔名驗證）；`/api/backtest/list` 跳過非回測 artifact 並帶 `template_label`。
+
+### Changed
+- **訊號改在完整抓取歷史上計算後才切回測窗**（`backtest.py` + `run_sweep` 簽名 `(template, full, window_bars, params, cost_bps)`）— 修正原 `ma_cross` MA200 warmup 被窗口吃掉、新模板 252 日 lookback 損失一年的問題。
+- `SCRIPT_PROTOCOLS.quant_backtest` cmd 改 `--params-json {params_json}`（requires: ticker/template/period/cost_bps/params_json）；requires 檢查改「只擋 None/空字串」— `cost_bps=0` 等合法 0 值不再被誤擋。
+- `test_backtest.py` 29 → 68 asserts：registry 完整性、resolve_params 轉型、全模板訊號互斥煙霧、新模板合成序列決定性行為、warmup 保留驗證。
+
+### Why
+- 使用者要求：策略模板太少 → 從已知策略庫選 20 種**先實測回測再取前 10**，並把下拉選單升級為淺顯易懂的卡片 + popup dialog 選擇器。排名用中位數（抗單一標的離群）+ 統一成本假設，卡片 badge 直接標示實測基準讓選擇有依據。**探索層紀律不變**：結果不入 investment_protocol 決策。
+
+## [4.62.0] — 2026-07-02 — 量化策略回測頁（quant-backtest）：動能規則 5-10 年歷史重放 + 參數掃描熱力圖
+
+### Added
+- **`skills/quant-backtest/`（新 skill）** — deterministic 0-LLM 回測引擎：
+  - `scripts/backtest.py` — 兩個策略模板：`momentum`（momentum-monitor `_composite` 計分規則**逐日向量化重放**，口徑鎖定 `momentum.py`；short_squeeze 組件因歷史 short interest 不可得固定中性 40 分並寫入 data_caveats）與 `ma_cross`（MA fast/slow 交叉）。訊號日收盤成交、單邊 cost_bps 內建、3y/5y/10y 窗口（多抓一段供 MA200 warmup）。輸出 metrics（total/CAGR/Sharpe/MaxDD/exposure/勝率）+ 逐年表 + 交易清單 + **參數掃描格**（momentum 6×6 entry×exit、ma_cross 3×3 fast×slow — 防過擬合：看高原不看尖峰）+ series → `skills/quant-backtest/data/<TICKER>_<template>.json`（gitignored）。每次 momentum 跑自動比對 live cache 的 ma_stage / trend_acceleration / stage 口徑（`validation_vs_live_cache`）。rc: 0 ok / 1 fatal / 2 degraded（<252 bars）。
+  - `scripts/test_backtest.py` — golden-fixture 回歸測試（29 asserts：組件分數轉折點 / 持倉狀態機 / 手算 metrics / 成本入帳 / sweep 形狀），改 engine 後必跑 rc=0。
+- **`Dashboard/backtest.html` + `page-backtest.js`（新頁「策略回測」，NAV stock 群組）** — 參數表單（ticker/模板/窗口/閾值/成本）→ POST `/api/protocol-queue` `{name:'quant_backtest'}`（SCRIPT_PROTOCOLS subprocess 路徑，0 LLM 0 Claude turn）→ 輪詢 → 渲染：6 指標 tiles、權益曲線（log，策略 vs B&H）、價格+進出場三角標記、雙回撤、動能分+持倉底色圖、**Sharpe 熱力圖**（發散色階，紫框標當前參數）、逐年報酬表、交易清單、歷史結果 chips。data_caveats + 重放口徑驗證 badge 常駐顯示。
+- `dashboard_server.py` — `SCRIPT_PROTOCOLS.quant_backtest`（requires 列出全部 8 參數防 placeholder 殘留；timeout 300s）+ `PROTOCOL_LOG_DIRS` + 只讀 `GET /api/backtest/list`、`GET /api/backtest/result?ticker=&template=`（ticker regex + template 白名單防路徑遍歷）。
+
+### Why
+- 使用者要「視覺化制定策略 + 回測 3 年歷史」。自家訊號歷史僅 2-3 個月（journal 2026-04 起），但 momentum 計分是純算術 → 可在 FMP 10 年日線上**重放**，成為第一個可完整回測的策略；PoC 已驗證重放與 live cache 口徑一致、NVDA 5y 跑出誠實結果（跑輸 B&H 但 MaxDD 砍半、2022 熊市 -10.7% vs -50.3%）。UI 刻意做成「模板+參數格」而非自由策略編輯器，配合掃描熱力圖與逐年表對抗曲線擬合。**探索層紀律**：結果不入 investment_protocol 決策。
+
+## [4.61.0] — 2026-07-02 — 盤中頁整合（盤中評估＋盤中策略 → 單一「盤中」頁分頁）＋全中文化 hover 解釋
+
+### Changed
+- **兩個盤中頁合併為單一「盤中」頁**（`Dashboard/intraday-eval.html`）：頂部 Tab 切換「策略」（regime／曝險紀律＋策略卡＋產業情緒排行＋族群輪動＋個股點子）與「評估」（個股急拉/急殺＋大盤盤中綜合＋逐檔價量體檢＋今日 K 線 modal）。原「盤中評估」內容原封移植為第二分頁的獨立 IIFE（scope 隔離，不改資料流／API）。策略／評估各自的 status＋refresh toolbar 隨分頁切換。
+- `Dashboard/utils.js` NAV：移除 `intraday`（盤中評估）項，保留單一 `intraday-eval` 項、標籤由「盤中策略」改為「盤中」。`i18n.js` 同步（zh「盤中」/ en「Intraday」）。
+- `Dashboard/intraday-mood.html` 改為 redirect stub（`→ intraday-eval.html#mood`），保留舊網址／書籤相容；`page-index-extra.js` 盤中異動帶卡片連結同步改指 `intraday-eval.html#mood`。分頁初始狀態：`#mood` 優先，其次 `localStorage` 記憶上次分頁。
+
+### Fixed
+- 盤中策略頁英文標籤全中文化：`verdict`（FAVOR/WARM/HOT/NEUTRAL/AVOID → 偏多/溫和/強勢/中性/迴避）、`vix_regime`（NORMAL/ELEVATED… → 正常/偏高…）、`skew_label`、`fear_greed_label`（Fear/Greed → 恐懼/貪婪）。
+- 氛圍條 8 格（盤中分數／市寬／SPY／QQQ／IWM／VIX／SKEW／F&G）＋產業評等徽章＋逐檔體檢欄位（RVOL／VWAP乖離／MA20／出貨日／型態／MACD/KDJ）全數加上 hover 白話 tooltip 解釋術語。
+
+### Why
+- 「盤中評估」與「盤中策略」頂部氛圍資訊高度重疊、且產業情緒排行只存在於策略頁，兩頁並列造成導覽冗餘。合併為單一入口＋分頁後，可行動策略與價量體檢一站可達。原本大量英文原始標籤（FAVOR/Fear/NORMAL…）與未解釋縮寫（SKEW/F&G/RVOL）對讀者不友善，全面中文化＋hover 說明降低理解門檻。
+
+## [4.60.0] — 2026-07-02 — 盤中策略樞紐（Intraday Evaluation hub）：每 10 分鐘統整 + 策略卡 + 重複策略特效 + 新頁面
+
+### Added
+- `scripts/intraday_eval/`（新模組）— 盤中**統一資料樞紐**：一條 worker 統整 `docs/STOCK_DATA_FETCH_INVENTORY.md` 下所有盤中產物（heatmap / intraday_mood / market_mood / intraday_spikes / retail_sector_pulse / thematic / sector_report），下游只透過**單一 accessor**（`get_snapshot()` / `/api/intraday-eval/data`）讀取，不再各自打 API（0 額外 API call，純讀既有快照）。
+  - `engine.py` — `load_sources()` 統整入口 + `evaluate()` 0-LLM 規則引擎：regime + 曝險紀律、市寬、半導體/軟體/加密族群輪動、產業排序（今日 breadth + 5d 前瞻）、個股點子、**9 條策略卡規則**（stable id）。
+  - `history.py` — 每 10 分鐘視窗記錄 `intraday_eval_history_<DATE>.json`，算每策略 **連續 streak** + **當日累計次數**（rapid /refresh 有 240s dedupe）。
+  - `narrate.py` — change-gated LLM 導讀（走 `model_router`，signature 未變則重用快取，TTL 30 分；失敗降級為規則式 fallback）。
+  - `test_engine.py` — golden-fixture 回歸（24 asserts，改 engine 後必跑 rc=0）。
+- `dashboard_server.py` — soft-import 樞紐 + `intraday_eval_poll_loop`（開機常駐 daemon，美股時段每 600s + 收盤後一次快照）+ 路由 `GET /api/intraday-eval/{data,history,state}`、`POST /api/intraday-eval/refresh`。
+- `Dashboard/intraday-eval.html` + `page-intraday-eval.js`（新頁「盤中策略」）— regime banner + 導讀 + mood 條 + 策略卡 + 產業排序條 + 族群輪動 + 個股點子表 + **策略重複時間軸**。
+- `Dashboard/style.css` — `.ie-*` 頁面樣式 + **重複策略特效**：連續 ≥2 視窗 `iePulse` 發光、≥3 `iePulseStrong`、當日累計 `×N` echo 徽章、≥3 次「全日主旋律」橘徽章（沿用 intraday-mood iaPulse / break-news echo 慣例）。
+
+### Changed
+- `Dashboard/utils.js` — NAV_ITEMS 新增「盤中策略」入口（id `intraday-eval`，icon `crosshair`）；`VERSION` → V4.60.0。
+- `Dashboard/i18n.js` — 補 `nav.intraday` / `nav.intraday_eval`（zh/en）。
+
+### Why
+- 使用者要一條盤中 worker 每 10 分鐘統整現狀、簡報策略，並在「同一策略連續數個視窗或整日反覆出現」時加特效視覺化。核心紀律：**統整一次、單一 function 供下游撈，不讓每個 feature 各自撈**；引擎 0-LLM 可測試可回歸，LLM 只做導讀且 change-gated 省 quota。屬**探索層**，**不**進入 investment_protocol 決策。
+- 註：既有 3 條盤中 daemon 未重寫，樞紐疊在其輸出之上做統整（避免高風險重構）。新路由/daemon 需重啟 `dashboard_server` 生效；重啟前新頁以 static-file fallback 唯讀可用。
+
+## [4.59.3] — 2026-06-30 — K 線彈窗載入加速：前端短快取 + 拉長盤中伺服器 TTL
+
+### Changed
+- `Dashboard/intraday-mood.html` — 新增前端記憶體快取 `_klCache`（45s TTL）+ `_klFetch()` helper，`openKline` 改走它；連點同一檔在 45 秒內直接用快取秒開，不再每次重打 `/api/heatmap/intraday`。只快取「有 bars」的成功回應，避免把暫時性錯誤快取住。
+- `dashboard_server.py` — `HEATMAP_INTRADAY_TTL_SEC_OPEN` 預設 `15` → `60`，減少盤中每次點擊都重新跟 FMP 抓 + 排在 ~500 檔背景 fan-out 後面等限流池 slot 的卡頓。
+
+### Why
+- 改 1 分 K 後使用者反映彈窗「載入好久」。實測 FMP 單日 1min 僅 0.83s / 39 根，取得本身不慢；真正延遲來自盤中只有 15s 快取 + 與背景大批 quote fan-out 共用 `fmp_pool.acquire_slot` 限流池而排隊。前端快取 + 拉長伺服器 TTL 直接消掉重複往返。純呈現/取得層調整，**不影響** investment_protocol 決策。
+
+## [4.59.2] — 2026-06-30 — 盤中個股小卡 K 線彈窗：單擊觸發 + 1 分 K + 移除 TradingView 浮水印
+
+### Changed
+- `Dashboard/intraday-mood.html` — 個股急拉/急殺小卡的今日 K 線彈窗改為**單擊**觸發（原為 `dblclick`，L373），tooltip 文案同步改 `點擊看今日 K 線`（L486）。
+- `Dashboard/intraday-mood.html` — lightweight-charts `layout` 加 `attributionLogo:false`（L317），移除右下角 TradingView 浮水印 logo（4.2.0 原生支援）。
+- `dashboard_server.py` `_fetch_heatmap_intraday` — FMP endpoint `historical-chart/5min` → `1min`（含 7 日 fallback 與 docstring），彈窗改顯示 1 分 K；前端 meta 標籤 `5分K` → `1分K`（L308/356）。
+
+### Why
+- 使用者要求：互動上單擊比雙擊直覺；盤中想看更細的 1 分 K 顆粒度；TradingView 浮水印視覺干擾。三項皆為純呈現層調整，**不影響** investment_protocol 決策、不碰評分。
+
+## [4.59.1] — 2026-06-30 — 推播去雜訊：區間盤整的反轉不再推，只推有方向 / 真突破
+
+### Changed
+- **`Dashboard/intraday-mood.html` — 桌面推播 + 翻轉 banner 加方向過濾**。新增 `isDirectionalAlert()`：KDJ+MACD 同向翻轉若發生在「10 分鐘 regime = 區間」且無真實 spike 佐證，視為震盪雜訊**不推播 / 不上 banner**；只有 regime 為多頭/空頭（趨勢中）或有 non-suppressed 的 high/breakout spike 突破區間時才放行。每張卡的反轉狀態仍照常顯示（只是不再打擾你）。banner 文案改「N 檔有方向翻轉」。
+
+### Why
+使用者反映推播雜訊仍多——「很多都是區間的但也推播」。區間裡 KDJ/MACD 會來回交叉產生大量假反轉。承接已具備的 10 分鐘 regime，把推播門檻提高到「真正有方向或突破」的訊號，cards 仍保留完整資訊。
+
+## [4.59.0] — 2026-06-30 — 雙擊個股小卡 → 今日 K 線彈窗（lightweight-charts）
+
+### Added
+- **`Dashboard/intraday-mood.html` — 雙擊個股急拉/急殺小卡開「今日 K 線」站內彈窗**。用 TradingView 免費 **lightweight-charts@4.2.0**（CDN，~50KB）畫蠟燭圖 + 量能 histogram，深色玻璃風與 dashboard 一致。
+  - **後端 0 改動**：重用既有 `GET /api/heatmap/intraday/<TICKER>`（FMP 5 分 OHLCV，已快取，盤中 15s / 收盤 5min TTL）。
+  - 前端只取**最新交易日**那一段（端點盤中回今日、盤前回 7 天 fallback），永遠呈現乾淨單一 session；標頭顯示日期 + 根數 + 收盤 + 當日淨變化%。
+  - FMP 的 ET wall-clock 時間以 UTC 解讀，讓時間軸直接印 ET 時鐘（09:35…）。
+  - 互動：卡片 `cursor:pointer` + `title="雙擊看今日 K 線"`；事件委派在 `#ia-spikes-body`（poll 重繪不掉監聽）；背景點擊 / ✕ / Esc 關閉；`ResizeObserver` 自適應寬度；每次開窗重建 chart 避免殘留。
+
+### Why
+使用者希望「雙擊小卡直接開今天的 K 線」。沿用既有 5 分 OHLCV 端點 + 站內輕量蠟燭圖庫，避免外連 iframe（資料外洩 / 風格不一 / 連線受限）。屬探索層，**不**進入 investment_protocol 決策。
+
+## [4.58.2] — 2026-06-30 — 卡片標頭漲跌改「近10分淨變化」對齊走勢線 + 牛皮股 sparkline 壓平
+
+### Changed
+- **`Dashboard/intraday-mood.html` — 卡片標頭 % 從「單分鐘 m1」改為「近 10 分鐘淨變化」**（`cx.spark` 首尾比），與走勢線同尺度。解決 GLW 那種「線在漲、標頭卻 -0.16%」的時間尺度違和——線往上→標頭綠、往下→標頭紅，內部自洽。無 10 分脈絡時退回 m1。前端從 `cx.spark` 推導，**0 引擎改動**。
+- **`sparkSVG()` 自動縮放壓平**：近乎平盤的序列不再被 min–max 拉滿。10 分總幅度 < `FLAT_FLOOR=0.3%` 時，線往中線收斂（`amp = min(1, pctRange/0.3)`），牛皮股畫出來就是平的，不會假裝成一波趨勢。
+
+### Why
+使用者反映「1 分鐘漲跌對我沒意義、應該 match 線」，且牛皮股（GLW）的 sparkline 被自動縮放放大、~0.1% 總幅看起來像大漲，與「區間 / 微跌」標籤違和。當下這分鐘的脈動已由 σ 倍數表達，標頭改放與線同尺度的 10 分淨變化更一致。
+
+## [4.58.1] — 2026-06-30 — σ 倍數依大小分色
+
+### Changed
+- **`Dashboard/intraday-mood.html`** — σ 倍數標籤（regime 脈絡列 + 急拉/急殺 chip）依大小分色，一眼判斷大小：`<1×` 灰（雜訊）· `1–2×` 橘（一般）· `≥2×` 紅（罕見大動作）。新增 `sigColor()` helper。
+
+### Why
+使用者希望 σ 倍數的數字本身帶顏色分級，不用讀數字就能看出「這分鐘相對自己波動算不算大」。
+
+## [4.58.0] — 2026-06-30 — 個股急拉卡片視覺化：移除無意義的時間戳訊號流，改 10 分鐘走勢 sparkline
+
+### Changed
+- **`Dashboard/intraday-mood.html` — 每張卡最下行從「時間戳訊號流」改為「10 分鐘走勢 sparkline」**。舊版顯示 `訊號流 ↗13:37 ↘13:30 ↗13:25`（某分上、某分下的歷史交叉時間戳）——無幅度、無「現在重不重要」，對 5 張 `尚無訊號` 的卡更是整張只剩這行噪音。新版改為：
+  - **regime 配色迷你走勢圖**（inline SVG `sparkSVG()`）— 直接畫出最近 10 根收盤的形狀，綠=多頭 / 紅=空頭 / 灰=區間，末點加圓點。
+  - **精簡 regime 標籤** `▲多頭 σ0.8×`（hover 顯示 `距高 -0.2%`）。
+  - 每張卡（含 `尚無訊號`）都恆顯示中期姿態，回答「這檔現在處於什麼狀態」而非「歷史上哪幾分鐘交叉」。
+
+### Added
+- **`skills/market-sentiment-analyzer/scripts/intraday_spikes.py` — `regime_context(bars)`**：always-on 10 分鐘姿態（regime + 距高/低 + 現分 σ 倍數 + `spark` 收盤序列），錨定在 NOW（最後一根）而非 spike。`build()` 為每檔 reading 掛 `rd["context"]`（取代原 `rd["flow"]` 掛載；`build_signal_flow` 函式保留供未來使用）。σ 倍數上限 50× 防死水標的爆數字。
+- **`test_intraday_spikes.py`** — 新增 2 個 golden test（regime_context 上升序列 + bar 數不足），全檔 31 assertions ALL PASS。
+
+### Why
+使用者看實際 UI 後反映「告訴我幾分鐘上、幾分鐘下沒意義」並要求「更視覺化」。承接 v4.57.0 引擎已具備的 10 分鐘 regime/σ 脈絡，把卡片底行從孤立的單分鐘箭頭時間戳，換成一眼看懂趨勢形狀的 sparkline + 中期姿態標籤。屬探索層，**不**進入 investment_protocol 決策。
+
+## [4.57.0] — 2026-06-30 — 盤中急拉擊殺去雜訊：10 分鐘 regime 脈絡 + σ 自適應門檻 + 急拉擊殺型態
+
+### Changed
+- **`skills/market-sentiment-analyzer/scripts/intraday_spikes.py` — `detect_spikes()` 從「單根固定門檻」升級為「10 分鐘脈絡感知」**。過去只看最近幾根的 `|1分|≥1%` / `|3分|≥2%` 絕對門檻，對高 β 名字（1%/分是日常呼吸）狂噴假訊號、對牛皮股漏接真突破。新增四層（資料沿用既有 90 分鐘 1 分線，**0 額外 API**）：
+  1. **σ 自適應**（`compute_baseline`）— 算 spike 前 10 根 1 分報酬的標準差 σ，輸出 `sigma_mult = |本分動能| / σ`。高波動股 σ 大、門檻自動拉高；牛皮股 σ 小、真突破才過。
+  2. **10 分鐘 regime 脈絡**（`_linreg` 斜率 + R²）— 分 up / down / range，將進來的這分鐘標為 `順勢急拉`(降級) / `逆勢急拉`(軋空嫌疑·升級) / `突破急拉`(橫盤衝破區間·最高價值) / `區間急拉`(雜訊嫌疑)，鏡像同理急殺側。
+  3. **持續性** — spike bar 須收在自身全距上/下 1/3（`sustained`），砍掉單根長影線瞬閃。
+  4. **複合分數 `score` 0–100** — σ 倍數 + 脈絡加權 + MACD/KDJ/量確認數 + 持續性。前端依分數排序/過濾，不再每根過門檻都塞進來。
+  - **`suppressed` 雜訊閘**：sub-σ（`< NOISE_SIGMA_K=2.0`）+ 無確認 + 順勢/區間 → 標記抑制、severity `low`、從 headline `spikes[]` 移除（仍掛在 reading 卡片）。突破 / 逆勢 / confirmed 永不抑制。
+  - **向後相容**：序列 < `BASELINE_MIN=15` 走 legacy 路徑（行為與舊版完全一致，新欄位為 None / False）。
+
+### Added
+- **`detect_pump_fade()` — 急拉擊殺 / 急殺反軋合成型態**。急拉 leg ≥ `PF_PUMP_PCT=1.5%` 後於 `PF_FADE_WIN` 根內被急殺回吐 ≥ `PF_FADE_RETRACE=50%`（拉高出貨/誘多被殺）＋鏡像急殺反軋（誘空被軋）。此型態跨多根、單根 `detect_spikes` 結構上看不到，需滾動窗。輸出 `pump_fades[]`。
+- **`Dashboard/intraday-mood.html`** — 卡片新增脈絡標籤行（`⚡ 突破急拉 · 分+2.0% · σ19.5× · 分數81`）；新增急拉擊殺 banner（`🎯 N 檔急拉擊殺/反軋`）。被抑制的雜訊 spike 不顯示 chip。
+- **`test_intraday_spikes.py`** — 新增 7 個 golden test（突破 / 逆勢 / σ 抑制 / legacy 不變 / 急拉擊殺 / 急殺反軋 / 無 fade），全檔 27 assertions ALL PASS。
+
+### Why
+使用者反映盤中「急拉擊殺只記當下這一根 tick 的狀況、雜訊偏多」，並建議先統計連續 10 分鐘線的趨勢、再判斷這分鐘進來的急拉。固定絕對 % 門檻無法區分「跟著趨勢的續攻 / 橫盤裡來回甩的雜波 / 從安靜基底突然啟動」三者，且對不同波動度標的不公平。此版把判斷從「孤立單根」改為「相對 10 分鐘 regime + 自身 σ」，並補上字面上的「急拉擊殺」拉高出貨型態。屬探索層，**不**進入 investment_protocol 決策。
+
+## [4.56.0] — 2026-06-28 — 投資方案頁可一鍵產生：playbook protocol + 「產生本週方案」按鈕
+
+### Added
+- **`playbook` protocol（dashboard_server.py）**— 把 weekly-tech-playbook 生成流程接成可從 UI 一鍵觸發的 Claude turn。新增四處 dict 條目：`PROTOCOL_MODEL`（opus，三籃選股判斷）、`PROTOCOL_TIMEOUT_OVERRIDES`（30 分鐘；env `PLAYBOOK_TIMEOUT_SEC`）、`PROTOCOL_PROMPTS`（完整流程：`build_pack.py` 抓報價 → 讀 pack → 三籃各選 10 檔寫 selections → `render.py --validate-only` 自我修正迴圈 → 正式 render）、`PROTOCOL_LOG_DIRS`。`_label_for` 加「📋 本週方案」、`enqueue_protocol` 加 playbook 無參數去重（running/queued 各擋一次）。沿用既有 `/api/protocol-queue` 端點與統一 FIFO 佇列，**未新增端點**。
+- **`Dashboard/playbook.html`**— header 加「🔄 產生本週方案」按鈕；空狀態卡片改為一鍵產生按鈕（取代原本只印手動指令）。
+- **`Dashboard/page-playbook.js`**— `generatePlaybook()`（confirm 對話框告知約 10–20 分鐘 / ~$4 tokens → `POST /api/protocol-queue {name:'playbook'}`）+ `pollGenStatus()`（輪詢 `/api/protocol-queue`：running 顯示經過時間、queued 顯示排隊中、完成自動 reload `playbook.json` + toast；重開頁面會接續顯示進行中的生成）。
+- **`Dashboard/i18n.js`**— 新增 `playbook_page` 區段（zh + en）：generate / generating / confirm / toast_queued / toast_dup / toast_done / toast_fail。
+
+### Why
+使用者反映「投資方案沒有從 UI 網頁上可以產生」。先前 `/playbook.html` 只**呈現** `playbook.json`，產生一份新方案得手動跑 `build_pack.py` → Claude 選股 → `render.py` 三步。此版把整條流程封裝成 `playbook` protocol，讓使用者在頁面上一鍵生成本週三籃 $100k 方案。屬前瞻探索層，**不**進入也不回寫 investment_protocol 決策。
+
+## [4.55.0] — 2026-06-28 — 總體儀表板「全新資訊架構」重設計：6 個最新資料源上首頁 + 修 F&G/VIX 量表讀舊欄位
+
+### Changed
+- **`Dashboard/index.html` 全面重排為 top-down 決策漏斗 6 段資訊架構**：① VERDICT（委員會今日裁決）→ ② STATE（市場狀態：工作台 + 二元風險 + 8 量表）→ ③ MOOD & TAPE（情緒與盤中）→ ④ SECTORS & THEMES（產業與題材）→ ⑤ IDEAS（可執行想法）→ ⑥ DESK（工作台與探索）。所有既有 live element ID 原封保留，既有 render 函式（verdict / 8 量表 / teasers / audit / watchlist）不受影響。
+- 移除已被取代的舊 `intraday-mini-strip` inline script（功能併入新「盤中異動帶」widget）。
+
+### Added
+- **`Dashboard/page-index-extra.js`（新檔）**— 把先前在首頁「完全沒有出現」的 6 個最新資料源接成正確綁定的視覺化 widget：
+  - 市場氛圍（`data.market_mood`：composite score + VIX/SKEW/F&G/期權傾向 sub-readings）
+  - 社群熱度（`trending_tickers.json`：gated tickers + market-wide buzz topics）
+  - 盤中異動帶（`intraday_mood.json` headline + `intraday_spikes.json` spikes/reversals，附 live dot）
+  - 零售產業脈動（`retail_sector_pulse.json`：依預測 5 日 outlook 排序，news_sentiment 著色 bar）
+  - 本週投資方案（`playbook.json`：保險/混合/激進三籃 + Codex review verdict）
+  - 知識圖譜 / 供應鏈探索導引卡
+  - 純讀取呈現層；自行 fetch feed，non-blocking；每次 `updateDashboard()` 末尾呼叫 `IndexExtras.render(data)`。
+- `Dashboard/style.css` 新增 `.ix-*` widget 樣式（section label / mood bar / buzz row / tape / pulse bar / playbook basket / explore card）。
+
+### Fixed
+- **首頁 F&G 與 VIX 量表讀到 stale 欄位**：`pill-fg` 原讀 `data.market.fear_greed`（漂移為 49.8「Neutral」），實際 `market_mood.json` 為 25.5「Fear」；`pill-vix` 原讀 `data.market_top.vix_level`。兩者改優先讀 `data.market_mood`（fear_greed.index / vix.current），tooltip data-attrs 同步。市場處於 Fear 時不再誤顯示 Neutral。
+
+### Why
+使用者反映「已經有很多新功能，但最新資料沒有正確反映到總體儀表板上」。盤點後確認 6 個每日/即時產出的 feed（mood / 社群 / 盤中 spikes / 零售脈動 / playbook / 圖譜）在首頁無任何露出，且情緒量表綁到會漂移的舊欄位。重設計把首頁改成符合每日讀盤心智模型的 6 段漏斗，並把所有最新資料源以正確綁定的方式視覺化呈現。
+
+## [4.54.2] — 2026-06-28 — REVIEW_2026-06-28 收尾：Rec 11 hot_zone_eval instrumentation (TODO-015) + carry-over 清理
+
+### Added
+- **Rec 11 `hot_zone_eval` instrumentation**（TODO-015，本週最高風險盲點）：決策層 Rec 11（熱區保守性鬆綁）上線 21 天，首個 qualifying 場景 **TXN 06-22** 出現卻**無任何欄位**可確認規則是否被評估（`hot_zone_probe` extractor=0/160），無法區分「評估後被 risk_flag 正確抑制」vs「規則根本沒被評估」。修正：
+  - `investment/investment_protocol_v5_0.md` Rec 11 段 + export JSON：每筆 deep-dive **強制**寫出 `hot_zone_eval` enum（`fired`/`suppressed_by_risk_flag`/`suppressed_by_cap`/`not_qualifying`），判定樹明列；`hot_zone_probe=true ⟺ eval=fired`。
+  - `scripts/extractors/deep_dive_extractor.py`：讀權威 `hot_zone_probe`/`hot_zone_eval`，並對缺欄歷史報告**反推** `hot_zone_eval_derived`（多一個 `qualifying_unexplained` 告警值＝gate 符合但仍 HOLD 且查無抑制源＝真 bug 訊號），160 份歷史報告即時回填。
+  - `investment/scripts/validate_session_export.py` §11b：`hot_zone_eval` enum + `probe⟺fired` 強制（present 時 hard error；legacy/V5.0 缺欄僅 warning，不破 rc=0 gate）。
+  - `investment/scripts/replay_rec11.py`：risk_flag/cap gate 從 docstring 自承的「assume-pass」改為讀 `hot_zone_eval` → `suppressed_*` 不計入「would fire」（TXN 不再被誤算成觸發）。
+  - `investment/phase5_export_schema.md`：補 `hot_zone_eval` 欄定義。
+
+### Changed
+- **REVIEW carry-over 清理**（`reports/decision_review/REVIEW_TODO.md`）：append TODO-015(done)；TODO-013 → **done (hypothesis refuted)**（agent_score_stdev 全樣本兩輪一致否證「高 dispersion 降倉」）；TODO-004 → **dropped**（modifier 欄 6 輪乾淨，輕量欄已足）；TODO-006 → **休眠**（殘量凍結老報告，無回推需求）。
+
+### Why
+- REVIEW_2026-06-28 點名「決策層最高風險 Rec 上線、首個 qualifying 場景出現，卻無欄位可確認規則是否被評估 → 驗收盲飛」為本週最重要盲點。TXN 反推為 `suppressed_by_risk_flag`（Valuation SELL −3.0 + Burry WARNING）證實規則有評估且正確抑制（TXN 後續 −14.1%，HOLD 對）。此修正**純 instrumentation + 文件 + bookkeeping，零下單/評分邏輯改動**，解鎖 TODO-012（Rec 11 真驗收）。extractor 25 test 通過（news_digest 1 筆 fail 為 pre-existing，與本案無關）。
+
+## [4.54.1] — 2026-06-27 — 修逆勢假反轉(MU 急跌爆「反轉向上」) + 訊號流收合
+
+### Fixed
+- **逆勢假反轉**（`intraday_spikes.py`）：`detect_reversal` 在清楚的下跌趨勢裡會把超賣區的 1 分線 KDJ/MACD 小金叉（dead-cat bounce）報成「反轉向上」並升 alert —— user 實例：MU 均線空頭排列、破低急跌，卡片卻爆綠「★⤴ 反轉向上」。新增 `apply_trend_context(rv, tr)`：當反轉方向與**嚴格均線排列趨勢**（`detect_trend`）相反 → 標 `counter_trend`、`alert=False`、改稱「逆勢反彈/回測」；`build()` 對每檔套用。前端 `intraday-mood.html` 狀態行對 `counter_trend` 反轉不當頭條，落回主導趨勢（如 MU → ▼順勢續跌），漲跌色/卡片高亮同步。
+
+### Changed
+- **訊號流收合**（`build_signal_flow` + 新 `_collapse_flow`）：連續同向事件收合成一筆（取該 run 最新時間，spike 在 run 內則保留 ⚡），不再「連三次 ⤴ ⤴ ⤴」；`max_events` 4→**3**。merged label 留作 hover tooltip。回應 user「卡片不要連三次訊號流,提醒就好」。
+
+### Why
+- 承 4.54.0：趨勢偵測器上線後，反轉與趨勢的優先序衝突現形 —— 逆勢 oscillator 交叉是反彈不是反轉，對趨勢中的個股喊反向是假訊號。以「嚴格排列趨勢」作脈絡閘 demote 逆勢反轉，讓主導趨勢說話；同時把訊號流去重，UX 從「重複洗版」改為「一次提醒」。`test_intraday_spikes.py` +4 case（逆勢降級/同向保留/無趨勢保留/flow 收合）。仍為探索層，不入 investment_protocol。
+
+## [4.54.0] — 2026-06-27 — 個股急拉/急殺：加「順勢續攻/續跌」趨勢延續 STATE 偵測器
+
+### Added
+- **`intraday_spikes.py`** 趨勢延續偵測層（payload version 1.3→**1.4**）：
+  - `detect_trend()` — **狀態型**偵測器（非事件型）：當乾淨趨勢「持續中」就觸發，補上 `detect_spikes`（暴衝）與 `detect_reversal`（剛交叉）都抓不到的「均線多頭排列順勢創高」缺口。多頭條件 = **嚴格疊排 ma5>ma10>ma20** + 收盤 ≥ ma5 + ma5 上揚 + KDJ `K>D 且 K≥TREND_K_MIN`(=50) + 收盤貼近近 `TREND_HIGH_WINDOW`(=20) 根窗高（`TREND_HIGH_TOL`=0.1%）；空頭為嚴格鏡像。`strength=strong` 當 K 深入趨勢區（≥70 / ≤30）。輸出 `ma`/`k`/`d`/`basis`/`direction`/`dir_zh`。
+  - `_sma()` 簡單均線 helper。
+  - `build()` 每檔 reading 掛 `trend`；新增 top-level `trends[]`（strong 優先、再依 |K−D| 排序）。
+- **`intraday-mood.html`** 個股卡片狀態行優先序改為 **反轉 > 順勢趨勢 > 尚無訊號**：有趨勢無反轉時顯示「▲順勢續攻 / ▼順勢續跌 + basis（均線排列·KDJ·創高貼價）+ ET 時間」，卡片左緣穩定色條高亮（`.ia-scard.trend`，非 pulse — 它是狀態不是事件）。價格漲跌色亦反映趨勢方向。
+- **`test_intraday_spikes.py`** +5 case（多頭續攻 / 空頭續跌 / 盤整 None / bar 不足 / 回落破排列），共 +19 asserts。
+
+### Why
+- User 指出「個股急拉/急殺」面板對一張明顯多頭續攻的分鐘圖（均線多頭排列 + KDJ 高檔順勢金叉 + 創高）仍顯示「尚無訊號」。經 review：面板原本只有兩個**瞬間變化**偵測器 —— 急拉/急殺需 |1分|≥1% 或 |3分|≥2%（平滑緩漲碰不到）、反轉需近 3 根內**新**交叉（順勢延續時交叉早過期）。缺的是**狀態型**「趨勢仍在續攻」偵測。本版補 `detect_trend()`，多頭排列採嚴格疊排（訊號少而準）。Live 驗證：原 12 檔全「尚無訊號」→ 6 檔跳出順勢訊號（GOOGL/META 續攻、AVGO/AAPL/NVDA/TSLA 續跌）。仍為探索層，不入 investment_protocol。
+
+## [4.53.0] — 2026-06-26 — 個股急拉/急殺：反轉偵測 + 每檔訊號流卡片 + KDJ+MACD 同向 alert
+
+### Added
+- **`intraday_spikes.py`** 反轉偵測層（payload version 1.2→**1.3**）：
+  - `detect_reversal()` — 純動能轉折（雙向）：近 `REVERSAL_LOOKBACK`(=3) 根內 KDJ K×D 交叉 **或** MACD 轉向（金叉/死叉、柱 sign-flip、DIF 零軸穿越）即算「正在反轉」。**`alert`** = KDJ 交叉 + MACD 同向轉折（user 的 SNDK 範例：KDJ 剛上翻 + MACD 轉正 → 趕快提示），標 `strength=strong`。KDJ 超賣翻揚/超買翻落 zone 註記。
+  - `build_signal_flow()` — 從 bar window 重建每檔近 30 分「訊號流」：所有 KDJ/MACD 交叉 + 急拉/急殺事件，各帶 bar 時間，新到舊，cap 4 筆（stateless）。
+  - `_macd_turn_recent()` / `_kdj_cross_recent()` recency 掃描 helper。
+  - `build()` 每檔 reading 掛 `reversal`/`flow`/`alert`；新增 top-level `alerts[]`。build ~1.1s（12 檔）。
+- **`intraday-mood.html`** UX 重做為**每檔一張緊湊卡片（placeholder）**（CSS grid，固定順序不每分鐘 reshuffle）：卡頭現價 + 即時 1分%；第二行當前反轉狀態（⤴/⤵ + dir_zh + basis + ET 時間，alert 卡綠/紅發光 pulse + ★）；第三行橫向訊號流（icon+時間）。頂部 alert banner 列出 KDJ+MACD 同向翻轉的檔。新增「🔔 提示」桌面通知 opt-in（permission gesture + 去重推播）。時間一律顯示 **ET**（盤中時區，原本 UTC 18:08 易混淆）。
+- **`test_intraday_spikes.py`** +3 case（反轉 alert / 平盤 None / 訊號流排序），共 33 asserts。
+
+### Why
+- 承 4.52.0：user 反映「每檔即時 % + 0.X% 噪音」不是訊號,且不要每分鐘亂跳;要「真的篩出正在反轉的股票」。經確認 = **純動能交叉、雙向**,核心情境是 SNDK「KDJ 剛上翻 + MACD 轉正 → 趕快提示」。再經確認 UX = **每檔一張卡片 + 橫向訊號流 + 對應時間**。本版把面板從「過門檻才亮的 chip 清單」改成「每檔常駐卡片、攤出訊號流時間軸」,並把 KDJ+MACD 同向翻轉升為發光 alert + 桌面推播。1 分線粒度下交叉最快 ~1 分偵測到;要 sub-minute 需 Alpaca SIP tick feed。仍為探索層,不入 investment_protocol。
+
+## [4.52.0] — 2026-06-26 — 個股急拉/急殺：每檔獨立訊號 + UI 可編輯名單
+
+### Added
+- **`intraday_spikes.py`** `latest_reading()` — 每檔監控標的算最近一根完成 bar 的即時 1分/3分 % 變動 + last price + `spiking` flag（不論是否過門檻），寫進 payload 新欄位 `readings[]` 與 `watchlist[]`。payload version 1.0→**1.1**。新增 `save_watchlist()`（驗證 `^[A-Z][A-Z0-9.\-]{0,9}$`、dedupe、≤50、保留檔頭註解、atomic write）+ public alias `load_watchlist`。
+- **`dashboard_server.py`** `GET /api/intraday-spikes/watchlist`（讀名單）+ `POST /api/intraday-spikes/watchlist`（`{tickers:[...]}` → 驗證/存檔 → 背景觸發 `_intraday_spikes_refresh`）。
+- **`intraday-mood.html`** 急拉/急殺面板改為**每檔一個獨立訊號 chip**：spiking 高亮（⚡ + 顏色邊框 + ✓MACD/✓KDJ/✓量 + ★），未過門檻者淡色顯示即時 1分/3分 變動，無資料者標「無資料」。新增「✎ 編輯名單」inline textarea 編輯器 → 儲存即 POST + 重新偵測。
+
+### Why
+- user 看富途某檔明顯急拉卻沒被標,問「目前監控哪 10 檔」「這樣不算急拉嗎」。根因：面板只在**過門檻**時才顯示 chip,平時只露「監控 N 檔」計數,看不到在監控誰、也看不到「有動但未達 ±1%/±2% 門檻」的即時狀態,且名單只能手改 `spike_watchlist.txt`。本版讓**每檔都是常駐的獨立訊號**（看得到每檔即時 %）,把名單攤在 UI 上,並可直接在面板增刪。注意：Alpaca 免費 IEX 僅覆蓋**美股**——港股/陸股那類標的這條 lane 抓不到,需另接資料源。
+
+## [4.51.0] — 2026-06-26 — 急拉/急殺加 MACD/KDJ/量 確認層
+
+### Added
+- **`intraday_spikes.py`** `detect_spikes()` — 價格 % 觸發後,在**同一批 1 分鐘 bar**上重用 `intraday.compute_macd`/`compute_kdj`（pure-python）算動能確認：急拉看 DIF>DEA/金叉/hist>0 + K>D、急殺看 DIF<DEA/死叉/hist<0 + K<D,加上量增 ≥3×。`confirmations`（MACD/KDJ/量陣列）+ `confirmed`（價格 + ≥2 項同向）+ severity 確認即升 high。每筆附 `macd`/`kdj` 讀數。Alpaca 抓取窗口 40→**90 分鐘**（1 分 MACD 需 ~35 根才穩）。
+- **`intraday-mood.html`** spike chip 顯示 ✓MACD/✓KDJ/✓量 badge + ★（≥2 確認）。
+- **`test_intraday_spikes.py`** +6 asserts（長上升序列 → MACD+KDJ confirmed → high）,共 24 asserts。
+
+### Why
+- user 看富途 SNDK 急拉範例,要「**MACD or KDJ 加上量**去判斷現在是否急拉/急殺」。原本只看價格 %；本版疊上動能確認層——交叉/方向須與急拉同向、量須放大才標 confirmed（★）,降低單看 % 的假訊號。**資金流向/特大單**那塊（tick 級按單大小）另議：免費 IEX 給不了,需 Futu OpenAPI 或 Alpaca SIP。
+
+## [4.50.0] — 2026-06-26 — 個股急拉/急殺快線（Alpaca 1 分鐘線，獨立 lane）
+
+### Added
+- **`intraday_spikes.py`**（0 LLM，deterministic）— 與 FMP 5min 大盤引擎並行的**獨立 lane**：讀 **Alpaca 1 分鐘 bar**（free IEX feed）對自訂 watchlist 偵測**急拉/急殺**。純核心 `detect_spikes()` 掃最近 5 分鐘：`|1分| ≥ 1%` 或 `|3分| ≥ 2%` 觸發,severity high/med,量增（this-min vol ≥ 3× 均量）為**次要確認**。為何 Alpaca：FMP 1min REST 被 402 鎖、Polygon 免費無即時 WS;Alpaca 免費層即有即時 1min。
+- **`config/spike_watchlist.txt`** — 一行一 ticker、`#` 註解的可手編名單（種子 10 檔 mega-cap）。
+- **接法 = REST 輪詢**（非 WebSocket）：`dashboard_server` `intraday_spikes_poll_loop` 每 `INTRADAY_SPIKES_INTERVAL_SEC`（預設 **60s**）盤中多檔一次抓 + 開機快照;GET `/api/intraday-spikes/data`;`intraday-mood.html` 頂部新增「個股急拉/急殺」區塊（▲▲ 綠 / ▼ 紅 chip + 時間 + 量增）。
+- **`test_intraday_spikes.py`** — 18-assert golden（急拉/急殺/3分累積/量增/資料不足/watchlist 解析）。
+
+### Why
+- user 要對**個股**抓 1 分鐘級急拉/急殺,大盤其餘維持 FMP 5min。Alpaca 免費 IEX 是唯一 $0 拿到即時 1min 的路。
+- **IEX 量能限制（誠實標註）**：免費 IEX 單一交易所、量被系統性低估,故偵測**以價格 % 為主**、量僅次要確認、非硬門檻;要準量需 Alpaca 付費 SIP（$99/mo,`ALPACA_FEED=sip`）。
+- 無 `ALPACA_API_KEY`/`ALPACA_SECRET_KEY` 時 graceful no-op,面板顯示提示。**探索層,不**入 investment_protocol 決策。
+
+## [4.49.1] — 2026-06-26 — 修：盤中評估頁左側欄不見
+
+### Fixed
+- **`intraday-mood.html`** — 頁面用 inline script 但漏呼叫 `UI.boot('intraday')`，導致 `<aside id="sidebar">` 從未 render、整條左側導覽列消失。補上 boot 呼叫（每頁必呼，否則 sidebar 空白）。`utils.js` NAV_ITEMS 的 `intraday` 項已存在，現在 active 高亮也正確。
+
+## [4.49.0] — 2026-06-26 — 盤中評估：MACD/KDJ 動能確認層（下殺/反轉提示）
+
+### Added
+- **`intraday.py`** — pure-python `compute_macd`（DIF/DEA/hist + 末根交叉）+ `compute_kdj`（RSV→K/D/J + 末根交叉），對 SPY/QQQ/IWM 各算**雙時間框**：日線（regime，~60 根永遠夠）+ 盤中 5min（時機，bar 數不足回 None 守門 → 早盤不噴垃圾）。
+- **新旗標（confluence-gated，只當確認層）**：
+  - **下殺** `momentum_breakdown`：盤中 KDJ 高檔死叉（K_prev≥70 或 J≥90）**或** 盤中 MACD 死叉 **且** 跌破 VWAP。
+  - **反轉** `momentum_reversal`：盤中 KDJ 低檔金叉（K_prev≤30 或 J≤10）**或** 日線 MACD 柱狀體由負轉升（且有破底/連跌弱勢脈絡）→ 強化既有價格行為「止跌」。
+  - **`macd_daily`**：日線 MACD 金叉/死叉 regime context（low/info）。
+- 每檔輸出加 `momentum`（macd_5m/kdj_5m/macd_1d/kdj_1d 數值，**永遠透出**）；`intraday-mood.html` 卡片加一行 MACD/KDJ 讀數 + 交叉箭頭。週期/超買超賣門檻（`MACD_*`/`KDJ_*`/`KDJ_OB`/`KDJ_OS`）皆檔頭常數可調。
+- **`test_intraday.py`** — +13 asserts（helper 守門、KDJ 死叉@超買 / 金叉@超賣、下殺/反轉旗標整合、MACD 結構），共 47 asserts。
+
+### Why
+- user 問「即時化有沒有 MACD/KDJ 反轉/下殺提示」。本來只有純價格行為（破底/止跌/VWAP）。加震盪指標當**確認層**——交叉須與價量同向（KDJ 須在超買/超賣區、MACD 死叉須配跌破 VWAP）才升級提示，刻意 gate 掉 5min 上的 whipsaw 假訊號。**依 user 指定：只出旗標、不動綜合分數**（震盪指標假訊號不汙染 −100..+100）。日線負責 regime、5min 負責時機。
+
+## [4.48.1] — 2026-06-26 — 盤中評估：即時 quote 混合（破底偵測秒級化）
+
+### Changed
+- **`intraday.py`** — `assess()` 新增 `live=` 參數 + `build()` 多抓一次 FMP `quote`（`_fetch_live_quote`）。最後一根收掉的 5-min K 棒最多落後約 5–6 分鐘（實測：12:30 K vs 12:36 quote），破底/急殺剛好發生在那幾分鐘。現在用即時 quote（~2 秒新）覆蓋 **spot 價 / 當日最高最低 / 當日量 / 昨收**——讓 **破底/止跌偵測**從「最多延遲 6 分鐘」變秒級，當日量改用官方累計值（原本是已收 5-min K 量加總、會少算最後幾分鐘）。**VWAP 與型態（高開低走等）仍用 5-min K**（quote 無 bar 歷史）。
+- 每檔輸出加 `data_source`（`live_quote+5min` / `5min`）+ `quote_timestamp`；`intraday-mood.html` 市場 pill 顯示「· 即時報價」。
+- **`test_intraday.py`** — 加 live-override 測試（8 asserts：live day_low 觸發破底、官方量覆蓋、timestamp 透出），共 34 asserts。
+- 註：1min K 在 stable 端點回 `None`（不可用），型態類訊號最細粒度維持 5-min。
+
+### Why
+- user 問「盤中評估是不是可以拿 FMP 即時 K 棒判斷」。確認本來就是用 5-min K，但點出「最後一根未收的 K」延遲問題。混合即時 quote 後，價量判斷對齊真實盤面，不再被 bar 邊界拖慢。
+
+## [4.48.0] — 2026-06-26 — 盤中評估引擎（Intraday weakness tape：破底/止跌/量價）
+
+### Added
+- **`skills/market-sentiment-analyzer/scripts/intraday.py`**（0 LLM，deterministic）— market_mood.py 的盤中快訊姊妹引擎。讀 FMP 盤中 5-min bars（量能 + VWAP）+ 近 ~60 日 daily bars，對 SPY/QQQ/IWM 算 signed −100..+100 盤中評估分（負=破底偏空）。偵測 **破底**（今日低跌破 5d/20d/50d 低，分級）、**止跌**（日內自低點反彈 / 跌破後收復＝假跌破）、**高開低走**、**量增價跌**（RVOL surge on down move）、跌破 VWAP、MA20 偏離、連跌天數、O'Neil 出貨日。`UNIVERSE`/`WEIGHTS`/門檻皆為檔頭常數可調。輸出 `Dashboard/intraday_mood.json`。
+- **`scripts/test_intraday.py`** — 26-assert golden-fixture（破底20日+量增價跌 / 止跌收復 / 高開低走 / 強勢 / 空資料 / aggregate / risk_label 邊界），network-free，改引擎必跑 rc=0。
+- **`dashboard_server.py`** — 常駐 `intraday_mood_poll_loop` daemon：美股盤中每 `INTRADAY_MOOD_INTERVAL_SEC`（預設 300s）重算 + 開機 1 張 + 每日收盤後 1 張快照（過夜不 stale）；獨立於 `_protocol_lock`／break_news。新 API GET `/api/intraday-mood/{data,state}` + POST `/api/intraday-mood/refresh`（背景跑）。
+- **`Dashboard/intraday-mood.html`** — 獨立「盤中評估」面板：綜合分量表 + 觸發旗標（severity 配色 + 影響標的）+ 每檔卡片（現價/昨收報酬、日內區間位置條、RVOL、VWAP 乖離、MA20、連跌/出貨、破底/止跌/型態）。`utils.js` sidebar 加「盤中評估」nav；`index.html` signals-band 加 mini-strip。
+- **`daily_update.sh` Step 9.35** — 寫盤中評估基線（非致命）。
+
+### Why
+- user 指出市場氛圍只看波動率情緒（VIX/SKEW/PCR/F&G），缺「盤中即時 + 近幾天走勢 + 成交量」與破底/止跌類訊號。本版補上一條**盤中價量探索層**：FMP 盤中分鐘 K + 量能（Finnhub 盤中 K 為付費故未用）→ deterministic 算破底/止跌/高開低走/量增價跌。與 market_mood 並列、互不汙染。**探索層，不**進入 investment_protocol 決策。
+
 ## [4.47.2] — 2026-06-22 — weekly-tech-playbook：Codex Review 整合的優化（解耦 + 去自打臉 nag）
 
 ### Changed
