@@ -51,6 +51,11 @@ skills/*/journal/
 
 # Root-level daemon stderr captures (breadth.err / burry.err / dual.err / …)
 /*.err
+/*.log
+
+# Governance-file backups written before edits (MAINTENANCE.md §1) — local safety
+# copies, the tracked file itself is the record
+docs/agent-ops/backups/
 
 # Break News per-item logs + daemon state (auto-written by poller; regenerable)
 news/break_news_logs/bn_*.json

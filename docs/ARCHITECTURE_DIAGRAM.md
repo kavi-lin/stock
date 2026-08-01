@@ -1,4 +1,4 @@
-# AI 投資委員會 — 系統架構與 Call Stack
+# AI Investment Committee — 系統架構與 Call Stack
 
 > **目的**：用 4 個視角解一個問題：「資料是從哪來的、被誰呼叫、什麼時候算、寫到哪、最後給誰看」。
 >
@@ -381,7 +381,7 @@ sequenceDiagram
 ### D-2. Cache & Report 目錄樹
 
 ```
-AI投資委員會/
+ai-investment-committee/
 ├─ Dashboard/
 │  └─ data.json                          ← bridge.py 唯一寫入點 (atomic)
 │

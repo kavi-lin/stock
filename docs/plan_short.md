@@ -65,7 +65,7 @@ Dashboard / Momentum 頁
 | 將不同時間維度（theme heat / momentum / Finnhub catalyst）合成單一分數 | 推薦不可解讀；使用者需要按時間維度做不同決策 |
 | 硬編 `macro_theme_map.yaml`（FRED regime → 主題加分/扣分） | 未驗證的民俗法則；落入 n=1 過擬合陷阱（參見本次 backtest 結論） |
 | 用 Finnhub upgrade / insider 直接加減分（+2/-2 機制） | 未驗證；先**只顯示**事件，不打分。等樣本累積後再評估 |
-| 影響 `investment_protocol_v4_8.md` 任何決策 | V4.8 不動共識 |
+| 影響 `investment_protocol_v5_0.md` 任何決策 | V4.8 不動共識 |
 | 上 dashboard 不標 EXPERIMENTAL | 推薦未驗證，需誠實標示 |
 
 ---
@@ -420,7 +420,7 @@ python3 skills/short-term-target/scripts/weekly_review.py
 
 | 系統 | 關係 |
 |---|---|
-| `investment_protocol_v4_8.md` | **不影響**。並行運作。可在 Phase 5 報告**選擇性**引用 short-term-target 輸出當「短期參考」（v2 才考慮） |
+| `investment_protocol_v5_0.md` | **不影響**。並行運作。可在 Phase 5 報告**選擇性**引用 short-term-target 輸出當「短期參考」（v2 才考慮） |
 | `dual_fetch.py` | thematic-screener 消費它的 scoring snapshot |
 | `theme-detector` | thematic-screener 為其下游 client，不修改 theme-detector 本體 |
 | `momentum-monitor` | 仍可獨立使用；但不再是主要推薦來源（thematic-screener 取代其在 Dashboard 的位置） |

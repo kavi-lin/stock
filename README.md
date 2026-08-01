@@ -1,4 +1,4 @@
-# AI 投資委員會
+# AI Investment Committee（AI 投資委員會）
 
 多 Agent 投資分析系統，由三個 Claude Code protocol + 短期戰術層 + 23 個 skill + 本地 Dashboard 組成。
 

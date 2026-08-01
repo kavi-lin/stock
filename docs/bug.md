@@ -1,4 +1,4 @@
-# AI 投資委員會 — Bug & 缺陷追蹤系統
+# AI Investment Committee — Bug & 缺陷追蹤系統
 
 本文件記錄系統在運行過程中發現的 Bug、UX 缺陷或架構性隱患。
 

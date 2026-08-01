@@ -1,4 +1,4 @@
-# AI 投資委員會 — Antigravity (agy) CLI Execution Context
+# AI Investment Committee（AI 投資委員會） — Antigravity (agy) CLI Execution Context
 
 This file defines the specific instructions, workflows, and standards for the Antigravity (agy) CLI agent within the "AI Investment Committee" project.
 
@@ -12,23 +12,7 @@ This file defines the specific instructions, workflows, and standards for the An
 
 ## 開發工作流 (Workflow Rules)
 
-### 1. 實作前確認 (Pre-implementation Confirmation)
-**觸發條件 (Trigger)**: 修改涉及 **≥ 2 個檔案** 或 單一檔案修改 **≥ 50 行**。
-**執行動作 (Action)**: 
-1. 進入 `Plan Mode` 進行設計。
-2. 輸出一份摘要表格 (File, Action, Est. Lines, Description) 與預估影響範圍。
-3. 等待使用者回覆 "OK" 後再開始執行。
-
-### 2. 任務完成檢查表 (Session Completion Checklist)
-**定義 (Definition)**: 使用者要求的開發、重構或修復任務已完成。
-1. **同步版本號 (Bump VERSION)**: 同時更新以下 **三個** 位置：
-    - `VERSION` 檔案 (例如: `1.5.0`)
-    - `Dashboard/utils.js` (例如: `'V1.5.0'`)
-    - `CHANGELOG.md` (新增 `## [x.y.z] — YYYY-MM-DD` 區塊，含 `### Changed/Added/Fixed` 條列與 `### Why` 動機)。
-    *Note: 大改動跳 minor (x.Y.z)，小修復跳 patch (x.y.Z)。*
-2. **更新進度紀錄 (Update SESSION_NOTES.md / TODO.md)**: 勾選已完成項目，更新狀態，並撰寫 `Last Session Note`。
-
-**🚫 例外規定 (EXCLUSION)**: 執行投資協議 (`分析`, `產業掃描` 等) **不屬於** Session。執行完協議後 **不可** 更新版本號或修改 TODO list。
+Workflow Rules 的唯一真相在 `CLAUDE.md` § Workflow Rules（動工前確認、收尾 checklist、protocol run 排除），**不在本檔複製**——兩處會脫鉤。收尾的版本三處同步後，必跑 `docs/agent-ops/MAINTENANCE.md` §2 的驗證命令，輸出 `SYNC OK` 才算完成；SESSION_NOTES / CHANGELOG 的讀寫規則（禁整檔 Read、插入錨點）同見 MAINTENANCE §3。
 
 ## Antigravity 專屬規範 (Antigravity Specific Guidelines)
 
@@ -49,17 +33,9 @@ This file defines the specific instructions, workflows, and standards for the An
 
 ## 常用操作捷徑 (Ops Shortcuts)
 
+完整指令總表（按情境分組，含「改了哪個引擎跑哪組測試」對照）：`docs/agent-ops/OPS_COMMANDS.md`。
 ```bash
-# 每日自動更新 (含數據抓取與圖譜建立)
-./daily_update.sh
-
-# 數據校對與分析
-python3 skills/finnhub-client/scripts/audit_drift_check.py            # Finnhub vs FMP 漂移檢查
-python3 investment/scripts/backtest_postmortem.py                     # 協議決策回測
-
-# Break News 偵錯
-python3 scripts/break_news/poller.py --once             # 單次抓取
-python3 scripts/break_news/debater.py --news-id <id>    # 單條 Debate
+./daily_update.sh   # 每日例行
 ```
 
-*參照 `CLAUDE.md` 獲取更多協議細節與進階命令。*
+*協議觸發表與更多細節參照 `CLAUDE.md`（單一真相來源）。*
