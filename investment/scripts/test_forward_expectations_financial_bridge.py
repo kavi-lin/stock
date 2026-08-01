@@ -157,5 +157,19 @@ check("i.2028 coverage rev", cov_rows["2028-12-31"]["coverage"]["num_analysts_re
 check("i.2028 coverage eps", cov_rows["2028-12-31"]["coverage"]["num_analysts_eps"], 8)
 check("i.2027 coverage absent -> None", cov_rows["2027-12-31"]["coverage"]["num_analysts_revenue"], None)
 
+print("Fixture J (point-in-time cutoff removes elapsed annual rows):")
+ec_cutoff = {
+    **EC,
+    "as_of_date": "2027-01-15",
+    "annual_estimates": [
+        {"date": "2026-12-31", "revenue_avg": 500, "eps_avg": 1},
+        *EC["annual_estimates"],
+    ],
+}
+cutoff = fb.build_financial_bridge(ec_cutoff)
+check("j.rows future-only", [r["date"] for r in cutoff["rows"]], ["2027-12-31", "2028-12-31"])
+check("j.excluded count", cutoff["excluded_nonforward_estimate_rows"], 1)
+check("j.cutoff provenance", cutoff["estimate_cutoff_date"], "2027-01-15")
+
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

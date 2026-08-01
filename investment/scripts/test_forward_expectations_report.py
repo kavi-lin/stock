@@ -47,7 +47,7 @@ SNAPSHOT = {
         "range": {"low": 60.0, "base": 100.0, "high": 150.0},
         "cases": {
             "bear": {"target_price": 60.0, "upside_pct": -40.0, "metric": "eps_consensus", "metric_value": 4.0, "multiple": 15.0},
-            "base": {"target_price": 100.0, "upside_pct": 0.0, "metric": "eps_consensus", "metric_value": 5.0, "multiple": 20.0},
+            "base": {"target_price": 100.0, "upside_pct": 0.0, "annualized_pct": 0.0, "metric": "eps_consensus", "metric_value": 5.0, "multiple": 20.0},
             "bull": {"target_price": 150.0, "upside_pct": 50.0, "metric": "eps_consensus", "metric_value": 6.0, "multiple": 25.0},
         },
     },
@@ -82,7 +82,7 @@ check("has bridge risk", "2028-03-31: eps_vs_margin_net_income = wide_gap (138% 
 check("has scenario section", "### Operating-Driver Scenarios" in md)
 check("has scenario watchlist", "royalty_bearing_units: required_numeric_driver_or_evidence_missing" in md)
 check("has future price section", "### Future Price Range" in md)
-check("has future price row", "| bull | $150.00 | +50.0% | eps_consensus 6.00x | 25.00x |" in md)
+check("has future price row", "| base | $100.00 | +0.0% | +0.0% | eps_consensus 5.00x | 20.00x |" in md)
 check("has policy", "Does not alter fair value" in md)
 
 print("Fixture B (same-metric gap table):")

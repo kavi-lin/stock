@@ -21,7 +21,13 @@ def check(label, got, want, tol=None):
 
 
 EARNINGS = {
+    "as_of_date": "2026-06-30",
     "annual_estimates": [
+        {
+            "date": "2025-12-31",
+            "revenue_avg": 50,
+            "eps_avg": 1,
+        },
         {
             "date": "2028-12-31",
             "revenue_avg": 200,
@@ -74,6 +80,7 @@ entries = snap["annual_estimate_snapshot"]["entries"]
 check("near.revenue_spread", entries[0]["revenue_spread_pct"], 10.0)
 check("far.eps_spread", entries[1]["eps_spread_pct"], 50.0)
 check("latest_year.near", snap["latest_year"]["date"], "2027-12-31")
+check("elapsed estimate excluded", len(entries), 2)
 
 print("Fixture B (rating momentum direction up):")
 rating = snap["rating_momentum"]

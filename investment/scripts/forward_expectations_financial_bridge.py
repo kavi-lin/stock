@@ -8,6 +8,7 @@ inputs degrade the bridge instead of filling precise assumptions.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import math
 import sys
@@ -56,12 +57,36 @@ def _last_four(rows):
     return [row for row in (rows or []) if isinstance(row, dict)][:4]
 
 
-def _latest_annual_estimates(earnings_cache: dict):
+def _parse_date(value):
+    try:
+        return dt.date.fromisoformat(str(value)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+def future_annual_estimates(earnings_cache: dict):
+    """Return only estimates that were still forward-looking at the cache cutoff.
+
+    FMP annual-estimate curves commonly retain the last reported FY (and sometimes
+    the just-ended current FY). Mixing those rows into a forward CAGR double-counts
+    already-realized growth. If the cache has no usable point-in-time cutoff we keep
+    the legacy rows rather than silently discard potentially valid fixtures/data.
+    """
     rows = [
         row for row in (earnings_cache.get("annual_estimates") or [])
         if isinstance(row, dict) and row.get("date")
     ]
-    return sorted(rows, key=lambda row: row["date"])
+    rows = sorted(rows, key=lambda row: row["date"])
+    cutoff_value = earnings_cache.get("as_of_date") or earnings_cache.get("last_earnings_date")
+    cutoff = _parse_date(cutoff_value)
+    if cutoff is None:
+        return rows
+    return [row for row in rows if (_parse_date(row.get("date")) or dt.date.min) > cutoff]
+
+
+def _latest_annual_estimates(earnings_cache: dict):
+    """Backward-compatible private alias; all consumers use the future-only policy."""
+    return future_annual_estimates(earnings_cache)
 
 
 def _historical_margins(earnings_cache: dict):
@@ -316,6 +341,10 @@ def build_financial_bridge(earnings_cache: dict, guidance_promoted: list[dict] |
                            generated_at: str | None = None) -> dict:
     """Build a conservative forward financial bridge from sourced estimates."""
     estimates = _latest_annual_estimates(earnings_cache)
+    all_estimate_rows = [
+        row for row in (earnings_cache.get("annual_estimates") or [])
+        if isinstance(row, dict) and row.get("date")
+    ]
     margins = _historical_margins(earnings_cache)
     fcf_margin, fcf_source = _fcf_margin(earnings_cache)
     capex_intensity, capex_source = _capex_intensity(earnings_cache)
@@ -391,6 +420,8 @@ def build_financial_bridge(earnings_cache: dict, guidance_promoted: list[dict] |
         "status": status,
         "generated_at": generated_at,
         "forecast_basis": "consensus_annual_estimates_plus_historical_conversion",
+        "estimate_cutoff_date": earnings_cache.get("as_of_date") or earnings_cache.get("last_earnings_date"),
+        "excluded_nonforward_estimate_rows": max(0, len(all_estimate_rows) - len(estimates)),
         "assumption_basis": "historical_ratios_held_constant",
         "held_constant_assumptions": assumptions,
         "terminal_sensitivity": sensitivity,

@@ -1,8 +1,35 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-02 (v4.77.0)
+> **Last Updated**: 2026-08-02 (v4.78.0)
 
 ---
+
+## ✅ Done (v4.78.0) — Forward Expectations 前瞻預測可信度修正
+
+- [x] annual estimates 依 point-in-time cutoff 排除 elapsed FY，consensus/revision/financial bridge 同源。
+- [x] terminal range 與 12m target 語意分離，輸出年化報酬；coverage <20 降低信心。
+- [x] calibration 支援完整 Q1–Q4 FY level、out-of-sample 時點 gate、earliest-vintage dedup。
+- [x] broad raw peers 只揭露，不進 numeric base-rate；需 ≥3 business-cohort members。
+- [ ] **校準觀察點**：累積 ≥15 個真正成熟 comparable points 後，才評估 growth/margin/multiple 規則；未達門檻不得升格 live。
+
+## 📋 Backlog — Protocol Lean 化：「保留 5 個 lane score，不保留 5 次固定 LLM」（2026-08-02 共識定案）
+
+> 共識五點：(1) 5 score ≠ 5 LLM，決策層 schema 不動；(2) 先 script 化決策數學，再談條件式跳過；(3) 改變 score 生產方式必 shadow-first；(4) Sentiment deterministic 化優於 News/Sentiment 合併；(5) LLM 集中在 Fundamentals / News / 條件式 Valuation reviewer / Red Team。
+> 驗證分流：搬公式 → spec parity + replay triage；改 score 生產 → shadow + weight 凍結窗；換格式 → golden file + validator；重排 → JSON regression equivalence。**每項獨立 bump 一版**（三處同步 + CHANGELOG + validator 向後相容），回滾邊界一項一版。
+
+- [ ] **L1 — `decision_engine.py`（Phase 3 script 化）**：Step 1 加權(C_eff)/1.5 structural/1.7 polarization/2 cascade 7 條/3 macro + dynamic threshold + Auto REJECT + Phase 4.6 cap 全入 script；unit tests 覆蓋全 cascade 路徑。驗收 = spec 100% parity；111 筆 replay mismatch **逐筆 triage**（`engine_bug` vs `historical_llm_arithmetic_error`），舊 schema entry 按 rule-version 或列排除清單（no silent caps）；protocol Phase 3 改「呼叫 script 禁手算」。
+- [ ] **L2 — `trade_plan_builder.py`（Phase 4 script 化）**：entry band / TP / SL / staged split / R/R / final sizing 組裝（risk_manager / tail_risk 已 script）；Trader LLM 觸發條件 deterministic 定義（option hedge / portfolio conflict / 跨週期多 catalysts）。驗收 = numeric parity 對 spec + 歷史 mismatch triage。
+- [ ] **L3 — Phase 5 deterministic renderer**：`render_investment_report.py` 照 ic-memo `compose.py` pattern；吸收 Step 4.5 injection；`--polish` optional（只收完成 MD + 可潤飾段白名單）。驗收 = golden reports + decision-lock + `validate_markdown_export.py` rc=0；移除 Sonnet formatter Agent call。
+- [ ] **L4 — Valuation quant 提前 Phase 1.5**：`compute_price_framework --self-assemble` quant pack 移到 Phase 1.5；Phase 2.4 只組 MHP / 5d band / 60d target（吃 technical/news qualitative）。驗收 = 重排前後 valuation_pack regression 完全一致；修 protocol「Phase 2 lane 依賴 2.4 pack」時序矛盾文字。
+- [ ] **L4b — Valuation Specialist 改條件式 reviewer**（依賴 L4，shadow-first）：觸發條件 deterministic（no curated peers / structural shift / anchor 嚴重衝突 / data quality 低但可能 BUY）；peer discovery 30-90d cache。
+- [ ] **L5 — Sentiment lane deterministic 化**（shadow-first）：公式已寫死（0.5×stock + 0.5×(market/10−5) + 規則表）→ det producer script；先 shadow N session 過 `shadow_report.py` 哨兵再翻預設；翻後 weight 凍結窗（照 V3.45.4 News 前例）。**統一 lane 契約第一個落地點**（見橫切 C1），動工前先定案 det_shadow 收斂。
+- [ ] **L6 — Technical deterministic-first**（shadow-first）：det score producer（technical_core 為基）；LLM reviewer 觸發規則化（指標矛盾 / gap / parabolic / det score 落 threshold ±band）；qualitative 欄位（pattern_taxonomy / smart_money / key_levels → MHP 依賴）需 det 版或觸發 LLM 時才產。shadow + weight 凍結窗。
+- [ ] **L7 — Red Team evidence ledger**：Python 壓 ledger（consensus_thesis / claims / negative_evidence / valuation_assumptions / implied_expectations / dq_flags / unresolved_conflicts）；RT prompt 改吃 ledger（先縮 prompt，不跳過）；classifier haystack 欄位保留。
+- [ ] **L8 — RT decision-invariant skip**（依賴 L1）：bounded simulation 窮舉 verdict × strength × basis × shift-tier，final action / cap / size tier / risk flags 全不變才 skip；skip = 跳過推理**不跳過產出物**——kill_conditions ← det kill triggers 生成、counter_thesis 模板化、`red_team_provenance: deterministic_skip`；decision_lock / Dashboard kill_triggers 相容。
+- [ ] **L9 — Refresh / content-hash mode**：factpack 加 `content_hash` + `material_change_since_last`；`analysis_mode: LEAN|FULL_IC|REFRESH` + LEAN→FULL_IC 升級規則 deterministic 寫進 protocol 正文（首次覆蓋 / structural shift / 高信心可行動決策必升）；refresh entry 的 history/Phase 6 語意定義。
+- [ ] **C1（橫切）— 統一 lane 資料契約**：per-lane `{provenance, llm_invoked, producer_version, input_hash, shadow_score}` + session 層 `{llm_invoked_lanes[], llm_skipped_lanes[], analysis_mode}`；**取代並吸收既有 det_shadow block**（`apply_det_shadow.py` 改為新契約 producer，勿兩套並存）——L5 動工前定案；validator + 舊 entry 向後相容；Phase 6 校準按 provenance 分層（防 selection bias）。
+- [ ] **C2（橫切）— factpack per-lane slim views**：`phase1_factpack.py` 直接產五個 lane view + Phase 0 lane-specific macro view，PM 不再手動切片（消 cross-anchor 抄錯面）。驗收 = view 欄位覆蓋現行注入規則的 JSON equivalence。
+- [ ] **C3（backlog，非 quick win）— Fundamentals 瘦身走消費者 audit**：catalysts 移交 News 需連動 ic-memo `build_fact_pack.py` / `compose.py` / Dashboard `page-decisions.js` / schema / fallback；`moat_assessment` 有消費者必留。程序 = producer/consumer 搜尋 → 保留/移交/落日，禁憑直覺刪。
 
 ## ✅ Done (v4.77.0) — 估值引擎 review 修正（degraded path 治理）
 

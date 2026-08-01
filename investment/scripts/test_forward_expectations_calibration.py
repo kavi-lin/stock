@@ -93,10 +93,38 @@ check("no annual_growth → unavailable",
       cal._realized_window_cagr({}, "2024-12-31", "2026-12-31", "revenue_growth")[1],
       "actual_basis_unavailable")
 
-print("Fixture D (future-level snapshots remain not_comparable_yet):")
+print("Fixture D (future-level snapshots wait for complete same-basis FY actual):")
 level_rows = [r for r in rows if r["forecast_basis"] == "future_level_snapshot"]
 check("level.count", len(level_rows), 2)
 check("level.status", level_rows[0]["status"], "actual_not_comparable_yet")
+
+print("Fixture D2 (completed Q1-Q4 FY level becomes comparable):")
+level_snapshot = {
+    **SNAPSHOT,
+    "generated_at": "2025-06-01T00:00:00+00:00",
+    "estimate_revision_snapshot": {
+        "latest_year": {"date": "2026-12-31", "revenue_avg": 1000, "eps_avg": 5},
+    },
+}
+level_earnings = {
+    "as_of_date": "2027-02-01",
+    "quarterly_pnl": [
+        {"fiscalYear": "2026", "period": q, "revenue": 250, "epsDiluted": 1.25}
+        for q in ("Q1", "Q2", "Q3", "Q4")
+    ],
+}
+realized_levels = cal._realized_fiscal_levels(level_earnings)
+check("level.actual revenue sum", realized_levels[2026]["revenue_level"], 1000)
+check("level.actual eps sum", realized_levels[2026]["eps_level"], 5.0)
+level_eval = cal.evaluate_snapshot(level_snapshot, level_earnings)["rows"]
+level_rev = [r for r in level_eval if r["metric"] == "revenue_level"][0]
+check("level comparable", level_rev["status"], "comparable")
+check("level same-basis actual", level_rev["actual_basis"], "quarterly_pnl_q1_q4_fiscal_sum")
+check("level exact APE", level_rev["absolute_pct_error"], 0.0)
+late_snapshot = {**level_snapshot, "generated_at": "2027-01-01T00:00:00+00:00"}
+late_rev = [r for r in cal.evaluate_snapshot(late_snapshot, level_earnings)["rows"]
+            if r["metric"] == "revenue_level"][0]
+check("post-period snapshot rejected", late_rev["status"], "not_point_in_time_forecast")
 
 print("Fixture E (summarize: insufficient sample / calibratable threshold):")
 comparable_rows = [r for r in cagr_rows if r["status"] == "comparable"]
@@ -123,6 +151,17 @@ with tempfile.TemporaryDirectory() as tmp:
     check("dedup → 2 tickers (not 4 files)", len(kept), 2)
     test_keep = [s for s in kept if s["ticker"] == "TEST"][0]
     check("dedup keeps latest TEST run", test_keep["run_id"], "R3")
+
+print("Fixture G (calibration row dedup keeps earliest vintage, not latest rerun):")
+vintage_rows = [
+    {"ticker": "TEST", "lane": "consensus_revision", "metric": "revenue_level",
+     "forecast_basis": "future_level_snapshot", "window_from": None, "window_to": "2027-12-31",
+     "snapshot_generated_at": stamp, "forecast_value": value}
+    for stamp, value in (("2026-01-01", 100), ("2026-06-01", 120))
+]
+kept_rows = cal._dedupe_forecast_rows(vintage_rows)
+check("vintage dedup one row", len(kept_rows), 1)
+check("vintage keeps earliest value", kept_rows[0]["forecast_value"], 100)
 
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

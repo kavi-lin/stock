@@ -21,7 +21,7 @@ values use the same metric. Cross-metric observations remain descriptive.
 SHADOW ONLY — does not touch the live fair_value blend or any decision logic.
 
 A point-in-time snapshot is written to investment/invest_logs/forward_expectations/.
-No forecast-vs-actual calibration engine (deferred until valuation approach stabilizes).
+Read-only forecast-vs-actual calibration is provided by forward_expectations_calibration.py.
 
 Usage:
   python3 investment/scripts/forward_expectations.py --ticker ARM --self-assemble
@@ -43,7 +43,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.insert(0, BASE_DIR)
 sys.path.insert(0, os.path.join(BASE_DIR, "investment", "scripts"))
 
-ENGINE_VERSION = "forward_expectations.py v1.13 (Future Price Range shadow)"
+ENGINE_VERSION = "forward_expectations.py v1.14 (point-in-time forward curve + calibrated horizon labels)"
 
 CAGR_CLAMP = (-0.50, 1.50)
 MAX_PEERS = 10
@@ -160,14 +160,19 @@ def consensus_lane(earnings_cache: dict) -> dict:
         "window_from": None, "window_to": None, "window_years": None,
         "eps_spread_pct": None, "num_analysts_eps": None, "num_analysts_revenue": None,
         "analyst_rating_direction": None,
+        "estimate_cutoff_date": earnings_cache.get("as_of_date") or earnings_cache.get("last_earnings_date"),
+        "excluded_nonforward_rows": 0,
         "note": "",
     }
+    from forward_expectations_financial_bridge import future_annual_estimates
+
     est = earnings_cache.get("annual_estimates")
-    if not isinstance(est, list) or len(est) < 2:
-        out["note"] = "annual_estimates 缺或 <2 年，consensus lane 跳過"
+    all_rows = [e for e in est if isinstance(e, dict) and e.get("date")] if isinstance(est, list) else []
+    rows = future_annual_estimates(earnings_cache)
+    out["excluded_nonforward_rows"] = max(0, len(all_rows) - len(rows))
+    if len(rows) < 2:
+        out["note"] = "future annual_estimates 缺或 <2 年，consensus lane 跳過"
         return out
-    # entries are most-distant-first; sort ascending by date to get nearest→furthest
-    rows = sorted([e for e in est if e.get("date")], key=lambda e: e["date"])
     near, far = rows[0], rows[-1]
     years = _years_between(near["date"], far["date"])
     rev_cagr = _cagr(near.get("revenue_avg"), far.get("revenue_avg"), years)
@@ -186,7 +191,7 @@ def consensus_lane(earnings_cache: dict) -> dict:
         "num_analysts_eps": far.get("num_analysts_eps"),
         "num_analysts_revenue": far.get("num_analysts_revenue"),
         "analyst_rating_direction": _analyst_rating_direction(earnings_cache),
-        "note": ("estimate-window CAGR（{}→{}）；非 trailing-base（避免低基期失真）"
+        "note": ("future-only estimate-window CAGR（{}→{}）；排除 cutoff 前資料，非 trailing-base"
                  .format(near["date"][:7], far["date"][:7])),
     })
     return out
@@ -252,10 +257,43 @@ def _subject_gross_margin(earnings_cache: dict):
     return (sum(grosses) / len(grosses)) if grosses else None
 
 
+def _select_base_rate_distribution(cohort: dict, cagrs: list, used: list) -> dict:
+    """Promote only a qualified business cohort into the numeric comparison lane."""
+    if cohort.get("available"):
+        dist = cohort["distribution"]
+        return {
+            "available": True, "basis": "cohort",
+            "peer_rev_cagr_median": dist["median"],
+            "peer_rev_cagr_p25": dist["p25"],
+            "peer_rev_cagr_p75": dist["p75"],
+            "peers_used": [m["ticker"] for m in cohort["members"]],
+            "raw_peer_distribution": None,
+            "note": (f"{cohort['member_count']} 名 cohort（同 sector + growth/margin/size ±1 tier，"
+                     f"記錄選取理由防 cherry-pick）營收 CAGR 分布"),
+        }
+    if len(cagrs) >= 3:
+        return {
+            "available": False, "basis": "raw_peers_advisory_only",
+            "raw_peer_distribution": {
+                "median": round(_pct(cagrs, 0.50), 4),
+                "p25": round(_pct(cagrs, 0.25), 4),
+                "p75": round(_pct(cagrs, 0.75), 4),
+                "peers": used,
+            },
+            "note": (f"cohort 不足（{cohort.get('member_count', 0)} 名）；{len(used)} 名 raw peers "
+                     "僅揭露、不進 numeric base-rate，避免 broad-sector peers 冒充 business comparables"),
+        }
+    return {
+        "available": False, "basis": None, "raw_peer_distribution": None,
+        "note": f"可用 peer <3（{len(cagrs)}），base_rate 跳過",
+    }
+
+
 def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
     out = {"available": False, "peer_rev_cagr_median": None, "peer_rev_cagr_p25": None,
            "peer_rev_cagr_p75": None, "peers_used": [], "self_revenue_yoy": None,
-           "growth_acceleration": None, "cohort": None, "basis": None, "note": ""}
+           "growth_acceleration": None, "cohort": None, "basis": None,
+           "raw_peer_distribution": None, "note": ""}
     yoy = (earnings_cache.get("derived") or {}).get("yoy_growth") or {}
     out["self_revenue_yoy"] = _num(yoy.get("revenue_yoy"))
     out["growth_acceleration"] = yoy.get("growth_acceleration")
@@ -304,29 +342,7 @@ def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
     cohort = build_cohort(subject, candidates)
     out["cohort"] = cohort
 
-    if cohort.get("available"):
-        dist = cohort["distribution"]
-        out.update({
-            "available": True, "basis": "cohort",
-            "peer_rev_cagr_median": dist["median"],
-            "peer_rev_cagr_p25": dist["p25"],
-            "peer_rev_cagr_p75": dist["p75"],
-            "peers_used": [m["ticker"] for m in cohort["members"]],
-            "note": (f"{cohort['member_count']} 名 cohort（同 sector + growth/margin/size ±1 tier，"
-                     f"記錄選取理由防 cherry-pick）營收 CAGR 分布"),
-        })
-    elif len(cagrs) >= 3:
-        out.update({
-            "available": True, "basis": "raw_peers_fallback",
-            "peer_rev_cagr_median": round(_pct(cagrs, 0.50), 4),
-            "peer_rev_cagr_p25": round(_pct(cagrs, 0.25), 4),
-            "peer_rev_cagr_p75": round(_pct(cagrs, 0.75), 4),
-            "peers_used": used,
-            "note": (f"cohort 不足（{cohort.get('member_count', 0)} 名），fallback {len(used)} 名 raw peer "
-                     f"歷史營收 CAGR 分布（防過度樂觀 base rate）"),
-        })
-    else:
-        out["note"] = f"可用 peer <3（{len(cagrs)}），base_rate 跳過"
+    out.update(_select_base_rate_distribution(cohort, cagrs, used))
     return out
 
 

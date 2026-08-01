@@ -12,6 +12,7 @@ import json
 import math
 import os
 from collections import defaultdict
+from datetime import date
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SNAPSHOT_DIR = os.path.join(BASE_DIR, "investment", "invest_logs", "forward_expectations")
@@ -69,6 +70,13 @@ def _year(value):
         return None
 
 
+def _date(value):
+    try:
+        return date.fromisoformat(str(value)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
 def _geomean_cagr(yoy_growths: list) -> float | None:
     """Annualized rate from a sequence of single-year YoY growths (same basis as a
     consensus estimate-window CAGR). Returns None if any year swings through ≤ -100%
@@ -123,6 +131,45 @@ def _realized_window_cagr(earnings_cache: dict | None, window_from, window_to, m
     return cagr, "comparable"
 
 
+def _realized_fiscal_levels(earnings_cache: dict | None) -> dict:
+    """Aggregate completed Q1-Q4 fiscal years into realized revenue/EPS levels."""
+    grouped = defaultdict(dict)
+    for row in (earnings_cache or {}).get("quarterly_pnl") or []:
+        if not isinstance(row, dict):
+            continue
+        year = _year(row.get("fiscalYear")) or _year(row.get("date"))
+        period = str(row.get("period") or "").upper()
+        if year is None or period not in {"Q1", "Q2", "Q3", "Q4"}:
+            continue
+        grouped[year][period] = row
+    realized = {}
+    for year, quarters in grouped.items():
+        if set(quarters) != {"Q1", "Q2", "Q3", "Q4"}:
+            continue
+        revenue = [_num(quarters[q].get("revenue")) for q in ("Q1", "Q2", "Q3", "Q4")]
+        eps = [_num(quarters[q].get("epsDiluted")) for q in ("Q1", "Q2", "Q3", "Q4")]
+        realized[year] = {
+            "revenue_level": sum(revenue) if all(v is not None for v in revenue) else None,
+            "eps_level": sum(eps) if all(v is not None for v in eps) else None,
+        }
+    return realized
+
+
+def _realized_fiscal_level(earnings_cache, target_date, metric, snapshot_generated_at):
+    target = _date(target_date)
+    generated = _date(snapshot_generated_at)
+    if target is None:
+        return None, "actual_basis_unavailable"
+    # A forecast created on/after fiscal year-end is not an out-of-sample forecast.
+    if generated is None or generated >= target:
+        return None, "not_point_in_time_forecast"
+    levels = _realized_fiscal_levels(earnings_cache)
+    if target.year not in levels:
+        return None, "actual_not_comparable_yet"
+    value = levels[target.year].get(metric)
+    return (value, "comparable") if value is not None else (None, "actual_basis_unavailable")
+
+
 def _forecast_points(snapshot: dict) -> list[dict]:
     points = []
     consensus = snapshot.get("consensus_lane") or {}
@@ -146,7 +193,7 @@ def _forecast_points(snapshot: dict) -> list[dict]:
         })
     revision = snapshot.get("estimate_revision_snapshot") or {}
     latest = revision.get("latest_year") or {}
-    for metric, actual_metric in (("revenue", "revenue_growth"), ("eps", "eps_growth")):
+    for metric, actual_metric in (("revenue", "revenue_level"), ("eps", "eps_level")):
         avg = latest.get(f"{metric}_avg")
         if avg is not None:
             points.append({
@@ -166,9 +213,15 @@ def evaluate_snapshot(snapshot: dict, earnings_cache: dict | None = None) -> dic
     for point in _forecast_points(snapshot):
         actual_value = direction_hit = ape = None
         actual_basis = None
-        if point["forecast_basis"] != "estimate_window_cagr":
-            # future-level snapshots have no realized same-basis actual to score against.
-            status = "actual_not_comparable_yet"
+        if point["forecast_basis"] == "future_level_snapshot":
+            actual_value, status = _realized_fiscal_level(
+                earnings_cache, point.get("window_to"), point["metric"], snapshot.get("generated_at"),
+            )
+            if status == "comparable":
+                actual_basis = "quarterly_pnl_q1_q4_fiscal_sum"
+                ape = _abs_pct_error(point["forecast_value"], actual_value)
+                # Direction on two positive level values is meaningless; score error only.
+                direction_hit = None
         else:
             actual_value, status = _realized_window_cagr(
                 earnings_cache, point.get("window_from"), point.get("window_to"), point["metric"],
@@ -183,6 +236,8 @@ def evaluate_snapshot(snapshot: dict, earnings_cache: dict | None = None) -> dic
                 actual_value = None
         rows.append({
             **point,
+            "ticker": ticker,
+            "snapshot_generated_at": snapshot.get("generated_at"),
             "actual_value": actual_value,
             "actual_basis": actual_basis,
             "actual_as_of": as_of,
@@ -245,21 +300,50 @@ def _latest_snapshot_per_ticker(snapshot_dir: str) -> list[dict]:
     return [snapshot for _, snapshot in sorted(latest.values(), key=lambda item: item[0])]
 
 
+def _dedupe_forecast_rows(rows: list[dict]) -> list[dict]:
+    """Keep the earliest archived forecast for each ticker/target/basis.
+
+    Re-runs are correlated observations, and keeping only the latest run can erase the
+    forecast immediately before it becomes measurable. Earliest-vintage selection is
+    conservative and preserves a genuinely point-in-time out-of-sample forecast.
+    """
+    kept = {}
+    for row in rows:
+        key = (
+            row.get("ticker"), row.get("lane"), row.get("metric"), row.get("forecast_basis"),
+            row.get("window_from"), row.get("window_to"),
+        )
+        stamp = row.get("snapshot_generated_at") or "9999"
+        if key not in kept or stamp < kept[key][0]:
+            kept[key] = (stamp, row)
+    return [item[1] for item in sorted(kept.values(), key=lambda item: item[0])]
+
+
 def run_calibration(snapshot_dir: str = SNAPSHOT_DIR, earnings_cache_dir: str = EARNINGS_CACHE_DIR,
                     min_n: int = MIN_CALIBRATION_N) -> dict:
     evaluations = []
     all_rows = []
-    snapshots = _latest_snapshot_per_ticker(snapshot_dir)
+    earnings_by_ticker = {}
+    snapshots = []
+    for path in _snapshot_files(snapshot_dir):
+        snapshot = _read_json(path)
+        if isinstance(snapshot, dict) and snapshot.get("ticker"):
+            snapshots.append(snapshot)
     for snapshot in snapshots:
-        cache = _earnings_cache_for(snapshot.get("ticker") or "", earnings_cache_dir)
+        ticker = (snapshot.get("ticker") or "").upper()
+        if ticker not in earnings_by_ticker:
+            earnings_by_ticker[ticker] = _earnings_cache_for(ticker, earnings_cache_dir)
+        cache = earnings_by_ticker[ticker]
         evaluation = evaluate_snapshot(snapshot, cache)
         evaluations.append(evaluation)
         all_rows.extend(evaluation["rows"])
+    deduped_rows = _dedupe_forecast_rows(all_rows)
     return {
-        "engine": "forward_expectations_calibration.py v2 (same-basis realized window + dedup)",
+        "engine": "forward_expectations_calibration.py v3 (realized FY levels + earliest-vintage dedup)",
         "snapshot_count": len(evaluations),
-        "deduped_from_files": len(_snapshot_files(snapshot_dir)),
-        "summary": summarize(all_rows, min_n),
+        "forecast_point_count": len(deduped_rows),
+        "deduped_from_rows": len(all_rows),
+        "summary": summarize(deduped_rows, min_n),
         "evaluations": evaluations,
     }
 

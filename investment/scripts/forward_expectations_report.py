@@ -222,19 +222,25 @@ def _future_price_lines(snapshot: dict):
         return lines
     lines.append(_bullet("Status", price_range.get("status") or "unavailable"))
     lines.append(_bullet("Method", price_range.get("method") or "N/A"))
-    lines.append(_bullet("Horizon", price_range.get("horizon_date") or "N/A"))
+    horizon = price_range.get("horizon_date") or "N/A"
+    if price_range.get("horizon_years") is not None:
+        horizon = f"{horizon} ({price_range.get('horizon_years'):.2f} years; terminal, not 12-month)"
+    lines.append(_bullet("Horizon", horizon))
     if price_range.get("available") and price_range.get("cases"):
         lines.append("")
-        lines.append("| Case | Target Price | Upside | Metric | Multiple |")
-        lines.append("|---|---:|---:|---|---:|")
+        lines.append("| Case | Target Price | Cumulative Upside | Annualized Return | Metric | Multiple |")
+        lines.append("|---|---:|---:|---:|---|---:|")
         for key in ("bear", "base", "bull"):
             case = (price_range.get("cases") or {}).get(key) or {}
             target = case.get("target_price")
             upside = case.get("upside_pct")
+            annualized = case.get("annualized_pct")
             lines.append(
-                f"| {key} | ${target:.2f} | {upside:+.1f}% | {case.get('metric') or ''} {_fmt_mult(case.get('metric_value'))} | {_fmt_mult(case.get('multiple'))} |"
+                f"| {key} | ${target:.2f} | {upside:+.1f}% | {annualized:+.1f}% | {case.get('metric') or ''} {_fmt_mult(case.get('metric_value'))} | {_fmt_mult(case.get('multiple'))} |"
+                if target is not None and upside is not None and annualized is not None
+                else f"| {key} | ${target:.2f} | {upside:+.1f}% | N/A | {case.get('metric') or ''} {_fmt_mult(case.get('metric_value'))} | {_fmt_mult(case.get('multiple'))} |"
                 if target is not None and upside is not None
-                else f"| {key} | N/A | N/A | {case.get('metric') or ''} | N/A |"
+                else f"| {key} | N/A | N/A | N/A | {case.get('metric') or ''} | N/A |"
             )
         r = price_range.get("range") or {}
         lines.append(_bullet("Range", f"${r.get('low')} / ${r.get('base')} / ${r.get('high')}"))

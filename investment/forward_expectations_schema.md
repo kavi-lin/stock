@@ -313,6 +313,11 @@ Rules:
 }
 ```
 
+`base_rate_lane.peer_rev_cagr_*` is populated only when the deterministic cohort gate
+finds at least three comparable businesses. A broad raw provider peer list may be retained
+under `raw_peer_distribution` for disclosure, but remains unavailable to numeric gap
+comparisons and cannot serve as the anti-fantasy base-rate anchor.
+
 ## Immutable Forecast Ledger
 
 Every run receives a UTC microsecond `run_id` and writes:
@@ -488,7 +493,7 @@ Top-level snapshot field:
 
 ```json
 "future_price_range": {
-  "engine": "forward_expectations_price_range.py v1.0",
+  "engine": "forward_expectations_price_range.py v1.3",
   "ticker": "ARM",
   "available": true,
   "status": "available",
@@ -499,13 +504,15 @@ Top-level snapshot field:
   "horizon_basis": "terminal_margin_normalized",
   "horizon_years": 4.6,
   "horizon_coverage": 11,
+  "horizon_interpretation": "multi_year_terminal_value_not_12m_price_target",
+  "horizon_coverage_quality": "thin",
   "reporting_to_trading_fx": 1.0,
   "method": "eps_x_pe",
   "range": {"low": 60.0, "base": 100.0, "high": 150.0},
   "cases": {
-    "bear": {"target_price": 60.0, "upside_pct": -40.0, "metric": "eps_consensus", "metric_value": 4.0, "multiple": 15.0},
-    "base": {"target_price": 100.0, "upside_pct": 0.0, "metric": "eps_consensus", "metric_value": 5.0, "multiple": 20.0},
-    "bull": {"target_price": 150.0, "upside_pct": 50.0, "metric": "eps_consensus", "metric_value": 6.0, "multiple": 25.0}
+    "bear": {"target_price": 60.0, "upside_pct": -40.0, "annualized_pct": -10.5, "metric": "eps_consensus", "metric_value": 4.0, "multiple": 15.0},
+    "base": {"target_price": 100.0, "upside_pct": 0.0, "annualized_pct": 0.0, "metric": "eps_consensus", "metric_value": 5.0, "multiple": 20.0},
+    "bull": {"target_price": 150.0, "upside_pct": 50.0, "annualized_pct": 9.2, "metric": "eps_consensus", "metric_value": 6.0, "multiple": 25.0}
   },
   "trajectory": [
     {"date": "2028-03-31", "years_out": 2.6, "coverage": 30, "thin_coverage": false, "consensus_eps": 4.0,
@@ -542,7 +549,10 @@ multiple explodes the target (tautology trap). Each row carries `years_out`, ana
 Past/already-reported fiscal years (`years_out ≤ 0`) are excluded. The headline
 `horizon_date` remains the terminal (farthest) row — that is where growth has cooled enough
 for the mature multiple + margin normalization to apply (`horizon_basis:
-terminal_margin_normalized`).
+terminal_margin_normalized`). It is explicitly labelled a multi-year terminal value, not a
+12-month target. Headline cases include both cumulative `upside_pct` and
+`annualized_pct`; terminal coverage below 20 analysts is flagged as thin and a
+price-independent forecast is downgraded to `low_confidence_terminal_range`.
 
 Supported mapping order:
 
@@ -648,13 +658,16 @@ python3 investment/scripts/forward_expectations_success_criteria.py --snapshot-f
 snapshots and later earnings-analyst caches, then emits forecast-vs-actual rows where
 comparison is valid.
 
-Initial supported comparisons:
+Supported comparisons:
 
-- `consensus.revenue_cagr` vs latest actual `revenue_yoy`;
-- `consensus.eps_cagr` vs latest actual `earnings_yoy`.
+- `consensus.revenue_cagr` vs realized CAGR over the same fiscal-year window;
+- `consensus.eps_cagr` vs realized net-income CAGR proxy over the same fiscal-year window;
+- point-in-time `consensus_revision` revenue/EPS levels vs completed Q1-Q4 fiscal-year sums.
 
-Future-level snapshots such as `consensus_revision.revenue_avg` are intentionally
-marked `actual_not_comparable_yet` until matching actual fiscal-year levels exist.
+Future-level snapshots remain `actual_not_comparable_yet` until matching actual fiscal-year
+levels exist. A snapshot generated on or after the target fiscal year-end is rejected as
+`not_point_in_time_forecast`. Re-run duplicates are collapsed to the earliest vintage for
+each ticker/target/basis so later refreshes cannot erase or multiply the original forecast.
 The scaffold reports:
 
 - absolute percent error;

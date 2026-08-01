@@ -12,6 +12,8 @@ import json
 import math
 import sys
 
+from forward_expectations_financial_bridge import future_annual_estimates
+
 
 def _num(value):
     return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
@@ -30,10 +32,7 @@ def _spread_pct(low, high, avg):
 
 
 def _estimate_rows(earnings_cache: dict) -> list[dict]:
-    rows = earnings_cache.get("annual_estimates")
-    if not isinstance(rows, list):
-        return []
-    return sorted([row for row in rows if row.get("date")], key=lambda row: row["date"])
+    return future_annual_estimates(earnings_cache)
 
 
 def estimate_snapshot(earnings_cache: dict) -> dict:

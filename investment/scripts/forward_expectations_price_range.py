@@ -12,12 +12,10 @@ import math
 import sys
 from datetime import date
 
-ENGINE_VERSION = "forward_expectations_price_range.py v1.2 (currency-normalized EPS + sanity gate)"
+ENGINE_VERSION = "forward_expectations_price_range.py v1.3 (explicit terminal horizon + annualized return)"
 DEFAULT_MULTIPLE_BAND = (0.85, 1.0, 1.15)
-# V4.40.0 — headline horizon policy: prefer the nearest fiscal year that is at least
-# ~18 months out AND carries adequate analyst coverage, instead of the farthest (thin,
-# noisy) estimate year. Far years remain in the trajectory, tagged thin_coverage.
-MIN_HORIZON_MONTHS = 18
+# Terminal coverage is a confidence gate, not a reason to silently substitute a nearer
+# fiscal year: compression and margin normalization are terminal-horizon assumptions.
 MIN_ANALYSTS = 20
 
 # V4.41.0 — currency normalization. FMP statements/estimates for a foreign-domiciled ADR
@@ -403,6 +401,9 @@ def build_future_price_range(
     # by re-valuing each near FY at today's rich multiple.
     row = _latest_bridge_row(financial_bridge or {})
     horizon_basis = "terminal_margin_normalized"
+    horizon_years = (round(_years_between(as_of_date, row.get("date")), 2)
+                     if row and _years_between(as_of_date, row.get("date")) is not None else None)
+    horizon_coverage = _coverage_count(row) if row else None
     base = {
         "engine": ENGINE_VERSION,
         "ticker": ticker,
@@ -413,9 +414,14 @@ def build_future_price_range(
         "changes_live_decision": False,
         "horizon_date": row.get("date") if row else None,
         "horizon_basis": horizon_basis,
-        "horizon_years": (round(_years_between(as_of_date, row.get("date")), 2)
-                          if row and _years_between(as_of_date, row.get("date")) is not None else None),
-        "horizon_coverage": _coverage_count(row) if row else None,
+        "horizon_years": horizon_years,
+        "horizon_coverage": horizon_coverage,
+        "horizon_interpretation": "multi_year_terminal_value_not_12m_price_target",
+        "horizon_coverage_quality": (
+            "unknown" if horizon_coverage is None
+            else "adequate" if horizon_coverage >= MIN_ANALYSTS
+            else "thin"
+        ),
         "reporting_to_trading_fx": round(_pos(reporting_to_trading_fx) or 1.0, 6),
         "method": None,
         "multiple_quality": None,
@@ -487,6 +493,7 @@ def build_future_price_range(
         }
 
     is_advisory = chosen is not forecast
+    thin_terminal = horizon_coverage is None or horizon_coverage < MIN_ANALYSTS
     warnings = []
     if chosen["multiple_range"].get("method") == "current_market_multiple_band":
         warnings.append("derived_current_market_multiple_used")
@@ -499,13 +506,25 @@ def build_future_price_range(
     if currency_unit_suspect:
         warnings.append("currency_unit_suspect")
     cases = chosen["cases"]
+    for case in cases.values():
+        case["annualized_pct"] = _annualized(case.get("target_price"), current_price, horizon_years)
+    if horizon_years is not None and horizon_years > 1.25:
+        warnings.append("multi_year_terminal_range_not_12m_target")
+    if horizon_coverage is None:
+        warnings.append("terminal_analyst_coverage_unknown")
+    elif horizon_coverage < MIN_ANALYSTS:
+        warnings.append("thin_terminal_analyst_coverage")
     trajectory = build_trajectory(
         financial_bridge, current_price, cases, row.get("date") if row else None, as_of_date, fx,
     )
     return {
         **base,
         "available": True,
-        "status": "advisory_band_only" if is_advisory else "available",
+        "status": (
+            "advisory_band_only" if is_advisory
+            else "low_confidence_terminal_range" if thin_terminal
+            else "available"
+        ),
         "method": chosen["method"],
         "multiple_quality": chosen["multiple_quality"],
         "trajectory": trajectory,

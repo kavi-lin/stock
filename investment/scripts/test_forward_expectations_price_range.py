@@ -35,6 +35,7 @@ BRIDGE = {
             "revenue": {"point": 1200, "low": 1000, "high": 1400},
             "eps_consensus": {"point": 5.0, "low": 4.0, "high": 6.0},
             "free_cash_flow": {"point": 180, "low": 140, "high": 220},
+            "coverage": {"num_analysts_revenue": 25, "num_analysts_eps": 25},
         },
     ],
 }
@@ -92,6 +93,13 @@ check("anchor.multiple_method", fcast["multiple_range"]["method"], "historical_m
 check("anchor.base = fwd_eps5 * p50 = 5*18 = 90 (NOT current 100)", fcast["cases"]["base"]["target_price"], 90.0)
 check("anchor.no derived warning", "derived_current_market_multiple_used" in fcast["warnings"], False)
 
+print("Fixture F2 (thin terminal coverage downgrades forecast status):")
+thin_bridge = {**BRIDGE, "rows": [{**BRIDGE["rows"][-1],
+                                    "coverage": {"num_analysts_revenue": 8, "num_analysts_eps": 5}}]}
+thin_fcast = pr.build_future_price_range("TEST", 100, thin_bridge, {}, {}, ANCHOR)
+check("thin.status low confidence", thin_fcast["status"], "low_confidence_terminal_range")
+check("thin.warning", "thin_terminal_analyst_coverage" in thin_fcast["warnings"], True)
+
 print("Fixture G (unusable anchor -> honest advisory band, not silent forecast):")
 BAD_ANCHOR = {"by_metric": {"pe": {"usable": False, "reason": "dispersion_too_high"}},
               "warnings": ["no_usable_historical_multiple_regime"]}
@@ -126,6 +134,9 @@ gt = pr.build_future_price_range(
 traj = gt["trajectory"]
 check("traj 2 forward rows", len(traj), 2)
 check("traj headline still terminal (farthest)", gt["horizon_date"], "2028-12-31")
+check("headline explicitly not 12m", gt["horizon_interpretation"], "multi_year_terminal_value_not_12m_price_target")
+check("headline base annualized", gt["cases"]["base"]["annualized_pct"], 41.42, tol=0.1)
+check("headline multi-year warning", "multi_year_terminal_range_not_12m_target" in gt["warnings"], True)
 check("traj terminal flagged", traj[-1]["is_terminal"], True)
 check("traj terminal base = 5*20 = 100", traj[-1]["targets"]["base"], 100.0)
 # near FY ~1yr: 50*(100/50)^(1/2) = 70.7 (glide to terminal, not re-valued at rich multiple)

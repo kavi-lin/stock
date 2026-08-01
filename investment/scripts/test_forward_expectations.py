@@ -102,6 +102,30 @@ check("market_b.available", market_b["available"], False)
 matrix_b = fe.assemble_expectations_matrix(cons_b, market_b, fe.base_rate_lane("TESTB", EC_B, no_fetch=True))
 check("matrix_b.verdict", matrix_b["verdict"], "comparison_unavailable")
 
+print("Fixture B1 (unqualified raw peers stay advisory-only):")
+raw_only = fe._select_base_rate_distribution(
+    {"available": False, "member_count": 1}, [0.05, 0.10, 0.20], ["A", "B", "C"],
+)
+check("raw_only unavailable", raw_only["available"], False)
+check("raw_only no numeric median", raw_only.get("peer_rev_cagr_median"), None)
+check("raw_only distribution disclosed", raw_only["raw_peer_distribution"]["median"], 0.10)
+check("raw_only basis", raw_only["basis"], "raw_peers_advisory_only")
+
+# Point-in-time guard: already-reported FY rows must not inflate the forward CAGR.
+print("Fixture B2 (exclude elapsed estimate rows):")
+ec_b2 = {
+    "as_of_date": "2026-06-30",
+    "annual_estimates": [
+        {"date": "2025-12-31", "revenue_avg": 100, "eps_avg": 1},
+        {"date": "2027-12-31", "revenue_avg": 200, "eps_avg": 2},
+        {"date": "2028-12-31", "revenue_avg": 220, "eps_avg": 2.2},
+    ],
+}
+cons_b2 = fe.consensus_lane(ec_b2)
+check("consensus_b2 excludes one elapsed row", cons_b2["excluded_nonforward_rows"], 1)
+check("consensus_b2 window starts in future", cons_b2["window_from"], "2027-12-31")
+check("consensus_b2 revenue uses future curve only", cons_b2["revenue_cagr"], 0.10, tol=0.001)
+
 # ── Fixture C: empty estimates → consensus lane degrades cleanly ──
 print("Fixture C (no estimates):")
 cons_c = fe.consensus_lane({"annual_estimates": []})

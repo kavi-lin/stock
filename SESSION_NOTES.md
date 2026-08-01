@@ -1,7 +1,13 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.77.0)
+> **Last Updated**: 2026-08-02 (v4.78.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.78.0) — Forward Expectations 前瞻預測修正
+- **範圍**：正式 `forward_expectations` shadow engine；未混入舊 12m EPS×P/E forecaster，也未改 live DCF/FV/decision。
+- **修正**：三個 annual-estimate 消費者統一 future-only cutoff；終端區間加 horizon/年化/coverage 降級；calibration 能在完整 FY 實績後核對 level 並保留最早 vintage；不合格 raw peers 不再成為 numeric base-rate。
+- **MU 影響**：排除 1 筆 elapsed FY 後，consensus revenue/EPS CAGR `66.72%/100.90%` → `41.34%/40.40%`；2030 終端 coverage 8，明確 thin。no-fetch price band 是 current-price-derived advisory，不是 forecast。
+- **驗收**：23 支 Forward Expectations regression scripts rc=0；核心 55/33/41/61/16 asserts；682 snapshots → 99 dedup forecast points，0 comparable（尚未真正成熟，誠實維持 insufficient sample）；SYNC OK 4.78.0。
 
 ## 🟢 Session Note (v4.77.0) — 估值引擎 review 修正（degraded path 治理）
 - **起因**：4.76.0 的外部 Claude review 因 CLI 未登入中斷，改由本 session 直接完成 review（範圍 A = commit `4e54e79`；B = 未提交的 DCF-primary + range-only peer fallback），共 12 項發現；使用者指示「你來負責修正」。
