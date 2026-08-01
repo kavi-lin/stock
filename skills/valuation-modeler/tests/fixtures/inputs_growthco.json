@@ -1,0 +1,26 @@
+{
+  "ticker": "GROWTHCO",
+  "profile": {"companyName": "GrowthCo Inc", "beta": 1.5, "marketCap": 3000000000000, "price": 120.0},
+  "quote": {"price": 120.0, "marketCap": 3000000000000},
+  "income": [
+    {"date": "2025-12-31", "revenue": 100000000000, "ebitda": 40000000000, "incomeTaxExpense": 4500000000, "incomeBeforeTax": 30000000000, "weightedAverageShsOutDil": 2500000000, "epsDiluted": 10.2},
+    {"date": "2024-12-31", "revenue": 80000000000, "ebitda": 32000000000, "incomeTaxExpense": 3600000000, "incomeBeforeTax": 24000000000, "weightedAverageShsOutDil": 2500000000, "epsDiluted": 8.16},
+    {"date": "2023-12-31", "revenue": 64000000000, "ebitda": 25600000000, "incomeTaxExpense": 2880000000, "incomeBeforeTax": 19200000000, "weightedAverageShsOutDil": 2500000000, "epsDiluted": 6.53},
+    {"date": "2022-12-31", "revenue": 51200000000, "ebitda": 20480000000, "incomeTaxExpense": 2304000000, "incomeBeforeTax": 15360000000, "weightedAverageShsOutDil": 2500000000, "epsDiluted": 5.22},
+    {"date": "2021-12-31", "revenue": 41000000000, "ebitda": 16400000000, "incomeTaxExpense": 1845000000, "incomeBeforeTax": 12300000000, "weightedAverageShsOutDil": 2500000000, "epsDiluted": 4.18}
+  ],
+  "cashflow": [
+    {"date": "2025-12-31", "depreciationAndAmortization": 4000000000, "capitalExpenditure": -5000000000, "changeInWorkingCapital": -2000000000},
+    {"date": "2024-12-31", "depreciationAndAmortization": 3200000000, "capitalExpenditure": -4000000000, "changeInWorkingCapital": -1600000000},
+    {"date": "2023-12-31", "depreciationAndAmortization": 2560000000, "capitalExpenditure": -3200000000, "changeInWorkingCapital": -1280000000}
+  ],
+  "balance": [
+    {"date": "2025-12-31", "totalDebt": 10000000000, "cashAndShortTermInvestments": 20000000000}
+  ],
+  "estimates": [
+    {"date": "2026-12-31", "revenueAvg": 130000000000, "epsAvg": 13.0},
+    {"date": "2027-12-31", "revenueAvg": 156000000000, "epsAvg": 15.6}
+  ],
+  "risk_free": 0.04,
+  "risk_free_src": "fred:test"
+}
