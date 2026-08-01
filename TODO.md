@@ -9,7 +9,7 @@
 - [x] annual estimates 依 point-in-time cutoff 排除 elapsed FY，consensus/revision/financial bridge 同源。
 - [x] terminal range 與 12m target 語意分離，輸出年化報酬；coverage <20 降低信心。
 - [x] calibration 支援完整 Q1–Q4 FY level、out-of-sample 時點 gate、earliest-vintage dedup。
-- [x] broad raw peers 只揭露，不進 numeric base-rate；需 ≥3 business-cohort members。
+- [x] broad raw peers 與 metric scope 不符的 cohort 只揭露；numeric base-rate 需 ≥3 members 且明確核准 `growth_base_rate`。
 - [ ] **校準觀察點**：累積 ≥15 個真正成熟 comparable points 後，才評估 growth/margin/multiple 規則；未達門檻不得升格 live。
 
 ## 📋 Backlog — Protocol Lean 化：「保留 5 個 lane score，不保留 5 次固定 LLM」（2026-08-02 共識定案）

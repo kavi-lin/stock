@@ -110,6 +110,27 @@ check("raw_only unavailable", raw_only["available"], False)
 check("raw_only no numeric median", raw_only.get("peer_rev_cagr_median"), None)
 check("raw_only distribution disclosed", raw_only["raw_peer_distribution"]["median"], 0.10)
 check("raw_only basis", raw_only["basis"], "raw_peers_advisory_only")
+curated = fe._curated_business_cohort(
+    {"name": "memory_storage", "comparison_scope": "range_only", "limitations": ["cycle"]},
+    [{"ticker": "SNDK", "revenue_cagr": 0.10}, {"ticker": "WDC", "revenue_cagr": 0.20},
+     {"ticker": "STX", "revenue_cagr": 0.30}],
+)
+check("range-only cohort not auto-promoted to growth", curated["available"], False)
+check("range-only scope mismatch explicit", curated["status"], "scope_not_approved_for_growth")
+check("curated business median", curated["distribution"]["median"], 0.20)
+check("curated membership fixed before values", curated["rationale"]["anti_cherry_pick"],
+      "Candidate membership is loaded before any revenue CAGR is fetched.")
+curated_disclosure = fe._select_base_rate_distribution(
+    curated, [0.10, 0.20, 0.30], ["SNDK", "WDC", "STX"],
+)
+check("range-only selection unavailable", curated_disclosure["available"], False)
+check("range-only selection basis", curated_disclosure["basis"], "curated_cohort_scope_mismatch")
+curated_growth = fe._curated_business_cohort(
+    {"name": "memory_storage", "comparison_scope": "growth_base_rate"},
+    [{"ticker": "SNDK", "revenue_cagr": 0.10}, {"ticker": "WDC", "revenue_cagr": 0.20},
+     {"ticker": "STX", "revenue_cagr": 0.30}],
+)
+check("growth-approved cohort can become numeric", curated_growth["available"], True)
 
 # Point-in-time guard: already-reported FY rows must not inflate the forward CAGR.
 print("Fixture B2 (exclude elapsed estimate rows):")

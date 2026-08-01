@@ -272,16 +272,23 @@ def _select_base_rate_distribution(cohort: dict, cagrs: list, used: list) -> dic
                      f"記錄選取理由防 cherry-pick）營收 CAGR 分布"),
         }
     if len(cagrs) >= 3:
+        scope_mismatch = cohort.get("status") == "scope_not_approved_for_growth"
         return {
-            "available": False, "basis": "raw_peers_advisory_only",
+            "available": False,
+            "basis": "curated_cohort_scope_mismatch" if scope_mismatch else "raw_peers_advisory_only",
             "raw_peer_distribution": {
                 "median": round(_pct(cagrs, 0.50), 4),
                 "p25": round(_pct(cagrs, 0.25), 4),
                 "p75": round(_pct(cagrs, 0.75), 4),
                 "peers": used,
             },
-            "note": (f"cohort 不足（{cohort.get('member_count', 0)} 名）；{len(used)} 名 raw peers "
-                     "僅揭露、不進 numeric base-rate，避免 broad-sector peers 冒充 business comparables"),
+            "note": (
+                f"curated cohort scope={cohort.get('rationale', {}).get('source_scope')} 未核准 revenue-growth base-rate；"
+                f"{len(used)} 名結果僅揭露、不進 numeric comparison"
+                if scope_mismatch else
+                f"cohort 不足（{cohort.get('member_count', 0)} 名）；{len(used)} 名 raw peers "
+                "僅揭露、不進 numeric base-rate，避免 broad-sector peers 冒充 business comparables"
+            ),
         }
     return {
         "available": False, "basis": None, "raw_peer_distribution": None,
@@ -289,11 +296,59 @@ def _select_base_rate_distribution(cohort: dict, cagrs: list, used: list) -> dic
     }
 
 
+def _curated_business_cohort(config: dict | None, candidates: list[dict]) -> dict | None:
+    """Build a growth base-rate cohort from an already human-approved peer universe."""
+    if not isinstance(config, dict):
+        return None
+    members = [
+        {"ticker": c["ticker"], "revenue_cagr": c["revenue_cagr"],
+         "match_reasons": ["human_approved_business_similarity"], "dim_matches": None}
+        for c in candidates if c.get("ticker") and _num(c.get("revenue_cagr")) is not None
+    ]
+    values = [m["revenue_cagr"] for m in members]
+    growth_scope_allowed = config.get("comparison_scope") in {"growth_base_rate", "multi_metric"}
+    available = len(members) >= 3 and growth_scope_allowed
+    return {
+        "available": available,
+        "status": (
+            "cohort_available" if available
+            else "scope_not_approved_for_growth" if len(members) >= 3
+            else "insufficient_cohort"
+        ),
+        "member_count": len(members),
+        "members": members,
+        "distribution": {
+            "median": round(_pct(values, 0.50), 4) if len(members) >= 3 else None,
+            "p25": round(_pct(values, 0.25), 4) if len(members) >= 3 else None,
+            "p75": round(_pct(values, 0.75), 4) if len(members) >= 3 else None,
+        },
+        "rationale": {
+            "criteria": ["human_approved_business_similarity"],
+            "cohort": config.get("name"),
+            "comparison_scope": "growth_base_rate_shadow" if growth_scope_allowed else "disclosure_only",
+            "source_scope": config.get("comparison_scope"),
+            "limitations": config.get("limitations") or [],
+            "anti_cherry_pick": "Candidate membership is loaded before any revenue CAGR is fetched.",
+        },
+    }
+
+
+def _load_curated_peer_config(ticker: str):
+    scripts_dir = os.path.join(BASE_DIR, "skills", "valuation-modeler", "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    try:
+        from peer_cohorts import load_cohort
+        return load_cohort(ticker)[0]
+    except Exception:
+        return None
+
+
 def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
     out = {"available": False, "peer_rev_cagr_median": None, "peer_rev_cagr_p25": None,
            "peer_rev_cagr_p75": None, "peers_used": [], "self_revenue_yoy": None,
            "growth_acceleration": None, "cohort": None, "basis": None,
-           "raw_peer_distribution": None, "note": ""}
+           "peer_universe_source": None, "raw_peer_distribution": None, "note": ""}
     yoy = (earnings_cache.get("derived") or {}).get("yoy_growth") or {}
     out["self_revenue_yoy"] = _num(yoy.get("revenue_yoy"))
     out["growth_acceleration"] = yoy.get("growth_acceleration")
@@ -306,7 +361,16 @@ def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
     except Exception as e:
         out["note"] = f"peer/fmp 模組 import 失敗: {e}"
         return out
-    peers = (get_peers(ticker) or [])[:MAX_PEERS]
+    curated_config = _load_curated_peer_config(ticker)
+    curated_symbols = [
+        str(item.get("ticker") or "").upper()
+        for item in (curated_config or {}).get("candidates") or []
+        if item.get("ticker")
+    ]
+    peers = curated_symbols or (get_peers(ticker) or [])[:MAX_PEERS]
+    out["peer_universe_source"] = (
+        "human_approved_curated_cohort" if curated_symbols else "provider_peer_endpoint"
+    )
     cagrs, used, candidates = [], [], []
     for p in peers:
         rows = fmp_pool.get("income-statement", {"symbol": p, "limit": 6},
@@ -338,8 +402,11 @@ def base_rate_lane(ticker: str, earnings_cache: dict, no_fetch: bool) -> dict:
         "market_cap": subj_prof.get("marketCap") or subj_prof.get("mktCap"),
         "rev_yoy": out["self_revenue_yoy"], "gross_margin": _subject_gross_margin(earnings_cache),
     }
-    from forward_expectations_cohort import build_cohort
-    cohort = build_cohort(subject, candidates)
+    if curated_symbols:
+        cohort = _curated_business_cohort(curated_config, candidates)
+    else:
+        from forward_expectations_cohort import build_cohort
+        cohort = build_cohort(subject, candidates)
     out["cohort"] = cohort
 
     out.update(_select_base_rate_distribution(cohort, cagrs, used))

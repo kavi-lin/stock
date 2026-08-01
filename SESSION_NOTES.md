@@ -5,8 +5,8 @@
 
 ## 🟢 Session Note (v4.78.0) — Forward Expectations 前瞻預測修正
 - **範圍**：正式 `forward_expectations` shadow engine；未混入舊 12m EPS×P/E forecaster，也未改 live DCF/FV/decision。
-- **修正**：三個 annual-estimate 消費者統一 future-only cutoff；終端區間加 horizon/年化/coverage 降級；calibration 能在完整 FY 實績後核對 level 並保留最早 vintage；不合格 raw peers 不再成為 numeric base-rate。
-- **MU 影響**：排除 1 筆 elapsed FY 後，consensus revenue/EPS CAGR `66.72%/100.90%` → `41.34%/40.40%`；2030 終端 coverage 8，明確 thin。no-fetch price band 是 current-price-derived advisory，不是 forecast。
+- **修正**：三個 annual-estimate 消費者統一 future-only cutoff；終端區間加 horizon/年化/coverage 降級；calibration 能在完整 FY 實績後核對 level 並保留最早 vintage；base-rate 需 metric-specific scope，MU 的 P/E `range_only` cohort 不自動擴成 growth anchor。
+- **MU 影響**：排除 1 筆 elapsed FY 後，consensus revenue/EPS CAGR `66.72%/100.90%` → `41.34%/40.40%`；2030 終端 coverage 8，明確 thin。SNDK/WDC/STX 多年 revenue CAGR 中位 `-9%` 因 cohort 僅核准 P/E range，保留揭露但不進 numeric gap。
 - **驗收**：23 支 Forward Expectations regression scripts rc=0；核心 55/33/41/61/16 asserts；682 snapshots → 99 dedup forecast points，0 comparable（尚未真正成熟，誠實維持 insufficient sample）；SYNC OK 4.78.0。
 
 ## 🟢 Session Note (v4.77.0) — 估值引擎 review 修正（degraded path 治理）
