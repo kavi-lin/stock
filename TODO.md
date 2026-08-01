@@ -1,8 +1,16 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-02 (v4.78.0)
+> **Last Updated**: 2026-08-02 (v4.78.1)
 
 ---
+
+## ✅ Done (v4.78.1) — Calibration index
+
+- [x] calibration 改讀 6 欄位 derived index（685 快照 362 ms → 29 ms，12.5x），輸出與 `--no-index` 全量掃描逐字相同。
+- [x] 索引綁 size+mtime 失效、schema/欄位集變更自動重建；Fixture H 斷言等價性與失效行為。
+- **刻意不做**：壓縮歸檔（tar.gz 只省空間不省時間，且解不了線性成長）；不動原始 ledger。
+- **後續**：若開始評分 `base_rate_lane` / `market_implied_lane` / `independent_lane` 等目前未計分的 lane，記得擴 `INDEX_FIELDS` 並 bump `INDEX_SCHEMA`。
+- **既有死碼**：`_latest_snapshot_per_ticker`（v2 遺留，只剩測試呼叫）待清。
 
 ## ✅ Done (v4.78.0) — Forward Expectations 前瞻預測可信度修正
 

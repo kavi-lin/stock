@@ -337,6 +337,26 @@ snapshot stores `generated_at`, source lineage, engine version, market price, an
 available lanes. It also stores the point-in-time Evidence Inventory, including
 provisional and missing evidence. Forecast-vs-actual calibration remains a later phase.
 
+### Calibration index（derived cache，非帳本）
+
+`forward_expectations_calibration.py` 是唯一會掃描整個 ledger 的消費者，而它只評
+兩條 lane，實際讀取 6 個欄位：`ticker` / `generated_at` / `run_id` /
+`as_of_earnings_date` / `consensus_lane` / `estimate_revision_snapshot`。
+其餘 ~22 個欄位（`evidence_inventory`、`source_discovery`、尚未評分的
+`base_rate_lane`、`market_implied_lane`、`independent_lane`、`multiple_anchor`、
+`future_price_range` 等）是產生時的管線輸出與審計證據，佔單檔約 97% 體積，
+落盤後只由單檔入口（`--snapshot-file`）與人工稽核讀取。
+
+因此掃描走 `<snapshot_dir>_calibration_index.json`（放在 ledger **目錄旁**，不可放
+目錄內，否則會被 `*.json` glob 當成快照解析）。紀律：
+
+- 索引是**快取**，ledger 才是紀錄。快照不可重新產生（vintage 依賴當日分析師估計），
+  任何情況都不得為了索引刪除原始檔
+- 每筆條目綁 source 檔的 size+mtime，簽章不符就回頭讀原始檔；`--no-index` 可強制
+  全量掃描核對（測試 Fixture H 斷言兩者輸出逐字相同）
+- 之後若開始評分其他 lane，擴充 `INDEX_FIELDS` 並 bump `INDEX_SCHEMA`，
+  舊索引會自動重建
+
 ## Evidence Inventory Promotion
 
 `forward_expectations_evidence.py` classifies local evidence:

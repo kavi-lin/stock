@@ -19,6 +19,19 @@ SNAPSHOT_DIR = os.path.join(BASE_DIR, "investment", "invest_logs", "forward_expe
 EARNINGS_CACHE_DIR = os.path.join(BASE_DIR, "skills", "earnings-analyst", "cache")
 MIN_CALIBRATION_N = 15
 
+# Calibration scores two lanes and needs nothing else from a snapshot. The other
+# ~22 keys (evidence_inventory, source_discovery, the unscored lanes …) are
+# build-time pipeline output and audit evidence — 97% of the bytes, never read
+# here. Caching this subset keeps a full-corpus scan flat as the corpus grows.
+#
+# The index is a CACHE, never a replacement: the raw snapshots stay the record
+# (they are not regenerable, and single-snapshot entry points still read them in
+# full). Widen INDEX_FIELDS — e.g. when base_rate_lane or market_implied_lane
+# start being scored — and bump INDEX_SCHEMA so stale indexes rebuild themselves.
+INDEX_SCHEMA = "fe_calibration_index.v1"
+INDEX_FIELDS = ("ticker", "generated_at", "run_id", "as_of_earnings_date",
+                "consensus_lane", "estimate_revision_snapshot")
+
 
 def _read_json(path: str):
     try:
@@ -53,6 +66,89 @@ def _direction_hit(forecast, actual):
 
 def _snapshot_files(snapshot_dir: str = SNAPSHOT_DIR) -> list[str]:
     return sorted(glob.glob(os.path.join(snapshot_dir, "*.json")))
+
+
+def default_index_path(snapshot_dir: str = SNAPSHOT_DIR) -> str:
+    """Index sits beside the snapshot directory, never inside it — a file within
+    would be picked up by the *.json glob and parsed as a snapshot."""
+    root = os.path.abspath(snapshot_dir).rstrip(os.sep)
+    return root + "_calibration_index.json"
+
+
+def _index_subset(snapshot: dict) -> dict:
+    return {key: snapshot[key] for key in INDEX_FIELDS if key in snapshot}
+
+
+def _read_index(path: str) -> dict:
+    data = _read_json(path)
+    if not isinstance(data, dict) or data.get("schema") != INDEX_SCHEMA:
+        return {}
+    if list(data.get("fields") or []) != list(INDEX_FIELDS):
+        return {}  # the scored field set changed — rebuild rather than trust it
+    entries = data.get("entries")
+    return entries if isinstance(entries, dict) else {}
+
+
+def _write_index(path: str, entries: dict) -> None:
+    """Atomic replace. A cache that cannot be written must never fail a run."""
+    tmp = f"{path}.tmp"
+    try:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(tmp, "w", encoding="utf-8") as handle:
+            json.dump({"schema": INDEX_SCHEMA, "fields": list(INDEX_FIELDS),
+                       "entries": entries}, handle, ensure_ascii=False)
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
+def _file_signature(path: str) -> list | None:
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    return [int(stat.st_size), round(stat.st_mtime, 3)]
+
+
+def load_snapshots(snapshot_dir: str = SNAPSHOT_DIR, *, use_index: bool = True,
+                   index_path: str | None = None) -> list[dict]:
+    """Snapshots reduced to the fields calibration scores.
+
+    An index entry is reused only while the source file's size and mtime still
+    match; anything missing or stale falls back to reading the raw snapshot, so
+    the result is identical either way (asserted in
+    test_forward_expectations_calibration.py).
+    """
+    files = _snapshot_files(snapshot_dir)
+    if index_path is None:
+        index_path = default_index_path(snapshot_dir)
+    cached = _read_index(index_path) if use_index else {}
+    entries: dict = {}
+    snapshots: list[dict] = []
+    stale = False
+    for path in files:
+        signature = _file_signature(path)
+        if signature is None:
+            continue
+        key = os.path.basename(path)
+        hit = cached.get(key)
+        if isinstance(hit, dict) and hit.get("sig") == signature and isinstance(hit.get("snapshot"), dict):
+            subset = hit["snapshot"]
+        else:
+            raw = _read_json(path)
+            if not isinstance(raw, dict):
+                continue
+            subset = _index_subset(raw)
+            stale = True
+        entries[key] = {"sig": signature, "snapshot": subset}
+        if subset.get("ticker"):
+            snapshots.append(subset)
+    if use_index and (stale or len(entries) != len(cached)):
+        _write_index(index_path, entries)
+    return snapshots
 
 
 def _earnings_cache_for(ticker: str, earnings_cache_dir: str = EARNINGS_CACHE_DIR) -> dict | None:
@@ -320,15 +416,12 @@ def _dedupe_forecast_rows(rows: list[dict]) -> list[dict]:
 
 
 def run_calibration(snapshot_dir: str = SNAPSHOT_DIR, earnings_cache_dir: str = EARNINGS_CACHE_DIR,
-                    min_n: int = MIN_CALIBRATION_N) -> dict:
+                    min_n: int = MIN_CALIBRATION_N, *, use_index: bool = True,
+                    index_path: str | None = None) -> dict:
     evaluations = []
     all_rows = []
     earnings_by_ticker = {}
-    snapshots = []
-    for path in _snapshot_files(snapshot_dir):
-        snapshot = _read_json(path)
-        if isinstance(snapshot, dict) and snapshot.get("ticker"):
-            snapshots.append(snapshot)
+    snapshots = load_snapshots(snapshot_dir, use_index=use_index, index_path=index_path)
     for snapshot in snapshots:
         ticker = (snapshot.get("ticker") or "").upper()
         if ticker not in earnings_by_ticker:
@@ -353,9 +446,14 @@ def main():
     ap.add_argument("--snapshot-dir", default=SNAPSHOT_DIR)
     ap.add_argument("--earnings-cache-dir", default=EARNINGS_CACHE_DIR)
     ap.add_argument("--min-n", type=int, default=MIN_CALIBRATION_N)
+    ap.add_argument("--index-path", default=None,
+                    help="calibration index location (default: sibling of --snapshot-dir)")
+    ap.add_argument("--no-index", action="store_true",
+                    help="read every raw snapshot; use to verify the index agrees")
     args = ap.parse_args()
     print(json.dumps(
-        run_calibration(args.snapshot_dir, args.earnings_cache_dir, args.min_n),
+        run_calibration(args.snapshot_dir, args.earnings_cache_dir, args.min_n,
+                        use_index=not args.no_index, index_path=args.index_path),
         ensure_ascii=False,
         indent=2,
         allow_nan=False,

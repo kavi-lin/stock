@@ -1,7 +1,16 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.78.0)
+> **Last Updated**: 2026-08-02 (v4.78.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.78.1) — Calibration index（先量測再選方案）
+- **起因**：committing 全部未提交改動後盤點體積，forward_expectations ledger 磁碟 80MB / 684 檔、約 31 檔/日成長。使用者問壓縮歸檔對效能的衝擊。
+- **量測翻轉了結論**：tar.gz 壓縮 9.6x 但**只省空間不省時間**（讀取反而慢 7%，且 git 本來就 zlib 壓過，加 96MB artifacts 只讓 `.git` 從 83M 長到 92M）。真正的問題是全語料掃描隨檔數線性成長：684 檔 0.36–0.64 s → 1 年 3.2 s → 5 年 13.5 s。
+- **關鍵發現**：calibration 只評 2 條 lane、只讀 6 個欄位，這 6 欄在整個語料只有 1.81MB（**比 79MB 小 44 倍**）；97% 解析成本花在它從不讀的 evidence/provenance 與尚未評分的 lane 上。且它是**唯一**掃整個 ledger 的消費者——其餘 fe_gap / fe_price_range / success_criteria 等都是 `--snapshot-file` 單檔入口。
+- **做掉**：derived index（放 ledger 目錄**旁**，放裡面會被 `*.json` glob 當快照）；條目綁 size+mtime，不符即回讀原始檔；`--no-index` 可全量核對。685 快照 362 ms → 29 ms（12.5x），輸出與全量掃描逐字相同。
+- **紀律**：索引是快取、ledger 才是紀錄——快照不可重新產生（vintage 依賴當日分析師估計），任何情況不得為索引刪原始檔。之後要評 `base_rate_lane` 等目前未計分的 lane，須擴 `INDEX_FIELDS` 並 bump `INDEX_SCHEMA`（舊索引自動重建）。
+- **驗收**：calibration 42 asserts（新增 Fixture H）、20 支 fe regression rc=0、success_criteria 正常委派；SYNC OK 4.78.1。
+- **未動**：`_latest_snapshot_per_ticker` 是 v2 遺留死碼（只剩自己的測試在呼叫），本次不清理。
 
 ## 🟢 Session Note (v4.78.0) — Forward Expectations 前瞻預測修正
 - **範圍**：正式 `forward_expectations` shadow engine；未混入舊 12m EPS×P/E forecaster，也未改 live DCF/FV/decision。

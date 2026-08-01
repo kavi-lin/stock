@@ -163,5 +163,56 @@ kept_rows = cal._dedupe_forecast_rows(vintage_rows)
 check("vintage dedup one row", len(kept_rows), 1)
 check("vintage keeps earliest value", kept_rows[0]["forecast_value"], 100)
 
+print("Fixture H (calibration index is a cache: same answer, never authoritative):")
+with tempfile.TemporaryDirectory() as tmp:
+    snap_dir = os.path.join(tmp, "forward_expectations")
+    os.makedirs(snap_dir)
+    for run, stamp in (("R1", "2026-01-01T00:00:00+00:00"), ("R2", "2026-02-01T00:00:00+00:00")):
+        with open(os.path.join(snap_dir, f"TEST_{run}.json"), "w", encoding="utf-8") as fh:
+            # Padding stands in for the evidence/provenance bulk the index drops.
+            json.dump({**SNAPSHOT, "run_id": run, "generated_at": stamp,
+                       "evidence_inventory": {"filler": "x" * 5000}}, fh)
+
+    index_path = cal.default_index_path(snap_dir)
+    check("index sits beside the dir, not inside it",
+          os.path.dirname(index_path) == os.path.dirname(snap_dir.rstrip(os.sep)), True)
+
+    raw = cal.run_calibration(snap_dir, tmp, 3, use_index=False)
+    check("no index written when disabled", os.path.exists(index_path), False)
+
+    first = cal.run_calibration(snap_dir, tmp, 3)
+    check("index file created", os.path.exists(index_path), True)
+    second = cal.run_calibration(snap_dir, tmp, 3)
+    canon = lambda r: json.dumps(r, sort_keys=True, allow_nan=False)
+    check("indexed run equals raw scan", canon(first), canon(raw))
+    check("second indexed run is stable", canon(second), canon(raw))
+
+    # The index must only carry the scored fields — never the audit bulk.
+    with open(index_path, encoding="utf-8") as fh:
+        index = json.load(fh)
+    entry = index["entries"]["TEST_R1.json"]["snapshot"]
+    check("index keeps only scored fields", sorted(entry) == sorted(
+        k for k in cal.INDEX_FIELDS if k in entry), True)
+    check("index drops evidence bulk", "evidence_inventory" in entry, False)
+
+    # A rewritten snapshot must invalidate its entry, or calibration would score
+    # a forecast that no longer exists on disk.
+    edited = {**SNAPSHOT, "run_id": "R1", "generated_at": "2026-01-01T00:00:00+00:00"}
+    edited["consensus_lane"] = {**SNAPSHOT["consensus_lane"], "revenue_cagr": 0.99}
+    path = os.path.join(snap_dir, "TEST_R1.json")
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(edited, fh)
+    os.utime(path, (0, 0))  # force a signature change even on a fast filesystem
+    refreshed = cal.run_calibration(snap_dir, tmp, 3)
+    values = {row["forecast_value"] for ev in refreshed["evaluations"] for row in ev["rows"]}
+    check("edited snapshot invalidates its entry", 0.99 in values, True)
+
+    # An index this version cannot read is rebuilt, not trusted.
+    with open(index_path, "w", encoding="utf-8") as fh:
+        json.dump({"schema": "fe_calibration_index.v0", "fields": ["ticker"],
+                   "entries": {"TEST_R1.json": {"sig": [1, 1.0], "snapshot": {"ticker": "GHOST"}}}}, fh)
+    rebuilt = cal.run_calibration(snap_dir, tmp, 3)
+    check("stale schema ignored", canon(rebuilt), canon(refreshed))
+
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

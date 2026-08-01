@@ -79,6 +79,10 @@ skills/_shared/fmp_supp_cache/
 # Nexus build provenance logs (per-day; baseline tracked, daily new ones ignored)
 scripts/nexus/cache/build_log_*.json
 
+# Forward Expectations calibration index — derived cache of the six fields
+# calibration scores, rebuilt from the tracked raw snapshots on demand
+investment/invest_logs/forward_expectations_calibration_index.json
+
 # Keep directory structure
 !news/news_logs/.gitkeep
 !sector/sector_logs/.gitkeep

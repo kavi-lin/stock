@@ -8,6 +8,25 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.78.1] — 2026-08-02 — Calibration index（全語料掃描 12.5x）
+
+### Added
+- `forward_expectations_calibration.py` 新增 derived index：只快取它實際評分的 6 個欄位（`ticker` / `generated_at` / `run_id` / `as_of_earnings_date` / `consensus_lane` / `estimate_revision_snapshot`）。索引放 ledger 目錄**旁**（放目錄內會被 `*.json` glob 當快照解析）。
+- CLI `--no-index`（強制全量掃描核對）與 `--index-path`。
+
+### Why
+- 單份快照 97% 體積是 evidence/provenance 與尚未評分的 lane（`evidence_inventory` 佔 41%），calibration 從不讀；但它是唯一掃描整個 ledger 的消費者，成本隨語料線性成長。684 檔已需 0.36–0.64 s，依現行約 31 檔/日推算 1 年 3.2 s、5 年 13.5 s。
+- 不改用壓縮歸檔：實測 tar.gz 只快取空間（9.6x）不快取時間（反而慢 7%），且解不了線性成長。索引則把同樣 5 年規模壓到 0.31 s。
+
+### Discipline
+- 索引是**快取**，ledger 才是紀錄。快照無法重新產生（vintage 依賴當日分析師估計），任何情況不得為索引刪除原始檔；單檔入口（`--snapshot-file`）與人工稽核仍讀完整快照。
+- 每筆條目綁 source 檔 size+mtime，簽章不符即回讀原始檔；schema/欄位集變更時舊索引自動重建。
+- 之後若開始評分 `base_rate_lane` / `market_implied_lane` 等目前未計分的 lane，需擴充 `INDEX_FIELDS` 並 bump `INDEX_SCHEMA`。
+
+### Validation
+- 全語料 685 快照：indexed 輸出與 `--no-index` 全量掃描 **逐字相同**；362 ms → 29 ms（12.5x）。
+- `test_forward_expectations_calibration.py` 42 asserts（新增 Fixture H：索引等價、只存已評分欄位、改寫快照使簽章失效、schema 不符時重建）；20 支 forward-expectations regression rc=0。
+
 ## [4.78.0] — 2026-08-02 — Forward Expectations point-in-time 與終端區間治理
 
 ### Fixed
