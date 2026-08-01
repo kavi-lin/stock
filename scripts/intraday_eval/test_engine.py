@@ -6,12 +6,21 @@ Runs the deterministic evaluate() against a synthetic snapshot and asserts the
 strategy rules fire as designed. MUST pass (rc=0) after any engine change.
 
     python3 -m scripts.intraday_eval.test_engine
+    python3 scripts/intraday_eval/test_engine.py   # same result, repo convention
 """
 from __future__ import annotations
 
 import sys
 
-from . import engine
+if __package__:
+    from . import engine
+else:
+    # Run as a plain script: relative imports have no parent package, so put the
+    # repo root on the path and import absolutely. Every other test in this repo
+    # is invoked as `python3 <path>`, and failing that way looks like a red test.
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from scripts.intraday_eval import engine
 
 
 def _fixture():
