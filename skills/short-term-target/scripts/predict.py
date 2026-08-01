@@ -561,12 +561,21 @@ def check_sufficiency(horizon, ohlcv, news_age_hr, sector_age_hr, atr_pct, fresh
     if rules.get("sector_hr") and sector_age_hr is not None and sector_age_hr > rules["sector_hr"]:
         missing.append(f"sector>{rules['sector_hr']}h_old")
     if missing:
-        return {
-            "status": "insufficient_data",
-            "missing": missing,
-            "would_need": "Refresh stale sources OR wait for sufficient OHLCV history",
-            "details": details,
-        }
+        # V4.71.0 (P1-7) — sector_intel 靠手動「產業掃描」更新，常態性 >72h。歷史 265/315
+        # 的 5d 預測因此整筆拒算（96% 的 missing 是 sector>72h_old，AUDIT_2026-07-16 F5）。
+        # sector heat 只是 β 修正項：過期時降級（β 項歸零 + 標記 + 信心折減）而非拒絕。
+        # news / ohlcv / atr 過期仍是硬拒 —— 它們是短天期預測的主驅動。
+        degradable = [m for m in missing if m.startswith("sector>")]
+        hard = [m for m in missing if not m.startswith("sector>")]
+        if hard:
+            return {
+                "status": "insufficient_data",
+                "missing": hard + degradable,
+                "would_need": "Refresh stale sources OR wait for sufficient OHLCV history",
+                "details": details,
+            }
+        return {"status": "ok", "missing": [], "would_need": None,
+                "details": details, "degraded": degradable}
     return {"status": "ok", "missing": [], "would_need": None, "details": details}
 
 
@@ -580,6 +589,10 @@ def predict_horizon(horizon, days, current, news, heat, momentum, atr_pct,
             "would_need": suff["would_need"],
             "data_sufficiency": suff["details"],
         }
+
+    degraded = suff.get("degraded") or []
+    if degraded:
+        heat = None   # sector heat 過期 → β 項歸零（(heat or 0.5)-0.5 = 0），不用舊值
 
     w = weights[horizon]
     shift_pct = (
@@ -602,9 +615,13 @@ def predict_horizon(horizon, days, current, news, heat, momentum, atr_pct,
     confidence, breakdown = compute_confidence(
         news_conf, heat_persistence, atr_pct, days, was_clamped, suff["status"] == "ok"
     )
+    if degraded:
+        confidence *= 0.8   # V4.71.0 P1-7 — sector 降級預測信心折減
+        breakdown["degraded_penalty"] = 0.8
 
     return {
         "status": "ok",
+        "degraded_sources": degraded,
         "target_central": round(target_central, 2),
         "target_low": round(target_low, 2),
         "target_high": round(target_high, 2),

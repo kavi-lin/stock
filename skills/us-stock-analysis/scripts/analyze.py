@@ -2,7 +2,7 @@
 """
 us-stock-analysis — fundamentals snapshot for a single US ticker.
 
-Produces the JSON consumed by investment_protocol_v4_8 Phase 2 Fundamentals
+Produces the JSON consumed by investment_protocol_v5_0 Phase 2 Fundamentals
 subagent. Six rubric fields: P/E vs sector, revenue YoY, FCF margin,
 debt-to-equity, next earnings date, analyst consensus EPS growth.
 

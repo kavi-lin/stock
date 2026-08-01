@@ -10,7 +10,7 @@ status: experimental
 
 # short-term-target — Tactical Opportunity Radar
 
-Short-term directional projection skill. Sister to `earnings-valuation-forecaster` (12-month fundamental target). Together they cover both ends of the time spectrum; `investment_protocol_v4_8.md` covers the 3-6 month middle.
+Short-term directional projection skill. Sister to `earnings-valuation-forecaster` (12-month fundamental target). Together they cover both ends of the time spectrum; `investment_protocol_v5_0.md` covers the 3-6 month middle.
 
 ## Purpose
 

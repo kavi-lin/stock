@@ -82,6 +82,6 @@ The `references/` folder has 4 files totalling ~1100 lines of methodology. Loadi
 ## Used By
 
 This skill is invoked from:
-- **`investment_protocol_v4_8.md`** — Phase 2 Fundamentals blind-analyst subagent
+- **`investment_protocol_v5_0.md`** — Phase 2 Fundamentals blind-analyst subagent
 - Direct user requests — `/stock-analysis AAPL`, "analyze NVDA"
 - Other skills that need per-ticker fundamentals as a prerequisite

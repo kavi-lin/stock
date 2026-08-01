@@ -64,6 +64,6 @@ Enhanced fields (v1.1.0):
 
 ## Consumers
 
-- `investment_protocol_v4_8.md` Phase 0 — macro context
+- `investment_protocol_v5_0.md` Phase 0 — macro context
 - `macro-regime-detector` — replace ETF-ratio proxies with official data
 - `news_protocol_v2.md` Phase 3 — news catalyst cross-reference

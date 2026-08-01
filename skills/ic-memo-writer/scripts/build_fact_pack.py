@@ -406,7 +406,30 @@ def section_12_appendix(trade: dict, degraded: list, provenance: dict) -> dict:
     }
 
 
-def build(ticker: str, *, output_dir: Path | None = None) -> tuple[Path, dict]:
+VM_CACHE_DIR = ROOT / "skills" / "valuation-modeler" / "cache"
+
+
+def load_valuation_model(ticker: str) -> tuple[dict | None, list[str]]:
+    """V4.69.0 --initiation：讀 valuation-modeler 的 dcf/comps payload cache。
+    缺檔回 (None, [確切補跑指令])——deterministic，不自動抓。"""
+    missing = []
+    out = {}
+    for kind, fname in (("dcf", f"{ticker}_dcf_payload.json"),
+                        ("comps", f"{ticker}_comps_payload.json")):
+        p = VM_CACHE_DIR / fname
+        if not p.exists():
+            missing.append(
+                f"python3 skills/valuation-modeler/scripts/{kind}.py {ticker} --json-only")
+            continue
+        try:
+            out[kind] = json.loads(p.read_text())
+        except Exception:
+            missing.append(
+                f"python3 skills/valuation-modeler/scripts/{kind}.py {ticker} --json-only  # cache 損毀，重跑")
+    return (out if not missing else None), missing
+
+
+def build(ticker: str, *, output_dir: Path | None = None, initiation: bool = False) -> tuple[Path, dict]:
     ticker = ticker.upper()
     output_dir = output_dir or CACHE_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -531,6 +554,23 @@ def build(ticker: str, *, output_dir: Path | None = None) -> tuple[Path, dict]:
         "_protocol_decision_lock": decision_lock,
     }
 
+    # V4.69.0 — initiation 模式：嵌入 valuation-modeler 自建 DCF/comps payload
+    if initiation:
+        vm, missing_cmds = load_valuation_model(ticker)
+        if vm is None:
+            print("[ic-memo] --initiation 需要 valuation-modeler cache，先跑：", file=sys.stderr)
+            for cmd in missing_cmds:
+                print(f"  {cmd}", file=sys.stderr)
+            sys.exit(4)
+        fact_pack["valuation_model"] = vm
+        provenance["valuation_model"] = {
+            "dcf_path": str((VM_CACHE_DIR / f"{ticker}_dcf_payload.json").relative_to(ROOT)),
+            "comps_path": str((VM_CACHE_DIR / f"{ticker}_comps_payload.json").relative_to(ROOT)),
+            "dcf_asof": vm["dcf"].get("asof"),
+            "comps_asof": vm["comps"].get("asof"),
+            "type": "valuation_modeler.payload",
+        }
+
     # Stable hash for fact_pack (excluding composed_at)
     stable_copy = {k: v for k, v in fact_pack.items() if k != "composed_at"}
     fact_pack_canonical = json.dumps(stable_copy, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
@@ -547,9 +587,11 @@ def main():
     ap = argparse.ArgumentParser(description="Build IC Memo fact_pack from protocol cache.")
     ap.add_argument("ticker", help="Stock ticker (case-insensitive)")
     ap.add_argument("--output-dir", type=Path, default=None, help="Override output dir")
+    ap.add_argument("--initiation", action="store_true",
+                    help="V4.69.0 首次覆蓋模式：嵌入 valuation-modeler DCF/comps payload（缺 cache 即失敗）")
     args = ap.parse_args()
 
-    out_path, fact_pack = build(args.ticker, output_dir=args.output_dir)
+    out_path, fact_pack = build(args.ticker, output_dir=args.output_dir, initiation=args.initiation)
     print(f"[ic-memo] fact_pack written: {out_path}")
     print(f"  ticker:              {fact_pack['ticker']}")
     print(f"  as_of:               {fact_pack['as_of']}")

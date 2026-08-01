@@ -2,7 +2,7 @@
 """
 technical-analyst — chart-pure technical snapshot for a single ticker.
 
-Produces the JSON consumed by investment_protocol_v4_8 Phase 2 Technical
+Produces the JSON consumed by investment_protocol_v5_0 Phase 2 Technical
 subagent. Per the V4.8 rubric: 20/50/200MA structure, RSI(14), MACD
 histogram, volume vs 20D avg, recent support/resistance.
 
@@ -36,6 +36,7 @@ from technical_core import (   # noqa: E402
     ma_structure,
     rsi_state,
     compute_macd,
+    parabolic_severity_tag,
 )
 
 import pandas as pd   # noqa: E402
@@ -173,6 +174,21 @@ def analyze(ticker: str):
         warnings.append("intraday_volume_unreliable")
     if hints["parabolic_risk"]:
         warnings.append("parabolic_exhaustion_risk")
+    # V4.72.0 (P2-9) — market-cap aware severity tag（_shared/technical_core 單一源）。
+    # protocol Technical lane 規則引用 large_cap_parabolic，本 script 是該 lane 的
+    # MANDATORY skill，補齊產出端（原只有 momentum.py 產，文件↔實作斷鏈）。
+    try:
+        _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        if _ROOT not in sys.path:
+            sys.path.insert(0, _ROOT)
+        from skills._shared.company_context import get_profile
+        _prof = get_profile(ticker) or {}
+        _mcap = _prof.get("marketCap") or _prof.get("mktCap")   # 同 momentum.py:522 容錯
+    except Exception:
+        _mcap = None
+    severity = parabolic_severity_tag(ma.get("above_ma200_pct"), _mcap)
+    if severity:
+        warnings.append(severity)
 
     return {
         "ticker":              ticker,

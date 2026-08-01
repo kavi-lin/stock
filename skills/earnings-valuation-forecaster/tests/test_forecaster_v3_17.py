@@ -15,6 +15,7 @@ from forecast import (
     _determine_transition_case,
     build_revenue_margin_matrix,
     build_scenarios,
+    live_anchor_eligibility,
     to_markdown,
 )
 
@@ -62,6 +63,28 @@ class TestTransitionCascade(unittest.TestCase):
                                           income_q=[], ratios_a=ratios_a)
         self.assertFalse(out["transition_case"])
         self.assertIsNone(out["reason"])
+
+    def test_live_gate_rejects_low_confidence(self):
+        out = live_anchor_eligibility(
+            {"cagr": 8.1, "consensus": 154.7, "trend": 2.5},
+            "LOW", {"transition_case": False},
+        )
+        self.assertFalse(out["eligible"])
+        self.assertIn("low_forecast_confidence", out["reasons"])
+
+    def test_live_gate_rejects_transition(self):
+        out = live_anchor_eligibility(
+            {"cagr": 8.1, "trend": 9.0}, "MEDIUM", {"transition_case": True},
+        )
+        self.assertFalse(out["eligible"])
+        self.assertIn("transition_without_safe_model", out["reasons"])
+
+    def test_live_gate_accepts_two_methods(self):
+        out = live_anchor_eligibility(
+            {"cagr": 8.1, "trend": 9.0}, "MEDIUM", {"transition_case": False},
+        )
+        self.assertTrue(out["eligible"])
+        self.assertEqual(out["reasons"], [])
 
     def test_no_bundle_returns_false(self):
         """Backward compat: missing earnings-analyst bundle → transition_case=False."""

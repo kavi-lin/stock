@@ -1,10 +1,12 @@
 ---
 name: ic-memo-writer
-description: 從 investment_protocol 既有 cache (history.json + earnings-analyst cache + company_context) 組「高可讀 IC Memo」12 章節 MD 報告。Deterministic-only renderer，不重評分，decision_lock hash 11 欄位防偷改結論。
+description: 從 investment_protocol 既有 cache (history.json + earnings-analyst cache + company_context) 組「高可讀 IC Memo」12 章節 MD 報告；V4.69.0 起另支援「首次覆蓋 Initiating Coverage」長格式（同一 fact pack 基礎 + valuation-modeler 自建 DCF/comps 全文渲染）。Deterministic-only renderer，不重評分，decision_lock hash 11 欄位防偷改結論。
 triggers:
   - "ic-memo [TICKER]"
   - "分析 [TICKER] --memo"  # protocol hook
-version: V1.0.0
+  - "首次覆蓋 [TICKER]"      # V4.69.0 → build_fact_pack --initiation + compose_initiation
+  - "分析 [TICKER] --initiation"
+version: V1.1.0
 ---
 
 # ic-memo-writer — Readable IC Memo from Protocol Cache
@@ -20,6 +22,13 @@ version: V1.0.0
 | `investment_protocol_v5_0` | 委員會 5 lane + Burry + Red Team + Phase 4.5 fair_value | `分析 [TICKER]` | ✅ 評分 + 決策 |
 | `earnings-analyst` | 8Q 三表 + segments + composite | `財報 [TICKER]` | ✅ 評分 |
 | **`ic-memo-writer` (本)** | **12 章節敘事 MD，純 deterministic 渲染** | `ic-memo [TICKER]` | ❌ 不評分 |
+| **`ic-memo-writer --initiation` (V4.69.0)** | **首次覆蓋長格式：12 章節 + §8a 8-anchor 表 + §8b 自建 DCF（假設 provenance/FCFF/sensitivity）+ §8c comps 全表** | `首次覆蓋 [TICKER]` | ❌ 不評分 |
+
+**首次覆蓋流程與前置**（規格見 `template_initiation.md`）：需 history.json 有 protocol entry
+＋ `skills/valuation-modeler/cache/<T>_{dcf,comps}_payload.json`（缺 → build_fact_pack rc=4
+並印出確切補跑指令）。流程：`build_fact_pack.py <T> --initiation` → `compose_initiation.py <T>`
+→ `validate_ic_memo.py reports/<DATE>_<T>_initiation.md --initiation`。輸出
+`reports/YYYYMMDD_<T>_initiation.md`。
 
 ## 12 章節結構
 

@@ -1,6 +1,6 @@
 ---
 name: earnings-valuation-forecaster
-description: Project 12-month target prices for a US stock using earnings trend analysis, peer multiple comparison, and sensitivity grids. Produces bull / base / bear scenarios with upside/downside, key assumptions, trigger conditions, and a 3×3 sensitivity matrix (EPS growth × forward multiple). Use when user asks for 目標價, fair value, 合理價格, valuation target, price projection, scenario analysis, or "what's this stock worth in 12 months" for a specific ticker. Standalone skill — not auto-wired into investment protocol.
+description: Project 12-month target prices for a US stock using earnings trend analysis, peer multiple comparison, and sensitivity grids. Produces bull / base / bear scenarios with upside/downside, key assumptions, trigger conditions, and a 3×3 sensitivity matrix (EPS growth × forward multiple). Use when user asks for 目標價, fair value, 合理價格, valuation target, price projection, scenario analysis, or "what's this stock worth in 12 months" for a specific ticker. Standalone trigger, soft-wired into investment protocol as an optional anchor (see What it is NOT).
 market: us-equity
 scope: per-ticker
 data_sources: [FMP]
@@ -28,7 +28,15 @@ system where we consume analyst consensus PTs but never produce our own.
 - Not DCF or intrinsic value
 - Not a day-trading signal
 - Not a definitive "buy/sell" — it's input to a decision, not a decision
-- Not integrated into `investment_protocol_v4_8.md` (user chose standalone)
+- Not a **hard** dependency of `investment_protocol_v5_0.md` — but it IS soft-wired
+  (V4.72.0 聲明同步，修正原「not integrated」與實作矛盾，AUDIT_2026-07-16 F6 #2)：
+  `compute_price_framework.py` 的 `--self-assemble` 會讀本 skill 的
+  `cache/<TICKER>.json.expected_value` 作為 `forecaster_blend` 候選；寫入端與
+  price-framework 讀取端都會執行 eligibility gate，
+  且 protocol Phase 2 Valuation lane 將 `forecast.py <T> --json-only` 列為該 anchor 來源。
+  `confidence=LOW`、可用主方法 <2、或 transition 尚無安全模型 → live null、
+  `expected_value_shadow` 保留供校準。cache 缺 / stale → anchor 為 null，protocol 不會失敗——這是 soft
+  dependency：**不跑本 skill 不會壞任何流程，但跑過會讓 fair value 多一個錨**。
 
 ## Usage
 

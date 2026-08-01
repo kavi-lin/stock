@@ -78,5 +78,5 @@ Two reasons:
 
 ## Used By
 
-- **`investment_protocol_v4_8.md`** — Phase 2 Technical blind-analyst subagent
+- **`investment_protocol_v5_0.md`** — Phase 2 Technical blind-analyst subagent
 - Standalone user requests with chart images

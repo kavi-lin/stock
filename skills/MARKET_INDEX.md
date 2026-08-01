@@ -1,7 +1,7 @@
 # Skills Market Index
 
 > Source of truth for `market` / `scope` classification + 接線狀態 of every skill in
-> `skills/`. 23 skills + `_shared`. Rewritten 2026-06-11 (V4.5 audit cleanup)。
+> `skills/`. 25 skills + `_shared`. Rewritten 2026-06-11 (V4.5 audit cleanup)；2026-07-03 補 quant-backtest；2026-07-16 補 valuation-modeler (V4.69.0)。
 > 接線證據見 `reports/SKILLS_AUDIT_2026-06-11.md`。
 
 `market` values:
@@ -25,8 +25,8 @@
 | `retail-sector-pulse` | us-equity | sector-level | news digests + predict 5d（ThreadPool×8）| Step 9.5 → `Dashboard/retail_sector_pulse.json`（retail volume 元件已隨 narrative-pulse 退役，graceful None）|
 | `market-sentiment-analyzer` | us-equity | market-level | yfinance (VIX/SPY) + CNN F&G | Step 9.3 mood；degraded → rc=2（V4.4）|
 | `momentum-monitor` | market-agnostic | universe-scan | **FMP 主源** + yfinance fallback；.info 24h sidecar | Step 9.7 screen + `動能 [TICKER]` + Dashboard momentum.html |
-| `ftd-detector` | us-equity | market-level | yfinance | ⚠ daily 實跑 `sector/ftd_yfinance.py`（複製改寫版，引用 user-level skills 路徑）；skill 內 fmp 版閒置 — 整併 backlog |
-| `market-top-detector` | us-equity | market-level | yfinance | ⚠ 同上 — daily 實跑 `sector/market_top_yfinance.py` |
+| `ftd-detector` | us-equity | market-level | yfinance | daily 實跑 `sector/ftd_yfinance.py`（yfinance adapter，V4.72.0 起 import **repo 內** skill scripts 為 canonical，env `SKILL_SCRIPTS_PATH_FTD` 可覆寫）；skill 內 fmp_client 僅供有 FMP 訂閱時直跑 |
+| `market-top-detector` | us-equity | market-level | yfinance | 同上 — daily 實跑 `sector/market_top_yfinance.py`（repo canonical，env `SKILL_SCRIPTS_PATH` 覆寫） |
 
 ## 🔵 Protocol lane（`分析` / `產業掃描` / `財報` / `ic-memo` 觸發）
 
@@ -34,7 +34,8 @@
 |---|---|---|---|---|
 | `earnings-analyst` | us-equity | single-ticker | FMP /stable（20 call 並行 ×8, V4.5）| `財報 [TICKER]`；cache key (TICKER, last_earnings_date) |
 | `earnings-valuation-forecaster` | us-equity | single-ticker | FMP /stable | `財報前瞻 [TICKER]`（V2.15 起 Dashboard earnings/calendar 卡片自動 morph button）+ 12M scenario |
-| `ic-memo-writer` | us-equity | single-ticker | protocol history + earnings cache + company_context | `ic-memo [TICKER]` / `分析 --memo`（V3.25 deterministic 0-LLM renderer）|
+| `ic-memo-writer` | us-equity | single-ticker | protocol history + earnings cache + company_context | `ic-memo [TICKER]` / `分析 --memo`（V3.25 deterministic 0-LLM renderer）；V4.69.0 `首次覆蓋 [TICKER]` → compose_initiation |
+| `valuation-modeler` | us-equity | single-ticker | FMP /stable + FRED cache（fmp_pool 限流）| V4.69.0 新增：`估值模型`/`同業比較 [TICKER]`；餵 protocol `dcf_self_built`(0.15)/`comps_implied`(0.10) anchor；`--xlsx` 出 Excel workbook |
 | `finnhub-client` | us-equity | single-ticker | Finnhub + FMP dual fetch（calendar memoized V4.4）| protocol quant 輸入 canonical snapshot + drift audit |
 | `us-stock-analysis` | us-equity | single-ticker | FMP（analyze.py；web search 違規已修 V4.4）| investment Fundamentals lane |
 | `short-contrarian-analyst` | us-equity | single-ticker | FMP, yfinance | investment Phase 2 第 5 lane（Burry）；T4 仲裁刻度已修 V4.4 |
@@ -43,6 +44,8 @@
 | `portfolio-risk-manager` | market-agnostic | portfolio-level | positions.json, yfinance | investment Phase 4 Step 2 |
 | `sector-analyst` | us-equity | sector-level | finvizfinance, yfinance | sector protocol core |
 | `market-news-analyst` | us-equity | news-scan | protocol lane 實跑 `fetch.py`（FMP per-ticker 48h）；SKILL.md 的 WebSearch 宏觀流程為獨立模式 | investment News lane + sector Phase 3 |
+| `quant-backtest` | market-agnostic | single-ticker | technical_core 價格資料 + 11 策略模板 registry | `回測 [TICKER]`（dashboard SCRIPT_PROTOCOLS subprocess，0 LLM）；探索層，不入 investment_protocol 決策 |
+| `weekly-tech-playbook` | us-equity | portfolio-level | FMP + 既有 skill caches + Codex Review（可選第二意見） | 「投資方案」/「週選方案」UI 觸發（dashboard PROTOCOL_MODEL `playbook` claude turn） |
 
 ## ⚠ 待處置 / 壞掉
 

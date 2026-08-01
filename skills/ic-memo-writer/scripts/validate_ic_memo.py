@@ -196,6 +196,38 @@ def validate_fact_pack(fact_pack: dict, *, check_history: bool = True) -> list[F
     return findings
 
 
+# V4.69.0 — initiation 模式額外必備區塊（compose_initiation.py 產出）
+INITIATION_REQUIRED_BLOCKS = [
+    "Initiating Coverage",
+    "### §8a Fair-value anchors",
+    "### §8b 自建 driver-based DCF",
+    "### §8c 同業比較",
+    "valuation_modeler.dcf_payload",
+    "valuation_modeler.comps_payload",
+]
+
+
+def validate_initiation(md_text: str, fact_pack: dict | None) -> list[Finding]:
+    """--initiation 模式：12 節之外，驗 initiation 專屬區塊 + anchor 數字一致性。"""
+    findings: list[Finding] = []
+    missing = [b for b in INITIATION_REQUIRED_BLOCKS if b not in md_text]
+    if missing:
+        findings.append(Finding("fatal", "F-I1", f"initiation blocks missing: {missing}"))
+    if fact_pack:
+        vm = fact_pack.get("valuation_model")
+        if not isinstance(vm, dict) or "dcf" not in vm or "comps" not in vm:
+            findings.append(Finding("fatal", "F-I2",
+                                    "fact_pack lacks valuation_model (rebuild with --initiation)"))
+        else:
+            # DCF fair value 與 comps anchor 數字必須 verbatim 出現在 MD
+            for label, val in (("dcf fair_value_per_share", vm["dcf"].get("fair_value_per_share")),
+                               ("comps_implied_value", vm["comps"].get("comps_implied_value"))):
+                if isinstance(val, (int, float)) and f"{val:,.2f}" not in md_text:
+                    findings.append(Finding("fatal", "F-I3",
+                                            f"{label} {val} not rendered verbatim in MD"))
+    return findings
+
+
 def validate_markdown(md_text: str, fact_pack: dict | None) -> list[Finding]:
     findings: list[Finding] = []
 
@@ -318,6 +350,8 @@ def main():
     ap.add_argument("--fact-pack-only", type=Path, help="Validate only fact_pack (no MD)")
     ap.add_argument("--no-history-check", action="store_true",
                     help="Skip history.json re-validation (used by tests with synthetic data)")
+    ap.add_argument("--initiation", action="store_true",
+                    help="V4.69.0 首次覆蓋模式：額外驗 §8a/8b/8c 與 valuation_model 一致性")
     ap.add_argument("--json", action="store_true", help="Output findings as JSON")
     args = ap.parse_args()
 
@@ -337,8 +371,8 @@ def main():
         # Locate fact_pack
         fp_path = args.fact_pack
         if fp_path is None:
-            # Extract ticker from filename: <DATE>_<TICKER>_ic_memo.md
-            m = re.match(r"(\d{8})_([A-Z]+)_ic_memo\.md$", md_path.name)
+            # Extract ticker from filename: <DATE>_<TICKER>_ic_memo.md / _initiation.md
+            m = re.match(r"(\d{8})_([A-Z]+)_(?:ic_memo|initiation)\.md$", md_path.name)
             if m:
                 ticker = m.group(2)
                 candidates = sorted(CACHE_DIR.glob(f"{ticker}_*_fact_pack.json"))
@@ -352,6 +386,8 @@ def main():
         findings.extend(validate_fact_pack(fact_pack, check_history=not args.no_history_check))
     if md_text is not None:
         findings.extend(validate_markdown(md_text, fact_pack))
+        if args.initiation:
+            findings.extend(validate_initiation(md_text, fact_pack))
 
     rc = determine_rc(findings)
 

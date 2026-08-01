@@ -290,30 +290,18 @@ def pe_percentiles(ratios_annual):
 # ── Peer PE blending (v1.1) ──────────────────────────────────────────────
 def _fetch_peer_pe(client, ticker):
     """
-    Fetch median PE of peer group.
-    Tries FMP /stock-peers first; falls back to static PEER_MAP.
+    Fetch median PE from the shared exact-industry valuation peer selector.
     Returns (median_pe_or_None, peers_used_list, source_str).
     """
-    peer_tickers = None
-    source = "none"
-
-    data = client.stock_peers(ticker)
-    if data and isinstance(data, list) and data:
-        first = data[0]
-        if isinstance(first, dict) and "peersList" in first:
-            peer_tickers = first["peersList"][:5]
-            source = "fmp_stock_peers"
-        elif isinstance(first, str):
-            peer_tickers = data[:5]
-            source = "fmp_stock_peers"
-
-    if not peer_tickers:
-        peer_tickers = PEER_MAP.get(ticker)
-        if peer_tickers:
-            source = "peer_map_static"
-
-    if not peer_tickers:
-        return None, [], "none"
+    try:
+        from skills._shared.company_context import select_valuation_peers
+        selection = select_valuation_peers(ticker)
+    except Exception:
+        return None, [], "exact_industry_selector_unavailable"
+    peer_tickers = selection.get("peers") or []
+    source = selection.get("selector") or "exact_industry_v1"
+    if not selection.get("eligible"):
+        return None, [], source
 
     pes, peers_used = [], []
     for p in peer_tickers:
@@ -415,6 +403,44 @@ def calc_expected_value(scenarios, confidence):
         + scenarios["bull"]["target"] * probs["bull"]
     )
     return round(ev, 2), probs
+
+
+def live_anchor_eligibility(methods, confidence, transition_info):
+    """Mechanical gate for the protocol's live ``forecaster_blend`` anchor."""
+    primary_methods = ("cagr", "consensus", "trend")
+    usable = sum(
+        1 for key, value in (methods or {}).items()
+        if key in primary_methods
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+    )
+    reasons = []
+    if str(confidence or "").upper() == "LOW":
+        reasons.append("low_forecast_confidence")
+    if usable < 2:
+        reasons.append("fewer_than_2_usable_methods")
+    if (transition_info or {}).get("transition_case"):
+        reasons.append("transition_without_safe_model")
+    return {"eligible": not reasons, "reasons": reasons, "usable_methods": usable}
+
+
+def apply_live_anchor_gate(payload):
+    """Apply the gate to fresh or legacy cached payloads (read-side defence)."""
+    out = dict(payload or {})
+    forward = out.get("forward_eps") or {}
+    eligibility = live_anchor_eligibility(
+        forward.get("methods") or {}, forward.get("confidence"),
+        out.get("transition_case") or {},
+    )
+    shadow = out.get("expected_value_shadow")
+    if shadow is None:
+        shadow = out.get("expected_value")
+    out["expected_value_shadow"] = shadow
+    out["live_eligibility"] = eligibility
+    if not eligibility["eligible"]:
+        out["expected_value"] = None
+        out["expected_value_upside_pct"] = None
+        out["signal"] = "INELIGIBLE"
+    return out
 
 
 def valuation_signal(price, expected_value, base_target):
@@ -1214,7 +1240,7 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
         if cached:
             cache_has_pre = bool(cached.get("pre_earnings"))
             if pre_earnings == cache_has_pre:
-                return cached
+                return apply_live_anchor_gate(cached)
 
     api_key = os.environ.get("FMP_API_KEY")
     if not api_key:
@@ -1305,10 +1331,14 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
         transition_info, income_q, current_price,
     )
 
-    # v1.1: expected value + advisory signal
-    ev, ev_probs = calc_expected_value(scenarios, confidence)
-    sig = valuation_signal(current_price, ev, scenarios["base"]["target"])
-    ev_upside = round((ev / current_price - 1) * 100, 1) if current_price > 0 else None
+    # Shadow value is always retained for calibration.  Only a forecast that
+    # passes the deterministic quality gate may become the live price anchor.
+    ev_shadow, ev_probs = calc_expected_value(scenarios, confidence)
+    live_eligibility = live_anchor_eligibility(methods, confidence, transition_info)
+    ev = ev_shadow if live_eligibility["eligible"] else None
+    sig = (valuation_signal(current_price, ev, scenarios["base"]["target"])
+           if ev is not None else "INELIGIBLE")
+    ev_upside = round((ev / current_price - 1) * 100, 1) if ev is not None and current_price > 0 else None
 
     payload = {
         "status":        "ok",
@@ -1348,8 +1378,10 @@ def run(ticker, no_cache=False, max_age=DEFAULT_TTL_SEC, pre_earnings=False):
             "cols": ["EPS −15%", "EPS base", "EPS +15%"],
         },
         "expected_value":               ev,
+        "expected_value_shadow":        ev_shadow,
         "expected_value_upside_pct":    ev_upside,
         "expected_value_probabilities": ev_probs,
+        "live_eligibility":             live_eligibility,
         "signal":                       sig,
         "caveats": [
             "Multiple range uses company's own 5-year annual history — blind to sector regime shifts",

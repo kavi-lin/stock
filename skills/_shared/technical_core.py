@@ -379,3 +379,22 @@ def compute_macd(close, fast=12, slow=26, signal=9):
                                   and macd_line.iloc[-2] >= signal_line.iloc[-2]
                                   and macd_line.iloc[-1]  < signal_line.iloc[-1]),
     }
+
+
+def parabolic_severity_tag(above_ma200_pct, market_cap):
+    """Market-cap aware parabolic severity classifier — single source (V4.72.0 P2-9).
+
+    原邏輯僅存在 momentum.py（V3.17 Wave 1），但 investment protocol Technical lane
+    規則引用 `large_cap_parabolic` 而該 lane 的 MANDATORY script 是 technical-analyst
+    ——文件↔實作斷鏈（AUDIT_2026-07-16 F6 #1）。抽到本檔供兩個 skill 共用。
+
+    Returns None（未達 severity 門檻）或
+    "large_cap_parabolic" | "mid_cap_extreme" | "microcap_extension"。
+    """
+    if above_ma200_pct is None or market_cap is None or above_ma200_pct <= 100:
+        return None
+    if market_cap > 10_000_000_000:
+        return "large_cap_parabolic"
+    if market_cap > 2_000_000_000:
+        return "mid_cap_extreme"
+    return "microcap_extension"

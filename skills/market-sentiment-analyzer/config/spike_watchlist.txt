@@ -1,0 +1,19 @@
+# 個股急拉/急殺監控名單（Alpaca 1分鐘線）
+# 一行一個 ticker，# 開頭為註解。探索期隨時加減。
+# REST 多檔一次抓，數量無硬上限（建議 ≤ 50）。
+# 流動性高的標的 IEX 報價較準；偵測以「價格 % 變動」為主，量能僅次要參考
+# （免費 IEX feed 量被低估，不可當硬門檻）。
+AAPL
+MSFT
+NVDA
+GOOGL
+AMZN
+META
+TSLA
+AMD
+AVGO
+MRVL
+MU
+SNDK
+GLW
+ALAB

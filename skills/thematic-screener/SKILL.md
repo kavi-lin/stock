@@ -159,5 +159,5 @@ skills/thematic-screener/
 | `short-term-target` | Direct upstream — subprocess invokes its predict.py |
 | `fred-macro` | Optional upstream — reads cache for regime context |
 | `momentum-monitor` | Independent (different scoring paradigm) |
-| `investment_protocol_v4_8.md` | **No relationship** — does not affect protocol decisions |
+| `investment_protocol_v5_0.md` | **No relationship** — does not affect protocol decisions |
 | `weekly_review.py` (Step 7, future) | Direct downstream — reads `data/recommendations/` to evaluate hit rate |

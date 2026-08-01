@@ -91,6 +91,15 @@ When sources are too stale, the script REFUSES to predict:
 
 **Do not extrapolate from `1d` to fill in `5d` when 5d is insufficient**. The whole point is to be honest.
 
+> **V4.71.0 (P1-7) — sector staleness is now DEGRADED, not refused.** Historical audit
+> (AUDIT_2026-07-16) found 84% of 5d predictions were refused, and 96% of those refusals
+> were `sector>72h_old` alone — sector_intel updates only when the user manually runs
+> `產業掃描`, so a freshness gate on it turned 5d into a dead horizon. Sector heat is a
+> β correction term, not a primary driver: when it is the *only* stale source, the script
+> now proceeds with the β term zeroed, `degraded_sources: ["sector>72h_old"]` flagged,
+> and confidence ×0.8. Stale **news / ohlcv / atr still hard-refuse** — they are the
+> primary drivers of short-horizon prediction.
+
 ### 6. **`global_warnings` matter**
 
 ```
@@ -169,7 +178,7 @@ Every Saturday/Sunday:
 | `short-term-target` (this) | 1d / 5d / 15d | News + sector + momentum + ATR fusion | Target range + confidence |
 | `momentum-monitor` | tape (intraday-ish) | RSI + MA + volume composite | 0-100 score + signals |
 | `earnings-valuation-forecaster` | 12 months | Forward EPS × multiple | Bull/Base/Bear scenarios |
-| `investment_protocol_v4_8.md` | 3-6 months | Multi-lane subagent debate | BUY/HOLD/SELL + position size |
+| `investment_protocol_v5_0.md` | 3-6 months | Multi-lane subagent debate | BUY/HOLD/SELL + position size |
 
 These are **complementary, not redundant**. You can use multiple together; just don't average their outputs.
 

@@ -2,7 +2,7 @@
 """
 market-news-analyst — per-ticker 48h news + structured analyst actions.
 
-Produces the JSON consumed by investment_protocol_v4_8 Phase 2 News subagent.
+Produces the JSON consumed by investment_protocol_v5_0 Phase 2 News subagent.
 Design principle: do deterministic scraping in Python so the subagent can't
 hallucinate analyst actions or SEC filings; let the subagent judge headline
 tone. When sources come back thin, surface a `sparse=true` flag so the

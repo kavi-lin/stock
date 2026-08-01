@@ -34,6 +34,7 @@ from technical_core import (
     rsi_state,
     intraday_state,
     compute_macd,
+    parabolic_severity_tag,
 )
 
 # V3.22 — fundamentals layer (P/S TTM, GM%, Rev YoY TTM). Pulled from the
@@ -668,13 +669,11 @@ def _signals_and_warnings(volume, ma, short_int, comp, rsi=None, macd=None,
     # `market_cap` is injected into the local namespace by analyze() prior to
     # this call (see momentum.py:analyze). Tag is additive — parabolic_blowoff_risk
     # remains the base flag, severity is the secondary classifier.
-    if am200 > 100 and market_cap is not None:
-        if market_cap > 10_000_000_000:
-            warnings.append("large_cap_parabolic")
-        elif market_cap > 2_000_000_000:
-            warnings.append("mid_cap_extreme")
-        else:
-            warnings.append("microcap_extension")
+    # V4.72.0 (P2-9): 判定移至 _shared/technical_core.parabolic_severity_tag 單一源
+    # （technical-analyst 同步使用，修 protocol Technical lane 引用斷鏈）。
+    severity = parabolic_severity_tag(am200, market_cap)
+    if severity:
+        warnings.append(severity)
     for c in ma["recent_crosses"]:
         if c["days_ago"] <= 10:
             if c["type"] == "golden_cross_20_50":  signals.append("fresh_golden_cross_20_50")
