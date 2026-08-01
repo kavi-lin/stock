@@ -16,6 +16,10 @@ Single source of truth for version history. Current version authority is `VERSIO
 
 ### Changed
 - calibration summary 拆成 `scored_with_point_in_time_caveat` / `pending_with_point_in_time_caveat` / `not_point_in_time_count` 三個欄位。單一計數會在「已標記但尚未成熟」時顯示 0，讀起來像沒有 caveat——實際語料有 19 筆待成熟。
+- **索引欄位改由測試守門，不再靠人記**（Fixture I）：AST 掃描 `forward_expectations_calibration.py` 取出所有 `snapshot.get("…")` / `snapshot["…"]` 讀到的 key，與 `INDEX_FIELDS` 雙向比對——有讀但沒進索引就 rc=1 並指名該欄位，有進索引但沒人讀也會被指出。偵測器本身用合成程式碼測過（確認 `.get()` 與 `[]` 兩種寫法都抓得到），避免變成永不觸發的裝飾。**動機**：4.78.1 的索引只快取 6 個已評分欄位，若日後開始評 `base_rate_lane` 等 lane 卻忘了擴充，`.get()` 會回 `None` → 該 lane 靜默零計分且不報錯。實測在 calibration 內加一行 `snapshot.get("base_rate_lane")` 後測試如預期失敗。
+
+### Removed
+- `_latest_snapshot_per_ticker`（v2「每檔留最新一筆」邏輯）及其 Fixture F。v3 改用 earliest-vintage dedup 後就沒有 production 呼叫端，只剩自己的測試在跑；已確認全 repo（排除 archive／CHANGELOG 的歷史敘述）無其他引用。
 - CLI 預設不再印 `evaluations`，改印 `summary` + 新增的 `forecast_points`（真正被計分的去重集合），並以 `evaluations_omitted` 揭露丟掉幾列與 `--full-evaluations` 還原方式。in-process 回傳值不變，`forward_expectations_success_criteria.py` 讀 `evaluations` 算 signed bias 不受影響。
 
 ### Why
