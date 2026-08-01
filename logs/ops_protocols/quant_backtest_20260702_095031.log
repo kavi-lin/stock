@@ -1,0 +1,7 @@
+=== script_protocol=quant_backtest cmd=['python3', 'skills/quant-backtest/scripts/backtest.py', 'MSFT', '--template', 'momentum', '--period', '5y', '--entry-score', '65', '--exit-score', '45', '--fast', '50', '--slow', '200', '--cost-bps', '10'] started=2026-07-02T09:50:31 ===
+[fetch] MSFT 2512 bars (2016-07-05 → 2026-07-01) in 1.33s
+[compute] 2512 days replay + backtest + sweep in 0.107s
+[write] /Users/kavi/Documents/Claude/Projects/AI投資委員會/skills/quant-backtest/data/MSFT_momentum.json
+[done] MSFT momentum 5y: strat +52.4% (B&H +44.1%) | Sharpe 0.78 | MaxDD -11.6% | 8 trades
+
+=== ended=2026-07-02T09:50:33 rc=0 ===

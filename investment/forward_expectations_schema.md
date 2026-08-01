@@ -317,6 +317,12 @@ Rules:
 finds at least three comparable businesses. A broad raw provider peer list may be retained
 under `raw_peer_distribution` for disclosure, but remains unavailable to numeric gap
 comparisons and cannot serve as the anti-fantasy base-rate anchor.
+When a human-approved audited cohort exists (for example MU memory/storage), the forward
+base-rate lane reuses that candidate membership before fetching historical revenue. The
+membership may be shared across valuation and growth analysis, but the computed metric and
+scope remain separate; a `range_only` P/E cohort is disclosure-only for revenue growth until
+its `comparison_scope` explicitly allows `growth_base_rate`. Forward base-rate never imports
+a peer P/E value or silently broadens a cohort's approved scope.
 
 ## Immutable Forecast Ledger
 

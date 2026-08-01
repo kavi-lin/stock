@@ -14,7 +14,7 @@ Single source of truth for version history. Current version authority is `VERSIO
 - Consensus、revision snapshot、financial bridge 共用 future-only annual-estimate selector；依 earnings cache cutoff 排除已公布年度，避免週期低基期重複灌入 forward CAGR。MU revenue/EPS CAGR 由 `66.72%/100.90%` 修正為 `41.34%/40.40%`。
 - Future Price Range 明示為 3–5 年 terminal value、各 case 新增年化報酬；終端 analyst coverage <20 降為 `low_confidence_terminal_range`，不再把薄樣本多年累積漲幅呈現成一般 12m target。
 - Calibration v3 可用完整 Q1–Q4 實績核對 point-in-time revenue/EPS level，拒絕財年結束後建立的假預測，並以 ticker/target/basis 最早 vintage 去除重跑膨脹。
-- Base-rate lane 僅允許 ≥3 名通過 business-cohort gate 的 peers 進 numeric comparison；broad raw provider peers 僅揭露為 advisory distribution。
+- Base-rate lane 僅允許 ≥3 名且 scope 明確核准 `growth_base_rate` 的 business peers 進 numeric comparison；broad raw peers 與 MU 現有 `range_only` P/E cohort 均僅揭露，不自動擴權。
 
 ### Validation
 - Forward Expectations 全套 23 支 golden/regression scripts rc=0；核心新增測試後：main 55、calibration 33、financial bridge 41、price range 61、revisions 16 asserts 全過；`py_compile`、`git diff --check` rc=0。

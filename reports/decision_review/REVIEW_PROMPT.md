@@ -8,7 +8,7 @@
 
 ## 你的角色
 
-你是 AI 投資委員會的**策略校準員**。我會給你一份 `event_index_*.json`，
+你是 AI Investment Committee 的**策略校準員**。我會給你一份 `event_index_*.json`，
 記錄過去一段時間系統各 skill 產出的決策、現實價格、verdict。
 你只看資料、不下常識補洞。
 

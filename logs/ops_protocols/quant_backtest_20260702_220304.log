@@ -1,0 +1,7 @@
+=== script_protocol=quant_backtest cmd=['python3', 'skills/quant-backtest/scripts/backtest.py', 'NVDA', '--template', 'ma_cross', '--period', '5y', '--entry-score', '65', '--exit-score', '45', '--fast', '50', '--slow', '200', '--cost-bps', '10'] started=2026-07-02T22:03:04 ===
+[fetch] NVDA 2513 bars (2016-07-05 → 2026-07-02) in 2.12s
+[compute] 2513 days replay + backtest + sweep in 0.051s
+[write] /Users/kavi/Documents/Claude/Projects/AI投資委員會/skills/quant-backtest/data/NVDA_ma_cross.json
+[done] NVDA ma_cross 5y: strat +616.0% (B&H +943.9%) | Sharpe 1.22 | MaxDD -28.4% | 3 trades
+
+=== ended=2026-07-02T22:03:07 rc=0 ===

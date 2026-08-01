@@ -1,0 +1,7 @@
+=== script_protocol=quant_backtest cmd=['python3', 'skills/quant-backtest/scripts/backtest.py', 'SPY', '--template', 'donchian', '--period', '3y', '--cost-bps', '10', '--params-json', '{"n_entry": 20, "n_exit": 10}'] started=2026-07-02T22:54:15 ===
+[fetch] SPY 1259 bars (2021-06-28 → 2026-07-02) in 1.66s
+[compute] 1259 days replay + backtest + sweep in 0.037s
+[write] /Users/kavi/Documents/Claude/Projects/AI投資委員會/skills/quant-backtest/data/SPY_donchian.json
+[done] SPY donchian 3y: strat +23.5% (B&H +71.2%) | Sharpe 0.88 | MaxDD -9.8% | 18 trades
+
+=== ended=2026-07-02T22:54:17 rc=0 ===

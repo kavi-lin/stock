@@ -1,0 +1,329 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-07-31T20:04:27.299538+00:00",
+  "market_open": false,
+  "session_fraction": 1.0,
+  "aggregate": {
+    "score": 17,
+    "risk_label": "中性",
+    "risk_label_en": "Neutral",
+    "headline_zh": "盤面中性（17）：近25日出貨日 7 天、盤中 KDJ 高檔死叉",
+    "flags": [
+      {
+        "type": "distribution_days",
+        "severity": "med",
+        "text_zh": "近25日出貨日 7 天",
+        "tickers": [
+          "SPY",
+          "QQQ",
+          "IWM"
+        ]
+      },
+      {
+        "type": "momentum_breakdown",
+        "severity": "med",
+        "text_zh": "盤中 KDJ 高檔死叉（K62.4/D76.8），動能轉弱",
+        "tickers": [
+          "SPY",
+          "QQQ"
+        ]
+      },
+      {
+        "type": "break_low",
+        "severity": "med",
+        "text_zh": "跌破20日低點 288.26（盤中已收復，疑假跌破）",
+        "tickers": [
+          "IWM"
+        ]
+      },
+      {
+        "type": "momentum_reversal",
+        "severity": "info",
+        "text_zh": "日線 MACD 柱狀體轉升，動能改善",
+        "tickers": [
+          "IWM"
+        ]
+      }
+    ]
+  },
+  "tickers": [
+    {
+      "symbol": "SPY",
+      "label": "大盤",
+      "score": 29,
+      "risk_label": "偏強",
+      "risk_label_en": "Firm",
+      "price": 746.89,
+      "prev_close": 741.69,
+      "day_open": 744.68,
+      "day_high": 748.89,
+      "day_low": 737.66,
+      "intraday_return_open_pct": 0.3,
+      "intraday_return_prevclose_pct": 0.7,
+      "range_position": 0.822,
+      "vwap": 744.81,
+      "vwap_gap_pct": 0.28,
+      "cum_volume": 51641850,
+      "avg20_volume": 47772883,
+      "rvol": 1.08,
+      "ma20": 745.58,
+      "ma50": 744.72,
+      "pct_above_ma20": 0.18,
+      "pct_above_ma50": 0.29,
+      "consecutive_down_days": 0,
+      "distribution_days": 7,
+      "recent_low_5d": 729.1,
+      "recent_low_20d": 729.1,
+      "recent_low_50d": 716.58,
+      "break_low_level": null,
+      "stabilizing": false,
+      "open_pattern": "range",
+      "open_pattern_zh": "區間震盪",
+      "components": {
+        "dir": 35.1,
+        "range_pos": 64.4,
+        "vwap": 28.0,
+        "vol_price": 43.2,
+        "break_low": 0.0,
+        "trend": 1.4
+      },
+      "flags": [
+        {
+          "type": "distribution_days",
+          "severity": "med",
+          "text_zh": "近25日出貨日 7 天"
+        },
+        {
+          "type": "momentum_breakdown",
+          "severity": "med",
+          "text_zh": "盤中 KDJ 高檔死叉（K62.4/D76.8），動能轉弱"
+        }
+      ],
+      "momentum": {
+        "macd_5m": {
+          "dif": 0.654,
+          "dea": 0.646,
+          "hist": 0.008,
+          "hist_prev": 0.148,
+          "cross": null
+        },
+        "kdj_5m": {
+          "k": 62.4,
+          "d": 76.8,
+          "j": 33.5,
+          "k_prev": 90.2,
+          "cross": "death"
+        },
+        "macd_1d": {
+          "dif": -1.349,
+          "dea": 0.173,
+          "hist": -1.522,
+          "hist_prev": -2.036,
+          "cross": null
+        },
+        "kdj_1d": {
+          "k": 32.6,
+          "d": 30.1,
+          "j": 37.6,
+          "k_prev": 18.8,
+          "cross": "golden"
+        }
+      },
+      "session_fraction": 1.0,
+      "data_source": "live_quote+5min",
+      "quote_timestamp": 1785528000,
+      "interpretation_zh": "偏強（29），現價較昨收 +0.70%，RVOL 1.1，位於日內區間 82%",
+      "_health": "ok",
+      "weight": 0.5
+    },
+    {
+      "symbol": "QQQ",
+      "label": "科技",
+      "score": 14,
+      "risk_label": "中性",
+      "risk_label_en": "Neutral",
+      "price": 687.93,
+      "prev_close": 683.55,
+      "day_open": 692.12,
+      "day_high": 695.77,
+      "day_low": 680.05,
+      "intraday_return_open_pct": -0.61,
+      "intraday_return_prevclose_pct": 0.64,
+      "range_position": 0.501,
+      "vwap": 687.04,
+      "vwap_gap_pct": 0.13,
+      "cum_volume": 45569400,
+      "avg20_volume": 40184176,
+      "rvol": 1.13,
+      "ma20": 702.25,
+      "ma50": 715.36,
+      "pct_above_ma20": -2.04,
+      "pct_above_ma50": -3.83,
+      "consecutive_down_days": 0,
+      "distribution_days": 9,
+      "recent_low_5d": 661.14,
+      "recent_low_20d": 661.14,
+      "recent_low_50d": 661.14,
+      "break_low_level": null,
+      "stabilizing": false,
+      "open_pattern": "range",
+      "open_pattern_zh": "區間震盪",
+      "components": {
+        "dir": 32.0,
+        "range_pos": 0.3,
+        "vwap": 13.0,
+        "vol_price": 45.4,
+        "break_low": 0.0,
+        "trend": -16.3
+      },
+      "flags": [
+        {
+          "type": "distribution_days",
+          "severity": "med",
+          "text_zh": "近25日出貨日 9 天"
+        },
+        {
+          "type": "momentum_breakdown",
+          "severity": "med",
+          "text_zh": "盤中 KDJ 高檔死叉（K54.6/D67.3），動能轉弱"
+        }
+      ],
+      "momentum": {
+        "macd_5m": {
+          "dif": 0.374,
+          "dea": 0.453,
+          "hist": -0.078,
+          "hist_prev": 0.088,
+          "cross": "death"
+        },
+        "kdj_5m": {
+          "k": 54.6,
+          "d": 67.3,
+          "j": 29.2,
+          "k_prev": 81.1,
+          "cross": "death"
+        },
+        "macd_1d": {
+          "dif": -10.63,
+          "dea": -6.819,
+          "hist": -3.811,
+          "hist_prev": -4.965,
+          "cross": null
+        },
+        "kdj_1d": {
+          "k": 23.8,
+          "d": 21.9,
+          "j": 27.6,
+          "k_prev": 12.8,
+          "cross": "golden"
+        }
+      },
+      "session_fraction": 1.0,
+      "data_source": "live_quote+5min",
+      "quote_timestamp": 1785528000,
+      "interpretation_zh": "中性（14），現價較昨收 +0.64%，RVOL 1.1，位於日內區間 50%",
+      "_health": "ok",
+      "weight": 0.3
+    },
+    {
+      "symbol": "IWM",
+      "label": "小型股",
+      "score": -10,
+      "risk_label": "中性",
+      "risk_label_en": "Neutral",
+      "price": 291.22,
+      "prev_close": 292.59,
+      "day_open": 293.56,
+      "day_high": 293.93,
+      "day_low": 287.83,
+      "intraday_return_open_pct": -0.8,
+      "intraday_return_prevclose_pct": -0.47,
+      "range_position": 0.556,
+      "vwap": 290.67,
+      "vwap_gap_pct": 0.19,
+      "cum_volume": 26464670,
+      "avg20_volume": 21227435,
+      "rvol": 1.25,
+      "ma20": 294.31,
+      "ma50": 292.13,
+      "pct_above_ma20": -1.05,
+      "pct_above_ma50": -0.31,
+      "consecutive_down_days": 0,
+      "distribution_days": 7,
+      "recent_low_5d": 288.26,
+      "recent_low_20d": 288.26,
+      "recent_low_50d": 270.63,
+      "break_low_level": "20d",
+      "stabilizing": true,
+      "open_pattern": "range",
+      "open_pattern_zh": "區間震盪",
+      "components": {
+        "dir": -23.4,
+        "range_pos": 11.1,
+        "vwap": 18.8,
+        "vol_price": -49.9,
+        "break_low": -28.8,
+        "trend": -8.4
+      },
+      "flags": [
+        {
+          "type": "break_low",
+          "severity": "med",
+          "text_zh": "跌破20日低點 288.26（盤中已收復，疑假跌破）"
+        },
+        {
+          "type": "distribution_days",
+          "severity": "med",
+          "text_zh": "近25日出貨日 7 天"
+        },
+        {
+          "type": "momentum_reversal",
+          "severity": "info",
+          "text_zh": "日線 MACD 柱狀體轉升，動能改善"
+        }
+      ],
+      "momentum": {
+        "macd_5m": {
+          "dif": 0.022,
+          "dea": 0.08,
+          "hist": -0.058,
+          "hist_prev": -0.039,
+          "cross": null
+        },
+        "kdj_5m": {
+          "k": 38.4,
+          "d": 41.7,
+          "j": 31.8,
+          "k_prev": 46.1,
+          "cross": "death"
+        },
+        "macd_1d": {
+          "dif": -0.311,
+          "dea": 0.423,
+          "hist": -0.734,
+          "hist_prev": -0.909,
+          "cross": null
+        },
+        "kdj_1d": {
+          "k": 33.3,
+          "d": 32.0,
+          "j": 35.9,
+          "k_prev": 24.4,
+          "cross": "golden"
+        }
+      },
+      "session_fraction": 1.0,
+      "data_source": "live_quote+5min",
+      "quote_timestamp": 1785528000,
+      "interpretation_zh": "中性（-10），現價較昨收 -0.47%，假跌破20d，RVOL 1.2，位於日內區間 56%",
+      "_health": "ok",
+      "weight": 0.2
+    }
+  ],
+  "_source_health": {
+    "SPY": "ok",
+    "QQQ": "ok",
+    "IWM": "ok"
+  },
+  "_partial": false
+}

@@ -1,0 +1,141 @@
+{
+  "as_of": "2026-06-27",
+  "decay_rules": {
+    "hit_window_days": 14,
+    "eviction_after_days": 21,
+    "eviction_basis": "last_observed_date",
+    "first_hit_gate_min_sources": 2
+  },
+  "candidates": [
+    {
+      "ticker": "NVDA",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "TSM",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AVGO",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "MU",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "VRT",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "CEG",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AMD",
+      "sector": "Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-06-06",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 20,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    }
+  ],
+  "sectors": [
+    {
+      "sector": "Technology / Semiconductors",
+      "hot": true,
+      "ticker_count": 7
+    },
+    {
+      "sector": "Semiconductors",
+      "hot": false,
+      "ticker_count": 1
+    }
+  ],
+  "stats": {
+    "candidates_in": 8,
+    "candidates_evicted": 6,
+    "first_hit_filtered": 10,
+    "digests_scanned": 24
+  }
+}

@@ -1,0 +1,7 @@
+=== script_protocol=quant_backtest cmd=['python3', 'skills/quant-backtest/scripts/backtest.py', 'MU', '--template', 'roc_trend', '--period', '5y', '--cost-bps', '10', '--params-json', '{"lookback":126,"entry_th_pct":0}'] started=2026-07-03T01:33:54 ===
+[fetch] MU 2513 bars (2016-07-05 → 2026-07-02) in 2.18s
+[compute] 2513 days replay + backtest + sweep in 0.059s
+[write] /Users/kavi/Documents/Claude/Projects/AI投資委員會/skills/quant-backtest/data/MU_roc_trend.json
+[done] MU roc_trend 5y: strat +754.2% (B&H +1087.6%) | Sharpe 1.18 | MaxDD -46.7% | 24 trades
+
+=== ended=2026-07-03T01:33:56 rc=0 ===

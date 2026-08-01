@@ -1,0 +1,8 @@
+{"type":"thread.started","thread_id":"019f70bb-47b2-76c1-a98d-74b46c81f4cd"}
+{"type":"turn.started"}
+{"type":"item.started","item":{"id":"item_0","type":"web_search","id":"exec-2fcb0be0-ccd3-431f-8b30-5075f80b9376","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_0","type":"web_search","id":"exec-2fcb0be0-ccd3-431f-8b30-5075f80b9376","query":"https://www.cnbc.com/2026/07/17/california-billionaire-tax.html","action":{"type":"other"}}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"exec-bf522d8b-ead2-4220-971e-d4043e64016c","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"exec-bf522d8b-ead2-4220-971e-d4043e64016c","query":"site:cnbc.com/2026/07/17 California billionaire tax What's at risk biggest state economy America","action":{"type":"search","query":"site:cnbc.com/2026/07/17 California billionaire tax What's at risk biggest state economy America"}}}
+{"type":"error","message":"Selected model is at capacity. Please try a different model."}
+{"type":"turn.failed","error":{"message":"Selected model is at capacity. Please try a different model."}}

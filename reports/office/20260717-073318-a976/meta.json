@@ -1,0 +1,33 @@
+{
+  "run_id": "20260717-073318-a976",
+  "task": "HBM 記憶體 2026 年供需：一句話判斷是過剩還是短缺，並給一個關鍵理由。",
+  "status": "done",
+  "created_at": "2026-07-17T07:33:18",
+  "finished_at": "2026-07-17T07:37:35",
+  "rounds_completed": 4,
+  "close_reason": "all_done",
+  "roles": [
+    {
+      "key": "lead",
+      "name": "Lead",
+      "engine": "claude"
+    },
+    {
+      "key": "critic",
+      "name": "Critic",
+      "engine": "gemini"
+    },
+    {
+      "key": "verifier",
+      "name": "Verifier",
+      "engine": "codex"
+    }
+  ],
+  "spend": {
+    "claude": 3,
+    "gemini": 5,
+    "codex": 5
+  },
+  "error": null,
+  "phase": "verdict"
+}

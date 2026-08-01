@@ -1,0 +1,162 @@
+{
+  "as_of": "2026-06-24",
+  "decay_rules": {
+    "hit_window_days": 14,
+    "eviction_after_days": 21,
+    "eviction_basis": "last_observed_date",
+    "first_hit_gate_min_sources": 2
+  },
+  "candidates": [
+    {
+      "ticker": "MU",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "TSM",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AVGO",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "VRT",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 4,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "AMD",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 3,
+      "source_credibility_max": "HIGH",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "Semiconductors-Memory",
+      "keyword_hits": [
+        "sold out",
+        "super-cycle"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-26",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    },
+    {
+      "ticker": "CEG",
+      "sector": "Technology / Semiconductors",
+      "keyword_hits": [
+        "super-cycle",
+        "供不應求"
+      ],
+      "hit_count_14d": 2,
+      "source_credibility_max": "MEDIUM",
+      "first_observed": "2026-05-31",
+      "last_observed": "2026-06-07",
+      "days_since_last_hit": 17,
+      "note": "watchlist only; not a Phase 3 modulation trigger in V2.19"
+    }
+  ],
+  "sectors": [
+    {
+      "sector": "Semiconductors-Memory",
+      "hot": true,
+      "ticker_count": 8
+    },
+    {
+      "sector": "Technology / Semiconductors",
+      "hot": false,
+      "ticker_count": 1
+    }
+  ],
+  "stats": {
+    "candidates_in": 9,
+    "candidates_evicted": 10,
+    "first_hit_filtered": 9,
+    "digests_scanned": 26
+  }
+}

@@ -1,0 +1,7 @@
+=== script_protocol=quant_backtest cmd=['python3', 'skills/quant-backtest/scripts/backtest.py', 'MU', '--template', 'supertrend', '--period', '5y', '--cost-bps', '10', '--params-json', '{"n":10,"mult":3}'] started=2026-07-03T01:40:00 ===
+[fetch] MU 2513 bars (2016-07-05 → 2026-07-02) in 2.37s
+[compute] 2513 days replay + backtest + sweep in 0.109s
+[write] /Users/kavi/Documents/Claude/Projects/AI投資委員會/skills/quant-backtest/data/MU_supertrend.json
+[done] MU supertrend 5y: strat +141.0% (B&H +1087.6%) | Sharpe 0.63 | MaxDD -64.7% | 24 trades
+
+=== ended=2026-07-03T01:40:03 rc=0 ===

@@ -1,0 +1,39 @@
+{
+  "run_id": "20260717-085640-ef3b",
+  "task": "現在適合加倉科技股嗎？給明確結論與理由。",
+  "status": "done",
+  "created_at": "2026-07-17T08:56:40",
+  "finished_at": "2026-07-17T09:06:17",
+  "rounds_completed": 5,
+  "close_reason": "all_done",
+  "roles": [
+    {
+      "key": "lead",
+      "name": "Lead",
+      "engine": "claude"
+    },
+    {
+      "key": "critic",
+      "name": "Critic",
+      "engine": "codex"
+    },
+    {
+      "key": "verifier",
+      "name": "Verifier",
+      "engine": "grok"
+    },
+    {
+      "key": "trader",
+      "name": "Trader",
+      "engine": "gemini"
+    }
+  ],
+  "spend": {
+    "gemini": 4,
+    "codex": 6,
+    "claude": 8,
+    "grok": 6
+  },
+  "error": null,
+  "phase": "verdict"
+}

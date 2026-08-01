@@ -226,6 +226,10 @@ def _future_price_lines(snapshot: dict):
     if price_range.get("horizon_years") is not None:
         horizon = f"{horizon} ({price_range.get('horizon_years'):.2f} years; terminal, not 12-month)"
     lines.append(_bullet("Horizon", horizon))
+    coverage = price_range.get("horizon_coverage")
+    quality = price_range.get("horizon_coverage_quality")
+    if coverage is not None or quality:
+        lines.append(_bullet("Terminal analyst coverage", f"{coverage if coverage is not None else 'unknown'} ({quality or 'unknown'})"))
     if price_range.get("available") and price_range.get("cases"):
         lines.append("")
         lines.append("| Case | Target Price | Cumulative Upside | Annualized Return | Metric | Multiple |")
@@ -264,6 +268,8 @@ def _future_price_lines(snapshot: dict):
                 + (f" · floor {_fmt_pct(mn.get('floor_net_margin'))}" if mn.get("floor_net_margin") else "")
                 + " · durable-platform retention, not sector mean reversion"
             ))
+        if price_range.get("warnings"):
+            lines.append(_bullet("Warnings", ", ".join(price_range["warnings"])))
     else:
         warnings = ", ".join(price_range.get("warnings") or [])
         lines.append(f"- Unavailable: {warnings or 'insufficient inputs'}")

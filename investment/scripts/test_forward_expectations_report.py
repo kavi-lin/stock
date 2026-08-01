@@ -42,6 +42,9 @@ SNAPSHOT = {
     "future_price_range": {
         "available": True,
         "status": "available",
+        "horizon_coverage": 8,
+        "horizon_coverage_quality": "thin",
+        "warnings": ["thin_terminal_analyst_coverage"],
         "method": "eps_x_pe",
         "horizon_date": "2028-12-31",
         "range": {"low": 60.0, "base": 100.0, "high": 150.0},
@@ -83,6 +86,8 @@ check("has scenario section", "### Operating-Driver Scenarios" in md)
 check("has scenario watchlist", "royalty_bearing_units: required_numeric_driver_or_evidence_missing" in md)
 check("has future price section", "### Future Price Range" in md)
 check("has future price row", "| base | $100.00 | +0.0% | +0.0% | eps_consensus 5.00x | 20.00x |" in md)
+check("has terminal coverage", "**Terminal analyst coverage**: 8 (thin)" in md)
+check("has price warnings", "thin_terminal_analyst_coverage" in md)
 check("has policy", "Does not alter fair value" in md)
 
 print("Fixture B (same-metric gap table):")

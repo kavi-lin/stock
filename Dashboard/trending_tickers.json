@@ -1,40 +1,71 @@
 {
   "version": "1.0",
-  "as_of": "2026-06-20T05:29:24.506544+00:00",
+  "as_of": "2026-07-31T14:03:17.434204+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
-  "post_count": 39,
-  "truth_social_dropped": 3,
+  "post_count": 48,
+  "truth_social_dropped": 4,
   "source_stats": {
-    "truth_social": 5,
+    "truth_social": 3,
     "reddit": 8,
-    "hacker_news": 26
+    "hacker_news": 35,
+    "google_trends": 2
   },
-  "tickers": [],
+  "tickers": [
+    {
+      "ticker": "AMD",
+      "sector": "Technology",
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "AMD Lucebox Beats Nvidia DGX Spark by 3.63x on DeepSeek V4 Flash",
+          "url": "https://www.lucebox.com/blog/deepseek-v4-asymmetric-parallelism",
+          "source": "Hacker News",
+          "engagement": 1.386,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.386,
+      "_gate": "known"
+    }
+  ],
   "low_confidence": [
     {
-      "ticker": "ASML",
+      "ticker": "GPT",
       "sector": null,
-      "mention_count": 1,
+      "mention_count": 2,
       "bull_hits_sum": 0,
       "bear_hits_sum": 0,
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "ASML denies US Government report that EUV chipmaking tool was shipped to China",
-          "url": "https://www.tomshardware.com/tech-industry/semiconductors/asml-denies-us-government-report-that-its-euv-chipmaking-tool-was-shipped-to-china-says-rumors-are-inaccurate-and-damaging-to-our-reputation",
+          "headline": "OpenAI revenue in July topped all of Q2 driven by GPT-5.6 release",
+          "url": "https://www.cnbc.com/2026/07/29/openai-cfo-sarah-friar-tells-employees-arr-in-july-topped-all-of-q2.html",
           "source": "Hacker News",
-          "engagement": 2.398,
+          "engagement": 3.526,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Why do OpenAI's GPT-2 weights beat mine? Part three: testing overtraining",
+          "url": "https://www.gilesthomas.com/2026/07/why-do-openai-gpt2-weights-beat-mine-3-overtraining",
+          "source": "Hacker News",
+          "engagement": 1.099,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 2.398,
+      "engagement_score": 4.625,
       "_gate": "unknown"
     },
     {
-      "ticker": "EUV",
+      "ticker": "LLM",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -42,20 +73,49 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "ASML denies US Government report that EUV chipmaking tool was shipped to China",
-          "url": "https://www.tomshardware.com/tech-industry/semiconductors/asml-denies-us-government-report-that-its-euv-chipmaking-tool-was-shipped-to-china-says-rumors-are-inaccurate-and-damaging-to-our-reputation",
+          "headline": "Ask HN: What are you using for LLM inference in production?",
+          "url": "https://news.ycombinator.com/item?id=49121047",
           "source": "Hacker News",
-          "engagement": 2.398,
+          "engagement": 2.89,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 2.398,
+      "engagement_score": 2.89,
       "_gate": "unknown"
     },
     {
-      "ticker": "WASM",
+      "ticker": "PEACE",
+      "sector": null,
+      "mention_count": 2,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Today, the Board of Peace reached a HISTORIC agreement for the COMPLETE DISARMAMENT of Hamas and all other armed groups in Gaza. This is a monumental step towa",
+          "url": "https://truthsocial.com/@realDonaldTrump/117011460524966016",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        },
+        {
+          "headline": "Today, the Board of Peace reached a HISTORIC agreement for the COMPLETE DISARMAMENT of Hamas and all other armed groups in Gaza. This is a monumental step toward lasting PEACE and",
+          "url": "https://truthsocial.com/@realDonaldTrump/117011270507732212",
+          "source": "Truth Social:@realDonaldTrump",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 2.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "CPU",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -63,8 +123,57 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Show HN: Jumpjet – a WASM runtime for game developers",
-          "url": "https://jumpjet.dev",
+          "headline": "Show HN: Tilery-VM – run Nvidia cuTile GPU kernels on a CPU, no GPU required",
+          "url": "https://github.com/drbh/tilery-vm",
+          "source": "Hacker News",
+          "engagement": 1.609,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.609,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SSI",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 1,
+      "bear_hits_sum": 0,
+      "matched_terms": [
+        {
+          "term": "long",
+          "side": "bull"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "Ilya Sutskever's SSI and Nvidia Announce Long-Term Strategic Partnership",
+          "url": "https://nvidianews.nvidia.com/news/ilya-sutskevers-safe-superintelligence-inc-and-nvidia-announce-long-term-strategic-partnership",
+          "source": "Hacker News",
+          "engagement": 1.386,
+          "polarity": 0.5,
+          "matched_terms": [
+            "long"
+          ]
+        }
+      ],
+      "polarity_score": 0.5,
+      "engagement_score": 1.386,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "DGX",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "AMD Lucebox Beats Nvidia DGX Spark by 3.63x on DeepSeek V4 Flash",
+          "url": "https://www.lucebox.com/blog/deepseek-v4-asymmetric-parallelism",
           "source": "Hacker News",
           "engagement": 1.386,
           "polarity": 0.0,
@@ -76,7 +185,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "WON",
+      "ticker": "DMARC",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -84,8 +193,71 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Senator Lindsey Graham is working incredibly hard for the Great People of South Carolina, a State I love and WON BIG in 2016, 2020, and 2024! Lindsey has been a wonderful friend, a",
-          "url": "https://truthsocial.com/@realDonaldTrump/116777408397415858",
+          "headline": "Show HN: DMARC.quest SPF/DKIM/DMARC Demystified",
+          "url": "https://www.dmarc.quest",
+          "source": "Hacker News",
+          "engagement": 1.099,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.099,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SPF",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Show HN: DMARC.quest SPF/DKIM/DMARC Demystified",
+          "url": "https://www.dmarc.quest",
+          "source": "Hacker News",
+          "engagement": 1.099,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.099,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "DKIM",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Show HN: DMARC.quest SPF/DKIM/DMARC Demystified",
+          "url": "https://www.dmarc.quest",
+          "source": "Hacker News",
+          "engagement": 1.099,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.099,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "EXIM",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "RT @ EximBankUS Thanks to @ realDonaldTrump , the Export-Import Bank is profitable for the first time in nearly a DECADE. Here’s why that matters to every American: ✅ Supply Chain",
+          "url": "https://truthsocial.com/@realDonaldTrump/117011459082239407",
           "source": "Truth Social:@realDonaldTrump",
           "engagement": 1.0,
           "polarity": 0.0,
@@ -97,7 +269,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "API",
+      "ticker": "ADR",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -105,70 +277,63 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Show HN: Schemic – your database schema, in the Zod API you know",
-          "url": "https://schemic.dev/",
-          "source": "Hacker News",
-          "engagement": 0.693,
+          "headline": "Yesterday I said SK Hynix was surprising low. Today it hit Korea's 30% limit. I don't think the US ADR will catch up.",
+          "url": "https://www.reddit.com/r/stocks/comments/1vbmcut/yesterday_i_said_sk_hynix_was_surprising_low/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
           "polarity": 0.0,
           "matched_terms": []
         }
       ],
       "polarity_score": 0.0,
-      "engagement_score": 0.693,
+      "engagement_score": 1.0,
       "_gate": "unknown"
     },
     {
-      "ticker": "BIOS",
+      "ticker": "KOSPI",
       "sector": null,
       "mention_count": 1,
-      "bull_hits_sum": 0,
+      "bull_hits_sum": 1,
       "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
+      "matched_terms": [
         {
-          "headline": "Show HN: Ratchet – let an AI agent reflash your BIOS over a CH341A (MCP server)",
-          "url": "https://github.com/jackulau/ratchet",
-          "source": "Hacker News",
-          "engagement": 0.693,
-          "polarity": 0.0,
-          "matched_terms": []
+          "term": "surge",
+          "side": "bull"
         }
       ],
-      "polarity_score": 0.0,
-      "engagement_score": 0.693,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "MCP",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Show HN: Ratchet – let an AI agent reflash your BIOS over a CH341A (MCP server)",
-          "url": "https://github.com/jackulau/ratchet",
-          "source": "Hacker News",
-          "engagement": 0.693,
-          "polarity": 0.0,
-          "matched_terms": []
+          "headline": "New ETF rules spur 14% KOSPI surge; limited impact on KOSDAQ in Korea",
+          "url": "https://www.reddit.com/r/stocks/comments/1vbbi71/new_etf_rules_spur_14_kospi_surge_limited_impact/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.5,
+          "matched_terms": [
+            "surge"
+          ]
         }
       ],
-      "polarity_score": 0.0,
-      "engagement_score": 0.693,
+      "polarity_score": 0.5,
+      "engagement_score": 1.0,
       "_gate": "unknown"
     }
   ],
   "sectors": [
     {
       "sector": "Technology",
-      "ticker_count": 0,
-      "engagement_score": 0.0,
-      "polarity_score": 0.0,
+      "ticker_count": 1,
+      "engagement_score": 1.386,
       "bull_hits_sum": 0,
       "bear_hits_sum": 0,
-      "top_tickers": []
+      "top_tickers": [
+        {
+          "ticker": "AMD",
+          "engagement_score": 1.386,
+          "polarity_score": 0.0,
+          "mention_count": 1
+        }
+      ],
+      "polarity_score": 0.0
     },
     {
       "sector": "Healthcare",
@@ -263,62 +428,62 @@
   ],
   "market_wide_buzz": [
     {
-      "topic": "market_direction",
-      "post_count": 3,
-      "engagement_score": 7.496,
+      "topic": "ai_capex",
+      "post_count": 7,
+      "engagement_score": 12.529,
       "sample_posts": [
         {
-          "headline": "Google Is Using Nvidia's Playbook to Build a Rival AI Chip Business",
-          "url": "https://www.wsj.com/tech/ai/google-is-using-nvidias-playbook-to-build-a-rival-ai-chip-business-1eac86f9",
+          "headline": "The Impending, Inescapable Deluge of A.I",
+          "url": "https://www.nytimes.com/interactive/2026/07/29/technology/ai-chips-data-center-boom.html",
           "source": "Hacker News",
           "engagement": 2.708,
           "polarity": 0.0
         },
         {
-          "headline": "Google Is Using Nvidia's Playbook to Build a Rival AI Chip Business",
-          "url": "https://www.wsj.com/tech/ai/google-is-using-nvidias-playbook-to-build-a-rival-ai-chip-business-1eac86f9",
+          "headline": "A data center wanted to buy a farm to use water legally reserved for irrigation",
+          "url": "https://www.techradar.com/pro/a-330-mw-data-center-wanted-to-buy-a-farm-switch-off-the-irrigation-and-drink-the-difference-californias-most-powerful-irrigation-district-said-no-so-it-sued",
           "source": "Hacker News",
           "engagement": 2.485,
           "polarity": 0.0
         },
         {
-          "headline": "Using AI to help physicians diagnose rare genetic diseases affecting children",
-          "url": "https://openai.com/index/diagnose-rare-childhood-diseases/",
+          "headline": "The Town That Wants a Data Center Next Door",
+          "url": "https://www.theatlantic.com/podcasts/2026/07/town-wants-data-center-next-door/688108/",
           "source": "Hacker News",
-          "engagement": 2.303,
+          "engagement": 2.079,
           "polarity": 0.0
         }
       ],
       "polarity_score": 0.0
     },
     {
-      "topic": "geopolitics",
-      "post_count": 5,
-      "engagement_score": 5.946,
+      "topic": "market_direction",
+      "post_count": 3,
+      "engagement_score": 5.194,
       "sample_posts": [
         {
-          "headline": "How Russia's nuclear-powered 'Skyfall' missile works",
-          "url": "https://www.npr.org/2026/06/18/nx-s1-5843252/russia-nuclear-powered-missile-burevestnik",
+          "headline": "Nvidia's $750B AI bet deepens fears of a circular tech bubble",
+          "url": "https://www.latimes.com/business/story/2026-07-29/nvidias-750-billion-ai-bet-deepens-fears-of-circular-tech-bubble",
           "source": "Hacker News",
-          "engagement": 1.946,
+          "engagement": 2.303,
+          "polarity": -0.5
+        },
+        {
+          "headline": "Moonshot built on 20k Nvidia chip cluster from Alibaba",
+          "url": "https://www.bloomberg.com/news/articles/2026-07-31/moonshot-s-kimi-built-on-20-000-nvidia-chip-cluster-from-alibaba",
+          "source": "Hacker News",
+          "engagement": 1.792,
           "polarity": 0.0
         },
         {
-          "headline": "We didn’t meet out of desperation, Iran did. They are FINISHED! We’ll play out the 60 days. They get no money, not ten cents!",
-          "url": "https://truthsocial.com/@realDonaldTrump/116777207736809151",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0
-        },
-        {
-          "headline": "The War has diminished Iran! It doesn’t, any longer, have an Air Force, a Navy, Antiaircraft Equipment, Radar, or practically anything else, and yet the Dumocr",
-          "url": "https://truthsocial.com/@realDonaldTrump/116777207460249864",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
+          "headline": "NVIDIA-labs OO Agents: Native Python Object-Oriented Agents",
+          "url": "https://github.com/NVIDIA-NeMo/labs-OO-Agents",
+          "source": "Hacker News",
+          "engagement": 1.099,
           "polarity": 0.0
         }
       ],
-      "polarity_score": 0.0
+      "polarity_score": -0.2217
     }
   ]
 }

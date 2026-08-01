@@ -1,0 +1,1179 @@
+{
+  "version": "1.5",
+  "generated_at": "2026-07-31T19:59:49.028493+00:00",
+  "feed": "iex",
+  "market_open": true,
+  "watchlist": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "TSLA",
+    "AMD",
+    "AVGO",
+    "MRVL",
+    "MU",
+    "SNDK",
+    "GLW",
+    "ALAB"
+  ],
+  "watchlist_count": 14,
+  "alerts": [
+    "NVDA"
+  ],
+  "reversals": [
+    {
+      "symbol": "NVDA",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "MACD死叉",
+        "KDJ死叉"
+      ],
+      "alert": true,
+      "both": true,
+      "bars_ago": 0,
+      "zone": "超買翻落",
+      "strength": "strong",
+      "last": 201.78,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": 0.383,
+        "dea": 0.388,
+        "hist": -0.005,
+        "hist_prev": 0.0,
+        "cross": "death"
+      },
+      "kdj": {
+        "k": 73.4,
+        "d": 75.5,
+        "j": 69.2,
+        "k_prev": 71.4,
+        "cross": null
+      }
+    },
+    {
+      "symbol": "MSFT",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "KDJ死叉"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 0,
+      "zone": "超買翻落",
+      "strength": "med",
+      "last": 465.86,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": 0.9,
+        "dea": 0.615,
+        "hist": 0.285,
+        "hist_prev": 0.338,
+        "cross": null
+      },
+      "kdj": {
+        "k": 83.3,
+        "d": 83.6,
+        "j": 82.6,
+        "k_prev": 85.9,
+        "cross": "death"
+      }
+    },
+    {
+      "symbol": "AVGO",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "KDJ死叉"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 0,
+      "zone": "超買翻落",
+      "strength": "med",
+      "last": 390.1,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": 0.577,
+        "dea": 0.392,
+        "hist": 0.185,
+        "hist_prev": 0.244,
+        "cross": null
+      },
+      "kdj": {
+        "k": 79.2,
+        "d": 79.2,
+        "j": 79.2,
+        "k_prev": 86.4,
+        "cross": "death"
+      }
+    },
+    {
+      "symbol": "AAPL",
+      "direction": "up",
+      "dir_zh": "反轉向上",
+      "basis": [
+        "KDJ金叉"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 1,
+      "zone": null,
+      "strength": "med",
+      "last": 309.65,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": 0.976,
+        "dea": 0.743,
+        "hist": 0.234,
+        "hist_prev": 0.22,
+        "cross": null
+      },
+      "kdj": {
+        "k": 79.4,
+        "d": 73.6,
+        "j": 91.2,
+        "k_prev": 75.6,
+        "cross": null
+      }
+    },
+    {
+      "symbol": "TSLA",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "MACD死叉"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 1,
+      "zone": null,
+      "strength": "med",
+      "last": 311.96,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": 0.357,
+        "dea": 0.413,
+        "hist": -0.056,
+        "hist_prev": -0.022,
+        "cross": null
+      },
+      "kdj": {
+        "k": 40.3,
+        "d": 59.7,
+        "j": 1.3,
+        "k_prev": 47.3,
+        "cross": null
+      }
+    },
+    {
+      "symbol": "ALAB",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "MACDDIF轉負"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 1,
+      "zone": null,
+      "strength": "med",
+      "last": 311.83,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": -0.382,
+        "dea": -0.025,
+        "hist": -0.357,
+        "hist_prev": -0.167,
+        "cross": null
+      },
+      "kdj": {
+        "k": 16.2,
+        "d": 37.5,
+        "j": -26.5,
+        "k_prev": 23.6,
+        "cross": null
+      }
+    },
+    {
+      "symbol": "AMZN",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "MACD死叉"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 2,
+      "zone": null,
+      "strength": "med",
+      "last": 272.31,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": 0.16,
+        "dea": 0.167,
+        "hist": -0.007,
+        "hist_prev": -0.007,
+        "cross": null
+      },
+      "kdj": {
+        "k": 47.1,
+        "d": 53.5,
+        "j": 34.1,
+        "k_prev": 46.0,
+        "cross": null
+      }
+    },
+    {
+      "symbol": "GLW",
+      "direction": "down",
+      "dir_zh": "反轉向下",
+      "basis": [
+        "MACD死叉"
+      ],
+      "alert": false,
+      "both": false,
+      "bars_ago": 2,
+      "zone": null,
+      "strength": "med",
+      "last": 138.58,
+      "at": "2026-07-31T19:58:00Z",
+      "macd": {
+        "dif": -0.23,
+        "dea": -0.207,
+        "hist": -0.023,
+        "hist_prev": -0.014,
+        "cross": null
+      },
+      "kdj": {
+        "k": 21.5,
+        "d": 25.9,
+        "j": 12.9,
+        "k_prev": 25.6,
+        "cross": null
+      }
+    }
+  ],
+  "spikes": [],
+  "trends": [
+    {
+      "symbol": "AMD",
+      "direction": "down",
+      "dir_zh": "順勢續跌",
+      "ma": {
+        "5": 479.63,
+        "10": 482.02,
+        "20": 483.06
+      },
+      "k": 6.8,
+      "d": 16.2,
+      "basis": [
+        "均線空頭排列",
+        "KDJ K7<D16",
+        "破低貼價"
+      ],
+      "strength": "strong",
+      "last": 477.71,
+      "at": "2026-07-31T19:58:00Z"
+    },
+    {
+      "symbol": "MU",
+      "direction": "down",
+      "dir_zh": "順勢續跌",
+      "ma": {
+        "5": 828.26,
+        "10": 831.37,
+        "20": 833.14
+      },
+      "k": 10.8,
+      "d": 19.0,
+      "basis": [
+        "均線空頭排列",
+        "KDJ K11<D19",
+        "破低貼價"
+      ],
+      "strength": "strong",
+      "last": 825.37,
+      "at": "2026-07-31T19:58:00Z"
+    },
+    {
+      "symbol": "META",
+      "direction": "up",
+      "dir_zh": "順勢續攻",
+      "ma": {
+        "5": 557.08,
+        "10": 555.05,
+        "20": 553.69
+      },
+      "k": 93.2,
+      "d": 86.2,
+      "basis": [
+        "均線多頭排列",
+        "KDJ K93>D86",
+        "創高貼價"
+      ],
+      "strength": "strong",
+      "last": 557.95,
+      "at": "2026-07-31T19:58:00Z"
+    },
+    {
+      "symbol": "MRVL",
+      "direction": "down",
+      "dir_zh": "順勢續跌",
+      "ma": {
+        "5": 188.78,
+        "10": 189.71,
+        "20": 190.29
+      },
+      "k": 5.1,
+      "d": 11.9,
+      "basis": [
+        "均線空頭排列",
+        "KDJ K5<D12",
+        "破低貼價"
+      ],
+      "strength": "strong",
+      "last": 187.57,
+      "at": "2026-07-31T19:58:00Z"
+    },
+    {
+      "symbol": "GLW",
+      "direction": "down",
+      "dir_zh": "順勢續跌",
+      "ma": {
+        "5": 138.73,
+        "10": 138.89,
+        "20": 139.04
+      },
+      "k": 21.5,
+      "d": 25.9,
+      "basis": [
+        "均線空頭排列",
+        "KDJ K22<D26",
+        "破低貼價"
+      ],
+      "strength": "strong",
+      "last": 138.58,
+      "at": "2026-07-31T19:58:00Z"
+    }
+  ],
+  "pump_fades": [],
+  "readings": [
+    {
+      "symbol": "AAPL",
+      "last": 309.65,
+      "m1": 0.02,
+      "m3": 0.48,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "up",
+      "reversal": {
+        "symbol": "AAPL",
+        "direction": "up",
+        "dir_zh": "反轉向上",
+        "basis": [
+          "KDJ金叉"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 1,
+        "zone": null,
+        "strength": "med",
+        "last": 309.65,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": 0.976,
+          "dea": 0.743,
+          "hist": 0.234,
+          "hist_prev": 0.22,
+          "cross": null
+        },
+        "kdj": {
+          "k": 79.4,
+          "d": 73.6,
+          "j": 91.2,
+          "k_prev": 75.6,
+          "cross": null
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": 0.107,
+        "r2": 0.71,
+        "dist_high": -0.14,
+        "dist_low": 1.15,
+        "sigma_mult": 0.1,
+        "spark": [
+          306.7,
+          307.48,
+          307.04,
+          306.82,
+          308.18,
+          309.76,
+          308.17,
+          308.5,
+          309.59,
+          309.65
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "MSFT",
+      "last": 465.86,
+      "m1": 0.02,
+      "m3": -0.13,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": {
+        "symbol": "MSFT",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "KDJ死叉"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 0,
+        "zone": "超買翻落",
+        "strength": "med",
+        "last": 465.86,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": 0.9,
+          "dea": 0.615,
+          "hist": 0.285,
+          "hist_prev": 0.338,
+          "cross": null
+        },
+        "kdj": {
+          "k": 83.3,
+          "d": 83.6,
+          "j": 82.6,
+          "k_prev": 85.9,
+          "cross": "death"
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": 0.074,
+        "r2": 0.71,
+        "dist_high": -0.21,
+        "dist_low": 0.77,
+        "sigma_mult": 0.1,
+        "spark": [
+          462.42,
+          464.4,
+          464.59,
+          464.61,
+          464.58,
+          465.7,
+          466.44,
+          466.58,
+          465.76,
+          465.86
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "NVDA",
+      "last": 201.78,
+      "m1": 0.13,
+      "m3": 0.07,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "up",
+      "reversal": {
+        "symbol": "NVDA",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "MACD死叉",
+          "KDJ死叉"
+        ],
+        "alert": true,
+        "both": true,
+        "bars_ago": 0,
+        "zone": "超買翻落",
+        "strength": "strong",
+        "last": 201.78,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": 0.383,
+          "dea": 0.388,
+          "hist": -0.005,
+          "hist_prev": 0.0,
+          "cross": "death"
+        },
+        "kdj": {
+          "k": 73.4,
+          "d": 75.5,
+          "j": 69.2,
+          "k_prev": 71.4,
+          "cross": null
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": 0.011,
+        "r2": 0.19,
+        "dist_high": -0.08,
+        "dist_low": 0.35,
+        "sigma_mult": 1.1,
+        "spark": [
+          201.62,
+          201.51,
+          201.43,
+          201.81,
+          201.71,
+          201.79,
+          201.65,
+          201.89,
+          201.53,
+          201.78
+        ]
+      },
+      "alert": true,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "GOOGL",
+      "last": 357.16,
+      "m1": 0.17,
+      "m3": 0.12,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "up",
+      "reversal": null,
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": -0.026,
+        "r2": 0.23,
+        "dist_high": -0.38,
+        "dist_low": 0.22,
+        "sigma_mult": 1.0,
+        "spark": [
+          357.11,
+          357.7,
+          357.73,
+          357.98,
+          358.48,
+          357.55,
+          356.73,
+          357.15,
+          356.54,
+          357.16
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "AMZN",
+      "last": 272.31,
+      "m1": 0.03,
+      "m3": 0.25,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "up",
+      "reversal": {
+        "symbol": "AMZN",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "MACD死叉"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 2,
+        "zone": null,
+        "strength": "med",
+        "last": 272.31,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": 0.16,
+          "dea": 0.167,
+          "hist": -0.007,
+          "hist_prev": -0.007,
+          "cross": null
+        },
+        "kdj": {
+          "k": 47.1,
+          "d": 53.5,
+          "j": 34.1,
+          "k_prev": 46.0,
+          "cross": null
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": -0.023,
+        "r2": 0.12,
+        "dist_high": -0.33,
+        "dist_low": 0.33,
+        "sigma_mult": 0.1,
+        "spark": [
+          271.76,
+          272.9,
+          273.01,
+          273.15,
+          272.87,
+          272.5,
+          271.62,
+          271.89,
+          272.24,
+          272.31
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "META",
+      "last": 557.95,
+      "m1": 0.0,
+      "m3": 0.29,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "up",
+      "reversal": null,
+      "trend": {
+        "symbol": "META",
+        "direction": "up",
+        "dir_zh": "順勢續攻",
+        "ma": {
+          "5": 557.08,
+          "10": 555.05,
+          "20": 553.69
+        },
+        "k": 93.2,
+        "d": 86.2,
+        "basis": [
+          "均線多頭排列",
+          "KDJ K93>D86",
+          "創高貼價"
+        ],
+        "strength": "strong",
+        "last": 557.95,
+        "at": "2026-07-31T19:58:00Z"
+      },
+      "context": {
+        "regime": "up",
+        "regime_zh": "多頭",
+        "slope_pct": 0.14,
+        "r2": 0.94,
+        "dist_high": -0.06,
+        "dist_low": 1.24,
+        "sigma_mult": 0.0,
+        "spark": [
+          552.4,
+          551.74,
+          552.15,
+          553.73,
+          555.15,
+          555.74,
+          556.34,
+          557.4,
+          557.95,
+          557.95
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "TSLA",
+      "last": 311.96,
+      "m1": 0.08,
+      "m3": -0.26,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": {
+        "symbol": "TSLA",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "MACD死叉"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 1,
+        "zone": null,
+        "strength": "med",
+        "last": 311.96,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": 0.357,
+          "dea": 0.413,
+          "hist": -0.056,
+          "hist_prev": -0.022,
+          "cross": null
+        },
+        "kdj": {
+          "k": 40.3,
+          "d": 59.7,
+          "j": 1.3,
+          "k_prev": 47.3,
+          "cross": null
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": -0.003,
+        "r2": 0.0,
+        "dist_high": -0.38,
+        "dist_low": 0.13,
+        "sigma_mult": 0.6,
+        "spark": [
+          312.17,
+          312.13,
+          312.06,
+          312.21,
+          312.96,
+          312.75,
+          312.76,
+          312.46,
+          311.7,
+          311.96
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "AMD",
+      "last": 477.71,
+      "m1": -0.05,
+      "m3": -0.52,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": null,
+      "trend": {
+        "symbol": "AMD",
+        "direction": "down",
+        "dir_zh": "順勢續跌",
+        "ma": {
+          "5": 479.63,
+          "10": 482.02,
+          "20": 483.06
+        },
+        "k": 6.8,
+        "d": 16.2,
+        "basis": [
+          "均線空頭排列",
+          "KDJ K7<D16",
+          "破低貼價"
+        ],
+        "strength": "strong",
+        "last": 477.71,
+        "at": "2026-07-31T19:58:00Z"
+      },
+      "context": {
+        "regime": "down",
+        "regime_zh": "空頭",
+        "slope_pct": -0.189,
+        "r2": 0.92,
+        "dist_high": -1.77,
+        "dist_low": 0.0,
+        "sigma_mult": 0.3,
+        "spark": [
+          485.96,
+          484.06,
+          483.91,
+          484.38,
+          483.77,
+          482.29,
+          480.23,
+          479.95,
+          477.96,
+          477.71
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "AVGO",
+      "last": 390.1,
+      "m1": -0.18,
+      "m3": -0.13,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": {
+        "symbol": "AVGO",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "KDJ死叉"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 0,
+        "zone": "超買翻落",
+        "strength": "med",
+        "last": 390.1,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": 0.577,
+          "dea": 0.392,
+          "hist": 0.185,
+          "hist_prev": 0.244,
+          "cross": null
+        },
+        "kdj": {
+          "k": 79.2,
+          "d": 79.2,
+          "j": 79.2,
+          "k_prev": 86.4,
+          "cross": "death"
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": 0.071,
+        "r2": 0.67,
+        "dist_high": -0.27,
+        "dist_low": 0.5,
+        "sigma_mult": 1.2,
+        "spark": [
+          389.25,
+          388.25,
+          388.31,
+          388.81,
+          389.53,
+          390.19,
+          390.61,
+          391.05,
+          390.82,
+          390.1
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "MRVL",
+      "last": 187.57,
+      "m1": -0.3,
+      "m3": -0.87,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": null,
+      "trend": {
+        "symbol": "MRVL",
+        "direction": "down",
+        "dir_zh": "順勢續跌",
+        "ma": {
+          "5": 188.78,
+          "10": 189.71,
+          "20": 190.29
+        },
+        "k": 5.1,
+        "d": 11.9,
+        "basis": [
+          "均線空頭排列",
+          "KDJ K5<D12",
+          "破低貼價"
+        ],
+        "strength": "strong",
+        "last": 187.57,
+        "at": "2026-07-31T19:58:00Z"
+      },
+      "context": {
+        "regime": "down",
+        "regime_zh": "空頭",
+        "slope_pct": -0.191,
+        "r2": 0.83,
+        "dist_high": -1.82,
+        "dist_low": 0.0,
+        "sigma_mult": 1.3,
+        "spark": [
+          191.04,
+          190.37,
+          190.37,
+          190.76,
+          190.71,
+          190.13,
+          189.23,
+          188.83,
+          188.13,
+          187.57
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "MU",
+      "last": 825.37,
+      "m1": 0.02,
+      "m3": -0.34,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": null,
+      "trend": {
+        "symbol": "MU",
+        "direction": "down",
+        "dir_zh": "順勢續跌",
+        "ma": {
+          "5": 828.26,
+          "10": 831.37,
+          "20": 833.14
+        },
+        "k": 10.8,
+        "d": 19.0,
+        "basis": [
+          "均線空頭排列",
+          "KDJ K11<D19",
+          "破低貼價"
+        ],
+        "strength": "strong",
+        "last": 825.37,
+        "at": "2026-07-31T19:58:00Z"
+      },
+      "context": {
+        "regime": "down",
+        "regime_zh": "空頭",
+        "slope_pct": -0.151,
+        "r2": 0.82,
+        "dist_high": -1.37,
+        "dist_low": 0.09,
+        "sigma_mult": 0.1,
+        "spark": [
+          836.85,
+          833.23,
+          834.11,
+          834.65,
+          833.55,
+          834.31,
+          828.15,
+          828.26,
+          825.23,
+          825.37
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "SNDK",
+      "last": 1212.29,
+      "m1": 0.28,
+      "m3": -0.4,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "up",
+      "reversal": null,
+      "trend": null,
+      "context": {
+        "regime": "down",
+        "regime_zh": "空頭",
+        "slope_pct": -0.201,
+        "r2": 0.89,
+        "dist_high": -1.71,
+        "dist_low": 0.39,
+        "sigma_mult": 0.9,
+        "spark": [
+          1231.88,
+          1226.86,
+          1227.83,
+          1228.29,
+          1223.74,
+          1224.74,
+          1217.12,
+          1213.65,
+          1208.87,
+          1212.29
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "GLW",
+      "last": 138.58,
+      "m1": -0.12,
+      "m3": -0.24,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": {
+        "symbol": "GLW",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "MACD死叉"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 2,
+        "zone": null,
+        "strength": "med",
+        "last": 138.58,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": -0.23,
+          "dea": -0.207,
+          "hist": -0.023,
+          "hist_prev": -0.014,
+          "cross": null
+        },
+        "kdj": {
+          "k": 21.5,
+          "d": 25.9,
+          "j": 12.9,
+          "k_prev": 25.6,
+          "cross": null
+        }
+      },
+      "trend": {
+        "symbol": "GLW",
+        "direction": "down",
+        "dir_zh": "順勢續跌",
+        "ma": {
+          "5": 138.73,
+          "10": 138.89,
+          "20": 139.04
+        },
+        "k": 21.5,
+        "d": 25.9,
+        "basis": [
+          "均線空頭排列",
+          "KDJ K22<D26",
+          "破低貼價"
+        ],
+        "strength": "strong",
+        "last": 138.58,
+        "at": "2026-07-31T19:58:00Z"
+      },
+      "context": {
+        "regime": "range",
+        "regime_zh": "區間",
+        "slope_pct": -0.044,
+        "r2": 0.67,
+        "dist_high": -0.62,
+        "dist_low": 0.08,
+        "sigma_mult": 0.8,
+        "spark": [
+          139.37,
+          138.91,
+          138.9,
+          139.04,
+          139.05,
+          138.78,
+          138.91,
+          138.65,
+          138.75,
+          138.58
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    },
+    {
+      "symbol": "ALAB",
+      "last": 311.83,
+      "m1": -0.56,
+      "m3": -0.84,
+      "at": "2026-07-31T19:58:00Z",
+      "spiking": false,
+      "direction": "down",
+      "reversal": {
+        "symbol": "ALAB",
+        "direction": "down",
+        "dir_zh": "反轉向下",
+        "basis": [
+          "MACDDIF轉負"
+        ],
+        "alert": false,
+        "both": false,
+        "bars_ago": 1,
+        "zone": null,
+        "strength": "med",
+        "last": 311.83,
+        "at": "2026-07-31T19:58:00Z",
+        "macd": {
+          "dif": -0.382,
+          "dea": -0.025,
+          "hist": -0.357,
+          "hist_prev": -0.167,
+          "cross": null
+        },
+        "kdj": {
+          "k": 16.2,
+          "d": 37.5,
+          "j": -26.5,
+          "k_prev": 23.6,
+          "cross": null
+        }
+      },
+      "trend": null,
+      "context": {
+        "regime": "down",
+        "regime_zh": "空頭",
+        "slope_pct": -0.149,
+        "r2": 0.6,
+        "dist_high": -1.83,
+        "dist_low": 0.02,
+        "sigma_mult": 1.8,
+        "spark": [
+          316.19,
+          316.12,
+          316.79,
+          317.22,
+          317.58,
+          316.72,
+          314.49,
+          314.46,
+          313.6,
+          311.83
+        ]
+      },
+      "alert": false,
+      "spike": null,
+      "pump_fade": null
+    }
+  ],
+  "_health": "ok",
+  "_partial": false
+}

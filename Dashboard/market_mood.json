@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generated_at": "2026-06-20T05:28:44.169886+00:00",
+  "generated_at": "2026-07-31T14:03:12.641915+00:00",
   "mood": {
-    "score": -15,
+    "score": -13,
     "label": "Neutral",
     "label_zh": "中性",
     "components_used": [
@@ -14,12 +14,12 @@
       "term_signed"
     ],
     "component_scores": {
-      "fg_signed": -25.5,
-      "fg_quality_signed": -57.9,
-      "pc_signed": -16.0,
-      "vix_signed": 36.0,
-      "skew_signed": -100,
-      "term_signed": 100
+      "fg_signed": -17.9,
+      "fg_quality_signed": -17.5,
+      "pc_signed": -28.0,
+      "vix_signed": 24.6,
+      "skew_signed": -99.3,
+      "term_signed": 74.3
     }
   },
   "options": {
@@ -27,42 +27,42 @@
     "source": "CNN put_call_options sub-index",
     "asof": null,
     "tilt": "bear",
-    "tilt_signed": -16.0,
+    "tilt_signed": -28.0,
     "interpretation_zh": "期權傾向（CNN put/call 子指標）：偏空（避險買權升高）",
     "fmp_megacap": []
   },
   "vix": {
-    "current": 16.4,
-    "percentile_1y": 34.5,
+    "current": 17.54,
+    "percentile_1y": 55.7,
     "regime": "NORMAL",
-    "vix3m": 20.51,
+    "vix3m": 19.77,
     "term_structure": "contango",
-    "term_diff": 4.11,
-    "interpretation_zh": "VIX 16.4 NORMAL，期限結構 contango（市場平靜）"
+    "term_diff": 2.23,
+    "interpretation_zh": "VIX 17.5 NORMAL，期限結構 contango（市場平靜）"
   },
   "skew": {
-    "current": 146.7,
-    "percentile_1y": 59.0,
+    "current": 139.9,
+    "percentile_1y": 13.9,
     "label": "high",
-    "interpretation_zh": "SKEW 147 high：機構在買尾部避險"
+    "interpretation_zh": "SKEW 140 high：機構在買尾部避險"
   },
   "fear_greed": {
-    "index": 37.3,
-    "label": "Fear",
+    "index": 41.1,
+    "label": "Neutral",
     "sub_indices": {
-      "market_momentum_sp500": 73.4,
-      "stock_price_strength": 36.8,
-      "stock_price_breadth": 17.0,
-      "put_call_options": 42.0,
+      "market_momentum_sp500": 31.0,
+      "stock_price_strength": 30.6,
+      "stock_price_breadth": 23.0,
+      "put_call_options": 36.0,
       "market_volatility_vix": 50.0,
-      "safe_haven_demand": 32.2,
-      "junk_bond_demand": 9.4
+      "safe_haven_demand": 46.6,
+      "junk_bond_demand": 70.2
     }
   },
   "spy_momentum": {
-    "rsi_14": 55.1,
-    "pct_above_ma50": 2.6,
-    "pct_above_ma200": 9.09
+    "rsi_14": 48.9,
+    "pct_above_ma50": -0.41,
+    "pct_above_ma200": 6.27
   },
   "_source_health": {
     "vix": "ok",

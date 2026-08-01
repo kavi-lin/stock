@@ -1,0 +1,14 @@
+{
+  "run_id": "20260717-085537-7619",
+  "task": "測試：目前市場情緒與廣度水位如何？",
+  "status": "running",
+  "created_at": "2026-07-17T08:55:37",
+  "finished_at": null,
+  "rounds_completed": 0,
+  "close_reason": null,
+  "roles": [],
+  "spend": {
+    "gemini": 1
+  },
+  "error": null
+}

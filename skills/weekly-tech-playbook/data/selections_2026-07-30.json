@@ -1,0 +1,356 @@
+{
+  "as_of": "2026-07-30",
+  "week_label": "2026-08-03 ~ 2026-08-07（W32）",
+  "capital_per_basket": 100000,
+  "tier_weights": { "core": 15000, "standard": 10000, "light": 5000 },
+  "author": "weekly-tech-playbook · Claude turn (Step 2)",
+  "discipline_note": "前瞻探索層，不進入也不回寫 investment_protocol 決策（buy_threshold / position_size / verdict）。所有 price / 動能為 2026-07-30 yfinance 快照，實際下單前必須核對即時報價。本週近 14 天無任何委員會覆蓋標的，故每檔 committee 欄一律標示「無近 14 天委員會覆蓋」——代表沒有 verdict 可引用，不代表已被委員會背書。",
+  "macro": {
+    "regime": "Neutral（market mood -17）· VIX 18.26 NORMAL · SPY 740.86 跌破 MA50、RSI 46.4",
+    "exposure_ceiling": "股票曝險上限 60–70%，保留 30%+ 現金分 2–3 批進場",
+    "breadth": "極窄：AI & Semiconductors 主題 5 日 breadth 僅 13.3%；27 檔科技候選中 25 檔 5 日為負，僅 MSFT (+0.7%)、AAPL (+4.6%) 收紅",
+    "market_top": "非頂部訊號。屬 AI capex 複合體的估值去槓桿（SPY 僅小幅跌破 MA50、VIX 未破 20、殖利率曲線未倒掛），而非景氣循環頂",
+    "sentiment": "Fear & Greed 39.5（Fear）· SKEW 143 顯示尾部避險已被搶購 · mood_label Neutral",
+    "real_rate_10y": "1.23%（FRED regime = expansion，殖利率曲線未倒掛）",
+    "key_events": [
+      "AI 半導體複合體 5 日回檔 -10% ~ -32%：觀察本週是否出現量縮止穩而非破底加速",
+      "VIX 20 為分水嶺：站上 20 且 SPY 續弱則暫停加碼、只做既有部位再平衡",
+      "10Y 實質利率 1.23%：升破 1.5% 將再次壓縮高倍數（ALAB / CRDO / IONQ）估值",
+      "HBM/DRAM 合約價與 WFE 訂單是 MU 論點唯一的證偽點，需追第一方財報與法說",
+      "Fed 與通膨數據（Core PCE / CPI）為下一個總經觸發點——交易前請自行核對官方公布日期，本 playbook 不假設日程"
+    ],
+    "playbook_logic": "本週是 AI capex 複合體的「估值去槓桿」而非「基本面破壞」：跌幅由估值倍數最高、離終端需求最遠的環節（連結晶片 ALAB -45.7%、客製矽 MRVL -41.0%、算力租賃 NBIS -43.5%）向內收斂，而現金流最厚的 megacap（AVGO -0.4%、NVDA -1.8%、CEG -0.9% 月變動）幾乎沒動——這是資金重排序，不是需求崩壞。總經端仍 expansion、曲線未倒掛、VIX 未破 20，所以策略不是清倉而是重配：保險籃收租於現金流 megacap 與相對強度（MSFT/GOOGL/AVGO），激進籃分批承接跌最深的高 beta（AMD/MU/VRT），兩籃都保留現金、每檔設明確 kill 價。唯一違反此邏輯的是 AAPL（1mo +21%）與 PLTR（1mo +7.3%）——它們是本週的相對強度溢價方，故一律降級不追價。"
+  },
+  "codex_review": {
+    "label": "Codex Review",
+    "reviewed_on": "2026-07-30",
+    "review_mode": "committee_informed",
+    "committee_dependency": "low",
+    "dependency_note": "本週 pack 的 committee_verdicts 為空（近 14 天 0 檔覆蓋），因此本次 review 的所有結論皆由 pack 的 regime / 主題熱度 / 價格動能與公開第一方資料推導，實質上不依賴委員會 verdict。但本次未另存 blind artifact，故明確標記為 committee_informed，不宣稱為獨立 blind pass。",
+    "verdict": "方向同意（買回檔而非追強勢），但三籃的共同缺陷是「同一個 AI capex 因子被買了三次」——保險籃與激進籃的相關性遠高於名稱暗示。替代配置維持科技主軸但把現金拉到 25%，並用單一因子上限取代籃內分散。",
+    "comparison_notes": [
+      {
+        "title": "總曝險",
+        "original": "三籃各滿配 $100k，保險籃「可較滿配」，僅靠籃內輕倉層與 kill 價控風險；macro 建議曝險上限 60–70%、保留 30% 現金分批。",
+        "note": "報告的曝險上限寫在 macro，卻沒有在任何一籃執行——三籃實際部署都逼近 100%。在 F&G 39.5、SPY 跌破 MA50、breadth 13.3% 的組合下，這是把「分批」寫成文字而非配重。替代配置把 25% 明確放在現金／短債，並規定只有在 SPY 站回 MA50 或 VIX 收在 18 以下時才動用後兩批。"
+      },
+      {
+        "title": "集中度／相關性",
+        "original": "保險籃 10 檔中 6 檔（AVGO/NVDA/TSM/TXN/ANET + 半導體相關 META 自研）直接掛鉤 AI 資本支出；激進籃 10 檔有 6 檔屬同一條半導體供應鏈。",
+        "note": "籃內「10 檔」提供的是名目分散而非因子分散。本週 5 日跌幅的橫斷面已經證明：AMD -23.0 / MRVL -22.4 / ALAB -25.2 / VRT -25.1 / CRDO -21.6 幾乎是同一個因子在動，持有 5 檔等於放大版持有 1 檔。替代配置改以因子上限管理：AI 半導體硬體合計 ≤ 34%（NVDA 10 + AVGO 8 + AMD 6 + MU 5 + TSM 5），電力/基建 ≤ 7%，其餘給現金與軟體現金流。"
+      },
+      {
+        "title": "高動能追價",
+        "original": "AAPL（1mo +21.0%）在保險籃列標準倉 $10k；PLTR（1mo +7.3%）在激進籃已降級為輕倉 $5k 並標「等回檔」。",
+        "note": "PLTR 的降級處理正確且應該同樣套用到 AAPL——AAPL 是全宇宙唯一 5 日與 1 個月雙正的名字，在整個複合體被清算時上漲，這是資金避風港行為，不是新的基本面。避風港部位在資金回流風險資產時會第一個被賣。替代配置把 AAPL 壓到 6%，並註明這是「暫時性避險替代品」而非長期核心。"
+      },
+      {
+        "title": "爭議標的：ALAB 與 IONQ",
+        "original": "ALAB（1mo -45.7%）在激進籃給標準倉 $10k；IONQ（1mo -40.3%）給輕倉 $5k，理由為量子主題 heat 44.9 且方向 bullish。",
+        "note": "ALAB 單月 -45.7% 已經不是回檔而是趨勢破壞，把它放在與 NVDA、MRVL 同一層（標準倉）等於假設兩者的下檔風險相同——不成立。IONQ 的問題不同：量子主題 heat 44.9、confidence「Low」、breadth 僅 5.3%，是熱度數字撐起來的主題而非參與度撐起來的主題。替代配置直接剔除這兩檔；願意保留者應限制在總資金 2% 以內並視為選擇權金。"
+      },
+      {
+        "title": "風控與 kill 紀律",
+        "original": "每檔給單一 kill 價（保險籃約 -8~-10%、激進籃約 -12~-14%），觸價即認賠。",
+        "note": "在 5 日已跌 20%+ 的名字上設 -12% 的 kill 價，等於在波動放大後用比平時更緊的相對停損——被隨機震盪掃出場的機率高於論點被證偽的機率。建議 kill 條件改為「價格 + 時間」雙軌：跌破 kill 價且連續 2 個交易日收盤未收回才執行；同時對 MU / AMAT 這類論點掛鉤產業價格的名字，加上非價格證偽點（HBM 合約價轉跌、WFE 訂單下修）——那才是真正的 kill 訊號。"
+      },
+      {
+        "title": "被忽略的分散來源",
+        "original": "候選宇宙 27 檔全為科技/AI 相關；主題表中熱度最高的 Industrials Sector Concentration（58.6、bullish、breadth 60.0%）未被任何一籃使用。",
+        "note": "本週熱度最高且方向 bullish、breadth 60% 的主題其實是工業（RTX/GE/HON/CAT/UPS），而被三籃重壓的 AI & Semiconductors breadth 只有 13.3%。籃子被 build_pack 的科技宇宙限制住，這是流程限制不是判斷——但使用者應知道：真正的分散在這 27 檔之外。替代配置的 25% 現金部分意義即在此：把資金留給宇宙外的機會，而非硬塞進第 11 檔半導體。"
+      }
+    ],
+    "recommended_allocation": [
+      { "ticker": "現金／短債", "weight_pct": 25, "role": "事件風險緩衝 + 第 2/3 批進場彈藥；SPY 站回 MA50 或 VIX ≤18 才動用" },
+      { "ticker": "NVDA", "weight_pct": 10, "role": "AI 算力核心；回檔最淺（1mo -1.8%）代表領導地位未破" },
+      { "ticker": "MSFT", "weight_pct": 10, "role": "現金流防禦 + 本週唯一收紅的雲端 megacap" },
+      { "ticker": "GOOGL", "weight_pct": 9, "role": "全端自有（TPU+Gemini+搜尋），megacap 中估值最低的 AI 曝險" },
+      { "ticker": "AVGO", "weight_pct": 8, "role": "客製 ASIC + 訂閱軟體雙引擎；崩跌週相對強度最佳（1mo -0.4%）" },
+      { "ticker": "AAPL", "weight_pct": 6, "role": "暫時性避險替代品（非長期核心）；資金回流風險資產時應先減" },
+      { "ticker": "META", "weight_pct": 6, "role": "廣告現金流自籌算力，與 capex 循環的相關性較低" },
+      { "ticker": "AMD", "weight_pct": 6, "role": "高 beta 反彈主力；分 3 批，首批不超過本項的 1/3" },
+      { "ticker": "MU", "weight_pct": 5, "role": "記憶體定價循環；證偽點為 HBM 合約價而非股價" },
+      { "ticker": "TSM", "weight_pct": 5, "role": "先進製程獨佔；1mo -17.5% 屬優質股回檔的再進場價值" },
+      { "ticker": "VRT", "weight_pct": 4, "role": "資料中心電力/液冷 capex beta；backlog 為觀察點" },
+      { "ticker": "PLTR", "weight_pct": 3, "role": "AI 應用層唯一正動能，但已含相對強度溢價，僅小倉不追價" },
+      { "ticker": "CEG", "weight_pct": 3, "role": "核電 PPA 長約現金流；與半導體因子相關性最低的科技曝險" }
+    ],
+    "execution": [
+      "分三批：本週先建 1/3（等權重比例縮放），SPY 站回 MA50 或 VIX 收 ≤18 建第 2 批，破前低則第 3 批留待止穩後再議——不設「無論如何都要建滿」的期限。",
+      "單一因子上限：AI 半導體硬體（NVDA+AVGO+AMD+MU+TSM）合計 ≤ 34%，任一單檔 ≤ 10%；電力/基建（VRT+CEG）≤ 7%。",
+      "kill 改為價格＋時間雙軌：跌破 kill 價且連續 2 個交易日收盤未收回才執行，避免在 20% 波動的名字上被隨機震盪掃出。",
+      "非價格證偽點優先於股價：MU 看 HBM/DRAM 合約價，AMD 看 MI 系列出貨與客戶名單，VRT 看 backlog 與訂單取消率。這些轉負時即使股價未破 kill 價也應減碼。",
+      "剔除 ALAB 與 IONQ；若堅持保留，兩者合計 ≤ 總資金 2% 並視同選擇權金（預期歸零仍可接受的金額）。",
+      "現金部位不是「還沒想好」——它的用途是本週宇宙外（例如 breadth 60% 的工業主題）與第 2/3 批彈藥，兩者都不應被提前消耗。"
+    ],
+    "sources": [
+      { "label": "FRED — 10-Year TIPS 實質利率 (DFII10)", "url": "https://fred.stlouisfed.org/series/DFII10" },
+      { "label": "Cboe — VIX 指數官方頁", "url": "https://www.cboe.com/tradable_products/vix/" },
+      { "label": "SEC EDGAR — 公司財報第一手申報全文檢索", "url": "https://www.sec.gov/edgar/search/" },
+      { "label": "FRED — 10Y-2Y 殖利率利差 (T10Y2Y)", "url": "https://fred.stlouisfed.org/series/T10Y2Y" }
+    ]
+  },
+  "baskets": {
+    "conservative": {
+      "label_zh": "保險",
+      "label_en": "Conservative",
+      "thesis": "在 AI 資本支出複合體被估值去槓桿的一週，把資金收回到現金流最厚、離終端需求最近的環節。核心三檔用「本月幾乎沒跌」證明的相對強度（MSFT +6.7%、AVGO -0.4%、GOOGL -5.4%），標準層用回檔幅度可控的一線龍頭承接再進場價值，輕倉層做半導體以外的分散（類比週期、網通、核電現金流）。不追 AAPL 的避風港溢價，不碰單月 -40% 的破壞性走勢。",
+      "picks": [
+        {
+          "ticker": "MSFT", "tier": "core", "weight_usd": 15000, "theme": "AI 雲端與軟體",
+          "price": 393.13, "mom_5d": 0.7, "mom_1mo": 6.7,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "整個 AI 複合體被清算的一週裡，27 檔候選中只有它與 AAPL 收紅——Azure 產能受限帶來的訂單能見度加上 Copilot 訂閱現金流，讓它在 capex 疑慮中被當成防禦而非攻擊部位",
+          "data": "5d +0.7% / 1mo +6.7%；候選宇宙 5 日僅 2 檔為正",
+          "kill": "跌破 $360（相對強度優勢消失，代表市場開始把雲端當成 capex 而非現金流）"
+        },
+        {
+          "ticker": "GOOGL", "tier": "core", "weight_usd": 15000, "theme": "AI 雲端與軟體",
+          "price": 334.63, "mom_5d": -2.2, "mom_1mo": -5.4,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "唯一自有全端（TPU 自研晶片 + Gemini 模型 + 搜尋現金流）的 megacap，外購算力的成本壓力對它是相對利多；本月 -5.4% 的回檔幅度只有半導體同業的四分之一",
+          "data": "5d -2.2% / 1mo -5.4%（vs AMAT 1mo -36.2%、MRVL -41.0%）",
+          "kill": "跌破 $305（回檔擴大到與供應鏈同步，代表自有全端的防禦論點失效）"
+        },
+        {
+          "ticker": "AVGO", "tier": "core", "weight_usd": 15000, "theme": "AI & 半導體",
+          "price": 370.91, "mom_5d": -6.5, "mom_1mo": -0.4,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "客製 ASIC 與 VMware 訂閱的雙引擎讓它同時擁有 AI 上檔與軟體現金流下檔；在半導體崩跌週交出 1 個月僅 -0.4% 的成績，是本週相對強度最強的純半導體曝險",
+          "data": "5d -6.5% / 1mo -0.4%（同期 AMD -21.1%、MU -33.3%）",
+          "kill": "跌破 $335（軟體現金流不再提供估值下檔支撐）"
+        },
+        {
+          "ticker": "NVDA", "tier": "standard", "weight_usd": 10000, "theme": "AI & 半導體",
+          "price": 191.37, "mom_5d": -9.8, "mom_1mo": -1.8,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "AI 算力主軸；5 日 -9.8% 但 1 個月僅 -1.8%，跌幅遠小於整條供應鏈，代表資金是在重排序而非撤離領導者。以標準倉分兩批進場，不因為「跌了」就給核心倉",
+          "data": "5d -9.8% / 1mo -1.8%；供應鏈同期 1mo 落在 -21% ~ -46%",
+          "kill": "跌破 $172（1 個月相對強度優勢被抹平，領導地位假設失效）"
+        },
+        {
+          "ticker": "AAPL", "tier": "standard", "weight_usd": 10000, "theme": "裝置端 AI / 消費電子",
+          "price": 340.83, "mom_5d": 4.6, "mom_1mo": 21.0,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "裝置端 AI 換機循環是本週唯一沒有被質疑的敘事，1 個月 +21% 為全宇宙最強；但正因為強在「別人都在跌」，這更像避風港資金而非新基本面——只給標準倉、不追高、不升核心",
+          "data": "5d +4.6% / 1mo +21.0%（唯一 5 日與 1 個月雙正）",
+          "kill": "跌破 $310（吐回本月漲幅一半，避風港資金開始回流風險資產）"
+        },
+        {
+          "ticker": "META", "tier": "standard", "weight_usd": 10000, "theme": "AI 雲端與軟體",
+          "price": 586.34, "mom_5d": -6.5, "mom_1mo": 4.2,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "廣告現金流自籌算力支出，不需要外部融資即可擴張——這正是本週市場在懲罰的那個弱點的反面；1 個月 +4.2% 顯示本週 -6.5% 屬 capex 疑慮外溢而非自身基本面",
+          "data": "5d -6.5% / 1mo +4.2%",
+          "kill": "跌破 $530（廣告現金流無法再抵銷 capex 折舊疑慮）"
+        },
+        {
+          "ticker": "TSM", "tier": "standard", "weight_usd": 10000, "theme": "AI & 半導體",
+          "price": 375.28, "mom_5d": -10.9, "mom_1mo": -17.5,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "先進製程的實質獨佔者，所有 AI 晶片不論誰勝出都要經過它；1 個月 -17.5% 已回吐大半漲幅，屬「優質股回檔＝再進場價值」的標準案例",
+          "data": "5d -10.9% / 1mo -17.5%",
+          "kill": "跌破 $340（跌幅向下游 fabless 靠攏，代表市場開始質疑晶圓需求本身）"
+        },
+        {
+          "ticker": "TXN", "tier": "light", "weight_usd": 5000, "theme": "類比半導體循環",
+          "price": 270.11, "mom_5d": -8.2, "mom_1mo": -5.4,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "類比半導體循環的復甦與 AI 資本支出脫鉤，加上股息與自有產能，是這一籃裡少數不吃同一個因子的半導體曝險——放輕倉層作為因子分散而非主攻",
+          "data": "5d -8.2% / 1mo -5.4%",
+          "kill": "跌破 $248（工業/車用終端需求同步轉弱，脫鉤論點失效）"
+        },
+        {
+          "ticker": "ANET", "tier": "light", "weight_usd": 5000, "theme": "AI 網通",
+          "price": 157.74, "mom_5d": -9.8, "mom_1mo": -3.9,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "資料中心乙太網骨幹，1 個月僅 -3.9%，抗跌程度明顯優於光通訊與連結晶片同業（CRDO -27.2%、ALAB -45.7%）；但客戶集中度高，故只給輕倉",
+          "data": "5d -9.8% / 1mo -3.9%",
+          "kill": "跌破 $142（與 CRDO/ALAB 的相對強度差距收斂，代表網通被歸入同一個殺盤因子）"
+        },
+        {
+          "ticker": "CEG", "tier": "light", "weight_usd": 5000, "theme": "核電 / IPP 電力",
+          "price": 257.08, "mom_5d": -6.5, "mom_1mo": -0.9,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "核電 PPA 長約現金流是這一籃裡與半導體因子相關性最低的科技曝險，1 個月 -0.9% 幾乎持平；但 Nuclear 主題熱度 58.5 的同時方向已轉 bearish、breadth 僅 25%，故不加碼、只留輕倉",
+          "data": "5d -6.5% / 1mo -0.9%；Nuclear 主題 heat 58.5 但 direction=bearish、breadth 25.0%",
+          "kill": "跌破 $232（電力主題由分歧轉為一致下行）"
+        }
+      ]
+    },
+    "aggressive": {
+      "label_zh": "激進",
+      "label_en": "Aggressive",
+      "thesis": "本週跌幅的橫斷面顯示這是估值去槓桿而非需求崩壞——跌最兇的是離終端最遠、倍數最高的環節，而現金流最厚的幾乎沒動。激進籃的賭注是：只要機櫃出貨與記憶體合約價不轉負，這批 -20% ~ -46% 的高 beta 就是被錯殺。核心三檔押在論點最硬、跌幅最劇的 AMD / MU / VRT，標準層用 NVDA 壓住整籃 beta 並加入與半導體低相關的電力（VST），輕倉層放賠率型部位。全部分批，全部設 kill 價，PLTR 因為沒跟著跌而被降級等回檔。",
+      "picks": [
+        {
+          "ticker": "AMD", "tier": "core", "weight_usd": 15000, "theme": "AI & 半導體",
+          "price": 425.56, "mom_5d": -23.0, "mom_1mo": -21.1,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "唯一具規模化機櫃級路線、能對 NVDA 形成第二供應源的挑戰者；5 日 -23% 是一線股中最劇烈的洗盤，而 1 個月 -21.1% 幾乎等於 5 日跌幅——代表殺盤集中在本週，屬事件式而非趨勢式。分三批承接，首批不超過本項的三分之一",
+          "data": "5d -23.0% / 1mo -21.1%（5 日跌幅 ≈ 1 個月跌幅，殺盤高度集中）",
+          "kill": "跌破 $375（跌破本週低點區，事件式殺盤轉為趨勢破壞）"
+        },
+        {
+          "ticker": "MU", "tier": "core", "weight_usd": 15000, "theme": "AI 記憶體 / HBM",
+          "price": 763.76, "mom_5d": -20.4, "mom_1mo": -33.3,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "HBM 與傳統 DRAM 同時吃緊的定價循環尚未出現轉折證據，但股價已把整段漲幅還回（1mo -33.3%）——這是價格修正而非需求修正。它也是本籃唯一有非股價證偽點的部位：合約價才是真 kill 訊號",
+          "data": "5d -20.4% / 1mo -33.3%",
+          "kill": "跌破 $670，或 HBM/DRAM 合約價由漲轉跌（後者優先，即使股價未破也應減碼）"
+        },
+        {
+          "ticker": "VRT", "tier": "core", "weight_usd": 15000, "theme": "AI 電力 / 資料中心基建",
+          "price": 225.54, "mom_5d": -25.1, "mom_1mo": -26.5,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "液冷與電力配套是機櫃出貨的直接 beta，也是最快能用 backlog 驗證真偽的環節；5 日 -25.1% 反映的是「capex 會不會被砍」的疑慮，只要訂單沒有取消，它是最先回補的部位",
+          "data": "5d -25.1% / 1mo -26.5%",
+          "kill": "跌破 $196，或季報出現 backlog 下滑／訂單取消率上升"
+        },
+        {
+          "ticker": "NVDA", "tier": "standard", "weight_usd": 10000, "theme": "AI & 半導體",
+          "price": 191.37, "mom_5d": -9.8, "mom_1mo": -1.8,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "激進籃的錨。它 1 個月只跌 1.8% 而供應鏈跌 20~46%，說明資金沒有離開 AI、只是離開了 AI 的高倍數週邊——留一個標準倉在最不會被錯殺的位置，壓住整籃 beta",
+          "data": "5d -9.8% / 1mo -1.8%",
+          "kill": "跌破 $172（領導者也開始補跌，整籃論點須重評）"
+        },
+        {
+          "ticker": "MRVL", "tier": "standard", "weight_usd": 10000, "theme": "AI 客製矽 / 光通訊",
+          "price": 163.81, "mom_5d": -22.4, "mom_1mo": -41.0,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "1 個月 -41% 的深度重設把客製 XPU 與 800G 光互連的成長預期幾乎清零；需求端沒有對應的取消證據，屬高賠率均值回歸。但重設幅度已達趨勢破壞邊緣，所以只給標準倉不給核心",
+          "data": "5d -22.4% / 1mo -41.0%",
+          "kill": "跌破 $142（重設變成新的下降趨勢）"
+        },
+        {
+          "ticker": "ALAB", "tier": "standard", "weight_usd": 10000, "theme": "AI 連結 / PCIe·UALink",
+          "price": 247.57, "mom_5d": -25.2, "mom_1mo": -45.7,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "全宇宙最深的單月跌幅（-45.7%）。連結晶片隨機櫃密度提升仍是結構性題材，但它同時是估值敏感度最高、離終端需求最遠的環節——賠率高、確定性低，因此嚴格限制在標準倉且分三批，不因為跌最多就加碼",
+          "data": "5d -25.2% / 1mo -45.7%（宇宙最深）",
+          "kill": "跌破 $212（-45% 之後再破，應視為趨勢破壞而非超跌）"
+        },
+        {
+          "ticker": "VST", "tier": "standard", "weight_usd": 10000, "theme": "核電 / IPP 電力",
+          "price": 143.24, "mom_5d": -14.1, "mom_1mo": -11.8,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "AI 負載推升電力需求是與半導體相關性最低的一條 AI 支線，也是本籃唯一不吃「晶片出貨」因子的部位；跌幅（1mo -11.8%）遠小於半導體，代表殺盤尚未擴散到電力端",
+          "data": "5d -14.1% / 1mo -11.8%；Nuclear 主題 heat 58.5（次高）但 direction=bearish",
+          "kill": "跌破 $126（電力端開始跟隨半導體補跌，分散效果消失）"
+        },
+        {
+          "ticker": "CRDO", "tier": "light", "weight_usd": 5000, "theme": "AI 連結 / AEC 銅纜",
+          "price": 178.92, "mom_5d": -21.6, "mom_1mo": -27.2,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "AEC 銅纜互連在機櫃內滲透率提升的題材完好，1 個月 -27.2% 提供不錯的進場點；但市值小、單一客戶依賴高、波動放大，只適合輕倉層",
+          "data": "5d -21.6% / 1mo -27.2%",
+          "kill": "跌破 $152"
+        },
+        {
+          "ticker": "PLTR", "tier": "light", "weight_usd": 5000, "theme": "AI 軟體 / 應用層",
+          "price": 124.15, "mom_5d": -0.3, "mom_1mo": 7.3,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "全宇宙唯一 1 個月為正的高 beta 名（+7.3%），在半導體被清算時幾乎沒動——這代表它身上已經有一層相對強度溢價。**等回檔**：本週只給輕倉，回踩 $115 附近再考慮加，不在溢價位置追價",
+          "data": "5d -0.3% / 1mo +7.3%（激進籃唯一正動能）",
+          "kill": "跌破 $110（相對強度溢價蒸發）"
+        },
+        {
+          "ticker": "IONQ", "tier": "light", "weight_usd": 5000, "theme": "量子運算",
+          "price": 32.16, "mom_5d": -7.3, "mom_1mo": -40.3,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "純樂透部位。量子主題熱度 44.9、方向 bullish 且加速，但 confidence 為 Low、breadth 僅 5.3%——熱度是被少數股票撐起來的。以「虧損上限＝倉位」的方式持有，不加碼、不攤平",
+          "data": "5d -7.3% / 1mo -40.3%；Quantum 主題 heat 44.9 / bullish / confidence=Low / breadth 5.3%",
+          "kill": "跌破 $27（或量子主題 breadth 續低於 10%，代表題材無資金參與）"
+        }
+      ]
+    },
+    "hybrid": {
+      "label_zh": "混合",
+      "label_en": "Hybrid",
+      "thesis": "保險 sleeve $65k（5 檔）＋ 激進 sleeve $35k（5 檔）。保險 sleeve 用三檔本月幾乎沒跌的現金流 megacap 打底，加上 NVDA 與 META 這兩個「跌幅可控、論點未破」的一線；激進 sleeve 只保留跌幅最深且論點最硬的 AMD / MU / VRT，加上兩個賠率型輕倉。相較純激進籃，本籃刻意剔除 ALAB / MRVL / CRDO 這類單月跌逾 27% 的連結晶片群——在只有 $35k 風險預算時，重複押同一個因子不划算。",
+      "picks": [
+        {
+          "ticker": "MSFT", "tier": "core", "weight_usd": 15000, "theme": "AI 雲端與軟體", "sleeve": "保險",
+          "price": 393.13, "mom_5d": 0.7, "mom_1mo": 6.7,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "混合籃的壓艙石：本週唯一收紅的雲端 megacap，用訂閱現金流承接 AI 敘事而不承接 capex 折舊風險",
+          "data": "5d +0.7% / 1mo +6.7%",
+          "kill": "跌破 $360"
+        },
+        {
+          "ticker": "GOOGL", "tier": "core", "weight_usd": 15000, "theme": "AI 雲端與軟體", "sleeve": "保險",
+          "price": 334.63, "mom_5d": -2.2, "mom_1mo": -5.4,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "自有 TPU 讓外購算力的成本壓力對它反而是利多；megacap 中估值最低的 AI 曝險，回檔幅度僅為半導體同業四分之一",
+          "data": "5d -2.2% / 1mo -5.4%",
+          "kill": "跌破 $305"
+        },
+        {
+          "ticker": "AVGO", "tier": "core", "weight_usd": 15000, "theme": "AI & 半導體", "sleeve": "保險",
+          "price": 370.91, "mom_5d": -6.5, "mom_1mo": -0.4,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "在半導體崩跌週交出 1 個月 -0.4%：客製 ASIC 的成長性加上訂閱軟體的下檔支撐，是保險 sleeve 裡唯一的純半導體曝險",
+          "data": "5d -6.5% / 1mo -0.4%",
+          "kill": "跌破 $335"
+        },
+        {
+          "ticker": "NVDA", "tier": "standard", "weight_usd": 10000, "theme": "AI & 半導體", "sleeve": "保險",
+          "price": 191.37, "mom_5d": -9.8, "mom_1mo": -1.8,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "放在保險 sleeve 而非激進 sleeve，理由是它 1 個月只跌 1.8%——在這個宇宙裡，它的行為模式已經比較接近現金流 megacap 而非高 beta",
+          "data": "5d -9.8% / 1mo -1.8%",
+          "kill": "跌破 $172"
+        },
+        {
+          "ticker": "META", "tier": "standard", "weight_usd": 10000, "theme": "AI 雲端與軟體", "sleeve": "保險",
+          "price": 586.34, "mom_5d": -6.5, "mom_1mo": 4.2,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "廣告現金流自籌算力，不需外部融資；1 個月 +4.2% 顯示本週回檔是外溢而非自身問題。取代 AAPL 進入保險 sleeve，避開避風港溢價",
+          "data": "5d -6.5% / 1mo +4.2%",
+          "kill": "跌破 $530"
+        },
+        {
+          "ticker": "AMD", "tier": "standard", "weight_usd": 10000, "theme": "AI & 半導體", "sleeve": "激進",
+          "price": 425.56, "mom_5d": -23.0, "mom_1mo": -21.1,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "激進 sleeve 的主攻：5 日 -23% 的殺盤高度集中在本週，第二供應源論點未見取消證據。在 $35k 風險預算下給標準倉而非核心倉",
+          "data": "5d -23.0% / 1mo -21.1%",
+          "kill": "跌破 $375"
+        },
+        {
+          "ticker": "MU", "tier": "standard", "weight_usd": 10000, "theme": "AI 記憶體 / HBM", "sleeve": "激進",
+          "price": 763.76, "mom_5d": -20.4, "mom_1mo": -33.3,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "唯一有非股價證偽點的激進部位——記憶體合約價可以直接驗證論點死活，這在只有 $35k 風險預算時特別有價值",
+          "data": "5d -20.4% / 1mo -33.3%",
+          "kill": "跌破 $670，或 HBM/DRAM 合約價轉跌"
+        },
+        {
+          "ticker": "VRT", "tier": "light", "weight_usd": 5000, "theme": "AI 電力 / 資料中心基建", "sleeve": "激進",
+          "price": 225.54, "mom_5d": -25.1, "mom_1mo": -26.5,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "機櫃出貨的直接 beta，backlog 可驗證；但 5 日 -25.1% 的波動度在混合籃只配得上輕倉",
+          "data": "5d -25.1% / 1mo -26.5%",
+          "kill": "跌破 $196"
+        },
+        {
+          "ticker": "PLTR", "tier": "light", "weight_usd": 5000, "theme": "AI 軟體 / 應用層", "sleeve": "激進",
+          "price": 124.15, "mom_5d": -0.3, "mom_1mo": 7.3,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "與半導體 sleeve 低相關的 AI 曝險，1 個月 +7.3%；但溢價已高，**等回檔**，本週只放輕倉不追價",
+          "data": "5d -0.3% / 1mo +7.3%",
+          "kill": "跌破 $110"
+        },
+        {
+          "ticker": "IONQ", "tier": "light", "weight_usd": 5000, "theme": "量子運算", "sleeve": "激進",
+          "price": 32.16, "mom_5d": -7.3, "mom_1mo": -40.3,
+          "committee": "無近 14 天委員會覆蓋",
+          "reason": "選擇權金部位：量子主題方向 bullish 且加速，但 breadth 僅 5.3%，賠率型而非確定性型。虧損上限即倉位，不攤平",
+          "data": "5d -7.3% / 1mo -40.3%",
+          "kill": "跌破 $27"
+        }
+      ]
+    }
+  }
+}

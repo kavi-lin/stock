@@ -1,0 +1,7 @@
+=== script_protocol=quant_backtest cmd=['python3', 'skills/quant-backtest/scripts/backtest.py', 'NU', '--template', 'roc_trend', '--period', '5y', '--cost-bps', '10', '--params-json', '{"lookback":126,"entry_th_pct":0}'] started=2026-07-03T01:33:29 ===
+[fetch] NU 1144 bars (2021-12-09 → 2026-07-02) in 1.43s
+[compute] 1144 days replay + backtest + sweep in 0.065s
+[write] /Users/kavi/Documents/Claude/Projects/AI投資委員會/skills/quant-backtest/data/NU_roc_trend.json
+[done] NU roc_trend 5y: strat +93.1% (B&H +32.0%) | Sharpe 0.62 | MaxDD -35.6% | 20 trades
+
+=== ended=2026-07-03T01:33:31 rc=0 ===
