@@ -8,6 +8,20 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.79.0] — 2026-08-02 — Forward Expectations review 三項 P2 收尾
+
+### Fixed
+- `forward_expectations.py`：promoted cohort 的 `note` 改由 `rationale.criteria` 動態產生（新增 `_cohort_selection_note`）。原本寫死「同 sector + growth/margin/size ±1 tier」，一旦 curated cohort 取得 `growth_base_rate` 核准而晉升，出處會被標成演算法選取而非 human-approved。演算法 cohort 現在如實列出自己比對到的 criteria，human-approved cohort 則標出 cohort 名稱與核准 scope。
+- `forward_expectations_calibration.py`：window-CAGR 路徑補上與 level 路徑對等的 point-in-time gate（`_cagr_point_in_time`）。`generated_at ≥ window_to` 判定為 `not_point_in_time_forecast`（整段 window 已結束，根本不是預測）；`generated_at ≥ window_from` 但未達 window_to 者仍可計分，但帶 `point_in_time_caveat: base_fiscal_year_elapsed_at_forecast_time`。
+
+### Changed
+- calibration summary 拆成 `scored_with_point_in_time_caveat` / `pending_with_point_in_time_caveat` / `not_point_in_time_count` 三個欄位。單一計數會在「已標記但尚未成熟」時顯示 0，讀起來像沒有 caveat——實際語料有 19 筆待成熟。
+- CLI 預設不再印 `evaluations`，改印 `summary` + 新增的 `forecast_points`（真正被計分的去重集合），並以 `evaluations_omitted` 揭露丟掉幾列與 `--full-evaluations` 還原方式。in-process 回傳值不變，`forward_expectations_success_criteria.py` 讀 `evaluations` 算 signed bias 不受影響。
+
+### Why
+- 三項都是 4.78.0 review 記在 TODO 的 P2。實測 685 份 snapshot：CAGR gate 新增拒收 0 筆（無回歸，符合 review 預估），19 筆 legacy row 帶上 caveat；CLI 輸出 1.82 MB → 54 KB（3.0%），且不再隨 ledger 線性成長。
+- 20 支 forward-expectations 迴歸腳本 rc=0（calibration 65 asserts、核心 68 asserts）；`success_criteria` verdict 維持 `insufficient_evidence`。Shadow-only，未動 DCF、fair value 或決策輸出。
+
 ## [4.78.1] — 2026-08-02 — Calibration index（全語料掃描 12.5x）
 
 ### Added

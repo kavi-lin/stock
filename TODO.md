@@ -1,8 +1,16 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-02 (v4.78.1)
+> **Last Updated**: 2026-08-02 (v4.79.0)
 
 ---
+
+## ✅ Done (v4.79.0) — 4.78.0 review 的 P1 + 三項 P2
+
+- [x] **P1**：archive 最新 MU snapshot 生成於兩個 commit 之間、仍帶被晉升的 -9% cohort median；已重跑並以新 snapshot 蓋過（`ce59d45`）。
+- [x] **P2-1**：promoted cohort 的 note 改由 `rationale.criteria` 動態產生（`_cohort_selection_note`），演算法與 human-approved 兩種出處不再混淆。
+- [x] **P2-2**：window-CAGR 路徑補 point-in-time gate；`generated_at ≥ window_to` 拒收，`≥ window_from` 標 `point_in_time_caveat` 但仍計分。實測新增拒收 0 筆（無回歸），19 筆 legacy row 帶 caveat。
+- [x] **P2-3**：CLI 改印 `summary` + `forecast_points`，`evaluations` 改由 `--full-evaluations` 取得（1.82 MB → 54 KB）。
+- [ ] **新發現 — `_signed_bias` 繞過 dedup**：`forward_expectations_success_criteria.py:38` 直接迭代 `evaluations` 全量 rows 算 signed bias，但 `summary` 用的是去重後的 99 筆。樣本成熟後，同一預測的 N 次重跑會被當成 N 個獨立觀測灌進 bias。今天 comparable=0 故無影響。修法：改吃 `calibration["forecast_points"]`（v4 已暴露該欄位），並補一條「重跑不得放大 bias 樣本」的 regression。
 
 ## ✅ Done (v4.78.1) — Calibration index
 
@@ -19,9 +27,7 @@
 - [x] calibration 支援完整 Q1–Q4 FY level、out-of-sample 時點 gate、earliest-vintage dedup。
 - [x] broad raw peers 與 metric scope 不符的 cohort 只揭露；numeric base-rate 需 ≥3 members 且明確核准 `growth_base_rate`。
 - [ ] **校準觀察點**：累積 ≥15 個真正成熟 comparable points 後，才評估 growth/margin/multiple 規則；未達門檻不得升格 live。
-- [ ] **P2 — curated cohort 晉升時 note 出處標錯（latent）**：`forward_expectations.py` `_select_base_rate_distribution` 的 available 分支寫死演算法 cohort 描述（「同 sector + growth/margin/size ±1 tier」）；未來若有 cohort 核准 `growth_base_rate`，晉升時會被標成演算法選取而非 human-approved。改為依 `cohort.rationale.criteria` 動態產 note。今天無 growth-approved cohort，不影響現行輸出。
-- [ ] **P2 — `estimate_window_cagr` 校準路徑補 point-in-time guard**：`not_point_in_time_forecast` gate 只在 `future_level_snapshot` 路徑；CAGR 路徑至少該拒收 `generated_at ≥ window_to` 的 row（現存 0 筆），並考慮對 base FY 已 elapsed 的 legacy row（現存 19/49 筆）標記部分 in-sample。新 snapshot 因 future-only cutoff 不再產生此類 row，僅影響 legacy 存量。
-- [ ] **P2 — `run_calibration` CLI 輸出膨脹**：v3 改全量評估後 CLI 把全部 `evaluations` 印進 stdout（684 snapshots / 2692 rows，隨 archive 線性成長）；CLI 改只印 summary + deduped forecast points，完整 evaluations 保留給程式內呼叫（success_criteria 用 dict 不受影響）。
+- 三項 P2 已於 v4.79.0 完成，明細見該區塊。
 
 ## 📋 Backlog — Protocol Lean 化：「保留 5 個 lane score，不保留 5 次固定 LLM」（2026-08-02 共識定案）
 

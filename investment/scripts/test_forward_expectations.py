@@ -132,6 +132,31 @@ curated_growth = fe._curated_business_cohort(
 )
 check("growth-approved cohort can become numeric", curated_growth["available"], True)
 
+# A promoted cohort must say how it was actually selected. The two builders earn trust
+# differently, so a note crediting the wrong one is a provenance error, not a wording nit.
+promoted_note = fe._select_base_rate_distribution(
+    curated_growth, [0.10, 0.20, 0.30], ["SNDK", "WDC", "STX"],
+)["note"]
+check("promoted curated cohort is credited as human-approved",
+      "human-approved cohort" in promoted_note, True)
+check("promoted curated cohort names its approved scope",
+      "growth_base_rate" in promoted_note, True)
+check("promoted curated cohort does not claim tier matching",
+      "±1 tier" in promoted_note, False)
+algo_cohort = {
+    "available": True, "member_count": 4,
+    "distribution": {"median": 0.13, "p25": 0.10, "p75": 0.20},
+    "members": [{"ticker": t} for t in ("AAA", "BBB", "CCC", "DDD")],
+    "rationale": {"criteria": ["sector(exact)", "growth_stage(+/-1)", "margin_tier(+/-1)"]},
+}
+algo_note = fe._select_base_rate_distribution(algo_cohort, [0.1] * 4, ["AAA"])["note"]
+check("algorithmic cohort still describes its own criteria",
+      "sector(exact)" in algo_note and "演算法 cohort" in algo_note, True)
+check("algorithmic cohort not mislabelled human-approved",
+      "human-approved" in algo_note, False)
+check("cohort with no recorded rationale says so",
+      "未記錄選取理由" in fe._cohort_selection_note({"member_count": 3}), True)
+
 # Point-in-time guard: already-reported FY rows must not inflate the forward CAGR.
 print("Fixture B2 (exclude elapsed estimate rows):")
 ec_b2 = {

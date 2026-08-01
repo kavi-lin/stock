@@ -257,6 +257,27 @@ def _subject_gross_margin(earnings_cache: dict):
     return (sum(grosses) / len(grosses)) if grosses else None
 
 
+def _cohort_selection_note(cohort: dict) -> str:
+    """Describe how this cohort was actually selected, from its own rationale.
+
+    Two builders feed this lane — an algorithmic sector/tier match and a
+    human-approved membership list — and they earn trust for different reasons. A
+    hardcoded description would credit the wrong one the moment a curated cohort is
+    approved for `growth_base_rate` and becomes promotable.
+    """
+    rationale = cohort.get("rationale") or {}
+    criteria = [str(c) for c in (rationale.get("criteria") or []) if c]
+    count = cohort.get("member_count", 0)
+    if not criteria:
+        return f"{count} 名 cohort（rationale 未記錄選取理由）營收 CAGR 分布"
+    if "human_approved_business_similarity" in criteria:
+        return (f"{count} 名 human-approved cohort（{rationale.get('cohort') or '未命名'}；"
+                f"核准 scope={rationale.get('source_scope') or '未標示'}，"
+                f"membership 先於 CAGR 載入防 cherry-pick）營收 CAGR 分布")
+    return (f"{count} 名演算法 cohort（{'、'.join(criteria)}，"
+            f"門檻選取前固定防 cherry-pick）營收 CAGR 分布")
+
+
 def _select_base_rate_distribution(cohort: dict, cagrs: list, used: list) -> dict:
     """Promote only a qualified business cohort into the numeric comparison lane."""
     if cohort.get("available"):
@@ -268,8 +289,7 @@ def _select_base_rate_distribution(cohort: dict, cagrs: list, used: list) -> dic
             "peer_rev_cagr_p75": dist["p75"],
             "peers_used": [m["ticker"] for m in cohort["members"]],
             "raw_peer_distribution": None,
-            "note": (f"{cohort['member_count']} 名 cohort（同 sector + growth/margin/size ±1 tier，"
-                     f"記錄選取理由防 cherry-pick）營收 CAGR 分布"),
+            "note": _cohort_selection_note(cohort),
         }
     if len(cagrs) >= 3:
         scope_mismatch = cohort.get("status") == "scope_not_approved_for_growth"

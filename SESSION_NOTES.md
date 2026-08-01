@@ -1,7 +1,16 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.78.1)
+> **Last Updated**: 2026-08-02 (v4.79.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.79.0) — 4.78.0 review 的三項 P2 收尾
+- **起因**：使用者要求 review Codex 對 forward-expectations 的修正。review 結論是方向正確、宣稱幾乎全部重現（20 支測試 rc=0、MU 數字逐項對上），但找到 1 個 P1（archive 最新 MU snapshot 生成於兩個 commit 之間，仍帶被晉升的 -9% cohort median）與 3 個 P2。P1 已於 `ce59d45` 重跑蓋掉，本次做 3 個 P2。
+- **做掉**：① promoted cohort 的 note 改由 `rationale.criteria` 動態產生——原本寫死演算法描述，curated cohort 一旦取得 `growth_base_rate` 核准就會被誤標成演算法選取；② window-CAGR 路徑補上與 level 路徑對等的 point-in-time gate（`generated_at ≥ window_to` 拒收，`≥ window_from` 標 caveat 但仍計分）；③ CLI 改印 `summary` + `forecast_points`，`evaluations` 需 `--full-evaluations`。
+- **自己踩到的坑**：原本只加一個 `point_in_time_caveat_count` 且只數 comparable rows——真實語料跑出來顯示 0，但實際有 19 筆帶 caveat 在等成熟，讀起來像「沒有 caveat」。拆成 `scored_` / `pending_` 兩個欄位才誠實。**教訓**：計數欄位若有前置篩選條件，要問「這個 0 是真的沒有，還是被篩掉了」。
+- **實測**：685 snapshots，CAGR gate 新增拒收 **0 筆**（符合 review 預估的「現存 0 筆」，無回歸）；19 筆 legacy row 帶 caveat；CLI 輸出 1.82 MB → 54 KB（3.0%）。`success_criteria` verdict 維持 `insufficient_evidence`。
+- **驗收**：20 支 fe regression rc=0（calibration 65 asserts、核心 68 asserts）；SYNC OK 4.79.0。Shadow-only。
+- **新發現（未修，已記 TODO）**：`forward_expectations_success_criteria.py:38` 的 `_signed_bias` 直接走 `evaluations` 全量 rows，**繞過 dedup**——summary 用 99 筆去重後的 row，signed bias 卻會用 2696 筆含重跑重複的 row。今天 comparable=0 所以無影響，樣本成熟後會是實質偏誤。
+- **並行風險**：本次全程有另一個 session 同時在改 `forward_expectations_calibration.py` / 其測試檔（移除 `_latest_snapshot_per_ticker` 死碼 + 新增 Fixture I guard），兩次 Edit 都收到「file modified on disk」。本次 commit 因此含該 session 的清理，非全部為本 session 產出。
 
 ## 🟢 Session Note (v4.78.1) — Calibration index（先量測再選方案）
 - **起因**：committing 全部未提交改動後盤點體積，forward_expectations ledger 磁碟 80MB / 684 檔、約 31 檔/日成長。使用者問壓縮歸檔對效能的衝擊。

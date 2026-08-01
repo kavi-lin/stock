@@ -324,6 +324,12 @@ scope remain separate; a `range_only` P/E cohort is disclosure-only for revenue 
 its `comparison_scope` explicitly allows `growth_base_rate`. Forward base-rate never imports
 a peer P/E value or silently broadens a cohort's approved scope.
 
+A promoted cohort's `note` is derived from its own `rationale.criteria`, never hardcoded:
+an algorithmic cohort lists the sector/tier criteria it matched on, a human-approved cohort
+names the cohort and its approved scope. The two earn trust for different reasons, so a note
+crediting the wrong builder is a provenance error rather than a wording detail — it matters
+the moment a curated cohort is approved for `growth_base_rate` and becomes promotable.
+
 ## Immutable Forecast Ledger
 
 Every run receives a UTC microsecond `run_id` and writes:
@@ -705,6 +711,35 @@ The scaffold reports:
 
 Calibration output must not alter live decisions, weights, fair value, or position
 sizing.
+
+### Point-in-time standing（window-CAGR 路徑）
+
+Window-CAGR rows face the same out-of-sample test as the level path. A snapshot written
+on or after `window_to` is rejected as `not_point_in_time_forecast` — the window had fully
+elapsed, so it was never a forecast. A snapshot written after `window_from` but before
+`window_to` is still forward-looking at the far end and stays in the sample carrying
+`point_in_time_caveat: base_fiscal_year_elapsed_at_forecast_time`; dropping it would shrink
+an already-thin sample, and counting it silently would flatter the engine's out-of-sample
+record. The summary splits the two so neither hides behind the other:
+
+| Field | Meaning |
+|---|---|
+| `scored_with_point_in_time_caveat` | comparable rows whose base FY had closed — these taint the current WAPE |
+| `pending_with_point_in_time_caveat` | caveated rows not yet comparable — will taint it once they mature |
+| `not_point_in_time_count` | rows rejected outright as hindsight, never scored |
+
+Post-cutoff snapshots cannot produce caveated rows (the consensus lane is future-only), so
+these counts drain toward zero as the legacy vintage ages out.
+
+### CLI output vs in-process result
+
+`run_calibration()` returns `evaluations` (every row of every snapshot) plus
+`forecast_points` (the deduped set that is actually scored). The CLI prints everything
+except `evaluations`, replacing it with an `evaluations_omitted` block recording the
+dropped row count and `--full-evaluations` to restore it. `evaluations` grows with the
+ledger rather than with the work, so printing it by default buried the answer and grew
+without bound. In-process consumers are unaffected —
+`forward_expectations_success_criteria.py` reads `evaluations` for signed bias.
 
 ## Ticker-Neutral Source Discovery
 

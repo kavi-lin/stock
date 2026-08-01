@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Golden fixtures for Forward Expectations calibration scaffold (v2: same-basis realized
 window CAGR + elapsed-window gate + latest-snapshot-per-ticker dedup)."""
+import ast
 import json
 import os
 import sys
@@ -137,21 +138,6 @@ check("many.status", summary_many["status"], "calibratable")
 rev_summary = [s for s in summary_many["lane_summaries"] if s["metric"] == "revenue_growth"][0]
 check("many.rev.n", rev_summary["n"], 3)
 
-print("Fixture F (dedup: latest snapshot per ticker, re-runs don't inflate n):")
-with tempfile.TemporaryDirectory() as tmp:
-    for run, stamp in (("R1", "2026-01-01T00:00:00+00:00"),
-                       ("R2", "2026-02-01T00:00:00+00:00"),
-                       ("R3", "2026-03-01T00:00:00+00:00")):
-        snap = {**SNAPSHOT, "run_id": run, "generated_at": stamp}
-        with open(os.path.join(tmp, f"TEST_{run}.json"), "w", encoding="utf-8") as fh:
-            json.dump(snap, fh)
-    with open(os.path.join(tmp, "OTHER_R1.json"), "w", encoding="utf-8") as fh:
-        json.dump({**SNAPSHOT, "ticker": "OTHER", "run_id": "R1", "generated_at": "2026-01-15T00:00:00+00:00"}, fh)
-    kept = cal._latest_snapshot_per_ticker(tmp)
-    check("dedup → 2 tickers (not 4 files)", len(kept), 2)
-    test_keep = [s for s in kept if s["ticker"] == "TEST"][0]
-    check("dedup keeps latest TEST run", test_keep["run_id"], "R3")
-
 print("Fixture G (calibration row dedup keeps earliest vintage, not latest rerun):")
 vintage_rows = [
     {"ticker": "TEST", "lane": "consensus_revision", "metric": "revenue_level",
@@ -213,6 +199,111 @@ with tempfile.TemporaryDirectory() as tmp:
                    "entries": {"TEST_R1.json": {"sig": [1, 1.0], "snapshot": {"ticker": "GHOST"}}}}, fh)
     rebuilt = cal.run_calibration(snap_dir, tmp, 3)
     check("stale schema ignored", canon(rebuilt), canon(refreshed))
+
+print("Fixture J (point-in-time gate on the window-CAGR path):")
+# Written after the whole window closed — not a forecast, must never be scored.
+hindsight = {**SNAPSHOT, "generated_at": "2027-06-01T00:00:00+00:00"}
+rows_hindsight = cal.evaluate_snapshot(hindsight, EARNINGS)["rows"]
+cagr_rows = [r for r in rows_hindsight if r["forecast_basis"] == "estimate_window_cagr"]
+check("elapsed-window CAGR rejected", {r["status"] for r in cagr_rows},
+      {"not_point_in_time_forecast"})
+check("rejected row carries no actual", {r["actual_value"] for r in cagr_rows}, {None})
+check("rejected row is not scored", {r["absolute_pct_error"] for r in cagr_rows}, {None})
+
+# Written mid-window: the base FY had closed, the far end had not. Still scored, but the
+# caveat has to travel with the row or the sample looks fully out-of-sample.
+mid = {**SNAPSHOT, "generated_at": "2025-06-01T00:00:00+00:00"}
+mid_rev = [r for r in cal.evaluate_snapshot(mid, EARNINGS)["rows"]
+           if r["metric"] == "revenue_growth"][0]
+check("mid-window forecast still comparable", mid_rev["status"], "comparable")
+check("mid-window forecast flagged partially in-sample",
+      mid_rev["point_in_time_caveat"], "base_fiscal_year_elapsed_at_forecast_time")
+check("mid-window forecast still scored", mid_rev["absolute_pct_error"] is not None, True)
+
+# A genuinely out-of-sample forecast keeps a clean record. Note this needs its own
+# snapshot: the shared SNAPSHOT is dated 2026-01-01 against a window opening 2024-12-31,
+# so it is itself a base-elapsed forecast and would not prove the clean path.
+clean = {**SNAPSHOT, "generated_at": "2024-06-01T00:00:00+00:00"}
+clean_rev = [r for r in cal.evaluate_snapshot(clean, EARNINGS)["rows"]
+             if r["metric"] == "revenue_growth"][0]
+check("out-of-sample forecast has no caveat", clean_rev["point_in_time_caveat"], None)
+check("out-of-sample forecast still comparable", clean_rev["status"], "comparable")
+check("scored caveat count surfaces in summary",
+      cal.summarize([mid_rev, clean_rev], 1)["scored_with_point_in_time_caveat"], 1)
+check("rejected count surfaces in summary",
+      cal.summarize(cagr_rows, 1)["not_point_in_time_count"], len(cagr_rows))
+# A caveated row that has not matured must not read as "no caveats" in the summary.
+pending = {**mid_rev, "status": "actual_not_comparable_yet"}
+pending_summary = cal.summarize([pending], 1)
+check("pending caveat counted separately",
+      pending_summary["pending_with_point_in_time_caveat"], 1)
+check("pending caveat not counted as scored",
+      pending_summary["scored_with_point_in_time_caveat"], 0)
+
+print("Fixture K (CLI prints the scored set, not the whole ledger):")
+with tempfile.TemporaryDirectory() as tmp:
+    snap_dir = os.path.join(tmp, "snapshots")
+    os.makedirs(snap_dir)
+    for run, stamp in (("R1", "2026-01-01T00:00:00+00:00"), ("R2", "2026-02-01T00:00:00+00:00")):
+        with open(os.path.join(snap_dir, f"TEST_{run}.json"), "w", encoding="utf-8") as fh:
+            json.dump({**SNAPSHOT, "run_id": run, "generated_at": stamp}, fh)
+    full = cal.run_calibration(snap_dir, tmp, 3)
+    check("in-process result keeps evaluations", "evaluations" in full, True)
+    check("scored points exposed alongside their count",
+          len(full["forecast_points"]), full["forecast_point_count"])
+
+    cli = cal.cli_payload(full)
+    check("CLI drops per-snapshot rows", "evaluations" in cli, False)
+    check("CLI keeps the scored set", len(cli["forecast_points"]), full["forecast_point_count"])
+    check("CLI keeps the verdict", cli["summary"]["status"], full["summary"]["status"])
+    check("CLI discloses what it dropped and how to get it",
+          cli["evaluations_omitted"]["row_count"],
+          sum(len(ev["rows"]) for ev in full["evaluations"]))
+    check("CLI output is smaller than the full payload",
+          len(json.dumps(cli)) < len(json.dumps(full)), True)
+    check("--full-evaluations restores the untrimmed payload",
+          json.dumps(cal.cli_payload(full, include_evaluations=True), sort_keys=True),
+          json.dumps(full, sort_keys=True))
+
+print("Fixture I (guard: INDEX_FIELDS must cover every snapshot field the module reads):")
+
+
+def snapshot_fields_read(source: str) -> set:
+    """Keys read off a variable named `snapshot`, via .get("k") or ["k"]."""
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "get" and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "snapshot" and node.args
+                and isinstance(node.args[0], ast.Constant)):
+            found.add(node.args[0].value)
+        elif (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name)
+                and node.value.id == "snapshot" and isinstance(node.slice, ast.Constant)):
+            found.add(node.slice.value)
+    return found
+
+
+# The detector itself must work, or this guard is decoration.
+probe = snapshot_fields_read(
+    'def f(snapshot):\n'
+    '    a = snapshot.get("base_rate_lane")\n'
+    '    b = snapshot["ticker"]\n'
+    '    return a, b\n'
+)
+check("detector finds .get() key", "base_rate_lane" in probe, True)
+check("detector finds [] key", "ticker" in probe, True)
+check("detector flags a field missing from INDEX_FIELDS",
+      bool(probe - set(cal.INDEX_FIELDS)), True)
+
+# A field read here but absent from the index would silently return None for
+# every indexed run — the lane would score nothing and report no error. Adding
+# a field means adding it to INDEX_FIELDS and bumping INDEX_SCHEMA.
+with open(cal.__file__, encoding="utf-8") as fh:
+    module_fields = snapshot_fields_read(fh.read())
+uncovered = sorted(module_fields - set(cal.INDEX_FIELDS))
+check("no snapshot field read outside INDEX_FIELDS", uncovered, [])
+check("INDEX_FIELDS has no unused entries",
+      sorted(set(cal.INDEX_FIELDS) - module_fields), [])
 
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

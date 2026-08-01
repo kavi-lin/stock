@@ -266,6 +266,28 @@ def _realized_fiscal_level(earnings_cache, target_date, metric, snapshot_generat
     return (value, "comparable") if value is not None else (None, "actual_basis_unavailable")
 
 
+def _cagr_point_in_time(snapshot_generated_at, window_from, window_to):
+    """Classify a CAGR forecast's out-of-sample standing at the moment it was written.
+
+    Returns (status_override, caveat). The level path already refuses a forecast
+    created after its target closed; a window CAGR deserves the same test, or a
+    snapshot written once the whole window had elapsed would be scored as a
+    prediction. A window whose *base* year had already closed is still forward-looking
+    at the far end, so it stays in the sample carrying a caveat instead of being
+    dropped — silently discarding it would shrink an already-empty sample, and
+    silently counting it would overstate the engine's out-of-sample record.
+    """
+    generated = _date(snapshot_generated_at)
+    start, end = _date(window_from), _date(window_to)
+    if generated is None or end is None:
+        return None, None
+    if generated >= end:
+        return "not_point_in_time_forecast", None
+    if start is not None and generated >= start:
+        return None, "base_fiscal_year_elapsed_at_forecast_time"
+    return None, None
+
+
 def _forecast_points(snapshot: dict) -> list[dict]:
     points = []
     consensus = snapshot.get("consensus_lane") or {}
@@ -308,7 +330,7 @@ def evaluate_snapshot(snapshot: dict, earnings_cache: dict | None = None) -> dic
     rows = []
     for point in _forecast_points(snapshot):
         actual_value = direction_hit = ape = None
-        actual_basis = None
+        actual_basis = point_in_time_caveat = None
         if point["forecast_basis"] == "future_level_snapshot":
             actual_value, status = _realized_fiscal_level(
                 earnings_cache, point.get("window_to"), point["metric"], snapshot.get("generated_at"),
@@ -319,17 +341,23 @@ def evaluate_snapshot(snapshot: dict, earnings_cache: dict | None = None) -> dic
                 # Direction on two positive level values is meaningless; score error only.
                 direction_hit = None
         else:
-            actual_value, status = _realized_window_cagr(
-                earnings_cache, point.get("window_from"), point.get("window_to"), point["metric"],
+            status_override, point_in_time_caveat = _cagr_point_in_time(
+                snapshot.get("generated_at"), point.get("window_from"), point.get("window_to"),
             )
-            if status == "window_unparseable":
-                status = "actual_basis_unavailable"
-            if status == "comparable":
-                actual_basis = "realized_window_cagr"
-                ape = _abs_pct_error(point["forecast_value"], actual_value)
-                direction_hit = _direction_hit(point["forecast_value"], actual_value)
+            if status_override:
+                status = status_override
             else:
-                actual_value = None
+                actual_value, status = _realized_window_cagr(
+                    earnings_cache, point.get("window_from"), point.get("window_to"), point["metric"],
+                )
+                if status == "window_unparseable":
+                    status = "actual_basis_unavailable"
+                if status == "comparable":
+                    actual_basis = "realized_window_cagr"
+                    ape = _abs_pct_error(point["forecast_value"], actual_value)
+                    direction_hit = _direction_hit(point["forecast_value"], actual_value)
+                else:
+                    actual_value = None
         rows.append({
             **point,
             "ticker": ticker,
@@ -338,6 +366,7 @@ def evaluate_snapshot(snapshot: dict, earnings_cache: dict | None = None) -> dic
             "actual_basis": actual_basis,
             "actual_as_of": as_of,
             "status": status,
+            "point_in_time_caveat": point_in_time_caveat,
             "absolute_pct_error": round(ape, 4) if ape is not None else None,
             "direction_hit": direction_hit,
         })
@@ -373,27 +402,19 @@ def summarize(rows: list[dict], min_n: int = MIN_CALIBRATION_N) -> dict:
         "comparable_count": len(comparable),
         "status": "calibratable" if len(comparable) >= min_n else "insufficient_sample",
         "min_required_n": min_n,
+        # Not fully out-of-sample: the window's base year had already closed when the
+        # forecast was written. Split scored from pending, because a single count would
+        # read as "no caveats" while rows carrying one are still waiting to mature. A
+        # WAPE built partly on the scored ones flatters the true out-of-sample record.
+        "scored_with_point_in_time_caveat": sum(
+            1 for row in comparable if row.get("point_in_time_caveat")),
+        "pending_with_point_in_time_caveat": sum(
+            1 for row in rows if row.get("point_in_time_caveat") and row.get("status") != "comparable"),
+        "not_point_in_time_count": sum(
+            1 for row in rows if row.get("status") == "not_point_in_time_forecast"),
         "lane_summaries": lane_summaries,
         "policy": "Small samples are directional only and must not change live decisions.",
     }
-
-
-def _latest_snapshot_per_ticker(snapshot_dir: str) -> list[dict]:
-    """Re-running the engine on the same ticker writes many near-identical snapshots; counting
-    each as an independent forecast inflated the sample (8 AAPL re-runs → 8 rows). Keep only the
-    latest snapshot per ticker so the calibration sample reflects true breadth, not re-run count."""
-    latest = {}
-    for path in _snapshot_files(snapshot_dir):
-        snapshot = _read_json(path)
-        if not isinstance(snapshot, dict):
-            continue
-        ticker = (snapshot.get("ticker") or "").upper()
-        if not ticker:
-            continue
-        stamp = snapshot.get("generated_at") or snapshot.get("run_id") or os.path.basename(path)
-        if ticker not in latest or stamp > latest[ticker][0]:
-            latest[ticker] = (stamp, snapshot)
-    return [snapshot for _, snapshot in sorted(latest.values(), key=lambda item: item[0])]
 
 
 def _dedupe_forecast_rows(rows: list[dict]) -> list[dict]:
@@ -432,13 +453,34 @@ def run_calibration(snapshot_dir: str = SNAPSHOT_DIR, earnings_cache_dir: str = 
         all_rows.extend(evaluation["rows"])
     deduped_rows = _dedupe_forecast_rows(all_rows)
     return {
-        "engine": "forward_expectations_calibration.py v3 (realized FY levels + earliest-vintage dedup)",
+        "engine": "forward_expectations_calibration.py v4 (point-in-time CAGR gate + scored-point CLI)",
         "snapshot_count": len(evaluations),
         "forecast_point_count": len(deduped_rows),
         "deduped_from_rows": len(all_rows),
         "summary": summarize(deduped_rows, min_n),
+        "forecast_points": deduped_rows,
         "evaluations": evaluations,
     }
+
+
+def cli_payload(calibration: dict, *, include_evaluations: bool = False) -> dict:
+    """Trim the full result down to what a person running this from a shell needs.
+
+    `evaluations` carries every row of every snapshot, so it grows with the ledger
+    rather than with the work — 685 snapshots produce 2692 rows, of which dedup keeps
+    99 as distinct forecasts. Printing all of them buries the scored set that is the
+    actual answer. The in-process return value still carries `evaluations` untouched;
+    success_criteria reads it for signed bias.
+    """
+    if include_evaluations:
+        return calibration
+    trimmed = {key: value for key, value in calibration.items() if key != "evaluations"}
+    trimmed["evaluations_omitted"] = {
+        "reason": "per-snapshot rows grow with the ledger; forecast_points is the scored set",
+        "row_count": sum(len(ev.get("rows") or []) for ev in calibration.get("evaluations") or []),
+        "restore_with": "--full-evaluations",
+    }
+    return trimmed
 
 
 def main():
@@ -450,10 +492,13 @@ def main():
                     help="calibration index location (default: sibling of --snapshot-dir)")
     ap.add_argument("--no-index", action="store_true",
                     help="read every raw snapshot; use to verify the index agrees")
+    ap.add_argument("--full-evaluations", action="store_true",
+                    help="also print per-snapshot rows (grows with the ledger)")
     args = ap.parse_args()
+    calibration = run_calibration(args.snapshot_dir, args.earnings_cache_dir, args.min_n,
+                                  use_index=not args.no_index, index_path=args.index_path)
     print(json.dumps(
-        run_calibration(args.snapshot_dir, args.earnings_cache_dir, args.min_n,
-                        use_index=not args.no_index, index_path=args.index_path),
+        cli_payload(calibration, include_evaluations=args.full_evaluations),
         ensure_ascii=False,
         indent=2,
         allow_nan=False,

@@ -1,5 +1,11 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-02 ｜帶前置篩選的計數欄位，0 可能是「被篩掉」而不是「沒有」
+- 情境：v4.79.0 給 calibration 加 `point_in_time_caveat_count`，統計有多少預測不是完全 out-of-sample
+- 坑：欄位只數 `status == "comparable"` 的 row。真實語料跑出來是 **0**，看起來像「沒有任何 caveat」——實際有 19 筆帶 caveat 的 row 卡在 `actual_not_comparable_yet`，只是還沒成熟。因為今天 comparable 恰好是 0，這個欄位在最需要它示警的時候永遠顯示 0，測試也照樣全綠（fixture 裡 comparable 不是 0）
+- 修法：任何「計數 / 比例」欄位若有前置篩選，落地前先問「這個 0 是真的沒有，還是被篩選條件擋掉」；把被擋掉的那一群也給一個欄位（本次拆成 `scored_with_` / `pending_with_`）。驗收不能只跑 fixture，要在真實語料上看一次數字並解釋每個 0
+- 已回寫規則？：否（屬驗收通則，與 LESSONS 既有「只驗 happy path 等於沒驗」同源；若再犯則合併寫進 MAINTENANCE 收尾 checklist）
+
 ## 2026-08-02 ｜修引擎不重跑 snapshot，archive 最新一筆仍是壞資料
 - 情境：review v4.78.0 forward-expectations 修正（5274299 cutoff + 77642f4 scope gate）
 - 坑：`MU_20260801T230255Z.json` 生成於兩個 commit 之間（07:02，scope fix 07:04 才進），base_rate_lane 帶著被自動晉升的 -9% cohort median 與錯誤 note，成為 archive 最新 MU snapshot——任何讀 latest snapshot 的報表都會拿到 fix 前的數值。程式碼與測試全對，壞的是資料層
