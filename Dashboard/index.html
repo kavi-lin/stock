@@ -61,8 +61,8 @@
     <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
 
     <!-- Main Content -->
-    <main class="ml-64 flex-1 flex flex-col">
-        
+    <main class="ml-64 flex-1 min-w-0 overflow-x-clip flex flex-col">
+
         <!-- Header -->
         <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-10">
             <div class="flex items-center gap-6">
@@ -76,7 +76,7 @@
                     <span class="text-sm font-semibold">KAVI_LIN</span>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-4">
                 <span id="last-update" class="inline-flex items-center"></span>
                 <div class="relative" id="preflight-wrap">
@@ -100,13 +100,17 @@
             </div>
         </header>
 
-        <!-- Dashboard Grid -->
-        <div class="p-6 space-y-5">
+        <!-- ════════════════════════════════════════════════════════════════
+             Command Center — 全新資訊架構 (V4.55.0)
+             Top-down decision funnel:
+               ① VERDICT  → ② STATE  → ③ MOOD & TAPE
+               ④ SECTORS  → ⑤ IDEAS  → ⑥ DESK
+             Every live ID preserved; 6 newest feeds surfaced as bound widgets.
+        ════════════════════════════════════════════════════════════════ -->
+        <div class="p-6 space-y-6">
 
-            <!-- ══ Zone A: Command — AI verdict hero + binary risk + 8-gauge status strip ══ -->
-            <!-- Layer 1: Today's AI Verdict HERO -->
+            <!-- ══════════ ① VERDICT — 委員會今日裁決 ══════════ -->
             <div id="today-verdict-card" class="hidden glass-card p-6" style="border-left:4px solid #22c55e;border-radius:8px">
-                <!-- Header: stance pill + headline + confidence -->
                 <div class="flex items-baseline gap-3 flex-wrap mb-3">
                     <span id="tv-stance" class="text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded" style="background:rgba(234,179,8,0.15);color:#eab308">NEUTRAL</span>
                     <h2 id="tv-headline" class="text-lg font-bold flex-1" style="color:var(--text-card-title)">—</h2>
@@ -139,8 +143,6 @@
                     </div>
                 </div>
 
-                <!-- V1.73.4 — three-signal-mini removed; replaced by sector-status-row hero (8 circular gauges + warning flags) below.
-                     Stub kept hidden so script.js renderThreeSignalMini calls don't error. -->
                 <div id="three-signal-mini" class="hidden"></div>
 
                 <!-- Fallback prose (shown only when today_verdict missing) -->
@@ -150,18 +152,20 @@
                 </div>
             </div>
 
-            <!-- ── V4.5 — Kill-Trigger Monitor banner（Red Team 推翻條件每日檢查；scripts/kill_trigger_monitor.py → kill_triggers.json）-->
+            <!-- Kill-Trigger Monitor banner (Red Team 推翻條件每日檢查) -->
             <div id="kill-trigger-banner" class="hidden"></div>
 
-            <!-- ── V4.6 — Today 工作台：該做的事 / 最新產出 / 晨報（/api/today + today-panel.js）-->
-            <div class="tw-stage-label">盤前 · PRE-MARKET</div>
+            <!-- ══════════ ② STATE — 市場狀態 ══════════ -->
+            <div class="ix-section-label">② 市場狀態 · MARKET STATE</div>
+
+            <!-- Today 工作台：該做的事 / 最新產出 / 晨報 -->
             <section id="today-workbench" class="grid grid-cols-1 lg:grid-cols-3 gap-5 hidden">
                 <div class="glass-card p-4" id="tw-actions"></div>
                 <div class="glass-card p-4" id="tw-outputs"></div>
                 <div class="glass-card p-4" id="tw-brief"></div>
             </section>
 
-            <!-- ── V1.73.4 — Binary risk (adaptive) — promoted from sector page (was older simple list) -->
+            <!-- Binary risk (adaptive) -->
             <div id="binary-alert-section" class="hidden">
                 <div class="binary-adaptive">
                     <div class="binary-adaptive-header">
@@ -173,57 +177,46 @@
                 </div>
             </div>
 
-            <!-- ── V1.73.4 — Status row hero: 8 circular gauges + warning flags (promoted from sector page) ── -->
+            <!-- Status row hero: 8 circular gauges + warning flags -->
             <section id="risk-overview" class="hidden">
                 <div class="sector-status-row">
-                    <!-- 4 numeric gauges -->
                     <div id="pill-breadth"   data-signal-tip="breadth"></div>
                     <div id="pill-ftd"       data-signal-tip="ftd"></div>
                     <div id="pill-marketop"  data-signal-tip="market_top"></div>
                     <div id="pill-fg"        data-signal-tip="fg"></div>
-                    <!-- 4 categorical / scaled gauges -->
                     <div id="pill-regime"    data-signal-tip="regime"></div>
                     <div id="pill-cycle"     data-signal-tip="cycle"></div>
                     <div id="pill-exposure"  data-signal-tip="exposure"></div>
                     <div id="pill-vix"       data-signal-tip="vix"></div>
-                    <!-- Warning flags (severity-tiered cards) — render-order tail -->
                     <div class="flex-1 flex flex-wrap gap-2 items-center justify-end" id="warning-flags-row"></div>
                 </div>
             </section>
 
-            <div class="tw-stage-label">盤中 · INTRADAY</div>
-
-            <!-- ══ Zone B: Signals band — sentiment + narrative + today-focus, consolidated 3-up.
-                 Previously three separate full-width strips competing for attention. ══ -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="signals-band">
-
-                <!-- Market sentiment trend (compact) — rendered by TrendChart (trend-chart.js).
-                     Click through to break-news.html for the full chart. -->
-                <a href="break-news.html" class="glass-card block p-4 no-underline" id="sentiment-trend-card">
-                    <div id="index-trend-mount"></div>
-                </a>
-
-                <!-- ── Industry Trend mini-strip (V3.33.0) — REAL trailing 領漲↔領跌 (replaces dead Narrative 焦點) ── -->
-                <a href="radar.html" class="glass-card block p-3 no-underline" id="industry-mini-strip"
-                   style="border-left:3px solid #34d399">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">產業趨勢</span>
-                        <span class="text-[10px] font-mono text-zinc-500 ml-auto" id="industry-mini-updated">—</span>
-                    </div>
-                    <div class="text-[11px] font-mono space-y-1" id="industry-mini-rows">
-                        <span class="text-zinc-500">載入中…</span>
-                    </div>
-                </a>
-
-                <!-- M3: Today's Focus Ticker (cross-module intersection — Top 3 with overheat guard) -->
-                <div id="focus-ticker-card" class="hidden"></div>
+            <!-- ══════════ ③ MOOD & TAPE — 情緒與盤中 (NEW) ══════════ -->
+            <div class="ix-section-label">③ 情緒與盤中 · MOOD &amp; TAPE</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Market mood composite (market_mood.json — VIX/SKEW/F&G/P-C) -->
+                <div class="glass-card p-4" id="mood-composite-card">
+                    <div class="ix-skeleton">載入市場氛圍…</div>
+                </div>
+                <!-- Social buzz (trending_tickers.json) -->
+                <div class="glass-card p-4" id="social-buzz-card">
+                    <div class="ix-skeleton">載入社群熱度…</div>
+                </div>
+                <!-- Intraday tape (intraday_mood.json + intraday_spikes.json) -->
+                <div class="glass-card p-4" id="intraday-tape-card" style="border-left:3px solid #34d399">
+                    <div class="ix-skeleton">載入盤中異動…</div>
+                </div>
             </div>
+            <!-- Multi-day sentiment trend chart (trend-chart.js) -->
+            <a href="break-news.html" class="glass-card block p-4 no-underline" id="sentiment-trend-card">
+                <div id="index-trend-mount"></div>
+            </a>
 
-            <!-- ══ Zone C: Intel teasers (3-up) ══ -->
-            <!-- Layer 3: Cross-module Deep Dive (3-column teaser) -->
+            <!-- ══════════ ④ SECTORS & THEMES — 產業與題材 ══════════ -->
+            <div class="ix-section-label">④ 產業與題材 · SECTORS &amp; THEMES</div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <!-- HOT Sectors Top 3 -->
+                <!-- HOT Sectors Top 3 (committee scoring) -->
                 <div class="glass-card p-4">
                     <div class="flex items-center gap-2 mb-3">
                         <i data-lucide="flame" class="w-3.5 h-3.5 text-emerald-500"></i>
@@ -233,14 +226,34 @@
                     <div id="hot-sectors-teaser" class="space-y-2"></div>
                 </div>
 
-                <!-- Latest News Verdicts -->
-                <div class="glass-card p-4">
-                    <div class="flex items-center gap-2 mb-3">
-                        <i data-lucide="newspaper" class="w-3.5 h-3.5 text-blue-400"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="teaser-news-title">最新裁決新聞</span>
-                        <a href="news.html" class="ml-auto text-[10px] text-zinc-500 hover:text-blue-400 transition-all">→</a>
-                    </div>
-                    <div id="news-verdicts-teaser" class="space-y-2"></div>
+                <!-- Retail sector pulse (retail_sector_pulse.json — NEW) -->
+                <div class="glass-card p-4" id="retail-pulse-card">
+                    <div class="ix-skeleton">載入零售產業脈動…</div>
+                </div>
+
+                <!-- Industry trailing trend + Today's focus ticker (stacked) -->
+                <div class="space-y-5">
+                    <a href="radar.html" class="glass-card block p-3 no-underline" id="industry-mini-strip" style="border-left:3px solid #34d399">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">產業趨勢</span>
+                            <span class="text-[10px] font-mono text-zinc-500 ml-auto" id="industry-mini-updated">—</span>
+                        </div>
+                        <div class="text-[11px] font-mono space-y-1" id="industry-mini-rows">
+                            <span class="text-zinc-500">載入中…</span>
+                        </div>
+                    </a>
+                    <!-- M3: Today's Focus Ticker (cross-module intersection) -->
+                    <div id="focus-ticker-card" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- ══════════ ⑤ IDEAS — 可執行想法 ══════════ -->
+            <div class="ix-section-label">⑤ 可執行想法 · ACTIONABLE IDEAS</div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- This week's playbook baskets (playbook.json — NEW) -->
+                <div class="glass-card p-4" id="playbook-card">
+                    <div class="ix-skeleton">載入本週投資方案…</div>
                 </div>
 
                 <!-- Momentum Top -->
@@ -252,12 +265,20 @@
                     </div>
                     <div id="momentum-teaser" class="space-y-2"></div>
                 </div>
+
+                <!-- Latest News Verdicts -->
+                <div class="glass-card p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="newspaper" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500" id="teaser-news-title">最新裁決新聞</span>
+                        <a href="news.html" class="ml-auto text-[10px] text-zinc-500 hover:text-blue-400 transition-all">→</a>
+                    </div>
+                    <div id="news-verdicts-teaser" class="space-y-2"></div>
+                </div>
             </div>
 
-            <div class="tw-stage-label">盤後 · POST-MARKET</div>
-
-            <!-- ══ Zone D: Action — recent analysis + quick-launch engine ══ -->
-            <!-- Layer 4: Recent Analysis + Quick Launch -->
+            <!-- ══════════ ⑥ DESK — 工作台與啟動 ══════════ -->
+            <div class="ix-section-label">⑥ 工作台與探索 · DESK</div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
                 <!-- Recent Analysis -->
@@ -308,11 +329,13 @@
 
                     <!-- Global Analyze Queue (compact strip) — mounted by analyze-queue.js -->
                     <div id="analyze-queue-widget"></div>
+
+                    <!-- Exploration teaser: knowledge graph + supply chain (NEW) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1" id="explore-teaser"></div>
                 </div>
             </div>
 
-            <!-- ══ Zone D: Experimental — Structural Watchlist (V2.19.1), collapsed by default.
-                 Section stays JS-gated (renderStructuralWatchlist toggles .hidden); body collapses. ══ -->
+            <!-- Structural Watchlist (experimental, collapsed) -->
             <section id="structural-watchlist" class="space-y-3 hidden">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold flex items-center gap-2">
@@ -483,5 +506,6 @@
     <script src="trend-chart.js"></script>
     <script src="today-panel.js"></script>
     <script src="script.js"></script>
+    <script src="page-index-extra.js"></script>
 </body>
 </html>

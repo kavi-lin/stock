@@ -25,6 +25,8 @@ const i18n = {
       news:      "即時新聞",
       break_news:"突發辯論",
       mood:      "市場氛圍",
+      intraday:  "盤中評估",
+      intraday_eval: "盤中",
       earnings:  "財報分析",
       calendar:  "決策日曆",
       graph:     "知識圖譜",
@@ -33,6 +35,17 @@ const i18n = {
       office:    "AI 辦公室",
       ops:       "Script 工具箱",
       logs:      "系統日誌",
+    },
+
+    // ── Playbook page (zh) ─────────────────────────────────────────
+    playbook_page: {
+      generate:     "產生本週方案",
+      generating:   "產生中",
+      confirm:      "產生本週三籃 $100k 投資方案？\n流程：抓報價 → opus 選股 → 渲染，約 10–20 分鐘、~$4 tokens。",
+      toast_queued: "已排入佇列：本週方案生成（約 10–20 分鐘）",
+      toast_dup:    "本週方案已在生成中",
+      toast_done:   "本週投資方案已更新",
+      toast_fail:   "生成失敗：{err}",
     },
 
     // ── Market Mood page (zh) ──────────────────────────────────────
@@ -1128,6 +1141,8 @@ const i18n = {
       news:      "News Feed",
       break_news:"Break News",
       mood:      "Market Mood",
+      intraday:  "Intraday Mood",
+      intraday_eval: "Intraday",
       earnings:  "Earnings",
       calendar:  "Decision Calendar",
       graph:     "Knowledge Graph",
@@ -1136,6 +1151,17 @@ const i18n = {
       office:    "AI Office",
       ops:       "Ops Scripts",
       logs:      "System Logs",
+    },
+
+    // ── Playbook page (en) ─────────────────────────────────────────
+    playbook_page: {
+      generate:     "Generate this week",
+      generating:   "Generating",
+      confirm:      "Generate this week's three $100k baskets?\nFlow: fetch quotes → opus selection → render. ~10–20 min, ~$4 tokens.",
+      toast_queued: "Queued: weekly playbook generation (~10–20 min)",
+      toast_dup:    "Weekly playbook is already generating",
+      toast_done:   "Weekly playbook updated",
+      toast_fail:   "Generation failed: {err}",
     },
 
     // ── Market Mood page (en) ──────────────────────────────────────

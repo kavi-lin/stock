@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | 策略回測</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .bt-chart { position: relative; height: 300px; }
+        .bt-chart.short { height: 190px; }
+        .bt-tile-value { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+        .bt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .bt-table th, .bt-table td { text-align: right; padding: 5px 10px; border-bottom: 1px solid rgba(161,161,170,0.12); font-variant-numeric: tabular-nums; }
+        .bt-table th:first-child, .bt-table td:first-child { text-align: left; }
+        .bt-table th { color: #71717a; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .bt-heat { display: grid; gap: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+        .bt-heat-cell { border-radius: 6px; padding: 8px 0; text-align: center; cursor: default; transition: transform .1s; }
+        .bt-heat-cell:hover { transform: scale(1.06); }
+        .bt-heat-cell.current { outline: 2px solid #8b5cf6; outline-offset: 1px; }
+        .bt-heat-axis { color: #71717a; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+        .bt-chip { cursor: pointer; transition: all .15s; }
+        .bt-chip:hover { border-color: rgba(139,92,246,0.5); }
+        /* 策略選擇 modal + 卡片 */
+        #bt-modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        #bt-modal.hidden { display: none; }
+        .bt-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); }
+        .bt-modal-panel { position: relative; max-width: 980px; width: 100%; max-height: 88vh; overflow-y: auto; border-radius: 16px; }
+        .bt-strategy-card { cursor: pointer; border: 1px solid rgba(161,161,170,0.18); border-radius: 12px; padding: 14px; transition: all .15s; display: flex; flex-direction: column; gap: 8px; }
+        .bt-strategy-card:hover { border-color: rgba(139,92,246,0.55); transform: translateY(-2px); }
+        .bt-strategy-card.selected { border-color: #8b5cf6; box-shadow: 0 0 0 1px #8b5cf6; }
+        .bt-strategy-card svg.sketch { width: 100%; height: 44px; opacity: .9; }
+        .bt-cat-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 9999px; letter-spacing: .06em; }
+        .bt-cat-trend { background: rgba(16,185,129,0.14); color: #10b981; }
+        .bt-cat-reversion { background: rgba(59,130,246,0.14); color: #3b82f6; }
+        .bt-cat-volume { background: rgba(245,158,11,0.14); color: #f59e0b; }
+        .bt-cat-house { background: rgba(139,92,246,0.16); color: #8b5cf6; }
+        .bt-rank-chip { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: #8b5cf6; }
+    </style>
+</head>
+<body class="flex min-h-screen transition-all" data-page="backtest">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="ml-64 flex-1 flex flex-col min-w-0">
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-20">
+            <div class="flex items-center gap-3">
+                <i data-lucide="flask-conical" class="w-5 h-5 text-violet-500"></i>
+                <h2 class="text-lg font-bold">策略回測</h2>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden sm:block">Quant Backtest</span>
+                <span class="experimental-badge">
+                    <i data-lucide="flask-conical" class="w-3 h-3"></i>
+                    <span>探索層 · 不入委員會決策</span>
+                </span>
+            </div>
+            <span id="bt-asof" class="text-[10px] font-mono text-zinc-500"></span>
+        </header>
+
+        <div class="p-8 space-y-5 max-w-[1200px]">
+
+            <!-- 參數表單 -->
+            <section class="glass-card p-5">
+                <div class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">Ticker</label>
+                        <input id="bt-ticker" type="text" value="NVDA" maxlength="9"
+                               class="w-28 bg-transparent border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-mono font-bold uppercase focus:border-violet-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">策略模板</label>
+                        <button id="bt-strategy-btn" type="button"
+                                class="flex items-center gap-2 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm hover:border-violet-500 transition-all">
+                            <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-violet-500"></i>
+                            <span id="bt-strategy-label" class="font-bold">均線交叉</span>
+                            <span id="bt-strategy-rank" class="bt-rank-chip"></span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-500"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">回測窗</label>
+                        <select id="bt-period" class="bg-transparent border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-violet-500">
+                            <option value="3y">3 年</option>
+                            <option value="5y" selected>5 年</option>
+                            <option value="10y">10 年</option>
+                        </select>
+                    </div>
+                    <div id="bt-params" class="flex items-end gap-4"></div>
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">單邊成本 bps</label>
+                        <input id="bt-cost" type="number" value="10" min="0" max="100"
+                               class="w-20 bg-transparent border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-mono outline-none focus:border-violet-500">
+                    </div>
+                    <button id="bt-run" class="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                        <span id="bt-run-label">執行回測</span>
+                    </button>
+                    <span id="bt-status" class="text-xs text-zinc-500 font-mono"></span>
+                </div>
+                <div id="bt-recent" class="flex flex-wrap gap-2 mt-4"></div>
+            </section>
+
+            <!-- 結果區 -->
+            <div id="bt-result" class="space-y-5 hidden">
+
+                <div id="bt-caveats" class="glass-card p-4 border-l-2 border-amber-500/60 text-xs text-zinc-500 leading-relaxed"></div>
+
+                <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" id="bt-tiles"></section>
+
+                <section class="glass-card p-5">
+                    <h3 class="text-sm font-bold mb-1">權益曲線（log）— 策略 vs 買進持有</h3>
+                    <div class="bt-chart"><canvas id="bt-ch-equity"></canvas></div>
+                </section>
+
+                <section class="glass-card p-5">
+                    <h3 class="text-sm font-bold mb-1">價格與進出場點</h3>
+                    <div class="bt-chart"><canvas id="bt-ch-price"></canvas></div>
+                    <p class="text-[11px] text-zinc-500 mt-2" id="bt-rule-note"></p>
+                </section>
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <section class="glass-card p-5">
+                        <h3 class="text-sm font-bold mb-1">回撤</h3>
+                        <div class="bt-chart short"><canvas id="bt-ch-dd"></canvas></div>
+                    </section>
+                    <section class="glass-card p-5" id="bt-score-panel">
+                        <h3 class="text-sm font-bold mb-1">動能綜合分與持倉區間</h3>
+                        <div class="bt-chart short"><canvas id="bt-ch-score"></canvas></div>
+                    </section>
+                </div>
+
+                <section class="glass-card p-5">
+                    <h3 class="text-sm font-bold mb-1">參數掃描 — Sharpe 熱力圖</h3>
+                    <p class="text-[11px] text-zinc-500 mb-3">看「高原」不是「尖峰」：只有單一參數點表現好 = 曲線擬合訊號。紫框 = 當前參數。</p>
+                    <div id="bt-heatmap" class="bt-heat"></div>
+                </section>
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <section class="glass-card p-5">
+                        <h3 class="text-sm font-bold mb-2">逐年報酬（%）</h3>
+                        <table class="bt-table" id="bt-yearly"></table>
+                    </section>
+                    <section class="glass-card p-5">
+                        <h3 class="text-sm font-bold mb-2">交易清單</h3>
+                        <div class="max-h-72 overflow-y-auto custom-scrollbar">
+                            <table class="bt-table" id="bt-trades"></table>
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- 策略選擇 popup dialog（page-backtest.js 渲染卡片） -->
+    <div id="bt-modal" class="hidden" role="dialog" aria-modal="true" aria-label="選擇策略模板">
+        <div class="bt-modal-backdrop" id="bt-modal-backdrop"></div>
+        <div class="bt-modal-panel glass-card p-6">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-violet-500"></i>
+                    <h3 class="text-base font-bold">選擇策略模板</h3>
+                </div>
+                <button id="bt-modal-close" class="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <p id="bt-modal-note" class="text-[11px] text-zinc-500 mb-4"></p>
+            <div id="bt-modal-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="page-backtest.js"></script>
+</body>
+</html>

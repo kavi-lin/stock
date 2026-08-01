@@ -288,8 +288,114 @@ function bindToggle() {
   });
 }
 
+// ── One-click weekly playbook generation ───────────────────────────────
+// Reuses the unified protocol queue (POST /api/protocol-queue {name:'playbook'}),
+// the same path as 分析 / sector / news. Exploration layer — does NOT enter
+// investment_protocol decisions.
+let _pbGenTimer = null;
+let _pbActive = false;   // a playbook run is queued or running
+
+const _pbT = () => (window.i18n?.[UI.currentLang]?.playbook_page) || {};
+
+function _pbFmtElapsed(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+}
+
+function _pbSetButtons(disabled, label) {
+  ['pb-generate-btn', 'pb-generate-btn-empty'].forEach(id => {
+    const b = $(id);
+    if (b) b.disabled = disabled;
+  });
+  ['pb-generate-label', 'pb-generate-label-empty'].forEach(id => {
+    const el = $(id);
+    if (el && label != null) el.textContent = label;
+  });
+}
+
+async function pollGenStatus() {
+  let st;
+  try {
+    const r = await fetch('/api/protocol-queue?v=' + Date.now());
+    st = await r.json();
+  } catch (_) { return; }
+  const tr = _pbT();
+  const active = st.active && st.active.name === 'playbook' ? st.active : null;
+  const queued = (st.queue || []).some(q => q.name === 'playbook');
+
+  if (active) {
+    _pbActive = true;
+    _pbSetButtons(true, `${tr.generating || '產生中'} ${_pbFmtElapsed(active.elapsed_sec)}`);
+    return;
+  }
+  if (queued) {
+    _pbActive = true;
+    _pbSetButtons(true, (UI.currentLang === 'zh' ? '排隊中…' : 'Queued…'));
+    return;
+  }
+  // Not active and not queued. If we were tracking a run, it just finished.
+  if (_pbActive) {
+    _pbActive = false;
+    if (_pbGenTimer) { clearInterval(_pbGenTimer); _pbGenTimer = null; }
+    _pbSetButtons(false, tr.generate || '產生本週方案');
+    const last = (st.recent || []).find(r => r.name === 'playbook');
+    if (last && last.status === 'done') {
+      UI.showToast?.(tr.toast_done || '本週投資方案已更新', 'success');
+      load();   // re-fetch playbook.json
+    } else if (last && last.status === 'error') {
+      UI.showToast?.((tr.toast_fail || '生成失敗：{err}').replace('{err}', last.error || 'error'), 'error');
+    }
+  } else {
+    // Idle on load — ensure button shows the default label.
+    _pbSetButtons(false, tr.generate || '產生本週方案');
+    if (_pbGenTimer) { clearInterval(_pbGenTimer); _pbGenTimer = null; }
+  }
+}
+
+async function generatePlaybook() {
+  const tr = _pbT();
+  if (!confirm(tr.confirm || '產生本週三籃 $100k 投資方案？\n約 10–20 分鐘、~$4 tokens。')) return;
+  try {
+    const res = await fetch('/api/protocol-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'playbook' }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 202 && body.queued) {
+      UI.showToast?.(tr.toast_queued || '已排入佇列：本週方案生成', 'success');
+      _pbActive = true;
+      _pbSetButtons(true, tr.generating || '產生中');
+      if (_pbGenTimer) clearInterval(_pbGenTimer);
+      _pbGenTimer = setInterval(pollGenStatus, 4000);
+      pollGenStatus();
+    } else if (res.status === 409 || body.reason) {
+      UI.showToast?.(tr.toast_dup || '本週方案已在生成中', 'warning');
+      _pbActive = true;
+      if (_pbGenTimer) clearInterval(_pbGenTimer);
+      _pbGenTimer = setInterval(pollGenStatus, 4000);
+      pollGenStatus();
+    } else {
+      UI.showToast?.((tr.toast_fail || '生成失敗：{err}').replace('{err}', body.error || res.status), 'error');
+    }
+  } catch (e) {
+    UI.showToast?.((tr.toast_fail || '生成失敗：{err}').replace('{err}', e.message), 'error');
+  }
+}
+
+function bindGenerate() {
+  ['pb-generate-btn', 'pb-generate-btn-empty'].forEach(id => {
+    $(id)?.addEventListener('click', generatePlaybook);
+  });
+  // Reflect an already-running generation when the page is (re)opened.
+  pollGenStatus().then(() => {
+    if (_pbActive && !_pbGenTimer) _pbGenTimer = setInterval(pollGenStatus, 4000);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   UI.boot('playbook', { reload: render });
   bindToggle();
+  bindGenerate();
   load();
 });

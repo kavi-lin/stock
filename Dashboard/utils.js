@@ -17,10 +17,12 @@
     { id: 'news',      href: 'news.html',      icon: 'newspaper',        i18n: 'nav_news',      zh: '即時新聞',   group: 'market' },
     { id: 'break-news',href: 'break-news.html',icon: 'radio',            i18n: 'nav_break_news',zh: '突發辯論',   group: 'market' },
     { id: 'mood',      href: 'mood.html',      icon: 'gauge',            i18n: 'nav_mood',      zh: '市場氛圍',   group: 'market' },
+    { id: 'intraday-eval', href: 'intraday-eval.html', icon: 'crosshair', i18n: 'nav_intraday_eval', zh: '盤中', group: 'market' },
 
     { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股',   group: 'stock' },
     { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達',   group: 'stock' },
     { id: 'earnings',  href: 'earnings.html',  icon: 'bar-chart-3',      i18n: 'nav_earnings',  zh: '財報分析',   group: 'stock' },
+    { id: 'backtest',  href: 'backtest.html',  icon: 'flask-conical',    i18n: 'nav_backtest',  zh: '策略回測',   group: 'stock' },
 
     { id: 'decisions', href: 'decisions.html', icon: 'gavel',            i18n: 'nav_decisions', zh: '決策中心',   group: 'portfolio' },
     { id: 'reports',   href: 'reports.html',   icon: 'file-text',        i18n: 'nav_reports',   zh: '投資報告',   group: 'portfolio' },
@@ -526,6 +528,7 @@
         { v: 'claude', label: 'Claude' },
         { v: 'gemini', label: 'Gemini' },
         { v: 'codex',  label: 'Codex' },
+        { v: 'grok',   label: 'Grok' },
       ].map(o => `<option value="${o.v}">${o.label}</option>`).join('');
       [pri, sec, ter, bnA, bnB].forEach(el => { el.innerHTML = opts; });
 
@@ -533,7 +536,7 @@
         const el = document.getElementById('llm-usage');
         if (!el || !status || !status.models) return;
         const zh = UI.currentLang === 'zh';
-        el.innerHTML = ['claude', 'gemini', 'codex'].map(m => {
+        el.innerHTML = ['claude', 'gemini', 'codex', 'grok'].map(m => {
           const s = status.models[m] || {};
           let tag = '', cls = 'ok';
           if (!s.enabled)               { tag = zh ? '停用' : 'off';   cls = 'off'; }

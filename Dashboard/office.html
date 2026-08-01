@@ -42,8 +42,10 @@
       .of-card.lead     { border-left-color: #3b82f6; }
       .of-card.critic   { border-left-color: #f59e0b; }
       .of-card.verifier { border-left-color: #22c55e; }
+      .of-card.trader   { border-left-color: #ec4899; }
+      .of-card.researcher { border-left-color: #14b8a6; }
       .of-role { font-weight: 800; font-size: 13px; }
-      .of-role.lead { color: #60a5fa; } .of-role.critic { color: #fbbf24; } .of-role.verifier { color: #4ade80; }
+      .of-role.lead { color: #60a5fa; } .of-role.critic { color: #fbbf24; } .of-role.verifier { color: #4ade80; } .of-role.trader { color: #f472b6; } .of-role.researcher { color: #2dd4bf; }
       .of-badge {
         font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
         padding: 2px 7px; border-radius: 999px; background: rgba(161,161,170,0.15);
@@ -95,20 +97,22 @@
         </header>
 
         <div class="flex-1 p-8 pt-6 max-w-4xl w-full mx-auto">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="of-pill lead" style="border-color:#3b82f6;color:#60a5fa">Lead · Claude</span>
-                <span class="of-pill critic" style="border-color:#f59e0b;color:#fbbf24">Critic · Gemini</span>
-                <span class="of-pill verifier" style="border-color:#22c55e;color:#4ade80">Verifier · Codex</span>
-                <span class="text-[10px] text-zinc-500">三角色自動協作 → 收斂 → 產出交付物</span>
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+                <span id="of-role-pills" class="contents">
+                    <span class="of-pill researcher" style="border-color:#14b8a6;color:#2dd4bf">Researcher · Gemini</span>
+                    <span class="of-pill lead" style="border-color:#3b82f6;color:#60a5fa">Lead · Claude</span>
+                    <span class="of-pill critic" style="border-color:#f59e0b;color:#fbbf24">Critic · 隨機</span>
+                    <span class="of-pill verifier" style="border-color:#22c55e;color:#4ade80">Verifier · 隨機</span>
+                    <span class="of-pill trader" style="border-color:#ec4899;color:#f472b6">Trader · 隨機</span>
+                </span>
+                <span class="of-pill" style="border-color:#a855f7;color:#c084fc">裁決 · Opus</span>
+                <span class="text-[10px] text-zinc-500">Gemini 先蒐資料 → 四方平行起草（Lead 固定 Claude；Critic 只派 codex/grok）→ 分歧萃取 → 定點交鋒 → Opus 裁決</span>
             </div>
 
             <textarea id="of-task" class="of-input" placeholder="輸入任務，例如：「研究 2026 記憶體產業供需，列出 3 個多空關鍵變數並各給佐證」。團隊會自動分工跑到收斂。"></textarea>
             <div class="flex items-center gap-3 mt-3">
                 <button id="of-start" class="of-btn primary"><i data-lucide="play" class="w-3.5 h-3.5"></i> 啟動團隊</button>
                 <button id="of-stop" class="of-btn danger hidden"><i data-lucide="square" class="w-3.5 h-3.5"></i> 停止</button>
-                <label class="text-xs text-zinc-500 flex items-center gap-1.5">輪數上限
-                    <select id="of-rounds" class="of-runs"><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
-                </label>
                 <span id="of-err" class="text-xs text-red-400"></span>
             </div>
 

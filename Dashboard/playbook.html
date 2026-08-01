@@ -29,6 +29,10 @@
             </div>
             <div class="flex items-center gap-3">
                 <span id="pb-asof" class="text-[10px] font-mono text-zinc-500"></span>
+                <button id="pb-generate-btn" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    <span id="pb-generate-label">產生本週方案</span>
+                </button>
                 <div class="flex items-center gap-1 text-[10px]" id="pb-basket-toggle">
                     <button data-basket="all"          class="sort-toggle active px-2 py-0.5 rounded">全部</button>
                     <button data-basket="conservative" class="sort-toggle px-2 py-0.5 rounded">🛡️ 保險</button>
@@ -43,8 +47,12 @@
             <div id="pb-no-data" class="hidden">
                 <div class="glass-card p-10 text-center space-y-3">
                     <i data-lucide="wallet" class="w-12 h-12 mx-auto text-zinc-500"></i>
-                    <div class="text-sm text-zinc-500">尚無投資方案。請先產出 selections 再跑 render.py</div>
-                    <code class="text-[10px] text-zinc-600 block">python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_&lt;DATE&gt;.json</code>
+                    <div class="text-sm text-zinc-500" id="pb-no-data-text">尚無投資方案。點下方按鈕一鍵產生本週三籃方案。</div>
+                    <button id="pb-generate-btn-empty" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <span id="pb-generate-label-empty">產生本週方案</span>
+                    </button>
+                    <code class="text-[10px] text-zinc-600 block">python3 skills/weekly-tech-playbook/scripts/build_pack.py &amp;&amp; … &amp;&amp; render.py</code>
                 </div>
             </div>
 

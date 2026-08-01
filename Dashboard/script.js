@@ -340,6 +340,7 @@ function renderSectorStatusStrip(data) {
     const br  = data.breadth || {};
     const ftd = data.ftd     || {};
     const mt  = data.market_top || {};
+    const mm  = data.market_mood || {};   // V4.55.0 — authoritative options/VIX/F&G snapshot
     const isZh = UI.currentLang === 'zh';
     const tr = (window.i18n?.[UI.currentLang]?.sector_page) || {};
 
@@ -421,7 +422,9 @@ function renderSectorStatusStrip(data) {
         });
     }
 
-    const fgScore = m.fear_greed ?? m.fear_greed_index;
+    // V4.55.0 — prefer the fresh market_mood.json F&G index (data.market.fear_greed
+    // was drifting stale; e.g. showed 49.8 "Neutral" while mood feed read 25.5 "Fear").
+    const fgScore = mm.fear_greed?.index ?? m.fear_greed ?? m.fear_greed_index;
     const fgEl = document.getElementById('pill-fg');
     if (fgEl) {
         // Mirrors F&G tooltip 5-tier contrarian semantic (utils.js fg_extreme_fear/fear/neutral/greed/extreme_greed)
@@ -513,7 +516,7 @@ function renderSectorStatusStrip(data) {
 
     const vixEl = document.getElementById('pill-vix');
     if (vixEl) {
-        const vix = mt.vix_level;
+        const vix = mm.vix?.current ?? mt.vix_level;   // V4.55.0 — fresh mood-feed VIX first
         // Mirrors VIX tooltip 5-tier (utils.js vx_calm/normal/elevated/high/panic)
         const vixColor = vix == null ? '#71717a'
                        : vix >= 40 ? '#ef4444'   // vx_panic 🔴
@@ -547,10 +550,10 @@ function renderSectorStatusStrip(data) {
     setAttrs('pill-marketop', { 'data-mt-score': mt.composite_score ?? '',
                                 'data-mt-zone':  mt.zone || '' });
     setAttrs('pill-exposure', { 'data-exposure': m.exposure_ceiling || '' });
-    setAttrs('pill-fg',       { 'data-fg-score': m.fear_greed ?? '',
-                                'data-fg-label': m.fear_greed_label || '' });
+    setAttrs('pill-fg',       { 'data-fg-score': mm.fear_greed?.index ?? m.fear_greed ?? '',
+                                'data-fg-label': mm.fear_greed?.label || m.fear_greed_label || '' });
     setAttrs('pill-cycle',    { 'data-cycle': m.cycle_phase || '' });
-    setAttrs('pill-vix',      { 'data-vix': mt.vix_level ?? '' });
+    setAttrs('pill-vix',      { 'data-vix': mm.vix?.current ?? mt.vix_level ?? '' });
 }
 
 // ── Layer 2a: Binary Risk 48h banner ──────────────────────────────────────
@@ -1157,6 +1160,10 @@ async function updateDashboard() {
 
     // Layer 5: Structural Watchlist (V2.19.1) — paradigm-shift candidates from news
     renderStructuralWatchlist(data.structural_watchlist);
+
+    // V4.55.0 — newest-feed widgets (mood / social buzz / intraday tape / retail
+    // pulse / playbook / explore). Self-fetches its own JSON feeds; non-blocking.
+    if (window.IndexExtras) window.IndexExtras.render(data);
 
   } catch (error) {
     UI.logToUI(error.message, 'error');

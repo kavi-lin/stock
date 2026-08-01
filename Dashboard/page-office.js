@@ -24,8 +24,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const setErr = (m) => { $('of-err').textContent = m || ''; };
 
   // ── status + chrome ───────────────────────────────────────────────────
+  const PHASE_LABEL = {
+    research: '⓪ 資料蒐集', draft: '① 獨立觀點', adjudicate: '② 分歧萃取',
+    rebuttal: '③ 定點交鋒', verdict: '④ 終局裁決',
+  };
+  const ROLE_COLORS = {
+    lead: ['#3b82f6', '#60a5fa'], critic: ['#f59e0b', '#fbbf24'],
+    verifier: ['#22c55e', '#4ade80'], trader: ['#ec4899', '#f472b6'],
+    researcher: ['#14b8a6', '#2dd4bf'],
+  };
+  // Engines are shuffled across the non-Lead seats each run — show this run's
+  // actual assignment from meta.roles. Researcher is pinned gemini (phase 0).
+  function renderRolePills(meta) {
+    const host = $('of-role-pills');
+    if (!host || !meta || !meta.roles || !meta.roles.length) return;
+    const pills = [`<span class="of-pill researcher" style="border-color:#14b8a6;color:#2dd4bf">Researcher · gemini</span>`]
+      .concat(meta.roles.map(r => {
+        const c = ROLE_COLORS[r.key] || ['#a1a1aa', '#d4d4d8'];
+        return `<span class="of-pill ${r.key}" style="border-color:${c[0]};color:${c[1]}">${r.name} · ${r.engine}</span>`;
+      }));
+    host.innerHTML = pills.join('');
+  }
   function setStatus(meta) {
     if (!meta) return;
+    renderRolePills(meta);
     $('of-statusbar').classList.remove('hidden');
     const pill = $('of-status-pill');
     pill.className = 'of-pill ' + (meta.status || '');
@@ -33,8 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const spend = meta.spend || {};
     const spendStr = Object.keys(spend).length
       ? ' · 呼叫 ' + Object.entries(spend).map(([k, v]) => `${k}:${v}`).join(' ') : '';
+    const stage = meta.phase ? (PHASE_LABEL[meta.phase] || meta.phase)
+      : `輪 ${meta.rounds_completed || 0}`;
     $('of-status-meta').textContent =
-      `輪 ${meta.rounds_completed || 0}${meta.close_reason ? ' · ' + meta.close_reason : ''}${spendStr}`;
+      `${stage}${meta.close_reason ? ' · ' + meta.close_reason : ''}${spendStr}`;
     const running = meta.status === 'running';
     $('of-start').disabled = running;
     $('of-stop').classList.toggle('hidden', !running);
@@ -100,6 +124,79 @@ document.addEventListener('DOMContentLoaded', () => {
     $('of-board').appendChild(card);
   }
 
+  // ── v2 pipeline renderers ─────────────────────────────────────────────
+  const esc = (s) => String(s || '').replace(/</g, '&lt;');
+
+  function phaseSep(title) {
+    const d = document.createElement('div');
+    d.className = 'of-round-sep';
+    d.innerHTML = `<span>${esc(title)}</span>`;
+    $('of-board').appendChild(d);
+  }
+
+  function renderDraft(ev) {
+    const card = document.createElement('div');
+    card.className = 'of-card ' + (ev.role || '');
+    const failed = ev.ok === false ? ' <span class="of-badge" style="color:#f87171">失敗</span>' : '';
+    const claims = (ev.claims && ev.claims.length)
+      ? `<div class="of-concerns" style="color:var(--text-muted)">主張：${ev.claims.map(esc).join('｜')}</div>` : '';
+    card.innerHTML =
+      `<div><span class="of-role ${ev.role}">${esc(ev.name || ev.role)}</span>
+         <span class="of-badge">${esc(ev.engine_used || ev.engine)}</span>${failed}</div>
+       <div class="of-summary">${esc(ev.summary)}</div>
+       <div class="of-detail">${md(ev.detail)}</div>
+       ${claims}`;
+    $('of-board').appendChild(card);
+  }
+
+  function renderResearch(ev) {
+    const card = document.createElement('div');
+    card.className = 'of-card researcher';
+    const failed = ev.ok === false ? ' <span class="of-badge" style="color:#f87171">無事實可用</span>' : '';
+    const facts = (ev.facts || []).map(f =>
+      `<li>${esc(f.fact)} <span style="color:var(--text-muted)">（${esc(f.source)}）</span></li>`).join('');
+    const gaps = (ev.gaps && ev.gaps.length)
+      ? `<div class="of-concerns">缺口：${ev.gaps.map(esc).join('｜')}</div>` : '';
+    card.innerHTML =
+      `<div><span class="of-role researcher">${esc(ev.name || 'Researcher')}</span>
+         <span class="of-badge">${esc(ev.engine_used || 'gemini')}</span>${failed}</div>
+       <div class="of-summary">${esc(ev.summary)}</div>
+       <div class="of-detail"><ul>${facts}</ul></div>
+       ${gaps}`;
+    $('of-board').appendChild(card);
+  }
+
+  function renderAdjudication(ev) {
+    const card = document.createElement('div');
+    card.className = 'of-card';
+    const cons = (ev.consensus && ev.consensus.length)
+      ? `<div class="of-detail"><b>✅ 共識</b><ul>${ev.consensus.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>`
+      : '<div class="of-detail">（無共識條目）</div>';
+    const dis = (ev.disagreements || []).map(d =>
+      `<div class="of-card" id="of-dis-${esc(d.id)}" style="margin:8px 0 0;border-left-color:#a855f7">
+         <div class="of-summary">⚔ ${esc(d.id)} · ${esc(d.topic)}</div>
+         <div class="of-detail">${Object.entries(d.positions || {}).map(([k, v]) =>
+           `<div><span class="of-role ${k}">${k}</span>：${esc(v)}</div>`).join('')}
+           <div style="margin-top:4px;color:var(--text-muted)">關鍵：${esc(d.crux)}</div>
+         </div>
+       </div>`).join('');
+    card.innerHTML = `<div class="of-summary">分歧萃取 — 共識 ${ (ev.consensus || []).length } 條 · 分歧 ${(ev.disagreements || []).length} 點</div>${cons}${dis}`;
+    $('of-board').appendChild(card);
+  }
+
+  const STANCE_ZH = { maintain: '維持', revise: '修正', concede: '讓步', no_reply: '無回應' };
+  function renderRebuttal(ev) {
+    const host = document.getElementById(`of-dis-${ev.dis_id}`) || $('of-board');
+    const d = document.createElement('div');
+    d.className = 'of-detail';
+    d.style.cssText = 'margin-top:6px;padding-top:6px;border-top:1px dashed rgba(161,161,170,.25)';
+    const evid = ev.evidence && ev.evidence !== '無' ? `｜證據：${esc(ev.evidence)}` : '';
+    d.innerHTML = `<span class="of-role ${ev.role}">${esc(ev.name || ev.role)}</span>
+      <span class="of-badge">${esc(STANCE_ZH[ev.stance] || ev.stance)}</span>
+      ${esc(ev.position)}<div style="color:var(--text-muted)">${esc(ev.argument)}${evid}</div>`;
+    host.appendChild(d);
+  }
+
   function handleEvent(ev) {
     if (ev.round != null && ev.round !== lastRound &&
         (ev.type === 'turn_started' || ev.type === 'turn')) {
@@ -107,6 +204,18 @@ document.addEventListener('DOMContentLoaded', () => {
       roundSep(ev.round);
     }
     switch (ev.type) {
+      // v2 pipeline events
+      case 'phase':
+        stopThinking();
+        phaseSep(ev.title || ev.phase);
+        startThinking(`${ev.title || ev.phase} 進行中`);
+        break;
+      case 'research': renderResearch(ev); break;
+      case 'draft': renderDraft(ev); break;
+      case 'adjudication': renderAdjudication(ev); break;
+      case 'rebuttal': renderRebuttal(ev); break;
+      case 'research_started': case 'draft_started': case 'rebuttal_started': break; // phase ticker covers these
+      // legacy round-robin events (old runs replay correctly)
       case 'turn_started': startThinking(`${ev.name || ev.role}（${ev.engine}）思考中`); break;
       case 'turn': renderTurn(ev); break;
       case 'composing': startThinking('Lead 整理交付物中'); break;
@@ -180,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const r = await fetch('/api/office/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Office-Token': token },
-        body: JSON.stringify({ task, max_rounds: parseInt($('of-rounds').value, 10) }),
+        body: JSON.stringify({ task }),
       });
       const meta = await r.json();
       if (!r.ok) { setErr(meta.error || ('啟動失敗 ' + r.status)); return; }

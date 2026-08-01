@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 投資委員會 | 盤中</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- TradingView lightweight-charts (candlestick) — 評估分頁 個股小卡 → 今日 K 線 modal -->
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+      /* ── Tab bar (策略 / 評估) ── */
+      .ie-tabbar { display:flex; gap:4px; }
+      .ie-tab { font-size:13px; font-weight:700; padding:5px 14px; border-radius:8px; border:1px solid transparent; color:var(--text-muted); cursor:pointer; background:none; display:flex; align-items:center; gap:6px; transition:all .15s; }
+      .ie-tab:hover { color:var(--text-main); }
+      .ie-tab.active { color:var(--text-main); background:var(--bg-card); border-color:var(--border); }
+      .ie-toolbar.hidden { display:none; }
+
+      /* ── 評估分頁樣式（原 盤中評估 頁移植） ── */
+      .ia-score-big { font-size: 46px; font-weight: 900; letter-spacing: .02em; line-height: 1; font-family: 'JetBrains Mono', monospace; }
+      .ia-meter { position: relative; height: 8px; border-radius: 999px; background: linear-gradient(90deg,#ef4444 0%,#f59e0b 35%,#71717a 50%,#34d399 65%,#22c55e 100%); opacity:.85; }
+      .ia-meter-mark { position:absolute; top:-3px; width:3px; height:14px; border-radius:2px; background:var(--text-main); box-shadow:0 0 4px rgba(0,0,0,.5); transform:translateX(-50%); }
+      .ia-flag { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:600; border:1px solid var(--border); white-space:nowrap; }
+      .ia-flag.high { background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.4); color:#f87171; }
+      .ia-flag.med  { background:rgba(245,158,11,.12); border-color:rgba(245,158,11,.4); color:#fbbf24; }
+      .ia-flag.low  { background:rgba(113,113,122,.12); border-color:rgba(113,113,122,.4); color:#a1a1aa; }
+      .ia-flag.info { background:rgba(52,211,153,.10); border-color:rgba(52,211,153,.35); color:#34d399; }
+      .ia-tick { display:flex; flex-direction:column; gap:8px; }
+      .ia-range { position:relative; height:6px; border-radius:999px; background:var(--bg-card); border:1px solid var(--border); }
+      .ia-range-fill { position:absolute; top:0; bottom:0; left:0; border-radius:999px; }
+      .ia-kv { font-size:11px; color:var(--text-muted); }
+      .ia-kv strong { color:var(--text-main); font-family:'JetBrains Mono',monospace; font-weight:700; }
+      .ia-empty { text-align:center; color:var(--text-muted); font-size:12px; padding:24px 12px; }
+      .ia-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; border:1px solid var(--border); }
+      .ia-dot { width:7px; height:7px; border-radius:999px; }
+      /* Per-ticker signal cards (個股急拉/急殺 — 每檔一個 placeholder) */
+      .ia-spgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; }
+      .ia-scard { border:1px solid var(--border); border-radius:10px; padding:8px 10px; background:var(--bg-card); display:flex; flex-direction:column; gap:4px; min-height:62px; transition:border-color .2s,box-shadow .2s; }
+      .ia-scard .ia-sc-head { display:flex; align-items:baseline; justify-content:space-between; gap:6px; font-family:'JetBrains Mono',monospace; }
+      .ia-scard .ia-sc-sym { font-weight:800; font-size:12px; color:var(--text-main); }
+      .ia-scard .ia-sc-px { font-size:11px; color:var(--text-muted); }
+      .ia-scard .ia-sc-state { font-size:11px; font-weight:700; }
+      .ia-scard .ia-sc-flow { font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+      .ia-scard .ia-sc-flow .lbl { opacity:.55; }
+      .ia-scard.alert { border-color:rgba(34,197,94,.7); box-shadow:0 0 0 1px rgba(34,197,94,.35),0 0 12px rgba(34,197,94,.25); animation:iaPulse 1.6s ease-in-out infinite; }
+      .ia-scard.alert.down { border-color:rgba(239,68,68,.7); box-shadow:0 0 0 1px rgba(239,68,68,.35),0 0 12px rgba(239,68,68,.25); }
+      /* 順勢續攻/續跌 — steady highlight (no pulse; it's a state, not a fresh event) */
+      .ia-scard.trend { border-color:rgba(34,197,94,.45); box-shadow:inset 3px 0 0 rgba(34,197,94,.65); }
+      .ia-scard.trend.down { border-color:rgba(239,68,68,.45); box-shadow:inset 3px 0 0 rgba(239,68,68,.65); }
+      @keyframes iaPulse { 0%,100%{box-shadow:0 0 0 1px rgba(34,197,94,.30),0 0 8px rgba(34,197,94,.18);} 50%{box-shadow:0 0 0 1px rgba(34,197,94,.55),0 0 16px rgba(34,197,94,.40);} }
+      .ia-spalert-banner { font-size:11px; font-weight:700; padding:6px 10px; border-radius:8px; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.4); color:#22c55e; }
+    </style>
+</head>
+<body class="flex min-h-screen transition-all" data-page="intraday-eval">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="ml-64 flex-1 flex flex-col">
+
+        <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-20">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="crosshair" class="w-5 h-5 text-indigo-400"></i>
+                    <h2 class="text-lg font-bold">盤中</h2>
+                </div>
+                <!-- Tab bar：策略（可行動）/ 評估（價量體檢） -->
+                <div class="ie-tabbar" role="tablist">
+                    <button class="ie-tab active" data-tab="strategy" role="tab">
+                        <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> 策略
+                    </button>
+                    <button class="ie-tab" data-tab="mood" role="tab">
+                        <i data-lucide="activity" class="w-3.5 h-3.5"></i> 評估
+                    </button>
+                </div>
+            </div>
+
+            <!-- 策略分頁 toolbar -->
+            <div id="ie-toolbar" class="ie-toolbar flex items-center gap-3">
+                <span id="ie-status" class="ie-chip">—</span>
+                <span id="ie-updated" class="text-xs" style="color:var(--text-muted)">—</span>
+                <button id="ie-refresh" class="ie-chip" style="cursor:pointer" title="重新評估">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 重評估
+                </button>
+            </div>
+
+            <!-- 評估分頁 toolbar -->
+            <div id="ia-toolbar" class="ie-toolbar hidden flex items-center gap-3">
+                <span id="ia-market" class="ia-pill"><span class="ia-dot" style="background:#71717a;"></span><span>—</span></span>
+                <button id="ia-refresh" class="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 transition-all flex items-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>重新評估</span>
+                </button>
+                <span id="ia-asof" class="text-[10px] font-mono text-zinc-500"></span>
+            </div>
+        </header>
+
+        <!-- ══════════════ 分頁 1：策略 ══════════════ -->
+        <div id="tab-strategy" class="ie-tabpane p-6 flex-1 overflow-y-auto" style="max-width:1400px">
+
+            <!-- Row 1: regime + narrative -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                <div class="glass-card p-5 lg:col-span-1">
+                    <div class="text-xs mb-2" style="color:var(--text-muted)">市場狀態 / 曝險紀律</div>
+                    <div id="ie-regime"></div>
+                </div>
+                <div class="glass-card p-5 lg:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+                        <div class="text-xs" style="color:var(--text-muted)">盤中導讀（規則 + LLM）</div>
+                    </div>
+                    <div id="ie-narrative" style="font-size:13px;line-height:1.7;color:var(--text-main)">載入中…</div>
+                </div>
+            </div>
+
+            <!-- Row 2: mood strip -->
+            <div id="ie-stats" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 mb-5"></div>
+
+            <!-- Row 3: strategy cards -->
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="list-checks" class="w-4 h-4 text-indigo-400"></i>
+                    <h3 class="font-bold text-sm">策略卡</h3>
+                    <span class="ie-chip" title="連續 ≥2 個 10 分鐘視窗出現的策略會發光；右上 ×N 為當日出現次數">
+                        連續發光＝重複主旋律
+                    </span>
+                </div>
+                <span id="ie-strat-meta" class="text-xs" style="color:var(--text-muted)"></span>
+            </div>
+            <div id="ie-scards" class="ie-scards mb-6"></div>
+
+            <!-- Row 4: sectors + groups -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                <div class="glass-card p-5">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i> 產業排序（今日 breadth + 5d 前瞻）
+                    </h3>
+                    <div id="ie-sectors"></div>
+                </div>
+                <div class="glass-card p-5">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                        <i data-lucide="git-compare" class="w-4 h-4 text-indigo-400"></i> 族群輪動
+                    </h3>
+                    <div id="ie-groups"></div>
+                    <div id="ie-rotation" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Row 5: ideas + timeline -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                <div class="glass-card p-5">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                        <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i> 個股點子
+                    </h3>
+                    <table class="w-full" style="border-collapse:collapse"><tbody id="ie-ideas"></tbody></table>
+                </div>
+                <div class="glass-card p-5">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i> 策略重複時間軸（當日）
+                    </h3>
+                    <div id="ie-timeline" class="ie-tl"></div>
+                    <div class="text-xs mt-3" style="color:var(--text-muted)">
+                        每格＝一個 10 分鐘視窗；<span style="color:#818cf8">■</span> 該策略當時出現，
+                        <span style="color:#fb923c">■</span> 當日出現 ≥3 次的主旋律。
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-xs" style="color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px">
+                探索層工具：本頁不進入 investment_protocol 決策。資料每 10 分鐘由盤中樞紐統整（0 額外 API call，讀既有快照）。
+            </div>
+        </div>
+
+        <!-- ══════════════ 分頁 2：評估 ══════════════ -->
+        <div id="tab-mood" class="ie-tabpane flex-1 overflow-y-auto p-6 space-y-5" style="display:none">
+
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Intraday Tape · 破底 / 止跌 / 量價</span>
+                <span class="experimental-badge"><i data-lucide="flask-conical" class="w-3 h-3"></i><span>EXPERIMENTAL</span></span>
+            </div>
+
+            <!-- Individual-stock 急拉/急殺 fast lane (Alpaca 1-min · separate from FMP market read) -->
+            <section id="ia-spikes" class="glass-card p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                    <h3 style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;">
+                        <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i><span>個股急拉 / 急殺</span>
+                        <span class="text-[10px] font-mono" style="color:var(--text-muted);">Alpaca 1分 · <span id="ia-spikes-feed">—</span> · 時間 ET</span>
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span id="ia-spikes-meta" class="text-[10px] font-mono" style="color:var(--text-muted);"></span>
+                        <button id="ia-spikes-notify" title="開啟桌面提示（KDJ+MACD 同向翻轉時推播）" class="text-[10px] font-mono px-2 py-0.5 rounded" style="border:1px solid var(--border,#3f3f46);color:var(--text-muted);">🔔 提示</button>
+                        <button id="ia-spikes-edit" class="text-[10px] font-mono px-2 py-0.5 rounded" style="border:1px solid var(--border,#3f3f46);color:var(--text-muted);">✎ 編輯名單</button>
+                    </div>
+                </div>
+                <!-- Edit panel (hidden until ✎) — one ticker per line, save → POST watchlist -->
+                <div id="ia-spikes-editor" class="hidden space-y-2">
+                    <textarea id="ia-spikes-input" rows="5" spellcheck="false"
+                        class="w-full text-xs font-mono p-2 rounded"
+                        style="background:var(--bg-soft,#18181b);border:1px solid var(--border,#3f3f46);color:var(--text,#e4e4e7);resize:vertical;"
+                        placeholder="一行一個 ticker，例如&#10;AAPL&#10;NVDA"></textarea>
+                    <div class="flex items-center gap-2">
+                        <button id="ia-spikes-save" class="text-[11px] font-mono px-3 py-1 rounded" style="background:#f59e0b;color:#000;font-weight:700;">儲存</button>
+                        <button id="ia-spikes-cancel" class="text-[11px] font-mono px-3 py-1 rounded" style="border:1px solid var(--border,#3f3f46);color:var(--text-muted);">取消</button>
+                        <span id="ia-spikes-edit-msg" class="text-[10px] font-mono" style="color:var(--text-muted);"></span>
+                    </div>
+                </div>
+                <div id="ia-spikes-alert" class="hidden ia-spalert-banner"></div>
+                <div id="ia-spikes-pf" class="hidden ia-spalert-banner"></div>
+                <div id="ia-spikes-body" class="ia-spgrid"><span class="ia-kv">載入中…</span></div>
+            </section>
+
+            <div id="ia-no-data" class="glass-card p-8 text-center hidden">
+                <i data-lucide="cloud-off" class="w-8 h-8 mx-auto mb-3 text-zinc-500"></i>
+                <p class="text-sm text-zinc-500">盤中評估資料尚未產生。美股盤中時段 dashboard_server 會每 5 分鐘自動更新，或按右上「重新評估」。</p>
+            </div>
+
+            <!-- Aggregate verdict band -->
+            <section id="ia-agg" class="glass-card p-5 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col justify-center gap-2">
+                        <div class="text-[11px] uppercase tracking-widest" style="color:var(--text-muted);">大盤盤中綜合（SPY·QQQ·IWM 加權）</div>
+                        <div class="flex items-end gap-3">
+                            <span id="ia-score" class="ia-score-big">—</span>
+                            <span id="ia-label" class="text-lg font-bold pb-1">—</span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="ia-meter"><div id="ia-mark" class="ia-meter-mark" style="left:50%;"></div></div>
+                            <div class="flex justify-between text-[9px] font-mono mt-1" style="color:var(--text-muted);">
+                                <span>-100 破底</span><span>0</span><span>+100 強勢</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col gap-3">
+                        <div id="ia-headline" class="text-sm font-semibold" style="line-height:1.6;"></div>
+                        <div id="ia-flags" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Per-ticker breakdown -->
+            <section id="ia-tickers-wrap" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></section>
+
+            <p class="text-[10px] text-center" style="color:var(--text-muted);">
+                探索層指標：盤中價量訊號，<strong>不</strong>進入 investment_protocol 決策。資料源 FMP（Finnhub 盤中 K 為付費，故未用）。
+            </p>
+        </div>
+    </main>
+
+    <!-- 今日 K 線 modal — opened by double-clicking a 個股急拉/急殺 card -->
+    <div id="ia-kline-modal" style="display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+      <div style="width:min(780px,93vw);background:var(--card,#18181b);border:1px solid var(--border,#3f3f46);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border,#3f3f46);">
+          <div style="font-family:'JetBrains Mono',monospace;">
+            <span id="ia-kl-sym" style="font-size:16px;font-weight:800;">—</span>
+            <span id="ia-kl-meta" style="font-size:11px;color:var(--text-muted);margin-left:8px;"></span>
+          </div>
+          <button id="ia-kl-close" title="關閉 (Esc)" style="font-size:18px;line-height:1;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:2px 6px;">✕</button>
+        </div>
+        <div id="ia-kl-chart" style="width:100%;height:380px;"></div>
+        <div id="ia-kl-hint" style="padding:6px 16px 12px;font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;"></div>
+      </div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script src="page-intraday-eval.js"></script>
+
+    <!-- 評估分頁邏輯（原 intraday-mood 頁移植；獨立 IIFE，與 page-intraday-eval.js scope 隔離） -->
+    <script>
+    (function () {
+      const SEV = { high: 'high', med: 'med', low: 'low', info: 'info' };
+      const fmt = (v, d = 2) => (v === null || v === undefined ? '—' : Number(v).toFixed(d));
+      const scoreColor = (s) => s == null ? 'var(--text-muted)'
+          : s <= -50 ? '#ef4444' : s <= -20 ? '#f59e0b' : s < 20 ? '#a1a1aa' : s < 50 ? '#34d399' : '#22c55e';
+
+      function renderAgg(d) {
+        const a = d.aggregate || {};
+        document.getElementById('ia-score').textContent = a.score == null ? '—' : (a.score > 0 ? '+' + a.score : a.score);
+        document.getElementById('ia-score').style.color = scoreColor(a.score);
+        const lbl = document.getElementById('ia-label');
+        lbl.textContent = a.risk_label || '—';
+        lbl.style.color = scoreColor(a.score);
+        if (a.score != null) document.getElementById('ia-mark').style.left = ((a.score + 100) / 2) + '%';
+        document.getElementById('ia-headline').textContent = a.headline_zh || '';
+        const fc = document.getElementById('ia-flags');
+        fc.innerHTML = (a.flags || []).map(f =>
+          `<span class="ia-flag ${SEV[f.severity] || 'low'}">${f.text_zh}${f.tickers && f.tickers.length ? ` <span style="opacity:.7;font-family:'JetBrains Mono';">${f.tickers.join('·')}</span>` : ''}</span>`
+        ).join('') || '<span class="ia-kv">無顯著旗標</span>';
+      }
+
+      function momLine(m) {
+        if (!m) return '';
+        const d1 = m.macd_1d, k1 = m.kdj_1d, k5 = m.kdj_5m;
+        const arrow = (c) => c === 'death' ? ' <span style="color:#ef4444;">✕死叉</span>' : c === 'golden' ? ' <span style="color:#22c55e;">✚金叉</span>' : '';
+        const macd = d1 ? `MACD日 ${d1.hist > 0 ? '+' : ''}${d1.hist}${arrow(d1.cross)}` : '';
+        const kj1 = k1 ? `KDJ日 ${k1.k}/${k1.d}/${k1.j}${arrow(k1.cross)}` : '';
+        const kj5 = k5 ? `5m ${k5.k}/${k5.d}/${k5.j}${arrow(k5.cross)}` : '5m K棒不足';
+        return [macd, kj1, kj5].filter(Boolean).join(' · ');
+      }
+
+      function renderTickers(d) {
+        const wrap = document.getElementById('ia-tickers-wrap');
+        wrap.innerHTML = (d.tickers || []).map(t => {
+          if (t.score == null) {
+            return `<div class="glass-card p-4 ia-tick"><div class="flex items-center justify-between"><span class="font-bold">${t.symbol}</span><span class="ia-kv">${t.interpretation_zh || '資料缺'}</span></div></div>`;
+          }
+          const col = scoreColor(t.score);
+          const rp = Math.max(0, Math.min(1, t.range_position == null ? 0.5 : t.range_position));
+          const ret = t.intraday_return_prevclose_pct;
+          const retCol = ret == null ? 'var(--text-muted)' : ret >= 0 ? '#22c55e' : '#ef4444';
+          const flags = (t.flags || []).slice(0, 3).map(f =>
+            `<span class="ia-flag ${SEV[f.severity] || 'low'}" style="font-size:10px;padding:2px 7px;">${f.text_zh}</span>`).join('');
+          return `
+            <div class="glass-card p-4 ia-tick" style="border-left:4px solid ${col};">
+              <div class="flex items-center justify-between">
+                <div class="flex items-baseline gap-2">
+                  <span class="font-black text-base">${t.symbol}</span>
+                  <span class="text-[10px]" style="color:var(--text-muted);">${t.label || ''}</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-mono font-black text-lg" style="color:${col};">${t.score > 0 ? '+' + t.score : t.score}</span>
+                  <span class="text-[11px] font-bold ml-1" style="color:${col};">${t.risk_label}</span>
+                </div>
+              </div>
+              <div class="ia-kv">現價 <strong>${fmt(t.price)}</strong> · 昨收 ${fmt(t.prev_close)} · <span style="color:${retCol};font-weight:700;">${ret == null ? '—' : (ret >= 0 ? '+' : '') + fmt(ret) + '%'}</span></div>
+              <div>
+                <div class="flex justify-between ia-kv mb-1"><span>日內區間位置</span><span>${(rp * 100).toFixed(0)}%</span></div>
+                <div class="ia-range"><div class="ia-range-fill" style="width:${(rp * 100).toFixed(0)}%;background:${col};"></div></div>
+                <div class="flex justify-between text-[9px] font-mono mt-0.5" style="color:var(--text-muted);"><span>低 ${fmt(t.day_low)}</span><span>高 ${fmt(t.day_high)}</span></div>
+              </div>
+              <div class="grid grid-cols-2 gap-x-3 gap-y-1">
+                <div class="ia-kv" title="RVOL＝相對成交量，今日累積量 ÷ 20 日均量。>1 表示量能高於平均、方向訊號較可信。">RVOL <strong>${fmt(t.rvol, 1)}</strong></div>
+                <div class="ia-kv" title="VWAP＝成交量加權均價；乖離為現價相對 VWAP 的百分比。>0 站上均價（買方掌控），<0 跌破。">VWAP乖離 <strong>${t.vwap_gap_pct == null ? '—' : (t.vwap_gap_pct >= 0 ? '+' : '') + fmt(t.vwap_gap_pct) + '%'}</strong></div>
+                <div class="ia-kv" title="現價相對 20 日均線的百分比。>0 站上短均、<0 跌破。">vs MA20 <strong>${t.pct_above_ma20 == null ? '—' : (t.pct_above_ma20 >= 0 ? '+' : '') + fmt(t.pct_above_ma20) + '%'}</strong></div>
+                <div class="ia-kv" title="連跌＝連續收黑天數；出貨日＝近 25 日內量增價跌的大戶出貨天數（越多越弱）。">連跌 <strong>${t.consecutive_down_days}</strong> 天 · 出貨 <strong>${t.distribution_days}</strong></div>
+                <div class="ia-kv" title="近 20 個交易日的最低價；跌破代表創短期新低。">20日低 <strong>${fmt(t.recent_low_20d)}</strong>${t.break_low_level ? ` <span style="color:#ef4444;">破${t.break_low_level}</span>` : ''}</div>
+                <div class="ia-kv" title="今日開盤型態（如低開高走）；「止跌」＝盤中出現量價止穩訊號。">型態 <strong>${t.open_pattern_zh || '—'}</strong>${t.stabilizing ? ' <span style="color:#34d399;">止跌</span>' : ''}</div>
+              </div>
+              <div class="ia-kv" style="padding-top:4px;border-top:1px dashed var(--border);font-size:10px;" title="MACD／KDJ 動能指標：金叉偏多、死叉偏空；日線為主趨勢、5 分為盤中節奏。">${momLine(t.momentum)}</div>
+              <div class="flex flex-wrap gap-1.5 pt-1">${flags || '<span class="ia-kv">—</span>'}</div>
+            </div>`;
+        }).join('');
+      }
+
+      function renderMarket(d) {
+        const el = document.getElementById('ia-market');
+        const open = d.market_open;
+        const frac = d.session_fraction;
+        const live = (d.tickers || []).some(t => t.data_source === 'live_quote+5min');
+        el.querySelector('.ia-dot').style.background = open ? '#22c55e' : '#71717a';
+        const base = open ? `盤中 ${frac != null ? Math.round(frac * 100) + '%' : ''}` : '已收盤';
+        el.querySelector('span:last-child').textContent = base + (live ? ' · 即時報價' : '');
+      }
+
+      function render(d) {
+        const hasData = d && d.aggregate && d.aggregate.score != null;
+        document.getElementById('ia-no-data').classList.toggle('hidden', hasData);
+        document.getElementById('ia-agg').classList.toggle('hidden', !hasData);
+        document.getElementById('ia-tickers-wrap').classList.toggle('hidden', !hasData);
+        if (d && d.generated_at) {
+          try { document.getElementById('ia-asof').textContent = new Date(d.generated_at).toLocaleString('zh-TW', { hour12: false }); } catch (e) {}
+        }
+        renderMarket(d || {});
+        if (!hasData) { if (window.lucide) lucide.createIcons(); return; }
+        renderAgg(d); renderTickers(d);
+        if (window.lucide) lucide.createIcons();
+      }
+
+      let _spikeWatchlist = [];   // last-known watchlist (for the editor)
+      let _spikeAlertSeen = {};   // symbol → last alert "at" we already notified on
+
+      // Inline SVG sparkline of the last ~10 closes — the visual replacement for the
+      // old timestamped 訊號流. Shows the SHAPE of the 10-min trend, colored by regime.
+      function sparkSVG(vals, color) {
+        if (!vals || vals.length < 2) return '';
+        const W = 120, H = 26, p = 3, n = vals.length;
+        const min = Math.min(...vals), max = Math.max(...vals), rng = (max - min) || 1;
+        // Dampen the autoscale for near-flat series: a ~0.1% 10-min range shouldn't look
+        // like a rally. Full amplitude only once the span reaches FLAT_FLOOR%; below that
+        // the line collapses toward the mid-line (a quiet stock draws quiet).
+        const FLAT_FLOOR = 0.3;
+        const pctRange = min > 0 ? (max - min) / min * 100 : 0;
+        const amp = Math.min(1, pctRange / FLAT_FLOOR);
+        const pts = vals.map((v, i) => {
+          const x = p + (W - 2 * p) * i / (n - 1);
+          const squeezed = 0.5 + ((v - min) / rng - 0.5) * amp;
+          const y = p + (H - 2 * p) * (1 - squeezed);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        });
+        const [lx, ly] = pts[pts.length - 1].split(',');
+        const area = `${p},${H - p} ${pts.join(' ')} ${W - p},${H - p}`;
+        return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="flex:0 0 auto;">
+          <polygon points="${area}" fill="${color}" opacity="0.12"/>
+          <polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="${lx}" cy="${ly}" r="2.3" fill="${color}"/>
+        </svg>`;
+      }
+
+      // σ-multiple color ramp: <1× 灰(雜訊) · 1–2× 橘(一般) · ≥2× 紅(罕見大動作)
+      function sigColor(m) {
+        if (m == null) return 'var(--text-muted)';
+        if (m < 1) return '#9ca3af';
+        if (m < 2) return '#f59e0b';
+        return '#ef4444';
+      }
+
+      // ── 單擊小卡 → 今日 K 線彈窗 (lightweight-charts; 1分 OHLCV via /api/heatmap/intraday) ──
+      let _klChart = null, _klResizeObs = null;
+      // 前端記憶體快取：盤中伺服器 TTL 短，連點同一檔不必每次重打 FMP（排隊在背景大批掃描後面才是卡頓主因）。
+      const _klCache = new Map();        // ticker → {ts, data}
+      const _KL_TTL_MS = 45000;          // 45s — 與伺服器盤中 TTL 同量級，連點秒開
+      function _klFetch(ticker) {
+        const hit = _klCache.get(ticker);
+        if (hit && (Date.now() - hit.ts) < _KL_TTL_MS) return Promise.resolve(hit.data);
+        return fetch(`/api/heatmap/intraday/${encodeURIComponent(ticker)}`, { cache: 'no-store' })
+          .then(r => r.json())
+          .then(d => { if (d && d.bars && d.bars.length) _klCache.set(ticker, { ts: Date.now(), data: d }); return d; });
+      }
+      function openKline(ticker) {
+        const modal = document.getElementById('ia-kline-modal');
+        const chartEl = document.getElementById('ia-kl-chart');
+        const hint = document.getElementById('ia-kl-hint');
+        document.getElementById('ia-kl-sym').textContent = ticker;
+        document.getElementById('ia-kl-meta').textContent = '1分K · 載入中…';
+        hint.textContent = '';
+        modal.style.display = 'flex';
+        if (_klChart) { try { _klChart.remove(); } catch (e) {} _klChart = null; }
+        chartEl.innerHTML = '';
+        if (!window.LightweightCharts) { hint.textContent = '圖表庫未載入（檢查網路 / CDN）'; return; }
+        const dark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const chart = LightweightCharts.createChart(chartEl, {
+          width: chartEl.clientWidth, height: 380,
+          layout: { background: { color: 'transparent' }, textColor: dark ? '#a1a1aa' : '#52525b', fontFamily: "'JetBrains Mono', monospace", attributionLogo: false },
+          grid: { vertLines: { color: 'rgba(127,127,127,.08)' }, horzLines: { color: 'rgba(127,127,127,.08)' } },
+          timeScale: { timeVisible: true, secondsVisible: false, borderColor: 'rgba(127,127,127,.2)' },
+          rightPriceScale: { borderColor: 'rgba(127,127,127,.2)' },
+          crosshair: { mode: 0 },
+        });
+        _klChart = chart;
+        const candle = chart.addCandlestickSeries({
+          upColor: '#22c55e', downColor: '#ef4444', borderVisible: false,
+          wickUpColor: '#22c55e', wickDownColor: '#ef4444',
+        });
+        const vol = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
+        vol.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+
+        _klFetch(ticker)
+          .then(d => {
+            const all = (d && d.bars) || [];
+            if (!all.length) { hint.textContent = '無盤中資料（盤前 / 週末？）'; return; }
+            // Endpoint returns today during US hours, else a 7-day fallback. Keep only the
+            // latest trading session so it's always one clean day (今日 during market hours).
+            const lastDay = String(all[all.length - 1].time).slice(0, 10);
+            const bars = all.filter(b => String(b.time).slice(0, 10) === lastDay);
+            // FMP "date" is ET wall-clock with no tz; treat it as UTC so the time axis
+            // prints the ET clock (09:35…) instead of being shifted.
+            const toT = s => Math.floor(Date.parse(String(s).replace(' ', 'T') + 'Z') / 1000);
+            const cd = [], vd = []; let prevC = null;
+            for (const b of bars) {
+              const t = toT(b.time);
+              if (!Number.isFinite(t)) continue;
+              cd.push({ time: t, open: b.o, high: b.h, low: b.l, close: b.c });
+              vd.push({ time: t, value: b.v, color: (prevC != null && b.c < prevC) ? 'rgba(239,68,68,.35)' : 'rgba(34,197,94,.35)' });
+              prevC = b.c;
+            }
+            candle.setData(cd); vol.setData(vd);
+            chart.timeScale().fitContent();
+            const last = bars[bars.length - 1], first = bars[0];
+            const net = first.o ? ((last.c / first.o - 1) * 100) : 0;
+            document.getElementById('ia-kl-meta').textContent =
+              `${lastDay} · 1分K ${cd.length} 根 · 收 ${last.c} (${net > 0 ? '+' : ''}${net.toFixed(2)}%)`;
+            hint.textContent = (d.cached ? '快取 · ' : '') + (d.market_open ? '盤中' : '已收盤') +
+              ` · as_of ${(d.as_of || '').slice(11, 19)} ET`;
+          })
+          .catch(e => { hint.textContent = '載入失敗：' + e; });
+
+        if (_klResizeObs) { try { _klResizeObs.disconnect(); } catch (e) {} }
+        _klResizeObs = new ResizeObserver(() => { if (_klChart) _klChart.applyOptions({ width: chartEl.clientWidth }); });
+        _klResizeObs.observe(chartEl);
+      }
+      function closeKline() {
+        document.getElementById('ia-kline-modal').style.display = 'none';
+        if (_klResizeObs) { try { _klResizeObs.disconnect(); } catch (e) {} _klResizeObs = null; }
+        if (_klChart) { try { _klChart.remove(); } catch (e) {} _klChart = null; }
+      }
+      (function wireKline() {
+        const body = document.getElementById('ia-spikes-body');
+        if (body) body.addEventListener('click', e => {
+          const card = e.target.closest('.ia-scard');
+          if (card && card.dataset.sym) openKline(card.dataset.sym);
+        });
+        const modal = document.getElementById('ia-kline-modal');
+        const closeBtn = document.getElementById('ia-kl-close');
+        if (closeBtn) closeBtn.addEventListener('click', closeKline);
+        if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeKline(); });
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape' && modal && modal.style.display === 'flex') closeKline();
+        });
+      })();
+
+      function renderSpikes(s) {
+        const body = document.getElementById('ia-spikes-body');
+        const banner = document.getElementById('ia-spikes-alert');
+        document.getElementById('ia-spikes-feed').textContent = (s && s.feed) ? s.feed.toUpperCase() : '—';
+        document.getElementById('ia-spikes-meta').textContent = (s && s.watchlist_count != null) ? `監控 ${s.watchlist_count} 檔` : '';
+        if (s && Array.isArray(s.watchlist)) _spikeWatchlist = s.watchlist;
+        banner.classList.add('hidden');
+        document.getElementById('ia-spikes-pf').classList.add('hidden');
+        body.classList.remove('ia-spgrid');
+        if (!s || s._health === 'no_alpaca_key') {
+          body.innerHTML = `<span class="ia-kv">未設定 Alpaca key — ${(s && s.note) || '設定 ALPACA_API_KEY / ALPACA_SECRET_KEY 後啟用（免費 IEX）'}</span>`;
+          return;
+        }
+        if (s._health !== 'ok' && !(s.readings && s.readings.length)) {
+          body.innerHTML = `<span class="ia-kv">${s.note || '資料暫缺'}</span>`;
+          return;
+        }
+
+        // Every watched ticker = its own placeholder card. Stable order (watchlist
+        // order) so cards don't reshuffle each minute; alerts are highlighted in place.
+        const readings = (s.readings && s.readings.length)
+          ? s.readings.slice()
+          : (s.watchlist || []).map(sym => ({ symbol: sym, last: null, m1: null, m3: null }));
+        if (!readings.length) { body.innerHTML = '<span class="ia-kv">名單為空 — 按「✎ 編輯名單」加入標的</span>'; return; }
+        body.classList.add('ia-spgrid');
+
+        const fmt = v => (v == null) ? '—' : `${v > 0 ? '+' : ''}${v.toFixed(2)}%`;
+        // Bar timestamps are UTC; show them in ET (US market time) so 14:08 reads as
+        // "2:08pm 盤中" instead of a confusing 18:08 UTC.
+        const hhmm = t => {
+          if (!t) return '';
+          try { return new Date(t).toLocaleTimeString('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false }); }
+          catch (e) { return (t || '').slice(11, 16); }
+        };
+
+        body.innerHTML = readings.map(r => {
+          const noData = r.last == null;
+          const rvRaw = r.reversal;              // current reversal (or null)
+          const tr = r.trend;                    // sustained 順勢續攻/續跌 (or null)
+          // A counter-trend reversal (oversold bounce against a strict stack) is NOT
+          // a headline turn — let the dominant trend speak instead (the MU 急跌 case).
+          const rv = (rvRaw && !rvRaw.counter_trend) ? rvRaw : null;
+          const alert = !!r.alert;               // KDJ cross + MACD turn, same dir (never counter-trend)
+          const up = rv ? rv.direction === 'up' : tr ? tr.direction === 'up' : (r.m1 || 0) > 0;
+          // Header %: the 10-min net change (matches the sparkline) — the single-minute m1
+          // was noise and could contradict the line (the GLW 區間 case). Falls back to m1
+          // only when there's no 10-min context yet.
+          const cx = r.context;
+          const net10 = (cx && cx.spark && cx.spark.length > 1 && cx.spark[0])
+            ? (cx.spark[cx.spark.length - 1] / cx.spark[0] - 1) * 100 : r.m1;
+          const netCol = noData ? 'var(--text-muted)'
+            : (net10 > 0.005 ? '#22c55e' : net10 < -0.005 ? '#ef4444' : 'var(--text-muted)');
+
+          // line 2 — current signal state (reversal > trend > none)
+          let state;
+          if (rv) {
+            const col = rv.direction === 'up' ? '#22c55e' : '#ef4444';
+            const arrow = rv.direction === 'up' ? '⤴' : '⤵';
+            const star = alert ? '★ ' : '';
+            const basis = (rv.basis || []).join('+');
+            const zone = rv.zone ? ` · ${rv.zone}` : '';
+            state = `<div class="ia-sc-state" style="color:${col};">${star}${arrow} ${rv.dir_zh} <span style="font-size:9px;opacity:.8;">${basis}${zone}</span> <span style="opacity:.6;font-size:9px;">${hhmm(rv.at)}</span></div>`;
+          } else if (tr) {
+            const col = tr.direction === 'up' ? '#22c55e' : '#ef4444';
+            const arrow = tr.direction === 'up' ? '▲' : '▼';
+            const star = tr.strength === 'strong' ? '★ ' : '';
+            const basis = (tr.basis || []).join(' · ');
+            state = `<div class="ia-sc-state" style="color:${col};">${star}${arrow} ${tr.dir_zh} <span style="font-size:9px;opacity:.8;">${basis}</span> <span style="opacity:.6;font-size:9px;">${hhmm(tr.at)}</span></div>`;
+          } else {
+            state = `<div class="ia-sc-state" style="color:var(--text-muted);font-weight:600;">— 尚無訊號</div>`;
+          }
+
+          // line 3 — 10-min posture: a regime-colored sparkline (visual) + compact tag.
+          // Replaces the old timestamped 訊號流 (幾分上/幾分下 = noise without magnitude).
+          let ctxLine = '';
+          if (cx && cx.spark && cx.spark.length > 1) {
+            const col = cx.regime === 'up' ? '#22c55e' : cx.regime === 'down' ? '#ef4444' : '#9ca3af';
+            const icon = cx.regime === 'up' ? '▲' : cx.regime === 'down' ? '▼' : '▬';
+            const sig = cx.sigma_mult != null ? ` σ${cx.sigma_mult}×` : '';
+            const sigHtml = cx.sigma_mult != null ? ` <span style="color:${sigColor(cx.sigma_mult)};font-weight:700;">σ${cx.sigma_mult}×</span>` : '';
+            const dist = (cx.dist_high != null) ? `距高 ${cx.dist_high > 0 ? '+' : ''}${cx.dist_high}%` : '';
+            ctxLine = `<div style="display:flex;align-items:center;gap:7px;margin-top:4px;" title="10分鐘走勢 · ${dist}${sig}">
+              ${sparkSVG(cx.spark, col)}
+              <span style="font-size:10px;font-weight:700;color:${col};white-space:nowrap;">${icon}${cx.regime_zh}${sigHtml}</span>
+            </div>`;
+          }
+
+          // line 2.5 — 急拉/急殺 context chip (10-min regime-aware; suppressed noise hidden)
+          let spikeLine = '';
+          const sp = r.spike;
+          if (sp && !sp.suppressed && sp.context_label) {
+            const col = sp.direction === 'spike_up' ? '#22c55e' : '#ef4444';
+            const mark = sp.severity === 'high' ? '⚡ ' : '';
+            const sig = sp.sigma_mult != null ? ` · <span style="color:${sigColor(sp.sigma_mult)};font-weight:700;">σ${sp.sigma_mult}×</span>` : '';
+            spikeLine = `<div class="ia-sc-state" style="color:${col};">${mark}${sp.context_label} <span style="font-size:9px;opacity:.8;">分${sp.m1 > 0 ? '+' : ''}${sp.m1}%${sig} · 分數${sp.score}</span> <span style="opacity:.6;font-size:9px;">${hhmm(sp.at)}</span></div>`;
+          }
+
+          const cls = 'ia-scard'
+            + (alert ? ' alert' + (up ? '' : ' down')
+               : (tr && !rv) ? ' trend' + (up ? '' : ' down') : '');
+          return `<div class="${cls}" data-sym="${r.symbol}" title="點擊看今日 K 線" style="cursor:pointer;">
+            <div class="ia-sc-head"><span class="ia-sc-sym">${r.symbol}</span><span class="ia-sc-px">${noData ? '無資料' : `${r.last} <span style="color:${netCol};" title="近10分鐘淨變化（對應走勢線）">${fmt(net10)}</span>`}</span></div>
+            ${state}
+            ${spikeLine}
+            ${ctxLine}
+          </div>`;
+        }).join('');
+
+        // 急拉擊殺 / 急殺反軋 banner — pump-then-fade pattern (拉高出貨/誘多被殺 等)
+        const pfBanner = document.getElementById('ia-spikes-pf');
+        pfBanner.classList.add('hidden');
+        const pfs = (s.pump_fades || []);
+        if (pfs.length) {
+          pfBanner.classList.remove('hidden');
+          pfBanner.innerHTML = `🎯 ${pfs.length} 檔急拉擊殺/反軋：` + pfs.map(p =>
+            `<strong>${p.symbol}</strong>(${p.dir_zh} ${p.pump_pct > 0 ? '+' : ''}${p.pump_pct}%→回${Math.round(p.retrace * 100)}%)`).join('、');
+        }
+
+        // Alert banner + (optional) desktop notification — only for DIRECTIONAL turns.
+        // A KDJ+MACD 同向翻轉 inside a choppy 區間 is mostly noise (oscillators cross back
+        // and forth); we only interrupt the user when the 10-min regime is actually trending
+        // (多頭/空頭) OR a real non-suppressed spike confirms a break out of the range.
+        const alerts = readings.filter(isDirectionalAlert);
+        if (alerts.length) {
+          banner.classList.remove('hidden');
+          banner.innerHTML = `⚡ ${alerts.length} 檔有方向翻轉：` +
+            alerts.map(a => `<strong>${a.symbol}</strong>(${a.reversal && a.reversal.direction === 'up' ? '↑' : '↓'})`).join('、');
+          maybeNotifyAlerts(alerts);
+        }
+      }
+
+      // Filter out range-chop reversals: a KDJ+MACD turn only counts as a real signal when
+      // the 10-min regime is trending, or a real spike breaks the range. Cuts push noise.
+      function isDirectionalAlert(r) {
+        if (!r.alert) return false;
+        const cx = r.context;
+        if (cx && cx.regime === 'range') {
+          const sp = r.spike;
+          return !!(sp && !sp.suppressed && (sp.severity === 'high' || sp.breakout));
+        }
+        return true;   // trending up/down (or no 10-min context yet) → genuine turn
+      }
+
+      // Desktop push for a NEW alert (only if user granted permission). De-duped by
+      // symbol+timestamp so the same cross doesn't re-notify across 60s polls.
+      function maybeNotifyAlerts(alerts) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        alerts.forEach(a => {
+          const key = a.reversal ? a.reversal.at : '';
+          if (_spikeAlertSeen[a.symbol] === key) return;
+          _spikeAlertSeen[a.symbol] = key;
+          const dir = a.reversal && a.reversal.direction === 'up' ? '反轉向上' : '反轉向下';
+          try { new Notification(`⚡ ${a.symbol} ${dir}`, { body: `KDJ+MACD 同向翻轉 · ${(a.reversal && a.reversal.at || '').slice(11, 16)}` }); } catch (e) {}
+        });
+      }
+
+      // ── Desktop-notification opt-in (needs a user gesture for permission) ──
+      (function wireSpikeNotify() {
+        const btn = document.getElementById('ia-spikes-notify');
+        if (!btn) return;
+        const paint = () => {
+          const ok = ('Notification' in window) && Notification.permission === 'granted';
+          btn.style.color = ok ? '#22c55e' : 'var(--text-muted)';
+          btn.style.borderColor = ok ? 'rgba(34,197,94,.5)' : 'var(--border,#3f3f46)';
+          btn.textContent = ok ? '🔔 提示開' : '🔔 提示';
+        };
+        if (!('Notification' in window)) { btn.style.display = 'none'; return; }
+        paint();
+        btn.addEventListener('click', () => {
+          if (Notification.permission === 'granted') return;
+          Notification.requestPermission().then(paint);
+        });
+      })();
+
+      // ── Watchlist inline editor ───────────────────────────────────────────
+      (function wireSpikeEditor() {
+        const editBtn = document.getElementById('ia-spikes-edit');
+        const editor = document.getElementById('ia-spikes-editor');
+        const input = document.getElementById('ia-spikes-input');
+        const msg = document.getElementById('ia-spikes-edit-msg');
+        if (!editBtn) return;
+        editBtn.addEventListener('click', async () => {
+          // Prefer a fresh server read so the textarea matches disk.
+          let list = _spikeWatchlist;
+          try { const r = await fetch('/api/intraday-spikes/watchlist', { cache: 'no-store' }); if (r.ok) list = (await r.json()).watchlist || list; } catch (e) {}
+          input.value = (list || []).join('\n');
+          msg.textContent = '';
+          editor.classList.remove('hidden');
+        });
+        document.getElementById('ia-spikes-cancel').addEventListener('click', () => editor.classList.add('hidden'));
+        document.getElementById('ia-spikes-save').addEventListener('click', async () => {
+          const tickers = input.value.split(/[\s,]+/).map(t => t.trim().toUpperCase()).filter(Boolean);
+          msg.textContent = '儲存中…'; msg.style.color = 'var(--text-muted)';
+          try {
+            const r = await fetch('/api/intraday-spikes/watchlist', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tickers })
+            });
+            const j = await r.json();
+            if (!r.ok) { msg.textContent = '✗ ' + (j.error || r.status); msg.style.color = '#ef4444'; return; }
+            _spikeWatchlist = j.watchlist || tickers;
+            msg.textContent = `✓ 已儲存 ${(j.watchlist || tickers).length} 檔，重新偵測中…`; msg.style.color = '#22c55e';
+            setTimeout(() => { editor.classList.add('hidden'); loadSpikes(); }, 1500);
+          } catch (e) { msg.textContent = '✗ ' + e; msg.style.color = '#ef4444'; }
+        });
+      })();
+
+      async function loadSpikes() {
+        try { const r = await fetch('/api/intraday-spikes/data', { cache: 'no-store' }); if (r.ok) return renderSpikes(await r.json()); } catch (e) {}
+        try { const r2 = await fetch('intraday_spikes.json', { cache: 'no-store' }); if (r2.ok) return renderSpikes(await r2.json()); } catch (e) {}
+        renderSpikes(null);
+      }
+
+      async function load() {
+        try {
+          const r = await fetch('/api/intraday-mood/data', { cache: 'no-store' });
+          if (r.ok) return render(await r.json());
+        } catch (e) {}
+        // fallback to the static artifact if the API isn't mounted
+        try {
+          const r2 = await fetch('intraday_mood.json', { cache: 'no-store' });
+          if (r2.ok) return render(await r2.json());
+        } catch (e) {}
+        render(null);
+      }
+
+      document.getElementById('ia-refresh').addEventListener('click', async (e) => {
+        const btn = e.currentTarget; btn.disabled = true; btn.style.opacity = '.5';
+        try { await fetch('/api/intraday-mood/refresh', { method: 'POST' }); } catch (err) {}
+        setTimeout(async () => { await load(); btn.disabled = false; btn.style.opacity = '1'; }, 6000);
+      });
+
+      load();
+      loadSpikes();
+      // Mood data refreshes server-side every 5 min; spikes every ~60s. Poll both
+      // every 60s (cheap static-file reads); spikes is the time-sensitive one.
+      setInterval(() => { load(); loadSpikes(); }, 60000);
+    })();
+    </script>
+
+    <!-- Boot（側欄）+ Tab 切換 -->
+    <script>
+      if (window.UI && UI.boot) UI.boot('intraday-eval');
+
+      (function wireTabs() {
+        const KEY = 'intraday_tab';
+        const tabs = Array.from(document.querySelectorAll('.ie-tab'));
+        const panes = { strategy: document.getElementById('tab-strategy'), mood: document.getElementById('tab-mood') };
+        const bars  = { strategy: document.getElementById('ie-toolbar'),  mood: document.getElementById('ia-toolbar') };
+        function show(which) {
+          if (!panes[which]) which = 'strategy';
+          tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === which));
+          Object.keys(panes).forEach(k => { panes[k].style.display = (k === which) ? '' : 'none'; });
+          Object.keys(bars).forEach(k => bars[k].classList.toggle('hidden', k !== which));
+          try { localStorage.setItem(KEY, which); } catch (e) {}
+          if (window.lucide) lucide.createIcons();
+        }
+        tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+        // #mood（來自舊 intraday-mood.html 導向）優先，其次記住的上次分頁
+        let init = 'strategy';
+        if (location.hash === '#mood') init = 'mood';
+        else { try { init = localStorage.getItem(KEY) || 'strategy'; } catch (e) {} }
+        show(init);
+      })();
+
+      if (window.lucide) lucide.createIcons();
+    </script>
+</body>
+</html>
