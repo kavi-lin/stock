@@ -195,23 +195,48 @@ def load_earnings_bundle(ticker):
 def load_peer_bundle(ticker):
     sys.path.insert(0, REPO)
     try:
-        from skills._shared.company_context import get_peers, get_profile, get_ratios_ttm
+        from skills._shared.company_context import (
+            get_profile, get_ratios_ttm, select_valuation_peers,
+        )
     except Exception as e:
         return {"status": "unavailable", "reason": f"import failed: {e}"}
     try:
-        peers_raw = get_peers(ticker)[:5]
+        selection = select_valuation_peers(ticker)
+        peers_raw = selection.get("peers") or []
     except Exception as e:
         return {"status": "unavailable", "reason": f"get_peers failed: {e}"}
-    if not peers_raw:
-        return {"status": "unavailable"}
-    peer_profiles = {}
-    for p in peers_raw:
-        try:
-            prof = get_profile(p)
-        except Exception:
-            prof = None
-        if prof:
-            peer_profiles[p] = prof
+    range_peer_cohort = None
+    range_peer_scenario = None
+    try:
+        vm_scripts = os.path.join(REPO, "skills", "valuation-modeler", "scripts")
+        if vm_scripts not in sys.path:
+            sys.path.insert(0, vm_scripts)
+        import peer_cohorts
+        range_peer_cohort = peer_cohorts.build_pe_cohort(ticker)
+        self_ratios_for_range = get_ratios_ttm(ticker) or {}
+        self_profile_for_range = get_profile(ticker) or {}
+        range_value = peer_cohorts.implied_pe_value({
+            "price": self_profile_for_range.get("price"),
+            "pe": self_ratios_for_range.get("pe_ttm"),
+        }, range_peer_cohort)
+        range_peer_scenario = {
+            **range_peer_cohort,
+            "value": range_value,
+            "eligible": bool(range_peer_cohort.get("eligible") and range_value),
+        }
+    except Exception:
+        range_peer_cohort = None
+    if not selection.get("eligible"):
+        return {
+            "status": "insufficient_peers",
+            "peers": peers_raw,
+            "peer_selector": selection.get("selector"),
+            "peer_exclusions": selection.get("dropped") or [],
+            "reason": selection.get("reason"),
+            "range_peer_cohort": range_peer_cohort,
+            "range_peer_scenario": range_peer_scenario,
+        }
+    peer_profiles = selection.get("profiles") or {}
     if len(peer_profiles) < 3:
         return {"status": "insufficient_peers", "peers": list(peer_profiles.keys())}
 
@@ -256,6 +281,9 @@ def load_peer_bundle(ticker):
     return {
         "status": "ok",
         "peers": list(peer_profiles.keys()),
+        "peer_selector": selection.get("selector"),
+        "peer_exclusions": selection.get("dropped") or [],
+        "subject_industry": selection.get("subject_industry"),
         "peer_pe_median": pe_med,
         "peer_market_cap_median": _med("marketCap"),
         "peer_beta_median": _med("beta"),
@@ -265,6 +293,8 @@ def load_peer_bundle(ticker):
         "peer_pb_median":        _med_ratio("price_to_book_ttm"),
         "peer_ratios_n":         len(peer_ratios),
         "self_ratios_ttm":       self_ratios,
+        "range_peer_cohort":     range_peer_cohort,
+        "range_peer_scenario":   range_peer_scenario,
     }
 
 

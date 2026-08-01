@@ -1,0 +1,29 @@
+{
+  "schema": "valuation_peer_cohorts.v1",
+  "cohorts": {
+    "MU": {
+      "name": "memory_storage_public_cohort",
+      "comparison_scope": "range_only",
+      "approved_at": "2026-08-02",
+      "approved_by": "user",
+      "discovery_method": "llm_assisted_then_human_approved",
+      "rationale": "Public NAND and storage vendors provide a cycle-sensitive valuation reference when the provider peer endpoint returns broad technology companies.",
+      "limitations": [
+        "No listed pure-play US DRAM/HBM peer exists.",
+        "Storage mix and capital intensity differ from Micron.",
+        "TTM P/E is pro-cyclical and can overstate value near a memory-cycle peak.",
+        "The cohort may extend a valuation range but cannot replace the primary DCF."
+      ],
+      "candidates": [
+        {"ticker": "SNDK", "role": "NAND flash and storage"},
+        {"ticker": "WDC", "role": "HDD and storage-cycle read-through"},
+        {"ticker": "STX", "role": "Storage-cycle demand read-through"}
+      ],
+      "reference_only": [
+        {"name": "SK Hynix", "listing": "KRX 000660", "role": "DRAM and HBM"},
+        {"name": "Samsung Electronics", "listing": "KRX 005930", "role": "DRAM, NAND and HBM"},
+        {"name": "Kioxia Holdings", "listing": "TSE 285A", "role": "NAND flash"}
+      ]
+    }
+  }
+}

@@ -8,6 +8,65 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.77.0] — 2026-08-02 — 估值引擎 review 修正（degraded path 治理）
+
+### Fixed
+- `dcf.py` start EBIT margin 期間錯配：走 `annual_analyst_estimate` 分支時，分子（已公布季度營業利益）除以全年營收估計會嚴重低估起始利潤率。改為同期基礎，provenance 區分 `quarterly_rollforward` / `reported_quarters_only`。MU 走 3 季 roll-forward，輸出不變。
+- `dcf.py` degraded payload 渲染崩潰：`run_dcf` 早退分支（no base revenue / invalid revenue path / no share count）缺 `wacc_used`，`render_md` 直接 TypeError。新增 `_render_degraded_md`，標 `DEGRADED` + reason，rc 維持 1。
+- `dcf.py` 缺 analyst 估計時的成長 fallback：原本整條 path 直接套成長上限表（45/30/20/12/8），把「上界」當成「預設」。改用 base growth 假設當種子再受 cap 約束。
+- `dcf.py` confirmed structural shift 靜默降級 legacy：新增 `projection_degrade_reason`（5 種 reason）寫入 payload 並在 run warnings 出現。
+- `dcf.py` structural mode 下 `--set revenue_growth_y1/ebitda_margin/da_pct/capex_pct` 靜默無效：改列入 warnings。
+- `dcf.py` earnings cache 以 mtime 排序（git checkout 會重置）→ 改 parse 檔名日期。
+- `comps.py` `_eps_growth` 年度選取污染 PEG：(a) 不過濾歷史年度，歷史成長可冒充 forward；(b) 最近年度成長超出 clamp 時靜默改抓更後面成長更高的配對。改為只取最近兩個未來會計年度、超 clamp 回 None。快取宇宙 25 檔中僅 CSCO 受影響（11.95% → 10.15%，修正值）。
+
+### Added
+- `dcf.py --projection-mode auto|legacy`：可強制 constant-ratio 模式做對照。
+- DCF 報告假設表新增「本次採用」欄（✓ / — / meta），區分當前 mode 實際讀取的欄位；sensitivity 受 `wacc−g ≥ 2%` 下限調整的 cell 加註實際 WACC。
+- `peer_cohorts.py` cohort `schema` 版本驗證（不符回 `unsupported_cohort_schema`）＋ `pe_min`/`pe_max`／scenario `value_low`/`value_high`（3 檔樣本無法 winsorize，改公開離散度）。
+- comps 報告在 canonical peer set eligible 時不再渲染第二張 range-only peer 表（payload 保留供審計），避免讀者混用兩個 peer universe。
+- `--xlsx` 對缺席的 `export_xlsx` 模組改為 graceful skip。
+
+### Validation
+- `test_dcf` 104 asserts / `test_comps` 52 asserts / `test_export_xlsx` 13 asserts 全 rc=0；`test_compute_price_framework.py` + `test_valuation_pack_consistency.py` + `check_skills.py` rc=0。
+- MU 迴歸：FV `$762.13`、WACC `12.49%`、sensitivity `$693.74–853.60` 與 4.76.0 逐項一致。
+
+### Why
+- 2026-08-02 估值 review 找到 12 項問題，全部集中在 degraded / fallback 分支：MU 剛好走 happy path，但下一個「非 3 季、缺 ebitAvg、缺年度估計」的 ticker 會拿到低估或過度樂觀的 anchor 而毫無警示。修法一律是「缺資料 → 保守且出聲」，不是「缺資料 → 套最寬鬆的合法上界」。
+
+## [4.76.0] — 2026-08-02 — DCF-primary FV + audited peer range
+
+### Changed
+- Eligible structural-shift self DCF 成為 primary FV；family blend 保留為 audit/scenario，不再把 DCF 與高週期相對估值平均成另一個單點。
+- `peer_cohorts.py` + audited config 支援 LLM/manual candidate discovery；倍數一律由 deterministic adapter 重抓、≥3 正 P/E、`range_only`，不得補 live peer anchor。
+- 新增 `valuation_explained_range`：DCF sensitivity、without-peer、with-peer、其他 eligible anchors、range drivers 與 limitations；報告 injector 以 DCF 主 FV + 解釋帶呈現。
+
+### Validation
+- MU @ `$812`：primary DCF `$762.13`（`-6.14%`）；DCF sensitivity `$693.74–853.60`；without-peer `$797.32`；SNDK/WDC/STX peer P/E scenario `$1,785.39`、with-peer `$1,291.36`；完整 anchor 解釋帶 `$693.74–1,468.26`（上緣 driver=analyst PT）。
+
+## [4.75.1] — 2026-08-02 — MU structural-shift DCF 重建
+
+### Changed
+- `valuation-modeler/dcf.py` 新增 confirmed structural-shift through-cycle 模式：current-FY quarterly roll-forward、逐年成長上限、EBIT/D&A/capex 正常化、terminal reinvestment、最新季度淨現金/股數與異常欄位品質閘門。
+- through-cycle WACC 對 observed beta 採 Blume mean reversion；敏感度中的 terminal growth 同步改變 reinvestment，避免高成長零成本。
+- canonical pack 在新 DCF eligible 時保留但停用 opaque vendor DCF，避免同一 cash-flow family 重複投票；legacy/failed self DCF 不會壓掉 vendor source。
+
+### Validation
+- MU DCF `$762.13`、WACC `12.49%`、terminal g `2.5%`；vs cached close `$823.03` 為 `-7.4%`（vs user quote `$812` 約 `-6.1%`），5×5 sensitivity `$693.74–$853.60`。
+- DCF 與 canonical framework regression、py_compile、invest validator 與版本同步均通過。
+
+## [4.75.0] — 2026-08-02 — 個股估值改為 canonical family aggregation
+
+### Changed
+- `compute_price_framework.py` 建立唯一權威 `valuation_pack`：anchor 先做 eligibility，再按 correlation group 去重、三個獨立 family 聚合；summary、MHP、deterministic shadow 全部只讀 pack projection，少於兩個 family 禁止強分數。
+- `--self-assemble` 改為 engine 擁有八個 live anchors；輸入檔同名 value/meta 會被清除並留下 audit，阻斷 LLM 注入估值。
+- DCF 負 terminal FCFF、LOW/transition/少於兩法 forecaster、少於三個 business-similar peers、缺 peer count、過期或結構轉折前 analyst PT 全部 fail-closed；Reverse DCF 維持 diagnostic-only。
+- peer selection 統一到 exact-industry + business-model selector；Phase 1、comps 與 forecaster 共用相同來源。
+- invest validator 新增 pack↔summary↔lane↔MHP hard consistency；新增 canonical consistency、eligibility 與注入防護 regression tests。
+
+### Validation
+- MU 重跑：FV `$623.79`、vs current `-24.21%`、score `-1`、confidence `low`；完整 lineage/排除原因在 `reports/20260802_MU_valuation_pack_audit.md`。
+- 同一個 Claude Fable 5 session 完成兩輪 code review；F1–F5 全部 resolved，最終明確 `ACCEPT`。
+
 ## [4.47.2] — 2026-06-22 — weekly-tech-playbook：Codex Review 整合的優化（解耦 + 去自打臉 nag）
 
 ### Changed

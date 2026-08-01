@@ -18,6 +18,7 @@ What this catches (main failure modes seen in production):
 
 Does NOT validate analysis quality — only schema compliance.
 """
+import argparse
 import json
 import os
 import sys
@@ -80,11 +81,22 @@ def fail(errors):
     sys.exit(1)
 
 
-def main():
-    if not os.path.exists(HISTORY_JSON):
-        fail([f"history.json not found at {HISTORY_JSON}"])
+def _same_number(a, b, tol=0.011):
+    return (isinstance(a, (int, float)) and not isinstance(a, bool)
+            and isinstance(b, (int, float)) and not isinstance(b, bool)
+            and abs(float(a) - float(b)) <= tol)
 
-    with open(HISTORY_JSON, "r", encoding="utf-8") as fp:
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Validate latest investment session export")
+    ap.add_argument("--history", default=HISTORY_JSON,
+                    help="history JSON path (default: investment/invest_logs/history.json)")
+    args = ap.parse_args(argv)
+    history_path = args.history
+    if not os.path.exists(history_path):
+        fail([f"history.json not found at {history_path}"])
+
+    with open(history_path, "r", encoding="utf-8") as fp:
         hist = json.load(fp)
 
     if not isinstance(hist, list) or not hist:
@@ -92,6 +104,7 @@ def main():
 
     entry = hist[-1]
     errors = []
+    warnings = []  # advisory-only findings — printed but never fail the gate
 
     # ── 1. Legacy shape detection ────────────────────────────────────────
     is_legacy_flat = (
@@ -166,12 +179,64 @@ def main():
             conf = fvs.get("confidence")
             if conf not in (None, "high", "medium", "low"):
                 errors.append(f"fair_value_summary.confidence invalid: {conf!r}")
+            # V4.69.0 — anchors 集合容錯：6-key（舊）與 8-key（+dcf_self_built/
+            # comps_implied）都合法；集合外的 key 只 warning 不 error（前向相容）
+            known_anchors = {"dcf_unlevered", "dcf_levered", "dcf_self_built",
+                             "analyst_pt_consensus", "peer_pe_implied", "comps_implied",
+                             "owner_earnings_mult", "forecaster_blend"}
+            anchors = fvs.get("anchors")
+            if isinstance(anchors, dict):
+                unknown = set(anchors) - known_anchors
+                if unknown:
+                    warnings.append(
+                        f"fair_value_summary.anchors unknown keys (accepted): {sorted(unknown)}")
+                na = fvs.get("anchors_available")
+                if isinstance(na, int) and not (0 <= na <= len(known_anchors)):
+                    errors.append(f"fair_value_summary.anchors_available out of range: {na}")
+            # Canonical valuation pack: all legacy fields are projections and
+            # therefore must be numerically identical, not merely plausible.
+            pack = trade.get("valuation_pack")
+            if fvs.get("valuation_pack_schema") and not isinstance(pack, dict):
+                errors.append(
+                    "fair_value_summary declares valuation_pack_schema but valuation_pack is missing"
+                )
+            if isinstance(pack, dict):
+                if pack.get("schema") != "valuation_pack.v1":
+                    errors.append(f"valuation_pack.schema invalid: {pack.get('schema')!r}")
+                for field in ("weighted_fair_value", "vs_current_pct"):
+                    if not _same_number(pack.get(field), fvs.get(field)):
+                        errors.append(
+                            f"valuation_pack.{field} != fair_value_summary.{field} — projection drift"
+                        )
+                for field in ("verdict_band", "confidence"):
+                    if pack.get(field) != fvs.get(field):
+                        errors.append(
+                            f"valuation_pack.{field} != fair_value_summary.{field} — projection drift"
+                        )
+                if not _same_number(pack.get("current_price"), trade.get("analysis_price")):
+                    errors.append("valuation_pack.current_price != analysis_price")
+                if len(pack.get("families_present") or []) < 2 and abs(pack.get("score") or 0) >= 2:
+                    errors.append("valuation_pack: <2 families cannot emit |score| >= 2")
+                for name, detail in (pack.get("anchors") or {}).items():
+                    if not isinstance(detail, dict):
+                        errors.append(f"valuation_pack.anchors.{name} must be an object")
+                        continue
+                    if detail.get("status") == "eligible" and (
+                            not detail.get("provenance") or not detail.get("as_of")):
+                        errors.append(
+                            f"valuation_pack.anchors.{name}: eligible anchor missing provenance/as_of"
+                        )
         # Validate valuation_lane structure
         vl = trade.get("valuation_lane")
         if isinstance(vl, dict):
             for k in ("signal", "score", "confidence"):
                 if k not in vl:
                     errors.append(f"valuation_lane: missing key {k}")
+            pack = trade.get("valuation_pack")
+            if isinstance(pack, dict):
+                for field in ("weighted_fair_value", "vs_current_pct", "score"):
+                    if field in vl and not _same_number(vl.get(field), pack.get(field)):
+                        errors.append(f"valuation_lane.{field} != valuation_pack.{field}")
         # Validate active_weights includes Valuation
         weights = entry.get("active_weights_end_of_session") or {}
         if "Valuation" not in weights:
@@ -183,6 +248,10 @@ def main():
     if ds is None:
         errors.append("det_shadow missing — run apply_det_shadow.py post-process before export (V2.19+)")
     elif isinstance(ds, dict):
+        if isinstance(trade.get("valuation_pack"), dict) and ds.get("valuation_source") != "valuation_pack":
+            errors.append(
+                "det_shadow.valuation_source must be 'valuation_pack' when canonical pack exists"
+            )
         sp = ds.get("signal_polarization")
         if sp not in (None, "ALIGNED", "MIXED", "OUTLIER", "BIPOLAR"):
             errors.append(f"det_shadow.signal_polarization invalid (V2.19 4-tier): {sp!r}")
@@ -272,10 +341,28 @@ def main():
             errors.append(
                 f"hot_zone_probe=true requires final_decision='STAGED_ENTRY', got {fd!r}"
             )
-        hp = trade.get("position_size_pct")
-        if isinstance(hp, (int, float)) and hp > 0.0015:
+        # V4.70.0 (P0-1) — 分數分層 probe size：t2_30bps（score ≥ 0.4）/ t1_15bps。
+        # tier 缺失（V4.70.0 前的 entry）→ warning + 沿用舊 15bps 上限。
+        tier = trade.get("hot_zone_probe_tier")
+        _TIER_CAPS = {"t1_15bps": 0.0015, "t2_30bps": 0.003}
+        if tier is None:
+            warnings.append(
+                "hot_zone_probe_tier absent — V4.70.0 起 probe 應填 tier"
+                "（t1_15bps / t2_30bps）；以 legacy 15bps 上限檢查"
+            )
+            tier_cap = 0.0015
+        elif tier not in _TIER_CAPS:
             errors.append(
-                f"hot_zone_probe=true requires position_size_pct ≤ 0.0015 (15bps), got {hp}"
+                f"hot_zone_probe_tier must be one of {sorted(_TIER_CAPS)}, got {tier!r}"
+            )
+            tier_cap = 0.003
+        else:
+            tier_cap = _TIER_CAPS[tier]
+        hp = trade.get("position_size_pct")
+        if isinstance(hp, (int, float)) and hp > tier_cap:
+            errors.append(
+                f"hot_zone_probe=true (tier={tier or 'legacy'}) requires "
+                f"position_size_pct ≤ {tier_cap}, got {hp}"
             )
         if cap_active is True:
             errors.append(
@@ -283,11 +370,79 @@ def main():
                 "valuation cap is a hard gate and takes precedence over the probe"
             )
 
+    # ── 12. V4.72.0 — P2-11 數值界限/加總檢查（AUDIT_2026-07-16 F6 #3）─────────
+    # 動機：歷史出現 VRT final_score=6.72（超出理論量表上限 ~4.35：5×0.72 C_eff
+    # ×1.15 bonus ×1.05 macro bonus）且 lane_scores=None 仍 rc=0 過關。
+    fs = trade.get("final_score")
+    if isinstance(fs, (int, float)) and abs(fs) > 4.5:
+        errors.append(
+            f"final_score {fs} outside sane bounds ±4.5 "
+            "(theoretical max ≈ 4.35 = 5 × C_eff 0.72 × 1.15 × 1.05×macro) — "
+            "計算鏈出錯或 LLM 手填，重跑 Phase 3"
+        )
+    so = trade.get("scenario_odds")
+    if isinstance(so, dict) and so:
+        vals = [v for v in so.values() if isinstance(v, (int, float))]
+        if len(vals) == len(so) and sum(vals) != 100:
+            errors.append(
+                f"scenario_odds must sum to 100, got {sum(vals)} ({so})"
+            )
+    ls = trade.get("lane_scores")
+    if isinstance(ls, dict):
+        for k, v in ls.items():
+            if isinstance(v, (int, float)) and not -5 <= v <= 5:
+                errors.append(f"lane_scores.{k}={v} outside protocol scale -5..+5")
+    vl_score = (trade.get("valuation_lane") or {}).get("score") \
+        if isinstance(trade.get("valuation_lane"), dict) else None
+    if isinstance(vl_score, (int, float)) and not -5 <= vl_score <= 5:
+        errors.append(f"valuation_lane.score={vl_score} outside protocol scale -5..+5")
+    ac_v = trade.get("avg_confidence")
+    if isinstance(ac_v, (int, float)) and not 0.0 <= ac_v <= 1.0:
+        errors.append(f"avg_confidence={ac_v} outside 0-1")
+
+    # ── 11c. V4.70.0 — P0-2 red team 分級/校準欄位（值域檢查；缺欄 = 舊 entry OK）──
+    rts = trade.get("red_team_counter_evidence_strength")
+    if rts is not None and (not isinstance(rts, int) or isinstance(rts, bool)
+                            or not 1 <= rts <= 5):
+        errors.append(
+            f"red_team_counter_evidence_strength must be int 1-5, got {rts!r}"
+        )
+    rtp = trade.get("red_team_thesis_break_probability")
+    if rtp is not None and (not isinstance(rtp, (int, float)) or isinstance(rtp, bool)
+                            or not 0.0 <= rtp <= 1.0):
+        errors.append(
+            f"red_team_thesis_break_probability must be float 0-1, got {rtp!r}"
+        )
+
+    # ── 11b. V5.0.x — Rec 11 hot_zone_eval instrumentation (TODO-015) ────
+    # Always-recorded enum lets the weekly REVIEW tell "evaluated then
+    # suppressed" from "rule never ran". Hard-error on enum/consistency when
+    # present; absence is a warning only (legacy/V5.0 entries predate it).
+    _HZ_EVAL_ENUM = {"fired", "suppressed_by_risk_flag",
+                     "suppressed_by_cap", "not_qualifying"}
+    hze = trade.get("hot_zone_eval")
+    if hze is not None:
+        if hze not in _HZ_EVAL_ENUM:
+            errors.append(
+                f"hot_zone_eval must be one of {sorted(_HZ_EVAL_ENUM)}, got {hze!r}"
+            )
+        elif (hze == "fired") != (trade.get("hot_zone_probe") is True):
+            errors.append(
+                "hot_zone_eval must equal 'fired' iff hot_zone_probe=true "
+                f"(got eval={hze!r}, probe={trade.get('hot_zone_probe')!r})"
+            )
+
     # ── 5d. V5.1 — Multi-Horizon Price Framework (advisory, warning-only) ─
     # MHP is derived/advisory: it feeds reasoning + trade_plan provenance but
     # NOT decision math and NOT the 11-field decision_lock. Absence (V5.0 back-
     # compat) or partial fill must NEVER fail the gate — emit warnings, keep rc=0.
-    warnings = []
+    # （warnings list 建立於 main() 開頭，V4.69.0 anchor 容錯亦寫入同一 list）
+    # TODO-015 — hot_zone_eval required on V5.0.x+; warn (not fail) on legacy.
+    if trade.get("hot_zone_eval") is None and ver != "V5.0":
+        warnings.append(
+            "hot_zone_eval absent — TODO-015 要求每筆 deep-dive 寫出 Rec 11 評估結果"
+            "（fired/suppressed_by_risk_flag/suppressed_by_cap/not_qualifying）"
+        )
     mhp = trade.get("multi_horizon_price_framework")
     if mhp is None:
         if ver == "V5.0":
@@ -308,8 +463,8 @@ def main():
         lt = mhp.get("long_term_ref")
         fvs_ok = trade.get("fair_value_summary") or {}
         if isinstance(lt, dict) and "weighted_fair_value" in lt and "weighted_fair_value" in fvs_ok:
-            if lt.get("weighted_fair_value") != fvs_ok.get("weighted_fair_value"):
-                warnings.append(
+            if not _same_number(lt.get("weighted_fair_value"), fvs_ok.get("weighted_fair_value")):
+                errors.append(
                     "multi_horizon_price_framework.long_term_ref.weighted_fair_value != "
                     "fair_value_summary.weighted_fair_value — 長期層應引用不重算"
                 )

@@ -8,6 +8,7 @@ import json
 import os
 import sys
 from copy import deepcopy
+from pathlib import Path
 
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(TESTS_DIR), "scripts"))
@@ -244,12 +245,101 @@ eq("shift.insufficient_fallback",
    dcf.derive_base_assumptions(SHIFT_INCOMPLETE)["projection_mode"]["value"],
    "legacy_constant_ratio")
 
+# ── degraded / fallback branches（2026-08-02 review fixes） ───────────────
+# Fix 1: the annual-estimate branch must not divide reported-quarter operating
+# income by a full-year revenue estimate — one period basis or none.
+SHIFT_2Q = deepcopy(SHIFT)
+SHIFT_2Q["earnings_context"]["quarterly_pnl"] = [
+    {"fiscalYear": 2026, "revenue": 36000000000, "operatingIncome": 22000000000},
+    {"fiscalYear": 2026, "revenue": 30000000000, "operatingIncome": 15000000000},
+]
+SHIFT_2Q["earnings_context"]["annual_estimates"] = (
+    [{"date": "2026-09-01", "revenue_avg": 158000000000}]
+    + SHIFT["earnings_context"]["annual_estimates"])
+A_2Q = dcf.derive_base_assumptions(SHIFT_2Q)
+eq("fix1.still_structural", A_2Q["projection_mode"]["value"], "structural_shift_through_cycle")
+eq("fix1.margin_basis", A_2Q["ebit_margin_start"]["provenance"], "reported_quarters_only")
+# 37e9 reported operating income / 66e9 reported revenue — not / 158e9
+eq("fix1.margin_value", A_2Q["ebit_margin_start"]["value"], 0.5606, tol=0.0005)
+eq("fix1.basis_noted",
+   any("reported quarter" in n for n in A_2Q["projection_notes"]["value"]), True)
+
+# Fix 2: a run with no fair value renders a degraded report instead of raising.
+R_DEGRADED = dcf.run_dcf(A, dict(INPUTS, income=[]))
+MD_DEGRADED = dcf.render_md({
+    "ticker": "GROWTHCO", "asof": "2026-01-01", "assumptions": A, "dcf": R_DEGRADED,
+    "sensitivity": {"wacc_values": [], "terminal_growth_values": [], "grid": []},
+    "current_price": 120.0, "upside_pct": None})
+eq("fix2.renders", MD_DEGRADED.startswith("# GROWTHCO"), True)
+eq("fix2.marked_degraded", "DEGRADED" in MD_DEGRADED, True)
+eq("fix2.reason_shown", "no_base_revenue" in MD_DEGRADED, True)
+
+# Fix 3: a missing analyst revenue estimate must fall back to the base growth
+# assumption, never promote the growth cap into the forecast.
+SHIFT_NOEST = deepcopy(SHIFT)
+SHIFT_NOEST["earnings_context"]["annual_estimates"] = []
+SHIFT_NOEST["estimates"] = [
+    {"date": "2027-09-01", "revenueAvg": 105000000000,
+     "ebitAvg": 34650000000, "ebitdaAvg": 52500000000},
+    {"date": "2028-09-01", "revenueAvg": 110000000000,
+     "ebitAvg": 36300000000, "ebitdaAvg": 55000000000},
+]
+A_NOEST = dcf.derive_base_assumptions(SHIFT_NOEST)
+eq("fix3.base_growth", A_NOEST["revenue_growth_y1"]["value"], 0.05)
+_g1 = A_NOEST["revenue_path"]["value"][0] / A_NOEST["projection_base_revenue"]["value"] - 1
+eq("fix3.uses_base_growth", _g1, 0.05, tol=0.0005)
+eq("fix3.not_the_cap", abs(_g1 - dcf.THROUGH_CYCLE_GROWTH_CAPS[0]) > 0.01, True)
+eq("fix3.noted",
+   any("base growth assumption" in n for n in A_NOEST["projection_notes"]["value"]), True)
+
+# Fix 4: overrides the active mode never reads are reported, not dropped.
+AS_IGNORED, _ = dcf.apply_overrides(AS, {"ebitda_margin": 0.10, "revenue_growth_y1": 0.05})
+RS_IGNORED = dcf.run_dcf(AS_IGNORED, SHIFT)
+eq("fix4.warned", any("overrides ignored" in w for w in RS_IGNORED["warnings"]), True)
+eq("fix4.value_unchanged", RS_IGNORED["fair_value_per_share"], RS["fair_value_per_share"])
+A_FORCED = dcf.derive_base_assumptions(SHIFT, force_legacy=True)
+eq("fix4.force_legacy", A_FORCED["projection_mode"]["value"], "legacy_constant_ratio")
+eq("fix4.force_legacy_prov", A_FORCED["projection_mode"]["provenance"], "forced")
+
+# Fix 5: a confirmed shift that cannot be built must say why, in payload and
+# in the run warnings — silent reversion to legacy ratios is the failure mode
+# that produced the wrong MU valuation in the first place.
+SHIFT_NO_EBIT = deepcopy(SHIFT)
+SHIFT_NO_EBIT["estimates"] = [{"date": "2027-09-01", "revenueAvg": 190000000000}]
+A_NO_EBIT = dcf.derive_base_assumptions(SHIFT_NO_EBIT)
+eq("fix5.degraded_mode", A_NO_EBIT["projection_mode"]["value"], "legacy_constant_ratio")
+eq("fix5.reason", A_NO_EBIT["projection_degrade_reason"]["value"],
+   "confirmed_shift_missing_forward_operating_estimates")
+eq("fix5.warned",
+   any("could not be modelled" in w
+       for w in dcf.run_dcf(A_NO_EBIT, SHIFT_NO_EBIT)["warnings"]), True)
+eq("fix5.no_quarterly_reason",
+   dcf.derive_base_assumptions(SHIFT_INCOMPLETE)["projection_degrade_reason"]["value"],
+   "confirmed_shift_missing_quarterly_pnl")
+# An ordinary legacy ticker never declared a shift — no reason, no warning.
+eq("fix5.plain_legacy_clean", "projection_degrade_reason" in dcf.derive_base_assumptions(INPUTS), False)
+
+# Fix 6: earnings cache ordering follows the filename date, not mtime.
+eq("fix6.sort_key_date", dcf._earnings_cache_sort_key(Path("MU_2026-05-28.json"))[0], "2026-05-28")
+eq("fix6.sort_key_order",
+   dcf._earnings_cache_sort_key(Path("MU_2026-05-28.json"))
+   < dcf._earnings_cache_sort_key(Path("MU_2026-06-25.json")), True)
+
+# Fix 8: the assumption table marks which fields the active mode actually reads.
+eq("fix8.structural_active",
+   dcf._assumption_status("ebit_margin_start", "structural_shift_through_cycle"), "✓")
+eq("fix8.legacy_field_inactive",
+   dcf._assumption_status("ebitda_margin", "structural_shift_through_cycle"), "—")
+eq("fix8.meta_field", dcf._assumption_status("projection_notes", "legacy_constant_ratio"), "meta")
+eq("fix8.floor_adjusted_tracked", isinstance(SS.get("floor_adjusted"), list), True)
+
 # ── payload assembly（無網路：直接測 upside 數學與 anchor 欄位存在） ─────────
 eq("payload.anchor_field", "fair_value_per_share" in R or True, True)  # field name contract
 md = dcf.render_md({"ticker": "GROWTHCO", "asof": "2026-01-01", "assumptions": A,
                     "dcf": R, "sensitivity": S, "current_price": 120.0, "upside_pct": 1.0})
 eq("md.header", md.startswith("# GROWTHCO"), True)
 eq("md.sens_table", "WACC \\ g" in md, True)
+eq("md.adoption_column", "本次採用" in md, True)
 
 # ──────────────────────────────────────────────────────────────────────────
 if FAILS:

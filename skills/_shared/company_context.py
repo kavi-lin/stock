@@ -6,7 +6,7 @@ Consumed by:
   - sector/scripts/fetch_earnings_pulse.py       (SECTOR_UNIVERSE / TICKER_TO_SECTOR)
   - sector/scripts/fetch_sector_news.py          (SECTOR_UNIVERSE)
   - sector/scripts/fetch_smart_money.py          (SECTOR_UNIVERSE / TICKER_TO_SECTOR)
-  - investment_protocol_v4_8 PEER_BUNDLE step    (get_peers + get_profile)
+  - investment_protocol_v5_0 PEER_BUNDLE step    (get_peers + get_profile)
 
 Cache:
   skills/_shared/cache/<TICKER>_<KIND>.json   TTL = 24h
@@ -16,6 +16,7 @@ Public API:
   TICKER_TO_SECTOR       reverse map (auto-built)
   get_profile(ticker)              → dict | None
   get_peers(ticker)                → list[str]   (returns [] on failure)
+  select_valuation_peers(ticker)   → deterministic exact-industry peer selection
   get_market_cap_history(ticker, limit=20) → list[dict]
   get_employee_history(ticker)     → list[dict]
   get_profiles_bulk(tickers)       → dict[ticker → dict]   (cache-aware)
@@ -223,6 +224,82 @@ def get_peers(ticker: str) -> list[str]:
                 peers.append(row)
     _write_cache(ticker, "peers", peers)
     return peers
+
+
+def _valuation_business_tag(profile: dict) -> str:
+    """Coarse, deterministic business-model tag for broad provider industries."""
+    industry = str((profile or {}).get("industry") or "").casefold()
+    text = str((profile or {}).get("description") or "").casefold()
+    if "semiconductor" not in industry:
+        return "generic"
+    rules = (
+        ("semiconductor_memory", ("dram", "nand", "memory and storage", "memory chips")),
+        ("semiconductor_equipment", ("fabrication tools", "wafer processing", "process control", "semiconductor equipment")),
+        ("semiconductor_ip", ("cpu designs", "licenses core", "intellectual property (ip)", "technology licensing")),
+        ("semiconductor_analog", ("analog and embedded", "analog division", "microcontrollers")),
+        ("semiconductor_wireless", ("wireless communication", "cdma", "5g modem")),
+        ("semiconductor_foundry", ("semiconductor foundry", "wafer foundry", "contract chip manufacturing")),
+        ("semiconductor_gpu", ("graphics processing unit", "graphics processors", "gpus")),
+    )
+    for tag, needles in rules:
+        if any(needle in text for needle in needles):
+            return tag
+    return "semiconductor_generic"
+
+
+def select_valuation_peers(ticker: str) -> dict:
+    """Return an auditable peer set for live valuation models.
+
+    FMP's stock-peers endpoint is deliberately broad.  A peer is eligible for
+    valuation only when both profiles expose the same normalized ``industry``.
+    The raw list and every exclusion remain in the result so downstream models
+    never turn a bad universe into a full-confidence anchor silently.
+    """
+    t = ticker.upper()
+    subject = get_profile(t) or {}
+    subject_industry = str(subject.get("industry") or "").strip().casefold()
+    subject_business_tag = _valuation_business_tag(subject)
+    raw = [p.upper() for p in get_peers(t) if isinstance(p, str) and p.upper() != t]
+    profiles = get_profiles_bulk(raw)
+    accepted: list[str] = []
+    dropped: list[dict] = []
+    for sym in raw:
+        prof = profiles.get(sym) or {}
+        peer_industry = str(prof.get("industry") or "").strip().casefold()
+        peer_business_tag = _valuation_business_tag(prof)
+        if not subject_industry:
+            dropped.append({"symbol": sym, "reason": "subject_industry_missing"})
+        elif not peer_industry:
+            dropped.append({"symbol": sym, "reason": "peer_industry_missing"})
+        elif peer_industry != subject_industry:
+            dropped.append({
+                "symbol": sym,
+                "reason": "industry_mismatch",
+                "subject_industry": subject.get("industry"),
+                "peer_industry": prof.get("industry"),
+            })
+        elif subject_business_tag not in ("generic", "semiconductor_generic") and \
+                peer_business_tag != subject_business_tag:
+            dropped.append({
+                "symbol": sym,
+                "reason": "business_model_mismatch",
+                "subject_business_tag": subject_business_tag,
+                "peer_business_tag": peer_business_tag,
+            })
+        else:
+            accepted.append(sym)
+    return {
+        "ticker": t,
+        "subject_industry": subject.get("industry"),
+        "subject_business_tag": subject_business_tag,
+        "raw_peers": raw,
+        "peers": accepted,
+        "dropped": dropped,
+        "profiles": {sym: profiles[sym] for sym in accepted if sym in profiles},
+        "selector": "exact_industry_business_model_v1",
+        "eligible": len(accepted) >= 3,
+        "reason": None if len(accepted) >= 3 else "fewer_than_3_business_similar_peers",
+    }
 
 
 def get_market_cap_history(ticker: str, limit: int = 20) -> list[dict]:

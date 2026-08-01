@@ -63,6 +63,8 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `red_team_counter_thesis` | string | 填 | V4.7+ |
 | `red_team_kill_conditions` | array[string] (2-3 條) | 填 | V4.7+ falsifiable |
 | `red_team_execution_failed` | bool | 填 | |
+| `red_team_counter_evidence_strength` | int 1-5 or `null` | optional **(V4.70.0+, P0-2)** | Phase 2.8 subagent 的 strength 輸出。Phase 3 rule 4 用它分級懲罰（5→×0.85 / 4→×0.925）；export 供 ≥20 session 後 outcome 校準 |
+| `red_team_thesis_break_probability` | float 0-1 or `null` | optional **(V4.70.0+, P0-2)** | Red Team 估 counter_thesis 在最長 kill window 內成立的機率。**僅記錄不進決策數學**——校準檢驗（AUDIT_2026-07-16 檢驗 A 的後續）用 |
 | `phase2_fanout_mode` | `"PARALLEL_SUBAGENT" \| "PARTIAL_FALLBACK" \| "FULL_FALLBACK"` | 填 | V4.8 |
 | `degraded_analysts` | array[string] | 填（正常情況空陣列）| V4.8 |
 | `macro_alignment` | `"ALIGNED" \| "CONTRARIAN"` | **必填** | HOLD 也要 |
@@ -88,18 +90,20 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `key_risks` | array[string] **繁體中文短描述**（非 snake_case）| 填（3-8 條）| 例：「RSI 98 拋物線過熱衰竭風險」|
 | `devils_advocate_filed` | bool | 填 | |
 | `trade_metadata` | `{trade_type, event_tag}` | **必填** | trade_type ∈ {event, trend, mean_reversion} |
-| `valuation_lane` | `{signal, score, confidence, weighted_fair_value, vs_current_pct}` | **V5.0+ 必填** | Phase 2 第 5 lane Valuation Specialist 輸出 |
-| `fair_value_summary` | object（見下） | **V5.0+ 必填** | Phase 4.5 deterministic anchor blend（= MHP 長期層，shape 不變、受 decision_lock 保護）|
+| `valuation_lane` | `{signal, score, confidence, weighted_fair_value, vs_current_pct}` | **V5.0+ 必填** | reviewer narrative + `valuation_pack` projection；LLM 不得產數字 |
+| `valuation_pack` | object（見下） | **新 engine output 必填**；舊 history 相容 | Phase 2.4 唯一估值計算權威；validator 強制所有 projection 相等 |
+| `fair_value_summary` | object（見下） | **V5.0+ 必填** | `valuation_pack` 相容 projection（= MHP 長期層、受 decision_lock 保護）|
 | `multi_horizon_price_framework` | object（見下） | **V5.1+ optional→required**；缺/不全 → validator 印 warning（非 fatal，rc 維持 0）| Phase 4.5 三時間框架（5d band / 60d target / long-term ref / convergence）。**不**進 11-field decision_lock（derived/advisory）|
 | `fair_value_range` | object（見下） | **V3.45.1+ optional**；缺 → validator warning（非 fatal，rc 0）| Phase 4.5.0b anchor 分布區間（P25/P50/P75 + range_verdict + dispersion + oe shadow）。**不**進 decision_lock；`fair_value_summary` 不變 |
+| `valuation_explained_range` | object（見下） | **V4.76.0+ optional** | structural-shift DCF 為 primary FV；DCF sensitivity + without/with-peer + 其他 eligible anchor 的解釋帶。range-only peer 不進 primary FV |
 | `implied_expectations` | object（掛 `valuation_lane` 或 trade 頂層；見下） | **V3.45.1+ optional**；缺 → warning（rc 0）| reverse DCF 隱含預期。**V3.45.3 起由 Phase 2.4 `compute_price_framework.py` engine 計算**（非 LLM 手算）。**不**進加權 / lane score / decision_lock |
 | `valuation_archetype_shadow` | object（見下） | **V3.46.0+ optional**；缺 → warning（rc 0）| Phase 2.4 engine archetype 分類 + 9-anchor shadow blend。**shadow-only** — live `fair_value_summary` 不動、不進 decision_lock。≥20 session 翻轉率報告後才議切換（#3b）|
-| `lane_scores` | `{fundamentals: int, sentiment: int, news: int, technical: int}` | **V2.10.0+ 必填** | Phase 2 五 lane 中除 valuation 外的 4 個 raw score（−3..+3）；用於 polarization detection |
+| `lane_scores` | `{fundamentals: int, sentiment: int, news: int, technical: int}` | **V2.10.0+ 必填** | Phase 2 五 lane 中除 valuation 外的 4 個 raw score（−5..+5，V4.72.0 修正——原文件誤寫 −3..+3 與協議 Phase 2 量表矛盾，歷史 9 筆合法 ±4 分即超出舊註記）；用於 polarization detection。validator §12 強制值域 |
 | `det_inputs` | `{altman_z, debt_to_equity, fcf_yield, insider_ratio_q, short_interest_pct, fred_in_sector_avoid}` | **V2.10.0+ 必填** | Red Team kill triggers 的 6 個量化輸入；LLM 從 FMP_SUPP_BUNDLE / earnings-analyst 拿到的原始數值，**直接寫入**，不再 LLM 重新解讀 |
 | `det_shadow` | object（見下） | **V2.10.0+ 由 post-processor 寫入**，LLM 不寫 | `apply_det_shadow.py` 後處理填入；包含 polarization label + det shadow scores + agreement flags |
 | `technical_lane` | object（見 V2.13 章節） | **V2.13.0+ 必填** | smart_money / pattern / market_strength / key_levels / high_prob_scenario |
 | `fundamentals_lane` | object（見 V2.13 章節） | **V2.13.0+ 必填** | moat_assessment / near_term_catalysts / bull_thesis / bear_thesis |
-| `news_lane` | object（見 V2.13 章節） | **V2.13.0+ 必填** | immediate_catalyst_5d / medium_term_shift_20d / decision_point_days / cross_asset_spillover |
+| `news_lane` | object（見 V2.13 章節） | **V2.13.0+ 必填** | immediate_catalyst_5d / decision_point_days / cross_asset_spillover（`medium_term_shift_20d` V4.71.0 落日移除） |
 | `institutional_lens` | string | **V2.13.0+ 必填** | Phase 3 PM 1-2 句機構流向整合 narrative |
 | `decision_confidence_pct` | int 0-100 | **V2.13.0+ 必填** | Phase 3 PM 決策信心度百分比 |
 | `scenario_odds` | `{bull, base, bear}` int 加總 100 | **V2.13.0+ 必填** | Phase 3 PM 三劇本機率 |
@@ -109,18 +113,59 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `decision_cap_active` | bool | optional **(V5.0.x+)** | Phase 4.6 — true 表示 valuation 證據不足，cap 已套用（不得 BUY、conf ≤ 0.65、size ≤ 30bps）。預設 false 視為未觸發 |
 | `decision_cap_reason` | `"insufficient_anchors" \| "low_valuation_confidence" \| "low_data_quality"` or `null` | required if `decision_cap_active=true` | 觸發 cap 的具體原因。Validator (`validate_session_export.py` § 10) 強制此 enum |
 | `cap_override_reason` | string or `null` | optional | PM 在 cap active 時若有重大 catalyst,可填 1 句說明保留 STAGED_ENTRY 路徑;不解除 size/conf cap |
-| `hot_zone_probe` | bool | optional **(V5.0.x+, Rec 11)** | 熱區保守性鬆綁觸發旗標。true 表示正分模糊區 `[0,+staged)` × `industry_top_30pct` × `RISK_ON/BULL` 把 default HOLD 降為小倉 probe。觸發時強制 `final_decision=STAGED_ENTRY`、`position_size_pct ≤ 0.0015`（15bps）、且 `decision_cap_active != true`。Validator (`validate_session_export.py` § 11) 強制。預設 false |
+| `hot_zone_probe` | bool | optional **(V5.0.x+, Rec 11)** | 熱區保守性鬆綁觸發旗標。true 表示正分模糊區 `[0,+staged)` × `industry_top_30pct` × `RISK_ON/BULL` 把 default HOLD 降為小倉 probe。觸發時強制 `final_decision=STAGED_ENTRY`、`position_size_pct ≤ tier 上限`、且 `decision_cap_active != true`。Validator (`validate_session_export.py` § 11) 強制。預設 false |
+| `hot_zone_probe_tier` | `"t1_15bps" \| "t2_30bps"` or `null` | required if `hot_zone_probe=true` **(V4.70.0+, P0-1)** | 分數分層 probe size：`final_score ≥ 0.4` → t2（≤30bps）/ `< 0.4` → t1（≤15bps）。依據 AUDIT_2026-07-16 replay（上半帶 mean +17.6% up 10/15 vs 下半帶 −1.2%）。Validator §11 按 tier 強制 size 上限 |
+| `hot_zone_eval` | `"fired" \| "suppressed_by_risk_flag" \| "suppressed_by_cap" \| "not_qualifying"` | **required (V5.0.x+, TODO-015)** | Rec 11 評估結果，不論是否 probe 一律寫出，使驗收不再盲飛。判定樹見 `investment_protocol_v5_0.md` Rec 11 段。Validator §11 強制：`hot_zone_probe=true ⟺ hot_zone_eval="fired"`。extractor 對缺欄的歷史報告反推 `hot_zone_eval_derived`（含 `qualifying_unexplained` 告警值） |
 
 ### `valuation_lane` (V5.0)
 ```json
 {
   "signal": "BUY | HOLD | SELL",
-  "score": "float -5 to +5",
+  "score": "float -3 to +3 — verbatim valuation_pack.score",
   "confidence": "float 0-1",
-  "weighted_fair_value": "float — Specialist 計算的合理價",
-  "vs_current_pct": "float — (fair - current) / current * 100"
+  "weighted_fair_value": "float — verbatim valuation_pack.weighted_fair_value",
+  "vs_current_pct": "float — verbatim valuation_pack.vs_current_pct"
 }
 ```
+
+### `valuation_pack`（canonical；唯一 builder=`compute_price_framework.py`）
+
+```json
+{
+  "schema": "valuation_pack.v1",
+  "engine": "string",
+  "current_price": "float",
+  "anchors": {
+    "<anchor>": {
+      "value": "float|null",
+      "family": "fundamental|relative|external_expectations",
+      "correlation_group": "string",
+      "assumption_set_id": "deterministic hash",
+      "provenance": "string|null",
+      "as_of": "YYYY-MM-DD|null",
+      "status": "eligible|ineligible",
+      "reason": "string|null",
+      "weight_raw": "float",
+      "weight_effective": "float"
+    }
+  },
+  "families": "object — group median → family representative",
+  "families_present": ["fundamental", "relative"],
+  "family_coverage_weight": "float",
+  "aggregation_mode": "dcf_primary_anchor_range|complete_fixed_family_weights|degraded_equal_family_votes|unavailable",
+  "primary_method": "dcf_self_built|family_aggregation",
+  "family_blended_fair_value": "float|null — DCF-primary 時僅供 scenario/audit",
+  "weighted_fair_value": "float|null",
+  "vs_current_pct": "float|null",
+  "verdict_band": "string|null",
+  "score": "float|null",
+  "confidence": "high|medium|low"
+}
+```
+
+Reverse DCF 不在 anchors 中，只是 market-implied diagnostic。缺 `provenance/as_of` 的 anchor
+不得 eligible；relative anchor 缺 `peer_count` 或少於 3 個 business-similar peers時不得 eligible；
+analyst PT 超過 180 天不得 eligible；少於兩個獨立 family 時 `|score| < 2`。
 
 ### `fair_value_summary` (V5.0 — Phase 4.5)
 ```json
@@ -128,19 +173,26 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
   "anchors": {
     "dcf_unlevered":        "float|null",
     "dcf_levered":          "float|null",
+    "dcf_self_built":       "float|null — V4.69.0+（valuation-modeler dcf.py）；舊 entry 無此 key，validator 不強制",
     "analyst_pt_consensus": "float|null",
     "peer_pe_implied":      "float|null",
+    "comps_implied":        "float|null — V4.69.0+（valuation-modeler comps.py）；舊 entry 無此 key，validator 不強制",
     "owner_earnings_mult":  "float|null",
     "forecaster_blend":     "float|null"
   },
-  "weights_used":         "object — 重分配後的權重（缺 anchor 時 sum=1.0）",
+  "anchors_effective":     "object — 僅 eligible anchors；排除者為 null，MHP 等 downstream 只讀此欄",
+  "weights_used":         "object — valuation_pack effective weights projection",
   "weighted_fair_value":  "float",
   "current_price":        "float",
   "vs_current_pct":       "float",
   "verdict_band":         "extreme_undervalued | undervalued | fairly_valued | overvalued | extreme_overvalued",
-  "confidence":           "high | medium | low",
-  "anchors_available":    "int 0-6",
-  "methodology_note":     "string — e.g. '5/6 anchors used; owner_earnings_mult unavailable, weight redistributed'"
+  "confidence":           "high | medium | low（獨立 family coverage + dispersion cap）",
+  "anchors_available":    "int 0-8（V4.69.0 前的 entry 為 0-6；V4.70.0+ 為修剪後 count）",
+  "families_present":     "array[string]",
+  "excluded_anchors":     "object anchor→reason",
+  "valuation_pack_schema": "valuation_pack.v1",
+  "methodology_note":     "string",
+  "outlier_diagnostics":  "array[{anchor,value,reason}] optional；只警示，不剔除 live anchor"
 }
 ```
 
@@ -185,7 +237,9 @@ PM verbatim 抄寫；block 內含 `engine` stamp（audit 用，optional 欄位�
 
 ### `fair_value_range` (V3.45.1 — Phase 4.5.0b，advisory sibling)
 
-Anchor 分布區間。**不**進 11-field decision_lock；`fair_value_summary` 整塊不變、仍是決策數字唯一來源。
+Legacy anchor 分布區間。**不**進 11-field decision_lock；決策數字仍只讀
+`fair_value_summary`。V4.76.0 structural-shift DCF-primary 模式另以
+`valuation_explained_range` 呈現方法差異，不回寫 primary FV。
 `agreement_grade` / `anchor_dispersion_cv` 為**純展示**（3.45.1 不接 Phase 4.6 cap，接線留 P2）。
 `owner_earnings_multiple_shadow` 為 shadow-log（live anchor 仍 static ×15，不回寫 weighted_fair_value）。
 
@@ -200,7 +254,7 @@ Anchor 分布區間。**不**進 11-field decision_lock；`fair_value_summary` �
   "range_verdict": "undervalued_zone | fair_zone | overvalued_zone | extreme_undervalued | extreme_overvalued | null",
   "anchor_dispersion_cv": "float | null — weighted std/mean",
   "agreement_grade":      "high | medium | low | null — cv<0.15 high / <0.35 medium / else low",
-  "anchors_used_n":       "int 0-6",
+  "anchors_used_n":       "int 0-8（V4.69.0 前的 entry 為 0-6）",
   "owner_earnings_multiple_shadow": {
     "oe_mult_static":      "float — 15（live anchor 用值，不變）",
     "oe_mult_rate_linked": "float | null — clamp(1/(treasury_10y_real+0.04), 10, 22)",
@@ -210,6 +264,26 @@ Anchor 分布區間。**不**進 11-field decision_lock；`fair_value_summary` �
 ```
 
 > 退化（V3.45.1 spec）：`anchors_used_n >= 4` → percentile；`2..3` → `minmax_fallback`（[min, median, max]）；`<2` → range 整組 null。
+
+### `valuation_explained_range`（V4.76.0 — DCF-primary presentation）
+
+```json
+{
+  "available": "bool",
+  "primary_fv": "float — eligible structural-shift DCF",
+  "primary_sensitivity": {"low": "float", "high": "float"},
+  "scenario_without_peer": "float|null — fundamental family representative",
+  "scenario_with_peer": "float|null — without-peer 與 range-only relative family 等權點",
+  "peer_pe_range_anchor": "float|null — ≥3 audited adjacent peers；非 primary",
+  "other_eligible_anchors": "object",
+  "range_low": "float",
+  "range_high": "float",
+  "range_low_driver": "string",
+  "range_high_driver": "string",
+  "peer_symbols": "array[string]",
+  "limitations": "array[string]"
+}
+```
 
 ### `implied_expectations` (V3.45.1 — Phase 2 Valuation Specialist，reverse DCF)
 
@@ -244,7 +318,7 @@ Anchor 分布區間。**不**進 11-field decision_lock；`fair_value_summary` �
     "peer_ev_sales_implied":  "float | null",
     "pb_roe_justified":       "float | null — (ROE−g)/(r−g) × BVPS，clamp [0.2,15]"
   },
-  "anchors_used_n": "int 0-9",
+  "anchors_used_n": "int 0-11（V4.69.0 起池含 dcf_self_built / comps_implied；之前為 0-9）",
   "weights_used": "object — archetype 權重重分配後（sum=1.0）",
   "weighted_fair_value_shadow": "float | null",
   "vs_current_pct_shadow":      "float | null",
@@ -389,6 +463,8 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
         "IF 48-72h 內 Iran/Hormuz 觸發 VIX > 25 THEN RISK_ON 前提瓦解"
       ],
       "red_team_execution_failed": false,
+      "red_team_counter_evidence_strength": 4,
+      "red_team_thesis_break_probability": 0.35,
       "phase2_fanout_mode": "PARALLEL_SUBAGENT",
       "degraded_analysts": [],
       "macro_alignment": "CONTRARIAN",
@@ -431,10 +507,25 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
       },
       "valuation_lane": {
         "signal": "BUY",
-        "score": 2.5,
+        "score": 1.0,
         "confidence": 0.7,
         "weighted_fair_value": 525.50,
         "vs_current_pct": 15.5
+      },
+      "valuation_pack": {
+        "schema": "valuation_pack.v1",
+        "engine": "compute_price_framework.py",
+        "current_price": 455.07,
+        "anchors": {},
+        "families": {},
+        "families_present": ["fundamental", "relative", "external_expectations"],
+        "family_coverage_weight": 1.0,
+        "aggregation_mode": "complete_fixed_family_weights",
+        "weighted_fair_value": 525.50,
+        "vs_current_pct": 15.5,
+        "verdict_band": "undervalued",
+        "score": 1.0,
+        "confidence": "high"
       },
       "fair_value_summary": {
         "anchors": {
@@ -452,7 +543,9 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
         "verdict_band":         "undervalued",
         "confidence":           "high",
         "anchors_available":    5,
-        "methodology_note":     "5/6 anchors used; forecaster_blend unavailable, weight redistributed"
+        "families_present":     ["fundamental", "relative", "external_expectations"],
+        "valuation_pack_schema": "valuation_pack.v1",
+        "methodology_note":     "canonical family aggregation; 5/8 anchors"
       },
       "thesis_id": "nvda-2026-05-06-001",
       "thesis_registered_at": "2026-05-06T15:42:00Z"
@@ -600,18 +693,13 @@ V2.13.0 為 invest protocol Phase 2 三個 lane（Technical / Fundamentals / New
     }
   ],
   "bull_thesis_one_line": "string ≤ 40 字 — 真正強在哪（量化證據）",
-  "bear_thesis_one_line": "string ≤ 40 字 — 市場擔心什麼（量化反駁）",
-  "market_position": {
-    "tam_usd":                 "float | null — Total Addressable Market (USD billions); null if no third-party source",
-    "industry_5y_cagr_pct":    "float | null — Industry forward 5Y CAGR %",
-    "company_revenue_share_pct": "float | null — company revenue ÷ TAM × 100",
-    "position_label":          "leader | challenger | niche | follower | INSUFFICIENT_DATA",
-    "competitive_moat_evidence": "string — 1-2 sentences citing PEER_BUNDLE numbers"
-  }
+  "bear_thesis_one_line": "string ≤ 40 字 — 市場擔心什麼（量化反駁）"
 }
 ```
 
-> **V2.17.0**：`market_position` 為 V2.17 新增 sub-block；現有 V2.13/V5.0 entries 缺欄不擋 validator（optional → required transition 留待 v3.0）。
+> **V2.17.0 → V4.71.0**：`market_position`（TAM/CAGR/市占 sub-block）已於 V4.71.0 落日移除
+> （P1-6：無渲染/決策消費者 + 無來源數字幻覺面，見 AUDIT_2026-07-16 F5）。
+> 舊 entry 含此欄無害；validator 從未強制。
 
 ### `news_lane` (V2.13.0)
 
@@ -623,10 +711,6 @@ V2.13.0 為 invest protocol Phase 2 三個 lane（Technical / Fundamentals / New
     "direction_lean": "BULLISH | BEARISH | NEUTRAL",
     "expected_move_pct": "float | null"
   } | null,
-  "medium_term_shift_20d": {
-    "narrative": "string — 1 句話描繪 5-20 天可能 narrative 移轉",
-    "label": "BULLISH | BEARISH | NEUTRAL"
-  },
   "decision_point_days": "int — 下次該重新評估的天數（預設 21，binary 事件當天）",
   "cross_asset_spillover": [
     {
@@ -648,6 +732,7 @@ V2.13.0 為 invest protocol Phase 2 三個 lane（Technical / Fundamentals / New
 
 > **V3.45.4**：`reasoning_one_line` / `key_factors` / `pt_revision_momentum` 為新增欄位。舊 entry 缺欄
 > → validator warning（非 fatal）。PT 注入層剝離詳見 protocol News subagent 章節。
+> **V4.71.0**：`medium_term_shift_20d` 落日移除（P1-6：無消費者 + default 模板輸出佔多數）。舊 entry 含此欄無害。
 
 ### Phase 3 PM 整合層新欄位
 
@@ -671,4 +756,3 @@ V2.13 新欄位 **皆為 informational**：
 - `validate_session_export.py` **不**將其列為 hard-required
 - 缺值不擋 rc=0；統計 `--coverage-report` 旗標可顯示新欄位非空率
 - LLM 應遵守 protocol 內 "必填" 規定（缺資料寫 `INSUFFICIENT_DATA` 而非 null），但 schema 層級不強制 — 累積 30+ run 後再評估是否提升至 hard-required
-

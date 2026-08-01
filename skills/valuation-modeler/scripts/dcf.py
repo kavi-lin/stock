@@ -66,6 +66,16 @@ OVERRIDABLE = {
     "da_pct_terminal", "capex_pct_start", "capex_pct_terminal",
 }
 
+# Which assumptions each projection mode actually consumes. An override on a
+# key the active mode ignores must be reported, never silently dropped.
+LEGACY_ONLY_KEYS = {"revenue_growth_y1", "revenue_growth_y2", "ebitda_margin",
+                    "da_pct", "capex_pct"}
+STRUCTURAL_ONLY_KEYS = {"ebit_margin_start", "ebit_margin_terminal", "da_pct_start",
+                        "da_pct_terminal", "capex_pct_start", "capex_pct_terminal",
+                        "projection_base_revenue", "revenue_path", "sales_to_capital"}
+META_KEYS = {"projection_mode", "projection_as_of", "projection_notes",
+             "projection_degrade_reason"}
+
 
 def _num(v):
     return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
@@ -94,13 +104,23 @@ def _median(values: list[float]) -> float | None:
     return vals[n // 2] if n % 2 else (vals[n // 2 - 1] + vals[n // 2]) / 2
 
 
+def _earnings_cache_sort_key(path: Path) -> tuple:
+    """Filename date first — mtime is reset by git checkout / file copies."""
+    _, _, date_part = path.stem.partition("_")
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        mtime = 0.0
+    return (date_part, mtime)
+
+
 def _latest_earnings_context(ticker: str) -> dict:
     """Latest non-infographic earnings cache; deterministic and read-only."""
     cache_dir = BASE_DIR / "skills" / "earnings-analyst" / "cache"
     candidates = sorted(
         (p for p in cache_dir.glob(f"{ticker.upper()}_*.json")
          if not p.name.endswith(".infographic.json")),
-        key=lambda p: p.stat().st_mtime,
+        key=_earnings_cache_sort_key,
     )
     if not candidates:
         return {}
@@ -172,7 +192,7 @@ def _analyst_growth(income: list, estimates: list) -> list[float]:
     return growths
 
 
-def derive_base_assumptions(inputs: dict) -> dict:
+def derive_base_assumptions(inputs: dict, *, force_legacy: bool = False) -> dict:
     """Every field: {"value": float|None, "provenance": str}."""
     income, cashflow = inputs.get("income") or [], inputs.get("cashflow") or []
     a: dict = {}
@@ -217,11 +237,18 @@ def derive_base_assumptions(inputs: dict) -> dict:
     a["erp"] = _field(ERP_DEFAULT, "default")
     a["cost_of_debt"] = _field(round(a["risk_free"]["value"] + DEBT_SPREAD_DEFAULT, 4), "default")
     a["wacc"] = _field(None, "derived")  # computed by compute_wacc unless overridden
-    through_cycle = _derive_through_cycle_assumptions(inputs, a)
+    if force_legacy:
+        a["projection_mode"] = _field("legacy_constant_ratio", "forced")
+        return a
+    through_cycle, degrade_reason = _derive_through_cycle_assumptions(inputs, a)
     if through_cycle:
         a.update(through_cycle)
     else:
         a["projection_mode"] = _field("legacy_constant_ratio", "derived")
+        if degrade_reason:
+            # A declared structural shift that could not be built is a data
+            # gap, not a modelling choice — never let it degrade silently.
+            a["projection_degrade_reason"] = _field(degrade_reason, "quality_gate")
     return a
 
 
@@ -250,7 +277,7 @@ def _nwc_pct(cashflow: list, income: list) -> float | None:
     return sum(ratios) / len(ratios) if ratios else None
 
 
-def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
+def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> tuple[dict, str | None]:
     """Build a normalized path when a confirmed structural shift is available.
 
     Quarterly revenue/operating income is preferred over provider EBITDA because
@@ -258,14 +285,20 @@ def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
     revenue targets are bounded by a declining growth envelope; they inform the
     path but cannot create an unbounded terminal base.  Terminal capex equals
     normalized D&A plus growth reinvestment implied by sales-to-capital.
+
+    Returns ``(assumptions, degrade_reason)``.  A non-None reason means a
+    confirmed shift was declared but the through-cycle path could not be built,
+    so the caller must surface it instead of quietly reverting to legacy ratios.
     """
     ctx = inputs.get("earnings_context") or {}
     shift = ctx.get("structural_shift") or {}
     confirmed = (shift.get("confirmed") is True or
                  str(shift.get("tier") or shift.get("status") or "").upper() == "CONFIRMED")
+    if not confirmed:
+        return {}, None
     quarterly = [r for r in (ctx.get("quarterly_pnl") or []) if isinstance(r, dict)]
-    if not confirmed or not quarterly:
-        return {}
+    if not quarterly:
+        return {}, "confirmed_shift_missing_quarterly_pnl"
 
     latest = quarterly[0]
     current_fy = str(latest.get("fiscalYear") or "")
@@ -279,14 +312,16 @@ def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
     }
     year1_revenue = None
     year1_source = None
-    if len(current_rows) == 3 and actual_revenue > 0 and next_revenue and next_revenue > 0:
+    roll_forward = bool(len(current_rows) == 3 and actual_revenue > 0
+                        and next_revenue and next_revenue > 0)
+    if roll_forward:
         year1_revenue = actual_revenue + next_revenue
         year1_source = "quarterly_actuals_plus_next_quarter_estimate"
     elif estimates_by_year.get(current_fy):
         year1_revenue = estimates_by_year[current_fy]
         year1_source = "annual_analyst_estimate"
     if not year1_revenue or year1_revenue <= 0:
-        return {}
+        return {}, "confirmed_shift_missing_current_fy_revenue"
 
     notes: list[str] = []
     current_fy_revenue = year1_revenue
@@ -294,7 +329,9 @@ def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
     try:
         fy0 = int(current_fy)
     except ValueError:
-        return {}
+        return {}, "confirmed_shift_unparseable_fiscal_year"
+    base_growth = (base.get("revenue_growth_y1") or {}).get("value")
+    base_growth_src = (base.get("revenue_growth_y1") or {}).get("provenance")
     prev = current_fy_revenue
     for index in range(PROJECTION_YEARS):
         forecast_year = fy0 + index + 1
@@ -308,27 +345,46 @@ def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
                     f"FY{forecast_year} analyst growth {raw_growth:.1%} capped to {bounded_growth:.1%}"
                 )
         else:
+            # The cap schedule bounds evidence; it is not itself an estimate.
+            # Missing data must fall back to the base growth assumption, never
+            # to the most aggressive growth the envelope still permits.
             if revenue_path:
                 prior_base = revenue_path[-2] if len(revenue_path) > 1 else current_fy_revenue
                 prior_growth = revenue_path[-1] / prior_base - 1
+                gap_src = "prior-year growth"
+            elif base_growth is not None:
+                prior_growth = base_growth
+                gap_src = f"base growth assumption ({base_growth_src})"
             else:
-                prior_growth = cap
+                prior_growth = base["terminal_growth"]["value"]
+                gap_src = "terminal growth"
             bounded_growth = _clamp(prior_growth, THROUGH_CYCLE_GROWTH_FLOOR, cap)
-            notes.append(f"FY{forecast_year} revenue estimate missing; bounded fade used")
+            notes.append(f"FY{forecast_year} revenue estimate missing; {gap_src} "
+                         f"{prior_growth:.1%} applied as {bounded_growth:.1%} (cap {cap:.0%})")
         prev = prev * (1 + bounded_growth)
         revenue_path.append(prev)
 
-    # Start EBIT margin: current-FY actual operating profit plus one estimated
-    # quarter at the latest observed margin.  Provider EBITDA is intentionally
-    # ignored when it is below operating income.
+    # Start EBIT margin: numerator and denominator must cover the same periods.
+    # The roll-forward branch projects one quarter at the latest observed margin
+    # so it matches the projected FY; the annual-estimate branch has no
+    # operating estimate for the unreported quarters and therefore stays on the
+    # reported-quarter margin.  Provider EBITDA is ignored when below EBIT.
     actual_operating = sum(_num(r.get("operatingIncome")) or 0.0 for r in current_rows)
     latest_rev = _num(latest.get("revenue"))
     latest_op = _num(latest.get("operatingIncome"))
     latest_margin = latest_op / latest_rev if latest_rev and latest_op is not None else None
-    projected_operating = actual_operating
-    if len(current_rows) == 3 and next_revenue and latest_margin is not None:
-        projected_operating += next_revenue * _clamp(latest_margin, *EBIT_MARGIN_CLAMP)
-    start_ebit_margin = projected_operating / year1_revenue if year1_revenue else None
+    if roll_forward and latest_margin is not None:
+        margin_num = actual_operating + next_revenue * _clamp(latest_margin, *EBIT_MARGIN_CLAMP)
+        margin_den = year1_revenue
+    else:
+        margin_num, margin_den = actual_operating, actual_revenue
+        notes.append(
+            f"start EBIT margin from {len(current_rows)} reported quarter(s); "
+            f"FY revenue from {year1_source}"
+        )
+    if not margin_den or margin_den <= 0:
+        return {}, "confirmed_shift_missing_quarterly_revenue"
+    start_ebit_margin = margin_num / margin_den
 
     # Long-run EBIT/D&A margins use forward analyst operating structure, not
     # peak-quarter margins or a three-year trough average.
@@ -346,7 +402,12 @@ def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
     terminal_ebit_margin = _median(forward_ebit_margins)
     terminal_da_pct = _median(forward_da_margins)
     if start_ebit_margin is None or terminal_ebit_margin is None or terminal_da_pct is None:
-        return {}
+        return {}, "confirmed_shift_missing_forward_operating_estimates"
+    if estimate_rows and forward:
+        # The two analyst snapshots are taken at different times and can
+        # disagree; record the split so a reader never assumes one source.
+        notes.append("revenue path from earnings-cache annual estimates; "
+                     "terminal margins from live FMP analyst estimates")
     start_ebit_margin = _clamp(start_ebit_margin, *EBIT_MARGIN_CLAMP)
     terminal_ebit_margin = _clamp(terminal_ebit_margin, *EBIT_MARGIN_CLAMP)
 
@@ -386,20 +447,22 @@ def _derive_through_cycle_assumptions(inputs: dict, base: dict) -> dict:
         notes.append("quarterly EBITDA below operating income: EBITDA field ignored")
 
     cache_path = ctx.get("_cache_path") or "earnings_analyst_cache"
+    margin_prov = ("quarterly_rollforward" if roll_forward and latest_margin is not None
+                   else "reported_quarters_only")
     return {
         "projection_mode": _field("structural_shift_through_cycle", "derived"),
         "projection_as_of": _field(ctx.get("as_of_date"), cache_path),
         "projection_base_revenue": _field(round(current_fy_revenue), year1_source),
         "revenue_path": _field([round(v) for v in revenue_path], year1_source),
-        "ebit_margin_start": _field(round(start_ebit_margin, 4), "quarterly_rollforward"),
-        "ebit_margin_terminal": _field(round(terminal_ebit_margin, 4), "analyst_normalized"),
+        "ebit_margin_start": _field(round(start_ebit_margin, 4), margin_prov),
+        "ebit_margin_terminal": _field(round(terminal_ebit_margin, 4), "fmp_analyst_estimates"),
         "da_pct_start": _field(round(start_da_pct, 4), "latest_fiscal_year"),
-        "da_pct_terminal": _field(round(terminal_da_pct, 4), "analyst_normalized"),
+        "da_pct_terminal": _field(round(terminal_da_pct, 4), "fmp_analyst_estimates"),
         "capex_pct_start": _field(round(start_capex_pct, 4), "quarterly_ttm_abs_capex"),
         "capex_pct_terminal": _field(round(terminal_capex_pct, 4), "normalized_reinvestment"),
         "sales_to_capital": _field(round(sales_to_capital, 4), "latest_fiscal_year"),
         "projection_notes": _field(notes, "quality_gate"),
-    }
+    }, None
 
 
 def apply_overrides(assumptions: dict, overrides: dict) -> tuple[dict, list[str]]:
@@ -504,6 +567,19 @@ def run_dcf(assumptions: dict, inputs: dict, wacc_override: float | None = None)
     nwc_pct = assumptions["nwc_pct"]["value"]
     tax = assumptions["tax_rate"]["value"]
     projection_mode = (assumptions.get("projection_mode") or {}).get("value")
+
+    degrade_reason = (assumptions.get("projection_degrade_reason") or {}).get("value")
+    if degrade_reason:
+        warnings.append(f"confirmed structural shift could not be modelled ({degrade_reason}) "
+                        "— legacy constant-ratio assumptions used")
+    # An override the active mode never reads would otherwise change nothing
+    # while still exiting rc=0, which reads as "applied".
+    inactive_keys = (LEGACY_ONLY_KEYS if projection_mode == "structural_shift_through_cycle"
+                     else STRUCTURAL_ONLY_KEYS)
+    ignored = sorted(k for k in inactive_keys
+                     if (assumptions.get(k) or {}).get("provenance") == "override")
+    if ignored:
+        warnings.append(f"overrides ignored in {projection_mode} mode: {', '.join(ignored)}")
 
     if projection_mode == "structural_shift_through_cycle":
         revenue_path = list((assumptions.get("revenue_path") or {}).get("value") or [])
@@ -627,7 +703,7 @@ def sensitivity_grid(assumptions: dict, inputs: dict, base: dict) -> dict:
     w0, tg0 = base["wacc_used"], base["terminal_growth_used"]
     wacc_vals = [round(w0 + d, 4) for d in (-0.01, -0.005, 0, 0.005, 0.01)]
     tg_vals = [round(tg0 + d, 4) for d in (-0.005, -0.0025, 0, 0.0025, 0.005)]
-    grid = []
+    grid, floor_adjusted = [], []
     for w in wacc_vals:
         row = []
         for tg in tg_vals:
@@ -645,15 +721,71 @@ def sensitivity_grid(assumptions: dict, inputs: dict, base: dict) -> dict:
                                      *CAPEX_PCT_CLAMP), 4),
                         "sensitivity_reinvestment",
                     )
-            r = run_dcf(a, inputs, wacc_override=max(w, tg + MIN_WACC_G_SPREAD))
+            # The row label is the requested WACC; the spread floor can raise
+            # the WACC actually used, so those cells are recorded as adjusted.
+            effective_wacc = max(w, tg + MIN_WACC_G_SPREAD)
+            if effective_wacc - w > 1e-9:
+                floor_adjusted.append({"wacc_label": w, "terminal_growth": tg,
+                                       "wacc_used": round(effective_wacc, 4)})
+            r = run_dcf(a, inputs, wacc_override=effective_wacc)
             row.append(r.get("fair_value_per_share"))
         grid.append(row)
-    return {"wacc_values": wacc_vals, "terminal_growth_values": tg_vals, "grid": grid}
+    return {"wacc_values": wacc_vals, "terminal_growth_values": tg_vals, "grid": grid,
+            "floor_adjusted": floor_adjusted}
 
 
 # ── report ────────────────────────────────────────────────────────────────
+def _assumption_status(key: str, mode: str | None) -> str:
+    """Which assumptions the active projection mode actually reads."""
+    if key in META_KEYS:
+        return "meta"
+    structural = mode == "structural_shift_through_cycle"
+    if key in STRUCTURAL_ONLY_KEYS:
+        return "✓" if structural else "—"
+    if key in LEGACY_ONLY_KEYS:
+        return "—" if structural else "✓"
+    return "✓"
+
+
+def _assumption_rows(assumptions: dict, mode: str | None) -> list[str]:
+    rows = []
+    for k, f in (assumptions or {}).items():
+        v = f.get("value")
+        vv = f"{v:.4f}" if isinstance(v, float) else str(v)
+        rows.append(f"| {k} | {vv} | {f.get('provenance')} | {_assumption_status(k, mode)} |")
+    return rows
+
+
+def _render_degraded_md(payload: dict) -> str:
+    """Report for a run that produced no fair value — never a crash."""
+    r = payload.get("dcf") or {}
+    elig = r.get("model_eligibility") or {}
+    reason = elig.get("reason") or r.get("error") or "unknown_model_failure"
+    lines = [
+        f"# {payload.get('ticker')} · Driver-based DCF Model — {payload.get('asof')}",
+        "",
+        f"> **DEGRADED — 無 fair value 輸出** · reason `{reason}`",
+        f"> current price ${payload.get('current_price')} · "
+        f"projection mode `{r.get('projection_mode')}`",
+        "",
+        "此檔不得作為 `dcf_self_built` anchor；請先補齊來源資料再重跑。",
+        "",
+        "## Assumptions（value / provenance）",
+        "",
+        "| 假設 | 值 | 來源 | 本次採用 |",
+        "|---|---|---|---|",
+    ]
+    lines += _assumption_rows(payload.get("assumptions") or {}, r.get("projection_mode"))
+    if r.get("warnings"):
+        lines += ["", "## Warnings", ""] + [f"- {w}" for w in r["warnings"]]
+    lines += ["", "---", "*valuation-modeler · deterministic engine · 數字全由 script 計算*", ""]
+    return "\n".join(lines)
+
+
 def render_md(payload: dict) -> str:
     a, r = payload["assumptions"], payload["dcf"]
+    if r.get("wacc_used") is None or r.get("fair_value_per_share") is None:
+        return _render_degraded_md(payload)
     s = payload["sensitivity"]
     t = payload["ticker"]
     lines = [
@@ -664,15 +796,12 @@ def render_md(payload: dict) -> str:
         f" · WACC {r.get('wacc_used'):.2%} · terminal g {r.get('terminal_growth_used'):.2%}",
         f"> projection mode `{r.get('projection_mode')}`",
         "",
-        "## Assumptions（value / provenance）",
+        "## Assumptions（value / provenance / 本次採用）",
         "",
-        "| 假設 | 值 | 來源 |",
-        "|---|---|---|",
+        "| 假設 | 值 | 來源 | 本次採用 |",
+        "|---|---|---|---|",
     ]
-    for k, f in a.items():
-        v = f.get("value")
-        vv = f"{v:.4f}" if isinstance(v, float) else str(v)
-        lines.append(f"| {k} | {vv} | {f.get('provenance')} |")
+    lines += _assumption_rows(a, r.get("projection_mode"))
     lines += ["", "## FCFF Projection", "",
               "| Yr | g | Revenue | EBIT % | EBITDA | NOPAT | Capex % | Capex | ΔNWC | FCFF | PV |",
               "|---|---|---|---|---|---|---|---|---|---|---|"]
@@ -690,6 +819,10 @@ def render_md(payload: dict) -> str:
               "|---|" + "---|" * len(s["terminal_growth_values"])]
     for w, row in zip(s["wacc_values"], s["grid"]):
         lines.append(f"| {w:.2%} | " + " | ".join(str(v) if v else "—" for v in row) + " |")
+    for adj in s.get("floor_adjusted") or []:
+        lines.append(f"> ⚠ cell (WACC {adj['wacc_label']:.2%}, g {adj['terminal_growth']:.2%}) "
+                     f"actually used WACC {adj['wacc_used']:.2%} to keep wacc−g ≥ "
+                     f"{MIN_WACC_G_SPREAD:.0%}")
     if r.get("warnings"):
         lines += ["", "## Warnings", ""] + [f"- {w}" for w in r["warnings"]]
     lines += ["", "---", "*valuation-modeler · deterministic engine · 數字全由 script 計算*", ""]
@@ -697,9 +830,10 @@ def render_md(payload: dict) -> str:
 
 
 # ── main ──────────────────────────────────────────────────────────────────
-def build_payload(ticker: str, overrides: dict, *, no_cache: bool = False) -> dict:
+def build_payload(ticker: str, overrides: dict, *, no_cache: bool = False,
+                  force_legacy: bool = False) -> dict:
     inputs = load_inputs(ticker, no_cache=no_cache)
-    assumptions = derive_base_assumptions(inputs)
+    assumptions = derive_base_assumptions(inputs, force_legacy=force_legacy)
     assumptions, errs = apply_overrides(assumptions, overrides)
     dcf = run_dcf(assumptions, inputs)
     sens = (sensitivity_grid(assumptions, inputs, dcf)
@@ -733,6 +867,8 @@ def main():
     ap.add_argument("--set", action="append", default=[], metavar="K=V",
                     help="single override, repeatable (e.g. --set wacc=0.09)")
     ap.add_argument("--xlsx", action="store_true", help="also export Excel workbook")
+    ap.add_argument("--projection-mode", choices=("auto", "legacy"), default="auto",
+                    help="auto = structural shift when confirmed; legacy = force constant-ratio")
     ap.add_argument("--output-dir", default=str(BASE_DIR / "reports"))
     ap.add_argument("--no-cache", action="store_true")
     args = ap.parse_args()
@@ -746,7 +882,8 @@ def main():
         k, v = kv.split("=", 1)
         overrides[k.strip()] = v.strip()
 
-    payload = build_payload(args.ticker, overrides, no_cache=args.no_cache)
+    payload = build_payload(args.ticker, overrides, no_cache=args.no_cache,
+                            force_legacy=args.projection_mode == "legacy")
     if payload["override_errors"]:
         for e in payload["override_errors"]:
             print(f"ERROR: {e}", file=sys.stderr)
@@ -758,10 +895,15 @@ def main():
     payload_cache.write_text(json.dumps(payload, ensure_ascii=False, indent=1))
 
     if args.xlsx:
-        import export_xlsx
-        out = Path(args.output_dir) / f"{dt.date.today():%Y%m%d}_{payload['ticker']}_valuation_model.xlsx"
-        xp = export_xlsx.build_workbook(dcf_json=payload, comps_json=None, out_path=str(out))
-        payload["xlsx_path"] = xp
+        try:
+            import export_xlsx
+        except ImportError as e:  # export_xlsx.py absent from this checkout
+            print(f"WARN: xlsx export unavailable ({e}) — skipped", file=sys.stderr)
+            payload["xlsx_skipped"] = True
+        else:
+            out = Path(args.output_dir) / f"{dt.date.today():%Y%m%d}_{payload['ticker']}_valuation_model.xlsx"
+            xp = export_xlsx.build_workbook(dcf_json=payload, comps_json=None, out_path=str(out))
+            payload["xlsx_path"] = xp
 
     if args.json_only:
         print(json.dumps(payload, ensure_ascii=False, indent=2))

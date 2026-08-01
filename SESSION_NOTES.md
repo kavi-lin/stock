@@ -1,7 +1,33 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-06-22 (v4.47.2)
+> **Last Updated**: 2026-08-02 (v4.77.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.77.0) — 估值引擎 review 修正（degraded path 治理）
+- **起因**：4.76.0 的外部 Claude review 因 CLI 未登入中斷，改由本 session 直接完成 review（範圍 A = commit `4e54e79`；B = 未提交的 DCF-primary + range-only peer fallback），共 12 項發現；使用者指示「你來負責修正」。
+- **關鍵判斷**：12 項全部落在 degraded / fallback 分支，happy path（MU）完全正確。所以修法統一為「缺資料 → 保守且出聲」，而不是原本的「缺資料 → 套最寬鬆的合法上界」。
+- **做掉(firm)**：① start EBIT margin 期間對齊（3 季 roll-forward vs 已公布季度兩種基礎，provenance 可分辨）；② `_render_degraded_md` 讓無 FV 的 run 產出 `DEGRADED` 報告而非 TypeError；③ 缺年度估計時成長種子改用 base growth 假設（原本直接套 45% cap）；④ `projection_degrade_reason` 5 種 reason 進 payload + warnings，禁止靜默退回 legacy；⑤ mode 讀不到的 override 列入 warnings；⑥ earnings cache 改 parse 檔名日期（mtime 會被 git checkout 重置）；⑦ `_eps_growth` 只取最近兩個未來 FY、超 clamp 回 None（原本會拿歷史成長或改抓更後面高成長年度）；⑧ cohort schema 驗證 + `pe_min/max` 離散度；⑨ canonical peer set 健康時不渲染第二張 peer 表；⑩ 新增 `--projection-mode auto|legacy`、`--xlsx` graceful skip、報告「本次採用」欄與 sensitivity 下限註記。
+- **MU 迴歸**：FV `$762.13`、WACC `12.49%`、sensitivity `$693.74–853.60` 與 4.76.0 逐項一致（MU 走 3 季 roll-forward，不受修正影響）。快取宇宙 25 檔中 PEG 僅 CSCO 變動（`11.95%` → `10.15%`，修正值）。
+- **驗收**：`test_dcf` 104 / `test_comps` 52 / `test_export_xlsx` 13 asserts 全 rc=0（新增 27 條對應 regression）；`test_compute_price_framework.py` + `test_valuation_pack_consistency.py` + `check_skills.py` + `validate_session_export.py` rc=0；SYNC OK 4.77.0。
+- **下一步**：範圍 B 的 6 個檔案（SKILL.md / config / comps.py / peer_cohorts.py / export_xlsx.py / 2 支測試）仍是 untracked——review 發現 #9 指出 commit `4e54e79` 的 `--xlsx` 會 import 到不存在的 `export_xlsx`，已加 graceful skip 擋住 crash，但根本解是把 B 一起 commit。等使用者決定。
+
+## 🟢 Session Note (v4.76.0) — DCF-primary + audited peer range
+- **使用者定案**：DCF commit 結果作主 FV；LLM 找到的同產業候選若 provider peer endpoint 漏掉，可進 skill，但數字與 eligibility 必須由 Python；其他 anchors 只解釋區間。
+- **做掉**：DCF commit `4e54e79`；audited `peer_cohorts.json` 只存候選/限制，P/E 由 shared adapter 重抓且 ≥3；`range_only` 永不補 live peer anchor。Structural DCF 改 primary FV，新增 explained range 與 report injection。
+- **MU**：primary `$762.13`；sensitivity `$693.74–853.60`；without peer `$797.32`；SNDK/WDC/STX P/E anchor `$1,785.39`、with-peer `$1,291.36`；含 PT 的完整帶 `$693.74–1,468.26`。
+- **驗收**：comps/framework/inject regression、pack consistency、invest validator、skill validator、Claude same-session review（結果見本 session 後續）與 version sync。
+
+## 🟢 Session Note (v4.75.1) — MU through-cycle DCF 重建
+- **起因**：MU 舊 vendor DCF `$384–446` 與多個估值落差過大；使用者要求聚焦重建 DCF。
+- **做掉**：confirmed shift 改以 FY26 quarterly roll-forward 作 t0、FY27 起折現；分析師營收套 45/30/20/12/8% caps；EBIT/D&A/capex fade 到 normalized state；terminal capex 含成長再投資；最新 net cash/shares；異常 EBITDA/FCF sign fail-visible；beta 用 Blume mean reversion，override 保留原意。
+- **MU 結果**：DCF `$762.13`，WACC `12.49%`，terminal g `2.5%`；cached `$823.03` 下 upside `-7.4%`，使用者報價 `$812` 下約 `-6.1%`；sensitivity `$693.74–853.60`。舊 vendor DCF 保留 audit、退出 live vote。
+- **驗收**：DCF / canonical framework regression、py_compile、invest validator、version sync rc=0；報告 `reports/20260802_MU_dcf_model.md`。
+
+## 🟢 Session Note (v4.75.0) — canonical valuation pack + eligibility fail-closed
+- **起因**：使用者質疑個股估值可信度，要求盤點、提出修正方案，先與同一個 Claude Fable 5 session 討論到共識，再實作並由該 session review 到全部修完。
+- **做掉**：唯一 `valuation_pack`；correlation group → family → portfolio 聚合；下游只能 projection；LLM 不得改估值；DCF/forecaster/peer/PT eligibility fail-closed；`--self-assemble` 清除 input-file anchor 注入；validator hard consistency；protocol/schema/skill 文件與測試同步。
+- **MU 實測**：只剩 fundamental family，FV `$623.79`、vs `-24.21%`、score `-1`、confidence `low`；self DCF、PT、relative、forecaster 均依明確原因排除，audit 在 `reports/20260802_MU_valuation_pack_audit.md`。
+- **外部複審**：Claude Fable 5 session `edfd3440-bc86-4328-9b94-90edf31b1193` 首輪提出 F1–F5；修正 injection、peer_count、PT freshness、fallback correlation 與 MU artifact 後逐項判定 resolved，最終 `ACCEPT`。
 
 ## 🟢 Session Note (v4.47.2) — weekly-tech-playbook：Codex Review 整合優化（解耦 fatal gate + 去自打臉 nag）
 - **起因**：user 請 codex review 並改 code（結果已在 working tree），要我檢討優化。Codex 加了一整套「committee-blind then reconcile」獨立 review：build_pack 多寫 `blind_pack_<DATE>.json`（去委員會 verdict 防 anchoring）、selections 加 `codex_review` block、render 驗證 + 渲染、review.py 把 Codex 替代配置（含現金 sleeve）一起評分排名、page-playbook 加面板。

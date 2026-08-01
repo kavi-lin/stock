@@ -1,8 +1,35 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-06-22 (v4.47.2)
+> **Last Updated**: 2026-08-02 (v4.77.0)
 
 ---
+
+## ✅ Done (v4.77.0) — 估值引擎 review 修正（degraded path 治理）
+
+- 12 項 review 發現全數修正：期間對齊的 start EBIT margin、degraded 報告不再 crash、缺估計時成長種子不再套 cap、structural shift 降級必附 reason、無效 override 出聲、`_eps_growth` 只取最近兩個未來 FY。
+- 新增 `--projection-mode auto|legacy`、cohort schema 驗證與 `pe_min/max` 離散度、canonical peer 健康時不渲染第二張 peer 表。
+- MU 迴歸逐項一致（`$762.13` / WACC `12.49%` / `$693.74–853.60`）；新增 27 條 regression assert。
+- **待使用者決定**：範圍 B（`SKILL.md`、`config/peer_cohorts.json`、`comps.py`、`peer_cohorts.py`、`export_xlsx.py`、2 支測試）仍 untracked，需與 `4e54e79` 一起 commit 才能解掉「單獨 checkout A 時 `--xlsx` ImportError」的根因。
+- **後續校準**：累積更多非 3 季 / 缺 `ebitAvg` 的實際 ticker 後，回頭檢查 `reported_quarters_only` margin 基礎與 degrade reason 的覆蓋是否夠用。
+
+## ✅ Done (v4.76.0) — DCF-primary + audited peer range
+
+- LLM/manual 只發現 candidate；Python ratio adapter、≥3 正值與 range-only gate 已落地。
+- Structural DCF 為主 FV；without/with-peer、DCF sensitivity 與其他 eligible anchors 形成 explained range。
+- **後續校準**：累積跨週期 outcome 後檢查 adjacent storage cohort 是否系統性高估；未達樣本門檻前不得升格 live peer anchor。
+
+## ✅ Done (v4.75.1) — MU structural-shift DCF 重建
+
+- current-FY roll-forward、bounded growth、normalized operating/reinvestment path、mean-reverting beta 與 latest balance/share inputs 已落地。
+- MU DCF `$762.13`，敏感度 `$693.74–853.60`；eligible 新 DCF 會 supersede opaque vendor DCF，但保留 lineage 稽核。
+- **後續校準**：累積 structural-shift 案例後回測 growth caps、terminal margin 與 beta adjustment；不得依單一 MU 現價反推參數。
+
+## ✅ Done (v4.75.0) — 個股估值可信度修正
+
+- 唯一 canonical valuation pack、三 family/correlation 去重、eligibility-before-aggregation、下游 hard consistency 已落地。
+- 關閉 LLM/input-file live anchor 注入；DCF、forecaster、peer/comps、analyst PT 改 fail-closed；Reverse DCF 僅 diagnostic。
+- MU audit、完整 regression tests、invest validator 與同 session Claude Fable 5 code review 均完成；最終 review `ACCEPT`。
+- **後續校準**：累積足夠 outcome 後再校準 PT 180 天 freshness 與 family weights；校準前不得憑 LLM 判斷改 live 數字。
 
 ## ✅ Done (v4.47.2) — weekly-tech-playbook：Codex Review 整合優化
 

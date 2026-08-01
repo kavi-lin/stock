@@ -8,9 +8,14 @@ Run: python3 investment/scripts/test_compute_price_framework.py   # rc=0 全過 
 """
 import os
 import sys
+import datetime as dt
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from compute_price_framework import (  # noqa: E402
+    build_valuation_pack,
+    _block_manual_anchor_overrides,
+    _supersede_vendor_dcf,
+    build_explained_valuation_range,
     compute_archetype_shadow,
     compute_fair_value_range,
     compute_fair_value_summary,
@@ -47,14 +52,16 @@ HYPER = {
     "volatility": {"sigma_daily": 0.035, "atr_14": 11.0, "momentum_20d_pct": 5.0},
 }
 
+# V4.69.0 8-anchor 權重下重驗算：available = dcf_u 150(.20) dcf_l 140(.10)
+# analyst 380(.20) forecaster 320(.05)，Σw=0.55 → (30+14+76+16)/0.55 = 247.27
 fvs = compute_fair_value_summary(HYPER["anchors"], 300.0)
-eq("hyper.live_wfv", fvs["weighted_fair_value"], 225.71)
+eq("hyper.live_wfv", fvs["weighted_fair_value"], 265.0)
 eq("hyper.live_verdict", fvs["verdict_band"], "overvalued")
 
 rng = compute_fair_value_range(HYPER["anchors"], 300.0, HYPER["fred"])
-eq("hyper.p25", rng["p25"], 144.44)
-eq("hyper.p50", rng["p50"], 198.57)
-eq("hyper.p75", rng["p75"], 344.0)
+eq("hyper.p25", rng["p25"], 145.83)
+eq("hyper.p50", rng["p50"], 252.0)
+eq("hyper.p75", rng["p75"], 362.0)
 eq("hyper.range_method", rng["range_method"], "weighted_percentile")
 eq("hyper.oe_linked", rng["owner_earnings_multiple_shadow"]["oe_mult_rate_linked"], 17.24)
 
@@ -69,8 +76,11 @@ eq("hyper.archetype", sh["archetype"], "hypergrowth")
 eq("hyper.ev_ebitda_implied", sh["new_anchors"]["peer_ev_ebitda_implied"], 199.5)
 eq("hyper.ev_sales_implied", sh["new_anchors"]["peer_ev_sales_implied"], 252.0)
 eq("hyper.pb_roe", sh["new_anchors"]["pb_roe_justified"], None)          # ROE<0 → null
-eq("hyper.shadow_wfv", sh["weighted_fair_value_shadow"], 270.52)
-eq("hyper.flip", sh["flip_vs_live"], True)
+# V4.69.0 hypergrowth 新權重：dcf_u .10 dcf_l .05 analyst .20 forecaster .10
+# ev_ebitda .15(199.5) ev_sales .20(252.0)，Σw=0.80 → 210.325/0.8 = 262.91
+eq("hyper.shadow_wfv", sh["weighted_fair_value_shadow"], 262.91)
+# live 247.27(-17.6% overvalued) vs shadow 262.91(-12.4% overvalued) → 同 band 不翻轉
+eq("hyper.flip", sh["flip_vs_live"], False)
 
 # ── Fixture 2: financial（pb_roe 手算 baseline） ──────────────────────────────
 FIN = {
@@ -144,8 +154,9 @@ eq("agree.capped_medium", fvs7["confidence"], "medium")
 eq("agree.med_kept_count_based", fvs7["confidence_count_based"], "high")
 
 # Tier NONE — converging anchors (cv < 0.35) keep their count-based confidence.
+# V4.69.0：high 門檻升為 ≥6，補第 6 個 tight anchor 保持測試意圖（tight → high 不被 cap）
 TIGHT = {"dcf_unlevered": 100.0, "dcf_levered": 102.0, "analyst_pt_consensus": 105.0,
-         "peer_pe_implied": 98.0, "owner_earnings_mult": 101.0}
+         "peer_pe_implied": 98.0, "owner_earnings_mult": 101.0, "forecaster_blend": 103.0}
 fvs6 = compute_fair_value_summary(TIGHT, 100.0)
 rng6 = compute_fair_value_range(TIGHT, 100.0, {})
 eq("agree.tight_cv_low", rng6["anchor_dispersion_cv"] < 0.35, True)
@@ -153,10 +164,229 @@ reconcile_confidence(fvs6, rng6)
 eq("agree.tight_conf_kept", fvs6["confidence"], "high")
 eq("agree.tight_no_cap", fvs6.get("confidence_capped_by"), None)
 
+# ── Fixture 7 (V4.69.0): 全 8 anchor 齊備 — 新權重直算 + 門檻 ────────────────
+FULL8 = {"dcf_unlevered": 100.0, "dcf_levered": 110.0, "dcf_self_built": 120.0,
+         "analyst_pt_consensus": 130.0, "peer_pe_implied": 140.0, "comps_implied": 150.0,
+         "owner_earnings_mult": 160.0, "forecaster_blend": 170.0}
+fvs8 = compute_fair_value_summary(FULL8, 100.0)
+# 20+11+18+26+21+15+8+8.5 = 127.5（Σw=1.0 無重分配）
+eq("full8.wfv", fvs8["weighted_fair_value"], 128.25)
+eq("full8.available", fvs8["anchors_available"], 8)
+eq("full8.confidence", fvs8["confidence"], "high")
+eq("full8.note", fvs8["methodology_note"].startswith("canonical family aggregation"), True)
+eq("full8.verdict", fvs8["verdict_band"], "undervalued")
+# 5 anchors → medium（新門檻 4-5）；3 → low
+eq("mid5.confidence", compute_fair_value_summary(
+    {k: FULL8[k] for k in list(FULL8)[:5]}, 100.0)["confidence"], "high")
+eq("low3.confidence", compute_fair_value_summary(
+    {k: FULL8[k] for k in list(FULL8)[:3]}, 100.0)["confidence"], "low")
+# archetype 權重表配平守恆：每個 archetype Σ=1.0
+from compute_price_framework import ARCHETYPE_WEIGHTS, ANCHOR_WEIGHTS  # noqa: E402
+for _name, _w in ARCHETYPE_WEIGHTS.items():
+    eq(f"archetype.{_name}.sum", round(sum(_w.values()), 6), 1.0)
+eq("live_weights.sum", round(sum(ANCHOR_WEIGHTS.values()), 6), 1.0)
+
+# ── Fixture 8 (V4.70.0): anchor outlier trim（P0-3 審計修正）─────────────────
+from compute_price_framework import trim_anchor_outliers  # noqa: E402
+
+# NVDA-like：owner_earnings $31.80 遠低於錨中位數 → 剔除；其餘保留
+NVDA_LIKE = {"dcf_unlevered": 247.42, "dcf_levered": 258.14, "dcf_self_built": None,
+             "analyst_pt_consensus": None, "peer_pe_implied": 369.30, "comps_implied": None,
+             "owner_earnings_mult": 31.80, "forecaster_blend": 347.15}
+eff, trimmed = trim_anchor_outliers(NVDA_LIKE)
+eq("trim.n_trimmed", len(trimmed), 1)
+eq("trim.which", trimmed[0]["anchor"], "owner_earnings_mult")
+eq("trim.eff_null", eff["owner_earnings_mult"], None)
+eq("trim.eff_keep", eff["dcf_unlevered"], 247.42)
+# 修剪後加權：dcf_u .20(247.42) dcf_l .10(258.14) peer_pe .15(369.30) fcast .05(347.15)
+# Σw=0.50 → (49.484+25.814+55.395+17.3575)/0.50 = 296.10
+fvs_t = compute_fair_value_summary(eff, 197.64)
+eq("trim.wfv", fvs_t["weighted_fair_value"], 313.72)
+eq("trim.available", fvs_t["anchors_available"], 4)
+# 未修剪對照（含 $31.80，Σw=0.55）→ 272.07：壞錨拉低 $24
+fvs_raw = compute_fair_value_summary(NVDA_LIKE, 197.64)
+eq("trim.raw_wfv_contrast", fvs_raw["weighted_fair_value"], 311.04)
+
+# 全體錨一致偏低（真高估）→ 中位數同步下移，不誤剪
+LOW_ALL = {"dcf_unlevered": 90.0, "dcf_levered": 95.0, "dcf_self_built": 100.0,
+           "analyst_pt_consensus": 110.0, "peer_pe_implied": None, "comps_implied": None,
+           "owner_earnings_mult": None, "forecaster_blend": None}
+_, trimmed_low = trim_anchor_outliers(LOW_ALL)
+eq("trim.consensus_low_no_trim", len(trimmed_low), 0)
+
+# n<4 不修剪（即使離群）
+SPARSE = {"dcf_unlevered": 100.0, "dcf_levered": None, "dcf_self_built": None,
+          "analyst_pt_consensus": 900.0, "peer_pe_implied": 105.0, "comps_implied": None,
+          "owner_earnings_mult": None, "forecaster_blend": None}
+_, trimmed_sparse = trim_anchor_outliers(SPARSE)
+eq("trim.sparse_no_trim", len(trimmed_sparse), 0)
+
+# 既有 fixtures 錨值都在 median×3 內 → 修剪為 no-op（HYPER 驗證）
+eff_h, trimmed_h = trim_anchor_outliers(HYPER["anchors"])
+eq("trim.hyper_noop", len(trimmed_h), 0)
+
+# ── Fixture 9: canonical pack eligibility / provenance / shift gates ────────
+STRICT_META = {
+    name: {"provenance": "fixture", "as_of": dt.date.today().isoformat(),
+           "correlation_key": "cashflow-fixture" if name.startswith("dcf_") else name}
+    for name in FULL8
+}
+for _peer_anchor in ("peer_pe_implied", "comps_implied"):
+    STRICT_META[_peer_anchor]["peer_count"] = 4
+STRICT_META["forecaster_blend"].update({"confidence": "LOW", "usable_methods": 3})
+pack = build_valuation_pack(FULL8, 100.0, anchor_meta=STRICT_META)
+eq("pack.schema", pack["schema"], "valuation_pack.v1")
+eq("pack.forecaster_gate", pack["anchors"]["forecaster_blend"]["status"], "ineligible")
+eq("pack.forecaster_reason", pack["anchors"]["forecaster_blend"]["reason"],
+   "low_forecast_confidence")
+eq("pack.families", pack["families_present"],
+   ["external_expectations", "fundamental", "relative"])
+
+# Missing provenance/as_of cannot enter live.
+pack_missing = build_valuation_pack({"dcf_unlevered": 100.0}, 100.0)
+eq("pack.provenance_required", pack_missing["weighted_fair_value"], None)
+eq("pack.provenance_reason", pack_missing["anchors"]["dcf_unlevered"]["reason"],
+   "missing_provenance")
+
+# Confirmed shift suppresses only PT that predates evidence; incomplete shift is advisory.
+recent_pt = (dt.date.today() - dt.timedelta(days=32)).isoformat()
+shift_date = (dt.date.today() - dt.timedelta(days=18)).isoformat()
+pt_meta = {"analyst_pt_consensus": {"provenance": "fixture", "as_of": recent_pt}}
+shift = {"status": "CONFIRMED", "evidence_date": shift_date, "provenance": "filing"}
+pack_shift = build_valuation_pack({"analyst_pt_consensus": 150.0}, 100.0,
+                                  anchor_meta=pt_meta, structural_shift=shift)
+eq("pack.shift_suppressed", pack_shift["anchors"]["analyst_pt_consensus"]["reason"],
+   "predates_structural_shift")
+pack_advisory = build_valuation_pack({"analyst_pt_consensus": 150.0}, 100.0,
+                                     anchor_meta=pt_meta,
+                                     structural_shift={"status": "CONFIRMED"})
+eq("pack.incomplete_shift_advisory", pack_advisory["anchors"]["analyst_pt_consensus"]["status"],
+   "eligible")
+
+stale_pt = (dt.date.today() - dt.timedelta(days=181)).isoformat()
+pack_stale_pt = build_valuation_pack(
+    {"analyst_pt_consensus": 150.0}, 100.0,
+    anchor_meta={"analyst_pt_consensus": {"provenance": "fixture", "as_of": stale_pt}},
+)
+eq("pack.stale_pt_gate", pack_stale_pt["anchors"]["analyst_pt_consensus"]["reason"],
+   "stale_analyst_pt")
+
+pack_peer_missing_n = build_valuation_pack(
+    {"comps_implied": 120.0}, 100.0,
+    anchor_meta={"comps_implied": {"provenance": "fixture", "as_of": dt.date.today().isoformat()}},
+)
+eq("pack.peer_count_fail_closed", pack_peer_missing_n["anchors"]["comps_implied"]["reason"],
+   "missing_peer_count")
+
+# --self-assemble owns all live anchor values/meta; input-file injections are removed.
+manual = {
+    "anchors": {"dcf_self_built": 9999.0, "comps_implied": 8888.0},
+    "anchor_meta": {
+        "dcf_self_built": {"provenance": "fabricated", "as_of": dt.date.today().isoformat()},
+        "comps_implied": {"provenance": "fabricated", "as_of": dt.date.today().isoformat(),
+                          "peer_count": 99},
+    },
+}
+blocked = _block_manual_anchor_overrides(manual)
+eq("pack.manual_override_names", blocked, ["dcf_self_built", "comps_implied"])
+eq("pack.manual_override_value_removed", manual["anchors"]["dcf_self_built"], None)
+eq("pack.manual_override_meta_removed", manual["anchor_meta"]["comps_implied"], {})
+
+# A live structural through-cycle DCF retains but supersedes opaque vendor DCFs.
+vendor_meta = {
+    "dcf_unlevered": {"provenance": "earnings_analyst_bundle", "as_of": "2026-06-25"},
+    "dcf_levered": {"provenance": "earnings_analyst_bundle", "as_of": "2026-06-25"},
+}
+superseded = _supersede_vendor_dcf(vendor_meta, {
+    "model_eligibility": {"eligible": True},
+    "dcf": {"projection_mode": "structural_shift_through_cycle"},
+})
+eq("pack.vendor_dcf_superseded", superseded, ["dcf_unlevered", "dcf_levered"])
+eq("pack.vendor_dcf_reason", vendor_meta["dcf_unlevered"]["reason"],
+   "superseded_by_auditable_through_cycle_dcf")
+
+# Legacy or failed self-built models cannot suppress an otherwise usable source.
+legacy_meta = {"dcf_unlevered": {"provenance": "fixture"}}
+eq("pack.vendor_dcf_legacy_kept", _supersede_vendor_dcf(legacy_meta, {
+    "model_eligibility": {"eligible": True}, "dcf": {"projection_mode": "legacy_constant_ratio"},
+}), [])
+eq("pack.vendor_dcf_legacy_eligible_untouched", legacy_meta["dcf_unlevered"].get("eligible"), None)
+
+# Eligible structural DCF owns primary FV; other methods explain the interval.
+primary_meta = {
+    "dcf_self_built": {
+        "provenance": "valuation_modeler.dcf", "as_of": dt.date.today().isoformat(),
+        "projection_mode": "structural_shift_through_cycle",
+        "sensitivity_low": 693.74, "sensitivity_high": 853.60,
+    },
+    "owner_earnings_mult": {
+        "provenance": "fixture.owner", "as_of": dt.date.today().isoformat(),
+    },
+}
+primary_pack = build_valuation_pack(
+    {"dcf_self_built": 762.13, "owner_earnings_mult": 832.50}, 812.0,
+    anchor_meta=primary_meta,
+)
+eq("primary.method", primary_pack["primary_method"], "dcf_self_built")
+eq("primary.fv", primary_pack["weighted_fair_value"], 762.13)
+eq("primary.family_shadow", primary_pack["family_blended_fair_value"], 797.32)
+eq("primary.dcf_weight", primary_pack["anchors"]["dcf_self_built"]["weight_effective"], 1.0)
+eq("primary.owner_weight", primary_pack["anchors"]["owner_earnings_mult"]["weight_effective"], 0.0)
+
+explained = build_explained_valuation_range(primary_pack, {
+    "peer_pe_range": {
+        "value": 1785.39, "eligible": True, "scope": "range_only", "peer_count": 3,
+        "peers": {"SNDK": {}, "WDC": {}, "STX": {}},
+        "limitations": ["adjacent storage mix"],
+    },
+})
+eq("range.primary", explained["primary_fv"], 762.13)
+eq("range.without_peer", explained["scenario_without_peer"], 797.32)
+eq("range.with_peer", explained["scenario_with_peer"], 1291.35)
+eq("range.low", explained["range_low"], 693.74)
+eq("range.high", explained["range_high"], 1291.35)
+eq("range.peers", explained["peer_symbols"], ["SNDK", "STX", "WDC"])
+
+range_with_pt_meta = dict(primary_meta, analyst_pt_consensus={
+    "provenance": "fixture.pt", "as_of": dt.date.today().isoformat(),
+})
+range_with_pt_pack = build_valuation_pack(
+    {"dcf_self_built": 762.13, "owner_earnings_mult": 832.50,
+     "analyst_pt_consensus": 1468.26}, 812.0,
+    anchor_meta=range_with_pt_meta,
+)
+range_with_pt = build_explained_valuation_range(range_with_pt_pack, {
+    "peer_pe_range": {
+        "value": 1785.39, "eligible": True, "scope": "range_only", "peer_count": 3,
+        "peers": {"SNDK": {}, "WDC": {}, "STX": {}},
+    },
+})
+eq("range.external_anchor_extends_high", range_with_pt["range_high"], 1468.26)
+eq("range.external_anchor_driver", range_with_pt["range_high_driver"],
+   "anchor:analyst_pt_consensus")
+eq("range.external_anchor_listed",
+   range_with_pt["other_eligible_anchors"]["analyst_pt_consensus"], 1468.26)
+
+# MHP may not resurrect a PT/forecaster anchor that canonical eligibility rejected.
+gated_meta = {
+    "analyst_pt_consensus": {"provenance": "fixture", "as_of": recent_pt},
+    "forecaster_blend": {"provenance": "fixture", "as_of": dt.date.today().isoformat(),
+                         "confidence": "LOW", "usable_methods": 3},
+}
+gated_pack = build_valuation_pack(
+    {"analyst_pt_consensus": 150.0, "forecaster_blend": 160.0}, 100.0,
+    anchor_meta=gated_meta, structural_shift=shift,
+)
+from compute_price_framework import fair_value_summary_from_pack  # noqa: E402
+gated_fvs = fair_value_summary_from_pack(gated_pack)
+gated_mhp = compute_mhp({"current_price": 100.0, "volatility": {}}, gated_fvs)
+eq("pack.mhp_pt_suppressed", gated_mhp["mid_term_60d"]["pt_60d"], None)
+eq("pack.mhp_forecaster_suppressed", gated_mhp["mid_term_60d"]["earnings_revision"], None)
+
 # ──────────────────────────────────────────────────────────────────────────────
 if FAILS:
     print(f"✗ {len(FAILS)} regression(s):")
     for f in FAILS:
         print("  -", f)
     sys.exit(1)
-print("✓ all golden fixtures pass (5 fixtures, 38 asserts)")
+print("✓ all golden + canonical valuation-pack fixtures pass")

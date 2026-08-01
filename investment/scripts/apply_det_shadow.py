@@ -441,12 +441,26 @@ def apply_to_trade(trade: dict) -> dict:
     """Compute and attach det_shadow block to a trades_this_session[] entry.
     Returns the (mutated) entry."""
     val_lane = trade.get("valuation_lane") or {}
+    pack = trade.get("valuation_pack") or {}
+    fvs = trade.get("fair_value_summary") or {}
     lane_scores = trade.get("lane_scores") or {}
     det_inputs  = trade.get("det_inputs")  or {}
 
-    polar = compute_polarization(lane_scores, val_lane.get("score"))
-    val_det = compute_val_det(val_lane.get("weighted_fair_value"),
-                                val_lane.get("vs_current_pct"))
+    pack_score = pack.get("score") if isinstance(pack, dict) else None
+    authoritative_score = pack_score if isinstance(pack_score, (int, float)) else val_lane.get("score")
+    authoritative_fv = (pack.get("weighted_fair_value") if isinstance(pack, dict)
+                        else None)
+    authoritative_vs = pack.get("vs_current_pct") if isinstance(pack, dict) else None
+    if authoritative_fv is None:
+        authoritative_fv = fvs.get("weighted_fair_value")
+    if authoritative_vs is None:
+        authoritative_vs = fvs.get("vs_current_pct")
+
+    polar = compute_polarization(lane_scores, authoritative_score)
+    # Canonical sessions do not run a second score formula.  Legacy sessions
+    # without a pack retain the historical FV-vs-price shadow mapping.
+    val_det = (authoritative_score if pack and isinstance(authoritative_score, (int, float))
+               else compute_val_det(authoritative_fv, authoritative_vs))
     val_agree = compute_val_agreement(val_lane.get("score"), val_det)
 
     rt_det = compute_red_team_det(det_inputs)
@@ -472,6 +486,7 @@ def apply_to_trade(trade: dict) -> dict:
         "polarization_detail":  polar,
         "valuation_score_det":  val_det,
         "val_agreement":        val_agree,
+        "valuation_source":     ("valuation_pack" if pack else "fair_value_summary"),
         "red_team_verdict_det": rt_det.get("verdict"),
         "red_team_detail":      rt_det,
         "red_team_agreement":   rt_agree,

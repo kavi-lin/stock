@@ -66,12 +66,12 @@ Phase 1 末段 PM **MUST** 取得同業 peer set，供 Fundamentals + Burry + Va
 ```python
 import sys
 sys.path.insert(0, ".")
-from skills._shared.company_context import get_peers, get_profile
+from skills._shared.company_context import select_valuation_peers
 from statistics import median
 
-peers_raw = get_peers(TICKER)[:5]
-peer_profiles = {p: get_profile(p) for p in peers_raw}
-peer_profiles = {p: prof for p, prof in peer_profiles.items() if prof}
+selection = select_valuation_peers(TICKER)
+peers_raw = selection["peers"]
+peer_profiles = selection["profiles"]
 ```
 
 ### Bundle shape
@@ -82,6 +82,8 @@ def _med(field):
 
 PEER_BUNDLE = {
   "peers":                  list(peer_profiles.keys()),
+  "peer_selector":          selection["selector"],
+  "peer_exclusions":        selection["dropped"],
   "peer_pe_median":         _med("peRatio"),
   "peer_market_cap_median": _med("marketCap"),
   "peer_beta_median":       _med("beta"),
@@ -90,7 +92,7 @@ PEER_BUNDLE = {
 ```
 
 ### Failure modes
-- `len(peer_profiles) < 3` → `PEER_BUNDLE = {"status": "insufficient_peers", "peers": [...]}`
+- exact industry + business-model 相似 peers `<3` → `PEER_BUNDLE = {"status": "insufficient_peers", "peers": [...], "peer_exclusions": [...]}`
 - `get_peers()` 回 `[]` → `PEER_BUNDLE = {"status": "unavailable"}`
 - Fundamentals / Burry / Valuation lane 自動 fallback 到 sector median rubric，**不**中止 protocol
 
@@ -144,6 +146,43 @@ FMP_SUPP_BUNDLE = get_supplementary_bundle(TICKER)
 - FMP-only。**不得**混入 dual_fetch `scoring.*` 欄位
 - 24h cache @ `skills/_shared/fmp_supp_cache/<TICKER>_<DATE>_supp.json`
 - 純讀，lane subagent 禁改
+
+---
+
+## 4. VALUATION_MODEL_BUNDLE（V4.69.0 — MUST attempt, FMP 24h cache）
+
+PM 在 bundle 準備期（Phase 0/1）跑兩個 valuation-modeler script，供 Valuation
+Specialist lane 的 `dcf_self_built` / `comps_implied` anchor 與 Phase 4.5 engine 使用：
+
+```bash
+python3 skills/valuation-modeler/scripts/dcf.py <TICKER> --json-only    > /tmp/vm_dcf.json
+python3 skills/valuation-modeler/scripts/comps.py <TICKER> --json-only  > /tmp/vm_comps.json
+```
+
+```python
+VALUATION_MODEL_BUNDLE = {
+  "dcf_self_built":  vm_dcf["fair_value_per_share"],     # float | null
+  "dcf_assumptions": vm_dcf["assumptions"],              # 含 provenance，Red Team 可引用
+  "dcf_sensitivity": vm_dcf["sensitivity"],              # 5×5 WACC × terminal growth
+  "comps_implied":   vm_comps["comps_implied_value"],    # float | null
+  "comps_table":     vm_comps["table"],                  # 全指標 quartiles + implied
+}
+```
+
+### Failure modes
+- 任一 script rc≠0 或 `degraded: true` → pack 保留 payload + `model_eligibility.reason`，live anchor 不參與聚合；bundle 其餘欄位保留可用部分
+- 兩者皆失敗 → `VALUATION_MODEL_BUNDLE = {"status": "unavailable"}`，protocol 照常執行（8 anchor 退化為 6）
+- confirmed structural shift 且資料齊全時，DCF 改走 auditable through-cycle path（current-FY
+  quarterly roll-forward、bounded forward growth、normalized EBIT/D&A/capex、mean-reverting beta）；
+  該模型 eligible 後，canonical pack 會保留但停用兩條 opaque vendor DCF，避免同法重複計權
+- exact business-similar peers不足時，可載入 `valuation-modeler/config/peer_cohorts.json` 的
+  audited candidate cohort。LLM/manual discovery 只能提供 ticker；P/E 必須由 Python 重抓且 ≥3
+  正值。結果標記 `range_only`，只延伸 `valuation_explained_range`，不補 live peer anchor
+
+### Injection rules
+- ✅ Phase 2.4 canonical pack ingestion + **Valuation Specialist reviewer** + Red Team（`dcf_assumptions` 的 provenance 與 sensitivity 是現成攻擊面）
+- ❌ Fundamentals / Sentiment / News / Technical
+- comps_implied 的 P/E 排除規則：見 `skills/valuation-modeler/SKILL.md`（防與 peer_pe_implied 重複計權）
 
 ---
 

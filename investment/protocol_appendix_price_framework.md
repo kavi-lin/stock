@@ -14,33 +14,33 @@
 
 > **V5.1 升級**：原單一 `fair_value_summary`（長期 6-anchor）擴展成三時間框架。
 > 每層用該時間尺度合適的方法：5 天用波動率機率帶，60 天用動能+重定價，長期用估值錨點。
-> **契約相容**：`fair_value_summary` key/shape **完全不變**（仍是長期層、仍受 decision_lock + validator 保護；
-> engine 的 blend 演算法與 V5.0 byte-identical）；三框架另存於新 sibling block `multi_horizon_price_framework`，
+> **契約相容**：`fair_value_summary` 保留為 `valuation_pack` projection（仍受 decision_lock + validator 保護）；
+> engine 只 build 一次，validator 強制 projection 數值相等。三框架另存於 sibling block `multi_horizon_price_framework`，
 > 長期層**直接引用** `fair_value_summary.weighted_fair_value`，不複製不重算。
 
-### 4.5.0 — Long-Term Layer：`fair_value_summary`（既有 6-anchor，原封不動）
+### 4.5.0 — Long-Term Layer：canonical `valuation_pack`
 
 ### 算法
 
 ```python
-# 從 Valuation Specialist (Phase 2) 拿 valuation_anchors
-anchors = phase2.valuation_specialist.valuation_anchors
-weights_default = {
-  "dcf_unlevered":      0.30,
-  "dcf_levered":        0.15,
-  "analyst_pt_consensus": 0.20,
-  "peer_pe_implied":    0.20,
-  "owner_earnings_mult": 0.10,
-  "forecaster_blend":   0.05,
+anchors = deterministic_sources_with_provenance
+eligible = apply_model_predicates_and_freshness(anchors)
+
+# 同 correlation group 先 median，一 group 一票；再得到 family representative。
+# correlation group 由固定 anchor-type mapping + assumption/input lineage 產生，LLM 不可指定。
+families = {
+  "fundamental": ["cashflow_intrinsic", "earnings_projection"],
+  "relative": ["peer_relative"],
+  "external_expectations": ["external_pt"],
 }
-
-# 缺 anchor → weight 重分配
-available = {k: v for k, v in anchors.items() if v is not None and v > 0}
-total_w = sum(weights_default[k] for k in available)
-weights_norm = {k: weights_default[k] / total_w for k in available}
-
-weighted_fair_value = sum(weights_norm[k] * available[k] for k in available)
-current_price = ticker_data_bundle["scoring"]["price"]
+family_weights = {"fundamental": 0.55, "relative": 0.25, "external_expectations": 0.20}
+weighted_fair_value = aggregate_eligible_family_representatives(eligible, family_weights)
+# 三 family 齊全才用 fixed weights；只剩 1/2 family 時改為 equal family votes，
+# 不把缺失 family 的權重指定轉移給某個 survivor，並壓低 confidence。
+if eligible_dcf_self_built.projection_mode == "structural_shift_through_cycle":
+    family_blended_fair_value = weighted_fair_value       # audit/scenario only
+    weighted_fair_value = eligible_dcf_self_built.value   # primary FV
+    aggregation_mode = "dcf_primary_anchor_range"
 vs_current_pct = (weighted_fair_value - current_price) / current_price * 100
 
 # Verdict band
@@ -50,11 +50,29 @@ elif vs_current_pct >= -10: verdict_band = "fairly_valued"
 elif vs_current_pct >= -30: verdict_band = "overvalued"
 else:                       verdict_band = "extreme_overvalued"
 
-# Confidence by anchor count
-if len(available) >= 5:    confidence = "high"
-elif len(available) >= 3:  confidence = "medium"
-else:                       confidence = "low"
+# Confidence by independent family coverage；不是 anchor count。
+if len(families_present) == 3: confidence = "high"
+elif len(families_present) == 2: confidence = "medium"
+else: confidence = "low"
+
+# 少於 2 個獨立 family，或同方向 family vote 少於 2，禁止 |score| >= 2。
 ```
+
+Eligibility 先於聚合：LOW forecaster、transition 無安全模型、<3 business-similar peers、
+負 terminal FCFF、缺 provenance/as_of、PT 超過 180 天，或 PT 早於 confirmed structural-shift evidence date，
+一律保留 value/reason 供 shadow audit，但不得進 live FV。Reverse DCF 是 market-implied diagnostic，永不投票。
+`--self-assemble` 的八個 live anchor 由 engine 擁有；input file 同名 value/meta 會被清除並列入
+`blocked_anchor_overrides[]`，不能以 LLM 或手工 metadata 偽裝成 deterministic source。
+當 eligible `dcf_self_built` 使用 `structural_shift_through_cycle` 模式時，來源不透明且與其同屬
+cash-flow intrinsic 的 vendor `dcf_unlevered` / `dcf_levered` 保留 value/lineage 但標記
+`superseded_by_auditable_through_cycle_dcf`，不得重複投票。若自建模型失敗或仍是 legacy mode，
+vendor DCF 不會因此被壓掉。
+
+`peer_cohorts.json` 只保存經人工核准的候選 ticker/角色/限制，不保存倍數。候選可由 LLM
+協助 discovery，但 `peer_cohorts.py` 必須重新由 deterministic ratio adapter 取數、取得 ≥3 個
+正 P/E 才輸出 `scope=range_only` scenario。此 scenario 不得填入 live `peer_pe_implied` 或
+`comps_implied`；只進 `valuation_explained_range`。該 block 以 DCF 為 primary，另列 DCF
+sensitivity、without-peer、with-peer 與其他 eligible anchor，並記錄 range_low/high 的實際 driver。
 
 ### 輸出
 
@@ -71,22 +89,25 @@ else:                       confidence = "low"
       "owner_earnings_mult":  "float|null",
       "forecaster_blend":     "float|null"
     },
-    "weights_used": {"dcf_unlevered": 0.32, "dcf_levered": 0.16, ...},  // 重分配後
+    "weights_used": {"dcf_unlevered": 0.18, ...},  // pack projection
     "weighted_fair_value":  "float",
     "current_price":        "float",
     "vs_current_pct":       "float",
     "verdict_band":         "extreme_undervalued | undervalued | fairly_valued | overvalued | extreme_overvalued",
-    "confidence":           "high | medium | low",
-    "anchors_available":    "int 0-6",
-    "methodology_note":     "string — e.g. '5/6 anchors used; owner_earnings_mult unavailable, weight redistributed'"
+    "confidence":           "high | medium | low（按獨立 family coverage + dispersion cap）",
+    "anchors_available":    "int 0-8",
+    "families_present":     ["fundamental", "relative"],
+    "excluded_anchors":     {"forecaster_blend": "low_forecast_confidence"},
+    "valuation_pack_schema": "valuation_pack.v1",
+    "methodology_note":     "string"
   }
 }
 ```
 
 ### 與 Valuation lane 的關係
-- Valuation Specialist (Phase 2) 給 lane score（-5 ~ +5）參與加權
-- `fair_value_summary` (Phase 4.5) 給 deterministic 數字呈現給 user（"合理股價 $215，現價 $285，溢價 32.5%"）
-- 兩者都用同一組 anchor，但 Specialist 是 LLM 詮釋（含 narrative），Phase 4.5 是純算數
+- `valuation_pack` 給唯一 FV / score / confidence。
+- Valuation Specialist 只 reviewer/explainer；lane 數值欄只能 verbatim projection。
+- `fair_value_summary`、MHP long-term、T5、det-shadow 全部只讀同一 pack，禁止重算。
 
 ### 4.5.0b — Anchor Distribution：`fair_value_range`（V3.45.1 NEW，advisory sibling）
 
@@ -127,8 +148,10 @@ if n >= 2:
     wmean = weighted_mean(anchors_list, weights_list)
     wstd  = weighted_std(anchors_list, weights_list)
     anchor_dispersion_cv = wstd / wmean if wmean else None
-    agreement_grade = ("high" if anchor_dispersion_cv < 0.15      # cv 小 = 錨一致 = 高同意度
-                       else "medium" if anchor_dispersion_cv < 0.35 else "low")
+    # V4.72.1 — 門檻改歷史 33/66 percentile（0.375/0.52，user 核准）；原 0.15/0.35 初值
+    # 把 28/30 session 判 low，標籤無鑑別度
+    agreement_grade = ("high" if anchor_dispersion_cv < 0.375    # cv 小 = 錨一致 = 高同意度
+                       else "medium" if anchor_dispersion_cv < 0.52 else "low")
 else:
     anchor_dispersion_cv, agreement_grade = None, None
 
@@ -144,9 +167,11 @@ oe_mult_rate_linked = clamp(1.0 / required_yield, 10, 22) if required_yield else
 > （折現名目 FCF）。兩組常數**用途不同非筆誤**，集中定義在 `compute_price_framework.py` 頂部
 > （`ERP_EARNINGS_YIELD` / `ERP_WACC`），改值只改 script 一處。
 
-> **agreement_grade / dispersion_cv 門檻（0.15 / 0.35）目前為初值** — 待 P2 接 Phase 4.6 cap 時用實際歷史分布校準。
-> **V3.46.1 backfill 發現**：歷史 37 筆 CV 分布 median=0.46、P33=0.367 — 初值 0.15/0.35 會把幾乎全部
-> session 判 low；校準建議門檻（33/66 pct）= **0.367 / 0.484**，#2 cap 接線前由 user 核可後改 engine 常數。
+> **agreement_grade 門檻已校準（V4.72.1，user 核准 2026-07-16）**：0.15/0.35 初值 → **0.375/0.52**
+> （SHADOW_REPORT_2026-07-16 n=67 的 33/66 percentile；歷史分級從 28/30 low → 4 high / 6 medium / 20 low）。
+> ⚠ **再校準檢查點**：此校準基於修剪前 anchors；P0-3 trim（V4.70.0）上線後 cv 分佈左移
+> （NVDA 例 0.341→0.188），累積 ≥20 筆修剪後 session 由 `shadow_report.py` 重出分佈再議門檻。
+> （歷史紀錄：V3.46.1 backfill 37 筆 median=0.46、建議 0.367/0.484，與本次 67 筆結果一致。）
 >
 > **#6 shadow 退出條件（寫死，避免永久欠債）**：累積 **≥ 20 session** 後，比對「若 live anchor 改用 `oe_mult_rate_linked` 會翻轉 `verdict_band` 的比率」。**翻轉率 < 15% → 出切換提案**（rate-linked 影響小、安全可切）；**≥ 15% → 維持 static 並標記需 backtest 驗證方向性**（影響大、不可盲切）。
 >
@@ -154,7 +179,18 @@ oe_mult_rate_linked = clamp(1.0 / required_yield, 10, 22) if required_yield else
 > #2 dispersion backfill / #6 oe 翻轉率 / #3 archetype 翻轉率 / #4 news 分布偏移 + checkpoint 進度，
 > 輸出 `reports/SHADOW_REPORT_<date>.md`。所有 shadow 的「≥N session 報告」都由它產。
 
-輸出 sibling block `fair_value_range`（見 schema）。**winsorize / outlier 降權留 P2**（percentile 取區間天然抗 outlier，P1 不需要）。
+輸出 sibling block `fair_value_range`（見 schema）。
+
+> **V4.70.0 (P0-3) — outlier 修剪已接線（原「winsorize / outlier 降權留 P2」項）**：
+> `trim_anchor_outliers()` 在 `fair_value_summary` / `fair_value_range` 計算**之前**執行——
+> n≥4 時錨值落在錨中位數 ×1/3..×3 之外 → 剔除不進加權（剩 <2 錨則放棄修剪）。
+> 修剪相對「錨共識」而非現價：全體錨一致偏低（真高估）時中位數同步下移，不誤剪。
+> 依據 AUDIT_2026-07-16 F3：NVDA owner_earnings×15 = $31.80（vs 錨中位 $258）以 0.05
+> 權重把 fair value 從 $296 拉到 $272 仍標 high confidence。修剪紀錄進
+> `fair_value_summary.anchors_trimmed`（raw 值保留於 anchors 欄）。
+> dispersion→confidence cap（V4.46.0）與 confidence→Phase 4.6 cap 既有鏈不變——
+> 修剪後 cv 仍 ≥0.60 者照樣壓 low → 觸發 decision cap，即 dispersion gate 已閉環。
+> `agreement_grade` 本身仍為展示欄（門檻校準議題不變，見上）。
 
 ### 4.5.0c — Valuation Archetype Shadow（V3.46.0 NEW，shadow-only）
 
@@ -369,3 +405,36 @@ else:
 
 > 缺料降級：`sigma_daily` 缺 → short_term confidence=low（仍輸出 atr 反推帶）；`mid_target` 全錨缺 → null（不擋）；長期層引用既有 `fair_value_summary`，永遠可得。Validator 對 MHP block 缺失/不全只印 **warning（非 fatal，rc 維持 0）**，向後相容 V5.0 舊 entry。
 
+
+---
+
+## Forward Expectations（shadow，advisory — V4.71.0 起移出 分析 flow，on-demand 工具）
+
+> 本節自 `investment_protocol_v5_0.md` Phase 4.5 移入（V4.71.0 P1-5 落日條款：協議本文
+> 每次 run 載入，此段為版本演進紀錄，無 runtime 必要）。指令與紀律速記留在協議本文。
+
+成長股的 `fair_value_summary` 後視錨（trailing DCF / owner-earnings）會把公允價壓到不可信
+（ARM「$8 DCF / FV $51 / −86%」）。手動跑
+`python3 investment/scripts/forward_expectations.py --ticker <T> --self-assemble`
+產出前瞻 lane（consensus 分析師估計 / market_implied reverse DCF / base_rate 同業歷史成長 /
+adapter-gated Independent）+ expectations matrix + expectations gap + forward financial bridge。
+可用 `python3 investment/scripts/forward_expectations_report.py --snapshot-file <snapshot.json>`
+將 snapshot render 成 MD §6 advisory 區塊。**只有同口徑指標可計算 gap 與 verdict**；
+FCF / EPS / 營收 CAGR 可並列描述，但禁止互減或產生跨口徑判定。
+**shadow-only — 不進 decision_lock、不改 `fair_value_summary` 或任何決策數學**；schema 見
+`investment/forward_expectations_schema.md`。跨產業 Independent lane 須遵守
+`investment/forward_expectations_adapter_contract.md`。
+
+版本演進（原協議本文段落 verbatim 保存）：
+- V4.15.0 起 `royalty_ip` adapter 可由 product segment deterministic match 並輸出 Revenue Exposure Map / driver tree / transmission graph；缺 units、rate、conversion 或 evidence 時必須維持 `independent_lane.available=false`，外部趨勢只能標為 `qualitative_only`。
+- V4.16.0 起每次 run 另保存 point-in-time `evidence_inventory`：structured company facts 可 accepted；Nexus `CO_THEME`／無 corroboration 或無 conversion method 的關係只能 provisional；缺來源與 adapter 必要 driver 必須明列 acquisition target。
+- V4.17.0 primary-source acquisition 僅讀既有 transcript 或 `--primary-source-file` 明確提供的 filing／IR／transcript bundle；缺 URL、日期、期間、單位或 supported source type 的候選不得 promoted。
+- V4.18.0 起 source discovery 對所有 ticker 共用：只依實際 filing metadata 分類 10-K／20-F／40-F／10-Q／6-K 等來源，不按 ticker、國家、產業或 adapter 猜測；URL 與 metadata 永遠 provisional，不得 numeric eligible。
+- V4.19.0 起可選 `--acquire-documents`，僅下載 discovery manifest 內 allowlisted SEC filing 文件並正規化成 text bundle；公司 IR root、SEC submissions manifest 與任意網站不抓。下載全文本身仍不是證據，必須再通過 primary-source promotion gate。
+- V4.20.0 起 management guidance extraction 可從 primary-source document 抽 revenue／EPS／margin／FCF／capex 明確 guidance；range 必須保持 range，midpoint 只當 derived helper，不得直接改 fair value。
+- V4.21.0 起 estimate revision snapshot 保存 annual revenue／EPS consensus curve、dispersion、analyst count 與 rating momentum；單一 cache 無歷史 estimate 版本時必須標示 delta unavailable，不得假造上修/下修。
+- V4.22.0 起 calibration scaffold 可唯讀對照 forecast snapshot 與後續 earnings actual；樣本不足固定 `insufficient_sample`，不得調權重或決策規則。
+- V4.23.0 起 forward financial bridge 將 annual estimates + 歷史 margin／FCF conversion／share count 映射成簡化 P&L/FCF；缺核心輸入必須降級。
+- V4.24.0 起 expectations gap 只做同口徑 gap，bridge wide-gap / negative FCF 只作財務敘事風險。
+- V4.25.0 起 report renderer 只產生 shadow MD section，不進 validator 必填欄位。
+- V4.26.0 起 scenario policy 先判定 allowed modes；缺 driver evidence / conversion method 時只能 qualitative-only 或 range/overlay-only，禁止固定 EPS/P-E 百分比加減、LLM invented TAM 或跨口徑 gap 當 driver。輸出 ≠ 前瞻單點公允價。
