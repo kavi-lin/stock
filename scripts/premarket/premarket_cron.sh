@@ -16,7 +16,7 @@
 # ============================================================
 set -u
 
-PROJECT_DIR="/Users/kavi/Developer/Claude/Projects/AI投資委員會"
+PROJECT_DIR="/Users/kavi/Developer/Claude/Projects/ai-investment-committee"
 cd "$PROJECT_DIR" || { echo "cannot cd $PROJECT_DIR"; exit 1; }
 
 # launchd runs with a minimal environment: no login shell, no ~/.zshrc,
@@ -29,6 +29,15 @@ DATE=$(date '+%Y-%m-%d')
 LOG_DIR="$PROJECT_DIR/logs/premarket_cron"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/premarket_${DATE}.log"
+
+# Catch-up guard. The plist fires at several morning slots (04:30 / 05:00 /
+# 06:00 / 07:00 / 08:00) because the 04:27 pmset wake is skipped when the Mac
+# sleeps on battery with the lid closed — the first slot after the Mac is
+# actually awake does the work, and every later slot is a no-op.
+if [ -f "$LOG" ] && grep -q "daily_update.sh rc=0" "$LOG"; then
+  echo "[premarket_cron] $(date '+%H:%M:%S') already succeeded today — skip" >> "$LOG"
+  exit 0
+fi
 
 # Log retention: keep the 10 most recent per-day logs (one per trading day =
 # ~2 weeks of weekdays), prune older. Count-based, not calendar-based, so

@@ -1,4 +1,4 @@
-# AI 投資委員會 — 產業掃描分數心算計算器 (Score Calculator)
+# AI Investment Committee — 產業掃描分數心算計算器 (Score Calculator)
 import sys
 
 def compute_deterministic_valuation_penalty(pe_zscore_1y: float | None, uptrend_ratio: float | None) -> int:

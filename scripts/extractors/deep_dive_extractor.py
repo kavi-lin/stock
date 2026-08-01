@@ -477,6 +477,114 @@ def _find_macro_regime(text: str, decision_date: str | None = None,
     return {"market_regime": regime, "macro_multiplier": mult, "source": source}
 
 
+# ── Rec 11 hot-zone probe instrumentation (TODO-015, REVIEW_2026-06-28) ──────
+# Rec 11 turns a default-HOLD in the positive ambiguous band into a 15bps
+# STAGED_ENTRY probe when:
+#   final_score ∈ [0,+staged) ∧ industry_top_30pct ∧ macro_regime∈{RISK_ON,BULL}
+#   ∧ decision_cap_active != true ∧ mandatory_risk_flags 為空
+# Until now neither the report nor event_index recorded whether the rule was
+# evaluated or why it stayed dormant, so a correct suppression (TXN 06-22) was
+# indistinguishable from "rule never ran". Three fields close that gap:
+#   hot_zone_probe         — authoritative bool, read from MD when Phase 5 emits it
+#   hot_zone_eval          — authoritative enum, read from MD when present
+#   hot_zone_eval_derived  — shadow recomputation, ALWAYS present (back-fills every
+#                            historical report that predates the authoritative field)
+# Derived enum:
+#   not_qualifying          gate not met (score/top30/regime) — most common
+#   suppressed_by_cap       gate met but decision_cap_active=true
+#   suppressed_by_risk_flag gate met but a Valuation SELL / Burry WARNING is visible
+#   fired                   gate met, decision=STAGED_ENTRY, size ≤ 15bps
+#   qualifying_unexplained  gate met, still HOLD, NO detectable suppressor, report
+#                           dated on/after Rec 11 go-live → the bug signal: Rec 11
+#                           may not have been evaluated at all. Should stay 0.
+#   not_evaluated_pre_rec11 gate met but report predates go-live (2026-06-07) →
+#                           rule did not exist yet, NOT a bug. Keeps the alarm clean.
+DEFAULT_STAGED_THRESHOLD = 0.8
+HOT_ZONE_FIRE_REGIMES = {"RISK_ON", "BULL"}
+REC11_GO_LIVE = "2026-06-07"  # v3.41.0 — qualifying-but-HOLD before this ≠ bug
+
+_HZ_PROBE_RE = re.compile(r"(?i)\"?hot_zone_probe\"?\s*[:|=]\s*\**\s*(true|false)")
+_HZ_EVAL_RE = re.compile(
+    r"(?i)\"?hot_zone_eval\"?\s*[:|=]\s*\**\s*\"?"
+    r"(fired|suppressed_by_risk_flag|suppressed_by_cap|not_qualifying|"
+    r"qualifying_unexplained|evaluated)\"?")
+_STAGED_THRESH_RE = re.compile(r"(?i)staged[_ ]threshold\D{0,8}([+-]?\d+\.?\d*)")
+# TXN forms: "| **Burry Score** | WARNING | ..." / "### Burry Score — WARNING | 20.5"
+# Cross table pipes (same row) but never a newline, so the flag word comes from
+# the Burry row's signal column, not an adjacent row.
+_BURRY_FLAG_RE = re.compile(
+    r"(?i)burry[^\n]{0,30}?\b(WARNING|AVOID|CANCEL|FAIL|RED|PASS|OK|CLEAR|GREEN)\b")
+_DECISION_CAP_RE = re.compile(
+    r"(?i)\"?decision_cap_active\"?\s*[:|=]\s*\**\s*(true|false)")
+
+
+def _hot_zone_risk_flag(text: str, agents: list[dict]) -> bool:
+    """Observable proxy for Rec 11's `mandatory_risk_flags 為空` term: a Valuation
+    SELL / score ≤ -2, or a non-clear Burry verdict. Shadow only — never feeds
+    live decision math. A detectable flag = the dormancy is *explained*."""
+    for a in agents:
+        if (a.get("agent") or "").lower().startswith("valuation"):
+            if a.get("signal") == "SELL":
+                return True
+            s = a.get("score")
+            if isinstance(s, (int, float)) and s <= -2:
+                return True
+    m = _BURRY_FLAG_RE.search(text)
+    if m and m.group(1).upper() in {"WARNING", "AVOID", "CANCEL", "FAIL", "RED"}:
+        return True
+    return False
+
+
+def _find_hot_zone(text: str, *, final_score, decision, position,
+                   macro_regime, top30, agents: list[dict],
+                   decision_date: str | None = None) -> dict:
+    out = {
+        "hot_zone_probe": None,          # authoritative (MD), None on legacy reports
+        "hot_zone_eval": None,           # authoritative enum (MD)
+        "hot_zone_eval_derived": None,   # shadow — always set
+        "hot_zone_qualifying": None,     # shadow gate result
+    }
+    mp = _HZ_PROBE_RE.search(text)
+    if mp:
+        out["hot_zone_probe"] = (mp.group(1).lower() == "true")
+    me = _HZ_EVAL_RE.search(text)
+    if me:
+        out["hot_zone_eval"] = me.group(1).lower()
+
+    mt = _STAGED_THRESH_RE.search(text)
+    try:
+        staged = float(mt.group(1)) if mt else DEFAULT_STAGED_THRESHOLD
+    except ValueError:
+        staged = DEFAULT_STAGED_THRESHOLD
+    if staged <= 0:
+        staged = DEFAULT_STAGED_THRESHOLD
+
+    regime = (macro_regime or "").upper()
+    qualifying = (
+        isinstance(final_score, (int, float)) and 0 <= final_score < staged
+        and top30 is True and regime in HOT_ZONE_FIRE_REGIMES
+    )
+    out["hot_zone_qualifying"] = qualifying
+    if not qualifying:
+        out["hot_zone_eval_derived"] = "not_qualifying"
+        return out
+
+    cap = _DECISION_CAP_RE.search(text)
+    if cap and cap.group(1).lower() == "true":
+        out["hot_zone_eval_derived"] = "suppressed_by_cap"
+    elif _hot_zone_risk_flag(text, agents):
+        out["hot_zone_eval_derived"] = "suppressed_by_risk_flag"
+    elif (decision or "").upper() == "STAGED_ENTRY" and (
+            position is None or position <= 0.0015):
+        out["hot_zone_eval_derived"] = "fired"
+    elif decision_date is not None and decision_date < REC11_GO_LIVE:
+        # Gate met but rule did not exist yet — expected, not a bug.
+        out["hot_zone_eval_derived"] = "not_evaluated_pre_rec11"
+    else:
+        out["hot_zone_eval_derived"] = "qualifying_unexplained"
+    return out
+
+
 def extract(path: Path) -> dict:
     text = path.read_text(encoding="utf-8")
     decision_date, ticker = _parse_filename(path)
@@ -515,6 +623,22 @@ def extract(path: Path) -> dict:
         round(statistics.pstdev(lane_scores), 4) if len(lane_scores) >= 2 else None
     )
 
+    # Rec 7 (V2.17.16) sub-industry heat — needed up-front so Rec 11 hot-zone
+    # instrumentation can read industry_top_30pct. Fail-soft.
+    heat = None
+    if enrich_ticker_heat is not None and ticker:
+        try:
+            heat = enrich_ticker_heat(ticker)
+        except Exception as e:                                              # pragma: no cover
+            heat = {"error": str(e)[:120]}
+    top30 = heat.get("industry_top_30pct") is True if isinstance(heat, dict) else None
+
+    # TODO-015 (REVIEW_2026-06-28) — Rec 11 hot-zone probe eval instrumentation.
+    hot_zone = _find_hot_zone(
+        text, final_score=final_score, decision=decision, position=position,
+        macro_regime=macro["market_regime"], top30=top30, agents=agents,
+        decision_date=decision_date)
+
     record = {
         "source": "deep-dive",
         "decision_date": decision_date,
@@ -530,6 +654,9 @@ def extract(path: Path) -> dict:
             "trader_proposal": trader,
             "macro_regime": macro["market_regime"],
             "macro_multiplier": macro["macro_multiplier"],
+            # TODO-015 — Rec 11 authoritative signals (None on legacy reports).
+            "hot_zone_probe": hot_zone["hot_zone_probe"],
+            "hot_zone_eval": hot_zone["hot_zone_eval"],
         },
         "agent_breakdown": agents,
         "tuning_hooks": {
@@ -544,14 +671,14 @@ def extract(path: Path) -> dict:
             "agent_score_count": len(lane_scores),
             "min_agent_confidence": min(confs, default=None),
             "max_agent_confidence": max(confs, default=None),
+            # TODO-015 — Rec 11 hot-zone shadow eval (back-fills legacy reports).
+            "hot_zone_eval_derived": hot_zone["hot_zone_eval_derived"],
+            "hot_zone_qualifying": hot_zone["hot_zone_qualifying"],
         },
     }
-    # Rec 7 (V2.17.16) — sub-industry heat overlay so weekly review can group
-    # repeat-misses by sector/industry instead of only by ticker. Fail-soft.
-    if enrich_ticker_heat is not None and ticker:
-        try:
-            record["tuning_hooks"]["sub_industry_heat"] = enrich_ticker_heat(ticker)
-        except Exception as e:                                              # pragma: no cover
-            record["tuning_hooks"]["sub_industry_heat"] = {"error": str(e)[:120]}
+    # Rec 7 (V2.17.16) — sub-industry heat overlay (computed above) so weekly
+    # review can group repeat-misses by sector/industry instead of only ticker.
+    if heat is not None:
+        record["tuning_hooks"]["sub_industry_heat"] = heat
     record["decision_id"] = f"deep-dive_{ticker}_{decision_date}"
     return record

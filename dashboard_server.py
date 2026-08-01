@@ -81,7 +81,7 @@ _heatmap_lock      = threading.Lock()
 _heatmap_news_cache = {}           # ticker → {ts: epoch, items: [{title, url, published, source}, ...]}
 # V2.12.0 — intraday 5-min OHLCV cache for radar K-line drill-down
 _heatmap_intraday_cache = {}       # ticker → {ts: epoch, data: {symbol, bars: [...], market_open}}
-HEATMAP_INTRADAY_TTL_SEC_OPEN   = int(os.getenv("HEATMAP_INTRADAY_TTL_SEC_OPEN",   "15"))
+HEATMAP_INTRADAY_TTL_SEC_OPEN   = int(os.getenv("HEATMAP_INTRADAY_TTL_SEC_OPEN",   "60"))
 HEATMAP_INTRADAY_TTL_SEC_CLOSED = int(os.getenv("HEATMAP_INTRADAY_TTL_SEC_CLOSED", "300"))
 # V2.12.0 — per-theme mini-heatmap composite cache (theme-detector + heatmap quotes)
 _theme_heatmap_cache = {"data": None, "ts": 0}
@@ -154,6 +154,7 @@ PROTOCOL_MODEL = {
     "link_digest": "sonnet",  # single-article extract + debate
     "triage":      "sonnet",  # headline_zh translation only
     "earnings":    "sonnet",  # structured infographic extraction
+    "playbook":    "opus",    # 3-basket $100k portfolio construction + selection judgment
 }
 PROTOCOL_MODEL_DEFAULT = "sonnet"  # unlisted claude protocols → sonnet floor
 
@@ -207,8 +208,15 @@ PROTOCOL_TIMEOUT_OVERRIDES = {
     # Default 25 min (1500s) is too short; 60 min gives comfortable headroom.
     "invest":     int(os.getenv("INVEST_TIMEOUT_SEC",     "3600")),  # 60 min
     # LLM Review of decision_review/event_index — 3-step statistical analysis,
-    # event_index can be 300KB+ JSON, expect deeper reasoning pass.
-    "llm_review": int(os.getenv("LLM_REVIEW_TIMEOUT_SEC", "900")),   # 15 min
+    # event_index can be 300KB+ JSON, expect deeper reasoning pass. V4.47.3 — Step 0
+    # (build_event_index.py) alone now takes ~8min (yfinance fetch volume has grown
+    # with decision history); 900s left too little runway for the review+write steps
+    # that follow, causing weekly hard-kills (rc=-1) mid-write. Bumped to match the
+    # sector-protocol precedent for the same "history outgrew the timeout" reason.
+    "llm_review": int(os.getenv("LLM_REVIEW_TIMEOUT_SEC", "1800")),  # 30 min
+    # weekly-tech-playbook: build_pack (yfinance ~1 min) + LLM selection of 3×10
+    # picks + validate-loop + render. 30 min headroom for an opus selection pass.
+    "playbook":   int(os.getenv("PLAYBOOK_TIMEOUT_SEC",   "1800")),  # 30 min
 }
 
 PROTOCOL_PROMPTS = {
@@ -226,6 +234,7 @@ PROTOCOL_PROMPTS = {
     "triage": "非互動模式：只跑 Stage 1 deterministic triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. **必須執行** `python3 news/scripts/stage1_triage.py` — script deterministic 寫 `news/news_logs/YYYY-MM-DD_triage.json`（block/dedup/credibility downgrade/news_type/score/4-view snap/晉級 gate 全內建）\n3. **禁止讀 raw.json 全文、禁止 LLM 重新 triage**。讀 triage.json 的 `shallow_verdicts` top-15，對這 15 則補 `headline_zh`（script 留 null），用單次 Edit 寫回 triage.json — 其餘欄位不動\n4. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
     "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker}` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
     "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict、新增 `industry_rollup` + `adjustment_ledger_active` 兩個 top-level 欄位）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（**四步驟**：Step 0 Adjustment Evaluation + Step 1 Pattern + Step 2 Root Cause + Step 3 Recommendations）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合 + industry_rollup + adjustment_ledger_active，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 四步驟執行：\n   - **Step 0 — Adjustment Evaluation（先做）**：對 `adjustment_ledger_active` 中每筆 active Rec，從 industry_rollup / decisions / 外部資料拉出 `target_metric` 當週數值，對照 ledger 的 `evaluation_history` 上次值，下 improved / no_change / regressed 判斷。連 3 週 no_change 建議 paused；regressed 建議 rolled-back。完整 ledger 在 `reports/decision_review/ADJUSTMENT_LEDGER.md`，schema 在 `ADJUSTMENT_LEDGER_SCHEMA.md`\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime / sub_industry_heat 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)。**必看 `industry_rollup`** 找 sub-industry / sector 集中性\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## 0. Adjustment Evaluation\n| Rec | applied_date | target_metric | last_value | this_week_value | judgement |\n|---|---|---|---|---|---|\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Industry Rollup\n| industry | sector | n | miss_rate | avg_miss_return | tickers | top_30%? |\n|---|---|---|---|---|---|---|\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跳過 Adjustment Evaluation、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
+    "playbook": "非互動模式：一個 turn 跑完整條 weekly-tech-playbook 生成流程，不要中途停下等使用者確認，不要輸出「請確認」摘要表。本流程為前瞻探索層，**不**進入也不回寫 investment_protocol 決策。完整規範見 `skills/weekly-tech-playbook/SKILL.md`。流程：\n1. 確定今天日期 DATE（YYYY-MM-DD）。\n2. **執行** `python3 skills/weekly-tech-playbook/scripts/build_pack.py`（即時抓 yfinance 報價）。它會寫 `skills/weekly-tech-playbook/data/pack_<DATE>.json`（含 regime、熱題、候選宇宙行情+動能、近 14 天委員會 verdict）與 `blind_pack_<DATE>.json`。stdout 會印出實際 DATE。\n3. **Read** `skills/weekly-tech-playbook/data/pack_<DATE>.json`。\n4. 依「最夯題材 + 委員會 verdict + 估值/動能紀律」為三個籃子各選 **10 檔**，寫 `skills/weekly-tech-playbook/data/selections_<DATE>.json`（schema 見 SKILL.md「selections JSON schema」）：\n   - 配重鐵律：每籃 tier_weights = 核心 $15k×3 + 標準 $10k×4 + 輕倉 $5k×3，**每籃 sum(weight_usd) 必須 == 100000**，每籃 10 檔，每檔必帶 `price`（直接抄 pack 報價）、`mom_5d`、`mom_1mo`、`theme`、`committee`、`reason`、`data`、`kill`。\n   - 🛡️保險(conservative)：megacap 質地 + 現金流 + 控估值，可較滿配；近月回檔的優質股視為再進場價值。\n   - 🔥激進(aggressive)：押最夯題材高 beta；近月已大漲 / 委員會標 extreme_overvalued / decision_cap 者降級為輕倉並標「等回檔」。\n   - ⚖️混合(hybrid)：保險 sleeve($65k) + 激進 sleeve($35k)，每檔加 `sleeve`(保險/激進) 欄位，整籃加總仍 == 100000。\n   - top-level 另填 `as_of`(=DATE)、`week_label`、`capital_per_basket`(100000)、`tier_weights`、`discipline_note`、`macro`(regime/exposure_ceiling/breadth/market_top/sentiment/real_rate_10y/key_events/playbook_logic — 從 pack 帶入)。\n   - （選配但建議）`codex_review`：第二意見。為求單 turn 穩定，用 `review_mode=\"committee_informed\"`（**不要**用 committee_blind_then_reconcile，那需要另存 blind_artifact 否則 render 會 fatal）。必填 label/reviewed_on/review_mode/committee_dependency/dependency_note/verdict + 至少 3 組 comparison_notes(title/original/note) + recommended_allocation(含現金且 sum(weight_pct)==100、ticker/role/weight_pct 齊全、無重複 ticker) + execution(≥1) + sources(≥2)。\n5. **驗證迴圈**：先跑 `python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_<DATE>.json --validate-only`。若 rc==1（fatal），依錯誤訊息修 selections_<DATE>.json 再驗，直到 rc==0 或 rc==2。**rc==1 絕不可進下一步。**\n6. **正式渲染**：`python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_<DATE>.json`。它會寫 `Dashboard/playbook.json`（餵 Dashboard）+ `reports/<DATE>_TECH_PLAYBOOK.md`（人讀）+ dated snapshot `data/playbook_<DATE>.json`。\n7. 結束條件：`Dashboard/playbook.json` + `reports/<DATE>_TECH_PLAYBOOK.md` 都寫入，且最終 render rc∈{0,2}。**禁止**：跳過 build_pack、跳過 validate-only、用假資料、價格欄位留空、跑到一半停下問問題、未產出 playbook.json 就結束。\n\n產生本週投資方案",
 }
 PROTOCOL_LOG_DIRS = {
     "sector":     "sector/scan_logs",
@@ -238,11 +247,13 @@ PROTOCOL_LOG_DIRS = {
     "link_digest": "news/scan_logs",
     "earnings":   "skills/earnings-analyst/cache",
     "llm_review": "reports/decision_review",
+    "playbook":   "skills/weekly-tech-playbook/logs",
     "earnings_preview": "skills/earnings-valuation-forecaster/cache",
     "supply_chain_generate": "nexus/supply_chain_logs",
     "weekly_review":       "logs/ops_protocols",
     "shadow_report":       "logs/ops_protocols",
     "backtest_postmortem": "logs/ops_protocols",
+    "quant_backtest":      "logs/ops_protocols",
 }
 
 # V2.15.0 — Script protocols: bypass Claude conversation, run a Python script
@@ -280,7 +291,27 @@ SCRIPT_PROTOCOLS = {
         "timeout": int(os.getenv("POSTMORTEM_TIMEOUT_SEC", "900")),
         "requires": [],
     },
+    # V4.63.0 — quant-backtest 策略回測 (探索層, 0 LLM, 不入 investment_protocol)。
+    # requires 列出全部參數: placeholder 不吃預設值, 前端 (backtest.html) 必須
+    # 每個 key 都送, 否則 "{...}" 字面殘留會被 argparse 擋下。模板各自的參數
+    # 由前端打包成 params_json 字串 (JSON), 引擎端 resolve_params 解析。
+    "quant_backtest": {
+        "cmd": ["python3", "skills/quant-backtest/scripts/backtest.py", "{ticker}",
+                "--template", "{template}", "--period", "{period}",
+                "--cost-bps", "{cost_bps}", "--params-json", "{params_json}"],
+        "label_template": "🧪 Backtest {ticker}",
+        "timeout": int(os.getenv("QUANT_BACKTEST_TIMEOUT_SEC", "300")),
+        "requires": ["ticker", "template", "period", "cost_bps", "params_json"],
+    },
 }
+
+# quant-backtest 模板白名單 — 同步 skills/quant-backtest/scripts/backtest.py
+# 的 STRATEGIES keys (result API 檔名驗證用)。
+QUANT_BACKTEST_TEMPLATES = frozenset([
+    "momentum", "ma_cross", "roc_trend", "donchian", "obv_trend",
+    "boll_reversion", "supertrend", "triple_ma", "rsi_reversion",
+    "high_52w", "keltner",
+])
 
 CUSTOM_PROTOCOLS = {
     "supply_chain_generate": {
@@ -501,7 +532,8 @@ def _run_script_protocol(name, params=None):
     spec = SCRIPT_PROTOCOLS[name]
     params = params or {}
     for req in spec.get("requires", []):
-        if not params.get(req):
+        if params.get(req) is None or params.get(req) == "":
+            # 0 是合法值 (如 cost_bps=0) — 只擋 None / 空字串
             return None, f"protocol '{name}' requires '{req}'"
 
     with _protocol_lock:
@@ -975,6 +1007,8 @@ def _label_for(name, params):
         return "🗂 Triage"
     if name == "sector":
         return "🏭 Sector Scan"
+    if name == "playbook":
+        return "📋 本週方案"
     if name == "earnings":
         return f"📊 Earnings {p.get('ticker', '?')}"
     if name == "supply_chain_generate":
@@ -1000,7 +1034,7 @@ def enqueue_protocol(name, params=None, source="direct"):
     if name in SCRIPT_PROTOCOLS:
         spec = SCRIPT_PROTOCOLS[name]
         for req in spec.get("requires", []):
-            if not params.get(req):
+            if params.get(req) is None or params.get(req) == "":
                 return None, f"missing {req}"
         ticker = (params.get("ticker") or "").upper().strip()
         if ticker:
@@ -1075,6 +1109,15 @@ def enqueue_protocol(name, params=None, source="direct"):
             if any(q.get("name") == "earnings" and (q.get("params") or {}).get("ticker") == ticker
                    for q in _protocol_queue):
                 return {"queued": False, "reason": "duplicate_pending", "ticker": ticker}, "duplicate"
+
+    # playbook dedup: parameterless generator — reject if already running/queued
+    if name == "playbook":
+        with _protocol_lock:
+            if _protocol_state.get("status") == "running" and _protocol_state.get("name") == "playbook":
+                return {"queued": False, "reason": "duplicate_active"}, "duplicate"
+        with _protocol_queue_lock:
+            if any(q.get("name") == "playbook" for q in _protocol_queue):
+                return {"queued": False, "reason": "duplicate_pending"}, "duplicate"
 
     entry = {
         "id":          f"{name}_{int(time.time())}_{os.urandom(2).hex()}",
@@ -2583,7 +2626,7 @@ def _build_theme_heatmap_payload():
 
 
 def _fetch_heatmap_intraday(ticker):
-    """Fetch today's 5-minute OHLCV bars via FMP /stable/historical-chart/5min.
+    """Fetch today's 1-minute OHLCV bars via FMP /stable/historical-chart/1min.
 
     Returns {symbol, as_of, market_open, bars: [{time, o, h, l, c, v}, ...]}.
     On weekend / pre-market when today is empty, falls back to last 7 days.
@@ -2594,14 +2637,14 @@ def _fetch_heatmap_intraday(ticker):
                 "as_of": _now_iso(), "market_open": False}
 
     today = date.today().isoformat()
-    url = (f"https://financialmodelingprep.com/stable/historical-chart/5min"
+    url = (f"https://financialmodelingprep.com/stable/historical-chart/1min"
            f"?symbol={ticker}&from={today}&to={today}&apikey={api_key}")
     rows = _fmp_get_json(url, timeout=10)
 
     if not isinstance(rows, list) or not rows:
         # Empty response (weekend / pre-market / holiday) — pull last 7 days
         seven_ago = (date.today() - timedelta(days=7)).isoformat()
-        url = (f"https://financialmodelingprep.com/stable/historical-chart/5min"
+        url = (f"https://financialmodelingprep.com/stable/historical-chart/1min"
                f"?symbol={ticker}&from={seven_ago}&to={today}&apikey={api_key}")
         rows = _fmp_get_json(url, timeout=10) or []
 
@@ -3130,6 +3173,60 @@ _break_news_state = {
 _break_news_lock = threading.Lock()
 _break_news_dispatch_lock = threading.Lock()   # serializes calls into debater scan
 
+# ── Intraday market-weakness engine (companion to market_mood.json) ──────────
+# Refreshes Dashboard/intraday_mood.json from FMP intraday 5-min bars + daily
+# bars during US market hours (+ one post-close snapshot). FMP-only — Finnhub
+# intraday candles are premium-gated. Read-only exploration layer; never feeds
+# investment_protocol decisions.
+INTRADAY_MOOD_INTERVAL_SEC = int(os.getenv("INTRADAY_MOOD_INTERVAL_SEC", "300"))
+INTRADAY_MOOD_OUTPUT = os.path.join(DASHBOARD_DIR, "intraday_mood.json")
+_intraday_mood_state = {"last_poll": None, "last_error": None, "last_score": None}
+_intraday_mood_lock = threading.Lock()
+try:
+    _ia_scripts = os.path.join(ROOT, "skills", "market-sentiment-analyzer", "scripts")
+    if _ia_scripts not in sys.path:
+        sys.path.insert(0, _ia_scripts)
+    import intraday as _intraday_engine
+    INTRADAY_MOOD_AVAILABLE = True
+except Exception as _ia_e:
+    INTRADAY_MOOD_AVAILABLE = False
+    sys.stderr.write(f"[intraday_mood] module load failed: {_ia_e}\n")
+
+# ── Individual-stock 急拉/急殺 fast lane (Alpaca 1-min; separate lane) ────────
+# Polls Alpaca 1-min bars for the spike_watchlist every 60s during market hours.
+# Graceful no-op without ALPACA_API_KEY/SECRET. Read-only exploration layer.
+INTRADAY_SPIKES_INTERVAL_SEC = int(os.getenv("INTRADAY_SPIKES_INTERVAL_SEC", "60"))
+INTRADAY_SPIKES_OUTPUT = os.path.join(DASHBOARD_DIR, "intraday_spikes.json")
+_intraday_spikes_state = {"last_poll": None, "last_error": None, "count": None}
+_intraday_spikes_lock = threading.Lock()
+try:
+    import intraday_spikes as _spikes_engine   # same _ia_scripts dir already on sys.path
+    INTRADAY_SPIKES_AVAILABLE = True
+except Exception as _sp_e:
+    INTRADAY_SPIKES_AVAILABLE = False
+    sys.stderr.write(f"[intraday_spikes] module load failed: {_sp_e}\n")
+
+# ── Intraday Evaluation hub (盤中策略) ───────────────────────────────────────
+# ONE worker consolidates every intraday artifact in
+# docs/STOCK_DATA_FETCH_INVENTORY.md (reads the JSON the other daemons already
+# produce — ZERO extra API calls), evaluates a regime + strategy cards (0-LLM),
+# tracks strategy recurrence (streak / day-count) for the UI effects, and adds
+# an optional change-gated LLM briefing. Exploration layer — never feeds
+# investment_protocol. Runs every 10 min during US market hours.
+INTRADAY_EVAL_INTERVAL_SEC = int(os.getenv("INTRADAY_EVAL_INTERVAL_SEC", "600"))
+INTRADAY_EVAL_OUTPUT = os.path.join(DASHBOARD_DIR, "intraday_eval.json")
+INTRADAY_EVAL_USE_LLM = os.getenv("INTRADAY_EVAL_USE_LLM", "1") != "0"
+_intraday_eval_state = {"last_poll": None, "last_error": None, "last_regime": None}
+_intraday_eval_lock = threading.Lock()
+try:
+    sys.path.insert(0, ROOT)
+    from scripts.intraday_eval import engine as _eval_engine
+    from scripts.intraday_eval import load_history as _eval_load_history
+    INTRADAY_EVAL_AVAILABLE = True
+except Exception as _ie_e:
+    INTRADAY_EVAL_AVAILABLE = False
+    sys.stderr.write(f"[intraday_eval] module load failed: {_ie_e}\n")
+
 try:
     sys.path.insert(0, ROOT)
     from scripts.break_news import store as _bn_store
@@ -3283,6 +3380,108 @@ def break_news_debate_loop():
             sys.stderr.write(f"[break_news] market brief error: {e}\n")
         if _shutdown.wait(BREAK_NEWS_INTERVAL_SEC):
             return
+
+
+def _intraday_mood_refresh(reason):
+    """Rebuild intraday_mood.json once; record state. Never raises."""
+    try:
+        payload = _intraday_engine.build()
+        _intraday_engine._write_atomic(INTRADAY_MOOD_OUTPUT, payload)
+        with _intraday_mood_lock:
+            _intraday_mood_state["last_poll"] = datetime.now().isoformat(timespec="seconds")
+            _intraday_mood_state["last_error"] = None
+            _intraday_mood_state["last_score"] = (payload.get("aggregate") or {}).get("score")
+    except Exception as e:
+        with _intraday_mood_lock:
+            _intraday_mood_state["last_error"] = str(e)[:300]
+        sys.stderr.write(f"[intraday_mood] refresh error ({reason}): {e}\n")
+
+
+def intraday_mood_poll_loop():
+    """Refresh intraday_mood.json every INTRADAY_MOOD_INTERVAL_SEC while the US
+    market is open, plus one snapshot at boot and one per weekday after the close
+    so the panel reflects the final session overnight instead of going stale."""
+    if not INTRADAY_MOOD_AVAILABLE:
+        return
+    if _shutdown.wait(15):
+        return
+    _intraday_mood_refresh("startup")
+    last_close_snapshot = None
+    while not _shutdown.wait(INTRADAY_MOOD_INTERVAL_SEC):
+        if _is_us_market_hours():
+            _intraday_mood_refresh("intraday")
+        else:
+            now_et = datetime.now(_HEATMAP_ET)
+            today = now_et.date().isoformat()
+            if now_et.weekday() < 5 and now_et.hour >= 16 and last_close_snapshot != today:
+                _intraday_mood_refresh("post-close")
+                last_close_snapshot = today
+
+
+def _intraday_spikes_refresh(reason):
+    """Rebuild intraday_spikes.json once; record state. Never raises."""
+    try:
+        payload = _spikes_engine.build()
+        _spikes_engine._write_atomic(INTRADAY_SPIKES_OUTPUT, payload)
+        with _intraday_spikes_lock:
+            _intraday_spikes_state["last_poll"] = datetime.now().isoformat(timespec="seconds")
+            _intraday_spikes_state["last_error"] = None
+            _intraday_spikes_state["count"] = len(payload.get("spikes", []))
+    except Exception as e:
+        with _intraday_spikes_lock:
+            _intraday_spikes_state["last_error"] = str(e)[:300]
+        sys.stderr.write(f"[intraday_spikes] refresh error ({reason}): {e}\n")
+
+
+def intraday_spikes_poll_loop():
+    """Poll Alpaca 1-min bars for the watchlist every INTRADAY_SPIKES_INTERVAL_SEC
+    (default 60s) during US market hours. One boot snapshot so the panel isn't
+    blank; otherwise idle outside market hours (spikes are intraday-only)."""
+    if not INTRADAY_SPIKES_AVAILABLE:
+        return
+    if _shutdown.wait(20):
+        return
+    _intraday_spikes_refresh("startup")
+    while not _shutdown.wait(INTRADAY_SPIKES_INTERVAL_SEC):
+        if _is_us_market_hours():
+            _intraday_spikes_refresh("intraday")
+
+
+def _intraday_eval_refresh(reason):
+    """Rebuild intraday_eval.json once (consolidate → evaluate → streaks →
+    optional LLM briefing). Records state; never raises."""
+    try:
+        payload = _eval_engine.build(with_narration=INTRADAY_EVAL_USE_LLM)
+        _eval_engine._write_atomic(INTRADAY_EVAL_OUTPUT, payload)
+        with _intraday_eval_lock:
+            _intraday_eval_state["last_poll"] = datetime.now().isoformat(timespec="seconds")
+            _intraday_eval_state["last_error"] = None
+            _intraday_eval_state["last_regime"] = (payload.get("regime") or {}).get("label")
+    except Exception as e:
+        with _intraday_eval_lock:
+            _intraday_eval_state["last_error"] = str(e)[:300]
+        sys.stderr.write(f"[intraday_eval] refresh error ({reason}): {e}\n")
+
+
+def intraday_eval_poll_loop():
+    """Refresh intraday_eval.json every INTRADAY_EVAL_INTERVAL_SEC (default 600s)
+    while the US market is open, plus one boot snapshot and one post-close
+    snapshot per weekday so the panel doesn't go stale overnight."""
+    if not INTRADAY_EVAL_AVAILABLE:
+        return
+    if _shutdown.wait(30):   # after the other intraday daemons have produced files
+        return
+    _intraday_eval_refresh("startup")
+    last_close_snapshot = None
+    while not _shutdown.wait(INTRADAY_EVAL_INTERVAL_SEC):
+        if _is_us_market_hours():
+            _intraday_eval_refresh("intraday")
+        else:
+            now_et = datetime.now(_HEATMAP_ET)
+            today = now_et.date().isoformat()
+            if now_et.weekday() < 5 and now_et.hour >= 16 and last_close_snapshot != today:
+                _intraday_eval_refresh("post-close")
+                last_close_snapshot = today
 
 
 def _bn_kick_debate_scan():
@@ -3614,6 +3813,61 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlparse(self.path).path
 
+        # ── V4.63.0 quant-backtest read-only artifacts ───────────────────
+        if path == "/api/backtest/list":
+            data_dir = os.path.join(ROOT, "skills", "quant-backtest", "data")
+            items = []
+            if os.path.isdir(data_dir):
+                for fn in sorted(os.listdir(data_dir)):
+                    if not fn.endswith(".json"):
+                        continue
+                    try:
+                        with open(os.path.join(data_dir, fn), encoding="utf-8") as f:
+                            d = json.load(f)
+                        if not d.get("ticker"):
+                            continue  # strategy_rank.json 等非回測 artifact
+                        items.append({
+                            "ticker": d.get("ticker"), "template": d.get("template"),
+                            "template_label": d.get("template_label"),
+                            "period": d.get("period"), "params": d.get("params"),
+                            "generated_at": d.get("generated_at"),
+                            "metrics": d.get("metrics"), "degraded": d.get("degraded"),
+                        })
+                    except Exception:
+                        continue
+            items.sort(key=lambda x: x.get("generated_at") or "", reverse=True)
+            return self._json(200, {"results": items})
+
+        # V4.63.0 — 策略模板基準排名 (rank_strategies.py 產出, 卡片 badge 用)
+        if path == "/api/backtest/strategies":
+            fp = os.path.join(ROOT, "skills", "quant-backtest", "data",
+                              "strategy_rank.json")
+            if not os.path.exists(fp):
+                return self._json(404, {"error": "strategy_rank.json not generated; "
+                                        "run rank_strategies.py"})
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+
+        if path == "/api/backtest/result":
+            qs = parse_qs(urlparse(self.path).query)
+            ticker = (qs.get("ticker", [""])[0]).strip().upper()
+            template = (qs.get("template", ["momentum"])[0]).strip()
+            if not re.match(r"^[A-Z][A-Z0-9.\-]{0,8}$", ticker) \
+                    or template not in QUANT_BACKTEST_TEMPLATES:
+                return self._json(400, {"error": "invalid ticker/template"})
+            fp = os.path.join(ROOT, "skills", "quant-backtest", "data",
+                              f"{ticker}_{template}.json")
+            if not os.path.exists(fp):
+                return self._json(404, {"error": f"no result for {ticker}/{template}"})
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+
         # ── Industry constituents (radar drill-down full list) ──────────
         if path.startswith("/api/industry/"):
             name = unquote(path[len("/api/industry/"):]).strip()
@@ -3918,6 +4172,59 @@ class Handler(SimpleHTTPRequestHandler):
                 "live": live, "persisted": persisted,
                 "interval_sec": BREAK_NEWS_INTERVAL_SEC,
             })
+        if path == "/api/intraday-mood/data":
+            try:
+                with open(INTRADAY_MOOD_OUTPUT, "r", encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except FileNotFoundError:
+                return self._json(404, {"error": "intraday_mood.json not generated yet"})
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+        if path == "/api/intraday-mood/state":
+            with _intraday_mood_lock:
+                live = dict(_intraday_mood_state)
+            return self._json(200, {"live": live, "interval_sec": INTRADAY_MOOD_INTERVAL_SEC,
+                                    "available": INTRADAY_MOOD_AVAILABLE})
+        if path == "/api/intraday-spikes/data":
+            try:
+                with open(INTRADAY_SPIKES_OUTPUT, "r", encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except FileNotFoundError:
+                return self._json(404, {"error": "intraday_spikes.json not generated yet",
+                                        "available": INTRADAY_SPIKES_AVAILABLE})
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+        if path == "/api/intraday-spikes/watchlist":
+            if not INTRADAY_SPIKES_AVAILABLE:
+                return self._json(503, {"error": "intraday_spikes module not loaded"})
+            try:
+                return self._json(200, {"watchlist": _spikes_engine.load_watchlist()})
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+        if path == "/api/intraday-eval/data":
+            try:
+                with open(INTRADAY_EVAL_OUTPUT, "r", encoding="utf-8") as f:
+                    return self._json(200, json.load(f))
+            except FileNotFoundError:
+                return self._json(404, {"error": "intraday_eval.json not generated yet",
+                                        "available": INTRADAY_EVAL_AVAILABLE})
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+        if path == "/api/intraday-eval/history":
+            if not INTRADAY_EVAL_AVAILABLE:
+                return self._json(503, {"error": "intraday_eval module not loaded"})
+            qs = parse_qs(urlparse(self.path).query)
+            date_arg = (qs.get("date") or [None])[0]
+            try:
+                return self._json(200, _eval_load_history(date_arg))
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+        if path == "/api/intraday-eval/state":
+            with _intraday_eval_lock:
+                live = dict(_intraday_eval_state)
+            return self._json(200, {"live": live, "interval_sec": INTRADAY_EVAL_INTERVAL_SEC,
+                                    "available": INTRADAY_EVAL_AVAILABLE,
+                                    "use_llm": INTRADAY_EVAL_USE_LLM})
         if path == "/api/break-news/brief":
             if not BREAK_NEWS_AVAILABLE:
                 return self._json(503, {"error": "break_news module not loaded"})
@@ -4332,7 +4639,7 @@ class Handler(SimpleHTTPRequestHandler):
                 body = json.loads(self.rfile.read(length).decode("utf-8"))
             except Exception as e:
                 return self._json(400, {"error": f"invalid JSON: {e}"})
-            valid = {"claude", "gemini", "codex"}
+            valid = {"claude", "gemini", "codex", "grok"}
             # Merge onto existing config so a partial POST (e.g. only the
             # dropdowns) keeps budgets / enabled / cooldown intact.
             cfg_path = os.path.join(ROOT, "config", "llm_config.json")
@@ -4480,6 +4787,44 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 return self._json(500, {"error": str(e)[:300]})
             return self._json(202, res)
+
+        if path == "/api/intraday-mood/refresh":
+            if not INTRADAY_MOOD_AVAILABLE:
+                return self._json(503, {"error": "intraday_mood module not loaded"})
+            # ~6 FMP calls (few seconds) — run in background; UI polls GET /data.
+            threading.Thread(target=lambda: _intraday_mood_refresh("manual"),
+                             daemon=True, name="intraday-mood-refresh").start()
+            return self._json(202, {"status": "refreshing"})
+
+        if path == "/api/intraday-eval/refresh":
+            if not INTRADAY_EVAL_AVAILABLE:
+                return self._json(503, {"error": "intraday_eval module not loaded"})
+            # Reads existing snapshots (no API calls) + optional 1 LLM briefing.
+            threading.Thread(target=lambda: _intraday_eval_refresh("manual"),
+                             daemon=True, name="intraday-eval-refresh").start()
+            return self._json(202, {"status": "refreshing"})
+
+        if path == "/api/intraday-spikes/watchlist":
+            if not INTRADAY_SPIKES_AVAILABLE:
+                return self._json(503, {"error": "intraday_spikes module not loaded"})
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            except Exception as e:
+                return self._json(400, {"error": f"invalid JSON: {e}"})
+            tickers = body.get("tickers")
+            if not isinstance(tickers, list):
+                return self._json(400, {"error": "missing 'tickers' (list)"})
+            try:
+                saved = _spikes_engine.save_watchlist(tickers)
+            except ValueError as e:
+                return self._json(400, {"error": str(e)[:200]})
+            except Exception as e:
+                return self._json(500, {"error": str(e)[:200]})
+            # Rebuild immediately so the UI reflects the new list on its next poll.
+            threading.Thread(target=lambda: _intraday_spikes_refresh("watchlist-edit"),
+                             daemon=True, name="intraday-spikes-refresh").start()
+            return self._json(200, {"watchlist": saved, "status": "saved"})
 
         if path == "/api/break-news/brief/refresh":
             if not BREAK_NEWS_AVAILABLE:
@@ -4855,6 +5200,36 @@ if __name__ == "__main__":
               f"(Claude + Gemini CLI debate)")
     else:
         sys.stderr.write("[break_news] disabled (module not loaded)\n")
+
+    # Intraday market-weakness engine (FMP intraday + daily, market-hours gated)
+    if INTRADAY_MOOD_AVAILABLE:
+        threading.Thread(target=intraday_mood_poll_loop, daemon=True,
+                         name="intraday_mood_poll").start()
+        print(f"Intraday Mood:      poll every {INTRADAY_MOOD_INTERVAL_SEC}s "
+              f"(FMP intraday, US market hours + post-close)")
+    else:
+        sys.stderr.write("[intraday_mood] disabled (module not loaded)\n")
+
+    # Individual-stock 急拉/急殺 fast lane (Alpaca 1-min, market-hours gated)
+    if INTRADAY_SPIKES_AVAILABLE:
+        threading.Thread(target=intraday_spikes_poll_loop, daemon=True,
+                         name="intraday_spikes_poll").start()
+        _sp_keyed = bool(os.getenv("ALPACA_API_KEY") and os.getenv("ALPACA_SECRET_KEY"))
+        print(f"Intraday Spikes:    poll every {INTRADAY_SPIKES_INTERVAL_SEC}s "
+              f"(Alpaca 1-min, {'IEX feed' if _sp_keyed else 'NO KEY — set ALPACA_API_KEY/SECRET'})")
+    else:
+        sys.stderr.write("[intraday_spikes] disabled (module not loaded)\n")
+
+    # Intraday Evaluation hub (盤中策略) — consolidates all intraday artifacts,
+    # evaluates strategy cards + recurrence, market-hours gated.
+    if INTRADAY_EVAL_AVAILABLE:
+        threading.Thread(target=intraday_eval_poll_loop, daemon=True,
+                         name="intraday_eval_poll").start()
+        print(f"Intraday Eval:      poll every {INTRADAY_EVAL_INTERVAL_SEC}s "
+              f"(hub: consolidate + strategy cards, {'LLM briefing' if INTRADAY_EVAL_USE_LLM else '0-LLM'}, "
+              f"US market hours + post-close)")
+    else:
+        sys.stderr.write("[intraday_eval] disabled (module not loaded)\n")
 
     if OFFICE_AVAILABLE:
         print("AI Office:          autonomous team at /office.html "

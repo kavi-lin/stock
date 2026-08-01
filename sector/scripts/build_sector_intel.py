@@ -402,6 +402,13 @@ def build(date: str, decision_path: Path) -> dict:
         "final_regime_stance": require(decision, "regime_stance"),
         "today_verdict": today_verdict,
     }
+    # Merge the LLM's arbitration judgment fields (regime_confidence,
+    # debate_resolution, devils_advocate_accepted/rejected, decision_tree_path,
+    # tail_risk_downgrades). The keys built above stay authoritative.
+    extra_4c = decision.get("_phase4c")
+    if isinstance(extra_4c, dict):
+        for k, v in extra_4c.items():
+            phase4c.setdefault(k, v)
 
     # ── sentiment_snapshot (decision-supplied or derived from overlay) ────
     sentiment = decision.get("sentiment_snapshot")

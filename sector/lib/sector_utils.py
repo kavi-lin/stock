@@ -1,4 +1,4 @@
-# AI 投資委員會 — 產業板塊別名與 Canonical 名稱共享工具模組
+# AI Investment Committee — 產業板塊別名與 Canonical 名稱共享工具模組
 import sys
 
 # Repo 11 大 Canonical Sector 鍵名 (精確對齊 schema 與資料庫快取鍵名)

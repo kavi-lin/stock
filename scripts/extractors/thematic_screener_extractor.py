@@ -79,7 +79,7 @@ def extract(path: Path,
         "decision_date": decision_date,
         "scope": "market",
         "tickers": [m["ticker"] for m in all_movers if m.get("ticker")],
-        "raw_path": str(path).split("AI投資委員會/")[-1],
+        "raw_path": str(path).split("ai-investment-committee/")[-1],
         "summary": f"radar: {len(extracted_themes)} themes × {len(all_movers)} movers",
         "decision_content": {
             "framework": data.get("framework"),

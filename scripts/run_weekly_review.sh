@@ -5,7 +5,7 @@
 # reports/decision_review/REVIEW_<TODAY>.md + updates REVIEW_TODO.md carry-over.
 #
 # Crontab (Sunday 08:00 Asia/Taipei — local machine time):
-#   0 8 * * 0 /Users/kavi/Documents/Claude/Projects/AI投資委員會/scripts/run_weekly_review.sh
+#   0 8 * * 0 /Users/kavi/Developer/Claude/Projects/ai-investment-committee/scripts/run_weekly_review.sh
 #
 # Caveats:
 #   - Mac must be AWAKE at run time (cron does not fire while asleep). Consider
@@ -16,7 +16,7 @@
 
 set -uo pipefail
 
-ROOT="/Users/kavi/Documents/Claude/Projects/AI投資委員會"
+ROOT="/Users/kavi/Developer/Claude/Projects/ai-investment-committee"
 PYTHON="/Library/Frameworks/Python.framework/Versions/3.11/bin/python3"
 CLAUDE="/Users/kavi/.local/bin/claude"
 export PATH="/Users/kavi/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"

@@ -29,6 +29,18 @@ Agent(description="FRED Macro proposal",         subagent_type="general-purpose"
 
 > 💰 **V3.44 — lane subagent 跑 Sonnet**：每個 lane 是**有界 JSON 任務**（收固定資料切片 → 出固定 schema 提案），不需 Opus 推理深度。`model="sonnet"` 砍 fan-out 段成本（~40%），**Arbiter（Phase 4c）留主模型 Opus** 做最終整合與決策樹。若 harness 不支援 `model=` 參數則忽略此欄、退回繼承主模型，不影響正確性。
 
+> **V4.67.0 — Arbiter 降級模式（2+1 補償）**：session 開場檢查 Agent tool 的 `model` 可用值——
+> **不存在高於 `sonnet` 的檔位**時，Phase 4c 改走 2+1（有高階檔照舊，本段零成本）：
+> 1. PS 以單一訊息盲開 **2 個獨立 Arbiter subagent**（各收全部 lane 提案 + Phase 4b DA 結果 +
+>    Phase 0 macro，prompt 完全相同、互相看不見），各自產出完整 Phase 4c 決策 JSON。
+> 2. 第 3 個 **referee subagent**（fresh context）只回答三問：兩份決策哪裡矛盾（exposure /
+>    sector 排序 / stance）；各自引用的證據哪份更硬；選哪份為主、需補什麼。**禁止 referee
+>    重做決策樹**、禁止產生兩份都沒有的新結論。
+> 3. Referee 輸出 = 既有單份 Phase 4c JSON（**不動 sector schema / validator**）；分歧摘要
+>    1-2 句寫進既有 rationale 文字欄位，格式 `[2+1: <一句話分歧>]`。
+> 4. 單份 Arbiter 失敗 → 直接採用另一份（等同原單軌）。
+> 原理見 `docs/agent-ops/MODEL_DISPATCH.md` §6。
+
 #### 共通 Subagent Prompt 骨架
 
 ```

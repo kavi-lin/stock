@@ -19,6 +19,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "extractors"))
 
 import deep_dive_extractor as dde  # noqa: E402
 from deep_dive_extractor import extract, _find_decision, _find_macro_regime  # noqa: E402
+from deep_dive_extractor import _find_hot_zone  # noqa: E402
 from news_digest_extractor import _find_macro_delta  # noqa: E402
 
 
@@ -390,3 +391,71 @@ def test_v50_table_score_with_capped_annotation():
         assert fund["confidence"] == 0.82
     finally:
         renamed.unlink()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TODO-015 (REVIEW_2026-06-28) — Rec 11 hot_zone_eval shadow derivation
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _hz(score, regime, top30, decision="HOLD", text="", position=None,
+        agents=None, date="2026-06-22"):
+    return _find_hot_zone(
+        text, final_score=score, decision=decision, position=position,
+        macro_regime=regime, top30=top30, agents=agents or [],
+        decision_date=date)
+
+
+def test_hot_zone_not_qualifying_wrong_regime():
+    assert _hz(0.3, "RISK_OFF", True)["hot_zone_eval_derived"] == "not_qualifying"
+
+
+def test_hot_zone_not_qualifying_not_top30():
+    assert _hz(0.3, "RISK_ON", False)["hot_zone_eval_derived"] == "not_qualifying"
+
+
+def test_hot_zone_not_qualifying_score_in_staged_band():
+    # score ≥ default staged 0.8 → already STAGED band, not the hot-zone HOLD band
+    assert _hz(0.9, "RISK_ON", True)["hot_zone_eval_derived"] == "not_qualifying"
+
+
+def test_hot_zone_suppressed_by_valuation_sell():
+    agents = [{"agent": "Valuation", "signal": "SELL", "score": -3.0}]
+    r = _hz(0.047, "RISK_ON", True, agents=agents)
+    assert r["hot_zone_qualifying"] is True
+    assert r["hot_zone_eval_derived"] == "suppressed_by_risk_flag"
+
+
+def test_hot_zone_suppressed_by_burry_warning():
+    text = "| **Burry Score** | WARNING | **20.5 / 100** |"
+    r = _hz(0.4, "BULL", True, text=text)
+    assert r["hot_zone_eval_derived"] == "suppressed_by_risk_flag"
+
+
+def test_hot_zone_suppressed_by_cap():
+    text = '"decision_cap_active": true'
+    r = _hz(0.4, "RISK_ON", True, text=text)
+    assert r["hot_zone_eval_derived"] == "suppressed_by_cap"
+
+
+def test_hot_zone_fired():
+    r = _hz(0.4, "RISK_ON", True, decision="STAGED_ENTRY", position=0.0015)
+    assert r["hot_zone_eval_derived"] == "fired"
+
+
+def test_hot_zone_qualifying_unexplained_is_bug_signal_post_golive():
+    # qualifying, still HOLD, no suppressor, dated after go-live → the alarm
+    r = _hz(0.4, "RISK_ON", True, decision="HOLD", date="2026-06-20")
+    assert r["hot_zone_eval_derived"] == "qualifying_unexplained"
+
+
+def test_hot_zone_pre_golive_not_flagged_as_bug():
+    # same shape but before Rec 11 existed → expected, not a bug
+    r = _hz(0.4, "RISK_ON", True, decision="HOLD", date="2026-05-10")
+    assert r["hot_zone_eval_derived"] == "not_evaluated_pre_rec11"
+
+
+def test_hot_zone_authoritative_md_fields_win():
+    text = 'hot_zone_probe: true\nhot_zone_eval: fired'
+    r = _hz(0.4, "RISK_ON", True, decision="STAGED_ENTRY", position=0.0015, text=text)
+    assert r["hot_zone_probe"] is True
+    assert r["hot_zone_eval"] == "fired"

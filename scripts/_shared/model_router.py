@@ -244,7 +244,10 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
             exit_code=-9, latency_ms=0, parse_status="failed",
             error="all models unavailable (disabled / over budget / in cooldown)")
     last.model_used = getattr(last, "agent", order[0])
-    last.fell_back = bool(tried)
+    # Nothing succeeded — the caller got no substitute model, so this is a
+    # failure, not a fallback. (fell_back=True here previously mislabeled
+    # timed-out turns as "fell back" in the Office UI.)
+    last.fell_back = False
     last.route_note = f"role={role} " + " ".join(tried) + " ALL_FAILED"
     return last
 

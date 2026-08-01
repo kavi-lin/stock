@@ -1,4 +1,4 @@
-# AI 投資委員會 — 產業掃描協定 (Sector Protocol) 深度審查、優化建議與實作計劃報告
+# AI Investment Committee — 產業掃描協定 (Sector Protocol) 深度審查、優化建議與實作計劃報告
 
 本報告針對目前的 **Pre-Market Sector Intelligence Protocol (V1.4)** 進行了深度架構審查、代碼流追蹤與實例驗證，並整合了具體的實作計劃（Implementation Plan）。
 

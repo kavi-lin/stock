@@ -1,6 +1,6 @@
 # News Protocol — 即時新聞分析模組
 
-這是 AI 投資委員會的**新聞分析子系統**，提供三種模式分析美股相關新聞並把結論 patch 到其他 protocol 的 cache。Claude 的執行 instruction 是 `news_protocol_v2.md`；本文檔說明**為什麼**這樣設計、**團隊結構**、**檔案關係**、**歷史版本演進**。
+這是 AI Investment Committee 的**新聞分析子系統**，提供三種模式分析美股相關新聞並把結論 patch 到其他 protocol 的 cache。Claude 的執行 instruction 是 `news_protocol_v2.md`；本文檔說明**為什麼**這樣設計、**團隊結構**、**檔案關係**、**歷史版本演進**。
 
 ---
 
@@ -123,7 +123,7 @@ reports/
 news_protocol_v2（任意時間觸發）
     ↓ patch（只有 Stage 2 / REVIEW 結論）
 sector_intel.json  ← sector_protocol_main 讀取（top_catalysts）
-phase0.json        ← investment_protocol_v4_8 讀取（macro_backdrop + binary_risks）
+phase0.json        ← investment_protocol_v5_0 讀取（macro_backdrop + binary_risks）
 
 不需要重新跑 sector_protocol 或 investment_protocol —
 下次執行時自動 pick up 更新後的 cache。

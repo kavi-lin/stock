@@ -1,11 +1,12 @@
 {
-  "primary": "codex",
-  "secondary": "claude",
+  "primary": "claude",
+  "secondary": "codex",
   "tertiary": "gemini",
   "enabled": {
     "claude": true,
     "gemini": true,
-    "codex": true
+    "codex": true,
+    "grok": true
   },
   "budgets": {
     "claude": {
@@ -16,6 +17,9 @@
     },
     "codex": {
       "daily_max_calls": 200
+    },
+    "grok": {
+      "daily_max_calls": 100
     }
   },
   "cooldown_hours": 4,

@@ -39,7 +39,7 @@ def extract(path: Path) -> dict:
         "decision_date": decision_date,
         "scope": "market",
         "tickers": [r["symbol"] for r in slim if r.get("symbol")],
-        "raw_path": str(path).split("AI投資委員會/")[-1],
+        "raw_path": str(path).split("ai-investment-committee/")[-1],
         "summary": (
             f"earnings analyzer: {summary.get('total','?')} stocks, "
             f"A:{summary.get('grade_a',0)} B:{summary.get('grade_b',0)} "

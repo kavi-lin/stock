@@ -87,16 +87,35 @@ def discover_sources() -> dict[str, list[Path]]:
 # Price helpers
 # ────────────────────────────────────────────────────────────────────
 
-PRICE_CACHE: dict[str, dict] = {}
+# V4.47.3 — was keyed on exact (ticker, start, end) despite a comment claiming
+# month-rounding reuse; every record has a slightly different decision/eval window
+# so the cache never actually hit, forcing one live yfinance call per record
+# (~1000+ calls across the full decision history, ~8min wall clock, almost all
+# network wait). Now keyed on ticker only, holding the widest range fetched so
+# far; a request inside the cached range is free, one outside it grows the
+# range with a single re-fetch. Also fixes repeat "possibly delisted" spam for
+# dead tickers (e.g. $SATS): once the empty result is cached for a range, any
+# later request nested in that range reuses it instead of re-querying Yahoo.
+PRICE_CACHE: dict[str, tuple[date, date, dict]] = {}
 
 
 def fetch_history(ticker: str, start: date, end: date) -> dict:
     if not ticker:
         return {}
-    # Wide-window cache key: round to month boundaries to maximize reuse
-    key = f"{ticker}|{start.isoformat()}|{end.isoformat()}"
-    if key in PRICE_CACHE:
-        return PRICE_CACHE[key]
+    cached = PRICE_CACHE.get(ticker)
+    if cached:
+        c_start, c_end, c_prices = cached
+        if start >= c_start and end <= c_end:
+            return c_prices
+        start = min(start, c_start)
+        end = max(end, c_end)
+    # eval_date (and hence `end`, which is eval_date + 4d buffer) never exceeds
+    # today + 4d — build_eval_block caps eval_d at `today`. Extend every network
+    # fetch's end out to that true ceiling so a ticker settles into ONE cached
+    # range instead of re-fetching each time a later record's window nudges
+    # `end` a few days further out (observed: $SATS re-fetched 5x, `end` growing
+    # a handful of days each call, before this fix).
+    end = max(end, date.today() + timedelta(days=4))
     try:
         h = yf.Ticker(ticker).history(start=start.isoformat(),
                                       end=(end + timedelta(days=1)).isoformat(),
@@ -105,7 +124,7 @@ def fetch_history(ticker: str, start: date, end: date) -> dict:
     except Exception as e:
         print(f"  ! yfinance fail {ticker}: {e}", file=sys.stderr)
         out = {}
-    PRICE_CACHE[key] = out
+    PRICE_CACHE[ticker] = (start, end, out)
     return out
 
 

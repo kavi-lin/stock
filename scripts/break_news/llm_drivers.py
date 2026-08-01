@@ -31,6 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
 AGY_BIN = os.environ.get("AGY_BIN") or "agy"
 CODEX_BIN = os.environ.get("CODEX_BIN") or "/usr/local/bin/codex"
+GROK_BIN = os.environ.get("GROK_BIN") or "/Users/kavi/.grok/bin/grok"
 GEMINI_MODEL = os.environ.get("BREAK_NEWS_GEMINI_MODEL", "gemini-2.5-flash-lite")
 LLM_TIMEOUT_SEC = int(os.environ.get("BREAK_NEWS_LLM_TIMEOUT_SEC", "180"))
 
@@ -159,13 +160,35 @@ def _run_cli(cmd: list[str], timeout: int) -> tuple[int, str, str, int, str | No
 
 
 def run_claude(system_prompt: str, user_prompt: str,
-               timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
+               timeout: int = LLM_TIMEOUT_SEC,
+               model: str | None = None,
+               max_turns: int | None = None,
+               strict_mcp: bool = False,
+               no_tools: bool = False) -> LLMResult:
+    """`model` / `max_turns` / `strict_mcp` / `no_tools` let text-only callers
+    (AI Office debate turns) pin a model and disable the agentic loop + MCP
+    startup + built-in tools — a bare `claude -p` in this repo goes agentic on
+    analysis prompts (WebSearch etc.) and either blows past the timeout or dies
+    with error_max_turns. `no_tools` also REPLACES the built-in Claude Code
+    system prompt (--system-prompt vs --append-system-prompt): with the default
+    prompt present the model keeps hallucinating textual tool calls
+    ("**Tool: read**") even when every tool is disabled. Defaults preserve
+    Break News behavior."""
     cmd = [
         CLAUDE_BIN, "-p", user_prompt,
         "--output-format", "json",
         "--permission-mode", "bypassPermissions",
-        "--append-system-prompt", system_prompt,
+        ("--system-prompt" if no_tools else "--append-system-prompt"),
+        system_prompt,
     ]
+    if model:
+        cmd += ["--model", model]
+    if max_turns is not None:
+        cmd += ["--max-turns", str(max_turns)]
+    if strict_mcp:
+        cmd += ["--strict-mcp-config"]
+    if no_tools:
+        cmd += ["--tools", ""]
     rc, out, err, latency, error = _run_cli(cmd, timeout)
     text = ""
     usage: dict = {}
@@ -324,8 +347,57 @@ def _codex_item_text(item: dict) -> str:
     return ""
 
 
+def run_grok(system_prompt: str, user_prompt: str,
+             timeout: int = LLM_TIMEOUT_SEC) -> LLMResult:
+    """Run the Grok CLI single-turn (`grok -p ... --output-format json`).
+
+    Envelope shape: `{"text": "<response>", "usage": {...}, ...}`. Web search
+    and subagent spawning are disabled so a headless probe can't hang waiting
+    on a permission prompt the CLI never surfaces in `-p` mode.
+    """
+    full_prompt = f"{system_prompt}\n\n---\n\n{user_prompt}"
+    cmd = [
+        GROK_BIN, "-p", full_prompt,
+        "--output-format", "json",
+        "--permission-mode", "dontAsk",
+        "--disable-web-search",
+        "--no-subagents",
+    ]
+    rc, out, err, latency, error = _run_cli(cmd, timeout)
+    text = ""
+    usage: dict = {}
+    if rc == 0 and out:
+        try:
+            envelope = json.loads(out)
+            text = envelope.get("text") or ""
+            usage = _usage_from_envelope(envelope)
+        except json.JSONDecodeError:
+            for line in reversed(out.splitlines()):
+                line = line.strip()
+                if line.startswith("{") and line.endswith("}"):
+                    try:
+                        envelope = json.loads(line)
+                        text = envelope.get("text") or ""
+                        usage = _usage_from_envelope(envelope)
+                        break
+                    except json.JSONDecodeError:
+                        continue
+    parsed, status = _extract_json(text or out)
+    return LLMResult(
+        agent="grok",
+        parsed=parsed,
+        raw_text=text,
+        raw_stdout=out,
+        exit_code=rc,
+        latency_ms=latency,
+        parse_status=status,
+        error=error or (err[:300] if rc != 0 and err else None),
+        **usage,
+    )
+
+
 # ── model registry + config ───────────────────────────────────────────────
-_RUNNERS = {"claude": run_claude, "gemini": run_gemini, "codex": run_codex}
+_RUNNERS = {"claude": run_claude, "gemini": run_gemini, "codex": run_codex, "grok": run_grok}
 VALID_MODELS = tuple(_RUNNERS)
 
 # Full governance config. Old `{primary,secondary}` files still parse — missing
@@ -335,10 +407,11 @@ _DEFAULT_CONFIG = {
     "primary":   "gemini",
     "secondary": "codex",
     "tertiary":  "claude",
-    "enabled":   {"claude": True, "gemini": True, "codex": True},
+    "enabled":   {"claude": True, "gemini": True, "codex": True, "grok": True},
     "budgets":   {"claude": {"daily_max_calls": 200},
                   "gemini": {"daily_max_calls": 500},
-                  "codex":  {"daily_max_calls": 200}},
+                  "codex":  {"daily_max_calls": 200},
+                  "grok":   {"daily_max_calls": 100}},
     "cooldown_hours": 4,
     # Break News debate uses its OWN two-model pair, independent of the general
     # primary/secondary above — so the Claude×Gemini divergence can be tuned

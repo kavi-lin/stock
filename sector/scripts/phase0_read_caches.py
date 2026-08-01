@@ -112,7 +112,9 @@ def _slim_fred(d: dict) -> dict:
     rs = rs_raw if isinstance(rs_raw, dict) else {}
     mi_raw = d.get("market_implications")
     mi = mi_raw if isinstance(mi_raw, dict) else {}
-    rot_raw = mi.get("sector_rotation")
+    # sector_rotation lives at the fred cache top level; older shapes nested it
+    # under market_implications, so fall back to that.
+    rot_raw = d.get("sector_rotation") or mi.get("sector_rotation")
     rot = rot_raw if isinstance(rot_raw, dict) else {}
     # velocity_highlights from change_velocity (top 3 accelerating/decelerating)
     cv = d.get("change_velocity") or {}

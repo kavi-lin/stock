@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# AI 投資委員會 — 每日標準更新流程
+# AI Investment Committee — 每日標準更新流程
 # 執行方式：bash daily_update.sh
 # ============================================================
 
@@ -102,7 +102,7 @@ wait_bg_jobs() {
 
 echo ""
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║  AI 投資委員會 — 每日更新  │  $TIMESTAMP  ║"
+echo "║  AI Investment Committee — 每日更新  │  $TIMESTAMP  ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""
 
@@ -359,6 +359,23 @@ step93_market_mood() {
   return 0
 }
 
+step935_intraday() {
+  local IA_RC
+  echo "[ 9.35 ] Intraday 評估基線（破底/止跌/量價 SPY·QQQ·IWM）..."
+  set +e
+  python3 skills/market-sentiment-analyzer/scripts/intraday.py \
+    --output Dashboard/intraday_mood.json --json-only \
+    > /dev/null 2> >(sed 's/^/         │ /' >&2)
+  IA_RC=$?
+  set -e
+  if [ "$IA_RC" -eq 0 ]; then
+    echo "         ✅ Intraday 評估 → Dashboard/intraday_mood.json"
+  else
+    echo "         ⚠️  Intraday 評估失敗 (rc=${IA_RC})，非致命,繼續..."
+  fi
+  return 0
+}
+
 step94_trending() {
   local TTK_RC TTK_COUNT
   echo "[ 9.4 ] Trending Ticker Discovery (社群極性)..."
@@ -471,6 +488,7 @@ non_fmp_lane() {
   run_bg "7_structural" step7_structural
   run_bg "8_nexus" step8_nexus
   run_bg "93_market_mood" step93_market_mood
+  run_bg "935_intraday" step935_intraday
   run_bg "94_trending" step94_trending
   wait_bg_jobs nonfatal
   step95_retail_sector
@@ -526,6 +544,12 @@ if [ "$FINAL_BRIDGE_RC" -eq 0 ]; then
 else
   echo "         ⚠️  Final bridge refresh 失敗 (rc=${FINAL_BRIDGE_RC})，保留前段 data.json"
 fi
+
+echo ""
+echo "[ Health ] 資料源健康檢查（artifact 新鮮度，抓 silent SOFT fail）..."
+set +e
+python3 scripts/daily_health.py
+set -e
 
 echo ""
 case "$FRED_STATUS" in

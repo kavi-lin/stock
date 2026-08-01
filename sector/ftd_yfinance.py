@@ -28,9 +28,15 @@ except ImportError:
     sys.exit(1)
 
 # ── inject skill path so we can reuse its analysis functions ─────────────────
-SKILL_SCRIPTS = os.path.expanduser(
-    "~/.claude/skills/ftd-detector/scripts"
+# V4.72.0 (P2-12 整併): repo 內 skills/ 為 canonical（版本控管、與 protocol 同步演進）。
+# 原 hardcode ~/.claude/skills/（user-level）會在機器間 silent drift、新機器直接斷
+# （AUDIT_2026-07-16 F6 #4）。與 market_top_yfinance.py 同模式：env var 可覆寫。
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKILL_SCRIPTS = os.environ.get(
+    "SKILL_SCRIPTS_PATH_FTD",
+    os.path.join(_PROJECT_ROOT, "skills/ftd-detector/scripts"),
 )
+SKILL_SCRIPTS = os.path.expanduser(SKILL_SCRIPTS)
 if SKILL_SCRIPTS not in sys.path:
     sys.path.insert(0, SKILL_SCRIPTS)
 

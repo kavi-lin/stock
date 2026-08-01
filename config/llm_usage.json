@@ -1,20 +1,20 @@
 {
-  "date": "2026-06-21",
+  "date": "2026-08-01",
   "models": {
     "claude": {
-      "calls": 0,
-      "cooldown_until": null,
-      "last_error": null,
+      "calls": 5,
+      "cooldown_until": "2026-08-01T22:16:35.000677+00:00",
+      "last_error": "\"edge-candidate-agent\",\"edge-concept-synthesizer\",\"edge-hint-extractor\",\"edge-pipeline-orchestrator\",\"edge-signal-aggregator\",\"edge-strategy-designer\",\"edge-strategy-reviewer\",\"exposure-coach\",\"finviz",
       "tokens": {
-        "input": 0,
-        "output": 0,
-        "cache_read": 0,
-        "cache_write": 0,
-        "cost_usd": 0.0
+        "input": 5572,
+        "output": 195695,
+        "cache_read": 16010620,
+        "cache_write": 553988,
+        "cost_usd": 40.111301
       }
     },
     "gemini": {
-      "calls": 13,
+      "calls": 42,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
@@ -26,7 +26,19 @@
       }
     },
     "codex": {
-      "calls": 5,
+      "calls": 31,
+      "cooldown_until": null,
+      "last_error": null,
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cost_usd": 0.0
+      }
+    },
+    "grok": {
+      "calls": 0,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
