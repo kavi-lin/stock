@@ -2,7 +2,7 @@
 
 個股完整分析 instruction，使用多 Agent 模擬委員會辯論，輸出 BUY/STAGED_ENTRY/HOLD/SELL 決策與雙軌進場計畫。
 
-> 當前檔案：`investment_protocol_v4_8.md`
+> 當前檔案：`investment_protocol_v5_0.md`
 
 ## V4.8.1 增量變更（Phase 1 Dual-Fetch Snapshot）
 

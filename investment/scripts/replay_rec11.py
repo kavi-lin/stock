@@ -17,9 +17,11 @@ NOT a backtest of trading P&L — it estimates bounded-probe capture only:
 a fired probe is bullish at 15bps, so on a HOLD-miss (price rose) it would have
 been directionally right, capturing ~0.0015 × return_pct of portfolio NAV.
 
-decision_cap_active / mandatory_risk_flags are NOT surfaced in event_index, so
-they are assumed-pass and flagged as the one unverifiable gate term. Read-only:
-touches no protocol state, writes only a report under reports/decision_review/.
+decision_cap_active / mandatory_risk_flags ARE now surfaced (TODO-015): the
+extractor writes `hot_zone_eval` (authoritative) / `hot_zone_eval_derived`
+(shadow), so a `suppressed_by_risk_flag` / `suppressed_by_cap` record is excluded
+from "would fire" instead of assume-pass (TXN 06-22 is no longer miscounted).
+Read-only: touches no protocol state, writes only under reports/decision_review/.
 """
 from __future__ import annotations
 import argparse
@@ -57,6 +59,11 @@ def collect(index: dict, industry_substr: str | None):
             continue
         rl = (r.get("reality_at_eval") or {}).get("ticker_reality") or {}
         score = dc.get("final_score")
+        # TODO-015 — the risk_flag / cap gate term is no longer assume-pass:
+        # the extractor surfaces it via hot_zone_eval (authoritative) or
+        # hot_zone_eval_derived (shadow). suppressed_* means a hard gate would
+        # have blocked the probe → exclude from "would fire" (TXN 06-22 fix).
+        hz_eval = dc.get("hot_zone_eval") or th.get("hot_zone_eval_derived")
         rows.append({
             "id": r.get("decision_id"),
             "industry": ind,
@@ -65,6 +72,8 @@ def collect(index: dict, industry_substr: str | None):
             "macro_regime": (th.get("macro_regime") or dc.get("macro_regime") or "").upper(),
             "top30": heat.get("industry_top_30pct") is True,
             "score_ok": isinstance(score, (int, float)) and score >= 0,
+            "hot_zone_eval": hz_eval,
+            "suppressed": hz_eval in ("suppressed_by_risk_flag", "suppressed_by_cap"),
             "return_pct": rl.get("return_pct"),
             "max_drawdown_pct": rl.get("max_drawdown_pct"),
         })
@@ -73,6 +82,9 @@ def collect(index: dict, industry_substr: str | None):
 
 def fires(row: dict, ignore_regime: bool) -> bool:
     if not (row["score_ok"] and row["top30"]):
+        return False
+    # Hard gate (risk_flag / decision_cap) now observable — was assume-pass.
+    if row.get("suppressed"):
         return False
     if ignore_regime:
         return True
@@ -120,8 +132,11 @@ def main():
     lines.append(f"| strict (live gate) | {strict_cap['n_fired']} | {strict_cap['avg_missed_return_pct']} | {strict_cap['avg_drawdown_pct']} | {strict_cap['synthetic_nav_capture_pct']} |")
     lines.append(f"| ex-regime (what-if) | {exreg_cap['n_fired']} | {exreg_cap['avg_missed_return_pct']} | {exreg_cap['avg_drawdown_pct']} | {exreg_cap['synthetic_nav_capture_pct']} |")
     lines.append("")
-    lines.append("⚠️ `decision_cap_active` / `mandatory_risk_flags` are not in event_index → "
-                 "assumed-pass; fired counts are upper bounds on those two terms only.")
+    n_supp = sum(1 for r in cands if r.get("suppressed"))
+    lines.append(
+        f"✓ TODO-015: risk_flag / decision_cap gate now read from `hot_zone_eval` "
+        f"— **{n_supp}** suppressed candidate(s) excluded from fire counts "
+        f"(no longer assume-pass; TXN 06-22 correctly excluded).")
     lines.append("")
     lines.append("### fired records (strict)")
     if strict:
