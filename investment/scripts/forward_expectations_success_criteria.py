@@ -33,21 +33,53 @@ def _num(value):
     return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
 
 
+def _bias_rows(calibration: dict):
+    """The rows signed bias averages over, and which set they came from.
+
+    Bias has to score the same set `summary` does — the deduped one. `evaluations`
+    holds every snapshot's rows, so a ticker re-run 27 times contributes 27 correlated
+    copies of one forecast; averaging those weights a single call by how often the
+    engine happened to be re-run rather than by evidence, and lets a re-run loop move a
+    gate that is supposed to measure forecasting skill.
+    """
+    points = (calibration or {}).get("forecast_points")
+    if isinstance(points, list):
+        return points, "deduped_forecast_points"
+    rows = [row for ev in (calibration or {}).get("evaluations") or []
+            for row in (ev.get("rows") or [])]
+    if not rows:
+        return [], "no_rows"
+    # Dedup keys on forecast identity. Rows predating v3 (and hand-built ones) carry no
+    # ticker, so every row would hash to the same key and collapse the whole set to one
+    # — a distortion worse than the re-run counting it is meant to fix. Without identity
+    # the honest answer is to score them raw and say so.
+    if any(row.get("ticker") is None for row in rows):
+        return rows, "raw_evaluations_not_deduped"
+    try:
+        # A calibration file written before v4 has no forecast_points; dedupe it the
+        # same way rather than scoring re-runs.
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from forward_expectations_calibration import _dedupe_forecast_rows
+        return _dedupe_forecast_rows(rows), "deduped_legacy_evaluations"
+    except Exception:
+        return rows, "raw_evaluations_not_deduped"
+
+
 def _signed_bias(calibration: dict):
     """Mean signed relative error (forecast - actual)/|actual| over comparable rows.
-    Positive = systematically optimistic. Returns (bias, n)."""
+    Positive = systematically optimistic. Returns (bias, n, basis)."""
+    rows, basis = _bias_rows(calibration)
     errors = []
-    for ev in (calibration or {}).get("evaluations") or []:
-        for row in ev.get("rows") or []:
-            if row.get("status") != "comparable":
-                continue
-            f, a = _num(row.get("forecast_value")), _num(row.get("actual_value"))
-            if f is None or a is None or abs(a) < 1e-9:
-                continue
-            errors.append((f - a) / abs(a))
+    for row in rows:
+        if row.get("status") != "comparable":
+            continue
+        f, a = _num(row.get("forecast_value")), _num(row.get("actual_value"))
+        if f is None or a is None or abs(a) < 1e-9:
+            continue
+        errors.append((f - a) / abs(a))
     if not errors:
-        return None, 0
-    return round(sum(errors) / len(errors), 4), len(errors)
+        return None, 0, basis
+    return round(sum(errors) / len(errors), 4), len(errors), basis
 
 
 def _criterion(name, status, detail, **extra):
@@ -96,16 +128,21 @@ def _error_criteria(calibration: dict):
         out.append(_criterion("directional_accuracy", "pass" if worst >= MIN_DIRECTIONAL else "fail",
                               f"worst_directional={worst} vs floor {MIN_DIRECTIONAL}", worst_directional=worst))
 
-    # C3 bias — no systematic optimism/pessimism.
-    bias, bias_n = _signed_bias(calibration)
+    # C3 bias — no systematic optimism/pessimism. Scored over the same deduped set as
+    # `summary`; `bias_basis` records which set was available so a legacy payload
+    # scored without dedup cannot pass itself off as the deduped one.
+    bias, bias_n, bias_basis = _signed_bias(calibration)
     if bias is None:
-        out.append(_criterion("forecast_bias", "insufficient_data", "no comparable rows for bias"))
+        out.append(_criterion("forecast_bias", "insufficient_data", "no comparable rows for bias",
+                              bias_basis=bias_basis))
     elif not sample_ok:
         out.append(_criterion("forecast_bias", "insufficient_sample",
-                              f"mean_signed_rel_error={bias} (|·|≤{MAX_ABS_BIAS}) but sample below min", bias=bias, n=bias_n))
+                              f"mean_signed_rel_error={bias} (|·|≤{MAX_ABS_BIAS}) but sample below min",
+                              bias=bias, n=bias_n, bias_basis=bias_basis))
     else:
         out.append(_criterion("forecast_bias", "pass" if abs(bias) <= MAX_ABS_BIAS else "fail",
-                              f"mean_signed_rel_error={bias} vs |{MAX_ABS_BIAS}|", bias=bias, n=bias_n))
+                              f"mean_signed_rel_error={bias} vs |{MAX_ABS_BIAS}|",
+                              bias=bias, n=bias_n, bias_basis=bias_basis))
     return out
 
 

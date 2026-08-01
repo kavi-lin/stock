@@ -8,6 +8,19 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.79.1] — 2026-08-02 — signed bias 改用去重集合（重跑不再放大樣本）
+
+### Fixed
+- `forward_expectations_success_criteria.py` 的 `_signed_bias` 原本直接迭代 `evaluations` 全量 rows，而 `summary` 用的是去重後的集合——同一個預測重跑 N 次會被當成 N 個獨立觀測。改吃 v4 新增的 `forecast_points`（新增 `_bias_rows`）。實測對照：一個樂觀預測重跑 20 次 + 一個準確預測，未去重 bias 為 `1.905`，去重後 `1.0`——差距純由重跑次數造成。今天 comparable=0 故 live 輸出不變。
+
+### Changed
+- `forecast_bias` criterion 新增 `bias_basis`，記錄實際採用的來源：`deduped_forecast_points`（v4+）／`deduped_legacy_evaluations`（v3 檔，rows 帶 identity）／`raw_evaluations_not_deduped`（無 identity）／`no_rows`。舊 payload 因此無法冒充已去重。
+- 無 `ticker` 的 rows 不做去重。dedup key 是預測身分，pre-v3 與手工 rows 全部 hash 到同一 key，硬去重會把整組塌縮成 1 筆——比它要修的重跑計數更失真。改為原樣計分並如實標示。
+
+### Why
+- 4.79.0 review 期間發現、記在 TODO 的項目。`_signed_bias` 是 shadow→live gate 的四個誤差判準之一，若讓重跑次數左右它，等於讓「跑幾次」影響升格判斷。
+- 20 支 fe regression rc=0（success_criteria 27 asserts，新增 9 條）；真實語料 `bias_basis: deduped_forecast_points`、verdict 維持 `insufficient_evidence`。Shadow-only。
+
 ## [4.79.0] — 2026-08-02 — Forward Expectations review 三項 P2 收尾
 
 ### Fixed

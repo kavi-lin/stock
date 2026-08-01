@@ -90,5 +90,46 @@ r6 = sc.evaluate_success_criteria(big, None)
 check("no snapshot: explainability insufficient_data", _by("driver_explainability", r6)["status"], "insufficient_data")
 check("no snapshot: verdict insufficient_evidence", r6["verdict"], "insufficient_evidence")
 
+# ── bias scores the deduped set: re-running the engine must not move the gate ────
+def rerun_row(stamp, forecast):
+    """One forecast, archived under a different snapshot vintage each re-run."""
+    return {"ticker": "MU", "lane": "consensus", "metric": "revenue_growth",
+            "forecast_basis": "estimate_window_cagr", "window_from": "2026-08-28",
+            "window_to": "2030-08-28", "snapshot_generated_at": stamp,
+            "status": "comparable", "forecast_value": forecast, "actual_value": 0.20}
+
+
+# An optimistic call re-run 20 times, against one accurate call. Un-deduped, the
+# optimistic forecast outvotes the accurate one 20:1 purely by re-run count.
+skewed = [rerun_row(f"2026-{m:02d}-01", 0.60) for m in range(1, 21)]
+skewed.append({**rerun_row("2026-01-01", 0.20), "ticker": "AAPL"})
+one_per_forecast = {"summary": {"comparable_count": 16, "min_required_n": 15,
+                                "lane_summaries": []},
+                    "forecast_points": sc._bias_rows({"evaluations": [{"rows": skewed}]})[0],
+                    "evaluations": [{"rows": skewed}]}
+bias_dedup, n_dedup, basis_dedup = sc._signed_bias(one_per_forecast)
+check("dedup keeps one row per distinct forecast", n_dedup, 2)
+check("dedup basis reported", basis_dedup, "deduped_forecast_points")
+check("re-runs no longer dominate the bias", bias_dedup, 1.0)  # mean of (+2.0, 0.0)
+
+# The old behaviour averaged all 21 rows: 20 copies of the optimistic call at +2.0
+# against one accurate call at 0.0, i.e. 1.905 — nearly double the deduped 1.0, moved
+# entirely by how often the engine was re-run. No code path produces that any more.
+raw_bias = round(sum((r["forecast_value"] - 0.20) / 0.20 for r in skewed) / len(skewed), 4)
+check("un-deduped average was inflated by re-runs", raw_bias, 1.9048)
+check("dedup pulls the bias back toward the evidence", bias_dedup < raw_bias, True)
+
+# Rows without identity cannot be deduped — scoring them raw is correct, but the
+# basis has to say so rather than collapsing 16 forecasts into one.
+anon = [{"status": "comparable", "forecast_value": 0.21, "actual_value": 0.20} for _ in range(16)]
+anon_bias, anon_n, anon_basis = sc._signed_bias({"evaluations": [{"rows": anon}]})
+check("identity-less rows are not collapsed", anon_n, 16)
+check("identity-less rows disclose their basis", anon_basis, "raw_evaluations_not_deduped")
+
+# The gate must carry the basis so a legacy payload cannot pass as a deduped one.
+check("bias criterion reports its basis",
+      _by("forecast_bias", sc.evaluate_success_criteria(one_per_forecast, GOOD_SNAPSHOT))["bias_basis"],
+      "deduped_forecast_points")
+
 print(f"\n{PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

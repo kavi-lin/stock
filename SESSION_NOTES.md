@@ -1,7 +1,13 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.79.0)
+> **Last Updated**: 2026-08-02 (v4.79.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.79.1) — signed bias 改吃去重集合
+- **起因**：4.79.0 實作 P2-3 時順手發現 `_signed_bias` 繞過 dedup，記進 TODO；使用者指示接著做。
+- **做掉**：`_bias_rows` 改優先讀 `forecast_points`（v4 新暴露），criterion 加 `bias_basis` 記錄實際來源。對照數字：一個樂觀預測重跑 20 次 + 一個準確預測，未去重 bias `1.905` vs 去重 `1.0`——差距純由重跑次數造成。這是 shadow→live gate 的四個誤差判準之一，等於讓「跑幾次」影響升格判斷。
+- **中途攔下自己的第二個坑**：原本 legacy fallback 無條件套 `_dedupe_forecast_rows`。但 dedup key 是預測身分，pre-v3 與手工 rows 沒有 `ticker`，全部 hash 到同一 key——實測 16 筆塌縮成 **1 筆**，還標成 `deduped_legacy_evaluations`（標籤是錯的，那是塌縮不是去重）。改成：無 identity 就不去重、原樣計分並標 `raw_evaluations_not_deduped`。**教訓同上一版**：既有測試 fixture 的 row 沒有 identity 欄位，塌縮後測試照樣全綠，是手動印出 `n` 才看到。
+- **驗收**：20 支 fe regression rc=0（success_criteria 27 asserts，新增 9 條）；真實語料 `bias_basis: deduped_forecast_points`、verdict 維持 `insufficient_evidence`；SYNC OK 4.79.1。Shadow-only。
 
 ## 🟢 Session Note (v4.79.0) — 4.78.0 review 的三項 P2 收尾
 - **起因**：使用者要求 review Codex 對 forward-expectations 的修正。review 結論是方向正確、宣稱幾乎全部重現（20 支測試 rc=0、MU 數字逐項對上），但找到 1 個 P1（archive 最新 MU snapshot 生成於兩個 commit 之間，仍帶被晉升的 -9% cohort median）與 3 個 P2。P1 已於 `ce59d45` 重跑蓋掉，本次做 3 個 P2。

@@ -1,6 +1,6 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-02 (v4.79.0)
+> **Last Updated**: 2026-08-02 (v4.79.1)
 
 ---
 
@@ -10,7 +10,7 @@
 - [x] **P2-1**：promoted cohort 的 note 改由 `rationale.criteria` 動態產生（`_cohort_selection_note`），演算法與 human-approved 兩種出處不再混淆。
 - [x] **P2-2**：window-CAGR 路徑補 point-in-time gate；`generated_at ≥ window_to` 拒收，`≥ window_from` 標 `point_in_time_caveat` 但仍計分。實測新增拒收 0 筆（無回歸），19 筆 legacy row 帶 caveat。
 - [x] **P2-3**：CLI 改印 `summary` + `forecast_points`，`evaluations` 改由 `--full-evaluations` 取得（1.82 MB → 54 KB）。
-- [ ] **新發現 — `_signed_bias` 繞過 dedup**：`forward_expectations_success_criteria.py:38` 直接迭代 `evaluations` 全量 rows 算 signed bias，但 `summary` 用的是去重後的 99 筆。樣本成熟後，同一預測的 N 次重跑會被當成 N 個獨立觀測灌進 bias。今天 comparable=0 故無影響。修法：改吃 `calibration["forecast_points"]`（v4 已暴露該欄位），並補一條「重跑不得放大 bias 樣本」的 regression。
+- [x] **`_signed_bias` 繞過 dedup** — 已於 v4.79.1 修正（改吃 `forecast_points`，criterion 加 `bias_basis`；無 identity 的 rows 不硬去重以免塌縮）。
 
 ## ✅ Done (v4.78.1) — Calibration index
 
