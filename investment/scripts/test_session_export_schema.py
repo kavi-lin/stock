@@ -99,6 +99,64 @@ def without(entry: dict, *keys: str) -> dict:
     return e
 
 
+def without_ra(entry: dict, *keys: str) -> dict:
+    """Drop keys from `risk_audit` (the §14 block) rather than the trade root."""
+    e = copy.deepcopy(entry)
+    for k in keys:
+        (e["trades_this_session"][0].get("risk_audit") or {}).pop(k, None)
+    return e
+
+
+# A STAGED_ENTRY fixture whose score genuinely bands to STAGED_ENTRY, so §13's
+# band-reachability rule does not mask what §14 is being tested for. Built from a live
+# engine run rather than hand-written numbers, for the same reason as `bonus_entry`.
+STAGED_INPUT = {
+    "ticker": "MU",
+    "lane_scores": {"fundamentals": 2.0, "sentiment": 1.0, "news": 1.0,
+                    "technical": 2.0, "valuation": 1.0},
+    "lane_confidence": {k: 0.7 for k in ("fundamentals", "sentiment", "news",
+                                         "technical", "valuation")},
+    "structural_shift": {"tier": "NONE"},
+    "red_team": {"verdict": "MODERATE_COUNTER", "basis": "unclassified"},
+    "macro": {"macro_multiplier": 0.9, "macro_backdrop_score": -1.0,
+              "market_regime": "SIDEWAYS"},
+    "burry": {"score": 37.1, "veto_flag": False},
+    "gates": {"proceed_to_phase3": True, "mandatory_risk_flags": [],
+              "phase2_fanout_mode": "PARALLEL_SUBAGENT", "risk_reward_ratio": 2.27},
+    "hot_zone": {"industry_top_30pct": False},
+    "decision_cap": {"anchors_available": 6, "fair_value_confidence": "high",
+                     "lane_data_quality_low": False},
+}
+
+
+def staged_entry_fixture(ex: dict) -> dict:
+    r = run_phase3(copy.deepcopy(STAGED_INPUT))
+    if r["final_decision"] != "STAGED_ENTRY":
+        FAILS.append(f"staged fixture: engine returned {r['final_decision']!r}, "
+                     "expected STAGED_ENTRY — the escape-direction cases need a score "
+                     "that genuinely bands to STAGED_ENTRY")
+    e = copy.deepcopy(ex)
+    tr = e["trades_this_session"][0]
+    tr["calculation_steps"] = r["calculation_steps"]
+    tr["decision_engine_version"] = r["decision_engine_version"]
+    for k in ("final_score", "avg_confidence", "hot_zone_probe", "hot_zone_eval",
+              "decision_cap_active"):
+        if k in r:
+            tr[k] = r[k]
+    tr["consensus_bonus_applied"] = r["calculation_steps"].get("bonus_applied", False)
+    tr["final_decision"] = "STAGED_ENTRY"
+    tr["final_action"] = e["final_action"] = "STAGED"
+    tr["staged_split"] = {"aggressive_pct": 50.0, "conservative_pct": 50.0}
+    ra = tr["risk_audit"]
+    ra["sized_for_decision"] = "STAGED_ENTRY"
+    ra["staged_entry_split"] = {"aggressive_pct": 50.0, "conservative_pct": 50.0}
+    halved = round(ra["sizing_chain"]["polar_adj"] * 0.5, 6)
+    ra["sizing_chain"]["final_position_size"] = halved
+    ra["position_size_pct"] = halved
+    tr["position_size_pct"] = halved
+    return e
+
+
 # The doc example is a *penalised* chain (rule_5 × 0.95), so it can only exercise the
 # penalty half of the cascade-label check. Generate the bonus half from the engine rather
 # than hand-writing it — a hardcoded chain would go stale the moment the rules move.
@@ -325,6 +383,40 @@ def main() -> int:
     e = copy.deepcopy(ex)
     e["trades_this_session"][0]["risk_audit"]["sized_for_decision"] = "STAGED_ENTRY"
     run(e, "tamper: sized_for STAGED_ENTRY but chain not halved", 1)
+
+    # ── sized_for_decision, ESCAPE direction (V4.86.1) ──────────────────────
+    # The cases above only exercise the direction that TRIPS the halving check. The
+    # field overrides that check, so the direction that matters more is the one that
+    # switches it off: declaring "BUY" on a STAGED_ENTRY export waves through a chain
+    # at twice the correct size. That shipped passing in 4.86.0 — a new field was
+    # added and only the failing direction was tested.
+    print("[sized_for_decision — escape direction]")
+    staged = staged_entry_fixture(ex)
+    run(staged, "STAGED_ENTRY, chain honestly halved", 0)
+
+    e = copy.deepcopy(staged)
+    e["trades_this_session"][0]["risk_audit"]["sizing_chain"]["final_position_size"] = \
+        e["trades_this_session"][0]["risk_audit"]["sizing_chain"]["polar_adj"]
+    e["trades_this_session"][0]["position_size_pct"] = \
+        e["trades_this_session"][0]["risk_audit"]["sizing_chain"]["polar_adj"]
+    e["trades_this_session"][0]["risk_audit"]["sized_for_decision"] = "BUY"
+    run(e, "tamper: sized_for spoofed BUY to skip the halving (2× size)", 1,
+        "without approval=REJECTED or decision_cap_active=true")
+
+    e = copy.deepcopy(staged)
+    e["trades_this_session"][0]["risk_audit"]["sized_for_decision"] = "NOT_A_DECISION"
+    run(e, "tamper: sized_for outside the decision enum", 1)
+
+    run(without_ra(ex, "sized_for_decision"),
+        "V5.2 minus risk_audit.sized_for_decision", 1, "sized_for_decision missing")
+
+    # The two legitimate divergences must survive the new equality rule.
+    e = copy.deepcopy(ex)
+    tr = e["trades_this_session"][0]
+    tr["risk_audit"].update(approval="REJECTED", rejection_reason="R/R 1.2 < 2.0")
+    tr.update(final_decision="HOLD", final_action="CANCEL", position_size_pct=0.0)
+    e["final_action"] = "CANCEL"
+    run(e, "legit divergence: approval=REJECTED → HOLD", 0)
 
     # ── cascade label, bonus side ───────────────────────────────────────────
     # Mirror of "cascade label vs penalty_applied". Relabelling a ×1.15 consensus chain

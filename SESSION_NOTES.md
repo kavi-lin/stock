@@ -1,7 +1,13 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.86.0)
+> **Last Updated**: 2026-08-02 (v4.86.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.86.1) — `sized_for_decision` 防偽收尾
+- **我為了修 P1 引入一個豁免欄位，然後只測了它會報錯的那一側。** `sized_for_decision` 的作用就是覆寫 STAGED_ENTRY 折半規則，所以在 STAGED_ENTRY 的 export 上宣告 `"BUY"`，兩倍大的鏈就原地過關（實測 errors=0）。tamper 測試蓋的是「sized_for=STAGED 但沒折半 → rc=1」，那是**會觸發檢查**的方向；漏的是**把檢查關掉**的方向。**判準：一個用來豁免某條規則的欄位，最該測的是它被拿來濫用豁免的情形。**這跟 4.81.0 記的「tamper 要包含標籤說謊而不只是數字說謊」是同一個形狀——同一課我在新欄位上又犯一次，說明那條教訓當初只記成了「cascade 標籤」的特例，沒抽象成「凡是能改變檢查行為的欄位都要反向測」。
+- **第一次重現失敗，差點誤判成不存在**：照 reviewer 的描述постро fixture 直接跑，結果 rc=1，看起來像是已經擋住了。細看錯誤訊息才發現擋它的是 §13 的 band 可達性（fixture 的 final_score 2.1888 band 到 BUY，STAGED_ENTRY 本來就不可達），跟 §14 無關。改用 `run_phase3()` 現跑一條**真的落在 STAGED 帶**的鏈（final_score 1.08）才暴露出來。**教訓：rc=1 不等於「被你想測的那條規則擋住」，要讀錯誤訊息確認是誰擋的。**新的 `staged_entry_fixture()` 就是為此存在，並且在 engine 不回 STAGED_ENTRY 時直接讓測試紅掉，不讓 fixture 悄悄退化。
+- **修法是列舉合法分歧而不是放寬**：Phase 4 定倉之後能合法改寫決策的只有兩件事（`approval=REJECTED`、`decision_cap_active=true`），其餘一律要求 `sized_for == final_decision`。實跑 builder 三種決策輸入確認都自然滿足這條，不會誤傷正常路徑。
+- **驗收**：schema battery 55 條（新增逃逸方向 5 條）；8 支測試 + validator + 兩個 replay 全 rc=0；builder 實跑 BUY / STAGED_ENTRY / HOLD 三種輸入 `sized_for` 皆與 `final_decision` 一致；SYNC OK 4.86.1。
 
 ## 🟢 Session Note (v4.86.0) — 4.82–4.85 review 修正（1 P1 + 7 P2）
 - **八條先逐一複跑重現才動手**，沒有照單全收。結果全部屬實，但有一條的嚴重度我下修了：reviewer 說 §14 有「三條路徑全炸」，實測第三條（probe capped）的失敗是 fixture 產物（那條鏈是照 BUY 算的），probe 分支本身是對的。P1 是**兩條** Phase 4.6 路徑。**判準：確認 bug 為真之後，仍要確認它的邊界在哪。**

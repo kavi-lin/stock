@@ -418,6 +418,14 @@ def check_phase4_sizing(entry, trade, errors, warnings):
             errors.append(
                 "mandatory_risk_flags missing or not an array — V5.2 起必填（正常情況空陣列）。"
                 "此欄是 Phase 3 Auto REJECT 與 Rec 11 probe 抑制的輸入，缺它 replay 只能靠假設")
+        # V4.86.1 — the schema marks this required, so enforce it. Silently falling back
+        # to `final_decision` on a capped entry resurrects the false "沒折半" error and
+        # points the PM at the wrong field: the fault is a missing column, not bad math.
+        if not ra.get("sized_for_decision"):
+            errors.append(
+                "risk_audit.sized_for_decision missing — V5.2 起必填。§14 用它判斷 "
+                "STAGED_ENTRY 折半該不該套；缺欄時退回 final_decision，capped entry 會被"
+                "誤判成『鏈沒折半』")
 
     chain = ra.get("sizing_chain")
     if not isinstance(chain, dict):
@@ -475,6 +483,24 @@ def check_phase4_sizing(entry, trade, errors, warnings):
     # `sized_for_decision` is the engine's record of its own input (V4.86.0); older
     # entries fall back to `final_decision`, which is correct whenever no cap fired.
     sized_for = ra.get("sized_for_decision") or fd
+
+    # V4.86.1 — the field must not become the escape hatch. Because it *overrides* the
+    # halving rule, declaring `sized_for_decision="BUY"` on a STAGED_ENTRY export waves
+    # through a chain at twice the correct size. There are exactly two things that can
+    # legitimately rewrite the decision after Phase 4 sized against it, so anything else
+    # must agree with `final_decision`.
+    _DECISIONS = ("BUY", "STAGED_ENTRY", "HOLD", "STAGED_EXIT", "SELL")
+    declared = ra.get("sized_for_decision")
+    if declared is not None and declared not in _DECISIONS:
+        errors.append(f"risk_audit.sized_for_decision={declared!r} must be one of {_DECISIONS}")
+    elif declared is not None and fd and declared != fd:
+        # REJECTED  → Phase 4 itself downgraded the plan to HOLD
+        # cap active → Phase 4.6 rewrote BUY into HOLD / STAGED_ENTRY
+        if not (ra.get("approval") == "REJECTED" or trade.get("decision_cap_active") is True):
+            errors.append(
+                f"risk_audit.sized_for_decision={declared!r} != final_decision={fd!r} without "
+                "approval=REJECTED or decision_cap_active=true — 只有這兩者能在 Phase 4 "
+                "定倉之後改寫決策；否則本欄等於繞過 STAGED_ENTRY 折半檢查")
     polar_adj, final_size = _numf(chain.get("polar_adj")), _numf(chain.get("final_position_size"))
     if polar_adj is not None and final_size is not None and sized_for:
         want = polar_adj * 0.5 if sized_for == "STAGED_ENTRY" else polar_adj

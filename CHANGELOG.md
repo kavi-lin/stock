@@ -8,6 +8,19 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.86.1] — 2026-08-02 — `sized_for_decision` 的防偽收尾（4.86.0 review）
+
+### Fixed
+- **P2 — `sized_for_decision` 可冒填繞過 STAGED_ENTRY 折半檢查**（`validate_session_export.py`）：這個欄位的作用就是**覆寫**折半規則，所以在 STAGED_ENTRY 的 export 上宣告 `"BUY"`，等於讓兩倍大的鏈原地過關。實測：無 cap、export STAGED_ENTRY、鏈未折半、`sized_for` 蓋成 BUY → **errors=0 全身而過**。Phase 4 定倉之後能合法改寫決策的只有兩件事，因此新增規則：`approval=REJECTED` 或 `decision_cap_active=true` 皆不成立時，`sized_for_decision` 必須等於 `final_decision`；另加 enum 值域檢查。
+- **P3 — schema 標 V5.2 必填但 validator 沒 enforce 存在**：capped entry 漏抄此欄會靜默 fallback 到 `final_decision`，讓「鏈沒折半」的 false positive 復活，而且錯誤訊息指向錯的地方（該報缺欄，不是報算錯）。補必填閘。
+- **P3 — schema TRADE 表 `position_size_pct｜HOLD 填 0.0` 與 cap-HOLD 定案矛盾**：補上唯一例外（`decision_cap_active=true` 把 BUY 壓成 HOLD 時保留 ≤ 0.003），並註明 §14 依 `approval` / `decision_cap_active` / `hot_zone_probe_capped` 三者判定倉位可否低於鏈尾。
+
+### Added
+- **tamper battery 補逃逸方向**：原本五條只測「會讓檢查觸發」的方向（`sized_for=STAGED` 但沒折半 → rc=1），漏了「把檢查關掉」的方向。新增 `staged_entry_fixture()`（用 `run_phase3()` 現跑一條**真的落在 STAGED 帶**的鏈，否則 §13 的 band 可達性會先擋下來、掩蓋 §14 到底有沒有把關）+ 冒填 / enum / 缺欄 / `approval=REJECTED` 合法分歧四案。
+
+### Why
+- 4.86.0 為了修 P1 引入這個欄位，卻只測了它會報錯的那一側。**一個用來「豁免」某條規則的欄位，最該測的是它被濫用來豁免的情形**——這正是 4.81.0「tamper 要包含標籤說謊」那條教訓的同一個形狀，我在新欄位上又犯了一次。
+
 ## [4.86.0] — 2026-08-02 — 4.82–4.85 review：1 P1 + 7 P2
 
 ### Fixed — 4.82.0

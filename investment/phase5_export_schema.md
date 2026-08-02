@@ -91,7 +91,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `take_profit` | number or `null` | HOLD null | |
 | `stop_loss` | number or `null` | HOLD null | |
 | `risk_reward_ratio` | float or `null` | HOLD null；BUY/STAGED_ENTRY **必填且 ≥ 2.0** | |
-| `position_size_pct` | float 0-1 | HOLD 填 0.0 | |
+| `position_size_pct` | float 0-1 | HOLD 填 0.0（**唯一例外**：`decision_cap_active=true` 把 BUY 壓成 HOLD 時保留 ≤ 0.003 的試水倉，見下） | Phase 4.6 cap 在 Phase 4 定倉之後才跑，只縮不放；validator §14 依 `approval` / `decision_cap_active` / `hot_zone_probe_capped` 三者判定倉位可否低於 `sizing_chain` 鏈尾 |
 | `staged_split` | `{aggressive_pct, conservative_pct}` or `null` | 僅 STAGED_ENTRY 填 | |
 | `position_size_method` | `"VOL_ADJUSTED" \| "RULE_BASED"` | 填 | |
 | `ftd_timeline_gate` | `{applied, days_since_ftd, stage, sector_class, multiplier, stop_loss_adjustment_pp, rejection_triggered}` or `null` | **V4.9+ 必填**；`applied=false` 時其他欄位 null | Phase 4 Step 3.5 輸出，記錄 FTD timeline gate 決策軌跡 |
