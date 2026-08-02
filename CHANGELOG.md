@@ -8,6 +8,21 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.84.0] — 2026-08-02 — model router 加 rolling window 預算（V321.X-ROUTER）
+
+### Added
+- **`model_router.py` rolling-window 預算**：`llm_usage.json` 每個 model 多存 `call_timestamps[]`，每次 `_record()` / `note_run()` 同時記日計數與時間戳。`model_available()` 多一道 `window` 閘（與既有 `daily budget` **並存且獨立**，任一超標即退出 fallback chain），`model_headroom()` 回傳兩者中**較緊**的那個，`model_status()` / `/api/llm-config` 多 `window_hours` / `window_max_calls` / `window_calls` / `window_remaining` / `window_resets_at` 五欄。
+- **`config/llm_config.json` per-model `window_max_calls` / `window_hours`**：claude 120/5h、codex 80/5h（兩支都是 session-window 制的 CLI）；gemini / grok 是 per-minute rate limit 不是 session window，留空 = 不設 window 閘（與 `daily_max_calls` 同慣例：缺 / 0 = 不限）。
+- **`scripts/_shared/test_model_router_window.py`**（新，~190 行）：window 計數邊界、兩道閘互相獨立、headroom 取較緊者、跨午夜不歸零、舊 usage shape 相容、時鐘偏移與 naive timestamp 處理，加一組**走真 loader + 真 config** 的 end-to-end 案例。
+
+### Fixed
+- **`load_llm_config()` 白名單漏掉新 budget key**（`scripts/break_news/llm_drivers.py`）：該函式是**逐鍵白名單**不是 merge，只複製 `daily_max_calls`。新加的 `window_max_calls` / `window_hours` 因此被靜默丟掉，`--status` 顯示 `window_max_calls: null`、cap 完全不生效。已補兩個 key 的解析；測試加 end-to-end 案例防復發（只對手搭的 cfg dict 斷言會漏掉這類錯）。
+
+### Why
+- 原有預算只認 UTC 日界，但 Anthropic 的 session window 是 5 小時滾動制 —— 日預算沒滿不代表 session window 沒滿，protocol 長跑因此會一頭撞進配額牆。
+- **時間戳刻意不隨 UTC 換日歸零**：session window 不理會午夜。若跟著日計數一起清空，00:00 UTC 會憑空發還一整個 window 的額度，正好是這個計數器要防的事故。日計數照常歸零，兩者分開處理。
+- V4.84.0 之前的 `llm_usage.json` 沒有 `call_timestamps`，一律讀成空 list —— window 從現在開始量，不假裝知道歷史。
+
 ## [4.83.0] — 2026-08-02 — decision card 的 polarization / RT basis 改吃決策時真值（V20-A5）
 
 ### Added

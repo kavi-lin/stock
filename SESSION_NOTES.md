@@ -1,7 +1,15 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.83.0)
+> **Last Updated**: 2026-08-02 (v4.84.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.84.0) — model router rolling window（V321.X-ROUTER）
+- **本版最重要的一行是「不要歸零」**：`_load_usage()` 原本在 UTC 換日時整份重建。日計數該歸零，但 `call_timestamps` **不能** —— session window 不理會午夜，跟著清空等於在 00:00 UTC 憑空發還一整個 window 的額度，正好是這個計數器要防的事故。這是整個功能唯一真正微妙的地方，測試特地寫了一條跨午夜案例。
+- **測試通過但功能沒生效，抓到的是最典型的一種假綠燈**：`--status` 顯示 `window_max_calls: null`，查下去發現 `load_llm_config()` 是**逐鍵白名單**不是 merge，只複製 `daily_max_calls`，我新加的兩個 key 被靜默丟掉。單元測試全過是因為它們餵手搭的 cfg dict，繞過了 loader。**教訓：新增 config key 一定要有一條走真 loader + 真 config 檔的 end-to-end 斷言**，否則測的是自己餵進去的東西。已加，並寫進 OPS §7。
+- **降級方向再次一致**：時鐘偏移到未來的時間戳「照算」（丟掉會少算 window）、naive timestamp 當 UTC 讀（丟掉同樣少算）、解析失敗的才忽略。原則是**寧可少給額度也不要多給**。
+- **兩道閘獨立而不是取代**：daily budget 與 window 各自能單獨擋下一個 model，`model_headroom()` 回較緊者 —— 呼叫端打算連發 N 次時，不能被日額度騙過去。
+- **只有 session-window 制的 CLI 設 window**（claude / codex）；gemini / grok 是 per-minute rate limit，硬套 5hr window 是張冠李戴，留空 = 不設閘（與 `daily_max_calls` 缺/0 同慣例）。
+- **驗收**：`test_model_router_window.py` rc=0（含跨午夜、舊 shape、corrupt 檔、loader end-to-end）；`--status` 四個 model 的 window 欄位皆正確（claude 0/120、codex 0/80、gemini/grok null）；`/api/llm-config` POST 的 merge 不會洗掉新 key；SYNC OK 4.84.0。
 
 ## 🟢 Session Note (v4.83.0) — decision badge 改吃決策時真值（V20-A5）
 - **TODO 過期了，動工前先查證**：V20-A1 / A2 寫著「已存 data.json，UI 沒秀」，實際上 badge 與 `SIGNAL_TIPS` 兩邊都在，更早的版本就做掉了（`ALIGNED` / `unclassified` 兩個良性值刻意不發 badge，與 `macro_alignment` 只標 CONTRARIAN 同一慣例——那是設計不是遺漏）。**教訓：UI 類 TODO 動工前先跑一次 grep 確認現況，backlog 會比 code 舊。**

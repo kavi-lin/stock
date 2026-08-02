@@ -457,9 +457,26 @@ def load_llm_config() -> dict:
     if isinstance(bg, dict):
         for m in _RUNNERS:
             mb = bg.get(m)
-            if isinstance(mb, dict) and "daily_max_calls" in mb:
+            if not isinstance(mb, dict):
+                continue
+            if "daily_max_calls" in mb:
                 try:
                     cfg["budgets"][m]["daily_max_calls"] = max(0, int(mb["daily_max_calls"]))
+                except (TypeError, ValueError):
+                    pass
+            # V4.84.0 — rolling-window budget (model_router._window_cfg reads these).
+            # This loader whitelists keys rather than merging, so a new budget key that
+            # is not named here is silently dropped and the cap never takes effect.
+            if "window_max_calls" in mb:
+                try:
+                    cfg["budgets"][m]["window_max_calls"] = max(0, int(mb["window_max_calls"]))
+                except (TypeError, ValueError):
+                    pass
+            if "window_hours" in mb:
+                try:
+                    wh = float(mb["window_hours"])
+                    if wh > 0:
+                        cfg["budgets"][m]["window_hours"] = wh
                 except (TypeError, ValueError):
                     pass
     try:

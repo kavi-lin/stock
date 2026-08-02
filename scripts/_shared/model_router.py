@@ -1,13 +1,22 @@
 """Multi-model governance — role-based routing, per-model daily call budget,
-quota cooldown, auto-fallback.
+rolling-window call budget, quota cooldown, auto-fallback.
 
 Every governed model call goes through `run_role()` / `run_with_fallback()`:
 they walk the configured fallback chain (primary → secondary → tertiary), skip
-models that are disabled / over their daily budget / in a quota cooldown, and
-on a quota or hard failure transparently fall back to the next model.
+models that are disabled / over their daily budget / over their rolling-window
+budget / in a quota cooldown, and on a quota or hard failure transparently fall
+back to the next model.
 
-Usage counters + cooldowns persist in `config/llm_usage.json` (auto-resets on
-UTC date rollover).
+Two independent budgets, both enforced (V4.84.0):
+  * `daily_max_calls`  — resets on UTC date rollover
+  * `window_max_calls` over `window_hours` — a rolling window that does NOT reset
+    at midnight, because the provider's session window does not either. This is
+    what lets a protocol run self-throttle before it walks into a 5-hour session
+    cap. Absent / 0 = uncapped, same convention as the daily budget.
+
+Usage counters + cooldowns persist in `config/llm_usage.json`. The daily counters
+auto-reset on UTC date rollover; `call_timestamps` deliberately survive that reset
+(see `_load_usage`) so a window straddling midnight is measured correctly.
 
 The returned `LLMResult` is annotated with `.model_used`, `.fell_back`,
 `.route_note`.
@@ -60,9 +69,69 @@ def _blank_usage() -> dict:
     return {
         "date": _today(),
         "models": {m: {"calls": 0, "cooldown_until": None, "last_error": None,
-                       "tokens": _blank_tokens()}
+                       "tokens": _blank_tokens(), "call_timestamps": []}
                    for m in VALID_MODELS},
     }
+
+
+# ───────────────────── rolling window (V4.84.0) ─────────────────────────────
+DEFAULT_WINDOW_HOURS = 5.0
+# Timestamps are pruned to the model's own window on every load. This ceiling is
+# the belt-and-braces bound on how long a stale entry can survive a config that
+# shrinks a window — without it, lowering `window_hours` would leave the older
+# timestamps in the file forever.
+_MAX_RETAINED_HOURS = 48.0
+
+
+def _window_cfg(model: str, cfg: dict) -> tuple[int, float]:
+    """(window_max_calls, window_hours) for `model`. max 0 = uncapped."""
+    b = (cfg.get("budgets", {}) or {}).get(model, {}) or {}
+    try:
+        cap = int(b.get("window_max_calls", 0) or 0)
+    except (TypeError, ValueError):
+        cap = 0
+    try:
+        hours = float(b.get("window_hours", DEFAULT_WINDOW_HOURS) or DEFAULT_WINDOW_HOURS)
+    except (TypeError, ValueError):
+        hours = DEFAULT_WINDOW_HOURS
+    return max(0, cap), (hours if hours > 0 else DEFAULT_WINDOW_HOURS)
+
+
+def _parse_ts(v) -> datetime | None:
+    if not isinstance(v, str) or not v:
+        return None
+    try:
+        d = datetime.fromisoformat(v)
+    except (TypeError, ValueError):
+        return None
+    # A naive timestamp from an older writer is read as UTC rather than dropped —
+    # discarding it would silently under-count the window.
+    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
+def _prune_timestamps(stamps, hours: float) -> list[str]:
+    """Keep only stamps inside `hours` (bounded by _MAX_RETAINED_HOURS). Future-dated
+    stamps are kept: a clock skew that drops them would under-count the window."""
+    if not isinstance(stamps, list):
+        return []
+    cutoff = _now() - timedelta(hours=min(max(hours, 0.0), _MAX_RETAINED_HOURS))
+    out = []
+    for s in stamps:
+        d = _parse_ts(s)
+        if d is not None and d >= cutoff:
+            out.append(d.isoformat())
+    return out
+
+
+def _window_calls(entry: dict, hours: float) -> int:
+    """How many calls this model made inside the trailing `hours`."""
+    cutoff = _now() - timedelta(hours=hours)
+    n = 0
+    for s in entry.get("call_timestamps") or []:
+        d = _parse_ts(s)
+        if d is not None and d >= cutoff:
+            n += 1
+    return n
 
 
 def _accumulate_tokens(entry: dict, tok: dict | None) -> None:
@@ -85,25 +154,49 @@ def _accumulate_tokens(entry: dict, tok: dict | None) -> None:
         t["cost_usd"] = round(float(t.get("cost_usd", 0.0) or 0.0) + float(cost), 6)
 
 
-def _load_usage() -> dict:
-    """Read llm_usage.json; auto-reset on UTC date rollover."""
+def _load_usage(cfg: dict | None = None) -> dict:
+    """Read llm_usage.json; auto-reset the daily counters on UTC date rollover.
+
+    The rollover reset deliberately does NOT clear `call_timestamps`: the rolling
+    window tracks the provider's session window, which pays no attention to UTC
+    midnight. Zeroing it there would hand back a full window's worth of headroom at
+    00:00 UTC — exactly the quota incident this counter exists to prevent.
+
+    Entries written before V4.84.0 have no `call_timestamps`. They get an empty list,
+    so the window starts measuring from now rather than pretending to know history.
+    """
+    cfg = cfg if isinstance(cfg, dict) else load_llm_config()
     try:
         with open(USAGE_FILE, "r", encoding="utf-8") as f:
             u = json.load(f)
     except (OSError, json.JSONDecodeError):
-        return _blank_usage()
-    if not isinstance(u, dict) or u.get("date") != _today():
-        return _blank_usage()
-    models = u.get("models")
-    if not isinstance(models, dict):
-        return _blank_usage()
+        u = None
+    if not isinstance(u, dict) or not isinstance(u.get("models"), dict):
+        u = None
+
+    carried = {}
+    if u is not None:
+        for m, e in (u.get("models") or {}).items():
+            if isinstance(e, dict):
+                carried[m] = e.get("call_timestamps")
+
+    if u is None or u.get("date") != _today():
+        fresh = _blank_usage()
+        for m, e in fresh["models"].items():
+            _, hours = _window_cfg(m, cfg)
+            e["call_timestamps"] = _prune_timestamps(carried.get(m), hours)
+        return fresh
+
     for m in VALID_MODELS:
-        e = models.setdefault(m, {"calls": 0, "cooldown_until": None, "last_error": None})
+        e = u["models"].setdefault(
+            m, {"calls": 0, "cooldown_until": None, "last_error": None})
         if not isinstance(e.get("tokens"), dict):
             e["tokens"] = _blank_tokens()
         else:
             for k, v in _blank_tokens().items():
                 e["tokens"].setdefault(k, v)
+        _, hours = _window_cfg(m, cfg)
+        e["call_timestamps"] = _prune_timestamps(e.get("call_timestamps"), hours)
     return u
 
 
@@ -138,7 +231,11 @@ def _in_cooldown(entry: dict) -> bool:
 
 
 def model_available(model: str, cfg: dict, usage: dict) -> tuple[bool, str]:
-    """Return (available, reason-if-not)."""
+    """Return (available, reason-if-not).
+
+    The two budgets are independent gates: `budget` = the UTC-day cap, `window` = the
+    rolling session-window cap. Either alone takes the model out of the chain.
+    """
     if not cfg.get("enabled", {}).get(model, True):
         return False, "disabled"
     entry = usage["models"].get(model, {})
@@ -147,12 +244,35 @@ def model_available(model: str, cfg: dict, usage: dict) -> tuple[bool, str]:
     budget = cfg.get("budgets", {}).get(model, {}).get("daily_max_calls", 0)
     if budget and entry.get("calls", 0) >= budget:
         return False, "budget"
+    win_cap, win_hours = _window_cfg(model, cfg)
+    if win_cap and _window_calls(entry, win_hours) >= win_cap:
+        return False, "window"
     return True, ""
+
+
+def window_state(model: str, cfg: dict, usage: dict) -> dict:
+    """Rolling-window snapshot for `model` — for --status and the Office UI."""
+    cap, hours = _window_cfg(model, cfg)
+    entry = usage["models"].get(model, {}) or {}
+    used = _window_calls(entry, hours)
+    stamps = sorted(s for s in (entry.get("call_timestamps") or []) if _parse_ts(s))
+    oldest = _parse_ts(stamps[0]) if stamps else None
+    return {
+        "window_hours": hours,
+        "window_max_calls": cap or None,
+        "window_calls": used,
+        "window_remaining": (max(0, cap - used) if cap else None),
+        # When the cap is hit, this is when the oldest call ages out and one slot
+        # frees up — more actionable than "blocked" with no horizon.
+        "window_resets_at": ((oldest + timedelta(hours=hours)).isoformat()
+                             if (cap and used >= cap and oldest) else None),
+    }
 
 
 def model_status() -> dict:
     """Per-model snapshot — for GET /api/llm-config."""
-    cfg, usage = load_llm_config(), _load_usage()
+    cfg = load_llm_config()
+    usage = _load_usage(cfg)
     models = {}
     for m in VALID_MODELS:
         e = usage["models"].get(m, {})
@@ -166,6 +286,7 @@ def model_status() -> dict:
             "cooldown_until": e.get("cooldown_until"),
             "last_error": e.get("last_error"),
             "tokens": e.get("tokens") or _blank_tokens(),
+            **window_state(m, cfg, usage),
         }
     return {"date": usage["date"], "chain": model_chain(cfg), "models": models}
 
@@ -177,23 +298,41 @@ def model_headroom(model: str, cfg: dict | None = None, usage: dict | None = Non
     enabled and available with no configured daily call cap.
     """
     cfg = cfg or load_llm_config()
-    usage = usage or _load_usage()
+    usage = usage or _load_usage(cfg)
     avail, reason = model_available(model, cfg, usage)
     if not avail:
         return 0, False, reason
     budget = cfg.get("budgets", {}).get(model, {}).get("daily_max_calls", 0)
-    if not budget:
+    entry = usage.get("models", {}).get(model) or {}
+    limits = []
+    if budget:
+        limits.append(max(0, int(budget) - int(entry.get("calls", 0) or 0)))
+    win_cap, win_hours = _window_cfg(model, cfg)
+    if win_cap:
+        limits.append(max(0, win_cap - _window_calls(entry, win_hours)))
+    # Headroom is the tighter of the two budgets — a caller planning N calls must
+    # not be told it has daily room when the rolling window will stop it first.
+    if not limits:
         return None, True, ""
-    calls = int((usage.get("models", {}).get(model) or {}).get("calls", 0) or 0)
-    return max(0, int(budget) - calls), True, ""
+    return min(limits), True, ""
+
+
+def _stamp_call(entry: dict) -> None:
+    """Record this call against both budgets: the daily counter and the rolling window."""
+    entry["calls"] = entry.get("calls", 0) + 1
+    stamps = entry.get("call_timestamps")
+    if not isinstance(stamps, list):
+        stamps = []
+    stamps.append(_now().isoformat())
+    entry["call_timestamps"] = stamps
 
 
 def _record(model: str, result: LLMResult, cfg: dict) -> None:
-    """Increment the call counter; trip a cooldown on a quota wall."""
-    usage = _load_usage()
+    """Increment the call counters; trip a cooldown on a quota wall."""
+    usage = _load_usage(cfg)
     e = usage["models"].setdefault(
         model, {"calls": 0, "cooldown_until": None, "last_error": None})
-    e["calls"] = e.get("calls", 0) + 1
+    _stamp_call(e)
     _accumulate_tokens(e, {
         "input_tokens": getattr(result, "input_tokens", 0),
         "output_tokens": getattr(result, "output_tokens", 0),
@@ -223,7 +362,7 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
     tried: list[str] = []
     last: LLMResult | None = None
     for model in order:
-        usage = _load_usage()
+        usage = _load_usage(cfg)
         avail, reason = model_available(model, cfg, usage)
         if not avail:
             tried.append(f"{model}:skip({reason})")
@@ -258,7 +397,7 @@ def pick_model(role: str = "protocol") -> str:
     Falls back to chain[0] when every model is unavailable."""
     cfg = load_llm_config()
     chain = model_chain(cfg)
-    usage = _load_usage()
+    usage = _load_usage(cfg)
     for m in chain:
         avail, _ = model_available(m, cfg, usage)
         if avail:
@@ -272,10 +411,10 @@ def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = N
     from the run's stream-json `result` event) is added to the model's daily
     token totals when supplied."""
     cfg = load_llm_config()
-    usage = _load_usage()
+    usage = _load_usage(cfg)
     e = usage["models"].setdefault(
         model, {"calls": 0, "cooldown_until": None, "last_error": None})
-    e["calls"] = e.get("calls", 0) + 1
+    _stamp_call(e)
     _accumulate_tokens(e, tokens)
     if not ok:
         e["last_error"] = (error_text or "run failed")[:200]

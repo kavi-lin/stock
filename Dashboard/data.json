@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-08-02 12:31:46",
+  "last_updated": "2026-08-02 12:36:46",
   "market": {
     "regime": "RISK_OFF",
     "cycle_phase": "Early",
@@ -27602,8 +27602,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -28193,8 +28193,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -28454,8 +28454,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -29607,8 +29607,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -29924,8 +29924,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -30127,8 +30127,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -78274,7 +78274,7 @@
     "snap_date": "2026-07-31",
     "generated_at": "2026-07-31 22:05",
     "freshness": "STALE",
-    "age_label": "38.4h",
+    "age_label": "38.5h",
     "total_rows": 528,
     "rows": [
       {
@@ -217281,8 +217281,8 @@
     ],
     "global_warnings": [],
     "status": "success",
-    "_cache_age_sec": 193727,
-    "_cache_age_hr": 53.8,
+    "_cache_age_sec": 194027,
+    "_cache_age_hr": 53.9,
     "_source_file": "2026-07-31.json",
     "_freshness": "STALE",
     "_total_log_days": 76,
@@ -217963,8 +217963,8 @@
         }
       },
       "status": "success",
-      "_cache_age_sec": 138516,
-      "_cache_age_hr": 38.5,
+      "_cache_age_sec": 138816,
+      "_cache_age_hr": 38.6,
       "_freshness": "STALE"
     },
     "trending": {
@@ -218129,7 +218129,7 @@
           "polarity_score": -0.2217
         }
       ],
-      "_cache_age_hr": 38.5,
+      "_cache_age_hr": 38.6,
       "_freshness": "STALE"
     }
   },
@@ -220544,7 +220544,7 @@
       "missing": [],
       "errors": []
     },
-    "_cache_age_sec": 205
+    "_cache_age_sec": 505
   },
   "industry_trend": {
     "status": "success",
@@ -221078,8 +221078,8 @@
     },
     "_partial": false,
     "status": "success",
-    "_cache_age_sec": 138529,
-    "_cache_age_hr": 38.5,
+    "_cache_age_sec": 138829,
+    "_cache_age_hr": 38.6,
     "_freshness": "STALE"
   },
   "theme_overrides": [
@@ -221187,6 +221187,6 @@
       "first_hit_filtered": 0,
       "digests_scanned": 11
     },
-    "_freshness_hr": 38.5
+    "_freshness_hr": 38.6
   }
 }

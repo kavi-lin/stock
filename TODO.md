@@ -545,11 +545,12 @@
   screen output so the GM% / P/S thresholds in Value Momentum can be
   calibrated against actual hit rates.
 
-- [ ] **[V321.X-ROUTER] Model router 5hr-window counter** — `model_router.py`
-  only tracks UTC-day budgets. Add rolling 5hr counter so protocol runs
-  (`分析`, `產業掃描`, `新聞分析`) also self-throttle when the Anthropic
-  session window is near exhaustion. Deferred from V3.21.0 — only needed if
-  the hourly-cap fix doesn't fully prevent the next quota incident.
+- [x] **[V321.X-ROUTER] Model router 5hr-window counter** — 4.84.0 完成。
+  `call_timestamps[]` + `window_max_calls`/`window_hours`（claude 120/5h、
+  codex 80/5h；gemini/grok 是 per-minute rate limit 不設 window）。與 daily
+  budget 兩道獨立閘，headroom 取較緊者。**時間戳不隨 UTC 換日歸零**——session
+  window 不理會午夜。順手修 `load_llm_config()` 白名單漏掉新 budget key（cap
+  原本完全不生效）。
 
 - [ ] **[V325.X-PE-WARMUP-RETRY] heatmap PE warm-up should retry on failure** —
   `dashboard_server._heatmap_refresh_pe_universe()` runs once on startup with

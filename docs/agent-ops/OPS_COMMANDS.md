@@ -99,6 +99,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | ticker price range CLI | `python3 investment/scripts/test_forward_price_range.py` |
 | valuation-modeler 引擎（dcf/comps/xlsx） | `python3 skills/valuation-modeler/tests/test_dcf.py` + `test_comps.py` + `test_export_xlsx.py` |
 | ic-memo initiation renderer / validator | `python3 skills/ic-memo-writer/tests/test_compose_initiation.py` |
+| `model_router.py` 預算 / `llm_config.json` budgets / `llm_drivers.load_llm_config()` | `python3 scripts/_shared/test_model_router_window.py`（rc=0）。含 end-to-end 案例走真的 loader + 真的 config —— `load_llm_config()` 是**白名單**不是 merge，新增 budget key 沒加進 loader 會被靜默丟掉、cap 永遠不生效 |
 | 任何 skill 的 SKILL.md / 結構 | `python3 scripts/check_skills.py`（warnings only；`--strict` 才 rc=1） |
 | Finnhub/FMP 資料層 | `python3 skills/finnhub-client/scripts/audit_drift_check.py` |
 

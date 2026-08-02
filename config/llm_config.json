@@ -8,15 +8,20 @@
     "codex": true,
     "grok": true
   },
+  "_budgets_note": "daily_max_calls resets at UTC midnight. window_max_calls/window_hours is an independent rolling window that does NOT reset at midnight — it mirrors the provider's session window. Omit window_max_calls (or set 0) to leave a model uncapped on that axis; gemini/grok are rate-limited per-minute rather than per-session, so only the session-window CLIs carry one.",
   "budgets": {
     "claude": {
-      "daily_max_calls": 300
+      "daily_max_calls": 300,
+      "window_max_calls": 120,
+      "window_hours": 5
     },
     "gemini": {
       "daily_max_calls": 500
     },
     "codex": {
-      "daily_max_calls": 200
+      "daily_max_calls": 200,
+      "window_max_calls": 80,
+      "window_hours": 5
     },
     "grok": {
       "daily_max_calls": 100
