@@ -417,6 +417,7 @@ Phase 4 全部算術由 `investment/scripts/trade_plan_builder.py` 產出，PM *
 | `risk_audit.ftd_timeline_gate` | object | `applied=false` 時 multiplier 必須是 1.0；`applied=true` 時 stage × sector_class 必須映到表上的乘數 |
 | `risk_audit.sector_concentration_f1` | object | `applied=true ⟺ multiplier=0.5`；`active_same_sector_confirmed=null` 時只能 `applied=false` |
 | `risk_audit.approval` | `"APPROVED" \| "REJECTED"` | `REJECTED` → `position_size_pct` 必須為 0 且 `final_decision` 不得為 BUY/STAGED_ENTRY |
+| `risk_audit.sized_for_decision` | `string` | **V5.2 必填**。Phase 4 **實際據以計算 sizing 鏈的**決策。Phase 4.6 cap 在 Phase 4 之後才跑，會把 BUY 改寫成 HOLD / STAGED_ENTRY，此時 `final_decision` 已無法解釋鏈（尤其 STAGED_ENTRY 的折半該不該套）。§14 一律用本欄重算，缺欄才退回 `final_decision` |
 
 **Validator §14（V4.82.0）**：
 
@@ -627,6 +628,7 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
       "position_size_method": "VOL_ADJUSTED",
       "risk_audit": {
         "risk_level": "HIGH",
+        "sized_for_decision": "BUY",
         "vol_adjusted_limit_pct": 4.06,
         "position_size_method": "VOL_ADJUSTED",
         "tail_risk": {

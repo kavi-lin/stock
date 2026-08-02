@@ -51,6 +51,19 @@ def translate_to_zh(fields: dict, timeout: int = 120) -> dict:
         sys.stderr.write(f"[link_digest.translate] run_gemini raised: {e}\n")
         return {}
 
+    # V4.86.0 — report the call to the router's budget accounting. This is the one
+    # place that calls a driver directly instead of going through `run_role`, and
+    # unreported calls make the budget under-count. Routing is deliberately NOT
+    # changed: translation is cosmetic and pinned to gemini, so falling back to a
+    # pricier model when gemini is exhausted would be the wrong trade. Reporting is
+    # best-effort — a bookkeeping failure must never lose the translation.
+    try:
+        from scripts._shared.model_router import note_run
+        note_run("gemini", getattr(res, "exit_code", 1) == 0,
+                 (getattr(res, "error", "") or "")[:200])
+    except Exception:  # noqa: BLE001
+        pass
+
     out = res.parsed if isinstance(getattr(res, "parsed", None), dict) else None
     if out is None:
         # fall back to a lenient brace-extraction on raw text

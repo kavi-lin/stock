@@ -88,9 +88,14 @@ eq("count.garbage_ignored",
 # A naive timestamp from an older writer counts as UTC — dropping it would under-count.
 _naive = (datetime.now(timezone.utc) - timedelta(minutes=5)).replace(tzinfo=None).isoformat()
 eq("count.naive_counted", mr._window_calls({"call_timestamps": [_naive]}, 5.0), 1)
-# Clock skew into the future must not silently free a slot.
+# Clock skew into the future must not silently free a slot...
 _future = (mr._now() + timedelta(minutes=30)).isoformat()
 eq("count.future_counted", mr._window_calls({"call_timestamps": [_future]}, 5.0), 1)
+# ...but a stamp beyond the skew horizon is a clock fault, and counting it forever
+# would wedge the window shut with no way back.
+_bogus = (mr._now() + timedelta(days=400)).isoformat()
+eq("count.clock_fault_ignored", mr._window_calls({"call_timestamps": [_bogus]}, 5.0), 0)
+eq("count.clock_fault_pruned", mr._prune_timestamps([_bogus], 5.0), [])
 
 
 # ── availability: the two budgets are independent gates ─────────────────────
@@ -191,6 +196,42 @@ eq("legacy.available", mr.model_available("claude", cfg_file, loaded)[0], True)
 broken = _with_usage_file({"garbage": True}, lambda: mr._load_usage(cfg_file))
 eq("corrupt.recovers", broken["date"], mr._today())
 
+# A LIVE quota cooldown must survive the rollover too (V4.86.0). It is a property of
+# the provider's clock, not of the UTC day — dropping it at 00:00 sent traffic straight
+# back into a wall that had not lifted.
+live_cd = (mr._now() + timedelta(hours=3)).isoformat()
+cd_day = {"date": "1999-01-01",
+          "models": {"claude": {"calls": 50, "cooldown_until": live_cd,
+                                "last_error": "429 usage limit",
+                                "tokens": mr._blank_tokens(), "call_timestamps": []}}}
+cd_rolled = _with_usage_file(cd_day, lambda: mr._load_usage(cfg_file))
+eq("rollover.cooldown_survives", cd_rolled["models"]["claude"]["cooldown_until"], live_cd)
+eq("rollover.last_error_survives", cd_rolled["models"]["claude"]["last_error"],
+   "429 usage limit")
+eq("rollover.still_in_cooldown", mr.model_available("claude", cfg_file, cd_rolled),
+   (False, "cooldown"))
+eq("rollover.calls_still_reset", cd_rolled["models"]["claude"]["calls"], 0)
+
+# An EXPIRED cooldown must not be resurrected on every load.
+old_cd = dict(cd_day)
+old_cd["models"] = {"claude": {**cd_day["models"]["claude"],
+                               "cooldown_until": (mr._now() - timedelta(hours=1)).isoformat()}}
+exp_rolled = _with_usage_file(old_cd, lambda: mr._load_usage(cfg_file))
+eq("rollover.expired_cooldown_dropped",
+   exp_rolled["models"]["claude"]["cooldown_until"], None)
+eq("rollover.available_after_expiry", mr.model_available("claude", cfg_file, exp_rolled)[0],
+   True)
+
+# A window longer than the retention floor must be measured over its real length,
+# not silently truncated to 48h.
+long_cfg = _cfg(cap=3, hours=72.0)
+long_stamps = [_ago(hours=60), _ago(hours=70)]
+eq("long_window.counted", mr._window_calls({"call_timestamps": long_stamps}, 72.0), 2)
+eq("long_window.not_pruned", len(mr._prune_timestamps(long_stamps, 72.0)), 2)
+eq("long_window.blocks",
+   mr.model_available("claude", long_cfg, _usage(long_stamps + [_ago(hours=1)])),
+   (False, "window"))
+
 
 # ── _stamp_call writes both counters ────────────────────────────────────────
 e = {"calls": 0}
@@ -203,6 +244,42 @@ eq("stamp.window_counted", mr._window_calls(e, 5.0), 2)
 e2 = {"calls": 5, "call_timestamps": None}
 mr._stamp_call(e2)
 eq("stamp.repairs_bad_type", len(e2["call_timestamps"]), 1)
+
+
+# ── roundtrip: note_run → save → reload actually persists the window ────────
+# Asserting on _stamp_call alone proves nothing about what survives the file.
+def _roundtrip():
+    for _ in range(3):
+        mr.note_run("claude", True)
+    reloaded = mr._load_usage(cfg_file)
+    return reloaded["models"]["claude"]
+
+
+with tempfile.TemporaryDirectory() as _d:
+    _p = Path(_d) / "llm_usage.json"
+    _orig = mr.USAGE_FILE
+    mr.USAGE_FILE = _p
+    try:
+        rt = _roundtrip()
+        eq("roundtrip.daily_persisted", rt["calls"], 3)
+        eq("roundtrip.window_persisted", len(rt["call_timestamps"]), 3)
+        eq("roundtrip.window_counted", mr._window_calls(rt, 5.0), 3)
+        eq("roundtrip.file_written", _p.exists(), True)
+
+        # Concurrent recorders must not clobber each other's increments.
+        import threading
+        _p.unlink(missing_ok=True)
+        threads = [threading.Thread(target=mr.note_run, args=("codex", True))
+                   for _ in range(24)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        after = mr._load_usage(cfg_file)["models"]["codex"]
+        eq("concurrent.no_lost_updates", after["calls"], 24)
+        eq("concurrent.window_matches", len(after["call_timestamps"]), 24)
+    finally:
+        mr.USAGE_FILE = _orig
 
 
 # ── end-to-end: the shipped config must survive load_llm_config() ───────────

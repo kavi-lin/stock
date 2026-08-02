@@ -8,6 +8,32 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.86.0] — 2026-08-02 — 4.82–4.85 review：1 P1 + 7 P2
+
+### Fixed — 4.82.0
+- **P1 — §14 沒建模 Phase 4.6 decision cap，所有 capped export 都被擋**（`validate_session_export.py`）：cap 在 Phase 4 sizing **之後**才跑，會把倉位夾到 30bps 並可能把 BUY 改寫成 HOLD / STAGED_ENTRY。§14 的兩條分支（「非 BUY-side ⇒ 0 倉位」與「size == 鏈尾」）因此對兩條合法路徑都 rc=1 —— 而 PM 依規禁止手改數字，等於 Phase 5 死鎖。現在把「倉位可低於鏈尾」的四個理由依優先序明確建模（REJECTED / decision cap / probe cap / 非 BUY-side），cap 只准縮不准放大。
+- **P1 附帶 — STAGED 折半該看哪個決策**：Phase 4.6 把 BUY 改寫成 STAGED_ENTRY 後，`final_decision` 已不能解釋鏈（鏈是照 BUY 算的、沒折半）。新增 `risk_audit.sized_for_decision` 記錄 **Phase 4 實際據以計算的決策**，§14 一律用它重算；缺欄才退回 `final_decision`。選擇補欄而不是放寬檢查 —— 放寬會讓真正該折半沒折半的鏈也過關。
+- **P2 — V20-F1 把候選自己算進集中度**（`trade_plan_builder.py`）：規則是「同 sector ≥3 → **第 4 個**減半」，但重跑既有持股的 `分析` 時，該持股自己的 active thesis 也被計入，於是在第 3 個名字就減半。`active_theses` 與 registry 兩條路徑都排除 `self_ticker`；明確計數（form 1）維持照單全收，那是呼叫端已解析並負責的數字。
+
+### Fixed — 4.84.0
+- **P2 — `cooldown_until` 在 UTC 換日被清掉**（`model_router.py`）：跟 4.84.0 修的是同一類 bug、同一個被重寫的分支 —— 我只搬了 `call_timestamps`，沒搬 cooldown。23:30 觸發的 4h quota cooldown 在 00:00 被 `_blank_usage()` 丟掉，router 立刻把流量導回還在牆內的 model。cooldown 與 `last_error` 現在一起跨日存活（僅限**尚未到期**者，避免每次載入都復活過期的 cooldown）；`calls` / tokens 照常歸零（那才是 per-UTC-day 的量）。
+- **P2 — docstring 對 window 的涵蓋範圍說謊**：原文寫「讓 protocol run 走進 5-hour session cap 前自我節流」。實際上 `dashboard_server` 的 protocol subprocess 路徑**刻意繞過 `pick_model`**（使用者點擊 = 明示選型，該處自己的註解寫著），事後只用 `note_run()` 回報，而一次 agentic run 只記 **1 筆** timestamp，實際可能燒掉幾十到幾百個 API turn。window 實際只約束單發的 `run_role` / `run_with_fallback`。已改寫成「governed calls，不是 API turns」，並明講依此 cap 去對應 provider 的 turn budget 保護不了那條路。**沒有**擅自把 protocol 路徑納管 —— 那會讓使用者主動點的操作被背景配額擋掉，是行為變更，應由使用者決定。
+- **P2 — `llm_usage.json` 的 load→mutate→save 無跨程序鎖**：單次寫入是 atomic（mkstemp + `os.replace`），所以壞的從來不是檔案完整性，而是 read-modify-write：dashboard server / break_news poller / CLI 併發時互相蓋寫，計數少算 → 實際用量可以超過看起來被遵守的上限。加 `_usage_write_lock()`（flock 在獨立的 `.lock` 檔上 —— `os.replace` 會把 usage 檔的 inode 換掉，鎖在它身上沒用）。best-effort：拿不到鎖仍執行，掉一次計數遠好過掉一次呼叫。
+- **P3 — `window_hours > 48` 被靜默截斷**：`_MAX_RETAINED_HOURS` 被當上限套在 window 長度上。改為 retention 就等於 window 本身（更簡單也更對：縮短 config 時舊 timestamp 下次載入自然被剪掉，原本擔心的「永遠留著」不存在）。
+- **P3 — 未來時間戳永久佔 slot**：時鐘偏移到未來的 stamp 原本無條件計入，一筆壞資料能把 window 永久卡死。改為 24h skew horizon 內照計（一般 NTP 漂移不該放行 slot），超過即視為時鐘故障忽略。
+- **P3 — `translate.py` 直呼 `run_gemini` 繞過記帳**：補 `note_run()` 回報。**不改 routing** —— 翻譯是裝飾性功能且刻意釘在 gemini，gemini 用罄時 fallback 到更貴的模型是錯的取捨。
+
+### Fixed — 4.85.0
+- **P2 — radar 懶抓路徑變成無退避的永久重抓（本次最實質的成本回歸，我自己引入的）**：失敗不再進快取後，`if not pe_entry` 這個觸發條件對「三個 endpoint 真的都沒資料」的 universe 外符號永遠成立 → 每 180s quote-TTL 重觸發一次 `_bg`，每符號每小時約 **60 個 FMP call、無限期**（修改前是每天 3 個）。而 warm-up 的 retry sweep 只掃 `_heatmap_state["tickers"]`，根本管不到它們 —— 我寫的程式註解說的正好相反。加 per-symbol 6h retry floor（`_heatmap_pe_attempted_at`），註解改成事實。
+- **P2 — 部分成功仍被當事實快取 24h**：`responded=True` 只要任一 endpoint 有回應就成立。429 斷在第一個 call 之後 → `{pe_ttm: 真值, ev_ebitda: None, fwd_eps: None}` 被當完整 bundle 存下，正是本版要修的「把失敗存成資料」，只是降到欄位粒度。改為在函式尾端**重新檢查熔斷器**：期間跳閘就丟棄整個 partial bundle。真的沒資料但熔斷器沒動的 ticker 仍算有效答案。
+- **P2 — warm-up 可重入 + retry 批次擋住 loop thread**：boot thread 與 600s loop 可同時跑同一批殘餘（~600 檔 × 3 call 要 8-10 分鐘，雙倍燒預算 + backoff 全域變數 race）。加 `_heatmap_pe_run_lock` 非重入鎖；loop 內改用 daemon thread 派發，避免盤中 inline 抓 8 分鐘把 quote refresh 卡住。「只在 daemon thread 變更」的註解與事實不符，已一併修正。
+
+### Added
+- 三份測試補上對應覆蓋：§14 × Phase 4.6 cap 五案（含兩條合法路徑 rc=0 + 三條竄改 rc=1）、router 的 cooldown 跨日 / 過期不復活 / >48h window / 時鐘故障 / **note_run→save→reload roundtrip** / **24 執行緒併發無遺失更新**、heatmap 的 mid-batch 429 partial / 非重入 / lazy retry floor。
+
+### Why
+- 七個 P2 有五個是我在 4.82–4.85 自己引入的，其中兩個（radar 重抓、partial bundle）是「修了 A 卻打開 B」——同一個修法在另一條路徑上變成新的失效模式。**教訓：改一個共用函式的失敗語意時，要列出它所有的呼叫端並逐一問「這條路的重試由誰負責」**；radar 那條的答案是「沒有人」，而我的註解卻寫著 warm-up 會管。
+
 ## [4.85.0] — 2026-08-02 — heatmap PE warm-up 失敗可重試（V325.X-PE-WARMUP-RETRY）
 
 ### Fixed

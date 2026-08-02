@@ -1,7 +1,16 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.85.0)
+> **Last Updated**: 2026-08-02 (v4.86.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.86.0) — 4.82–4.85 review 修正（1 P1 + 7 P2）
+- **八條先逐一複跑重現才動手**，沒有照單全收。結果全部屬實，但有一條的嚴重度我下修了：reviewer 說 §14 有「三條路徑全炸」，實測第三條（probe capped）的失敗是 fixture 產物（那條鏈是照 BUY 算的），probe 分支本身是對的。P1 是**兩條** Phase 4.6 路徑。**判準：確認 bug 為真之後，仍要確認它的邊界在哪。**
+- **七個 P2 裡有五個是我自己在 4.82–4.85 引入的**，其中兩個是同一種病：**修了 A 卻打開 B**。`_fetch_pe_ttm` 的失敗語意一改，radar 懶抓那條路就從「每天 3 個 call」變成「每小時 60 個、無限期」，因為它的重試原本就是靠「失敗會被快取」這個副作用擋住的。**教訓：改共用函式的失敗語意時，先列出所有呼叫端，逐一問「這條路的重試由誰負責」**——radar 的答案是「沒有人」，而我在程式註解裡寫的是「warm-up 的 sweep 會管」，事實上那個 sweep 只掃 universe。**註解寫了一個我沒驗證的機制，這比程式錯更危險，因為下一個人會信它。**
+- **cooldown 跨日被清除是最刺的一條**：我當時就在重寫那個 rollover 分支、還特地寫了「時間戳不能歸零」的長註解，卻只搬了 `call_timestamps`，沒問「同一個 blank 重建還丟掉了什麼別的、也不屬於 UTC 日的東西」。**判準：把某欄位從「隨日重置」救出來時，要掃過同一個 reset 裡的每一欄，逐欄問它到底屬不屬於那個週期。**
+- **P1 選擇補欄而不是放寬檢查**：Phase 4.6 改寫決策後，`final_decision` 不再能解釋 sizing 鏈（折半該不該套）。可以把檢查放寬成「兩種都接受」，但那會讓真正該折半卻沒折半的鏈也過關。改成讓 engine 記下 `sized_for_decision`（它自己的輸入），檢查照舊嚴格。**歧義的正解是消除歧義，不是接受兩種答案。**
+- **有一條刻意不修**：window 管不到 protocol subprocess 路徑（`note_run` 一次 agentic run 只記 1 筆，實際幾十到幾百 turn）。把那條路納管會讓使用者主動點的操作被背景配額擋掉——那是行為變更，該由使用者定奪。我只把 docstring 改成事實（「governed calls，不是 API turns」）並明講依此 cap 對應 provider turn budget 保護不了那條路。**說謊的 docstring 要修；要不要改行為是另一個決定。**
+- **併發鎖補在對的層**：`llm_usage.json` 的單次寫入本來就 atomic，壞的是 read-modify-write。flock 加在**獨立的 `.lock` 檔**上，因為 `os.replace` 會把 usage 檔的 inode 換掉，鎖在它自己身上沒有意義。
+- **驗收**：8 支測試 + 3 個 validator/replay 全 rc=0；`test_session_export_schema.py` 50 案（新增 §14 × Phase 4.6 五案）；router 新增 cooldown 跨日 / 過期不復活 / >48h window / 時鐘故障 / roundtrip / 24 執行緒併發；heatmap 新增 mid-batch 429 partial / 非重入 / lazy retry floor。commit 排除 `data.json` / `llm_usage.json` 兩個 runtime artifact（上一版夾帶進去被 review 點名）。SYNC OK 4.86.0。
 
 ## 🟢 Session Note (v4.85.0) — heatmap PE warm-up 重試（V325.X-PE-WARMUP-RETRY）
 - **TODO 描述的症狀對，病因更嚴重**：記的是「cache 空到下次重啟」。實際讀 code 發現 `_fetch_pe_ttm` 在 429 熔斷期回傳**全 None 的 dict** —— 跟「這支股票本來就沒 P/E」完全同形。而 `val_snapshot` 的過濾條件是 `isinstance(v[1], dict)`，全 None dict **通過了**。所以失敗值不只被快取 24 小時，還會被當成事實**蓋掉既有的好值**。**教訓：修 bug 前先讀清楚失敗值長什麼樣，不要照 TODO 的描述直接動手。**

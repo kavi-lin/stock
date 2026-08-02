@@ -124,6 +124,80 @@ try:
     ds._fetch_pe_ttm = _orig_fetch
     ds._heatmap_ratelimit_until = time.time() + 900
     eq("fetch.breaker_returns_none", ds._fetch_pe_ttm("AAPL", "k"), None)
+
+    # ── V4.86.0: a 429 tripping MID-ticker must not cache a half-filled bundle ──
+    # The first endpoint's value is real; the other two are None because of the
+    # outage, not because the ticker lacks them.
+    _orig_get = ds._fmp_get_json
+    try:
+        state = {"n": 0}
+
+        def _partial(url, timeout=10):
+            state["n"] += 1
+            if state["n"] == 1:
+                return [{"priceToEarningsRatioTTM": 18.5}]
+            ds._heatmap_ratelimit_until = time.time() + 1800   # breaker trips
+            return None
+
+        ds._fmp_get_json = _partial
+        ds._heatmap_ratelimit_until = 0.0
+        eq("partial.mid_batch_429_discarded", ds._fetch_pe_ttm("AAPL", "k"), None)
+
+        # ...but a genuinely data-less ticker with no outage is still a real answer:
+        # responded=True on at least one endpoint, breaker untouched.
+        ds._heatmap_ratelimit_until = 0.0
+        ds._fmp_get_json = lambda url, timeout=10: (
+            [{"priceToEarningsRatioTTM": None}] if "ratios-ttm" in url else [])
+        eq("partial.no_data_but_responded",
+           ds._fetch_pe_ttm("LOSSCO", "k"), {"pe_ttm": None, "ev_ebitda": None,
+                                             "fwd_eps": None})
+        # Nothing anywhere → failure, retried.
+        ds._fmp_get_json = lambda url, timeout=10: []
+        eq("partial.total_silence_is_failure", ds._fetch_pe_ttm("GHOST", "k"), None)
+    finally:
+        ds._fmp_get_json = _orig_get
+        ds._heatmap_ratelimit_until = 0.0
+
+    # ── V4.86.0: warm-up is non-reentrant ───────────────────────────────────
+    import threading
+    _reset()
+    started = threading.Event()
+    release = threading.Event()
+    concurrent = {"count": 0, "max": 0}
+    guard = threading.Lock()
+
+    def _slow(sym, key):
+        with guard:
+            concurrent["count"] += 1
+            concurrent["max"] = max(concurrent["max"], concurrent["count"])
+        started.set()
+        release.wait(5)
+        with guard:
+            concurrent["count"] -= 1
+        return BUNDLE_A
+
+    ds._fetch_pe_ttm = _slow
+    t1 = threading.Thread(target=ds._heatmap_refresh_pe_universe, kwargs={"max_workers": 2})
+    t1.start()
+    started.wait(5)
+    # Second caller (the refresh loop) must bounce off the lock, not start a 2nd batch.
+    eq("reentrancy.second_call_is_noop", ds._heatmap_refresh_pe_universe(max_workers=2), False)
+    release.set()
+    t1.join(10)
+    eq("reentrancy.single_pass_only", concurrent["max"] <= 2, True)   # == max_workers
+    eq("reentrancy.batch_completed", sorted(ds._heatmap_pe_cache), ["AAA", "BBB", "CCC", "DDD"])
+
+    # ── V4.86.0: radar lazy fetch has a per-symbol retry floor ──────────────
+    # Without it a permanently-empty symbol is refetched every 180s quote TTL.
+    ds._heatmap_pe_attempted_at.clear()
+    now = time.time()
+    ds._heatmap_pe_attempted_at["GHOST"] = now
+    eq("lazy.floor_blocks_immediate_retry",
+       (now - ds._heatmap_pe_attempted_at["GHOST"]) >= ds.HEATMAP_PE_LAZY_RETRY_SEC, False)
+    ds._heatmap_pe_attempted_at["GHOST"] = now - ds.HEATMAP_PE_LAZY_RETRY_SEC - 1
+    eq("lazy.floor_expires",
+       (now - ds._heatmap_pe_attempted_at["GHOST"]) >= ds.HEATMAP_PE_LAZY_RETRY_SEC, True)
+    eq("lazy.floor_is_hours_not_minutes", ds.HEATMAP_PE_LAZY_RETRY_SEC >= 3600, True)
 finally:
     ds._fetch_pe_ttm = _orig_fetch
     ds._heatmap_ratelimit_until = 0.0

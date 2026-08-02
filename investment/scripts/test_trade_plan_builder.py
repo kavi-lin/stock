@@ -369,6 +369,25 @@ _theses3 = _theses + [{"sector": "Technology", "structural_shift_tier": "CONFIRM
                        "status": "ACTIVE"}]
 eq("f1.list_applied", compute_concentration({"active_theses": _theses3}, "Technology"
                                             )["applied"], True)
+# V4.86.0 — the candidate's OWN open thesis must not count toward its own limit.
+# The rule sizes 「第 4 個」, so re-analysing a name already held would otherwise
+# halve at the 3rd rather than the 4th.
+_held = [{"sector": "Technology", "structural_shift_tier": "CONFIRMED",
+          "status": "ACTIVE", "ticker": t} for t in ("MU", "NVDA", "AMD")]
+eq("f1.excludes_self_count",
+   compute_concentration({"active_theses": _held}, "Technology", ticker="MU"
+                         )["active_same_sector_confirmed"], 2)
+eq("f1.excludes_self_not_applied",
+   compute_concentration({"active_theses": _held}, "Technology", ticker="MU")["applied"],
+   False)
+# A genuine 4th name still trips it.
+eq("f1.fourth_name_applies",
+   compute_concentration({"active_theses": _held}, "Technology", ticker="INTC")["applied"],
+   True)
+# An explicit count is taken at face value — the caller resolved it and owns it.
+eq("f1.explicit_not_self_adjusted",
+   compute_concentration({"active_same_sector_confirmed": 3}, "Technology", ticker="MU"
+                         )["applied"], True)
 # An unavailable registry is "unknown", never a verified zero.
 _absent = compute_concentration(None, "Technology", theses_dir="/nonexistent/theses")
 eq("f1.absent_count", _absent["active_same_sector_confirmed"], None)

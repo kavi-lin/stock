@@ -465,13 +465,19 @@ def compute_ftd_gate(ftd: dict, sector_class: str, technical: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 def compute_concentration(conc: dict | None, sector: str | None,
-                          theses_dir: str = THESES_DIR) -> dict:
+                          theses_dir: str = THESES_DIR, ticker: str | None = None) -> dict:
     """同 sector ≥3 active CONFIRMED → 第 4 個 ×0.5.
 
     Three input forms, most explicit first:
       1. `active_same_sector_confirmed: <int>` — a count the caller already resolved
-      2. `active_theses: [{sector, structural_shift_tier, status}]` — counted here
+      2. `active_theses: [{ticker, sector, structural_shift_tier, status}]` — counted here
       3. absent → the registry at `theses_dir` is consulted
+
+    The candidate's OWN open thesis is excluded from the count (V4.86.0). The rule sizes
+    「第 4 個」— the 4th name in a sector — so it must count the *other* holdings. Re-running
+    `分析` on something already held would otherwise count that position as one of the
+    three and halve at the 3rd name. Form 1 is taken at face value: the caller resolved
+    the count and owns that decision.
 
     When none of the three yields a number the multiplier stays 1.0 and the status says
     exactly why. An unavailable registry is never reported as "0 positions" — that would
@@ -479,6 +485,7 @@ def compute_concentration(conc: dict | None, sector: str | None,
     """
     conc = conc or {}
     sec = (conc.get("sector") or sector or "").strip().lower()
+    self_ticker = (conc.get("ticker") or ticker or "").strip().upper()
 
     explicit = _i(conc.get("active_same_sector_confirmed"))
     if explicit is not None:
@@ -490,10 +497,12 @@ def compute_concentration(conc: dict | None, sector: str | None,
             and (t.get("sector") or "").strip().lower() == sec
             and (t.get("structural_shift_tier") or t.get("tier")) == "CONFIRMED"
             and (t.get("status") or "ACTIVE").upper() in ("ACTIVE", "ENTRY_READY")
+            and (not self_ticker
+                 or (t.get("ticker") or "").strip().upper() != self_ticker)
         )
         source = "active_theses_input"
     else:
-        count, source = _count_registry_confirmed(theses_dir, sec)
+        count, source = _count_registry_confirmed(theses_dir, sec, self_ticker)
 
     if count is None:
         return {"applied": False, "multiplier": 1.0, "sector": sector,
@@ -516,8 +525,12 @@ def compute_concentration(conc: dict | None, sector: str | None,
     }
 
 
-def _count_registry_confirmed(theses_dir: str, sector_lower: str):
-    """Read the trader-memory-core registry index. Returns (count|None, source)."""
+def _count_registry_confirmed(theses_dir: str, sector_lower: str, self_ticker: str = ""):
+    """Read the trader-memory-core registry index. Returns (count|None, source).
+
+    `self_ticker` is excluded — see `compute_concentration` on why the candidate must
+    not count itself toward its own concentration limit.
+    """
     idx_path = os.path.join(theses_dir, "_index.json")
     if not os.path.exists(idx_path):
         return None, "registry_unavailable"
@@ -539,6 +552,8 @@ def _count_registry_confirmed(theses_dir: str, sector_lower: str):
     count = 0
     for tid, entry in entries.items():
         if (entry or {}).get("status", "").upper() not in ("ACTIVE", "ENTRY_READY"):
+            continue
+        if self_ticker and (entry or {}).get("ticker", "").strip().upper() == self_ticker:
             continue
         path = os.path.join(theses_dir, f"{tid}.yaml")
         if not os.path.exists(path):
@@ -725,7 +740,7 @@ def run_phase4(inp: dict, *, use_subprocess: bool = True, timeout: int = 120) ->
 
     # ── V20-F1 ───────────────────────────────────────────────────────────
     f1 = compute_concentration(inp.get("concentration"), sector_info["sector"],
-                               inp.get("theses_dir") or THESES_DIR)
+                               inp.get("theses_dir") or THESES_DIR, ticker)
     if not f1["applied"] and f1["active_same_sector_confirmed"] is None:
         warnings.append(f1["note"])
 
@@ -846,6 +861,12 @@ def run_phase4(inp: dict, *, use_subprocess: bool = True, timeout: int = 120) ->
 
     risk_audit = {
         "risk_level": risk_level,
+        # The decision the sizing chain was computed against. Phase 4.6 runs AFTER this
+        # and may rewrite `final_decision` (BUY → HOLD / STAGED_ENTRY under a valuation
+        # cap), at which point the exported decision no longer explains the chain — in
+        # particular whether the STAGED_ENTRY halving applies. Recording it here lets
+        # validator §14 re-derive the chain without guessing.
+        "sized_for_decision": decision,
         "vol_adjusted_limit_pct": s2["vol_adjusted_limit_pct"],
         "position_size_method": s2["position_size_method"],
         "tail_risk": {

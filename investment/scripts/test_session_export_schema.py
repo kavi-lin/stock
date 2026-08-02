@@ -285,6 +285,47 @@ def main() -> int:
         mutate(e["trades_this_session"][0])
         run(e, f"tamper: {name}", 1)
 
+    # ── §14 × Phase 4.6 decision cap (V4.86.0 regression) ───────────────────
+    # The cap runs AFTER Phase 4 sizing, clamps the position to 30bps and may rewrite
+    # BUY into HOLD / STAGED_ENTRY. §14 shipped without modelling any of that and so
+    # rejected every capped export — a hard stop at Phase 5 with no legal way out,
+    # since the PM is forbidden from hand-editing the numbers.
+    print("[§14 × Phase 4.6 cap]")
+
+    def _capped(**over):
+        e = copy.deepcopy(ex)
+        tr = e["trades_this_session"][0]
+        fields = {"decision_cap_active": True, "avg_confidence": 0.65,
+                  "position_size_pct": 0.003}
+        fields.update(over)
+        tr.update(fields)
+        e["final_action"] = tr["final_action"]
+        return e
+
+    run(_capped(decision_cap_reason="insufficient_anchors", final_decision="HOLD",
+                final_action="CANCEL"),
+        "cap, no override: BUY → HOLD @30bps", 0)
+    run(_capped(decision_cap_reason="low_valuation_confidence",
+                cap_override_reason="major catalyst", final_decision="STAGED_ENTRY",
+                final_action="STAGED",
+                staged_split={"aggressive_pct": 50.0, "conservative_pct": 50.0}),
+        "cap + override: STAGED_ENTRY @30bps", 0)
+
+    # The cap only ever shrinks — it can never justify a size above the chain tail.
+    run(_capped(decision_cap_reason="low_data_quality", final_decision="HOLD",
+                final_action="CANCEL", position_size_pct=0.05),
+        "tamper: cap used to justify an ENLARGED position", 1)
+    # ...and an uncapped HOLD still has to be flat.
+    e = copy.deepcopy(ex)
+    e["trades_this_session"][0].update(final_decision="HOLD", final_action="CANCEL",
+                                       position_size_pct=0.02)
+    e["final_action"] = "CANCEL"
+    run(e, "tamper: uncapped HOLD carrying a live position", 1)
+    # sized_for_decision is what drives the halving check, not final_decision.
+    e = copy.deepcopy(ex)
+    e["trades_this_session"][0]["risk_audit"]["sized_for_decision"] = "STAGED_ENTRY"
+    run(e, "tamper: sized_for STAGED_ENTRY but chain not halved", 1)
+
     # ── cascade label, bonus side ───────────────────────────────────────────
     # Mirror of "cascade label vs penalty_applied". Relabelling a ×1.15 consensus chain
     # `no_penalty` leaves both the arithmetic and `bonus_applied` intact, so only the

@@ -10,9 +10,20 @@ back to the next model.
 Two independent budgets, both enforced (V4.84.0):
   * `daily_max_calls`  — resets on UTC date rollover
   * `window_max_calls` over `window_hours` — a rolling window that does NOT reset
-    at midnight, because the provider's session window does not either. This is
-    what lets a protocol run self-throttle before it walks into a 5-hour session
-    cap. Absent / 0 = uncapped, same convention as the daily budget.
+    at midnight, because the provider's session window does not either.
+    Absent / 0 = uncapped, same convention as the daily budget.
+
+**What the window does and does not govern** (corrected in V4.86.0 — the original
+claim that it makes "protocol runs self-throttle" was wrong on both halves):
+  * It DOES gate `run_role()` / `run_with_fallback()` / `pick_model()`, i.e. the
+    single-shot governed calls, and it removes an exhausted model from the chain.
+  * It does NOT gate the agentic protocol subprocess path. `dashboard_server`
+    deliberately bypasses `pick_model` there (a user-clicked protocol is an explicit
+    model choice, see its comment) and only reports the outcome afterwards through
+    `note_run()`. That records **one** timestamp for a run that may spend dozens to
+    hundreds of API turns, so the window under-counts the largest consumer by design.
+    Treat `window_calls` as "governed calls", not "API turns"; sizing the cap as if it
+    were the provider's turn budget will not protect that path.
 
 Usage counters + cooldowns persist in `config/llm_usage.json`. The daily counters
 auto-reset on UTC date rollover; `call_timestamps` deliberately survive that reset
@@ -26,6 +37,7 @@ Standalone: `python3 scripts/_shared/model_router.py --status`
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import re
@@ -33,6 +45,11 @@ import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:      # non-POSIX — the usage lock degrades to a no-op
+    fcntl = None
 
 _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
@@ -76,11 +93,10 @@ def _blank_usage() -> dict:
 
 # ───────────────────── rolling window (V4.84.0) ─────────────────────────────
 DEFAULT_WINDOW_HOURS = 5.0
-# Timestamps are pruned to the model's own window on every load. This ceiling is
-# the belt-and-braces bound on how long a stale entry can survive a config that
-# shrinks a window — without it, lowering `window_hours` would leave the older
-# timestamps in the file forever.
-_MAX_RETAINED_HOURS = 48.0
+# A timestamp further ahead than this is a clock fault, not a call. Counting it would
+# wedge the window shut with no way to recover; ignoring near-future skew would let a
+# fast clock hand back slots. Kept generous so ordinary NTP drift still counts.
+_MAX_FUTURE_SKEW_HOURS = 24.0
 
 
 def _window_cfg(model: str, cfg: dict) -> tuple[int, float]:
@@ -110,26 +126,40 @@ def _parse_ts(v) -> datetime | None:
 
 
 def _prune_timestamps(stamps, hours: float) -> list[str]:
-    """Keep only stamps inside `hours` (bounded by _MAX_RETAINED_HOURS). Future-dated
-    stamps are kept: a clock skew that drops them would under-count the window."""
+    """Keep only stamps inside the model's own window, and drop clock-fault stamps.
+
+    Retention is exactly `hours`: nothing older can affect `_window_calls`, and
+    shrinking `window_hours` in config drops the now-irrelevant stamps on the next
+    load rather than stranding them. (V4.86.0 — this used to clamp to a 48h ceiling,
+    which silently truncated any window configured longer than that.)
+    """
     if not isinstance(stamps, list):
         return []
-    cutoff = _now() - timedelta(hours=min(max(hours, 0.0), _MAX_RETAINED_HOURS))
+    now = _now()
+    cutoff = now - timedelta(hours=max(hours, 0.0))
+    horizon = now + timedelta(hours=_MAX_FUTURE_SKEW_HOURS)
     out = []
     for s in stamps:
         d = _parse_ts(s)
-        if d is not None and d >= cutoff:
+        if d is not None and cutoff <= d <= horizon:
             out.append(d.isoformat())
     return out
 
 
 def _window_calls(entry: dict, hours: float) -> int:
-    """How many calls this model made inside the trailing `hours`."""
-    cutoff = _now() - timedelta(hours=hours)
+    """How many calls this model made inside the trailing `hours`.
+
+    Near-future stamps still count (a slightly fast clock must not free up slots), but
+    one beyond `_MAX_FUTURE_SKEW_HOURS` is a clock fault and is ignored — otherwise a
+    single bad stamp wedges the window shut with no path to recovery.
+    """
+    now = _now()
+    cutoff = now - timedelta(hours=hours)
+    horizon = now + timedelta(hours=_MAX_FUTURE_SKEW_HOURS)
     n = 0
     for s in entry.get("call_timestamps") or []:
         d = _parse_ts(s)
-        if d is not None and d >= cutoff:
+        if d is not None and cutoff <= d <= horizon:
             n += 1
     return n
 
@@ -157,10 +187,20 @@ def _accumulate_tokens(entry: dict, tok: dict | None) -> None:
 def _load_usage(cfg: dict | None = None) -> dict:
     """Read llm_usage.json; auto-reset the daily counters on UTC date rollover.
 
-    The rollover reset deliberately does NOT clear `call_timestamps`: the rolling
-    window tracks the provider's session window, which pays no attention to UTC
-    midnight. Zeroing it there would hand back a full window's worth of headroom at
-    00:00 UTC — exactly the quota incident this counter exists to prevent.
+    Three things deliberately SURVIVE the rollover, because none of them is a
+    property of the UTC day:
+
+      * `call_timestamps` — the rolling window tracks the provider's session window,
+        which pays no attention to midnight. Zeroing it would hand back a full
+        window's worth of headroom at 00:00 UTC.
+      * `cooldown_until` — a 4h quota cooldown tripped at 23:30 is still in force at
+        00:00. Dropping it (V4.84.0 did) sent traffic straight back into a wall the
+        provider had not lifted yet.
+      * `last_error` — the operator-facing explanation for that cooldown; clearing it
+        while the cooldown stands leaves an unexplained block.
+
+    What DOES reset is the daily call counter and the token totals, which are exactly
+    the per-UTC-day quantities.
 
     Entries written before V4.84.0 have no `call_timestamps`. They get an empty list,
     so the window starts measuring from now rather than pretending to know history.
@@ -178,13 +218,20 @@ def _load_usage(cfg: dict | None = None) -> dict:
     if u is not None:
         for m, e in (u.get("models") or {}).items():
             if isinstance(e, dict):
-                carried[m] = e.get("call_timestamps")
+                carried[m] = e
 
     if u is None or u.get("date") != _today():
         fresh = _blank_usage()
         for m, e in fresh["models"].items():
+            prev = carried.get(m) or {}
             _, hours = _window_cfg(m, cfg)
-            e["call_timestamps"] = _prune_timestamps(carried.get(m), hours)
+            e["call_timestamps"] = _prune_timestamps(prev.get("call_timestamps"), hours)
+            # Carry a cooldown only while it is still in the future — an expired one
+            # would otherwise be resurrected every load.
+            cu = prev.get("cooldown_until")
+            if _parse_ts(cu) is not None and _parse_ts(cu) > _now():
+                e["cooldown_until"] = cu
+                e["last_error"] = prev.get("last_error")
         return fresh
 
     for m in VALID_MODELS:
@@ -209,6 +256,45 @@ def _save_usage(u: dict) -> None:
         os.replace(tmp, USAGE_FILE)
     except OSError:
         pass
+
+
+@contextlib.contextmanager
+def _usage_write_lock():
+    """Serialise the load → mutate → save cycle ACROSS PROCESSES (V4.86.0).
+
+    The individual write is atomic (mkstemp + os.replace), which is why a torn file
+    was never the problem. The problem is the read-modify-write: the dashboard server,
+    the break-news poller and a CLI invocation each load the same counters, increment
+    their own, and save — so concurrent recorders overwrite each other and the budget
+    under-counts, letting real usage exceed a cap that looks respected on disk.
+
+    A separate `.lock` file is used rather than the usage file itself, because
+    `os.replace` swaps the inode out from under any lock held on it.
+
+    Best-effort: if flock is unavailable or the lock cannot be taken, the body still
+    runs. Losing an occasional increment is strictly better than dropping the call.
+    """
+    lock_path = USAGE_FILE.with_suffix(".lock")
+    fh = None
+    try:
+        USAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        fh = open(lock_path, "a+")
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+    except (OSError, NameError, AttributeError):
+        if fh is not None:
+            try:
+                fh.close()
+            except OSError:
+                pass
+            fh = None
+    try:
+        yield
+    finally:
+        if fh is not None:
+            try:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+            finally:
+                fh.close()
 
 
 # ─────────────────────────── availability ───────────────────────────────────
@@ -328,24 +414,29 @@ def _stamp_call(entry: dict) -> None:
 
 
 def _record(model: str, result: LLMResult, cfg: dict) -> None:
-    """Increment the call counters; trip a cooldown on a quota wall."""
-    usage = _load_usage(cfg)
-    e = usage["models"].setdefault(
-        model, {"calls": 0, "cooldown_until": None, "last_error": None})
-    _stamp_call(e)
-    _accumulate_tokens(e, {
-        "input_tokens": getattr(result, "input_tokens", 0),
-        "output_tokens": getattr(result, "output_tokens", 0),
-        "cache_read_tokens": getattr(result, "cache_read_tokens", 0),
-        "cache_write_tokens": getattr(result, "cache_write_tokens", 0),
-        "cost_usd": getattr(result, "cost_usd", 0.0),
-    })
-    if result.exit_code != 0 or not result.parsed:
-        e["last_error"] = (result.error or f"parse={result.parse_status}")[:200]
-    if is_quota_error(result):
-        hrs = float(cfg.get("cooldown_hours", 4))
-        e["cooldown_until"] = (_now() + timedelta(hours=hrs)).isoformat()
-    _save_usage(usage)
+    """Increment the call counters; trip a cooldown on a quota wall.
+
+    The whole load → mutate → save cycle is held under `_usage_write_lock` so a
+    concurrent recorder in another process cannot clobber this increment.
+    """
+    with _usage_write_lock():
+        usage = _load_usage(cfg)
+        e = usage["models"].setdefault(
+            model, {"calls": 0, "cooldown_until": None, "last_error": None})
+        _stamp_call(e)
+        _accumulate_tokens(e, {
+            "input_tokens": getattr(result, "input_tokens", 0),
+            "output_tokens": getattr(result, "output_tokens", 0),
+            "cache_read_tokens": getattr(result, "cache_read_tokens", 0),
+            "cache_write_tokens": getattr(result, "cache_write_tokens", 0),
+            "cost_usd": getattr(result, "cost_usd", 0.0),
+        })
+        if result.exit_code != 0 or not result.parsed:
+            e["last_error"] = (result.error or f"parse={result.parse_status}")[:200]
+        if is_quota_error(result):
+            hrs = float(cfg.get("cooldown_hours", 4))
+            e["cooldown_until"] = (_now() + timedelta(hours=hrs)).isoformat()
+        _save_usage(usage)
 
 
 # ─────────────────────────── routing ────────────────────────────────────────
@@ -411,17 +502,18 @@ def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = N
     from the run's stream-json `result` event) is added to the model's daily
     token totals when supplied."""
     cfg = load_llm_config()
-    usage = _load_usage(cfg)
-    e = usage["models"].setdefault(
-        model, {"calls": 0, "cooldown_until": None, "last_error": None})
-    _stamp_call(e)
-    _accumulate_tokens(e, tokens)
-    if not ok:
-        e["last_error"] = (error_text or "run failed")[:200]
-    if error_text and _QUOTA_RE.search(error_text):
-        hrs = float(cfg.get("cooldown_hours", 4))
-        e["cooldown_until"] = (_now() + timedelta(hours=hrs)).isoformat()
-    _save_usage(usage)
+    with _usage_write_lock():
+        usage = _load_usage(cfg)
+        e = usage["models"].setdefault(
+            model, {"calls": 0, "cooldown_until": None, "last_error": None})
+        _stamp_call(e)
+        _accumulate_tokens(e, tokens)
+        if not ok:
+            e["last_error"] = (error_text or "run failed")[:200]
+        if error_text and _QUOTA_RE.search(error_text):
+            hrs = float(cfg.get("cooldown_hours", 4))
+            e["cooldown_until"] = (_now() + timedelta(hours=hrs)).isoformat()
+        _save_usage(usage)
 
 
 def run_role(role: str, system_prompt: str, user_prompt: str,

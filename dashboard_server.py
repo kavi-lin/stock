@@ -98,12 +98,21 @@ _heatmap_pe_cache = {}                                                   # {sym:
 _heatmap_pe_lock  = threading.Lock()
 HEATMAP_PE_TTL_SEC = int(os.getenv("HEATMAP_PE_TTL_SEC", "86400"))       # 24h
 # V4.85.0 — retry state for the PE warm-up. A cache entry whose value is not a dict
-# is a *failure* and is retried under this backoff; only a real bundle gets the 24h
-# TTL. Both are epoch/seconds, mutated only from the heatmap daemon thread.
+# is a *failure* and is retried under this backoff; only a real bundle gets the 24h TTL.
+# V4.86.0 — `_heatmap_pe_run_lock` makes the warm-up non-reentrant: the boot thread and
+# the refresh loop can otherwise start the same ~600-ticker residual batch at once,
+# doubling the spend and racing the backoff globals.
 _heatmap_pe_next_attempt_at = 0.0
 _heatmap_pe_backoff_sec     = 0
+_heatmap_pe_run_lock        = threading.Lock()
 HEATMAP_PE_RETRY_BASE_SEC = int(os.getenv("HEATMAP_PE_RETRY_BASE_SEC", "300"))    # 5 min
 HEATMAP_PE_RETRY_MAX_SEC  = int(os.getenv("HEATMAP_PE_RETRY_MAX_SEC", "3600"))    # 1h
+# V4.86.0 — per-symbol retry floor for the radar lazy-fetch path. Those symbols live
+# OUTSIDE `_heatmap_state["tickers"]`, so the warm-up's retry sweep never reaches them;
+# without a floor of their own, a symbol whose three endpoints are genuinely empty gets
+# refetched on every 180s quote-TTL expiry — ~60 FMP calls/hour, forever.
+_heatmap_pe_attempted_at = {}                                            # {sym: epoch}
+HEATMAP_PE_LAZY_RETRY_SEC = int(os.getenv("HEATMAP_PE_LAZY_RETRY_SEC", "21600"))  # 6h
 # V2.13.5 — fast live-quote cache for radar K-line tail (5s TTL, single ticker
 # per request, FMP quote-short endpoint). Decoupled from intraday-bars cache so
 # the K-line popup can build a 15s tick tail between 5-min bar boundaries.
@@ -2496,11 +2505,22 @@ def _fetch_theme_extra_quotes(symbols):
             }
             _theme_extra_quote_cache[sym] = (now, row)
             out[sym] = row
+            # V4.86.0 — rate-limit the retry of symbols that have no bundle yet. These
+            # are outside the heatmap universe, so `_heatmap_refresh_pe_universe`'s
+            # retry sweep never covers them; the only thing standing between a
+            # permanently-empty symbol and an unbounded refetch loop is this floor.
             if not pe_entry:
-                fetched_syms.append(sym)
+                with _heatmap_pe_lock:
+                    last_try = _heatmap_pe_attempted_at.get(sym, 0.0)
+                if (now - last_try) >= HEATMAP_PE_LAZY_RETRY_SEC:
+                    fetched_syms.append(sym)
 
     # Lazy PE fetch for newly-seen symbols (background — populates next render)
     if fetched_syms:
+        with _heatmap_pe_lock:
+            for s in fetched_syms:
+                _heatmap_pe_attempted_at[s] = now
+
         def _bg():
             from concurrent.futures import ThreadPoolExecutor, as_completed
             with ThreadPoolExecutor(max_workers=5) as ex:
@@ -2511,9 +2531,9 @@ def _fetch_theme_extra_quotes(symbols):
                         pe = fut.result()
                     except Exception:
                         pe = None
-                    # V4.85.0 — only a real bundle is cached. Caching a failure here
-                    # would park an empty entry against the 24h TTL and hide the
-                    # ticker from the warm-up's retry sweep.
+                    # V4.85.0 — only a real bundle is cached. Caching a failure would
+                    # park an empty entry against the 24h TTL and make the symbol look
+                    # resolved. The retry floor above is what bounds the cost instead.
                     if isinstance(pe, dict):
                         with _heatmap_pe_lock:
                             _heatmap_pe_cache[s] = (time.time(), pe)
@@ -2709,7 +2729,15 @@ def _fetch_pe_ttm(ticker, api_key):
     # `responded` tracks whether ANY endpoint actually came back with rows. A ticker
     # whose three calls all return empty is indistinguishable from an outage at this
     # level, so it is reported as a failure and retried rather than cached as fact.
+    #
+    # V4.86.0 — `responded` alone is not enough. If the 429 breaker trips partway
+    # through, the first endpoint's value is real but the other two are None *because
+    # of the outage*, and returning that bundle caches a half-filled record as fact for
+    # 24h — the very "store a failure as data" bug this function was changed to stop,
+    # just at field rather than record granularity. So the breaker is re-checked at the
+    # end: if it tripped during these calls, the partial bundle is discarded.
     responded = False
+    breaker_at_entry = _heatmap_ratelimit_until
 
     # 1) PE TTM
     rows = _fmp_get_json(f"{base}/ratios-ttm?symbol={ticker}&apikey={api_key}", timeout=10) or []
@@ -2738,7 +2766,12 @@ def _fetch_pe_ttm(ticker, api_key):
         if future:
             out["fwd_eps"] = _safe_round(future[0].get("epsAvg"), 4)
 
-    return out if responded else None
+    if not responded:
+        return None
+    if _heatmap_ratelimit_until != breaker_at_entry:
+        # Rate limit tripped mid-ticker: whatever is still None here may well exist.
+        return None
+    return out
 
 
 def _heatmap_refresh_pe_universe(max_workers=10):
@@ -2760,6 +2793,21 @@ def _heatmap_refresh_pe_universe(max_workers=10):
     api_key = os.getenv("FMP_API_KEY")
     if not api_key:
         return False
+    # Non-reentrant. The boot thread and the refresh loop both call this, and a residual
+    # batch of ~600 tickers × 3 calls takes minutes — long enough for the loop to come
+    # round and start the same batch again, doubling the spend and racing the backoff
+    # globals below. Whoever is already running will finish the work.
+    if not _heatmap_pe_run_lock.acquire(blocking=False):
+        return False
+    try:
+        return _heatmap_refresh_pe_universe_locked(max_workers)
+    finally:
+        _heatmap_pe_run_lock.release()
+
+
+def _heatmap_refresh_pe_universe_locked(max_workers):
+    global _heatmap_pe_next_attempt_at, _heatmap_pe_backoff_sec
+    api_key = os.getenv("FMP_API_KEY")
     now = time.time()
     if now < _heatmap_pe_next_attempt_at:
         return False
@@ -2931,11 +2979,13 @@ def heatmap_refresh_loop():
             if _is_us_market_hours():
                 _heatmap_refresh_quotes()
 
-            # V4.85.0 — PE warm-up re-attempt. Cheap when nothing is outstanding
-            # (the TTL / backoff checks return before any HTTP call), and it is the
-            # only thing that gets a partially-failed warm-up back to full coverage
-            # without a server restart.
-            _heatmap_refresh_pe_universe()
+            # V4.85.0 — PE warm-up re-attempt: the only thing that gets a partially
+            # failed warm-up back to full coverage without a server restart.
+            # V4.86.0 — dispatched to its own thread. A residual batch can run for
+            # minutes, and inline it would hold up the quote refresh above for the
+            # rest of the loop period, freezing the heatmap mid-session. The
+            # non-reentrancy lock inside makes a redundant dispatch a cheap no-op.
+            threading.Thread(target=_heatmap_refresh_pe_universe, daemon=True).start()
         except Exception as e:
             sys.stderr.write(f"[heatmap] loop error: {e}\n")
             with _heatmap_lock:

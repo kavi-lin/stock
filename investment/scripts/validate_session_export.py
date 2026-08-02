@@ -469,27 +469,52 @@ def check_phase4_sizing(entry, trade, errors, warnings):
 
     # ── Tier A.4 — STAGED halving + chain tail vs exported size ─────────────
     fd = trade.get("final_decision")
+    # The halving belongs to the decision Phase 4 SIZED against, not to whatever the
+    # export finally says: Phase 4.6 runs after Phase 4 and can rewrite BUY → HOLD /
+    # STAGED_ENTRY, at which point `final_decision` no longer explains the chain.
+    # `sized_for_decision` is the engine's record of its own input (V4.86.0); older
+    # entries fall back to `final_decision`, which is correct whenever no cap fired.
+    sized_for = ra.get("sized_for_decision") or fd
     polar_adj, final_size = _numf(chain.get("polar_adj")), _numf(chain.get("final_position_size"))
-    if polar_adj is not None and final_size is not None and fd:
-        want = polar_adj * 0.5 if fd == "STAGED_ENTRY" else polar_adj
+    if polar_adj is not None and final_size is not None and sized_for:
+        want = polar_adj * 0.5 if sized_for == "STAGED_ENTRY" else polar_adj
         if abs(want - final_size) > 1.5e-6:
             errors.append(
                 f"sizing_chain.final_position_size={final_size} != {want:.8f} — "
-                f"final_decision={fd!r} "
-                f"{'須折半 (× 0.5)' if fd == 'STAGED_ENTRY' else '不折半'}")
+                f"sized_for_decision={sized_for!r} "
+                f"{'須折半 (× 0.5)' if sized_for == 'STAGED_ENTRY' else '不折半'}")
 
     size = _numf(trade.get("position_size_pct"))
     approval = ra.get("approval")
     probe_capped = ra.get("hot_zone_probe_capped") is True
+    cap_on = trade.get("decision_cap_active") is True
     if size is not None and final_size is not None:
-        # Three legitimate ways the exported size departs from the chain tail; anything
-        # else means the number was edited after the engine produced it.
-        if approval == "REJECTED" or fd not in ("BUY", "STAGED_ENTRY"):
+        # The exported size may sit BELOW the chain tail for exactly four reasons, in
+        # precedence order. Anything else means the number was edited after the engine
+        # produced it. Modelling these explicitly is what keeps the gate from rejecting
+        # a legitimately-capped export.
+        #
+        # V4.86.0 — `decision_cap_active` was missing from this list, which made §14
+        # reject every Phase 4.6 outcome: the cap runs AFTER Phase 4 sizing (protocol
+        # §PHASE 4.6 / decision_engine.apply_decision_cap), clamps the size to 30bps and
+        # may drop BUY to HOLD *while leaving a live probe-sized position*. Both of those
+        # tripped the "not BUY-side ⇒ 0" and "size == chain tail" branches below.
+        if approval == "REJECTED":
+            if abs(size) > 1e-9:
+                errors.append(f"position_size_pct={size} but approval=REJECTED — "
+                              "被否決的計畫必須是 0 倉位")
+        elif cap_on:
+            # Phase 4.6 only ever reduces. §10 separately enforces the 30bps ceiling.
+            if size > final_size + 1.5e-6:
+                errors.append(
+                    f"position_size_pct={size} > sizing_chain tail {final_size} with "
+                    "decision_cap_active=true — Phase 4.6 cap 只會縮小倉位，不會放大")
+        elif fd not in ("BUY", "STAGED_ENTRY"):
             if abs(size) > 1e-9:
                 errors.append(
-                    f"position_size_pct={size} but "
-                    f"{'approval=REJECTED' if approval == 'REJECTED' else f'final_decision={fd!r}'}"
-                    " — 不可執行的決策必須是 0 倉位")
+                    f"position_size_pct={size} but final_decision={fd!r} — "
+                    "不可執行的決策必須是 0 倉位（除非 decision_cap_active=true，"
+                    "Phase 4.6 允許 cap 後保留 ≤30bps 的試水倉）")
         elif probe_capped:
             if size > final_size + 1.5e-6:
                 errors.append(f"position_size_pct={size} > sizing_chain tail {final_size} "
@@ -497,7 +522,8 @@ def check_phase4_sizing(entry, trade, errors, warnings):
         elif abs(size - final_size) > 1.5e-6:
             errors.append(
                 f"position_size_pct={size} != sizing_chain.final_position_size={final_size} — "
-                "兩者必須一致，除非 approval=REJECTED 或 hot_zone_probe_capped=true")
+                "兩者必須一致，除非 approval=REJECTED / decision_cap_active=true / "
+                "hot_zone_probe_capped=true")
 
     # ── Tier B — rule-table conformance (V4.82.0+ entries only) ─────────────
     if not builder_ver:
