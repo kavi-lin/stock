@@ -14,6 +14,9 @@ What must hold now:
   3. Retries are backed off, and the backoff escalates while the failure persists.
   4. The rate-limit breaker is not charged as a failed batch (nothing was attempted).
   5. A fully-warm cache costs zero HTTP calls.
+  6. A symbol FMP has no bundle for is `PE_ABSENT`, not a failure — it is quarantined
+     after a streak instead of pinning the backoff at its ceiling forever (V4.86.2).
+  7. A transport outage never quarantines anything, however long it lasts (V4.86.2).
 
 Run: python3 tests/test_heatmap_pe_retry.py   # rc=0 全過 / rc=1 fail
 """
@@ -45,6 +48,8 @@ BUNDLE_B = {"pe_ttm": 30.0, "ev_ebitda": 9.0, "fwd_eps": 4.0}
 def _reset(tickers=("AAA", "BBB", "CCC", "DDD")):
     ds._heatmap_state["tickers"] = {t: {"price": 100.0} for t in tickers}
     ds._heatmap_pe_cache.clear()
+    ds._heatmap_pe_empty_streak.clear()
+    ds._heatmap_pe_quarantined.clear()
     ds._heatmap_pe_next_attempt_at = 0.0
     ds._heatmap_pe_backoff_sec = 0
     ds._heatmap_ratelimit_until = 0.0
@@ -151,9 +156,13 @@ try:
         eq("partial.no_data_but_responded",
            ds._fetch_pe_ttm("LOSSCO", "k"), {"pe_ttm": None, "ev_ebitda": None,
                                              "fwd_eps": None})
-        # Nothing anywhere → failure, retried.
+        # V4.86.2 — all three endpoints answered with an empty list: the symbol has no
+        # bundle at FMP. That is a fact, reported as PE_ABSENT, not a retryable failure.
         ds._fmp_get_json = lambda url, timeout=10: []
-        eq("partial.total_silence_is_failure", ds._fetch_pe_ttm("GHOST", "k"), None)
+        eq("partial.total_silence_is_absent", ds._fetch_pe_ttm("GHOST", "k"), ds.PE_ABSENT)
+        # ...but an endpoint that did not answer at all (None ≠ list) is still an outage.
+        ds._fmp_get_json = lambda url, timeout=10: ([] if "ratios-ttm" in url else None)
+        eq("partial.transport_failure_is_none", ds._fetch_pe_ttm("GHOST", "k"), None)
     finally:
         ds._fmp_get_json = _orig_get
         ds._heatmap_ratelimit_until = 0.0
@@ -198,6 +207,60 @@ try:
     eq("lazy.floor_expires",
        (now - ds._heatmap_pe_attempted_at["GHOST"]) >= ds.HEATMAP_PE_LAZY_RETRY_SEC, True)
     eq("lazy.floor_is_hours_not_minutes", ds.HEATMAP_PE_LAZY_RETRY_SEC >= 3600, True)
+
+    # ── V4.86.2: permanently-empty symbols are quarantined, not retried forever ──
+    # The bug: CCC/DDD have no FMP valuation bundle at all, so every pass left them in
+    # `failed` — the backoff sat pinned at its ceiling and `return not failed` was
+    # permanently False, which made the health signal meaningless.
+    _reset()
+    ds._fetch_pe_ttm = lambda sym, key: (BUNDLE_A if sym in ("AAA", "BBB") else ds.PE_ABSENT)
+    for i in range(ds.HEATMAP_PE_EMPTY_STREAK_MAX):
+        ds._heatmap_pe_next_attempt_at = 0.0
+        # An absent symbol is not a failure: the batch is healthy from pass 1.
+        eq(f"absent.pass{i}_is_healthy", ds._heatmap_refresh_pe_universe(max_workers=4), True)
+        eq(f"absent.pass{i}_no_backoff", ds._heatmap_pe_backoff_sec, 0)
+    eq("absent.quarantined_after_streak", sorted(ds._heatmap_pe_quarantined), ["CCC", "DDD"])
+    eq("absent.not_cached_as_data", "CCC" in ds._heatmap_pe_cache, False)
+
+    # Quarantined symbols leave the batch entirely — zero HTTP for them.
+    probed: list[str] = []
+
+    def _count(sym, key):
+        probed.append(sym)
+        return ds.PE_ABSENT
+
+    ds._fetch_pe_ttm = _count
+    ds._heatmap_pe_next_attempt_at = 0.0
+    eq("absent.quarantine_returns_true", ds._heatmap_refresh_pe_universe(max_workers=4), True)
+    eq("absent.quarantine_skips_fetch", probed, [])
+
+    # The quarantine expires and the symbol gets exactly one re-probe.
+    ds._heatmap_pe_quarantined["CCC"] = time.time() - ds.HEATMAP_PE_QUARANTINE_SEC - 1
+    ds._heatmap_pe_next_attempt_at = 0.0
+    ds._heatmap_refresh_pe_universe(max_workers=4)
+    eq("absent.reprobe_after_expiry", probed, ["CCC"])
+    eq("absent.reprobe_requarantines", "CCC" in ds._heatmap_pe_quarantined, True)
+
+    # A symbol that starts answering again clears both the streak and the quarantine.
+    ds._heatmap_pe_quarantined["DDD"] = time.time() - ds.HEATMAP_PE_QUARANTINE_SEC - 1
+    ds._fetch_pe_ttm = lambda sym, key: BUNDLE_B
+    ds._heatmap_pe_next_attempt_at = 0.0
+    ds._heatmap_refresh_pe_universe(max_workers=4)
+    eq("absent.recovery_clears_quarantine", "DDD" in ds._heatmap_pe_quarantined, False)
+    eq("absent.recovery_clears_streak", "DDD" in ds._heatmap_pe_empty_streak, False)
+    eq("absent.recovery_cached", ds._heatmap_pe_cache["DDD"][1]["pe_ttm"], 30.0)
+
+    # ── V4.86.2: an outage must never quarantine the universe ───────────────
+    # Every symbol failing on transport looks identical to "every symbol is empty" if
+    # you only count failures — which is why the fetcher distinguishes the two.
+    _reset()
+    ds._fetch_pe_ttm = lambda sym, key: None
+    for _ in range(ds.HEATMAP_PE_EMPTY_STREAK_MAX + 2):
+        ds._heatmap_pe_next_attempt_at = 0.0
+        ds._heatmap_refresh_pe_universe(max_workers=4)
+    eq("outage.nothing_quarantined", dict(ds._heatmap_pe_quarantined), {})
+    eq("outage.no_streaks", dict(ds._heatmap_pe_empty_streak), {})
+    eq("outage.backoff_still_armed", ds._heatmap_pe_backoff_sec > 0, True)
 finally:
     ds._fetch_pe_ttm = _orig_fetch
     ds._heatmap_ratelimit_until = 0.0

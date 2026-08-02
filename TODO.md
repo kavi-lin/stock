@@ -1,8 +1,15 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-02 (v4.79.1)
+> **Last Updated**: 2026-08-02 (v4.86.2)
 
 ---
+
+## ✅ Done (v4.86.2) — 4.82–4.85 review 的 P3 尾款（明細見 CHANGELOG）
+
+- [x] `trade_plan_builder.classify_sector()` 補 FMP `profile.sector` 四個拼法（`Consumer Defensive` 原本被誤類成 cyclical，不只是噪音）。
+- [x] `replay_trade_plan.replay_sizing()` 反解納入兩個 Phase 3 倉位 cap（V5.1+ 從 `calculation_steps` 取；讀不到 → 退出 cohort；pre-V5.1 的 1.0 假設改具名 factor）。
+- [x] `investment_protocol_v5_0.md` 補回 `stop_buffer_pct` 預設 1.0% 與算式（此前只有 engine 知道）。
+- [x] `_fetch_pe_ttm` 拆出 `PE_ABSENT` 三態 + warm-up 空資料 symbol 隔離，解掉 backoff 被永久空 ticker 釘死、`return not failed` 失去意義的問題。
 
 ## ✅ Done (v4.79.0) — 4.78.0 review 的 P1 + 三項 P2
 

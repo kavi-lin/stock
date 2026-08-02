@@ -75,14 +75,18 @@ TAIL_RISK = os.path.join(ROOT, "skills/tail-risk-analyzer/scripts/tail_risk.py")
 THESES_DIR = os.path.join(ROOT, "investment/invest_logs/theses")
 
 # Protocol §PHASE 4 Step 3.5 — sector classification.
+# Both protocol-table names and the FMP `profile.sector` spellings that actually
+# arrive from company_context / the FMP bundle ("Basic Materials",
+# "Financial Services", "Consumer Cyclical", "Consumer Defensive").
 CYCLICAL_SECTORS = {
-    "technology", "industrials", "materials", "financials",
-    "consumer_discretionary", "cons. disc.", "consumer discretionary",
+    "technology", "industrials", "materials", "basic materials", "financials",
+    "financial services", "consumer_discretionary", "cons. disc.",
+    "consumer discretionary", "consumer cyclical",
     "energy", "communication", "communication services",
 }
 DEFENSIVE_SECTORS = {
     "utilities", "consumer_staples", "cons. staples", "consumer staples",
-    "healthcare", "health care", "real_estate", "real estate",
+    "consumer defensive", "healthcare", "health care", "real_estate", "real estate",
 }
 
 # Step 3.5 stage table: days_since_ftd → (stage, cyclical_mult, defensive_mult,

@@ -206,13 +206,41 @@ def replay_risk_reward(date, trade):
 # Cohort C — inverse sizing chain solve
 # ---------------------------------------------------------------------------
 
+def _phase3_caps(trade):
+    """The two Phase 3 position caps (structural-shift 50%, polarization 25%).
+
+    Both are plain multiplications in the Step 4 chain, so they invert cleanly — but only
+    when the export actually records them, which V5.1 does via `calculation_steps`. A
+    pre-V5.1 trade carries no record of either; pinning them to 1.0 there is an explicit
+    assumption (it appears in `factors` under its own name), not a silent one.
+
+    Returns `(factors, exclusion_reason)`; exactly one is non-None.
+    """
+    cs = trade.get("calculation_steps")
+    if not isinstance(cs, dict) or not cs:
+        return {"phase3_caps_unrecorded_assumed_uncapped": 1.0}, None
+    out = {}
+    for name, block, field in (
+        ("phase3_structural_shift_cap", "structural_shift_modulation", "position_size_cap_pct"),
+        ("phase3_polarization_cap", "polarization_modulation", "position_cap_after"),
+    ):
+        pct = _f((cs.get(block) or {}).get(field))
+        if pct is None or not 0 < pct <= 100:
+            # calculation_steps is present but this cap is unreadable — the size cannot be
+            # inverted without inventing the factor, so the trade leaves the cohort.
+            return None, f"phase3_cap_unreadable:{block}.{field}"
+        out[name] = pct / 100.0
+    return out, None
+
+
 def replay_sizing(date, entry, trade):
     """Divide the stored size back out through the recoverable multipliers.
 
     Recoverable from history: fragility_label, the macro cap trigger (phase0 snapshot),
-    binary_classification, burry_override_active, the FTD gate block, the STAGED halving.
-    NOT recoverable: the Step 2 vol cap (0/172 persisted) and the two Phase 3 position
-    caps on pre-V5.1 entries — which is exactly why this runs backwards.
+    binary_classification, burry_override_active, the FTD gate block, the STAGED halving,
+    and — on V5.1+ entries only — the two Phase 3 position caps out of `calculation_steps`.
+    NOT recoverable: the Step 2 vol cap (0/172 persisted), and those same two caps on
+    pre-V5.1 entries — which is exactly why this runs backwards.
 
     The macro cap is a `min()`, not a multiplication, so a trade whose chain hit it cannot
     be inverted at all; those are excluded rather than solved with a fabricated factor.
@@ -250,11 +278,16 @@ def replay_sizing(date, entry, trade):
     elif date >= FTD_GATE_SINCE and gate is None:
         return {"status": "excluded", "reason": "ftd_gate_expected_but_absent"}
 
-    if trade.get("final_decision") == "STAGED_ENTRY":
-        factors["staged_halving"] = 0.5
-
     # V20-F1 is new in V4.82.0 — pinned to 1.0 so it can never fabricate a mismatch.
     factors["v20_f1_sector_concentration"] = 1.0
+
+    caps, cap_reason = _phase3_caps(trade)
+    if cap_reason:
+        return {"status": "excluded", "reason": cap_reason}
+    factors.update(caps)
+
+    if trade.get("final_decision") == "STAGED_ENTRY":
+        factors["staged_halving"] = 0.5
 
     denom = 1.0
     for v in factors.values():
@@ -327,7 +360,7 @@ def run(history_path):
             "exclusion_reasons": dict(sorted(reasons.items(), key=lambda kv: -kv[1])),
             "reconciles": len(eligible) + len(excluded) == len(rows),
         }
-    return {"engine": "replay_trade_plan.py v1.0.0 (V4.82.0)",
+    return {"engine": "replay_trade_plan.py v1.1.0 (V4.86.2)",
             "history": history_path, "summary": summary, "rows": rows}
 
 

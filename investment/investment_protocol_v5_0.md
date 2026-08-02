@@ -1196,6 +1196,7 @@ PM **不需**先跑那兩支。兩支任一失敗 → engine 降級並在 `warni
   "analysis_price": 455.07,
   "time_horizon": "mid",
   "sector": "Technology",                     // 省略時由 ticker 反查 company_context
+  "stop_buffer_pct": 1.0,                     // 省略 = 1.0（Step 1 stop_loss 緩衝，見下）
   "multi_horizon_price_framework": { /* Phase 2.4 engine 輸出整塊 */ },
   "technical": {"key_levels": {"support": 415.0, "resistance": 560.0},
                 "pattern": "breakout|null", "rs_rating": 92,
@@ -1227,6 +1228,7 @@ engine + `test_trade_plan_builder.py`）。
 > - `entry_conservative` ← short_term_5d `[band_lower_capped, band_point]`（回檔承接；下界貼 support）
 > - `take_profit` ← mid_term_60d `mid_target`；若 > `key_levels.resistance` → cap 在 resistance 並於 `exit_conditions` 註記「需突破 $R 才上看 $mid_target」
 > - `stop_loss` ← `min(short_term band_lower_capped, key_levels.support)` − buffer；與 Step 4 `final_stop_loss_pct` 算出的價取**較保守（較高）**者
+>   - buffer = `stop_buffer_pct`，**預設 1.0%**（input 省略時 engine 取此值）；算式 `structural = pre_buffer × (1 − stop_buffer_pct/100)`，Step 1 與 Step 4 用同一個值
 > - `risk_reward_ratio` 用上述 TP/SL 重算，仍須 ≥ 2.0。不足時 engine 依本條的補救順序先**收緊 entry**
 >   （aggressive 中點 → conservative 中點 → conservative 下界），全部不過才降級 HOLD 並
 >   `approval=REJECTED`；實際採用哪一軌寫在 `trade_plan.entry_track_used`，嘗試序寫在 `rr_solve_trace`

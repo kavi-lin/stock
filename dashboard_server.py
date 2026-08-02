@@ -113,6 +113,21 @@ HEATMAP_PE_RETRY_MAX_SEC  = int(os.getenv("HEATMAP_PE_RETRY_MAX_SEC", "3600"))  
 # refetched on every 180s quote-TTL expiry — ~60 FMP calls/hour, forever.
 _heatmap_pe_attempted_at = {}                                            # {sym: epoch}
 HEATMAP_PE_LAZY_RETRY_SEC = int(os.getenv("HEATMAP_PE_LAZY_RETRY_SEC", "21600"))  # 6h
+# V4.86.2 — known-empty quarantine for the warm-up path. A handful of universe members
+# have no ratios bundle at FMP at all (recent listings, non-operating shells, symbols FMP
+# spells differently). They came back empty on every single pass, which pinned
+# `_heatmap_pe_backoff_sec` at its ceiling forever and made the warm-up's
+# `return not failed` permanently False — so the health signal stopped distinguishing
+# "FMP is down" from "these four tickers have no P/E". `PE_ABSENT` is the fetcher's way
+# of saying "answered, and there is nothing"; after N such results in a row a symbol is
+# quarantined — skipped from the batch until the re-probe TTL. A transport failure
+# (None) never counts toward the streak, so an outage cannot quarantine the universe.
+# One success clears both the streak and the quarantine.
+PE_ABSENT = "pe_absent"
+_heatmap_pe_empty_streak = {}                                            # {sym: int}
+_heatmap_pe_quarantined  = {}                                            # {sym: epoch marked}
+HEATMAP_PE_EMPTY_STREAK_MAX = int(os.getenv("HEATMAP_PE_EMPTY_STREAK_MAX", "3"))
+HEATMAP_PE_QUARANTINE_SEC   = int(os.getenv("HEATMAP_PE_QUARANTINE_SEC", "86400"))  # 24h
 # V2.13.5 — fast live-quote cache for radar K-line tail (5s TTL, single ticker
 # per request, FMP quote-short endpoint). Decoupled from intraday-bars cache so
 # the K-line popup can build a 15s tick tail between 5-min bar boundaries.
@@ -2707,11 +2722,18 @@ def _fetch_pe_ttm(ticker, api_key):
     """Single-ticker valuation bundle: PE TTM + EV/EBITDA TTM + forward EPS
     estimate (next fiscal year). Three FMP calls per ticker, cache 24h.
 
-    Returns {"pe_ttm", "ev_ebitda", "fwd_eps"} (any field may be None on miss),
-    or **None when nothing was actually fetched** (rate-limit breaker open, or all
-    three calls came back empty). V4.85.0 — previously an unattempted fetch returned
-    the all-None dict, which the caller could not tell apart from a genuine
-    "this ticker has no P/E" and cached for the full 24h TTL.
+    Three distinct return values:
+      dict          — {"pe_ttm", "ev_ebitda", "fwd_eps"} (any field may be None on miss)
+      `PE_ABSENT`   — all three endpoints answered, none had a row: FMP has no valuation
+                      bundle for this symbol at all
+      None          — nothing was actually fetched (rate-limit breaker open, or the
+                      transport failed)
+
+    V4.85.0 — previously an unattempted fetch returned the all-None dict, which the
+    caller could not tell apart from a genuine "this ticker has no P/E" and cached for
+    the full 24h TTL. V4.86.2 splits the remaining ambiguity: "answered with nothing"
+    and "did not answer" were both None, so the warm-up could not tell a permanently
+    data-less universe member apart from an outage and retried it on every pass forever.
     Forward PE is computed live in quote refresh (price / fwd_eps), so price
     drift within the 24h cache window stays accurate."""
     base = "https://financialmodelingprep.com/stable"
@@ -2739,24 +2761,35 @@ def _fetch_pe_ttm(ticker, api_key):
     responded = False
     breaker_at_entry = _heatmap_ratelimit_until
 
+    # `answered` counts endpoints that came back well-formed, empty list included. That
+    # is what separates "this symbol has nothing" from "the transport is down" — the
+    # latter surfaces as None out of `_fmp_get_json`, never as a list.
+    answered = 0
+
+    def _rows(url):
+        nonlocal answered
+        raw = _fmp_get_json(url, timeout=10)
+        if isinstance(raw, list):
+            answered += 1
+            return raw
+        return []
+
     # 1) PE TTM
-    rows = _fmp_get_json(f"{base}/ratios-ttm?symbol={ticker}&apikey={api_key}", timeout=10) or []
-    if isinstance(rows, list) and rows:
+    rows = _rows(f"{base}/ratios-ttm?symbol={ticker}&apikey={api_key}")
+    if rows:
         responded = True
         out["pe_ttm"] = _safe_round(rows[0].get("priceToEarningsRatioTTM"), 2)
 
     # 2) EV/EBITDA TTM
-    rows = _fmp_get_json(f"{base}/key-metrics-ttm?symbol={ticker}&apikey={api_key}", timeout=10) or []
-    if isinstance(rows, list) and rows:
+    rows = _rows(f"{base}/key-metrics-ttm?symbol={ticker}&apikey={api_key}")
+    if rows:
         responded = True
         out["ev_ebitda"] = _safe_round(rows[0].get("evToEBITDATTM"), 2)
 
     # 3) Forward EPS (closest future fiscal year, sorted asc)
-    rows = _fmp_get_json(
-        f"{base}/analyst-estimates?symbol={ticker}&period=annual&limit=4&apikey={api_key}",
-        timeout=10,
-    ) or []
-    if isinstance(rows, list) and rows:
+    rows = _rows(
+        f"{base}/analyst-estimates?symbol={ticker}&period=annual&limit=4&apikey={api_key}")
+    if rows:
         responded = True
         today_iso = date.today().isoformat()
         future = sorted(
@@ -2767,7 +2800,9 @@ def _fetch_pe_ttm(ticker, api_key):
             out["fwd_eps"] = _safe_round(future[0].get("epsAvg"), 4)
 
     if not responded:
-        return None
+        # Every endpoint answered and none had a row → the symbol is genuinely absent
+        # from FMP's valuation coverage. Anything less is an outage, and stays retryable.
+        return PE_ABSENT if answered == 3 else None
     if _heatmap_ratelimit_until != breaker_at_entry:
         # Rate limit tripped mid-ticker: whatever is still None here may well exist.
         return None
@@ -2822,22 +2857,33 @@ def _heatmap_refresh_pe_universe_locked(max_workers):
     if not symbols:
         return False
     todo = []
+    quarantined = 0
     with _heatmap_pe_lock:
         for sym in symbols:
             cached = _heatmap_pe_cache.get(sym)
             # A cached failure (value None) is retried as soon as the backoff allows;
             # only a real bundle earns the 24h TTL.
-            if (not cached or not isinstance(cached[1], dict)
-                    or (now - cached[0]) >= HEATMAP_PE_TTL_SEC):
-                todo.append(sym)
+            if (cached and isinstance(cached[1], dict)
+                    and (now - cached[0]) < HEATMAP_PE_TTL_SEC):
+                continue
+            marked = _heatmap_pe_quarantined.get(sym)
+            if marked is not None and (now - marked) < HEATMAP_PE_QUARANTINE_SEC:
+                quarantined += 1
+                continue
+            todo.append(sym)
     if not todo:
         _heatmap_pe_backoff_sec = 0
+        _heatmap_pe_next_attempt_at = 0.0
+        if quarantined:
+            sys.stderr.write(f"[heatmap-pe] nothing to fetch — {quarantined} symbol(s) "
+                             f"quarantined as known-empty\n")
         return True
 
     from concurrent.futures import ThreadPoolExecutor, as_completed
     sys.stderr.write(f"[{datetime.now().strftime('%H:%M:%S')}] [heatmap-pe] fetching {len(todo)} tickers...\n")
     fetched = 0
-    failed = []
+    failed = []      # transport failures — retryable, these drive the backoff
+    absent = []      # answered with nothing — a fact about the symbol, not a fault
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
         futures = {ex.submit(_fetch_pe_ttm, sym, api_key): sym for sym in todo}
         for fut in as_completed(futures):
@@ -2850,12 +2896,36 @@ def _heatmap_refresh_pe_universe_locked(max_workers):
                 with _heatmap_pe_lock:
                     _heatmap_pe_cache[sym] = (time.time(), pe)
                 fetched += 1
+            elif pe is PE_ABSENT:
+                absent.append(sym)
             else:
                 # Leave any previously-good bundle in place — a failed refresh must not
                 # blank out data that is merely stale.
                 failed.append(sym)
 
+    # Streak accounting. Only `absent` counts: a transport failure says nothing about
+    # whether the symbol has data, so an outage can never quarantine the universe.
     stamp = datetime.now().strftime("%H:%M:%S")
+    absent_set, failed_set = set(absent), set(failed)
+    newly_quarantined = []
+    with _heatmap_pe_lock:
+        for sym in todo:
+            if sym in absent_set:
+                streak = _heatmap_pe_empty_streak.get(sym, 0) + 1
+                _heatmap_pe_empty_streak[sym] = streak
+                if streak >= HEATMAP_PE_EMPTY_STREAK_MAX:
+                    _heatmap_pe_quarantined[sym] = time.time()
+                    newly_quarantined.append(sym)
+            elif sym not in failed_set:
+                _heatmap_pe_empty_streak.pop(sym, None)
+                _heatmap_pe_quarantined.pop(sym, None)
+    if absent:
+        sample = ", ".join(sorted(absent)[:8]) + (" …" if len(absent) > 8 else "")
+        sys.stderr.write(
+            f"[{stamp}] [heatmap-pe] {len(absent)} symbol(s) have no FMP valuation "
+            f"bundle ({len(newly_quarantined)} newly quarantined for "
+            f"{HEATMAP_PE_QUARANTINE_SEC}s) [{sample}]\n")
+
     if failed:
         # Escalating backoff, capped at the refresh interval that the loop polls on, so
         # a persistent outage costs one retry per pass rather than a tight loop.
@@ -2871,7 +2941,8 @@ def _heatmap_refresh_pe_universe_locked(max_workers):
     else:
         _heatmap_pe_backoff_sec = 0
         _heatmap_pe_next_attempt_at = 0.0
-        sys.stderr.write(f"[{stamp}] [heatmap-pe] done: {fetched}/{len(todo)}\n")
+        no_data = f" ({len(absent)} with no FMP bundle)" if absent else ""
+        sys.stderr.write(f"[{stamp}] [heatmap-pe] done: {fetched}/{len(todo)}{no_data}\n")
 
     # Patch _heatmap_state ticker rows with new valuation bundle. forward_pe
     # computed live from row's current price + cached fwd_eps.

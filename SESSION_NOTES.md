@@ -1,7 +1,13 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.86.1)
+> **Last Updated**: 2026-08-02 (v4.86.2)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.86.2) — P3 尾款四件（sector 同義詞 / 反解漏 cap / spec 補值 / backoff 釘死）
+- **兩個標成 P3 的其實會產生錯誤數字，不只是噪音。** sector 同義詞看起來是「消 warning」，但四個 FMP 拼法裡三個落在保守側只是吵，`Consumer Defensive` 是**真的誤類**——staples 被當 cyclical 收緊停損。反解漏 cap 看起來是「replay 精度」，實際是一筆 50/25 雙 cap 的 entry 會偽裝成 `matched`（實測 size 5% 應反解出 40% base、超上限，修前 matched 修後 mismatched）。**判準：P3 的嚴重度標記是憑第一印象給的，動工時要用「這條會不會讓某個數字錯」重問一次。**
+- **backoff 那條原本的修法會失效，寫測試前先在紙上跑才發現。** 我第一版用 `fetched == 0` 當 outage 判準：全批失敗 = FMP 掛了，就不累計 streak。但第二輪之後殘餘批次**只剩那些永遠空的 symbol**，`fetched` 必然是 0 → 永遠判成 outage → 隔離永遠不會發生，正是要修的情境。**教訓：用「整批表現」推斷單一 symbol 的性質，在殘餘批次收斂之後必然失真。**改成讓 `_fetch_pe_ttm` 直接分辨「三個 endpoint 都回了、都沒 row」（`PE_ABSENT`）與「根本沒答」（`None`）——這是 4.85.0 那條「加 retry 之前先讓函式有能力表達失敗」的下一格：**先讓函式有能力表達「答了但沒有」，重試策略才有東西可依據。**
+- **反解的兩種缺值要分開處理。** V5.1+ 的 cap 躺在 `calculation_steps` 裡但欄位讀不到 → 退出 cohort（不假設 1.0）；pre-V5.1 根本沒紀錄 → 仍假設 1.0，但寫成具名 factor 進輸出。**「無從得知」與「讀取失敗」的降級方向不同：前者標記後續行，後者退出。**
+- **驗收**：`test_trade_plan_builder.py`（sector 補 5 條）/ `test_heatmap_pe_retry.py`（補契約 6、7：空資料隔離 + outage 不得隔離）/ `test_decision_engine.py` / `validate_session_export.py` / `replay_trade_plan.py` 全 rc=0；replay 三 cohort 覆蓋數與修前一致（eligible 47、mismatch 0）；OPS §7 heatmap 那列同步新契約；SYNC OK 4.86.2。
 
 ## 🟢 Session Note (v4.86.1) — `sized_for_decision` 防偽收尾
 - **我為了修 P1 引入一個豁免欄位，然後只測了它會報錯的那一側。** `sized_for_decision` 的作用就是覆寫 STAGED_ENTRY 折半規則，所以在 STAGED_ENTRY 的 export 上宣告 `"BUY"`，兩倍大的鏈就原地過關（實測 errors=0）。tamper 測試蓋的是「sized_for=STAGED 但沒折半 → rc=1」，那是**會觸發檢查**的方向；漏的是**把檢查關掉**的方向。**判準：一個用來豁免某條規則的欄位，最該測的是它被拿來濫用豁免的情形。**這跟 4.81.0 記的「tamper 要包含標籤說謊而不只是數字說謊」是同一個形狀——同一課我在新欄位上又犯一次，說明那條教訓當初只記成了「cascade 標籤」的特例，沒抽象成「凡是能改變檢查行為的欄位都要反向測」。

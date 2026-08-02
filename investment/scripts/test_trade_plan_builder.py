@@ -87,6 +87,13 @@ eq("sector.utilities", classify_sector("Utilities", None)["sector_class"], "defe
 eq("sector.staples", classify_sector("Consumer_Staples", None)["sector_class"], "defensive")
 eq("sector.health", classify_sector("Healthcare", None)["sector_class"], "defensive")
 eq("sector.reit", classify_sector("Real_Estate", None)["sector_class"], "defensive")
+# FMP `profile.sector` spellings — these are what actually arrive from the bundle.
+eq("sector.fmp_materials", classify_sector("Basic Materials", None)["sector_class"], "cyclical")
+eq("sector.fmp_financials", classify_sector("Financial Services", None)["sector_class"], "cyclical")
+eq("sector.fmp_cyclical", classify_sector("Consumer Cyclical", None)["sector_class"], "cyclical")
+eq("sector.fmp_defensive", classify_sector("Consumer Defensive", None)["sector_class"], "defensive")
+eq("sector.fmp_defensive_basis", classify_sector("Consumer Defensive", None)["basis"],
+   "protocol_table")
 # An unrecognised sector falls to the conservative (cyclical) side, never defensive.
 eq("sector.unknown_class", classify_sector("Crypto Mining", None)["sector_class"], "cyclical")
 eq("sector.unknown_basis", classify_sector("Crypto Mining", None)["basis"],
@@ -474,10 +481,94 @@ eq("Z.rr_clears", _z["trade_plan"]["risk_reward_ratio"] >= 2.0, True)
 eq("Z.version", _z["trade_plan_builder_version"], "1.0.0")
 
 
+# ── Fixture R: replay inverse-solve must divide out the two Phase 3 position caps ──
+# `replay_trade_plan.replay_sizing()` recovers the implied Step 2 base by dividing the
+# stored size back through the multipliers. Both Phase 3 caps are plain multiplications
+# in the Step 4 chain (see compute_step4: `× position_size_cap_pct/100`, then
+# `× polar_position_cap_pct/100`), so they invert — but only if they are in the divisor.
+# Every historical V5.1 entry so far carries 100/100, i.e. factor 1.0, so nothing in the
+# corpus exercises the 50/25 path. Without these fixtures a regression that drops the
+# caps from the divisor — or "corrects" them into a min() the way the macro cap works —
+# stays green, and a genuinely oversized entry replays as `matched`.
+#
+# Coverage boundary: every payload below is SYNTHETIC. Measured at V4.86.2, the corpus
+# has 2 trades with `calculation_steps` and both record 100/100, so no production entry
+# has ever exercised a live cap. A green Fixture R means the inversion algebra is right,
+# not that real data has run through it.
+from replay_trade_plan import replay_sizing, _phase3_caps  # noqa: E402
+
+_R_TRADE = {"position_size_pct": 0.025, "fragility_label": "ROBUST",
+            "binary_classification": "positive", "final_decision": "BUY",
+            "ftd_timeline_gate": {"applied": True, "multiplier": 1.0}}
+_R_DATE = "2026-08-10"
+
+
+def _r(**over):
+    return replay_sizing(_R_DATE, {}, dict(_R_TRADE, **over))
+
+
+def _cs(shift, polar):
+    return {"structural_shift_modulation": {"position_size_cap_pct": shift},
+            "polarization_modulation": {"position_cap_after": polar}}
+
+
+# R1 — pre-V5.1: no record of either cap. Still solvable, but the 1.0 is a NAMED
+# assumption in the output, not a silent one.
+_r1 = _r()
+eq("R.pre_v51_matched", _r1["status"], "matched")
+eq("R.pre_v51_base", _r1["implied_base"], 0.025)
+eq("R.pre_v51_assumption_is_named",
+   "phase3_caps_unrecorded_assumed_uncapped" in _r1["factors"], True)
+
+# R2 — V5.1 uncapped: reading 100/100 out of calculation_steps changes nothing.
+_r2 = _r(calculation_steps=_cs(100, 100))
+eq("R.v51_uncapped_matched", _r2["status"], "matched")
+eq("R.v51_uncapped_base", _r2["implied_base"], 0.025)
+eq("R.v51_no_stale_assumption",
+   "phase3_caps_unrecorded_assumed_uncapped" in _r2["factors"], False)
+
+# R3 — V5.1 with BOTH caps live: 2.5% after ×0.5 ×0.25 implies a 20% base, the exact
+# risk_manager ceiling, so it is admissible and the factors name both caps.
+_r3 = _r(calculation_steps=_cs(50, 25))
+eq("R.both_caps_matched", _r3["status"], "matched")
+eq("R.both_caps_base", _r3["implied_base"], 0.2)
+eq("R.both_caps_shift_factor", _r3["factors"]["phase3_structural_shift_cap"], 0.5)
+eq("R.both_caps_polar_factor", _r3["factors"]["phase3_polarization_cap"], 0.25)
+
+# R4 — the false `matched` this fix exists to kill. 5% under a 50/25 chain implies a 40%
+# base, double the ceiling. Ignoring the caps would have solved 0.05 → admissible.
+_r4 = _r(position_size_pct=0.05, calculation_steps=_cs(50, 25))
+eq("R.oversize_mismatched", _r4["status"], "mismatched")
+eq("R.oversize_implied_base", _r4["sweep"][0]["implied_base"], 0.4)
+eq("R.oversize_inadmissible", _r4["sweep"][0]["admissible"], False)
+eq("R.oversize_would_pass_uncapped", _r(position_size_pct=0.05)["status"], "matched")
+
+# R5 — calculation_steps present but a cap unreadable: leave the cohort rather than
+# invent the factor. Both the missing-block and the out-of-range shapes.
+for _label, _bad in (("missing_block", {"polarization_modulation": {"position_cap_after": 100}}),
+                     ("out_of_range", _cs(150, 100)),
+                     ("zero", _cs(0, 100)),
+                     ("non_numeric", _cs("50", 100))):
+    _r5 = _r(calculation_steps=_bad)
+    eq(f"R.unreadable_{_label}_excluded", _r5["status"], "excluded")
+    eq(f"R.unreadable_{_label}_reason",
+       _r5["reason"].startswith("phase3_cap_unreadable:"), True)
+
+# R6 — the helper itself, so the contract is pinned independent of the caller.
+eq("R.helper_pre_v51", _phase3_caps({})[0],
+   {"phase3_caps_unrecorded_assumed_uncapped": 1.0})
+eq("R.helper_reads_both", _phase3_caps({"calculation_steps": _cs(50, 25)})[0],
+   {"phase3_structural_shift_cap": 0.5, "phase3_polarization_cap": 0.25})
+eq("R.helper_reason_none", _phase3_caps({"calculation_steps": _cs(50, 25)})[1], None)
+eq("R.helper_factors_none_on_error",
+   _phase3_caps({"calculation_steps": _cs(None, 100)})[0], None)
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 if FAILS:
     print(f"✗ {len(FAILS)} spec-parity failure(s):")
     for f in FAILS:
         print("  -", f)
     sys.exit(1)
-print("✓ all trade-plan-builder spec-parity fixtures pass (A–Q + MU golden replay)")
+print("✓ all trade-plan-builder spec-parity fixtures pass "
+      "(A–Q + MU golden replay + R replay cap inversion)")

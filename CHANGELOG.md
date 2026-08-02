@@ -8,6 +8,21 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.86.2] — 2026-08-02 — 4.82–4.85 review 的 P3 尾款（sector 同義詞 / 反解完整性 / spec 補值 / backoff 釘死）
+
+### Fixed
+- **Phase 4 sector 分類漏 FMP 拼法**（`investment/scripts/trade_plan_builder.py`）：`classify_sector()` 只認 protocol 表與 GICS 拼法，但實際流進來的是 FMP `profile.sector` 的字串。四個對不上的名字裡有三個仍落在保守側（cyclical）只是每次噴 warning，**`Consumer Defensive` 卻是真的誤類**——它是 staples，該走 defensive 的 FTD 乘數與停損調整，卻被當 cyclical 收緊。補 `Basic Materials` / `Financial Services` / `Consumer Cyclical` / `Consumer Defensive` 四個同義詞，測試補五條。
+- **Phase 4 反解沒扣掉兩個 Phase 3 倉位 cap**（`investment/scripts/replay_trade_plan.py`）：`replay_sizing()` 把 `position_size_pct` 除回可回收的乘數以求 Step 2 base，但 structural-shift cap（50%）與 polarization cap（25%）兩項一直沒進除數。兩者都是純乘法、可逆，且 V5.1 起就躺在 `calculation_steps` 裡。少除等於把 implied base 算小，**一筆 50/25 雙 cap 的 entry 會偽裝成 `matched`**（實測：size 5% 應反解出 40% base、超出 20% 上限，修前報 matched，修後報 mismatched）。V5.1+ 從 `calculation_steps` 取值；欄位讀不到 → 退出 cohort 而非假設 1.0；pre-V5.1 無紀錄，1.0 的假設改成具名 factor（`phase3_caps_unrecorded_assumed_uncapped`）寫進輸出，不再靜默。
+- **heatmap P/E warm-up 的 backoff 被永久空資料 ticker 釘死**（`dashboard_server.py`）：universe 裡少數 symbol 在 FMP 根本沒有估值 bundle，每一輪都進 `failed` → `_heatmap_pe_backoff_sec` 常駐上限、`return not failed` 永遠 False，健康訊號失去意義，且每輪固定燒 3 calls/symbol。根因是 `_fetch_pe_ttm()` 把「答了但沒資料」與「根本沒答」都回 `None`。拆成三態：`dict` / `PE_ABSENT`（三個 endpoint 都回了、都沒 row）/ `None`（transport 失敗或 429 breaker）。`PE_ABSENT` 連續 `HEATMAP_PE_EMPTY_STREAK_MAX`（3）次 → 隔離 `HEATMAP_PE_QUARANTINE_SEC`（24h）不再撈，且不計入 backoff；transport 失敗**永不**計入 streak，所以 FMP 全站掛掉不會把整個 universe 隔離掉；任一次成功清空 streak 與隔離。
+
+### Added
+- **spec 補回 stop buffer 預設值**（`investment/investment_protocol_v5_0.md`）：`stop_buffer_pct` 進 Phase 4 input shape，Step 1 `stop_loss` 那條註明預設 1.0% 與算式 `structural = pre_buffer × (1 − stop_buffer_pct/100)`。此前這個值只有 engine 知道，spec 讀者無從得知 buffer 是多少。
+- **`tests/test_heatmap_pe_retry.py` 補第 6、7 條契約**：空資料 symbol 從第一輪起就算健康批次、streak 滿才隔離、隔離期零 HTTP、到期只補撈一次、恢復供應即解除；以及連續 outage 不得隔離任何 symbol（backoff 照樣上膛）。
+- **`test_trade_plan_builder.py` Fixture R — replay 反解的 cap 除數**：歷史語料裡每一筆 V5.1 entry 的兩個 cap 都是 100/100（factor 1.0），所以 `replay_trade_plan.py` 三 cohort rc=0 **完全沒有行使過 50/25 路徑**——這條修正原本零自動化覆蓋。補 6 組：pre-V5.1 具名假設、V5.1 uncapped、雙 cap 反解出 20% base、**5% 在 50/25 鏈下反解出 40% base 判 mismatched（且斷言同一筆在無 cap 除數時會假 matched）**、四種 unreadable 形狀（缺 block／超範圍／0／非數值）逐一退出 cohort、`_phase3_caps()` helper 契約。日後有人把 `position_cap_after` 誤讀成 `min()` 語義去「修正」反解，會有測試變紅。
+
+### Why
+- 4.82–4.85 review 記下但未進帳的 P3，四項全落在剛動過的檔案家族，趁上下文還熱一批收掉。其中兩項（sector 誤類、反解漏 cap）是會產生**錯誤數字**而非只是噪音的，優先度實際高於原本的 P3 標記。
+
 ## [4.86.1] — 2026-08-02 — `sized_for_decision` 的防偽收尾（4.86.0 review）
 
 ### Fixed
