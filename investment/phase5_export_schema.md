@@ -1,9 +1,15 @@
 # Phase 5 Session Export Schema
 
-> **Schema Version**: `V5.0`
+> **Schema Version**: `V5.1`
 > **Consumer**: `bridge.py` / Dashboard decisions cards / decision history
 > **Producer**: Investment Protocol Phase 5 (PM / Sonnet formatter)
-> **Last updated**: 2026-05-02
+> **Last updated**: 2026-08-02
+>
+> **V5.1 changes vs V5.0**:
+> - `calculation_steps` **+** `decision_engine_version` 從「建議」升為 **必填**（缺任一 → validator rc=1）
+> - §13 算術硬閘由「`export_date ≥ 2026-08-03`」改綁 schema 版本 —— 版本切乾淨、回填不誤傷；
+>   日期門檻續留當後衛，擋「cutover 後仍 stamp 舊版以繞道」的 mis-stamp
+> - 既有 V5.0 entry **不需回填**：舊版號照原規則驗，永久相容
 >
 > **V5.0 changes vs V4.8**:
 > - Added `valuation_lane` to track 5th parallel analyst (Valuation Specialist)
@@ -28,7 +34,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 ### Top-level
 | Field | Type | Note |
 |---|---|---|
-| `session_export_version` | `"V5.0"` | 固定字串；若 protocol 升版，本檔 header + 此欄同步改 |
+| `session_export_version` | `"V5.1"` | 固定字串；若 protocol 升版，本檔 header + 此欄同步改。Validator 接受 `V4.8` / `V5.0` / `V5.1`（舊版號只驗當年規則），新 export 一律戳 `V5.1` |
 | `export_date` | `"YYYY-MM-DD"` | 交易會議日期 |
 | `date` | `"YYYY-MM-DD"` | 鏡射 `export_date`（舊版相容；bridge.py 兩者都讀）|
 | `ticker` | `"STRING"` | 鏡射 `trades_this_session[0].ticker` |
@@ -93,7 +99,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `valuation_lane` | `{signal, score, confidence, weighted_fair_value, vs_current_pct}` | **V5.0+ 必填** | reviewer narrative + `valuation_pack` projection；LLM 不得產數字 |
 | `valuation_pack` | object（見下） | **新 engine output 必填**；舊 history 相容 | Phase 2.4 唯一估值計算權威；validator 強制所有 projection 相等 |
 | `fair_value_summary` | object（見下） | **V5.0+ 必填** | `valuation_pack` 相容 projection（= MHP 長期層、受 decision_lock 保護）|
-| `multi_horizon_price_framework` | object（見下） | **V5.1+ optional→required**；缺/不全 → validator 印 warning（非 fatal，rc 維持 0）| Phase 4.5 三時間框架（5d band / 60d target / long-term ref / convergence）。**不**進 11-field decision_lock（derived/advisory）|
+| `multi_horizon_price_framework` | object（見下） | **V5.0+ optional（過渡中）**；缺/不全 → validator 印 warning（非 fatal，rc 維持 0）| Phase 4.5 三時間框架（5d band / 60d target / long-term ref / convergence）。**不**進 11-field decision_lock（derived/advisory）|
 | `fair_value_range` | object（見下） | **V3.45.1+ optional**；缺 → validator warning（非 fatal，rc 0）| Phase 4.5.0b anchor 分布區間（P25/P50/P75 + range_verdict + dispersion + oe shadow）。**不**進 decision_lock；`fair_value_summary` 不變 |
 | `valuation_explained_range` | object（見下） | **V4.76.0+ optional** | structural-shift DCF 為 primary FV；DCF sensitivity + without/with-peer + 其他 eligible anchor 的解釋帶。range-only peer 不進 primary FV |
 | `implied_expectations` | object（掛 `valuation_lane` 或 trade 頂層；見下） | **V3.45.1+ optional**；缺 → warning（rc 0）| reverse DCF 隱含預期。**V3.45.3 起由 Phase 2.4 `compute_price_framework.py` engine 計算**（非 LLM 手算）。**不**進加權 / lane score / decision_lock |
@@ -196,7 +202,7 @@ analyst PT 超過 180 天不得 eligible；少於兩個獨立 family 時 `|score
 }
 ```
 
-### `multi_horizon_price_framework` (V5.1 — Phase 4.5)
+### `multi_horizon_price_framework` (Phase 4.5)
 
 三時間框架 deterministic 輸出（0 LLM 重評）。長期層 `long_term_ref` 直接引用 `fair_value_summary`，不複製不重算。
 **不**進 11-field decision_lock。缺料降級：`sigma_daily` 缺 → short_term confidence=low（atr 反推）；`mid_target` 全錨缺 → null。
@@ -354,7 +360,7 @@ Phase 3 全部算術由 `investment/scripts/decision_engine.py` 產出，PM **ve
 
 | 欄 | 型別 | 說明 |
 |---|---|---|
-| `decision_engine_version` | `string` | engine 版號（如 `"1.0.0"`）。**有此欄 = 走 V4.70.0+ 規則**，validator 加驗規則表 |
+| `decision_engine_version` | `string` | engine 版號（如 `"1.0.0"`）。**有此欄 = 走 V4.70.0+ 規則**，validator 加驗規則表。**V5.1 起必填** |
 | `calculation_steps.penalty_value` | `float｜null` | 實際套用的 cascade 乘數（0.85 / 0.925 / 0.95）；`penalty_applied=true` 時必填 |
 | `calculation_steps.cascade_rule_applied` | `string` | `no_penalty` / `consensus_bonus` / `rule_1..5_*`；與 `penalty_value` 必須對得上 |
 | `calculation_steps.red_team_effective_verdict` | `string` | rule 1 降級後的 verdict（未降級時等同 `red_team_verdict`） |
@@ -367,10 +373,13 @@ Phase 3 全部算術由 `investment/scripts/decision_engine.py` 產出，PM **ve
   lane scores 重算須相符、`final_decision` 必須落在 band 可達集合內）。任一不符 **rc=1**。
 - 再有 `decision_engine_version` → 加驗規則表（C_eff ∈ {0.35, 0.60, 0.72}、cascade→penalty
   對映、`buy_threshold` 符合 tier × polarization 矩陣、`hot_zone_eval` 必填）。
-- **2026-08-03 起的 entry 缺 `calculation_steps` 直接 rc=1**（V4.80.1）——否則「手算並整段
-  省略該欄」就能繞過本節硬閘。此門檻目前綁 `export_date`；改綁 schema 版本需 bump
-  `session_export_version` 到 V5.1（獨立一版做，見 TODO）。
-- 該日期之前且無 `decision_engine_version` 的 entry → **整段跳過，rc=0**（向後相容，不溯及既往）。
+- **`session_export_version = "V5.1"` 的 entry 缺 `calculation_steps` 或 `decision_engine_version`
+  直接 rc=1**（V4.81.0）——否則「手算並整段省略該欄」就能繞過本節硬閘。門檻綁 schema 版本而非
+  日期：回填一筆舊分析時只要照舊戳 `V5.0` 就依當年規則驗，不會被今天的門檻誤傷。
+- **後衛**：`export_date ≥ 2026-08-03` 但戳 `V5.0`/`V4.8` 又缺 `calculation_steps` → 一樣 rc=1
+  （V4.80.1 的日期閘留著，專擋「刻意戳舊版號繞過版本閘」的 mis-stamp）。另有反向 guard：
+  戳 `V5.0` 卻帶 `decision_engine_version` → rc=1，提示改戳 `V5.1`。
+- 上述皆不適用且無 `decision_engine_version` 的 entry → **整段跳過，rc=0**（向後相容，不溯及既往）。
 
 **band 可達集合**（`final_decision` 允許偏離 band 的四條路徑，其餘一律 rc=1）：
 
@@ -466,11 +475,14 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
 
 ---
 
-## FULL EXAMPLE（V5.0 — 以 BUY 決策為範本）
+## FULL EXAMPLE（V5.1 — 以 BUY 決策為範本）
+
+> Phase 3 數字（`final_score` / `avg_confidence` / `calculation_steps` / `hot_zone_eval`）為
+> `decision_engine.py` 實跑輸出，整份範例可直接過 validator。抄 shape，**不要**抄數字。
 
 ```json
 {
-  "session_export_version": "V4.8",
+  "session_export_version": "V5.1",
   "export_date": "2026-04-18",
   "date": "2026-04-18",
   "ticker": "MU",
@@ -486,7 +498,7 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
     {
       "ticker": "MU",
       "final_action": "EXECUTE",
-      "final_score": 1.746,
+      "final_score": 2.1888,
       "final_decision": "BUY",
       "consensus_bonus_applied": false,
       "red_team_verdict": "STRONG_COUNTER",
@@ -502,7 +514,56 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
       "phase2_fanout_mode": "PARALLEL_SUBAGENT",
       "degraded_analysts": [],
       "macro_alignment": "CONTRARIAN",
-      "avg_confidence": 0.703,
+      "avg_confidence": 0.75,
+      "decision_engine_version": "1.0.0",
+      "calculation_steps": {
+        "fund": "0.25 × 4 × 0.72 = 0.7200",
+        "sent": "0.15 × 3 × 0.72 = 0.3240",
+        "news": "0.20 × 3 × 0.72 = 0.4320",
+        "tech": "0.25 × 4 × 0.72 = 0.7200",
+        "val": "0.15 × 1 × 0.72 = 0.1080",
+        "raw_total": 2.304,
+        "structural_shift_modulation": {
+          "tier": "NONE",
+          "applied_adjustments": ["no modulation — standard rules apply"],
+          "shift_macro_floor": 0.0,
+          "position_size_cap_pct": 100,
+          "red_team_mean_reversion_blocked": false
+        },
+        "polarization_modulation": {
+          "label": "ALIGNED",
+          "lane_range": 3.0,
+          "pos_strong": 5,
+          "neg_strong": 0,
+          "outlier_lane_id": null,
+          "applied_adjustments": ["no modulation"],
+          "confidence_multiplier": 1.0,
+          "position_cap_after": 100
+        },
+        "red_team_basis": "unclassified",
+        "red_team_auto_downgrade": false,
+        "cascade_rule_applied": "rule_5_default_strong_counter",
+        "dynamic_threshold": {
+          "buy_threshold": 1.2,
+          "staged_threshold": 0.8,
+          "rationale": "default 1.2 (tier=NONE, polarization=ALIGNED)"
+        },
+        "red_team_verdict": "STRONG_COUNTER",
+        "red_team_effective_verdict": "STRONG_COUNTER",
+        "red_team_counter_evidence_strength": null,
+        "red_team_thesis_break_probability": null,
+        "bonus_applied": false,
+        "penalty_applied": true,
+        "penalty_value": 0.95,
+        "raw_after_bonus": 2.1888,
+        "macro_multiplier": 0.9,
+        "macro_alignment": "CONTRARIAN",
+        "effective_macro_mult": 0.9,
+        "final_score": 2.1888
+      },
+      "hot_zone_probe": false,
+      "hot_zone_eval": "not_qualifying",
+      "decision_cap_active": false,
       "burry_score": 37.1,
       "burry_override_active": false,
       "burry_override_recheck_date": null,
@@ -667,12 +728,19 @@ BUY / STAGED_ENTRY 必填 R/R ≥ 2.0；沒有就應該降級到 HOLD。
 
 ## 版本更新規則
 
-當 Protocol 升版（例如 V4.8 → V5.0）：
-1. 本檔 header `Schema Version` + 正文 `session_export_version` 同步改
+當 Protocol 升版（例如 V5.0 → V5.1）：
+1. 本檔 header `Schema Version` + 正文 `session_export_version` + FULL EXAMPLE 的版本戳同步改
 2. 如有新欄位 → 加到 REQUIRED table + FULL EXAMPLE
 3. 如有欄位改語意 → 加進 DO NOT 區塊說明舊用法禁用
-4. 更新 `validate_session_export.py` 的版本檢查與必填清單
-5. Protocol 的 Phase 5 章節**不必動**（只引用本檔路徑）
+4. 更新 `validate_session_export.py`：`ACCEPTED_VERSIONS` 加新版號、`CURRENT_VERSION` 指到新版號，
+   **舊版號一律留在 ACCEPTED_VERSIONS**（既有 entry 永不回填）。新的硬性必填欄用版本集合開閘
+   （見 `CALC_STEPS_REQUIRED_VERSIONS`），不要用 `ver == "V5.x"` 單值比較——單值比較在下次升版時
+   會靜默失效（V4.81.0 修掉的 `ver != "V5.0"` 就是這樣寫壞的）
+5. 下游同步：`replay_decision_engine.py`（`FIVE_LANE_VERSIONS`）與 `validate_markdown_export.py`
+   （`V5_VERSIONS`）都從 validator import 版本集合，新增版號時**只改 validator**即可
+6. 若新版號同時是 Dashboard badge token → 檢查 `Dashboard/page-decisions.js`
+   `detectProtocolVersion()` / `VERSION_COLOR` / `DECISION_TIPS` 是否撞名
+7. Protocol 的 Phase 5 章節**不必動**（只引用本檔路徑）
 
 ---
 
@@ -707,7 +775,7 @@ V2.13.0 為 invest protocol Phase 2 三個 lane（Technical / Fundamentals / New
 }
 ```
 
-> **V5.1**：`volatility` 為新增 sub-block，餵 Phase 4.5 Multi-Horizon Price Framework 5-Day Band。deterministic FMP read，LLM 不重判讀。缺欄不擋 validator（optional→required 過渡，同 `market_position`）。
+> **Phase 4.5 補充**：`volatility` 為新增 sub-block，餵 Multi-Horizon Price Framework 5-Day Band。deterministic FMP read，LLM 不重判讀。缺欄不擋 validator（optional→required 過渡，同 `market_position`）。
 
 ### `fundamentals_lane` (V2.13.0)
 

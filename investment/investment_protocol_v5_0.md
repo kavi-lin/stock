@@ -819,7 +819,11 @@ Phase 3 的**全部算術**由 `investment/scripts/decision_engine.py` 執行。
    `decision_margin` / `decision_cap_active` / `decision_cap_reason` /
    `position_size_cap_pct` / `polar_position_cap_pct` 進 session export。
 
-**禁止手算 / 重算 / 微調任何 Phase 3 數字。** 下方 Step 1–4 的公式自此為 **spec 參照**
+**禁止手算 / 重算 / 微調任何 Phase 3 數字。** V4.81.0 起這是 schema 硬閘：export 戳
+`session_export_version: "V5.1"`，缺 `calculation_steps` 或 `decision_engine_version`
+→ `validate_session_export.py` rc=1（省略整塊不再是繞道，是直接擋下）。
+
+下方 Step 1–4 的公式自此為 **spec 參照**
 （engine 是唯一執行來源，`test_decision_engine.py` 是兩者的 parity 契約）——改公式必須
 同步改 engine 與該測試，否則 validator 會擋。
 
@@ -1415,7 +1419,7 @@ python3 investment/scripts/append_session_export.py --from-file /tmp/<ticker>_se
 
 ```bash
 cat <<'JSON' | python3 investment/scripts/append_session_export.py
-{ "session_export_version": "V5.0", ... }
+{ "session_export_version": "V5.1", ... }
 JSON
 ```
 

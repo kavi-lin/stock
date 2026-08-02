@@ -33,6 +33,11 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Single source of truth for which schema versions are 5-lane era (= carry
+# fair_value_summary, so the MD must render a 合理股價 section).
+from validate_session_export import V5_VERSIONS  # noqa: E402
+
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
 REPORTS_DIR  = os.path.join(ROOT, "reports")
@@ -119,16 +124,16 @@ def _check_burry_scale(text, errors):
 
 
 def _check_fair_value_section(text, errors, history_entry):
-    """V5.0+ MD reports must contain '合理股價' section if entry is V5.0."""
+    """5-lane-era MD reports must contain a '合理股價' section."""
     if not history_entry:
         return  # standalone --report mode without history context, skip
-    if history_entry.get("session_export_version") != "V5.0":
-        return  # V4.8 entries don't need fair value section
+    if history_entry.get("session_export_version") not in V5_VERSIONS:
+        return  # pre-V5.0 (4-lane) entries have no fair_value_summary to render
     if not re.search(r"合理股價", text):
-        errors.append("V5.0 報告缺「合理股價」section（fair_value_summary 必須在 MD 呈現）")
+        errors.append("V5.0+ 報告缺「合理股價」section（fair_value_summary 必須在 MD 呈現）")
     # Check anchor table mentions weighted fair value
     if not re.search(r"(weighted_fair_value|加權合理價|Weighted\s*Fair\s*Value)", text, re.IGNORECASE):
-        errors.append("V5.0 報告「合理股價」section 缺 weighted_fair_value 標示")
+        errors.append("V5.0+ 報告「合理股價」section 缺 weighted_fair_value 標示")
 
 
 def validate(report_path, history_entry=None):
@@ -146,7 +151,7 @@ def validate(report_path, history_entry=None):
     if errors:
         fail(errors)
 
-    print(f"[validate_markdown_export] ✓ {os.path.relpath(report_path, ROOT)} passes V4.8/V5.0 schema check")
+    print(f"[validate_markdown_export] ✓ {os.path.relpath(report_path, ROOT)} passes V4.8/V5.0/V5.1 schema check")
     return 0
 
 

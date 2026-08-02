@@ -712,10 +712,10 @@ const DECISION_TIPS = {
     },
     // ── Protocol version bookmarks ──────────────────────────────────────
     version_v51: {
-        zh: { title: 'Protocol V5.1 — 前瞻估值（最新）',
-              desc: 'V5.0 全部 + **前瞻估值（4.40）**：forward future price range 綁定 **PEG terminal P/E**（terminal_pe = clamp(2.2×終期成長%, 20, 60)，隨成長降速自動壓縮）+ **逐年年化 glide trajectory**（錨定 terminal 內插，非每年重估）+ per-FY analyst coverage 薄覆蓋標記。Shadow-only，不入 live 決策。有此標 = snapshot 已用新引擎重生。' },
-        en: { title: 'Protocol V5.1 — Forward Valuation (current)',
-              desc: 'All of V5.0 + **forward valuation (4.40)**: future price range bound to a **PEG terminal P/E** (clamp(2.2×terminal_growth%, 20, 60); auto-compresses as growth decelerates) + **per-FY annualized glide trajectory** (anchored to terminal, not re-valued yearly) + thin-coverage flags. Shadow-only. This badge = snapshot regenerated with the new engine.' },
+        zh: { title: 'Protocol V5.1 — Phase 3 決策數學全 script 化（最新）',
+              desc: 'V5.0 全部 + **Phase 3 決策數學不得手算**：entry 必須帶 `calculation_steps` + `decision_engine_version`（`decision_engine.py` 輸出 verbatim），validator §13 會逐項重推算術鏈（每條 lane 乘積、Σ、bonus/penalty、macro step、threshold 公式、decision band），對不上直接 rc=1。\n\n另含 **前瞻估值（4.40）**：forward future price range 綁定 **PEG terminal P/E**（terminal_pe = clamp(2.2×終期成長%, 20, 60)）+ **逐年年化 glide trajectory**。前瞻層 shadow-only，不入 live 決策。' },
+        en: { title: 'Protocol V5.1 — Phase 3 Math Fully Scripted (current)',
+              desc: 'All of V5.0 + **no hand-computed Phase 3 math**: the entry must carry `calculation_steps` + `decision_engine_version` (verbatim `decision_engine.py` output). Validator §13 re-derives the whole chain (per-lane products, Σ, bonus/penalty, macro step, threshold formula, decision band) and fails rc=1 on any mismatch.\n\nAlso **forward valuation (4.40)**: future price range bound to a **PEG terminal P/E** (clamp(2.2×terminal_growth%, 20, 60)) + **per-FY annualized glide trajectory**. The forward layer stays shadow-only.' },
     },
     version_v50: {
         zh: { title: 'Protocol V5.0',
@@ -820,17 +820,17 @@ const DECISION_TIPS = {
 
 /* ── Version detection + UI helpers ─────────────────────────── */
 function detectProtocolVersion(item) {
-    // V5.1 — card carries the new (4.40) forward valuation: per-FY annualized glide
-    // trajectory bound to a PEG terminal P/E. Old forward snapshots lack `trajectory`,
-    // so this cleanly distinguishes regenerated cards from stale ones.
-    const fwd = item.forward_expectations;
-    if (fwd && Array.isArray(fwd.trajectory) && fwd.trajectory.length > 0) return 'V5.1';
-    // Trust bridge.py if it set protocol_version (from session_export_version)
+    // V4.81.0 — the stamp wins. `V5.1` is now a real session_export_version (Phase 3
+    // engine block mandatory), so the trajectory heuristic below can no longer be
+    // allowed to mint that token on top of a card stamped something else.
     if (item.protocol_version && item.protocol_version !== 'legacy') {
-        // Normalize: "V5.0" / "V4.8" / "V4.7" / "V4.6" / "V4.5" → keep as-is
+        // Normalize: "V5.1" / "V5.0" / "V4.8" / "V4.7" / "V4.6" / "V4.5" → keep as-is
         return String(item.protocol_version).toUpperCase();
     }
-    // Fallback heuristic for older entries with no version stamp
+    // Fallback heuristics for entries with no version stamp, newest signal first:
+    // a (4.40) forward snapshot carries a per-FY glide `trajectory`; older ones don't.
+    const fwd = item.forward_expectations;
+    if (fwd && Array.isArray(fwd.trajectory) && fwd.trajectory.length > 0) return 'V5.1';
     if (item.valuation_lane || item.fair_value_summary) return 'V5.0';
     if (item.degraded_analysts != null && item.phase2_fanout_mode) return 'V4.8';
     if (item.red_team_verdict) return 'V4.7';

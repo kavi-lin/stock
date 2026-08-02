@@ -90,6 +90,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | `forward_expectations.py` 核心 | `python3 investment/scripts/test_forward_expectations.py`（rc=0 為準） |
 | `inject_report_facts.py` | `python3 investment/scripts/test_inject_report_facts.py` |
 | `decision_engine.py` / Phase 3 決策數學 / `validate_session_export.py` §13 | `python3 investment/scripts/test_decision_engine.py` + `python3 investment/scripts/validate_session_export.py`（兩者 rc=0）；改到 cascade/threshold 再跑 `replay_decision_engine.py` 看 replay 是否仍 rc=0 |
+| `session_export_version` / export schema 版本閘 / `phase5_export_schema.md` 的 FULL EXAMPLE | `python3 investment/scripts/test_session_export_schema.py`（rc=0；fixture 直接從 schema doc 的 FULL EXAMPLE 解析，doc 壞掉會紅）。升版號時同時檢查 `replay_decision_engine.py` 覆蓋數沒歸零 |
 | forward_expectations 子模組 | 對應測試檔用 `ls investment/scripts/test_forward_expectations_*.py` 找（多數與子模組同名；另有 numeric_safety 等綜合測試——改到相鄰邏輯就一併跑） |
 | Royalty/IP adapter | `python3 investment/scripts/test_royalty_ip_adapter.py` |
 | Semiconductor adapter | `python3 investment/scripts/test_semiconductor_adapter.py` |

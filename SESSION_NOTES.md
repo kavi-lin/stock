@@ -1,7 +1,17 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.80.1)
+> **Last Updated**: 2026-08-02 (v4.81.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.81.0) — export schema 升 V5.1（TODO L1b）
+- **起因**：4.80.1 把 §13 硬閘綁在 `export_date ≥ 2026-08-03`，當時就記著「日期切不如版本切」。這一版把門檻改綁 `session_export_version = V5.1`。
+- **掃描比 TODO 寫的多兩個點**：① TODO 只列了 validator + schema doc + protocol，漏掉 `validate_markdown_export.py` 這個隱藏消費端（`!= "V5.0"` 直接 return，新版 entry 會整段跳過「合理股價」檢查）；② `Dashboard/page-decisions.js` 的 `detectProtocolVersion()` 已經把 `'V5.1'` 這個 token 用在別的概念上（有 `forward_expectations.trajectory` 就回 V5.1，且優先級最高）——直接拿 V5.1 當 schema 版號會撞名。**教訓：升版號前先 grep 這個 token 有沒有被別人當成別的意思用**，不只 grep 欄位名。
+- **單值比較是這次的主題**：`ver == "V5.0"` / `ver != "V5.0"` 這種寫法在升版當下不會報錯，只會靜默改變行為——replay 會把新 entry 全判成 `pre_v5_four_lane_schema`（覆蓋數歸零但 rc 仍 0），markdown validator 會整段跳過。全部改成版本集合，且下游兩支改 **import** validator 的集合而不是各自硬寫。
+- **順手抓到兩個真的洞**（都不在 TODO 上，都是實測出來的）：① `hot_zone_eval` 的 warning 條件 `ver != "V5.0"` **寫反了**——只對不可能有該欄的舊 entry 發警告，對必須有該欄的現行 export 恆不發（REVIEW_2026-07-31 記的「75 筆全 None 卻沒人吭聲」就是這個）；② §13 Tier B 的 cascade 檢查只在 `rule_*` 名稱上比對 `penalty_value`，把已套 0.95 懲罰的鏈條改標 `no_penalty` 就能過閘——是寫 tamper battery 時第 11 條意外 rc=0 才發現的。**tamper 測試要包含「標籤說謊」而不只是「數字說謊」**。
+- **修一個錯的預期而不是錯的程式**：tamper「banded BUY 卻標 HOLD」我原本預期 rc=1，實際 rc=0 —— 查表確認 `BUY → HOLD` 是 Auto REJECT / decision cap 的合法路徑，是我的斷言錯。改成反向（低於門檻卻標 BUY）才是真的越界。
+- **schema doc 的 FULL EXAMPLE 本身是壞的**：header 寫 V5.0、JSON 戳 `V4.8`、內容卻有 `valuation_lane`——照抄會直接撞 §2b mis-stamp guard。改成實跑 engine 產出的完整 V5.1 範例，並讓驗收 fixture **直接從 doc 解析**，以後 doc 壞掉測試就會紅。
+- **review 抓到一個對稱性遺漏**：cascade 標籤檢查我只鎖了 penalty 側，bonus 側同款謊言（×1.15 鏈條改標 `no_penalty`，`bonus_applied` 與數字都不動）仍 errors=0。已補兩側各雙向，並用 `run_phase3()` **現跑**一條 consensus_bonus 鏈當 fixture（不寫死，規則移動時不會過期）。**教訓：補一條 invariant 時先問「這條規則有幾個對稱面」**——penalty/bonus 是同一個 cascade 欄位的兩側，我只想到觸發我的那一側。
+- **驗收**：23 條 battery 全過（舊 V5.0 rc=0、V5.1 缺 `calculation_steps`/`decision_engine_version` 各 rc=1、日期後衛 rc=1、V4.8/V5.0 兩個 mis-stamp guard rc=1、11 條 §13 tamper 全 rc=1、bonus 側 3 條含 engine 實跑鏈 rc=0）；live history rc=0；`test_decision_engine.py` rc=0；markdown validator rc=0 且 V5.1 仍強制「合理股價」section；replay 覆蓋不變（1+2+169=172）；SYNC OK 4.81.0。
 
 ## 🟢 Session Note (v4.80.1) — 4.80.0 review 的兩個 P1
 - **起因**：外部 review 對 v4.80.0 做端到端實測，抓到 2 個 P1、2 個 P2。兩個 P1 我都先自己複跑重現才動手（不照單全收），確認屬實。

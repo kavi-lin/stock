@@ -30,9 +30,16 @@ from decision_engine import compute_dynamic_threshold, decision_band  # noqa: E4
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
-# V5.0+: accept V4.8 (legacy) and V5.0 (current) — V4.8 lives until pre-V5.0 entries decay
-ACCEPTED_VERSIONS = ("V4.8", "V5.0")
-CURRENT_VERSION   = "V5.0"
+# Accepted schema versions, oldest → newest. V4.8 (4-lane legacy) lives until pre-V5.0
+# entries decay; V5.0 opened the 5-lane era; V5.1 makes the Phase 3 engine block mandatory.
+ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1")
+CURRENT_VERSION   = "V5.1"
+# 5-lane era — valuation_lane / fair_value_summary required, Rec 11 + MHP instrumented.
+V5_VERSIONS = ("V5.0", "V5.1")
+# Versions whose entries MUST carry the Phase 3 engine output (`calculation_steps` +
+# `decision_engine_version`). Version-keyed rather than date-keyed so a backfilled entry
+# stamped V5.1 is held to exactly the same bar as one exported today.
+CALC_STEPS_REQUIRED_VERSIONS = ("V5.1",)
 
 TOP_REQUIRED = [
     "session_export_version", "export_date", "ticker", "final_action",
@@ -63,7 +70,7 @@ TRADE_REQUIRED = [
     "analysis_price",
 ]
 
-# V5.0+ additional required fields (only enforced when entry is V5.0)
+# V5.0+ additional required fields (only enforced when entry is in V5_VERSIONS)
 TRADE_REQUIRED_V5 = [
     "valuation_lane",       # 5th lane (Valuation Specialist) output
     "fair_value_summary",   # Phase 4.5 deterministic anchor blend
@@ -112,11 +119,10 @@ _CASCADE_PENALTY = {
 }
 _KNOWN_MULTIPLIERS = (1.0, 1.15, 0.85, 0.925, 0.95)
 
-# §13 must not be bypassable by simply omitting the block. Entries exported from this
-# date on are required to carry `calculation_steps` — otherwise "PM 手算並整段省略" walks
-# straight through the gate the protocol says will stop it.
-# Date-keyed rather than version-keyed because all 78 existing V5.0 entries predate the
-# block; keying on the schema version needs a V5.1 bump (own release — see TODO).
+# §13 must not be bypassable by simply omitting the block. The primary gate is now
+# version-keyed (CALC_STEPS_REQUIRED_VERSIONS); this date threshold stays as the backstop
+# that catches the mis-stamp bypass — an entry exported after the cutover but stamped with
+# an older version precisely to dodge the version gate.
 CALC_STEPS_REQUIRED_FROM = "2026-08-03"
 
 
@@ -136,22 +142,36 @@ def check_phase3_arithmetic(entry, trade, errors, warnings):
     holds for V4.70.0+ math: C_eff quantisation, cascade→penalty mapping, the dynamic
     threshold matrix, and the mandatory Rec 11 instrumentation.
 
-    Entries with neither block are skipped entirely (pre-V4.80.0 back-compat, rc=0).
+    Entries with neither block are skipped entirely (pre-V4.80.0 back-compat, rc=0) —
+    unless the entry is stamped a version in CALC_STEPS_REQUIRED_VERSIONS, where both
+    blocks are mandatory and their absence is rc=1.
     """
     cs = trade.get("calculation_steps")
     engine_ver = trade.get("decision_engine_version")
+    ver = entry.get("session_export_version")
+    _ENGINE_CMD = ("`python3 investment/scripts/decision_engine.py --from-file "
+                   "/tmp/<T>_p3.json` 的 calculation_steps 整塊 verbatim 抄寫")
     if not isinstance(cs, dict):
         if engine_ver:
             errors.append(
                 f"decision_engine_version={engine_ver!r} present but calculation_steps is "
                 "missing — the engine emits both; do not hand-assemble the Phase 3 block")
+        elif ver in CALC_STEPS_REQUIRED_VERSIONS:
+            errors.append(
+                f"calculation_steps missing — session_export_version={ver!r} 的 entry 必須帶 "
+                f"Phase 3 engine 輸出（{_ENGINE_CMD}）。省略此欄等同繞過 §13 算術硬閘")
         elif (entry.get("export_date") or entry.get("date") or "") >= CALC_STEPS_REQUIRED_FROM:
             errors.append(
                 f"calculation_steps missing — {CALC_STEPS_REQUIRED_FROM} 起的 entry 必須帶 "
-                "Phase 3 engine 輸出（`python3 investment/scripts/decision_engine.py "
-                "--from-file /tmp/<T>_p3.json` 的 calculation_steps 整塊 verbatim 抄寫）。"
-                "省略此欄等同繞過 §13 算術硬閘")
+                f"Phase 3 engine 輸出（{_ENGINE_CMD}）。省略此欄等同繞過 §13 算術硬閘")
         return
+
+    # V5.1+ — the engine stamp is required alongside the block, so Tier B (rule-table
+    # conformance) can never be skipped by exporting calculation_steps unstamped.
+    if ver in CALC_STEPS_REQUIRED_VERSIONS and not engine_ver:
+        errors.append(
+            f"decision_engine_version missing — session_export_version={ver!r} 的 entry 必須連 "
+            "engine 版號一起抄（engine 兩者同時輸出）；缺版號會讓 §13 Tier B 規則表驗證整段跳過")
 
     # ── Tier A.1 — Step 1 products and their sum ─────────────────────────────
     lane_scores, ceffs, contribs = {}, {}, []
@@ -289,6 +309,28 @@ def check_phase3_arithmetic(entry, trade, errors, warnings):
                           f"{allowed_pv}, got {pv}")
     elif rule not in (None, "no_penalty", "consensus_bonus"):
         warnings.append(f"cascade_rule_applied={rule!r} is not a known V4.70.0 cascade rule")
+    # V4.81.0 — the label must agree with what the chain actually did, in both
+    # directions and on both sides. Without this, relabelling a penalised chain
+    # `no_penalty` passes: the arithmetic still multiplies by 0.95, and the
+    # rule→penalty_value table above only fires on rule_* names. Tier A.2 treats
+    # bonus/penalty as mutually exclusive branches (bonus wins), so each flag pins
+    # exactly one label family.
+    if cs.get("penalty_applied") is True and rule in (None, "no_penalty", "consensus_bonus"):
+        errors.append(
+            f"calculation_steps: penalty_applied=true but cascade_rule_applied={rule!r} — "
+            "a penalised chain must name the rule that penalised it (rule_1..5_*)")
+    if cs.get("penalty_applied") is not True and rule in _CASCADE_PENALTY:
+        errors.append(
+            f"calculation_steps: cascade_rule_applied={rule!r} is a penalty rule but "
+            f"penalty_applied={cs.get('penalty_applied')!r}")
+    if cs.get("bonus_applied") is True and rule != "consensus_bonus":
+        errors.append(
+            f"calculation_steps: bonus_applied=true but cascade_rule_applied={rule!r} — "
+            "a ×1.15 consensus chain must be labelled 'consensus_bonus'")
+    if cs.get("bonus_applied") is not True and rule == "consensus_bonus":
+        errors.append(
+            "calculation_steps: cascade_rule_applied='consensus_bonus' but "
+            f"bonus_applied={cs.get('bonus_applied')!r}")
 
     tier = (cs.get("structural_shift_modulation") or {}).get("tier")
     if polar.get("label") and buy is not None:
@@ -337,7 +379,9 @@ def main(argv=None):
     # ── 2. Version check ─────────────────────────────────────────────────
     ver = entry.get("session_export_version")
     if ver not in ACCEPTED_VERSIONS:
-        errors.append(f"session_export_version = {ver!r}, expected one of {ACCEPTED_VERSIONS}")
+        errors.append(
+            f"session_export_version = {ver!r}, expected one of {ACCEPTED_VERSIONS} "
+            f"(new exports stamp {CURRENT_VERSION!r})")
 
     # ── 2b. V4.8 mis-stamp guard (V2.17.8) ───────────────────────────────
     # If entry has V5.0-only fields (valuation_lane / fair_value_summary) but
@@ -350,7 +394,21 @@ def main(argv=None):
         if v5_only_fields:
             errors.append(
                 f"session_export_version='V4.8' but entry has V5.0-only fields {v5_only_fields} — "
-                f"this is a Phase 5 stamping bug. Patch session_export_version to 'V5.0'."
+                f"this is a Phase 5 stamping bug. Patch session_export_version to "
+                f"{CURRENT_VERSION!r} (or 'V5.0' if the entry carries no Phase 3 engine block)."
+            )
+
+    # ── 2c. V5.0 mis-stamp guard (V4.81.0) ───────────────────────────────
+    # Mirror of 2b one version up: `decision_engine_version` only exists on entries the
+    # Phase 3 engine produced, which is exactly what V5.1 makes mandatory. Stamping such
+    # an entry V5.0 would route it round the version gate in §13.
+    if ver == "V5.0":
+        trade_first = ((entry.get("trades_this_session") or [{}])[0]) or {}
+        if trade_first.get("decision_engine_version"):
+            errors.append(
+                "session_export_version='V5.0' but entry carries decision_engine_version — "
+                f"Phase 3 engine output stamps {CURRENT_VERSION!r}. Patch the version field; "
+                "keeping V5.0 bypasses the §13 calculation_steps gate."
             )
 
     # ── 3. Top-level required keys ───────────────────────────────────────
@@ -375,10 +433,10 @@ def main(argv=None):
             errors.append(f"trades_this_session[0]: missing key {k}")
 
     # V5.0+ requires fair_value_summary + valuation_lane
-    if ver == "V5.0":
+    if ver in V5_VERSIONS:
         for k in TRADE_REQUIRED_V5:
             if k not in trade:
-                errors.append(f"trades_this_session[0]: missing V5.0 key {k}")
+                errors.append(f"trades_this_session[0]: missing V5.0+ key {k}")
         # Validate fair_value_summary structure
         fvs = trade.get("fair_value_summary")
         if isinstance(fvs, dict):
@@ -631,7 +689,7 @@ def main(argv=None):
     # ── 11b. V5.0.x — Rec 11 hot_zone_eval instrumentation (TODO-015) ────
     # Always-recorded enum lets the weekly REVIEW tell "evaluated then
     # suppressed" from "rule never ran". Hard-error on enum/consistency when
-    # present; absence is a warning only (legacy/V5.0 entries predate it).
+    # present; absence is a warning only (pre-V5.0 entries predate the field).
     _HZ_EVAL_ENUM = {"fired", "suppressed_by_risk_flag",
                      "suppressed_by_cap", "not_qualifying"}
     hze = trade.get("hot_zone_eval")
@@ -646,22 +704,25 @@ def main(argv=None):
                 f"(got eval={hze!r}, probe={trade.get('hot_zone_probe')!r})"
             )
 
-    # ── 5d. V5.1 — Multi-Horizon Price Framework (advisory, warning-only) ─
+    # ── 5d. Phase 4.5 Multi-Horizon Price Framework (advisory, warning-only) ─
     # MHP is derived/advisory: it feeds reasoning + trade_plan provenance but
     # NOT decision math and NOT the 11-field decision_lock. Absence (V5.0 back-
     # compat) or partial fill must NEVER fail the gate — emit warnings, keep rc=0.
     # （warnings list 建立於 main() 開頭，V4.69.0 anchor 容錯亦寫入同一 list）
-    # TODO-015 — hot_zone_eval required on V5.0.x+; warn (not fail) on legacy.
-    if trade.get("hot_zone_eval") is None and ver != "V5.0":
+    # TODO-015 — hot_zone_eval required on V5.0.x+; silent on pre-V5.0 (the field
+    # postdates them). The pre-V4.81.0 form was `ver != "V5.0"`, i.e. exactly inverted:
+    # it nagged the legacy entries that cannot have the field and never fired on the
+    # modern ones that must.
+    if trade.get("hot_zone_eval") is None and ver in V5_VERSIONS:
         warnings.append(
             "hot_zone_eval absent — TODO-015 要求每筆 deep-dive 寫出 Rec 11 評估結果"
             "（fired/suppressed_by_risk_flag/suppressed_by_cap/not_qualifying）"
         )
     mhp = trade.get("multi_horizon_price_framework")
     if mhp is None:
-        if ver == "V5.0":
+        if ver in V5_VERSIONS:
             warnings.append(
-                "multi_horizon_price_framework absent — V5.1 三框架未填（V5.0 舊 entry 可接受，"
+                "multi_horizon_price_framework absent — Phase 4.5 三框架未填（不擋 gate，"
                 "新分析建議補上 short_term_5d / mid_term_60d / convergence）"
             )
     elif isinstance(mhp, dict):

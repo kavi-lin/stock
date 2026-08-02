@@ -8,6 +8,27 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.81.0] — 2026-08-02 — `session_export_version` 升 V5.1：§13 硬閘改綁 schema 版本（TODO L1b）
+
+### Changed
+- **§13 門檻由日期改綁版本**（`validate_session_export.py`）：`ACCEPTED_VERSIONS` 加入 `V5.1`、`CURRENT_VERSION` 指向它，新增 `V5_VERSIONS`（5-lane 世代）與 `CALC_STEPS_REQUIRED_VERSIONS`（engine block 必填的版本集合）。戳 `V5.1` 的 entry 缺 `calculation_steps` **或** `decision_engine_version` → rc=1。4.80.1 的 `export_date ≥ 2026-08-03` 日期閘留任後衛，專擋「cutover 後刻意戳舊版號繞過版本閘」。既有 78 筆 V5.0 entry 不需回填，照當年規則驗。
+- **版本條件式全面改吃集合**：`ver == "V5.0"` 型的單值比較在下次升版時會靜默失效，已改 `ver in V5_VERSIONS` —— 命中 V5.0+ 必填欄檢查（`valuation_lane` / `fair_value_summary`）與 MHP warning 兩處。
+- **`replay_decision_engine.py` / `validate_markdown_export.py` 改 import validator 的版本集合**：兩者原本各自硬寫 `"V5.0"`，升版時會一個把新 entry 全判成 `pre_v5_four_lane_schema` 排除（replay 覆蓋歸零）、一個整段跳過「合理股價」section 檢查。現在新增版號只改 validator 一處。
+- **`Dashboard/page-decisions.js` 解 V5.1 token 撞名**：`detectProtocolVersion()` 原本讓 `forward_expectations.trajectory` 啟發式先於 bridge 傳來的 `protocol_version` 回傳 `'V5.1'`；`V5.1` 現在是真的 schema 版號，改為**戳記優先、啟發式降為無版號時的 fallback**。副作用：舊的「有 trajectory 但 stamped V5.0」卡片 badge 由 V5.1 變回 V5.0（純 UI）。`version_v51` tooltip 改寫為 schema 語意。
+
+### Fixed
+- **`hot_zone_eval` warning 條件寫反**（`validate_session_export.py`）：`ver != "V5.0"` 讓警告只對**不可能有該欄**的 pre-V5.0 舊 entry 觸發，對**必須有該欄**的現行 export 恆不觸發（REVIEW_2026-07-31 記錄的 75 筆全 None 即此因）。改為 `ver in V5_VERSIONS`。
+- **`cascade_rule_applied` 標籤可與實際懲罰／加成脫鉤**（§13 Tier B）：把已套 0.95 懲罰的鏈條改標 `no_penalty` 原本能過閘 —— rule→`penalty_value` 對照表只在 `rule_*` 名稱上生效，`no_penalty` 落進 else 分支只發 warning。補**兩側各雙向**的一致性檢查：`penalty_applied=true` 必須指名 `rule_1..5_*` / penalty rule 必須配 `penalty_applied=true`；`bonus_applied=true` 必須標 `consensus_bonus` / `consensus_bonus` 必須配 `bonus_applied=true`（bonus 側是 review 抓到的對稱遺漏，同款改標實測原本 errors=0）。影響僅 trace label，決策數學不變。
+- **`phase5_export_schema.md` FULL EXAMPLE 版本戳過期**：header 寫 V5.0、JSON 卻戳 `V4.8`，而範例含 `valuation_lane` —— 照抄會直接撞上 §2b mis-stamp guard。改為完整 V5.1 範例，Phase 3 數字改用 `decision_engine.py` 實跑輸出（含 `calculation_steps` / `hot_zone_eval` / `decision_cap_active`），補 post-processor 的 `det_shadow` 後可直接過 validator。
+
+### Added
+- **V5.0 mis-stamp guard**（§2c，仿 §2b 上移一版）：戳 `V5.0` 卻帶 `decision_engine_version` → rc=1 並提示改戳 `V5.1`。`decision_engine_version` 只有 engine 產得出來，而那正是 V5.1 要求的東西。
+- `investment/scripts/test_session_export_schema.py` — 版本閘契約測試（23 條）：版本閘雙向、三個 mis-stamp bypass、11 條 §13 tamper、cascade 標籤 bonus 側 3 條。**fixture 直接從 `phase5_export_schema.md` 的 FULL EXAMPLE 解析**（doc 再度過期就會紅）；bonus 鏈由 `run_phase3()` 現跑產生而非寫死，規則移動時不會變成過期 fixture。已進 `OPS_COMMANDS.md` §7。
+
+### Why
+- 日期閘擋得住「今天手算」，擋不住「回填一筆舊分析」——後者會被今天的門檻誤傷，而繞道只要把版號寫成 `V5.0` 就成立。版本閘讓「這筆 entry 該用哪套規則驗」由 entry 自己宣告，回填與新做各歸各的規則。
+- 收尾用一組 20 條的驗收 battery（fixture 直接從 schema doc 的 FULL EXAMPLE 解析，doc 本身即受測）：舊 V5.0 rc=0、V5.1 缺兩欄各 rc=1、日期後衛 rc=1、兩個 mis-stamp guard rc=1、11 條 §13 tamper 全 rc=1、replay 覆蓋維持 172=1+2+169。
+
 ## [4.80.1] — 2026-08-02 — 4.80.0 review 的 2 個 P1 + 2 個 P2
 
 ### Fixed

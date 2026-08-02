@@ -49,6 +49,9 @@ from itertools import product
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from decision_engine import apply_decision_cap, run_phase3  # noqa: E402
+# Schema versions live in the validator — importing keeps replay coverage from silently
+# shrinking to zero the next time the export schema is bumped.
+from validate_session_export import V5_VERSIONS as FIVE_LANE_VERSIONS  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
@@ -269,9 +272,10 @@ def replay_trade(entry, trade, decision, reports_dir, tol):
     era = "current" if (date or "") >= CURRENT_RULES_SINCE else "pre_v4_70"
     row = {"date": date, "ticker": ticker, "version": ver, "rule_era": era}
 
-    if ver not in ("V5.0",):
+    if ver not in FIVE_LANE_VERSIONS:
         row.update(status="excluded", reason="pre_v5_four_lane_schema",
-                   detail=f"session_export_version={ver!r} predates the 5-lane weighting")
+                   detail=f"session_export_version={ver!r} predates the 5-lane weighting "
+                          f"(replayable: {', '.join(FIVE_LANE_VERSIONS)})")
         return row
 
     lanes = source_lanes(trade, decision, date, ticker, reports_dir)
