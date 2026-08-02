@@ -375,7 +375,8 @@ OUTPUT (strict JSON):
 
 對應外部模板「真正強在哪 / 市場擔心什麼」+ moat + catalysts：
 
-1. **`moat_assessment`**（必填）：`WIDE | NARROW | ERODING | NONE` + 1 行依據
+1. **`moat_assessment`**（必填）：物件 `{level, type, evidence_one_line}` ——
+   `WIDE | NARROW | ERODING | NONE` + 1 行依據（V5.3 形狀鎖：字串形態已落日）
    - 類型：brand / IP-patent / switching_cost / scale_economies / network_effect / regulation / 無
    - 例：「WIDE — 平台網路效應（active devs ≥ 25M, App Store 30% take rate 連續 5Y 穩定）」
    - 依據：peer 比較（PEER_BUNDLE）+ FCF margin trend + ROIC vs WACC（如可得）
@@ -491,7 +492,8 @@ OUTPUT (strict JSON):
 
 對應外部模板「主力吸籌/出貨」+「型態分類」+「強弱/關鍵價/劇本」三件套：
 
-1. **`smart_money_analysis`**（必填）：1-2 句敘述 + 一個 label
+1. **`smart_money_analysis`**（必填）：物件 `{label, narrative}` —— 正文欄位一律叫
+   `narrative`（V5.3 形狀鎖；歷史上出現過 `note` 與純字串兩種形態，validator §15 現在會擋）
    - label: `accumulating | distributing | neutral | mixed`
    - 依據綜合：
      - `FMP_SUPP_BUNDLE.insider_summary.quarters[0].acquired_disposed_ratio`（< 0.3 distributing；> 1.0 accumulating）
@@ -902,7 +904,7 @@ Phase 3 的**全部算術**由 `investment/scripts/decision_engine.py` 執行。
    `position_size_cap_pct` / `polar_position_cap_pct` 進 session export。
 
 **禁止手算 / 重算 / 微調任何 Phase 3 數字。** V4.81.0 起這是 schema 硬閘：export 戳
-`session_export_version: "V5.1"`，缺 `calculation_steps` 或 `decision_engine_version`
+`session_export_version: "V5.1"` 以上（現行 `"V5.3"`），缺 `calculation_steps` 或 `decision_engine_version`
 → `validate_session_export.py` rc=1（省略整塊不再是繞道，是直接擋下）。
 
 下方 Step 1–4 的公式自此為 **spec 參照**
@@ -1548,7 +1550,7 @@ python3 investment/scripts/append_session_export.py --from-file /tmp/<ticker>_se
 
 ```bash
 cat <<'JSON' | python3 investment/scripts/append_session_export.py
-{ "session_export_version": "V5.1", ... }
+{ "session_export_version": "V5.3", ... }
 JSON
 ```
 
@@ -1559,20 +1561,34 @@ JSON
 > - `lane_scores: {fundamentals, sentiment, news, technical}` — Phase 2 四個非 valuation lane 的 raw score（−3..+3）
 > - `det_inputs: {altman_z, debt_to_equity, fcf_yield, insider_ratio_q, short_interest_pct, fred_in_sector_avoid}` — 6 個 quant 原始值，**直接從 Phase 2 bundle 抄寫**，禁重新解讀
 > - `det_shadow` — Step 1.5 跑 post-processor 後自動產生，**不要手寫**
+> - `lane_contract` — 同上（C1 契約，V5.3 起必填）。**PM 手寫等於偽造 provenance**：
+>   這塊記的是「每個 lane 到底是誰產的」，手寫的話 Phase 6 分層校準會拿到一份沒人驗過的自述
 
 > **V5.0.x 補必填欄位**（trades_this_session[] 內，Phase 4.6 產出）：
 > - `decision_cap_active: bool`
 > - `decision_cap_reason: "insufficient_anchors" | "low_valuation_confidence" | "low_data_quality" | null`
 > - `cap_override_reason: string | null`
 
-### Step 1.5 — Apply deterministic shadow + polarization label (V2.10.0+ MUST-run)
+### Step 1.5 — Apply deterministic shadow + lane 契約 (V2.10.0+ MUST-run)
 ```bash
 python3 investment/scripts/apply_det_shadow.py --inplace investment/invest_logs/history.json
 ```
-此步把 `det_shadow` block 寫入最新一筆 trades_this_session[]。Polarization 從 lane_scores 算；val_det 從 weighted_fair_value 算；red_team_det 從 det_inputs 6 條 kill triggers 算。
+此步把兩塊 post-processor 產物寫入最新一筆 trades_this_session[]：
+
+**(A) `det_shadow`** — polarization 從 lane_scores 算；val_det 從 weighted_fair_value 算；
+red_team_det 從 det_inputs 6 條 kill triggers 算。
 - 若 `lane_scores` 不齊 → polarization=null（不影響其他欄位）
 - 若 `det_inputs` < 3 個有效值 → red_team_verdict_det=null（不影響其他欄位）
-- LLM 主分數（final_score / valuation_lane.score / red_team_verdict）**不被覆蓋**
+
+**(B) `lane_contract`**（C1，V5.3 起）— 六個 lane（五個分析 lane + Red Team）的
+`{provenance, llm_invoked, producer_version, input_hash, shadow_score}` ＋ session 層
+`{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`。
+- **已有的值一律保留**：det producer（未來的 Sentiment / Technical / RT skip）在自己的 phase
+  就寫好該 lane 的 provenance，這一步只補沒人認領的欄位（預設 = 今天的協定行為 `llm`）
+- 版號不在 `V5.3+` 的 entry **不寫契約** —— `--inplace history.json` 掃過全部舊 entry 時，
+  不會給 V4.6 的四 lane session 補一份六 lane provenance
+
+兩塊都是 sidecar：LLM 主分數（final_score / valuation_lane.score / red_team_verdict）**不被覆蓋**。
 
 ### Step 2 — Schema validate (MANDATORY gate)
 ```bash

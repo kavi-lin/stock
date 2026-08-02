@@ -1,26 +1,39 @@
-"""V2.10.0 — apply deterministic shadow + polarization label to session_export JSON.
+"""V4.90.0 — Phase 5 post-processor：deterministic shadow + 統一 lane 資料契約。
 
-Reads a session_export.json (or a single trade entry), computes:
-  - signal_polarization : ALIGNED | MIXED | BIPOLAR  (from lane scores)
+本檔是 Phase 5 Step 1.5 的**唯一** post-processor。兩個產出物：
+
+**(A) `det_shadow`**（V2.10.0 起）— session 層的 shadow 判讀：
+  - signal_polarization : ALIGNED | MIXED | OUTLIER | BIPOLAR  (from lane scores)
   - valuation_score_det : -1 | -0.5 | 0 | +0.5 | +1   (from FV vs price)
   - val_agreement       : AGREE | DRIFT | DISAGREE   (LLM val vs det)
   - red_team_verdict_det: NONE | MODERATE_COUNTER | STRONG_COUNTER  (from kill triggers)
   - red_team_agreement  : AGREE | DISAGREE          (LLM red_team vs det)
 
-LLM's main scores (final_score, lane_scores, valuation_lane.score, red_team_verdict)
-are NEVER overwritten — det fields are sidecar metadata for sanity check + UX badge.
+**(B) `lane_contract`**（C1，V4.90.0 起，只寫 `V5.3+` entry）— per-lane 產出來源：
+  六個 lane（五個分析 lane + Red Team）各自的
+  `{provenance, llm_invoked, producer_version, input_hash, shadow_score}`
+  ＋ session 層 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`。
+
+**為什麼合在同一支**：C1 明定「勿兩套並存」。契約若另開一支 script，Phase 5 就有兩個
+post-process 步驟、兩套版號、兩個可能漏跑的點。`valuation` 的 `shadow_score` 與
+`det_shadow.valuation_score_det` 是**同一次計算**寫兩處（後者為既有消費端保留的別名，
+validator §15 硬性比對兩者相等），不是兩條計算路徑。
+
+LLM 主分數（final_score / lane_scores / valuation_lane.score / red_team_verdict）
+**永不**被覆寫 — 以上兩塊都是 sidecar metadata。
 
 Usage:
   python3 investment/scripts/apply_det_shadow.py SESSION_EXPORT.json
   python3 investment/scripts/apply_det_shadow.py --inplace SESSION_EXPORT.json
   python3 investment/scripts/apply_det_shadow.py --dry-run SESSION_EXPORT.json   # print only
 
-詳見 investment/phase5_export_schema.md V2.10 章節。
+詳見 investment/phase5_export_schema.md 的 `det_shadow` / `lane_contract` 章節。
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from typing import Any
 
@@ -338,6 +351,157 @@ def compute_red_team_agreement(llm_verdict: str | None, det_verdict: str | None)
 
 
 # ---------------------------------------------------------------------------
+# (4) C1 — 統一 lane 資料契約 (V4.90.0)
+# ---------------------------------------------------------------------------
+
+CONTRACT_VERSION = "C1/1.0"
+
+# 只有這些 schema 版本的 entry 會被寫入 lane_contract。舊 entry 不回填：
+# V4.6 的四 lane fanout 與今天的六 lane 契約不是同一回事，補一塊「看起來很完整」
+# 的 provenance 上去等於在稽核軌跡放假證據（Phase 6 按 provenance 分層時會直接吃到）。
+# 與 §13 / §14 同一條紀律：門檻綁 schema 版本，不綁日期。
+LANE_CONTRACT_VERSIONS = ("V5.3",)
+
+# 六個 lane = 五個 Phase 2 分析 lane + Red Team。RT 放進同一張表而不是另立一組欄位，
+# 是為了讓 L8（RT decision-invariant skip）只要改 `lanes.red_team.provenance`，
+# 不必再發明一套平行欄位——那正是 C1 要消滅的東西。
+LANE_NAMES = ("fundamentals", "sentiment", "news", "technical", "valuation", "red_team")
+
+# provenance 值域：
+#   llm            — LLM subagent 產出（今天六個 lane 的預設）
+#   deterministic  — script 產出，本回合沒有 LLM 參與（L5 / L6 / L8 落地後才會出現）
+#   hybrid         — det producer 先跑，條件式 LLM reviewer 也跑了（L4b gate 翻預設後）
+#   absent         — 本回合沒有產出（fanout 失敗 / RT execution failed）
+PROVENANCE_VALUES = ("llm", "deterministic", "hybrid", "absent")
+
+# provenance 中「LLM 有參與」的子集合 —— llm_invoked 由此推導，值域一改這裡跟著改。
+LLM_PROVENANCE = ("llm", "hybrid")
+
+# 外來 producer 會**主動聲明**的 provenance 子集合 —— 只有這兩個值受保留規則保護。
+# `llm` 與 `absent` 是 post-processor 自己的推導結果（預設行為 / 從訊號推出缺席），
+# 不是任何人的聲明；對它們套保留規則會複製 P2 的死結：lane_scores 補齊後重跑，
+# 上一輪推出的 `absent` 卻被自己保留住，§15 報錯而「重跑」永遠修不好。
+EXTERNAL_PROVENANCE = ("deterministic", "hybrid")
+
+# L9 會定義 LEAN / REFRESH 的升級規則與 Phase 6 語意；C1 先把值域釘住，
+# 讓 L9 只需要改「什麼時候寫哪個值」，不必再動契約形狀。
+ANALYSIS_MODES = ("FULL_IC", "LEAN", "REFRESH")
+
+LANE_FIELDS = ("provenance", "llm_invoked", "producer_version", "input_hash", "shadow_score")
+
+_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+
+
+def protocol_version() -> str:
+    """repo VERSION —— LLM lane 的 `producer_version` 用它。
+
+    LLM lane 沒有「producer script 版號」可填，但它的評分行為由 rubric 決定，而 rubric
+    改動一律 bump repo 版號。所以 `protocol:<VERSION>` 回答的是 Phase 6 真正要問的
+    「這筆是在哪一版 rubric 下打的分」，比填 null 有用。
+    """
+    try:
+        with open(os.path.join(_ROOT, "VERSION"), encoding="utf-8") as f:
+            v = f.read().strip()
+        return v or "unknown"
+    except OSError:
+        return "unknown"
+
+
+def authoritative_valuation_score(trade: dict) -> float | None:
+    """Valuation lane 的權威分數：canonical pack 優先，退 `valuation_lane.score`。
+
+    抽成函式是因為它有**兩個**呼叫端：`apply_to_trade()` 拿它餵 `compute_polarization()`，
+    validator §15 拿它重算同一組 `missing_lanes` 來驗 provenance。取值順序若各寫一份，
+    改動時只改一邊就會讓 validator 對合法 entry 報錯 —— 正是 C1 要消滅的漂移面。
+    """
+    pack = trade.get("valuation_pack")
+    pack_score = pack.get("score") if isinstance(pack, dict) else None
+    if isinstance(pack_score, (int, float)) and not isinstance(pack_score, bool):
+        return pack_score
+    val_lane = trade.get("valuation_lane")
+    return val_lane.get("score") if isinstance(val_lane, dict) else None
+
+
+def _blank_lane() -> dict:
+    return {k: None for k in LANE_FIELDS}
+
+
+def build_lane_contract(trade: dict, *, val_det: float | None = None,
+                        missing_lanes: tuple | list = (),
+                        version: str | None = None) -> dict:
+    """組 `lane_contract`。**保留外來聲明，重算自己的推導** —— 每個欄位屬於哪一邊
+    要逐個分，這條界線劃錯一格就是一個死結（P2 / 4.90.4 各踩過一次）：
+
+    **保留域（外來 producer 的聲明，post-processor 不得動）**
+      - `provenance` ∈ EXTERNAL_PROVENANCE（deterministic / hybrid）——L5 sentiment det、
+        L4b reviewer gate、L8 RT skip 在自己的 phase 寫入
+      - `producer_version` / `input_hash` / 非 valuation 的 `shadow_score`（L5 shadow 期
+        det 值就寫在這，provenance 仍是 llm）
+
+    **推導域（post-processor 自己的輸出，每次重算贏）**
+      - `provenance` 的 `llm` / `absent` 兩個值 —— 預設行為與「從訊號推出缺席」都是
+        本函式的推導，不是聲明。保留它們的後果（4.90.4 實錘）：PM 漏填 lane_scores
+        → 推成 absent → 補分數重跑 → 上一輪的 absent 被自己保留住 → §15 報錯而
+        「重跑」永遠修不好
+      - `llm_invoked` —— 定義上就是 provenance 的投影，獨立保留只會保住 corrupt 值
+      - `valuation.shadow_score` —— 與 `det_shadow.valuation_score_det` 同一次計算
+        （P2，4.90.1）；無條件同步 `val_det`，包含變回 None 的情形
+
+    `missing_lanes` 取自 `compute_polarization()` 的同名輸出（單一事實來源，不另判斷
+    「這個 lane 有沒有分數」）。
+    """
+    existing = trade.get("lane_contract")
+    existing = existing if isinstance(existing, dict) else {}
+    prior_lanes = existing.get("lanes")
+    prior_lanes = prior_lanes if isinstance(prior_lanes, dict) else {}
+    pv = version or protocol_version()
+
+    lanes: dict[str, dict] = {}
+    for name in LANE_NAMES:
+        cur = _blank_lane()
+        prior = prior_lanes.get(name)
+        if isinstance(prior, dict):
+            for k in LANE_FIELDS:
+                if prior.get(k) is not None:      # False / 0.0 是合法值，只有 None 算空
+                    cur[k] = prior[k]
+
+        if cur["provenance"] not in EXTERNAL_PROVENANCE:
+            # llm / absent / None 全部重推 —— 這三個都是本函式的推導域，不是聲明。
+            if name == "red_team":
+                absent = bool(trade.get("red_team_execution_failed"))
+            else:
+                absent = name in missing_lanes
+            cur["provenance"] = "absent" if absent else "llm"
+
+        # 恆為 provenance 的投影，不吃保留值 —— corrupt 的 llm_invoked 重跑即修復。
+        cur["llm_invoked"] = cur["provenance"] in LLM_PROVENANCE
+
+        if cur["producer_version"] is None and cur["provenance"] in LLM_PROVENANCE:
+            cur["producer_version"] = f"protocol:{pv}"
+
+        # `input_hash` 今天恆為 null：factpack 的 content_hash 是 L9 的產出物，還不存在。
+        # 欄位先開，是為了 L5 的 det producer 有位置可寫，不必再改一次契約形狀。
+        if name == "valuation":
+            # 同 producer 的重算一律贏（見 docstring）：這欄與 det_shadow.valuation_score_det
+            # 是同一次計算的兩個落點，任何分歧都會把 entry 卡死在 §15。
+            cur["shadow_score"] = val_det
+
+        lanes[name] = cur
+
+    mode = existing.get("analysis_mode")
+    if mode not in ANALYSIS_MODES:
+        mode = "FULL_IC"
+
+    return {
+        "contract_version":  CONTRACT_VERSION,
+        "analysis_mode":     mode,
+        "llm_invoked_lanes": [n for n in LANE_NAMES if lanes[n]["llm_invoked"]],
+        "llm_skipped_lanes": [n for n in LANE_NAMES if not lanes[n]["llm_invoked"]],
+        "lanes":             lanes,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Apply to a single trade entry
 # ---------------------------------------------------------------------------
 
@@ -437,9 +601,16 @@ def compute_lane_freshness_penalty(trade: dict) -> dict:
     }
 
 
-def apply_to_trade(trade: dict) -> dict:
-    """Compute and attach det_shadow block to a trades_this_session[] entry.
-    Returns the (mutated) entry."""
+def apply_to_trade(trade: dict, *, entry_version: str | None = None) -> dict:
+    """Compute and attach `det_shadow` (+ `lane_contract` on V5.3+) to a
+    trades_this_session[] entry. Returns the (mutated) entry.
+
+    `entry_version` = 該 entry 的 `session_export_version`。**None 專指「沒有 entry 外殼
+    可讀」**（單筆 trade 檔的 CLI 路徑）→ 視為現行版本、寫契約。有外殼卻缺版號是另一回事
+    （壞掉的 entry，不是無版號的 trade），由 `apply_to_session_export()` 傳空字串落到
+    「不寫」那側。走 history list 時每筆用自己的版號判斷，所以 `--inplace history.json`
+    不會把契約亂灑到 181 筆舊 entry 上。
+    """
     val_lane = trade.get("valuation_lane") or {}
     pack = trade.get("valuation_pack") or {}
     fvs = trade.get("fair_value_summary") or {}
@@ -447,7 +618,7 @@ def apply_to_trade(trade: dict) -> dict:
     det_inputs  = trade.get("det_inputs")  or {}
 
     pack_score = pack.get("score") if isinstance(pack, dict) else None
-    authoritative_score = pack_score if isinstance(pack_score, (int, float)) else val_lane.get("score")
+    authoritative_score = authoritative_valuation_score(trade)
     authoritative_fv = (pack.get("weighted_fair_value") if isinstance(pack, dict)
                         else None)
     authoritative_vs = pack.get("vs_current_pct") if isinstance(pack, dict) else None
@@ -496,6 +667,13 @@ def apply_to_trade(trade: dict) -> dict:
         "news_pt_leakage":      pt_leak["flag"],     # V3.45.4 — None=舊 entry 無 haystack
         "news_pt_leakage_detail": pt_leak,
     }
+
+    # C1 (V4.90.0) — 統一 lane 契約。`val_det` 是同一次計算的結果，不重算；
+    # 契約裡的 valuation.shadow_score 與上面的 valuation_score_det 因此恆等
+    # （validator §15 硬性比對，擋事後手改其中一處）。
+    if entry_version is None or entry_version in LANE_CONTRACT_VERSIONS:
+        trade["lane_contract"] = build_lane_contract(
+            trade, val_det=val_det, missing_lanes=polar.get("missing_lanes") or [])
     return trade
 
 
@@ -504,14 +682,20 @@ def apply_to_session_export(payload: dict) -> dict:
 
     V2.20.0: forward `export_date` from outer payload into each trade so freshness
     computation can use it as `as_of_date`.
+    V4.90.0: forward `session_export_version` so the C1 lane contract is only written
+    on entries whose schema version declares it (old entries stay untouched).
     """
     export_date = payload.get("export_date") or payload.get("date")
+    # 缺版號的 payload 傳 ""（不是 None）：None 在 apply_to_trade 的語意是「沒有 entry 外殼」
+    # → 寫契約。這裡外殼是有的、只是欄位漏了，那是壞掉的 entry，不該因此拿到一份契約
+    # （下游 §2e 也會擋，但讓 producer 先不寫比較乾淨）。
+    ver = payload.get("session_export_version") or ""
     trades = payload.get("trades_this_session") or []
     for t in trades:
         if isinstance(t, dict):
             if export_date and not t.get("as_of_date"):
                 t["_as_of_date_inherited"] = export_date  # transient, pickup by freshness
-            apply_to_trade(t)
+            apply_to_trade(t, entry_version=ver)
     return payload
 
 
@@ -545,12 +729,18 @@ def main() -> int:
         sys.exit(f"[ERROR] Unrecognized JSON shape at {args.path}")
 
     if args.dry_run:
-        # Print just the det_shadow blocks
+        # Print just the post-processor output (det_shadow + C1 contract)
+        def _blocks(t: dict) -> dict:
+            out = {"det_shadow": t.get("det_shadow", {})}
+            if t.get("lane_contract") is not None:
+                out["lane_contract"] = t["lane_contract"]
+            return out
+
         if isinstance(payload, dict) and "trades_this_session" in payload:
             for t in payload["trades_this_session"]:
-                print(json.dumps(t.get("det_shadow", {}), indent=2, ensure_ascii=False))
+                print(json.dumps(_blocks(t), indent=2, ensure_ascii=False))
         elif isinstance(payload, dict):
-            print(json.dumps(payload.get("det_shadow", {}), indent=2, ensure_ascii=False))
+            print(json.dumps(_blocks(payload), indent=2, ensure_ascii=False))
         return 0
 
     if args.inplace:

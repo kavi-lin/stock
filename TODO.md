@@ -36,6 +36,29 @@
 - [ ] **校準觀察點**：累積 ≥15 個真正成熟 comparable points 後，才評估 growth/margin/multiple 規則；未達門檻不得升格 live。
 - 三項 P2 已於 v4.79.0 完成，明細見該區塊。
 
+## 📋 Backlog — S路線：產業掃描 Lean 化 + 資料補強（2026-08-03 兩輪審視定案）
+
+> 來源：2026-08-03 對 sector protocol V1.4 的兩輪審視。編號：**SE** = 第一輪（執行效率 Efficiency）、**SD** = 第二輪（資料補強 Data）。紀律對齊 invest 端 L 路線：**score 生產方式改變必 shadow-first**；權重/門檻/翻預設**使用者拍板**；探索層（break news / nexus / 回測）產出**永不進 score/verdict**。每項獨立 bump 一版。
+> 依賴：SE2 依賴 SE1 達標；SE6 動工前先立 lane contract（C1 教訓）；SD1 是一切權重再校準的前提。**不動的**：News lane / DA / `upcoming_events` / `today_verdict` 留 LLM——那是真判斷。
+
+### SE — 執行效率（第一輪：元件×stage 盤點）
+
+- [ ] **SE1 — Shadow score 報告落盤**（4c 割接前置）：`build_sector_intel.py` 已跑 `sector_score_calculator.py` 雙軌，但結果只進 stderr 不落盤（查 7/21、7/29、7/31 三場 intel 皆無 shadow 欄位）→ 寫 `sector/cache/shadow_score_<DATE>.json`（比照 invest `SHADOW_REPORT_*`）累積。割接判準沿用 review 定案：N=5 場、0 hard diff (>1.0)、≤2 soft diff (0.5–1.0)、0 penalty_drift。
+- [ ] **SE2 — Phase 4c 決策樹 script 化割接**（依賴 SE1 達標；invest L1/4.80.0 的移植）：STEP A–G.5（乘數/降級/verdict/stance）全是 threshold 邏輯，`step6_overlay.py` + `sector_score_calculator.py` 已寫完最難兩塊。割接後 PS 只出 4 component 分數 + 質化欄位，script 算 verdict；LLM 只寫 STEP H `today_verdict`。消心算漂移 + 砍 4c（PS 最長 inline 推理段）。零星手算清理（`synthesized_exposure` 三訊號合成、`uptrend_ratio_overall` 平均）割接時順手併入，不獨立開項。
+- [ ] **SE3 — R4–R7 DA pre-trigger script 化**：V4.12.2 只把規則全文移出 prompt，threshold 比對仍是 PS 手算（4 規則 × N HOT sector）。照 `valuation_reviewer_gate.py`「零新計算」模式寫 `da_pretrigger.py`（或併入 `phase_prefetch.py`）：讀 cache → 出 `triggers_fired[]` + 命中數值，PS 直接 paste。
+- [ ] **SE4 — Protocol 文件瘦身**：純 fallback 段落搬 `sector/protocol_appendix_fallback.md`（`phase_0.md` 層 A–E 舊流程 ~70 行、`phase_1-2-3.md` Step 1–3e sequential 備援 ~130 行），主檔留一行指路。每場直接省 context，零行為風險。
+- [ ] **SE5 — FRED lane 條件式 gate**（照 invest L4b 模式，shadow-only 起手）：step6 overlay 已 deterministic 套 FRED，lane 增量只剩 qualitative rationale（且 confidence<0.40 自標 LOW-CONFIDENCE）。先做 `would_invoke` shadow 統計，數據定案後翻預設（使用者拍板）。省一個 Sonnet subagent／場。
+- [ ] **SE6 — Rotation lane det-shadow + sector 版 lane contract**（C1/4.90.0 教訓：**割接第一個 lane 前先立契約**）：先在 sector_intel 加 per-lane `{provenance, llm_invoked, producer_version, shadow_score}`（現只有 session 級 `phase4_fanout_mode`/`degraded_agents`），再做 Rotation lane（最機械：uptrend_ratio + rotation_signal 排序）det producer shadow。否則 `backtest_step6_overlay.py` 這類回測會混 LLM 分與 script 分。
+
+### SD — 資料補強（第二輪：缺口 / 用滿 / 跨頁供給）
+
+- [ ] **SD1 — Verdict 成績單（feedback loop）**：sector verdict 從未回測命中率，25/25/25/25 base 權重是手拍的。照 `momentum-journal` 模式寫 `sector/scripts/verdict_journal.py`：scan 時 snapshot（date × sector × verdict × score × components），事後回填 proxy ETF 5/20/60d forward return → `sector_verdict_index.json`（比照 invest `event_index`），供 Dashboard decisions 頁。**沒有 ledger，任何 rubric 調整都是猜**；權重調整另開項目且使用者拍板。
+- [ ] **SD2 — 盤前數據**（協定名為 Pre-Market 卻零盤前數字）：`phase_prefetch.py` 加 premarket task（SOFT fail）：ES/NQ 期貨 + 11 支 proxy ETF 盤前漲跌/gap（FMP `/stable/` premarket 或 yfinance）→ `_phase0.premarket` 新 block，`today_verdict` 可引用；亦供 break-news / mood 頁。
+- [ ] **SD3 — 跨板塊共同因子風險**（新時代盲點：HOT 集合全押同一 AI 敘事 = 表面分散實際單注）：script 算 11 proxy ETF 90d 報酬相關矩陣 + theme-detector `affected_sectors` 重疊計數；HOT 集合 avg pairwise corr > 門檻 → `risk_flags += "correlated_bets"` + stance cap。**先 shadow 兩週再定門檻**；矩陣輸出供 sector.html 證據熱力區。
+- [ ] **SD4 — 小額訊號補強**（三個皆 shadow-first、SOFT fail）：(a) VIX 期限結構 ^VIX/^VIX3M 進 `sentiment.py`（backwardation flag）；(b) earnings revisions breadth：`fetch_earnings_pulse.py` 擴 FMP analyst-estimates 上修/下修比（前瞻，補 `beat_rate_30d` 的回望性）；(c) equal vs cap weight RS：RSP* vs XL* 配對偵測 mega-cap masking → Phase 4b divergence 提示（R8 候選，不改 score）。
+- [ ] **SD5 — 既有數據用滿 + 跨頁供給**：(a) V2.9.0 多週期 RS（已算、只當 DA 提示）→ deterministic momentum-exhaustion overlay 候選（照 valuation_penalty 模式，shadow 看分佈再定）；(b) PT/grades ~111 calls 產出只有 R6 一條提示 → 配 SD4(b) 重估 ROI，不值就 `--skip-analyst` 常態化；(c) Break News divergence notes → 只餵 `watch_next`/narrative + provenance 標記（**探索層紀律：不進 score/verdict**）；(d) 跨頁：stance/synthesized_exposure 歷史 → mood.html regime 時間軸；sector PE z-score cache → valuation-modeler comps 的 sector baseline（純資料供給）。
+- [ ] **SD6 — Watchlist（不動工，等資料源）**：CFTC COT 持倉（週頻可行但排後）；真 ETF flow / 板塊選擇權 GEX、IV skew（免費源不穩，不為它加爬蟲維護債）。
+
 ## 📋 Backlog — Protocol Lean 化：「保留 5 個 lane score，不保留 5 次固定 LLM」（2026-08-02 共識定案）
 
 > 共識五點：(1) 5 score ≠ 5 LLM，決策層 schema 不動；(2) 先 script 化決策數學，再談條件式跳過；(3) 改變 score 生產方式必 shadow-first；(4) Sentiment deterministic 化優於 News/Sentiment 合併；(5) LLM 集中在 Fundamentals / News / 條件式 Valuation reviewer / Red Team。
@@ -58,19 +81,29 @@
 - [x] **L4 — Valuation quant 提前 Phase 1.5**（4.88.0）：`--stage quant` / `--stage mhp --from-quant`；單發模式 = 兩段的組合，等價是結構保證。protocol 新增 §PHASE 1.5、Phase 2.4 縮成 MHP-only、修 Valuation lane 數字來源時序矛盾。live NVDA 兩段 vs 單發 bitwise identical。
 - [x] **L4b — Valuation Specialist 改條件式 reviewer**（4.89.0，shadow-only）：5 條 trigger，其中 `transition_case_active` 為 **mandatory**——實測發現跳過 lane 會讓 `valuation_confirmed_transition=False`、Phase 3 cascade rule #2 的 ×0.95 落回 ×0.85，「跳過不改決策數字」前提不成立。peer discovery cache TTL 30d，只餵 gate 不餵 build_pe_cohort，且不覆寫人工核准的 config。
 - [ ] **L4b-2 — 翻預設（skip 生效）**（依賴 L4b shadow 樣本，**使用者拍板**）：gate 接進 `shadow_report.py` 讀出端；停止規則用「discovery 覆蓋率穩定後再數 N」而非固定 session 數（暖機期命中率不反映穩態）——但**「穩定」必須落成具名可操作常數**（例：連續 K 個 session 的 `no_peer_cohort` 命中率不再下降），理由同 `ARCHETYPE_CHECKPOINT_N` 寫成常數；否則只是把人工判斷點從「跑滿沒」換成「穩定沒」；validator 目前擋 `shadow_only=false`，翻預設時要一併鬆綁。
-- [ ] **L5 — Sentiment lane deterministic 化**（shadow-first）：公式已寫死（0.5×stock + 0.5×(market/10−5) + 規則表）→ det producer script；先 shadow N session 過 `shadow_report.py` 哨兵再翻預設；翻後 weight 凍結窗（照 V3.45.4 News 前例）。**統一 lane 契約第一個落地點**（見橫切 C1），動工前先定案 det_shadow 收斂。
+- [ ] **L5 — Sentiment lane deterministic 化**（shadow-first）：公式已寫死（0.5×stock + 0.5×(market/10−5) + 規則表）→ det producer script；先 shadow N session 過 `shadow_report.py` 哨兵再翻預設；翻後 weight 凍結窗（照 V3.45.4 News 前例）。**C1 契約已定案（4.90.0），此項不再被擋**。
+  - 落地點已備好：det producer 在自己的 phase 寫 `lane_contract.lanes.sentiment = {provenance: "deterministic", llm_invoked: false, producer_version: "<script> v1.0", shadow_score: <det>}`，post-processor 的保留規則不會覆寫（`test_lane_contract.py` 的保留 case 就是在守這件事）。shadow 期間 provenance 仍是 `llm`，det 值寫 `shadow_score`。
+  - 停止規則沿用 `ARCHETYPE_CHECKPOINT_N = 20` 的形狀：具名常數 N=20 + `shadow_report.py` 哨兵（det vs LLM flip-rate）；翻後照 V3.45.4 News 前例上 weight 凍結窗。
 - [ ] **L6 — Technical deterministic-first**（shadow-first）：det score producer（technical_core 為基）；LLM reviewer 觸發規則化（指標矛盾 / gap / parabolic / det score 落 threshold ±band）；qualitative 欄位（pattern_taxonomy / smart_money / key_levels → MHP 依賴）需 det 版或觸發 LLM 時才產。shadow + weight 凍結窗。
 - [ ] **L7 — Red Team evidence ledger**：Python 壓 ledger（consensus_thesis / claims / negative_evidence / valuation_assumptions / implied_expectations / dq_flags / unresolved_conflicts）；RT prompt 改吃 ledger（先縮 prompt，不跳過）；classifier haystack 欄位保留。
-- [ ] **L8 — RT decision-invariant skip**（依賴 L1）：bounded simulation 窮舉 verdict × strength × basis × shift-tier，final action / cap / size tier / risk flags 全不變才 skip；skip = 跳過推理**不跳過產出物**——kill_conditions ← det kill triggers 生成、counter_thesis 模板化、`red_team_provenance: deterministic_skip`；decision_lock / Dashboard kill_triggers 相容。
+- [ ] **L8 — RT decision-invariant skip**（依賴 L1）：bounded simulation 窮舉 verdict × strength × basis × shift-tier，final action / cap / size tier / risk flags 全不變才 skip；skip = 跳過推理**不跳過產出物**——kill_conditions ← det kill triggers 生成、counter_thesis 模板化；decision_lock / Dashboard kill_triggers 相容。
+  - **原本規劃的 `red_team_provenance: deterministic_skip` 欄位不要開**：C1（4.90.0）已把 red_team 納為第六個 lane，skip 只要寫 `lane_contract.lanes.red_team = {provenance: "deterministic", llm_invoked: false, producer_version: ...}`。另立平行欄位正是 C1 要消滅的東西。
 - [ ] **L9 — Refresh / content-hash mode**：factpack 加 `content_hash` + `material_change_since_last`；`analysis_mode: LEAN|FULL_IC|REFRESH` + LEAN→FULL_IC 升級規則 deterministic 寫進 protocol 正文（首次覆蓋 / structural shift / 高信心可行動決策必升）；refresh entry 的 history/Phase 6 語意定義。
-- [ ] **C1（橫切）— 統一 lane 資料契約**：per-lane `{provenance, llm_invoked, producer_version, input_hash, shadow_score}` + session 層 `{llm_invoked_lanes[], llm_skipped_lanes[], analysis_mode}`；**取代並吸收既有 det_shadow block**（`apply_det_shadow.py` 改為新契約 producer，勿兩套並存）——L5 動工前定案；validator + 舊 entry 向後相容；Phase 6 校準按 provenance 分層（防 selection bias）。
-  - **design 輸入 — 4.87.0 實測盤點的持久化缺口**（L3 動工時逐筆驗過 MSFT/MU 2026-08-02 兩筆真 entry）。C1 定案時要回答的是「這些哪些進 history、哪些留在 `phase_inputs` artifact」：
-    1. **`sentiment_lane` 整塊不存在** —— schema 從來沒有這個 key，Sentiment 只在 `lane_scores.sentiment` 有一個數字，沒有任何質性欄位。
-    2. **四個 lane 的 `key_factors` / `risk_flags` 從未持久化** —— 只有 `news_lane.key_factors`（V3.45.4 加的）有；`risk_flags` **五個 lane 全部沒有**。這是報告 §5 人真正在讀的證據段。
-    3. **per-lane raw `signal` / `confidence` / `phase0_alignment` 只有 valuation 有** —— `valuation_lane` 存了 `{signal, score, confidence}`，其餘四個 lane 的 signal 與 confidence 只活在 Phase 3 的 `calculation_steps` 字串裡（且是 c_eff 量化後的值，raw 值不可回推）。
-    4. **`macro_context` 只有 ~384 bytes** —— 報告 §3 的宏觀段實際來自 Phase 0 JSON，history 只留一段摘要。
-    5. **lane 區塊形狀在真實 entry 之間不一致** —— `moat_assessment` 有時是 dict 有時是字串；`smart_money_analysis` 的正文欄位有時叫 `narrative` 有時叫 `note`；`immediate_catalyst_5d` 有時是 dict 有時是 null。C1 的契約要把形狀定死，否則每個消費端都要各自寫相容碼（renderer 現在就寫了三處）。
-  - **`phase_inputs/` 那批檔案就是 C1 的實測樣本** —— 累積幾份後可直接回答「哪些欄位每次都在、哪些其實沒人用」，不必憑空設計。
+  - **契約側的兩個欄位 C1 已開好**：`lane_contract.analysis_mode`（值域已釘 `FULL_IC|LEAN|REFRESH`，validator 驗）與 per-lane `input_hash`（目前恆 null，等 factpack content_hash）。L9 只需要改「什麼時候寫哪個值」，不必再動契約形狀。
+- [x] **C1（橫切）— 統一 lane 資料契約** — **4.90.0 完成**（schema `V5.3`）。`lane_contract`：六個 lane（五個分析 lane + **red_team**）的 `{provenance, llm_invoked, producer_version, input_hash, shadow_score}` + session 層 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`；producer 併進 `apply_det_shadow.py`（Step 1.5 同一步，不另開 script）；validator §15 + §2e 反向 guard；`test_lane_contract.py`（producer 半 + 18 例 tamper battery）。
+  - **持久化缺口的裁決**：只有**契約欄位**進 history。質性大塊（五個 lane 的 `key_factors` / `risk_flags`、sentiment 質性欄、`macro_context` 全文）留在 `phase_inputs/` artifact —— history.json 是決策帳本，不是報告的第二份原稿；L3 已讓 artifact 落地存檔且有重疊欄位硬閘。缺口 1-4 因此**不進 history**，狀態不變。
+  - **缺口 5（形狀不一）已修**：`moat_assessment` / `smart_money_analysis` 一律 dict、`immediate_catalyst_5d` dict 或 null、smart money 正文欄位統一 `narrative`。**只對 V5.3+ 生效**。
+  - **原計畫「renderer 三處相容碼在 C1 落地後刪」沒做，是刻意的**：形狀鎖對舊 entry 豁免（181 筆全在 V5.0 以下），renderer 讀得到它們，刪相容碼＝舊 entry 渲染時靜默掉字。刪除條件應是「舊 entry 淡出 render 路徑」，不是「C1 落地」。
+  - **`producer_version` 對 LLM lane 填 `protocol:<repo VERSION>`**（不是 null）：LLM lane 沒有 producer script 版號，但評分行為由 rubric 決定、rubric 改動一律 bump repo 版號 —— 這回答的正是 Phase 6 要問的「這筆在哪一版 rubric 下打的分」。
+  - **`input_hash` 目前恆 null**：factpack `content_hash` 是 L9 的產出物。欄位先開，L5 的 det producer 才有位置寫，不必再改一次契約形狀。
+  - **舊 entry 不回填**（版本閘綁 `V5.3`，同 §13/§14 紀律）：V4.6 的四 lane fanout 與六 lane 契約不是同一回事，補一份「看起來很完整」的 provenance 等於在稽核軌跡放假證據，而 Phase 6 分層會直接吃到。
+  - **`lane_scores` 升為 validator 硬性要求**（V5.3+）：契約用它推導 `provenance: absent`；protocol 從 V2.10.0 寫必填但 validator 從未擋，於是「整塊省略」＝ 把四個跑過的 lane 標成沒產出。FULL EXAMPLE 也補齊了這個一直缺席的欄位。
+  - **順手補的下游洞**：Dashboard `VERSION_COLOR` / tooltip 缺 `V5.2`（L2 就漏了）與 `V5.3` → 新 entry 會被標成灰色 `ARCHIVE` badge，最新的變最舊的。
+  - **4.90.1 收掉 review 的 P2**（保留規則套到 `lanes.valuation.shadow_score` → 吸收閘永久 rc=1 且重跑修不好）+ 1 個 P3（缺版號的 payload 仍寫契約）。明細見 CHANGELOG。
+  - **4.90.2 自審收掉 §15 兩條實錘繞道**：null lane block 跳過全部欄位檢查；有分數的 lane 手改 `absent` 全綠。修法 = provenance 雙向錨在 lane_scores（§13 保護）與 RT 旗標（schema 必填）上。
+  - **4.90.3 複審 4.90.2**：抽出 `authoritative_valuation_score()`（4.90.2 在 validator 重寫了一份取值順序 = 自己引入的漂移面）+ 擋 `lane_scores` **部分**省略（整塊省略的零售版，producer 與 validator 會一致同意那個偽造）。
+  - **4.90.4 第四輪 review**：保留規則界線改為逐欄位定域（`EXTERNAL_PROVENANCE` 常數）——P2 同型死結在 `provenance` 的 llm/absent 與 `llm_invoked` 復發，真實序列（漏填 lane score → 補上 → 重跑）就會鎖死。**L5/L6/L8 加契約欄位時照兩域表歸類**（schema doc `lane_contract` 節），不再逐次憑直覺。
+  - **[P3, 已知未修]** 形狀鎖的「正文欄位改名」檢查只認得 `note` 這一個錯名（`text` / `comment` 之類漏網）。要收緊就是把條件改成「`narrative` 不在 dict 裡即報錯」，約 2 行；使用者評為可接受，先記著。
 - [ ] **C2（橫切）— factpack per-lane slim views**：`phase1_factpack.py` 直接產五個 lane view + Phase 0 lane-specific macro view，PM 不再手動切片（消 cross-anchor 抄錯面）。驗收 = view 欄位覆蓋現行注入規則的 JSON equivalence。
 - [ ] **C3（backlog，非 quick win）— Fundamentals 瘦身走消費者 audit**：catalysts 移交 News 需連動 ic-memo `build_fact_pack.py` / `compose.py` / Dashboard `page-decisions.js` / schema / fallback；`moat_assessment` 有消費者必留。程序 = producer/consumer 搜尋 → 保留/移交/落日，禁憑直覺刪。
 

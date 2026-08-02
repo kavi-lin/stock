@@ -728,10 +728,22 @@ const DECISION_TIPS = {
               scale: '🟢 ≥ 70%   high — standard size\n🟡 50-70%  medium — cut one notch\n⚪ < 50%   low — wait or tiny pilot (high fragility → just wait)' },
     },
     // ── Protocol version bookmarks ──────────────────────────────────────
+    version_v53: {
+        zh: { title: 'Protocol V5.3 — 統一 lane 資料契約（最新）',
+              desc: 'V5.2 全部 + **每個 lane 都要交代自己是誰產的**：entry 必須帶 `lane_contract` —— 六個 lane（五個分析 lane + Red Team）各自的 `{provenance, llm_invoked, producer_version, input_hash, shadow_score}`，加 session 層 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`。validator §15 驗值域、驗 session 清單與 per-lane 的一致性、驗契約的 valuation shadow 與 `det_shadow` 同源。\n\n**為什麼要這塊**：lane 正在一個個從 LLM 換成 script（Sentiment → Technical → Red Team）。沒有 provenance，Phase 6 校準會把「LLM 打的分」與「公式算的分」混在同一個池子裡回歸，得到的權重兩邊都不適用。\n\n同版另有 **lane 區塊形狀鎖**：`moat_assessment` / `smart_money_analysis` 一律 dict、`immediate_catalyst_5d` 一律 dict 或 null（舊 entry 不受影響）。' },
+        en: { title: 'Protocol V5.3 — Unified Lane Data Contract (current)',
+              desc: 'All of V5.2 + **every lane declares who produced it**: the entry must carry `lane_contract` — per-lane `{provenance, llm_invoked, producer_version, input_hash, shadow_score}` across all six lanes (five analysts + Red Team), plus a session layer `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`. Validator §15 checks the enums, that the session lists project the per-lane flags exactly, and that the contract\'s valuation shadow matches `det_shadow`.\n\n**Why**: lanes are being converted from LLM to script one at a time (Sentiment → Technical → Red Team). Without provenance, Phase 6 calibration regresses LLM-scored and formula-scored entries in one pool and the resulting weights fit neither.\n\nSame version also **locks lane block shapes**: `moat_assessment` / `smart_money_analysis` are always objects, `immediate_catalyst_5d` an object or null (older entries unaffected).' },
+    },
+    version_v52: {
+        zh: { title: 'Protocol V5.2 — Phase 4 倉位鏈全 script 化',
+              desc: 'V5.1 全部 + **Phase 4 sizing 不得手算**：entry 必須帶 `risk_audit` + `trade_plan_builder_version` + `mandatory_risk_flags`（`trade_plan_builder.py` 輸出 verbatim）。validator §14 逐段重算九段乘法鏈（fragility / macro cap 的 min() 語意 / FTD / F1 / shift / polar / STAGED 折半），對不上 rc=1。\n\n`mandatory_risk_flags` 自本版起首次持久化 —— 它是 Phase 3 Auto REJECT 與 Rec 11 probe 抑制的輸入，之前 replay 只能宣告假設。' },
+        en: { title: 'Protocol V5.2 — Phase 4 Sizing Chain Fully Scripted',
+              desc: 'All of V5.1 + **no hand-computed Phase 4 sizing**: the entry must carry `risk_audit` + `trade_plan_builder_version` + `mandatory_risk_flags` (verbatim `trade_plan_builder.py` output). Validator §14 re-derives all nine links of the multiplicative chain (fragility, the macro cap\'s min() semantics, FTD, F1, shift, polarization, STAGED halving) and fails rc=1 on any mismatch.\n\n`mandatory_risk_flags` is persisted for the first time here — it feeds Phase 3 Auto REJECT and Rec 11 probe suppression, which replay could previously only assume.' },
+    },
     version_v51: {
-        zh: { title: 'Protocol V5.1 — Phase 3 決策數學全 script 化（最新）',
+        zh: { title: 'Protocol V5.1 — Phase 3 決策數學全 script 化',
               desc: 'V5.0 全部 + **Phase 3 決策數學不得手算**：entry 必須帶 `calculation_steps` + `decision_engine_version`（`decision_engine.py` 輸出 verbatim），validator §13 會逐項重推算術鏈（每條 lane 乘積、Σ、bonus/penalty、macro step、threshold 公式、decision band），對不上直接 rc=1。\n\n另含 **前瞻估值（4.40）**：forward future price range 綁定 **PEG terminal P/E**（terminal_pe = clamp(2.2×終期成長%, 20, 60)）+ **逐年年化 glide trajectory**。前瞻層 shadow-only，不入 live 決策。' },
-        en: { title: 'Protocol V5.1 — Phase 3 Math Fully Scripted (current)',
+        en: { title: 'Protocol V5.1 — Phase 3 Math Fully Scripted',
               desc: 'All of V5.0 + **no hand-computed Phase 3 math**: the entry must carry `calculation_steps` + `decision_engine_version` (verbatim `decision_engine.py` output). Validator §13 re-derives the whole chain (per-lane products, Σ, bonus/penalty, macro step, threshold formula, decision band) and fails rc=1 on any mismatch.\n\nAlso **forward valuation (4.40)**: future price range bound to a **PEG terminal P/E** (clamp(2.2×terminal_growth%, 20, 60)) + **per-FY annualized glide trajectory**. The forward layer stays shadow-only.' },
     },
     version_v50: {
@@ -855,6 +867,10 @@ function detectProtocolVersion(item) {
 }
 
 const VERSION_COLOR = {
+    // V5.2 / V5.3 加在 V4.90.0：schema 已經跳到 V5.3，沒有這兩格的話新 entry 會落到
+    // LEGACY 的灰色 ARCHIVE badge —— 最新的 entry 被標成最舊的，是最糟的一種預設。
+    'V5.3':   { bg: 'rgba(139,92,246,0.22)',  border: 'rgba(167,139,250,0.70)', fg: '#c4b5fd', label: 'V5.3'   },
+    'V5.2':   { bg: 'rgba(6,182,212,0.20)',   border: 'rgba(34,211,238,0.65)',  fg: '#67e8f9', label: 'V5.2'   },
     'V5.1':   { bg: 'rgba(20,184,166,0.22)',  border: 'rgba(45,212,191,0.70)',  fg: '#5eead4', label: 'V5.1'   },
     'V5.0':   { bg: 'rgba(16,185,129,0.18)',  border: 'rgba(16,185,129,0.55)',  fg: '#34d399', label: 'V5.0'   },
     'V4.8':   { bg: 'rgba(59,130,246,0.18)',  border: 'rgba(59,130,246,0.55)',  fg: '#60a5fa', label: 'V4.8'   },
@@ -868,6 +884,8 @@ function buildVersionBookmark(version) {
     const c = VERSION_COLOR[version] || VERSION_COLOR['LEGACY'];
     // V2.17.8 — version bookmark gets rich tooltip via data-tip-key
     const tipKeyMap = {
+        'V5.3':   'version_v53',
+        'V5.2':   'version_v52',
         'V5.1':   'version_v51',
         'V5.0':   'version_v50',
         'V4.8':   'version_v48',

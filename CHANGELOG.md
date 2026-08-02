@@ -8,6 +8,139 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.90.4] — 2026-08-03 — P2 的病往旁邊一格：保留規則的界線改為逐欄位定域
+
+### Fixed
+- **`provenance` 的 `llm`/`absent` 與 `llm_invoked` 誤入保留域**。真實序列（非 tamper）
+  即可觸發：PM 漏填一個 lane score → Step 1.5 推成 `absent` → validator 報 lane_scores
+  缺 key → PM 補分數重跑 → 上一輪的 `absent` 被**自己**保留住 → §15 報「重跑可修」而
+  重跑永遠修不好。根因與 P2（4.90.1）完全同型：post-processor 自己的推導結果被當外來
+  聲明保留 —— 4.90.1 只修了 `valuation.shadow_score` 一個欄位，沒把判準推廣到整張表。
+- 修法 = 新常數 `EXTERNAL_PROVENANCE = ("deterministic", "hybrid")` 定界：
+  provenance 只保留這兩個值（外來 producer 的聲明），`llm`/`absent`/None 每次重推；
+  `llm_invoked` 恆為 provenance 的投影（corrupt 值重跑即修復）；
+  `producer_version` / `input_hash` / 非 valuation `shadow_score` 續留保留域
+  （L5 shadow 期的形態 —— provenance=llm + 外來 shadow_score —— 有測試釘住）。
+
+### Changed
+- `test_lane_contract.py` 新增 `test_derivation_domain_reconverges()`（死結序列收斂 /
+  corrupt llm_invoked 修復 / 外來聲明不被掃掉 / L5 shadow 形態）；schema doc 的保留規則
+  段改為兩域逐欄位表。
+
+### Why
+- 修 P2 時只把「同 producer 重算贏」用在出事的那個欄位上，是對症不對病。病是：**契約
+  每個欄位都要先問「這是誰的輸出」再決定保留還是重算** —— 4.90.4 把這個分域寫成常數
+  與文件，之後 L5/L6/L8 加欄位時照表歸類，不再逐次憑直覺。
+
+## [4.90.3] — 2026-08-03 — 複審 4.90.2 自己：抽掉我剛引入的漂移面 + 補零售版繞道
+
+### Fixed
+- **4.90.2 的註解說謊了**：它寫「validator 用**同一條**推導」，但只有 `compute_polarization`
+  是共用的 —— 它的輸入（authoritative valuation score，pack.score 優先退
+  `valuation_lane.score`）我在 validator 裡**重寫了一份**。`apply_to_trade` 哪天改取值
+  順序，validator 這份不跟著動 → 對合法 entry 報 rc=1。抽出
+  `apply_det_shadow.authoritative_valuation_score()`，兩個呼叫端一起 import。
+  （順帶修掉抄過去時漏的 `bool` 排除：`isinstance(True, int)` 為真。）
+- **`lane_scores` 部分省略 = 4.90.0 那個洞的零售版**：`{"fundamentals": 4}` 讓另外三個
+  lane 被推成 `absent`，而 producer 與 validator 會**一致同意** → 全綠。「兩邊一致」在
+  這裡完全不是保護。四個 key 現在必須都在，沒產出的明寫 `null`。
+
+### Changed
+- `test_lane_contract.py` 補 3 條：部分省略擋下、明寫 `null` + 契約標 absent 合法
+  （擋的是省略不是缺席）、共用 helper 的兩端一致。
+
+### Why
+- 兩條都是同一個判準的再應用：**「兩邊算出來一樣」只有在兩邊是同一份實作時才有意義**，
+  否則它證明的只是「今天還沒漂」。C1 的整個立論就建在這上面，而我在修 C1 的過程中
+  親手違反了一次。
+
+## [4.90.2] — 2026-08-03 — 自審收掉 §15 兩條實錘繞道（provenance 偽造面）
+
+### Fixed
+- **lane block 為 null 時整組欄位檢查被跳過**：`if blk is None: continue` 的註解說
+  「已由 absent_lanes 報過」，但 `absent_lanes` 只抓**缺 key** —— key 在、值為 null 的
+  lane 完全不驗，session 清單配合把它列進 skipped 就全綠。改為 key 不在才 continue，
+  非 dict（含 null）一律 error。
+- **provenance 與實際訊號從未互相驗證**：有分數的 lane 手改 `absent` 全綠通過 ——
+  Phase 6 分層會把它從 LLM 池靜默剔除（selection bias 向量，正是 C1 要防的事）。
+  §15 現在用**與 producer 同一條推導**（`compute_polarization().missing_lanes` +
+  `red_team_execution_failed`）雙向鎖：有分數 ⇒ 不得 absent；無分數 ⇒ 必須 absent；
+  RT 沒失敗 ⇒ 不得 absent、失敗 ⇒ 必須 absent（連 deterministic 一起擋，不只 llm）。
+- `test_lane_contract.py` 補 4 條回歸（兩條繞道各一 + 兩個反向），修前實跑確認 rc=0、
+  修後 rc=1。
+
+### Why
+- 兩條都是「review 之後自審」實跑抓到的：§15 的宣稱是「手改契約會被擋」，但它原本
+  只驗**契約內部自洽**（llm_invoked ⟺ provenance、清單 ⟺ per-lane），沒驗**契約對外部
+  事實**（分數在不在、RT 跑沒跑）。內部自洽的偽造只要改得夠齊就過閘——一致性檢查
+  必須錨在偽造者改不動的東西上（lane_scores 受 §13 算術鏈保護、RT 旗標是 schema 必填）。
+
+## [4.90.1] — 2026-08-03 — 修 C1 review 的 P2：保留規則與吸收閘互斥
+
+### Fixed
+- **`lanes.valuation.shadow_score` 不再套保留規則**（`apply_det_shadow.build_lane_contract`）。
+  該欄的 producer 是 `apply_to_trade()` 自己，且與 `det_shadow.valuation_score_det` 是同一次
+  計算的兩個落點；`det_shadow` 每次整塊重建，契約卻保留舊值 → 上游 pack 一改就兩邊分歧，
+  validator §15 吸收閘 **永久 rc=1**，而錯誤訊息指的「重跑 apply_det_shadow.py」修不好
+  （保留規則會繼續保住舊值），唯一出路是手改契約 —— 正是那道閘要禁止的事。改為無條件
+  同步 `val_det`，**包含 `val_det` 變回 null 的情形**（只覆寫非 None 會留下同一個死結）。
+- `apply_to_session_export()` 對缺 `session_export_version` 的 payload 傳 `""` 而非 `None`：
+  `None` 在 `apply_to_trade()` 的語意是「沒有 entry 外殼」（單筆 trade CLI 路徑）→ 寫契約。
+  有外殼卻漏版號是壞掉的 entry，不該因此拿到一份契約。
+
+### Changed
+- `test_lane_contract.py` 把鎖錯的那條測試反轉（「既有 shadow_score 勝過 val_det」→
+  「同 producer 重算贏」），新增 `test_absorb_never_diverges()`：值變了 / 值變回 None
+  兩支都驗重跑收斂，並確認**其餘 lane 的保留規則不受影響**（P2 的界線就在這）。
+
+### Why
+- 保留規則是為**外來** producer（L5 sentiment det / L8 RT skip）設計的；套到 post-processor
+  自己產的欄位上，就變成「自己的舊值擋住自己的新值」。L5 是第一個真正依賴保留規則的
+  外來 producer，這條界線必須在它動工前劃對。
+
+## [4.90.0] — 2026-08-03 — C1：統一 lane 資料契約（schema V5.3）
+
+### Added
+- `apply_det_shadow.py` 新增 C1 契約 producer：`build_lane_contract()` +
+  `LANE_NAMES` / `PROVENANCE_VALUES` / `ANALYSIS_MODES` / `LANE_FIELDS` /
+  `LANE_CONTRACT_VERSIONS` 常數（值域與形狀的單一事實來源）。
+- 新 block `lane_contract`（trades_this_session[] 內，V5.3 起必填）：六個 lane
+  （fundamentals / sentiment / news / technical / valuation / **red_team**）各自的
+  `{provenance, llm_invoked, producer_version, input_hash, shadow_score}`
+  ＋ session 層 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`。
+- `validate_session_export.py` §15：值域、`llm_invoked` ⟺ `provenance` 一致性、
+  det/hybrid 必附 `producer_version`、session 清單必須是 per-lane 的精確投影、
+  契約 valuation shadow == `det_shadow.valuation_score_det`（吸收閘）、
+  RT 執行失敗不得標 `llm_invoked`。§2e 反向 guard：戳 V5.2 以下卻帶契約 → rc=1。
+- **lane 區塊形狀鎖**（§15，只對 V5.3+）：`moat_assessment` /
+  `smart_money_analysis` 一律 object、`immediate_catalyst_5d` 一律 object 或 null，
+  smart money 正文欄位統一 `narrative`（`note` 落日）。
+- `lane_scores` 自 V5.3 起由 validator 強制（protocol 從 V2.10.0 就寫必填，但沒人擋）：
+  契約用它推導 `provenance: absent`，整塊省略會把四個跑過的 lane 標成「沒產出」。
+- `test_lane_contract.py`：producer 半（預設 / absent / **保留規則** / 冪等 / 版本閘 /
+  吸收）＋ validator §15 tamper battery（19 例）。
+- Dashboard `VERSION_COLOR` / tooltip 補 `V5.2`、`V5.3` 兩格。
+
+### Changed
+- schema doc 升 `V5.3`，FULL EXAMPLE 同步；`det_shadow.valuation_score_det` 降為**別名**
+  （權威值在契約，兩處由同一次計算寫出）。
+- `apply_to_trade(trade, *, entry_version=None)`：契約只寫 `V5.3+` entry，
+  `--inplace history.json` 掃過 181 筆舊 entry 時不回填。
+- `test_session_export_schema.py` 的 fixture 改用**實跑 producer** 產契約（不再手寫 literal），
+  新增 `as_version()` helper + V5.2 back-compat 與 §2e 兩個 case。
+- protocol Phase 5 Step 1.5 改寫為兩塊產物；Fundamentals / Technical lane 的
+  `moat_assessment` / `smart_money_analysis` 補上明確 shape。
+- FULL EXAMPLE 補上一直缺席的 `lane_scores`（值與 `calculation_steps` 的五段乘積一致）。
+
+### Why
+- Sentiment（L5）→ Technical（L6）→ Red Team（L8）會一個個從 LLM 換成 script。沒有
+  per-lane provenance，Phase 6 校準會把「LLM 打的分」與「公式算的分」放進同一池回歸，
+  得到的權重兩邊都不適用（selection bias）。契約必須在**第一個 lane 切換之前**定案。
+- 契約吸收既有 `det_shadow` 而非另立一套：C1 的「勿兩套並存」是為了避免 L5 之後每加一個
+  det lane 就要在兩個 block 各寫一次 shadow score。
+- 舊 entry 不回填：V4.6 的四 lane fanout 與六 lane 契約不是同一回事，補一份
+  「看起來很完整」的 provenance 等於在稽核軌跡放假證據。
+
 ## [4.89.0] — 2026-08-02 — L4b：Valuation Specialist 條件式觸發 gate（shadow-only）
 
 ### Added

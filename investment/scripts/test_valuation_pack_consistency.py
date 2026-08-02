@@ -71,7 +71,10 @@ trade["multi_horizon_price_framework"]["long_term_ref"].update({
     "verdict_band": pack["verdict_band"],
     "confidence": pack["confidence"],
 })
-apply_to_trade(trade)
+# Version has to be threaded through exactly as Phase 5 Step 1.5 does it: the C1 lane
+# contract is only written on V5.3+, and stamping one onto an older entry is itself a
+# validator error (§2e). The fixture inherits whatever the newest real entry is stamped.
+apply_to_trade(trade, entry_version=entry.get("session_export_version"))
 if trade["det_shadow"]["valuation_score_det"] != pack["score"]:
     raise SystemExit("det_shadow must reuse canonical pack score")
 

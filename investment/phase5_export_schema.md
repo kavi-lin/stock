@@ -1,9 +1,20 @@
 # Phase 5 Session Export Schema
 
-> **Schema Version**: `V5.2`
+> **Schema Version**: `V5.3`
 > **Consumer**: `bridge.py` / Dashboard decisions cards / decision history
-> **Producer**: Investment Protocol Phase 5 (PM / Sonnet formatter)
-> **Last updated**: 2026-08-02
+> **Producer**: Investment Protocol Phase 5 (PM / deterministic renderer)
+> **Last updated**: 2026-08-03
+>
+> **V5.3 changes vs V5.2**（C1 — 統一 lane 資料契約）:
+> - 新增必填 `lane_contract`：六個 lane（五個分析 lane + Red Team）各自的
+>   `{provenance, llm_invoked, producer_version, input_hash, shadow_score}`
+>   ＋ session 層 `{analysis_mode, llm_invoked_lanes[], llm_skipped_lanes[]}`（缺 → validator rc=1）
+> - **lane 區塊形狀鎖**：`fundamentals_lane.moat_assessment` / `technical_lane.smart_money_analysis`
+>   一律 object，`news_lane.immediate_catalyst_5d` 一律 object 或 null；smart money 的正文欄位
+>   統一叫 `narrative`（`note` 落日）
+> - `det_shadow.valuation_score_det` 降為**別名** —— 與 `lane_contract.lanes.valuation.shadow_score`
+>   由同一次計算寫出，validator §15 硬性比對兩者相等
+> - 既有 V5.0 / V5.1 / V5.2 entry **不需回填**：舊版號照原規則驗，永久相容
 >
 > **V5.2 changes vs V5.1**:
 > - Phase 4 script 化（`trade_plan_builder.py`）。新增三個必填欄：`trade_plan_builder_version`、
@@ -42,7 +53,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 ### Top-level
 | Field | Type | Note |
 |---|---|---|
-| `session_export_version` | `"V5.2"` | 固定字串；若 protocol 升版，本檔 header + 此欄同步改。Validator 接受 `V4.8` / `V5.0` / `V5.1` / `V5.2`（舊版號只驗當年規則），新 export 一律戳 `V5.2` |
+| `session_export_version` | `"V5.3"` | 固定字串；若 protocol 升版，本檔 header + 此欄同步改。Validator 接受 `V4.8` / `V5.0` / `V5.1` / `V5.2` / `V5.3`（舊版號只驗當年規則），新 export 一律戳 `V5.3` |
 | `export_date` | `"YYYY-MM-DD"` | 交易會議日期 |
 | `date` | `"YYYY-MM-DD"` | 鏡射 `export_date`（舊版相容；bridge.py 兩者都讀）|
 | `ticker` | `"STRING"` | 鏡射 `trades_this_session[0].ticker` |
@@ -521,17 +532,120 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
 
 **用途**：rubric / score 公式不變；新欄位提供「LLM 是否與量化規則一致」+「訊號是否兩極化」的 sanity check 維度。Dashboard 會把 BIPOLAR / DISAGREE 顯示為 badge。
 
+> **V5.3 起 `valuation_score_det` 是別名**：權威值在
+> `lane_contract.lanes.valuation.shadow_score`。兩處由 `apply_to_trade()` 的**同一次**計算寫出，
+> validator §15 硬性比對相等 —— 不等只可能是有人事後手改其中一處。既有消費端
+> （`shadow_report.py` / `bridge.py` / Dashboard / `test_valuation_pack_consistency.py`）繼續讀舊欄，
+> 不需要改；等契約全面上線後再落日。
+
+### `lane_contract` (V5.3 — C1 統一 lane 資料契約，post-processor 寫入)
+
+由 `apply_det_shadow.py` 與 `det_shadow` **同一步**寫出（Phase 5 Step 1.5），**LLM 不寫**。
+
+```json
+{
+  "contract_version":  "C1/1.0",
+  "analysis_mode":     "FULL_IC | LEAN | REFRESH",
+  "llm_invoked_lanes": ["array[string] — 本次有 LLM 參與的 lane"],
+  "llm_skipped_lanes": ["array[string] — 本次沒有 LLM 參與的 lane"],
+  "lanes": {
+    "fundamentals | sentiment | news | technical | valuation | red_team": {
+      "provenance":       "llm | deterministic | hybrid | absent",
+      "llm_invoked":      "bool — 由 provenance 推導：llm/hybrid ⇒ true",
+      "producer_version": "string | null — det/hybrid 必填；LLM lane 填 'protocol:<repo VERSION>'",
+      "input_hash":       "string | null — 目前恆 null，L9 factpack content_hash 落地後由 producer 填",
+      "shadow_score":     "float | null — det producer 的分數（今天只有 valuation 有）"
+    }
+  }
+}
+```
+
+**六個 lane 全列，缺席的填 `provenance: "absent"`**（不是省略）。省略與「跑了但沒記」在事後
+無法區分，Phase 6 按 provenance 分層時會把兩者混為一談。Red Team 放進同一張表而不是另立
+一組欄位 —— L8（RT decision-invariant skip）只要改 `lanes.red_team.provenance`，不必再發明
+一套平行欄位，那正是 C1 要消滅的東西。
+
+**保留外來聲明，重算自己的推導**（V4.90.4 定界）—— 逐欄位分兩域：
+
+- **保留域（外來 producer 的聲明）**：`provenance` ∈ {`deterministic`, `hybrid`}（L5 / L6 /
+  L8 在自己的 phase 寫入，post-processor 不得覆寫回 `llm` 預設）；`producer_version` /
+  `input_hash` / 非 valuation 的 `shadow_score`（L5 shadow 期 det 值寫在這，provenance 仍是 `llm`）。
+- **推導域（post-processor 自己的輸出，每次重算贏）**：`provenance` 的 `llm` / `absent`
+  兩個值（預設行為與「從訊號推出缺席」是推導不是聲明——套保留規則的實錘後果：PM 漏填
+  `lane_scores` → 推成 `absent` → 補分數重跑 → 上一輪的 `absent` 被自己保留住，§15 報錯
+  而「重跑」永遠修不好）；`llm_invoked`（恆為 provenance 的投影）；
+  `lanes.valuation.shadow_score`（與 `det_shadow.valuation_score_det` 同一次計算，**無條件**
+  同步含變回 null 的情形，V4.90.1）。
+
+這條界線劃錯一格就是一個「重跑修不好、只能手改契約」的死結，而手改正是 §15 要禁止的事
+（V4.90.1 / V4.90.4 各實錘一次，`test_lane_contract.py` 兩組回歸鎖死）。
+
+| provenance | 意思 | 今天誰會是這個值 |
+|---|---|---|
+| `llm` | LLM subagent 產出 | 六個 lane 的預設（現行協定行為） |
+| `deterministic` | script 產出，本回合沒有 LLM | L5（Sentiment）/ L6（Technical）/ L8（RT skip）落地後 |
+| `hybrid` | det producer + 條件式 LLM reviewer 都跑了 | L4b gate 翻預設後的 Valuation |
+| `absent` | 本回合沒有產出 | lane 無分數，或 `red_team_execution_failed=true` |
+
+**Validator §15（V4.90.0）**：
+
+- `session_export_version = "V5.3"` 的 entry 缺 `lane_contract` 直接 **rc=1**；反向 guard：
+  戳 `V5.2` 以下卻帶 `lane_contract` → rc=1（門檻綁 schema 版本，同 §13 / §14）。
+- 值域：`provenance` / `analysis_mode` 必須落在上表；`llm_invoked` 必須與 `provenance` 一致
+  （`llm`/`hybrid` ⇒ true）；`provenance` 為 `deterministic`/`hybrid` 時 `producer_version` 必填
+  —— 不具名的 det lane 無法歸屬到任何一版公式，Phase 6 就分不了層。
+- `llm_invoked_lanes` + `llm_skipped_lanes` 必須**剛好分割**六個 lane，且與 per-lane
+  `llm_invoked` 完全一致（session 層清單是 per-lane 的投影，不是獨立事實）。
+- `lanes.valuation.shadow_score` 必須等於 `det_shadow.valuation_score_det`（吸收閘）。
+- **provenance 錨在外部事實上，雙向鎖**（V4.90.2）：五個分析 lane 用與 producer 同一條
+  推導（`compute_polarization().missing_lanes`）——有分數 ⇒ 不得 `absent`、無分數 ⇒ 必須
+  `absent`；RT 用 `red_team_execution_failed` ——沒失敗 ⇒ 不得 `absent`、失敗 ⇒ 必須
+  `absent`。契約內部自洽（清單對齊、llm_invoked 一致）擋不住改得夠齊的手改，一致性
+  必須錨在偽造者改不動的東西上（lane_scores 受 §13 算術鏈保護、RT 旗標 schema 必填）。
+- lane block 一律 object：`"sentiment": null` 不是缺席（缺席 = `provenance: "absent"`），
+  是 rc=1。
+- **`lane_scores` 升為硬性要求，且四個 key 必須都在**（值可為 `null`；protocol 從 V2.10.0
+  就寫必填，validator 過去沒擋）：契約用「這個 lane 有沒有分數」推導 `provenance: "absent"`，
+  省略（整塊或部分）會把實際跑過的 lane 標成「本回合沒產出」—— 少寫一個欄位就偽造了
+  provenance，且 producer 與 validator 會**一致同意**那個偽造，兩邊一致在這裡不是保護。
+  與契約「六個 lane 全列、缺席明寫 `absent`」同一條紀律，往上游推一層。
+- 版號不在 `LANE_CONTRACT_VERSIONS` 的 entry → **整段跳過，rc=0**（181 筆舊 entry 不回填）。
+
+**為什麼舊 entry 不回填**：V4.6 的四 lane fanout 與今天的六 lane 契約不是同一回事。補一塊
+「看起來很完整」的 provenance 上去，等於在稽核軌跡放假證據 —— 而 Phase 6 按 provenance 分層
+校準時會直接吃到它。
+
+**值域與形狀的單一事實來源是 `apply_det_shadow.py`**（`LANE_NAMES` / `PROVENANCE_VALUES` /
+`ANALYSIS_MODES` / `LANE_FIELDS`）；validator **import** 不複製。
+
+### lane 區塊形狀鎖 (V5.3)
+
+真實 entry 之間，同一個欄位出現過兩種形狀，導致每個消費端各自寫相容碼（renderer 現在有三處）。
+V5.3 起把形狀定死，**只對 V5.3+ 生效**：
+
+| 欄位 | V5.3 起的形狀 | 過去出現過的另一種 |
+|---|---|---|
+| `fundamentals_lane.moat_assessment` | object `{level, type, evidence_one_line}` | 單行字串 |
+| `technical_lane.smart_money_analysis` | object `{label, narrative}` | 單行字串／正文欄位叫 `note` |
+| `news_lane.immediate_catalyst_5d` | object 或 `null` | 字串 |
+
+> 舊 entry 照當年規則驗，所以 `render_investment_report.py` 的三處相容碼**必須留著** ——
+> 它讀得到 181 筆舊 entry。等舊 entry 淡出 render 路徑才談刪除。
+
 ---
 
-## FULL EXAMPLE（V5.2 — 以 BUY 決策為範本）
+## FULL EXAMPLE（V5.3 — 以 BUY 決策為範本）
 
 > Phase 3 數字（`final_score` / `avg_confidence` / `calculation_steps` / `hot_zone_eval`）為
 > `decision_engine.py` 實跑輸出；Phase 4 數字（`trade_plan` 各價位 / `risk_audit` / `sizing_chain`）
 > 為 `trade_plan_builder.py` 實跑輸出。整份範例可直接過 validator。抄 shape，**不要**抄數字。
+>
+> `det_shadow` 與 `lane_contract` **不在**範例裡：兩者都是 Step 1.5 post-processor 寫的，
+> PM 手寫等於偽造 provenance。`test_session_export_schema.py` 驗證時會實跑 producer 補上這兩塊。
 
 ```json
 {
-  "session_export_version": "V5.2",
+  "session_export_version": "V5.3",
   "export_date": "2026-04-18",
   "date": "2026-04-18",
   "ticker": "MU",
@@ -564,6 +678,7 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
       "degraded_analysts": [],
       "macro_alignment": "CONTRARIAN",
       "avg_confidence": 0.75,
+      "lane_scores": {"fundamentals": 4, "sentiment": 3, "news": 3, "technical": 4},
       "decision_engine_version": "1.0.0",
       "calculation_steps": {
         "fund": "0.25 × 4 × 0.72 = 0.7200",

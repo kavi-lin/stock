@@ -25,7 +25,16 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from apply_det_shadow import compute_polarization  # noqa: E402
+from apply_det_shadow import (  # noqa: E402
+    ANALYSIS_MODES,
+    LANE_CONTRACT_VERSIONS,
+    LANE_FIELDS,
+    LANE_NAMES,
+    LLM_PROVENANCE,
+    PROVENANCE_VALUES,
+    authoritative_valuation_score,
+    compute_polarization,
+)
 from decision_engine import compute_dynamic_threshold, decision_band  # noqa: E402
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -33,17 +42,20 @@ HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
 # Accepted schema versions, oldest → newest. V4.8 (4-lane legacy) lives until pre-V5.0
 # entries decay; V5.0 opened the 5-lane era; V5.1 makes the Phase 3 engine block mandatory;
 # V5.2 does the same for the Phase 4 engine block.
-ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2")
-CURRENT_VERSION   = "V5.2"
+ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2", "V5.3")
+CURRENT_VERSION   = "V5.3"
 # 5-lane era — valuation_lane / fair_value_summary required, Rec 11 + MHP instrumented.
-V5_VERSIONS = ("V5.0", "V5.1", "V5.2")
+V5_VERSIONS = ("V5.0", "V5.1", "V5.2", "V5.3")
 # Versions whose entries MUST carry the Phase 3 engine output (`calculation_steps` +
 # `decision_engine_version`). Version-keyed rather than date-keyed so a backfilled entry
 # stamped V5.1 is held to exactly the same bar as one exported today.
-CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2")
+CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2", "V5.3")
 # Versions whose entries MUST carry the Phase 4 engine output (`risk_audit` +
 # `trade_plan_builder_version` + `mandatory_risk_flags`). Same version-keyed discipline.
-RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2",)
+RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2", "V5.3")
+# Versions whose entries MUST carry the C1 lane contract (`lane_contract`).
+# 值域與形狀的單一事實來源在 apply_det_shadow.py（producer），這裡只 import 不複製。
+LANE_CONTRACT_REQUIRED_VERSIONS = LANE_CONTRACT_VERSIONS
 
 TOP_REQUIRED = [
     "session_export_version", "export_date", "ticker", "final_action",
@@ -635,6 +647,225 @@ def check_phase4_sizing(entry, trade, errors, warnings):
                           f"risk_audit.final_stop_loss_pct={stop_pct} — projection drift")
 
 
+# ---------------------------------------------------------------------------
+# V4.90.0 §15 — C1 統一 lane 資料契約 (`lane_contract`) + lane 區塊形狀鎖
+# ---------------------------------------------------------------------------
+
+# C1 決策 3：五個 lane 的質性區塊在真實 entry 之間形狀不一（`moat_assessment` 忽 dict 忽
+# string、`smart_money_analysis` 的正文欄位忽 `narrative` 忽 `note`、`immediate_catalyst_5d`
+# 忽 dict 忽 null）。每個消費端各自寫相容碼是不可持續的（renderer 現在就有三處）。
+# 這裡把形狀定死，**只對 V5.3+ 生效** —— 舊 entry 照當年規則驗，renderer 的相容碼因此
+# 必須留著（它讀得到 181 筆舊 entry），等舊 entry 淡出 render 路徑才談刪除。
+#   欄位 → (期望型別, 期望正文欄位或 None, 是否允許 null)
+LANE_SHAPE_LOCKS = (
+    ("fundamentals_lane", "moat_assessment",      None,        False),
+    ("technical_lane",    "smart_money_analysis", "narrative", False),
+    ("news_lane",         "immediate_catalyst_5d", None,       True),
+)
+
+
+def check_lane_contract(entry, trade, errors, warnings):
+    """§15 — 驗 `lane_contract` 形狀、值域、與 `det_shadow` 的一致性。
+
+    舊 entry（版號不在 `LANE_CONTRACT_REQUIRED_VERSIONS`）**整段跳過**，向後相容；
+    「戳舊版號卻帶契約」的繞道由 §2e 擋，兩邊合起來才是完整的版本閘。
+    """
+    ver = entry.get("session_export_version")
+    if ver not in LANE_CONTRACT_REQUIRED_VERSIONS:
+        return
+
+    lc = trade.get("lane_contract")
+    if lc is None:
+        errors.append(
+            "lane_contract missing — run apply_det_shadow.py post-process before export "
+            f"(C1 契約自 {CURRENT_VERSION} 起必填)")
+        return
+    if not isinstance(lc, dict):
+        errors.append(f"lane_contract must be an object, got {type(lc).__name__}")
+        return
+
+    if not isinstance(lc.get("contract_version"), str) or not lc.get("contract_version"):
+        errors.append("lane_contract.contract_version must be a non-empty string")
+
+    # `lane_scores` 自 V2.10.0 起就是 protocol 必填，但 validator 從未強制。C1 讓它變成
+    # 硬性要求：契約用「這個 lane 有沒有分數」推導 `provenance: absent`，所以整塊省略
+    # 會讓四個跑過的 lane 被標成「本回合沒產出」—— 省略一個欄位就偽造了 provenance。
+    _lane_scores = trade.get("lane_scores")
+    if not isinstance(_lane_scores, dict):
+        errors.append(
+            "lane_scores missing or not an object — C1 契約用它推導哪些 lane 有產出；"
+            "整塊省略會把四個跑過的 lane 標成 provenance='absent'（偽造 provenance）")
+    else:
+        # 四個 key 必須都在（值可為 null）。只擋「整塊省略」不夠：`{"fundamentals": 4}`
+        # 會讓另外三個 lane 一樣被推成 absent，而 producer 與 validator 會一致同意 →
+        # 全綠。契約要求六個 lane 全列、缺席明寫 absent，它所依據的 lane_scores 就不能
+        # 允許部分省略——省略與「跑了但沒記」在事後同樣無法區分。
+        _missing_keys = [k for k in ("fundamentals", "sentiment", "news", "technical")
+                         if k not in _lane_scores]
+        if _missing_keys:
+            errors.append(
+                f"lane_scores missing key(s): {_missing_keys} — 四個 lane 一律列出，"
+                "沒產出的填 null（省略會讓契約把它推成 provenance='absent'，"
+                "與『跑了但沒記』無法區分）")
+    mode = lc.get("analysis_mode")
+    if mode not in ANALYSIS_MODES:
+        errors.append(f"lane_contract.analysis_mode invalid: {mode!r} — "
+                      f"expected one of {list(ANALYSIS_MODES)}")
+
+    lanes = lc.get("lanes")
+    if not isinstance(lanes, dict):
+        errors.append("lane_contract.lanes must be an object keyed by lane name")
+        return
+    absent_lanes = [n for n in LANE_NAMES if n not in lanes]
+    if absent_lanes:
+        errors.append(
+            f"lane_contract.lanes missing lane(s): {absent_lanes} — 六個 lane 一律列出，"
+            "沒跑的填 provenance='absent'。省略與『跑了但沒記』無法區分，Phase 6 分層會把"
+            "兩者混為一談")
+    unknown = [n for n in lanes if n not in LANE_NAMES]
+    if unknown:
+        errors.append(f"lane_contract.lanes has unknown lane(s): {unknown} — "
+                      f"expected exactly {list(LANE_NAMES)}")
+
+    # provenance 與實際訊號的一致性基準。**兩個函式都 import 自 producer**（不是重寫一份）：
+    # 取值順序或 missing 判定哪天改了，producer 與 validator 一起改，不會出現「validator
+    # 對合法 entry 報錯」的漂移。
+    _ls = trade.get("lane_scores")
+    derived_missing = set(compute_polarization(
+        _ls if isinstance(_ls, dict) else {},
+        authoritative_valuation_score(trade)).get("missing_lanes") or [])
+
+    for name in LANE_NAMES:
+        if name not in lanes:
+            continue                      # 已由 absent_lanes 報過
+        blk = lanes[name]
+        if not isinstance(blk, dict):
+            # 含 null：`"sentiment": null` 若只 continue，五個欄位檢查整組被跳過，
+            # 而 session 清單只要跟著把它列進 skipped 就全綠 —— 一個 null 換一次靜默偽造。
+            errors.append(f"lane_contract.lanes.{name} must be an object, got "
+                          f"{type(blk).__name__}")
+            continue
+        for f in LANE_FIELDS:
+            if f not in blk:
+                errors.append(f"lane_contract.lanes.{name}: missing field {f}")
+
+        prov = blk.get("provenance")
+        if prov not in PROVENANCE_VALUES:
+            errors.append(f"lane_contract.lanes.{name}.provenance invalid: {prov!r} — "
+                          f"expected one of {list(PROVENANCE_VALUES)}")
+        elif name != "red_team":
+            # absent ⟺ 該 lane 真的沒有分數。少了這條，有分數的 lane 手改成 absent
+            # 一樣全綠 —— Phase 6 分層會把它從 LLM 池靜默剔除（selection bias 向量）。
+            if prov == "absent" and name not in derived_missing:
+                errors.append(
+                    f"lane_contract.lanes.{name}.provenance='absent' 但該 lane 有分數 — "
+                    "有產出的 lane 不得自稱缺席；重跑 apply_det_shadow.py")
+            elif prov != "absent" and name in derived_missing:
+                errors.append(
+                    f"lane_contract.lanes.{name}.provenance={prov!r} 但該 lane 無分數 — "
+                    "無產出的 lane 應為 'absent'；分數真的存在的話先修 lane_scores")
+        else:
+            # RT 的缺席由 red_team_execution_failed 決定，兩個方向都鎖：
+            # 失敗卻標有產出（既有檢查涵蓋 llm；這裡連 deterministic 一起擋），
+            # 或沒失敗卻標 absent（RT verdict 明明在 entry 裡）。
+            rt_failed = bool(trade.get("red_team_execution_failed"))
+            if prov == "absent" and not rt_failed:
+                errors.append(
+                    "lane_contract.lanes.red_team.provenance='absent' 但 "
+                    "red_team_execution_failed=false — RT 有跑就不得自稱缺席")
+            elif prov != "absent" and rt_failed:
+                errors.append(
+                    f"lane_contract.lanes.red_team.provenance={prov!r} 但 "
+                    "red_team_execution_failed=true — RT 失敗時 provenance 應為 'absent'")
+        inv = blk.get("llm_invoked")
+        if not isinstance(inv, bool):
+            errors.append(f"lane_contract.lanes.{name}.llm_invoked must be bool, got {inv!r}")
+        elif prov in PROVENANCE_VALUES and inv != (prov in LLM_PROVENANCE):
+            errors.append(
+                f"lane_contract.lanes.{name}: llm_invoked={inv} contradicts "
+                f"provenance={prov!r}（llm/hybrid ⇒ true；deterministic/absent ⇒ false）")
+
+        pver = blk.get("producer_version")
+        if pver is not None and not isinstance(pver, str):
+            errors.append(f"lane_contract.lanes.{name}.producer_version must be string|null, "
+                          f"got {type(pver).__name__}")
+        elif prov in ("deterministic", "hybrid") and not pver:
+            errors.append(
+                f"lane_contract.lanes.{name}.producer_version required when "
+                f"provenance={prov!r} — Phase 6 按 producer 版號分層校準，不具名的 det lane "
+                "無法歸屬到任何一版公式")
+
+        ih = blk.get("input_hash")
+        if ih is not None and not isinstance(ih, str):
+            errors.append(f"lane_contract.lanes.{name}.input_hash must be string|null, "
+                          f"got {type(ih).__name__}")
+        ss = blk.get("shadow_score")
+        if ss is not None and (isinstance(ss, bool) or not isinstance(ss, (int, float))):
+            errors.append(f"lane_contract.lanes.{name}.shadow_score must be number|null, "
+                          f"got {ss!r}")
+
+    # ── session 層兩個清單必須是六個 lane 的分割，且與 per-lane llm_invoked 一致 ──
+    inv_list, skip_list = lc.get("llm_invoked_lanes"), lc.get("llm_skipped_lanes")
+    for label, val in (("llm_invoked_lanes", inv_list), ("llm_skipped_lanes", skip_list)):
+        if not isinstance(val, list) or any(not isinstance(x, str) for x in val):
+            errors.append(f"lane_contract.{label} must be an array of lane names")
+    if isinstance(inv_list, list) and isinstance(skip_list, list):
+        if sorted(str(x) for x in inv_list + skip_list) != sorted(LANE_NAMES):
+            errors.append(
+                "lane_contract: llm_invoked_lanes + llm_skipped_lanes 必須剛好分割六個 lane "
+                f"（got invoked={inv_list}, skipped={skip_list}）")
+        else:
+            derived = sorted(n for n in LANE_NAMES
+                             if isinstance(lanes.get(n), dict)
+                             and lanes[n].get("llm_invoked") is True)
+            if sorted(str(x) for x in inv_list) != derived:
+                errors.append(
+                    f"lane_contract.llm_invoked_lanes={sorted(inv_list)} 與 per-lane "
+                    f"llm_invoked 推導值 {derived} 不符 — session 層清單是 per-lane 的投影，"
+                    "不是獨立事實")
+
+    # ── 吸收閘：契約的 valuation.shadow_score 與 det_shadow.valuation_score_det 同源 ──
+    # 兩者由 apply_to_trade() 的同一次計算寫出，永不可能自然漂移；不等 = 有人事後手改
+    # 其中一處，那正是 C1「勿兩套並存」要擋的失效模式。
+    val_blk, ds = lanes.get("valuation"), trade.get("det_shadow")
+    if isinstance(val_blk, dict) and isinstance(ds, dict):
+        a, b = val_blk.get("shadow_score"), ds.get("valuation_score_det")
+        same = (a is None and b is None) or _same_number(a, b, tol=1e-9)
+        if not same:
+            errors.append(
+                f"lane_contract.lanes.valuation.shadow_score={a!r} != "
+                f"det_shadow.valuation_score_det={b!r} — 同一次計算的兩個落點，"
+                "不一致代表其中一處被事後編輯；重跑 apply_det_shadow.py")
+
+    # ── Red Team：執行失敗就不可能有 LLM 產出 ──
+    rt = lanes.get("red_team")
+    if isinstance(rt, dict) and trade.get("red_team_execution_failed") and \
+            rt.get("llm_invoked") is True:
+        errors.append(
+            "lane_contract.lanes.red_team.llm_invoked=true 但 red_team_execution_failed=true "
+            "— 兩者矛盾；RT 失敗時 provenance 應為 'absent'")
+
+    # ── lane 區塊形狀鎖（C1 決策 3；只對 V5.3+ 生效） ──
+    for lane_key, field, body_key, allow_null in LANE_SHAPE_LOCKS:
+        lane_blk = trade.get(lane_key)
+        if not isinstance(lane_blk, dict) or field not in lane_blk:
+            continue
+        val = lane_blk[field]
+        if val is None:
+            if not allow_null:
+                errors.append(f"{lane_key}.{field} must be an object (C1 形狀鎖；null 不接受)")
+            continue
+        if not isinstance(val, dict):
+            errors.append(
+                f"{lane_key}.{field} must be an object, got {type(val).__name__} — "
+                "C1 形狀鎖：字串形態已落日，改填結構化 dict（舊 entry 不受影響）")
+            continue
+        if body_key and body_key not in val and "note" in val:
+            errors.append(
+                f"{lane_key}.{field}: 正文欄位請用 {body_key!r}（本筆用了 'note'）— "
+                "C1 統一命名，消費端不再各寫 fallback")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Validate latest investment session export")
     ap.add_argument("--history", default=HISTORY_JSON,
@@ -714,6 +945,20 @@ def main(argv=None):
                 f"session_export_version={ver!r} but entry carries trade_plan_builder_version "
                 f"— Phase 4 engine output stamps {CURRENT_VERSION!r}. Patch the version field; "
                 f"keeping {ver} bypasses the §14 risk_audit gate."
+            )
+
+    # ── 2e. V5.2 mis-stamp guard (V4.90.0) ───────────────────────────────
+    # Mirror of 2d one version up: `lane_contract` only exists on entries the C1
+    # post-processor wrote, which is exactly what V5.3 makes mandatory. Stamping such an
+    # entry older would route it round the version gate in §15 — and would also plant a
+    # provenance record on an entry whose lanes were never produced under the contract.
+    if ver not in LANE_CONTRACT_REQUIRED_VERSIONS:
+        trade_first = ((entry.get("trades_this_session") or [{}])[0]) or {}
+        if trade_first.get("lane_contract") is not None:
+            errors.append(
+                f"session_export_version={ver!r} but entry carries lane_contract — "
+                f"C1 contract output stamps {CURRENT_VERSION!r}. Patch the version field; "
+                f"keeping {ver} bypasses the §15 lane_contract gate."
             )
 
     # ── 3. Top-level required keys ───────────────────────────────────────
@@ -1161,6 +1406,10 @@ def main(argv=None):
     # ── 14. V4.82.0 — Phase 4 sizing re-derivation (trade_plan_builder parity) ──
     # 舊 entry（無 risk_audit 也無 trade_plan_builder_version）整段跳過 → 向後相容。
     check_phase4_sizing(entry, trade, errors, warnings)
+
+    # ── 15. V4.90.0 — C1 統一 lane 資料契約 + lane 區塊形狀鎖 ──
+    # 版號不在 LANE_CONTRACT_REQUIRED_VERSIONS 的 entry 整段跳過 → 向後相容。
+    check_lane_contract(entry, trade, errors, warnings)
 
     # ── 14b. V4.82.0 — fragility_label enum ──────────────────────────────
     # replay_trade_plan.py 的 sizing cohort 發現歷史上有 6 筆用了 protocol 表外的標籤

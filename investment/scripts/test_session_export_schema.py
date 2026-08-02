@@ -35,6 +35,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from apply_det_shadow import build_lane_contract  # noqa: E402
 from decision_engine import run_phase3  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -69,8 +70,30 @@ def extract_full_example() -> dict:
     fence = text.index("```json", start) + len("```json")
     end = text.index("```", fence)
     entry = json.loads(text[fence:end])
-    entry["trades_this_session"][0].setdefault("det_shadow", copy.deepcopy(DET_SHADOW))
+    trade = entry["trades_this_session"][0]
+    trade.setdefault("det_shadow", copy.deepcopy(DET_SHADOW))
+    # C1 (V5.3) — same story as det_shadow, one step later in the same post-process.
+    # Built by the **real** producer rather than a literal, so a contract shape change
+    # cannot pass this test while breaking the validator: both sides import the same
+    # constants. `val_det` is seeded from the fixture shadow so §15's absorb gate
+    # (contract shadow_score == det_shadow.valuation_score_det) holds by construction.
+    trade.setdefault("lane_contract", build_lane_contract(
+        trade, val_det=trade["det_shadow"]["valuation_score_det"]))
     return entry
+
+
+def as_version(entry: dict, ver: str, *, keep_contract: bool = False) -> dict:
+    """Restamp a fixture and (by default) drop `lane_contract`.
+
+    A back-compat case is meant to prove that a V5.0/V5.1 entry still validates, not to
+    trip §2e on a contract block it would never have carried. `keep_contract=True` is for
+    the one test that targets §2e itself.
+    """
+    e = copy.deepcopy(entry)
+    e["session_export_version"] = ver
+    if not keep_contract:
+        e["trades_this_session"][0].pop("lane_contract", None)
+    return e
 
 
 def run(entry: dict, label: str, want_rc: int, want_substr: str | None = None) -> None:
@@ -197,34 +220,39 @@ def main() -> int:
     ex = extract_full_example()
     ver = ex.get("session_export_version")
     print(f"[fixture] phase5_export_schema.md FULL EXAMPLE — version={ver!r}")
-    if ver != "V5.2":
-        FAILS.append(f"FULL EXAMPLE stamps {ver!r}; the doc's Schema Version is V5.2")
+    if ver != "V5.3":
+        FAILS.append(f"FULL EXAMPLE stamps {ver!r}; the doc's Schema Version is V5.3")
 
     print("[version gate — §13 Phase 3 engine]")
-    run(ex, "V5.2 full example", 0)
+    run(ex, "V5.3 full example", 0)
     run(without(ex, "calculation_steps", "decision_engine_version"),
-        "V5.2 minus calculation_steps", 1, "calculation_steps missing")
+        "V5.3 minus calculation_steps", 1, "calculation_steps missing")
     run(without(ex, "decision_engine_version"),
-        "V5.2 minus decision_engine_version", 1, "decision_engine_version missing")
+        "V5.3 minus decision_engine_version", 1, "decision_engine_version missing")
 
     print("[version gate — §14 Phase 4 engine]")
     run(without(ex, "risk_audit", "trade_plan_builder_version"),
-        "V5.2 minus risk_audit", 1, "risk_audit missing")
+        "V5.3 minus risk_audit", 1, "risk_audit missing")
     run(without(ex, "trade_plan_builder_version"),
-        "V5.2 minus trade_plan_builder_version", 1, "trade_plan_builder_version missing")
+        "V5.3 minus trade_plan_builder_version", 1, "trade_plan_builder_version missing")
     run(without(ex, "mandatory_risk_flags"),
-        "V5.2 minus mandatory_risk_flags", 1, "mandatory_risk_flags missing")
+        "V5.3 minus mandatory_risk_flags", 1, "mandatory_risk_flags missing")
 
-    # Back-compat: the pre-existing V5.0 / V5.1 entries must never need a backfill.
-    legacy = without(ex, "calculation_steps", "decision_engine_version",
-                     "risk_audit", "trade_plan_builder_version", "mandatory_risk_flags")
-    legacy["session_export_version"] = "V5.0"
+    print("[version gate — §15 C1 lane contract]")
+    run(without(ex, "lane_contract"), "V5.3 minus lane_contract", 1, "lane_contract missing")
+
+    # Back-compat: the pre-existing V5.0 / V5.1 / V5.2 entries must never need a backfill.
+    legacy = as_version(without(ex, "calculation_steps", "decision_engine_version",
+                                "risk_audit", "trade_plan_builder_version",
+                                "mandatory_risk_flags"), "V5.0")
     run(legacy, "V5.0 legacy, pre-cutover, no engine block", 0)
 
-    legacy51 = without(ex, "risk_audit", "trade_plan_builder_version",
-                       "mandatory_risk_flags")
-    legacy51["session_export_version"] = "V5.1"
+    legacy51 = as_version(without(ex, "risk_audit", "trade_plan_builder_version",
+                                  "mandatory_risk_flags"), "V5.1")
     run(legacy51, "V5.1 legacy, Phase 3 engine only, no Phase 4 block", 0)
+
+    legacy52 = as_version(ex, "V5.2")
+    run(legacy52, "V5.2 legacy, both engine blocks, no lane contract", 0)
 
     print("[bypass guards]")
     # Backstop: stamping an old version after the cutover must not open the gate.
@@ -232,21 +260,23 @@ def main() -> int:
     e["export_date"] = e["date"] = "2026-08-05"
     run(e, "V5.0 stamp after cutover (date backstop)", 1, "2026-08-03")
 
-    e = without(ex, "risk_audit", "trade_plan_builder_version", "mandatory_risk_flags")
-    e["session_export_version"] = "V5.0"
+    e = as_version(without(ex, "risk_audit", "trade_plan_builder_version",
+                           "mandatory_risk_flags"), "V5.0")
     run(e, "V5.0 stamp carrying decision_engine_version (§2c)", 1,
         "entry carries decision_engine_version")
 
-    e = copy.deepcopy(ex)
-    e["session_export_version"] = "V4.8"
+    e = as_version(ex, "V4.8")
     run(e, "V4.8 stamp carrying V5.0-only fields (§2b)", 1, "stamping bug")
 
     # §2d — the same bypass one version up: keep the Phase 4 engine block but stamp V5.1
     # so §14's version gate never fires.
-    e = copy.deepcopy(ex)
-    e["session_export_version"] = "V5.1"
+    e = as_version(ex, "V5.1")
     run(e, "V5.1 stamp carrying trade_plan_builder_version (§2d)", 1,
         "entry carries trade_plan_builder_version")
+
+    # §2e — one more version up: keep the contract but stamp V5.2 so §15 never fires.
+    e = as_version(ex, "V5.2", keep_contract=True)
+    run(e, "V5.2 stamp carrying lane_contract (§2e)", 1, "entry carries lane_contract")
 
     e = copy.deepcopy(ex)
     e["session_export_version"] = "V6.0"
