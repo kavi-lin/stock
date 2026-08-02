@@ -1171,42 +1171,76 @@ engine 另附 `cascade_rule_applied` / `penalty_value` / `red_team_effective_ver
 
 Trader Agent + Risk Manager (inline)。
 
-### Step 1 — Dual-Track Trade Plan
+### 執行方式（V4.82.0 — script 化，禁手算）
+
+Phase 4 全部算術由 `investment/scripts/trade_plan_builder.py` 產出。PM 只做三件事：
+
+1. **組 input JSON**（下方 shape，數字全部照抄 Phase 0 / 2.4 / 3 既有輸出，**不重算**）
+2. **一個 Bash call**
+3. **verbatim 抄寫** engine 的 `trade_plan` + `risk_audit` 兩塊進 session export
+
+```bash
+python3 investment/scripts/trade_plan_builder.py --from-file /tmp/<TICKER>_p4.json
+```
+
+Engine 內部自行 subprocess 呼叫 `risk_manager.py`（Step 2）與 `tail_risk.py`（Step 3）—
+PM **不需**先跑那兩支。兩支任一失敗 → engine 降級並在 `warnings` 說明（Step 2 失敗 →
+`RULE_BASED` base 0.05；Step 3 失敗 → 保守取 `MODERATE ×0.75`，**不得**當 ROBUST）。
+
+**Input shape**：
 
 ```json
 {
-  "trade_plan": {
-    "entry_aggressive":   {"range": [min, max], "trigger": "LIMIT|MARKET|BREAKOUT", "trigger_conditions": "string"},
-    "entry_conservative": {"range": [min, max], "trigger_conditions": "string"},
-    "take_profit": "price",
-    "stop_loss": "price",
-    "risk_reward_ratio": "float — must >= 2.0",
-    "time_horizon": "short | mid | long",
-    "exit_conditions": "string"
-  }
+  "ticker": "MU",
+  "final_decision": "BUY",                    // Phase 3 engine 的 final_decision
+  "analysis_price": 455.07,
+  "time_horizon": "mid",
+  "sector": "Technology",                     // 省略時由 ticker 反查 company_context
+  "multi_horizon_price_framework": { /* Phase 2.4 engine 輸出整塊 */ },
+  "technical": {"key_levels": {"support": 415.0, "resistance": 560.0},
+                "pattern": "breakout|null", "rs_rating": 92,
+                "distance_from_50ma_pct": 8.4},
+  "phase0": {"ftd": {"state": "FTD_CONFIRMED", "days_since_ftd": 7},
+             "macro_backdrop_score": -1.0},
+  "phase3": {"position_size_cap_pct": 100, "polar_position_cap_pct": 100,
+             "hot_zone_probe": false, "hot_zone_position_size_cap": null,
+             "t4_resolution": "NONE|OVERRIDE_BURRY",
+             "binary_classification": "positive", "binary_event_within_48h": false},
+  "mandatory_risk_flags": [],
+  "concentration": {"active_same_sector_confirmed": 1}
 }
 ```
+
+`rc=1` = input 不可用（`ticker` 缺 / `final_decision` 非 Phase 3 五值之一）→ 修 input 重跑，
+**禁止**改手算補上。
+
+以下 Step 1–4 是 engine 的 **spec**（engine 是執行權威，本節是規格；兩者不一致以本節為準並修
+engine + `test_trade_plan_builder.py`）。
+
+### Step 1 — Dual-Track Trade Plan（spec）
 
 - BUY → 兩軌二選一（預設 aggressive）
 - STAGED_ENTRY → 兩軌各佔 50%
 
-> **V5.1 — entry/TP/SL 取值 provenance（補原本 protocol 未明定缺口；V3.45.3 起直接取 Phase 2.4 engine 輸出，不再前向引用）**：
-> - `entry_aggressive.range` ← short_term_5d `[band_point 附近, band_upper_capped]`（突破續勢）或現價附近（pattern=breakout 時）
-> - `entry_conservative.range` ← short_term_5d `[band_lower_capped, band_point]`（回檔承接；下界貼 support）
+> **entry/TP/SL 取值 provenance**（V3.45.3 起直接取 Phase 2.4 engine 輸出，不再前向引用）：
+> - `entry_aggressive` ← short_term_5d `[band_point, band_upper_capped]`（突破續勢）或現價附近（pattern=breakout 時）
+> - `entry_conservative` ← short_term_5d `[band_lower_capped, band_point]`（回檔承接；下界貼 support）
 > - `take_profit` ← mid_term_60d `mid_target`；若 > `key_levels.resistance` → cap 在 resistance 並於 `exit_conditions` 註記「需突破 $R 才上看 $mid_target」
 > - `stop_loss` ← `min(short_term band_lower_capped, key_levels.support)` − buffer；與 Step 4 `final_stop_loss_pct` 算出的價取**較保守（較高）**者
-> - `risk_reward_ratio` 用上述 TP/SL 重算，仍須 ≥ 2.0（不足 → 收緊 entry 或降級 HOLD）
+> - `risk_reward_ratio` 用上述 TP/SL 重算，仍須 ≥ 2.0。不足時 engine 依本條的補救順序先**收緊 entry**
+>   （aggressive 中點 → conservative 中點 → conservative 下界），全部不過才降級 HOLD 並
+>   `approval=REJECTED`；實際採用哪一軌寫在 `trade_plan.entry_track_used`，嘗試序寫在 `rr_solve_trace`
+> - key level 壓過 band_point 時（support > band_point）兩軌可能上下界顛倒 → engine 排序並在
+>   `provenance_notes` 標記，該區間極窄須人工複核
 
-### Step 2 — Vol-Adjusted Position Sizing
-```bash
-python3 skills/portfolio-risk-manager/scripts/risk_manager.py <TICKER> --json-only
-```
-取 `final_position_cap_pct` → `vol_adjusted_limit_pct`
+### Step 2 — Vol-Adjusted Position Sizing（spec）
 
-### Step 3 — Tail Risk Assessment
-```bash
-python3 skills/tail-risk-analyzer/scripts/tail_risk.py <TICKER> --json-only
-```
+`risk_manager.py <TICKER> --json-only` 的 `final_position_cap_pct` → `vol_adjusted_limit_pct`；
+`base = vol_adjusted_limit OR 0.05`（後者 = `RULE_BASED`）。
+
+### Step 3 — Tail Risk Assessment（spec）
+
+`tail_risk.py <TICKER> --json-only`：
 
 | fragility_label | tail_risk_score | position_multiplier |
 |---|---|---|
@@ -1214,13 +1248,17 @@ python3 skills/tail-risk-analyzer/scripts/tail_risk.py <TICKER> --json-only
 | MODERATE | 30-60 | × 0.75 |
 | FRAGILE | ≥ 60 | × 0.5 |
 
-### Step 3.5 — FTD Timeline Gate (V4.9)
+label 與 score 不一致時**以 label 為準**並發 warning（同一支 script 同時輸出兩者，不一致 = 輸入被手改）。
 
-適用前提: `phase0.ftd.state == FTD_CONFIRMED` AND `days_since_ftd != null`。
+### Step 3.5 — FTD Timeline Gate (V4.9)（spec）
+
+適用前提: `phase0.ftd.state == FTD_CONFIRMED` AND `days_since_ftd != null`。不成立 →
+`applied=false`、multiplier 1.0（**記錄**，不是靜默跳過）。
 
 Sector 分類：
 - **Cyclical**: Tech, Industrials, Materials, Financials, Cons. Disc., Energy, Communication
 - **Defensive**: Utilities, Cons. Staples, Healthcare, Real Estate
+- 表外 sector → 取 **cyclical**（保守側），並在 `warnings` 標明
 
 | `days_since_ftd` | Stage | Cyclical mul. | Defensive mul. | 停損調整 |
 |---|---|---|---|---|
@@ -1230,18 +1268,20 @@ Sector 分類：
 | 21+ | exhausted | × 0.50 OR reject | × 0.85 | -2% (cyclical) |
 
 Day 21+ reject (cyclical only): IF `RS_rating < 90` OR `distance_from_50ma > 15%` → `decision = REJECT`。
+兩個輸入皆缺 → **不 reject 但維持 ×0.50**，並註記「reject 條件無法判定」（缺料 ≠ 通過）。
 
-### Step 4 — Final Sizing
+### Step 4 — Final Sizing（spec）
 
 ```
 base       = vol_adjusted_limit OR 0.05
 tail_adj   = base × fragility_multiplier
 macro_cap  = min(tail_adj, 0.03) if macro_backdrop_score < -3 else tail_adj
-binary_adj = macro_cap × 0.5-0.7  if binary_classification ∈ [unknown, negative] AND event < 48h
+binary_adj = macro_cap × 0.5      if binary_classification ∈ [unknown, negative] AND event < 48h
            = macro_cap            otherwise
 burry_override_adj = binary_adj × 0.5 if t4.resolution == OVERRIDE_BURRY else binary_adj
 ftd_adj    = burry_override_adj × ftd_timeline_multiplier
-shift_adj  = ftd_adj × (position_size_cap_pct / 100)   # V2.18.0 — CANDIDATE 強制 ×0.5
+f1_adj     = ftd_adj × 0.5 if 同 sector active CONFIRMED ≥ 3 else ftd_adj   # V4.82.0 — V20-F1
+shift_adj  = f1_adj × (position_size_cap_pct / 100)   # V2.18.0 — CANDIDATE 強制 ×0.5
 polar_adj  = shift_adj × (polar_position_cap_pct / 100)  # V2.19.0 — BIPOLAR 強制 ×0.25
 final_position_size = polar_adj × 0.5 if final_decision == STAGED_ENTRY else polar_adj
 final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment   # 上限 -10%
@@ -1254,38 +1294,43 @@ final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment   # 上限 -1
 > BIPOLAR → 25（砍 1/4）；OUTLIER → 100；MIXED → 100；ALIGNED → 100。
 >
 > 兩個 cap 串聯（multiply）— BIPOLAR + CANDIDATE = 0.25 × 0.50 = 0.125 倍 → 極小試水單。
+>
+> **V4.82.0 — V20-F1 sector concentration**：`concentration` 取三種輸入形式（明確計數 →
+> `active_theses[]` 由 engine 計數 → thesis registry `_index.json`）。三者皆不可得時
+> **multiplier 維持 1.0 但標 `applied=false` + `source=registry_unavailable`**，
+> 絕不當作「已確認 0 個同 sector 部位」。F1 擺在 ftd_adj 之後、兩個 Phase 3 cap 之前 ——
+> 它與 FTD 同屬倉位側煞車，而 V2.18/V2.19 兩個 cap 依設計是倉位的最後一句話。
+>
+> `base_stop_pct` = 結構停損價相對 entry reference 的百分比（protocol 未獨立定義；
+> 唯有這個讀法能讓 Step 1 與 Step 4 談論同一個部位）。
 
-**Binary risk**: positive (歷史 beat ≥ 70%) → 不減倉；unknown (FOMC / 地緣) → 48h 內減倉；negative (已知壞消息) → 減 50%
+**Binary risk**: positive (歷史 beat ≥ 70%) → 不減倉；unknown (FOMC / 地緣) → 48h 內減倉；negative (已知壞消息) → 減 50%。
+原文 `× 0.5-0.7` 是區間，engine 一律取保守端 `× 0.5` 以保證可重現。
+
+**Rec 11 probe 上限**：`hot_zone_probe=true` 時 Phase 4 算出的倉位不得超過 Phase 3 給的
+`hot_zone_position_size_cap`（t1 15bps / t2 30bps）；超過即 cap 並記 `hot_zone_probe_capped=true`。
+
+**REJECTED 的後果**：`approval=REJECTED`（FTD day-21 reject 或 R/R 不足）→ `final_decision`
+降為 HOLD 且 `position_size_pct=0`，但 `sizing_chain` 仍完整輸出（審計看得到「本來會是多少」）。
+
+**Engine 輸出 shape**（`trade_plan` / `risk_audit` 欄位明細見 `phase5_export_schema.md`）：
 
 ```json
 {
   "phase": 4,
-  "trade_plan": { /* see above */ },
-  "risk_audit": {
-    "risk_level": "LOW|MEDIUM|HIGH",
-    "vol_adjusted_limit_pct": "float|null",
-    "position_size_method": "VOL_ADJUSTED | RULE_BASED",
-    "tail_risk": {
-      "fragility_label": "ROBUST|MODERATE|FRAGILE",
-      "tail_risk_score": "float",
-      "fragility_adjustment": "× 1.0|× 0.75|× 0.5"
-    },
-    "binary_classification": "positive|unknown|negative|none",
-    "burry_override_active": "bool",
-    "burry_override_multiplier": "0.5 | 1.0",
-    "ftd_timeline_gate": {
-      "applied": "bool", "days_since_ftd": "int|null",
-      "stage": "prime|standard|late_cycle|exhausted|n/a",
-      "sector_class": "cyclical|defensive",
-      "multiplier": "1.0|0.95|0.9|0.75|0.5",
-      "stop_loss_adjustment_pp": "0|-1|-2",
-      "rejection_triggered": "bool"
-    },
-    "position_size_pct": "float 0.00-0.10",
-    "staged_entry_split": {"aggressive_pct": "float|null", "conservative_pct": "float|null"},
-    "approval": "APPROVED | REJECTED",
-    "rejection_reason": "string if REJECTED"
-  }
+  "trade_plan_builder_version": "1.0.0",
+  "final_decision": "BUY | STAGED_ENTRY | HOLD | …",
+  "mandatory_risk_flags": [],
+  "trade_plan": { /* entry_aggressive / entry_conservative / take_profit / stop_loss /
+                     risk_reward_ratio / time_horizon / exit_conditions /
+                     entry_reference_price / entry_track_used / rr_solve_trace /
+                     provenance_notes */ },
+  "risk_audit": { /* risk_level / vol_adjusted_limit_pct / position_size_method /
+                     tail_risk / binary_classification / burry_override_* /
+                     ftd_timeline_gate / sector_concentration_f1 / sizing_chain /
+                     position_size_pct / final_stop_loss_pct / stop_loss_derivation /
+                     staged_entry_split / hot_zone_probe_capped / approval /
+                     rejection_reason */ }
 }
 ```
 

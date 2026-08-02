@@ -43,7 +43,8 @@
   - **TODO 原本漏列的兩處**：`validate_markdown_export.py` 是隱藏消費端（新版 entry 會整段跳過「合理股價」檢查）；`Dashboard/page-decisions.js` 的 `detectProtocolVersion()` 已把 `'V5.1'` token 用在 trajectory 啟發式上 → 改成戳記優先、啟發式降 fallback。下游兩支現在 **import** validator 的版本集合，升版只改一處。
   - **順手修掉兩個實測出來的洞**：`hot_zone_eval` warning 條件寫反（只對舊 entry 發、對現行 export 恆不發）；§13 Tier B 可把已套懲罰的鏈條改標 `no_penalty` 過閘（cascade 標籤與 `penalty_applied` 現在雙向一致性檢查）。
   - **`phase5_export_schema.md` FULL EXAMPLE 已改為實跑 engine 的完整 V5.1 範例**，驗收 fixture 直接從 doc 解析 → doc 再壞掉測試會紅。
-- [ ] **L2 — `trade_plan_builder.py`（Phase 4 script 化）**：entry band / TP / SL / staged split / R/R / final sizing 組裝（risk_manager / tail_risk 已 script）；Trader LLM 觸發條件 deterministic 定義（option hedge / portfolio conflict / 跨週期多 catalysts）。驗收 = numeric parity 對 spec + 歷史 mismatch triage。
+- [x] **L2 — `trade_plan_builder.py`（Phase 4 script 化）**：entry band / TP / SL / staged split / R/R / final sizing 組裝（risk_manager / tail_risk 已 script）。**4.82.0 完成**：engine + `test_trade_plan_builder.py`（17 fixture）+ `replay_trade_plan.py`（3 cohort）+ validator §14 + schema V5.2。
+  - 未做（刻意留下）：**Trader LLM 觸發條件 deterministic 定義**（option hedge / portfolio conflict / 跨週期多 catalysts）—— 這三個情境目前 protocol 完全沒有 spec 可 script 化，硬定會是憑空發明規則而非 script 化既有規則。要做需先累積實例並由使用者定調，另開項目。
 - [ ] **L3 — Phase 5 deterministic renderer**：`render_investment_report.py` 照 ic-memo `compose.py` pattern；吸收 Step 4.5 injection；`--polish` optional（只收完成 MD + 可潤飾段白名單）。驗收 = golden reports + decision-lock + `validate_markdown_export.py` rc=0；移除 Sonnet formatter Agent call。
 - [ ] **L4 — Valuation quant 提前 Phase 1.5**：`compute_price_framework --self-assemble` quant pack 移到 Phase 1.5；Phase 2.4 只組 MHP / 5d band / 60d target（吃 technical/news qualitative）。驗收 = 重排前後 valuation_pack regression 完全一致；修 protocol「Phase 2 lane 依賴 2.4 pack」時序矛盾文字。
 - [ ] **L4b — Valuation Specialist 改條件式 reviewer**（依賴 L4，shadow-first）：觸發條件 deterministic（no curated peers / structural shift / anchor 嚴重衝突 / data quality 低但可能 BUY）；peer discovery 30-90d cache。
@@ -714,7 +715,7 @@
 
 ##### F. Phase 5.5 Cross-Protocol Wiring
 
-- [ ] **[V20-F1]** `thesis_registry` concentration check — Phase 4 sizing：同 sector ≥3 active CONFIRMED → 第 4 個減半。防 sector concentration risk
+- [x] **[V20-F1]** `thesis_registry` concentration check — Phase 4 sizing：同 sector ≥3 active CONFIRMED → 第 4 個減半。防 sector concentration risk（4.82.0 隨 `trade_plan_builder.py` 落地；registry 不可得時標 `source=registry_unavailable` 不當作 0 部位）
 - [ ] **[V20-F2]** Sector protocol 讀 thesis_registry 反向加權 — `sector_intel.json` 加 `active_thesis_count[sector]`，下次 sector 跑時 sector heat 拉
 
 #### V2.21+ — 大改，**不要塞 V2.20**

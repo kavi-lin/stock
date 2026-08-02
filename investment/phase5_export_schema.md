@@ -1,9 +1,17 @@
 # Phase 5 Session Export Schema
 
-> **Schema Version**: `V5.1`
+> **Schema Version**: `V5.2`
 > **Consumer**: `bridge.py` / Dashboard decisions cards / decision history
 > **Producer**: Investment Protocol Phase 5 (PM / Sonnet formatter)
 > **Last updated**: 2026-08-02
+>
+> **V5.2 changes vs V5.1**:
+> - Phase 4 script 化（`trade_plan_builder.py`）。新增三個必填欄：`trade_plan_builder_version`、
+>   `risk_audit`、`mandatory_risk_flags`（缺任一 → validator rc=1）
+> - `mandatory_risk_flags` 首次持久化 —— 這是 Phase 3 Auto REJECT 與 Rec 11 probe 抑制的輸入，
+>   過去從未寫進 history，`replay_decision_engine.py` 只能宣告 `[]` 當假設（declared assumption #2）
+> - §14 新增：sizing 鏈 re-derivation（Tier A 算術 / Tier B 規則表，與 §13 同模式）
+> - 既有 V5.0 / V5.1 entry **不需回填**：舊版號照原規則驗，永久相容
 >
 > **V5.1 changes vs V5.0**:
 > - `calculation_steps` **+** `decision_engine_version` 從「建議」升為 **必填**（缺任一 → validator rc=1）
@@ -34,7 +42,7 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 ### Top-level
 | Field | Type | Note |
 |---|---|---|
-| `session_export_version` | `"V5.1"` | 固定字串；若 protocol 升版，本檔 header + 此欄同步改。Validator 接受 `V4.8` / `V5.0` / `V5.1`（舊版號只驗當年規則），新 export 一律戳 `V5.1` |
+| `session_export_version` | `"V5.2"` | 固定字串；若 protocol 升版，本檔 header + 此欄同步改。Validator 接受 `V4.8` / `V5.0` / `V5.1` / `V5.2`（舊版號只驗當年規則），新 export 一律戳 `V5.2` |
 | `export_date` | `"YYYY-MM-DD"` | 交易會議日期 |
 | `date` | `"YYYY-MM-DD"` | 鏡射 `export_date`（舊版相容；bridge.py 兩者都讀）|
 | `ticker` | `"STRING"` | 鏡射 `trades_this_session[0].ticker` |
@@ -78,8 +86,8 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `burry_score` | float 0-100 | 填 | |
 | `burry_override_active` | bool | 填 | V4.7+ |
 | `burry_override_recheck_date` | `"YYYY-MM-DD"` or `null` | 填 | V4.7+ |
-| `entry_aggressive` | `[min_str, max_str]` or `null` | HOLD 通常 null；若 MD 報告有觀察區間可填 | |
-| `entry_conservative` | `[min_str, max_str]` or `null` | HOLD 若 MD 有再評觸發價位應填 | |
+| `entry_aggressive` | `[min, max]`（number；V5.2 前的 entry 為字串，兩者皆合法）or `null` | HOLD 通常 null；若 MD 報告有觀察區間可填 | V5.2 起由 `trade_plan_builder.py` 產出 number |
+| `entry_conservative` | `[min, max]`（同上）or `null` | HOLD 若 MD 有再評觸發價位應填 | |
 | `take_profit` | number or `null` | HOLD null | |
 | `stop_loss` | number or `null` | HOLD null | |
 | `risk_reward_ratio` | float or `null` | HOLD null；BUY/STAGED_ENTRY **必填且 ≥ 2.0** | |
@@ -122,6 +130,10 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `hot_zone_probe` | bool | optional **(V5.0.x+, Rec 11)** | 熱區保守性鬆綁觸發旗標。true 表示正分模糊區 `[0,+staged)` × `industry_top_30pct` × `RISK_ON/BULL` 把 default HOLD 降為小倉 probe。觸發時強制 `final_decision=STAGED_ENTRY`、`position_size_pct ≤ tier 上限`、且 `decision_cap_active != true`。Validator (`validate_session_export.py` § 11) 強制。預設 false |
 | `hot_zone_probe_tier` | `"t1_15bps" \| "t2_30bps"` or `null` | required if `hot_zone_probe=true` **(V4.70.0+, P0-1)** | 分數分層 probe size：`final_score ≥ 0.4` → t2（≤30bps）/ `< 0.4` → t1（≤15bps）。依據 AUDIT_2026-07-16 replay（上半帶 mean +17.6% up 10/15 vs 下半帶 −1.2%）。Validator §11 按 tier 強制 size 上限 |
 | `hot_zone_eval` | `"fired" \| "suppressed_by_risk_flag" \| "suppressed_by_cap" \| "not_qualifying"` | **required (V5.0.x+, TODO-015)** | Rec 11 評估結果，不論是否 probe 一律寫出，使驗收不再盲飛。判定樹見 `investment_protocol_v5_0.md` Rec 11 段。Validator §11 強制：`hot_zone_probe=true ⟺ hot_zone_eval="fired"`。extractor 對缺欄的歷史報告反推 `hot_zone_eval_derived`（含 `qualifying_unexplained` 告警值） |
+| `trade_plan_builder_version` | `string` | **V5.2+ 必填** | Phase 4 engine 版號（如 `"1.0.0"`）。有此欄 = 走 script 化 Phase 4，validator §14 加驗規則表。缺欄且戳 V5.2 → rc=1 |
+| `risk_audit` | object（見下） | **V5.2+ 必填** | `trade_plan_builder.py` 的 `risk_audit` 整塊 verbatim。內含 `sizing_chain`，validator §14 據此重算九段乘法鏈 |
+| `mandatory_risk_flags` | array[string] | **V5.2+ 必填**（正常情況空陣列） | Phase 3 Auto REJECT（含 `systemic` 字樣者一票否決）與 Rec 11 probe 抑制的輸入。**V5.2 前從未持久化** —— 補上後 `replay_decision_engine.py` 才不必宣告 `[]` 當假設 |
+| `final_stop_loss_pct` | float or `null` | **V5.2+ 必填**（HOLD 可 null） | Step 4 `base_stop_pct + ftd_timeline_stop_adjustment`，下限 −10%。取自 `risk_audit.final_stop_loss_pct` |
 
 ### `valuation_lane` (V5.0)
 ```json
@@ -390,6 +402,40 @@ Phase 3 全部算術由 `investment/scripts/decision_engine.py` 產出，PM **ve
 | `BUY` / `STAGED_ENTRY` | `HOLD` | Auto REJECT 或 decision cap（無 override） |
 | `HOLD` | `STAGED_ENTRY` | Rec 11 熱區 probe（`hot_zone_probe=true`） |
 
+### `risk_audit` + `trade_plan_builder_version` (V5.2 — Phase 4 engine)
+
+Phase 4 全部算術由 `investment/scripts/trade_plan_builder.py` 產出，PM **verbatim 抄寫**整塊。
+欄位語意見 `investment_protocol_v5_0.md` §PHASE 4；此處只記 validator 契約：
+
+| 欄 | 型別 | 說明 |
+|---|---|---|
+| `trade_plan_builder_version` | `string` | engine 版號（如 `"1.0.0"`）。**有此欄 = 走 V4.82.0+ 規則**，validator 加驗規則表。**V5.2 起必填** |
+| `risk_audit.sizing_chain` | object | 九段乘法鏈的逐段值 + `steps[]` 文字軌跡。validator §14 逐段重算 |
+| `risk_audit.sizing_chain.base` | `float` | Step 2 起點（`vol_adjusted_limit_pct / 100` 或 `0.05`） |
+| `risk_audit.position_size_method` | `"VOL_ADJUSTED" \| "RULE_BASED"` | 與 `vol_adjusted_limit_pct` 是否為 null 必須一致 |
+| `risk_audit.tail_risk.fragility_label` | `"ROBUST" \| "MODERATE" \| "FRAGILE"` | 與 `sizing_chain` 用的 fragility 乘數必須對得上（1.0 / 0.75 / 0.5） |
+| `risk_audit.ftd_timeline_gate` | object | `applied=false` 時 multiplier 必須是 1.0；`applied=true` 時 stage × sector_class 必須映到表上的乘數 |
+| `risk_audit.sector_concentration_f1` | object | `applied=true ⟺ multiplier=0.5`；`active_same_sector_confirmed=null` 時只能 `applied=false` |
+| `risk_audit.approval` | `"APPROVED" \| "REJECTED"` | `REJECTED` → `position_size_pct` 必須為 0 且 `final_decision` 不得為 BUY/STAGED_ENTRY |
+
+**Validator §14（V4.82.0）**：
+
+- 有 `risk_audit.sizing_chain` → 硬驗九段鏈（`tail_adj = base × fragility`、macro cap 的
+  `min()` 語意、binary / burry / ftd / f1 / shift / polar 各段乘法、STAGED 折半、
+  `position_size_pct` 與鏈尾一致）。任一不符 **rc=1**。
+- 再有 `trade_plan_builder_version` → 加驗規則表（fragility 乘數表、FTD stage × sector_class
+  乘數表與停損 pp、F1 二值、`approval=REJECTED ⇒ size 0`、`hot_zone_probe` 的 tier 上限）。
+- **`session_export_version = "V5.2"` 的 entry 缺 `risk_audit` / `trade_plan_builder_version` /
+  `mandatory_risk_flags` 直接 rc=1** —— 否則「手算並整段省略該欄」就能繞過本節硬閘。
+  門檻綁 schema 版本而非日期（同 §13）。
+- 反向 guard：戳 `V5.1`/`V5.0` 卻帶 `trade_plan_builder_version` → rc=1，提示改戳 `V5.2`。
+- 上述皆不適用的 entry → **整段跳過，rc=0**（向後相容，不溯及既往）。
+
+**`sizing_chain` 為何連 `steps[]` 一起存**：macro cap 是 `min()` 不是乘法，鏈上只留數字的話
+無法從尾部反推它有沒有觸發。`replay_trade_plan.py` 的 inverse solve 因此把「命中 macro cap」
+的 trade 整批排除（`macro_cap_min_not_invertible`）而不是硬解——存 `steps[]` 讓未來的
+entry 不必再走這條退路。
+
 ### `det_inputs` (V2.10.0)
 
 LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄寫，不重新判讀**）：
@@ -475,14 +521,15 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
 
 ---
 
-## FULL EXAMPLE（V5.1 — 以 BUY 決策為範本）
+## FULL EXAMPLE（V5.2 — 以 BUY 決策為範本）
 
 > Phase 3 數字（`final_score` / `avg_confidence` / `calculation_steps` / `hot_zone_eval`）為
-> `decision_engine.py` 實跑輸出，整份範例可直接過 validator。抄 shape，**不要**抄數字。
+> `decision_engine.py` 實跑輸出；Phase 4 數字（`trade_plan` 各價位 / `risk_audit` / `sizing_chain`）
+> 為 `trade_plan_builder.py` 實跑輸出。整份範例可直接過 validator。抄 shape，**不要**抄數字。
 
 ```json
 {
-  "session_export_version": "V5.1",
+  "session_export_version": "V5.2",
   "export_date": "2026-04-18",
   "date": "2026-04-18",
   "ticker": "MU",
@@ -567,14 +614,85 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
       "burry_score": 37.1,
       "burry_override_active": false,
       "burry_override_recheck_date": null,
-      "entry_aggressive": ["448", "462"],
-      "entry_conservative": ["405", "425"],
-      "take_profit": 540,
-      "stop_loss": 415,
-      "risk_reward_ratio": 2.13,
+      "trade_plan_builder_version": "1.0.0",
+      "mandatory_risk_flags": [],
+      "entry_aggressive": [425.0, 462.0],
+      "entry_conservative": [405.0, 425.0],
+      "take_profit": 540.0,
+      "stop_loss": 400.97,
+      "risk_reward_ratio": 2.27,
       "position_size_pct": 0.0203,
+      "final_stop_loss_pct": -9.59,
       "staged_split": null,
       "position_size_method": "VOL_ADJUSTED",
+      "risk_audit": {
+        "risk_level": "HIGH",
+        "vol_adjusted_limit_pct": 4.06,
+        "position_size_method": "VOL_ADJUSTED",
+        "tail_risk": {
+          "fragility_label": "FRAGILE",
+          "tail_risk_score": 60.0,
+          "fragility_adjustment": "× 0.5",
+          "degraded": false
+        },
+        "binary_classification": "unknown",
+        "binary_event_within_48h": false,
+        "burry_override_active": false,
+        "burry_override_multiplier": 1.0,
+        "ftd_timeline_gate": {
+          "applied": false, "days_since_ftd": null, "stage": "n/a",
+          "sector_class": "cyclical", "multiplier": 1.0,
+          "stop_loss_adjustment_pp": 0, "rejection_triggered": false
+        },
+        "sector_concentration_f1": {
+          "applied": false, "multiplier": 1.0, "sector": "Technology",
+          "active_same_sector_confirmed": 1, "source": "explicit_count",
+          "note": "同 sector active CONFIRMED 1 < 3 → 不減倉"
+        },
+        "sizing_chain": {
+          "base": 0.0406,
+          "tail_adj": 0.0203,
+          "macro_cap": 0.0203,
+          "binary_adj": 0.0203,
+          "binary_multiplier": 1.0,
+          "burry_override_adj": 0.0203,
+          "burry_override_multiplier": 1.0,
+          "ftd_adj": 0.0203,
+          "f1_adj": 0.0203,
+          "f1_multiplier": 1.0,
+          "shift_adj": 0.0203,
+          "polar_adj": 0.0203,
+          "final_position_size": 0.0203,
+          "steps": [
+            "base 0.040600 × fragility 0.5 = 0.020300",
+            "macro_backdrop -1.0 ≥ -3.0 → macro cap 不觸發 = 0.020300",
+            "binary unknown (event<48h=False) → × 1.0 = 0.020300",
+            "burry_override False → × 1.0 = 0.020300",
+            "ftd_timeline × 1.0 = 0.020300",
+            "V20-F1 sector concentration × 1.0 = 0.020300",
+            "structural_shift cap 100.0% → × 1.0 = 0.020300",
+            "polarization cap 100.0% → × 1.0 = 0.020300",
+            "decision BUY → 不折半 = 0.020300"
+          ]
+        },
+        "position_size_pct": 0.0203,
+        "final_stop_loss_pct": -9.59,
+        "stop_loss_derivation": {
+          "base_stop_pct": -9.59, "ftd_stop_adjustment_pp": 0,
+          "floored_at_limit": false, "structural_stop_price": 400.95,
+          "pct_based_stop_price": 400.97, "selected": "pct_based",
+          "note": "base -9.59% + FTD 0pp = -9.59%"
+        },
+        "staged_entry_split": null,
+        "hot_zone_probe_capped": false,
+        "approval": "APPROVED",
+        "rejection_reason": null
+      },
+      "ftd_timeline_gate": {
+        "applied": false, "days_since_ftd": null, "stage": "n/a",
+        "sector_class": "cyclical", "multiplier": 1.0,
+        "stop_loss_adjustment_pp": 0, "rejection_triggered": false
+      },
       "fragility_label": "FRAGILE",
       "binary_classification": "unknown",
       "time_horizon": "mid",
@@ -741,6 +859,9 @@ BUY / STAGED_ENTRY 必填 R/R ≥ 2.0；沒有就應該降級到 HOLD。
 6. 若新版號同時是 Dashboard badge token → 檢查 `Dashboard/page-decisions.js`
    `detectProtocolVersion()` / `VERSION_COLOR` / `DECISION_TIPS` 是否撞名
 7. Protocol 的 Phase 5 章節**不必動**（只引用本檔路徑）
+8. 新的 engine 產出區塊（`calculation_steps` / `risk_audit` …）除了版本閘，一定要配一條
+   **反向 mis-stamp guard**：戳舊版號卻帶新 engine 版號欄 → rc=1。少了它，「戳 V5.1 就好」
+   就是繞過新硬閘的最短路徑（§13 的 V5.0 guard、§14 的 V5.0/V5.1 guard 都是這條）
 
 ---
 

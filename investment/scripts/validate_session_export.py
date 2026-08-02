@@ -31,15 +31,19 @@ from decision_engine import compute_dynamic_threshold, decision_band  # noqa: E4
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
 # Accepted schema versions, oldest → newest. V4.8 (4-lane legacy) lives until pre-V5.0
-# entries decay; V5.0 opened the 5-lane era; V5.1 makes the Phase 3 engine block mandatory.
-ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1")
-CURRENT_VERSION   = "V5.1"
+# entries decay; V5.0 opened the 5-lane era; V5.1 makes the Phase 3 engine block mandatory;
+# V5.2 does the same for the Phase 4 engine block.
+ACCEPTED_VERSIONS = ("V4.8", "V5.0", "V5.1", "V5.2")
+CURRENT_VERSION   = "V5.2"
 # 5-lane era — valuation_lane / fair_value_summary required, Rec 11 + MHP instrumented.
-V5_VERSIONS = ("V5.0", "V5.1")
+V5_VERSIONS = ("V5.0", "V5.1", "V5.2")
 # Versions whose entries MUST carry the Phase 3 engine output (`calculation_steps` +
 # `decision_engine_version`). Version-keyed rather than date-keyed so a backfilled entry
 # stamped V5.1 is held to exactly the same bar as one exported today.
-CALC_STEPS_REQUIRED_VERSIONS = ("V5.1",)
+CALC_STEPS_REQUIRED_VERSIONS = ("V5.1", "V5.2")
+# Versions whose entries MUST carry the Phase 4 engine output (`risk_audit` +
+# `trade_plan_builder_version` + `mandatory_risk_flags`). Same version-keyed discipline.
+RISK_AUDIT_REQUIRED_VERSIONS = ("V5.2",)
 
 TOP_REQUIRED = [
     "session_export_version", "export_date", "ticker", "final_action",
@@ -343,6 +347,242 @@ def check_phase3_arithmetic(entry, trade, errors, warnings):
         errors.append("hot_zone_eval missing — TODO-015 要求每筆 engine-scored deep-dive 必填")
 
 
+# ---------------------------------------------------------------------------
+# V4.82.0 §14 — Phase 4 sizing-chain re-derivation (trade_plan_builder parity)
+# ---------------------------------------------------------------------------
+_FRAGILITY_MULT = {"ROBUST": 1.0, "MODERATE": 0.75, "FRAGILE": 0.5}
+_MACRO_CAP_LIMIT = 0.03
+_MACRO_CAP_TRIGGER = -3.0
+# (stage, sector_class) → (multiplier, stop_loss_adjustment_pp)
+_FTD_TABLE = {
+    ("prime", "cyclical"): (1.00, 0), ("prime", "defensive"): (1.00, 0),
+    ("standard", "cyclical"): (0.90, 0), ("standard", "defensive"): (1.00, 0),
+    ("late_cycle", "cyclical"): (0.75, -1), ("late_cycle", "defensive"): (0.95, 0),
+    ("exhausted", "cyclical"): (0.50, -2), ("exhausted", "defensive"): (0.85, 0),
+}
+_HZ_TIER_CAPS = {"t1_15bps": 0.0015, "t2_30bps": 0.003}
+
+
+def _chain_step(chain, prev_key, key, factor, label, errors):
+    """One multiplicative link of the Step 4 chain: chain[key] == chain[prev_key] × factor."""
+    prev, got = _numf(chain.get(prev_key)), _numf(chain.get(key))
+    if prev is None or got is None or factor is None:
+        return
+    want = prev * factor
+    # The engine rounds each stage to 6dp, so the tolerance has to clear one rounding
+    # step at each end rather than assume exact equality.
+    if abs(want - got) > 1.5e-6:
+        errors.append(f"sizing_chain.{key}={got} != {prev_key} {prev} × {label} {factor} "
+                      f"= {want:.8f} — Phase 4 手算，重跑 trade_plan_builder.py")
+
+
+def check_phase4_sizing(entry, trade, errors, warnings):
+    """Re-derive the Phase 4 sizing chain from the exported `risk_audit`.
+
+    Tier A (any entry carrying sizing_chain) — timeless arithmetic: each multiplicative
+    link, the macro cap's min() semantics, the STAGED halving, and agreement between the
+    chain tail and the exported `position_size_pct`.
+
+    Tier B (entries stamped `trade_plan_builder_version`) — rule-table conformance that
+    only holds for V4.82.0+ math: the fragility table, the FTD stage × sector_class table,
+    F1's two-valued multiplier, and the REJECTED ⇒ zero-size invariant.
+
+    Entries with neither block are skipped entirely (pre-V4.82.0 back-compat, rc=0) —
+    unless the entry is stamped a version in RISK_AUDIT_REQUIRED_VERSIONS, where the whole
+    block is mandatory and its absence is rc=1.
+    """
+    ra = trade.get("risk_audit")
+    builder_ver = trade.get("trade_plan_builder_version")
+    ver = entry.get("session_export_version")
+    _CMD = ("`python3 investment/scripts/trade_plan_builder.py --from-file "
+            "/tmp/<T>_p4.json` 的 trade_plan + risk_audit 整塊 verbatim 抄寫")
+
+    if not isinstance(ra, dict):
+        if builder_ver:
+            errors.append(
+                f"trade_plan_builder_version={builder_ver!r} present but risk_audit is "
+                "missing — the engine emits both; do not hand-assemble the Phase 4 block")
+        elif ver in RISK_AUDIT_REQUIRED_VERSIONS:
+            errors.append(
+                f"risk_audit missing — session_export_version={ver!r} 的 entry 必須帶 "
+                f"Phase 4 engine 輸出（{_CMD}）。省略此欄等同繞過 §14 算術硬閘")
+        return
+
+    if ver in RISK_AUDIT_REQUIRED_VERSIONS:
+        if not builder_ver:
+            errors.append(
+                f"trade_plan_builder_version missing — session_export_version={ver!r} 的 entry "
+                "必須連 engine 版號一起抄（engine 兩者同時輸出）；缺版號會讓 §14 Tier B 規則表"
+                "驗證整段跳過")
+        if not isinstance(trade.get("mandatory_risk_flags"), list):
+            errors.append(
+                "mandatory_risk_flags missing or not an array — V5.2 起必填（正常情況空陣列）。"
+                "此欄是 Phase 3 Auto REJECT 與 Rec 11 probe 抑制的輸入，缺它 replay 只能靠假設")
+
+    chain = ra.get("sizing_chain")
+    if not isinstance(chain, dict):
+        if ver in RISK_AUDIT_REQUIRED_VERSIONS:
+            errors.append("risk_audit.sizing_chain missing — §14 無法重算九段乘法鏈")
+        return
+
+    # ── Tier A.1 — fragility link ────────────────────────────────────────────
+    label = ((ra.get("tail_risk") or {}).get("fragility_label"))
+    frag_mult = _FRAGILITY_MULT.get(label)
+    _chain_step(chain, "base", "tail_adj", frag_mult, "fragility", errors)
+
+    # ── Tier A.2 — macro cap is a min(), not a multiplication ────────────────
+    backdrop = _numf((entry.get("phase0_macro_snapshot") or {}).get("macro_backdrop_score"))
+    tail_adj, macro_cap = _numf(chain.get("tail_adj")), _numf(chain.get("macro_cap"))
+    if tail_adj is not None and macro_cap is not None and backdrop is not None:
+        want = min(tail_adj, _MACRO_CAP_LIMIT) if backdrop < _MACRO_CAP_TRIGGER else tail_adj
+        if abs(want - macro_cap) > 1.5e-6:
+            errors.append(
+                f"sizing_chain.macro_cap={macro_cap} != {want:.8f} — macro_backdrop_score "
+                f"{backdrop} {'<' if backdrop < _MACRO_CAP_TRIGGER else '≥'} "
+                f"{_MACRO_CAP_TRIGGER} 時規則是 "
+                f"{'min(tail_adj, 0.03)' if backdrop < _MACRO_CAP_TRIGGER else 'tail_adj 原值'}")
+
+    # ── Tier A.3 — the remaining multiplicative links ───────────────────────
+    _chain_step(chain, "macro_cap", "binary_adj", _numf(chain.get("binary_multiplier")),
+                "binary", errors)
+    _chain_step(chain, "binary_adj", "burry_override_adj",
+                _numf(chain.get("burry_override_multiplier")), "burry_override", errors)
+    ftd_mult = _numf((ra.get("ftd_timeline_gate") or {}).get("multiplier"))
+    _chain_step(chain, "burry_override_adj", "ftd_adj", ftd_mult, "ftd_timeline", errors)
+    f1_mult = _numf(chain.get("f1_multiplier"))
+    if f1_mult is None:
+        f1_mult = _numf((ra.get("sector_concentration_f1") or {}).get("multiplier"))
+    _chain_step(chain, "ftd_adj", "f1_adj", f1_mult, "v20_f1", errors)
+
+    # The two Phase 3 caps are percentages; they are mirrored on the trade so the chain
+    # can be re-derived without re-reading the Phase 3 engine output.
+    shift_cap = _numf((trade.get("calculation_steps") or {})
+                      .get("structural_shift_modulation", {}).get("position_size_cap_pct"))
+    polar_cap = _numf((trade.get("calculation_steps") or {})
+                      .get("polarization_modulation", {}).get("position_cap_after"))
+    if shift_cap is not None:
+        _chain_step(chain, "f1_adj", "shift_adj", shift_cap / 100.0, "structural_shift_cap",
+                    errors)
+    if polar_cap is not None:
+        _chain_step(chain, "shift_adj", "polar_adj", polar_cap / 100.0, "polarization_cap",
+                    errors)
+
+    # ── Tier A.4 — STAGED halving + chain tail vs exported size ─────────────
+    fd = trade.get("final_decision")
+    polar_adj, final_size = _numf(chain.get("polar_adj")), _numf(chain.get("final_position_size"))
+    if polar_adj is not None and final_size is not None and fd:
+        want = polar_adj * 0.5 if fd == "STAGED_ENTRY" else polar_adj
+        if abs(want - final_size) > 1.5e-6:
+            errors.append(
+                f"sizing_chain.final_position_size={final_size} != {want:.8f} — "
+                f"final_decision={fd!r} "
+                f"{'須折半 (× 0.5)' if fd == 'STAGED_ENTRY' else '不折半'}")
+
+    size = _numf(trade.get("position_size_pct"))
+    approval = ra.get("approval")
+    probe_capped = ra.get("hot_zone_probe_capped") is True
+    if size is not None and final_size is not None:
+        # Three legitimate ways the exported size departs from the chain tail; anything
+        # else means the number was edited after the engine produced it.
+        if approval == "REJECTED" or fd not in ("BUY", "STAGED_ENTRY"):
+            if abs(size) > 1e-9:
+                errors.append(
+                    f"position_size_pct={size} but "
+                    f"{'approval=REJECTED' if approval == 'REJECTED' else f'final_decision={fd!r}'}"
+                    " — 不可執行的決策必須是 0 倉位")
+        elif probe_capped:
+            if size > final_size + 1.5e-6:
+                errors.append(f"position_size_pct={size} > sizing_chain tail {final_size} "
+                              "even though hot_zone_probe_capped=true (cap 只會變小)")
+        elif abs(size - final_size) > 1.5e-6:
+            errors.append(
+                f"position_size_pct={size} != sizing_chain.final_position_size={final_size} — "
+                "兩者必須一致，除非 approval=REJECTED 或 hot_zone_probe_capped=true")
+
+    # ── Tier B — rule-table conformance (V4.82.0+ entries only) ─────────────
+    if not builder_ver:
+        return
+
+    if label not in _FRAGILITY_MULT:
+        errors.append(
+            f"risk_audit.tail_risk.fragility_label={label!r} outside the protocol set "
+            f"{sorted(_FRAGILITY_MULT)} — Step 3 表只有這三格")
+    if trade.get("fragility_label") != label:
+        errors.append(
+            f"trades_this_session[0].fragility_label={trade.get('fragility_label')!r} != "
+            f"risk_audit.tail_risk.fragility_label={label!r} — projection drift")
+
+    gate = ra.get("ftd_timeline_gate") or {}
+    if gate.get("applied") is True:
+        keyed = (gate.get("stage"), gate.get("sector_class"))
+        want = _FTD_TABLE.get(keyed)
+        if want is None:
+            errors.append(f"ftd_timeline_gate stage/sector_class {keyed} 不在 Step 3.5 表上")
+        else:
+            if ftd_mult is not None and abs(ftd_mult - want[0]) > 1e-9:
+                errors.append(f"ftd_timeline_gate.multiplier={ftd_mult} but {keyed} maps to "
+                              f"{want[0]} in the Step 3.5 table")
+            got_pp = gate.get("stop_loss_adjustment_pp")
+            if got_pp is not None and got_pp != want[1]:
+                errors.append(f"ftd_timeline_gate.stop_loss_adjustment_pp={got_pp} but "
+                              f"{keyed} maps to {want[1]}")
+    elif gate.get("applied") is False and ftd_mult is not None and abs(ftd_mult - 1.0) > 1e-9:
+        errors.append(f"ftd_timeline_gate.applied=false requires multiplier 1.0, got {ftd_mult}")
+
+    f1 = ra.get("sector_concentration_f1") or {}
+    if f1:
+        applied, mult = f1.get("applied"), _numf(f1.get("multiplier"))
+        if mult is not None and mult not in (0.5, 1.0):
+            errors.append(f"sector_concentration_f1.multiplier={mult} — V20-F1 只有 0.5 / 1.0")
+        if applied is True and mult is not None and abs(mult - 0.5) > 1e-9:
+            errors.append("sector_concentration_f1.applied=true requires multiplier 0.5")
+        if applied is not True and mult is not None and abs(mult - 1.0) > 1e-9:
+            errors.append("sector_concentration_f1.applied=false requires multiplier 1.0")
+        if f1.get("active_same_sector_confirmed") is None and applied is True:
+            errors.append(
+                "sector_concentration_f1.applied=true with active_same_sector_confirmed=null "
+                "— 未評估的 concentration 不得減倉")
+
+    if approval not in ("APPROVED", "REJECTED"):
+        errors.append(f"risk_audit.approval={approval!r} must be APPROVED or REJECTED")
+    if approval == "REJECTED":
+        if not ra.get("rejection_reason"):
+            errors.append("risk_audit.approval=REJECTED requires a rejection_reason")
+        if fd in ("BUY", "STAGED_ENTRY"):
+            errors.append(
+                f"risk_audit.approval=REJECTED but final_decision={fd!r} — REJECTED 的計畫"
+                "必須降級到 HOLD")
+
+    method = ra.get("position_size_method")
+    vol_limit = ra.get("vol_adjusted_limit_pct")
+    if method == "VOL_ADJUSTED" and vol_limit is None:
+        errors.append("position_size_method='VOL_ADJUSTED' but vol_adjusted_limit_pct is null")
+    if method == "RULE_BASED" and vol_limit is not None:
+        errors.append(f"position_size_method='RULE_BASED' but vol_adjusted_limit_pct="
+                      f"{vol_limit} — 有 vol cap 就不該走 RULE_BASED")
+    if trade.get("position_size_method") != method:
+        errors.append(
+            f"trades_this_session[0].position_size_method={trade.get('position_size_method')!r}"
+            f" != risk_audit.position_size_method={method!r} — projection drift")
+
+    if trade.get("hot_zone_probe") is True:
+        tier_cap = _HZ_TIER_CAPS.get(trade.get("hot_zone_probe_tier"))
+        if tier_cap is not None and size is not None and size > tier_cap + 1e-9:
+            errors.append(f"hot_zone_probe tier cap {tier_cap} exceeded by "
+                          f"position_size_pct={size} — Phase 4 必須 cap 在 Phase 3 給的上限")
+
+    stop_pct = _numf(ra.get("final_stop_loss_pct"))
+    if stop_pct is not None:
+        if stop_pct > 0:
+            errors.append(f"risk_audit.final_stop_loss_pct={stop_pct} must be ≤ 0 (它是跌幅)")
+        if stop_pct < -10.0 - 1e-9:
+            errors.append(f"risk_audit.final_stop_loss_pct={stop_pct} 超過 -10% 上限")
+        mirrored = _numf(trade.get("final_stop_loss_pct"))
+        if mirrored is not None and not _same_number(mirrored, stop_pct, tol=5e-4):
+            errors.append(f"trades_this_session[0].final_stop_loss_pct={mirrored} != "
+                          f"risk_audit.final_stop_loss_pct={stop_pct} — projection drift")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Validate latest investment session export")
     ap.add_argument("--history", default=HISTORY_JSON,
@@ -407,8 +647,21 @@ def main(argv=None):
         if trade_first.get("decision_engine_version"):
             errors.append(
                 "session_export_version='V5.0' but entry carries decision_engine_version — "
-                f"Phase 3 engine output stamps {CURRENT_VERSION!r}. Patch the version field; "
+                "Phase 3 engine output stamps 'V5.1' or newer. Patch the version field; "
                 "keeping V5.0 bypasses the §13 calculation_steps gate."
+            )
+
+    # ── 2d. V5.1 mis-stamp guard (V4.82.0) ───────────────────────────────
+    # Mirror of 2c one version up: `trade_plan_builder_version` only exists on entries the
+    # Phase 4 engine produced, which is exactly what V5.2 makes mandatory. Stamping such an
+    # entry V5.0/V5.1 would route it round the version gate in §14.
+    if ver in ("V4.8", "V5.0", "V5.1"):
+        trade_first = ((entry.get("trades_this_session") or [{}])[0]) or {}
+        if trade_first.get("trade_plan_builder_version"):
+            errors.append(
+                f"session_export_version={ver!r} but entry carries trade_plan_builder_version "
+                f"— Phase 4 engine output stamps {CURRENT_VERSION!r}. Patch the version field; "
+                f"keeping {ver} bypasses the §14 risk_audit gate."
             )
 
     # ── 3. Top-level required keys ───────────────────────────────────────
@@ -822,6 +1075,20 @@ def main(argv=None):
     # ── 13. V4.80.0 — Phase 3 arithmetic re-derivation (decision_engine parity) ──
     # 舊 entry（無 calculation_steps 也無 decision_engine_version）整段跳過 → 向後相容。
     check_phase3_arithmetic(entry, trade, errors, warnings)
+
+    # ── 14. V4.82.0 — Phase 4 sizing re-derivation (trade_plan_builder parity) ──
+    # 舊 entry（無 risk_audit 也無 trade_plan_builder_version）整段跳過 → 向後相容。
+    check_phase4_sizing(entry, trade, errors, warnings)
+
+    # ── 14b. V4.82.0 — fragility_label enum ──────────────────────────────
+    # replay_trade_plan.py 的 sizing cohort 發現歷史上有 6 筆用了 protocol 表外的標籤
+    # （`RESILIENT` / `MEDIUM`），Step 3 乘數因此無從對應。§6 只驗非 null，補上值域。
+    # Validator 只看最後一筆，所以對新 export 設 error 不會誤傷既有 history。
+    _frag = trade.get("fragility_label")
+    if _frag is not None and _frag not in ("ROBUST", "MODERATE", "FRAGILE"):
+        errors.append(
+            f"fragility_label={_frag!r} outside the Step 3 table (ROBUST/MODERATE/FRAGILE) — "
+            "tail-risk-analyzer 只輸出這三值；表外標籤讓 Phase 4 乘數無從對應")
 
     if errors:
         fail(errors)

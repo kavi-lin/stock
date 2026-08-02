@@ -48,7 +48,7 @@
 
 ### `pre_v5_four_lane_schema` — 94 筆
 
-> session_export_version='V4.6' predates the 5-lane weighting (replayable: V5.0, V5.1)
+> session_export_version='V4.6' predates the 5-lane weighting (replayable: V5.0, V5.1, V5.2)
 
 - **V4.6**（21 筆）：2026-04-15/AMD, 2026-04-15/APLD, 2026-04-15/APP, 2026-04-15/AVGO, 2026-04-15/CRWV, 2026-04-15/GOOGL, 2026-04-15/IONQ, 2026-04-15/LITE, 2026-04-15/META, 2026-04-15/MU, 2026-04-15/NBIS, 2026-04-15/NVDA, 2026-04-15/ORCL, 2026-04-15/PLTR, 2026-04-15/RGTI, 2026-04-15/SMR, 2026-04-15/TSLA, 2026-04-15/TSM, 2026-04-15/VST, 2026-04-16/AMD, 2026-04-17/BAC
 - **V4.8**（73 筆）：2026-04-18/AMD, 2026-04-18/AVGO, 2026-04-18/INTC, 2026-04-18/MSFT, 2026-04-18/MU, 2026-04-18/TSLA, 2026-04-19/CFG, 2026-04-19/CHRW, 2026-04-19/EME, 2026-04-19/HPE, 2026-04-19/IR, 2026-04-21/AAPL, 2026-04-21/ALAB, 2026-04-21/AMZN, 2026-04-21/APLD, 2026-04-21/GOOGL, 2026-04-21/MRVL, 2026-04-21/MU, 2026-04-21/NTRS, 2026-04-21/NVTS, 2026-04-21/ORCL, 2026-04-21/STT, 2026-04-21/TEL, 2026-04-22/ALAB, 2026-04-22/GEV, 2026-04-22/HPE, 2026-04-22/MRVL, 2026-04-22/MSFT, 2026-04-22/NTRS, 2026-04-22/NVDA, 2026-04-23/POET, 2026-04-23/TSM, 2026-04-23/VRT, 2026-04-24/FCX, 2026-04-24/MRVL, 2026-04-24/MU, 2026-04-24/NEE, 2026-04-24/ON, 2026-04-25/SNA, 2026-04-26/AIZ, 2026-04-26/AVGO, 2026-04-26/CSCO, 2026-04-26/CSX, 2026-04-26/DLR, 2026-04-26/GSAT, 2026-04-26/NVDA, 2026-04-26/QCOM, 2026-04-26/TSM, 2026-04-26/VRT, 2026-04-27/AAOI, 2026-04-27/ALAB, 2026-04-27/ARM, 2026-04-27/CRM, 2026-04-27/FTV, 2026-04-27/GLW, 2026-04-27/LITE, 2026-04-27/MU, 2026-04-27/NOW, 2026-04-27/NVDA, 2026-04-27/PKG, 2026-04-27/SLB, 2026-04-27/TSM, 2026-04-28/BE, 2026-04-28/HUBB, 2026-04-29/NVDA, 2026-04-29/TSM, 2026-05-01/AAPL, 2026-05-01/GOOG, 2026-05-01/LLY, 2026-05-01/MRVL, 2026-05-01/MU, 2026-05-02/TEAM, 2026-05-02/VRT
@@ -154,7 +154,7 @@
 ## 5. Declared assumptions（會影響判讀，明寫不藏）
 
 1. `proceed_to_phase3=true` — 由「session 走到 Phase 3 並產出決策」反推，非猜測。
-2. `mandatory_risk_flags=[]` — 此欄從未寫進 history。若某筆 replay 給 BUY-side 而存檔是 HOLD，`unrecorded_gate_input` 是合法 triage 結論。
+2. `mandatory_risk_flags` — **V5.2 (V4.82.0) 起持久化**，該版之後的 entry 讀真值，不再是假設。此前的 entry 沒有這個欄位，replay 只能餵 `[]`；`[]` 等於斷言「沒有任何 flag 觸發」，而那正是無法保證的事。因此舊 entry 若 replay 給 BUY-side 而存檔是 HOLD，`unrecorded_gate_input` 仍是合法 triage 結論；新 entry 不再適用此免責。
 3. `industry_top_30pct` 取自 event_index `sub_industry_heat`，那是**產生索引當下**的熱度、非決策當下；只影響 Rec 11 hot-zone 判定。
 4. `calculation_steps` 來源的 lane confidence 由 C_eff 反推代表值（0.35→0.40 / 0.60→0.55 / 0.72→0.75）——decision 數學只吃 C_eff，故無損；但 `avg_confidence` 不在本 harness 的比對範圍內。
 5. Phase 4.6 decision cap：entry 有存 `decision_cap_active` 時直接沿用該結果，否則由 `fair_value_summary` 的 anchors/confidence 與 `degraded_analysts` 重推。

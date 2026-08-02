@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-08-02 07:00:38",
+  "last_updated": "2026-08-02 12:26:46",
   "market": {
     "regime": "RISK_OFF",
     "cycle_phase": "Early",
@@ -27602,8 +27602,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -28193,8 +28193,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -28454,8 +28454,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -29607,8 +29607,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -29924,8 +29924,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -30127,8 +30127,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "fmp-earnings",
-          "sector-protocol"
+          "sector-protocol",
+          "fmp-earnings"
         ]
       },
       "links": {},
@@ -34231,7 +34231,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -34293,9 +34293,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -34692,7 +34692,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -34754,9 +34754,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -35570,7 +35570,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -35632,9 +35632,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -40869,7 +40869,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -40931,9 +40931,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -47600,7 +47600,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -47662,9 +47662,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -49700,7 +49700,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -49762,9 +49762,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -51587,7 +51587,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -51649,9 +51649,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -52184,7 +52184,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -52246,9 +52246,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -52513,7 +52513,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -52575,9 +52575,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -53870,7 +53870,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -53932,9 +53932,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -54211,7 +54211,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -54273,9 +54273,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -60001,7 +60001,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -60063,9 +60063,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -61157,7 +61157,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -61219,9 +61219,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -65460,7 +65460,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -65522,9 +65522,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -69791,7 +69791,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -69853,9 +69853,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -71333,7 +71333,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -71395,9 +71395,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -72591,7 +72591,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -72653,9 +72653,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -76052,7 +76052,7 @@
         "margin_normalized": true,
         "held_net_margin": 0.481,
         "base_net_margin": 0.3848,
-        "as_of": "2026-08-01T22:59:58.254621+00:00",
+        "as_of": "2026-08-01T23:23:28.209523+00:00",
         "shadow_only": true,
         "status": "low_confidence_terminal_range",
         "is_forecast": true,
@@ -76114,9 +76114,9 @@
           "base": 212.7,
           "bull": 475.5
         },
-        "expectations_gap_status": "same_metric_gap_available",
-        "base_rate_median": 0.1011,
-        "base_rate_basis": "cohort",
+        "expectations_gap_status": "bridge_risk_only",
+        "base_rate_median": null,
+        "base_rate_basis": "curated_cohort_scope_mismatch",
         "warnings": [
           "eps_margin_normalized",
           "multi_year_terminal_range_not_12m_target",
@@ -77188,7 +77188,7 @@
     "snap_date": "2026-07-31",
     "generated_at": "2026-07-31 22:05",
     "freshness": "STALE",
-    "age_label": "32.9h",
+    "age_label": "38.4h",
     "total_rows": 528,
     "rows": [
       {
@@ -216195,8 +216195,8 @@
     ],
     "global_warnings": [],
     "status": "success",
-    "_cache_age_sec": 173860,
-    "_cache_age_hr": 48.3,
+    "_cache_age_sec": 193427,
+    "_cache_age_hr": 53.7,
     "_source_file": "2026-07-31.json",
     "_freshness": "STALE",
     "_total_log_days": 76,
@@ -216877,8 +216877,8 @@
         }
       },
       "status": "success",
-      "_cache_age_sec": 118649,
-      "_cache_age_hr": 33.0,
+      "_cache_age_sec": 138216,
+      "_cache_age_hr": 38.4,
       "_freshness": "STALE"
     },
     "trending": {
@@ -217043,7 +217043,7 @@
           "polarity_score": -0.2217
         }
       ],
-      "_cache_age_hr": 33.0,
+      "_cache_age_hr": 38.4,
       "_freshness": "STALE"
     }
   },
@@ -217222,7 +217222,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-07-31_MSFT_earnings.md",
-      "cache_age_days": 2.2,
+      "cache_age_days": 2.5,
       "company_name": "Microsoft Corporation",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -217306,7 +217306,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-07-31_META_earnings.md",
-      "cache_age_days": 2.2,
+      "cache_age_days": 2.5,
       "company_name": "Meta Platforms, Inc.",
       "sector": "Communication Services",
       "industry": "Internet Content & Information",
@@ -217392,7 +217392,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-07-31_AMZN_earnings.md",
-      "cache_age_days": 2.2,
+      "cache_age_days": 2.5,
       "company_name": "Amazon.com, Inc.",
       "sector": "Consumer Cyclical",
       "industry": "Specialty Retail",
@@ -217474,7 +217474,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-06-25_MU_earnings.md",
-      "cache_age_days": 37.4,
+      "cache_age_days": 37.6,
       "company_name": "Micron Technology, Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -217556,7 +217556,7 @@
         "analyst": 7
       },
       "report_path": "reports/2026-06-24_SNDK_earnings.md",
-      "cache_age_days": 38.4,
+      "cache_age_days": 38.6,
       "company_name": "Sandisk Corporation",
       "sector": "Technology",
       "industry": "Hardware, Equipment & Parts",
@@ -217641,7 +217641,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-06-23_CEG_earnings.md",
-      "cache_age_days": 40.2,
+      "cache_age_days": 40.4,
       "company_name": "Constellation Energy Corporation",
       "sector": "Utilities",
       "industry": "Renewable Utilities",
@@ -217726,7 +217726,7 @@
         "analyst": 13
       },
       "report_path": null,
-      "cache_age_days": 41.2,
+      "cache_age_days": 41.4,
       "company_name": "IonQ, Inc.",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -217808,7 +217808,7 @@
         "analyst": 7
       },
       "report_path": "reports/2026-06-18_MRVL_earnings.md",
-      "cache_age_days": 45.3,
+      "cache_age_days": 45.5,
       "company_name": "Marvell Technology, Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -217894,7 +217894,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 45.9,
+      "cache_age_days": 46.1,
       "company_name": "Oracle Corporation",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -217958,7 +217958,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 45.9,
+      "cache_age_days": 46.2,
       "company_name": "NVIDIA Corporation",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -218024,7 +218024,7 @@
         "analyst": 5
       },
       "report_path": null,
-      "cache_age_days": 45.9,
+      "cache_age_days": 46.1,
       "company_name": "Advanced Micro Devices, Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -218088,7 +218088,7 @@
         "analyst": 15
       },
       "report_path": null,
-      "cache_age_days": 46.3,
+      "cache_age_days": 46.6,
       "company_name": "Taiwan Semiconductor Manufacturing Company Limited",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -218175,7 +218175,7 @@
         "analyst": 5
       },
       "report_path": null,
-      "cache_age_days": 45.4,
+      "cache_age_days": 45.6,
       "company_name": "Nebius Group N.V.",
       "sector": "Communication Services",
       "industry": "Internet Content & Information",
@@ -218257,7 +218257,7 @@
         "analyst": 11
       },
       "report_path": null,
-      "cache_age_days": 51.7,
+      "cache_age_days": 51.9,
       "company_name": "Apple Inc.",
       "sector": "Technology",
       "industry": "Consumer Electronics",
@@ -218321,7 +218321,7 @@
         "analyst": 10
       },
       "report_path": "reports/2026-06-04_AVGO_earnings.md",
-      "cache_age_days": 58.4,
+      "cache_age_days": 58.6,
       "company_name": "Broadcom Inc.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -218405,7 +218405,7 @@
         "analyst": 5
       },
       "report_path": "reports/2026-06-02_HPE_earnings.md",
-      "cache_age_days": 60.4,
+      "cache_age_days": 60.6,
       "company_name": "Hewlett Packard Enterprise Company",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -218487,7 +218487,7 @@
         "analyst": 5
       },
       "report_path": "reports/2026-05-30_DELL_earnings.md",
-      "cache_age_days": 64.2,
+      "cache_age_days": 64.5,
       "company_name": "Dell Technologies Inc.",
       "sector": "Technology",
       "industry": "Computer Hardware",
@@ -218571,7 +218571,7 @@
         "analyst": 5
       },
       "report_path": "reports/2026-05-23_NOK_earnings.md",
-      "cache_age_days": 69.9,
+      "cache_age_days": 70.1,
       "company_name": "Nokia Oyj",
       "sector": "Technology",
       "industry": "Communication Equipment",
@@ -218653,7 +218653,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-05-10_LLY_earnings.md",
-      "cache_age_days": 83.4,
+      "cache_age_days": 83.6,
       "company_name": "Eli Lilly and Company",
       "sector": "Healthcare",
       "industry": "Drug Manufacturers - General",
@@ -218740,7 +218740,7 @@
         "analyst": 2
       },
       "report_path": "reports/2026-05-10_INTC_earnings.md",
-      "cache_age_days": 83.4,
+      "cache_age_days": 83.6,
       "company_name": "Intel Corporation",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -218824,7 +218824,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-05-10_ASML_earnings.md",
-      "cache_age_days": 83.4,
+      "cache_age_days": 83.6,
       "company_name": "ASML Holding N.V.",
       "sector": "Technology",
       "industry": "Semiconductors",
@@ -218906,7 +218906,7 @@
         "analyst": 15
       },
       "report_path": "reports/2026-05-10_APP_earnings.md",
-      "cache_age_days": 83.4,
+      "cache_age_days": 83.6,
       "company_name": "AppLovin Corporation",
       "sector": "Technology",
       "industry": "Software - Application",
@@ -218990,7 +218990,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-05-08_RKLB_earnings.md",
-      "cache_age_days": 85.5,
+      "cache_age_days": 85.7,
       "company_name": "Rocket Lab USA, Inc.",
       "sector": "Industrials",
       "industry": "Aerospace & Defense",
@@ -219054,7 +219054,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-05-05_PLTR_earnings.md",
-      "cache_age_days": 88.9,
+      "cache_age_days": 89.1,
       "company_name": "Palantir Technologies Inc.",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -219102,21 +219102,21 @@
     }
   ],
   "fred_macro": {
-    "generated_at": "2026-08-01T22:37:18+00:00",
+    "generated_at": "2026-08-02T03:02:02+00:00",
     "asof": null,
     "cache_hit": false,
     "cache_age_sec": 0,
     "series": {
-      "DGS2": {
-        "value": 4.23,
-        "value_smooth_3d": 4.2367,
+      "DGS10": {
+        "value": 4.68,
+        "value_smooth_3d": 4.6533,
         "date": "2026-07-30",
         "data_freshness_days": 3,
-        "delta_bps_1m": 9.0,
-        "delta_bps_3m": 35.0,
-        "delta_bps_1y": 29.0,
-        "percentile_1y": 96,
-        "trend_30d": "stable",
+        "delta_bps_1m": 24.0,
+        "delta_bps_3m": 29.0,
+        "delta_bps_1y": 30.0,
+        "percentile_1y": 99,
+        "trend_30d": "rising",
         "trend_90d": "rising"
       },
       "DFF": {
@@ -219131,6 +219131,18 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
+      "T10Y2Y": {
+        "value": 0.47,
+        "value_smooth_3d": 0.4567,
+        "date": "2026-07-31",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 16.0,
+        "delta_bps_3m": -4.0,
+        "delta_bps_1y": 4.0,
+        "percentile_1y": 19,
+        "trend_30d": "rising",
+        "trend_90d": "stable"
+      },
       "T10Y3M": {
         "value": 0.92,
         "value_smooth_3d": 0.8733,
@@ -219143,17 +219155,17 @@
         "trend_30d": "rising",
         "trend_90d": "rising"
       },
-      "T10Y2Y": {
-        "value": 0.47,
-        "value_smooth_3d": 0.4567,
-        "date": "2026-07-31",
-        "data_freshness_days": 2,
-        "delta_bps_1m": 16.0,
-        "delta_bps_3m": -4.0,
-        "delta_bps_1y": 4.0,
-        "percentile_1y": 19,
-        "trend_30d": "rising",
-        "trend_90d": "stable"
+      "DGS2": {
+        "value": 4.23,
+        "value_smooth_3d": 4.2367,
+        "date": "2026-07-30",
+        "data_freshness_days": 3,
+        "delta_bps_1m": 9.0,
+        "delta_bps_3m": 35.0,
+        "delta_bps_1y": 29.0,
+        "percentile_1y": 96,
+        "trend_30d": "stable",
+        "trend_90d": "rising"
       },
       "DFII10": {
         "value": 2.41,
@@ -219167,17 +219179,16 @@
         "trend_30d": "rising",
         "trend_90d": "rising"
       },
-      "DGS10": {
-        "value": 4.68,
-        "value_smooth_3d": 4.6533,
-        "date": "2026-07-30",
-        "data_freshness_days": 3,
-        "delta_bps_1m": 24.0,
-        "delta_bps_3m": 29.0,
-        "delta_bps_1y": 30.0,
-        "percentile_1y": 99,
-        "trend_30d": "rising",
-        "trend_90d": "rising"
+      "CPILFESL": {
+        "value": 336.065,
+        "date": "2026-06-01",
+        "data_freshness_days": 62,
+        "yoy_change_pct": 2.57,
+        "mom_change_pct": -0.02,
+        "wow_change": 0.0,
+        "percentile_1y": 83,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
       },
       "PCEPILFE": {
         "value": 130.266,
@@ -219187,6 +219198,17 @@
         "mom_change_pct": 0.13,
         "wow_change": 0.0,
         "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "CPIAUCSL": {
+        "value": 332.568,
+        "date": "2026-06-01",
+        "data_freshness_days": 62,
+        "yoy_change_pct": 3.46,
+        "mom_change_pct": -0.42,
+        "wow_change": 0.0,
+        "percentile_1y": 83,
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
@@ -219201,17 +219223,6 @@
         "trend_30d": "stable",
         "trend_90d": "falling"
       },
-      "CPILFESL": {
-        "value": 336.065,
-        "date": "2026-06-01",
-        "data_freshness_days": 62,
-        "yoy_change_pct": 2.57,
-        "mom_change_pct": -0.02,
-        "wow_change": 0.0,
-        "percentile_1y": 83,
-        "trend_30d": "stable",
-        "trend_90d": "stable"
-      },
       "PAYEMS": {
         "value": 158984.0,
         "date": "2026-06-01",
@@ -219220,17 +219231,6 @@
         "mom_change_pct": 0.04,
         "wow_change": 0.0,
         "percentile_1y": 92,
-        "trend_30d": "stable",
-        "trend_90d": "stable"
-      },
-      "CPIAUCSL": {
-        "value": 332.568,
-        "date": "2026-06-01",
-        "data_freshness_days": 62,
-        "yoy_change_pct": 3.46,
-        "mom_change_pct": -0.42,
-        "wow_change": 0.0,
-        "percentile_1y": 83,
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
@@ -219257,17 +219257,6 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
-      "NFCI": {
-        "value": -0.554,
-        "date": "2026-07-24",
-        "data_freshness_days": 9,
-        "yoy_change_pct": -7.57,
-        "mom_change_pct": -8.63,
-        "wow_change": -0.01,
-        "percentile_1y": 8,
-        "trend_30d": "falling",
-        "trend_90d": "falling"
-      },
       "SAHMREALTIME": {
         "value": 0.07,
         "date": "2026-06-01",
@@ -219289,6 +219278,17 @@
         "percentile_1y": 92,
         "trend_30d": "stable",
         "trend_90d": "stable"
+      },
+      "NFCI": {
+        "value": -0.554,
+        "date": "2026-07-24",
+        "data_freshness_days": 9,
+        "yoy_change_pct": -7.57,
+        "mom_change_pct": -8.63,
+        "wow_change": -0.01,
+        "percentile_1y": 8,
+        "trend_30d": "falling",
+        "trend_90d": "falling"
       },
       "DCOILWTICO": {
         "value": 84.25,
@@ -219458,12 +219458,12 @@
       "missing": [],
       "errors": []
     },
-    "_cache_age_sec": 1416
+    "_cache_age_sec": 5100
   },
   "industry_trend": {
     "status": "success",
     "as_of": "2026-07-31 22:07:57",
-    "_cache_age_hr": 32.8,
+    "_cache_age_hr": 38.3,
     "_freshness": "STALE",
     "_source_file": "theme_detector_2026-07-31_221055.json",
     "leaders": [
@@ -219992,8 +219992,8 @@
     },
     "_partial": false,
     "status": "success",
-    "_cache_age_sec": 118662,
-    "_cache_age_hr": 33.0,
+    "_cache_age_sec": 138229,
+    "_cache_age_hr": 38.4,
     "_freshness": "STALE"
   },
   "theme_overrides": [
@@ -220101,6 +220101,6 @@
       "first_hit_filtered": 0,
       "digests_scanned": 11
     },
-    "_freshness_hr": 33.0
+    "_freshness_hr": 38.4
   }
 }

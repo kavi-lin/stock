@@ -200,7 +200,12 @@ def build_base_input(entry, trade, decision, lanes):
             "proceed_to_phase3": True,   # inferred: the session reached Phase 3 and decided
             "risk_reward_ratio": trade.get("risk_reward_ratio"),
             "binary_classification": trade.get("binary_classification"),
-            "mandatory_risk_flags": [],  # never persisted — declared assumption, see report
+            # V4.82.0 — persisted from V5.2 on. Older entries have no record of it, and an
+            # absent field is NOT an empty list: `[]` asserts "no flags fired", which is
+            # exactly the claim we cannot make. Keep `[]` as the replay input (the engine
+            # needs a list) but flag the entry so §5 assumption 2 stays honest about which
+            # rows rest on it.
+            "mandatory_risk_flags": list(trade.get("mandatory_risk_flags") or []),
             "phase2_fanout_mode": trade.get("phase2_fanout_mode"),
         },
         "hot_zone": {"industry_top_30pct": heat.get("industry_top_30pct")},
@@ -517,8 +522,10 @@ def build_report(rows, tol, as_of):
     A("## 5. Declared assumptions（會影響判讀，明寫不藏）")
     A("")
     A("1. `proceed_to_phase3=true` — 由「session 走到 Phase 3 並產出決策」反推，非猜測。")
-    A("2. `mandatory_risk_flags=[]` — 此欄從未寫進 history。若某筆 replay 給 BUY-side 而"
-      "存檔是 HOLD，`unrecorded_gate_input` 是合法 triage 結論。")
+    A("2. `mandatory_risk_flags` — **V5.2 (V4.82.0) 起持久化**，該版之後的 entry 讀真值，"
+      "不再是假設。此前的 entry 沒有這個欄位，replay 只能餵 `[]`；`[]` 等於斷言「沒有任何 "
+      "flag 觸發」，而那正是無法保證的事。因此舊 entry 若 replay 給 BUY-side 而存檔是 HOLD，"
+      "`unrecorded_gate_input` 仍是合法 triage 結論；新 entry 不再適用此免責。")
     A("3. `industry_top_30pct` 取自 event_index `sub_industry_heat`，那是**產生索引當下**"
       "的熱度、非決策當下；只影響 Rec 11 hot-zone 判定。")
     A("4. `calculation_steps` 來源的 lane confidence 由 C_eff 反推代表值"

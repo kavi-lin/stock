@@ -1,20 +1,20 @@
 {
-  "date": "2026-08-01",
+  "date": "2026-08-02",
   "models": {
     "claude": {
-      "calls": 5,
-      "cooldown_until": "2026-08-01T22:16:35.000677+00:00",
-      "last_error": "\"edge-candidate-agent\",\"edge-concept-synthesizer\",\"edge-hint-extractor\",\"edge-pipeline-orchestrator\",\"edge-signal-aggregator\",\"edge-strategy-designer\",\"edge-strategy-reviewer\",\"exposure-coach\",\"finviz",
+      "calls": 0,
+      "cooldown_until": null,
+      "last_error": null,
       "tokens": {
-        "input": 5572,
-        "output": 195695,
-        "cache_read": 16010620,
-        "cache_write": 553988,
-        "cost_usd": 40.111301
+        "input": 0,
+        "output": 0,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cost_usd": 0.0
       }
     },
     "gemini": {
-      "calls": 42,
+      "calls": 3,
       "cooldown_until": null,
       "last_error": null,
       "tokens": {
@@ -26,9 +26,9 @@
       }
     },
     "codex": {
-      "calls": 31,
-      "cooldown_until": null,
-      "last_error": null,
+      "calls": 1,
+      "cooldown_until": "2026-08-02T04:26:21.289267+00:00",
+      "last_error": "You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at Aug 8th, 2026 12:15 PM.",
       "tokens": {
         "input": 0,
         "output": 0,

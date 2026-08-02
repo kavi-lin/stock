@@ -1,0 +1,5181 @@
+{
+  "engine": "replay_trade_plan.py v1.0.0 (V4.82.0)",
+  "history": "/Users/kavi/Developer/Claude/Projects/ai-investment-committee/investment/invest_logs/history.json",
+  "summary": {
+    "trade_plan": {
+      "total": 172,
+      "eligible": 20,
+      "excluded": 152,
+      "matched": 4,
+      "mismatched": 16,
+      "current_rule_mismatched": 0,
+      "exclusion_reasons": {
+        "no_multi_horizon_price_framework": 134,
+        "no_stored_plan_to_compare": 9,
+        "no_key_levels": 7,
+        "mhp_mid_target_missing": 2
+      },
+      "reconciles": true
+    },
+    "risk_reward": {
+      "total": 172,
+      "eligible": 76,
+      "excluded": 96,
+      "matched": 36,
+      "mismatched": 40,
+      "current_rule_mismatched": 0,
+      "exclusion_reasons": {
+        "no_stored_risk_reward_ratio": 88,
+        "no_take_profit_or_stop_loss": 6,
+        "no_entry_range": 2
+      },
+      "reconciles": true
+    },
+    "sizing": {
+      "total": 172,
+      "eligible": 47,
+      "excluded": 125,
+      "matched": 47,
+      "mismatched": 0,
+      "current_rule_mismatched": 0,
+      "exclusion_reasons": {
+        "zero_position_no_chain_to_invert": 103,
+        "decision_sensitive_unknown:binary_event_within_48h": 11,
+        "ftd_gate_expected_but_absent": 5,
+        "unusable_fragility_label:RESILIENT": 4,
+        "unusable_fragility_label:MEDIUM": 2
+      },
+      "reconciles": true
+    }
+  },
+  "rows": [
+    {
+      "date": "2026-04-15",
+      "ticker": "AMD",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.13,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 246.25,
+            "rr": null
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 221.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 215.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.13 not reproducible from any entry track (tried [None, None, None]) with TP 320.0 / SL 248.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.054,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.054,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "TSLA",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 3.44,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 317.5,
+            "rr": 3.44
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "GOOGL",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.75,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 330.0,
+            "rr": 2.75
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "unusable_fragility_label:RESILIENT"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "CRWV",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 3.0,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 90.0,
+            "rr": 3.0
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "META",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.85,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 687.5,
+            "rr": 2.85
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "unusable_fragility_label:RESILIENT"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "NVDA",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.78,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 198.5,
+            "rr": 2.78
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "unusable_fragility_label:RESILIENT"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.38,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 381.5,
+            "rr": 2.49
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 352.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 345.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.38 not reproducible from any entry track (tried [2.49, None, None]) with TP 435.0 / SL 360.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "unusable_fragility_label:RESILIENT"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "APLD",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.6,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 25.0,
+            "rr": 3.0
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 23.0,
+            "rr": 5.67
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.6 not reproducible from any entry track (tried [3.0, 5.67]) with TP 40.0 / SL 20.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "NBIS",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 2.5,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 130.0,
+            "rr": 2.5
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "PLTR",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.0,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 133.0,
+            "rr": 5.25
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 123.0,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 118.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.0 not reproducible from any entry track (tried [5.25, None, None]) with TP 175.0 / SL 125.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.076,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.076,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "LITE",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.71,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 685.0,
+            "rr": 2.26
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 660.0,
+            "rr": 3.43
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.71 not reproducible from any entry track (tried [2.26, 3.43]) with TP 900.0 / SL 590.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "RGTI",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 5.5,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 11.0,
+            "rr": 3.67
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 10.0,
+            "rr": 6.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 5.5 not reproducible from any entry track (tried [3.67, 6.0]) with TP 22.0 / SL 8.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "IONQ",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 3.67,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 31.5,
+            "rr": 4.27
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 26.5,
+            "rr": 57.0
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 25.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 3.67 not reproducible from any entry track (tried [4.27, 57.0, None]) with TP 55.0 / SL 26.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "APP",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.22,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 438.25,
+            "rr": 3.28
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 424.0,
+            "rr": 5.38
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 418.0,
+            "rr": 7.04
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.22 not reproducible from any entry track (tried [3.28, 5.38, 7.04]) with TP 580.0 / SL 395.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.06,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.06,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "SMR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_take_profit_or_stop_loss"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "ORCL",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 3.79,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 151.5,
+            "rr": 3.79
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.0376,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0376,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "VST",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_take_profit_or_stop_loss"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "MU",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.14,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 454.0,
+            "rr": 2.14
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "unusable_fragility_label:MEDIUM"
+      }
+    },
+    {
+      "date": "2026-04-15",
+      "ticker": "AVGO",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 4.24,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 336.5,
+            "rr": 4.24
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "unusable_fragility_label:MEDIUM"
+      }
+    },
+    {
+      "date": "2026-04-16",
+      "ticker": "AMD",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.27,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 252.75,
+            "rr": 6.06
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 238.0,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 228.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.27 not reproducible from any entry track (tried [6.06, None, None]) with TP 330.0 / SL 240.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.056,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.056,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-17",
+      "ticker": "BAC",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.05,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 51.38,
+            "rr": 3.74
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 49.5,
+            "rr": 9.67
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 48.5,
+            "rr": 31.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.05 not reproducible from any entry track (tried [3.74, 9.67, 31.0]) with TP 64.0 / SL 48.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.14,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "ticker": "TSLA",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.6,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 402.5,
+            "rr": 1.59
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 362.5,
+            "rr": 15.4
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 355.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.6 not reproducible from any entry track (tried [1.59, 15.4, None]) with TP 478.0 / SL 355.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "ticker": "AVGO",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "staged_blend",
+        "stored_rr": 2.25,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 390.75,
+            "rr": 2.27
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.071467,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.071467,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.035733,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "ticker": "AMD",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "ticker": "MU",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.13,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 455.0,
+            "rr": 2.12
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.0812,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.0812,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0406,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "ticker": "MSFT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-18",
+      "ticker": "INTC",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "ticker": "CFG",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 4.78,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 61.25,
+            "rr": 4.78
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.133333,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.133333,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "ticker": "HPE",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 4.56,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 24.68,
+            "rr": 2.45
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 23.85,
+            "rr": 4.56
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.1,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.1,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "ticker": "EME",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.71,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 802.5,
+            "rr": 3.0
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 760.0,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 750.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.71 not reproducible from any entry track (tried [3.0, None, None]) with TP 900.0 / SL 770.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.133333,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.133333,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.066667,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "ticker": "CHRW",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-19",
+      "ticker": "IR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "STT",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.38,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 149.5,
+            "rr": 2.38
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.133333,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.133333,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "MU",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "staged_blend",
+        "stored_rr": 2.59,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 427.5,
+            "rr": 2.54
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.068,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.068,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "AMZN",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "ALAB",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.13,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 169.0,
+            "rr": 2.12
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.035,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.035,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "AAPL",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.11,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 261.25,
+            "rr": 11.92
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 251.0,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 244.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.11 not reproducible from any entry track (tried [11.92, None, None]) with TP 300.0 / SL 258.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.07,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.07,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "MRVL",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.43,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 146.0,
+            "rr": 2.43
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.0552,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0552,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "ORCL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "GOOGL",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.1,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 334.0,
+            "rr": 2.88
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 311.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 308.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.1 not reproducible from any entry track (tried [2.88, None, None]) with TP 380.0 / SL 318.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.168,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.168,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.084,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "TEL",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.68,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 238.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 222.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 220.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.68 not reproducible from any entry track (tried [None, None, None]) with TP 280.0 / SL 245.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.12,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.12,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.06,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "APLD",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "NVTS",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-21",
+      "ticker": "NTRS",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.24,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 162.5,
+            "rr": 2.24
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.058,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.058,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "NVDA",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "GEV",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.36,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 992.5,
+            "rr": 2.33
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.130667,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.130667,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "NTRS",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.8,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 170.0,
+            "rr": 2.8
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.168,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.168,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.084,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "MRVL",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.13,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 151.0,
+            "rr": 2.13
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.055733,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.055733,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "ALAB",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 3.33,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 177.25,
+            "rr": 4.62
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 168.5,
+            "rr": 103.0
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 165.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 3.33 not reproducible from any entry track (tried [4.62, 103.0, None]) with TP 220.0 / SL 168.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.06,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.06,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.03,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "HPE",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-22",
+      "ticker": "MSFT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-23",
+      "ticker": "VRT",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.18,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 302.0,
+            "rr": 2.18
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.0864,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0864,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-23",
+      "ticker": "POET",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "staged_blend",
+        "stored_rr": 2.81,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 8.62,
+            "rr": 2.81
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.0408,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0408,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-23",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.75,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 385.0,
+            "rr": 3.0
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 372.0,
+            "rr": 29.0
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 368.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.75 not reproducible from any entry track (tried [3.0, 29.0, None]) with TP 430.0 / SL 370.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.097733,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.097733,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "ticker": "ON",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "ticker": "NEE",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.1,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 95.9,
+            "rr": 2.47
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 92.75,
+            "rr": 8.71
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 92.0,
+            "rr": 16.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.1 not reproducible from any entry track (tried [2.47, 8.71, 16.0]) with TP 108.0 / SL 91.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.1,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.1,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "ticker": "FCX",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "ticker": "MU",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "staged_blend",
+        "stored_rr": 2.31,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 467.0,
+            "rr": 2.31
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.1144,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.1144,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0572,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-24",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-25",
+      "ticker": "SNA",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "NVDA",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.63,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 207.5,
+            "rr": 2.74
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 189.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 185.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.63 not reproducible from any entry track (tried [2.74, None, None]) with TP 250.0 / SL 192.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.266667,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.133333,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "GSAT",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.15,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 81.5,
+            "rr": 2.43
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 79.25,
+            "rr": 8.6
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 78.5,
+            "rr": 23.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.15 not reproducible from any entry track (tried [2.43, 8.6, 23.0]) with TP 90.0 / SL 78.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.0834,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.0834,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "CSX",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "DLR",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.5,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 195.5,
+            "rr": 4.08
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 191.0,
+            "rr": 15.5
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 190.0,
+            "rr": 32.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.5 not reproducible from any entry track (tried [4.08, 15.5, 32.0]) with TP 222.0 / SL 189.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.14,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.52,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 400.0,
+            "rr": 2.86
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 385.0,
+            "rr": 12.5
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 380.0,
+            "rr": 80.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.52 not reproducible from any entry track (tried [2.86, 12.5, 80.0]) with TP 460.0 / SL 379.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.266667,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.133333,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "AIZ",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.42,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 226.25,
+            "rr": 3.43
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 223.5,
+            "rr": 5.31
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 222.0,
+            "rr": 7.2
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.42 not reproducible from any entry track (tried [3.43, 5.31, 7.2]) with TP 258.0 / SL 217.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.195733,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.195733,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.097867,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "VRT",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.33,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 323.0,
+            "rr": 2.39
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 302.5,
+            "rr": 11.67
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 295.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.33 not reproducible from any entry track (tried [2.39, 11.67, None]) with TP 390.0 / SL 295.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.2028,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.1014,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "AVGO",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.35,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 404.0,
+            "rr": 4.44
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 394.0,
+            "rr": 13.5
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 390.0,
+            "rr": 42.5
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.35 not reproducible from any entry track (tried [4.44, 13.5, 42.5]) with TP 475.0 / SL 388.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.28,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "QCOM",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-26",
+      "ticker": "CSCO",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.23,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 87.25,
+            "rr": 2.17
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 83.25,
+            "rr": 6.08
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 82.0,
+            "rr": 10.5
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.23 not reproducible from any entry track (tried [2.17, 6.08, 10.5]) with TP 103.0 / SL 80.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.28,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "SLB",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.36,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 55.35,
+            "rr": 2.36
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "ftd_gate_expected_but_absent"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "FTV",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "ARM",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "LITE",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "GLW",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "AAOI",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "ALAB",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.5,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 400.0,
+            "rr": 2.5
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.296296,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.148148,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "NVDA",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.53,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 207.0,
+            "rr": 2.53
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.28,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "PKG",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "CRM",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "NOW",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-27",
+      "ticker": "MU",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.12,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 504.5,
+            "rr": 3.92
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 487.5,
+            "rr": 10.6
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 480.0,
+            "rr": 28.0
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.12 not reproducible from any entry track (tried [3.92, 10.6, 28.0]) with TP 620.0 / SL 475.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.269333,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.134667,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-28",
+      "ticker": "HUBB",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-28",
+      "ticker": "BE",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-04-29",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.09,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 390.0,
+            "rr": 2.09
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.234667,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.117333,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-04-29",
+      "ticker": "NVDA",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "ticker": "GOOG",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 3.6,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 366.0,
+            "rr": 1.05
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 335.0,
+            "rr": 3.6
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.140089,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.140089,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "ticker": "MU",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.19,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 535.0,
+            "rr": 1.31
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 452.5,
+            "rr": null
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 440.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.19 not reproducible from any entry track (tried [1.31, None, None]) with TP 620.0 / SL 470.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "ftd_timeline": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.112,
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.112,
+            "admissible": true
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.056,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "ticker": "LLY",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.54,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 932.5,
+            "rr": 2.68
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 902.5,
+            "rr": 6.08
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 895.0,
+            "rr": 8.2
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.54 not reproducible from any entry track (tried [2.68, 6.08, 8.2]) with TP 1100.0 / SL 870.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.95,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.14007,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14007,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-01",
+      "ticker": "AAPL",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.02,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 277.75,
+            "rr": 4.85
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 271.5,
+            "rr": 15.29
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 268.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.02 not reproducible from any entry track (tried [4.85, 15.29, None]) with TP 325.0 / SL 268.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 1.0,
+          "ftd_timeline": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.14,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "VRT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "TEAM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.62,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 88.0,
+            "rr": 2.91
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 82.5,
+            "rr": 6.82
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 80.0,
+            "rr": 13.33
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.62 not reproducible from any entry track (tried [2.91, 6.82, 13.33]) with TP 120.0 / SL 77.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "ftd_timeline": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.130667,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.130667,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "NVDA",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.71,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 199.0,
+            "rr": 2.71
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.280178,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.140089,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "EME",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "GOOGL",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "staged_blend",
+        "stored_rr": 2.5,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 360.0,
+            "rr": 2.5
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.140089,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.140089,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "TEAM",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 4.33,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 80.75,
+            "rr": 4.49
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 75.0,
+            "rr": 15.0
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 72.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 4.33 not reproducible from any entry track (tried [4.49, 15.0, None]) with TP 120.0 / SL 72.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.5,
+          "ftd_timeline": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.130133,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.130133,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-02",
+      "ticker": "VRT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_take_profit_or_stop_loss"
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.195556,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.195556,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "ticker": "LLY",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.69,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 953.25,
+            "rr": 3.22
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 932.5,
+            "rr": 5.11
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 920.0,
+            "rr": 7.35
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.69 not reproducible from any entry track (tried [3.22, 5.11, 7.35]) with TP 1170.0 / SL 886.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.95,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.14007,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14007,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "ticker": "MSFT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "ticker": "QCOM",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "ticker": "CRWV",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-03",
+      "ticker": "CRWV",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-05",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.08,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 395.5,
+            "rr": 2.1
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.177778,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.177778,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-07",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.4,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 416.0,
+            "rr": 2.4
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.75,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.177778,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.177778,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-07",
+      "ticker": "CRWV",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-07",
+      "ticker": "AMD",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-07",
+      "ticker": "ORCL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-07",
+      "ticker": "ALAB",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-08",
+      "ticker": "NEE",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-08",
+      "ticker": "CRWV",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-08",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-10",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-10",
+      "ticker": "HPE",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-10",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.14,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 409.5,
+            "rr": 2.29
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 392.0,
+            "rr": 4.91
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 388.0,
+            "rr": 6.22
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.14 not reproducible from any entry track (tried [2.29, 4.91, 6.22]) with TP 500.0 / SL 370.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.195467,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.195467,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-11",
+      "ticker": "NVDA",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.87,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 216.0,
+            "rr": 2.75
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 205.0,
+            "rr": 11.0
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 200.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.87 not reproducible from any entry track (tried [2.75, 11.0, None]) with TP 260.0 / SL 200.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.070133,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.070133,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-16",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-18",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-20",
+      "ticker": "D",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_take_profit_or_stop_loss"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-20",
+      "ticker": "MU",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.07,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 657.5,
+            "rr": 4.01
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 635.0,
+            "rr": 12.69
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 620.0,
+            "rr": null
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.07 not reproducible from any entry track (tried [4.01, 12.69, None]) with TP 800.0 / SL 622.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-20",
+      "ticker": "TSM",
+      "final_decision": "BUY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "aggressive_mid",
+        "stored_rr": 2.19,
+        "tried": [
+          {
+            "track": "aggressive_mid",
+            "entry_ref": 400.0,
+            "rr": 2.19
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "decision_sensitive_unknown:binary_event_within_48h",
+        "sweep": [
+          {
+            "binary_multiplier": 0.5,
+            "implied_base": 0.234667,
+            "admissible": false
+          },
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.117333,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-05-20",
+      "ticker": "GOOGL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-20",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-23",
+      "ticker": "NOK",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-26",
+      "ticker": "CRWD",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-29",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-29",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-30",
+      "ticker": "PANW",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-31",
+      "ticker": "TSM",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-05-31",
+      "ticker": "MSFT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_entry_range"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-03",
+      "ticker": "PLTR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-08",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_multi_horizon_price_framework"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-13",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-13",
+      "ticker": "GOOGL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "matched",
+        "era": "pre_rule",
+        "diffs": [],
+        "replay": {
+          "take_profit": 349.3,
+          "entry_aggressive": [
+            359.68,
+            375.91
+          ],
+          "entry_conservative": [
+            343.45,
+            359.68
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-13",
+      "ticker": "SPCX",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "mhp_mid_target_missing"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-13",
+      "ticker": "NOK",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [11.5, 12.8] vs replay [12.54, 14.8]"
+        ],
+        "replay": {
+          "take_profit": 14.04,
+          "entry_aggressive": [
+            14.8,
+            17.06
+          ],
+          "entry_conservative": [
+            12.54,
+            14.8
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [204.57, 244.0] vs replay [204.57, 279.72]"
+        ],
+        "replay": {
+          "take_profit": 324.2,
+          "entry_aggressive": [
+            279.72,
+            354.87
+          ],
+          "entry_conservative": [
+            204.57,
+            279.72
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "TSM",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.57,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 415.64,
+            "rr": 1.35
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 404.0,
+            "rr": 3.3
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 400.0,
+            "rr": 5.02
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.57 not reproducible from any entry track (tried [1.35, 3.3, 5.02]) with TP 450.16 / SL 390.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "ftd_gate_expected_but_absent"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "AAPL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [250.0, 265.0] vs replay [287.34, 287.38]"
+        ],
+        "replay": {
+          "take_profit": 286.83,
+          "entry_aggressive": [
+            287.34,
+            299.53
+          ],
+          "entry_conservative": [
+            287.34,
+            287.38
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "PLTR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [114.0, 123.0] vs replay [114.33, 128.01]"
+        ],
+        "replay": {
+          "take_profit": 138.86,
+          "entry_aggressive": [
+            128.01,
+            141.69
+          ],
+          "entry_conservative": [
+            114.33,
+            128.01
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "RGTI",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "matched",
+        "era": "pre_rule",
+        "diffs": [],
+        "replay": {
+          "take_profit": 21.02,
+          "entry_aggressive": [
+            20.51,
+            21.02
+          ],
+          "entry_conservative": [
+            18.47,
+            20.51
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "AMD",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-14",
+      "ticker": "ALAB",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [291.7, 319.44] vs replay [291.7, 367.17]"
+        ],
+        "replay": {
+          "take_profit": 372.14,
+          "entry_aggressive": [
+            367.17,
+            442.64
+          ],
+          "entry_conservative": [
+            291.7,
+            367.17
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-15",
+      "ticker": "ARM",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [298.0, 312.0] vs replay [298.38, 374.52]"
+        ],
+        "replay": {
+          "take_profit": 408.89,
+          "entry_aggressive": [
+            374.52,
+            427.99
+          ],
+          "entry_conservative": [
+            298.38,
+            374.52
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-15",
+      "ticker": "ORCL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [161.83, 170.0] vs replay [161.83, 189.51]"
+        ],
+        "replay": {
+          "take_profit": 189.18,
+          "entry_aggressive": [
+            189.51,
+            217.19
+          ],
+          "entry_conservative": [
+            161.83,
+            189.51
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-18",
+      "ticker": "TSM",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [405.0, 415.0] vs replay [410.24, 447.81]"
+        ],
+        "replay": {
+          "take_profit": 442.58,
+          "entry_aggressive": [
+            442.58,
+            447.81
+          ],
+          "entry_conservative": [
+            410.24,
+            447.81
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_take_profit_or_stop_loss"
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "ftd_timeline": 0.5,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.195733,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.195733,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-06-21",
+      "ticker": "NVDA",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "take_profit stored 221.93 vs replay 212.71"
+        ],
+        "replay": {
+          "take_profit": 212.71,
+          "entry_aggressive": [
+            210.73,
+            212.71
+          ],
+          "entry_conservative": [
+            208.78,
+            210.73
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "staged_blend",
+        "stored_rr": 2.14,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 210.74,
+            "rr": 2.14
+          }
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.14,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.14,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-06-21",
+      "ticker": "PLTR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [66.0, 113.0] vs replay [121.71, 126.65]"
+        ],
+        "replay": {
+          "take_profit": 138.77,
+          "entry_aggressive": [
+            121.71,
+            136.2
+          ],
+          "entry_conservative": [
+            121.71,
+            126.65
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-21",
+      "ticker": "NBIS",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [200.0, 238.0] vs replay [232.95, 286.69]"
+        ],
+        "replay": {
+          "take_profit": 298.8,
+          "entry_aggressive": [
+            286.69,
+            340.43
+          ],
+          "entry_conservative": [
+            232.95,
+            286.69
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "matched",
+        "era": "pre_rule",
+        "matched_track": "conservative_mid",
+        "stored_rr": 2.6,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 219.0,
+            "rr": 2.57
+          }
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-21",
+      "ticker": "MU",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.14,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 927.5,
+            "rr": 2.06
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 890.0,
+            "rr": 3.71
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.14 not reproducible from any entry track (tried [2.06, 3.71]) with TP 1149.43 / SL 820.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "ftd_gate_expected_but_absent"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "TXN",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_take_profit_or_stop_loss"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "CRDO",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 2.0,
+        "tried": [
+          {
+            "track": "conservative_mid",
+            "entry_ref": 246.0,
+            "rr": 6.56
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 239.0,
+            "rr": 14.13
+          }
+        ],
+        "diffs": [
+          "stored R/R 2.0 not reproducible from any entry track (tried [6.56, 14.13]) with TP 337.88 / SL 232.0"
+        ]
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "ftd_gate_expected_but_absent"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "MRVL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "ftd_gate_expected_but_absent"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "NOK",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "AAPL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "IONQ",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "take_profit stored 64.0 vs replay 58.75"
+        ],
+        "replay": {
+          "take_profit": 58.75,
+          "entry_aggressive": [
+            55.73,
+            59.15
+          ],
+          "entry_conservative": [
+            53.26,
+            55.73
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_entry_range"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "CCJ",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-22",
+      "ticker": "CEG",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-24",
+      "ticker": "SNDK",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-24",
+      "ticker": "JBL",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [340.0, 353.75] vs replay [353.75, 381.58]"
+        ],
+        "replay": {
+          "take_profit": 360.21,
+          "entry_aggressive": [
+            381.58,
+            411.56
+          ],
+          "entry_conservative": [
+            353.75,
+            381.58
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-24",
+      "ticker": "SPCX",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "mhp_mid_target_missing"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-27",
+      "ticker": "MSFT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "matched",
+        "era": "pre_rule",
+        "diffs": [],
+        "replay": {
+          "take_profit": 377.63,
+          "entry_aggressive": [
+            359.87,
+            385.0
+          ],
+          "entry_conservative": [
+            349.2,
+            359.87
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-06-27",
+      "ticker": "PLTR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-07-08",
+      "ticker": "PLTR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_key_levels"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-07-08",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [854.35, 880.0] vs replay [854.35, 915.34]"
+        ],
+        "replay": {
+          "take_profit": 898.34,
+          "entry_aggressive": [
+            915.34,
+            1089.29
+          ],
+          "entry_conservative": [
+            854.35,
+            915.34
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-07-08",
+      "ticker": "NVDA",
+      "final_decision": "STAGED_ENTRY",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "take_profit stored 247.42 vs replay 200.63"
+        ],
+        "replay": {
+          "take_profit": 200.63,
+          "entry_aggressive": [
+            193.76,
+            200.63
+          ],
+          "entry_conservative": [
+            193.76,
+            197.22
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "stored_rr": 3.65,
+        "tried": [
+          {
+            "track": "staged_blend",
+            "entry_ref": 196.72,
+            "rr": 3.99
+          },
+          {
+            "track": "conservative_mid",
+            "entry_ref": 194.3,
+            "rr": 5.16
+          },
+          {
+            "track": "conservative_low",
+            "entry_ref": 191.37,
+            "rr": 7.61
+          }
+        ],
+        "diffs": [
+          "stored R/R 3.65 not reproducible from any entry track (tried [3.99, 5.16, 7.61]) with TP 247.42 / SL 184.0"
+        ]
+      },
+      "sizing": {
+        "status": "matched",
+        "era": "pre_rule",
+        "factors": {
+          "fragility": 0.75,
+          "staged_halving": 0.5,
+          "v20_f1_sector_concentration": 1.0
+        },
+        "implied_base": 0.004,
+        "sweep": [
+          {
+            "binary_multiplier": 1.0,
+            "implied_base": 0.004,
+            "admissible": true
+          }
+        ]
+      }
+    },
+    {
+      "date": "2026-07-31",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "matched",
+        "era": "pre_rule",
+        "diffs": [],
+        "replay": {
+          "take_profit": 839.31,
+          "entry_aggressive": [
+            873.69,
+            1011.77
+          ],
+          "entry_conservative": [
+            854.35,
+            873.69
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-08-02",
+      "ticker": "MU",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-08-02",
+      "ticker": "MSFT",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "mismatched",
+        "era": "pre_rule",
+        "diffs": [
+          "entry_conservative stored [410.0, 427.0] vs replay [427.1, 476.24]"
+        ],
+        "replay": {
+          "take_profit": 466.32,
+          "entry_aggressive": [
+            466.32,
+            476.24
+          ],
+          "entry_conservative": [
+            427.1,
+            476.24
+          ]
+        }
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    },
+    {
+      "date": "2026-08-02",
+      "ticker": "PLTR",
+      "final_decision": "HOLD",
+      "trade_plan": {
+        "status": "excluded",
+        "reason": "no_stored_plan_to_compare"
+      },
+      "risk_reward": {
+        "status": "excluded",
+        "reason": "no_stored_risk_reward_ratio"
+      },
+      "sizing": {
+        "status": "excluded",
+        "reason": "zero_position_no_chain_to_invert"
+      }
+    }
+  ]
+}

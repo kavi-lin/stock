@@ -139,20 +139,34 @@ def main() -> int:
     ex = extract_full_example()
     ver = ex.get("session_export_version")
     print(f"[fixture] phase5_export_schema.md FULL EXAMPLE — version={ver!r}")
-    if ver != "V5.1":
-        FAILS.append(f"FULL EXAMPLE stamps {ver!r}; the doc's Schema Version is V5.1")
+    if ver != "V5.2":
+        FAILS.append(f"FULL EXAMPLE stamps {ver!r}; the doc's Schema Version is V5.2")
 
-    print("[version gate]")
-    run(ex, "V5.1 full example", 0)
+    print("[version gate — §13 Phase 3 engine]")
+    run(ex, "V5.2 full example", 0)
     run(without(ex, "calculation_steps", "decision_engine_version"),
-        "V5.1 minus calculation_steps", 1, "calculation_steps missing")
+        "V5.2 minus calculation_steps", 1, "calculation_steps missing")
     run(without(ex, "decision_engine_version"),
-        "V5.1 minus decision_engine_version", 1, "decision_engine_version missing")
+        "V5.2 minus decision_engine_version", 1, "decision_engine_version missing")
 
-    # Back-compat: the 78 pre-existing V5.0 entries must never need a backfill.
-    legacy = without(ex, "calculation_steps", "decision_engine_version")
+    print("[version gate — §14 Phase 4 engine]")
+    run(without(ex, "risk_audit", "trade_plan_builder_version"),
+        "V5.2 minus risk_audit", 1, "risk_audit missing")
+    run(without(ex, "trade_plan_builder_version"),
+        "V5.2 minus trade_plan_builder_version", 1, "trade_plan_builder_version missing")
+    run(without(ex, "mandatory_risk_flags"),
+        "V5.2 minus mandatory_risk_flags", 1, "mandatory_risk_flags missing")
+
+    # Back-compat: the pre-existing V5.0 / V5.1 entries must never need a backfill.
+    legacy = without(ex, "calculation_steps", "decision_engine_version",
+                     "risk_audit", "trade_plan_builder_version", "mandatory_risk_flags")
     legacy["session_export_version"] = "V5.0"
     run(legacy, "V5.0 legacy, pre-cutover, no engine block", 0)
+
+    legacy51 = without(ex, "risk_audit", "trade_plan_builder_version",
+                       "mandatory_risk_flags")
+    legacy51["session_export_version"] = "V5.1"
+    run(legacy51, "V5.1 legacy, Phase 3 engine only, no Phase 4 block", 0)
 
     print("[bypass guards]")
     # Backstop: stamping an old version after the cutover must not open the gate.
@@ -160,7 +174,7 @@ def main() -> int:
     e["export_date"] = e["date"] = "2026-08-05"
     run(e, "V5.0 stamp after cutover (date backstop)", 1, "2026-08-03")
 
-    e = copy.deepcopy(ex)
+    e = without(ex, "risk_audit", "trade_plan_builder_version", "mandatory_risk_flags")
     e["session_export_version"] = "V5.0"
     run(e, "V5.0 stamp carrying decision_engine_version (§2c)", 1,
         "entry carries decision_engine_version")
@@ -169,8 +183,15 @@ def main() -> int:
     e["session_export_version"] = "V4.8"
     run(e, "V4.8 stamp carrying V5.0-only fields (§2b)", 1, "stamping bug")
 
+    # §2d — the same bypass one version up: keep the Phase 4 engine block but stamp V5.1
+    # so §14's version gate never fires.
     e = copy.deepcopy(ex)
-    e["session_export_version"] = "V5.2"
+    e["session_export_version"] = "V5.1"
+    run(e, "V5.1 stamp carrying trade_plan_builder_version (§2d)", 1,
+        "entry carries trade_plan_builder_version")
+
+    e = copy.deepcopy(ex)
+    e["session_export_version"] = "V6.0"
     run(e, "unknown version rejected", 1, "expected one of")
 
     # ── §13 tamper battery ──────────────────────────────────────────────────
@@ -205,6 +226,61 @@ def main() -> int:
     ]
     print("[§13 tamper battery]")
     for name, mutate in tampers:
+        e = copy.deepcopy(ex)
+        mutate(e["trades_this_session"][0])
+        run(e, f"tamper: {name}", 1)
+
+    # ── §14 tamper battery ──────────────────────────────────────────────────
+    # Same shape as §13's: mutate a valid chain one field at a time, including the
+    # *labels* (fragility, FTD stage, approval), because a mislabelled chain still
+    # re-derives perfectly and only the rule tables can catch it.
+    p4_tampers = [
+        ("tail_adj ignores fragility",
+         lambda tr: tr["risk_audit"]["sizing_chain"].__setitem__("tail_adj", 0.0406)),
+        ("macro_cap invented",
+         lambda tr: tr["risk_audit"]["sizing_chain"].__setitem__("macro_cap", 0.03)),
+        ("binary link wrong",
+         lambda tr: tr["risk_audit"]["sizing_chain"].__setitem__("binary_adj", 0.019)),
+        ("burry link wrong",
+         lambda tr: tr["risk_audit"]["sizing_chain"].__setitem__("burry_override_adj", 0.018)),
+        ("ftd link wrong",
+         lambda tr: tr["risk_audit"]["sizing_chain"].__setitem__("ftd_adj", 0.017)),
+        ("f1 link wrong",
+         lambda tr: tr["risk_audit"]["sizing_chain"].__setitem__("f1_adj", 0.016)),
+        ("chain tail vs position_size_pct drift",
+         lambda tr: tr.__setitem__("position_size_pct", 0.05)),
+        ("fragility label off the table",
+         lambda tr: (tr["risk_audit"]["tail_risk"].__setitem__("fragility_label", "RESILIENT"),
+                     tr.__setitem__("fragility_label", "RESILIENT"))),
+        ("fragility label projection drift",
+         lambda tr: tr.__setitem__("fragility_label", "ROBUST")),
+        ("ftd gate inert but multiplier ≠ 1.0",
+         lambda tr: tr["risk_audit"]["ftd_timeline_gate"].__setitem__("multiplier", 0.75)),
+        ("ftd stage vs multiplier off the table",
+         lambda tr: tr["risk_audit"]["ftd_timeline_gate"].update(
+             {"applied": True, "stage": "prime", "sector_class": "cyclical",
+              "multiplier": 0.5})),
+        ("F1 applied without a count",
+         lambda tr: tr["risk_audit"]["sector_concentration_f1"].update(
+             {"applied": True, "active_same_sector_confirmed": None})),
+        ("F1 multiplier off the two-value set",
+         lambda tr: tr["risk_audit"]["sector_concentration_f1"].__setitem__("multiplier", 0.8)),
+        ("REJECTED with a live position",
+         lambda tr: tr["risk_audit"].update({"approval": "REJECTED",
+                                             "rejection_reason": "R/R"})),
+        ("position_size_method projection drift",
+         lambda tr: tr.__setitem__("position_size_method", "RULE_BASED")),
+        ("RULE_BASED with a vol cap present",
+         lambda tr: (tr["risk_audit"].__setitem__("position_size_method", "RULE_BASED"),
+                     tr.__setitem__("position_size_method", "RULE_BASED"))),
+        ("stop loss past the -10% limit",
+         lambda tr: (tr["risk_audit"].__setitem__("final_stop_loss_pct", -14.0),
+                     tr.__setitem__("final_stop_loss_pct", -14.0))),
+        ("stop loss mirror drift",
+         lambda tr: tr.__setitem__("final_stop_loss_pct", -4.0)),
+    ]
+    print("[§14 tamper battery]")
+    for name, mutate in p4_tampers:
         e = copy.deepcopy(ex)
         mutate(e["trades_this_session"][0])
         run(e, f"tamper: {name}", 1)

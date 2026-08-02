@@ -8,6 +8,29 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.82.0] — 2026-08-02 — Phase 4 script 化：`trade_plan_builder.py` + §14 sizing 硬閘（TODO L2）
+
+### Added
+- **`investment/scripts/trade_plan_builder.py`**（新，~700 行）：Phase 4 全部算術的執行權威，`decision_engine.py` 之於 Phase 3 的對應物。一個 Bash call 收全部 —— Step 1 dual-track entry/TP/SL（吃 Phase 2.4 MHP `band_capped` / `mid_target`，TP cap 在 resistance、SL 取 `min(band_lower, support)` 與 Step 4 百分比停損的**較保守者**）、Step 2/3 內部 subprocess 呼叫 `risk_manager.py` / `tail_risk.py`、Step 3.5 FTD timeline gate（sector 分類 + stage 表 + day-21 cyclical reject）、Step 4 九段 sizing 乘法鏈 + `final_stop_loss_pct`。PM 只組 input JSON 與 verbatim 抄寫，**禁手算**。
+- **V20-F1 sector concentration**（TODO 勾銷）：同 sector ≥3 active CONFIRMED → ×0.5，插在 `ftd_adj` 之後、兩個 Phase 3 cap 之前（F1 與 FTD 同屬倉位側煞車；V2.18/V2.19 兩個 cap 依設計是倉位的最後一句話）。三種輸入形式（明確計數 / `active_theses[]` / thesis registry `_index.json`），三者皆不可得時 multiplier 維持 1.0 但標 `source=registry_unavailable` —— **絕不當作「已確認 0 個同 sector 部位」**。
+- **`test_trade_plan_builder.py`**（新，~330 行 / 17 組 fixture）：sizing 鏈逐段邊界、FTD 表 8×2 全格、fragility 表、staged split、F1 三種輸入、R/R 降級路徑、停損 −10% 上下界，加 MU golden replay（重現 schema FULL EXAMPLE 的 `position_size_pct=0.0203`）。
+- **`replay_trade_plan.py`**（新，~330 行）：歷史 mismatch triage，照 `replay_decision_engine` 三紀律。三個 cohort 各有分母：`trade_plan` 20/172 eligible、`risk_reward` 76/172、`sizing` 47/172，排除原因全部列表且 eligible+excluded=total 對得起來。
+- **validator §14**（`validate_session_export.py`，~200 行）：Tier A 重算九段鏈（含 macro cap 的 `min()` 語意）、Tier B 驗規則表（fragility / FTD stage×sector_class / F1 二值 / `REJECTED ⇒ 0 倉位` / probe tier 上限 / 停損 −10%）。`test_session_export_schema.py` 加 18 個 §14 tamper case，全部 rc=1。
+
+### Changed
+- **`session_export_version` 升 `V5.2`**：新增三個必填欄 `trade_plan_builder_version` / `risk_audit` / `mandatory_risk_flags`（缺任一 rc=1）。門檻綁 schema 版本（`RISK_AUDIT_REQUIRED_VERSIONS`）而非日期，既有 V5.0/V5.1 entry 不需回填。新增 §2d 反向 mis-stamp guard：戳 V5.1/V5.0/V4.8 卻帶 `trade_plan_builder_version` → rc=1。
+- **`mandatory_risk_flags` 首次持久化**：這是 Phase 3 Auto REJECT 與 Rec 11 probe 抑制的輸入，過去從未寫進 history，`replay_decision_engine.py` 只能宣告 `[]` 當假設（declared assumption #2）。現在 replay 讀真值，assumption #2 降級為「僅適用 V5.2 之前的 entry」。
+- **`investment_protocol_v5_0.md` §PHASE 4 改寫**：Step 1–4 降為 engine 的 spec 參照，前置「組 JSON → 一個 Bash call → verbatim 抄寫」；補上原文未明定的三處（`base_stop_pct` 的定義、binary `× 0.5-0.7` 區間一律取保守端 0.5、R/R 不足時「收緊 entry」的確定性順序）。
+
+### Fixed
+- **entry 區間上下界可能顛倒**（`trade_plan_builder.py`，由 replay 抓到）：`band_capped` 是 `[max(band_lower, support), band_point, min(band_upper, resistance)]`，support 高過 band_point 時（歷史上 AAPL/PLTR/TSM 三筆）兩軌會產出 `[高, 低]`。改為排序並在 `provenance_notes` 標記「區間極窄請人工複核」。
+- **`fragility_label` 值域未驗**（`validate_session_export.py` §14b）：§6 只驗非 null，歷史上有 6 筆用了表外標籤（`RESILIENT` / `MEDIUM`），Step 3 乘數因此無從對應。補上 enum error（validator 只看最後一筆，不誤傷既有 history）。
+- **R/R 不足時的補救順序原本無定義**：protocol 只寫「收緊 entry 或降級 HOLD」，沒說收到哪。engine 依序試 aggressive 中點 → conservative 中點 → conservative 下界，全部不過才降 HOLD；採用哪一軌寫在 `entry_track_used`、嘗試序寫在 `rr_solve_trace`。
+
+### Why
+- Phase 4 是 Phase 3 之後最後一塊仍靠 LLM 手算的決策數學：九段乘法鏈 + 兩張查表 + 一個條件 reject + 兩個獨立導出的停損價要調和。`replay_trade_plan.py` 的 `trade_plan` cohort 顯示 20 筆可比對中 16 筆與 MHP 導出值不符（全部歸類 `rule_version_drift`，因為 V4.82.0 前沒有任何 script 強制 entry = band）—— 那 16 筆正是本版要消除的漂移。
+- 決策 tail：`vol_adjusted_limit_pct` 在 172 筆歷史中持久化 **0 筆**，所以 sizing 鏈無法前向 replay。改用 inverse solve（把已知乘數除回去、檢查隱含 base 落在 (0, 20%] 的可行區間），47/172 全部通過；命中 macro cap 的 trade 因 `min()` 不可逆而整批排除，不硬解。存 `sizing_chain.steps[]` 就是為了讓未來的 entry 不必再走這條退路。
+
 ## [4.81.0] — 2026-08-02 — `session_export_version` 升 V5.1：§13 硬閘改綁 schema 版本（TODO L1b）
 
 ### Changed
