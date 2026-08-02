@@ -1,7 +1,19 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.86.2)
+> **Last Updated**: 2026-08-02 (v4.87.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.87.0) — L3 Phase 5 deterministic renderer（原假設被實測推翻）
+- **條目寫「history entry → MD」，實測發現 history 撐不起這份報告。** 動工前先逐欄比對 MSFT/MU 兩筆真 entry 與它們的 MD：五個 lane 的 `risk_flags` **全部**沒持久化、`key_factors` 只有 news 有、`sentiment_lane` 整塊不存在、per-lane raw signal/confidence 只有 valuation 有。單輸入會讓報告掉約 80 行——而那 80 行正是人真正在讀的證據段。**判準：backlog 條目描述的是動工前的理解，動工第一件事是驗證那個理解還成立。**這跟 4.83.0 記的「UI 類 TODO 先 grep 現況」同一形狀，但這次過期的不是 UI 狀態而是**資料模型假設**，代價大得多。
+- **修法選「多一個 artifact」而不是「改 schema」，理由是避免跟 C1 對撞。** 把 lane 欄位補進 export schema 看起來更乾淨，但「per-lane 該持久化哪些欄位」正是 C1 要定的主題——現在定等於預判 C1 的設計，C1 落地時同一塊結構要再遷移一次、向後相容矩陣做兩遍。**判準：當一個修法會替尚未定案的上游決策先做選擇時，改走不預判的那條路，即使它多一個中間產物。**缺口清單已原文寫進 C1 條目當 design 輸入，`phase_inputs/` 那批檔案順帶成為 C1 的實測樣本。
+- **雙輸入的代價是兩源漂移，所以硬閘先於渲染。** bundle 與 history 重疊 12 欄，任一不符 rc=1 且**不產出任何檔案**。最有價值的是拿 `calculation_steps` 的 step 字串當證人——那裡記著決策數學實際吃到的 score 與量化後 c_eff，比兩份 JSON 互比更接近真相。
+- **硬閘第一版就差點誤判每一筆 CONFIRMED entry。** MU 的 `calculation_steps.val` 是 `0.15 × -1.5 × 0.60 = …  // Step 1.5 CONFIRMED: … score 0.0 → -1.5`，而 `valuation_lane.score` 是 0.0——兩者**應該**不同，那是 Step 1.5 的設計。若照「step 分數必須等於 lane 分數」硬比，每筆 CONFIRMED 都會被判漂移。改成：帶 `//` 註記的 step 只驗 c_eff 不驗 score。**教訓：寫一致性檢查時，先找出「合法的不一致」有哪些，否則檢查會把設計當成 bug。**
+- **`--polish` 的真正風險是編數字，不是文筆。** 三道守衛裡數字圍堵最關鍵：潤飾段每個數字都要能在事實集合裡找到（含百分比與 0-4 dp 四捨五入形式）。寫測試時我第一版拿「Azure +43%」當假數字，結果守衛放行——查下去 43 確實在 bundle 的 news key_factors 裡，**守衛是對的、我的 fixture 挑錯數字**。換成 91.7% 才真的測到。**判準：負向測試要先確認「那個壞值真的壞」，否則測到的是自己的誤解。**
+- **全部守衛 fail-open**：LLM 回非 JSON、router 拋例外、段落夾帶 `#`／`|`／HTML 註解、數字編造——一律丟棄該段回退制式句，rc 恆為 0。報告永遠產得出來，polish 只能讓它更好看不能讓它產不出來。
+- **review 之後：量了才知道數字圍堵比我寫的說法弱。** reviewer 指出「上漲 9%」這種小整數百分比會被 `≤12 豁免` 放行，我去收緊「帶單位不吃豁免」，結果測試還是綠的——查下去發現 **9.0 / 7.0 / 8.0 本身就是 entry 裡的原始數字**，而且一筆 MSFT 的事實集合覆蓋 1–30 幾乎所有整數（原始值 + 大數字 0-dp 四捨五入）。也就是說 reviewer 提的修法治不了他提的症狀。**教訓：收緊一道檢查之前先量它現在到底擋掉多少，否則你改的是自己想像中的守衛。**最後做三件事：單位規則照留（豁免不該無條件給）、移除 `_fact_forms` 的 `v/100` 分支（prose 不會把 6.47 寫成 0.0647，那分支純粹放寬）、**把上限寫進 docstring 與測試**——擋的是「從無到有」，不是「剛好撞上」。
+- **回填只回填得起的那一份。** phase_inputs 樣本數為零違反這功能自己立的教義，所以回填 MSFT（內容逐字取自已發布報告，標 `provenance.captured=backfill`，過硬閘 0 error）。**MU 刻意不回填**——它在測試裡的 lane 證據是我為了測 calculation_steps 硬閘現編的合成資料，寫進稽核目錄等於放一份假 Phase 2 證據。已發布報告一律不覆寫。**判準：補樣本是為了讓稽核軌跡完整，用假資料補會讓它比空的更糟。**
+- **驗收**：`test_render_investment_report.py` A-F 六組 rc=0（golden 逐位元穩定 + FACTS 與 `inject_report_facts` 同源、decision-lock 逐項到頁、12 欄逐一漂移偵測、Step 1.5 覆寫不誤判、polish 三守衛含圍堵上限、CLI rc=1 不產檔）；`test_trade_plan_builder.py` 補 Fixture R 6 組補上 4.86.2 反解 cap 的零覆蓋；MSFT 347 行 / MU 307 行實渲染（輸出到暫存區驗證，未覆寫已發布報告）皆過 `validate_markdown_export.py` rc=0；SYNC OK 4.87.0。
+- **覆蓋率邊界（使用者要求明寫，免得「測試全綠」被誤讀成「真實資料驗證過」）**。收尾時掃了全庫 172 筆 trade：**渲染 172/172 不崩、逐筆過 `validate_markdown_export` 172/172、0 筆輸出 <150 行**——形狀相容性是真的驗過了（那三處相容碼本來就是加第 2 筆才逼出來的，掃完其餘 170 筆沒再冒出第 4 種形狀）。但兩條路徑**仍靠合成 fixture 撐著**：(a) `calculation_steps` 全庫只有 **2 筆**，且 corpus 裡**沒有任何一筆 stamped V5.1**，所以硬閘最強的那半（比對 step 字串的 score / c_eff）真實樣本 = 1 筆 MU；(b) replay 反解的兩個 Phase 3 cap 在真實語料裡**全部是 100/100**（factor 1.0），Fixture R 的 50/25 路徑六組全是合成的。另有 **94 筆（55%）是 V4.6/V4.8 4-lane 時代，沒有 MHP / fair_value_summary**，渲染出來 §6 整段 N/A——骨架正確但不適合拿去回填舊報告。這三條都要等實際跑幾次 deep dive 才會長出真樣本，與 `phase_inputs/` 樣本數同一情況。
 
 ## 🟢 Session Note (v4.86.2) — P3 尾款四件（sector 同義詞 / 反解漏 cap / spec 補值 / backoff 釘死）
 - **兩個標成 P3 的其實會產生錯誤數字，不只是噪音。** sector 同義詞看起來是「消 warning」，但四個 FMP 拼法裡三個落在保守側只是吵，`Consumer Defensive` 是**真的誤類**——staples 被當 cyclical 收緊停損。反解漏 cap 看起來是「replay 精度」，實際是一筆 50/25 雙 cap 的 entry 會偽裝成 `matched`（實測 size 5% 應反解出 40% base、超上限，修前 matched 修後 mismatched）。**判準：P3 的嚴重度標記是憑第一印象給的，動工時要用「這條會不會讓某個數字錯」重問一次。**

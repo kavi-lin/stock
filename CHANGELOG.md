@@ -8,6 +8,32 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.87.0] — 2026-08-02 — L3：Phase 5 報告改 deterministic 渲染，移除 Sonnet formatter
+
+### Added
+- **`investment/scripts/render_investment_report.py`** — Phase 5 委員會報告不再由 LLM「寫」，改由 script 從兩份**持久化 artifact**「渲染」：`history.json` 末筆（決策記錄）+ `investment/invest_logs/phase_inputs/<DATE>_<TICKER>.json`（Phase 0/2 證據包）。預設 0 LLM。六個決策關鍵區塊（decision_summary / lane_scores / fair_value_anchors / kill_conditions / key_risks / watch_conditions）**import** `inject_report_facts.py` 的同一組 renderer——兩者不可能漂移，且仍包在 `<!--FACTS:*-->` 內（舊報告 refresh 路徑不變）。
+- **重疊欄位硬閘（rc=1，渲染前擋）**：bundle 與 history 重疊的 12 欄逐一交叉驗證（5 個 lane score、raw confidence 的 c_eff 帶域、final_score / final_decision / final_action、position_size_pct、analysis_price、burry_score、red_team_verdict）。有 `calculation_steps` 時**額外**比對 step 字串裡決策數學實際吃到的 score 與 c_eff。任一不符 → 逐條列出、**不產出任何檔案**。雙輸入的固有風險是兩源漂移，這是 V20-A5「POLAR SPLIT 事後偵測」的事前預防版。
+- **`--polish`（預設 OFF）**：五段純敘事（決議摘要句 / Consensus View / Differentiated View / Bull Case / Bear Case）在任何 JSON 欄位都不存在，不帶 flag 時由 JSON 推導成制式句。帶 flag 則一次 **走 `model_router`**（記帳／預算／cooldown）的呼叫改寫且**只**改寫這五段，三道守衛全部 **fail-open**：(1) 結構——非敘事區位元必須完全相同、段落含 `#`／`|`／`<!--` 一律丟棄；(2) **數字圍堵**——潤飾段每個數字都必須存在於 bundle / history / 制式報告的事實集合（含百分比與 0-4 dp 四捨五入形式），否則丟棄該段；(3) footer 蓋 `polish：<model> @ [段名]` 或 `polish：none`。任何失敗只退回制式句，rc 恆為 0——報告永遠產得出來。
+  - **數字圍堵的已知上限（實測後寫進 docstring 與測試，不含糊帶過）**：它擋的是「從無到有的數字」，擋不了「剛好撞上真實數字的錯數字」。實測一筆 MSFT entry 的事實集合覆蓋 1–30 幾乎所有整數（它們既是原始值、也是大數字 0-dp 四捨五入的結果），所以「上漲 9%」會通過。守衛真正有效的區間是模型實際會幻覺的量級——帶小數的價格、成長率、倍數，那裡的空間是稀疏的。順帶收緊兩處：帶單位的數字（`%`／`倍`／`x`／`$`）**不吃**小整數豁免（豁免只給序數）；`_fact_forms` 移除 `v/100` 分支（prose 會把 0.5874 寫成 58.74%，但不會把 6.47 寫成 0.0647——那個分支只是白白放寬，例如讓 678 授權 "6.78"）。
+- **`investment/invest_logs/phase_inputs/`** + README + **一份回填樣本**（`2026-08-02_MSFT.json`，`provenance.captured = "backfill"`，內容逐字取自已發布報告，非決策當下原件；已驗重疊欄位硬閘 0 error）。bundle 落地存檔而非 `/tmp` 即棄。**MU 那筆刻意不回填**——它在測試裡的 lane 證據是為了測硬閘現編的合成資料，寫進稽核目錄等於放一份假證據。已發布報告一律不覆寫（protocol 執行 ≠ dev session）。
+- **`investment/scripts/test_render_investment_report.py`**（A-F 六組）：golden 逐位元穩定 + FACTS 同源、decision-lock 數字逐項到頁、12 個重疊欄位逐一漂移偵測、Step 1.5 覆寫不誤判、polish 三守衛 fail-open（含 router 拋例外 / 回非 JSON / 非字串值）、輸出過 `validate_markdown_export.py` rc=0。
+
+### Changed
+- **`investment_protocol_v5_0.md` §PHASE 5**：Step 4 由「Sonnet Formatter Agent call（~60 行 prompt）」改為「PM 寫 bundle → 一個 Bash call」，Step 4.5 fact injection 併入 Step 4；MODEL_DISPATCH 表的 `Sonnet MD Formatter (Phase 5)` 標為已移除；MUST NOT 補「手抄數字進報告」；Step 5 rc=1 的處置由「retry Sonnet 一次」改為「修 renderer 或修 history」——渲染是決定性的，重試不會有不同結果。
+
+### Fixed
+- **`--polish` 之外順手修掉三個真實 entry 的形狀不一致**：`moat_assessment`（dict vs 字串）、`smart_money_analysis` 正文欄位（`narrative` vs `note`）、`immediate_catalyst_5d`（dict vs null）。只認一種形狀會靜默漏掉另一種 entry 的整段內容。
+
+### 覆蓋率邊界（明寫，免得「測試全綠」被誤讀成「真實資料驗證過」）
+- **驗過的**：全庫 172 筆 trade 掃描——渲染 **172/172** 不崩、逐筆過 `validate_markdown_export.py` **172/172**、0 筆輸出 <150 行。形狀相容性是真的驗過（三處相容碼是加第 2 筆才逼出來的，掃完其餘 170 筆沒再冒出第 4 種形狀）。
+- **仍靠合成 fixture 的**：(1) `calculation_steps` 全庫只有 **2 筆**且 corpus 裡**無任何 V5.1 戳記** → 硬閘最強的那半（比對 step 字串的 score / c_eff）真實樣本 = 1 筆；(2) replay 反解的兩個 Phase 3 cap 真實語料**全是 100/100**，Fixture R 的 50/25 路徑六組皆合成。
+- **不適用的**：94 筆（55%）是 V4.6/V4.8 4-lane 時代，無 MHP／`fair_value_summary`，渲染出 §6 整段 N/A——骨架正確，但不適合拿來回填舊報告。
+- 三條都隨 V5.1 deep dive 累積自動收斂，與 `phase_inputs/` 樣本數同一情況。
+
+### Why
+- Lean 化路線的 L3。每次 deep dive 直接省掉一次 Sonnet formatter call，而且報告從「LLM 抄寫產物」變成「artifact 的函數」——同一份輸入必產出同一份輸出。
+- **動工時原假設被推翻**：條目寫的是「history entry → MD」，實測 MSFT/MU 兩筆真 entry 發現 history **撐不起** §5——五個 lane 的 `risk_flags` 全部沒持久化、`key_factors` 只有 news 有、`sentiment_lane` 整塊不存在。單輸入會讓報告掉約 80 行人真正在讀的證據段。改雙輸入而非改 schema，是因為「per-lane 該持久化哪些欄位」正是 C1 要定的主題，先開一版 schema 等於預判 C1 的設計、C1 落地時要再遷移一次。缺口清單已原文寫進 TODO 的 C1 條目當 design 輸入。
+
 ## [4.86.2] — 2026-08-02 — 4.82–4.85 review 的 P3 尾款（sector 同義詞 / 反解完整性 / spec 補值 / backoff 釘死）
 
 ### Fixed

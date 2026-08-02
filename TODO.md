@@ -52,7 +52,9 @@
   - **`phase5_export_schema.md` FULL EXAMPLE 已改為實跑 engine 的完整 V5.1 範例**，驗收 fixture 直接從 doc 解析 → doc 再壞掉測試會紅。
 - [x] **L2 — `trade_plan_builder.py`（Phase 4 script 化）**：entry band / TP / SL / staged split / R/R / final sizing 組裝（risk_manager / tail_risk 已 script）。**4.82.0 完成**：engine + `test_trade_plan_builder.py`（17 fixture）+ `replay_trade_plan.py`（3 cohort）+ validator §14 + schema V5.2。
   - 未做（刻意留下）：**Trader LLM 觸發條件 deterministic 定義**（option hedge / portfolio conflict / 跨週期多 catalysts）—— 這三個情境目前 protocol 完全沒有 spec 可 script 化，硬定會是憑空發明規則而非 script 化既有規則。要做需先累積實例並由使用者定調，另開項目。
-- [ ] **L3 — Phase 5 deterministic renderer**：`render_investment_report.py` 照 ic-memo `compose.py` pattern；吸收 Step 4.5 injection；`--polish` optional（只收完成 MD + 可潤飾段白名單）。驗收 = golden reports + decision-lock + `validate_markdown_export.py` rc=0；移除 Sonnet formatter Agent call。
+- [x] **L3 — Phase 5 deterministic renderer** — **4.87.0 完成**。`render_investment_report.py`（雙輸入：history 末筆 + `invest_logs/phase_inputs/<DATE>_<TICKER>.json`）+ `test_render_investment_report.py`（A-F 六組）；Phase 5 Step 4 的 Sonnet formatter Agent call 移除，Step 4.5 injection 併入（六個 FACTS 區塊改 **import** `inject_report_facts.py` 的同一組 renderer，不複製）。
+  - **動工時發現原假設錯**：「history entry → MD」做不到——§5 五個 lane 的 key_factors / risk_flags、sentiment lane 整塊、per-lane raw signal/confidence 都沒持久化，走單輸入會讓報告掉約 80 行。改雙輸入，bundle 落地存檔（不是 `/tmp` 即棄），並補**重疊欄位硬閘**：不符 rc=1 不產檔。
+  - **`--polish` 預設 OFF**，只動五段純敘事；三道守衛全 fail-open（結構 / 數字圍堵 / model_router 記帳 + footer provenance）。CI 測的永遠是 0-LLM 那條路徑，不需要 mock LLM。
 - [ ] **L4 — Valuation quant 提前 Phase 1.5**：`compute_price_framework --self-assemble` quant pack 移到 Phase 1.5；Phase 2.4 只組 MHP / 5d band / 60d target（吃 technical/news qualitative）。驗收 = 重排前後 valuation_pack regression 完全一致；修 protocol「Phase 2 lane 依賴 2.4 pack」時序矛盾文字。
 - [ ] **L4b — Valuation Specialist 改條件式 reviewer**（依賴 L4，shadow-first）：觸發條件 deterministic（no curated peers / structural shift / anchor 嚴重衝突 / data quality 低但可能 BUY）；peer discovery 30-90d cache。
 - [ ] **L5 — Sentiment lane deterministic 化**（shadow-first）：公式已寫死（0.5×stock + 0.5×(market/10−5) + 規則表）→ det producer script；先 shadow N session 過 `shadow_report.py` 哨兵再翻預設；翻後 weight 凍結窗（照 V3.45.4 News 前例）。**統一 lane 契約第一個落地點**（見橫切 C1），動工前先定案 det_shadow 收斂。
@@ -61,6 +63,13 @@
 - [ ] **L8 — RT decision-invariant skip**（依賴 L1）：bounded simulation 窮舉 verdict × strength × basis × shift-tier，final action / cap / size tier / risk flags 全不變才 skip；skip = 跳過推理**不跳過產出物**——kill_conditions ← det kill triggers 生成、counter_thesis 模板化、`red_team_provenance: deterministic_skip`；decision_lock / Dashboard kill_triggers 相容。
 - [ ] **L9 — Refresh / content-hash mode**：factpack 加 `content_hash` + `material_change_since_last`；`analysis_mode: LEAN|FULL_IC|REFRESH` + LEAN→FULL_IC 升級規則 deterministic 寫進 protocol 正文（首次覆蓋 / structural shift / 高信心可行動決策必升）；refresh entry 的 history/Phase 6 語意定義。
 - [ ] **C1（橫切）— 統一 lane 資料契約**：per-lane `{provenance, llm_invoked, producer_version, input_hash, shadow_score}` + session 層 `{llm_invoked_lanes[], llm_skipped_lanes[], analysis_mode}`；**取代並吸收既有 det_shadow block**（`apply_det_shadow.py` 改為新契約 producer，勿兩套並存）——L5 動工前定案；validator + 舊 entry 向後相容；Phase 6 校準按 provenance 分層（防 selection bias）。
+  - **design 輸入 — 4.87.0 實測盤點的持久化缺口**（L3 動工時逐筆驗過 MSFT/MU 2026-08-02 兩筆真 entry）。C1 定案時要回答的是「這些哪些進 history、哪些留在 `phase_inputs` artifact」：
+    1. **`sentiment_lane` 整塊不存在** —— schema 從來沒有這個 key，Sentiment 只在 `lane_scores.sentiment` 有一個數字，沒有任何質性欄位。
+    2. **四個 lane 的 `key_factors` / `risk_flags` 從未持久化** —— 只有 `news_lane.key_factors`（V3.45.4 加的）有；`risk_flags` **五個 lane 全部沒有**。這是報告 §5 人真正在讀的證據段。
+    3. **per-lane raw `signal` / `confidence` / `phase0_alignment` 只有 valuation 有** —— `valuation_lane` 存了 `{signal, score, confidence}`，其餘四個 lane 的 signal 與 confidence 只活在 Phase 3 的 `calculation_steps` 字串裡（且是 c_eff 量化後的值，raw 值不可回推）。
+    4. **`macro_context` 只有 ~384 bytes** —— 報告 §3 的宏觀段實際來自 Phase 0 JSON，history 只留一段摘要。
+    5. **lane 區塊形狀在真實 entry 之間不一致** —— `moat_assessment` 有時是 dict 有時是字串；`smart_money_analysis` 的正文欄位有時叫 `narrative` 有時叫 `note`；`immediate_catalyst_5d` 有時是 dict 有時是 null。C1 的契約要把形狀定死，否則每個消費端都要各自寫相容碼（renderer 現在就寫了三處）。
+  - **`phase_inputs/` 那批檔案就是 C1 的實測樣本** —— 累積幾份後可直接回答「哪些欄位每次都在、哪些其實沒人用」，不必憑空設計。
 - [ ] **C2（橫切）— factpack per-lane slim views**：`phase1_factpack.py` 直接產五個 lane view + Phase 0 lane-specific macro view，PM 不再手動切片（消 cross-anchor 抄錯面）。驗收 = view 欄位覆蓋現行注入規則的 JSON equivalence。
 - [ ] **C3（backlog，非 quick win）— Fundamentals 瘦身走消費者 audit**：catalysts 移交 News 需連動 ic-memo `build_fact_pack.py` / `compose.py` / Dashboard `page-decisions.js` / schema / fallback；`moat_assessment` 有消費者必留。程序 = producer/consumer 搜尋 → 保留/移交/落日，禁憑直覺刪。
 

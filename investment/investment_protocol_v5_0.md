@@ -34,7 +34,7 @@ Ticker 由 user 指定。**非互動模式**（Dashboard reverse-call via `claud
 - ❌ Phase 2 subagent prompt 含其他 lane 的 score / signal / reasoning
 - ❌ Phase 2 subagent prompt 含 PM 的 historical_bias / active_weights / prior session
 - ❌ 跨 lane 引用 PEER_BUNDLE / EARNINGS_ANALYST_BUNDLE / FMP_SUPP_BUNDLE 的數字推測對方結論
-- ❌ Sonnet MD formatter 重新評分 / 改 score / 改 decision / 改 position size
+- ❌ 手抄數字進 Phase 5 MD 報告（V4.87.0 起全篇由 `render_investment_report.py` 渲染；`--polish` 只准動五段純敘事，且數字須通過事實集合圍堵）
 - ❌ Final Score 用 `/5.0` 或 `/10` scale（V1.88 統一 `/3.0`）
 - ❌ 為了補 cache 自動 enqueue `財報` protocol（user 主動觸發層）
 
@@ -250,7 +250,7 @@ PM 以**單一訊息**平行呼叫 5 個 Agent subagent（Fundamentals / Sentime
 | **Sentiment / News / Technical** | `"sonnet"` | rubric 明確的結構化抽取+評分；品質哨兵 = det_shadow agreement + lane score 分布（`shadow_report.py` 監測） |
 | Fundamentals / Valuation Specialist | 不指定（inherit session model） | 判斷較重，第二批降級候選 — 第一批 10 session 哨兵無異常後再議 |
 | Red Team (Phase 2.8) | 不指定（inherit） | 對抗性推理 = 核心價值，**永不降級**；最強檔不可用時走下方 2+1 補償 |
-| Sonnet MD Formatter (Phase 5) | `"sonnet"`（既有） | validator gate 兜底 |
+| ~~Sonnet MD Formatter (Phase 5)~~ | **已移除（V4.87.0）** | 報告改 `render_investment_report.py` deterministic 渲染；`--polish` 的五段敘事走 model_router，不佔 Agent 派工 |
 
 > 第一批降級後**前 10 個 session** 盯 `shadow_report.py` lane 哨兵段：任一降級 lane 的 score
 > 分布 vs 歷史明顯偏移、或 agreement 異常率升 → 該 lane 改回 inherit 並記 SESSION_NOTES。
@@ -1500,90 +1500,94 @@ rc ≠ 0 → 修正最後一筆後重跑直到 rc=0。
 
 ### Step 3 — 確認 `./invest_logs/YYYY-MM-DD_phase0.json` 已存在
 
-### Step 4 — Sonnet MD Report Formatter (MUST use Agent tool)
+### Step 4 — Deterministic MD Render（V4.87.0；取代 Sonnet Formatter Agent call）
+
+報告不再由 LLM「寫」，改由 script 從兩份**持久化 artifact**「渲染」。
+
+**4a. PM 寫 phase_inputs bundle**（Write 工具，唯一需要 PM 動手的一步）
 
 ```
-Agent(
-  description="Session MD report formatter",
-  subagent_type="general-purpose", model="sonnet",
-  prompt="""
-  You are a MARKDOWN FORMATTER — not an analyst.
-
-  HARD CONSTRAINTS:
-    - 不得重新評分、改變 signal、改變 final_decision、改變 position_size、改變 entry/TP/SL 數字。
-    - 不得新增你自己的判斷或觀點。
-    - 若資料有缺漏，填「N/A」而非自行補全。
-    - **佔位符強制 (V4.66.0)**：下列 6 個決策關鍵區塊你「不寫內容」，只在對應位置各寫一行
-      佔位符，數字由 Step 4.5 script 從 history.json verbatim 注入（抄寫=算術，LLM 禁手抄）：
-      `<!--INJECT:decision_summary-->` `<!--INJECT:lane_scores-->` `<!--INJECT:fair_value_anchors-->`
-      `<!--INJECT:kill_conditions-->` `<!--INJECT:key_risks-->` `<!--INJECT:watch_conditions-->`
-    - **Score Scale 強制 (V1.88)**：
-      * Final Score: `X.XXX / 3.0` 或裸數字 ≤ 3.0；禁 /5.0、/10
-      * 5 lane scores (Fund/Sent/News/Tech/Val): 0-3 範圍裸數字；禁 lane: X/10
-      * Burry score: `X.X / 100`；禁 /12 或 /10
-      * Red Team strength: `N/5` 或 N 整數
-      * 範例對：`Final Score 1.609 / 3.0`、`Burry 50.3 / 100`
-      * 範例錯：`HOLD (6.72/10)`、`Fundamentals: 8.1/10`、`Burry 4.5/12`
-
-  TICKER: <T>
-  DATE: <YYYY-MM-DD>
-
-  PHASE 0-4.5 COMPLETE JSON:
-  <paste phase0_macro_snapshot, phase2 all 6 outputs (5 lanes + Burry), phase2.5, phase2.8 red team, phase3, phase4, phase4.5 fair_value_summary, phase5 trades_this_session[0]>
-
-  OUTPUT 結構 (純 Markdown，不含 code fence):
-    1. 標題: `# YYYY-MM-DD TICKER — 投資委員會分析`
-    2. 決議摘要: 1-2 句決議敘事（不含數字），下一行寫 `<!--INJECT:decision_summary-->`
-    3. Phase 0 Macro Context (1 段)
-    4. Final Visualization Table: 只寫 `<!--INJECT:lane_scores-->`
-    5. 詳細評分 (key_factors / risk_flags per lane)
-    6. **Multi-Horizon Price Framework (V5.1 — 升級自 V5.0 合理股價估算)**: 三時間框架表 —
-       - **長期合理價 + 長期區間 + 隱含預期**: 標題「合理股價」下只寫 `<!--INJECT:fair_value_anchors-->`
-         （anchors 表 + weighted_fair_value + verdict_band + fair_value_range + implied_expectations 全由 script 注入）
-       - **隱含預期 (V3.45.1)**: `implied_expectations` — 現價隱含 5Y FCF CAGR vs 實際 vs lane 估（sanity_note）
-       - **5 日機率帶**: `[下界 / 點估計 / 上界]`（capped 版）+ drift + confidence + catalyst flag + key_level 反射註記
-       - **60 日 target**: momentum_target / pt_60d / earnings_revision → mid_target + reality_check 成立條件
-       - **三框收斂訊號**: `mhp_signal`（wait_for_pullback / high_conviction_long_zone / momentum_not_value / neutral_aligned）+ 1 句解讀
-    7. **Red Team Counter Thesis (V2.14.0 IC-memo 結構強化)**:
-       - **Consensus View (市場共識)**: 1-2 句 — 主流分析師 / 媒體普遍認同的看法（從 Phase 2 News + Sentiment lane 抽）
-       - **Differentiated View (本委員會差異化判斷)**: 1-2 句 — 本次分析跟 consensus 哪裡不同、為什麼（from final_decision + final_score 的關鍵 driver）
-       - **Counter Thesis**: red_team_counter_thesis 全文
-       - **Numbered Kill Conditions**: 只寫 `<!--INJECT:kill_conditions-->`（script 會照搬 red_team_kill_conditions 並編號）
-    8. **進場計畫 (V2.14.0 Returns Profile 三檔)**:
-       - **Base Case**: 進場區間（← 5 日 band）+ TP1 / TP2（TP ← 60 日 mid_target）+ SL（← band 下界 / support 取較保守）+ R/R（雙軌 staged_split）+ position_size_pct
-       - **Bull Case (1-2 句)**: 若 base case 觸發後 follow-through，下一個 TP3 / 加碼條件 / 持有窗口（從 long-term verdict_band + watch_conditions 推）
-       - **Bear Case (1-2 句)**: 若 SL 觸發 / kill condition 命中 → exit 行為 + 不再進場條件
-    9. 關鍵風險: 只寫 `<!--INJECT:key_risks-->`
-    10. Watch / re-eval 觸發條件: 只寫 `<!--INJECT:watch_conditions-->`
-
-  寫入 `../reports/<YYYYMMDD>_<TICKER>.md`，回傳檔案路徑。
-  """
-)
+investment/invest_logs/phase_inputs/<YYYY-MM-DD>_<TICKER>.json
 ```
 
-### Step 4.5 — Deterministic Fact Injection (V4.66.0)
+內容 = 以前貼進 formatter prompt 的同一包 Phase 0 / 2 證據。**這包必須落地存檔**，不是
+`/tmp` 即棄——報告有約 80 行（各 lane 的 key_factors / risk_flags / signal / confidence、
+Burry components、Phase 0 明細）的來源只在這裡；不存檔等於渲染完就蒸發，稽核軌跡斷掉。
+
+```json
+{
+  "bundle_version": "P5-INPUTS/1.0",
+  "ticker": "MU", "date": "2026-08-02",
+  "phase0": {"regime_confidence": 0.6, "market_top_zone": "Orange", "ftd_state": "...",
+             "breadth_composite": 71, "vix": 15.99, "fred_verdict": "Soft Landing",
+             "real_rate_pct": 2.41, "hot_sectors": [...], "cold_sectors": [...]},
+  "lanes": {
+    "fundamentals": {"signal": "BUY", "score": 1.5, "confidence": 0.72,
+                     "phase0_alignment": "MISALIGNED",
+                     "key_factors": ["2-4 條計分主因"], "risk_flags": ["1-3 條"]},
+    "sentiment":  { …同結構… },   "news":      { …同結構，可加 analyst_consensus… },
+    "technical":  { …同結構… },   "valuation": { …同結構… }
+  },
+  "burry": {"score": 47.1, "label": "NEUTRAL", "veto_flag": false,
+            "components": {...}, "narrative": "..."},
+  "phase3": {"final_score": -0.2963, "final_decision": "HOLD", "final_action": "CANCEL"},
+  "phase4": {"position_size_pct": 0.0, "analysis_price": 823.03},
+  "red_team": {"verdict": "STRONG_COUNTER"}
+}
+```
+
+`lanes` 的 score / confidence **直接抄 Phase 2 lane 輸出**，禁重新解讀；`phase3` / `phase4` /
+`burry` / `red_team` 是刻意的重複欄位，用來讓 renderer 交叉驗證（見 4c）。
+
+**4b. 渲染**
 
 ```bash
-python3 investment/scripts/inject_report_facts.py
+python3 investment/scripts/render_investment_report.py
+# 選項：--polish（見 4d）／--phase-inputs <path>／--out <path>／--stdout
 ```
 
-把 Step 4 的 6 個佔位符替換成 history.json 末筆的 verbatim 區塊（0 LLM；idempotent — 重跑會刷新 `<!--FACTS:*-->` 標記內容）。
+0 LLM。輸出 `reports/<YYYYMMDD>_<TICKER>.md`。決策關鍵的六個區塊（decision_summary /
+lane_scores / fair_value_anchors / kill_conditions / key_risks / watch_conditions）由
+renderer **import** `inject_report_facts.py` 的同一組 renderer 產生 —— 兩者永遠不可能漂移，
+且仍包在 `<!--FACTS:*-->` 標記內（舊報告的 refresh 路徑不變）。
 
-- rc=0 → 續 Step 5。輸出會列 injected / refreshed 的區塊名。
-- rc=1（未知 placeholder / 殘留 INJECT token / 報告不存在）→ 修正 Step 4 輸出的佔位符拼寫後重跑本步。**禁止**手抄數字補進報告代替注入。
-- 5 日band / 60 日 target / 收斂訊號（第 6 節其餘部分）仍由 Formatter 從 JSON 轉寫 — 該層是 advisory，數字漂移非致命；決策關鍵數字已全部 script 化。
+**4c. 重疊欄位硬閘（rc=1，渲染前擋）**
 
-> **V2.14.0 IC-memo 強化動機** 已移至 `investment_protocol_v5_0_DESIGN_NOTES.md`（純人讀）。執行重點：consensus vs differentiated view 並陳、Kill Conditions numbered、Returns Profile 三檔；欄位來源**仍是** Phase 2-4 已產出 JSON，formatter 不重新評分。
+bundle 與 history 末筆重疊的每一欄都會交叉比對：5 個 lane score、raw confidence 的 c_eff
+帶域、final_score / final_decision / final_action、position_size_pct、analysis_price、
+burry_score、red_team_verdict。有 `calculation_steps` 時**額外**比對 step 字串裡決策數學
+實際吃到的 score 與 c_eff。
 
-> **成本**: Sonnet 4.6 vs Opus → 每次節省 ~$0.4-0.7。違反 hard constraints → PM reject 並 retry 1 次；再失敗 → PM inline 寫 MD (照 V5.0 template，禁 freestyle)。
+- 任一不符 → rc=1，逐條列出差異，**不產出任何檔案**。修 bundle（history 是權威）後重跑。
+- 例外：Step 1.5 覆寫過的 lane（step 字串帶 `// ...` 註記，例如 `score 0.0 → -1.5`）只比對
+  c_eff，不比對 score —— 那個差異是設計，不是漂移。
+
+雙輸入的固有風險是兩源漂移；這道閘是事前預防版（V20-A5 的 POLAR SPLIT badge 是事後偵測版）。
+
+**4d. `--polish`（預設關）**
+
+五段純敘事在任何 JSON 欄位都不存在：決議摘要句、Consensus View、Differentiated View、
+Bull Case、Bear Case。不帶 flag → 由 JSON 推導的制式句，0 LLM，CI 測的就是這條路徑。
+帶 `--polish` → 一次 **走 model_router**（記帳／預算／cooldown）的呼叫改寫且**只**改寫這五段，
+三道守衛全部 **fail-open**（丟棄潤飾、保留制式句、stderr 記 warning，rc 仍為 0——報告永遠產得出來）：
+
+1. **結構**：非敘事區位元必須完全相同；段落內含 `#` / `|` / `<!--` 一律丟棄該段
+2. **數字圍堵**：潤飾段出現的每個數字都必須存在於 bundle / history / 制式報告的事實集合
+   （含百分比與四捨五入形式）；否則丟棄該段。真正的風險不是文筆，是模型順手編一個看似合理的數字
+3. **provenance**：footer 蓋 `polish：<model> @ [段名…]` 或 `polish：none`
+
+**禁止**：手抄數字進報告代替渲染；跳過硬閘；`--polish` 失敗時人工把 LLM 文字貼進去。
 
 ### Step 5 — Markdown Score-Scale Validation Gate
 ```bash
 python3 investment/scripts/validate_markdown_export.py
 ```
 - rc=0 → 完成
-- rc=1 → retry Sonnet 一次（paste stderr 違規清單進 prompt）
-- 再失敗 → PM inline 覆寫 + 重跑 validator，rc=0 才結束 protocol
+- rc=1 → **renderer 的 bug 或 history 資料異常，不是「重寫一次就好」**。讀 stderr 的違規清單、
+  修 renderer 或修 history 末筆，重跑 Step 4 → Step 5。V4.87.0 起報告是渲染出來的，同一份輸入
+  必產出同一份輸出，所以「retry 一次看看」不會有不同結果。
+- 若 rc=1 來自 `--polish`：那不可能——polish 的三道守衛 fail-open，失敗只會退回制式句。真的發生
+  代表守衛有洞，補 `test_render_investment_report.py` Fixture E 再修。
 
 **禁止**：跳過 validator、接受 rc=1 報告、把 freestyle MD 寫進 reports/ 標 done。
 

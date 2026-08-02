@@ -1,0 +1,146 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "MSFT",
+ "date": "2026-08-02",
+ "provenance": {
+  "captured": "backfill",
+  "captured_at_session_time": false,
+  "reconstructed_from": "reports/20260802_MSFT.md (Sonnet formatter 產出的已發布報告) + investment/invest_logs/history.json 末筆",
+  "reconstructed_in": "V4.87.0 dev session",
+  "why": "L3 落地時 phase_inputs 樣本數為零，C1 的 lane 契約設計需要真實欄位形狀當輸入。本檔逐字取自已發布報告的 §5 詳細評分與 §3 宏觀段，不是決策當下 PM 寫入的原件。",
+  "caveat": "PM 在 Phase 5 Step 4a 寫入的檔案不得帶 provenance.captured=backfill。往後的檔案都應是 session 當下產生。"
+ },
+ "phase0": {
+  "regime_confidence": 0.6,
+  "market_top_zone": "Orange",
+  "market_top_score": 46.9,
+  "ftd_state": "RALLY_ATTEMPT_day2",
+  "breadth_composite": 71,
+  "vix": 15.99,
+  "fear_greed": 42.5,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 2.41,
+  "dgs10_pct": 4.68,
+  "hot_sectors": [
+   "Industrials",
+   "Financials",
+   "Energy",
+   "Consumer_Discretionary"
+  ],
+  "cold_sectors": [
+   "Technology",
+   "Real_Estate",
+   "Utilities",
+   "Consumer_Staples"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "BUY",
+   "score": 1.5,
+   "confidence": 0.72,
+   "phase0_alignment": "MISALIGNED",
+   "key_factors": [
+    "PE 25.8 vs peer median 35.3",
+    "Rev +17.8% YoY, EPS +31.3%",
+    "ROE 33.2%, Altman Z 8.39 safe"
+   ],
+   "risk_flags": [
+    "Gross margin z=-2.56 compression + capex intensity 39.8%",
+    "FCF yield 1.94% below real rate 2.41%; net debt -$52.0B"
+   ]
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.21,
+   "confidence": 0.55,
+   "phase0_alignment": "NEUTRAL",
+   "key_factors": [
+    "Insider MSPR -100, ratio 0 latest quarter",
+    "Short float only 1.24%",
+    "Congress net bullish 24 buys vs 9 sells"
+   ],
+   "risk_flags": [
+    "Institutional 資料為空；CEO comp 欄位錯標",
+    "Q3 insider 樣本薄：僅 1 筆賣出交易"
+   ],
+   "market_sentiment_composite": 59.2,
+   "insider_signal": "distributing",
+   "short_pct_float": 1.24,
+   "mspr_latest": -100
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 3.5,
+   "confidence": 0.72,
+   "phase0_alignment": "MISALIGNED",
+   "key_factors": [
+    "Q4 FY26 財報 Azure +43% 突破 $100B 年化 run-rate",
+    "07-30 創美股史上單日最大市值增幅約 $450B",
+    "管理層指引 Q1 FY27 Azure 成長約 45%",
+    "PT 修正動能 FLAT（+0.52%），30 日零升降評"
+   ],
+   "risk_flags": [
+    "兩件證券集體訴訟律師事務所招攬（Rosen / Gross Law，Aug-11 期限）",
+    "Technology 為 Phase 0 cold sector，債券殖利率創多年新高"
+   ],
+   "analyst_consensus": "Buy（66 buy / 16 hold / 0 sell）"
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": 1.0,
+   "confidence": 0.55,
+   "phase0_alignment": "MISALIGNED",
+   "key_factors": [
+    "Price above all MAs, testing $466 resistance",
+    "Volume 1.72x 20d avg confirms breakout attempt",
+    "RSI 74.5 overbought; stage still Stage 1 basing"
+   ],
+   "risk_flags": [
+    "RSI 74.5 超買鄰近壓力，回檔風險",
+    "20/50 死亡交叉僅 28 天前，stage 未確認"
+   ]
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.6,
+   "phase0_alignment": "ALIGNED",
+   "key_factors": [
+    "Weighted FV $415.52 = 11.8% premium",
+    "整個 DCF 網格上限僅 $338",
+    "P/E 25.8x 與 mega-cap 同業一致"
+   ],
+   "risk_flags": [
+    "PT dispersion 51.7%（$510-647）使 consensus 錨低精度",
+    "peer_pe_implied 被非可比小型股灌水"
+   ]
+  }
+ },
+ "burry": {
+  "score": 36.8,
+  "label": "NEUTRAL",
+  "veto_flag": false,
+  "components": {
+   "fcf_yield_pct": 0.47,
+   "ev_ebit": 18.03,
+   "debt_to_equity": 0.29,
+   "pct_below_52w_high": 13.73,
+   "insider_net": "SELL"
+  },
+  "narrative": "Altman safe → 不觸發；Piotroski 6 moderate → 不調；owner earnings $28.59B vs GAAP FCF 約 $67.2B 差距 >30% → 註記；insider latest_trend distributing → 註記；DCF FCFF $303.37 vs FCFE $337.01 差 11.1%（<20%）→ 不註記；comp_benchmark 資料為空。"
+ },
+ "phase3": {
+  "final_score": 0.729,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL",
+  "avg_confidence": 0.534
+ },
+ "phase4": {
+  "position_size_pct": 0.0,
+  "analysis_price": 464.72
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}
