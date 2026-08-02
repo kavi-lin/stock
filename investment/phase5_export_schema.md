@@ -347,6 +347,40 @@ LLM 在 Phase 2 末尾彙總 4 個 lane 各自最終 raw score，寫入 trades_t
 
 > Valuation lane score 已存於 `valuation_lane.score`，不重複。
 
+### `calculation_steps` + `decision_engine_version` (V4.80.0 — Phase 3 engine)
+
+Phase 3 全部算術由 `investment/scripts/decision_engine.py` 產出，PM **verbatim 抄寫**整塊。
+欄位明細見 `investment_protocol_v5_0.md` §PHASE 3 的 export shape；此處只記 validator 契約：
+
+| 欄 | 型別 | 說明 |
+|---|---|---|
+| `decision_engine_version` | `string` | engine 版號（如 `"1.0.0"`）。**有此欄 = 走 V4.70.0+ 規則**，validator 加驗規則表 |
+| `calculation_steps.penalty_value` | `float｜null` | 實際套用的 cascade 乘數（0.85 / 0.925 / 0.95）；`penalty_applied=true` 時必填 |
+| `calculation_steps.cascade_rule_applied` | `string` | `no_penalty` / `consensus_bonus` / `rule_1..5_*`；與 `penalty_value` 必須對得上 |
+| `calculation_steps.red_team_effective_verdict` | `string` | rule 1 降級後的 verdict（未降級時等同 `red_team_verdict`） |
+
+**Validator §13（V4.80.0）**：
+
+- 有 `calculation_steps` → 硬驗算術鏈（每條 Step 1 乘積、Σ=raw_total、bonus/penalty 乘法、
+  `effective_macro_mult = max(macro_multiplier, shift_macro_floor)`、macro_alignment 與正負號
+  一致、`final_score` 與頂層鏡射一致、`staged = max(0.6, buy−0.4)`、polarization label 由
+  lane scores 重算須相符、`final_decision` 必須落在 band 可達集合內）。任一不符 **rc=1**。
+- 再有 `decision_engine_version` → 加驗規則表（C_eff ∈ {0.35, 0.60, 0.72}、cascade→penalty
+  對映、`buy_threshold` 符合 tier × polarization 矩陣、`hot_zone_eval` 必填）。
+- **2026-08-03 起的 entry 缺 `calculation_steps` 直接 rc=1**（V4.80.1）——否則「手算並整段
+  省略該欄」就能繞過本節硬閘。此門檻目前綁 `export_date`；改綁 schema 版本需 bump
+  `session_export_version` 到 V5.1（獨立一版做，見 TODO）。
+- 該日期之前且無 `decision_engine_version` 的 entry → **整段跳過，rc=0**（向後相容，不溯及既往）。
+
+**band 可達集合**（`final_decision` 允許偏離 band 的四條路徑，其餘一律 rc=1）：
+
+| banded | 可另接受 | 依據 |
+|---|---|---|
+| `BUY` | `STAGED_ENTRY` | Step 1.7 BIPOLAR 強制降階 |
+| `BUY` | `STAGED_ENTRY` | Phase 4.6 cap 觸發 **且** `cap_override_reason` 非空 |
+| `BUY` / `STAGED_ENTRY` | `HOLD` | Auto REJECT 或 decision cap（無 override） |
+| `HOLD` | `STAGED_ENTRY` | Rec 11 熱區 probe（`hot_zone_probe=true`） |
+
 ### `det_inputs` (V2.10.0)
 
 LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄寫，不重新判讀**）：

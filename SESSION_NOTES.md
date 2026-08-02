@@ -1,7 +1,24 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.79.1)
+> **Last Updated**: 2026-08-02 (v4.80.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.80.1) — 4.80.0 review 的兩個 P1
+- **起因**：外部 review 對 v4.80.0 做端到端實測，抓到 2 個 P1、2 個 P2。兩個 P1 我都先自己複跑重現才動手（不照單全收），確認屬實。
+- **P1-1 是本次最有價值的一條**：Auto REJECT 的 `rr < 2.0` 與 `FULL_FALLBACK` 兩條我寫成「只在決策是 BUY-side 時才評」——單看是對的（HOLD 的 rr 本來就是 null）。但熱區 probe 是在硬閘之後才把 HOLD 升成 STAGED_ENTRY，升完不回檢，於是 probe 可以帶著 R/R 1.5 開倉。**教訓：閘的評估對象若是「決策」，那任何會改寫決策的步驟之後都必須重評**；我把 probe 排在硬閘之後是對的（spec 要求硬閘優先），錯在沒意識到那兩條閘的輸入被自己改掉了。修法是 fire 前用假設決策 `STAGED_ENTRY` 重跑一次硬閘。
+- **P1-2 是自己挖的坑**：同一版 protocol 才定案「cap + override → STAGED_ENTRY」，validator §13 的 band 可達集卻沒跟著加，第一筆真走 override 的 BUY 會卡死在收尾（而 PM 依規禁止手改）。**教訓：新增一條決策路徑時，要同時問「哪個 validator 會看到這條路徑」**。
+- **測試盲點**：`reject.rr_irrelevant_for_hold` 與 `reject.full_fallback_hold_ok` 兩條單元斷言各自都對，漏的是「HOLD × probe」的組合。已補 4 條 e2e fixture，含「R/R 2.5 仍應 fire」的反向斷言防止修過頭變成 blanket veto。
+- **順手**：§13 原本能靠「省略 `calculation_steps`」整段繞過（protocol 寫的「validator 會擋」實際不成立）→ 改為 2026-08-03 起缺此欄 rc=1；engine 缺 lane 由 warn 改 raise（原本會產出 `MISSING` 字串讓 validator 報「unparseable」，訊息誤導 triage）。
+- **量測紀律**：驗收時我自己的 shell 迴圈把三筆 rc 讀成 2（實際 0），改成無 pipe、無迴圈展開的逐條直跑才對得上——與 reviewer 稍早的 pipe-吃-rc 是同一類錯。**rc 驗收一律逐條直跑**。
+- **驗收**：`test_decision_engine.py` rc=0；validator 4 個正常 fixture rc=0（含 live history 與 pre-4.70 entry）、7 種竄改/違規全部 rc=1；replay rc=0 且覆蓋數不變（1+2+169=172）；SYNC OK 4.80.1。
+
+## 🟢 Session Note (v4.80.0) — Phase 3 決策數學 script 化（TODO L1）
+- **起因**：TODO「Protocol Lean 化」的 L1。共識是「先 script 化決策數學，再談條件式跳過 LLM」，所以這一版只搬公式、不動 score 的生產方式。
+- **做掉**：`decision_engine.py`（Step 1 三檔 C_eff → 1.5 structural → 1.7 polarization → 2 五級 cascade → 3 macro → 4 dynamic threshold + band → Rec 11 判定樹 → Auto REJECT；`--phase 4.6` 獨立套 decision cap）+ `test_decision_engine.py`（spec parity 契約）+ `replay_decision_engine.py`；protocol Phase 3/4.6 改 script call；validator §13 硬閘。polarization / red_team_basis 直接 import `apply_det_shadow.py`，沒有第二份實作。
+- **原假設被實測推翻**：TODO 寫「111 筆 replay 逐筆 triage」，實際能做 parity 的只有 **1 筆**。原因不是 harness 弱，是**史料本身沒有 per-lane confidence**——`history.json` 只存 `avg_confidence`，per-lane 值只能從 `calculation_steps`（全語料 2 筆）、event_index `agent_breakdown`（有 5 lane 的 33 筆全在 V4.70.0 之前）或 MD 報告表頭（格式十幾種）回收。V4.70.0（2026-07-16）之後累積的 deep-dive 只有 4 筆，那 4 筆全部逐點相符（1 筆嚴格 parity + 3 筆在 spec 預設假設下 |Δ| ≤ 0.0003）。
+- **不猜的做法**：未持久化的離散輸入（structural_shift tier / counter_evidence_strength / rule-2 transition / binary event 48h）不套預設值，而是**列舉全組合跑 sweep**——結果不變才算 eligible，會變就列 `decision_sensitive_unknown` 並附「spec 預設值」advisory（明確標示是假設）。38 筆落這一類，其中 `structural_shift.tier` 38 次全中，等於量化證明「這個欄位該被持久化」。
+- **順手抓到兩個 spec 矛盾**（已寫進 protocol，非默默處理）：① Phase 4.6 rule 6 的「熱區例外」在 decision_cap 路徑上恆不成立——validator §11 禁止 probe 與 cap 併存，且 Phase 3 判定樹會先出 `suppressed_by_cap`；② cap 對 `BUY` 的落點原文沒寫死，依 override 條款與歷史 23 筆 entry 定案為「無 override → HOLD、有 override → STAGED_ENTRY」。
+- **驗收**：`test_decision_engine.py` rc=0（A–M fixture + MU 2026-08-02 golden replay，5 條 Step 1 字串逐字相符）；validator 對現行 history rc=0（向後相容），6 種竄改（分數、乘積、band 不可達、polarization 說謊、threshold 矩陣、legacy C_eff）全部 rc=1；replay rc=0；SYNC OK 4.80.0。
 
 ## 🟢 Session Note (v4.79.1) — signed bias 改吃去重集合
 - **起因**：4.79.0 實作 P2-3 時順手發現 `_signed_bias` 繞過 dedup，記進 TODO；使用者指示接著做。

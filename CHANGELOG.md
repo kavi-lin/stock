@@ -8,6 +8,38 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.80.1] — 2026-08-02 — 4.80.0 review 的 2 個 P1 + 2 個 P2
+
+### Fixed
+- **P1-1 熱區 probe 逃過 Auto REJECT**（`decision_engine.py`）：`risk_reward_ratio < 2.0` 與 `FULL_FALLBACK` 兩條硬閘是決策側條件式的，而 probe 觸發前的 banded 決策是 HOLD → 兩條恆不觸發，probe 因此能帶著 R/R 1.5 或 FULL_FALLBACK 開倉（實測 `hot_zone_eval=fired`、`final_decision=STAGED_ENTRY`、`auto_reject=false`），且 validator §13 的可達集恰好放行 `HOLD → STAGED_ENTRY`，下游也攔不住。改為 fire 之前以假設決策 `STAGED_ENTRY` 重跑硬閘，觸發即 `suppressed_by_risk_flag`；trace 落 `auto_reject.probe_prospective_reasons`。
+- **P1-2 validator 判死 cap override 路徑**（`validate_session_export.py`）：banded `BUY` + cap 觸發 + `cap_override_reason` → `STAGED_ENTRY` 是 4.80.0 才在 protocol 定案的合法路徑，卻不在 §13 band 可達集內（實測 rc=1）。第一筆真的走 override 的 BUY 會卡死在收尾，而 PM 依規禁止手改。可達集補上該條並在 schema doc 列表格。
+- **P2-1 §13 可整段繞過**：跳過條件原本是「`calculation_steps` 缺席」，等於手算並省略該欄即可通過。改為 `export_date ≥ 2026-08-03` 缺此欄直接 rc=1（綁 schema 版本需 bump V5.1，另開一版）。
+- **P2-2 MISSING lane 契約不一致**：engine 缺 lane 只 warn 並輸出 `… × MISSING = 0.0000`，PM 抄進 export 後 validator 報「unparseable」形成死路。改為 `run_phase3` 直接 raise（deep-dive 本就要求 5 lane、權重從不重分配），validator 對 MISSING 形式給明確指引。
+- P3 小修：`_num` 不再輸出科學記號（`4e-05` 會讓 step-string regex 解不開）；replay 比對前先套 `apply_decision_cap`（存檔的 `final_decision` 是 post-4.6 值，否則未來 capped entry 會出偽 NEEDS_TRIAGE）；`macro_alignment` 的 sign 規則 engine 與 validator 統一為 spec 原文（0/0 → ALIGNED）；weights 覆寫值等同預設時不再誤發 warning；`open()` 補 context manager。
+
+### Why
+- P1-1 在真金白銀的決策路徑上：規則寫「硬閘優先於熱區例外」，實作卻讓例外繞過了兩道閘。單元層的 `reject.rr_irrelevant_for_hold` / `reject.full_fallback_hold_ok` 各自沒錯，缺的是「HOLD × probe」的組合 fixture——已補 4 條（含 R/R 2.5 仍應 fire 的反向斷言）。
+
+## [4.80.0] — 2026-08-02 — Phase 3 決策數學 script 化（TODO L1）
+
+### Added
+- `investment/scripts/decision_engine.py` — Phase 3 全數學單一執行來源：Step 1 加權（三檔 C_eff）/ 1.5 structural shift / 1.7 polarization / 2 五級 cascade（first match wins）/ 3 directional macro / 4 dynamic threshold + decision band / Rec 11 熱區判定樹與 15-30 bps 分層 / Auto REJECT 硬閘。`--phase 4.6` 為獨立 entry point，收 Phase 4 sizing 後套 decision cap。polarization 與 red_team_basis 直接 import `apply_det_shadow.py`，不複製實作。
+- `investment/scripts/test_decision_engine.py` — spec parity 契約：C_eff 邊界、cascade 全 5 rule + bonus/veto 路徑、polarization 4 tier + BIPOLAR 例外、threshold 矩陣 5 值、band 正負對稱邊界、熱區 4 種 eval + 0.4 tier 分界、Auto REJECT 逐條、Phase 4.6 cap 與 override，外加 2026-08-02 MU entry 的 golden replay（5 條 Step 1 字串與全部下游數字逐字相符）。
+- `investment/scripts/replay_decision_engine.py` — engine × `history.json` 全量 replay。未持久化的輸入不用猜：列舉未知離散欄位跑全組合，結果不變才算 eligible，會變則列 `decision_sensitive_unknown` 並附「spec 預設值」advisory。報告 → `reports/decision_review/DECISION_ENGINE_REPLAY_<date>.md`。
+
+### Changed
+- `investment_protocol_v5_0.md` Phase 3 改「組 input JSON → 一個 Bash call → verbatim 抄寫」，公式降為 spec 參照；質性欄（`institutional_lens` / `scenario_odds` / `action_label` / `decision_confidence_pct`）仍由 PM 自寫。Phase 4.6 指向 engine cap entry point。
+- `validate_session_export.py` 新增 §13：有 `calculation_steps` → 硬驗算術鏈（乘積、Σ、bonus/penalty、macro 步、threshold 公式、polarization 重算、band 可達性）；再有 `decision_engine_version` → 加驗 V4.70.0 規則表。兩者皆無的舊 entry 整段跳過，rc=0 不溯及。
+- `phase5_export_schema.md` 補 `calculation_steps` / `decision_engine_version` 契約段。
+
+### Fixed
+- Phase 4.6 rule 6 的「熱區例外」與 validator §11 互斥規則矛盾：例外在 decision_cap 路徑上恆不成立（Phase 3 判定樹已先出 `suppressed_by_cap`）。engine 回報 `hot_zone_exception_applicable: false`，protocol 加註說明。
+- Phase 4.6 cap 對 `BUY` 的落點原文未明確：定案為無 override 退 `HOLD`、有 override 退 `STAGED_ENTRY`，與歷史 23 筆 cap entry 一致。
+
+### Why
+- Phase 3 是「LLM 手算最容易錯、錯了最貴」的一段：三檔量化、5 級 cascade 優先序、4 tier × threshold 矩陣、熱區判定樹、硬閘優先序全靠 prompt 紀律維持。搬進 script 後，spec 由測試鎖住、產出由 validator 擋住。
+- Replay 的實測結論寫進報告：能做 parity 的歷史樣本只有 1 筆（+3 筆在預設假設下逐點相符），因為 per-lane confidence 從未寫進 `history.json`，且 V4.70.0 之後的 deep-dive 累積筆數還少。harness 會隨新 session 自動變成真的 parity gate。
+
 ## [4.79.1] — 2026-08-02 — signed bias 改用去重集合（重跑不再放大樣本）
 
 ### Fixed

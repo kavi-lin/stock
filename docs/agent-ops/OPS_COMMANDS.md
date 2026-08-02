@@ -36,6 +36,9 @@ python3 skills/valuation-modeler/scripts/comps.py <T> [--xlsx]                  
 
 ```bash
 python3 investment/scripts/compute_price_framework.py --from-file <inputs.json>  # Phase 2.4 價格框架引擎（0 LLM 算術；--self-assemble 自組輸入；--no-fetch 跳過 FMP vol）
+python3 investment/scripts/decision_engine.py --from-file /tmp/<T>_p3.json       # Phase 3 決策引擎（0 LLM 算術；輸出 calculation_steps 整塊 verbatim 抄寫）
+python3 investment/scripts/decision_engine.py --phase 4.6 --from-file /tmp/<T>_p46.json  # Phase 4.6 decision cap 套用（收 Phase 4 sizing 後）
+python3 investment/scripts/replay_decision_engine.py                             # engine × history 全量 replay + 排除清單 → reports/decision_review/DECISION_ENGINE_REPLAY_<date>.md
 python3 investment/scripts/inject_report_facts.py                                # Phase 5 Step 4.5：報告佔位符 → history.json verbatim 注入（0 LLM、idempotent）
 python3 investment/scripts/register_thesis.py                                    # Phase 5.5 thesis register（idempotent、non-fatal）
 python3 investment/scripts/backtest_postmortem.py                                # protocol 決策回測
@@ -86,6 +89,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | earnings valuation forecaster | `python3 skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py` |
 | `forward_expectations.py` 核心 | `python3 investment/scripts/test_forward_expectations.py`（rc=0 為準） |
 | `inject_report_facts.py` | `python3 investment/scripts/test_inject_report_facts.py` |
+| `decision_engine.py` / Phase 3 決策數學 / `validate_session_export.py` §13 | `python3 investment/scripts/test_decision_engine.py` + `python3 investment/scripts/validate_session_export.py`（兩者 rc=0）；改到 cascade/threshold 再跑 `replay_decision_engine.py` 看 replay 是否仍 rc=0 |
 | forward_expectations 子模組 | 對應測試檔用 `ls investment/scripts/test_forward_expectations_*.py` 找（多數與子模組同名；另有 numeric_safety 等綜合測試——改到相鄰邏輯就一併跑） |
 | Royalty/IP adapter | `python3 investment/scripts/test_royalty_ip_adapter.py` |
 | Semiconductor adapter | `python3 investment/scripts/test_semiconductor_adapter.py` |

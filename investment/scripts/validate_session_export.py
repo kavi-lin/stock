@@ -21,7 +21,12 @@ Does NOT validate analysis quality — only schema compliance.
 import argparse
 import json
 import os
+import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from apply_det_shadow import compute_polarization  # noqa: E402
+from decision_engine import compute_dynamic_threshold, decision_band  # noqa: E402
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
@@ -85,6 +90,215 @@ def _same_number(a, b, tol=0.011):
     return (isinstance(a, (int, float)) and not isinstance(a, bool)
             and isinstance(b, (int, float)) and not isinstance(b, bool)
             and abs(float(a) - float(b)) <= tol)
+
+
+def _numf(x):
+    if isinstance(x, bool) or not isinstance(x, (int, float)):
+        return None
+    return float(x)
+
+
+# V4.80.0 §13 — Phase 3 arithmetic re-derivation
+_STEP_RE = re.compile(
+    r"^\s*([\d.]+)\s*×\s*([+\-−–]?[\d.]+)\s*×\s*([\d.]+)\s*=\s*([+\-−–]?[\d.]+)")
+_STEP_LANES = {"fund": "fundamentals", "sent": "sentiment", "news": "news",
+               "tech": "technical", "val": "valuation"}
+_CASCADE_PENALTY = {
+    "rule_1_paradigm_confirmed_mr_downgrade": (0.925,),
+    "rule_2_transition_signature_mr_soften": (0.95,),
+    "rule_3_paradigm_candidate": (0.925,),
+    "rule_4_pure_forward": (0.85, 0.925),
+    "rule_5_default_strong_counter": (0.95,),
+}
+_KNOWN_MULTIPLIERS = (1.0, 1.15, 0.85, 0.925, 0.95)
+
+# §13 must not be bypassable by simply omitting the block. Entries exported from this
+# date on are required to carry `calculation_steps` — otherwise "PM 手算並整段省略" walks
+# straight through the gate the protocol says will stop it.
+# Date-keyed rather than version-keyed because all 78 existing V5.0 entries predate the
+# block; keying on the schema version needs a V5.1 bump (own release — see TODO).
+CALC_STEPS_REQUIRED_FROM = "2026-08-03"
+
+
+def _dash(s):
+    return float(str(s).replace("−", "-").replace("–", "-"))
+
+
+def check_phase3_arithmetic(entry, trade, errors, warnings):
+    """Re-derive the Phase 3 chain from the exported `calculation_steps`.
+
+    Tier A (any entry carrying calculation_steps) — timeless arithmetic: each Step 1
+    product, their sum, the bonus/penalty multiplication, the macro step, the threshold
+    formula, and the decision band. These catch a hand-written or hallucinated number
+    regardless of which rule version produced the entry.
+
+    Tier B (entries stamped `decision_engine_version`) — rule-table conformance that only
+    holds for V4.70.0+ math: C_eff quantisation, cascade→penalty mapping, the dynamic
+    threshold matrix, and the mandatory Rec 11 instrumentation.
+
+    Entries with neither block are skipped entirely (pre-V4.80.0 back-compat, rc=0).
+    """
+    cs = trade.get("calculation_steps")
+    engine_ver = trade.get("decision_engine_version")
+    if not isinstance(cs, dict):
+        if engine_ver:
+            errors.append(
+                f"decision_engine_version={engine_ver!r} present but calculation_steps is "
+                "missing — the engine emits both; do not hand-assemble the Phase 3 block")
+        elif (entry.get("export_date") or entry.get("date") or "") >= CALC_STEPS_REQUIRED_FROM:
+            errors.append(
+                f"calculation_steps missing — {CALC_STEPS_REQUIRED_FROM} 起的 entry 必須帶 "
+                "Phase 3 engine 輸出（`python3 investment/scripts/decision_engine.py "
+                "--from-file /tmp/<T>_p3.json` 的 calculation_steps 整塊 verbatim 抄寫）。"
+                "省略此欄等同繞過 §13 算術硬閘")
+        return
+
+    # ── Tier A.1 — Step 1 products and their sum ─────────────────────────────
+    lane_scores, ceffs, contribs = {}, {}, []
+    for key, lane in _STEP_LANES.items():
+        raw = cs.get(key)
+        if not isinstance(raw, str):
+            errors.append(f"calculation_steps.{key} must be the engine's step string, got {raw!r}")
+            continue
+        m = _STEP_RE.match(raw)
+        if not m:
+            if "MISSING" in raw:
+                errors.append(
+                    f"calculation_steps.{key}: lane input missing ({raw!r}) — Phase 3 需要"
+                    "五個 lane 都有 score 與 confidence（權重不重分配）。先補 Phase 2 "
+                    "fan-in/inline fallback 再重跑 decision_engine.py，不要匯出殘缺的鏈")
+            else:
+                errors.append(f"calculation_steps.{key} unparseable: {raw!r} "
+                              "(expected 'W × score × C_eff = result')")
+            continue
+        w, s, ce, res = (_dash(m.group(1)), _dash(m.group(2)),
+                         _dash(m.group(3)), _dash(m.group(4)))
+        if abs(w * s * ce - res) > 5e-4:
+            errors.append(f"calculation_steps.{key}: {w} × {s} × {ce} = {w * s * ce:.4f}, "
+                          f"but the entry states {res} — Phase 3 手算，重跑 decision_engine.py")
+        lane_scores[lane], ceffs[lane] = s, ce
+        contribs.append(res)
+
+    raw_total = _numf(cs.get("raw_total"))
+    if raw_total is not None and len(contribs) == len(_STEP_LANES):
+        if abs(sum(contribs) - raw_total) > 5e-4:
+            errors.append(f"calculation_steps.raw_total={raw_total} != Σ lane contributions "
+                          f"{sum(contribs):.4f}")
+
+    # ── Tier A.2 — bonus / penalty multiplication ────────────────────────────
+    rab = _numf(cs.get("raw_after_bonus"))
+    pv = _numf(cs.get("penalty_value"))
+    rule = cs.get("cascade_rule_applied") or cs.get("penalty_rule")
+    if raw_total is not None and rab is not None:
+        if cs.get("bonus_applied") is True:
+            expected = 1.15
+        elif cs.get("penalty_applied") is True:
+            expected = pv
+        else:
+            expected = 1.0
+        if expected is None:
+            ratio = rab / raw_total if raw_total else None
+            if ratio is None or not any(abs(ratio - k) <= 1e-3 for k in _KNOWN_MULTIPLIERS):
+                errors.append(
+                    f"calculation_steps: penalty_applied=true but penalty_value missing and the "
+                    f"implied multiplier {ratio} is not one of {_KNOWN_MULTIPLIERS}")
+        elif abs(raw_total * expected - rab) > 5e-4:
+            errors.append(f"calculation_steps.raw_after_bonus={rab} != raw_total {raw_total} "
+                          f"× {expected}")
+
+    # ── Tier A.3 — macro step ────────────────────────────────────────────────
+    mm = _numf(cs.get("macro_multiplier"))
+    floor = _numf((cs.get("structural_shift_modulation") or {}).get("shift_macro_floor"))
+    eff = _numf(cs.get("effective_macro_mult"))
+    if mm is not None and floor is not None and eff is not None:
+        if abs(max(mm, floor) - eff) > 1e-6:
+            errors.append(f"calculation_steps.effective_macro_mult={eff} != "
+                          f"max(macro_multiplier {mm}, shift_macro_floor {floor})")
+    align = cs.get("macro_alignment")
+    backdrop = _numf((entry.get("phase0_macro_snapshot") or {}).get("macro_backdrop_score"))
+    if rab is not None and backdrop is not None and align in ("ALIGNED", "CONTRARIAN"):
+        _sgn = lambda v: (1 if v > 0 else (-1 if v < 0 else 0))  # noqa: E731
+        same = _sgn(rab) == _sgn(backdrop)   # spec-literal, matches decision_engine.compute_step3
+        if same != (align == "ALIGNED"):
+            errors.append(
+                f"calculation_steps.macro_alignment={align} contradicts sign(raw_after_bonus "
+                f"{rab}) vs sign(macro_backdrop_score {backdrop})")
+    fs_cs = _numf(cs.get("final_score"))
+    if rab is not None and eff is not None and fs_cs is not None and align:
+        expected_fs = rab * eff if align == "ALIGNED" else rab
+        if abs(expected_fs - fs_cs) > 5e-4:
+            errors.append(f"calculation_steps.final_score={fs_cs} != {expected_fs:.4f} "
+                          f"(raw_after_bonus × effective_macro_mult under {align})")
+    if fs_cs is not None and not _same_number(fs_cs, trade.get("final_score"), tol=5e-4):
+        errors.append(f"trades_this_session[0].final_score={trade.get('final_score')} != "
+                      f"calculation_steps.final_score={fs_cs}")
+
+    # ── Tier A.4 — threshold formula, polarization label, decision band ──────
+    dt = cs.get("dynamic_threshold") or {}
+    buy, staged = _numf(dt.get("buy_threshold")), _numf(dt.get("staged_threshold"))
+    if buy is not None and staged is not None:
+        if abs(max(0.6, round(buy - 0.4, 10)) - staged) > 1e-6:
+            errors.append(f"dynamic_threshold.staged_threshold={staged} != "
+                          f"max(0.6, buy_threshold {buy} − 0.4)")
+
+    polar = cs.get("polarization_modulation") or {}
+    if len(lane_scores) == len(_STEP_LANES) and polar.get("label"):
+        recomputed = compute_polarization(lane_scores, lane_scores.get("valuation"))
+        if recomputed.get("label") and recomputed["label"] != polar.get("label"):
+            errors.append(
+                f"polarization_modulation.label={polar.get('label')!r} but the lane scores in "
+                f"calculation_steps recompute to {recomputed['label']!r}")
+        for fld, key in (("lane_range", "range"), ("pos_strong", "pos_strong"),
+                         ("neg_strong", "neg_strong")):
+            got, want = polar.get(fld), recomputed.get(key)
+            if got is not None and want is not None and not _same_number(got, want, tol=1e-6):
+                errors.append(f"polarization_modulation.{fld}={got} != recomputed {want}")
+
+    fd = trade.get("final_decision")
+    if fs_cs is not None and buy is not None and staged is not None and fd:
+        banded = decision_band(fs_cs, buy, staged)
+        allowed = {banded}
+        if banded == "BUY" and polar.get("label") == "BIPOLAR":
+            allowed.add("STAGED_ENTRY")          # Step 1.7 forced downgrade
+        if banded == "BUY" and trade.get("decision_cap_active") is True \
+                and trade.get("cap_override_reason"):
+            allowed.add("STAGED_ENTRY")          # Phase 4.6 cap + override（不退到 HOLD）
+        if banded in ("BUY", "STAGED_ENTRY"):
+            allowed.add("HOLD")                  # Auto REJECT / decision cap
+        if banded == "HOLD" and trade.get("hot_zone_probe") is True:
+            allowed.add("STAGED_ENTRY")          # Rec 11 probe
+        if fd not in allowed:
+            errors.append(
+                f"final_decision={fd!r} is not reachable from final_score {fs_cs} with "
+                f"buy={buy}/staged={staged} (band → {banded}, allowed {sorted(allowed)})")
+
+    # ── Tier B — rule-table conformance (V4.70.0+ entries only) ──────────────
+    if not engine_ver:
+        return
+    for lane, ce in ceffs.items():
+        if ce not in (0.35, 0.60, 0.72):
+            errors.append(f"calculation_steps: {lane} C_eff={ce} outside the V4.70.0 "
+                          "three-tier set (0.35/0.60/0.72)")
+    if rule in _CASCADE_PENALTY:
+        allowed_pv = _CASCADE_PENALTY[rule]
+        if pv is None:
+            errors.append(f"cascade_rule_applied={rule!r} requires penalty_value "
+                          f"(one of {allowed_pv})")
+        elif not any(abs(pv - k) <= 1e-9 for k in allowed_pv):
+            errors.append(f"cascade_rule_applied={rule!r} implies penalty_value in "
+                          f"{allowed_pv}, got {pv}")
+    elif rule not in (None, "no_penalty", "consensus_bonus"):
+        warnings.append(f"cascade_rule_applied={rule!r} is not a known V4.70.0 cascade rule")
+
+    tier = (cs.get("structural_shift_modulation") or {}).get("tier")
+    if polar.get("label") and buy is not None:
+        want = compute_dynamic_threshold(tier, polar.get("label"))
+        if abs(want["buy_threshold"] - buy) > 1e-9:
+            errors.append(
+                f"dynamic_threshold.buy_threshold={buy} but tier={tier!r} × "
+                f"polarization={polar.get('label')!r} maps to {want['buy_threshold']}")
+    if trade.get("hot_zone_eval") is None:
+        errors.append("hot_zone_eval missing — TODO-015 要求每筆 engine-scored deep-dive 必填")
 
 
 def main(argv=None):
@@ -543,6 +757,10 @@ def main(argv=None):
             warnings.append("valuation_archetype_shadow.flip_vs_live must be bool|null")
     elif vas is not None:
         warnings.append("valuation_archetype_shadow must be an object when present")
+
+    # ── 13. V4.80.0 — Phase 3 arithmetic re-derivation (decision_engine parity) ──
+    # 舊 entry（無 calculation_steps 也無 decision_engine_version）整段跳過 → 向後相容。
+    check_phase3_arithmetic(entry, trade, errors, warnings)
 
     if errors:
         fail(errors)

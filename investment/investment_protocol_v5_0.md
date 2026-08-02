@@ -798,6 +798,35 @@ V3.17 (Wave 1) — transition_signature 攻擊指引:
 
 PM (inline)。Price framework 數字已由 **Phase 2.4 engine** 產出，直接引用。
 
+### 執行方式（V4.80.0 — script 化，禁手算）
+
+Phase 3 的**全部算術**由 `investment/scripts/decision_engine.py` 執行。PM 只做三件事：
+
+1. **組 input JSON**（寫到 `/tmp/<TICKER>_p3.json`）——只填 Phase 0-2.8 已經產出的事實：
+   `lane_scores` / `lane_confidence`（5 lane 原始 confidence，engine 自己做 C_eff 量化）、
+   `structural_shift.tier`、`red_team`（verdict / counter_thesis / kill_conditions /
+   counter_evidence_strength）、`transition`（V3.17 rule-2 四欄 + 兩個 mtime）、
+   `macro`（multiplier / backdrop_score / regime）、`burry`、`gates`、`hot_zone`、
+   `decision_cap`。完整 shape 見 script docstring。
+2. **跑一次**：
+
+   ```bash
+   python3 investment/scripts/decision_engine.py --from-file /tmp/<TICKER>_p3.json
+   ```
+
+3. **verbatim 抄寫** `calculation_steps` 整塊 + `final_score` / `final_decision` /
+   `avg_confidence` / `hot_zone_probe` / `hot_zone_probe_tier` / `hot_zone_eval` /
+   `decision_margin` / `decision_cap_active` / `decision_cap_reason` /
+   `position_size_cap_pct` / `polar_position_cap_pct` 進 session export。
+
+**禁止手算 / 重算 / 微調任何 Phase 3 數字。** 下方 Step 1–4 的公式自此為 **spec 參照**
+（engine 是唯一執行來源，`test_decision_engine.py` 是兩者的 parity 契約）——改公式必須
+同步改 engine 與該測試，否則 validator 會擋。
+
+engine 唯一**不產**的欄位是質性判斷，仍由 PM 自寫：`institutional_lens`、`scenario_odds`
+（加總必須 100）、`action_label`、`decision_confidence_pct`、`contrarian_note`、
+`red_team_note`。
+
 ```
 Step 1 (Raw):
   raw_total = Σ(Weight_i × Score_i × C_eff_i)
@@ -1018,6 +1047,12 @@ THEN:
 
 - **負分區（`(-staged, 0)`）不適用** — 仍 default HOLD（無證據鬆綁空方）。
 - **硬閘優先**：Auto REJECT（下節）、burry≤1 CANCEL、`proceed_to_phase3=false`、systemic risk flag、decision_cap 全部**優先於**本例外；任一觸發即不 probe。
+  - **以「probe 後的決策」評估硬閘（V4.80.1）**：Auto REJECT 有兩條是決策側條件式——
+    `risk_reward_ratio < 2.0` 與 `FULL_FALLBACK AND final_decision ∈ {BUY, STAGED_ENTRY}`。
+    熱區 probe 發生前的 banded 決策是 HOLD，用 HOLD 去評這兩條會**恆不觸發**，等於 probe
+    可以帶著 R/R 1.5 或 FULL_FALLBACK 開倉。engine 因此在 fire 之前用假設決策
+    `STAGED_ENTRY` 再跑一次硬閘，觸發即 `suppressed_by_risk_flag`
+    （trace 在 `auto_reject.probe_prospective_reasons`）。
 
 **TODO-015 instrumentation（V5.0.x，REVIEW_2026-06-28）— Phase 5 export 必填**：
 每筆 deep-dive 不論是否 probe，**一律**寫出 `hot_zone_eval`（enum），記錄 Rec 11 評估結果，使驗收不再盲飛（TXN 06-22 首個 qualifying 場景因報告無此欄無法確認規則是否被評估）。判定樹（由上而下，首符即取）：
@@ -1047,6 +1082,10 @@ THEN:
 - Unknown/negative binary risk < 48h
 - `mandatory_risk_flags` 含系統性事件
 - `phase2_fanout_summary.mode = FULL_FALLBACK` AND `final_decision ∈ {BUY, STAGED_ENTRY}` → 強制降為 HOLD
+
+**Export shape**（`calculation_steps` 以下所有欄位由 engine 產出，PM verbatim 抄寫；
+engine 另附 `cascade_rule_applied` / `penalty_value` / `red_team_effective_verdict`
+三個 trace 欄，一併抄）：
 
 ```json
 {
@@ -1284,6 +1323,22 @@ shadow-only、只渲染 MD、無決策消費者；落日條款改為 on-demand �
 
 PM (inline, deterministic — 沒有 LLM 呼叫)。在 Phase 5 export 之前強制執行。
 
+**執行方式（V4.80.0）**：cap 由 `decision_engine.py` 的獨立 entry point 套用，收 Phase 4
+sizing 的結果為輸入——**不要手動套下面的規則表**：
+
+```bash
+python3 investment/scripts/decision_engine.py --phase 4.6 --from-file /tmp/<TICKER>_p46.json
+# input: {"decision_cap": {...}, "final_decision": ..., "avg_confidence": ...,
+#         "position_size_pct": ..., "final_action": ..., "hot_zone_probe": ...,
+#         "cap_override_reason": null}
+# output: 套完 cap 的 final_decision / avg_confidence / position_size_pct / final_action
+#         + adjustments[] 逐條 trace，直接抄進 export
+```
+
+Phase 3 已先行評估 cap 觸發條件（同一組輸入在 Phase 3 就齊全，故 Rec 11 判定樹引用
+`decision_cap_active` 無循環依賴）；本 Phase 只負責**套用**到 sizing 後的數字。
+下方規則表為 spec 參照。
+
 ### 目的
 Phase 4.5 anchors 不足 / fair value confidence=low 時，仍可能因其他 lane 推力推出
 高信心 BUY → 過去常見「弱 valuation 證據卻給高信心 BUY」誤判。Cap 把這類決策硬壓回
@@ -1308,6 +1363,10 @@ Phase 4.5 anchors 不足 / fair value confidence=low 時，仍可能因其他 la
 5. **`position_size_pct`** = `min(原值, 0.003)` — 即 30 bps 上限
 6. **`final_action`** 對應改：原 `EXECUTE` → `STAGED`；若降為 HOLD 則 `CANCEL`
    - **熱區例外（Rec 11）**：當 `hot_zone_probe=true`（見 decision band 熱區鬆綁）且本 cap 非 systemic / 非 decision_cap 觸發時，**保留 `STAGED` probe，不 force `CANCEL`**。probe tier 上限（15/30 bps）本就 ≤ 30bps cap，無衝突。systemic risk flag / decision_cap_active 觸發的 cap **不適用**此例外（硬閘優先）。
+   - ⚠️ **此例外在 decision_cap 路徑上恆不成立**（V4.80.0 engine 實作時發現）：validator §11
+     禁止 `hot_zone_probe=true` 與 `decision_cap_active=true` 併存，且 Phase 3 判定樹在 cap
+     觸發時已先出 `suppressed_by_cap`。engine 保留該分支並回報 `hot_zone_exception_applicable:
+     false`——例外只對「非 decision_cap 來源的其他 cap」有意義，不是死碼但在本節不會被走到。
 
 ### Override 例外
 
@@ -1317,6 +1376,10 @@ Phase 4.5 anchors 不足 / fair value confidence=low 時，仍可能因其他 la
 - **`cap_override_reason: string`** — 一句說明為何 override（非空字串）
 
 Override **不解除** size 與 confidence 的 cap，只是允許不退到 HOLD。
+
+明確化（V4.80.0 engine 實作定案）：cap 觸發時 `BUY` → **無 override 退 `HOLD`／有 override
+退 `STAGED_ENTRY`**；本來就是 `STAGED_ENTRY` / `HOLD` 的決策不再下降。與歷史 23 筆 cap
+entry 一致（22 筆 HOLD/CANCEL、1 筆 STAGED_ENTRY/STAGED）。
 
 ### Schema export 欄位（trades_this_session[0]）
 
