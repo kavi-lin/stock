@@ -8,6 +8,49 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.89.0] — 2026-08-02 — L4b：Valuation Specialist 條件式觸發 gate（shadow-only）
+
+### Added
+- `investment/scripts/valuation_reviewer_gate.py`：讀 Phase 1.5 quant artifact +
+  peer cohort + transition 訊號 → `{would_invoke, triggers_fired[], triggers[]}`。
+  **零新計算**（quant 訊號全部來自 artifact）。**shadow-only**：本版 PM 照跑 lane。
+- 5 條 trigger：`transition_case_active`（**mandatory**）/ `no_peer_cohort` /
+  `structural_shift_typed` / `anchor_conflict_severe` / `low_quality_possible_buy`。
+- `peer_cohorts.py` 新增 discovery cache 層：`load_discovered_cohort` /
+  `record_discovered_cohort` / `resolve_cohort_availability`，寫
+  `skills/valuation-modeler/cache/peer_discovery.json`（TTL 30d，provenance=discovered）。
+- `test_valuation_reviewer_gate.py`：5 條 trigger 各自獨立命中 + 全靜默、mandatory 旗標、
+  proxy 兩側、TTL 30d 邊界（第 30 天有效 / 第 31 天過期）、discovered 拒絕覆寫 curated、
+  壞 cache 不偽裝成「還沒發現」、artifact 四種不可用 rc=1。
+- `phase5_export_schema.md` + `validate_session_export.py` §5i：新增 optional
+  `valuation_reviewer_gate` block（缺 → 靜默，舊 entry 相容）。
+
+### Changed
+- protocol Valuation Specialist 節新增「條件式觸發 gate」小節（trigger 表 + proxy 理由 +
+  peer discovery 紀律 + 翻預設條件）。
+
+### Fixed
+- `peer_cohorts.load_cohort()` 的 `path` 參數改吃 `str`/`Path` 皆可（原本只吃 `Path`，
+  外部呼叫傳字串會 `AttributeError`）。
+- review P3 三件：(a) validator §5i 對**缺** `shadow_only` 欄位改發 warning——原本只擋顯式
+  `false`，省略該欄即可繞過；(b) `load_quant_artifact()` 改驗 gate 實際讀的每個 leaf key
+  （缺 key rc=1，`null` 值仍合法），原本 `_num(...) or 0` 會把缺欄讀成 0、判成低品質、
+  無聲灌水 shadow 統計；(c) protocol 的 gate 小節原插在 Valuation Specialist 的 bullet
+  list 中間，導致 Anchors 表渲染到 gate 標題底下——改搬到 lane 本體之後。
+- `low_quality_possible_buy` 的 `possible_buy` 判定：`verdict_band` 為 null（無 eligible
+  anchor，pack 算不出 verdict）改視為「不在高估側」。原本判 False 會讓**估值完全未知 +
+  資料品質低**的 session 反而跳過 reviewer，方向是錯的。由新增的 null-leaf 測試逼出。
+
+### Why
+- Specialist 沒有數字權（score 是 pack projection），但**跳過它會改決策數字**：
+  `decision_engine.compute_transition_gate()` 吃 lane 的 `cited_transition_overlay` /
+  `transition_dissent_basis`，lane 不跑 → `valuation_confirmed_transition=False` →
+  Phase 3 cascade rule #2 的 ×0.95 軟化落回 ×0.85。所以 `transition_case_active` 設為
+  mandatory trigger，不得被 shadow 統計關掉。
+- `no_peer_cohort` 今天 100% 命中（curated cohort 只有 MU 一個），所以 peer discovery
+  cache 是本項核心而非附件——沒有它，shadow 數據只會說「每次都該跑」。
+- validator 擋 `shadow_only=false`：翻預設是使用者拍板的事，不是任一 session 能自己決定的。
+
 ## [4.88.0] — 2026-08-02 — L4：估值 quant 提前 Phase 1.5，Phase 2.4 只組 MHP
 
 ### Added

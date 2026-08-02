@@ -86,6 +86,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 | 你改了什麼 | 必跑 |
 |---|---|
 | `compute_price_framework.py` / valuation projection validator | `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_valuation_pack_consistency.py`（兩者 rc=0；後者含故意 drift 的 rc=1 fixture）。前者含 V4.88.0 staged regression：`--stage quant` + `--stage mhp` 合併輸出必須與單發模式逐位元一致（只豁免 `valuation_pack.built_at`），改到分段/合併路徑必紅 |
+| `valuation_reviewer_gate.py` / `peer_cohorts.py` 的 discovery cache | `python3 investment/scripts/test_valuation_reviewer_gate.py`（rc=0）+ `python3 skills/valuation-modeler/tests/test_comps.py`。鎖住「5 條 trigger 各自獨立命中、`transition_case_active` 是唯一 mandatory、TTL 30d 邊界、discovered 永不覆寫人工核准的 `config/peer_cohorts.json`、artifact 不可用 rc=1」 |
 | earnings valuation forecaster | `python3 skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py` |
 | `forward_expectations.py` 核心 | `python3 investment/scripts/test_forward_expectations.py`（rc=0 為準） |
 | `inject_report_facts.py` | `python3 investment/scripts/test_inject_report_facts.py` |

@@ -1,7 +1,18 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.88.0)
+> **Last Updated**: 2026-08-02 (v4.89.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.89.0) — L4b 條件式 Valuation reviewer（前提實測後被修正）
+- **「沒有數字權 = 跳過不改決策」被實測推翻。** 條目與我收到的規劃都寫「Specialist 的 score 是 pack projection，所以跳過 LLM 不動任何決策數字」。grep 下去發現 `decision_engine.compute_transition_gate()` 吃兩個**純 LLM 欄位**（`cited_transition_overlay` / `transition_dissent_basis`）；lane 不跑 → `cited` 缺 → `valuation_confirmed_transition=False` → Phase 3 cascade rule #2 的 ×0.95 軟化落回 ×0.85（raw_total 100 即 95 vs 85，門檻附近足以翻 BUY/HOLD）。實跑兩次 `compute_transition_gate()` 對照確認。**判準：「這個 lane 有沒有數字權」要看的是 decision engine 讀了它哪些欄位，不是看它的 score 怎麼來的。**修法是加第 5 條 mandatory trigger，不是放寬前提。
+- **方向是保守，但保守不等於沒事。** 跳過會讓懲罰更重（×0.85 而非 ×0.95），是 fail-safe 方向。但這仍然是決策數字被改了——如果只看「會不會變得更敢買」就放行，等於默認「往保守偏移不算 regression」，那條線一鬆，之後任何省成本的改動都可以用同一個理由過關。
+- **`no_peer_cohort` 今天 100% 命中，所以 discovery cache 是核心不是附件。** `config/peer_cohorts.json` 只有 MU 一個 curated cohort。沒有 discovery cache 的話，shadow 數據只會告訴你「每次都該跑」，省不到任何東西也學不到任何東西。
+- **discovery cache 刻意不餵 `build_pe_cohort`。** 只餵 gate。餵下去的話 LLM 發現的 peer 會流進 `valuation_explained_range` 這條 **live 數字路徑**——那超出 shadow-first 的範圍。同理 `record_discovered_cohort()` 對已有 curated cohort 的 ticker 直接拒絕寫入：人工核准的那份永遠贏，不讓兩份悄悄分歧。config 那個檔帶 `approved_by: user`，任何 agent 不得寫入。
+- **validator 擋 `shadow_only=false`（error 不是 warning）。** 翻預設要使用者拍板；把它做成 warning 等於允許某個 session 自己決定然後留一行沒人看的黃字。六種情形逐一實跑驗過（缺 block 靜默、would_invoke 與 triggers 矛盾 → warning、未知 trigger 名 → warning、shadow_only=false → error）。
+- **shadow 窗口我不建議用固定 session 數**：前幾個 session 會被 discovery cache 暖機主導（今天除 MU 外全部命中 `no_peer_cohort`），那段期間的命中率不反映穩態。既有前例在 `shadow_report.py` 裡是兩個具名常數——`ARCHETYPE_CHECKPOINT_N = 20`（翻 live 行為）與 `NEWS_FREEZE_N = 10`（降級後監看）。L4b 是翻 live 行為，形狀接近前者。建議停止規則寫成「discovery 覆蓋率穩定後再數 N」而不是「跑滿 N 個 session」。
+- **驗收**：`test_valuation_reviewer_gate.py` rc=0（5 條 trigger 各自獨立 + 全靜默、mandatory 唯一性、proxy 兩側、TTL 第 30/31 天邊界、拒絕覆寫 curated、壞 cache 不偽裝、artifact 四種不可用 rc=1）；`test_comps.py` / `test_dcf.py` / `test_session_export_schema.py` / `validate_session_export.py` 全 rc=0；live NVDA gate 實跑 would_invoke=true（`no_peer_cohort` + `anchor_conflict_severe`，cv 0.4314 未達門檻但 span 9.73x 達標）；SYNC OK 4.89.0。
+- **review 收尾：補 P3 時測試逼出一個真缺陷。** 三條 P3（缺 `shadow_only` 繞道 / leaf key 只驗 block / protocol 小節插錯位置）都是幾行的事，但補「leaf 值為 null 仍合法」那條測試時炸了——我的 `possible_buy` 寫成 `verdict is not None and verdict not in OVERVALUED_BANDS`，於是 `verdict_band=null`（無 eligible anchor、pack 根本算不出估值）會判成「不是可能 BUY」→ 不叫 reviewer。**估值完全未知 + 資料品質低，正是最該叫人看的情形，我的邏輯卻讓它最不會被叫。**改成 `verdict not in OVERVALUED_BANDS`（null 視為不在高估側）。**判準：寫「非高估側」這種否定條件時，要分開想「已知不高估」與「不知道」——把未知歸到跳過側，等於在最不確定的地方省事。**
+- **未驗**：gate 尚未接進 `shadow_report.py` 的讀出端（它只掃 history.json，要等 session export 真的帶 `valuation_reviewer_gate` 才有樣本）。翻預設所需的統計面板是下一版的事。
 
 ## 🟢 Session Note (v4.88.0) — L4 估值 quant 提前 Phase 1.5（等價用結構保證，不用比對）
 - **「兩段合併 == 單發」不該靠測試比對，該讓它無法不成立。** 第一個設計是分別寫 quant 路徑與 mhp 路徑，再用 regression 檢查兩者相等——那等於把契約託付給我未來記得同步改兩處。改成把 `main()` 拆成 `build_quant_stage()` + `build_full_output()`，**單發模式本身就是這兩段的組合**，staged 只是把中間物存進檔案再讀回來。等價成了結構事實，測試從此只是防呆而不是唯一防線。**判準：當驗收條件是「兩條路徑必須等價」時，先問能不能讓它們是同一條路徑。**

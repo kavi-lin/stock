@@ -1124,6 +1124,36 @@ def main(argv=None):
     elif vas is not None:
         warnings.append("valuation_archetype_shadow must be an object when present")
 
+    # ── 5i. V4.89.0 — valuation_reviewer_gate（shadow-only，warning-only）──────
+    # 缺 block 完全靜默：172 筆歷史 entry 都沒有它，warning 會變成純噪音。
+    # 但 shadow_only=false 要擋——那代表有人讓 gate 真的跳過了 lane，而翻預設
+    # 需要使用者拍板，不是任一 session 可以自行決定的事。
+    vrg = trade.get("valuation_reviewer_gate")
+    if isinstance(vrg, dict):
+        known = {"transition_case_active", "no_peer_cohort", "structural_shift_typed",
+                 "anchor_conflict_severe", "low_quality_possible_buy"}
+        fired = vrg.get("triggers_fired")
+        if fired is None:
+            warnings.append("valuation_reviewer_gate.triggers_fired missing")
+        elif not isinstance(fired, list) or any(t not in known for t in fired):
+            warnings.append(f"valuation_reviewer_gate.triggers_fired invalid: {fired!r}")
+        wi = vrg.get("would_invoke")
+        if wi not in (None, True, False):
+            warnings.append("valuation_reviewer_gate.would_invoke must be bool|null")
+        elif isinstance(fired, list) and wi is not None and wi != bool(fired):
+            warnings.append(
+                f"valuation_reviewer_gate.would_invoke={wi} contradicts triggers_fired={fired}")
+        shadow_only = vrg.get("shadow_only")
+        if shadow_only is False:
+            errors.append("valuation_reviewer_gate.shadow_only=false — 翻預設需使用者拍板，"
+                          "session 不得自行讓 gate 生效")
+        elif shadow_only is not True:
+            # gate 永遠會寫這個欄位；缺欄本身即異常，否則省略它就是繞過上面那條 error。
+            warnings.append(
+                f"valuation_reviewer_gate.shadow_only missing or invalid: {shadow_only!r}")
+    elif vrg is not None:
+        warnings.append("valuation_reviewer_gate must be an object when present")
+
     # ── 13. V4.80.0 — Phase 3 arithmetic re-derivation (decision_engine parity) ──
     # 舊 entry（無 calculation_steps 也無 decision_engine_version）整段跳過 → 向後相容。
     check_phase3_arithmetic(entry, trade, errors, warnings)

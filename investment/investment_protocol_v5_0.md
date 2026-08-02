@@ -533,6 +533,7 @@ OUTPUT (strict JSON):
   Phase 1.5 定版（V4.88.0 起這是結構事實，不只是紀律）。engine 真正的 suppression 閘是
   `structural_shift` typed input，來源是 earnings-analyst cache 而非 lane。proposal 的用途
   是人工審閱，以及作為**下次 session** typed input 的候選。LLM 文字任何時候都不得改數字。
+
 - **Anchors（V4.69.0 起 8 個；多數從現有 bundle 抽，兩個新 anchor 走 valuation-modeler script（FMP 24h cache，增量 call 極少））**：
   | Anchor | 來源 | Weight |
   |---|---|---|
@@ -550,6 +551,45 @@ OUTPUT (strict JSON):
 - **絕對禁止**: 直接 mirror Fundamentals 的 P/E judgment；本 lane 是獨立估值維度
 - 額外輸出：`suppression_proposals[]`（advisory-only，見上）、`valuation_commentary`；
   數值欄由 pack projection 注入。
+
+##### 條件式觸發 gate（V4.89.0 — **shadow-only，本版 lane 照跑**）
+
+```bash
+python3 investment/scripts/valuation_reviewer_gate.py \
+    --from-quant investment/invest_logs/<DATE>_<TICKER>_pf_quant.json
+```
+
+零新計算——所有 quant 訊號直接讀 Phase 1.5 artifact。輸出 `{would_invoke, triggers_fired[],
+triggers[]}` 寫進 session export 的 `valuation_reviewer_gate`（schema 見
+`phase5_export_schema.md`）。**本版 `would_invoke` 只被記錄，PM 一律照跑 lane、決策數字一個都不動。**
+
+| Trigger | 命中條件 | Mandatory |
+|---|---|---|
+| `transition_case_active` | `transition_signature ∈ {paradigm_only, mix_only, both}` 或 `forecaster.transition_case is True` | ✅ **是** |
+| `no_peer_cohort` | 無 curated 也無未過期 discovered cohort（TTL 30d） | 否 |
+| `structural_shift_typed` | typed shift input 齊備（status + evidence_date + provenance） | 否 |
+| `anchor_conflict_severe` | `cv ≥ 0.60` 或 `dispersion_ratio ≥ 5.0` 或 `agreement_grade = low` | 否 |
+| `low_quality_possible_buy` | （confidence=low 或 anchors < 4）且 pack 不在高估側 | 否 |
+
+**`transition_case_active` 為什麼 mandatory**：`decision_engine.compute_transition_gate()` 吃
+本 lane 的 `cited_transition_overlay` / `transition_dissent_basis` 兩個純 LLM 欄位。lane 不跑
+→ `cited` 缺 → `valuation_confirmed_transition = False` → Phase 3 cascade rule #2 的 ×0.95
+軟化不觸發，落回 ×0.85（raw_total 100 即 95 vs 85）。方向雖然保守，但那是**改了決策數字**，
+違反「跳過 LLM 不改決策」的前提。這條不得被 shadow 統計說服關掉。
+
+**`low_quality_possible_buy` 的 proxy**：Phase 2 時點還沒有 tentative decision（Phase 3 才有），
+所以用 pack 自身當「可能 BUY」的替身。刻意**不**改成 Phase 3 後補跑第二輪——那會打破
+Phase 2 平行 fan-out 的結構。
+
+**Peer discovery cache**：reviewer 提出的 peers 寫
+`skills/valuation-modeler/cache/peer_discovery.json`（TTL 30d，provenance=`discovered`）。
+`config/peer_cohorts.json` 是**人工核准區**（`approved_by`/`approved_at`），任何 agent 不得寫入；
+已有 curated cohort 的 ticker 一律拒絕寫入 discovered，不讓兩份悄悄分歧。discovery cache
+**只餵 gate**，不餵 `build_pe_cohort` —— 否則 LLM 發現的 peer 會流進
+`valuation_explained_range` 這條 live 數字路徑。
+
+**翻預設（skip 真的生效）不在本版**：需累積 shadow 樣本後由使用者拍板。validator 會擋
+`shadow_only=false`。
 
 ##### Reverse DCF `implied_expectations`（engine 產出，Specialist 不算）
 
