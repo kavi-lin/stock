@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""test_heatmap_pe_retry.py — V4.85.0 heatmap PE warm-up retry contract.
+
+The bug this pins down: `_heatmap_refresh_pe_universe()` ran exactly once from a
+startup thread and wrote `(now, result)` for every ticker regardless of outcome.
+`_fetch_pe_ttm` returned an all-None dict when it had not actually fetched anything
+(rate-limit breaker open), so a bad boot cached empty bundles against the 24h TTL —
+and since the heatmap loop never called the warm-up again, `heatmap.json` and
+everything joined off it stayed blank until the next server restart.
+
+What must hold now:
+  1. A failure is never cached — a stale-but-good bundle survives a failed refresh.
+  2. Partial success is kept; only the failures are retried.
+  3. Retries are backed off, and the backoff escalates while the failure persists.
+  4. The rate-limit breaker is not charged as a failed batch (nothing was attempted).
+  5. A fully-warm cache costs zero HTTP calls.
+
+Run: python3 tests/test_heatmap_pe_retry.py   # rc=0 全過 / rc=1 fail
+"""
+from __future__ import annotations
+
+import os
+import sys
+import time
+from pathlib import Path
+
+os.environ.setdefault("FMP_API_KEY", "dummy-key-for-test")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.argv = ["dashboard_server.py"]
+
+import dashboard_server as ds  # noqa: E402
+
+FAILS: list[str] = []
+
+
+def eq(label, got, want):
+    if got != want:
+        FAILS.append(f"{label}: got {got!r}, want {want!r}")
+
+
+BUNDLE_A = {"pe_ttm": 20.0, "ev_ebitda": 12.0, "fwd_eps": 5.0}
+BUNDLE_B = {"pe_ttm": 30.0, "ev_ebitda": 9.0, "fwd_eps": 4.0}
+
+
+def _reset(tickers=("AAA", "BBB", "CCC", "DDD")):
+    ds._heatmap_state["tickers"] = {t: {"price": 100.0} for t in tickers}
+    ds._heatmap_pe_cache.clear()
+    ds._heatmap_pe_next_attempt_at = 0.0
+    ds._heatmap_pe_backoff_sec = 0
+    ds._heatmap_ratelimit_until = 0.0
+
+
+_orig_fetch = ds._fetch_pe_ttm
+try:
+    # ── Round 1: half the batch fails ───────────────────────────────────────
+    _reset()
+    ds._fetch_pe_ttm = lambda sym, key: BUNDLE_A if sym in ("AAA", "BBB") else None
+    eq("round1.partial_returns_false", ds._heatmap_refresh_pe_universe(max_workers=4), False)
+    eq("round1.successes_cached", sorted(ds._heatmap_pe_cache), ["AAA", "BBB"])
+    eq("round1.failures_not_cached", "CCC" in ds._heatmap_pe_cache, False)
+    eq("round1.backoff_armed", ds._heatmap_pe_backoff_sec, ds.HEATMAP_PE_RETRY_BASE_SEC)
+    eq("round1.rows_patched", ds._heatmap_state["tickers"]["AAA"]["pe"], 20.0)
+    eq("round1.failed_row_untouched", "pe" in ds._heatmap_state["tickers"]["CCC"], False)
+
+    # Backoff suppresses an immediate retry.
+    eq("backoff.suppresses_retry", ds._heatmap_refresh_pe_universe(max_workers=4), False)
+
+    # ── Round 2: backoff expires, the rest succeed ──────────────────────────
+    ds._heatmap_pe_next_attempt_at = 0.0
+    ds._fetch_pe_ttm = lambda sym, key: BUNDLE_B
+    eq("round2.full_success", ds._heatmap_refresh_pe_universe(max_workers=4), True)
+    eq("round2.all_cached", sorted(ds._heatmap_pe_cache), ["AAA", "BBB", "CCC", "DDD"])
+    eq("round2.backoff_cleared", ds._heatmap_pe_backoff_sec, 0)
+    # The already-good tickers are NOT refetched — their round-1 values survive.
+    eq("round2.good_values_kept", ds._heatmap_pe_cache["AAA"][1]["pe_ttm"], 20.0)
+    eq("round2.failed_recovered", ds._heatmap_pe_cache["CCC"][1]["pe_ttm"], 30.0)
+    eq("round2.forward_pe_computed", ds._heatmap_state["tickers"]["CCC"]["forward_pe"], 25.0)
+
+    # ── A fully-warm cache costs no HTTP ────────────────────────────────────
+    called: list[str] = []
+
+    def _spy(sym, key):
+        called.append(sym)
+        return BUNDLE_B
+
+    ds._fetch_pe_ttm = _spy
+    eq("warm.returns_true", ds._heatmap_refresh_pe_universe(max_workers=4), True)
+    eq("warm.no_fetches", called, [])
+
+    # ── A failed refresh must not blank an existing good bundle ─────────────
+    ds._heatmap_pe_next_attempt_at = 0.0
+    ds._heatmap_pe_cache["CCC"] = (0.0, BUNDLE_B)      # force TTL expiry on one ticker
+    ds._fetch_pe_ttm = lambda sym, key: None
+    ds._heatmap_refresh_pe_universe(max_workers=4)
+    eq("stale.good_bundle_survives", ds._heatmap_pe_cache["CCC"][1], BUNDLE_B)
+    eq("stale.row_keeps_value", ds._heatmap_state["tickers"]["CCC"]["pe"], 30.0)
+
+    # ── Backoff escalates while the failure persists ────────────────────────
+    _reset()
+    ds._fetch_pe_ttm = lambda sym, key: None
+    ds._heatmap_refresh_pe_universe(max_workers=4)
+    b1 = ds._heatmap_pe_backoff_sec
+    ds._heatmap_pe_next_attempt_at = 0.0
+    ds._heatmap_refresh_pe_universe(max_workers=4)
+    b2 = ds._heatmap_pe_backoff_sec
+    eq("escalate.base", b1, ds.HEATMAP_PE_RETRY_BASE_SEC)
+    eq("escalate.doubles", b2, min(b1 * 2, ds.HEATMAP_PE_RETRY_MAX_SEC))
+    # ...and is capped.
+    for _ in range(12):
+        ds._heatmap_pe_next_attempt_at = 0.0
+        ds._heatmap_refresh_pe_universe(max_workers=4)
+    eq("escalate.capped", ds._heatmap_pe_backoff_sec, ds.HEATMAP_PE_RETRY_MAX_SEC)
+
+    # ── Rate-limit breaker is not a failed batch ────────────────────────────
+    _reset()
+    ds._fetch_pe_ttm = lambda sym, key: BUNDLE_A
+    ds._heatmap_ratelimit_until = time.time() + 900
+    eq("ratelimit.skips", ds._heatmap_refresh_pe_universe(max_workers=4), False)
+    eq("ratelimit.no_backoff_charged", ds._heatmap_pe_backoff_sec, 0)
+    eq("ratelimit.waits_for_breaker",
+       int(ds._heatmap_pe_next_attempt_at), int(ds._heatmap_ratelimit_until))
+
+    # ── _fetch_pe_ttm signals "did not fetch" as None, not an empty bundle ──
+    ds._fetch_pe_ttm = _orig_fetch
+    ds._heatmap_ratelimit_until = time.time() + 900
+    eq("fetch.breaker_returns_none", ds._fetch_pe_ttm("AAPL", "k"), None)
+finally:
+    ds._fetch_pe_ttm = _orig_fetch
+    ds._heatmap_ratelimit_until = 0.0
+
+if FAILS:
+    print(f"✗ {len(FAILS)} failure(s):")
+    for f in FAILS:
+        print("  -", f)
+    sys.exit(1)
+print("✓ heatmap PE warm-up retry contract holds")

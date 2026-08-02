@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-08-02 12:36:46",
+  "last_updated": "2026-08-02 12:41:46",
   "market": {
     "regime": "RISK_OFF",
     "cycle_phase": "Early",
@@ -27602,8 +27602,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -28193,8 +28193,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -28454,8 +28454,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -78274,7 +78274,7 @@
     "snap_date": "2026-07-31",
     "generated_at": "2026-07-31 22:05",
     "freshness": "STALE",
-    "age_label": "38.5h",
+    "age_label": "38.6h",
     "total_rows": 528,
     "rows": [
       {
@@ -217281,8 +217281,8 @@
     ],
     "global_warnings": [],
     "status": "success",
-    "_cache_age_sec": 194027,
-    "_cache_age_hr": 53.9,
+    "_cache_age_sec": 194327,
+    "_cache_age_hr": 54.0,
     "_source_file": "2026-07-31.json",
     "_freshness": "STALE",
     "_total_log_days": 76,
@@ -217963,7 +217963,7 @@
         }
       },
       "status": "success",
-      "_cache_age_sec": 138816,
+      "_cache_age_sec": 139115,
       "_cache_age_hr": 38.6,
       "_freshness": "STALE"
     },
@@ -220140,7 +220140,7 @@
         "analyst": 13
       },
       "report_path": "reports/2026-05-05_PLTR_earnings.md",
-      "cache_age_days": 89.1,
+      "cache_age_days": 89.2,
       "company_name": "Palantir Technologies Inc.",
       "sector": "Technology",
       "industry": "Software - Infrastructure",
@@ -220544,12 +220544,12 @@
       "missing": [],
       "errors": []
     },
-    "_cache_age_sec": 505
+    "_cache_age_sec": 805
   },
   "industry_trend": {
     "status": "success",
     "as_of": "2026-07-31 22:07:57",
-    "_cache_age_hr": 38.4,
+    "_cache_age_hr": 38.5,
     "_freshness": "STALE",
     "_source_file": "theme_detector_2026-07-31_221055.json",
     "leaders": [
@@ -221078,7 +221078,7 @@
     },
     "_partial": false,
     "status": "success",
-    "_cache_age_sec": 138829,
+    "_cache_age_sec": 139129,
     "_cache_age_hr": 38.6,
     "_freshness": "STALE"
   },

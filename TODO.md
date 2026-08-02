@@ -552,14 +552,12 @@
   window 不理會午夜。順手修 `load_llm_config()` 白名單漏掉新 budget key（cap
   原本完全不生效）。
 
-- [ ] **[V325.X-PE-WARMUP-RETRY] heatmap PE warm-up should retry on failure** —
-  `dashboard_server._heatmap_refresh_pe_universe()` runs once on startup with
-  a 24h TTL. If it errors mid-batch, the in-memory cache stays empty until
-  the next server restart, and heatmap.json (+ everything joined from it,
-  including momentum-screen P/E) renders blank. V3.25.2 added the manual
-  rescue `scripts/backfill_heatmap_pe.py`; the real fix is making the
-  daemon retry-on-failure or re-attempt every N hours when the cache is
-  still partially empty. Schedule separately from the V3.25.2 hot-fix.
+- [x] **[V325.X-PE-WARMUP-RETRY] heatmap PE warm-up should retry on failure** —
+  4.85.0 完成。失敗不進快取（既有好值原地保留）、部分成功保留、殘餘下輪補抓、
+  指數 backoff（5 分→1 小時）、429 熔斷不計失敗批次、loop 內補呼叫 warm-up。
+  實測比 TODO 描述更糟：`_fetch_pe_ttm` 在熔斷期回傳全 None 的 **dict**，通過了
+  `isinstance(v[1], dict)` 檢查，於是失敗值被當事實**蓋掉既有好值**。已改為回
+  `None`。`scripts/backfill_heatmap_pe.py` 手動救援保留但常態不該再需要。
 
 ## ✅ Recently Completed
 

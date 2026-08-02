@@ -1,7 +1,15 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.84.0)
+> **Last Updated**: 2026-08-02 (v4.85.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.85.0) — heatmap PE warm-up 重試（V325.X-PE-WARMUP-RETRY）
+- **TODO 描述的症狀對，病因更嚴重**：記的是「cache 空到下次重啟」。實際讀 code 發現 `_fetch_pe_ttm` 在 429 熔斷期回傳**全 None 的 dict** —— 跟「這支股票本來就沒 P/E」完全同形。而 `val_snapshot` 的過濾條件是 `isinstance(v[1], dict)`，全 None dict **通過了**。所以失敗值不只被快取 24 小時，還會被當成事實**蓋掉既有的好值**。**教訓：修 bug 前先讀清楚失敗值長什麼樣，不要照 TODO 的描述直接動手。**
+- **根因是型別分不出兩件事**：「抓到了但沒有資料」vs「根本沒去抓 / 抓失敗」在原本的回傳型別上是同一個東西。加 retry 之前要先讓函式**有能力表達失敗**（改回 `None`），否則重試邏輯只是在重試一個它以為成功的東西。
+- **失敗不進快取，比「快取失敗但標記」更簡單也更安全**：舊值留著就是最好的降級（stale 好過空白），而失敗的 ticker 自動落回 `todo`（因為 `not isinstance(cached[1], dict)`），不需要第二份失敗清單。
+- **429 熔斷不該計 backoff**：熔斷期根本沒發請求，記一次失敗是懲罰錯對象；改成把下次嘗試時間對齊熔斷解除時間。
+- **兩個 caller 都要修**：radar 的 lazy fetch `_bg()` 也在快取 None，會佔住 24h TTL 並讓 warm-up 的重試掃描看不到那支 ticker。
+- **驗收**：`tests/test_heatmap_pe_retry.py` rc=0（部分失敗 / backoff 抑制 / 補抓不重抓已成功者 / 失敗不洗掉好值 / escalate 且有上限 / 429 不計失敗 / 全暖零 HTTP）；`dashboard_server.py` 語法 OK；SYNC OK 4.85.0。
 
 ## 🟢 Session Note (v4.84.0) — model router rolling window（V321.X-ROUTER）
 - **本版最重要的一行是「不要歸零」**：`_load_usage()` 原本在 UTC 換日時整份重建。日計數該歸零，但 `call_timestamps` **不能** —— session window 不理會午夜，跟著清空等於在 00:00 UTC 憑空發還一整個 window 的額度，正好是這個計數器要防的事故。這是整個功能唯一真正微妙的地方，測試特地寫了一條跨午夜案例。

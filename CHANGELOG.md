@@ -8,6 +8,21 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.85.0] — 2026-08-02 — heatmap PE warm-up 失敗可重試（V325.X-PE-WARMUP-RETRY）
+
+### Fixed
+- **`_fetch_pe_ttm` 分不出「抓不到」與「沒去抓」**（`dashboard_server.py`）：429 熔斷冷卻中它回傳**全 None 的 dict**，跟「這支股票本來就沒有 P/E」長得一模一樣，呼叫端照樣當成功結果、蓋上 24h TTL 存進快取。改為兩種情況都回 `None`（熔斷中未發出請求 / 三個 endpoint 全無回應），呼叫端才有辦法分流。
+- **`_heatmap_refresh_pe_universe()` 只跑一次且會快取失敗**：原本從啟動 thread 呼叫一次，不論成敗都寫 `(now, result)`。啟動時遇到 FMP 熔斷或批次中途失敗 → 空 bundle 卡滿 24h TTL，而 `heatmap_refresh_loop` 從不再呼叫它，`heatmap.json`（及所有 join 自它的資料，含 momentum-screen P/E）就一路空白到下次重啟。現在：**失敗一律不進快取**（既有的舊值原地保留，失敗的 refresh 不會把資料洗白）、部分成功保留、殘餘失敗下輪補抓、指數 backoff（5 分起跳、上限 1 小時）、剩幾支沒抓到直接 log 出來（附前 8 支 ticker）。
+- **`heatmap_refresh_loop` 迴圈內補呼叫 warm-up**：這是「不重啟 server 就能補回完整覆蓋」的唯一途徑。無事可做時在 TTL / backoff 檢查就返回，不發任何 HTTP。
+- **radar 的 lazy PE fetch 同步修正**：`_bg()` 也只快取 dict，否則失敗會佔住 24h TTL 並讓 warm-up 的重試掃描看不到那支 ticker。
+- **429 熔斷不計為失敗批次**：熔斷中根本沒發請求，記 backoff 是懲罰錯對象；改為把下次嘗試時間對齊熔斷解除時間。
+
+### Added
+- **`tests/test_heatmap_pe_retry.py`**（新，~130 行）：部分失敗 / backoff 抑制立即重試 / 補抓後不重抓已成功者 / 失敗不洗掉既有好值 / backoff escalate 且有上限 / 429 不計失敗 / 全暖快取零 HTTP。
+
+### Why
+- TODO 記的是「cache 空到下次重啟」，實測下來比這更糟：**失敗值會被當成事實蓋掉既有好值**，因為 `val_snapshot` 只檢查 `isinstance(v[1], dict)`，而熔斷期的全 None dict 通過了這個檢查。V3.25.2 的手動救援 `scripts/backfill_heatmap_pe.py` 留著不動，但常態不該再需要它。
+
 ## [4.84.0] — 2026-08-02 — model router 加 rolling window 預算（V321.X-ROUTER）
 
 ### Added
