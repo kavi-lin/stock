@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
-"""test_compute_price_framework.py — V3.48.0 golden-fixture regression test.
+"""test_compute_price_framework.py — V4.88.0 golden-fixture regression test.
 
 鎖定 engine 數學 baseline（3.45.3–3.48.0 全部人工驗算過）。任何未來改動若無意間
-改變輸出，這裡先炸。純 stdlib、零網路（直接 call functions，不走 FMP fetch）。
+改變輸出，這裡先炸。純 stdlib、零網路（直接 call functions 或 --no-fetch CLI）。
+V4.88.0 起另鎖 staged mode：quant（Phase 1.5）+ mhp（Phase 2.4）合併輸出必須與
+單發模式逐位元一致。
 
 Run: python3 investment/scripts/test_compute_price_framework.py   # rc=0 全過 / rc=1 fail
 """
+import copy
+import json
 import os
+import subprocess
 import sys
+import tempfile
 import datetime as dt
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 from compute_price_framework import (  # noqa: E402
+    MHP_QUALITATIVE_KEYS,
+    QUANT_BLOCK_KEYS,
+    QUANT_STAGE_SCHEMA,
+    EngineInputError,
+    build_full_output,
+    build_quant_stage,
     build_valuation_pack,
     _block_manual_anchor_overrides,
     _supersede_vendor_dcf,
@@ -21,7 +34,10 @@ from compute_price_framework import (  # noqa: E402
     compute_fair_value_summary,
     compute_implied_expectations,
     compute_mhp,
+    load_quant_stage,
     reconcile_confidence,
+    resolve_effective_input,
+    write_quant_artifact,
 )
 
 FAILS = []
@@ -382,6 +398,196 @@ gated_fvs = fair_value_summary_from_pack(gated_pack)
 gated_mhp = compute_mhp({"current_price": 100.0, "volatility": {}}, gated_fvs)
 eq("pack.mhp_pt_suppressed", gated_mhp["mid_term_60d"]["pt_60d"], None)
 eq("pack.mhp_forecaster_suppressed", gated_mhp["mid_term_60d"]["earnings_revision"], None)
+
+# ── Fixture 10 (V4.88.0): staged mode — quant (Phase 1.5) + mhp (Phase 2.4) ──
+# 驗收核心：固定輸入下「staged 兩段合併輸出 == 單發輸出」逐位元一致。唯一豁免欄位
+# 是 valuation_pack.built_at（quant 段的時戳；兩次單發跑也不會相同）。
+TODAY = dt.date.today().isoformat()
+STAGED_META = {
+    name: {"provenance": "fixture", "as_of": TODAY, "correlation_key": f"fixture:{name}"}
+    for name in ("dcf_unlevered", "dcf_self_built", "analyst_pt_consensus",
+                 "peer_pe_implied", "comps_implied", "owner_earnings_mult",
+                 "forecaster_blend")
+}
+STAGED_META["peer_pe_implied"]["peer_count"] = 5
+STAGED_META["comps_implied"]["peer_count"] = 4
+
+# Phase 1.5 可得的部分（engine-owned quant，全部不需要 Phase 2 lane）
+STAGED_QUANT_INPUT = {
+    "ticker": "STAGE", "current_price": 100.0,
+    "anchors": {"dcf_unlevered": 108.0, "dcf_levered": None, "dcf_self_built": 121.0,
+                "analyst_pt_consensus": 132.0, "peer_pe_implied": 96.0,
+                "comps_implied": 114.0, "owner_earnings_mult": 88.0,
+                "forecaster_blend": 126.0},
+    "anchor_meta": STAGED_META,
+    "fred": {"treasury_10y": 0.041, "treasury_10y_real": 0.018},
+    "reverse_dcf": {"fcf_base_per_share": 4.2, "actual_3y_fcf_cagr": 0.12,
+                    "lane_fcf_estimate": 0.15},
+    "archetype_inputs": {"sector": "Technology", "revenue_yoy": 0.11, "fcf_margin": 0.21,
+                         "eps_ttm": 4.4, "margin_sigma_pp": 1.8},
+    "peer_ratios": {"peer_ev_ebitda_median": 18.0, "peer_ev_sales_median": 6.0,
+                    "peer_pb_median": 5.0},
+    "self_ratios": {"ev_to_ebitda_ttm": 20.0, "ev_to_sales_ttm": 7.0, "roe_ttm": 0.19,
+                    "book_value_per_share_ttm": 22.0, "pe_ttm": 22.7},
+    "ev_block": {"enterprise_value": 26e9, "net_debt": 1.5e9, "shares": 250e6},
+    "beta": 1.1,
+    "volatility": {"sigma_daily": 0.022, "atr_14": 2.4, "momentum_20d_pct": 6.0},
+}
+# Phase 2 lane 才有的 qualitative（MHP 專用）
+STAGED_QUALITATIVE = {
+    "key_levels": {"support": 92.0, "resistance": 118.0},
+    "pattern_taxonomy": "pullback_in_uptrend",
+    "smart_money_label": "accumulating",
+    "immediate_catalyst_5d": {"event": "Q3 earnings", "date": "2026-08-20",
+                              "direction_lean": "BULLISH", "expected_move_pct": 4.0},
+}
+STAGED_SINGLE_INPUT = {**copy.deepcopy(STAGED_QUANT_INPUT), **copy.deepcopy(STAGED_QUALITATIVE)}
+
+ENGINE_PATH = os.path.join(HERE, "compute_price_framework.py")
+
+
+def run_engine(args, stdin_text=None):
+    """CLI runner — (rc, parsed stdout JSON)。零網路（一律帶 --no-fetch）。"""
+    proc = subprocess.run([sys.executable, ENGINE_PATH, "--no-fetch", *args],
+                          input=stdin_text or "", capture_output=True, text=True)
+    try:
+        payload = json.loads(proc.stdout)
+    except Exception:
+        payload = {"_unparseable_stdout": proc.stdout, "_stderr": proc.stderr}
+    return proc.returncode, payload
+
+
+def normalized(out):
+    """逐位元比較用：抹掉唯一的 wall-clock 欄位，其餘（含 key 順序）全保留。"""
+    clone = copy.deepcopy(out)
+    if isinstance(clone.get("valuation_pack"), dict):
+        clone["valuation_pack"]["built_at"] = "<normalized>"
+    return json.dumps(clone, ensure_ascii=False, sort_keys=False)
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    single_path = os.path.join(tmp, "single.json")
+    quant_in_path = os.path.join(tmp, "quant_in.json")
+    qual_path = os.path.join(tmp, "qual.json")
+    artifact_path = os.path.join(tmp, "artifact.json")
+    for path, payload in ((single_path, STAGED_SINGLE_INPUT),
+                          (quant_in_path, STAGED_QUANT_INPUT),
+                          (qual_path, STAGED_QUALITATIVE)):
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh)
+
+    rc_single, single_out = run_engine(["--from-file", single_path])
+    eq("staged.single_rc", rc_single, 0)
+    rc_quant, quant_art = run_engine(
+        ["--from-file", quant_in_path, "--stage", "quant", "--out", artifact_path])
+    eq("staged.quant_rc", rc_quant, 0)
+    rc_mhp, staged_out = run_engine(
+        ["--from-file", qual_path, "--stage", "mhp", "--from-quant", artifact_path])
+    eq("staged.mhp_rc", rc_mhp, 0)
+
+    # 非退化守衛：等價比對不能是兩個空殼相等
+    eq("staged.fv_not_null", single_out["fair_value_summary"]["weighted_fair_value"] is not None,
+       True)
+    eq("staged.mhp_signal_present",
+       single_out["multi_horizon_price_framework"]["convergence"]["mhp_signal"] is not None, True)
+    eq("staged.equivalent_bitwise", normalized(staged_out), normalized(single_out))
+
+    # quant artifact：schema / 六個 block / 不含 MHP（結構證明 quant 不吃 lane 輸入）
+    eq("staged.artifact_schema", quant_art["schema"], QUANT_STAGE_SCHEMA)
+    eq("staged.artifact_blocks", sorted(quant_art["quant_blocks"]), sorted(QUANT_BLOCK_KEYS))
+    eq("staged.artifact_no_mhp", "multi_horizon_price_framework" in quant_art["quant_blocks"],
+       False)
+    eq("staged.artifact_persisted", quant_art["persisted_to"], artifact_path)
+    eq("staged.artifact_on_disk", os.path.exists(artifact_path), True)
+    with open(artifact_path, encoding="utf-8") as fh:
+        eq("staged.artifact_file_matches_stdout", json.load(fh), quant_art)
+    # 現價/sigma 凍結在 Phase 1.5：MHP 段不得重抓
+    eq("staged.frozen_price", quant_art["effective_input"]["current_price"], 100.0)
+    eq("staged.frozen_sigma", quant_art["effective_input"]["volatility"]["sigma_daily"], 0.022)
+
+    # quant block 在 MHP 段 verbatim 併回（不是重算後剛好相等）
+    for _block in QUANT_BLOCK_KEYS:
+        eq(f"staged.verbatim.{_block}", staged_out[_block], quant_art["quant_blocks"][_block])
+
+    # qualitative 全缺 → MHP 段降級不擋（drift=0、無 key level cap），quant block 照舊
+    rc_bare, bare_out = run_engine(["--stage", "mhp", "--from-quant", artifact_path])
+    eq("staged.bare_rc", rc_bare, 0)
+    eq("staged.bare_drift", bare_out["multi_horizon_price_framework"]["short_term_5d"]["drift_sigma"],
+       0.0)
+    eq("staged.bare_no_cap",
+       bare_out["multi_horizon_price_framework"]["short_term_5d"]["key_level_note"],
+       "帶未觸及 key levels")
+    eq("staged.bare_quant_intact", bare_out["valuation_pack"],
+       quant_art["quant_blocks"]["valuation_pack"])
+
+    # --from-quant 檔壞掉 → rc=1（絕不靜默 fallback 成「用 Phase 2.4 價格重算」）
+    broken_path = os.path.join(tmp, "broken.json")
+    with open(broken_path, "w", encoding="utf-8") as fh:
+        fh.write("{not json")
+    rc_broken, broken_out = run_engine(
+        ["--from-file", qual_path, "--stage", "mhp", "--from-quant", broken_path])
+    eq("staged.broken_rc", rc_broken, 1)
+    eq("staged.broken_error", "unreadable" in broken_out.get("error", ""), True)
+
+    wrong_schema_path = os.path.join(tmp, "wrong_schema.json")
+    with open(wrong_schema_path, "w", encoding="utf-8") as fh:
+        json.dump({"schema": "something_else.v1", "quant_blocks": {}}, fh)
+    rc_wrong, wrong_out = run_engine(
+        ["--stage", "mhp", "--from-quant", wrong_schema_path])
+    eq("staged.wrong_schema_rc", rc_wrong, 1)
+    eq("staged.wrong_schema_error", QUANT_STAGE_SCHEMA in wrong_out.get("error", ""), True)
+
+    truncated_path = os.path.join(tmp, "truncated.json")
+    truncated = copy.deepcopy(quant_art)
+    truncated["quant_blocks"].pop("valuation_pack")
+    with open(truncated_path, "w", encoding="utf-8") as fh:
+        json.dump(truncated, fh)
+    rc_trunc, trunc_out = run_engine(["--stage", "mhp", "--from-quant", truncated_path])
+    eq("staged.truncated_rc", rc_trunc, 1)
+    eq("staged.truncated_error", "valuation_pack" in trunc_out.get("error", ""), True)
+
+    # 旗標誤用
+    rc_no_quant, no_quant_out = run_engine(["--from-file", qual_path, "--stage", "mhp"])
+    eq("staged.mhp_without_artifact_rc", rc_no_quant, 1)
+    eq("staged.mhp_without_artifact_error",
+       "requires --from-quant" in no_quant_out.get("error", ""), True)
+    rc_stray, stray_out = run_engine(["--from-file", single_path, "--from-quant", artifact_path])
+    eq("staged.stray_from_quant_rc", rc_stray, 1)
+    eq("staged.stray_from_quant_error", "only applies" in stray_out.get("error", ""), True)
+
+    # 無 ticker 且無 --out → 不寫檔但照樣輸出 artifact（測試/一次性用法）
+    no_ticker = {k: v for k, v in STAGED_QUANT_INPUT.items() if k != "ticker"}
+    rc_nt, nt_art = run_engine(["--stage", "quant"], stdin_text=json.dumps(no_ticker))
+    eq("staged.no_ticker_rc", rc_nt, 0)
+    eq("staged.no_ticker_not_persisted", nt_art["persisted_to"], None)
+
+    # 單發模式輸出 shape 未變（向後相容：舊 key 一個不少、順序不變）
+    eq("staged.single_shot_keys", list(single_out),
+       ["engine", "ticker", "valuation_pack", "fair_value_summary", "fair_value_range",
+        "multi_horizon_price_framework", "implied_expectations",
+        "valuation_archetype_shadow", "valuation_explained_range"])
+
+    # In-process 等價（同一組函式，不經 CLI）：單發 == build_quant_stage → build_full_output
+    inproc_single = copy.deepcopy(STAGED_SINGLE_INPUT)
+    resolve_effective_input(inproc_single, no_fetch=True)
+    inproc_quant = copy.deepcopy(STAGED_QUANT_INPUT)
+    resolve_effective_input(inproc_quant, no_fetch=True)
+    inproc_artifact = os.path.join(tmp, "inproc.json")
+    write_quant_artifact(build_quant_stage(inproc_quant), inproc_artifact)
+    eq("staged.inproc_equivalent",
+       normalized(build_full_output(load_quant_stage(inproc_artifact), STAGED_QUALITATIVE)),
+       normalized(build_full_output(build_quant_stage(inproc_single), inproc_single)))
+
+    # current_price 缺 → 兩個 stage 都 rc=1（原有守衛不因分段而鬆掉）
+    try:
+        resolve_effective_input({"ticker": "X"}, no_fetch=True)
+        eq("staged.missing_price_raises", "no_raise", "EngineInputError")
+    except EngineInputError as exc:
+        eq("staged.missing_price_raises", "current_price" in str(exc), True)
+
+# MHP_QUALITATIVE_KEYS 是 compute_mhp 真正讀的 lane 欄位——名單漂掉會讓分段悄悄漏餵
+eq("staged.qualitative_key_list", sorted(MHP_QUALITATIVE_KEYS),
+   ["immediate_catalyst_5d", "key_levels", "pattern_taxonomy", "smart_money_label"])
 
 # ──────────────────────────────────────────────────────────────────────────────
 if FAILS:

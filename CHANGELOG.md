@@ -8,6 +8,41 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.88.0] — 2026-08-02 — L4：估值 quant 提前 Phase 1.5，Phase 2.4 只組 MHP
+
+### Added
+- `compute_price_framework.py` 新增 staged mode：`--stage quant`（Phase 1.5，產 6 個 quant
+  block + 凍結的 effective input，預設持久化到 `invest_logs/<DATE>_<TICKER>_pf_quant.json`，
+  `--out` 可改路徑）與 `--stage mhp --from-quant <file>`（Phase 2.4，只算
+  `multi_horizon_price_framework`，quant block verbatim 併回）。不給 `--stage` = 單發模式，行為不變。
+- `investment_protocol_v5_0.md` 新增 **§PHASE 1.5 — VALUATION QUANT STAGE**。
+- `test_compute_price_framework.py` 新增 staged regression：CLI 兩段合併輸出與單發輸出
+  逐位元一致（唯一豁免 `valuation_pack.built_at`）、quant block verbatim 併回、
+  qualitative 全缺時 MHP 降級不擋、artifact 壞掉/schema 不符/缺 block → rc=1、旗標誤用 → rc=1。
+
+### Changed
+- `main()` 拆成 `resolve_effective_input()` / `build_quant_stage()` / `build_full_output()`；
+  單發模式本身就是這兩段的組合，所以 staged 等價是**結構保證**而非事後比對。
+- `current_price` 與 `volatility` 改在 Phase 1.5 定版並持久化；Phase 2.4 不再重抓
+  （否則 lane 看過的 pack 會與最終輸出的價格基準不同）。
+- Phase 2.4 節縮成 MHP-only；`ENGINE_VERSION` → `v2.3 (V4.88.0)`。
+- 修 Valuation Specialist lane 的數字來源（改指 Phase 1.5 artifact）與各處 phase 標籤：
+  `protocol_appendix_price_framework.md`、`phase5_export_schema.md`、`OPS_COMMANDS.md` §7。
+
+### Fixed
+- `suppression_proposals[]` 的文字改標 **advisory / audit-only**（review P3）。全庫零消費端，
+  engine 真正的 suppression 閘是 `structural_shift` typed input（來源 earnings-analyst cache
+  而非 lane）。原文寫「proposal 被 engine eligibility 規則接受才生效」暗示一條不存在的
+  lane→engine 通路；L4 之後 pack 在 lane 之前定版，本 session 內生效更是結構上不可能。
+- `write_quant_artifact()` 的 repo-internal 判斷補 path separator 界定，避免同名兄弟目錄
+  （`…-old`）被當成 repo 內而算出跨目錄 relpath（僅影響 `persisted_to` 顯示字串）。
+
+### Why
+- 舊文字自相矛盾：Valuation Specialist 是 Phase 2 平行 lane，數字來源卻寫「Phase 2.4 engine
+  產生的 valuation_pack」——一個在它之後才跑的引擎。V3.48.0 `--self-assemble` 之後，6 個
+  quant block 的輸入全由 engine 自讀 cache 組裝、零 lane 輸入，本來就不需要等 Phase 2；
+  真正依賴 lane 的只有 MHP（catalyst 加寬 + key_levels 反射註記）。
+
 ## [4.87.0] — 2026-08-02 — L3：Phase 5 報告改 deterministic 渲染，移除 Sonnet formatter
 
 ### Added

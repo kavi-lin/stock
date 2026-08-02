@@ -24,6 +24,19 @@ Usage:
   cat inputs.json | python3 investment/scripts/compute_price_framework.py
   python3 investment/scripts/compute_price_framework.py --from-file f.json --no-fetch
 
+Staged mode (V4.88.0 — quant 提前 Phase 1.5)：六個 quant block 完全不吃 qualitative
+lane 輸入（anchors / FRED / OHLCV 全由 engine 自組），所以可以在 Phase 2 lane fan-out
+之前就算完；Phase 2.4 只剩 MHP 需要 technical/news lane 的 key_levels 與 catalyst。
+  # Phase 1.5 — 產 quant artifact（預設寫 invest_logs/<DATE>_<TICKER>_pf_quant.json）
+  python3 investment/scripts/compute_price_framework.py --from-file /tmp/nvda_pf.json \
+      --self-assemble --stage quant
+  # Phase 2.4 — 只算 MHP，quant block 從 artifact verbatim 併回（現價/sigma 不會重抓而漂移）
+  python3 investment/scripts/compute_price_framework.py --from-file /tmp/nvda_qual.json \
+      --stage mhp --from-quant investment/invest_logs/2026-08-02_NVDA_pf_quant.json
+兩段合併輸出與單發模式逐位元一致（唯一例外：`valuation_pack.built_at` 是 quant 段的
+時戳）——因為單發模式本身就是 build_quant_stage() → build_full_output() 的組合，
+等價是結構保證而非事後比對。不給 --stage 即單發模式，行為與 V4.87.0 相同。
+
 Input JSON shape (all price-level fields in the SAME per-share unit):
 {
   "ticker": "NVDA",
@@ -70,7 +83,18 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, BASE_DIR)
 
-ENGINE_VERSION = "compute_price_framework.py v2.2 (V4.76.0)"
+ENGINE_VERSION = "compute_price_framework.py v2.3 (V4.88.0)"
+
+# Staged mode (V4.88.0). QUANT_BLOCK_KEYS = 完全由 engine-owned 決定論輸入算出的
+# block；MHP_QUALITATIVE_KEYS = 唯一需要等 Phase 2 lane 的欄位。
+QUANT_STAGE_SCHEMA = "price_framework_quant.v1"
+QUANT_BLOCK_KEYS = (
+    "valuation_pack", "fair_value_summary", "fair_value_range",
+    "implied_expectations", "valuation_archetype_shadow", "valuation_explained_range",
+)
+MHP_QUALITATIVE_KEYS = (
+    "pattern_taxonomy", "smart_money_label", "key_levels", "immediate_catalyst_5d",
+)
 
 # ── Constants (B3 — 兩組常數用途不同，集中定義並註明) ─────────────────────────
 # WACC for reverse DCF: nominal 10Y + full equity risk premium (discounting nominal FCF).
@@ -1354,45 +1378,68 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
     return filled
 
 
-def main():
-    ap = argparse.ArgumentParser(description="Deterministic price framework engine (V3.45.3)")
-    ap.add_argument("--from-file", help="input JSON path (default: stdin)")
-    ap.add_argument("--no-fetch", action="store_true",
-                    help="skip FMP volatility fetch even if volatility absent")
-    ap.add_argument("--self-assemble", action="store_true",
-                    help="V3.48.0: quant inputs 自組（earnings cache / peer bundle / supp / "
-                         "forecaster cache / phase0）。input file 給的欄位永遠優先；"
-                         "qualitative 欄（pattern/key_levels/catalyst）仍須 LLM lane 提供")
-    args = ap.parse_args()
+# ── V4.88.0: staged execution (Phase 1.5 quant / Phase 2.4 MHP) ──────────────
+class EngineInputError(Exception):
+    """Unusable input — main() renders it as {"error": ...} with rc=1."""
 
+
+def read_input(path: str | None, *, allow_empty: bool = False) -> dict:
+    """Load the input JSON object. ``allow_empty`` maps blank/absent input to {}."""
+    if path:
+        try:
+            with open(path, encoding="utf-8") as f:
+                raw = f.read()
+        except OSError as e:
+            raise EngineInputError(f"unparseable input: {e}")
+    elif allow_empty and sys.stdin.isatty():
+        raw = ""
+    else:
+        raw = sys.stdin.read()
+    if allow_empty and not raw.strip():
+        return {}
     try:
-        raw = open(args.from_file).read() if args.from_file else sys.stdin.read()
-        inp = json.loads(raw)
+        payload = json.loads(raw)
     except Exception as e:
-        print(json.dumps({"error": f"unparseable input: {e}"}))
-        sys.exit(1)
+        raise EngineInputError(f"unparseable input: {e}")
+    if not isinstance(payload, dict):
+        raise EngineInputError("input must be a JSON object")
+    return payload
 
+
+def resolve_effective_input(inp: dict, *, self_assemble: bool = False,
+                            no_fetch: bool = False) -> list:
+    """Normalize price + volatility (+ optional self-assembly) in place.
+
+    Everything resolved here is engine-owned quant state. Freezing it once is
+    what lets the quant stage run at Phase 1.5 and the MHP stage reuse it
+    unchanged — a second live fetch at Phase 2.4 would silently move the price
+    and sigma out from under an already-published valuation_pack.
+    Returns the self-assembled field list（audit 用）。
+    """
     assembled = []
-    if args.self_assemble:
-        t = inp.get("ticker")
-        if not t:
-            print(json.dumps({"error": "--self-assemble requires ticker in input"}))
-            sys.exit(1)
-        assembled = assemble_inputs(t, inp, authoritative_anchors=True)
+    if self_assemble:
+        ticker = inp.get("ticker")
+        if not ticker:
+            raise EngineInputError("--self-assemble requires ticker in input")
+        assembled = assemble_inputs(ticker, inp, authoritative_anchors=True)
 
     cp = _pos(inp.get("current_price"))
     if cp is None:
-        print(json.dumps({"error": "current_price required and must be > 0"}))
-        sys.exit(1)
+        raise EngineInputError("current_price required and must be > 0")
     inp["current_price"] = cp
 
     vol = inp.get("volatility") or {}
-    if _pos(vol.get("sigma_daily")) is None and not args.no_fetch and inp.get("ticker"):
+    if _pos(vol.get("sigma_daily")) is None and not no_fetch and inp.get("ticker"):
         fetched = fetch_volatility(inp["ticker"])
         merged = dict(fetched)
         merged.update({k: v for k, v in vol.items() if v is not None})
         inp["volatility"] = merged
+    return assembled
 
+
+def build_quant_stage(inp: dict, *, assembled: list | None = None) -> dict:
+    """Phase 1.5 half — every block that needs no Phase 2 qualitative input."""
+    cp = inp["current_price"]
     anchors_raw = inp.get("anchors") or {}
     fred = inp.get("fred") or {}
     # Median outlier detection remains diagnostic only.  A correlated majority
@@ -1415,24 +1462,148 @@ def main():
     if outlier_diagnostics:
         pack["outlier_diagnostics"] = outlier_diagnostics
         fvs["outlier_diagnostics"] = outlier_diagnostics
-    inp_effective = dict(inp)
-    inp_effective["anchors"] = effective_anchors
-    out = {
+    return {
+        "schema": QUANT_STAGE_SCHEMA,
+        "stage": "quant",
         "engine": ENGINE_VERSION,
         "ticker": inp.get("ticker"),
-        "valuation_pack": pack,
-        "fair_value_summary": fvs,
-        "fair_value_range": frange,
-        "multi_horizon_price_framework": compute_mhp(inp_effective, fvs),
-        "implied_expectations": compute_implied_expectations(inp),
-        "valuation_archetype_shadow": compute_archetype_shadow(inp, fvs),
-        "valuation_explained_range": build_explained_valuation_range(
-            pack, inp.get("valuation_scenarios") or {}),
+        "quant_blocks": {
+            "valuation_pack": pack,
+            "fair_value_summary": fvs,
+            "fair_value_range": frange,
+            "implied_expectations": compute_implied_expectations(inp),
+            "valuation_archetype_shadow": compute_archetype_shadow(inp, fvs),
+            "valuation_explained_range": build_explained_valuation_range(
+                pack, inp.get("valuation_scenarios") or {}),
+        },
+        "effective_input": inp,
+        "self_assembled_fields": list(assembled or []),
+        "blocked_anchor_overrides": list(inp.get("blocked_anchor_overrides") or []),
     }
-    if assembled:
-        out["self_assembled_fields"] = assembled   # audit：哪些欄位由 engine 自組（非 LLM 提供）
-    if inp.get("blocked_anchor_overrides"):
-        out["blocked_anchor_overrides"] = inp["blocked_anchor_overrides"]
+
+
+def build_full_output(quant: dict, qualitative: dict | None = None) -> dict:
+    """Phase 2.4 half — add MHP, carry every quant block through verbatim.
+
+    Single-shot mode is this same composition with ``qualitative is inp``, so
+    "staged == single-shot" holds by construction rather than by comparison.
+    """
+    qual = qualitative or {}
+    eff = quant.get("effective_input") or {}
+    blocks = quant["quant_blocks"]
+    fvs = blocks["fair_value_summary"]
+    # compute_mhp only ever reads these six fields; anchors reach it via fvs.
+    mhp_input = {"current_price": eff["current_price"], "volatility": eff.get("volatility")}
+    for key in MHP_QUALITATIVE_KEYS:
+        value = qual.get(key)
+        mhp_input[key] = eff.get(key) if value is None else value
+
+    out = {
+        "engine": ENGINE_VERSION,
+        "ticker": quant.get("ticker"),
+        "valuation_pack": blocks["valuation_pack"],
+        "fair_value_summary": fvs,
+        "fair_value_range": blocks["fair_value_range"],
+        "multi_horizon_price_framework": compute_mhp(mhp_input, fvs),
+        "implied_expectations": blocks["implied_expectations"],
+        "valuation_archetype_shadow": blocks["valuation_archetype_shadow"],
+        "valuation_explained_range": blocks["valuation_explained_range"],
+    }
+    if quant.get("self_assembled_fields"):
+        # audit：哪些欄位由 engine 自組（非 LLM 提供）
+        out["self_assembled_fields"] = quant["self_assembled_fields"]
+    if quant.get("blocked_anchor_overrides"):
+        out["blocked_anchor_overrides"] = quant["blocked_anchor_overrides"]
+    return out
+
+
+def load_quant_stage(path: str) -> dict:
+    """Read + validate a Phase 1.5 artifact. A broken file must fail loudly:
+    silently degrading here would recompute quant blocks at Phase 2.4 prices."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            quant = json.load(f)
+    except Exception as e:
+        raise EngineInputError(f"unreadable --from-quant artifact: {e}")
+    if not isinstance(quant, dict) or quant.get("schema") != QUANT_STAGE_SCHEMA:
+        raise EngineInputError(f"--from-quant artifact is not {QUANT_STAGE_SCHEMA}")
+    blocks = quant.get("quant_blocks")
+    missing = ([k for k in QUANT_BLOCK_KEYS if k not in blocks]
+               if isinstance(blocks, dict) else list(QUANT_BLOCK_KEYS))
+    if missing:
+        raise EngineInputError(f"--from-quant artifact missing quant_blocks: {','.join(missing)}")
+    eff = quant.get("effective_input")
+    if not isinstance(eff, dict) or _pos(eff.get("current_price")) is None:
+        raise EngineInputError("--from-quant artifact missing effective_input.current_price")
+    return quant
+
+
+def default_quant_artifact_path(ticker: str | None) -> str | None:
+    if not ticker:
+        return None
+    return os.path.join(BASE_DIR, "investment", "invest_logs",
+                        f"{dt.date.today().isoformat()}_{str(ticker).upper()}_pf_quant.json")
+
+
+def write_quant_artifact(quant: dict, path: str) -> str:
+    """Persist the artifact and stamp where it went (file == stdout payload)."""
+    # 前綴比對會被同名兄弟目錄騙到（…/ai-investment-committee-old）→ 補 sep 界定
+    inside = os.path.abspath(path).startswith(os.path.join(BASE_DIR, ""))
+    quant["persisted_to"] = os.path.relpath(path, BASE_DIR) if inside else path
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(quant, f, ensure_ascii=False, indent=2)
+    except OSError as e:
+        raise EngineInputError(f"cannot persist quant artifact to {path}: {e}")
+    return path
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Deterministic price framework engine (V4.88.0)")
+    ap.add_argument("--from-file", help="input JSON path (default: stdin)")
+    ap.add_argument("--no-fetch", action="store_true",
+                    help="skip FMP volatility fetch even if volatility absent")
+    ap.add_argument("--self-assemble", action="store_true",
+                    help="V3.48.0: quant inputs 自組（earnings cache / peer bundle / supp / "
+                         "forecaster cache / phase0）。input file 給的欄位永遠優先；"
+                         "qualitative 欄（pattern/key_levels/catalyst）仍須 LLM lane 提供")
+    ap.add_argument("--stage", choices=("quant", "mhp"),
+                    help="V4.88.0 staged mode：quant = Phase 1.5 六個 quant block（另持久化）；"
+                         "mhp = Phase 2.4 只算 MHP，quant block 從 --from-quant verbatim 併回。"
+                         "不給 = 單發模式（向後相容）")
+    ap.add_argument("--from-quant", help="--stage mhp 用的 Phase 1.5 quant artifact 路徑")
+    ap.add_argument("--out", help="--stage quant 的持久化路徑"
+                                  "（預設 investment/invest_logs/<DATE>_<TICKER>_pf_quant.json）")
+    args = ap.parse_args()
+
+    try:
+        if args.from_quant and args.stage != "mhp":
+            raise EngineInputError("--from-quant only applies to --stage mhp")
+        if args.stage == "mhp":
+            if not args.from_quant:
+                raise EngineInputError("--stage mhp requires --from-quant")
+            # qualitative 缺料不擋：compute_mhp 自己降級（drift=0 / 無 key level cap）
+            out = build_full_output(load_quant_stage(args.from_quant),
+                                    read_input(args.from_file, allow_empty=True))
+        else:
+            inp = read_input(args.from_file)
+            assembled = resolve_effective_input(
+                inp, self_assemble=args.self_assemble, no_fetch=args.no_fetch)
+            quant = build_quant_stage(inp, assembled=assembled)
+            if args.stage == "quant":
+                path = args.out or default_quant_artifact_path(inp.get("ticker"))
+                if path:
+                    write_quant_artifact(quant, path)
+                else:
+                    quant["persisted_to"] = None
+                out = quant
+            else:
+                out = build_full_output(quant, inp)
+    except EngineInputError as e:
+        print(json.dumps({"error": str(e)}))
+        sys.exit(1)
+
     print(json.dumps(out, ensure_ascii=False, indent=2))
     sys.exit(0)
 

@@ -105,13 +105,13 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `devils_advocate_filed` | bool | 填 | |
 | `trade_metadata` | `{trade_type, event_tag}` | **必填** | trade_type ∈ {event, trend, mean_reversion} |
 | `valuation_lane` | `{signal, score, confidence, weighted_fair_value, vs_current_pct}` | **V5.0+ 必填** | reviewer narrative + `valuation_pack` projection；LLM 不得產數字 |
-| `valuation_pack` | object（見下） | **新 engine output 必填**；舊 history 相容 | Phase 2.4 唯一估值計算權威；validator 強制所有 projection 相等 |
+| `valuation_pack` | object（見下） | **新 engine output 必填**；舊 history 相容 | Phase 1.5 唯一估值計算權威；validator 強制所有 projection 相等 |
 | `fair_value_summary` | object（見下） | **V5.0+ 必填** | `valuation_pack` 相容 projection（= MHP 長期層、受 decision_lock 保護）|
 | `multi_horizon_price_framework` | object（見下） | **V5.0+ optional（過渡中）**；缺/不全 → validator 印 warning（非 fatal，rc 維持 0）| Phase 4.5 三時間框架（5d band / 60d target / long-term ref / convergence）。**不**進 11-field decision_lock（derived/advisory）|
 | `fair_value_range` | object（見下） | **V3.45.1+ optional**；缺 → validator warning（非 fatal，rc 0）| Phase 4.5.0b anchor 分布區間（P25/P50/P75 + range_verdict + dispersion + oe shadow）。**不**進 decision_lock；`fair_value_summary` 不變 |
 | `valuation_explained_range` | object（見下） | **V4.76.0+ optional** | structural-shift DCF 為 primary FV；DCF sensitivity + without/with-peer + 其他 eligible anchor 的解釋帶。range-only peer 不進 primary FV |
-| `implied_expectations` | object（掛 `valuation_lane` 或 trade 頂層；見下） | **V3.45.1+ optional**；缺 → warning（rc 0）| reverse DCF 隱含預期。**V3.45.3 起由 Phase 2.4 `compute_price_framework.py` engine 計算**（非 LLM 手算）。**不**進加權 / lane score / decision_lock |
-| `valuation_archetype_shadow` | object（見下） | **V3.46.0+ optional**；缺 → warning（rc 0）| Phase 2.4 engine archetype 分類 + 9-anchor shadow blend。**shadow-only** — live `fair_value_summary` 不動、不進 decision_lock。≥20 session 翻轉率報告後才議切換（#3b）|
+| `implied_expectations` | object（掛 `valuation_lane` 或 trade 頂層；見下） | **V3.45.1+ optional**；缺 → warning（rc 0）| reverse DCF 隱含預期。**V3.45.3 起由 `compute_price_framework.py` engine 計算**（V4.88.0 起在 Phase 1.5；非 LLM 手算）。**不**進加權 / lane score / decision_lock |
+| `valuation_archetype_shadow` | object（見下） | **V3.46.0+ optional**；缺 → warning（rc 0）| Phase 1.5 engine archetype 分類 + 9-anchor shadow blend。**shadow-only** — live `fair_value_summary` 不動、不進 decision_lock。≥20 session 翻轉率報告後才議切換（#3b）|
 | `lane_scores` | `{fundamentals: int, sentiment: int, news: int, technical: int}` | **V2.10.0+ 必填** | Phase 2 五 lane 中除 valuation 外的 4 個 raw score（−5..+5，V4.72.0 修正——原文件誤寫 −3..+3 與協議 Phase 2 量表矛盾，歷史 9 筆合法 ±4 分即超出舊註記）；用於 polarization detection。validator §12 強制值域 |
 | `det_inputs` | `{altman_z, debt_to_equity, fcf_yield, insider_ratio_q, short_interest_pct, fred_in_sector_avoid}` | **V2.10.0+ 必填** | Red Team kill triggers 的 6 個量化輸入；LLM 從 FMP_SUPP_BUNDLE / earnings-analyst 拿到的原始數值，**直接寫入**，不再 LLM 重新解讀 |
 | `det_shadow` | object（見下） | **V2.10.0+ 由 post-processor 寫入**，LLM 不寫 | `apply_det_shadow.py` 後處理填入；包含 polarization label + det shadow scores + agreement flags |
@@ -218,7 +218,7 @@ analyst PT 超過 180 天不得 eligible；少於兩個獨立 family 時 `|score
 
 三時間框架 deterministic 輸出（0 LLM 重評）。長期層 `long_term_ref` 直接引用 `fair_value_summary`，不複製不重算。
 **不**進 11-field decision_lock。缺料降級：`sigma_daily` 缺 → short_term confidence=low（atr 反推）；`mid_target` 全錨缺 → null。
-**V3.45.3 起整包由 Phase 2.4 `compute_price_framework.py` 計算**（含 `fair_value_summary` blend / `fair_value_range` / 本 block / `implied_expectations`），
+**V3.45.3 起整包由 `compute_price_framework.py` 計算**（V4.88.0 起 MHP 在 Phase 2.4、其餘在 Phase 1.5）（含 `fair_value_summary` blend / `fair_value_range` / 本 block / `implied_expectations`），
 PM verbatim 抄寫；block 內含 `engine` stamp（audit 用，optional 欄位）。
 
 ```json
@@ -321,7 +321,7 @@ Legacy anchor 分布區間。**不**進 11-field decision_lock；決策數字仍
 }
 ```
 
-### `valuation_archetype_shadow` (V3.46.0 — Phase 2.4 engine，shadow-only)
+### `valuation_archetype_shadow` (V3.46.0 — Phase 1.5 engine，shadow-only)
 
 固定 anchor 權重對未獲利成長股 / 金融股半殘 → archetype 動態權重。**live `fair_value_summary` 不動**；
 本 block 純 shadow 累積翻轉率數據（#6 oe shadow 同模式），**不**進 decision_lock。

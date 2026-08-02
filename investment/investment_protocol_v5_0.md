@@ -239,6 +239,39 @@ python3 investment/scripts/phase1_factpack.py <TICKER> --out /tmp/<TICKER>_factp
 
 ---
 
+## PHASE 1.5 — VALUATION QUANT STAGE (V4.88.0 NEW)
+
+PM (inline，一個 Bash call)。Phase 1 bundles 就緒後、**Phase 2 fan-out 之前**執行。
+
+```bash
+# input file 只需 {"ticker": "<T>"}；八個 live anchor 與所有 quant 原料由 engine 自組
+python3 investment/scripts/compute_price_framework.py \
+    --from-file /tmp/<ticker>_pf.json --self-assemble --stage quant
+# → 寫 investment/invest_logs/<DATE>_<TICKER>_pf_quant.json（--out 可改路徑），同時印到 stdout
+```
+
+一次產出 6 個 **quant block**：`valuation_pack`（唯一估值權威）+ `fair_value_summary`
+（pack projection）+ `fair_value_range` + `valuation_explained_range` +
+`implied_expectations` + `valuation_archetype_shadow`（shadow-only，不得反寫 live pack）。
+
+**為什麼能提前**：V3.48.0 `--self-assemble` 之後，這 6 個 block 的輸入（8 anchor、`ev_block`、
+peer/self ratios、beta、FRED、OHLCV、owner earnings）全部由 engine 自讀 cache/API 組裝，
+**零 lane 輸入**。它們從來不需要等 Phase 2；舊版把整包壓在 Phase 2.4 才跑，才會產生
+「Valuation lane 的數字來源是一個在它之後才跑的引擎」這個時序矛盾。
+
+**凍結語意（重要）**：`current_price` 與 `volatility`（sigma/atr/momentum）在此刻定版，
+連同 6 個 block 一起持久化。Phase 2.4 **不得重抓** —— 否則 lane 已看過的 pack 會與最終
+輸出的價格基準不同。Phase 2.4 只把 quant block verbatim 併回。
+
+**下游**：Phase 2 Valuation Specialist 直接注入本 artifact 的 pack projection（見該 lane 定義）；
+Phase 2.8 Red Team 收 `implied_expectations.red_team_kill_seed`；Phase 3/4/4.5 引用既存輸出。
+
+**失敗處理**：rc=1（`error` 欄說明）→ 修正輸入重跑，不得手算任何 framework 數字。
+Phase 1.5 未跑時 Phase 2.4 可退回單發模式（見該節），但 Valuation lane 就失去 pack 注入，
+只能走 `INSUFFICIENT_DATA` 路徑。
+
+---
+
 ## PHASE 2 — 5-LANE PARALLEL SUBAGENT FAN-OUT
 
 PM 以**單一訊息**平行呼叫 5 個 Agent subagent（Fundamentals / Sentiment / News / Technical / Valuation Specialist），等 5 個結果回傳後進入 Phase 2 末段（Burry inline）與 Phase 2.5。
@@ -490,11 +523,16 @@ OUTPUT (strict JSON):
 
 #### Valuation Specialist Subagent (V5.0 NEW)
 - **角色**：估值品質 reviewer / explainer。**沒有數字權**：不得自行計算或修改 FV、score、weight。
-- **數字來源**：Phase 2.4 `compute_price_framework.py` 單次產生 `valuation_pack`；lane 的
-  `score / weighted_fair_value / vs_current_pct` 只能 verbatim projection 自 pack。
+- **數字來源**：**Phase 1.5** quant artifact 的 `valuation_pack`（`compute_price_framework.py
+  --stage quant`，在本 lane 之前就已定版）；lane 的 `score / weighted_fair_value /
+  vs_current_pct` 只能 verbatim projection 自該 pack。PM 注入 lane prompt 時貼 pack projection，
+  **不貼**整個 artifact（Physical isolation：`effective_input` 含其他 lane 的原料）。
 - **允許輸出**：對 anchor freshness / business fit / structural shift 提出結構化
-  `suppression_proposals[]`（anchor、reason、evidence）；proposal 只有被 engine 的 deterministic
-  eligibility 規則接受才生效，LLM 文字本身不得改數字。
+  `suppression_proposals[]`（anchor、reason、evidence）。**這是 advisory / audit-only**：
+  engine 沒有任何程式路徑消費本欄位，本 session 內它**不可能**改動 pack——pack 已在
+  Phase 1.5 定版（V4.88.0 起這是結構事實，不只是紀律）。engine 真正的 suppression 閘是
+  `structural_shift` typed input，來源是 earnings-analyst cache 而非 lane。proposal 的用途
+  是人工審閱，以及作為**下次 session** typed input 的候選。LLM 文字任何時候都不得改數字。
 - **Anchors（V4.69.0 起 8 個；多數從現有 bundle 抽，兩個新 anchor 走 valuation-modeler script（FMP 24h cache，增量 call 極少））**：
   | Anchor | 來源 | Weight |
   |---|---|---|
@@ -510,12 +548,13 @@ OUTPUT (strict JSON):
   `<2` 個獨立 family 時 `|score| < 2` 且 confidence=low。
 - **論述格式**：只能引用 `valuation_pack` 已存在數字並解釋排除原因，不得重算另一個合理價。
 - **絕對禁止**: 直接 mirror Fundamentals 的 P/E judgment；本 lane 是獨立估值維度
-- 額外輸出：`suppression_proposals[]`、`valuation_commentary`；數值欄由 pack projection 注入。
+- 額外輸出：`suppression_proposals[]`（advisory-only，見上）、`valuation_commentary`；
+  數值欄由 pack projection 注入。
 
 ##### Reverse DCF `implied_expectations`（engine 產出，Specialist 不算）
 
 現價隱含 5Y FCF CAGR vs 實際 vs lane 估 — falsifiable sanity check + Red Team 彈藥。
-由 **Phase 2.4 engine 計算**（Specialist 只負責 anchors；演算法 / clamp / WACC fallback 見
+由 **Phase 1.5 engine 計算**（Specialist 只負責 anchors；演算法 / clamp / WACC fallback 見
 `protocol_appendix_price_framework.md`）。**不進**加權 / lane score / decision_lock。
 Red Team subagent 收 `red_team_kill_seed` 當 kill condition 起點。shape 見 schema。
 
@@ -620,36 +659,39 @@ python3 skills/short-contrarian-analyst/scripts/burry_score.py <TICKER> --json-o
 
 ---
 
-## PHASE 2.4 — PRICE FRAMEWORK ENGINE (V3.45.3 NEW)
+## PHASE 2.4 — MHP STAGE (V3.45.3；V4.88.0 起只組 MHP)
 
-PM (inline，一個 Bash call)。Phase 2 Fan-In 後所有估值輸入已備齊
-（anchors / volatility / key_levels / pattern / catalyst / FRED / owner earnings）。
-PM 組 input JSON 後呼叫 deterministic engine，**禁止手算任何 framework 數字**：
+PM (inline，一個 Bash call)。Phase 2 Fan-In 後，唯一還缺的輸入到齊：
+technical_lane 的 `key_levels / pattern_taxonomy / smart_money_label` 與 news_lane 的
+`immediate_catalyst_5d`。PM 只寫這 4 個 qualitative 欄進 input JSON，
+**禁止手算任何 framework 數字**：
 
 ```bash
-# input：Phase 2 Valuation Specialist anchors + technical_lane key_levels/pattern/smart_money
-#        + news_lane immediate_catalyst_5d + Phase 0 FRED + owner earnings per share
-#        + V3.46.0 archetype shadow 用：archetype_inputs{sector,revenue_yoy,fcf_margin,eps_ttm,
-#          margin_sigma_pp} + peer_ratios（PEER_BUNDLE 新 median 欄）+ self_ratios（PEER_BUNDLE
-#          self_ratios_ttm）+ ev_block{enterprise_value,net_debt,shares}（earnings bundle）+ beta
-#
-# V3.48.0 — 標準跑法：--self-assemble。quant 欄位（anchors / ev_block / archetype_inputs /
-# peer_ratios / self_ratios / beta / fred real rate / fcf base）由 engine 直接讀
-# earnings cache + peer bundle + supp bundle + forecaster cache + phase0 自組，
-# **0 LLM 抄寫**。PM 的 input file 只需給 qualitative 欄（pattern_taxonomy / smart_money_label /
-# key_levels / immediate_catalyst_5d）+ ticker；八個 live anchor 的 input-file value/meta 會被
-# engine 清除並重組，輸出 blocked_anchor_overrides[] + self_assembled_fields[] 供 audit。
-python3 investment/scripts/compute_price_framework.py --from-file /tmp/<ticker>_pf.json --self-assemble
+# input file 只需 qualitative 4 欄（+ ticker）。anchors / volatility / FRED 等 quant 欄
+# 已在 Phase 1.5 定版，寫在這裡也不會被採用。
+python3 investment/scripts/compute_price_framework.py \
+    --from-file /tmp/<ticker>_qual.json \
+    --stage mhp --from-quant investment/invest_logs/<DATE>_<TICKER>_pf_quant.json
 ```
 
-一次回傳 7 個 block：`valuation_pack`（唯一權威）+ `fair_value_summary`（pack projection）+
-`fair_value_range` +
-`valuation_explained_range` + `multi_horizon_price_framework` + `implied_expectations`。PM **verbatim 抄寫**進後續 phase 輸出。
-另有 `valuation_archetype_shadow` 僅供研究；不得反寫 live pack。
-input 含 `ticker` 且未給 volatility 時，engine 自抓 FMP OHLCV 算 sigma/atr/momentum
-（消除 LLM 抄寫風險）；`technical_lane.volatility` 仍必填（lane 呈現用），framework 計算以 engine 自算值為準。
+輸出 = Phase 1.5 的 6 個 quant block **verbatim 併回** + 新算的
+`multi_horizon_price_framework`，共 7 個 block，shape 與 V4.87.0 單發模式完全相同
+（`phase5_export_schema.md` 不變）。PM **verbatim 抄寫**進後續 phase 輸出。
 
-**時點 2.4 的原因**：下游全是消費者 — T5 (2.5) 用 `mhp_signal`、Red Team (2.8) 收 `red_team_kill_seed`、Phase 3/4/4.5 引用既存輸出；且 engine 是唯一計算來源（迭代解/percentile 超出 LLM inline 可靠範圍）。
+- **quant block 不重算**：位元一致是結構保證（同一份 artifact 搬過來），不是事後比對。
+  `--from-quant` 檔缺失/壞掉/schema 不符 → **rc=1**，engine 不會靜默改用 Phase 2.4 的價格重算。
+- **qualitative 缺料不擋**：4 欄任一缺 → MHP 自行降級（drift=0 / 不做 key-level cap），rc 仍 0。
+- **`technical_lane.volatility`** 仍必填（lane 呈現用），但 framework 計算一律以 Phase 1.5
+  凍結的 engine 自算值為準。
+
+**單發模式（向後相容）**：不給 `--stage` 時 engine 照舊一次算完 7 個 block
+（`--from-file <full input> --self-assemble`）。Phase 1.5 沒跑成功時走這條，代價是
+Valuation lane 當時拿不到 pack。
+
+**時點 2.4 的原因（V4.88.0 修正）**：留在這裡的只剩 MHP —— 它是唯一真正吃 Phase 2 lane
+輸出的 block（5 日帶要 news lane 的 catalyst 加寬、key_levels 做反射註記）。其餘 6 個
+quant block 沒有這個依賴，已前移 Phase 1.5。下游消費者不變：T5 (2.5) 用 `mhp_signal`、
+Red Team (2.8) 收 `red_team_kill_seed`（Phase 1.5 產出）、Phase 3/4/4.5 引用既存輸出。
 
 ---
 
@@ -717,7 +759,7 @@ TENTATIVE CONSENSUS DIRECTION: <BULLISH | BEARISH | MIXED>
 PHASE 0 MACRO + FRED slim
 PHASE 2 ANALYST OUTPUTS (6: 5 lanes + Burry)
 STRUCTURAL_SHIFT_TIER: <NONE | CANDIDATE | CONFIRMED | INSUFFICIENT_DATA>     ← V2.19 NEW
-IMPLIED_EXPECTATIONS: <Phase 2.4 engine implied_expectations，含 red_team_kill_seed>   ← V3.45.1 NEW (V3.45.3 改 engine 產出)
+IMPLIED_EXPECTATIONS: <Phase 1.5 engine implied_expectations，含 red_team_kill_seed>   ← V3.45.1 NEW (V4.88.0 改 Phase 1.5 產出)
 
 TASK:
 1. 找共識最脆弱 1 個主論點 → counter_thesis (1-2 句)
@@ -796,7 +838,7 @@ V3.17 (Wave 1) — transition_signature 攻擊指引:
 
 ## PHASE 3 — DECISION ENGINE
 
-PM (inline)。Price framework 數字已由 **Phase 2.4 engine** 產出，直接引用。
+PM (inline)。Price framework 數字已由 **Phase 1.5（估值 quant）+ Phase 2.4（MHP）engine** 產出，直接引用。
 
 ### 執行方式（V4.80.0 — script 化，禁手算）
 
@@ -851,7 +893,7 @@ Step 1 (Raw):
 Step 1.5 (Structural Shift Modulation — V2.18.0):
   Read latest earnings-analyst cache `structural_shift.tier` for ticker.
   IF tier = CONFIRMED:
-    - 估值不在本 Phase 重算。Phase 2.4 pack 只在 typed shift input 同時具備
+    - 估值不在本 Phase 重算。Phase 1.5 pack 只在 typed shift input 同時具備
       `evidence_date + provenance` 且 `PT as_of <= evidence_date` 時 suppress PT；缺 metadata
       則 shift 對估值只能 advisory。未被 shift suppress 的 PT 仍須通過 180 天 freshness gate。
     - Red Team mean-reversion attack BLOCKED — cannot trigger STRONG_COUNTER
@@ -1223,7 +1265,7 @@ engine + `test_trade_plan_builder.py`）。
 - BUY → 兩軌二選一（預設 aggressive）
 - STAGED_ENTRY → 兩軌各佔 50%
 
-> **entry/TP/SL 取值 provenance**（V3.45.3 起直接取 Phase 2.4 engine 輸出，不再前向引用）：
+> **entry/TP/SL 取值 provenance**（V3.45.3 起直接取 price framework engine 輸出，不再前向引用）：
 > - `entry_aggressive` ← short_term_5d `[band_point, band_upper_capped]`（突破續勢）或現價附近（pattern=breakout 時）
 > - `entry_conservative` ← short_term_5d `[band_lower_capped, band_point]`（回檔承接；下界貼 support）
 > - `take_profit` ← mid_term_60d `mid_target`；若 > `key_levels.resistance` → cap 在 resistance 並於 `exit_conditions` 註記「需突破 $R 才上看 $mid_target」
@@ -1340,9 +1382,9 @@ final_stop_loss_pct = base_stop_pct + ftd_timeline_stop_adjustment   # 上限 -1
 
 ## PHASE 4.5 — MULTI-HORIZON PRICE FRAMEWORK（封裝呈現層）
 
-**全部數字已由 Phase 2.4 engine 算出**（`valuation_pack` + `fair_value_summary` + `fair_value_range` +
-`valuation_explained_range` +
-`multi_horizon_price_framework` + `implied_expectations` + `valuation_archetype_shadow`）。
+**全部數字已由 engine 算出**（Phase 1.5 quant stage：`valuation_pack` + `fair_value_summary` + `fair_value_range` +
+`valuation_explained_range` + `implied_expectations` + `valuation_archetype_shadow`；
+Phase 2.4 MHP stage：`multi_horizon_price_framework`）。
 本 Phase PM 只做兩件事：
 
 1. **verbatim 抄寫** engine 7 個 block 進 session export（shape 見 `phase5_export_schema.md`）。

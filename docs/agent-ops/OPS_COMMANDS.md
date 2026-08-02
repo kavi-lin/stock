@@ -85,7 +85,7 @@ python3 scripts/_shared/model_router.py --status        # 多模型預算/cooldo
 
 | 你改了什麼 | 必跑 |
 |---|---|
-| `compute_price_framework.py` / valuation projection validator | `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_valuation_pack_consistency.py`（兩者 rc=0；後者含故意 drift 的 rc=1 fixture） |
+| `compute_price_framework.py` / valuation projection validator | `python3 investment/scripts/test_compute_price_framework.py` + `python3 investment/scripts/test_valuation_pack_consistency.py`（兩者 rc=0；後者含故意 drift 的 rc=1 fixture）。前者含 V4.88.0 staged regression：`--stage quant` + `--stage mhp` 合併輸出必須與單發模式逐位元一致（只豁免 `valuation_pack.built_at`），改到分段/合併路徑必紅 |
 | earnings valuation forecaster | `python3 skills/earnings-valuation-forecaster/tests/test_forecaster_v3_17.py` |
 | `forward_expectations.py` 核心 | `python3 investment/scripts/test_forward_expectations.py`（rc=0 為準） |
 | `inject_report_facts.py` | `python3 investment/scripts/test_inject_report_facts.py` |

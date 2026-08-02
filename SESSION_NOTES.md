@@ -1,7 +1,17 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.87.0)
+> **Last Updated**: 2026-08-02 (v4.88.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.88.0) — L4 估值 quant 提前 Phase 1.5（等價用結構保證，不用比對）
+- **「兩段合併 == 單發」不該靠測試比對，該讓它無法不成立。** 第一個設計是分別寫 quant 路徑與 mhp 路徑，再用 regression 檢查兩者相等——那等於把契約託付給我未來記得同步改兩處。改成把 `main()` 拆成 `build_quant_stage()` + `build_full_output()`，**單發模式本身就是這兩段的組合**，staged 只是把中間物存進檔案再讀回來。等價成了結構事實，測試從此只是防呆而不是唯一防線。**判準：當驗收條件是「兩條路徑必須等價」時，先問能不能讓它們是同一條路徑。**
+- **`compute_mhp` 到底吃什麼，得去讀而不是照 protocol 抄。** protocol 說 MHP 要 technical/news lane 的東西，但實際簽名只讀 6 個欄位（`current_price`/`volatility` + 4 個 qualitative），anchors 是走 `fvs` 進去的。確認這點之後 mhp 段的輸入可以縮成那 6 欄，`MHP_QUALITATIVE_KEYS` 也才有資格當常數釘住——並補一條測試鎖那份名單，名單漂掉會讓分段悄悄漏餵而不報錯。
+- **分段真正的風險不是算錯，是價格漂移。** 兩段之間隔著整個 Phase 2 fan-out（實際上是幾十分鐘）。若 mhp 段重抓 quote/OHLCV，Valuation lane 看過的 pack 就與最終輸出的價格基準不同——數字全對，基準不同。所以 `current_price` 與 `volatility` 在 Phase 1.5 定版並隨 artifact 持久化，mhp 段只讀不抓。同理 `--from-quant` 檔壞掉一律 rc=1：**靜默 fallback 成「用 Phase 2.4 的價格重算」正是這功能要消滅的東西。**
+- **`built_at` 是唯一豁免欄位，而且它本來就不可比。** 兩次單發跑也不會相同（`dt.datetime.now()`）。除它之外連 key 順序都逐位元比——`build_full_output` 的 dict literal 順序就是舊 `main()` 的順序，所以舊消費者看到的 shape 一個欄位都沒動。
+- **順手修了文件裡三處過期的 phase 標籤**（`protocol_appendix_price_framework.md` / `phase5_export_schema.md` / OPS §7）。這批不在原摘要表裡，但留著就是新的自相矛盾——L4 修的就是這種矛盾。
+- **驗收**：`test_compute_price_framework.py`（新增 staged 區段：CLI 兩段合併 == 單發逐位元、6 個 block verbatim 併回、qualitative 全缺降級不擋、artifact 壞掉/schema 不符/缺 block/旗標誤用四種 rc=1）、`test_valuation_pack_consistency.py`、`test_session_export_schema.py` 全 rc=0；**live NVDA 實跑**（`--self-assemble --stage quant` → `--stage mhp`）與單發輸出 bitwise identical，20 個欄位自組、fv 150.71、band [177.09, 203.09, 210.0]；SYNC OK 4.88.0。
+- **未驗的邊界**：live 對照是在收盤時段跑的，兩次 quote 相同，所以「價格凍結」這條在**盤中**的真實行為（單發會漂、staged 不會）尚未實測——那正是分段的價值所在，但也意味著盤中跑時兩者本來就**不該**相等。下次盤中 deep dive 時值得記一筆實際落差。
+- **review 收尾：一條紙上機制被新時序推成明確的假話。** `suppression_proposals[]` 全庫零消費端（只出現在 protocol 兩行），engine 真正的 suppression 閘是 `structural_shift` typed input，來源是 earnings-analyst cache 不是 lane。這在 L4 之前就是虛文；但 L4 之後 pack 在 lane 之前定版，「proposal 影響 pack」從「沒接線」升級成**結構上不可能**。改標 advisory / audit-only + 指明真正的閘在哪。**判準：改動時序之後要回頭掃一遍「誰的輸出流向誰」的敘述——原本只是沒實作的句子，可能已經變成明確錯誤的句子。**
 
 ## 🟢 Session Note (v4.87.0) — L3 Phase 5 deterministic renderer（原假設被實測推翻）
 - **條目寫「history entry → MD」，實測發現 history 撐不起這份報告。** 動工前先逐欄比對 MSFT/MU 兩筆真 entry 與它們的 MD：五個 lane 的 `risk_flags` **全部**沒持久化、`key_factors` 只有 news 有、`sentiment_lane` 整塊不存在、per-lane raw signal/confidence 只有 valuation 有。單輸入會讓報告掉約 80 行——而那 80 行正是人真正在讀的證據段。**判準：backlog 條目描述的是動工前的理解，動工第一件事是驗證那個理解還成立。**這跟 4.83.0 記的「UI 類 TODO 先 grep 現況」同一形狀，但這次過期的不是 UI 狀態而是**資料模型假設**，代價大得多。

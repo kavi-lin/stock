@@ -1,13 +1,14 @@
 # Price Framework Spec Appendix（V4.0.0 自 protocol 外移）
 
-> **角色**：本檔是 Phase 2.4 `compute_price_framework.py` engine 內含邏輯的 **spec 文件（audit 用）**。
+> **角色**：本檔是 `compute_price_framework.py` engine 內含邏輯的 **spec 文件（audit 用）**。
+> V4.88.0 起 engine 分兩段跑：Phase 1.5 六個 quant block、Phase 2.4 只組 MHP；本檔的演算法不受分段影響。
 > **實作以 engine script + `test_compute_price_framework.py` golden fixtures 為準** — 本檔與 engine
 > 不一致時以 engine 為準並回修本檔。PM 執行 `分析` **不需要讀本檔**（protocol Phase 4.5 摘要已足）。
 > 外移動機：V3.45.x–3.46.x 累積 366 行演算法 spec，PM 每跑一次全讀 = 純 token 浪費。
 
 ## PHASE 4.5 — MULTI-HORIZON PRICE FRAMEWORK (V5.1 — 升級自 V5.0 fair_value_summary)
 
-**V3.45.3 起：全部數字由 Phase 2.4 `compute_price_framework.py` 算出，本 Phase 只封裝呈現。**
+**V3.45.3 起：全部數字由 `compute_price_framework.py` 算出（V4.88.0：quant 在 Phase 1.5、MHP 在 Phase 2.4），本 Phase 只封裝呈現。**
 **禁止 LLM 手算/重算任何 framework 數字** — V3.45.x 累積的數學（weighted percentile、CV、reverse DCF
 迭代解）超出 LLM inline 可靠範圍，engine script 是唯一計算來源。PM verbatim 抄寫 engine 輸出。
 以下演算法區塊為 **spec 文件**（記載 engine 內含邏輯供 audit），實作以 script 為準。
@@ -198,7 +199,7 @@ oe_mult_rate_linked = clamp(1.0 / required_yield, 10, 22) if required_yield else
 peer_pe 在 EPS ≤ 0 時失效（權重變相塞給 PT）；金融股缺 P/B 維度。原 6-anchor 池對未獲利成長股
 與金融股的估值**半殘**。
 
-**紀律**：**live `fair_value_summary` 權重 / anchor 池 / verdict 完全不動**。Engine（Phase 2.4）另輸出
+**紀律**：**live `fair_value_summary` 權重 / anchor 池 / verdict 完全不動**。Engine（Phase 1.5）另輸出
 `valuation_archetype_shadow`：deterministic archetype 分類 + 9-anchor 池（6 既有 + 3 新）archetype
 權重 shadow blend + `flip_vs_live`。**退出條件**：≥ 20 session 後出翻轉率報告 → user 拍 → #3b 切 live
 （cap / T5 接線同步做）。與 #6 oe shadow 同模式。
