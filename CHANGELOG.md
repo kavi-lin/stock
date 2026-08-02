@@ -8,6 +8,18 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.83.0] — 2026-08-02 — decision card 的 polarization / RT basis 改吃決策時真值（V20-A5）
+
+### Added
+- **`bridge.py` `extract_audit_history()` 攤平兩個 badge 欄位**（V20-A5）：`signal_polarization` / `red_team_basis` 直接進 `recent_analysis[]`，附 `*_source`（`calculation_steps` | `det_shadow` | null）與 `*_disagrees`。取值優先序 = **決策時 `calculation_steps` > 後處理 `det_shadow`** —— 前者是真的動了分數的值（confidence 乘數 / position cap / buy_threshold / cascade 罰則），後者是 `apply_det_shadow.py` 事後補寫的 shadow。
+- **兩個新 badge + tooltip**（`page-decisions.js`）：`POLAR SPLIT` / `RT BASIS SPLIT`，在同一筆 entry 兩個來源不一致時亮。兩者由同一支 classifier 產出，理應相同；不同代表後處理看到的 lane scores / counter_thesis 文字跟決策當下不一樣（entry 被事後編輯過）。與既有 `RT DISAGREE` / `VAL DISAGREE` 同一套視覺語言。
+
+### Changed
+- **`page-decisions.js` badge renderer 改讀攤平欄位**，`det_shadow` 保留為 fallback —— 尚未重跑 bridge 的 `data.json` 仍能正常渲染。
+
+### Why
+- V20-A1 / A2（polarization 4-tier badge、RT basis 4-tier badge）**在更早的版本就已經做掉了**，TODO 上的「UI 沒秀」已經過期；badge 與 `SIGNAL_TIPS` 兩邊都在（`ALIGNED` / `unclassified` 這兩個良性值刻意不發 badge，與 `macro_alignment` 只標 CONTRARIAN 同一慣例）。真正還沒做的是 A5 —— 而它不只是「省一層 `.det_shadow`」：renderer 原本**只**讀 shadow，V5.1+ entry 的決策時真值根本沒被看到。現行 172 筆中 2 筆有 `calculation_steps`（往後每筆都會有），0 筆不一致。
+
 ## [4.82.0] — 2026-08-02 — Phase 4 script 化：`trade_plan_builder.py` + §14 sizing 硬閘（TODO L2）
 
 ### Added

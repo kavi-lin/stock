@@ -682,11 +682,11 @@
 
 ##### A. UI Decision Layer 完整化
 
-- [ ] **[V20-A1]** Polarization 4-tier badge in `decisions.html` — `det_shadow.signal_polarization` (BIPOLAR/OUTLIER/MIXED/ALIGNED) 已存 data.json，UI 沒秀
-- [ ] **[V20-A2]** Red Team basis badge in `decisions.html` — `red_team_basis` (pure_forward/pure_mean_reversion/contaminated/unclassified) 已存，user 看不到 anti-spoofing 偵測結果
+- [x] **[V20-A1]** Polarization 4-tier badge in `decisions.html` — **更早版本就已做掉**（badge + `SIGNAL_TIPS` 皆在；`ALIGNED` 刻意不發 badge，同 `macro_alignment` 慣例）。4.83.0 改吃 A5 的攤平欄位
+- [x] **[V20-A2]** Red Team basis badge in `decisions.html` — **更早版本就已做掉**（`unclassified` 刻意不發 badge）。4.83.0 改吃 A5 的攤平欄位
 - [ ] **[V20-A3]** structural_shift tier badge in earnings card (`page-earnings.js`) — CANDIDATE/CONFIRMED 視覺化
 - [ ] **[V20-A4]** Theme-detector structural_shift override icon in `sector.html` — `tier_counts` 已寫進 theme JSON
-- [ ] **[V20-A5]** `bridge.py` 加 polarization / red_team_basis 注入 `recent_analysis[]` — 給 A1/A2 用
+- [x] **[V20-A5]** `bridge.py` 加 polarization / red_team_basis 注入 `recent_analysis[]`（4.83.0）— 不只是省一層 `.det_shadow`：renderer 原本只讀 shadow，V5.1+ entry 的決策時真值（`calculation_steps`）沒被看到。附 `*_source` / `*_disagrees` 與兩個 SPLIT badge
 
 ##### B. Backtest 深化（先補分析維度，accrual 等不及）
 

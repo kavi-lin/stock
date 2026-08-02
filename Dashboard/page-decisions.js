@@ -557,6 +557,23 @@ const DECISION_TIPS = {
               desc: 'Valuation has two paths: (a) **LLM Valuation Specialist** synthesizes 6 anchors into a score, (b) **DET (pure math)** = weighted fair_value vs price.\n\nA gap means LLM is **either too soft or too hard**:\n  • LLM > DET (LLM bullish) → watch for narrative bias\n  • LLM < DET (LLM bearish) → may be over-cautious — check reasoning\n\n**Sizing**: defer to the more conservative path; half-notch cut and re-read val_lane reasoning.',
               scale: 'LLM > DET → LLM bullish (narrative bias risk)\nLLM < DET → LLM bearish (over-caution risk)\n|LLM − DET| material → badge shows' },
     },
+    // ── V4.83.0 — 決策時標籤 vs 後處理 shadow 不一致 ──────────────────────
+    polarization_source_split: {
+        zh: { title: '🟠 兩極標籤不一致（決策時 vs 後處理）',
+              desc: 'Polarization 標籤在同一筆 entry 有兩個來源：(a) **決策當下** `calculation_steps.polarization_modulation.label` —— 這個值真的動了分數（avg_confidence 乘數 + position cap + buy_threshold）；(b) **後處理** `det_shadow.signal_polarization`，由 `apply_det_shadow.py` 事後補寫。\n\n兩者是同一支程式算的，**理應完全相同**。不同代表後處理跑的時候看到的 lane scores 跟決策當下不一樣 —— 通常是 entry 被事後編輯過，或後處理跑在一份還沒定案的資料上。\n\n**badge 顯示的是決策當下那個值**（實際生效的那個）。\n\n**建議**：這不影響已成交的部位，但代表這筆 entry 的稽核軌跡有裂縫；重跑 `apply_det_shadow.py` 看標籤會不會收斂。',
+              scale: '兩個來源一致 → 不顯示 badge（正常）\n兩個來源不同 → 顯示此 badge，取決策當下值\n只有一個來源  → 不顯示（無從比對）' },
+        en: { title: '🟠 Polarization Label Split (decision-time vs post-process)',
+              desc: 'The polarization label has two sources on one entry: (a) **decision-time** `calculation_steps.polarization_modulation.label` — the value that actually moved the score (confidence multiplier + position cap + buy_threshold); (b) **post-process** `det_shadow.signal_polarization`, written afterwards by `apply_det_shadow.py`.\n\nBoth come from the same code, so they **must match**. A split means the post-processor saw different lane scores than the decision did — usually an entry edited after the fact, or a post-process run against non-final data.\n\n**The badge shows the decision-time value** (the one that took effect).\n\n**Action**: does not change an executed position, but the audit trail on this entry has a crack; re-run `apply_det_shadow.py` and see whether the labels converge.',
+              scale: 'sources agree     → no badge (normal)\nsources disagree  → this badge; decision-time value shown\nonly one source   → no badge (nothing to compare)' },
+    },
+    red_team_basis_source_split: {
+        zh: { title: '🟠 RT 基礎不一致（決策時 vs 後處理）',
+              desc: '同 `polarization_source_split` 的紅隊版：`calculation_steps.red_team_basis`（決策當下，決定 cascade 走 rule 1/2/4 哪一條、罰多少）vs `det_shadow.red_team_basis`（後處理補寫）。\n\n兩者由 `apply_det_shadow.classify_red_team_basis()` 同一個 classifier 產出，輸入是 counter_thesis 與 kill_conditions 的文字。不同 → 後處理看到的文字跟決策當下不同（counter_thesis 被事後改寫最常見）。\n\n**影響**：basis 直接決定 Phase 3 罰分係數（`pure_forward` + strength 5 → ×0.85；`pure_mean_reversion` 在 CONFIRMED 期間直接被降級）。決策已按當時的值算完，不會回溯。\n\n**建議**：重讀 `red_team_counter_thesis`，確認事後編輯沒有改變論述性質。',
+              scale: '兩個來源一致 → 不顯示 badge（正常）\n兩個來源不同 → 顯示此 badge，取決策當下值\n只有一個來源  → 不顯示（無從比對）' },
+        en: { title: '🟠 RT Basis Split (decision-time vs post-process)',
+              desc: 'The Red Team counterpart of `polarization_source_split`: `calculation_steps.red_team_basis` (decision-time — picks which cascade rule fires and how hard) vs `det_shadow.red_team_basis` (written afterwards).\n\nBoth come from the same `apply_det_shadow.classify_red_team_basis()` over the counter_thesis and kill_conditions text. A split means the post-processor read different text than the decision did — most often a counter_thesis edited after the fact.\n\n**Impact**: basis drives the Phase 3 penalty (`pure_forward` + strength 5 → ×0.85; `pure_mean_reversion` is downgraded outright during a CONFIRMED shift). The decision already used the value it had; nothing is retroactive.\n\n**Action**: re-read `red_team_counter_thesis` and confirm the edit did not change the nature of the argument.',
+              scale: 'sources agree     → no badge (normal)\nsources disagree  → this badge; decision-time value shown\nonly one source   → no badge (nothing to compare)' },
+    },
     // ── V2.13.0 action_label ────────────────────────────────────────────
     action_attack: {
         zh: { title: '🔥 進攻（ATTACK）',
@@ -1253,20 +1270,34 @@ function buildV48StatusPills(item, wl) {
     // V2.17.8 — native title= upgraded to data-tip-key (rich DECISION_TIPS)
     // V2.20.0 — polarization 升 4-tier (BIPOLAR/OUTLIER/MIXED/ALIGNED) + red_team_basis 4-tier
     const ds = item.det_shadow || {};
+    // V4.83.0 (V20-A5) — bridge now flattens both labels, preferring the decision-time
+    // `calculation_steps` block over the post-processor shadow. Fall back to det_shadow so
+    // the badges keep rendering against data.json files written before that plumbing.
+    const polarization = item.signal_polarization || ds.signal_polarization;
+    const rtBasis      = item.red_team_basis || ds.red_team_basis;
     // V2.20.0 — Polarization 4-tier + RT basis 4-tier badges (data-signal-tip pattern, consistent with earnings card)
-    if (ds.signal_polarization === 'BIPOLAR') {
+    if (polarization === 'BIPOLAR') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="polarization_bipolar" style="background:color-mix(in srgb,#a855f7,transparent 88%);color:#a855f7;border:1px solid color-mix(in srgb,#a855f7,transparent 70%)">${isZh ? '訊號兩極' : 'BIPOLAR'}</span>`);
-    } else if (ds.signal_polarization === 'OUTLIER') {
+    } else if (polarization === 'OUTLIER') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="polarization_outlier" style="background:color-mix(in srgb,#a78bfa,transparent 88%);color:#a78bfa;border:1px solid color-mix(in srgb,#a78bfa,transparent 70%)">${isZh ? '訊號離群' : 'OUTLIER'}</span>`);
-    } else if (ds.signal_polarization === 'MIXED') {
+    } else if (polarization === 'MIXED') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="polarization_mixed" style="background:color-mix(in srgb,#0ea5e9,transparent 88%);color:#0ea5e9;border:1px solid color-mix(in srgb,#0ea5e9,transparent 70%)">${isZh ? '訊號分歧' : 'MIXED'}</span>`);
     }
-    if (ds.red_team_basis === 'pure_mean_reversion') {
+    if (rtBasis === 'pure_mean_reversion') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="red_team_basis_mr_only" style="background:color-mix(in srgb,#dc2626,transparent 88%);color:#dc2626;border:1px solid color-mix(in srgb,#dc2626,transparent 70%)">${isZh ? 'RT 歷史攻擊' : 'RT MR-ONLY'}</span>`);
-    } else if (ds.red_team_basis === 'contaminated') {
+    } else if (rtBasis === 'contaminated') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="red_team_basis_contaminated" style="background:color-mix(in srgb,#ea580c,transparent 88%);color:#ea580c;border:1px solid color-mix(in srgb,#ea580c,transparent 70%)">${isZh ? 'RT 污染' : 'RT CONTAM'}</span>`);
-    } else if (ds.red_team_basis === 'pure_forward') {
+    } else if (rtBasis === 'pure_forward') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-signal-tip="red_team_basis_pure_forward" style="background:color-mix(in srgb,#16a34a,transparent 88%);color:#16a34a;border:1px solid color-mix(in srgb,#16a34a,transparent 70%)">${isZh ? 'RT 前瞻' : 'RT FWD'}</span>`);
+    }
+    // V4.83.0 — decision-time label vs post-processor shadow disagree. Both derive from
+    // apply_det_shadow.py, so a split means the shadow ran against different lane scores
+    // than the decision did; the badge shows the decision-time value.
+    if (item.polarization_disagrees) {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="polarization_source_split" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? '兩極標籤不一致' : 'POLAR SPLIT'}</span>`);
+    }
+    if (item.red_team_basis_disagrees) {
+        pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="red_team_basis_source_split" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? 'RT 基礎不一致' : 'RT BASIS SPLIT'}</span>`);
     }
     if (ds.red_team_agreement === 'DISAGREE') {
         pills.push(`<span class="text-[8px] px-1.5 py-0.5 rounded font-bold" data-tip-key="red_team_disagree" style="background:color-mix(in srgb,#f97316,transparent 88%);color:#f97316;border:1px solid color-mix(in srgb,#f97316,transparent 70%)">${isZh ? 'Red Team 不一致' : 'RT DISAGREE'}</span>`);

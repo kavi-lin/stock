@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "last_updated": "2026-08-02 12:26:46",
+  "last_updated": "2026-08-02 12:31:46",
   "market": {
     "regime": "RISK_OFF",
     "cycle_phase": "Early",
@@ -27602,8 +27602,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -28193,8 +28193,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -28454,8 +28454,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -29607,8 +29607,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -29924,8 +29924,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -30127,8 +30127,8 @@
           "within_48h": false
         },
         "_merged_from_sources": [
-          "sector-protocol",
-          "fmp-earnings"
+          "fmp-earnings",
+          "sector-protocol"
         ]
       },
       "links": {},
@@ -33131,6 +33131,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -33569,6 +33575,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -34022,6 +34034,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "calculation_steps",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "calculation_steps",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -34480,6 +34498,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -34928,6 +34952,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -35367,6 +35397,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "Insider acquired/disposed ratio 0.02 signals heavy insider selling, coinciding with a volatile down day (volume 1.15x 20D avg, wide 900-959 range) as price pulls back from parabolic highs.",
         "smart_money_label": "distributing",
@@ -35792,6 +35828,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -36125,6 +36167,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -36537,6 +36585,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -36949,6 +37003,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "成交量自 IPO 日 522M 崩落至近兩日約 30M，價格在 $154-158 橫盤；量縮橫盤訊號曖昧（賣壓耗盡或興趣消退皆可能）。",
         "smart_money_label": "mixed",
@@ -37295,6 +37355,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "MIXED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "insider disposition ratio=0（50,061 disposed / 0 acquired 2026Q2）= 公司層分布；今日 +2.95% 量 2.15x 構成中性偏多，但不足以蓋過 insider 訊號",
         "smart_money_label": "distributing",
@@ -37637,6 +37703,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "contaminated",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "score": 1,
         "signal": "HOLD",
@@ -37982,6 +38054,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "accumulating",
@@ -38404,6 +38482,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -38766,6 +38850,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -39191,6 +39281,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -39600,6 +39696,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -39917,6 +40019,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -40220,6 +40328,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -40482,6 +40596,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -40751,6 +40871,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -41098,6 +41224,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -41499,6 +41631,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -41934,6 +42072,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "insider ratio 0.286(Q2)/0.160(Q1) 持續重度賣超；今日 +2.95% 量放大 1.4× 為盤中吸籌但被內部人賣超抵銷",
         "smart_money_label": "mixed",
@@ -42355,6 +42499,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "score": 2,
         "pattern": "uptrend_continuation",
@@ -42707,6 +42857,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "MIXED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "Insider Q2 ratio 1.8 顯示內部人買進；但價格仍在 MA200 下、近 5 日 -11.3%，機構分配壓過內部人信心。label: mixed。",
         "pattern_taxonomy": "consolidation",
@@ -43108,6 +43264,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "neutral",
@@ -43515,6 +43677,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "內部人重度分配（acquired_disposed_ratio 0.028，近零買進對抗持續賣出）。label: distributing。",
         "pattern_taxonomy": "uptrend_continuation (parabolic extension)",
@@ -43859,6 +44027,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -44284,6 +44458,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "內部人 Q2 賣 1.18M vs 買 363k，前 3 季亦淨賣 — 持續派發。label: distributing",
         "pattern_taxonomy": "consolidation",
@@ -44635,6 +44815,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -45053,6 +45239,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "MIXED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -45465,6 +45657,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -45766,6 +45964,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -46206,6 +46410,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "neutral",
@@ -46622,6 +46832,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "MIXED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "Day-1 成交量約509M vs 流通量638.9M，近乎整個流通量換手一次——屬IPO配售churn與flipping，非可讀的機構吸籌/出貨。",
         "smart_money_label": "neutral",
@@ -46972,6 +47188,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -47403,6 +47625,12 @@
           "scanned": true
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "calculation_steps",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "calculation_steps",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "Insider activity heavy distribution（2026Q2 acquired_disposed_ratio 0.0101，99 賣單 vs 63 股買入）；volume 0.73× 20D avg 無機構承接確認。Label: distributing",
         "pattern_taxonomy": "pullback_in_uptrend",
@@ -47823,6 +48051,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "Insider acq/disp ratio 0.50 (Q1 0.46, Q4 0.51) 連 3 季淨拋售；+8.98% 大漲僅 0.32× 20D 量能，無機構承接確認。Label: distributing。",
         "pattern_taxonomy": "uptrend_continuation",
@@ -48149,6 +48383,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": "Insider acquired/disposed ratio 0.15 latest Q = heavy net selling; short interest only 3.3% float so no squeeze tailwind; supply distributed into strength.",
         "pattern_taxonomy": "consolidation",
@@ -48471,6 +48711,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "MIXED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "signal": "HOLD",
         "score": 1,
@@ -48739,6 +48985,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "signal": "BUY",
         "score": 3,
@@ -48998,6 +49250,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -49236,6 +49494,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "narrative": "Mixed: insider Q2 acq/disp 0.508 (mild distributing), 今日量 33.8M = 1.33x 20d avg 且 +1.68% 收近高 (price/volume positive)。RS 99 隱含機構持續持倉，但 MACD histogram 轉弱顯示頂部動能漸弱",
@@ -49590,6 +49854,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "narrative": "內部人 4 季連續 distributing (Q2 2026 ratio=0,零買單) + 量比僅 1.34× 平均、價貼 52w high → 機構與 insider 在強勢中減碼非加碼。",
@@ -49928,6 +50198,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -50191,6 +50467,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "narrative": "Insider / institutional bundle data empty for NOK; price action 顯示 steady demand without distribution signature, but smart-money read inconclusive.",
@@ -50497,6 +50779,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -50836,6 +51124,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -51151,6 +51445,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "accumulating",
@@ -51481,6 +51781,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "accumulating",
@@ -51814,6 +52120,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -52078,6 +52390,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -52417,6 +52735,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "neutral",
@@ -52752,6 +53076,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -53099,6 +53429,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -53424,6 +53760,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "accumulating",
@@ -53752,6 +54094,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_forward",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "narrative": "Insider Q2 sell-ratio 0（9 sale tx, 71,726 disposed, 0 buys）配合 +15.5% gap 量 1.58× 20D avg = 內部人在 ATH 分配股權，散戶接力。30d analyst 升降評未呈現淨累積，整體屬 distribution-into-strength。",
@@ -54106,6 +54454,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -54444,6 +54798,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "narrative": "Insider Q2 ratio 0.0552 (869 disposals vs 48 acquisitions) 第三季連續 distributing；今日 -6.6% 量 1.18× 20D avg 為 moderate-not-climactic supply。",
@@ -54706,6 +55066,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "narrative": "Insider Q1 2026 ratio 1.58 (955k acquired vs 396k disposed) 重度買進 + 今日 -2.17% 下跌僅 1.09× 量（NORMAL 非 distribution spike）+ 0 spike days 過去 10 sessions → smart money posture constructive",
@@ -54965,6 +55331,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -55222,6 +55594,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -55566,6 +55944,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "mixed",
@@ -55896,6 +56280,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "distributing",
@@ -56178,6 +56568,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "OUTLIER",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "accumulating",
@@ -56500,6 +56896,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "ALIGNED",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": {
         "smart_money_analysis": {
           "label": "accumulating",
@@ -56812,6 +57214,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -56989,6 +57397,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": "BIPOLAR",
+      "polarization_source": "det_shadow",
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -57172,6 +57586,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -57352,6 +57772,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -57612,6 +58038,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -57791,6 +58223,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -58028,6 +58466,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -58217,6 +58661,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -58404,6 +58854,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -58641,6 +59097,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -58828,6 +59290,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -59060,6 +59528,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -59212,6 +59686,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -59374,6 +59854,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -59592,6 +60078,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -59747,6 +60239,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -59980,6 +60478,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -60216,6 +60720,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -60373,6 +60883,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -60608,6 +61124,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -60820,6 +61342,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -60974,6 +61502,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -61136,6 +61670,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -61366,6 +61906,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -61521,6 +62067,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -61673,6 +62225,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -61832,6 +62390,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -62065,6 +62629,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -62276,6 +62846,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -62431,6 +63007,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -62587,6 +63169,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -62740,6 +63328,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -62896,6 +63490,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -63124,6 +63724,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -63276,6 +63882,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -63436,6 +64048,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -63581,6 +64199,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -63737,6 +64361,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -63886,6 +64516,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -64039,6 +64675,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -64190,6 +64832,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -64402,6 +65050,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -64546,6 +65200,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -64695,6 +65355,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -64845,6 +65511,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -65063,6 +65735,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -65212,6 +65890,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -65439,6 +66123,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -65660,6 +66350,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -65810,6 +66506,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -65955,6 +66657,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -66105,6 +66813,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -66317,6 +67031,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -66469,6 +67189,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -66618,6 +67344,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -66834,6 +67566,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -67047,6 +67785,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -67199,6 +67943,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -67423,6 +68173,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -67600,6 +68356,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -67748,6 +68510,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -67974,6 +68742,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -68145,6 +68919,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -68294,6 +69074,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -68452,6 +69238,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -68603,6 +69395,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -68805,6 +69603,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -69030,6 +69834,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -69258,6 +70068,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -69468,6 +70284,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -69614,6 +70436,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -69770,6 +70598,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -69997,6 +70831,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -70143,6 +70983,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -70288,6 +71134,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -70439,6 +71291,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -70595,6 +71453,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -70798,6 +71662,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -70944,6 +71814,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -71091,6 +71967,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -71312,6 +72194,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "pure_mean_reversion",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -71531,6 +72419,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -71756,6 +72650,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -71907,6 +72807,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -72056,6 +72962,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -72206,6 +73118,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -72422,6 +73340,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -72570,6 +73494,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -72787,6 +73717,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -72931,6 +73867,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -73143,6 +74085,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -73288,6 +74236,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -73430,6 +74384,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -73644,6 +74604,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -73782,6 +74748,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -73921,6 +74893,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -74117,6 +75095,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -74314,6 +75298,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -74449,6 +75439,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -74643,6 +75639,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -74853,6 +75855,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -74993,6 +76001,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75129,6 +76143,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75323,6 +76343,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75464,6 +76490,12 @@
           "scanned": false
         }
       },
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": "unclassified",
+      "red_team_basis_source": "det_shadow",
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75610,6 +76642,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75756,6 +76794,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75833,6 +76877,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -75958,6 +77008,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -76031,6 +77087,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -76171,6 +77233,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -76295,6 +77363,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -76429,6 +77503,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -76493,6 +77573,12 @@
       "valuation_lane": null,
       "fair_value_summary": null,
       "det_shadow": null,
+      "signal_polarization": null,
+      "polarization_source": null,
+      "polarization_disagrees": false,
+      "red_team_basis": null,
+      "red_team_basis_source": null,
+      "red_team_basis_disagrees": false,
       "technical_lane": null,
       "fundamentals_lane": null,
       "news_lane": null,
@@ -216195,8 +217281,8 @@
     ],
     "global_warnings": [],
     "status": "success",
-    "_cache_age_sec": 193427,
-    "_cache_age_hr": 53.7,
+    "_cache_age_sec": 193727,
+    "_cache_age_hr": 53.8,
     "_source_file": "2026-07-31.json",
     "_freshness": "STALE",
     "_total_log_days": 76,
@@ -216877,8 +217963,8 @@
         }
       },
       "status": "success",
-      "_cache_age_sec": 138216,
-      "_cache_age_hr": 38.4,
+      "_cache_age_sec": 138516,
+      "_cache_age_hr": 38.5,
       "_freshness": "STALE"
     },
     "trending": {
@@ -217043,7 +218129,7 @@
           "polarity_score": -0.2217
         }
       ],
-      "_cache_age_hr": 38.4,
+      "_cache_age_hr": 38.5,
       "_freshness": "STALE"
     }
   },
@@ -219102,11 +220188,23 @@
     }
   ],
   "fred_macro": {
-    "generated_at": "2026-08-02T03:02:02+00:00",
+    "generated_at": "2026-08-02T04:28:37+00:00",
     "asof": null,
     "cache_hit": false,
     "cache_age_sec": 0,
     "series": {
+      "DGS2": {
+        "value": 4.23,
+        "value_smooth_3d": 4.2367,
+        "date": "2026-07-30",
+        "data_freshness_days": 3,
+        "delta_bps_1m": 9.0,
+        "delta_bps_3m": 35.0,
+        "delta_bps_1y": 29.0,
+        "percentile_1y": 96,
+        "trend_30d": "stable",
+        "trend_90d": "rising"
+      },
       "DGS10": {
         "value": 4.68,
         "value_smooth_3d": 4.6533,
@@ -219131,18 +220229,6 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
-      "T10Y2Y": {
-        "value": 0.47,
-        "value_smooth_3d": 0.4567,
-        "date": "2026-07-31",
-        "data_freshness_days": 2,
-        "delta_bps_1m": 16.0,
-        "delta_bps_3m": -4.0,
-        "delta_bps_1y": 4.0,
-        "percentile_1y": 19,
-        "trend_30d": "rising",
-        "trend_90d": "stable"
-      },
       "T10Y3M": {
         "value": 0.92,
         "value_smooth_3d": 0.8733,
@@ -219155,17 +220241,17 @@
         "trend_30d": "rising",
         "trend_90d": "rising"
       },
-      "DGS2": {
-        "value": 4.23,
-        "value_smooth_3d": 4.2367,
-        "date": "2026-07-30",
-        "data_freshness_days": 3,
-        "delta_bps_1m": 9.0,
-        "delta_bps_3m": 35.0,
-        "delta_bps_1y": 29.0,
-        "percentile_1y": 96,
-        "trend_30d": "stable",
-        "trend_90d": "rising"
+      "T10Y2Y": {
+        "value": 0.47,
+        "value_smooth_3d": 0.4567,
+        "date": "2026-07-31",
+        "data_freshness_days": 2,
+        "delta_bps_1m": 16.0,
+        "delta_bps_3m": -4.0,
+        "delta_bps_1y": 4.0,
+        "percentile_1y": 19,
+        "trend_30d": "rising",
+        "trend_90d": "stable"
       },
       "DFII10": {
         "value": 2.41,
@@ -219201,14 +220287,14 @@
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
-      "CPIAUCSL": {
-        "value": 332.568,
+      "PAYEMS": {
+        "value": 158984.0,
         "date": "2026-06-01",
         "data_freshness_days": 62,
-        "yoy_change_pct": 3.46,
-        "mom_change_pct": -0.42,
+        "yoy_change_pct": 0.32,
+        "mom_change_pct": 0.04,
         "wow_change": 0.0,
-        "percentile_1y": 83,
+        "percentile_1y": 92,
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
@@ -219223,14 +220309,14 @@
         "trend_30d": "stable",
         "trend_90d": "falling"
       },
-      "PAYEMS": {
-        "value": 158984.0,
+      "CPIAUCSL": {
+        "value": 332.568,
         "date": "2026-06-01",
         "data_freshness_days": 62,
-        "yoy_change_pct": 0.32,
-        "mom_change_pct": 0.04,
+        "yoy_change_pct": 3.46,
+        "mom_change_pct": -0.42,
         "wow_change": 0.0,
-        "percentile_1y": 92,
+        "percentile_1y": 83,
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
@@ -219243,18 +220329,6 @@
         "wow_change": 9000.0,
         "percentile_1y": 4,
         "trend_30d": "falling",
-        "trend_90d": "stable"
-      },
-      "BAMLH0A0HYM2": {
-        "value": 2.84,
-        "value_smooth_3d": 2.85,
-        "date": "2026-07-30",
-        "data_freshness_days": 3,
-        "delta_bps_1m": 9.0,
-        "delta_bps_3m": 7.0,
-        "delta_bps_1y": -5.0,
-        "percentile_1y": 44,
-        "trend_30d": "stable",
         "trend_90d": "stable"
       },
       "SAHMREALTIME": {
@@ -219276,6 +220350,18 @@
         "mom_change_pct": 0.24,
         "wow_change": 0.0,
         "percentile_1y": 92,
+        "trend_30d": "stable",
+        "trend_90d": "stable"
+      },
+      "BAMLH0A0HYM2": {
+        "value": 2.84,
+        "value_smooth_3d": 2.85,
+        "date": "2026-07-30",
+        "data_freshness_days": 3,
+        "delta_bps_1m": 9.0,
+        "delta_bps_3m": 7.0,
+        "delta_bps_1y": -5.0,
+        "percentile_1y": 44,
         "trend_30d": "stable",
         "trend_90d": "stable"
       },
@@ -219458,12 +220544,12 @@
       "missing": [],
       "errors": []
     },
-    "_cache_age_sec": 5100
+    "_cache_age_sec": 205
   },
   "industry_trend": {
     "status": "success",
     "as_of": "2026-07-31 22:07:57",
-    "_cache_age_hr": 38.3,
+    "_cache_age_hr": 38.4,
     "_freshness": "STALE",
     "_source_file": "theme_detector_2026-07-31_221055.json",
     "leaders": [
@@ -219992,8 +221078,8 @@
     },
     "_partial": false,
     "status": "success",
-    "_cache_age_sec": 138229,
-    "_cache_age_hr": 38.4,
+    "_cache_age_sec": 138529,
+    "_cache_age_hr": 38.5,
     "_freshness": "STALE"
   },
   "theme_overrides": [
@@ -220101,6 +221187,6 @@
       "first_hit_filtered": 0,
       "digests_scanned": 11
     },
-    "_freshness_hr": 38.4
+    "_freshness_hr": 38.5
   }
 }

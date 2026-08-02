@@ -1,7 +1,14 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-02 (v4.82.0)
+> **Last Updated**: 2026-08-02 (v4.83.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.83.0) — decision badge 改吃決策時真值（V20-A5）
+- **TODO 過期了，動工前先查證**：V20-A1 / A2 寫著「已存 data.json，UI 沒秀」，實際上 badge 與 `SIGNAL_TIPS` 兩邊都在，更早的版本就做掉了（`ALIGNED` / `unclassified` 兩個良性值刻意不發 badge，與 `macro_alignment` 只標 CONTRARIAN 同一慣例——那是設計不是遺漏）。**教訓：UI 類 TODO 動工前先跑一次 grep 確認現況，backlog 會比 code 舊。**
+- **但 A5 不是「只省一層 `.det_shadow`」**：renderer 原本**只**讀 `det_shadow`，那是 `apply_det_shadow.py` 事後補寫的 shadow；V5.1+ entry 的 `calculation_steps` 才是決策當下真的動了分數的值（confidence 乘數 / position cap / buy_threshold / cascade 罰則）。兩者理應相同但來源不同，badge 顯示錯的那個不會有人發現。改成 **決策時優先、shadow fallback**，並把 `*_source` 一起送出去。
+- **有了兩個來源就該驗它們一致**：加 `*_disagrees` + 兩個 SPLIT badge（與既有 `RT DISAGREE` / `VAL DISAGREE` 同一套視覺語言）。不一致代表後處理跑的時候看到的 lane scores / counter_thesis 文字跟決策當下不同 —— 通常是 entry 被事後編輯。現行 172 筆 0 不一致（健康），但這是往後才會用到的哨兵。
+- **fallback 留著是為了不綁 bridge 重跑**：renderer 讀不到攤平欄位就退回 `det_shadow`，還沒重生成的 `data.json` 照樣渲染。
+- **驗收**：`bridge.extract_audit_history()` 實跑 192 筆，2 筆 source=calculation_steps（V5.1 那兩筆）、67/170 筆 source=det_shadow、0 筆 disagree；`node --check` 兩檔語法 OK；SYNC OK 4.83.0。
 
 ## 🟢 Session Note (v4.82.0) — Phase 4 script 化（TODO L2）
 - **起因**：Phase 3 已在 4.80.0 script 化，Phase 4 是最後一塊仍靠 LLM 手算的決策數學（九段乘法鏈 + 兩張查表 + 一個條件 reject + 兩個獨立導出的停損價要調和）。

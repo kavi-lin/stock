@@ -1624,6 +1624,32 @@ def extract_audit_history(positions_by_ticker=None):
                 fair_value_summary   = meta.get("fair_value_summary")       # {anchors, weights_used, weighted_fair_value, verdict_band, confidence, ...}
                 # V2.10.0 Det shadow (post-processor) — polarization label + agreement flags
                 det_shadow           = meta.get("det_shadow")               # {signal_polarization, valuation_score_det, val_agreement, red_team_verdict_det, red_team_agreement, ...}
+                # V4.83.0 (V20-A5) — surface the two labels the decision cards render as
+                # badges, so page-decisions.js does not have to know which block holds them.
+                # `calculation_steps` is the decision-time authority (those exact values
+                # moved the score); det_shadow is the post-processor shadow of the same
+                # thing and is what pre-V5.1 entries have. Prefer the former, fall back to
+                # the latter, and say which one the badge is showing — an entry where the
+                # two disagree is a real finding, not something to paper over.
+                _cs                  = meta.get("calculation_steps") or {}
+                _polar_live          = ((_cs.get("polarization_modulation") or {}).get("label"))
+                _polar_shadow        = (det_shadow or {}).get("signal_polarization")
+                signal_polarization  = _polar_live or _polar_shadow
+                polarization_source  = ("calculation_steps" if _polar_live
+                                        else ("det_shadow" if _polar_shadow else None))
+                _basis_live          = _cs.get("red_team_basis")
+                _basis_shadow        = (det_shadow or {}).get("red_team_basis")
+                red_team_basis       = _basis_live or _basis_shadow
+                red_team_basis_source = ("calculation_steps" if _basis_live
+                                         else ("det_shadow" if _basis_shadow else None))
+                # Both blocks derive from apply_det_shadow.py, so on an entry carrying both
+                # they must agree. A disagreement means the post-processor ran against
+                # different lane scores than the decision did — worth a badge, in the same
+                # spirit as the existing RT/VAL DISAGREE pills.
+                polarization_disagrees = bool(_polar_live and _polar_shadow
+                                              and _polar_live != _polar_shadow)
+                red_team_basis_disagrees = bool(_basis_live and _basis_shadow
+                                                and _basis_live != _basis_shadow)
                 # V2.13.0 — Phase 2 lane outputs (Technical / Fundamentals / News) + Phase 3 PM 整合層
                 technical_lane       = meta.get("technical_lane")
                 fundamentals_lane    = meta.get("fundamentals_lane")
@@ -1721,6 +1747,13 @@ def extract_audit_history(positions_by_ticker=None):
                     "fair_value_summary": fair_value_summary,
                     # V2.10.0 Det shadow + polarization
                     "det_shadow":         det_shadow,
+                    # V4.83.0 (V20-A5) — flattened badge inputs for A1 / A2
+                    "signal_polarization":       signal_polarization,
+                    "polarization_source":       polarization_source,
+                    "polarization_disagrees":    polarization_disagrees,
+                    "red_team_basis":            red_team_basis,
+                    "red_team_basis_source":     red_team_basis_source,
+                    "red_team_basis_disagrees":  red_team_basis_disagrees,
                     # V2.13.0 lane outputs + PM integration fields
                     "technical_lane":     technical_lane,
                     "fundamentals_lane":  fundamentals_lane,
