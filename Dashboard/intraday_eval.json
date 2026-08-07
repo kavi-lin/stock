@@ -1,368 +1,367 @@
 {
   "version": "1.0",
-  "as_of": "2026-07-31T20:05:24+00:00",
-  "as_of_et": "2026-07-31T16:05:24-04:00",
-  "market_open": false,
-  "session_fraction": 1.0,
+  "as_of": "2026-08-07T16:16:41+00:00",
+  "as_of_et": "2026-08-07T12:16:41-04:00",
+  "market_open": true,
+  "session_fraction": 0.427,
   "regime": {
-    "label": "RISK-OFF 偏防禦",
-    "posture": "defensive",
-    "exposure_ceiling": "0-25%",
-    "tape_bias": -1,
-    "committee_stance": "DEFENSIVE",
+    "label": "中性/區間",
+    "posture": "neutral",
+    "exposure_ceiling": "40-60%",
+    "tape_bias": 1,
+    "committee_stance": null,
     "drivers": [
-      "盤中分數 17（中性）",
-      "市寬 47.2% 上漲",
-      "近25日出貨日 7 天",
-      "委員會 stance DEFENSIVE"
+      "盤中分數 30（偏強）",
+      "市寬 66.0% 上漲",
+      "近25日出貨日 6 天"
     ],
     "cautions": []
   },
   "mood": {
-    "intraday_score": 17,
-    "intraday_label": "中性",
-    "headline_zh": "盤面中性（17）：近25日出貨日 7 天、盤中 KDJ 高檔死叉",
-    "mood_score": -13,
-    "vix": 17.54,
-    "vix_regime": "NORMAL",
-    "skew": 139.9,
-    "skew_label": "high",
-    "fear_greed": 41.1,
-    "fear_greed_label": "Neutral",
-    "distribution_days": 7,
-    "spy_chg": 0.7,
-    "qqq_chg": 0.64,
-    "iwm_chg": -0.47,
+    "intraday_score": 30,
+    "intraday_label": "偏強",
+    "headline_zh": "盤面偏強（30）：近25日出貨日 6 天、日內自低點反彈，收復至區間 82%，止跌訊號",
+    "mood_score": 25,
+    "vix": 14.86,
+    "vix_regime": "LOW",
+    "skew": 134.7,
+    "skew_label": "elevated",
+    "fear_greed": 63.5,
+    "fear_greed_label": "Greed",
+    "distribution_days": 6,
+    "spy_chg": 0.59,
+    "qqq_chg": 1.1,
+    "iwm_chg": 0.97,
     "open_pattern_zh": "區間震盪"
   },
   "breadth": {
     "n": 517,
-    "advancers": 244,
-    "decliners": 271,
-    "adv_pct": 47.2,
-    "median_chg": -0.07
+    "advancers": 341,
+    "decliners": 174,
+    "adv_pct": 66.0,
+    "median_chg": 0.41
   },
   "groups": {
     "semiconductors": {
-      "avg": 0.61,
-      "up": 15,
-      "down": 11,
+      "avg": 2.54,
+      "up": 19,
+      "down": 7,
       "n": 26,
       "worst": [
         {
-          "ticker": "NXPI",
-          "chg": -5.9
+          "ticker": "STX",
+          "chg": -5.45
         },
         {
-          "ticker": "MU",
-          "chg": -5.31
+          "ticker": "WDC",
+          "chg": -3.81
         },
         {
           "ticker": "SNDK",
-          "chg": -4.93
+          "chg": -2.15
         },
         {
-          "ticker": "QCOM",
-          "chg": -2.27
+          "ticker": "AMD",
+          "chg": -1.23
         },
         {
-          "ticker": "ON",
-          "chg": -1.87
+          "ticker": "MU",
+          "chg": -0.74
         },
         {
-          "ticker": "MCHP",
-          "chg": -0.73
+          "ticker": "ARM",
+          "chg": -0.72
         }
       ],
       "best": [
         {
-          "ticker": "MPWR",
-          "chg": 9.61
-        },
-        {
           "ticker": "COHR",
-          "chg": 6.63
+          "chg": 15.53
         },
         {
-          "ticker": "NVDA",
-          "chg": 3.39
+          "ticker": "MCHP",
+          "chg": 13.88
         },
         {
           "ticker": "LITE",
-          "chg": 3.38
-        },
-        {
-          "ticker": "MRVL",
-          "chg": 3.22
+          "chg": 6.7
         },
         {
           "ticker": "GLW",
-          "chg": 2.64
+          "chg": 6.46
+        },
+        {
+          "ticker": "MRVL",
+          "chg": 3.64
+        },
+        {
+          "ticker": "SWKS",
+          "chg": 3.58
         }
       ]
     },
     "software_platforms": {
-      "avg": 1.33,
-      "up": 17,
-      "down": 4,
+      "avg": 2.85,
+      "up": 20,
+      "down": 1,
       "n": 21,
       "worst": [
         {
-          "ticker": "SHOP",
-          "chg": -3.88
-        },
-        {
-          "ticker": "APP",
-          "chg": -2.5
-        },
-        {
           "ticker": "TTD",
-          "chg": -1.12
+          "chg": -21.39
         },
         {
-          "ticker": "ADSK",
-          "chg": -0.22
+          "ticker": "FTNT",
+          "chg": 0.07
         },
         {
-          "ticker": "INTU",
-          "chg": 0.1
+          "ticker": "MSFT",
+          "chg": 0.69
         },
         {
-          "ticker": "DDOG",
-          "chg": 0.56
+          "ticker": "PANW",
+          "chg": 1.0
+        },
+        {
+          "ticker": "CDNS",
+          "chg": 1.2
+        },
+        {
+          "ticker": "SNPS",
+          "chg": 1.43
         }
       ],
       "best": [
         {
-          "ticker": "FTNT",
-          "chg": 5.04
-        },
-        {
-          "ticker": "SNPS",
-          "chg": 4.53
-        },
-        {
-          "ticker": "MSFT",
-          "chg": 3.41
-        },
-        {
           "ticker": "TEAM",
-          "chg": 3.21
+          "chg": 30.33
         },
         {
-          "ticker": "CRWD",
-          "chg": 3.2
+          "ticker": "PLTR",
+          "chg": 9.21
         },
         {
-          "ticker": "CDNS",
-          "chg": 2.26
+          "ticker": "NOW",
+          "chg": 6.17
+        },
+        {
+          "ticker": "WDAY",
+          "chg": 4.75
+        },
+        {
+          "ticker": "DDOG",
+          "chg": 3.33
+        },
+        {
+          "ticker": "EPAM",
+          "chg": 3.0
         }
       ]
     },
     "crypto_fintech": {
-      "avg": -3.45,
-      "up": 1,
-      "down": 3,
+      "avg": 3.14,
+      "up": 3,
+      "down": 1,
       "n": 4,
       "worst": [
         {
-          "ticker": "COIN",
-          "chg": -9.3
-        },
-        {
-          "ticker": "MSTR",
-          "chg": -3.97
-        },
-        {
           "ticker": "PYPL",
-          "chg": -0.81
+          "chg": -1.1
         },
         {
           "ticker": "HOOD",
-          "chg": 0.3
+          "chg": 3.69
+        },
+        {
+          "ticker": "COIN",
+          "chg": 4.92
+        },
+        {
+          "ticker": "MSTR",
+          "chg": 5.06
         }
       ],
       "best": [
         {
-          "ticker": "HOOD",
-          "chg": 0.3
-        },
-        {
-          "ticker": "PYPL",
-          "chg": -0.81
-        },
-        {
           "ticker": "MSTR",
-          "chg": -3.97
+          "chg": 5.06
         },
         {
           "ticker": "COIN",
-          "chg": -9.3
+          "chg": 4.92
+        },
+        {
+          "ticker": "HOOD",
+          "chg": 3.69
+        },
+        {
+          "ticker": "PYPL",
+          "chg": -1.1
         }
       ]
     }
   },
   "sectors": [
     {
-      "sector": "Energy",
-      "intraday_avg": 1.44,
-      "breadth_pct": 91.3,
-      "n": 23,
-      "pred5d": 1.23,
+      "sector": "Technology",
+      "intraday_avg": 1.61,
+      "breadth_pct": 73.9,
+      "n": 92,
+      "pred5d": 0.94,
+      "pulse_direction": "neutral_mixed",
+      "rank_score": 2.08,
+      "verdict": "WARM"
+    },
+    {
+      "sector": "Materials",
+      "intraday_avg": 0.77,
+      "breadth_pct": 65.0,
+      "n": 20,
+      "pred5d": 1.31,
       "pulse_direction": "mod_bull",
-      "rank_score": 2.06,
+      "rank_score": 1.42,
+      "verdict": "WARM"
+    },
+    {
+      "sector": "Consumer_Discretionary",
+      "intraday_avg": 1.03,
+      "breadth_pct": 65.5,
+      "n": 55,
+      "pred5d": 0.57,
+      "pulse_direction": "neutral_mixed",
+      "rank_score": 1.32,
       "verdict": "WARM"
     },
     {
       "sector": "Industrials",
-      "intraday_avg": 0.57,
-      "breadth_pct": 67.9,
+      "intraday_avg": 0.5,
+      "breadth_pct": 66.7,
       "n": 78,
-      "pred5d": 0.27,
-      "pulse_direction": "neutral_mixed",
-      "rank_score": 0.7,
-      "verdict": "WARM"
-    },
-    {
-      "sector": "Technology",
-      "intraday_avg": 0.52,
-      "breadth_pct": 65.2,
-      "n": 92,
-      "pred5d": 0.03,
-      "pulse_direction": "neutral_mixed",
-      "rank_score": 0.53,
-      "verdict": "WARM"
-    },
-    {
-      "sector": "Financials",
-      "intraday_avg": -0.16,
-      "breadth_pct": 44.3,
-      "n": 70,
-      "pred5d": 1.35,
+      "pred5d": 1.32,
       "pulse_direction": "mod_bull",
-      "rank_score": 0.52,
+      "rank_score": 1.16,
       "verdict": "NEUTRAL"
     },
     {
-      "sector": "Communication",
-      "intraday_avg": 0.56,
-      "breadth_pct": 50.0,
-      "n": 20,
-      "pred5d": -1.16,
-      "pulse_direction": "mod_bear",
-      "rank_score": -0.02,
-      "verdict": "WARM"
-    },
-    {
       "sector": "Healthcare",
-      "intraday_avg": -0.15,
-      "breadth_pct": 40.0,
+      "intraday_avg": 0.28,
+      "breadth_pct": 70.0,
       "n": 60,
-      "pred5d": 0.1,
-      "pulse_direction": "neutral_mixed",
-      "rank_score": -0.1,
+      "pred5d": 1.17,
+      "pulse_direction": "mod_bull",
+      "rank_score": 0.87,
       "verdict": "NEUTRAL"
     },
     {
       "sector": "Real_Estate",
-      "intraday_avg": -0.33,
-      "breadth_pct": 32.3,
+      "intraday_avg": 0.78,
+      "breadth_pct": 100.0,
       "n": 31,
-      "pred5d": 0.31,
+      "pred5d": 0.13,
       "pulse_direction": "neutral_mixed",
-      "rank_score": -0.17,
+      "rank_score": 0.85,
+      "verdict": "WARM"
+    },
+    {
+      "sector": "Energy",
+      "intraday_avg": 0.19,
+      "breadth_pct": 43.5,
+      "n": 23,
+      "pred5d": 1.09,
+      "pulse_direction": "mod_bull",
+      "rank_score": 0.74,
       "verdict": "NEUTRAL"
     },
     {
-      "sector": "Consumer_Staples",
-      "intraday_avg": -0.75,
-      "breadth_pct": 25.0,
-      "n": 36,
-      "pred5d": 0.06,
+      "sector": "Financials",
+      "intraday_avg": -0.15,
+      "breadth_pct": 41.4,
+      "n": 70,
+      "pred5d": 1.59,
+      "pulse_direction": "mod_bull",
+      "rank_score": 0.65,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "sector": "Communication",
+      "intraday_avg": 0.33,
+      "breadth_pct": 65.0,
+      "n": 20,
+      "pred5d": 0.26,
       "pulse_direction": "neutral_mixed",
-      "rank_score": -0.72,
+      "rank_score": 0.46,
       "verdict": "NEUTRAL"
     },
     {
       "sector": "Utilities",
-      "intraday_avg": -0.58,
-      "breadth_pct": 28.1,
+      "intraday_avg": 0.77,
+      "breadth_pct": 84.4,
       "n": 32,
-      "pred5d": -0.36,
+      "pred5d": -0.89,
       "pulse_direction": "neutral_mixed",
-      "rank_score": -0.76,
-      "verdict": "NEUTRAL"
+      "rank_score": 0.33,
+      "verdict": "WARM"
     },
     {
-      "sector": "Consumer_Discretionary",
-      "intraday_avg": -0.48,
-      "breadth_pct": 23.6,
-      "n": 55,
-      "pred5d": -0.88,
+      "sector": "Consumer_Staples",
+      "intraday_avg": 0.09,
+      "breadth_pct": 55.6,
+      "n": 36,
+      "pred5d": -0.04,
       "pulse_direction": "neutral_mixed",
-      "rank_score": -0.92,
-      "verdict": "NEUTRAL"
-    },
-    {
-      "sector": "Materials",
-      "intraday_avg": -1.48,
-      "breadth_pct": 20.0,
-      "n": 20,
-      "pred5d": 1.06,
-      "pulse_direction": "mod_bull",
-      "rank_score": -0.95,
+      "rank_score": 0.07,
       "verdict": "NEUTRAL"
     }
   ],
   "rotation": [
     {
       "from": "高估值成長",
-      "to": "Industrials",
+      "to": "Materials",
       "note": "資金流向價值/防禦板塊"
     }
   ],
   "themes": [
     {
-      "name": "Gold & Precious Metals",
-      "direction": "bullish",
-      "lifecycle": "Trending",
-      "heat": null
-    },
-    {
-      "name": "Consumer Cyclical Sector Concentration",
-      "direction": "bullish",
-      "lifecycle": "Trending",
-      "heat": null
-    },
-    {
-      "name": "Consumer Cyclical Sector Concentration",
+      "name": "Communication Services Sector Concentration",
       "direction": "bearish",
       "lifecycle": "Accelerating",
       "heat": null
     },
     {
-      "name": "Real Estate & REITs",
-      "direction": "bearish",
-      "lifecycle": "Accelerating",
-      "heat": null
-    },
-    {
-      "name": "Financial Services & Banks",
-      "direction": "bearish",
-      "lifecycle": "Accelerating",
-      "heat": null
-    },
-    {
-      "name": "Financial Sector Concentration",
+      "name": "Quantum Computing",
       "direction": "bullish",
       "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "AI & Semiconductors",
+      "direction": "bullish",
+      "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "Robotics & Automation",
+      "direction": "bullish",
+      "lifecycle": "Trending",
+      "heat": null
+    },
+    {
+      "name": "Space Economy",
+      "direction": "bullish",
+      "lifecycle": "Mature",
+      "heat": null
+    },
+    {
+      "name": "Defense & Aerospace",
+      "direction": "bullish",
+      "lifecycle": "Mature",
       "heat": null
     }
   ],
   "ideas": [
     {
-      "ticker": "AMD",
-      "chg": -0.57,
+      "ticker": "AVGO",
+      "chg": 1.06,
       "sector": "Technology",
       "tag": "trend",
       "dir": "down",
@@ -370,53 +369,44 @@
       "strength": "strong"
     },
     {
-      "ticker": "MU",
-      "chg": -5.31,
-      "sector": "Technology",
-      "tag": "trend",
-      "dir": "down",
-      "reason": "順勢續跌",
-      "strength": "strong"
-    },
-    {
-      "ticker": "META",
-      "chg": 3.25,
+      "ticker": "GOOGL",
+      "chg": -0.65,
       "sector": "Communication Services",
       "tag": "trend",
-      "dir": "up",
-      "reason": "順勢續攻",
-      "strength": "strong"
-    },
-    {
-      "ticker": "MRVL",
-      "chg": 3.22,
-      "sector": "Technology",
-      "tag": "trend",
       "dir": "down",
       "reason": "順勢續跌",
-      "strength": "strong"
-    },
-    {
-      "ticker": "GLW",
-      "chg": 2.64,
-      "sector": "Technology",
-      "tag": "trend",
-      "dir": "down",
-      "reason": "順勢續跌",
-      "strength": "strong"
-    },
-    {
-      "ticker": "NVDA",
-      "chg": 3.39,
-      "sector": "Technology",
-      "tag": "reversal",
-      "dir": "down",
-      "reason": "反轉向下",
       "strength": "strong"
     },
     {
       "ticker": "AMZN",
-      "chg": 15.85,
+      "chg": 1.81,
+      "sector": "Consumer Cyclical",
+      "tag": "trend",
+      "dir": "down",
+      "reason": "順勢續跌",
+      "strength": "med"
+    },
+    {
+      "ticker": "TEAM",
+      "chg": 30.33,
+      "sector": "Technology",
+      "tag": "leader",
+      "dir": "up",
+      "reason": "盤中漲幅領先",
+      "strength": null
+    },
+    {
+      "ticker": "COHR",
+      "chg": 15.53,
+      "sector": "Technology",
+      "tag": "leader",
+      "dir": "up",
+      "reason": "盤中漲幅領先",
+      "strength": null
+    },
+    {
+      "ticker": "ABNB",
+      "chg": 15.35,
       "sector": "Consumer Cyclical",
       "tag": "leader",
       "dir": "up",
@@ -424,17 +414,8 @@
       "strength": null
     },
     {
-      "ticker": "DXCM",
-      "chg": 12.38,
-      "sector": "Healthcare",
-      "tag": "leader",
-      "dir": "up",
-      "reason": "盤中漲幅領先",
-      "strength": null
-    },
-    {
-      "ticker": "MPWR",
-      "chg": 9.61,
+      "ticker": "MCHP",
+      "chg": 13.88,
       "sector": "Technology",
       "tag": "leader",
       "dir": "up",
@@ -442,27 +423,36 @@
       "strength": null
     },
     {
-      "ticker": "ETN",
-      "chg": 7.88,
-      "sector": "Industrials",
+      "ticker": "PLTR",
+      "chg": 9.21,
+      "sector": "Technology",
       "tag": "leader",
       "dir": "up",
       "reason": "盤中漲幅領先",
       "strength": null
     },
     {
-      "ticker": "GOOG",
-      "chg": 7.11,
-      "sector": "Communication Services",
+      "ticker": "NEM",
+      "chg": 7.27,
+      "sector": "Basic Materials",
       "tag": "leader",
       "dir": "up",
       "reason": "盤中漲幅領先",
       "strength": null
     },
     {
-      "ticker": "GOOGL",
-      "chg": 6.91,
-      "sector": "Communication Services",
+      "ticker": "LITE",
+      "chg": 6.7,
+      "sector": "Technology",
+      "tag": "leader",
+      "dir": "up",
+      "reason": "盤中漲幅領先",
+      "strength": null
+    },
+    {
+      "ticker": "GLW",
+      "chg": 6.46,
+      "sector": "Technology",
       "tag": "leader",
       "dir": "up",
       "reason": "盤中漲幅領先",
@@ -471,58 +461,58 @@
   ],
   "strategies": [
     {
-      "id": "defensive_cash",
-      "title": "控曝險、守成為主",
-      "stance": "defensive",
-      "confidence": 0.7,
-      "rationale": "防禦環境（曝險上限 0-25%）：反彈未確認、市寬/出貨日偏弱，不追高。",
-      "tickers": [],
-      "evidence": [
-        "盤中分數 17（中性）",
-        "市寬 47.2% 上漲",
-        "近25日出貨日 7 天",
-        "委員會 stance DEFENSIVE"
-      ],
-      "streak": 39,
-      "day_count": 39,
-      "highlight": true,
-      "day_motif": true
-    },
-    {
       "id": "software_momentum",
       "title": "軟體/平台順勢",
       "stance": "favor",
       "confidence": 0.6,
-      "rationale": "軟體/平台族群均漲 1.33%，資金自硬體換手至軟體；強勢股回踩不追高。",
+      "rationale": "軟體/平台族群均漲 2.85%，資金自硬體換手至軟體；強勢股回踩不追高。",
       "tickers": [
-        "FTNT",
-        "SNPS",
-        "MSFT",
         "TEAM",
-        "CRWD"
+        "PLTR",
+        "NOW",
+        "WDAY",
+        "DDOG"
       ],
       "evidence": [
-        "領漲：FTNT +5.04%",
-        "領漲：SNPS +4.53%",
-        "領漲：MSFT +3.41%"
+        "領漲：TEAM +30.33%",
+        "領漲：PLTR +9.21%",
+        "領漲：NOW +6.17%"
       ],
-      "streak": 5,
-      "day_count": 7,
+      "streak": 16,
+      "day_count": 16,
       "highlight": true,
       "day_motif": true
     },
     {
       "id": "value_defensive_rotation",
-      "title": "資金輪動至 Industrials",
+      "title": "資金輪動至 Materials",
       "stance": "favor",
       "confidence": 0.55,
-      "rationale": "價值/防禦板塊今日領先且前瞻偏多（Industrials）；反彈確認後優先佈局。",
+      "rationale": "價值/防禦板塊今日領先且前瞻偏多（Materials）；反彈確認後優先佈局。",
       "tickers": [
-        "Industrials"
+        "Materials"
       ],
       "evidence": [],
-      "streak": 20,
-      "day_count": 20,
+      "streak": 11,
+      "day_count": 11,
+      "highlight": true,
+      "day_motif": true
+    },
+    {
+      "id": "crypto_fintech_riskon",
+      "title": "加密/fintech 風險偏好升溫",
+      "stance": "favor",
+      "confidence": 0.5,
+      "rationale": "加密-fintech 族群均漲 3.14%，高 beta 風險偏好回補；事件前控部位。",
+      "tickers": [
+        "MSTR",
+        "COIN",
+        "HOOD",
+        "PYPL"
+      ],
+      "evidence": [],
+      "streak": 16,
+      "day_count": 16,
       "highlight": true,
       "day_motif": true
     },
@@ -534,8 +524,8 @@
       "rationale": "出貨日堆疊 + 機構買尾部避險，重大數據/財報前先降槓桿、留現金彈性。",
       "tickers": [],
       "evidence": [],
-      "streak": 39,
-      "day_count": 39,
+      "streak": 17,
+      "day_count": 17,
       "highlight": true,
       "day_motif": true
     }
@@ -549,28 +539,29 @@
     "retail_sector_pulse": true,
     "kill_triggers": true,
     "thematic": true,
-    "sector_stance": true
+    "sector_stance": false
   },
   "recurrence": {
-    "window_index": 39,
-    "windows_today": 39,
+    "window_index": 17,
+    "windows_today": 17,
     "highlighted": [
-      "defensive_cash",
       "software_momentum",
       "value_defensive_rotation",
+      "crypto_fintech_riskon",
       "event_risk_guard"
     ],
     "day_motifs": [
-      "defensive_cash",
       "software_momentum",
       "value_defensive_rotation",
+      "crypto_fintech_riskon",
       "event_risk_guard"
     ],
     "streak_highlight_min": 2,
     "day_motif_min": 3
   },
   "_narration_meta": {
-    "cached": true
+    "cached": false,
+    "model_used": "claude"
   },
-  "narrative_zh": "目前 regime 為 RISK-OFF 偏防禦，曝險上限維持 0-25%。盤中分數 28（偏強）、市寬 52.0% 上漲，指數收紅但近 25 日已累積 7 個出貨日，委員會 stance 維持 DEFENSIVE 已 38 天，短線反彈不足以改變曝險紀律，仍以控制部位、守成為主。策略主旋律有二：其一為軟體/平台順勢，該族群盤中均漲 1.01%、17 漲 4 跌，代表個股為 FTNT、SNPS、CRWD、MSFT、TEAM；其二為資金輪動至 Industrials，已連續 19 天，工業盤中均漲 0.68%、市寬 70.5%，Energy 則以 1.38% 與 87.0% 市寬居首，兩者 verdict 均為 WARM。風險提醒：Crypto/Fintech 盤中均跌 2.99%、IWM 下跌 0.38%，且 SKEW 139.9 偏高、跌破 20 日低點 288.26，尾部風險未解，任何進場都應嚴設停損並限制單筆規模。"
+  "narrative_zh": "目前 regime 判定為中性／區間，曝險上限維持 40-60%，不因盤中偏強（分數 30、市寬 66% 上漲）就擴張部位。VIX 14.86 偏低但 SKEW 134.7 已屬偏高，近 25 日累積 6 個出貨日，指數收復日內區間 82% 屬止跌訊號而非趨勢轉強，紀律仍以既有部位為主。策略主旋律有二：一是軟體／平台順勢（已連續 16 日），TEAM、PLTR、NOW、WDAY、DDOG 為代表，配合 Technology 板塊盤中 +1.61%、市寬 73.9%；二是加密／fintech 風險偏好升溫（16 日），MSTR、COIN、HOOD、PYPL 表現同向，反映的是風險胃納而非基本面改善。資金輪動至 Materials 已連 11 日，可視為分散方向。風險提醒：低 VIX 搭配高 SKEW 與 6 個出貨日，代表尾部保護成本被低估；「二元事件前控部位」訊號已連續 17 日，遇事件日應先降低單一標的集中度。"
 }

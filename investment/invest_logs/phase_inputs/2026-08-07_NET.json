@@ -1,0 +1,133 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "NET",
+ "date": "2026-08-07",
+ "phase0": {
+  "regime_confidence": 0.65,
+  "market_top_zone": "Yellow (Early Warning)",
+  "ftd_state": "FTD CONFIRMED, day 2 post-confirmation (rally-day 6; FTD originally confirmed on rally-day 4)",
+  "breadth_composite": 76,
+  "vix": 15.15,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 2.41,
+  "hot_sectors": [
+   "Healthcare",
+   "Technology",
+   "Industrials",
+   "Materials",
+   "Communication"
+  ],
+  "cold_sectors": [
+   "Energy",
+   "Financials",
+   "Consumer_Discretionary",
+   "Consumer_Staples",
+   "Utilities",
+   "Real_Estate"
+  ]
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.62,
+   "phase0_alignment": "ALIGNED",
+   "key_factors": [
+    "營收 +33.5% YoY、毛利率 73.3%",
+    "EV/Sales 40.9x vs 同業中位 11.2x",
+    "GAAP 未獲利：ROE -6.2%、營益率 -9.7%"
+   ],
+   "risk_flags": [
+    "無 earnings-analyst cache",
+    "FCF yield 0.29-0.76%，遠低於 5% 門檻"
+   ]
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": 0.97,
+   "confidence": 0.6,
+   "phase0_alignment": "ALIGNED",
+   "key_factors": [
+    "內部人派發：最新季 ratio 0.078",
+    "空頭部位僅 3.47% float（偏多）",
+    "市場層 Greed composite 69.3 貢獻 +1.93"
+   ],
+   "risk_flags": [
+    "內部人 16 買 vs 204 賣",
+    "institutional 與 exec-comp bundle 皆為空"
+   ]
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 4.2,
+   "confidence": 0.85,
+   "phase0_alignment": "ALIGNED",
+   "analyst_consensus": "Buy",
+   "key_factors": [
+    "Q2 beat-and-raise：營收 $696.1M、+36% YoY 加速",
+    "全年指引上調，盤後 +16.2%",
+    "分析師共識 Buy（29 B / 9 H / 2 S）",
+    "PT 修正動能 DOWN -13.96%（pre-print 陳舊值）"
+   ],
+   "risk_flags": [
+    "極端估值對獲利了結敏感",
+    "PT 動能與 30d 升降評資料皆為 pre-print 或空"
+   ]
+  },
+  "technical": {
+   "signal": "BUY",
+   "score": 2.5,
+   "confidence": 0.65,
+   "phase0_alignment": "ALIGNED",
+   "key_factors": [
+    "Stage 2 上升結構，價在所有均線之上",
+    "-2.91% 紅 K 伴隨 1.63× 均量",
+    "MACD 柱為正但動能減速"
+   ],
+   "risk_flags": [
+    "內部人四季派發趨勢",
+    "下跌日放量，屬迷你派發"
+   ]
+  },
+  "valuation": {
+   "signal": "SELL",
+   "score": -1.0,
+   "confidence": 0.35,
+   "phase0_alignment": "ALIGNED",
+   "key_factors": [
+    "8 個 anchor 僅 1 個結構上可用",
+    "唯一 anchor 半數來自近零 EBITDA 分母",
+    "EV/Sales 40.9x vs 同業 11.2x"
+   ],
+   "risk_flags": [
+    "-85.29% 的幅度是假象，只有方向穩健",
+    "comps weight_raw 0.10 被降級聚合提升為 1.00"
+   ]
+  }
+ },
+ "burry": {
+  "score": 15.4,
+  "label": "T4_VETO",
+  "veto_flag": true,
+  "components": {
+   "fcf_yield_pct": 0.76,
+   "ev_ebit": null,
+   "debt_to_equity": 2.31,
+   "pct_below_52w_high": 5.61,
+   "insider_net": "SELL"
+  },
+  "narrative": "FCF yield 0.8% │ D/E 2.31 │ 6% below 52wH │ insider=SELL"
+ },
+ "phase3": {
+  "final_score": 0.7392,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": 0.0,
+  "analysis_price": 284.43
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER"
+ }
+}

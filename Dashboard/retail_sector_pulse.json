@@ -1,7 +1,7 @@
 {
   "version": "1.1",
   "schema_note": "V3.20.1 — 3-lane composite (price/polarity/attention); retail sourced from trending_tickers.json",
-  "as_of": "2026-07-31T14:03:26.856933+00:00",
+  "as_of": "2026-08-07T14:34:29.099321+00:00",
   "weights_version": "v1.1",
   "lookback_hours": 72,
   "horizon": "5d",
@@ -10,77 +10,67 @@
     {
       "sector": "Technology",
       "proxy_etf": "XLK",
-      "news_sentiment_score": -1.5,
-      "news_label": "mod_bear",
-      "news_count_72h": 1,
+      "news_sentiment_score": 1.02,
+      "news_label": "mod_bull",
+      "news_count_72h": 2,
       "news_breadth": "narrow",
-      "retail_polarity_score": 0.0,
-      "retail_engagement_score": 1.39,
+      "retail_polarity_score": null,
+      "retail_engagement_score": null,
       "retail_volume_label": "calm",
-      "retail_top_tickers": [
-        {
-          "ticker": "AMD",
-          "engagement_score": 1.386,
-          "polarity_score": 0.0,
-          "mention_count": 1
-        }
-      ],
-      "sample_posts": [
-        {
-          "ticker": "AMD",
-          "headline": "AMD Lucebox Beats Nvidia DGX Spark by 3.63x on DeepSeek V4 Flash",
-          "url": "https://www.lucebox.com/blog/deepseek-v4-asymmetric-parallelism",
-          "source": "Hacker News",
-          "engagement": 1.386,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
+      "retail_top_tickers": [],
+      "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.03,
-      "predicted_5d_bullish_breadth_pct": 60.0,
-      "predicted_5d_avg_confidence": 0.462,
+      "predicted_5d_median_pct": 0.94,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.552,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.002,
+      "composite_score": 0.188,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.006,
-        "retail_polarity": 0.0,
-        "retail_attention": 0.0
+        "price_5d_norm": 0.188,
+        "retail_polarity": null,
+        "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.0% (3/5 看漲); 散戶 polarity +0.00 (AMD); 新聞 1 篇偏空。資料部分缺。",
-      "framing_en": "5d med +0.0% (3/5 bull); retail polarity +0.00 (AMD); news 1 mostly bearish. Partial data.",
+      "framing_zh": "5天中位 +0.9% (5/5 看漲); 新聞 2 篇偏多。資料部分缺。",
+      "framing_en": "5d med +0.9% (5/5 bull); news 2 mostly bullish. Partial data.",
       "key_tickers": [
         {
           "ticker": "MSFT",
-          "target_central_pct": 2.82,
-          "confidence": 0.5
-        },
-        {
-          "ticker": "AAPL",
-          "target_central_pct": 1.44,
-          "confidence": 0.61
+          "target_central_pct": 2.6,
+          "confidence": 0.58
         },
         {
           "ticker": "NVDA",
-          "target_central_pct": -1.03,
-          "confidence": 0.45
+          "target_central_pct": 1.63,
+          "confidence": 0.58
+        },
+        {
+          "ticker": "AVGO",
+          "target_central_pct": 0.94,
+          "confidence": 0.55
         }
       ],
       "key_headlines": [
         {
-          "published": "2026-07-29T05:00:00+00:00",
-          "source": "Seeking Alpha",
-          "headline": "Buy The Dip: 3 Top European AI Stocks",
+          "published": "2026-08-05T09:16:39+00:00",
+          "source": "24/7 Wall St.",
+          "headline": "Live Nasdaq Composite: AI Earnings Keep Market Rally on Track as Softer Payrolls Pull Yields Lower",
           "verdict": "BINARY",
-          "net_impact_score": -1.5
+          "net_impact_score": 1.3
+        },
+        {
+          "published": "2026-08-05T13:41:15+00:00",
+          "source": "CNBC",
+          "headline": "SpaceX dives 9% after AI spending surge rattles investors",
+          "verdict": "BINARY",
+          "net_impact_score": 0.8
         }
       ],
       "data_health": {
         "news_72h_ok": true,
-        "retail_signals_ok": true,
+        "retail_signals_ok": false,
         "predict_5d_ok": true,
-        "all_ok": true
+        "all_ok": false
       }
     },
     {
@@ -96,34 +86,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.1,
-      "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.574,
-      "predicted_5d_label": "neutral",
-      "composite_score": 0.02,
-      "composite_direction": "neutral_mixed",
+      "predicted_5d_median_pct": 1.17,
+      "predicted_5d_bullish_breadth_pct": 60.0,
+      "predicted_5d_avg_confidence": 0.654,
+      "predicted_5d_label": "mod_bull",
+      "composite_score": 0.234,
+      "composite_direction": "mod_bull",
       "signal_lanes": {
-        "price_5d_norm": 0.02,
+        "price_5d_norm": 0.234,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.1% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.1% (4/5 bull). Partial data.",
+      "framing_zh": "5天中位 +1.2% (3/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +1.2% (3/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "ABBV",
-          "target_central_pct": 1.24,
-          "confidence": 0.62
+          "ticker": "MRK",
+          "target_central_pct": 1.19,
+          "confidence": 0.69
         },
         {
-          "ticker": "MRK",
-          "target_central_pct": 1.21,
-          "confidence": 0.59
+          "ticker": "JNJ",
+          "target_central_pct": 1.17,
+          "confidence": 0.69
         },
         {
           "ticker": "LLY",
-          "target_central_pct": -0.2,
-          "confidence": 0.55
+          "target_central_pct": 1.25,
+          "confidence": 0.59
         }
       ],
       "key_headlines": [],
@@ -147,34 +137,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 1.23,
+      "predicted_5d_median_pct": 1.09,
       "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.58,
+      "predicted_5d_avg_confidence": 0.636,
       "predicted_5d_label": "mod_bull",
-      "composite_score": 0.246,
+      "composite_score": 0.218,
       "composite_direction": "mod_bull",
       "signal_lanes": {
-        "price_5d_norm": 0.246,
+        "price_5d_norm": 0.218,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +1.2% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +1.2% (4/5 bull). Partial data.",
+      "framing_zh": "5天中位 +1.1% (4/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +1.1% (4/5 bull). Partial data.",
       "key_tickers": [
         {
           "ticker": "XOM",
-          "target_central_pct": 1.59,
-          "confidence": 0.61
+          "target_central_pct": 1.51,
+          "confidence": 0.68
         },
         {
           "ticker": "CVX",
-          "target_central_pct": 1.31,
-          "confidence": 0.63
+          "target_central_pct": 1.13,
+          "confidence": 0.69
         },
         {
-          "ticker": "EOG",
-          "target_central_pct": 1.23,
-          "confidence": 0.58
+          "ticker": "COP",
+          "target_central_pct": 1.09,
+          "confidence": 0.64
         }
       ],
       "key_headlines": [],
@@ -198,34 +188,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 1.35,
-      "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.592,
+      "predicted_5d_median_pct": 1.59,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.724,
       "predicted_5d_label": "mod_bull",
-      "composite_score": 0.27,
+      "composite_score": 0.318,
       "composite_direction": "mod_bull",
       "signal_lanes": {
-        "price_5d_norm": 0.27,
+        "price_5d_norm": 0.318,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +1.4% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +1.4% (4/5 bull). Partial data.",
+      "framing_zh": "5天中位 +1.6% (5/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +1.6% (5/5 bull). Partial data.",
       "key_tickers": [
         {
           "ticker": "BRK-B",
-          "target_central_pct": 1.65,
-          "confidence": 0.71
+          "target_central_pct": 2.41,
+          "confidence": 0.8
         },
         {
           "ticker": "BAC",
-          "target_central_pct": 1.43,
-          "confidence": 0.65
+          "target_central_pct": 1.8,
+          "confidence": 0.77
         },
         {
           "ticker": "JPM",
-          "target_central_pct": 1.35,
-          "confidence": 0.61
+          "target_central_pct": 1.59,
+          "confidence": 0.75
         }
       ],
       "key_headlines": [],
@@ -249,34 +239,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -0.88,
-      "predicted_5d_bullish_breadth_pct": 20.0,
-      "predicted_5d_avg_confidence": 0.528,
+      "predicted_5d_median_pct": 0.57,
+      "predicted_5d_bullish_breadth_pct": 60.0,
+      "predicted_5d_avg_confidence": 0.62,
       "predicted_5d_label": "neutral",
-      "composite_score": -0.176,
+      "composite_score": 0.114,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.176,
+        "price_5d_norm": 0.114,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -0.9% (1/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -0.9% (1/5 bull). Partial data.",
+      "framing_zh": "5天中位 +0.6% (3/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +0.6% (3/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "MCD",
-          "target_central_pct": -0.95,
-          "confidence": 0.65
+          "ticker": "AMZN",
+          "target_central_pct": 1.73,
+          "confidence": 0.57
+        },
+        {
+          "ticker": "HD",
+          "target_central_pct": 1.34,
+          "confidence": 0.69
         },
         {
           "ticker": "TSLA",
-          "target_central_pct": -1.85,
-          "confidence": 0.33
-        },
-        {
-          "ticker": "NKE",
-          "target_central_pct": -0.88,
-          "confidence": 0.53
+          "target_central_pct": -1.26,
+          "confidence": 0.46
         }
       ],
       "key_headlines": [],
@@ -290,9 +280,9 @@
     {
       "sector": "Consumer_Staples",
       "proxy_etf": "XLP",
-      "news_sentiment_score": null,
-      "news_label": "neutral",
-      "news_count_72h": 0,
+      "news_sentiment_score": 0.8,
+      "news_label": "mod_bull",
+      "news_count_72h": 1,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -300,39 +290,47 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.06,
-      "predicted_5d_bullish_breadth_pct": 60.0,
-      "predicted_5d_avg_confidence": 0.616,
+      "predicted_5d_median_pct": -0.04,
+      "predicted_5d_bullish_breadth_pct": 40.0,
+      "predicted_5d_avg_confidence": 0.716,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.012,
+      "composite_score": -0.008,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.012,
+        "price_5d_norm": -0.008,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.1% (3/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.1% (3/5 bull). Partial data.",
+      "framing_zh": "5天中位 -0.0% (2/5 看漲); 新聞 1 篇偏多。資料部分缺。",
+      "framing_en": "5d med -0.0% (2/5 bull); news 1 mostly bullish. Partial data.",
       "key_tickers": [
         {
           "ticker": "KO",
-          "target_central_pct": 1.7,
-          "confidence": 0.61
+          "target_central_pct": 1.48,
+          "confidence": 0.72
         },
         {
           "ticker": "WMT",
-          "target_central_pct": -1.1,
-          "confidence": 0.61
+          "target_central_pct": -0.65,
+          "confidence": 0.7
         },
         {
           "ticker": "PG",
-          "target_central_pct": -0.46,
-          "confidence": 0.59
+          "target_central_pct": -0.63,
+          "confidence": 0.69
         }
       ],
-      "key_headlines": [],
+      "key_headlines": [
+        {
+          "published": "2026-08-05T13:54:38+00:00",
+          "source": "Investing.com",
+          "headline": "Kraft Heinz raises forecasts as new CEO’s turnaround push drives sales beat",
+          "verdict": "BINARY",
+          "net_impact_score": 0.8
+        }
+      ],
       "data_health": {
-        "news_72h_ok": false,
+        "news_72h_ok": true,
         "retail_signals_ok": false,
         "predict_5d_ok": true,
         "all_ok": false
@@ -351,34 +349,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.27,
+      "predicted_5d_median_pct": 1.32,
       "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.522,
-      "predicted_5d_label": "neutral",
-      "composite_score": 0.054,
-      "composite_direction": "neutral_mixed",
+      "predicted_5d_avg_confidence": 0.616,
+      "predicted_5d_label": "mod_bull",
+      "composite_score": 0.264,
+      "composite_direction": "mod_bull",
       "signal_lanes": {
-        "price_5d_norm": 0.054,
+        "price_5d_norm": 0.264,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.3% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.3% (4/5 bull). Partial data.",
+      "framing_zh": "5天中位 +1.3% (4/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +1.3% (4/5 bull). Partial data.",
       "key_tickers": [
         {
           "ticker": "RTX",
-          "target_central_pct": 1.96,
-          "confidence": 0.57
+          "target_central_pct": 2.51,
+          "confidence": 0.66
         },
         {
-          "ticker": "CAT",
-          "target_central_pct": -1.59,
-          "confidence": 0.35
+          "ticker": "GE",
+          "target_central_pct": 1.55,
+          "confidence": 0.66
         },
         {
-          "ticker": "HON",
-          "target_central_pct": 0.56,
-          "confidence": 0.57
+          "ticker": "UNP",
+          "target_central_pct": 1.32,
+          "confidence": 0.68
         }
       ],
       "key_headlines": [],
@@ -402,34 +400,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 1.06,
+      "predicted_5d_median_pct": 1.31,
       "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.558,
+      "predicted_5d_avg_confidence": 0.65,
       "predicted_5d_label": "mod_bull",
-      "composite_score": 0.212,
+      "composite_score": 0.262,
       "composite_direction": "mod_bull",
       "signal_lanes": {
-        "price_5d_norm": 0.212,
+        "price_5d_norm": 0.262,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +1.1% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +1.1% (4/5 bull). Partial data.",
+      "framing_zh": "5天中位 +1.3% (4/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +1.3% (4/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "ECL",
-          "target_central_pct": 1.2,
+          "ticker": "SHW",
+          "target_central_pct": 1.68,
           "confidence": 0.62
         },
         {
-          "ticker": "SHW",
-          "target_central_pct": 1.27,
-          "confidence": 0.52
+          "ticker": "ECL",
+          "target_central_pct": 1.47,
+          "confidence": 0.7
         },
         {
           "ticker": "APD",
-          "target_central_pct": 1.06,
-          "confidence": 0.61
+          "target_central_pct": 1.31,
+          "confidence": 0.71
         }
       ],
       "key_headlines": [],
@@ -443,9 +441,9 @@
     {
       "sector": "Utilities",
       "proxy_etf": "XLU",
-      "news_sentiment_score": -2.5,
-      "news_label": "mod_bear",
-      "news_count_72h": 1,
+      "news_sentiment_score": null,
+      "news_label": "neutral",
+      "news_count_72h": 0,
       "news_breadth": "narrow",
       "retail_polarity_score": null,
       "retail_engagement_score": null,
@@ -453,47 +451,39 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -0.36,
+      "predicted_5d_median_pct": -0.89,
       "predicted_5d_bullish_breadth_pct": 0.0,
-      "predicted_5d_avg_confidence": 0.64,
+      "predicted_5d_avg_confidence": 0.712,
       "predicted_5d_label": "neutral",
-      "composite_score": -0.072,
+      "composite_score": -0.178,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.072,
+        "price_5d_norm": -0.178,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -0.4% (0/5 看漲); 新聞 1 篇偏空。資料部分缺。",
-      "framing_en": "5d med -0.4% (0/5 bull); news 1 mostly bearish. Partial data.",
+      "framing_zh": "5天中位 -0.9% (0/5 看漲)。資料部分缺。",
+      "framing_en": "5d med -0.9% (0/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "AEP",
-          "target_central_pct": -0.82,
-          "confidence": 0.64
-        },
-        {
           "ticker": "SRE",
-          "target_central_pct": -0.45,
-          "confidence": 0.62
+          "target_central_pct": -1.82,
+          "confidence": 0.7
         },
         {
-          "ticker": "SO",
-          "target_central_pct": -0.36,
-          "confidence": 0.64
-        }
-      ],
-      "key_headlines": [
+          "ticker": "NEE",
+          "target_central_pct": -1.1,
+          "confidence": 0.71
+        },
         {
-          "published": "2026-07-29T07:00:00+00:00",
-          "source": "MarketWatch",
-          "headline": "The dollar's rally matters — but it still won't help Fed's Warsh win the inflation fight",
-          "verdict": "BINARY",
-          "net_impact_score": -2.5
+          "ticker": "AEP",
+          "target_central_pct": -0.89,
+          "confidence": 0.7
         }
       ],
+      "key_headlines": [],
       "data_health": {
-        "news_72h_ok": true,
+        "news_72h_ok": false,
         "retail_signals_ok": false,
         "predict_5d_ok": true,
         "all_ok": false
@@ -512,34 +502,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": 0.31,
-      "predicted_5d_bullish_breadth_pct": 80.0,
-      "predicted_5d_avg_confidence": 0.57,
+      "predicted_5d_median_pct": 0.13,
+      "predicted_5d_bullish_breadth_pct": 60.0,
+      "predicted_5d_avg_confidence": 0.616,
       "predicted_5d_label": "neutral",
-      "composite_score": 0.062,
+      "composite_score": 0.026,
       "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": 0.062,
+        "price_5d_norm": 0.026,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 +0.3% (4/5 看漲)。資料部分缺。",
-      "framing_en": "5d med +0.3% (4/5 bull). Partial data.",
+      "framing_zh": "5天中位 +0.1% (3/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +0.1% (3/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "PLD",
-          "target_central_pct": 0.96,
-          "confidence": 0.6
-        },
-        {
           "ticker": "CCI",
-          "target_central_pct": -1.05,
-          "confidence": 0.53
+          "target_central_pct": -1.04,
+          "confidence": 0.52
         },
         {
-          "ticker": "EQIX",
-          "target_central_pct": 0.88,
-          "confidence": 0.54
+          "ticker": "PLD",
+          "target_central_pct": -0.41,
+          "confidence": 0.69
+        },
+        {
+          "ticker": "WELL",
+          "target_central_pct": 0.28,
+          "confidence": 0.69
         }
       ],
       "key_headlines": [],
@@ -563,34 +553,34 @@
       "retail_top_tickers": [],
       "sample_posts": [],
       "matched_terms_summary": {},
-      "predicted_5d_median_pct": -1.16,
-      "predicted_5d_bullish_breadth_pct": 0.0,
-      "predicted_5d_avg_confidence": 0.474,
-      "predicted_5d_label": "mod_bear",
-      "composite_score": -0.232,
-      "composite_direction": "mod_bear",
+      "predicted_5d_median_pct": 0.26,
+      "predicted_5d_bullish_breadth_pct": 100.0,
+      "predicted_5d_avg_confidence": 0.59,
+      "predicted_5d_label": "neutral",
+      "composite_score": 0.052,
+      "composite_direction": "neutral_mixed",
       "signal_lanes": {
-        "price_5d_norm": -0.232,
+        "price_5d_norm": 0.052,
         "retail_polarity": null,
         "retail_attention": null
       },
-      "framing_zh": "5天中位 -1.2% (0/5 看漲)。資料部分缺。",
-      "framing_en": "5d med -1.2% (0/5 bull). Partial data.",
+      "framing_zh": "5天中位 +0.3% (5/5 看漲)。資料部分缺。",
+      "framing_en": "5d med +0.3% (5/5 bull). Partial data.",
       "key_tickers": [
         {
-          "ticker": "META",
-          "target_central_pct": -2.55,
-          "confidence": 0.4
-        },
-        {
           "ticker": "DIS",
-          "target_central_pct": -1.48,
-          "confidence": 0.6
+          "target_central_pct": 1.11,
+          "confidence": 0.7
         },
         {
           "ticker": "GOOGL",
-          "target_central_pct": -1.16,
-          "confidence": 0.49
+          "target_central_pct": 0.4,
+          "confidence": 0.55
+        },
+        {
+          "ticker": "NFLX",
+          "target_central_pct": 0.26,
+          "confidence": 0.64
         }
       ],
       "key_headlines": [],
@@ -605,73 +595,44 @@
   "market_wide_buzz": [
     {
       "topic": "ai_capex",
-      "post_count": 7,
-      "engagement_score": 12.529,
+      "post_count": 6,
+      "engagement_score": 18.489,
       "sample_posts": [
         {
-          "headline": "The Impending, Inescapable Deluge of A.I",
-          "url": "https://www.nytimes.com/interactive/2026/07/29/technology/ai-chips-data-center-boom.html",
+          "headline": "Americans are rallying against data centers. Surprisingly few are getting built",
+          "url": "https://www.cnn.com/2026/08/06/business/ai-data-center-construction",
           "source": "Hacker News",
-          "engagement": 2.708,
+          "engagement": 8.875,
+          "polarity": 0.5
+        },
+        {
+          "headline": "Nashville uses eminent domain to block data center near zoo",
+          "url": "https://nashvillebanner.com/2026/08/04/metro-council-data-center-eminent-domain-vote/",
+          "source": "Hacker News",
+          "engagement": 4.357,
           "polarity": 0.0
         },
         {
-          "headline": "A data center wanted to buy a farm to use water legally reserved for irrigation",
-          "url": "https://www.techradar.com/pro/a-330-mw-data-center-wanted-to-buy-a-farm-switch-off-the-irrigation-and-drink-the-difference-californias-most-powerful-irrigation-district-said-no-so-it-sued",
-          "source": "Hacker News",
-          "engagement": 2.485,
-          "polarity": 0.0
-        },
-        {
-          "headline": "The Town That Wants a Data Center Next Door",
-          "url": "https://www.theatlantic.com/podcasts/2026/07/town-wants-data-center-next-door/688108/",
+          "headline": "Salem Brought a Guillotine to Oppose New Data Center",
+          "url": "https://www.gadgetreview.com/salem-brought-a-guillotine-to-oppose-new-data-center-company-reps-left-feeling-unsafe",
           "source": "Hacker News",
           "engagement": 2.079,
           "polarity": 0.0
         }
       ],
-      "polarity_score": 0.0
-    },
-    {
-      "topic": "market_direction",
-      "post_count": 3,
-      "engagement_score": 5.194,
-      "sample_posts": [
-        {
-          "headline": "Nvidia's $750B AI bet deepens fears of a circular tech bubble",
-          "url": "https://www.latimes.com/business/story/2026-07-29/nvidias-750-billion-ai-bet-deepens-fears-of-circular-tech-bubble",
-          "source": "Hacker News",
-          "engagement": 2.303,
-          "polarity": -0.5
-        },
-        {
-          "headline": "Moonshot built on 20k Nvidia chip cluster from Alibaba",
-          "url": "https://www.bloomberg.com/news/articles/2026-07-31/moonshot-s-kimi-built-on-20-000-nvidia-chip-cluster-from-alibaba",
-          "source": "Hacker News",
-          "engagement": 1.792,
-          "polarity": 0.0
-        },
-        {
-          "headline": "NVIDIA-labs OO Agents: Native Python Object-Oriented Agents",
-          "url": "https://github.com/NVIDIA-NeMo/labs-OO-Agents",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0
-        }
-      ],
-      "polarity_score": -0.2217
+      "polarity_score": 0.24
     }
   ],
   "trending_meta": {
     "available": true,
     "lexicon_version": "v1.3",
-    "post_count": 48,
-    "as_of": "2026-07-31T14:03:17.434204+00:00",
+    "post_count": 41,
+    "as_of": "2026-08-07T14:34:21.349271+00:00",
     "source_stats": {
       "truth_social": 3,
       "reddit": 8,
-      "hacker_news": 35,
-      "google_trends": 2
+      "hacker_news": 29,
+      "google_trends": 1
     }
   }
 }

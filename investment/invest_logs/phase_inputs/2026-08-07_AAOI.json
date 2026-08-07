@@ -1,0 +1,151 @@
+{
+ "bundle_version": "P5-INPUTS/1.0",
+ "ticker": "AAOI",
+ "date": "2026-08-07",
+ "phase0": {
+  "regime_confidence": 0.65,
+  "market_regime": "BULL",
+  "market_top_zone": "Yellow (Early Warning)",
+  "market_top_score": 34,
+  "ftd_state": "FTD_CONFIRMED, day 2 post-confirmation (dual-index, rally-day 6)",
+  "ftd_days_since": 2,
+  "breadth_composite": 76,
+  "breadth_zone": "Healthy",
+  "vix": 15.28,
+  "vix_regime": "NORMAL",
+  "fear_greed_index": 59.6,
+  "fred_verdict": "Soft Landing",
+  "real_rate_pct": 2.41,
+  "dgs10_pct": 4.63,
+  "yield_curve_10y2y": 0.44,
+  "macro_backdrop_score": 1.5,
+  "macro_multiplier": 0.9,
+  "hot_sectors": [
+   "Technology",
+   "Industrials",
+   "Consumer Discretionary",
+   "Financials",
+   "Energy"
+  ],
+  "cold_sectors": [
+   "Consumer Staples",
+   "Utilities",
+   "Real Estate"
+  ],
+  "sector_rotation_note": "real_rate_high overlay (DFII10 2.41 > 2.0) 明確 LOWER Technology / Real Estate、RAISE Financials / Energy — AAOI 落在被降權桶內"
+ },
+ "lanes": {
+  "fundamentals": {
+   "signal": "HOLD",
+   "score": 0.5,
+   "confidence": 0.55,
+   "phase0_alignment": "ALIGNED",
+   "key_factors": [
+    "Revenue +51.4% YoY, above 26.9% 3Y CAGR",
+    "Piotroski 2 weak, ROE -6.14%, EPS negative",
+    "Net cash $159M, Altman Z 9.69 safe"
+   ],
+   "risk_flags": [
+    "Owner earnings/share -3.89, qoq -250%, heavy capex burn",
+    "peer_pe_median unavailable + no TTM P/E: no valuation anchor"
+   ]
+  },
+  "sentiment": {
+   "signal": "HOLD",
+   "score": -0.55,
+   "confidence": 0.6,
+   "phase0_alignment": "MISALIGNED",
+   "key_factors": [
+    "Insider selling dominant, ratio 0.04",
+    "MSPR collapsed to -100",
+    "Short float elevated 12.86%"
+   ],
+   "risk_flags": [
+    "Heavy insider distribution 4 straight quarters",
+    "Institutional accumulation signal unavailable"
+   ]
+  },
+  "news": {
+   "signal": "BUY",
+   "score": 2.0,
+   "confidence": 0.6,
+   "phase0_alignment": "ALIGNED",
+   "analyst_consensus": "Buy",
+   "key_factors": [
+    "Q2 EPS $0.06 vs $0.03 est，轉虧為盈",
+    "管理層：需求超過產能至 2027 年中",
+    "FCC 研擬禁中國光模組，AAOI 受惠",
+    "營收僅打平，股價自盤前 +10% 重挫"
+   ],
+   "risk_flags": [
+    "股價自盤前 +10% 回落至 -3.4%，實際消化偏獲利了結",
+    "共識僅 Buy（0 Strong Buy），PT 修正動能 FLAT"
+   ]
+  },
+  "technical": {
+   "signal": "HOLD",
+   "score": -1.0,
+   "confidence": 0.55,
+   "phase0_alignment": "MISALIGNED",
+   "key_factors": [
+    "Death cross 20/50, price below MA50",
+    "Distribution day: -3.4% on 1.57x volume",
+    "Insiders distributing, accelerating in Q3"
+   ],
+   "risk_flags": [
+    "Below MA50 despite basing above MA200",
+    "Heavy insider selling last 4 quarters"
+   ]
+  },
+  "valuation": {
+   "signal": "HOLD",
+   "score": -0.5,
+   "confidence": 0.15,
+   "phase0_alignment": "NEUTRAL",
+   "key_factors": [
+    "All eight valuation anchors ineligible, zero families",
+    "Negative EBITDA blocks WACC and FCFF convergence",
+    "Zero peers: industry mismatch voids relative valuation"
+   ],
+   "risk_flags": [
+    "EV/Sales 16.33x paired with negative owner earnings",
+    "Valuation unfalsifiable: no anchor can invalidate price"
+   ]
+  }
+ },
+ "burry": {
+  "score": 43.3,
+  "label": "NEUTRAL",
+  "veto_flag": false,
+  "components": {
+   "fcf_yield_pct": -4.54,
+   "ev_ebit": null,
+   "debt_to_equity": 0.25,
+   "pct_below_52w_high": 44.32,
+   "insider_net": "SELL"
+  },
+  "component_scores": {
+   "fcf_yield": 10.0,
+   "ev_ebit": null,
+   "debt_to_equity": 90.0,
+   "pct_below_52w_high": 90.0,
+   "insider": 20
+  },
+  "narrative": "FCF yield -4.5% │ D/E 0.25 │ 44% below 52wH │ insider=SELL。規則檢核：Altman zone=safe（不調分）；Piotroski 2=weak（僅註記不調分）；owner earnings -$317.27M 與 GAAP FCF 方向背離 >30%（註記）；insider latest_trend=distributing（註記）；DCF FCFF/FCFE 皆不可得（不適用）；comp_benchmark 與 PEER_BUNDLE 皆空（不適用）。verdict NEUTRAL，無 Phase 4 乘數調整。"
+ },
+ "phase3": {
+  "final_score": 0.0763,
+  "final_decision": "HOLD",
+  "final_action": "CANCEL"
+ },
+ "phase4": {
+  "position_size_pct": 0.0,
+  "analysis_price": 124.22
+ },
+ "red_team": {
+  "verdict": "STRONG_COUNTER",
+  "counter_evidence_strength": 5,
+  "thesis_break_probability": 0.65,
+  "basis_classified": "unclassified"
+ }
+}

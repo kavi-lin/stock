@@ -1,10 +1,10 @@
 {
   "version": "1.0",
-  "generated_at": "2026-07-31T14:03:12.641915+00:00",
+  "generated_at": "2026-08-07T14:34:15.203395+00:00",
   "mood": {
-    "score": -13,
-    "label": "Neutral",
-    "label_zh": "中性",
+    "score": 25,
+    "label": "Greed",
+    "label_zh": "偏樂觀",
     "components_used": [
       "fg_signed",
       "fg_quality_signed",
@@ -14,55 +14,55 @@
       "term_signed"
     ],
     "component_scores": {
-      "fg_signed": -17.9,
-      "fg_quality_signed": -17.5,
-      "pc_signed": -28.0,
-      "vix_signed": 24.6,
-      "skew_signed": -99.3,
-      "term_signed": 74.3
+      "fg_signed": 27.0,
+      "fg_quality_signed": 12.7,
+      "pc_signed": 50,
+      "vix_signed": 51.4,
+      "skew_signed": -64.9,
+      "term_signed": 100
     }
   },
   "options": {
     "put_call_ratio": null,
     "source": "CNN put_call_options sub-index",
     "asof": null,
-    "tilt": "bear",
-    "tilt_signed": -28.0,
-    "interpretation_zh": "期權傾向（CNN put/call 子指標）：偏空（避險買權升高）",
+    "tilt": "bull",
+    "tilt_signed": 50,
+    "interpretation_zh": "期權傾向（CNN put/call 子指標）：偏多（賣權需求偏低）",
     "fmp_megacap": []
   },
   "vix": {
-    "current": 17.54,
-    "percentile_1y": 55.7,
-    "regime": "NORMAL",
-    "vix3m": 19.77,
+    "current": 14.86,
+    "percentile_1y": 7.9,
+    "regime": "LOW",
+    "vix3m": 18.7,
     "term_structure": "contango",
-    "term_diff": 2.23,
-    "interpretation_zh": "VIX 17.5 NORMAL，期限結構 contango（市場平靜）"
+    "term_diff": 3.84,
+    "interpretation_zh": "VIX 14.9 LOW，期限結構 contango（市場平靜）"
   },
   "skew": {
-    "current": 139.9,
-    "percentile_1y": 13.9,
-    "label": "high",
-    "interpretation_zh": "SKEW 140 high：機構在買尾部避險"
+    "current": 134.7,
+    "percentile_1y": 1.2,
+    "label": "elevated",
+    "interpretation_zh": "SKEW 135 elevated"
   },
   "fear_greed": {
-    "index": 41.1,
-    "label": "Neutral",
+    "index": 63.5,
+    "label": "Greed",
     "sub_indices": {
-      "market_momentum_sp500": 31.0,
-      "stock_price_strength": 30.6,
-      "stock_price_breadth": 23.0,
-      "put_call_options": 36.0,
+      "market_momentum_sp500": 76.8,
+      "stock_price_strength": 31.8,
+      "stock_price_breadth": 40.2,
+      "put_call_options": 86.0,
       "market_volatility_vix": 50.0,
-      "safe_haven_demand": 46.6,
-      "junk_bond_demand": 70.2
+      "safe_haven_demand": 62.6,
+      "junk_bond_demand": 97.0
     }
   },
   "spy_momentum": {
-    "rsi_14": 48.9,
-    "pct_above_ma50": -0.41,
-    "pct_above_ma200": 6.27
+    "rsi_14": 65.7,
+    "pct_above_ma50": 3.47,
+    "pct_above_ma200": 10.34
   },
   "_source_health": {
     "vix": "ok",

@@ -1,71 +1,20 @@
 {
   "version": "1.0",
-  "as_of": "2026-07-31T14:03:17.434204+00:00",
+  "as_of": "2026-08-07T14:34:21.349271+00:00",
   "lookback_hours": 24,
   "lexicon_version": "v1.3",
-  "post_count": 48,
-  "truth_social_dropped": 4,
+  "post_count": 41,
+  "truth_social_dropped": 2,
   "source_stats": {
     "truth_social": 3,
     "reddit": 8,
-    "hacker_news": 35,
-    "google_trends": 2
+    "hacker_news": 29,
+    "google_trends": 1
   },
-  "tickers": [
-    {
-      "ticker": "AMD",
-      "sector": "Technology",
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "AMD Lucebox Beats Nvidia DGX Spark by 3.63x on DeepSeek V4 Flash",
-          "url": "https://www.lucebox.com/blog/deepseek-v4-asymmetric-parallelism",
-          "source": "Hacker News",
-          "engagement": 1.386,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.386,
-      "_gate": "known"
-    }
-  ],
+  "tickers": [],
   "low_confidence": [
     {
-      "ticker": "GPT",
-      "sector": null,
-      "mention_count": 2,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "OpenAI revenue in July topped all of Q2 driven by GPT-5.6 release",
-          "url": "https://www.cnbc.com/2026/07/29/openai-cfo-sarah-friar-tells-employees-arr-in-july-topped-all-of-q2.html",
-          "source": "Hacker News",
-          "engagement": 3.526,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Why do OpenAI's GPT-2 weights beat mine? Part three: testing overtraining",
-          "url": "https://www.gilesthomas.com/2026/07/why-do-openai-gpt2-weights-beat-mine-3-overtraining",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 4.625,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "LLM",
+      "ticker": "BMS",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -73,58 +22,8 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Ask HN: What are you using for LLM inference in production?",
-          "url": "https://news.ycombinator.com/item?id=49121047",
-          "source": "Hacker News",
-          "engagement": 2.89,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.89,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "PEACE",
-      "sector": null,
-      "mention_count": 2,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Today, the Board of Peace reached a HISTORIC agreement for the COMPLETE DISARMAMENT of Hamas and all other armed groups in Gaza. This is a monumental step towa",
-          "url": "https://truthsocial.com/@realDonaldTrump/117011460524966016",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        },
-        {
-          "headline": "Today, the Board of Peace reached a HISTORIC agreement for the COMPLETE DISARMAMENT of Hamas and all other armed groups in Gaza. This is a monumental step toward lasting PEACE and",
-          "url": "https://truthsocial.com/@realDonaldTrump/117011270507732212",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 2.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "CPU",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Show HN: Tilery-VM – run Nvidia cuTile GPU kernels on a CPU, no GPU required",
-          "url": "https://github.com/drbh/tilery-vm",
+          "headline": "BMS ran AI for drug discovery 3 years- what they found and why they doubled down",
+          "url": "https://blogs.nvidia.com/blog/bristol-myers-squibb-building-life-science-industrys-most-advanced-ai-factory-on-nvidia-vera-rubin/",
           "source": "Hacker News",
           "engagement": 1.609,
           "polarity": 0.0,
@@ -136,35 +35,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "SSI",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 1,
-      "bear_hits_sum": 0,
-      "matched_terms": [
-        {
-          "term": "long",
-          "side": "bull"
-        }
-      ],
-      "sample_posts": [
-        {
-          "headline": "Ilya Sutskever's SSI and Nvidia Announce Long-Term Strategic Partnership",
-          "url": "https://nvidianews.nvidia.com/news/ilya-sutskevers-safe-superintelligence-inc-and-nvidia-announce-long-term-strategic-partnership",
-          "source": "Hacker News",
-          "engagement": 1.386,
-          "polarity": 0.5,
-          "matched_terms": [
-            "long"
-          ]
-        }
-      ],
-      "polarity_score": 0.5,
-      "engagement_score": 1.386,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "DGX",
+      "ticker": "GOP",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -172,8 +43,8 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "AMD Lucebox Beats Nvidia DGX Spark by 3.63x on DeepSeek V4 Flash",
-          "url": "https://www.lucebox.com/blog/deepseek-v4-asymmetric-parallelism",
+          "headline": "Texas commissioner: GOP will lose elections from data center backlash",
+          "url": "https://www.texastribune.org/2026/08/06/sid-miller-republicans-elections-data-centers-abbott/",
           "source": "Hacker News",
           "engagement": 1.386,
           "polarity": 0.0,
@@ -185,7 +56,7 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "DMARC",
+      "ticker": "RWAY",
       "sector": null,
       "mention_count": 1,
       "bull_hits_sum": 0,
@@ -193,92 +64,8 @@
       "matched_terms": [],
       "sample_posts": [
         {
-          "headline": "Show HN: DMARC.quest SPF/DKIM/DMARC Demystified",
-          "url": "https://www.dmarc.quest",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.099,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "SPF",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Show HN: DMARC.quest SPF/DKIM/DMARC Demystified",
-          "url": "https://www.dmarc.quest",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.099,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "DKIM",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Show HN: DMARC.quest SPF/DKIM/DMARC Demystified",
-          "url": "https://www.dmarc.quest",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.099,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "EXIM",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "RT @ EximBankUS Thanks to @ realDonaldTrump , the Export-Import Bank is profitable for the first time in nearly a DECADE. Here’s why that matters to every American: ✅ Supply Chain",
-          "url": "https://truthsocial.com/@realDonaldTrump/117011459082239407",
-          "source": "Truth Social:@realDonaldTrump",
-          "engagement": 1.0,
-          "polarity": 0.0,
-          "matched_terms": []
-        }
-      ],
-      "polarity_score": 0.0,
-      "engagement_score": 1.0,
-      "_gate": "unknown"
-    },
-    {
-      "ticker": "ADR",
-      "sector": null,
-      "mention_count": 1,
-      "bull_hits_sum": 0,
-      "bear_hits_sum": 0,
-      "matched_terms": [],
-      "sample_posts": [
-        {
-          "headline": "Yesterday I said SK Hynix was surprising low. Today it hit Korea's 30% limit. I don't think the US ADR will catch up.",
-          "url": "https://www.reddit.com/r/stocks/comments/1vbmcut/yesterday_i_said_sk_hynix_was_surprising_low/",
+          "headline": "RWAY - Buy or Hold",
+          "url": "https://www.reddit.com/r/stocks/comments/1vi2ac9/rway_buy_or_hold/",
           "source": "Reddit:r/stocks",
           "engagement": 1.0,
           "polarity": 0.0,
@@ -290,50 +77,165 @@
       "_gate": "unknown"
     },
     {
-      "ticker": "KOSPI",
+      "ticker": "OKLO",
       "sector": null,
       "mention_count": 1,
-      "bull_hits_sum": 1,
+      "bull_hits_sum": 0,
       "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "Oklo Inc. (OKLO) first-ever quarterly revenue of $1.21 million (vs. $0.12 million consensus); EPS: -$0.28 (vs. -$0.16 expected)",
+          "url": "https://www.reddit.com/r/stocks/comments/1vi2843/oklo_inc_oklo_firstever_quarterly_revenue_of_121/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "EPAM",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "EPAM another disappointing quarter results, negative FCF and reduced assets, -90% stock 5y return",
+          "url": "https://www.reddit.com/r/stocks/comments/1vhz2bd/epam_another_disappointing_quarter_results/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "NBV",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "If a public company trading below NBV purchased back all of its outstanding shares without incurring debt, who would own the company?",
+          "url": "https://www.reddit.com/r/stocks/comments/1vhyuzq/if_a_public_company_trading_below_nbv_purchased/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "FIG",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 2,
       "matched_terms": [
         {
-          "term": "surge",
-          "side": "bull"
+          "term": "overvalued",
+          "side": "bear"
+        },
+        {
+          "term": "short",
+          "side": "bear"
         }
       ],
       "sample_posts": [
         {
-          "headline": "New ETF rules spur 14% KOSPI surge; limited impact on KOSDAQ in Korea",
-          "url": "https://www.reddit.com/r/stocks/comments/1vbbi71/new_etf_rules_spur_14_kospi_surge_limited_impact/",
+          "headline": "figma/FIG is way overvalued and it will drop to 7 usd per share. SHORT",
+          "url": "https://www.reddit.com/r/stocks/comments/1vhx8is/figmafig_is_way_overvalued_and_it_will_drop_to_7/",
           "source": "Reddit:r/stocks",
           "engagement": 1.0,
-          "polarity": 0.5,
+          "polarity": -0.6667,
           "matched_terms": [
-            "surge"
+            "overvalued",
+            "short"
           ]
         }
       ],
-      "polarity_score": 0.5,
+      "polarity_score": -0.6667,
       "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SHORT",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 2,
+      "matched_terms": [
+        {
+          "term": "overvalued",
+          "side": "bear"
+        },
+        {
+          "term": "short",
+          "side": "bear"
+        }
+      ],
+      "sample_posts": [
+        {
+          "headline": "figma/FIG is way overvalued and it will drop to 7 usd per share. SHORT",
+          "url": "https://www.reddit.com/r/stocks/comments/1vhx8is/figmafig_is_way_overvalued_and_it_will_drop_to_7/",
+          "source": "Reddit:r/stocks",
+          "engagement": 1.0,
+          "polarity": -0.6667,
+          "matched_terms": [
+            "overvalued",
+            "short"
+          ]
+        }
+      ],
+      "polarity_score": -0.6667,
+      "engagement_score": 1.0,
+      "_gate": "unknown"
+    },
+    {
+      "ticker": "SOM",
+      "sector": null,
+      "mention_count": 1,
+      "bull_hits_sum": 0,
+      "bear_hits_sum": 0,
+      "matched_terms": [],
+      "sample_posts": [
+        {
+          "headline": "SOM designs \"vertical data center\" for Downtown Kansas City",
+          "url": "https://www.dezeen.com/2026/08/05/data-center-skyscraper-kansas-city-som/",
+          "source": "Hacker News",
+          "engagement": 0.693,
+          "polarity": 0.0,
+          "matched_terms": []
+        }
+      ],
+      "polarity_score": 0.0,
+      "engagement_score": 0.693,
       "_gate": "unknown"
     }
   ],
   "sectors": [
     {
       "sector": "Technology",
-      "ticker_count": 1,
-      "engagement_score": 1.386,
+      "ticker_count": 0,
+      "engagement_score": 0.0,
+      "polarity_score": 0.0,
       "bull_hits_sum": 0,
       "bear_hits_sum": 0,
-      "top_tickers": [
-        {
-          "ticker": "AMD",
-          "engagement_score": 1.386,
-          "polarity_score": 0.0,
-          "mention_count": 1
-        }
-      ],
-      "polarity_score": 0.0
+      "top_tickers": []
     },
     {
       "sector": "Healthcare",
@@ -429,61 +331,32 @@
   "market_wide_buzz": [
     {
       "topic": "ai_capex",
-      "post_count": 7,
-      "engagement_score": 12.529,
+      "post_count": 6,
+      "engagement_score": 18.489,
       "sample_posts": [
         {
-          "headline": "The Impending, Inescapable Deluge of A.I",
-          "url": "https://www.nytimes.com/interactive/2026/07/29/technology/ai-chips-data-center-boom.html",
+          "headline": "Americans are rallying against data centers. Surprisingly few are getting built",
+          "url": "https://www.cnn.com/2026/08/06/business/ai-data-center-construction",
           "source": "Hacker News",
-          "engagement": 2.708,
+          "engagement": 8.875,
+          "polarity": 0.5
+        },
+        {
+          "headline": "Nashville uses eminent domain to block data center near zoo",
+          "url": "https://nashvillebanner.com/2026/08/04/metro-council-data-center-eminent-domain-vote/",
+          "source": "Hacker News",
+          "engagement": 4.357,
           "polarity": 0.0
         },
         {
-          "headline": "A data center wanted to buy a farm to use water legally reserved for irrigation",
-          "url": "https://www.techradar.com/pro/a-330-mw-data-center-wanted-to-buy-a-farm-switch-off-the-irrigation-and-drink-the-difference-californias-most-powerful-irrigation-district-said-no-so-it-sued",
-          "source": "Hacker News",
-          "engagement": 2.485,
-          "polarity": 0.0
-        },
-        {
-          "headline": "The Town That Wants a Data Center Next Door",
-          "url": "https://www.theatlantic.com/podcasts/2026/07/town-wants-data-center-next-door/688108/",
+          "headline": "Salem Brought a Guillotine to Oppose New Data Center",
+          "url": "https://www.gadgetreview.com/salem-brought-a-guillotine-to-oppose-new-data-center-company-reps-left-feeling-unsafe",
           "source": "Hacker News",
           "engagement": 2.079,
           "polarity": 0.0
         }
       ],
-      "polarity_score": 0.0
-    },
-    {
-      "topic": "market_direction",
-      "post_count": 3,
-      "engagement_score": 5.194,
-      "sample_posts": [
-        {
-          "headline": "Nvidia's $750B AI bet deepens fears of a circular tech bubble",
-          "url": "https://www.latimes.com/business/story/2026-07-29/nvidias-750-billion-ai-bet-deepens-fears-of-circular-tech-bubble",
-          "source": "Hacker News",
-          "engagement": 2.303,
-          "polarity": -0.5
-        },
-        {
-          "headline": "Moonshot built on 20k Nvidia chip cluster from Alibaba",
-          "url": "https://www.bloomberg.com/news/articles/2026-07-31/moonshot-s-kimi-built-on-20-000-nvidia-chip-cluster-from-alibaba",
-          "source": "Hacker News",
-          "engagement": 1.792,
-          "polarity": 0.0
-        },
-        {
-          "headline": "NVIDIA-labs OO Agents: Native Python Object-Oriented Agents",
-          "url": "https://github.com/NVIDIA-NeMo/labs-OO-Agents",
-          "source": "Hacker News",
-          "engagement": 1.099,
-          "polarity": 0.0
-        }
-      ],
-      "polarity_score": -0.2217
+      "polarity_score": 0.24
     }
   ]
 }
