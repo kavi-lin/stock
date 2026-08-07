@@ -42,7 +42,6 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-HOME = Path.home()
 PY = sys.executable or "python3"
 
 # Per-task subprocess wall cap. Most fetches are <30s, but fetch_smart_money
@@ -124,8 +123,8 @@ def build_tasks(d: str):
     def s(script):  # sector-local script path
         return str(ROOT / "sector" / "scripts" / script)
 
-    econ = str(HOME / ".claude/skills/economic-calendar-fetcher/scripts/get_economic_calendar.py")
-    earn = str(HOME / ".claude/skills/earnings-calendar/scripts/fetch_earnings_fmp.py")
+    econ = str(ROOT / "skills/economic-calendar-fetcher/scripts/get_economic_calendar.py")
+    earn = s("fetch_earnings_calendar.py")
     senti = str(ROOT / "skills/market-sentiment-analyzer/scripts/sentiment.py")
 
     # (fn, name, cmd, [glob_pat], hard)

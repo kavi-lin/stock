@@ -14,6 +14,7 @@ from statistics import mean, median
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from sector.lib.date_utils import lookback_window  # noqa: E402
+from sector.lib.earnings_calendar import FetchStats, fetch_calendar_range  # noqa: E402
 from sector.lib.fmp_client import (  # noqa: E402
     SECTOR_TOP_5,
     SECTOR_UNIVERSE,
@@ -24,9 +25,13 @@ from sector.lib.fmp_client import (  # noqa: E402
 
 
 def fetch_earnings_window(from_d: str, to_d: str) -> list:
-    rows = fmp_get("/stable/earnings-calendar", {"from": from_d, "to": to_d})
-    if not isinstance(rows, list):
-        sys.exit(f"[ERROR] FMP earnings-calendar non-list response for {from_d}..{to_d}")
+    stats = FetchStats()
+    rows = fetch_calendar_range(from_d, to_d, stats=stats)
+    print(
+        f"[fetch_earnings_pulse] calendar_api_calls={stats.api_calls} "
+        f"cache_hits={stats.cache_hits} splits={stats.splits}",
+        file=sys.stderr,
+    )
     return rows
 
 

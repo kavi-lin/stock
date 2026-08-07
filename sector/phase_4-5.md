@@ -85,6 +85,38 @@ OUTPUT（單一 JSON object）:
 > - 優先序：credit_stress_elevated > yield_curve_inverted > real_rate_high > yield_curve_steep
 > - `regime_confidence < 0.40` → `key_rationale` 開頭加 "LOW-CONFIDENCE"
 
+##### 條件式觸發 gate（V4.94.0 — **shadow-only，本版 lane 照跑**）
+
+跑完 Phase 4a 後補一行（不影響本場任何決策，只累積樣本）：
+
+```bash
+python3 sector/scripts/fred_lane_gate.py --date {SCAN_DATE} \
+        --hot "{Phase 4a HOT sectors}" --write
+```
+
+| Trigger | 意義 |
+|---|---|
+| `adjustments_active` | **mandatory** — `sector_rotation.adjustments` 非空。GUIDE RULE 1 要求 override favor，而**本專案只有這個 lane 會做**（`step6_overlay.py` 只讀 favor/avoid） |
+| `adjustment_conflict` | 同一 sector 被不同 adjustment 一升一降 → 需 RULE 2 優先序仲裁 |
+| `macro_theme_conflict` | Phase 4a HOT 撞上 FRED avoid 或 `adjustment.lower` |
+| `regime_transition` | `regime_label` 與上一場不同 |
+
+- 四條全靜默（adjustments 為空 = GUIDE RULE 4「base map valid as-is」）→ lane 只會覆述
+  step6 已 deterministic 套完的 `favor[]`，增量趨近於零。
+- `regime_confidence < 0.40` **不是** trigger：低信心時 step6 的 confidence gating 已把
+  乘數壓回 1.0 附近，lane 增量更低。只記 note。
+- **翻預設（skip 生效）需使用者拍板**，依賴 shadow 樣本；翻時唯一要小心的是
+  **skip 不得寫進 `degraded_agents`**（會誤觸發 PARTIAL_FALLBACK 的 confidence cap 與
+  stance 限制）。既有先例：`fred_available=false → FRED lane skip，不算 degraded`。
+- 跳過**不改決策數字**（與 invest L4b 的 valuation lane 相反）：STEP G.5 直接讀
+  `fred_snapshot.sector_rotation_avoid`、Step 6 走 `step6_overlay.py`、`consensus_warning`
+  只定義在 rotation/theme/news 三 lane —— 都不經此 lane。
+
+> ⚠️ **已知缺口（V4.94.0 記錄，未修）**：`_phase0.fred_snapshot` 的 slim 11 欄**不含
+> `adjustments`**，但上面的規則要求 lane 套用它 —— lane 目前收不到這份資料。修法（把
+> adjustments 併進 lane 切片）會改變 lane 產出，屬行為變更，不與 shadow-only 的 gate 同版動。
+> gate 會在 `notes` 標出這件事。
+
 #### Fan-In 驗證（PS 層）
 
 1. N 個 subagent 全回傳 + `subagent_isolated=true` → `phase4_fanout_mode: PARALLEL_SUBAGENT`
@@ -98,14 +130,29 @@ OUTPUT（單一 JSON object）:
 
 ### Step 2 (Phase 4b) — Devil's Advocate（V1.3 獨立 subagent）
 
-#### DA Pre-Trigger 計算（V4.12.2 — prompt 瘦身）
+#### DA Pre-Trigger 計算（V4.12.2 prompt 瘦身 · V4.93.0 script 化）
 
 > 結構性 divergence 規則 R4–R7 是**條件觸發**型：多數日子根本沒命中，但舊版每次把
-> 4 條全文塞進 DA prompt（DA 是單一最肥 subagent input）。V4.12.2 改為 **PS 先用手上
-> cache 算哪些觸發，只把 fired 的規則塊 + 命中 sector/數值 paste 進 prompt**；沒觸發
-> 的不貼。正確性不變 — 沒觸發的規則本來就不會產 challenge。
+> 4 條全文塞進 DA prompt（DA 是單一最肥 subagent input）。V4.12.2 改為只 paste fired
+> 的規則塊；V4.93.0 進一步把**判定本身**從 PS 心算搬進 script。
 
-**計算**：對每個 Phase 4a HOT 提案 sector，用已在手 cache 逐條檢查（純 threshold 比對）：
+⚠️ **MUST 用 script，不可 LLM 逐條比對**（同 `step6_overlay.py` 紀律）：
+
+```bash
+python3 sector/scripts/da_pretrigger.py --date {SCAN_DATE} \
+        --hot "{Phase 4a HOT sectors，逗號分隔}" --prompt-only
+```
+
+- **零新計算**：只讀 Phase 1/3 已落地的 cache（valuation / smart_money / earnings_pulse
+  + `fred_latest.json`），不打 API、不重算上游指標。
+- stdout 就是 `<TRIGGERED_DIVERGENCE_RULES>` 的內容，**逐字 paste**，PS 不需再組字。
+  去掉 `--prompt-only` 可拿完整 JSON（誰觸發、引哪個數值）供稽核。
+- **rc=1 = HARD cache 缺席**（valuation / smart_money / earnings_pulse）→ 先修 Phase 1/3
+  的 cache 再繼續。**不得**把 rc=1 當成「沒有觸發」跳過 —— 那會靜默關掉 DA 該發的 challenge。
+- FRED 缺席不是錯誤（`fred_available=false` 是合法狀態）：R4 會標
+  `available=false`，prompt block 明寫「未能判定 ≠ 未觸發」。
+
+規則門檻（**僅供參考；script 是唯一執行者**，改門檻改 `da_pretrigger.py` 的常數區）：
 
 | 規則 | 觸發條件（per HOT sector） | 來源 |
 |---|---|---|
@@ -114,10 +161,8 @@ OUTPUT（單一 JSON object）:
 | **R6 PT target exhausted** | `analyst_pt_upside_median_pct<0.03` AND `pt_sample_size>=3` | `_phase3.sector_earnings_pulse` |
 | **R7 動能耗盡** | `rs_vs_spy_3m>0.05` AND `rs_vs_spy_5d<0` AND `rs_vs_spy_20d<0` | `_phase1.sectors[].sector_valuation` |
 
-**組 `<TRIGGERED_DIVERGENCE_RULES>` placeholder**：
-- 任一 HOT sector 命中某規則 → paste 下方 R4–R7 library 該條原文 + 命中的 sector 名單與具體數值。
-- 完全沒觸發 → 填 `"(無結構性 divergence 觸發 — 專注 R1-R3 + tail-risk)"`。
-- R4–R7 全文只留在下方 library（spec 參考），**不再無條件塞進每次 prompt**。
+> 完全沒觸發時 script 會輸出 `"(無結構性 divergence 觸發 — 專注 R1-R3 + tail-risk)"`。
+> R4–R7 原文留在下方 library（spec 參考）與 script 內，**不再無條件塞進每次 prompt**。
 
 ##### R4–R7 Rule Library（觸發才 paste；each MUST 引具體數值）
 

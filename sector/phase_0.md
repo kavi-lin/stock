@@ -30,72 +30,27 @@ stdout 輸出單一 JSON：
 }
 ```
 
-**用法**：一次 Bash → pipe 到 python -c 解析 → 一個 turn 拿到所有資料。**取代下方層 A-E 各自讀 cache 的舊流程**（每層 1 turn × LLM overhead ~3-5s → 5-8 個 turn 省掉）。
+**用法**：一次 Bash → pipe 到 python -c 解析 → 一個 turn 拿到所有資料。**取代層 A-E 各自讀 cache 的舊流程**（每層 1 turn × LLM overhead ~3-5s → 5-8 個 turn 省掉；舊流程全文見 `protocol_appendix_fallback.md` §1）。
 
-**Fallback**：`stale_layers` 或 `missing_layers` 非空 → 跑下方對應 layer script 重整 cache → 再跑一次 reader。
+**Fallback**：`stale_layers` 或 `missing_layers` 非空 → 跑 `protocol_appendix_fallback.md` §1 對應 layer 的重整指令 → 再跑一次 reader。**注意 reader 只要有一層可用就 rc=0**，所以「有 stale/missing 層」是常見狀況而非 reader 失敗 —— 這種情況也要開 appendix §1 取重整指令。
 
 `fred_latest.json` 內部 1h cache（fresh_window 3600s）；其他層 fresh_window 10800s。
 
 ---
 
-## 資料來源（優先順序）— 舊流程備援
+## 每場都適用的紀律（不是備援）
 
-### 層 A — market-breadth-analyzer（優先，量化）
+### ⚠️ FTD 文字反幻覺規則（V1.5 — BUG-006）
 
-1. 取 `./breadth_cache/market_breadth_*.json` 最新檔（FRESH = mtime < 10800s）
-   - **FRESH** → 直接讀取，跳至「欄位映射」
-   - **STALE 或缺失** → 執行腳本（約 5 秒）：
-     ```bash
-     python3 ~/.claude/skills/market-breadth-analyzer/scripts/market_breadth_analyzer.py \
-       --output-dir ./breadth_cache/
-     ```
-     完成後讀取產出的新檔
+- 報告 FTD 狀態時，**必須引用 `ftd_timeline.ftd_status_text` 原文**（含 day-counter），不得自由命名「FTD Day N」。
+- `quality_score.breakdown.base` 的 `"Day 6 FTD: +60 (prime window)"` — 這個 `6` 是 **FTD 確認時的 rally-day**（永遠不變），**不是**「FTD 後過了幾天」。AI 若直接抄 `Day 6` 當作今天的 day-counter 即為幻覺。
+- 三個易混淆 day 的語意：`ftd_timeline.ftd_day_number`（fixed）vs `ftd_timeline.days_since_ftd`（每天 +1）vs `ftd_timeline.rally_day_count`（每天 +1）。
 
-> `uptrend_ratio_overall` 不在此處取得，由 Phase 1 完成後取各產業 `uptrend_ratio` 平均值回填。
+### FRED（層 E）— MUST-run
 
-### 層 B — Web Search（最後手段，有層 A 則跳過）
-
-2. Web search: "US market breadth today", "S&P 500 advance decline today"
-
-### 層 C — FTD Detector cache（量化底部確認）
-
-3. 取 `./ftd_cache/ftd_detector_*.json` 最新檔（FRESH = mtime < 10800s）
-   - **FRESH** → 直接讀取
-   - **STALE 或缺失** → 執行腳本（約 10 秒）：
-     ```bash
-     python3 sector/ftd_yfinance.py --output-dir sector/ftd_cache/
-     ```
-   - 讀取欄位：`market_state.combined_state`、`quality_score.total_score`、`quality_score.exposure_range`、`ftd_timeline.*`
-   - **⚠️ FTD 文字反幻覺規則（V1.5 — BUG-006）**：
-     - 報告 FTD 狀態時，**必須引用 `ftd_timeline.ftd_status_text` 原文**（含 day-counter），不得自由命名「FTD Day N」。
-     - `quality_score.breakdown.base` 的 `"Day 6 FTD: +60 (prime window)"` — 這個 `6` 是 **FTD 確認時的 rally-day**（永遠不變），**不是**「FTD 後過了幾天」。AI 若直接抄 `Day 6` 當作今天的 day-counter 即為幻覺。
-     - 三個易混淆 day 的語意：`ftd_timeline.ftd_day_number`（fixed）vs `ftd_timeline.days_since_ftd`（每天 +1）vs `ftd_timeline.rally_day_count`（每天 +1）。
-
-### 層 D — Market Top Detector cache（量化頂部偵測）
-
-4. 取 `./market_top_cache/market_top_*.json` 最新檔（FRESH = mtime < 10800s）
-   - **FRESH** → 直接讀取
-   - **STALE 或缺失** → 執行腳本（約 10 秒）：
-     ```bash
-     python3 sector/market_top_yfinance.py --output-dir sector/market_top_cache/
-     ```
-   - 讀取欄位：`composite.composite_score`、`composite.zone`、`composite.risk_budget`
-
-> 層 C + 層 D 腳本完全獨立 → 並行執行。
-
-### 層 E — FRED Macro Snapshot（V1.4 新增，MUST-run）
-
-5. 取 `skills/fred-macro/cache/fred_latest.json` 最新檔（FRESH = mtime < 3600s；fred-macro 自帶 1 hr cache）
-   - **FRESH** → 直接讀取
-   - **STALE 或缺失** → 執行：
-     ```bash
-     python3 skills/fred-macro/scripts/fetch.py --json-only
-     ```
-   - 失敗（無 API key / 網路錯誤）→ `fred_available = false`，`fred_snapshot = null`，protocol 繼續跑不中斷
-
-6. **必讀**：`skills/fred-macro/SECTOR_ROTATION_GUIDE.md`（LLM instruction — 解釋 `favor` vs `adjustments` 兩層結構與衝突處理優先序）
-
-7. 寫入 `_phase0.fred_snapshot` **slim shape**（僅這 11 個欄位，完整 snapshot 仍在 cache 檔）：
+- 失敗（無 API key / 網路錯誤）→ `fred_available = false`，`fred_snapshot = null`，protocol 繼續跑不中斷
+- **必讀**：`skills/fred-macro/SECTOR_ROTATION_GUIDE.md`（LLM instruction — 解釋 `favor` vs `adjustments` 兩層結構與衝突處理優先序）
+- 寫入 `_phase0.fred_snapshot` **slim shape**（僅這 11 個欄位，完整 snapshot 仍在 cache 檔）：
    ```
    generated_at / regime_label / regime_confidence / macro_scores_composite /
    yield_curve_value / yield_curve_inverted / credit_stress_elevated /
@@ -133,32 +88,25 @@ stdout 輸出單一 JSON：
 
 ---
 
-## 欄位映射（market-breadth-analyzer → phase0 JSON）
+## cycle_phase 推斷規則（**LLM 仍在用** — 由 decision JSON authored）
 
-| Phase0 欄位 | 來源路徑 | 說明 |
-|---|---|---|
-| `breadth_score` | `composite.composite_score` | 0–100 複合分數 |
-| `breadth_components.overall_breadth` | `composite.composite_score` | |
-| `breadth_components.sector_participation` | `composite.component_scores.breadth_level_trend.score` | |
-| `breadth_components.momentum` | `composite.component_scores.ma_crossover.score` | |
-| `breadth_components.mean_reversion_risk` | `100 - composite.component_scores.cycle_position.score` | |
-| `exposure_ceiling` | `composite.exposure_guidance` | 廣度單一來源 |
-| `cycle_phase` | 由 `components.cycle_position.signal` 推斷 | |
-| `warning_flags` | 由各組件信號推斷 | |
-| `regime_confidence` | data_quality: Complete=0.9, Partial=0.7, Limited=0.4 | |
-
-### cycle_phase 推斷規則
+由 `components.cycle_position.signal` 推斷：
 - signal 含 "extreme_trough" 或 "TROUGH" → `"Early"`
 - signal 含 "PEAK" 且含 "recovery" → `"Mid"`
 - signal 含 "PEAK" 且不含 "recovery" → `"Late"`
 - 其他 → `"Mid"`
 
-### warning_flags 量化觸發規則
-- `components.bearish_signal.signal_active = true` → `"Bearish_Signal_Active"`
-- `components.ma_crossover.gap < 0` → `"Below_200MA"`
-- `components.historical_percentile.percentile_rank < 30` → `"Low_Historical_Percentile"`
-- `components.divergence.early_warning = true` → `"Early_Warning_Divergence"`
-- `composite.zone = "Critical"` → `"Critical_Zone"`
-- `composite.zone = "Weakening"` → `"Weakening_Zone"`
+## exposure_ceiling（**LLM 仍要寫** — 由 decision JSON authored）
+
+- 值一律取自**廣度的單一來源** `composite.exposure_guidance`（e.g. `"40-60%"`），不要另行推估、不要與 `synthesized_exposure` 混用。
+- `build_sector_intel.py` 用 `require(decision, "exposure_ceiling")` **硬取**這個 key：decision JSON 缺它 → build 直接中止（不是填預設值）。同時它也是 `validate_sector_intel.py` 檢查的頂層必填欄位。
+
+> 其餘 phase0 欄位（`breadth_score` / `breadth_components` / `warning_flags` /
+> `regime_confidence`）**由 `build_sector_intel.py` 的 `build_phase0()` 自動填**，
+> 不需手填也不要手抄。舊版手動映射表的三處**過期列**（`breadth_components`、
+> `regime_confidence`、`warning_flags`）連同它們與現行實作的差異記在
+> `protocol_appendix_fallback.md` §2（僅供理解沿革，**判斷一律以 script 為準**）；
+> 該表其餘各列已由上面的規則取代。
 
 > **JSON Schema** → 見 `schema.md` Phase 0
+> **備援流程**（reader 失敗，或 `stale_layers`/`missing_layers` 非空要重整）→ `protocol_appendix_fallback.md` §1

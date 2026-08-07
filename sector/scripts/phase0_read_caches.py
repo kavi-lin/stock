@@ -106,38 +106,65 @@ def _slim_market_top(d: dict) -> dict:
     }
 
 
+def _str_list(xs) -> list:
+    """favor/avoid only accept list-of-str. A bare string would be iterated
+    char-by-char downstream (step6_overlay `_matches`, da_pretrigger R4) into
+    one-letter "sectors"; a non-str element crashes `canonicalize_sector_name`
+    with AttributeError. Every consumer reads these two fields through this
+    slim, so the shape guard lives here once."""
+    if not isinstance(xs, list):
+        return []
+    return [x for x in xs if isinstance(x, str)]
+
+
+def _fred_sector_rotation(d: dict) -> dict:
+    """Resolve `sector_rotation` with the legacy-shape fallback.
+
+    It lives at the fred cache top level; older shapes nested it under
+    `market_implications`. This is the ONLY place that fallback order is
+    encoded — `fred_lane_gate.py` reads `adjustments` through this same
+    function. A second hand-written copy of the fallback stays equivalent
+    only until a third shape appears, then the two readers silently diverge
+    (avoid from one source, adjustments from another).
+    """
+    mi_raw = d.get("market_implications")
+    mi = mi_raw if isinstance(mi_raw, dict) else {}
+    rot_raw = d.get("sector_rotation") or mi.get("sector_rotation")
+    return rot_raw if isinstance(rot_raw, dict) else {}
+
+
 def _slim_fred(d: dict) -> dict:
     """Match phase_0.md slim shape (11 fields)."""
     rs_raw = d.get("regime_signals")
     rs = rs_raw if isinstance(rs_raw, dict) else {}
-    mi_raw = d.get("market_implications")
-    mi = mi_raw if isinstance(mi_raw, dict) else {}
-    # sector_rotation lives at the fred cache top level; older shapes nested it
-    # under market_implications, so fall back to that.
-    rot_raw = d.get("sector_rotation") or mi.get("sector_rotation")
-    rot = rot_raw if isinstance(rot_raw, dict) else {}
+    rot = _fred_sector_rotation(d)
     # velocity_highlights from change_velocity (top 3 accelerating/decelerating)
     cv = d.get("change_velocity") or {}
     vel = []
     for series_id, info in (cv.items() if isinstance(cv, dict) else []):
-        v = (info or {}).get("velocity")
+        # `(info or {}).get` still crashes on truthy non-dicts (a bare string
+        # value) — same guard-depth rule as favor/avoid: type-check, don't
+        # truthiness-check.
+        v = info.get("velocity") if isinstance(info, dict) else None
         if v in ("accelerating", "decelerating"):
             vel.append(f"{series_id}:{v}")
         if len(vel) >= 3:
             break
+    ms_raw = d.get("macro_scores")
+    ms = ms_raw if isinstance(ms_raw, dict) else {}
     return {
         "generated_at":            d.get("generated_at"),
         "regime_label":            d.get("regime_label"),
         "regime_confidence":       d.get("regime_confidence"),
-        "macro_scores_composite":  (d.get("macro_scores") or {}).get("composite"),
+        "macro_scores_composite":  ms.get("composite"),
         "yield_curve_value":       rs.get("yield_curve_value"),
         "yield_curve_inverted":    rs.get("yield_curve_inverted"),
         "credit_stress_elevated":  rs.get("credit_stress_elevated"),
         "financial_stress_above_avg": rs.get("financial_stress_above_avg"),
         "fed_rate_direction":      rs.get("fed_rate_direction"),
         "real_rate_preferred":     rs.get("real_rate_preferred"),
-        "sector_rotation_favor":   rot.get("favor") or [],
-        "sector_rotation_avoid":   rot.get("avoid") or [],
+        "sector_rotation_favor":   _str_list(rot.get("favor")),
+        "sector_rotation_avoid":   _str_list(rot.get("avoid")),
         "velocity_highlights":     vel,
     }
 

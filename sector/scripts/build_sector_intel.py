@@ -41,7 +41,9 @@ Top-level keys:
         verdict             str   HOT / WARM / COLD / AVOID
         composite_score     int   0-100
         score_components    obj   {breadth_momentum, theme_heat, news_catalyst,
-                                   rotation_signal, valuation_penalty}  (valuation_penalty REQUIRED)
+                                   rotation_signal, valuation_penalty}
+                                  (ALL FIVE hard-required since 4.95.1 — a null
+                                   component would poison the shadow cutover pool)
         risk_flags          list[str]
         proxy_etf           str   (REQUIRED when verdict == HOT)
         sector_actions      list[str]   (optional free-text actions; -> key_reasons fallback)
@@ -92,7 +94,13 @@ VALIDATOR = ROOT / "sector" / "scripts" / "validate_sector_intel.py"
 
 sys.path.insert(0, str(ROOT))
 from sector.lib.sector_utils import canonicalize_sector_name
-from sector.scripts.sector_score_calculator import run_shadow_score_check, verify_session_dual_run
+from sector.scripts.sector_score_calculator import (
+    REQUIRED_SCORE_COMPONENTS,
+    build_shadow_report,
+    run_shadow_score_check,
+    verify_session_dual_run,
+    write_shadow_report,
+)
 
 
 def die(msg: str) -> None:
@@ -189,8 +197,13 @@ def build_phase0(date: str) -> dict:
                               else ftd_qual.get("quality_score")
                               if ftd_qual.get("quality_score") is not None
                               else ftd_qual.get("score")),
-            "exposure_range": ftd_state.get("exposure_range")
-                              or ftd_state.get("recommended_exposure"),
+            # exposure_range lives beside total_score in quality_score
+            # (post_ftd_monitor.py writes it there; phase_0.md agrees) — it was
+            # never in market_state, so the old market_state reads always gave
+            # null. Kept as fallbacks for any older cache shape.
+            "exposure_range": (ftd_qual.get("exposure_range")
+                               or ftd_state.get("exposure_range")
+                               or ftd_state.get("recommended_exposure")),
             "ftd_status_text": ftd_timeline.get("ftd_status_text"),
             "ftd_day_number": ftd_timeline.get("ftd_day_number"),
             "days_since_ftd": ftd_timeline.get("days_since_ftd"),
@@ -239,6 +252,12 @@ def require(decision: dict, key: str):
 
 
 def build(date: str, decision_path: Path) -> dict:
+    # backfill 判定基準日在**進場時**就定格：判定式若寫在 build 尾端呼叫
+    # `datetime.now()`，跨夜 build（23:59 起跑、00:01 收尾）會把當日場次誤標
+    # backfill 而退出割接分母。這裡與 build_phase0 讀 cache 是同一時刻，語意
+    # 才對——backfill 問的是「cache 是不是掃描日當天的」。
+    run_day = datetime.now().strftime("%Y-%m-%d")
+
     # ── decision file ─────────────────────────────────────────────────────
     if not decision_path.exists():
         die(f"decision file not found: {decision_path}\n"
@@ -341,12 +360,29 @@ def build(date: str, decision_path: Path) -> dict:
     # ── top-level sectors[] (final verdicts) ──────────────────────────────
     sectors_out = []
     shadow_reports = []
+    # SE1 — Step 5 特殊乘數要靠這兩個欄位才判得出來（cycle 乘數只在 fred 不可用時
+    # 生效；fred 可用時由 Step 6 取代，重複套 = 雙重計分）。
+    shadow_context = {
+        "cycle_phase": phase0.get("cycle_phase"),
+        "fred_available": phase0.get("fred_available"),
+    }
     for s in dec_sectors:
         name = s["name"]
-        sc = s.get("score_components") or {}
-        if "valuation_penalty" not in sc:
+        sc = s.get("score_components")
+        if sc is None:
+            sc = {}
+        elif not isinstance(sc, dict):
+            # list/字串等型別要走 die() 給人看得懂的訊息 —— `or {}` 只攔 falsy，
+            # truthy 非 dict 會在下一行 `.get` 裸 AttributeError（舊版反而能乾淨 die）。
+            die(f"decision.sectors[{name}].score_components must be an object, "
+                f"got {type(sc).__name__}")
+        missing_sc = [k for k in REQUIRED_SCORE_COMPONENTS if sc.get(k) is None]
+        if missing_sc:
+            # 五個分項全部 hard-required（原本只擋 valuation_penalty）。缺一格在
+            # shadow 端會變成「算不出」而讓整場退出割接證據池，在這裡先擋掉比較快
+            # 也比較誠實 —— decision JSON 本來就該五格齊全。
             die(f"decision.sectors[{name}].score_components missing "
-                f"valuation_penalty (V1.4 hard-required)")
+                f"{', '.join(missing_sc)} (hard-required)")
         verdict = s.get("verdict")
         if verdict == "HOT" and not s.get("proxy_etf"):
             die(f"decision.sectors[{name}] verdict=HOT requires proxy_etf")
@@ -381,11 +417,38 @@ def build(date: str, decision_path: Path) -> dict:
         }
 
         # Run shadow scoring check
-        report = run_shadow_score_check(s_unified, val_sectors)
+        report = run_shadow_score_check(s_unified, val_sectors, shadow_context)
         shadow_reports.append(report)
 
     is_ok, summary_msg = verify_session_dual_run(shadow_reports)
     print(summary_msg, file=sys.stderr)
+
+    # SE1 — 落盤。舊版只印 stderr，protocol 跑完就沒了，於是「shadow 跑了幾個月」
+    # 等於零樣本，SE2 的割接判準（N=5 場）永遠無從累計。
+    #
+    # `backfill`：重跑過去日期（`--date <舊日期>`）時，`build_phase0()` 讀的是**今天**
+    # 的 FRED/breadth cache，存下的 context 不是掃描日的狀態。這種樣本的證據等級等同
+    # `--audit-decisions` 的歷史重放，不得計入 live 割接分母 —— 否則 audit/live 的
+    # 分離就只做在正門。
+    backfill = date != run_day
+    shadow_report = build_shadow_report(shadow_reports, scan_date=date,
+                                        context=shadow_context, backfill=backfill)
+    # shadow 是 shadow-only 產物：落盤失敗不得中斷 build（唯一該中斷的是下面的
+    # SECTOR_CALC_STRICT）。cache 目錄唯讀/磁碟滿不該讓整場產業掃描沒有 intel 檔。
+    # 攔 Exception 而非只攔 OSError：這裡的判準是「shadow 不得影響主流程」，不是
+    # 「哪幾種 IO 錯誤該原諒」。序列化錯誤（TypeError）等非 IO 例外同樣不該讓正式
+    # 產出陪葬，而例外內容有印出來，不是靜默吞掉。
+    try:
+        shadow_path = write_shadow_report(shadow_report)
+    except Exception as e:
+        shadow_path = None
+        print(f"[build_sector_intel] ⚠ shadow report 落盤失敗（不中斷 build）: "
+              f"{type(e).__name__}: {e}", file=sys.stderr)
+    sess = shadow_report["session"]
+    if shadow_path:
+        print(f"[build_sector_intel] shadow report → {shadow_path} "
+              f"(sample_valid={sess['sample_valid']}, status={sess['status']}"
+              f"{', backfill' if backfill else ''})", file=sys.stderr)
 
     if not is_ok and os.environ.get("SECTOR_CALC_STRICT") == "1":
         print("[build_sector_intel] ERROR: Calculator dual-run failed under strict enforcement mode (SECTOR_CALC_STRICT=1).", file=sys.stderr)

@@ -20,7 +20,8 @@ sector/
 ├── phase_0.md                 ← Phase 0 細節：三層廣度/FTD/頂部訊號合成 + synthesized_exposure
 ├── phase_1-2-3.md             ← Phase 1-3 + Extreme Sentiment Playbook
 ├── phase_4-5.md               ← Phase 4 辯論 / 4c 決策樹 STEP A-G / Phase 5 輸出
-└── schema.md                  ← 所有 Phase 0-5 的 JSON schema 定義
+├── schema.md                  ← 所有 Phase 0-5 的 JSON schema 定義
+└── protocol_appendix_fallback.md  ← 條件式：reader/prefetch 備援指令與耗時預算（正常場次不載入）
 ```
 
 **載入規則**：
@@ -29,6 +30,7 @@ sector/
 3. 執行 Phase 1-3 → 讀 `phase_1-2-3.md`
 4. 執行 Phase 4-5 → 讀 `phase_4-5.md`
 5. 寫 JSON 時 → 讀 `schema.md` 確認欄位
+6. **只有** reader/prefetch 失敗，或需要逐層重整 stale/missing cache 時 → 讀 `protocol_appendix_fallback.md`
 
 每 phase 的注意力只在 100–200 行內，避免一次載入 650+ 行的大檔。
 

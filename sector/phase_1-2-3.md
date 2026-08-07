@@ -76,10 +76,11 @@ echo "rc=$?"   # rc=1 → 有 HARD task 失敗（valuation / earnings_pulse / sm
 - **0-LLM / read-only**：並行跑 `fetch_sector_valuation` + `fetch_earnings_pulse` + `fetch_smart_money` + `fetch_sector_news` + `fetch_general_news` + `sentiment` + econ/earnings calendar + `sector_digest`，寫 cache 的照寫，stdout-only 的（sentiment / 兩個 calendar / digest）inline 進輸出 JSON 的 `results.<name>.data`。
 - **讀回**：`Read /tmp/sector_prefetch_$SCAN_DATE.json` 一次拿到全部。`results.valuation.cache` / `results.sector_news.cache` 等給 `build_sector_intel.py` 用的 cache 路徑都已寫好。
 - **HARD FAIL 契約不變**：`rc=1` 或 `hard_fail=true` 時，檢查哪個 HARD task（看 `results.<name>.error`）。`valuation` 失敗 = 照舊 abort（V1.4 規則）。
-- **SOFT 失敗正常**：`econ_calendar` / `earnings_calendar` 為 SOFT（fail 不 abort，靠下方 Step 5 WebSearch 補 narrative）。兩個 skill 已於 V3.44.1 migrate 到 FMP `/stable/` endpoint（舊 v3 已退役 403）— 正常應回資料，若 `data=null` 表示 FMP 端又變動。
-- **Fallback**：prefetch 本身炸了（script error）→ 回到下方逐 Step 手動流程。
+- **SOFT 失敗正常**：`econ_calendar` / `earnings_calendar` 為 SOFT（fail 不 abort，靠下方執行順序表的 Step 5 WebSearch 補 narrative）。兩個 skill 已於 V3.44.1 migrate 到 FMP `/stable/` endpoint（舊 v3 已退役 403）— 正常應回資料，若 `data=null` 表示 FMP 端又變動。
+- **Calendar 完整性／成本**：共用 calendar fetcher 對 4,000-row 飽和回應自動切段並以 2h cache 重用；Step 3 用 24h cached company screener 本機篩 US $2B+，禁止逐 symbol `/profile` fan-out。
+- **Fallback**：prefetch 本身炸了（script error）→ 走 `protocol_appendix_fallback.md` §3 的逐 Step 手動流程。
 
-讀完 prefetch JSON 後，直接進 Phase 3 判斷邏輯（extreme_sentiment trigger 等），**跳過**下方 Step 1–3e 的逐項執行（資料已在 JSON / cache 內）。下方逐 Step 規格保留為 fallback + 欄位語意參考。
+讀完 prefetch JSON 後，直接進 Phase 3 判斷邏輯（extreme_sentiment trigger 等），**跳過** Step 1–3e 的逐項執行（資料已在 JSON / cache 內）。逐 Step 的**執行指令**保留在 `protocol_appendix_fallback.md` §3 當 fallback；**欄位語意與判斷 rubric 留在下方**，prefetch 成功也照樣適用。
 
 ### ⚠️ 執行順序（強制）
 
@@ -95,129 +96,44 @@ Step 4  reuse _phase0.fred_snapshot → fed_rate_direction / yield (不再 searc
 Step 5  WebSearch HARD CAP（依 Step 3e available 動態）→ 僅補 narrative 突發,不抓 Step 3d/3e 已有的
 ```
 
-### Step 1 — Market Sentiment
+### Rubric 與紀律（**每場適用**；「怎麼跑」在 appendix）
 
-```bash
-python3 skills/market-sentiment-analyzer/scripts/sentiment.py --json
-```
+> 執行細節（bash 指令、argparse 怪癖、平行寫法、耗時預算）→
+> `protocol_appendix_fallback.md` §3。**只有 prefetch 失敗才需要讀那份。**
+> 以下是判斷規則，prefetch 成功也照樣適用。
+>
+> 上表的 Step 編號與 appendix §3 的小節編號一一對應（Step 1 ↔ §3 Step 1，依此類推）。
 
-- 輸出 stdout JSON：`composite_score` / `label` / `vix` / `put_call_ratio` / `spy_momentum.rsi_14` 等。
-- 失敗 = soft（缺值，後續 `political_overlay` 各欄位填 null，extreme_sentiment_triggered 視為 false）。
-
-### Step 2 — Economic Calendar
-
-```bash
-python3 ~/.claude/skills/economic-calendar-fetcher/scripts/get_economic_calendar.py \
-  --from {SCAN_DATE} --to {SCAN_DATE+7d} --format json
-```
-
-- argparse 介面（**不**支援 `--json` / `--days N`，會 unrecognized arguments）。
-- 輸出 stdout JSON：本週 FOMC / CPI / NFP / GDP / PMI 等事件。
-- 失敗 = soft（缺 macro 事件，依賴 WebSearch 補；不 abort protocol）。
-
-### Step 3 — Earnings Calendar
-
-```bash
-python3 ~/.claude/skills/earnings-calendar/scripts/fetch_earnings_fmp.py {SCAN_DATE} {SCAN_DATE+7d}
-```
-
-- **位置參數**（**不**支援 `--json` / `--days N` / `--from` / `--to`，會 `Invalid start date format` 報錯）。
-- 第三位置參數可選 API key（預設讀 `$FMP_API_KEY`）。
-- 輸出 stdout JSON：本週 mid+ 大型股財報日（含 EPS estimate / market cap）。
-- 失敗 = soft（缺 earnings catalyst，Phase 3 可繼續；不 abort protocol）。
-
-### ⚡ V2.20.2 — Steps 3b/3c/3d/3e PARALLEL（推薦，省 3-4 min）
-
-**過去**：4 個 fetch_*.py 串著跑 → 每個 ~10-30s + 每個 1 turn LLM overhead = **~6 min wall**。
-
-**現在**：bash `&` 平行 + `wait` 收尾 → 單 turn，~30s wall（取最慢一個）。
-
-```bash
-SCAN_DATE=$(date +%Y-%m-%d)
-PIDS=()
-python3 sector/scripts/fetch_earnings_pulse.py --date $SCAN_DATE > /tmp/fetch_eps.log 2>&1 &
-PIDS+=($!)
-python3 sector/scripts/fetch_smart_money.py    --date $SCAN_DATE > /tmp/fetch_smt.log 2>&1 &
-PIDS+=($!)
-python3 sector/scripts/fetch_sector_news.py    --date $SCAN_DATE --lookback-days 2 > /tmp/fetch_snews.log 2>&1 &
-PIDS+=($!)
-python3 sector/scripts/fetch_general_news.py   --date $SCAN_DATE > /tmp/fetch_gnews.log 2>&1 &
-PIDS+=($!)
-FAIL=0
-for pid in "${PIDS[@]}"; do wait $pid || FAIL=$((FAIL+1)); done
-echo "parallel fetches: 4 launched, $FAIL failed"
-# Inspect /tmp/fetch_*.log for stderr if any failed
-ls -la sector/cache/sector_earnings_pulse_*.json sector/cache/sector_smart_money_*.json \
-       sector/cache/sector_news_*.json sector/cache/general_news_*.json | head -4
-```
-
-**規則**：
-- 4 個 fetch script 完全獨立（讀 FMP 不同 endpoint，寫不同 cache 檔）→ 平行安全
-- `fetch_general_news` 是 SOFT（fail 不 abort），其他 3 個是 HARD FAIL
-- `FAIL` 計數需 ≤ 1（只允許 general_news SOFT fail）
-- 若任一 HARD script fail → 看 `/tmp/fetch_*.log` 找原因；通常是 FMP rate limit 或 API key
-
-**何時跳過 parallel mode**：
-- 偵錯需要看單一 script 的詳細 stderr → 改回 sequential（下方原 Step 3b/3c/3d/3e）
-- 想加 `--skip-analyst` / `--skip-institutional` 等 flag → sequential 較清楚
-
-舊 sequential 步驟保留在下方備援。
-
----
-
-### Step 3b — Sector Earnings Pulse（V1.4 必跑，sequential 備援）
-
-```bash
-python3 sector/scripts/fetch_earnings_pulse.py --date {SCAN_DATE}
-```
-
-- 輸出：`sector/cache/sector_earnings_pulse_<DATE>.json`
-- 失敗 = HARD FAIL（earnings calendar 段；analyst 段為 SOFT，失敗欄位 null）。中止 protocol 僅在 earnings calendar 失敗。
-- ⚡ **不要手抄進 JSON** — `build_sector_intel.py` 自動把這個 cache 讀進
-  `_phase3.sector_earnings_pulse`。確認 rc=0、cache 產生即可。
+**Step 3b — Sector Earnings Pulse**（HARD；cache → `_phase3.sector_earnings_pulse`）
 - **Rubric 用法**：`news_catalyst` 元件 ±5
   - `beat_rate_30d > 0.7 AND surprise_score_avg > 0`（且 report_count ≥ 5）→ +5
   - `beat_rate_30d < 0.4`（且 report_count ≥ 5）→ −5
   - `report_count < 5` → 樣本不足，skip 不調分
 - **V2.9.0 PT 訊號用法**（不改 rubric，給 Phase 4b 提示）：
-  - HOT consensus + `analyst_pt_upside_median_pct < 0.03` AND `pt_sample_size >= 3` → 「目標價已被消化」divergence challenge
-- 想省 ~111 calls（grades + PT consensus）可加 `--skip-analyst`（V2.9.0+；舊 `--skip-grades` 仍接受 alias）
+  HOT consensus + `analyst_pt_upside_median_pct < 0.03` AND `pt_sample_size >= 3`
+  → 「目標價已被消化」divergence challenge（= R6）
 
-### Step 3c — Smart Money Signals（V1.4 必跑）
-
-```bash
-python3 sector/scripts/fetch_smart_money.py --date {SCAN_DATE}
-```
-
-- 輸出：`sector/cache/sector_smart_money_<DATE>.json`
-- 失敗 = HARD FAIL（insider/senate 段；institutional 段為 SOFT）。
-- ⚡ **不要手抄進 JSON** — `build_sector_intel.py` 自動把這個 cache 讀進
-  `_phase3.smart_money_signals`。
-- **Phase 4b 用法**：HOT consensus + insider ratio < 0.5 + senate net buy < 0 → 強制 divergence challenge（見 `phase_4-5.md` Step 2 規則 5）。
+**Step 3c — Smart Money Signals**（HARD；cache → `_phase3.smart_money_signals`）
+- **Phase 4b 用法**：HOT consensus + insider ratio < 0.5 + senate net buy < 0 → 強制
+  divergence challenge（= R5，見 `phase_4-5.md` Step 2）
 - **V2.9.0 institutional Q-on-Q 用法**（不改 rubric，給 Phase 4b 提示）：
-  - HOT consensus + `institutional_holders_qoq_delta < 0` AND `institutional_ownership_pct_delta < 0` AND `institutional_sample_size >= 3` → 「機構淨流出」divergence challenge
-- 想省 ~131 calls（institutional Q-on-Q）可加 `--skip-institutional`（V2.9.0+）
+  HOT consensus + `institutional_holders_qoq_delta < 0` AND
+  `institutional_ownership_pct_delta < 0` AND `institutional_sample_size >= 3`
+  → 「機構淨流出」divergence challenge
 
-### Step 3d — Sector News Cache（V1.4 必跑;取代 WebSearch 主力）
+**Step 3d — Sector News Cache**（HARD）
+- 此 cache 是 `top_catalysts` 的**主資料源** — 從每 sector 的 articles 抽 catalyst 事件，
+  引用 `url` / `publisher` 為 source
+- **禁止**用 WebSearch 抓 Step 3d 已有的個股新聞
 
-```bash
-python3 sector/scripts/fetch_sector_news.py --date {SCAN_DATE} --lookback-days 2
-```
+**Step 3e — General Narrative News Cache**（SOFT）
+- `available=true` → 從此 cache 抽「當日 S&P 500 narrative」，Step 5 WebSearch budget
+  由 ≤2 降到 ≤1（只留給突發事件）
 
-- 輸出：`sector/cache/sector_news_<DATE>.json`(11 sectors × top 10 articles)
-- 失敗 = HARD FAIL。
-- 此 cache 是 `top_catalysts` 的主資料源 — 從每 sector 的 articles 抽取 catalyst 事件,引用 `url`/`publisher` 為 source
-- WebSearch step 5 縮減到 ≤2 query 只用於補 narrative-class(整體市場情緒、突發事件未被 FMP 索引)。**禁止**用 WebSearch 抓 Step 3d 已有的個股新聞
+**Step 1/2/3（sentiment / econ calendar / earnings calendar）**：全部 SOFT。
+sentiment 失敗 → `political_overlay` 各欄填 null、`extreme_sentiment_triggered` 視為 false。
 
-### Step 3e — General Narrative News Cache（V1.71+ soft）
-
-```bash
-python3 sector/scripts/fetch_general_news.py --date {SCAN_DATE}
-```
-
-- 輸出：`sector/cache/general_news_<DATE>.json`（FMP `/stable/news/general-latest`，limit=20）
-- 失敗 = SOFT；寫 `{available: false, reason: ...}`，protocol 不中斷
-- 用途：補 Phase 3 Step 5 「broader market narrative」query。如果 `available=true`，protocol 從這個 cache 抽取「當日 S&P 500 narrative」；Step 5 WebSearch budget 從 ≤2 降到 ≤1（只留給突發事件）
+⚡ **四個 cache 都不要手抄進 JSON** —— `build_sector_intel.py` 會自己讀。確認 rc=0 即可。
 
 > **禁止**用 WebSearch 抓 Step 1-4 / Step 3d-3e 已有的（FOMC/財報日期、利率、F&G、VIX、個股新聞、broader narrative）。
 > **禁止**同主題 ≥ 2 個查詢。
@@ -308,19 +224,7 @@ Trigger 條件：
 
 ### Phase 3 預算
 
-| Step | Tool | 耗時 |
-|---|---|---|
-| 1 | `market-sentiment-analyzer` script | ~6s |
-| 2 | `economic-calendar-fetcher` script | ~5s |
-| 3 | `~/.claude/skills/earnings-calendar/scripts/fetch_earnings_fmp.py` | ~5s |
-| 3b | `sector/scripts/fetch_earnings_pulse.py`（含 grades-summary） | ~30s |
-| 3c | `sector/scripts/fetch_smart_money.py` | ~25s |
-| 3d | `sector/scripts/fetch_sector_news.py` | ~10s |
-| 3e | `sector/scripts/fetch_general_news.py`（soft） | ~3s |
-| 4 | reuse `_phase0.fred_snapshot` | 0s |
-| 5 | WebSearch ≤ 1（Case A）/ ≤ 2（Case B） | ~10–20s |
-
-**總預算 ≤ 110s**
+**總預算 ≤ 110s**（逐 Step 耗時表 → `protocol_appendix_fallback.md` §3）
 
 **JSON Schema** → 見 `schema.md` Phase 3
 

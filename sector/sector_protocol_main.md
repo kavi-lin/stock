@@ -8,7 +8,15 @@
 3. Phase 1-3 執行 → phase_1-2-3.md
 4. Phase 4-5 執行 → phase_4-5.md
 5. 寫 JSON       → schema.md
+
+（條件式，正常場次不載入）
+   phase0_read_caches.py / phase_prefetch.py 失敗（rc≠0），
+   或 reader rc=0 但 stale_layers / missing_layers 非空需逐層重整
+                  → protocol_appendix_fallback.md
 ```
+
+> **SE4 紀律**：appendix 只放「怎麼跑」（bash 指令、argparse 怪癖、平行寫法、耗時預算）。
+> **判斷規則（rubric、紀律、欄位語意）一律留主檔** —— 那些每場都在用，搬走等於拿準確度換 token。
 
 ## SESSION CONFIG
 
