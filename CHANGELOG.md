@@ -8,6 +8,737 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.108.0] — 2026-08-07 — 第 9 根 anchor（虧損題材股）+ speculative governor：煞車改調速器
+
+### Added
+- `compute_price_framework.py` 新增第 9 根 anchor `fwd_earnings_discounted`（**條件錨**）：取 horizon ≤3.5y 內**最遠**一個 `epsAvg > 0` 且分析師 ≥3 家的年度 EPS × justified P/E（`clamp(成長率%, 15, 35)`）÷ CAPM 折現（`clamp(10Y + β×0.045, 0.10, 0.30)`）。刻意 **peer-free**——題材股最常見的失敗模式正是「沒有可比同業」，任何吃 peer median 的方法會重複踩同一個坑。AAOI 實測：FY27 EPS $5.73 × 35 ÷ 1.2122^1.399 = **$153.13**（β=3.687 → 21.2% 門檻利率）。
+- Live 資格 `evaluate_fwd_anchor_scope()`：**四根 cashflow_intrinsic 錨皆非 live 且 TTM EPS 非正**時才開，否則值照算但只進 archetype shadow 池。raw weight 0.15 掛在八根的 1.0 預算之外——它只在 cashflow 族（合計 0.50）結構性缺席時上場，永遠擠不掉既有錨。MSFT 實測：值算出 $452.66、狀態 `ineligible: cashflow_intrinsic_anchors_live:...`、live FV 394.02 一位元不動。
+- `valuation_pack.evidence_independence`：family topology 給獨立 family 各一票，卻看不出「兩個不同 family 其實由同一批賣方分析師餵養」。`analyst_pt_consensus` + `fwd_earnings_discounted` 同時 live 就是這個情形 → `sell_side_only=true`。不改數字、不改 verdict，唯一後果是強制 governor。
+- `implied_expectations.market_implied_revenue`：reverse DCF 對 FCF ≤ 0 無定義（過去只留一句「不適用」），改問營收——EV 原地不動下，營收要成長幾倍才能把今天的 EV/S 消化到成熟中樞 4.0x。AAOI：16.33x → 需 ×4.08（5Y CAGR 32%）vs 分析師路徑 149% → `market_below_sell_side` + 可證偽 kill seed。
+- `decision_engine.py` Phase 4.6 **speculative governor**：`pre_profit_anchor_live` 或 `sell_side_only` 任一成立 → `speculative_grade=true`、size ≤ 1%、conf ≤ 0.70，**但 `final_decision` / `final_action` 不動**。與 cap 的根本差異：cap 說「不准判斷」，governor 說「判斷可以，籌碼受限」。兩者同時成立時較嚴的 cap 值（30bps / 0.65）勝出。
+- Validator §10b：governor 規則 + 兩條 integrity 檢查（export 裡出現 pre-profit 錨或 sell-side-only 證據 ⇒ `speculative_grade` 必須為 true），杜絕「用新錨解鎖決策卻不掛 governor」。
+- **`FWD_PE_CLAMP` 的校準工具**（`shadow_report.py` 新區段 + `test_shadow_report.py`）：把 anchor 公式**倒過來解**，得出每檔標的的市場隱含 justified PE = `price × (1+r)^horizon ÷ target_eps`——同一個目標年度 EPS、同一個折現率下，市場實際付幾倍。pre-profit 標的成長率必然爆表 → PE 恆取上限，所以上限對不對是這根錨最關鍵的單一假設；`pe_clamp_binding` / `justified_pe_raw` 一併留在 `valuation_pack.anchors.*.calibration`，讓「上限綁到的頻率」能用 grep 回答。
+- 校準讀 `invest_logs/*_pf_quant.json` 而非 `history.json`（其餘 shadow section 都讀後者）：artifact 每次 Phase 1.5 都產出、對 shadow 狀態的 anchor 一樣留有 calibration，所以**今天就有數字**，不必等 session 累積——這正是提出這個工具的理由。判準只看 **live cohort**（`status == eligible`）：全母體混 archetype（實測 MSFT 23.5x 與 NET 182.7x 同池），拿它出判準等於用錯的母體校準因果參數。
+
+- **`TERMINAL_EV_SALES` 拆成兩個情境**：4.0（保守／規範性）+ `TERMINAL_EV_SALES_SECTOR_TYPICAL` 8.0（科技中樞），兩個 CAGR 同時輸出。實測（2026-08-07，成熟獲利公司 median EV/S）：半導體 13.9 / 通訊設備 8.3 / 軟體 8.0 / 工業包裝 2.8——**4.0 大約在工業水準，對科技股是刻意保守的壓力測試假設，不是「實測中樞」**（原文件把它寫成後者，是錯的）。AAOI 因此從單一句「需 32% CAGR」變成「4x → 32%／8x → 15%」。
+- 校準讀出端加報 `beta_fallback_rate` 與 `discount_clamp_binding_n`，並在 docstring 註明 `market_implied_pe` 是「**在我們假設的折現率下**」市場付的倍數，不是無假設的市場觀測（SPCX 的 beta 修正把隱含 PE 由 38.8 推到 45.3）。
+
+### Fixed（校準部分）
+- **無效 beta 會被靜默渲染成「低風險」**：`beta ≤ 0` 或缺值原本落到 CAPM `1.0` 或折現率下限 10%——對一個定義上比市場危險的母體，那是把資料缺陷換成最寬鬆的折現。實例 SPCX：beta=0（IPO 2026-06-12，歷史不足兩個月）吃到 10% 下限，是整組 11 檔樣本裡最寬鬆的一檔。改用母體中位數 `FWD_BETA_FALLBACK = 2.73`（n=14 實測）→ r=16.9%，anchor $115.18 → $99.50（現價 $129，由 +0.2% 轉為 −23%）。`beta_source` / `discount_clamp_binding` 一併記錄。有效 beta 的標的（AAOI 3.687）完全不受影響。
+
+### Why（校準部分）
+- 使用者問「clamp 值要怎麼校準」。第一個答案是「反解」——不需要新資料、不需要等待。實測 11 檔：全母體隱含 PE 中位數 36.7、上限 35 實際綁到 8/11。
+- **`#2 dispersion` 那套 percentile 手法在此不適用**：`agreement_grade` 的門檻是描述性的，切在它所描述的分布上；PE clamp 是因果參數，直接決定輸出——拿它自己的輸出校準它會循環。市場隱含 PE 外生於這根錨，才是合法標的。
+- 同理**不可自動跟隨中位數**：泡沫期中位數上移、上限跟著上移，錨就永遠不會說貴——與被拒絕的 EV/S 分位錨同一個陷阱、方向相反。因此判準只出報告，改值一律 user 核准（照 agreement_grade 2026-07-16 的先例）。
+- 一個被實測否決的設計：原本想用 archetype 分層母體，但 11 檔裡有 6 檔是 `balanced / rule=no_inputs`（缺 earnings-analyst cache，不是真的不屬於 hypergrowth），拿它過濾會靜默丟掉多數樣本。改用 anchor 自己的 scope 判定——引擎自己算的、必然存在，而且定義上就等於「這根錨真正服務的母體」。
+- **量完才發現兩個常數的問題方向相反**：`FWD_PE_CLAMP` 上限 35 撐得住（全母體隱含 PE 中位數 36.7），但 `TERMINAL_EV_SALES` 4.0 被我在文件裡誤稱為「成熟中樞」——實測科技業中樞是 8-14x，4.0 其實是工業水準。**校準的第一個產出常常不是新數字，而是發現舊註解在說謊**；那句誤述會讓讀報告的人把「需 32% 營收 CAGR」當成中性基準讀，而它其實是壓力情境。
+- SPCX 那個 beta=0 是同一個家族的第三個實例（前兩個見 4.106.0）：**失效方向是靜默、且 fail closed 在最新的資料上**。新上市 → 歷史不足 → beta=0 → 折現率下限 → 最寬鬆的估值，整條鏈沒有任何一步會報錯。判準因此改成「無效輸入必須落到保守預設，不是中性預設」。
+
+### Fixed
+- Validator §14 為 governor 開了「倉位可低於 `sizing_chain` 鏈尾」的合法出路。少了這條，虧損題材股的 export 會在 Phase 5 被判「倉位不等於鏈尾」——決策放行了卻無法落地，等於白做。這正是 V4.86.0 對 decision cap 犯過的同一個錯，這次一起補。
+- `assemble_inputs()` 從 comps payload 回填 `self_ratios` / `ev_block`：`phase1_factpack` 只在 peer bundle `status == "ok"` 時 emit 這些欄位，而那恰恰是題材股必然失敗的路徑（AAOI: `fewer_than_3_business_similar_peers`）。subject 自己的 ratio 根本不需要 peers。
+- `compute_fwd_earnings_anchor()` 保留**過去**年度在序列裡當成長率分母：目標年正好是第一個未來年度時，分母應該是最近的已實現年度。初版把過去年度先過濾掉，那個情境會直接判 `no_usable_growth_rate_for_justified_pe`。
+- protocol 加註同日執行順序：`財報 <T>` 必須跑在 `分析 <T>` 之前。2026-08-07 AAOI 的 `pf_quant` 16:39 產出、earnings cache 19:01 才寫入，一根本來拿得到的 `analyst_pt_consensus`（$160）被判成 null。
+
+### Why
+- 起點是使用者的觀察：「還在虧損、但市場已經在追逐的題材股，需要有特別的 anchor 去判斷」。原本的結論是「AAOI 在轉虧為盈前結構上拿不到 decision-grade 估值」——`insufficient_anchors` 正在正確地拒絕替一個所有內在價值法都無定義的標的製造數字。但那個結論把「拒絕判斷」當成唯一選項。
+- 先驗證了兩件事才動手：(a) 八根全滅是結構問題**疊加**時序問題，修掉時序後仍只有 1 根，離解鎖只差 1 根；(b) 上一輪構想的 EV/Sales 分位錨對 AAOI **救不了**——`select_valuation_peers` 回傳 0 家，shadow 層本來就為 hypergrowth 準備的 `peer_ev_sales_implied` 同樣是 null。不是方法不適用，是沒有同業中位數可乘。
+- 沒做「EV/S 自身歷史分位錨」：題材股正在經歷結構性 re-rating，「相對自己歷史的分位」只會量測「漲了多遠」，對這個 archetype 永遠輸出最大看空——方向恆定的錨不提供判斷只提供噪音。cross-sectional growth-adjusted 迴歸是正路但要建整個 universe 管線。
+- 誠實性的關鍵取捨：新錨與 PT 都源自賣方，**不是兩份獨立證據**。設計上沒有假裝它們獨立（那會讓 confidence medium 名不副實），而是讓 pack 明說 `sell_side_only`，由 governor 用籌碼限制回應。系統因此從「拒絕判斷」變成「判斷可以，但這個判斷的前提是相信賣方 FY 預估，所以只給探針倉」。
+- 已知限制寫進 schema：目標年度的選擇對數值影響很大（AAOI FY27 覆蓋 3 家 → $153；掉到 2 家則退回 FY26 → $33）。這是方法本身的性質，由「≥3 分析師 + 3.5y horizon + 必須有第 2 根錨才解 cap + governor 壓倉位」四道限制共同約束，不用平滑掩蓋。
+
+## [4.107.0] — 2026-08-07 — forecaster cache 一併預熱(第 8 根 anchor);「新的一季」不能用 mtime 判斷
+
+### Added
+- `phase1_factpack.prewarm_forecaster_cache()`:同 4.106.0 的病灶第二例。`compute_price_framework.py:1330` 對 forecaster cache 只做 `if os.path.exists(fc_path)`,protocol `:582` 明列生成指令 `forecast.py <T> --json-only` 卻沒有任何一步會跑它,所以 `forecaster_blend`(weight 0.05)預設就是缺席。實測 MSFT 補上後 `anchors_available` 8/8、`forecaster_blend = $598.42`、三個 family 全覆蓋。
+- 成本確認:`forecast.py` **0 LLM**(無任何 LLM 依賴),自帶 4h TTL,命中 0 FMP call、未命中約 6 個 endpoint。排在 `analyze.py` **之後**執行——forecast.py 會讀 earnings-analyst cache 當輸入。
+- 狀態獨立為 `forecaster_prewarm`,不與 `earnings_prewarm` 混報:兩者影響半徑差一個量級(前者 1 根 0.05 anchor,後者 6 根 anchor + Fundamentals lane)。`forecast.py` 對虧損股 rc=1 屬於標的事實而非傳輸失敗,故保留它自己的 reason —— AAOI 回報 `unavailable: negative_or_missing_ttm_eps`(GAAP TTM EPS −0.78;新聞的 $0.06 是非 GAAP 單季,兩者不衝突)。
+
+### Fixed
+- 上述預熱的新鮮度判斷,初版寫成「earnings cache 比 forecaster cache 新就強制 refetch」——**錯的**。`analyze.py` 每次都就地改寫 earnings cache,mtime 恆為「剛剛」,條件因此恆真,等於每跑一次 protocol 就多付一次完整 refetch(實測 MSFT 27.6s)。改為由 `prewarm_earnings_cache()` 回傳 `refreshed` 旗標——它解析 `fetch.py` 自己在 stderr 宣告的 cache-hit/wrote 決定,那才是「季度有沒有換」的唯一可靠訊號。修後 MSFT 穩態 1.33s。
+- 連帶:`prewarm_earnings_cache()` 回傳值由 `str` 改為 `(status, refreshed)`;`earnings_prewarm` 對外仍是字串,新增 `ok (refreshed)` 值域。
+
+### Why
+- 4.106.0 修完後使用者問「剩下的所有 anchor 各是什麼」,逐根盤點時發現第 8 根 `forecaster_blend` 是**同一個 pattern 的第二個實例**——只讀不生的 cache 依賴。它本身只有 0.05 權重,但同時餵 `forecaster.transition_case`,而那是 `valuation_reviewer_gate` 五個 trigger 裡**唯一的 mandatory**:cache 不存在時 gate 讀到 `transition_case=False`,把「沒查過」渲染成「查過了不是」。
+- 紀律備忘:mtime 只在「檔案被寫入 == 內容有意義地改變」時才是新鮮度訊號。就地改寫型的 cache(analyze.py、任何 augment-in-place 的流程)一律不成立,要嘛用內容鍵(`(TICKER, last_earnings_date)`),要嘛讓真正做決定的那一層自己回報。
+
+## [4.106.0] — 2026-08-07 — 財報 bundle 在 Phase 1 自動預熱;修 V5.2/V5.3 卡片與 bundle merge 兩處靜默失效
+
+### Fixed
+- `Dashboard/page-decisions.js`:版本閘從列舉白名單改成數值比較(新增 `versionAtLeast()`)。原本是 `version === 'V5.0' || version === 'V5.1'`,4.90.0 把 schema 推到 V5.3 時只補了 `VERSION_COLOR` 的色票、漏補這兩行,導致所有 V5.2/V5.3 卡片的 Layer 3「證據 · 估值」整段(現值估值軸 + 未來前瞻 glide chart + implied CAGR chips)與 Layer 2 的 Red Team 區塊**完全不渲染**。資料一直是好的——`data.json` 裡 AAOI 的 `forward_expectations.range` 三點俱全,純 render gate。白名單的失效方向是「對最新的資料 fail closed」,是最糟的一種預設,故改為 floor 比較,之後跳版不會重演。
+- `skills/us-stock-analysis/scripts/analyze.py`:bundle → 輸出區塊的 merge 原本用 `locals().get(block_name)` 解析目標,只有 bundle key 剛好等於區域變數名的區塊才會生效。實際上 `_derive_from_bundle()` emit 的 5 個 key 裡有 **3 個對不上**(`margins_cash`→local `margins`、`earnings_calendar`→local `earnings`、`balance_sheet`→local `balance`),覆寫算出來後被整包丟掉、無任何痕跡——FMP canonical TTM margins 在 bundle 新鮮時仍然輸給 yfinance。改為顯式 registry。
+- 同檔:`growth.revenue_yoy_pct` 改由 bundle 的 `derived.yoy_growth.revenue_yoy` 供應。原本只走 yfinance `info.revenueGrowth`,那個欄位落後財報發布——2026-08-07 AAOI 報告寫 +51.4%(仍是 Q1),FMP 當下已有 Q2 的 +86.4%。3Y CAGR 維持 yfinance 年度資料(正確,不動)。
+
+### Added
+- `investment/scripts/phase1_factpack.py` 新增 `prewarm_earnings_cache()`:讀 bundle 前先跑 earnings-analyst 的 `fetch.py` + `analyze.py`(皆 0 LLM;narrate/render 屬 `財報 <T>`,anchor 用不到)。protocol 從來只**讀** earnings-analyst cache、沒有任何一步會**生**它,兩個讀取點(本檔與 `compute_price_framework._latest_earnings_cache`)都是純 glob + fail-soft,所以當天發財報的股票會讓 Phase 1.5 對著缺席的 bundle 凍結 `valuation_pack`,8 個 anchor 全 `missing_or_nonpositive_value` → 0/8 → `insufficient_anchors` decision cap,而且靜默。
+- 成本:`fetch.py` 自帶 `(TICKER, last_earnings_date)` 快取閘,命中即 early-return,穩態只多 1 個 FMP call;那一 call(income-statement 最新日期)同時就是新鮮度判準,比接 earnings calendar 更硬——calendar 說「已宣布」,這個說「數字可查」,anchor 要的是後者。真的有新財報才付完整 17 endpoints。
+- fail-soft 依契約:timeout / rc≠0 / 缺 script / 任何例外都只回傳狀態字串,Phase 1 照常完成;狀態寫進 factpack 輸出的 `earnings_prewarm` 供稽核。`--no-prewarm` 可關閉(離線或零 FMP 配額)。factpack 的 READ-ONLY 契約因此放寬為「對 invest_logs / history / reports 唯讀」,docstring 已同步更新。
+- 新增測試 `investment/scripts/test_phase1_factpack.py`(13 案例,鎖 fail-soft 五條路徑 + fetch 失敗必須不跑 analyze)與 `skills/us-stock-analysis/scripts/test_bundle_merge.py`(15 案例,鎖 registry 與 emit 端不得漂移)。兩支之前都無測試覆蓋。
+
+### Why
+- 使用者問「為什麼 V5.3 的卡片沒有現股估值跟未來前瞻」以及「今天 AAOI 的個股分析有參考今天的財報嗎」。兩個問題追下去是同一條線:卡片空白是 render gate,估值 0/8 是 bundle 缺席,而 bundle 缺席的根因是 protocol 從不主動生成它。時序實證:16:39 Phase 1.5 跑時 cache 不存在(`pf_quant` 的 `earnings_asof` 為 null、lineage 寫成 `earnings_analyst:AAOI:unknown`),16:59 的 forward_expectations 快照已讀到 Q2 數字(`revenue_yoy 0.8642`)——cache 是在估值 pack 凍結之後才生出來的。4.88.0 把估值 quant 前移到 Phase 1.5(修「lane 的數字來源在它之後才跑」)之後,這個時序缺口變成必然而非偶然。
+
+## [4.105.1] — 2026-08-07 — Break News 修 stale backlog 死鎖,即時辯論停擺 2+ 天
+
+### Fixed
+- `scripts/break_news/poller.py` `_pending_backlog_count()`:原本無條件數所有 `pending_debate` 狀態的 bn_*.json,餵進 `_auto_budget_limit()` 的 `queued_calls = pending_backlog * EST_CALLS_PER_DEBATE` 當「未來呼叫需求」。但 `debater.scan_pending()` 只吃 `age <= PENDING_MAX_AGE_HOURS`(預設 2h)的項目,超齡項目永遠留在 `pending_debate` 等人工 triage、不會被自動辯論消耗掉。實測 backlog 裡 43 筆全部 stale(最舊回溯到 2026-05-27),`43*2=86` 恆大於當下 `binding_call_headroom`(64),`model_debate_capacity` 卡死在 0 → `admission_remaining` 恆 0 → poller 不再寫入新 bn_*.json、debater `scan_pending()` 每輪撈到空清單直接 return(連 `debater` state 都不更新)。無錯誤訊息、`last_status` 照樣顯示 `ok`,靜默死鎖。修法:計數改用同一條 `PENDING_MAX_AGE_HOURS` 判準(新增同名常數,讀同一個 env var `BREAK_NEWS_PENDING_MAX_AGE_HOURS` 與 debater.py 保持同步),只數「debater 實際還會處理」的新鮮 backlog。
+
+### Why
+- 使用者發現 `/break-news.html` 最新一場辯論停在 2026-08-04 23:56,已 2+ 天沒新辯論。追查:`dashboard_server.py` 的 poll/debate loop 兩條 daemon 執行緒都活著(process 有跑、health check 200),`items_added` 卻連續多輪為 0。定位到上述死鎖後修 `_pending_backlog_count()` 驗證:修前 `43`(`model_debate_capacity=0`),修後 `0`(`model_debate_capacity=32`,`admission_remaining=25`)。43 筆歷史 stale backlog(2026-05-27 ~ 2026-07-13)未動——留給使用者透過 `/break-news.html` 手動 triage(`list_stale_pending()` 既有設計,非本次範圍)。
+
+## [4.105.0] — 2026-08-07 — 盤中頁單頁化:兩 tab 合併、重複顯示歸一、族群密集卡
+
+### Changed
+- `Dashboard/intraday-eval.html` + `Dashboard/page-intraday-eval.js`:移除 strategy/mood 兩 tab(演化痕跡——mood 面板先出、eval hub 後出,用 tab 縫合),單頁重排:①regime+LLM 導讀+盤中分數 meter → ②SPY/QQQ/IWM 深度卡+情緒窄卡(VIX/SKEW/F&G,tooltip 保留) → ③個股即時區(`id="mood"` 錨點;spike 卡+警報/擊殺橫幅+推播鈕**永遠可見**) → ④策略卡+timeline+盤中領漲 → ⑤sector 排名+族群密集卡。
+- 消除重複:盤中分數與三大 ETF 原本兩 tab 各一份,現各留較深的一份;8 格 stat grid 解散(每格都有去處,市寬→`#ie-breadth-meta`);ideas 表刪 trend/reversal 列(與 60 秒 spike 卡同源但走 10 分鐘 lane,會互相矛盾),只留熱圖領漲。
+- 族群統計升級密集卡:族群名+均幅(右上有色)+「N 檔 · 上漲 X% · ↑↓」+領漲 top3 chips+最弱 3 檔 hover。「連 N 窗」未做——`/api/intraday-eval/history` 無族群層資料,不為此動後端。
+- 兩條輪詢照舊(inline 60s 讀 mood/spikes;page JS 60s 讀 eval),移除所有 tab 可見性 gating;`intraday-mood.html` redirect 殼不動,`#mood` 錨點捲至個股即時區。
+
+### Why
+- 使用者質疑分 tab 的理由——確認是縫合痕不是資訊架構。實害:警報/擊殺橫幅鎖在 mood tab(停在策略 tab 時看不到)、同一數字兩處顯示且新鮮度不同。實作 Opus 5,fresh-context 驗收 8/8 PASS(含 git diff 逐行對帳,「搬丟的東西=0」;id 交叉核對 44/44、雙 JS node --check rc=0)。
+
+## [4.104.1] — 2026-08-07 — 盤中推播擴充三事件源,移除前端重複過濾
+
+### Changed
+- `Dashboard/intraday-eval.html`:推播從單一事件源(反轉 alert)擴充為三種——合格反轉(★)、急拉擊殺/反軋(pump_fade,原本只有橫幅從不推播)、severity high 且未被 σ 降噪的急拉/急殺 spike。統一 `notifyOnce(kind, symbol, key, ...)` 去重(kind:symbol → 事件時間戳),取代舊 `maybeNotifyAlerts`。
+- `isDirectionalAlert` 移除「區間 regime 需 high spike 確認」的二次過濾:那道閘是舊無門檻偵測時代的前端補丁,4.104.0 偵測層已過「雙確認 + σ 位移 + zone/2.5σ」,留著會把合格訊號也擋掉。反轉推播內容補位移 % 與 zone。
+
+### Why
+- 使用者反映重啟後完全沒有推播:反轉 alert 變嚴(4.104.0)後,唯一的推播事件源近乎歸零,而真正該推的急拉擊殺/高強度 spike 從來沒接推播。
+
+## [4.104.0] — 2026-08-07 — 個股反轉降噪:雙確認 + σ 位移門檻 + 翻面冷卻 + 開盤加嚴窗
+
+### Changed
+- `skills/market-sentiment-analyzer/scripts/intraday_spikes.py`(payload version 1.6):
+  - `detect_reversal` 改為 KDJ 交叉「且」MACD 翻轉**同向**才成立;單一來源交叉只留在訊號流,不再報「反轉」。
+  - 新增 σ 位移門檻:「交叉完成前一根 close → 最新 close」的位移須 ≥ `REV_SIGMA_K`(1.5)× 交叉前 10 根 1 分報酬 σ;σ 算不出退 `REV_MIN_DISP_PCT`(0.3%)固定門檻。回傳新增 `disp_pct` / `disp_sigma_mult`。
+  - alert 重定義:位移門檻已過為前提,zone(超賣翻揚/超買翻落)或位移 ≥ `REV_ALERT_SIGMA`(2.5σ)。
+  - 翻面冷卻:`build(prev_payload=None)` 讀前輪輸出,同檔 `REV_FLIP_COOLDOWN_MIN`(10 分)內反向反轉須 zone 或 ≥ `REV_FLIP_SIGMA`(2.5σ)才放行;前檔缺失/壞檔/跨日自動退無狀態。時間比較全用 bar 時間戳,非 wall clock。
+  - 開盤加嚴窗:ET 09:30–09:45(以 bar 時間戳判定,`in_open_grace`)spike 門檻 ×`OPEN_GATE_MULT`(1.5)、severity 封頂 med 除非 confirmed、反轉額外要求 zone。
+  - 順手:`main()` 例外救援 skeleton 的 version 硬編碼 1.0 → 1.6(驗收發現的既有不同步)。
+- `test_intraday_spikes.py` 新增 [AC]–[AM] 13 組測試,既有 reversal fixture 依新語意修正。
+
+### Why
+- 使用者反映「小小波動就反轉」。根因:`detect_reversal` 只要 3 根 1 分 K 內任一 KDJ/MACD 交叉就報反轉,無任何振幅門檻;1 分 K 的 KDJ 在盤整時每幾分鐘就交叉一次。修在偵測層而非顯示層——同批即時 bars 實測誤報 14 檔中 9 檔 → 0 檔,被降級的交叉仍留在 `build_signal_flow` 訊號流。
+
+### Discipline
+- 前端 / intraday_eval hub / dashboard_server 零改動;dashboard_server 無參數呼叫 `build()` 自動生效冷卻。實作 Opus 5、fresh-context 驗收 8/8 PASS(位移基準點、冷卻時間源、09:45 整點邊界皆獨立推演實測)。
+
+## [4.103.0] — 2026-08-07 — X KOL 專屬頁面 `/x-kol.html`
+
+### Added
+- `Dashboard/x-kol.html` — 獨立頁:族群卡(熱度/提及/5日/1月/YTD/狀態)、**送分析 / 剔除按鈕**、貼文原文(點代號可篩選)、身分警示與不可分析區塊。側邊欄「市場」組新增入口。
+- `GET /api/x-kol/heat` — 熱度即時重算(純讀 append-only JSONL,零成本);FMP 價格與身分走**背景執行緒**,回應帶 `prices_pending`,前端 6 秒後自動再拉一次。
+- `POST /api/x-kol/decide` — UI 決定寫入候選檔,與 CLI `--promote/--reject` 完全等效。
+- `heat.load_identity_cache()` — 代號身分永久快取。
+- `tests/test_x_kol_api.py` — 20 支契約測試,含**邊界守衛**:原始碼層級斷言 decide route 不得出現 `enqueue_protocol` / `subprocess` 等字樣。
+
+### Fixed
+- **請求同步等 FMP 會掛住頁面**:`prices=0` 回應 9ms,`prices=1` 逾時超過 90 秒。`fmp_pool` 是共用的 220 次/分窗口,heatmap 的 517 檔 × 20 worker fan-out 會把它佔滿(實測窗口正好卡在 220/60s),我們的呼叫排在後面。改為背景刷新,請求恆為 10ms。
+- **無價格代號造成無限刷新**:`$SIVE` 永遠不會出現在 `prices`,以 `prices` 判斷「是否還缺」會導致每個請求都重新 fan-out、無聲燒掉共用額度。改記 `attempted`(試過的)而非成功的。
+- **貼文排序**:單次掃描的 append 順序本來就是最新在前,再反轉會讓該次掃描倒著顯示。改為明確依 `created_at` 排序 —— 檔案順序是實作細節,`created_at` 才是契約。
+- 身分解析改吃永久快取(代號身分是靜態的),把該模組的 FMP 呼叫從每代號 3 次降到 1 次;背景刷新完成時間 160s → 60s。
+
+### Why
+- 使用者要求「不用排程,但要有地方看得到這些 X 來的推薦 ticker」,且要能直接在 UI 按決定。
+
+### Discipline
+- decide route **只記錄決定,絕不發起分析** —— 探索層不得伸手進決策層。這條界線有原始碼層級的測試守著。
+
+## [4.102.1] — 2026-08-06 — X KOL：可分析性閘（$SIVE 查證）
+
+### Added
+- `heat.mark_unanalyzable()`:沒有 FMP 價格序列的代號標為不可分析。`分析 [TICKER]` 依 protocol **數字全走 script、禁手算**,拿不到價格就跑不動 —— 貼文再有料也一樣。標記會持久化到候選檔,`--promote` 時警告(仍允許記為 watch item)。
+- 這類代號**仍計入族群熱度** —— 它是關於那個族群的證據,只是永遠不能變成部位。熱度與晉升是兩件不同的事,這正是分成兩階段的原因。
+- 2 支測試。
+
+### Verified
+- `SIVEF` 在 FMP **不存在**(無美國 F 股)。
+- `SIVE.ST` 有 profile(Sivers Semiconductors AB、STO、SEK、瑞典、半導體、市值 10,841,860,308 SEK、`isAdr: false`)但 **EOD 0 筆、quote none** —— 只有基本資料沒有價格。
+- 裸代號 `SIVE` = Silver Verde May Mining(OTC、$0.07、市值 145 萬),與貼文所指完全無關。
+
+## [4.102.0] — 2026-08-06 — X KOL：族群熱度 + 人工晉升閘
+
+### Added
+- `scripts/x_kol/heat.py` — 讀 shadow log 產出族群熱度與候選佇列。
+  - **主體 vs 順帶提及**:貼文第一個 cashtag 視為主體(權重 1.0),其餘為支撐提及(0.4)。以真實資料校準:「$AAOI 怎麼念」那則玩笑裡,道具 `$TSM`/`$AMD` 5 日 +4.6%/+1.1%(大盤水準),主體 `$AAOI` +43.5%。**降權但不歸零** —— `$SIVE` 從未當過主體,卻是那條鏈真正的供應商連結。
+  - **族群 = 共同提及分群**(連通分量),不用寫死的 sector map。目的就是找出市場實際在一起交易的組合,不是 GICS 認為的組合。
+  - 時間衰減(半衰期 3 天):再度被提及的主題才算持續熱度。
+  - `--with-prices` 走 FMP 補 5d/1m/YTD,讓晉升決定有依據。
+- **人工晉升閘**:`--promote` / `--reject` / `--mark-analyzed` 把決定寫進 `x_kol_candidates.json`,**已決定的永不重問**。`--queue` 列出已核准未跑的 `分析 [TICKER]`。腳本**從不自動發起分析**。
+- **代號身分驗證**:cashtag 是字串不是識別碼。`$SIVE` 裸代號在 FMP 解析成 Silver Verde May Mining(OTC、股價 $0.07、市值 145 萬),但貼文講的是 Sivers Semiconductors AB(`SIVE.ST`,斯德哥爾摩)。OTC/微型股/同代號他所上市會標 ⚠ 並要求人工確認。比對限定「去掉交易所後綴後完全相同」—— 前綴比對會把 `JBLU` 當成 `JBL`、`AMDS` 當成 `AMD`,亂叫的警告等於沒有警告。
+- `tests/test_x_kol_heat.py` — 13 支測試。
+
+### Why
+- 使用者指出:玩笑話本身就是熱度證據 —— 一個關於「$AAOI 怎麼念」的梗要成立,觀眾必須早就人手一張。實測支持:他提到的每一檔 5 日都遠勝大盤(AEVA +61.5%、AAOI +43.5%、RKLB +20.2%、VIAV +15.4%、JBL +12.4% vs SPY +3.7%),且全在 CPO/光通訊同一條鏈。**單純數 cashtag 就能還原那個族群,不需要 LLM。**
+- 但主體/道具的區分同樣被價格驗證,所以是**分流**不是丟棄:梗進熱度計、論點進供應鏈。
+
+### Discipline
+- 探索層。`heat.py` 只寫 `x_kol_heat.json` 與候選佇列,不碰 Dashboard/*.json、不接 investment_protocol。晉升到 `分析` 是**人工**決定。
+- 貼文對個股是同步到落後(AAOI 8/03 已 +22.73%,梗是 8/06 才發;AEVA 那則開頭就在轉述盤後 +18.26%)。**這是溫度計不是進場鈕** —— 可用的是族群持續性,不是單一名字的那一跳。
+
+## [4.101.0] — 2026-08-06 — X KOL：分頁修掉靜默資料遺失（首次 live 驗證）
+
+### Fixed
+- **靜默資料遺失**:`max_results` 是上限不是保證,X 回傳的分頁是**填不滿**的(實測要 10 只回 5、要 5 只回 1),而結果是最新在前。若 KOL 在兩次掃描間發文超過一頁,單次抓取只拿到最新那一截,把水位推到 `newest_id` 就會**永久且無聲**跳過下面那段。`fetch_timeline()` 改為跟隨 `next_token` 走完同一個 since_id 查詢,`collect.max_pages_per_sweep` 設上限;撞到上限時回 `meta["truncated"]`,collect 把它當 error 列出來 —— 缺口要看得見。
+- **冷啟同樣 under-fill**:原本冷啟不分頁,要 5 則只拿到 1 則(2026-08-06 實測,當天另外 4 則有 cashtag 的貼文完全沒進 log)。新增 `stop_after`,以**記錄數**而非頁數收斂,冷啟因此是可預期的「最近 N 則」。
+
+### Changed
+- `collect.max_results` 10 → **100**(API 上限)。計費按**實際回傳數**,所以調高在安靜時完全不花錢,只是讓單頁涵蓋的窗口更寬、更難產生缺口。
+- 新增 `collect.max_pages_per_sweep`(預設 5)。
+
+### Verified (首次真實 API 執行)
+- **「0 則回傳 = $0」成立**:第二次掃回 0 則,帳本從 $0.0150 完全沒動,但限速計數有走(9999→9998)。**掃描消耗的是限速額度,不是錢** —— 頻率可以放心調密。
+- 限速 header 證實文件數字:`/users/by/username` 300/15min、`/users/:id/tweets` **10,000**/15min。
+- cashtag 由 X 直接解析,實測拿到 `AAOI` `TSM` `AMD` `SIVE` `JBL` `AEVA` `VIAV` `RKLB`。
+- 目前花費 $0.0650 / $10。
+
+### Caveat
+- 帳本記的是**我方收到的筆數**,不是 X 實際計費。X 有 24h UTC 去重(官方稱 soft guarantee),所以同日重讀同一則我方會**高估**成本 —— 偏保守、方向安全,但仍須拿 X billing dashboard 對一次。
+
+## [4.100.2] — 2026-08-06 — X KOL：token 從密鑰檔讀,不從 shell profile
+
+### Added
+- `client.load_env_file()` / `resolve_token()` / `env_file_is_private()` — token 改為先讀環境變數、再退回 `scripts/premarket/premarket_cron.env`(premarket_cron.sh 已在 source 的同一份密鑰檔,mode 600 且 gitignored)。可用 `X_KOL_ENV_FILE` 覆寫路徑。
+- `--status` 新增 auth 行:顯示 token 來源與長度,**永不顯示值**;密鑰檔權限非 owner-only 時出警告;token 來自環境變數時提醒排程跑不到。
+- 4 支測試:export/引號/壞行解析、環境變數優先於檔案、644 權限必須被抓出、缺 token 的錯誤訊息要指向密鑰檔。
+
+### Why
+- launchd / cron 不起 login shell,`~/.zshrc` 的 export 對排程執行**不可見** —— 這正是 `premarket_cron.sh` 當初要 source 一份 env 檔的原因,collector 之後要排程就會踩同一個坑。
+- `~/.zshrc` 目前是 mode 644(任何以本人身分執行的程序都讀得到),而密鑰檔是 600。
+- token 絕不可放 `config/x_kol.json` —— 該檔進版控。
+
+## [4.100.1] — 2026-08-06 — X KOL：分析水位（只有新貼文進 LLM）+ 限速觀測
+
+### Added
+- `scripts/x_kol/pending.py` — append-only log 上的**分析水位**。`since_id` 保證只「抓」新貼文,但 log 沒有任何東西標記哪幾筆已分析過,下游 LLM 階段會每次重讀整份。改用 byte offset cursor:log 嚴格 append-only,所以 offset 就是精確的 O(1) 游標,往後讀到的**必然**是新的。不在記錄上加 analyzed 旗標(那要改寫 append-only 檔),也不留無上限的 seen-id 集合。
+- `read_pending()` 回傳記錄但**不移動**游標,`commit()` 要在分析成功後才呼叫 → 分析中途崩潰會重送而非靜默丟失(at-least-once;探索 log 該往這邊失敗)。半行(writer 正在 append)不送出。
+- `XClient.rate_limit` — 記錄每個回應的 `x-rate-limit-*`。這些 header 搭順風車不另計費,是量真實頻率餘裕的誠實方法,不必去信文件上的數字。
+- `sweep()` 回傳 `records`(本輪新增的記錄),同行程消費者可直接取用。
+- `collect.py --status` 加印待分析筆數與游標位置;live sweep 收尾印限速餘裕。
+
+### Why
+- 使用者要求「只有新的文章內容才會被拉下來給 LLM 分析」。抓取端本來就只抓新的(實測:第二次掃 `since_id=111` 回 0 則),缺的是下游的同等保證。
+- 頻率查證:`GET /2/users/:id/tweets` 為 10,000 req/15min(per app)/ 900(per user)。20 帳號每 5 分鐘一輪 = 60 req/15min,離最緊的閘仍有 15 倍餘裕 —— **限速不是瓶頸,成本才是,而成本只跟新貼文數有關、與掃描頻率無關。**
+
+## [4.100.0] — 2026-08-06 — X KOL collector 骨架（探索層，$10 試點）
+
+### Added
+- `config/x_kol.json` — KOL 名單 + 預算 + 節奏設定。名單人工維護,**任何 agent 不得自動增刪帳號**。
+- `scripts/x_kol/budget.py` — 硬預算帳本。X 按**回傳資源數**計費,成本在請求前不可知,所以拆成兩段:`check()` 用**最壞情況**(該請求可能回傳的全部資源 × 定價)做事前否決,`record()` 事後記實際值。flock + atomic write,跨行程不會漏記。累計不自動歸零 —— 試點預算是總額不是日配額。
+- `scripts/x_kol/client.py` — X API v2 client。`since_id` 增量 + 單執行緒定速 + 429 倍增退避。handle→id 解析永久快取(每次 $0.010)。
+- `scripts/x_kol/collect.py` — 掃一輪 → append-only shadow JSONL。`--dry-run` 零 HTTP 零花費、`--status` 看帳本與水位。單一帳號失敗不拖垮整輪;撞預算天花板是**刻意停止**,已收的資料留在磁碟。
+- `tests/test_x_kol.py` — 13 支 hermetic 測試(無網路、無 key)。
+- `.gitignore` — runtime state 與 shadow log 不進版控;`config/x_kol.json` 保持追蹤。
+
+### Why
+- 實測(2026-08-06)免費 syndication 端點 `syndication.twitter.com/srv/timeline-profile/screen-name/<handle>` 仍可用且回傳 X 已解析好的 cashtag,但:(a) 約 8 個請求觸發 429、冷卻約 183 秒;(b) **目標帳號 @aleabitoreddit 只回 2 則且停在 2025-11**,免費路徑拿不到。付費 API 因此是唯一可行路徑,$10 試點約當 2,000 則貼文讀取。
+- `since_id` 是成本能成立的關鍵:計費按回傳資源數,沒有新貼文就回 0 則、花 $0。X 官方雖有 24h UTC 去重,但自己註明是 soft guarantee,故成本正確性不依賴它。
+
+### Discipline
+- 探索層。只寫 shadow JSONL 一個產物,不碰 Dashboard/*.json、不 patch 任何 cache,產出**永不**進 investment_protocol 的 buy_threshold / position_size / verdict。接進 intraday mood 是之後**依實測資料**再決定的事,不因為收集器存在就自動接線。
+
+## [4.99.3] — 2026-08-06 — 盤前 chain 解除 news→sector 連坐
+
+### Changed
+- `dashboard_server.py` 新增 `_PREMARKET_NONBLOCKING = {"news"}`：phase 1 只有 blocking item 失敗才中止整條 chain；news 失敗改記進新的 `warnings` 欄位，phase 2 sector 照跑。
+- `daily` 維持 fail-fast —— sector 的 phase 0 讀 breadth / FTD / market-top cache，那是 daily_update 刷新的，是真的資料相依。
+- `Dashboard/script.js` 的 chain 收尾：`done` 帶 warnings 時改出黃色降級 toast，不再報「盤前檢查完成」蓋掉失敗。
+- `tests/test_premarket_daily_outcome.py` 新增 3 支：news 失敗不擋 sector 且必留 warning、daily 失敗仍擋 sector 且 sector 不得 enqueue、非阻斷名單只含 news。
+
+### Removed
+- 刪除 4/18、5/16-5/19、5/31、6/03、6/05 共 8 份 shallow 超篩的歷史 digest 日檔（`legacy_digest_backup/` 仍留有備份，`news_events.jsonl` 為事實來源可隨時 re-project）。這 8 天落在所有消費端的時間窗之外（bridge 取最近 3 份、nexus 30 天、retail-pulse 72h、theme-detector windowed），無功能影響。
+
+### Why
+- news 與 sector 之間沒有資料邊（sector 從不讀 digest），舊的 fail-fast 卻讓 news 的 validator 失敗連坐掉整場 sector。2026-08-06 的實際損失就是這個：digest 內容完好、只是超篩，卻賠掉 sector。
+
+## [4.99.2] — 2026-08-06 — Projection 補上 shallow top-10 cap（盤前 chain 卡在 phase 1）
+
+### Fixed
+- `news_event_store.py::build_projection()` 新增 `_cap_shallow()`：投影時對 shallow verdict 重新套用 top-10（依 `materiality_score`，legacy 退回 `|shallow_score|`）。deep 維持不設限——盤中 FLASH/REVIEW 當天累積是刻意設計。
+- 保留原順序切（只刪不重排），tie 以投影 slot 決勝，同一份 store 的投影仍逐位元穩定。
+- `tests/news/test_news_event_store.py` 新增兩支回歸：同日兩次 run 的 union 必須重切回 10 且過 validator；全同分 tie 的切法必須穩定且不重排。兩支在停用 cap 時皆紅。
+
+### Why
+- top-10 cap 原本只存在於 per-run 的 `build_digest_packet.py:77`，但 digest.json 現在是 `news_events.jsonl` 的投影，而 `latest_by_event_id()` 依 `event_id` 去重、不依 run 去重。同一天跑多次 news 時，每次各自從當下 triage 快照挑 top-10，選中的項目不同 → union 撐破 cap。
+- 2026-08-06 跑了 3 次 digest（08:25 legacy_migration / 08:47 / 20:33），union 得到 20 shallow，撞上 `validate_digest_output.py` 的 >15 硬閘 rc=1；盤前 chain 的 phase 1 fail-fast（`dashboard_server.py:1918-1921`）因此 raise，sector 完全沒被 enqueue。
+- 回溯查核：4/18、5/16-5/19、5/31、6/03、6/05 這 8 天磁碟上的 digest 早就是 14-20 shallow，只是都卡在 15 硬閘以下沒被抓到；今天的 20 才越線。
+
+## [4.99.1] — 2026-08-06 — Mixed DIGEST/FLASH validator 修正
+
+### Fixed
+- News validator 改按每筆 judgment 的 `event_type` 與 `fanout_mode` 檢查 review/cache/isolation 語意；同日 DIGEST projection 內合法的 pending INLINE FLASH 不再被頂層 DIGEST/PER_AGENT_BATCH 規則誤判。
+- Event-store 回歸測試新增同日 DIGEST + FLASH projection，覆蓋 stable event append、mixed-mode validator 與真實 canary 形狀。
+
+### Why
+- Append-only projection 可以同時包含不同 protocol mode；頂層欄位描述 projection anchor，不能取代 record-level execution contract。
+
+## [4.99.0] — 2026-08-06 — News append-only event store
+
+### Added
+- `news_events.jsonl` 成為 DIGEST／FLASH／REVIEW judgment 的 append-only source of truth；stable `event_id` 與 deterministic `record_id` 讓同 payload replay 實體零新增。
+- `news_event_store.py` 提供 projection、pending lookup、event-id REVIEW、legacy migration、rollback 與 10-run telemetry summary；`news_cache_projection.py` 統一 reviewed event 的 sector/phase0 cache 投影。
+- 成功的 server DIGEST 自動記錄 Stage 2、BINARY、source/genre、tokens、elapsed 與 cost telemetry；首場真實 canary 已回填為 1/10。
+
+### Changed
+- `digest.json` 保留既有 Dashboard contract，但改為 JSONL 的 deterministic projection；validator 會在記憶體重建並要求完全一致。
+- FLASH／REVIEW 不再直接覆寫 daily digest/cache；REVIEW 以 event_id append superseding record，projection 再更新 pending → reviewed。
+- Link Digest machine writer 同步改 append `LINK_DIGEST` event，避免後續 projection 洗掉直接寫入的卡片。
+- finalizer replay 不再刷新 digest generated time 或 catalyst `updated_at`；macro score、binary risks、patch count 與 catalyst 全部保持 byte/semantic idempotent。
+
+### Migration
+- 86 份 legacy digest 已完成本機 migration（1,283 judgment records），原檔備份於 `news_logs/legacy_digest_backup/`；rollback → re-project hash 一致，重跑 migration `appended=0`。
+
+### Why
+- 共用 daily digest 的 read-modify-write 讓 DIGEST、FLASH、REVIEW 有覆寫競態，也無法可靠追蹤 pending verdict 歷史；append-only log 把歷史、projection 與 replay 邊界分開。
+
+## [4.98.0] — 2026-08-06 — News deterministic finalizer 與 token 收斂
+
+### Changed
+- DIGEST 的 LLM 產出縮為 compact four-lane `YYYY-MM-DD_debate.json`；權重、net score、verdict、shallow assembly 與 Markdown 不再由模型重複生成。
+- 新增 `finalize_digest.py`，統一 digest 組裝、V2.3 validator、stable event ID、sector/phase0 idempotent cache patch 與報告 render。
+- `arbiter_rules.py` 成為 finalizer/validator 共用的唯一計分來源；validator 會重算 lane score、檢查 weights/confidence/event ID，擋住算術與 schema 漂移。
+- Runtime prompt 與 News protocol 改走 compact packet → debate contract → single finalizer call；Phase 3–4 目標由約 6k LLM tokens 降至 1–2k。
+
+### Added
+- `news/debate_input_schema.md` 定義 LLM 與 deterministic finalizer 的最小契約。
+- finalizer 測試覆蓋產物組裝、binary 規則、缺欄拒絕、stable event ID 與 cache replay 不重複加總。
+
+### Why
+- 模型手算權重、重寫 shallow、組大 JSON/Markdown 同時浪費 output token，且容易讓 digest、cache、validator 三者漂移；判斷保留給四 lane，機械工作下沉程式。
+
+## [4.97.2] — 2026-08-06 — Heatmap FMP 401 熱斷與 log 降噪
+
+### Fixed
+- Heatmap 共用 FMP transport 將 HTTP 401 視為 process-wide credential failure：首次失敗只印一行可行動訊息，之後 quote、PE、news、intraday 共用 6 小時熱斷，不再每 ticker 重複呼叫。
+- Quote fan-out 在熱斷觸發且零成功時 fail closed：保留舊 `heatmap.json` 與 `last_update`，不再把 `0/517` 寫成新鮮 snapshot。
+- `test_heatmap_pe_retry.py` 新增 401 回歸，鎖定單次 transport、單行 log、長 cooldown 與舊 timestamp 保留。
+
+### Why
+- 401 與單一 ticker 無資料無關；對 517 檔繼續 fan-out 只會洗版並重複使用已被拒絕的 credential。
+
+## [4.97.1] — 2026-08-06 — 盤前鏈正確接住 daily degraded 狀態
+
+### Fixed
+- `dashboard_server.py` 將 `daily_update.sh` 的 `rc=2` 映射為 `degraded` 而非 `error`；盤前 Phase 1 會保留警告並繼續執行 sector protocol。
+- 盤前 modal 與全站 chain status pill 新增黃色 `⚠️ 降級完成，繼續` 狀態；真正的其他非零 rc 仍會中止鏈條。
+- 新增 exit-code contract 回歸測試，鎖定 `0=done`、`2=degraded`、其他非零 `=error`，且 degraded 必須被輪詢器視為 terminal。
+
+### Why
+- daily pipeline 已將 `rc=2` 定義為「產物已發布、但某個資料源降級」；上層 orchestrator 若仍以「任何非零都致命」解讀，會錯誤短路 Sector 與 Dashboard 刷新。
+
+## [4.97.0] — 2026-08-06 — News materiality、BINARY 語意與 compact packet
+
+### Changed
+- Stage 1 將方向 `shallow_score` 與事件 `materiality_score` 分離，加入 source origin、文章 genre penalty、explicit pending binary、event clustering 與 source diversity；安靜日不再強迫湊滿 5 則。
+- Arbiter V2.3 把 BINARY 收斂為真正有未決結果分支與日期的事件；非 binary verdict 由共用 deterministic 規則以 net score ±0.75 分類，Bull/Bear 分差只保留為 debate intensity。
+- 新增 compact digest packet，只輸出 Stage 2、shallow top-10 與 slim macro/theme；triage 保存原始 URL，Stage 2 bundle 5,000 → 3,000 chars，避免重讀全檔與無謂 WebSearch。
+
+### Fixed
+- Validator 新增 V2.3 semantic gate、published ISO、DIGEST/REVIEW cache flag 與 binary metadata 驗證；升版當日既有 V2.2 artifact 在 loose mode 相容，新 server strict run 必須明示 `arbiter_rule_version=V2.3`。
+
+### Why
+- 既有 Bull 正分／Bear 負分契約配上「最大分差 ≥4 即 BINARY」，造成連續五份 digest 共 25/25 全部 BINARY；Stage 1 同時會讓升評文、listicle 以情緒關鍵字占滿昂貴的 Stage 2。
+
+## [4.96.0] — 2026-08-06 — Daily update fail-aware、single-run 與 enrichment 加速
+
+### Changed
+- `daily_update.sh` 新增跨 process single-run lock、signal/暫存 log 清理與 degraded `rc=2`；Phase 2、morning brief、kill-trigger、final bridge 的 soft failure 不再被結尾固定 `rc=0` 吞掉。
+- 日常 Nexus 改為 deterministic Tier 1+2；Tier 3 LLM 與 `--full` 留給明確的 on-demand rebuild，避免有 Anthropic key 的互動 shell 意外觸發無上限 backfill。
+- thematic enrichment 的 FMP HTTP 全數接入中央 `fmp_pool`，新增 12-worker bounded concurrency；recommendations 與 per-ticker enrichment cache 改為 atomic replace。
+- 缺少 `FINNHUB_API_KEY` 時在 daily 層只提示一次，prediction fan-out 直接使用 proxy fallback，不再輸出數百行相同 warning。
+
+### Fixed
+- `daily_health.py --run-date` 現在驗證 auto artifact 是否為本日、JSON/CSV 是否可解析、producer 是否標記 `_partial`；daily 以 strict gate 決定成功或降級，cron 後續時段可補跑失敗來源。
+- 背景函式即使自行切換 `set -e`，wrapper 仍能可靠收集 rc 與 elapsed marker；新增 health gate 與 enrichment pool/concurrency 回歸測試。
+
+### Why
+- 舊流程把探索層與資料源失敗一律轉成成功，cron 因而停止當日補跑；同時 thematic enrichment 直接繞過中央限流且序列執行，最近實跑 518 秒、佔整輪約 76%。
+
+## [4.95.7] — 2026-08-06 — Earnings calendar 移除逐檔瓶頸並補完整性守衛
+
+### Fixed
+- Step 3 upcoming calendar 改用一次 `/stable/earnings-calendar` 加 24h cached `/stable/company-screener` 本機 join，移除全市場逐 symbol `/profile` fan-out；實測 2,838 calls 降為 cold-cache 2 calls、warm-cache 0 calls。
+- 新增共用 calendar 2h exact-range cache；碰到 FMP 4,000-row response cap 時自動二分日期區間並去重，單日仍飽和則 fail closed，不再把殘缺的「30 日」資料當完整 earnings pulse。
+- `fetch_earnings_pulse.py` 與 upcoming calendar 共用完整性邏輯並輸出 API/cache/split telemetry；相關回歸測試覆蓋 cache、切段、單日飽和及 screener 本機篩選。
+
+### Why
+- 中央 220 RPM limiter 已阻止 429，但舊 calendar 仍需數千次 profile enrichment，與 smart-money 共用 pool 後會撞上 360 秒 prefetch timeout；HTTP 200 的 4,000-row 飽和回應也會靜默截斷 30 日樣本。
+
+## [4.95.6] — 2026-08-05 — RSS 改以一手官方來源優先
+
+### Changed
+- 移除已凍結約 398 天的 MarketWatch MarketPulse，加入經 live 驗證的 SEC Press、FTC Competition、Census Economic Indicators、EIA Press 四個官方 RSS。
+- 新增共用 `source_kind` taxonomy；Digest 與 Break News 去重時依 official / filing / wire / publisher / aggregator / press-release 順序保留較接近原始事件的來源，不再把所有 `HIGH` provider 視為同級。
+- `fetch_all_news.py` 保留 RSS intermediate 的 `feed_stats` 至 unified raw artifact，讓每日來源數量與健康狀態可稽核；同時修正原本建立 URL dedupe map 卻未用於 final union 的死路徑，現在確實先按 canonical URL、再按 headline 去重。
+- Stage 1 verdict、Break News source/raw-stream metadata 延續保存 `source_kind`；新增 deterministic regression tests。
+
+### Why
+- 既有 12 源中只有 Fed 是一手發布，媒體與聚合器重疊高；同時 unified merge 會覆寫逐-feed telemetry，死源難以自動發現。低量官方 feed 可提升事件原始性而不顯著增加噪音。
+
+## [4.95.5] — 2026-08-05 — FMP calendar 呼叫納入中央 rate pool
+
+### Fixed
+- `phase_prefetch.py` 不再呼叫 `~/.claude` 下未受控的 calendar scripts；economic calendar 與新 repo-owned earnings calendar 全部改走 `scripts/_shared/fmp_pool.py`。
+- earnings calendar 的 per-symbol `/stable/profile` fan-out 保留平行取數，但每次 request 都先取得 cross-process rolling-window slot，不再繞過 220 RPM 上限。
+- FMP 429 現在安全保存 endpoint、response body 與 `Retry-After` 至 `~/.cache_bridge/fmp_last_429.json`，並優先遵守 server 的 `Retry-After`；artifact 與錯誤訊息不含 query/API key。
+- fallback protocol 指令同步指向 repo-owned scripts，避免 prefetch 失敗後又走回未受控路徑。
+
+### Why
+- Starter 雖有 300 calls/min，但舊 earnings-calendar 以 16 threads 直接逐 symbol 抓 profile；它與中央 pool 的 220 RPM 同時執行時，FMP 實際看到的總量可超過方案上限並讓 sector HARD inputs 回 429。
+
+## [4.95.4] — 2026-08-05 — Dashboard protocol 改吃主要 LLM 路由
+
+### Changed
+- 盤前檢查、產業掃描與其他 Dashboard agentic protocols 不再硬鎖 Claude，啟動時改由 `model_router.pick_model()` 依 primary → secondary → tertiary 選擇 provider。
+- 補齊 Codex protocol 相容層：Claude tool 名稱語意映射、parallel subagent 指引、JSONL 進度/錯誤/token usage 解析，並保留 artifact + validator 完成閘。
+- Sidebar 說明改為明確標示 Dashboard protocols 共用主要 LLM 設定。
+
+### Why
+- 原 UI 會寫入 `primary=codex`，但 `run_protocol()` 又直接設 `proto_model="claude"`，導致設定顯示與實際執行不一致。
+
+## [4.95.3] — 2026-08-03 — 五 agent review 彙整的殘餘 P2/P3（4.95.2 未覆蓋部分）
+
+> 4.95.2 修掉了彙整報告裡已知的五處；本版收掉其餘：L5 的 NaN 大洞、`_slim_fred`
+> 的第二層型別崩潰、以及 SE1/SE3/SE5/L5 的可修 P3。P2/P3 全部有回歸測試，關鍵修正
+> 做過 mutation 驗證。
+
+### Fixed
+- **[L5 P2] `sentiment_score._num()` 沒擋 NaN — NaN 會變 +3.0 滿分看多**
+  （`sentiment_score.py`）。market_composite 是 NaN 時不走降級分支，`_clamp` 因
+  `min(hi, nan)` 回 hi 而輸出**上界 +3.0** 且 `degraded_reason=None`；規則層輸入
+  NaN 既不進 `missing_inputs` 也不觸發規則。補 `math.isfinite`（與 4.95.1 給
+  `sector_score_calculator._num` 加的是同一條——兩支 `_num` 在同一輪分歧了）。
+  mutation 驗證：拿掉 isfinite → 5 個測試紅，錯法正是 `score=3.0 degraded=None`。
+  NaN 源頭同步堵住：`sentiment.py` 對 yfinance `shortPercentOfFloat` 的 `float()`
+  原樣放行 NaN，改為非有限值當缺席。
+- **[L5 同構] `shadow_report._direction()` 對 NaN 回假 NEUTRAL**：NaN 的兩個帶寬
+  比較都回 False → 判成 NEUTRAL 進翻轉率樣本。`_direction` 與 `section_sentiment_det`
+  的樣本過濾一併補 isfinite（實跑確認 `_direction(nan)` 原本回 `"NEUTRAL"`）。
+- **[SE5 P2] `_slim_fred()` 第二層型別崩潰**（`phase0_read_caches.py`）：
+  `change_velocity` 的值、`macro_scores` 是 truthy 非 dict 時 `(x or {}).get`
+  照樣 AttributeError——gate 對 raw cache 呼叫的第一個函式還留著 4.95.1 修過的
+  同款洞。改 isinstance 守衛。
+- **[L5 P3] flip 判準把「溫和同向」記成翻轉**（`shadow_report.py`）。LLM lane score
+  是整數（±1 起跳，除 0 外必落在 0.5 中性帶外）、det 是連續值——「LLM +1 vs det
+  +0.45」被記成 direction flip，溫和情緒個股會單靠帶寬把翻轉率頂在 20% 門檻上。
+  翻轉分子改只數 **POS↔NEG 對翻**；NEUTRAL↔方向性另計 `band_mismatch`（報表可見、
+  不進判準分子；集中出現時該檢討的是 `SENTIMENT_NEUTRAL_BAND`，不是擋翻預設）。
+- **[L5 P3] validator 的 `shadow_only` 只認 JSON true**（`validate_session_export.py`
+  §5i/§5j）：舊版 `is False` 才 error，`0`／`"false"` 靠型別繞成 warning。改為
+  true 通過、缺欄 warning、**其餘一律 error**——守翻預設大門的欄位不吃 truthiness。
+- **[SE1 P3] `build_sector_intel.py` 三處**：(a) list 型 `score_components` 裸
+  AttributeError → 改乾淨 `die()`（`or {}` 只攔 falsy）；(b) backfill 判定的基準日
+  改在 build **進場時**定格——跨夜 build（23:59 起跑、00:01 收尾）原本會誤標
+  backfill 退出割接分母；(c) 檔頭 schema docstring 仍寫「只有 valuation_penalty
+  REQUIRED」，與 4.95.1 的五格 hard-require 矛盾（文件指著過期的權威）。
+- **[SE1 P3] 讀出端**（`sector_score_calculator.py`）：負數計數器判 malformed——
+  割接判準是跨場 sum，一筆 `hard_diffs: -2` 能抵銷別場的真 hard diff；
+  `write_shadow_report` 改原子寫入（temp + `os.replace`，半份 JSON 不再有機會存在），
+  `fred_lane_gate.write_gate_record` 同款。
+- **[SE5 P3] gate 讀出端與 CLI**（`fred_lane_gate.py`）：(a) `would_invoke: null`
+  不再被 `bool()` 記成 skip 票，非 bool 判 malformed；(b) `--date 8/3/2026` 會被
+  塞進檔名靜默寫出 `fred_lane_gate_8/3/` 子目錄——argparse 層加 ISO 驗證；
+  (c) `_read_sector_rotation()` 改薄封裝共用 `phase0_read_caches._fred_sector_rotation()`
+  （抽出的單一 fallback 來源），不再是手抄複本——`_slim_fred` 長出第三種形狀時
+  兩個讀者不會分歧。
+- **[SE3 P3] `da_pretrigger.py` 兩處**：(a) `fred_generated_at` 補上 `--prompt-only`
+  路徑——R4 fired 時 stamp 進 prompt block 的 R4 段（PS 實際 paste 的是這條路，
+  只寫進 JSON 等於沒說）；(b) `RULE_LIBRARY` 的 R4/R5/R6 門檻數字全改常數插值
+  （4.95.1 只插了 R5 豁免那格），並加測試釘住——改常數而原文不跟上會直接紅。
+
+### Notes
+- **刻意不修**：SE1「hard-require die() 是 live 行為變更混在 shadow 集出貨」——既成
+  事實且方向刻意，記錄即可；SE3b（FRED stale 門檻）本來就是 TODO 的規格決策；
+  L5 契約側全數通過無需動。**backfill 接線的 build 層測試**另立 TODO：`build_phase0()`
+  經 subprocess 讀 live repo cache、無法 hermetic 測，要先給它 cache-dir 注入點。
+- 版號：`sentiment_score` v1.1（NaN 行為變更，會寫進 block 的 `producer_version`）、
+  `da_pretrigger` v1.2、`fred_lane_gate` v1.2；`CALCULATOR_VERSION` 續不動（原子寫入
+  與讀出端不改計分語意）。
+- 驗收：7 支測試全 rc=0（sector 3 + sentiment + lane_contract + session_export_schema
+  + valuation_reviewer_gate）；`tests/test_gics_sector_audit.py` 18 passed；
+  `validate_session_export.py` 對真實 history rc=0；`shadow_report.py` 實跑正常。
+
+## [4.95.2] — 2026-08-03 — 4.95.1 的第二輪 review 修正（同一條判準把同構位置掃完）
+
+> 對 4.95.1 做第二輪對抗性 review 後的修正。4.95.1 的主題是「韌性從檔案層下沉到欄位層」，
+> 這輪抓到的全是**同一條判準沒貫徹到底**的殘留：覆蓋守衛停在 key 層、rc 契約守了 fred
+> cache 卻沒守歷史 intel、共用 slim 源頭沒消毒、讀出端分母紀律漏了三個入口。
+
+### Fixed
+- **[SE3] 覆蓋守衛只做到 key 層，值層復發**（`da_pretrigger.py`）。4.95.1 的 `uncovered[]`
+  用 `s not in cache` 判——`{"Utilities": null}` 或訊號欄位全 null 的板塊 key 在、值判
+  不了，仍被讀成「查過了、乾淨」（正是該輪要殺的 bug class 往下一層又復發）。覆蓋判定
+  下沉到欄位層（`R5/R6/R7_SIGNAL_FIELDS`；R5 任一訊號有值即可判、R6/R7 須全有值才判得了
+  「有／沒有」），entry 非 object 或訊號欄位無效 → `uncovered` + prompt 警語。型別髒值
+  （字串分項——build 端 gate 用 `is None` 擋不住的那種）同樣落 uncovered，不再靜默讀成
+  「沒觸發」。
+- **[SE5] `previous_regime_label()` 守衛包太淺**（`fred_lane_gate.py`）。壞形狀歷史 intel
+  （頂層 list、`_phase0` 是字串、label 非字串）→ AttributeError traceback：rc=1 且 stdout
+  空，違反本檔「rc=1 只在 fred cache 不可讀」的 rc 契約，且一份壞歷史檔會拖死之後每一場
+  gate。改為逐層 isinstance、跳過壞檔往前找更早的好檔。
+- **[SE5] `_slim_fred()` favor/avoid 元素層直通**（`phase0_read_caches.py`）。`rot.get("avoid")
+  or []` 對字串值／非字串元素原樣放行——下游 `step6_overlay._matches` 會逐字元迭代、
+  `da_pretrigger` R4 的 canonicalize 直接 AttributeError。新增 `_str_list()` 在 slim 源頭
+  消毒（4.95.1 只修了 gate 自己的 `_canon_list`，沒修三個消費端共用的源頭）。
+- **[SE5] avoid 的靜默略過無痕**（`fred_lane_gate.py`）。`_shape_warnings()` 只覆蓋
+  adjustments 的 raise/lower，不覆蓋同為 `macro_theme_conflict` 判定輸入的 avoid——被
+  丟掉的元素若不留痕，「資料壞了」會被讀成「HOT 沒撞上 avoid」。補同款警語。
+- **[SE4→code] FTD `exposure_range` 讀錯 dict，live intel 恆 null**（`build_sector_intel.py:198`）。
+  欄位實際住在 `quality_score`（`post_ftd_monitor.py` 與 `total_score` 同層寫入；
+  `phase_0.md:72` 一直是對的），code 卻從 `market_state` 讀。文件對、code 錯——修 code。
+  修後真實 cache 實跑讀到 `0-25%`。
+- **[SE1] `--status` 讀出端三個繞道**（`sector_score_calculator.py`）：(a) **非字串**版號被
+  `or UNKNOWN_VERSION` 放行（4.95.1 只擋了缺失/falsy）→ `sorted()` 混型 TypeError 掛掉
+  整份統計；(b) `shadow_score_*.prev.json` 手動備份檔被 glob 撈進來，同一場數兩次灌水
+  割接分母（audit 端早就跳過，讀出端漏了）；(c) `sample_valid` 用 truthiness——字串
+  `"false"` 照算進割接分母。分別改 isinstance 守衛、`.prev` skip、`is True`。
+
+### Why
+- 4.95.1 的教訓是「守衛要下沉到不可用的最小單位」；這輪的教訓是 4.90.4 那條判準的重演：
+  **修 bug class 不能只修出事的那格，要拿同一條判準把同構位置全掃一遍**——覆蓋守衛、
+  rc 契約、元素消毒、分母紀律各留了一格。
+- 版號：`da_pretrigger` v1.1、`fred_lane_gate` v1.1；`CALCULATOR_VERSION` **刻意不動**
+  （本輪未改計分語意；bump 會讓混版本檢查把既有 shadow 池標成 mixed，反而卡割接分母）。
+
+### Notes
+- 驗收：三支測試新增回歸案例全 rc=0；**revert 模擬逐項確認會紅**（key 層版在
+  `cover2.null_entry` 炸、淺守衛版讓 gate CLI stdout 空、版號混型 `sorted()` TypeError、
+  分母 5→7 灌水）；`tests/test_gics_sector_audit.py` 18 passed、`test_lane_contract.py` rc=0；
+  `build_phase0()` 真實 cache 唯讀實跑 `exposure_range = "0-25%"`。
+- L5（`apply_det_shadow.py` 映射）review 仍在進行，findings 另行處理。
+
+## [4.95.1] — 2026-08-03 — SE1/SE3/SE4/SE5 的 code review 修正（韌性從檔案層補到欄位層）
+
+> 對 4.92.0–4.95.0 做 code review 後的修正。四筆的核心設計都經得起檢驗，但共用一個
+> 盲點：**韌性只做到檔案層，沒做到欄位／元素層**。測試全綠是因為現有資料乾淨；資料髒
+> 一格時壞法全是靜默的，而且剛好打在 SE1 想守護的「割接證據可信度」上。
+
+### Fixed
+- **[SE1] 單一分項缺失/null 被當 0 → 假 hard diff 且算進割接證據**
+  （`sector_score_calculator.py`）。舊版 `_num(sc.get(k)) or 0` 讓 `theme_heat: null`
+  算出 `diff=20` 且 `reproducible=True`。割接判準是**累計 0 hard**，一筆這種樣本就
+  永久擋死 SE2，理由還是假的。改為逐欄位守衛（`REQUIRED_SCORE_COMPONENTS`），缺一格
+  整筆退出證據池。**「算不出 ≠ 算錯」這條規則本來只實作在整個 dict 缺席的層級。**
+  `build_sector_intel.py` 端同步把五個分項全列 hard-required（原本只擋 `valuation_penalty`）。
+- **[SE1] 重跑過去日期會把 shadow 寫進 live 證據池**（`build_sector_intel.py`）。
+  `--audit-decisions` 守住了正門，但 `--date <舊日期>` 是後門——而且 `build_phase0()`
+  讀的是**今天**的 cache，存下的 `context` 不是掃描日的狀態。新增 `backfill` 判定：
+  `scan_date != today` → `sample_valid=false` + `invalid_reasons=["backfill_rebuild"]`。
+- **[SE1] half-up 沒有貫穿到底**：`round(pre × mult, 2)` 的中間值是銀行家捨入，造成
+  雙重捨入（`64.25 × 1.035 = 66.49875` → 2dp 66.5 → **67**，真 half-up 是 66），且
+  「有 mult 走 2dp、無 mult 不走」讓同值有兩種捨法。改為單步 half-up + `_ROUND_EPS`。
+  **eps 不是保險而是必要**：實掃乘數表 × 0.5 間隔分數，`50.0 × 1.15 == 57.49999999999999`
+  等 3 例的真值恰為 `.5`，裸 `floor(v+0.5)` 會少 1 分。473 筆歷史樣本無法區分變體
+  （沒有樣本落在邊界），所以這一項是按原則而非資料定的。
+- **[SE1] shadow 落盤失敗會中斷整場 build**：包 try/except（OSError）。shadow-only
+  的產物不該讓產業掃描沒有 intel 檔。
+- **[SE3] per-sector 資料缺席被讀成「沒觸發」**（`da_pretrigger.py`）。整檔缺席的
+  rc=1 護不到逐板塊那一層：`sectors: {}` 或 `--hot "Semiconductors"`（非 canonical 名，
+  `silent=True` 吞掉警告）會讓 R5/R6/R7 全部回報 `fired=false, available=true`——
+  **正是本檔 docstring 自己標為最危險的失敗模式**。新增 `uncovered[]` / `unknown_sectors[]`
+  並寫進 prompt block 的「未能判定」警語。
+- **[SE3] FRED snapshot 沒有時間紀錄**：`fred_latest.json` 沒有日期版本、與 `--date`
+  無綁定關係（重放舊日期用今天的、daemon 停擺用前幾天的）。輸出新增 `fred_generated_at`。
+- **[SE3] R5 的 consensus 豁免把缺席欄位當滿足**：`senate is None or senate >= 0` 改為
+  三者皆須有值。豁免是對 DA 宣稱「這裡查過了、確實乾淨」，用不可知的 13F 欄位湊不得。
+- **[SE3] rc=1 的 error JSON 走 stdout**：改 stderr。stdout 的契約是「逐字 paste 進
+  `<TRIGGERED_DIVERGENCE_RULES>`」，忘了看 rc 的 pipeline 會把錯誤訊息貼進 prompt。
+- **[SE5] 舊形狀 fred cache 讓 mandatory trigger 靜默不觸發**（`fred_lane_gate.py`）。
+  本檔已呼叫 `_slim_fred()` 取 avoid/regime_label，而它對舊形狀會 fallback 到
+  `market_implications.sector_rotation`；`adjustments` 卻只讀頂層。於是舊形狀 cache →
+  `adjustments_active`（唯一 mandatory）不觸發、known-gap note 一併消失、rc=0 無警告，
+  shadow 統計累積**假的 skip 票**。抽出 `_read_sector_rotation()` 走同一條路徑。
+- **[SE5] `raise`/`lower` 元素層沒守型別**：list 內非字串 → `AttributeError`（rc=1 但
+  stdout 空，違反本檔 rc 契約）；值是字串 → 逐字元迭代產生單字元「板塊」污染 conflict
+  統計。`_canon_list()` 收嚴，並由 `_shape_warnings()` 把略過的東西標進 `notes`——
+  靜默略過與「確實沒有」在輸出上必須分得出來。
+- **[SE4] `exposure_ceiling` 被錯標成 script 自動填，且映射 rubric 兩邊都遺失**
+  （`phase_0.md`）。實際上 `build_sector_intel.py` 用 `require(decision, ...)` 硬取，
+  缺了整場 build 中止；`phase_4-5.md` 也仍列它為 decision JSON 必填 key，兩份主檔互相
+  矛盾。被刪掉的映射列「← `composite.exposure_guidance`（廣度單一來源）」是 live rubric，
+  主檔與 appendix §2 **都沒有**——這是 4.95.0 瘦身唯一真正遺失的判斷規則。已補回主檔
+  成獨立小節，並修正 appendix §2「映射表已移至此」的不實指路（該表沒有原樣搬走）。
+- **[SE4] appendix 載入條件比實際需求窄**：`phase0_read_caches.py` **有一層可用就 rc=0**，
+  所以「有 stale/missing 層要重整」是常態而非 failure，但重整指令只在 appendix §1，
+  而四個檔都寫「實際失敗才讀」。條件改為兩款並列（rc≠0 或 stale/missing 非空）。
+- **[SE4] 四個過期的「下方」指標**（`phase_0.md` ×2、`phase_1-2-3.md` ×2）指向已搬走的
+  內容——在它們服務的那個失敗情境裡，session 往下捲會找不到東西。全部改指 appendix。
+- **[讀出端] `--status` 的兩個繞道**：`hard_diffs: null` 會 `TypeError` 掛掉整份統計
+  （`.get(k, 0)` 只在 key 不存在時給預設）；版號缺失會被 falsy 過濾器濾掉，於是既
+  繞過混版本檢查又照算有效場次。前者改判 malformed，後者用 `<unknown>` 自成一格。
+  另補：零板塊報告不再算 `sample_valid=true`（否則 N=5 可用空場次湊滿）。
+- **[讀出端] `_num()` 收嚴擋 NaN/inf**：NaN 的所有比較都回 False，`abs(nan - x) > 1.0`
+  是 False——一筆爛資料會顯示成「完全相符」。JSON 的 `NaN` 是 Python parser 接受的
+  合法字面值。
+- **[nit] `_round_half_up()` 對負數改 half-away-from-zero**（原本 toward +∞）；
+  目前 `_clamp` 擋在前面所以不可觀察，但 helper 被重用時就會咬人。
+- **[nit] `RULE_LIBRARY` R5 的豁免門檻改由常數插值**：寫死會在改常數時讓 paste 進
+  prompt 的規則原文與 script 實際判定脫鉤，而 DA 只看得到前者。
+- **[docs] `sector/README.md` 載入規則補 appendix；`docs/bug.md` BUG-006 的「層 C」
+  指路更新**（該標題已隨 4.95.0 搬走，規則本身在「每場都適用的紀律」節）。
+
+### Notes
+- **`--audit-decisions` 的 43 場數字修前修後完全相同**（38 clean / 4 hard / 33 soft /
+  1 drift）：歷史檔的分項本來就齊全，新守衛在真實資料上零新增排除。唯一 `sample_valid=false`
+  的 2026-06-05 是 SE1 既有規則（`fred_available=true` 但多數板塊沒記 step6 乘數）。
+- 「常駐 context −157 行」的正確數字是 **−150**（`sector_protocol_main.md` 增 7 行）。
+- `da_pretrigger.py` / `fred_lane_gate.py` 讀的 FRED 路徑是
+  `skills/fred-macro/cache/fred_latest.json`（不是 `sector/cache/`）——程式是對的，記在這裡免得下次又查一次。
+
+## [4.95.0] — 2026-08-03 — SE4：sector protocol 文件瘦身（備援搬 appendix，rubric 全留）
+
+### Added
+- `sector/protocol_appendix_fallback.md`（173 行，**條件式載入**）：Phase 0 層 A–E 的逐層
+  cache 讀取、Phase 3 Step 1–3e 的 sequential 與 parallel 備援、耗時預算表。
+  只有 `phase0_read_caches.py` / `phase_prefetch.py` **實際失敗**時才需要讀。
+
+### Changed
+- `phase_0.md` 164 → 106 行、`phase_1-2-3.md` 342 → 243 行（**常駐 context −157 行**）。
+- `sector_protocol_main.md` 的載入順序加一格條件式 appendix，並寫下 SE4 的切分紀律。
+
+### Why / 切分準則
+- **只搬「怎麼跑」，判斷規則一律留主檔**。動手前先確認哪些段落是 live rubric：
+  `news_catalyst` ±5（beat_rate/surprise/report_count）、R5/R6/R7 的 divergence 提示、
+  `top_catalysts` 的資料源與 WebSearch 禁令、FTD 反幻覺規則（BUG-006）、FRED slim 11 欄
+  的 shape、`cycle_phase` 推斷規則、情緒欄位映射 —— 這七類**每場都在用**，搬走等於拿
+  準確度換 token。改為把散在各 Step 的 rubric bullets 集中成一節「Rubric 與紀律」。
+- **`cycle_phase` 與 `warning_flags` 的分野是實查出來的**，不是照文件分類：前者仍由 LLM
+  在 decision JSON authored（`build_sector_intel.py` 用 `require(decision, "cycle_phase")`），
+  規則必須留；後者已由 script 實作（`build_sector_intel.py:153-165`），表可以走。
+- **舊「欄位映射表」沒有原樣搬走，而是標記為非現行 spec**：實查發現它與 script 實作
+  已有三處不一致（`breadth_components` 只寫 1 個子欄不是 4 個、`regime_confidence` 是
+  硬編 0.9 不是 data_quality 映射、`warning_flags` 是 4 種不是 6 種且觸發條件不同）。
+  把過期的表當 spec 搬進 appendix，等於讓它以「參考資料」的身分繼續誤導。
+
+## [4.94.0] — 2026-08-03 — SE5：FRED Macro lane 條件式觸發 gate（shadow-only）
+
+### Added
+- `sector/scripts/fred_lane_gate.py`：`{would_invoke, triggers_fired[], triggers[], notes[]}`。
+  **零新計算**（只讀 `fred_latest.json` + 既有 sector_intel）。**shadow-only**：PS 照跑 lane。
+  `--write` 落盤 `sector/cache/fred_lane_gate_<DATE>.json`、`--status` 統計 invoke 率。
+- 4 條 trigger：`adjustments_active`（**mandatory**）/ `adjustment_conflict` /
+  `macro_theme_conflict` / `regime_transition`。
+- `test_fred_lane_gate.py`：4 條 trigger 各自命中與否定案例、RULE 2 衝突偵測、
+  sector 名稱正規化、壞形狀（null rotation / 非 list adjustments / 混雜元素）不誤判、
+  fred 不可讀 rc=1、`shadow_only` 恆 true、落盤/讀出/壞檔排除。
+
+### Why
+- **lane 的增量價值只剩 `adjustments` 這一層**：`sector_rotation.favor[]` 已由
+  `step6_overlay.py` deterministic 套進分數，而 `adjustments[]`（GUIDE RULE 1「overrides
+  favor」+ RULE 2 優先序）**實查沒有任何腳本消費**——`step6_overlay.py:81-82` 只讀
+  favor/avoid，`_slim_fred()` 的 11 欄也不含它。所以 lane 是 adjustments 的唯一執行者，
+  `adjustments_active` 設為 mandatory；adjustments 為空（RULE 4）時 lane 只會覆述
+  step6 已算過的東西。
+- **`regime_confidence < 0.40` 刻意不設為 trigger**：低信心時 step6 的 confidence gating
+  已把乘數壓回 1.0 附近、lane 論述也必須自標 LOW-CONFIDENCE，增量更低——把它當觸發
+  條件方向是反的。只記 note 供 shadow 分析。
+- **跳過不改決策數字**（與 L4b 的 valuation lane 相反，那支因為會改數字所以有 mandatory
+  trigger）：STEP G.5 直接讀 `fred_snapshot.sector_rotation_avoid`、Step 6 走
+  `step6_overlay.py`、`consensus_warning` 只定義在 rotation/theme/news 三 lane。翻預設時
+  唯一要小心的是 **skip 不得寫進 `degraded_agents`**（會誤觸發 PARTIAL_FALLBACK 的
+  confidence cap 與 stance 限制）。
+
+### Known gap（記錄，未修）
+- `_phase0.fred_snapshot` 的 slim 11 欄**不含 `adjustments`**，但 protocol 要求 FRED lane
+  「`adjustments[]` overrides favor（不可只重複 favor）」——**lane 被要求套用一份它從未
+  收到的資料**。修法（把 adjustments 併進 lane 切片）會改變 lane 產出，屬行為變更，不與
+  shadow-only 的 gate 同版動。gate 會在 `notes` 標出。
+
+## [4.93.0] — 2026-08-03 — SE3：R4–R7 DA pre-trigger script 化
+
+### Added
+- `sector/scripts/da_pretrigger.py`：讀 valuation / smart_money / earnings_pulse /
+  `fred_latest.json` → `{triggers_fired[], rules{}, prompt_block}`。**零新計算**。
+  `--prompt-only` 的 stdout 就是 `<TRIGGERED_DIVERGENCE_RULES>` 的內容，PS **逐字 paste**。
+- `test_da_pretrigger.py`：四條規則各自命中 + 各自的 sample-size / 方向性 gate
+  （R5 institutional n≥3 且雙負、R6 pt_sample≥3、R7 三窗口必須反向）、R4 邊界
+  （`> 2.0` 不是 `>=`）與優先序、null 欄位不得被當 0 誤觸發、HARD cache 缺席 rc=1、
+  FRED 缺席 rc=0 但標 unavailable、sector 名稱正規化、純函式性。
+
+### Changed
+- `phase_4-5.md` 的 DA Pre-Trigger 節改為「MUST 用 script」（同 `step6_overlay.py` 紀律），
+  門檻表降為參考、script 為唯一執行者。
+
+### Why
+- V4.12.2 只把規則**全文**移出 prompt，**判定本身仍是 PS 心算**：4 條規則 × N 個 HOT
+  sector 的純 threshold 比對，正是 LLM 最容易錯又最不值得花 token 的形態。
+- **「資料缺席」與「沒觸發」在輸出上嚴格分離**：FRED 缺席時 R4 標 `available=false`，
+  prompt block 明寫「未能判定 ≠ 未觸發」。把未知講成安全是這支 script 最危險的失敗
+  模式——DA 會少發該發的 challenge 且全鏈路無人察覺。HARD cache 缺席則一律 rc=1，
+  不得回「沒有觸發」。
+- 實跑 2026-07-31 cache 對照當日 intel 的 `sector_divergence_watch`：R7 Technology 的
+  三窗口數值與 R4 Financials 的 real_rate 門檻**逐字吻合**。
+
+## [4.92.0] — 2026-08-03 — SE1：sector shadow score 落盤 + 覆蓋率誠實化
+
+### Added
+- `sector/cache/shadow_score_<DATE>.json`（`sector_shadow_score.v1`）：每場 build 自動落盤，
+  含 `coverage.modeled` / `coverage.not_modeled`、per-sector 對照、`sample_valid`。
+- `--status`：掃所有 shadow 報告統計 SE2 割接進度（N=5 場、0 hard、≤2 soft**累計**、
+  0 penalty drift）。只數 `sample_valid` 的場次，混 calculator 版本會擋。
+- `--audit-decisions`：重放既有 43 份 `sector_decision_*.json`（**唯讀，不寫 shadow 樣本**）。
+  照 invest L1（4.80.0）用 replay 取代 live 累積的同一招。
+- `test_sector_score_calculator.py`：Step 5 偵測不重算（含 2026-07-31 Energy 真實回歸樣本）、
+  捨入慣例、算不出 vs 算錯、割接統計分母紀律、audit 不得混進 live 分母。
+
+### Fixed
+- **捨入慣例改 half-up**：原本用 Python 內建 `round()`（銀行家捨入，`round(42.5)==42`）。
+  473 筆歷史樣本實測 half-up 相符率 92.2% vs banker's 91.5%，差的 3 筆全是 `.5` 邊界
+  （42.5→43、54.5→55、46.5→47）LLM 三次都進位。用錯會造成整批 ±1 的系統性 soft diff。
+- `verify_session_dual_run()` 不再把「無法複算」的板塊計入 diff（假 FAIL），改標
+  `sample_valid=false` 讓整場退出割接證據池。
+
+### Why
+- **舊版的 shadow 等於零樣本**：結果只印 stderr，protocol 跑完就沒了，`SECTOR_CALC_STRICT=1`
+  又預設沒人設——所以「shadow 跑了幾個月都沒事」不能當割接依據，實查 7/21、7/29、7/31
+  三場 intel 也確實找不到任何 shadow 欄位。SE2 的判準必須先有東西可數。
+- **Step 5 特殊乘數刻意「偵測不重算」**：SE1 原本要補模 binary_risk ×0.70 / cycle ×0.85，
+  假設「LLM 套了、calculator 沒套 → 假 hard diff」。**實測推翻了這個假設**——掃過全部
+  帶 `binary_risk_within_48h` 的 33 筆，31 筆的 `sum(score_components) × step6_mult` 直接
+  等於 `composite_score`，證明 LLM 是把乘數**烙進四個分項之後**才寫下（2026-07-31 Energy
+  的 `key_reasons` 明寫「已因 OPEC 會議套用 binary ×0.70（91.8 → 64.3）」，而 64.3 正是
+  四分項的和）。在 calculator 再乘一次 = 雙重計分，會把那 31 筆正確樣本全打成 hard diff。
+  改為記錄條件存在並標 `unverified_steps`——SE2 割接後 engine 從原始分項算起，這步才變
+  成可驗證的。
+- **歷史 audit 刻意不寫進 shadow 樣本**：那些場次的 `_phase0` 已不可考（cycle_phase 取自
+  decision 檔、fred_available 由 step6 乘數存在與否反推），與實跑樣本不是同一等級的證據。
+  混進去就是在稽核軌跡放假樣本（C1 的教訓）。
+- **audit 結果**：43 場、38 場全乾淨；4 hard / 33 soft / 1 penalty drift，且**幾乎全部集中
+  在 5 月的早期場次**——7 月以後 9 場裡 8 場全乾淨，唯一 hard diff 是 2026-07-20
+  Communication（calc 56 vs LLM 39，套不套 ×0.70 都對不上，屬真實漂移）。
+
+## [4.91.0] — 2026-08-03 — L5：Sentiment lane deterministic score producer（shadow-only）
+
+### Added
+- `skills/market-sentiment-analyzer/scripts/sentiment_score.py`：protocol §PHASE 2
+  Sentiment rubric 搬成 script。`0.5 × stock_specific + 0.5 × (composite/10 − 5)`，
+  輸出 `{score, market_layer, stock_specific, stock_detail.rules_fired[], missing_inputs[],
+  degraded_reason, input_hash, producer_version}`。**shadow-only**：LLM lane 照跑照用。
+- `test_sentiment_score.py`：市場層 golden（PLTR 2026-08-02 的 `+0.92` 可重現）、規則表
+  11 條逐條、四個邊界（ratio 恰 0.3/1.0、short 恰 10%、5-10% 空檔）、兩個 clamp 兩端、
+  降級（缺輸入 ≠ 中性、市場層缺 → score=null）、input_hash 穩定性。
+- 新 block `sentiment_det`（trade 內，optional）+ validator §5j（warning 級；
+  **`shadow_only=false` 為 error** —— 翻預設需使用者拍板）。
+- `apply_det_shadow.py`：`sentiment_det.score` → `lane_contract.lanes.sentiment.shadow_score`
+  （走 C1 保留域）。**只映 score**：契約的 `producer_version` 記的是 lane 的產出者，
+  shadow 期是 LLM；填 det 版號會讓 Phase 6 把這筆歸進 script 池。
+- `shadow_report.py` L5 區段：det vs LLM **方向**翻轉率 + |Δ| 分布 + 逐筆表；
+  `SENTIMENT_CHECKPOINT_N = 20`、`SENTIMENT_DIRECTION_FLIP_MAX = 0.20`。
+
+### Changed
+- protocol Sentiment Subagent 節新增 L5 小節（指令 + 三個規格定案表 + 兩條做不出來的
+  規則 + 翻預設條件）；schema doc 新增 `sentiment_det` 章節。
+
+### Why
+- **動工盤點推翻了 backlog 的假設**：TODO 寫「公式已寫死」，實際只有市場層是完整規格。
+  `stock_specific` 的聚合方式與 clamp 全庫 grep 不到任何定義（只有 protocol 一行公式與
+  報告裡的敘述值）。本版把兩者定死為「加總 + clamp [-3,+3]」並寫成具名常數 + 測試釘住；
+  insider 取 `quarters[0]` 則是沿用 schema 既有的 `det_inputs.insider_ratio_q` 定義。
+- 歷史報告可見 LLM 曾把規則表**外**的因子算進 `stock_specific`（例：APP 那筆的
+  「retail/momo 資金 5 日 +19%」）。det 化會移除這些 —— 這是 shadow 要量的東西，不是 bug，
+  所以哨兵看**方向翻轉率**而非分數差。
+
 ## [4.90.4] — 2026-08-03 — P2 的病往旁邊一格：保留規則的界線改為逐欄位定域
 
 ### Fixed

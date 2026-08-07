@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.90.4';
+  const VERSION = 'V4.108.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -486,7 +486,7 @@
               <span>${isZh ? '備援 LLM' : 'Tertiary LLM'}</span>
               <select id="set-llm-tertiary" class="sidebar-set-select"></select>
             </label>
-            <div class="sidebar-set-hint">${isZh ? '主要用完額度自動降到次要 / 備援' : 'Falls back primary → secondary → tertiary on quota'}</div>
+            <div class="sidebar-set-hint">${isZh ? '一般呼叫與 Dashboard protocol 共用；啟動時依額度自動降到次要 / 備援' : 'Shared by regular calls and Dashboard protocols; falls back at launch on quota'}</div>
             <div class="sidebar-set-sub">${isZh ? '突發辯論配對' : 'Break News debate pair'}</div>
             <label class="sidebar-set-row">
               <span>${isZh ? '辯手 A' : 'Debater A'}</span>
@@ -869,7 +869,7 @@
     return pill;
   }
 
-  const _CHAIN_GLYPH = { skipped: '✅', queued: '⏳', running: '🔄', done: '✅', error: '❌' };
+  const _CHAIN_GLYPH = { skipped: '✅', queued: '⏳', running: '🔄', done: '✅', degraded: '⚠️', error: '❌' };
   function _chainMeta(it, isZh) {
     const el = fmtElapsed(it.elapsed_sec || 0);
     switch (it.status) {
@@ -877,6 +877,7 @@
       case 'queued':  return isZh ? '排隊中' : 'queued';
       case 'running': return `${isZh ? '執行中' : 'running'} · ${el}`;
       case 'done':    return `${isZh ? '完成' : 'done'} · ${el}`;
+      case 'degraded': return `${isZh ? '降級完成，繼續' : 'degraded, continuing'} · ${el}`;
       case 'error':   return (it.error || '').slice(0, 60) || (isZh ? '錯誤' : 'error');
       default:        return '—';
     }

@@ -197,6 +197,9 @@ python3 investment/scripts/phase1_factpack.py <TICKER> --out /tmp/<TICKER>_factp
 - `phase0_source == "STALE_NEEDS_L3"` → 依 Phase 0 L3 重跑 skill chain（factpack 不跑重活），完成後再進 Phase 2。其餘值（`SECTOR_CACHE`/`INVEST_CACHE`）= phase0 FRESH，直接用。
 - `phase0_validator_rc != 0` → 修正後重跑（同 Validator gate）。
 - 任一 `bundles_loaded[*]` 非 ok → 該 lane 走原 fallback 規則（見下表 + appendix），**不**中止 protocol。
+- `forecaster_prewarm != "ok"` → `forecaster_blend`（0.05）缺席，且 `forecaster.transition_case` 讀不到值。**此時 `valuation_reviewer_gate` 的 `transition_case_active`（五個 trigger 中唯一 mandatory）不得解讀為「已確認非 transition case」——那是「未檢查」**。虧損股回報 `unavailable: negative_or_missing_ttm_eps` 屬正常（PE-multiple 對負 EPS 無效），非錯誤。
+- `earnings_prewarm != "ok"` → 財報 bundle 可能停在上一季。**Phase 1.5 的估值 anchor 幾乎全部從這份 bundle 取料**（唯一例外是第 9 根 `fwd_earnings_discounted`，走 analyst-estimates cache），缺了就是 0-1/9 → `insufficient_anchors` decision cap。此時要嘛手動補 `財報 <T>` 後重跑，要嘛在報告裡明講「本次估值無 decision grade」。`--no-prewarm` 只在離線／零 FMP 配額時使用。
+  - ⚠️ **同日順序**：`財報 <T>` 必須跑在 `分析 <T>` **之前**。Phase 1.5 的 quant artifact 一旦產出就凍結（見下），之後才寫入的 earnings cache 不會被回頭讀取——2026-08-07 AAOI 就是這樣把一根本來拿得到的 `analyst_pt_consensus` 判成 null。若確認 cache 比 artifact 新，重跑 Phase 1.5。
 - factpack 為**唯讀聚合**，不寫 history、不評分。若它失敗，回落手動逐 bundle（下方摘要 + appendix）。
 
 > ⚠️ 仍須遵守 Physical isolation：注入 lane 時只貼該 lane 對應欄位，禁貼整包 factpack 給單一 lane（會 cross-anchor）。
@@ -206,7 +209,7 @@ python3 investment/scripts/phase1_factpack.py <TICKER> --out /tmp/<TICKER>_factp
 | Bundle | Source | Cost | Lane 注入 |
 |---|---|---|---|
 | `TICKER_DATA_BUNDLE` | `bash skills/finnhub-client/scripts/run_dual_fetch.sh --tickers <T>` → 讀 `scoring.*` (15 scalar) | 1 dual_fetch / session | All 5 lanes |
-| `EARNINGS_ANALYST_BUNDLE` | 讀 `skills/earnings-analyst/cache/<T>_*.json` (≤ 90d) — V3.17 加 `transition_signature` / `business_mix_shift_overlay` / `cash_conversion_quality` / `working_capital_diagnostics` | 0 FMP call | Fundamentals + **Valuation Specialist** + Phase 3 penalty cascade |
+| `EARNINGS_ANALYST_BUNDLE` | factpack 先跑 `earnings-analyst` 的 `fetch.py` + `analyze.py`（V4.106.0）再讀 `skills/earnings-analyst/cache/<T>_*.json` (≤ 90d) — V3.17 加 `transition_signature` / `business_mix_shift_overlay` / `cash_conversion_quality` / `working_capital_diagnostics` | 快取命中 1 FMP call；當季新財報才走完整 17 endpoints | Fundamentals + **Valuation Specialist** + Phase 3 penalty cascade |
 | `PEER_BUNDLE` | `from skills._shared.company_context import get_peers, get_profile` | 2-7 FMP, 24h cache | Fundamentals + Burry + **Valuation Specialist** |
 | `FMP_SUPP_BUNDLE` | `from skills._shared.fmp_supplementary import get_supplementary_bundle` | 2-9 FMP, 24h cache | 視 lane 而定（見 appendix） |
 
@@ -254,8 +257,8 @@ python3 investment/scripts/compute_price_framework.py \
 （pack projection）+ `fair_value_range` + `valuation_explained_range` +
 `implied_expectations` + `valuation_archetype_shadow`（shadow-only，不得反寫 live pack）。
 
-**為什麼能提前**：V3.48.0 `--self-assemble` 之後，這 6 個 block 的輸入（8 anchor、`ev_block`、
-peer/self ratios、beta、FRED、OHLCV、owner earnings）全部由 engine 自讀 cache/API 組裝，
+**為什麼能提前**：V3.48.0 `--self-assemble` 之後，這 6 個 block 的輸入（9 anchor、`ev_block`、
+peer/self ratios、beta、FRED、OHLCV、owner earnings、analyst estimates）全部由 engine 自讀 cache/API 組裝，
 **零 lane 輸入**。它們從來不需要等 Phase 2；舊版把整包壓在 Phase 2.4 才跑，才會產生
 「Valuation lane 的數字來源是一個在它之後才跑的引擎」這個時序矛盾。
 
@@ -415,6 +418,38 @@ OUTPUT (strict JSON):
   - `executive_compensation` (V5.0): CEO comp YoY > 30% → reasoning 註記治理紅旗；SBC > 15% revenue → -0.5
 - 額外輸出: `market_sentiment_composite`, `vix_current`, `insider_signal`, `short_pct_float`, `mspr_latest`
 
+##### L5 — deterministic score producer（V4.91.0，**shadow-only**）
+
+上面整張 rubric 已搬成 script。**本版 LLM lane 照跑、分數照用**；det 輸出只作 shadow。
+
+```bash
+python3 skills/market-sentiment-analyzer/scripts/sentiment_score.py --ticker <TICKER> \
+    --from-sentiment <sentiment.py 的輸出檔>     # 或 --market-composite <Phase 0 composite>
+```
+
+輸出整塊抄進 `trades_this_session[0].sentiment_det`（PM 抄寫，**不要**手寫
+`lane_contract` —— Step 1.5 的 post-processor 會把 `score` 映進契約的
+`lanes.sentiment.shadow_score`；手寫契約等於偽造 provenance）。
+
+**兩個 protocol 原本沒寫、由 producer 定死的規格**（改動成本 = 改一個常數）：
+
+| 空白 | 定案 | 依據 |
+|---|---|---|
+| 規則表如何聚合成 `stock_specific` | 命中項**加總**後 clamp `[-3, +3]` | 各規則寫成有號分數，加總是自然讀法 |
+| 最終分數 clamp | `[-3, +3]` | 69 筆歷史 lane score 全落在此區間 —— clamp 一直存在，只是沒寫下來 |
+| insider 取哪一季 | `quarters[0]`（最近一季） | 沿用 schema 既有的 `det_inputs.insider_ratio_q` 定義，不另立一個 |
+
+**兩條規則現行資料源做不出來**，一律進 `missing_inputs[]` 而非猜值：
+`institutional.accumulation_signal`（FMP_SUPP_BUNDLE 的 `institutional` block 實測常為空）、
+`SBC > 15% revenue`（bundle 只有 CEO comp，無 SBC/revenue）。
+
+**翻預設的條件**（`shadow_report.py` L5 區段）：累積 ≥ `SENTIMENT_CHECKPOINT_N`（20）**筆
+shadow 樣本**（1 筆 = 一支個股的一次分析；多股 session 一場可貢獻多筆）**且**方向翻轉率
+< `SENTIMENT_DIRECTION_FLIP_MAX`（20%，方向帶 `SENTIMENT_NEUTRAL_BAND`=±0.5）→ 出提案 → **使用者拍板** →
+翻後照 V3.45.4 News 前例上 weight 凍結窗。看方向翻轉而不是分數差：det 拿掉了 LLM 的
+規則表外因子（歷史報告可見 LLM 曾把「retail/momo 資金 5 日 +19%」這類項目算進去），
+連續值有落差是預期的，決策層真正感覺得到的是方向翻掉。
+
 #### News Subagent
 - **Rubric**: 過去 48h company news + analyst rating changes + PT trend + cross-ref Phase 0 themes
 - **Skill**: `python3 skills/market-news-analyst/scripts/fetch.py <TICKER> --hours 48 --json-only`
@@ -536,7 +571,7 @@ OUTPUT (strict JSON):
   `structural_shift` typed input，來源是 earnings-analyst cache 而非 lane。proposal 的用途
   是人工審閱，以及作為**下次 session** typed input 的候選。LLM 文字任何時候都不得改數字。
 
-- **Anchors（V4.69.0 起 8 個；多數從現有 bundle 抽，兩個新 anchor 走 valuation-modeler script（FMP 24h cache，增量 call 極少））**：
+- **Anchors（V4.106.0 起 8 常規 + 1 條件；多數從現有 bundle 抽，valuation-modeler 的兩個走 script（FMP 24h cache，增量 call 極少））**：
   | Anchor | 來源 | Weight |
   |---|---|---|
   | `dcf_unlevered` | `EARNINGS_ANALYST_BUNDLE.valuation.dcf_intrinsic` | 0.20 |
@@ -547,8 +582,13 @@ OUTPUT (strict JSON):
   | `comps_implied` | `python3 skills/valuation-modeler/scripts/comps.py <T> --json-only` → `.comps_implied_value`（EV/EBITDA+EV/Sales+PEG implied 中位數；P/E 排除防與 peer_pe_implied 重複計權） | 0.10 |
   | `owner_earnings_mult` | `FMP_SUPP_BUNDLE.owner_earnings.ownersEarnings × 15` (default Buffett multiple) | 0.05 |
   | `forecaster_blend` | `python3 skills/earnings-valuation-forecaster/scripts/forecast.py <T> --json-only` (3-method blend) | 0.05 |
+  | `fwd_earnings_discounted` **(條件錨)** | analyst-estimates cache：覆蓋 ≥3 家的最遠獲利年度 EPS × justified P/E ÷ CAPM 折現。**僅在 cashflow_intrinsic 四根皆非 live 且 TTM EPS 非正時 live**，否則只進 shadow 池 | 0.15（在八根的 1.0 預算之外） |
 - **缺 anchor 處理**：engine 保留 value + ineligible reason；不得由其他 family 暗中承接權重。
   `<2` 個獨立 family 時 `|score| < 2` 且 confidence=low。
+- **第 9 根 live 時**：`fair_value_summary` 會同時給出 `pre_profit_anchor_live` 與
+  `sell_side_only` 兩個布林，**必須**原樣帶進 Phase 4.6 的 `speculative` 輸入——那是
+  governor 的唯一觸發來源（見 PHASE 4.6）。lane 論述請一併說明「這個估值成立的前提是
+  相信賣方 FY 預估」，不要把它寫成與 DCF 同級的獨立證據。
 - **論述格式**：只能引用 `valuation_pack` 已存在數字並解釋排除原因，不得重算另一個合理價。
 - **絕對禁止**: 直接 mirror Fundamentals 的 P/E judgment；本 lane 是獨立估值維度
 - 額外輸出：`suppression_proposals[]`（advisory-only，見上）、`valuation_commentary`；
@@ -1465,9 +1505,12 @@ sizing 的結果為輸入——**不要手動套下面的規則表**：
 python3 investment/scripts/decision_engine.py --phase 4.6 --from-file /tmp/<TICKER>_p46.json
 # input: {"decision_cap": {...}, "final_decision": ..., "avg_confidence": ...,
 #         "position_size_pct": ..., "final_action": ..., "hot_zone_probe": ...,
-#         "cap_override_reason": null}
+#         "cap_override_reason": null,
+#         "speculative": {"pre_profit_anchor_live": ..., "sell_side_only": ...}}
+#           └ 兩個布林直接抄 fair_value_summary 的同名欄，不是 PM 判斷
 # output: 套完 cap 的 final_decision / avg_confidence / position_size_pct / final_action
-#         + adjustments[] 逐條 trace，直接抄進 export
+#         + speculative_grade / speculative_reasons + adjustments[] 逐條 trace，
+#         直接抄進 export
 ```
 
 Phase 3 已先行評估 cap 觸發條件（同一組輸入在 Phase 3 就齊全，故 Rec 11 判定樹引用
@@ -1516,18 +1559,42 @@ Override **不解除** size 與 confidence 的 cap，只是允許不退到 HOLD�
 退 `STAGED_ENTRY`**；本來就是 `STAGED_ENTRY` / `HOLD` 的決策不再下降。與歷史 23 筆 cap
 entry 一致（22 筆 HOLD/CANCEL、1 筆 STAGED_ENTRY/STAGED）。
 
+### Speculative governor（V4.106.0 NEW — 煞車之外的調速器）
+
+**問題**：cap 是二元的——證據不足就封死。但虧損中的題材成長股（AAOI 型）在
+`fwd_earnings_discounted`（第 9 根條件錨，見 `phase5_export_schema.md`）上線後拿得到
+2 根錨、confidence medium，cap 因此**正當地**解除。此時若無其他機制，一檔還在虧損、
+估值完全建立在賣方預估上的股票會拿到與 NVDA 同級的倉位。
+
+**規則**：governor 與 cap 同一時序位置（Phase 4 定倉之後），由 engine 自動套用，
+**只縮不放**：
+
+| 觸發條件（任一） | `speculative_reasons` 值 |
+|---|---|
+| `fair_value_summary.pre_profit_anchor_live == true` | `pre_profit_fwd_earnings_anchor` |
+| `fair_value_summary.sell_side_only == true` | `sell_side_only_evidence` |
+
+觸發後：`speculative_grade=true`、`position_size_pct = min(原值, 0.01)`、
+`avg_confidence = min(原值, 0.70)`。**`final_decision` / `final_action` 不動**——這是
+governor 與 cap 的根本差異：cap 說「不准判斷」，governor 說「判斷可以，籌碼受限」。
+cap 與 governor 同時成立時，較嚴的 cap 值（30bps / 0.65）勝出。
+
 ### Schema export 欄位（trades_this_session[0]）
 
 ```json
 {
   "decision_cap_active":  true,
   "decision_cap_reason":  "insufficient_anchors | low_valuation_confidence | low_data_quality",
-  "cap_override_reason":  "string | null"
+  "cap_override_reason":  "string | null",
+  "speculative_grade":    false,
+  "speculative_reasons":  []
 }
 ```
 
-未觸發 cap 時 `decision_cap_active=false`、其餘兩欄 null。
-Validator (`validate_session_export.py` § 10) 會檢查 cap 規則一致性，違反 rc=1。
+未觸發 cap 時 `decision_cap_active=false`、其後兩欄 null。
+Validator (`validate_session_export.py` § 10 / § 10b) 會檢查 cap 與 governor 規則一致性，
+違反 rc=1；§10b 另強制「export 裡出現 pre-profit 錨或 sell-side-only 證據 ⇒
+`speculative_grade` 必須為 true」，杜絕「用新錨解鎖決策卻不掛 governor」。
 
 ---
 

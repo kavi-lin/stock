@@ -36,7 +36,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from apply_det_shadow import build_lane_contract  # noqa: E402
-from decision_engine import run_phase3  # noqa: E402
+from decision_engine import SPECULATIVE_CONFIDENCE_CAP, run_phase3  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SCHEMA_MD = os.path.join(ROOT, "investment/phase5_export_schema.md")
@@ -447,6 +447,54 @@ def main() -> int:
     tr.update(final_decision="HOLD", final_action="CANCEL", position_size_pct=0.0)
     e["final_action"] = "CANCEL"
     run(e, "legit divergence: approval=REJECTED → HOLD", 0)
+
+    # ── §10b × §14 — V4.108.0 speculative governor ──────────────────────────
+    # 第 9 根錨（fwd_earnings_discounted）讓虧損題材股重新拿得到估值、decision cap
+    # 解除。這組案例鎖住兩件事：(a) governor 縮小的倉位在 §14 有合法出路（否則決策
+    # 放行了卻卡在 Phase 5），(b) 用新錨解鎖決策卻不掛 governor 會被擋下。
+    print("[§10b speculative governor]")
+
+    def _spec(*, grade=True, sell_side_only=True, fwd_status="eligible", **over):
+        e = copy.deepcopy(ex)
+        tr = e["trades_this_session"][0]
+        pack = tr.setdefault("valuation_pack", {})
+        pack.setdefault("anchors", {})["fwd_earnings_discounted"] = {
+            "value": 153.13, "status": fwd_status, "family": "fundamental",
+            "provenance": "fmp_analyst_estimates.annual", "as_of": "2026-08-07",
+        }
+        pack["evidence_independence"] = {
+            "eligible_anchors": ["analyst_pt_consensus", "fwd_earnings_discounted"],
+            "sell_side_only": sell_side_only,
+        }
+        if grade:
+            tr["speculative_grade"] = True
+            tr["speculative_reasons"] = ["pre_profit_fwd_earnings_anchor",
+                                         "sell_side_only_evidence"]
+            tr["avg_confidence"] = 0.70
+            tr["position_size_pct"] = 0.01      # governor 壓過 sizing_chain 鏈尾
+        tr.update(over)
+        return e
+
+    run(_spec(), "speculative export @1% below the chain tail", 0)
+    run(_spec(position_size_pct=0.03),
+        "tamper: speculative_grade used to justify a 3% position", 1,
+        "position_size_pct ≤ 0.01")
+    run(_spec(avg_confidence=0.82),
+        "tamper: speculative_grade with confidence 0.82", 1,
+        f"avg_confidence ≤ {SPECULATIVE_CONFIDENCE_CAP}")
+    run(_spec(speculative_reasons=[]),
+        "tamper: speculative_grade without reasons", 1, "non-empty speculative_reasons")
+    run(_spec(speculative_reasons=["gut_feel"]),
+        "tamper: speculative reason outside the enum", 1, "must be a subset")
+    # Integrity：用新錨解鎖決策卻不掛 governor
+    run(_spec(grade=False), "tamper: pre-profit anchor live without speculative_grade", 1,
+        "必須同時設 speculative_grade=true")
+    run(_spec(grade=False, fwd_status="ineligible"),
+        "tamper: sell-side-only evidence without speculative_grade", 1,
+        "必須同時設 speculative_grade=true")
+    # 影子狀態的第 9 根 + 有獨立證據 → 不是 speculative，既有 session 一位元不動
+    run(_spec(grade=False, fwd_status="ineligible", sell_side_only=False),
+        "shadow-only 9th anchor on a normal export", 0)
 
     # ── cascade label, bonus side ───────────────────────────────────────────
     # Mirror of "cascade label vs penalty_applied". Relabelling a ×1.15 consensus chain

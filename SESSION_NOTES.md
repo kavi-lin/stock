@@ -1,113 +1,152 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-03 (v4.90.4)
+> **Last Updated**: 2026-08-07 (v4.108.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
 
-## 🟢 Session Note (v4.90.0) — C1 統一 lane 資料契約（契約的價值在保留規則，不在形狀）
-- **這塊最容易壞的地方不是形狀，是「被自己的 post-processor 覆寫」。** 契約值域寫錯會被 validator 擋，但 `build_lane_contract()` 若無條件重算，L5/L6/L8 在自己 phase 寫好的 `provenance: "deterministic"` 會在 Step 1.5 被靜默改回 `llm` 預設——契約還在、值域還對、validator 全綠，只是每個 lane 都變成 LLM 產出，而 Phase 6 就是照這個欄位分層的。所以 producer 的規則是「只補 None 的欄」，`test_lane_contract.py` 的保留 case 也最多（含 `llm_invoked=False` 與 `shadow_score=0.0` 這兩個 falsy-but-not-empty 的坑）。**判準：一個純 metadata 欄位的失效模式通常是靜默的，測試要照著「壞掉之後看起來仍然正常」去設計。**
-- **`apply_det_shadow.py --inplace history.json` 會掃過全部 181 筆，不是只有末筆。** protocol 的 Step 1.5 說明寫「寫入最新一筆」，但 code 是 `for entry in payload`。det_shadow 這樣做無害（冪等），契約不行——給 V4.6 的四 lane session 補一份六 lane provenance 就是在稽核軌跡放假證據。所以 producer 收 `entry_version`，只寫 `V5.3+`。**判準：新增一個「事後補寫」的欄位之前，先確認那支 post-processor 實際掃過的範圍，而不是它文件裡寫的範圍。**
-- **red_team 當第六個 lane，不是另立欄位。** L8 條目原本規劃 `red_team_provenance: deterministic_skip`。RT 併進同一張表之後，L8 只要改 `lanes.red_team.provenance` —— 另開平行欄位正是 C1 要消滅的東西。TODO 的 L8 已改。
-- **「勿兩套並存」的實作解**：`det_shadow.valuation_score_det` 有五個現存消費端（shadow_report / bridge / Dashboard / 兩支測試），硬搬會炸一片。做法是**同一次計算寫兩處**（不是兩條計算路徑），validator §15 硬性比對相等 —— 自然漂移不可能，不等只可能是有人手改。舊欄降為別名，等契約全面上線再落日。
-- **原計畫「renderer 三處相容碼在 C1 落地後刪」我沒做，因為那跟「舊 entry 豁免」互相矛盾。** 形狀鎖只對 V5.3+ 生效，而 renderer 讀得到 181 筆 V5.0 以下的 entry；刪了相容碼＝渲染舊 entry 時靜默掉字。刪除的正確條件是「舊 entry 淡出 render 路徑」，不是「C1 落地」。**判準：規劃階段寫下的清理動作，落地時要用實際的資料分布重新驗一次前提。**
-- **e2e 實跑逼出一個我自己種下的偽造面。** 把 FULL EXAMPLE 走一次真 CLI（PM 寫完 → `apply_det_shadow --inplace` → validator）之後，契約長出 `llm_skipped_lanes: [fundamentals, sentiment, news, technical]` —— 因為那份範例從來沒有 `lane_scores`，而我用「有沒有分數」推導 `absent`。protocol 從 V2.10.0 就寫 `lane_scores` 必填，validator 卻從未擋過；於是「少寫一個欄位」＝ 讓四個跑過的 lane 自稱沒產出，事後從 entry 完全看不出來。修法是 V5.3 起硬性要求 `lane_scores`，並把範例補齊（值與 `calculation_steps` 五段乘積一致）。**判準：新欄位若由既有欄位推導，要先確認那個既有欄位真的被強制——protocol 寫「必填」不等於 validator 擋得住。**
-- **順手補的下游洞**：Dashboard `VERSION_COLOR` / tooltip 缺 `V5.2`（L2 當時就漏了）與 `V5.3`，新 entry 會落到 LEGACY 的灰色 `ARCHIVE` badge——最新的 entry 被標成最舊的。
-- **驗收**：`test_lane_contract.py` rc=0（producer 6 組 + validator §15 tamper 19 例）；e2e 走真 CLI（含一筆 V5.0 混在同檔，確認不回填）；`test_session_export_schema.py` / `test_valuation_pack_consistency.py` / `test_decision_engine.py` / `test_trade_plan_builder.py` / `test_render_investment_report.py` / `validate_session_export.py` 全 rc=0；`shadow_report.py` / `replay_decision_engine.py` / `validate_v219.py` 照跑 rc=0；SYNC OK 4.90.0。
-- **未驗**：history 目前**沒有任何 V5.1/V5.2/V5.3 entry**（181 筆全在 V5.0 以下），所以 §15 與 §2e 只在 fixture 上驗過，真實 export 路徑要等下一次 `分析 [TICKER]` session 才會第一次走到。同理 `input_hash` 恆 null、五個非 valuation lane 的 `shadow_score` 恆 null，要等 L9 / L5 才有值。
-- **（4.90.1 review 修正）我把保留規則套到了不該套的欄位上，而且測試把錯的行為鎖了進去。** `lanes.valuation.shadow_score` 的 producer 就是 post-processor 自己，`det_shadow` 那塊又每次整塊重建 —— 對它套「非 None 就不動」等於自己的舊值擋住自己的新值：上游 pack 一改就兩邊分歧、§15 吸收閘**永久 rc=1**，而我寫的錯誤訊息叫人「重跑 `apply_det_shadow.py`」根本修不好，唯一出路是手改契約，正是那道閘要禁止的事。**判準：套保留規則之前要先問「這個欄位是誰產的」——保留只對『外來 producer 先寫好的欄位』成立；同一個 producer 自己的欄位，重算永遠該贏。**
-  - 修法必須是**無條件**同步，不能是「`val_det` 非 None 才覆寫」：`val_det` 變回 None（pack/fvs 都沒了）時，契約守著舊的非 None 值會留下同一個死結。complementary 的一條：其餘五個 lane 的保留規則完全不動，那條界線現在有測試釘著。
-  - **測試把錯的行為當契約鎖住，比 bug 本身更值得記。** 原本那條 `既有 shadow_score 勝過傳入的 val_det` 是我照著「保留規則」的直覺寫的，fixture 還特地捏了一個 valuation 帶外來 `shadow_score` 的狀態——而那個狀態天生過不了 validator。**寫測試時若 fixture 需要捏一個現實中不會出現的狀態才能成立，那多半是在驗證一個不該存在的行為。**
-- **（4.90.2 自審）§15 只驗了契約的內部自洽，沒驗契約對外部事實——兩條繞道實跑全綠。** (A) `lanes.sentiment: null` + session 清單配合列進 skipped → 五欄檢查整組被 `if blk is None: continue` 跳過（註解宣稱 absent_lanes 報過，但那只抓缺 key 不抓 null 值）；(B) 有分數的 lane 手改 `provenance: "absent"` → llm_invoked 一致、清單對齊，全部通過——而 Phase 6 分層會把這筆從 LLM 池靜默剔除，正是 C1 要防的 selection bias。修法：per-lane 檢查改為「key 不在才跳過、非 dict 一律 error」；provenance 雙向錨在偽造者改不動的東西上（lane_scores 受 §13 算術鏈保護、`red_team_execution_failed` 是 schema 必填），推導**與 producer 共用同一條** `compute_polarization().missing_lanes`，兩邊不可能因實作分歧吵架。**判準：一致性檢查若只比對「偽造者可以一起改的欄位」，改得夠齊就能過閘；至少一端要錨在他改不動的外部事實上。**
-- **（4.90.3 複審 4.90.2 自己）我在修漂移面的那次修補裡，親手引入一個漂移面。** 4.90.2 的註解寫「validator 用**同一條**推導」——`compute_polarization` 確實是共用的，但**它的輸入我重寫了一份**（authoritative valuation score 的取值順序）。producer 哪天改取值來源，validator 這份不跟著動，就會對合法 entry 報 rc=1。抽成 `authoritative_valuation_score()` 兩端 import 才算數。**判準：說「共用同一條推導」之前，把那條推導的『輸入』也數進去——共用一個函式但各自餵不同來源的參數，不是共用。**（抄過去時還漏了 `bool` 排除，`isinstance(True, int)` 為真——重寫一份的代價從來不只是「未來會漂」。）
-- **同一輪抓到 4.90.0 那個洞的零售版**：`lane_scores` 只擋了「整塊省略」，`{"fundamentals": 4}` 這種部分省略照樣把三個 lane 推成 `absent`，而 producer 與 validator **一致同意** → 全綠。**「兩邊算出來一樣」不是保護，當兩邊讀的是同一份被動過手腳的輸入時，它只證明兩邊都被騙了。**四個 key 現在必須都在，沒產出的明寫 `null`——與契約「六個 lane 全列、缺席明寫 absent」同一條紀律，只是往上游推一層。
-- **（4.90.4，第四輪 code review）修 P2 時我對症不對病——同一個病三天後在旁邊一格復發。** P2 的修法只把「同 producer 重算贏」用在出事的 `valuation.shadow_score` 上；這輪拿同一判準**逐欄位重掃整張表**，發現 `provenance` 的 `llm`/`absent` 與 `llm_invoked` 一樣是 post-processor 自己的推導、一樣被保留規則鎖住，而且**真實操作序列就會踩到**（PM 漏填 lane score → 推成 absent → 補分數重跑 → 上一輪的 absent 被自己保留住 → §15 的「重跑可修」變謊話）。修法是把界線寫成常數 `EXTERNAL_PROVENANCE`：保留域=外來聲明（det/hybrid + producer_version/input_hash/非 val shadow_score），推導域=自己的輸出（llm/absent、llm_invoked 投影、val shadow_score），L5 shadow 形態（provenance=llm + 外來 shadow_score）有測試釘住。**判準：修一個「規則套錯對象」的 bug 時，不能只把出事的那個對象搬走——要拿同一條判準把規則覆蓋的每個對象重新分類一遍，否則同型 bug 就躺在下一格等著。**
+## 🟢 Session Note (v4.108.0) — 「拒絕判斷」不該是唯一選項;不獨立的證據要標出來,不要假裝獨立
 
-## 🟢 Session Note (v4.89.0) — L4b 條件式 Valuation reviewer（前提實測後被修正）
-- **「沒有數字權 = 跳過不改決策」被實測推翻。** 條目與我收到的規劃都寫「Specialist 的 score 是 pack projection，所以跳過 LLM 不動任何決策數字」。grep 下去發現 `decision_engine.compute_transition_gate()` 吃兩個**純 LLM 欄位**（`cited_transition_overlay` / `transition_dissent_basis`）；lane 不跑 → `cited` 缺 → `valuation_confirmed_transition=False` → Phase 3 cascade rule #2 的 ×0.95 軟化落回 ×0.85（raw_total 100 即 95 vs 85，門檻附近足以翻 BUY/HOLD）。實跑兩次 `compute_transition_gate()` 對照確認。**判準：「這個 lane 有沒有數字權」要看的是 decision engine 讀了它哪些欄位，不是看它的 score 怎麼來的。**修法是加第 5 條 mandatory trigger，不是放寬前提。
-- **方向是保守，但保守不等於沒事。** 跳過會讓懲罰更重（×0.85 而非 ×0.95），是 fail-safe 方向。但這仍然是決策數字被改了——如果只看「會不會變得更敢買」就放行，等於默認「往保守偏移不算 regression」，那條線一鬆，之後任何省成本的改動都可以用同一個理由過關。
-- **`no_peer_cohort` 今天 100% 命中，所以 discovery cache 是核心不是附件。** `config/peer_cohorts.json` 只有 MU 一個 curated cohort。沒有 discovery cache 的話，shadow 數據只會告訴你「每次都該跑」，省不到任何東西也學不到任何東西。
-- **discovery cache 刻意不餵 `build_pe_cohort`。** 只餵 gate。餵下去的話 LLM 發現的 peer 會流進 `valuation_explained_range` 這條 **live 數字路徑**——那超出 shadow-first 的範圍。同理 `record_discovered_cohort()` 對已有 curated cohort 的 ticker 直接拒絕寫入：人工核准的那份永遠贏，不讓兩份悄悄分歧。config 那個檔帶 `approved_by: user`，任何 agent 不得寫入。
-- **validator 擋 `shadow_only=false`（error 不是 warning）。** 翻預設要使用者拍板；把它做成 warning 等於允許某個 session 自己決定然後留一行沒人看的黃字。六種情形逐一實跑驗過（缺 block 靜默、would_invoke 與 triggers 矛盾 → warning、未知 trigger 名 → warning、shadow_only=false → error）。
-- **shadow 窗口我不建議用固定 session 數**：前幾個 session 會被 discovery cache 暖機主導（今天除 MU 外全部命中 `no_peer_cohort`），那段期間的命中率不反映穩態。既有前例在 `shadow_report.py` 裡是兩個具名常數——`ARCHETYPE_CHECKPOINT_N = 20`（翻 live 行為）與 `NEWS_FREEZE_N = 10`（降級後監看）。L4b 是翻 live 行為，形狀接近前者。建議停止規則寫成「discovery 覆蓋率穩定後再數 N」而不是「跑滿 N 個 session」。
-- **驗收**：`test_valuation_reviewer_gate.py` rc=0（5 條 trigger 各自獨立 + 全靜默、mandatory 唯一性、proxy 兩側、TTL 第 30/31 天邊界、拒絕覆寫 curated、壞 cache 不偽裝、artifact 四種不可用 rc=1）；`test_comps.py` / `test_dcf.py` / `test_session_export_schema.py` / `validate_session_export.py` 全 rc=0；live NVDA gate 實跑 would_invoke=true（`no_peer_cohort` + `anchor_conflict_severe`，cv 0.4314 未達門檻但 span 9.73x 達標）；SYNC OK 4.89.0。
-- **review 收尾：補 P3 時測試逼出一個真缺陷。** 三條 P3（缺 `shadow_only` 繞道 / leaf key 只驗 block / protocol 小節插錯位置）都是幾行的事，但補「leaf 值為 null 仍合法」那條測試時炸了——我的 `possible_buy` 寫成 `verdict is not None and verdict not in OVERVALUED_BANDS`，於是 `verdict_band=null`（無 eligible anchor、pack 根本算不出估值）會判成「不是可能 BUY」→ 不叫 reviewer。**估值完全未知 + 資料品質低，正是最該叫人看的情形，我的邏輯卻讓它最不會被叫。**改成 `verdict not in OVERVALUED_BANDS`（null 視為不在高估側）。**判準：寫「非高估側」這種否定條件時，要分開想「已知不高估」與「不知道」——把未知歸到跳過側，等於在最不確定的地方省事。**
-- **未驗**：gate 尚未接進 `shadow_report.py` 的讀出端（它只掃 history.json，要等 session export 真的帶 `valuation_reviewer_gate` 才有樣本）。翻預設所需的統計面板是下一版的事。
+- **緣起**:使用者說「還在虧損、但市場明顯已經在追逐的題材股,需要有特別的一個 anchor 去判斷」。我上一輪的結論是「AAOI 轉盈前結構上拿不到 decision-grade 估值」——`insufficient_anchors` 正在正確地拒絕替一個所有內在價值法都無定義的標的製造數字。那個結論本身沒錯,但它把「拒絕判斷」當成唯一選項。
+- **動手前先驗兩件事**:(a) 八根全滅是**結構問題疊加時序問題**——`pf_quant` 16:39 跑、earnings cache 19:01 才寫入,裡面其實有 `price_target_consensus $160`。修掉時序後仍只有 1 根,所以結構問題是主因,但起點從「0 根救起」變成「只差 1 根」。(b) 上一輪構想的 EV/Sales 分位錨對 AAOI **根本救不了**:`select_valuation_peers` 回 0 家,shadow 層本來就為 hypergrowth 準備的 `peer_ev_sales_implied` 同樣 null。不是方法不適用,是沒有同業中位數可乘——**任何吃 peer median 的設計在題材股上都會重複踩這個坑,因為題材股常常正是「沒有可比同業」的那種股票**。
+- **做了什麼**:第 9 根 `fwd_earnings_discounted`(peer-free:覆蓋 ≥3 家的最遠獲利年度 EPS × justified PE ÷ CAPM 折現)+ `market_implied_revenue`(FCF ≤ 0 時 reverse DCF 的替代)+ Phase 4.6 speculative governor。AAOI:0 根 → 2 根、conf medium、FV $156.56 vs 現價 $133.5。
+- **最關鍵的誠實性取捨**:新錨與 `analyst_pt_consensus` **都源自同一批賣方分析師**,family topology 卻會給它們各一票。我沒有假裝它們獨立(那會讓 confidence=medium 名不副實),而是讓 pack 明說 `evidence_independence.sell_side_only`,由 governor 用**籌碼**回應:size ≤ 1%、conf ≤ 0.70,但 `final_decision` 不動。系統因此從「拒絕判斷」變成「判斷可以,但這個判斷的前提是相信賣方 FY 預估,所以只給探針倉」。
+- **差點重犯的錯**:governor 縮小倉位後,export 會在 validator §14 撞上「倉位必須等於 sizing_chain 鏈尾」——決策放行了卻卡在 Phase 5,等於白做。這正是 V4.86.0 對 decision cap 犯過的同一個錯(當時 cap 讓每一份 export 都被拒)。寫 governor 時同步補了 §14 的合法出路,並加兩條 integrity 檢查防「用新錨解鎖決策卻不掛 governor」。
+- **紀律備忘**:**新增一根 anchor 時,要能證明它沒有動到既有的任何一根。** 初版把 hypergrowth archetype 的權重重新分配來騰出 0.15,`hyper.shadow_wfv` 立刻從 262.91 變 276.65、verdict 翻轉——那是不必要的附帶損害。改成「條件錨的權重掛在 1.0 預算之外」後既有 fixture 全綠,而全綠本身就是「零附帶損害」的證明。同理 #3b 翻轉率報告日後才能把差異單一歸因到「多了這根」。
+- **接著使用者問「clamp 值要怎麼校準」——答案是反解,不是等待**:把公式倒過來得出市場隱含 justified PE(`price × (1+r)^h ÷ target_eps`),即「同一個目標年度 EPS、同一個折現率下,市場實際付幾倍」。實測 11 檔:全母體中位數 36.7、上限 35 實際綁到 8/11、AAOI 的隱含 PE 31.6。做成 `shadow_report.py` 的常設區段 + `test_shadow_report.py`。
+- **為什麼不能沿用 `#2 dispersion` 那套 percentile 手法**:`agreement_grade` 的門檻是**描述性**的,切在它所描述的那個分布上;PE clamp 是**因果**參數,直接決定輸出——拿它自己的輸出來校準它會循環。市場隱含 PE 外生於這根錨,才是合法的校準標的。同理**不可自動跟隨中位數**:泡沫期中位數上移、上限跟著上移,錨就永遠不會說貴——與被我拒絕的 EV/S 分位錨同一個陷阱、方向相反。所以判準只出報告,改值一律 user 核准。
+- **兩個被實測否決的設計**:(a) 校準原本要讀 `history.json`(其餘 shadow section 都讀它),但那要等 session 累積,直接違背「立即可用」這個提案理由——改讀 `*_pf_quant.json`,每次 Phase 1.5 都產出且對 shadow anchor 一樣留有原料。(b) 原本想用 archetype 分層母體,實測 11 檔有 6 檔是 `balanced / rule=no_inputs`(缺 earnings-analyst cache,不是真的不屬於 hypergrowth),拿它過濾會靜默丟掉多數樣本;改用 anchor 自己的 scope 判定——引擎算的、必然存在、定義上就等於「這根錨真正服務的母體」。
+- **今天的判準是 `accumulating`,而那是誠實的**:live cohort 只有 AAOI 一檔。全母體那組(中位數 36.7)只當背景脈絡印出來並明確標註「不是校準目標」,因為 MSFT 23.5x 與 NET 182.7x 混在同一個分位裡沒有意義。
+- **量完之後,兩個常數的問題方向相反**:`FWD_PE_CLAMP` 上限 35 撐得住(全母體隱含 PE 中位數 36.7);但 `TERMINAL_EV_SALES = 4.0` 被我在文件裡誤稱為「成熟中樞」——實測成熟獲利公司 median EV/S 是半導體 13.9 / 通訊設備 8.3 / 軟體 8.0 / 工業包裝 2.8,**4.0 其實在工業水準**。改成雙情境輸出(4x 需 32% / 8x 需 15%),並把 4.0 正名為壓力測試用的規範性假設。**校準的第一個產出常常不是新數字,而是發現舊註解在說謊**——那句誤述會讓人把壓力情境當中性基準讀。
+- **順手抓到 4.106.0 那個家族的第三個實例**:SPCX beta=0(IPO 2026-06-12,歷史不足兩個月)。舊行為讓它落到折現率**下限 10%**,是 11 檔樣本裡最寬鬆的一檔——新上市 → 歷史不足 → beta=0 → 最低折現率 → 最高估值,整條鏈沒有任何一步會報錯。改成 `beta ≤ 0`／缺值 → 母體中位數 2.73(n=14 實測),r=16.9%,anchor $115.18→$99.50(現價 $129,由 +0.2% 轉 −23%)。有效 beta 的標的完全不動。判準記成一句:**無效輸入必須落到保守預設,不是中性預設**(CAPM 的 `beta=1.0` 就是中性預設,對這個母體剛好是錯的方向)。
+- **一個必須寫進 docstring 的限制**:`market_implied_pe` 是「**在我們假設的折現率下**」市場付的倍數,不是無假設的市場觀測——SPCX 的 beta 修正把它從 38.8 推到 45.3。所以倍數校準與折現率校準不能同時做,要先釘住折現率再看 PE 分布。
+- **驗收**:`test_compute_price_framework`(+Fixture 11,約 60 個新斷言)/ `test_shadow_report`(新檔)/ `test_decision_engine`(+Fixture L2)/ `test_session_export_schema`(+§10b 八案例)/ `test_valuation_pack_consistency` / `test_lane_contract` / `test_phase1_factpack` 全 rc=0。實跑對照:AAOI 新錨 live($153.13、3 位分析師、horizon 1.399y)、MSFT 值算出 $452.66 但正確判 `ineligible: cashflow_intrinsic_anchors_live` 且 live FV 394.02 不動。
 
-## 🟢 Session Note (v4.88.0) — L4 估值 quant 提前 Phase 1.5（等價用結構保證，不用比對）
-- **「兩段合併 == 單發」不該靠測試比對，該讓它無法不成立。** 第一個設計是分別寫 quant 路徑與 mhp 路徑，再用 regression 檢查兩者相等——那等於把契約託付給我未來記得同步改兩處。改成把 `main()` 拆成 `build_quant_stage()` + `build_full_output()`，**單發模式本身就是這兩段的組合**，staged 只是把中間物存進檔案再讀回來。等價成了結構事實，測試從此只是防呆而不是唯一防線。**判準：當驗收條件是「兩條路徑必須等價」時，先問能不能讓它們是同一條路徑。**
-- **`compute_mhp` 到底吃什麼，得去讀而不是照 protocol 抄。** protocol 說 MHP 要 technical/news lane 的東西，但實際簽名只讀 6 個欄位（`current_price`/`volatility` + 4 個 qualitative），anchors 是走 `fvs` 進去的。確認這點之後 mhp 段的輸入可以縮成那 6 欄，`MHP_QUALITATIVE_KEYS` 也才有資格當常數釘住——並補一條測試鎖那份名單，名單漂掉會讓分段悄悄漏餵而不報錯。
-- **分段真正的風險不是算錯，是價格漂移。** 兩段之間隔著整個 Phase 2 fan-out（實際上是幾十分鐘）。若 mhp 段重抓 quote/OHLCV，Valuation lane 看過的 pack 就與最終輸出的價格基準不同——數字全對，基準不同。所以 `current_price` 與 `volatility` 在 Phase 1.5 定版並隨 artifact 持久化，mhp 段只讀不抓。同理 `--from-quant` 檔壞掉一律 rc=1：**靜默 fallback 成「用 Phase 2.4 的價格重算」正是這功能要消滅的東西。**
-- **`built_at` 是唯一豁免欄位，而且它本來就不可比。** 兩次單發跑也不會相同（`dt.datetime.now()`）。除它之外連 key 順序都逐位元比——`build_full_output` 的 dict literal 順序就是舊 `main()` 的順序，所以舊消費者看到的 shape 一個欄位都沒動。
-- **順手修了文件裡三處過期的 phase 標籤**（`protocol_appendix_price_framework.md` / `phase5_export_schema.md` / OPS §7）。這批不在原摘要表裡，但留著就是新的自相矛盾——L4 修的就是這種矛盾。
-- **驗收**：`test_compute_price_framework.py`（新增 staged 區段：CLI 兩段合併 == 單發逐位元、6 個 block verbatim 併回、qualitative 全缺降級不擋、artifact 壞掉/schema 不符/缺 block/旗標誤用四種 rc=1）、`test_valuation_pack_consistency.py`、`test_session_export_schema.py` 全 rc=0；**live NVDA 實跑**（`--self-assemble --stage quant` → `--stage mhp`）與單發輸出 bitwise identical，20 個欄位自組、fv 150.71、band [177.09, 203.09, 210.0]；SYNC OK 4.88.0。
-- **未驗的邊界**：live 對照是在收盤時段跑的，兩次 quote 相同，所以「價格凍結」這條在**盤中**的真實行為（單發會漂、staged 不會）尚未實測——那正是分段的價值所在，但也意味著盤中跑時兩者本來就**不該**相等。下次盤中 deep dive 時值得記一筆實際落差。
-- **review 收尾：一條紙上機制被新時序推成明確的假話。** `suppression_proposals[]` 全庫零消費端（只出現在 protocol 兩行），engine 真正的 suppression 閘是 `structural_shift` typed input，來源是 earnings-analyst cache 不是 lane。這在 L4 之前就是虛文；但 L4 之後 pack 在 lane 之前定版，「proposal 影響 pack」從「沒接線」升級成**結構上不可能**。改標 advisory / audit-only + 指明真正的閘在哪。**判準：改動時序之後要回頭掃一遍「誰的輸出流向誰」的敘述——原本只是沒實作的句子，可能已經變成明確錯誤的句子。**
+## 🟢 Session Note (v4.107.0) — mtime 不是新鮮度,除非「寫入」等於「內容真的變了」
 
-## 🟢 Session Note (v4.87.0) — L3 Phase 5 deterministic renderer（原假設被實測推翻）
-- **條目寫「history entry → MD」，實測發現 history 撐不起這份報告。** 動工前先逐欄比對 MSFT/MU 兩筆真 entry 與它們的 MD：五個 lane 的 `risk_flags` **全部**沒持久化、`key_factors` 只有 news 有、`sentiment_lane` 整塊不存在、per-lane raw signal/confidence 只有 valuation 有。單輸入會讓報告掉約 80 行——而那 80 行正是人真正在讀的證據段。**判準：backlog 條目描述的是動工前的理解，動工第一件事是驗證那個理解還成立。**這跟 4.83.0 記的「UI 類 TODO 先 grep 現況」同一形狀，但這次過期的不是 UI 狀態而是**資料模型假設**，代價大得多。
-- **修法選「多一個 artifact」而不是「改 schema」，理由是避免跟 C1 對撞。** 把 lane 欄位補進 export schema 看起來更乾淨，但「per-lane 該持久化哪些欄位」正是 C1 要定的主題——現在定等於預判 C1 的設計，C1 落地時同一塊結構要再遷移一次、向後相容矩陣做兩遍。**判準：當一個修法會替尚未定案的上游決策先做選擇時，改走不預判的那條路，即使它多一個中間產物。**缺口清單已原文寫進 C1 條目當 design 輸入，`phase_inputs/` 那批檔案順帶成為 C1 的實測樣本。
-- **雙輸入的代價是兩源漂移，所以硬閘先於渲染。** bundle 與 history 重疊 12 欄，任一不符 rc=1 且**不產出任何檔案**。最有價值的是拿 `calculation_steps` 的 step 字串當證人——那裡記著決策數學實際吃到的 score 與量化後 c_eff，比兩份 JSON 互比更接近真相。
-- **硬閘第一版就差點誤判每一筆 CONFIRMED entry。** MU 的 `calculation_steps.val` 是 `0.15 × -1.5 × 0.60 = …  // Step 1.5 CONFIRMED: … score 0.0 → -1.5`，而 `valuation_lane.score` 是 0.0——兩者**應該**不同，那是 Step 1.5 的設計。若照「step 分數必須等於 lane 分數」硬比，每筆 CONFIRMED 都會被判漂移。改成：帶 `//` 註記的 step 只驗 c_eff 不驗 score。**教訓：寫一致性檢查時，先找出「合法的不一致」有哪些，否則檢查會把設計當成 bug。**
-- **`--polish` 的真正風險是編數字，不是文筆。** 三道守衛裡數字圍堵最關鍵：潤飾段每個數字都要能在事實集合裡找到（含百分比與 0-4 dp 四捨五入形式）。寫測試時我第一版拿「Azure +43%」當假數字，結果守衛放行——查下去 43 確實在 bundle 的 news key_factors 裡，**守衛是對的、我的 fixture 挑錯數字**。換成 91.7% 才真的測到。**判準：負向測試要先確認「那個壞值真的壞」，否則測到的是自己的誤解。**
-- **全部守衛 fail-open**：LLM 回非 JSON、router 拋例外、段落夾帶 `#`／`|`／HTML 註解、數字編造——一律丟棄該段回退制式句，rc 恆為 0。報告永遠產得出來，polish 只能讓它更好看不能讓它產不出來。
-- **review 之後：量了才知道數字圍堵比我寫的說法弱。** reviewer 指出「上漲 9%」這種小整數百分比會被 `≤12 豁免` 放行，我去收緊「帶單位不吃豁免」，結果測試還是綠的——查下去發現 **9.0 / 7.0 / 8.0 本身就是 entry 裡的原始數字**，而且一筆 MSFT 的事實集合覆蓋 1–30 幾乎所有整數（原始值 + 大數字 0-dp 四捨五入）。也就是說 reviewer 提的修法治不了他提的症狀。**教訓：收緊一道檢查之前先量它現在到底擋掉多少，否則你改的是自己想像中的守衛。**最後做三件事：單位規則照留（豁免不該無條件給）、移除 `_fact_forms` 的 `v/100` 分支（prose 不會把 6.47 寫成 0.0647，那分支純粹放寬）、**把上限寫進 docstring 與測試**——擋的是「從無到有」，不是「剛好撞上」。
-- **回填只回填得起的那一份。** phase_inputs 樣本數為零違反這功能自己立的教義，所以回填 MSFT（內容逐字取自已發布報告，標 `provenance.captured=backfill`，過硬閘 0 error）。**MU 刻意不回填**——它在測試裡的 lane 證據是我為了測 calculation_steps 硬閘現編的合成資料，寫進稽核目錄等於放一份假 Phase 2 證據。已發布報告一律不覆寫。**判準：補樣本是為了讓稽核軌跡完整，用假資料補會讓它比空的更糟。**
-- **驗收**：`test_render_investment_report.py` A-F 六組 rc=0（golden 逐位元穩定 + FACTS 與 `inject_report_facts` 同源、decision-lock 逐項到頁、12 欄逐一漂移偵測、Step 1.5 覆寫不誤判、polish 三守衛含圍堵上限、CLI rc=1 不產檔）；`test_trade_plan_builder.py` 補 Fixture R 6 組補上 4.86.2 反解 cap 的零覆蓋；MSFT 347 行 / MU 307 行實渲染（輸出到暫存區驗證，未覆寫已發布報告）皆過 `validate_markdown_export.py` rc=0；SYNC OK 4.87.0。
-- **覆蓋率邊界（使用者要求明寫，免得「測試全綠」被誤讀成「真實資料驗證過」）**。收尾時掃了全庫 172 筆 trade：**渲染 172/172 不崩、逐筆過 `validate_markdown_export` 172/172、0 筆輸出 <150 行**——形狀相容性是真的驗過了（那三處相容碼本來就是加第 2 筆才逼出來的，掃完其餘 170 筆沒再冒出第 4 種形狀）。但兩條路徑**仍靠合成 fixture 撐著**：(a) `calculation_steps` 全庫只有 **2 筆**，且 corpus 裡**沒有任何一筆 stamped V5.1**，所以硬閘最強的那半（比對 step 字串的 score / c_eff）真實樣本 = 1 筆 MU；(b) replay 反解的兩個 Phase 3 cap 在真實語料裡**全部是 100/100**（factor 1.0），Fixture R 的 50/25 路徑六組全是合成的。另有 **94 筆（55%）是 V4.6/V4.8 4-lane 時代，沒有 MHP / fair_value_summary**，渲染出來 §6 整段 N/A——骨架正確但不適合拿去回填舊報告。這三條都要等實際跑幾次 deep dive 才會長出真樣本，與 `phase_inputs/` 樣本數同一情況。
+- **緣起**:4.106.0 修完,使用者問「剩下的所有 anchor 各是什麼」。逐根盤點八根時發現第 8 根 `forecaster_blend` 是**同一個 pattern 的第二例**——`compute_price_framework.py:1330` 只做 `os.path.exists`,protocol `:582` 列了生成指令卻沒人跑。補進 factpack prewarm(0 LLM、4h TTL、命中 0 call),MSFT 實測 `anchors_available` 8/8、`forecaster_blend $598.42`。
+- **我自己踩的坑**:初版新鮮度判斷寫成「earnings cache 比 forecaster cache 新 → 強制 refetch」。恆真。因為 `analyze.py` 每次都**就地改寫** earnings cache,mtime 永遠是「剛剛」。結果每跑一次 protocol 就多一次完整 refetch,MSFT 27.6s。是實跑時間異常才抓到——測試不會抓,因為它 mock 掉 subprocess。
+- **修法**:改由 `prewarm_earnings_cache()` 解析 `fetch.py` 自己在 stderr 宣告的 `cache hit:` / `wrote`,回傳 `(status, refreshed)`。fetch.py 的 cache key 是 `(TICKER, last_earnings_date)`,它的決定才是「季度有沒有換」的權威。修後 1.33s。
+- **紀律備忘**:**mtime 只在「檔案被寫入 == 內容有意義地改變」時才是新鮮度訊號。** augment-in-place 型的 cache(analyze.py 這類把 derived 欄位寫回原檔的流程)一律不成立。要嘛用內容鍵,要嘛讓真正做決定的那一層自己回報。另外:這種「成本 bug」不會讓任何測試變紅,只會讓每次執行慢一點、多燒一點配額——只能靠實跑計時抓。
+- **順帶釐清**:使用者問「8/7 財報 EPS 明明是 0.06,為何系統說負的」。$0.06 是**非 GAAP 單季**(beat $0.03 est),系統用的是 **GAAP TTM** −0.78(−0.28/−0.19/−0.03/−0.28 四季相加),FMP 的 `priceToEarningsRatioTTM` 也是 −159.5。`forecast.py:1114` 明訂 TTM EPS ≤ 0 時 PE-multiple math 無效。兩個數字都對,基礎不同;`peer_pe_implied` 掛掉是同一個原因。
+- **一個未收口的洞**:cache 缺席時 `valuation_reviewer_gate` 的 `transition_case_active`(五個 trigger 裡唯一 mandatory)會讀到 `transition_case=False`——把「沒查過」渲染成「查過了不是」。protocol 判讀規則已加註,但 gate 本身仍不區分 false 與 unknown,列為待辦。
+- **驗收**:`test_phase1_factpack.py` 擴到 27 案例(新增換季旗標、forecaster 五條路徑);MSFT 8/8 錨、AAOI 回報 `unavailable: negative_or_missing_ttm_eps`;穩態計時 MSFT 1.33s / AAOI 2.60s。
 
-## 🟢 Session Note (v4.86.2) — P3 尾款四件（sector 同義詞 / 反解漏 cap / spec 補值 / backoff 釘死）
-- **兩個標成 P3 的其實會產生錯誤數字，不只是噪音。** sector 同義詞看起來是「消 warning」，但四個 FMP 拼法裡三個落在保守側只是吵，`Consumer Defensive` 是**真的誤類**——staples 被當 cyclical 收緊停損。反解漏 cap 看起來是「replay 精度」，實際是一筆 50/25 雙 cap 的 entry 會偽裝成 `matched`（實測 size 5% 應反解出 40% base、超上限，修前 matched 修後 mismatched）。**判準：P3 的嚴重度標記是憑第一印象給的，動工時要用「這條會不會讓某個數字錯」重問一次。**
-- **backoff 那條原本的修法會失效，寫測試前先在紙上跑才發現。** 我第一版用 `fetched == 0` 當 outage 判準：全批失敗 = FMP 掛了，就不累計 streak。但第二輪之後殘餘批次**只剩那些永遠空的 symbol**，`fetched` 必然是 0 → 永遠判成 outage → 隔離永遠不會發生，正是要修的情境。**教訓：用「整批表現」推斷單一 symbol 的性質，在殘餘批次收斂之後必然失真。**改成讓 `_fetch_pe_ttm` 直接分辨「三個 endpoint 都回了、都沒 row」（`PE_ABSENT`）與「根本沒答」（`None`）——這是 4.85.0 那條「加 retry 之前先讓函式有能力表達失敗」的下一格：**先讓函式有能力表達「答了但沒有」，重試策略才有東西可依據。**
-- **反解的兩種缺值要分開處理。** V5.1+ 的 cap 躺在 `calculation_steps` 裡但欄位讀不到 → 退出 cohort（不假設 1.0）；pre-V5.1 根本沒紀錄 → 仍假設 1.0，但寫成具名 factor 進輸出。**「無從得知」與「讀取失敗」的降級方向不同：前者標記後續行，後者退出。**
-- **驗收**：`test_trade_plan_builder.py`（sector 補 5 條）/ `test_heatmap_pe_retry.py`（補契約 6、7：空資料隔離 + outage 不得隔離）/ `test_decision_engine.py` / `validate_session_export.py` / `replay_trade_plan.py` 全 rc=0；replay 三 cohort 覆蓋數與修前一致（eligible 47、mismatch 0）；OPS §7 heatmap 那列同步新契約；SYNC OK 4.86.2。
+## 🟢 Session Note (v4.106.0) — 只讀不生的快取依賴,會在「當天發財報」那天靜默崩掉
 
-## 🟢 Session Note (v4.86.1) — `sized_for_decision` 防偽收尾
-- **我為了修 P1 引入一個豁免欄位，然後只測了它會報錯的那一側。** `sized_for_decision` 的作用就是覆寫 STAGED_ENTRY 折半規則，所以在 STAGED_ENTRY 的 export 上宣告 `"BUY"`，兩倍大的鏈就原地過關（實測 errors=0）。tamper 測試蓋的是「sized_for=STAGED 但沒折半 → rc=1」，那是**會觸發檢查**的方向；漏的是**把檢查關掉**的方向。**判準：一個用來豁免某條規則的欄位，最該測的是它被拿來濫用豁免的情形。**這跟 4.81.0 記的「tamper 要包含標籤說謊而不只是數字說謊」是同一個形狀——同一課我在新欄位上又犯一次，說明那條教訓當初只記成了「cascade 標籤」的特例，沒抽象成「凡是能改變檢查行為的欄位都要反向測」。
-- **第一次重現失敗，差點誤判成不存在**：照 reviewer 的描述постро fixture 直接跑，結果 rc=1，看起來像是已經擋住了。細看錯誤訊息才發現擋它的是 §13 的 band 可達性（fixture 的 final_score 2.1888 band 到 BUY，STAGED_ENTRY 本來就不可達），跟 §14 無關。改用 `run_phase3()` 現跑一條**真的落在 STAGED 帶**的鏈（final_score 1.08）才暴露出來。**教訓：rc=1 不等於「被你想測的那條規則擋住」，要讀錯誤訊息確認是誰擋的。**新的 `staged_entry_fixture()` 就是為此存在，並且在 engine 不回 STAGED_ENTRY 時直接讓測試紅掉，不讓 fixture 悄悄退化。
-- **修法是列舉合法分歧而不是放寬**：Phase 4 定倉之後能合法改寫決策的只有兩件事（`approval=REJECTED`、`decision_cap_active=true`），其餘一律要求 `sized_for == final_decision`。實跑 builder 三種決策輸入確認都自然滿足這條，不會誤傷正常路徑。
-- **驗收**：schema battery 55 條（新增逃逸方向 5 條）；8 支測試 + validator + 兩個 replay 全 rc=0；builder 實跑 BUY / STAGED_ENTRY / HOLD 三種輸入 `sized_for` 皆與 `final_decision` 一致；SYNC OK 4.86.1。
+- **緣起**:使用者問兩件事——「為什麼 V5.3 的卡片沒有現股估值跟未來前瞻」、「今天 AAOI 的個股分析有參考今天的財報嗎」。追下去是同一條線。
+- **卡片空白**:`page-decisions.js` 的版本閘是列舉白名單 `version === 'V5.0' || version === 'V5.1'`。4.90.0 把 schema 推到 V5.3 時只補了 `VERSION_COLOR` 色票、漏補這行,V5.2/V5.3 卡片因此整段 Layer 3(現值估值 + 未來前瞻)與 Red Team 區塊不渲染。資料一直好的(`data.json` 的 `forward_expectations.range` 三點俱全)。改成 `versionAtLeast()` 數值比較。
+- **估值 0/8**:protocol 從來只**讀** earnings-analyst cache,沒有任何一步會**生**它——`phase1_factpack.load_earnings_bundle()` 與 `compute_price_framework._latest_earnings_cache()` 都是純 glob + fail-soft。AAOI 當天發財報,16:39 Phase 1.5 跑時 cache 還不在(`pf_quant` 的 `earnings_asof` 為 null、lineage 寫成 `earnings_analyst:AAOI:unknown`),8 個 anchor 全 `missing_or_nonpositive_value` → `insufficient_anchors` cap。16:59 的 forward_expectations 快照已讀到 Q2 數字——cache 是在估值 pack 凍結**之後**才生出來的。修法:factpack 讀 bundle 前先跑 `fetch.py` + `analyze.py`(0 LLM)。
+- **順手挖到的第三個**:`us-stock-analysis/analyze.py` 的 bundle merge 用 `locals().get(block_name)` 解析目標,`_derive_from_bundle()` emit 的 5 個 key 有 **3 個對不上區域變數名**(`margins_cash`/`earnings_calendar`/`balance_sheet`),覆寫算完就被丟掉。所以 bundle 就算新鮮,margins 仍然輸給 yfinance。另 `revenue_yoy_pct` 只走 yfinance `info.revenueGrowth`,該欄位落後財報發布(報告寫 +51.4% 是 Q1,FMP 當下已是 Q2 的 +86.4%)。
+- **紀律備忘**:三個 bug 共用一個形狀——**失效方向都是靜默且 fail closed 在最新的資料上**。列舉白名單對新版本 fail closed、`locals()` 對改名 fail silent、fail-soft 的快取依賴對「今天剛發生的事」fail silent。`fetch.py` 自帶 `(TICKER, last_earnings_date)` 快取閘,所以「先確認再撈」不必另接 calendar:income-statement 的最新日期回答的是「數字可查」,calendar 只回答「已宣布」,anchor 要的是前者。
+- **驗收**:新增 `test_phase1_factpack.py`(13 案例,鎖 fail-soft 五條路徑 + fetch 失敗必須不跑 analyze)與 `test_bundle_merge.py`(15 案例,鎖 registry 與 emit 端漂移;此測試在撰寫當下就抓到我 registry 少一格 `balance_sheet`)。既有 `test_compute_price_framework` / `test_lane_contract` / `test_valuation_pack_consistency` 三支 rc=0。AAOI 實跑:`revenue_yoy_pct` 51.4→86.42、`gross_margin_pct` 接上 28.92、prewarm 快取命中 1 FMP call ~1s、無效 ticker 走 fail-soft 不中止。
 
-## 🟢 Session Note (v4.86.0) — 4.82–4.85 review 修正（1 P1 + 7 P2）
-- **八條先逐一複跑重現才動手**，沒有照單全收。結果全部屬實，但有一條的嚴重度我下修了：reviewer 說 §14 有「三條路徑全炸」，實測第三條（probe capped）的失敗是 fixture 產物（那條鏈是照 BUY 算的），probe 分支本身是對的。P1 是**兩條** Phase 4.6 路徑。**判準：確認 bug 為真之後，仍要確認它的邊界在哪。**
-- **七個 P2 裡有五個是我自己在 4.82–4.85 引入的**，其中兩個是同一種病：**修了 A 卻打開 B**。`_fetch_pe_ttm` 的失敗語意一改，radar 懶抓那條路就從「每天 3 個 call」變成「每小時 60 個、無限期」，因為它的重試原本就是靠「失敗會被快取」這個副作用擋住的。**教訓：改共用函式的失敗語意時，先列出所有呼叫端，逐一問「這條路的重試由誰負責」**——radar 的答案是「沒有人」，而我在程式註解裡寫的是「warm-up 的 sweep 會管」，事實上那個 sweep 只掃 universe。**註解寫了一個我沒驗證的機制，這比程式錯更危險，因為下一個人會信它。**
-- **cooldown 跨日被清除是最刺的一條**：我當時就在重寫那個 rollover 分支、還特地寫了「時間戳不能歸零」的長註解，卻只搬了 `call_timestamps`，沒問「同一個 blank 重建還丟掉了什麼別的、也不屬於 UTC 日的東西」。**判準：把某欄位從「隨日重置」救出來時，要掃過同一個 reset 裡的每一欄，逐欄問它到底屬不屬於那個週期。**
-- **P1 選擇補欄而不是放寬檢查**：Phase 4.6 改寫決策後，`final_decision` 不再能解釋 sizing 鏈（折半該不該套）。可以把檢查放寬成「兩種都接受」，但那會讓真正該折半卻沒折半的鏈也過關。改成讓 engine 記下 `sized_for_decision`（它自己的輸入），檢查照舊嚴格。**歧義的正解是消除歧義，不是接受兩種答案。**
-- **有一條刻意不修**：window 管不到 protocol subprocess 路徑（`note_run` 一次 agentic run 只記 1 筆，實際幾十到幾百 turn）。把那條路納管會讓使用者主動點的操作被背景配額擋掉——那是行為變更，該由使用者定奪。我只把 docstring 改成事實（「governed calls，不是 API turns」）並明講依此 cap 對應 provider turn budget 保護不了那條路。**說謊的 docstring 要修；要不要改行為是另一個決定。**
-- **併發鎖補在對的層**：`llm_usage.json` 的單次寫入本來就 atomic，壞的是 read-modify-write。flock 加在**獨立的 `.lock` 檔**上，因為 `os.replace` 會把 usage 檔的 inode 換掉，鎖在它自己身上沒有意義。
-- **驗收**：8 支測試 + 3 個 validator/replay 全 rc=0；`test_session_export_schema.py` 50 案（新增 §14 × Phase 4.6 五案）；router 新增 cooldown 跨日 / 過期不復活 / >48h window / 時鐘故障 / roundtrip / 24 執行緒併發；heatmap 新增 mid-batch 429 partial / 非重入 / lazy retry floor。commit 排除 `data.json` / `llm_usage.json` 兩個 runtime artifact（上一版夾帶進去被 review 點名）。SYNC OK 4.86.0。
+## 🟢 Session Note (v4.105.1) — 預算閘不能把「永遠不會被消耗的需求」算進未來需求
 
-## 🟢 Session Note (v4.85.0) — heatmap PE warm-up 重試（V325.X-PE-WARMUP-RETRY）
-- **TODO 描述的症狀對，病因更嚴重**：記的是「cache 空到下次重啟」。實際讀 code 發現 `_fetch_pe_ttm` 在 429 熔斷期回傳**全 None 的 dict** —— 跟「這支股票本來就沒 P/E」完全同形。而 `val_snapshot` 的過濾條件是 `isinstance(v[1], dict)`，全 None dict **通過了**。所以失敗值不只被快取 24 小時，還會被當成事實**蓋掉既有的好值**。**教訓：修 bug 前先讀清楚失敗值長什麼樣，不要照 TODO 的描述直接動手。**
-- **根因是型別分不出兩件事**：「抓到了但沒有資料」vs「根本沒去抓 / 抓失敗」在原本的回傳型別上是同一個東西。加 retry 之前要先讓函式**有能力表達失敗**（改回 `None`），否則重試邏輯只是在重試一個它以為成功的東西。
-- **失敗不進快取，比「快取失敗但標記」更簡單也更安全**：舊值留著就是最好的降級（stale 好過空白），而失敗的 ticker 自動落回 `todo`（因為 `not isinstance(cached[1], dict)`），不需要第二份失敗清單。
-- **429 熔斷不該計 backoff**：熔斷期根本沒發請求，記一次失敗是懲罰錯對象；改成把下次嘗試時間對齊熔斷解除時間。
-- **兩個 caller 都要修**：radar 的 lazy fetch `_bg()` 也在快取 None，會佔住 24h TTL 並讓 warm-up 的重試掃描看不到那支 ticker。
-- **驗收**：`tests/test_heatmap_pe_retry.py` rc=0（部分失敗 / backoff 抑制 / 補抓不重抓已成功者 / 失敗不洗掉好值 / escalate 且有上限 / 429 不計失敗 / 全暖零 HTTP）；`dashboard_server.py` 語法 OK；SYNC OK 4.85.0。
+- **現象**:使用者發現 `/break-news.html` 最新辯論停在 2026-08-04 23:56,已 2+ 天靜默無新辯論。`dashboard_server.py` 的 poll/debate 兩條 daemon 執行緒都活著、health check 200、`last_status` 全程顯示 `ok`——沒有任何錯誤訊號可查。
+- **根因**:`poller._auto_budget_limit()` 把 `_pending_backlog_count()`(無條件數所有 `pending_debate` 狀態項)乘 `EST_CALLS_PER_DEBATE` 當「未來呼叫需求」去扣減可用額度。但 `debater.scan_pending()` 只吃 `age <= PENDING_MAX_AGE_HOURS`(2h)內的項目——超齡項目永遠留在 `pending_debate` 等人工 triage,根本不會被自動辯論消耗。backlog 累積到 43 筆(最舊回溯到 2026-05-27,全部早已 stale)後,`43*2=86` 恆大於當下 headroom,`model_debate_capacity` 卡死在 0 → 新 admission 恆 0 → backlog 只增不減 → 自我鎖死,永遠不會自然恢復。
+- **修法**:`_pending_backlog_count()` 改用與 `debater.py` 相同的 `PENDING_MAX_AGE_HOURS` 判準(同一個 env var,新增同名常數保持同步),只數「debater 實際還會處理」的新鮮 backlog。修前 `43`(`model_debate_capacity=0`),修後 `0`(`model_debate_capacity=32`)。
+- **紀律備忘**:兩個獨立的「stale 判準」(一個決定要不要處理、一個決定要不要算進預算)只要不同源,就可能互相打架且互相看不見對方——這類 silent deadlock 不會出現在任何 error log,只能靠「預期行為 vs 實際數字」的落差抓到。43 筆歷史 stale backlog 本身沒清,留給使用者透過既有的 `list_stale_pending()` 手動 triage。
+- **驗收**:`tests/test_break_news_v4.py` 3 passed(1 個既有無關失敗,stash 前後行為一致,非本次改動所致);修前後 `_pending_backlog_count()` / `_auto_budget_limit()` 手動對照數字。
 
-## 🟢 Session Note (v4.84.0) — model router rolling window（V321.X-ROUTER）
-- **本版最重要的一行是「不要歸零」**：`_load_usage()` 原本在 UTC 換日時整份重建。日計數該歸零，但 `call_timestamps` **不能** —— session window 不理會午夜，跟著清空等於在 00:00 UTC 憑空發還一整個 window 的額度，正好是這個計數器要防的事故。這是整個功能唯一真正微妙的地方，測試特地寫了一條跨午夜案例。
-- **測試通過但功能沒生效，抓到的是最典型的一種假綠燈**：`--status` 顯示 `window_max_calls: null`，查下去發現 `load_llm_config()` 是**逐鍵白名單**不是 merge，只複製 `daily_max_calls`，我新加的兩個 key 被靜默丟掉。單元測試全過是因為它們餵手搭的 cfg dict，繞過了 loader。**教訓：新增 config key 一定要有一條走真 loader + 真 config 檔的 end-to-end 斷言**，否則測的是自己餵進去的東西。已加，並寫進 OPS §7。
-- **降級方向再次一致**：時鐘偏移到未來的時間戳「照算」（丟掉會少算 window）、naive timestamp 當 UTC 讀（丟掉同樣少算）、解析失敗的才忽略。原則是**寧可少給額度也不要多給**。
-- **兩道閘獨立而不是取代**：daily budget 與 window 各自能單獨擋下一個 model，`model_headroom()` 回較緊者 —— 呼叫端打算連發 N 次時，不能被日額度騙過去。
-- **只有 session-window 制的 CLI 設 window**（claude / codex）；gemini / grok 是 per-minute rate limit，硬套 5hr window 是張冠李戴，留空 = 不設閘（與 `daily_max_calls` 缺/0 同慣例）。
-- **驗收**：`test_model_router_window.py` rc=0（含跨午夜、舊 shape、corrupt 檔、loader end-to-end）；`--status` 四個 model 的 window 欄位皆正確（claude 0/120、codex 0/80、gemini/grok null）；`/api/llm-config` POST 的 merge 不會洗掉新 key；SYNC OK 4.84.0。
+## 🟢 Session Note (v4.105.0) — tab 是縫合痕,不是資訊架構
 
-## 🟢 Session Note (v4.83.0) — decision badge 改吃決策時真值（V20-A5）
-- **TODO 過期了，動工前先查證**：V20-A1 / A2 寫著「已存 data.json，UI 沒秀」，實際上 badge 與 `SIGNAL_TIPS` 兩邊都在，更早的版本就做掉了（`ALIGNED` / `unclassified` 兩個良性值刻意不發 badge，與 `macro_alignment` 只標 CONTRARIAN 同一慣例——那是設計不是遺漏）。**教訓：UI 類 TODO 動工前先跑一次 grep 確認現況，backlog 會比 code 舊。**
-- **但 A5 不是「只省一層 `.det_shadow`」**：renderer 原本**只**讀 `det_shadow`，那是 `apply_det_shadow.py` 事後補寫的 shadow；V5.1+ entry 的 `calculation_steps` 才是決策當下真的動了分數的值（confidence 乘數 / position cap / buy_threshold / cascade 罰則）。兩者理應相同但來源不同，badge 顯示錯的那個不會有人發現。改成 **決策時優先、shadow fallback**，並把 `*_source` 一起送出去。
-- **有了兩個來源就該驗它們一致**：加 `*_disagrees` + 兩個 SPLIT badge（與既有 `RT DISAGREE` / `VAL DISAGREE` 同一套視覺語言）。不一致代表後處理跑的時候看到的 lane scores / counter_thesis 文字跟決策當下不同 —— 通常是 entry 被事後編輯。現行 172 筆 0 不一致（健康），但這是往後才會用到的哨兵。
-- **fallback 留著是為了不綁 bridge 重跑**：renderer 讀不到攤平欄位就退回 `det_shadow`，還沒重生成的 `data.json` 照樣渲染。
-- **驗收**：`bridge.extract_audit_history()` 實跑 192 筆，2 筆 source=calculation_steps（V5.1 那兩筆）、67/170 筆 source=det_shadow、0 筆 disagree；`node --check` 兩檔語法 OK；SYNC OK 4.83.0。
+- **緣起**:使用者問「為什麼盤中要分兩個 tab」。盤點確認:mood 面板先出、eval hub 後出,tab 是合併時的縫合痕。實害三條:警報/擊殺橫幅鎖在 mood tab(停在策略 tab 看不到)、盤中分數與三大 ETF 兩處各顯示一次、ideas 表(10 分 lane)與 spike 卡(60 秒 lane)同源不同步會互相矛盾。
+- **修法**:單頁重排「決策→環境→個股→策略→板塊」;重複顯示各留較深的一份(ETF 深度卡>stat 格);ideas 只留熱圖領漲;族群統計升級密集卡(名/均幅/N 檔·上漲%/領漲 chips)。`#mood` 錨點保留讓 redirect 殼不斷鏈。
+- **紀律備忘**:「連 N 窗」因 history API 無族群層資料而略過——前端需求不做穿透後端的擅自擴充,列 TODO 由使用者決定。
+- **驗收**:fresh-context 逐行對帳 git diff(433+138 行),「搬丟的東西=0」;id 交叉核對(驗收者自寫腳本)44/44 存在;雙 JS node --check rc=0;4.104.1 推播三事件源確認完好。
 
-## 🟢 Session Note (v4.82.0) — Phase 4 script 化（TODO L2）
-- **起因**：Phase 3 已在 4.80.0 script 化，Phase 4 是最後一塊仍靠 LLM 手算的決策數學（九段乘法鏈 + 兩張查表 + 一個條件 reject + 兩個獨立導出的停損價要調和）。
-- **先跑 feasibility 再定分母，這次證明是對的**：動工前掃 172 筆 history —— `vol_adjusted_limit_pct` 持久化 **0 筆**、`tail_risk_score` 1 筆。sizing 鏈根本無法前向 replay，硬做出來的「100% parity」會是假的。改用 **inverse solve**（把已知乘數除回去、檢查隱含 base 是否落在 (0, 20%] 可行區間），47/172 全過。**教訓：replay harness 的第一步是量分母，不是寫比對邏輯。**
-- **`min()` 不可逆這件事值得記**：macro cap 是 `min(tail_adj, 0.03)` 不是乘法，鏈上只留數字就無法從尾部反推它有沒有觸發。這批 trade 直接整批排除（`macro_cap_min_not_invertible`）而不是硬解一個假因子。存 `sizing_chain.steps[]` 就是為了讓未來的 entry 不必再走這條退路。
-- **replay 抓到 engine 的真 bug**（不是它本來要找的東西）：`band_capped` 是 `[max(band_lower, support), band_point, min(band_upper, resistance)]`，support 高過 band_point 時兩軌會產出 `[高, 低]` —— 歷史上 AAPL/PLTR/TSM 三筆命中。**教訓：replay 跑歷史資料時，異常的「replay 值」和異常的「stored 值」一樣值得看。**我第一眼只在讀 stored 那欄。
-- **rule-era 一開始標錯，rc=1 是假的**：R/R cohort 我先寫死 `era="current"`，40 筆全變 NEEDS_TRIAGE。但 V4.82.0 之前根本沒有任何 script 強制 entry = band 或 R/R = 區間隱含值 —— 那 40 筆量的是本版要消除的漂移，不是 engine 缺陷。三個 cohort 統一綁 `CURRENT_RULES_SINCE`。**判準：問「這條規則當時存在嗎」，不是「這個欄位當時存在嗎」。**
-- **protocol 有三處原文沒定義，script 化才浮出來**：① `base_stop_pct` 從未被獨立定義（採「結構停損價相對 entry reference 的百分比」，唯一能讓 Step 1 與 Step 4 談論同一個部位的讀法）；② binary `× 0.5-0.7` 是區間，一律取保守端 0.5 才可重現；③「R/R 不足 → 收緊 entry 或降級 HOLD」沒說收到哪，定為 aggressive 中點 → conservative 中點 → conservative 下界。**三處都寫回 protocol，不是只寫進 code。**
-- **降級一律往保守側，且要說出口**：tail_risk 拿不到時取 `MODERATE ×0.75` 不取 ROBUST（把最大乘數給最不了解的情況）；表外 sector 取 cyclical；day-21 reject 的 RS/distance 兩個輸入都缺時「不 reject 但維持 ×0.50」並註記「無法判定」——**缺料 ≠ 通過**。同理 F1 registry 不可得時標 `registry_unavailable` 而不是回報 0 個部位。
-- **順手補一個洞**：`fragility_label` 值域從來沒驗過（§6 只驗非 null），歷史上有 6 筆用了表外標籤（`RESILIENT` / `MEDIUM`），Step 3 乘數無從對應。是 replay 的 sizing cohort 排除表跳出來的。
-- **驗收**：`test_trade_plan_builder.py` 17 組 rc=0；`test_session_export_schema.py` 45 條（含 18 條新 §14 tamper）rc=0；`replay_trade_plan.py` 三 cohort `current_rule_mismatched=0` rc=0；`replay_decision_engine.py` / `test_decision_engine.py` / live validator 全 rc=0；SYNC OK 4.82.0。
+## 🟢 Session Note (v4.104.0) — 反轉訊號的門檻要長在偵測層,不是顯示層
+
+- **根因**:`detect_reversal` 3 根 1 分 K 內任一 KDJ/MACD 交叉就報「反轉」,無振幅門檻;前端雖有三道閘(區間需 spike 確認/逆勢不顯示/推播去重)但卡片狀態行照樣翻面。修在偵測層:雙確認 + σ 位移(1.5σ,退 0.3%)+ 翻面冷卻(10 分內反向需 zone 或 2.5σ)+ 開盤 15 分加嚴。同批即時 bars 誤報 9/14 檔 → 0。
+- **設計選擇**:冷卻靠讀前輪 `intraday_spikes.json` 實現有狀態,前檔缺/壞/跨日退無狀態;所有時間比較用 bar 時間戳不用 wall clock(可測性);被降級的交叉仍在 `build_signal_flow` 訊號流,資訊不丟失。
+- **駁回一條盤點發現**:「IEX 量能低估 → VOL_MULT 確認結構性弱」不成立——`vol_mult` 是同 feed 內「本分鐘 vs 前 15 分均量」的比值,低估在分子分母同時出現、大致抵消。子代理的推論性結論採用前要自己重推導(已記 LESSONS)。
+- **未做(已入 TODO)**:spikes 無收盤快照、daily_health 不監控 spikes/eval;跨資產環境層 + 事件時間軸 + 說故事層(A–D)是下一輪主菜。盤中檢討全文結論:反轉降噪(本次)→ narrate 餵 spikes/kill_triggers(小改)→ 跨資產 ring + 事件日誌 → 鏈接器 + 敘事。
+- **驗收**:test_intraday_spikes(新增 13 組)+ test_intraday 皆 rc=0;fresh-context 驗收 8/8 PASS,位移基準(交叉完成前一根 close)以獨立腳本實測吻合。
+- **連動修正(.1)**:偵測層變嚴後,推播唯一事件源(反轉 alert)近乎歸零 → 前端推播擴充為三事件源(合格反轉★/急拉擊殺/高強度 spike),並移除 `isDirectionalAlert` 的區間二次過濾——閘門收緊後,下游為舊噪音加的補丁要跟著拆,否則合格訊號被雙重攔截。
+
+## 🟢 Session Note (v4.100.1) — 抓取只抓新的,不等於下游只看新的
+
+- **缺口**:`since_id` 保證只「抓」新貼文,但 append-only log 上沒有任何東西標記哪幾筆分析過。下游 LLM 階段若直接讀 log,會每次重讀整份 —— 付費試點會付錢重讀同一批推文。
+- **修法**:byte offset cursor(`scripts/x_kol/pending.py`)。log 嚴格 append-only,offset 就是精確游標,往後讀必然是新的。不在記錄加旗標(要改寫 append-only 檔)、不留無上限 seen-id 集合。
+- **崩潰語意選 at-least-once**:`read_pending()` 不移動游標,`commit()` 只在分析成功後呼叫。中途崩潰會重送而非靜默丟失 —— 探索 log 該往「重複」而不是「漏掉」的方向失敗。半行(writer 正在 append)不送出。
+- **頻率不是瓶頸**(查證後別再重算):`/2/users/:id/tweets` = 10,000 req/15min per app、900 per user。20 帳號每 5 分鐘一輪只用 60 req/15min。**成本與掃描頻率無關,只跟 KOL 實際發文量有關**,所以掃密一點不會比較貴。
+- **待實測驗證**:「0 則回傳 = $0」是依官方「按回傳資源計費」推得,尚未用真 key 對過 X 帳單。第一次 live sweep 後要拿 `--status` 的花費對 X billing dashboard。
+- **驗收**:20 支 hermetic 測試 rc=0,含 4 週期端到端(冷啟 2 → 閒置 0 → 新增 1 → 閒置 0,log 3 筆、0 筆重分析)。
+
+## 🟢 Session Note (v4.100.0) — 按回傳計費,就不能用樂觀的閘
+
+- **實測結論(別重做一遍)**:免費 syndication 端點活著、回傳 X 已解析的 cashtag,但約 8 req 觸發 429、冷卻 ~183s;**@aleabitoreddit 只回 2 則且停在 2025-11**(內容在訂閱牆後),免費路徑拿不到目標帳號 → 才走付費 API。企業官方帳號(@nvidia)20 則 0 個 cashtag,選人要挑真的打 `$TICKER` 的散戶分析型帳號。
+- **預算閘的形狀**:X 按**回傳資源數**計費,所以事前不知道要花多少。事後計數器擋不住任何東西(發現時錢已經花了),因此 `check()` 一律用**最壞情況**否決、`record()` 才記實際。$10 試點賭不起樂觀估計。
+- **成本能成立全靠 `since_id`**:沒有新貼文就回 0 則、$0。X 的 24h 去重是官方自稱的 soft guarantee,**不可依賴**。
+- **撞天花板是停止不是失敗**:sweep 遇 `BudgetExceeded` 就 break,已收資料留在 append-only log,state 水位照存。
+- **未接線**:只寫 shadow JSONL,沒碰 intraday_mood。要不要接、怎麼加權,等有真資料再說。
+- **待使用者提供**:KOL 名單(目前只有 Serenity 一人 enabled)、以及 `X_BEARER_TOKEN`。
+- **驗收**:13 支 hermetic 測試 rc=0、dry-run 零花費、無 token 乾淨 rc=1、gitignore 覆蓋確認。
+
+## 🟢 Session Note (v4.99.3) — 沒有資料邊就不該有失敗邊
+
+- **原則**：phase 1 的 fail-fast 該綁「資料相依」而不是「同一個 phase」。sector 讀 daily 刷新的 breadth/FTD/market-top cache → daily 維持阻斷；sector 從不讀 digest → news 改為非阻斷，只記 `warnings`。
+- **名單化**：`_PREMARKET_NONBLOCKING = {"news"}`，之後要加 item 進 phase 1 時，先問「sector 讀不讀它的產物」再決定放不放進這個 set。
+- **不可靜默**：`done` 帶 warnings 時 UI 出黃色降級 toast；失敗那列本來就顯示 ❌。降級不等於成功。
+- **8 天歷史日檔已刪**：4/18、5/16-5/19、5/31、6/03、6/05。刪前確認全部落在所有消費端時間窗外（bridge 最近 3 份 / nexus 30d / retail-pulse 72h / theme-detector windowed），且 `legacy_digest_backup/` 有備份、JSONL 可 re-project。
+- **驗收**：premarket chain 4 tests（3 支新增，反向驗過會紅）、News 99 tests、py_compile、`node --check` 全過。
+
+## 🟢 Session Note (v4.99.2) — per-run 的 cap 擋不住 union
+
+- **現象**：盤前 chain 20:27 起跑，daily done、news error、sector 停在 `idle` 從未 enqueue。digest 其實跑完了（26 verdicts、20:33 落盤），死的是收尾 validator：`shallow over-cap: got 20, max 15`。
+- **根因**：top-10 cap 只在 per-run 的 `build_digest_packet.py:77`，但 digest.json 現在是 event store 投影，`latest_by_event_id()` 依 `event_id` 去重、不依 run 去重。當天 3 次 digest run（08:25/08:47/20:33）各自從不同 triage 快照挑 top-10 → union 20 shallow。
+- **修法**：cap 移到 `build_projection()`（`_cap_shallow()`，`SHALLOW_PROJECTION_CAP = 10`）。deep 不設限是刻意的——盤中 FLASH/REVIEW 累積是設計。只刪不重排、tie 以 slot 決勝，投影仍逐位元穩定。
+- **鏈路教訓**：phase 1 是 fail-fast（`dashboard_server.py:1918-1921`），任一 item error 就 raise，phase 2 完全不執行。news 的 validator 失敗會連坐 sector。
+- **未清的債**：4/18、5/16-5/19、5/31、6/03、6/05 這 8 天磁碟 digest 是 14-20 shallow（同一 bug，只是沒越 15 硬閘），現在與修正後的投影不一致；要不要 re-project 未決。
+- **驗收**：News 99 tests（新增 2 支回歸，停用 cap 時皆紅）、2026-08-06 re-project 後 validator rc=0（10 shallow + 6 deep）、其餘 78 個歷史日期投影與磁碟仍逐位元一致。
+
+## 🟢 Session Note (v4.99.1) — Projection mode 不能覆蓋事件 mode
+
+- **真實 canary**：WDC FLASH 已成功 append 為 `news_a0ea342405161641`、pending、cache 未更新；失敗只發生在 post-run validator。
+- **根因/修法**：同日 projection 頂層保留 DIGEST/PER_AGENT_BATCH，舊 validator 卻套到 INLINE FLASH；現改依每筆 `event_type`/`fanout_mode` 驗 review、cache 與 isolation。
+- **驗收**：News 97 tests、相關 health/routing 3 tests、py_compile、真實 mixed projection validator 與 diff check 全過；未重跑 LLM。
+
+## 🟢 Session Note (v4.99.0) — News 歷史只追加，日檔只是投影
+
+- **單一事實來源**：DIGEST／FLASH／REVIEW 全部 append `news_events.jsonl`；daily digest 維持 Dashboard contract，但由 active event deterministic 重建。
+- **審核語意**：FLASH 保存 pending record；REVIEW 以同一 stable event_id append superseding record，不再搜尋 headline 後覆寫整份 digest。
+- **遷移/回復**：86 份 legacy digest、1,283 judgment 完成 migration；一次性 backup 可 rollback，重投影 hash 一致，migration replay 零新增。
+- **Telemetry**：server 成功 DIGEST 自動記 Stage 2/BINARY/source/genre/token/time/cost；真實 canary 已回填 1/10，materiality 仍固定 4.5。
+- **驗收**：News 96 tests、server routing 3 tests、py_compile、diff check、真實 migration replay、rollback/re-project 與 News validator 全過。
+
+## 🟢 Session Note (v4.98.0) — 模型只做判斷，程式負責產物
+
+- **責任收斂**：Stage 2 只產 four-lane compact judgment；finalizer 統一 score/verdict、digest/MD、validator 與 cache patch。
+- **一致性**：finalizer/validator 共用 `arbiter_rules.py`；validator 重算權重。stable event ID 不依賴 triage 排名，phase0 ledger 阻止 replay 重複加總。
+- **Token 目標**：Phase 3–4 約 6k → 1–2k LLM tokens；protocol 同步移除手寫 digest/Impact Card 指令。
+- **驗收**：News 90 tests（含 real validator integration）、py_compile、routing contract、現有 digest validator、diff check 全過。
+
+## 🟢 Session Note (v4.97.2) — credential failure 是整批狀態，不是 517 個 ticker failure
+
+- **根因**：Heatmap 僅對 FMP 429 熱斷；401 走一般 HTTP error，20-worker fan-out 因而對 517 檔逐一輸出同一錯誤，並每個週期重演。
+- **修法**：共用 transport 首次 401 後啟動 6h process-wide breaker，只印一行「檢查 key 並重啟」；期間所有 Heatmap FMP 消費端快速返回。
+- **資料完整性**：零成功的 auth-failed quote batch 不更新 `last_update`、不改寫舊 snapshot，避免將「拒絕取數」假裝成新鮮的 `0/517`。
+- **驗收**：Heatmap retry contract 含新 401 fixture 全過；Python compile、diff check 與版本同步通過。
+
+## 🟢 Session Note (v4.97.1) — degraded 是可繼續的契約，不是失敗別名
+
+- **根因**：`daily_update.sh` 已將 `rc=2` 定義為降級可用，但 Dashboard runner 仍將所有非零 rc 映射為 `error`，盤前鏈因而錯誤中止 Sector 與裁決面板刷新。
+- **修法**：上層新增明確 exit-code mapping：`0=done`、`2=degraded`、其他非零 `=error`；modal 與全站 pill 用黃色警告顯示 degraded，狀態機照常前進。
+- **驗收**：新增 `test_premarket_daily_outcome.py`，並跑 Dashboard 相關回歸、JS/Python 語法、diff check 與版本同步。
+
+## 🟢 Session Note (v4.97.0) — 分歧強度不是二元事件，方向字數也不是重要性
+
+- **BINARY 根因**：Bull 固定正分、Bear 固定負分，再以 max-min≥4 判 BINARY，讓 7/29–8/5 五份 digest 的 25 筆 deep 全部坍縮成 BINARY。V2.3 改成事件本身須 explicit pending + date；net score 只決定 directional bias。
+- **Triage 根因**：`upgrade/strong/raise/surge` 同時兼任方向與晉級排序，三篇 Zacks 加兩篇升評文可占滿 8/6 top-5。新增 materiality/genre/source/event 維度後，回放改由實際財報、Fed/私人信貸與 Reuters 事件晉級；安靜日可少於 5。
+- **Token 首批落地**：triage 保存 URL；compact packet 一次輸出 Stage 2 + shallow top-10 + slim macro/theme；bundle cap 5,000→3,000 chars，避免主 Agent 重讀三份全檔與搜尋已有 URL。
+- **驗收**：News 83 tests passed、py_compile、schema FULL EXAMPLE parse、現有 digest validator rc=0、diff check rc=0。舊同日 artifact loose-compatible；新 strict run 必須明示 V2.3。
+
+## 🟢 Session Note (v4.96.0) — daily_update 可靠性與 thematic 主瓶頸
+
+- **成功語意改正**：Phase 2 與 final artifact 的失敗會聚合成 degraded `rc=2`，cron 不再把 silent SOFT fail 記成當日成功；health gate 新增本日、可解析、`_partial` 驗證。
+- **執行治理**：跨 process lock 擋 cron／Dashboard／手動重複執行，trap 清理 lock、背景程序與本輪 temp logs；日常 Nexus 固定 Tier 1+2，Tier 3 LLM full backfill 移出 daily。
+- **效能**：thematic enrichment 從直接 urllib + serial 改走中央 `fmp_pool` + 12-worker bounded concurrency；兩層輸出 atomic replace。最近基線 enrichment 216 tickers/518s，預期冷跑下限改由 220 RPM pool 主導，待下一次真實 daily log 驗證。
+- **降噪**：headless 無 Finnhub key 時整批 proxy fallback，只提示一次。
+- **驗收**：`bash -n`、4 支 Python `py_compile`、新增/既有 targeted pytest 6 passed、single-run lock probe rc=75、`git diff --check` 均通過；未為驗收重燒一次完整外部 API daily。
 
 <!-- 批次輪替制：主檔超過 20 個 Session Note 時跑 `python3 scripts/rotate_session_notes.py`，最舊 10 個自動切成 archive/session_notes_v<A>_to_v<B>.md。查舊版本：Grep 版號於 archive/session_notes_v*.md（規則：docs/agent-ops/MAINTENANCE.md §3） -->
 

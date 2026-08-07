@@ -35,7 +35,13 @@ from apply_det_shadow import (  # noqa: E402
     authoritative_valuation_score,
     compute_polarization,
 )
-from decision_engine import compute_dynamic_threshold, decision_band  # noqa: E402
+from decision_engine import (  # noqa: E402
+    SPECULATIVE_CONFIDENCE_CAP,
+    SPECULATIVE_REASONS,
+    SPECULATIVE_SIZE_CAP_PCT,
+    compute_dynamic_threshold,
+    decision_band,
+)
 
 ROOT         = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HISTORY_JSON = os.path.join(ROOT, "investment/invest_logs/history.json")
@@ -113,6 +119,21 @@ def _same_number(a, b, tol=0.011):
     return (isinstance(a, (int, float)) and not isinstance(a, bool)
             and isinstance(b, (int, float)) and not isinstance(b, bool)
             and abs(float(a) - float(b)) <= tol)
+
+
+def _same_projection(a, b, tol=0.011):
+    """Projection equality that treats null==null as agreement, not drift.
+
+    A 0-anchor valuation pack emits null for weighted_fair_value / vs_current_pct /
+    verdict_band, and every downstream projection faithfully carries the same null.
+    `_same_number` rejects (None, None) because neither side is numeric, which turned
+    a correctly-propagated "unavailable" into a schema-drift error (first hit: AAOI
+    2026-08-07, the first session where all 8 anchors were ineligible). Only both-null
+    is exempted — null on one side and a number on the other is still real drift.
+    """
+    if a is None and b is None:
+        return True
+    return _same_number(a, b, tol=tol)
 
 
 def _numf(x):
@@ -553,6 +574,14 @@ def check_phase4_sizing(entry, trade, errors, warnings):
                     f"position_size_pct={size} but final_decision={fd!r} — "
                     "不可執行的決策必須是 0 倉位（除非 decision_cap_active=true，"
                     "Phase 4.6 允許 cap 後保留 ≤30bps 的試水倉）")
+        elif trade.get("speculative_grade") is True:
+            # V4.108.0 — speculative governor 與 decision cap 同一個時序位置（Phase 4
+            # 定倉之後），同樣只會縮小。少了這條，虧損題材股的 export 會在 §14 被判
+            # 「倉位不等於鏈尾」——決策放行了卻無法通過 Phase 5，等於白做。
+            if size > final_size + 1.5e-6:
+                errors.append(
+                    f"position_size_pct={size} > sizing_chain tail {final_size} with "
+                    "speculative_grade=true — governor 只會縮小倉位，不會放大")
         elif probe_capped:
             if size > final_size + 1.5e-6:
                 errors.append(f"position_size_pct={size} > sizing_chain tail {final_size} "
@@ -1003,9 +1032,11 @@ def main(argv=None):
                 errors.append(f"fair_value_summary.confidence invalid: {conf!r}")
             # V4.69.0 — anchors 集合容錯：6-key（舊）與 8-key（+dcf_self_built/
             # comps_implied）都合法；集合外的 key 只 warning 不 error（前向相容）
+            # V4.108.0 — 第 9 根 fwd_earnings_discounted（虧損題材股專用條件錨）
             known_anchors = {"dcf_unlevered", "dcf_levered", "dcf_self_built",
                              "analyst_pt_consensus", "peer_pe_implied", "comps_implied",
-                             "owner_earnings_mult", "forecaster_blend"}
+                             "owner_earnings_mult", "forecaster_blend",
+                             "fwd_earnings_discounted"}
             anchors = fvs.get("anchors")
             if isinstance(anchors, dict):
                 unknown = set(anchors) - known_anchors
@@ -1026,7 +1057,7 @@ def main(argv=None):
                 if pack.get("schema") != "valuation_pack.v1":
                     errors.append(f"valuation_pack.schema invalid: {pack.get('schema')!r}")
                 for field in ("weighted_fair_value", "vs_current_pct"):
-                    if not _same_number(pack.get(field), fvs.get(field)):
+                    if not _same_projection(pack.get(field), fvs.get(field)):
                         errors.append(
                             f"valuation_pack.{field} != fair_value_summary.{field} — projection drift"
                         )
@@ -1057,7 +1088,21 @@ def main(argv=None):
             pack = trade.get("valuation_pack")
             if isinstance(pack, dict):
                 for field in ("weighted_fair_value", "vs_current_pct", "score"):
-                    if field in vl and not _same_number(vl.get(field), pack.get(field)):
+                    if field not in vl:
+                        continue
+                    # pack field null = nothing to project. Protocol「缺 anchor 處理」puts
+                    # the lane on the INSUFFICIENT_DATA path, where it emits its own bounded
+                    # |score| < 2 at confidence=low instead of mirroring the pack. Enforce
+                    # that bound here rather than demanding a projection that cannot exist.
+                    if pack.get(field) is None:
+                        if field == "score" and isinstance(vl.get(field), (int, float)) \
+                                and abs(float(vl[field])) >= 2:
+                            errors.append(
+                                "valuation_lane.score: valuation_pack.score is null "
+                                "(INSUFFICIENT_DATA path) — |score| must stay < 2"
+                            )
+                        continue
+                    if not _same_number(vl.get(field), pack.get(field)):
                         errors.append(f"valuation_lane.{field} != valuation_pack.{field}")
         # Validate active_weights includes Valuation
         weights = entry.get("active_weights_end_of_session") or {}
@@ -1153,6 +1198,47 @@ def main(argv=None):
             errors.append(
                 f"decision_cap_active=true requires position_size_pct ≤ 0.003 (30bps), got {ps}"
             )
+
+    # ── 10b. V4.108.0 — speculative governor（第 9 根錨解鎖後的籌碼限制）─────
+    # 設計意圖：fwd_earnings_discounted 讓虧損題材股重新拿得到估值、decision cap 解除；
+    # 這裡確保「解鎖」不會偷渡成正常倉位。兩條 integrity 檢查是關鍵——只要 export 裡
+    # 出現 pre-profit 錨或 sell-side-only 證據，speculative_grade 就必須是 true，
+    # 否則 PM 可以用新錨解鎖決策卻不掛 governor。
+    spec_grade = trade.get("speculative_grade")
+    pack_for_spec = trade.get("valuation_pack")
+    fwd_live = sell_side_only = False
+    if isinstance(pack_for_spec, dict):
+        fwd_detail = (pack_for_spec.get("anchors") or {}).get("fwd_earnings_discounted")
+        fwd_live = isinstance(fwd_detail, dict) and fwd_detail.get("status") == "eligible"
+        sell_side_only = (
+            (pack_for_spec.get("evidence_independence") or {}).get("sell_side_only") is True)
+    if (fwd_live or sell_side_only) and spec_grade is not True:
+        errors.append(
+            "valuation_pack 顯示 "
+            + ("pre-profit 錨 live" if fwd_live else "")
+            + (" + " if fwd_live and sell_side_only else "")
+            + ("賣方預估是唯一證據" if sell_side_only else "")
+            + " — 必須同時設 speculative_grade=true（Phase 4.6 governor）"
+        )
+    if spec_grade is True:
+        # enum 與兩個上限都從 decision_engine import——governor 與它的驗收共用同一組
+        # 常數，改一邊而忘了另一邊的漂移在此結構性不可能發生。
+        sr = trade.get("speculative_reasons")
+        if not isinstance(sr, list) or not sr:
+            errors.append("speculative_grade=true requires a non-empty speculative_reasons list")
+        elif any(r not in SPECULATIVE_REASONS for r in sr):
+            errors.append(
+                f"speculative_reasons must be a subset of {SPECULATIVE_REASONS}, got {sr!r}")
+        sps = trade.get("position_size_pct")
+        if isinstance(sps, (int, float)) and sps > SPECULATIVE_SIZE_CAP_PCT:
+            errors.append(
+                f"speculative_grade=true requires position_size_pct ≤ "
+                f"{SPECULATIVE_SIZE_CAP_PCT} ({SPECULATIVE_SIZE_CAP_PCT:.0%}), got {sps}")
+        sac = trade.get("avg_confidence")
+        if isinstance(sac, (int, float)) and sac > SPECULATIVE_CONFIDENCE_CAP:
+            errors.append(
+                f"speculative_grade=true requires avg_confidence ≤ "
+                f"{SPECULATIVE_CONFIDENCE_CAP}, got {sac}")
 
     # ── 11. V5.0.x — Rec 11 hot-zone probe rules (TODO-001+002) ──────────
     # When the hot-zone conservative-loosening exception fires, enforce:
@@ -1288,7 +1374,7 @@ def main(argv=None):
         lt = mhp.get("long_term_ref")
         fvs_ok = trade.get("fair_value_summary") or {}
         if isinstance(lt, dict) and "weighted_fair_value" in lt and "weighted_fair_value" in fvs_ok:
-            if not _same_number(lt.get("weighted_fair_value"), fvs_ok.get("weighted_fair_value")):
+            if not _same_projection(lt.get("weighted_fair_value"), fvs_ok.get("weighted_fair_value")):
                 errors.append(
                     "multi_horizon_price_framework.long_term_ref.weighted_fair_value != "
                     "fair_value_summary.weighted_fair_value — 長期層應引用不重算"
@@ -1389,15 +1475,56 @@ def main(argv=None):
             warnings.append(
                 f"valuation_reviewer_gate.would_invoke={wi} contradicts triggers_fired={fired}")
         shadow_only = vrg.get("shadow_only")
-        if shadow_only is False:
-            errors.append("valuation_reviewer_gate.shadow_only=false — 翻預設需使用者拍板，"
-                          "session 不得自行讓 gate 生效")
-        elif shadow_only is not True:
-            # gate 永遠會寫這個欄位；缺欄本身即異常，否則省略它就是繞過上面那條 error。
-            warnings.append(
-                f"valuation_reviewer_gate.shadow_only missing or invalid: {shadow_only!r}")
+        if shadow_only is True:
+            pass
+        elif shadow_only is None:
+            # gate 永遠會寫這個欄位；缺欄本身即異常，否則省略它就是繞過下面那條 error。
+            warnings.append("valuation_reviewer_gate.shadow_only missing")
+        else:
+            # 只認 JSON true。`is False` 版本讓 0／"false" 只拿 warning —— 對「守翻預設
+            # 大門」的欄位，任何非 true 的值都等同宣告 gate 生效過，一律 error。
+            errors.append(f"valuation_reviewer_gate.shadow_only={shadow_only!r} — 只認 true；"
+                          "翻預設需使用者拍板，session 不得自行讓 gate 生效")
     elif vrg is not None:
         warnings.append("valuation_reviewer_gate must be an object when present")
+
+    # ── 5j. V4.91.0 — sentiment_det（L5 shadow-only，warning-only）──────────
+    # 缺 block 完全靜默：舊 entry 沒有它，warning 會變成純噪音（同 5i gate 前例）。
+    # 但 shadow_only=false 要擋 —— 那代表有人讓 det 分數真的取代了 LLM lane，而翻預設
+    # 需要使用者拍板 + weight 凍結窗，不是任一 session 可以自行決定的事。
+    sdt = trade.get("sentiment_det")
+    if isinstance(sdt, dict):
+        sdt_shadow = sdt.get("shadow_only")
+        if sdt_shadow is True:
+            pass
+        elif sdt_shadow is None:
+            warnings.append("sentiment_det.shadow_only missing")
+        else:
+            # 同 5i：只認 JSON true，0／"false" 不得靠型別繞成 warning。
+            errors.append(f"sentiment_det.shadow_only={sdt_shadow!r} — 只認 true；"
+                          "L5 翻預設需使用者拍板，session 不得自行讓 det 分數取代 LLM lane")
+        sc = sdt.get("score")
+        if sc is not None and (isinstance(sc, bool) or not isinstance(sc, (int, float))):
+            warnings.append(f"sentiment_det.score must be number|null, got {sc!r}")
+        elif isinstance(sc, (int, float)) and not isinstance(sc, bool) and not -3.0 <= sc <= 3.0:
+            warnings.append(f"sentiment_det.score={sc} outside the lane range [-3, +3]")
+        if sc is None and not sdt.get("degraded_reason"):
+            warnings.append("sentiment_det.score is null but degraded_reason is empty — "
+                            "算不出分數必須說明原因（缺市場層 / 缺輸入）")
+        if not isinstance(sdt.get("producer_version"), str) or not sdt.get("producer_version"):
+            warnings.append("sentiment_det.producer_version missing — shadow 樣本必須可歸屬"
+                            "到產生它的公式版本，否則翻預設時不知道累積的是哪一版的數據")
+        # 契約那一格是 validator 驗過的權威副本；不一致代表 block 或契約被事後改過。
+        _sent_slot = ((trade.get("lane_contract") or {}).get("lanes") or {}).get("sentiment")
+        if isinstance(_sent_slot, dict):
+            _slot_score = _sent_slot.get("shadow_score")
+            _same = (_slot_score is None and sc is None) or _same_number(_slot_score, sc, tol=1e-9)
+            if not _same:
+                warnings.append(
+                    f"lane_contract.lanes.sentiment.shadow_score={_slot_score!r} != "
+                    f"sentiment_det.score={sc!r} — 重跑 apply_det_shadow.py")
+    elif sdt is not None:
+        warnings.append("sentiment_det must be an object when present")
 
     # ── 13. V4.80.0 — Phase 3 arithmetic re-derivation (decision_engine parity) ──
     # 舊 entry（無 calculation_steps 也無 decision_engine_version）整段跳過 → 向後相容。

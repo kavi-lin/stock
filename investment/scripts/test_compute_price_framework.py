@@ -196,11 +196,25 @@ eq("mid5.confidence", compute_fair_value_summary(
     {k: FULL8[k] for k in list(FULL8)[:5]}, 100.0)["confidence"], "high")
 eq("low3.confidence", compute_fair_value_summary(
     {k: FULL8[k] for k in list(FULL8)[:3]}, 100.0)["confidence"], "low")
-# archetype 權重表配平守恆：每個 archetype Σ=1.0
-from compute_price_framework import ARCHETYPE_WEIGHTS, ANCHOR_WEIGHTS  # noqa: E402
+# 權重表配平守恆。V4.108.0 起 fwd_earnings_discounted 是**條件錨**，刻意留在 1.0
+# 預算之外：它的 live 資格只在 cashflow_intrinsic 整組（raw 合計 0.50）結構性缺席時
+# 才開，所以它永遠擠不掉既有錨的權重；shadow 池同理（既有 11 根相對權重不動）。
+# 這兩條斷言就是「新錨沒有偷偷改動舊配平」的守衛。
+from compute_price_framework import (  # noqa: E402
+    ANCHOR_WEIGHTS, ARCHETYPE_WEIGHTS, FWD_EARNINGS_RAW_WEIGHT, LEGACY_ANCHOR_WEIGHTS,
+)
 for _name, _w in ARCHETYPE_WEIGHTS.items():
-    eq(f"archetype.{_name}.sum", round(sum(_w.values()), 6), 1.0)
-eq("live_weights.sum", round(sum(ANCHOR_WEIGHTS.values()), 6), 1.0)
+    eq(f"archetype.{_name}.legacy_sum",
+       round(sum(v for k, v in _w.items() if k != "fwd_earnings_discounted"), 6), 1.0)
+eq("archetype.hypergrowth.conditional_anchor",
+   ARCHETYPE_WEIGHTS["hypergrowth"]["fwd_earnings_discounted"], FWD_EARNINGS_RAW_WEIGHT)
+for _name in ("mature_cashflow", "cyclical", "financial", "balanced"):
+    eq(f"archetype.{_name}.no_conditional_anchor",
+       ARCHETYPE_WEIGHTS[_name]["fwd_earnings_discounted"], 0.0)
+eq("live_weights.legacy_sum", round(sum(LEGACY_ANCHOR_WEIGHTS.values()), 6), 1.0)
+eq("live_weights.conditional_outside_budget",
+   round(sum(ANCHOR_WEIGHTS.values()) - sum(LEGACY_ANCHOR_WEIGHTS.values()), 6),
+   FWD_EARNINGS_RAW_WEIGHT)
 
 # ── Fixture 8 (V4.70.0): anchor outlier trim（P0-3 審計修正）─────────────────
 from compute_price_framework import trim_anchor_outliers  # noqa: E402
@@ -588,6 +602,231 @@ with tempfile.TemporaryDirectory() as tmp:
 # MHP_QUALITATIVE_KEYS 是 compute_mhp 真正讀的 lane 欄位——名單漂掉會讓分段悄悄漏餵
 eq("staged.qualitative_key_list", sorted(MHP_QUALITATIVE_KEYS),
    ["immediate_catalyst_5d", "key_levels", "pattern_taxonomy", "smart_money_label"])
+
+# ── Fixture 11 (V4.108.0): anchor 9 — fwd_earnings_discounted ────────────────
+# 真實回歸案例：AAOI 2026-08-07。八根 live anchor 全滅（DCF 為負、無可比同業、虧損
+# 中所以 owner earnings / P/E 皆無定義）→ anchors_available=0 → insufficient_anchors
+# 封死決策。第 9 根用分析師覆蓋足夠的最遠獲利年度把「市場在追的未來」折回今天。
+from compute_price_framework import (  # noqa: E402
+    FWD_BETA_FALLBACK,
+    FWD_DISCOUNT_CLAMP,
+    FWD_MAX_HORIZON_YEARS,
+    FWD_MIN_ANALYSTS,
+    TERMINAL_EV_SALES,
+    TERMINAL_EV_SALES_SECTOR_TYPICAL,
+    compute_fwd_earnings_anchor,
+    compute_market_implied_revenue,
+    evaluate_fwd_anchor_scope,
+)
+
+FIXED_TODAY = dt.date(2026, 8, 7)          # 固定日期：horizon 是天數差，不能隨執行日漂
+AAOI_EST = [
+    {"date": "2025-12-31", "epsAvg": -0.32563, "revenueAvg": 452665557,
+     "numAnalystsEps": 4, "numAnalystsRevenue": 4},
+    {"date": "2026-12-31", "epsAvg": 1.03327, "revenueAvg": 1040370400,
+     "numAnalystsEps": 3, "numAnalystsRevenue": 3},
+    {"date": "2027-12-31", "epsAvg": 5.72687, "revenueAvg": 2801711860,
+     "numAnalystsEps": 3, "numAnalystsRevenue": 3},
+    {"date": "2028-12-31", "epsAvg": 11.6, "revenueAvg": 4166800000,
+     "numAnalystsEps": 1, "numAnalystsRevenue": 1},          # 單一分析師 → 不可用
+]
+fwd = compute_fwd_earnings_anchor(AAOI_EST, today=FIXED_TODAY, beta=3.687, treasury_10y=0.0463)
+# 手算：FY27 EPS 5.72687 × justified PE 35（成長 455% 觸頂 clamp）
+#       ÷ (1 + 0.2122)^1.39904 = 200.4405 / 1.30899 = 153.13
+eq("fwd.value", fwd["value"], 153.13)
+eq("fwd.target_year", fwd["target_fiscal_year"], "2027-12-31")   # 最遠的合格年度，非最近
+eq("fwd.analysts", fwd["analyst_count"], 3)
+eq("fwd.horizon", fwd["horizon_years"], 1.399)
+eq("fwd.pe_clamped", fwd["justified_pe"], 35.0)
+eq("fwd.growth_source", fwd["growth_source"], "eps_cagr")
+eq("fwd.discount_rate", fwd["discount_rate"], 0.2122)           # 高 beta → 21% 門檻
+# 校準原料：pre-profit 標的成長率必然爆表 → 上限恆綁。留下未夾前的值與綁定端，
+# shadow_report 的 FWD_PE_CLAMP 校準才能用 grep 回答「上限綁到的頻率」
+eq("fwd.pe_clamp_binding", fwd["pe_clamp_binding"], "upper")
+eq("fwd.pe_raw_kept", fwd["justified_pe_raw"], 454.63, tol=0.5)
+
+# 目標年退回第一個未來年度時，成長率的分母是最近的**已實現**年度（EPS 為負）→
+# 自動退回營收 CAGR，而不是放棄
+thin_fy27 = copy.deepcopy(AAOI_EST)
+thin_fy27[2]["numAnalystsEps"] = 2
+fwd_thin = compute_fwd_earnings_anchor(thin_fy27, today=FIXED_TODAY, beta=3.687,
+                                       treasury_10y=0.0463)
+eq("fwd.thin_target_steps_back", fwd_thin["target_fiscal_year"], "2026-12-31")
+eq("fwd.thin_growth_source", fwd_thin["growth_source"], "revenue_cagr")
+eq("fwd.thin_has_value", fwd_thin["value"] is not None, True)
+
+# Gates：全部薄覆蓋 / 無未來預估 / 全年度虧損 → null + reason（不是例外）
+eq("fwd.gate_thin_all", compute_fwd_earnings_anchor(
+    [dict(r, numAnalystsEps=1) for r in AAOI_EST], today=FIXED_TODAY)["reason"],
+   f"no_estimate_year_with_positive_eps_and_{FWD_MIN_ANALYSTS}_analysts"
+   f"_within_{FWD_MAX_HORIZON_YEARS:g}y")
+eq("fwd.gate_no_future", compute_fwd_earnings_anchor(
+    AAOI_EST[:1], today=FIXED_TODAY)["reason"], "no_future_analyst_estimates")
+eq("fwd.gate_all_loss", compute_fwd_earnings_anchor(
+    [dict(r, epsAvg=-1.0) for r in AAOI_EST], today=FIXED_TODAY)["value"], None)
+# horizon 上限：只剩 3.5 年外的年度合格 → 不可用（沒人預測那麼遠）
+far = [{"date": "2030-12-31", "epsAvg": 20.0, "revenueAvg": 9e9, "numAnalystsEps": 5}]
+eq("fwd.gate_horizon", compute_fwd_earnings_anchor(far, today=FIXED_TODAY)["value"], None)
+# 折現率下限：低 beta 的題材股也不得低於 10%
+eq("fwd.discount_floor", compute_fwd_earnings_anchor(
+    AAOI_EST, today=FIXED_TODAY, beta=0.2, treasury_10y=0.01)["discount_rate"], 0.10)
+eq("fwd.discount_floor_flagged", compute_fwd_earnings_anchor(
+    AAOI_EST, today=FIXED_TODAY, beta=0.2, treasury_10y=0.01)["discount_clamp_binding"], "lower")
+# 高 beta 觸頂（CRWV 實測 beta 7.41）→ 記錄綁定端，讓「0.30 上限在處理什麼」可查
+eq("fwd.discount_cap_flagged", compute_fwd_earnings_anchor(
+    AAOI_EST, today=FIXED_TODAY, beta=7.41, treasury_10y=0.0463)["discount_clamp_binding"], "upper")
+
+# 無效 beta 不得被當成「市場級風險」。SPCX 實測 beta=0（IPO 2026-06-12，歷史不足兩
+# 個月）——舊行為讓它吃到 10% 折現率下限，是整組樣本裡最寬鬆的一檔；那是把資料缺陷
+# 渲染成低風險，與 v4.106.0「靜默 fail closed 在最新資料上」同一個形狀。
+for _label, _beta in (("zero", 0.0), ("missing", None), ("negative", -1.2)):
+    _d = compute_fwd_earnings_anchor(AAOI_EST, today=FIXED_TODAY, beta=_beta,
+                                     treasury_10y=0.0463)
+    eq(f"fwd.beta_{_label}_falls_back", _d["beta_used"], FWD_BETA_FALLBACK)
+    eq(f"fwd.beta_{_label}_source", _d["beta_source"], "population_median_fallback")
+    # 關鍵斷言：fallback 必須比下限**嚴格**（否則等於沒修）
+    eq(f"fwd.beta_{_label}_not_floor", _d["discount_rate"] > FWD_DISCOUNT_CLAMP[0], True)
+_valid = compute_fwd_earnings_anchor(AAOI_EST, today=FIXED_TODAY, beta=3.687,
+                                     treasury_10y=0.0463)
+eq("fwd.beta_valid_source", _valid["beta_source"], "profile")
+eq("fwd.beta_valid_used", _valid["beta_used"], 3.687)
+
+# Scope gate — 只填真空、不排擠
+eq("fwd.scope_vacuum", evaluate_fwd_anchor_scope(
+    {"anchors": {"analyst_pt_consensus": 160.0}}), (True, None))
+eq("fwd.scope_blocked_by_dcf", evaluate_fwd_anchor_scope(
+    {"anchors": {"dcf_self_built": 88.0}})[0], False)
+eq("fwd.scope_blocked_reason", evaluate_fwd_anchor_scope(
+    {"anchors": {"dcf_self_built": 88.0}})[1], "cashflow_intrinsic_anchors_live:dcf_self_built")
+# 值存在但來源自己判定不合格的 DCF 不算「還活著」→ 真空成立
+eq("fwd.scope_ineligible_dcf_is_vacuum", evaluate_fwd_anchor_scope(
+    {"anchors": {"dcf_self_built": 88.0},
+     "anchor_meta": {"dcf_self_built": {"model_eligibility": {"eligible": False}}}})[0], True)
+eq("fwd.scope_profitable_issuer", evaluate_fwd_anchor_scope(
+    {"anchors": {}, "archetype_inputs": {"eps_ttm": 4.4}}),
+   (False, "profitable_issuer_shadow_only"))
+
+# strict metadata：覆蓋數 / horizon 缺 → fail closed（與 peer_count 同一紀律）
+AAOI_META_OK = {
+    "analyst_pt_consensus": {"provenance": "earnings_analyst_bundle.pt_news",
+                             "as_of": dt.date.today().isoformat()},
+    # 與 assemble_inputs 實際寫入的 meta 同形（校準欄位一起帶，否則 pack 的
+    # calibration 投影不會被這組 fixture 測到）
+    "fwd_earnings_discounted": {"provenance": "fmp_analyst_estimates.annual",
+                                "as_of": dt.date.today().isoformat(),
+                                "analyst_count": 3, "horizon_years": 1.399,
+                                "target_fiscal_year": "2027-12-31", "target_eps": 5.7269,
+                                "justified_pe": 35.0, "justified_pe_raw": 454.63,
+                                "pe_clamp_binding": "upper", "discount_rate": 0.2122,
+                                "growth_source": "eps_cagr"},
+}
+eq("fwd.strict_missing_count", build_valuation_pack(
+    {"fwd_earnings_discounted": 153.13}, 135.12,
+    anchor_meta={"fwd_earnings_discounted": {"provenance": "f",
+                                             "as_of": dt.date.today().isoformat()}},
+)["anchors"]["fwd_earnings_discounted"]["reason"], "missing_analyst_count")
+eq("fwd.strict_thin_count", build_valuation_pack(
+    {"fwd_earnings_discounted": 153.13}, 135.12,
+    anchor_meta={"fwd_earnings_discounted": {"provenance": "f", "analyst_count": 2,
+                                             "as_of": dt.date.today().isoformat(),
+                                             "horizon_years": 1.4}},
+)["anchors"]["fwd_earnings_discounted"]["reason"],
+   f"fewer_than_{FWD_MIN_ANALYSTS}_analysts_on_target_year")
+
+# AAOI 端到端：0 根 → 2 根、1 family → 2 family、cap 解除但標記 sell_side_only
+aaoi_pack = build_valuation_pack({"analyst_pt_consensus": 160.0,
+                                  "fwd_earnings_discounted": 153.13}, 135.12,
+                                 anchor_meta=AAOI_META_OK)
+aaoi_fvs = fair_value_summary_from_pack(aaoi_pack)
+eq("aaoi.anchors_available", aaoi_fvs["anchors_available"], 2)      # ≥2 → cap 不再觸發
+eq("aaoi.families", aaoi_pack["families_present"],
+   ["external_expectations", "fundamental"])
+eq("aaoi.confidence", aaoi_pack["confidence"], "medium")            # 2 family → medium
+eq("aaoi.fv", aaoi_pack["weighted_fair_value"], 156.56)
+eq("aaoi.verdict", aaoi_pack["verdict_band"], "undervalued")
+eq("aaoi.sell_side_only", aaoi_pack["evidence_independence"]["sell_side_only"], True)
+eq("aaoi.fvs_sell_side_only", aaoi_fvs["sell_side_only"], True)
+eq("aaoi.fvs_pre_profit_live", aaoi_fvs["pre_profit_anchor_live"], True)
+# calibration 進 pack（export 只帶 pack；沒有這格，未來要從 history.json 做結果
+# 回測就得回頭重算輸入）。八根常規錨沒有校準原料 → None，不污染 entry
+eq("aaoi.calibration_in_pack",
+   aaoi_pack["anchors"]["fwd_earnings_discounted"]["calibration"]["target_eps"], 5.7269)
+eq("aaoi.calibration_absent_elsewhere",
+   aaoi_pack["anchors"]["analyst_pt_consensus"]["calibration"], None)
+# |score| ≥ 2 需要兩個同向 family；賣方依賴不改分數，只改籌碼（governor 的事）
+eq("aaoi.score", aaoi_pack["score"], 1.0)
+
+# 一根獨立錨進來 → 不再是 sell-side-only（旗標不是「有沒有 pre-profit 錨」的別名）
+mixed_meta = dict(AAOI_META_OK, comps_implied={
+    "provenance": "valuation_modeler.comps", "as_of": dt.date.today().isoformat(),
+    "peer_count": 4})
+mixed_pack = build_valuation_pack(
+    {"analyst_pt_consensus": 160.0, "fwd_earnings_discounted": 153.13,
+     "comps_implied": 120.0}, 135.12, anchor_meta=mixed_meta)
+eq("aaoi.mixed_not_sell_side_only",
+   mixed_pack["evidence_independence"]["sell_side_only"], False)
+
+# 獲利股不受影響：fwd 值存在但 scope 判 shadow → live blend 與沒有第 9 根時逐位元相同
+PROFITABLE = {"dcf_self_built": 120.0, "analyst_pt_consensus": 130.0,
+              "peer_pe_implied": 140.0}
+prof_meta = {
+    "dcf_self_built": {"provenance": "valuation_modeler.dcf",
+                       "as_of": dt.date.today().isoformat()},
+    "analyst_pt_consensus": {"provenance": "fixture", "as_of": dt.date.today().isoformat()},
+    "peer_pe_implied": {"provenance": "fixture", "as_of": dt.date.today().isoformat(),
+                        "peer_count": 5},
+}
+prof_base = build_valuation_pack(PROFITABLE, 100.0, anchor_meta=prof_meta)
+prof_shadowed = build_valuation_pack(
+    {**PROFITABLE, "fwd_earnings_discounted": 999.0}, 100.0,
+    anchor_meta={**prof_meta, "fwd_earnings_discounted": {
+        "provenance": "fmp_analyst_estimates.annual", "as_of": dt.date.today().isoformat(),
+        "analyst_count": 5, "horizon_years": 1.2,
+        "eligible": False, "reason": "cashflow_intrinsic_anchors_live:dcf_self_built"}})
+eq("fwd.profitable_live_fv_unchanged", prof_shadowed["weighted_fair_value"],
+   prof_base["weighted_fair_value"])
+eq("fwd.profitable_shadow_reason",
+   prof_shadowed["anchors"]["fwd_earnings_discounted"]["reason"],
+   "cashflow_intrinsic_anchors_live:dcf_self_built")
+eq("fwd.profitable_not_sell_side_only",
+   prof_shadowed["evidence_independence"]["sell_side_only"], False)
+
+# 市場隱含營收路徑（reverse DCF 對 FCF ≤ 0 無定義時的替代 diagnostic）
+mir = compute_market_implied_revenue({
+    "self_ratios": {"ev_to_sales_ttm": 16.33062489219256},
+    "revenue_path": {"analyst_revenue_cagr": 1.4894, "horizon_years": 2.0}})
+eq("mir.multiple", mir["required_revenue_multiple"], 4.08)     # 16.33 / 4.0
+eq("mir.cagr", mir["implied_revenue_cagr"], 0.3249)            # 4.0827^(1/5) − 1
+eq("mir.verdict", mir["verdict"], "market_below_sell_side")    # 32% ≪ 賣方 149%
+eq("mir.kill_seed_present", "32%" in mir["red_team_kill_seed"], True)
+# 雙 terminal：這個假設的槓桿極大（4x 需 32% / 8x 需 15%），藏在單一常數裡等於把結論
+# 藏起來。2026-08-07 量測成熟獲利公司 median EV/S：半導體 13.9 / 通訊設備 8.3 /
+# 軟體 8.0 / 工業 2.8——4.0 是刻意保守的規範性假設，不是實測中樞。
+eq("mir.sector_terminal_reported", mir["terminal_ev_to_sales_sector_typical"],
+   TERMINAL_EV_SALES_SECTOR_TYPICAL)
+eq("mir.sector_cagr", mir["implied_revenue_cagr_sector"], 0.1533, tol=0.001)
+eq("mir.sector_easier_than_conservative",
+   mir["implied_revenue_cagr_sector"] < mir["implied_revenue_cagr"], True)
+eq("mir.both_in_note", "8x 則需 15%" in mir["note"], True)
+# EV/S 已在科技中樞之下 → sector 情境不要求任何營收擴張（倍數不得被要求「反向擴張」）
+_mid = compute_market_implied_revenue({"self_ratios": {"ev_to_sales_ttm": 6.0}})
+eq("mir.sector_floor_at_one", _mid["required_revenue_multiple_sector"], 1.0)
+eq("mir.sector_floor_zero_cagr", _mid["implied_revenue_cagr_sector"], 0.0)
+eq("mir.conservative_still_positive", _mid["implied_revenue_cagr"] > 0, True)
+eq("mir.terminal_ordering", TERMINAL_EV_SALES < TERMINAL_EV_SALES_SECTOR_TYPICAL, True)
+eq("mir.below_terminal", compute_market_implied_revenue(
+    {"self_ratios": {"ev_to_sales_ttm": 2.5}})["implied_revenue_cagr"], 0.0)
+eq("mir.unavailable", compute_market_implied_revenue({})["reason"],
+   "ev_to_sales_ttm_unavailable")
+# FCF ≤ 0 的 implied_expectations 不再空手而歸：改掛營收 kill seed
+ie_pre_profit = compute_implied_expectations({
+    "current_price": 135.12, "fred": {"treasury_10y": 0.0463},
+    "reverse_dcf": {"fcf_base_per_share": -2.1},
+    "self_ratios": {"ev_to_sales_ttm": 16.33062489219256}})
+eq("mir.ie_fallback_cagr", ie_pre_profit["implied_5y_fcf_cagr"], None)
+eq("mir.ie_revenue_mode",
+   ie_pre_profit["market_implied_revenue"]["implied_revenue_cagr"], 0.3249)
+eq("mir.ie_kill_seed", ie_pre_profit["red_team_kill_seed"].startswith("IF 未來 2 季營收"), True)
 
 # ──────────────────────────────────────────────────────────────────────────────
 if FAILS:

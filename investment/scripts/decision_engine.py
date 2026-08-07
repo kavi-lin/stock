@@ -64,6 +64,11 @@ action_label — stay with the PM and are NOT engine inputs):
                    "lane_data_quality_low": false}
 }
 
+Phase 4.6 input additionally accepts a `speculative` block copied verbatim from
+`fair_value_summary` (V4.108.0)：
+  "speculative": {"pre_profit_anchor_live": true, "sell_side_only": true}
+
+
 Output: single JSON object on stdout carrying the full `calculation_steps` block the
 PM copies verbatim into the Phase 5 export. rc=0 on success, rc=1 on unusable input.
 """
@@ -96,6 +101,14 @@ DEFAULT_WEIGHTS = {"fundamentals": 0.25, "sentiment": 0.15, "news": 0.20,
 BULL_REGIMES = ("RISK_ON", "BULL")
 
 CAP_REASONS = ("insufficient_anchors", "low_valuation_confidence", "low_data_quality")
+
+# V4.108.0 — speculative governor（Phase 4.6）。compute_price_framework 的第 9 根錨
+# （fwd_earnings_discounted）讓虧損題材股重新拿得到估值，decision cap 因此解除；但
+# 「可以判斷」不等於「可以下正常倉位」——這條 governor 把煞車換成調速器：verdict 放行，
+# 籌碼壓到探針級。兩個觸發條件都來自 valuation_pack，不是 LLM 判斷。
+SPECULATIVE_SIZE_CAP_PCT = 0.01     # 1%：比一般部位小一個量級，比 30bps cap 寬
+SPECULATIVE_CONFIDENCE_CAP = 0.70   # 對應 fair_value confidence 的 "medium" 上限
+SPECULATIVE_REASONS = ("pre_profit_fwd_earnings_anchor", "sell_side_only_evidence")
 
 
 # ---------------------------------------------------------------------------
@@ -570,6 +583,45 @@ def evaluate_decision_cap_triggers(cap_in: dict | None) -> dict:
     return {"decision_cap_active": False, "decision_cap_reason": None, "evaluated": True}
 
 
+def evaluate_speculative_grade(spec_in: dict | None) -> dict:
+    """Is this valuation decision-grade but not size-grade?
+
+    Inputs come straight from `fair_value_summary` (`pre_profit_anchor_live` /
+    `sell_side_only`), so the PM copies two booleans rather than re-deriving a
+    judgment. Absent block = not evaluated = no governor (back-compat).
+    """
+    if not isinstance(spec_in, dict) or not spec_in:
+        return {"speculative_grade": False, "speculative_reasons": [], "evaluated": False}
+    reasons = []
+    if spec_in.get("pre_profit_anchor_live") is True:
+        reasons.append(SPECULATIVE_REASONS[0])      # pre_profit_fwd_earnings_anchor
+    if spec_in.get("sell_side_only") is True:
+        reasons.append(SPECULATIVE_REASONS[1])      # sell_side_only_evidence
+    return {"speculative_grade": bool(reasons), "speculative_reasons": reasons,
+            "evaluated": True}
+
+
+def _apply_speculative_governor(out: dict, spec: dict, adjustments: list) -> None:
+    """Tighten size/confidence in place. Only ever tightens — a decision cap that
+    already clamped harder (30bps) keeps its clamp."""
+    out["speculative_grade"] = spec["speculative_grade"]
+    out["speculative_reasons"] = list(spec["speculative_reasons"])
+    if not spec["speculative_grade"]:
+        return
+    conf = _f(out.get("avg_confidence"))
+    if conf is not None and conf > SPECULATIVE_CONFIDENCE_CAP:
+        out["avg_confidence"] = SPECULATIVE_CONFIDENCE_CAP
+        adjustments.append(
+            f"avg_confidence {conf} → {SPECULATIVE_CONFIDENCE_CAP} "
+            f"(speculative: {', '.join(spec['speculative_reasons'])})")
+    size = _f(out.get("position_size_pct"))
+    if size is not None and size > SPECULATIVE_SIZE_CAP_PCT:
+        out["position_size_pct"] = SPECULATIVE_SIZE_CAP_PCT
+        adjustments.append(
+            f"position_size_pct {size} → {SPECULATIVE_SIZE_CAP_PCT} "
+            f"(speculative 1% cap: {', '.join(spec['speculative_reasons'])})")
+
+
 def apply_decision_cap(payload: dict) -> dict:
     """Phase 4.6 entry point — runs AFTER Phase 4 sizing, before Phase 5 export.
 
@@ -616,8 +668,11 @@ def apply_decision_cap(payload: dict) -> dict:
         "adjustments": adjustments,
         "warnings": [],
     }
+    spec = evaluate_speculative_grade(payload.get("speculative"))
+
     if not trig["decision_cap_active"]:
         adjustments.append("decision cap not triggered — Phase 4 values pass through unchanged")
+        _apply_speculative_governor(out, spec, adjustments)
         return out
 
     if trig["decision_cap_reason"] not in CAP_REASONS:
@@ -648,6 +703,7 @@ def apply_decision_cap(payload: dict) -> dict:
         out["warnings"].append(
             "hot_zone_probe=true with decision_cap_active=true — validator §11 forbids "
             "this pairing; the Phase 3 tree should have emitted suppressed_by_cap")
+    _apply_speculative_governor(out, spec, adjustments)
     return out
 
 

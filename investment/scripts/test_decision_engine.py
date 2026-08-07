@@ -510,6 +510,63 @@ eq("cap.hot_zone_exception_inapplicable", l_probe["hot_zone_exception_applicable
 eq("cap.hot_zone_conflict_warned", len(l_probe["warnings"]) >= 1, True)
 
 
+# ── Fixture L2 (V4.108.0): speculative governor — 煞車改調速器 ───────────────
+# 第 9 根錨（fwd_earnings_discounted）讓虧損題材股重新拿得到估值 → decision cap 解除。
+# Governor 的職責是確保「解除」不等於「正常倉位」：verdict 放行，籌碼壓到 1%。
+from decision_engine import evaluate_speculative_grade  # noqa: E402
+
+eq("spec.absent_block_not_evaluated", evaluate_speculative_grade(None)["evaluated"], False)
+eq("spec.clean_valuation_not_speculative", evaluate_speculative_grade(
+    {"pre_profit_anchor_live": False, "sell_side_only": False})["speculative_grade"], False)
+eq("spec.reasons_both", evaluate_speculative_grade(
+    {"pre_profit_anchor_live": True, "sell_side_only": True})["speculative_reasons"],
+   ["pre_profit_fwd_earnings_anchor", "sell_side_only_evidence"])
+eq("spec.sell_side_alone_triggers", evaluate_speculative_grade(
+    {"sell_side_only": True})["speculative_grade"], True)
+
+# AAOI 形狀：cap 未觸發（2 根錨、confidence medium），governor 接手壓倉位與信心
+l2_aaoi = apply_decision_cap({
+    "decision_cap": {"anchors_available": 2, "fair_value_confidence": "medium"},
+    "speculative": {"pre_profit_anchor_live": True, "sell_side_only": True},
+    "final_decision": "BUY", "avg_confidence": 0.82,
+    "position_size_pct": 0.025, "final_action": "EXECUTE"})
+eq("spec.verdict_survives", l2_aaoi["final_decision"], "BUY")      # 放行，不是拒絕
+eq("spec.action_survives", l2_aaoi["final_action"], "EXECUTE")
+eq("spec.size_capped", l2_aaoi["position_size_pct"], 0.01)
+eq("spec.conf_capped", l2_aaoi["avg_confidence"], 0.70)
+eq("spec.grade_flagged", l2_aaoi["speculative_grade"], True)
+eq("spec.cap_not_active", l2_aaoi["decision_cap_active"], False)
+
+# 已經比 1% 小的倉位不被放大（governor 只收不放）
+l2_small = apply_decision_cap({
+    "decision_cap": {"anchors_available": 2, "fair_value_confidence": "medium"},
+    "speculative": {"pre_profit_anchor_live": True},
+    "final_decision": "STAGED_ENTRY", "avg_confidence": 0.55,
+    "position_size_pct": 0.002, "final_action": "STAGED"})
+eq("spec.small_size_untouched", l2_small["position_size_pct"], 0.002)
+eq("spec.low_conf_untouched", l2_small["avg_confidence"], 0.55)
+
+# decision cap 與 governor 同時成立 → 較嚴的 30bps / 0.65 勝出（不得被 1% 放寬）
+l2_both = apply_decision_cap({
+    "decision_cap": {"anchors_available": 1},
+    "speculative": {"pre_profit_anchor_live": True, "sell_side_only": True},
+    "final_decision": "BUY", "avg_confidence": 0.82,
+    "position_size_pct": 0.025, "final_action": "EXECUTE"})
+eq("spec.cap_wins_size", l2_both["position_size_pct"], 0.003)
+eq("spec.cap_wins_conf", l2_both["avg_confidence"], 0.65)
+eq("spec.cap_still_forces_hold", l2_both["final_decision"], "HOLD")
+eq("spec.both_flags_recorded", l2_both["speculative_grade"], True)
+
+# 無 speculative block 的既有 session：欄位存在但為 false，數值一位元不動
+l2_legacy = apply_decision_cap({
+    "decision_cap": {"anchors_available": 5, "fair_value_confidence": "high"},
+    "final_decision": "BUY", "avg_confidence": 0.82,
+    "position_size_pct": 0.02, "final_action": "EXECUTE"})
+eq("spec.legacy_grade_false", l2_legacy["speculative_grade"], False)
+eq("spec.legacy_size_untouched", l2_legacy["position_size_pct"], 0.02)
+eq("spec.legacy_conf_untouched", l2_legacy["avg_confidence"], 0.82)
+
+
 # ── Fixture M: end-to-end precedence — hard gates outrank the probe ──────────
 M_BASE = {
     "ticker": "TEST",

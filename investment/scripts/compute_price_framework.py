@@ -109,6 +109,24 @@ TERMINAL_GROWTH = 0.025
 IMPLIED_CAGR_CLAMP = (-0.20, 0.60)
 OE_MULT_CLAMP = (10.0, 22.0)
 
+# V4.108.0 — reverse DCF 對 FCF ≤ 0 的公司無定義（AAOI 實測直接棄權），但「市場在
+# 定價什麼」對這種標的恰恰是最該問的問題。改問營收：在 EV 不變的前提下，營收要成長
+# 幾倍、年化幾 % 才能把今天的 EV/S 消化到目標倍數。這是 diagnostic 不是 anchor
+# ——不進權重、不進 verdict，只餵 Red Team 與 speculative governor。
+#
+# 兩個 terminal 是刻意的，因為這個假設的槓桿極大（AAOI：4x → 需 32% CAGR；8x → 15%），
+# 藏在單一常數裡等於把結論藏起來：
+#   CONSERVATIVE 4.0  = **規範性**假設：「倍數正常化到無題材光環的硬體業」。它不是實測
+#                       中樞——2026-08-07 量測成熟獲利公司 median EV/S：半導體 13.9、
+#                       通訊設備 8.3、軟體 8.0、工業/包裝 2.8。4.0 大約在工業水準，
+#                       對科技股刻意保守，當壓力測試用。
+#   SECTOR_TYPICAL 8.0 = 同次量測的科技中樞（通訊設備 8.26 / 軟體 7.99）。標為「情境」
+#                       而非基準是因為它有循環性：拿今天正在 re-rating 的可比公司當
+#                       「成熟終值」（LITE 28.1x、PE 143）會讓門檻自動變低。
+TERMINAL_EV_SALES = 4.0
+TERMINAL_EV_SALES_SECTOR_TYPICAL = 8.0
+IMPLIED_REVENUE_HORIZON_Y = 5.0
+
 # V4.72.1 (user 核准 2026-07-16) — agreement_grade 門檻改歷史 33/66 percentile。
 # 原初值 0.15/0.35 把 28/30 session 判 low（歷史 cv 中位數 0.45，8 個異方法錨對
 # 科技股天生散）——93% 時間亮的警示燈無資訊量。SHADOW_REPORT_2026-07-16 校準：
@@ -121,7 +139,7 @@ AGREEMENT_GRADE_LOW_CV = 0.52     # cv >= this → low；中間 → medium
 # 只動族內拆分：新增 dcf_self_built（valuation-modeler 自建 driver-based DCF）與
 # comps_implied（EV/EBITDA + EV/Sales + PEG implied 中位數；P/E 排除防與
 # peer_pe_implied 重複計權）。兩個新 anchor 缺值時照舊重分配。
-ANCHOR_WEIGHTS = {
+LEGACY_ANCHOR_WEIGHTS = {
     "dcf_unlevered": 0.20,
     "dcf_levered": 0.10,
     "dcf_self_built": 0.15,
@@ -132,6 +150,38 @@ ANCHOR_WEIGHTS = {
     "forecaster_blend": 0.05,
 }
 
+# ── V4.108.0 — anchor 9: fwd_earnings_discounted（虧損中的題材成長股）─────────
+# 為什麼要第 9 根：八根 live anchor 全部要求「現在」就有正的現金流／盈餘（DCF 族、
+# owner earnings）或 ≥3 家同業（倍數族）。還在虧損、又沒有可比同業的題材股兩者都拿
+# 不到——AAOI 2026-08-07 實測八根全 null → anchors_available=0 → insufficient_anchors
+# 把決策直接封死。這根把「市場在追的那個未來」本身變成可證偽的數字：取分析師覆蓋
+# 足夠的最遠獲利年度 EPS，乘一個受限的 justified P/E，用 CAPM 門檻利率折回今天。
+#
+# 它的 raw weight 刻意留在 LEGACY_ANCHOR_WEIGHTS 的 1.0 預算之外：live 資格只在
+# cashflow_intrinsic 整組（raw 權重合計 0.50）結構性缺席時才開（見
+# evaluate_fwd_anchor_scope），所以它永遠不會擠掉任何一根既有 anchor 的權重。
+FWD_EARNINGS_RAW_WEIGHT = 0.15
+ANCHOR_WEIGHTS = {**LEGACY_ANCHOR_WEIGHTS,
+                  "fwd_earnings_discounted": FWD_EARNINGS_RAW_WEIGHT}
+
+FWD_MIN_ANALYSTS = 3               # 目標年度 EPS 覆蓋數；strict 模式缺 → fail closed
+FWD_MAX_HORIZON_YEARS = 3.5        # 更遠的預估不可用（覆蓋薄且沒人能預測那麼遠）
+FWD_PE_CLAMP = (15.0, 35.0)        # justified P/E 上下限（成長率再高也不給第 36 倍）
+FWD_PEG_FACTOR = 1.0               # justified P/E = 成長率(%) × factor
+FWD_DISCOUNT_CLAMP = (0.10, 0.30)  # CAPM 門檻利率；低 beta 的題材股也不得低於 10%
+# 無效 beta（≤0 或缺）**不得**解讀成「市場級風險」而落到折現率下限——這根錨服務的母體
+# 定義上就比市場危險，那等於把資料缺陷換成最寬鬆的折現。實例：SPCX beta=0（IPO
+# 2026-06-12，歷史不足兩個月）原本吃到 10% 下限，是整組樣本裡最寬鬆的一檔。
+# 2.73 = 題材股母體 valid beta 中位數（n=14，2026-08-07 量測；重新量測見 TODO）。
+FWD_BETA_FALLBACK = 2.73
+CASHFLOW_INTRINSIC_ANCHORS = ("dcf_unlevered", "dcf_levered", "dcf_self_built",
+                              "owner_earnings_mult")
+# 同一批賣方分析師餵養的錨。兩根同時 eligible 時 family topology 會給它們各一票，
+# 但那不是兩份獨立證據——build_valuation_pack 因此另外標記 sell_side_only，由
+# decision_engine 的 speculative governor 限制倉位（不是拒絕決策）。
+# forecaster_blend 不列入：它的 cagr / trend 兩法用歷史實績，不是純 consensus。
+SELL_SIDE_ANCHORS = ("analyst_pt_consensus", "fwd_earnings_discounted")
+
 # Canonical valuation topology.  Anchor-level weights above remain as legacy
 # audit metadata; live aggregation happens group -> family -> portfolio so
 # correlated methods do not receive independent votes.
@@ -141,6 +191,7 @@ ANCHOR_TOPOLOGY = {
     "dcf_self_built": ("fundamental", "cashflow_intrinsic"),
     "owner_earnings_mult": ("fundamental", "cashflow_intrinsic"),
     "forecaster_blend": ("fundamental", "earnings_projection"),
+    "fwd_earnings_discounted": ("fundamental", "earnings_projection"),
     "peer_pe_implied": ("relative", "peer_relative"),
     "comps_implied": ("relative", "peer_relative"),
     "analyst_pt_consensus": ("external_expectations", "external_pt"),
@@ -189,27 +240,35 @@ ARCHETYPE_WEIGHTS = {
         "dcf_unlevered": 0.20, "dcf_levered": 0.10, "dcf_self_built": 0.10,
         "analyst_pt_consensus": 0.15, "peer_pe_implied": 0.10, "comps_implied": 0.05,
         "owner_earnings_mult": 0.15, "forecaster_blend": 0.05,
+        "fwd_earnings_discounted": 0.0,
         "peer_ev_ebitda_implied": 0.10, "peer_ev_sales_implied": 0.0, "pb_roe_justified": 0.0,
     },
+    # V4.108.0：fwd_earnings_discounted 是 hypergrowth shadow 池唯一的新成員，權重與
+    # live 表同樣掛在 1.0 預算之外——既有 11 根的相對權重一位元都不動，#3b 翻轉率報告
+    # 才能把差異單一歸因到「多了這根」，而不是混進一次重分配。
     "hypergrowth": {
         "dcf_unlevered": 0.10, "dcf_levered": 0.05, "dcf_self_built": 0.10,
         "analyst_pt_consensus": 0.20, "peer_pe_implied": 0.0, "comps_implied": 0.10,
         "owner_earnings_mult": 0.0, "forecaster_blend": 0.10,
+        "fwd_earnings_discounted": FWD_EARNINGS_RAW_WEIGHT,
         "peer_ev_ebitda_implied": 0.15, "peer_ev_sales_implied": 0.20, "pb_roe_justified": 0.0,
     },
     "cyclical": {
         "dcf_unlevered": 0.15, "dcf_levered": 0.10, "dcf_self_built": 0.10,
         "analyst_pt_consensus": 0.15, "peer_pe_implied": 0.10, "comps_implied": 0.05,
         "owner_earnings_mult": 0.10, "forecaster_blend": 0.05,
+        "fwd_earnings_discounted": 0.0,
         "peer_ev_ebitda_implied": 0.20, "peer_ev_sales_implied": 0.0, "pb_roe_justified": 0.0,
     },
     "financial": {
         "dcf_unlevered": 0.05, "dcf_levered": 0.05, "dcf_self_built": 0.0,
         "analyst_pt_consensus": 0.30, "peer_pe_implied": 0.20, "comps_implied": 0.0,
         "owner_earnings_mult": 0.0, "forecaster_blend": 0.05,
+        "fwd_earnings_discounted": 0.0,
         "peer_ev_ebitda_implied": 0.0, "peer_ev_sales_implied": 0.0, "pb_roe_justified": 0.35,
     },
-    "balanced": {**ANCHOR_WEIGHTS, "peer_ev_ebitda_implied": 0.0,
+    "balanced": {**LEGACY_ANCHOR_WEIGHTS, "fwd_earnings_discounted": 0.0,
+                 "peer_ev_ebitda_implied": 0.0,
                  "peer_ev_sales_implied": 0.0, "pb_roe_justified": 0.0},
 }
 
@@ -313,6 +372,164 @@ def _stable_hash(value) -> str:
     return hashlib.sha256(encoded).hexdigest()[:16]
 
 
+def _iso_date(value) -> dt.date | None:
+    try:
+        return dt.date.fromisoformat(str(value)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+# ── V4.108.0 — anchor 9 computation ──────────────────────────────────────────
+def compute_fwd_earnings_anchor(estimates, *, today: dt.date | None = None,
+                                beta=None, treasury_10y=None) -> dict:
+    """Price the first credibly-covered profitable year back to today.
+
+    Deliberately peer-free: 題材股最常見的失敗模式就是「沒有可比同業」（AAOI 的
+    exact-industry peer set = 0），任何吃 peer median 的方法在這個 archetype 上會
+    重複踩同一個坑。這裡只用分析師 EPS 預估 + CAPM 折現率。
+
+    目標年度取 horizon 內**最遠**一個覆蓋足夠的獲利年度（取最近的那個會把公司價值
+    低估成「僅僅一年的盈餘」——第一個轉盈年之後的所有年份都還在）。覆蓋數與 horizon
+    上限就是防止這個選擇滑進沒人真的在預測的遠方。
+
+    Returns a detail dict；任何一道 gate 沒過 → value=None + reason（不是例外）。
+    """
+    today = today or dt.date.today()
+    detail = {
+        "value": None, "reason": None, "target_fiscal_year": None, "target_eps": None,
+        "analyst_count": None, "justified_pe": None, "justified_pe_raw": None,
+        "pe_clamp_binding": None, "growth_used": None,
+        "growth_source": None, "discount_rate": None, "discount_clamp_binding": None,
+        "horizon_years": None, "beta_used": None, "beta_source": None,
+        "beta": _num(beta), "risk_free": _num(treasury_10y),
+    }
+    # 過去年度**保留**在序列裡：目標年只從未來年度挑，但成長率的分母要用它前一個
+    # 年度——目標年正好是第一個未來年度時，那個分母就是最近的已實現年度。
+    rows = sorted(
+        ((d, row) for row, d in ((r, _iso_date((r or {}).get("date")))
+                                 for r in (estimates or []) if isinstance(r, dict))
+         if d is not None),
+        key=lambda pair: pair[0],
+    )
+    if not any(d > today for d, _ in rows):
+        detail["reason"] = "no_future_analyst_estimates"
+        return detail
+
+    def _analysts(row):
+        return _num(row.get("numAnalystsEps")) or _num(row.get("numAnalystEstimatedEps"))
+
+    eligible_idx = [
+        i for i, (d, row) in enumerate(rows)
+        if d > today
+        and _pos(row.get("epsAvg")) is not None
+        and (_analysts(row) or 0) >= FWD_MIN_ANALYSTS
+        and (d - today).days / 365.25 <= FWD_MAX_HORIZON_YEARS
+    ]
+    if not eligible_idx:
+        detail["reason"] = (
+            f"no_estimate_year_with_positive_eps_and_{FWD_MIN_ANALYSTS}_analysts"
+            f"_within_{FWD_MAX_HORIZON_YEARS:g}y")
+        return detail
+
+    idx = eligible_idx[-1]
+    target_date, target = rows[idx]
+    target_eps = _pos(target.get("epsAvg"))
+    horizon = max((target_date - today).days / 365.25, 0.25)
+
+    # justified P/E ← PEG。EPS CAGR 優先；轉盈年之前 EPS ≤ 0 使 CAGR 無定義時退回
+    # 營收 CAGR（近似，已標在 growth_source）。兩者皆不可得 → 放棄，不猜。
+    growth, growth_source = None, None
+    if idx > 0:
+        prior_date, prior = rows[idx - 1]
+        span = max((target_date - prior_date).days / 365.25, 0.25)
+        prior_eps = _pos(prior.get("epsAvg"))
+        if prior_eps:
+            growth, growth_source = (target_eps / prior_eps) ** (1 / span) - 1, "eps_cagr"
+        else:
+            prior_rev, target_rev = _pos(prior.get("revenueAvg")), _pos(target.get("revenueAvg"))
+            if prior_rev and target_rev:
+                growth, growth_source = (target_rev / prior_rev) ** (1 / span) - 1, "revenue_cagr"
+    if growth is None:
+        detail["reason"] = "no_usable_growth_rate_for_justified_pe"
+        return detail
+
+    # 校準原料：pre-profit 標的的成長率幾乎必然爆表，PE 因此恆取上限——上限是不是
+    # 對的，就成了這根錨最關鍵的一個假設。把「原始值」與「綁到哪一端」一起留下來，
+    # shadow_report 的校準區塊才能用 grep 回答「上限綁到的頻率」而不必重算。
+    justified_pe_raw = growth * 100 * FWD_PEG_FACTOR
+    justified_pe = clamp(justified_pe_raw, *FWD_PE_CLAMP)
+    pe_clamp_binding = ("upper" if justified_pe_raw > FWD_PE_CLAMP[1]
+                        else "lower" if justified_pe_raw < FWD_PE_CLAMP[0] else None)
+    rf = _num(treasury_10y)
+    rf = WACC_FALLBACK_RF if rf is None else rf
+    b_raw = _num(beta)
+    if b_raw is None or b_raw <= 0:
+        b_used, beta_source = FWD_BETA_FALLBACK, "population_median_fallback"
+    else:
+        b_used, beta_source = b_raw, "profile"
+    r_raw = rf + b_used * ERP_WACC
+    r = clamp(r_raw, *FWD_DISCOUNT_CLAMP)
+    discount_clamp_binding = ("upper" if r_raw > FWD_DISCOUNT_CLAMP[1]
+                              else "lower" if r_raw < FWD_DISCOUNT_CLAMP[0] else None)
+
+    detail.update({
+        "value": round(target_eps * justified_pe / (1 + r) ** horizon, 2),
+        "target_fiscal_year": target_date.isoformat(),
+        "target_eps": round(target_eps, 4),
+        "analyst_count": int(_analysts(target) or 0),
+        "justified_pe": round(justified_pe, 2),
+        "justified_pe_raw": round(justified_pe_raw, 2),
+        "pe_clamp_binding": pe_clamp_binding,
+        "growth_used": round(growth, 4),
+        "growth_source": growth_source,
+        "discount_rate": round(r, 4),
+        "discount_clamp_binding": discount_clamp_binding,
+        "beta_used": round(b_used, 4),
+        "beta_source": beta_source,
+        "horizon_years": round(horizon, 3),
+    })
+    return detail
+
+
+def evaluate_fwd_anchor_scope(inp: dict) -> tuple[bool, str | None]:
+    """Live 資格：只在所有內在價值法結構性無定義時才開。
+
+    這道閘是「只填真空、不排擠」的執行點——任何一根 cashflow_intrinsic 錨還活著，
+    或公司本來就有正的 TTM EPS，這根就退回 shadow（值照樣算、照樣進 archetype
+    shadow 池，只是不進 live blend）。
+    """
+    anchors = inp.get("anchors") or {}
+    meta = inp.get("anchor_meta") or {}
+    live = []
+    for name in CASHFLOW_INTRINSIC_ANCHORS:
+        if _pos(anchors.get(name)) is None:
+            continue
+        m = meta.get(name) or {}
+        if m.get("eligible") is False:
+            continue
+        if (m.get("model_eligibility") or {}).get("eligible") is False:
+            continue
+        live.append(name)
+    if live:
+        return False, f"cashflow_intrinsic_anchors_live:{','.join(live)}"
+    eps_ttm = _num((inp.get("archetype_inputs") or {}).get("eps_ttm"))
+    if eps_ttm is not None and eps_ttm > 0:
+        return False, "profitable_issuer_shadow_only"
+    return True, None
+
+
+# pack entry 的 calibration 欄位鍵；reverse-implied PE 的重算只需要前四個
+# （implied_pe = price × (1+discount_rate)^horizon_years ÷ target_eps）。
+CALIBRATION_KEYS = ("target_fiscal_year", "target_eps", "discount_rate", "horizon_years",
+                    "justified_pe", "justified_pe_raw", "pe_clamp_binding", "growth_source",
+                    "beta_used", "beta_source", "discount_clamp_binding")
+
+
+def _calibration_block(meta: dict) -> dict | None:
+    block = {k: meta.get(k) for k in CALIBRATION_KEYS}
+    return block if any(v is not None for v in block.values()) else None
+
+
 def _anchor_eligibility(name: str, value, meta: dict, structural_shift: dict,
                         strict_metadata: bool) -> tuple[bool, str | None]:
     if _pos(value) is None:
@@ -334,6 +551,17 @@ def _anchor_eligibility(name: str, value, meta: dict, structural_shift: dict,
             return False, "fewer_than_2_usable_methods"
         if meta.get("transition_case") is True:
             return False, "transition_without_safe_model"
+    if name == "fwd_earnings_discounted":
+        n_analysts = _num(meta.get("analyst_count"))
+        if strict_metadata and n_analysts is None:
+            return False, "missing_analyst_count"
+        if n_analysts is not None and n_analysts < FWD_MIN_ANALYSTS:
+            return False, f"fewer_than_{FWD_MIN_ANALYSTS}_analysts_on_target_year"
+        horizon = _num(meta.get("horizon_years"))
+        if strict_metadata and horizon is None:
+            return False, "missing_forecast_horizon"
+        if horizon is not None and horizon > FWD_MAX_HORIZON_YEARS:
+            return False, "forecast_horizon_beyond_limit"
     if name in ("peer_pe_implied", "comps_implied"):
         pc = _num(meta.get("peer_count"))
         if strict_metadata and pc is None:
@@ -407,6 +635,10 @@ def build_valuation_pack(anchors: dict, current_price: float, *,
             "projection_mode": meta.get("projection_mode"),
             "sensitivity_low": _pos(meta.get("sensitivity_low")),
             "sensitivity_high": _pos(meta.get("sensitivity_high")),
+            # anchor 自帶的校準原料（目前只有 fwd_earnings_discounted 有；其餘為 None）。
+            # 放進 pack 而不是只留在 anchor_meta，是因為 export 只帶 pack——沒有這一格，
+            # 未來要從 history.json 做結果回測時就得回頭重算輸入。
+            "calibration": _calibration_block(meta),
         }
         if eligible:
             grouped.setdefault(family, {}).setdefault(correlation_group, []).append(value)
@@ -466,6 +698,12 @@ def build_valuation_pack(anchors: dict, current_price: float, *,
     score = _valuation_score(vs_pct, family_ratios)
     family_count = len(families)
     confidence = "high" if family_count == 3 else "medium" if family_count == 2 else "low"
+    # Family topology gives independent families independent votes; it cannot see
+    # that two *different* families may be fed by the same sell-side analysts.
+    # Flagging it is the honest answer — the number stands, the size does not.
+    eligible_names = sorted(n for n, e in entries.items() if e["status"] == "eligible")
+    sell_side_only = bool(eligible_names) and all(n in SELL_SIDE_ANCHORS
+                                                  for n in eligible_names)
     return {
         "schema": VALUATION_PACK_SCHEMA,
         "engine": ENGINE_VERSION,
@@ -486,6 +724,14 @@ def build_valuation_pack(anchors: dict, current_price: float, *,
         "verdict_band": _verdict_band(vs_pct) if vs_pct is not None else None,
         "score": score,
         "confidence": confidence,
+        "evidence_independence": {
+            "eligible_anchors": eligible_names,
+            "sell_side_anchors": [n for n in eligible_names if n in SELL_SIDE_ANCHORS],
+            "sell_side_only": sell_side_only,
+            "note": ("每一根合格錨都源自賣方分析師預估——兩個 family 的票不是兩份獨立"
+                     "證據；估值可用但屬 speculative grade" if sell_side_only else
+                     "至少一根合格錨獨立於賣方預估"),
+        },
         "structural_shift": structural_shift,
     }
 
@@ -515,6 +761,10 @@ def fair_value_summary_from_pack(pack: dict) -> dict:
         "valuation_pack_schema": pack["schema"],
         "primary_method": pack.get("primary_method"),
         "family_blended_fair_value": pack.get("family_blended_fair_value"),
+        # Phase 4.6 speculative governor 直接讀這兩欄（不必自己重解 valuation_pack）
+        "sell_side_only": (pack.get("evidence_independence") or {}).get("sell_side_only"),
+        "pre_profit_anchor_live": (
+            (pack["anchors"].get("fwd_earnings_discounted") or {}).get("status") == "eligible"),
         "methodology_note": (
             f"{'DCF primary with anchor range' if pack.get('primary_method') == 'dcf_self_built' else 'canonical family aggregation'}; "
             f"mode={pack.get('aggregation_mode')}; {len(eligible)}/{len(ANCHOR_WEIGHTS)} anchors; "
@@ -868,6 +1118,69 @@ def _dcf_pv(fcf0: float, g: float, wacc: float, gt: float) -> float:
     return pv + tv / (1 + wacc) ** 5
 
 
+def compute_market_implied_revenue(inp: dict) -> dict:
+    """EV 不變下，把今天的 EV/S 消化到成熟中樞所需的營收 CAGR。
+
+    這條式子刻意假設「EV 原地不動」——所以答案的意思是「光是要撐住今天的價格，
+    營收就得長這麼快」，而不是任何形式的目標價。
+    """
+    ev_sales = _pos((inp.get("self_ratios") or {}).get("ev_to_sales_ttm"))
+    out = {
+        "applicable": False, "reason": None,
+        "ev_to_sales_ttm": ev_sales, "terminal_ev_to_sales": TERMINAL_EV_SALES,
+        "terminal_ev_to_sales_sector_typical": TERMINAL_EV_SALES_SECTOR_TYPICAL,
+        "horizon_years": IMPLIED_REVENUE_HORIZON_Y,
+        "required_revenue_multiple": None, "implied_revenue_cagr": None,
+        "required_revenue_multiple_sector": None, "implied_revenue_cagr_sector": None,
+        "analyst_revenue_cagr": _num((inp.get("revenue_path") or {}).get("analyst_revenue_cagr")),
+        "analyst_horizon_years": _num((inp.get("revenue_path") or {}).get("horizon_years")),
+        "verdict": None, "note": "", "red_team_kill_seed": "",
+    }
+    if ev_sales is None:
+        out["reason"] = "ev_to_sales_ttm_unavailable"
+        return out
+    if ev_sales <= TERMINAL_EV_SALES:
+        out["applicable"] = True
+        out["required_revenue_multiple"] = 1.0
+        out["implied_revenue_cagr"] = 0.0
+        out["note"] = (f"EV/S {ev_sales:.2f}x 已在成熟中樞 {TERMINAL_EV_SALES:g}x 之下"
+                       "——現價未內含營收擴張要求")
+        return out
+
+    mult = ev_sales / TERMINAL_EV_SALES
+    cagr = mult ** (1 / IMPLIED_REVENUE_HORIZON_Y) - 1
+    sector_mult = max(ev_sales / TERMINAL_EV_SALES_SECTOR_TYPICAL, 1.0)
+    sector_cagr = sector_mult ** (1 / IMPLIED_REVENUE_HORIZON_Y) - 1
+    out.update({
+        "applicable": True,
+        "required_revenue_multiple": round(mult, 2),
+        "implied_revenue_cagr": round(cagr, 4),
+        "required_revenue_multiple_sector": round(sector_mult, 2),
+        "implied_revenue_cagr_sector": round(sector_cagr, 4),
+    })
+    parts = [f"EV/S {ev_sales:.2f}x → 收斂到 {TERMINAL_EV_SALES:g}x 需營收 ×{mult:.2f}"
+             f"（{IMPLIED_REVENUE_HORIZON_Y:g}Y CAGR {cagr * 100:.0f}%，且 EV 原地不動）；"
+             f"若倍數只收斂到科技中樞 {TERMINAL_EV_SALES_SECTOR_TYPICAL:g}x 則需 "
+             f"{sector_cagr * 100:.0f}%"]
+    analyst = out["analyst_revenue_cagr"]
+    if analyst is not None:
+        parts.append(f"分析師路徑 {analyst * 100:.0f}%")
+        ratio = (cagr / analyst) if analyst else None
+        if ratio is not None and ratio > 1.2:
+            out["verdict"] = "market_above_sell_side"
+            parts.append("→ 市場要求的成長高於賣方預估，定價已跑在共識前面")
+        elif ratio is not None and ratio < 0.8:
+            out["verdict"] = "market_below_sell_side"
+            parts.append("→ 市場要求的成長低於賣方預估：若共識成真，現價偏保守")
+        else:
+            out["verdict"] = "aligned_with_sell_side"
+            parts.append("→ 與賣方預估大致一致")
+    out["note"] = "；".join(parts)
+    out["red_team_kill_seed"] = (
+        f"IF 未來 2 季營收年化增速 < {cagr * 100:.0f}% THEN 現價內含的營收路徑破裂")
+    return out
+
+
 def compute_implied_expectations(inp: dict) -> dict:
     cp = inp["current_price"]
     rdcf = inp.get("reverse_dcf") or {}
@@ -891,9 +1204,13 @@ def compute_implied_expectations(inp: dict) -> dict:
         "lane_fcf_estimate": _num(rdcf.get("lane_fcf_estimate")),
         "sanity_note": "",
         "red_team_kill_seed": "",
+        "market_implied_revenue": compute_market_implied_revenue(inp),
     }
     if fcf_ps is None or fcf_ps <= 0:
-        out["sanity_note"] = "FCF base ≤ 0 或缺，reverse DCF 不適用"
+        rev = out["market_implied_revenue"]
+        out["sanity_note"] = "FCF base ≤ 0 或缺，reverse DCF 不適用" + (
+            f"；改用營收路徑：{rev['note']}" if rev.get("applicable") else "")
+        out["red_team_kill_seed"] = rev.get("red_team_kill_seed") or ""
         return out
     if wacc <= TERMINAL_GROWTH:
         out["sanity_note"] = f"WACC {wacc:.3f} ≤ terminal growth，模型退化，跳過"
@@ -1305,6 +1622,15 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
             if range_scenario.get("eligible") and _pos(range_scenario.get("value")):
                 inp.setdefault("valuation_scenarios", {})["peer_pe_range"] = range_scenario
                 filled.append("valuation_scenarios.peer_pe_range")
+            # Subject-side ratios survive a failed peer search (they need no peers).
+            # phase1_factpack only emits them when the peer bundle is "ok", which is
+            # exactly the case that fails for 沒有可比同業的題材股 — so backfill here.
+            comps_self = universe.get("self") or {}
+            _fill("self_ratios.ev_to_sales_ttm", _pos(comps_self.get("ev_sales")))
+            _fill("self_ratios.ev_to_ebitda_ttm", _pos(comps_self.get("ev_ebitda")))
+            _fill("ev_block.enterprise_value", _pos(comps_self.get("enterprise_value")))
+            _fill("ev_block.net_debt", _num(comps_self.get("net_debt")))
+            _fill("ev_block.shares", _pos(comps_self.get("shares")))
         except Exception:
             pass
 
@@ -1374,6 +1700,67 @@ def assemble_inputs(ticker: str, inp: dict, *, authoritative_anchors: bool = Fal
             _fill("fred.treasury_10y_source", rf_source)
     except Exception:
         pass
+
+    # ── anchor 9 + 營收反解（都吃同一份 analyst estimates cache）────────────────
+    # 必須排在最後：折現率要 beta（peer bundle 段填）與 10Y（上一段填），scope gate
+    # 要看其餘 anchor 的最終值與 eligibility。
+    estimates = []
+    try:
+        vm_scripts = os.path.join(BASE_DIR, "skills", "valuation-modeler", "scripts")
+        if vm_scripts not in sys.path:
+            sys.path.insert(0, vm_scripts)
+        import fmp_client as vm_fmp_client  # noqa: F811 — 同一模組，上段已載入
+        estimates = vm_fmp_client.analyst_estimates(ticker) or []
+    except Exception:
+        estimates = []
+    if estimates:
+        fwd = compute_fwd_earnings_anchor(
+            estimates, beta=_num(inp.get("beta")),
+            treasury_10y=_num((inp.get("fred") or {}).get("treasury_10y")))
+        scope_ok, scope_reason = evaluate_fwd_anchor_scope(inp)
+        # 值一律填（shadow 池要用），live 資格由 meta.eligible 決定。
+        _fill("anchors.fwd_earnings_discounted", fwd["value"])
+        lineage = f"analyst_estimates:{ticker.upper()}:{fwd.get('target_fiscal_year') or 'none'}"
+        _meta("fwd_earnings_discounted",
+              provenance="fmp_analyst_estimates.annual", as_of=today,
+              analyst_count=fwd.get("analyst_count"),
+              horizon_years=fwd.get("horizon_years"),
+              target_fiscal_year=fwd.get("target_fiscal_year"),
+              target_eps=fwd.get("target_eps"),
+              justified_pe=fwd.get("justified_pe"),
+              justified_pe_raw=fwd.get("justified_pe_raw"),
+              pe_clamp_binding=fwd.get("pe_clamp_binding"),
+              growth_used=fwd.get("growth_used"),
+              growth_source=fwd.get("growth_source"),
+              discount_rate=fwd.get("discount_rate"),
+              discount_clamp_binding=fwd.get("discount_clamp_binding"),
+              beta_used=fwd.get("beta_used"),
+              beta_source=fwd.get("beta_source"),
+              correlation_key=lineage, input_lineage_ids=[lineage])
+        if not scope_ok:
+            _meta("fwd_earnings_discounted", eligible=False, reason=scope_reason)
+        elif fwd.get("reason"):
+            _meta("fwd_earnings_discounted", eligible=False, reason=fwd["reason"])
+        filled.append("anchors.fwd_earnings_discounted.scope="
+                      + ("live" if scope_ok else scope_reason or "shadow"))
+
+        # 營收路徑：拿覆蓋 ≥3 家的最遠年度營收預估對照市場隱含值
+        rev_rows = sorted(
+            ((d, r) for r, d in ((row, _iso_date((row or {}).get("date")))
+                                 for row in estimates if isinstance(row, dict))
+             if d is not None and _pos(r.get("revenueAvg"))),
+            key=lambda pair: pair[0])
+        covered = [(d, r) for d, r in rev_rows
+                   if (_num(r.get("numAnalystsRevenue")) or 0) >= FWD_MIN_ANALYSTS]
+        if len(covered) >= 2:
+            (d0, r0), (d1, r1) = covered[0], covered[-1]
+            span = (d1 - d0).days / 365.25
+            if span >= 0.5:
+                cagr = (r1["revenueAvg"] / r0["revenueAvg"]) ** (1 / span) - 1
+                _fill("revenue_path.analyst_revenue_cagr", round(cagr, 4))
+                _fill("revenue_path.horizon_years", round(span, 2))
+                _fill("revenue_path.source",
+                      f"analyst_estimates {d0.isoformat()}→{d1.isoformat()}")
 
     return filled
 

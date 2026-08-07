@@ -139,6 +139,8 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
 | `decision_cap_active` | bool | optional **(V5.0.x+)** | Phase 4.6 — true 表示 valuation 證據不足，cap 已套用（不得 BUY、conf ≤ 0.65、size ≤ 30bps）。預設 false 視為未觸發 |
 | `decision_cap_reason` | `"insufficient_anchors" \| "low_valuation_confidence" \| "low_data_quality"` or `null` | required if `decision_cap_active=true` | 觸發 cap 的具體原因。Validator (`validate_session_export.py` § 10) 強制此 enum |
 | `cap_override_reason` | string or `null` | optional | PM 在 cap active 時若有重大 catalyst,可填 1 句說明保留 STAGED_ENTRY 路徑;不解除 size/conf cap |
+| `speculative_grade` | bool | optional **(V4.108.0+)** | Phase 4.6 speculative governor。true = 估值成立但只靠 pre-profit 錨／賣方預估，**verdict 放行、籌碼受限**（size ≤ 1%、conf ≤ 0.70）。由 `decision_engine.apply_decision_cap` 從 `fair_value_summary` 的 `pre_profit_anchor_live` / `sell_side_only` 兩個布林算出，非 PM 判斷。Validator §10b 強制，且 §14 為它開了「倉位可低於 sizing_chain 鏈尾」的合法出路 |
+| `speculative_reasons` | array of `"pre_profit_fwd_earnings_anchor" \| "sell_side_only_evidence"` | required if `speculative_grade=true` | 觸發 governor 的具體條件；Validator §10b 強制非空且限於此 enum |
 | `hot_zone_probe` | bool | optional **(V5.0.x+, Rec 11)** | 熱區保守性鬆綁觸發旗標。true 表示正分模糊區 `[0,+staged)` × `industry_top_30pct` × `RISK_ON/BULL` 把 default HOLD 降為小倉 probe。觸發時強制 `final_decision=STAGED_ENTRY`、`position_size_pct ≤ tier 上限`、且 `decision_cap_active != true`。Validator (`validate_session_export.py` § 11) 強制。預設 false |
 | `hot_zone_probe_tier` | `"t1_15bps" \| "t2_30bps"` or `null` | required if `hot_zone_probe=true` **(V4.70.0+, P0-1)** | 分數分層 probe size：`final_score ≥ 0.4` → t2（≤30bps）/ `< 0.4` → t1（≤15bps）。依據 AUDIT_2026-07-16 replay（上半帶 mean +17.6% up 10/15 vs 下半帶 −1.2%）。Validator §11 按 tier 強制 size 上限 |
 | `hot_zone_eval` | `"fired" \| "suppressed_by_risk_flag" \| "suppressed_by_cap" \| "not_qualifying"` | **required (V5.0.x+, TODO-015)** | Rec 11 評估結果，不論是否 probe 一律寫出，使驗收不再盲飛。判定樹見 `investment_protocol_v5_0.md` Rec 11 段。Validator §11 強制：`hot_zone_probe=true ⟺ hot_zone_eval="fired"`。extractor 對缺欄的歷史報告反推 `hot_zone_eval_derived`（含 `qualifying_unexplained` 告警值） |
@@ -176,7 +178,8 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
       "status": "eligible|ineligible",
       "reason": "string|null",
       "weight_raw": "float",
-      "weight_effective": "float"
+      "weight_effective": "float",
+      "calibration": "object|null — anchor 自帶的校準原料；目前只有 fwd_earnings_discounted 有，其餘為 null"
     }
   },
   "families": "object — group median → family representative",
@@ -189,13 +192,73 @@ Claude（或 Sonnet 格式化 subagent）在 Phase 5 末尾**必須**：
   "vs_current_pct": "float|null",
   "verdict_band": "string|null",
   "score": "float|null",
-  "confidence": "high|medium|low"
+  "confidence": "high|medium|low",
+  "evidence_independence": {
+    "eligible_anchors": ["string"],
+    "sell_side_anchors": ["string — eligible 之中源自賣方預估者"],
+    "sell_side_only": "bool — 每一根 eligible anchor 都是賣方預估",
+    "note": "string"
+  }
 }
 ```
 
 Reverse DCF 不在 anchors 中，只是 market-implied diagnostic。缺 `provenance/as_of` 的 anchor
 不得 eligible；relative anchor 缺 `peer_count` 或少於 3 個 business-similar peers時不得 eligible；
 analyst PT 超過 180 天不得 eligible；少於兩個獨立 family 時 `|score| < 2`。
+
+**`evidence_independence`（V4.108.0）**：family topology 給獨立 family 各一票，但它看不出
+「兩個不同 family 其實由同一批賣方分析師餵養」——`analyst_pt_consensus` 與
+`fwd_earnings_discounted` 同時 eligible 就是這個情形。`sell_side_only=true` 不改估值數字、
+不改 verdict，它的唯一後果是強制 Phase 4.6 的 speculative governor（見下）。
+`forecaster_blend` 不算賣方錨：它的 cagr / trend 兩法用歷史實績。
+
+**`fwd_earnings_discounted`（V4.108.0，第 9 根｜條件錨）**：專為**還在虧損、又沒有可比同業**
+的題材成長股而設——這種標的八根 live anchor 全部無定義（DCF 為負、owner earnings / P/E
+無定義、倍數族拿不到 ≥3 家 business-similar peers），`anchors_available=0` 會讓
+`insufficient_anchors` 直接封死決策。公式（全決定論，peer-free）：
+
+```
+target  = horizon ≤ 3.5y 內**最遠**一個 epsAvg > 0 且 numAnalystsEps ≥ 3 的年度
+pe      = clamp(成長率% × 1.0, 15, 35)      # EPS CAGR 優先，轉盈前退回營收 CAGR
+beta    = profile beta（≤0 或缺 → FWD_BETA_FALLBACK 2.73，見下）
+r       = clamp(10Y + beta × 0.045, 0.10, 0.30)
+value   = target_eps × pe ÷ (1 + r)^horizon_years
+```
+
+> **無效 beta 不得解讀成「市場級風險」**：這根錨服務的母體定義上就比市場危險，讓
+> `beta=0`／缺值落到折現率下限（10%）等於把資料缺陷換成最寬鬆的折現。實例：SPCX
+> beta=0（IPO 2026-06-12，歷史不足兩個月）原本吃到 10% 下限、是整組樣本裡最寬鬆的一檔，
+> 修正後改用母體中位數 2.73 → r=16.9%，anchor 由 $115.18 降到 $99.50。`beta_source`
+> 記錄用的是 `profile` 還是 `population_median_fallback`，fallback 率在
+> `shadow_report.py` 的校準區段可查——偏高就該重新量測 `FWD_BETA_FALLBACK`。
+
+Live 資格（`evaluate_fwd_anchor_scope`）：**所有 cashflow_intrinsic 錨**
+（dcf_unlevered / dcf_levered / dcf_self_built / owner_earnings_mult）皆非 live **且**
+TTM EPS 非正時才開；否則值照算但只進 archetype shadow 池。raw weight 0.15 刻意留在
+八根的 1.0 預算之外——它只在 cashflow 族（合計 0.50）結構性缺席時上場，永遠擠不掉既有錨。
+`anchor_meta` 需帶 `analyst_count` 與 `horizon_years`，缺 → fail closed（與 `peer_count` 同紀律）。
+
+> **已知限制**：目標年度的選擇對數值影響很大（AAOI 2026-08-07：FY27 覆蓋 3 家 → $153；
+> 若 FY27 掉到 2 家則退回 FY26 → $33）。這是方法本身的性質，由「≥3 分析師 + 3.5 年
+> horizon + 必須有第 2 根錨才解 cap + governor 壓倉位」四道限制共同約束，不由平滑掩蓋。
+
+**`calibration` 與 `FWD_PE_CLAMP` 的校準（V4.108.0）**：pre-profit 標的的成長率幾乎必然
+爆表，`justified_pe` 因此**恆取上限 35**——上限對不對，就是這根錨最關鍵的單一假設。
+`calibration` 把重算所需的原料留在 pack（`target_eps` / `discount_rate` / `horizon_years`
+/ `justified_pe_raw` / `pe_clamp_binding`），讓校準不必回頭重跑引擎：
+
+```
+市場隱含 justified PE = current_price × (1 + discount_rate)^horizon_years ÷ target_eps
+```
+
+即「同一個目標年度 EPS、同一個折現率下，市場實際付幾倍」。讀出端是
+`shadow_report.py` 的 FWD_PE_CLAMP 區段（掃 `invest_logs/*_pf_quant.json`，同標的取最新
+一次），判準 = **live cohort** 的 P33–P66 是否包住現行上限。
+
+> 為什麼不能用 `#2 dispersion` 那套「切自己輸出分布的 percentile」：`agreement_grade`
+> 的門檻是**描述性**的，切在它所描述的分布上；PE clamp 是**因果**參數，直接決定輸出——
+> 拿它自己的輸出校準它會循環。市場隱含 PE 外生於這根錨，才是合法的校準標的。
+> 同理**不可自動跟隨中位數**：泡沫期中位數上移、上限跟著上移，錨就永遠不會說貴。
 
 ### `fair_value_summary` (V5.0 — Phase 4.5)
 ```json
@@ -208,7 +271,8 @@ analyst PT 超過 180 天不得 eligible；少於兩個獨立 family 時 `|score
     "peer_pe_implied":      "float|null",
     "comps_implied":        "float|null — V4.69.0+（valuation-modeler comps.py）；舊 entry 無此 key，validator 不強制",
     "owner_earnings_mult":  "float|null",
-    "forecaster_blend":     "float|null"
+    "forecaster_blend":     "float|null",
+    "fwd_earnings_discounted": "float|null — V4.108.0+（條件錨，見 valuation_pack 說明）；舊 entry 無此 key，validator 不強制"
   },
   "anchors_effective":     "object — 僅 eligible anchors；排除者為 null，MHP 等 downstream 只讀此欄",
   "weights_used":         "object — valuation_pack effective weights projection",
@@ -217,10 +281,12 @@ analyst PT 超過 180 天不得 eligible；少於兩個獨立 family 時 `|score
   "vs_current_pct":       "float",
   "verdict_band":         "extreme_undervalued | undervalued | fairly_valued | overvalued | extreme_overvalued",
   "confidence":           "high | medium | low（獨立 family coverage + dispersion cap）",
-  "anchors_available":    "int 0-8（V4.69.0 前的 entry 為 0-6；V4.70.0+ 為修剪後 count）",
+  "anchors_available":    "int 0-9（V4.108.0 前為 0-8；V4.69.0 前為 0-6；V4.70.0+ 為修剪後 count）",
   "families_present":     "array[string]",
   "excluded_anchors":     "object anchor→reason",
   "valuation_pack_schema": "valuation_pack.v1",
+  "sell_side_only":       "bool|null — V4.108.0+；valuation_pack.evidence_independence 的投影，Phase 4.6 governor 直接讀",
+  "pre_profit_anchor_live": "bool|null — V4.108.0+；fwd_earnings_discounted 是否 eligible",
   "methodology_note":     "string",
   "outlier_diagnostics":  "array[{anchor,value,reason}] optional；只警示，不剔除 live anchor"
 }
@@ -329,9 +395,43 @@ Legacy anchor 分布區間。**不**進 11-field decision_lock；決策數字仍
   "actual_3y_fcf_cagr":   "float | null",
   "lane_fcf_estimate":    "float | null",
   "sanity_note":          "string",
-  "red_team_kill_seed":   "string — falsifiable kill condition 起點"
+  "red_team_kill_seed":   "string — falsifiable kill condition 起點",
+  "market_implied_revenue": {
+    "applicable":               "bool",
+    "reason":                   "string | null — 例：ev_to_sales_ttm_unavailable",
+    "ev_to_sales_ttm":          "float | null",
+    "terminal_ev_to_sales":     "4.0 — 保守（規範性）情境",
+    "terminal_ev_to_sales_sector_typical": "8.0 — 科技中樞情境",
+    "horizon_years":            5.0,
+    "required_revenue_multiple": "float | null — ev_to_sales_ttm ÷ terminal",
+    "implied_revenue_cagr":     "float | null",
+    "required_revenue_multiple_sector": "float | null — 同上但用科技中樞；下限 1.0（不要求反向擴張）",
+    "implied_revenue_cagr_sector": "float | null",
+    "analyst_revenue_cagr":     "float | null — 覆蓋 ≥3 家的最遠年度回推",
+    "analyst_horizon_years":    "float | null",
+    "verdict": "market_above_sell_side | market_below_sell_side | aligned_with_sell_side | null",
+    "note":                     "string",
+    "red_team_kill_seed":       "string"
+  }
 }
 ```
+
+**`market_implied_revenue`（V4.108.0）**：reverse DCF 對 FCF ≤ 0 的公司無定義（過去直接
+棄權，`sanity_note` 只留一句「不適用」），但「市場在定價什麼」對虧損題材股恰恰是最該問的
+問題。改問營收：**EV 原地不動**的前提下，營收要成長幾倍、年化幾 % 才能把今天的 EV/S 消化到
+目標倍數。答案的意思是「光是撐住今天的價格，營收就得長這麼快」，**不是**任何形式的
+目標價；與 `implied_5y_fcf_cagr` 同級——不進加權、不進 verdict，只餵 Red Team 與 governor。
+
+**兩個 terminal 是刻意的**，因為這個假設的槓桿極大（AAOI：4x → 需 32% CAGR；8x → 15%），
+藏在單一常數裡等於把結論藏起來：
+
+| 常數 | 值 | 性質 |
+|---|---|---|
+| `TERMINAL_EV_SALES` | 4.0 | **規範性**假設：「倍數正常化到無題材光環的硬體業」。**不是**實測中樞——2026-08-07 量測成熟獲利公司 median EV/S 為半導體 13.9 / 通訊設備 8.3 / 軟體 8.0 / 工業包裝 2.8，4.0 大約在工業水準，對科技股刻意保守，當壓力測試用 |
+| `TERMINAL_EV_SALES_SECTOR_TYPICAL` | 8.0 | 同次量測的科技中樞。標為「情境」而非基準是因為它有**循環性**：拿今天正在 re-rating 的可比公司當「成熟終值」（LITE 28.1x、PE 143）會讓門檻自動變低 |
+
+sector 情境的 `required_revenue_multiple_sector` 下限為 1.0——EV/S 已在科技中樞之下時
+不要求任何營收擴張，而不是輸出一個「倍數反向擴張」的負成長。
 
 ### `valuation_archetype_shadow` (V3.46.0 — Phase 1.5 engine，shadow-only)
 
@@ -348,7 +448,7 @@ Legacy anchor 分布區間。**不**進 11-field decision_lock；決策數字仍
     "peer_ev_sales_implied":  "float | null",
     "pb_roe_justified":       "float | null — (ROE−g)/(r−g) × BVPS，clamp [0.2,15]"
   },
-  "anchors_used_n": "int 0-11（V4.69.0 起池含 dcf_self_built / comps_implied；之前為 0-9）",
+  "anchors_used_n": "int 0-12（V4.108.0 起池含 fwd_earnings_discounted，僅 hypergrowth 權重 > 0；V4.69.0 起含 dcf_self_built / comps_implied；之前為 0-9）",
   "weights_used": "object — archetype 權重重分配後（sum=1.0）",
   "weighted_fair_value_shadow": "float | null",
   "vs_current_pct_shadow":      "float | null",
@@ -617,6 +717,34 @@ LLM 從 Phase 2 / Phase 4.5 bundle 取得的 6 個量化原始值（**直接抄�
 
 **值域與形狀的單一事實來源是 `apply_det_shadow.py`**（`LANE_NAMES` / `PROVENANCE_VALUES` /
 `ANALYSIS_MODES` / `LANE_FIELDS`）；validator **import** 不複製。
+
+### `sentiment_det` (V4.91.0 — L5 Sentiment det producer，shadow-only)
+
+由 `skills/market-sentiment-analyzer/scripts/sentiment_score.py` 產出，PM **整塊抄寫**。
+Step 1.5 的 post-processor 把 `score` 映進 `lane_contract.lanes.sentiment.shadow_score`。
+
+```json
+{
+  "producer_version": "string — 具名公式版號（shadow 樣本要可歸屬到哪一版）",
+  "shadow_only":      "true — 恆真；false 由 validator 擋（翻預設需使用者拍板）",
+  "score":            "float | null — 0.5×stock_specific + 0.5×(composite/10−5)，clamp [-3,+3]",
+  "market_layer":     "float | null — composite/10 − 5",
+  "market_composite": "float | null — sentiment.py composite_score (0-100)",
+  "stock_specific":   "float — 規則表命中加總後 clamp [-3,+3]",
+  "stock_detail":     "{raw_sum, clamped, rules_fired[{rule, points, detail}]}",
+  "missing_inputs":   "array[string] — 拿不到的輸入（≠ 拿到了但中性）",
+  "degraded_reason":  "string | null — score=null 時必填",
+  "input_hash":       "string — 同輸入必得同分數，稽核用"
+}
+```
+
+**這塊是 shadow，不是決策數字**：`lane_scores.sentiment` 仍由 LLM lane 產出並進 Phase 3。
+Validator §5j 為 warning 級（缺 block 靜默、舊 entry 相容），但 **`shadow_only=false` 是 error** ——
+那代表有 session 自行讓 det 取代了 LLM lane，而翻預設需使用者拍板 + weight 凍結窗。
+
+> **契約側只映 `score`**。`producer_version` 在契約那格記的是**lane 的產出者**，shadow 期
+> 是 LLM（`protocol:<VERSION>`）；把 det script 的版號填進去等於向 Phase 6 宣稱這筆已是
+> script 產的，分層會歸錯池。det 公式的版號與 `input_hash` 完整留在本 block。
 
 ### lane 區塊形狀鎖 (V5.3)
 
