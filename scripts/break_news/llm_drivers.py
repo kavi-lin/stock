@@ -79,12 +79,15 @@ def _usage_from_envelope(envelope: dict) -> dict:
 
 
 def parse_stream_log_usage(log_path: str) -> dict:
-    """Scan a claude `--output-format stream-json` protocol log and return the
-    token usage from its terminal `result` event. {} when none found.
+    """Scan a provider JSONL protocol log and return terminal token usage.
+
+    Claude reports a ``result`` envelope; Codex reports ``turn.completed`` with
+    ``cached_input_tokens``. Returns {} when neither terminal event is present.
 
     Used by the dashboard protocol runner (sector / news / invest) to attribute
     per-run tokens to the model that produced them."""
     last_result = None
+    last_codex_usage = None
     try:
         with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
@@ -97,9 +100,23 @@ def parse_stream_log_usage(log_path: str) -> dict:
                     continue
                 if isinstance(ev, dict) and ev.get("type") == "result":
                     last_result = ev
+                elif isinstance(ev, dict) and ev.get("type") == "turn.completed":
+                    usage = ev.get("usage")
+                    if isinstance(usage, dict):
+                        last_codex_usage = usage
     except OSError:
         return {}
-    return _usage_from_envelope(last_result) if last_result else {}
+    if last_result:
+        return _usage_from_envelope(last_result)
+    if last_codex_usage:
+        return {
+            "input_tokens": int(last_codex_usage.get("input_tokens", 0) or 0),
+            "output_tokens": int(last_codex_usage.get("output_tokens", 0) or 0),
+            "cache_read_tokens": int(last_codex_usage.get("cached_input_tokens", 0) or 0),
+            "cache_write_tokens": 0,
+            "cost_usd": 0.0,
+        }
+    return {}
 
 
 def _extract_json(text: str) -> tuple[dict | None, str]:

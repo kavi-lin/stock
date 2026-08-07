@@ -77,8 +77,8 @@
    ```
    - rc=0 → done. rc=2 → degraded but usable (e.g. digest validator count nudge);
      still acceptable. rc=1 → fatal, fix the judgment.json and re-run.
-   - Do **not** hand-write the digest.json verdict or the `bn_*.json` yourself — the
-     writer owns those schemas. Your job is the MD + the judgment.json.
+   - Do **not** hand-write `news_events.jsonl`, the digest projection, or `bn_*.json`
+     yourself — the writer owns those schemas. Your job is the MD + judgment.json.
 
 End condition: the MD + judgment.json are written and `build_artifacts.py` exited
 0 or 2. Do not stop mid-flow to ask the user anything.

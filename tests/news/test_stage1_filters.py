@@ -20,6 +20,9 @@ from news.scripts.stage1_triage import (   # noqa: E402
     _headline_template_key,
     effective_credibility,
     classify_news_type,
+    classify_content_genre,
+    detect_binary_event,
+    select_stage2_items,
     _build_verdict,
 )
 
@@ -296,13 +299,24 @@ class TestBuildVerdict:
             "headline": "AAPL Q3 Earnings beat",
             "raw_summary": "Revenue up 12%",
             "source": "FMP",
+            "url": "https://example.com/aapl-earnings",
             "source_credibility": "HIGH",
             "published": "2026-05-20T13:00:00Z",
         })
         assert "effective_credibility" in v
         assert v["effective_credibility"] == "HIGH"
+        assert v["url"] == "https://example.com/aapl-earnings"
         # headline_zh is null in stage 1 now
         assert v["headline_zh"] is None
+
+    def test_verdict_preserves_source_kind(self):
+        v = _build_verdict(0, {
+            "headline": "SEC announces a new market structure rule",
+            "source": "SEC Press",
+            "source_credibility": "HIGH",
+            "source_kind": "official_regulator",
+        })
+        assert v["source_kind"] == "official_regulator"
 
     def test_verdict_press_release_downgraded(self):
         v = _build_verdict(0, {
@@ -318,3 +332,100 @@ class TestBuildVerdict:
         # (still might advance via |score|>=1.5 or binary, but the cred path is closed)
         if abs(v["shallow_score"]) < 1.5 and not v["binary_flag"]:
             assert v["advance_to_stage2"] is False
+
+
+class TestMaterialitySelection:
+    def test_rating_article_does_not_advance_on_sentiment_words(self):
+        v = _build_verdict(0, {
+            "headline": "Cinemark upgraded to Strong Buy: Here's What You Should Know",
+            "raw_summary": "Analysts see strong gains after an earnings beat",
+            "source": "Zacks Investment Research",
+            "source_kind": "publisher",
+            "source_credibility": "HIGH",
+        })
+        assert v["content_genre"] == "analyst_rating"
+        assert v["shallow_score"] > 0
+        assert v["materiality_score"] < 4.5
+        assert select_stage2_items([v]) == []
+
+    def test_first_party_earnings_event_outranks_listicle(self):
+        event = _build_verdict(0, {
+            "headline": "Eli Lilly tops quarterly estimates and raises 2026 outlook",
+            "raw_summary": "Revenue rose 18% to $12.4 billion",
+            "source": "Reuters",
+            "source_kind": "wire",
+            "source_credibility": "HIGH",
+        })
+        listicle = _build_verdict(1, {
+            "headline": "ChatGPT picks 3 stocks to buy after strong earnings",
+            "raw_summary": "Three bargain stocks could surge",
+            "source": "Finbold",
+            "source_kind": "publisher",
+            "source_credibility": "HIGH",
+        })
+        verdicts = sorted(
+            [listicle, event],
+            key=lambda x: (x["materiality_score"], abs(x["shallow_score"])),
+            reverse=True,
+        )
+        selected = select_stage2_items(verdicts)
+        assert [v["news_id"] for v in selected] == [event["news_id"]]
+
+    def test_source_diversity_caps_one_publisher_at_two(self):
+        verdicts = []
+        for i, company in enumerate(("Alpha", "Beta", "Gamma")):
+            verdicts.append({
+                "news_id": f"n{i:04d}",
+                "headline": f"{company} reports earnings and raises guidance {10+i}%",
+                "source": "Same Publisher",
+                "materiality_score": 7.0 - i,
+                "shallow_score": 3.0,
+                "binary_flag": False,
+                "advance_to_stage2": True,
+            })
+        selected = select_stage2_items(verdicts)
+        assert len(selected) == 2
+        assert verdicts[2]["advance_reason"] == "source_diversity"
+
+    def test_similar_headlines_collapse_to_one_event(self):
+        a = {
+            "news_id": "n0001", "headline": "AMD reports Q2 earnings beat and raises guidance",
+            "source": "Reuters", "materiality_score": 7.0, "shallow_score": 3.0,
+            "binary_flag": False, "advance_to_stage2": True,
+        }
+        b = {
+            "news_id": "n0002", "headline": "AMD Q2 earnings beat estimates, guidance raised",
+            "source": "CNBC", "materiality_score": 6.5, "shallow_score": 3.0,
+            "binary_flag": False, "advance_to_stage2": True,
+        }
+        selected = select_stage2_items([a, b])
+        assert [v["news_id"] for v in selected] == ["n0001"]
+        assert b["advance_reason"] == "duplicate_event"
+
+
+class TestBinaryDetection:
+    def test_generic_merger_story_is_not_automatically_binary(self):
+        assert detect_binary_event("Company announces acquisition of a smaller rival") is False
+
+    def test_explicit_merger_vote_is_binary(self):
+        assert detect_binary_event("Shareholders set merger approval vote for Friday") is True
+
+    def test_fda_decision_is_binary(self):
+        assert detect_binary_event("FDA decision on DrugCo treatment due Friday") is True
+
+    def test_completed_rate_decision_is_not_binary(self):
+        assert detect_binary_event("Fed rate decision rocks Wall Street inflation fears") is False
+
+    def test_completed_panel_vote_is_not_binary(self):
+        assert detect_binary_event("Biotech soars 132% after key FDA panel vote") is False
+
+    def test_genre_classifier_marks_market_recap(self):
+        assert classify_content_genre({}, "TSX Hits Record High; Shopify Surges 17%", "") == "market_recap"
+
+    def test_investment_club_trade_note_is_opinion(self):
+        assert classify_content_genre({}, "We're trimming a rallying stock before earnings", "") == "opinion"
+
+    def test_commentary_source_is_not_straight_news(self):
+        assert classify_content_genre(
+            {"source": "24/7 Wall Street"}, "GLP-1 drove record earnings", "",
+        ) == "research_commentary"

@@ -7,7 +7,7 @@ fingerprint dedupe (URL primary, headline-tokens secondary), and writes
 to news_logs/<DATE>_raw.json — the file news_protocol_v2 Stage 1 reads.
 
 Sources:
-  1. fetch_news_rss.py     — 9 public RSS feeds (CNBC / MarketWatch / PR Newswire / ...)
+  1. fetch_news_rss.py     — public media + first-party official RSS feeds
   2. fetch_finnhub_news.py — Finnhub /news?category=general (1-5 min latency)
   3. fetch_fmp_news.py     — FMP /news-general-latest + /news-stock-latest (5-30 min)
   4. fetch_sec_edgar.py    — SEC EDGAR 8-K Atom feed (0-15 min, regulatory)
@@ -29,6 +29,11 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+try:
+    from news.source_policy import infer_source_kind, source_priority
+except ModuleNotFoundError:  # direct: python3 news/fetch_all_news.py
+    from source_policy import infer_source_kind, source_priority
 
 HERE = Path(__file__).parent
 STOPWORDS = {"the","a","an","to","of","for","in","on","at","by","and","or","is","are","as","with","from","it","its","be","this","that","new"}
@@ -60,15 +65,42 @@ def _url_fp(url: str) -> str:
     return re.sub(r"[?#].*$", "", url.lower().rstrip("/"))
 
 
-def _load_intermediate(path: Path):
+def _load_payload(path: Path):
     if not path.exists():
-        return []
+        return {}
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return data.get("items") or []
+        return json.loads(path.read_text(encoding="utf-8"))
     except Exception as e:
         print(f"  [WARN] {path.name}: load failed: {e}", file=sys.stderr)
-        return []
+        return {}
+
+
+def _load_intermediate(path: Path):
+    return _load_payload(path).get("items") or []
+
+
+def _dedupe_items(items: list[dict]) -> list[dict]:
+    """Dedupe by canonical URL, then headline; closest-to-origin source wins."""
+    by_url: dict[str, dict] = {}
+    without_url: list[dict] = []
+    for item in items:
+        url_fp = _url_fp(item.get("url", ""))
+        if not url_fp:
+            without_url.append(item)
+            continue
+        previous = by_url.get(url_fp)
+        if previous is None or source_priority(item) > source_priority(previous):
+            by_url[url_fp] = item
+
+    by_headline: dict[str, dict] = {}
+    for item in [*by_url.values(), *without_url]:
+        headline_fp = _headline_fp(item.get("headline", ""))
+        if not headline_fp:
+            continue
+        previous = by_headline.get(headline_fp)
+        if previous is None or source_priority(item) > source_priority(previous):
+            by_headline[headline_fp] = item
+    return list(by_headline.values())
 
 
 def main():
@@ -117,7 +149,8 @@ def main():
     }
 
     # Snapshot RSS items first since we'll overwrite the canonical raw.json
-    rss_items = _load_intermediate(intermediate_files["rss"])
+    rss_payload = _load_payload(intermediate_files["rss"])
+    rss_items = rss_payload.get("items") or []
 
     all_items = []
     for src in ("finnhub", "fmp", "edgar"):
@@ -125,38 +158,15 @@ def main():
             continue
         for it in _load_intermediate(intermediate_files[src]):
             it.setdefault("source_credibility", "HIGH")
+            it.setdefault("source_kind", infer_source_kind(it.get("source", "")))
             all_items.append(it)
     if "rss" not in skip:
         all_items.extend(rss_items)
 
-    # Dedupe: URL fingerprint first (exact same article), then headline tokens.
-    # HIGH credibility wins ties.
-    by_url = {}
-    by_hl  = {}
     for it in all_items:
-        url_fp = _url_fp(it.get("url", ""))
-        hl_fp  = _headline_fp(it.get("headline", ""))
+        it.setdefault("source_kind", infer_source_kind(it.get("source", "")))
 
-        cred_high = it.get("source_credibility") == "HIGH"
-
-        # URL match: keep first or replace if HIGH beats non-HIGH
-        if url_fp:
-            prev = by_url.get(url_fp)
-            if prev is None:
-                by_url[url_fp] = it
-            elif cred_high and prev.get("source_credibility") != "HIGH":
-                by_url[url_fp] = it
-
-        # Headline fingerprint match (only after URL didn't disqualify it)
-        if hl_fp:
-            prev = by_hl.get(hl_fp)
-            if prev is None:
-                by_hl[hl_fp] = it
-            elif cred_high and prev.get("source_credibility") != "HIGH":
-                by_hl[hl_fp] = it
-
-    # Final union: prefer headline-fp dedupe (catches reposts where URL differs)
-    deduped = list(by_hl.values())
+    deduped = _dedupe_items(all_items)
 
     # Sort newest first (None pubs sink last)
     def _ts_key(it):
@@ -173,6 +183,7 @@ def main():
         "window_hours": args.hours,
         "providers": [name for name, _, _ in fetchers if results.get(name, (None, -1, "", ""))[1] == 0],
         "providers_failed": [name for name, _, _ in fetchers if results.get(name, (None, -1, "", ""))[1] != 0],
+        "feed_stats": rss_payload.get("feed_stats", []) if "rss" not in skip else [],
         "raw_count": len(all_items),
         "after_dedupe": len(deduped),
         "items": deduped,

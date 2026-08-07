@@ -17,14 +17,25 @@ What this catches:
   6. fanout_mode inconsistency (PER_AGENT_BATCH but subagent_isolated=false)
 """
 import glob
+import argparse
 import json
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
+
+try:
+    from news.arbiter_rules import ARBITER_RULE_VERSION, classify_verdict, compute_net_impact, directional_bias
+    from news.scripts.news_event_store import build_projection, load_events
+except ModuleNotFoundError:  # direct: python3 news/scripts/validate_digest_output.py
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+    from news.arbiter_rules import ARBITER_RULE_VERSION, classify_verdict, compute_net_impact, directional_bias
+    from news.scripts.news_event_store import build_projection, load_events
 
 ROOT     = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(ROOT, "news/news_logs")
-EXPECTED_SCHEMA_VER = "V2.1"
+EXPECTED_SCHEMA_VER = "V2.3"
+ARBITER_ROLLOUT_DATE = "2026-08-06"
 
 TOP_REQUIRED = [
     "timestamp", "mode", "stage1_count", "stage2_count",
@@ -33,7 +44,7 @@ TOP_REQUIRED = [
 ]
 VERDICT_REQUIRED_COMMON = [
     "news_id", "depth", "review_status",
-    "headline", "headline_zh", "source_label", "news_type",
+    "headline", "headline_zh", "source_label", "news_type", "published",
     "bull_case", "bear_case", "sector_view", "macro_view",
     "net_impact_score",
     "binary_risk", "binary_event_date", "within_48h",
@@ -61,6 +72,96 @@ def find_latest_digest():
     return files[-1] if files else None
 
 
+def _verdict_event_type(verdict: dict, projection_mode: str) -> str:
+    """Return the record-level mode, falling back for legacy non-event digests."""
+    event_type = verdict.get("event_type")
+    if event_type in ("DIGEST", "FLASH", "REVIEW", "LINK_DIGEST"):
+        return event_type
+    return projection_mode
+
+
+def _verdict_fanout_mode(verdict: dict, projection_mode: str, projection_fanout: str) -> str:
+    """Resolve fan-out per record; mixed FLASH records are always inline."""
+    if verdict.get("fanout_mode"):
+        return verdict["fanout_mode"]
+    if _verdict_event_type(verdict, projection_mode) in ("FLASH", "LINK_DIGEST"):
+        return "INLINE"
+    return projection_fanout
+
+
+def _arbiter_semantic_errors(
+    verdict: dict,
+    index: int = 0,
+    fanout_mode: str = "PER_AGENT_BATCH",
+    degraded_agents: list | None = None,
+) -> list[str]:
+    """Validate V2.3 verdict semantics without file/freshness side effects."""
+    errors = []
+    news_id = verdict.get("news_id", "?")
+    score = verdict.get("net_impact_score")
+    binary = verdict.get("binary_risk")
+    actual = verdict.get("verdict")
+    event_id = verdict.get("event_id")
+    if not isinstance(event_id, str) or not event_id.startswith("news_"):
+        errors.append(f"verdicts[{index}] deep ({news_id}): event_id must start with 'news_'")
+    lane_scores = verdict.get("lane_scores")
+    weights_used = verdict.get("weights_used")
+    confidences = verdict.get("lane_confidences")
+    if not isinstance(confidences, dict) or any(lane not in confidences for lane in ("bull", "bear", "sector", "macro")):
+        errors.append(f"verdicts[{index}] deep ({news_id}): lane_confidences must contain four lanes")
+    else:
+        degraded_lanes = {
+            str(name).lower().replace("_analyst", "").replace(" analyst", "").strip()
+            for name in (degraded_agents or [])
+        }
+        for lane, value in confidences.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 1:
+                errors.append(f"verdicts[{index}] deep ({news_id}): lane_confidences.{lane} must be within 0..1")
+            elif verdict.get("source_credibility") == "LOW" and value > 0.5:
+                errors.append(f"verdicts[{index}] deep ({news_id}): LOW source confidence exceeds 0.5")
+            elif lane in degraded_lanes and value > 0.5:
+                errors.append(f"verdicts[{index}] deep ({news_id}): degraded {lane} confidence exceeds 0.5")
+    try:
+        expected_score, expected_weights = compute_net_impact(
+            lane_scores,
+            verdict.get("news_type"),
+            verdict.get("source_credibility", "MEDIUM"),
+            fanout_mode,
+        )
+    except (TypeError, ValueError) as e:
+        errors.append(f"verdicts[{index}] deep ({news_id}): invalid lane scoring: {e}")
+    else:
+        if score != expected_score:
+            errors.append(
+                f"verdicts[{index}] deep ({news_id}): net_impact_score={score!r}, "
+                f"shared weighting requires {expected_score!r}"
+            )
+        if weights_used != expected_weights:
+            errors.append(f"verdicts[{index}] deep ({news_id}): weights_used does not match news_type")
+    try:
+        expected = classify_verdict(score, binary)
+    except (TypeError, ValueError) as e:
+        return [f"verdicts[{index}] deep ({news_id}): invalid Arbiter inputs: {e}"]
+    if actual != expected:
+        errors.append(
+            f"verdicts[{index}] deep ({news_id}): verdict={actual!r} "
+            f"but deterministic {ARBITER_RULE_VERSION} rule requires {expected!r}"
+        )
+    if binary:
+        expected_bias = directional_bias(score)
+        if verdict.get("directional_bias") != expected_bias:
+            errors.append(
+                f"verdicts[{index}] deep ({news_id}): BINARY "
+                f"directional_bias={verdict.get('directional_bias')!r}, expected {expected_bias!r}"
+            )
+        if not verdict.get("binary_event_date"):
+            errors.append(
+                f"verdicts[{index}] deep ({news_id}): "
+                "binary_risk=true requires binary_event_date"
+            )
+    return errors
+
+
 def _cross_check_files(digest, digest_path):
     """Cross-check today's digest against its sibling triage.json.
 
@@ -74,6 +175,8 @@ def _cross_check_files(digest, digest_path):
     matching triage file, so making this hard-fail would break historical
     digests. Today's run (NEWS_RUN_START_MS set) bumps it to hard-fail.
     """
+    if digest.get("mode") not in (None, "DIGEST"):
+        return []
     base = os.path.basename(digest_path)
     # Strip trailing _digest.json
     date = base[: -len("_digest.json")] if base.endswith("_digest.json") else base
@@ -119,6 +222,7 @@ def _cross_check_files(digest, digest_path):
         v.get("news_id")
         for v in (digest.get("verdicts") or [])
         if isinstance(v, dict) and v.get("depth") == "deep"
+        and v.get("event_type", "DIGEST") == "DIGEST"
     }
     missing = sorted(d for d in deep_ids if d and d not in triage_stage2_ids)
     if missing:
@@ -141,8 +245,11 @@ def _cross_check_files(digest, digest_path):
     return errors
 
 
-def main():
-    path = find_latest_digest()
+def main(argv=None):
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--path", help="validate this digest instead of latest news_logs file")
+    args, _ = parser.parse_known_args(argv)
+    path = os.path.abspath(args.path) if args.path else find_latest_digest()
     if not path:
         fail([f"no *_digest.json found under {LOGS_DIR}"])
 
@@ -170,6 +277,19 @@ def main():
     mtime_sec = _os.path.getmtime(path)
     mtime_age_sec = _t.time() - mtime_sec
     run_start_ms = _os.environ.get("NEWS_RUN_START_MS")
+    arbiter_v23 = data.get("arbiter_rule_version") == ARBITER_RULE_VERSION
+    if run_start_ms and ts_str[:10] >= ARBITER_ROLLOUT_DATE and not arbiter_v23:
+        errors.append(
+            f"arbiter_rule_version must be {ARBITER_RULE_VERSION!r} for "
+            f"new strict runs dated {ARBITER_ROLLOUT_DATE} or later"
+        )
+    elif ts_str[:10] >= ARBITER_ROLLOUT_DATE and not arbiter_v23:
+        print(
+            f"[validate_digest_output] note: legacy same-day artifact has no "
+            f"arbiter_rule_version={ARBITER_RULE_VERSION}; V2.3 semantic checks skipped "
+            "in loose mode.",
+            file=sys.stderr,
+        )
     if run_start_ms:
         try:
             run_start_sec = int(run_start_ms) / 1000.0
@@ -216,6 +336,14 @@ def main():
         for k in VERDICT_REQUIRED_COMMON:
             if k not in v:
                 errors.append(f"verdicts[{i}] ({v.get('news_id','?')}): missing key {k}")
+        published = v.get("published")
+        if not isinstance(published, str) or not published.strip():
+            errors.append(f"verdicts[{i}] ({v.get('news_id','?')}): published must be a non-empty ISO timestamp")
+        else:
+            try:
+                datetime.fromisoformat(published.strip().replace("Z", "+00:00"))
+            except ValueError:
+                errors.append(f"verdicts[{i}] ({v.get('news_id','?')}): published is not valid ISO-8601: {published!r}")
         depth = v.get("depth")
         if depth not in ("shallow", "deep"):
             errors.append(f"verdicts[{i}]: invalid depth {depth!r} (must be 'shallow' or 'deep')")
@@ -236,11 +364,41 @@ def main():
             # Deep: tickers_mentioned must be list (possibly empty — but not missing)
             if not isinstance(v.get("tickers_mentioned"), list):
                 errors.append(f"verdicts[{i}] deep ({v.get('news_id','?')}): tickers_mentioned must be array (use [] if none)")
+            verdict_type = _verdict_event_type(v, mode)
+            verdict_fanout = _verdict_fanout_mode(
+                v, mode, data.get("fanout_mode")
+            )
+            if arbiter_v23 and v.get("event_type", "DIGEST") != "LINK_DIGEST":
+                errors.extend(_arbiter_semantic_errors(
+                    v, i, verdict_fanout,
+                    v.get("degraded_agents") or data.get("degraded_agents"),
+                ))
+            if verdict_type == "FLASH":
+                if v.get("review_status") != "pending":
+                    errors.append(
+                        f"verdicts[{i}] FLASH ({v.get('news_id','?')}): "
+                        f"review_status must be 'pending' (got {v.get('review_status')!r})"
+                    )
+                if v.get("cache_updated") is not False:
+                    errors.append(
+                        f"verdicts[{i}] FLASH ({v.get('news_id','?')}): cache_updated must be false"
+                    )
+            elif verdict_type in ("DIGEST", "REVIEW"):
+                if v.get("review_status") != "reviewed":
+                    errors.append(
+                        f"verdicts[{i}] {verdict_type} ({v.get('news_id','?')}): "
+                        f"review_status must be 'reviewed' (got {v.get('review_status')!r})"
+                    )
+                if v.get("cache_updated") is not True:
+                    errors.append(
+                        f"verdicts[{i}] {verdict_type} ({v.get('news_id','?')}): cache_updated must be true"
+                    )
         else:
             shallow_count += 1
 
     # ── 4. Mode-specific rules ────────────────────────────────────────────
-    if mode == "FLASH":
+    is_event_projection = data.get("event_projection_version") == 1
+    if mode == "FLASH" and not is_event_projection:
         if shallow_count != 0 or deep_count != 1:
             errors.append(f"FLASH mode must have 0 shallow + 1 deep verdict (got {shallow_count}/{deep_count})")
         dv = next((v for v in verdicts if v.get("depth") == "deep"), None)
@@ -250,13 +408,15 @@ def main():
             if dv.get("cache_updated"):
                 errors.append("FLASH verdict cache_updated must be false (FLASH doesn't patch cache)")
 
-    elif mode == "REVIEW":
+    elif mode == "REVIEW" and not is_event_projection:
         if shallow_count != 0 or deep_count != 1:
             errors.append(f"REVIEW mode must have 0 shallow + 1 deep verdict (got {shallow_count}/{deep_count})")
         dv = next((v for v in verdicts if v.get("depth") == "deep"), None)
         if dv:
             if dv.get("review_status") != "reviewed":
                 errors.append(f"REVIEW verdict review_status must be 'reviewed' (got {dv.get('review_status')!r})")
+            if dv.get("event_type") != "LINK_DIGEST" and dv.get("cache_updated") is not True:
+                errors.append("REVIEW verdict cache_updated must be true")
 
     elif mode == "DIGEST":
         # Shallow is capped at top 10 by |shallow_score| (see news_protocol_v2.md Phase 4).
@@ -285,14 +445,35 @@ def main():
     valid_fm = ("PER_AGENT_BATCH", "PARTIAL_FALLBACK", "FULL_FALLBACK", "INLINE")
     if fm not in valid_fm:
         errors.append(f"fanout_mode must be one of {valid_fm} (got {fm!r})")
-    if fm == "PER_AGENT_BATCH":
-        # All deep verdicts should have subagent_isolated=true
-        bad = [v.get("news_id") for v in verdicts if v.get("depth") == "deep" and v.get("subagent_isolated") is not True]
-        if bad:
-            errors.append(f"fanout_mode=PER_AGENT_BATCH but these deep verdicts have subagent_isolated!=true: {bad}")
+    for i, v in enumerate(verdicts):
+        if v.get("depth") != "deep":
+            continue
+        verdict_fm = _verdict_fanout_mode(v, mode, fm)
+        if verdict_fm not in valid_fm:
+            errors.append(
+                f"verdicts[{i}] ({v.get('news_id','?')}): fanout_mode must be one of "
+                f"{valid_fm} (got {verdict_fm!r})"
+            )
+        elif verdict_fm == "PER_AGENT_BATCH" and v.get("subagent_isolated") is not True:
+            errors.append(
+                f"verdicts[{i}] ({v.get('news_id','?')}): fanout_mode=PER_AGENT_BATCH "
+                "requires subagent_isolated=true"
+            )
 
     # ── 6. v3.14.3 — cross-check digest against sibling triage.json ──────
     errors.extend(_cross_check_files(data, path))
+
+    # ── 7. Event-store projection integrity ──────────────────────────────
+    if data.get("event_projection_version") == 1:
+        event_path = os.path.join(os.path.dirname(path), "news_events.jsonl")
+        try:
+            projection_date = data.get("projection_date") or os.path.basename(path)[:10]
+            expected = build_projection(load_events(Path(event_path)), projection_date)
+        except Exception as exc:
+            errors.append(f"event projection cannot be rebuilt: {exc}")
+        else:
+            if expected != data:
+                errors.append("digest.json differs from deterministic news_events.jsonl projection")
 
     if errors:
         fail(errors)

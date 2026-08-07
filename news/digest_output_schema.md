@@ -1,8 +1,11 @@
 # News Digest Output Schema
 
-> **Schema Version**: `V2.1`
+> **Schema Version**: `V2.3`
 > **Consumer**: `bridge.py` / Dashboard news page / decisions binary_risks sidebar
-> **Producer**: News Protocol V2 Phase 4（DIGEST / FLASH / REVIEW 三模式共用）
+> **Producer**: `news_events.jsonl` 為 source of truth；DIGEST 由
+> `finalize_digest.py` append events，FLASH / REVIEW 由
+> `news_event_store.py` append；`digest.json` 一律是 deterministic projection。
+> Event schema / migration / rollback 見 `news/event_store_schema.md`。
 > **File location**: `news/news_logs/YYYY-MM-DD_digest.json`
 > **Last updated**: 2026-04-18
 
@@ -10,7 +13,7 @@
 
 ## 目的
 
-本檔案是 `news/news_logs/YYYY-MM-DD_digest.json` 每次 Phase 4 新寫入的 shape **唯一事實來源**。News Protocol V2 不再內嵌 JSON 範本 — 任何 schema 變動改這裡就好。
+本檔案是 `news/news_logs/YYYY-MM-DD_digest.json` shape **唯一事實來源**。DIGEST 的 LLM 輸入契約另見 `debate_input_schema.md`；LLM 不直接組裝本 shape。
 
 **V2.1 新增**（vs V2.0）：
 - `fanout_mode` — Stage 2 per-agent batch subagent 執行狀態
@@ -23,10 +26,7 @@
 - deep verdicts 的 `news_id` 必須 ⊆ triage.json `stage2_items`（validator cross-check）
 - `headline_zh` 由 LLM 補 deep 5 + shallow top 10（script 階段留 null）
 
-Claude 在 Phase 4 末尾**必須**：
-1. 以本檔的 `FULL EXAMPLE` 為 shape 範本填入本次 DIGEST / FLASH / REVIEW 結果
-2. 執行 `python3 news/scripts/validate_digest_output.py` — rc ≠ 0 時修正再重跑
-3. 禁止輸出本檔 `## DO NOT` 區塊列出的任何 legacy shape
+DIGEST Phase 4 **必須**執行 `finalize_digest.py`；它負責組裝與呼叫 validator。FLASH / REVIEW 仍須直接符合本 schema 並執行 `validate_digest_output.py`。rc ≠ 0 不得宣告完成。
 
 ---
 
@@ -43,18 +43,22 @@ Claude 在 Phase 4 末尾**必須**：
 | `degraded_agents` | array[string] | V2.1 — fallback 時列出降級的 agent（正常空陣列）|
 | `verdicts` | array | 本次所有分析結果（shallow + deep 混合；至少 1 則）|
 | `session_macro_delta` | float | -1.0 ~ +1.0；所有 deep verdicts 加總後對 phase0 macro 的淨衝擊 |
+| `arbiter_rule_version` | `"V2.3"` | 2026-08-06 起必填；verdict 由 `news/arbiter_rules.py` deterministic 驗證 |
 
 ### verdicts[i] — 每則新聞（shallow 與 deep 共用，但部分欄位只在 deep 填）
 
 | Field | Type | Shallow | Deep | Note |
 |---|---|---|---|---|
 | `news_id` | string | 必填 | 必填 | `n001`, `n002`, … |
+| `event_id` | string | 不填 | 必填 | V2.3 deterministic stable ID；cache idempotency key |
 | `depth` | `"shallow" \| "deep"` | 必填 | 必填 | 決定本則是否經過 Stage 2 |
 | `review_status` | `"reviewed" \| "pending"` | 必填 | 必填 | DIGEST Stage 2 / REVIEW = reviewed；FLASH = pending；Stage 1 shallow = reviewed（不會再 promote） |
 | `headline` | string | 必填 | 必填 | 原文（通常英文）|
 | `headline_zh` | string | 必填 | 必填 | 繁中翻譯 |
 | `source_label` | `"Reuters \| Bloomberg \| Yahoo Finance \| MarketWatch \| CNBC \| Investing.com \| …"` | 必填 | 必填 | |
+| `source_credibility` | `"HIGH" \| "MEDIUM" \| "LOW"` | 可省略 | 必填 | LOW 觸發 shared Arbiter safety cap |
 | `news_type` | `"earnings \| monetary_policy \| macro_data \| geopolitical \| corporate \| sector_news \| sentiment"` | 必填 | 必填 | |
+| `published` | ISO-8601 string | 必填 | 必填 | 原始發布時間；Dashboard freshness 使用 |
 | `bull_case` | string | ≤30 字 snap | 完整段落 150–250 字 | |
 | `bear_case` | string | ≤30 字 snap | 完整段落 150–250 字 | |
 | `sector_view` | string | ≤30 字 snap | 完整段落 | Shallow 時是一句話；Deep 時含 supply chain 2 階效應 |
@@ -70,6 +74,12 @@ Claude 在 Phase 4 末尾**必須**：
 | `affected_sectors` | array of `{sector, direction}` | 可空 | 必填 ≥ 1 筆 | `direction ∈ {bullish, bearish, binary, neutral}` |
 | `tickers_mentioned` | array[string] | 可空 | 必填（若完全無個股 → 顯式 `[]`）| Ticker symbols |
 | `subagent_isolated` | bool | null OK | V2.1：Deep 來自 subagent → true；fallback inline → false | |
+| `directional_bias` | `"BULLISH" \| "BEARISH" \| "NEUTRAL"` | null OK | BINARY 必填 | 保存二元事件目前的淨方向 |
+| `lane_scores` | object | 不填 | 必填 | Bull/Bear/Sector/Macro 原始分數；validator 重算 net score |
+| `lane_confidences` | object | 不填 | 必填 | 四 lane confidence |
+| `weights_used` | object | 不填 | 必填 | 必須符合 `arbiter_rules.py` 的 news_type 權重 |
+| `macro_backdrop_delta` | float | 不填 | 必填 | 單事件 -1..+1；finalizer 加總為 session delta |
+| `evidence_urls` | array[string] | 不填 | 必填 | lane 判斷的直接證據來源；可空 |
 
 ---
 
@@ -77,7 +87,8 @@ Claude 在 Phase 4 末尾**必須**：
 
 ```json
 {
-  "timestamp": "2026-04-18 09:15",
+  "timestamp": "2026-08-06 09:15",
+  "arbiter_rule_version": "V2.3",
   "mode": "DIGEST",
   "stage1_count": 42,
   "stage2_count": 4,
@@ -86,19 +97,25 @@ Claude 在 Phase 4 末尾**必須**：
   "verdicts": [
     {
       "news_id": "n003",
+      "event_id": "news_0123456789abcdef",
       "depth": "deep",
       "review_status": "reviewed",
       "headline": "NVDA raises Q3 guidance by 12%",
       "headline_zh": "輝達上修第三季指引 12%",
       "source_label": "Bloomberg",
+      "source_credibility": "HIGH",
       "news_type": "earnings",
+      "published": "2026-08-06T00:30:00Z",
       "bull_case": "AI capex 週期續航明確…（150-250 字完整論述）",
       "bear_case": "高基期 + 中國出口管制…（150-250 字）",
       "sector_view": "半導體 +strong、半導體設備 +moderate、公用事業 +weak（AI 電力需求連動）；供應鏈 2 階效應：CoWoS 產能緊俏拉動 TSM / ASML 稼動率…",
       "macro_view": "對 Fed 路徑中性，非通膨驅動；利差 / 匯率無顯著衝擊；歷史類比 2024 Q2 NVDA 指引上調後 SOX 三週 +11%…",
       "verdict": "BULLISH",
       "net_impact_score": 3.2,
-      "arbiter_reasoning": "news_type=earnings 權重 Sector 40%；四方分數 Bull +4 / Bear -2 / Sector +4 / Macro 0，加權 = 3.2 BULLISH。採 Sector 主論點，Bear 高基期警告保留作再評條件。",
+      "weights_used": {"bull": 0.25, "bear": 0.25, "sector": 0.40, "macro": 0.10},
+      "lane_scores": {"bull": 5, "bear": -1, "sector": 5, "macro": 2},
+      "lane_confidences": {"bull": 0.8, "bear": 0.7, "sector": 0.9, "macro": 0.7},
+      "arbiter_reasoning": "news_type=earnings 權重 Sector 40%；四方分數 Bull +5 / Bear -1 / Sector +5 / Macro +2，加權 = 3.2 BULLISH。採 Sector 主論點，Bear 高基期警告保留作再評條件。",
       "debate_note": "Sector Bull（基期論）vs Bear 最大分歧：FY27 能否維持 +30% 成長",
       "binary_risk": false,
       "binary_event_date": null,
@@ -110,7 +127,9 @@ Claude 在 Phase 4 末尾**必須**：
         { "sector": "Utilities", "direction": "bullish" }
       ],
       "tickers_mentioned": ["NVDA", "TSM", "ASML", "AVGO", "VRT"],
-      "subagent_isolated": true
+      "subagent_isolated": true,
+      "macro_backdrop_delta": 0.3,
+      "evidence_urls": ["https://example.com/source"]
     },
     {
       "news_id": "n001",
@@ -120,6 +139,7 @@ Claude 在 Phase 4 末尾**必須**：
       "headline_zh": "蘋果獲分析師小幅調升",
       "source_label": "Yahoo Finance",
       "news_type": "corporate",
+      "published": "2026-08-06T00:10:00Z",
       "bull_case": "小幅 PT 上調，對 AAPL 中性偏多",
       "bear_case": "評級調整幅度有限，消息強度低",
       "sector_view": "Tech 大型股觸動不大",
@@ -147,7 +167,7 @@ Claude 在 Phase 4 末尾**必須**：
 
 ### DIGEST
 - `stage1_count ≥ stage2_count`（triage 必然 ≥ 晉級）
-- verdicts = deep（≤5）+ shallow **top 10**（依 `|shallow_score|`；validator 下限 `min(10, s1−s2)`、硬上限 15），不得只留 deep
+- verdicts = deep（≤5）+ shallow **top 10**（依 `materiality_score`；legacy 無此欄才退回 `|shallow_score|`；validator 下限 `min(10, s1−s2)`、硬上限 15），不得只留 deep
 - 所有 deep verdict `review_status = reviewed` + `cache_updated = true`
 - fanout_mode 應為 `PER_AGENT_BATCH`（正常）或 `PARTIAL_FALLBACK`（某 agent 降級）/ `FULL_FALLBACK`（極端情況）
 

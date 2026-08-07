@@ -24,11 +24,15 @@ from pathlib import Path
 import requests
 from lxml import etree
 
+try:
+    from news.source_policy import infer_source_kind, source_priority
+except ModuleNotFoundError:  # direct: python3 news/fetch_news_rss.py
+    from source_policy import infer_source_kind, source_priority
+
 # ---- Feeds (public, no key) --------------------------------------------------
 FEEDS = [
     ("Yahoo Finance",  "https://finance.yahoo.com/news/rssindex",          "HIGH"),
     ("MarketWatch",    "https://feeds.content.dowjones.io/public/rss/mw_topstories", "HIGH"),
-    ("MarketWatch Mkt","https://feeds.content.dowjones.io/public/rss/mw_marketpulse", "HIGH"),
     ("CNBC Top",       "https://www.cnbc.com/id/100003114/device/rss/rss.html",   "HIGH"),
     ("CNBC Markets",   "https://www.cnbc.com/id/15839135/device/rss/rss.html",    "HIGH"),
     ("CNBC Economy",   "https://www.cnbc.com/id/20910258/device/rss/rss.html",    "HIGH"),
@@ -39,6 +43,12 @@ FEEDS = [
     ("PR Newswire",    "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss", "MEDIUM"),
     # Fed press releases — low-volume, high-impact macro mover (rate/regulatory).
     ("Fed Press",      "https://www.federalreserve.gov/feeds/press_all.xml",       "HIGH"),
+    # First-party US policy and macro releases. These outrank republished media
+    # coverage during dedupe but retain the same parser/output contract.
+    ("SEC Press",      "https://www.sec.gov/news/pressreleases.rss",                "HIGH"),
+    ("FTC Competition","https://www.ftc.gov/feeds/press-release-competition.xml",  "HIGH"),
+    ("Census Indicators", "https://www.census.gov/economic-indicators/indicator.xml", "HIGH"),
+    ("EIA Press",      "https://www.eia.gov/rss/press_rss.xml",                    "HIGH"),
     # Nasdaq + Benzinga US-markets feeds — fresh retail/trader coverage to widen
     # break-news intake after dropping the StockTwits social source (V3.40.7).
     ("Nasdaq Markets", "https://www.nasdaq.com/feed/rssoutbound?category=Markets", "MEDIUM"),
@@ -151,6 +161,7 @@ def fetch_feed(name: str, url: str, credibility: str):
             "raw_summary": desc[:500],
             "source": name,
             "source_credibility": credibility,
+            "source_kind": infer_source_kind(name),
             "published": pub_dt.isoformat() if pub_dt else None,
             "_fp": headline_fingerprint(title),
             "_dt": pub_dt,
@@ -174,13 +185,19 @@ def main():
         print(f"  → {name}")
         items = fetch_feed(name, url, cred)
         kept = items[: args.max_per_feed]
-        feed_stats.append({"feed": name, "fetched": len(items), "kept": len(kept)})
+        feed_stats.append({
+            "feed": name,
+            "source_kind": infer_source_kind(name),
+            "credibility": cred,
+            "fetched": len(items),
+            "kept": len(kept),
+        })
         all_items.extend(kept)
 
     # Time filter (keep items without timestamps — better than dropping)
     filtered = [x for x in all_items if (x["_dt"] is None or x["_dt"] >= cutoff)]
 
-    # Dedupe by headline fingerprint (keep first seen, prefer HIGH credibility)
+    # Dedupe by headline fingerprint; closest-to-origin source wins.
     seen = {}
     for x in filtered:
         fp = x["_fp"]
@@ -189,7 +206,7 @@ def main():
         prev = seen.get(fp)
         if prev is None:
             seen[fp] = x
-        elif x["source_credibility"] == "HIGH" and prev["source_credibility"] != "HIGH":
+        elif source_priority(x) > source_priority(prev):
             seen[fp] = x
     deduped = list(seen.values())
 
@@ -207,6 +224,7 @@ def main():
             "raw_summary": x["raw_summary"],
             "source": x["source"],
             "source_credibility": x["source_credibility"],
+            "source_kind": x["source_kind"],
             "published": x["published"],
         })
 

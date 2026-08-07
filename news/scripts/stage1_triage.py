@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Stage 1 shallow triage — keyword-based scoring for the day's raw news pool.
+Stage 1 deterministic triage — directional scoring plus event materiality.
 
 v3.14.3 additions
 -----------------
@@ -59,6 +59,115 @@ KEYWORDS = {
 POSITIVE_KEYS = ["bull", "gain", "raise", "strong", "beat", "rally", "surge", "upgrade", "win", "bullish"]
 NEGATIVE_KEYS = ["bear", "loss", "cut", "weak", "miss", "crash", "plunge", "downgrade", "risk", "bearish", "decline"]
 BINARY_KEYS = ["election", "vote", "decision", "merger", "acquisition", "bankruptcy"]
+
+STAGE2_MAX_ITEMS = 5
+STAGE2_MATERIALITY_MIN = 4.5
+
+_SOURCE_MATERIALITY = {
+    "official_regulator": 3.0,
+    "official_macro": 3.0,
+    "company_filing": 2.5,
+    "wire": 2.0,
+    "publisher": 1.0,
+    "aggregator": 0.25,
+    "press_release": -1.0,
+    "social": -1.5,
+    "unknown": 0.0,
+}
+
+_TYPE_MATERIALITY = {
+    "monetary_policy": 2.0,
+    "macro_data": 2.0,
+    "geopolitical": 2.0,
+    "earnings": 1.5,
+    "corporate": 1.5,
+    "sector_news": 1.0,
+    "sentiment": 0.25,
+}
+
+_GENRE_RULES = [
+    ("routine_regulatory", re.compile(
+        r"\bannounces? approval of the application by\b|"
+        r"\bnotice of (?:filing|effectiveness)\b",
+        re.I,
+    )),
+    ("filing_notice", re.compile(r"^\s*\[?8-k\]?[^:]*:\s*8-k\b|^\s*\[8-k\]", re.I)),
+    ("analyst_rating", re.compile(
+        r"\b(?:upgraded?|downgraded?)\s+to\s+(?:strong\s+)?(?:buy|sell|hold)\b|"
+        r"\b(?:raises?|cuts?|lowers?)\s+(?:the\s+)?(?:price\s+)?target\b|"
+        r"\banalyst\s+(?:upgrade|downgrade|rating)\b",
+        re.I,
+    )),
+    ("listicle", re.compile(
+        r"\b(?:top|best|these|tap)\s+\d+\b[^\n]{0,35}\bstocks?\b|"
+        r"\bstocks?\s+to\s+(?:buy|sell|watch)\b|"
+        r"\bchatgpt\s+(?:picks?|names?)\b|"
+        r"\bhere(?:'|’)s\s+what\s+you\s+should\s+know\b|"
+        r"\bbargain stocks?\b|\btoo cheap to ignore\b",
+        re.I,
+    )),
+    ("earnings_preview", re.compile(r"\bearnings preview\b|\bwhat to expect\b", re.I)),
+    ("opinion", re.compile(
+        r"^(?:opinion|commentary)\s*:|\bI(?:'|’)m\s+(?:more\s+)?bullish\b|"
+        r"\bwhy\s+I\s+(?:bought|sold|like|avoid)\b|\block in gains\b|"
+        r"\bwe(?:'|’)re\s+(?:trimming|buying|selling)\b",
+        re.I,
+    )),
+    ("market_recap", re.compile(
+        r"\blive\s+(?:nasdaq|s&p|dow)\b|\bmarket recap\b|"
+        r"\bstocks?\s+(?:today|close)\b|"
+        r"\b(?:index|tsx|nasdaq|s&p|dow)\s+(?:hits|closes|rises|falls|jumps|surges|plunges)\b",
+        re.I,
+    )),
+]
+
+_GENRE_PENALTY = {
+    "straight_news": 0.0,
+    "market_recap": 1.25,
+    "opinion": 2.0,
+    "earnings_preview": 2.0,
+    "analyst_rating": 3.0,
+    "listicle": 4.0,
+    "press_release": 2.0,
+    "research_commentary": 1.75,
+    "filing_notice": 2.0,
+    "routine_regulatory": 3.0,
+}
+
+_COMMENTARY_SOURCES = {
+    "24/7 Wall Street", "247 Wall St", "Finbold", "FXEmpire", "GuruFocus",
+    "Invezz", "Motley Fool", "Seeking Alpha", "The Motley Fool",
+    "Zacks Investment Research",
+}
+
+_MATERIAL_EVENT_RE = re.compile(
+    r"\b(?:reports?|beats?|misses?|raises?|cuts?|lowers?)\s+(?:q[1-4]\s+|fy\d{2,4}\s+)?"
+    r"(?:earnings|eps|revenue|guidance|forecast|outlook)|"
+    r"\b(?:announces?|approves?|rejects?|files?|launches?)\s+(?:a\s+|the\s+)?"
+    r"(?:merger|acquisition|buyback|offering|tariff|sanctions?|bankruptcy)|"
+    r"\b(?:fomc|fed)\s+(?:raises?|cuts?|holds?)\b|"
+    r"\b(?:cpi|pce|gdp|payrolls?|unemployment)\b[^\n]{0,35}\b(?:rises?|falls?|prints?|at)\b",
+    re.I,
+)
+_MARKET_MOVE_RE = re.compile(r"\b(?:surges?|plunges?|jumps?|dives?|falls?|rises?)\s+\d+(?:\.\d+)?%", re.I)
+_MAGNITUDE_RE = re.compile(r"(?:\$\s?\d|\b\d+(?:\.\d+)?\s?(?:%|bp|bps|billion|million)\b)", re.I)
+_BINARY_EVENT_RE = re.compile(
+    r"\b(?:fda|pdufa|court|jury|shareholder|regulator|commission)\b[^\n]{0,60}"
+    r"\b(?:decision|ruling|verdict|vote|approval|approve|reject)\b|"
+    r"\b(?:merger|acquisition)\b[^\n]{0,60}\b(?:vote|approval|approve|reject|deadline)\b|"
+    r"\b(?:referendum|election result|rate decision)\b",
+    re.I,
+)
+_BINARY_PENDING_RE = re.compile(
+    r"\b(?:awaits?|awaiting|due|expected|pending|scheduled|set(?:\s+for)?|"
+    r"will\s+(?:decide|rule|vote)|to\s+vote|deadline|before)\b",
+    re.I,
+)
+_EVENT_STOPWORDS = {
+    "after", "amid", "and", "are", "as", "at", "before", "by", "for", "from",
+    "in", "into", "is", "its", "new", "of", "on", "or", "says", "the", "to",
+    "with", "why", "what", "stock", "stocks", "shares", "market", "markets",
+}
 
 
 # ─── P0a — hard-block negative-content patterns ──────────────────────────────
@@ -177,6 +286,121 @@ def effective_credibility(item: dict, headline: str = "", summary: str = "") -> 
             return "MEDIUM"
         return "LOW"
     return provider
+
+
+def classify_content_genre(item: dict, headline: str = "", summary: str = "") -> str:
+    """Classify article form separately from event type.
+
+    A reliable publisher can still publish a low-materiality rating note or
+    listicle. Keeping genre separate prevents provider credibility from
+    promoting that content into Stage 2.
+    """
+    if (item or {}).get("source_kind") == "press_release":
+        return "press_release"
+    text = f"{headline or ''}\n{summary or ''}"
+    for genre, pattern in _GENRE_RULES:
+        if pattern.search(text):
+            return genre
+    if (item or {}).get("source") in _COMMENTARY_SOURCES:
+        return "research_commentary"
+    return "straight_news"
+
+
+def detect_binary_event(headline: str, summary: str = "") -> bool:
+    """Return true only for an explicit outcome-dependent event.
+
+    Generic words such as ``decision`` or ``merger`` are intentionally not
+    sufficient. Those broad keywords caused routine earnings and corporate
+    stories to enter the binary path.
+    """
+    text = f"{headline or ''}\n{summary or ''}"
+    return bool(_BINARY_EVENT_RE.search(text) and _BINARY_PENDING_RE.search(text))
+
+
+def calc_materiality_score(
+    item: dict,
+    headline: str,
+    summary: str,
+    news_type: str,
+    shallow_score: float,
+    effective_cred: str,
+    genre: str,
+) -> float:
+    """Score event importance independently from directional sentiment."""
+    source_kind = (item or {}).get("source_kind", "unknown")
+    score = _SOURCE_MATERIALITY.get(source_kind, 0.0)
+    score += _TYPE_MATERIALITY.get(news_type, 0.0)
+    score += min(abs(float(shallow_score)), 4.0) * 0.35
+
+    text = f"{headline or ''}\n{summary or ''}"
+    if _MATERIAL_EVENT_RE.search(text):
+        score += 1.5
+    elif _MARKET_MOVE_RE.search(text):
+        score += 1.0
+    if _MAGNITUDE_RE.search(text):
+        score += 0.5
+
+    score += {"HIGH": 0.5, "MEDIUM": 0.0, "LOW": -0.75}.get(effective_cred, 0.0)
+    score -= _GENRE_PENALTY.get(genre, 0.0)
+    return round(max(0.0, min(10.0, score)), 2)
+
+
+def _event_tokens(headline: str) -> set[str]:
+    tokens = re.findall(r"[a-z0-9]+", (headline or "").lower())
+    return {
+        token for token in tokens
+        if token not in _EVENT_STOPWORDS and len(token) > 2 and not token.isdigit()
+    }
+
+
+def _event_subject(headline: str) -> str:
+    for token in re.findall(r"[a-z0-9]+", (headline or "").lower()):
+        if token not in _EVENT_STOPWORDS and len(token) > 2 and not token.isdigit():
+            return token
+    return ""
+
+
+def _same_event(a: dict, b: dict) -> bool:
+    """Conservative headline similarity used only for Stage 2 diversity."""
+    if _event_subject(a.get("headline", "")) != _event_subject(b.get("headline", "")):
+        return False
+    left = _event_tokens(a.get("headline", ""))
+    right = _event_tokens(b.get("headline", ""))
+    if not left or not right:
+        return False
+    overlap = len(left & right) / min(len(left), len(right))
+    return overlap >= 0.60
+
+
+def select_stage2_items(verdicts: list[dict], limit: int = STAGE2_MAX_ITEMS) -> list[dict]:
+    """Select material, diverse events without forcing the daily quota full."""
+    selected: list[dict] = []
+    source_counts: dict[str, int] = {}
+    for verdict in verdicts:
+        if len(selected) >= limit:
+            break
+        if not verdict.get("binary_flag") and verdict.get("materiality_score", 0) < STAGE2_MATERIALITY_MIN:
+            verdict["advance_to_stage2"] = False
+            verdict["advance_reason"] = None
+            continue
+        if any(_same_event(verdict, existing) for existing in selected):
+            verdict["advance_to_stage2"] = False
+            verdict["advance_reason"] = "duplicate_event"
+            continue
+        source = verdict.get("source") or "Unknown"
+        source_cap = 3 if verdict.get("source_kind") == "wire" else 2
+        if verdict.get("content_genre") in {"analyst_rating", "listicle", "research_commentary"}:
+            source_cap = 1
+        if source_counts.get(source, 0) >= source_cap:
+            verdict["advance_to_stage2"] = False
+            verdict["advance_reason"] = "source_diversity"
+            continue
+        verdict["advance_to_stage2"] = True
+        verdict["advance_reason"] = "binary" if verdict.get("binary_flag") else "materiality"
+        verdict["_stage2_rank"] = len(selected) + 1
+        selected.append(verdict)
+        source_counts[source] = source_counts.get(source, 0) + 1
+    return selected
 
 
 # ─── P1b — rule-based news_type classifier (priority-ordered) ────────────────
@@ -314,31 +538,22 @@ def _build_verdict(idx: int, item: dict) -> dict:
     shallow_score = calc_shallow_score(headline, summary, news_type)
     bull, bear, sector_view, macro_view = gen_4view_snaps(headline, news_type)
     cred_eff = effective_credibility(item, headline, summary)
-    binary = (
-        any(kw in headline.lower() for kw in BINARY_KEYS)
-        and "election" not in headline.lower()
+    genre = classify_content_genre(item, headline, summary)
+    materiality_score = calc_materiality_score(
+        item, headline, summary, news_type, shallow_score, cred_eff, genre,
     )
-    # Advancement gate — uses effective credibility, not raw provider
-    advance = (
-        abs(shallow_score) >= 1.5
-        or (cred_eff == "HIGH" and abs(shallow_score) >= 0.5)
-        or binary
-    )
-    if abs(shallow_score) >= 3:
-        advance_reason = "score"
-    elif binary:
-        advance_reason = "binary"
-    elif cred_eff == "HIGH" and abs(shallow_score) >= 0.5:
-        advance_reason = "credibility"
-    else:
-        advance_reason = None
+    binary = detect_binary_event(headline, summary)
+    advance = binary or materiality_score >= STAGE2_MATERIALITY_MIN
     return {
         "news_id":             news_id,
         "headline":            headline[:150],
         "headline_zh":         None,  # P0f — digest LLM fills top-N later
         "source":              source,
+        "url":                 item.get("url", ""),
         "source_credibility":  item.get("source_credibility", "MEDIUM"),
+        "source_kind":         item.get("source_kind", "unknown"),
         "effective_credibility": cred_eff,
+        "content_genre":        genre,
         "raw_summary":         (summary or "")[:200],
         "news_type":           news_type,
         "bull_case":           bull,
@@ -346,9 +561,10 @@ def _build_verdict(idx: int, item: dict) -> dict:
         "sector_view":         sector_view,
         "macro_view":          macro_view,
         "shallow_score":       shallow_score,
+        "materiality_score":   materiality_score,
         "binary_flag":         binary,
         "advance_to_stage2":   advance,
-        "advance_reason":      advance_reason,
+        "advance_reason":      "binary" if binary else ("materiality" if advance else None),
         "published":           published,
     }
 
@@ -393,15 +609,14 @@ def main() -> int:
 
         verdicts.append(_build_verdict(i, item))
 
-    # Sort by |shallow_score| desc and pick top-5 for Stage 2
-    verdicts.sort(key=lambda x: abs(x["shallow_score"]), reverse=True)
-    stage2_count = sum(1 for v in verdicts if v["advance_to_stage2"])
-    stage2_count = min(stage2_count, 5)
-    for i, v in enumerate(verdicts):
-        if i < stage2_count and v["advance_to_stage2"]:
-            v["_stage2_rank"] = i + 1
-        else:
-            v["advance_to_stage2"] = False
+    # Materiality determines scarce Stage 2 budget; shallow_score remains a
+    # directional signal only. A quiet day is allowed to advance fewer than 5.
+    verdicts.sort(
+        key=lambda x: (x["materiality_score"], abs(x["shallow_score"])),
+        reverse=True,
+    )
+    stage2_items = select_stage2_items(verdicts)
+    stage2_count = len(stage2_items)
 
     output = {
         "phase":                  "stage1_triage",
@@ -414,7 +629,7 @@ def main() -> int:
         "template_dedup_dropped": template_dedup_dropped,
         "shallow_verdicts":       verdicts[:50],   # Export top 50 for dashboard
         "advanced_count":         stage2_count,
-        "stage2_items":           [v for v in verdicts if v["advance_to_stage2"]],
+        "stage2_items":           stage2_items,
         "stage1_max_items":       STAGE1_MAX_ITEMS,
     }
 
@@ -437,7 +652,7 @@ def main() -> int:
     for v in verdicts[:25]:
         tag = "✅ DEEP" if v["advance_to_stage2"] else "❌ SKIP"
         print(
-            f"{tag:10} {v['news_id']:6} [{v['shallow_score']:+.1f}] "
+            f"{tag:10} {v['news_id']:6} [D={v['shallow_score']:+.1f} M={v['materiality_score']:.2f}] "
             f"{v['headline'][:60]:60} {v['news_type']:15}"
         )
     print("─" * 100)

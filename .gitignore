@@ -10,6 +10,10 @@ events_archive.json
 
 # Log files with sensitive data — keep structure but ignore actual content
 news/news_logs/*.json
+news/news_logs/news_events.jsonl
+news/news_logs/news_events.jsonl.lock
+news/news_logs/event_payloads/
+news/news_logs/legacy_digest_backup/
 sector/sector_logs/*.json
 investment/invest_logs/history.json
 investment/invest_logs/*_phase0.json

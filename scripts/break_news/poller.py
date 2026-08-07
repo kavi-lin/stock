@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from news.fetch_news_rss import FEEDS, fetch_feed, headline_fingerprint  # noqa: E402
+from news.source_policy import infer_source_kind, source_priority  # noqa: E402
 from news.scripts.stage1_triage import (  # noqa: E402
     classify_news_type, calc_shallow_score, gen_4view_snaps, BINARY_KEYS,
 )
@@ -66,6 +67,9 @@ HOURLY_CAP = max(1, int(os.environ.get("BREAK_NEWS_HOURLY_CAP", "25")))
 SLOT_MINUTES = 60.0 / HOURLY_CAP
 BACKFILL_MINUTES = max(1, int(os.environ.get("BREAK_NEWS_BACKFILL_MINUTES", "30")))
 SESSION_TZ = ZoneInfo("America/New_York")
+# Mirrors debater.PENDING_MAX_AGE_HOURS (same env var) so the backlog count
+# below only reflects items debater.scan_pending() will actually pick up.
+PENDING_MAX_AGE_HOURS = float(os.environ.get("BREAK_NEWS_PENDING_MAX_AGE_HOURS", "2"))
 
 _last_feed_stats: list[dict] = []
 
@@ -97,14 +101,34 @@ def _in_us_news_window(now_utc: datetime | None = None) -> bool:
 
 
 def _pending_backlog_count() -> int:
+    """Count pending_debate items still eligible for auto-debate.
+
+    debater.scan_pending() skips items older than PENDING_MAX_AGE_HOURS —
+    they sit in pending_debate forever awaiting manual triage and will never
+    consume future call budget. Counting them here previously starved
+    `model_debate_capacity` to 0 permanently once the stale backlog alone
+    exceeded available headroom, blocking new admissions with no error and
+    no way to recover (see CHANGELOG stale-backlog deadlock, 2026-08-07).
+    """
+    now_utc = datetime.now(timezone.utc)
     n = 0
     for p in store.STORE_DIR.glob("bn_*.json"):
         try:
             with open(p, "r", encoding="utf-8") as f:
-                if json.load(f).get("state") == "pending_debate":
-                    n += 1
+                d = json.load(f)
         except (OSError, json.JSONDecodeError):
             continue
+        if d.get("state") != "pending_debate":
+            continue
+        fetched = d.get("fetched_at")
+        if fetched:
+            try:
+                dt = datetime.fromisoformat(fetched.replace("Z", "+00:00"))
+                if (now_utc - dt).total_seconds() / 3600.0 > PENDING_MAX_AGE_HOURS:
+                    continue
+            except ValueError:
+                pass
+        n += 1
     return n
 
 
@@ -314,7 +338,12 @@ def fetch_fresh_items(window_hours: int) -> list[dict]:
     feed_stats: list[dict] = []
     for name, url, cred in FEEDS:
         items = fetch_feed(name, url, cred)
-        feed_stats.append({"feed": name, "fetched": len(items)})
+        feed_stats.append({
+            "feed": name,
+            "source_kind": infer_source_kind(name),
+            "credibility": cred,
+            "fetched": len(items),
+        })
         for x in items:
             dt = x.get("_dt")
             if dt is not None and dt < cutoff:
@@ -356,10 +385,8 @@ def fetch_fresh_items(window_hours: int) -> list[dict]:
 
     _last_feed_stats = feed_stats
 
-    # Newest first, keep best credibility on fingerprint collision.
-    # RSS HIGH/MEDIUM > Futu MEDIUM > social LOW, so high-quality sources win.
+    # Newest first, keep the source closest to the original event on collision.
     seen: dict[str, dict] = {}
-    cred_rank = {"HIGH": 2, "MEDIUM": 1, "LOW": 0}
     for x in out:
         fp = x.get("_fp") or ""
         if not fp:
@@ -367,7 +394,7 @@ def fetch_fresh_items(window_hours: int) -> list[dict]:
         prev = seen.get(fp)
         if prev is None:
             seen[fp] = x
-        elif cred_rank.get(x.get("source_credibility"), 0) > cred_rank.get(prev.get("source_credibility"), 0):
+        elif source_priority(x) > source_priority(prev):
             seen[fp] = x
         elif x.get("source") != "Futu Push" and prev.get("source") == "Futu Push":
             # Same cred tie → prefer non-Futu (real RSS URL beats synthetic futu://).
@@ -492,6 +519,7 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
         source = {
             "name": raw.get("source"),
             "credibility": raw.get("source_credibility"),
+            "kind": raw.get("source_kind") or infer_source_kind(raw.get("source", "")),
             "url": raw.get("url"),
             "feed_fingerprint": raw.get("_fp"),
             "published": raw.get("published"),
@@ -505,6 +533,7 @@ def run_once(window_hours: int = WINDOW_HOURS, dry_run: bool = False) -> dict:
             "raw_summary": summary[:400],
             "source": raw.get("source"),
             "credibility": raw.get("source_credibility", "MEDIUM"),
+            "source_kind": raw.get("source_kind") or infer_source_kind(raw.get("source", "")),
             "url": raw.get("url"),
             "feed_fingerprint": raw.get("_fp"),
             "published": raw.get("published"),

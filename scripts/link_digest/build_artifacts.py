@@ -6,10 +6,8 @@ Consumes a judgment.json produced by the `link_digest` protocol turn and fans it
 out into the two machine-consumed files that the news feed + Knowledge Graph
 (Project Nexus) + supply-chain page ingest, with guaranteed schema:
 
-  1. Append a deep/reviewed verdict to the canonical
-     `news/news_logs/YYYY-MM-DD_digest.json` (bridge.extract_news + nexus
-     load_news_digests read it). Append is kept validator-safe; on a fresh day a
-     minimal REVIEW-mode file is created.
+  1. Append a deep/reviewed LINK_DIGEST event to `news_events.jsonl`, then
+     deterministically rebuild `YYYY-MM-DD_digest.json` for bridge/Nexus readers.
   2. Write `news/break_news_logs/bn_<YYYYMMDD>_<hash>.json` (state=closed) with
      `summary.merged_entities` + `summary.merged_relations`. Nexus tier-1 turns
      these into ticker/sector/theme nodes and — for ticker↔ticker relations
@@ -29,6 +27,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 try:
@@ -36,6 +35,7 @@ try:
 except Exception:  # keep the writer usable even if the translator import breaks
     def translate_to_zh(fields, timeout=120):  # type: ignore
         return {}
+from news.scripts.news_event_store import append_verdict
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 NEWS_LOGS = os.path.join(ROOT, "news", "news_logs")
@@ -230,7 +230,14 @@ def write_digest_verdict(j: dict, entities: dict, tr: dict) -> str:
         data["stage2_count"] = int(data.get("stage2_count", 0)) + 1
     data["timestamp"] = now_min  # refresh freshness gate
 
-    _atomic_write(digest_path, data)
+    append_verdict(
+        verdict,
+        event_type="LINK_DIGEST",
+        date=today,
+        root=Path(ROOT),
+        store_path=Path(NEWS_LOGS) / "news_events.jsonl",
+        origin="link_digest",
+    )
     print(f"[link_digest] digest verdict {nid} → {os.path.relpath(digest_path, ROOT)}")
     return digest_path
 

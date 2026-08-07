@@ -26,10 +26,11 @@
 | **Macro/Policy Expert** | **Stage 2 subagent batch** | 財經/政策專家 | Fed 路徑、殖利率、匯率、地緣、歷史類比 |
 | **News Arbiter** | inline | 仲裁辯論、加權評分、執行 cache patch | 綜合判斷、cache 一致性 |
 
-### V2.2 執行模式說明
+### V2.3 執行模式說明
 
-- **Stage 1**（triage）**全 deterministic**：`scripts/stage1_triage.py` 做 hard-block（法律廣告/地產 PR/理財專欄）、headline-template dedup、content-aware credibility downgrade、rule-based news_type、keyword score、4-view template snaps、晉級 gate，寫 `YYYY-MM-DD_triage.json`。LLM **不讀 raw.json 全文**（287KB ≈ 70K tokens），只讀 script 輸出 + `stage2_items` + `shallow_verdicts` top-25，補 top-15 `headline_zh`
-- **Stage 2**（deep debate，≤5 則 × 4 agent 完整辯論）**per-agent batch subagent**：每位 agent 一個 Agent tool call，一次看全部晉級項目（每篇全文截 5000 chars）、輸出 N 份自己視角的分析，彼此不看對方輸出 — 消除同 model 序列產生 4 視角的 anchoring，與 investment_protocol Phase 2 fan-out 同邏輯
+- **Stage 1**（triage）**全 deterministic**：`scripts/stage1_triage.py` 做 hard-block、headline-template dedup、credibility、news_type、方向 `shallow_score`、獨立 `materiality_score`、genre penalty、事件/來源多樣性及 4-view template snaps，寫 `YYYY-MM-DD_triage.json`。LLM **不讀 raw.json 全文**；`build_digest_packet.py` 只交付 Stage 2 + shallow top-10 + slim macro/theme，並補 top-15 `headline_zh`
+- **Stage 2**（deep debate，≤5 則 × 4 agent 完整辯論）**per-agent batch subagent**：每位 agent 一個 Agent tool call，一次看全部晉級項目（每篇截 3000 chars）、輸出 N 份自己視角的分析，彼此不看對方 output
+- **Phase 3–4 deterministic finalize**：LLM 只寫 compact `YYYY-MM-DD_debate.json`；`finalize_digest.py` 統一計分、裁決、組 digest、validator、idempotent cache patch 與 Markdown render
 - **REVIEW** 同樣套用 subagent 模式（1 則 × 4 agent 擴展）
 
 ---
@@ -37,13 +38,13 @@
 ## 執行流程（DIGEST 為例）
 
 ```
-Stage 1 Triage (script)     Stage 2 Deep Debate        Phase 3 Arbiter       Phase 4 Patch
+Stage 1 Triage (script)     Stage 2 Deep Debate        Compact judgment      Finalizer
 ─────────────────────       ─────────────────────      ──────────────        ───────────────
 fetch_all_news.py           4 subagent parallel        加權計算              sector_intel.json
 → stage1_triage.py          Bull / Bear / Sector       per news_type         phase0.json
-  (block/dedup/score        / Macro                    weights table         news_logs/digest.json
-   /snap/gate, 0 LLM)       ≤5 則 × ≤5000 chars        verdict output        validator → rc=0
-→ 晉級 ≤5 則                subagent_isolated=true     cache_action          → MD 報告
+  (block/dedup/score        / Macro                    lane JSON only        score + verdict
+   /snap/gate, 0 LLM)       ≤5 則 × ≤3000 chars        no math/render        digest/cache/MD
+→ 晉級 ≤5 則                subagent_isolated=true     one judgment Write    validator → rc=0
 ```
 
 ---
@@ -93,16 +94,22 @@ news/
 ├── README.md                        ← 本文件（說明、哲學、版本歷史）
 ├── news_protocol_v2.md              ← Claude instruction（純執行規則）
 ├── digest_output_schema.md          ← digest.json shape 唯一事實來源
+├── debate_input_schema.md           ← LLM → deterministic finalizer 最小契約
 ├── fetch_all_news.py                ← orchestrator：4 fetcher 平行（RSS / Finnhub / FMP / SEC EDGAR）
 ├── fetch_news_rss.py                ← RSS 抓取腳本
 ├── scripts/
 │   ├── stage1_triage.py             ← Stage 1 deterministic triage（block/dedup/score/snap/gate，0 LLM）
+│   ├── build_digest_packet.py        ← compact Stage 2 packet（triage + slim macro/theme，0 LLM）
+│   ├── finalize_digest.py           ← score/assemble/event append/validate/cache/render
+│   ├── news_event_store.py          ← append-only JSONL + projection/migration/rollback
+│   ├── news_cache_projection.py     ← reviewed event → sector/phase0 idempotent projection
 │   ├── validate_digest_output.py    ← schema validator（rc=0 才可進 MD 階段；cross-check triage.json）
 │   ├── build_structural_watchlist.py← Phase 4.5 structural watchlist（daily_update Step 7）
 │   └── (salvage_digest.py 已移至 archive/)  ← API stream idle timeout 後的搶救工具
 ├── news_logs/
 │   ├── YYYY-MM-DD_raw.json          ← 4 源合併原始資料
 │   ├── YYYY-MM-DD_triage.json       ← Stage 1 script 輸出（shallow_verdicts top-50 + stage2_items）
+│   ├── YYYY-MM-DD_debate.json       ← Stage 2 compact lane judgments
 │   └── YYYY-MM-DD_digest.json       ← 分析結果 cache（shallow + deep）
 └── scan_logs/
     └── news_YYYYMMDD_HHMMSS.log     ← protocol 執行 stream-json log
@@ -146,13 +153,13 @@ phase0.json        ← investment_protocol_v5_0 讀取（macro_backdrop + binary
 
 ## Token 預算
 
-| 項目 | V1 | V2.0-2.1（實測） | V2.2 |
+| 項目 | V1 | V2.0-2.1（實測） | V2.3 目標 |
 |---|---|---|---|
-| Stage 1 triage | n/a | ~70k in（LLM 讀整包 raw.json）+ ~6k out | **~4k**（script 跑完只讀 top-25） |
-| Web 請求 | ~30k（6 WebSearch） | ~8k（5 WebFetch） | ~8k（5 WebFetch，每篇截 5000 chars） |
-| Stage 2 辯論 | ~15k（3 人） | ~32k in（4 subagent × full bundle）+ ~8k out | **~20k**（bundle cap 後） |
-| Phase 3-4 + MD | — | ~8k（shallow 20 卡） | **~6k**（shallow 10 卡照抄 snaps） |
-| **DIGEST 合計** | **~45k** | **~110k+** | **~35-40k** |
+| Stage 1 triage | n/a | ~70k in（LLM 讀整包 raw.json）+ ~6k out | **~2k**（compact packet） |
+| Web 請求 | ~30k（6 WebSearch） | ~8k（5 WebFetch） | **~5k**（packet URL + 每篇 3000 chars） |
+| Stage 2 辯論 | ~15k（3 人） | ~32k in（4 subagent × full bundle）+ ~8k out | **~12-16k**（adaptive N + bundle cap） |
+| Phase 3-4 + MD | — | ~8k（shallow 20 卡） | **~1-2k**（只產 compact judgment；其餘 0 LLM） |
+| **DIGEST 合計** | **~45k** | **~110k+** | **~15-25k**（待 10 場 telemetry 驗證） |
 | **FLASH** | ~8k | ~5k | ~5k |
 | **REVIEW** | n/a | ~4k | ~4k |
 | **TRIAGE（standalone）** | n/a | ~75k | **~5k**（script + top-15 headline_zh） |
@@ -172,12 +179,9 @@ phase0.json        ← investment_protocol_v5_0 讀取（macro_backdrop + binary
 
 ### API Stream Idle Timeout
 
-歷史上 Phase 4 寫 digest.json 時發生過兩次：超大 JSON 單 tool call → stream idle watchdog 中斷、token 全浪費。
+歷史上 Phase 4 手寫 digest.json 曾因超大 JSON 觸發 stream idle watchdog，並重複消耗 output token。
 
-**現行預防**（protocol Phase 4 規則；歷史的「分塊 Write + digest_append_deep.py」方案已退役、腳本封存 `news/scripts/archive/`）：
-- shallow 硬上限 top 10 → digest.json < 10KB → 單次 `Write` < 1 min，不會觸發 idle
-- ❌ 禁用 `Bash` + heredoc；❌ 禁止分多次 Write / chunks 子資料夾
-- ⚠️ Write 前先 Read 一次 digest.json（解鎖 Write-safety 守門，避免失敗重試重 stream 一次）
+**現行預防**：LLM 只寫 compact debate input；`finalize_digest.py` 在本機 deterministic 產生 digest 與 Markdown，不再串流大型 artifact。stable `event_id` ledger 讓同一 debate 重跑不會重複 patch macro/risk。
 
 **萬一撞上**：不要重跑 protocol（會再燒同樣 tokens），改跑：
 ```bash
@@ -231,7 +235,13 @@ python3 archive/salvage_digest.py
 
 ## 版本演進
 
-### V2.2（現行）
+### V2.3（現行）
+- **BINARY 語意修正**：BINARY 只代表有明確結果分支與事件日期；Bull/Bear 天生異號造成的 score spread 只進 `debate_note`。非 binary verdict 由 `arbiter_rules.py` 依 net score ±0.75 deterministic 驗證。
+- **Stage 1 materiality 分離**：方向分數不再兼任重要性；新增 source origin、event type、數值/實質事件、genre penalty、event clustering 與 source diversity。安靜日不強迫湊滿 5 則。
+- **Validator semantic gate**：2026-08-06 起要求 `arbiter_rule_version=V2.3`，驗證 verdict/binary metadata、published ISO 與 cache flags。
+- **Deterministic finalizer**：LLM output 收斂為 compact four-lane judgment；共用 Arbiter 公式、digest/MD assembly、validator 與 idempotent cache patch 全下沉 script。
+
+### V2.2
 - **Stage 1 全 deterministic**：protocol 接上 `scripts/stage1_triage.py`（v3.14.3 已具備 block / template-dedup / credibility downgrade / rule-based news_type / score / snap / gate），LLM 禁讀 raw.json 全文、禁手工 triage — DIGEST 單跑 ~110K → ~35-40K tokens
 - **Stage 2 bundle cap**：每篇全文截 5000 chars（4 subagent 各收一份，重複成本 ×4）
 - **MD 報告 Shallow Digest 20 → 10**，snaps 照抄 triage.json（與 digest.json 一致）
