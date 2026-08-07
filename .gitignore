@@ -19,12 +19,20 @@ investment/invest_logs/history.json
 investment/invest_logs/*_phase0.json
 investment/invest_logs/*_phase0_*.json
 investment/invest_logs/*.md
+# Phase 1.5 quant artifact（V4.88.0 staged mode）：與 history/phase0 同類的 per-session
+# 引擎狀態，可由 --self-assemble 重建。shadow_report 的 FWD_PE_CLAMP 校準讀本機這些檔，
+# 不需要入版控（同 history.json 的處理）。
+investment/invest_logs/*_pf_quant.json
+investment/invest_logs/*.SELFASSEMBLED_RAW.json
 
 # Third-party reference repos (read-only, not part of protocol)
 reference/
 
 # Claude Code scheduled task lock (local state)
 .claude/scheduled_tasks.lock
+
+# LLM 預算計數器的互斥鎖（0 byte，純本機執行期狀態；計數本體 llm_usage.json 有入版控）
+config/llm_usage.lock
 
 # Python bytecode
 __pycache__/
