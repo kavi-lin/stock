@@ -11,11 +11,63 @@ cd "$PROJECT_DIR"
 
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 DATE=$(date '+%Y-%m-%d')
+LOCK_DIR="${TMPDIR:-/tmp}/ai_investment_committee_daily_update.lock"
+
+terminate_tree() {
+  local parent="$1" child
+  for child in $(pgrep -P "$parent" 2>/dev/null || true); do
+    terminate_tree "$child"
+  done
+  kill "$parent" 2>/dev/null || true
+}
+
+cleanup() {
+  local rc=$?
+  trap - EXIT INT TERM HUP
+  if [ "${#RUN_BG_PIDS[@]}" -gt 0 ]; then
+    for pid in "${RUN_BG_PIDS[@]}"; do
+      terminate_tree "$pid"
+    done
+  fi
+  if [ -d "$LOCK_DIR" ] && [ -f "$LOCK_DIR/pid" ] \
+      && [ "$(sed -n '1p' "$LOCK_DIR/pid" 2>/dev/null)" = "$$" ]; then
+    rm -f "$LOCK_DIR/pid"
+    rmdir "$LOCK_DIR" 2>/dev/null || true
+  fi
+  exit "$rc"
+}
+
+acquire_run_lock() {
+  local owner=""
+  if mkdir "$LOCK_DIR" 2>/dev/null; then
+    printf '%s\n' "$$" > "$LOCK_DIR/pid"
+    return 0
+  fi
+  if [ -f "$LOCK_DIR/pid" ]; then
+    owner=$(sed -n '1p' "$LOCK_DIR/pid" 2>/dev/null || true)
+  fi
+  if [ -n "$owner" ] && kill -0 "$owner" 2>/dev/null; then
+    echo "❌ daily_update 已在執行（pid=${owner}），拒絕重複啟動。"
+    exit 75
+  fi
+  echo "⚠️  清除 stale daily_update lock（owner=${owner:-unknown}）"
+  rm -f "$LOCK_DIR/pid"
+  rmdir "$LOCK_DIR" 2>/dev/null || true
+  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo "❌ 無法取得 daily_update lock：$LOCK_DIR"
+    exit 75
+  fi
+  printf '%s\n' "$$" > "$LOCK_DIR/pid"
+}
+
+acquire_run_lock
+trap cleanup EXIT INT TERM HUP
 # Worker counts raised for the FMP paid plan (250/min). Aggregate RPM is now
 # capped centrally by scripts/_shared/fmp_pool, so worker count only governs
 # local concurrency/latency, not quota safety.
 MOMENTUM_SCREEN_WORKERS="${MOMENTUM_SCREEN_WORKERS:-20}"
 THEMATIC_PREDICT_WORKERS="${THEMATIC_PREDICT_WORKERS:-16}"
+THEMATIC_ENRICH_WORKERS="${THEMATIC_ENRICH_WORKERS:-12}"
 DAILY_RUN_THEMATIC="${DAILY_RUN_THEMATIC:-1}"
 DAILY_RUN_MOMENTUM_SCREEN="${DAILY_RUN_MOMENTUM_SCREEN:-1}"
 DAILY_FORCE_THEMATIC="${DAILY_FORCE_THEMATIC:-0}"
@@ -38,10 +90,13 @@ run_bg() {
   echo "         ▶ ${name} started → ${log}"
   (
     _job_start=$(date +%s)
-    set +e
-    "$@"
-    _job_rc=$?
-    set -e
+    # Invoke in a conditional context so a job function's own `set -e` cannot
+    # terminate this wrapper before we capture its rc and elapsed marker.
+    if "$@"; then
+      _job_rc=0
+    else
+      _job_rc=$?
+    fi
     echo "__JOB_ELAPSED_SEC__:$(( $(date +%s) - _job_start ))"
     exit "$_job_rc"
   ) > "$log" 2>&1 &
@@ -81,12 +136,18 @@ wait_bg_jobs() {
     fi
 
     if [ "$rc" -ne 0 ]; then
-      failed="$rc"
+      failed=1
       if [ "$fatal" = "fatal" ]; then
         echo "         ❌ ${name} 失敗，中止。"
       else
         echo "         ⚠️  ${name} 失敗（非致命，rc=${rc}），繼續..."
       fi
+    fi
+
+    # The FRED marker is consumed immediately after Phase 1; all other
+    # per-job logs have already been streamed above and need not accumulate.
+    if [ "$name" != "4_fred" ]; then
+      rm -f "$log"
     fi
   done
 
@@ -95,7 +156,10 @@ wait_bg_jobs() {
   RUN_BG_LOGS=()
 
   if [ "$fatal" = "fatal" ] && [ "$failed" -ne 0 ]; then
-    return "$failed"
+    return 1
+  fi
+  if [ "$failed" -ne 0 ]; then
+    return 2
   fi
   return 0
 }
@@ -192,6 +256,7 @@ elif grep -q "__FRED_STATUS__:failed" "$FRED_LOG" 2>/dev/null; then
 else
   FRED_STATUS="skipped"
 fi
+rm -f "$FRED_LOG"
 
 echo ""
 
@@ -294,10 +359,14 @@ print(len(ts))
 " 2>/dev/null)
   [ -z "$TICKER_COUNT" ] && TICKER_COUNT="?"
   echo "         ▶ predicting ~${TICKER_COUNT} unique tickers（4h cache 命中數秒；冷跑 3-8 分鐘）"
+  if [ -z "$FINNHUB_API_KEY" ]; then
+    echo "         ⚠️  FINNHUB_API_KEY 未設定；整批略過 optional company-news，使用 proxy fallback"
+  fi
   STEP6_START=$(date +%s)
   set +e
   python3 skills/thematic-screener/scripts/screen.py --json-only \
     --predict-workers "$THEMATIC_PREDICT_WORKERS" \
+    --enrich-workers "$THEMATIC_ENRICH_WORKERS" \
     > /dev/null 2> >(sed 's/^/         │ /' >&2)
   SCREEN_RC=$?
   set -e
@@ -308,7 +377,7 @@ print(len(ts))
   else
     echo "         ⚠️  thematic-screener 執行失敗（非致命，${STEP6_ELAPSED}s 後 rc=${SCREEN_RC}），繼續..."
   fi
-  return 0
+  return "$SCREEN_RC"
 }
 
 step7_structural() {
@@ -323,14 +392,14 @@ step7_structural() {
   else
     echo "         ⚠️  watchlist build 失敗 (rc=${WATCHLIST_RC})，非致命，繼續..."
   fi
-  return 0
+  return "$WATCHLIST_RC"
 }
 
 step8_nexus() {
   local NEXUS_RC NEXUS_SIZE
-  echo "[ 8/10 ] Nexus 知識圖譜（Tier 1+2+3）..."
+  echo "[ 8/10 ] Nexus 知識圖譜（daily deterministic Tier 1+2）..."
   set +e
-  python3 scripts/nexus/build_graph.py --tier 1,2,3 --full 2> >(sed 's/^/         │ /' >&2)
+  python3 scripts/nexus/build_graph.py --tier 1,2 2> >(sed 's/^/         │ /' >&2)
   NEXUS_RC=$?
   set -e
   if [ "$NEXUS_RC" -eq 0 ]; then
@@ -339,7 +408,7 @@ step8_nexus() {
   else
     echo "         ⚠️  Nexus build 失敗 (rc=${NEXUS_RC})，非致命，繼續..."
   fi
-  return 0
+  return "$NEXUS_RC"
 }
 
 step93_market_mood() {
@@ -356,7 +425,7 @@ step93_market_mood() {
   else
     echo "         ⚠️  Market Mood 失敗 (rc=${MOOD_RC})，非致命,繼續..."
   fi
-  return 0
+  return "$MOOD_RC"
 }
 
 step935_intraday() {
@@ -373,7 +442,7 @@ step935_intraday() {
   else
     echo "         ⚠️  Intraday 評估失敗 (rc=${IA_RC})，非致命,繼續..."
   fi
-  return 0
+  return "$IA_RC"
 }
 
 step94_trending() {
@@ -392,7 +461,7 @@ step94_trending() {
   else
     echo "         ⚠️  Trending discovery 失敗 (rc=${TTK_RC})，非致命,繼續..."
   fi
-  return 0
+  return "$TTK_RC"
 }
 
 step95_retail_sector() {
@@ -410,7 +479,7 @@ step95_retail_sector() {
   else
     echo "         ⚠️  Retail Sector Pulse 失敗 (rc=${RSP_RC})，非致命,繼續..."
   fi
-  return 0
+  return "$RSP_RC"
 }
 
 step96_fundamentals_prefetch() {
@@ -427,7 +496,7 @@ step96_fundamentals_prefetch() {
   else
     echo "         ⚠️  Fundamentals prefetch rc=${FND_RC}（非致命，screen.py lazy refetch 即可）"
   fi
-  return 0
+  return "$FND_RC"
 }
 
 step97_momentum_screen() {
@@ -452,7 +521,7 @@ step97_momentum_screen() {
   else
     echo "         ⚠️  Momentum screen rc=${MOM_RC}（非致命，繼續...）"
   fi
-  return 0
+  return "$MOM_RC"
 }
 
 # Two independent FMP sub-chains. Ordering WITHIN each chain is required
@@ -462,12 +531,16 @@ step97_momentum_screen() {
 # their combined call rate under 250/min, which the old serialized lane had to
 # enforce by hand.
 fmp_chain_thematic() {
-  step55_etf_holdings
-  step6_thematic
+  local rc=0
+  step55_etf_holdings || rc=$?
+  step6_thematic || rc=$?
+  return "$rc"
 }
 fmp_chain_momentum() {
-  step96_fundamentals_prefetch
-  step97_momentum_screen
+  local rc=0
+  step96_fundamentals_prefetch || rc=$?
+  step97_momentum_screen || rc=$?
+  return "$rc"
 }
 
 fmp_lane() {
@@ -481,6 +554,7 @@ fmp_lane() {
 }
 
 non_fmp_lane() {
+  local rc=0 step_rc=0
   echo "[ Phase 2B ] Non-FMP lane: structural / Nexus / trending..."
   RUN_BG_PIDS=()
   RUN_BG_NAMES=()
@@ -490,14 +564,19 @@ non_fmp_lane() {
   run_bg "93_market_mood" step93_market_mood
   run_bg "935_intraday" step935_intraday
   run_bg "94_trending" step94_trending
-  wait_bg_jobs nonfatal
-  step95_retail_sector
+  wait_bg_jobs nonfatal || rc=$?
+  step95_retail_sector || step_rc=$?
+  [ "$step_rc" -ne 0 ] && rc="$step_rc"
+  return "$rc"
 }
 
-echo "[ Phase 2 ]  Hybrid parallel: FMP-heavy work serialized, light lanes parallel..."
+echo "[ Phase 2 ]  Hybrid parallel: pool-governed FMP chains + light lanes..."
 run_bg "phase2a_fmp_lane" fmp_lane
 run_bg "phase2b_non_fmp_lane" non_fmp_lane
+set +e
 wait_bg_jobs nonfatal
+PHASE2_RC=$?
+set -e
 
 step98_morning_brief() {
   local MB_RC
@@ -513,9 +592,13 @@ step98_morning_brief() {
   else
     echo "         ⚠️  Morning brief rc=${MB_RC}（非致命，繼續...）"
   fi
-  return 0
+  return "$MB_RC"
 }
-step98_morning_brief
+if step98_morning_brief; then
+  MORNING_BRIEF_RC=0
+else
+  MORNING_BRIEF_RC=$?
+fi
 
 step99_kill_triggers() {
   local KT_RC
@@ -529,9 +612,13 @@ step99_kill_triggers() {
   else
     echo "         ⚠️  Kill-trigger monitor rc=${KT_RC}（非致命，繼續...）"
   fi
-  return 0
+  return "$KT_RC"
 }
-step99_kill_triggers
+if step99_kill_triggers; then
+  KILL_TRIGGER_RC=0
+else
+  KILL_TRIGGER_RC=$?
+fi
 
 echo ""
 echo "[ 10/10 ] Final bridge refresh → Dashboard/data.json..."
@@ -547,9 +634,24 @@ fi
 
 echo ""
 echo "[ Health ] 資料源健康檢查（artifact 新鮮度，抓 silent SOFT fail）..."
+HEALTH_ARGS=(--strict --run-date "$DATE")
+if [ "$DAILY_RUN_THEMATIC" != "1" ] && [ "$DAILY_FORCE_THEMATIC" != "1" ]; then
+  HEALTH_ARGS+=(--allow-stale "thematic recommendations")
+fi
+if [ "$DAILY_RUN_MOMENTUM_SCREEN" != "1" ]; then
+  HEALTH_ARGS+=(--allow-stale "momentum screen CSV")
+fi
 set +e
-python3 scripts/daily_health.py
+python3 scripts/daily_health.py "${HEALTH_ARGS[@]}"
+HEALTH_RC=$?
 set -e
+
+DEGRADED=0
+for rc in "$PHASE2_RC" "$MORNING_BRIEF_RC" "$KILL_TRIGGER_RC" "$FINAL_BRIDGE_RC" "$HEALTH_RC"; do
+  if [ "$rc" -ne 0 ]; then
+    DEGRADED=1
+  fi
+done
 
 echo ""
 case "$FRED_STATUS" in
@@ -559,9 +661,17 @@ case "$FRED_STATUS" in
 esac
 
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║  ✅ 全部完成  │  $DATE                    ║"
+if [ "$DEGRADED" -eq 0 ]; then
+  echo "║  ✅ 全部完成  │  $DATE                    ║"
+else
+  echo "║  ⚠️  降級完成 │  $DATE  │ rc=2              ║"
+fi
 echo "║  提醒：產業上升趨勢比例需另執行「產業掃描」才更新    ║"
 echo "$FRED_LINE"
 echo "║  提醒：每週末跑 weekly_review.py 評估推薦準確度      ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""
+
+if [ "$DEGRADED" -ne 0 ]; then
+  exit 2
+fi

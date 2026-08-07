@@ -2173,7 +2173,7 @@ def extract_news():
                 raw_meta = pub_map.get(v.get("news_id", "")) or {}
                 published = v.get("published") or v.get("published_at") \
                             or raw_meta.get("published")
-                url = v.get("url") or raw_meta.get("url") or ""
+                url = v.get("url") or v.get("source_url") or raw_meta.get("url") or ""
                 news.append({
                     "headline":          v.get("headline"),
                     "headline_zh":       v.get("headline_zh", ""),

@@ -9,6 +9,8 @@ because the artifact stops getting newer.
 Usage:
     python3 scripts/daily_health.py            # table, always rc=0 (informational)
     python3 scripts/daily_health.py --strict   # rc=1 if any FAIL
+    python3 scripts/daily_health.py --strict --run-date YYYY-MM-DD
+                                             # daily gate: auto artifacts must be from that local date
     python3 scripts/daily_health.py --json     # machine-readable output
 
 Called at the end of daily_update.sh. Thresholds are per-source below —
@@ -16,6 +18,8 @@ Called at the end of daily_update.sh. Thresholds are per-source below —
 (or a missing artifact) is FAIL.
 """
 import argparse
+import csv
+from datetime import datetime
 import glob
 import json
 import os
@@ -53,21 +57,54 @@ SOURCES = [
 ]
 
 
-def check(src):
+def _validate_artifact(path):
+    """Return an actionable error for corrupt/partial artifacts, else None."""
+    try:
+        if path.endswith(".json"):
+            with open(path, encoding="utf-8") as fh:
+                payload = json.load(fh)
+            if not isinstance(payload, (dict, list)):
+                return "JSON root is not an object/list"
+            if isinstance(payload, dict) and payload.get("_partial"):
+                return "producer marked artifact _partial"
+        elif path.endswith(".csv"):
+            with open(path, newline="", encoding="utf-8") as fh:
+                rows = csv.reader(fh)
+                if next(rows, None) is None or next(rows, None) is None:
+                    return "CSV has no data rows"
+    except (OSError, UnicodeError, json.JSONDecodeError, csv.Error) as exc:
+        return f"unreadable artifact: {type(exc).__name__}"
+    return None
+
+
+def check(src, *, run_date=None, allow_stale=frozenset()):
     paths = glob.glob(os.path.join(ROOT, src["glob"]))
     if not paths:
         return {"name": src["name"], "kind": src["kind"], "status": "FAIL" if src["kind"] == "auto" else "MISS",
-                "age_hours": None, "artifact": None}
+                "age_hours": None, "artifact": None, "reason": "artifact missing"}
     newest = max(paths, key=os.path.getmtime)
     age_h = (time.time() - os.path.getmtime(newest)) / 3600.0
-    if age_h <= src["max_age_hours"]:
+    reason = _validate_artifact(newest)
+    artifact_date = datetime.fromtimestamp(os.path.getmtime(newest)).date().isoformat()
+    gate_exempt = src["name"] in allow_stale
+    if reason:
+        status = "FAIL" if src["kind"] == "auto" else "WARN"
+    elif run_date and src["kind"] == "auto" and not gate_exempt and artifact_date != run_date:
+        status = "FAIL"
+        reason = f"not refreshed for run date {run_date} (artifact date {artifact_date})"
+    elif gate_exempt and src["kind"] == "auto":
+        status = "OK" if age_h <= src["max_age_hours"] else "WARN"
+        if status == "WARN":
+            reason = "stale source explicitly allowed by caller"
+    elif age_h <= src["max_age_hours"]:
         status = "OK"
     elif age_h <= 3 * src["max_age_hours"]:
         status = "WARN"
     else:
         status = "FAIL" if src["kind"] == "auto" else "WARN"
     return {"name": src["name"], "kind": src["kind"], "status": status,
-            "age_hours": round(age_h, 1), "artifact": os.path.relpath(newest, ROOT)}
+            "age_hours": round(age_h, 1), "artifact": os.path.relpath(newest, ROOT),
+            "reason": reason, "artifact_date": artifact_date, "gate_exempt": gate_exempt}
 
 
 def fmt_age(h):
@@ -83,9 +120,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--strict", action="store_true", help="rc=1 if any auto source FAILs")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--run-date", help="daily gate: require auto artifacts from YYYY-MM-DD")
+    ap.add_argument("--allow-stale", action="append", default=[], metavar="SOURCE",
+                    help="exempt an intentionally disabled auto source from --run-date (repeatable)")
     args = ap.parse_args()
 
-    results = [check(s) for s in SOURCES]
+    if args.run_date:
+        try:
+            datetime.strptime(args.run_date, "%Y-%m-%d")
+        except ValueError:
+            ap.error("--run-date must use YYYY-MM-DD")
+    known = {s["name"] for s in SOURCES}
+    unknown = sorted(set(args.allow_stale) - known)
+    if unknown:
+        ap.error("unknown --allow-stale source(s): " + ", ".join(unknown))
+
+    results = [check(s, run_date=args.run_date, allow_stale=set(args.allow_stale)) for s in SOURCES]
     counts = {k: sum(1 for r in results if r["status"] == k) for k in ("OK", "WARN", "FAIL", "MISS")}
 
     if args.json:
@@ -97,11 +147,12 @@ def main():
             tag = "" if r["kind"] == "auto" else "（手動節奏）"
             print(f" {ICON[r['status']]} {r['status']:<4} {fmt_age(r['age_hours']):>6}  {r['name']}{tag}"
                   + (f"  → {r['artifact']}" if r["status"] != "OK" and r["artifact"] else "")
-                  + ("  → artifact 不存在" if r["artifact"] is None else ""))
+                  + ("  → artifact 不存在" if r["artifact"] is None else "")
+                  + (f"  [{r['reason']}]" if r.get("reason") else ""))
         print(f"── HEALTH: {counts['OK']} OK / {counts['WARN']} WARN / {counts['FAIL']} FAIL / {counts['MISS']} 從未產出 ──")
         if counts["FAIL"] or counts["WARN"]:
-            print("   ⚠️  WARN/FAIL = 該源的最新 artifact 已超齡：對應 step 可能連續失敗中，")
-            print("      下游正在沿用舊 cache（silent SOFT fail）。回看上方對應 step log。")
+            print("   ⚠️  WARN/FAIL = artifact 超齡、非本日、損壞或 producer 標為 partial；")
+            print("      下游可能正在沿用舊 cache（silent SOFT fail）。回看對應 step log。")
 
     if args.strict and counts["FAIL"]:
         sys.exit(1)
