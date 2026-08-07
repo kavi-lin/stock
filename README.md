@@ -44,7 +44,7 @@
 ### 📅 Mon-Fri 盤前 (Daily, ~3-5 min auto)
 
 ```bash
-./daily_update.sh       # 7 step 全自動
+./daily_update.sh       # 10-step 全自動
 ```
 
 | Step | 動作 | 輸出 |
@@ -202,7 +202,7 @@ python3 skills/finnhub-client/scripts/audit_drift_check.py
 AI投資委員會/
 ├── bridge.py                  ← 整合所有 cache → Dashboard/data.json
 ├── dashboard_server.py        ← Local HTTP server + positions API + mtime auto-refresh
-├── daily_update.sh            ← 7-step daily auto refresh
+├── daily_update.sh            ← 10-step daily auto refresh
 ├── positions.json             ← 使用者手動持倉
 │
 ├── Dashboard/                 ← Pure HTML/JS (index/decisions/sector/news/earnings/calendar/momentum/radar)
@@ -222,7 +222,7 @@ AI投資委員會/
 
 | 腳本 | 用途 | 觸發 |
 |---|---|---|
-| `daily_update.sh` | 7-step 全自動 daily refresh | 每日早上手動或 cron |
+| `daily_update.sh` | 10-step 全自動 daily refresh | 每日早上手動或 cron |
 | `bridge.py` | 整合 cache + watchlist + theme overrides → `Dashboard/data.json` | daily Step 5 |
 | `dashboard_server.py` | Local HTTP server + positions API + auto-refresh | `./open_dashboard.sh` |
 | `news/scripts/build_structural_watchlist.py` (V2.19.1) | 14d hit / 21d eviction / 2-source gate watchlist + lifecycle log | daily Step 7 |

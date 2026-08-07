@@ -1,5 +1,41 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-06 ｜Projection metadata 不能取代 record contract
+- 情境：同日 append-only News projection 同時包含 DIGEST 與 FLASH。
+- 坑：validator 用頂層 DIGEST/PER_AGENT_BATCH 規則檢查所有 deep records，把合法 pending/INLINE FLASH 誤判失敗；artifact 已存在但 Dashboard 任務顯示消失。
+- 修法：混合 projection 的 review/cache/isolation/算分一律按每筆 `event_type` 與 `fanout_mode` 驗證，頂層 mode 只描述 anchor；回歸測試必含異質 records。
+- 已回寫規則？：是（v4.99.1 record-level validator 與 mixed DIGEST+FLASH test）。
+
+## 2026-08-06 ｜對抗 lane 的分數距離不是事件狀態
+- 情境：News Arbiter 用四 lane 最大分差判定 BINARY，而 Bull 契約限定 +1..+5、Bear 限定 -5..-1
+- 坑：拿刻意設計成異號的對抗分數做 max-min≥4，幾乎必然觸發；連續五份 digest 25/25 全成 BINARY，測試仍綠，因為只驗 enum/shape、不驗分布與事件語意
+- 修法：事件狀態（binary/pending/date）與方向強度（net score/debate spread）分欄；validator 由共用 deterministic 規則重算。任何分類規則上線前，用至少數日真實 artifact 檢查 label distribution，不能只測單筆 fixture
+- 已回寫規則？：是（News Protocol V2.3、`arbiter_rules.py`、semantic validator 與 distribution 觀察 TODO）
+
+## 2026-08-06 ｜檢查 env 名稱也要用 parser，不要用只涵蓋裸賦值的 regex
+- 情境：review `daily_update.sh` 的 launchd 環境能力，只想列出 cron env 的變數名稱並遮罩值
+- 坑：遮罩式只匹配行首 `KEY=...`，實檔使用 `export KEY=...`，導致工具輸出意外帶出本機 secret。即使檔案 git-ignored、目的只是讀名稱，輸出仍會進 session transcript
+- 修法：任何 env inventory 一律只輸出 parser 取得的 key 名；shell 檔先移除可選 `export` 再解析，或以不回顯內容的檢查逐一測 key 是否存在。禁止先整檔讀出再靠顯示端 regex 遮罩；已曝光的 credential 立即輪替
+- 已回寫規則？：否（本條保留可執行的診斷紀律；未記錄任何 key 值）
+
+## 2026-08-06 ｜API 回 200 不代表區間資料完整，enrichment 前要先縮 universe
+- 情境：修 sector prefetch 的 earnings calendar 360 秒 timeout；中央 limiter 已把流量壓在 220 RPM，仍跑不完
+- 坑：未來 7 日 calendar 回 2,837 symbols，程式對每支逐一打 `/profile` 才篩 market cap；同時過去 30 日 calendar 回剛好 4,000 rows、HTTP 200，實際日期卻只覆蓋最後 8–9 天。前者是 filter-after-fetch 的 2,837-call fan-out，後者是無錯誤訊息的 response cap 截斷
+- 修法：enrichment 前先用一次 bulk/screener snapshot 本機交集，禁止把「篩選所需 metadata」做成逐 symbol 請求；範圍 API 若筆數碰到已知 cap，必須切段、去重並在單日仍飽和時 fail closed，不能把 HTTP 200 當 completeness 證明
+- 已回寫規則？：是（4.95.7：`sector/lib/earnings_calendar.py` 分段完整性；Step 3 改 cached company-screener join；`sector/scripts/README.md` 記錄契約）
+
+## 2026-08-05 ｜中央 limiter 的上限只對納管流量成立
+- 情境：Starter 方案 300 RPM、中央 pool 設 220 RPM，sector prefetch 仍在 valuation/smart-money 收到 429
+- 坑：只檢查 `fmp_pool_window.json` 會錯判「不可能超量」；同一個 prefetch 還平行呼叫 `~/.claude` calendar scripts，其中 earnings calendar 用 16 threads 逐 symbol 直接 `requests.get(/stable/profile)`，完全不進中央 window。另：HTTP client 丟掉 429 body/Retry-After，使 RPM、bandwidth、權限限制看起來一樣
+- 修法：排查共享配額時先列出整個 execution graph 的所有 HTTP 出口，不只檢查名義上的 shared client；所有 fan-out 必須先取得同一個 cross-process slot。429 保存去 query、去 key 的 endpoint/body/Retry-After artifact；401 這種整批 credential failure 必須在共用 transport 首次命中就熱斷並聚合 log，不得繼續逐檔 fan-out
+- 已回寫規則？：是（4.95.5：phase_prefetch calendar 全改 repo-owned `fmp_pool` client；`fmp_pool.py` 新增安全診斷 artifact）
+
+## 2026-08-03 ｜修 bug class 的那輪，要拿修法判準回頭掃自己新增的程式碼
+- 情境：4.95.2 對 4.95.1（「韌性從檔案層下沉到欄位層」的 review 修正輪）做第二輪 review
+- 坑：四個修正各自把守衛下沉了一層就停，同一 bug class 在再下一層原樣復發——`uncovered[]` 修到 key 層（`{"Utilities": null}` 仍讀成「查過了、乾淨」，da_pretrigger.py 舊 `_uncovered`）、擋了「版號缺失」放行「版號非字串」（sector_score_calculator.py 舊 L488，float 版號讓 `sorted()` TypeError 掛掉 --status）、修了 gate 的 `_canon_list` 沒修共用源頭 `_slim_fred`。測試全綠，因為回歸案例只釘到修正做到的那一層
+- 修法：修 bug class 的 PR 收尾加一步——用修法那條判準（「不可用的最小單位是什麼」「這條規則覆蓋的對象還有誰」）重掃 PR 自己新增/修改的程式碼與測試 fixture；並用 revert 模擬驗證新測試在「往下一層的變體」上也會紅，而不只在原 bug 上會紅。另：恆 null 的合法欄位是 doc-vs-code 矛盾的藏身處（FTD `exposure_range` 讀錯 dict 恆 null 一直沒人發現），review 時對「永遠是 null 的欄位」要問一句是設計還是讀錯位置
+- 已回寫規則？：否（與 4.90.4 Session Note 的判準同源；已在 CHANGELOG 4.95.2 / SESSION_NOTES 記錄，再犯則升格進 MAINTENANCE §2 收尾 checklist）
+
 ## 2026-08-02 ｜帶前置篩選的計數欄位，0 可能是「被篩掉」而不是「沒有」
 - 情境：v4.79.0 給 calibration 加 `point_in_time_caveat_count`，統計有多少預測不是完全 out-of-sample
 - 坑：欄位只數 `status == "comparable"` 的 row。真實語料跑出來是 **0**，看起來像「沒有任何 caveat」——實際有 19 筆帶 caveat 的 row 卡在 `actual_not_comparable_yet`，只是還沒成熟。因為今天 comparable 恰好是 0，這個欄位在最需要它示警的時候永遠顯示 0，測試也照樣全綠（fixture 裡 comparable 不是 0）
@@ -47,3 +83,72 @@
 - 坑：使用者已 OK 改動摘要表後直接下手 Edit `config/llm_config.json`，改完才想到 §1「永遠不准做」的無備份改治理檔規則，靠 `git show HEAD:` 補回原始內容才補上備份——若該檔當時不是 clean（已有未 commit 的異動），git show HEAD 補的會是錯的版本
 - 修法：治理檔（`config/llm_config.json`、`weights.yaml`、`positions.json`…）的 Edit 前，先跑 `cp X docs/agent-ops/backups/X.bak-YYYYMMDD`，跟「先問使用者」同一步驟做，不要等改完
 - 已回寫規則？：否（規則本身在 MAINTENANCE.md §1 已存在且夠清楚，這條純記過程疏漏）
+
+## 2026-08-03 ｜「spec 說乘數套在 X」不等於「JSON 欄位存的是套用前的 X」
+- 情境：SE1 要修 sector shadow calculator 的覆蓋率（`sector/scripts/sector_score_calculator.py`）
+- 坑：我從 `sector_protocol_main.md` Step 5 的「特殊條件乘數（套用於 Score_adjusted）」推論
+  calculator 漏模 ×0.70，補模後**實跑 2026-07-31 當場產生 diff=20 的假 hard diff**。掃過全部
+  帶 `binary_risk_within_48h` 的 33 筆歷史 decision 檔才發現：31 筆的
+  `sum(score_components) × step6_mult` 直接等於 `composite_score` —— LLM 是把乘數**烙進四個
+  分項之後**才寫下的（Energy 那筆的 `key_reasons` 白紙黑字寫「已套用 binary ×0.70（91.8 →
+  64.3）」，64.3 正是四分項的和）。補模 = 雙重計分，會把 31 筆正確樣本全打成 hard diff。
+- 修法：**要重算一個 LLM 寫下的數字之前，先用歷史樣本反查該欄位的實際語意**
+  （`sum(components) × mult == composite?` 這種一行 pandas/字典比對就夠）。spec 描述的是
+  計算順序，不保證中間值落在哪個欄位。反查不出來就「偵測不重算」+ 標 unverified，
+  不要猜。同理適用任何 shadow / replay engine 的欄位對齊。
+- 已回寫規則？：否（屬動工方法而非治理規則；SE2 割接的規格已在 TODO 記下「engine 必須改吃
+  未經乘數的原始分項，否則同一乘數套兩次」）
+
+## 2026-08-03 ｜Python 內建 `round()` 用在給人看的分數上是靜默錯誤源
+- 情境：同上，SE1 對照 LLM 的 `composite_score`
+- 坑：`round()` 是銀行家捨入（`round(42.5) == 42`），而 protocol 的整數分慣例是 half-up。
+  473 筆歷史樣本實測 half-up 相符 92.2% vs banker's 91.5%，差的 3 筆全是 `.5` 邊界且 LLM
+  三次都進位。用錯不會炸，只會產生整批 ±1 的差異——**剛好落在 soft diff 門檻內**，看起來
+  像「LLM 心算有點飄」而不是「我的捨入方式錯了」，很容易被當成雜訊接受。
+- 修法：任何要與 LLM/人工產出的整數分對照的 script，捨入一律寫成具名函式
+  （`_round_half_up = math.floor(v + 0.5)`）+ 註解 + 邊界測試，不要直接呼叫 `round()`。
+- 已回寫規則？：否（已在 `OPS_COMMANDS.md` §7 的測試表註明「不可換回內建 `round()`」，
+  由測試守住）
+
+## 2026-08-03 ｜「資料不可用」守衛要問「不可用的最小單位是什麼」
+- 情境：SE1/SE3/SE5 三支 script 的 code review（`sector_score_calculator.py` /
+  `da_pretrigger.py` / `fred_lane_gate.py`）
+- 坑：三支是不同時間分開寫的，卻各自在同一個位置漏同一種守衛 —— 都**已經**在整檔層級
+  寫了正確的守衛（`missing_score_components` / `_load_hard_cache` rc=1 /
+  `isinstance(a, dict)`），但規則沒往下延伸一層：`_num(...) or 0` 讓單一 null 分項變
+  0 分（產生假 hard diff，而累計上限是 0，一筆就永久擋死割接且理由是假的）、
+  `cache.get(s) or {}` 讓缺席板塊變「查過了、沒事」、`_canon_list` 讓 list 內非字串
+  炸出 traceback。**三支的測試全綠，因為現有資料剛好乾淨。**
+- 修法：寫「資料不可用」守衛時先問「不可用的最小單位是什麼」——檔案、板塊、還是欄位。
+  答案幾乎都是最小的那個。測試要照那個粒度設計（缺一格、空 dict、型別錯），而不是只
+  測「整份不見」。
+- 已回寫規則？：否（屬動工方法；三支的具名守衛已由 `OPS_COMMANDS.md` §7 的測試表釘住）
+
+## 2026-08-03 ｜做了 audit/live 分離之後，要列一遍「還有誰能寫進這個池子」
+- 情境：同上，SE1 的割接證據池
+- 坑：`--audit-decisions` 刻意設計成唯讀、不寫 shadow 樣本（正門守得很好），但
+  `build_sector_intel.py --date <過去日期>` 重跑舊場次會照常落盤進 live 分母 ——
+  而且 `build_phase0()` 讀的是**今天**的 FRED/breadth cache，存下的 `context` 根本不是
+  掃描日的狀態。repo 裡的 `.prev-0101` 備份證明重跑舊日期是實際會發生的操作。
+- 修法：新增一個「證據池」概念時，把**所有**寫入路徑列出來逐一判定，而不是只守自己
+  新增的那條。這裡的修法是 `scan_date != today` → `sample_valid=false` +
+  `invalid_reasons=["backfill_rebuild"]`。
+- 已回寫規則？：否
+
+## 2026-08-03 ｜資料無法裁決時，要說出「這一項是按原則定的」
+- 情境：同上，half-up 捨入的第二輪修正
+- 坑：473 筆歷史樣本對四個捨入變體給出**完全相同**的結果（沒有樣本落在邊界），所以
+  「實測 92.2%」這個數字**無法**支持「中間那道 `round(x, 2)` 該不該留」。差點又用一次
+  同一組數字去背書一個它證明不了的決定。
+- 修法：改用兩個可獨立驗證的事實決定 ——(a) `round(x,2)` 是銀行家捨入，造成雙重捨入
+  （`64.25 × 1.035` → 67 而非 66）；(b) 實掃乘數表 × 0.5 間隔分數，
+  `50.0 × 1.15 == 57.49999999999999` 等 3 例真值恰為 `.5`，裸 `floor(v+0.5)` 會少 1 分，
+  所以 eps 是必要不是保險。**在 CHANGELOG 明寫「這一項是按原則而非資料定的」**，
+  免得下一個人以為它有樣本背書。
+- 已回寫規則？：否
+
+## 2026-08-07 ｜子代理的推論性結論是主張,不是事實
+- 情境：盤中系統盤點,Explore 子代理回報「IEX 免費 feed 量能系統性低估 → `VOL_MULT` 量能確認結構性弱」,差點被寫進變更表當成要修的問題。
+- 坑：低估「水位」不等於扭曲「比值」——`vol_mult` 是同 feed 內本分鐘 vs 前 15 分均量的比值,低估在分子分母同時出現、大致抵消。子代理把一個正確事實(量被低估)外推成一個錯誤結論(確認失效),而事實部分的正確性讓結論看起來可信。
+- 修法：子代理回報裡「事實」(檔案:行號、實跑輸出)直接採用,「推論」(所以…因此…結構性…)一律自己重推導一遍再放進變更表;動工前確認表就是做這件事的最後閘門。
+- 已回寫規則？：否(單一案例,先記中繼站;重複發生再進 MODEL_DISPATCH §4 回報合約)

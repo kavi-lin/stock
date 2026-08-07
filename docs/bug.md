@@ -105,7 +105,7 @@
 - **優先級 (Priority)**: High
 - **狀態**: Resolved (2026-04-26)
 - **發現日期**: 2026-04-26（gemini code review 觸發）
-- **修法**: `sector/ftd_yfinance.py` 新增 `ftd_timeline` 區塊輸出（含 `ftd_status_text` / `days_since_ftd` / `rally_day_count` / `ftd_day_number` 四欄）；`sector/phase_0.md` 層 C 加反幻覺規則，要求報告 FTD 狀態必須引用 `ftd_status_text` 原文；`sector/schema.md` Phase 0 / Phase 5 ftd block 補新欄位（V1.5 schema bump）。
+- **修法**: `sector/ftd_yfinance.py` 新增 `ftd_timeline` 區塊輸出（含 `ftd_status_text` / `days_since_ftd` / `rally_day_count` / `ftd_day_number` 四欄）；`sector/phase_0.md` 加反幻覺規則（原「層 C」段；V4.95.0 文件瘦身後該規則移到 `phase_0.md`「每場都適用的紀律」節），要求報告 FTD 狀態必須引用 `ftd_status_text` 原文；`sector/schema.md` Phase 0 / Phase 5 ftd block 補新欄位（V1.5 schema bump）。
 
 ### 描述
 4/22 產業掃描報告寫 "FTD day 6"，但 4/21 報告寫 "FTD Day 14"。兩者皆指同一個 rally 週期內、僅相差 1 個交易日的時間點，物理上「day」應該每天 +1（4/21 是 N → 4/22 是 N+1），結果 AI 卻寫出反直覺的 14 → 6，引發 gemini 質疑「AI 抄歷史 JSON 當範本」。
@@ -129,7 +129,7 @@
 
 ### 解決方案
 1. **`sector/ftd_yfinance.py`** — 在輸出 JSON 加 `ftd_timeline` 區塊，提供 canonical 「FTD CONFIRMED, day {N} post-confirmation (rally-day {M}; FTD originally confirmed on rally-day {K})」字串供 AI 直接引用，並附 `_help` 欄位說明三個 day 的語意差異。
-2. **`sector/phase_0.md`** 層 C — 增「FTD 文字反幻覺規則」：必引用 `ftd_status_text` 原文，禁止從 `quality_score.breakdown.base` 反推 day-counter。
+2. **`sector/phase_0.md`**（原「層 C」，現於「每場都適用的紀律」節）— 增「FTD 文字反幻覺規則」：必引用 `ftd_status_text` 原文，禁止從 `quality_score.breakdown.base` 反推 day-counter。
 3. **`sector/schema.md`** — Phase 0 / Phase 5 `_phase0` ftd block 加 `ftd_status_text` / `ftd_day_number` / `days_since_ftd` / `rally_day_count` 四欄（V1.5）。
 
 ### 後續觀察點
