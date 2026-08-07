@@ -54,6 +54,20 @@ AVG_LOOKBACK = 15       # trailing minutes for the volume baseline
 REVERSAL_LOOKBACK = 3   # a momentum cross stays "正在反轉" for this many bars after it
                         # fires → sticky display (won't flicker away next minute)
 KDJ_OS, KDJ_OB = 30.0, 70.0   # KDJ oversold/overbought zones — for 翻揚/翻落 annotation only
+# ── 反轉降噪 (雙確認 + σ 位移 + 翻面冷卻) ─────────────────────────────────────
+# Why: 1-min KDJ crosses every few minutes in chop, so "任一交叉 → 反轉" turned the
+# panel into noise. 反轉 now needs KDJ **AND** MACD the same way, PLUS a price
+# displacement big enough vs this stock's own pre-cross σ. 寧可漏弱訊號，不要雜訊。
+REV_SIGMA_K = 1.5           # |交叉後位移| ≥ K×σ 才算反轉（σ = 交叉前 10 根 1 分報酬率）
+REV_MIN_DISP_PCT = 0.3      # σ 算不出（bars 不足/完全無波動）時退回的固定位移門檻 (%)
+REV_ALERT_SIGMA = 2.5       # 無 zone 註記時，位移 ≥ 這個 σ 倍數才升級 alert/strong
+REV_FLIP_COOLDOWN_MIN = 10  # 上一輪反方向反轉在這幾分鐘內 → 本輪翻面需額外條件
+REV_FLIP_SIGMA = 2.5        # 冷卻期內放行翻面所需的 σ 倍數（或有 zone 註記）
+# ── 開盤加嚴窗 (09:30–09:45 ET) ──────────────────────────────────────────────
+# 開盤前 15 分鐘每檔都在跳，門檻不抬就是雜訊機。判定用**最後一根 bar 的時間戳**
+# 轉 ET（非 wall clock），純函式可單元測試。
+OPEN_GRACE_MIN = 15         # 開盤後這幾分鐘視為加嚴窗（09:30 含 → 09:45 不含）
+OPEN_GATE_MULT = 1.5        # 窗內 SPIKE_1M_PCT / SPIKE_3M_PCT 門檻乘數
 # ── 順勢續攻/續跌 (trend-continuation STATE detector) tuning ──────────────────
 TREND_MA = (5, 10, 20)        # strict bull/bear stack on 1-min closes (ma5>ma10>ma20)
 TREND_K_MIN = 50.0            # KDJ K floor for a bull trend — momentum intact, NOT a fresh cross
@@ -144,6 +158,43 @@ def _stdev(values):
     return (sum((v - m) ** 2 for v in values) / (n - 1)) ** 0.5
 
 
+def _ret_sigma(closes_seg):
+    """一段 closes 的 1 分報酬率(%)樣本 σ。不足 2 筆報酬 → None；完全無波動 → 0.0。"""
+    rets = [(closes_seg[k] / closes_seg[k - 1] - 1) * 100
+            for k in range(1, len(closes_seg)) if closes_seg[k - 1]]
+    return _stdev(rets)
+
+
+_TS_FRAC_RE = __import__("re").compile(r"\.(\d{1,9})")
+
+
+def _parse_ts(s):
+    """ISO8601（'Z' 結尾、奈秒小數都吃）→ aware datetime；解析不了回 None（絕不 raise）。"""
+    if not isinstance(s, str) or not s.strip():
+        return None
+    t = _TS_FRAC_RE.sub(lambda m: "." + m.group(1)[:6], s.strip().replace("Z", "+00:00"))
+    try:
+        d = datetime.fromisoformat(t)
+    except (ValueError, TypeError):
+        return None
+    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
+def in_open_grace(bar_ts):
+    """該 bar 時間戳落在 ET 09:30（含）–09:45（不含）→ True（開盤加嚴窗）。
+    刻意吃 bar 時間而非 wall clock：回放/測試才可重現。解析失敗一律 False。"""
+    d = _parse_ts(bar_ts)
+    if d is None:
+        return False
+    try:
+        from zoneinfo import ZoneInfo
+        et = d.astimezone(ZoneInfo("America/New_York"))
+    except Exception:
+        et = d.astimezone(timezone(timedelta(hours=-4)))
+    open_m = 9 * 60 + 30
+    return open_m <= et.hour * 60 + et.minute < open_m + OPEN_GRACE_MIN
+
+
 def _linreg(ys):
     """Least-squares line over x=0..n-1. Returns (slope, r2). Flat/degenerate → (0, 0)."""
     n = len(ys)
@@ -203,8 +254,7 @@ def compute_baseline(closes, highs, lows, idx, up):
     if idx < BASELINE_MIN - 1 or idx < REGIME_WINDOW + 1:
         return out
     base = closes[idx - REGIME_WINDOW:idx]            # the 10 bars before the spike
-    rets = [(base[k] / base[k - 1] - 1) * 100 for k in range(1, len(base)) if base[k - 1]]
-    sigma = _stdev(rets)
+    sigma = _ret_sigma(base)
     move = abs((closes[idx] / closes[idx - 1] - 1) * 100) if closes[idx - 1] else 0.0
     if sigma and sigma > 1e-9:
         out["sigma_mult"] = round(move / sigma, 1)
@@ -239,11 +289,16 @@ def detect_spikes(symbol, bars):
     base = vols[max(0, n - AVG_LOOKBACK - WINDOW_MIN):max(1, n - WINDOW_MIN)]
     avg_vol = sum(base) / len(base) if base else None
 
+    # 開盤 15 分鐘：門檻 ×OPEN_GATE_MULT（開盤每檔都在跳，不抬門檻就是雜訊機）。
+    open_win = in_open_grace(times[-1])
+    gate1 = SPIKE_1M_PCT * (OPEN_GATE_MULT if open_win else 1.0)
+    gate3 = SPIKE_3M_PCT * (OPEN_GATE_MULT if open_win else 1.0)
+
     best = None
     for i in range(max(1, n - WINDOW_MIN), n):
         m1 = (closes[i] / closes[i - 1] - 1) * 100 if closes[i - 1] else 0.0
         m3 = (closes[i] / closes[i - 3] - 1) * 100 if i >= 3 and closes[i - 3] else 0.0
-        r1, r3 = abs(m1) / SPIKE_1M_PCT, abs(m3) / SPIKE_3M_PCT
+        r1, r3 = abs(m1) / gate1, abs(m3) / gate3
         if r1 < 1 and r3 < 1:
             continue
         sign = m1 if r1 >= r3 else m3
@@ -309,6 +364,8 @@ def detect_spikes(symbol, bars):
         severity = "high"
     else:
         severity = "med"
+    if open_win and severity == "high" and not confirmed:
+        severity = "med"                   # 開盤窗：未經 MACD/KDJ/量 確認的最多 med
 
     label_txt = f"　{context_label}" if context_label else ""
     sig_txt = f"　σ{sigma_mult:.1f}×" if sigma_mult is not None else ""
@@ -320,7 +377,7 @@ def detect_spikes(symbol, bars):
         "macd": macd, "kdj": kdj, "confirmations": confs, "confirmed": confirmed,
         "regime": ctx["regime"], "context_label": context_label, "ctx_class": ctx_class,
         "sigma_mult": sigma_mult, "sustained": sustained, "breakout": breakout,
-        "score": score, "suppressed": suppressed,
+        "score": score, "suppressed": suppressed, "open_grace": open_win,
         "text_zh": f"{symbol} {dir_zh}{label_txt} 1分{best['m1']:+.1f}% · 3分{best['m3']:+.1f}%{sig_txt}{conf_txt}",
     }
 
@@ -394,8 +451,7 @@ def regime_context(bars):
     highs = [b.get("h", b["c"]) for b in bars]
     lows = [b.get("l", b["c"]) for b in bars]
     win = closes[-REGIME_WINDOW:]
-    rets = [(win[k] / win[k - 1] - 1) * 100 for k in range(1, len(win)) if win[k - 1]]
-    sigma = _stdev(rets)
+    sigma = _ret_sigma(win)
     move = (closes[-1] / closes[-2] - 1) * 100 if n >= 2 and closes[-2] else 0.0
     sigma_mult = round(min(abs(move) / sigma, 50.0), 1) if sigma and sigma > 1e-9 else None
     slope, r2 = _linreg(win)
@@ -482,11 +538,19 @@ def _macd_turn_recent(closes, lookback=REVERSAL_LOOKBACK):
 
 
 def detect_reversal(symbol, bars):
-    """Momentum-turn reversal (both directions). "正在反轉" when, within the last
-    REVERSAL_LOOKBACK bars, a fresh KDJ K×D cross OR a fresh MACD turn fired. The
-    **alert** case (the SNDK example) is KDJ cross + MACD turn the SAME direction —
-    that's the "趕快提示" moment. Returns a dict, or None when not reversing (→ the
-    card shows 尚無訊號 rather than being hidden, since every ticker has a slot)."""
+    """Momentum-turn reversal (both directions) — **雙確認 + σ 位移** gated.
+
+    "正在反轉" requires, within the last REVERSAL_LOOKBACK bars, a fresh KDJ K×D
+    cross **AND** a fresh MACD turn the SAME direction (single-source no longer
+    qualifies: a 1-min KDJ crosses every few minutes in chop, which is exactly the
+    「小小波動就報反轉」noise), AND a price displacement since the cross that is
+    large vs THIS stock's own pre-cross σ (≥ REV_SIGMA_K×σ; fixed REV_MIN_DISP_PCT
+    fallback when σ is unavailable/zero). Demoted crosses are NOT lost — they still
+    show up in build_signal_flow's 訊號流.
+
+    alert (the "趕快提示" moment) = displacement gate passed AND (KDJ zone 註記 or
+    ≥ REV_ALERT_SIGMA σ). Returns a dict, or None when not reversing (→ the card
+    shows 尚無訊號 rather than being hidden, since every ticker has a slot)."""
     if len(bars) < 40:           # need a stable MACD signal line (slow+signal ≈ 35)
         return None
     closes = [b["c"] for b in bars]
@@ -496,19 +560,15 @@ def detect_reversal(symbol, bars):
     kdj_cross, kdj_ago, kdj_snap = _kdj_cross_recent(highs, lows, closes)
     macd_dir, macd_ago, macd_reason = _macd_turn_recent(closes)
     kdj_dir = ("up" if kdj_cross == "golden" else "down") if kdj_cross else None
-    if not kdj_dir and not macd_dir:
-        return None
+    if not (kdj_dir and macd_dir and kdj_dir == macd_dir):
+        return None                                       # 單一來源 → 不算反轉
 
-    # Freshest of the two decides display direction; same-direction → alert.
     cands = []                                            # (basis, dir, bars_ago, reason)
-    if kdj_dir:
-        cands.append(("KDJ", kdj_dir, kdj_ago, "金叉" if kdj_dir == "up" else "死叉"))
-    if macd_dir:
-        cands.append(("MACD", macd_dir, macd_ago, macd_reason))
+    cands.append(("KDJ", kdj_dir, kdj_ago, "金叉" if kdj_dir == "up" else "死叉"))
+    cands.append(("MACD", macd_dir, macd_ago, macd_reason))
     cands.sort(key=lambda c: c[2])                        # freshest first
     fresh_dir = cands[0][1]
     up = fresh_dir == "up"
-    alert = bool(kdj_dir and macd_dir and kdj_dir == macd_dir)   # KDJ + MACD 同向
 
     # KDJ zone annotation: golden from oversold / death from overbought = better turn.
     zone = None
@@ -519,12 +579,32 @@ def detect_reversal(symbol, bars):
         elif not up and kp >= KDJ_OB:
             zone = "超買翻落"
 
+    if in_open_grace(bars[-1]["t"]) and not zone:
+        return None                    # 開盤窗：沒有超買/超賣區註記的翻轉一律不報
+
+    # σ 位移門檻：交叉完成前一根 close → 最新 close 的位移，比對交叉前 10 根的 σ。
+    ci = len(closes) - 1 - cands[0][2]                    # 較新那個訊號所在的 bar
+    prev_c = closes[ci - 1] if ci >= 1 else None
+    disp = (closes[-1] / prev_c - 1) * 100 if prev_c else 0.0
+    sigma = _ret_sigma(closes[max(0, ci - REGIME_WINDOW):ci])
+    if sigma and sigma > 1e-9:
+        mult = min(abs(disp) / sigma, 50.0)               # 上限同 regime_context，避免爆數字
+        if mult < REV_SIGMA_K:
+            return None                                   # 位移 < K×σ → 只是呼吸
+    else:
+        mult = None                                       # σ 算不出 → 退固定門檻
+        if abs(disp) < REV_MIN_DISP_PCT:
+            return None
+
+    alert = bool(zone) or (mult is not None and mult >= REV_ALERT_SIGMA)
     return {
         "symbol": symbol, "direction": "up" if up else "down",
         "dir_zh": "反轉向上" if up else "反轉向下",
         "basis": [f"{b}{r}" for b, d, a, r in cands if d == fresh_dir],
-        "alert": alert, "both": alert, "bars_ago": cands[0][2], "zone": zone,
+        "alert": alert, "both": True, "bars_ago": cands[0][2], "zone": zone,
         "strength": "strong" if alert else "med",
+        "disp_pct": round(disp, 2),
+        "disp_sigma_mult": round(mult, 1) if mult is not None else None,
         "last": round(closes[-1], 2), "at": bars[-1]["t"],
         "macd": _ind.compute_macd(closes), "kdj": _ind.compute_kdj(highs, lows, closes),
     }
@@ -545,6 +625,51 @@ def apply_trend_context(rv, tr):
         rv["dir_zh"] = "逆勢反彈" if rv.get("direction") == "up" else "逆勢回測"
         rv["alert"] = False
     return rv
+
+
+def prev_reversal_map(prev_payload):
+    """上一輪 payload → {symbol: reversal}（翻面冷卻用）。只在 generated_at 是**同一
+    UTC 日**時有效——隔夜/跨日不套冷卻。缺檔或格式壞一律回 {}（等於不冷卻）。"""
+    if not isinstance(prev_payload, dict):
+        return {}
+    g = _parse_ts(prev_payload.get("generated_at"))
+    if g is None or g.astimezone(timezone.utc).date() != datetime.now(timezone.utc).date():
+        return {}
+    out = {}
+    for rv in (prev_payload.get("reversals") or []):
+        if isinstance(rv, dict) and rv.get("symbol"):
+            out[rv["symbol"]] = rv
+    return out
+
+
+def flip_cooldown_ok(rv, prev_rv):
+    """翻面冷卻（純函式）：上一輪同 symbol 的反轉方向**相反**且距最新 bar 不到
+    REV_FLIP_COOLDOWN_MIN 分鐘 → 這種來回翻面幾乎都是盤整雜訊，要有 zone 註記或
+    ≥ REV_FLIP_SIGMA 的 σ 位移才放行；否則整筆壓掉。其餘情況一律 True。"""
+    if not rv or not prev_rv:
+        return True
+    if prev_rv.get("direction") == rv.get("direction"):
+        return True
+    t_prev, t_now = _parse_ts(prev_rv.get("at")), _parse_ts(rv.get("at"))
+    if t_prev is None or t_now is None:
+        return True
+    if abs((t_now - t_prev).total_seconds()) / 60.0 >= REV_FLIP_COOLDOWN_MIN:
+        return True
+    if rv.get("zone"):
+        return True
+    m = rv.get("disp_sigma_mult")
+    return m is not None and m >= REV_FLIP_SIGMA
+
+
+def _read_prev_payload(path=None):
+    """讀上一輪輸出（預設 Dashboard/intraday_spikes.json）。讀不到/格式壞 → None，絕不 raise。"""
+    p = path or os.path.join(_ROOT, "Dashboard", "intraday_spikes.json")
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else None
+    except Exception:
+        return None
 
 
 def _sma(values, n):
@@ -701,9 +826,11 @@ def _market_open():
     return o <= now <= c
 
 
-def build():
+def build(prev_payload=None):
+    """prev_payload = 上一輪的 payload，供翻面冷卻比對；None → 自己讀預設輸出檔
+    （讀不到就當沒有，不冷卻）。dashboard_server 的 build() 無參數呼叫照常生效。"""
     wl = _load_watchlist()
-    base = {"version": "1.5", "generated_at": datetime.now(timezone.utc).isoformat(),
+    base = {"version": "1.6", "generated_at": datetime.now(timezone.utc).isoformat(),
             "feed": ALPACA_FEED, "market_open": _market_open(),
             "watchlist": wl, "watchlist_count": len(wl),
             "alerts": [], "reversals": [], "spikes": [], "trends": [],
@@ -716,12 +843,15 @@ def build():
                 "note": "spike_watchlist.txt 為空"}
 
     bars_by = _fetch_alpaca_bars(wl)
+    prev_rev = prev_reversal_map(prev_payload if prev_payload is not None else _read_prev_payload())
     spikes, readings, reversals, alerts, trends, pump_fades = [], [], [], [], [], []
     for sym in wl:
         bars = bars_by.get(sym) or []
         rd = latest_reading(sym, bars)
         tr = detect_trend(sym, bars)
         rv = apply_trend_context(detect_reversal(sym, bars), tr)
+        if not flip_cooldown_ok(rv, prev_rev.get(sym)):
+            rv = None                      # 冷卻期內的低品質翻面 → 本輪不報
         rd["reversal"] = rv
         rd["trend"] = tr
         rd["context"] = regime_context(bars)   # always-on 10-min posture (sparkline + regime)
@@ -769,7 +899,7 @@ def main():
         payload = build()
     except Exception as e:
         print(f"[spikes] build failed: {e}", file=sys.stderr)
-        payload = {"version": "1.0", "generated_at": datetime.now(timezone.utc).isoformat(),
+        payload = {"version": "1.6", "generated_at": datetime.now(timezone.utc).isoformat(),
                    "feed": ALPACA_FEED, "spikes": [], "_health": "error",
                    "_partial": True, "note": str(e)[:200]}
     _write_atomic(args.output, payload)

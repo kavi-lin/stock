@@ -1,9 +1,11 @@
-/* page-intraday-eval.js — 盤中策略 (Intraday Evaluation hub)
+/* page-intraday-eval.js — 盤中 (Intraday Evaluation hub · 10 分鐘 lane)
  * Reads the consolidated snapshot from /api/intraday-eval/data (the single hub
- * accessor) + /history for the recurrence timeline. Renders regime, strategy
- * cards with repeated-strategy effects (consecutive-window glow + ×N day badge),
- * sector ranking, group rotation, stock ideas, and the day timeline.
- * Exploration layer — does not feed investment_protocol.
+ * accessor) + /history for the recurrence timeline. Renders regime, the 情緒窄卡
+ * (VIX/SKEW/F&G), strategy cards with repeated-strategy effects (consecutive-window
+ * glow + ×N day badge), sector ranking, dense group cards, 盤中領漲, and the timeline.
+ * The page is single-pane: the 60s lane (mood / spikes) lives in intraday-eval.html's
+ * inline IIFE and owns the ETF deep cards + 個股即時區 — no tab gating, both loops
+ * render every cycle. Exploration layer — does not feed investment_protocol.
  */
 (function () {
   'use strict';
@@ -73,30 +75,37 @@
       <div class="flex flex-wrap gap-1.5 mt-3">${drivers}${cautions}</div>`;
   }
 
+  // 情緒窄卡：原 8 格 stat grid 收斂後只留 VIX / SKEW / F&G。
+  // 盤中分數 → 頂部 meter；SPY/QQQ/IWM → 市場環境的 ETF 深度卡；市寬 → 板塊區標頭。
+  const BREADTH_TIP = '市場廣度：追蹤的成分股中今日上漲的比例。>50% 代表多數股票在漲（普漲），越高代表漲勢越全面。';
+
   function renderStats(m, b) {
-    // [label, value, sub, signedFlag, unit, tip] — sub 已中文化，tip 為 hover 白話說明
-    const cells = [
-      ['盤中分數', m.intraday_score, m.intraday_label, false, '',
-        '盤中價量綜合分數（−100 破底 ～ +100 強勢）。整合市寬、出貨日、開盤型態等訊號，數字越高盤面越強。'],
-      ['市寬 上漲%', b.adv_pct, `${b.advancers ?? '—'}/${b.n ?? '—'}`, false, '%',
-        '市場廣度：追蹤的成分股中今日上漲的比例。>50% 代表多數股票在漲（普漲），越高代表漲勢越全面。'],
-      ['SPY', m.spy_chg, null, true, '%', 'SPY＝S&P 500 大盤 ETF，今日相對昨收的漲跌幅。代表整體美股。'],
-      ['QQQ', m.qqq_chg, null, true, '%', 'QQQ＝那斯達克 100 ETF，今日漲跌幅。偏科技/成長股的溫度計。'],
-      ['IWM', m.iwm_chg, null, true, '%', 'IWM＝羅素 2000 小型股 ETF，今日漲跌幅。代表中小型股的風險偏好。'],
-      ['VIX', m.vix, vixRegimeZh(m.vix_regime), false, '',
+    // [label, value, sub, tip] — sub 已中文化，tip 為 hover 白話說明
+    const rows = [
+      ['VIX', m.vix, vixRegimeZh(m.vix_regime),
         'VIX＝恐慌指數（S&P 500 未來 30 天隱含波動率）。<15 平靜、15–22 正常、22–32 偏高、>32 恐慌。'],
-      ['SKEW', m.skew, skewZh(m.skew_label), false, '',
+      ['SKEW', m.skew, skewZh(m.skew_label),
         'SKEW＝尾部風險指數。越高代表機構越積極買進「黑天鵝」下跌保護；>135 通常視為偏高警訊。'],
-      ['F&G', m.fear_greed, fearGreedZh(m.fear_greed_label), false, '',
+      ['F&G', m.fear_greed, fearGreedZh(m.fear_greed_label),
         'F&G＝CNN 恐懼與貪婪指數（0 極度恐懼 ～ 100 極度貪婪）。低檔常是逢低買點、高檔常是過熱訊號。'],
     ];
-    $('ie-stats').innerHTML = cells.map(([k, v, sub, signedFlag, unit, tip]) => {
-      const cls = signedFlag ? pctClass(v) : '';
-      const val = signedFlag ? signed(v) : (v == null ? '—' : (typeof v === 'number' ? num(v, v >= 100 ? 0 : 1) : v));
-      return `<div class="ie-stat" title="${esc(tip || '')}" style="cursor:help"><div class="k">${esc(k)}</div>
-        <div class="v ${cls}">${esc(val)}${unit && v != null ? unit : ''}</div>
-        ${sub ? `<div class="k" style="margin-top:2px">${esc(sub)}</div>` : ''}</div>`;
-    }).join('');
+    $('ie-stats').innerHTML =
+      `<div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">市場情緒</div>` +
+      rows.map(([k, v, sub, tip]) => {
+        const val = v == null ? '—' : (typeof v === 'number' ? num(v, v >= 100 ? 0 : 1) : v);
+        return `<div class="ie-srow" title="${esc(tip)}">
+          <div><div class="k">${esc(k)}</div><div class="v">${esc(val)}</div></div>
+          <div class="s">${esc(sub || '')}</div>
+        </div>`;
+      }).join('');
+    // 市寬併入板塊區標頭（stat grid 解散後不可消失）
+    const bm = $('ie-breadth-meta');
+    if (bm) {
+      bm.title = BREADTH_TIP;
+      bm.textContent = b.adv_pct == null
+        ? '市寬 —'
+        : `市寬 上漲 ${num(b.adv_pct, 1)}% · ${b.advancers ?? '—'}/${b.n ?? '—'}`;
+    }
   }
 
   function renderStrategies(list, rec) {
@@ -146,29 +155,46 @@
     }).join('');
   }
 
+  // 族群密集卡：族群名 + 均幅、統計行（N 檔 · 上漲 X%）、領漲 top3 chips、最弱 3 檔（hover 看漲跌幅）。
+  // 「連 N 窗」未做：/api/intraday-eval/history 的 window 只存 strategy_ids，拿不到族群層資料。
   function renderGroups(g, rotation) {
-    const labels = { semiconductors: '半導體', software_platforms: '軟體/平台', crypto_fintech: '加密/fintech' };
-    const rows = Object.keys(labels).filter(k => g[k]).map(k => {
-      const v = g[k].avg;
-      return `<div class="ie-bar-row">
-        <div class="ie-bar-name">${labels[k]} <span class="ie-conf">${g[k].up}↑/${g[k].down}↓</span></div>
-        <div class="ie-bar-track"><div class="ie-bar-fill" style="left:${v >= 0 ? '50%' : '0%'};width:${Math.min(50, Math.abs(v || 0) * 4)}%;background:${v >= 0 ? '#22c55e' : '#f87171'}"></div>
-          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border)"></div></div>
-        <div class="ie-bar-val ${pctClass(v)}">${signed(v, 1)}%</div>
+    const labels = { semiconductors: '半導體', software_platforms: '軟體平台', crypto_fintech: '加密-fintech' };
+    const chip = (x) => `<span class="ie-gchip ${x.chg > 0 ? 'up' : (x.chg < 0 ? 'down' : '')}">${esc(x.ticker)} ${signed(x.chg, 1)}%</span>`;
+    const cards = Object.keys(labels).filter(k => g[k]).map(k => {
+      const d = g[k] || {};
+      const v = d.avg;
+      const n = d.n != null ? d.n : ((d.up || 0) + (d.down || 0));
+      const upPct = n ? Math.round((d.up || 0) / n * 100) : null;
+      const best = (d.best || []).slice(0, 3);
+      const worst = (d.worst || []).slice(0, 3);
+      const weakTip = worst.length
+        ? '最弱 3 檔：' + worst.map(w => `${w.ticker} ${signed(w.chg, 1)}%`).join(' · ')
+        : '無最弱名單';
+      return `<div class="ie-gcard">
+        <div class="ie-g-top">
+          <span class="ie-g-name">${labels[k]}</span>
+          <span class="ie-g-avg ${pctClass(v)}">${signed(v, 1)}%</span>
+        </div>
+        <div class="ie-g-stat" title="N 檔＝族群樣本數；上漲%＝其中今日翻紅的比例；右上為族群均幅。">
+          ${n} 檔 · 上漲 ${upPct == null ? '—' : upPct + '%'} · ${d.up || 0}↑/${d.down || 0}↓
+        </div>
+        <div class="ie-g-chips">${best.map(chip).join('') || '<span class="ie-g-stat">無領漲</span>'}</div>
+        <div class="ie-g-weak" title="${esc(weakTip)}">弱 ${worst.length ? worst.map(w => esc(w.ticker)).join(' · ') : '—'}</div>
       </div>`;
     }).join('');
     const notes = (rotation || []).map(r =>
       `<div class="ie-chip" style="display:flex;white-space:normal;text-align:left">↻ ${esc(r.from)} → ${esc(r.to)}：${esc(r.note)}</div>`).join('');
-    $('ie-groups').innerHTML = rows;
+    $('ie-groups').innerHTML = cards || '<div class="ie-chip">無資料</div>';
     $('ie-rotation').innerHTML = notes;
   }
 
+  // 盤中領漲：只留 tag === 'leader'。順勢/反轉（trend/reversal）抄的是 10 分鐘 lane，
+  // 與個股即時區的 60 秒 spike 卡同源不同步，會互相矛盾 → 交給即時區單一來源。
   function renderIdeas(list) {
-    if (!list.length) { $('ie-ideas').innerHTML = '<tr><td class="ie-mut" style="font-size:12px">無</td></tr>'; return; }
-    const tagZh = { trend: '順勢', reversal: '反轉', leader: '領漲' };
-    $('ie-ideas').innerHTML = list.map(i => `<tr class="ie-idea-row">
+    const leaders = (list || []).filter(i => i.tag === 'leader');
+    if (!leaders.length) { $('ie-ideas').innerHTML = '<tr><td class="ie-mut" style="font-size:12px">無</td></tr>'; return; }
+    $('ie-ideas').innerHTML = leaders.map(i => `<tr class="ie-idea-row">
       <td style="font-family:'JetBrains Mono',monospace;font-weight:800">${esc(i.ticker)}</td>
-      <td><span class="ie-tk">${esc(tagZh[i.tag] || i.tag)}</span></td>
       <td class="${pctClass(i.chg)}" style="font-family:'JetBrains Mono',monospace;text-align:right">${i.chg == null ? '—' : signed(i.chg, 1) + '%'}</td>
       <td style="color:var(--text-muted)">${esc(i.reason || '')}${i.sector ? ' · ' + esc(zhSector(i.sector)) : ''}</td>
     </tr>`).join('');

@@ -14,14 +14,27 @@
     <!-- TradingView lightweight-charts (candlestick) — 評估分頁 個股小卡 → 今日 K 線 modal -->
     <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-      /* ── Tab bar (策略 / 評估) ── */
-      .ie-tabbar { display:flex; gap:4px; }
-      .ie-tab { font-size:13px; font-weight:700; padding:5px 14px; border-radius:8px; border:1px solid transparent; color:var(--text-muted); cursor:pointer; background:none; display:flex; align-items:center; gap:6px; transition:all .15s; }
-      .ie-tab:hover { color:var(--text-main); }
-      .ie-tab.active { color:var(--text-main); background:var(--bg-card); border-color:var(--border); }
-      .ie-toolbar.hidden { display:none; }
+      /* ── 情緒窄卡（VIX / SKEW / F&G — 原 8 格 stat grid 收斂） ── */
+      .ie-srow { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 0; border-bottom:1px dashed var(--border); cursor:help; }
+      .ie-srow:last-child { border-bottom:none; }
+      .ie-srow .k { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+      .ie-srow .v { font-size:18px; font-weight:800; font-family:'JetBrains Mono',monospace; line-height:1.2; color:var(--text-main); }
+      .ie-srow .s { font-size:10.5px; color:var(--text-muted); text-align:right; }
 
-      /* ── 評估分頁樣式（原 盤中評估 頁移植） ── */
+      /* ── 族群密集卡（板塊區） ── */
+      .ie-ggrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:8px; }
+      .ie-gcard { border:1px solid var(--border); border-radius:10px; padding:9px 11px; background:var(--bg-card); display:flex; flex-direction:column; gap:5px; }
+      .ie-gcard .ie-g-top { display:flex; align-items:baseline; justify-content:space-between; gap:6px; }
+      .ie-gcard .ie-g-name { font-size:12px; font-weight:800; color:var(--text-main); }
+      .ie-gcard .ie-g-avg { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:800; }
+      .ie-gcard .ie-g-stat { font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+      .ie-gcard .ie-g-chips { display:flex; flex-wrap:wrap; gap:4px; }
+      .ie-gchip { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; border:1px solid var(--border); color:var(--text-muted); white-space:nowrap; }
+      .ie-gchip.up { color:#22c55e; background:rgba(34,197,94,.10); border-color:rgba(34,197,94,.35); }
+      .ie-gchip.down { color:#f87171; background:rgba(239,68,68,.10); border-color:rgba(239,68,68,.35); }
+      .ie-gcard .ie-g-weak { font-size:9.5px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; cursor:help; opacity:.85; }
+
+      /* ── 個股即時區 / 市場環境樣式（原 盤中評估 頁移植） ── */
       .ia-score-big { font-size: 46px; font-weight: 900; letter-spacing: .02em; line-height: 1; font-family: 'JetBrains Mono', monospace; }
       .ia-meter { position: relative; height: 8px; border-radius: 999px; background: linear-gradient(90deg,#ef4444 0%,#f59e0b 35%,#71717a 50%,#34d399 65%,#22c55e 100%); opacity:.85; }
       .ia-meter-mark { position:absolute; top:-3px; width:3px; height:14px; border-radius:2px; background:var(--text-main); box-shadow:0 0 4px rgba(0,0,0,.5); transform:translateX(-50%); }
@@ -63,119 +76,83 @@
     <main class="ml-64 flex-1 flex flex-col">
 
         <header class="h-16 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-8 sticky top-0 backdrop-blur-md z-20">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="crosshair" class="w-5 h-5 text-indigo-400"></i>
-                    <h2 class="text-lg font-bold">盤中</h2>
-                </div>
-                <!-- Tab bar：策略（可行動）/ 評估（價量體檢） -->
-                <div class="ie-tabbar" role="tablist">
-                    <button class="ie-tab active" data-tab="strategy" role="tab">
-                        <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> 策略
-                    </button>
-                    <button class="ie-tab" data-tab="mood" role="tab">
-                        <i data-lucide="activity" class="w-3.5 h-3.5"></i> 評估
-                    </button>
-                </div>
+            <div class="flex items-center gap-3">
+                <i data-lucide="crosshair" class="w-5 h-5 text-indigo-400"></i>
+                <h2 class="text-lg font-bold">盤中</h2>
+                <span id="ia-market" class="ia-pill"><span class="ia-dot" style="background:#71717a;"></span><span>—</span></span>
             </div>
 
-            <!-- 策略分頁 toolbar -->
-            <div id="ie-toolbar" class="ie-toolbar flex items-center gap-3">
+            <!-- 單頁 toolbar：策略樞紐（10 分）與情緒/個股（60 秒）兩條 lane 各自重評估 -->
+            <div class="flex items-center gap-3">
                 <span id="ie-status" class="ie-chip">—</span>
                 <span id="ie-updated" class="text-xs" style="color:var(--text-muted)">—</span>
-                <button id="ie-refresh" class="ie-chip" style="cursor:pointer" title="重新評估">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 重評估
+                <button id="ie-refresh" class="ie-chip" style="cursor:pointer" title="重新評估盤中策略樞紐（10 分鐘 lane）">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> 重評估策略
                 </button>
-            </div>
-
-            <!-- 評估分頁 toolbar -->
-            <div id="ia-toolbar" class="ie-toolbar hidden flex items-center gap-3">
-                <span id="ia-market" class="ia-pill"><span class="ia-dot" style="background:#71717a;"></span><span>—</span></span>
-                <button id="ia-refresh" class="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 transition-all flex items-center gap-1.5">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>重新評估</span>
+                <button id="ia-refresh" title="重新評估盤中情緒 / 價量（5 分鐘 lane）" class="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 transition-all flex items-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>重評估情緒</span>
                 </button>
                 <span id="ia-asof" class="text-[10px] font-mono text-zinc-500"></span>
             </div>
         </header>
 
-        <!-- ══════════════ 分頁 1：策略 ══════════════ -->
-        <div id="tab-strategy" class="ie-tabpane p-6 flex-1 overflow-y-auto" style="max-width:1400px">
+        <!-- ══ 單頁：決策 → 市場環境 → 個股即時 → 策略 → 板塊/族群 ══ -->
+        <div class="p-6 flex-1 overflow-y-auto space-y-5" style="max-width:1500px">
 
-            <!-- Row 1: regime + narrative -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-                <div class="glass-card p-5 lg:col-span-1">
+            <!-- ① 決策頂部：regime + LLM 導讀 + 盤中分數 meter -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="glass-card p-5">
                     <div class="text-xs mb-2" style="color:var(--text-muted)">市場狀態 / 曝險紀律</div>
                     <div id="ie-regime"></div>
                 </div>
-                <div class="glass-card p-5 lg:col-span-2">
+                <div class="glass-card p-5">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
                         <div class="text-xs" style="color:var(--text-muted)">盤中導讀（規則 + LLM）</div>
                     </div>
                     <div id="ie-narrative" style="font-size:13px;line-height:1.7;color:var(--text-main)">載入中…</div>
                 </div>
+
+                <!-- 盤中分數 meter（原評估分頁 aggregate band） -->
+                <section id="ia-agg" class="glass-card p-5 space-y-3 hidden">
+                    <div class="text-[11px] uppercase tracking-widest" style="color:var(--text-muted);">大盤盤中綜合（SPY·QQQ·IWM 加權）</div>
+                    <div class="flex items-end gap-3">
+                        <span id="ia-score" class="ia-score-big">—</span>
+                        <span id="ia-label" class="text-lg font-bold pb-1">—</span>
+                    </div>
+                    <div>
+                        <div class="ia-meter"><div id="ia-mark" class="ia-meter-mark" style="left:50%;"></div></div>
+                        <div class="flex justify-between text-[9px] font-mono mt-1" style="color:var(--text-muted);">
+                            <span>-100 破底</span><span>0</span><span>+100 強勢</span>
+                        </div>
+                    </div>
+                    <div id="ia-headline" class="text-sm font-semibold" style="line-height:1.6;"></div>
+                    <div id="ia-flags" class="flex flex-wrap gap-2"></div>
+                </section>
             </div>
 
-            <!-- Row 2: mood strip -->
-            <div id="ie-stats" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 mb-5"></div>
-
-            <!-- Row 3: strategy cards -->
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="list-checks" class="w-4 h-4 text-indigo-400"></i>
-                    <h3 class="font-bold text-sm">策略卡</h3>
-                    <span class="ie-chip" title="連續 ≥2 個 10 分鐘視窗出現的策略會發光；右上 ×N 為當日出現次數">
-                        連續發光＝重複主旋律
+            <!-- ② 市場環境：SPY/QQQ/IWM 深度卡 + 情緒窄卡（VIX/SKEW/F&G） -->
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="gauge" class="w-4 h-4 text-indigo-400"></i>
+                    <h3 class="font-bold text-sm">市場環境</h3>
+                    <span class="ie-chip" title="ETF 深度卡走 5 分鐘 FMP 快照；VWAP 乖離／連跌／出貨日／型態／止跌同一份資料">
+                        VWAP · 出貨日 · 止跌
                     </span>
                 </div>
-                <span id="ie-strat-meta" class="text-xs" style="color:var(--text-muted)"></span>
-            </div>
-            <div id="ie-scards" class="ie-scards mb-6"></div>
-
-            <!-- Row 4: sectors + groups -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                <div class="glass-card p-5">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
-                        <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i> 產業排序（今日 breadth + 5d 前瞻）
-                    </h3>
-                    <div id="ie-sectors"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <!-- Per-ticker breakdown -->
+                    <section id="ia-tickers-wrap" class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></section>
+                    <div id="ie-stats" class="glass-card p-4"></div>
                 </div>
-                <div class="glass-card p-5">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
-                        <i data-lucide="git-compare" class="w-4 h-4 text-indigo-400"></i> 族群輪動
-                    </h3>
-                    <div id="ie-groups"></div>
-                    <div id="ie-rotation" class="mt-3"></div>
+                <div id="ia-no-data" class="glass-card p-8 text-center hidden mt-4">
+                    <i data-lucide="cloud-off" class="w-8 h-8 mx-auto mb-3 text-zinc-500"></i>
+                    <p class="text-sm text-zinc-500">盤中評估資料尚未產生。美股盤中時段 dashboard_server 會每 5 分鐘自動更新，或按右上「重評估情緒」。</p>
                 </div>
             </div>
 
-            <!-- Row 5: ideas + timeline -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                <div class="glass-card p-5">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
-                        <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i> 個股點子
-                    </h3>
-                    <table class="w-full" style="border-collapse:collapse"><tbody id="ie-ideas"></tbody></table>
-                </div>
-                <div class="glass-card p-5">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
-                        <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i> 策略重複時間軸（當日）
-                    </h3>
-                    <div id="ie-timeline" class="ie-tl"></div>
-                    <div class="text-xs mt-3" style="color:var(--text-muted)">
-                        每格＝一個 10 分鐘視窗；<span style="color:#818cf8">■</span> 該策略當時出現，
-                        <span style="color:#fb923c">■</span> 當日出現 ≥3 次的主旋律。
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-xs" style="color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px">
-                探索層工具：本頁不進入 investment_protocol 決策。資料每 10 分鐘由盤中樞紐統整（0 額外 API call，讀既有快照）。
-            </div>
-        </div>
-
-        <!-- ══════════════ 分頁 2：評估 ══════════════ -->
-        <div id="tab-mood" class="ie-tabpane flex-1 overflow-y-auto p-6 space-y-5" style="display:none">
+            <!-- ③ 個股即時區（60 秒 lane）— #mood 錨點（舊 intraday-mood.html 導向） -->
+            <div id="mood" class="space-y-2" style="scroll-margin-top:80px">
 
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Intraday Tape · 破底 / 止跌 / 量價</span>
@@ -191,7 +168,7 @@
                     </h3>
                     <div class="flex items-center gap-2">
                         <span id="ia-spikes-meta" class="text-[10px] font-mono" style="color:var(--text-muted);"></span>
-                        <button id="ia-spikes-notify" title="開啟桌面提示（KDJ+MACD 同向翻轉時推播）" class="text-[10px] font-mono px-2 py-0.5 rounded" style="border:1px solid var(--border,#3f3f46);color:var(--text-muted);">🔔 提示</button>
+                        <button id="ia-spikes-notify" title="開啟桌面提示（合格反轉★／急拉擊殺／高強度急拉急殺時推播）" class="text-[10px] font-mono px-2 py-0.5 rounded" style="border:1px solid var(--border,#3f3f46);color:var(--text-muted);">🔔 提示</button>
                         <button id="ia-spikes-edit" class="text-[10px] font-mono px-2 py-0.5 rounded" style="border:1px solid var(--border,#3f3f46);color:var(--text-muted);">✎ 編輯名單</button>
                     </div>
                 </div>
@@ -212,40 +189,67 @@
                 <div id="ia-spikes-body" class="ia-spgrid"><span class="ia-kv">載入中…</span></div>
             </section>
 
-            <div id="ia-no-data" class="glass-card p-8 text-center hidden">
-                <i data-lucide="cloud-off" class="w-8 h-8 mx-auto mb-3 text-zinc-500"></i>
-                <p class="text-sm text-zinc-500">盤中評估資料尚未產生。美股盤中時段 dashboard_server 會每 5 分鐘自動更新，或按右上「重新評估」。</p>
-            </div>
+            </div><!-- /#mood -->
 
-            <!-- Aggregate verdict band -->
-            <section id="ia-agg" class="glass-card p-5 hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    <div class="flex flex-col justify-center gap-2">
-                        <div class="text-[11px] uppercase tracking-widest" style="color:var(--text-muted);">大盤盤中綜合（SPY·QQQ·IWM 加權）</div>
-                        <div class="flex items-end gap-3">
-                            <span id="ia-score" class="ia-score-big">—</span>
-                            <span id="ia-label" class="text-lg font-bold pb-1">—</span>
-                        </div>
-                        <div class="mt-2">
-                            <div class="ia-meter"><div id="ia-mark" class="ia-meter-mark" style="left:50%;"></div></div>
-                            <div class="flex justify-between text-[9px] font-mono mt-1" style="color:var(--text-muted);">
-                                <span>-100 破底</span><span>0</span><span>+100 強勢</span>
-                            </div>
+            <!-- ④ 策略區：策略卡 + 重複時間軸 + 盤中領漲 -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-4 h-4 text-indigo-400"></i>
+                        <h3 class="font-bold text-sm">策略卡</h3>
+                        <span class="ie-chip" title="連續 ≥2 個 10 分鐘視窗出現的策略會發光；右上 ×N 為當日出現次數">
+                            連續發光＝重複主旋律
+                        </span>
+                    </div>
+                    <span id="ie-strat-meta" class="text-xs" style="color:var(--text-muted)"></span>
+                </div>
+                <div id="ie-scards" class="ie-scards mb-4"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="glass-card p-5">
+                        <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                            <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i> 策略重複時間軸（當日）
+                        </h3>
+                        <div id="ie-timeline" class="ie-tl"></div>
+                        <div class="text-xs mt-3" style="color:var(--text-muted)">
+                            每格＝一個 10 分鐘視窗；<span style="color:#818cf8">■</span> 該策略當時出現，
+                            <span style="color:#fb923c">■</span> 當日出現 ≥3 次的主旋律。
                         </div>
                     </div>
-                    <div class="lg:col-span-2 flex flex-col gap-3">
-                        <div id="ia-headline" class="text-sm font-semibold" style="line-height:1.6;"></div>
-                        <div id="ia-flags" class="flex flex-wrap gap-2"></div>
+                    <div class="glass-card p-5">
+                        <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                            <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i> 盤中領漲
+                            <span class="ie-chip" title="順勢／反轉訊號改由上方「個股急拉 / 急殺」的 60 秒 lane 負責，這裡只列漲幅領先">
+                                順勢/反轉看上方即時區
+                            </span>
+                        </h3>
+                        <table class="w-full" style="border-collapse:collapse"><tbody id="ie-ideas"></tbody></table>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Per-ticker breakdown -->
-            <section id="ia-tickers-wrap" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></section>
+            <!-- ⑤ 板塊 / 族群區 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="glass-card p-5">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2 flex-wrap">
+                        <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i> 產業排序（今日 breadth + 5d 前瞻）
+                        <span id="ie-breadth-meta" class="ie-chip">市寬 —</span>
+                    </h3>
+                    <div id="ie-sectors"></div>
+                </div>
+                <div class="glass-card p-5">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2">
+                        <i data-lucide="git-compare" class="w-4 h-4 text-indigo-400"></i> 族群輪動
+                    </h3>
+                    <div id="ie-groups" class="ie-ggrid"></div>
+                    <div id="ie-rotation" class="mt-3 flex flex-col gap-1.5"></div>
+                </div>
+            </div>
 
-            <p class="text-[10px] text-center" style="color:var(--text-muted);">
-                探索層指標：盤中價量訊號，<strong>不</strong>進入 investment_protocol 決策。資料源 FMP（Finnhub 盤中 K 為付費，故未用）。
-            </p>
+            <div class="text-xs" style="color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px">
+                探索層工具：本頁<strong>不</strong>進入 investment_protocol 決策。策略／板塊每 10 分鐘由盤中樞紐統整（0 額外 API call，讀既有快照）；
+                大盤價量與情緒為 FMP 5 分快照（Finnhub 盤中 K 為付費，故未用）；個股急拉/急殺走 Alpaca 1 分 lane，前端每 60 秒輪詢。
+            </div>
         </div>
     </main>
 
@@ -370,7 +374,7 @@
       }
 
       let _spikeWatchlist = [];   // last-known watchlist (for the editor)
-      let _spikeAlertSeen = {};   // symbol → last alert "at" we already notified on
+      let _spikeNotifySeen = {};  // "kind:symbol" → last event key we already notified on
 
       // Inline SVG sparkline of the last ~10 closes — the visual replacement for the
       // old timestamped 訊號流. Shows the SHAPE of the 10-min trend, colored by regime.
@@ -617,44 +621,47 @@
           pfBanner.classList.remove('hidden');
           pfBanner.innerHTML = `🎯 ${pfs.length} 檔急拉擊殺/反軋：` + pfs.map(p =>
             `<strong>${p.symbol}</strong>(${p.dir_zh} ${p.pump_pct > 0 ? '+' : ''}${p.pump_pct}%→回${Math.round(p.retrace * 100)}%)`).join('、');
+          pfs.forEach(p => notifyOnce('pf', p.symbol, p.at || '',
+            `🎯 ${p.symbol} ${p.dir_zh}`,
+            `${p.pump_pct > 0 ? '+' : ''}${p.pump_pct}% 後回 ${Math.round(p.retrace * 100)}% · ${hhmm(p.at)}`));
         }
 
-        // Alert banner + (optional) desktop notification — only for DIRECTIONAL turns.
-        // A KDJ+MACD 同向翻轉 inside a choppy 區間 is mostly noise (oscillators cross back
-        // and forth); we only interrupt the user when the 10-min regime is actually trending
-        // (多頭/空頭) OR a real non-suppressed spike confirms a break out of the range.
+        // 高強度急拉/急殺 push — severity high 且未被 σ 降噪的 spike。反轉門檻變嚴後
+        // (v4.104.0),這類事件是盤中主要的可推播訊號源,不再只有橫幅。
+        (s.spikes || []).filter(x => x.severity === 'high').forEach(x =>
+          notifyOnce('spike', x.symbol, x.at || '',
+            `${x.direction === 'spike_up' ? '⚡' : '💥'} ${x.symbol} ${x.context_label || x.dir_zh}`,
+            `1分${x.m1 > 0 ? '+' : ''}${x.m1}% · 3分${x.m3 > 0 ? '+' : ''}${x.m3}%`
+            + (x.sigma_mult != null ? ` · σ${x.sigma_mult}×` : '') + ` · ${hhmm(x.at)}`));
+
+        // Alert banner + desktop push — 合格反轉(★)。
         const alerts = readings.filter(isDirectionalAlert);
         if (alerts.length) {
           banner.classList.remove('hidden');
           banner.innerHTML = `⚡ ${alerts.length} 檔有方向翻轉：` +
             alerts.map(a => `<strong>${a.symbol}</strong>(${a.reversal && a.reversal.direction === 'up' ? '↑' : '↓'})`).join('、');
-          maybeNotifyAlerts(alerts);
+          alerts.forEach(a => {
+            const rv = a.reversal || {};
+            notifyOnce('rev', a.symbol, rv.at || '',
+              `⚡ ${a.symbol} ${rv.direction === 'up' ? '反轉向上' : '反轉向下'}`,
+              `KDJ+MACD 同向 · 位移${rv.disp_pct != null ? ` ${rv.disp_pct > 0 ? '+' : ''}${rv.disp_pct}%` : ''}`
+              + (rv.zone ? ` · ${rv.zone}` : '') + ` · ${hhmm(rv.at)}`);
+          });
         }
       }
 
-      // Filter out range-chop reversals: a KDJ+MACD turn only counts as a real signal when
-      // the 10-min regime is trending, or a real spike breaks the range. Cuts push noise.
-      function isDirectionalAlert(r) {
-        if (!r.alert) return false;
-        const cx = r.context;
-        if (cx && cx.regime === 'range') {
-          const sp = r.spike;
-          return !!(sp && !sp.suppressed && (sp.severity === 'high' || sp.breakout));
-        }
-        return true;   // trending up/down (or no 10-min context yet) → genuine turn
-      }
+      // v4.104.0 起 alert 在偵測層已過「雙確認 + σ 位移 + zone/2.5σ」門檻,前端不再疊
+      // 區間二次過濾——那道閘是舊無門檻偵測時代的補丁,留著會把合格訊號也擋掉。
+      function isDirectionalAlert(r) { return !!r.alert; }
 
-      // Desktop push for a NEW alert (only if user granted permission). De-duped by
-      // symbol+timestamp so the same cross doesn't re-notify across 60s polls.
-      function maybeNotifyAlerts(alerts) {
+      // Desktop push for a NEW event (only if user granted permission). De-duped per
+      // event kind by symbol+timestamp so the same event doesn't re-notify across 60s polls.
+      function notifyOnce(kind, symbol, key, title, body) {
         if (!('Notification' in window) || Notification.permission !== 'granted') return;
-        alerts.forEach(a => {
-          const key = a.reversal ? a.reversal.at : '';
-          if (_spikeAlertSeen[a.symbol] === key) return;
-          _spikeAlertSeen[a.symbol] = key;
-          const dir = a.reversal && a.reversal.direction === 'up' ? '反轉向上' : '反轉向下';
-          try { new Notification(`⚡ ${a.symbol} ${dir}`, { body: `KDJ+MACD 同向翻轉 · ${(a.reversal && a.reversal.at || '').slice(11, 16)}` }); } catch (e) {}
-        });
+        const k = `${kind}:${symbol}`;
+        if (_spikeNotifySeen[k] === key) return;
+        _spikeNotifySeen[k] = key;
+        try { new Notification(title, { body }); } catch (e) {}
       }
 
       // ── Desktop-notification opt-in (needs a user gesture for permission) ──
@@ -741,29 +748,16 @@
     })();
     </script>
 
-    <!-- Boot（側欄）+ Tab 切換 -->
+    <!-- Boot（側欄）-->
     <script>
       if (window.UI && UI.boot) UI.boot('intraday-eval');
 
-      (function wireTabs() {
-        const KEY = 'intraday_tab';
-        const tabs = Array.from(document.querySelectorAll('.ie-tab'));
-        const panes = { strategy: document.getElementById('tab-strategy'), mood: document.getElementById('tab-mood') };
-        const bars  = { strategy: document.getElementById('ie-toolbar'),  mood: document.getElementById('ia-toolbar') };
-        function show(which) {
-          if (!panes[which]) which = 'strategy';
-          tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === which));
-          Object.keys(panes).forEach(k => { panes[k].style.display = (k === which) ? '' : 'none'; });
-          Object.keys(bars).forEach(k => bars[k].classList.toggle('hidden', k !== which));
-          try { localStorage.setItem(KEY, which); } catch (e) {}
-          if (window.lucide) lucide.createIcons();
-        }
-        tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
-        // #mood（來自舊 intraday-mood.html 導向）優先，其次記住的上次分頁
-        let init = 'strategy';
-        if (location.hash === '#mood') init = 'mood';
-        else { try { init = localStorage.getItem(KEY) || 'strategy'; } catch (e) {} }
-        show(init);
+      // 單頁後 #mood 只是錨點（舊 intraday-mood.html 仍導向 intraday-eval.html#mood）。
+      // 直接開啟時 hash 可能早於 DOM 完成，補捲一次到個股即時區。
+      (function scrollToHash() {
+        if (location.hash !== '#mood') return;
+        const go = () => { const el = document.getElementById('mood'); if (el) el.scrollIntoView({ block: 'start' }); };
+        setTimeout(go, 0);
       })();
 
       if (window.lucide) lucide.createIcons();

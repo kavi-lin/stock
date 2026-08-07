@@ -34,6 +34,22 @@ def hl_bars(rows):
             for i, (c, h, l) in enumerate(rows)]
 
 
+def ts_bars(closes, end_min, hl=0.0):
+    """Bars whose LAST bar sits at `end_min` minutes-past-UTC-midnight (2026-06-25).
+    開盤窗測試專用：09:30 ET = 13:30 UTC（EDT）。hl = 高低點對 close 的展幅。"""
+    n = len(closes)
+    out = []
+    for i, c in enumerate(closes):
+        m = end_min - (n - 1) + i
+        out.append({"t": f"2026-06-25T{m // 60:02d}:{m % 60:02d}:00Z",
+                    "o": c, "h": c + hl, "l": c - hl, "c": c, "v": 1000})
+    return out
+
+
+ET_0935 = 13 * 60 + 35      # 開盤窗內（09:35 ET）
+ET_1300 = 17 * 60           # 開盤窗外（13:00 ET）
+
+
 def test_no_spike():
     print("\n[A] 平盤無急拉/急殺")
     check(sp.detect_spikes("AAPL", bars([100] * 8)) is None, "flat → None")
@@ -111,14 +127,21 @@ def _v_shape_bars():
 
 
 def test_reversal_alert():
-    print("\n[H] 反轉偵測 — KDJ+MACD 同向 = alert（SNDK 範例）")
+    print("\n[H] 反轉偵測 — KDJ+MACD 雙確認 + 大位移 = alert（SNDK 範例）")
     r = sp.detect_reversal("SNDK", _v_shape_bars())
     check(r is not None, "V-shape → reversal detected")
     check(r and r["direction"] == "up", f"direction up (got {r and r['direction']})")
-    check(r and r["alert"] is True, "KDJ+MACD 同向 → alert=True")
+    check(r and r["zone"] == "超賣翻揚", f"zone 超賣翻揚 (got {r and r.get('zone')})")
+    check(r and r["alert"] is True, "雙確認 + zone → alert=True")
     check(r and r["strength"] == "strong", "alert → strength strong")
+    check(r and r["both"] is True, "both=True（雙確認已是前提）")
     check(r and any("KDJ" in b for b in r["basis"]) and any("MACD" in b for b in r["basis"]),
           f"basis 含 KDJ+MACD (got {r and r['basis']})")
+    check(r and r.get("disp_pct") is not None and r["disp_pct"] > 0,
+          f"disp_pct 為正位移 (got {r and r.get('disp_pct')})")
+    check(r and r.get("disp_sigma_mult") is not None
+          and r["disp_sigma_mult"] >= sp.REV_SIGMA_K,
+          f"disp_sigma_mult ≥ {sp.REV_SIGMA_K} (got {r and r.get('disp_sigma_mult')})")
 
 
 def test_reversal_none_on_flat():
@@ -307,6 +330,172 @@ def test_regime_context_insufficient():
     check(sp.regime_context(bars([100] * 10)) is None, "<BASELINE_MIN → None")
 
 
+# ── 反轉降噪四件套（雙確認 / σ 位移 / 翻面冷卻 / 開盤加嚴窗）─────────────────
+def _single_source_bars():
+    """穩定上升 42 根後小回檔兩根 → 只有 KDJ 死叉、MACD 沒翻 = 單一來源。
+    舊版會報「反轉向下」（多頭排列中的雜訊），新版必須 None。"""
+    return bars([round(100 + 0.2 * i, 4) for i in range(42)] + [108.2, 108.1])
+
+
+def _chop_bars():
+    """±0.5% 來回甩 44 根：KDJ 金叉 + MACD 金叉都在，但位移 0.5% ≈ 自身 σ 0.53%
+    → 位移／σ ≈ 0.95 < REV_SIGMA_K。這就是「小小波動就報反轉」的原型。"""
+    return bars([100.0 + (0.5 if i % 2 else 0.0) for i in range(44)])
+
+
+def _flat_then_jump(pct):
+    """完全平盤 40 根（σ = 0，算不出倍數）後跳一根 → 走 REV_MIN_DISP_PCT 固定門檻。"""
+    return bars([100.0] * 40 + [round(100 * (1 + pct / 100), 4)])
+
+
+def test_reversal_needs_both():
+    print("\n[AC] 雙確認 — 只有 KDJ 交叉、MACD 沒翻 → 不算反轉")
+    b = _single_source_bars()
+    closes = [x["c"] for x in b]
+    kc, ka, _ = sp._kdj_cross_recent([x["h"] for x in b], [x["l"] for x in b], closes)
+    md, _, _ = sp._macd_turn_recent(closes)
+    check(kc == "death", f"fixture 確實有 KDJ 死叉 (got {kc})")
+    check(md is None, f"fixture 確實沒有 MACD 翻轉 (got {md})")
+    check(sp.detect_reversal("SOLO", b) is None, "單一來源 → None（舊版會誤報反轉向下）")
+
+
+def test_reversal_disp_gate_fail():
+    print("\n[AD] σ 位移門檻 — 雙確認但位移 < 1.5σ → 降級不報")
+    b = _chop_bars()
+    closes = [x["c"] for x in b]
+    kc, _, _ = sp._kdj_cross_recent([x["h"] for x in b], [x["l"] for x in b], closes)
+    md, _, _ = sp._macd_turn_recent(closes)
+    check(kc == "golden" and md == "up", f"fixture 雙確認齊備 (kdj={kc} macd={md})")
+    sigma = sp._ret_sigma(closes[len(closes) - 1 - sp.REGIME_WINDOW:len(closes) - 1])
+    disp = abs((closes[-1] / closes[-2] - 1) * 100)
+    check(sigma and disp / sigma < sp.REV_SIGMA_K,
+          f"位移/σ = {disp / sigma:.2f} < {sp.REV_SIGMA_K}")
+    check(sp.detect_reversal("CHOPPY", b) is None, "整盤雜訊 → None（不再轟炸）")
+
+
+def test_reversal_sigma_fallback():
+    print("\n[AE] σ 算不出 → 退固定門檻 REV_MIN_DISP_PCT")
+    ok = sp.detect_reversal("FLATJ", _flat_then_jump(0.4))
+    check(ok is not None, f"平盤後 +0.4% ≥ {sp.REV_MIN_DISP_PCT}% → 放行")
+    check(ok and ok["disp_sigma_mult"] is None, f"σ=0 → disp_sigma_mult None (got {ok and ok['disp_sigma_mult']})")
+    check(ok and abs(ok["disp_pct"] - 0.4) < 0.01, f"disp_pct ≈ 0.4 (got {ok and ok['disp_pct']})")
+    check(ok and ok["alert"] is False and ok["strength"] == "med",
+          f"無 zone 又無 σ 倍數 → 不升 alert (got alert={ok and ok['alert']})")
+    check(sp.detect_reversal("FLATJ", _flat_then_jump(0.2)) is None,
+          f"平盤後 +0.2% < {sp.REV_MIN_DISP_PCT}% → None")
+
+
+def test_flip_cooldown_suppress():
+    print("\n[AF] 翻面冷卻 — 10 分鐘內反向翻面且無 zone/高 σ → 壓掉")
+    prev = {"symbol": "X", "direction": "down", "at": "2026-06-25T17:35:00Z"}
+    rv = {"symbol": "X", "direction": "up", "at": "2026-06-25T17:40:00Z",
+          "zone": None, "disp_sigma_mult": 1.8}
+    check(sp.flip_cooldown_ok(rv, prev) is False, "5 分鐘前反向 + 弱訊號 → 不放行")
+
+
+def test_flip_cooldown_release():
+    print("\n[AG] 翻面冷卻放行 — zone 註記 / 高 σ / 逾時 / 同向")
+    prev = {"symbol": "X", "direction": "down", "at": "2026-06-25T17:35:00Z"}
+    base = {"symbol": "X", "direction": "up", "at": "2026-06-25T17:40:00Z",
+            "zone": None, "disp_sigma_mult": 1.8}
+    check(sp.flip_cooldown_ok({**base, "zone": "超賣翻揚"}, prev) is True, "有 zone → 放行")
+    check(sp.flip_cooldown_ok({**base, "disp_sigma_mult": sp.REV_FLIP_SIGMA}, prev) is True,
+          f"σ ≥ {sp.REV_FLIP_SIGMA} → 放行")
+    check(sp.flip_cooldown_ok({**base, "at": "2026-06-25T17:50:00Z"}, prev) is True,
+          f"距前次 ≥ {sp.REV_FLIP_COOLDOWN_MIN} 分 → 放行")
+    check(sp.flip_cooldown_ok({**base, "direction": "down"}, prev) is True, "同向 → 不套冷卻")
+    check(sp.flip_cooldown_ok(base, None) is True, "無前一輪 → 放行")
+    check(sp.flip_cooldown_ok(None, prev) is True, "本輪無反轉 → True（無事可壓）")
+
+
+def test_prev_reversal_map():
+    print("\n[AH] 前檔解析 — 同日才套冷卻；缺檔/壞格式/跨日 → {}")
+    from datetime import datetime, timezone
+    today = datetime.now(timezone.utc).isoformat()
+    good = {"generated_at": today, "reversals": [{"symbol": "AAPL", "direction": "up",
+                                                  "at": "2026-06-25T17:40:00Z"}]}
+    m = sp.prev_reversal_map(good)
+    check(m.get("AAPL", {}).get("direction") == "up", f"同日 → 取得 AAPL (got {m})")
+    check(sp.prev_reversal_map({"generated_at": "2020-01-01T00:00:00Z",
+                                "reversals": [{"symbol": "AAPL"}]}) == {}, "跨日 → {}")
+    check(sp.prev_reversal_map(None) == {}, "None → {}")
+    check(sp.prev_reversal_map({"generated_at": "not-a-time"}) == {}, "壞時間 → {}")
+    check(sp.prev_reversal_map({"generated_at": today}) == {}, "無 reversals → {}")
+
+
+def test_prev_payload_graceful():
+    print("\n[AI] 前檔缺失 graceful — 不存在/壞 JSON → None，build() 簽名相容")
+    import inspect
+    check(sp._read_prev_payload("/nonexistent/does/not/exist.json") is None, "檔不存在 → None（不 raise）")
+    bad = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_bad_prev.tmp.json")
+    try:
+        with open(bad, "w", encoding="utf-8") as f:
+            f.write("{not json")
+        check(sp._read_prev_payload(bad) is None, "壞 JSON → None（不 raise）")
+    finally:
+        if os.path.exists(bad):
+            os.remove(bad)
+    params = inspect.signature(sp.build).parameters
+    check(list(params) == ["prev_payload"] and params["prev_payload"].default is None,
+          f"build(prev_payload=None) 簽名（dashboard_server 呼叫 build() 相容）(got {list(params)})")
+
+
+def _no_key_env(fn):
+    """暫時清掉 Alpaca 金鑰，確保 build() 走 skeleton 路徑、測試絕不連網。"""
+    saved = {k: os.environ.pop(k, None) for k in ("ALPACA_API_KEY", "ALPACA_SECRET_KEY")}
+    try:
+        return fn()
+    finally:
+        for k, v in saved.items():
+            if v is not None:
+                os.environ[k] = v
+
+
+def test_build_version():
+    print("\n[AJ] build() — version 1.6 + 無金鑰時 skeleton")
+    p = _no_key_env(lambda: sp.build())
+    check(p.get("version") == "1.6", f"version 1.6 (got {p.get('version')})")
+    check(p.get("_health") == "no_alpaca_key", f"無金鑰 → skeleton (got {p.get('_health')})")
+    p2 = _no_key_env(lambda: sp.build(prev_payload={"generated_at": "x", "reversals": []}))
+    check(p2.get("version") == "1.6", "傳入 prev_payload 亦可（不 raise）")
+
+
+def test_open_grace_helper():
+    print("\n[AK] 開盤窗判定 — 吃 bar 時間戳（09:30 含 ~ 09:45 不含），非 wall clock")
+    check(sp.in_open_grace("2026-06-25T13:30:00Z") is True, "09:30 ET → True（含）")
+    check(sp.in_open_grace("2026-06-25T13:44:00Z") is True, "09:44 ET → True")
+    check(sp.in_open_grace("2026-06-25T13:29:00Z") is False, "09:29 ET → False")
+    check(sp.in_open_grace("2026-06-25T13:45:00Z") is False, "09:45 ET → False（不含）")
+    check(sp.in_open_grace("2026-06-25T17:00:00Z") is False, "13:00 ET → False")
+    check(sp.in_open_grace("2026-06-25T13:35:00.123456789Z") is True, "奈秒小數可解析")
+    check(sp.in_open_grace("bogus") is False and sp.in_open_grace(None) is False,
+          "壞字串/None → False（不 raise）")
+
+
+def test_open_grace_spike_gate():
+    print("\n[AL] 開盤窗 — spike 門檻 ×1.5 且未確認者 severity 封頂 med")
+    weak = [100] * 7 + [101.2]                      # +1.2%：平時過門檻，窗內不過(需 ≥1.5%)
+    check(sp.detect_spikes("OPEN", ts_bars(weak, ET_0935)) is None, "窗內 +1.2% → 不報")
+    out = sp.detect_spikes("OPEN", ts_bars(weak, ET_1300))
+    check(out is not None and out["severity"] == "med", f"窗外 +1.2% → 照舊 med (got {out and out['severity']})")
+    check(out and out["open_grace"] is False, "窗外 open_grace False")
+    big_in = sp.detect_spikes("OPEN", ts_bars([100] * 7 + [103.0], ET_0935))
+    check(big_in is not None and big_in["open_grace"] is True, "窗內 +3% → 仍偵測到")
+    check(big_in and big_in["severity"] == "med", f"窗內未確認 → severity 封頂 med (got {big_in and big_in['severity']})")
+    big_out = sp.detect_spikes("OPEN", ts_bars([100] * 7 + [103.0], ET_1300))
+    check(big_out and big_out["severity"] == "high", f"窗外 +3% → high 不受影響 (got {big_out and big_out['severity']})")
+
+
+def test_open_grace_reversal_gate():
+    print("\n[AM] 開盤窗 — 反轉額外要求 zone 註記")
+    flat = [100.0] * 40 + [100.4]
+    check(sp.detect_reversal("OPEN", ts_bars(flat, ET_0935)) is None, "窗內無 zone → 不報")
+    check(sp.detect_reversal("OPEN", ts_bars(flat, ET_1300)) is not None, "窗外同一組 bars → 照報")
+    vs = [100 - 0.1 * i for i in range(40)] + [96.0, 96.4, 96.9, 97.5]
+    rv = sp.detect_reversal("OPEN", ts_bars(vs, ET_0935, hl=0.2))
+    check(rv is not None and rv["zone"] == "超賣翻揚", f"窗內有 zone → 放行 (got {rv and rv.get('zone')})")
+
+
 def main():
     test_no_spike()
     test_insufficient()
@@ -337,6 +526,17 @@ def main():
     test_pump_fade_none()
     test_regime_context()
     test_regime_context_insufficient()
+    test_reversal_needs_both()
+    test_reversal_disp_gate_fail()
+    test_reversal_sigma_fallback()
+    test_flip_cooldown_suppress()
+    test_flip_cooldown_release()
+    test_prev_reversal_map()
+    test_prev_payload_graceful()
+    test_build_version()
+    test_open_grace_helper()
+    test_open_grace_spike_gate()
+    test_open_grace_reversal_gate()
     print("\n" + "=" * 50)
     if _FAILS:
         print(f"FAILED — {len(_FAILS)} assertion(s):")
