@@ -210,7 +210,14 @@ def _protocol_command(model, prompt, claude_model=None):
     The stdout reader just pipes to the log, so only the command differs.
     `claude_model` (when truthy) pins `claude --model` for tier control."""
     if model == "gemini":
+        # V4.109.1: `--output-format stream-json` added. This was the only one of
+        # the four branches not asking for structured output, so the log was plain
+        # prose and `parse_stream_log_usage` had nothing to read — every Agy run
+        # settled with zero tokens. That never showed before the quota broker
+        # started assigning providers, because the protocol had always taken the
+        # configured chain default (claude).
         return [AGY_BIN, "--print", prompt,
+                "--output-format", "stream-json",
                 "--dangerously-skip-permissions"]
     if model == "codex":
         return [CODEX_BIN, "exec", "--json", "-C", ROOT,
@@ -611,6 +618,32 @@ def _parse_events(path, max_events=40):
             if cost is not None: bits.append(f"${cost:.4f}")
             summary = " · ".join(bits) if bits else sub
             events.append({"icon": "✅" if sub == "success" else "⚠", "text": f"Result: {summary}"})
+        # V4.109.1 — Agy keys its events off `event`, not `type`, and nests each
+        # payload under a key named after the event. Without this branch its
+        # stream-json lines all fall through and the panel shows nothing but the
+        # `===` header, which is worse than the plain prose the log used to hold.
+        elif (e := ev.get("event")):
+            payload = ev.get(e) if isinstance(ev.get(e), dict) else {}
+            if e == "init":
+                events.append({"icon": "🚀", "text": "Session started (agy)"})
+            elif e == "step_update":
+                step = payload.get("step_type") or "step"
+                state = payload.get("state") or ""
+                events.append({"icon": "▸", "text": f"{step} {state}".strip()})
+            elif e == "result":
+                usage = payload.get("usage") or {}
+                bits = []
+                if usage.get("input_tokens") is not None:
+                    bits.append(f"in {usage['input_tokens']}")
+                if usage.get("output_tokens") is not None:
+                    bits.append(f"out {usage['output_tokens']}")
+                if payload.get("num_turns") is not None:
+                    bits.append(f"{payload['num_turns']} turns")
+                # Agy reports SUCCESS in upper case; compared case-insensitively
+                # so a healthy run is not flagged as a warning.
+                status = str(payload.get("status") or "").upper()
+                events.append({"icon": "✅" if status in ("", "SUCCESS", "OK") else "⚠",
+                               "text": "Result: " + (" · ".join(bits) or status or "done")})
 
     return events[-max_events:]
 

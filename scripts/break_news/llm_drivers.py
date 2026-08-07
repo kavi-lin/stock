@@ -82,12 +82,22 @@ def parse_stream_log_usage(log_path: str) -> dict:
     """Scan a provider JSONL protocol log and return terminal token usage.
 
     Claude reports a ``result`` envelope; Codex reports ``turn.completed`` with
-    ``cached_input_tokens``. Returns {} when neither terminal event is present.
+    ``cached_input_tokens``; Agy reports ``{"event": "result", "result": {...}}``
+    — payload nested under a key named after the event, not at the top level.
+    Returns {} when no terminal event is present.
+
+    The Agy branch arrived in V4.109.1. Until the quota broker started assigning
+    providers, the protocol always ran on the configured chain default (claude),
+    so this path had never executed once — and the first governed run the broker
+    routed to Agy settled with zero tokens. That same nesting caught the broker
+    out in its own Agy adapter during its Phase 5 live testing; the shape here is
+    taken from the fixture that fix produced.
 
     Used by the dashboard protocol runner (sector / news / invest) to attribute
     per-run tokens to the model that produced them."""
     last_result = None
     last_codex_usage = None
+    last_agy_usage = None
     try:
         with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
@@ -98,12 +108,19 @@ def parse_stream_log_usage(log_path: str) -> dict:
                     ev = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-                if isinstance(ev, dict) and ev.get("type") == "result":
+                if not isinstance(ev, dict):
+                    continue
+                if ev.get("type") == "result":
                     last_result = ev
-                elif isinstance(ev, dict) and ev.get("type") == "turn.completed":
+                elif ev.get("type") == "turn.completed":
                     usage = ev.get("usage")
                     if isinstance(usage, dict):
                         last_codex_usage = usage
+                elif ev.get("event") == "result":
+                    payload = ev.get("result")
+                    usage = payload.get("usage") if isinstance(payload, dict) else None
+                    if isinstance(usage, dict):
+                        last_agy_usage = usage
     except OSError:
         return {}
     if last_result:
@@ -113,6 +130,16 @@ def parse_stream_log_usage(log_path: str) -> dict:
             "input_tokens": int(last_codex_usage.get("input_tokens", 0) or 0),
             "output_tokens": int(last_codex_usage.get("output_tokens", 0) or 0),
             "cache_read_tokens": int(last_codex_usage.get("cached_input_tokens", 0) or 0),
+            "cache_write_tokens": 0,
+            "cost_usd": 0.0,
+        }
+    if last_agy_usage:
+        # `thinking_tokens` is a subset of Agy's output count, so it is not added
+        # in — the broker's TokenUsage keeps the two apart for the same reason.
+        return {
+            "input_tokens": int(last_agy_usage.get("input_tokens", 0) or 0),
+            "output_tokens": int(last_agy_usage.get("output_tokens", 0) or 0),
+            "cache_read_tokens": int(last_agy_usage.get("cache_read_tokens", 0) or 0),
             "cache_write_tokens": 0,
             "cost_usd": 0.0,
         }

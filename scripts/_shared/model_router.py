@@ -636,6 +636,26 @@ def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
         # months of quietly ungoverned spending.
         sys.stderr.write(f"[broker] {role}: request rejected ({exc}); not running\n")
         return None, "broker:rejected", False
+
+    # Open the execution row *before* the call rather than letting `complete()`
+    # do it on the way out. The client opens one either way, so skipping this
+    # does not lose the settlement — it loses the duration: `started_at` lands
+    # microseconds before `finished_at`, and `execution_stats` derives
+    # `p50_duration_seconds` from exactly that difference. Every governed call
+    # was reporting itself as instantaneous, which pins the broker's latency
+    # score at its maximum for whoever it is scoring and leaves the component
+    # unable to tell a fast provider from a slow one. Found in the Phase 7 live
+    # smoke test: runs dispatched through `/v1/run` recorded 6-10s while these
+    # recorded 0.003-0.010s.
+    #
+    # `start()` also records the model, and it is the only request that carries
+    # it — so it must be the model that will actually run, which is the broker's
+    # assigned provider, not the one we asked for.
+    try:
+        lease.start(model=broker_gate.MODEL_FOR_PROVIDER.get(lease.provider, model))
+    except BrokerError as exc:
+        # The hold is real and the call may proceed; only the timing is lost.
+        sys.stderr.write(f"[broker] {role}: could not open the execution row ({exc})\n")
     return lease, f"broker:{lease.provider}", True
 
 

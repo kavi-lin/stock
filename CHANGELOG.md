@@ -8,6 +8,49 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.109.1] — 2026-08-08 — protocol run 對 Agy 回報零 token；納管自己造成的回歸
+
+V4.109.0 的 live smoke 抓出來的。**這個 bug 是納管本身造成的**,而且只有實機跑
+才看得到。
+
+### Fixed
+- **`_protocol_command` 的四個分支裡只有 gemini 沒要求結構化輸出**。claude 有
+  `--output-format stream-json --verbose`、codex 有 `--json`、grok 有
+  `--output-format streaming-json`,gemini 只有 `--print`。於是 protocol log 是純
+  散文,`parse_stream_log_usage` 讀不到任何東西,**每一筆 Agy 上的 protocol run
+  都以零 token 結算**。
+  納管前這條路永遠走 `model_chain` 的預設(claude),所以從未暴露;V4.109.0 之後
+  broker 依實際餘額指派,Agy 常常是 rank 1,於是這條沒人走過的路變成了主要路徑。
+  首次納管的 triage run 實測正是如此:102.4 秒、rc=0、token 全零。
+- **`parse_stream_log_usage` 不認 Agy 的形狀**。Agy 把 payload **巢狀在與事件同名
+  的鍵底下**(`{"event":"result","result":{...,"usage":{...}}}`),而既有實作只認
+  claude 的 `{"type":"result"}` 與 codex 的 `{"type":"turn.completed"}`。
+  這與 llm-quota-broker 自己 Phase 5 在它的 Agy adapter 上踩到的是**同一個坑**;
+  本檔的形狀直接取自那次修正留下的 fixture。`thinking_tokens` 是 output 的子集,
+  不另外加總。
+- **`_parse_events` 同樣只認 `type` 不認 `event`**,所以 Agy 的 stream-json 每一行
+  都會被靜靜跳過,protocol 面板只剩 `===` 標頭。不補這一段的話,log 從人類可讀的
+  散文變成 UI 讀不懂的 JSONL,對盯著 log 的人反而是退步。`status` 以大小寫不敏感
+  比對——Agy 回的是大寫 `SUCCESS`,直接比對小寫會把健康的 run 標成警告。
+- **`lease.start()` 從來沒被呼叫**。client 的 `complete()` 會代為補開 execution
+  row,所以結算沒掉——掉的是**執行時間**:`started_at` 落在 `finished_at` 前幾微秒,
+  而 broker 的 `p50_duration_seconds` 正是兩者相減,再餵給
+  `latency_score(p50) = 1/(1 + p50/60)`。實測:走 broker `/v1/run` 的執行記錄
+  6.79 / 8.20 / 9.91 秒,走本 repo 的記錄 0.003–0.010 秒。latency 評分對所有受治理
+  流量等於失效。修在 `_acquire()` 回傳前——三條路徑(`governed_call` /
+  `run_with_fallback` / `acquire_protocol_lease`)都經過它,一處涵蓋。
+  `start(model=...)` 傳的是 `MODEL_FOR_PROVIDER.get(lease.provider, model)` 而非
+  原本要求的 model:broker 可能指派別家,而 `start` 是唯一帶 model 的請求,記錯就
+  永遠錯了。修後 protocol run 記錄 102.4 秒。
+
+### Why
+- 這一輪的教訓是**納管會改變流量的走向,而沒人走過的那條路沒有被驗證過**。
+  V4.109.0 把「用哪一家」從設定檔交給 broker,等於把三條備援路徑升格為主要路徑,
+  而它們從未跑過真實負載。離線測試看不到這件事:它們不會去比較四個分支的旗標是否
+  一致。
+- `start()` 失敗只寫 log 不擋:預約是真的、呼叫可以照跑,掉的只有這一次的計時,
+  為此擋下一個已經核准的呼叫不划算。
+
 ## [4.109.0] — 2026-08-08 — LLM Quota Broker 接管額度：本地預算降為 fallback
 
 ### Added
