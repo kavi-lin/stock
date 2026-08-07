@@ -271,6 +271,140 @@ def test_derivation_domain_reconverges() -> None:
           "L5 shadow 形態：provenance 推導為 llm、外來 shadow_score 保留")
 
 
+def test_sentiment_det_mapping() -> None:
+    """L5（V4.91.0）—— `sentiment_det` block → 契約 sentiment slot。"""
+    print("[producer — sentiment_det 映射（L5）]")
+    base = {"lane_scores": {"fundamentals": 4, "sentiment": 3, "news": 3, "technical": 4},
+            "valuation_pack": {"score": 1.0, "weighted_fair_value": 120.0,
+                               "vs_current_pct": 20.0}}
+    det = {"score": -0.04, "shadow_only": True,
+           "producer_version": "sentiment_score.py v1.0 (L5 / V4.91.0)",
+           "input_hash": "sha256:706d0ea085ece11c008a9dcf7ecc8975"}
+
+    t = {**copy.deepcopy(base), "sentiment_det": copy.deepcopy(det)}
+    apply_to_trade(t)
+    s = t["lane_contract"]["lanes"]["sentiment"]
+    check(s["shadow_score"] == -0.04, "det 分數落進契約的 shadow_score", json.dumps(s))
+    check(t["lane_scores"]["sentiment"] == 3,
+          "LLM lane 分數不被覆寫（shadow-only 的字面意思）")
+    check(s["provenance"] == "llm" and s["llm_invoked"] is True,
+          "shadow 期 provenance 仍是 llm —— 翻預設是改 producer，不是某個 session 的事")
+    # 這條是 L5 最容易寫錯的一格：det script 的版號**不得**寫進契約的 producer_version。
+    # 那一欄回答「這條 lane 是誰產的」，shadow 期的答案是 LLM；填 det 版號 = 對 Phase 6
+    # 宣稱這筆已經是 script 產的，分層會把它歸錯池。
+    check(s["producer_version"].startswith("protocol:"),
+          "producer_version 記 LLM（不是 det script 的版號）", s["producer_version"])
+    check(s["input_hash"] is None,
+          "input_hash 留 null —— 它描述 lane 的輸入，det 的 hash 在 sentiment_det 裡")
+
+    # 缺 block / block 壞掉 → 契約照常產出，shadow_score 留 null（不擋、不猜）
+    t = copy.deepcopy(base)
+    apply_to_trade(t)
+    check(t["lane_contract"]["lanes"]["sentiment"]["shadow_score"] is None,
+          "無 sentiment_det → shadow_score 留 null")
+    t = {**copy.deepcopy(base), "sentiment_det": "oops"}
+    apply_to_trade(t)
+    check(t["lane_contract"]["lanes"]["sentiment"]["shadow_score"] is None,
+          "sentiment_det 非 dict → 忽略，不炸也不猜")
+
+    # det 分數為 None（市場層缺）→ 契約 shadow_score 仍是 null，不填 0
+    t = {**copy.deepcopy(base),
+         "sentiment_det": {**det, "score": None, "degraded_reason": "market_composite_unavailable"}}
+    apply_to_trade(t)
+    check(t["lane_contract"]["lanes"]["sentiment"]["shadow_score"] is None,
+          "det degraded（score=None）→ 契約不以 0 頂替")
+
+    # ── 4.95.1 —— 契約那格是 block 的投影，不是獨立聲明 ──────────────────────
+    # 原本只在 `shadow_score is None` 時映，於是 det 重算後契約永遠停在第一次的值。
+    # 後果不是「少更新一格」：stale 值會被 shadow_report 當成翻預設判準的樣本，而
+    # validator §5j 開的藥方（「重跑 apply_det_shadow.py」）根本修不掉它 —— 與 4.90.4
+    # 的 absent 死結同一個形狀（保留了本該重算的推導域）。
+    t = {**copy.deepcopy(base), "sentiment_det": copy.deepcopy(det)}
+    apply_to_trade(t)
+    t["sentiment_det"]["score"] = 1.25
+    apply_to_trade(t)
+    check(t["lane_contract"]["lanes"]["sentiment"]["shadow_score"] == 1.25,
+          "det 重算後重跑 apply → 契約同步（不停在舊值）",
+          json.dumps(t["lane_contract"]["lanes"]["sentiment"]))
+
+    # 變回 None 也要同步 —— 同 valuation「包含變回 None 的情形」的規則
+    t["sentiment_det"] = {**det, "score": None,
+                          "degraded_reason": "market_composite_unavailable"}
+    apply_to_trade(t)
+    check(t["lane_contract"]["lanes"]["sentiment"]["shadow_score"] is None,
+          "det 由有值變回 None → 契約跟著清空（不留孤兒分數）")
+
+    # block 缺席才保留既有值：沒有來源可鏡射時，保留是唯一不丟資料的選擇
+    t = {**copy.deepcopy(base), "sentiment_det": copy.deepcopy(det)}
+    apply_to_trade(t)
+    del t["sentiment_det"]
+    apply_to_trade(t)
+    check(t["lane_contract"]["lanes"]["sentiment"]["shadow_score"] == -0.04,
+          "block 缺席 → 保留既有 shadow_score（無來源可鏡射，不得歸零）")
+
+
+def test_sentiment_direction_band() -> None:
+    """L5 翻預設判準的另一半（4.95.1）—— `shadow_report._direction` 的中性帶。
+
+    翻轉率是「det 與 LLM 方向不一致的比例」，所以中性帶決定分子。它和 STOCK_CLAMP
+    一樣是 protocol 沒寫、由實作定死的規格，因此同級待遇：具名常數 + 測試釘住。
+    留成 magic number 的話，改動它會靜默改變已累積樣本的意義。
+    """
+    print("[L5 — 方向帶（翻預設判準的分子）]")
+    from shadow_report import SENTIMENT_NEUTRAL_BAND, _direction  # noqa: E402
+
+    b = SENTIMENT_NEUTRAL_BAND
+    check(_direction(b) == "NEUTRAL" and _direction(-b) == "NEUTRAL",
+          f"|score| 恰 {b} 仍是 NEUTRAL（邊界含）")
+    check(_direction(b + 0.01) == "POS" and _direction(-b - 0.01) == "NEG",
+          "越過帶寬才算有方向")
+    check(_direction(0) == "NEUTRAL", "0 → NEUTRAL")
+    check(_direction(None) is None and _direction("1.0") is None,
+          "非數值 → None（不參與樣本，也不當 0）")
+    # bool 是 int 的子類：True 若漏過，會安靜地變成一筆 POS 樣本進翻轉率分母
+    check(_direction(True) is None and _direction(False) is None,
+          "bool 不是分數 → None", f"{_direction(True)} / {_direction(False)}")
+    # NaN 的兩個帶寬比較都回 False → 舊版判成假 NEUTRAL 進樣本（4.95.3）
+    check(_direction(float("nan")) is None and _direction(float("inf")) is None,
+          "NaN/inf 不是分數 → None（不是假 NEUTRAL）",
+          f"{_direction(float('nan'))} / {_direction(float('inf'))}")
+
+
+def test_sentiment_flip_semantics() -> None:
+    """4.95.3 —— 翻轉分子只數 POS↔NEG 對翻；NEUTRAL↔方向性另計 band_mismatch。
+
+    LLM lane score 是整數（±1 起跳，除 0 外必落在 0.5 帶外），det 是連續值——
+    「LLM +1 vs det +0.45」這種溫和同向若也算翻轉，溫和情緒個股會單靠帶寬把
+    翻轉率頂在 20% 門檻上方：判準量到的是帶寬，不是「該不該偏多」有沒有翻。
+    """
+    print("[L5 — flip 語意（對翻 vs 帶寬不一致分開計）]")
+    from shadow_report import section_sentiment_det  # noqa: E402
+
+    def entry(llm, det):
+        return {"date": "2026-08-03", "trades_this_session": [{
+            "ticker": "T",
+            "lane_scores": {"sentiment": llm},
+            "lane_contract": {"lanes": {"sentiment": {"shadow_score": det}}},
+        }]}
+
+    sec = section_sentiment_det([
+        entry(1, 0.45),           # 溫和同向（det 落中性帶）→ band_mismatch，非 flip
+        entry(1, -1.2),           # 真對翻 → flip
+        entry(-2, -0.8),          # 同向皆出帶 → 乾淨
+        entry(0, 0.2),            # 兩邊都 NEUTRAL → 乾淨
+        entry(1, float("nan")),   # NaN → 整筆排除，不進分母
+    ])
+    check(sec["n"] == 4, "NaN 樣本排除於分母", str(sec["n"]))
+    check(sec["direction_flips"] == 1, "只有 POS↔NEG 對翻算 flip",
+          str(sec["direction_flips"]))
+    check(sec["band_mismatches"] == 1, "NEUTRAL↔方向性 → band_mismatch 另計",
+          str(sec["band_mismatches"]))
+    rows = {(r["llm"], r["det"]): r for r in sec["rows"]}
+    mild = rows[(1, 0.45)]
+    check(mild["flip"] is False and mild["band_mismatch"] is True,
+          "「LLM +1 vs det +0.45」不再記成翻轉", str(mild))
+
+
 def test_absorb_never_diverges() -> None:
     """保留規則 × 吸收閘的邊界（4.90.1 回歸）。
 
@@ -468,6 +602,9 @@ def main() -> int:
     test_producer_idempotent()
     test_producer_version_gate()
     test_derivation_domain_reconverges()
+    test_sentiment_det_mapping()
+    test_sentiment_direction_band()
+    test_sentiment_flip_semantics()
     test_absorb_never_diverges()
     test_absorb()
     test_validator(extract_full_example())

@@ -14,6 +14,7 @@ Usage:
 """
 import argparse
 import json
+import math
 import os
 import sys
 from datetime import datetime, timezone
@@ -237,7 +238,10 @@ def _fetch_ticker_signals(ticker: str) -> dict:
     try:
         info = yf.Ticker(ticker).info or {}
         sp = info.get("shortPercentOfFloat")
-        if sp is not None:
+        # yfinance 偶發回 NaN；`float(nan)` 原樣放行，落進 cache 後所有比較都回
+        # False，下游 sentiment_score 會把它讀成假極端值。非有限值一律當缺席。
+        if sp is not None and isinstance(sp, (int, float)) \
+                and not isinstance(sp, bool) and math.isfinite(sp):
             out["short_pct_float"] = round(float(sp) * 100, 2)  # 0.012 → 1.2%
             out["short_pct_float_source"] = "yfinance.info (FINRA bi-monthly)"
     except Exception as e:

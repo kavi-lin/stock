@@ -435,8 +435,8 @@ def build_lane_contract(trade: dict, *, val_det: float | None = None,
     **保留域（外來 producer 的聲明，post-processor 不得動）**
       - `provenance` ∈ EXTERNAL_PROVENANCE（deterministic / hybrid）——L5 sentiment det、
         L4b reviewer gate、L8 RT skip 在自己的 phase 寫入
-      - `producer_version` / `input_hash` / 非 valuation 的 `shadow_score`（L5 shadow 期
-        det 值就寫在這，provenance 仍是 llm）
+      - `producer_version` / `input_hash` / `shadow_score`（**沒有對應 det block 時**——
+        沒有來源可鏡射，保留是唯一不丟資料的選擇）
 
     **推導域（post-processor 自己的輸出，每次重算贏）**
       - `provenance` 的 `llm` / `absent` 兩個值 —— 預設行為與「從訊號推出缺席」都是
@@ -446,6 +446,9 @@ def build_lane_contract(trade: dict, *, val_det: float | None = None,
       - `llm_invoked` —— 定義上就是 provenance 的投影，獨立保留只會保住 corrupt 值
       - `valuation.shadow_score` —— 與 `det_shadow.valuation_score_det` 同一次計算
         （P2，4.90.1）；無條件同步 `val_det`，包含變回 None 的情形
+      - `sentiment.shadow_score`（**`sentiment_det` block 在場時**，4.95.1）—— 那一格是
+        block 的投影，不是獨立聲明：PM 寫的是 block，契約由本函式映。保留投影 = 重蹈
+        4.90.4：det 重算後契約永遠停在舊值，而 validator §5j 叫人「重跑 apply」修不掉
 
     `missing_lanes` 取自 `compute_polarization()` 的同名輸出（單一事實來源，不另判斷
     「這個 lane 有沒有分數」）。
@@ -479,8 +482,25 @@ def build_lane_contract(trade: dict, *, val_det: float | None = None,
         if cur["producer_version"] is None and cur["provenance"] in LLM_PROVENANCE:
             cur["producer_version"] = f"protocol:{pv}"
 
-        # `input_hash` 今天恆為 null：factpack 的 content_hash 是 L9 的產出物，還不存在。
-        # 欄位先開，是為了 L5 的 det producer 有位置可寫，不必再改一次契約形狀。
+        # L5（V4.91.0）—— sentiment det producer 的輸出落進契約的保留域。
+        # PM 把 `sentiment_det` 當普通資料寫進 trade，由這裡映射，**PM 不手寫契約**
+        # （手寫 provenance 就是偽造）。shadow 期 provenance 維持 `llm`：det 分數只
+        # 進 shadow_score，翻預設是改 producer 的事，不是某個 session 能自行決定的。
+        # **只映 shadow_score**：shadow 期 lane 的權威產出者仍是 LLM，所以
+        # `producer_version` 必須留 `protocol:<VERSION>`（誰產的就寫誰）。把 det script
+        # 的版號寫進去會宣稱這條 lane 是 script 產的 —— 那正是 Phase 6 分層要讀的欄位。
+        # det 公式的版號與 input_hash 完整留在 `sentiment_det` block（隨 trade 持久化）。
+        # block 在場 → **無條件**鏡射（含 score 變回 None）。同 valuation 的「同 producer
+        # 的重算一律贏」：契約那格與 block 是同一次計算的兩個落點，任何分歧都只可能是
+        # 契約停在舊值。4.95.1 修：原本只在 `is None` 時映，於是 det 重算後永遠同步不了，
+        # 而 stale 值會被 shadow_report 當成翻預設判準的樣本（review 抓到）。
+        # 不消毒非數值：validator §15 對非 number|null 是 error，比這裡靜默吃掉更響亮。
+        if name == "sentiment":
+            sd = trade.get("sentiment_det")
+            if isinstance(sd, dict):
+                cur["shadow_score"] = sd.get("score")
+
+        # `input_hash` 對其餘 lane 恆為 null：factpack 的 content_hash 是 L9 的產出物。
         if name == "valuation":
             # 同 producer 的重算一律贏（見 docstring）：這欄與 det_shadow.valuation_score_det
             # 是同一次計算的兩個落點，任何分歧都會把 entry 卡死在 §15。
