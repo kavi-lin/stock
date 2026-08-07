@@ -1,0 +1,52 @@
+{
+  "_doc": "X KOL collector config. Exploration layer — output NEVER enters investment_protocol decisions (buy_threshold / position_size / verdict). Roster is curated by hand; no agent may auto-add accounts.",
+
+  "budget": {
+    "_doc": "Hard ceiling in USD. The collector refuses to issue a request once the projected worst-case spend would cross total_usd. Prices are X pay-per-use as of 2026-08; update both if X changes them.",
+    "total_usd": 10.0,
+    "price_per_post_read_usd": 0.005,
+    "price_per_user_read_usd": 0.010,
+    "reserve_usd": 0.25
+  },
+
+  "pacing": {
+    "_doc": "Single-threaded, fixed spacing. min_interval_sec is the floor between any two HTTP calls; a 429 backs off to backoff_sec and doubles up to backoff_max_sec. Measured 2026-08-06 on the free syndication endpoint: ~8 rapid requests triggered 429 with a ~183s cooldown, so the same queue-don't-burst discipline is applied here.",
+    "min_interval_sec": 2.0,
+    "backoff_sec": 60,
+    "backoff_max_sec": 900,
+    "timeout_sec": 20
+  },
+
+  "collect": {
+    "_doc": "max_results is a CEILING, not a promise — asking 10 returned 5 (observed 2026-08-06). Billing is per resource RETURNED, so raising it costs nothing when the account is quiet; it only widens the window that a single page can cover. 100 is the API maximum. max_pages_per_sweep bounds next_token pagination, which exists to stop a busy account's posts falling into a silent gap below the watermark. first_run_max caps the cold-start backfill (that one does NOT paginate — Serenity alone has 6,000+ posts of history).",
+    "max_results": 100,
+    "max_pages_per_sweep": 5,
+    "first_run_max": 5,
+    "shadow_log": "news/x_kol_logs/x_kol_events.jsonl"
+  },
+
+  "heat": {
+    "_doc": "Theme-heat weights, hand-calibrated like the rest of the exploration layer — no agent may auto-tune them. primary vs secondary: validated 2026-08-06 on real data — in a joke about how to pronounce $AAOI, the props $TSM/$AMD tracked the market (+4.8%/+1.4% 5d) while the subject $AAOI ran +45.8%. So position matters, but secondary mentions are NOT noise ($SIVE surfaced only as a secondary and was the actual supply-chain link), hence a reduced weight rather than zero.",
+    "half_life_days": 3.0,
+    "primary_weight": 1.0,
+    "secondary_weight": 0.4,
+    "surface_min_score": 0.3,
+    "candidates_path": "news/x_kol_logs/x_kol_candidates.json",
+    "heat_path": "news/x_kol_logs/x_kol_heat.json"
+  },
+
+  "roster": [
+    {
+      "handle": "aleabitoreddit",
+      "label": "Serenity",
+      "enabled": true,
+      "note": "AI/semi supply-chain. High cashtag density. Free syndication endpoint returns only 2 stale posts for this account (verified 2026-08-06), which is why the paid API path exists at all. Attention signal, NOT an endorsement — see the manipulation caveat in the proposal."
+    },
+    {
+      "handle": "REPLACE_ME",
+      "label": "example — copy this block per account",
+      "enabled": false,
+      "note": "Pick accounts that actually type $TICKER. Verified 2026-08-06: corporate accounts (e.g. @nvidia) produced 0 cashtags across 20 posts, retail-analyst accounts produced many. Zero-cashtag accounts add cost and no signal."
+    }
+  ]
+}

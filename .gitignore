@@ -101,3 +101,12 @@ reports/2026-05-23_NOK_image_review.md
 # launchd pre-market job: secrets + logs (do not commit)
 scripts/premarket/premarket_cron.env
 logs/premarket_cron/
+
+# X KOL collector runtime state (regenerable) + raw observation log.
+# config/x_kol.json (roster + budget) IS tracked; these are per-machine runtime.
+config/x_kol_state.json
+config/x_kol_handles.json
+config/x_kol_usage.json*
+news/x_kol_logs/
+config/x_kol_analysis_cursor.json
+config/x_kol_symbol_identity.json

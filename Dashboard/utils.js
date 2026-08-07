@@ -18,6 +18,7 @@
     { id: 'break-news',href: 'break-news.html',icon: 'radio',            i18n: 'nav_break_news',zh: '突發辯論',   group: 'market' },
     { id: 'mood',      href: 'mood.html',      icon: 'gauge',            i18n: 'nav_mood',      zh: '市場氛圍',   group: 'market' },
     { id: 'intraday-eval', href: 'intraday-eval.html', icon: 'crosshair', i18n: 'nav_intraday_eval', zh: '盤中', group: 'market' },
+    { id: 'x-kol',     href: 'x-kol.html',     icon: 'megaphone',        i18n: 'nav_x_kol',     zh: 'X KOL',      group: 'market' },
 
     { id: 'momentum',  href: 'momentum.html',  icon: 'trending-up',      i18n: 'nav_momentum',  zh: '動能選股',   group: 'stock' },
     { id: 'radar',     href: 'radar.html',     icon: 'radar',            i18n: 'nav_radar',     zh: '短期雷達',   group: 'stock' },

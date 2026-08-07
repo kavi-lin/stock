@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script>!function(){var t=localStorage.getItem('dash_theme')||'dark';document.documentElement.setAttribute('data-theme',t);'dark'===t?document.documentElement.classList.add('dark'):document.documentElement.classList.remove('dark')}();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X KOL 族群熱度 | AI 投資委員會</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      .xk-bar { display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+        padding:10px 14px; border-radius:10px; background:var(--bg-card);
+        border:1px solid rgba(161,161,170,0.18); margin-bottom:16px; font-size:11px; }
+      .xk-metric { color:var(--text-muted); }
+      .xk-metric strong { color:var(--text-main); font-weight:700; font-family:'JetBrains Mono',monospace; }
+      .xk-cluster { background:var(--bg-card); border:1px solid rgba(161,161,170,0.18);
+        border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+      .xk-cluster-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+        margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(161,161,170,0.12); }
+      .xk-lead { font-family:'JetBrains Mono',monospace; font-weight:800; font-size:14px; color:#60a5fa; }
+      .xk-score { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted); }
+      table.xk-tbl { width:100%; border-collapse:collapse; font-size:11px; }
+      table.xk-tbl th { text-align:right; font-weight:600; color:var(--text-muted);
+        padding:4px 8px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+      table.xk-tbl th:first-child, table.xk-tbl td:first-child { text-align:left; }
+      table.xk-tbl td { text-align:right; padding:5px 8px; border-top:1px solid rgba(161,161,170,0.08);
+        font-family:'JetBrains Mono',monospace; }
+      .xk-tkr { font-weight:800; cursor:pointer; }
+      .xk-tkr:hover { color:#60a5fa; text-decoration:underline; }
+      .pos { color:#22c55e; } .neg { color:#ef4444; } .dim { color:var(--text-muted); }
+      .xk-state { font-family:'Inter',sans-serif; font-size:10px; padding:2px 7px;
+        border-radius:999px; font-weight:700; }
+      .st-pending  { background:rgba(161,161,170,0.14); color:var(--text-muted); }
+      .st-promoted { background:rgba(34,197,94,0.14);  color:#22c55e; }
+      .st-rejected { background:rgba(239,68,68,0.12);  color:#ef4444; }
+      .st-analyzed { background:rgba(59,130,246,0.14); color:#60a5fa; }
+      .xk-btn { font-family:'Inter',sans-serif; font-size:10px; font-weight:700;
+        padding:3px 9px; border-radius:6px; cursor:pointer; border:1px solid transparent;
+        background:rgba(161,161,170,0.12); color:var(--text-main); transition:all .15s; }
+      .xk-btn:hover { transform:translateY(-1px); }
+      .xk-btn.go   { background:rgba(34,197,94,0.14);  color:#22c55e; border-color:rgba(34,197,94,0.35); }
+      .xk-btn.no   { background:rgba(239,68,68,0.10);  color:#ef4444; border-color:rgba(239,68,68,0.30); }
+      .xk-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+      .xk-warn { background:rgba(234,179,8,0.08); border:1px solid rgba(234,179,8,0.30);
+        border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:11px; }
+      .xk-warn h4 { color:#eab308; font-weight:800; font-size:11px; margin-bottom:6px; }
+      .xk-block { background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.25);
+        border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:11px; }
+      .xk-block h4 { color:#ef4444; font-weight:800; font-size:11px; margin-bottom:6px; }
+      .xk-post { border-top:1px solid rgba(161,161,170,0.10); padding:9px 2px; font-size:11px; }
+      .xk-post-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+        font-size:10px; color:var(--text-muted); margin-bottom:3px; font-family:'JetBrains Mono',monospace; }
+      .xk-post-text { color:var(--text-main); line-height:1.55; white-space:pre-wrap; }
+      .xk-chip { font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700;
+        padding:1px 5px; border-radius:4px; background:rgba(59,130,246,0.12); color:#60a5fa; }
+      .xk-note { font-size:10px; color:var(--text-muted); line-height:1.6; }
+    </style>
+</head>
+<body class="flex min-h-screen transition-all" data-page="x-kol">
+
+    <aside id="sidebar" class="w-64 border-r border-zinc-200 dark:border-zinc-900 flex flex-col fixed h-full transition-all"></aside>
+
+    <main class="flex-1 ml-64 p-6 max-w-[1400px]">
+      <div class="flex items-baseline gap-3 mb-1 flex-wrap">
+        <h1 class="text-xl font-black tracking-tight">X KOL 族群熱度</h1>
+        <span class="text-[10px] text-zinc-500" id="xk-updated">載入中…</span>
+        <button class="xk-btn ml-auto" onclick="XK.load(true)">
+          <i data-lucide="refresh-cw" class="w-3 h-3 inline"></i> 重新整理
+        </button>
+      </div>
+      <p class="xk-note mb-4" style="max-width:78ch">
+        探索層溫度計 — 量的是「哪個族群現在有注意力」,<strong>不是進場訊號</strong>。
+        貼文對個股多半同步或落後(例:AAOI 在 8/03 已 +22.73%,相關貼文 8/06 才出現)。
+        可用的是族群持續性。送分析與否<strong>永遠由你決定</strong>,本頁不會自動觸發任何分析。
+      </p>
+
+      <div class="xk-bar" id="xk-bar"></div>
+      <div id="xk-alerts"></div>
+      <div id="xk-clusters"></div>
+
+      <h2 class="text-sm font-black mt-6 mb-2">貼文原文</h2>
+      <div class="xk-note mb-2" id="xk-filter-note"></div>
+      <div id="xk-posts" class="mb-10"></div>
+    </main>
+
+    <script src="i18n.js"></script>
+    <script src="utils.js"></script>
+    <script>
+    const XK = {
+      data: null,
+      filter: null,
+
+      async load(force) {
+        try {
+          const r = await fetch('/api/x-kol/heat?prices=1' + (force ? '&_=' + Date.now() : ''),
+                                { cache: 'no-store' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          XK.data = await r.json();
+          XK.render();
+          // Price enrichment runs in the background on the server (it shares the
+          // FMP window with the heatmap fan-out), so poll once more for it.
+          if (XK.data.prices_pending && !XK._repoll) {
+            XK._repoll = true;
+            setTimeout(() => { XK._repoll = false; XK.load(); }, 6000);
+          }
+        } catch (e) {
+          if (UI.isFetchCancellation(e)) return;
+          document.getElementById('xk-clusters').innerHTML =
+            `<div class="xk-block"><h4>讀取失敗</h4>${UI.escapeHTML(e.message)}</div>`;
+        }
+      },
+
+      pct(v) {
+        if (v === null || v === undefined) return '<span class="dim">-</span>';
+        const cls = v > 0 ? 'pos' : (v < 0 ? 'neg' : 'dim');
+        return `<span class="${cls}">${v > 0 ? '+' : ''}${v}%</span>`;
+      },
+
+      render() {
+        const d = XK.data, heat = d.heat;
+        document.getElementById('xk-updated').textContent =
+          `更新 ${(heat.generated_at || '').replace('T', ' ').slice(0, 16)}`;
+
+        document.getElementById('xk-bar').innerHTML = `
+          <span class="xk-metric">貼文 <strong>${heat.posts_scanned}</strong></span>
+          <span class="xk-metric">代號 <strong>${heat.tickers.length}</strong></span>
+          <span class="xk-metric">族群 <strong>${heat.themes.length}</strong></span>
+          <span class="xk-metric">追蹤 <strong>${d.roster.map(r => '@' + r.handle).join(' ')}</strong></span>
+          ${d.prices_pending ? '<span class="xk-metric dim">價格載入中…</span>' : ''}
+          <span class="xk-metric ml-auto">API 花費
+            <strong>$${d.budget.spent_usd.toFixed(4)}</strong> / $${d.budget.total_usd.toFixed(2)}
+            <span class="dim">(${d.budget.post_reads} 則)</span></span>`;
+
+        // ── warnings ──
+        let alerts = '';
+        const flags = heat.identity_flags || {};
+        if (Object.keys(flags).length) {
+          alerts += `<div class="xk-warn"><h4>⚠ 裸代號可能不是貼文講的公司</h4>` +
+            Object.entries(flags).map(([s, i]) =>
+              `<div style="margin-bottom:3px"><span class="xk-chip">$${s}</span>
+               → ${UI.escapeHTML(i.resolves_to || '?')}
+               <span class="dim">— ${UI.escapeHTML(i.note || '')}</span></div>`).join('') +
+            `<div class="dim" style="margin-top:5px">送分析前先確認身分 — 用錯代號跑出來的報告,看起來跟正確的一樣有自信。</div></div>`;
+        }
+        const blocked = heat.unanalyzable || {};
+        if (Object.keys(blocked).length) {
+          alerts += `<div class="xk-block"><h4>✗ 無法送分析 — protocol 拿不到數字</h4>` +
+            Object.entries(blocked).map(([s, r]) =>
+              `<div><span class="xk-chip">$${s}</span> <span class="dim">${UI.escapeHTML(r)}</span></div>`).join('') +
+            `<div class="dim" style="margin-top:5px">這些仍計入族群熱度 — 它們是族群的證據,只是不能成為部位。</div></div>`;
+        }
+        document.getElementById('xk-alerts').innerHTML = alerts;
+
+        // ── clusters ──
+        const hasPrices = Object.keys(heat.prices || {}).length > 0;
+        document.getElementById('xk-clusters').innerHTML = heat.themes.map(theme => {
+          const rows = theme.members.map(sym => {
+            const s = heat.tickers.find(t => t.ticker === sym) || {};
+            const p = (heat.prices || {})[sym];
+            const state = (d.candidates[sym] || {}).decision || 'pending';
+            const isBlocked = !!(heat.unanalyzable || {})[sym];
+            return `<tr>
+              <td><span class="xk-tkr" onclick="XK.setFilter('${sym}')">$${sym}</span>
+                  ${isBlocked ? '<span class="dim" title="無法送分析">✗</span>' : ''}</td>
+              <td>${s.score?.toFixed(2) ?? '-'}</td>
+              <td class="dim">${s.mentions ?? 0}/${s.primary_mentions ?? 0}</td>
+              ${hasPrices ? `<td>${XK.pct(p?.d5)}</td><td>${XK.pct(p?.d21)}</td><td>${XK.pct(p?.ytd)}</td>` : ''}
+              <td><span class="xk-state st-${state}">${
+                {pending:'待決', promoted:'已送分析', rejected:'已剔除', analyzed:'已分析'}[state] || state}</span></td>
+              <td>
+                <button class="xk-btn go" ${state === 'promoted' ? 'disabled' : ''}
+                        onclick="XK.decide('${sym}','promoted')">送分析</button>
+                <button class="xk-btn no" ${state === 'rejected' ? 'disabled' : ''}
+                        onclick="XK.decide('${sym}','rejected')">剔除</button>
+              </td></tr>`;
+          }).join('');
+          return `<div class="xk-cluster">
+            <div class="xk-cluster-head">
+              <span class="xk-lead">$${theme.lead}</span>
+              <span class="xk-score">熱度 ${theme.score.toFixed(2)} · ${theme.size} 檔</span>
+              <span class="xk-score dim">${theme.members.map(m => '$' + m).join(' ')}</span>
+            </div>
+            <table class="xk-tbl"><thead><tr>
+              <th>代號</th><th>熱度</th><th>提及/主體</th>
+              ${hasPrices ? '<th>5日</th><th>1月</th><th>YTD</th>' : ''}
+              <th>狀態</th><th></th>
+            </tr></thead><tbody>${rows}</tbody></table>
+          </div>`;
+        }).join('') || '<div class="xk-note">尚無資料 — 先跑 <code>python3 scripts/x_kol/collect.py</code></div>';
+
+        XK.renderPosts();
+        UI.icons();
+      },
+
+      renderPosts() {
+        const posts = XK.data.posts || [];
+        const shown = XK.filter ? posts.filter(p => (p.cashtags || []).includes(XK.filter)) : posts;
+        document.getElementById('xk-filter-note').innerHTML = XK.filter
+          ? `只顯示提到 <span class="xk-chip">$${XK.filter}</span> 的貼文 ·
+             <span class="xk-tkr" onclick="XK.setFilter(null)">顯示全部</span>`
+          : `共 ${posts.length} 則 · 點上方代號可篩選`;
+        document.getElementById('xk-posts').innerHTML = shown.map(p => `
+          <div class="xk-post">
+            <div class="xk-post-meta">
+              <span>${(p.created_at || '').replace('T', ' ').slice(0, 16)}</span>
+              <span>@${UI.escapeHTML(p.handle || '')}</span>
+              ${(p.cashtags || []).map(c => `<span class="xk-chip">$${c}</span>`).join('')}
+              <span class="dim">曝光 ${(p.metrics?.impression ?? 0).toLocaleString()}</span>
+              <a href="${UI.escapeHTML(p.url || '#')}" target="_blank" rel="noopener"
+                 class="dim" style="text-decoration:underline">原文</a>
+            </div>
+            <div class="xk-post-text">${UI.escapeHTML(p.text || '')}</div>
+          </div>`).join('') || '<div class="xk-note">沒有符合的貼文</div>';
+      },
+
+      setFilter(sym) { XK.filter = sym; XK.renderPosts(); },
+
+      async decide(ticker, decision) {
+        try {
+          const r = await fetch('/api/x-kol/decide', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticker, decision }),
+          });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+          UI.showToast(`$${ticker} → ${decision === 'promoted' ? '已送分析佇列' : '已剔除'}`,
+                       decision === 'promoted' ? 'info' : 'warn', 3000);
+          await XK.load(true);
+        } catch (e) {
+          UI.showToast(`失敗: ${e.message}`, 'error', 6000);
+        }
+      },
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initTheme();
+      try { UI.renderSidebar('x-kol'); } catch (e) { console.warn('sidebar', e); }
+      UI.applyNavTranslations();
+      UI.icons();
+      XK.load();
+    });
+    </script>
+</body>
+</html>
