@@ -1780,6 +1780,9 @@ async function _pollPremarketChain() {
         case 'done':
           _setRow(key, '✅', `${isZh?'完成':'done'} · ${elapsed}`, 100);
           break;
+        case 'degraded':
+          _setRow(key, '⚠️', `${isZh?'降級完成，繼續':'degraded, continuing'} · ${elapsed}`, 100);
+          break;
         case 'error':
           _setRow(key, '❌', `${isZh?'錯誤':'error'}: ${(it.error || '').slice(0, 80)}`, 100);
           break;
@@ -1800,7 +1803,18 @@ async function _pollPremarketChain() {
         _setRow('verdict', '✅', isZh ? 'Dashboard 更新完成' : 'dashboard updated', 100);
         updateDashboard();
         document.getElementById('preflight-run-chain')?.removeAttribute('disabled');
-        UI.showToast(isZh ? '盤前檢查完成' : 'Pre-market check complete', 'success', 5000);
+        // A non-blocking phase-1 failure (news) no longer stops the chain, so
+        // 'done' can carry warnings. Say so instead of a clean success toast —
+        // the failed row already shows ❌ in the modal.
+        const warn = (s.warnings || []).join('; ');
+        if (warn) {
+          UI.showToast(
+            isZh ? `盤前檢查完成（部分降級）: ${warn.slice(0, 120)}`
+                 : `Pre-market check done (partial): ${warn.slice(0, 120)}`,
+            'warn', 8000);
+        } else {
+          UI.showToast(isZh ? '盤前檢查完成' : 'Pre-market check complete', 'success', 5000);
+        }
         // V2.17.6 — auto-dismiss preflight modal 4s after dashboard update so
         // user sees the ✅ result then UI returns to normal without requiring
         // manual ESC click.
@@ -1820,7 +1834,8 @@ async function _pollPremarketChain() {
 
 // V2.13.11 — _finalizeChain / _maybeStartPhase2 / _pollDailyUpdate /
 // _pollProtoForChain removed; chain terminal state now handled inline in
-// _pollPremarketChain when server reports `status: done|error`.
+// _pollPremarketChain when server reports `status: done|error`; individual
+// items may also finish as `degraded` without failing the chain.
 
 document.getElementById('preflight-run-chain')?.addEventListener('click', runPremarketChain);
 

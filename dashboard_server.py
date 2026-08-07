@@ -65,6 +65,12 @@ _HEATMAP_TICKER_RE       = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 # instead of re-firing ~500 calls every cycle (and flooding the log).
 HEATMAP_RATELIMIT_COOLDOWN = int(os.getenv("HEATMAP_RATELIMIT_COOLDOWN", "1800"))  # 30 min
 _heatmap_ratelimit_until = 0.0   # epoch; quote refresh skipped until this time
+# A 401 is not a transient per-symbol failure. Once one request proves the
+# credential is rejected, stop every heatmap FMP path for a long window. A
+# corrected environment requires a server restart anyway, so retrying 517 symbols
+# every poll only burns calls and floods stderr.
+HEATMAP_AUTH_COOLDOWN = int(os.getenv("HEATMAP_AUTH_COOLDOWN", "21600"))  # 6h
+_heatmap_breaker_reason = None  # None | "rate_limit" | "auth_<status>"
 # Optional soft sub-cap so the always-on dashboard server doesn't starve a
 # concurrent daily_update.sh run of the shared 250/min FMP budget. 0 = use the
 # pool's full DEFAULT_TARGET_RPM. The pool's cross-process window is the actual
@@ -148,16 +154,17 @@ _refresh_state = {
 }
 _state_lock = threading.Lock()
 
-# ── Reverse-call to Claude CLI (protocol runner) ─────────────────────────
-# Lets the Dashboard trigger a model CLI to execute a protocol (sector/news/invest).
+# ── Reverse-call to model CLI (protocol runner) ─────────────────────────
+# Lets the Dashboard trigger the configured primary model CLI to execute a
+# protocol (sector/news/invest). Provider selection happens once at launch.
 # Single-job lock: one protocol at a time to avoid runaway token burn.
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN") or "/Users/kavi/.local/bin/claude"
 AGY_BIN    = os.environ.get("AGY_BIN")    or "agy"
 CODEX_BIN  = os.environ.get("CODEX_BIN")  or "/usr/local/bin/codex"
+GROK_BIN   = os.environ.get("GROK_BIN")   or "/Users/kavi/.grok/bin/grok"
 
-# Multi-model governance — protocols route through the governor (claude first;
-# gemini/codex only as quota fallback). Soft-import so the server still boots
-# if the module is missing.
+# Multi-model governance. Soft-import so the server still boots if the module
+# is missing; that degraded path retains Claude as the safe legacy default.
 try:
     from scripts._shared import model_router as _mrouter
     MODEL_ROUTER_AVAILABLE = True
@@ -206,8 +213,15 @@ def _protocol_command(model, prompt, claude_model=None):
         return [AGY_BIN, "--print", prompt,
                 "--dangerously-skip-permissions"]
     if model == "codex":
-        return [CODEX_BIN, "exec", prompt, "--json", "-C", ROOT,
-                "--dangerously-bypass-approvals-and-sandbox", "--color", "never"]
+        return [CODEX_BIN, "exec", "--json", "-C", ROOT,
+                "--dangerously-bypass-approvals-and-sandbox", "--color", "never",
+                "--ephemeral", prompt]
+    if model == "grok":
+        grok_bin = GROK_BIN if os.path.exists(GROK_BIN) else "grok"
+        return [grok_bin, "--output-format", "streaming-json", "--cwd", ROOT,
+                "--always-approve", "--no-memory", prompt]
+    if model != "claude":
+        raise ValueError(f"unsupported protocol model: {model}")
     claude_bin = CLAUDE_BIN if os.path.exists(CLAUDE_BIN) else "claude"
     cmd = [claude_bin, "-p", prompt,
            "--output-format", "stream-json", "--verbose",
@@ -215,6 +229,35 @@ def _protocol_command(model, prompt, claude_model=None):
     if claude_model:
         cmd += ["--model", claude_model]
     return cmd
+
+
+def _select_protocol_model():
+    """Resolve the launch-time provider from the shared primary LLM config.
+
+    `pick_model()` preserves the UI's documented primary → secondary →
+    tertiary availability policy. Agentic protocols cannot safely replay after a
+    half-completed failure, so selection happens once before the subprocess starts.
+    """
+    if MODEL_ROUTER_AVAILABLE:
+        try:
+            return _mrouter.pick_model("agentic_protocol")
+        except Exception as e:
+            sys.stderr.write(f"[model_router] protocol selection failed: {e}\n")
+    return "claude"
+
+
+def _adapt_protocol_prompt(model, prompt):
+    """Add provider vocabulary guidance without changing protocol semantics."""
+    if model != "codex":
+        return prompt
+    return (
+        "Codex compatibility note: protocol docs use Claude tool names as abstract "
+        "operations. Map Read/Write/Edit/Grep/Bash/WebFetch/WebSearch to your "
+        "available filesystem, shell, and web tools. Map each Agent(...) requirement "
+        "to an isolated collaboration subagent; when the protocol requires parallel "
+        "fan-out, spawn all required agents together before waiting. Preserve every "
+        "validator and required-artifact gate exactly.\n\n" + prompt
+    )
 # Global default (25 min); news DIGEST normally finishes in 1-2 min, so give it
 # a tighter ceiling (12 min) — past runs that crossed 10 min have all been
 # pathological (e.g. Claude looping on a Bash-heredoc write that hits Stream
@@ -258,15 +301,28 @@ PROTOCOL_PROMPTS = {
               "視為 STALE 必須重跑 Phase 0–1，不要當成 FRESH 跳過。\n\n產業掃描",
     "news":   "非互動模式 + 硬規定（V2.2 script-first triage）：\n0. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json\n1. **必須執行** `python3 news/scripts/stage1_triage.py`（deterministic triage：block/dedup/credibility/score/snap/晉級 gate，寫 YYYY-MM-DD_triage.json + stdout 印 triage 表）。**禁止讀 raw.json 全文、禁止 LLM 手工 triage** — 只讀 script stdout + triage.json 的 `stage2_items`（≤5 則）與 `shallow_verdicts` top-25\n2. **必須 dispatch 4 個 Agent tool_use**（Bull_Analyst / Bear_Analyst / Sector_Analyst / Macro_Analyst），不得在 thinking block 裡自己幻想 4 視角\n3. **必須 Write news_logs/YYYY-MM-DD_digest.json**（timestamp 必須是今天日期）。`stage1_count` = triage.json `shallow_verdicts` 長度；shallow 取 top 10、snaps 照抄 triage.json 不重寫；validator 有 freshness gate + triage cross-check 會擋\n4. 晉級名單 = triage.json `stage2_items`（script 已依 gate + |shallow_score| 取前 5）**不要停下等使用者確認**\n5. 跑完 Phase 3 Arbiter + Phase 4 cache patch + validator + 產出 reports/YYYY-MM-DD_news_digest.md（Shallow Digest top 10 照抄 snaps）\n6. **禁止**：讀昨天 MD 當範本、跳過 Stage 1/2 直接寫 MD、單 model 編 4-view 辯論\n7. 一個 turn 跑完整條 pipeline，不要中途停下。\n8. **每筆 verdict（不論 shallow/deep）必須帶 `published` 欄位**（從 triage.json 對應 news_id 抄過來的 ISO timestamp）— UI 用此算「Xm/Xh ago」freshness；deep 5 + shallow 10 補 `headline_zh`。\n\n新聞分析 DIGEST",
     "invest": "SESSION CONFIG: RISK_TOLERANCE={risk_tolerance}\n非互動模式：照 protocol 規則直接執行，不要輸出「請確認」類摘要表停下來等候。Phase 0 cache 策略：< 3h 用現有、否則 L3 重跑。\n\n分析 {ticker}",
-    "flash":  "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 產出 reports MD 報告，不要中途停下等使用者回話。\n\n新聞分析 FLASH {ticker} 近期動態",
-    "flash_text": "非互動模式：一個 turn 跑完 Stage 2 Deep Debate + Arbiter + 雙重 artifact 寫入，不要中途停下等使用者回話。輸入是富途推播原文（中英混排），請：\n1. 先抽出事件主體（公司/標的/ticker，若有）\n2. WebFetch 補上下文（最近 24h 相關報導）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter\n4. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_news_flash.md` — 完整 Impact Card（review_status: pending）\n   (b) `news/news_logs/YYYY-MM-DD_digest.json` — 讀現有 file，append 一筆 verdict 到 `verdicts[]` 陣列（不要覆寫整個檔）。verdict 必須含：news_id (next available `nNNN`), depth: \"deep\", review_status: \"pending\", headline, headline_zh, source_label, news_type, bull_case, bear_case, sector_view, macro_view, verdict (BULLISH/BEARISH/BINARY/NEUTRAL), net_impact_score (數字), arbiter_reasoning, binary_risk (bool), within_48h (bool), affected_sectors (string list), tickers_mentioned (string list), date (YYYY-MM-DD), published (ISO timestamp — 用 WebFetch 取得的原始發布時間，UI 拿來算 freshness)。**這條是 Dashboard「待審核」tab 顯示卡片的唯一來源 — 沒寫等於沒分析過。**\n\n新聞分析 FLASH \"{headline}\"",
-    "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter 覆寫 + cache patch + MD 報告，不要中途停下。覆寫 verdict 時請保留原 `published` 欄位（若不存在，從對應 raw.json 補上）。\n\n新聞分析 審核 \"{headline}\"",
-    "link_digest": "非互動模式：一個 turn 跑完整條 link digest pipeline，不要中途停下等使用者回話。輸入是使用者提供的一條文章 URL：{url}\n依照 `news/link_digest_protocol.md` 規範執行：\n1. WebFetch({url}) 讀完整文章（headline / publisher / 發布時間 ISO / 主體）\n2. WebSearch 找 3-5 則相關報導並 WebFetch 前 3-5 篇讀全文（交叉佐證 + 找上下游/客戶/競品/產業/總經）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter（net_impact_score -5~+5、verdict BULLISH/BEARISH/BINARY/NEUTRAL、arbiter_reasoning ≥150 字、debate_note 一行）\n4. 抽 entities（tickers/sectors/themes/tech_keywords）+ supply-chain relations（ticker↔ticker：SUPPLIES_TO/CUSTOMER_OF/CONTRACT_MFG_FOR/CO_DEVELOPS_WITH/COMPETES_WITH，格式 subject/object 用 \"ticker:NVDA\"；ticker→theme：BENEFITS_FROM/HEADWIND_FROM，object 用 \"theme:hbm\"），每條 relation 標 corroborating_sources（**≥2 源才會晉升為 KG 供應鏈 directed edge**）\n5. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_link_digest.md` — 人讀判斷 digest（來源摘要+原文連結 / 相關新聞綜述（附引用連結）/ 4 視角辯論 / Arbiter 裁決 / KG payload 附錄列出 entities+relations）\n   (b) `news/news_logs/link_digest/<id>.judgment.json` — 機器記錄，schema 見 link_digest_protocol.md（<id> = `ld_YYYYMMDD_<url 的 sha1 前 8 碼>`）\n6. **必須執行**：`python3 scripts/link_digest/build_artifacts.py news/news_logs/link_digest/<id>.judgment.json`（它負責 append digest.json verdict + 寫 bn_*.json KG payload + 驗證 + 刷新 nexus graph；rc=0 或 rc=2 皆可收尾，rc=1 要修 judgment.json 重跑）\n7. **禁止**：自己手寫 digest.json / bn_*.json（schema 由 build_artifacts 保證）、跳過 WebSearch、跑到一半停下問問題。\n\n連結分析 {url}",
+    "flash":  "非互動模式：一個 turn 跑完 Stage 2 inline Deep Debate + Arbiter。依 news/news_protocol_v2.md 的 FLASH event-store 流程，只寫單筆 payload JSON，再呼叫 news_event_store.py append；禁止直接修改 digest.json 或 cache。最後產出 reports Impact Card。\n\n新聞分析 FLASH {ticker} 近期動態",
+    "flash_text": "非互動模式：一個 turn 跑完 Stage 2 inline Deep Debate + Arbiter + event append，不要中途停下。輸入是富途推播原文（中英混排）：\n1. 抽出主體並 WebFetch 最近 24h 上下文。\n2. 跑 Bull/Bear/Sector/Macro 四視角。\n3. 寫單筆 payload 到 `news/news_logs/event_payloads/YYYY-MM-DD_HHMM_flash.json`。必含完整 prose、published ISO、source、affected_sectors、tickers、binary fields、macro_backdrop_delta，以及四 lane 的 `lane_scores` / `lane_confidences`；禁止自行計算 net score/weights/verdict。\n4. 執行 `python3 news/scripts/news_event_store.py append --mode FLASH --date YYYY-MM-DD --payload <payload>`；腳本會 deterministic 計分、產 stable event_id、append `news_events.jsonl` 並重建 digest projection。禁止直接 Write/Edit digest.json 或 cache。\n5. 產 `reports/YYYY-MM-DD_HHMM_news_flash.md`，標記 CLI 回傳的 event_id 與 review_status=pending。\n6. 執行 `python3 news/scripts/validate_digest_output.py`，rc=0 才完成。\n\n新聞分析 FLASH \"{headline}\"",
+    "review": "非互動模式：一個 turn 跑完擴展辯論 + Arbiter + event append + cache projection + MD。先執行 `python3 news/scripts/news_event_store.py pending` 列出 pending events，再於 JSON 輸出中精確匹配本次 headline，取得唯一 event_id；0 筆或多筆皆停止並清楚回報。禁止把 untrusted headline 拼進 shell command，也不得用 headline 直接覆寫 digest。讀該 event payload，跑四 lane review，寫 `event_payloads/YYYY-MM-DD_HHMM_review.json`（含 lane_scores/lane_confidences 與完整 verdict prose，但禁止自行計算 net score/weights/verdict），再執行 `python3 news/scripts/news_event_store.py review --event-id <EVENT_ID> --payload <payload>`。腳本負責 append REVIEW event、deterministic projection 與 cache patch。禁止直接修改 digest.json、phase0.json 或 sector_intel.json。最後產 REVIEWED Impact Card 並跑 News validator rc=0。\n\n新聞分析 審核 \"{headline}\"",
+    "link_digest": "非互動模式：一個 turn 跑完整條 link digest pipeline，不要中途停下等使用者回話。輸入是使用者提供的一條文章 URL：{url}\n依照 `news/link_digest_protocol.md` 規範執行：\n1. WebFetch({url}) 讀完整文章（headline / publisher / 發布時間 ISO / 主體）\n2. WebSearch 找 3-5 則相關報導並 WebFetch 前 3-5 篇讀全文（交叉佐證 + 找上下游/客戶/競品/產業/總經）\n3. 跑 4 視角 inline 辯論（Bull/Bear/Sector/Macro）+ Arbiter（net_impact_score -5~+5、verdict BULLISH/BEARISH/BINARY/NEUTRAL、arbiter_reasoning ≥150 字、debate_note 一行）\n4. 抽 entities（tickers/sectors/themes/tech_keywords）+ supply-chain relations（ticker↔ticker：SUPPLIES_TO/CUSTOMER_OF/CONTRACT_MFG_FOR/CO_DEVELOPS_WITH/COMPETES_WITH，格式 subject/object 用 \"ticker:NVDA\"；ticker→theme：BENEFITS_FROM/HEADWIND_FROM，object 用 \"theme:hbm\"），每條 relation 標 corroborating_sources（**≥2 源才會晉升為 KG 供應鏈 directed edge**）\n5. **必須產兩個檔（缺一不可）**：\n   (a) `reports/YYYY-MM-DD_HHMM_link_digest.md` — 人讀判斷 digest（來源摘要+原文連結 / 相關新聞綜述（附引用連結）/ 4 視角辯論 / Arbiter 裁決 / KG payload 附錄列出 entities+relations）\n   (b) `news/news_logs/link_digest/<id>.judgment.json` — 機器記錄，schema 見 link_digest_protocol.md（<id> = `ld_YYYYMMDD_<url 的 sha1 前 8 碼>`）\n6. **必須執行**：`python3 scripts/link_digest/build_artifacts.py news/news_logs/link_digest/<id>.judgment.json`（它負責 append LINK_DIGEST event、重建 digest projection、寫 bn_*.json KG payload、驗證與刷新 nexus graph；rc=0 或 rc=2 皆可收尾，rc=1 要修 judgment.json 重跑）\n7. **禁止**：自己手寫 digest.json / news_events.jsonl / bn_*.json（schema 由 build_artifacts 保證）、跳過 WebSearch、跑到一半停下問問題。\n\n連結分析 {url}",
     "triage": "非互動模式：只跑 Stage 1 deterministic triage，**禁止跑 Stage 2 deep debate**，**禁止寫 digest.json**，**禁止 patch sector_intel.json / phase0.json**。流程：\n1. **必須先執行** `python3 news/fetch_all_news.py --hours 24 --output news/news_logs/` 重撈 4 個源（RSS + Finnhub + FMP + SEC EDGAR）合併成 unified raw.json — 不能直接讀現有 raw，避免吃到舊資料\n2. **必須執行** `python3 news/scripts/stage1_triage.py` — script deterministic 寫 `news/news_logs/YYYY-MM-DD_triage.json`（block/dedup/credibility downgrade/news_type/score/4-view snap/晉級 gate 全內建）\n3. **禁止讀 raw.json 全文、禁止 LLM 重新 triage**。讀 triage.json 的 `shallow_verdicts` top-15，對這 15 則補 `headline_zh`（script 留 null），用單次 Edit 寫回 triage.json — 其餘欄位不動\n4. 一個 turn 跑完，不要中途停下等候。\n\n新聞分析 TRIAGE",
     "earnings": "非互動模式：照 skills/earnings-analyst/SKILL.md 跑完整 6 步驟（含 LLM narrate phase），不要中途停下等使用者確認。**MUST** sequentially run:\n1. `python3 skills/earnings-analyst/scripts/fetch.py {ticker}`（cache hit 也 OK；V1.73 抓 17 endpoints 含 transcript）\n2. `python3 skills/earnings-analyst/scripts/analyze.py {ticker}`\n3. `python3 skills/earnings-analyst/scripts/validate.py {ticker}` — 必須 rc=0\n4. **NARRATE phase（LLM in-conversation, NEW）** — 用 Read 工具讀 `skills/earnings-analyst/cache/{ticker}_<DATE>.json`（含 ~50K 字 transcript.content），用 Write 工具寫 `skills/earnings-analyst/cache/{ticker}_<DATE>.infographic.json`。Schema 見 `skills/earnings-analyst/schema.md` 「Infographic Cache (V1.0)」section。必抽：headline_oneliner / surprise / segments_q（**優先從 transcript CFO 段抽季度數字，無則退化 FY**） / capital_returns（buyback authorization、dividend hike、announcements）/ ceo_quote / key_highlights (≥3) / summary (≥2)\n5. `python3 skills/earnings-analyst/scripts/render.py {ticker}`\n6. `python3 skills/earnings-analyst/scripts/validate_infographic.py {ticker}` — 必須 rc=0\n\n結束條件：reports/<DATE>_{ticker}_earnings.md + cache/<TICKER>_<DATE>.infographic.json 都寫入 + 兩個 validate 都 rc=0。**禁止**：跳步驟、跳 validate、跑到一半停下問問題。\n\n財報 {ticker}",
     "llm_review": "非互動模式：對決策日曆做統計檢討，一個 turn 跑完不要中途停下。流程：\n0. **必須先 rebuild event_index**：`python3 scripts/build_event_index.py` — 此 indexer 掃 reports/ + investment/invest_logs/ + news/news_logs/ + sector/sector_logs/ 重建 `reports/decision_review/event_index_latest.json`（含每筆 decision 的 verdict、新增 `industry_rollup` + `adjustment_ledger_active` 兩個 top-level 欄位）。**rc 必須 0** 才繼續；rc≠0 就 fail 整個 protocol、不要硬跑舊 index。預期 ~30-60 秒。\n1. **Read** `reports/decision_review/REVIEW_PROMPT.md` 拿到完整 prompt 規範（**四步驟**：Step 0 Adjustment Evaluation + Step 1 Pattern + Step 2 Root Cause + Step 3 Recommendations）\n2. **Read** 剛 rebuild 的 `reports/decision_review/event_index_latest.json`（過去決策 + verdict 集合 + industry_rollup + adjustment_ledger_active，可能 300KB+）。確認 `generated_at` 是今天日期，否則 abort\n3. 依 REVIEW_PROMPT 四步驟執行：\n   - **Step 0 — Adjustment Evaluation（先做）**：對 `adjustment_ledger_active` 中每筆 active Rec，從 industry_rollup / decisions / 外部資料拉出 `target_metric` 當週數值，對照 ledger 的 `evaluation_history` 上次值，下 improved / no_change / regressed 判斷。連 3 週 no_change 建議 paused；regressed 建議 rolled-back。完整 ledger 在 `reports/decision_review/ADJUSTMENT_LEDGER.md`，schema 在 `ADJUSTMENT_LEDGER_SCHEMA.md`\n   - Step 1 — Pattern Detection：依 source / verdict / window_complete_pct / decisive_agent / regime / sub_industry_heat 統計顯著 pattern (N≥5 才算 pattern；N=3-4 標 preliminary；N≤2 標 speculation)。**必看 `industry_rollup`** 找 sub-industry / sector 集中性\n   - Step 2 — Root Cause Hypotheses：對每個 pattern 提出 1-2 個假設，引用 specific decision_id 為證據\n   - Step 3 — Adjustment Recommendations：給 protocol/config 具體調整建議（agent 權重、score 閾值、cycle phase 規則等），標 confidence (high/med/low) + 影響範圍\n4. **Write** 結果到 `reports/decision_review/REVIEW_<TODAY>.md`（YYYY-MM-DD 為今天日期）。Markdown 結構：\n```markdown\n# LLM Review · YYYY-MM-DD\n\n_event_index_at: <event_index 的 generated_at>_  \n_decisions_analyzed: <N>_\n\n## 0. Adjustment Evaluation\n| Rec | applied_date | target_metric | last_value | this_week_value | judgement |\n|---|---|---|---|---|---|\n\n## Pattern Detection\n### <Pattern Title> (n=N, N≥5 robust / N=3-4 preliminary / N≤2 speculation)\n- 證據：<引用 specific decisions>\n- 統計：<numbers>\n\n## Industry Rollup\n| industry | sector | n | miss_rate | avg_miss_return | tickers | top_30%? |\n|---|---|---|---|---|---|---|\n\n## Root Cause Hypotheses\n### <Hypothesis>\n- 對應 pattern：<which>\n- 推論：<reasoning>\n\n## Adjustment Recommendations\n### <Recommendation Title>\n- 動作：<concrete config change>\n- Confidence：high|med|low\n- 影響：<scope>\n```\n5. **禁止**：跳過 Step 0 indexer rebuild、跳過 Adjustment Evaluation、跑到一半停下問問題、輸出意見徵詢、未產出 MD 就結束。\n\n決策日曆 LLM Review",
     "playbook": "非互動模式：一個 turn 跑完整條 weekly-tech-playbook 生成流程，不要中途停下等使用者確認，不要輸出「請確認」摘要表。本流程為前瞻探索層，**不**進入也不回寫 investment_protocol 決策。完整規範見 `skills/weekly-tech-playbook/SKILL.md`。流程：\n1. 確定今天日期 DATE（YYYY-MM-DD）。\n2. **執行** `python3 skills/weekly-tech-playbook/scripts/build_pack.py`（即時抓 yfinance 報價）。它會寫 `skills/weekly-tech-playbook/data/pack_<DATE>.json`（含 regime、熱題、候選宇宙行情+動能、近 14 天委員會 verdict）與 `blind_pack_<DATE>.json`。stdout 會印出實際 DATE。\n3. **Read** `skills/weekly-tech-playbook/data/pack_<DATE>.json`。\n4. 依「最夯題材 + 委員會 verdict + 估值/動能紀律」為三個籃子各選 **10 檔**，寫 `skills/weekly-tech-playbook/data/selections_<DATE>.json`（schema 見 SKILL.md「selections JSON schema」）：\n   - 配重鐵律：每籃 tier_weights = 核心 $15k×3 + 標準 $10k×4 + 輕倉 $5k×3，**每籃 sum(weight_usd) 必須 == 100000**，每籃 10 檔，每檔必帶 `price`（直接抄 pack 報價）、`mom_5d`、`mom_1mo`、`theme`、`committee`、`reason`、`data`、`kill`。\n   - 🛡️保險(conservative)：megacap 質地 + 現金流 + 控估值，可較滿配；近月回檔的優質股視為再進場價值。\n   - 🔥激進(aggressive)：押最夯題材高 beta；近月已大漲 / 委員會標 extreme_overvalued / decision_cap 者降級為輕倉並標「等回檔」。\n   - ⚖️混合(hybrid)：保險 sleeve($65k) + 激進 sleeve($35k)，每檔加 `sleeve`(保險/激進) 欄位，整籃加總仍 == 100000。\n   - top-level 另填 `as_of`(=DATE)、`week_label`、`capital_per_basket`(100000)、`tier_weights`、`discipline_note`、`macro`(regime/exposure_ceiling/breadth/market_top/sentiment/real_rate_10y/key_events/playbook_logic — 從 pack 帶入)。\n   - （選配但建議）`codex_review`：第二意見。為求單 turn 穩定，用 `review_mode=\"committee_informed\"`（**不要**用 committee_blind_then_reconcile，那需要另存 blind_artifact 否則 render 會 fatal）。必填 label/reviewed_on/review_mode/committee_dependency/dependency_note/verdict + 至少 3 組 comparison_notes(title/original/note) + recommended_allocation(含現金且 sum(weight_pct)==100、ticker/role/weight_pct 齊全、無重複 ticker) + execution(≥1) + sources(≥2)。\n5. **驗證迴圈**：先跑 `python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_<DATE>.json --validate-only`。若 rc==1（fatal），依錯誤訊息修 selections_<DATE>.json 再驗，直到 rc==0 或 rc==2。**rc==1 絕不可進下一步。**\n6. **正式渲染**：`python3 skills/weekly-tech-playbook/scripts/render.py --selections skills/weekly-tech-playbook/data/selections_<DATE>.json`。它會寫 `Dashboard/playbook.json`（餵 Dashboard）+ `reports/<DATE>_TECH_PLAYBOOK.md`（人讀）+ dated snapshot `data/playbook_<DATE>.json`。\n7. 結束條件：`Dashboard/playbook.json` + `reports/<DATE>_TECH_PLAYBOOK.md` 都寫入，且最終 render rc∈{0,2}。**禁止**：跳過 build_pack、跳過 validate-only、用假資料、價格欄位留空、跑到一半停下問問題、未產出 playbook.json 就結束。\n\n產生本週投資方案",
 }
+
+# Keep the runtime packet short: the detailed contract lives in the protocol
+# and schema, while this prompt pins the non-negotiable execution gates.
+PROTOCOL_PROMPTS["news"] = (
+    "非互動執行 News V2.3，一個 turn 完整收尾。先讀 CLAUDE.md trigger 對應的 "
+    "news/news_protocol_v2.md；依序跑 fetch_all_news.py、stage1_triage.py、"
+    "build_digest_packet.py。之後只使用 compact packet：Stage 2 名單完全採用 "
+    "stage2_items（可少於 5），直接 fetch packet URL，每篇交給四個隔離 lane 的 bundle "
+    "最多 3000 chars；URL 缺失/失敗才 search。Arbiter 依 news/arbiter_rules.py，只有 "
+    "binary_risk=true 可判 BINARY。依 news/debate_input_schema.md 只寫 compact debate JSON；"
+    "禁止手寫 digest/MD/cache。最後只跑一次 finalize_digest.py，須 validator rc=0，"
+    "完成 digest、idempotent cache patch 與 report，不得停下等確認。"
+)
 PROTOCOL_LOG_DIRS = {
     "sector":     "sector/scan_logs",
     "news":       "news/scan_logs",
@@ -357,6 +413,9 @@ CUSTOM_PROTOCOLS = {
 PROTOCOL_VALIDATORS = {
     "sector": ["sector/scripts/validate_sector_intel.py"],
     "news":   ["news/scripts/validate_digest_output.py"],
+    "flash":  ["news/scripts/validate_digest_output.py"],
+    "flash_text": ["news/scripts/validate_digest_output.py"],
+    "review": ["news/scripts/validate_digest_output.py"],
 }
 
 # Post-run required-artifact gate. Catches a model returning rc=0 while leaving
@@ -387,18 +446,33 @@ _protocol_proc = {"p": None}  # mutable holder so cancel can reach it
 # with news / sector queue jobs.
 _daily_update_state = {
     "job_id":      None,
-    "status":      "idle",     # idle | running | done | error
+    "status":      "idle",     # idle | running | done | degraded | error
     "started_at":  None,
     "ended_at":    None,
     "log_path":    None,
     "returncode":  None,
     "current_step": 0,
-    "total_steps":  6,
+    "total_steps":  10,
     "elapsed_sec": 0,
     "log_tail":    "",
+    "warning":     None,
+    "error":       None,
 }
 _daily_update_lock = threading.Lock()
 _daily_update_proc = {"p": None}
+
+
+def _daily_update_outcome(returncode):
+    """Map the shell contract without treating usable degradation as fatal."""
+    if returncode == 0:
+        return "done", None
+    if returncode == 2:
+        return "degraded", "daily_update.sh degraded (rc=2); usable artifacts were published"
+    return "error", f"daily_update.sh exited rc={returncode}"
+
+
+def _daily_update_is_terminal(status):
+    return status in ("done", "degraded", "error")
 
 
 def _now_iso():
@@ -431,7 +505,43 @@ def _parse_events(path, max_events=40):
         except Exception:
             continue
         t = ev.get("type")
-        if t == "system":
+        if t == "thread.started":
+            thread_id = str(ev.get("thread_id") or "")
+            events.append({"icon": "🚀", "text": f"Codex session started ({thread_id[:12]})"})
+        elif t == "turn.started":
+            events.append({"icon": "▸", "text": "Codex turn started"})
+        elif t in ("item.started", "item.completed"):
+            item = ev.get("item") or {}
+            kind = item.get("type", "item")
+            if kind == "agent_message" and t == "item.completed":
+                text = str(item.get("text") or "").strip()
+                if text:
+                    events.append({"icon": "💬", "text": text[:160]})
+            elif kind == "command_execution":
+                cmd = str(item.get("command") or "")[:140]
+                if t == "item.started":
+                    events.append({"icon": "💻", "text": f"Command: {cmd}"})
+                else:
+                    rc = item.get("exit_code")
+                    events.append({"icon": "✓" if rc in (0, None) else "✗",
+                                   "text": f"Command rc={rc}: {cmd}"})
+            elif kind in ("mcp_tool_call", "tool_call"):
+                name = item.get("name") or item.get("tool") or "tool"
+                events.append({"icon": "⚙", "text": f"{name}"})
+        elif t == "turn.completed":
+            usage = ev.get("usage") or {}
+            bits = []
+            if usage.get("input_tokens") is not None:
+                bits.append(f"in {usage['input_tokens']}")
+            if usage.get("output_tokens") is not None:
+                bits.append(f"out {usage['output_tokens']}")
+            events.append({"icon": "✅", "text": "Result: " + (" · ".join(bits) or "success")})
+        elif t in ("turn.failed", "error"):
+            err = ev.get("error") or ev.get("message") or "unknown error"
+            if isinstance(err, dict):
+                err = err.get("message") or str(err)
+            events.append({"icon": "✗", "text": str(err)[:180]})
+        elif t == "system":
             sub = ev.get("subtype", "")
             if sub == "init":
                 model = ev.get("model", "")
@@ -513,7 +623,7 @@ def _tail_log(path, lines=50):
 
 
 def _extract_error_from_log(log_path, rc):
-    """When the claude subprocess exits non-zero, mine the stream-json log for the
+    """When a model subprocess exits non-zero, mine its JSONL log for the
     actual failure message (e.g. 'API Error: Stream idle timeout') rather than
     leaving the user with a cryptic 'exit code 1'.
 
@@ -539,6 +649,12 @@ def _extract_error_from_log(log_path, rc):
             except Exception:
                 continue
             t = obj.get("type")
+            if t in ("turn.failed", "error"):
+                msg = obj.get("error") or obj.get("message") or ""
+                if isinstance(msg, dict):
+                    msg = msg.get("message") or str(msg)
+                if isinstance(msg, str) and msg.strip():
+                    return msg.strip().splitlines()[0][:280]
             if t == "result":
                 # claude CLI result event carries `.result` (the terminal text)
                 # plus `.is_error` and `.subtype` for classification
@@ -796,20 +912,14 @@ def run_protocol(name, params=None):
         prompt = PROTOCOL_PROMPTS[name]
         for _k, _v in (params or {}).items():
             prompt = prompt.replace("{" + _k + "}", str(_v))
-        # Dashboard agentic protocols (產業掃描/新聞/分析/llm_review/…) are written
-        # exclusively for a claude turn — they drive Agent subagents, project-relative
-        # paths, and claude-CLI-specific behaviour. gemini/codex fallback was observed
-        # to "succeed" (rc=0) while doing nothing useful (find wrong file copies, time
-        # out, never write the artifact), so we pin claude here and intentionally
-        # bypass model_router's pick_model: a user-clicked protocol is an explicit,
-        # expensive request that should NOT be silently rerouted by the 4h quota-
-        # cooldown heuristic (which never checks the real quota). A genuine 529 is
-        # still recorded via note_run below and caught by the rc/artifact gate.
-        # NOTE: model_router multi-model governance is unchanged for break_news
-        # debater (codex/gemini primary via run_with_fallback) — a separate path.
-        proto_model = "claude"
-        claude_model = _protocol_model_for(name)  # tier: opus (deep) / sonnet (cheap)
+        # Select once from the shared primary → secondary → tertiary chain. We do
+        # not replay a partially completed agentic run on another provider: required
+        # artifact + validator gates below are the safe failure boundary.
+        proto_model = _select_protocol_model()
+        prompt = _adapt_protocol_prompt(proto_model, prompt)
+        claude_model = (_protocol_model_for(name) if proto_model == "claude" else None)
         rc = -1
+        telemetry_usage = {}
         try:
             lf = open(log_path, "w", buffering=1)
             lf.write(f"=== protocol={name} model={proto_model}:{claude_model or 'cli-default'} prompt={prompt!r} started={_now_iso()} ===\n")
@@ -866,17 +976,17 @@ def run_protocol(name, params=None):
             lf.write(f"\n=== ended={_now_iso()} rc={rc} ===\n")
             lf.close()
 
-            # Record this run against the model's daily budget; a quota wall in
-            # the log tail trips its cooldown so the next run routes elsewhere.
+            # Record this run against the selected model's daily budget; a quota
+            # wall in the log tail makes the next launch select another provider.
             if MODEL_ROUTER_AVAILABLE:
                 try:
                     with open(log_path, "r", encoding="utf-8", errors="ignore") as _lf:
                         _tail = _lf.read()[-4000:]
-                    # Attribute this run's tokens to proto_model by mining the
-                    # stream-json log's terminal `result` event usage block.
+                    # Attribute this run's tokens by mining the provider JSONL.
                     try:
                         from scripts.break_news.llm_drivers import parse_stream_log_usage
                         _tok = parse_stream_log_usage(log_path)
+                        telemetry_usage = _tok or {}
                     except Exception:
                         _tok = None
                     _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail, tokens=_tok)
@@ -954,6 +1064,49 @@ def run_protocol(name, params=None):
 
             # Success → refresh data.json so Dashboard picks up new state
             if _protocol_state["status"] == "done":
+                if name == "news":
+                    try:
+                        from news.scripts.news_event_store import append_run_telemetry
+                        today = start.strftime("%Y-%m-%d")
+                        with open(os.path.join(ROOT, "news", "news_logs", f"{today}_digest.json"), encoding="utf-8") as fp:
+                            digest = json.load(fp)
+                        triage_path = os.path.join(ROOT, "news", "news_logs", f"{today}_triage.json")
+                        try:
+                            with open(triage_path, encoding="utf-8") as fp:
+                                stage2_items = json.load(fp).get("stage2_items") or []
+                        except (OSError, json.JSONDecodeError):
+                            stage2_items = []
+                        sources, genres = {}, {}
+                        for item in stage2_items:
+                            source = str(item.get("source") or "unknown")
+                            genre = str(item.get("content_genre") or "unknown")
+                            sources[source] = sources.get(source, 0) + 1
+                            genres[genre] = genres.get(genre, 0) + 1
+                        deep = [v for v in (digest.get("verdicts") or []) if v.get("event_type", "DIGEST") == "DIGEST" and v.get("depth") == "deep"]
+                        append_run_telemetry(
+                            os.path.join(ROOT, "news", "news_logs", "news_events.jsonl"),
+                            run_id=job_id, date=today,
+                            payload={
+                                "model": proto_model,
+                                "stage2_count": len(deep),
+                                "binary_count": sum(v.get("binary_risk") is True for v in deep),
+                                "source_distribution": sources,
+                                "genre_distribution": genres,
+                                "input_tokens": telemetry_usage.get("input_tokens", 0),
+                                "output_tokens": telemetry_usage.get("output_tokens", 0),
+                                "cache_read_tokens": telemetry_usage.get("cache_read_tokens", 0),
+                                "cache_write_tokens": telemetry_usage.get("cache_write_tokens", 0),
+                                "cost_usd": telemetry_usage.get("cost_usd", 0.0),
+                                "elapsed_sec": int((datetime.now() - start).total_seconds()),
+                            },
+                            recorded_at=_now_iso(),
+                        )
+                    except Exception as telemetry_error:
+                        try:
+                            with open(log_path, "a") as _lf:
+                                _lf.write(f"\n=== telemetry warning: {telemetry_error} ===\n")
+                        except Exception:
+                            pass
                 # zh-TW localise any new deep verdicts BEFORE bridge reads the digest,
                 # so data.json carries the *_zh fields the News page renders. Best-effort
                 # (gemini/agy); never blocks the pipeline on a translation hiccup.
@@ -1488,7 +1641,7 @@ def run_free_caches():
 _DAILY_UPDATE_STEP_RE = re.compile(r"\[\s*(\d+(?:\.\d+)?)\s*/\s*(\d+)\s*\]")
 
 def run_daily_update():
-    """Spawn bash daily_update.sh in a background thread, parse [N/6] step
+    """Spawn bash daily_update.sh in a background thread, parse [N/10] step
     markers from stdout, expose status via _daily_update_state. Used by the
     pre-market check Phase 1 orchestrator (parallel to news Claude protocol)."""
     script = os.path.join(ROOT, "daily_update.sh")
@@ -1509,9 +1662,10 @@ def run_daily_update():
             "log_path":     log_path,
             "returncode":   None,
             "current_step": 0,
-            "total_steps":  6,
+            "total_steps":  10,
             "elapsed_sec":  0,
             "log_tail":     "",
+            "warning":      None,
             "error":        None,
         })
 
@@ -1528,7 +1682,7 @@ def run_daily_update():
                     env={**os.environ, "PATH": os.environ.get("PATH", "")},
                 )
                 _daily_update_proc["p"] = proc
-                # Stream stdout line-by-line; parse [N/6] step markers
+                # Stream stdout line-by-line; parse [N/10] step markers
                 for line in proc.stdout:
                     logf.write(line)
                     logf.flush()
@@ -1545,11 +1699,12 @@ def run_daily_update():
                             pass
                 rc = proc.wait()
             with _daily_update_lock:
+                status, message = _daily_update_outcome(rc)
                 _daily_update_state["returncode"] = rc
                 _daily_update_state["ended_at"]   = _now_iso()
-                _daily_update_state["status"]     = "done" if rc == 0 else "error"
-                if rc != 0:
-                    _daily_update_state["error"] = f"daily_update.sh exited rc={rc}"
+                _daily_update_state["status"]     = status
+                _daily_update_state["warning"]    = message if status == "degraded" else None
+                _daily_update_state["error"]      = message if status == "error" else None
                 _daily_update_state["current_step"] = _daily_update_state["total_steps"]
         except Exception as e:
             with _daily_update_lock:
@@ -1705,8 +1860,17 @@ _premarket_chain_state = {
         "news":   {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
         "sector": {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
     },
+    "warnings":    [],         # non-blocking phase-1 failures; chain still finishes
     "error":       None,
 }
+
+# Phase-1 items whose failure must NOT stop the chain. `sector` reads the breadth
+# / FTD / market-top caches that daily_update refreshes, so a daily failure is a
+# real dependency and still aborts. News has no such edge — sector never reads
+# the digest — so a news failure used to cost the whole sector run for nothing
+# (2026-08-06: digest was complete, only over-cap by the shallow validator, and
+# sector never ran). It now records a warning and the chain proceeds.
+_PREMARKET_NONBLOCKING = {"news"}
 
 
 def _wait_protocol_completion(name, baseline_ts, timeout_sec, on_progress=None):
@@ -1775,6 +1939,7 @@ def run_premarket_chain():
                 "news":   {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
                 "sector": {"status": "idle", "elapsed_sec": 0, "reason": None, "error": None},
             },
+            "warnings":    [],
             "error":       None,
         })
 
@@ -1816,12 +1981,13 @@ def run_premarket_chain():
                         sa = _daily_update_state.get("started_at")
                     elapsed = int((datetime.now() - datetime.fromisoformat(sa)).total_seconds()) if sa else 0
                     _set_item("daily", elapsed_sec=elapsed)
-                    if s in ("done", "error"):
+                    if _daily_update_is_terminal(s):
                         break
                 with _daily_update_lock:
                     final = _daily_update_state.get("status")
+                    warning = _daily_update_state.get("warning")
                     err = _daily_update_state.get("error")
-                _set_item("daily", status=final, error=err)
+                _set_item("daily", status=final, reason=warning, error=err)
                 if final == "error":
                     phase1_errors.append(("daily", err or "unknown"))
 
@@ -1865,10 +2031,17 @@ def run_premarket_chain():
             t_news.start()
             t_daily.join()
             t_news.join()
+            # Items have already had their own state set to "error". Only a
+            # blocking item aborts the chain; non-blocking ones (see
+            # _PREMARKET_NONBLOCKING) downgrade to a warning so phase 2 still runs.
+            blocking = [e for e in phase1_errors if e[0] not in _PREMARKET_NONBLOCKING]
+            if blocking:
+                raise RuntimeError(f"phase 1 failed ({blocking[0][0]}): {blocking[0][1]}")
             if phase1_errors:
-                # Both items have already had their state set to "error"; stop the chain.
-                first = phase1_errors[0]
-                raise RuntimeError(f"phase 1 failed ({first[0]}): {first[1]}")
+                with _premarket_chain_lock:
+                    _premarket_chain_state["warnings"] = [
+                        f"{key}: {msg}" for key, msg in phase1_errors
+                    ]
 
             # ── Phase 2: sector ─────────────────────────────────
             with _premarket_chain_lock:
@@ -2358,9 +2531,13 @@ def _fmp_get_json(url, timeout=20):
     On HTTP 429 (rate-limited) it trips the heatmap circuit breaker
     (`_heatmap_ratelimit_until`) and logs only once per cooldown window — so a
     fan-out of ~500 calls all 429-ing produces one line, not 500."""
-    global _heatmap_ratelimit_until
+    global _heatmap_ratelimit_until, _heatmap_breaker_reason
     from urllib.request import Request, urlopen
     from urllib.error  import URLError, HTTPError
+    # All FMP-backed heatmap features share this helper. This early check keeps
+    # news/intraday/lazy quote calls quiet too, not only the main quote fan-out.
+    if time.time() < _heatmap_ratelimit_until:
+        return None
     # Count this call against the shared cross-process 250/min window so the
     # dashboard's ~500-ticker fan-out and a concurrent daily_update.sh run never
     # collectively exceed FMP's limit. Keeps the urllib transport (so the 429
@@ -2380,10 +2557,27 @@ def _fmp_get_json(url, timeout=20):
             now = time.time()
             with _heatmap_lock:
                 first = now >= _heatmap_ratelimit_until
-                _heatmap_ratelimit_until = now + HEATMAP_RATELIMIT_COOLDOWN
+                _heatmap_ratelimit_until = max(
+                    _heatmap_ratelimit_until, now + HEATMAP_RATELIMIT_COOLDOWN)
+                if first:
+                    _heatmap_breaker_reason = "rate_limit"
             if first:
                 sys.stderr.write(f"[heatmap] FMP rate-limited (429) — pausing quote "
                                  f"refresh {HEATMAP_RATELIMIT_COOLDOWN}s\n")
+        elif getattr(e, "code", None) == 401:
+            code = int(e.code)
+            now = time.time()
+            with _heatmap_lock:
+                reason = f"auth_{code}"
+                first = now >= _heatmap_ratelimit_until or _heatmap_breaker_reason != reason
+                _heatmap_ratelimit_until = max(
+                    _heatmap_ratelimit_until, now + HEATMAP_AUTH_COOLDOWN)
+                _heatmap_breaker_reason = reason
+            if first:
+                sys.stderr.write(
+                    f"[heatmap] FMP authorization rejected ({code}) — pausing all "
+                    f"heatmap FMP requests for {HEATMAP_AUTH_COOLDOWN}s; verify "
+                    "FMP_API_KEY and restart the Dashboard\n")
         else:
             sys.stderr.write(f"[heatmap] HTTP error: HTTPError {getattr(e, 'code', '?')}\n")
         return None
@@ -2460,9 +2654,8 @@ def _heatmap_refresh_quotes():
     if not api_key:
         return False
 
-    # 429 circuit breaker — skip the whole ~500-call fan-out while cooling down.
+    # Shared 429/auth circuit breaker — skip the whole ~500-call fan-out.
     if time.time() < _heatmap_ratelimit_until:
-        sys.stderr.write("[heatmap] skip quote refresh — FMP rate-limit cooldown\n")
         return False
 
     with _heatmap_lock:
@@ -2491,6 +2684,11 @@ def _heatmap_refresh_quotes():
                 continue
             if q:
                 quotes[sym] = q
+
+    # A permanent auth/plan error can trip mid-fan-out. Do not overwrite a good
+    # cached snapshot's timestamp with a misleading 0/N "refresh".
+    if not quotes and time.time() < _heatmap_ratelimit_until:
+        return False
 
     updated = 0
     with _heatmap_lock:
@@ -2953,10 +3151,9 @@ def _heatmap_refresh_pe_universe_locked(max_workers):
     if now < _heatmap_pe_next_attempt_at:
         return False
     if now < _heatmap_ratelimit_until:
-        # Nothing was attempted, so do not treat this as a failed batch — just come
-        # back once the 429 breaker has cleared.
+        # Nothing was attempted, so do not treat this as a failed batch. The helper
+        # already emitted the single actionable 401/429 line when it tripped.
         _heatmap_pe_next_attempt_at = _heatmap_ratelimit_until
-        sys.stderr.write("[heatmap-pe] skip — FMP rate-limit cooldown\n")
         return False
     with _heatmap_lock:
         symbols = list(_heatmap_state["tickers"].keys())

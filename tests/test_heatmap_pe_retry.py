@@ -53,6 +53,7 @@ def _reset(tickers=("AAA", "BBB", "CCC", "DDD")):
     ds._heatmap_pe_next_attempt_at = 0.0
     ds._heatmap_pe_backoff_sec = 0
     ds._heatmap_ratelimit_until = 0.0
+    ds._heatmap_breaker_reason = None
 
 
 _orig_fetch = ds._fetch_pe_ttm
@@ -124,6 +125,40 @@ try:
     eq("ratelimit.no_backoff_charged", ds._heatmap_pe_backoff_sec, 0)
     eq("ratelimit.waits_for_breaker",
        int(ds._heatmap_pe_next_attempt_at), int(ds._heatmap_ratelimit_until))
+
+    # ── Auth rejection is a shared, quiet breaker ──────────────────────────
+    # A bad credential is permanent for this process. The first 401 should emit
+    # one actionable line; subsequent ticker calls must not touch the transport.
+    import contextlib
+    import io
+    from urllib.error import HTTPError
+    from unittest.mock import patch
+
+    _reset()
+    calls = {"n": 0}
+
+    def _unauthorized(*args, **kwargs):
+        calls["n"] += 1
+        raise HTTPError("https://example.invalid", 401, "Unauthorized", {}, None)
+
+    auth_log = io.StringIO()
+    with patch("urllib.request.urlopen", _unauthorized), contextlib.redirect_stderr(auth_log):
+        eq("auth.first_returns_none", ds._fmp_get_json("https://example.invalid"), None)
+        eq("auth.second_returns_none", ds._fmp_get_json("https://example.invalid"), None)
+    eq("auth.one_transport_call", calls["n"], 1)
+    eq("auth.breaker_reason", ds._heatmap_breaker_reason, "auth_401")
+    eq("auth.long_cooldown",
+       ds._heatmap_ratelimit_until >= time.time() + ds.HEATMAP_AUTH_COOLDOWN - 2, True)
+    eq("auth.one_log_line", len(auth_log.getvalue().strip().splitlines()), 1)
+    eq("auth.actionable_log", "verify FMP_API_KEY" in auth_log.getvalue(), True)
+
+    # Quote refresh must preserve the old snapshot timestamp instead of writing
+    # "0/N refreshed" as if the empty batch were current.
+    ds._heatmap_state["last_update"] = "keep-me"
+    eq("auth.quote_batch_skipped", ds._heatmap_refresh_quotes(), False)
+    eq("auth.quote_timestamp_preserved", ds._heatmap_state["last_update"], "keep-me")
+    ds._heatmap_ratelimit_until = 0.0
+    ds._heatmap_breaker_reason = None
 
     # ── _fetch_pe_ttm signals "did not fetch" as None, not an empty bundle ──
     ds._fetch_pe_ttm = _orig_fetch

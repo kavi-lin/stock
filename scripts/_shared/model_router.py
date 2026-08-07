@@ -17,11 +17,11 @@ Two independent budgets, both enforced (V4.84.0):
 claim that it makes "protocol runs self-throttle" was wrong on both halves):
   * It DOES gate `run_role()` / `run_with_fallback()` / `pick_model()`, i.e. the
     single-shot governed calls, and it removes an exhausted model from the chain.
-  * It does NOT gate the agentic protocol subprocess path. `dashboard_server`
-    deliberately bypasses `pick_model` there (a user-clicked protocol is an explicit
-    model choice, see its comment) and only reports the outcome afterwards through
-    `note_run()`. That records **one** timestamp for a run that may spend dozens to
-    hundreds of API turns, so the window under-counts the largest consumer by design.
+  * It DOES select the provider for the agentic protocol subprocess path through
+    `pick_model()` at launch. The run only reports its outcome afterwards through
+    `note_run()`; there is no mid-run provider replay. That records **one** timestamp
+    for a run that may spend dozens to hundreds of API turns, so the window still
+    under-counts the largest consumer by design.
     Treat `window_calls` as "governed calls", not "API turns"; sizing the cap as if it
     were the provider's turn budget will not protect that path.
 

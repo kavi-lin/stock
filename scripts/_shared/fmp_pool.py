@@ -43,12 +43,16 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, Sequence
+from urllib.parse import urlsplit
 
 import requests
 
@@ -70,12 +74,76 @@ _JITTER_MAX = 0.3
 _CACHE_BRIDGE = Path(os.path.expanduser("~/.cache_bridge"))
 _STATE_PATH = Path(os.getenv("FMP_POOL_STATE", str(_CACHE_BRIDGE / "fmp_pool_window.json")))
 _LOCK_PATH = Path(os.getenv("FMP_POOL_LOCK", str(_CACHE_BRIDGE / "fmp_pool.lock")))
+_LAST_429_PATH = Path(
+    os.getenv("FMP_LAST_429_PATH", str(_CACHE_BRIDGE / "fmp_last_429.json"))
+)
 
 # Intra-process serialization of the lock section (flock alone does not exclude
 # threads of the same process reliably).
 _THREAD_LOCK = threading.Lock()
 
 _AUTH_BLOCK = (401, 402, 403)  # permanent paid/auth block — never retry, return None
+
+
+def _redact_error_body(text: str) -> str:
+    """Keep FMP diagnostics useful without persisting credentials."""
+    clean = (text or "")[:2000]
+    key = os.environ.get("FMP_API_KEY")
+    if key:
+        clean = clean.replace(key, "[REDACTED]")
+    clean = re.sub(
+        r'(?i)(["\']?apikey["\']?\s*[:=]\s*["\']?)[^"\'\s,&}]+',
+        r"\1[REDACTED]",
+        clean,
+    )
+    return clean
+
+
+def _retry_after_seconds(value: str | None) -> float | None:
+    if not value:
+        return None
+    try:
+        return max(0.0, float(value))
+    except (TypeError, ValueError):
+        try:
+            when = parsedate_to_datetime(value)
+            if when.tzinfo is None:
+                when = when.replace(tzinfo=timezone.utc)
+            return max(0.0, (when - datetime.now(timezone.utc)).total_seconds())
+        except (TypeError, ValueError, OverflowError):
+            return None
+
+
+def _record_429(url: str, response) -> float | None:
+    """Atomically retain the latest 429 evidence, excluding query/API keys."""
+    _ensure_dirs()
+    _LAST_429_PATH.parent.mkdir(parents=True, exist_ok=True)
+    retry_raw = response.headers.get("Retry-After")
+    try:
+        body = json.dumps(response.json(), ensure_ascii=False)
+    except Exception:
+        body = getattr(response, "text", "") or ""
+    parsed = urlsplit(url)
+    artifact = {
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "status": 429,
+        "endpoint": f"{parsed.scheme}://{parsed.netloc}{parsed.path}",
+        "retry_after": retry_raw,
+        "response_body": _redact_error_body(body),
+    }
+    tmp = _LAST_429_PATH.with_suffix(
+        _LAST_429_PATH.suffix + f".{os.getpid()}.{threading.get_ident()}.tmp"
+    )
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(artifact, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, _LAST_429_PATH)
+    except Exception:
+        try:
+            tmp.unlink(missing_ok=True)
+        except Exception:
+            pass
+    return _retry_after_seconds(retry_raw)
 
 
 def _ensure_dirs() -> None:
@@ -177,7 +245,9 @@ def _request(url: str, params: dict, *, retries: int, timeout: int) -> tuple[Any
             if r.status_code in _AUTH_BLOCK:
                 return None, r.status_code
             if r.status_code == 429:
-                time.sleep((2 ** attempt) + (os.getpid() % 5) / 10.0)
+                retry_after = _record_429(url, r)
+                exponential = (2 ** attempt) + (os.getpid() % 5) / 10.0
+                time.sleep(max(exponential, retry_after or 0.0))
                 continue
             if r.status_code != 200:
                 # Other 4xx are permanent; 5xx worth a short retry.
@@ -218,7 +288,8 @@ def get(
     full = {**(params or {}), "apikey": key}
     data, status = _request(url, full, retries=retries, timeout=timeout)
     if data is None and hard_fail and status not in _AUTH_BLOCK:
-        sys.exit(f"[ERROR] FMP {path} failed (status={status})")
+        detail = f"; diagnostic={_LAST_429_PATH}" if status == 429 else ""
+        sys.exit(f"[ERROR] FMP {path} failed (status={status}{detail})")
     return data
 
 
@@ -243,7 +314,10 @@ def get_url(
     p.setdefault("apikey", key)
     data, status = _request(full_url, p, retries=retries, timeout=timeout)
     if data is None and hard_fail and status not in _AUTH_BLOCK:
-        sys.exit(f"[ERROR] FMP {full_url} failed (status={status})")
+        detail = f"; diagnostic={_LAST_429_PATH}" if status == 429 else ""
+        safe_url = urlsplit(full_url)
+        endpoint = f"{safe_url.scheme}://{safe_url.netloc}{safe_url.path}"
+        sys.exit(f"[ERROR] FMP {endpoint} failed (status={status}{detail})")
     return data
 
 

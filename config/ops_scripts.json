@@ -5,7 +5,7 @@
       "id": "daily_update",
       "name": "每日資料更新",
       "cmd": "./daily_update.sh",
-      "desc": "Breadth → FTD → Top → FRED → Bridge → Thematic → Watchlist → Nexus（8 步全自動）",
+      "desc": "Breadth → FTD → Top → FRED → Bridge → Thematic/Momentum → Watchlist → Nexus Tier 1+2 → Health gate",
       "cadence": "daily",
       "artifact_globs": [
         "Dashboard/data.json"
