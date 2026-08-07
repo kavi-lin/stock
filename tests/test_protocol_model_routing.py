@@ -24,13 +24,34 @@ def check(name, condition, detail=""):
         failures.append(f"{name}: {detail}")
 
 
-# Primary selection delegates to the shared governor instead of pinning Claude.
-old_pick = ds._mrouter.pick_model
+# Primary selection delegates to the shared governor instead of pinning Claude,
+# and (V4.106.0) comes back with the broker reservation that covers the run.
+old_acquire = ds._mrouter.acquire_protocol_lease
+sentinel_lease = object()
 try:
-    ds._mrouter.pick_model = lambda role="": "codex"
-    check("selection.primary", ds._select_protocol_model() == "codex")
+    ds._mrouter.acquire_protocol_lease = lambda role="": ("codex", sentinel_lease, "broker:codex")
+    selected, lease = ds._select_protocol_model()
+    check("selection.primary", selected == "codex")
+    check("selection.lease", lease is sentinel_lease,
+          "the reservation must reach the caller, or note_run cannot settle it")
 finally:
-    ds._mrouter.pick_model = old_pick
+    ds._mrouter.acquire_protocol_lease = old_acquire
+
+# A run the broker declines must NOT fall through to a default provider: that is
+# how the largest consumer in this repo used to escape governance entirely.
+def _blocked(role=""):
+    raise ds._mrouter.ProtocolBlocked("no capacity")
+
+
+try:
+    ds._mrouter.acquire_protocol_lease = _blocked
+    try:
+        ds._select_protocol_model()
+        check("selection.fail_closed", False, "a blocked run was allowed to start")
+    except ds._mrouter.ProtocolBlocked:
+        check("selection.fail_closed", True)
+finally:
+    ds._mrouter.acquire_protocol_lease = old_acquire
 
 # Codex gets a writable agentic command rooted at this repo, with options before
 # the prompt so prompts beginning with '-' cannot be parsed as CLI flags.

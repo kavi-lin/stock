@@ -430,10 +430,21 @@ _DEFAULT_CONFIG = {
                   "codex":  {"daily_max_calls": 200},
                   "grok":   {"daily_max_calls": 100}},
     "cooldown_hours": 4,
-    # Break News debate uses its OWN two-model pair, independent of the general
-    # primary/secondary above — so the Claude×Gemini divergence can be tuned
-    # without affecting supply-chain / protocol routing.
-    "break_news": {"primary": "gemini", "secondary": "codex"},
+    # Break News debate pair — since V4.109.0 this is the FALLBACK, used only
+    # when the quota broker cannot answer or can name fewer than two providers
+    # that are able to serve (`debater._turn_order`). It stays independent of
+    # the general primary/secondary chain so the Claude×Gemini divergence
+    # AGENTS.md calls a core signal can be tuned without touching
+    # supply-chain / protocol routing.
+    #
+    # The value used to be `gemini` / `codex`, which never matched that stated
+    # intent — nor the docstring of `break_news_pair`'s own caller, which has
+    # always claimed a claude↔gemini fallback.
+    "break_news": {"primary": "claude", "secondary": "gemini"},
+    # V4.106.0 — quota broker. Empty here on purpose: `broker_gate.broker_config`
+    # holds the defaults, and an absent block means "on with defaults" so a config
+    # file written before Phase 7 does not silently opt out of governance.
+    "broker": {},
 }
 
 
@@ -508,16 +519,29 @@ def load_llm_config() -> dict:
             v = str(bn.get(key, "")).lower().strip()
             if v in _RUNNERS:
                 cfg["break_news"][key] = v
+    # V4.106.0 — quota broker settings. Carried through whole rather than
+    # key-whitelisted: `broker_gate.broker_config()` owns their defaults and
+    # validation, and this loader silently dropping a key it had not been taught
+    # about is exactly the trap noted above for the window budget.
+    bk = raw.get("broker")
+    if isinstance(bk, dict):
+        cfg["broker"] = dict(bk)
     return cfg
 
 
 def break_news_pair() -> list[str]:
-    """The two Break-News debaters [primary, secondary] — its own config
-    section, independent of the general primary/secondary chain."""
+    """The configured Break-News debate pair [primary, secondary].
+
+    Since V4.109.0 this is the *fallback* for `debater._turn_order()`, which
+    normally takes the quota broker's live top two. The last-resort literal is
+    claude↔gemini to match AGENTS.md and that caller's docstring; it used to be
+    gemini↔codex, so a config file that failed validation silently produced a
+    pair neither document described.
+    """
     cfg = load_llm_config()
     bn = cfg.get("break_news") or {}
     pair = [bn.get("primary"), bn.get("secondary")]
-    return pair if all(m in _RUNNERS for m in pair) else ["gemini", "codex"]
+    return pair if all(m in _RUNNERS for m in pair) else ["claude", "gemini"]
 
 
 def model_chain(cfg: dict | None = None) -> list[str]:

@@ -8,6 +8,37 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.109.0] — 2026-08-08 — LLM Quota Broker 接管額度：本地預算降為 fallback
+
+### Added
+- `scripts/_shared/broker_client.py`：**vendored** 自 llm-quota-broker(`src/llm_quota_broker/client.py`),逐 byte 相同、不得在此編輯。純 stdlib——本 repo 用系統 `python3` 跑 scripts、沒有 venv,裝不了套件。上游 `lqb client sync --check` 與其測試會擋下漂移。
+- `scripts/_shared/broker_gate.py`：本 repo 這一側的邊界。provider 對照(**`gemini` → broker 的 `agy`**,因為 `run_gemini` 從一開始呼叫的就是 `agy` binary)、token 估算、TTL、可降級角色名單、`usage_for_broker()`(丟掉 `cost_usd`——broker 的 `TokenUsage` 禁止未知欄位,一個多餘的鍵會讓結算變成 4xx 並讓預約漏到 TTL)。
+- `model_router.governed_call()`：給「自己呼叫 driver」的呼叫端用的閘門 context manager。
+- `model_router.acquire_protocol_lease()` / `RunBlocked` / `ProtocolBlocked` / `broker_status()`。
+- `config/llm_config.json` 新增 `broker` 區塊；`llm_drivers.load_llm_config()` 一併整塊帶過(該 loader 是**白名單式**的,不教它就會靜靜丟掉——檔內註解早就寫了這個陷阱)。
+- `tests/test_broker_gate.py`：失效政策契約,對一個 stub broker 跑真 HTTP,不碰任何 vendor CLI。
+
+### Changed
+- **額度真相從 `config/llm_usage.json` 移到 broker**。原因不是本地計數器算錯,是它算不到:台股專案燒的是同一份 claude / codex / agy 訂閱,而它從來讀不到這個檔。兩本帳對同一個池各記各的,加起來永遠不等於真實剩餘。
+- `run_role` / `run_with_fallback` 派工前預約、跑完以實際 token 結算。**角色 → 模型的規則一步未動**：debater 仍為每個 voice 釘住模型,那個意圖以 `preferred_providers` + 其餘全 `forbidden` 送出,broker 只能同意或拒絕,不會替換。
+- `daily_max_calls` / `window_max_calls` 仍**逐筆記錄**,但只在降級路徑**執行**。降級路徑靠這些計數器,不能讓它變瞎;同時兩個 enforcer 對一個池正是這次整合要消滅的東西。
+- **agentic protocol run 首次納管**。V4.86.0 的 review 明確不納管它(原文:「使用者主動點的操作被背景配額擋掉是行為變更,應由使用者決定」);2026-08-08 使用者決定納管。它是本 repo 最大的單一消費者——一次 run 數十到數百個 API turn 卻只記一筆 timestamp——不納管等於 20% 硬性保留只是理論值。`_select_protocol_model()` 改回傳 `(model, lease)` 且**會擋**,dashboard 把擋下轉成可見的 protocol error 而非默默改用預設 provider。
+- Office 的 `_call_claude_text` 與 link digest 的翻譯改走 `governed_call()`。兩者原本直呼 driver、事後才 `note_run()`——事後回報讓計數器誠實,但擋不住任何東西,而 Office 的 retry 等於免費的第二次花費。現在 retry 也各自預約。
+- Break News poller 的 `_model_call_headroom()` 降為**規劃估計**：broker 可達時本地上限不再當 cap(否則 poller 會對著一個沒人執行的計數器自我節流),數字仍留在 `local_headroom` 給狀態面板顯示。
+- **側邊欄設定面板的五個 LLM 下拉全部移除**(主要/次要/備援 + 辯手 A/B),改成每 30 秒輪詢的唯讀讀出:每條派工路徑現在會用哪家 + 該家即時剩餘額度。理由是那些控制項設定的是「主要用罄就降到次要」,而 broker **只會派出還有額度的一家**——那個降級步驟已經不可能發生,留著下拉等於讓人設定一個不存在的行為。指派仍在 `config/llm_config.json`,`POST /api/llm-config` 也仍在,只有 UI 不再寫入。
+- **辯手 A/B 改由 broker 指派**——「目前實際能服務的前兩名」,而不是設定檔裡選好一次就再也不對的固定配對。`debater._turn_order()` 每場辯論問一次 `broker_gate.ranked_models()`(用 `reserve=false` preview,不佔額度),取 rank 1 與 rank 2。broker 答不出來、或它能給的不足兩家時,退回設定檔那對——**一場辯論需要兩個聲音才叫辯論**,回傳單元素清單會讓每場辯論靜靜變成獨白;讓 per-call 閘門去拒絕該拒絕的那一方,落進既有的 `single_voice` / `cli_failures` 路徑,不新增控制流。A/B 對稱(round 1 是平行盲開場),順序只決定 transcript 上誰叫 A。
+- `model_router.broker_status()` 增加 `providers`(即時剩餘額度,經 `broker_gate.provider_quota()` 讀 `/v1/status`)與 `routes`(每條路徑實際會用的 model)。**protocol 那條刻意不預測贏家**:預測要嘛在這裡重做一份 broker 的 scoring(兩份實作會互相矛盾),要嘛每次輪詢都往帳本射一筆 preview decision(把真正的決策淹掉),所以誠實地只列合格名單。broker 連不上時**不顯示上次的百分比**——來自不明時點的數字讀起來像現在的,正是要避免的假精確。
+
+### Fixed
+- **辯論配對的文件與實作長期不一致**。`AGENTS.md`「Claude x Gemini Break News divergence is an intended signal」、`llm_drivers` 預設值正上方的註解、以及 `debater._turn_order()` 的 docstring(「Falls back to claude↔gemini」)三處都說 Claude×Gemini,但三個實作點全是 gemini/codex——包含 `break_news_pair()` 的最後手段字面值,它就寫在那個宣稱 claude↔gemini 的 docstring 呼叫的下一行。設定檔從 `2e0056a` 建檔起是 codex/gemini,`703b3e0` 對調成 gemini/codex,**從未**符合過文件。三處統一為 claude/gemini(現在的角色是 broker 答不出來時的 fallback)。
+- **`broker_gate` 的 `cfg` 預設值會靜靜忽略設定檔**。不帶 `cfg` 呼叫時 `broker_config()` 拿到的是 `{}` 而非 `llm_config.json`,於是 `broker.base_url` / `enabled` 完全不生效。由新增的 `_turn_order()` 測試抓到(它連到了開發機上的真 daemon 而不是 stub)。`debater` 現在顯式傳入。
+
+### Why
+- **失效政策**：預設 fail-closed;只有新聞線(`debate` / `brief` / `link_digest`)可退回本地預算。那三條是連續、非決策性流程,數小時靜默的代價高於本地計數器的不精確,且花費仍受 `llm_config.json` 上限——不是無上限 fallback。
+- **整個整合建立在一個型別區分上**：`BrokerUnavailable`(broker 答不出來)vs `BrokerRefused`(broker 答了「不行」)。降級許可只綁前者。從後者降級等於去花 broker 剛剛拒絕支付的 20% 硬性保留,那正是整套系統存在的唯一理由。程式碼比對型別,不比對訊息字串。
+- 已知限制：protocol run 的事前估算(200k in / 40k out)是**先驗值不是量測值**,刻意取大(資料不足要保守)。跑過幾次後應依 `lqb history` 回調 `broker.protocol_tokens`。`grok` 不在 broker 治理範圍(該端休眠),走到它就是無人治理的花費,已在 `broker_gate.PROVIDER_FOR_MODEL` 明寫。
+- **尚未做**：Dashboard protocol / Break News / Office 的 live smoke test——要真燒額度,另開一輪。
+
 ## [4.108.0] — 2026-08-07 — 第 9 根 anchor（虧損題材股）+ speculative governor：煞車改調速器
 
 ### Added

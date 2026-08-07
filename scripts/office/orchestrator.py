@@ -82,12 +82,30 @@ def is_running(run_id):
 def _call_claude_text(system_prompt, user_prompt, model, timeout):
     """Text-only claude turn: pinned model, no agentic loop, no MCP startup,
     no built-in tools. One retry — headless `claude -p` occasionally fails
-    transiently even on prompts that normally succeed in under a minute."""
+    transiently even on prompts that normally succeed in under a minute.
+
+    V4.106.0: each attempt takes a quota reservation first. This path calls the
+    driver directly rather than through `run_with_fallback`, so before the broker
+    it was reported to the budget afterwards but gated by nothing — and a retry
+    doubled the spend. The Office is a decision-bearing flow, so a broker that
+    cannot answer stops it (fail-closed) rather than falling back to the local
+    counters; the caller already handles a failed `LLMResult`.
+    """
     res = None
     for _attempt in range(2):
-        res = llm_drivers.run_claude(system_prompt, user_prompt, timeout=timeout,
-                                     model=model, max_turns=1, strict_mcp=True,
-                                     no_tools=True)
+        try:
+            with model_router.governed_call("office", "claude",
+                                            system_prompt, user_prompt) as hold:
+                res = llm_drivers.run_claude(system_prompt, user_prompt, timeout=timeout,
+                                             model=model, max_turns=1, strict_mcp=True,
+                                             no_tools=True)
+                hold.settle(res)
+        except model_router.RunBlocked as blocked:
+            res = llm_drivers.LLMResult(
+                agent="claude", parsed=None, raw_text="", raw_stdout="",
+                exit_code=-9, latency_ms=0, parse_status="failed", error=str(blocked))
+            model_router.note_run("claude", False, str(blocked))
+            break
         model_router.note_run("claude", res.exit_code == 0, res.error or "")
         if res.exit_code == 0:
             break

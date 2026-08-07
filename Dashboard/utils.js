@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.108.0';
+  const VERSION = 'V4.109.0';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -474,29 +474,10 @@
             </button>
           </div>
           <div id="settings-panel" class="sidebar-settings hidden">
-            <label class="sidebar-set-row">
-              <span>${isZh ? '主要 LLM' : 'Primary LLM'}</span>
-              <select id="set-llm-primary" class="sidebar-set-select"></select>
-            </label>
-            <label class="sidebar-set-row">
-              <span>${isZh ? '次要 LLM' : 'Secondary LLM'}</span>
-              <select id="set-llm-secondary" class="sidebar-set-select"></select>
-            </label>
-            <label class="sidebar-set-row">
-              <span>${isZh ? '備援 LLM' : 'Tertiary LLM'}</span>
-              <select id="set-llm-tertiary" class="sidebar-set-select"></select>
-            </label>
-            <div class="sidebar-set-hint">${isZh ? '一般呼叫與 Dashboard protocol 共用；啟動時依額度自動降到次要 / 備援' : 'Shared by regular calls and Dashboard protocols; falls back at launch on quota'}</div>
-            <div class="sidebar-set-sub">${isZh ? '突發辯論配對' : 'Break News debate pair'}</div>
-            <label class="sidebar-set-row">
-              <span>${isZh ? '辯手 A' : 'Debater A'}</span>
-              <select id="set-bn-primary" class="sidebar-set-select"></select>
-            </label>
-            <label class="sidebar-set-row">
-              <span>${isZh ? '辯手 B' : 'Debater B'}</span>
-              <select id="set-bn-secondary" class="sidebar-set-select"></select>
-            </label>
-            <div class="sidebar-set-hint">${isZh ? '突發新聞辯論用獨立配對，與上方通用路由分開' : 'Break News debate uses its own pair, separate from general routing'}</div>
+            <div class="sidebar-set-sub">${isZh ? 'LLM 路由' : 'LLM routing'}</div>
+            <div id="llm-routing" class="sidebar-llm-usage"></div>
+            <div class="sidebar-set-hint">${isZh ? '由 quota broker 授權；它只會派出還有額度的一家，所以沒有「降級順序」可設。要改指派請編輯 config/llm_config.json。' : 'Authorised by the quota broker, which only ever assigns a provider that has quota — so there is no fallback order to configure. Edit config/llm_config.json to change assignments.'}</div>
+            <div class="sidebar-set-sub">${isZh ? '本地用量（降級路徑用）' : 'Local usage (degraded path)'}</div>
             <div id="llm-usage" class="sidebar-llm-usage"></div>
           </div>
           <div class="sidebar-version">${VERSION}</div>
@@ -511,27 +492,86 @@
       document.getElementById('settings-toggle')?.addEventListener('click', () =>
         document.getElementById('settings-panel')?.classList.toggle('hidden'));
       UI._paintRiskChip();
-      UI._initLlmSettings();
+      UI._initLlmRouting();
     },
 
-    // ── LLM settings (primary / secondary / tertiary CLI + usage) ────────
-    // Persisted server-side at config/llm_config.json — Python scripts read it,
-    // so this cannot be localStorage. The model_router governor falls back
-    // primary → secondary → tertiary on quota / failure.
-    async _initLlmSettings() {
-      const pri = document.getElementById('set-llm-primary');
-      const sec = document.getElementById('set-llm-secondary');
-      const ter = document.getElementById('set-llm-tertiary');
-      const bnA = document.getElementById('set-bn-primary');
-      const bnB = document.getElementById('set-bn-secondary');
-      if (!pri || !sec || !ter || !bnA || !bnB) return;
-      const opts = [
-        { v: 'claude', label: 'Claude' },
-        { v: 'gemini', label: 'Gemini' },
-        { v: 'codex',  label: 'Codex' },
-        { v: 'grok',   label: 'Grok' },
-      ].map(o => `<option value="${o.v}">${o.label}</option>`).join('');
-      [pri, sec, ter, bnA, bnB].forEach(el => { el.innerHTML = opts; });
+    // ── LLM routing readout (V4.109.0 — read-only) ───────────────────────
+    // The primary / secondary / tertiary and debate-pair dropdowns are gone.
+    // The quota broker is the authority now, and it only ever assigns a
+    // provider that still has quota — so the "fall back to secondary when the
+    // primary is exhausted" ladder those controls configured describes a step
+    // that can no longer happen. What is worth showing instead is what will
+    // actually run and how much is left, polled from the broker.
+    //
+    // Assignments still live in config/llm_config.json (Python scripts read it,
+    // so it was never localStorage) and POST /api/llm-config still works; only
+    // this UI stopped writing to it.
+    async _initLlmRouting() {
+      const routingEl = document.getElementById('llm-routing');
+      if (!routingEl) return;
+      const LABELS = {
+        general:  { zh: '一般呼叫',  en: 'Regular calls' },
+        debate:   { zh: '辯手 A/B',  en: 'Debaters A/B' },
+        protocol: { zh: 'Protocol',  en: 'Protocol' },
+      };
+
+      const pct = (p) => (p === null || p === undefined) ? '—' : `${Number(p).toFixed(0)}%`;
+
+      const renderRouting = (broker) => {
+        const zh = UI.currentLang === 'zh';
+        if (!broker) {
+          // No `broker` key at all — not the same as "switched off". The usual
+          // cause is a dashboard_server still running the pre-V4.109.0 module
+          // (static files reload per request, Python does not), so say the one
+          // thing that fixes it rather than reporting a state nobody chose.
+          routingEl.innerHTML = `<div class="sidebar-llm-row sidebar-llm-cool"><span>`
+            + `${zh ? '讀不到 broker 狀態' : 'no broker status'}</span>`
+            + `<span>${zh ? '請重啟 dashboard_server' : 'restart dashboard_server'}</span></div>`;
+          return;
+        }
+        if (!broker.enabled) {
+          routingEl.innerHTML = `<div class="sidebar-llm-row sidebar-llm-off"><span>`
+            + `${zh ? 'broker 已關閉' : 'broker disabled'}</span><span>${zh ? '走本地預算' : 'local budget'}</span></div>`;
+          return;
+        }
+        if (broker.reachable !== true) {
+          // No last-known percentages on purpose: a number from an unknown time
+          // reads as current and is exactly the false precision to avoid.
+          routingEl.innerHTML = `<div class="sidebar-llm-row sidebar-llm-cool"><span>`
+            + `${zh ? 'broker 連不上' : 'broker unreachable'}</span><span>${zh ? '決策流程停派' : 'decision flows halted'}</span></div>`;
+          return;
+        }
+        const providers = broker.providers || {};
+        const cls = (m) => {
+          const p = providers[m];
+          if (!p) return 'off';
+          if (p.reserve_only || p.cooldown_until) return 'cool';
+          return 'ok';
+        };
+        routingEl.innerHTML = (broker.routes || []).map(route => {
+          const label = (LABELS[route.key] || {})[zh ? 'zh' : 'en'] || route.key;
+          if (route.decided_by === 'broker') {
+            // Deliberately not predicting a winner — see model_router.routes().
+            // The candidates are listed with live quota so the pick is obvious
+            // without this file pretending to know the broker's ranking.
+            const picks = route.picks > 1
+              ? (zh ? `broker 挑前 ${route.picks}` : `broker picks top ${route.picks}`)
+              : (zh ? 'broker 挑' : 'broker picks');
+            const eligible = (route.eligible || [])
+              .map(m => `${m} ${pct((providers[m] || {}).remaining_percent)}`).join(' · ');
+            return `<div class="sidebar-llm-row"><span>${label}</span>`
+              + `<span>${picks}</span></div>`
+              + `<div class="sidebar-llm-tok">${eligible || (zh ? '無合格 provider' : 'no eligible provider')}</div>`;
+          }
+          const model = route.model || '—';
+          const info = providers[model] || {};
+          const flag = info.reserve_only ? (zh ? ' 保留區' : ' reserve-only')
+                     : info.cooldown_until ? (zh ? ' 冷卻中' : ' cooldown') : '';
+          return `<div class="sidebar-llm-row sidebar-llm-${cls(model)}">`
+            + `<span>${label}</span>`
+            + `<span>${model} ${pct(info.remaining_percent)}${flag}</span></div>`;
+        }).join('');
+      };
 
       const renderUsage = (status) => {
         const el = document.getElementById('llm-usage');
@@ -556,37 +596,28 @@
         }).join('');
       };
 
-      try {
-        const cfg = await (await fetch('/api/llm-config')).json();
-        if (cfg.primary)   pri.value = cfg.primary;
-        if (cfg.secondary) sec.value = cfg.secondary;
-        if (cfg.tertiary)  ter.value = cfg.tertiary;
-        const bn = cfg.break_news || {};
-        if (bn.primary)   bnA.value = bn.primary;
-        if (bn.secondary) bnB.value = bn.secondary;
-        renderUsage(cfg.status);
-      } catch (e) { /* keep defaults */ }
-
-      const save = async () => {
+      const refresh = async () => {
         try {
-          const r = await fetch('/api/llm-config', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              primary: pri.value, secondary: sec.value, tertiary: ter.value,
-              break_news: { primary: bnA.value, secondary: bnB.value },
-            }),
-          });
-          const cfg = await r.json().catch(() => ({}));
-          if (!r.ok) throw new Error((cfg || {}).error || r.status);
+          const cfg = await (await fetch('/api/llm-config')).json();
+          renderRouting((cfg.status || {}).broker);
           renderUsage(cfg.status);
-          UI.showToast((UI.currentLang === 'zh' ? 'LLM 設定已儲存' : 'LLM settings saved'), 'info', 2200);
         } catch (e) {
-          UI.showToast((UI.currentLang === 'zh' ? 'LLM 設定儲存失敗: ' : 'LLM settings save failed: ')
-            + e.message, 'error', 3200);
+          // A dashboard-server hiccup is not a quota statement. Leave whatever
+          // is on screen and try again next tick rather than inventing a state.
         }
       };
-      [pri, sec, ter, bnA, bnB].forEach(el => el.addEventListener('change', save));
+
+      await refresh();
+      // Quota moves while the page sits open, and it is the number the panel
+      // exists to show. Poll only while the panel is actually visible — a
+      // sidebar nobody opened does not need to keep asking the broker.
+      if (UI._llmRoutingTimer) clearInterval(UI._llmRoutingTimer);
+      UI._llmRoutingTimer = setInterval(() => {
+        if (!document.getElementById('settings-panel')?.classList.contains('hidden')) refresh();
+      }, 30000);
+      document.getElementById('settings-toggle')?.addEventListener('click', () => {
+        if (!document.getElementById('settings-panel')?.classList.contains('hidden')) refresh();
+      });
     },
 
     // ── Risk Tolerance (sent with every invest protocol invocation) ──────

@@ -1,8 +1,27 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-07 (v4.108.0)
+> **Last Updated**: 2026-08-08 (v4.109.0)
 
 ---
+
+## ✅ Done (v4.109.0) — LLM Quota Broker 接管額度
+
+- [x] `broker_client.py`(vendored)+ `broker_gate.py`(本 repo 的邊界)+ `model_router` 全面改走預約→執行→結算。
+- [x] 本地 daily / rolling-window 預算降為降級路徑專用;仍逐筆記錄。
+- [x] agentic protocol run 納管(V4.86.0 明確保留給使用者決定的那一項,2026-08-08 已決定)。
+- [x] Office `_call_claude_text` 與 link digest 翻譯補上閘門(原本只有事後回報)。
+- [x] `tests/test_broker_gate.py` 鎖住失效政策。
+- [x] 側邊欄五個 LLM 下拉移除,改唯讀讀出(每 30s,面板開著才輪詢)。
+
+- [x] 辯手 A/B 改由 broker 指派(目前能服務的前兩名);設定檔那對降為 fallback,並依 `AGENTS.md` 改回 claude+gemini。
+
+- [ ] **protocol 的合格名單只有 claude + gemini**。chain 是 primary=claude / secondary=gemini / **tertiary=claude**,去重後 codex 根本沒進名單——即使它有額度也不會被派到 protocol run。要讓 codex 有資格就把 tertiary 改成 codex。(辯論那條沒有這個問題:它問的是全部三家。)
+- [ ] **快照過期會讓 broker 拒絕全部派工**。2026-08-08 實測:快照 1.5 小時舊 → 三家全部 `stale_snapshot` → `no_capacity`。這是 freshness 閘門的正確行為,但**操作上看起來像「額度用完」**。目前只能手動 `lqb refresh`。broker 的 LaunchAgent 沒有排程刷新,值得在 Phase 9 操作手冊處理(或讓 broker 自己定期 probe)。
+
+- [ ] **live smoke test 三條線**:Dashboard protocol、Break News、Office。要真燒額度,須人在場;先用 `lqb status` 確認三家都不在 reserve-only。
+- [ ] **protocol run 的 token 估算要回調**:`config/llm_config.json` 的 `broker.protocol_tokens` 目前是 200k/40k **先驗值,不是量測值**。跑過 3–5 次真實 protocol run 後用 `lqb history` 看實際分布再改;改大改小都要有數字支撐,不能憑一次觀感。
+- [ ] **`grok` 仍在 chain 內但無人治理**:broker 端休眠(Phase 3 延後——weekly 池只能靠登入後網頁 DOM 取得)。要嘛從 `llm_config.json` 的 chain 拿掉,要嘛接受它是唯一不受 20% 硬性保留約束的出口。目前是後者,且只寫在 `broker_gate.PROVIDER_FOR_MODEL` 的註解裡。
+- [ ] **daemon 沒起來時只有 stderr 一行**:若實際使用常忘記起 daemon,考慮讓 Break News 狀態面板顯示 `broker.reachable=false` 橫幅(`model_status()` 已經帶這個欄位)。
 
 ## ✅ Done (v4.108.0) — 第 9 根 anchor（虧損題材股）+ speculative governor
 

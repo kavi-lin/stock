@@ -232,18 +232,26 @@ def _protocol_command(model, prompt, claude_model=None):
 
 
 def _select_protocol_model():
-    """Resolve the launch-time provider from the shared primary LLM config.
+    """Resolve the launch-time provider AND reserve its quota. Returns (model, lease).
 
-    `pick_model()` preserves the UI's documented primary → secondary →
-    tertiary availability policy. Agentic protocols cannot safely replay after a
-    half-completed failure, so selection happens once before the subprocess starts.
+    `acquire_protocol_lease()` preserves the UI's documented primary → secondary
+    → tertiary availability policy, but settles it against the quota broker's
+    view of what is actually left rather than a local call count. Agentic
+    protocols cannot safely replay after a half-completed failure, so both the
+    selection and the reservation happen once, before the subprocess starts.
+
+    Raises when the run must not start — the broker unreachable, or no provider
+    with capacity outside its 20% hard reserve. The caller turns that into a
+    visible protocol error. It must not be swallowed into a default provider,
+    which is what this function used to do and what left the largest consumer in
+    this repo effectively ungoverned.
+
+    Pass `lease` back to `note_run()` so the hold is settled with real tokens.
     """
     if MODEL_ROUTER_AVAILABLE:
-        try:
-            return _mrouter.pick_model("agentic_protocol")
-        except Exception as e:
-            sys.stderr.write(f"[model_router] protocol selection failed: {e}\n")
-    return "claude"
+        model, lease, _note = _mrouter.acquire_protocol_lease("agentic_protocol")
+        return model, lease
+    return "claude", None
 
 
 def _adapt_protocol_prompt(model, prompt):
@@ -912,10 +920,25 @@ def run_protocol(name, params=None):
         prompt = PROTOCOL_PROMPTS[name]
         for _k, _v in (params or {}).items():
             prompt = prompt.replace("{" + _k + "}", str(_v))
-        # Select once from the shared primary → secondary → tertiary chain. We do
-        # not replay a partially completed agentic run on another provider: required
-        # artifact + validator gates below are the safe failure boundary.
-        proto_model = _select_protocol_model()
+        # Select once from the shared primary → secondary → tertiary chain, and
+        # reserve the quota before spending it. We do not replay a partially
+        # completed agentic run on another provider: required artifact +
+        # validator gates below are the safe failure boundary.
+        #
+        # A refusal here ends the run before it starts. That is deliberate: this
+        # path is the largest single consumer in the repo, and it is the one the
+        # 20% hard reserve exists to keep out of the last fifth of a window.
+        proto_lease = None
+        try:
+            proto_model, proto_lease = _select_protocol_model()
+        except Exception as e:
+            with _protocol_lock:
+                _protocol_state["status"]      = "error"
+                _protocol_state["error"]       = f"quota broker: {e}"
+                _protocol_state["ended_at"]    = _now_iso()
+                _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
+            _protocol_proc["p"] = None
+            return
         prompt = _adapt_protocol_prompt(proto_model, prompt)
         claude_model = (_protocol_model_for(name) if proto_model == "claude" else None)
         rc = -1
@@ -989,7 +1012,9 @@ def run_protocol(name, params=None):
                         telemetry_usage = _tok or {}
                     except Exception:
                         _tok = None
-                    _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail, tokens=_tok)
+                    _mrouter.note_run(proto_model, rc == 0, "" if rc == 0 else _tail,
+                                      tokens=_tok, lease=proto_lease)
+                    proto_lease = None   # settled; the cleanup below must not cancel it
                 except Exception:
                     pass
 
@@ -1126,6 +1151,16 @@ def run_protocol(name, params=None):
                 _protocol_state["ended_at"]  = _now_iso()
                 _protocol_state["elapsed_sec"] = int((datetime.now() - start).total_seconds())
             _protocol_proc["p"] = None
+        finally:
+            # A hold that outlives its run makes every other project — and the
+            # next protocol launch — see less headroom than really exists. The
+            # broker reclaims it at TTL regardless, but six hours is a long time
+            # to under-report a whole provider.
+            if proto_lease is not None and MODEL_ROUTER_AVAILABLE:
+                try:
+                    proto_lease.cancel("protocol run ended without settling")
+                except Exception:
+                    pass
 
     threading.Thread(target=_run, daemon=True).start()
     return job_id, None

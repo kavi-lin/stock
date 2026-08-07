@@ -1,29 +1,46 @@
-"""Multi-model governance — role-based routing, per-model daily call budget,
-rolling-window call budget, quota cooldown, auto-fallback.
+"""Multi-model governance — Broker-gated routing, with the local per-model daily
+call budget, rolling-window call budget and quota cooldown kept as the fallback.
+
+**The LLM Quota Broker is the quota authority (Phase 7, V4.106.0).** The counters
+in this file used to be the whole story, and could not be: the Taiwan-stock
+project spends the same three subscriptions and has never been able to read
+`config/llm_usage.json`. Every governed call now takes a reservation from the
+broker first and settles it with real token counts afterwards, so both projects
+draw from one ledger and one 20% hard reserve.
+
+What that changed here, and what it did not:
+
+  * `run_role` / `run_with_fallback` / `pick_model` reserve before spending and
+    settle after. A run the broker declines does not happen.
+  * The local budgets still RECORD every call — the degraded path below runs on
+    them — but they no longer BLOCK while the broker is answering. Two enforcers
+    against one pool is the problem this integration exists to remove.
+  * Role → model policy did not move. This file still decides which providers
+    are acceptable for a role; it tells the broker, and the broker picks among
+    them on quota, confidence and success rate.
+
+Failure policy is in `scripts/_shared/broker_gate.py`: fail-closed everywhere
+except the news line, and never a fallback when the broker answered "no capacity"
+rather than failing to answer. See that module's docstring.
 
 Every governed model call goes through `run_role()` / `run_with_fallback()`:
-they walk the configured fallback chain (primary → secondary → tertiary), skip
-models that are disabled / over their daily budget / over their rolling-window
-budget / in a quota cooldown, and on a quota or hard failure transparently fall
-back to the next model.
+they resolve the role's acceptable providers, ask the broker to reserve one of
+them, run it, and settle with the tokens it actually used.
 
-Two independent budgets, both enforced (V4.84.0):
+Two independent local budgets, enforced only on the degraded path (V4.84.0,
+demoted to a fallback in V4.106.0):
   * `daily_max_calls`  — resets on UTC date rollover
   * `window_max_calls` over `window_hours` — a rolling window that does NOT reset
     at midnight, because the provider's session window does not either.
     Absent / 0 = uncapped, same convention as the daily budget.
 
-**What the window does and does not govern** (corrected in V4.86.0 — the original
-claim that it makes "protocol runs self-throttle" was wrong on both halves):
-  * It DOES gate `run_role()` / `run_with_fallback()` / `pick_model()`, i.e. the
-    single-shot governed calls, and it removes an exhausted model from the chain.
-  * It DOES select the provider for the agentic protocol subprocess path through
-    `pick_model()` at launch. The run only reports its outcome afterwards through
-    `note_run()`; there is no mid-run provider replay. That records **one** timestamp
-    for a run that may spend dozens to hundreds of API turns, so the window still
-    under-counts the largest consumer by design.
-    Treat `window_calls` as "governed calls", not "API turns"; sizing the cap as if it
-    were the provider's turn budget will not protect that path.
+**What the local window does and does not govern** (corrected in V4.86.0 — the
+original claim that it makes "protocol runs self-throttle" was wrong on both
+halves). It counts **governed calls, not API turns**: an agentic protocol run
+records one timestamp for dozens to hundreds of API turns, so sizing the cap as
+if it were the provider's turn budget never protected that path. That
+undercount is exactly what the broker's token-level accounting replaces, and it
+is why the local budgets are a fallback rather than a second opinion.
 
 Usage counters + cooldowns persist in `config/llm_usage.json`. The daily counters
 auto-reset on UTC date rollover; `call_timestamps` deliberately survive that reset
@@ -55,6 +72,10 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+from scripts._shared import broker_gate  # noqa: E402
+from scripts._shared.broker_gate import (  # noqa: E402
+    BrokerError, BrokerRefused, BrokerUnavailable,
+)
 from scripts.break_news.llm_drivers import (  # noqa: E402
     LLMResult, LLM_TIMEOUT_SEC, VALID_MODELS, load_llm_config, model_chain, run_llm,
 )
@@ -317,10 +338,15 @@ def _in_cooldown(entry: dict) -> bool:
 
 
 def model_available(model: str, cfg: dict, usage: dict) -> tuple[bool, str]:
-    """Return (available, reason-if-not).
+    """Return (available, reason-if-not) according to the LOCAL budgets.
 
-    The two budgets are independent gates: `budget` = the UTC-day cap, `window` = the
-    rolling session-window cap. Either alone takes the model out of the chain.
+    Since V4.106.0 this is the degraded path's gate, not the primary one: while
+    the broker is answering, it decides. `_run_chain` consults this only when no
+    broker reservation was taken — the broker is switched off, the model is one
+    it does not govern, or a news-line role is running degraded.
+
+    The two local budgets remain independent gates: `budget` = the UTC-day cap,
+    `window` = the rolling session-window cap. Either alone takes the model out.
     """
     if not cfg.get("enabled", {}).get(model, True):
         return False, "disabled"
@@ -374,7 +400,82 @@ def model_status() -> dict:
             "tokens": e.get("tokens") or _blank_tokens(),
             **window_state(m, cfg, usage),
         }
-    return {"date": usage["date"], "chain": model_chain(cfg), "models": models}
+    return {
+        "date": usage["date"],
+        "chain": model_chain(cfg),
+        "models": models,
+        "broker": broker_status(cfg),
+    }
+
+
+def broker_status(cfg: dict | None = None) -> dict:
+    """The quota authority's live state — for `--status` and the sidebar.
+
+    Reported alongside the local counters rather than replacing them, because
+    while the broker is up those counters describe the fallback, not the budget
+    actually in force. An operator reading only `calls: 24 / 300` would otherwise
+    conclude there is plenty of room when the broker is refusing everything.
+
+    `providers` carries live remaining quota per model; `routes` says which model
+    each dispatch path will actually use. Those two together are what the sidebar
+    shows now that it no longer offers a choice — the broker only ever assigns a
+    provider that has quota, so a primary → secondary → tertiary ladder was
+    describing a fallback that cannot happen.
+    """
+    cfg = cfg if isinstance(cfg, dict) else load_llm_config()
+    settings = broker_gate.broker_config(cfg)
+    state = {
+        "enabled": settings["enabled"],
+        "authority": settings["enabled"],
+        "reachable": None,
+        "degradable_roles": list(settings["degradable_roles"]),
+        "error": None,
+        "providers": {},
+        "routes": routes(cfg),
+    }
+    if not settings["enabled"]:
+        return state
+    client = broker_gate.broker_client(cfg)
+    state["base_url"] = getattr(client, "base_url", None)
+    try:
+        client.health()
+        state["reachable"] = True
+    except BrokerError as exc:
+        state["reachable"] = False
+        state["error"] = str(exc)[:300]
+        return state
+    state["providers"] = broker_gate.provider_quota(cfg)
+    return state
+
+
+def routes(cfg: dict | None = None) -> list[dict]:
+    """Which model each dispatch path will use right now.
+
+    Only `general` is deterministic: it is pinned by configuration and the
+    broker may approve or refuse it, never substitute. The Break News debate
+    and the agentic protocol are assigned by the broker on real remaining
+    quota, so for those the honest answer is the candidate set, not a
+    prediction.
+
+    Predicting a winner here would mean either re-implementing the broker's
+    scoring (two implementations that can disagree) or firing a preview
+    decision into its ledger on every UI poll — and a decision log buried under
+    status-panel traffic can no longer answer "why did nothing run at 03:00".
+    The debate path does ask for the real ranking, but once per debate, not
+    once per poll.
+    """
+    cfg = cfg if isinstance(cfg, dict) else load_llm_config()
+    chain = model_chain(cfg)
+    pair = cfg.get("break_news") or {}
+    governed = [m for m in VALID_MODELS if broker_gate.provider_for(m)]
+    return [
+        {"key": "general", "model": chain[0] if chain else None, "decided_by": "config"},
+        {"key": "debate", "model": None, "decided_by": "broker", "picks": 2,
+         "eligible": governed,
+         "fallback": [pair.get("primary"), pair.get("secondary")]},
+        {"key": "protocol", "model": None, "decided_by": "broker", "picks": 1,
+         "eligible": [m for m in chain if broker_gate.provider_for(m)]},
+    ]
 
 
 def model_headroom(model: str, cfg: dict | None = None, usage: dict | None = None) -> tuple[int | None, bool, str]:
@@ -439,6 +540,196 @@ def _record(model: str, result: LLMResult, cfg: dict) -> None:
         _save_usage(usage)
 
 
+# ──────────────────────── broker gate (V4.106.0) ────────────────────────────
+class RunBlocked(RuntimeError):
+    """The quota broker did not authorise this call. Carries the operator-facing why."""
+
+
+class ProtocolBlocked(RunBlocked):
+    """`RunBlocked` for the agentic protocol path, named for clearer tracebacks."""
+
+
+def _task_type(role: str) -> str:
+    """Role name → a ledger task type the broker's schema accepts."""
+    cleaned = "".join(
+        character if character.isalnum() or character in "_-" else "-"
+        for character in str(role or "call").strip().lower()
+    ).lstrip("-_")
+    return cleaned or "call"
+
+
+def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
+             protocol: bool = False):
+    """Reserve broker capacity for one call. Returns (lease, note, allowed).
+
+    `allowed=False` means do not run: either the broker refused (no capacity) or
+    it could not answer and this role is not one permitted to degrade.
+
+    `lease=None` with `allowed=True` means run without a broker hold, which
+    happens in exactly three situations — the broker is switched off for this
+    project, the model is one the broker does not govern (`grok`), or a news-line
+    role is degrading because the broker is unreachable. In all three the local
+    budget is the only remaining gate, so the caller applies it.
+    """
+    client = broker_gate.broker_client(cfg)
+    if client is None:
+        return None, "broker:off", True
+    provider = broker_gate.provider_for(model)
+    if provider is None:
+        return None, f"broker:ungoverned({model})", True
+
+    if protocol:
+        estimated_input, estimated_output = broker_gate.protocol_estimate(cfg)
+        ttl = broker_gate.PROTOCOL_TTL_SECONDS
+        task_type = "agentic_protocol"
+        # The whole chain goes in as an UNORDERED acceptable set, and the broker
+        # picks. Its `preference` component is a boolean "is this provider in the
+        # caller's list", not a rank, so listing all three cancels that component
+        # out entirely (each scores 1.0) and the winner is decided on headroom
+        # 0.35 + confidence + success rate.
+        #
+        # **The UI's primary → secondary → tertiary order therefore does not
+        # apply to a protocol run.** That is a deliberate 2026-08-08 decision,
+        # not an oversight: a protocol run is the largest single consumer here,
+        # and which provider has quota left matters more than which one was
+        # nominated last week. Single-shot calls are the opposite — they pin the
+        # role's model and forbid the rest, so there the UI is absolute.
+        # Changing this back means listing only `chain[0]`, forbidding the rest,
+        # and retrying down the chain on `BrokerRefused`.
+        acceptable = [broker_gate.provider_for(m) for m in model_chain(cfg)]
+        acceptable = [p for p in acceptable if p]
+        preferred = acceptable or [provider]
+        forbidden: list[str] = []
+    else:
+        estimated_input, estimated_output = broker_gate.estimate_tokens(role, *prompts, cfg=cfg)
+        ttl = broker_gate.SINGLE_CALL_TTL_SECONDS
+        task_type = _task_type(role)
+        # A single-shot call is pinned: the debater assigns a model per voice on
+        # purpose, and substituting one silently would change what the committee
+        # is, not just where its quota came from. Everything else is forbidden so
+        # the broker either grants this provider or refuses.
+        preferred = [provider]
+        forbidden = [p for p in broker_gate.PROVIDER_FOR_MODEL.values() if p != provider]
+
+    try:
+        lease = client.acquire(
+            task_id=broker_gate.new_task_id(role),
+            task_type=task_type,
+            estimated_input_tokens=estimated_input,
+            estimated_output_tokens=estimated_output,
+            preferred_providers=preferred,
+            forbidden_providers=forbidden,
+            reservation_ttl_seconds=ttl,
+        )
+    except BrokerRefused as exc:
+        # The broker answered. Never degrade from this: the answer is that the
+        # quota it would take is inside the hard reserve.
+        return None, f"broker:refused({exc.code})", False
+    except BrokerUnavailable as exc:
+        if broker_gate.is_degradable(role, cfg):
+            sys.stderr.write(f"[broker] {role}: unavailable ({exc}); using the local budget\n")
+            return None, "broker:unavailable-degraded", True
+        sys.stderr.write(f"[broker] {role}: unavailable ({exc}); not running (fail-closed)\n")
+        return None, "broker:unavailable", False
+    except BrokerError as exc:
+        # A malformed request is this repo's bug. Degrading would hide it behind
+        # months of quietly ungoverned spending.
+        sys.stderr.write(f"[broker] {role}: request rejected ({exc}); not running\n")
+        return None, "broker:rejected", False
+    return lease, f"broker:{lease.provider}", True
+
+
+def _settle(lease, model: str, result: LLMResult) -> None:
+    """Report a finished call to the broker. Never raises into the caller.
+
+    A settlement that cannot be delivered leaves the hold to expire at its TTL.
+    That is a worse outcome than settling — until it expires, the other project
+    sees less headroom than really exists — but it is not a reason to fail a call
+    whose answer is already in hand.
+    """
+    if lease is None:
+        return
+    error_class = None
+    if result.exit_code != 0 or result.parsed is None:
+        if is_quota_error(result):
+            error_class = "quota"
+        elif "timeout" in (result.error or "").lower():
+            error_class = "timeout"
+        elif result.exit_code != 0:
+            error_class = "transient"
+        else:
+            # Ran fine, produced nothing parseable.
+            error_class = "invalid_output"
+    try:
+        lease.complete(
+            usage=broker_gate.usage_for_broker({
+                "input_tokens": getattr(result, "input_tokens", 0),
+                "output_tokens": getattr(result, "output_tokens", 0),
+                "cache_read_tokens": getattr(result, "cache_read_tokens", 0),
+                "cache_write_tokens": getattr(result, "cache_write_tokens", 0),
+            }),
+            exit_code=result.exit_code,
+            error_class=error_class,
+            error_detail=(result.error or "")[:2000] or None,
+            model=model,
+        )
+    except BrokerError as exc:
+        sys.stderr.write(f"[broker] settle failed for {model}: {exc}\n")
+
+
+def _release(lease, reason: str) -> None:
+    """Drop a hold for a call that never ran. Best-effort, same reasoning as above."""
+    if lease is None:
+        return
+    try:
+        lease.cancel(reason)
+    except BrokerError as exc:
+        sys.stderr.write(f"[broker] cancel failed: {exc}\n")
+
+
+class _Hold:
+    """A reservation handed to a caller that runs the CLI itself."""
+
+    def __init__(self, lease, model: str, note: str) -> None:
+        self.lease = lease
+        self.model = model
+        self.note = note
+
+    def settle(self, result: LLMResult) -> None:
+        """Report the finished call. Safe to call once; ignored afterwards."""
+        _settle(self.lease, self.model, result)
+        self.lease = None
+
+
+@contextlib.contextmanager
+def governed_call(role: str, model: str, *prompts: str):
+    """Reserve quota for a call this module does not make itself.
+
+    Several call sites drive a driver directly — the Office pins a Claude model
+    and turns off its tools, the link digest is pinned to Gemini — and used to
+    report the spend afterwards through `note_run()`. Reporting after the fact
+    keeps the local counters honest but cannot stop anything, so those calls were
+    spending quota no reservation covered. This is the same gate `_run_chain`
+    applies, in a form those sites can wrap around their own call::
+
+        with governed_call("office", "claude", system_prompt, user_prompt) as hold:
+            result = llm_drivers.run_claude(...)
+            hold.settle(result)
+
+    Raises :class:`RunBlocked` when the call must not happen. An unsettled hold
+    is cancelled on the way out, so no path leaks one.
+    """
+    cfg = load_llm_config()
+    lease, note, allowed = _acquire(role, model, cfg, prompts=prompts)
+    if not allowed:
+        raise RunBlocked(f"the quota broker did not authorise this {role} call ({note})")
+    hold = _Hold(lease, model, note)
+    try:
+        yield hold
+    finally:
+        _release(hold.lease, "caller did not settle")
+
+
 # ─────────────────────────── routing ────────────────────────────────────────
 def _run_chain(preferred: str | None, role: str, system_prompt: str,
                user_prompt: str, timeout: int) -> LLMResult:
@@ -453,26 +744,44 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
     tried: list[str] = []
     last: LLMResult | None = None
     for model in order:
-        usage = _load_usage(cfg)
-        avail, reason = model_available(model, cfg, usage)
-        if not avail:
-            tried.append(f"{model}:skip({reason})")
+        lease, broker_note, allowed = _acquire(
+            role, model, cfg, prompts=(system_prompt, user_prompt))
+        if not allowed:
+            tried.append(f"{model}:skip({broker_note})")
             continue
-        result = run_llm(model, system_prompt, user_prompt, timeout=timeout)
+        if lease is None:
+            # No hold was taken, so the local budget is the only gate left.
+            usage = _load_usage(cfg)
+            avail, reason = model_available(model, cfg, usage)
+            if not avail:
+                tried.append(f"{model}:skip({broker_note},{reason})")
+                continue
+        else:
+            # Defensive: with everything else forbidden the broker can only grant
+            # what was asked for, but if that ever widens, run what it granted.
+            model = broker_gate.MODEL_FOR_PROVIDER.get(lease.provider, model)
+
+        try:
+            result = run_llm(model, system_prompt, user_prompt, timeout=timeout)
+        except BaseException:
+            _release(lease, "the call raised before producing a result")
+            raise
         _record(model, result, cfg)
+        _settle(lease, model, result)
         if result.exit_code == 0 and result.parsed is not None:
             result.model_used = model
             result.fell_back = bool(tried)
-            result.route_note = f"role={role} " + " ".join(tried + [f"{model}:ok"])
+            result.route_note = f"role={role} " + " ".join(
+                tried + [f"{model}:ok({broker_note})"])
             return result
-        tried.append(f"{model}:fail")
+        tried.append(f"{model}:fail({broker_note})")
         last = result
 
     if last is None:
         last = LLMResult(
             agent=(order[0]), parsed=None, raw_text="", raw_stdout="",
             exit_code=-9, latency_ms=0, parse_status="failed",
-            error="all models unavailable (disabled / over budget / in cooldown)")
+            error="no model could run: " + " ".join(tried))
     last.model_used = getattr(last, "agent", order[0])
     # Nothing succeeded — the caller got no substitute model, so this is a
     # failure, not a fallback. (fell_back=True here previously mislabeled
@@ -483,9 +792,13 @@ def _run_chain(preferred: str | None, role: str, system_prompt: str,
 
 
 def pick_model(role: str = "protocol") -> str:
-    """First available model in the chain — for spawning a long subprocess
-    (e.g. an agentic protocol) where run_role's call-and-fallback doesn't fit.
-    Falls back to chain[0] when every model is unavailable."""
+    """First locally-available model in the chain. Takes NO broker reservation.
+
+    Selection only — kept for callers that want to know which provider would be
+    chosen without committing to spend. A long subprocess must use
+    :func:`acquire_protocol_lease` instead, which reserves the quota it is about
+    to spend and can refuse.
+    """
     cfg = load_llm_config()
     chain = model_chain(cfg)
     usage = _load_usage(cfg)
@@ -496,11 +809,56 @@ def pick_model(role: str = "protocol") -> str:
     return chain[0] if chain else "gemini"
 
 
-def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = None) -> None:
-    """Record a protocol / long-run subprocess against `model`'s daily budget;
-    trip a cooldown when `error_text` looks like a quota wall. `tokens` (parsed
-    from the run's stream-json `result` event) is added to the model's daily
-    token totals when supplied."""
+def acquire_protocol_lease(role: str = "agentic_protocol") -> tuple[str, object | None, str]:
+    """Reserve quota for one agentic protocol run: returns (model, lease, note).
+
+    **The broker chooses the provider here, and the UI's primary → secondary →
+    tertiary order does not apply** (2026-08-08 decision — see the note in
+    :func:`_acquire`). Every chain member is offered as an equally acceptable
+    candidate and the winner is the one with real remaining quota, because a
+    protocol run is the largest single consumer in this repo. Single-shot calls
+    keep the opposite rule: there the UI is absolute and the broker may only
+    approve or refuse.
+
+    `pick_model()` below is a *fallback only* — it names a provider for the case
+    where the configured chain maps to nothing the broker governs. When the
+    broker answers, its choice replaces it.
+
+    Raises :class:`ProtocolBlocked` when the run must not start. Until V4.106.0
+    this path was deliberately never blocked, on the grounds that stopping a
+    button the operator just pressed is a behaviour change that was theirs to
+    approve. They approved it on 2026-08-08: a protocol run is the single
+    largest consumer here, and letting it through unreserved is what makes the
+    hard reserve theoretical. Blocking is loud and explains itself, which is the
+    part that matters.
+
+    `lease` is `None` when the broker is switched off for this project; the run
+    then proceeds under the local budget exactly as it used to. Pass whatever
+    comes back to :func:`note_run` so the hold is settled with real tokens.
+    """
+    cfg = load_llm_config()
+    model = pick_model(role)
+    lease, note, allowed = _acquire(role, model, cfg, protocol=True)
+    if not allowed:
+        raise ProtocolBlocked(
+            f"the quota broker did not authorise this run ({note}). "
+            "Check `lqb status`; the daemon may be down, or every provider is "
+            "inside its 20% hard reserve.")
+    if lease is not None:
+        model = broker_gate.MODEL_FOR_PROVIDER.get(lease.provider, model)
+    return model, lease, note
+
+
+def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = None,
+             lease: object | None = None) -> None:
+    """Record a protocol / long-run subprocess and settle its broker reservation.
+
+    The local counters are updated whatever happens: they are what the degraded
+    path runs on, so they must not go blind while the broker is healthy. When
+    `lease` is supplied (from :func:`acquire_protocol_lease`) the hold is settled
+    with the tokens the run actually reported, releasing the difference between
+    the estimate and reality.
+    """
     cfg = load_llm_config()
     with _usage_write_lock():
         usage = _load_usage(cfg)
@@ -514,6 +872,30 @@ def note_run(model: str, ok: bool, error_text: str = "", tokens: dict | None = N
             hrs = float(cfg.get("cooldown_hours", 4))
             e["cooldown_until"] = (_now() + timedelta(hours=hrs)).isoformat()
         _save_usage(usage)
+
+    if lease is None:
+        return
+    error_class = None
+    if not ok:
+        # Only a real quota wall may say `quota`: the broker puts the provider
+        # into cooldown on that word, so a mislabelled timeout would sideline a
+        # healthy provider for hours.
+        if error_text and _QUOTA_RE.search(error_text):
+            error_class = "quota"
+        elif "timeout" in (error_text or "").lower():
+            error_class = "timeout"
+        else:
+            error_class = "transient"
+    try:
+        lease.complete(
+            usage=broker_gate.usage_for_broker(tokens),
+            exit_code=0 if ok else 1,
+            error_class=error_class,
+            error_detail=(error_text or "")[:2000] or None,
+            model=model,
+        )
+    except BrokerError as exc:
+        sys.stderr.write(f"[broker] settle failed for protocol run on {model}: {exc}\n")
 
 
 def run_role(role: str, system_prompt: str, user_prompt: str,

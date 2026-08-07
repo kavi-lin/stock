@@ -38,6 +38,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.break_news import store, prompts  # noqa: E402
 from scripts.break_news.llm_drivers import (  # noqa: E402, F401
     run_llm, load_llm_config, break_news_pair, LLMResult)
+from scripts._shared import broker_gate  # noqa: E402
 from scripts._shared.model_router import run_with_fallback  # noqa: E402
 
 MAX_ROUNDS = int(os.environ.get("BREAK_NEWS_MAX_ROUNDS", "2"))
@@ -54,9 +55,29 @@ _MODEL_NAMES = {"claude": "Claude", "gemini": "Gemini", "codex": "Codex"}
 
 
 def _turn_order() -> list[str]:
-    """The two debaters — read from the dedicated `break_news` config section
-    (independent of the general primary/secondary chain). Falls back to
-    claude↔gemini if that section is missing/invalid."""
+    """The two debaters — the quota broker's current top two, best first.
+
+    V4.109.0: this used to be a fixed pair in `config/llm_config.json`, chosen
+    once and then wrong every time a provider ran out. The broker ranks what can
+    actually serve *right now*, across both projects that share these
+    subscriptions, so it assigns A and B.
+
+    Falls back to the configured pair when the broker cannot answer, or when it
+    names fewer than two: a debate needs two voices to be a debate, and handing
+    back a one-element list here would quietly turn every debate into a
+    monologue. The per-call gate then refuses whichever voice it must, which
+    lands in the existing `single_voice` / `cli_failures` paths rather than in a
+    new one.
+
+    A and B are symmetric — round 1 is two blind parallel openers — so the order
+    only decides which model is labelled A in the transcript.
+    """
+    # `cfg` is passed explicitly: without it `broker_gate` falls back to its own
+    # defaults and silently ignores the `broker` block in llm_config.json —
+    # including a base_url or an `enabled: false` the operator set there.
+    ranked = broker_gate.ranked_models("debate", count=2, cfg=load_llm_config())
+    if ranked is not None and len(ranked) >= 2:
+        return ranked
     return break_news_pair()
 
 

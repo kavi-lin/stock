@@ -193,10 +193,22 @@ def _voice_order(preferred: str, chain: list[str]) -> list[str]:
 
 
 def _model_call_headroom(pair: list[str]) -> dict:
+    """Admission capacity for new debates, in LLM-call units.
+
+    V4.106.0 — a *planning* estimate, no longer the gate. The quota broker
+    decides at dispatch time, in tokens, across both projects that share these
+    subscriptions. What remains here is the local call budget, which since Phase
+    7 only binds on the degraded path; while the broker is reachable it is
+    deliberately not treated as a cap, or the poller would throttle itself
+    against a counter nothing else enforces any more. The counts stay in the
+    response regardless, because the Break News status panel displays them.
+    """
     cfg = model_router.load_llm_config()
     status = model_router.model_status()
     chain = model_router.model_chain(cfg)
     usage_date = status.get("date")
+    broker = status.get("broker") or {}
+    broker_governs = bool(broker.get("enabled")) and broker.get("reachable") is True
     details = {}
     voice_headrooms: list[int] = []
     fallback_backed = False
@@ -206,12 +218,20 @@ def _model_call_headroom(pair: list[str]) -> dict:
         selected = None
         for model in order:
             headroom, available, reason = model_router.model_headroom(model, cfg=cfg)
+            local_headroom = headroom
             model_state = (status.get("models") or {}).get(model, {})
+            if broker_governs:
+                # `None` means "no local cap in force", which is the truth while
+                # the broker is the authority. `local_headroom` keeps the number
+                # visible for the panel without letting it gate.
+                headroom, available, reason = None, True, ""
             rec = {
                 "model": model,
                 "headroom": headroom,
+                "local_headroom": local_headroom,
                 "available": available,
                 "reason": reason,
+                "governed_by": "broker" if broker_governs else "local_budget",
                 "calls": model_state.get("calls"),
                 "daily_max": model_state.get("daily_max"),
             }

@@ -45,22 +45,32 @@ def translate_to_zh(fields: dict, timeout: int = 120) -> dict:
         return {}
 
     user = "Translate the values of this JSON object:\n" + json.dumps(payload, ensure_ascii=False)
+
+    # V4.106.0 — reserve the quota before spending it. Routing is still
+    # deliberately NOT changed: translation is cosmetic and pinned to gemini, so
+    # falling back to a pricier model when gemini is exhausted would be the wrong
+    # trade, and the reservation names gemini alone. `link_digest` is on the
+    # news-line allowlist, so an unreachable broker degrades to the local budget
+    # rather than dropping the translation; a broker that answers "no capacity"
+    # still stops it, because that answer is about the hard reserve.
+    from scripts._shared import model_router
     try:
-        res = run_gemini(_SYS, user, timeout=timeout)
-    except Exception as e:
-        sys.stderr.write(f"[link_digest.translate] run_gemini raised: {e}\n")
+        with model_router.governed_call("link_digest", "gemini", _SYS, user) as hold:
+            try:
+                res = run_gemini(_SYS, user, timeout=timeout)
+            except Exception as e:
+                sys.stderr.write(f"[link_digest.translate] run_gemini raised: {e}\n")
+                return {}
+            hold.settle(res)
+    except model_router.RunBlocked as blocked:
+        sys.stderr.write(f"[link_digest.translate] {blocked}\n")
         return {}
 
-    # V4.86.0 — report the call to the router's budget accounting. This is the one
-    # place that calls a driver directly instead of going through `run_role`, and
-    # unreported calls make the budget under-count. Routing is deliberately NOT
-    # changed: translation is cosmetic and pinned to gemini, so falling back to a
-    # pricier model when gemini is exhausted would be the wrong trade. Reporting is
-    # best-effort — a bookkeeping failure must never lose the translation.
+    # The local counters keep recording whatever the broker did: they are what
+    # the degraded path runs on, so they must not go blind while it is healthy.
     try:
-        from scripts._shared.model_router import note_run
-        note_run("gemini", getattr(res, "exit_code", 1) == 0,
-                 (getattr(res, "error", "") or "")[:200])
+        model_router.note_run("gemini", getattr(res, "exit_code", 1) == 0,
+                              (getattr(res, "error", "") or "")[:200])
     except Exception:  # noqa: BLE001
         pass
 

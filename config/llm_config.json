@@ -8,6 +8,17 @@
     "codex": true,
     "grok": true
   },
+  "_broker_note": "V4.106.0: the LLM Quota Broker is the quota authority — it sees the Taiwan-stock project's spend on the same subscriptions, which config/llm_usage.json never could. The budgets below are now the FALLBACK, enforced only when the broker cannot answer. degradable_roles are the only roles allowed to take that fallback; every other role stops. A broker that answers 'no capacity' stops all roles, news included, because that answer is about the 20% hard reserve. protocol_tokens is the pre-run estimate for one agentic protocol run: deliberately generous, and worth re-tuning from `lqb history` once real runs have been recorded.",
+  "broker": {
+    "enabled": true,
+    "base_url": "http://127.0.0.1:8787",
+    "timeout_sec": 10,
+    "degradable_roles": ["debate", "brief", "link_digest"],
+    "protocol_tokens": {
+      "input": 200000,
+      "output": 40000
+    }
+  },
   "_budgets_note": "daily_max_calls resets at UTC midnight. window_max_calls/window_hours is an independent rolling window that does NOT reset at midnight — it mirrors the provider's session window. Omit window_max_calls (or set 0) to leave a model uncapped on that axis; gemini/grok are rate-limited per-minute rather than per-session, so only the session-window CLIs carry one.",
   "budgets": {
     "claude": {
@@ -28,8 +39,9 @@
     }
   },
   "cooldown_hours": 4,
+  "_break_news_note": "辯手 A / B 的 **fallback**。V4.109.0 起正常情況由 quota broker 指派『目前實際能服務的前兩名』,這裡只在 broker 答不出來(或它能給的不足兩家)時生效。值改回 claude+gemini 以符合 AGENTS.md『Claude×Gemini 刻意分歧是核心設計』——這個檔案從建檔起是 codex/gemini、後來對調成 gemini/codex,與該文件從未一致過。A/B 對稱(round 1 為平行盲開場),順序只決定 transcript 上誰叫 A。",
   "break_news": {
-    "primary": "gemini",
-    "secondary": "codex"
+    "primary": "claude",
+    "secondary": "gemini"
   }
 }
