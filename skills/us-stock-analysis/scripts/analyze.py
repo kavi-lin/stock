@@ -81,6 +81,13 @@ def _derive_from_bundle(bundle: dict) -> dict:
     nx_raw = bundle.get("next_earnings_est")
     nx_date = nx_raw if isinstance(nx_raw, str) else (nx_raw or {}).get("date")
 
+    der = bundle.get("derived", {}) or {}
+    # V4.106.0 — revenue YoY from the bundle. It used to come only from yfinance
+    # `info.revenueGrowth`, which lags the release: on 2026-08-07 AAOI's card read
+    # +51.4% (still Q1) while FMP already had Q2 at +86.4%. The bundle value is the
+    # same quarter the rest of this block is priced off, so they can't disagree.
+    rev_yoy = (der.get("yoy_growth", {}) or {}).get("revenue_yoy")
+
     ev_to_ebitda = km.get("evToEBITDATTM") or rat.get("enterpriseValueMultipleTTM")
     pe          = rat.get("priceToEarningsRatioTTM")
     pb          = rat.get("priceToBookRatioTTM")
@@ -98,6 +105,10 @@ def _derive_from_bundle(bundle: dict) -> dict:
         },
         "balance_sheet": {
             "debt_to_equity": dt_eq,
+        },
+        "growth": {
+            "revenue_yoy_pct": round(rev_yoy * 100, 2)
+                               if isinstance(rev_yoy, (int, float)) else None,
         },
         "margins_cash": {
             "gross_margin_pct":     round(gross_margin * 100, 2) if gross_margin else None,
@@ -339,11 +350,23 @@ def analyze(ticker: str, use_fmp: bool = True, use_bundle: bool = True):
     # since those are FMP-sourced canonical TTM metrics. yfinance still provides
     # fields the bundle doesn't carry (price block, growth/EPS forward, analyst).
     bundle_overrides = _derive_from_bundle(bundle) if bundle else {}
+    # V4.106.0 — explicit registry. This was `locals().get(block_name)`, which resolved
+    # only the blocks whose bundle key happened to equal the local variable name:
+    # `margins_cash` (local `margins`) and `earnings_calendar` (local `earnings`) never
+    # matched, so those overrides were dropped without a trace and FMP-canonical
+    # margins lost to yfinance even when the bundle was fresh.
+    # Keys are what _derive_from_bundle emits (== the output block names), values are
+    # the locals they fill. test_bundle_merge.py fails if the two sides drift apart.
+    mergeable = {
+        "price": price, "valuation": valuation, "growth": growth,
+        "margins_cash": margins, "balance_sheet": balance,
+        "earnings_calendar": earnings, "analyst": analyst,
+    }
     if bundle_overrides:
         for block_name, block_data in bundle_overrides.items():
             if block_name.startswith("_"):
                 continue
-            target = locals().get(block_name)
+            target = mergeable.get(block_name)
             if isinstance(target, dict):
                 for k, v in block_data.items():
                     if v is not None:

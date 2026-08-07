@@ -866,6 +866,22 @@ function detectProtocolVersion(item) {
     return 'LEGACY';
 }
 
+// V4.106.0 — feature gates compare numerically instead of enumerating versions.
+// The old form was `version === 'V5.0' || version === 'V5.1'`; when schema jumped to
+// V5.3 (4.90.0) only VERSION_COLOR below got the new entries, so every V5.2/V5.3 card
+// silently lost its whole Layer-3 evidence block (present value + forward glide) and
+// its Red Team block. An enumerated whitelist fails closed on the newest data, which
+// is the worst direction for it to fail in — hence the floor comparison.
+function versionAtLeast(version, floor) {
+    const parse = v => {
+        const m = /^V(\d+)\.(\d+)/.exec(String(v || ''));
+        return m ? [Number(m[1]), Number(m[2])] : null;
+    };
+    const a = parse(version), b = parse(floor);
+    if (!a || !b) return false;              // 'LEGACY' / unparseable → no version-gated extras
+    return a[0] !== b[0] ? a[0] > b[0] : a[1] >= b[1];
+}
+
 const VERSION_COLOR = {
     // V5.2 / V5.3 加在 V4.90.0：schema 已經跳到 V5.3，沒有這兩格的話新 entry 會落到
     // LEGACY 的灰色 ARCHIVE badge —— 最新的 entry 被標成最舊的，是最糟的一種預設。
@@ -1528,9 +1544,10 @@ function buildCard(item) {
     ].filter(Boolean);
 
     // Version-specific extras — both return { html, chip } or ''
-    // V5.1 = V5.0 + forward valuation; must inherit the full V5.0 render path.
-    const v5Block      = (version === 'V5.0' || version === 'V5.1') ? buildV5ValuationBlock(item, wl) : '';
-    const redTeamBlock = (version === 'V5.0' || version === 'V5.1' || version === 'V4.8' || version === 'V4.7') ? buildRedTeamBlock(item, wl) : '';
+    // V5.1 = V5.0 + forward valuation; must inherit the full V5.0 render path, and so
+    // must every schema above it (V5.2 / V5.3 / whatever lands next) — see versionAtLeast.
+    const v5Block      = versionAtLeast(version, 'V5.0') ? buildV5ValuationBlock(item, wl) : '';
+    const redTeamBlock = versionAtLeast(version, 'V4.7') ? buildRedTeamBlock(item, wl) : '';
     const bookmarkHtml = buildVersionBookmark(version);
 
     // Entry targets block — V4.6 supports dual-track
