@@ -11,10 +11,25 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from get_economic_calendar import (
+    fetch_economic_calendar,
     format_event_output,
     get_api_key,
     validate_date_range,
 )
+
+
+def test_fetch_routes_through_shared_pool(monkeypatch):
+    calls = []
+
+    def fake_get(path, params, **kwargs):
+        calls.append((path, params, kwargs))
+        return SAMPLE_EVENTS
+
+    monkeypatch.setattr("get_economic_calendar.fmp_pool.get", fake_get)
+    assert fetch_economic_calendar("2025-01-01", "2025-01-02", "test-key") == SAMPLE_EVENTS
+    assert calls == [("economic-calendar", {"from": "2025-01-01", "to": "2025-01-02"}, {
+        "stable": True, "hard_fail": False, "api_key": "test-key",
+    })]
 
 # ---------------------------------------------------------------------------
 # Sample fixtures

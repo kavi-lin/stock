@@ -21,9 +21,7 @@ import json
 import os
 import sys
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -36,7 +34,9 @@ ENRICH_CACHE = SKILL_DIR / "cache" / "enrich"
 ENRICH_CACHE.mkdir(parents=True, exist_ok=True)
 
 # Fall back to company_context.get_profile() for ticker not in shared cache
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "skills" / "_shared"))
+from scripts._shared import fmp_pool
 try:
     from company_context import get_profile as _get_profile_remote
 except ImportError:
@@ -114,19 +114,8 @@ def read_supp_bundle(ticker: str) -> dict:
 # ---------- light FMP fetch (PT consensus + grades) ----------
 
 def _fmp_get(path: str, params: dict, timeout: int = 12) -> list | dict | None:
-    api_key = os.environ.get("FMP_API_KEY", "")
-    if not api_key:
-        return None
-    qs = urllib.parse.urlencode({**params, "apikey": api_key})
-    url = f"https://financialmodelingprep.com/stable/{path}?{qs}"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "thematic-screener/1.0"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            if resp.status != 200:
-                return None
-            return json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.URLError, OSError, ValueError):
-        return None
+    """Use the project-wide cross-process FMP rate and retry governor."""
+    return fmp_pool.get(path, params, stable=True, retries=2, timeout=timeout)
 
 
 def fetch_pt_consensus(ticker: str) -> dict:
@@ -323,11 +312,16 @@ def enrich_one(ticker: str, *, force: bool = False) -> dict:
         },
     }
 
+    tmp = cache_path.with_suffix(cache_path.suffix + f".{os.getpid()}.tmp")
     try:
-        with open(cache_path, "w") as f:
+        with open(tmp, "w") as f:
             json.dump(out, f, indent=2)
+        os.replace(tmp, cache_path)
     except Exception:
-        pass
+        try:
+            tmp.unlink(missing_ok=True)
+        except Exception:
+            pass
 
     return out
 
@@ -348,7 +342,7 @@ def _prune_enrich_cache(max_age_days: int = 7) -> None:
 
 
 def enrich_movers(tickers: list[str], *, force: bool = False,
-                  progress_every_sec: float = 30.0) -> dict:
+                  progress_every_sec: float = 30.0, workers: int = 12) -> dict:
     """Batch entry. Returns {ticker: enrichment_dict}.
 
     Emits progress to stderr at least every `progress_every_sec` seconds (and
@@ -359,21 +353,26 @@ def enrich_movers(tickers: list[str], *, force: bool = False,
     _prune_enrich_cache()
     out = {}
     total = len(tickers)
+    workers = max(1, min(int(workers or 1), total or 1))
     t_start = time.time()
     t_last_log = t_start
-    for idx, t in enumerate(tickers, 1):
-        try:
-            out[t] = enrich_one(t, force=force)
-        except Exception as e:
-            print(f"[enrich] WARN {t}: {e}", file=sys.stderr)
-            out[t] = {"ticker": t, "error": str(e)[:200]}
-        now = time.time()
-        if now - t_last_log >= progress_every_sec or idx == total:
-            elapsed = int(now - t_start)
-            stamp = _dt.datetime.now().strftime("%H:%M:%S")
-            print(f"[{stamp}]   ... {idx}/{total} enriched (elapsed {elapsed}s)",
-                  file=sys.stderr, flush=True)
-            t_last_log = now
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {executor.submit(enrich_one, t, force=force): t for t in tickers}
+        for idx, future in enumerate(as_completed(futures), 1):
+            ticker = futures[future]
+            try:
+                out[ticker] = future.result()
+            except Exception as e:
+                print(f"[enrich] WARN {ticker}: {e}", file=sys.stderr)
+                out[ticker] = {"ticker": ticker, "error": str(e)[:200]}
+            now = time.time()
+            if now - t_last_log >= progress_every_sec or idx == total:
+                elapsed = int(now - t_start)
+                stamp = _dt.datetime.now().strftime("%H:%M:%S")
+                print(f"[{stamp}]   ... {idx}/{total} enriched "
+                      f"(workers={workers}, elapsed {elapsed}s)",
+                      file=sys.stderr, flush=True)
+                t_last_log = now
     return out
 
 
@@ -381,8 +380,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("tickers", nargs="+", type=str.upper)
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--workers", type=int, default=12)
     args = ap.parse_args()
-    out = enrich_movers(args.tickers, force=args.force)
+    out = enrich_movers(args.tickers, force=args.force, workers=args.workers)
     print(json.dumps(out, indent=2, ensure_ascii=False))
     return 0
 

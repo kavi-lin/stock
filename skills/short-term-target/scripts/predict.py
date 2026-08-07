@@ -401,6 +401,11 @@ def get_news_driver_v2(ticker):
     """v0.2: Finnhub /company-news + keyword+magnitude+negation scoring.
     Returns (score, label, source_tag, n_articles, news_age_hr).
     n_articles=0 / source='proxy_fallback' → caller should use proxy."""
+    # Capability-level absence is expected in the headless daily job. Detect it
+    # once here instead of constructing a client and emitting the same warning
+    # for every ticker in a 200+ symbol fan-out.
+    if not os.environ.get("FINNHUB_API_KEY"):
+        return None
     sys.path.insert(0, str(ROOT / "skills" / "finnhub-client" / "scripts"))
     try:
         from finnhub_client import FinnhubClient, FinnhubError

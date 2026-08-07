@@ -8,11 +8,14 @@ import argparse
 import json
 import os
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Optional
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+
+from scripts._shared import fmp_pool  # noqa: E402
 
 
 def get_api_key() -> Optional[str]:
@@ -41,38 +44,18 @@ def fetch_economic_calendar(from_date: str, to_date: str, api_key: str) -> list[
         List of economic event dictionaries
 
     Raises:
-        urllib.error.HTTPError: If API request fails
-        ValueError: If response is invalid
+        ValueError: If the API request fails or response is invalid
     """
-    base_url = "https://financialmodelingprep.com/api/v3/economic_calendar"
-
-    # Build query parameters
-    params = {"from": from_date, "to": to_date}
-
-    # Construct URL with parameters
-    url = f"{base_url}?{urllib.parse.urlencode(params)}"
-
-    try:
-        # Make API request
-        request = urllib.request.Request(url, headers={"apikey": api_key})
-        with urllib.request.urlopen(request) as response:
-            if response.status != 200:
-                raise ValueError(f"API returned status code {response.status}")
-
-            data = json.loads(response.read().decode("utf-8"))
-
-            if not isinstance(data, list):
-                raise ValueError(f"Unexpected API response format: {type(data)}")
-
-            return data
-
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8") if e.fp else "No error details"
-        raise urllib.error.HTTPError(
-            e.url, e.code, f"FMP API error: {e.reason}. Details: {error_body}", e.hdrs, e.fp
-        )
-    except urllib.error.URLError as e:
-        raise ValueError(f"Network error: {e.reason}")
+    data = fmp_pool.get(
+        "economic-calendar",
+        {"from": from_date, "to": to_date},
+        stable=True,
+        hard_fail=False,
+        api_key=api_key,
+    )
+    if not isinstance(data, list):
+        raise ValueError("FMP economic-calendar request failed or returned a non-list response")
+    return data
 
 
 def validate_date_range(from_date: str, to_date: str) -> None:

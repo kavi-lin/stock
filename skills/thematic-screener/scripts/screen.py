@@ -498,6 +498,8 @@ def main():
                     help="Compact JSON output")
     ap.add_argument("--predict-workers", type=int, default=1,
                     help="Bounded parallelism for per-ticker predict.py subprocesses")
+    ap.add_argument("--enrich-workers", type=int, default=12,
+                    help="Bounded FMP-pool-governed enrichment concurrency")
     args = ap.parse_args()
 
     themes_data, theme_meta = load_latest_themes()
@@ -541,7 +543,7 @@ def main():
         _log(f"Enriching {len(ok_tickers)} tickers (caches first, light FMP fetches as needed)...")
         enrich_start = time.time()
         try:
-            enrichments = enrich_movers(ok_tickers)
+            enrichments = enrich_movers(ok_tickers, workers=args.enrich_workers)
             _log(f"Enrich phase done in {time.time() - enrich_start:.0f}s "
                  f"({len(enrichments)} enriched)")
         except Exception as e:
@@ -598,6 +600,7 @@ def main():
             "n_themes_total": len(all_themes),
             "n_unique_tickers_predicted": len(all_tickers),
             "predict_workers": args.predict_workers,
+            "enrich_workers": args.enrich_workers,
             "show_all_themes": True,
         },
         "themes": themes_block,
@@ -618,7 +621,12 @@ def main():
         RECS_DIR.mkdir(parents=True, exist_ok=True)
         date_str = datetime.date.today().isoformat()
         path = RECS_DIR / f"{date_str}.json"
-        path.write_text(json.dumps(out, indent=2, default=str))
+        tmp = path.with_suffix(path.suffix + f".{os.getpid()}.tmp")
+        try:
+            tmp.write_text(json.dumps(out, indent=2, default=str))
+            os.replace(tmp, path)
+        finally:
+            tmp.unlink(missing_ok=True)
         print(f"\nWrote {path}", file=sys.stderr)
 
 
