@@ -156,12 +156,57 @@ drawdown 差幾乎是 0，證明漂移來源就是除息而非隨機噪音。
 
 第二個獨立漂移源：**bar 數 250 vs 254**——同樣傳 `period="1y"`，兩源回不同長度。
 
-### 建議
+### 建議（原始，2026-08-08 上午）
 
 **(i) 不遷。** 理由：閘門明訂零翻轉，實測翻了；而且漂移不是噪音，是一個
 **有方向、可解釋、對配息標的系統性偏高**的偏誤——它會讓所有配息股與債券 ETF 看起來比
 實際更脆弱，正好是防禦性配置最常出現的那一類標的。若之後仍要遷，走選項 (iii) 先解決
 除息調整，且必須連 `technical-analyst` 等既有 consumer 一起重驗。
+
+---
+
+### ⚠ 更新（2026-08-08 下午）：前置條件已解除，但問題升級成共用模組決策
+
+探測 FMP endpoint 後發現 **`/stable/historical-price-eod/dividend-adjusted` 在現行方案
+可用**，回 `adjClose / adjOpen / adjHigh / adjLow`。實測確認它真的做了調整（KO 一年前的
+bar `68.86 → 66.97`，最新 bar 不變——與 yfinance `auto_adjust=True` 同慣例）。
+
+**用 adjClose 重跑同一批 16 檔（shadow v2）：**
+
+| 指標 | v1（`.../full`，close） | v2（`.../dividend-adjusted`，adjClose） |
+|---|---|---|
+| **label 翻轉** | **1/16**（PFE 29.1→30.6） | **0/16** ✅ |
+| bar 數對齊 | 250 vs 254 | **250 vs 250** ✅ |
+| 配息股 dd 平均差 | +1.140 | **-0.000** |
+| 配息股 dd 最大差 | +2.750 (MO) | **-0.010** |
+| ETF dd 最大差 | +2.980 (TLT 7.74→10.72) | **+0.010** (TLT 7.74→7.74) |
+
+**開工表的零翻轉閘門通過。** 兩個獨立漂移源（除息、bar 數）同時消失。
+
+**但因此浮現一個更大的問題**：要享受這個結果，得改的是
+`skills/_shared/technical_core.py` 的端點，而它有 **9 個消費者**——
+`technical-analyst/analyze.py`、`momentum-monitor/momentum.py`、`quant-backtest`（backtest
++ rank_strategies）、`kill_trigger_monitor.py`、`short-term-target/predict.py`、
+`thematic-screener/screen.py`、`market-sentiment-analyzer/sentiment.py`、
+`theme-detector/etf_scanner.py`。
+（`momentum-monitor/scripts/technical_core.py` 是 14 行 shim，非副本。）
+
+**而 technical_core 目前主源與 fallback 的調整慣例並不一致**：FMP 路徑取未調整
+`close`，yfinance fallback 走 `auto_adjust=True`（已除息調整）。**同一檔標的拿到哪一種
+序列，取決於當下 FMP 有沒有失敗**——而 fallback 是常態性、靜默發生的。換 adjClose
+不只是為了 B4，是讓這個共用模組內部自洽。`technical_core.py` 自己那段免責註解說配息股
+「MA 讀數略高、可接受」，也是同一個偏差的表述。
+
+**新選項 (v)：先改 technical_core 端點（共用模組），再遷三支。**
+- Blast radius：`technical_core._fetch_fmp_ohlc` 一處端點 + 欄名映射；但**行為變更擴散到
+  9 個消費者**（RSI／MA／MACD／backtest／momentum 分數全部會微幅移動）。
+- 需要自己的 shadow：對每個消費者的關鍵輸出做前後對照，尤其 `quant-backtest`（策略績效）
+  與 `short-term-target`（有使用者手動校準的 weights.yaml，禁區）。
+- **這已經不是 B4 的範圍**，是一個獨立提案，需使用者拍板。
+
+**B4 本身的結論改為**：技術阻礙已排除，但**遷移的正確順序是「先修共用模組，再遷三支」**，
+而共用模組那一步的影響面遠大於風控三支。在共用模組的 shadow 做完之前，三支維持 yfinance
+仍是正確的——因為現在遷過去，拿到的是那個內部不自洽的序列。
 
 ---
 
