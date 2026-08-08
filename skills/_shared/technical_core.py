@@ -39,8 +39,9 @@ except Exception:
 SESSION_TOTAL_MIN = 390   # 9:30 → 16:00 ET regular session
 INTRADAY_EARLY_CUTOFF_MIN = 30  # < 30 min elapsed → too_early (vol signals suppressed)
 
-# v1.62 (I-PG): primary OHLC source switched to FMP /stable/historical-price-eod/full
-# (Starter plan unlocks this endpoint). yfinance kept as automatic fallback when
+# v1.62 (I-PG): primary OHLC source switched to FMP; V4.113.0 moved it from
+# `historical-price-eod/full` to `historical-price-eod/dividend-adjusted` — see
+# _FMP_OHLC_ENDPOINT below. yfinance kept as automatic fallback when
 # FMP_API_KEY is unset, returns 401, or response is malformed. The yf.Ticker handle
 # is still returned so downstream callers (momentum.py:_short_interest_block) can
 # read .info attributes.
@@ -50,8 +51,17 @@ _PERIOD_DAYS = {
 }
 
 
+# The FMP OHLC endpoint. `dividend-adjusted` (not `full`) because the yfinance fallback
+# below runs auto_adjust=True — with `full`'s unadjusted close, which series you got
+# depended on whether FMP happened to fail, and every ex-dividend date showed up as a
+# fake negative return. Kept as a module constant so a shadow can patch it and run both
+# conventions in one process; env vars were rejected deliberately — "behaviour depends on
+# invisible ambient state" is the very bug this replaced.
+_FMP_OHLC_ENDPOINT = "historical-price-eod/dividend-adjusted"
+
+
 def _fetch_fmp_ohlc(ticker, period):
-    """Fetch FMP /stable/historical-price-eod/full → DataFrame matching yfinance schema.
+    """Fetch FMP _FMP_OHLC_ENDPOINT → DataFrame matching yfinance schema.
     Returns None on any failure (caller falls back to yfinance)."""
     if not os.getenv("FMP_API_KEY"):
         return None
@@ -67,7 +77,7 @@ def _fetch_fmp_ohlc(ticker, period):
             sys.path.insert(0, _root)
         from scripts._shared import fmp_pool
         data = fmp_pool.get(
-            "historical-price-eod/full",
+            _FMP_OHLC_ENDPOINT,
             {"symbol": ticker, "from": start.date().isoformat(), "to": end.date().isoformat()},
             stable=True,
             timeout=30,
@@ -80,14 +90,13 @@ def _fetch_fmp_ohlc(ticker, period):
         df["Date"] = pd.to_datetime(df["date"])
         df = df.set_index("Date").sort_index()  # ascending date
         df = df.rename(columns={
-            "open": "Open", "high": "High", "low": "Low",
-            "close": "Close", "volume": "Volume",
+            "adjOpen": "Open", "adjHigh": "High", "adjLow": "Low",
+            "adjClose": "Close", "volume": "Volume",
         })
-        # FMP /stable/historical-price-eod returns split-adjusted (NOT dividend-adjusted)
-        # close. yfinance auto_adjust=True is dividend-adjusted. For RSI/MA/MACD pattern
-        # recognition the difference is ~1-2% accumulated dividends — does not affect
-        # technical signals. Dividend payers (KO/JNJ/PG) may show slightly higher MA
-        # readings vs yfinance, acceptable.
+        # Both providers are dividend-adjusted: this endpoint by definition, yfinance via
+        # auto_adjust=True below. That equivalence is the contract callers rely on — it is
+        # what makes the FMP→yfinance failover invisible instead of silently changing the
+        # return distribution. `test_technical_core_fetch.py` asserts both halves.
         return df[["Open", "High", "Low", "Close", "Volume"]]
     except Exception:
         return None
@@ -95,10 +104,14 @@ def _fetch_fmp_ohlc(ticker, period):
 
 # ── Data fetch ─────────────────────────────────────────────────────────
 def fetch_history(ticker, period="1y"):
-    """Fetch OHLCV. Tries FMP /stable/historical-price-eod/full first (Starter plan),
-    falls back to yfinance on any failure. Always returns (hist_df, yf.Ticker_handle)
-    so downstream code can still access yfinance metadata via the handle.
-    Raises RuntimeError if both providers fail."""
+    """Fetch OHLCV. Tries FMP `_FMP_OHLC_ENDPOINT` first, falls back to yfinance on any
+    failure. Always returns (hist_df, yf.Ticker_handle) so downstream code can still
+    access yfinance metadata via the handle. Raises RuntimeError if both providers fail.
+
+    **Contract: both paths return dividend-adjusted prices.** Callers compute returns,
+    volatility and drawdown off this series, so a provider disagreeing on the adjustment
+    convention would make the numbers depend on which provider happened to answer. Do not
+    change either path's adjustment without changing both (V4.113.0)."""
     t = yf.Ticker(ticker)  # lazy — no API call until .info / .history accessed
 
     # Primary: FMP

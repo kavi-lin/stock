@@ -32,6 +32,13 @@ import yfinance as yf
 SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
 JOURNAL_DIR  = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "journal"))
 JOURNAL_FILE = os.path.join(JOURNAL_DIR, "journal.jsonl")
+
+# V4.113.0 switched technical_core to dividend-adjusted prices. Entries snapshotted before
+# this date carry an unadjusted price basis; entries after carry an adjusted one. Forward
+# returns are computed off the basis in force when the entry was written, so a cohort that
+# straddles this date mixes the two — the difference is not signal. Historical values are
+# NOT rewritten; stats() flags the straddle instead.
+PRICE_BASIS_SWITCH_DATE = "2026-08-08"
 STATS_FILE   = os.path.join(JOURNAL_DIR, "stats.json")
 CACHE_DIR    = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "cache"))
 
@@ -381,6 +388,15 @@ def cmd_stats():
 
     now_ts = datetime.now().isoformat(timespec="seconds")
     volume_field_count = _fill_volume_fields_from_cache(entries)
+
+    snap_dates = [e.get("snap_date") for e in entries if e.get("snap_date")]
+    basis_straddle = bool(snap_dates) and (min(snap_dates) < PRICE_BASIS_SWITCH_DATE
+                                           <= max(snap_dates))
+    if basis_straddle:
+        print(f"[journal] ⚠ cohort straddles the {PRICE_BASIS_SWITCH_DATE} price-basis "
+              f"switch (unadjusted → dividend-adjusted). Cross-period comparisons mix a "
+              f"basis change with real signal — split the cohort at that date before "
+              f"reading these aggregates.", file=sys.stderr)
 
     # Buckets keyed by group → {horizon → [returns]}
     by_signal = defaultdict(lambda: defaultdict(list))

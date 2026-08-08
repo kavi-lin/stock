@@ -1,7 +1,20 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.112.0)
+> **Last Updated**: 2026-08-08 (v4.113.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.113.0) — 分析結果取決於網路狀況:同一檔股票拿到哪種價格序列,看 FMP 當下有沒有失敗
+
+- **緣起**:探 Batch B 的 B4 前置條件(「FMP 有沒有 adjClose」)時,順手發現的東西比 B4 本身重要——`technical_core.fetch_history` 主源取未除息調整的 close、yfinance fallback 走 `auto_adjust=True`(已調整),而 **fallback 是常態性、靜默發生的**。這比「文件教錯」更差:文件教錯至少是穩定地錯,這個是**連復現都不穩定**。
+- **B4 的前置條件其實一直不存在**:`/stable/historical-price-eod/dividend-adjusted` 在現行方案就能用。原始盤點寫「需先解決除息調整」是因為只看了 `full` 端點的欄位就下結論——**「這個方案拿不到」和「我沒查過有沒有別的端點」是兩件事**。一次 API 探測就翻案。
+- **零翻轉閘門套錯場景**:第一版實施表沿用 B4 的「決策層零翻轉」,被指出會自我矛盾——B4 是**換資料源**(翻轉=漂移),本批是**修正基準**(翻轉可能=修好了)。硬性零翻轉會把正當修正擋掉,或誘使人把解釋得通的翻轉硬拗成沒翻。改成「零**不可歸因**翻轉」+ 無配息組當天然對照。
+- **對照組同時是 shadow 自身的 sanity check**:無配息標的在兩個基準下應該逐位元一致,實測 7/7 一致——**先證明量尺沒壞,再讀量出來的數**。
+- **最強的歸因證據不是統計量,是形態**:消失的 4 筆 cross 全部是「一兩天內來回穿越」(MO `death 07-14`+`golden 07-15`、PM `death 07-16`+`golden 07-17`)。一根除息假陰線把 MA20 拉下去、隔天就回來——**那是假訊號的指紋,不是漂移**。配合 ma_200 51 筆全部同向下修,歸因鏈完整。
+- **我自己的判定寫太粗,差點誤報**:第一版把 `ma_structure`/`macd` 整個 dict 當分類欄位,報出「配息組 51/52 翻轉」;拆到子欄位後 `rsi_state.zone` 真翻轉是 **0**(29 筆只是內嵌 rsi 值在動)。**聚合層級選錯,會讓連續值位移看起來像分類翻轉。**
+- **影響面也誤報過**:先前說 9 個消費者,用「import technical_core」當代理指標;實際只有 5 個呼叫 `fetch_history`,4 個只 import `rsi_14`。連帶 `short-term-target` 出局——它自己走 `auto_adjust=False`,`weights.yaml` 的校準基準沒被觸及。
+- **必須知道的系統性影響**:翻轉全部可歸因,但**不是隨機的**——ma_200 全數下修,三筆 stage 全朝「較不看空」。所有配息股的技術面讀數會系統性偏多一點。這是修正,但方向一致、影響全部配息標的,不是可忽略的噪音。
+- **零覆蓋路徑補 16 個測試**,含斷言 fallback 傳入 `auto_adjust=True`——把「兩路徑同慣例」從註解變成機器可驗。三處種回 bug 皆紅在對應測試。
+- **§2b 第一次照新規則執行就有收穫**:抓到 `technical_core.py:42` 還寫著舊端點名。
 
 ## 🟢 Session Note (v4.112.0) — 有文件、無產生器:四條規則描述的保護機制,程式裡根本沒有
 

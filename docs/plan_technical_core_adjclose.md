@@ -117,13 +117,123 @@ transport 層要同步遷 patch 目標）在這裡不適用，取而代之的是
 處理：**不改歷史值**，在 journal 加一筆切換日註記（欄位或 README 皆可，實施表定案），
 `stats` 輸出時若 cohort 跨越該日則標註。同樣適用於任何跨日比較的 momentum 統計。
 
+## 5b. Shadow 通過標準（**訂錯過一次，這是修正後的版本**）
+
+第一版實施表寫「決策層 boolean 與分類零翻轉」——**錯，而且會自我矛盾**。
+
+B4 用零翻轉當閘門是對的，因為那是**換資料源**，翻轉 = 引入漂移。
+**本批是修正基準**：配息股序列裡的假負報酬（除息日）被拿掉後，一檔剛好卡在 MA50 交叉
+邊緣的 KO 或 TLT，cross 偵測或 stage 分類**應該**翻——那是修正，不是回歸。硬性零翻轉
+會讓正當修正把整批卡死，或更糟，誘使執行者把「解釋得通的翻轉」硬拗成沒翻。
+
+### 正確標準：**零「不可歸因」翻轉**
+
+| 情況 | 判定 |
+|---|---|
+| 該 ticker 有配息，且翻轉方向與「假負報酬消失」的機制一致 | **記為修正，放行**（逐筆寫進報告） |
+| 翻轉無法歸因到除息機制 | **擋批**，停下來問使用者 |
+| **無配息標的出現任何差異** | **一律視為不可歸因** —— 它們在兩個基準下序列應該**逐位元一致** |
+
+最後一列同時是 **shadow 自身正確性的 sanity check**：無配息組若不是逐位元一致，
+先懷疑 shadow 寫錯，而不是 code 改錯。
+
+## 5c. Shadow 樣本集（59 檔）
+
+| 來源 | 數量 | 理由 |
+|---|---|---|
+| B4 shadow 原 16 檔 | 16 | 現成、分群齊（8 配息 / 5 無配息 / 3 ETF），含 TLT/KO/MO 三個最敏感的 |
+| `positions.json` 全持倉 | 6 | GOOGL META MRVL MSFT NTRS VRT —— **kill_trigger_monitor 監控的是真實部位，樣本必須涵蓋它實際看的標的** |
+| momentum journal 最新 snapshot（2026-06-17） | 23 | 活躍 cohort。（未結算 entry 涵蓋 529 檔＝幾乎整個 S&P，過大；最新 snapshot 才是 momentum 實際重新評分的集合） |
+| 高股息壓力樣本 | 15 | PM SO D DUK ED O KMB CL PEP MRK CVX IBM MMM GIS K —— 除息機制最敏感，刻意加壓 |
+
+聯集去重 = **59 檔**。無配息對照組（NVDA/TSLA/AMZN/GOOGL/COIN 等）必須逐位元一致。
+
 ## 6. 分級處置（第 2 條）
 
 | 消費者 | 層級 | 處置 |
 |---|---|---|
 | quant-backtest ×2 | **探索層**（CLAUDE.md 全域紀律：產出永不進 investment_protocol 決策） | 漂移可容忍，但**要量化**：每策略績效 delta + 排名翻轉數，寫進報告 |
-| technical-analyst / momentum-monitor / kill_trigger_monitor | 接決策路徑 | 逐 ticker 對照，**任何 boolean 翻轉（cross 偵測、stage 分類、kill trigger）逐筆解釋** |
+| technical-analyst / momentum-monitor / kill_trigger_monitor | 接決策路徑 | 逐 ticker 對照，**任何 boolean 翻轉（cross 偵測、stage 分類、kill trigger）逐筆歸因**——判定標準見 §5b（零「不可歸因」翻轉，不是零翻轉） |
 | short-term-target | **不受影響**（見 2b） | 無 |
+
+## 6b. Shadow 實測結果（2026-08-08，59 檔，V4.113.0）
+
+兩邊都走**真實的 `_fetch_fmp_ohlc` code path**：舊基準靠 patch `fmp_pool.get`，讓它改打
+`full` 並把 `close→adjClose` 欄名改回去，模擬 V4.113.0 之前的 payload。差異只來自上游
+資料，不來自 shadow 另寫的一套邏輯。
+
+### 閘門判定：✅ **通過（零不可歸因翻轉）**
+
+| 檢查 | 結果 |
+|---|---|
+| **無配息對照組逐位元一致** | **7/7** ✅（AMZN COIN DVA GNRC MNST PANW TSLA）——同時證明 shadow 自身正確 |
+| 翻轉是否全落在配息標的 | **是**，零非配息翻轉 |
+| `ma_200` 位移方向 | **51/51 全部下修**（-3.978% ~ -0.028%，中位 -0.795%）——除息機制的簽名 |
+
+### 分類翻轉分解（第一版判定過寬，此為修正後）
+
+第一版把 `ma_structure` / `macd` 整個 dict 當分類欄位，報出 51/52「翻轉」——**錯**。
+拆到子欄位後：
+
+| 欄位 | 真翻轉數 | 說明 |
+|---|---|---|
+| `rsi_state.zone` | **0** | 29 筆有差異但 zone 全同，只是內嵌 rsi 值位移 |
+| `ma_structure.stage` | **3** | MO / MS / PG |
+| `macd.bullish_cross` | **3** | MS / TLT / WST |
+| `macd.histogram_trend` | **1** | O（flat → falling） |
+| `crosses`（清單） | 19 | 見下方分類 |
+
+### 逐筆歸因
+
+**(a) cross 清單 19 筆，四類：**
+
+| 類型 | 數量 | 標的 | 歸因 |
+|---|---|---|---|
+| 同型別、日期位移 1-2 天 | 13 | DUK ED IRM KMB MCHP MMM O PFE SO T TLT VZ XLK | MA 在略微不同的日子交叉。機制直接後果 |
+| **cross 消失** | 4 | HST MO MS PM | **最強證據，見下** |
+| cross 出現 | 1 | PEP（`death_cross_50_200 06-29`） | ma_200 下修使 50/200 關係改變 |
+| 型別替換 | 1 | PG | 同上 |
+
+**消失的四筆全部是「一兩天內來回穿越」的假訊號：**
+
+| 標的 | 舊基準的 cross | 調整後 |
+|---|---|---|
+| HST | `death 07-28` + `golden 07-31`（3 天內來回） | 空 |
+| MO | `death 07-14` + `golden 07-15`（**隔天穿回**）+ `death 08-07` | 空 |
+| PM | `death 07-16` + `golden 07-17`（**隔天穿回**） | 空 |
+| MS | `death 08-07`（當天） | 空 |
+
+「短期 MA 瞬間穿越又立刻穿回」正是除息假跌的指紋——一根假的大陰線把 MA20 拉下去，
+隔天就回來。調整後這些假交叉全部消失。**這不是漂移，是這次變更要修的東西本身。**
+
+**(b) `stage` 三筆，全部朝「較不看空」方向，與 `ma_200` 下修一致：**
+
+| 標的 | 變化 | `above_ma200_pct` | `ma_200` |
+|---|---|---|---|
+| MO | Stage 3 top → Stage 1 basing | +4.11 → +6.60 | -2.33% |
+| MS | Stage 1 basing → Stage 2 uptrend | +16.44 → +17.67 | -1.05% |
+| PG | Stage 4 downtrend → Stage 1 basing | -1.47 → **-0.07** | -1.40% |
+
+PG 尤其乾淨：`above_ma200_pct` 從 -1.47 移到 -0.07，正好卡在 0 附近的帶邊。
+
+**(c) `macd.bullish_cross` 三筆，histogram 全在 ±0.02 的極邊界：**
+
+| 標的 | bullish_cross | histogram |
+|---|---|---|
+| MS | True → False | +0.087 → +0.210 |
+| TLT | False → True | **-0.006 → +0.018** |
+| WST | False → True | **-0.013 → +0.005** |
+
+TLT 與 WST 的 histogram 絕對值皆 < 0.02，是零軸上的抖動，任何微小基準位移都會翻。
+
+### ⚠ 必須知道的系統性影響（可歸因，但方向一致）
+
+所有翻轉都通過歸因，**但它們不是隨機的**：`ma_200` 51 筆全部下修，三筆 stage 全部朝
+較看多方向。機制上這是必然的——調整後的歷史價較低，長期均線隨之下移，價格相對更高於
+均線。
+
+**結論：所有配息股的技術面讀數會系統性地偏多一點點。** 這是修正（假跌本來就在人為壓低
+它們），不是 bug，但它是**方向性的、影響全部配息標的**，不是可以忽略的噪音。
 
 ## 7. B4 後續（額外要求）
 

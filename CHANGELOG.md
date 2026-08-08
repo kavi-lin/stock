@@ -8,6 +8,52 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.113.0] — 2026-08-08 — 同一檔股票拿到哪種價格序列，取決於 FMP 當下有沒有失敗
+
+`technical_core.fetch_history()` 的主源取**未除息調整**的 close，yfinance fallback 走
+`auto_adjust=True`（**已調整**）。fallback 是常態性、靜默發生的，所以分析結果隨網路狀況
+變——**比「文件教錯」更差，因為連復現都不穩定**。
+
+範圍表與完整 shadow 見 `docs/plan_technical_core_adjclose.md`。
+
+### Changed
+- `skills/_shared/technical_core.py` — `_fetch_fmp_ohlc` 改打
+  `/stable/historical-price-eod/dividend-adjusted`，欄名映射 `adjOpen/adjHigh/adjLow/
+  adjClose → Open/High/Low/Close`。端點提為 module 常數 `_FMP_OHLC_ENDPOINT`
+  （**刻意不用環境變數**：「行為取決於執行環境的隱形狀態」正是本批要消滅的病，
+  不在治病的 commit 裡引入同款病原；常數也讓 shadow 能在同一 process 跑兩邊）
+- 同檔 `:42` 與 `:86-90` 兩段註解——後者原寫「FMP 未除息、配息股 MA 讀數略高、可接受」，
+  修完即為假話，改寫為契約：**兩路徑皆為 dividend-adjusted**。`fetch_history` docstring
+  同步明寫此不變式
+- `skills/momentum-monitor/scripts/journal.py` — 新增 `PRICE_BASIS_SWITCH_DATE`；
+  `stats` 偵測 cohort 跨越切換日時輸出警告（**不改歷史值**，跨期比較會混入基準變化）
+
+### Added
+- `skills/_shared/tests/test_technical_core_fetch.py` — **16 test**，該路徑此前
+  **零覆蓋**卻餵 5 個消費者。mock 打 `fmp_pool.get`（真 transport 層）。鎖端點常數、
+  欄名映射、排序、from/to 傳遞、五種 malformed payload → fallback、兩者皆敗 → RuntimeError，
+  以及**斷言 fallback 傳入 `auto_adjust=True`**——讓「兩路徑同慣例」的契約從註解變成
+  機器可驗。三處種回 bug 皆紅在對應測試
+
+### Why / Shadow 證據（59 檔：B4 的 16 ∪ positions 6 ∪ journal 最新 snapshot 23 ∪ 高股息壓力 15）
+- **無配息對照組 7/7 逐位元一致**（同時證明 shadow 自身正確）；所有差異都落在配息標的
+- `ma_200` **51/51 全部下修**（-3.98% ~ -0.03%，中位 -0.795%）——除息機制的方向簽名
+- 真分類翻轉：`rsi_state.zone` **0**、`stage` 3、`macd.bullish_cross` 3、
+  `histogram_trend` 1、cross 清單 19
+- **消失的 4 筆 cross 全是「一兩天內來回穿越」**（MO `death 07-14`+`golden 07-15`、
+  PM `death 07-16`+`golden 07-17`、HST 3 天內來回、MS 當天）——一根除息假陰線把 MA20
+  拉下去隔天就回來，**正是本次要修的東西本身**
+- macd 三筆翻轉的 histogram 皆在 ±0.02 零軸抖動範圍（TLT -0.006→+0.018、WST -0.013→+0.005）
+- **⚠ 系統性影響**：翻轉全部可歸因，但**不是隨機的**——所有配息股的技術面讀數會系統性
+  偏多一點（歷史價調低 → 長期均線下移 → 價格相對更高於均線）。三筆 stage 全朝「較不看空」。
+  這是修正而非 bug，但方向一致且影響全部配息標的
+
+### 影響面
+5 個消費者（**先前誤報 9 個**——用 import 當代理指標，實際只有這 5 個呼叫
+`fetch_history`）：technical-analyst / momentum-monitor / quant-backtest ×2 /
+kill_trigger_monitor。另 4 個只 import `rsi_14`（純函式）不受影響——**含
+`short-term-target`，其 `weights.yaml` 校準基準未被觸及**。
+
 ## [4.112.0] — 2026-08-08 — 風控三支 Batch B 第一波：把四條「有文件、無產生器」的規則對回現實
 
 `docs/plan_risk_trio_B.md` 的 B2 + B3 + B7 + B1，使用者逐項拍板後執行。四項的共同形狀是
