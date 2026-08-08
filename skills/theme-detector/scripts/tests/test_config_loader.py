@@ -189,12 +189,21 @@ class TestStripEtfCount:
 
 class TestLoadThemesConfig:
     def test_bundled_yaml_loads_successfully(self):
-        """Default (no path) loads the bundled themes.yaml."""
+        """Default (no path) loads the bundled themes.yaml.
+
+        Asserts a floor and the structure, not an exact theme count: the catalog is
+        expected to grow (15 → 21 since this test was written), and an `== 15` pinned
+        every legitimate addition as a failure. What matters is that the bundle loaded
+        and every entry is well-formed.
+        """
         config, catalog = load_themes_config()
         assert "cross_sector" in config
-        assert len(config["cross_sector"]) == 15
+        assert len(config["cross_sector"]) >= 15
+        for theme in config["cross_sector"]:
+            assert theme.get("theme_name")
+            assert isinstance(theme.get("matching_keywords"), list)
         assert "AI & Semiconductors" in catalog
-        assert catalog["AI & Semiconductors"] == 8
+        assert catalog["AI & Semiconductors"] >= 1
 
     def test_custom_yaml_path(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -224,9 +233,11 @@ class TestLoadThemesConfig:
 
         monkeypatch.setattr("config_loader._get_bundled_yaml_path", fake_get_path)
         config, catalog = load_themes_config()
-        # Should fall back to DEFAULT_THEMES_CONFIG from default_theme_config.py
+        # Should fall back to DEFAULT_THEMES_CONFIG from default_theme_config.py.
+        # Floor, not an exact count — same reason as above.
         assert "cross_sector" in config
-        assert len(config["cross_sector"]) == 15
+        assert len(config["cross_sector"]) >= 15
+        assert catalog
 
     def test_config_has_no_etf_count_after_loading(self):
         """etf_count should be stripped from the returned config."""

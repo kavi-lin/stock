@@ -323,7 +323,16 @@ def rsi_14(close, period=14):
     avg_gain = gain.ewm(alpha=1 / period, adjust=False, min_periods=period).mean()
     avg_loss = loss.ewm(alpha=1 / period, adjust=False, min_periods=period).mean()
     rs = avg_gain / avg_loss.replace(0, np.nan)
-    return 100 - (100 / (1 + rs))
+    out = 100 - (100 / (1 + rs))
+    # V4.113.2: avg_loss == 0 with any gain is the maximally-overbought case — RSI is
+    # 100 by definition, not undefined. The replace() above exists to dodge a divide by
+    # zero, but it turned that case into NaN, which rsi_state() reports as
+    # zone="unknown". The asymmetry was invisible because the mirror case works: all
+    # losses gives avg_gain 0 → rs 0 → RSI 0. A ticker up 14 straight sessions was
+    # therefore returning "no reading" for the exact condition the overbought zone
+    # exists to catch. Warm-up NaNs are unaffected (NaN == 0 is False), and a fully
+    # flat series stays NaN because RSI genuinely is undefined with no movement.
+    return out.mask((avg_loss == 0) & (avg_gain > 0), 100.0)
 
 
 def rsi_state(hist):

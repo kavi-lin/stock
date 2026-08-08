@@ -1,512 +1,322 @@
-"""Tests for FMP Client VIX term structure auto-detection and endpoint fallback"""
+"""Tests for FMPClient's endpoint chain (market-top-detector), response normalization and shape guards.
+
+**Rewritten V4.113.2.** The previous version was stale in two independent ways and had
+been failing 11/55 while silently hitting the live network:
+
+1. **Wrong mock target.** It patched `client.session.get`, but the 2026-08-08 `fmp_pool`
+   refactor moved the transport to `fmp_pool.get_url` (`fmp_client.py:103`). `self.session`
+   still exists as a leftover, so the patch "succeeded" and did nothing — every test made a
+   real HTTP call. Symptom: the suite took 12s. Mocks now land on
+   `fmp_client.fmp_pool.get_url`, the function the client actually calls, and return
+   **already-parsed payloads** (that is what `get_url` returns — not a Response object).
+
+2. **Asserted a fallback chain that no longer exists.** V4.111.6 deleted the v3 leg after
+   measuring it 403 on every endpoint; `_FMP_ENDPOINTS` now holds exactly one URL per key.
+   Tests named `..._falls_back_to_v3` asserting `call_count == 2` were pinning deleted
+   behaviour. The rejection paths they covered are still real and still worth testing —
+   they now assert the honest outcome: **reject → None, exactly one call.**
+
+Payload shapes reflect the current stable endpoints: `quote` returns a flat list;
+`historical-price-eod/full` returns a flat list of bars (newest-first) which the client
+normalizes to `{"symbol", "historical"}`.
+"""
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-
-class TestVixTermStructure:
-    """Test VIX term structure auto-classification."""
-
-    def _make_client(self):
-        """Create a mock FMPClient without real API key."""
-        with patch.dict(os.environ, {"FMP_API_KEY": "test_key"}):
-            from fmp_client import FMPClient
-
-            client = FMPClient(api_key="test_key")
-        return client
-
-    def test_steep_contango(self):
-        """VIX/VIX3M < 0.85 -> steep_contango."""
-        client = self._make_client()
-        client.get_quote = MagicMock(
-            side_effect=lambda s: [{"price": 12.0}] if "VIX3M" not in s else [{"price": 16.0}]
-        )
-        result = client.get_vix_term_structure()
-        assert result is not None
-        assert result["classification"] == "steep_contango"
-        assert result["ratio"] < 0.85
-
-    def test_contango(self):
-        """VIX/VIX3M 0.85-0.95 -> contango."""
-        client = self._make_client()
-        client.get_quote = MagicMock(
-            side_effect=lambda s: [{"price": 14.0}] if "VIX3M" not in s else [{"price": 15.5}]
-        )
-        result = client.get_vix_term_structure()
-        assert result["classification"] == "contango"
-
-    def test_flat(self):
-        """VIX/VIX3M 0.95-1.05 -> flat."""
-        client = self._make_client()
-        client.get_quote = MagicMock(
-            side_effect=lambda s: [{"price": 15.0}] if "VIX3M" not in s else [{"price": 15.2}]
-        )
-        result = client.get_vix_term_structure()
-        assert result["classification"] == "flat"
-
-    def test_backwardation(self):
-        """VIX/VIX3M > 1.05 -> backwardation."""
-        client = self._make_client()
-        client.get_quote = MagicMock(
-            side_effect=lambda s: [{"price": 22.0}] if "VIX3M" not in s else [{"price": 18.0}]
-        )
-        result = client.get_vix_term_structure()
-        assert result["classification"] == "backwardation"
-
-    def test_unavailable(self):
-        """VIX3M unavailable -> None."""
-        client = self._make_client()
-        client.get_quote = MagicMock(
-            side_effect=lambda s: [{"price": 15.0}] if "VIX3M" not in s else None
-        )
-        result = client.get_vix_term_structure()
-        assert result is None
+import fmp_client  # noqa: E402
+from fmp_client import FMPClient  # noqa: E402
 
 
-def _mock_response(status_code, json_data=None, text=""):
-    """Create a mock requests.Response."""
-    resp = Mock()
-    resp.status_code = status_code
-    resp.json = Mock(return_value=json_data)
-    resp.text = text
-    return resp
+def _make_client():
+    client = FMPClient(api_key="test_key")
+    client.RATE_LIMIT_DELAY = 0
+    return client
 
 
-class TestEndpointFallback:
-    """Test stable/v3 endpoint fallback logic in FMPClient."""
+def _patch_pool(*payloads):
+    """Patch the real transport. Each call pops the next payload; None = failed request
+    (which is exactly what get_url returns on network/auth failure)."""
+    return patch.object(fmp_client.fmp_pool, "get_url",
+                        MagicMock(side_effect=list(payloads)))
 
-    def _make_client(self):
-        """Create FMPClient with mocked session."""
-        with patch.dict(os.environ, {"FMP_API_KEY": "test_key"}):
-            from fmp_client import FMPClient
 
-            client = FMPClient(api_key="test_key")
-        client.RATE_LIMIT_DELAY = 0  # disable rate limiting in tests
-        return client
+BARS = [{"symbol": "^GSPC", "date": "2026-03-20", "close": 5500.0}]
+QUOTE = [{"symbol": "^GSPC", "price": 5500.0}]
 
-    # ------------------------------------------------------------------
-    # Tier A — Fallback logic (4 tests)
-    # ------------------------------------------------------------------
 
-    def test_quote_stable_success(self):
-        """Stable 200 returns data, v3 is NOT called."""
-        client = self._make_client()
-        quote_data = [{"symbol": "^GSPC", "price": 5500.0}]
+# =========================================================================
+# Transport wiring — the regression that let the old suite hit the network
+# =========================================================================
 
-        call_log = []
+class TestTransportWiring:
 
-        def mock_get(url, params=None, timeout=None):
-            call_log.append(url)
-            if "stable" in url:
-                return _mock_response(200, quote_data)
-            return _mock_response(403, text="Forbidden")
+    def test_client_calls_fmp_pool_not_its_own_session(self):
+        """The guard against this file going stale again: if the transport moves,
+        this fails loudly instead of the suite silently making real requests."""
+        client = _make_client()
+        with _patch_pool(QUOTE) as mocked:
+            client.get_quote("^GSPC")
+        assert mocked.call_count == 1
 
-        client.session.get = mock_get
-        result = client.get_quote("^GSPC")
+    def test_api_key_is_forwarded_to_the_pool(self):
+        """The pool injects apikey into params; the client's session header does not
+        travel with it, so the key has to be passed explicitly."""
+        client = _make_client()
+        with _patch_pool(QUOTE) as mocked:
+            client.get_quote("^GSPC")
+        assert mocked.call_args.kwargs.get("api_key") == "test_key"
 
-        assert result == quote_data
-        assert len(call_log) == 1
-        assert "stable" in call_log[0]
+    def test_call_counter_tracks_real_requests(self):
+        client = _make_client()
+        with _patch_pool(QUOTE, BARS):
+            client.get_quote("^GSPC")
+            client.get_historical_prices("^GSPC", days=80)
+        assert client.api_calls_made == 2
 
-    def test_quote_stable_403_falls_back_to_v3(self):
-        """Stable 403, v3 200 returns v3 data."""
-        client = self._make_client()
-        v3_data = [{"symbol": "^GSPC", "price": 5500.0}]
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(403, text="Forbidden")
-            return _mock_response(200, v3_data)
+# =========================================================================
+# Endpoint chain — stable-only since V4.111.6
+# =========================================================================
 
-        client.session.get = mock_get
-        result = client.get_quote("^GSPC")
-        assert result == v3_data
+class TestEndpointChain:
 
-    def test_quote_both_fail(self):
-        """Both endpoints 403 returns None."""
-        client = self._make_client()
+    def test_quote_success_makes_exactly_one_call(self):
+        client = _make_client()
+        with _patch_pool(QUOTE) as mocked:
+            assert client.get_quote("^GSPC") == QUOTE
+        assert mocked.call_count == 1
 
-        def mock_get(url, params=None, timeout=None):
-            return _mock_response(403, text="Forbidden")
+    def test_quote_failure_returns_none_without_retrying_a_second_endpoint(self):
+        """V4.111.6 removed the v3 leg (403 on every endpoint when measured). A failed
+        request is now terminal — no second URL to try."""
+        client = _make_client()
+        with _patch_pool(None) as mocked:
+            assert client.get_quote("^GSPC") is None
+        assert mocked.call_count == 1
 
-        client.session.get = mock_get
-        result = client.get_quote("^GSPC")
-        assert result is None
+    def test_historical_failure_returns_none(self):
+        client = _make_client()
+        with _patch_pool(None) as mocked:
+            assert client.get_historical_prices("^GSPC", days=80) is None
+        assert mocked.call_count == 1
 
-    def test_historical_fallback_to_v3(self):
-        """Stable 403, v3 200 returns v3 data for historical."""
-        client = self._make_client()
-        v3_data = {"symbol": "^GSPC", "historical": [{"date": "2026-03-20", "close": 5500.0}]}
+    def test_stable_quote_url_is_used(self):
+        client = _make_client()
+        with _patch_pool(QUOTE) as mocked:
+            client.get_quote("^GSPC")
+        assert mocked.call_args.args[0] == "https://financialmodelingprep.com/stable/quote"
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(403, text="Forbidden")
-            return _mock_response(200, v3_data)
+    def test_stable_historical_url_is_used(self):
+        client = _make_client()
+        with _patch_pool(BARS) as mocked:
+            client.get_historical_prices("^GSPC", days=80)
+        url = mocked.call_args.args[0]
+        assert url == "https://financialmodelingprep.com/stable/historical-price-eod/full"
 
-        client.session.get = mock_get
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result == v3_data
-        assert "historical" in result
 
-    # ------------------------------------------------------------------
-    # Tier B — Response normalization (4 tests)
-    # ------------------------------------------------------------------
+# =========================================================================
+# Response normalization — flat list → {"symbol", "historical"}
+# =========================================================================
 
-    def test_historical_stable_v3_format_passthrough(self):
-        """Stable returns v3-compatible format {'historical': [...]} — returned as-is."""
-        client = self._make_client()
-        data = {"symbol": "^GSPC", "historical": [{"date": "2026-03-20", "close": 5500.0}]}
+class TestResponseNormalization:
 
-        def mock_get(url, params=None, timeout=None):
-            return _mock_response(200, data)
+    def test_flat_bar_list_is_normalized_to_the_consumer_shape(self):
+        """The stable endpoint returns a flat list; every downstream consumer still
+        expects the old {"symbol", "historical"} dict."""
+        client = _make_client()
+        with _patch_pool(BARS):
+            result = client.get_historical_prices("^GSPC", days=80)
 
-        client.session.get = mock_get
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result == data
+        assert result == {"symbol": "^GSPC", "historical": BARS}
 
-    def test_historical_stable_batch_format_exact_match(self):
-        """Stable returns historicalStockList with matching symbol — normalized."""
-        client = self._make_client()
-        batch_data = {
-            "historicalStockList": [
-                {
-                    "symbol": "^GSPC",
-                    "historical": [{"date": "2026-03-20", "close": 5500.0}],
-                }
-            ]
-        }
+    def test_timeseries_truncates_because_the_endpoint_ignores_it(self):
+        """`historical-price-eod/full` ignores the `timeseries` parameter and returns the
+        full history regardless (measured V4.111.6: timeseries=2 still returned 287KB).
+        The client truncates client-side to keep the old contract."""
+        many = [{"symbol": "^GSPC", "date": f"2026-03-{i:02d}", "close": 5500.0 + i}
+                for i in range(1, 21)]
+        client = _make_client()
+        with _patch_pool(many):
+            result = client.get_historical_prices("^GSPC", days=5)
 
-        def mock_get(url, params=None, timeout=None):
-            return _mock_response(200, batch_data)
+        assert len(result["historical"]) == 5
+        assert result["historical"] == many[:5]        # newest-first preserved
 
-        client.session.get = mock_get
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result is not None
-        assert "historical" in result
+    def test_historical_stock_list_batch_shape_is_still_handled(self):
+        client = _make_client()
+        batch = {"historicalStockList": [
+            {"symbol": "^GSPC", "historical": [{"date": "2026-03-20", "close": 5500.0}]}]}
+        with _patch_pool(batch):
+            result = client.get_historical_prices("^GSPC", days=80)
+
+        assert result["symbol"] == "^GSPC"
         assert result["historical"] == [{"date": "2026-03-20", "close": 5500.0}]
 
-    def test_historical_stable_batch_no_match_falls_back_to_v3(self):
-        """Stable batch has wrong symbol, falls back to v3 which succeeds."""
-        client = self._make_client()
-        batch_data = {
-            "historicalStockList": [
-                {
-                    "symbol": "SPY",
-                    "historical": [{"date": "2026-03-20", "close": 550.0}],
-                }
-            ]
-        }
-        v3_data = {"symbol": "^GSPC", "historical": [{"date": "2026-03-20", "close": 5500.0}]}
+    def test_batch_shape_without_a_matching_symbol_returns_none(self):
+        client = _make_client()
+        batch = {"historicalStockList": [
+            {"symbol": "SPY", "historical": [{"date": "2026-03-20", "close": 500.0}]}]}
+        with _patch_pool(batch) as mocked:
+            assert client.get_historical_prices("^GSPC", days=80) is None
+        assert mocked.call_count == 1
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(200, batch_data)
-            return _mock_response(200, v3_data)
 
-        client.session.get = mock_get
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result == v3_data
+# =========================================================================
+# Shape guards — truthy but wrong is still wrong
+# =========================================================================
 
-    def test_historical_batch_no_match_returns_none_when_v3_also_fails(self):
-        """Stable batch no match + v3 403 returns None."""
-        client = self._make_client()
-        batch_data = {
-            "historicalStockList": [
-                {
-                    "symbol": "SPY",
-                    "historical": [{"date": "2026-03-20", "close": 550.0}],
-                }
-            ]
-        }
+class TestShapeValidation:
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(200, batch_data)
-            return _mock_response(403, text="Forbidden")
+    def test_quote_rejects_a_dict_payload(self):
+        """FMP returns {"Error Message": ...} with HTTP 200. Truthy, and the wrong shape —
+        without this guard it would flow downstream as if it were quote data."""
+        client = _make_client()
+        with _patch_pool({"Error Message": "Invalid API call"}):
+            assert client.get_quote("^GSPC") is None
 
-        client.session.get = mock_get
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result is None
+    def test_quote_rejects_an_empty_list(self):
+        client = _make_client()
+        with _patch_pool([]):
+            assert client.get_quote("^GSPC") is None
 
-    # ------------------------------------------------------------------
-    # Tier B+ — Shape validation (2 tests)
-    # ------------------------------------------------------------------
+    def test_historical_rejects_a_scalar_list(self):
+        client = _make_client()
+        with _patch_pool([1, 2, 3]):
+            assert client.get_historical_prices("^GSPC", days=80) is None
 
-    def test_quote_rejects_non_list_response(self):
-        """Stable returns truthy dict — skipped, falls back to v3."""
-        client = self._make_client()
-        error_dict = {"Error Message": "Invalid API KEY."}
-        v3_data = [{"symbol": "^GSPC", "price": 5500.0}]
+    def test_historical_rejects_a_dict_without_historical_key(self):
+        client = _make_client()
+        with _patch_pool({"symbol": "^GSPC"}):
+            assert client.get_historical_prices("^GSPC", days=80) is None
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(200, error_dict)
-            return _mock_response(200, v3_data)
 
-        client.session.get = mock_get
-        result = client.get_quote("^GSPC")
-        assert result == v3_data
+# =========================================================================
+# Symbol mismatch — FMP sometimes answers with a different ticker
+# =========================================================================
 
-    def test_historical_rejects_non_dict_response(self):
-        """Stable returns truthy list — skipped, falls back to v3."""
-        client = self._make_client()
-        bad_data = [1, 2, 3]
-        v3_data = {"symbol": "^GSPC", "historical": [{"date": "2026-03-20", "close": 5500.0}]}
+class TestSymbolMismatch:
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(200, bad_data)
-            return _mock_response(200, v3_data)
+    def test_single_quote_with_the_wrong_symbol_is_rejected(self):
+        client = _make_client()
+        with _patch_pool([{"symbol": "SPY", "price": 500.0}]):
+            assert client.get_quote("^GSPC") is None
 
-        client.session.get = mock_get
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result == v3_data
+    def test_single_historical_with_the_wrong_symbol_is_rejected(self):
+        client = _make_client()
+        with _patch_pool([{"symbol": "SPY", "date": "2026-03-20", "close": 500.0}]):
+            assert client.get_historical_prices("^GSPC", days=80) is None
 
-    # ------------------------------------------------------------------
-    # Symbol mismatch protection
-    # ------------------------------------------------------------------
+    def test_batch_quote_skips_the_symbol_check(self):
+        """Multi-symbol requests legitimately return other tickers, so the single-symbol
+        guard must not fire — otherwise every batch call would be rejected."""
+        client = _make_client()
+        batch = [{"symbol": "^GSPC", "price": 5000}, {"symbol": "SPY", "price": 500}]
+        with _patch_pool(batch):
+            assert client.get_quote("^GSPC,SPY") == batch
 
-    def test_quote_symbol_mismatch_falls_back(self):
-        """Single-symbol quote returning wrong symbol is rejected."""
-        client = self._make_client()
-        wrong = _mock_response(200, [{"symbol": "SPY", "price": 500.0}])
-        correct = _mock_response(200, [{"symbol": "^GSPC", "price": 5000.0}])
-        client.session.get = MagicMock(side_effect=[wrong, correct])
+    def test_dash_and_dot_ticker_forms_are_treated_as_equal(self):
+        """BRK-B vs BRK.B: FMP is inconsistent across endpoints, so the comparison
+        normalizes before rejecting."""
+        client = _make_client()
+        with _patch_pool([{"symbol": "BRK.B", "price": 400.0}]):
+            assert client.get_quote("BRK-B") == [{"symbol": "BRK.B", "price": 400.0}]
 
-        result = client.get_quote("^GSPC")
-        assert result == [{"symbol": "^GSPC", "price": 5000.0}]
-        assert client.session.get.call_count == 2
 
-    def test_historical_symbol_mismatch_falls_back(self):
-        """Single-symbol historical returning wrong symbol is rejected."""
-        client = self._make_client()
-        wrong = _mock_response(200, {"symbol": "SPY", "historical": [{"close": 500}]})
-        correct = _mock_response(200, {"symbol": "^GSPC", "historical": [{"close": 5000}]})
-        client.session.get = MagicMock(side_effect=[wrong, correct])
+# =========================================================================
+# Caching
+# =========================================================================
 
-        result = client.get_historical_prices("^GSPC", days=80)
-        assert result["symbol"] == "^GSPC"
-        assert client.session.get.call_count == 2
+class TestCaching:
 
-    def test_batch_quote_skips_symbol_check(self):
-        """Multi-symbol (batch) quote does not apply symbol mismatch check."""
-        client = self._make_client()
-        batch_data = [{"symbol": "^GSPC", "price": 5000}, {"symbol": "^VIX", "price": 20}]
-        resp = _mock_response(200, batch_data)
-        client.session.get = MagicMock(return_value=resp)
+    def test_repeated_quote_hits_the_cache(self):
+        client = _make_client()
+        with _patch_pool(QUOTE) as mocked:
+            client.get_quote("^GSPC")
+            client.get_quote("^GSPC")
+        assert mocked.call_count == 1
 
-        result = client.get_quote("^GSPC,^VIX")
-        assert result == batch_data
-        assert client.session.get.call_count == 1
+    def test_failed_fetch_is_not_cached(self):
+        """Caching a None would make one transient failure permanent for the process."""
+        client = _make_client()
+        with _patch_pool(None, QUOTE) as mocked:
+            assert client.get_quote("^GSPC") is None
+            assert client.get_quote("^GSPC") == QUOTE
+        assert mocked.call_count == 2
 
-    # ------------------------------------------------------------------
-    # Skill-specific tests
-    # ------------------------------------------------------------------
+    def test_different_day_counts_are_cached_separately(self):
+        client = _make_client()
+        with _patch_pool(BARS, BARS) as mocked:
+            client.get_historical_prices("^GSPC", days=80)
+            client.get_historical_prices("^GSPC", days=200)
+        assert mocked.call_count == 2
 
-    def test_vix_term_structure_works_via_fallback(self):
-        """VIX term structure succeeds when get_quote uses stable->v3 fallback."""
-        client = self._make_client()
 
-        vix_data = [{"symbol": "^VIX", "price": 18.0}]
-        vix3m_data = [{"symbol": "^VIX3M", "price": 20.0}]
+# =========================================================================
+# Constructor
+# =========================================================================
 
-        def mock_get(url, params=None, timeout=None):
-            if "stable" in url:
-                return _mock_response(403, text="Forbidden")
-            # v3 fallback: route by symbol in URL path
-            if "^VIX3M" in url:
-                return _mock_response(200, vix3m_data)
-            if "^VIX" in url:
-                return _mock_response(200, vix_data)
-            return _mock_response(404, text="Not Found")
+class TestConstructor:
 
-        client.session.get = mock_get
-        result = client.get_vix_term_structure()
+    def test_missing_api_key_raises(self, monkeypatch):
+        monkeypatch.delenv("FMP_API_KEY", raising=False)
+        with pytest.raises(ValueError, match="FMP API key required"):
+            FMPClient(api_key=None)
 
-        assert result is not None
-        assert result["vix"] == 18.0
-        assert result["vix3m"] == 20.0
-        # 18/20 = 0.9 -> contango
-        assert result["classification"] == "contango"
-        assert result["ratio"] == 0.9
+    def test_key_is_read_from_the_environment(self, monkeypatch):
+        monkeypatch.setenv("FMP_API_KEY", "env_key")
+        assert FMPClient().api_key == "env_key"
 
-    def test_market_top_exits_on_sp500_failure(self):
-        """main() exits with code 1 when S&P 500 data unavailable."""
-        from fmp_client import FMPClient
 
-        with (
-            patch.object(FMPClient, "__init__", lambda self, **kw: None),
-            patch.object(FMPClient, "get_quote", return_value=None),
-            patch.object(FMPClient, "get_historical_prices", return_value=None),
-            patch.object(
-                FMPClient,
-                "get_api_stats",
-                return_value={
-                    "cache_entries": 0,
-                    "api_calls_made": 0,
-                    "rate_limit_reached": False,
-                },
-            ),
-            patch("sys.argv", ["market_top_detector.py"]),
-        ):
-            # Need to set required attributes that __init__ would set
-            def fake_init(self, **kw):
-                self.api_key = "test"  # pragma: allowlist secret
-                self.session = MagicMock()
-                self.cache = {}
-                self.last_call_time = 0
-                self.rate_limit_reached = False
-                self.retry_count = 0
-                self.max_retries = 1
-                self.api_calls_made = 0
+# =========================================================================
+# VIX term structure — market-top only
+# =========================================================================
 
-            with patch.object(FMPClient, "__init__", fake_init):
-                import market_top_detector
+class TestVixTermStructure:
 
-                with pytest.raises(SystemExit) as exc_info:
-                    market_top_detector.main()
-                assert exc_info.value.code == 1
+    def _q(self, sym, price):
+        return [{"symbol": sym, "price": price}]
 
-    def test_market_top_continues_on_vix_failure(self, capsys):
-        """main() continues with warning when VIX unavailable (non-fatal)."""
-        from fmp_client import FMPClient
+    @pytest.mark.parametrize("vix,vix3m,expected", [
+        (10.0, 20.0, "steep_contango"),      # ratio 0.50
+        (16.9, 20.0, "steep_contango"),      # 0.845 — just under 0.85
+        (17.0, 20.0, "contango"),            # 0.85  — boundary is inclusive-lower
+        (18.9, 20.0, "contango"),            # 0.945
+        (19.0, 20.0, "flat"),                # 0.95
+        (21.0, 20.0, "flat"),                # 1.05  — upper bound inclusive
+        (21.1, 20.0, "backwardation"),       # 1.055
+        (30.0, 20.0, "backwardation"),
+    ])
+    def test_classification_bands(self, vix, vix3m, expected):
+        """0.85 / 0.95 / 1.05 boundaries. Backwardation is the risk-off signal the
+        detector keys off, so the top bound matters."""
+        client = _make_client()
+        with _patch_pool(self._q("^VIX", vix), self._q("^VIX3M", vix3m)):
+            out = client.get_vix_term_structure()
 
-        sp500_quote = [{"symbol": "^GSPC", "price": 5500.0, "yearHigh": 5600.0}]
-        sp500_hist = {
-            "symbol": "^GSPC",
-            "historical": [
-                {
-                    "date": f"2026-03-{20 - i:02d}",
-                    "close": 5500.0 - i * 10,
-                    "volume": 3_000_000_000,
-                    "open": 5490.0 - i * 10,
-                    "high": 5510.0 - i * 10,
-                    "low": 5480.0 - i * 10,
-                }
-                for i in range(260)
-            ],
-        }
-        qqq_quote = [{"symbol": "QQQ", "price": 480.0, "yearHigh": 500.0}]
-        qqq_hist = {
-            "symbol": "QQQ",
-            "historical": [
-                {
-                    "date": f"2026-03-{20 - i:02d}",
-                    "close": 480.0 - i,
-                    "volume": 50_000_000,
-                    "open": 479.0 - i,
-                    "high": 481.0 - i,
-                    "low": 478.0 - i,
-                }
-                for i in range(260)
-            ],
-        }
+        assert out["classification"] == expected
+        assert out["ratio"] == pytest.approx(round(vix / vix3m, 3))
+        assert out["vix"] == round(vix, 2)
+        assert out["vix3m"] == round(vix3m, 2)
 
-        def mock_quote(symbols):
-            if symbols == "^GSPC":
-                return sp500_quote
-            if symbols == "QQQ":
-                return qqq_quote
-            if symbols == "^VIX":
-                return None  # VIX fails
-            if symbols == "^VIX3M":
-                return None
-            # Return generic quote for ETFs
-            return [
-                {
-                    "symbol": symbols.split(",")[0],
-                    "price": 100.0,
-                    "yearHigh": 110.0,
-                    "changesPercentage": 0.5,
-                    "volume": 1_000_000,
-                    "avgVolume": 1_000_000,
-                }
-            ]
+    def test_missing_vix3m_returns_none(self):
+        """VIX3M is the leg most often unavailable; without it there is no term
+        structure to report — must not fall back to a single-leg guess."""
+        client = _make_client()
+        with _patch_pool(self._q("^VIX", 20.0), None):
+            assert client.get_vix_term_structure() is None
 
-        def mock_hist(symbol, days=365):
-            if symbol == "^GSPC":
-                return sp500_hist
-            if symbol == "QQQ":
-                return qqq_hist
-            # Generic history for ETFs
-            return {
-                "symbol": symbol,
-                "historical": [
-                    {
-                        "date": f"2026-03-{20 - i:02d}",
-                        "close": 100.0 + i * 0.1,
-                        "volume": 1_000_000,
-                        "open": 99.9 + i * 0.1,
-                        "high": 100.1 + i * 0.1,
-                        "low": 99.8 + i * 0.1,
-                    }
-                    for i in range(min(days, 260))
-                ],
-            }
+    def test_missing_vix_returns_none(self):
+        client = _make_client()
+        with _patch_pool(None, self._q("^VIX3M", 20.0)):
+            assert client.get_vix_term_structure() is None
 
-        def mock_batch_quotes(symbols):
-            result = {}
-            for s in symbols:
-                q = mock_quote(s)
-                if q:
-                    for item in q:
-                        result[item.get("symbol", s)] = item
-            return result
-
-        def mock_batch_hist(symbols, days=50):
-            result = {}
-            for s in symbols:
-                d = mock_hist(s, days)
-                if d and "historical" in d:
-                    result[s] = d["historical"]
-            return result
-
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with (
-                patch.dict(os.environ, {"FMP_API_KEY": "test_key"}),  # pragma: allowlist secret
-                patch(
-                    "sys.argv",
-                    [
-                        "market_top_detector.py",
-                        "--static-basket",
-                        "--no-auto-breadth",
-                        "--breadth-200dma",
-                        "60.0",
-                        "--put-call",
-                        "0.70",
-                        "--vix-term",
-                        "contango",
-                        "--output-dir",
-                        tmpdir,
-                    ],
-                ),
-            ):
-                from fmp_client import FMPClient
-
-                with (
-                    patch.object(FMPClient, "get_quote", side_effect=mock_quote),
-                    patch.object(FMPClient, "get_historical_prices", side_effect=mock_hist),
-                    patch.object(FMPClient, "get_batch_quotes", side_effect=mock_batch_quotes),
-                    patch.object(FMPClient, "get_batch_historical", side_effect=mock_batch_hist),
-                ):
-                    import importlib
-
-                    import market_top_detector
-
-                    importlib.reload(market_top_detector)
-
-                    # Should NOT raise SystemExit — VIX failure is non-fatal
-                    try:
-                        market_top_detector.main()
-                    except SystemExit:
-                        pytest.fail("main() should not exit when only VIX fails")
-
-            captured = capsys.readouterr()
-            assert "WARN" in captured.out or "VIX unavailable" in captured.out
+    def test_zero_vix3m_returns_none_instead_of_dividing_by_zero(self):
+        client = _make_client()
+        with _patch_pool(self._q("^VIX", 20.0), self._q("^VIX3M", 0.0)):
+            assert client.get_vix_term_structure() is None

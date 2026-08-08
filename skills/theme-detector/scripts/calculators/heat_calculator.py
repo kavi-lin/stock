@@ -30,12 +30,14 @@ def momentum_strength_score(weighted_return_pct: float) -> float:
     Midpoint at |wr| = 15% (typical strong industry weighted return).
     Log transform compresses extreme values for better mid-range separation.
 
-    Examples:
-        |0%|  -> ~3
-        |5%|  -> ~27
-        |15%| -> 50 (midpoint)
-        |30%| -> ~73
-        |50%| -> ~86
+    Examples (V4.113.2: recomputed — the previous list claimed ~3 / ~27 / 50 / ~73 / ~86,
+    which corresponds to a gentler slope than the -2.0 this formula actually uses. Only
+    the midpoint was ever right; the rest were never recomputed after the slope was tuned):
+        |0%|  -> 0.4
+        |5%|  -> 12.3
+        |15%| -> 50.0 (midpoint, by construction)
+        |30%| -> 79.0
+        |50%| -> 91.0
     """
     x = abs(weighted_return_pct)
     log_x = math.log(1.0 + x)

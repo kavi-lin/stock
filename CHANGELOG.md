@@ -8,6 +8,54 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.113.2] — 2026-08-08 — stale test 修復批：52 紅歸零，並挖出共用 RSI 的不對稱 bug
+
+TODO 上躺了兩個版本的「stale test 修復批」。根因不只一種，值得分開記：
+
+### Fixed
+- **`skills/_shared/technical_core.py` `rsi_14` — 無損失時回 NaN 而非 100**（真 bug，
+  由重寫測試時挖出）。`avg_loss.replace(0, np.nan)` 是為了避開除以零，卻把「完全沒有
+  下跌」變成未定義；鏡像案例是好的（全跌 → RSI 0 → oversold），所以這個不對稱一直沒被
+  發現。後果：連漲 14 天（或連漲後持平）的標的，`rsi_state()` 回 `zone="unknown"`
+  ——**最極端的超買狀態，產出的是「沒有資料」**，而 overbought 正是動能耗盡的判斷依據。
+  修為 `avg_loss == 0 且 avg_gain > 0 → 100`；warm-up NaN 與完全持平（RSI 真的未定義）
+  不受影響。此函式餵 9 個消費者，此前零直接測試覆蓋
+
+### Changed（測試，非行為）
+- `ftd-detector` / `market-top-detector` 的 `test_fmp_client.py` **整檔重寫**（23 紅 → 0）。
+  兩層過時：(a) mock 打 `client.session.get`，但 fmp_pool 重構後 transport 是
+  `fmp_pool.get_url`，`self.session` 只是殘留 → patch「成功」但什麼都沒攔，**每個測試都在
+  打真網路**（症狀：套件跑 12-13 秒，修後 0.10 秒）；(b) 斷言 `call_count == 2` 的
+  stable→v3 fallback，而 V4.111.6 已刪掉 v3 那一腿。新版加了一條
+  `test_client_calls_fmp_pool_not_its_own_session` 專門防這個檔再次過時
+- `theme-detector/test_heat_calculator.py` 重寫（22 紅 → 0）：V2.19.2（commit 3afa76d）
+  換掉了全部四個公式（plain sigmoid → log-sigmoid、線性 → sqrt、離散桶 → 連續、
+  線性 → 冪次曲線），`uptrend_signal_score` 的 `ratio` 輸入慣例也從百分比改成 0-1 分數。
+  期望值由**各函式文件化的公式推導**，不是抄現行輸出——否則等於無條件背書 code
+- `theme-detector/test_etf_scanner.py` 三個 fallback 測試改為**依 URL 分派**而非固定
+  `side_effect` 序列（`FMP_HIST_BATCH_SIZE` 改 1 後真實呼叫次數變動，序列錯位讓 AAPL 的
+  historical 被派給別的請求）；stats 改讀公開的 `backend_stats()` 而非私有 `_stats`
+  （其形狀已從扁平改為 `{stock, etf}` 巢狀，公開存取器刻意保留了向後相容）
+- `theme-detector/test_config_loader.py`：`len(cross_sector) == 15` 改為下界 + 結構檢查
+  ——主題目錄已長到 21 個，精確計數讓每次合法新增都變成失敗
+
+### Added
+- `skills/_shared/tests/test_technical_core_rsi.py`（14 test）：鎖無損失 → 100、
+  鏡像的全跌 → 0、兩極對稱、完全持平仍未定義、warm-up NaN 不被誤填
+
+### 已知問題（記錄，未改行為）
+- `heat_calculator.momentum_strength_score` 的 docstring 範例（~3/~27/50/~73/~86）對應的是
+  比實際 -2.0 更平緩的斜率，**只有 midpoint 是對的**。已重算為 0.4/12.3/50/79/91，並加
+  測試釘住，斜率再調時會一起紅
+- `uptrend_signal_score` 的 `weight = entry.get("weight") or 1.0`：**`0.0` 是 falsy，
+  會被靜默換成 `1.0`**，無法把某 sector 權重歸零，且 `total_weight == 0` 的保護成為死碼。
+  與 V4.111.7 的 burry `0.0` 同族。改動會移動 theme heat 分數，故記錄不改
+
+### 驗收
+theme-detector 460 / ftd 65 / market-top 210 / _shared 30 全綠（原 52 紅）。
+transport 與 RSI 兩處各種回 bug 確認會紅（transport 版另外把執行時間從 0.09 秒推回 22 秒
+——時間本身是第二個訊號）。
+
 ## [4.113.1] — 2026-08-08 — 補完 V4.113.0 承諾但沒做的逐消費者量化（結論被修正）
 
 V4.113.0 的範圍表 §6 與實施表 T6 承諾了 momentum composite 對照、quant-backtest

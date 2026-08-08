@@ -598,106 +598,101 @@ class TestBatchETFVolumeRatios:
 class TestSymbolLevelFallback:
     """Tests for symbol-level FMP -> yfinance fallback."""
 
+    # V4.113.2: these three used a fixed `side_effect` list, which assumed a specific
+    # number of FMP calls in a specific order. FMP_HIST_BATCH_SIZE is now 1 (the batch
+    # form returns 402), so the real call count changed and the sequence desynchronised —
+    # AAPL's historical response was being handed to a different request entirely. They
+    # now dispatch on the URL, which is robust to call-count changes. They also read
+    # stats through the public `backend_stats()` accessor rather than reaching into
+    # `_stats`, whose shape changed from flat to {stock, etf} nested.
+
+    @staticmethod
+    def _url_responder(quote_payload, hist_payload_by_symbol):
+        """Answer by endpoint + requested symbol instead of by call order."""
+        def respond(url, *args, **kwargs):
+            params = kwargs.get("params") or {}
+            sym = params.get("symbol", "")
+            resp = MagicMock()
+            if "quote" in url:
+                resp.status_code = 200
+                resp.json.return_value = quote_payload
+                return resp
+            payload = hist_payload_by_symbol.get(sym)
+            if payload is None:
+                resp.status_code = 500
+                resp.json.return_value = {}
+                return resp
+            resp.status_code = 200
+            resp.json.return_value = payload
+            return resp
+        return respond
+
     @patch("etf_scanner._requests_lib")
     @patch("etf_scanner.yf")
     def test_partial_fmp_success_fills_missing_from_yfinance(self, mock_yf, mock_requests):
-        """Partial FMP success -> missing symbols fall back to yfinance."""
+        """FMP covers AAPL; MSFT has no historical, so only MSFT falls back to yfinance."""
         scanner = ETFScanner(fmp_api_key="test_key", rate_limit_sec=0)
 
-        # FMP: only AAPL succeeds
-        quote_resp = MagicMock()
-        quote_resp.status_code = 200
-        quote_resp.json.return_value = [
-            {"symbol": "AAPL", "pe": 30, "price": 150, "yearHigh": 180, "yearLow": 120},
-        ]
-        hist_resp = MagicMock()
-        hist_resp.status_code = 200
-        # Historical with enough data for RSI (newest-first from FMP)
-        hist_resp.json.return_value = {
-            "historicalStockList": [
-                {"symbol": "AAPL", "historical": [{"close": float(150 - i)} for i in range(20)]},
-            ]
-        }
-        mock_requests.get.side_effect = [
-            quote_resp,
-            hist_resp,
-            # Per-symbol retry for MSFT (fails)
-            MagicMock(status_code=500),
-            MagicMock(status_code=500),
-        ]
-
-        # yfinance fallback: download for MSFT
-        mock_df = pd.DataFrame(
-            {
-                "Close": np.linspace(300, 400, 20),
-                "High": np.linspace(305, 405, 20),
-                "Low": np.linspace(295, 395, 20),
-                "Volume": [1_000_000] * 20,
-            }
+        # Newest-first, rising into the present -> RSI is well defined for AAPL.
+        aapl_bars = [{"symbol": "AAPL", "close": float(150 - i)} for i in range(20)]
+        mock_requests.get.side_effect = self._url_responder(
+            [{"symbol": "AAPL", "pe": 30, "price": 150, "yearHigh": 180, "yearLow": 120}],
+            {"AAPL": aapl_bars},                       # MSFT missing -> 500 -> fallback
         )
+
+        mock_df = pd.DataFrame({
+            "Close": np.linspace(300, 400, 20), "High": np.linspace(305, 405, 20),
+            "Low": np.linspace(295, 395, 20), "Volume": [1_000_000] * 20,
+        })
         mock_yf.download.return_value = mock_df
         mock_ticker = MagicMock()
         mock_ticker.info = {"trailingPE": 35.0}
         mock_yf.Ticker.return_value = mock_ticker
 
         results = scanner.batch_stock_metrics(["AAPL", "MSFT"])
+        by_sym = {r["symbol"]: r for r in results}
+
         assert len(results) == 2
-        # AAPL from FMP
-        aapl = [r for r in results if r["symbol"] == "AAPL"][0]
-        assert aapl["pe_ratio"] == 30
-        # MSFT from yfinance fallback
-        msft = [r for r in results if r["symbol"] == "MSFT"][0]
-        assert msft["pe_ratio"] == 35.0
-        # Stats show fallback occurred
-        assert scanner._stats["yf_fallbacks"] >= 1
+        assert by_sym["AAPL"]["pe_ratio"] == 30
+        assert by_sym["AAPL"]["rsi_14"] is not None       # served by FMP, no fallback
+        assert by_sym["MSFT"]["pe_ratio"] == 35.0         # filled by yfinance
+        assert scanner.backend_stats()["yf_fallbacks"] >= 1
 
     @patch("etf_scanner._requests_lib")
     def test_all_fmp_success_no_yfinance_calls(self, mock_requests):
-        """When FMP succeeds for all symbols, yfinance is not called."""
+        """When FMP answers everything, yfinance must not be touched — the fallback is
+        there for gaps, not as a routine second opinion."""
         scanner = ETFScanner(fmp_api_key="test_key", rate_limit_sec=0)
-
-        quote_resp = MagicMock()
-        quote_resp.status_code = 200
-        quote_resp.json.return_value = [
-            {"symbol": "AAPL", "pe": 30, "price": 150, "yearHigh": 180, "yearLow": 120},
-        ]
-        hist_resp = MagicMock()
-        hist_resp.status_code = 200
-        hist_resp.json.return_value = {
-            "historicalStockList": [
-                {"symbol": "AAPL", "historical": [{"close": float(150 - i)} for i in range(20)]},
-            ]
-        }
-        mock_requests.get.side_effect = [quote_resp, hist_resp]
+        aapl_bars = [{"symbol": "AAPL", "close": float(150 - i)} for i in range(20)]
+        mock_requests.get.side_effect = self._url_responder(
+            [{"symbol": "AAPL", "pe": 30, "price": 150, "yearHigh": 180, "yearLow": 120}],
+            {"AAPL": aapl_bars},
+        )
 
         with patch("etf_scanner.yf") as mock_yf:
-            scanner.batch_stock_metrics(["AAPL"])
+            results = scanner.batch_stock_metrics(["AAPL"])
             mock_yf.download.assert_not_called()
 
-        assert scanner._stats["yf_calls"] == 0
+        assert results[0]["rsi_14"] is not None
+        assert scanner.backend_stats()["yf_calls"] == 0
 
     @patch("etf_scanner.HAS_REQUESTS", False)
     @patch("etf_scanner.yf")
     def test_all_fmp_fail_falls_back_entirely(self, mock_yf):
-        """Without requests library, falls back entirely to yfinance."""
+        """Without the requests library there is no FMP path at all."""
         scanner = ETFScanner(fmp_api_key="test_key", rate_limit_sec=0)
 
-        mock_df = pd.DataFrame(
-            {
-                "Close": np.linspace(100, 150, 20),
-                "High": np.linspace(105, 155, 20),
-                "Low": np.linspace(95, 145, 20),
-                "Volume": [1_000_000] * 20,
-            }
-        )
-        mock_yf.download.return_value = mock_df
+        mock_yf.download.return_value = pd.DataFrame({
+            "Close": np.linspace(100, 150, 20), "High": np.linspace(105, 155, 20),
+            "Low": np.linspace(95, 145, 20), "Volume": [1_000_000] * 20,
+        })
         mock_ticker = MagicMock()
         mock_ticker.info = {"trailingPE": 25.0}
         mock_yf.Ticker.return_value = mock_ticker
 
         results = scanner.batch_stock_metrics(["AAPL"])
         assert len(results) == 1
-        assert scanner._stats["yf_calls"] == 1
+        assert scanner.backend_stats()["yf_calls"] == 1
 
 
 # ---------------------------------------------------------------------------
