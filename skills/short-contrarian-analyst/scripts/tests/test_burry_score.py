@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """burry_score.py — scoring bands, weight renormalization, and the V4.111.7 regression.
 
-Zero network: every test patches `burry_score.yf.Ticker`, which is the object the module
-actually calls (`compute()` line 1). Patching anything else would let the real yfinance
-through — this repo has shipped a suite that mocked `session.get` while the code went
-through `fmp_pool`, and it silently hit the live network for weeks.
+Zero network. Two mocks are needed since V4.113.3, and both matter:
+  * `bs.fetch_history` — the price leg, moved to technical_core in that release
+  * `bs.yf.Ticker`     — still the source of `.info` and `.insider_transactions`
+
+Patching only `yf.Ticker` (as this file did before) leaves the price leg live: the suite
+stayed green while making real network calls, which is worse than failing — a green run
+that proves nothing. See MAINTENANCE §2c.
 """
 import sys
 from pathlib import Path
@@ -25,13 +28,31 @@ def _fake_ticker(info=None, closes=None, insider=None, history_raises=False):
     reproduces a price-fetch outage."""
     tk = MagicMock()
     tk.info = info if info is not None else {}
-    if history_raises:
-        tk.history.side_effect = RuntimeError("yfinance: connection reset")
-    else:
-        series = closes if closes is not None else [100.0] * 250
-        tk.history.return_value = pd.DataFrame({"Close": series})
     tk.insider_transactions = insider
+    # Carried so _fetch_for() can build the matching price stub from the same fixture.
+    tk._closes = closes
+    tk._raises = history_raises
     return tk
+
+
+def _fetch_for(tk):
+    """Price stub matching the intent expressed on the ticker fixture."""
+    return _fake_fetch(closes=tk._closes, history_raises=tk._raises)
+
+
+def _fake_fetch(closes=None, history_raises=False):
+    """Stand-in for technical_core.fetch_history (V4.113.3 moved the price path here).
+
+    Patching `yf.Ticker.history` no longer intercepts the price leg — those tests kept
+    passing while hitting the live network, which is worse than failing: a green run
+    that proves nothing (MAINTENANCE §2c).
+    """
+    if history_raises:
+        def _raise(*a, **k):
+            raise RuntimeError("technical_core: both providers failed")
+        return _raise
+    series = closes if closes is not None else [100.0] * 250
+    return lambda *a, **k: (pd.DataFrame({"Close": series}), MagicMock())
 
 
 HEALTHY_INFO = {
@@ -97,7 +118,8 @@ def test_price_fetch_failure_renormalizes_instead_of_scoring_zero():
     weights_active regains 'pct_below_52w_high' and burry_score drops.
     """
     tk = _fake_ticker(info=HEALTHY_INFO, history_raises=True)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["components"]["pct_below_52w_high"] is None
@@ -112,9 +134,11 @@ def test_price_fetch_failure_does_not_change_the_other_components():
     healthy = _fake_ticker(info=HEALTHY_INFO, closes=[100.0] * 250)
     broken = _fake_ticker(info=HEALTHY_INFO, history_raises=True)
 
-    with patch.object(bs.yf, "Ticker", return_value=healthy):
+    with patch.object(bs.yf, "Ticker", return_value=healthy), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(healthy)):
         ok = bs.compute("TEST")
-    with patch.object(bs.yf, "Ticker", return_value=broken):
+    with patch.object(bs.yf, "Ticker", return_value=broken), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(broken)):
         degraded = bs.compute("TEST")
 
     for key in ("fcf_yield", "ev_ebit", "debt_to_equity"):
@@ -125,7 +149,8 @@ def test_flat_price_series_is_not_confused_with_a_failure():
     """A genuinely-at-the-high stock (0% below) still scores 20 and still counts. Only an
     *absent* read renormalizes out — otherwise the fix would erase a real signal."""
     tk = _fake_ticker(info=HEALTHY_INFO, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["components"]["pct_below_52w_high"] == 0.0
@@ -144,7 +169,8 @@ def test_score_is_renormalized_over_active_weights_only():
     score must divide by that partial total. Dividing by 1.0 instead would drag every
     incomplete ticker toward 0 — straight into the T4_VETO band."""
     tk = _fake_ticker(info={"enterpriseValue": 100e9, "ebitda": 8e9}, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     active = out["weights_active"]
@@ -165,7 +191,8 @@ def test_score_uses_full_weights_when_nothing_is_missing():
         closes=[100.0] * 250,
         insider=pd.DataFrame({"Transaction": ["Purchase"] * 5, "Shares": [100] * 5}),
     )
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert set(out["weights_active"]) == set(WEIGHTS)
@@ -178,7 +205,8 @@ def test_all_components_missing_yields_null_score_not_a_veto():
     """No data must read as UNKNOWN, never as T4_VETO — protocol :793 excludes UNKNOWN
     from T4 precisely so a data outage cannot force a HOLD."""
     tk = _fake_ticker(info={}, history_raises=True)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["burry_score"] is None
@@ -202,7 +230,8 @@ def test_verdict_bands(score, expected, monkeypatch):
     monkeypatch.setattr(bs, "score_insider", lambda *_a, _s=score: _s)
 
     tk = _fake_ticker(info=HEALTHY_INFO, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["burry_score"] == pytest.approx(score)
@@ -213,7 +242,8 @@ def test_verdict_bands(score, expected, monkeypatch):
 
 def test_output_golden_keys():
     tk = _fake_ticker(info=HEALTHY_INFO, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("test")
 
     assert set(out) == {
@@ -234,7 +264,8 @@ def test_ev_ebit_key_is_really_ebitda():
     EBIT — the reasoning string is where the honest label lives. Renaming the key breaks
     stored sessions; this test is here to make that trade-off explicit rather than a bug."""
     tk = _fake_ticker(info=HEALTHY_INFO, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["components"]["ev_ebit"] == pytest.approx(100e9 / 8e9, abs=0.01)
@@ -247,7 +278,8 @@ def test_debt_to_equity_is_divided_by_one_hundred():
     """yfinance reports D/E as a percentage (KO=139.79). Forgetting the /100 would push
     every leveraged name into the >2 → 10 band."""
     tk = _fake_ticker(info={**HEALTHY_INFO, "debtToEquity": 139.79}, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["components"]["debt_to_equity"] == pytest.approx(1.40, abs=0.01)
@@ -257,7 +289,8 @@ def test_negative_fcf_falls_back_to_operating_cashflow():
     """yfinance's freeCashflow is sometimes wrong (KO reported -1.46B against OpCF +7.4B)."""
     info = {**HEALTHY_INFO, "freeCashflow": -1_460_000_000, "operatingCashflow": 7_400_000_000}
     tk = _fake_ticker(info=info, closes=[100.0] * 250)
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     expected_yield = (7_400_000_000 * 0.85 / 100_000_000_000) * 100
@@ -271,7 +304,8 @@ def test_insider_sniffing_failure_is_fail_safe():
     type(tk).insider_transactions = property(
         lambda _self: (_ for _ in ()).throw(RuntimeError("schema changed")))
 
-    with patch.object(bs.yf, "Ticker", return_value=tk):
+    with patch.object(bs.yf, "Ticker", return_value=tk), \
+         patch.object(bs, "fetch_history", side_effect=_fetch_for(tk)):
         out = bs.compute("TEST")
 
     assert out["components"]["insider_net"] == "UNKNOWN"

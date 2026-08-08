@@ -17,6 +17,9 @@ import pandas as pd
 import yfinance as yf
 
 ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from skills._shared import technical_core  # noqa: E402
 
 
 def load_positions(path: Path):
@@ -84,8 +87,10 @@ def compute(ticker: str, positions_path: Path, vol_budget: float,
     holdings_tickers = [p["ticker"] for p in positions if p["ticker"] != candidate]
 
     # Candidate stats
-    tk = yf.Ticker(candidate)
-    hist = tk.history(period="6mo", auto_adjust=True)["Close"].dropna()
+    # V4.113.3: candidate prices via the canonical source. The handle it returns is still
+    # a yf.Ticker, so the sector lookup below (`tk.info`) is unchanged.
+    hist_df, tk = technical_core.fetch_history(candidate, period="6mo")
+    hist = hist_df["Close"].dropna()
     if len(hist) < 30:
         raise ValueError(f"insufficient data for {candidate}")
     rets = hist.pct_change().dropna()

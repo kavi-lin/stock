@@ -41,6 +41,25 @@ def _ticker(closes=None, sector="Technology", history_raises=False, info_raises=
     return tk
 
 
+@pytest.fixture(autouse=True)
+def _route_candidate_fetch_through_yf():
+    """V4.113.3 moved the candidate price path to `technical_core.fetch_history`, while
+    the sector loop still uses `yf.Ticker` directly. Rather than make every test build two
+    fixtures, route the shared fetcher back through whatever `rm.yf.Ticker` mock the test
+    already installed — one fixture keeps driving both paths.
+
+    Without this, `yf.Ticker` patches stop covering the candidate leg and the tests reach
+    the live network (observed: the suite went from 0.6s to 72s). Autouse so a new test
+    cannot forget it.
+    """
+    def _fetch(ticker, period="1y"):
+        tk = rm.yf.Ticker(ticker)
+        return tk.history(period=period, auto_adjust=True), tk
+
+    with patch.object(rm.technical_core, "fetch_history", side_effect=_fetch):
+        yield
+
+
 def _positions_file(tmp_path, entries):
     p = tmp_path / "positions.json"
     p.write_text(json.dumps(entries))

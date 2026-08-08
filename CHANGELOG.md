@@ -8,6 +8,47 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.113.3] — 2026-08-08 — B4：風控三支遷 technical_core，閘門過真實 code path 重跑
+
+`docs/plan_risk_trio_B.md` B4。前置條件在 V4.113.0 解除（FMP dividend-adjusted 端點）、
+共用模組在同版修好，這批把三支風控 skill 接上去。
+
+### Changed
+- `tail_risk.py` / `burry_score.py` / `risk_manager.py` 的價格路徑改走
+  `technical_core.fetch_history`（FMP dividend-adjusted 主源 + yfinance fallback，
+  兩路徑同慣例）。burry 與 rm 保留 `yf.Ticker` 供 `.info` / `.insider_transactions` /
+  sector 查詢——`fetch_history` 回傳的 handle 就是 yf.Ticker，metadata 路徑不變
+- 三支測試的 patch 目標同步遷移。`risk_manager` 用 autouse fixture 把
+  `technical_core.fetch_history` 路由回既有的 `yf.Ticker` mock，讓每個測試維持單一 fixture
+
+### 閘門：✅ PASS — 0 label 翻轉（16 檔，**過真實 `tail_risk.compute()`**）
+V4.113.0 的 shadow 是直打端點，不算數；這次舊基準用 patch 把 `fetch_history` 換成
+pre-migration 的 `yf.Ticker(...).history(auto_adjust=True)`，兩邊都走真實模組。
+
+| 群組 | Δscore 中位 | Δscore 最大 |
+|---|---|---|
+| 配息 (8) | -0.050 | +0.400 (PFE) |
+| 無配息 (5) | -0.100 | -0.200 |
+| ETF (3) | +0.000 | -0.100 |
+
+全體 `|Δscore|` 最大 **0.400**、中位 0.100；`sample_days` 250 → 254（FMP 多 4 根）。
+
+**⚠ 餘裕不大**：樣本中最接近分級帶邊的距離是 **0.60 分**（XLK 30.6），而最大 Δscore 是
+**0.400**。這批沒有翻轉，但落在帶邊 0.4 分內的標的會翻——閘門通過不等於這個遷移對
+所有標的都無感。
+
+### 基線 diff
+- `burry_score KO` **逐位元一致**
+- `tail_risk SPY`：`sample_days` 250→254 帶動指標小數點後微移，`tail_risk_score` 與
+  `fragility_label` 不變
+- `risk_manager NVDA`：`daily_vol_pct` 2.434 → 2.512（多 4 根 bar），`raw_cap` 仍 20.00、
+  `final_position_cap_pct` 不變
+
+### 驗收
+三支 + `_shared` 143 passed（0.75s，migration 前一度因 patch 失效變成 71.9s 的真網路跑）；
+`test_trade_plan_builder` / `validate_session_export` / `test_session_export_schema` /
+`check_skills` / `validate_sector_intel` 全 rc=0；replay 三 cohort current-rule mismatched 皆 0。
+
 ## [4.113.2] — 2026-08-08 — stale test 修復批：52 紅歸零，並挖出共用 RSI 的不對稱 bug
 
 TODO 上躺了兩個版本的「stale test 修復批」。根因不只一種，值得分開記：

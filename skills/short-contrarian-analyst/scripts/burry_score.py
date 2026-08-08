@@ -11,7 +11,14 @@ import json
 import sys
 from datetime import datetime, timezone
 
+import os
+
 import yfinance as yf
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from skills._shared.technical_core import fetch_history  # noqa: E402
 
 
 def score_fcf_yield(fcf_yield_pct):
@@ -74,6 +81,8 @@ def get_insider_net(tk):
 
 
 def compute(ticker: str):
+    # V4.113.3: prices via the canonical source; the yfinance handle it returns still
+    # serves .info and .insider_transactions, so the metadata path is unchanged.
     tk = yf.Ticker(ticker)
     info = tk.info or {}
 
@@ -103,7 +112,7 @@ def compute(ticker: str):
 
     # 52-week high
     try:
-        hist = tk.history(period="1y", auto_adjust=True)["Close"].dropna()
+        hist = fetch_history(ticker, period="1y")[0]["Close"].dropna()
         high_52 = float(hist.max())
         current = float(hist.iloc[-1])
         pct_below_high = (1 - current / high_52) * 100

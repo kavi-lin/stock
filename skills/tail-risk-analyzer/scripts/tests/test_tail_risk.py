@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """tail_risk.py — fragility bands, weights, and the <30-bar degradation contract.
 
-Zero network: patches `tail_risk.yf.Ticker`, the object `compute()` actually calls.
+Zero network: patches `tail_risk.fetch_history` — the price path moved to
+technical_core in V4.113.3, so patching `yf.Ticker` no longer intercepts anything.
 
 The 30/60 bands and the .10/.10/.15/.30/.35 weights asserted here are mirrored in
 `trade_plan_builder.py:102`, `validate_session_export.py:386` + the §14b enum gate, and
@@ -30,21 +31,27 @@ def _prices_from_returns(rets, start=100.0):
     return px
 
 
-def _fake_ticker(closes=None, empty=False):
-    tk = MagicMock()
-    tk.history.return_value = pd.DataFrame() if empty else pd.DataFrame({"Close": closes})
-    return tk
+def _fake_fetch(closes=None, empty=False):
+    """Stand-in for technical_core.fetch_history: returns (hist_df, yf_handle).
+
+    V4.113.3 moved the price path here from `yf.Ticker(...).history(...)`. Patching
+    `yf.Ticker` no longer intercepts anything — the old tests kept passing while making
+    live network calls (the suite went from <1s to 72s), which is exactly the failure
+    mode MAINTENANCE §2c exists to catch.
+    """
+    df = pd.DataFrame() if empty else pd.DataFrame({"Close": closes})
+    return lambda *a, **k: (df, MagicMock())
 
 
 def _run(closes):
-    with patch.object(tr.yf, "Ticker", return_value=_fake_ticker(closes)):
+    with patch.object(tr, "fetch_history", side_effect=_fake_fetch(closes)):
         return tr.compute("TEST", "1y")
 
 
 # ── degradation contract ────────────────────────────────────────────────────
 
 def test_empty_history_raises():
-    with patch.object(tr.yf, "Ticker", return_value=_fake_ticker(empty=True)):
+    with patch.object(tr, "fetch_history", side_effect=_fake_fetch(empty=True)):
         with pytest.raises(ValueError, match="insufficient data"):
             tr.compute("TEST", "1y")
 
@@ -53,7 +60,7 @@ def test_empty_history_raises():
 def test_under_thirty_bars_raises(n_bars):
     """The floor is 30 bars. Below it the script must refuse rather than emit a label —
     the consumer then takes MODERATE ×0.75, never ROBUST (protocol :1310-1313)."""
-    with patch.object(tr.yf, "Ticker", return_value=_fake_ticker([100.0] * n_bars)):
+    with patch.object(tr, "fetch_history", side_effect=_fake_fetch([100.0] * n_bars)):
         with pytest.raises(ValueError, match="insufficient data"):
             tr.compute("TEST", "1y")
 
@@ -70,7 +77,7 @@ def test_main_emits_error_json_and_exit_1(capsys):
     """The degradation path the consumer parses: {"error", "ticker"} on stdout, rc=1."""
     argv = ["tail_risk.py", "TEST", "--json-only"]
     with patch.object(sys, "argv", argv), \
-         patch.object(tr.yf, "Ticker", return_value=_fake_ticker(empty=True)):
+         patch.object(tr, "fetch_history", side_effect=_fake_fetch(empty=True)):
         with pytest.raises(SystemExit) as exc:
             tr.main()
 
@@ -295,5 +302,5 @@ def test_fragility_label_stays_inside_the_validator_enum():
 
 
 def test_ticker_is_uppercased():
-    with patch.object(tr.yf, "Ticker", return_value=_fake_ticker([100.0 + i * 0.1 for i in range(250)])):
+    with patch.object(tr, "fetch_history", side_effect=_fake_fetch([100.0 + i * 0.1 for i in range(250)])):
         assert tr.compute("spy", "1y")["ticker"] == "SPY"

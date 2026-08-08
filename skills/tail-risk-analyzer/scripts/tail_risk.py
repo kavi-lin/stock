@@ -11,8 +11,15 @@ import json
 import sys
 from datetime import datetime, timezone
 
+import os
+
 import numpy as np
 import yfinance as yf
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+from skills._shared.technical_core import fetch_history  # noqa: E402
 
 
 def clamp(v, lo=0, hi=100):
@@ -34,7 +41,11 @@ def fragility_for(score):
 
 
 def compute(ticker: str, lookback: str):
-    hist = yf.Ticker(ticker).history(period=lookback, auto_adjust=True)
+    # V4.113.3: canonical price source (FMP dividend-adjusted primary, yfinance fallback).
+    # Both legs are dividend-adjusted as of V4.113.0 — required here because this module
+    # computes a return *distribution*, where an unadjusted ex-dividend drop reads as a
+    # real down day and inflates drawdown, downside deviation and negative skew.
+    hist, _ = fetch_history(ticker, period=lookback)
     if hist.empty or len(hist) < 30:
         raise ValueError(f"insufficient data for {ticker}")
 
