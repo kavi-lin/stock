@@ -16,8 +16,11 @@
 - [ ] **fmp_pool endpoint circuit breaker**(可選):連續失敗端點自動停打,防「壞兩個月沒人發現」再犯(上游 561df13 概念,加在 fmp_pool 一處)。
 - [ ] **stale test 修復批**:theme-detector 套件 29 紅(heat_calculator 等);ftd/market-top `test_fmp_client` 11+12 紅——mock 綁 `session.get` 而程式碼已走 fmp_pool,測試靜默打真網路。修法:patch `fmp_pool.get_url`。基線證據見 CHANGELOG 4.111.6。
 - [x] **風控三支改版 Batch A**(v4.111.7 完成):burry 價格失敗誤觸 T4_VETO、rm sector 分母膨脹兩個真 bug + top-level try/except + 死參數清理 + 三份文件詐欺/漂移修正 + 106 個測試(零網路,兩個 bug 皆種回確認紅)。基線 diff 僅刻意移除的 `portfolio_size_usd` 一處差異;replay 三 cohort current-rule mismatched 皆 0。
-- [ ] **風控三支改版 Batch B**(7 項語意升級,**每項需使用者逐項拍板**;決策備忘已備妥 → **`docs/plan_risk_trio_B.md`**,含 2026-08-08 實跑 shadow 證據;開工表 `docs/plan_risk_trio.md` §4):B1 vol-scaling 失能(20% ceiling 恆綁,cap 恆 20)、B2 protocol ×0.7/×1.15 有文件無實作(實作動 §14 validator+schema+replay,或刪文件,二選一)、B3 sector `EXTREMELY_FRAGILE` 降級規則永不觸發(script 出 3 值 / schema 期待 5 值)、B4 三支遷 technical_core(需 label 零翻轉證據)、B5 insider 換 fmp_supplementary、B6 drawdown-circuit-breaker 概念、B7 normalizer 再校準 + sector off-band 門檻對齊。上游參考 `position-sizer` / `drawdown-circuit-breaker` 走 GitHub。
-  - **B 批背景**(v4.111.7 review 發現,既有問題非本批引入,目前無實害):`tail_risk.py` 的 `downside_deviation` 在視窗內只有一天負報酬時 `neg.std()` 回 NaN,`json.dumps` 會輸出非嚴格 JSON 的 `NaN` 字面值。現無 consumer 讀這欄,故不在 Batch A 動;B7 校準時一併處理(`len(neg) < 2` → `0.0` 或 `None`)。
+- [x] **風控三支改版 Batch B 第一波**(v4.112.0,使用者逐項拍板後執行):B2 刪 ×0.7/×1.15 文件宣稱、B3 sector enum 收斂為 3 值 + 刪 `EXTREMELY_FRAGILE` 死規則 + 移除 `fragility_downgrade`、B7 兩個 off-band 門檻對齊 60(`<40`→`<60`、`>70`→`≥60`)+ `downside_deviation` NaN 修復、B1 天花板參數化 `--max-cap`(預設不變)。另修 `investment/README.md` 相關性表(review 新發現,原盤點漏掉,含不存在的 ×1.1)。決策備忘 `docs/plan_risk_trio_B.md`。
+- [ ] **風控三支 Batch B 餘三項——備忘結論為「維持現狀」,重啟需先解決前置條件**(證據見 `docs/plan_risk_trio_B.md`):
+  - **B4 遷 technical_core**:實測 16 檔翻 1 檔(PFE 29.1→30.6),撞上零翻轉閘門。漂移有方向——配息股 drawdown +1.14 / ETF +1.16(TLT 7.74→10.72)/ 無配息股 +0.01,因 FMP `historical-price-eod` 非 dividend-adjusted。**重啟前置**:先解決除息調整(或確認 FMP 有調整後序列),且要連 `technical-analyst` 等既有 consumer 一起重驗。
+  - **B5 insider 換 fmp_supplementary**:一致率 67%,但 FMP 對 12 檔判 10 檔 `distributing`(8 檔 ratio=0.000),直接映射會讓該元件變常數偏移。**重啟前置**:改用相對基準映射(自身前 4 季中位數或同業中位數)並先出門檻校準 shadow。
+  - **B6 drawdown-circuit-breaker**:資料源存在(`positions.json` 有 `realized_pl`/`exit_price`/`exit_date`)。**重啟前置**:帳本目前僅 7 筆、全獲利、全在 2026-04 同一週,連敗與週月虧損門檻無從校準——需先累積含虧損的關倉樣本。上游機制參考 `tradermonty/claude-trading-skills` 的 `drawdown-circuit-breaker`。
 
 ## ✅ Done (v4.111.3) — decisions 倒數環的永久重繪迴圈
 

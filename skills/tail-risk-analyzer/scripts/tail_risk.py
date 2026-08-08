@@ -56,9 +56,12 @@ def compute(ticker: str, lookback: str):
     dd = (cum / peak - 1).min()
     max_dd = float(-dd * 100)  # positive pct
 
-    # Downside deviation (semi-std of negative returns)
+    # Downside deviation (semi-std of negative returns). Needs >= 2 samples: pandas' std
+    # is ddof=1, so a single negative day divides by zero and yields NaN — which
+    # json.dumps then writes as the bare literal `NaN`, invalid strict JSON. No consumer
+    # reads this field today, so the failure was silent; report 0.0 instead.
     neg = rets[rets < 0]
-    downside = float(neg.std() * np.sqrt(252) * 100) if len(neg) > 0 else 0.0
+    downside = float(neg.std() * np.sqrt(252) * 100) if len(neg) > 1 else 0.0
 
     # Normalize each component 0-100 (higher = more fragile)
     # Calibrated 2026-04 against SPY/TLT/NVDA/TSLA/COIN/RIVN/BTC-USD

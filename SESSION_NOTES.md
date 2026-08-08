@@ -1,7 +1,18 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.111.7)
+> **Last Updated**: 2026-08-08 (v4.112.0)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.112.0) — 有文件、無產生器:四條規則描述的保護機制,程式裡根本沒有
+
+- **緣起**:Batch A 收尾後接著做 Batch B 規劃。七項各出一份決策備忘(`docs/plan_risk_trio_B.md`,含實跑 shadow),使用者逐項拍板後執行第一波 B2+B3+B7+B1。
+- **四項是同一個形狀**:文件宣稱的行為**沒有產生器**。×0.7/×1.15 沒有 chain 段;`EXTREMELY_FRAGILE` 沒有會輸出它的 script;README 的相關性 `×1.1` 沒有對應 code path(該 script 的乘數只會縮減,最大 1.00)。**這類 bug 不會讓程式報錯,只會讓讀文件的人與 agent 以為某個保護機制存在。**
+- **shadow 讓建議變成可辯護的**:B4 原本「遷 technical_core」看起來是對齊慣例的好事,實跑 16 檔翻 1 檔(PFE 29.1→30.6)直接撞上零翻轉閘門;而且漂移有方向——配息股 drawdown +1.14、ETF +1.16(TLT 7.74→10.72)、**無配息股 +0.01**。`technical_core.py` 自己的註解早就說 FMP 非 dividend-adjusted 且「不影響技術訊號」,但那句的適用範圍是型態辨識,**tail-risk 算的是報酬分布,正好在免責之外**。
+- **B5 的重點不是一致率**:67% 看起來還好,真正的問題是 FMP 對 12 檔判 10 檔 `distributing`(8 檔 ratio=0.000)——大型股內部人賣出多半是 RSU 機械性行為。直接映射會讓 insider 元件**從噪音訊號變成常數偏移**,等於把五元件悄悄降成四元件。**換資料源要問的是「訊號變好了嗎」,不是「新的比較權威嗎」。**
+- **B1 只參數化不改預設**:47 筆反解 implied base,精確簇 `0.140` 出現 8 次(=20×0.70)——同一個值重複 8 次不可能來自連續計算。但頂端 `0.1955-0.1957`/`0.1778`/`0.1680` 只能用 `raw_cap<20` 解釋,對應 daily_vol 3.07-3.57%。**所以不能說「vol 從未參與」,準確說法是作用域被壓到一條窄縫**。這反而更支持先參數化:調 vol-budget 只會把縫移到別處,而你不會知道移對了沒。
+- **兩次被 review 抓到考據問題,都值得記**:①「兩年來沒人依它決策」——專案只有幾個月,修辭失控;②「33/47 精確落在格點」——`精確`名不符實,±0.0005 只有 13/47,±0.005 才 33/47 且該容差覆蓋了區間 42%。③`fragility_downgrade` 我寫「兩次都 ROBUST」,實際是三列 FRAGILE/FRAGILE/ROBUST。**結論都沒錯,但支撐結論的事實錯了——而錯誤考據一旦寫進 CHANGELOG 就會被後人當事實引用。**
+- **驗收**:基線 diff 唯一差異 `max_cap_pct`(事先聲明);tail-risk SPY/TLT 逐位元一致;113 passed;六支 gate 全 rc=0(含 sector validator)。NaN 種回確認 `json.dumps(allow_nan=False)` 會炸。
+- **餘留**:Batch B 的 **B4 / B5 / B6 建議維持現狀**,備忘已寫明理由與證據;若日後要重啟,B4 需先解決除息調整、B5 需改用相對基準映射、B6 需帳本累積到有虧損樣本。
 
 ## 🟢 Session Note (v4.111.7) — 缺資料被寫成「最糟的資料」:兩個 bug,同一個錯誤的兩種寫法
 

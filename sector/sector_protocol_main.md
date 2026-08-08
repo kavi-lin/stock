@@ -154,7 +154,10 @@ Override：`sector ∈ favor` → raw × 1.05 (cap 1.15)；`sector ∈ avoid` �
 | 25–49 | COLD | 減少暴露，避免新建倉 |
 | 0–24 | AVOID | 清倉或嚴格停損 |
 
-> `fragility_label = EXTREMELY FRAGILE` → 強制降一個 verdict 等級（不調整分數，直接 downgrade label）
+> `fragility_label = FRAGILE` **且** `extreme_sentiment_triggered = true` → 強制降一個
+> verdict 等級（不調整分數，直接 downgrade label）。細節見 `phase_4-5.md` STEP D。
+> （V4.112.0：原寫 `EXTREMELY FRAGILE` 單獨觸發，但 tail-risk-analyzer 只輸出
+> `ROBUST / MODERATE / FRAGILE`，該條永不觸發，已刪除。）
 
 ---
 

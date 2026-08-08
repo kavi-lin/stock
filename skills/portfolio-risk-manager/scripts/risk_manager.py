@@ -67,7 +67,18 @@ def correlation_multiplier(avg_corr: float) -> float:
             return mult
 
 
-def compute(ticker: str, positions_path: Path, vol_budget: float):
+# The vol-scaling ceiling. At the default 0.6%/day budget this binds for any ticker with
+# daily vol <= 3.0% (~48% annualized) — i.e. almost everything — so `raw_cap` is a constant
+# 20.0 in practice and the correlation multiplier does all the differentiating.
+# Back-solving 47 historical trades put ~6-8 of them (daily vol 3.07-3.57%) just past that
+# breakpoint, with the cap moving <= 3.2pp; every other trade pinned here. Parameterized in
+# V4.112.0 so the ceiling can be varied and observed — the DEFAULT IS UNCHANGED, and
+# changing it changes position sizing, so it stays a caller's decision.
+DEFAULT_MAX_CAP_PCT = 20.0
+
+
+def compute(ticker: str, positions_path: Path, vol_budget: float,
+            max_cap: float = DEFAULT_MAX_CAP_PCT):
     candidate = ticker.upper()
     positions = load_positions(positions_path)
     holdings_tickers = [p["ticker"] for p in positions if p["ticker"] != candidate]
@@ -104,7 +115,7 @@ def compute(ticker: str, positions_path: Path, vol_budget: float):
 
     # Raw vol-adjusted cap: vol_budget / daily_vol * 100 (= position % of portfolio)
     raw_cap = (vol_budget / daily_vol * 100) if daily_vol > 0 else 0.0
-    raw_cap = float(min(raw_cap, 20.0))  # hard cap 20% regardless
+    raw_cap = float(min(raw_cap, max_cap))  # ceiling regardless of how low the vol is
 
     corr_mult = correlation_multiplier(avg_corr)
 
@@ -153,6 +164,7 @@ def compute(ticker: str, positions_path: Path, vol_budget: float):
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "inputs": {
             "vol_budget_pct": vol_budget,
+            "max_cap_pct": max_cap,
             "positions_loaded": len(positions),
             "candidate_sector": candidate_sector,
         },
@@ -179,6 +191,9 @@ def main():
     ap.add_argument("--positions", default=str(ROOT / "positions.json"),
                     help="default resolves against the repo root, not the CWD")
     ap.add_argument("--vol-budget", type=float, default=0.6, help="daily portfolio vol budget pct")
+    ap.add_argument("--max-cap", type=float, default=DEFAULT_MAX_CAP_PCT,
+                    help=f"vol-scaling ceiling pct (default {DEFAULT_MAX_CAP_PCT}); "
+                         "lowering it changes position sizing")
     ap.add_argument("--json-only", action="store_true")
     args = ap.parse_args()
 
@@ -186,7 +201,7 @@ def main():
     # consumer (trade_plan_builder.compute_step2) reads {"error"} and falls back to
     # RULE_BASED 0.05. Without this it got an empty stdout and no reason string.
     try:
-        out = compute(args.ticker, Path(args.positions), args.vol_budget)
+        out = compute(args.ticker, Path(args.positions), args.vol_budget, args.max_cap)
     except Exception as e:
         print(json.dumps({"error": str(e), "ticker": args.ticker}))
         sys.exit(1)

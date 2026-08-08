@@ -149,7 +149,8 @@ w₁–w₄ 依照 cycle_phase × market_regime × breadth_score × extreme_sent
 - `binary_risk_within_48h` → 分數 × 0.70
 - `consensus_warning` + DA 未接受 → `regime_confidence × 0.85`
 - `synthesized_exposure < 40%` → 至少 3 個 AVOID
-- `EXTREMELY_FRAGILE` tail label → HOT 自動降級為 WARM
+- `FRAGILE` tail label **+ extreme_sentiment** → HOT 自動降級為 WARM（V4.112.0：原寫
+  `EXTREMELY_FRAGILE` 單獨觸發，該值 script 從不輸出，規則已刪）
 
 ---
 
@@ -162,7 +163,7 @@ w₁–w₄ 依照 cycle_phase × market_regime × breadth_score × extreme_sent
 | A | `signal_conflict = true` | regime_stance 上限 NEUTRAL |
 | B | `synthesized_exposure < 40%` | 至少 3 個 AVOID |
 | C | Late / Recession cycle | 週期性產業降級 |
-| D | `EXTREMELY_FRAGILE` | HOT → WARM |
+| D | `FRAGILE` + `extreme_sentiment_triggered` | HOT → WARM |
 | E | `binary_risk_within_48h` | score × 0.70 |
 | F | `consensus_warning` + 無 DA 接受 | `regime_confidence × 0.85` |
 | G | `signal_conflict` + HOT 存在 | HOT → WARM 保險 |

@@ -708,9 +708,15 @@ python3 skills/short-contrarian-analyst/scripts/burry_score.py <TICKER> --json-o
 | Verdict | Score | Phase 4 影響 |
 |---|---|---|
 | `T4_VETO` | < 20 | 強制 HOLD，Phase 4 不執行倉位計算 |
-| `WARNING` | 20-35 | Phase 4 final × 0.7 |
+| `WARNING` | 20-35 | **無倉位調整**；`burry_voice` 註記高估風險 |
 | `NEUTRAL` | 35-60 | 無調整 |
-| `VALUE_BONUS` | ≥ 60 | Phase 4 final × 1.15 |
+| `VALUE_BONUS` | ≥ 60 | **無倉位調整**；`burry_voice` 註記深度價值 |
+
+> **V4.112.0 更正**：`WARNING` 與 `VALUE_BONUS` 過去寫成 Phase 4 final ×0.7 / ×1.15，
+> 但 sizing chain 從未有這兩段——`trade_plan_builder.py` 的九段 chain 只有
+> `burry_override_adj`（OVERRIDE_BURRY 的 ×0.5），§14 validator 亦無對應驗算。
+> 自 V4.7 起累積的 174 筆歷史交易沒有一筆的倉位反映過它們。
+> **唯一會因 Burry 改變倉位的是 `OVERRIDE_BURRY` ×0.5**；其餘 verdict 只進 narrative。
 
 ### Burry 加分／減分規則（從 PEER_BUNDLE / FMP_SUPP_BUNDLE / EARNINGS_ANALYST_BUNDLE 讀）
 

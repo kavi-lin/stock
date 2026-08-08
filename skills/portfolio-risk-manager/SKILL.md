@@ -20,6 +20,7 @@ python3 skills/portfolio-risk-manager/scripts/risk_manager.py NVDA
 python3 skills/portfolio-risk-manager/scripts/risk_manager.py NVDA --vol-budget 0.8
 python3 skills/portfolio-risk-manager/scripts/risk_manager.py CRWV --json-only
 python3 skills/portfolio-risk-manager/scripts/risk_manager.py CRWV --positions /path/to/positions.json
+python3 skills/portfolio-risk-manager/scripts/risk_manager.py NVDA --max-cap 10   # 見下方 Known limitation
 ```
 
 `--positions` defaults to `<repo root>/positions.json` — resolved against the repo, not the
@@ -31,12 +32,34 @@ Failure → `{"error", "ticker"}` on stdout + exit 1. The consumer
 (`trade_plan_builder.compute_step2`, `:355-370`) reads that and falls back to
 `RULE_BASED` base 0.05 (protocol `:1310-1313`).
 
-> **Known limitation — vol-scaling is currently inert.** `raw_cap = vol_budget / daily_vol × 100`
-> is clipped by a hard 20% ceiling (`risk_manager.py:106-107`), and at the default 0.6% budget
-> any ticker with daily vol ≤ 3% (≈48% annualized) pins to exactly 20.0. That covers nearly
-> every normal equity — NVDA at 38.6% annualized vol still returns 20.0 — so in practice the
-> correlation multiplier is the only live differentiator. Fixing this changes position sizing
-> for real, so it is deferred to a user-approved decision (`docs/plan_risk_trio.md` B1).
+> **Known limitation — vol-scaling only acts inside a narrow slit.**
+> `raw_cap = vol_budget / daily_vol × 100`, clipped by `--max-cap` (default 20.0). At the
+> default 0.6%/day budget the ceiling binds for any ticker with daily vol ≤ 3.0%
+> (≈48% annualized) — nearly every normal equity, NVDA at 38.6% annualized vol included.
+> Above that breakpoint the formula does take over, but the observed range is thin.
+>
+> Back-solving the implied Step 2 base from 47 historical trades
+> (`replay_trade_plan.replay_sizing`) makes the shape concrete. If the ceiling always binds,
+> the base can only land on `20 × {1.00, .85, .70, .55} × {1, 0.5} / 100` — eight points:
+>
+> | on the ceiling lattice | ±0.0005 | ±0.005 |
+> |---|---|---|
+> | hits | 13/47 (28%) | 33/47 (70%) |
+>
+> The loose figure overstates it (those eight ±0.005 bins cover 42% of the observed range).
+> The decisive evidence is the exact cluster: `0.140` appears **8 times** at three decimals
+> (= 20 × 0.70). One value repeating eight times cannot come from a continuous vol
+> calculation — only from a pinned constant times a discrete correlation tier.
+>
+> The top of the distribution is where vol did participate: `0.1955–0.1957` (×4),
+> `0.1778` (×2), `0.1680` (×2) sit *below* the 0.20 lattice point and only resolve with
+> `corr_mult = 1.00` and `raw_cap < 20` — implying daily vol 3.07–3.57%, just past the
+> breakpoint, moving the cap by ≤ 3.2pp.
+>
+> So: **~6–8 trades saw marginal vol participation at the edge; every other trade pinned at
+> 20.** `--max-cap` exists (V4.112.0) to make that observable — the same 47 trades can be
+> re-solved under a different ceiling to see how the distribution moves. **Changing the
+> default changes position sizing and remains a user decision** (`docs/plan_risk_trio_B.md` B1).
 
 ## Output schema
 ```json
@@ -45,6 +68,7 @@ Failure → `{"error", "ticker"}` on stdout + exit 1. The consumer
   "generated_at": "ISO8601",
   "inputs": {
     "vol_budget_pct": 0.6,
+    "max_cap_pct": 20.0,
     "positions_loaded": 5,
     "candidate_sector": "Technology"
   },

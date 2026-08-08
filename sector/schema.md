@@ -286,7 +286,7 @@
     {
       "sector": "string",
       "proxy_etf": "string",
-      "fragility_label": "ANTIFRAGILE | RESILIENT | FRAGILE | EXTREMELY FRAGILE",
+      "fragility_label": "ROBUST | MODERATE | FRAGILE",
       "tail_risk_score": "float 0–100",
       "key_tail_flags": ["fat_tail_warning", "crash_vulnerability"],
       "tail_risk_source": "SKILL_EXECUTED | SKIPPED_LOW_SCORE | SKIPPED_CAPACITY_LIMIT"
@@ -484,9 +484,9 @@
       },
       "key_reasons": ["max 3 items, max 10 words each"],
       "devils_advocate_note": "string if challenged",
-      "tail_risk_label": "ANTIFRAGILE | RESILIENT | FRAGILE | EXTREMELY FRAGILE | N/A",
+      "tail_risk_label": "ROBUST | MODERATE | FRAGILE | N/A",
       "proxy_etf": "string",
-      "risk_flags": ["binary_risk_within_48h", "late_cycle", "overbought", "fat_tail_warning", "extreme_sentiment", "fragility_downgrade", "extreme_sentiment_fragile_combo", "macro_theme_divergence"],
+      "risk_flags": ["binary_risk_within_48h", "late_cycle", "overbought", "fat_tail_warning", "extreme_sentiment", "extreme_sentiment_fragile_combo", "macro_theme_divergence"],
       "step6_fred_multiplier": "float (V1.4) — FRED regime overlay applied to score; 1.0 = no-op"
     }
   ],

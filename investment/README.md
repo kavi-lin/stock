@@ -167,20 +167,33 @@ Contrarian Analyst 不納入 FinalScore 加權，只透過 Phase 2.5 T4 觸發 v
 
 ### 相關性調整
 
-| 與現有持倉相關性 | 倍數 |
+| 與現有持倉平均相關性 \|avg_corr\| | 倍數 |
 |---|---|
-| > 0.7（高相關）| × 0.7 |
-| 0.4–0.7（中等）| × 0.9 |
-| < 0.4（低相關）| × 1.1 |
+| < 0.3（低相關）| × 1.00 |
+| 0.3 – 0.6（中等）| × 0.85 |
+| 0.6 – 0.8（高相關）| × 0.70 |
+| ≥ 0.8（極高）| × 0.55 |
+
+> **V4.112.0 更正**：本表原寫 `>0.7 → ×0.7 / 0.4–0.7 → ×0.9 / <0.4 → ×1.1`，與
+> `risk_manager.py` 的 `CORRELATION_BANDS` 四帶完全不符，且 `×1.1` 是一個**從未存在的
+> 放大乘數**——該 script 的相關性乘數只會縮減，最大值是 1.00。以 code 為 canonical，
+> 表在 `skills/portfolio-risk-manager/SKILL.md`；帶界為下界含入，且鍵在 `|avg_corr|`
+> （負相關同樣算集中度）。
 
 ### 尾部風險調整（tail-risk-analyzer）
 
-| Fragility Label | 倉位倍數 |
-|---|---|
-| EXTREMELY FRAGILE | × 0.5 |
-| FRAGILE | × 0.75 |
-| RESILIENT | × 1.0 |
-| ANTIFRAGILE | × 1.1（僅 PM 高確信度）|
+| Fragility Label | tail_risk_score | 倉位倍數 |
+|---|---|---|
+| FRAGILE | ≥ 60 | × 0.5 |
+| MODERATE | 30 – 60 | × 0.75 |
+| ROBUST | < 30 | × 1.0 |
+
+> **V4.112.0 更正**：本表原寫四級 `EXTREMELY FRAGILE / FRAGILE / RESILIENT / ANTIFRAGILE`，
+> 且 `ANTIFRAGILE → ×1.1`。`tail-risk-analyzer` 只輸出三值，`ANTIFRAGILE` 從不存在，
+> **×1.1 這個放大乘數也從未被實作**——`FRAGILE_MULTIPLIER` 的最大值是 1.0。三值表鏡像於
+> `trade_plan_builder.py`、`validate_session_export.py`（含 §14b enum gate）與
+> `replay_trade_plan.py`，以 code 為 canonical。Step 3 失敗時取 MODERATE ×0.75，
+> **不得**當 ROBUST。
 
 ### 最終倉位計算順序
 ```

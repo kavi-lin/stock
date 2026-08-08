@@ -45,8 +45,14 @@ entered the average as if it were real data — a transient network blip could m
 
 ## Veto rules
 - Burry Score `< 20` → **T4 veto active** → HOLD regardless of other agents
-- Burry Score `< 35` → **warning flag** → Phase 4 position multiplier × 0.7
-- Burry Score `>= 60` → deep value bonus → Phase 4 multiplier × 1.15
+- Burry Score `< 35` → **warning flag** → narrative only, **no position effect**
+- Burry Score `>= 60` → deep value bonus → narrative only, **no position effect**
+
+> Until V4.112.0 the two lines above claimed Phase 4 multipliers of ×0.7 and ×1.15. No
+> such stage has ever existed in the sizing chain — `trade_plan_builder.py` applies
+> exactly one Burry multiplier, `burry_override_adj` (×0.5, and only when the PM resolves
+> T4 with `OVERRIDE_BURRY`). See the verdict table in `investment_protocol_v5_0.md`
+> ("Verdict → Phase 4 影響").
 
 ## Output schema
 ```json

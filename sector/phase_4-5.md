@@ -263,9 +263,9 @@ DA subagent 必須回傳 `subagent_isolated: true`。若：
 ```
 對每個納入檢查的 HOT 產業（composite_score > 75）的 proxy_etf：
 → 執行 tail-risk-analyzer skill（per-stock mode，傳入 proxy_etf ticker）
-→ fragility_label = FRAGILE 或 EXTREMELY FRAGILE
+→ fragility_label = FRAGILE
   → 必須將此產業加入 challenge_targets
-→ tail_risk_score > 70 OR excess_kurtosis > 5
+→ tail_risk_score ≥ 60 OR excess_kurtosis > 5      # ≥ 60 = FRAGILE 帶
   → risk_flags += "fat_tail_warning"
 → 2020 COVID 情境回測下跌 > 40%
   → risk_flags += "crash_vulnerability"
@@ -308,12 +308,17 @@ STEP C.6 — Step 6 FRED Regime Overlay（取代 STEP C 當 fred_available=true�
   fred_available=false → 跳過，回 STEP C。
 
 STEP D — Tail Risk Downgrades
-  IF fragility_label = EXTREMELY_FRAGILE:
-    → DOWNGRADE: HOT → WARM（不調整分數，直接降 label）
-    → risk_flags += "fragility_downgrade"
-  ELIF (fragility_label = FRAGILE AND extreme_sentiment_triggered = true):
+  IF (fragility_label = FRAGILE AND extreme_sentiment_triggered = true):
     → DOWNGRADE: HOT → WARM
     → risk_flags += "extreme_sentiment_fragile_combo"
+
+  # V4.112.0：原本這裡還有一條「IF fragility_label = EXTREMELY_FRAGILE → 降級 +
+  # risk_flags += fragility_downgrade」。tail-risk-analyzer 只輸出
+  # ROBUST / MODERATE / FRAGILE，從來沒有 EXTREMELY_FRAGILE，該條永不觸發，已刪除。
+  # 歷史上 fragility_downgrade 出現過三列（2026-04-18 XLK/XLB、04-19 XLU），
+  # 而那三列的 fragility_label 分別是 FRAGILE/FRAGILE/ROBUST——沒有一個是
+  # EXTREMELY_FRAGILE，證明那個 flag 一直是 DA 自行判斷貼上的，不是這條規則的產物。
+  # 改以 FRAGILE 單獨觸發會「放寬」降級門檻，屬語意變更，不在本次對齊範圍。
 
 STEP E — Binary Risk
   FOR EACH ev IN upcoming_events WHERE ev.is_binary AND ev.within_48h:

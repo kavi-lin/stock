@@ -8,6 +8,7 @@ The 30/60 bands and the .10/.10/.15/.30/.35 weights asserted here are mirrored i
 `replay_trade_plan.py`. A change that turns these tests red is a change that has to land
 in all of those at once.
 """
+import json
 import math
 import sys
 from pathlib import Path
@@ -67,7 +68,6 @@ def test_thirty_bars_is_accepted():
 
 def test_main_emits_error_json_and_exit_1(capsys):
     """The degradation path the consumer parses: {"error", "ticker"} on stdout, rc=1."""
-    import json
     argv = ["tail_risk.py", "TEST", "--json-only"]
     with patch.object(sys, "argv", argv), \
          patch.object(tr.yf, "Ticker", return_value=_fake_ticker(empty=True)):
@@ -231,6 +231,39 @@ def test_flat_series_has_zero_dispersion():
     assert out["skewness"] == 0.0
     assert out["ann_vol"] == 0.0
     assert out["fragility_label"] == "ROBUST"
+
+
+def test_downside_deviation_with_one_negative_day_is_not_nan():
+    """B7 regression: pandas std is ddof=1, so a single negative return divides by zero
+    and yields NaN. json.dumps writes that as the bare literal `NaN` — not valid strict
+    JSON, so any consumer using a strict parser would choke on the payload.
+
+    Seeding the bug back (`len(neg) > 0`) turns this red.
+    """
+    closes = _prices_from_returns([0.01] * 100 + [-0.02] + [0.01] * 100)
+    out = _run(closes)
+
+    assert out["downside_deviation"] == 0.0
+    assert not math.isnan(out["downside_deviation"])
+    json.dumps(out, allow_nan=False)          # strict mode: raises if any NaN survived
+
+
+def test_downside_deviation_is_real_with_two_or_more_negative_days():
+    """The guard must not swallow the genuine statistic — two negative days is enough."""
+    closes = _prices_from_returns([0.01] * 100 + [-0.02, -0.03] + [0.01] * 100)
+    out = _run(closes)
+
+    assert out["downside_deviation"] > 0.0
+
+
+def test_no_output_field_is_nan():
+    """Nothing else in the payload may leak NaN either — strict json.dumps over a range
+    of shapes, including the degenerate flat series."""
+    for closes in ([100.0] * 250,
+                   [100.0 + i * 0.1 for i in range(250)],
+                   _prices_from_returns([0.01] * 100 + [-0.02] + [0.01] * 100),
+                   _prices_from_returns([0.08, -0.09] * 125)):
+        json.dumps(_run(closes), allow_nan=False)
 
 
 def test_sample_days_counts_returns_not_bars():

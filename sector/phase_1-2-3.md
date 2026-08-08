@@ -204,7 +204,7 @@ Trigger 條件：
 
 級聯動作：
   1. COLD/AVOID 產業：評估升級機會
-     IF (COLD AND uptrend_ratio > 0.5 AND tail_risk < 40)
+     IF (COLD AND uptrend_ratio > 0.5 AND tail_risk_score < 60)   # < 60 = ROBUST 或 MODERATE（非極端即可）
        → 標記 "fear_capitulation_opportunity"
 
   2. Phase 4c：cyclical COLD 板塊 composite_score × 1.10

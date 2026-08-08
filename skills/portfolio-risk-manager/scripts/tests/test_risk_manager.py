@@ -278,6 +278,58 @@ def test_high_vol_ticker_falls_below_the_ceiling(tmp_path):
     assert out["raw_vol_adjusted_cap_pct"] < 20.0
 
 
+def test_max_cap_default_is_unchanged_at_twenty(tmp_path):
+    """B1 zero-behaviour-change guard: parameterizing the ceiling must not move the
+    default. A regression here silently resizes every position the protocol takes."""
+    assert rm.DEFAULT_MAX_CAP_PCT == 20.0
+
+    p = tmp_path / "none.json"
+    with patch.object(rm.yf, "Ticker", return_value=_ticker(_price_series(daily_vol=0.02))), \
+         patch.object(rm, "fetch_history", return_value=pd.DataFrame()):
+        out = rm.compute("NVDA", p, 0.6)          # max_cap omitted → default
+
+    assert out["inputs"]["max_cap_pct"] == 20.0
+    assert out["raw_vol_adjusted_cap_pct"] == 20.0
+
+
+def test_lower_max_cap_binds(tmp_path):
+    p = tmp_path / "none.json"
+    with patch.object(rm.yf, "Ticker", return_value=_ticker(_price_series(daily_vol=0.02))), \
+         patch.object(rm, "fetch_history", return_value=pd.DataFrame()):
+        out = rm.compute("NVDA", p, 0.6, max_cap=10.0)
+
+    assert out["inputs"]["max_cap_pct"] == 10.0
+    assert out["raw_vol_adjusted_cap_pct"] == 10.0
+
+
+def test_raising_max_cap_hands_control_back_to_the_vol_formula(tmp_path):
+    """With the ceiling out of the way the cap becomes vol_budget/daily_vol*100 — i.e. the
+    scaling that has been dormant. This is the observability the parameter exists for."""
+    p = tmp_path / "none.json"
+    with patch.object(rm.yf, "Ticker", return_value=_ticker(_price_series(daily_vol=0.02))), \
+         patch.object(rm, "fetch_history", return_value=pd.DataFrame()):
+        out = rm.compute("NVDA", p, 0.6, max_cap=1000.0)
+
+    dv = out["ticker_stats"]["daily_vol_pct"]
+    assert out["raw_vol_adjusted_cap_pct"] == pytest.approx(round(0.6 / dv * 100, 2), abs=0.02)
+    assert out["raw_vol_adjusted_cap_pct"] > 20.0        # ceiling was the only thing binding
+
+
+def test_max_cap_flag_reaches_compute(tmp_path, capsys):
+    """The CLI flag must actually be threaded through — a parameter that main() drops
+    would pass every unit test above and still do nothing in production."""
+    argv = ["risk_manager.py", "NVDA", "--positions", str(tmp_path / "none.json"),
+            "--max-cap", "7.5", "--json-only"]
+    with patch.object(sys, "argv", argv), \
+         patch.object(rm.yf, "Ticker", return_value=_ticker(_price_series(daily_vol=0.02))), \
+         patch.object(rm, "fetch_history", return_value=pd.DataFrame()):
+        rm.main()
+
+    out = json.loads(capsys.readouterr().out)
+    assert out["inputs"]["max_cap_pct"] == 7.5
+    assert out["raw_vol_adjusted_cap_pct"] == 7.5
+
+
 def test_vol_budget_scales_the_cap(tmp_path):
     p = tmp_path / "none.json"
     caps = []
@@ -331,7 +383,9 @@ def test_output_golden_keys(tmp_path):
         "correlation_multiplier", "sector_cap_triggered", "final_position_cap_pct",
         "reasoning",
     }
-    assert set(out["inputs"]) == {"vol_budget_pct", "positions_loaded", "candidate_sector"}
+    # `max_cap_pct` added V4.112.0 (B1) — the sole success-path shape change in that wave.
+    assert set(out["inputs"]) == {"vol_budget_pct", "max_cap_pct", "positions_loaded",
+                                  "candidate_sector"}
     assert set(out["ticker_stats"]) == {
         "daily_vol_pct", "ann_vol_pct", "avg_correlation_with_portfolio"}
     assert out["ticker"] == "NVDA"

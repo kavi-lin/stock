@@ -8,6 +8,66 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.112.0] — 2026-08-08 — 風控三支 Batch B 第一波：把四條「有文件、無產生器」的規則對回現實
+
+`docs/plan_risk_trio_B.md` 的 B2 + B3 + B7 + B1，使用者逐項拍板後執行。四項的共同形狀是
+**文件描述了一條程式碼裡不存在的規則**——而讀文件的 agent 會照著它做決策。
+
+bump minor 而非 patch：B3 刪掉一條 protocol 降級規則、B7 改兩個門檻（皆為 protocol 語意
+變更，即使那條規則從未觸發），B1 新增 CLI 參數。
+
+### Changed
+- **B2** `investment_protocol_v5_0.md` 的 Verdict 表 + `short-contrarian-analyst/SKILL.md`
+  Veto rules —— `WARNING → Phase 4 final ×0.7` 與 `VALUE_BONUS → ×1.15` 改為
+  「無倉位調整，僅進 narrative」。sizing chain 從來沒有這兩段：九段裡只有
+  `burry_override_adj`（OVERRIDE_BURRY ×0.5），§14 validator 亦無對應驗算，自 V4.7 起
+  174 筆歷史交易無一筆倉位反映過它們。**補實作不是修 bug，是今天開始改變倉位規則**，
+  且該規則從未被任何 replay 驗證過 —— 故選擇刪文件
+- **B3** `sector/schema.md` 的 `fragility_label` / `tail_risk_label` enum 由
+  `ANTIFRAGILE｜RESILIENT｜FRAGILE｜EXTREMELY FRAGILE` 收斂為 `ROBUST｜MODERATE｜FRAGILE`。
+  落差不是「5 值 vs 3 值」而是**兩套字彙**——`ANTIFRAGILE`/`RESILIENT` 在 script 不存在，
+  `ROBUST`/`MODERATE` 在 schema 不存在，唯一交集是 `FRAGILE`
+- **B3** `sector/phase_4-5.md` STEP D 刪除 `EXTREMELY_FRAGILE` 分支（永不觸發），
+  `ELIF` 提為 `IF`；`risk_flags` enum 移除隨之失去產生器的 `fragility_downgrade`。
+  該 flag 歷史上出現過三列（2026-04-18 XLK / XLB、04-19 XLU），對應的 fragility_label
+  分別是 FRAGILE / FRAGILE / ROBUST —— **沒有一個是 EXTREMELY_FRAGILE**，證明它一直是
+  DA 自行判斷貼的而非該規則的產物。改以 FRAGILE 單獨觸發會「放寬」降級門檻，屬語意變更，
+  刻意不在對齊批做
+- **B7** sector 兩個 off-band 門檻對齊分級帶：`phase_1-2-3.md` 的
+  `tail_risk < 40` → `tail_risk_score < 60`（ROBUST 或 MODERATE，使用者定調「非極端即可」；
+  順帶修正欄名，原寫 `tail_risk` 與 script 輸出鍵不符）；`phase_4-5.md` 的
+  `tail_risk_score > 70` → `≥ 60`（FRAGILE 帶）。兩條門檻現在互補於 60
+- **B1** `risk_manager.py` 的 20% 天花板參數化為 `--max-cap`（`DEFAULT_MAX_CAP_PCT = 20.0`，
+  **預設不變**）；`inputs` 新增 `max_cap_pct` 回顯 —— 本波唯一的成功路徑 shape 變更，
+  已事先聲明為基線 diff 的唯一預期差異
+- `investment/README.md` 的「相關性調整」表寫 `>0.7→×0.7 / 0.4–0.7→×0.9 / <0.4→×1.1`，
+  與 `CORRELATION_BANDS` 的四帶完全不符，且 `×1.1` 是一個**從未存在的放大乘數**
+  （該 script 的相關性乘數只會縮減，最大 1.00）。改以 code 為 canonical。
+  本項為 review 新發現，原始盤點漏掉，與 tail-risk SKILL.md 教錯權重同族
+- **同一條死規則的另外四處鏡像**（收尾殘留掃描發現，實施表原本只列了 schema.md 與
+  phase_4-5.md 兩處）：`sector/sector_protocol_main.md` 的 verdict 降級註、
+  `sector/README.md` 的分數調整機制與 Phase 4c 決策樹 STEP D、以及
+  `investment/README.md` 的尾部風險表。後者是四級表
+  （`EXTREMELY FRAGILE / FRAGILE / RESILIENT / ANTIFRAGILE`）**且 `ANTIFRAGILE → ×1.1`
+  同樣是不存在的放大乘數**——`FRAGILITY_MULTIPLIER` 最大值是 1.0。全部改為三值 +
+  score 帶，並註明鏡像位置與 Step 3 失敗取 MODERATE 的降級合約
+
+### Fixed
+- `tail_risk.py` 的 `downside_deviation`：pandas `std` 為 ddof=1，視窗內只有一天負報酬時
+  除以零得 NaN，`json.dumps` 寫成裸 `NaN` 字面值（非嚴格 JSON）。改 `len(neg) > 1`。
+  目前無 consumer 讀該欄故失敗是靜默的；種回 bug 確認 `json.dumps(allow_nan=False)` 會炸
+
+### Added
+- 三支測試 106 → **113**：`--max-cap` 四條（預設仍 20.0 的零行為變更回歸、降低會綁、
+  抬高則交還 vol 公式、CLI flag 真的有接到 compute）、NaN 三條（含 strict-JSON 全欄掃描）
+
+### Why
+- 這四條規則的共同點是「文件宣稱的行為沒有產生器」：×0.7/×1.15 沒有 chain 段、
+  EXTREMELY_FRAGILE 沒有產生它的 script、×1.1 沒有對應的 code path。它們不會讓程式報錯，
+  只會讓讀文件的人與 agent 以為某個保護機制存在
+- B1 刻意只做參數化不改預設：47 筆反解證明的是「vol 的作用域被壓縮到 daily_vol
+  3.0%–3.6% 的窄縫」，**沒有**證明「把縫開大會更好」。先讓它可觀測、可重解，再談改預設
+
 ## [4.111.7] — 2026-08-08 — 風控三支 Batch A：抓不到價格的元件被當成「最糟的分數」參與投票
 
 `docs/plan_risk_trio.md` Batch A（修正批，不動 protocol 語意）。三支風控 skill 自
