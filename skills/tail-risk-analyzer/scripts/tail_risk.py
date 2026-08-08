@@ -15,6 +15,24 @@ import numpy as np
 import yfinance as yf
 
 
+def clamp(v, lo=0, hi=100):
+    return max(lo, min(hi, v))
+
+
+# Fragility bands, lower bound inclusive: 30 → MODERATE, 60 → FRAGILE. This table is
+# mirrored in investment/scripts/{trade_plan_builder.py:102, validate_session_export.py:386
+# (+ the §14b enum gate), replay_trade_plan.py} — moving a bound means moving all of them
+# and re-baselining the replay cohort.
+FRAGILITY_BANDS = ((30.0, "ROBUST", 1.0), (60.0, "MODERATE", 0.75), (None, "FRAGILE", 0.5))
+
+
+def fragility_for(score):
+    """score → (fragility_label, position_multiplier)."""
+    for upper, label, mult in FRAGILITY_BANDS:
+        if upper is None or score < upper:
+            return label, mult
+
+
 def compute(ticker: str, lookback: str):
     hist = yf.Ticker(ticker).history(period=lookback, auto_adjust=True)
     if hist.empty or len(hist) < 30:
@@ -42,10 +60,6 @@ def compute(ticker: str, lookback: str):
     neg = rets[rets < 0]
     downside = float(neg.std() * np.sqrt(252) * 100) if len(neg) > 0 else 0.0
 
-    # Normalize each component to 0-100 (higher = more fragile)
-    def clamp(v, lo=0, hi=100):
-        return max(lo, min(hi, v))
-
     # Normalize each component 0-100 (higher = more fragile)
     # Calibrated 2026-04 against SPY/TLT/NVDA/TSLA/COIN/RIVN/BTC-USD
     n_kurt = clamp(kurt * 8)            # fat-tail penalty (weight low b/c noisy on 1y)
@@ -64,12 +78,7 @@ def compute(ticker: str, lookback: str):
         1,
     )
 
-    if score < 30:
-        label, mult = "ROBUST", 1.0
-    elif score < 60:
-        label, mult = "MODERATE", 0.75
-    else:
-        label, mult = "FRAGILE", 0.5
+    label, mult = fragility_for(score)
 
     return {
         "ticker": ticker.upper(),

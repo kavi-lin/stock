@@ -6,6 +6,8 @@ scope: event-scan
 data_sources: [FMP API]
 ---
 
+> **Upstream alignment**: fork 自 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)（2026-04）。最近對齊審查 **2026-08-08**（V4.111.5–6）：確認 fmp_pool `/stable/economic-calendar` 遷移（2775deb）已修復 legacy v3 403；上游同型修復為 648b025。本檔 API 參考已同步為 stable 端點。
+
 # Economic Calendar Fetcher
 
 ## Overview
@@ -22,7 +24,7 @@ The skill uses a Python script to query the FMP API and returns raw JSON or text
 - Default to next 7 days for quick market outlook
 
 **Data Source:**
-- FMP Economic Calendar API: `https://financialmodelingprep.com/api/v3/economic_calendar`
+- FMP Economic Calendar API: `https://financialmodelingprep.com/stable/economic-calendar`
 - Covers major economies: US, EU, UK, Japan, China, Canada, Australia
 - Event types: Central bank decisions, employment, inflation, GDP, trade, housing, surveys
 
@@ -344,7 +346,7 @@ If user requested specific filters, note at top:
   - Best practices for caching and efficiency
 
 **API Details:**
-- Endpoint: `https://financialmodelingprep.com/api/v3/economic_calendar`
+- Endpoint: `https://financialmodelingprep.com/stable/economic-calendar`
 - Authentication: API key required (free tier: 250 requests/day)
 - Max date range: 90 days per request
 - Response format: JSON array of event objects

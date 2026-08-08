@@ -1,8 +1,23 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-08 (v4.111.3)
+> **Last Updated**: 2026-08-08 (v4.111.6)
 
 ---
+
+## ✅ Done (v4.111.6) — 上游對齊批:v3 legacy 清理 + 兩個偵測器 FMP 路徑修復
+
+- [x] 比對 fork 源頭 tradermonty/claude-trading-skills(現 71 skills,MIT)4 月後 delta;評估:5 個值得引入,其餘重複或超綱。
+- [x] ftd/market-top `fmp_client.py`:historical 遷 `stable/historical-price-eod/full` + flat-list normalizer + timeseries 截斷 + `from` 縮 payload(上游 c54959e/20a9a1);死的 v3 鏈與 `BASE_URL` 移除(原鏈 stable 404 → v3 403 兩條全死)。實測 ^GSPC 80 bars + quote。
+- [x] theme-detector:`representative_stock_selector` 移除死 FMP etf-holder 層(v3 403;stable 替代 402 不在訂閱);`etf_scanner` 移除 v3 quote fallback。
+- [x] `intraday.py` 移除死 v3 fallback(實測 stable 90 bars);econ-calendar SKILL.md v3 URL → stable。
+- [x] 10 個 SKILL.md 回填 upstream alignment blockquote;MARKET_INDEX 維護規則加上游對齊條目。
+
+- [ ] **theme-detector 上游方法論回灌**(設計題,獨立 session):Heat v2 stock-leadership evidence(5D+20% / EP9M / range expansion / 新高 / high-RS)+ `--history-file` heat 歷史與加速度(1D/5D delta、20D z-score、What Changed Today)。上游 92baba0 / ad75b2c。
+- [ ] **fmp_pool endpoint circuit breaker**(可選):連續失敗端點自動停打,防「壞兩個月沒人發現」再犯(上游 561df13 概念,加在 fmp_pool 一處)。
+- [ ] **stale test 修復批**:theme-detector 套件 29 紅(heat_calculator 等);ftd/market-top `test_fmp_client` 11+12 紅——mock 綁 `session.get` 而程式碼已走 fmp_pool,測試靜默打真網路。修法:patch `fmp_pool.get_url`。基線證據見 CHANGELOG 4.111.6。
+- [x] **風控三支改版 Batch A**(v4.111.7 完成):burry 價格失敗誤觸 T4_VETO、rm sector 分母膨脹兩個真 bug + top-level try/except + 死參數清理 + 三份文件詐欺/漂移修正 + 106 個測試(零網路,兩個 bug 皆種回確認紅)。基線 diff 僅刻意移除的 `portfolio_size_usd` 一處差異;replay 三 cohort current-rule mismatched 皆 0。
+- [ ] **風控三支改版 Batch B**(7 項語意升級,**每項需使用者逐項拍板**,開工表 `docs/plan_risk_trio.md` §4):B1 vol-scaling 失能(20% ceiling 恆綁,cap 恆 20)、B2 protocol ×0.7/×1.15 有文件無實作(實作動 §14 validator+schema+replay,或刪文件,二選一)、B3 sector `EXTREMELY_FRAGILE` 降級規則永不觸發(script 出 3 值 / schema 期待 5 值)、B4 三支遷 technical_core(需 label 零翻轉證據)、B5 insider 換 fmp_supplementary、B6 drawdown-circuit-breaker 概念、B7 normalizer 再校準 + sector off-band 門檻對齊。上游參考 `position-sizer` / `drawdown-circuit-breaker` 走 GitHub。
+  - **B 批背景**(v4.111.7 review 發現,既有問題非本批引入,目前無實害):`tail_risk.py` 的 `downside_deviation` 在視窗內只有一天負報酬時 `neg.std()` 回 NaN,`json.dumps` 會輸出非嚴格 JSON 的 `NaN` 字面值。現無 consumer 讀這欄,故不在 Batch A 動;B7 校準時一併處理(`len(neg) < 2` → `0.0` 或 `None`)。
 
 ## ✅ Done (v4.111.3) — decisions 倒數環的永久重繪迴圈
 
@@ -59,7 +74,7 @@
 - [ ] **快照過期會讓 broker 拒絕全部派工**。2026-08-08 實測:快照 1.5 小時舊 → 三家全部 `stale_snapshot` → `no_capacity`。這是 freshness 閘門的正確行為,但**操作上看起來像「額度用完」**。~~目前只能手動 `lqb refresh`。broker 的 LaunchAgent 沒有排程刷新~~ → broker 已於 2026-08-08 加入 daemon 內建的 300 秒排程刷新;同日又修好一次「排程有跑但 launchd 的 PATH 找不到 agy、且 claude 解析到四個月前的舊安裝」,見 broker `docs/TODO.md` 缺陷 7。仍保留這條是因為**操作上的誤讀還在**:過期造成的拒絕看起來仍像額度用完(broker 端已改為逐 provider 說明真正原因)。
 
 - [ ] **live smoke test 三條線**:Dashboard protocol、Break News、Office。要真燒額度,須人在場;先用 `lqb status` 確認三家都不在 reserve-only。
-- [ ] **重的 protocol 還沒有任何量測值**。V4.110.0 把 `broker.protocol_tokens` 改成逐 protocol,但只有 `triage` 填了實測數字(233,139 in / 28,702 out / 143s,2026-08-08 agy)。`invest`／`sector`／`playbook`／`llm_review` 仍走 `default` 200k/40k——**而那個 default 連 triage 都不夠**,這幾個又是 opus 檔的 30–45 分鐘多路辯論。各跑一次後用 `lqb history --stats --task-type agentic_protocol:invest` 逐一填回。改大改小都要有數字支撐。
+- [ ] **重的 protocol 還沒有任何量測值**。V4.110.0 把 `broker.protocol_tokens` 改成逐 protocol,但只有 `triage` 填了實測數字(233,139 in / 28,702 out / 143s,2026-08-08 agy)。`invest`／`sector`／`playbook`／`llm_review` 仍走 `default` 200k/40k——**而那個 default 連 triage 都不夠**,這幾個又是 opus 檔的 30–45 分鐘多路辯論。各跑一次後用 `lqb history --stats --task-type agentic_protocol-invest` 逐一填回（V4.111.4 起分隔符是 `-` 不是 `:`）。改大改小都要有數字支撐。
 - [ ] **`grok` 仍在 chain 內但無人治理**:broker 端休眠(Phase 3 延後——weekly 池只能靠登入後網頁 DOM 取得)。要嘛從 `llm_config.json` 的 chain 拿掉,要嘛接受它是唯一不受 20% 硬性保留約束的出口。目前是後者,且只寫在 `broker_gate.PROVIDER_FOR_MODEL` 的註解裡。
 - [ ] **daemon 沒起來時只有 stderr 一行**:若實際使用常忘記起 daemon,考慮讓 Break News 狀態面板顯示 `broker.reachable=false` 橫幅(`model_status()` 已經帶這個欄位)。
 
@@ -606,7 +621,7 @@
 - 稽核餘留全清：thematic in-process predict ✓、earnings fetch 並行 ✓、weekly_review weights_version ✓（+ per-version 報告段）、RSI 5→1 統一 ✓、technical_core 升 _shared ✓、MARKET_INDEX 重寫 ✓。
 - ~~earnings-trade-analyzer 處置~~ → **已刪（v4.5.1，user 拍板）**；event index extractor 留（讀歷史 artifact）。
 - **仍待**：
-  - econ-calendar 修復（FMP legacy 403；連帶發現 `/stable/rating-historical` + `/stable/grades-summary` 也 404 — earnings bundle 的 rating_history/grades_summary 長期全零）。
+  - ~~econ-calendar 修復~~ → **已修（v4.111.5 確認：8/8 fmp_pool 重構已遷 `/stable`，實測 477 筆；MARKET_INDEX / daily_health 同步）**。餘留另案：`/stable/rating-historical` + `/stable/grades-summary` 仍 404 — earnings bundle 的 rating_history/grades_summary 長期全零。
   - ftd/market-top 三頭 lineage 整併（sector/*_yfinance.py ↔ skills 目錄 ↔ ~/.claude 路徑）。
   - kill-trigger v2 候選：sector RS 謂詞（需 sector_intel 數值欄）、predict 端 invalidation 接入、ic-memo §11 條件同步。
 

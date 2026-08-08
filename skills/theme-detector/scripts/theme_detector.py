@@ -646,7 +646,6 @@ def main():
 
         selector = RepresentativeStockSelector(
             finviz_elite_key=args.finviz_api_key,
-            fmp_api_key=args.fmp_api_key,
             finviz_mode=finviz_mode,
             rate_limit_sec=1.0,
             min_cap=args.dynamic_min_cap,

@@ -400,22 +400,6 @@ def _mock_finviz_elite_stocks(industry, limit, is_bearish):
     ]
 
 
-def _mock_etf_holdings(etf, limit):
-    """Return fake ETF holdings."""
-    return [
-        {
-            "symbol": f"ETF{etf}{i}",
-            "source": "etf_holdings",
-            "market_cap": (5 - i) * 500_000_000,
-            "change": None,
-            "volume": None,
-            "matched_industries": [],
-            "reasons": [f"Held by {etf}"],
-        }
-        for i in range(min(limit, 5))
-    ]
-
-
 class TestSelectStocks:
     def test_finviz_elite_priority(self):
         """finviz_mode=elite + key => Elite is used."""
@@ -477,28 +461,6 @@ class TestSelectStocks:
             result = sel.select_stocks(theme, max_stocks=5)
             assert len(result) > 0
             assert all(d["source"] == "finviz_public" for d in result)
-
-    def test_etf_holdings_supplement(self):
-        """FINVIZ returns few stocks => ETF holdings supplement."""
-        sel = RepresentativeStockSelector(fmp_api_key="test_key")
-
-        def empty_finviz(industry, limit, is_bearish):
-            return []
-
-        with (
-            patch.object(sel, "_fetch_finviz_public", side_effect=empty_finviz),
-            patch.object(sel, "_fetch_etf_holdings", side_effect=_mock_etf_holdings),
-            patch.object(sel, "_rate_limit"),
-        ):
-            theme = {
-                "direction": "bullish",
-                "matching_industries": [{"name": "Gold"}],
-                "proxy_etfs": ["GDX", "GLD"],
-                "static_stocks": [],
-            }
-            result = sel.select_stocks(theme, max_stocks=5)
-            assert len(result) > 0
-            assert any(d["source"] == "etf_holdings" for d in result)
 
     def test_static_final_fallback(self):
         """All sources fail => static_stocks."""
@@ -773,19 +735,16 @@ class TestCircuitBreaker:
         assert sel._source_states["public"].disabled is False
 
     def test_mixed_source_failures_independent(self):
-        """Elite fail -> Public success -> FMP fail: independent counters."""
+        """Elite fail -> Public success: independent counters."""
         sel = RepresentativeStockSelector(
             finviz_elite_key="key",
-            fmp_api_key="key",
             finviz_mode="elite",
         )
         sel._record_failure("elite")
         sel._record_success("public")
-        sel._record_failure("fmp")
 
         assert sel._source_states["elite"].consecutive_failures == 1
         assert sel._source_states["public"].consecutive_failures == 0
-        assert sel._source_states["fmp"].consecutive_failures == 1
 
     def test_success_resets_own_source_count(self):
         """Success resets only that source's consecutive counter."""
@@ -805,7 +764,6 @@ class TestCircuitBreaker:
         """One active source disabled => status='degraded'."""
         sel = RepresentativeStockSelector(
             finviz_elite_key="key",
-            fmp_api_key="key",
             finviz_mode="elite",
         )
         for _ in range(_MAX_CONSECUTIVE_FAILURES):
@@ -816,10 +774,9 @@ class TestCircuitBreaker:
         """All active sources disabled => status='circuit_broken'."""
         sel = RepresentativeStockSelector(
             finviz_elite_key="key",
-            fmp_api_key="key",
             finviz_mode="elite",
         )
-        for source in ["elite", "public", "fmp"]:
+        for source in ["elite", "public"]:
             for _ in range(_MAX_CONSECUTIVE_FAILURES):
                 sel._record_failure(source)
         assert sel.status == "circuit_broken"
@@ -833,13 +790,6 @@ class TestCircuitBreaker:
         for _ in range(_MAX_CONSECUTIVE_FAILURES):
             sel._record_failure("elite")
         # elite is disabled but not in active sources
-        assert sel.status == "active"
-
-    def test_status_active_ignores_fmp_when_no_key(self):
-        """fmp_api_key=None => fmp not in active sources."""
-        sel = RepresentativeStockSelector()
-        for _ in range(_MAX_CONSECUTIVE_FAILURES):
-            sel._record_failure("fmp")
         assert sel.status == "active"
 
 
@@ -1074,7 +1024,7 @@ class TestProperties:
     def test_query_count(self):
         sel = RepresentativeStockSelector()
         sel._source_states["public"].total_queries = 5
-        sel._source_states["fmp"].total_queries = 2
+        sel._source_states["elite"].total_queries = 2
         assert sel.query_count == 7
 
     def test_failure_count(self):
@@ -1087,17 +1037,12 @@ class TestProperties:
         sel = RepresentativeStockSelector(finviz_mode="public")
         assert sel._active_sources == ["public"]
 
-    def test_active_sources_public_mode_with_fmp(self):
-        sel = RepresentativeStockSelector(finviz_mode="public", fmp_api_key="key")
-        assert sel._active_sources == ["public", "fmp"]
-
     def test_active_sources_elite_mode(self):
         sel = RepresentativeStockSelector(
             finviz_elite_key="key",
             finviz_mode="elite",
-            fmp_api_key="key",
         )
-        assert sel._active_sources == ["elite", "public", "fmp"]
+        assert sel._active_sources == ["elite", "public"]
 
     def test_active_sources_elite_mode_no_key(self):
         """elite mode but no key => elite not in active sources."""
@@ -1109,4 +1054,3 @@ class TestProperties:
         states = sel.source_states
         assert "elite" in states
         assert "public" in states
-        assert "fmp" in states

@@ -535,11 +535,6 @@ def _fetch_daily(symbol, before_date):
     data = fp.get("historical-price-eod/full", {"symbol": symbol, "from": start,
                                                 "to": date.today().isoformat()}, stable=True)
     hist = data if isinstance(data, list) else (data.get("historical") if isinstance(data, dict) else None)
-    if not hist:
-        # Legacy v3 fallback (nested under "historical").
-        data = fp.get_url(f"https://financialmodelingprep.com/api/v3/historical-price-full/{symbol}",
-                          {"timeseries": 130})
-        hist = data.get("historical") if isinstance(data, dict) else (data if isinstance(data, list) else None)
     bars = []
     for r in (hist or []):
         d = (r.get("date") or "")[:10]

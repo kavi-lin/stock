@@ -719,7 +719,7 @@ python3 skills/short-contrarian-analyst/scripts/burry_score.py <TICKER> --json-o
 1. **Altman Z-Score** (`quality_scores.altman_zone`): danger → -2，grey → -1，safe → 0
 2. **Piotroski F-Score** (`piotroski_strength`): strong → +1；weak → reasoning 註記不調 score
 3. **Owner Earnings vs GAAP FCF** (`owner_earnings.ownersEarnings` vs `cash_flow[0].freeCashFlow`): 差距 > 30% → narrative 註記，不調 score
-4. **Insider trend** (`insider_summary.latest_trend`): accumulating + `component_scores.insider == 0` → narrative 註記正向背離；distributing → narrative 註記
+4. **Insider trend** (`insider_summary.latest_trend`): accumulating + `components.insider_net == "SELL"` → narrative 註記正向背離；distributing → narrative 註記
 5. **DCF FCFF vs FCFE 差距** (`dcf_intrinsic` vs `dcf_levered_intrinsic`): 差 > 20% → narrative 加註資本結構警告，不調 score
 6. **Comp benchmark** (V5.0, `comp_benchmark.ceo_vs_peer_pct`): CEO comp > peer median 200%+ → narrative 治理紅旗
 7. **PEER_BUNDLE mispricing** (V4.10): `EV/EBIT > peer_median × 1.5` 或 `fcf_yield < peer 中位數一半` → narrative 加註，不調 score

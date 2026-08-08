@@ -139,32 +139,8 @@ class TestFMPEndpointFallback:
         assert called_params["symbol"] == "AAPL,MSFT"
 
     @patch("etf_scanner._requests_lib")
-    def test_stable_fails_falls_back_to_v3_path_format(self, mock_requests):
-        """When stable fails, v3 endpoint uses /SYMBOLS path format."""
-        scanner = self._make_scanner()
-
-        # First call (stable) fails
-        fail_resp = MagicMock()
-        fail_resp.status_code = 500
-        # Second call (v3) succeeds
-        ok_resp = MagicMock()
-        ok_resp.status_code = 200
-        ok_resp.json.return_value = [{"symbol": "AAPL"}]
-        mock_requests.get.side_effect = [fail_resp, ok_resp]
-
-        result = scanner._fmp_request("quote", "AAPL,MSFT")
-        assert result is not None
-
-        # Verify v3 call uses path-based symbols
-        v3_call = mock_requests.get.call_args_list[1]
-        called_url = v3_call[0][0]
-        assert "/api/v3/quote/AAPL,MSFT" in called_url
-        # Symbols should NOT be in params for v3
-        assert "symbol" not in v3_call[1]["params"]
-
-    @patch("etf_scanner._requests_lib")
-    def test_both_fail_returns_none(self, mock_requests):
-        """When both stable and v3 fail, returns None."""
+    def test_stable_fail_returns_none(self, mock_requests):
+        """Stable (only endpoint since v3 removal) fails => None."""
         scanner = self._make_scanner()
         fail_resp = MagicMock()
         fail_resp.status_code = 500
@@ -172,7 +148,7 @@ class TestFMPEndpointFallback:
 
         result = scanner._fmp_request("quote", "AAPL")
         assert result is None
-        assert scanner._stats["fmp_failures"] == 2
+        assert scanner.backend_stats()["fmp_failures"] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -269,14 +245,14 @@ class TestFMPQuoteFetch:
         """When retry returns BRK-B, it is cached under normalized BRK.B."""
         scanner = self._make_scanner()
 
-        # Batch call with normalized BRK.B: stable fails, v3 fails
+        # Batch call with normalized BRK.B: stable fails (single endpoint since v3 removal)
         fail_resp = MagicMock()
         fail_resp.status_code = 500
         # Retry with original BRK-B: stable returns data with BRK-B symbol
         retry_resp = MagicMock()
         retry_resp.status_code = 200
         retry_resp.json.return_value = [{"symbol": "BRK-B", "pe": 10}]
-        mock_requests.get.side_effect = [fail_resp, fail_resp, retry_resp]
+        mock_requests.get.side_effect = [fail_resp, retry_resp]
 
         result = scanner._fetch_fmp_quotes(["BRK-B"])
         # Cache key is normalized to BRK.B despite API returning BRK-B
@@ -400,7 +376,7 @@ class TestFMPHistoricalFetch:
         """When retry returns BRK-B, result key is normalized to BRK.B."""
         scanner = self._make_scanner()
 
-        # Batch with normalized BRK.B: stable+v3 both fail
+        # Batch with normalized BRK.B: stable fails (single-endpoint chain)
         fail_resp = MagicMock()
         fail_resp.status_code = 500
         # Per-symbol retry with normalized BRK.B: fails
@@ -412,10 +388,8 @@ class TestFMPHistoricalFetch:
             "historical": [{"close": 400}],
         }
         mock_requests.get.side_effect = [
-            fail_resp,
-            fail_resp,  # batch stable+v3
-            fail_resp,
-            fail_resp,  # per-symbol BRK.B stable+v3
+            fail_resp,   # batch stable
+            fail_resp,   # per-symbol BRK.B stable
             retry_resp,  # per-symbol BRK-B stable succeeds
         ]
 

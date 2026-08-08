@@ -40,6 +40,7 @@ def score_de(de):
 
 def score_52w(pct_below):
     # pct_below = positive number = % below 52w high
+    if pct_below is None: return None
     if pct_below < 5:   return 20.0
     if pct_below < 20:  return 20 + (pct_below - 5) * (40 / 15)     # → 60
     if pct_below < 40:  return 60 + (pct_below - 20) * (30 / 20)    # → 90
@@ -107,7 +108,11 @@ def compute(ticker: str):
         current = float(hist.iloc[-1])
         pct_below_high = (1 - current / high_52) * 100
     except Exception:
-        pct_below_high = 0.0
+        # NOT 0.0 — that maps to score_52w's harshest band (20) and would enter the
+        # weighted average disguised as real data, so a transient fetch failure could
+        # manufacture a WARNING or even a T4_VETO. This agent holds veto power; an
+        # absent component must be absent. None → renormalized out below, same as insider.
+        pct_below_high = None
         current = None
 
     insider_net = get_insider_net(tk)
@@ -142,7 +147,10 @@ def compute(ticker: str):
     if fcf_yield_pct is not None: reasoning_bits.append(f"FCF yield {fcf_yield_pct:.1f}%")
     if ev_ebit is not None: reasoning_bits.append(f"EV/EBITDA {ev_ebit:.1f}")
     if de is not None: reasoning_bits.append(f"D/E {de:.2f}")
-    reasoning_bits.append(f"{pct_below_high:.0f}% below 52wH")
+    if pct_below_high is not None:
+        reasoning_bits.append(f"{pct_below_high:.0f}% below 52wH")
+    else:
+        reasoning_bits.append("52wH n/a (price fetch failed → weight renormalized)")
     reasoning_bits.append(f"insider={insider_net}")
 
     return {
@@ -154,7 +162,7 @@ def compute(ticker: str):
             "fcf_yield_pct": round(fcf_yield_pct, 2) if fcf_yield_pct is not None else None,
             "ev_ebit": round(ev_ebit, 2) if ev_ebit is not None else None,
             "debt_to_equity": round(de, 2) if de is not None else None,
-            "pct_below_52w_high": round(pct_below_high, 2),
+            "pct_below_52w_high": round(pct_below_high, 2) if pct_below_high is not None else None,
             "insider_net": insider_net,
         },
         "component_scores": {k: (round(v, 1) if v is not None else None) for k, v in comp_scores.items()},

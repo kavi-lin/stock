@@ -39,6 +39,7 @@ being confused, and `_run_chain` branches on the type, never on a message.
 """
 from __future__ import annotations
 
+import re
 import sys
 import uuid
 from pathlib import Path
@@ -53,10 +54,11 @@ from scripts._shared.broker_client import (  # noqa: E402
 
 __all__ = [
     "BROKER_PROJECT", "BrokerAuthError", "BrokerError", "BrokerRefused", "BrokerRejected",
-    "BrokerUnavailable", "broker_client", "broker_config", "estimate_tokens", "governed_models",
+    "BrokerUnavailable", "TASK_TYPE_PATTERN", "broker_client", "broker_config",
+    "estimate_tokens", "governed_models",
     "is_degradable", "new_task_id", "protocol_estimate", "protocol_task_type",
     "provider_for", "provider_quota", "quota_snapshot",
-    "ranked_models", "usage_for_broker",
+    "ranked_models", "sanitize_task_type", "usage_for_broker",
 ]
 
 #: Namespaces this project's tasks in the shared ledger. Task ids are unique per
@@ -114,6 +116,21 @@ PROTOCOL_OUTPUT_TOKENS = 40_000
 #: `lqb history --stats` report a row per protocol, so each one calibrates from
 #: its own runs instead of from an average of things that are not alike.
 PROTOCOL_TASK_TYPE_PREFIX = "agentic_protocol"
+
+#: The broker's own schema for `task_type`. Names are built to satisfy it here
+#: rather than discovered as a 400 at acquire time, because a rejected request is
+#: not a quota state: `_acquire` classifies it as this repo's bug and fails
+#: closed, so one invalid character stops every protocol run. V4.110.0 did
+#: exactly that — it joined the protocol name on with a colon, which this pattern
+#: does not allow, and every `分析` / `產業掃描` / triage run raised
+#: `ProtocolBlocked` while `lqb status` showed a healthy daemon with quota to
+#: spare. Fixed in V4.111.4; the separator is now a hyphen.
+TASK_TYPE_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+
+#: Joins the prefix to the protocol name. A hyphen, because protocol names carry
+#: underscores of their own (`llm_review`) and the boundary has to stay readable
+#: in `lqb history --stats --task-type agentic_protocol-invest`.
+PROTOCOL_TASK_TYPE_SEPARATOR = "-"
 
 #: Reservation TTLs. The broker reclaims a hold when its TTL passes — including
 #: one that is still running — and a reclaimed hold cannot then be settled, so
@@ -231,15 +248,34 @@ def protocol_estimate(cfg: dict | None = None, protocol: str | None = None) -> t
     return table.get(str(protocol or "").strip().lower(), fallback)
 
 
+def sanitize_task_type(name: object, default: str = "") -> str:
+    """`name` reduced to something `TASK_TYPE_PATTERN` accepts, or `default`.
+
+    Substitution rather than rejection: the caller is naming its own work, and a
+    name the broker will not take should cost a mangled history row, never a
+    refused run. Non-ASCII letters are replaced too — `str.isalnum()` is true for
+    CJK, and the broker's pattern is ASCII-only.
+    """
+    cleaned = "".join(
+        character if (character.isascii() and character.isalnum()) or character in "_-" else "-"
+        for character in str(name or "").strip().lower()
+    ).lstrip("-_")
+    return cleaned or default
+
+
 def protocol_task_type(protocol: str | None = None) -> str:
     """The ledger task type for one run of `protocol`.
 
     Unnamed runs keep the bare `agentic_protocol`, which is also what every run
     recorded before V4.110.0 is filed under — those rows are an average across
-    protocols and should not be read as any single protocol's history.
+    protocols and should not be read as any single protocol's history. Runs
+    between V4.110.0 and V4.111.4 recorded nothing at all: the name they built
+    was rejected by the broker before it reached the ledger.
     """
-    name = str(protocol or "").strip().lower()
-    return f"{PROTOCOL_TASK_TYPE_PREFIX}:{name}" if name else PROTOCOL_TASK_TYPE_PREFIX
+    name = sanitize_task_type(protocol)
+    if not name:
+        return PROTOCOL_TASK_TYPE_PREFIX
+    return f"{PROTOCOL_TASK_TYPE_PREFIX}{PROTOCOL_TASK_TYPE_SEPARATOR}{name}"
 
 
 def usage_for_broker(tokens: dict | None) -> dict:

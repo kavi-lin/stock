@@ -6,6 +6,8 @@ scope: sector-level
 data_sources: [finvizfinance, yfinance]
 ---
 
+> **Upstream alignment**: fork 自 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)（2026-04）。最近對齊審查 **2026-08-08**（V4.111.6）：無需回灌 — 上游 4 月後變更僅 docs / Windows encoding。
+
 # Sector Analyst
 
 ## Overview

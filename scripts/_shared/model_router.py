@@ -552,12 +552,36 @@ class ProtocolBlocked(RunBlocked):
 
 
 def _task_type(role: str) -> str:
-    """Role name → a ledger task type the broker's schema accepts."""
-    cleaned = "".join(
-        character if character.isalnum() or character in "_-" else "-"
-        for character in str(role or "call").strip().lower()
-    ).lstrip("-_")
-    return cleaned or "call"
+    """Role name → a ledger task type the broker's schema accepts.
+
+    One sanitiser for both paths, in `broker_gate`, next to the pattern it
+    enforces. Two copies is how V4.110.0 shipped a protocol task type with a
+    colon in it: this path cleaned its names and the protocol path did not.
+    """
+    return broker_gate.sanitize_task_type(role, default="call")
+
+
+def _blocked_reason(note: str) -> str:
+    """Why a run was not authorised, in the operator's terms, from `note`.
+
+    These three notes mean three unrelated things and only one of them is about
+    quota. Until V4.111.4 they shared one sentence that named the other two
+    causes ("the daemon may be down, or every provider is inside its 20% hard
+    reserve"), so a malformed request — a bug in this repo — sent the operator to
+    `lqb status`, which showed a healthy daemon with quota to spare.
+    """
+    if note.startswith("broker:refused"):
+        return ("no provider has quota outside its hard reserve. `lqb status` "
+                "shows what is left in each pool and when it refills.")
+    if note.startswith("broker:unavailable"):
+        return ("the broker could not be reached — check the daemon is up "
+                "(`lqb status`). A protocol run is the largest consumer here, so "
+                "it is not one of the roles allowed to fall back to the local budget.")
+    if note.startswith("broker:rejected"):
+        return ("the broker rejected the request itself. That is a bug in this "
+                "repo, not a quota state — the daemon's reason is on stderr above, "
+                "and no amount of waiting will clear it.")
+    return "see the note above."
 
 
 def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
@@ -744,7 +768,8 @@ def governed_call(role: str, model: str, *prompts: str):
     cfg = load_llm_config()
     lease, note, allowed = _acquire(role, model, cfg, prompts=prompts)
     if not allowed:
-        raise RunBlocked(f"the quota broker did not authorise this {role} call ({note})")
+        raise RunBlocked(f"the quota broker did not authorise this {role} call "
+                         f"({note}): {_blocked_reason(note)}")
     hold = _Hold(lease, model, note)
     try:
         yield hold
@@ -870,9 +895,7 @@ def acquire_protocol_lease(role: str = "agentic_protocol",
     lease, note, allowed = _acquire(role, model, cfg, protocol=True, protocol_name=protocol)
     if not allowed:
         raise ProtocolBlocked(
-            f"the quota broker did not authorise this run ({note}). "
-            "Check `lqb status`; the daemon may be down, or every provider is "
-            "inside its 20% hard reserve.")
+            f"the quota broker did not authorise this run ({note}): {_blocked_reason(note)}")
     if lease is not None:
         model = broker_gate.MODEL_FOR_PROVIDER.get(lease.provider, model)
     return model, lease, note

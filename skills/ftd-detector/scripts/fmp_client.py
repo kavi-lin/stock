@@ -15,6 +15,7 @@ Features:
 import os
 import sys
 import time
+from datetime import date, timedelta
 from typing import Optional
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -29,7 +30,11 @@ except ImportError:
     sys.exit(1)
 
 
-# --- FMP endpoint fallback: stable (new users) -> v3 (legacy users) ---
+# --- FMP endpoints: stable only（2026-08-08 對齊上游 v3 清理）---
+# v3 全端點 legacy 403、stable/historical-price-full 404 — 舊 fallback 鏈兩條都死。
+# historical 改走 stable/historical-price-eod/full（flat list、newest-first、
+# 忽略 timeseries 參數）：URL builder 補 from 縮小 payload，
+# _request_with_fallback 內 normalizer 還原 {"symbol","historical"} 形狀並截斷到 N。
 
 
 def _stable_quote_url(base, symbols_str, params):
@@ -38,30 +43,25 @@ def _stable_quote_url(base, symbols_str, params):
     return base, params
 
 
-def _v3_quote_url(base, symbols_str, params):
-    """api/v3/quote/^GSPC"""
-    return f"{base}/{symbols_str}", params
-
-
 def _stable_hist_url(base, symbols_str, params):
-    """stable/historical-price-full?symbol=^GSPC&timeseries=80"""
+    """stable/historical-price-eod/full?symbol=^GSPC&from=...（flat list）"""
     params["symbol"] = symbols_str
+    ts = params.get("timeseries")
+    if ts:
+        try:
+            days = int(ts)
+            params["from"] = (date.today() - timedelta(days=days * 2 + 10)).isoformat()
+        except (TypeError, ValueError):
+            pass
     return base, params
-
-
-def _v3_hist_url(base, symbols_str, params):
-    """api/v3/historical-price-full/^GSPC?timeseries=80"""
-    return f"{base}/{symbols_str}", params
 
 
 _FMP_ENDPOINTS = {
     "quote": [
         ("https://financialmodelingprep.com/stable/quote", _stable_quote_url),
-        ("https://financialmodelingprep.com/api/v3/quote", _v3_quote_url),
     ],
     "historical": [
-        ("https://financialmodelingprep.com/stable/historical-price-full", _stable_hist_url),
-        ("https://financialmodelingprep.com/api/v3/historical-price-full", _v3_hist_url),
+        ("https://financialmodelingprep.com/stable/historical-price-eod/full", _stable_hist_url),
     ],
 }
 
@@ -69,7 +69,6 @@ _FMP_ENDPOINTS = {
 class FMPClient:
     """Client for Financial Modeling Prep API with rate limiting and caching"""
 
-    BASE_URL = "https://financialmodelingprep.com/api/v3"
     RATE_LIMIT_DELAY = 0.3  # 300ms between requests
 
     def __init__(self, api_key: Optional[str] = None):
@@ -110,7 +109,7 @@ class FMPClient:
         return None
 
     def _request_with_fallback(self, endpoint_key, symbols_str, extra_params=None):
-        """Try stable endpoint first, fall back to v3 for legacy users."""
+        """Run the (stable-only) endpoint chain and normalize the response shape."""
         params = dict(extra_params) if extra_params else {}
         endpoints = _FMP_ENDPOINTS[endpoint_key]
         is_single = "," not in symbols_str
@@ -133,6 +132,22 @@ class FMPClient:
                     continue
 
             if endpoint_key == "historical":
+                # stable/historical-price-eod/full returns a flat list of bars
+                # (newest-first) and ignores timeseries — normalize back to the
+                # {"symbol", "historical"} shape consumers expect, truncated to N.
+                if isinstance(data, list):
+                    bars = [b for b in data if isinstance(b, dict)]
+                    if not bars:
+                        continue
+                    if is_single and bars[0].get("symbol"):
+                        if bars[0]["symbol"].replace("-", ".") != symbols_str.replace("-", "."):
+                            continue
+                    n = params.get("timeseries")
+                    try:
+                        n = int(n) if n else None
+                    except (TypeError, ValueError):
+                        n = None
+                    return {"symbol": symbols_str, "historical": bars[:n] if n else bars}
                 if not isinstance(data, dict):
                     continue
                 if "historicalStockList" in data:

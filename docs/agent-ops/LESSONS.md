@@ -1,5 +1,29 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-08 ｜綠燈的測試可能一行都沒執行到目標——patch 到不存在的名字不會報錯
+- 情境：風控三支補測試（v4.111.7）。要鎖 tail-risk 的分級門檻與權重，寫了 `monkeypatch.setattr(tr, "clamp", fake, raising=False)`。
+- 坑：兩種「假綠」各踩一次。(a) `clamp` 是 `compute()` 內的 **nested function**，module 層沒有這個名字，`raising=False` 於是**安靜地新增一個沒人讀的屬性**——測試全綠，真 `clamp` 照跑，斷言測的是原始行為不是注入行為；(b) `assert out["correlation_multiplier"] in (1.0, 0.85, 0.70, 0.55)` 這種「值域斷言」在四個選項裡恆真，改壞 code 也不會紅。兩者都是 2026-08-08「mock 要打在真實 code path 上」的變體：那條講 patch 錯層會打真網路，這條講 patch 錯名字連錯都不會錯。
+- 修法：(a) `monkeypatch.setattr` 預設 `raising=True`，**沒有把握不要加 `raising=False`**——它把「名字打錯」從 AttributeError 降級成靜默通過；(b) 要測的邏輯若埋在函式內部（nested def、inline if-chain），先提升為 module-level 具名函式再測，這是純 seam、基線輸出應逐位元一致（本輪 SPY/KO diff 為證）；(c) 斷言要寫成**會因為改動而翻轉**的形狀（`fragility_for(29.9) == ("ROBUST", 1.0)`），不是「落在某集合內」；(d) 新測試收尾一律**種回 bug 確認會紅**——本輪兩個 bug 種回後分別炸出 `assert 20.0 is None`（五元件全缺卻生出 20 分）與集中度 10% 的投組 `sector_cap_triggered=True`，這才證明測試對得上 bug。
+- 已回寫規則？：否——屬測試紀律，與既有「mock 打真 code path」同族，已在 plan_risk_trio.md §0.6 有 (a)(b) 兩條；本條補「patch 錯名字/值域斷言」兩個新面向，第三次重複再固化進 MAINTENANCE。
+
+## 2026-08-08 ｜fork 來的 skill 是資產也是負債——上游修掉的 bug 會留在副本裡
+- 情境：比對上游 claude-trading-skills 4 月後 delta，發現專案 6 處 FMP v3 殘留，其中 ftd/market-top 的 historical 鏈（stable 404 → v3 403）整條死。
+- 坑：三層疊加。(a) fork 後上游做了系統性 endpoint 遷移（3776da1），副本無人追蹤；(b) 死 fallback 不報錯——鏈上「還有下一條」讓每條失敗都顯得正常，最後一條也死時 caller 只拿到 None；(c) 測試 mock 綁舊實作（`session.get`），fmp_pool 遷移後測試靜默打真網路，11+12 紅躺著沒人看。
+- 修法：(a) fork 系 skill 在 SKILL.md 頂部記 upstream alignment（已做 10 檔），日後審查直接 git log 上游對齊日之後的 delta；(b) fallback 鏈每條端點要能 probe——本輪 3 行 urllib 實測 403/404/402 定案；(c) 改 transport 層（session→pool）時 grep 測試的 patch 目標一併遷。
+- 已回寫規則？：部分（MARKET_INDEX 維護規則新增上游對齊條目）；(c) 屬測試紀律，重複發生再固化。修復見 CHANGELOG v4.111.6。
+
+## 2026-08-08 ｜壞掉名單沒有跟著「順手修好它的 refactor」重測
+- 情境：skills 盤點，MARKET_INDEX 把 economic-calendar-fetcher 列「上游壞 403」，實跑卻直接回 477 筆事件。
+- 坑：8/8 fmp_pool 重構（2775deb）把 script 從 legacy `api/v3/economic_calendar` 遷到 `/stable/`，403 作為**副作用**被修掉，但壞掉名單、`daily_health.py` 的「已知上游 403」標籤都沒人回頭重測。另 daily_health 監控 `skills/economic-calendar-fetcher/cache/*.json`，該 skill 無持久 artifact（stdout inline 進 /tmp bundle）——這條健檢自建立起永遠 MISS，誤報反而讓「壞掉」印象自我強化。
+- 修法：(a) 觸及資料源 endpoint 的 refactor 收尾時，grep MARKET_INDEX 待處置名單 + daily_health SOURCES，提到該源的條目實跑重測、同步狀態；(b) 立健檢條目前先確認 producer 真的會寫那個路徑——沒有 artifact 就不要立 artifact 健檢。
+- 已回寫規則？：否（MARKET_INDEX 維護規則已有「接線證據過時時重跑稽核」，本案是其實例；重複發生再固化進 MAINTENANCE）。修復見 CHANGELOG v4.111.5。
+
+## 2026-08-08 ｜stub 比真服務寬鬆，等於這支測試看不見 fail-closed 回歸
+- 情境：V4.110.0 把 broker 的 protocol task type 改成 `agentic_protocol:<name>`，`tests/test_broker_gate.py` 全綠，隔天所有 protocol run（`分析`/`產業掃描`/triage）一律 `ProtocolBlocked`。
+- 坑：broker 的 `task_type` pattern 是 `^[a-z0-9][a-z0-9_-]*$`，冒號不在裡面 → 每次 acquire 400 → `_acquire` 正確地把 400 當成「本 repo 的 bug、不准降級」→ fail-closed 停掉全部。測試沒抓到，是因為 stub server 收下任何 `task_type`。**外部服務的欄位約束沒有進 stub，這支測試就只在測我們自己的想像**（`tests/test_broker_gate.py:76`）。第二個成因：`_task_type()` 與 `protocol_task_type()` 是同一條約束的兩份實作，只有前者有清洗。
+- 修法：(a) stub 一律複製真服務的欄位驗證，加完要**故意把 bug 種回去確認測試會紅**——沒紅過的守衛不算守衛。(b) 同一條外部約束只留一個執行點，放在約束本身（pattern）旁邊。(c) 要驗「請求合不合法」用 `recommend(task, reserve=False)` preview，不必真的佔額度。(d) 錯誤訊息不可把多種 note 併成一句共用文案——本案那句點名的兩個原因（daemon 掛了／額度見底）正好都不是 `broker:rejected` 的意思，把人送去看一個顯示一切正常的 `lqb status`。
+- 已回寫規則？：否（屬測試紀律）。修復見 CHANGELOG v4.111.4。
+
 ## 2026-08-08 ｜共通項不能解釋差異；效能問題沒 profile 之前的因果都是猜的
 - 情境：接手另一個 session 的交接文件查「開 Dashboard 系統卡頓」。該文件已把根因定調為「56 個 `setInterval` 缺 `document.hidden` 保護」，並排好 `pollEvery()` 收口 46 處的重構計畫。
 - 坑：那份文件第 3 段自己寫著「每分鐘 166 次小 JSON 請求在算術上燒不掉一整顆核」——**它已經否證了自己第 2 段的主張，卻沒有察覺，仍照著被否證的假設規劃重構**。實際 profile 後：各頁 JS 執行只佔 0.4%–2.8% 一顆核，timer 完全不是元凶。真兇是 `decisions.html:35` 的 `transition: stroke-dashoffset 0.9s linear` 撞上每 1.0 秒寫一次的 `updateRefreshStatus`——每秒續一個 0.9 秒的不可合成 transition，頁面永遠不 idle（110 Paint/s、56 Commit/s）。照原計畫做完 46 處重構，這個 bug 一個字都不會被碰到。
@@ -30,12 +54,6 @@
 - 修法：enrichment 前先用一次 bulk/screener snapshot 本機交集，禁止把「篩選所需 metadata」做成逐 symbol 請求；範圍 API 若筆數碰到已知 cap，必須切段、去重並在單日仍飽和時 fail closed，不能把 HTTP 200 當 completeness 證明
 - 已回寫規則？：是（4.95.7：`sector/lib/earnings_calendar.py` 分段完整性；Step 3 改 cached company-screener join；`sector/scripts/README.md` 記錄契約）
 
-## 2026-08-05 ｜中央 limiter 的上限只對納管流量成立
-- 情境：Starter 方案 300 RPM、中央 pool 設 220 RPM，sector prefetch 仍在 valuation/smart-money 收到 429
-- 坑：只檢查 `fmp_pool_window.json` 會錯判「不可能超量」；同一個 prefetch 還平行呼叫 `~/.claude` calendar scripts，其中 earnings calendar 用 16 threads 逐 symbol 直接 `requests.get(/stable/profile)`，完全不進中央 window。另：HTTP client 丟掉 429 body/Retry-After，使 RPM、bandwidth、權限限制看起來一樣
-- 修法：排查共享配額時先列出整個 execution graph 的所有 HTTP 出口，不只檢查名義上的 shared client；所有 fan-out 必須先取得同一個 cross-process slot。429 保存去 query、去 key 的 endpoint/body/Retry-After artifact；401 這種整批 credential failure 必須在共用 transport 首次命中就熱斷並聚合 log，不得繼續逐檔 fan-out
-- 已回寫規則？：是（4.95.5：phase_prefetch calendar 全改 repo-owned `fmp_pool` client；`fmp_pool.py` 新增安全診斷 artifact）
-
 ## 2026-08-03 ｜修 bug class 的那輪，要拿修法判準回頭掃自己新增的程式碼
 - 情境：4.95.2 對 4.95.1（「韌性從檔案層下沉到欄位層」的 review 修正輪）做第二輪 review
 - 坑：四個修正各自把守衛下沉了一層就停，同一 bug class 在再下一層原樣復發——`uncovered[]` 修到 key 層（`{"Utilities": null}` 仍讀成「查過了、乾淨」，da_pretrigger.py 舊 `_uncovered`）、擋了「版號缺失」放行「版號非字串」（sector_score_calculator.py 舊 L488，float 版號讓 `sorted()` TypeError 掛掉 --status）、修了 gate 的 `_canon_list` 沒修共用源頭 `_slim_fred`。測試全綠，因為回歸案例只釘到修正做到的那一層
@@ -59,18 +77,6 @@
 - 坑：後續 review 找到 12 項問題，**全部**在 degraded / fallback 分支，happy path 一項都沒錯——因為 MU 剛好是「3 季已公布 + 有 next-quarter estimate + estimates 有 ebitAvg」的最順情境。實際踩到的：2 季 ticker 會拿已公布季度獲利除全年營收估計（`dcf.py` start EBIT margin）；缺年度估計時整條成長路徑直接套成長上限表 45/30/20/12/8（把「證據上界」當「預設值」）；confirmed shift 建不起來時靜默退回 legacy 而 legacy 對該股會算出負 terminal FCFF；資料缺失的 ticker 在非 `--json-only` 模式直接 TypeError 而不是 degraded
 - 修法：引擎類交付的 DoD 加一條——**每個 early-return / fallback / except 分支都要有一條 regression test**，且測試 fixture 不能只有一個「資料齊全」版本。寫 fallback 時問一句「這個預設值是保守還是最寬鬆？」缺資料一律往保守 + 出聲（寫 reason 進 payload + warnings），不准往上界靠
 - 已回寫規則？：是（`skills/valuation-modeler/SKILL.md` 新增「缺資料時的紀律（degraded path）」段；本條記通則，其他引擎同樣適用）
-
-## 2026-07-03 ｜開處方前先確認「這件事實際是誰在做」
-- 情境：實作「§11 verbatim 改 script 注入」backlog
-- 坑：診斷時把 verbatim 風險定位在 ic-memo §11，動工前覆查才發現 ic-memo 的 §11 早就是 `compose.py` deterministic 渲染；真正由 LLM 手抄數字的是 protocol Step 4 的 Sonnet MD Formatter，且其 validator 只驗刻度格式不驗值
-- 修法：任何「叫 X 改為 script 做」的處方，動工第一步先讀原始碼確認 X 目前的執行者到底是 LLM 還是 script（grep 該欄位在 protocol/scripts 兩邊的出現點），再定改動對象
-- 已回寫規則？：是（DIAGNOSIS §三.1 已改為正確定位；本條記過程）
-
-## 2026-07-03 ｜兩層 CLAUDE.md 會同時載入且會脫鉤
-- 情境：治理文件總體檢
-- 坑：父層 `/Users/kavi/Documents/CLAUDE.md` 是舊拷貝，與專案版一起被載入，內容停在 V4.13 → 每 session 浪費 ~14KB 且指令互相矛盾
-- 修法：父層永遠只放指標；規則只寫專案 CLAUDE.md 一處
-- 已回寫規則？：是（父層已改指標檔；MAINTENANCE.md §1「永遠不准」）
 
 ## 2026-07-03 ｜檔名帶版號的 protocol 換版時要清引用
 - 情境：v4_8 歸檔

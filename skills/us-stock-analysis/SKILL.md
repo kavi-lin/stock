@@ -6,6 +6,8 @@ scope: single-ticker
 data_sources: [yfinance, FMP API]
 ---
 
+> **Upstream alignment**: fork 自 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)（2026-04）。最近對齊審查 **2026-08-08**（V4.111.6）：無需回灌 — 上游 4 月後變更僅 knowledge-skill contract tests。
+
 # US Stock Analysis
 
 Comprehensive single-ticker US equity analysis — fundamentals, technicals, valuation, comparison, investment reports. See `README.md` for tone / formatting pedagogy and example queries.

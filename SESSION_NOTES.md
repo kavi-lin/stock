@@ -1,7 +1,45 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.111.3)
+> **Last Updated**: 2026-08-08 (v4.111.7)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.111.7) — 缺資料被寫成「最糟的資料」:兩個 bug,同一個錯誤的兩種寫法
+
+- **緣起**:執行 `docs/plan_risk_trio.md` Batch A(前一 session 由兩個 fresh-context agent 盤點產出的開工表)。動工前 spot-check 6 處關鍵行號 + 下游合約(FRAGILITY_MULTIPLIER、§14b enum gate、降級合約、段序註解)**全部對得上**,開工表可信,不需重新考古。
+- **兩個 bug 是同族**:burry 價格抓取失敗 → `pct_below_high = 0.0` → 映射到最嚴苛的 20 分**且以真資料身份參與加權**;rm 的 sector 檢查 `except: continue` → 失敗的 holding 退出分母、成功的同產業 holding 留在分子 → 比率膨脹。**一個把缺失值當最低分投票,一個把缺失值從分母剔除——都讓網路品質變成風控結論。**而 burry 是有 T4 否決權的 agent。
+- **種回 bug 的證據都很直白**:burry 版種回後 `assert 20.0 is None` —— 五個元件全缺,卻生出 20.0 分(WARNING 帶);rm 版種回後真實集中度 10% 的投組 `sector_cap_triggered` 變 `True`。**回歸測試不種回去確認會紅,就只是一段和實作同構的描述。**
+- **開工表自己也有漏洞,而它是可以被發現的**:原文 A1 只寫「改 None 讓 renorm 掉」,但 `score_52w(None)` 會在 `None < 5` TypeError、`:145` 的 `{pct_below_high:.0f}` 也會炸。**照抄開工表會當場壞掉**——交接文件寫的是意圖,邊界要自己推一遍。
+- **綠燈但什麼都沒測到,踩了兩次**:①`monkeypatch.setattr(tr, "clamp", ..., raising=False)` —— `clamp` 是 `compute()` 裡的 nested function,module 層根本沒這個名字,`raising=False` 於是**安靜地新增一個沒人用的屬性**,測試全綠而真 clamp 照跑;②`assert x in (1.0, 0.85, 0.70, 0.55)` 這種「值域斷言」在四個選項裡永遠成立。修法是把 `clamp`/分級表/相關性表提升到 module level(純 seam,基線逐位元一致),斷言改成 `fragility_for(29.9) == ("ROBUST", 1.0)` 這種**會因為改動而翻轉**的形狀。
+- **`warnings[]` 只在失敗路徑出現**(使用者指定):成功路徑不輸出這個 key,否則基線 diff 會多出第二處差異,「`portfolio_size_usd` 是唯一預期差異」的宣稱就破了。
+- **驗收**:三支基線 diff——tail-risk / burry **逐位元一致**,rm 僅差刻意移除的 `portfolio_size_usd`;新測試 106 passed;下游 5 支 gate 全 rc=0;replay 三 cohort `current-rule mismatched` 皆 **0**。
+- **Batch B 未動**(7 項語意升級,會改變 position sizing):vol-scaling 失能修復、×0.7/×1.15 有文件無實作、sector 5 值 enum 死規則、technical_core 遷移、insider 換 fmp_supplementary、circuit-breaker、normalizer 再校準。等使用者逐項拍板。
+
+## 🟢 Session Note (v4.111.6) — fork 的程式碼會過期:上游清完 v3,我們的副本還在打死端點
+
+- **緣起**:skills 檢討延伸——使用者要求比對上游 tradermonty/claude-trading-skills(71 skills,MIT,clone 於 scratchpad)有無可回灌的更新。評估結論:大多重複或超綱,5 個值得引入(dual-axis-skill-reviewer 立即可用 / position-sizer + drawdown-circuit-breaker 供風控三支改版 / macro-regime-detector + COT 對做探索層),外加本批 v3 清理。
+- **v3 掃描發現按嚴重度排**:①ftd/market-top 的 FMP historical 鏈「stable/historical-price-full 404 → v3 403」**兩條全死**,daily 只靠 yfinance adapter 撐著;②representative_stock_selector 的 etf-holder 每輪靜默燒一次死呼叫,且 stable 替代端點 402 不在訂閱——**修法是刪層不是遷移**;③intraday / etf_scanner 的死 fallback。全部用 3 行 urllib 實測 403/404/402 定案,不靠猜。
+- **修法照上游**(c54959e / 20a9a1):`historical-price-eod/full` 回 flat list(newest-first)且**忽略 timeseries 參數**(timeseries=2 也回 287KB 全史)→ normalizer 還原舊消費者形狀 + 截斷到 N + `from` 縮 payload。實測 ^GSPC 80 bars / quote / intraday 90 bars 全通。
+- **測試基線紀律**:每動一檔先 stash 比對基線——theme-detector 套件本來就 31 紅、ftd/market-top test_fmp_client 本來就 11+12 紅(mock 綁 `session.get`,fmp_pool 遷移後測試**靜默打真網路**,與 v4.111.4 stub 教訓同族)。本批零新增失敗、順手修 4 個,其餘入 TODO 修復批——**不把陳年債算進本批,也不假裝它不存在**。
+- **回填 alignment**:10 個 SKILL.md 頂部 blockquote 記「fork 自哪、何時對齊、回灌/不回灌與原因」;MARKET_INDEX 維護規則加對齊條目。下次對照上游直接 git log 對齊日之後的 delta,不用重考古。
+- **餘留**(全在 TODO v4.111.6 區塊):theme-detector Heat v2 leadership + heat 歷史/加速度回灌(設計題)、fmp_pool circuit breaker(可選)、stale test 兩批。
+
+## 🟢 Session Note (v4.111.5) — 壞掉名單上的東西已被別的 refactor 順手修好,而名單沒人回頭對
+
+- **緣起**:使用者要求盤點所有 skills + 最後更新時間(檢討用)。專案 25 個與 MARKET_INDEX 一致;user 層級 `~/.claude/skills` 52 個 mtime 全停在 4 月,含 9 個與專案同名的舊快照 + 專案已刪的 earnings-trade-analyzer → 使用者清空該目錄,追問 econ-calendar 還有沒有在用。
+- **接線還在,而且已經好了**:三個消費者(sector `phase_prefetch.py` SOFT task `econ_calendar` / `daily_health.py` / `bridge.py` inline 版)。實跑回 477 筆——8/8 fmp_pool 重構(2775deb)把 script 從 legacy `api/v3/economic_calendar`(403 元凶)遷到 `/stable/`,上游問題**作為副作用被修掉**,但 MARKET_INDEX 壞掉名單與 daily_health「已知上游 403」標籤都沒同步。
+- **健檢那條從來不可能綠**:glob 指 `skills/economic-calendar-fetcher/cache/*.json`,該 skill 無持久 artifact(stdout inline 進 /tmp bundle)→ 自建立起永遠 MISS。修法是移除條目而非改 glob——**沒有 artifact 的產出不要立 artifact 健檢假裝有監控**,誤報反而讓「壞掉」印象自我強化。
+- **收尾**:MARKET_INDEX econ 移回 Protocol lane、待處置區清空;daily_health 移除該條(原位留註解);TODO v4.5.0「仍待」銷項(rating-historical / grades-summary 404 另案保留)。驗證:econ task 走 `phase_prefetch.build_tasks` 實 wiring rc=0 / 477 筆、daily_health 16 OK / 0 FAIL、check_skills rc=0。
+- **skills 盤點餘留(給下個 session 檢討用)**:①風控三支 portfolio-risk-manager / tail-risk-analyzer / short-contrarian-analyst 自 4/19 未動,都接在 investment protocol 決策路徑,該對一次輸出 schema 是否仍與 V5.0+L4b 相容;②ftd / market-top 的 skill 內 fmp_client 與 `sector/*_yfinance.py` canonical 雙軌 drift(TODO 既有項);③sector-analyst 自 5/4 未動,落後 sector V2.x 節奏。
+
+## 🟢 Session Note (v4.111.4) — 錯誤訊息指著兩個不成立的原因;而測試 stub 比真 daemon 寬鬆
+
+- **緣起**:使用者貼上 `quota broker: ... (broker:rejected). Check lqb status; the daemon may be down, or every provider is inside its 20% hard reserve.` 問「這是什麼錯誤」。跑 `lqb status`:daemon 正常、claude 51% / agy 78%,**訊息點名的兩個原因都不成立**。
+- **真因是上一個 commit 自己種的**:V4.110.0 把 protocol 的 task type 改成 `agentic_protocol:<name>`,broker 的欄位 pattern 是 `^[a-z0-9][a-z0-9_-]*$` —— 冒號不在裡面。每次 acquire 拿 400 → `_acquire` 歸類為「本 repo 的 bug,不准降級」→ fail-closed。**`分析`/`產業掃描`/triage 全線停擺,而面板顯示額度充足。**
+- **診斷用 preview 重現,不燒額度**:`client.recommend(task, reserve=False)` 走同一條驗證路徑但不開 reservation,直接印出 daemon 的 `string_pattern_mismatch`。**要驗「請求合不合法」不需要真的佔額度。**
+- **為什麼測試沒抓到**:`tests/test_broker_gate.py` 的 stub server 收下任何 `task_type`。**stub 比真服務寬鬆 = 這支測試對 fail-closed 回歸完全無感** —— production 每一次 protocol run 都 400,測試卻全綠。修法是把 daemon 的 pattern 搬進 stub;把分隔符改回 `:` 重跑,測試如實炸在 `ProtocolBlocked`。
+- **兩份 sanitiser 是這個 bug 的成因**:單發路徑的 `_task_type()` 一直有清洗(所以它沒事),`protocol_task_type()` 是後來寫的第二份、沒有。這版合併成 `broker_gate.sanitize_task_type()` 一份,放在 pattern 旁邊。**同一條約束有兩個執行點,遲早只有一個會被更新。**
+- **順手修掉誤導**:三個 note(`refused` / `unavailable` / `rejected`)本來共用一句話,而那句點名的兩個原因正好都不是 `rejected` 的意思。改成 `_blocked_reason()` 分流。**錯誤訊息把人送去看 `lqb status`,而 `lqb status` 一切正常時,人會先懷疑監控壞了,不會懷疑訊息本身。**
+- **驗收**:`test_broker_gate` / `test_model_router_window` / `test_protocol_model_routing` 三支 rc=0;對真 daemon preview `agentic_protocol-invest` / `-triage` / 無名三種皆 200(recommended=agy)。冒號形態從未進過 ledger,無 history 需要遷移。
 
 ## 🟢 Session Note (v4.111.3) — 交接文件把假設寫成了事實;真的去 profile 只花了 20 分鐘
 
@@ -101,82 +139,6 @@
 - **頻率不是瓶頸**(查證後別再重算):`/2/users/:id/tweets` = 10,000 req/15min per app、900 per user。20 帳號每 5 分鐘一輪只用 60 req/15min。**成本與掃描頻率無關,只跟 KOL 實際發文量有關**,所以掃密一點不會比較貴。
 - **待實測驗證**:「0 則回傳 = $0」是依官方「按回傳資源計費」推得,尚未用真 key 對過 X 帳單。第一次 live sweep 後要拿 `--status` 的花費對 X billing dashboard。
 - **驗收**:20 支 hermetic 測試 rc=0,含 4 週期端到端(冷啟 2 → 閒置 0 → 新增 1 → 閒置 0,log 3 筆、0 筆重分析)。
-
-## 🟢 Session Note (v4.100.0) — 按回傳計費,就不能用樂觀的閘
-
-- **實測結論(別重做一遍)**:免費 syndication 端點活著、回傳 X 已解析的 cashtag,但約 8 req 觸發 429、冷卻 ~183s;**@aleabitoreddit 只回 2 則且停在 2025-11**(內容在訂閱牆後),免費路徑拿不到目標帳號 → 才走付費 API。企業官方帳號(@nvidia)20 則 0 個 cashtag,選人要挑真的打 `$TICKER` 的散戶分析型帳號。
-- **預算閘的形狀**:X 按**回傳資源數**計費,所以事前不知道要花多少。事後計數器擋不住任何東西(發現時錢已經花了),因此 `check()` 一律用**最壞情況**否決、`record()` 才記實際。$10 試點賭不起樂觀估計。
-- **成本能成立全靠 `since_id`**:沒有新貼文就回 0 則、$0。X 的 24h 去重是官方自稱的 soft guarantee,**不可依賴**。
-- **撞天花板是停止不是失敗**:sweep 遇 `BudgetExceeded` 就 break,已收資料留在 append-only log,state 水位照存。
-- **未接線**:只寫 shadow JSONL,沒碰 intraday_mood。要不要接、怎麼加權,等有真資料再說。
-- **待使用者提供**:KOL 名單(目前只有 Serenity 一人 enabled)、以及 `X_BEARER_TOKEN`。
-- **驗收**:13 支 hermetic 測試 rc=0、dry-run 零花費、無 token 乾淨 rc=1、gitignore 覆蓋確認。
-
-## 🟢 Session Note (v4.99.3) — 沒有資料邊就不該有失敗邊
-
-- **原則**：phase 1 的 fail-fast 該綁「資料相依」而不是「同一個 phase」。sector 讀 daily 刷新的 breadth/FTD/market-top cache → daily 維持阻斷；sector 從不讀 digest → news 改為非阻斷，只記 `warnings`。
-- **名單化**：`_PREMARKET_NONBLOCKING = {"news"}`，之後要加 item 進 phase 1 時，先問「sector 讀不讀它的產物」再決定放不放進這個 set。
-- **不可靜默**：`done` 帶 warnings 時 UI 出黃色降級 toast；失敗那列本來就顯示 ❌。降級不等於成功。
-- **8 天歷史日檔已刪**：4/18、5/16-5/19、5/31、6/03、6/05。刪前確認全部落在所有消費端時間窗外（bridge 最近 3 份 / nexus 30d / retail-pulse 72h / theme-detector windowed），且 `legacy_digest_backup/` 有備份、JSONL 可 re-project。
-- **驗收**：premarket chain 4 tests（3 支新增，反向驗過會紅）、News 99 tests、py_compile、`node --check` 全過。
-
-## 🟢 Session Note (v4.99.2) — per-run 的 cap 擋不住 union
-
-- **現象**：盤前 chain 20:27 起跑，daily done、news error、sector 停在 `idle` 從未 enqueue。digest 其實跑完了（26 verdicts、20:33 落盤），死的是收尾 validator：`shallow over-cap: got 20, max 15`。
-- **根因**：top-10 cap 只在 per-run 的 `build_digest_packet.py:77`，但 digest.json 現在是 event store 投影，`latest_by_event_id()` 依 `event_id` 去重、不依 run 去重。當天 3 次 digest run（08:25/08:47/20:33）各自從不同 triage 快照挑 top-10 → union 20 shallow。
-- **修法**：cap 移到 `build_projection()`（`_cap_shallow()`，`SHALLOW_PROJECTION_CAP = 10`）。deep 不設限是刻意的——盤中 FLASH/REVIEW 累積是設計。只刪不重排、tie 以 slot 決勝，投影仍逐位元穩定。
-- **鏈路教訓**：phase 1 是 fail-fast（`dashboard_server.py:1918-1921`），任一 item error 就 raise，phase 2 完全不執行。news 的 validator 失敗會連坐 sector。
-- **未清的債**：4/18、5/16-5/19、5/31、6/03、6/05 這 8 天磁碟 digest 是 14-20 shallow（同一 bug，只是沒越 15 硬閘），現在與修正後的投影不一致；要不要 re-project 未決。
-- **驗收**：News 99 tests（新增 2 支回歸，停用 cap 時皆紅）、2026-08-06 re-project 後 validator rc=0（10 shallow + 6 deep）、其餘 78 個歷史日期投影與磁碟仍逐位元一致。
-
-## 🟢 Session Note (v4.99.1) — Projection mode 不能覆蓋事件 mode
-
-- **真實 canary**：WDC FLASH 已成功 append 為 `news_a0ea342405161641`、pending、cache 未更新；失敗只發生在 post-run validator。
-- **根因/修法**：同日 projection 頂層保留 DIGEST/PER_AGENT_BATCH，舊 validator 卻套到 INLINE FLASH；現改依每筆 `event_type`/`fanout_mode` 驗 review、cache 與 isolation。
-- **驗收**：News 97 tests、相關 health/routing 3 tests、py_compile、真實 mixed projection validator 與 diff check 全過；未重跑 LLM。
-
-## 🟢 Session Note (v4.99.0) — News 歷史只追加，日檔只是投影
-
-- **單一事實來源**：DIGEST／FLASH／REVIEW 全部 append `news_events.jsonl`；daily digest 維持 Dashboard contract，但由 active event deterministic 重建。
-- **審核語意**：FLASH 保存 pending record；REVIEW 以同一 stable event_id append superseding record，不再搜尋 headline 後覆寫整份 digest。
-- **遷移/回復**：86 份 legacy digest、1,283 judgment 完成 migration；一次性 backup 可 rollback，重投影 hash 一致，migration replay 零新增。
-- **Telemetry**：server 成功 DIGEST 自動記 Stage 2/BINARY/source/genre/token/time/cost；真實 canary 已回填 1/10，materiality 仍固定 4.5。
-- **驗收**：News 96 tests、server routing 3 tests、py_compile、diff check、真實 migration replay、rollback/re-project 與 News validator 全過。
-
-## 🟢 Session Note (v4.98.0) — 模型只做判斷，程式負責產物
-
-- **責任收斂**：Stage 2 只產 four-lane compact judgment；finalizer 統一 score/verdict、digest/MD、validator 與 cache patch。
-- **一致性**：finalizer/validator 共用 `arbiter_rules.py`；validator 重算權重。stable event ID 不依賴 triage 排名，phase0 ledger 阻止 replay 重複加總。
-- **Token 目標**：Phase 3–4 約 6k → 1–2k LLM tokens；protocol 同步移除手寫 digest/Impact Card 指令。
-- **驗收**：News 90 tests（含 real validator integration）、py_compile、routing contract、現有 digest validator、diff check 全過。
-
-## 🟢 Session Note (v4.97.2) — credential failure 是整批狀態，不是 517 個 ticker failure
-
-- **根因**：Heatmap 僅對 FMP 429 熱斷；401 走一般 HTTP error，20-worker fan-out 因而對 517 檔逐一輸出同一錯誤，並每個週期重演。
-- **修法**：共用 transport 首次 401 後啟動 6h process-wide breaker，只印一行「檢查 key 並重啟」；期間所有 Heatmap FMP 消費端快速返回。
-- **資料完整性**：零成功的 auth-failed quote batch 不更新 `last_update`、不改寫舊 snapshot，避免將「拒絕取數」假裝成新鮮的 `0/517`。
-- **驗收**：Heatmap retry contract 含新 401 fixture 全過；Python compile、diff check 與版本同步通過。
-
-## 🟢 Session Note (v4.97.1) — degraded 是可繼續的契約，不是失敗別名
-
-- **根因**：`daily_update.sh` 已將 `rc=2` 定義為降級可用，但 Dashboard runner 仍將所有非零 rc 映射為 `error`，盤前鏈因而錯誤中止 Sector 與裁決面板刷新。
-- **修法**：上層新增明確 exit-code mapping：`0=done`、`2=degraded`、其他非零 `=error`；modal 與全站 pill 用黃色警告顯示 degraded，狀態機照常前進。
-- **驗收**：新增 `test_premarket_daily_outcome.py`，並跑 Dashboard 相關回歸、JS/Python 語法、diff check 與版本同步。
-
-## 🟢 Session Note (v4.97.0) — 分歧強度不是二元事件，方向字數也不是重要性
-
-- **BINARY 根因**：Bull 固定正分、Bear 固定負分，再以 max-min≥4 判 BINARY，讓 7/29–8/5 五份 digest 的 25 筆 deep 全部坍縮成 BINARY。V2.3 改成事件本身須 explicit pending + date；net score 只決定 directional bias。
-- **Triage 根因**：`upgrade/strong/raise/surge` 同時兼任方向與晉級排序，三篇 Zacks 加兩篇升評文可占滿 8/6 top-5。新增 materiality/genre/source/event 維度後，回放改由實際財報、Fed/私人信貸與 Reuters 事件晉級；安靜日可少於 5。
-- **Token 首批落地**：triage 保存 URL；compact packet 一次輸出 Stage 2 + shallow top-10 + slim macro/theme；bundle cap 5,000→3,000 chars，避免主 Agent 重讀三份全檔與搜尋已有 URL。
-- **驗收**：News 83 tests passed、py_compile、schema FULL EXAMPLE parse、現有 digest validator rc=0、diff check rc=0。舊同日 artifact loose-compatible；新 strict run 必須明示 V2.3。
-
-## 🟢 Session Note (v4.96.0) — daily_update 可靠性與 thematic 主瓶頸
-
-- **成功語意改正**：Phase 2 與 final artifact 的失敗會聚合成 degraded `rc=2`，cron 不再把 silent SOFT fail 記成當日成功；health gate 新增本日、可解析、`_partial` 驗證。
-- **執行治理**：跨 process lock 擋 cron／Dashboard／手動重複執行，trap 清理 lock、背景程序與本輪 temp logs；日常 Nexus 固定 Tier 1+2，Tier 3 LLM full backfill 移出 daily。
-- **效能**：thematic enrichment 從直接 urllib + serial 改走中央 `fmp_pool` + 12-worker bounded concurrency；兩層輸出 atomic replace。最近基線 enrichment 216 tickers/518s，預期冷跑下限改由 220 RPM pool 主導，待下一次真實 daily log 驗證。
-- **降噪**：headless 無 Finnhub key 時整批 proxy fallback，只提示一次。
-- **驗收**：`bash -n`、4 支 Python `py_compile`、新增/既有 targeted pytest 6 passed、single-run lock probe rc=75、`git diff --check` 均通過；未為驗收重燒一次完整外部 API daily。
 
 <!-- 批次輪替制：主檔超過 20 個 Session Note 時跑 `python3 scripts/rotate_session_notes.py`，最舊 10 個自動切成 archive/session_notes_v<A>_to_v<B>.md。查舊版本：Grep 版號於 archive/session_notes_v*.md（規則：docs/agent-ops/MAINTENANCE.md §3） -->
 

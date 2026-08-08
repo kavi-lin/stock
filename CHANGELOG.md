@@ -8,6 +8,156 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.111.7] — 2026-08-08 — 風控三支 Batch A：抓不到價格的元件被當成「最糟的分數」參與投票
+
+`docs/plan_risk_trio.md` Batch A（修正批，不動 protocol 語意）。三支風控 skill 自
+2026-04-16 起程式碼未動、零測試，位置卻是全 protocol 風險最高的：short-contrarian 有
+T4 否決權，另兩支直接決定 Phase 4 倉位。
+
+### Fixed
+- `skills/short-contrarian-analyst/scripts/burry_score.py:110-116` — 價格抓取失敗時
+  `pct_below_high` 由 `0.0` 改 `None`。`0.0` 會映射到 `score_52w` 最嚴苛的 20 分**並以
+  真資料身份參與加權**，一次網路閃斷就能憑空造出 `WARNING` 甚至 `T4_VETO`——而這支有
+  否決權。改後走 `:131-133` 既有的 renorm 路徑（與 insider 一致）；`score_52w` 補 None
+  guard（否則 `None < 5` TypeError）、reasoning 明寫該元件缺席
+- `skills/portfolio-risk-manager/scripts/risk_manager.py:111-138` — sector 集中度檢查的
+  `except: continue` 把取價失敗的 holding 從 `portfolio_value` 分母移除，卻把成功的同產業
+  holding 留在分子 → 比率膨脹，網路閃斷可誤觸 ×0.5 懲罰。改為任一失敗即**停用該次檢查**
+  並在 `warnings[]` 具名（寧可少罰不誤罰）；順帶把每 holding 兩次 `yf.Ticker` 併為一次
+- 同檔 — 補 top-level try/except（對齊另兩支）：例外改出 `{"error","ticker"}` + exit 1，
+  consumer `trade_plan_builder.compute_step2` 才拿得到降級理由字串，而非空 stdout + traceback
+- 同檔 — `--positions` 預設由 CWD-relative 改 `ROOT/positions.json`（子目錄手跑不再靜默
+  讀到空投組）；移除從未參與計算的死參數 `--portfolio-size` 與 `inputs.portfolio_size_usd`
+
+### Changed
+- `skills/tail-risk-analyzer/SKILL.md` — 權重與門檻**教錯**：寫 30/20/20/20/10 與 35/65，
+  而 code 及所有 consumer（protocol `:1371`、`trade_plan_builder.py:392`）一律是
+  .10/.10/.15/.30/.35 與 30/60。SKILL.md 是唯一異端，改以 code 為準，並補 `sample_days`、
+  三處鏡像位置、<30 bars 降級合約
+- `skills/short-contrarian-analyst/SKILL.md` — frontmatter `data_sources` 移除 FMP
+  宣稱（script 裡沒有任何 FMP 呼叫）；註明 `ev_ebit` 實為 EV/EBITDA（key 因 history
+  相容不改）；補 `weights_active`；說明 `burry_voice`/`veto_flag` 由 PM 於 Phase 2 合成
+- `skills/MARKET_INDEX.md:41` 資料源同步；`skills/portfolio-risk-manager/SKILL.md` 補
+  `--json-only`、positions 路徑行為、`warnings[]`，並明記 vol-scaling 失能現況
+- `investment/README.md:144-146,205` — burry 刻度殘留 pre-V4.4 的 0-10（`≤ 2` 等），
+  改 0-100 對齊 protocol `:790-800`；`:287` 屬版本沿革，保留原文另加當時刻度註記
+- `investment/investment_protocol_v5_0.md:722` — 規則條件 `component_scores.insider == 0`
+  不可達（該 scorer 只出 80/50/20/None），改 `components.insider_net == "SELL"`。
+  narrative-only 規則，零倉位影響
+
+### Added
+- 三支各補 `scripts/tests/`，共 106 test、全 mock 零網路（patch `yf.Ticker` / `yf.download`
+  這兩個模組真正呼叫的入口）。涵蓋 golden keys、分級邊界（30/60、20/35/60、相關性
+  0.3/0.6/0.8）、降級路徑、renorm 不變式，以及上述兩個 bug 的回歸——兩條都**先種回 bug
+  確認會紅**再收
+- `tail_risk.py` 的 `clamp` / 分級表、`risk_manager.py` 的相關性分級表由 function-local
+  提升為 module-level（`fragility_for()` / `correlation_multiplier()`）。純測試 seam，
+  行為不變：SPY / KO 基線輸出逐位元一致
+
+### Why
+- 「抓不到資料」和「資料很糟」在加權平均裡必須是兩件事。兩個 bug 是同一個錯誤的兩種寫法：
+  一個把缺失值當最低分投票，一個把缺失值從分母剔除——都讓網路品質變成風控結論
+- Batch B（vol-scaling 失能修復、×0.7/×1.15 有文件無實作、sector 5 值 enum 死規則、
+  technical_core 遷移等 7 項）會改變 position sizing，未經使用者逐項拍板不動
+
+## [4.111.6] — 2026-08-08 — 對照上游才發現：兩個偵測器的 FMP 路徑整條是死的
+
+skills 檢討第二輪：比對 fork 源頭 tradermonty/claude-trading-skills（2026-04 fork，
+現 71 skills）4 月後的變更，發現專案殘留 6 處 FMP v3 legacy 引用（實測全端點 403）。
+最嚴重的是 ftd-detector / market-top-detector 的 historical 鏈：
+`stable/historical-price-full`（404）→ v3（403）**兩條全死**，只靠 sector 的
+yfinance adapter 撐著 daily；theme-detector 的 representative_stock_selector
+每輪靜默燒一次死的 etf-holder 呼叫。
+
+### Fixed
+- ftd/market-top `fmp_client.py` — historical 遷 `stable/historical-price-eod/full`
+  （flat list、newest-first、忽略 timeseries）：normalizer 還原 `{"symbol","historical"}`
+  消費者形狀 + 截斷到 N 保 timeseries 契約 + `from` 參數縮 payload（對應上游
+  c54959e / 20a9a1）。v3 fallback 與 `BASE_URL` 移除。實測 ^GSPC 80 bars + quote 正常；
+  sector daily 的 `*_yfinance.py` adapter 不受影響
+- `skills/theme-detector/scripts/representative_stock_selector.py` — 移除死的 FMP
+  etf-holder 層（v3 403；stable `etf/holdings` 402 不在現行訂閱——刪層而非遷移），
+  鏈改 finviz elite → public → static；`fmp_api_key` 參數與 "fmp" source state 一併移除
+
+### Changed
+- `skills/theme-detector/scripts/etf_scanner.py` — v3 quote fallback 移除（死碼）
+- `skills/market-sentiment-analyzer/scripts/intraday.py` — `_fetch_daily` 死 v3
+  fallback 移除（實測 stable 路徑 90 bars）
+- 10 個 SKILL.md 回填 **upstream alignment** blockquote（9 個 fork 系記「何時對齊、
+  回灌了什麼／為何不回灌」+ market-sentiment-analyzer 標註原生）；MARKET_INDEX
+  維護規則新增上游對齊條目；econ-calendar SKILL.md 內文 v3 URL → stable
+
+### Tests
+- 本批觸及路徑的測試已修（selector 68/68 綠；etf_scanner 修 2 個 mock 序列）。
+  動手前後 stash 基線比對：**零新增失敗**。既有 stale 債務入 TODO——theme-detector
+  套件 29 紅、ftd/market-top `test_fmp_client` 11+12 紅（mock 綁 `session.get`，
+  程式碼已走 fmp_pool → 測試靜默打真網路，與 4.111.4 stub 教訓同族）
+
+### Why
+- fork 後上游做了系統性 v3 → stable 遷移（3776da1 家族），專案副本停在遷移前；
+  econ-calendar（4.111.5）與本批同根因。alignment 紀錄回填後，之後對照上游
+  直接 git log 對齊日期之後的 delta 即可，不用重考古
+
+## [4.111.5] — 2026-08-08 — econ-calendar 早被別的 refactor 順手修好，壞掉名單和健檢沒人回頭對
+
+skills 盤點時發現 `economic-calendar-fetcher` 還掛在 MARKET_INDEX「待處置／壞掉」
+名單，實跑 `get_economic_calendar.py` 卻直接回 477 筆事件——8/8 的 fmp_pool 重構
+（2775deb）把 script 從 legacy `api/v3/economic_calendar`（403 元凶）遷到
+`/stable/economic-calendar` 時，上游問題作為副作用被修掉，但索引與健檢標籤沒同步。
+另外 `daily_health.py` 監控的 `skills/economic-calendar-fetcher/cache/*.json` 從來
+不會存在（該 skill 無持久 artifact，stdout inline 進 sector prefetch 的 /tmp
+bundle），這條健檢自建立起永遠 MISS。
+
+### Changed
+- `skills/MARKET_INDEX.md` — econ-calendar 移出「待處置／壞掉」（該區清空），補回
+  Protocol lane 表（global-macro / event-scan；接線 = sector FAST PATH
+  `phase_prefetch.py` SOFT task `econ_calendar` + `bridge.py` inline 版）
+- `scripts/daily_health.py` — 移除 econ calendar 健檢條目（無 artifact 可監控，
+  永遠誤報 MISS），原位留註解說明
+- `TODO.md` — v4.5.0「仍待」的 econ-calendar 修復銷項（`/stable/rating-historical`
+  + `/stable/grades-summary` 404 是另一件事，保留另案）
+
+### Why
+- 修復是 endpoint 遷移 refactor 的副作用，壞掉名單沒有隨之重測。驗證：econ task
+  走 `phase_prefetch.build_tasks` 實際 wiring rc=0 / 477 筆；`daily_health.py`
+  16 OK / 0 FAIL；`check_skills.py` rc=0。
+
+## [4.111.4] — 2026-08-08 — V4.110.0 的 task type 帶冒號，broker 400 擋掉全部 protocol run
+
+`分析` / `產業掃描` / triage 一律以 `ProtocolBlocked` 收場，訊息說「daemon 可能掛了，
+或每一家都在 20% hard reserve 內」。兩者都不成立：`lqb status` 顯示 daemon 正常、
+claude 51% / agy 78%。真正的原因是 V4.110.0 把 task type 改成
+`agentic_protocol:<name>`，而 broker 的欄位 pattern 是 `^[a-z0-9][a-z0-9_-]*$`——
+冒號不在裡面。每一次 acquire 都拿到 400，`_acquire` 把它歸類為「這個 repo 自己的
+bug」（正確：400 不是額度狀態，不准降級），於是 fail-closed。
+
+單發呼叫沒事，因為 `model_router._task_type()` 一直有清洗；`protocol_task_type()`
+是第二份實作，沒有。兩份實作是這個 bug 的成因，所以這版只留一份。
+
+### Fixed
+- `scripts/_shared/broker_gate.py` — 新增 `TASK_TYPE_PATTERN` 與唯一的
+  `sanitize_task_type()`；`protocol_task_type()` 改用 `-` 分隔並先清洗，
+  非 ASCII / 空白 / 冒號都會被換掉（protocol 名字取壞只該弄髒 history row，
+  不該擋掉整個 run）。分隔符選 `-` 是因為 protocol 名字自己帶底線（`llm_review`）。
+- `scripts/_shared/model_router.py` — `_task_type()` 改為呼叫上面那份；新增
+  `_blocked_reason()`，`ProtocolBlocked` / `RunBlocked` 依 note 分流成三種說法
+  （refused=額度、unavailable=daemon、rejected=本 repo 的 bug，等多久都不會好）。
+  舊訊息把三種併成一句，且那句點名的兩個原因正好都不是 `rejected` 的意思。
+- `tests/test_broker_gate.py` — **stub 開始驗 `task_type` pattern**。這才是漏網的
+  根因：stub 比真 daemon 寬鬆，所以 production 每一次 protocol run 都 400，
+  這支測試卻全綠。另加 `task_type.*` 直接斷言（含冒號 / 中文 / 空白的 hostile 輸入）。
+- `config/llm_config.json`、`TODO.md` — `lqb history --stats --task-type` 的範例
+  改為 `agentic_protocol-invest`。
+
+驗證：`python3 tests/test_broker_gate.py` rc=0；把分隔符改回 `:` 重跑，測試如實
+炸在 `ProtocolBlocked`（確認 stub 真的能看見這個回歸）；對真 daemon 下 preview
+（`reserve=false`，不佔額度）`agentic_protocol-invest` / `-triage` / 無名三種
+皆 200，recommended=agy。
+
+### Why
+- 冒號形態沒有留下任何 history row（全被擋在 ledger 之前），所以不需要遷移。
+- V4.110.0 的動機沒有改變：逐 protocol 的 p50 仍然是要拿的東西，只是名字要合法。
+
 ## [4.111.3] — 2026-08-08 — decisions 頁的倒數環讓瀏覽器永遠停不下來
 
 `decisions.html` 開著沒人碰,每秒仍在重繪 56 次、50 秒內 2789 次 style recalc。

@@ -6,6 +6,8 @@ scope: market-level
 data_sources: [yfinance]
 ---
 
+> **Upstream alignment**: fork 自 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)（2026-04）。最近對齊審查 **2026-08-08**（V4.111.6）：回灌 v3 清理 — quote/historical 鏈移除死的 v3 fallback（全端點 legacy 403），historical 遷 `stable/historical-price-eod/full` + flat-list normalizer + timeseries 截斷（對應上游 c54959e / 20a9a1 / 3776da1）。sector daily 路徑（`sector/market_top_yfinance.py`）不受影響。
+
 # Market Top Detector Skill
 
 ## Purpose

@@ -6,6 +6,8 @@ scope: single-ticker
 data_sources: [chart image or yfinance]
 ---
 
+> **Upstream alignment**: fork 自 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)（2026-04）。最近對齊審查 **2026-08-08**（V4.111.6）：無需回灌 — 上游 SKILL.md 增補為文件樣板；fail-closed 修正屬其 Shapiro contrarian 模式（本專案未 fork 該模式）。
+
 # Technical Analyst
 
 Weekly-chart-driven technical analysis → probabilistic scenarios + structured report. Pure chart analysis, no news/fundamental input. See `README.md` for example usage scenarios and pedagogy.

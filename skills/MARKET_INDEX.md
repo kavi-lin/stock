@@ -1,7 +1,7 @@
 # Skills Market Index
 
 > Source of truth for `market` / `scope` classification + 接線狀態 of every skill in
-> `skills/`. 25 skills + `_shared`. Rewritten 2026-06-11 (V4.5 audit cleanup)；2026-07-03 補 quant-backtest；2026-07-16 補 valuation-modeler (V4.69.0)。
+> `skills/`. 25 skills + `_shared`. Rewritten 2026-06-11 (V4.5 audit cleanup)；2026-07-03 補 quant-backtest；2026-07-16 補 valuation-modeler (V4.69.0)；2026-08-08 econ-calendar 修復移回 Protocol lane (V4.111.5)。
 > 接線證據見 `reports/SKILLS_AUDIT_2026-06-11.md`。
 
 `market` values:
@@ -38,7 +38,7 @@
 | `valuation-modeler` | us-equity | single-ticker | FMP /stable + FRED cache（fmp_pool 限流）| V4.69.0 新增：`估值模型`/`同業比較 [TICKER]`；餵 protocol `dcf_self_built`(0.15)/`comps_implied`(0.10) anchor；`--xlsx` 出 Excel workbook |
 | `finnhub-client` | us-equity | single-ticker | Finnhub + FMP dual fetch（calendar memoized V4.4）| protocol quant 輸入 canonical snapshot + drift audit |
 | `us-stock-analysis` | us-equity | single-ticker | FMP（analyze.py；web search 違規已修 V4.4）| investment Fundamentals lane |
-| `short-contrarian-analyst` | us-equity | single-ticker | FMP, yfinance | investment Phase 2 第 5 lane（Burry）；T4 仲裁刻度已修 V4.4 |
+| `short-contrarian-analyst` | us-equity | single-ticker | yfinance（V4.111.7 更正：從無 FMP 呼叫）| investment Phase 2 第 5 lane（Burry）；T4 仲裁刻度已修 V4.4 |
 | `technical-analyst` | market-agnostic | single-ticker | shared technical_core（FMP 主源）；chart 圖片為獨立模式 | investment Phase 2 Technical lane（`analyze.py --json-only`）|
 | `tail-risk-analyzer` | market-agnostic | single-ticker | yfinance | investment Phase 4 Step 3、sector Phase 4b |
 | `portfolio-risk-manager` | market-agnostic | portfolio-level | positions.json, yfinance | investment Phase 4 Step 2 |
@@ -46,12 +46,11 @@
 | `market-news-analyst` | us-equity | news-scan | protocol lane 實跑 `fetch.py`（FMP per-ticker 48h）；SKILL.md 的 WebSearch 宏觀流程為獨立模式 | investment News lane + sector Phase 3 |
 | `quant-backtest` | market-agnostic | single-ticker | technical_core 價格資料 + 11 策略模板 registry | `回測 [TICKER]`（dashboard SCRIPT_PROTOCOLS subprocess，0 LLM）；探索層，不入 investment_protocol 決策 |
 | `weekly-tech-playbook` | us-equity | portfolio-level | FMP + 既有 skill caches + Codex Review（可選第二意見） | 「投資方案」/「週選方案」UI 觸發（dashboard PROTOCOL_MODEL `playbook` claude turn） |
+| `economic-calendar-fetcher` | global-macro | event-scan | FMP `/stable/economic-calendar`（fmp_pool；2026-08-08 起，legacy v3 403 解除） | `產業掃描` FAST PATH `phase_prefetch.py` SOFT task `econ_calendar`（stdout inline 進 /tmp bundle）；`bridge.py` 另有獨立 inline 版 |
 
 ## ⚠ 待處置 / 壞掉
 
-| Skill | 狀態 |
-|---|---|
-| `economic-calendar-fetcher` | 上游壞：FMP econ-calendar legacy endpoint 403（見 memory `project_fmp_legacy_calendar_deprecated`）。sector Step 2/3 因此 silent SOFT fail — 修復 backlog |
+（目前無。econ-calendar 的 legacy v3 403 已於 2026-08-08 fmp_pool 重構修復 — 實測 `/stable/economic-calendar` 回 477 筆事件，條目移回上方 Protocol lane。）
 
 > 已刪：`supply-chain-event-analyst`（V4.4，被 Nexus 取代）、`earnings-trade-analyzer`（V4.5.1，0 接線；歷史 artifact `reports/earnings_trade_analyzer_2026-04-26_*` 仍由 event index extractor 讀取）
 
@@ -80,5 +79,6 @@ Protocol 檔案內用 `[framework]` / `[domain:us-equity]` HTML 註解標註哪�
 ## 維護規則
 
 - 每加新 skill / 改接線必須同步更新此索引（`python3 scripts/check_skills.py` 會掃 cross-ref）
+- **上游對齊**：9 個 fork 系 skill（源頭 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)，2026-04 fork）的對齊紀錄寫在各自 SKILL.md 頂部 blockquote；最近一輪全面審查 2026-08-08（V4.111.6，v3 legacy 清理批）
 - 改動分類（例如原本 `us-equity` 被抽象成 `market-agnostic`）時，必須同步檢查 CLAUDE.md 對應章節
 - 接線證據過時時重跑稽核（grep daily_update.sh / dashboard_server.py / protocol 文件）

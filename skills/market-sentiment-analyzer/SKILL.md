@@ -6,6 +6,8 @@ scope: market-level
 data_sources: [yfinance (VIX/SPY), CNN F&G]
 ---
 
+> **Upstream note**: 專案原生 skill（上游 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills) 無對應）。2026-08-08（V4.111.6）隨上游 v3 稽核移除 `intraday.py` 的死 v3 historical fallback（legacy 403，永不成功）。
+
 # Market Sentiment Analyzer
 
 ## Companion engines (separate outputs, NOT consumed by protocols)

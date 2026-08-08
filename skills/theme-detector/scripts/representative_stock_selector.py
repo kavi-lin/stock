@@ -193,31 +193,30 @@ def _parse_volume(value) -> Optional[int]:
 class RepresentativeStockSelector:
     """Select representative stocks for themes dynamically.
 
-    Fallback chain: FINVIZ Elite -> FINVIZ Public -> FMP ETF Holdings -> static_stocks
+    Fallback chain: FINVIZ Elite -> FINVIZ Public -> static_stocks
+    （FMP ETF Holdings 層已於 2026-08-08 移除：v3 `etf-holder` 為 legacy 403，
+    stable 替代端點 `etf/holdings` 在現行訂閱層為 402 — 兩條路都不可用，
+    留著只會每輪靜默 fail 一次。）
     """
 
     def __init__(
         self,
         finviz_elite_key: Optional[str] = None,
-        fmp_api_key: Optional[str] = None,
         finviz_mode: str = "public",
         rate_limit_sec: float = 1.0,
         max_per_industry: int = 4,
         min_cap: str = "small",
     ):
         self._finviz_elite_key = finviz_elite_key
-        self._fmp_api_key = fmp_api_key
         self._finviz_mode = finviz_mode
         self._rate_limit_sec = rate_limit_sec
         self._max_per_industry = max_per_industry
         self._min_cap = min_cap
         self._industry_cache: dict[tuple[str, bool], list[dict]] = {}
-        self._etf_cache: dict[str, list[dict]] = {}
         self._last_request_time: float = 0.0
         self._source_states: dict[str, _SourceState] = {
             "elite": _SourceState(),
             "public": _SourceState(),
-            "fmp": _SourceState(),
         }
 
     # -- Public properties ---------------------------------------------------
@@ -241,8 +240,6 @@ class RepresentativeStockSelector:
         if self._finviz_mode == "elite" and self._finviz_elite_key:
             sources.append("elite")
         sources.append("public")  # always available
-        if self._fmp_api_key:
-            sources.append("fmp")
         return sources
 
     @property
@@ -315,22 +312,7 @@ class RepresentativeStockSelector:
                 if len(unique_syms) >= max_stocks:
                     break
 
-        # Priority 2: FMP ETF Holdings
-        unique_count = len(set(c["symbol"] for c in candidates))
-        if (
-            unique_count < max_stocks
-            and self._fmp_api_key
-            and not self._source_states["fmp"].disabled
-        ):
-            for etf in theme.get("proxy_etfs", []):
-                if etf in self._etf_cache:
-                    candidates.extend(self._etf_cache[etf])
-                    continue
-                holdings = self._fetch_etf_holdings(etf, limit=max_stocks)
-                self._etf_cache[etf] = holdings
-                candidates.extend(holdings)
-
-        # Priority 3: static_stocks fallback
+        # Priority 2: static_stocks fallback
         if not candidates:
             for sym in theme.get("static_stocks", [])[:max_stocks]:
                 candidates.append(
@@ -454,52 +436,6 @@ class RepresentativeStockSelector:
         except Exception:
             logger.exception("FINVIZ public fetch failed for %s", industry)
             self._record_failure("public")
-            return []
-
-    def _fetch_etf_holdings(self, etf_symbol: str, limit: int) -> list[dict]:
-        """Fetch top ETF holdings via FMP API."""
-        if requests is None or not self._fmp_api_key:
-            return []
-
-        self._rate_limit()
-        self._source_states["fmp"].total_queries += 1
-
-        url = f"https://financialmodelingprep.com/api/v3/etf-holder/{etf_symbol}"
-
-        try:
-            resp = requests.get(url, headers={"apikey": self._fmp_api_key}, timeout=15)
-            if resp.status_code != 200:
-                self._record_failure("fmp")
-                return []
-
-            data = resp.json()
-            if not isinstance(data, list):
-                self._record_failure("fmp")
-                return []
-
-            stocks: list[dict] = []
-            for item in data[:limit]:
-                ticker = item.get("asset", "").strip()
-                if not ticker:
-                    continue
-                stocks.append(
-                    {
-                        "symbol": ticker,
-                        "source": "etf_holdings",
-                        "market_cap": _parse_market_cap(item.get("marketValue")),
-                        "change": None,
-                        "volume": None,
-                        "matched_industries": [],
-                        "reasons": [f"Held by {etf_symbol}"],
-                    }
-                )
-
-            self._record_success("fmp")
-            return stocks
-
-        except Exception:
-            logger.exception("FMP ETF holdings fetch failed for %s", etf_symbol)
-            self._record_failure("fmp")
             return []
 
     # -- Scoring & ranking ---------------------------------------------------

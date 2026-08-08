@@ -6,6 +6,8 @@ scope: theme-scan
 data_sources: [finviz-performance, yfinance]
 ---
 
+> **Upstream alignment**: fork 自 [tradermonty/claude-trading-skills](https://github.com/tradermonty/claude-trading-skills)（2026-04）。最近對齊審查 **2026-08-08**（V4.111.6）：回灌 v3 清理 — `etf_scanner` 移除 v3 quote fallback；`representative_stock_selector` 移除死的 FMP etf-holder 層（v3 403，stable 替代端點 402 不在現行訂閱）。**未回灌**（列 TODO）：上游 Heat v2 leadership evidence + heat 歷史/加速度訊號（92baba0 / ad75b2c）。
+
 # Theme Detector
 
 ## Overview

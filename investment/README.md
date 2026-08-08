@@ -140,9 +140,11 @@ Contrarian Analyst 不納入 FinalScore 加權，只透過 Phase 2.5 T4 觸發 v
 - `insider_pts` 0–2（內部人活動）
 - `contrarian_pts` 0–1（逆向情緒：負面新聞 = 機會，正面新聞 = 擁擠警告）
 
-### T4 仲裁規則（V4.7 強化）
-- `burry_score = 0–1`（極端高估）→ 強烈建議 `CANCEL`
-- `burry_score = 2`（高估）→ `DOWNGRADE_DECISION`（BUY → HOLD）或 `OVERRIDE_BURRY`
+### T4 仲裁規則（V4.7 強化；刻度為 0-100，V4.111.7 對齊 protocol `:790-800`）
+- T4 觸發 = `veto_flag`，即 `burry_score < 20`
+- `burry_score < 10`（極端高估）→ 強烈建議 `CANCEL`
+- `burry_score 10–19`（高估）→ `DOWNGRADE_DECISION`（BUY → HOLD）或 `OVERRIDE_BURRY`
+- `verdict = UNKNOWN`（資料不足，score=null）→ 不觸發 T4，narrative 註記資料缺口
 - **`OVERRIDE_BURRY` 自動啟動三項成本（V4.7）**：
   1. Phase 4 倉位 × 0.5
   2. 必填 `override_justification`（≥ 20 字具體凌駕理由，不可泛泛而談）
@@ -200,7 +202,7 @@ base = vol_adjusted_limit（若 Step 2 執行）或 0.05
 | Binary — positive | earnings 歷史 beat ≥ 70% | 不減倉 |
 | Macro cap | macro_backdrop_score < −3 | position ≤ 3% |
 | Auto REJECT | risk_reward_ratio < 2.0 | REJECTED |
-| T4 Veto | burry_score ≤ 2 AND BUY | CANCEL / DOWNGRADE / OVERRIDE |
+| T4 Veto | burry_score < 20 AND BUY | CANCEL / DOWNGRADE / OVERRIDE |
 | **Burry OVERRIDE 成本（V4.7）** | T4 resolution = OVERRIDE_BURRY | 倉位 × 0.5 + 必填 justification + 5d 複審 |
 | **Consensus Bonus（V4.7 Red-Team-gated）** | 4 agent 同向 + Burry 不 veto + Red Team NO_VIABLE_COUNTER | raw × 1.15 |
 | **Red Team Penalty（V4.7）** | red_team_verdict = STRONG_COUNTER | raw × 0.85，bonus 禁用 |
@@ -282,7 +284,7 @@ reports/
 ### V4.5
 - Phase 2 新增第五 Agent **Contrarian Analyst (Burry)**，使用 `short-contrarian-analyst` skill
 - Phase 2 Sentiment Agent 新增 `market-sentiment-analyzer` skill 作為 fallback
-- Phase 2.5 新增 **T4** 觸發條件（`burry_score ≤ 2` AND `BUY`）
+- Phase 2.5 新增 **T4** 觸發條件（`burry_score ≤ 2` AND `BUY`；當時為 0-10 刻度，V4.4 起改 0-100，現行條件見上方 T4 仲裁規則）
 - Phase 4 Risk Audit 新增 vol-adjusted position sizing（`portfolio-risk-manager`）
 - Phase 4 Risk Audit 新增尾部風險評估（`tail-risk-analyzer`）
 - Final Visualization Table 新增 Contrarian 列

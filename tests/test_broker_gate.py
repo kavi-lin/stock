@@ -77,6 +77,21 @@ class StubBroker(BaseHTTPRequestHandler):
 
         if self.path == "/v1/recommend":
             self.server.requests.append(body)
+            task_type = str((body.get("task") or {}).get("task_type") or "")
+            if not broker_gate.TASK_TYPE_PATTERN.match(task_type):
+                # The daemon's own field pattern, enforced here because V4.110.0
+                # shipped `agentic_protocol:<name>` and this file passed. A stub
+                # that accepts more than the real broker does cannot see a
+                # fail-closed regression: every protocol run 400'd in production
+                # while every assertion here stayed green.
+                self._send(400, {"error": {
+                    "code": "invalid_request",
+                    "message": f"task_type {task_type!r} does not match "
+                               r"'^[a-z0-9][a-z0-9_-]*$'",
+                    "retryable": False,
+                    "occurred_at": "2026-08-08T00:00:00+00:00", "context": {},
+                }})
+                return
             if mode == "rank":
                 # A full evaluation: two eligible and ranked, one excluded.
                 self._send(200, {
@@ -218,6 +233,30 @@ check("task_type.sanitised", mr._task_type("Report Polish!") == "report-polish-"
       mr._task_type("Report Polish!"))
 check("task_type.empty", mr._task_type("") == "call")
 
+# V4.111.4 — every task type this repo can build must satisfy the broker's own
+# field pattern. It is checked here on the names rather than only through the
+# stub because the cost of failing it is not a bad history row: `_acquire` reads
+# a 400 as this repo's bug and fails closed, so one invalid character stops every
+# protocol run while `lqb status` reports a healthy daemon.
+check("task_type.protocol_is_schema_valid",
+      broker_gate.TASK_TYPE_PATTERN.match(broker_gate.protocol_task_type("invest")) is not None,
+      broker_gate.protocol_task_type("invest"))
+check("task_type.protocol_no_colon",
+      broker_gate.protocol_task_type("invest") == "agentic_protocol-invest",
+      "V4.110.0 used a colon, which the broker's pattern rejects")
+check("task_type.protocol_unnamed", broker_gate.protocol_task_type() == "agentic_protocol")
+check("task_type.protocol_keeps_underscores",
+      broker_gate.protocol_task_type("llm_review") == "agentic_protocol-llm_review",
+      "underscores are legal; the separator is a hyphen so the boundary stays readable")
+for _hostile in ("invest:v2", "產業掃描", "Sector Scan", "!!!"):
+    _built = broker_gate.protocol_task_type(_hostile)
+    check(f"task_type.hostile[{_hostile}]",
+          broker_gate.TASK_TYPE_PATTERN.match(_built) is not None, _built)
+check("task_type.role_is_schema_valid",
+      all(broker_gate.TASK_TYPE_PATTERN.match(mr._task_type(r)) is not None
+          for r in ("debate", "brief", "link_digest", "report_polish", "Report Polish!", "")),
+      "the single-call path must satisfy the same pattern")
+
 est_in, est_out = broker_gate.estimate_tokens("debate", "x" * 300, "y" * 300)
 check("estimate.input_measured", est_in == 200, str(est_in))
 check("estimate.output_prior", est_out == 3_000, str(est_out))
@@ -354,7 +393,7 @@ try:
     with _Patched(config_for(server, **per_protocol), Recorder()):
         mr.acquire_protocol_lease("agentic_protocol", "triage")
     reserved = server.requests[0]["task"]
-    check("protocol.named_type", reserved["task_type"] == "agentic_protocol:triage", str(reserved))
+    check("protocol.named_type", reserved["task_type"] == "agentic_protocol-triage", str(reserved))
     check("protocol.named_estimate", reserved["estimated_input_tokens"] == 240_000, str(reserved))
     check("protocol.named_output", reserved["estimated_output_tokens"] == 32_000, str(reserved))
 finally:
@@ -367,7 +406,7 @@ try:
     with _Patched(config_for(server, **per_protocol), Recorder()):
         mr.acquire_protocol_lease("agentic_protocol", "invest")
     reserved = server.requests[0]["task"]
-    check("protocol.unmeasured_type", reserved["task_type"] == "agentic_protocol:invest", str(reserved))
+    check("protocol.unmeasured_type", reserved["task_type"] == "agentic_protocol-invest", str(reserved))
     check("protocol.unmeasured_estimate",
           reserved["estimated_input_tokens"] == 200_000, str(reserved))
 finally:

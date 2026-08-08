@@ -52,26 +52,16 @@ def _stable_quote_url(base: str, symbols_str: str, params: dict) -> tuple[str, d
     return base, params
 
 
-def _v3_quote_url(base: str, symbols_str: str, params: dict) -> tuple[str, dict]:
-    """api/v3/quote/A,B"""
-    return f"{base}/{symbols_str}", params
-
-
 def _stable_hist_url(base: str, symbols_str: str, params: dict) -> tuple[str, dict]:
-    """stable/historical-price-full?symbol=A,B&..."""
+    """stable/historical-price-eod/full?symbol=A,B&..."""
     params["symbol"] = symbols_str
     return base, params
 
 
-def _v3_hist_url(base: str, symbols_str: str, params: dict) -> tuple[str, dict]:
-    """api/v3/historical-price-full/A,B?..."""
-    return f"{base}/{symbols_str}", params
-
-
 _FMP_ENDPOINTS = {
+    # v3 fallback 已於 2026-08-08 移除：legacy 端點全面 403，永遠不會成功
     "quote": [
         ("https://financialmodelingprep.com/stable/quote", _stable_quote_url),
-        ("https://financialmodelingprep.com/api/v3/quote", _v3_quote_url),
     ],
     "historical": [
         ("https://financialmodelingprep.com/stable/historical-price-eod/full", _stable_hist_url),
