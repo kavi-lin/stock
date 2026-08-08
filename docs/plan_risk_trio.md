@@ -4,6 +4,17 @@
 > 盤點由兩個 fresh-context Explore agent 完成,所有 `file:line` 以產生當日 working tree 為準——**動工前先 spot-check 幾個關鍵行號仍對得上**(中間若有其他 session 改過檔案,行號會漂)。
 > 本表分兩批:**Batch A = 修正批**(不改 protocol 語意,確認表後可直接做);**Batch B = 語意升級**(每項只準備決策備忘,未經使用者逐項拍板不准動手)。
 
+> ## ✅ 執行狀態(2026-08-08 收工,repo V4.113.1)——**本檔已執行完畢,是歷史紀錄不是待辦**
+>
+> | 批次 | 狀態 |
+> |---|---|
+> | **Batch A**(§3,9 項) | **全部完成** → V4.111.7,commit `01d422e`。兩個真 bug 皆先種回確認會紅;基線 diff 唯一差異是刻意移除的 `portfolio_size_usd`;三支從零建了 106 個測試 |
+> | **Batch B**(§4,7 項) | 決策備忘全出 → **`docs/plan_risk_trio_B.md`**(含實跑 shadow)。使用者逐項拍板後:**B2 / B3 / B7 / B1 已執行**(V4.112.0);**B4 / B5 / B6 維持現狀**,重啟前置條件見 `TODO.md` |
+>
+> **本檔的 `file:line` 引用已全面過時**(Batch A/B 都改過這些檔)。要查現況請看:
+> `docs/plan_risk_trio_B.md`(Batch B 決策紀錄)、`docs/plan_technical_core_adjclose.md`
+> (由 B4 前置探測衍生出的共用模組修正,V4.113.0)、`CHANGELOG.md` 的 4.111.7 / 4.112.0 / 4.113.x。
+
 ---
 
 ## 0. 執行守則(先讀,不可跳過)
