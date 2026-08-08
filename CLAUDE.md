@@ -72,5 +72,5 @@ python3 skills/short-term-target/scripts/weekly_review.py      # 週末覆盤
 ## Workflow Rules（dev/refactor/fix session）
 
 1. **動工前確認**：改動 ≥2 檔或單檔 ≥50 行 → 先輸出摘要表（File / Action / Est. Lines / Description），等使用者「OK」。使用者已在本輪明確授權自主作業時免確認。
-2. **收尾 checklist**：(a) 三處版本同步並跑 MAINTENANCE.md 的驗證命令；(b) 按 MAINTENANCE.md 的讀寫規則更新 `SESSION_NOTES.md` / `TODO.md`（禁止整檔 Read）；(c) 改了引擎 → 跑 `OPS_COMMANDS.md` §7 對應測試 rc=0。
+2. **收尾 checklist**：(a) 三處版本同步並跑 MAINTENANCE.md 的驗證命令；(b) 按 MAINTENANCE.md 的讀寫規則更新 `SESSION_NOTES.md` / `TODO.md`（禁止整檔 Read）；(c) 改了引擎 → 跑 `OPS_COMMANDS.md` §7 對應測試 rc=0；(d) 收尾殘留掃描 —— `MAINTENANCE.md` §2b，用字串問不用清單問。
 3. **🚫 排除**：protocol 執行（`產業掃描`、`分析` 等）不是 dev session——不 bump 版本、不動 todolist。
