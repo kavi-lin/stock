@@ -54,7 +54,8 @@ from scripts._shared.broker_client import (  # noqa: E402
 __all__ = [
     "BROKER_PROJECT", "BrokerAuthError", "BrokerError", "BrokerRefused", "BrokerRejected",
     "BrokerUnavailable", "broker_client", "broker_config", "estimate_tokens", "governed_models",
-    "is_degradable", "new_task_id", "protocol_estimate", "provider_for", "provider_quota",
+    "is_degradable", "new_task_id", "protocol_estimate", "protocol_task_type",
+    "provider_for", "provider_quota", "quota_snapshot",
     "ranked_models", "usage_for_broker",
 ]
 
@@ -97,12 +98,22 @@ OUTPUT_TOKEN_PRIORS = {
 #: call, so no prompt-derived number describes it. This prior is deliberately
 #: large: DESIGN §6 requires missing data to be treated conservatively, never as
 #: zero, and over-reserving costs a refused run while under-reserving eats the
-#: hard reserve. It is a starting point, not a measurement — every run reports
-#: its real tokens back, which is what the broker's own estimator calibrates on.
-#: Tune it in `config/llm_config.json` under `broker.protocol_tokens` once a few
-#: runs have been recorded, rather than editing this file.
+#: hard reserve. It is the floor under an *unrecognised* protocol name — every
+#: protocol we have measured overrides it from `config/llm_config.json` under
+#: `broker.protocol_tokens`, keyed by protocol name. Tune it there, not here.
 PROTOCOL_INPUT_TOKENS = 200_000
 PROTOCOL_OUTPUT_TOKENS = 40_000
+
+#: Protocol runs are reported to the broker as `agentic_protocol:<name>` rather
+#: than one flat `agentic_protocol`, because these protocols differ by an order
+#: of magnitude — `triage` is one sonnet pass filling in headlines, `invest` is
+#: a five-lane opus debate that runs for forty minutes. One shared prior cannot
+#: serve both: sized for `triage` it leaves the largest consumer effectively
+#: unreserved, and sized for `invest` it falsely refuses the cheap one, which is
+#: fail-closed and stops both calling projects. Separate task types also make
+#: `lqb history --stats` report a row per protocol, so each one calibrates from
+#: its own runs instead of from an average of things that are not alike.
+PROTOCOL_TASK_TYPE_PREFIX = "agentic_protocol"
 
 #: Reservation TTLs. The broker reclaims a hold when its TTL passes — including
 #: one that is still running — and a reclaimed hold cannot then be settled, so
@@ -126,8 +137,6 @@ def broker_config(cfg: dict | None = None) -> dict:
     """
     raw = (cfg or {}).get("broker")
     raw = raw if isinstance(raw, dict) else {}
-    protocol = raw.get("protocol_tokens")
-    protocol = protocol if isinstance(protocol, dict) else {}
     roles = raw.get("degradable_roles")
     return {
         "enabled": raw.get("enabled", True) is not False,
@@ -135,11 +144,31 @@ def broker_config(cfg: dict | None = None) -> dict:
         "timeout_sec": _positive_float(raw.get("timeout_sec"), 10.0),
         "degradable_roles": tuple(str(r).strip().lower() for r in roles if str(r).strip())
                             if isinstance(roles, list) else DEFAULT_DEGRADABLE_ROLES,
-        "protocol_input_tokens": _positive_int(
-            protocol.get("input"), PROTOCOL_INPUT_TOKENS),
-        "protocol_output_tokens": _positive_int(
-            protocol.get("output"), PROTOCOL_OUTPUT_TOKENS),
+        "protocol_tokens": _protocol_token_table(raw.get("protocol_tokens")),
     }
+
+
+def _protocol_token_table(raw: object) -> dict:
+    """`broker.protocol_tokens` → `{protocol name: (input, output)}`.
+
+    Two shapes are accepted. The nested one keys estimates by protocol name and
+    reserves `default` for the rest. The flat `{"input": …, "output": …}` is the
+    pre-measurement shape from V4.106.0; it is read as `default` alone, so a
+    config written before per-protocol estimates keeps its old meaning instead
+    of silently falling back to the constants.
+    """
+    if not isinstance(raw, dict):
+        return {}
+    entries = {"default": raw} if ("input" in raw or "output" in raw) else raw
+    table = {}
+    for name, entry in entries.items():
+        if not isinstance(entry, dict):
+            continue
+        table[str(name).strip().lower()] = (
+            _positive_int(entry.get("input"), PROTOCOL_INPUT_TOKENS),
+            _positive_int(entry.get("output"), PROTOCOL_OUTPUT_TOKENS),
+        )
+    return table
 
 
 def broker_client(cfg: dict | None = None) -> BrokerClient | None:
@@ -191,10 +220,26 @@ def estimate_tokens(role: str, *prompts: str, cfg: dict | None = None) -> tuple[
     return estimated_input, int(OUTPUT_TOKEN_PRIORS.get(key, DEFAULT_OUTPUT_TOKENS))
 
 
-def protocol_estimate(cfg: dict | None = None) -> tuple[int, int]:
-    """(input, output) prior for one agentic protocol run. See the constants above."""
-    settings = broker_config(cfg)
-    return settings["protocol_input_tokens"], settings["protocol_output_tokens"]
+def protocol_estimate(cfg: dict | None = None, protocol: str | None = None) -> tuple[int, int]:
+    """(input, output) prior for one run of `protocol`. See the constants above.
+
+    An unrecognised name falls back to `default`, never to zero: a protocol we
+    have no numbers for is the one most likely to surprise us.
+    """
+    table = broker_config(cfg)["protocol_tokens"]
+    fallback = table.get("default", (PROTOCOL_INPUT_TOKENS, PROTOCOL_OUTPUT_TOKENS))
+    return table.get(str(protocol or "").strip().lower(), fallback)
+
+
+def protocol_task_type(protocol: str | None = None) -> str:
+    """The ledger task type for one run of `protocol`.
+
+    Unnamed runs keep the bare `agentic_protocol`, which is also what every run
+    recorded before V4.110.0 is filed under — those rows are an average across
+    protocols and should not be read as any single protocol's history.
+    """
+    name = str(protocol or "").strip().lower()
+    return f"{PROTOCOL_TASK_TYPE_PREFIX}:{name}" if name else PROTOCOL_TASK_TYPE_PREFIX
 
 
 def usage_for_broker(tokens: dict | None) -> dict:
@@ -297,14 +342,33 @@ def provider_quota(cfg: dict | None = None) -> dict:
     prints. Agy's two pools are separate, so a global minimum can under-report
     headroom for a task aimed at the healthier group; under-reporting is the
     safe direction and keeps this number comparable across providers.
+
+    `buckets` carries the individual windows behind that minimum, tightest
+    first. The min alone is not enough to act on: "claude 54%" is a weekly pool
+    that refills on Aug 13, while "gemini 78%" sits next to a 5h window at 94%
+    that refills in two hours. Same headline number, completely different answer
+    to "can I run the protocol now or should I wait?". Each bucket keeps
+    whichever reset hint the provider gave — `resets_at`, a `reset_label`
+    string, or `refresh_in_seconds` — because no provider reports all three.
+    """
+    return quota_snapshot(cfg)["providers"]
+
+
+def quota_snapshot(cfg: dict | None = None) -> dict:
+    """`provider_quota()` plus the broker-wide `hard_reserve_percent`, one call.
+
+    The sidebar needs both on every poll and they come from the same `/v1/status`
+    response; fetching twice would double the broker traffic for no new
+    information. Shape: `{"providers": {...}, "hard_reserve_percent": float|None}`.
     """
     client = broker_client(cfg)
+    empty = {"providers": {}, "hard_reserve_percent": None}
     if client is None:
-        return {}
+        return empty
     try:
         status = client.status()
     except BrokerError:
-        return {}
+        return empty
 
     out: dict[str, dict] = {}
     for entry in status.get("providers") or []:
@@ -315,23 +379,51 @@ def provider_quota(cfg: dict | None = None) -> dict:
         if model is None:
             continue
         snapshot = entry.get("snapshot") or {}
-        buckets = snapshot.get("buckets") if isinstance(snapshot, dict) else None
+        raw_buckets = snapshot.get("buckets") if isinstance(snapshot, dict) else None
         remaining = None
-        if isinstance(buckets, dict) and buckets:
-            values = [w.get("remaining_percent") for w in buckets.values()
-                      if isinstance(w, dict) and w.get("remaining_percent") is not None]
+        buckets: list[dict] = []
+        if isinstance(raw_buckets, dict) and raw_buckets:
+            for name, window in raw_buckets.items():
+                if not isinstance(window, dict):
+                    continue
+                buckets.append({
+                    "name": str(name),
+                    "remaining_percent": window.get("remaining_percent"),
+                    "resets_at": window.get("resets_at"),
+                    "reset_label": window.get("reset_label"),
+                    "refresh_in_seconds": window.get("refresh_in_seconds"),
+                    "window_minutes": window.get("window_minutes"),
+                    "reserve_only": bool(window.get("reserve_only")),
+                })
+            values = [b["remaining_percent"] for b in buckets
+                      if b["remaining_percent"] is not None]
             if values:
                 remaining = min(float(v) for v in values)
+            # Tightest first: the binding window is the one worth reading first,
+            # and a bucket with no percentage cannot bind anything.
+            buckets.sort(key=lambda b: (b["remaining_percent"] is None,
+                                        b["remaining_percent"]))
         out[model] = {
             "provider": provider_id,
             "remaining_percent": remaining,
+            "buckets": buckets,
+            "plan": snapshot.get("plan") if isinstance(snapshot, dict) else None,
             "reserve_only": bool(entry.get("reserve_only")),
             "cooldown_until": entry.get("cooldown_until"),
             "authenticated": entry.get("authenticated"),
             "confidence": (entry.get("provenance") or {}).get("confidence"),
             "age_seconds": (entry.get("provenance") or {}).get("age_seconds"),
         }
-    return out
+
+    # The floor the broker will not dispatch below. Surfaced so the sidebar can
+    # draw it on the quota bars rather than leaving the user to wonder why a
+    # provider showing 15% left is being refused. None rather than a guessed
+    # default — a made-up number drawn as a hard line is worse than no line.
+    try:
+        reserve = float(status.get("hard_reserve_percent"))
+    except (TypeError, ValueError):
+        reserve = None
+    return {"providers": out, "hard_reserve_percent": reserve}
 
 
 def _positive_int(value, default: int) -> int:

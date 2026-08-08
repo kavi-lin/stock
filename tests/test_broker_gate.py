@@ -341,6 +341,44 @@ try:
 finally:
     server.shutdown()
 
+# V4.110.0 — a named protocol reserves against its own measured prior and files
+# its tokens under its own task type. One shared `agentic_protocol` row averaged
+# a 143-second triage pass together with a forty-minute five-lane debate, so no
+# protocol could calibrate from it and the prior stayed a guess for all of them.
+per_protocol = {"protocol_tokens": {
+    "default": {"input": 200_000, "output": 40_000},
+    "triage": {"input": 240_000, "output": 32_000},
+}}
+server, _thread = start_stub("grant", "codex")
+try:
+    with _Patched(config_for(server, **per_protocol), Recorder()):
+        mr.acquire_protocol_lease("agentic_protocol", "triage")
+    reserved = server.requests[0]["task"]
+    check("protocol.named_type", reserved["task_type"] == "agentic_protocol:triage", str(reserved))
+    check("protocol.named_estimate", reserved["estimated_input_tokens"] == 240_000, str(reserved))
+    check("protocol.named_output", reserved["estimated_output_tokens"] == 32_000, str(reserved))
+finally:
+    server.shutdown()
+
+# An unmeasured protocol falls back to `default`, never to zero — the one we have
+# no numbers for is the one most likely to surprise us.
+server, _thread = start_stub("grant", "codex")
+try:
+    with _Patched(config_for(server, **per_protocol), Recorder()):
+        mr.acquire_protocol_lease("agentic_protocol", "invest")
+    reserved = server.requests[0]["task"]
+    check("protocol.unmeasured_type", reserved["task_type"] == "agentic_protocol:invest", str(reserved))
+    check("protocol.unmeasured_estimate",
+          reserved["estimated_input_tokens"] == 200_000, str(reserved))
+finally:
+    server.shutdown()
+
+# The pre-V4.110.0 flat shape keeps its old meaning rather than being dropped in
+# favour of the constants — a config file is not upgraded when the code is.
+flat = broker_gate.broker_config({"broker": {"protocol_tokens": {"input": 111, "output": 22}}})
+check("protocol.flat_shape_still_read", flat["protocol_tokens"] == {"default": (111, 22)},
+      str(flat["protocol_tokens"]))
+
 # ─────────────────── governed_call, for callers that run their own CLI ──────
 server, _thread = start_stub("grant", "claude")
 try:

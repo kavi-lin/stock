@@ -1,7 +1,37 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-07 (v4.108.0)
+> **Last Updated**: 2026-08-08 (v4.111.3)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
+
+## 🟢 Session Note (v4.111.3) — 交接文件把假設寫成了事實;真的去 profile 只花了 20 分鐘
+
+- **緣起**:使用者回報開委員會 Dashboard 系統會卡頓,並附上另一個 session 寫的交接文件。該文件量測扎實(時間軸、`/v1/status` 30 秒節奏證明分頁開啟時刻、關閉前後程序對比),但**它的結論段和它自己的證據段互相矛盾而沒有被察覺**:第 2 段花大篇幅列出 56 個 `setInterval`、只有 10 處 `document.hidden` 保護,第 3 段又誠實寫下「每分鐘 166 次小 JSON 請求在算術上燒不掉一整顆核」。**它自己已經否證了自己的主張,卻仍在第 4 段規劃 `pollEvery()` 收口 46 處的重構。**
+- **它說「沒有人 profile 過」是對的,而這正是唯一該做的事**:Safari 沒有可程式化接上的 profiler,但 Chrome 有 —— `--headless=new --remote-debugging-port` + CDP,用 node 22 內建的 `WebSocket` 直接講 protocol,不需要裝 puppeteer。`Performance.getMetrics` 拆出 Script/Layout/RecalcStyle,`Tracing` 數 Paint/Commit/RasterTask。**「手邊沒有那個瀏覽器的 profiler」不等於「量不到」。**
+- **timer 假設當場出局**:各頁 ScriptDuration 只有 0.4%–2.8% 一顆核。index.html 閒置 3.0%、sector 1.8%、momentum 1.3%。**真正的訊號在 Paint**:decisions.html 閒置時 110 Paint/s、56 Commit/s、50 秒 2789 次 style recalc,而 index/sector 是 0.1–0.6 Paint/s。同樣掛著那 56 個 timer,差異卻是 100 倍——**差異在哪,元凶就在哪;共通項不可能解釋差異。**
+- **根因是一行 CSS 配一個 1 秒 timer**:`decisions.html:35` 的環帶 `transition: stroke-dashoffset 0.9s linear`,`updateRefreshStatus` 每 **1.0** 秒寫一次 `strokeDashoffset`。**每秒啟動一個 0.9 秒的 transition,永遠接不完**,而 `stroke-dashoffset` 不可合成,每格都要主執行緒重新光柵化。這頁從開啟那刻起就沒有 idle 過。0.9 < 1.0 看起來還「留了 0.1 秒餘裕」,實際上餘裕從來不存在——**只要 transition 沒結束前下一次寫入到達,它就會續上,而它每次都到達。**
+- **A/B 是唯一能結案的證據**:只把那一個 transition 關掉、其他不動 → Paint 111.9→3.1/s、Commit 56.0→1.1/s、`document.getAnimations()` 從 1 變 0。**證明它是這頁唯一在跑的動畫**,不是「疑似相關」。
+- **一併排除的,每一條都有量測**:記憶體洩漏(掛 3 分鐘,元素數固定 13,921、heap 與 listener 都在降)、`dashboard_server.py`(開機至今累計 1:10 CPU)、backdrop-filter(86 個 blur 全關掉,Chrome 每格反而 0.65ms→1.15ms,**因為少了分層,推翻我自己原本的假設**)。
+- **沒有結案的部分要講清楚**:Chrome 上此頁最高 8% 一顆核,而使用者在 Safari 看到的是燒掉一整顆核。**我無法證明這一行 100% 解釋 Safari 那顆核**,只能說 56 fps 的零產值重繪在任何引擎上都是純浪費。修完仍卡就得回到 Safari Web Inspector。
+- **同類問題留了一個沒動**:`intraday-eval.html` 閒置 241 Paint/s,來自 3 張**可見**的 `.ie-scard.repeat-strong` 在動 `box-shadow`(`style.css:4874-4875`)——同樣不可合成。它是刻意的視覺設計,改會動到外觀,屬於使用者的美術決定而不是我的 bug 修復,所以只回報不擅改。
+- **值得記住的偵測手法**:`getComputedStyle(el).animationIterationCount === 'infinite'` 掃出來的東西會騙人——decisions/index/sector 三頁都掃到同一個隱形的 `chain-pill-head-icon` 旋轉圖示,但只有 decisions 在燒。**`document.getAnimations()` 才是權威清單**(它涵蓋 transition,而 transition 正是本案元凶,`animationIterationCount` 永遠看不到它)。
+
+## 🟢 Session Note (v4.111.0 ~ v4.111.2) — 一個數字有四套門檻時,錯的通常不是門檻,是「誰有資格著色」
+
+- **緣起**:使用者兩個要求。(a)「llm_quota_broker 傳進來的東西視覺化,永遠顯示,不用再放齒輪裡」,外加一個問題「本地用量現在還重要嗎」。(b) 看到 AI 裁決卡的 tooltip 後說「顏色應該跟裡面 popup 一致,應該要偏綠色;dialog 有 75~90 跟下面黃燈 60~85 邏輯上 conflict,給一個統一的標準」。
+- **本地用量的答案是「一半死了、一半是唯一來源」**:`calls / daily_max` 在 broker 在線時完全不參與決策,只有 broker 關掉/連不上才是真閘門;但 `tokens` / `cost_usd` **broker 根本不報**,本地帳本是全專案唯一的花費紀錄。所以不是「留」或「砍」,是拆開:次數階梯改成只在降級狀態顯示(那時它才是真限制),花費壓成常駐一行。**「這個欄位還重要嗎」這種問題,答案常常是「要看是哪一半」。**
+- **面板原本丟掉的資訊比顯示的多**:`provider_quota()` 只回傳所有 bucket 的 min。但 min 藏住的正是可行動的部分——claude 54% 是週池要等 8/13,gemini 78% 旁邊有個今晚就重置的 5h 窗。**同樣的 headline 數字,對「現在跑還是等等跑」是相反的答案。** 補回 per-bucket 明細 + 20% 硬保留線(以前使用者看到「還剩 15%」卻被拒派,面板不給任何解釋)。
+- **順手避掉的成本 bug**:一開始把 `hard_reserve_percent` 寫成獨立函式,等於每次輪詢打兩次 `/v1/status`。改成 `quota_snapshot()` 一次取回 — 兩者本來就在同一個 response 裡。**這種「多一倍流量但功能正常」的寫法不會讓任何測試變紅**,和 v4.107.0 那個 mtime 恆真是同一類。
+- **曝險門檻的根因不在門檻,在著色權**:程式裡有**五份**互相矛盾的定義(exposure guide 85/60/30、synth guide 75/50/25、sector pill 75/50、`script.js` pill 又一份 85/60/30),但真正讓使用者看到紅色的是第五個——`components.js` 的曝險卡寫 `color: sty.fg`,`sty` 是**裁決 stance**。它是整個 grid 裡唯一一張「顏色與自己的數字無關」的卡。所以 75-90% 被畫成 DEFENSIVE 紅,而它自己的 tooltip 說那是標準區。**四套門檻是噪音,一張卡不看自己的數值才是 bug。**
+- **同一張卡還有第二個分岔**:圓環填充用中位數 82.5,環上印的數字卻是上界 90 — 一個環同時講兩個數。統一成「區間取中位數 → 同時決定顏色、填充、數字」。
+- **統一標準選 75/50/25 的理由不是偏好**:synth guide 與 sector pill 已是這套(2:1),而且它是 synth 公式「三個中位數取 min」當初寫的邊界。抽成 `UI.EXPOSURE_TIERS` 後五個 consumer 全部改讀它,連 `STAGE_DOTS` 的燈號也從 tier 表生成——**日後改門檻不可能漏掉某一份。**
+- **回報時明講了行為變更**:這次改完,目前的上限會從紅變綠。這是移除 stance 污染後的正確結果,但它改變使用者每天看盤的顏色語意,所以動手前先講、等使用者點頭才做。
+- **驗收**:`test_broker_gate` / `test_protocol_model_routing` / `scripts/_shared/tests` rc=0(7 passed)。曝險 tier 用 node 實跑 9 個輸入驗證邊界連續且 75-90%→82.5→進攻/綠。LLM 面板用 DOM stub 對**實際 broker payload** 渲染四種狀態(正常 / broker 連不上 / broker 關閉 / 無 broker key)與中英雙語,均正確。瀏覽器擴充當時未連線,故未做視覺截圖驗證。
+- **v4.111.1 續:同一個 bug class 還有三例,而我第一輪只修了被指出的那一個。** 使用者接著回報頂部風控 31.6 顯示綠色但 tooltip 說 🟡。根因與曝險完全相同——卡片用通用 `colorByScore(n, inverse)`,tooltip 各有五段級距表,那個 helper 的 35/65 兩個切點和任何一份都對不上,而且沒有橘色。廣度同一個 helper(60/40 剛好對得上,但把 25-39 🟠 與 0-24 🔴 併成一個紅)。**教訓:抓到「同一個量有兩套定義」時,要把同一個 render 迴圈裡的其他項目一併盤過,而不是只修被指到的那張卡。** 五張卡裡我第一輪只查了一張。
+- **Macro 卡的 popup 從來沒有存在過**:掛著 `data-tip-key: 'macro_briefing_tip'`,但沒有任何一頁的 `PILL_TIPS` 有這個 key,`showTip()` 每次第一行就 return。**看起來接好了、實際靜默沒有**——和 v4.106.0 那組 fail-silent 同族。移除時還要一併拿掉 `data-tip-text`/`title`,否則 sector.html 上 `[data-tip-key]` 監聽器會與新的 signal tip 同時觸發,一次 hover 疊兩個 tooltip。
+- **面板收斂**:使用者要求灰字全收進 hover、兩句說明移除。常駐區只剩長條;細節(全部窗口、重置時間、plan/confidence/新鮮度、逐 provider 今日花費)進 hover card。花費改逐 provider 是順勢而為——本地帳本本來就逐 model 記。broker 掛掉時沒有 provider 列可 hover,所以降級路徑保留常駐花費行。
+- **一個差點犯的錯**:hover listener 綁在 `_initLlmPanel()` 裡,而 `renderSidebar()` 會在語言切換時重跑——綁兩次會讓同一個元素被兩組 listener 一顯一隱地閃爍。加了 `UI._llmTipBound` 一次性旗標。
+- **v4.111.2 sidebar 重整**:主題/風險容忍/語言/日誌四個控制項原本佔滿 footer,風險容忍還是整條寬按鈕——**設定幾天才動一次的東西,拿走了視線最常落下的位置**。全部收進 header 齒輪的 popup,footer 只留額度面板。語言列順勢改成顯示**當前**語言而非「點了會切到哪」:它原本是獨立 toggle,`English` 意思是「切到英文」;放進 popup 與「主題 · 深色」並排後,同樣的字會被讀成現況陳述。**同一個字串的意思會隨它旁邊的鄰居改變。**
+- **同一個一次性綁定坑,這輪又出現一次**:popup 的 outside-click / Escape 監聽也不能綁在 `renderSidebar()` 裡。而且主題與語言切換本身就會重繪 sidebar、把 popup 銷毀,所以要 `UI._reopenSettings` 切完自動重開——在選單裡切主題不該順手把選單關掉。
 
 ## 🟢 Session Note (v4.108.0) — 「拒絕判斷」不該是唯一選項;不獨立的證據要標出來,不要假裝獨立
 

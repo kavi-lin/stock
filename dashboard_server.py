@@ -238,8 +238,12 @@ def _protocol_command(model, prompt, claude_model=None):
     return cmd
 
 
-def _select_protocol_model():
+def _select_protocol_model(name=None):
     """Resolve the launch-time provider AND reserve its quota. Returns (model, lease).
+
+    `name` is the protocol being launched. It sizes the reservation and keys the
+    ledger, because a `triage` run and an `invest` run are not the same order of
+    magnitude — see `broker_gate.PROTOCOL_TASK_TYPE_PREFIX`.
 
     `acquire_protocol_lease()` preserves the UI's documented primary → secondary
     → tertiary availability policy, but settles it against the quota broker's
@@ -256,7 +260,7 @@ def _select_protocol_model():
     Pass `lease` back to `note_run()` so the hold is settled with real tokens.
     """
     if MODEL_ROUTER_AVAILABLE:
-        model, lease, _note = _mrouter.acquire_protocol_lease("agentic_protocol")
+        model, lease, _note = _mrouter.acquire_protocol_lease("agentic_protocol", name)
         return model, lease
     return "claude", None
 
@@ -963,7 +967,7 @@ def run_protocol(name, params=None):
         # 20% hard reserve exists to keep out of the last fifth of a window.
         proto_lease = None
         try:
-            proto_model, proto_lease = _select_protocol_model()
+            proto_model, proto_lease = _select_protocol_model(name)
         except Exception as e:
             with _protocol_lock:
                 _protocol_state["status"]      = "error"

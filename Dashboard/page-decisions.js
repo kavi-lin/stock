@@ -2487,7 +2487,13 @@ document.addEventListener('keydown', e => {
 // so first page load picks up an in-flight job.
 pollProtocolStatus();
 setInterval(pollProtocolStatus, 2000);
-setInterval(updateRefreshStatus, 1000);
+// Countdown ring ticks 1/s, but only while the tab is actually being looked at —
+// a hidden tab has nothing to show and the fetch is pure waste.
+setInterval(() => { if (!document.hidden) updateRefreshStatus(); }, 1000);
+// Coming back to the tab must not wait up to a second on a stale ring.
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) updateRefreshStatus();
+});
 
 // ── V4.6 — Adjustment Ledger panel (read-only) ──────────────────────────
 // Active config-adjustment recommendations from decision_review/ADJUSTMENT_LEDGER.md.

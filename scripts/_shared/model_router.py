@@ -444,7 +444,9 @@ def broker_status(cfg: dict | None = None) -> dict:
         state["reachable"] = False
         state["error"] = str(exc)[:300]
         return state
-    state["providers"] = broker_gate.provider_quota(cfg)
+    snapshot = broker_gate.quota_snapshot(cfg)
+    state["providers"] = snapshot["providers"]
+    state["hard_reserve_percent"] = snapshot["hard_reserve_percent"]
     return state
 
 
@@ -559,7 +561,7 @@ def _task_type(role: str) -> str:
 
 
 def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
-             protocol: bool = False):
+             protocol: bool = False, protocol_name: str | None = None):
     """Reserve broker capacity for one call. Returns (lease, note, allowed).
 
     `allowed=False` means do not run: either the broker refused (no capacity) or
@@ -579,9 +581,9 @@ def _acquire(role: str, model: str, cfg: dict, *, prompts: tuple[str, ...] = (),
         return None, f"broker:ungoverned({model})", True
 
     if protocol:
-        estimated_input, estimated_output = broker_gate.protocol_estimate(cfg)
+        estimated_input, estimated_output = broker_gate.protocol_estimate(cfg, protocol_name)
         ttl = broker_gate.PROTOCOL_TTL_SECONDS
-        task_type = "agentic_protocol"
+        task_type = broker_gate.protocol_task_type(protocol_name)
         # The whole chain goes in as an UNORDERED acceptable set, and the broker
         # picks. Its `preference` component is a boolean "is this provider in the
         # caller's list", not a rank, so listing all three cancels that component
@@ -829,8 +831,15 @@ def pick_model(role: str = "protocol") -> str:
     return chain[0] if chain else "gemini"
 
 
-def acquire_protocol_lease(role: str = "agentic_protocol") -> tuple[str, object | None, str]:
+def acquire_protocol_lease(role: str = "agentic_protocol",
+                           protocol: str | None = None) -> tuple[str, object | None, str]:
     """Reserve quota for one agentic protocol run: returns (model, lease, note).
+
+    `protocol` is the protocol's own name (`triage`, `invest`, …). It selects
+    the pre-run estimate and namespaces the ledger task type, because these
+    protocols differ by an order of magnitude and one shared prior can only be
+    wrong for one end of that range — see `broker_gate.PROTOCOL_TASK_TYPE_PREFIX`.
+    Omitting it keeps the old flat behaviour rather than reserving nothing.
 
     **The broker chooses the provider here, and the UI's primary → secondary →
     tertiary order does not apply** (2026-08-08 decision — see the note in
@@ -858,7 +867,7 @@ def acquire_protocol_lease(role: str = "agentic_protocol") -> tuple[str, object 
     """
     cfg = load_llm_config()
     model = pick_model(role)
-    lease, note, allowed = _acquire(role, model, cfg, protocol=True)
+    lease, note, allowed = _acquire(role, model, cfg, protocol=True, protocol_name=protocol)
     if not allowed:
         raise ProtocolBlocked(
             f"the quota broker did not authorise this run ({note}). "

@@ -8,15 +8,16 @@
     "codex": true,
     "grok": true
   },
-  "_broker_note": "V4.106.0: the LLM Quota Broker is the quota authority — it sees the Taiwan-stock project's spend on the same subscriptions, which config/llm_usage.json never could. The budgets below are now the FALLBACK, enforced only when the broker cannot answer. degradable_roles are the only roles allowed to take that fallback; every other role stops. A broker that answers 'no capacity' stops all roles, news included, because that answer is about the 20% hard reserve. protocol_tokens is the pre-run estimate for one agentic protocol run: deliberately generous, and worth re-tuning from `lqb history` once real runs have been recorded.",
+  "_broker_note": "V4.106.0: the LLM Quota Broker is the quota authority — it sees the Taiwan-stock project's spend on the same subscriptions, which config/llm_usage.json never could. The budgets below are now the FALLBACK, enforced only when the broker cannot answer. degradable_roles are the only roles allowed to take that fallback; every other role stops. A broker that answers 'no capacity' stops all roles, news included, because that answer is about the 20% hard reserve. protocol_tokens is the pre-run estimate for one agentic protocol run — see the note directly above it.",
   "broker": {
     "enabled": true,
     "base_url": "http://127.0.0.1:8787",
     "timeout_sec": 10,
     "degradable_roles": ["debate", "brief", "link_digest"],
+    "_protocol_tokens_note": "V4.110.0: keyed by protocol name, because these differ by an order of magnitude and one shared prior can only be right for one end of that range. Each key is reported to the broker as task type `agentic_protocol:<name>`, so `lqb history --stats --task-type agentic_protocol:triage` shows that protocol's own p50 rather than an average of unlike things. `default` covers any protocol without a row. MEASURED means real settled tokens are behind the number; the rest are still the deliberately-generous V4.106.0 prior.",
     "protocol_tokens": {
-      "input": 200000,
-      "output": 40000
+      "default": { "input": 200000, "output": 40000 },
+      "triage":  { "input": 240000, "output": 32000, "_source": "MEASURED 2026-08-08: 1 run on agy, 233139 in / 28702 out / 143s" }
     }
   },
   "_budgets_note": "daily_max_calls resets at UTC midnight. window_max_calls/window_hours is an independent rolling window that does NOT reset at midnight — it mirrors the provider's session window. Omit window_max_calls (or set 0) to leave a model uncapped on that axis; gemini/grok are rate-limited per-minute rather than per-session, so only the session-window CLIs carry one.",

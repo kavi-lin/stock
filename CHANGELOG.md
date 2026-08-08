@@ -8,6 +8,204 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.111.3] — 2026-08-08 — decisions 頁的倒數環讓瀏覽器永遠停不下來
+
+`decisions.html` 開著沒人碰,每秒仍在重繪 56 次、50 秒內 2789 次 style recalc。
+用 headless Chrome + CDP profile 出來的:倒數環 `#refresh-ring` 帶著
+`transition: stroke-dashoffset 0.9s linear`,而 `updateRefreshStatus` 每 **1.0 秒**
+寫一次 `strokeDashoffset` —— 每秒啟動一個 0.9 秒的 transition,永遠接不完。
+`stroke-dashoffset` 不能交給合成器,每一格都要主執行緒重新光柵化,所以這頁從開啟
+那刻起就再也沒有進入過 idle。
+
+### Fixed
+- `Dashboard/decisions.html:35` — transition 移除 `stroke-dashoffset`,只留 `stroke 0.3s ease`
+  (顏色切換仍然是漸變)。環每秒只走圓周 1/300,直接跳格肉眼無差。
+- `Dashboard/page-decisions.js:2490` — 1s 倒數改為 `document.hidden` 時跳過,並補
+  `visibilitychange` listener,切回前景立刻補跑一次而不是等下一個週期。
+
+量測(headless Chrome,閒置 20s):
+
+| | Paint/s | Commit/s | RecalcStyle / 50s |
+|---|---|---|---|
+| 修前 | 110.3 | 55.1 | 2789 |
+| 修後 | 3.1 | 1.1 | 53 |
+
+### Why
+- 使用者回報開委員會 Dashboard 會讓系統卡頓(Safari WebContent 98.6% + GPU 36.1%,
+  8 GB 機器連帶 swap)。原本的假設是「56 個 setInterval 沒有 `document.hidden` 保護」,
+  **profile 後排除**:各頁 JS 執行時間只有 0.4%–2.8% 一顆核,timer 不是元凶。
+  一併排除記憶體洩漏(元素數 3 分鐘固定在 13,921)、`dashboard_server.py`(累計 1:10 CPU)、
+  以及 backdrop-filter(全關掉 Chrome 反而更慢)。
+- 未確立:Chrome 上此頁最高 8% 一顆核,無法證明這一行 100% 解釋 Safari 那顆核
+  (手邊沒有 Safari profiler)。但 56 fps 的零產值重繪在任何引擎上都是純浪費。
+- 已知同類問題未修:`intraday-eval.html` 閒置 241 Paint/s,來自 3 張可見的
+  `.ie-scard.repeat-strong` 在動 `box-shadow`(`style.css:4874-4875`)——`box-shadow`
+  同樣不可合成。那是刻意的視覺設計,要改會動到外觀,留給使用者決定。
+
+## [4.111.2] — 2026-08-08 — sidebar 控制項收進 header 齒輪;footer 讓給額度面板
+
+主題 / 風險容忍 / 語言 / 系統日誌四個控制項原本佔滿 sidebar footer,其中風險容忍還是
+整條寬的按鈕——那是**設定幾天才動一次的東西,卻拿走了視線最常落下的位置**。V4.111.0
+把常駐額度面板放進 footer 之後,兩者互相排擠。
+
+- 齒輪移到 sidebar header(AUGUR logo 那排右側,原本主題鍵的位置),點開一個 popup
+  收納主題 / 風險容忍 / 語言 / 系統日誌,以及額度面板的說明文字。
+- 風險容忍從整條寬按鈕縮成 popup 裡的一行 + 小 chip(10.5px → 9px)。
+- footer 現在只有額度面板與版號。
+- 語言列改顯示**當前**語言而非「點了會切到哪」。原本它是獨立 toggle 按鈕,寫
+  `English` 意思是「切到英文」;放進 popup 後與上一行「主題 · 深色」並排,同樣的字會
+  被讀成現況陳述,所以改成陳述現況。主題列同理新增 `深色 / 淺色` 值。
+- 主題與語言切換會 `renderSidebar()` 重繪、把 popup 一起銷毀,所以切完自動重開
+  (`UI._reopenSettings`)——在選單裡切主題不該順手把選單關掉。
+- popup 的 outside-click / Escape 監聽只綁一次,同 hover card 的理由:renderSidebar
+  每次切主題語言都會重跑。
+
+## [4.111.1] — 2026-08-08 — 頂部風控/廣度/Macro 也接上級距表;LLM 面板細節改 hover
+
+### 卡片顏色:同一個 bug class 的第二、三、四例
+
+V4.111.0 修掉曝險卡「顏色不看自己數值」之後,使用者指出頂部風控 31.6 顯示綠色,
+但它的 tooltip 說 30-50 是 🟡 早期警告——連 `mt.zone` 自己都寫 `Yellow (Early Warning)`。
+
+根因同一個:卡片用通用的 `colorByScore(n, inverse)` 上色,而 tooltip 各自有五段級距表。
+那個 helper 只有 35/65 兩個切點,**和任何一份 tooltip 都對不上**,而且完全沒有橘色
+——頂部風控卻有兩段橘。廣度也走同一個 helper(60/40 剛好對得上,但它把 tooltip 的
+25-39 🟠 和 0-24 🔴 併成一個紅,分數落在 25-39 就會不一致)。
+
+- 新增 `UI.SIGNAL_TIERS`(breadth / market_top 數值級距 + macro 分類級距)與
+  `UI.signalTier()` / `signalColor()` / `signalStages()`。門檻**沒有改動**——它們在
+  tooltip 裡本來就是對的,錯的是卡片讀了另一張表。
+- `market_top` 的反向性(分數高=風險高)寫進表裡,不再是呼叫端傳 `inverse` 旗標
+  ——卡片正是傳了 `inverse` 還拿到錯的級距。
+- `STAGE_DOTS` 的 breadth / market_top / macro 燈號改由 tier 表生成。
+- `colorByScore` 只剩 FTD 未確認時的 `quality_score` fallback(該訊號沒有 tooltip
+  級距表可牴觸),並在 docstring 註明不得再用於有 tooltip 的訊號。
+
+### Macro 卡的 popup 從來沒有存在過
+
+它掛著 `data-tip-key: 'macro_briefing_tip'`,但**沒有任何一頁的 `PILL_TIPS` 有這個
+key**,所以 `showTip()` 每次都在第一行 return——卡片看起來接好了 popup,實際上靜默地
+沒有。改接真正的 signal tip(含十個 FRED 體制的分級與部位含意),並移除舊的
+`data-tip-text` / `title`:sector.html 上 `[data-tip-key]` 監聽器會與 signal tip
+同時觸發,一次 hover 疊兩個 tooltip。
+
+Macro 卡的顏色原本是 `regime_label === 'Overheating' ? 橘 : colorByScore(composite)`
+——十個體制裡只特別處理一個,其餘吃 composite 分數。但卡面顯示的是**體制名稱**,
+圍著 "Overheating" 畫綠圈只因 composite 剛好 72,又是同一種「顏色與所示數值不同源」。
+現在顏色一律由體制名稱決定。分級(順風 / 過渡 / 緊縮 / 壓力)經使用者核准。
+不在 `VALID_REGIMES` 十個之內的名稱回 null → 灰色,不用猜測分桶。
+
+### LLM 面板:釘住的只留長條,細節改 hover
+
+使用者要求灰字全部收起、`辯手：全部 3 家候選` 與 `虛線 = 硬保留` 兩句移除。
+
+- 常駐區只剩「誰 / 什麼狀態 / 剩多少 / 長條 / 區分性路由 badge」。
+- 每家 provider 的 hover card 給完整資訊:**全部**窗口(不只最緊的兩個)、各自重置
+  時間、plan 與 confidence、讀數新鮮度、該家今日呼叫數與 token/`$`。
+- 花費從常駐行移進 hover card,並改為**逐 provider**——本地帳本本來就是逐 model 記的。
+  broker 掛掉時沒有 provider 列可 hover,所以降級路徑仍保留常駐花費行。
+- hover 監聽只綁一次:`renderSidebar()` 會在語言切換時重跑,綁兩次會讓同一個元素
+  被兩組 listener 一顯一隱地閃爍。
+
+## [4.111.0] — 2026-08-08 — LLM 額度改為常駐視覺化;曝險上限四套門檻收斂成一套
+
+兩件事,共通點都是「同一個數字在不同地方講不同的話」。
+
+### LLM 額度面板（齒輪 → 常駐）
+
+V4.109.0 把額度真相交給 quota broker 後,這塊就只是唯讀讀數了,卻還折在齒輪裡——
+因為它原本是設定表單。但額度不是設定,它回答的是「我現在能不能開一個 protocol」,
+那是**點下去之前**要知道的事。所以移到 sidebar footer 常駐,齒輪只留說明文字。
+
+原本 UI 丟掉的資訊比顯示的多:`broker_gate.provider_quota()` 只回傳所有 bucket 的
+**最小值**。但那個 min 藏住了唯一能拿來行動的部分——claude 54% 是週池,要等 8/13
+才會動;gemini 78% 旁邊是一個今晚就重置的 5h 窗。同樣的 headline 數字,對「現在跑
+還是等等跑」是完全相反的答案。
+
+- `broker_gate.provider_quota()` 加回 per-bucket 明細(名稱 / 剩餘% / `resets_at` /
+  `reset_label` / `refresh_in_seconds` / `window_minutes`),最緊的排前面。三種重置
+  格式都留著,因為沒有一家 provider 三種都報。
+- 新增 `broker_gate.quota_snapshot()` — providers + `hard_reserve_percent` 一次取回。
+  兩者來自同一個 `/v1/status`,分兩次抓等於白白多一倍 broker 流量。
+- 20% 硬保留線畫在長條上。以前使用者看到「還剩 15%」卻被拒派,面板不給任何解釋。
+- provider 依「最緊優先」排序;`reserve_only` / cooldown / 未登入一律降色——一條綠
+  滿的長條掛在 broker 根本不會派的 provider 上,是這個面板最可能誤導人的樣子。
+- 路由掛成 provider 上的 badge,但**每一列都出現的 tag 一律提到面板層講一次**。
+  `debate` 的合格名單就是全部三家,原本在 claude / gemini / codex 各印一次
+  「辯手 候選·2」——三個彼此無法區分的 chip,等於把「broker 從所有人裡挑」重複三遍。
+  真正有資訊的是差異:`general` 釘在 claude、`protocol` 不含 codex。所以通用路由收成
+  一行摘要,每列只留區分性的。broker 決定的路徑仍**不預測贏家**(理由見
+  `model_router.routes()`),所以寫「候選」。
+- 窗口明細改成一行一個窗、三欄對齊(名稱 / 剩餘% / 重置)。原本擠成一串會換行的文字,
+  百分比對不齊,而一個長的重置字串會把下一個窗擠成孤行——正好在最需要看懂的時候看不懂。
+  重置字串也統一格式:同一份 payload 裡同時有 `Aug13at12pm` 和 `Aug 13 at 11:59am`,
+  現在一律正規化成 `8/13 12pm`,原文留在 row 的 title。超出兩個窗以 `+N` 標示。
+
+**本地用量的定位也一併釐清**:呼叫次數上限(`calls / daily_max`)只有在 broker 關掉
+或連不上時才是真的閘門,broker 在線時它描述的是沒人在走的降級路徑——把「2/300」擺在
+一個正在拒絕請求的 broker 旁邊,正是讓人誤判「還很空」的原因。所以次數階梯改成**只在
+降級狀態才顯示**。花費(token / `$`)則相反:broker 只報百分比不報金額,本地帳本是
+唯一來源,所以常駐一行。
+
+### 曝險上限:四套門檻 → 一套
+
+同一個「建議曝險」數字,程式裡有四份互相矛盾的定義,外加第五份在 `script.js`:
+
+| 定義處 | 綠 | 黃 | 橘 | 紅 |
+|---|---|---|---|---|
+| `utils.js` exposure guide | 85-100 | 60-85 | 30-60 | 0-30 |
+| `utils.js` synth guide | 75-100 | 50-75 | 25-50 | 0-25 |
+| `page-sector.js` PILL_TIPS | 75-100 | 50-74 | (無) | <50 |
+| `script.js` pill-exposure | 85-100 | 60-85 | 30-60 | 0-30 |
+| 裁決卡顏色 | 不看數值,吃 `sty.fg`(裁決 stance) | | | |
+
+最後一行是 bug 的根:曝險卡是整個 grid 裡唯一「顏色與自己的數字無關」的卡,顏色來自
+DEFENSIVE/NEUTRAL stance,所以 75-90% 的上限被畫成紅色,而它自己的 tooltip 說那是
+標準區。同一張卡的圓環也是兩個數:填充用中位數 82.5,環上印的卻是上界 90。
+
+- 新增 `UI.EXPOSURE_TIERS` 作為唯一門檻表,採 **75 / 50 / 25**(synth 與 sector pill
+  已是這套,2:1;也是 synth 公式「三個中位數取 min」當初寫的邊界)。標籤統一為
+  進攻 / 標準 / 防禦 / 極低。
+- 配套 `UI.exposureMid()` / `UI.exposureTier()` / `UI.exposureStages()`。規則收斂成
+  一句:**區間取中位數 → 同時決定顏色、圓環填充、圓環數字**,三者不可能再分岔。
+- 五個 consumer 全部改讀它;`STAGE_DOTS` 的 `ex_*` 也從 tier 表生成,免得日後改門檻
+  漏掉燈號。`sy_*` 那組 key 隨之退場(synth 與 exposure 現在共用同一組 stage)。
+- **視覺**:曝險卡在 xl 斷點放大為 `col-span-2`、圓環 72px、卡面直接顯示 tier tag,
+  與其他五張「撈數據」卡做出區隔——它是系統**合成**出來的裁決,也是倉位真正的依據,
+  不該長得像第六張同級磁磚。signal grid 隨之 `xl:grid-cols-6` → `7`。
+
+**行為變更**:目前 75-90% 的上限會從紅色變綠色(中位數 82.5 → 進攻)。這是移除
+stance 污染後的正確結果,但確實改變了每日看盤的顏色語意。
+
+## [4.110.0] — 2026-08-08 — protocol 事前估算改為逐 protocol,並取得第一筆真實量測
+
+V4.109.1 修好 Agy 的 token 回報後,重跑一次 triage 拿到**第一筆真實結算**:
+`233,139 in / 28,702 out / 142.9 秒`(agy)。
+
+這筆數字推翻了原本的計畫方向。`broker.protocol_tokens` 一直被記為「刻意取大的
+先驗值,量測後應下調」——實測顯示它對這批 protocol 裡**最便宜的那個**就已經低估
+17%。triage 是 sonnet 檔、只補 top-15 的 `headline_zh`;`invest` 是 opus 檔的五路
+辯論,`sector` Phase 0→5,`playbook` 三籃 $100k 建構,量級差一個數量級以上。
+
+### Changed
+- **`broker.protocol_tokens` 改為以 protocol 名為 key**,`default` 兜底。
+  單一共用先驗值只能對區間的一端正確:照 triage 抓,則本 repo 最大的單一消費者
+  形同未預約,20% hard reserve 變成理論值;照 invest 抓,則便宜的 protocol 被誤拒,
+  **而誤拒是 fail-closed,會連帶停掉兩個呼叫端專案**。
+- **task type 由 `agentic_protocol` 改為 `agentic_protocol:<name>`**。因此
+  `lqb history --stats` 會逐 protocol 給一列 p50,每個 protocol 從自己的歷史校準,
+  而不是從一堆不像的東西的平均。舊的 `agentic_protocol` 列是跨 protocol 平均,
+  不該被當成任何單一 protocol 的歷史讀。
+- `acquire_protocol_lease(role, protocol)` 與 `_select_protocol_model(name)` 各
+  多收一個 protocol 名。**漏傳是無聲的**:run 照跑,但走 `default` 估算、token 落進
+  匯總列——`test_protocol_model_routing.py` 因此釘死這個轉發。
+- 相容舊格式:`{"input": …, "output": …}` 這個 V4.106.0 的平坦寫法仍讀得懂,視為
+  只有 `default`。設定檔不會因為程式碼升級就自動升級。
+
+### Known
+- **只有 triage 有量測值**,其餘 protocol 仍走 `default`(200k/40k)——而 default 已
+  知對 triage 都不夠。重的 protocol 各跑一次才能收斂,代價是 30–45 分鐘的 opus 額度。
+
 ## [4.109.1] — 2026-08-08 — protocol run 對 Agy 回報零 token；納管自己造成的回歸
 
 V4.109.0 的 live smoke 抓出來的。**這個 bug 是納管本身造成的**,而且只有實機跑

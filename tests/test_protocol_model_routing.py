@@ -28,18 +28,28 @@ def check(name, condition, detail=""):
 # and (V4.106.0) comes back with the broker reservation that covers the run.
 old_acquire = ds._mrouter.acquire_protocol_lease
 sentinel_lease = object()
+seen = {}
 try:
-    ds._mrouter.acquire_protocol_lease = lambda role="": ("codex", sentinel_lease, "broker:codex")
-    selected, lease = ds._select_protocol_model()
+    def _fake(role="", protocol=None):
+        seen["role"], seen["protocol"] = role, protocol
+        return "codex", sentinel_lease, "broker:codex"
+
+    ds._mrouter.acquire_protocol_lease = _fake
+    selected, lease = ds._select_protocol_model("triage")
     check("selection.primary", selected == "codex")
     check("selection.lease", lease is sentinel_lease,
           "the reservation must reach the caller, or note_run cannot settle it")
+    # V4.110.0 — the protocol's own name sizes the reservation and keys the
+    # ledger. Dropping it here is silent: the run still starts, but against the
+    # `default` prior, and its tokens land in a pooled row that no protocol can
+    # calibrate from.
+    check("selection.protocol_name", seen.get("protocol") == "triage", repr(seen))
 finally:
     ds._mrouter.acquire_protocol_lease = old_acquire
 
 # A run the broker declines must NOT fall through to a default provider: that is
 # how the largest consumer in this repo used to escape governance entirely.
-def _blocked(role=""):
+def _blocked(role="", protocol=None):
     raise ds._mrouter.ProtocolBlocked("no capacity")
 
 

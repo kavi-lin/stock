@@ -38,6 +38,13 @@
         if (v === null || v === undefined || v === '') return '—';
         return `${typeof v === 'number' ? Number(v).toFixed(v % 1 ? 1 : 0) : v}${suffix}`;
       };
+      // Generic 3-way score colour. V4.111.1 removed its last use on a card
+      // that also has a tooltip tier table — breadth, market top and macro all
+      // read UI.SIGNAL_TIERS now, because this helper's 35/65 breakpoints
+      // matched none of theirs and it has no orange tier at all. What is left
+      // is the FTD fallback for an unconfirmed rally, where `quality_score` has
+      // no tier table to disagree with. Do NOT reintroduce it for a signal that
+      // has a tooltip — that is the whole bug class.
       const colorByScore = (score, inverse = false) => {
         if (score === null || score === undefined || Number.isNaN(Number(score))) return '#a1a1aa';
         const n = Number(score);
@@ -52,18 +59,22 @@
         .filter(([, v]) => v !== null && v !== undefined && v !== '')
         .map(([k, v]) => `${k}="${UI.escapeHTML(String(v))}"`)
         .join(' ');
-      const miniGauge = ({ value, color, display, suffix }) => {
+      // `big` is used by the exposure card only — it is a synthesized verdict,
+      // not a fetched reading, and sizing says so before any label is read.
+      const miniGauge = ({ value, color, display, suffix, big }) => {
         const n = Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Number(value))) : 0;
         const C = 100;
         const dash = (n / 100) * C;
-        return `<div class="relative w-14 h-14 shrink-0" style="color:${color}">
-          <svg viewBox="0 0 36 36" class="w-14 h-14 -rotate-90">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-opacity="0.14" stroke-width="3"></circle>
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-width="3"
+        const box = big ? 'w-[72px] h-[72px]' : 'w-14 h-14';
+        const sw  = big ? 3.6 : 3;
+        return `<div class="relative ${box} shrink-0" style="color:${color}">
+          <svg viewBox="0 0 36 36" class="${box} -rotate-90">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-opacity="0.14" stroke-width="${sw}"></circle>
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-width="${sw}"
               stroke-linecap="round" stroke-dasharray="${dash.toFixed(1)} ${C}"></circle>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center leading-none">
-            <span class="text-[11px] font-black">${UI.escapeHTML(display)}</span>
+            <span class="${big ? 'text-[15px]' : 'text-[11px]'} font-black">${UI.escapeHTML(display)}</span>
             ${suffix ? `<span class="text-[8px] font-bold mt-0.5 opacity-80">${UI.escapeHTML(suffix)}</span>` : ''}
           </div>
         </div>`;
@@ -143,28 +154,38 @@
         : ftdDay <= 12 ? { zh: '主升', en: 'STD', pct: 78, color: '#eab308' }
         : ftdDay <= 20 ? { zh: '補漲', en: 'LATE', pct: 52, color: '#f97316' }
         : { zh: '過熱', en: 'HOT', pct: 22, color: '#ef4444' };
+      // Exposure ceiling — the one derived verdict in a grid of fetched signals.
+      // V4.111.0 fixed three ways this card contradicted its own tooltip:
+      //   · colour came from `sty.fg` (the verdict *stance*), so a 75-90% cap
+      //     rendered DEFENSIVE-red while its tooltip called it standard;
+      //   · the gauge filled to the midpoint but printed the upper bound, so one
+      //     ring showed two different numbers;
+      //   · the thresholds it implied were a third set, disagreeing with both
+      //     tooltip tables.
+      // All three now come off UI.EXPOSURE_TIERS via the midpoint. `wide` marks
+      // it as synthesized rather than fetched — see the grid renderer below.
+      const exposureRaw = market.exposure_ceiling || br.exposure_ceiling || '';
+      const exposureMid = UI.exposureMid(exposureRaw);
+      const exposureTier = UI.exposureTier(exposureMid);
       const signalCards = [
         {
           label: isZh ? '建議曝險' : 'Exposure',
-          value: market.exposure_ceiling || br.exposure_ceiling || '—',
+          value: exposureRaw || '—',
           sub: isZh ? '裁決上限' : 'verdict cap',
-          color: sty.fg,
-          gaugeValue: (() => {
-            const nums = String(market.exposure_ceiling || br.exposure_ceiling || '').match(/\d+/g);
-            return nums?.length > 1 ? (Number(nums[0]) + Number(nums[1])) / 2 : Number(nums?.[0] || 0);
-          })(),
-          gaugeDisplay: (() => {
-            const nums = String(market.exposure_ceiling || br.exposure_ceiling || '').match(/\d+/g);
-            return nums?.length ? `${nums[nums.length - 1]}%` : '—';
-          })(),
+          color: exposureTier ? exposureTier.color : '#a1a1aa',
+          gaugeValue: exposureMid ?? 0,
+          gaugeDisplay: exposureMid == null ? '—' : `${Math.round(exposureMid)}%`,
+          tag: exposureTier ? exposureTier[isZh ? 'zh' : 'en'].tag : '',
+          tagAction: exposureTier ? exposureTier[isZh ? 'zh' : 'en'].action : '',
+          wide: true,
           tip: 'exposure',
-          attrs: { 'data-exposure': market.exposure_ceiling || br.exposure_ceiling || '' },
+          attrs: { 'data-exposure': exposureRaw },
         },
         {
           label: isZh ? '廣度' : 'Breadth',
           value: fmt(br.score ?? market.breadth_score),
           sub: br.zone || market.cycle_phase || '—',
-          color: colorByScore(br.score ?? market.breadth_score),
+          color: UI.signalColor('breadth', br.score ?? market.breadth_score),
           gaugeValue: br.score ?? market.breadth_score,
           gaugeDisplay: fmt(br.score ?? market.breadth_score),
           tip: 'breadth',
@@ -193,7 +214,7 @@
           label: isZh ? '頂部風控' : 'Top Risk',
           value: fmt(mt.composite_score),
           sub: mt.zone || mt.risk_budget || '—',
-          color: colorByScore(mt.composite_score, true),
+          color: UI.signalColor('market_top', mt.composite_score),
           gaugeValue: mt.composite_score,
           gaugeDisplay: fmt(mt.composite_score),
           tip: 'market_top',
@@ -207,18 +228,27 @@
           label: 'Macro',
           value: fred.regime_label || '—',
           sub: fredSignals.real_rate_preferred != null ? `real ${Number(fredSignals.real_rate_preferred).toFixed(2)}%` : `score ${fmt(fredScores.composite)}`,
-          color: fred.regime_label === 'Overheating' ? '#f97316' : colorByScore(fredScores.composite),
+          // Colour follows the regime label, not the composite score: the card
+          // shows the label, and a green ring around "Overheating" because the
+          // composite happened to be 72 is the same stance-vs-value split that
+          // made the exposure card lie. The special-case `=== 'Overheating'`
+          // this replaces covered exactly one of the ten regimes.
+          color: UI.signalColor('macro', fred.regime_label),
           gaugeValue: fredScores.composite ?? 50,
-          gaugeDisplay: fred.regime_label === 'Overheating' ? (isZh ? '熱' : 'HOT') : fmt(fredScores.composite),
+          gaugeDisplay: fmt(fredScores.composite),
           gaugeSuffix: fredSignals.real_rate_preferred != null ? `${Number(fredSignals.real_rate_preferred).toFixed(1)}%` : '',
+          // V4.111.1 — this card carried `data-tip-key: 'macro_briefing_tip'`,
+          // but no PILL_TIPS entry by that name exists on any page, so showTip()
+          // returned early every time: the card looked wired for a popup and
+          // silently had none. Replaced with a real signal tip. The old
+          // `data-tip-text` / `title` are gone rather than kept alongside — on
+          // sector.html the [data-tip-key] listener would now fire next to the
+          // signal tip and stack two tooltips on one hover.
+          tip: 'macro',
           attrs: {
-            'data-tip-key': 'macro_briefing_tip',
-            'data-tip-text': isZh
-              ? `FRED macro regime = ${fred.regime_label || '—'}。綜合利率、通膨、就業、信用與金融條件；Overheating 代表通膨/利率壓力偏高，通常壓抑高估值成長股與長天期資產。Real rate ${fmt(fredSignals.real_rate_preferred, '%')}。`
-              : `FRED macro regime = ${fred.regime_label || '—'}. Composite of rates, inflation, employment, credit, and financial conditions; Overheating means rate/inflation pressure is elevated and usually weighs on high-multiple growth and duration assets. Real rate ${fmt(fredSignals.real_rate_preferred, '%')}.`,
-            title: isZh
-              ? `FRED macro regime: ${fred.regime_label || '—'} · composite ${fmt(fredScores.composite)} · real rate ${fmt(fredSignals.real_rate_preferred, '%')}`
-              : `FRED macro regime: ${fred.regime_label || '—'} · composite ${fmt(fredScores.composite)} · real rate ${fmt(fredSignals.real_rate_preferred, '%')}`,
+            'data-macro-label': fred.regime_label || '',
+            'data-macro-composite': fredScores.composite ?? '',
+            'data-macro-real': fredSignals.real_rate_preferred ?? '',
           },
         },
         {
@@ -236,12 +266,13 @@
       ];
       if (signalGrid) {
         signalGrid.innerHTML = signalCards.map(s => `
-          <div class="rounded-lg border px-2.5 py-1.5 min-h-[60px] flex items-center gap-2.5" ${s.tip ? `data-signal-tip="${s.tip}"` : ''} ${attrStr(s.attrs)}
-               style="border-color:${s.color}38;background:${s.color}10">
-            ${miniGauge({ value: s.gaugeValue, color: s.color, display: s.gaugeDisplay || s.value, suffix: s.gaugeSuffix })}
+          <div class="signal-card${s.wide ? ' signal-card-wide' : ''} rounded-lg border px-2.5 py-1.5 min-h-[60px] flex items-center gap-2.5" ${s.tip ? `data-signal-tip="${s.tip}"` : ''} ${attrStr(s.attrs)}
+               style="border-color:${s.color}${s.wide ? '66' : '38'};background:${s.color}${s.wide ? '18' : '10'}">
+            ${miniGauge({ value: s.gaugeValue, color: s.color, display: s.gaugeDisplay || s.value, suffix: s.gaugeSuffix, big: s.wide })}
             <div class="min-w-0">
               <div class="text-[9px] font-black uppercase tracking-widest text-zinc-500">${UI.escapeHTML(s.label)}</div>
-              <div class="text-[14px] font-black leading-tight mt-1 truncate" style="color:${s.color}" title="${UI.escapeHTML(String(s.value))}">${UI.escapeHTML(String(s.value))}</div>
+              <div class="${s.wide ? 'text-[19px]' : 'text-[14px]'} font-black leading-tight mt-1 truncate" style="color:${s.color}" title="${UI.escapeHTML(String(s.value))}">${UI.escapeHTML(String(s.value))}</div>
+              ${s.tag ? `<div class="signal-card-tag mt-1" style="color:${s.color};border-color:${s.color}55;background:${s.color}1f">${UI.escapeHTML(s.tag)}${s.tagAction ? ` · ${UI.escapeHTML(s.tagAction)}` : ''}</div>` : ''}
               <div class="text-[10px] text-zinc-500 truncate mt-0.5" title="${UI.escapeHTML(String(s.sub))}">${UI.escapeHTML(String(s.sub))}</div>
             </div>
           </div>`).join('');

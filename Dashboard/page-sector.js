@@ -5,6 +5,15 @@
  */
 
 /* ── Pill hover tooltip ─────────────────────────────────────── */
+// One `🟢 75-100%：進攻 — 滿倉操作` line per exposure tier, straight from the
+// shared table so this pill cannot drift from the verdict card again.
+function _exposureScale(lang) {
+    return (window.UI?.EXPOSURE_TIERS || []).map(t => {
+        const l = t[lang === 'en' ? 'en' : 'zh'];
+        return `${t.dot} ${l.range_label}${lang === 'en' ? ': ' : '：'}${l.tag} — ${l.action}`;
+    }).join('\n');
+}
+
 const PILL_TIPS = {
     regime: {
         zh: { title: '市場機制', desc: '描述大盤資金流向的整體狀態，由廣度、FTD、情緒三訊號綜合判定。影響個股分析的建議曝險上限。', scale: '🟢 RISK_ON / BULL：資金進場，適合持股\n🟡 SIDEWAYS / VOLATILE：震盪觀望\n🔴 RISK_OFF / BEAR：資金撤退，降低倉位' },
@@ -18,9 +27,12 @@ const PILL_TIPS = {
         zh: { title: 'FTD 跟進日狀態', desc: 'Follow-Through Day（跟進日），William O\'Neil 確認大盤反彈的信號。反彈第 4 天以上出現大成交量收漲，代表機構資金進場確認。', scale: '🟢 FTD_CONFIRMED：反彈已確認，可增加曝險\n🟡 RALLY_ATTEMPT：反彈觀察中，還沒確認\n🔴 NO_SIGNAL / DISTRIBUTION：無反彈信號或派發中，偏弱' },
         en: { title: 'Follow-Through Day', desc: 'O\'Neil signal confirming a market rally. A big-volume up day on day 4+ of a rally attempt signals institutional buying.', scale: '🟢 FTD_CONFIRMED: rally confirmed, increase exposure\n🟡 RALLY_ATTEMPT: watching, not yet confirmed\n🔴 NO_SIGNAL / DISTRIBUTION: no signal or distribution phase' },
     },
+    // scale is generated from UI.EXPOSURE_TIERS (V4.111.0) — this pill used to
+    // carry its own 75/50 table with no 橘 tier, a third definition of the same
+    // number. Now it can only ever agree with the tooltip and the verdict card.
     exposure: {
-        zh: { title: '建議曝險上限', desc: '由廣度、FTD、市場頂部三訊號合成的最保守倉位上限。超過這個比例持股，整體組合風險偏高。', scale: '🟢 75–100%：市場強健，可高持股\n🟡 50–74%：謹慎，精選個股\n🔴 <50%：防守模式，降低整體倉位' },
-        en: { title: 'Synthesized Exposure Ceiling', desc: 'Most conservative position limit derived from breadth, FTD, and market-top signals. Holding above this level raises portfolio risk.', scale: '🟢 75–100%: strong market, high allocation OK\n🟡 50–74%: cautious, be selective\n🔴 <50%: defensive, reduce overall exposure' },
+        zh: { title: '建議曝險上限', desc: '由廣度、FTD、市場頂部三訊號合成的最保守倉位上限。超過這個比例持股，整體組合風險偏高。', scale: _exposureScale('zh') },
+        en: { title: 'Synthesized Exposure Ceiling', desc: 'Most conservative position limit derived from breadth, FTD, and market-top signals. Holding above this level raises portfolio risk.', scale: _exposureScale('en') },
     },
     fg: {
         zh: { title: '貪婪恐懼指數', desc: 'CNN Fear & Greed Index，0–100 測量市場整體情緒。極度恐懼時往往是買點，極度貪婪時市場容易反轉。', scale: '🟢 45–74  Greed / Neutral：正常市場情緒\n🟡 75–89  Extreme Greed：警戒，估值偏貴\n🔴  0–24  Extreme Fear：恐慌（逆向可能是機會）\n⚠️  >90  Euphoria：高度警戒反轉風險' },

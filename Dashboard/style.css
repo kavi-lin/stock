@@ -391,7 +391,6 @@ aside#sidebar { display: flex; flex-direction: column; }
   background: color-mix(in srgb, var(--text-main) 5%, transparent);
   color: var(--text-main);
 }
-.sidebar-icon-btn-wide { flex: 1; justify-content: flex-start; padding: 6px 10px; }
 
 /* Nav: grouped */
 .sidebar-nav { flex: 1; padding: 10px 12px; overflow-y: auto; }
@@ -446,27 +445,13 @@ aside#sidebar { display: flex; flex-direction: column; }
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
   display: flex; flex-direction: column; gap: 8px;
 }
-.sidebar-risk {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 12px; border-radius: 10px;
-  background: color-mix(in srgb, var(--text-main) 4%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text-main) 10%, transparent);
-  cursor: pointer; transition: all 0.15s;
-  width: 100%;
-}
-.sidebar-risk:hover {
-  border-color: color-mix(in srgb, var(--text-main) 22%, transparent);
-  background: color-mix(in srgb, var(--text-main) 7%, transparent);
-}
-.sidebar-risk-label {
-  font-size: 9px; font-weight: 900;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-muted);
-}
+/* Risk chip — V4.111.2 shrank it from a full-width footer button to a chip in
+   the settings popup. It is set once every few days; it was taking the most
+   prominent slot in the sidebar for a control nobody touches intraday. */
 .sidebar-risk-chip {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px; font-weight: 900;
-  padding: 3px 9px; border-radius: 5px;
+  font-size: 9px; font-weight: 900;
+  padding: 1.5px 6px; border-radius: 4px;
   letter-spacing: 0.04em;
   border: 1px solid;
   font-variant-numeric: tabular-nums;
@@ -484,8 +469,42 @@ aside#sidebar { display: flex; flex-direction: column; }
   box-shadow: 0 0 8px rgba(239,68,68,0.30);
 }
 
-.sidebar-icon-row {
-  display: flex; gap: 6px; align-items: stretch;
+/* ── Settings popup (header gear) ─────────────────────────────────
+   Theme / risk / language / logs, plus the quota panel's explanation. These
+   are set-once controls; the footer they used to occupy is now the always-on
+   quota readout. Anchored under the gear rather than centred as a modal so it
+   reads as belonging to that button. */
+.sidebar-header { position: relative; }
+.sidebar-pop {
+  position: absolute; top: calc(100% - 6px); right: 14px; z-index: 60;
+  width: 214px; padding: 6px;
+  display: flex; flex-direction: column; gap: 1px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+.sidebar-pop.hidden { display: none; }
+.sidebar-pop-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 6px 8px; border-radius: 7px;
+  background: transparent; border: 0; cursor: pointer;
+  color: var(--text-main); text-align: left;
+  transition: background 0.12s;
+}
+.sidebar-pop-row:hover { background: color-mix(in srgb, var(--text-main) 7%, transparent); }
+.sidebar-pop-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10.5px; font-weight: 700; color: var(--text-main);
+}
+.sidebar-pop-label i, .sidebar-pop-label svg { color: var(--text-muted); flex-shrink: 0; }
+.sidebar-pop-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.sidebar-pop .sidebar-llm-help {
+  margin-top: 3px; padding: 7px 8px 2px 8px;
 }
 
 .sidebar-version {
@@ -498,39 +517,208 @@ aside#sidebar { display: flex; flex-direction: column; }
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 8%, transparent);
 }
 
-/* ── Sidebar LLM settings panel ─────────────────────────────────── */
-.sidebar-settings {
-  display: flex; flex-direction: column; gap: 6px;
+/* ── Verdict signal grid — synthesized card vs fetched cards ──────
+   Every card in #tv-signal-grid but one is a reading fetched from a source
+   (breadth CSV, FTD state, FRED…). The exposure ceiling is the only one the
+   system *derives*, and it is the number position sizing actually keys off.
+   It gets two columns, a heavier border, and a tier tag so it does not read
+   as the sixth equal tile. Column span only past the xl breakpoint — below
+   that the grid is 2-3 wide and a 2-span card would eat the whole row. */
+.signal-card-wide { grid-column: span 1; }
+@media (min-width: 1280px) {
+  .signal-card-wide { grid-column: span 2; }
+}
+.signal-card-tag {
+  display: inline-block;
+  font-size: 9px; font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 1.5px 6px; border-radius: 5px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* ── Sidebar LLM quota panel (V4.111.0) ──────────────────────────
+   Always visible, no longer folded into the gear: quota answers "can I launch
+   this now", which is a thing to know before clicking, not after opening a
+   panel. The gear keeps only the prose explanation (.sidebar-llm-help). */
+.sidebar-llm {
+  display: flex; flex-direction: column; gap: 7px;
   padding: 8px; border-radius: 8px;
   background: color-mix(in srgb, var(--text-muted) 6%, transparent);
   border: 1px solid color-mix(in srgb, var(--text-muted) 12%, transparent);
 }
-.sidebar-settings.hidden { display: none; }
-.sidebar-set-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  font-size: 9.5px; font-weight: 700; color: var(--text-muted);
-  letter-spacing: 0.04em;
+.sidebar-llm-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
 }
-.sidebar-set-select {
-  flex-shrink: 0; width: 96px;
-  font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 6px;
-  background: var(--bg-card); color: var(--text-main);
-  border: 1px solid color-mix(in srgb, var(--text-muted) 22%, transparent);
-  cursor: pointer;
+.sidebar-llm-title {
+  font-size: 8px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted);
 }
-.sidebar-set-hint {
-  font-size: 8.5px; color: var(--text-muted); opacity: 0.7; line-height: 1.4;
+.sidebar-llm-state {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5px; font-weight: 700; color: var(--text-muted); opacity: 0.6;
 }
-.sidebar-set-sub {
+.sidebar-llm-state-warn { color: #eab308; opacity: 1; }
+
+/* One provider block: name + headline %, bar, windows, route tags */
+.sidebar-llm-prov { display: flex; flex-direction: column; gap: 3px; }
+.sidebar-llm-prov + .sidebar-llm-prov {
+  margin-top: 7px; padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 12%, transparent);
+}
+.sidebar-llm-prov-head {
+  display: flex; align-items: baseline; gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.sidebar-llm-prov-name {
+  flex-shrink: 0;
+  font-size: 9px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-main);
+}
+.sidebar-llm-prov-pct {
+  flex-shrink: 0; margin-left: auto;
+  font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums;
+  color: var(--llm-accent, #10b981);
+}
+.sidebar-llm-bar {
+  position: relative; height: 5px; border-radius: 3px; overflow: hidden;
+  background: color-mix(in srgb, var(--text-muted) 18%, transparent);
+}
+.sidebar-llm-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: var(--llm-accent, #10b981);
+  transition: width 0.35s ease;
+}
+/* Hard reserve marker — the floor the broker refuses to dispatch below.
+   Drawn over the fill so a bar that looks healthy still shows where it stops
+   being usable. Omitted entirely when the broker did not report a value. */
+.sidebar-llm-bar-reserve {
+  position: absolute; top: -1px; bottom: -1px; width: 0;
+  border-left: 1px dashed color-mix(in srgb, var(--text-main) 55%, transparent);
+}
+.sidebar-llm-prov { cursor: default; }
+.sidebar-llm-flag {
+  flex: 1 1 auto; min-width: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; font-weight: 900; color: var(--llm-accent, #eab308);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Provider hover card — every window, its reset, freshness, routes and spend.
+   All of this used to sit inline under each bar in small grey type, which made
+   the pinned panel tall and hard to scan; the bars are the always-on part, the
+   detail is on demand. */
+.llm-tip {
+  position: fixed; z-index: 90;
+  width: 250px; max-width: calc(100vw - 24px);
+  padding: 9px 11px; border-radius: 9px;
+  background: var(--bg-card);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+.llm-tip.hidden { display: none; }
+.llm-tip-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.llm-tip-name {
+  font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-main);
+}
+.llm-tip-pct {
+  font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums;
+  color: var(--llm-accent, #10b981);
+}
+.llm-tip-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; font-weight: 600; color: var(--text-muted); opacity: 0.7;
+  margin-top: 2px;
+}
+.llm-tip-bkts {
+  display: flex; flex-direction: column; gap: 2px;
+  margin-top: 7px; padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+.llm-tip-bkt {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  column-gap: 8px; align-items: baseline;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600; line-height: 1.5; color: var(--text-main);
+}
+.llm-tip-bkt-name  { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.llm-tip-bkt-pct   { font-weight: 900; font-variant-numeric: tabular-nums; }
+.llm-tip-bkt-reset { color: var(--text-muted); opacity: 0.7; white-space: nowrap; }
+.llm-tip-routes, .llm-tip-dim, .llm-tip-foot {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; font-weight: 600; color: var(--text-muted);
+  line-height: 1.5; margin-top: 5px;
+}
+.llm-tip-dim { opacity: 0.55; }
+.llm-tip-foot {
+  padding-top: 5px;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 16%, transparent);
+  opacity: 0.85;
+}
+.sidebar-llm-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+.sidebar-llm-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; font-weight: 800; letter-spacing: 0.03em;
+  padding: 1px 4px; border-radius: 3px;
+  color: var(--llm-accent, #10b981);
+  background: color-mix(in srgb, var(--llm-accent, #10b981) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--llm-accent, #10b981) 30%, transparent);
+}
+.sidebar-llm-tag-idle {
+  color: var(--text-muted); background: transparent;
+  border-color: color-mix(in srgb, var(--text-muted) 25%, transparent);
+}
+
+/* Provider states — a green bar on a provider the broker will not use is the
+   most misleading thing this panel could show, so state drives every accent. */
+.sidebar-llm-ok   { --llm-accent: #10b981; }
+.sidebar-llm-cool { --llm-accent: #eab308; }
+.sidebar-llm-low  { --llm-accent: #f97316; }
+.sidebar-llm-off  { --llm-accent: #a1a1aa; opacity: 0.6; }
+
+.sidebar-llm-notice {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; font-weight: 700; letter-spacing: 0.03em;
+  color: var(--llm-accent, var(--text-muted));
+}
+.sidebar-llm-foot {
+  display: flex; flex-direction: column; gap: 3px;
+}
+/* Degraded-path only: with the broker down there are no provider rows to
+   hover, so spend stays inline there rather than having no home at all. */
+.sidebar-llm-spend {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 12%, transparent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5px; font-weight: 600; color: var(--text-muted); opacity: 0.8;
+  line-height: 1.35; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.sidebar-llm-sub {
   font-size: 8px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--text-muted); margin-top: 6px; padding-top: 5px;
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 14%, transparent);
 }
-/* per-model daily usage / cooldown readout */
-.sidebar-llm-usage {
-  display: flex; flex-direction: column; gap: 2px; margin-top: 4px;
-  padding-top: 5px; border-top: 1px solid color-mix(in srgb, var(--text-muted) 14%, transparent);
+.sidebar-llm-help {
+  display: flex; flex-direction: column; gap: 5px;
+  margin-top: 2px; padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 14%, transparent);
+  font-size: 8.5px; color: var(--text-muted); opacity: 0.75; line-height: 1.45;
 }
+.sidebar-llm-help.hidden { display: none; }
+.sidebar-llm-help code {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  padding: 0 3px; border-radius: 3px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+}
+
+/* Local per-model call counters — only rendered on the degraded path */
 .sidebar-llm-row {
   display: flex; justify-content: space-between; gap: 8px;
   font-size: 8.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
@@ -538,11 +726,6 @@ aside#sidebar { display: flex; flex-direction: column; }
 }
 .sidebar-llm-row.sidebar-llm-cool { color: #eab308; }
 .sidebar-llm-row.sidebar-llm-off  { color: var(--text-muted); opacity: 0.5; }
-.sidebar-llm-tok {
-  font-size: 7.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
-  color: var(--text-muted); opacity: 0.65; text-transform: none;
-  letter-spacing: 0; margin: -2px 0 5px 2px; line-height: 1.3;
-}
 
 /* Custom Scrollbar — width applies to vertical, height to horizontal.
    Without `height`, horizontal scrollbars fall back to browser default

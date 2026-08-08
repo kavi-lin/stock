@@ -168,7 +168,10 @@ function renderThreeSignalMini(data) {
   const mids = [br.exposure_ceiling, ftd.exposure_range, mt.risk_budget].map(pm).filter(v => v !== null);
   const synth = mids.length ? Math.min(...mids) : null;
   const synthLabel = synth !== null ? `${Math.round(synth)}%` : '—';
-  const synthColor = synth === null ? '#71717a' : synth >= 75 ? '#22c55e' : synth >= 50 ? '#f59e0b' : '#ef4444';
+  // V4.111.0 — shared tier table. The old inline ladder had the right 75/50
+  // breakpoints but its own amber, and no defensive tier at all, so a 40%
+  // synth ceiling painted the same red as a 5% one.
+  const synthColor = synth === null ? '#71717a' : (UI.exposureTier(synth)?.color || '#71717a');
 
   const zoneCol = (z) => {
     if (!z) return '#71717a'; const zl = z.toLowerCase();
@@ -499,12 +502,9 @@ function renderSectorStatusStrip(data) {
             midPct = Number(single[1]);
             displayStr = `${single[1]}<span class="sector-gauge-unit">%</span>`;
         }
-        // Mirrors exposure tooltip 4-tier semantic (utils.js br_strong/healthy/neutral/critical)
-        const expColor = midPct == null ? '#a78bfa'
-                       : midPct >= 85 ? '#22c55e'   // 85-100 滿倉 🟢
-                       : midPct >= 60 ? '#eab308'   // 60-85 標準 🟡
-                       : midPct >= 30 ? '#f59e0b'   // 30-60 防禦 🟠
-                       : '#ef4444';                  // 0-30 極低 🔴
+        // V4.111.0 — was a private 85/60/30 copy of the tier table, so this pill
+        // and its own hover tooltip could disagree about the same number.
+        const expColor = UI.exposureTier(midPct)?.color || '#a78bfa';
         exposureEl.innerHTML = _gaugeHTML({
             value: midPct,
             label: tr.pill_exposure || (isZh ? '曝險上限' : 'Exposure'),

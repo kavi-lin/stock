@@ -8,7 +8,7 @@
 
   // Semantic release tag shown in sidebar footer. Bump on meaningful releases.
   // Cache-busting is handled separately by dashboard_server.py (mtime injection).
-  const VERSION = 'V4.109.1';
+  const VERSION = 'V4.111.3';
 
   // V1.71.x — group field enables sectioned sidebar layout
   const NAV_ITEMS = [
@@ -43,8 +43,193 @@
     { key: 'ops',       zh: '工具',  en: 'OPS',       icon: 'wrench' },
   ];
 
+  // ── Exposure ceiling tiers — THE single threshold table (V4.111.0) ───────
+  // One number ("what % of the portfolio may be deployed") used to carry four
+  // disagreeing definitions: the exposure guide said 85/60/30, the synth guide
+  // and the sector pill said 75/50/25, and the verdict card ignored the value
+  // entirely and coloured itself by the verdict *stance* — which is why a
+  // 75-90% ceiling rendered red while its own tooltip called it standard.
+  //
+  // 75/50/25 wins because two of the three tables already used it, and because
+  // it is the boundary the synth formula (min of three midpoints) was written
+  // against. Everything that classifies an exposure figure now reads this list:
+  // the tooltip stage tables, the sector pill scale, and the verdict card.
+  //
+  // Ranges are on the **midpoint** of the ceiling: a cap is published as a band
+  // ("75-90%") and the midpoint is what positions it. Colour, gauge fill, and
+  // gauge number all derive from that one value, so they cannot drift apart.
+  const EXPOSURE_TIERS = [
+    { key: 'ex_full', min: 75, max: 100, color: '#22c55e', dot: '🟢',
+      zh: { range_label: '75-100%', tag: '進攻', action: '滿倉操作',
+            detail: '三訊號全綠，cash 0-25%，新進不限制，可加碼領導股' },
+      en: { range_label: '75-100%', tag: 'Aggressive', action: 'Full size',
+            detail: 'All 3 signals green, cash 0-25%, no entry limits, can add to leaders' } },
+    { key: 'ex_standard', min: 50, max: 74, color: '#eab308', dot: '🟡',
+      zh: { range_label: '50-75%', tag: '標準', action: '正常配置',
+            detail: '主升段或訊號小幅雜訊，留 25-50% 現金，新進需挑高 RS 標的' },
+      en: { range_label: '50-75%', tag: 'Standard', action: 'Normal',
+            detail: 'Uptrend or minor signal noise — hold 25-50% cash, prefer high-RS names' } },
+    { key: 'ex_defensive', min: 25, max: 49, color: '#f97316', dot: '🟠',
+      zh: { range_label: '25-50%', tag: '防禦', action: '降倉、選股',
+            detail: '至少一個訊號明顯轉弱，cash 50-75%，僅留高 conviction 個股' },
+      en: { range_label: '25-50%', tag: 'Defensive', action: 'Cut & select',
+            detail: 'At least one signal clearly weakening — cash 50-75%, high-conviction only' } },
+    { key: 'ex_minimal', min: 0, max: 24, color: '#ef4444', dot: '🔴',
+      zh: { range_label: '0-25%', tag: '極低', action: 'Cash 為主',
+            detail: '訊號明顯偏空或已 critical，幾乎不開新倉、等下次 FTD' },
+      en: { range_label: '0-25%', tag: 'Minimal', action: 'Cash priority',
+            detail: 'Bearish or already critical — barely any new entries, wait for next FTD' } },
+  ];
+
+  // ── Signal tiers — THE threshold tables for the verdict cards (V4.111.1) ─
+  // Same disease EXPOSURE_TIERS cured, two cards over: the tooltips carried
+  // real 5-tier tables while the cards coloured themselves with a generic
+  // `colorByScore(n, inverse)` whose only breakpoints were 35/65. Market top
+  // 31.6 therefore rendered green while its own tooltip — and its own
+  // `zone: "Yellow (Early Warning)"` — called it an early warning. None of the
+  // generic helper's cut points matched any tooltip's, and it had no orange
+  // tier at all where market top has two.
+  //
+  // `range` tiers classify a 0-100 score; `label` tiers classify a categorical
+  // regime string. Both carry the prose the tooltip stage table renders, so a
+  // tier cannot be recoloured without its explanation moving with it.
+  const SIGNAL_TIERS = {
+    // Higher = healthier. Unchanged thresholds — these were already correct in
+    // the tooltip; it is the card that was reading a different table.
+    breadth: { kind: 'range', tiers: [
+      { key: 'br_strong', min: 75, max: 100, color: '#22c55e', dot: '🟢',
+        zh: { range_label: 'score 75+', tag: '健康強勢', action: '全力進攻', detail: '多數成分股健康突破，可以高倉位、新進不限制' },
+        en: { range_label: 'score 75+', tag: 'Strong', action: 'Full attack', detail: 'Most stocks healthy & breaking out — full size, no entry restrictions' } },
+      { key: 'br_healthy', min: 60, max: 74, color: '#22c55e', dot: '🟢',
+        zh: { range_label: 'score 60-75', tag: '主升中段', action: '標準參與', detail: '行情仍在主升段，標準倉位 + 一般停損即可' },
+        en: { range_label: 'score 60-75', tag: 'Healthy', action: 'Standard', detail: 'Uptrend intact — standard size + stop' } },
+      { key: 'br_neutral', min: 40, max: 59, color: '#eab308', dot: '🟡',
+        zh: { range_label: 'score 40-60', tag: '訊號混合', action: '選股、降倉', detail: '多空交雜，僅選 RS 強標的 + 倉位降 25%' },
+        en: { range_label: 'score 40-60', tag: 'Neutral', action: 'Selective', detail: 'Mixed signals — high-RS only + size −25%' } },
+      { key: 'br_weakening', min: 25, max: 39, color: '#f97316', dot: '🟠',
+        zh: { range_label: 'score 25-40', tag: '走弱中', action: '防禦為主', detail: '個股普遍轉弱，避免新進、現有倉位收緊停損' },
+        en: { range_label: 'score 25-40', tag: 'Weakening', action: 'Defensive', detail: 'Stocks broadly weakening — no new entries + tighten stops' } },
+      { key: 'br_critical', min: 0, max: 24, color: '#ef4444', dot: '🔴',
+        zh: { range_label: 'score < 25', tag: '行情危險', action: '退守 cash', detail: '多數股票破位，cash 為王、保留資金等下次 FTD' },
+        en: { range_label: 'score < 25', tag: 'Critical', action: 'Cash priority', detail: 'Most stocks breaking down — cash priority, wait for next FTD' } },
+    ] },
+
+    // Higher = MORE topping risk. The inversion lives in the table, not in a
+    // boolean argument at each call site — which is how the card ended up
+    // asking for `inverse` and still getting the wrong tier.
+    market_top: { kind: 'range', tiers: [
+      { key: 'mt_normal', min: 0, max: 29, color: '#22c55e', dot: '🟢',
+        zh: { range_label: 'score 0-30', tag: '正常', action: '可進攻', detail: '暫無頂部訊號，廣度與領導同步，倉位上限可拉滿' },
+        en: { range_label: 'score 0-30', tag: 'Normal', action: 'Attack', detail: 'No topping signals, breadth + leadership aligned, full size OK' } },
+      { key: 'mt_warning', min: 30, max: 49, color: '#eab308', dot: '🟡',
+        zh: { range_label: 'score 30-50', tag: '早期警告', action: '留意', detail: '個別訊號出現（如 distribution day 累積），上限不變但需密切觀察' },
+        en: { range_label: 'score 30-50', tag: 'Early warning', action: 'Watch', detail: 'Isolated signals (e.g. distribution days) — size unchanged but monitor' } },
+      { key: 'mt_elevated', min: 50, max: 64, color: '#f97316', dot: '🟠',
+        zh: { range_label: 'score 50-65', tag: '風險升高', action: '降倉、收緊', detail: '訊號累積中，倉位上限調降至 60-80%、停損收緊' },
+        en: { range_label: 'score 50-65', tag: 'Elevated', action: 'Cut & tighten', detail: 'Signals stacking — cap at 60-80%, tighten stops' } },
+      { key: 'mt_high', min: 65, max: 79, color: '#f97316', dot: '🟠',
+        zh: { range_label: 'score 65-80', tag: '高機率頂部', action: '撤退中', detail: '明確頂部訊號，倉位上限 40-60%、僅留高 conviction 標的' },
+        en: { range_label: 'score 65-80', tag: 'High risk', action: 'Retreat', detail: 'Clear top signals — cap at 40-60%, keep only high-conviction names' } },
+      { key: 'mt_top', min: 80, max: 100, color: '#ef4444', dot: '🔴',
+        zh: { range_label: 'score 80+', tag: '頂部成形', action: 'Cash 優先', detail: '訊號全到位，倉位上限 ≤ 30%、現金為主等修正' },
+        en: { range_label: 'score 80+', tag: 'Top formed', action: 'Cash priority', detail: 'All signals tripped — cap ≤30%, cash priority, wait for correction' } },
+    ] },
+
+    // Categorical. `labels` are the ten values validate_phase0.VALID_REGIMES
+    // admits; anything outside that set classifies as null rather than being
+    // bucketed by guesswork, so a renamed regime shows grey instead of a
+    // confident wrong colour. Grouping approved by the user 2026-08-08.
+    macro: { kind: 'label', tiers: [
+      { key: 'mc_benign', color: '#22c55e', dot: '🟢',
+        labels: ['Goldilocks', 'Soft Landing', 'Reflation', 'Benign Easing'],
+        zh: { range_label: 'benign', tag: '順風', action: '正常配置', detail: 'Goldilocks / Soft Landing / Reflation / Benign Easing — 通膨與利率壓力不強，成長股與長天期資產不受壓抑' },
+        en: { range_label: 'benign', tag: 'Tailwind', action: 'Normal', detail: 'Goldilocks / Soft Landing / Reflation / Benign Easing — rate & inflation pressure contained, growth and duration unpenalised' } },
+      { key: 'mc_transition', color: '#eab308', dot: '🟡',
+        labels: ['Transitional', 'Recession Easing'],
+        zh: { range_label: 'transition', tag: '過渡', action: '看其他訊號', detail: 'Transitional / Recession Easing — 體制未定或衰退中政策已轉鬆（落底過程），macro 不主導，靠廣度與 FTD 決策' },
+        en: { range_label: 'transition', tag: 'In flux', action: 'Defer to others', detail: 'Transitional / Recession Easing — regime unsettled or policy easing into a downturn; let breadth and FTD lead' } },
+      { key: 'mc_tightening', color: '#f97316', dot: '🟠',
+        labels: ['Overheating', 'Late Cycle Tightening'],
+        zh: { range_label: 'tightening', tag: '緊縮', action: '壓抑成長股', detail: 'Overheating / Late Cycle Tightening — 通膨或利率壓力偏高，高估值成長與長天期資產首當其衝，偏好現金流與定價權' },
+        en: { range_label: 'tightening', tag: 'Tightening', action: 'Growth penalised', detail: 'Overheating / Late Cycle Tightening — rate/inflation pressure elevated; high-multiple growth and duration hit first, favour cash flow and pricing power' } },
+      { key: 'mc_stress', color: '#ef4444', dot: '🔴',
+        labels: ['Stagflation', 'Recession Risk'],
+        zh: { range_label: 'stress', tag: '壓力', action: '防禦', detail: 'Stagflation / Recession Risk — 成長與通膨同時不利或信用轉壞，降低整體曝險、避開高槓桿與景氣循環股' },
+        en: { range_label: 'stress', tag: 'Stress', action: 'Defensive', detail: 'Stagflation / Recession Risk — growth and inflation both adverse or credit deteriorating; cut exposure, avoid leverage and cyclicals' } },
+    ] },
+  };
+
   window.UI = {
     VERSION,
+    EXPOSURE_TIERS,
+    SIGNAL_TIERS,
+
+    // ── Signal tier helpers ──────────────────────────────────────────────
+    // `value` is a 0-100 score for range signals, a regime string for label
+    // signals. Returns null for missing/unknown input so callers render grey
+    // rather than committing to a tier they cannot justify.
+    signalTier(signal, value) {
+      const spec = SIGNAL_TIERS[signal];
+      if (!spec || value === null || value === undefined || value === '') return null;
+      if (spec.kind === 'label') {
+        const v = String(value).trim().toLowerCase();
+        return spec.tiers.find(t => t.labels.some(l => l.toLowerCase() === v)) || null;
+      }
+      const n = Number(value);
+      if (Number.isNaN(n)) return null;
+      return spec.tiers.find(t => n >= t.min && n <= t.max)
+          || (n > 100 ? spec.tiers.find(t => t.max === 100) : spec.tiers.find(t => t.min === 0))
+          || null;
+    },
+
+    // Colour for a card/gauge. Grey when the tier is unknown — the one honest
+    // answer when the value is missing or the regime name is unrecognised.
+    signalColor(signal, value) {
+      return UI.signalTier(signal, value)?.color || '#a1a1aa';
+    },
+
+    // Tier rows in the shape the tooltip stage tables expect.
+    signalStages(signal, lang) {
+      const spec = SIGNAL_TIERS[signal];
+      if (!spec) return [];
+      const l = lang === 'en' ? 'en' : 'zh';
+      return spec.tiers.map(t => ({
+        key: t.key,
+        range: spec.kind === 'range' ? [t.min, t.max] : null,
+        labels: t.labels || null,
+        ...t[l],
+      }));
+    },
+
+    // ── Exposure ceiling helpers ─────────────────────────────────────────
+    // `"75-90%"` → 82.5. A ceiling is published as a band; the midpoint is the
+    // single number every consumer positions on (see EXPOSURE_TIERS). Returns
+    // null for anything unparseable so callers can show "—" instead of a 0%
+    // that would read as "go to cash".
+    exposureMid(raw) {
+      const nums = String(raw ?? '').match(/\d+(?:\.\d+)?/g);
+      if (!nums || !nums.length) return null;
+      return nums.length > 1
+        ? (Number(nums[0]) + Number(nums[1])) / 2
+        : Number(nums[0]);
+    },
+
+    // Tier for a numeric midpoint (not a raw band string — call exposureMid
+    // first). Clamps rather than returning null for out-of-range input: a
+    // ceiling above 100 or below 0 is bad data, but "off the top" is still
+    // unambiguously the top tier.
+    exposureTier(mid) {
+      if (mid === null || mid === undefined || Number.isNaN(Number(mid))) return null;
+      const v = Number(mid);
+      return EXPOSURE_TIERS.find(t => v >= t.min && v <= t.max)
+          || (v > 100 ? EXPOSURE_TIERS[0] : EXPOSURE_TIERS[EXPOSURE_TIERS.length - 1]);
+    },
+
+    // Tier rows in the shape the tooltip stage tables expect.
+    exposureStages(lang) {
+      const l = lang === 'en' ? 'en' : 'zh';
+      return EXPOSURE_TIERS.map(t => ({ key: t.key, range: [t.min, t.max], ...t[l] }));
+    },
 
     // ── Theme ────────────────────────────────────────────────────────────
     currentTheme: localStorage.getItem('dash_theme') || 'dark',
@@ -83,8 +268,12 @@
       const t = window.i18n?.[UI.currentLang];
       if (!t) return;
       const nav = t.nav || {};
+      // Shows the language currently in force, not the one clicking switches
+      // to. It used to be a standalone toggle button where "English" meant
+      // "switch to English"; as a settings row next to "主題 · 深色" the same
+      // text would read as a statement of current state, so now it is one.
       const langEl = document.getElementById('lang-text');
-      if (langEl) langEl.textContent = UI.currentLang === 'zh' ? 'English' : '繁體中文';
+      if (langEl) langEl.textContent = UI.currentLang === 'zh' ? '繁體中文' : 'English';
       document.querySelectorAll('[data-i18n^="nav_"]').forEach(el => {
         const key = el.getAttribute('data-i18n').replace('nav_', '');
         if (nav[key]) el.textContent = nav[key];
@@ -447,177 +636,493 @@
               <div class="sidebar-brand-sub" data-nav-brand-sub data-zh="識微 · AI 投資委員會" data-en="AI Investment Committee">${isZh ? '識微 · AI 投資委員會' : 'AI Investment Committee'}</div>
             </div>
           </div>
-          <button id="theme-toggle" class="sidebar-icon-btn" title="${isZh ? '切換主題' : 'Toggle theme'}">
-            <i data-lucide="moon" class="w-3.5 h-3.5" id="theme-icon"></i>
+          <button id="settings-toggle" class="sidebar-icon-btn" title="${isZh ? '設定' : 'Settings'}">
+            <i data-lucide="settings" class="w-3.5 h-3.5"></i>
           </button>
+
+          <!-- V4.111.2 — theme / risk / language / logs all moved off the
+               footer and behind this one gear. They are set-once controls; the
+               footer they used to occupy is now the always-on quota panel,
+               which is read constantly. -->
+          <div id="settings-popup" class="sidebar-pop hidden">
+            <button id="theme-toggle" class="sidebar-pop-row" type="button">
+              <span class="sidebar-pop-label">
+                <i data-lucide="moon" class="w-3 h-3" id="theme-icon"></i>
+                ${isZh ? '主題' : 'Theme'}
+              </span>
+              <span id="theme-value" class="sidebar-pop-value"></span>
+            </button>
+            <button id="risk-toggle" class="sidebar-pop-row" type="button"
+                    title="${isZh ? '點擊循環 LOW → MEDIUM → HIGH' : 'Click to cycle LOW → MEDIUM → HIGH'}">
+              <span class="sidebar-pop-label">
+                <i data-lucide="shield" class="w-3 h-3"></i>
+                ${isZh ? '風險容忍' : 'Risk'}
+              </span>
+              <span id="risk-chip" class="sidebar-risk-chip">${UI.riskTolerance}</span>
+            </button>
+            <button id="lang-toggle" class="sidebar-pop-row" type="button">
+              <span class="sidebar-pop-label">
+                <i data-lucide="languages" class="w-3 h-3"></i>
+                ${isZh ? '語言' : 'Language'}
+              </span>
+              <span id="lang-text" class="sidebar-pop-value">${isZh ? '繁體中文' : 'English'}</span>
+            </button>
+            <button id="show-logs" class="sidebar-pop-row" type="button">
+              <span class="sidebar-pop-label">
+                <i data-lucide="terminal" class="w-3 h-3"></i>
+                ${isZh ? '系統日誌' : 'System logs'}
+              </span>
+              <span class="sidebar-pop-value">${isZh ? '開/關' : 'toggle'}</span>
+            </button>
+            <div class="sidebar-llm-help">
+              <div>${isZh
+                ? '額度由 quota broker 授權，它只派還有額度的一家，所以沒有「降級順序」可設。要改指派請編輯 <code>config/llm_config.json</code>。'
+                : 'Quota is authorised by the broker, which only ever assigns a provider that has quota — there is no fallback order to configure. Edit <code>config/llm_config.json</code> to change assignments.'}</div>
+              <div>${isZh
+                ? '長條 = 該家最緊的窗口還剩多少；虛線是 broker 的硬保留線，低於它就不再派工。滑過任一家可看各窗口（5h / 週 / 本節）、重置時間與今日花費。'
+                : 'Each bar is the tightest window that provider has left; the dashed line is the broker hard reserve — below it nothing is dispatched. Hover a provider for its windows (5h / weekly / session), reset times and spend.'}</div>
+              <div>${isZh
+                ? '花費只有本地帳本有（broker 不報金額）。呼叫次數上限只有在 broker 關掉或連不上時才是真的限制，所以平常不顯示。'
+                : 'Spend comes from the local ledger only — the broker does not report cost. The per-day call caps bind only when the broker is off or unreachable, so they stay hidden until then.'}</div>
+            </div>
+          </div>
         </div>
 
         <!-- Nav (grouped) -->
         <nav class="sidebar-nav">${groupsHTML}</nav>
 
-        <!-- Footer: prominent risk pill + icon row + version -->
+        <!-- Footer: the quota panel and nothing else. Everything that used to
+             sit above it is a set-once control and now lives behind the header
+             gear; this is the part that is read on every glance. -->
         <div class="sidebar-footer">
-          <button id="risk-toggle" class="sidebar-risk" title="${isZh ? '點擊循環 LOW → MEDIUM → HIGH' : 'Click to cycle LOW → MEDIUM → HIGH'}">
-            <span class="sidebar-risk-label">${isZh ? '風險容忍' : 'RISK'}</span>
-            <span id="risk-chip" class="sidebar-risk-chip">${UI.riskTolerance}</span>
-          </button>
-          <div class="sidebar-icon-row">
-            <button id="lang-toggle" class="sidebar-icon-btn sidebar-icon-btn-wide" title="${isZh ? '切換語言' : 'Toggle language'}">
-              <i data-lucide="languages" class="w-3.5 h-3.5"></i>
-              <span id="lang-text" class="text-[10px] font-bold">English</span>
-            </button>
-            <button id="settings-toggle" class="sidebar-icon-btn" title="${isZh ? 'LLM 設定' : 'LLM settings'}">
-              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-            </button>
-            <button id="show-logs" class="sidebar-icon-btn" title="${isZh ? '系統日誌' : 'System logs'}">
-              <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-          <div id="settings-panel" class="sidebar-settings hidden">
-            <div class="sidebar-set-sub">${isZh ? 'LLM 路由' : 'LLM routing'}</div>
-            <div id="llm-routing" class="sidebar-llm-usage"></div>
-            <div class="sidebar-set-hint">${isZh ? '由 quota broker 授權；它只會派出還有額度的一家，所以沒有「降級順序」可設。要改指派請編輯 config/llm_config.json。' : 'Authorised by the quota broker, which only ever assigns a provider that has quota — so there is no fallback order to configure. Edit config/llm_config.json to change assignments.'}</div>
-            <div class="sidebar-set-sub">${isZh ? '本地用量（降級路徑用）' : 'Local usage (degraded path)'}</div>
-            <div id="llm-usage" class="sidebar-llm-usage"></div>
+          <div id="llm-panel" class="sidebar-llm">
+            <div class="sidebar-llm-head">
+              <span class="sidebar-llm-title">${isZh ? 'LLM 額度' : 'LLM QUOTA'}</span>
+              <span id="llm-panel-state" class="sidebar-llm-state"></span>
+            </div>
+            <div id="llm-providers"></div>
+            <div id="llm-foot" class="sidebar-llm-foot"></div>
           </div>
           <div class="sidebar-version">${VERSION}</div>
         </div>`;
 
       // Wire sidebar buttons immediately after DOM insertion
-      document.getElementById('theme-toggle')?.addEventListener('click', () => UI.toggleTheme());
-      document.getElementById('lang-toggle')?.addEventListener('click',  () => UI.toggleLang());
-      document.getElementById('show-logs')?.addEventListener('click',    () =>
-        document.getElementById('debug-console')?.classList.toggle('hidden'));
-      document.getElementById('risk-toggle')?.addEventListener('click',  () => UI.cycleRiskTolerance());
-      document.getElementById('settings-toggle')?.addEventListener('click', () =>
-        document.getElementById('settings-panel')?.classList.toggle('hidden'));
+      const pop = document.getElementById('settings-popup');
+      const closePop = () => pop?.classList.add('hidden');
+      // Theme and language re-render the whole sidebar, which destroys this
+      // popup mid-click. Reopening it afterwards keeps the menu where the user
+      // left it — toggling theme should not also dismiss the menu they are in.
+      document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        UI.toggleTheme(); UI._reopenSettings = true;
+      });
+      document.getElementById('lang-toggle')?.addEventListener('click', () => {
+        UI.toggleLang(); UI._reopenSettings = true;
+      });
+      document.getElementById('show-logs')?.addEventListener('click', () => {
+        document.getElementById('debug-console')?.classList.toggle('hidden');
+        closePop();
+      });
+      document.getElementById('risk-toggle')?.addEventListener('click', () => UI.cycleRiskTolerance());
+      document.getElementById('settings-toggle')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        pop?.classList.toggle('hidden');
+      });
+      // Dismiss on outside click / Escape. Bound once per page — renderSidebar
+      // runs again on every theme and language toggle.
+      if (!UI._settingsPopBound) {
+        UI._settingsPopBound = true;
+        document.addEventListener('click', (e) => {
+          const p = document.getElementById('settings-popup');
+          if (!p || p.classList.contains('hidden')) return;
+          if (!e.target.closest?.('#settings-popup, #settings-toggle')) p.classList.add('hidden');
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') document.getElementById('settings-popup')?.classList.add('hidden');
+        });
+      }
+      if (UI._reopenSettings) { UI._reopenSettings = false; pop?.classList.remove('hidden'); }
       UI._paintRiskChip();
-      UI._initLlmRouting();
+      UI._paintThemeValue();
+      UI._initLlmPanel();
     },
 
-    // ── LLM routing readout (V4.109.0 — read-only) ───────────────────────
-    // The primary / secondary / tertiary and debate-pair dropdowns are gone.
-    // The quota broker is the authority now, and it only ever assigns a
-    // provider that still has quota — so the "fall back to secondary when the
-    // primary is exhausted" ladder those controls configured describes a step
-    // that can no longer happen. What is worth showing instead is what will
-    // actually run and how much is left, polled from the broker.
+    // Current theme spelled out in the settings row — the moon/sun icon alone
+    // never said whether it meant "you are in dark" or "switch to dark".
+    _paintThemeValue() {
+      const el = document.getElementById('theme-value');
+      if (!el) return;
+      const zh = UI.currentLang === 'zh';
+      el.textContent = UI.currentTheme === 'dark' ? (zh ? '深色' : 'Dark') : (zh ? '淺色' : 'Light');
+    },
+
+    // ── LLM quota panel (V4.111.0 — always visible) ──────────────────────
+    // V4.109.0 made the broker the quota authority and turned this into a
+    // read-only readout; it stayed folded inside the gear because it had been a
+    // settings form. But quota is not a setting — it is the answer to "can I
+    // launch a protocol right now", which is worth knowing before you click,
+    // not after opening a panel. So it is always on, and the gear now holds
+    // only the explanation.
+    //
+    // What each provider gets is a bar of its **tightest** window plus the
+    // individual windows underneath, because the headline min hides the thing
+    // you act on: claude at 54% is a weekly pool that will not move until
+    // Aug 13, while gemini at 78% sits beside a 5h window that refills tonight.
     //
     // Assignments still live in config/llm_config.json (Python scripts read it,
     // so it was never localStorage) and POST /api/llm-config still works; only
     // this UI stopped writing to it.
-    async _initLlmRouting() {
-      const routingEl = document.getElementById('llm-routing');
-      if (!routingEl) return;
-      const LABELS = {
-        general:  { zh: '一般呼叫',  en: 'Regular calls' },
-        debate:   { zh: '辯手 A/B',  en: 'Debaters A/B' },
-        protocol: { zh: 'Protocol',  en: 'Protocol' },
+    async _initLlmPanel() {
+      const hostEl = document.getElementById('llm-providers');
+      if (!hostEl) return;
+      const stateEl = document.getElementById('llm-panel-state');
+      const footEl  = document.getElementById('llm-foot');
+
+      const ROUTE_LABELS = {
+        general:  { zh: '一般',     en: 'general' },
+        debate:   { zh: '辯手',     en: 'debate' },
+        protocol: { zh: 'protocol', en: 'protocol' },
       };
 
+      const esc = (s) => UI.escapeHTML(s);
       const pct = (p) => (p === null || p === undefined) ? '—' : `${Number(p).toFixed(0)}%`;
 
-      const renderRouting = (broker) => {
-        const zh = UI.currentLang === 'zh';
-        if (!broker) {
-          // No `broker` key at all — not the same as "switched off". The usual
-          // cause is a dashboard_server still running the pre-V4.109.0 module
-          // (static files reload per request, Python does not), so say the one
-          // thing that fixes it rather than reporting a state nobody chose.
-          routingEl.innerHTML = `<div class="sidebar-llm-row sidebar-llm-cool"><span>`
-            + `${zh ? '讀不到 broker 狀態' : 'no broker status'}</span>`
-            + `<span>${zh ? '請重啟 dashboard_server' : 'restart dashboard_server'}</span></div>`;
-          return;
-        }
-        if (!broker.enabled) {
-          routingEl.innerHTML = `<div class="sidebar-llm-row sidebar-llm-off"><span>`
-            + `${zh ? 'broker 已關閉' : 'broker disabled'}</span><span>${zh ? '走本地預算' : 'local budget'}</span></div>`;
-          return;
-        }
-        if (broker.reachable !== true) {
-          // No last-known percentages on purpose: a number from an unknown time
-          // reads as current and is exactly the false precision to avoid.
-          routingEl.innerHTML = `<div class="sidebar-llm-row sidebar-llm-cool"><span>`
-            + `${zh ? 'broker 連不上' : 'broker unreachable'}</span><span>${zh ? '決策流程停派' : 'decision flows halted'}</span></div>`;
-          return;
-        }
-        const providers = broker.providers || {};
-        const cls = (m) => {
-          const p = providers[m];
-          if (!p) return 'off';
-          if (p.reserve_only || p.cooldown_until) return 'cool';
-          return 'ok';
-        };
-        routingEl.innerHTML = (broker.routes || []).map(route => {
-          const label = (LABELS[route.key] || {})[zh ? 'zh' : 'en'] || route.key;
-          if (route.decided_by === 'broker') {
-            // Deliberately not predicting a winner — see model_router.routes().
-            // The candidates are listed with live quota so the pick is obvious
-            // without this file pretending to know the broker's ranking.
-            const picks = route.picks > 1
-              ? (zh ? `broker 挑前 ${route.picks}` : `broker picks top ${route.picks}`)
-              : (zh ? 'broker 挑' : 'broker picks');
-            const eligible = (route.eligible || [])
-              .map(m => `${m} ${pct((providers[m] || {}).remaining_percent)}`).join(' · ');
-            return `<div class="sidebar-llm-row"><span>${label}</span>`
-              + `<span>${picks}</span></div>`
-              + `<div class="sidebar-llm-tok">${eligible || (zh ? '無合格 provider' : 'no eligible provider')}</div>`;
+      // "gemini.weekly" → "gemini·週". Provider bucket names are namespaced and
+      // inconsistent across CLIs; the segments that carry meaning are mapped and
+      // the rest passed through rather than dropped, so an unfamiliar bucket
+      // still shows up instead of silently vanishing.
+      const bucketLabel = (b, zh) => {
+        const parts = String(b.name || '').split('.').map(seg => {
+          if (seg === 'five_hour')  return '5h';
+          if (seg === 'weekly')     return zh ? '週' : 'wk';
+          if (seg === 'session')    return zh ? '本節' : 'session';
+          if (seg === 'all_models') return '';
+          if (seg === 'claude_gpt') return 'gpt';
+          if (seg === 'primary') {
+            const w = Number(b.window_minutes);
+            if (w >= 10080) return zh ? '週' : 'wk';
+            if (w >= 1440)  return zh ? '日' : 'day';
+            return zh ? '主池' : 'main';
           }
-          const model = route.model || '—';
-          const info = providers[model] || {};
-          const flag = info.reserve_only ? (zh ? ' 保留區' : ' reserve-only')
-                     : info.cooldown_until ? (zh ? ' 冷卻中' : ' cooldown') : '';
-          return `<div class="sidebar-llm-row sidebar-llm-${cls(model)}">`
-            + `<span>${label}</span>`
-            + `<span>${model} ${pct(info.remaining_percent)}${flag}</span></div>`;
+          return seg;
+        }).filter(Boolean);
+        return parts.join('·') || String(b.name || '?');
+      };
+
+      const shortDuration = (sec, zh) => {
+        const s = Number(sec);
+        if (!Number.isFinite(s) || s <= 0) return '';
+        if (s < 3600)  return `${Math.round(s / 60)}m`;
+        if (s < 86400) return `${(s / 3600).toFixed(1)}h`;
+        return `${(s / 86400).toFixed(1)}d`;
+      };
+
+      // Providers report resets three different ways and never all three, and
+      // the string form arrives however that CLI happened to print it — the
+      // same broker payload carries both "Aug13at12pm" and "Aug 13 at 11:59am".
+      // Normalised to one short form so a column of them can be compared at a
+      // glance; the raw text stays in the row's title attribute.
+      const MONTHS = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6,
+                       jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
+      const resetHint = (b, zh) => {
+        const d = shortDuration(b.refresh_in_seconds, zh);
+        if (d) return zh ? `${d}後` : `in ${d}`;
+        const label = String(b.reset_label || '').replace(/\s*\([^)]*\)\s*/g, '').trim();
+        if (!label) return '';
+        const m = label.match(/^([a-z]{3})[a-z]*\s*(\d{1,2})\s*at\s*(.+)$/i);
+        if (m && MONTHS[m[1].toLowerCase()]) {
+          return `${MONTHS[m[1].toLowerCase()]}/${m[2]} ${m[3].replace(/\s+/g, '')}`;
+        }
+        return label.replace(/\s+/g, ' ');
+      };
+
+      const ageLabel = (sec, zh) => {
+        const s = Number(sec);
+        if (!Number.isFinite(s)) return '';
+        if (s < 90) return zh ? '剛更新' : 'just now';
+        const d = shortDuration(s, zh);
+        return zh ? `${d} 前` : `${d} ago`;
+      };
+
+      // One bar per provider. `state` drives colour: cooled-down and
+      // reserve-only providers are dimmed because the broker will not send them
+      // work, and a full-looking green bar on a provider nothing can use is the
+      // single most misleading thing this panel could show.
+      const providerRow = (model, info, routeTags, reserveLine, zh) => {
+        const remaining = info.remaining_percent;
+        const has = remaining !== null && remaining !== undefined;
+        const width = has ? Math.max(0, Math.min(100, Number(remaining))) : 0;
+        let state = 'ok', flag = '';
+        if (info.cooldown_until)   { state = 'cool'; flag = zh ? '冷卻中' : 'cooldown'; }
+        else if (info.reserve_only) { state = 'cool'; flag = zh ? '保留區' : 'reserve'; }
+        else if (has && reserveLine !== null && width <= reserveLine) {
+          state = 'low'; flag = zh ? '低於保留線' : 'below reserve';
+        } else if (info.authenticated === false) {
+          state = 'off'; flag = zh ? '未登入' : 'no auth';
+        }
+
+        // Only route tags this provider does NOT share with every other one —
+        // a chip that appears on every row cannot tell the rows apart. See the
+        // universal-route filter in render().
+        const tags = routeTags.length
+          ? `<div class="sidebar-llm-tags">${routeTags
+              .map(t => `<span class="sidebar-llm-tag">${esc(t)}</span>`).join('')}</div>`
+          : '';
+
+        // The always-on row is deliberately just: who, what state, how much
+        // left. Window-by-window detail, freshness and spend all live in the
+        // hover card (llmTipHTML) — kept out of the sidebar so the three bars
+        // stay scannable, which is the whole point of the panel being pinned.
+        return `<div class="sidebar-llm-prov sidebar-llm-${state}" data-llm-prov="${esc(model)}">
+          <div class="sidebar-llm-prov-head">
+            <span class="sidebar-llm-prov-name">${esc(model)}</span>
+            ${flag ? `<span class="sidebar-llm-flag">${esc(flag)}</span>` : ''}
+            <span class="sidebar-llm-prov-pct">${pct(remaining)}</span>
+          </div>
+          <div class="sidebar-llm-bar">
+            <div class="sidebar-llm-bar-fill" style="width:${width}%"></div>
+            ${reserveLine !== null ? `<div class="sidebar-llm-bar-reserve" style="left:${reserveLine}%"></div>` : ''}
+          </div>
+          ${tags}
+        </div>`;
+      };
+
+      // Hover card for one provider: every window it has (not just the two
+      // tightest), where each resets, how old the reading is, and what this
+      // provider has cost today. `usage` is the local ledger row — the broker
+      // reports percentages and never money, so spend can only come from here.
+      const llmTipHTML = (model, info, usage, reserveLine, routeTags, zh) => {
+        const rows = (info.buckets || []).map(b => {
+          const hint = resetHint(b, zh);
+          return `<div class="llm-tip-bkt">
+            <span class="llm-tip-bkt-name">${esc(bucketLabel(b, zh))}</span>
+            <span class="llm-tip-bkt-pct">${pct(b.remaining_percent)}</span>
+            <span class="llm-tip-bkt-reset">${esc(hint)}</span>
+          </div>`;
+        }).join('') || `<div class="llm-tip-dim">${zh ? '無窗口資料' : 'no window data'}</div>`;
+
+        const meta = [];
+        if (info.plan) meta.push(String(info.plan));
+        if (info.confidence) meta.push(String(info.confidence));
+        const age = ageLabel(info.age_seconds, zh);
+        if (age) meta.push(age);
+
+        const t = (usage && usage.tokens) || {};
+        const tok = (t.input || 0) + (t.output || 0) + (t.cache_read || 0) + (t.cache_write || 0);
+        const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
+        const spend = (usage || tok)
+          ? `<div class="llm-tip-foot">${zh ? '今日' : 'today'} ${(usage && usage.calls) || 0} ${zh ? '次' : 'calls'}`
+            + `${tok ? ` · ${fmtK(tok)} tok` : ''}`
+            + `${t.cost_usd ? ` · $${Number(t.cost_usd).toFixed(2)}` : ''}</div>`
+          : '';
+
+        // No hard-reserve line here: the user asked for that sentence gone, and
+        // the gear help already explains what the dashed marker on the bar is.
+        return `<div class="llm-tip-head">
+            <span class="llm-tip-name">${esc(model)}</span>
+            <span class="llm-tip-pct">${pct(info.remaining_percent)}</span>
+          </div>
+          ${meta.length ? `<div class="llm-tip-meta">${esc(meta.join(' · '))}</div>` : ''}
+          <div class="llm-tip-bkts">${rows}</div>
+          ${routeTags.length ? `<div class="llm-tip-routes">${esc(routeTags.join(' · '))}</div>` : ''}
+          ${spend}`;
+      };
+
+      const notice = (cls, main, sub) =>
+        `<div class="sidebar-llm-notice sidebar-llm-${cls}"><span>${esc(main)}</span><span>${esc(sub)}</span></div>`;
+
+      // Local call counters. Only rendered when the broker is NOT the authority
+      // — that is the one situation where `calls / daily_max` is the limit that
+      // actually stops a run. While the broker is up they describe a fallback
+      // nobody is on, and showing "2/300" next to a refusing broker is how an
+      // operator concludes there is plenty of room when there is none.
+      const localCallsHTML = (status, zh) => {
+        const models = (status && status.models) || {};
+        return ['claude', 'gemini', 'codex', 'grok'].map(m => {
+          const s = models[m] || {};
+          let tag = '', cls = 'ok';
+          if (!s.enabled)                                { tag = zh ? '停用' : 'off';   cls = 'off'; }
+          else if (s.unavailable_reason === 'cooldown')  { tag = zh ? '冷卻中' : 'cooldown'; cls = 'cool'; }
+          else if (s.unavailable_reason === 'budget')    { tag = zh ? '額度滿' : 'maxed'; cls = 'cool'; }
+          return `<div class="sidebar-llm-row sidebar-llm-${cls}"><span>${esc(m)}</span>`
+            + `<span>${s.calls || 0}/${s.daily_max || 0}${tag ? ' · ' + tag : ''}</span></div>`;
         }).join('');
       };
 
-      const renderUsage = (status) => {
-        const el = document.getElementById('llm-usage');
-        if (!el || !status || !status.models) return;
+      // Spend is local-ledger-only — the broker reports percentages, never
+      // money — so this line stays regardless of which path is in force.
+      const spendHTML = (status, zh) => {
+        const models = (status && status.models) || {};
+        let tok = 0, cost = 0;
+        Object.values(models).forEach(s => {
+          const t = (s && s.tokens) || {};
+          tok += (t.input || 0) + (t.output || 0) + (t.cache_read || 0) + (t.cache_write || 0);
+          cost += Number(t.cost_usd || 0);
+        });
+        if (!tok && !cost) return '';
+        const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
+        return `<div class="sidebar-llm-spend">`
+          + `<span>${zh ? '今日' : 'today'}</span>`
+          + `<span>$${cost.toFixed(2)} · ${fmtK(tok)} tok</span></div>`;
+      };
+
+      const render = (status) => {
         const zh = UI.currentLang === 'zh';
-        el.innerHTML = ['claude', 'gemini', 'codex', 'grok'].map(m => {
-          const s = status.models[m] || {};
-          let tag = '', cls = 'ok';
-          if (!s.enabled)               { tag = zh ? '停用' : 'off';   cls = 'off'; }
-          else if (s.unavailable_reason === 'cooldown') { tag = zh ? '冷卻中' : 'cooldown'; cls = 'cool'; }
-          else if (s.unavailable_reason === 'budget')   { tag = zh ? '額度滿' : 'maxed'; cls = 'cool'; }
-          const t = s.tokens || {};
-          const totTok = (t.input || 0) + (t.output || 0) + (t.cache_read || 0) + (t.cache_write || 0);
-          const fmtK = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
-          const tokLine = totTok > 0
-            ? `<div class="sidebar-llm-tok">${fmtK(totTok)} tok · in ${fmtK(t.input || 0)} / out ${fmtK(t.output || 0)} / cache ${fmtK(t.cache_read || 0)}${t.cost_usd ? ' · $' + Number(t.cost_usd).toFixed(2) : ''}</div>`
-            : '';
-          return `<div class="sidebar-llm-row sidebar-llm-${cls}">`
-            + `<span>${m}</span>`
-            + `<span>${s.calls || 0}/${s.daily_max || 0}${tag ? ' · ' + tag : ''}</span></div>`
-            + tokLine;
-        }).join('');
+        const broker = (status || {}).broker;
+
+        if (!broker) {
+          // No `broker` key at all — not the same as "switched off". The usual
+          // cause is a dashboard_server still running an older module (static
+          // files reload per request, Python does not), so say the one thing
+          // that fixes it rather than reporting a state nobody chose.
+          if (stateEl) stateEl.textContent = '';
+          hostEl.innerHTML = notice('cool', zh ? '讀不到 broker 狀態' : 'no broker status',
+                                            zh ? '請重啟 dashboard_server' : 'restart dashboard_server');
+          if (footEl) footEl.innerHTML = spendHTML(status, zh);
+          return;
+        }
+
+        const authoritative = broker.enabled && broker.reachable === true;
+        if (!authoritative) {
+          const [main, sub] = !broker.enabled
+            ? [zh ? 'broker 已關閉' : 'broker disabled', zh ? '改走本地預算' : 'local budget in force']
+            // No last-known percentages on purpose: a number from an unknown
+            // time reads as current and is exactly the false precision to avoid.
+            : [zh ? 'broker 連不上' : 'broker unreachable', zh ? '決策流程停派' : 'decision flows halted'];
+          if (stateEl) { stateEl.textContent = zh ? '降級' : 'degraded'; stateEl.className = 'sidebar-llm-state sidebar-llm-state-warn'; }
+          hostEl.innerHTML = notice('cool', main, sub)
+            + `<div class="sidebar-llm-sub">${zh ? '本地呼叫上限（此時才是真限制）' : 'Local call caps (binding now)'}</div>`
+            + localCallsHTML(status, zh);
+          if (footEl) footEl.innerHTML = spendHTML(status, zh);
+          return;
+        }
+
+        const providers = broker.providers || {};
+        const reserveRaw = broker.hard_reserve_percent;
+        const reserveLine = (reserveRaw === null || reserveRaw === undefined)
+          ? null : Math.max(0, Math.min(100, Number(reserveRaw)));
+
+        const names = Object.keys(providers);
+
+        // Which dispatch paths each provider serves. Broker-decided routes list
+        // candidates, not a winner — model_router.routes() explains why the UI
+        // must not predict one — so those render as eligibility, not a promise.
+        //
+        // A route every provider is eligible for is dropped from the always-on
+        // rows entirely: `debate` accepts all three, so it printed "辯手 候選·2"
+        // on claude, gemini and codex alike — three chips that could not tell
+        // the rows apart. What distinguishes them is the narrower routes
+        // (general is pinned to claude, protocol excludes codex), and only
+        // those stay on the row. The full list, universal routes included,
+        // still shows in each provider's hover card.
+        const tagsFor = {};      // row chips — distinguishing routes only
+        const allTagsFor = {};   // hover card — every route this provider serves
+        (broker.routes || []).forEach(route => {
+          const label = (ROUTE_LABELS[route.key] || {})[zh ? 'zh' : 'en'] || route.key;
+          if (route.decided_by === 'broker') {
+            // "候選" not "will run": the broker picks at dispatch time from
+            // whoever still has quota, and this list is the eligible set.
+            const eligible = (route.eligible || []).filter(m => names.includes(m));
+            const cand = zh ? '候選' : 'cand';
+            const chip = route.picks > 1 ? `${label} ${cand}·${route.picks}` : `${label} ${cand}`;
+            const isUniversal = names.length && eligible.length === names.length;
+            eligible.forEach(m => {
+              (allTagsFor[m] = allTagsFor[m] || []).push(chip);
+              if (!isUniversal) (tagsFor[m] = tagsFor[m] || []).push(chip);
+            });
+          } else if (route.model) {
+            (tagsFor[route.model] = tagsFor[route.model] || []).push(label);
+            (allTagsFor[route.model] = allTagsFor[route.model] || []).push(label);
+          }
+        });
+        if (!names.length) {
+          hostEl.innerHTML = notice('cool', zh ? 'broker 無 provider' : 'no providers',
+                                            zh ? '檢查 lqb 設定' : 'check lqb config');
+        } else {
+          // Tightest first — same order as the buckets, and the provider about
+          // to run out is the one worth seeing without scrolling.
+          names.sort((a, b) => {
+            const pa = providers[a].remaining_percent, pb = providers[b].remaining_percent;
+            return (pa === null || pa === undefined ? 101 : pa) - (pb === null || pb === undefined ? 101 : pb);
+          });
+          hostEl.innerHTML = names
+            .map(m => providerRow(m, providers[m], tagsFor[m] || [], reserveLine, zh))
+            .join('');
+          // Hover content is built now, while the payload is in hand, and
+          // stashed per model — the mouseover handler must not re-derive it
+          // from the DOM it just wrote.
+          UI._llmTips = {};
+          names.forEach(m => {
+            UI._llmTips[m] = llmTipHTML(
+              m, providers[m], ((status || {}).models || {})[m],
+              reserveLine, allTagsFor[m] || [], zh);
+          });
+        }
+
+        if (stateEl) {
+          const ages = names.map(m => Number(providers[m].age_seconds)).filter(Number.isFinite);
+          const oldest = ages.length ? Math.max(...ages) : null;
+          stateEl.textContent = oldest === null ? '' : ageLabel(oldest, zh);
+          stateEl.className = 'sidebar-llm-state';
+        }
+        // Spend and the reserve-line legend moved into the hover cards; the
+        // pinned panel keeps only bars.
+        if (footEl) footEl.innerHTML = '';
       };
 
       const refresh = async () => {
         try {
           const cfg = await (await fetch('/api/llm-config')).json();
-          renderRouting((cfg.status || {}).broker);
-          renderUsage(cfg.status);
+          render(cfg.status);
         } catch (e) {
           // A dashboard-server hiccup is not a quota statement. Leave whatever
           // is on screen and try again next tick rather than inventing a state.
         }
       };
 
+      // Hover card. Bound once per page — renderSidebar() may run again on a
+      // language toggle, and a second set of listeners would each show and hide
+      // the same element, leaving it flickering.
+      if (!UI._llmTipBound) {
+        UI._llmTipBound = true;
+        let tipEl = document.getElementById('llm-tip');
+        if (!tipEl) {
+          tipEl = document.createElement('div');
+          tipEl.id = 'llm-tip';
+          tipEl.className = 'llm-tip hidden';
+          document.body.appendChild(tipEl);
+        }
+        let hideTimer = null;
+        const show = (row) => {
+          const html = (UI._llmTips || {})[row.dataset.llmProv];
+          if (!html) return;
+          if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+          tipEl.innerHTML = html;
+          tipEl.classList.remove('hidden');
+          // Anchored to the right of the sidebar, then pulled back up if the
+          // card would run off the bottom — the lowest provider row sits near
+          // the viewport floor, which is exactly where it opens downward.
+          const r = row.getBoundingClientRect();
+          const h = tipEl.offsetHeight;
+          tipEl.style.left = `${r.right + 10}px`;
+          tipEl.style.top = `${Math.max(8, Math.min(r.top, window.innerHeight - h - 8))}px`;
+        };
+        const hide = () => { hideTimer = setTimeout(() => tipEl.classList.add('hidden'), 80); };
+        document.addEventListener('mouseover', (e) => {
+          const row = e.target.closest?.('[data-llm-prov]');
+          if (row) show(row);
+        });
+        document.addEventListener('mouseout', (e) => {
+          if (e.target.closest?.('[data-llm-prov]')) hide();
+        });
+      }
+
       await refresh();
-      // Quota moves while the page sits open, and it is the number the panel
-      // exists to show. Poll only while the panel is actually visible — a
-      // sidebar nobody opened does not need to keep asking the broker.
-      if (UI._llmRoutingTimer) clearInterval(UI._llmRoutingTimer);
-      UI._llmRoutingTimer = setInterval(() => {
-        if (!document.getElementById('settings-panel')?.classList.contains('hidden')) refresh();
-      }, 30000);
-      document.getElementById('settings-toggle')?.addEventListener('click', () => {
-        if (!document.getElementById('settings-panel')?.classList.contains('hidden')) refresh();
-      });
+      // Quota moves while the page sits open. The panel is always visible now,
+      // so it always polls — but not while the tab is in the background, where
+      // nobody can read it and every tick is a wasted broker round-trip.
+      if (UI._llmPanelTimer) clearInterval(UI._llmPanelTimer);
+      UI._llmPanelTimer = setInterval(() => { if (!document.hidden) refresh(); }, 30000);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
     },
 
     // ── Risk Tolerance (sent with every invest protocol invocation) ──────
@@ -1009,26 +1514,14 @@
         zh: {
           title: '市場廣度 · 多少股票還在強勢區',
           desc:  '計算成分股「在 200 日均線之上的比例 + 8 日均線變化 + 突破/破底家數比 + 漲跌家數差」等多個指標，合成 0-100 分。分數高 = 大盤健康（不是只有少數權值股撐盤）；分數低 = 多數個股已轉弱、行情危險。建議倉位由分數決定。',
-          stages: [
-            { key: 'br_strong',    range: [75,100], range_label: 'score 75+',    tag: '健康強勢', action: '全力進攻', detail: '多數成分股健康突破，可以高倉位、新進不限制' },
-            { key: 'br_healthy',   range: [60,74],  range_label: 'score 60-75',  tag: '主升中段', action: '標準參與', detail: '行情仍在主升段，標準倉位 + 一般停損即可' },
-            { key: 'br_neutral',   range: [40,59],  range_label: 'score 40-60',  tag: '訊號混合', action: '選股、降倉', detail: '多空交雜，僅選 RS 強標的 + 倉位降 25%' },
-            { key: 'br_weakening', range: [25,39],  range_label: 'score 25-40',  tag: '走弱中',   action: '防禦為主',  detail: '個股普遍轉弱，避免新進、現有倉位收緊停損' },
-            { key: 'br_critical',  range: [0,24],   range_label: 'score < 25',   tag: '行情危險', action: '退守 cash', detail: '多數股票破位，cash 為王、保留資金等下次 FTD' },
-          ],
+          stages: UI.signalStages('breadth', 'zh'),
           no_active: '廣度資料缺失或來源失敗',
           hint: '資料源：TraderMonty CSV (每日盤後更新，盤前看到的可能是 D-1 收盤值)',
         },
         en: {
           title: 'Market Breadth · How many stocks are still strong',
           desc:  'Composite of "% stocks above 200-day MA + 8-day MA delta + new highs vs lows + advance/decline gap" → 0-100 score. High = market is healthy (not just a few mega-caps holding it up); low = most stocks already weakening, dangerous.',
-          stages: [
-            { key: 'br_strong',    range: [75,100], range_label: 'score 75+',    tag: 'Strong',     action: 'Full attack',  detail: 'Most stocks healthy & breaking out — full size, no entry restrictions' },
-            { key: 'br_healthy',   range: [60,74],  range_label: 'score 60-75',  tag: 'Healthy',    action: 'Standard',     detail: 'Uptrend intact — standard size + stop' },
-            { key: 'br_neutral',   range: [40,59],  range_label: 'score 40-60',  tag: 'Neutral',    action: 'Selective',    detail: 'Mixed signals — high-RS only + size −25%' },
-            { key: 'br_weakening', range: [25,39],  range_label: 'score 25-40',  tag: 'Weakening',  action: 'Defensive',    detail: 'Stocks broadly weakening — no new entries + tighten stops' },
-            { key: 'br_critical',  range: [0,24],   range_label: 'score < 25',   tag: 'Critical',   action: 'Cash priority',detail: 'Most stocks breaking down — cash priority, wait for next FTD' },
-          ],
+          stages: UI.signalStages('breadth', 'en'),
           no_active: 'Breadth data unavailable / source failed',
           hint: 'Source: TraderMonty CSV (updated post-close — pre-market values may be D-1)',
         },
@@ -1037,24 +1530,14 @@
         zh: {
           title: '綜合曝險 · 三訊號合成的倉位上限',
           desc:  '把廣度建議倉位、FTD 倉位、頂部風控三個來源的中位數取「最保守者（最小值）」 → 得出可承受倉位上限。意義：當三訊號彼此衝突時（例如 breadth 還健康但頂部風險爆表），系統會自動偏向最保守那一個，避免單一訊號誤判。實際個股建倉以這個上限為基準再乘 sector / FTD timeline / tail risk 等其他乘數。',
-          stages: [
-            { key: 'sy_aggressive', range: [75,100], range_label: '75-100%', tag: '進攻',     action: '滿倉操作',     detail: '三訊號全綠，可開高倉位、新進不限、停損標準' },
-            { key: 'sy_standard',   range: [50,74],  range_label: '50-75%',  tag: '標準',     action: '正常配置',     detail: '主升段或訊號小幅雜訊，一般倉位 + 一般停損' },
-            { key: 'sy_defensive',  range: [25,49],  range_label: '25-50%',  tag: '防守',     action: '降倉、選股',   detail: '至少一個訊號明顯轉弱，倉位降至 50% 以下、僅留高 conviction' },
-            { key: 'sy_crisis',     range: [0,24],   range_label: '0-25%',   tag: '危機模式', action: 'Cash 主導',    detail: '三訊號之一已 critical，幾乎不開新倉、保留資金等下次 FTD' },
-          ],
+          stages: UI.exposureStages('zh'),
           no_active: '至少一個訊號缺失，無法合成曝險上限',
           hint: '計算：min( breadth_ceiling中位數, ftd_range中位數, market_top_budget中位數 )',
         },
         en: {
           title: 'Synthesized Ceiling · Position cap from 3 signals',
           desc:  'Takes the midpoint of breadth ceiling, FTD range, and market top budget — uses the most conservative (lowest) one as your position cap. Why: when signals disagree (e.g. breadth healthy but topping signals are loud), the system auto-defers to the most cautious. Per-trade size = this cap × sector / FTD-timeline / tail-risk multipliers downstream.',
-          stages: [
-            { key: 'sy_aggressive', range: [75,100], range_label: '75-100%', tag: 'Aggressive', action: 'Full size',    detail: 'All 3 signals green — full size, no entry restrictions, normal stops' },
-            { key: 'sy_standard',   range: [50,74],  range_label: '50-75%',  tag: 'Standard',   action: 'Normal',       detail: 'Uptrend or minor signal noise — normal size + stop' },
-            { key: 'sy_defensive',  range: [25,49],  range_label: '25-50%',  tag: 'Defensive',  action: 'Cut & select',  detail: 'At least one signal weakening — cut size <50%, high-conviction only' },
-            { key: 'sy_crisis',     range: [0,24],   range_label: '0-25%',   tag: 'Crisis',     action: 'Cash priority', detail: 'One signal is critical — barely any new entries, hold cash for next FTD' },
-          ],
+          stages: UI.exposureStages('en'),
           no_active: 'At least one signal missing — cap cannot be synthesized',
           hint: 'Formula: min( breadth_ceiling_mid, ftd_range_mid, market_top_budget_mid )',
         },
@@ -1063,26 +1546,14 @@
         zh: {
           title: '頂部風險 · 大盤是否已過熱',
           desc:  '綜合 distribution day（高量殺低天數）、領導股是否轉弱、防禦類股是否輪動進場、新高家數萎縮、Russell 2000 落後 SPY 程度等多類指標 → 合成 0-100 分。分數越高代表頂部訊號越多，需要降倉防範。與 breadth 互補：breadth 看「現在健康嗎」，這個看「快崩了嗎」。',
-          stages: [
-            { key: 'mt_normal',     range: [0,29],   range_label: 'score 0-30',   tag: '正常',     action: '可進攻',      detail: '暫無頂部訊號，廣度與領導同步，倉位上限可拉滿' },
-            { key: 'mt_warning',    range: [30,49],  range_label: 'score 30-50',  tag: '早期警告', action: '留意',        detail: '個別訊號出現（如 distribution day 累積），上限不變但需密切觀察' },
-            { key: 'mt_elevated',   range: [50,64],  range_label: 'score 50-65',  tag: '風險升高', action: '降倉、收緊',  detail: '訊號累積中，倉位上限調降至 60-80%、停損收緊' },
-            { key: 'mt_high',       range: [65,79],  range_label: 'score 65-80',  tag: '高機率頂部', action: '撤退中',     detail: '明確頂部訊號，倉位上限 40-60%、僅留高 conviction 標的' },
-            { key: 'mt_top',        range: [80,100], range_label: 'score 80+',    tag: '頂部成形', action: 'Cash 優先',  detail: '訊號全到位，倉位上限 ≤ 30%、現金為主等修正' },
-          ],
+          stages: UI.signalStages('market_top', 'zh'),
           no_active: '頂部資料缺失或來源失敗',
           hint: '組合內部：distribution day / leadership / defensive rotation / 新高萎縮 等子分數',
         },
         en: {
           title: 'Market Top Risk · Is the market overheated',
           desc:  'Composite of distribution days, leadership deterioration, defensive sector rotation, new-high contraction, Russell 2000 lagging SPY, etc. → 0-100 risk score. Higher = more topping signals stacked, time to de-risk. Complementary to breadth: breadth = "is it healthy now", market top = "is it about to crack".',
-          stages: [
-            { key: 'mt_normal',     range: [0,29],   range_label: 'score 0-30',   tag: 'Normal',         action: 'Attack',       detail: 'No topping signals, breadth + leadership aligned, full size OK' },
-            { key: 'mt_warning',    range: [30,49],  range_label: 'score 30-50',  tag: 'Early warning',  action: 'Watch',        detail: 'Isolated signals (e.g. distribution days) — size unchanged but monitor' },
-            { key: 'mt_elevated',   range: [50,64],  range_label: 'score 50-65',  tag: 'Elevated',       action: 'Cut & tighten',detail: 'Signals stacking — cap at 60-80%, tighten stops' },
-            { key: 'mt_high',       range: [65,79],  range_label: 'score 65-80',  tag: 'High risk',      action: 'Retreat',      detail: 'Clear top signals — cap at 40-60%, keep only high-conviction names' },
-            { key: 'mt_top',        range: [80,100], range_label: 'score 80+',    tag: 'Top formed',     action: 'Cash priority',detail: 'All signals tripped — cap ≤30%, cash priority, wait for correction' },
-          ],
+          stages: UI.signalStages('market_top', 'en'),
           no_active: 'Market top data unavailable / source failed',
           hint: 'Sub-scores include: distribution days / leadership / defensive rotation / new-high contraction',
         },
@@ -1117,25 +1588,15 @@
       exposure: {
         zh: {
           title: '曝險上限 · 整體可承受倉位',
-          desc:  '由廣度、FTD、頂部三訊號合成的「整體投資組合最大倉位百分比」。意義：當前環境若你開到這個比例就是上限，不應再加碼；個股單筆建倉再從這個上限往下分配（依 sector 集中度、tail risk）。通常顯示為區間（如 60-75%）→ 取中位數定位。',
-          stages: [
-            { key: 'ex_full',      range: [85,100], range_label: '85-100%', tag: '滿倉',     action: '可全力進攻',  detail: '三訊號全綠，cash 比例 0-15%，新進不限制，可加碼領導股' },
-            { key: 'ex_standard',  range: [60,84],  range_label: '60-85%',  tag: '標準',     action: '正常配置',    detail: '主升段，留 15-40% 現金應對波動，新進需挑高 RS 標的' },
-            { key: 'ex_defensive', range: [30,59],  range_label: '30-60%',  tag: '防禦',     action: '降倉、選股',  detail: '訊號轉弱，cash 至少 40-70%，僅留高 conviction 個股、新進高度選擇性' },
-            { key: 'ex_minimal',   range: [0,29],   range_label: '0-30%',   tag: '極低',     action: 'Cash 為主',   detail: '訊號明顯偏空，cash 至少 70%、等下次 FTD 才加倉' },
-          ],
+          desc:  '由廣度、FTD、頂部三訊號合成的「整體投資組合最大倉位百分比」。意義：當前環境若你開到這個比例就是上限，不應再加碼；個股單筆建倉再從這個上限往下分配（依 sector 集中度、tail risk）。通常顯示為區間（如 75-90%）→ 取中位數定位。',
+          stages: UI.exposureStages('zh'),
           no_active: '曝險上限資料缺失',
           hint: '與綜合曝險（synth）連動 — 個股倉位 = 此上限 × tail risk × sector cap × FTD multiplier',
         },
         en: {
           title: 'Exposure Cap · Max portfolio size',
-          desc:  'Composite ceiling from breadth + FTD + top risk → max % of portfolio that should be deployed. Treat as a cap: do not add beyond this; per-trade size is allocated below this cap with further sector / tail-risk haircuts. Usually shown as a range (e.g. 60-75%) → midpoint determines stage.',
-          stages: [
-            { key: 'ex_full',      range: [85,100], range_label: '85-100%', tag: 'Full',       action: 'Full attack',    detail: '3 signals green, cash 0-15%, no entry restrictions, can add to leaders' },
-            { key: 'ex_standard',  range: [60,84],  range_label: '60-85%',  tag: 'Standard',   action: 'Normal',         detail: 'Uptrend, hold 15-40% cash for volatility, prefer high-RS names' },
-            { key: 'ex_defensive', range: [30,59],  range_label: '30-60%',  tag: 'Defensive',  action: 'Cut & select',   detail: 'Signals weakening, cash 40-70%, high-conviction only, very selective entries' },
-            { key: 'ex_minimal',   range: [0,29],   range_label: '0-30%',   tag: 'Minimal',    action: 'Cash priority',  detail: 'Bearish signals, cash 70%+, wait for next FTD before adding' },
-          ],
+          desc:  'Composite ceiling from breadth + FTD + top risk → max % of portfolio that should be deployed. Treat as a cap: do not add beyond this; per-trade size is allocated below this cap with further sector / tail-risk haircuts. Usually shown as a range (e.g. 75-90%) → midpoint determines stage.',
+          stages: UI.exposureStages('en'),
           no_active: 'Exposure cap data unavailable',
           hint: 'Per-trade size = this cap × tail risk × sector cap × FTD timeline multiplier',
         },
@@ -1166,6 +1627,22 @@
           ],
           no_active: 'Fear & Greed data unavailable',
           hint: 'Source: CNN Fear & Greed (VIX, Put/Call, momentum, safe-haven demand)',
+        },
+      },
+      macro: {
+        zh: {
+          title: 'Macro 體制 · 利率與信用環境',
+          desc:  'FRED 資料合成的總體體制判定，綜合利率、通膨、就業、信用與金融條件五個子分數。它不預測方向，而是說明**哪一類資產這段時間吃虧**：緊縮體制壓抑高估值成長與長天期資產，壓力體制則是整體降曝險。與其他訊號的分工——廣度/FTD 看盤面，這個看盤面背後的資金成本。',
+          stages: UI.signalStages('macro', 'zh'),
+          no_active: 'FRED macro 資料缺失或體制名稱無法辨識',
+          hint: '子分數：rates / inflation / employment / credit / financial_conditions（加權合成 composite）',
+        },
+        en: {
+          title: 'Macro Regime · Rates & credit backdrop',
+          desc:  'FRED-derived regime call composed from five sub-scores: rates, inflation, employment, credit, and financial conditions. It does not predict direction — it says **which assets are penalised right now**: tightening regimes punish high-multiple growth and duration, stress regimes call for lower exposure outright. Division of labour: breadth and FTD read the tape; this reads the cost of money behind it.',
+          stages: UI.signalStages('macro', 'en'),
+          no_active: 'FRED macro data unavailable or regime label unrecognised',
+          hint: 'Sub-scores: rates / inflation / employment / credit / financial_conditions (weighted into composite)',
         },
       },
       cycle: {
@@ -1679,22 +2156,25 @@
     function classifyStage(stages, daysSince) {
       if (daysSince == null || daysSince === '' || isNaN(daysSince)) return null;
       const n = Number(daysSince);
-      return stages.find(s => n >= s.range[0] && n <= s.range[1]) || null;
+      // Categorical stage tables (macro) carry `range: null` and are classified
+      // by UI.signalTier instead. Skipping them rather than indexing null keeps
+      // a mistaken call here from throwing inside a hover handler.
+      return stages.find(s => s.range && n >= s.range[0] && n <= s.range[1]) || null;
     }
 
     const STAGE_DOTS = {
       // FTD
       prime: '🟢', standard: '🟡', late_cycle: '🟠', exhausted: '🔴',
-      // Breadth
-      br_strong: '🟢', br_healthy: '🟢', br_neutral: '🟡', br_weakening: '🟠', br_critical: '🔴',
-      // Market top
-      mt_normal: '🟢', mt_warning: '🟡', mt_elevated: '🟠', mt_high: '🟠', mt_top: '🔴',
-      // Synth ceiling
-      sy_aggressive: '🟢', sy_standard: '🟡', sy_defensive: '🟠', sy_crisis: '🔴',
+      // Breadth / market top / macro — sourced from UI.SIGNAL_TIERS so a tier
+      // edit cannot leave the dots behind (see the Exposure note below).
+      ...Object.fromEntries(Object.values(UI.SIGNAL_TIERS)
+        .flatMap(spec => spec.tiers.map(t => [t.key, t.dot]))),
       // Regime
       rg_risk_on: '🟢', rg_neutral: '🟡', rg_volatile: '🟠', rg_risk_off: '🔴',
-      // Exposure
-      ex_full: '🟢', ex_standard: '🟡', ex_defensive: '🟠', ex_minimal: '🔴',
+      // Exposure — shared by the synth ceiling too, since V4.111.0 gave both
+      // guides the same tier table (UI.EXPOSURE_TIERS). Sourced from there so a
+      // future tier edit cannot leave the dots behind.
+      ...Object.fromEntries(UI.EXPOSURE_TIERS.map(t => [t.key, t.dot])),
       // Fear & Greed (contrarian: extreme fear = green/buy, extreme greed = red/sell)
       fg_extreme_fear: '🟢', fg_fear: '🟡', fg_neutral: '🟡', fg_greed: '🟠', fg_extreme_greed: '🔴',
       // Cycle
@@ -1833,6 +2313,25 @@
       return { liveHTML, stage };
     }
 
+    function macroLive(el, t, lang) {
+      const label = (el.dataset.macroLabel || '').trim();
+      if (!label) return { liveHTML: noActiveHTML(t), stage: null };
+      const stage = UI.signalTier('macro', label);
+      const comp = el.dataset.macroComposite;
+      const real = el.dataset.macroReal;
+      const bits = [];
+      if (comp !== '' && comp != null) bits.push(`composite ${Number(comp).toFixed(0)}`);
+      if (real !== '' && real != null) bits.push(`real ${Number(real).toFixed(2)}%`);
+      const liveHTML = `<div class="stt-live">
+        <span class="stt-live-dot">${STAGE_DOTS[stage?.key] || '⚪'}</span>
+        <span>🏦 ${label}</span>
+        <span class="stt-live-stage">${stage ? `${stage[lang === 'en' ? 'en' : 'zh'].tag} — ${stage[lang === 'en' ? 'en' : 'zh'].action}`
+          : (lang === 'en' ? 'regime unrecognised' : '體制名稱無法辨識')}</span>
+      </div>
+      ${bits.length ? `<div class="stt-live-sources">${bits.join(' · ')}</div>` : ''}`;
+      return { liveHTML, stage };
+    }
+
     function cycleLive(el, t, lang) {
       const phase = (el.dataset.cycle || '').trim();
       if (!phase) return { liveHTML: noActiveHTML(t), stage: null };
@@ -1877,6 +2376,7 @@
     const LIVE_BUILDERS = {
       ftd: ftdLive, breadth: breadthLive, market_top: marketTopLive, synth: synthLive,
       regime: regimeLive, exposure: exposureLive, fg: fgLive, cycle: cycleLive, vix: vixLive,
+      macro: macroLive,
       bearish_signal:            _flagMetricLive('🚨'),
       low_historical_percentile: _flagMetricLive('📊'),
       divergence:                _flagMetricLive('↘'),

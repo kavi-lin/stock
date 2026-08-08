@@ -1,8 +1,48 @@
 # INTEL COMMAND — Backlog & Tasks
 
-> **Last Updated**: 2026-08-08 (v4.109.0)
+> **Last Updated**: 2026-08-08 (v4.111.3)
 
 ---
+
+## ✅ Done (v4.111.3) — decisions 倒數環的永久重繪迴圈
+
+- [x] `decisions.html:35` transition 拿掉 `stroke-dashoffset`(每 1.0s 續一個 0.9s 的不可合成 transition,頁面永遠不 idle)。Paint 110.3→3.1/s、Commit 55.1→1.1/s、RecalcStyle 2789→53(/50s)。
+- [x] `page-decisions.js:2490` 1s 倒數加 `document.hidden` 跳過 + `visibilitychange` 立即補跑(已實測:強制設 STALE 後 dispatch 事件 600ms 內復原)。
+- [x] 排除法有量測背書:timer(JS 僅 0.4%–2.8% 一顆核)、記憶體洩漏(3 分鐘元素數固定 13,921)、`dashboard_server.py`(累計 1:10 CPU)、backdrop-filter(全關反而更慢)皆非元凶。
+
+- [ ] **Safari 端未複驗**:全部量測來自 headless Chrome(該頁修前 8.1% / 修後 6.7% 一顆核),使用者回報的是 Safari 燒掉一整顆核。**無法證明這一行 100% 解釋 Safari 那顆核**——請開 decisions 頁觀察是否仍卡;若仍卡需用 Safari Web Inspector Timeline 再查一輪。
+- [ ] **`intraday-eval.html` 同類問題未修**:閒置 241 Paint/s(比修前的 decisions 還高),來自 3 張可見的 `.ie-scard.repeat-strong` 在動 `box-shadow`(`style.css:4874-4875`),`box-shadow` 同樣不可合成。改法是換成 `opacity` 動偽元素光環,但**會動到外觀**,需使用者決定。
+- [ ] `docs/agent-ops/LESSONS.md` 已 160 行(門檻 150),下個 dev session 收尾時順手精簡。
+
+## ✅ Done (v4.111.2) — sidebar 控制項收進 header 齒輪
+
+- [x] 主題 / 風險容忍 / 語言 / 系統日誌 + 額度說明全部收進 header 齒輪的 popup;footer 只留額度面板與版號。
+- [x] 風險容忍由整條寬按鈕縮成 popup 一行 + 小 chip;語言與主題列改顯示當前值而非切換目標。
+- [x] popup outside-click / Escape 只綁一次;切主題語言後自動重開(renderSidebar 會銷毀它)。
+
+- [ ] **popup 未做視覺驗證**:結構用 DOM stub 驗過(齒輪在 header、四列齊全、footer 已清空),但實際位置(`right:14px` / `width:214px` 在 256px sidebar 內)與深淺色對比需開頁確認。
+
+## ✅ Done (v4.111.1) — 卡片級距表補齊 + 面板細節改 hover
+
+- [x] `UI.SIGNAL_TIERS`(breadth / market_top / macro)+ `signalTier/signalColor/signalStages`;三張卡改讀它,`colorByScore` 只剩 FTD fallback。
+- [x] 頂部風控 31.6 由綠改 🟡 早期警告(與 tooltip、與 `mt.zone` 一致)。
+- [x] Macro 卡補上真正的 popup(舊的 `data-tip-key: macro_briefing_tip` 沒有對應 PILL_TIPS 項,靜默無效);顏色改由體制名稱決定。
+- [x] LLM 面板常駐區只留長條;窗口明細/新鮮度/逐 provider 花費改 hover card;移除 `辯手：全部 N 家候選` 與 `虛線 = 硬保留` 兩行。
+
+- [ ] **Macro 分級的部位含意文案未經實戰檢驗**:順風/過渡/緊縮/壓力四級的 action 與 detail 是本輪新寫的,分級經使用者核准但文字未逐句校過。實際遇到 Stagflation / Recession Risk 時回頭看措辭是否可操作。
+- [ ] **`fg` / `vix` / `cycle` / `regime` 四個 tip 仍各自持有級距表**,目前沒有卡片用通用 helper 幫它們上色(所以沒有牴觸),但同樣的 drift 風險還在。要收就一起收進 `SIGNAL_TIERS`。
+
+## ✅ Done (v4.111.0) — LLM 額度常駐視覺化 + 曝險門檻收斂
+
+- [x] LLM 額度面板移出齒輪常駐在 sidebar footer;齒輪改放說明。每家一條 quota bar + 20% 硬保留線 + per-bucket 明細(5h / 週 / 本節與重置時間)+ 路由 badge。
+- [x] `broker_gate.quota_snapshot()` — providers 與 `hard_reserve_percent` 一次取回(原本會打兩次 `/v1/status`);`provider_quota()` 保留為薄封裝。
+- [x] 本地用量拆開:呼叫次數上限只在 broker 關閉/連不上時顯示(那時才是真閘門),花費(token / `$`)常駐一行(broker 不報金額,本地帳本是唯一來源)。
+- [x] `UI.EXPOSURE_TIERS` 成為曝險門檻唯一來源(75/50/25),五個 consumer 全部改讀;`STAGE_DOTS` 的 `ex_*` 由 tier 表生成。
+- [x] 修掉曝險卡吃 `sty.fg`(裁決 stance)著色的 bug,以及圓環「填充用中位數、印上界」的分岔。
+- [x] 曝險卡在 xl 斷點放大 `col-span-2` + 72px 圓環 + tier tag,與其他撈數據卡區隔。
+
+- [ ] **面板未做瀏覽器視覺驗證**:本輪 Chrome 擴充未連線,改用 DOM stub 對實際 broker payload 驗證四種狀態與中英雙語。實際版面(sidebar 寬 256px、三家 provider 的高度)需下次開頁時目視確認,特別是 provider 家數增加時 footer 會不會擠壓 nav。
+- [ ] **`window_minutes` 只有 codex 有**:bucket 標籤對 `primary` 靠它判斷是週池還日池,其他 provider 全走名稱推斷。若日後有 provider 只給 `primary` 又不給 window,會顯示成「主池」而看不出窗長。
 
 ## ✅ Done (v4.109.0) — LLM Quota Broker 接管額度
 
@@ -11,15 +51,15 @@
 - [x] agentic protocol run 納管(V4.86.0 明確保留給使用者決定的那一項,2026-08-08 已決定)。
 - [x] Office `_call_claude_text` 與 link digest 翻譯補上閘門(原本只有事後回報)。
 - [x] `tests/test_broker_gate.py` 鎖住失效政策。
-- [x] 側邊欄五個 LLM 下拉移除,改唯讀讀出(每 30s,面板開著才輪詢)。
+- [x] 側邊欄五個 LLM 下拉移除,改唯讀讀出(每 30s;V4.111.0 起改為常駐 + 分頁在背景時暫停輪詢)。
 
 - [x] 辯手 A/B 改由 broker 指派(目前能服務的前兩名);設定檔那對降為 fallback,並依 `AGENTS.md` 改回 claude+gemini。
 
 - [ ] **protocol 的合格名單只有 claude + gemini**。chain 是 primary=claude / secondary=gemini / **tertiary=claude**,去重後 codex 根本沒進名單——即使它有額度也不會被派到 protocol run。要讓 codex 有資格就把 tertiary 改成 codex。(辯論那條沒有這個問題:它問的是全部三家。)
-- [ ] **快照過期會讓 broker 拒絕全部派工**。2026-08-08 實測:快照 1.5 小時舊 → 三家全部 `stale_snapshot` → `no_capacity`。這是 freshness 閘門的正確行為,但**操作上看起來像「額度用完」**。目前只能手動 `lqb refresh`。broker 的 LaunchAgent 沒有排程刷新,值得在 Phase 9 操作手冊處理(或讓 broker 自己定期 probe)。
+- [ ] **快照過期會讓 broker 拒絕全部派工**。2026-08-08 實測:快照 1.5 小時舊 → 三家全部 `stale_snapshot` → `no_capacity`。這是 freshness 閘門的正確行為,但**操作上看起來像「額度用完」**。~~目前只能手動 `lqb refresh`。broker 的 LaunchAgent 沒有排程刷新~~ → broker 已於 2026-08-08 加入 daemon 內建的 300 秒排程刷新;同日又修好一次「排程有跑但 launchd 的 PATH 找不到 agy、且 claude 解析到四個月前的舊安裝」,見 broker `docs/TODO.md` 缺陷 7。仍保留這條是因為**操作上的誤讀還在**:過期造成的拒絕看起來仍像額度用完(broker 端已改為逐 provider 說明真正原因)。
 
 - [ ] **live smoke test 三條線**:Dashboard protocol、Break News、Office。要真燒額度,須人在場;先用 `lqb status` 確認三家都不在 reserve-only。
-- [ ] **protocol run 的 token 估算要回調**:`config/llm_config.json` 的 `broker.protocol_tokens` 目前是 200k/40k **先驗值,不是量測值**。跑過 3–5 次真實 protocol run 後用 `lqb history` 看實際分布再改;改大改小都要有數字支撐,不能憑一次觀感。
+- [ ] **重的 protocol 還沒有任何量測值**。V4.110.0 把 `broker.protocol_tokens` 改成逐 protocol,但只有 `triage` 填了實測數字(233,139 in / 28,702 out / 143s,2026-08-08 agy)。`invest`／`sector`／`playbook`／`llm_review` 仍走 `default` 200k/40k——**而那個 default 連 triage 都不夠**,這幾個又是 opus 檔的 30–45 分鐘多路辯論。各跑一次後用 `lqb history --stats --task-type agentic_protocol:invest` 逐一填回。改大改小都要有數字支撐。
 - [ ] **`grok` 仍在 chain 內但無人治理**:broker 端休眠(Phase 3 延後——weekly 池只能靠登入後網頁 DOM 取得)。要嘛從 `llm_config.json` 的 chain 拿掉,要嘛接受它是唯一不受 20% 硬性保留約束的出口。目前是後者,且只寫在 `broker_gate.PROVIDER_FOR_MODEL` 的註解裡。
 - [ ] **daemon 沒起來時只有 stderr 一行**:若實際使用常忘記起 daemon,考慮讓 Break News 狀態面板顯示 `broker.reachable=false` 橫幅(`model_status()` 已經帶這個欄位)。
 

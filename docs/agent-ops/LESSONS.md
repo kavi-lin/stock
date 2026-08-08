@@ -1,5 +1,11 @@
 # 踩坑教訓（格式見 MAINTENANCE.md §4；>150 行時精簡）
 
+## 2026-08-08 ｜共通項不能解釋差異；效能問題沒 profile 之前的因果都是猜的
+- 情境：接手另一個 session 的交接文件查「開 Dashboard 系統卡頓」。該文件已把根因定調為「56 個 `setInterval` 缺 `document.hidden` 保護」，並排好 `pollEvery()` 收口 46 處的重構計畫。
+- 坑：那份文件第 3 段自己寫著「每分鐘 166 次小 JSON 請求在算術上燒不掉一整顆核」——**它已經否證了自己第 2 段的主張，卻沒有察覺，仍照著被否證的假設規劃重構**。實際 profile 後：各頁 JS 執行只佔 0.4%–2.8% 一顆核，timer 完全不是元凶。真兇是 `decisions.html:35` 的 `transition: stroke-dashoffset 0.9s linear` 撞上每 1.0 秒寫一次的 `updateRefreshStatus`——每秒續一個 0.9 秒的不可合成 transition，頁面永遠不 idle（110 Paint/s、56 Commit/s）。照原計畫做完 46 處重構，這個 bug 一個字都不會被碰到。
+- 修法：(a) 效能歸因**一律先量再修**，缺 Safari profiler 不等於量不到——`Chrome --headless=new --remote-debugging-port` + CDP，node 22 內建 `WebSocket` 直接講 protocol，不必裝 puppeteer；`Performance.getMetrics` 拆 Script/Layout/RecalcStyle，`Tracing` 數 Paint/Commit。(b) **鎖定元凶要找差異項，不是共通項**：56 個 timer 每頁都有，但 index 0.6 Paint/s、decisions 110 Paint/s——差 100 倍的東西不可能由共通項解釋。(c) 結案必須做 A/B（只關那一行 → 56 fps 掉到 1.1 fps）才算證明，不是「疑似相關」。(d) 掃永久動畫用 `document.getAnimations()`，**不要用 `getComputedStyle().animationIterationCount === 'infinite'`**——後者看不見 transition，而本案元凶正是 transition；三個頁面都掃到同一個隱形旋轉圖示，但只有一頁在燒。
+- 已回寫規則？：否（本條是診斷紀律，非流程規則）。同批修復見 CHANGELOG v4.111.3；`intraday-eval.html` 的 `box-shadow` 動畫（241 Paint/s）已知未修，屬視覺設計決定。
+
 ## 2026-08-06 ｜Projection metadata 不能取代 record contract
 - 情境：同日 append-only News projection 同時包含 DIGEST 與 FLASH。
 - 坑：validator 用頂層 DIGEST/PER_AGENT_BATCH 規則檢查所有 deep records，把合法 pending/INLINE FLASH 誤判失敗；artifact 已存在但 Dashboard 任務顯示消失。
