@@ -235,6 +235,69 @@ TLT 與 WST 的 histogram 絕對值皆 < 0.02，是零軸上的抖動，任何�
 **結論：所有配息股的技術面讀數會系統性地偏多一點點。** 這是修正（假跌本來就在人為壓低
 它們），不是 bug，但它是**方向性的、影響全部配息標的**，不是可以忽略的噪音。
 
+## 6c. 逐消費者量化（補完 — V4.113.0 首版漏做，V4.113.1 補上）
+
+> **首版失誤紀錄**：§6 與實施表 T6 承諾了 momentum composite 對照、quant-backtest
+> 「每策略 CAGR/Sharpe delta + 排名翻轉數」、kill_trigger boolean 翻轉數，
+> 但 259 行回填段只做了**指標層**（`technical_core` 自身函式的 59 檔對照）。
+> 指標層證據確實讓風險看起來很低，但**可推導不等於已報告**——縮了範圍就要寫。
+> 這是自家 no-silent-caps 慣例管的事，補做結果見下，而且它改變了結論。
+
+### (a) `kill_trigger_monitor` — 6 檔持倉，兩基準實跑
+
+| ticker | below_ma50 | below_ma200 | rsi<30 | rsi>70 | 判定 |
+|---|---|---|---|---|---|
+| GOOGL | True | False | False | False | ✅ 無翻轉 |
+| META | True | True | False | False | ✅ 無翻轉 |
+| MRVL | True | False | False | False | ✅ 無翻轉 |
+| MSFT | False | False | False | True | ✅ 無翻轉 |
+| NTRS | False | False | False | False | ✅ 無翻轉 |
+| VRT | True | False | False | False | ✅ 無翻轉 |
+
+**kill_trigger 相關 boolean 翻轉 = 0。** 六檔持倉的觸發判定完全不受影響。
+
+### (b) `momentum.py` composite score — ⚠ 位移比指標層大得多
+
+| 群組 | n | 中位 delta | 最大 delta | 全零 |
+|---|---|---|---|---|
+| **無配息（對照組）** | 5 | +0.000 | **+0.000** | ✅ **是** |
+| 配息 | 11 | +0.000 | **+33.800** | 否 |
+
+逐筆有變化的三檔：
+
+| ticker | old | new | delta | 對應機制 |
+|---|---|---|---|---|
+| **PG** | **21.20** | **55.00** | **+33.80** | shadow 的 `stage: Stage 4 downtrend → Stage 1 basing`，composite 的 `ma_stage` 分量因此大跳 |
+| **MO** | 37.50 | 55.00 | +17.50 | 同上，`Stage 3 top → Stage 1 basing` |
+| TLT | 45.00 | 40.00 | -5.00 | `recent_crosses` 日期位移 |
+
+**PG 從 21.2 跨到 55.0，等於從 `WEAK` 帶跨進 `NEUTRAL` 帶**——這是實質的標籤變化，
+而指標層的對照只顯示「stage 翻了一格」。**「指標層零不可歸因翻轉」不等於「消費者層影響小」**：
+composite 把多個指標加權後，單一分量的一格跳動會被放大。
+
+### (c) `quant-backtest` — KO/TLT/NVDA × 11 策略（探索層，量化不設閘門）
+
+| ticker | 配息 | CAGR delta 中位 | CAGR delta 最大 | Sharpe delta 最大 | **名次變動** |
+|---|---|---|---|---|---|
+| KO | Y | +1.000 pp | +5.100 pp | +0.570 | **9/11** |
+| TLT | Y | +1.300 pp | +3.200 pp | +0.700 | **6/11** |
+| **NVDA** | **N** | **+0.000 pp** | **+0.100 pp** | **+0.010** | **0/11** ✅ |
+
+無配息對照組（NVDA）名次零變動、delta 近乎 0，再次驗證量尺。
+配息標的的**策略名次變動 9/11 與 6/11 相當大**——CAGR 全部朝正向（除息假跌被移除後，
+歷史報酬計算不再被人為壓低）。
+
+**探索層產出永不進 investment_protocol 決策（CLAUDE.md 全域紀律），故不設閘門；
+但既有的回測報告與新報告不可比**，與 journal 的接縫同性質。
+
+### 補完後的整體結論（修正首版語氣）
+
+首版寫「翻轉全部可歸因」是對的，但配上「指標層溫和」的印象會低估影響。準確的說法：
+
+> **歸因全部成立，但幅度在消費者層被放大**：momentum composite 最大 +33.8（跨標籤帶）、
+> backtest 策略名次變動最高 9/11。無配息對照組在三個消費者層全部零變動，
+> 證明變化來源純粹是除息調整。方向一律偏多。
+
 ## 7. B4 後續（額外要求）
 
 `b4_shadow_v2.py` 是**直打端點**算出零翻轉的，不是走改過的 `fetch_history`。

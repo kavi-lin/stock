@@ -1,6 +1,6 @@
 # INTEL COMMAND — Session Notes & System State
 
-> **Last Updated**: 2026-08-08 (v4.113.0)
+> **Last Updated**: 2026-08-08 (v4.113.1)
 > **Role**: This file serves as the "Short-term Memory" and "Handoff Cache" for AI Agents. It contains market regime states, token optimization logs, and data integrity notes. **Task backlog has been moved to TODO.md; full version history to CHANGELOG.md.**
 
 ## 🟢 Session Note (v4.113.0) — 分析結果取決於網路狀況:同一檔股票拿到哪種價格序列,看 FMP 當下有沒有失敗
@@ -15,6 +15,10 @@
 - **必須知道的系統性影響**:翻轉全部可歸因,但**不是隨機的**——ma_200 全數下修,三筆 stage 全朝「較不看空」。所有配息股的技術面讀數會系統性偏多一點。這是修正,但方向一致、影響全部配息標的,不是可忽略的噪音。
 - **零覆蓋路徑補 16 個測試**,含斷言 fallback 傳入 `auto_adjust=True`——把「兩路徑同慣例」從註解變成機器可驗。三處種回 bug 皆紅在對應測試。
 - **§2b 第一次照新規則執行就有收穫**:抓到 `technical_core.py:42` 還寫著舊端點名。
+- **補記(v4.113.1)——承諾了逐消費者量化卻只做了指標層**:範圍表 §6 白紙黑字寫了 momentum composite / quant-backtest CAGR-Sharpe-名次 / kill_trigger boolean 三項,回填段只有 technical_core 自身函式的 59 檔對照。指標層讓風險看起來很低,但**可推導不等於已報告**——縮範圍不寫,報告讀起來就像全做了,這正是自家 no-silent-caps 慣例管的事。
+- **補做的結果修正了結論**:kill_trigger 6 檔持倉翻轉 = 0(如預期);但 **momentum composite 最大 +33.8**(PG 21.2→55.0,**從 WEAK 帶跨進 NEUTRAL 帶**)、**backtest 名次變動 KO 9/11、TLT 6/11**。**「指標層零不可歸因翻轉」不等於「消費者層影響小」**——composite 把多指標加權,單一分量翻一格會被放大。無配息對照組在三個消費者層全部零變動,量尺再次成立。
+- **兩個介面陷阱**:①`momentum.analyze()` 輸出含 `cache_hit`,一度以為價格路徑有快取會讓對照失效——查證後 cache 只在 yfinance `.info` metadata,價格直接 `fetch_history`,對照有效;②`run_strategy` 回的是含 `metrics` 的巢狀 dict,不是扁平指標。**猜介面會讓 shadow 靜默回空,而空結果看起來像「沒有差異」。**
+
 
 ## 🟢 Session Note (v4.112.0) — 有文件、無產生器:四條規則描述的保護機制,程式裡根本沒有
 

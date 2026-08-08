@@ -8,6 +8,32 @@ Single source of truth for version history. Current version authority is `VERSIO
 > commits where applicable; for un-committed work, dates reflect local VERSION
 > bump time.
 
+## [4.113.1] — 2026-08-08 — 補完 V4.113.0 承諾但沒做的逐消費者量化（結論被修正）
+
+V4.113.0 的範圍表 §6 與實施表 T6 承諾了 momentum composite 對照、quant-backtest
+每策略 CAGR/Sharpe delta + 排名翻轉數、kill_trigger boolean 翻轉數，但回填段只做了
+**指標層**（technical_core 自身函式的 59 檔對照）。指標層證據讓風險看起來很低，
+但**可推導不等於已報告**——縮了範圍就要寫，這是自家 no-silent-caps 慣例管的事。
+
+### Added
+- `docs/plan_technical_core_adjclose.md` §6c — 三個消費者的實跑量化（零程式碼變更）
+
+### 補做結果（改變了 V4.113.0 的結論語氣）
+- **(a) kill_trigger_monitor**：6 檔持倉（GOOGL META MRVL MSFT NTRS VRT）兩基準實跑，
+  `below_ma50 / below_ma200 / rsi<30 / rsi>70` **翻轉 = 0**
+- **(b) momentum composite**：無配息對照組 5/5 **全零**；配息組中位 +0.000 但
+  **最大 +33.800** —— PG `21.20 → 55.00`（**從 WEAK 帶跨進 NEUTRAL 帶**）、
+  MO `37.50 → 55.00`、TLT `45.00 → 40.00`。對應 shadow 的 stage 翻轉
+  （PG Stage4→1、MO Stage3→1），composite 把單一分量的一格跳動放大了
+- **(c) quant-backtest**（探索層，不設閘門）：KO 名次變動 **9/11**、TLT **6/11**、
+  NVDA（無配息對照）**0/11**。CAGR delta 中位 +1.0~+1.3pp，全部朝正向
+
+### Why
+- **「指標層零不可歸因翻轉」不等於「消費者層影響小」**。V4.113.0 的歸因全部成立，
+  但幅度在消費者層被放大：composite 加權後，單一分量一格跳動 → 最大 +33.8 跨標籤帶
+- 無配息對照組在三個消費者層**全部零變動**，再次證明變化來源純粹是除息調整、量尺沒壞
+- 既有回測報告與新報告不可比，與 momentum journal 的接縫同性質
+
 ## [4.113.0] — 2026-08-08 — 同一檔股票拿到哪種價格序列，取決於 FMP 當下有沒有失敗
 
 `technical_core.fetch_history()` 的主源取**未除息調整**的 close，yfinance fallback 走
