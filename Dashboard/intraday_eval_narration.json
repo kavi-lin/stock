@@ -1,6 +1,6 @@
 {
-  "signature": "中性/區間|software_momentum/value_defensive_rotation/crypto_fintech_riskon/event_risk_guard",
-  "ts": "2026-08-07T16:16:58+00:00",
-  "briefing_zh": "目前 regime 判定為中性／區間，曝險上限維持 40-60%，不因盤中偏強（分數 30、市寬 66% 上漲）就擴張部位。VIX 14.86 偏低但 SKEW 134.7 已屬偏高，近 25 日累積 6 個出貨日，指數收復日內區間 82% 屬止跌訊號而非趨勢轉強，紀律仍以既有部位為主。策略主旋律有二：一是軟體／平台順勢（已連續 16 日），TEAM、PLTR、NOW、WDAY、DDOG 為代表，配合 Technology 板塊盤中 +1.61%、市寬 73.9%；二是加密／fintech 風險偏好升溫（16 日），MSTR、COIN、HOOD、PYPL 表現同向，反映的是風險胃納而非基本面改善。資金輪動至 Materials 已連 11 日，可視為分散方向。風險提醒：低 VIX 搭配高 SKEW 與 6 個出貨日，代表尾部保護成本被低估；「二元事件前控部位」訊號已連續 17 日，遇事件日應先降低單一標的集中度。",
+  "signature": "中性/區間|software_momentum/value_defensive_rotation/event_risk_guard",
+  "ts": "2026-08-08T02:30:37+00:00",
+  "briefing_zh": "Regime 維持中性／區間，淨曝險上限 40–60%，單日反彈不構成上調理由。市寬 66.5%、中位數 +0.45%，屬普遍參與；但近 25 日出貨日 6 天，是限制加碼的主因。\n\n主旋律一：軟體／平台順勢連 40 天在榜，族群均漲 3.07%，觀察 TEAM、PLTR、NOW、WDAY。主旋律二：資金外溢至 Materials、Healthcare、Industrials，5 日預估與市寬均優於大盤，可作半導體之外的分散。\n\n風險：VIX 14.86 偏低但 SKEW 134.7 偏高，尾部定價不便宜；「二元事件前控部位」已連 41 天，事件前別把倉位推到上限。",
   "model_used": "claude"
 }
